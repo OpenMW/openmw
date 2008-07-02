@@ -33,7 +33,7 @@ using namespace std;
 
 AudioDevicePtr device;
 
-extern "C" int cpp_openDevice()
+extern "C" int32_t cpp_openDevice()
 {
   device = OpenDevice("");
   if (!device) return 1;
@@ -86,7 +86,7 @@ extern "C" void cpp_destroyInstance(OutputStream *sound)
   sound->unref();
 }
 
-extern "C" int cpp_isPlaying(OutputStream *sound)
+extern "C" int32_t cpp_isPlaying(OutputStream *sound)
 {
   if(sound && sound->isPlaying()) return 1;
   return 0;

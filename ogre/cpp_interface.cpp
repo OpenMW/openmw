@@ -41,7 +41,7 @@ extern "C" void cpp_cleanup()
     }
 }
 
-extern "C" int cpp_configure()
+extern "C" int32_t cpp_configure()
 {
   mRoot = new Root();
 
@@ -345,13 +345,13 @@ String LASTNAME;
 // Load the contents of a mesh
 extern "C" void cpp_createMesh(
 		char* name,		// Name of the mesh
-		int numVerts,		// Number of vertices
+		int32_t numVerts,	// Number of vertices
 		float* vertices,	// Vertex list
 		float* normals,		// Normal list
 		float* colors,		// Vertex colors
 		float* uvs,		// Texture coordinates
-		int numFaces,		// Number of faces*3
-		unsigned short* faces,	// Faces
+		int32_t numFaces,	// Number of faces*3
+		uint16_t* faces,	// Faces
 		float radius,		// Bounding sphere
 		char* material,		// Material
 		// Bounding box
@@ -560,7 +560,7 @@ extern "C" SceneNode* cpp_createNode(
 		char *name,
 		float *trafo,
 		SceneNode *parent,
-		int noRot)
+		int32_t noRot)
 {
   //std::cout << "cpp_createNode(" << name << ")";
   SceneNode *node = parent->createChildSceneNode(name);
@@ -650,7 +650,7 @@ extern "C" void cpp_loadMemImage(
  		    char* name,  // Name to give the resource
 		    char* type,  // Image type (eg. "dds")
 		    void* data,  // Pointer to file data
-		    unsigned int size,   // Size
+		    uint32_t size,// Size
 		    Texture* txt)// Texture
 {
   
@@ -704,7 +704,7 @@ extern "C" void* cpp_setupSkeleton(char* name)
 }
 
 // Use this later when loading textures directly from NIF files
-extern "C" void cpp_createTexture(char* name, uint width, uint height)
+extern "C" void cpp_createTexture(char* name, uint32_t width, uint32_t height)
 {
   TexturePtr texture = TextureManager::getSingleton().createManual(
       name, 		// name
@@ -748,7 +748,7 @@ extern "C" void cpp_createTexture(char* name, uint width, uint height)
   material->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 }
 
-extern "C" void *cpp_insertBone(char* name, void* rootBone, int index)
+extern "C" void *cpp_insertBone(char* name, void* rootBone, int32_t index)
 {
   return (void*) ( ((Bone*)rootBone)->createChild(index) );
 }

@@ -32,7 +32,7 @@ void crap(char *p, ColourValue v)
   std::cerr << p << ": " << v.getAsRGBA() << "\n";
 }
 
-extern "C" void cpp_debug(int i)
+extern "C" void cpp_debug(int32_t i)
 {
   std::cerr << "Running cpp_debug(" << i << ")\n";
 

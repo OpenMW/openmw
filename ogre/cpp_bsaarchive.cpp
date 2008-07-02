@@ -29,11 +29,11 @@
 // Callbacks to D code
 
 // Does the file exist in the archives?
-extern "C" int d_bsaExists(const char *filename);
+extern "C" int32_t d_bsaExists(const char *filename);
 
 // Open a file. Return the pointer and size.
 extern "C" void d_bsaOpenFile(const char *filename,
-                              void **retPtr, unsigned int *retSize);
+                              void **retPtr, uint32_t *retSize);
 
 
 // This archive does not cover one .bsa file, instead it interacts
@@ -57,7 +57,7 @@ public:
   {
     //std::cout << "open(" << filename << ")\n";
     void *ptr;
-    unsigned int size;
+    uint32_t size;
 
     // Open the file
     d_bsaOpenFile(filename.c_str(), &ptr, &size);

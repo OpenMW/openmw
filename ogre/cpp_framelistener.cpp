@@ -25,12 +25,12 @@
 // Callbacks to D code.
 
 // Called once each frame
-extern "C" int d_frameStarted(float time);
+extern "C" int32_t d_frameStarted(float time);
 
 // Handle events
-extern "C" void d_handleKey(int keycode, unsigned int text);
+extern "C" void d_handleKey(int keycode, uint32_t text);
 extern "C" void d_handleMouseMove(const OIS::MouseState *state);
-extern "C" void d_handleMouseButton(const OIS::MouseState *state, int button);
+extern "C" void d_handleMouseButton(const OIS::MouseState *state, int32_t button);
 
 // Frame listener, passed to Ogre. The only thing we use this for is
 // to capture input and pass control to D code.
@@ -101,7 +101,7 @@ InputListener mInput;
 
 // Functions called from D during event handling
 
-extern "C" int cpp_isPressed(int keysym)
+extern "C" int32_t cpp_isPressed(int32_t keysym)
 {
   return mKeyboard->isKeyDown((OIS::KeyCode)keysym);
 }
