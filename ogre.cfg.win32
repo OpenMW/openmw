@@ -5,13 +5,13 @@ Allow NVPerfHUD=No
 Anti aliasing=None
 Floating-point mode=Fastest
 Full Screen=No
-Rendering Device=NVIDIA Quadro NVS 135M
+Rendering Device=
 VSync=No
 Video Mode=800 x 600 @ 32-bit colour
 
 [OpenGL Rendering Subsystem]
 Colour Depth=32
-Display Frequency=N/A
+Display Frequency=60
 FSAA=0
 Full Screen=No
 RTT Preferred Mode=FBO

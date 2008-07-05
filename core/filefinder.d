@@ -221,4 +221,4 @@ struct FilenameHasher
   }
 }
 
-version(Windows) alias CITextHasher FilenameHasher;
+version(Windows) alias CITextHash FilenameHasher;

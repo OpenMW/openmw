@@ -21,7 +21,7 @@
 
  */
 
-module esm.esmtool;
+module esmtool;
 
 import std.stdio;
 

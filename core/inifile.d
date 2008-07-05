@@ -39,8 +39,14 @@ struct IniWriter
   void openFile(char[] file)
   {
     if(ini is null) ini = new File();
+    char[] oldFile = file~".old";
+
+    // Windows doesn't support renaming into an existing file
+    version(Windows)
+      if(exists(oldFile)) remove(oldFile);
+
     if(exists(file))
-      rename(file, file~".old");
+      rename(file, oldFile);
     ini.open(file, FileMode.OutNew);
   }
 

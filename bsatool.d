@@ -21,7 +21,7 @@
 
  */
 
-module bsa.bsatool;
+module bsatool;
 
 import std.stdio;
 

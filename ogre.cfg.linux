@@ -1,0 +1,7 @@
+Render System=OpenGL Rendering Subsystem
+
+[OpenGL Rendering Subsystem]
+FSAA=0
+Full Screen=No
+RTT Preferred Mode=FBO
+Video Mode=800 x 600

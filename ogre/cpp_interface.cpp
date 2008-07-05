@@ -74,8 +74,12 @@ extern "C" int32_t cpp_configure()
   // You can skip this and use root.restoreConfig() to load configuration
   // settings if you were sure there are valid ones saved in ogre.cfg
 
-  //if(mRoot->showConfigDialog())
-  if(mRoot->restoreConfig())
+  // TODO: This should be controlled through the ini file. It's
+  // sensible to open the dialoge the first time, and later only
+  // open it when a command line parameter is given.
+
+  if(mRoot->showConfigDialog())
+  //if(mRoot->restoreConfig())
     return 0;
   return 1;
 }

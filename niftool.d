@@ -21,7 +21,7 @@
 
  */
 
-module nif.niftool;
+module niftool;
 
 import nif.nif;
 import nif.niffile;
