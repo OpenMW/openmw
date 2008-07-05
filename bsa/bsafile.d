@@ -24,14 +24,13 @@ module bsa.bsafile;
 
 //debug=checkHash;
 
-debug(checkHash) import std.stdio;
-
 // This file does not have any unit tests, since you really need the
 // data to test it. Use the program named 'bsatool', it uses the NIF
 // reader library and scans through a bsa archive, providing a good
 // test of both libraries.
 
 //import std.stream;
+import std.stdio;
 import std.string;
 import std.mmfile;
 
@@ -65,8 +64,14 @@ class BSAFile
   // multiple blocks may be mapped simultaneously. However, it MUST be
   // a multiple of the system page size. TODO: On my system it is 4K,
   // later on I will have to call getpagesize and the windows
-  // equivalent to find this. For now I just assume 8K is ok.
-  static int pageSize = 8*1024;
+  // equivalent to find this (include the word "granularity" when you
+  // google for it.) For now I just assume 4K is ok on UNIX, but on
+  // Windows we need 64K. (Hands up if you agree that MMFile should
+  // handle this internally!)
+  version(Windows)
+    static int pageSize = 64*1024;
+  else
+    static int pageSize = 4*1024;
 
   // Represents one file entry in the archive
   struct FileStruct

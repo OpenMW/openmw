@@ -76,8 +76,12 @@ struct IniWriter
   }
 
   alias writeType!(int) writeInt;
-  alias writeType!(float) writeFloat;
   alias writeType!(char[]) writeString;
+
+  void writeFloat(char[] name, float f)
+  {
+    ini.writefln("%s=%.3s", name, f);
+  }
 
   void writeBool(char[] name, bool b)
   {
