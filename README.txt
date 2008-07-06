@@ -29,11 +29,10 @@ binary packages and installation from source.
 See also the changelog at the end.
 
 Note: if you are using a localized (non-English) version of Morrowind,
-the default starting cell (Sud) might not exist, and the esmtool will
-probably fail with UTF errors, since the system currently expects UTF8
-input. This will be fixed in a future release - I have even added
-localized support as one of the major goals on the web page.
-
+the default starting cell (Sud) might not exist, and the esmtool
+program will probably fail with UTF errors. This will be fixed in a
+future release - I have even added localized support as one of the
+major goals on the web page.
 
 
 
@@ -41,7 +40,7 @@ localized support as one of the major goals on the web page.
 On the immediate TODO list:
 ===========================
 
-- read the input files in the correct code page
+- read the data files in the correct code page
 - support for Mac
 - collision detection
 - displaying creatures correcty, animation
@@ -62,8 +61,11 @@ For instructions, see the files INSTALL-win32.txt or
 INSTALL-linux.txt.
 
 FreeBSD has also been tested but is only partially supported, due to
-sketchy D compiler support. Linux 64 bit currently does NOT work, for
-the same reason.
+sketchy D compiler support. It will run, but exceptions do not work
+and will immediately abort the program.
+
+Linux 64 bit is known NOT to work, also because of compiler
+deficiencies.
 
 
 
@@ -107,13 +109,14 @@ Changelog:
 0.3 (work in progress)
 - built and tested on Windows XP
 - partial support for FreeBSD (exceptions do not work)
-- removed some config files, since these are auto-generated when
-  missing
-- made the config system more robust (an Ogre config windows opened
-  when needed)
-- alternatively reads config file from ~/.openmw/ on unix systems.
+- renamed main program from 'morro' to 'openmw'
+- made the config system more robust
+- added -oc switch for showing Ogre config window on startup
+- removed some config files, these are auto-generated when
+  missing. Separated plugins.cfg into linux and windows versions.
 - updated Makefile and sources for increased portability (thanks to
   Dmitry Marakasov.)
+- tested against OIS 1.0.0 (Ubuntu repository package)
 
 0.2 (2008 jun. 17) - latest release
 - compiles with gdc

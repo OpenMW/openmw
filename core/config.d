@@ -147,13 +147,19 @@ struct ConfigManager
     // Initialize the key binding manager
     keyBindings.initKeys();
 
-    // On Linux / Unix, if openmw.ini is not found in the current
-    // directory, use ~/openmw/openmw.ini instead.
+    /* Disable this at the moment. It's a good idea to put
+       configuration in a central location, but it's useless as long
+       as Ogre expects to find it's files in the current working
+       directory. The best permanent solution would be to let the
+       locations of ogre.cfg and plugins.cfg be determined by
+       openmw.ini - I will fix that later.
+
     version(Posix)
       {
         if(!exists(confFile))
           confFile = expandTilde("~/.openmw/openmw.ini");
       }
+    */
 
     readIni(reset);
 

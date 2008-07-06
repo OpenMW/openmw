@@ -79,9 +79,19 @@ static ~this()
 // Loads ogre configurations, creats the root, etc.
 void setupOgre()
 {
-  // Later we will send some config info from core.config along with
+  char[] plugincfg;
+
+  version(Windows)
+    plugincfg = "plugins.cfg.win32";
+  else version(Posix)
+    plugincfg = "plugins.cfg.linux";
+  else
+    // Assume the user knows what to do
+    plugincfg = "plugins.cfg";
+
+  // Later we will send more config info from core.config along with
   // this function
-  if(cpp_configure(config.finalOgreConfig))
+  if(cpp_configure(config.finalOgreConfig, toStringz(plugincfg)))
     OgreException("Configuration abort");
 
   cpp_initWindow();

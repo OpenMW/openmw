@@ -41,12 +41,18 @@ extern "C" void cpp_cleanup()
     }
 }
 
-extern "C" int32_t cpp_configure(int32_t showConfig)
+extern "C" int32_t cpp_configure(
+                   int32_t showConfig, // Do we show the config dialogue?
+                   char *plugincfg     // Name of 'plugin.cfg' file
+                   )
 {
-  mRoot = new Root();
+  mRoot = new Root(plugincfg);
 
   // Add the BSA archive manager before reading the config file.
   ArchiveManager::getSingleton().addArchiveFactory( &mBSAFactory );
+
+  /* The only entry we use from resources.cfg is the "BSA=internal"
+     entry, which we can put in manually.
 
   // Load resource paths from config file
   ConfigFile cf;
@@ -69,11 +75,14 @@ extern "C" int32_t cpp_configure(int32_t showConfig)
 			     archName, typeName, secName);
 	}
     }
+  */
+  ResourceGroupManager::getSingleton().
+    addResourceLocation("internal", "BSA", "General");
 
   // Show the configuration dialog and initialise the system, if the
   // showConfig parameter is specified. The settings are stored in
-  // ogre.cfg. If the parameter is false, the settings are assumed to
-  // come from ogre.cfg.
+  // ogre.cfg. If showConfig is false, the settings are assumed to
+  // already exist in ogre.cfg.
   int result;
   if(showConfig)
     result = mRoot->showConfigDialog();
