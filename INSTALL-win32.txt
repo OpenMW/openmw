@@ -1,0 +1,232 @@
+OpenMW - the completely unofficial reimplementation of Morrowind
+================================================================
+
+Written by Nicolay Korslund
+Email: korslund@gmail.com
+WWW: http://openmw.snaptoad.com
+License: See GPL3.txt
+Current version: 0.2 (second release, very pre-alpha)
+Date: 2008 jun. 17
+
+
+
+QUICK NOTE: You must own and install Morrowind before you can use
+OpenMW. Let me repeat that: OpenMW will NOT run if you do not have
+Morrowind installed on your system!
+
+
+
+
+New in version 0.2
+==================
+
+The second release should now work with the GDC compiler (the D
+frontend for GCC) and DSSS. Since GDC is the only option for compiling
+on other Unixes, on 64 bit and on Mac, this will probably make porting
+to these platforms much easier. DSSS (a specialized D build tool) will
+hopefully make porting to Windows a lot easier.
+
+To compile, you no longer use 'make'. Instead you use 'dsss build',
+which will run 'make' for you. (More details below.)
+
+See the changelog at the end.
+
+
+
+
+Installation from source
+========================
+
+These instructions are for the brave souls who seek to compile OpenMW
+on their own. If you are using the binary version, you can skip to the
+next section.
+
+Supported platforms:
+--------------------
+
+The only operating system that has been tested and is known to work is
+32bit Ubuntu Linux 8.04. Windows and other platforms have not been
+tested as of yet.
+
+Dependencies:
+-------------
+
+Dependencies needed to build OpenMW:
+
+OGRE 1.4.5         (3d engine)
+Audiere 1.9.4      (sound engine)
+OIS-1.2.0          (input system)
+gcc and g++        (C++ compiler)
+GNU make           (build tool for C++ files)
+DMD 1.030          (D compiler)
+  or GDC 4.1.3     (alternative D compiler)
+Monster 0.8        (scripting language and tools)
+DSSS 0.75          (D build tool)
+curl               (for DSSS)
+
+The above versions are the ones I have tested recently, but other
+versions might work. OGRE and Audiere will require their own set of
+dependencies. I recommend using an automated package tool to install
+as many of these as possible. On ubuntu, try typing:
+
+sudo apt-get install libogre-dev libaudiere-dev build-essential g++ curl gdc
+
+This takes care of OGRE, Audiere, the C and D compilers, make and
+curl. The rest have to be installed manually. There is a libois-dev
+package in Ubuntu (OIS version 0.99), but this has NOT been tested.
+
+You can find the other libraries and tools here:
+
+OIS:      http://sourceforge.net/projects/wgois/
+DMD:      http://digitalmars.com/d/1.0/dmd-linux.html
+DSSS:     http://svn.dsource.org/projects/dsss/downloads/
+Monster:  http://monster.snaptoad.com/download.html
+
+If you are using a DSSS binary and not compiling from source (I
+recommend the binary), make sure to get one that matches your D
+compiler. Ie. get the GDC version if you installed GDC, and the DMD
+version for DMD.
+
+If you want to install Ogre and Audiere manually as well, try:
+
+OGRE:     http://ogre3d.org
+Audiere:  http://audiere.sourceforge.net/
+
+Once everything is set up correctly, you might need to alter a couple
+of lines in the Makefile. The Makefile is only used to compile the C++
+parts of OpenMW, that interfaces with Ogre, OIS and Audiere. On the
+line:
+
+OGCC=g++ `pkg-config --cflags OGRE`
+
+Insert the path to your OIS include directory (or leave it blank if
+you installed OIS in /usr). For example, you might add:
+
+-I/home/me/my/path/to/OIS/include
+
+You might also need to add other include paths or options for Ogre if
+the pkg-config command doesn't work for some reason. Mine outputs
+
+$ pkg-config --cflags OGRE
+-DOGRE_GUI_GLX -DOGRE_CONFIG_LITTLE_ENDIAN -I/usr/include/OGRE
+
+After you are reasonably satisfied, you can try running make manually
+to see if the C++ parts compile. When you are ready to compile the D
+parts and link it all together, type:
+
+dsss build
+
+If something goes terribly wrong during the build (it probably will),
+_and_ you figure out how to solve it, I would appreciate if you told
+me about it so I could update these instructions.
+
+
+
+
+Running the binary
+==================
+
+The binary downloads have been compiled on a 32-bit Ubuntu 8.04 box
+with the libraries mentioned below. They might not work on other linux
+systems due to differing library setups. If this is the case, then
+your only option is to compile from source.
+
+Dependencies:
+-------------
+
+The binary depends on the following libraries:
+
+OGRE 1.4
+Audiere 1.9.4
+OIS-1.2.0
+
+and Morrowind of course. If you followed the compilation instructions
+above, you will have these already. If not, you can find them here:
+
+OGRE:     http://ogre3d.org
+Audiere:  http://audiere.sourceforge.net/
+OIS:      http://sourceforge.net/projects/wgois/
+
+Alternatively (on Ubuntu 8.04) you can at least get Ogre and Audiere
+with the command:
+
+sudo apt-get install libogre14 libaudiere-1.9.4
+
+Configuration:
+--------------
+
+Before you can run OpenMW, you have to help it find the Morrowind data
+files. The 'morro' program needs the files Morrowind.esm and
+Morrowind.bsa, and the directories Sound/ and Music/ from your
+Morrowind Data Files directory. By default it expects to find these in
+the data/ directory. (Can be changed in morro.ini.)
+
+I recommend creating a symbolic link to your original Morrowind
+install. For example, if you have Morrowind installed in:
+
+c:\Program Files\Bethesda Softworks\Morrowind\
+
+and your windows c: drive is mounted on /media/hda1, then run the
+following command:
+
+ln -s "/media/hda1/Program Files/Bethesda Softworks/Morrowind/Data Files/" data
+
+Also, if you have OGRE installed in a non-standard directory (ie. NOT
+to /usr/lib/OGRE), you have to change the PluginFolder in plugins.cfg.
+
+Finally, you can change screen resolution and fullscreen mode in
+ogre.cfg. (I don't recommend fullscreen mode yet, since it may mess up
+your screen and input settings if the program crashes.)
+
+Running OpenMW:
+---------------
+
+If Azura is with you and all the stars and planets are aligned in your
+favor, you should now be able to run OpenMW using the program called
+'morro'.
+
+Write morro -h to see a list of options.
+
+Running without parameters should bring you into the cave called Sud,
+or the last cell loaded. You are in free float mode. Move around with
+WASD (or arrow keys), move up and down with left shift and ctrl, exit
+with 'q' or escape.
+
+To load another cell, specify the cell name on the command line. Use
+the 'esmtool' program to get a list of cells (see below.) Note that
+you must use quotation marks "" if the cell name contains spaces or
+other weird characters. Exterior cells are disabled at the moment.
+
+Enjoy! ;-)
+
+
+
+
+Other included tools:
+=====================
+
+esmtool     - Used to inspect ES files (ESM, ESP, ESS). Run without
+              arguments to get a list of options.
+
+bsatool     - Tool for viewing and extracting files from BSA archives.
+              (Can also be used to test the NIF parser on a BSA.)
+
+niftool     - Decodes one or more NIF files and prints the details.
+
+
+
+
+Changelog:
+==========
+
+0.3 (work in progress)
+- updated Makefile and sources for increased portability (thanks to
+  Dmitry Marakasov for FreeBSD tips and testing!)
+
+0.2 (2008 jun. 17) - latest release
+- compiles with gdc
+- switched to DSSS for building D code
+- includes the program esmtool
+
+0.1 (2008 jun. 03)
+- first release

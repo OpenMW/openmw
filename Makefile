@@ -4,11 +4,8 @@
 CXX?= g++
 CXXFLAGS?=
 
-# Replace this path with your OIS include path
-OIS_PATH=../../../software/include
-
 # Compiler settings for Ogre + OIS. Change as needed.
-OGCC=$(CXX) $(CXXFLAGS) `pkg-config --cflags OGRE` -I$(OIS_PATH)
+OGCC=$(CXX) $(CXXFLAGS) `pkg-config --cflags OGRE OIS`
 
 # Compiler settings for Audiere
 AGCC=$(CXX) $(CXXFLAGS) `audiere-config --cxxflags`

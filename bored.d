@@ -59,7 +59,7 @@ void main()
       if(loot) writefln("You have loot.");
       if(level>1) writefln("You are level ", level);
       writefln("
-  1) Kill monster
+  1) Kill a monster
   2) Read a book
   3) Read an NPC
   4) Sell some loot

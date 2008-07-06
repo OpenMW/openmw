@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (morro.d) is part of the OpenMW package.
+  This file (openmw.d) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -61,6 +61,7 @@ void main(char[][] args)
   bool render = true;
   bool help = false;
   bool resetKeys = false;
+  bool showOgreFlag = false;
 
   // Some examples to try:
   //
@@ -89,6 +90,7 @@ void main(char[][] args)
       }
     else if(a == "-h") help=true;
     else if(a == "-rk") resetKeys = true;
+    else if(a == "-oc") showOgreFlag = true;
     else cells ~= a;
 
   if(cells.length + eCells.length/2 > 1 )
@@ -100,6 +102,10 @@ void main(char[][] args)
   initializeMemoryRegions();
   config.initialize(resetKeys);
   scope(exit) config.writeConfig();
+
+  // If the -oc parameter is specified, we override any config
+  // setting.
+  if(showOgreFlag) config.finalOgreConfig = true;
 
   if(cells.length == 0 && eCells.length == 0)
     if(config.defaultCell.length)
@@ -115,6 +121,7 @@ void main(char[][] args)
       writefln("    -n            Only load, do not render");
       writefln("    -ex,y         Load exterior cell (x,y)");
       writefln("    -rk           Reset key bindings to default");
+      writefln("    -oc           Show the Ogre config dialogue");  
       writefln("    -h            Show this help");
       writefln("");
       writefln("Specifying more than one cell implies -n");

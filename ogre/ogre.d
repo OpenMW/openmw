@@ -24,6 +24,7 @@
 module ogre.ogre;
 
 import core.resource;
+import core.config;
 
 import ogre.bindings;
 import util.uniquename;
@@ -80,7 +81,8 @@ void setupOgre()
 {
   // Later we will send some config info from core.config along with
   // this function
-  if(cpp_configure()) OgreException("Configuration abort");
+  if(cpp_configure(config.finalOgreConfig))
+    OgreException("Configuration abort");
 
   cpp_initWindow();
 

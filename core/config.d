@@ -25,6 +25,7 @@ module core.config;
 
 import std.string;
 import std.file;
+import std.path;
 import std.stdio;
 
 import monster.util.string;
@@ -54,6 +55,7 @@ struct ConfigManager
 {
   IniWriter iniWriter;
 
+  // Sound setting
   float musicVolume;
   float sfxVolume;
   float mainVolume;
@@ -63,6 +65,15 @@ struct ConfigManager
   float mouseSensX;
   float mouseSensY;
   bool flipMouseY;
+
+  // Ogre configuration
+  bool showOgreConfig; // The configuration setting
+  // The actual result, overridable by a command line switch, and also
+  // set to true if firstRun is true.
+  bool finalOgreConfig;
+
+  // Other settings
+  bool firstRun;
 
   // Number of current screen shot. Saved upon exit, so that shots
   // from separate sessions don't overwrite each other.
@@ -74,6 +85,9 @@ struct ConfigManager
   char[] sndDir;
   char[] musDir; // Explore music
   char[] musDir2; // Battle music
+
+  // Configuration file
+  char[] confFile = "openmw.ini";
 
   // Cell to load at startup
   char[] defaultCell;
@@ -133,12 +147,68 @@ struct ConfigManager
     // Initialize the key binding manager
     keyBindings.initKeys();
 
-    readIni();
+    // On Linux / Unix, if openmw.ini is not found in the current
+    // directory, use ~/openmw/openmw.ini instead.
+    version(Posix)
+      {
+        if(!exists(confFile))
+          confFile = expandTilde("~/.openmw/openmw.ini");
+      }
 
-    if(reset) with(keyBindings)
+    readIni(reset);
+
+    // I think DMD is on the brink of collapsing here. This has been
+    // moved elsewhere, because DMD couldn't handle one more import in
+    // this file.
+    //updateMouseSensitivity();
+  }
+
+  // Read config from morro.ini, if it exists. The reset parameter is
+  // set to true if we should use default key bindings instead of the
+  // ones from the config file.
+  void readIni(bool reset)
+  {
+    // Read configuration file, if it exists.
+    IniReader ini;
+
+    // TODO: Right now we have to specify each option twice, once for
+    // reading and once for writing. Fix it? Nah. Don't do anything,
+    // this entire configuration scheme is likely to change anyway.
+
+    ini.readFile(confFile);
+
+    screenShotNum = ini.getInt("General", "Screenshots", 0);
+    mainVolume = saneVol(ini.getFloat("Sound", "Main Volume", 0.7));
+    musicVolume = saneVol(ini.getFloat("Sound", "Music Volume", 0.5));
+    sfxVolume = saneVol(ini.getFloat("Sound", "SFX Volume", 0.5));
+    useMusic = ini.getBool("Sound", "Enable Music", true);
+
+    mouseSensX = ini.getFloat("Controls", "Mouse Sensitivity X", 0.2);
+    mouseSensY = ini.getFloat("Controls", "Mouse Sensitivity Y", 0.2);
+    flipMouseY = ini.getBool("Controls", "Flip Mouse Y Axis", false);
+
+    defaultCell = ini.getString("General", "Default Cell", "Sud");
+
+    firstRun = ini.getBool("General", "First Run", true);
+    showOgreConfig = ini.getBool("General", "Show Ogre Config", false);
+
+    // This flag determines whether we will actually show the Ogre
+    // config dialogue. The EITHER of the following are true, the
+    // config box will be shown:
+    // - The program is being run for the first time
+    // - The "Show Ogre Config" option in openmw.ini is set.
+    // - The -oc option is specified on the command line
+    // - The file ogre.cfg is missing
+
+    finalOgreConfig = showOgreConfig || firstRun ||
+                      !exists("ogre.cfg");
+
+    // Set default key bindings if the user specified the -rk setting,
+    // or if no config file was found.
+    if(reset || !ini.wasRead) with(keyBindings)
       {
         // Remove all existing key bindings
-        clear();
+        //clear();
 
 	// Bind some default keys
 	bind(Keys.MoveLeft, KC.A, KC.LEFT);
@@ -154,66 +224,41 @@ struct ConfigManager
 	bind(Keys.MusVolUp, KC.N2);
 	bind(Keys.SfxVolDown, KC.N3);
 	bind(Keys.SfxVolUp, KC.N4);
+        bind(Keys.Mute, KC.M);
+
 	bind(Keys.ToggleBattleMusic, KC.SPACE);
+        bind(Keys.Debug, KC.G);
 
 	bind(Keys.Pause, KC.PAUSE, KC.P);
 	bind(Keys.ScreenShot, KC.SYSRQ);
 	bind(Keys.Exit, KC.Q, KC.ESCAPE);
       }
-
-    // I think DMD is on the brink of collapsing here. This has been
-    // moved elsewhere, because DMD couldn't handle one more import in
-    // this file.
-    //updateMouseSensitivity();
-  }
-
-  // Read config from morro.ini, if it exists.
-  void readIni()
-  {
-    // Read configuration file, if it exists.
-    IniReader ini;
-
-    // TODO: Right now we have to specify each option twice, once for
-    // reading and once for writing. Fix it? Nah. Don't do anything,
-    // this entire configuration scheme is likely to change anyway.
-
-    ini.readFile("morro.ini");
-
-    screenShotNum = ini.getInt("General", "Screenshots", 0);
-    mainVolume = saneVol(ini.getFloat("Sound", "Main Volume", 0.7));
-    musicVolume = saneVol(ini.getFloat("Sound", "Music Volume", 0.5));
-    sfxVolume = saneVol(ini.getFloat("Sound", "SFX Volume", 0.5));
-    useMusic = ini.getBool("Sound", "Enable Music", true);
-
-    mouseSensX = ini.getFloat("Controls", "Mouse Sensitivity X", 0.2);
-    mouseSensY = ini.getFloat("Controls", "Mouse Sensitivity Y", 0.2);
-    flipMouseY = ini.getBool("Controls", "Flip Mouse Y Axis", false);
-
-    defaultCell = ini.getString("General", "Default Cell", "");
-
-    // Read key bindings
-    for(int i; i<Keys.Length; i++)
+    else
       {
-	char[] s = keyToString[i];
-	if(s.length)
-	  keyBindings.bindComma(cast(Keys)i, ini.getString("Bindings", s, ""));
+        // Read key bindings
+        for(int i; i<Keys.Length; i++)
+          {
+            char[] s = keyToString[i];
+            if(s.length)
+              keyBindings.bindComma(cast(Keys)i, ini.getString("Bindings", s, ""));
+          }
       }
 
     // Read specific directories
-    bsaDir = ini.getString("General", "BSA Directory", "./");
-    esmDir = ini.getString("General", "ESM Directory", "./");
-    sndDir = ini.getString("General", "SFX Directory", "sound/Sound/");
-    musDir = ini.getString("General", "Explore Music Directory", "sound/Music/Explore/");
-    musDir2 = ini.getString("General", "Battle Music Directory", "sound/Music/Battle/");
+    bsaDir = ini.getString("General", "BSA Directory", "data/");
+    esmDir = ini.getString("General", "ESM Directory", "data/");
+    sndDir = ini.getString("General", "SFX Directory", "data/Sound/");
+    musDir = ini.getString("General", "Explore Music Directory", "data/Music/Explore/");
+    musDir2 = ini.getString("General", "Battle Music Directory", "data/Music/Battle/");
   }
 
   // Create the config file
   void writeConfig()
   {
-    writefln("In writeConfig");
+    writefln("writeConfig(%s)", confFile);
     with(iniWriter)
       {
-	openFile("morro.ini");
+	openFile(confFile);
 
 	comment("Don't write your own comments in this file, they");
 	comment("will disappear when the file is rewritten.");
@@ -225,6 +270,14 @@ struct ConfigManager
 	writeString("Battle Music Directory", musDir2);
 	writeInt("Screenshots", screenShotNum);
 	writeString("Default Cell", defaultCell);
+
+        // Save the setting as it appeared in the input. The setting
+        // you specify in the ini is persistent, specifying the -oc
+        // parameter does not change it.
+        writeBool("Show Ogre Config", showOgreConfig);
+
+        // The next run is never the first run.
+        writeBool("First Run", false);
 
 	section("Controls");
 	writeFloat("Mouse Sensitivity X", mouseSensX);
@@ -271,6 +324,10 @@ struct ConfigManager
     intuitive to try out a new mod without risking your savegame data
     or original settings. So these would be handled in a separate
     plugin manager.
+
+    In any case, the import should be interactive and user-driven, so
+    there is no use in making it before we have a gui of some sort up
+    and running.
     */
   }
 }

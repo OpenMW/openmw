@@ -51,8 +51,9 @@ typedef void* ManualLoader;
 extern(C):
 
 // Do engine configuration. Returns 0 if we should continue, 1 if
-// not.
-int cpp_configure();
+// not. The parameter (0 or 1) determine whether an Ogre config
+// dialogue is shown.
+int cpp_configure(int showConfig);
 
 // Sets up the window
 void cpp_initWindow();

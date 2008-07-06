@@ -41,7 +41,7 @@ extern "C" void cpp_cleanup()
     }
 }
 
-extern "C" int32_t cpp_configure()
+extern "C" int32_t cpp_configure(int32_t showConfig)
 {
   mRoot = new Root();
 
@@ -70,18 +70,17 @@ extern "C" int32_t cpp_configure()
 	}
     }
 
-  // Show the configuration dialog and initialise the system
-  // You can skip this and use root.restoreConfig() to load configuration
-  // settings if you were sure there are valid ones saved in ogre.cfg
+  // Show the configuration dialog and initialise the system, if the
+  // showConfig parameter is specified. The settings are stored in
+  // ogre.cfg. If the parameter is false, the settings are assumed to
+  // come from ogre.cfg.
+  int result;
+  if(showConfig)
+    result = mRoot->showConfigDialog();
+  else
+    result = mRoot->restoreConfig();
 
-  // TODO: This should be controlled through the ini file. It's
-  // sensible to open the dialoge the first time, and later only
-  // open it when a command line parameter is given.
-
-  if(mRoot->showConfigDialog())
-  //if(mRoot->restoreConfig())
-    return 0;
-  return 1;
+  return !result;
 }
 
 // Initialize window. This will create and show the actual window.

@@ -23,12 +23,42 @@
 
 module core.inifile;
 
+import std.stdio;
 import std.stream;
 import std.string;
+import std.path;
 import std.file;
 
 import monster.util.string;
 import monster.util.aa;
+
+void safeMkdir(char[] npath)
+{
+  char curDir[];
+  int index = 0;
+  int srch;
+
+  do
+    {
+      while(npath[index..$].begins("/"))
+        index++;
+
+      srch = npath[index..$].find('/');
+
+      if(srch == -1)
+        curDir = npath;
+      else
+        {
+          index += srch;
+          curDir = npath[0..index];
+        }
+      index++;
+
+      if(!exists(curDir) || !isdir(curDir))
+        mkdir(curDir);
+    }
+  while(srch != -1)
+}
 
 // Writes an ini file.
 struct IniWriter
@@ -41,12 +71,14 @@ struct IniWriter
     if(ini is null) ini = new File();
     char[] oldFile = file~".old";
 
-    // Windows doesn't support renaming into an existing file
-    version(Windows)
-      if(exists(oldFile)) remove(oldFile);
-
     if(exists(file))
-      rename(file, oldFile);
+      copy(file, oldFile);
+
+    // Make sure the output directory exists
+    char[] dr = getDirName(file);
+    if(dr.length)
+      safeMkdir(dr);
+
     ini.open(file, FileMode.OutNew);
   }
 
@@ -147,6 +179,7 @@ struct IniReader
   {
     vars.reset();
     section = null;
+    wasRead = false;
   }
 
   int getInt(char[] sec, char[] var, int def)
@@ -187,6 +220,8 @@ struct IniReader
       return def;
   }
 
+  bool wasRead = false;
+
   void readFile(char[] fn)
   {
     // Reset this struct
@@ -195,6 +230,8 @@ struct IniReader
     // If the file doesn't exist, simply exit. This will work fine,
     // and default values will be used instead.
     if(!exists(fn)) return;
+
+    wasRead = true;
 
     // Read buffer. Finite in size but perfectly safe - the readLine
     // routine allocates more mem if it needs it.
