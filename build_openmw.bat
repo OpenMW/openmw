@@ -1,9 +1,8 @@
 @echo off
 rem See INSTALL.txt for instructions.
 
-rem This batch file assumes you have run nodsss_monster.bat in the
-rem Monster directory. It assumes Monster is located in ..\monster,
-rem Ogre in ..\ogre and Audiere in ..\audiere
+rem This file assumes it can find Ogre in ..\ogre and
+rem Audiere in ..\audiere
 
 echo Compiling C++ files
 g++ -c sound\cpp_audiere.cpp -I..\audiere\include

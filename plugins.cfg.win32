@@ -1,7 +1,7 @@
 # Defines plugins to load
 
 # Define plugin folder
-PluginFolder=..\Ogre\bin\debug\
+PluginFolder=.\
 
 # Define plugins
 Plugin=RenderSystem_Direct3D9_d
