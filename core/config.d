@@ -80,6 +80,7 @@ struct ConfigManager
   int screenShotNum;
 
   // Directories
+  char[] dataDir;
   char[] esmDir;
   char[] bsaDir;
   char[] sndDir;
@@ -250,12 +251,29 @@ struct ConfigManager
           }
       }
 
-    // Read specific directories
+    // Read data file directory
+    dataDir = ini.getString("General", "Data Directory", "data/");
+
+    // Make sure there's a trailing slash at the end. The forward slash
+    // / works on all platforms, while the backslash \ does not. This
+    // isn't super robust, but we will fix a general path handle
+    // mechanism later (or use an existing one.)
+    if(dataDir.ends("\\")) dataDir[$-1] = '/';
+    if(!dataDir.ends("/")) dataDir ~= '/';
+
+    bsaDir = dataDir;
+    esmDir = dataDir;
+    sndDir = dataDir ~ "Sound/";
+    musDir = dataDir ~ "Music/Explore/";
+    musDir2 = dataDir ~ "Music/Battle/";
+
+    /* Don't bother reading every directory seperately
     bsaDir = ini.getString("General", "BSA Directory", "data/");
     esmDir = ini.getString("General", "ESM Directory", "data/");
     sndDir = ini.getString("General", "SFX Directory", "data/Sound/");
     musDir = ini.getString("General", "Explore Music Directory", "data/Music/Explore/");
     musDir2 = ini.getString("General", "Battle Music Directory", "data/Music/Battle/");
+    */
   }
 
   // Create the config file
@@ -269,11 +287,14 @@ struct ConfigManager
 	comment("Don't write your own comments in this file, they");
 	comment("will disappear when the file is rewritten.");
 	section("General");
+	writeString("Data Directory", dataDir);
+	/*
 	writeString("ESM Directory", esmDir);
 	writeString("BSA Directory", bsaDir);
 	writeString("SFX Directory", sndDir);
 	writeString("Explore Music Directory", musDir);
 	writeString("Battle Music Directory", musDir2);
+	*/
 	writeInt("Screenshots", screenShotNum);
 	writeString("Default Cell", defaultCell);
 

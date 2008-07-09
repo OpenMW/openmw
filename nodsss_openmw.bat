@@ -16,8 +16,4 @@ copy ..\audiere\bin\audiere.dll .
 copy \windows\system32\d3dx9_30.dll d3dx9d_30.dll
 
 echo Compiling main program (openmw.exe)
-gdc openmw.d bsa\*.d core\*.d esm\*.d input\*.d nif\*.d ogre\*.d scene\*.d sound\*.d util\*.d cpp_audiere.o cpp_ogre.o ..\monster\monster\util\*.d ..\monster\monster\minibos\*.d ..\monster\monster\minibos\c\*.d ..\monster\monster\minibos\c\windows\*.d -I..\monster ogremain_d.dll ..\audiere\lib\audiere.lib OIS_d.dll -lstdc++ -o openmw.exe
-
-echo Setting up the correct Ogre cfg files
-copy ogre.cfg.win32 ogre.cfg
-copy plugins.cfg.win32 plugins.cfg
+gdc openmw.d bsa\*.d core\*.d esm\*.d input\*.d nif\*.d ogre\*.d scene\*.d sound\*.d util\*.d cpp_audiere.o cpp_ogre.o monster\util\*.d ogremain_d.dll ..\audiere\lib\audiere.lib OIS_d.dll -lstdc++ -o openmw.exe

@@ -26,6 +26,7 @@ module morro;
 import std.stdio;
 import std.string;
 import std.cstream;
+import std.file;
 
 import ogre.ogre;
 import ogre.bindings;
@@ -102,6 +103,14 @@ void main(char[][] args)
   initializeMemoryRegions();
   config.initialize(resetKeys);
   scope(exit) config.writeConfig();
+
+  // Check if the data directory exists
+  if(!exists(config.dataDir) || !isdir(config.dataDir))
+  {
+    writefln("Cannot find data directory '", config.dataDir,
+	"' - please edit openmw.ini.");
+    return;
+  }
 
   // If the -oc parameter is specified, we override any config
   // setting.
