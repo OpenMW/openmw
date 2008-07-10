@@ -21,7 +21,7 @@ Morrowind installed on your system!
 Release notes for 0.3
 =====================
 
-As of this release, OpenMW officially builds and runs on Windows.  The
+As of this release, OpenMW officially builds and runs on Windows. The
 installation instructions have been split into the files
 COMPILE-win32.txt and README-win32.txt for the source and binary
 windows releases respectively, and COMPILE-linux.txt for Linux / Unix
