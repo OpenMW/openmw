@@ -1,5 +1,6 @@
 @echo off
-rem See INSTALL.txt for instructions.
+
+rem See BUILDING-win32.txt for instructions.
 
 rem This file assumes it can find Ogre in ..\ogre and
 rem Audiere in ..\audiere

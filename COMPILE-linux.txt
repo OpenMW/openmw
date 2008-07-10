@@ -12,8 +12,6 @@ engine. For more information, see README.txt or
 Installation from source
 ========================
 
-(this file is NOT complete!)
-
 
 Supported Unix platforms:
 -------------------------
@@ -22,14 +20,15 @@ The only Unix operating system that has been tested and is known to
 work is 32bit Ubuntu Linux 8.04.
 
 FreeBSD works partially, but you have to recompile most of the
-dependencies as well. There is a bug in the compiler can breaks
-exceptions though, so if anything goes wrong you probably will not get
+dependencies as well. There is a bug in the compiler however, that
+breaks exceptions. So if anything goes wrong you probably will not get
 any sensible error message.
 
 Linux 64 bit is known NOT to work at the moment.
 
 If you manage to build OpenMW on a platform not listed here, or want
 to try, please let me know!
+
 
 
 Dependencies:
@@ -44,44 +43,38 @@ gcc and g++        (C++ compiler)
 GNU make           (build tool for C++ files)
 DMD 1.031          (D compiler)
   or GDC 4.1.3     (alternative D compiler)
-Monster 0.8        (scripting language and tools)
-DSSS 0.75          (D build tool)
-curl               (for DSSS)
+
 
 The above versions are the ones I have tested recently, but other
 versions might work. OGRE, Audiere and OIS will require their own set
 of dependencies. I recommend using an automated package tool to
 install as many of these as possible. On ubuntu, try typing:
 
-sudo apt-get install libogre-dev libaudiere-dev libois-dev build-essential g++ curl gdc
-
-This takes care of OGRE, Audiere, OIS, the C and D compilers, make and
-curl. The rest have to be installed manually. This will give you the
-GDC (frontend for GCC) compiler.
-
-The "official" compiler, DMD, is updated more often, but both should
-work. Note however that DMD is only available on 32 bit Linux - other
-operating systems or architectures will have to use GDC. (However GDC
-might also be unstable on these platforms.)
-
-If you want to use DMD instead, go to
-http://digitalmars.com/d/1.0/dmd-linux.html
-
-You can find the two remaining dependencies here:
-
-DSSS:     http://svn.dsource.org/projects/dsss/downloads/
-Monster:  http://monster.snaptoad.com/download.html
-
-If you are using a DSSS binary and not compiling from source (I
-recommend the binary), make sure to get one that matches your D
-compiler. Ie. get the GDC version if you installed GDC, and the DMD
-version for DMD.
-
-If you want to install Ogre, Audiere or OIS manually as well, try:
+sudo apt-get install libogre-dev libaudiere-dev libois-dev build-essential g++ gdc
+If you want to install Ogre, Audiere or OIS manually, try:
 
 OGRE:     http://ogre3d.org
 Audiere:  http://audiere.sourceforge.net/
 OIS:      http://sourceforge.net/projects/wgois/
+
+
+
+Choosing a D compiler
+---------------------
+
+The above apt-get command installs the GDC compiler. There are
+currently two choices for the D compiler, DMD and GDC. DMD is the
+"official" compiler and is updated more often, while GDC is a
+completely open source frontend to GCC (The GNU compiler.) Both should
+work equally well with OpenMW.
+
+If you want to use DMD instead, it can be found at:
+http://digitalmars.com/d/1.0/dmd-linux.html
+
+Note that DMD is only available on 32 bit Linux - other operating
+systems or architectures will have to use GDC. However GDC might be
+unstable on these platforms as well, even if it runs.
+
 
 
 Building:
@@ -89,22 +82,16 @@ Building:
 
 After installing all the dependencies, you can try running make first
 to see if the C++ parts compile. You may need to alter the Makefile if
-you are using non-standard include paths, etc. When you are ready to
-compile the D parts and link it all together, type:
+you are using non-standard include paths, etc. If you have DSSS
+installed (a D build tool), type:
 
 dsss build
 
-If something goes terribly wrong during the build (which isn't
-unlikely), and you figure out how to solve it, I would appreciate if
-you told me about it so I could update these instructions.
+If you do NOT have DSSS, you can compile using the script
 
+./build_openmw.sh
 
-
-
-Installation from binary
-========================
-
-(not written yet - we might as well create a .deb file)
+(Currently only works with the GDC compiler)
 
 
 

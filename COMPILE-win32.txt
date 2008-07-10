@@ -31,10 +31,10 @@ gdc 4.1.3 (mingw)  (D compiler)
 
 The above versions are the ones I have tested recently, but other
 versions might work. OGRE, Audiere and OIS are complex libraries with
-their own set of dependencies. I recomend downloading prebuild SDKs
+their own set of dependencies. I recommend downloading prebuild SDKs
 instead of building them from source. You can find these here:
 
-OGRE:     http://ogre3d.org (See "Getting Ogre" above)
+OGRE:     http://ogre3d.org (See "Getting Ogre" in README-win32.txt for details)
 Audiere:  http://audiere.sourceforge.net/
 OIS:      Comes with Ogre
 Mingw     http://sourceforge.net/projects/mingw/
@@ -44,15 +44,14 @@ gdc       http://sourceforge.net/projects/gdcwin/
 is incompatible with most C++ compilers in Windows.)
 
 
-Setting everything up:
-----------------------
+Setting everything up
+---------------------
 
 First, install Mingw (get the automatic installer.) Make sure gcc and
 g++ packages are selected.
 
 Next install the gdcwin installer (the package named 'gdc') and
-install it (the default is to install it in the same dir as mingw,
-this is ok.)
+install it in the same directory as Mingw.
 
 Open a command line. Set up your PATH to include Mingw and gdc
 (eg. "set PATH=%PATH%;c:\mingw\bin"). Make sure the commands g++ and
@@ -75,6 +74,7 @@ To build, simply run build_openmw.bat
 Running
 -------
 
-For instructions on how to set everything up, see RUNNING-win32.txt
+For instructions on how to set everything up after compilation, see
+README-win32.txt.
 
 Good luck!
