@@ -26,6 +26,8 @@ module sound.music;
 import sound.audiere;
 import sound.audio;
 
+import std.string;
+
 import core.config;
 import core.resource;
 
@@ -178,10 +180,7 @@ struct MusicManager
 	index = 0;
       }
 
-    // Make sure the string is null terminated
-    assert(*(playlist[index].ptr+playlist[index].length) == 0);
-
-    music = cpp_playStream(playlist[index].ptr, volume);
+    music = cpp_playStream(toStringz(playlist[index]), volume);
 
     if(!music) fail("Unable to start music track " ~ playlist[index]);
 
