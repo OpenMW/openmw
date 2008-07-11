@@ -186,7 +186,7 @@ struct IniReader
   {
     char[] value;
     if(vars.inList(SecVar(sec,var), value))
-      return atoi(value);
+      return cast(int)atoi(value);
     else
       return def;
   }

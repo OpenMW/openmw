@@ -227,6 +227,7 @@ struct GameSetting
     else if(type == VarType.Float) return format(f);
     else if(type == VarType.String) return str;
     else if(type == VarType.None) return "(no value)";
+    assert(0);
   }
 
   void load()

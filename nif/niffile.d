@@ -117,7 +117,7 @@ struct NIFFile
       recObj = null;
     }
 
-  long size()
+  ulong size()
   in
   {
     if(f is null) fail("Cannot get size, file is not open");
@@ -129,7 +129,7 @@ struct NIFFile
 
   bool eof() { return f.eof(); }
 
-  void seekCur(ulong skip)
+  void seekCur(long skip)
   in
   {
     if(f is null) fail("Cannot seek, file is not open");

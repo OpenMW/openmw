@@ -367,6 +367,7 @@ struct HashTable(Key, Value, Alloc = GCAlloc, Hash = DefHash,
           return old;
         }
       fail("Failed to replace key '%s', not found", k);
+      assert(0);
     }
 
   // Remove key, return value. If key does not exist, throw an

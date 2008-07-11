@@ -79,20 +79,6 @@ void cpp_startRendering();
 // Cleans up after ogre
 void cpp_cleanup();
 
-// Create a manual loader for textures
-ManualLoader cpp_createTexture(
-	         char* name,  // Resource name
-		 TextureIndex ti); // Texture index
-
-// Inserts texture from memory data. This isn't used anymore and will
-// be removed.
-void cpp_loadMemImage(
-	     char* name,  // Name to give the resource
-	     char* type,  // Image type (eg. "dds")
-	     void* data,  // Pointer to file data
-	     uint size, 	 // Size
-	     void* texture); // Texture resource
-
 // Gets a child SceneNode from the root node, then detatches it to
 // hide it from view. Used for creating the "template" node associated
 // with a NIF mesh.
@@ -162,12 +148,3 @@ void cpp_moveCameraRel(float x, float y, float z);
 
 // Do some debug action. Check the menu for today's specials!
 void cpp_debug(int i);
-
-// CALLBACKS:
-
-// Called when a texture wants to be loaded. Not used anymore.
-void d_loadTexture(TextureIndex ti, void *tex)
-{
-  assert(0);
-  resources.loadTexture(ti, tex);
-}

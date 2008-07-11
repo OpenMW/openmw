@@ -368,28 +368,6 @@ struct ResourceManager
       // mem
     }
 
-  // Inserts a texture into ogre. Currently it only supports BSA
-  // textures, will later support textures in the file system. OGRE is
-  // able to load these itself, so in that case we can IIRC do
-  // nothing. The tex pointer points to an already existing Texture*
-  // resource in C++.
-  void loadTexture(TextureIndex ti, void *tex)
-  in
-  {
-    assert(ti.isLoaded);
-    assert(!ti.isEmpty);
-  }
-  body
-  {
-    assert(0, "This function is no longer in use");
-
-    void[] s = archives[ti.bsaFile].findSlice(ti.bsaIndex);
-
-    // Insert it into ogre. Note that we are actually being called
-    // from a manual loader at this point, this just dumps the texture
-    // data into an existing OGRE resource.
-    cpp_loadMemImage(ti.name.ptr, ti.type.ptr, s.ptr, s.length, tex);
-  }
 }
 
 struct SoundResource
@@ -471,18 +449,6 @@ struct TextureResource
   ManualLoader ml;
 
   public:
-
-  // Insert the texture resource into OGRE. THIS IS NO LONGER NEEDED.
-  void load()
-  in
-  {
-    assert(!isEmpty());
-  }
-  body
-  {
-    writefln("still calling TextureResource.load");
-    if(ml == null) ml = cpp_createTexture(name.ptr, this);
-  }
 
   char[] getName() { return name; }
   char[] getNewName() { return newName; }

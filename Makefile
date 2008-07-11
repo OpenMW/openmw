@@ -2,7 +2,7 @@
 
 # Compiler settings
 CXX?= g++
-CXXFLAGS?=
+CXXFLAGS?= -Wall -g
 
 # Compiler settings for Ogre + OIS. Change as needed.
 OGCC=$(CXX) $(CXXFLAGS) `pkg-config --cflags OGRE OIS`

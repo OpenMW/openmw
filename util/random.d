@@ -112,7 +112,7 @@ class DRand : Random
   void initialize(long newSeed)
     {
       origSeed = newSeed;
-      rand_seed(newSeed, 0);
+      rand_seed(cast(uint)newSeed, 0);
     }
 
   alias Random.initialize initialize;

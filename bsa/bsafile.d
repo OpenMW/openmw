@@ -177,7 +177,7 @@ class BSAFile
        */
       assert(!isLoaded);
 
-      uint fsize = mmf.length;
+      ulong fsize = mmf.length;
 
       if( fsize < 12 )
 	fail("File too small to be a valid BSA archive");

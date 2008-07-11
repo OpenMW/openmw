@@ -64,7 +64,7 @@ abstract class Node : Named
     {
       super.read();
 
-      flags = nifFile.getShort();
+      flags = nifFile.getUshort();
       nifFile.getTransformation(trafo);
   
       debug(verbose)

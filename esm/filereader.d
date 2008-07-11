@@ -86,12 +86,13 @@ enum Version { Unknown, v12, v13 }
 struct TES3FileContext
 {
   char[] filename;
-  uint leftFile, leftRec, leftSub;
+  uint leftRec, leftSub;
+  size_t leftFile;
   NAME recName, subName;
   FileType type;
   Version ver;
 
-  ulong filepos;
+  size_t filepos;
 }
 
 /**
@@ -205,7 +206,7 @@ struct TES3File
     {
       if(filename != c.filename)
 	openFile(c.filename, r);
-      file.seekSet(c.filepos);
+      file.seekSet(cast(long)c.filepos);
 
       // File is now open, copy state information
       filename = c.filename;
