@@ -55,18 +55,7 @@ struct MusicManager
     throw new SoundException(name ~ " Jukebox", msg);
   }
 
-  /* KILLME
-  // Used when randomizing playlist
-  struct rndListStruct
-  {
-    char[] entry;
-    bool used;
-  }
-  rndListStruct[] rndList;
-  */
-
-  // TODO: How do we handle the play list? Randomize should be an
-  // option. We could also support things like M3U files, etc.
+  // List of songs to play
   char[][] playlist;
   int index; // Index of next song to play
 
@@ -141,44 +130,6 @@ struct MusicManager
         playlist[idx] = s;
       }
   }
-    /* KILLME
-    int left = playlist.length;
-    rndList.length = left;
-
-    foreach(int i, ref s; rndList)
-      {
-	s.used = false;
-	s.entry = playlist[i];
-      }
-
-    while(left--)
-      {
-	int index = rnd.randInt(0,left);
-	int i = 0;
-	foreach(ref s; rndList)
-	  {
-	    // Skip the ones we have used already
-	    if(s.used) continue;
-
-	    // Is this the correct index?
-	    if(i == index)
-	      {
-		s.used = true;
-		playlist[left] = s.entry;
-		break;
-	      }
-	    i++;
-	  }	  
-      }
-
-    // Check that we don't replay the previous song, if the caller
-    // requested this.
-    if(checklast && playlist[0] == last)
-      {
-	playlist[0] = playlist[$-1];
-	playlist[$-1] = last;
-      }
-    */
 
   // Skip to the next track
   void playNext()
