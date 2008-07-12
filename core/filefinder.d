@@ -153,6 +153,11 @@ class FileFinder
       return 0;
     }
 
+  bool has(char[] file)
+    {
+      return lookup.inList(file);
+    }
+
   int opApply(int delegate(ref char[]) del)
     {
       int res = 0;

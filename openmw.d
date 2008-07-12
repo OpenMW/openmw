@@ -140,25 +140,8 @@ void main(char[][] args)
   initializeSound();
   resources.initResources();
 
-  // Files to load
-  /*
-  const char[][] files = ["Morrowind.esm",
-			  "Tribunal.esm",
-			  "Bloodmoon.esm"];
-  /*/
-  const char[][] files = ["Morrowind.esm"];
-  //*/
-
-  // Add the path to the file name. The path is read from the config
-  // file.
-  char[][] esmFiles;
-  esmFiles.length = files.length;
-  foreach(int i, char[] ef; files)
-    // TODO: Quick hack, use FileFinder instead.
-    esmFiles[i] = config.esmDir ~ ef;
-
-  // Load all data from the ESM files
-  loadTESFiles(esmFiles);
+  // Load all ESM and ESP files
+  loadTESFiles(config.gameFiles);
 
   CellData cd = cellList.get();
 

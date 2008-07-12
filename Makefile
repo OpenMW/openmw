@@ -37,10 +37,10 @@ all: makedirs openmw esmtool niftool bsatool bored
 cpp_ogre.o: $(ogre_cpp_files)
 	$(OGCC) -c $<
 
-objs/%.o: %.d
+objs/%.o: %.d makedirs
 	$(DMD) -c $< -of$@
 
-nifobjs/%.o: %.d
+nifobjs/%.o: %.d makedirs
 	$(DMD) -debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose -c $< -of$@
 
 # This is a hack for gdmd (dmd-like frontend to gdc), since it does
@@ -78,6 +78,6 @@ bored: bored.d
 	$(DMD) $^
 
 clean:
-	-rm cpp_ogre.o
-	-rm openmw esmtool niftool bsatool bored
-	-rm -r objs/ nifobjs/ dsss_objs/
+	-rm -f cpp_ogre.o
+	-rm -f openmw esmtool niftool bsatool bored
+	-rm -rf objs/ nifobjs/ dsss_objs/

@@ -31,6 +31,7 @@ import std.stdio;
 import monster.util.string;
 
 import core.inifile;
+import core.filefinder;
 
 import sound.audio;
 
@@ -78,6 +79,9 @@ struct ConfigManager
   // Number of current screen shot. Saved upon exit, so that shots
   // from separate sessions don't overwrite each other.
   int screenShotNum;
+
+  // Game files to load (max 255)
+  char[][] gameFiles;
 
   // Directories
   char[] dataDir;
@@ -267,6 +271,47 @@ struct ConfigManager
     musDir = dataDir ~ "Music/Explore/";
     musDir2 = dataDir ~ "Music/Battle/";
 
+    // A maximum of 255 game files are allowed. Search the whole range
+    // in case some holes developed in the number sequence. This isn't
+    // a great way of specifying files (it's just a copy of the flawed
+    // model that Morrowind uses), but it will do for the time being.
+    FileFinder srch = new FileFinder(esmDir, null, Recurse.No);
+    for(int i = 0;i < 255;i++)
+      {
+        char[] s = ini.getString("Game Files", format("GameFile[%d]",i), null);
+        if(s != null && srch.has(s))
+          {
+            writefln("Adding game file %s", s);
+            gameFiles ~= esmDir ~ s;
+          }
+      }
+    delete srch;
+
+    if(gameFiles.length == 0)
+      {
+        // No game files set. Look in the esmDir for Morrowind.esm.
+        // We can add Tribunal.esm, and Bloodmoon.esm as defaults too
+        // later, when we're out of testing mode.
+        char[][] baseFiles = ["Morrowind.esm"];
+        //char[][] baseFiles = ["Morrowind.esm","Tribunal.esm","Bloodmoon.esm"];
+        srch = new FileFinder(esmDir, "esm", Recurse.No);
+
+        foreach(ref s; baseFiles)
+          {
+            if(srch.has(s))
+              {
+                writefln("Adding game file %s", s);
+                gameFiles ~= esmDir ~ s;
+              }
+          }
+        delete srch;
+      }
+
+    // FIXME: Must sort gameFiles so that ESMs come first, then ESPs.
+    // I don't know if this needs to be done by filename, or by the
+    // actual file type..
+    // Further sort the two groups by file date (oldest first).
+
     /* Don't bother reading every directory seperately
     bsaDir = ini.getString("General", "BSA Directory", "data/");
     esmDir = ini.getString("General", "ESM Directory", "data/");
@@ -325,6 +370,10 @@ struct ConfigManager
 	writeFloat("Music Volume", musicVolume);
 	writeFloat("SFX Volume", sfxVolume);
 	writeBool("Enable Music", useMusic);
+
+	section("Game Files");
+	foreach(int i, ref s; gameFiles)
+	  writeString(format("GameFile[%d]",i), s[esmDir.length..$]);
 
 	close();
       }
