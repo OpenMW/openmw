@@ -26,6 +26,7 @@ module sound.music;
 import sound.audio;
 import sound.al;
 
+import std.stdio;
 import std.string;
 
 import core.config;
@@ -54,6 +55,7 @@ struct MusicManager
     throw new SoundException(name ~ " Jukebox", msg);
   }
 
+  /* KILLME
   // Used when randomizing playlist
   struct rndListStruct
   {
@@ -61,6 +63,7 @@ struct MusicManager
     bool used;
   }
   rndListStruct[] rndList;
+  */
 
   // TODO: How do we handle the play list? Randomize should be an
   // option. We could also support things like M3U files, etc.
@@ -112,17 +115,33 @@ struct MusicManager
     randomize();
   }
 
-  // Randomize playlist. An N^2 algorithm, but our current playlists
-  // are small. Improve it later if you really have to. If the
-  // argument is true, then we don't want the old last to be the new
-  // first.
+  // Randomize playlist. If the argument is true, then we don't want
+  // the old last to be the new first.
   private void randomize(bool checklast = false)
   {
     if(playlist.length < 2) return;
 
-    // Get the name of the last song played
-    char[] last = playlist[(index==0) ? ($-1) : (index-1)];
+    // Get the index of the last song played
+    int lastidx = ((index==0) ? (playlist.length-1) : (index-1));
 
+    foreach(int i, char[] s; playlist)
+      {
+        int idx = rnd.randInt(i,playlist.length-1);
+
+        // Don't put the last idx as the first entry
+        if(i == 0 && checklast && lastidx == idx)
+          {
+            idx++;
+            if(idx == playlist.length)
+              idx = i;
+          }
+        if(idx == i) /* skip if swapping with self */
+          continue;
+        playlist[i] = playlist[idx];
+        playlist[idx] = s;
+      }
+  }
+    /* KILLME
     int left = playlist.length;
     rndList.length = left;
 
@@ -159,7 +178,7 @@ struct MusicManager
 	playlist[0] = playlist[$-1];
 	playlist[$-1] = last;
       }
-  }
+    */
 
   // Skip to the next track
   void playNext()

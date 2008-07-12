@@ -29,6 +29,9 @@ public import sound.music;
 import sound.al;
 import sound.alc;
 
+import std.stdio;
+import std.string;
+
 ALCdevice  *Device = null;
 ALCcontext *Context = null;
 
@@ -67,7 +70,11 @@ void initializeSound()
 
 void shutdownSound()
 {
+  jukebox.disableMusic();
+  battleMusic.disableMusic();
+
   alutExit();
+
   alcMakeContextCurrent(null);
   if(Context) alcDestroyContext(Context);
   Context = null;

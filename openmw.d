@@ -359,9 +359,6 @@ void main(char[][] args)
 
       // Run it until the user tells us to quit
       startRendering();
-
-      jukebox.disableMusic();
-      battleMusic.disableMusic();
     }
   else debug(verbose) writefln("Skipping rendering");
 

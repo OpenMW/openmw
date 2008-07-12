@@ -183,7 +183,7 @@ struct ResourceManager
     // Otherwise, make this an empty resource
     else
       {
-        writefln("Lookup failed to find sound %s", id);
+        //writefln("Lookup failed to find sound %s", id);
         si.file = null;
       }
 
@@ -242,7 +242,7 @@ struct ResourceManager
 
     if(mi.bsaIndex == -1)
       {
-        writefln("Lookup failed to find mesh %s", search);
+        //writefln("Lookup failed to find mesh %s", search);
         assert(mi.bsaFile == -1);
       }
 
@@ -329,7 +329,7 @@ struct ResourceManager
 
     if(ti.bsaIndex == -1)
       {
-        writefln("Lookup failed to find texture %s", tmp);
+        //writefln("Lookup failed to find texture %s", tmp);
         assert(ti.bsaFile == -1);
       }
 

@@ -200,9 +200,11 @@ extern "C" void cpp_makeScene()
   root->pitch(Degree(-90));
 }
 
+// Create a sky dome. Currently disabled since we aren't including the
+// Ogre example data (which has the sky material.)
 extern "C" void cpp_makeSky()
 {
-  mSceneMgr->setSkyDome( true, "Examples/CloudySky", 5, 8 );
+  //mSceneMgr->setSkyDome( true, "Examples/CloudySky", 5, 8 );
 }
 
 extern "C" Light* cpp_attachLight(char *name, SceneNode* base,
