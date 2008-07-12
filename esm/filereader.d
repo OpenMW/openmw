@@ -87,12 +87,12 @@ struct TES3FileContext
 {
   char[] filename;
   uint leftRec, leftSub;
-  size_t leftFile;
+  ulong leftFile;
   NAME recName, subName;
   FileType type;
   Version ver;
 
-  size_t filepos;
+  ulong filepos;
 }
 
 /**
@@ -118,7 +118,7 @@ struct TES3File
 
   // These are only used by getRecHeader and getSubHeader for
   // asserting the file's integrity.
-  uint leftFile;   // Number of unread bytes in file
+  ulong leftFile;   // Number of unread bytes in file
   uint leftRec;    // Number of unread bytes in record
 
   // This is used by sub-record readers for integrity checking.

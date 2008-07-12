@@ -154,6 +154,7 @@ void main(char[][] args)
 	case WT.MarksmanThrown: writef("Thrown weapon"); break;
 	case WT.Arrow: writef("Arrow"); break;
 	case WT.Bolt: writef("Bolt"); break;
+        default: assert(0);
 	}
       writefln(" id '%s': name '%s'", n, m.name);
 
@@ -278,6 +279,7 @@ void printRaw()
 	case FileType.Master: writefln("Master"); break;
 	case FileType.Savegame: writefln("Savegame"); break;
 	case FileType.Unknown: writefln("Unknown"); break;
+        default: assert(0);
 	}
       writef("Version: ");
       if(isVer12()) writefln("1.2");

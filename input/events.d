@@ -309,9 +309,13 @@ extern(C) int d_frameStarted(float time)
   if(sndCumTime > sndRefresh)
     {
       float x, y, z;
-      cpp_getCameraPos(&x, &y, &z);
+      float fx, fy, fz;
+      float ux, uy, uz;
 
-      soundScene.update(x,y,z);
+      cpp_getCameraPos(&x, &y, &z);
+      cpp_getCameraOrientation(&fx, &fy, &fz, &ux, &uy, &uz);
+
+      soundScene.update(x,y,z,fx,fy,fz,ux,uy,uz);
       sndCumTime -= sndRefresh;
     }
 

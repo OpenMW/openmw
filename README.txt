@@ -5,8 +5,8 @@ Written by Nicolay Korslund
 Email: korslund@gmail.com
 WWW: http://openmw.snaptoad.com
 License: See GPL3.txt
-Current version: 0.3 (still very pre-alpha)
-Date: 2008 jul. 10
+Current version: 0.4 (still very pre-alpha)
+Date: 2008 jul. 12
 
 
 
@@ -18,16 +18,24 @@ Morrowind installed on your system!
 
 
 
-Release notes for 0.3
-=====================
+IMPORTANT: Subversion notes
+===========================
 
-As of this release, OpenMW officially builds and runs on Windows. The
-installation instructions have been split into the files
-COMPILE-win32.txt and README-win32.txt for the source and binary
-windows releases respectively, and COMPILE-linux.txt for Linux / Unix
-systems.
+The subversion code is currently in the process of switching from
+Audiere to OpenAL. This means that:
 
-See the changelog at the end for more changes.
+- you need to install OpenAL and ALUT
+- you no longer need Audiere
+- music does not (currently) work
+
+Generally true for all SVN versions is that:
+
+- a given SVN revision is not guaranteed to work or compile
+- windows compilation scripts are unlikely to work since they are
+  updated less often
+- README and instructions might be out of date
+
+See the changelog at the end for an up-to-date list of changes.
 
 Note: if you are using a localized (non-English) version of Morrowind,
 the default starting cell (Sud) might not exist, and the esmtool
@@ -105,13 +113,17 @@ Thanks goes out to:
 
 - Bastien Jansen for continued testing on 64 bit linux.
 
-- Bethesda Softworks for creating Morrowind!
-
+- Chris Robinson for OpenAL and ALUT support
 
 
 
 Changelog:
 ==========
+
+0.4 (Work in progress)
+- switched from Audiere to OpenAL (BIG thanks to Chris Robinson)
+- added complete Makefile (again) as a alternative build tool
+- cosmetic changes to placate gdc -Wall
 
 0.3 (2008 jul. 10) - latest release
 - built and tested on Windows XP

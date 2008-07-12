@@ -132,6 +132,20 @@ extern "C" void cpp_getCameraPos(float *x, float *y, float *z)
   *z = pos[1];
 }
 
+// Get current camera orientation
+extern "C" void cpp_getCameraOrientation(float *fx, float *fy, float *fz,
+                                         float *ux, float *uy, float *uz)
+{
+  Vector3 front = mCamera->getDirection();
+  Vector3 up = mCamera->getUp();
+  *fx = front[0];
+  *fy = -front[2];
+  *fz = front[1];
+  *ux = up[0];
+  *uy = -up[2];
+  *uz = up[1];
+}
+
 // Move and rotate camera in place. Transforms Morrowind coordinates
 // to OGRE coordinates.
 extern "C" void cpp_moveCamera(float x, float y, float z,

@@ -167,7 +167,7 @@ class NiAutoNormalParticlesData : ShapeData
       debug(verbose) writef("Active vertices: ");
 
       // Number of active vertices (always matches count?)
-      activeCount = nifFile.wgetUshortIs(cast(ushort)vertices.length/3);
+      activeCount = nifFile.wgetUshortIs(cast(ushort)(vertices.length/3));
 
       nifFile.wgetFloat(); // Active radius (?)
       nifFile.wgetShort(); // Number of valid entries in the following arrays

@@ -23,34 +23,29 @@
 
 module sound.music;
 
-import sound.audiere;
 import sound.audio;
+import sound.al;
 
 import std.string;
 
 import core.config;
 import core.resource;
 
+extern (C) ALuint alutCreateBufferFromFile(char *filename);
+extern (C) ALenum alutGetError();
+extern (C) ALchar *alutGetErrorString(ALenum err);
+
 // Simple music player, has a playlist and can pause/resume music.
 struct MusicManager
 {
   private:
-
-  // How often we check if the music has died.
-  const float pollInterval = 2.0;
-
-  // Max file size to load. Files larger than this are streamed.
-  const int loadSize = 1024*1024;
 
   // How much to add to the volume each second when fading
   const float fadeInRate = 0.10;
   const float fadeOutRate = 0.35;
 
   // Volume
-  float volume, maxVolume;
-
-  // Time since last time we polled
-  float sumTime;
+  ALfloat volume, maxVolume;
 
   char[] name;
 
@@ -73,7 +68,10 @@ struct MusicManager
   int index; // Index of next song to play
 
   bool musicOn;
-  AudiereInstance music;
+  ALuint sID;
+  ALuint bIDs[1];
+
+  ubyte[] readData;
 
   // Which direction are we currently fading, if any
   enum Fade {  None = 0, In, Out  }
@@ -85,6 +83,8 @@ struct MusicManager
   void initialize(char[] name)
   {
     this.name = name;
+    sID = 0;
+    foreach(ref b; bIDs) b = 0;
     musicOn = false;
     updateVolume();
   }
@@ -100,7 +100,7 @@ struct MusicManager
     // a fade. Even if we are fading, though, the volume should never
     // be over the max.
     if(fading == Fade.None || volume > maxVolume) volume = maxVolume;
-    cpp_setParams(music, volume, 0.0);
+    alSourcef(sID, AL_GAIN, volume);
   }
 
   // Give a music play list
@@ -120,7 +120,8 @@ struct MusicManager
   {
     if(playlist.length < 2) return;
 
-    char[] last = playlist[0];
+    // Get the name of the last song played
+    char[] last = playlist[(index==0) ? ($-1) : (index-1)];
 
     int left = playlist.length;
     rndList.length = left;
@@ -166,12 +167,24 @@ struct MusicManager
     // If music is disabled, do nothing
     if(!musicOn) return;
 
-    // Kill current track
-    if(music) cpp_destroyInstance(music);
-    music = null;
-
     // No tracks to play?
     if(!playlist.length) return;
+
+    // Generate a source to play back with if needed
+    if(!sID)
+      {
+        alGenSources(1, &sID);
+        if(checkALError() != AL_NO_ERROR)
+            return;
+        alSourcei(sID, AL_SOURCE_RELATIVE, AL_TRUE);
+      }
+
+    // Kill current track
+    alSourceStop(sID);
+    alSourcei(sID, AL_BUFFER, 0);
+    alDeleteBuffers(bIDs.length, bIDs.ptr);
+    foreach(ref b; bIDs) b = 0;
+    checkALError();
 
     // End of list? Randomize and start over
     if(index == playlist.length)
@@ -180,9 +193,35 @@ struct MusicManager
 	index = 0;
       }
 
-    music = cpp_playStream(toStringz(playlist[index]), volume);
+    readData.length = 128*1024 / bIDs.length;
 
-    if(!music) fail("Unable to start music track " ~ playlist[index]);
+    // FIXME: Should load up and queue 3 or 4 buffers here instead of trying to
+    // load it all into one (when we switch away from ALUT).
+    char *fname = toStringz(playlist[index]);
+    bIDs[0] = alutCreateBufferFromFile(fname);
+    if(!bIDs[0])
+      {
+        writefln("Unable to load music track %s: %s", playlist[index],
+                 toString(alutGetErrorString(alutGetError())));
+        alDeleteSources(1, &sID);
+        checkALError();
+        sID = 0;
+        index++;
+        return;
+      }
+
+    alSourcei(sID, AL_BUFFER, bIDs[0]);
+    alSourcePlay(sID);
+    if(checkALError() != AL_NO_ERROR)
+      {
+        writefln("Unable to start music track %s", playlist[index]);
+        alSourceStop(sID);
+        alDeleteSources(1, &sID);
+        alDeleteBuffers(bIDs.length, bIDs.ptr);
+        checkALError();
+        sID = 0;
+        foreach(ref b; bIDs) b = 0;
+      }
 
     index++;
   }
@@ -192,7 +231,6 @@ struct MusicManager
   {
     if(!config.useMusic) return;
 
-    sumTime = 0;
     musicOn = true;
     volume = maxVolume;
     fading = Fade.None;
@@ -202,9 +240,16 @@ struct MusicManager
   // Disable music
   void disableMusic()
   {
-    if(music) cpp_destroyInstance(music);
-    music = null;
-    musicOn = false;    
+    if(sID)
+      {
+        alSourceStop(sID);
+        alDeleteSources(1, &sID);
+        alDeleteBuffers(bIDs.length, bIDs.ptr);
+        checkALError();
+        sID = 0;
+        foreach(ref b; bIDs) b = 0;
+      }
+    musicOn = false;
   }
 
   // Pause current track
@@ -218,29 +263,67 @@ struct MusicManager
   {
     if(!config.useMusic) return;
 
-    sumTime = 0;
     volume = 0.0;
     fading = Fade.In;
     musicOn = true;
-    if(music) cpp_playSound(music);
+    if(sID) addTime(0);
     else playNext();
   }
 
-  // Add time since last frame to the counter. If the accumulated time
-  // has passed the polling interval, then check if the music has
-  // died. The Audiere library has a callback functionality, but it
-  // turned out not to be terribly reliable. Sometimes it was never
-  // called at all. So we have to poll at regular intervals .. :( This
-  // function is also used for fading.
+  // Checks if a stream is playing, filling more data as needed, and restarting
+  // if it stalled or was paused.
+  private bool isPlaying()
+  {
+    if(!sID) return false;
+    /* Use this when we can do streaming..
+    ALint count;
+    alGetSourcei(sID, AL_BUFFERS_PROCESSED, &count);
+    if(checkALError() != AL_NO_ERROR) return false;
+
+    for(int i = 0;i < count;i++)
+      {
+        int length = GetData(readData.ptr, readData.length);
+        if(length <= 0)
+          {
+            if(i == 0)
+              {
+                ALint state;
+                alGetSourcei(sID, AL_SOURCE_STATE, &state);
+                if(checkALError() != AL_NO_ERROR || state == AL_STOPPED)
+                  return false;
+              }
+            break;
+          }
+
+        ALuint bid;
+        alSourceUnqueueBuffers(sID, 1, &bid);
+        if(checkALError() == AL_NO_ERROR)
+          {
+            alBufferData(bid, dataFreq, dataFormat, length, readData.ptr);
+            alSourceQueueBuffers(sID, 1, &bid);
+            checkALError();
+          }
+      }
+
+    ALint state = AL_PLAYING;
+    alGetSourcei(sID, AL_SOURCE_STATE, &state);
+    if(state != AL_PLAYING) alSourcePlay(sID);
+    return (checkALError() == AL_NO_ERROR);
+    */
+    ALint state;
+    alGetSourcei(sID, AL_SOURCE_STATE, &state);
+    if(checkALError() != AL_NO_ERROR || state == AL_STOPPED) return false;
+
+    if(state != AL_PLAYING) alSourcePlay(sID);
+    return (checkALError() == AL_NO_ERROR);
+  }
+
+  // Check if the music has died. This function is also used for fading.
   void addTime(float time)
   {
     if(!musicOn) return;
-    sumTime += time;
-    if(sumTime > pollInterval)
-      {
-	sumTime = 0;
-	if(!cpp_isPlaying(music)) playNext();
-      }
+
+    if(!isPlaying()) playNext();
 
     if(fading)
       {
@@ -263,14 +346,16 @@ struct MusicManager
 		fading = Fade.None;
 		volume = 0.0;
 
-		// We are done fading out, disable music.
-		cpp_stopSound(music);
+                // We are done fading out, disable music. Don't call
+                // enableMusic (or isPlaying) unless you want it to start
+                // again.
+                if(sID) alSourcePause(sID);
 		musicOn = false;
 	      }
 	  }
 
 	// Set the new volume
-	cpp_setParams(music, volume, 0.0);
+        if(sID) alSourcef(sID, AL_GAIN, volume);
       }
   }
 }

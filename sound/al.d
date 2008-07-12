@@ -1,3 +1,5 @@
+module sound.al;
+
 extern(System):
 
 //Defines

@@ -26,7 +26,15 @@ module sound.audio;
 public import sound.sfx;
 public import sound.music;
 
-import sound.audiere;
+import sound.al;
+import sound.alc;
+
+ALCdevice  *Device = null;
+ALCcontext *Context = null;
+
+// Temporarilly use ALUT for data loading until something better is picked
+extern (C) ALboolean alutInitWithoutContext(int *argc, char **argv);
+extern (C) ALboolean alutExit();
 
 class SoundException : Exception
 {
@@ -38,9 +46,40 @@ MusicManager battleMusic;
 
 void initializeSound()
 {
-  if(cpp_openDevice())
+  Device = alcOpenDevice(null);
+  Context = alcCreateContext(Device, null);
+
+  if(!Device || !Context)
     throw new SoundException("initializeSound()",
 			     "Failed to initialize music device");
+
+  alcMakeContextCurrent(Context);
+  alutInitWithoutContext(null, null);
+
+  // Gross HACK: We should use the default model (inverse distance clamped).
+  // But without a proper rolloff factor, distance attenuation is completely
+  // wrong. This at least makes sure the max distance is the 'silence' point
+  alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
   jukebox.initialize("Main");
   battleMusic.initialize("Battle");
+}
+
+void shutdownSound()
+{
+  alutExit();
+  alcMakeContextCurrent(null);
+  if(Context) alcDestroyContext(Context);
+  Context = null;
+  if(Device) alcCloseDevice(Device);
+  Device = null;
+}
+
+ALenum checkALError()
+{
+    ALenum err = alGetError();
+    if(err != AL_NO_ERROR)
+        writefln("WARNING: Received AL error (%x): %s", err,
+                 toString(alGetString(err)));
+    return err;
 }

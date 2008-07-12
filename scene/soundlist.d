@@ -37,10 +37,7 @@ SoundList soundScene;
 // very long.
 struct SoundList
 {
-  // TODO: This is really just a test, a hack. Will be replaced by a
-  // list or similar later.
-  SoundInstance list[50];
-  int index = 0;
+  SoundInstance[] list;
 
   // Get a sound instance from a Sound struct
   static SoundInstance getInstance(Sound *s, bool loop=false)
@@ -57,16 +54,33 @@ struct SoundList
 
   SoundInstance *insert(Sound *snd, bool loop=false)
   {
-    if(index == 50) return null;
-
-    SoundInstance *s = &list[index++];
-    *s = getInstance(snd, loop);
-    return s;
+    // Reuse a dead instance if one exists
+    foreach(ref s; list)
+      {
+        if(s.owner == null)
+          {
+            s = getInstance(snd, loop);
+            return &s;
+          }
+      }
+    // Otherwise append a new one
+    list ~= getInstance(snd, loop);
+    return &list[$-1];
   }
 
-  void update(float x, float y, float z)
+  void update(float x, float y, float z,
+              float frontx, float fronty, float frontz,
+              float upx, float upy, float upz)
   {
-    foreach(ref s; list[0..index])
-      s.setPlayerPos(x,y,z);
+    SoundInstance.setPlayerPos(x,y,z,frontx,fronty,frontz,upx,upy,upz);
+  }
+
+  void kill()
+  {
+    foreach(ref s; list)
+      {
+        if(s.owner) s.kill();
+      }
+    list = null;
   }
 }

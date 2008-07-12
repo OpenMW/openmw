@@ -23,13 +23,15 @@
 
 module sound.sfx;
 
-import sound.audiere;
 import sound.audio;
+import sound.al;
 
 import core.config;
 import core.resource;
 
 import std.string;
+
+extern (C) ALuint alutCreateBufferFromFile(char *filename);
 
 // Handle for a sound resource. This struct represents one sound
 // effect file (not a music file, those are handled differently
@@ -39,10 +41,10 @@ import std.string;
 // file, when to kill resources, etc.
 struct SoundFile
 {
-  AudiereResource res;
+  ALuint bID;
   char[] name;
   bool loaded;
-  
+
   private int refs;
 
   private void fail(char[] msg)
@@ -53,36 +55,44 @@ struct SoundFile
   // Load a sound resource.
   void load(char[] file)
   {
-    // Make sure the string is null terminated
-    assert(*(file.ptr+file.length) == 0);
-
     name = file;
 
     loaded = true;
     refs = 0;
 
-    res = cpp_openSound(file.ptr);
-
-    if(!res) fail("Failed to open sound file " ~ file);
+    bID = alutCreateBufferFromFile(toStringz(file));
+    if(!bID) fail("Failed to open sound file " ~ file);
   }
 
   // Get an instance of this resource.
+  // FIXME: Should not call fail() here since it's quite possible for this to
+  // fail (on hardware drivers). When it does, it should check for an existing
+  // sound it doesn't need and kill it, then try again
   SoundInstance getInstance()
   {
     SoundInstance si;
     si.owner = this;
-    si.inst = cpp_createInstance(res);
-    if(!si.inst) fail("Failed to instantiate sound resource");
+    alGenSources(1, &si.inst);
+    if(checkALError() != AL_NO_ERROR || !si.inst)
+      fail("Failed to instantiate sound resource");
+
+    alSourcei(si.inst, AL_BUFFER, cast(ALint)bID);
+    if(checkALError() != AL_NO_ERROR)
+      {
+        alDeleteSources(1, &si.inst);
+        fail("Failed to load sound resource");
+      }
     refs++;
 
     return si;
   }
 
   // Return the sound instance when you're done with it
-  private void returnInstance(AudiereInstance inst)
+  private void returnInstance(ALuint sid)
   {
     refs--;
-    cpp_destroyInstance(inst);
+    alSourceStop(sid);
+    alDeleteSources(1, &sid);
     if(refs == 0) unload();
   }
 
@@ -90,38 +100,34 @@ struct SoundFile
   void unload()
   {
     loaded = false;
-    cpp_closeSound(res);
+    alDeleteBuffers(1, &bID);
   }
 }
 
 struct SoundInstance
 {
-  AudiereInstance inst;
+  ALuint inst;
   SoundFile *owner;
-  float volume, min, max;
-  float xx, yy, zz; // 3D position
-  bool playing;
-  bool repeat;
 
   // Return this instance to the owner
   void kill()
   {
     owner.returnInstance(inst);
+    owner = null;
   }
 
   // Start playing a sound.
   void play()
   {
-    playing = true;
-    cpp_playSound(inst);
-    if(repeat) cpp_setRepeat(inst);
+    alSourcePlay(inst);
+    checkALError();
   }
 
   // Go buy a cookie
   void stop()
   {
-    cpp_stopSound(inst);
-    playing = false;
+    alSourceStop(inst);
+    checkALError();
   }
 
   // Set parameters such as max volume and range
@@ -132,71 +138,35 @@ struct SoundInstance
   }
   body
   {
-    this.volume = volume;
-    min = minRange;
-    max = maxRange;
-    this.repeat = repeat;
-    playing = false;
+    alSourcef(inst, AL_GAIN, volume);
+    alSourcef(inst, AL_REFERENCE_DISTANCE, minRange);
+    alSourcef(inst, AL_MAX_DISTANCE, maxRange);
+    alSourcei(inst, AL_LOOPING, repeat ? AL_TRUE : AL_FALSE);
+    alSourcePlay(inst);
+    checkALError();
   }
 
-  // Set 3D position of sound
+  // Set 3D position of sounds. Need to convert from app's world coords to
+  // standard left-hand coords
   void setPos(float x, float y, float z)
   {
-    xx = x;
-    yy = y;
-    zz = z;
+    alSource3f(inst, AL_POSITION, x, z, -y);
+    checkALError();
   }
 
-  // Currently VERY experimental, panning disabled. At some point we
-  // will likely switch to OpenAL with built-in 3D sound and dump this
-  // entirely.
-  void setPlayerPos(float x, float y, float z)
+  static void setPlayerPos(float x, float y, float z,
+                           float frontx, float fronty, float frontz,
+                           float upx, float upy, float upz)
   {
-    //writef("{%s %s %s} ", x, y, z);
-    // Distance squared
-    x -= xx;
-    y -= yy;
-    z -= zz;
-    //writef("[%s %s %s] ", x, y, z);
-    float r2 = (x*x + y*y + z*z);
-    //writefln(r2, " (%s)", max*max);
-
-    // If outside range, disable
-    if(r2 > max*max)
-      {
-	// We just moved out of range
-	if(playing)
-	  {
-	    //writefln("Out of range");
-	    stop();
-	  }
-      }
-    else
-      {
-	// We just moved into range
-	if(!playing)
-	  {
-	    //writefln("In range!");
-	    play();
-	  }
-      }
-
-    if(!playing) return;
-
-    // Invert distance
-    if(r2 < 1) r2 = 1;
-    else r2 = 1/r2;
-
-    float vol = 2*r2*min*min;
-    float pan = 0;//80*x*r2;
-
-    //writefln("x=%s, vol=%s, pan=%s", x, vol, pan);
-
-    if(vol>1.0) vol = 1.0;
-    if(pan<-1.0) pan = -1.0;
-    else if(pan > 1.0) pan = 1.0;
-    //writefln("vol=", vol, " volume=", vol*volume*config.calcSfxVolume());
-
-    cpp_setParams(inst, vol*volume*config.calcSfxVolume(), pan);
+    ALfloat orient[6];
+    orient[0] = frontx;
+    orient[1] = frontz;
+    orient[2] =-fronty;
+    orient[3] = upx;
+    orient[4] = upz;
+    orient[5] =-upy;
+    alListener3f(AL_POSITION, x, z, -y);
+    alListenerfv(AL_ORIENTATION, orient.ptr);
+    checkALError();
   }
 }

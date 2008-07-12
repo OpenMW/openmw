@@ -37,8 +37,8 @@ Dependencies:
 Dependencies needed to build OpenMW:
 
 OGRE 1.4.5         (3d engine)
-Audiere 1.9.4      (sound engine)
 OIS-1.0.0          (input system)
+OpenAL             (3d sound system)
 gcc and g++        (C++ compiler)
 GNU make           (build tool for C++ files)
 DMD 1.031          (D compiler)
@@ -46,15 +46,15 @@ DMD 1.031          (D compiler)
 
 
 The above versions are the ones I have tested recently, but other
-versions might work. OGRE, Audiere and OIS will require their own set
-of dependencies. I recommend using an automated package tool to
-install as many of these as possible. On ubuntu, try typing:
+versions might work. OGRE and OIS will require their own set of
+dependencies. I recommend using an automated package tool to install
+as many of these as possible. On ubuntu, try typing:
 
-sudo apt-get install libogre-dev libaudiere-dev libois-dev build-essential g++ gdc
-If you want to install Ogre, Audiere or OIS manually, try:
+sudo apt-get install libogre-dev libalut0 libois-dev build-essential g++ gdc
+If you want to install Ogre, OpenAL or OIS manually, try:
 
-OGRE:     http://ogre3d.org
-Audiere:  http://audiere.sourceforge.net/
+OGRE:     http://ogre3d.org/
+Audiere:  http://openal.org/
 OIS:      http://sourceforge.net/projects/wgois/
 
 
@@ -87,11 +87,19 @@ installed (a D build tool), type:
 
 dsss build
 
-If you do NOT have DSSS, you can compile using the script
+If you do NOT have DSSS, try using make
+
+make all
+
+You might need to edit the Makefile to match your setup. If you are
+using DMD instead of GDC, try changing the compiler from "gdmd" to
+"dmd" in the Makefile.
+
+If all else fails, you can try the build script:
 
 ./build_openmw.sh
 
-(Currently only works with the GDC compiler)
+This build method is deprecated and only works with gdc.
 
 
 
