@@ -57,7 +57,7 @@ sudo apt-get install libogre-dev libavcodec-dev libavformat-dev libois-dev build
 If you want to install Ogre, OpenAL or OIS manually, try:
 
 OGRE:     http://ogre3d.org/
-Audiere:  http://openal.org/
+OpenAL:   http://openal.org/
 OIS:      http://sourceforge.net/projects/wgois/
 
 
@@ -161,6 +161,6 @@ later version.
 To load another cell, specify the cell name on the command line. Use
 the 'esmtool' program to get a list of cells. Note that you must use
 quotation marks "" if the cell name contains spaces or other weird
-characters. Exterior cells are disabled at the moment.
+characters.
 
 Enjoy! ;-)

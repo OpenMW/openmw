@@ -133,11 +133,12 @@ class ListID(Type) : ListKeeper
 	// forward reference from this file. Load on top of it. The
 	// LoadState tells the struct whether it contains loaded data.
 	{
+          /*
 	  if(p.state == LoadState.Loaded)
 	    // Make a special case for this, perhaps, or just ignore it.
 	    writefln("WARNING: Duplicate record in file %s: '%s'",
 		     esFile.getFilename(), id);
-	    //esFile.fail("Duplicate record in file: '" ~ id ~ "'");
+          */
 
 	  assert(icmp(p.id, id) == 0);
 	  p.load();
