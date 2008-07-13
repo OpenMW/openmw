@@ -32,13 +32,6 @@ import sound.alc;
 import std.stdio;
 import std.string;
 
-ALCdevice  *Device = null;
-ALCcontext *Context = null;
-
-// Temporarilly use ALUT for data loading until something better is picked
-extern (C) ALboolean alutInitWithoutContext(int *argc, char **argv);
-extern (C) ALboolean alutExit();
-
 class SoundException : Exception
 {
   this(char[] caller, char[] msg) { super(caller ~ " SoundException: " ~ msg); }
@@ -46,6 +39,9 @@ class SoundException : Exception
 
 MusicManager jukebox;
 MusicManager battleMusic;
+
+ALCdevice  *Device = null;
+ALCcontext *Context = null;
 
 void initializeSound()
 {
@@ -57,7 +53,6 @@ void initializeSound()
 			     "Failed to initialize music device");
 
   alcMakeContextCurrent(Context);
-  alutInitWithoutContext(null, null);
 
   // Gross HACK: We should use the default model (inverse distance clamped).
   // But without a proper rolloff factor, distance attenuation is completely
@@ -72,8 +67,6 @@ void shutdownSound()
 {
   jukebox.disableMusic();
   battleMusic.disableMusic();
-
-  alutExit();
 
   alcMakeContextCurrent(null);
   if(Context) alcDestroyContext(Context);

@@ -23,6 +23,7 @@
 
 module sound.sfx;
 
+import sound.avcodec;
 import sound.audio;
 import sound.al;
 
@@ -30,8 +31,7 @@ import core.config;
 import core.resource;
 
 import std.string;
-
-extern (C) ALuint alutCreateBufferFromFile(char *filename);
+import std.stdio;
 
 // Handle for a sound resource. This struct represents one sound
 // effect file (not a music file, those are handled differently
@@ -57,11 +57,81 @@ struct SoundFile
   {
     name = file;
 
-    loaded = true;
+    loaded = false;
     refs = 0;
+    bID = 0;
 
-    bID = alutCreateBufferFromFile(toStringz(file));
-    if(!bID) fail("Failed to open sound file " ~ file);
+    ubyte[] outData;
+    AVFile fileHandle = cpp_openAVFile(toStringz(file));
+    AVAudio audioHandle = cpp_getAVAudioStream(fileHandle, 0);
+
+    if(!fileHandle)
+      {
+        writefln("Unable to open %s", file);
+        goto errclose;
+      }
+    if(!audioHandle)
+      {
+        writefln("Unable to load sound %s", file);
+        goto errclose;
+      }
+
+    int ch, bits, rate;
+    if(cpp_getAVAudioInfo(audioHandle, &rate, &ch, &bits) != 0)
+      {
+        writefln("Unable to get info for sound %s", file);
+        goto errclose;
+      }
+
+    int fmt = 0;
+    if(bits == 8)
+      {
+        if(ch == 1) fmt = AL_FORMAT_MONO8;
+        if(ch == 2) fmt = AL_FORMAT_STEREO8;
+        if(ch == 4) fmt = alGetEnumValue("AL_FORMAT_QUAD8");
+      }
+    if(bits == 16)
+      {
+        if(ch == 1) fmt = AL_FORMAT_MONO16;
+        if(ch == 2) fmt = AL_FORMAT_STEREO16;
+        if(ch == 4) fmt = alGetEnumValue("AL_FORMAT_QUAD16");
+      }
+
+    if(fmt == 0)
+      {
+        writefln("Unhandled format (%d channels, %d bits) for sound %s", ch, bits, file);
+        goto errclose;
+      }
+
+    int total = 0;
+    do
+      {
+        // Grow by an arbitrary amount. Should be big enough to get the
+        // whole sound in one or two iterations, but not allocate too much
+        // memory in case its short
+        outData.length = outData.length+8192;
+        int length = cpp_getAVAudioData(audioHandle, outData.ptr+total, outData.length-total);
+        total += length;
+      }
+    while(total == outData.length);
+
+    if(total)
+      {
+        alGenBuffers(1, &bID);
+        alBufferData(bID, fmt, outData.ptr, total, rate);
+        if(checkALError() != AL_NO_ERROR)
+          {
+            writefln("Unable to load sound %s", file);
+            alDeleteBuffers(1, &bID);
+            bID = 0;
+          }
+        else loaded = true;
+      }
+
+  errclose:
+    if(fileHandle) cpp_closeAVFile(fileHandle);
+    fileHandle = null;
+    audioHandle = null;
   }
 
   // Get an instance of this resource.

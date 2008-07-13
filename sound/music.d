@@ -23,6 +23,7 @@
 
 module sound.music;
 
+import sound.avcodec;
 import sound.audio;
 import sound.al;
 
@@ -32,10 +33,6 @@ import std.string;
 import core.config;
 import core.resource;
 
-extern (C) ALuint alutCreateBufferFromFile(char *filename);
-extern (C) ALenum alutGetError();
-extern (C) ALchar *alutGetErrorString(ALenum err);
-
 // Simple music player, has a playlist and can pause/resume music.
 struct MusicManager
 {
@@ -44,6 +41,9 @@ struct MusicManager
   // How much to add to the volume each second when fading
   const float fadeInRate = 0.10;
   const float fadeOutRate = 0.35;
+
+  // Maximum buffer length, divided up among OpenAL buffers
+  const uint bufLength = 128*1024;
 
   // Volume
   ALfloat volume, maxVolume;
@@ -61,9 +61,14 @@ struct MusicManager
 
   bool musicOn;
   ALuint sID;
-  ALuint bIDs[1];
+  ALuint bIDs[4];
 
-  ubyte[] readData;
+  ALenum bufFormat;
+  ALint bufRate;
+
+  AVFile fileHandle;
+  AVAudio audioHandle;
+  ubyte[] outData;
 
   // Which direction are we currently fading, if any
   enum Fade {  None = 0, In, Out  }
@@ -77,6 +82,8 @@ struct MusicManager
     this.name = name;
     sID = 0;
     foreach(ref b; bIDs) b = 0;
+    outData.length = bufLength / bIDs.length;
+    fileHandle = null;
     musicOn = false;
     updateVolume();
   }
@@ -156,6 +163,10 @@ struct MusicManager
     foreach(ref b; bIDs) b = 0;
     checkALError();
 
+    if(fileHandle) cpp_closeAVFile(fileHandle);
+    fileHandle = null;
+    audioHandle = null;
+
     // End of list? Randomize and start over
     if(index == playlist.length)
       {
@@ -163,36 +174,96 @@ struct MusicManager
 	index = 0;
       }
 
-    readData.length = 128*1024 / bIDs.length;
-
-    // FIXME: Should load up and queue 3 or 4 buffers here instead of trying to
-    // load it all into one (when we switch away from ALUT).
-    char *fname = toStringz(playlist[index]);
-    bIDs[0] = alutCreateBufferFromFile(fname);
-    if(!bIDs[0])
+    alGenBuffers(bIDs.length, bIDs.ptr);
+    if(checkALError() != AL_NO_ERROR)
       {
-        writefln("Unable to load music track %s: %s", playlist[index],
-                 toString(alutGetErrorString(alutGetError())));
+        writefln("Unable to create %d buffers", bIDs.length);
         alDeleteSources(1, &sID);
         checkALError();
         sID = 0;
-        index++;
         return;
       }
 
-    alSourcei(sID, AL_BUFFER, bIDs[0]);
+    fileHandle = cpp_openAVFile(toStringz(playlist[index]));
+    if(!fileHandle)
+      {
+        writefln("Unable to open %s", playlist[index]);
+        goto errclose;
+      }
+
+    audioHandle = cpp_getAVAudioStream(fileHandle, 0);
+    if(!audioHandle)
+      {
+        writefln("Unable to load music track %s", playlist[index]);
+        goto errclose;
+      }
+
+    int ch, bits, rate;
+    if(cpp_getAVAudioInfo(audioHandle, &rate, &ch, &bits) != 0)
+      {
+        writefln("Unable to get info for music track %s", playlist[index]);
+        goto errclose;
+      }
+
+    bufRate = rate;
+    bufFormat = 0;
+    if(bits == 8)
+      {
+        if(ch == 1) bufFormat = AL_FORMAT_MONO8;
+        if(ch == 2) bufFormat = AL_FORMAT_STEREO8;
+        if(ch == 4) bufFormat = alGetEnumValue("AL_FORMAT_QUAD8");
+      }
+    if(bits == 16)
+      {
+        if(ch == 1) bufFormat = AL_FORMAT_MONO16;
+        if(ch == 2) bufFormat = AL_FORMAT_STEREO16;
+        if(ch == 4) bufFormat = alGetEnumValue("AL_FORMAT_QUAD16");
+      }
+
+    if(bufFormat == 0)
+      {
+        writefln("Unhandled format (%d channels, %d bits) for music track %s", ch, bits, playlist[index]);
+        goto errclose;
+      }
+
+    foreach(int i, ref b; bIDs)
+      {
+        int length = cpp_getAVAudioData(audioHandle, outData.ptr, outData.length);
+        if(length) alBufferData(b, bufFormat, outData.ptr, length, bufRate);
+        if(length == 0 || checkALError() != AL_NO_ERROR)
+          {
+            if(i == 0)
+              {
+                writefln("No audio data in music track %s", playlist[index]);
+                goto errclose;
+              }
+            alDeleteBuffers(bIDs.length-i, bIDs.ptr+i);
+            checkALError();
+            bIDs[i..$] = 0;
+            break;
+          }
+      }
+
+    alSourceQueueBuffers(sID, bIDs.length, bIDs.ptr);
     alSourcePlay(sID);
     if(checkALError() != AL_NO_ERROR)
       {
         writefln("Unable to start music track %s", playlist[index]);
-        alSourceStop(sID);
-        alDeleteSources(1, &sID);
-        alDeleteBuffers(bIDs.length, bIDs.ptr);
-        checkALError();
-        sID = 0;
-        foreach(ref b; bIDs) b = 0;
+        goto errclose;
       }
 
+    index++;
+    return;
+  errclose:
+    if(fileHandle) cpp_closeAVFile(fileHandle);
+    fileHandle = null;
+    audioHandle = null;
+    alSourceStop(sID);
+    alDeleteSources(1, &sID);
+    alDeleteBuffers(bIDs.length, bIDs.ptr);
+    checkALError();
+    sID = 0;
+    foreach(ref b; bIDs) b = 0;
     index++;
   }
 
@@ -210,15 +281,22 @@ struct MusicManager
   // Disable music
   void disableMusic()
   {
+    if(fileHandle) cpp_closeAVFile(fileHandle);
+    fileHandle = null;
+    audioHandle = null;
+
     if(sID)
       {
         alSourceStop(sID);
         alDeleteSources(1, &sID);
-        alDeleteBuffers(bIDs.length, bIDs.ptr);
         checkALError();
         sID = 0;
-        foreach(ref b; bIDs) b = 0;
       }
+
+    alDeleteBuffers(bIDs.length, bIDs.ptr);
+    checkALError();
+    foreach(ref b; bIDs) b = 0;
+
     musicOn = false;
   }
 
@@ -245,14 +323,14 @@ struct MusicManager
   private bool isPlaying()
   {
     if(!sID) return false;
-    /* Use this when we can do streaming..
+
     ALint count;
     alGetSourcei(sID, AL_BUFFERS_PROCESSED, &count);
     if(checkALError() != AL_NO_ERROR) return false;
 
     for(int i = 0;i < count;i++)
       {
-        int length = GetData(readData.ptr, readData.length);
+        int length = cpp_getAVAudioData(audioHandle, outData.ptr, outData.length);
         if(length <= 0)
           {
             if(i == 0)
@@ -269,7 +347,7 @@ struct MusicManager
         alSourceUnqueueBuffers(sID, 1, &bid);
         if(checkALError() == AL_NO_ERROR)
           {
-            alBufferData(bid, dataFreq, dataFormat, length, readData.ptr);
+            alBufferData(bid, bufFormat, outData.ptr, length, bufRate);
             alSourceQueueBuffers(sID, 1, &bid);
             checkALError();
           }
@@ -277,13 +355,6 @@ struct MusicManager
 
     ALint state = AL_PLAYING;
     alGetSourcei(sID, AL_SOURCE_STATE, &state);
-    if(state != AL_PLAYING) alSourcePlay(sID);
-    return (checkALError() == AL_NO_ERROR);
-    */
-    ALint state;
-    alGetSourcei(sID, AL_SOURCE_STATE, &state);
-    if(checkALError() != AL_NO_ERROR || state == AL_STOPPED) return false;
-
     if(state != AL_PLAYING) alSourcePlay(sID);
     return (checkALError() == AL_NO_ERROR);
   }
