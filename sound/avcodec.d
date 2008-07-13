@@ -1,3 +1,5 @@
+module sound.avcodec;
+
 extern (C):
 
 // A unique handle that represents an AV file
@@ -19,7 +21,7 @@ void cpp_closeAVFile(AVFile file);
 // Get a unique handle to an audio stream in the file. The given number
 // is for files that can contain multiple audio streams (generally you
 // would pass 0, for the first audio stream)
-void *cpp_getAVAudioStream(AVFile file, int streamnum);
+AVAudio cpp_getAVAudioStream(AVFile file, int streamnum);
 
 // Get audio info representing the current stream. Returns 0 for success
 // (not likely to fail)

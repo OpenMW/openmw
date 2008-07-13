@@ -39,7 +39,8 @@ Dependencies needed to build OpenMW:
 OGRE 1.4.5         (3d engine)
 OIS-1.0.0          (input system)
 OpenAL             (3d sound system)
-libavcodec         (MP3 library)
+libavcodec,
+  libavformat      (For MP3 playback)
 gcc and g++        (C++ compiler)
 GNU make           (build tool for C++ files)
 DMD 1.031          (D compiler)
@@ -51,7 +52,8 @@ versions might work. OGRE, OIS and the other libraries have
 dependencies of their own, so I recommend using an automated package
 tool to install as many of these as possible. On ubuntu, try typing:
 
-sudo apt-get install libogre-dev libavcodec-dev libois-dev build-essential g++ gdc
+sudo apt-get install libogre-dev libavcodec-dev libavformat-dev libois-dev build-essential g++ gdc
+
 If you want to install Ogre, OpenAL or OIS manually, try:
 
 OGRE:     http://ogre3d.org/
