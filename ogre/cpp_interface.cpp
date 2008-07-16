@@ -215,14 +215,19 @@ extern "C" Light* cpp_attachLight(char *name, SceneNode* base,
 
   l->setDiffuseColour(r,g,b);
 
-  // Pulled these numbers out of nowhere. Looks OK-ish. I can polish
-  // it later.
-  l->setAttenuation(8*radius, 0, 0.008, 0.0);
+  // This seems to look reasonably ok.
+  l->setAttenuation(3*radius, 0, 0, 12.0/(radius*radius));
 
   // base might be null, sometimes lights don't have meshes
   if(base) base->attachObject(l);
 
   return l;
+}
+
+// Toggle between fullscreen and windowed mode.
+extern "C" void cpp_toggleFullscreen()
+{
+  std::cout << "Not implemented yet\n";
 }
 
 extern "C" void cpp_setAmbient(float r, float g, float b, // Ambient light

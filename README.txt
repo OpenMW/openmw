@@ -113,7 +113,7 @@ Thanks goes out to:
 
 - Bastien Jansen for continued testing on 64 bit linux.
 
-- Chris Robinson for OpenAL and ALUT support
+- Chris Robinson for OpenAL and MP3 support
 
 
 

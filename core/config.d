@@ -237,6 +237,8 @@ struct ConfigManager
 	bind(Keys.SfxVolUp, KC.N4);
         bind(Keys.Mute, KC.M);
 
+        bind(Keys.Fullscreen, KC.F);
+
 	bind(Keys.ToggleBattleMusic, KC.SPACE);
         bind(Keys.Debug, KC.G);
 

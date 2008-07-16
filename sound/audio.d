@@ -54,11 +54,6 @@ void initializeSound()
 
   alcMakeContextCurrent(Context);
 
-  // Gross HACK: We should use the default model (inverse distance clamped).
-  // But without a proper rolloff factor, distance attenuation is completely
-  // wrong. This at least makes sure the max distance is the 'silence' point
-  alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
-
   jukebox.initialize("Main");
   battleMusic.initialize("Battle");
 }
@@ -75,11 +70,14 @@ void shutdownSound()
   Device = null;
 }
 
-ALenum checkALError()
+bool checkALError(char[] what = "")
 {
     ALenum err = alGetError();
+    if(what.length) what = " while " ~ what;
     if(err != AL_NO_ERROR)
-        writefln("WARNING: Received AL error (%x): %s", err,
-                 toString(alGetString(err)));
-    return err;
+      writefln("WARNING: OpenAL error%s: (%x) %s", what, err,
+               toString(alGetString(err)));
+
+
+    return err != AL_NO_ERROR;
 }

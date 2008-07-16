@@ -90,6 +90,11 @@ void toggleBattle()
     }
 }
 
+void toggleFullscreen()
+{
+  cpp_toggleFullscreen();
+}
+
 const float volDiff = 0.05;
 
 void musVolume(bool increase)
@@ -212,6 +217,7 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
       case Keys.SfxVolUp: sfxVolume(true); break;
       case Keys.SfxVolDown: sfxVolume(false); break;
       case Keys.Mute: toggleMute(); break;
+      case Keys.Fullscreen: toggleFullscreen(); break;
 
       case Keys.Debug: cpp_debug(0); break;
       case Keys.ScreenShot: takeScreenShot(); break;
@@ -265,16 +271,14 @@ bool isPressed(Keys key)
 
 extern(C) int d_frameStarted(float time)
 {
-  /*
   tmpTime += time;
   cnt++;
-  if(tmpTime >= 1.0)
+  if(tmpTime >= 1.5)
     {
-      writefln("\nfps: ", cnt/tmpTime);
+      writefln("fps: ", cnt/tmpTime);
       cnt = 0;
       tmpTime = 0;
     }
-  //*/
 
   if(doExit) return 0;
 

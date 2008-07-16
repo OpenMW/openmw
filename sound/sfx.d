@@ -119,7 +119,7 @@ struct SoundFile
       {
         alGenBuffers(1, &bID);
         alBufferData(bID, fmt, outData.ptr, total, rate);
-        if(checkALError() != AL_NO_ERROR)
+        if(checkALError())
           {
             writefln("Unable to load sound %s", file);
             alDeleteBuffers(1, &bID);
@@ -143,11 +143,11 @@ struct SoundFile
     SoundInstance si;
     si.owner = this;
     alGenSources(1, &si.inst);
-    if(checkALError() != AL_NO_ERROR || !si.inst)
+    if(checkALError() || !si.inst)
       fail("Failed to instantiate sound resource");
 
     alSourcei(si.inst, AL_BUFFER, cast(ALint)bID);
-    if(checkALError() != AL_NO_ERROR)
+    if(checkALError())
       {
         alDeleteSources(1, &si.inst);
         fail("Failed to load sound resource");
@@ -177,6 +177,7 @@ struct SoundFile
 struct SoundInstance
 {
   ALuint inst;
+  ALfloat volume;
   SoundFile *owner;
 
   // Return this instance to the owner
@@ -190,14 +191,14 @@ struct SoundInstance
   void play()
   {
     alSourcePlay(inst);
-    checkALError();
+    checkALError("playing sound instance");
   }
 
   // Go buy a cookie
   void stop()
   {
     alSourceStop(inst);
-    checkALError();
+    checkALError("stopping sound instance");
   }
 
   // Set parameters such as max volume and range
@@ -208,12 +209,13 @@ struct SoundInstance
   }
   body
   {
-    alSourcef(inst, AL_GAIN, volume);
+    this.volume = volume;
+    alSourcef(inst, AL_GAIN, 0);
     alSourcef(inst, AL_REFERENCE_DISTANCE, minRange);
     alSourcef(inst, AL_MAX_DISTANCE, maxRange);
     alSourcei(inst, AL_LOOPING, repeat ? AL_TRUE : AL_FALSE);
     alSourcePlay(inst);
-    checkALError();
+    checkALError("setting sound parameters");
   }
 
   // Set 3D position of sounds. Need to convert from app's world coords to
@@ -221,7 +223,31 @@ struct SoundInstance
   void setPos(float x, float y, float z)
   {
     alSource3f(inst, AL_POSITION, x, z, -y);
-    checkALError();
+    checkALError("setting sound position");
+  }
+
+  // TODO: This should probably be merged in setPos. All active sounds
+  // should respecify their position after the listener does, which would
+  // be ideal for keeping moving sounds moving while handling distance
+  // culling for moving and stationary sounds
+  void updateSound()
+  {
+    ALfloat lp[3];
+    ALfloat p[3];
+    ALfloat dist;
+    alGetSourcef(inst, AL_MAX_DISTANCE, &dist);
+    alGetSourcefv(inst, AL_POSITION, p.ptr);
+    alGetListenerfv(AL_POSITION, lp.ptr);
+    if(!checkALError("updating sound position"))
+      {
+        p[0] -= lp[0];
+        p[1] -= lp[1];
+        p[2] -= lp[2];
+        if((p[0]*p[0] + p[1]*p[1] + p[2]*p[2]) > dist*dist)
+          alSourcef(inst, AL_GAIN, 0);
+        else
+          alSourcef(inst, AL_GAIN, volume);
+      }
   }
 
   static void setPlayerPos(float x, float y, float z,
@@ -237,6 +263,6 @@ struct SoundInstance
     orient[5] =-upy;
     alListener3f(AL_POSITION, x, z, -y);
     alListenerfv(AL_ORIENTATION, orient.ptr);
-    checkALError();
+    checkALError("setting player position");
   }
 }

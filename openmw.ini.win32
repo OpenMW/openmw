@@ -29,6 +29,7 @@ Decrease Music Volume=1
 Increase SFX Volume=4
 Decrease SFX Volume=3
 Mute Sound=m
+Toggle Fullscreen Mode=f
 Toggle Battle Music=space
 OGRE Test Action=g
 Pause=pause,p

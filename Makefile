@@ -9,7 +9,7 @@ DMD=gdmd -version=Posix
 NIFFLAGS=
 
 # Compiler settings for Ogre + OIS. Change as needed.
-OGCC=$(CXX) $(CXXFLAGS) `pkg-config --cflags OGRE OIS openal`
+OGCC=$(CXX) $(CXXFLAGS) `pkg-config --cflags OGRE OIS`
 
 # Compiler settings for ffmpeg. Change as needed.
 AVGCC=$(CXX) $(CXXFLAGS) `pkg-config --cflags libavcodec libavformat`

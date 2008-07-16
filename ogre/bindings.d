@@ -137,6 +137,9 @@ void cpp_createMesh(
 		NodePtr owner		// Scene node to attach to.
 		);
 
+// Toggle fullscreen mode
+void cpp_toggleFullscreen();
+
 // Save a screen shot to the given file name
 void cpp_screenshot(char *filename);
 

@@ -62,7 +62,8 @@ enum Keys
     SfxVolUp, SfxVolDown,
     Mute,
 
-    // This will not be part of the finished product :)
+    // These will not be part of the finished product
+    Fullscreen,
     ToggleBattleMusic,
     Debug,
 
@@ -245,6 +246,7 @@ struct KeyBindings
     keyToString[Keys.SfxVolDown] = "Decrease SFX Volume";
     keyToString[Keys.Mute] = "Mute Sound";
 
+    keyToString[Keys.Fullscreen] = "Toggle Fullscreen Mode";
     keyToString[Keys.ToggleBattleMusic] = "Toggle Battle Music";
     keyToString[Keys.Debug] = "OGRE Test Action";
 
