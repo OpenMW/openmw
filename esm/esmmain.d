@@ -66,9 +66,8 @@ void loadTESFiles(char[][] files)
 	}
 
       // We have to loop through the lists and check for broken
-      // references at this point, if all forward references were
-      // loaded. There might be other end-of-file things to do
-      // also.
+      // references at this point, and if all forward references were
+      // loaded. There might be other end-of-file things to do also.
       endFiles();
     }
 
@@ -114,4 +113,29 @@ void loadTESFiles(char[][] files)
 
   // Finally, sort the hyperlink lists
   hyperlinks.sort();
+}
+
+// Load a TES savegame file (.ess). Currently VERY limited, only reads
+// the header.
+void importSavegame(char[] file)
+{
+  writefln("Loading savegame %s", file);
+  esFile.open(file, esmRegion);
+  scope(exit) esFile.close();
+
+  if(esFile.getFileType != FileType.Ess)
+    throw new TES3FileException(file ~ " is not a savegame");
+
+  with(esFile.saveData)
+    {
+      writefln("Floats:");
+      foreach(i, f; unknown)
+        writefln("  %s: %s", i, f);
+
+      writefln("Cell name: ", stripz(cell));
+
+      writefln("Strange value: ", unk2);
+      writefln("Player name: ", stripz(player));
+    }
+  writefln();
 }

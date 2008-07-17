@@ -101,6 +101,13 @@ void main(char[][] args)
     }
 
   initializeMemoryRegions();
+
+  /*
+  importSavegame("data/quiksave.ess");
+  importSavegame("data/Perm1hal0000.ess");
+  return;
+  */
+
   config.initialize(resetKeys);
   scope(exit) config.writeConfig();
 

@@ -140,12 +140,13 @@ struct TES3File
     char[] name;   // File name of an esm master for this file
     ulong size;	   // The master file's size in bytes (used for
                    // version control)
-  } 
+  }
 
   // List of esm masters for this file. For savegames this list also
   // contains all plugins.
   _mast masters[];
   
+
   // TES3.HEDR, file header struct
   align(1) struct HEDRstruct
   {
@@ -166,6 +167,19 @@ struct TES3File
   RegionManager region;
 
  public:
+
+  // A struct found in the headers of savegame files. Contains quick
+  // information to get us going, like the cell name and the player
+  // name.
+  struct _saveData
+  {
+    float[6] unknown; // 24 bytes
+    char[64] cell; // Cell name
+    float unk2; // Unknown value
+    char[32] player; // Player name
+  }
+  static assert(_saveData.sizeof == 124);
+  _saveData saveData;
 
   // Get file information
   char[] getFilename() { return filename; }
@@ -244,15 +258,9 @@ struct TES3File
 
       debug writefln("Reading header");
 
+      // Do NOT .dup this filename, since it is referenced outside the
+      // GC's reach and might be deleted.
       this.filename = filename;
-
-      // Make a copy so the file name is not overwritten (not really needed?)
-      // this.filename = region.copy(filename);
-
-      // Oops, this was bad. The file name ends up in various
-      // TES3FileContext structs, allocated outside the GC's reach. A
-      // .dup'ed copy might be released and overwritten.
-      // this.filename = filename.dup;
 
       leftFile = file.size;
 
@@ -316,13 +324,16 @@ struct TES3File
 
       if(type == FileType.Savegame)
 	{
-          // What are these again? I don't remember.
-	  getSubNameIs("GMDT");
-	  skipHSubSize(124);
+          // Savegame-related data
+
+          // Cell name, player name and player position
+          readHNExact(&saveData, 124, "GMDT");
+
+          // Contains eg. 0xff0000, 0xff00, 0xff, 0x0, 0x20. No idea.
 	  getSubNameIs("SCRD");
 	  skipHSubSize(20);
 
-          // Screenshot, used for save games.
+          // Screenshot. Fits with 128x128x4 bytes
 	  getSubNameIs("SCRS");
 	  skipHSubSize(65536);
 	}
