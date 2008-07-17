@@ -144,7 +144,7 @@ struct ResourceManager
     char[][] getDir(char[] dir)
       {
 	dir = FileFinder.addSlash(dir);
-	char[][] res = listdir(dir);
+	char[][] res = ((exists(dir) && isdir(dir)) ? listdir(dir) : null);
 	foreach(ref char[] fn; res)
 	  fn = dir ~ fn;
 	return res;

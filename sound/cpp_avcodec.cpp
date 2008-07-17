@@ -43,7 +43,7 @@ struct MyFile {
         vector<uint8_t> Data;
         vector<char> DecodedData;
     };
-    vector<MyStream> Streams;
+    vector<MyStream*> Streams;
 };
 
 // TODO:
@@ -75,9 +75,10 @@ extern "C" void cpp_closeAVFile(MyFile *file)
 
     for(size_t i = 0;i < file->Streams.size();i++)
     {
-        avcodec_close(file->Streams[i].CodecCtx);
-        file->Streams[i].Data.clear();
-        file->Streams[i].DecodedData.clear();
+        avcodec_close(file->Streams[i]->CodecCtx);
+        file->Streams[i]->Data.clear();
+        file->Streams[i]->DecodedData.clear();
+        delete file->Streams[i];
     }
     file->Streams.clear();
 
@@ -95,18 +96,20 @@ extern "C" MyFile::MyStream *cpp_getAVAudioStream(MyFile *file, int streamnum)
 
         if(streamnum == 0)
         {
-            MyFile::MyStream stream;
-            stream.parent = file;
-            stream.CodecCtx = file->FmtCtx->streams[i]->codec;
-            stream.StreamNum = i;
+            MyFile::MyStream *stream = new MyFile::MyStream;
+            stream->parent = file;
+            stream->CodecCtx = file->FmtCtx->streams[i]->codec;
+            stream->StreamNum = i;
 
-            AVCodec *codec = avcodec_find_decoder(stream.CodecCtx->codec_id);
-            if(!codec) return NULL;
-            if(avcodec_open(stream.CodecCtx, codec) < 0)
+            AVCodec *codec = avcodec_find_decoder(stream->CodecCtx->codec_id);
+            if(!codec || avcodec_open(stream->CodecCtx, codec) < 0)
+            {
+                delete stream;
                 return NULL;
+            }
 
             file->Streams.push_back(stream);
-            return &file->Streams[file->Streams.size()-1];
+            return stream;
         }
         streamnum--;
     }
@@ -130,14 +133,14 @@ static int getNextPacket(MyFile *file)
     AVPacket packet;
     while(av_read_frame(file->FmtCtx, &packet) >= 0)
     {
-        for(vector<MyFile::MyStream>::iterator i = file->Streams.begin();
+        for(vector<MyFile::MyStream*>::iterator i = file->Streams.begin();
             i != file->Streams.end();i++)
         {
-            if(i->StreamNum == packet.stream_index)
+            if((*i)->StreamNum == packet.stream_index)
             {
-                size_t idx = i->Data.size();
-                i->Data.resize(idx + packet.size);
-                memcpy(&i->Data[idx], packet.data, packet.size);
+                size_t idx = (*i)->Data.size();
+                (*i)->Data.resize(idx + packet.size);
+                memcpy(&(*i)->Data[idx], packet.data, packet.size);
                 av_free_packet(&packet);
                 return 0;
             }

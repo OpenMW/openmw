@@ -40,7 +40,7 @@ struct MusicManager
 
   // How much to add to the volume each second when fading
   const float fadeInRate = 0.10;
-  const float fadeOutRate = 0.35;
+  const float fadeOutRate = 0.20;
 
   // Maximum buffer length, divided up among OpenAL buffers
   const uint bufLength = 128*1024;
@@ -85,7 +85,6 @@ struct MusicManager
     outData.length = bufLength / bIDs.length;
     fileHandle = null;
     musicOn = false;
-    updateVolume();
   }
 
   // Get the new volume setting.
@@ -99,7 +98,8 @@ struct MusicManager
     // a fade. Even if we are fading, though, the volume should never
     // be over the max.
     if(fading == Fade.None || volume > maxVolume) volume = maxVolume;
-    alSourcef(sID, AL_GAIN, volume);
+    if(sID)
+      alSourcef(sID, AL_GAIN, volume);
   }
 
   // Give a music play list
@@ -154,6 +154,8 @@ struct MusicManager
         if(checkALError())
             fail("Couldn't generate music sources");
         alSourcei(sID, AL_SOURCE_RELATIVE, AL_TRUE);
+
+        updateVolume();
       }
     else
       {
@@ -263,7 +265,6 @@ struct MusicManager
     if(!config.useMusic) return;
 
     musicOn = true;
-    volume = maxVolume;
     fading = Fade.None;
     playNext();
   }
@@ -371,7 +372,7 @@ struct MusicManager
 	else
 	  {
 	    assert(fading == Fade.Out);
-	    volume -= fadeOutRate * time;	
+	    volume -= fadeOutRate * time;
 	    if(volume <= 0.0)
 	      {
 		fading = Fade.None;
