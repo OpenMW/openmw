@@ -64,12 +64,12 @@ abstract class Record
     }
  public:
 
+  // Allocate objects of this class (and all subclasses) in the
+  // nifRegion. This means we can allocate and deallocate the entire
+  // nif tree very quickly, without involving the GC, and with zero
+  // chance of memory leaks or heap fragmentation.
   new(uint sz)
     {
-      // After eliminating all GC dependence, this is no longer
-      // needed.
-      //return nifRegion.allocateGC(sz).ptr;
-
       return nifRegion.allocate(sz).ptr;
     }
 

@@ -37,14 +37,6 @@ class RegionManagerException : Exception
     { super( format("Memory Region Manager '%s': %s", name, msg ) ); }
 }
 
-// I tried this as an inner class, and it didn't even remotely work. I
-// think inner class support in DMD sucks quite a bit. Works ok now
-// (but still had some problems - template support in general is still
-// pretty patchy.)
-
-// UPDATE: The above comment was written a long time ago, it might
-// work now. But if it ain't broke, don't fix it.
-
 // A resizable array using a region for memory allocation. These can
 // safely be resized back and forth without wasting large amounts of
 // memory.
@@ -179,7 +171,7 @@ class RegionManager
   // Use a default buffer size of one meg. Might change later.
   const uint defaultBufferSize = 1024*1024;
 
-  // The size to use for new buffer.
+  // The size to use for new buffers.
   uint bufferSize;
 
   // Current amount of space that is 'lost' in unused end-of-buffer
@@ -205,11 +197,6 @@ class RegionManager
   // large enough to prevent this from being necessary in most cases.
   void nextBuffer()
     {
-      /*
-      if(currentBuffer != 0)
-	writefln("WARNING: adding new buffer, number ", currentBuffer);
-      */
-
       // We should never have to increase the number of buffers!
       if(currentBuffer >= buffers.length) fail("Out of buffers");
 

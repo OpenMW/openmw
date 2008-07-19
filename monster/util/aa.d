@@ -228,7 +228,7 @@ struct HashTable(Key, Value, Alloc = GCAlloc, Hash = DefHash,
     }
 
   // Look up a value. If found return true, otherwise false.
-  bool inList(Key k) { return lookup(k) != null; }
+  bool inList(Key k) { return lookupKey(k) != null; }
 
   // Look up a value. If found return pointer, otherwise null.
   Value* lookup(Key k)
