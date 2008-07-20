@@ -192,6 +192,7 @@ struct ResourceManager
     // Copy name and insert. We MUST copy here, since indices during
     // load are put in a temporary buffer, and thus overwritten.
     si.name = esmRegion.copyz(id);
+    assert(si.name == id);
     soundLookup[si.name] = si;
 
     return si;

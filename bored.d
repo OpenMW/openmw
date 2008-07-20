@@ -110,6 +110,12 @@ those plugins.");
 	      play=false;
 	      break;
 	    }
+          if(rnd() < 0.02)
+            {
+              writefln("You were eaten by a grue.");
+              play=false;
+              break;
+            }
 	  switch(rand(0,15))
 	    {
 	    case 0: str = "Fjol the Outlaw"; goldinc = rand(0,70); lootinc = rand(10,120); break;

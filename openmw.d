@@ -201,26 +201,6 @@ void main(char[][] args)
       return null;
     }
 
-  /*
-  Sound *l = cast(Sound*) sounds.lookup("Fire 40");
-  if(l)
-    {
-      writefln("id: %s", l.id);
-      writefln("volume: ", l.data.volume);
-      writefln("range: %s-%s", l.data.minRange, l.data.maxRange);
-      writefln("sound file name: ", l.sound.getName);
-      writefln("playing... press enter to quit");
-
-      SoundInstance inst = SoundList.getInstance(l, true);
-      inst.setPos(0,0,0);
-      inst.setPlayerPos(0, 0, 0);
-      inst.play();
-      din.readLine();
-      inst.kill;
-      render = false;
-    }
-  */
-
   if(render)
     {
       // Warm up OGRE
@@ -287,11 +267,11 @@ void main(char[][] args)
 	  if(s)
 	    {
 	      writefln("Static light %s has sound %s", ls.m.id, s.id);
-	      ls.loopSound = soundScene.insert(s, true);
-	      if(ls.loopSound)
-		ls.loopSound.setPos(ls.base.pos.position[0],
-				    ls.base.pos.position[1],
-				    ls.base.pos.position[2]);
+              ls.loopSound = soundScene.insert(s, true);
+              if(ls.loopSound)
+                ls.loopSound.setPos(ls.base.pos.position[0],
+                                    ls.base.pos.position[1],
+                                    ls.base.pos.position[2]);
 	    }
 	}
       // Misc items

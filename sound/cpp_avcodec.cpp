@@ -128,7 +128,7 @@ extern "C" int cpp_getAVAudioInfo(MyFile::MyStream *stream,
     return 0;
 }
 
-static int getNextPacket(MyFile *file)
+static void getNextPacket(MyFile *file, int streamidx)
 {
     AVPacket packet;
     while(av_read_frame(file->FmtCtx, &packet) >= 0)
@@ -141,14 +141,16 @@ static int getNextPacket(MyFile *file)
                 size_t idx = (*i)->Data.size();
                 (*i)->Data.resize(idx + packet.size);
                 memcpy(&(*i)->Data[idx], packet.data, packet.size);
-                av_free_packet(&packet);
-                return 0;
+                if(streamidx == packet.stream_index)
+                {
+                    av_free_packet(&packet);
+                    return;
+                }
+                break;
             }
         }
         av_free_packet(&packet);
     }
-
-    return 1;
 }
 
 extern "C" int cpp_getAVAudioData(MyFile::MyStream *stream, char *data, int length)
@@ -158,14 +160,25 @@ extern "C" int cpp_getAVAudioData(MyFile::MyStream *stream, char *data, int leng
     int dec = 0;
     while(dec < length)
     {
+        if(stream->DecodedData.size() > 0)
+        {
+            size_t rem = length-dec;
+            if(rem > stream->DecodedData.size())
+                rem = stream->DecodedData.size();
+
+            memcpy(data, &stream->DecodedData[0], rem);
+            data += rem;
+            dec += rem;
+            if(rem < stream->DecodedData.size())
+                memmove(&stream->DecodedData[0], &stream->DecodedData[rem],
+                        stream->DecodedData.size() - rem);
+            stream->DecodedData.resize(stream->DecodedData.size()-rem);
+        }
         if(stream->DecodedData.size() == 0)
         {
-            while(stream->Data.size() == 0)
-            {
-                if(getNextPacket(stream->parent) != 0)
-                    break;
-            }
-
+            // Must always get at least one more packet if possible, in case
+            // the previous one wasn't enough
+            getNextPacket(stream->parent, stream->StreamNum);
             int insize = stream->Data.size();
             if(insize == 0)
                 break;
@@ -174,6 +187,7 @@ extern "C" int cpp_getAVAudioData(MyFile::MyStream *stream, char *data, int leng
             // codecs read in larger chunks and may accidently read
             // past the end of the allocated buffer
             stream->Data.resize(insize + FF_INPUT_BUFFER_PADDING_SIZE);
+            memset(&stream->Data[insize], 0, FF_INPUT_BUFFER_PADDING_SIZE);
             stream->DecodedData.resize(AVCODEC_MAX_AUDIO_FRAME_SIZE);
 
             int16_t *ptr = (int16_t*)&stream->DecodedData[0];
@@ -185,28 +199,16 @@ extern "C" int cpp_getAVAudioData(MyFile::MyStream *stream, char *data, int leng
                 stream->Data.resize(insize);
                 break;
             }
-
-            int datarem = insize-len;
-            if(datarem)
-                memmove(&stream->Data[0], &stream->Data[len], datarem);
-            stream->Data.resize(datarem);
+            if(len > 0)
+            {
+                int datarem = insize-len;
+                if(datarem)
+                    memmove(&stream->Data[0], &stream->Data[len], datarem);
+                stream->Data.resize(datarem);
+            }
 
             stream->DecodedData.resize(size);
-            if(stream->DecodedData.size() == 0)
-                break;
         }
-
-        size_t rem = length-dec;
-        if(rem > stream->DecodedData.size())
-            rem = stream->DecodedData.size();
-
-        memcpy(data, &stream->DecodedData[0], rem);
-        data += rem;
-        dec += rem;
-        if(rem < stream->DecodedData.size())
-            memmove(&stream->DecodedData[0], &stream->DecodedData[rem],
-                    stream->DecodedData.size() - rem);
-        stream->DecodedData.resize(stream->DecodedData.size()-rem);
     }
     return dec;
 }

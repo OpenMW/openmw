@@ -187,17 +187,26 @@ struct DialInfo
     deleted = false;
     questStatus = Quest.None;
 
-    // Figure out how we check the owner's type
-    if(tp == Dialogue.Type.Journal)
-      {
-	if(subName == "QSTN") questStatus = Quest.Name;
-	else if(subName == "QSTF") questStatus = Quest.Finished;
-	else if(subName == "QSTR") questStatus = Quest.Restart;
-
-	if(questStatus != Quest.None) getHByte();
-      }
+    if(subName == "QSTN") questStatus = Quest.Name;
+    else if(subName == "QSTF") questStatus = Quest.Finished;
+    else if(subName == "QSTR") questStatus = Quest.Restart;
     else if(subName == "DELE") {getHInt(); deleted = true;}
-    else fail("Don't know what to do with " ~ subName ~ " here.");
+    else
+      fail("Don't know what to do with " ~ subName ~ " in INFO " ~ id);
+
+    if(questStatus != Quest.None)
+      {
+        getHByte();
+        // The Quest markers should only appear in journal INFOs, but
+        // sometime the appear outside it. We could issue a warning,
+        // but lets just ignore it instead.
+
+        /*
+        if(tp != Dialogue.Type.Journal)
+          writefln("WARNING: Found INFO quest marker in INFO %s type %s",
+                   id, cast(int)tp);
+        */
+      }
   }}
 }
 

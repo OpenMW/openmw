@@ -183,6 +183,8 @@ struct MusicManager
     // If something fails, clean everything up.
     scope(failure)
       {
+        // This block is only executed if an exception is thrown.
+
         if(fileHandle) cpp_closeAVFile(fileHandle);
 
         fileHandle = null;
@@ -199,6 +201,8 @@ struct MusicManager
 
         // Try the next track if playNext is called again
         index++;
+
+        // The function exits here.
       }
 
     if(checkALError())
@@ -222,13 +226,21 @@ struct MusicManager
       {
         if(ch == 1) bufFormat = AL_FORMAT_MONO8;
         if(ch == 2) bufFormat = AL_FORMAT_STEREO8;
-        if(ch == 4) bufFormat = alGetEnumValue("AL_FORMAT_QUAD8");
+        if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
+          {
+            if(ch == 4) bufFormat = alGetEnumValue("AL_FORMAT_QUAD8");
+            if(ch == 6) bufFormat = alGetEnumValue("AL_FORMAT_51CHN8");
+          }
       }
     if(bits == 16)
       {
         if(ch == 1) bufFormat = AL_FORMAT_MONO16;
         if(ch == 2) bufFormat = AL_FORMAT_STEREO16;
-        if(ch == 4) bufFormat = alGetEnumValue("AL_FORMAT_QUAD16");
+        if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
+          {
+            if(ch == 4) bufFormat = alGetEnumValue("AL_FORMAT_QUAD16");
+            if(ch == 6) bufFormat = alGetEnumValue("AL_FORMAT_51CHN16");
+          }
       }
 
     if(bufFormat == 0)

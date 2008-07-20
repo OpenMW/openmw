@@ -44,6 +44,8 @@ struct SoundList
   {
     const distFactor = 40.0; // Just guessing, really.
 
+    assert(!s.sound.isEmpty());
+
     SoundInstance inst = s.sound.getInstance();
     inst.setParams(s.data.volume/255.0,
 		   s.data.minRange*distFactor,
@@ -54,6 +56,11 @@ struct SoundList
 
   SoundInstance *insert(Sound *snd, bool loop=false)
   {
+    // For some reason, we get called with empty sound instances here
+    // if some files are missing, but not for others. Check into it
+    // later.
+    if(snd.sound.isEmpty) return null;
+
     // Reuse a dead instance if one exists
     foreach(ref s; list)
       {

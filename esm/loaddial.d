@@ -180,8 +180,6 @@ struct Dialogue
   }}
 }
 
-// TODO/FIXME: HACK suddenly needed with version 0.167 :(
-// Haven't re-tested it with non-ancient compiler
 typedef Dialogue.Type DialogueType;
 
 /+

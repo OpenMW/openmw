@@ -6,7 +6,7 @@ Email: korslund@gmail.com
 WWW: http://openmw.snaptoad.com
 License: See GPL3.txt
 Current version: 0.4 (still very pre-alpha)
-Date: 2008 jul. 12
+Date: 2008 jul. 20
 
 
 
@@ -115,17 +115,26 @@ Thanks goes out to:
 
 - Chris Robinson for OpenAL and MP3 support
 
+- Various others for testing, ideas and patches
+
+
 
 
 Changelog:
 ==========
 
-0.4 (Work in progress)
+0.4 (2008 jul. 20) - work in progress
+
 - switched from Audiere to OpenAL (BIG thanks to Chris Robinson)
 - added complete Makefile (again) as a alternative build tool
+- much more realistic lighting (thanks again to Chris Robinson)
+- should work with Russian version
+- various bug-fixes
 - cosmetic changes to placate gdc -Wall
 
+
 0.3 (2008 jul. 10) - latest release
+
 - built and tested on Windows XP
 - partial support for FreeBSD (exceptions do not work)
 - temporarily dropped DSSS and Monster as necessary dependencies
@@ -138,10 +147,14 @@ Changelog:
   Dmitry Marakasov.)
 - tested against OIS 1.0.0 (Ubuntu repository package)
 
+
 0.2 (2008 jun. 17)
+
 - compiles with gdc
 - switched to DSSS for building D code
 - includes the program esmtool
 
+
 0.1 (2008 jun. 03)
+
 - first release
