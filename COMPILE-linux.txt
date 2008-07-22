@@ -77,7 +77,11 @@ http://sourceforge.net/projects/dgcc
 If you want to use DMD instead, it can be found at:
 http://digitalmars.com/d/1.0/dmd-linux.html
 
-Note that DMD is only available on 32 bit Linux - other operating
+Note that the DMD unstable branch (2.000 and up) will NOT currently
+work with OpenMW. Use the stable branch (1.x) instead. The latest
+version known to work is DMD 1.031, so I recommend that.
+
+Also note that DMD is only available on 32 bit Linux - other operating
 systems or architectures will have to use GDC. However GDC might be
 unstable on these platforms as well, even if it runs.
 

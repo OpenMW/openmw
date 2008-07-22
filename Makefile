@@ -1,9 +1,9 @@
 # Designed for GNU Make
 
 # Compiler settings
-CXX?= g++
 CXXFLAGS?= -Wall -g
 DMD=gdmd -version=Posix
+#DMD=dmd -version=Posix
 
 # Some extra flags for niftool and bsatool
 NIFFLAGS=-debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose
@@ -20,8 +20,7 @@ AVGCC=$(CXX) $(CXXFLAGS) $(CF_FFMPEG)
 # passed to the compiler, the rest are dependencies.
 ogre_cpp=ogre framelistener interface overlay bsaarchive
 
-# FFmpeg files, in the form sound/cpp_X.cpp. Only the first file is
-# passed to the compiler, the rest are dependencies.
+# FFmpeg files, in the form sound/cpp_X.cpp.
 avcodec_cpp=avcodec
 
 ## No modifications should be required below this line. ##
