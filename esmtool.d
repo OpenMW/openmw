@@ -156,7 +156,8 @@ void main(char[][] args)
 	case WT.Bolt: writef("Bolt"); break;
         default: assert(0);
 	}
-      writefln(" id '%s': name '%s'", n, m.name);
+      try writefln(" id '%s': name '%s'", n, m.name);
+      catch {writefln("(Invalid UTF string)");}
 
       if(m.data.flags & Weapon.Flags.Magical)
 	writefln("Magical");
@@ -225,14 +226,22 @@ void main(char[][] args)
       writefln("Total cell placable items: ", cellRefs.length);
     }
   if(scptList) foreach(a, b; scripts.names) writefln(a);
-  if(ciList) foreach(a, b; cells.in_cells) writefln(a);
+  if(ciList)
+    foreach(a, b; cells.in_cells)
+    {
+      try writefln(a);
+      catch {writefln("(Invalid UTF string)");}
+    }
   if(ceList)
     foreach(uint i, c; .cells.ex_cells)
     {
       int x, y;
       CellList.decompound(i, x, y);
       if(c.name.length)
-	writefln("%s,%s: %s", x, y, c.name);
+        {
+          try writefln("%s,%s: %s", x, y, c.name);
+          catch {writefln("(Invalid UTF string)");}
+        }
     }
 
   if(scptShow)
