@@ -27,12 +27,11 @@ import std.stdio;
 
 import core.memory;
 import esm.esmmain;
+import monster.util.string;
 
-import std.utf;
 import std.gc;
 import gcstats;
 
-import monster.util.string;
 
 // Not used, but we have to link it in along with the C++ stuff.
 import input.events;
@@ -129,8 +128,7 @@ void main(char[][] args)
   try loadTESFiles(files);
   catch(Exception e)
     {
-      try {writefln(e);}
-      catch {writefln("(Invalid UTF in error message)");}
+      writefln(e);
     }
   catch { writefln("Error: Unkown failure"); }
 
@@ -156,8 +154,7 @@ void main(char[][] args)
 	case WT.Bolt: writef("Bolt"); break;
         default: assert(0);
 	}
-      try writefln(" id '%s': name '%s'", n, m.name);
-      catch {writefln("(Invalid UTF string)");}
+      writefln(" id '%s': name '%s'", n, m.name);
 
       if(m.data.flags & Weapon.Flags.Magical)
 	writefln("Magical");
@@ -228,20 +225,14 @@ void main(char[][] args)
   if(scptList) foreach(a, b; scripts.names) writefln(a);
   if(ciList)
     foreach(a, b; cells.in_cells)
-    {
-      try writefln(a);
-      catch {writefln("(Invalid UTF string)");}
-    }
+      writefln(a);
   if(ceList)
     foreach(uint i, c; .cells.ex_cells)
     {
       int x, y;
       CellList.decompound(i, x, y);
       if(c.name.length)
-        {
-          try writefln("%s,%s: %s", x, y, c.name);
-          catch {writefln("(Invalid UTF string)");}
-        }
+        writefln("%s,%s: %s", x, y, c.name);
     }
 
   if(scptShow)
@@ -346,11 +337,7 @@ void printRaw()
 		//subName == "SCTX") // For script text
 		//getHString();
 		{
-		  try{writefln("'%s'", getHString());}
-		  catch(UtfException e)
-		    {
-		      writefln("Got an UTF-ie, ", e);
-		    }
+		  writefln("'%s'", getHString());
 		}
 	      else if(subName == "FLTV" || subName == "XSCL") writefln(getHFloat());
 	      else if(subName == "INTV" /*|| subName == "NAM0"*/ || subName == "FRMR")

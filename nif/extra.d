@@ -25,6 +25,8 @@ module nif.extra;
 import nif.record;
 import nif.controlled;
 
+import monster.util.string;
+
 abstract class Extra : Record
 {
   Extra extra;
@@ -98,7 +100,7 @@ class NiTextKeyExtraData : Extra
 	  k.string = nifFile.getString;
 
 	  debug(verbose)
-	    writefln("  %d: %s @ %f ", i, k.string.clean().chomp(), k.time);
+	    writefln("  %d: %s @ %f ", i, makeUTF8(k.string).chomp(), k.time);
 	}
     }
 }
@@ -120,7 +122,7 @@ class NiStringExtraData : Extra
       debug(verbose)
 	{
 	  // "NCO" means 'no collision', I think
-	  writefln("String: %s", string.clean());
+	  writefln("String: %s", makeUTF8(string));
 	}
     }
 }

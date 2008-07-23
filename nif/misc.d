@@ -24,25 +24,8 @@
 // This doesn't have to be part of the nif package at all.
 module nif.misc;
 
-import std.utf;
 import std.string;
 import monster.util.string;
-
-// Find an alternative to this
-char[] clean(char[] s)
-{
-  try{validate(s);}
-  catch(UtfException e)
-    {
-      return "(invalid utf-string)";
-    }
-  return s;
-}
-
-unittest
-{
-  assert(clean("abc æøå") == "abc æøå");
-}
 
 struct Vector
 {

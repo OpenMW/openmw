@@ -29,7 +29,7 @@ import std.stream;
 import std.string;
 
 import util.regions;
-
+import monster.util.string;
 import core.resource;
 
 import esm.listkeeper;
@@ -378,12 +378,16 @@ struct TES3File
   // This should be more than big enough for references.
   private char lookupBuffer[200];
 
+  // Get a temporary string. This is faster and more memory efficient
+  // that the other string functions (because it is allocation free),
+  // but the returned string is only valid until tmpHString() is
+  // called again.
   char[] tmpHString()
   {
     getSubHeader();
+    assert(leftSub <= lookupBuffer.length, "lookupBuffer wasn't large enough");
 
     // Use this to test the difference in memory consumption.
-    //return getString(region.getString(leftSub));
     return getString(lookupBuffer[0..leftSub]);
   }
 
@@ -581,13 +585,17 @@ struct TES3File
     {
       getSubHeader();
 
-      // Hack to make MultiMark.esp load
+      // Hack to make MultiMark.esp load. Zero-length strings do not
+      // occur in any of the official mods, but MultiMark makes use of
+      // them. For some reason, they break the rules, and contain a
+      // byte (value 0) even if the header says there is no data. If
+      // Morrowind accepts it, so should we.
       if(leftSub == 0)
 	{
 	  // Skip the following zero byte
 	  leftRec--;
 	  assert(file.getc() == 0);
-	  // Report this by setting a flag or something?
+	  // TODO: Report this by setting a flag or something?
 	  return null;
 	}
 
@@ -729,13 +737,19 @@ struct TES3File
 
   // Fill buffer of predefined length. If actual string is shorter
   // (ie. null terminated), the buffer length is set
-  // accordingly. Chopped string is returned.
+  // accordingly. Chopped string is returned. All strings pass through
+  // this function, so any character encoding conversions should
+  // happen here.
   char[] getString(char[] str)
     {
       if(str.length != file.readBlock(str.ptr,str.length))
 	fail("getString() could not find enough data in stream");
 
       str = stripz(str);
+      makeUTF8(str); // TODO: A hack. Will replace non-utf characters
+                     // with question marks. This is neither a very
+                     // desirable result nor a very optimized
+                     // implementation of it.
       return str;
     }
 
