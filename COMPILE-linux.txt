@@ -54,18 +54,23 @@ tool to install as many of these as possible. On ubuntu, try typing:
 
 sudo apt-get install libogre-dev libavcodec-dev libavformat-dev libois-dev build-essential g++ gdc
 
-A note about
+A note about OpenAL: The library found in most Linux distributions
+(0.0.8 SI) is out of date. Some distributions are now changing to
+OpenAL Soft, which is a newer and less hardware-dependent
+implementation. If you experience sound problems (like stuttering
+music), try switching to OpenAL Soft.
 
 libavcodec and libavformat are part of the FFmpeg package, which is
 part of the 'mplayer' project. Note that some of the codecs might be
-patented in your country.
+patented in your country or area.
 
 If you want to install Ogre, OpenAL, OIS or FFmpeg manually, try:
 
-OGRE:     http://ogre3d.org/
-OpenAL:   http://openal.org/
-OIS:      http://sourceforge.net/projects/wgois/
-FFmpeg:   http://ffmpeg.mplayerhq.hu/download.html
+OGRE:             http://ogre3d.org/
+OpenAL:           http://openal.org/
+  Linux source:   http://kcat.strangesoft.net/openal.html
+OIS:              http://sourceforge.net/projects/wgois/
+FFmpeg:           http://ffmpeg.mplayerhq.hu/download.html
 
 
 Choosing a D compiler

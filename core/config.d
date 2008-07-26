@@ -198,7 +198,7 @@ struct ConfigManager
     mouseSensY = ini.getFloat("Controls", "Mouse Sensitivity Y", 0.2);
     flipMouseY = ini.getBool("Controls", "Flip Mouse Y Axis", false);
 
-    defaultCell = ini.getString("General", "Default Cell", "Sud");
+    defaultCell = ini.getString("General", "Default Cell", "Assu");
 
     firstRun = ini.getBool("General", "First Run", true);
     showOgreConfig = ini.getBool("General", "Show Ogre Config", false);
