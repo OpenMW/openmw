@@ -49,13 +49,12 @@ major goals on the web page.
 On the immediate TODO list:
 ===========================
 
-- read the data files in the correct code page
-- switch audio to OpenAL
+- full support for localized versions (with character recoding)
 - support for Mac
-- collision detection
+- collision detection + walking & fall physics
 - displaying creatures correcty, animation
 - rendering NPCs
-- GUI/HUD system
+- choosing a GUI/HUD system that playes well with OGRE
 - rendering outdoor scenes (exterior cells)
 
 
@@ -123,12 +122,13 @@ Thanks goes out to:
 Changelog:
 ==========
 
-0.4 (2008 jul. 20) - work in progress
+0.4 (2008 jul. 23) - work in progress
 
 - switched from Audiere to OpenAL (BIG thanks to Chris Robinson)
 - added complete Makefile (again) as a alternative build tool
 - much more realistic lighting (thanks again to Chris Robinson)
-- should work with Russian version
+- various localization fixes - tested with Russian and French versions
+- temporary workaround for the Unicode issue: invalid UTF displayed as '?'
 - various bug-fixes
 - cosmetic changes to placate gdc -Wall
 

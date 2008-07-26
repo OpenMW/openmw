@@ -48,18 +48,24 @@ DMD 1.031          (D compiler)
 
 
 The above versions are the ones I have tested recently, but other
-versions might work. OGRE, OIS and the other libraries have
+versions might work. OGRE, OpenAL and the other libraries have
 dependencies of their own, so I recommend using an automated package
 tool to install as many of these as possible. On ubuntu, try typing:
 
 sudo apt-get install libogre-dev libavcodec-dev libavformat-dev libois-dev build-essential g++ gdc
 
-If you want to install Ogre, OpenAL or OIS manually, try:
+A note about
+
+libavcodec and libavformat are part of the FFmpeg package, which is
+part of the 'mplayer' project. Note that some of the codecs might be
+patented in your country.
+
+If you want to install Ogre, OpenAL, OIS or FFmpeg manually, try:
 
 OGRE:     http://ogre3d.org/
 OpenAL:   http://openal.org/
 OIS:      http://sourceforge.net/projects/wgois/
-
+FFmpeg:   http://ffmpeg.mplayerhq.hu/download.html
 
 
 Choosing a D compiler

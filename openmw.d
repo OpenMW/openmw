@@ -100,6 +100,25 @@ void main(char[][] args)
       render=false;
     }
 
+  void showHelp()
+    {
+      writefln("Syntax: %s [options] cell-name [cell-name]", args[0]);
+      writefln("  Options:");
+      writefln("    -n            Only load, do not render");
+      writefln("    -ex,y         Load exterior cell (x,y)");
+      writefln("    -rk           Reset key bindings to default");
+      writefln("    -oc           Show the Ogre config dialogue");  
+      writefln("    -h            Show this help");
+      writefln("");
+      writefln("Specifying more than one cell implies -n");
+    }
+
+  if(help)
+    {
+      showHelp();
+      return;
+    }
+
   initializeMemoryRegions();
 
   /*
@@ -130,17 +149,9 @@ void main(char[][] args)
   if(cells.length == 1)
     config.defaultCell = cells[0];
 
-  if(help || (cells.length == 0 && eCells.length == 0))
+  if(cells.length == 0 && eCells.length == 0)
     {
-      writefln("Syntax: %s [options] cell-name [cell-name]", args[0]);
-      writefln("  Options:");
-      writefln("    -n            Only load, do not render");
-      writefln("    -ex,y         Load exterior cell (x,y)");
-      writefln("    -rk           Reset key bindings to default");
-      writefln("    -oc           Show the Ogre config dialogue");  
-      writefln("    -h            Show this help");
-      writefln("");
-      writefln("Specifying more than one cell implies -n");
+      showHelp();
       return;
     }
 

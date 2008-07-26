@@ -326,7 +326,7 @@ struct ConfigManager
   // Create the config file
   void writeConfig()
   {
-    writefln("writeConfig(%s)", confFile);
+    //writefln("writeConfig(%s)", confFile);
     with(iniWriter)
       {
 	openFile(confFile);
