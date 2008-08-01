@@ -1,6 +1,6 @@
 module sound.al;
 
-extern(System):
+extern(C):
 
 //Defines
 const int AL_NONE                                =  0;

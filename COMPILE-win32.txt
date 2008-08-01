@@ -26,8 +26,7 @@ Dependencies needed to build OpenMW:
 
 OGRE 1.4.9         (3d engine)
 OpenAL             (3d sound system)
-libavcodec,
-  libavformat      (For MP3 playback)
+FFmpeg             (For MP3 playback)
 Mingw              (C++ compiler)
 gdc 4.1.3 (mingw)  (D compiler)
 
@@ -36,15 +35,18 @@ versions might work. OGRE, OpenAL and OIS are complex libraries with
 their own set of dependencies. I recommend downloading prebuild SDKs
 instead of building them from source.
 
-libavcodec and libavformat are part of the FFmpeg package, which is
-part of the 'mplayer' project. Note that some of the codecs might be
-patented in your country.
+FFmpeg package contains the necessary libraries libavcodec and
+libavformat. You will most likely have to build it from source. This
+can be done either with Mingw32/Msys or with Cygwin. See below for
+instructions. Note that some of the codecs included with FFmpeg might
+be patented in your country.
 
 You can find the libraries here:
 
 OGRE:     http://ogre3d.org (See "Getting Ogre" in README-win32.txt for details)
 OIS:      Comes with the Ogre SDK
 OpenAL:   http://openal.org/
+FFmpeg:   http://ffmpeg.mplayerhq.hu/
 Mingw     http://sourceforge.net/projects/mingw/
 gdc       http://sourceforge.net/projects/gdcwin/
 
@@ -65,11 +67,17 @@ Open a command line. Set up your PATH to include Mingw and gdc
 (eg. "set PATH=%PATH%;c:\mingw\bin"). Make sure the commands g++ and
 gdc work (should output "no input files".)
 
-The build script expects to find the Ogre and Audiere SDKs in the
+The build script expects to find the Ogre and FFmpeg SDKs in the
 parent directory. An example directory structure is:
 
 c:\openmw\Ogre       - Ogre SDK
 c:\openmw\openmw     - OpenMW source
+c:\openmw\ffmpeg     - FFmpeg
+
+You must compile FFmpeg from source, since at the time of writing
+there are no prebuilt SDKs available. The source must be built with
+Mingw as well (not Cygwin!) The following configure flags should work:
+./configure --enable-shared --disable--ffserver --disable-ffplay
 
 
 Building

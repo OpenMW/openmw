@@ -1,6 +1,6 @@
 module sound.alc;
 
-extern(System):
+extern(C):
 
 //Definitions
 const int ALC_FALSE                             =  0;
