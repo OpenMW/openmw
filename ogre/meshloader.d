@@ -123,6 +123,11 @@ struct MeshLoader
 
   void handleNiNode(NiNode data, NodePtr node)
   {
+    // Ignore sound activators and similar objects.
+    NiStringExtraData d = cast(NiStringExtraData) data.extra;
+    if(d !is null && d.string == "MRK")
+      return;
+
     // Handle any effects here
 
     // In the cases where meshes have skeletal animations, we must
