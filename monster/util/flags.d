@@ -35,7 +35,7 @@ struct Flags(T)
     { flags ^= flags & t; }
 
   bool has(T t)
-    { return (flags & t) != t; }
+    { return (flags & t) == t; }
 
   bool hasAny(T t)
     { return (flags & t) != 0; }
