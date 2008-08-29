@@ -12,11 +12,13 @@ g++ -c ogre\cpp_ogre.cpp -I..\ogre\include
 copy ..\ogre\bin\debug\ogremain_d.dll .
 copy ..\ogre\bin\debug\ois_d.dll .
 copy ..\ogre\bin\debug\cg.dll .
-copy ..\ffmpeg\libavcodec\cygavcodec-51.dll cygavcodec.dll
-copy ..\ffmpeg\libavformat\cygavformat-52.dll cygavformat.dll
-copy ..\ffmpeg\libavdevice\cygavdevice-52.dll cygavdevice.dll
-copy ..\ffmpeg\libavutil\cygavutil-49.dll cygavutil.dll
+copy ..\ogre\bin\debug\RenderSystem*.dll .
+copy ..\ogre\bin\debug\Plugin*.dll .
+copy ..\ffmpeg\libavcodec\avcodec-51.dll .
+copy ..\ffmpeg\libavformat\avformat-52.dll .
+copy ..\ffmpeg\libavdevice\avdevice-52.dll .
+copy ..\ffmpeg\libavutil\avutil-49.dll .
 copy \windows\system32\d3dx9_30.dll d3dx9d_30.dll
 
 echo Compiling main program (openmw.exe)
-gdc -Wall -g openmw.d bsa\*.d core\*.d esm\*.d input\*.d nif\*.d ogre\*.d scene\*.d sound\*.d util\*.d cpp_ogre.o cpp_avcodec.o monster\util\*.d cygavcodec.dll cygavformat.dll cygavdevice.dll cygavutil.dll openal32.dll ogremain_d.dll OIS_d.dll -lstdc++ -o openmw.exe
+gdc -Wall -g openmw.d bsa\*.d core\*.d esm\*.d input\*.d nif\*.d ogre\*.d scene\*.d sound\*.d util\*.d cpp_ogre.o cpp_avcodec.o monster\util\*.d avcodec-51.dll avformat-52.dll avdevice-52.dll avutil-49.dll openal32.dll ogremain_d.dll OIS_d.dll -lstdc++ -o openmw.exe

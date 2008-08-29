@@ -63,6 +63,7 @@ void main(char[][] args)
   bool help = false;
   bool resetKeys = false;
   bool showOgreFlag = false;
+  bool noSound = false;
 
   // Some examples to try:
   //
@@ -92,6 +93,7 @@ void main(char[][] args)
     else if(a == "-h") help=true;
     else if(a == "-rk") resetKeys = true;
     else if(a == "-oc") showOgreFlag = true;
+    else if(a == "-ns") noSound = true;
     else cells ~= a;
 
   if(cells.length + eCells.length/2 > 1 )
@@ -107,7 +109,8 @@ void main(char[][] args)
       writefln("    -n            Only load, do not render");
       writefln("    -ex,y         Load exterior cell (x,y)");
       writefln("    -rk           Reset key bindings to default");
-      writefln("    -oc           Show the Ogre config dialogue");  
+      writefln("    -oc           Show the Ogre config dialogue");
+      writefln("    -ns           Completely disable sound");
       writefln("    -h            Show this help");
       writefln("");
       writefln("Specifying more than one cell implies -n");
@@ -155,7 +158,7 @@ void main(char[][] args)
       return;
     }
 
-  initializeSound();
+  if(!noSound) initializeSound();
   resources.initResources();
 
   // Load all ESM and ESP files
@@ -244,12 +247,6 @@ void main(char[][] args)
 	  cpp_makeSky();
 	}
 
-      // TODO: We get some strange lamp-shaped activators in some scenes,
-      // eg in Abebaal. These are sound activators (using scripts), but
-      // they still appear. Find out if they have some special flags
-      // somewhere (eg. only-show-in-editor), or if we just have to filter
-      // them by the "Sound_*" name. Deal with it later.
-
       // Insert the meshes of statics into the scene
       foreach(ref LiveStatic ls; cd.statics)
 	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
@@ -258,8 +255,10 @@ void main(char[][] args)
 	{
 	  NodePtr n = putObject(ls.m.model, &ls.base.pos, ls.base.scale);
 	  ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
-	  Sound *s = ls.m.sound;
-	  if(s)
+	  if(!noSound)
+	  {
+            Sound *s = ls.m.sound;
+            if(s)
 	    {
 	      writefln("Dynamic light %s has sound %s", ls.m.id, s.id);
 	      ls.loopSound = soundScene.insert(s, true);
@@ -268,12 +267,15 @@ void main(char[][] args)
 				    ls.base.pos.position[1],
 				    ls.base.pos.position[2]);
 	    }
+	  }
 	}
       // Static lights
       foreach(ref LiveLight ls; cd.statLights)
 	{
 	  NodePtr n = putObject(ls.m.model, &ls.base.pos, ls.base.scale);
 	  ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
+          if(!noSound)
+          {
 	  Sound *s = ls.m.sound;
 	  if(s)
 	    {
@@ -284,6 +286,7 @@ void main(char[][] args)
                                     ls.base.pos.position[1],
                                     ls.base.pos.position[2]);
 	    }
+          }
 	}
       // Misc items
       foreach(ref LiveMisc ls; cd.miscItems)
@@ -336,15 +339,18 @@ void main(char[][] args)
       initializeInput();
 
       // Start swangin'
-      jukebox.enableMusic();
+      if(!noSound) jukebox.enableMusic();
 
       // Run it until the user tells us to quit
       startRendering();
     }
   else debug(verbose) writefln("Skipping rendering");
 
-  soundScene.kill();
-  shutdownSound();
+  if(!noSound)
+    {
+      soundScene.kill();
+      shutdownSound();
+    }
 
   debug(verbose)
     {
