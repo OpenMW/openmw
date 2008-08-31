@@ -18,35 +18,33 @@ Morrowind installed on your system!
 
 
 
-IMPORTANT: Subversion notes
+IMPORTANT: OpenMW 0.4 notes
 ===========================
 
-The subversion code is currently in the process of switching from
-Audiere to OpenAL. This means that:
+As of OpenMW 0.4, we have switched sound libraries from Audiere to
+OpenAL + libavcodec. This means that:
 
-- you need to install OpenAL and ALUT
+- you need to install OpenAL
+- you must install libavcodec / ffmpeg for mp3 playback
 - you no longer need Audiere
-- music does not (currently) work
-
-Generally true for all SVN versions is that:
-
-- a given SVN revision is not guaranteed to work or compile
-- windows compilation scripts are unlikely to work since they are
-  updated less often
-- README and instructions might be out of date
 
 See the changelog at the end for an up-to-date list of changes.
 
+Also new in this release is the way files are distributed for
+Windows. There is now a separate "DLL pack" that can be used with
+either the binary version or the source version. You no longer need to
+run around the internet to find various SDKs and such - everything
+should be included in the DLL-pack, including the necessary C/C++
+header files.
+
 Note: if you are using a localized (non-English) version of Morrowind,
-the default starting cell (Sud) might not exist, and the esmtool
-program will probably fail with UTF errors. This will be fixed in a
-future release - I have even added localized support as one of the
-major goals on the web page.
+the default starting cell (Assu) might not exist. Try esmtool (see
+below) to get a list of existing cells.
 
 
 
 
-On the immediate TODO list:
+On the near-future TODO list:
 ===========================
 
 - full support for localized versions (with character recoding)
@@ -54,8 +52,8 @@ On the immediate TODO list:
 - collision detection + walking & fall physics
 - displaying creatures correcty, animation
 - rendering NPCs
-- choosing a GUI/HUD system that playes well with OGRE
 - rendering outdoor scenes (exterior cells)
+- choosing a GUI/HUD system that playes well with OGRE
 
 
 
@@ -63,8 +61,8 @@ On the immediate TODO list:
 Installation
 ============
 
-Currently supported platforms are Windows and Linux. Tested on Windows
-XP and Ubuntu 8.04.
+Currently supported platforms are Windows, Linux and FreeBSD. Most
+testing has been on Windows XP and Ubuntu 8.04.
 
 For instructions, see one of the following:
 
@@ -72,12 +70,7 @@ README-win32.txt    - instructions for binary Windows release
 COMPILE-win32.txt   - instructions for building source on Windows
 COMPILE-linux.tx    - instructions for building source on Linux / Unix
 
-FreeBSD has also been tested but is only partially supported, due to
-sketchy D compiler support. It will run, but exceptions do not work
-and will immediately abort the program.
-
-Linux 64 bit is known NOT to work, also because of current compiler
-deficiencies.
+Linux 64 bit is known NOT to work, because of compiler deficiencies.
 
 
 
@@ -110,7 +103,7 @@ Thanks goes out to:
 
 - Dmitry Marakasov for testing and porting to FreeBSD.
 
-- Bastien Jansen for continued testing on 64 bit linux.
+- Bastien Jansen for testing on 64 bit linux.
 
 - Chris Robinson for OpenAL and MP3 support
 
@@ -122,18 +115,19 @@ Thanks goes out to:
 Changelog:
 ==========
 
-0.4 (2008 jul. 23) - work in progress
+0.4 (2008 aug. 30) - latest release
 
 - switched from Audiere to OpenAL (BIG thanks to Chris Robinson)
 - added complete Makefile (again) as a alternative build tool
-- much more realistic lighting (thanks again to Chris Robinson)
+- more realistic lighting (thanks again to Chris Robinson)
 - various localization fixes - tested with Russian and French versions
 - temporary workaround for the Unicode issue: invalid UTF displayed as '?'
+- added -ns option to disable sound, for debugging
 - various bug-fixes
 - cosmetic changes to placate gdc -Wall
 
 
-0.3 (2008 jul. 10) - latest release
+0.3 (2008 jul. 10)
 
 - built and tested on Windows XP
 - partial support for FreeBSD (exceptions do not work)

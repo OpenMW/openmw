@@ -12,46 +12,33 @@ engine. For more information, see README.txt or
 Building from source
 ====================
 
+
 Supported Windows platforms:
 ----------------------------
 
 Only tested on Windows XP. If you manage to compile or run OpenMW on
-another Windows platform (9x/Me/NT/Vista), please let me know!
+another Windows platform (9x/Me/NT/2000/Vista), please let me know!
+
 
 
 Dependencies:
 -------------
 
-Dependencies needed to build OpenMW:
+To compile OpenMW you need Mingw with g++ (a C++ compiler) and gdc
+(the D compiler.) You can find them here:
 
-OGRE 1.4.9         (3d engine)
-OpenAL             (3d sound system)
-FFmpeg             (For MP3 playback)
-Mingw              (C++ compiler)
-gdc 4.1.3 (mingw)  (D compiler)
-
-The above versions are the ones I have tested recently, but other
-versions might work. OGRE, OpenAL and OIS are complex libraries with
-their own set of dependencies. I recommend downloading prebuild SDKs
-instead of building them from source.
-
-FFmpeg package contains the necessary libraries libavcodec and
-libavformat. You will most likely have to build it from source. This
-can be done either with Mingw32/Msys or with Cygwin. See below for
-instructions. Note that some of the codecs included with FFmpeg might
-be patented in your country.
-
-You can find the libraries here:
-
-OGRE:     http://ogre3d.org (See "Getting Ogre" in README-win32.txt for details)
-OIS:      Comes with the Ogre SDK
-OpenAL:   http://openal.org/
-FFmpeg:   http://ffmpeg.mplayerhq.hu/
 Mingw     http://sourceforge.net/projects/mingw/
 gdc       http://sourceforge.net/projects/gdcwin/
 
-(Note that the "official" D compiler, DMD, will not currently work on
-Windows, because it is incompatible with most C++ compilers.)
+Note that the "official" D compiler, DMD, will not currently work on
+Windows, because it is uses an object format incompatible with most
+C++ compilers.
+
+As of verion 0.4, all library dependencies have been included in the
+single file openmw-dll-pack.zip for convenience. Simply download the
+file and unpack it in the same directory as the OpenMW source
+code. You should not need to download any other files.
+
 
 
 Setting everything up
@@ -64,26 +51,43 @@ Next install the gdcwin installer (the package named 'gdc') and
 install it in the same directory as Mingw.
 
 Open a command line. Set up your PATH to include Mingw and gdc
-(eg. "set PATH=%PATH%;c:\mingw\bin"). Make sure the commands g++ and
-gdc work (should output "no input files".)
+(eg. "set PATH=%PATH%;c:\mingw\bin").
 
-The build script expects to find the Ogre and FFmpeg SDKs in the
-parent directory. An example directory structure is:
+Next you must make sure the D include files are found by the
+compiler. Run the following command:
+set DFLAGS=-Ic:\mingw\include\d\3.4.5\
+where the path following -I is the path of your Mingw GDC include
+directory.
 
-c:\openmw\Ogre       - Ogre SDK
-c:\openmw\openmw     - OpenMW source
-c:\openmw\ffmpeg     - FFmpeg
+Make sure the commands g++ and gdc work (should output "no input
+files".)
 
-You must compile FFmpeg from source, since at the time of writing
-there are no prebuilt SDKs available. The source must be built with
-Mingw as well (not Cygwin!) The following configure flags should work:
-./configure --enable-shared --disable--ffserver --disable-ffplay
+
+
+Manually installing dependencies:
+---------------------------------
+
+If you download the DLL pack mentioned above, you can skip this
+section. If you wish to install dependencies manually though, here is
+a list of dependencies and where you can find them:
+
+OGRE:     http://ogre3d.org
+OIS:      Comes with the Ogre SDK
+OpenAL:   http://openal.org/
+FFmpeg:   http://ffmpeg.mplayerhq.hu/
+
+The biggest problem is the lack of a prebuilt SDK for FFmpeg. You must
+build it under Mingw as well (not Cygwin!). I found the following link
+helpful (read the comments as well, not just the post itself):
+http://www.gooli.org/blog/building-ffmpeg-for-windows-with-msys-and-mingw/
+
 
 
 Building
 --------
 
 To build, simply run build_openmw.bat
+
 
 
 Running

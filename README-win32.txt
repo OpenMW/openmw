@@ -12,45 +12,25 @@ engine. For more information, see README.txt or
 Running OpenMW
 ==============
 
-If you downloaded one of the binary releases, keep on reading. If you
-got the source release, read the file COMPILE-win32.txt first, and
-come back here when you are done.
+OpenMW consists of three separate downloads:
 
-There are two binary packages for Windows: one that includes all the
-Ogre DLLs, and one doesn't. The only reason to get the non-ogre
-version is to save bandwidth when you already have the Ogre SDK.
- 
-If you have the version with Ogre, you can skip the next section.
+openmw-0.X_win32.zip     - binary package (with EXE file)
+openmw-0.X.zip           - source code
+openmw-dll-pack.zip      - library pack
 
 
-Getting Ogre
-------------
+You only need to download either the binary package or the source
+code, not both. The DLL pack is needed in both cases. The DLL pack
+does not change from version to version unless specified, so you
+should only need to download it once.
 
-OpenMW is built and tested against Ogre 1.4.9. You can get it using
-this direct link:
-
-http://downloads.sourceforge.net/ogre/OgreSDKSetup1.4.9_CBMingW.exe?modtime=1213925466&big_mirror=1
-
-Or you can get it from: http://ogre3d.org -> Select Download
--> Prebuilt SDK -> Code::Blocks + MinGW
-
-Once you have installed it, copy the following files from
-"Ogre/bin/debug/" into the OpenMW directory:
-
-OgreMain_d.dll
-Plugin_*.dll
-RenderSystem_*.dll
-cg.dll
-OIS_d.dll
+If you downloaded the binary release, keep reading. If you got the
+source release, please read COMPILE-win32.txt first, then return here
+for final configuration instructions.
 
 
-Final configuration
+Configuration
 -------------------
-
-The final DLL you need (not included for copyright reasons) is
-d3dx9d_30.dll. If you have DirectX installed, you most likely have
-d3dx9_30.dll in your \windows\system32 folder. Copy it to the OpenMW
-directory and rename it to d3dx9d_30.dll (note the "d" after the "9".)
 
 OpenMW assumes you have the Morrowind data files in c:\Program
 Files\Bethesda Softworks\Morrowind\Data Files\ . If this is not the
@@ -62,6 +42,11 @@ Running
 
 Just run openmw.exe and enjoy! ;-)
 
+We have just updated the sound system, so it is possible things won't
+work. If you get error messages related to sound, try disabling sound
+with the -ns option. We are working on flattening out the remaining
+bugs.
+
 The first time you run OpenMW, you will be asked to set screen
 resolution and other graphics settings. To be safe, it's not
 recommended to select fullscreen mode on the first run. You can bring
@@ -70,9 +55,7 @@ up the dialogue at any time by using the -oc switch.
 Move around with WASD or arrow keys, move up and down with left shift
 and ctrl, exit with 'q' or escape.
 
-You start in a cell called "Sud". You can change this in openmw.ini or
-by specifying a cell name on the command line. Note that if you have a
-localized (non-English) version, the cell "Sud" might not exist. I
-will solve this issue in a later version.
+You start in a cell called "Assu". You can change this in openmw.ini or
+by specifying a cell name on the command line.
 
 Write openmw -h on the command line to see a complete list of options.

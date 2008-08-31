@@ -16,15 +16,15 @@ Installation from source
 Supported Unix platforms:
 -------------------------
 
-The only Unix operating system that has been tested and is known to
-work is 32bit Ubuntu Linux 8.04.
+OpenMW has been tested for the most part on 32bit Ubuntu Linux
+8.04. It should, however, also work on most other 32bit
+distributions.
 
-FreeBSD works partially, but you have to recompile most of the
-dependencies as well. There is a bug in the compiler however, that
-breaks exceptions. So if anything goes wrong you probably will not get
-any sensible error message.
+FreeBSD is also known to work with recent versions of GDC (the D
+compiler), but you might need to rebuild most of the dependencies from
+source yourself.
 
-Linux 64 bit is known NOT to work at the moment.
+64bit Linux is specifically known NOT to work.
 
 If you manage to build OpenMW on a platform not listed here, or want
 to try, please let me know!
@@ -50,7 +50,8 @@ DMD 1.031          (D compiler)
 The above versions are the ones I have tested recently, but other
 versions might work. OGRE, OpenAL and the other libraries have
 dependencies of their own, so I recommend using an automated package
-tool to install as many of these as possible. On ubuntu, try typing:
+tool to install as many of these as possible. On Ubuntu, for example,
+try typing:
 
 sudo apt-get install libogre-dev libavcodec-dev libavformat-dev libois-dev build-essential g++ gdc
 
@@ -62,7 +63,7 @@ music), try switching to OpenAL Soft.
 
 libavcodec and libavformat are part of the FFmpeg package, which is
 part of the 'mplayer' project. Note that some of the codecs might be
-patented in your country or area.
+patent protected in your country or area.
 
 If you want to install Ogre, OpenAL, OIS or FFmpeg manually, try:
 
@@ -71,6 +72,7 @@ OpenAL:           http://openal.org/
   Linux source:   http://kcat.strangesoft.net/openal.html
 OIS:              http://sourceforge.net/projects/wgois/
 FFmpeg:           http://ffmpeg.mplayerhq.hu/download.html
+
 
 
 Choosing a D compiler
@@ -92,19 +94,20 @@ Note that the DMD unstable branch (2.000 and up) will NOT currently
 work with OpenMW. Use the stable branch (1.x) instead. The latest
 version known to work is DMD 1.031, so I recommend that.
 
-Also note that DMD is only available on 32 bit Linux - other operating
-systems or architectures will have to use GDC. However GDC might be
-unstable on these platforms as well, even if it runs.
+Also note that DMD is only available on 32 bit x86 Linux - other
+operating systems or architectures will have to use GDC. Note however
+that GDC might be unstable on these platforms as well, especially on
+64 bit platforms.
 
 
 
 Building:
 ---------
 
-After installing all the dependencies, you can try running make first
-to see if the C++ parts compile. You may need to alter the Makefile if
-you are using non-standard include paths, etc. If you have DSSS
-installed (a D build tool), type:
+After installing all the dependencies, you can try running "make cpp"
+first to see if the C++ parts compile. You may need to alter the
+Makefile if you are using non-standard include paths, etc. If you have
+DSSS installed (a D build tool), type:
 
 dsss build
 
@@ -145,7 +148,7 @@ following command:
 ln -s "/media/hda1/Program Files/Bethesda Softworks/Morrowind/Data Files/" data
 
 Also, if you have OGRE installed in a non-standard directory (ie. NOT
-to /usr/lib/OGRE), you have to change the PluginFolder in the file
+in /usr/lib/OGRE), you have to change the PluginFolder in the file
 plugins.cfg.linux.
 
 The first time you run openmw you will be asked to set screen
@@ -166,12 +169,10 @@ favor, you should now be able to run OpenMW using the program called
 
 Write openmw -h to see a list of options.
 
-Running without parameters should bring you into the cave called Sud,
+Running without parameters should bring you into the cave called Assu,
 or the last cell loaded. You are in free float mode. Move around with
 WASD (or arrow keys), move up and down with left shift and ctrl, exit
-with 'q' or escape. Note that if you have a localized (non-English)
-version, the cell "Sud" might not exist. I will solve this issue in a
-later version.
+with 'q' or escape.
 
 To load another cell, specify the cell name on the command line. Use
 the 'esmtool' program to get a list of cells. Note that you must use
