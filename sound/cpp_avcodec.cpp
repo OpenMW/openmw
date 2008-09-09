@@ -22,14 +22,15 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 extern "C" { // the headers don't do this..
 #ifdef WIN32
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #else
-#include <ffmpeg/avcodec.h>
-#include <ffmpeg/avformat.h>
+#include <avcodec.h>
+#include <avformat.h>
 #endif
 }
 

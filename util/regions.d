@@ -347,7 +347,7 @@ class RegionManager
       currentBuffer = 0;
       left = null;
 
-      // Free the ranges from the clutch of the GC's hand.
+      // Free the ranges from the GC's evil clutch.
       foreach(inout void *p; gcRanges[0..currentRange])
 	if(p)
 	  {
