@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+    <FileVersion major="1" minor="6" />
+    <Project>
+        <Option title="OpenMW" />
+        <Option pch_mode="2" />
+        <Option compiler="gdc" />
+        <Build>
+            <Target title="Debug">
+                <Option output="bin/Debug/OpenMW" prefix_auto="1" extension_auto="1" />
+                <Option object_output="obj/Debug/" />
+                <Option type="1" />
+                <Option compiler="gdc" />
+                <Compiler>
+                    <Add option="-g" />
+                    <Add option="-fversion=Posix" />
+                    <Add directory="/usr/include/OGRE" />
+                </Compiler>
+            </Target>
+            <Target title="Release">
+                <Option output="bin/Release/OpenMW" prefix_auto="1" extension_auto="1" />
+                <Option object_output="obj/Release/" />
+                <Option type="1" />
+                <Option compiler="gdc" />
+                <Compiler>
+                    <Add option="-O2" />
+                </Compiler>
+                <Linker>
+                    <Add option="-s" />
+                </Linker>
+            </Target>
+        </Build>
+        <Compiler>
+            <Add option="-Wall" />
+            <Add directory="/usr/include/OGRE" />
+        </Compiler>
+        <Linker>
+            <Add library="OgreMain" />
+            <Add library="OIS" />
+            <Add library="stdc++" />
+            <Add library="openal" />
+            <Add library="avcodec" />
+            <Add library="avformat" />
+        </Linker>
+        <Unit filename="bsa/bsafile.d" />
+        <Unit filename="core/config.d" />
+        <Unit filename="core/filefinder.d" />
+        <Unit filename="core/inifile.d" />
+        <Unit filename="core/memory.d" />
+        <Unit filename="core/resource.d" />
+        <Unit filename="esm/defs.d" />
+        <Unit filename="esm/esmmain.d" />
+        <Unit filename="esm/filereader.d" />
+        <Unit filename="esm/imports.d" />
+        <Unit filename="esm/listkeeper.d" />
+        <Unit filename="esm/loadacti.d" />
+        <Unit filename="esm/loadalch.d" />
+        <Unit filename="esm/loadappa.d" />
+        <Unit filename="esm/loadarmo.d" />
+        <Unit filename="esm/loadbody.d" />
+        <Unit filename="esm/loadbook.d" />
+        <Unit filename="esm/loadbsgn.d" />
+        <Unit filename="esm/loadcell.d" />
+        <Unit filename="esm/loadclas.d" />
+        <Unit filename="esm/loadclot.d" />
+        <Unit filename="esm/loadcont.d" />
+        <Unit filename="esm/loadcrea.d" />
+        <Unit filename="esm/loadcrec.d" />
+        <Unit filename="esm/loaddial.d" />
+        <Unit filename="esm/loaddoor.d" />
+        <Unit filename="esm/loadench.d" />
+        <Unit filename="esm/loadfact.d" />
+        <Unit filename="esm/loadglob.d" />
+        <Unit filename="esm/loadgmst.d" />
+        <Unit filename="esm/loadinfo.d" />
+        <Unit filename="esm/loadingr.d" />
+        <Unit filename="esm/loadlevlist.d" />
+        <Unit filename="esm/loadligh.d" />
+        <Unit filename="esm/loadlocks.d" />
+        <Unit filename="esm/loadltex.d" />
+        <Unit filename="esm/loadmgef.d" />
+        <Unit filename="esm/loadmisc.d" />
+        <Unit filename="esm/loadnpc.d" />
+        <Unit filename="esm/loadnpcc.d" />
+        <Unit filename="esm/loadrace.d" />
+        <Unit filename="esm/loadregn.d" />
+        <Unit filename="esm/loadscpt.d" />
+        <Unit filename="esm/loadskil.d" />
+        <Unit filename="esm/loadsndg.d" />
+        <Unit filename="esm/loadsoun.d" />
+        <Unit filename="esm/loadspel.d" />
+        <Unit filename="esm/loadsscr.d" />
+        <Unit filename="esm/loadstat.d" />
+        <Unit filename="esm/loadweap.d" />
+        <Unit filename="esm/records.d" />
+        <Unit filename="input/events.d" />
+        <Unit filename="input/keys.d" />
+        <Unit filename="input/ois.d" />
+        <Unit filename="monster/util/aa.d" />
+        <Unit filename="monster/util/flags.d" />
+        <Unit filename="monster/util/freelist.d" />
+        <Unit filename="monster/util/growarray.d" />
+        <Unit filename="monster/util/list.d" />
+        <Unit filename="monster/util/string.d" />
+        <Unit filename="nif/base.d" />
+        <Unit filename="nif/controlled.d" />
+        <Unit filename="nif/controller.d" />
+        <Unit filename="nif/data.d" />
+        <Unit filename="nif/effect.d" />
+        <Unit filename="nif/extra.d" />
+        <Unit filename="nif/misc.d" />
+        <Unit filename="nif/nif.d" />
+        <Unit filename="nif/niffile.d" />
+        <Unit filename="nif/node.d" />
+        <Unit filename="nif/property.d" />
+        <Unit filename="nif/record.d" />
+        <Unit filename="ogre/bindings.d" />
+        <Unit filename="ogre/cpp_ogre.cpp">
+            <Option compiler="gdc" use="1" buildCommand="gcc $includes -c $file -o $object" />
+        </Unit>
+        <Unit filename="ogre/meshloader.d" />
+        <Unit filename="ogre/ogre.d" />
+        <Unit filename="openmw.d" />
+        <Unit filename="scene/celldata.d" />
+        <Unit filename="scene/player.d" />
+        <Unit filename="scene/soundlist.d" />
+        <Unit filename="sound/al.d" />
+        <Unit filename="sound/alc.d" />
+        <Unit filename="sound/audio.d" />
+        <Unit filename="sound/avcodec.d" />
+        <Unit filename="sound/cpp_avcodec.cpp">
+            <Option compiler="gdc" use="1" buildCommand="gcc $includes -c $file -o $object" />
+        </Unit>
+        <Unit filename="sound/music.d" />
+        <Unit filename="sound/sfx.d" />
+        <Unit filename="util/random.d" />
+        <Unit filename="util/regions.d" />
+        <Unit filename="util/reglist.d" />
+        <Unit filename="util/uniquename.d" />
+        <Extensions>
+            <code_completion />
+            <debugger />
+        </Extensions>
+    </Project>
+</CodeBlocks_project_file>
