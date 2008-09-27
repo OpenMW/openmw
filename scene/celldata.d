@@ -39,7 +39,8 @@ import sound.audio;
 import scene.player;
 
 // Base properties common to all live objects. Currently extremely
-// sketchy.
+// sketchy. TODO: This will all be handled in Monster script at some
+// point.
 struct LiveObjectBase
 {
   // Should this stuff be in here?
@@ -92,7 +93,7 @@ struct LiveObjectBase
   // ??
   byte unam;
 
-  // Don't even get me started on script-related issues
+  // TODO: Scripts
 }
 
 // Generic version of a "live" object
@@ -223,6 +224,21 @@ class CellData
 
       loadReferences();
 
+      // TODO: Set up landscape system here.
+      /*
+      with(esFile)
+      {
+        restoreContext(exCell.land.context, reg);
+
+        // TODO: Not all of these will be present at all times
+        readHNExact(,12675, "VNML");
+        readHNExact(,4232, "VHGT");
+        readHNExact(,81, "WNAM");
+        readHNExact(,12675, "VCLR");
+        readHNExact(,512, "VTEX");
+      }
+      */
+
       const float cellWidth = 8192;
 
       // TODO/FIXME: This is temporary
@@ -243,7 +259,7 @@ class CellData
 
       esFile.restoreContext(inCell.context, reg);
 
-      // TODO: Read this crap in loadcell.d
+      // TODO: Read this in loadcell.d
       if(esFile.isNextSub("INTV") || esFile.isNextSub("WHGT"))
 	water = esFile.getHInt();
       //writefln("Water height: ", water);
@@ -555,12 +571,6 @@ class CellData
 		  }
 	      }
 	  }
-
-	// Skip this? Large chance that the same file will be used for
-	// the next cell load, and the rest of our system can handle
-	// that without closing or reopening the file.
-
-	//close(); // Close the file
       }
     }
 }
@@ -582,8 +592,9 @@ struct CellFreelist
     if(next) return list[--next];
 
     // Since these are reused, there's no waste in allocating on the
-    // stack here. Also, this is only semi-runtime (executed when
-    // loading a cell), thus a rare GC slow down is non-critical.
+    // heap here. Also, this is only semi-runtime (executed when
+    // loading a cell), thus an occational GC slow down is not
+    // critical.
     return new CellData(new RegionManager("CELL"));
   }
 

@@ -45,9 +45,6 @@ import core.resource;
 // these directly in D code, only pass them back to the C++ code.
 typedef void* NodePtr;
 
-// Pointer to a manual loader class in C++.
-typedef void* ManualLoader;
-
 extern(C):
 
 // Do engine configuration. Returns 0 if we should continue, 1 if
@@ -152,3 +149,6 @@ void cpp_moveCameraRel(float x, float y, float z);
 
 // Do some debug action. Check the menu for today's specials!
 void cpp_debug(int i);
+
+// Insert a 100x100x100 axis-aligned cube at x,y,z
+void cpp_drawBox(float x, float y, float z);

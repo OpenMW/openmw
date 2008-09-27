@@ -334,8 +334,6 @@ struct ResourceManager
         assert(ti.bsaFile == -1);
       }
 
-    ti.ml = null;
-
     textureLookup[ti.name] = ti;
 
     return ti;
@@ -447,7 +445,6 @@ struct TextureResource
   int bsaFile;	// If set to -1, the file is in the file system
   int bsaIndex;
   char[] type;  // Texture format, eg "tga" or "dds";
-  ManualLoader ml;
 
   public:
 
@@ -460,11 +457,13 @@ struct TextureResource
     return bsaIndex == -1;
   }
 
+  /*KILLME
   // Returns true if resource is loaded
   bool isLoaded()
   {
     return ml != null;
   }
+  */
 }
 
 // OLD STUFF
@@ -494,12 +493,6 @@ struct TextureResource
       writef("Loading BSA archives...");
 
       writefln(" Done\n");
-    }
-
-  void killBSAs()
-    {
-      foreach(BSAFile f; archives)
-	delete f;
     }
 }
 +/

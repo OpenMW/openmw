@@ -557,6 +557,13 @@ struct TES3File
       file.seekCur(leftSub);
     }
 
+  // Check the name and size before skipping
+  void skipHNSub(char[] name, uint size)
+  {
+    getSubNameIs(name);
+    skipHSubSize(size);
+  }
+
   // These read an entire sub-record, including the header. They also
   // adjust and check leftSub and leftRecord variables through calling
   // getSubHeader().

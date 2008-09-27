@@ -56,3 +56,23 @@ SceneNode *root;
 #include "cpp_bsaarchive.cpp"
 #include "cpp_interface.cpp"
 #include "cpp_overlay.cpp"
+
+// Testing
+extern "C" void cpp_drawBox(float x, float y, float z)
+{
+  // Create a plane aligned with the xy-plane.
+  /*
+    MeshManager::getSingleton().createPlane("box1",
+           ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+           Plane(Vector3::UNIT_X, 0),
+	   100,100);
+    Entity *ent = mSceneMgr->createEntity( "box", "box1" );
+  */
+
+  Entity *ent = mSceneMgr->createEntity( "box", SceneManager::PT_SPHERE);
+  ent->setCastShadows(false);
+  SceneNode *nd = root->createChildSceneNode();
+  nd->attachObject(ent);
+  //nd->setScale(0.5, 0.5, 0.5);
+  nd->setPosition(x,y,z);
+}

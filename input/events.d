@@ -33,6 +33,8 @@ import core.config;
 import scene.soundlist;
 import scene.player;
 
+import bullet.bindings;
+
 import ogre.bindings;
 
 import input.keys;
@@ -246,6 +248,10 @@ void initializeInput()
     {
       cpp_moveCamera(position[0], position[1], position[2],
 		     rotation[0], rotation[1], rotation[2]);
+
+      // Insert a collision box close to the player
+      cpp_insertBox(position[0], position[1]+500, position[2]);
+      cpp_drawBox(position[0], position[1]+500, position[2]);
     }
 
   // TODO/FIXME: This should have been in config, but DMD's module
@@ -294,29 +300,41 @@ extern(C) int d_frameStarted(float time)
   if(pause) return 1;
 
   const float moveSpeed = 900;
+  float speed = moveSpeed * time;
 
   // Check if the movement keys are pressed
   float moveX = 0, moveY = 0, moveZ = 0;
+  float x, y, z;
 
-  if(isPressed(Keys.MoveLeft)) moveX -= moveSpeed;
-  if(isPressed(Keys.MoveRight)) moveX += moveSpeed;
-  if(isPressed(Keys.MoveForward)) moveZ -= moveSpeed;
-  if(isPressed(Keys.MoveBackward)) moveZ += moveSpeed;
-  if(isPressed(Keys.MoveUp)) moveY += moveSpeed;
-  if(isPressed(Keys.MoveDown)) moveY -= moveSpeed;
+  if(isPressed(Keys.MoveLeft)) moveX -= speed;
+  if(isPressed(Keys.MoveRight)) moveX += speed;
+  if(isPressed(Keys.MoveForward)) moveZ -= speed;
+  if(isPressed(Keys.MoveBackward)) moveZ += speed;
+  if(isPressed(Keys.MoveUp)) moveY += speed;
+  if(isPressed(Keys.MoveDown)) moveY -= speed;
 
-  // Move camera. We only support "ghost-mode" at the moment, so we
-  // move without physics or collision detection.
-  cpp_moveCameraRel(moveX*time, moveY*time, moveZ*time);
+  // Move the player. This is a temporary hack, we should do this more
+  // efficiently in C++.
+  if(moveX != 0 || moveY !=0 || moveZ != 0)
+    {
+      cpp_moveCameraRel(moveX, moveY, moveZ);
+      cpp_getCameraPos(&x, &y, &z);
+      bool nw = cpp_movePlayerCollision(x, y, z, moveX, moveY, moveZ) != 0;
+
+      if(nw != collides)
+        {
+          if(nw) writefln("Entered shape");
+          else writefln("Left shape");
+          collides = nw;
+        }
+    }
 
   sndCumTime += time;
   if(sndCumTime > sndRefresh)
     {
-      float x, y, z;
       float fx, fy, fz;
       float ux, uy, uz;
 
-      cpp_getCameraPos(&x, &y, &z);
       cpp_getCameraOrientation(&fx, &fy, &fz, &ux, &uy, &uz);
 
       soundScene.update(x,y,z,fx,fy,fz,ux,uy,uz);
@@ -326,3 +344,4 @@ extern(C) int d_frameStarted(float time)
   return 1;
 }
 
+bool collides = false;

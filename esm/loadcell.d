@@ -123,9 +123,9 @@ struct ExteriorCell
 
 struct ExtCellHash
 {
-  // This is a pretty good hash, gives no collisions at all for
-  // Morrowind.esm and a table size of 2048, and very few collisions
-  // overall. Not that it matters of course.
+  // This is a pretty good hash, gives no collisions for all of
+  // Morrowind.esm when the table size is 2048, and it gives very few
+  // collisions overall. Not that it matters that much.
   static uint hash(uint val)
   {
     uint res = cast(ushort)val;
@@ -304,8 +304,7 @@ struct Land
     // Save file position
     getContext(context);
 
-    // TODO: We don't decode these yet. Se ESLand.h from
-    // Morrowindremake for a lot of hints.
+    // Skip these here. Load the actual data when the cell is loaded.
     if(isNextSub("VNML")) skipHSubSize(12675);
     if(isNextSub("VHGT")) skipHSubSize(4232);
     if(isNextSub("WNAM")) skipHSubSize(81);
@@ -342,7 +341,8 @@ struct PathGrid
     assert(state == LoadState.Unloaded);
 
     readHNExact(&data, data.sizeof, "DATA");
-    getHNString("NAME"); // Cell name, we don't really need it.
+    getHNString("NAME"); // Cell name, we don't really need it so just
+                         // ignore it.
 
     // Remember this file position
     getContext(context);
@@ -352,7 +352,7 @@ struct PathGrid
       {
 	int size = skipHSub();
 	if(size != 16*data.s2)
-	  fail("Path grid table size");
+	  fail("Path grid table size mismatch");
       }
 
     // Size varies. Path grid chances? Connections? Multiples of 4

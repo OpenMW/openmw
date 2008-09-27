@@ -8,13 +8,17 @@ DMD=gdmd -version=Posix
 # Some extra flags for niftool and bsatool
 NIFFLAGS=-debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose
 
-# Compiler settings for Ogre + OIS. Change as needed.
+# Compiler settings for Ogre + OIS.
 CF_OIS=$(shell pkg-config --cflags OGRE OIS)
 OGCC=$(CXX) $(CXXFLAGS) $(CF_OIS)
 
-# Compiler settings for ffmpeg. Change as needed.
+# Compiler settings for ffmpeg.
 CF_FFMPEG=$(shell pkg-config --cflags libavcodec libavformat)
 AVGCC=$(CXX) $(CXXFLAGS) $(CF_FFMPEG)
+
+# Settings for Bullet
+CF_BULLET=-Iinclude/bullet
+BGCC=$(CXX) $(CXXFLAGS) $(CF_BULLET)
 
 # Ogre C++ files, on the form ogre/cpp_X.cpp. Only the first file is
 # passed to the compiler, the rest are dependencies.
@@ -23,10 +27,14 @@ ogre_cpp=ogre framelistener interface overlay bsaarchive
 # FFmpeg files, in the form sound/cpp_X.cpp.
 avcodec_cpp=avcodec
 
-## No modifications should be required below this line. ##
+# Bullet cpp files
+bullet_cpp=bullet
+
+#### No modifications should be required below this line. ####
 
 ogre_cpp_files=$(ogre_cpp:%=ogre/cpp_%.cpp)
 avcodec_cpp_files=$(avcodec_cpp:%=sound/cpp_%.cpp)
+bullet_cpp_files=$(bullet_cpp:%=bullet/cpp_%.cpp)
 
 # All object files needed by openmw and esmtool
 src := $(wildcard */*.d)
@@ -47,13 +55,16 @@ obj_nif := $(src_nif:%.d=nifobjs/%.o)
 all: openmw esmtool niftool bsatool bored
 
 # Only build C++ sources. Used when building from DSSS.
-cpp: cpp_ogre.o cpp_avcodec.o
+cpp: cpp_ogre.o cpp_avcodec.o cpp_bullet.o
 
 cpp_ogre.o: $(ogre_cpp_files)
 	$(OGCC) -c $<
 
 cpp_avcodec.o: $(avcodec_cpp_files)
 	$(AVGCC) -c $<
+
+cpp_bullet.o: $(bullet_cpp_files)
+	$(BGCC) -c $<
 
 objs/%.o: %.d
 	dirname $@ | xargs mkdir -p
@@ -63,8 +74,8 @@ nifobjs/%.o: %.d
 	dirname $@ | xargs mkdir -p
 	$(DMD) $(NIFFLAGS) -c $< -of$@
 
-openmw: openmw.d cpp_ogre.o cpp_avcodec.o $(obj)
-	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat
+openmw: openmw.d cpp_ogre.o cpp_avcodec.o cpp_bullet.o $(obj)
+	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat bullet/libBulletDynamics.a bullet/libBulletCollision.a bullet/libLinearMath.a
 
 esmtool: esmtool.d cpp_ogre.o cpp_avcodec.o $(obj)
 	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat

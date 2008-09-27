@@ -146,11 +146,13 @@ extern "C" void cpp_getCameraOrientation(float *fx, float *fy, float *fz,
   *uz = up[1];
 }
 
-// Move and rotate camera in place. Transforms Morrowind coordinates
-// to OGRE coordinates.
+// Move and rotate camera in place.
 extern "C" void cpp_moveCamera(float x, float y, float z,
 			       float r1, float r2, float r3)
 {
+  // Transforms Morrowind coordinates to OGRE coordinates. The camera
+  // is not affected by the rotation of the root node, so we must
+  // transform this manually.
   mCamera->setPosition(Vector3(x,z,-y));
 
   // Rotation is probably not correct, but for now I have no reference

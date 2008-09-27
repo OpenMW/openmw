@@ -31,6 +31,8 @@ import std.file;
 import ogre.ogre;
 import ogre.bindings;
 
+import bullet.bullet;
+
 import scene.celldata;
 import scene.soundlist;
 
@@ -219,9 +221,12 @@ void main(char[][] args)
     {
       // Warm up OGRE
       setupOgre();
-
-      // Clean up ogre when we're finished.
       scope(exit) cleanupOgre();
+
+      // Set up Bullet
+      initBullet();
+      scope(exit) cleanupBullet();
+
 
       if(cd.inCell)
 	{
