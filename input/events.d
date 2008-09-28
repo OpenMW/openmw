@@ -243,13 +243,18 @@ float musCumTime = 0;
 
 void initializeInput()
 {
-  // Move the camera in place
+  // Move the player into place. TODO: This isn't really input-related
+  // at all, and should be moved.
   with(playerData.position)
     {
-      cpp_moveCamera(position[0], position[1], position[2],
-		     rotation[0], rotation[1], rotation[2]);
+      // TODO: Think about renaming these functions to ogre_moveCamera
+      // and bullet_movePlayer etc.
+      cpp_moveCamera(position[0], position[1], position[2]);
+      cpp_setCameraRotation(rotation[0], rotation[1], rotation[2]);
 
-      // Insert a collision box close to the player
+      cpp_movePlayer(position[0], position[1], position[2]);
+
+      // Insert a collision shape close to the player
       cpp_insertBox(position[0], position[1]+500, position[2]);
       cpp_drawBox(position[0], position[1]+500, position[2]);
     }
@@ -299,12 +304,12 @@ extern(C) int d_frameStarted(float time)
   // The rest is ignored in pause mode
   if(pause) return 1;
 
-  const float moveSpeed = 900;
-  float speed = moveSpeed * time;
+  // Walking / floating speed, in points per second.
+  const float speed = 300;
 
   // Check if the movement keys are pressed
   float moveX = 0, moveY = 0, moveZ = 0;
-  float x, y, z;
+  float x, y, z, ox, oy, oz;
 
   if(isPressed(Keys.MoveLeft)) moveX -= speed;
   if(isPressed(Keys.MoveRight)) moveX += speed;
@@ -313,21 +318,34 @@ extern(C) int d_frameStarted(float time)
   if(isPressed(Keys.MoveUp)) moveY += speed;
   if(isPressed(Keys.MoveDown)) moveY -= speed;
 
-  // Move the player. This is a temporary hack, we should do this more
-  // efficiently in C++.
-  if(moveX != 0 || moveY !=0 || moveZ != 0)
-    {
-      cpp_moveCameraRel(moveX, moveY, moveZ);
-      cpp_getCameraPos(&x, &y, &z);
-      bool nw = cpp_movePlayerCollision(x, y, z, moveX, moveY, moveZ) != 0;
+  // This isn't very elegant, but it's simple and it works.
 
-      if(nw != collides)
-        {
-          if(nw) writefln("Entered shape");
-          else writefln("Left shape");
-          collides = nw;
-        }
-    }
+  // Get the current coordinates
+  cpp_getCameraPos(&ox, &oy, &oz);
+
+  // Move camera using relative coordinates. TODO: We won't really
+  // need to move the camera here (since it's moved below anyway), we
+  // only want the transformation from camera space to world
+  // space. This can likely be done more efficiently.
+  cpp_moveCameraRel(moveX, moveY, moveZ);
+
+  // Get the result
+  cpp_getCameraPos(&x, &y, &z);
+
+  // The result is the real movement direction, in world coordinates
+  moveX = x-ox;
+  moveY = y-oy;
+  moveZ = z-oz;
+
+  // Tell Bullet that this is where we want to go
+  cpp_setPlayerDir(moveX, moveY, moveZ);
+
+  // Perform a Bullet time step
+  cpp_timeStep(time);
+
+  // Get the final (actual) player position and update the camera
+  cpp_getPlayerPos(&x, &y, &z);
+  cpp_moveCamera(x,y,z);
 
   sndCumTime += time;
   if(sndCumTime > sndRefresh)

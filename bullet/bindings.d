@@ -32,12 +32,23 @@ extern(C):
 
 // Initialize the dynamic world. Returns non-zero if an error occurs.
 int cpp_initBullet();
-void cpp_timeStep(float delta);
-void cpp_cleanupBullet();
+
+// Warp the player to a specific location.
+void cpp_movePlayer(float x, float y, float z);
+
+// Request that the player moves in this direction
+void cpp_setPlayerDir(float x, float y, float z);
+
+// Get the current player position, after physics and collision have
+// been applied.
+void cpp_getPlayerPos(float *x, float *y, float *z);
 
 // Insert a debug collision object
 void cpp_insertBox(float x, float y, float z);
 
-// Move the player's collision shape
-int cpp_movePlayerCollision(float x, float y, float z,
-                            float dx, float dy, float dz);
+// Move the physics simulation 'delta' seconds forward in time
+void cpp_timeStep(float delta);
+
+// Deallocate objects
+void cpp_cleanupBullet();
+

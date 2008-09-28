@@ -1,196 +1,229 @@
-#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
 
 #include <iostream>
 
 using namespace std;
 
-btDefaultCollisionConfiguration* m_collisionConfiguration;
-btCollisionDispatcher *m_dispatcher;
-btBroadphaseInterface *m_broadphase;
-//btSequentialImpulseConstraintSolver* m_solver;
-//btDynamicsWorld *m_dynamicsWorld;
-btCollisionWorld *m_collisionWorld;
+class CustomOverlappingPairCallback;
 
-//btCollisionObject* m_playerObject;
-btConvexShape *playerShape;
+// System variables
+btDefaultCollisionConfiguration* g_collisionConfiguration;
+btCollisionDispatcher *g_dispatcher;
+//btBroadphaseInterface *g_broadphase;
+btAxisSweep3 *g_broadphase;
+btSequentialImpulseConstraintSolver* g_solver;
+btDynamicsWorld *g_dynamicsWorld;
+
+// Player variables
+btCollisionObject* g_playerObject;
+btConvexShape *g_playerShape;
+
+// Player position. This is updated automatically by the physics
+// system based on g_walkDirection and collisions. It is read by D
+// code through cpp_getPlayerPos().
+btVector3 g_playerPosition;
+
+// Walking vector - defines direction and speed that the player
+// intends to move right now. This is updated from D code each frame
+// through cpp_setPlayerDir(), based on player input (and later, AI
+// decisions.) The units of the vector are points per second.
+btVector3 g_walkDirection;
+
+// These variables and the class below are used in player collision
+// detection. The callback is injected into the broadphase and keeps a
+// continuously updated list of what objects are colliding with the
+// player (in g_pairCache). This list is used in the function called
+// recoverFromPenetration() below.
+btHashedOverlappingPairCache* g_pairCache;
+CustomOverlappingPairCallback *g_customPairCallback;
+
+// Include the player physics
+#include "cpp_player.cpp"
+
+class CustomOverlappingPairCallback : public btOverlappingPairCallback
+{
+public:
+  virtual btBroadphasePair* addOverlappingPair(btBroadphaseProxy* proxy0,
+                                               btBroadphaseProxy* proxy1)
+  {
+    if (proxy0->m_clientObject==g_playerObject ||
+        proxy1->m_clientObject==g_playerObject)
+      return g_pairCache->addOverlappingPair(proxy0,proxy1);
+    return 0;
+  }
+
+  virtual void* removeOverlappingPair(btBroadphaseProxy* proxy0,
+                                      btBroadphaseProxy* proxy1,
+                                      btDispatcher* dispatcher)
+  {
+    if (proxy0->m_clientObject==g_playerObject ||
+        proxy1->m_clientObject==g_playerObject)
+      return g_pairCache->removeOverlappingPair(proxy0,proxy1,dispatcher);
+
+    return 0;
+  }
+
+  void removeOverlappingPairsContainingProxy(btBroadphaseProxy* proxy0,
+                                             btDispatcher* dispatcher)
+  {    if (proxy0->m_clientObject==g_playerObject)
+      g_pairCache->removeOverlappingPairsContainingProxy(proxy0,dispatcher);
+  }
+
+  /* KILLME
+  btBroadphasePairArray& getOverlappingPairArray()
+  { return g_pairCache->getOverlappingPairArray(); }
+  btOverlappingPairCache* getOverlappingPairCache()
+  { return g_pairCache; }
+  */
+};
 
 extern "C" int32_t cpp_initBullet()
 {
+  // ------- SET UP THE WORLD -------
+
   // Set up basic objects
-  m_collisionConfiguration = new btDefaultCollisionConfiguration();
-  m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
-  m_broadphase = new btDbvtBroadphase();
-  m_collisionWorld =
-    new btCollisionWorld(m_dispatcher, m_broadphase,
-                         m_collisionConfiguration);
+  g_collisionConfiguration = new btDefaultCollisionConfiguration();
+  g_dispatcher = new btCollisionDispatcher(g_collisionConfiguration);
+  //g_broadphase = new btDbvtBroadphase();
+  g_solver = new btSequentialImpulseConstraintSolver;
 
-  /*m_solver = new btSequentialImpulseConstraintSolver;
-  m_dynamicsWorld =
-    new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase,
-                                m_solver, m_collisionConfiguration);
-  m_dynamicsWorld->setGravity(btVector3(0,-10,0));
-  */
+  // TODO: Figure out what to do with this. We need the user callback
+  // function used below (I think), but this is only offered by this
+  // broadphase implementation (as far as I can see.)
+  btVector3 worldMin(-100000,-100000,-100000);
+  btVector3 worldMax(100000,100000,100000);
+  g_broadphase = new btAxisSweep3(worldMin,worldMax);
 
-  // Create player collision object
-  //playerShape = new btCylinderShape(btVector3(50, 50, 50));
-  playerShape = new btSphereShape(50);
+  g_dynamicsWorld =
+    new btDiscreteDynamicsWorld(g_dispatcher,
+                                g_broadphase,
+                                g_solver,
+                                g_collisionConfiguration);
 
+  //g_dynamicsWorld->setGravity(btVector3(0,-10,0));
+
+
+  // ------- SET UP THE PLAYER -------
+
+  // Create the player collision shape.
+  float width = 50;
+  //float height = 50;
   /*
-  m_playerObject = new btCollisionObject ();
-  m_playerObject->setCollisionShape (m_shape);
-  m_playerObject->setCollisionFlags (btCollisionObject::CF_NO_CONTACT_RESPONSE);
+  // One possible shape is the convex hull around two spheres
+  btVector3 spherePositions[2];
+  btScalar sphereRadii[2];
+  sphereRadii[0] = width;
+  sphereRadii[1] = width;
+  spherePositions[0] = btVector3 (0.0, height/2.0, 0.0);
+  spherePositions[1] = btVector3 (0.0, -height/2.0, 0.0);
+  m_shape = new btMultiSphereShape(btVector3(width/2.0, height/2.0, width/2.0),
+                                   &spherePositions[0], &sphereRadii[0], 2);
   */
+  //g_playerShape = new btCylinderShape(btVector3(50, 50, 50));
+  g_playerShape = new btSphereShape(width);
 
-  /*
-  // Dynamic shapes:
+  // Create the collision object
+  g_playerObject = new btCollisionObject ();
+  g_playerObject->setCollisionShape (g_playerShape);
+  g_playerObject->setCollisionFlags (btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
-  // Re-using the same collision is better for memory usage and
-  // performance.
 
-  btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-  //btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-  //m_collisionShapes.push_back(colShape);
+  // ------- OTHER STUFF -------
 
-  // Create Dynamic Objects
-  btTransform startTransform;
-  startTransform.setIdentity();
+  // Create a custom callback to pick out all the objects colliding
+  // with the player. We use this in the collision recovery phase.
+  g_pairCache = new btHashedOverlappingPairCache();
+  g_customPairCallback = new CustomOverlappingPairCallback();
+  g_broadphase->setOverlappingPairUserCallback(g_customPairCallback);
 
-  mass = 1.f;
+  // Set up the callback that moves the player at the end of each
+  // simulation step.
+  g_dynamicsWorld->setInternalTickCallback(playerStepCallback);
 
-  colShape->calculateLocalInertia(mass,localInertia);
+  // Add the character collision object to the world.
+  g_dynamicsWorld->addCollisionObject(g_playerObject
+                                      ,btBroadphaseProxy::DebrisFilter
+                                      //,btBroadphaseProxy::StaticFilter
+                                      );
 
-///create 125 (5x5x5) dynamic objects
-#define ARRAY_SIZE_X 5
-#define ARRAY_SIZE_Y 5
-#define ARRAY_SIZE_Z 5
-
-#define START_POS_X -5
-#define START_POS_Y -5
-#define START_POS_Z -3
-
-  float start_x = START_POS_X - ARRAY_SIZE_X/2;
-  float start_y = START_POS_Y;
-  float start_z = START_POS_Z - ARRAY_SIZE_Z/2;
-
-  for (int k=0;k<ARRAY_SIZE_Y;k++)
-    for (int i=0;i<ARRAY_SIZE_X;i++)
-      for(int j = 0;j<ARRAY_SIZE_Z;j++)
-        {
-          startTransform.setOrigin(btVector3(2.0*i + start_x,
-                                             10+2.0*k + start_y,
-                                             2.0*j + start_z));
-
-          btDefaultMotionState* myMotionState =
-            new btDefaultMotionState(startTransform);
-
-          btRigidBody::btRigidBodyConstructionInfo
-            rbInfo(mass,myMotionState,colShape,localInertia);
-
-          btRigidBody* body = new btRigidBody(rbInfo);
-          body->setActivationState(ISLAND_SLEEPING);
-
-          m_dynamicsWorld->addRigidBody(body);
-          body->setActivationState(ISLAND_SLEEPING);
-        }
-  */
+  // Success!
   return 0;
 }
 
-extern "C" int32_t cpp_movePlayerCollision(float x, float y, float z,
-                                        float dx, float dy, float dz)
+// Warp the player to a specific location. We do not bother setting
+// rotation, since it's completely irrelevant for collision detection.
+extern "C" void cpp_movePlayer(float x, float y, float z)
 {
-  btTransform start, end;
-  start.setIdentity();
-  end.setIdentity();
-
-  // The sweep test moves the shape from the old position to the
-  // new. The 0.1 offset in one of the coordinates is to make sure a
-  // sweep is performed even when the player does not move.
-  start.setOrigin(btVector3(x, y, z));
-  end.setOrigin(btVector3(x+dx,y+dy,z+dz));
-
-  btCollisionWorld::ClosestConvexResultCallback cb(btVector3(0,0,0),
-                                            btVector3(0,0,0));
-
-  m_collisionWorld->convexSweepTest(playerShape, start, end, cb);
-
-  if(cb.hasHit()) return 1;
-  else return 0;
+  btTransform tr;
+  tr.setIdentity();
+  tr.setOrigin(btVector3(x,y,z));
+  g_playerObject->setWorldTransform(tr);
 }
 
+// Request that the player moves in this direction
+extern "C" void cpp_setPlayerDir(float x, float y, float z)
+{ g_walkDirection.setValue(x,y,z); }
+
+// Get the current player position, after physics and collision have
+// been applied.
+extern "C" void cpp_getPlayerPos(float *x, float *y, float *z)
+{
+  *x = g_playerPosition.getX();
+  *y = g_playerPosition.getY();
+  *z = g_playerPosition.getZ();
+}
+
+// Insert a debug collision shape
 extern "C" void cpp_insertBox(float x, float y, float z)
 {
   btCollisionShape* groundShape =
     new btSphereShape(50);
     //new btBoxShape(btVector3(100,100,100));
 
+  // Create a motion state to hold the object (not sure why yet.)
   btTransform groundTransform;
   groundTransform.setIdentity();
   groundTransform.setOrigin(btVector3(x,y,z));
-
-  btCollisionObject *obj = new btCollisionObject;
-  obj->setCollisionShape(groundShape);
-  obj->setWorldTransform(groundTransform);
-
-  m_collisionWorld->addCollisionObject(obj);
-
-  /*
-  m_collisionWorld->addCollisionObject(obj,
-      btBroadphaseProxy::DebrisFilter,  // ??
-      btBroadphaseProxy::StaticFilter); // Only static objects
-
-  /*
   btDefaultMotionState* myMotionState =
     new btDefaultMotionState(groundTransform);
 
+  // Create a rigid body from the motion state. Give it zero mass and
+  // inertia.
   btRigidBody::btRigidBodyConstructionInfo
     rbInfo(0, myMotionState, groundShape, btVector3(0,0,0));
-
   btRigidBody* body = new btRigidBody(rbInfo);
 
-  // Add the body to the dynamics world
-  m_dynamicsWorld->addRigidBody(body);
-  */
+  // Add the body to the world
+  g_dynamicsWorld->addRigidBody(body);
 }
 
-/*
+// Move the physics simulation 'delta' seconds forward in time
 extern "C" void cpp_timeStep(float delta)
 {
-  // TODO: Find what unit Bullet uses here
-  m_dynamicsWorld->stepSimulation(delta / 1000.f);
+  // TODO: We might experiment with the number of time steps. Remember
+  // that the function also returns the number of steps performed.
+  g_dynamicsWorld->stepSimulation(delta,2);
 }
-*/
 
 // Cleanup in the reverse order of creation/initialization
 extern "C" void cpp_cleanupBullet()
 {
   // Remove the rigidbodies from the dynamics world and delete them
-  for (int i=m_collisionWorld->getNumCollisionObjects()-1; i>=0 ;i--)
+  for (int i=g_dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
     {
-      btCollisionObject* obj = m_collisionWorld->getCollisionObjectArray()[i];
-      /*
+      btCollisionObject* obj = g_dynamicsWorld->getCollisionObjectArray()[i];
       btRigidBody* body = btRigidBody::upcast(obj);
 
       if (body && body->getMotionState())
         delete body->getMotionState();
-      */
 
-      m_collisionWorld->removeCollisionObject( obj );
+      g_dynamicsWorld->removeCollisionObject( obj );
       delete obj;
     }
 
-  // Delete collision shapes
-  /*
-  for (int j=0;j<m_collisionShapes.size();j++)
-    {
-      btCollisionShape* shape = m_collisionShapes[j];
-      delete shape;
-    }
-  */
-
-  delete m_collisionWorld;
-  //delete m_solver;
-  delete m_broadphase;
-  delete m_dispatcher;
-  delete m_collisionConfiguration;
+  delete g_dynamicsWorld;
+  delete g_solver;
+  delete g_broadphase;
+  delete g_dispatcher;
+  delete g_collisionConfiguration;
 }

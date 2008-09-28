@@ -142,7 +142,8 @@ void cpp_screenshot(char *filename);
 
 // Camera control and information
 void cpp_rotateCamera(float x, float y);
-void cpp_moveCamera(float x, float y, float z, float r1, float r2, float r3);
+void cpp_moveCamera(float x, float y, float z);
+void cpp_setCameraRotation(float r1, float r2, float r3);
 void cpp_getCameraPos(float *x, float *y, float *z);
 void cpp_getCameraOrientation(float *fx, float *fy, float *fz, float *ux, float *uy, float *uz);
 void cpp_moveCameraRel(float x, float y, float z);

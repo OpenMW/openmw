@@ -132,7 +132,8 @@ extern "C" void cpp_getCameraPos(float *x, float *y, float *z)
   *z = pos[1];
 }
 
-// Get current camera orientation
+// Get current camera orientation, in the form of 'front' and 'up'
+// vectors.
 extern "C" void cpp_getCameraOrientation(float *fx, float *fy, float *fz,
                                          float *ux, float *uy, float *uz)
 {
@@ -146,18 +147,21 @@ extern "C" void cpp_getCameraOrientation(float *fx, float *fy, float *fz,
   *uz = up[1];
 }
 
-// Move and rotate camera in place.
-extern "C" void cpp_moveCamera(float x, float y, float z,
-			       float r1, float r2, float r3)
+// Move camera
+extern "C" void cpp_moveCamera(float x, float y, float z)
 {
   // Transforms Morrowind coordinates to OGRE coordinates. The camera
   // is not affected by the rotation of the root node, so we must
   // transform this manually.
   mCamera->setPosition(Vector3(x,z,-y));
+}
 
-  // Rotation is probably not correct, but for now I have no reference
-  // point. Fix it later when we teleport from one cell to another, so
-  // we have something to compare against.
+// Rotate camera using Morrowind rotation specifiers
+extern "C" void cpp_setCameraRotation(float r1, float r2, float r3)
+{
+  // TODO: This translation is probably not correct, but for now I
+  // have no reference point. Fix it later when we teleport from one
+  // cell to another, so we have something to compare against.
 
   // Rotate around X axis
   Quaternion xr(Radian(-r1), Vector3::UNIT_X);
@@ -170,7 +174,7 @@ extern "C" void cpp_moveCamera(float x, float y, float z,
   mCamera->setOrientation(xr*yr*zr);
 }
 
-// Move camera relative to its own axis set
+// Move camera relative to its own axis set.
 extern "C" void cpp_moveCameraRel(float x, float y, float z)
 {
   mCamera->moveRelative(Vector3(x,y,z));
