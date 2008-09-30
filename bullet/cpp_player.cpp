@@ -1,3 +1,26 @@
+/*
+  OpenMW - The completely unofficial reimplementation of Morrowind
+  Copyright (C) 2008  Nicolay Korslund
+  Email: < korslund@gmail.com >
+  WWW: http://openmw.snaptoad.com/
+
+  This file (cpp_player.cpp) is part of the OpenMW package.
+
+  OpenMW is distributed as free software: you can redistribute it
+  and/or modify it under the terms of the GNU General Public License
+  version 3, as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  version 3 along with this program. If not, see
+  http://www.gnu.org/licenses/ .
+
+ */
+
 // This file handles player-specific physics and collision detection
 
 // TODO: Later we might handle various physics modes, eg. dynamic
@@ -10,6 +33,8 @@
 // player collision, these will be member variables.
 bool g_touchingContact;
 btVector3 g_touchingNormal;
+btScalar g_currentStepOffset;
+float g_stepHeight = 20;
 
 // Returns the reflection direction of a ray going 'direction' hitting
 // a surface with normal 'normal'
@@ -49,11 +74,12 @@ public:
   }
 };
 
-/* Used to step up small steps and slopes. Not done.
-void KinematicCharacterController::stepUp (const btCollisionWorld* world)
+// Used to step up small steps and slopes.
+void stepUp()
 {
   // phase 1: up
-  btVector3 targetPosition = g_playerPosition + btVector3 (btScalar(0.0), m_stepHeight, btScalar(0.0));
+  btVector3 targetPosition = g_playerPosition +
+    btVector3(0.0, 0.0, g_stepHeight);
   btTransform start, end;
 
   start.setIdentity ();
@@ -63,23 +89,22 @@ void KinematicCharacterController::stepUp (const btCollisionWorld* world)
   start.setOrigin (g_playerPosition + btVector3(0.0, 0.1, 0.0));
   end.setOrigin (targetPosition);
 
-  ClosestNotMeConvexResultCallback callback (g_playerObject);
-  world->convexSweepTest (g_playerShape, start, end, callback);
+  ClosestNotMeConvexResultCallback callback;
+  g_dynamicsWorld->convexSweepTest (g_playerShape, start, end, callback);
 
   if (callback.hasHit())
     {
       // we moved up only a fraction of the step height
-      m_currentStepOffset = m_stepHeight * callback.m_closestHitFraction;
+      g_currentStepOffset = g_stepHeight * callback.m_closestHitFraction;
       g_playerPosition.setInterpolate3(g_playerPosition, targetPosition,
                                        callback.m_closestHitFraction);
     }
   else
     {
-      m_currentStepOffset = m_stepHeight;
+      g_currentStepOffset = g_stepHeight;
       g_playerPosition = targetPosition;
     }
 }
-*/
 
 void updateTargetPositionBasedOnCollision (const btVector3& hitNormal,
                                            btVector3 &targetPosition)
@@ -168,15 +193,15 @@ void stepForward(btVector3& walkMove)
     }
 }
 
-/* Not done. Will handle gravity, falling, sliding, etc.
-void KinematicCharacterController::stepDown (const btCollisionWorld* g_dynamicsWorld, btScalar dt)
+void stepDown (btScalar dt)
 {
   btTransform start, end;
 
   // phase 3: down
-  btVector3 step_drop = btVector3(btScalar(0.0), m_currentStepOffset, btScalar(0.0));
-  btVector3 gravity_drop = btVector3(btScalar(0.0), m_stepHeight, btScalar(0.0));
-  targetPosition -= (step_drop + gravity_drop);
+  btVector3 step_drop = btVector3(0,0,g_currentStepOffset);
+  btVector3 gravity_drop = btVector3(0,0,g_stepHeight);
+
+  btVector3 targetPosition = g_playerPosition - step_drop - gravity_drop;
 
   start.setIdentity ();
   end.setIdentity ();
@@ -184,20 +209,17 @@ void KinematicCharacterController::stepDown (const btCollisionWorld* g_dynamicsW
   start.setOrigin (g_playerPosition);
   end.setOrigin (targetPosition);
 
-  ClosestNotMeConvexResultCallback callback (g_playerObject);
-  g_dynamicsWorld->convexSweepTest (g_playerShape, start, end, callback);
+  ClosestNotMeConvexResultCallback callback;
+  g_dynamicsWorld->convexSweepTest(g_playerShape, start, end, callback);
 
   if (callback.hasHit())
-    {
-      // we dropped a fraction of the height -> hit floor
-      g_playerPosition.setInterpolate3 (g_playerPosition, targetPosition, callback.m_closestHitFraction);
-    } else {
-      // we dropped the full height
-		
-      g_playerPosition = targetPosition;
-    }
+    // we dropped a fraction of the height -> hit floor
+    g_playerPosition.setInterpolate3(g_playerPosition, targetPosition,
+                                     callback.m_closestHitFraction);
+  else
+    // we dropped the full height
+    g_playerPosition = targetPosition;
 }
-*/
 
 // Check if the player currently collides with anything, and adjust
 // its position accordingly. Returns true if collisions were found.
@@ -292,9 +314,9 @@ void playerStepCallback(btDynamicsWorld* dynamicsWorld, btScalar timeStep)
 
   btVector3 walkStep = g_walkDirection * timeStep;
 
-  //stepUp();
+  stepUp();
   stepForward(walkStep);
-  //stepDown(dt);
+  stepDown(timeStep);
 
   // Move the player (but keep rotation)
   xform = g_playerObject->getWorldTransform ();

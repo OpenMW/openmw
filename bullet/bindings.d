@@ -28,27 +28,46 @@ module bullet.bindings;
  * handles Bullet.
  */
 
+typedef void* BulletShape;
+
 extern(C):
 
 // Initialize the dynamic world. Returns non-zero if an error occurs.
-int cpp_initBullet();
+int bullet_init();
 
 // Warp the player to a specific location.
-void cpp_movePlayer(float x, float y, float z);
+void bullet_movePlayer(float x, float y, float z);
 
 // Request that the player moves in this direction
-void cpp_setPlayerDir(float x, float y, float z);
+void bullet_setPlayerDir(float x, float y, float z);
 
 // Get the current player position, after physics and collision have
 // been applied.
-void cpp_getPlayerPos(float *x, float *y, float *z);
+void bullet_getPlayerPos(float *x, float *y, float *z);
 
-// Insert a debug collision object
-void cpp_insertBox(float x, float y, float z);
+// Create a triangle shape. This is cumulative, all meshes created
+// with this function are added to the same shape. Since the various
+// parts of a mesh can be differently transformed and we are putting
+// them all in one shape, we must transform the vertices manually.
+void bullet_createTriShape(int numFaces,
+                           void *triArray,
+                           int numVerts,
+                           void *vertArray,
+                           float *trans,float *matrix);
+
+// "Flushes" the meshes created with createTriShape, returning the
+// pointer to the final shape object.
+BulletShape bullet_getFinalShape();
+
+// Insert a static mesh with the given translation, quaternion
+// rotation and scale. The quaternion is assumed to be in Ogre format,
+// ie. with the W first.
+void bullet_insertStatic(BulletShape shp, float *pos,
+                         float *quat, float scale);
 
 // Move the physics simulation 'delta' seconds forward in time
-void cpp_timeStep(float delta);
+void bullet_timeStep(float delta);
 
 // Deallocate objects
-void cpp_cleanupBullet();
+void bullet_cleanup();
 

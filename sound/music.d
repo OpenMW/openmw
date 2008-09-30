@@ -167,7 +167,7 @@ struct MusicManager
         checkALError("killing current track");
       }
 
-    if(fileHandle) cpp_closeAVFile(fileHandle);
+    if(fileHandle) avc_closeAVFile(fileHandle);
     fileHandle = null;
     audioHandle = null;
 
@@ -185,7 +185,7 @@ struct MusicManager
       {
         // This block is only executed if an exception is thrown.
 
-        if(fileHandle) cpp_closeAVFile(fileHandle);
+        if(fileHandle) avc_closeAVFile(fileHandle);
 
         fileHandle = null;
         audioHandle = null;
@@ -208,16 +208,16 @@ struct MusicManager
     if(checkALError())
       fail("Couldn't generate buffers");
 
-    fileHandle = cpp_openAVFile(toStringz(playlist[index]));
+    fileHandle = avc_openAVFile(toStringz(playlist[index]));
     if(!fileHandle)
       fail("Unable to open " ~ playlist[index]);
 
-    audioHandle = cpp_getAVAudioStream(fileHandle, 0);
+    audioHandle = avc_getAVAudioStream(fileHandle, 0);
     if(!audioHandle)
       fail("Unable to load music track " ~ playlist[index]);
 
     int ch, bits, rate;
-    if(cpp_getAVAudioInfo(audioHandle, &rate, &ch, &bits) != 0)
+    if(avc_getAVAudioInfo(audioHandle, &rate, &ch, &bits) != 0)
       fail("Unable to get info for music track " ~ playlist[index]);
 
     bufRate = rate;
@@ -248,7 +248,7 @@ struct MusicManager
 
     foreach(int i, ref b; bIDs)
       {
-        int length = cpp_getAVAudioData(audioHandle, outData.ptr, outData.length);
+        int length = avc_getAVAudioData(audioHandle, outData.ptr, outData.length);
         if(length) alBufferData(b, bufFormat, outData.ptr, length, bufRate);
         if(length == 0 || checkALError())
           {
@@ -284,7 +284,7 @@ struct MusicManager
   // Disable music
   void disableMusic()
   {
-    if(fileHandle) cpp_closeAVFile(fileHandle);
+    if(fileHandle) avc_closeAVFile(fileHandle);
     fileHandle = null;
     audioHandle = null;
 
@@ -333,7 +333,7 @@ struct MusicManager
 
     for(int i = 0;i < count;i++)
       {
-        int length = cpp_getAVAudioData(audioHandle, outData.ptr, outData.length);
+        int length = avc_getAVAudioData(audioHandle, outData.ptr, outData.length);
         if(length <= 0)
           {
             if(i == 0)

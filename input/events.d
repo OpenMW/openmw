@@ -94,7 +94,7 @@ void toggleBattle()
 
 void toggleFullscreen()
 {
-  cpp_toggleFullscreen();
+  ogre_toggleFullscreen();
 }
 
 const float volDiff = 0.05;
@@ -126,7 +126,7 @@ void mainVolume(bool increase)
 void takeScreenShot()
 {
   char[] file = format("screenshot_%06d.png", config.screenShotNum++);
-  cpp_screenshot(toStringz(file));
+  ogre_screenshot(toStringz(file));
   writefln("Wrote '%s'", file);
 }
 
@@ -161,8 +161,8 @@ extern(C) void d_handleMouseMove(MouseState *state)
              state.X.abs, state.Y.abs, state.Z.abs,
              state.X.rel, state.Y.rel, state.Z.rel);
 
-  cpp_rotateCamera( state.X.rel * effMX,
-                    state.Y.rel * effMY );
+  ogre_rotateCamera( state.X.rel * effMX,
+                     state.Y.rel * effMY );
 }
 
 extern(C) void d_handleMouseButton(MouseState *state, int button)
@@ -221,7 +221,7 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
       case Keys.Mute: toggleMute(); break;
       case Keys.Fullscreen: toggleFullscreen(); break;
 
-      case Keys.Debug: cpp_debug(0); break;
+      case Keys.Debug: ogre_debug(0); break;
       case Keys.ScreenShot: takeScreenShot(); break;
       case Keys.Pause: togglePause(); break;
       case Keys.Exit: exitProgram(); break;
@@ -247,16 +247,10 @@ void initializeInput()
   // at all, and should be moved.
   with(playerData.position)
     {
-      // TODO: Think about renaming these functions to ogre_moveCamera
-      // and bullet_movePlayer etc.
-      cpp_moveCamera(position[0], position[1], position[2]);
-      cpp_setCameraRotation(rotation[0], rotation[1], rotation[2]);
+      ogre_moveCamera(position[0], position[1], position[2]);
+      ogre_setCameraRotation(rotation[0], rotation[1], rotation[2]);
 
-      cpp_movePlayer(position[0], position[1], position[2]);
-
-      // Insert a collision shape close to the player
-      cpp_insertBox(position[0], position[1]+500, position[2]);
-      cpp_drawBox(position[0], position[1]+500, position[2]);
+      bullet_movePlayer(position[0], position[1], position[2]);
     }
 
   // TODO/FIXME: This should have been in config, but DMD's module
@@ -269,14 +263,14 @@ void initializeInput()
 float tmpTime = 0;
 int cnt;
 
-extern(C) int cpp_isPressed(int keysym);
+extern(C) int ois_isPressed(int keysym);
 
 // Check if a key is currently down
 bool isPressed(Keys key)
 {
   KeyBind *b = &keyBindings.bindings[key];
   foreach(i; b.syms)
-    if(i != 0 && cpp_isPressed(i)) return true;
+    if(i != 0 && ois_isPressed(i)) return true;
   return false;
 }
 
@@ -321,16 +315,16 @@ extern(C) int d_frameStarted(float time)
   // This isn't very elegant, but it's simple and it works.
 
   // Get the current coordinates
-  cpp_getCameraPos(&ox, &oy, &oz);
+  ogre_getCameraPos(&ox, &oy, &oz);
 
   // Move camera using relative coordinates. TODO: We won't really
   // need to move the camera here (since it's moved below anyway), we
   // only want the transformation from camera space to world
   // space. This can likely be done more efficiently.
-  cpp_moveCameraRel(moveX, moveY, moveZ);
+  ogre_moveCameraRel(moveX, moveY, moveZ);
 
   // Get the result
-  cpp_getCameraPos(&x, &y, &z);
+  ogre_getCameraPos(&x, &y, &z);
 
   // The result is the real movement direction, in world coordinates
   moveX = x-ox;
@@ -338,14 +332,14 @@ extern(C) int d_frameStarted(float time)
   moveZ = z-oz;
 
   // Tell Bullet that this is where we want to go
-  cpp_setPlayerDir(moveX, moveY, moveZ);
+  bullet_setPlayerDir(moveX, moveY, moveZ);
 
   // Perform a Bullet time step
-  cpp_timeStep(time);
+  bullet_timeStep(time);
 
   // Get the final (actual) player position and update the camera
-  cpp_getPlayerPos(&x, &y, &z);
-  cpp_moveCamera(x,y,z);
+  bullet_getPlayerPos(&x, &y, &z);
+  ogre_moveCamera(x,y,z);
 
   sndCumTime += time;
   if(sndCumTime > sndRefresh)
@@ -353,7 +347,7 @@ extern(C) int d_frameStarted(float time)
       float fx, fy, fz;
       float ux, uy, uz;
 
-      cpp_getCameraOrientation(&fx, &fy, &fz, &ux, &uy, &uz);
+      ogre_getCameraOrientation(&fx, &fy, &fz, &ux, &uy, &uz);
 
       soundScene.update(x,y,z,fx,fy,fz,ux,uy,uz);
       sndCumTime -= sndRefresh;

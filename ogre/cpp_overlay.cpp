@@ -27,14 +27,9 @@ PanelOverlayElement *cont;
 
 int visible;
 
-void crap(char *p, ColourValue v)
+extern "C" void ogre_debug(int32_t i)
 {
-  std::cerr << p << ": " << v.getAsRGBA() << "\n";
-}
-
-extern "C" void cpp_debug(int32_t i)
-{
-  std::cerr << "Running cpp_debug(" << i << ")\n";
+  std::cerr << "Running ogre_debug(" << i << ")\n";
 
   if(om)
     {

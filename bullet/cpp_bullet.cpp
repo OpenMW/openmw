@@ -1,3 +1,26 @@
+/*
+  OpenMW - The completely unofficial reimplementation of Morrowind
+  Copyright (C) 2008  Nicolay Korslund
+  Email: < korslund@gmail.com >
+  WWW: http://openmw.snaptoad.com/
+
+  This file (cpp_bullet.cpp) is part of the OpenMW package.
+
+  OpenMW is distributed as free software: you can redistribute it
+  and/or modify it under the terms of the GNU General Public License
+  version 3, as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  version 3 along with this program. If not, see
+  http://www.gnu.org/licenses/ .
+
+ */
+
 #include "btBulletDynamicsCommon.h"
 
 #include <iostream>
@@ -20,20 +43,24 @@ btConvexShape *g_playerShape;
 
 // Player position. This is updated automatically by the physics
 // system based on g_walkDirection and collisions. It is read by D
-// code through cpp_getPlayerPos().
+// code through bullet_getPlayerPos().
 btVector3 g_playerPosition;
 
 // Walking vector - defines direction and speed that the player
 // intends to move right now. This is updated from D code each frame
-// through cpp_setPlayerDir(), based on player input (and later, AI
+// through bullet_setPlayerDir(), based on player input (and later, AI
 // decisions.) The units of the vector are points per second.
 btVector3 g_walkDirection;
+
+// The current trimesh shape being built. All new inserted meshes are
+// added into this, until bullet_getFinalShape() is called.
+btTriangleIndexVertexArray *g_currentMesh;
 
 // These variables and the class below are used in player collision
 // detection. The callback is injected into the broadphase and keeps a
 // continuously updated list of what objects are colliding with the
 // player (in g_pairCache). This list is used in the function called
-// recoverFromPenetration() below.
+// recoverFromPenetration().
 btHashedOverlappingPairCache* g_pairCache;
 CustomOverlappingPairCallback *g_customPairCallback;
 
@@ -77,7 +104,7 @@ public:
   */
 };
 
-extern "C" int32_t cpp_initBullet()
+extern "C" int32_t bullet_init()
 {
   // ------- SET UP THE WORLD -------
 
@@ -89,9 +116,14 @@ extern "C" int32_t cpp_initBullet()
 
   // TODO: Figure out what to do with this. We need the user callback
   // function used below (I think), but this is only offered by this
-  // broadphase implementation (as far as I can see.)
-  btVector3 worldMin(-100000,-100000,-100000);
-  btVector3 worldMax(100000,100000,100000);
+  // broadphase implementation (as far as I can see.) Maybe we can
+  // scan through the cell first and find good values that covers all
+  // the objects before we set up the dynamic world. Another option is
+  // to create a custom broadphase designed for our purpose. (We
+  // should probably use different ones for interior and exterior
+  // cells in any case.)
+  btVector3 worldMin(-40000,-40000,-40000);
+  btVector3 worldMax(40000,40000,40000);
   g_broadphase = new btAxisSweep3(worldMin,worldMax);
 
   g_dynamicsWorld =
@@ -107,18 +139,18 @@ extern "C" int32_t cpp_initBullet()
 
   // Create the player collision shape.
   float width = 50;
-  //float height = 50;
   /*
   // One possible shape is the convex hull around two spheres
+  float height = 100;
   btVector3 spherePositions[2];
   btScalar sphereRadii[2];
   sphereRadii[0] = width;
   sphereRadii[1] = width;
   spherePositions[0] = btVector3 (0.0, height/2.0, 0.0);
   spherePositions[1] = btVector3 (0.0, -height/2.0, 0.0);
-  m_shape = new btMultiSphereShape(btVector3(width/2.0, height/2.0, width/2.0),
-                                   &spherePositions[0], &sphereRadii[0], 2);
-  */
+  g_playerShape = new btMultiSphereShape(btVector3(width/2.0, height/2.0,
+                       width/2.0), &spherePositions[0], &sphereRadii[0], 2);
+  //*/
   //g_playerShape = new btCylinderShape(btVector3(50, 50, 50));
   g_playerShape = new btSphereShape(width);
 
@@ -146,13 +178,16 @@ extern "C" int32_t cpp_initBullet()
                                       //,btBroadphaseProxy::StaticFilter
                                       );
 
+  // Make sure this is zero at startup
+  g_currentMesh = NULL;
+
   // Success!
   return 0;
 }
 
 // Warp the player to a specific location. We do not bother setting
 // rotation, since it's completely irrelevant for collision detection.
-extern "C" void cpp_movePlayer(float x, float y, float z)
+extern "C" void bullet_movePlayer(float x, float y, float z)
 {
   btTransform tr;
   tr.setIdentity();
@@ -161,20 +196,120 @@ extern "C" void cpp_movePlayer(float x, float y, float z)
 }
 
 // Request that the player moves in this direction
-extern "C" void cpp_setPlayerDir(float x, float y, float z)
+extern "C" void bullet_setPlayerDir(float x, float y, float z)
 { g_walkDirection.setValue(x,y,z); }
 
 // Get the current player position, after physics and collision have
 // been applied.
-extern "C" void cpp_getPlayerPos(float *x, float *y, float *z)
+extern "C" void bullet_getPlayerPos(float *x, float *y, float *z)
 {
   *x = g_playerPosition.getX();
   *y = g_playerPosition.getY();
   *z = g_playerPosition.getZ();
 }
 
+unsigned char* copyBuffer(void *buf, int elemSize, int len)
+{
+  int size = elemSize * len;
+  void *res = malloc(size);
+  memcpy(res, buf, size);
+
+  return (unsigned char*)res;
+}
+
+// Create a triangle shape and insert it into the current index/vertex
+// array. If no array is active, create one.
+extern "C" void bullet_createTriShape(int32_t numFaces,
+                                      void *triArray,
+                                      int32_t numVerts,
+                                      void *vertArray,
+                                      float *trans,
+                                      float *matrix)
+{
+  // This struct holds the index and vertex buffers of a single
+  // trimesh.
+  btIndexedMesh im;
+
+  // Set up the triangles
+  int numTriangles = numFaces / 3;
+  im.m_numTriangles = numTriangles;
+  im.m_triangleIndexStride = 6; // 3 indices * 2 bytes per short
+  im.m_triangleIndexBase = copyBuffer(triArray, 6, numTriangles);
+
+  // Set up the vertices
+  im.m_numVertices = numVerts;
+  im.m_vertexStride = 12; // 4 bytes per float * 3 floats per vertex
+  im.m_vertexBase = copyBuffer(vertArray, 12, numVerts);
+
+  // Transform all the vertex values according to 'trans' and 'matrix'
+  float *vb = (float*) im.m_vertexBase;
+  for(int i=0; i<numVerts; i++)
+    {
+      float x,y,z;
+
+      // Reinventing basic linear algebra for the win!
+      x = matrix[0]*vb[0]+matrix[1]*vb[1]+matrix[2]*vb[2] + trans[0];
+      y = matrix[3]*vb[0]+matrix[4]*vb[1]+matrix[5]*vb[2] + trans[1];
+      z = matrix[6]*vb[0]+matrix[7]*vb[1]+matrix[8]*vb[2] + trans[2];
+      *(vb++) = x;
+      *(vb++) = y;
+      *(vb++) = z;
+    }
+
+  // If no mesh is currently active, create one
+  if(g_currentMesh == NULL)
+    g_currentMesh = new btTriangleIndexVertexArray;
+
+  // Add the mesh. Nif data stores triangle indices as shorts.
+  g_currentMesh->addIndexedMesh(im, PHY_SHORT);
+}
+
+// Get the shape built up so far, if any. This clears g_currentMesh,
+// so the next call to createTriShape will start a new shape.
+extern "C" btCollisionShape *bullet_getFinalShape()
+{
+  // Return null if no meshes have been inserted
+  if(g_currentMesh == NULL) return NULL;
+
+  // Create the shape from the completed mesh
+  btBvhTriangleMeshShape *shape =
+    new btBvhTriangleMeshShape(g_currentMesh, false);
+
+  g_currentMesh = NULL;
+  return shape;
+}
+
+// Insert a static mesh
+extern "C" void bullet_insertStatic(btCollisionShape *shape,
+                                    float *pos,
+                                    float *quat,
+                                    float scale)
+{
+  if(scale != 1.0)
+    {
+      cout << "WARNING: Cannot scale collision meshes yet (wanted "
+           << scale << ")\n";
+      return;
+    }
+
+  btTransform trafo;
+  trafo.setIdentity();
+  trafo.setOrigin(btVector3(pos[0], pos[1], pos[2]));
+
+  // Ogre uses WXYZ quaternions, Bullet uses XYZW.
+  trafo.setRotation(btQuaternion(quat[1], quat[2], quat[3], quat[0]));
+
+  // Create and insert the collision object
+  btCollisionObject *obj = new btCollisionObject();
+  obj->setCollisionShape(shape);
+  obj->setWorldTransform(trafo);
+  g_dynamicsWorld->addCollisionObject(obj);
+}
+
+
+/*
 // Insert a debug collision shape
-extern "C" void cpp_insertBox(float x, float y, float z)
+extern "C" void bullet_insertBox(float x, float y, float z)
 {
   btCollisionShape* groundShape =
     new btSphereShape(50);
@@ -184,21 +319,33 @@ extern "C" void cpp_insertBox(float x, float y, float z)
   btTransform groundTransform;
   groundTransform.setIdentity();
   groundTransform.setOrigin(btVector3(x,y,z));
+
+  // Use a simple collision object for static objects
+  btCollisionObject *obj = new btCollisionObject();
+  obj->setCollisionShape(groundShape);
+  obj->setWorldTransform(groundTransform);
+
+  g_dynamicsWorld->addCollisionObject(obj);
+
+  // You can also use a rigid body with a motion state, but this is
+  // overkill for statics.
+  /*
   btDefaultMotionState* myMotionState =
     new btDefaultMotionState(groundTransform);
 
   // Create a rigid body from the motion state. Give it zero mass and
-  // inertia.
+  // zero inertia.
   btRigidBody::btRigidBodyConstructionInfo
     rbInfo(0, myMotionState, groundShape, btVector3(0,0,0));
   btRigidBody* body = new btRigidBody(rbInfo);
 
   // Add the body to the world
   g_dynamicsWorld->addRigidBody(body);
-}
+  */
+//}
 
 // Move the physics simulation 'delta' seconds forward in time
-extern "C" void cpp_timeStep(float delta)
+extern "C" void bullet_timeStep(float delta)
 {
   // TODO: We might experiment with the number of time steps. Remember
   // that the function also returns the number of steps performed.
@@ -206,7 +353,7 @@ extern "C" void cpp_timeStep(float delta)
 }
 
 // Cleanup in the reverse order of creation/initialization
-extern "C" void cpp_cleanupBullet()
+extern "C" void bullet_cleanup()
 {
   // Remove the rigidbodies from the dynamics world and delete them
   for (int i=g_dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)

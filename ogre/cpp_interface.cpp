@@ -25,7 +25,7 @@
 //               E X P O R T E D    F U N C T I O N S
 //-----------------------------------------------------------------------
 
-extern "C" void cpp_cleanup()
+extern "C" void ogre_cleanup()
 {
   // Kill the input systems. This will reset input options such as key
   // repetition.
@@ -41,7 +41,7 @@ extern "C" void cpp_cleanup()
     }
 }
 
-extern "C" int32_t cpp_configure(
+extern "C" int32_t ogre_configure(
                    int32_t showConfig, // Do we show the config dialogue?
                    char *plugincfg     // Name of 'plugin.cfg' file
                    )
@@ -93,9 +93,9 @@ extern "C" int32_t cpp_configure(
 }
 
 // Initialize window. This will create and show the actual window.
-extern "C" void cpp_initWindow()
+extern "C" void ogre_initWindow()
 {
-  std::cout << "cpp_initWindow()\n";
+  std::cout << "ogre_initWindow()\n";
 
   // Initialize OGRE.
   mWindow = mRoot->initialise(true);
@@ -160,11 +160,11 @@ extern "C" void cpp_initWindow()
   mKeyboard -> setEventCallback( &mInput );
   mMouse    -> setEventCallback( &mInput );
 
-  std::cout << "cpp_initWindow finished\n";
+  std::cout << "ogre_initWindow finished\n";
 }
 
 // Make a scene, set the given ambient light
-extern "C" void cpp_makeScene()
+extern "C" void ogre_makeScene()
 {
   // Get the SceneManager, in this case a generic one
   mSceneMgr = mRoot->createSceneManager(ST_GENERIC);
@@ -202,12 +202,12 @@ extern "C" void cpp_makeScene()
 
 // Create a sky dome. Currently disabled since we aren't including the
 // Ogre example data (which has the sky material.)
-extern "C" void cpp_makeSky()
+extern "C" void ogre_makeSky()
 {
   //mSceneMgr->setSkyDome( true, "Examples/CloudySky", 5, 8 );
 }
 
-extern "C" Light* cpp_attachLight(char *name, SceneNode* base,
+extern "C" Light* ogre_attachLight(char *name, SceneNode* base,
 				  float r, float g, float b,
 				  float radius)
 {
@@ -225,12 +225,12 @@ extern "C" Light* cpp_attachLight(char *name, SceneNode* base,
 }
 
 // Toggle between fullscreen and windowed mode.
-extern "C" void cpp_toggleFullscreen()
+extern "C" void ogre_toggleFullscreen()
 {
   std::cout << "Not implemented yet\n";
 }
 
-extern "C" void cpp_setAmbient(float r, float g, float b, // Ambient light
+extern "C" void ogre_setAmbient(float r, float g, float b, // Ambient light
 			       float rs, float gs, float bs) // "Sunlight"
 {
   ColourValue c = ColourValue(r, g, b);
@@ -244,7 +244,7 @@ extern "C" void cpp_setAmbient(float r, float g, float b, // Ambient light
   l->setDirection(0,-1,0);
 }
 
-extern "C" void cpp_setFog(float rf, float gf, float bf, // Fog color
+extern "C" void ogre_setFog(float rf, float gf, float bf, // Fog color
 			float flow, float fhigh) // Fog distance
 {
   ColourValue fogColor( rf, gf, bf );
@@ -257,7 +257,7 @@ extern "C" void cpp_setFog(float rf, float gf, float bf, // Fog color
   //vp->setBackgroundColour(fogColor);
 }
 
-extern "C" void cpp_startRendering()
+extern "C" void ogre_startRendering()
 {
   mRoot->startRendering();
 }
@@ -292,43 +292,81 @@ void cloneNode(SceneNode *from, SceneNode *to, char* name)
     }
 }
 
+// Convert a Morrowind rotation (3 floats) to a quaternion (4 floats)
+extern "C" void ogre_mwToQuaternion(float *mw, float *quat)
+{
+  // Rotate around X axis
+  Quaternion xr(Radian(-mw[0]), Vector3::UNIT_X);
+
+  // Rotate around Y axis
+  Quaternion yr(Radian(-mw[1]), Vector3::UNIT_Y);
+
+  // Rotate around Z axis
+  Quaternion zr(Radian(-mw[2]), Vector3::UNIT_Z);
+
+  // Rotates first around z, then y, then x
+  Quaternion res = xr*yr*zr;
+
+  // Copy result back to caller
+  for(int i=0; i<4; i++)
+    quat[i] = res[i];
+}
+
 // Supposed to insert a copy of the node, for now it just inserts the
 // actual node.
-extern "C" SceneNode *cpp_insertNode(SceneNode *base, char* name,
-				     float *pos, float scale)
+extern "C" SceneNode *ogre_insertNode(SceneNode *base, char* name,
+                                      float *pos, float *quat,
+                                      float scale)
 {
-  //std::cout << "cpp_insertNode(" << name << ")\n";
+  //std::cout << "ogre_insertNode(" << name << ")\n";
   SceneNode *node = root->createChildSceneNode(name);
 
   // Make a copy of the node
   cloneNode(base, node, name);
 
-  // pos points to a Placement struct, which has the format
-  // float x, y, z; // position
-  // float r1, r2, r3; // rotation
-
+  // Apply transformations
   node->setPosition(pos[0], pos[1], pos[2]);
-
-  // Rotate around X axis
-  Quaternion xr(Radian(-pos[3]), Vector3::UNIT_X);
-
-  // Rotate around Y axis
-  Quaternion yr(Radian(-pos[4]), Vector3::UNIT_Y);
-
-  // Rotate around Z axis
-  Quaternion zr(Radian(-pos[5]), Vector3::UNIT_Z);
-
-  // Rotates first around z, then y, then x
-  node->setOrientation(xr*yr*zr);
+  node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
 
   node->setScale(scale, scale, scale);
 
   return node;
 }
 
+// Get the world transformation of a node (the total transformation of
+// this node and all parent nodes). Return it as a translation
+// (3-vector) and a rotation / scaling part (3x3 matrix)
+extern "C" void ogre_getWorldTransform(SceneNode *node,
+                                       float *trans, // Storage for translation
+                                       float *matrix)// For 3x3 matrix
+{
+  // Get the world transformation first
+  Matrix4 trafo;
+  node->getWorldTransforms(&trafo);
+
+  // Extract the translation part and pass it to the caller
+  Vector3 tr = trafo.getTrans();
+  trans[0] = tr[0];
+  trans[1] = tr[1];
+  trans[2] = tr[2];
+
+  // Next extract the matrix
+  Matrix3 mat;
+  trafo.extract3x3Matrix(mat);
+  matrix[0] = mat[0][0];
+  matrix[1] = mat[0][1];
+  matrix[2] = mat[0][2];
+  matrix[3] = mat[1][0];
+  matrix[4] = mat[1][1];
+  matrix[5] = mat[1][2];
+  matrix[6] = mat[2][0];
+  matrix[7] = mat[2][1];
+  matrix[8] = mat[2][2];
+}
+
 // Create the water plane. It doesn't really resemble "water" yet
 // though.
-extern "C" void cpp_createWater(float level)
+extern "C" void ogre_createWater(float level)
 {
     // Create a plane aligned with the xy-plane.
     MeshManager::getSingleton().createPlane("water",
@@ -362,7 +400,7 @@ public:
 String LASTNAME;
 
 // Load the contents of a mesh
-extern "C" void cpp_createMesh(
+extern "C" void ogre_createMesh(
 		char* name,		// Name of the mesh
 		int32_t numVerts,	// Number of vertices
 		float* vertices,	// Vertex list
@@ -522,7 +560,7 @@ extern "C" void cpp_createMesh(
   msh->_setBoundingSphereRadius(radius);
 }
 
-extern "C" void cpp_createMaterial(char *name,	    // Name to give
+extern "C" void ogre_createMaterial(char *name,	    // Name to give
 						    // resource
 
 				   float *ambient,  // Ambient RBG
@@ -568,20 +606,20 @@ extern "C" void cpp_createMaterial(char *name,	    // Name to give
       LASTNAME = material->getName();
 }
 
-extern "C" SceneNode *cpp_getDetachedNode()
+extern "C" SceneNode *ogre_getDetachedNode()
 {
   SceneNode *node = root->createChildSceneNode();
   root->removeChild(node);
   return node;
 }
 
-extern "C" SceneNode* cpp_createNode(
+extern "C" SceneNode* ogre_createNode(
 		char *name,
 		float *trafo,
 		SceneNode *parent,
 		int32_t noRot)
 {
-  //std::cout << "cpp_createNode(" << name << ")";
+  //std::cout << "ogre_createNode(" << name << ")";
   SceneNode *node = parent->createChildSceneNode(name);
   //std::cout << " ... done\n";
 
@@ -613,7 +651,7 @@ extern "C" SceneNode* cpp_createNode(
 /* Code currently not in use
 
 // We need this later for animated meshes. Boy will this be a mess.
-extern "C" void* cpp_setupSkeleton(char* name)
+extern "C" void* ogre_setupSkeleton(char* name)
 {
   SkeletonPtr skel = SkeletonManager::getSingleton().create(
     name, "Closet", true);
@@ -627,7 +665,7 @@ extern "C" void* cpp_setupSkeleton(char* name)
 }
 
 // Use this later when loading textures directly from NIF files
-extern "C" void cpp_createTexture(char* name, uint32_t width, uint32_t height)
+extern "C" void ogre_createTexture(char* name, uint32_t width, uint32_t height)
 {
   TexturePtr texture = TextureManager::getSingleton().createManual(
       name, 		// name
@@ -671,7 +709,7 @@ extern "C" void cpp_createTexture(char* name, uint32_t width, uint32_t height)
   material->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 }
 
-extern "C" void *cpp_insertBone(char* name, void* rootBone, int32_t index)
+extern "C" void *ogre_insertBone(char* name, void* rootBone, int32_t index)
 {
   return (void*) ( ((Bone*)rootBone)->createChild(index) );
 }

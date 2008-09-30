@@ -28,7 +28,7 @@ ogre_cpp=ogre framelistener interface overlay bsaarchive
 avcodec_cpp=avcodec
 
 # Bullet cpp files
-bullet_cpp=bullet
+bullet_cpp=bullet player
 
 #### No modifications should be required below this line. ####
 

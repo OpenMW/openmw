@@ -27,6 +27,7 @@ import core.resource;
 import core.config;
 
 import ogre.bindings;
+import bullet.bindings;
 import util.uniquename;
 import std.stdio;
 
@@ -44,7 +45,8 @@ class OgreException : Exception
 
 // Place a mesh in the 3D scene graph, at the given
 // location/scale. Returns a node pointer to the inserted object.
-NodePtr placeObject(MeshIndex mesh, Placement *pos, float scale)
+NodePtr placeObject(MeshIndex mesh, Placement *pos, float scale,
+                    bool collide)
 {
   // Get a scene node for this object. mesh.getNode() will either load
   // it from file or BSA archive, or give us a handle if it is already
@@ -52,22 +54,35 @@ NodePtr placeObject(MeshIndex mesh, Placement *pos, float scale)
 
   // This must be called BEFORE UniqueName below, because it might
   // possibly use UniqueName itself and overwrite the data
-  // there. (That was a fun bug to track down...)
+  // there. (That was a fun bug to track down...) Calling getNode()
+  // will load the mesh if it is not already loaded.
   NodePtr node = mesh.getNode();
 
-  // Let us insert a copy
+  // First, convert the Morrowind rotation to a quaternion
+  float[4] quat;
+  ogre_mwToQuaternion(pos.rotation.ptr, quat.ptr);
+
+  // Insert a mesh copy into Ogre.
   char[] name = UniqueName(mesh.getName);
-  return cpp_insertNode(node, name.ptr, pos, scale);
+  node = ogre_insertNode(node, name.ptr, pos.position.ptr,
+                         quat.ptr, scale);
+
+  // Insert a collision shape too, if the mesh has one.
+  if(collide && mesh.shape !is null)
+    bullet_insertStatic(mesh.shape, pos.position.ptr,
+                        quat.ptr, scale);
+
+  return node;
 }
 
 NodePtr attachLight(NodePtr parent, Color c, float radius)
 {
-  return cpp_attachLight(UniqueName("_light").ptr, parent,
+  return ogre_attachLight(UniqueName("_light").ptr, parent,
 			 c.red/255.0, c.green/255.0, c.blue/255.0,
 			 radius);
 }
 
-// If 'true' then we must call cpp_cleanup() on exit.
+// If 'true' then we must call ogre_cleanup() on exit.
 bool ogreSetup = false;
 
 // Make sure we clean up
@@ -91,22 +106,22 @@ void setupOgre()
 
   // Later we will send more config info from core.config along with
   // this function
-  if(cpp_configure(config.finalOgreConfig, toStringz(plugincfg)))
+  if(ogre_configure(config.finalOgreConfig, toStringz(plugincfg)))
     OgreException("Configuration abort");
 
-  cpp_initWindow();
+  ogre_initWindow();
 
   // We set up the scene manager in a separate function, since we
   // might have to do that for every new cell later on, and handle
   // exterior cells differently, etc.
-  cpp_makeScene();
+  ogre_makeScene();
 
   ogreSetup = true;
 }
 
 void setAmbient(Color amb, Color sun, Color fog, float density)
 {
-  cpp_setAmbient(amb.red/255.0, amb.green/255.0, amb.blue/255.0,
+  ogre_setAmbient(amb.red/255.0, amb.green/255.0, amb.blue/255.0,
 		 sun.red/255.0, sun.green/255.0, sun.blue/255.0);
 
   // Calculate fog distance
@@ -114,7 +129,7 @@ void setAmbient(Color amb, Color sun, Color fog, float density)
   float fhigh = 4500 + 9000*(1-density);
   float flow = 200 + 2000*(1-density);
 
-  cpp_setFog(fog.red/255.0, fog.green/255.0, fog.blue/255.0, 200, fhigh);
+  ogre_setFog(fog.red/255.0, fog.green/255.0, fog.blue/255.0, 200, fhigh);
 }
 
 // Jump into the OGRE rendering loop. Everything should be loaded and
@@ -122,7 +137,7 @@ void setAmbient(Color amb, Color sun, Color fog, float density)
 void startRendering()
 {
   // Kick OGRE into gear
-  cpp_startRendering();
+  ogre_startRendering();
 }
 
 // Cleans up after OGRE. Resets things like screen resolution and
@@ -130,7 +145,7 @@ void startRendering()
 void cleanupOgre()
 {
   if(ogreSetup)
-    cpp_cleanup();
+    ogre_cleanup();
 
   ogreSetup = false;
 }
@@ -143,3 +158,4 @@ align(1) struct Placement
   float[3] position;
   float[3] rotation;
 }
+static assert(Placement.sizeof == 4*6);

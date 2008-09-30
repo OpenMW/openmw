@@ -23,7 +23,7 @@
 
 // This file inserts an archive manager for .bsa files into the ogre
 // resource loading system. It uses callbacks to D to interact with
-// the d-based bsa handling code. The D bindings are in
+// the D-based bsa handling code. The D bindings are in
 // core/resource.d.
 
 // Callbacks to D code
@@ -49,17 +49,19 @@ public:
   bool isCaseSensitive(void) const { return false; }
 
   // The archives are already loaded in D code, and they are never
-  // unloaded.
+  // unloaded. Just ignore these.
   void load() {}
   void unload() {}
 
+  // Open a file in the archive. We delegate the function to D-code.
   DataStreamPtr open(const String& filename) const
   {
     //std::cout << "open(" << filename << ")\n";
     void *ptr;
     uint32_t size;
 
-    // Open the file
+    // Open the file. The BSA archives are memory mapped, D code
+    // returns a pointer and a file size.
     d_bsaOpenFile(filename.c_str(), &ptr, &size);
 
     return DataStreamPtr(new MemoryDataStream(ptr, size));
@@ -93,7 +95,7 @@ public:
   }
 
   // Gets called once for each of the ogre formats, *.program,
-  // *.material etc. We can ignore that.
+  // *.material etc. We can ignore this.
   FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
                                bool dirs = false)
   {

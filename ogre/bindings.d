@@ -49,49 +49,58 @@ extern(C):
 
 // Do engine configuration. Returns 0 if we should continue, 1 if
 // not.
-int cpp_configure(int showConfig, // Do we show the config dialogue?
-                  char *plugincfg // Name of 'plugin.cfg' file
-                  );
+int ogre_configure(int showConfig, // Do we show the config dialogue?
+                   char *plugincfg // Name of 'plugin.cfg' file
+                   );
 
 // Sets up the window
-void cpp_initWindow();
+void ogre_initWindow();
 
 // Set up an empty scene.
-void cpp_makeScene();
+void ogre_makeScene();
 
 // Set the ambient light and "sunlight"
-void cpp_setAmbient(float r, float g, float b,
+void ogre_setAmbient(float r, float g, float b,
 		    float rs, float gs, float bs);
 
 // Set fog color and view distance
-void cpp_setFog(float rf, float gf, float bf,
+void ogre_setFog(float rf, float gf, float bf,
 		float flow, float fhigh);
 
 // Create a simple sky dome
-int cpp_makeSky();
+int ogre_makeSky();
 
 // Enter main rendering loop
-void cpp_startRendering();
+void ogre_startRendering();
 
 // Cleans up after ogre
-void cpp_cleanup();
+void ogre_cleanup();
 
 // Gets a child SceneNode from the root node, then detatches it to
 // hide it from view. Used for creating the "template" node associated
 // with a NIF mesh.
-NodePtr cpp_getDetachedNode();
+NodePtr ogre_getDetachedNode();
+
+// Convert a Morrowind rotation (3 floats) to a quaternion (4 floats)
+void ogre_mwToQuaternion(float *mw, float *quat);
 
 // Create a copy of the given scene node, with the given coordinates
-// and rotation.
-NodePtr cpp_insertNode(NodePtr base, char* name,
-		       Placement *pos, float scale);
+// and rotation (as a quaternion.)
+NodePtr ogre_insertNode(NodePtr base, char* name,
+                        float *pos, float *quat, float scale);
+
+// Get the world transformation of a node, returned as a translation
+// and a matrix. The matrix includes both rotation and scaling. The
+// buffers given must be large enough to store the result (3 and 9
+// floats respectively.)
+void ogre_getWorldTransform(NodePtr node, float *trans, float *matrix);
 
 // Create a (very crappy looking) plane to simulate the water level
-void cpp_createWater(float level);
+void ogre_createWater(float level);
 
 // Creates a scene node as a child of 'parent', then translates and
 // rotates it according to the data in 'trafo'.
-NodePtr cpp_createNode(
+NodePtr ogre_createNode(
 	     char *name, 		// Name to give the node
 	     Transformation *trafo,	// Transformation
 	     NodePtr parent,		// Parent node
@@ -99,23 +108,23 @@ NodePtr cpp_createNode(
 
 // Create a light with the given diffuse color. Attach it to SceneNode
 // 'parent'.
-NodePtr cpp_attachLight(char* name, NodePtr parent,
-			float r, float g, float b,
-			float radius);
+NodePtr ogre_attachLight(char* name, NodePtr parent,
+                         float r, float g, float b,
+                         float radius);
 
 // Create the specified material
-void cpp_createMaterial(char *name,	// Name to give resource
-			float *ambient, // Ambient RBG value
-			float *diffuse,
-			float *specular,
-			float *emissive,// Self illumination
-			float glossiness,// Same as shininess?
-			float alpha,    // Use this in all alpha values?
-			char *texture); // Texture name
+void ogre_createMaterial(char *name,	// Name to give resource
+                         float *ambient, // Ambient RBG value
+                         float *diffuse,
+                         float *specular,
+                         float *emissive,// Self illumination
+                         float glossiness,// Same as shininess?
+                         float alpha,    // Use this in all alpha values?
+                         char *texture); // Texture name
 
 // Creates a mesh and gives it a bounding box. Also creates an entity
 // and attached it to the given SceneNode 'owner'.
-void cpp_createMesh(
+void ogre_createMesh(
 		char* name,		// Name of the mesh
 		int numVerts,		// Number of vertices
 		float* vertices,	// Vertex list
@@ -135,21 +144,18 @@ void cpp_createMesh(
 		);
 
 // Toggle fullscreen mode
-void cpp_toggleFullscreen();
+void ogre_toggleFullscreen();
 
 // Save a screen shot to the given file name
-void cpp_screenshot(char *filename);
+void ogre_screenshot(char *filename);
 
 // Camera control and information
-void cpp_rotateCamera(float x, float y);
-void cpp_moveCamera(float x, float y, float z);
-void cpp_setCameraRotation(float r1, float r2, float r3);
-void cpp_getCameraPos(float *x, float *y, float *z);
-void cpp_getCameraOrientation(float *fx, float *fy, float *fz, float *ux, float *uy, float *uz);
-void cpp_moveCameraRel(float x, float y, float z);
+void ogre_rotateCamera(float x, float y);
+void ogre_moveCamera(float x, float y, float z);
+void ogre_setCameraRotation(float r1, float r2, float r3);
+void ogre_getCameraPos(float *x, float *y, float *z);
+void ogre_getCameraOrientation(float *fx, float *fy, float *fz, float *ux, float *uy, float *uz);
+void ogre_moveCameraRel(float x, float y, float z);
 
 // Do some debug action. Check the menu for today's specials!
-void cpp_debug(int i);
-
-// Insert a 100x100x100 axis-aligned cube at x,y,z
-void cpp_drawBox(float x, float y, float z);
+void ogre_debug(int i);

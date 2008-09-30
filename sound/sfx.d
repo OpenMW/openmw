@@ -62,8 +62,8 @@ struct SoundFile
     bID = 0;
 
     ubyte[] outData;
-    AVFile fileHandle = cpp_openAVFile(toStringz(file));
-    AVAudio audioHandle = cpp_getAVAudioStream(fileHandle, 0);
+    AVFile fileHandle = avc_openAVFile(toStringz(file));
+    AVAudio audioHandle = avc_getAVAudioStream(fileHandle, 0);
 
     if(!fileHandle)
       {
@@ -77,7 +77,7 @@ struct SoundFile
       }
 
     int ch, bits, rate;
-    if(cpp_getAVAudioInfo(audioHandle, &rate, &ch, &bits) != 0)
+    if(avc_getAVAudioInfo(audioHandle, &rate, &ch, &bits) != 0)
       {
         writefln("Unable to get info for sound %s", file);
         goto errclose;
@@ -110,7 +110,7 @@ struct SoundFile
         // whole sound in one or two iterations, but not allocate too much
         // memory in case its short
         outData.length = outData.length+8192;
-        int length = cpp_getAVAudioData(audioHandle, outData.ptr+total, outData.length-total);
+        int length = avc_getAVAudioData(audioHandle, outData.ptr+total, outData.length-total);
         total += length;
       }
     while(total == outData.length);
@@ -129,7 +129,7 @@ struct SoundFile
       }
 
   errclose:
-    if(fileHandle) cpp_closeAVFile(fileHandle);
+    if(fileHandle) avc_closeAVFile(fileHandle);
     fileHandle = null;
     audioHandle = null;
   }

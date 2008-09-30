@@ -53,11 +53,11 @@ struct MyFile {
 };
 
 // TODO:
-// extern "C" MyFile::MyStream *cpp_getAVVideoStream(MyFile *file, int streamnum);
-// extern "C" int cpp_getAVVideoInfo(MyFile::MyStream *stream, float *fps, int *width, int * height);
-// extern "C" int cpp_getAVVideoData(MyFile::MyStream *stream, char *data, int length);
+// extern "C" MyFile::MyStream *avc_getAVVideoStream(MyFile *file, int streamnum);
+// extern "C" int avc_getAVVideoInfo(MyFile::MyStream *stream, float *fps, int *width, int * height);
+// extern "C" int avc_getAVVideoData(MyFile::MyStream *stream, char *data, int length);
 
-extern "C" MyFile *cpp_openAVFile(char *fname)
+extern "C" MyFile *avc_openAVFile(char *fname)
 {
     static bool done = false;
     if(!done) { av_register_all();
@@ -75,7 +75,7 @@ extern "C" MyFile *cpp_openAVFile(char *fname)
     return NULL;
 }
 
-extern "C" void cpp_closeAVFile(MyFile *file)
+extern "C" void avc_closeAVFile(MyFile *file)
 {
     if(!file) return;
 
@@ -92,7 +92,7 @@ extern "C" void cpp_closeAVFile(MyFile *file)
     delete file;
 }
 
-extern "C" MyFile::MyStream *cpp_getAVAudioStream(MyFile *file, int streamnum)
+extern "C" MyFile::MyStream *avc_getAVAudioStream(MyFile *file, int streamnum)
 {
     if(!file) return NULL;
     for(unsigned int i = 0;i < file->FmtCtx->nb_streams;i++)
@@ -122,7 +122,7 @@ extern "C" MyFile::MyStream *cpp_getAVAudioStream(MyFile *file, int streamnum)
     return NULL;
 }
 
-extern "C" int cpp_getAVAudioInfo(MyFile::MyStream *stream,
+extern "C" int avc_getAVAudioInfo(MyFile::MyStream *stream,
                                   int *rate, int *channels, int *bits)
 {
     if(!stream) return 1;
@@ -159,7 +159,7 @@ static void getNextPacket(MyFile *file, int streamidx)
     }
 }
 
-extern "C" int cpp_getAVAudioData(MyFile::MyStream *stream, char *data, int length)
+extern "C" int avc_getAVAudioData(MyFile::MyStream *stream, char *data, int length)
 {
     if(!stream) return 0;
 

@@ -101,13 +101,13 @@ InputListener mInput;
 
 // Functions called from D during event handling
 
-extern "C" int32_t cpp_isPressed(int32_t keysym)
+extern "C" int32_t ois_isPressed(int32_t keysym)
 {
   return mKeyboard->isKeyDown((OIS::KeyCode)keysym);
 }
 
 // Dump screen contents to file
-extern "C" void cpp_screenshot(char* filename)
+extern "C" void ogre_screenshot(char* filename)
 {
   mWindow->writeContentsToFile(filename);
 
@@ -117,14 +117,14 @@ extern "C" void cpp_screenshot(char* filename)
 }
 
 // Rotate camera as result of mouse movement
-extern "C" void cpp_rotateCamera(float x, float y)
+extern "C" void ogre_rotateCamera(float x, float y)
 {
   mCamera->yaw(Degree(-x));
   mCamera->pitch(Degree(-y));
 }
 
 // Get current camera position
-extern "C" void cpp_getCameraPos(float *x, float *y, float *z)
+extern "C" void ogre_getCameraPos(float *x, float *y, float *z)
 {
   Vector3 pos = mCamera->getPosition();
   *x = pos[0];
@@ -134,7 +134,7 @@ extern "C" void cpp_getCameraPos(float *x, float *y, float *z)
 
 // Get current camera orientation, in the form of 'front' and 'up'
 // vectors.
-extern "C" void cpp_getCameraOrientation(float *fx, float *fy, float *fz,
+extern "C" void ogre_getCameraOrientation(float *fx, float *fy, float *fz,
                                          float *ux, float *uy, float *uz)
 {
   Vector3 front = mCamera->getDirection();
@@ -148,7 +148,7 @@ extern "C" void cpp_getCameraOrientation(float *fx, float *fy, float *fz,
 }
 
 // Move camera
-extern "C" void cpp_moveCamera(float x, float y, float z)
+extern "C" void ogre_moveCamera(float x, float y, float z)
 {
   // Transforms Morrowind coordinates to OGRE coordinates. The camera
   // is not affected by the rotation of the root node, so we must
@@ -157,7 +157,7 @@ extern "C" void cpp_moveCamera(float x, float y, float z)
 }
 
 // Rotate camera using Morrowind rotation specifiers
-extern "C" void cpp_setCameraRotation(float r1, float r2, float r3)
+extern "C" void ogre_setCameraRotation(float r1, float r2, float r3)
 {
   // TODO: This translation is probably not correct, but for now I
   // have no reference point. Fix it later when we teleport from one
@@ -175,7 +175,7 @@ extern "C" void cpp_setCameraRotation(float r1, float r2, float r3)
 }
 
 // Move camera relative to its own axis set.
-extern "C" void cpp_moveCameraRel(float x, float y, float z)
+extern "C" void ogre_moveCameraRel(float x, float y, float z)
 {
   mCamera->moveRelative(Vector3(x,y,z));
 }

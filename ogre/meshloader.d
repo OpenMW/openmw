@@ -32,6 +32,8 @@ import nif.record;
 import core.resource;
 import ogre.bindings;
 
+import bullet.bindings;
+
 import util.uniquename;
 
 /*
@@ -52,15 +54,15 @@ struct MeshLoader
   // Not sure how to handle the bounding box, just ignore it for now.
 
   char[] baseName; // NIF file name. Used in scene node names etc. so
-		   // that we can easier identify where they came
-		   // from.
+		   // that we can identify where they came from in
+		   // case of error messages.
 
   // Load a NIF mesh. Assumes nifMesh is already opened. This creates
   // a "template" scene node containing this mesh, and removes it from
   // the main scene. This node can later be "cloned" so that multiple
   // instances of the object can be inserted into the world without
   // inserting the mesh more than once.
-  NodePtr loadMesh(char[] name)
+  void loadMesh(char[] name, out NodePtr base, out BulletShape shape)
   {
     baseName = name;
 
@@ -72,15 +74,18 @@ struct MeshLoader
 	// TODO: Figure out what to do in this case, we should
 	// probably throw.
         writefln("NIF '%s' IS NOT A MESH", name);
-	return null;
+	return;
       }
 
     // Get a fresh SceneNode and detatch it from the root. We use this
     // as the base for our mesh.
-    NodePtr base = cpp_getDetachedNode();
+    base = ogre_getDetachedNode();
 
     // Recursively insert nodes (don't rotate the first node)
     insertNode(n, base, true);
+
+    // Get the final shape, if any
+    shape = bullet_getFinalShape();
 
     return base;
   }
@@ -99,7 +104,7 @@ struct MeshLoader
     // problem, I don't know when to do this and when not to. Neither
     // is always right. Update: It looks like we should always set
     // noRot to false in exterior cells.
-    NodePtr node = cpp_createNode(UniqueName(data.name).ptr, &data.trafo,
+    NodePtr node = ogre_createNode(UniqueName(data.name).ptr, &data.trafo,
 				  parent, cast(int)noRot);
 
     // Handle any general properties here
@@ -206,7 +211,7 @@ struct MeshLoader
 
     // Create the material
     if(material.length)
-      cpp_createMaterial(material.ptr, mp.ambient.array.ptr, mp.diffuse.array.ptr,
+      ogre_createMaterial(material.ptr, mp.ambient.array.ptr, mp.diffuse.array.ptr,
 			 mp.specular.array.ptr, mp.emissive.array.ptr,
 			 mp.glossiness, mp.alpha, texturePtr);
     else if(texturePtr)
@@ -218,7 +223,7 @@ struct MeshLoader
 	zero[] = 0.0;
 	one[] = 1.0;
 
-	cpp_createMaterial(newName.ptr, one.ptr, one.ptr, zero.ptr, zero.ptr, 0.0, 1.0,
+	ogre_createMaterial(newName.ptr, one.ptr, one.ptr, zero.ptr, zero.ptr, 0.0, 1.0,
 			   texturePtr);
       }
 
@@ -258,7 +263,23 @@ struct MeshLoader
 	    if( vertices[i+2] > maxZ) maxZ = vertices[i+2];
 	  }
 
-	cpp_createMesh(newName.ptr, vertices.length, vertices.ptr,
+        // TODO: Get the node world transformation, needed to set up
+        // the collision shape properly.
+        float[3] trans;
+        float[9] matrix;
+        ogre_getWorldTransform(node, trans.ptr, matrix.ptr);
+
+        // Create a bullet collision shape from the trimesh, if there
+        // are any triangles present. Pass along the world
+        // transformation as well, since we must transform the trimesh
+        // data manually.
+        if(facesPtr != null)
+          bullet_createTriShape(triangles.length, facesPtr,
+                                vertices.length, vertices.ptr,
+                                trans.ptr, matrix.ptr);
+
+        // Create the ogre mesh, associate it with the node
+	ogre_createMesh(newName.ptr, vertices.length, vertices.ptr,
 		       normalsPtr, colorsPtr, uvsPtr, triangles.length, facesPtr,
 		       radius, material.ptr, minX, minY, minZ, maxX, maxY, maxZ,
 		       node);
@@ -267,19 +288,19 @@ struct MeshLoader
 }
 /*
     // Create a skeleton and get the root bone (index 0)
-    BonePtr bone = cpp_setupSkeleton(name);
+    BonePtr bone = ogre_setupSkeleton(name);
 
     // Reset the bone index. The next bone to be created has index 1.
     boneIndex = 1;
     // Create a mesh and assign the skeleton to it
-    MeshPtr mesh = cpp_setupMesh(name);
+    MeshPtr mesh = ogre_setupMesh(name);
 
     // Loop through the nodes, creating submeshes, materials and
     // skeleton bones in the process.
     handleNode(node, bone, mesh);
 
   // Create the "template" entity
-  EntityPtr entity = cpp_createEntity(name);
+  EntityPtr entity = ogre_createEntity(name);
 
   // Loop through once again, this time to set the right
   // transformations on the entity's SkeletonInstance. The order of
@@ -291,20 +312,20 @@ struct MeshLoader
   if(lastBone != boneIndex) writefln("WARNING: Bone number doesn't match");
 
   if(!hasBBox)
-    cpp_setMeshBoundingBox(mesh, minX, minY, minZ, maxX, maxY, maxZ);
+    ogre_setMeshBoundingBox(mesh, minX, minY, minZ, maxX, maxY, maxZ);
 
   return entity;
 }
 void handleNode(Node node, BonePtr root, MeshPtr mesh)
 {
   // Insert a new bone for this node
-  BonePtr bone = cpp_insertBone(node.name, root, boneIndex++);
+  BonePtr bone = ogre_insertBone(node.name, root, boneIndex++);
 
 }
 
 void transformBones(Node node, EntityPtr entity)
 {
-  cpp_transformBone(entity, &node.trafo, boneIndex++);
+  ogre_transformBone(entity, &node.trafo, boneIndex++);
 
   NiNode n = cast(NiNode)node;
   if(n !is null)

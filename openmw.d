@@ -207,13 +207,14 @@ void main(char[][] args)
     }
 	    
   // Simple safety hack
-  NodePtr putObject(MeshIndex m, Placement *pos, float scale)
+  NodePtr putObject(MeshIndex m, Placement *pos, float scale,
+                    bool collide=false)
     {
       if(m == null)
 	writefln("WARNING: CANNOT PUT NULL OBJECT");
       else if(m.isEmpty)
 	writefln("WARNING: CANNOT INSERT EMPTY MESH '%s'", m.getName);
-      else return placeObject(m, pos, scale);
+      else return placeObject(m, pos, scale, collide);
       return null;
     }
 
@@ -235,7 +236,7 @@ void main(char[][] args)
 
 	  // Not all interior cells have water
 	  if(cd.inCell.flags & CellFlags.HasWater)
-	    cpp_createWater(cd.water);
+	    ogre_createWater(cd.water);
 	}
       else
 	{
@@ -246,15 +247,15 @@ void main(char[][] args)
 	  setAmbient(c, c, c, 0);
 
 	  // Put in the water
-	  cpp_createWater(cd.water);
+	  ogre_createWater(cd.water);
 
 	  // Create an ugly sky
-	  cpp_makeSky();
+	  ogre_makeSky();
 	}
 
       // Insert the meshes of statics into the scene
       foreach(ref LiveStatic ls; cd.statics)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, &ls.base.pos, ls.base.scale, true);
       // Inventory lights
       foreach(ref LiveLight ls; cd.lights)
 	{
@@ -277,7 +278,7 @@ void main(char[][] args)
       // Static lights
       foreach(ref LiveLight ls; cd.statLights)
 	{
-	  NodePtr n = putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	  NodePtr n = putObject(ls.m.model, &ls.base.pos, ls.base.scale, true);
 	  ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
           if(!noSound)
           {
@@ -303,7 +304,7 @@ void main(char[][] args)
       */
       // Containers
       foreach(ref LiveContainer ls; cd.containers)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, &ls.base.pos, ls.base.scale, true);
       // Doors
       foreach(ref LiveDoor ls; cd.doors)
 	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
@@ -334,7 +335,7 @@ void main(char[][] args)
       // Tools
       foreach(ref LiveTool ls; cd.tools)
 	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
-      // Creatures (these often look like shit 
+      // Creatures (not displayed very well yet)
       foreach(ref LiveCreature ls; cd.creatures)
 	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
 

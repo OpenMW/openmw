@@ -49,11 +49,11 @@ On the near-future TODO list:
 
 - full support for localized versions (with character recoding)
 - support for Mac
-- collision detection + walking & fall physics
+- collision detection + walk & fall physics
 - displaying creatures correcty, animation
 - rendering NPCs
 - rendering outdoor scenes (exterior cells)
-- choosing a GUI/HUD system that playes well with OGRE
+- choosing a GUI/HUD system that plays well with OGRE
 
 
 
@@ -62,7 +62,7 @@ Installation
 ============
 
 Currently supported platforms are Windows, Linux and FreeBSD. Most
-testing has been on Windows XP and Ubuntu 8.04.
+testing is on Ubuntu 8.04 and Windows XP Professional (in that order).
 
 For instructions, see one of the following:
 
@@ -70,7 +70,9 @@ README-win32.txt    - instructions for binary Windows release
 COMPILE-win32.txt   - instructions for building source on Windows
 COMPILE-linux.tx    - instructions for building source on Linux / Unix
 
-Linux 64 bit is known NOT to work, because of compiler deficiencies.
+Linux 64 bit is known NOT to work, because of current compiler
+deficiencies. This will hopefully be sorted out at some point, but
+it's not a bug in the OpenMW code.
 
 
 
@@ -114,6 +116,15 @@ Thanks goes out to:
 
 Changelog:
 ==========
+
+0.5 (WIP)
+
+- working on collision detection with Bullet
+- working on fixing sound issues for windows (running out of sound
+  resources, music playback doesn't good)
+- added build files for CMake (with CMakeD) and Code::Blocks (neither
+  are tested yet)
+- various minor changes and updates
 
 0.4 (2008 aug. 30) - latest release
 

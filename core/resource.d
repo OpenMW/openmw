@@ -35,6 +35,8 @@ import util.random;
 
 import bsa.bsafile;
 
+import bullet.bindings;
+
 import core.memory;
 import core.config;
 
@@ -361,7 +363,7 @@ struct ResourceManager
 
       // Load and insert nif
       // TODO: Might add BSA name to the handle name, for clarity
-      mi.node = meshLoader.loadMesh(mi.name);
+      meshLoader.loadMesh(mi.name, mi.node, mi.shape);
 
       // TODO: We could clear the BSA memory mapping here to free some
       // mem
@@ -408,6 +410,9 @@ struct MeshResource
   NodePtr node;
 
   public:
+
+  // Bullet collision shape. Can be null.
+  BulletShape shape;
 
   NodePtr getNode()
   in
