@@ -232,8 +232,6 @@ bool recoverFromPenetration()
                                           g_dynamicsWorld->getDispatchInfo(),
                                           g_dispatcher);
 
-  g_playerPosition = g_playerObject->getWorldTransform().getOrigin();
-	
   btScalar maxPen = 0.0;
   for (int i = 0; i < g_pairCache->getNumOverlappingPairs(); i++)
     {
@@ -285,41 +283,56 @@ bool recoverFromPenetration()
 // main function is responsible for player movement.
 void playerStepCallback(btDynamicsWorld* dynamicsWorld, btScalar timeStep)
 {
-  // Before moving, recover from current penetrations
-
-  int numPenetrationLoops = 0;
-  g_touchingContact = false;
-  while (recoverFromPenetration())
-    {
-      numPenetrationLoops++;
-      g_touchingContact = true;
-
-      // Make sure we don't stay here indefinitely
-      if (numPenetrationLoops > 4)
-        break;
-    }
-
-  // Get the player position
-  btTransform xform;
-  xform = g_playerObject->getWorldTransform ();
-  g_playerPosition = xform.getOrigin();
-
-  // Next, do the walk.
-
-  // TODO: Walking direction should be set from D code, and the final
-  // position should be retrieved back from C++. The walking direction
-  // always reflects the intentional action of an agent (ie. the
-  // player or the AI), but the end result comes from collision and
-  // physics.
-
+  // The walking direction is set from D code each frame, and the
+  // final player position is read back from D code after the
+  // simulation.
   btVector3 walkStep = g_walkDirection * timeStep;
 
-  stepUp();
-  stepForward(walkStep);
-  stepDown(timeStep);
+  // Get the player position
+  g_playerPosition = g_playerObject->getWorldTransform().getOrigin();
 
-  // Move the player (but keep rotation)
-  xform = g_playerObject->getWorldTransform ();
+  if(g_physMode == PHYS_GHOST)
+    {
+      // Ghost mode - just move, no collision
+      g_playerPosition += walkStep;
+    }
+  else
+    {
+      // Collision detection is active
+
+      // Before moving, recover from current penetrations
+      int numPenetrationLoops = 0;
+      g_touchingContact = false;
+      while (recoverFromPenetration())
+        {
+          numPenetrationLoops++;
+          g_touchingContact = true;
+
+          // Make sure we don't stay here indefinitely
+          if (numPenetrationLoops > 4)
+            break;
+        }
+
+      // recoverFromPenetration updates g_playerPosition and the
+      // collision mesh, so they are still in sync at this point
+
+      // Next, do the walk. The following functions only updates
+      // g_playerPosition, they do not move the collision object.
+
+      if(g_physMode == PHYS_WALK)
+        {
+          stepUp();
+          stepForward(walkStep);
+          stepDown(timeStep);
+        }
+      else if(g_physMode == PHYS_FLY)
+        stepForward(walkStep);
+      else
+        cout << "WARNING: Unknown physics mode " << g_physMode << "!\n";
+    }
+
+  // Move the player collision mesh
+  btTransform xform = g_playerObject->getWorldTransform ();
   xform.setOrigin (g_playerPosition);
   g_playerObject->setWorldTransform (xform);
 }

@@ -65,6 +65,8 @@ enum Keys
     // These will not be part of the finished product
     Fullscreen,
     ToggleBattleMusic,
+    PhysMode, // Toggle physics mode between walking, flying and ghost
+    Nighteye, // Full ambient lighting
     Debug,
 
     // Misc
@@ -248,6 +250,8 @@ struct KeyBindings
 
     keyToString[Keys.Fullscreen] = "Toggle Fullscreen Mode";
     keyToString[Keys.ToggleBattleMusic] = "Toggle Battle Music";
+    keyToString[Keys.PhysMode] = "Toggle Physics Mode";
+    keyToString[Keys.Nighteye] = "Toggle Nighteye";
     keyToString[Keys.Debug] = "OGRE Test Action";
 
     keyToString[Keys.Pause] = "Pause";

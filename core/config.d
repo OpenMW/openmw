@@ -240,6 +240,8 @@ struct ConfigManager
         bind(Keys.Fullscreen, KC.F);
 
 	bind(Keys.ToggleBattleMusic, KC.SPACE);
+        bind(Keys.PhysMode, KC.T);
+        bind(Keys.Nighteye, KC.N);
         bind(Keys.Debug, KC.G);
 
 	bind(Keys.Pause, KC.PAUSE, KC.P);

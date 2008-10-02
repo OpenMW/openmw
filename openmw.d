@@ -308,9 +308,9 @@ void main(char[][] args)
       // Doors
       foreach(ref LiveDoor ls; cd.doors)
 	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
-      // Activators
+      // Activators (including beds etc)
       foreach(ref LiveActivator ls; cd.activators)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, &ls.base.pos, ls.base.scale, true);
       // Potions
       foreach(ref LivePotion ls; cd.potions)
 	putObject(ls.m.model, &ls.base.pos, ls.base.scale);

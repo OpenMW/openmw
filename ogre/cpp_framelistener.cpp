@@ -121,6 +121,8 @@ extern "C" void ogre_rotateCamera(float x, float y)
 {
   mCamera->yaw(Degree(-x));
   mCamera->pitch(Degree(-y));
+
+  //g_light->setDirection(mCamera->getDirection());
 }
 
 // Get current camera position
@@ -154,6 +156,8 @@ extern "C" void ogre_moveCamera(float x, float y, float z)
   // is not affected by the rotation of the root node, so we must
   // transform this manually.
   mCamera->setPosition(Vector3(x,z,-y));
+
+  //g_light->setPosition(mCamera->getPosition());
 }
 
 // Rotate camera using Morrowind rotation specifiers

@@ -42,6 +42,14 @@ SceneManager *mSceneMgr;
 Camera *mCamera;
 Viewport *vp;
 
+ColourValue g_ambient;
+int g_lightOn = 0;
+
+/*
+int g_spotOn = 0;
+Light *g_light;
+*/
+
 OIS::InputManager *mInputManager;
 OIS::Mouse *mMouse;
 OIS::Keyboard *mKeyboard;

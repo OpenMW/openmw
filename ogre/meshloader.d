@@ -102,8 +102,8 @@ struct MeshLoader
     // names later, in order to attach arms and legs on NPCs
     // etc. Always ignore transformation of the first node? This is a
     // problem, I don't know when to do this and when not to. Neither
-    // is always right. Update: It looks like we should always set
-    // noRot to false in exterior cells.
+    // is always right. Update: I originally thought noRot should be
+    // false for exteriors and true for interiors, but this isn't so.
     NodePtr node = ogre_createNode(UniqueName(data.name).ptr, &data.trafo,
 				  parent, cast(int)noRot);
 

@@ -49,10 +49,9 @@ abstract class Controlled : Extra
 // Record with name and controller/extra data link
 abstract class Named : Controlled
 {
+  // Name of this object. This is used to refer to the object from .kf
+  // files.
   char[] name;
-
-  //Extra extra;
-  //Controller controller;
 
  override:
   char[] toString()
@@ -68,23 +67,8 @@ abstract class Named : Controlled
       //super.read(f);
       name = nifFile.getString();
       debug(verbose) writefln("Name: %s", name);
-      /*
-      debug(verbose) writef("Extra ");
-      getIndex(f);
-      debug(verbose) writef("Controller ");
-      getIndex(f);
-      */
       super.read();
     }
-
-  /*
-  void sortOut(Record[] list)
-    {
-      super.sortOut(list);
-      extra = lookup!(Extra)(list);
-      controller = lookup!(Controller)(list);
-    }
-  */
 }
 
 class NiSequenceStreamHelper : Named {}

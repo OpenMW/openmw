@@ -163,7 +163,7 @@ extern "C" void ogre_initWindow()
   std::cout << "ogre_initWindow finished\n";
 }
 
-// Make a scene, set the given ambient light
+// Make a scene
 extern "C" void ogre_makeScene()
 {
   // Get the SceneManager, in this case a generic one
@@ -198,6 +198,53 @@ extern "C" void ogre_makeScene()
   SceneNode *rt = mSceneMgr->getRootSceneNode();
   root = rt->createChildSceneNode();
   root->pitch(Degree(-90));
+
+  /*
+  g_light = mSceneMgr->createLight("carry");
+  g_light->setDiffuseColour(1,0.7,0.3);
+  g_light->setAttenuation(2000, 0, 0.008, 0);
+  */
+}
+
+/*
+// Toggle carryable light
+extern "C" void ogre_toggleCarryLight()
+{
+  if(g_spotOn == 0)
+    {
+      g_light->setVisible(true);
+      g_spotOn = 1;
+    }
+  else
+    {
+      g_light->setVisible(false);
+      g_spotOn = 0;
+    }
+}
+*/
+
+// Toggle ambient light
+extern "C" void ogre_toggleLight()
+{
+  if(g_lightOn == 0)
+    {
+      std::cout << "Turning the lights up\n";
+      ColourValue half = 0.7*g_ambient + 0.3*ColourValue(1,1,1);
+      mSceneMgr->setAmbientLight(half);
+      g_lightOn = 1;
+    }
+  else if(g_lightOn == 1)
+    {
+      std::cout << "Turning the lights to full\n";
+      g_lightOn = 2;
+      mSceneMgr->setAmbientLight(ColourValue(1,1,1));
+    }
+  else
+    {
+      std::cout << "Setting lights to normal\n";
+      g_lightOn = 0;
+      mSceneMgr->setAmbientLight(g_ambient);
+    }
 }
 
 // Create a sky dome. Currently disabled since we aren't including the
@@ -217,6 +264,7 @@ extern "C" Light* ogre_attachLight(char *name, SceneNode* base,
 
   // This seems to look reasonably ok.
   l->setAttenuation(3*radius, 0, 0, 12.0/(radius*radius));
+  //l->setAttenuation(5*radius, 0, 0, 8.0/(radius*radius));
 
   // base might be null, sometimes lights don't have meshes
   if(base) base->attachObject(l);
@@ -233,8 +281,8 @@ extern "C" void ogre_toggleFullscreen()
 extern "C" void ogre_setAmbient(float r, float g, float b, // Ambient light
 			       float rs, float gs, float bs) // "Sunlight"
 {
-  ColourValue c = ColourValue(r, g, b);
-  mSceneMgr->setAmbientLight(c);
+  g_ambient = ColourValue(r, g, b);
+  mSceneMgr->setAmbientLight(g_ambient);
 
   // Create a "sun" that shines light downwards. It doesn't look
   // completely right, but leave it for now.

@@ -147,6 +147,15 @@ class ShapeData : Record
       if(nifFile.getInt != 0)
 	{
 	  if(uvs == 0) nifFile.warn("Empty UV list");
+
+          // Only the 6 first bits are used as a count, the rest are
+          // (unknown) flags.
+          if(uvs > 0b111111)
+            {
+              nifFile.warn("UV count contains (unknown) flags");
+              uvs = uvs & 0b111111;
+            }
+
 	  uvlist = nifFile.getArraySize!(float)(uvs*verts*2);
 	}
       else if(uvs != 0) nifFile.warn("UV list was unexpectedly missing");
@@ -528,6 +537,7 @@ class NiTriShapeData : ShapeData
       debug(verbose) writefln("Number of faces: ", tris);
       if(tris)
 	{
+          // Must have three times as many vertices as triangles
 	  int cnt = nifFile.getIntIs(tris*3);
 	  triangles = nifFile.getArraySize!(short)(cnt);
 	}

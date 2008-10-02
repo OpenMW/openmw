@@ -31,6 +31,7 @@ Decrease SFX Volume=3
 Mute Sound=m
 Toggle Fullscreen Mode=f
 Toggle Battle Music=space
+Toggle Physics Mode=t
 OGRE Test Action=g
 Pause=pause,p
 Screen Shot=print_screen
@@ -41,3 +42,6 @@ Main Volume=0.7
 Music Volume=0.5
 SFX Volume=0.5
 Enable Music=yes
+
+[Game Files]
+GameFile[0]=Morrowind.esm

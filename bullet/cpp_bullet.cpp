@@ -64,6 +64,16 @@ btTriangleIndexVertexArray *g_currentMesh;
 btHashedOverlappingPairCache* g_pairCache;
 CustomOverlappingPairCallback *g_customPairCallback;
 
+// Three physics modes: walking (with gravity and collision), flying
+// (collision but no gravity) and ghost mode (fly through walls)
+enum
+  {
+    PHYS_WALK,
+    PHYS_FLY,
+    PHYS_GHOST
+  };
+int g_physMode;
+
 // Include the player physics
 #include "cpp_player.cpp"
 
@@ -181,8 +191,32 @@ extern "C" int32_t bullet_init()
   // Make sure this is zero at startup
   g_currentMesh = NULL;
 
+  // Start out walking
+  g_physMode = PHYS_WALK;
+
   // Success!
   return 0;
+}
+
+// Switch to the next physics mode
+extern "C" void bullet_nextMode()
+{
+  g_physMode++;
+  if(g_physMode > PHYS_GHOST)
+    g_physMode = PHYS_WALK;
+
+  switch(g_physMode)
+    {
+    case PHYS_WALK:
+      cout << "Entering walking mode\n";
+      break;
+    case PHYS_FLY:
+      cout << "Entering flying mode\n";
+      break;
+    case PHYS_GHOST:
+      cout << "Entering ghost mode\n";
+      break;
+    }
 }
 
 // Warp the player to a specific location. We do not bother setting
@@ -285,6 +319,8 @@ extern "C" void bullet_insertStatic(btCollisionShape *shape,
                                     float *quat,
                                     float scale)
 {
+  // TODO: Good test case for scaled meshes: Aharunartus, some of the
+  // stairs inside the cavern currently don't collide
   if(scale != 1.0)
     {
       cout << "WARNING: Cannot scale collision meshes yet (wanted "

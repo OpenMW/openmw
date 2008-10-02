@@ -221,6 +221,9 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
       case Keys.Mute: toggleMute(); break;
       case Keys.Fullscreen: toggleFullscreen(); break;
 
+      case Keys.PhysMode: bullet_nextMode(); break;
+      case Keys.Nighteye: ogre_toggleLight(); break;
+
       case Keys.Debug: ogre_debug(0); break;
       case Keys.ScreenShot: takeScreenShot(); break;
       case Keys.Pause: togglePause(); break;

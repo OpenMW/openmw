@@ -70,6 +70,9 @@ void ogre_setFog(float rf, float gf, float bf,
 // Create a simple sky dome
 int ogre_makeSky();
 
+// Toggle full ambient lighting on and off
+void ogre_toggleLight();
+
 // Enter main rendering loop
 void ogre_startRendering();
 

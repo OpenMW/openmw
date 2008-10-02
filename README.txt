@@ -122,6 +122,9 @@ Changelog:
 - working on collision detection with Bullet
 - working on fixing sound issues for windows (running out of sound
   resources, music playback doesn't good)
+- new key bindings:
+  t - toggle physics mode (walking, flying, ghost)
+  n - nighteye, toggle full ambient light
 - added build files for CMake (with CMakeD) and Code::Blocks (neither
   are tested yet)
 - various minor changes and updates
