@@ -242,13 +242,78 @@ extern "C" void bullet_getPlayerPos(float *x, float *y, float *z)
   *z = g_playerPosition.getZ();
 }
 
-unsigned char* copyBuffer(void *buf, int elemSize, int len)
+void* copyBuffer(void *buf, int elemSize, int len)
 {
   int size = elemSize * len;
   void *res = malloc(size);
   memcpy(res, buf, size);
 
-  return (unsigned char*)res;
+  return res;
+}
+
+// Define a cube with coordinates 0,0,0 - 1,1,1.
+const float cube_verts[] =
+  {
+    0,0,0,   1,0,0,   0,1,0,
+    1,1,0,   0,0,1,   1,0,1,
+    0,1,1,   1,1,1
+  };
+
+// Triangles of the cube. The orientation of each triange doesn't
+// matter.
+const short cube_tris[] =
+  {
+    // bottom side
+    0, 1, 2,
+    1, 2, 3,
+    // top side
+    4, 5, 6,
+    5, 6, 7,
+    // front side
+    0, 4, 5,
+    0, 1, 5,
+    // back side
+    2, 3, 7,
+    2, 6, 7,
+    // left side
+    0, 2, 4,
+    2, 4, 6,
+    // right side
+    1, 3, 5,
+    3, 5, 7
+  };
+
+const int cube_num_verts = 8;
+const int cube_num_tris = 12;
+
+// Create a (trimesh) box with the given dimensions. Used for bounding
+// boxes. TODO: I guess we have to use the NIF-specified bounding box
+// for this, not our automatically calculated one.
+extern "C" void bullet_createBox(float xmin, float ymin, float zmin,
+                                 float xmax, float ymax, float zmax,
+                                 float *trans, float *matrix)
+{
+  // Make a copy of the vertex buffer, since we need to change it
+  float *vbuffer = (float*)copyBuffer(cube_verts, 12, cube_num_verts);
+
+  // Calculate the widths
+  float xwidth = xmax-xmin;
+  float ywidth = ymax-ymin;
+  float zwidth = zmax-zmin;
+
+  // Transform the cube to (xmin,xmax) etc
+  float *vb = vbuffer;
+  for(int i=0; i<cube_num_verts; i++)
+    {
+      *vb = (*vb)*xwidth + xmin; vb++;
+      *vb = (*vb)*ywidth + ymin; vb++;
+      *vb = (*vb)*zwidth + zmin; vb++;
+    }
+
+  // Insert the trimesh
+  createTriShape(cube_num_tris*3, cube_tris,
+                 cube_num_verts, vbuffer,
+                 trans, matrix);
 }
 
 // Create a triangle shape and insert it into the current index/vertex
@@ -260,6 +325,16 @@ extern "C" void bullet_createTriShape(int32_t numFaces,
                                       float *trans,
                                       float *matrix)
 {
+  createTriShape(numFaces, copyBuffer(triArray, 2, numFaces)
+                 numVerts, copyBuffer(vertArray, 12, numVerts),
+                 trans, matrix);
+}
+
+// Internal version that does not copy buffers
+void createTriShape(int32_t numFaces, void *triArray,
+                    int32_t numVerts, void *vertArray,
+                    float *trans, float *matrix)
+{
   // This struct holds the index and vertex buffers of a single
   // trimesh.
   btIndexedMesh im;
@@ -268,15 +343,15 @@ extern "C" void bullet_createTriShape(int32_t numFaces,
   int numTriangles = numFaces / 3;
   im.m_numTriangles = numTriangles;
   im.m_triangleIndexStride = 6; // 3 indices * 2 bytes per short
-  im.m_triangleIndexBase = copyBuffer(triArray, 6, numTriangles);
+  im.m_triangleIndexBase = (unsigned char*)triArray;
 
   // Set up the vertices
   im.m_numVertices = numVerts;
   im.m_vertexStride = 12; // 4 bytes per float * 3 floats per vertex
-  im.m_vertexBase = copyBuffer(vertArray, 12, numVerts);
+  im.m_vertexBase = (unsigned char*)vertArray;
 
-  // Transform all the vertex values according to 'trans' and 'matrix'
-  float *vb = (float*) im.m_vertexBase;
+  // Transform vertex values in vb according to 'trans' and 'matrix'
+  float *vb = (float*)im.m_vertexBase;
   for(int i=0; i<numVerts; i++)
     {
       float x,y,z;
@@ -341,44 +416,6 @@ extern "C" void bullet_insertStatic(btCollisionShape *shape,
   obj->setWorldTransform(trafo);
   g_dynamicsWorld->addCollisionObject(obj);
 }
-
-
-/*
-// Insert a debug collision shape
-extern "C" void bullet_insertBox(float x, float y, float z)
-{
-  btCollisionShape* groundShape =
-    new btSphereShape(50);
-    //new btBoxShape(btVector3(100,100,100));
-
-  // Create a motion state to hold the object (not sure why yet.)
-  btTransform groundTransform;
-  groundTransform.setIdentity();
-  groundTransform.setOrigin(btVector3(x,y,z));
-
-  // Use a simple collision object for static objects
-  btCollisionObject *obj = new btCollisionObject();
-  obj->setCollisionShape(groundShape);
-  obj->setWorldTransform(groundTransform);
-
-  g_dynamicsWorld->addCollisionObject(obj);
-
-  // You can also use a rigid body with a motion state, but this is
-  // overkill for statics.
-  /*
-  btDefaultMotionState* myMotionState =
-    new btDefaultMotionState(groundTransform);
-
-  // Create a rigid body from the motion state. Give it zero mass and
-  // zero inertia.
-  btRigidBody::btRigidBodyConstructionInfo
-    rbInfo(0, myMotionState, groundShape, btVector3(0,0,0));
-  btRigidBody* body = new btRigidBody(rbInfo);
-
-  // Add the body to the world
-  g_dynamicsWorld->addRigidBody(body);
-  */
-//}
 
 // Move the physics simulation 'delta' seconds forward in time
 extern "C" void bullet_timeStep(float delta)

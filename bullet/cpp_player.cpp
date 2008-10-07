@@ -49,7 +49,12 @@ btVector3 perpComponent (const btVector3& direction, const btVector3& normal)
 btManifoldArray manifoldArray;
 
 // Callback used for collision detection sweep tests. It prevents self
-// collision and is used in calls to convexSweepTest().
+// collision and is used in calls to convexSweepTest(). TODO: It might
+// be enough to just set the filters on this. If we set the group and
+// mask so that we only collide with static objects, self collision
+// would never happen. The sweep test function should have had a
+// version where you only specify the filters - I might add that
+// myself.
 class ClosestNotMeConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback
 {
 public:
