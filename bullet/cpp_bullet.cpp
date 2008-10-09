@@ -289,6 +289,7 @@ const int cube_num_tris = 12;
 // Create a (trimesh) box with the given dimensions. Used for bounding
 // boxes. TODO: I guess we have to use the NIF-specified bounding box
 // for this, not our automatically calculated one.
+/*
 extern "C" void bullet_createBox(float xmin, float ymin, float zmin,
                                  float xmax, float ymax, float zmax,
                                  float *trans, float *matrix)
@@ -315,6 +316,7 @@ extern "C" void bullet_createBox(float xmin, float ymin, float zmin,
                  cube_num_verts, vbuffer,
                  trans, matrix);
 }
+*/
 
 // Create a triangle shape and insert it into the current index/vertex
 // array. If no array is active, create one.
