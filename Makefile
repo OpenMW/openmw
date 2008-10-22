@@ -9,7 +9,7 @@ DMD=gdmd -version=Posix
 NIFFLAGS=-debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose
 
 # Compiler settings for Ogre + OIS.
-CF_OIS=$(shell pkg-config --cflags OGRE OIS)
+CF_OIS=$(shell pkg-config --cflags OIS OGRE)
 OGCC=$(CXX) $(CXXFLAGS) $(CF_OIS)
 
 # Compiler settings for ffmpeg.
@@ -77,7 +77,7 @@ nifobjs/%.o: %.d
 openmw: openmw.d cpp_ogre.o cpp_avcodec.o cpp_bullet.o $(obj)
 	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
 
-esmtool: esmtool.d cpp_ogre.o cpp_avcodec.o $(obj)
+esmtool: esmtool.d cpp_ogre.o cpp_avcodec.o cpp_bullet.o $(obj)
 	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
 
 niftool: niftool.d $(obj_nif)
