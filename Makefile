@@ -37,7 +37,9 @@ avcodec_cpp_files=$(avcodec_cpp:%=sound/cpp_%.cpp)
 bullet_cpp_files=$(bullet_cpp:%=bullet/cpp_%.cpp)
 
 # All object files needed by openmw and esmtool
-src := $(wildcard */*.d)
+src := $(wildcard bsa/*.d) $(wildcard bullet/*.d) $(wildcard core/*.d) \
+$(wildcard esm/*.d) $(wildcard input/*.d) $(wildcard nif/*.d) $(wildcard ogre/*.d) \
+$(wildcard scene/*.d) $(wildcard sound/*.d) $(wildcard util/*.d)
 src := $(src) $(wildcard monster/util/*.d)
 obj := $(src:%.d=objs/%.o)
 
