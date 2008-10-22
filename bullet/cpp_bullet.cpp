@@ -286,52 +286,6 @@ const short cube_tris[] =
 const int cube_num_verts = 8;
 const int cube_num_tris = 12;
 
-// Create a (trimesh) box with the given dimensions. Used for bounding
-// boxes. TODO: I guess we have to use the NIF-specified bounding box
-// for this, not our automatically calculated one.
-/*
-extern "C" void bullet_createBox(float xmin, float ymin, float zmin,
-                                 float xmax, float ymax, float zmax,
-                                 float *trans, float *matrix)
-{
-  // Make a copy of the vertex buffer, since we need to change it
-  float *vbuffer = (float*)copyBuffer(cube_verts, 12, cube_num_verts);
-
-  // Calculate the widths
-  float xwidth = xmax-xmin;
-  float ywidth = ymax-ymin;
-  float zwidth = zmax-zmin;
-
-  // Transform the cube to (xmin,xmax) etc
-  float *vb = vbuffer;
-  for(int i=0; i<cube_num_verts; i++)
-    {
-      *vb = (*vb)*xwidth + xmin; vb++;
-      *vb = (*vb)*ywidth + ymin; vb++;
-      *vb = (*vb)*zwidth + zmin; vb++;
-    }
-
-  // Insert the trimesh
-  createTriShape(cube_num_tris*3, cube_tris,
-                 cube_num_verts, vbuffer,
-                 trans, matrix);
-}
-*/
-
-// Create a triangle shape and insert it into the current index/vertex
-// array. If no array is active, create one.
-extern "C" void bullet_createTriShape(int32_t numFaces,
-                                      void *triArray,
-                                      int32_t numVerts,
-                                      void *vertArray,
-                                      float *trans,
-                                      float *matrix)
-{
-  createTriShape(numFaces, copyBuffer(triArray, 2, numFaces)
-                 numVerts, copyBuffer(vertArray, 12, numVerts),
-                 trans, matrix);
-}
-
 // Internal version that does not copy buffers
 void createTriShape(int32_t numFaces, void *triArray,
                     int32_t numVerts, void *vertArray,
@@ -373,6 +327,52 @@ void createTriShape(int32_t numFaces, void *triArray,
 
   // Add the mesh. Nif data stores triangle indices as shorts.
   g_currentMesh->addIndexedMesh(im, PHY_SHORT);
+}
+
+// Create a (trimesh) box with the given dimensions. Used for bounding
+// boxes. TODO: I guess we have to use the NIF-specified bounding box
+// for this, not our automatically calculated one.
+/*
+extern "C" void bullet_createBox(float xmin, float ymin, float zmin,
+                                 float xmax, float ymax, float zmax,
+                                 float *trans, float *matrix)
+{
+  // Make a copy of the vertex buffer, since we need to change it
+  float *vbuffer = (float*)copyBuffer(cube_verts, 12, cube_num_verts);
+
+  // Calculate the widths
+  float xwidth = xmax-xmin;
+  float ywidth = ymax-ymin;
+  float zwidth = zmax-zmin;
+
+  // Transform the cube to (xmin,xmax) etc
+  float *vb = vbuffer;
+  for(int i=0; i<cube_num_verts; i++)
+    {
+      *vb = (*vb)*xwidth + xmin; vb++;
+      *vb = (*vb)*ywidth + ymin; vb++;
+      *vb = (*vb)*zwidth + zmin; vb++;
+    }
+
+  // Insert the trimesh
+  createTriShape(cube_num_tris*3, cube_tris,
+                 cube_num_verts, vbuffer,
+                 trans, matrix);
+}
+*/
+
+// Create a triangle shape and insert it into the current index/vertex
+// array. If no array is active, create one.
+extern "C" void bullet_createTriShape(int32_t numFaces,
+                                      void *triArray,
+                                      int32_t numVerts,
+                                      void *vertArray,
+                                      float *trans,
+                                      float *matrix)
+{
+  createTriShape(numFaces, copyBuffer(triArray, 2, numFaces),
+                 numVerts, copyBuffer(vertArray, 12, numVerts),
+                 trans, matrix);
 }
 
 // Get the shape built up so far, if any. This clears g_currentMesh,

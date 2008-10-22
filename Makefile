@@ -75,10 +75,10 @@ nifobjs/%.o: %.d
 	$(DMD) $(NIFFLAGS) -c $< -of$@
 
 openmw: openmw.d cpp_ogre.o cpp_avcodec.o cpp_bullet.o $(obj)
-	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat bullet/libBulletDynamics.a bullet/libBulletCollision.a bullet/libLinearMath.a
+	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
 
 esmtool: esmtool.d cpp_ogre.o cpp_avcodec.o $(obj)
-	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat
+	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
 
 niftool: niftool.d $(obj_nif)
 	$(DMD) $^ -of$@

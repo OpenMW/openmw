@@ -82,6 +82,8 @@ public:
     return ptr;
   }
 
+  time_t getModifiedTime(const String&) { return 0; }
+
   // After load() is called, find("*") is called once. It doesn't seem
   // to matter that we return an empty list, exists() gets called on
   // the correct files anyway.

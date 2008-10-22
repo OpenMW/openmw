@@ -193,8 +193,9 @@ extern "C" void ogre_makeScene()
 
   // Turn the entire scene (represented by the 'root' node) -90
   // degrees around the x axis. This makes Z go upwards, and Y go into
-  // the screen. This is the orientation that Morrowind uses, and it
-  // automagically makes everything work as it should.
+  // the screen (when x is to the right.) This is the orientation that
+  // Morrowind uses, and it automagically makes everything work as it
+  // should.
   SceneNode *rt = mSceneMgr->getRootSceneNode();
   root = rt->createChildSceneNode();
   root->pitch(Degree(-90));
