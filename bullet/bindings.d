@@ -48,6 +48,13 @@ void bullet_setPlayerDir(float x, float y, float z);
 // been applied.
 void bullet_getPlayerPos(float *x, float *y, float *z);
 
+// Create a box shape.
+/*
+void bullet_createBoxShape(float minX, float minY, float minZ,
+                           float maxX, float maxY, float maxZ,
+                           float *trans,float *matrix);
+*/
+
 // Create a triangle shape. This is cumulative, all meshes created
 // with this function are added to the same shape. Since the various
 // parts of a mesh can be differently transformed and we are putting

@@ -82,7 +82,7 @@ struct MeshLoader
     base = ogre_getDetachedNode();
 
     // Recursively insert nodes (don't rotate the first node)
-    insertNode(n, base, true);
+    insertNode(n, base, 0, true);
 
     // Get the final shape, if any
     shape = bullet_getFinalShape();
@@ -92,10 +92,12 @@ struct MeshLoader
 
   private:
 
-  void insertNode(Node data, NodePtr parent, bool noRot = false)
+  void insertNode(Node data, NodePtr parent,
+                  int flags,
+                  bool noRot = false)
   {
-    // Skip hidden nodes for now.
-    if(data.flags & 0x01) return;
+    // Add the flags to the previous node's flags
+    flags = data.flags | flags;
 
     // Create a scene node, move and rotate it into place. The name
     // must be unique, however we might have to recognize some special
@@ -115,23 +117,29 @@ struct MeshLoader
       NiNode n = cast(NiNode)data;
       if(n !is null)
 	// Handle the NiNode, and any children it might have
-	handleNiNode(n, node);
+	handleNiNode(n, node, flags);
     }
 
     {
       NiTriShape n = cast(NiTriShape)data;
       if(n !is null)
 	// Trishape, with a mesh
-	handleNiTriShape(n, node);
+	handleNiTriShape(n, node, flags);
     }
   }
 
-  void handleNiNode(NiNode data, NodePtr node)
+  void handleNiNode(NiNode data, NodePtr node, int flags)
   {
     // Ignore sound activators and similar objects.
     NiStringExtraData d = cast(NiStringExtraData) data.extra;
-    if(d !is null && d.string == "MRK")
-      return;
+    if(d !is null)
+      {
+        if(d.string == "MRK")
+          return;
+
+        if(d.string == "NCO")
+          flags |= 0x800; // Temporary internal marker
+      }
 
     // Handle any effects here
 
@@ -144,15 +152,30 @@ struct MeshLoader
 
     // Loop through children
     foreach(Node n; data.children)
-      insertNode(n, node);
+      insertNode(n, node, flags);
   }
 
-  void handleNiTriShape(NiTriShape shape, NodePtr node)
+  void handleNiTriShape(NiTriShape shape, NodePtr node, int flags)
   {
     char[] texture;
     char[] material;
     char[] newName = UniqueName(baseName);
     NiMaterialProperty mp;
+
+    bool hidden = (flags & 0x01) != 0; // Not displayed
+    bool collide = (flags & 0x02) != 0; // Use this mesh for collision
+    bool bbcollide = (flags & 0x04) != 0; // Use bounding box for
+                                          // collision
+    // Always use mesh collision for now
+    if(bbcollide) collide = true;
+    bbcollide = false;
+
+    // Things marked "NCO" should not collide with anything.
+    if(flags & 0x800)
+      collide = false;
+
+    // Skip the entire material phase for hidden nodes
+    if(hidden) goto nomaterial;
 
     // Scan the property list for textures
     foreach(Property p; shape.properties)
@@ -227,6 +250,8 @@ struct MeshLoader
 			   texturePtr);
       }
 
+  nomaterial:
+
     with(shape.data)
       {
 	//writefln("Number of vertices: ", vertices.length);
@@ -251,7 +276,9 @@ struct MeshLoader
 	  maxY = -float.infinity,
 	  maxZ = -float.infinity;
 
-	// Calculate the bounding box. TODO: This is really a hack.
+	// Calculate the bounding box. TODO: This is really a
+	// hack. IIRC the bounding box supplied by the NIF could not
+	// be trusted, but I can't remember why :/
 	for( int i; i < vertices.length; i+=3 )
 	  {
 	    if( vertices[i] < minX ) minX = vertices[i];
@@ -269,20 +296,34 @@ struct MeshLoader
         float[9] matrix;
         ogre_getWorldTransform(node, trans.ptr, matrix.ptr);
 
-        // Create a bullet collision shape from the trimesh, if there
-        // are any triangles present. Pass along the world
-        // transformation as well, since we must transform the trimesh
-        // data manually.
-        if(facesPtr != null)
-          bullet_createTriShape(triangles.length, facesPtr,
-                                vertices.length, vertices.ptr,
+        // Next we must create the actual OGRE mesh and the collision
+        // objects, based on the flags we have been given.
+        assert(!bbcollide);
+        /* // Bounding box collision currently disabled
+        if(bbcollide)
+          // Insert the bounding box into the collision system
+          bullet_createBoxShape(minX, minY, minZ, maxX, maxY, maxZ,
                                 trans.ptr, matrix.ptr);
 
-        // Create the ogre mesh, associate it with the node
-	ogre_createMesh(newName.ptr, vertices.length, vertices.ptr,
-		       normalsPtr, colorsPtr, uvsPtr, triangles.length, facesPtr,
-		       radius, material.ptr, minX, minY, minZ, maxX, maxY, maxZ,
-		       node);
+        // Create a bullet collision shape from the trimesh. Pass
+        // along the world transformation as well, since we must
+        // transform the trimesh data manually.
+        else*/if(collide)
+          {
+            assert(facesPtr !is null,
+                   "cannot create collision shape without a mesh");
+            bullet_createTriShape(triangles.length, facesPtr,
+                                  vertices.length, vertices.ptr,
+                                  trans.ptr, matrix.ptr);
+          }
+
+        // Create the ogre mesh, associate it with the node. Skip for
+        // hidden nodes.
+        if(!hidden)
+          ogre_createMesh(newName.ptr, vertices.length, vertices.ptr,
+                          normalsPtr, colorsPtr, uvsPtr, triangles.length,
+                          facesPtr, radius, material.ptr, minX, minY, minZ,
+                          maxX, maxY, maxZ, node);
       }
   }
 }

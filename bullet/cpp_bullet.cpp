@@ -29,6 +29,12 @@ using namespace std;
 
 class CustomOverlappingPairCallback;
 
+enum
+  {
+    MASK_PLAYER = 1,
+    MASK_STATIC = 2
+  };
+
 // System variables
 btDefaultCollisionConfiguration* g_collisionConfiguration;
 btCollisionDispatcher *g_dispatcher;
@@ -56,6 +62,11 @@ btVector3 g_walkDirection;
 // added into this, until bullet_getFinalShape() is called.
 btTriangleIndexVertexArray *g_currentMesh;
 
+// Current compound shape being built. g_compoundShape and
+// g_currentMesh are returned together (the mesh inserted into the
+// compound) if both are present.
+btCompoundShape *g_compoundShape;
+
 // These variables and the class below are used in player collision
 // detection. The callback is injected into the broadphase and keeps a
 // continuously updated list of what objects are colliding with the
@@ -76,6 +87,9 @@ int g_physMode;
 
 // Include the player physics
 #include "cpp_player.cpp"
+
+// Include the uniform shape scaler
+//#include "cpp_scale.cpp"
 
 class CustomOverlappingPairCallback : public btOverlappingPairCallback
 {
@@ -105,13 +119,6 @@ public:
   {    if (proxy0->m_clientObject==g_playerObject)
       g_pairCache->removeOverlappingPairsContainingProxy(proxy0,dispatcher);
   }
-
-  /* KILLME
-  btBroadphasePairArray& getOverlappingPairArray()
-  { return g_pairCache->getOverlappingPairArray(); }
-  btOverlappingPairCache* getOverlappingPairCache()
-  { return g_pairCache; }
-  */
 };
 
 extern "C" int32_t bullet_init()
@@ -132,8 +139,8 @@ extern "C" int32_t bullet_init()
   // to create a custom broadphase designed for our purpose. (We
   // should probably use different ones for interior and exterior
   // cells in any case.)
-  btVector3 worldMin(-40000,-40000,-40000);
-  btVector3 worldMax(40000,40000,40000);
+  btVector3 worldMin(-20000,-20000,-20000);
+  btVector3 worldMax(20000,20000,20000);
   g_broadphase = new btAxisSweep3(worldMin,worldMax);
 
   g_dynamicsWorld =
@@ -149,20 +156,25 @@ extern "C" int32_t bullet_init()
 
   // Create the player collision shape.
   float width = 50;
+
   /*
-  // One possible shape is the convex hull around two spheres
-  float height = 100;
+  float height = 50;
   btVector3 spherePositions[2];
   btScalar sphereRadii[2];
   sphereRadii[0] = width;
   sphereRadii[1] = width;
-  spherePositions[0] = btVector3 (0.0, height/2.0, 0.0);
-  spherePositions[1] = btVector3 (0.0, -height/2.0, 0.0);
+  spherePositions[0] = btVector3 (0,0,0);
+  spherePositions[1] = btVector3 (0,0,-height);
+
+  // One possible shape is the convex hull around two spheres
   g_playerShape = new btMultiSphereShape(btVector3(width/2.0, height/2.0,
                        width/2.0), &spherePositions[0], &sphereRadii[0], 2);
-  //*/
-  //g_playerShape = new btCylinderShape(btVector3(50, 50, 50));
+  */
+
+  // Other posibilities - most are too slow, except the sphere
+  //g_playerShape = new btCylinderShapeZ(btVector3(width, width, height));
   g_playerShape = new btSphereShape(width);
+  //g_playerShape = new btCapsuleShapeZ(width, height);
 
   // Create the collision object
   g_playerObject = new btCollisionObject ();
@@ -183,13 +195,13 @@ extern "C" int32_t bullet_init()
   g_dynamicsWorld->setInternalTickCallback(playerStepCallback);
 
   // Add the character collision object to the world.
-  g_dynamicsWorld->addCollisionObject(g_playerObject
-                                      ,btBroadphaseProxy::DebrisFilter
-                                      //,btBroadphaseProxy::StaticFilter
-                                      );
+  g_dynamicsWorld->addCollisionObject(g_playerObject,
+                                      MASK_PLAYER,
+                                      MASK_STATIC);
 
-  // Make sure this is zero at startup
+  // Make sure these is zero at startup
   g_currentMesh = NULL;
+  g_compoundShape = NULL;
 
   // Start out walking
   g_physMode = PHYS_WALK;
@@ -242,6 +254,41 @@ extern "C" void bullet_getPlayerPos(float *x, float *y, float *z)
   *z = g_playerPosition.getZ();
 }
 
+// Create a box shape and add it to the cumulative shape of the
+// current object
+/*
+extern "C" void bullet_createBoxShape(float minX, float minY, float minZ,
+                                      float maxX, float maxY, float maxZ,
+                                      float *trans,float *matrix)
+{
+  if(g_compoundShape == NULL)
+    g_compoundShape = new btCompoundShape;
+
+  // Build a box from the given data.
+  int x = (maxX-minX)/2;
+  int y = (maxY-minY)/2;
+  int z = (maxZ-minZ)/2;
+  btBoxShape *box = new btBoxShape(btVector3(x,y,z));
+
+  // Next, create the transformations
+  btMatrix3x3 mat(matrix[0], matrix[1], matrix[2],
+                  matrix[3], matrix[4], matrix[5],
+                  matrix[6], matrix[7], matrix[8]);
+
+  // In addition to the mesh's world translation, we have to add the
+  // local translation of the box origin to fit with the given min/max
+  // values.
+  x += minX + trans[0];
+  y += minY + trans[1];
+  z += minZ + trans[2];
+  btVector3 trns(x,y,z);
+
+  // Finally, add the shape to the compound
+  btTransform tr(mat, trns);
+  g_compoundShape->addChildShape(tr, box);
+}
+*/
+
 void* copyBuffer(void *buf, int elemSize, int len)
 {
   int size = elemSize * len;
@@ -250,41 +297,6 @@ void* copyBuffer(void *buf, int elemSize, int len)
 
   return res;
 }
-
-// Define a cube with coordinates 0,0,0 - 1,1,1.
-const float cube_verts[] =
-  {
-    0,0,0,   1,0,0,   0,1,0,
-    1,1,0,   0,0,1,   1,0,1,
-    0,1,1,   1,1,1
-  };
-
-// Triangles of the cube. The orientation of each triange doesn't
-// matter.
-const short cube_tris[] =
-  {
-    // bottom side
-    0, 1, 2,
-    1, 2, 3,
-    // top side
-    4, 5, 6,
-    5, 6, 7,
-    // front side
-    0, 4, 5,
-    0, 1, 5,
-    // back side
-    2, 3, 7,
-    2, 6, 7,
-    // left side
-    0, 2, 4,
-    2, 4, 6,
-    // right side
-    1, 3, 5,
-    3, 5, 7
-  };
-
-const int cube_num_verts = 8;
-const int cube_num_tris = 12;
 
 // Internal version that does not copy buffers
 void createTriShape(int32_t numFaces, void *triArray,
@@ -328,6 +340,41 @@ void createTriShape(int32_t numFaces, void *triArray,
   // Add the mesh. Nif data stores triangle indices as shorts.
   g_currentMesh->addIndexedMesh(im, PHY_SHORT);
 }
+
+// Define a cube with coordinates 0,0,0 - 1,1,1.
+const float cube_verts[] =
+  {
+    0,0,0,   1,0,0,   0,1,0,
+    1,1,0,   0,0,1,   1,0,1,
+    0,1,1,   1,1,1
+  };
+
+// Triangles of the cube. The orientation of each triange doesn't
+// matter.
+const short cube_tris[] =
+  {
+    // bottom side
+    0, 1, 2,
+    1, 2, 3,
+    // top side
+    4, 5, 6,
+    5, 6, 7,
+    // front side
+    0, 4, 5,
+    0, 1, 5,
+    // back side
+    2, 3, 7,
+    2, 6, 7,
+    // left side
+    0, 2, 4,
+    2, 4, 6,
+    // right side
+    1, 3, 5,
+    3, 5, 7
+  };
+
+const int cube_num_verts = 8;
+const int cube_num_tris = 12;
 
 // Create a (trimesh) box with the given dimensions. Used for bounding
 // boxes. TODO: I guess we have to use the NIF-specified bounding box
@@ -379,14 +426,33 @@ extern "C" void bullet_createTriShape(int32_t numFaces,
 // so the next call to createTriShape will start a new shape.
 extern "C" btCollisionShape *bullet_getFinalShape()
 {
-  // Return null if no meshes have been inserted
-  if(g_currentMesh == NULL) return NULL;
+  btCollisionShape *shape;
 
-  // Create the shape from the completed mesh
-  btBvhTriangleMeshShape *shape =
-    new btBvhTriangleMeshShape(g_currentMesh, false);
+  // Create a shape from all the inserted completed meshes
+  shape = NULL;
+  if(g_currentMesh != NULL)
+    shape = new btBvhTriangleMeshShape(g_currentMesh, false);
 
+  // Is there a compound shape as well? (usually contains bounding
+  // boxes)
+  if(g_compoundShape != NULL)
+    {
+      // If both shape types are present, insert the mesh shape into
+      // the compound.
+      if(shape != NULL)
+        {
+          btTransform tr;
+          tr.setIdentity();
+          g_compoundShape->addChildShape(tr, shape);
+        }
+
+      // The compound is the final shape
+      shape = g_compoundShape;
+    }
+
+  // Clear these for the next NIF
   g_currentMesh = NULL;
+  g_compoundShape = NULL;
   return shape;
 }
 
@@ -396,14 +462,12 @@ extern "C" void bullet_insertStatic(btCollisionShape *shape,
                                     float *quat,
                                     float scale)
 {
-  // TODO: Good test case for scaled meshes: Aharunartus, some of the
-  // stairs inside the cavern currently don't collide
+  // Are we scaled?
   if(scale != 1.0)
-    {
-      cout << "WARNING: Cannot scale collision meshes yet (wanted "
-           << scale << ")\n";
-      return;
-    }
+    return;
+    // Wrap the shape in a class that scales it. TODO: Try this on
+    // ALL shapes, just to test the slowdown.
+    //shape = new ScaleShape(shape, scale);
 
   btTransform trafo;
   trafo.setIdentity();
@@ -416,7 +480,7 @@ extern "C" void bullet_insertStatic(btCollisionShape *shape,
   btCollisionObject *obj = new btCollisionObject();
   obj->setCollisionShape(shape);
   obj->setWorldTransform(trafo);
-  g_dynamicsWorld->addCollisionObject(obj);
+  g_dynamicsWorld->addCollisionObject(obj, MASK_STATIC, MASK_PLAYER);
 }
 
 // Move the physics simulation 'delta' seconds forward in time

@@ -312,6 +312,9 @@ extern(C) int d_frameStarted(float time)
   if(isPressed(Keys.MoveRight)) moveX += speed;
   if(isPressed(Keys.MoveForward)) moveZ -= speed;
   if(isPressed(Keys.MoveBackward)) moveZ += speed;
+
+  // TODO: These should be enabled for floating modes (like swimming
+  // and levitation) only.
   if(isPressed(Keys.MoveUp)) moveY += speed;
   if(isPressed(Keys.MoveDown)) moveY -= speed;
 

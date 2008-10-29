@@ -34,7 +34,7 @@
 bool g_touchingContact;
 btVector3 g_touchingNormal;
 btScalar g_currentStepOffset;
-float g_stepHeight = 20;
+float g_stepHeight = 5;
 
 // Returns the reflection direction of a ray going 'direction' hitting
 // a surface with normal 'normal'
@@ -292,6 +292,18 @@ void playerStepCallback(btDynamicsWorld* dynamicsWorld, btScalar timeStep)
   // final player position is read back from D code after the
   // simulation.
   btVector3 walkStep = g_walkDirection * timeStep;
+
+  float len = walkStep.length();
+
+  // In walk mode, it shouldn't matter whether or not we look up or
+  // down. Rotate the vector back to the horizontal plane.
+  if(g_physMode == PHYS_WALK)
+    {
+      walkStep.setZ(0);
+      float len2 = walkStep.length();
+      if(len2 > 0)
+        walkStep *= len/len2;
+    }
 
   // Get the player position
   g_playerPosition = g_playerObject->getWorldTransform().getOrigin();

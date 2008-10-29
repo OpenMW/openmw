@@ -120,6 +120,7 @@ Changelog:
 0.5 (WIP)
 
 - working on collision detection with Bullet
+- working on walk & fall character physics
 - working on fixing sound issues for windows (running out of sound
   resources, music playback doesn't good)
 - new key bindings:

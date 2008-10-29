@@ -182,6 +182,8 @@ extern "C" void ogre_makeScene()
   // Alter the camera aspect ratio to match the viewport
   mCamera->setAspectRatio(Real(vp->getActualWidth()) / Real(vp->getActualHeight()));
 
+  mCamera->setFOVy(Degree(55));
+
   // Set default mipmap level (NB some APIs ignore this)
   TextureManager::getSingleton().setDefaultNumMipmaps(5);
 

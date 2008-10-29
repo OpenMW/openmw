@@ -120,9 +120,15 @@ extern "C" void ogre_screenshot(char* filename)
 extern "C" void ogre_rotateCamera(float x, float y)
 {
   mCamera->yaw(Degree(-x));
+
+  Quaternion nopitch = mCamera->getOrientation();
+
   mCamera->pitch(Degree(-y));
 
-  //g_light->setDirection(mCamera->getDirection());
+  // Is the camera close to being upside down?
+  if(mCamera->getUp()[1] <= 0.1)
+    // If so, undo the last pitch
+    mCamera->setOrientation(nopitch);
 }
 
 // Get current camera position
@@ -155,7 +161,7 @@ extern "C" void ogre_moveCamera(float x, float y, float z)
   // Transforms Morrowind coordinates to OGRE coordinates. The camera
   // is not affected by the rotation of the root node, so we must
   // transform this manually.
-  mCamera->setPosition(Vector3(x,z,-y));
+  mCamera->setPosition(Vector3(x,z+90,-y));
 
   //g_light->setPosition(mCamera->getPosition());
 }
@@ -181,5 +187,8 @@ extern "C" void ogre_setCameraRotation(float r1, float r2, float r3)
 // Move camera relative to its own axis set.
 extern "C" void ogre_moveCameraRel(float x, float y, float z)
 {
-  mCamera->moveRelative(Vector3(x,y,z));
+  mCamera->moveRelative(Vector3(x,0,z));
+
+  // up/down movement is always done relative the world axis
+  mCamera->move(Vector3(0,y,0));
 }
