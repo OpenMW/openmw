@@ -172,7 +172,7 @@ struct MeshLoader
 
     // Things marked "NCO" should not collide with anything.
     if(flags & 0x800)
-      collide = false;
+      { collide = false; bbcollide=false; }
 
     // Skip the entire material phase for hidden nodes
     if(hidden) goto nomaterial;
@@ -297,9 +297,11 @@ struct MeshLoader
         ogre_getWorldTransform(node, trans.ptr, matrix.ptr);
 
         // Next we must create the actual OGRE mesh and the collision
-        // objects, based on the flags we have been given.
+        // objects, based on the flags we have been given. TODO: I
+        // guess the NIF bounding box is better than the one we have
+        // calculated ourselves? This code definitely doesn't work,
+        // but I haven't look into why yet.
         assert(!bbcollide);
-        /* // Bounding box collision currently disabled
         if(bbcollide)
           // Insert the bounding box into the collision system
           bullet_createBoxShape(minX, minY, minZ, maxX, maxY, maxZ,
@@ -308,7 +310,7 @@ struct MeshLoader
         // Create a bullet collision shape from the trimesh. Pass
         // along the world transformation as well, since we must
         // transform the trimesh data manually.
-        else*/if(collide)
+        else if(collide)
           {
             assert(facesPtr !is null,
                    "cannot create collision shape without a mesh");

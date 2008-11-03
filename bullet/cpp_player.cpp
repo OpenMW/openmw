@@ -3,6 +3,7 @@
   Copyright (C) 2008  Nicolay Korslund
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
+  (see additional copyrights for this file below)
 
   This file (cpp_player.cpp) is part of the OpenMW package.
 
@@ -19,15 +20,40 @@
   version 3 along with this program. If not, see
   http://www.gnu.org/licenses/ .
 
- */
+  ----
+
+  Parts of this file is based on the kinematic character controller
+  demo included with the Bullet library. The copyright statement for
+  these parts follow:
+
+  Bullet Continuous Collision Detection and Physics Library
+  Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any
+  damages arising from the use of this software.  Permission is
+  granted to anyone to use this software for any purpose, including
+  commercial applications, and to alter it and redistribute it freely,
+  subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must
+     not claim that you wrote the original software. If you use this
+     software in a product, an acknowledgment in the product
+     documentation would be appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must
+     not be misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source
+     distribution.
+*/
+
 
 // This file handles player-specific physics and collision detection
 
 // TODO: Later we might handle various physics modes, eg. dynamic
-// (full physics), player_walk, player_fall, player_swim, player_float,
-// player_levitate, player_ghost. These would be applicable to any
-// object (through Monster script), allowing player physics to be used
-// on NPCs and creatures.
+// (full physics), player_walk, player_fall, player_swim,
+// player_float, player_levitate, player_ghost. These would be
+// applicable to any object (through Monster script), allowing the
+// physics code to be shared between NPCs, creatures and the player.
 
 // Variables used internally in this file. Once we make per-object
 // player collision, these will be member variables.

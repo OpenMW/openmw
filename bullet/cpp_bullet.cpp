@@ -62,11 +62,6 @@ btVector3 g_walkDirection;
 // added into this, until bullet_getFinalShape() is called.
 btTriangleIndexVertexArray *g_currentMesh;
 
-// Current compound shape being built. g_compoundShape and
-// g_currentMesh are returned together (the mesh inserted into the
-// compound) if both are present.
-btCompoundShape *g_compoundShape;
-
 // These variables and the class below are used in player collision
 // detection. The callback is injected into the broadphase and keeps a
 // continuously updated list of what objects are colliding with the
@@ -89,7 +84,7 @@ int g_physMode;
 #include "cpp_player.cpp"
 
 // Include the uniform shape scaler
-//#include "cpp_scale.cpp"
+#include "cpp_scale.cpp"
 
 class CustomOverlappingPairCallback : public btOverlappingPairCallback
 {
@@ -201,7 +196,6 @@ extern "C" int32_t bullet_init()
 
   // Make sure these is zero at startup
   g_currentMesh = NULL;
-  g_compoundShape = NULL;
 
   // Start out walking
   g_physMode = PHYS_WALK;
@@ -254,42 +248,7 @@ extern "C" void bullet_getPlayerPos(float *x, float *y, float *z)
   *z = g_playerPosition.getZ();
 }
 
-// Create a box shape and add it to the cumulative shape of the
-// current object
-/*
-extern "C" void bullet_createBoxShape(float minX, float minY, float minZ,
-                                      float maxX, float maxY, float maxZ,
-                                      float *trans,float *matrix)
-{
-  if(g_compoundShape == NULL)
-    g_compoundShape = new btCompoundShape;
-
-  // Build a box from the given data.
-  int x = (maxX-minX)/2;
-  int y = (maxY-minY)/2;
-  int z = (maxZ-minZ)/2;
-  btBoxShape *box = new btBoxShape(btVector3(x,y,z));
-
-  // Next, create the transformations
-  btMatrix3x3 mat(matrix[0], matrix[1], matrix[2],
-                  matrix[3], matrix[4], matrix[5],
-                  matrix[6], matrix[7], matrix[8]);
-
-  // In addition to the mesh's world translation, we have to add the
-  // local translation of the box origin to fit with the given min/max
-  // values.
-  x += minX + trans[0];
-  y += minY + trans[1];
-  z += minZ + trans[2];
-  btVector3 trns(x,y,z);
-
-  // Finally, add the shape to the compound
-  btTransform tr(mat, trns);
-  g_compoundShape->addChildShape(tr, box);
-}
-*/
-
-void* copyBuffer(void *buf, int elemSize, int len)
+void* copyBuffer(const void *buf, int elemSize, int len)
 {
   int size = elemSize * len;
   void *res = malloc(size);
@@ -299,9 +258,9 @@ void* copyBuffer(void *buf, int elemSize, int len)
 }
 
 // Internal version that does not copy buffers
-void createTriShape(int32_t numFaces, void *triArray,
-                    int32_t numVerts, void *vertArray,
-                    float *trans, float *matrix)
+void createTriShape(int32_t numFaces, const void *triArray,
+                    int32_t numVerts, const void *vertArray,
+                    const float *trans, const float *matrix)
 {
   // This struct holds the index and vertex buffers of a single
   // trimesh.
@@ -377,12 +336,11 @@ const int cube_num_verts = 8;
 const int cube_num_tris = 12;
 
 // Create a (trimesh) box with the given dimensions. Used for bounding
-// boxes. TODO: I guess we have to use the NIF-specified bounding box
+// boxes. TODO: I guess we should use the NIF-specified bounding box
 // for this, not our automatically calculated one.
-/*
-extern "C" void bullet_createBox(float xmin, float ymin, float zmin,
-                                 float xmax, float ymax, float zmax,
-                                 float *trans, float *matrix)
+extern "C" void bullet_createBoxShape(float xmin, float ymin, float zmin,
+                                      float xmax, float ymax, float zmax,
+                                      float *trans, float *matrix)
 {
   // Make a copy of the vertex buffer, since we need to change it
   float *vbuffer = (float*)copyBuffer(cube_verts, 12, cube_num_verts);
@@ -406,7 +364,6 @@ extern "C" void bullet_createBox(float xmin, float ymin, float zmin,
                  cube_num_verts, vbuffer,
                  trans, matrix);
 }
-*/
 
 // Create a triangle shape and insert it into the current index/vertex
 // array. If no array is active, create one.
@@ -433,38 +390,21 @@ extern "C" btCollisionShape *bullet_getFinalShape()
   if(g_currentMesh != NULL)
     shape = new btBvhTriangleMeshShape(g_currentMesh, false);
 
-  // Is there a compound shape as well? (usually contains bounding
-  // boxes)
-  if(g_compoundShape != NULL)
-    {
-      // If both shape types are present, insert the mesh shape into
-      // the compound.
-      if(shape != NULL)
-        {
-          btTransform tr;
-          tr.setIdentity();
-          g_compoundShape->addChildShape(tr, shape);
-        }
-
-      // The compound is the final shape
-      shape = g_compoundShape;
-    }
-
   // Clear these for the next NIF
   g_currentMesh = NULL;
-  g_compoundShape = NULL;
   return shape;
 }
 
 // Insert a static mesh
-extern "C" void bullet_insertStatic(btCollisionShape *shape,
+extern "C" void bullet_insertStatic(btConcaveShape *shape,
                                     float *pos,
                                     float *quat,
                                     float scale)
 {
+  // FIXME: Scaling does NOT work.
+
   // Are we scaled?
-  if(scale != 1.0)
-    return;
+  if(scale != 1.0) {}
     // Wrap the shape in a class that scales it. TODO: Try this on
     // ALL shapes, just to test the slowdown.
     //shape = new ScaleShape(shape, scale);
