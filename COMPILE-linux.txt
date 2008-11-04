@@ -21,10 +21,11 @@ OpenMW has been tested for the most part on 32bit Ubuntu Linux
 distributions.
 
 FreeBSD is also known to work with recent versions of GDC (the D
-compiler), but you might need to rebuild most of the dependencies from
-source yourself.
+compiler), but you might need to rebuild some of the dependencies from
+source yourself. (If you have done this and can give more specific
+instructions, please let me know!)
 
-64bit Linux is specifically known NOT to work.
+64bit systems are NOT supported.
 
 If you manage to build OpenMW on a platform not listed here, or want
 to try, please let me know!
@@ -38,14 +39,14 @@ Dependencies needed to build OpenMW:
 
 OGRE 1.4.5         (3d engine)
 OIS-1.0.0          (input system)
+Bullet 2.72        (collision and physics library)
 OpenAL             (3d sound system)
 libavcodec,
   libavformat      (For MP3 playback)
 gcc and g++        (C++ compiler)
 GNU make           (build tool for C++ files)
-DMD 1.031          (D compiler)
+DMD 1.036          (D compiler)
   or GDC 4.1.3     (alternative D compiler)
-
 
 The above versions are the ones I have tested recently, but other
 versions might work. OGRE, OpenAL and the other libraries have
@@ -56,22 +57,32 @@ try typing:
 sudo apt-get install libogre-dev libavcodec-dev libavformat-dev libois-dev build-essential g++ gdc
 
 A note about OpenAL: The library found in most Linux distributions
-(0.0.8 SI) is out of date. Some distributions are now changing to
-OpenAL Soft, which is a newer and less hardware-dependent
-implementation. If you experience sound problems (like stuttering
-music), try switching to OpenAL Soft.
+(0.0.8 SI) is outdated. Some distributions are now changing to OpenAL
+Soft, which has a less hardware-dependent implementation. If you
+experience sound problems (like stuttering music), try switching to
+OpenAL Soft.
 
 libavcodec and libavformat are part of the FFmpeg package, which is
 part of the 'mplayer' project. Note that some of the codecs might be
 patent protected in your country or area.
 
-If you want to install Ogre, OpenAL, OIS or FFmpeg manually, try:
+If you want to install Ogre, Bullet, OpenAL, OIS or FFmpeg manually,
+try:
 
 OGRE:             http://ogre3d.org/
 OpenAL:           http://openal.org/
   Linux source:   http://kcat.strangesoft.net/openal.html
 OIS:              http://sourceforge.net/projects/wgois/
 FFmpeg:           http://ffmpeg.mplayerhq.hu/download.html
+Bullet:           (fill in here)
+
+Setting up Bullet
+-----------------
+
+Bullet is not yet included in most Linux distributions. Follow these
+instructions for setting it up manually.
+
+(to be written)
 
 
 
@@ -81,8 +92,8 @@ Choosing a D compiler
 The above apt-get command installs the GDC compiler. There are
 currently two choices for the D compiler, DMD and GDC. DMD is the
 "official" compiler and is updated more often, while GDC is a
-completely open source frontend to GCC (The GNU compiler.) Both should
-work equally well with OpenMW.
+completely open source front-end for GCC (the GNU compiler.) Both
+should work equally well with OpenMW.
 
 If you want to install GDC manually, go to
 http://sourceforge.net/projects/dgcc
@@ -91,8 +102,7 @@ If you want to use DMD instead, it can be found at:
 http://digitalmars.com/d/1.0/dmd-linux.html
 
 Note that the DMD unstable branch (2.000 and up) will NOT currently
-work with OpenMW. Use the stable branch (1.x) instead. The latest
-version known to work is DMD 1.031, so I recommend that.
+work with OpenMW. Use the stable branch (1.x) instead.
 
 Also note that DMD is only available on 32 bit x86 Linux - other
 operating systems or architectures will have to use GDC. Note however
@@ -170,9 +180,9 @@ favor, you should now be able to run OpenMW using the program called
 Write openmw -h to see a list of options.
 
 Running without parameters should bring you into the cave called Assu,
-or the last cell loaded. You are in free float mode. Move around with
-WASD (or arrow keys), move up and down with left shift and ctrl, exit
-with 'q' or escape.
+or the last cell loaded. Move around with WASD (or arrow keys), change
+physics mode (walking, flying, ghost) with 't', exit with 'q' or
+escape.
 
 To load another cell, specify the cell name on the command line. Use
 the 'esmtool' program to get a list of cells. Note that you must use

@@ -163,7 +163,10 @@ struct HashTable(Key, Value, Alloc = GCAlloc, Hash = DefHash,
 
   void reset()
     {
-      *this = typeof(*this).init;
+      // This stopped working in DMD 1.032 and later versions.
+      //*this = typeof(*this).init;
+      // But this seems to do the trick
+      *this = (HashTable!(Key, Value, Alloc, Hash, keyFormat)).init;
     }
 
   // Returns number of buckets of each size. Mostly used for testing

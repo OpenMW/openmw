@@ -5,10 +5,8 @@ Written by Nicolay Korslund
 Email: korslund@gmail.com
 WWW: http://openmw.snaptoad.com
 License: See GPL3.txt
-Current version: 0.4 (still very pre-alpha)
-Date: 2008 jul. 20
-
-
+Current version: 0.5 (WIP)
+Date: 2008 nov. 4
 
 
 QUICK NOTE: You must own and install Morrowind before you can use
@@ -17,63 +15,21 @@ Morrowind installed on your system!
 
 
 
-
-IMPORTANT: OpenMW 0.4 notes
-===========================
-
-As of OpenMW 0.4, we have switched sound libraries from Audiere to
-OpenAL + libavcodec. This means that:
-
-- you need to install OpenAL
-- you must install libavcodec / ffmpeg for mp3 playback
-- you no longer need Audiere
-
-See the changelog at the end for an up-to-date list of changes.
-
-Also new in this release is the way files are distributed for
-Windows. There is now a separate "DLL pack" that can be used with
-either the binary version or the source version. You no longer need to
-run around the internet to find various SDKs and such - everything
-should be included in the DLL-pack, including the necessary C/C++
-header files.
-
-Note: if you are using a localized (non-English) version of Morrowind,
-the default starting cell (Assu) might not exist. Try esmtool (see
-below) to get a list of existing cells.
-
-
-
-
-On the near-future TODO list:
-===========================
-
-- full support for localized versions (with character recoding)
-- support for Mac
-- collision detection + walk & fall physics
-- displaying creatures correcty, animation
-- rendering NPCs
-- rendering outdoor scenes (exterior cells)
-- choosing a GUI/HUD system that plays well with OGRE
-
-
-
-
 Installation
 ============
 
 Currently supported platforms are Windows, Linux and FreeBSD. Most
-testing is on Ubuntu 8.04 and Windows XP Professional (in that order).
+testing has been done on Ubuntu 8.04 and Windows XP Professional.
 
 For instructions, see one of the following:
 
 README-win32.txt    - instructions for binary Windows release
-COMPILE-win32.txt   - instructions for building source on Windows
-COMPILE-linux.tx    - instructions for building source on Linux / Unix
+COMPILE-win32.txt   - instructions for building from source on Windows
+COMPILE-linux.tx    - instructions for building from source on Linux / Unix
 
-Linux 64 bit is known NOT to work, because of current compiler
-deficiencies. This will hopefully be sorted out at some point, but
-it's not a bug in the OpenMW code.
-
+Linux 64 does NOT work because of problems with the D compiler. This
+will hopefully be sorted out at some point, but right now it is not
+supported.
 
 
 
@@ -92,11 +48,10 @@ niftool     - Decodes one or more NIF files and prints the details.
 
 
 
-
 Acknowledgements
 ================
 
-Thanks goes out to:
+Thanks go out to:
 
 - Bethesda Softworks for creating Morrowind!
 
@@ -104,13 +59,10 @@ Thanks goes out to:
   file format.
 
 - Dmitry Marakasov for testing and porting to FreeBSD.
-
 - Bastien Jansen for testing on 64 bit linux.
-
 - Chris Robinson for OpenAL and MP3 support
-
-- Various others for testing, ideas and patches
-
+- Jacob Essex for landscape code (still in progress)
+- Many others for testing, ideas and patches
 
 
 
@@ -119,16 +71,14 @@ Changelog:
 
 0.5 (WIP)
 
-- working on collision detection with Bullet
-- working on walk & fall character physics
-- working on fixing sound issues for windows (running out of sound
-  resources, music playback doesn't good)
-- new key bindings:
+- Collision detection with Bullet
+- Experimental walk & fall character physics
+- (WIP) Fixed various sound issues on Windows
+- New key bindings:
   t - toggle physics mode (walking, flying, ghost)
-  n - nighteye, toggle full ambient light
-- added build files for CMake (with CMakeD) and Code::Blocks (neither
-  are tested yet)
-- various minor changes and updates
+  n - night-eye: brightens the scene
+- Fixed incompatability with DMD 1.032 and newer
+- Various minor changes and updates
 
 0.4 (2008 aug. 30) - latest release
 

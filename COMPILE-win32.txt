@@ -19,6 +19,8 @@ Supported Windows platforms:
 Only tested on Windows XP. If you manage to compile or run OpenMW on
 another Windows platform (9x/Me/NT/2000/Vista), please let me know!
 
+At the moment, only command line building is supported.
+
 
 
 Dependencies:
@@ -34,10 +36,10 @@ Note that the "official" D compiler, DMD, will not currently work on
 Windows, because it is uses an object format incompatible with most
 C++ compilers.
 
-As of verion 0.4, all library dependencies have been included in the
-single file openmw-dll-pack.zip for convenience. Simply download the
-file and unpack it in the same directory as the OpenMW source
-code. You should not need to download any other files.
+All library dependencies are included in the file
+openmw-dll-pack.zip. Simply download this file and unpack it in the
+same directory as the OpenMW source code. You should not need to
+download any other dependencies.
 
 
 
@@ -75,11 +77,16 @@ OGRE:     http://ogre3d.org
 OIS:      Comes with the Ogre SDK
 OpenAL:   http://openal.org/
 FFmpeg:   http://ffmpeg.mplayerhq.hu/
+Bullet:   (fill in here)
 
-The biggest problem is the lack of a prebuilt SDK for FFmpeg. You must
-build it under Mingw as well (not Cygwin!). I found the following link
-helpful (read the comments as well, not just the post itself):
+The biggest problem is the lack of a prebuilt SDKs for FFmpeg and
+Bullet. You must build these yourself.
+
+FFmpeg must build it under Mingw (not Cygwin!). I found the following
+link helpful (read the comments as well, not just the post itself):
 http://www.gooli.org/blog/building-ffmpeg-for-windows-with-msys-and-mingw/
+
+Bullet: (not written yet)
 
 
 
