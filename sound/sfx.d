@@ -106,9 +106,9 @@ struct SoundFile
     int total = 0;
     do
       {
-        // Grow by an arbitrary amount. Should be big enough to get the
-        // whole sound in one or two iterations, but not allocate too much
-        // memory in case its short
+        // Grow by an arbitrary amount. Should be big enough to get
+        // the whole sound in one or two iterations, but not allocate
+        // too much memory in case it's short
         outData.length = outData.length+8192;
         int length = avc_getAVAudioData(audioHandle, outData.ptr+total, outData.length-total);
         total += length;
@@ -135,9 +135,6 @@ struct SoundFile
   }
 
   // Get an instance of this resource.
-  // FIXME: Should not call fail() here since it's quite possible for this to
-  // fail (on hardware drivers). When it does, it should check for an existing
-  // sound it doesn't need and kill it, then try again
   SoundInstance getInstance()
   {
     SoundInstance si;
@@ -232,6 +229,8 @@ struct SoundInstance
   // culling for moving and stationary sounds
   void updateSound()
   {
+    if(owner is null) return;
+
     ALfloat lp[3];
     ALfloat p[3];
     ALfloat dist;
@@ -243,8 +242,16 @@ struct SoundInstance
         p[0] -= lp[0];
         p[1] -= lp[1];
         p[2] -= lp[2];
-        if((p[0]*p[0] + p[1]*p[1] + p[2]*p[2]) > dist*dist)
-          alSourcef(inst, AL_GAIN, 0);
+
+        // If the sound is out of range, mute it
+        ALfloat d2 = p[0]*p[0] + p[1]*p[1] + p[2]*p[2];
+        if(d2 > dist*dist)
+          {
+            alSourcef(inst, AL_GAIN, 0);
+
+            // If the sound is really out of range, we should reclaim
+            // it. This is not implemented yet.
+          }
         else
           alSourcef(inst, AL_GAIN, volume);
       }

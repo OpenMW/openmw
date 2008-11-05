@@ -381,10 +381,20 @@ void main(char[][] args)
       writefln();
     }
   /*
-  writefln("Statics:");
-  foreach(ref s; cd.statics)
+  writefln("Races:");
+  foreach(s; races.names)
     {
-      writefln("%s: %s", s.m.id, s.m.model.getName);
+      writefln("%s:", s.id);
+      writefln("  strength: ", s.data.strength[0]);
+      writefln("  intelligence: ", s.data.intelligence[0]);
+      writefln("  willpower: ", s.data.willpower[0]);
+      writefln("  agility: ", s.data.agility[0]);
+      writefln("  speed: ", s.data.speed[0]);
+      writefln("  endurance: ", s.data.endurance[0]);
+      writefln("  personality: ", s.data.personality[0]);
+      writefln("  luck: ", s.data.luck[0]);
+      writefln("  height: ", s.data.height[0]);
+      writefln("  weight: ", s.data.weight[0]);
     }
   */
 

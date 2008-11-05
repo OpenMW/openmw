@@ -32,6 +32,7 @@ Mute Sound=m
 Toggle Fullscreen Mode=f
 Toggle Battle Music=space
 Toggle Physics Mode=t
+Toggle Nighteye=n
 OGRE Test Action=g
 Pause=pause,p
 Screen Shot=print_screen

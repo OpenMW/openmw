@@ -29,8 +29,8 @@ Dependencies:
 To compile OpenMW you need Mingw with g++ (a C++ compiler) and gdc
 (the D compiler.) You can find them here:
 
-Mingw     http://sourceforge.net/projects/mingw/
-gdc       http://sourceforge.net/projects/gdcwin/
+Mingw:    http://sourceforge.net/projects/mingw/
+gdc:      http://sourceforge.net/projects/gdcwin/
 
 Note that the "official" D compiler, DMD, will not currently work on
 Windows, because it is uses an object format incompatible with most
@@ -70,8 +70,8 @@ Manually installing dependencies:
 ---------------------------------
 
 If you download the DLL pack mentioned above, you can skip this
-section. If you wish to install dependencies manually though, here is
-a list of dependencies and where you can find them:
+section. If you wish to install dependencies manually, here is a list
+of dependencies and where you can find them:
 
 OGRE:     http://ogre3d.org
 OIS:      Comes with the Ogre SDK
@@ -88,9 +88,9 @@ FFmpeg must be built under Mingw (not Cygwin!). I found the following
 link helpful (read the comments as well, not just the post itself):
 http://www.gooli.org/blog/building-ffmpeg-for-windows-with-msys-and-mingw/
 
-After building, place the dll files in the openmw "root" (same place
-as build_openmw.bat) and the include files in includes/ffmpeg. Refer
-to build_openmw.bat for the exact names and locations of expected files.
+After building, place the dlls in the openmw "root" (same place as
+build_openmw.bat) and the include files in includes/ffmpeg. Refer to
+build_openmw.bat for the exact names and locations of expected files.
 
 Bullet:
 

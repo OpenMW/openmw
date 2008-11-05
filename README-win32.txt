@@ -22,8 +22,8 @@ openmw-dll-pack.zip      - library pack
 You only need the binary or the source package, not both. The DLL pack
 is needed in both cases.
 
-If downloaded the source release, please read COMPILE-win32.txt before
-reading the rest of this file.
+NOTE: If downloaded the SOURCE release, please read COMPILE-win32.txt
+before reading the rest of this file.
 
 
 Configuration
@@ -31,7 +31,7 @@ Configuration
 
 OpenMW assumes you have the Morrowind data files in c:\Program
 Files\Bethesda Softworks\Morrowind\Data Files\ . If this is not where
-you have installed Morrowind, you should edit the openmw.ini file.
+you have installed Morrowind, you should edit the file openmw.ini.
 
 
 Running
@@ -40,9 +40,9 @@ Running
 Just run openmw.exe and enjoy! ;-)
 
 The first time you run OpenMW, you will be asked to set screen
-resolution and other graphics settings. To be safe, it's not
-recommended to select fullscreen mode on the first run. You can bring
-up the dialogue at any time by using the -oc switch.
+resolution and other graphics settings. To be safe, I don't recommend
+setting fullscreen mode on the first run. You can bring up the
+dialogue at any time by using the -oc switch.
 
 Move around with WASD or arrow keys, change physics mode (walking,
 flying, ghost) with 't', exit with 'q' or escape.

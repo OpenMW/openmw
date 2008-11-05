@@ -53,8 +53,11 @@ struct Race
 
     // Attribute values for male/female
     int[2] strength, intelligence, willpower, agility,
-      speed, endurance, personality, luck, height,
-      weight;
+      speed, endurance, personality, luck;
+
+    // The actual eye level height (in game units) is (probably) given
+    // as 'height' times 128. This has not been tested yet.
+    float[2] height, weight;
 
     Flags flags; // 0x1 - playable, 0x2 - beast race
 

@@ -5,8 +5,8 @@ Written by Nicolay Korslund
 Email: korslund@gmail.com
 WWW: http://openmw.snaptoad.com
 License: See GPL3.txt
-Current version: 0.5 (WIP)
-Date: 2008 nov. 4
+Current version: 0.5
+Date: 2008 nov. 5
 
 
 QUICK NOTE: You must own and install Morrowind before you can use
@@ -19,7 +19,7 @@ Installation
 ============
 
 Currently supported platforms are Windows, Linux and FreeBSD. Most
-testing has been done on Ubuntu 8.04 and Windows XP Professional.
+testing is done on Ubuntu 8.04 and Windows XP Professional.
 
 For instructions, see one of the following:
 
@@ -27,9 +27,8 @@ README-win32.txt    - instructions for binary Windows release
 COMPILE-win32.txt   - instructions for building from source on Windows
 COMPILE-linux.tx    - instructions for building from source on Linux / Unix
 
-Linux 64 does NOT work because of problems with the D compiler. This
-will hopefully be sorted out at some point, but right now it is not
-supported.
+Linux 64 does NOT work, because of problems with the D compiler. We
+hope to sort this out at some point, but right now it's not supported.
 
 
 
@@ -69,18 +68,18 @@ Thanks go out to:
 Changelog:
 ==========
 
-0.5 (WIP)
+0.5 (2008 nov. 5) - latest release
 
 - Collision detection with Bullet
 - Experimental walk & fall character physics
-- (WIP) Fixed various sound issues on Windows
 - New key bindings:
   t - toggle physics mode (walking, flying, ghost)
   n - night-eye: brightens the scene
 - Fixed incompatability with DMD 1.032 and newer
 - Various minor changes and updates
 
-0.4 (2008 aug. 30) - latest release
+
+0.4 (2008 aug. 30)
 
 - switched from Audiere to OpenAL (BIG thanks to Chris Robinson)
 - added complete Makefile (again) as a alternative build tool

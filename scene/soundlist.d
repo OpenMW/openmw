@@ -81,9 +81,7 @@ struct SoundList
   {
     SoundInstance.setPlayerPos(x,y,z,frontx,fronty,frontz,upx,upy,upz);
     foreach(ref s; list)
-      {
-        if(s.owner) s.updateSound();
-      }
+      if(s.owner) s.updateSound();
   }
 
   void kill()

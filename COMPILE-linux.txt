@@ -76,14 +76,31 @@ OIS:              http://sourceforge.net/projects/wgois/
 FFmpeg:           http://ffmpeg.mplayerhq.hu/download.html
 Bullet:           http://bulletphysics.com/
 
+
 Setting up Bullet
 -----------------
 
-Bullet is not yet included in most Linux distributions. Follow these
-instructions for setting it up manually.
+Bullet is not yet included in most Linux distributions, and must
+usually be compiled manually. Consult the documentation included with
+Bullet for instructions on compiling.
 
-(to be written)
+After compiling, you should have the files libbulletdynamics.a,
+libbulletcollision.a and libbulletmath.a. (Depending on build method,
+you may end up with names like libLibBulletDynamics.a instead.) Copy
+or link these to bullet/ in the openmw directory (and rename them to
+the libbulletdynamics.a etc if necessary.)
 
+Example:
+cd openmw/bullet
+ln -s ~/software/bullet-2.72/src/BulletCollision/libbulletcollision.a .
+
+Next, create a link to the "src" directory in openmw/include/bullet/ .
+
+Example:
+cd openmw
+mkdir -p include
+cd include
+ln -s ~/software/bullet-2.72/src bullet
 
 
 Choosing a D compiler
