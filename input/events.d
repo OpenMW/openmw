@@ -239,7 +239,7 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
 const float sndRefresh = 0.17;
 
 // Refresh rate for music fadeing, seconds.
-const float musRefresh = 0.2;
+const float musRefresh = 0.05;
 
 float sndCumTime = 0;
 float musCumTime = 0;

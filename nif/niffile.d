@@ -302,16 +302,13 @@ struct NIFFile
     }
 
   // Set the size of the provided array to 'count', and fill it.
-  template getArraySize(T)
+  T[] getArraySize(T)(int count)
     {
-      T[] getArraySize(int count)
-	{
-	  T[] arr;
-	  fitArray(count, T.sizeof);
-	  arr = cast(T[])nifRegion.allocate(count * T.sizeof);
-	  getArrayLen!(T)(arr);
-	  return arr;
-	}
+      T[] arr;
+      fitArray(count, T.sizeof);
+      arr = cast(T[])nifRegion.allocate(count * T.sizeof);
+      getArrayLen!(T)(arr);
+      return arr;
     }
 
   // Get an array of Ts preceded by an array length of type Index

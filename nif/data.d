@@ -153,7 +153,7 @@ class ShapeData : Record
           if(uvs > 0b111111)
             {
               nifFile.warn("UV count contains (unknown) flags");
-              uvs = uvs & 0b111111;
+              uvs = cast(short)(uvs & 0b111111);
             }
 
 	  uvlist = nifFile.getArraySize!(float)(uvs*verts*2);

@@ -74,7 +74,7 @@ OpenAL:           http://openal.org/
   Linux source:   http://kcat.strangesoft.net/openal.html
 OIS:              http://sourceforge.net/projects/wgois/
 FFmpeg:           http://ffmpeg.mplayerhq.hu/download.html
-Bullet:           (fill in here)
+Bullet:           http://bulletphysics.com/
 
 Setting up Bullet
 -----------------
