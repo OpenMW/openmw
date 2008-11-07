@@ -29,6 +29,7 @@ import std.stream;
 import std.string;
 
 import util.regions;
+import util.utfconvert;
 import monster.util.string;
 import core.resource;
 

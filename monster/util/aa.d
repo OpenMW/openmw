@@ -297,6 +297,19 @@ struct HashTable(Key, Value, Alloc = GCAlloc, Hash = DefHash,
       return p.value;
     }
 
+  // Gets the stored key associated with the given key. This seemingly
+  // useless function is handy for custom hashers that collapse
+  // several values into one, for example the case insensitive string
+  // hasher. getKey will return the key as it was originally inserted
+  // into the list. In the case of reference types (such as arrays) it
+  // can also be used for referencing the original data.
+  Key getKey(Key k)
+    {
+      Node *p = lookupKey(k);
+      if(!p) fail("Cannot get key '%s', not found", k);
+      return p.key;
+    }
+
   // Insert a new value, replace it if it already exists. Returns v.
   Value insert(Key k, Value v)
     {

@@ -25,7 +25,7 @@ module nif.extra;
 import nif.record;
 import nif.controlled;
 
-import monster.util.string;
+import util.utfconvert;
 
 abstract class Extra : Record
 {

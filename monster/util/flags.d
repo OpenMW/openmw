@@ -34,18 +34,22 @@ struct Flags(T)
   void unset(T t)
     { flags ^= flags & t; }
 
-  bool has(T t)
-    { return (flags & t) == t; }
-
-  bool hasAny(T t)
-    { return (flags & t) != 0; }
-
   void set(T t, bool value)
     {
       if(value) set(t);
       else unset(t);
       assert(has(t) == value);
     }
+
+  // Does it have all of the bits in the parameter set?
+  bool has(T t)
+    { return (flags & t) == t; }
+
+  // Does it have any of the bits in the parameter set?
+  bool hasAny(T t)
+    { return (flags & t) != 0; }
+
+  // For single-bit parameters, has() and hasAny() are identical.
 }
 
 unittest
