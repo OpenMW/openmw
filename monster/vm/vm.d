@@ -23,10 +23,10 @@
 
 module monster.vm.vm;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
-import monster.minibos.uni;
-import monster.minibos.c.string;
+import std.string;
+import std.stdio;
+import std.uni;
+import std.c.string;
 
 import monster.compiler.bytecode;
 import monster.compiler.linespec;

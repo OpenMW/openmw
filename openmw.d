@@ -41,6 +41,7 @@ import core.memory;
 import core.config;
 
 import monster.util.string;
+import mscripts.object;
 
 import sound.audio;
 
@@ -125,6 +126,7 @@ void main(char[][] args)
     }
 
   initializeMemoryRegions();
+  initMonsterScripts();
 
   /*
   importSavegame("data/quiksave.ess");

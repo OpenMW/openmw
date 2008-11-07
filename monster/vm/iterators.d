@@ -30,8 +30,8 @@ import monster.vm.mclass;
 import monster.vm.mobject;
 import monster.util.flags;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
+import std.string;
+import std.stdio;
 
 // An iterator index.
 typedef int IIndex;

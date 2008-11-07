@@ -50,7 +50,7 @@ import monster.vm.mclass;
 import monster.vm.error;
 import monster.vm.fstack;
 
-import monster.minibos.stdio;
+import std.stdio;
 
 // One problem with these split compiler / vm classes is that we
 // likely end up with data (or at least pointers) we don't need, and a

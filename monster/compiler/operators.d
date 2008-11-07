@@ -32,7 +32,7 @@ import monster.compiler.types;
 import monster.vm.error;
 import monster.vm.arrays;
 
-import monster.minibos.stdio;
+import std.stdio;
 
 // Handles - ! ++ --
 class UnaryOperator : Expression

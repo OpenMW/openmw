@@ -30,8 +30,8 @@ import monster.compiler.expression;
 import monster.compiler.scopes;
 import monster.compiler.block;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
+import std.string;
+import std.stdio;
 import monster.vm.error;
 
 enum VarType

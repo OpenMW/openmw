@@ -45,10 +45,10 @@ import monster.util.flags;
 import monster.util.freelist;
 import monster.util.string;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
-import monster.minibos.file;
-import monster.minibos.stream;
+import std.string;
+import std.stdio;
+import std.file;
+import std.stream;
 
 // TODO: Needed to fix DMD/GDC template problems. Remove if this bug
 // is fixed.

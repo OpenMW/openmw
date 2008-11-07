@@ -24,9 +24,9 @@
 
 module monster.vm.stack;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
-import monster.minibos.utf;
+import std.string;
+import std.stdio;
+import std.utf;
 
 import monster.compiler.scopes;
 

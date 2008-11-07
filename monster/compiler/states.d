@@ -34,7 +34,7 @@ import monster.vm.error;
 
 import monster.util.aa;
 
-import monster.minibos.stdio;
+import std.stdio;
 
 struct State
 {

@@ -32,9 +32,9 @@ import monster.compiler.states;
 import monster.compiler.variables;
 import monster.compiler.scopes;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
-import monster.minibos.utf;
+import std.string;
+import std.stdio;
+import std.utf;
 
 // An index to a monster object.
 typedef int MIndex;

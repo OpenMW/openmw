@@ -32,7 +32,7 @@ import monster.vm.error;
 import monster.vm.fstack;
 
 import monster.util.freelist;
-import monster.minibos.string;
+import std.string;
 
 // Enable minor safety checks - can be removed from release code.
 debug=safecheck;

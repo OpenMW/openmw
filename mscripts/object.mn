@@ -1,0 +1,8 @@
+// This is the base class of all OpenMW Monster classes.
+class Object;
+
+// Sleeps a given amount of time
+idle sleep(float seconds);
+
+// Print a message to screen
+native print(char[][] msg...);

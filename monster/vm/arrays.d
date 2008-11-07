@@ -27,9 +27,9 @@ import monster.util.freelist;
 import monster.util.flags;
 import monster.vm.error;
 
-import monster.minibos.string;
-import monster.minibos.uni;
-import monster.minibos.stdio;
+import std.string;
+import std.uni;
+import std.stdio;
 
 // An index to an array. Array indices may be 0, unlike object indices
 // which span from 1 and upwards, and has 0 as the illegal 'null'

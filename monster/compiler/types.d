@@ -35,8 +35,8 @@ import monster.compiler.states;
 import monster.vm.mclass;
 import monster.vm.error;
 
-import monster.minibos.stdio;
-import monster.minibos.string;
+import std.stdio;
+import std.string;
 
 /*
   List of all type classes:

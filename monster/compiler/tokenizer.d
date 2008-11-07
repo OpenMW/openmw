@@ -24,9 +24,9 @@
 
 module monster.compiler.tokenizer;
 
-import monster.minibos.string;
-import monster.minibos.stream;
-import monster.minibos.stdio;
+import std.string;
+import std.stream;
+import std.stdio;
 
 import monster.util.string : begins;
 

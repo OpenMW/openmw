@@ -27,7 +27,7 @@ import monster.compiler.scopes;
 import monster.compiler.types;
 import monster.compiler.assembler;
 
-import monster.minibos.stdio;
+import std.stdio;
 
 /* This module contains special scopes for builtin types. These are
    used to resolve type properties like .length for arrays and .min

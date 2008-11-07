@@ -26,7 +26,7 @@ module monster.vm.error;
 
 import monster.compiler.tokenizer;
 version(Tango) import tango.core.Exception;
-import monster.minibos.string;
+import std.string;
 
 class MonsterException : Exception
 {

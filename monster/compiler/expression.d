@@ -38,9 +38,9 @@ import monster.vm.mclass;
 import monster.vm.arrays;
 import monster.util.list;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
-import monster.minibos.utf : decode, toUTF32;
+import std.string;
+import std.stdio;
+import std.utf : decode, toUTF32;
 
 alias Expression[] ExprArray;
 

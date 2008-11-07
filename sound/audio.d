@@ -26,6 +26,8 @@ module sound.audio;
 public import sound.sfx;
 public import sound.music;
 
+import monster.monster;
+
 import sound.al;
 import sound.alc;
 

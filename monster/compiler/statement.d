@@ -24,8 +24,8 @@
 
 module monster.compiler.statement;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
+import std.string;
+import std.stdio;
 
 import monster.compiler.tokenizer;
 import monster.compiler.expression;

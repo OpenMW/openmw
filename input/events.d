@@ -35,6 +35,8 @@ import scene.player;
 
 import bullet.bindings;
 
+import monster.monster;
+
 import ogre.bindings;
 
 import input.keys;
@@ -289,6 +291,9 @@ extern(C) int d_frameStarted(float time)
     }
 
   if(doExit) return 0;
+
+  // Run the Monster scheduler
+  scheduler.doFrame();
 
   musCumTime += time;
   if(musCumTime > musRefresh)

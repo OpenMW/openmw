@@ -24,8 +24,8 @@
 
 module monster.vm.codestream;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
+import std.string;
+import std.stdio;
 import monster.vm.error;
 import monster.compiler.linespec;
 

@@ -24,8 +24,8 @@
 
 module monster.compiler.assembler;
 
-import monster.minibos.string;
-import monster.minibos.stdio;
+import std.string;
+import std.stdio;
 
 import monster.util.list;
 

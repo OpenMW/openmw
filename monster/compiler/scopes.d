@@ -23,8 +23,8 @@
 
 module monster.compiler.scopes;
 
-import monster.minibos.stdio;
-import monster.minibos.string;
+import std.stdio;
+import std.string;
 
 import monster.util.aa;
 
