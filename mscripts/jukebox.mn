@@ -1,0 +1,212 @@
+/*
+  OpenMW - The completely unofficial reimplementation of Morrowind
+  Copyright (C) 2008  Nicolay Korslund
+  Email: < korslund@gmail.com >
+  WWW: http://openmw.snaptoad.com/
+
+  This file (jukebox.mn) is part of the OpenMW package.
+
+  OpenMW is distributed as free software: you can redistribute it
+  and/or modify it under the terms of the GNU General Public License
+  version 3, as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  version 3 along with this program. If not, see
+  http://www.gnu.org/licenses/ .
+
+ */
+
+/*
+   A simple jukebox with a playlist. It can play, stop, pause with
+   fade in and fade out, and adjust volume.
+*/
+
+class Jukebox : Object;
+
+// Between 0 (off) and 1 (full volume)
+float fadeLevel = 0.0;
+
+// How much to fade in and out each second
+float fadeInRate = 0.10;
+float fadeOutRate = 0.25;
+
+// Time between each fade step
+float fadeInterval = 0.2;
+
+// List of sounds to play
+char[][] playlist;
+
+// Index of current song
+int index;
+
+// The music volume, set by the user. Does NOT change to adjust for
+// fading, etc. TODO: This should be stored in a configuration class,
+// not here.
+float musVolume;
+
+bool isPlaying; // Is a song currently playing?
+
+// TODO: Make "isPaused" instead, makes more sense
+bool hasSong; // Is a song currently selected (playing or paused)
+
+// TODO: Move to Object for now
+native int randInt(int a, int b);
+
+// Native functions to control music
+native setSound(char[] filename);
+native setVolume(float f);
+native playSound();
+native stopSound();
+idle waitUntilFinished();
+
+// Fade out and then stop the music. TODO: Rename these to resume()
+// etc and use super.resume, when this is possible.
+pause() { state = fadeOut; }
+resume()
+{
+  if(!hasSong) next();
+  else playSound();
+
+  state = fadeIn;
+}
+
+// Stop the current song. Calling resume again after this is called
+// will start a new song.
+stop()
+{
+  stopSound();
+
+  hasSong = false;
+  isPlaying = false;
+  fadeLevel = 0.0;
+  state = null;
+}
+
+play()
+{
+  if(index >= playlist.length)
+    return;
+
+  setSound(playlist[index]);
+  playSound();
+
+  isPlaying = true;
+  hasSong = true;
+}
+
+// Play the next song in the playlist
+next()
+{
+  if(isPlaying)
+    stop();
+
+  // Find the index of the next song, if any
+  if(playlist.length == 0) return;
+
+  if(++index >= playlist.length)
+    {
+      index = 0;
+      randomize();
+    }
+
+  play();
+}
+
+// Set the new music volume setting. TODO: This should be read from a
+// config object instead.
+updateVolume(float vol)
+{
+  musVolume = vol;
+  if(isPlaying)
+    setVolume(musVolume*fadeLevel);
+}
+
+setPlaylist(char[][] lst)
+{
+  playlist = lst;
+  randomize();
+}
+
+// Randomize playlist.
+randomize()
+{
+  if(playlist.length < 2) return;
+
+  foreach(int i, char[] s; playlist)
+    {
+      // Index to switch with
+      int idx = randInt(i,playlist.length-1);
+
+      // To avoid playing the same song twice in a row, don't set the
+      // first song to the previous last.
+      if(i == 0 && idx == playlist.length-1)
+        idx--;
+
+      if(idx == i) // Skip if swapping with self
+        continue;
+
+      playlist[i] = playlist[idx];
+      playlist[idx] = s;
+    }
+}
+
+// Fade in
+state fadeIn
+{
+ begin:
+
+  setVolume(musVolume*fadeLevel);
+
+  sleep(fadeInterval);
+
+  fadeLevel += fadeInterval*fadeInRate;
+
+  if(fadeLevel >= 1.0)
+    {
+      fadeLevel = 1.0;
+      setVolume(musVolume);
+      state = playing;
+    }
+  goto begin;
+}
+
+// Fade out
+state fadeOut
+{
+ begin:
+
+  sleep(fadeInterval);
+
+  fadeLevel -= fadeInterval*fadeOutRate;
+
+  if(fadeLevel <= 0.0)
+    {
+      fadeLevel = 0.0;
+
+      stopSound();
+      isPlaying = false;
+
+      state = null;
+    }
+
+  setVolume(musVolume*fadeLevel);
+  goto begin;
+}
+
+state playing
+{
+ begin:
+  // Wait for the song to play. Will return imediately if the song has
+  // already stopped or if no song is playing
+  waitUntilFinished();
+
+  // Start playing the next song
+  next();
+
+  goto begin;
+}

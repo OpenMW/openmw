@@ -119,7 +119,7 @@ struct SoundFile
       {
         alGenBuffers(1, &bID);
         alBufferData(bID, fmt, outData.ptr, total, rate);
-        if(checkALError())
+        if(!noALError())
           {
             writefln("Unable to load sound %s", file);
             alDeleteBuffers(1, &bID);
@@ -140,11 +140,11 @@ struct SoundFile
     SoundInstance si;
     si.owner = this;
     alGenSources(1, &si.inst);
-    if(checkALError() || !si.inst)
+    if(!noALError() || !si.inst)
       fail("Failed to instantiate sound resource");
 
     alSourcei(si.inst, AL_BUFFER, cast(ALint)bID);
-    if(checkALError())
+    if(!noALError())
       {
         alDeleteSources(1, &si.inst);
         fail("Failed to load sound resource");
@@ -237,7 +237,7 @@ struct SoundInstance
     alGetSourcef(inst, AL_MAX_DISTANCE, &dist);
     alGetSourcefv(inst, AL_POSITION, p.ptr);
     alGetListenerfv(AL_POSITION, lp.ptr);
-    if(!checkALError("updating sound position"))
+    if(noALError())
       {
         p[0] -= lp[0];
         p[1] -= lp[1];

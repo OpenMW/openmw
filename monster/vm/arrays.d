@@ -30,6 +30,7 @@ import monster.vm.error;
 import std.string;
 import std.uni;
 import std.stdio;
+import std.utf;
 
 // An index to an array. Array indices may be 0, unlike object indices
 // which span from 1 and upwards, and has 0 as the illegal 'null'
@@ -151,6 +152,9 @@ struct Arrays
   alias createT!(double) create;
   alias createT!(dchar) create;
   alias createT!(AIndex) create;
+
+  ArrayRef *create(char[] arg)
+  { return create(toUTF32(arg)); }
 
   // Generic element size
   ArrayRef *create(int[] data, int size)

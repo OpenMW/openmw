@@ -26,8 +26,6 @@ module sound.audio;
 public import sound.sfx;
 public import sound.music;
 
-import monster.monster;
-
 import sound.al;
 import sound.alc;
 
@@ -56,14 +54,16 @@ void initializeSound()
 
   alcMakeContextCurrent(Context);
 
+  MusicManager.sinit();
+
   jukebox.initialize("Main");
   battleMusic.initialize("Battle");
 }
 
 void shutdownSound()
 {
-  jukebox.disableMusic();
-  battleMusic.disableMusic();
+  jukebox.shutdown();
+  battleMusic.shutdown();
 
   alcMakeContextCurrent(null);
   if(Context) alcDestroyContext(Context);
@@ -72,14 +72,14 @@ void shutdownSound()
   Device = null;
 }
 
-bool checkALError(char[] what = "")
+void checkALError(char[] what = "")
 {
-    ALenum err = alGetError();
-    if(what.length) what = " while " ~ what;
-    if(err != AL_NO_ERROR)
-      writefln("WARNING: OpenAL error%s: (%x) %s", what, err,
-               toString(alGetString(err)));
-
-
-    return err != AL_NO_ERROR;
+  ALenum err = alGetError();
+  if(what.length) what = " while " ~ what;
+  if(err != AL_NO_ERROR)
+    throw new Exception(format("OpenAL error%s: (%x) %s", what, err,
+               toString(alGetString(err))));
 }
+
+bool noALError()
+{ return alGetError() == AL_NO_ERROR; }

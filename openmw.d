@@ -347,7 +347,7 @@ void main(char[][] args)
       initializeInput();
 
       // Start swangin'
-      if(!noSound) jukebox.enableMusic();
+      if(!noSound) jukebox.play();
 
       // Run it until the user tells us to quit
       startRendering();

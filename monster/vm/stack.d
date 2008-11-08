@@ -99,7 +99,7 @@ struct CodeStack
         fleft = 0;
         return;
       }
-    fleft = left + (frm-pos);
+    fleft = left + (pos-frm);
     assert(fleft >= 0 && fleft <= total);
   }
 

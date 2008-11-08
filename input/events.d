@@ -81,15 +81,15 @@ void toggleBattle()
   if(battle)
     {
       writefln("Changing to normal music");
-      jukebox.resumeMusic();
-      battleMusic.pauseMusic();
+      jukebox.resume();
+      battleMusic.pause();
       battle=false;
     }
   else
     {
       writefln("Changing to battle music");
-      jukebox.pauseMusic();
-      battleMusic.resumeMusic();
+      jukebox.pause();
+      battleMusic.resume();
       battle=true;
     }
 }
@@ -298,8 +298,8 @@ extern(C) int d_frameStarted(float time)
   musCumTime += time;
   if(musCumTime > musRefresh)
     {
-      jukebox.addTime(musRefresh);
-      battleMusic.addTime(musRefresh);
+      jukebox.updateBuffers();
+      battleMusic.updateBuffers();
       musCumTime -= musRefresh;
     }
 
