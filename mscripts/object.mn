@@ -29,3 +29,6 @@ idle sleep(float seconds);
 
 // Print a message to screen
 native print(char[][] msg...);
+
+// Get a random number between a and b (inclusive)
+native int randInt(int a, int b);

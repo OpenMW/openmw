@@ -404,10 +404,38 @@ extern "C" void bullet_insertStatic(btConcaveShape *shape,
   // FIXME: Scaling does NOT work.
 
   // Are we scaled?
-  if(scale != 1.0) {}
-    // Wrap the shape in a class that scales it. TODO: Try this on
-    // ALL shapes, just to test the slowdown.
-    //shape = new ScaleShape(shape, scale);
+  if(scale != 1.0)
+    {
+      cout << "Scaling shape " << shape << " by " << scale << endl;
+
+      // Not quite sure how to handle local scaling yet. Our initial
+      // attempt was to create a wrapper that showed a scale mesh to
+      // the "outside world" while referencing the original, but I
+      // suspect it ended up altering the original data. At least it
+      // doesn't work the way it is now, and only crashes.
+
+      // The alternative is to create a new copy of the shape for each
+      // scaled version we insert. This is wasteful, but might be
+      // acceptable.
+
+      // It's also possible we can achieve this effect by changing
+      // larger parts of the Bullet library - but I hope I don't have
+      // to create my own dispatcher and such. Finally, even if the
+      // transformations given to objects are supposed to be uniform
+      // in length, maybe we can cheat the system and scale the
+      // transformation instead. Try it just for kicks, and go through
+      // the system to see what parts of Bullet it would break.
+
+      // In any case, when we find a solution we should apply it to
+      // all shapes (not just scale!=1.0) to get a better impression
+      // of any performance and memory overhead.
+
+      // Also, as an optimization, it looks like multiple instances of
+      // the same shape are often inserted with the same scale
+      // factor. We could easily cache this. The scale-recreation of
+      // meshes (in necessary) could be done as a separate function,
+      // and the caching could be done in D code.
+    }
 
   btTransform trafo;
   trafo.setIdentity();

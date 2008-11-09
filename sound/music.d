@@ -90,9 +90,6 @@ struct MusicManager
   {
     assert(mc is null);
     mc = new MonsterClass("Jukebox", "jukebox.mn");
-    mc.bind("randInt",
-            { stack.pushInt(rnd.randInt
-                (stack.popInt,stack.popInt));});
     mc.bind("waitUntilFinished",
             new Idle_waitUntilFinished);
 

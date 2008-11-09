@@ -26,6 +26,7 @@ module mscripts.object;
 import monster.monster;
 import std.stdio;
 import std.date;
+import core.resource : rnd;
 
 // Set up the base Monster classes we need in OpenMW
 void initMonsterScripts()
@@ -38,6 +39,9 @@ void initMonsterScripts()
 
   // Bind various functions
   mc.bind("print", { print(); });
+  mc.bind("randInt",
+  { stack.pushInt(rnd.randInt
+    (stack.popInt,stack.popInt));});
   mc.bind("sleep", new IdleSleep);
 
   // Load and run the test script
