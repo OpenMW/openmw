@@ -60,6 +60,8 @@ void main(char[][] args)
 
   bool weList; // List weapons
 
+  bool gmst; // List game settings
+
   bool numbers; // List how many there are of each record type
 
   foreach(char[] a; args[1..$])
@@ -69,6 +71,7 @@ void main(char[][] args)
     else if(a == "-s") scptShow = true;
     else if(scptShow && scptName == "") scptName = a;
 
+    else if(a == "-g") gmst = true;
     else if(a == "-cil") ciList = true;
     else if(a == "-cel") ceList = true;
 
@@ -85,8 +88,9 @@ void main(char[][] args)
       writefln("Syntax: %s [options] esm-file [esm-file ... ]", args[0]);
       writefln("  Options:");
       writefln("    -r            Display all records in raw format");
-      writefln("    -n            List the number of each record");
+      writefln("    -n            List the number of each record type");
       writefln("    -sl           List scripts");
+      writefln("    -g            List game settings (GMST)");
       writefln("    -s name       Show given script");
       writefln("    -cil          List interior cells");
       writefln("    -cel          List exterior cells with names");
@@ -222,6 +226,18 @@ void main(char[][] args)
       writefln("Total actors: ", actors.length);
       writefln("Total cell placable items: ", cellRefs.length);
     }
+  if(gmst)
+    {
+      foreach(a, b; gameSettings.names)
+        {
+          writef(a, " (");
+          if(b.type == VarType.Int) writefln("int) = ", b.i);
+          else if(b.type == VarType.Float) writefln("float) = ", b.f);
+          else if(b.type == VarType.String) writefln("string) = '%s'", b.str);
+          else writefln("no value)", cast(int)b.type);
+        }
+    }
+
   if(scptList) foreach(a, b; scripts.names) writefln(a);
   if(ciList)
     foreach(a, b; cells.in_cells)

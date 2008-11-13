@@ -35,6 +35,7 @@ import bullet.bullet;
 
 import scene.celldata;
 import scene.soundlist;
+import scene.gamesettings;
 
 import core.resource;
 import core.memory;
@@ -167,6 +168,8 @@ void main(char[][] args)
 
   // Load all ESM and ESP files
   loadTESFiles(config.gameFiles);
+
+  scene.gamesettings.loadGameSettings();
 
   CellData cd = cellList.get();
 

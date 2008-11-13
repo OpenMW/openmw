@@ -1,0 +1,2107 @@
+/*
+  OpenMW - The completely unofficial reimplementation of Morrowind
+  Copyright (C) 2008  Nicolay Korslund
+  Email: < korslund@gmail.com >
+  WWW: http://openmw.snaptoad.com/
+
+  This file (gamesettings.mn) is part of the OpenMW package.
+
+  OpenMW is distributed as free software: you can redistribute it
+  and/or modify it under the terms of the GNU General Public License
+  version 3, as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  version 3 along with this program. If not, see
+  http://www.gnu.org/licenses/ .
+
+ */
+
+// Contains all the game settings (GMST) variables of Morrowind,
+// Tribunal and Bloodmoon. Based on "Morrowind Scripting for Dummies"
+// (v9).
+class GameSettings : Object;
+
+// TODO / FIXME: This file is NOT completely edited. We need to read
+// through this entire file, alongside with the Scripting for Dummies
+// PDF, to make sure the comments have been copied and placed
+// correctly. Also, there's a question of what we should do with
+// default values - eg. if the user doesn't have Tribunal, do we still
+// need the tribunal-only GMSTs? They should be initialized to their
+// "normal" value by defailt. Dirty GMST entries are handled
+// automatically by the plugin loader, so we don't have to worry about
+// this here.
+
+// All string values are currently missing. Fix that too.
+
+
+float fRepairMult; // Sets the general effectiveness of the repair
+                   // skill of the character, via the armorer's hammer
+                   // used
+float fRepairAmountMult; // Tells the game how many points of
+                         // health are returned to the item when
+                         // repaired
+
+// Determines cost for repairing items (Whether calculated from Max
+// Item Health or Item Cost, I'm not sure)
+
+float fSpellValueMult;
+float fSpellMakingValueMult;
+float fEnchantmentValueMult; // The setting for the price you pay at an enchanter to enchant an item. Linear.
+float fTravelMult; // Sets the cost of Silt Strider and boat travel (I think)
+
+// Multiplies cost of Travel. Unsure why the number is so high, but
+// raising it raises the cost of Fast Travel
+
+float fTravelTimeMult; // Tells the game how much time elapses during
+                       // this sort of travel
+float fMagesGuildTravel; // Sets the cost of Guild Guide travel
+float fWortChanceValue; // Is compared to your alchemy skill to
+                        // determine which of the effects of an
+                        // ingredient you can see. -(Wakim, Iudas)
+float fMinWalkSpeed; // This is the minimum walking speed of the PC,
+                     // regardless of stats, skills or encumbrance
+float fMaxWalkSpeed; // This is the maximum walking speed of the PC,
+                     // regardless of stats, skills, or encumbrance
+
+// The actual walking speed of NPC's (and the PC) is set by checking
+// various factors (Speed, Athletics, etc.) and assigning a value
+// between fMinWalkSpeed and fMaxWalkSpeed based on that. The two
+// settings dictate the spectrum of Walk Speeds
+
+float fMinWalkSpeedCreature; // The same as for the PC, but if you
+                             // badly encumber a creature it'll move
+                             // veeerrry slowly. I've done this by
+                             // accident.
+
+float fMaxWalkSpeedCreature; // Same as above, they get faster, so they
+                             // cover the speed spectrum more rapidly
+
+float fEncumberedMoveEffect; // This sets how encumbrance affects
+                             // walking and running speed, within the
+                             // min/max limits set by other values.
+
+float fBaseRunMultiplier; // Exactly as it says. Changing the value
+                          // will increase/decrease base running
+                          // speed. Dictates how much faster Running is
+                          // than the current Walk Speed
+
+float fAthleticsRunBonus; // Sets how Athletics affects running speed.
+
+float fJumpAcrobaticsBase; // Sets the base jumping distance for the
+                           // PC.
+
+float fJumpAcroMultiplier; // Sets the multiplier for Acrobatics, which
+                           // is why you can leap over tall buildings
+                           // when your Acro is high enough.
+
+float fJumpEncumbranceBase; // Effects how greatly jumping ability is
+                            // effected by Encumbrance, but I'm unsure
+                            // how
+
+float fJumpEncumbranceMultiplier; // Effects how greatly jumping
+                                  // ability is effected by
+                                  // Encumbrance, but I'm unsure how
+
+float fJumpRunMultiplier; // UNSURE. Presumably effects Jump Distance
+                          // while running (it doesn't seem to effect
+                          // height, but I could be wrong)
+
+float fJumpMoveBase;
+float fJumpMoveMult;
+float fSwimWalkBase; // Multiplies your walking speed to achieve the
+                     // swimming speed at a 'walk' Base swim speed
+                     // while 'walking'
+
+float fSwimRunBase; // Multiplies your running speed to achieve the
+                    // swimming speed at a 'run'.
+
+float fSwimWalkAthleticsMult; // Tells the game how Athletics affects
+                              // 'walking' swimming speed. These low
+                              // values keep you from flying through
+                              // the water like you do on land when
+                              // your Athletics is high.
+
+float fSwimRunAthleticsMult; // Same as above.
+
+float fSwimHeightScale; // Determines how close to the surface you have
+                        // to be before the breathe indicator goes away
+
+float fHoldBreathTime; // The number of seconds your PC can hold her
+                       // breath. Base time that a character can remain
+                       // underwater before incurring suffocation
+                       // damage
+
+float fHoldBreathEndMult; // How Endurance affects the time you can
+                          // hold your breath. I believe this is a
+                          // flat-out multiplier to End, added as
+                          // seconds to HoldBreathTime.<Doesn't seem to
+                          // work.>
+
+float fSuffocationDamage; // The amount of health damage you take each
+                          // second you suffocate
+
+float fMinFlySpeed; // Exactly as it says. minimum flying speed.
+float fMaxFlySpeed;
+
+float fStromWindSpeed; // UNSURE - Determines altered walk speed during
+                       // an ash or blight storm, but I'm unsure
+                       // how. Might be a separate value from that
+                       // entirely. might determine speed of storm
+                       // particles /sprites(Dust, etc.) Interesting
+                       // (possibally related) note, while treading
+                       // water in an ash storm, I noticed I was moving
+                       // slightly.
+
+float fStromWalkMult; // Determines altered walk speed during an ash or
+                      // blight storm, but I'm unsure how uses the
+                      // getwindspeed to lower the PC movement speed
+                      // during storms...
+
+float fFallDamageDistanceMin; // The minimum distance you have to fall
+                              // before you take damage. (Presumably in
+                              // units) In game units each unit - .0.56
+                              // inches
+
+float fFallDistanceBase; // This will increase/decrease the distance
+                         // needed to fall before you take damage.
+
+float fFallDistanceMult; // Higher you are the more damage you take
+                         // when you hit
+
+float fFallAcroBase; // Acrobatics skill increases the distance you can
+                     // fall before you take damage.
+
+float fFallAcroMult; // Has to do w/ how the Acrobatics skill effects
+                     // Fall Distance and Damage, but unsure how
+
+int iMaxActivateDist; // Maximum distance for the player to be able to
+                      // 'Activate' an object - approx 9 feet
+
+int iMaxInfoDist; // Maximum distance for an Info message
+                  // (object/NPC/creature name, etc.) to pop up in the
+                  // Player's view
+
+float fVanityDelay; // Seconds until VanityMode begins. the camera
+                    // starts circling the player if there is no input
+                    // via mouse or keyboard.
+
+float fMaxHeadTrackDistance; // IIRC, this is the maximum distance an
+                             // NPC or creature can be away from
+                             // another NPC or creature and still
+                             // trigger the 'head follow' routine you
+                             // sometimes see. Put your PC in Balmora,
+                             // let it go to Vanity View and you'll see
+                             // your PC watch passing NPCs and 'follow'
+                             // their movements for a certain amount of
+                             // time.
+
+float fInteriorHeadTrackMult; // UNSURE. something to do w/ the
+                              // modifier for this in Interiors. Do
+                              // they track at half-distance in
+                              // Interiors?
+
+// These values are used to set what weights are used to determine
+// whether a piece of armor is light, medium, or heavy. Altering a
+// value alters these categories for *all* armor of that type
+// *everywhere* in the game. Rather nice, actually; I used it in redux
+// to set weight categories for all of my armor types across the
+// board.
+
+int iHelmWeight;
+int iPauldronWeight;
+int iCuirassWeight;
+int iGauntletWeight;
+int iGreavesWeight;
+int iBootsWeight;
+int iShieldWeight;
+
+// These values are used in conjunction with armor weights to set the
+// weight classes (Light, Medium, Heavy).
+
+float fLightMaxMod;
+float fMedMaxMod;
+
+// These two values dictate the range of AR for characters going
+// Unarmored, based on the Unarmored skill. As they are, the settings
+// produce a Maximum Unarmored AR of 65 (at 100 Unarmored skill),
+// which you can see is some for of multiplication between the two
+// settings. Reversing the values produces the same effect , so it
+// seems the values are interchangeable (unless I missed
+// something. could be wrong) - Changing one to 1.000 and the other to
+// 0.0650 results in a max Unarmored AR of 650. The game multiplies
+// the numbers and then multiplies the resulting number by 1000 to
+// obtain the actual in-game Max Unarmored AR. Doesn't seem to effect
+// Min AR independently, only max - Progression of AR (from low skill
+// to high skill) appears to be hard-coded. It has also been found
+// that the Unarmored skill doesn't work at all UNLESS atleast one
+// item of armor is worn. (Forum Info / The other Felix)
+
+float fUnarmoredBase1;
+float fUnarmoredBase2;
+
+int iBaseArmorSkill; // The Skill Level where in-game armors reach
+                     // their base (i.e. 'In-Editor') AR value '
+                     // Example: Glass Armor has a Base AR of 50. At
+                     // Light Armor skill level 30 (as indicated
+                     // above), it will read as having AR 50
+                     // in-game. Before Skill Level 30, armors have
+                     // diminished AR's from their Base Value, and
+                     // after Skill Level 30, armors have higher AR's
+                     // than their base until Skill Level reaches
+                     // 100. I haven't figured out the game's scheme
+                     // for determining the mult value yet
+
+float fBlockStillBonus; // UNSURE. Presumably the amount that standing
+                        // still increases the chance to block
+
+float fDamageStrengthBase; // Your STR adds to the damage you do with
+                           // weapons. This determines how much damage
+                           // is added.
+
+float fDamageStrengthMult; // Effects amount that Strength effects
+                           // damage dealt in combat (Unsure of how
+                           // this value relates to in-game effect)
+float fSwingBlockBase;
+float fSwingBlockMult;
+
+float fFatigueBase; // How much fatigue you lose while
+                    // walking. However, this appears to let you jump
+                    // very high without getting hurt (Bug?. Forum Info
+                    // / DinkumThinkum). All effect 'Fatigue' in-game,
+                    // obviously. For separate actions, although not
+                    // all of them actually have an effect in-game
+                    // (I've never been able to get spells to reduce
+                    // fatigue). They seem pretty self-explanatory, but
+                    // I haven't tested them thoroughly
+
+float fFatigueMult; // Used to determine successful chance of casting
+                    // if you are fatigued
+
+float fFatigueReturnBase; // How much fatigue you regain per
+                          // second. This is why you don't actually
+                          // fatigue while walking.
+
+float fFatigueReturnMult; // How much fatigue returns per second while
+                          // walking
+
+float fEndFatigueMult;
+
+float fFatigueAttackBase; // How much fatigue you lose with every melee
+                          // attack you make
+
+float fFatigueAttackMult;
+float fWeaponFatigueMult;
+
+float fFatigueBlockBase; // How much fatigue you lose blocking with a
+                         // shield.
+
+float fFatigueBlockMult; // This will increase the amount of fatigue
+                         // lost when blocking with a shield.
+
+float fWeaponFatigueBlockMult;
+float fFatigueRunBase; // How much fatigue you lose running.
+
+float fFatigueRunMult; // This one appears to work with encumbrance,the
+                       // more encumbered the more fatigue you
+                       // lose/second
+
+float fFatigueJumpBase; // How much fatigue you lose jumping.
+
+float fFatigueJumpMult; // Modifier for fatigue loss
+
+float fFatigueSwimWalkBase; // How much fatigue you lose swimming at a
+                            // 'walk'
+
+float fFatigueSwimRunBase; // How much fatigue you lose swimming at a
+                           // 'run'.
+
+float fFatigueSwimWalkMult; // Modifier for fatigue loss
+
+float fFatigueSwimRunMult; // Modifier for fatigue loss
+
+float fFatigueSneakBase; // The base level of fatigue loss while
+                         // sneaking
+
+float fFatigueSneakMult; // Multiplier to that base level
+float fMinHandToHandMult;
+float fMaxHandToHandMult;
+float fHandtoHandHealthPer;
+
+float fCombatInvisoMult; // Reduce the chance to hit the PC when he is
+                         // chameleoned or invisible
+
+float fCombatKODamageMult;
+float fCombatCriticalStrikeMult; // This one appears to only work if
+                                 // you hit someone unawares while
+                                 // sneaking. I never got it to do
+                                 // anything else. 4x damage from a
+                                 // successful sneak attack works when
+                                 // chameleoned or invisible
+
+int iBlockMinChance; // Minimum chance of blocking with a shield
+int iBlockMaxChance; // Maximum chance of blocking with a shield
+
+float fLevelUpHealthEndMult; // Multiplies current END to get hit
+                             // points added at level-up.
+
+float fSoulGemMult; // A soul gem's monetary value is multiplied by
+                    // this value to determine the soul capacity of a
+                    // soul gem. Creatures with a soul value less than
+                    // or equal to that capacity can float it; // in
+                    // the gem.
+
+float fEffectCostMult; // The setting for all magicka costs for all
+                       // spell effects. Changing this will change what
+                       // all spells and enchantments
+                       // cost. Everything. Linear change. Doubling
+                       // this makes all spells cost twice as much
+                       // magicka, all enchanted items cost twice as
+                       // many charges.
+
+float fSpellPriceMult;
+float fFatigueSpellBase;
+float fFatigueSpellMult;
+float fFatigueSpellCostMult;
+float fPotionStrengthMult;
+float fPotionT1MagMult;
+float fPotionT1DurMult;
+float fPotionMinUsefulDuration;
+float fPotionT4BaseStrengthMult;
+float fPotionT4EquipStrengthMult;
+float fIngredientMult; // Min # of an ingredient required to make a potion
+float fMagicItemCostMult;
+float fMagicItemPriceMult;
+float fMagicItemOnceMult;
+float fMagicItemUsedMult;
+float fMagicItemStrikeMult;
+float fMagicItemConstantMult;
+
+//UNUSED (? check the pdf again)
+float fEnchantmentMult; // Setting for how much enchantment an item can
+                        // hold based upon the value set in each
+                        // individual item's property file. Linear, if
+                        // an item in TESCS shows an enchantment value
+                        // of 1200 (i.e. an exquisite ring) multiply it
+                        // by fEnchantmentMult to get the actual
+                        // enchantment you'll see in the make an
+                        // enchanted item window.
+
+float fEnchantmentChanceMult; // These affect the PC's chance of making
+                              // an enchantment
+
+float fPCbaseMagickaMult; // This sets the spell point multiplier for
+                          // the PC with respect to INT (e.g., 1 x INT
+                          // with this setting)
+
+float fNPCbaseMagickaMult; // This does the same thing for NPCs.
+
+float fAutoSpellChance;
+float fAutoPCSpellChance;
+int iAutoSpellTimesCanCast;
+int iAutoSpellAttSkillMin;
+int iAutoSpellAlterationMax;
+int iAutoSpellConjurationMax;
+int iAutoSpellDestructionMax;
+int iAutoSpellIllusionMax;
+int iAutoSpellMysticismMax;
+int iAutoSpellRestorationMax;
+int iAutoPCSpellMax;
+int iAutoRepFacMod; // A positive modification to relations you get
+                    // with people who belong to the same faction
+int iAutoRepLevMod; // You can apparently add rep points with each
+                    // level-up. I've never tried it.
+
+int iMagicItemChargeOnce;
+int iMagicItemChargeConst;
+int iMagicItemChargeUse;
+int iMagicItemChargeStrike;
+
+// 1068-1071 effect the amount of charges auto-calculated on magic
+// items based on their function. This value is the number of uses
+// that the game will account for when calculating the max charges of
+// a magic item (works universally, across the board with all 'ingame
+// items '1068 is the setting for the number of charges an
+// automatically calculated cast once effect enchanted item will
+// have. Formula is BaseSpellEffectCost x
+// iMagicItemChargeOnce. Linear. This way an item with a cast once
+// effect will have exactly the number of charges needed to cast the
+// effect upon it 1069 for const effect items 1070 is the setting for
+// the multiplier for charges for automatically calculated cast when
+// used effect enchanted items. See above for explanation. 1071 for ;
+// //Cast on Strike; // items (charges are calculated to account for X
+// 'uses' with this value as is)
+
+int iMonthsToRespawn; // The time to respawn things like the Fighters
+                      // Guild/Mages Guild chests, etc. How many months
+                      // before a picked plant respawns
+                      // ingredients. Chests in guilds respawn contents
+                      // the same as any other chests.
+
+float fCorpseClearDelay; // How many hours it takes before a
+                         // non-persistent corpse disappears. Also
+                         // controls time before certain temporary data
+                         // is cleared if the object has not been in an
+                         // active cell in that time (e.g. Talked to PC
+                         // flag).
+
+float fCorpseRespawnDelay; // How many hours it takes before a
+                           // respawnable creature actually respawns
+                           // (note that this doesn't seem to work
+                           // properly).
+
+float fBarterGoldResetDelay; // How many hours it takes before a trader
+                             // resets it barter gold to its default
+                             // value.
+
+float fEncumbranceStrMult; // A straight multiplier to STR to see how
+                           // much a PC/NPC/creature can carry.
+
+float fPickLockMult; // Dictates amount that Lock pick difficulty
+                     // raises according to Lock Level. Lower the value
+                     // here, the harder it gets. Positive values make
+                     // locks get easier with higher lock Levels
+
+float fTrapCostMult; // Dictates difficulty of traps based on the spell
+                     // cost of the spell assigned as trap. Lower the
+                     // value here, the harder it gets to disarm
+                     // (again, based on spell cost of assigned 'trap')
+                     // The values is multiplied by the spell cost of a
+                     // trap and then added to your chance of disarming
+                     // it. Since it's set to zero, the trap spell's
+                     // cost is not incorporated into the chance. So
+                     // basically it's also unused.
+
+float fMessageTimePerChar;
+float fMagicItemRechargePerSecond; // This is the setting for the
+                                   // amount of charges restored to a
+                                   // charged magic item per second of
+                                   // game play. Linear. 0.05 x 20
+                                   // seconds = 1 charge restored.
+
+int i1stPersonSneakDelta;
+
+// If you barter with a merchant successfully, your disposition with
+// that merchant increases by one and falls by 1 if you fail a barter
+// attempt.
+
+int iBarterSuccessDisposition;
+int iBarterFailDisposition;
+
+int iLevelupTotal; // How many skill points you need before you level
+                   // up.
+int iLevelupMajorMult; // How much each major skill is worth in
+                       // points. E.g., if you set this to 2 then each
+                       // point earned in a major skill counts as 2
+                       // skill points for leveling up.
+
+int iLevelupMinorMult; // Same as above, but for minor skills.
+
+// I *think* - not sure if I remember this correctly - but I think
+// this works like the above, but for skills governed by your two
+// primary attributes. So if your primary attributes are STR and AGI,
+// and you set 1087 to 2, then any major skill governed by one of
+// these attributes which goes up by a point counts as 2 points for
+// purposes of leveling.
+
+int iLevelupMajorMultAttribute;
+int iLevelupMinorMultAttribute;
+int iLevelupMiscMultAttriubte;
+
+int iLevelupSpecialization;
+int iLevelUp01Mult;
+int iLevelUp02Mult;
+int iLevelUp03Mult;
+int iLevelUp04Mult;
+int iLevelUp05Mult;
+int iLevelUp06Mult;
+int iLevelUp07Mult;
+int iLevelUp08Mult;
+int iLevelUp09Mult;
+int iLevelUp10Mult;
+
+// The game keeps track of how many skill points you've gained since
+// the last level up. If you gained 8 skill points in skills governed
+// by AGI, then when you get to distribute attribute points whatever
+// number is in place for iLevelUp08Mult will be used for AGI. So if
+// this value is 4, you'll see a x 4 next to AGI when you level up
+// (you'll get 4 points in AGI if you pick this during the leveling
+// process).
+
+int iSoulAmountForConstantEffect; // This is the setting for the
+                                  // minimum soul value to toggle the
+                                  // constant effect button in the
+                                  // enchantment creation window.
+
+float fConstantEffectMult; // UNUSED
+
+float fEnchantmentConstantDurationMult; // This setting is the
+                                        // multiplier for constant
+                                        // effect cast cost as compared
+                                        // to a 0 duration spell. so
+                                        // restore health 2-2 for 0
+                                        // secs, which costs 0.50 to
+                                        // cast as a spell, costs 0.5 x
+                                        // 100 = 50 as a constant
+                                        // effect.
+
+float fEnchantmentConstantChanceMult;
+
+float fWeaponDamageMult; // weapon damage during combat. depreciation
+                          // as it were.
+
+float fSeriousWoundMult; // UNUSED
+
+float fKnockDownMult; // This sets the chance for a knock-down
+                       // factored on how much damage you do in a
+                       // single blow.
+
+// Sets the base odds for a knockdown when the condition for it is met
+
+int iKnockDownOddsBase;
+int iKnockDownOddsMult;
+
+float fCombatArmorMinMult;
+float fHandToHandReach; // Sets the reach of HTH weapons. Values of
+                         // less than 1.0 have no meaning.
+
+float fVoiceIdleOdds; // Controls likelihood of an NPC 'speaking' a
+                       // voice clip when Idle (Unsure of specifics)
+
+int iVoiceAttackOdds; // Controls likelihood of an NPC 'speaking' a
+                       // voice clip when attacking (Unsure of
+                       // specifics)
+
+int iVoiceHitOdds; // Controls likelihood of an NPC 'speaking' a voice
+                    // clip when being hit (Unsure of specifics)
+
+float fProjectileMinSpeed; // Sets the minimum speed of projectile weapons
+float fProjectileMaxSpeed; // Dictates maximum speed of projectiles
+                           // from bows and crossbows
+
+float fThrownWeaponMinSpeed; // Sets the minimum speed of thrown weapons
+float fThrownWeaponMaxSpeed; // Dictates Max speed of thrown weapons
+float fTargetSpellMaxSpeed; // Sets the speed of spells. Double this
+                            // and your spells will *zip* across the
+                            // screen! Min speed is apparently
+                            // hard-coded
+
+float fProjectileThrownStoreChance; // The odds of getting arrows back
+                                    // when you loot a corpse. Thrown
+                                    // weapons also
+
+int iPickMinChance; // Minimum pickpocketing chance (forum info /
+                    // Iudas)
+int iPickMaxChance; // Maximum pickpocketing chance (forum info /
+                    // Iudas)
+float fDispRaceMod; // You have better relations with your own race
+                    // than with others.
+
+// These determine how personality affect NPC disposition
+float fDispPersonalityMult;
+float fDispPersonalityBase;
+
+// These determine how your rank in a faction will alter your
+// relations with people that belong to that faction. This is why when
+// you reach high ranks in a faction everyone in that faction suddenly
+// becomes very friendly.
+
+float fDispFactionMod;
+float fDispFactionRankBase;
+float fDispFactionRankMult;
+
+float fDispCrimeMod; // This is multiplied by the player's crime level
+                     // (bounty) to determine how that information
+                     // affects an NPC's disposition towards the
+                     // player.
+
+float fDispDiseaseMod; // How much disposition is lowered when you're
+                       // suffering from a disease.
+
+int iDispAttackMod; // Not completely sure. NPC disposition modifier if
+                    // PC attacks said NPC
+
+float fDispWeaponDrawn; // How much disposition is lowered when you
+                        // have a weapon drawn.
+
+
+// I don't remember if these work the same as the previous barter
+// disposition values, or if these are multipliers. These effect the
+// long term disposition of the merchant
+
+float fDispBargainSuccessMod;
+float fDispBargainFailMod;
+
+float fDispPickPocketMod; // NPC disposition modifier for catching the
+                          // PC attempting to pickpocket them
+
+int iDaysinPrisonMod; // Determines prison time based on your crime
+                      // level.
+
+float fDispAttacking; // Unsure. I believe it's an NPC Disposition
+                      // modifier if the PC is attacking something
+                      // other than the NPC, ie it effects
+                      // non-combatants dispostion.
+
+float fDispStealing; // Unsure - I believe it's an NPC Disposition
+                     // modifier if the PC is stealing from someone
+                     // other than the NPC it effects
+
+int iDispTresspass; // NPC Disposition modifier for catching the PC
+                    // 'trespassing'. Not sure what that exactly means
+                    // in-game
+
+int iDispKilling; // Unsure NPC Disposition modifier for witnessing the
+                  // PC kill an innocent NPC (I think)
+
+int iTrainingMod; // Determines training costs. The higher the value,
+                  // the more training costs. Unsure of method of
+                  // calculation
+
+int iAlchemyMod; // Controls the value of player-made potions. Set to 0
+                 // and player made potions have 0 value, set to 1 and
+                 // player made potions have about 1/4 to 1/2 of what
+                 // they have if you leave it at the default 2 (forum
+                 // info / BeanCounter, Iudas).
+
+float fBargainOfferBase; // This is multiplied by the item's value to
+                         // determine what the merchant will offer when
+                         // selling. Base value is also modified by PC
+                         // level. Base amount that merchants will buy
+                         // items from you for, in percentage points
+                         // Believe it goes both ways, but I'm unsure
+                         // how it would work the 'other way'
+
+float fBargainOfferMulti; // Effects how much the merchant lowers his
+                          // offers during a bargaining session
+
+float fDispositionMod;
+float fPersonalityMod;
+float fLuckMod; // IIRC, this is multiplied by your Luck as a
+                // percentage to get a base increase to all skills.
+float fReputationMod;
+float fLevelMod;
+float fBribe10Mod; // Dictates amount that NPC Disposition will raise
+                   // on a successful 10 Gold Bribe. Don't believe it's
+                   // in straight disposition points. Could be
+                   // percentages - (Other factors like race, sex,
+                   // opposing faction etc. reduce this amount
+                   // significantly)
+
+float fBribe100Mod; // Dictates amount that NPC Disposition will raise
+                    // on a successful 100 Gold Bribe. See above.
+
+float fBribe1000Mod; // Dictates amount that NPC Disposition will raise
+                     // on a successful 1000 Gold Bribe. See above.
+
+float fPerDieRollMult;
+float fPerTempMult; // is used in just about every disposition
+                    // modifying calculation.
+
+int iPerMinChance;
+int iPerMinChange;
+
+// These all determine how fast you gain skill points in each
+// skill. The lower the value, the faster you'll gain skill
+// points. The values are multiplied by whatever rate you set for each
+// individual skill.
+float fSpecialSkillBonus;
+float fMajorSkillBonus;
+float fMinorSkillBonus;
+float fMiscSkillBonus;
+
+int iAlarmKilling;
+int iAlarmAttack;
+int iAlarmStealing;
+int iAlarmPickPocket;
+int iAlarmTresspass;
+
+float fAlarmRadius; // When an NPC raises the alarm, this is the base
+                    // radius for response by other affiliated NPCs.
+
+// These set the gold value for crimes. I believe that fCrimeStealing
+// is multiplied by the price of the item stolen.
+
+int iCrimeKilling;
+int iCrimeAttack;
+float fCrimeStealing;
+int iCrimePickPocket;
+int iCrimeTresspass;
+
+int iCrimeThreshold; // When NPC's start to react negatively to the PC
+int iCrimeThresholdMultiplier;
+float fCrimeGoldDiscountMult; // Thieves guild discount when you have a
+                              // price on your head.
+
+float fCrimeGoldTurnInMult; // Discount on the fine if you turn
+                            // yourself in.
+int iFightAttack;
+int iFightAttacking;
+int iFightDistanceBase;
+float fFightDistanceMultiplier;
+int iFightAlarmMult;
+float fFightDispMult;
+float fFightStealing;
+int iFightPickpocket;
+int iFightTrespass;
+int iFightKilling;
+int iFlee; // UNUSED
+int iGreetDistanceMultiplier; // Used for those annoying voice
+                              // greetings NPCs use when you get too
+                              // close Specifically (if the
+                              // Construction Set help is to be
+                              // believed) this is multiplied by their
+                              // hello rating to get the distance
+                              // before they talk.
+int iGreetDuration;
+float fGreetDistanceReset; // How far away from an NPC you have to get
+                           // before they check for a voice greeting
+                           // again.
+float fIdleChanceMultiplier; // Probability multiplier that an NPC will
+                             // mumble something while standing idly
+                             // near the PC
+float fSneakUseDist; // Helps determine if you can sneak
+float fSneakUseDelay; // Helps determine how long before the Sneak Icon
+                      // come on
+
+float fSneakDistanceBase; // see above
+float fSneakDistanceMultiplier; // see above
+float fSneakSpeedMultiplier; // Multiplied by base walking speed to see
+                             // how fast you move while sneaking.
+
+float fSneakViewMult; // Makes it more difficult to sneak when in view
+                      // of an NPC.
+float fSneakNoViewMult; // Makes it easier to sneak when you aren't in
+                        // view.
+float fSneakSkillMult;
+float fSneakBootMult; // Multiplied by the boot value (weight?) to
+                      // determine the reduction to Sneak skill.
+
+float fCombatDistance; // Combined with weapon reach, determines the
+                       // effective distance that hits can be obtained
+float fCombatAngleXY;
+float fCombatAngleZ;
+float fCombatForceSideAngle;
+float fCombatTorsoSideAngle;
+float fCombatTorsoStartPercent;
+float fCombatTorsoStopPercent;
+float fCombatBlockLeftAngle;
+float fCombatBlockRightAngle;
+
+// Shields are worn on the left and partially block attacks from 90
+// degrees left to 30 degrees right of the PC's facing.
+
+float fCombatDelayCreature;
+float fCombatDelayNPC;
+float fAIMeleeWeaponMult; // Used in the determination of how far away
+                          // an NPC will flee if they flee combat and
+                          // the PC has a melee weapon in hand
+float fAIRangeMeleeWeaponMult; // as above but the PC has a crossbow or Bow in hand
+float fAIMagicSpellMult;
+float fAIRangeMagicSpellMult; // As above but the PC has a spell readied
+float fAIMeleeArmorMult;
+float fAIMeleeSummWeaponMult;
+float fAIFleeHealthMult; // Alters the opponents flee rating when health declines
+float fAIFleeFleeMult; // Used to alter base flee ratings.
+float fPickPocketMod;
+// Multiplier to item's weight vs player's security. As far as I've
+
+// tested it, chances are as follows:
+// Enter/Leave inventory:
+//   Player.Sneak > d100 + Victim.Sneak
+// Take items:
+//   Player.Security > d100 + fPickPocketMod * item Weight
+
+// In the moment you successfully take an item, the inventory is
+// reloaded (this is why sometimes items vanish or appear) and you
+// have to make another Enter/Leave inventory check, so effectively
+// both checks are made when taking items. When the victim can't
+// detect you (sneaking, invisibility or chameleon) you always succeed
+// in entering the inventory, though only chameleon will also help you
+// in taking items and leaving the inventory. (JOG)
+
+float fSleepRandMod; // Affects the chance of a mob waking the PC up
+                     // while asleep in the wilderness.
+
+float fSleepRestMod; // Unused (Thanks to Damar Stiehl for these two)
+int iNumberCreatures;
+
+float fAudioDefaultMinDistance;
+float fAudioDefaultMaxDistance;
+float fAudioVoiceDefaultMinDistance;
+float fAudioVoiceDefaultMaxDistance;
+float fAudioMinDistanceMult;
+float fAudioMaxDistanceMult;
+float fNPCHealthBarTime; // Controls delay before the Opponents health
+                         // bar disappears
+float fNPCHealthBarFade; // Controls how many seconds the bar float
+                         // fades (rather than abruptly vanishing)
+float fDifficultyMult;
+float fMagicDetectRefreshRate;
+float fMagicStartIconBlink; // The number of seconds a spell icon will
+                            // fade before the spell runs out, on the
+                            // lower right-hand corner of the screen.
+float fMagicCreatureCastDelay;
+float fDiseaseXferChance; // The chance of catching a disease if hit by
+                          // a creature, or looting a diseased
+                          // creature's corpse.
+float fElementalShieldMult;
+float fMagicSunBlockedMult; // Vampire weakness
+float fWereWolfRunMult; // Werewolf run speed multiplier.
+float fWereWolfSilverWeaponDamageMult; // The damage multiplier for
+                                       // silver weapon damage against
+                                       // all werewolves.
+int iWereWolfBounty;
+float fWereWolfStrength;
+float fWereWolfAgility;
+float fWereWolfEndurance;
+float fWereWolfSpeed;
+float fWereWolfHandtoHand;
+float fWereWolfUnarmored;
+float fWereWolfAthletics;
+float fWereWolfAcrobatics;
+float fWereWolfInteligence;
+float fWereWolfWillPower;
+float fWereWolfPersonality;
+float fWereWolfLuck;
+float fWereWolfBlock;
+float fWereWolfArmorer;
+float fWereWolfMediumArmor;
+float fWereWolfHeavyARmor;
+float fWereWolfBluntWeapon;
+float fWereWolfLongBlade;
+float fWereWolfAxe;
+float fWereWolfSpear;
+float fWereWolfDestruction;
+float fWereWolfAlteration;
+float fWereWolfIllusion;
+float fWereWolfConjuration;
+float fWereWolfMysticism;
+float fWereWolfRestoration;
+float fWereWolfEnchant;
+float fWereWolfAlchemy;
+float fWereWolfSecurity;
+float fWereWolfSneak;
+float fWereWolfLightArmor;
+float fWereWolfShortBlade;
+float fWereWolfMarksman;
+float fWereWolfSpeechcraft;
+
+// These are the skills and attributes for Werewolf form.
+
+int iWereWolfLevelToAttack;
+int iWereWolfFightMod;
+int iWereWolfFleeMod;
+float fWereWolfHealth;
+float fWereWolfFatigue;
+float fWereWolfMagica;
+float fCombatDistaceWereWolfMod; // Determines the attack range of a
+                                 //  Werewolf.
+float fFleeDistance; // Determines how far away someone will flee.
+
+// NOT documented in Scripting for Dummies.
+float fWaterReflectUpdateAlways;
+float fWaterReflectUpdateSeldom;
+float fRestMagicMult;
+
+char[] sMonthMorningstar;
+char[] sMonthSunsdawn;
+char[] sMonthFirstseed;
+char[] sMonthRainshand;
+char[] sMonthSecondseed;
+char[] sMonthMidyear;
+char[] sMonthSunsheight;
+char[] sMonthLastseed;
+char[] sMonthHeartfire;
+char[] sMonthFrostfall;
+char[] sMonthSunsdusk;
+char[] sMonthEveningstar;
+char[] sSpecialization;
+char[] sSpecializationCombat;
+char[] sSpecializationMagic;
+char[] sSpecializationStealth;
+char[] sSkillClassMajor;
+char[] sSkillClassMinor;
+char[] sSkillClassMisc;
+char[] sRacialTraits;
+char[] sHealthPerHourOfRest;
+char[] sHealthPerLevel;
+char[] sGoverningAttribute;
+char[] sClass;
+char[] sTraits;
+char[] sJournal;
+char[] sOK;
+char[] sClose;
+char[] sPrev;
+char[] sNext;
+char[] sTake;
+char[] sWeaponTab;
+char[] sApparelTab;
+char[] sMagicTab;
+char[] sMiscTab;
+char[] sWornTab;
+char[] sAllTab;
+char[] sAttack;
+char[] sUses;
+char[] sQuality;
+char[] sCharges;
+char[] sArmorRating;
+char[] sSlash;
+char[] sThrust;
+char[] sChop;
+char[] sEncumbrance;
+char[] sCondition;
+char[] sWeight;
+char[] sValue;
+char[] sLight;
+char[] sMedium;
+char[] sHeavy;
+char[] sCancel;
+char[] sTakeAll;
+char[] sUntilHealed;
+char[] sRest;
+char[] sWait;
+char[] sRestIllegal;
+char[] sGold;
+char[] sMove;
+char[] sTo;
+char[] sActorInCombat;
+char[] sArmor;
+char[] sTopics;
+char[] sService;
+char[] sPersuasion;
+char[] sBye;
+char[] sGoodbye;
+char[] sYes;
+char[] sNo;
+char[] sOn;
+char[] sOff;
+char[] sFull;
+char[] sWorld;
+char[] sExpelled;
+char[] sExpelledMessage;
+char[] sFavoriteSkills;
+char[] sGame;
+char[] sVideo;
+char[] sAudio;
+char[] sControls;
+char[] sPrefs;
+char[] sPreferences;
+char[] sNewGame;
+char[] sExitGame;
+char[] sOptions;
+char[] sSaveGame;
+char[] sLoadGame;
+char[] sDeleteGame;
+char[] sSaveGameDenied;
+char[] sSaveGameFailed;
+char[] sSaveGameTooBig;
+char[] sSaveGameNoMemory;
+char[] sMaximumSaveGameMessage;
+char[] sRender_Distance;
+char[] sNear;
+char[] sFar;
+char[] sGamma_Correction;
+char[] sLight_Gamma;
+char[] sDark_Gamma;
+char[] sSeldom;
+char[] sAlways;
+char[] sWaterTerrainReflect;
+char[] sWaterReflectUpdate;
+char[] sMaster;
+char[] sVoice;
+char[] sEffects;
+char[] sFootsteps;
+char[] sMusic;
+char[] sTransparency_Menu;
+char[] sMenu_Help_Delay;
+char[] sAIDistance;
+char[] sHigh;
+char[] sLow;
+char[] sDetail_Level;
+char[] sMenus;
+char[] sStrip;
+char[] sReturnToGame;
+char[] sForward;
+char[] sBack;
+char[] sLeft;
+char[] sRight;
+char[] sUse;
+char[] sActivate;
+char[] sReady_Weapon;
+char[] sReady_Magic;
+char[] sCrouch_Sneak;
+char[] sRun;
+char[] sAlways_Run;
+char[] sAuto_Run;
+char[] sJump;
+char[] sNextWeapon;
+char[] sPrevWeapon;
+char[] sNextSpell;
+char[] sPrevSpell;
+char[] sTogglePOVCmd;
+char[] sMenu_Mode;
+char[] sJournalCmd;
+char[] sRestKey;
+char[] sQuickMenu;
+char[] sQuick1Cmd;
+char[] sQuick2Cmd;
+char[] sQuick3Cmd;
+char[] sQuick4Cmd;
+char[] sQuick5Cmd;
+char[] sQuick6Cmd;
+char[] sQuick7Cmd;
+char[] sQuick8Cmd;
+char[] sQuick9Cmd;
+char[] sQuick10Cmd;
+char[] sQuickSaveCmd;
+char[] sQuickLoadCmd;
+char[] sKeyName_00;
+char[] sKeyName_01;
+char[] sKeyName_02;
+char[] sKeyName_03;
+char[] sKeyName_04;
+char[] sKeyName_05;
+char[] sKeyName_06;
+char[] sKeyName_07;
+char[] sKeyName_08;
+char[] sKeyName_09;
+char[] sKeyName_0A;
+char[] sKeyName_0B;
+char[] sKeyName_0C;
+char[] sKeyName_0D;
+char[] sKeyName_0E;
+char[] sKeyName_0F;
+char[] sKeyName_10;
+char[] sKeyName_11;
+char[] sKeyName_12;
+char[] sKeyName_13;
+char[] sKeyName_14;
+char[] sKeyName_15;
+char[] sKeyName_16;
+char[] sKeyName_17;
+char[] sKeyName_18;
+char[] sKeyName_19;
+char[] sKeyName_1A;
+char[] sKeyName_1B;
+char[] sKeyName_1C;
+char[] sKeyName_1D;
+char[] sKeyName_1E;
+char[] sKeyName_1F;
+char[] sKeyName_20;
+char[] sKeyName_21;
+char[] sKeyName_22;
+char[] sKeyName_23;
+char[] sKeyName_24;
+char[] sKeyName_25;
+char[] sKeyName_26;
+char[] sKeyName_27;
+char[] sKeyName_28;
+char[] sKeyName_29;
+char[] sKeyName_2A;
+char[] sKeyName_2B;
+char[] sKeyName_2C;
+char[] sKeyName_2D;
+char[] sKeyName_2E;
+char[] sKeyName_2F;
+char[] sKeyName_30;
+char[] sKeyName_31;
+char[] sKeyName_32;
+char[] sKeyName_33;
+char[] sKeyName_34;
+char[] sKeyName_35;
+char[] sKeyName_36;
+char[] sKeyName_37;
+char[] sKeyName_38;
+char[] sKeyName_39;
+char[] sKeyName_3A;
+char[] sKeyName_3B;
+char[] sKeyName_3C;
+char[] sKeyName_3D;
+char[] sKeyName_3E;
+char[] sKeyName_3F;
+char[] sKeyName_40;
+char[] sKeyName_41;
+char[] sKeyName_42;
+char[] sKeyName_43;
+char[] sKeyName_44;
+char[] sKeyName_45;
+char[] sKeyName_46;
+char[] sKeyName_47;
+char[] sKeyName_48;
+char[] sKeyName_49;
+char[] sKeyName_4A;
+char[] sKeyName_4B;
+char[] sKeyName_4C;
+char[] sKeyName_4D;
+char[] sKeyName_4E;
+char[] sKeyName_4F;
+char[] sKeyName_50;
+char[] sKeyName_51;
+char[] sKeyName_52;
+char[] sKeyName_53;
+char[] sKeyName_54;
+char[] sKeyName_55;
+char[] sKeyName_56;
+char[] sKeyName_57;
+char[] sKeyName_58;
+char[] sKeyName_59;
+char[] sKeyName_5A;
+char[] sKeyName_5B;
+char[] sKeyName_5C;
+char[] sKeyName_5D;
+char[] sKeyName_5E;
+char[] sKeyName_5F;
+char[] sKeyName_60;
+char[] sKeyName_61;
+char[] sKeyName_62;
+char[] sKeyName_63;
+char[] sKeyName_64;
+char[] sKeyName_65;
+char[] sKeyName_66;
+char[] sKeyName_67;
+char[] sKeyName_68;
+char[] sKeyName_69;
+char[] sKeyName_6A;
+char[] sKeyName_6B;
+char[] sKeyName_6C;
+char[] sKeyName_6D;
+char[] sKeyName_6E;
+char[] sKeyName_6F;
+char[] sKeyName_70;
+char[] sKeyName_71;
+char[] sKeyName_72;
+char[] sKeyName_73;
+char[] sKeyName_74;
+char[] sKeyName_75;
+char[] sKeyName_76;
+char[] sKeyName_77;
+char[] sKeyName_78;
+char[] sKeyName_79;
+char[] sKeyName_7A;
+char[] sKeyName_7B;
+char[] sKeyName_7C;
+char[] sKeyName_7D;
+char[] sKeyName_7E;
+char[] sKeyName_7F;
+char[] sKeyName_80;
+char[] sKeyName_81;
+char[] sKeyName_82;
+char[] sKeyName_83;
+char[] sKeyName_84;
+char[] sKeyName_85;
+char[] sKeyName_86;
+char[] sKeyName_87;
+char[] sKeyName_88;
+char[] sKeyName_89;
+char[] sKeyName_8A;
+char[] sKeyName_8B;
+char[] sKeyName_8C;
+char[] sKeyName_8D;
+char[] sKeyName_8E;
+char[] sKeyName_8F;
+char[] sKeyName_90;
+char[] sKeyName_91;
+char[] sKeyName_92;
+char[] sKeyName_93;
+char[] sKeyName_94;
+char[] sKeyName_95;
+char[] sKeyName_96;
+char[] sKeyName_97;
+char[] sKeyName_98;
+char[] sKeyName_99;
+char[] sKeyName_9A;
+char[] sKeyName_9B;
+char[] sKeyName_9C;
+char[] sKeyName_9D;
+char[] sKeyName_9E;
+char[] sKeyName_9F;
+char[] sKeyName_A0;
+char[] sKeyName_A1;
+char[] sKeyName_A2;
+char[] sKeyName_A3;
+char[] sKeyName_A4;
+char[] sKeyName_A5;
+char[] sKeyName_A6;
+char[] sKeyName_A7;
+char[] sKeyName_A8;
+char[] sKeyName_A9;
+char[] sKeyName_AA;
+char[] sKeyName_AB;
+char[] sKeyName_AC;
+char[] sKeyName_AD;
+char[] sKeyName_AE;
+char[] sKeyName_AF;
+char[] sKeyName_B0;
+char[] sKeyName_B1;
+char[] sKeyName_B2;
+char[] sKeyName_B3;
+char[] sKeyName_B4;
+char[] sKeyName_B5;
+char[] sKeyName_B6;
+char[] sKeyName_B7;
+char[] sKeyName_B8;
+char[] sKeyName_B9;
+char[] sKeyName_BA;
+char[] sKeyName_BB;
+char[] sKeyName_BC;
+char[] sKeyName_BD;
+char[] sKeyName_BE;
+char[] sKeyName_BF;
+char[] sKeyName_C0;
+char[] sKeyName_C1;
+char[] sKeyName_C2;
+char[] sKeyName_C3;
+char[] sKeyName_C4;
+char[] sKeyName_C5;
+char[] sKeyName_C6;
+char[] sKeyName_C7;
+char[] sKeyName_C8;
+char[] sKeyName_C9;
+char[] sKeyName_CA;
+char[] sKeyName_CB;
+char[] sKeyName_CC;
+char[] sKeyName_CD;
+char[] sKeyName_CE;
+char[] sKeyName_CF;
+char[] sKeyName_D0;
+char[] sKeyName_D1;
+char[] sKeyName_D2;
+char[] sKeyName_D3;
+char[] sKeyName_D4;
+char[] sKeyName_D5;
+char[] sKeyName_D6;
+char[] sKeyName_D7;
+char[] sKeyName_D8;
+char[] sKeyName_D9;
+char[] sKeyName_DA;
+char[] sKeyName_DB;
+char[] sKeyName_DC;
+char[] sKeyName_DD;
+char[] sKeyName_DE;
+char[] sKeyName_DF;
+char[] sKeyName_E0;
+char[] sKeyName_E1;
+char[] sKeyName_E2;
+char[] sKeyName_E3;
+char[] sKeyName_E4;
+char[] sKeyName_E5;
+char[] sKeyName_E6;
+char[] sKeyName_E7;
+char[] sKeyName_E8;
+char[] sKeyName_E9;
+char[] sKeyName_EA;
+char[] sKeyName_EB;
+char[] sKeyName_EC;
+char[] sKeyName_ED;
+char[] sKeyName_EE;
+char[] sKeyName_EF;
+char[] sKeyName_F0;
+char[] sKeyName_F1;
+char[] sKeyName_F2;
+char[] sKeyName_F3;
+char[] sKeyName_F4;
+char[] sKeyName_F5;
+char[] sKeyName_F6;
+char[] sKeyName_F7;
+char[] sKeyName_F8;
+char[] sKeyName_F9;
+char[] sKeyName_FA;
+char[] sKeyName_FB;
+char[] sKeyName_FC;
+char[] sKeyName_FD;
+char[] sKeyName_FE;
+char[] sKeyName_FF;
+char[] sForwardXbox;
+char[] sBackXbox;
+char[] sSlideLeftXbox;
+char[] sSlideRightXbox;
+char[] sMenuModeXbox;
+char[] sActivateXbox;
+char[] sUseXbox;
+char[] sReadyItemXbox;
+char[] sReadyMagicXbox;
+char[] sCrouchXbox;
+char[] sRunXbox;
+char[] sToggleRunXbox;
+char[] sJumpXbox;
+char[] sTogglePOVXbox;
+char[] sMenuNextXbox;
+char[] sMenuPrevXbox;
+char[] sJournalXbox;
+char[] sQuick4Xbox;
+char[] sQuick5Xbox;
+char[] sQuick6Xbox;
+char[] sQuick7Xbox;
+char[] sQuick8Xbox;
+char[] sQuick9Xbox;
+char[] sQuick0Xbox;
+char[] sOptionsMenuXbox;
+char[] sSystemMenuXbox;
+char[] sRestMenuXbox;
+char[] sQuickSaveXbox;
+char[] sQuickLoadXbox;
+char[] sMoveUpXbox;
+char[] sMoveDownXbox;
+char[] sLookUpXbox;
+char[] sLookDownXbox;
+char[] sTurnLeftXbox;
+char[] sTurnRightXbox;
+char[] sNextWeaponXbox;
+char[] sPrevWeaponXbox;
+char[] sNextSpellXbox;
+char[] sPrevSpellXbox;
+char[] sDialogText1Xbox;
+char[] sDialogText2Xbox;
+char[] sDialogText3Xbox;
+char[] sQuick_Save;
+char[] sShadowText;
+char[] sLockSuccess;
+char[] sLockFail;
+char[] sLockImpossible;
+char[] sTrapSuccess;
+char[] sTrapFail;
+char[] sTrapImpossible;
+char[] sTrapped;
+char[] sLockLevel;
+char[] sKeyUsed;
+char[] sUnlocked;
+char[] sBarter;
+char[] sRepair;
+char[] sSpells;
+char[] sTraining;
+char[] sTravel;
+char[] sSpellmaking;
+char[] sEnchanting;
+char[] sJoystickNotFound;
+char[] sJournalEntry;
+char[] sDay;
+char[] sCreate;
+char[] sIngredients;
+char[] sApparatus;
+char[] sCreatedEffects;
+char[] sOnetypeEffectMessage;
+char[] sName;
+char[] sNameTitle;
+char[] sSelect;
+char[] sBuy;
+char[] sInfo;
+char[] sMagicEffects;
+char[] sOnce;
+char[] sCostCharge;
+char[] sCostChance;
+char[] sAttributesMenu1;
+char[] sBirthsignmenu1;
+char[] sBirthsignmenu2;
+char[] sChooseClassMenu1;
+char[] sChooseClassMenu2;
+char[] sChooseClassMenu3;
+char[] sChooseClassMenu4;
+char[] sCreateClassMenuWarning;
+char[] sClassChoiceMenu1;
+char[] sClassChoiceMenu2;
+char[] sClassChoiceMenu3;
+char[] sNotifyMessage1;
+char[] sNotifyMessage2;
+char[] sNotifyMessage3;
+char[] sNotifyMessage4;
+char[] sNotifyMessage4XBOX;
+char[] sNotifyMessage5;
+char[] sNotifyMessage6;
+char[] sNotifyMessage6a;
+char[] sNotifyMessage7;
+char[] sNotifyMessage8;
+char[] sNotifyMessage9;
+char[] sNotifyMessage10;
+char[] sNotifyMessage11;
+char[] sNotifyMessage12;
+char[] sNotifyMessage13;
+char[] sNotifyMessage14;
+char[] sNotifyMessage15;
+char[] sNotifyMessage16;
+char[] sNotifyMessage16_a;
+char[] sNotifyMessage17;
+char[] sNotifyMessage18;
+char[] sNotifyMessage19;
+char[] sNotifyMessage20;
+char[] sNotifyMessage21;
+char[] sNotifyMessage22;
+char[] sNotifyMessage23;
+char[] sNotifyMessage24;
+char[] sNotifyMessage25;
+char[] sNotifyMessage26;
+char[] sNotifyMessage27;
+char[] sNotifyMessage28;
+char[] sNotifyMessage29;
+char[] sNotifyMessage30;
+char[] sNotifyMessage31;
+char[] sNotifyMessage32;
+char[] sNotifyMessage33;
+char[] sNotifyMessage34;
+char[] sNotifyMessage35;
+char[] sNotifyMessage36;
+char[] sNotifyMessage37;
+char[] sNotifyMessage38;
+char[] sNotifyMessage39;
+char[] sNotifyMessage40;
+char[] sNotifyMessage41;
+char[] sNotifyMessage42;
+char[] sNotifyMessage43;
+char[] sNotifyMessage44;
+char[] sNotifyMessage45;
+char[] sNotifyMessage46;
+char[] sNotifyMessage47;
+char[] sNotifyMessage48;
+char[] sNotifyMessage49;
+char[] sNotifyMessage50;
+char[] sNotifyMessage51;
+char[] sNotifyMessage52;
+char[] sNotifyMessage53;
+char[] sNotifyMessage54;
+char[] sNotifyMessage55;
+char[] sNotifyMessage56;
+char[] sNotifyMessage57;
+char[] sNotifyMessage58;
+char[] sNotifyMessage59;
+char[] sNotifyMessage60;
+char[] sNotifyMessage61;
+char[] sNotifyMessage62;
+char[] sNotifyMessage63;
+char[] sNotifyMessage64;
+char[] sNotifyMessage65;
+char[] sNotifyMessage66;
+char[] sNotifyMessage67;
+char[] sInPrisonTitle;
+char[] sInfoRefusal;
+char[] sAdmireSuccess;
+char[] sAdmireFail;
+char[] sIntimidateSuccess;
+char[] sIntimidateFail;
+char[] sTauntSuccess;
+char[] sTauntFail;
+char[] sServiceRefusal;
+char[] sBribeSuccess;
+char[] sBribeFail;
+char[] sBookSkillMessage;
+char[] sLoadingMessage1;
+char[] sLoadingMessage2;
+char[] sLoadingMessage3;
+char[] sLoadingMessage4;
+char[] sLoadingMessage5;
+char[] sLoadingMessage9;
+char[] sLoadingMessage14;
+char[] sLoadingMessage15;
+char[] sInvalidSaveGameMsg;
+char[] sInvalidSaveGameMsgXBOX;
+char[] sLoadingErrorsMsg;
+char[] sMissingMastersMsg;
+char[] sChangedMastersMsg;
+char[] sMastPlugMismatchMsg;
+char[] sGeneralMastPlugMismatchMsg;
+char[] sLoadLastSaveMsg;
+char[] sMessage1;
+char[] sMessage2;
+char[] sMessage3;
+char[] sMessage4;
+char[] sMessage5;
+char[] sMessageQuestionAnswer1;
+char[] sMessageQuestionAnswer2;
+char[] sMessageQuestionAnswer3;
+char[] sBarterDialog1;
+char[] sBarterDialog2;
+char[] sBarterDialog3;
+char[] sBarterDialog4;
+char[] sBarterDialog5;
+char[] sBarterDialog6;
+char[] sBarterDialog7;
+char[] sBarterDialog8;
+char[] sBarterDialog9;
+char[] sBarterDialog10;
+char[] sBarterDialog11;
+char[] sBarterDialog12;
+char[] sInventoryMessage1;
+char[] sInventoryMessage2;
+char[] sInventoryMessage3;
+char[] sInventoryMessage4;
+char[] sInventoryMessage5;
+char[] sContentsMessage1;
+char[] sContentsMessage2;
+char[] sContentsMessage3;
+char[] sAttributeListTitle;
+char[] sConsoleTitle;
+char[] sCreateClassMenu1;
+char[] sCreateClassMenu2;
+char[] sCreateClassMenu3;
+char[] sCreateClassMenuHelp1;
+char[] sCreateClassMenuHelp2;
+char[] sControlsMenu1;
+char[] sControlsMenu2;
+char[] sControlsMenu3;
+char[] sControlsMenu4;
+char[] sControlsMenu5;
+char[] sControlsMenu6;
+char[] sGameWithoutLauncherXbox;
+char[] sDialogMenu1;
+char[] sEnchantmentMenu1;
+char[] sEnchantmentMenu2;
+char[] sEnchantmentMenu3;
+char[] sEnchantmentMenu4;
+char[] sEnchantmentMenu5;
+char[] sEnchantmentMenu6;
+char[] sEnchantmentMenu7;
+char[] sEnchantmentMenu8;
+char[] sEnchantmentMenu9;
+char[] sEnchantmentMenu10;
+char[] sEnchantmentMenu11;
+char[] sEnchantmentMenu12;
+char[] sEnchantmentHelp1;
+char[] sEnchantmentHelp2;
+char[] sEnchantmentHelp3;
+char[] sEnchantmentHelp4;
+char[] sEnchantmentHelp5;
+char[] sEnchantmentHelp6;
+char[] sEnchantmentHelp7;
+char[] sEnchantmentHelp8;
+char[] sEnchantmentHelp9;
+char[] sEnchantmentHelp10;
+char[] sInputMenu1;
+char[] sInventoryMenu1;
+char[] sLevelUpMenu1;
+char[] sLevelUpMenu2;
+char[] sLevelUpMenu3;
+char[] sLevelUpMenu4;
+char[] sLevelUpMsg;
+char[] sLevelUp;
+char[] sRange;
+char[] sArea;
+char[] sMagnitude;
+char[] sDuration;
+char[] sDrain;
+char[] sAbsorb;
+char[] sFortify;
+char[] sRestore;
+char[] sDamage;
+char[] spoint;
+char[] spoints;
+char[] spercent;
+char[] sfor;
+char[] ssecond;
+char[] sseconds;
+char[] sin;
+char[] sfootarea;
+char[] sfeet;
+char[] sXTimes;
+char[] sXTimesINT;
+char[] sonword;
+char[] sNone;
+char[] sDone;
+char[] sStartCell;
+char[] sStartError;
+char[] sStartCellError;
+char[] sAdmire;
+char[] sIntimidate;
+char[] sTaunt;
+char[] sBribe_10_Gold;
+char[] sBribe_100_Gold;
+char[] sBribe_1000_Gold;
+char[] sPersuasionMenuTitle;
+char[] sFast;
+char[] sSlow;
+char[] sBestAttack;
+char[] sSubtitles;
+char[] sMouseFlip;
+char[] sCursorOff;
+char[] sEnableJoystick;
+char[] sXStrafe;
+char[] sStrafe;
+char[] sTurn;
+char[] sMouseWheelUpShort;
+char[] sMouseWheelDownShort;
+char[] sMouse;
+char[] sJoystickShort;
+char[] sJoystickHatShort;
+char[] sPickUp;
+char[] sItemName;
+char[] sNoName;
+char[] sItem;
+char[] sRaceMenu1;
+char[] sRaceMenu2;
+char[] sRaceMenu3;
+char[] sRaceMenu4;
+char[] sRaceMenu5;
+char[] sRaceMenu6;
+char[] sRaceMenu7;
+char[] sRestMenu1;
+char[] sRestMenu2;
+char[] sRestMenu3;
+char[] sRestMenu4;
+char[] sSaveMenu1;
+char[] sServiceRepairTitle;
+char[] sServiceTravelTitle;
+char[] sServiceTrainingTitle;
+char[] sServiceTrainingWords;
+char[] sServiceSpellsTitle;
+char[] sSkillsMenu1;
+char[] sBonusSkillTitle;
+char[] sSpecializationMenu1;
+char[] sSpellmakingMenuTitle;
+char[] sSpellmakingMenu1;
+char[] sSpellmakingHelp1;
+char[] sSpellmakingHelp2;
+char[] sSpellmakingHelp3;
+char[] sSpellmakingHelp4;
+char[] sSpellmakingHelp5;
+char[] sSpellmakingHelp6;
+char[] sKilledEssential;
+char[] sCrimeMessage;
+char[] sPotionSuccess;
+char[] sMagicItem;
+char[] sMagnitudeDes;
+char[] sAreaDes;
+char[] sDurationDes;
+char[] sRangeDes;
+char[] sCrimeHelp;
+char[] sSoulGem;
+char[] sCastCost;
+char[] sTravelServiceTitle;
+char[] sSpellServiceTitle;
+char[] sRepairServiceTitle;
+char[] sTrainingServiceTitle;
+char[] sMortar;
+char[] sCalcinator;
+char[] sAlembic;
+char[] sRetort;
+char[] sQuestionMark;
+char[] s3dAudio;
+char[] s3dHardware;
+char[] s3dSoftware;
+char[] sYourGold;
+char[] sSellerGold;
+char[] sTotalCost;
+char[] sTotalSold;
+char[] sOffer;
+char[] sLess;
+char[] sMore;
+char[] sInventory;
+char[] sBookPageOne;
+char[] sBookPageTwo;
+char[] sDisposeofCorpse;
+char[] sCaughtStealingMessage;
+char[] sUserDefinedClass;
+char[] sAsk;
+char[] sEnchantItems;
+char[] sSoulGemsWithSouls;
+char[] sDoYouWantTo;
+char[] sRechargeEnchantment;
+char[] sMake_Enchantment;
+char[] sSell;
+char[] sEquip;
+char[] sDrop;
+char[] sContainer;
+char[] sStats;
+char[] sMap;
+char[] sCenter;
+char[] sSaveMenuHelp01;
+char[] sSaveMenuHelp02;
+char[] sSaveMenuHelp03;
+char[] sSaveMenuHelp04;
+char[] sSaveMenuHelp05;
+char[] sSaveMenuHelp06;
+char[] sBlocks;
+char[] sFileSize;
+char[] sSave;
+char[] sDeleteSpell;
+char[] sQuestionDeleteSpell;
+char[] sDeleteSpellError;
+char[] sLocal;
+char[] sLoadFailedMessage;
+char[] sShadows;
+char[] sControlerVibration;
+char[] sQuanityMenuMessage01;
+char[] sQuanityMenuMessage02;
+char[] sSex;
+char[] sHair;
+char[] sFace;
+char[] sRepairFailed;
+char[] sRepairSuccess;
+char[] sHeal;
+char[] sgp;
+char[] sSetValueMessage01;
+char[] sDelete;
+char[] sVideoWarning;
+char[] sResChangeWarning;
+char[] sShift;
+char[] sBackspace;
+char[] sCustomClassName;
+char[] sSpace;
+char[] sInventorySelectNoItems;
+char[] sInventorySelectNoSoul;
+char[] sInventorySelectNoIngredients;
+char[] sDisposeCorpseFail;
+char[] sQuickMenuTitle;
+char[] sQuickMenuInstruc;
+char[] sQuickMenu1;
+char[] sQuickMenu2;
+char[] sQuickMenu3;
+char[] sQuickMenu4;
+char[] sQuickMenu5;
+char[] sQuickMenu6;
+char[] sMagicSelectTitle;
+char[] sNextRank;
+char[] sNeedOneSkill;
+char[] sNeedTwoSkills;
+char[] sand;
+char[] sOneHanded;
+char[] sTwoHanded;
+char[] sType;
+char[] sAt;
+char[] sUnequip;
+char[] sScrolldown;
+char[] sScrollup;
+char[] sSleepInterrupt;
+char[] sSoultrapSuccess;
+char[] sCantEquipWeapWarning;
+char[] sOfferMenuTitle;
+char[] sPowers;
+char[] sBreath;
+char[] sDifficulty;
+char[] sEasy;
+char[] sHard;
+char[] sAttributeStrength;
+char[] sAttributeIntelligence;
+char[] sAttributeWillpower;
+char[] sAttributeAgility;
+char[] sAttributeSpeed;
+char[] sAttributeEndurance;
+char[] sAttributePersonality;
+char[] sAttributeLuck;
+char[] sSkillBlock;
+char[] sSkillArmorer;
+char[] sSkillMediumarmor;
+char[] sSkillHeavyarmor;
+char[] sSkillBluntweapon;
+char[] sSkillLongblade;
+char[] sSkillAxe;
+char[] sSkillSpear;
+char[] sSkillAthletics;
+char[] sSkillEnchant;
+char[] sSkillDestruction;
+char[] sSkillAlteration;
+char[] sSkillIllusion;
+char[] sSkillConjuration;
+char[] sSkillMysticism;
+char[] sSkillRestoration;
+char[] sSkillAlchemy;
+char[] sSkillUnarmored;
+char[] sSkillSecurity;
+char[] sSkillSneak;
+char[] sSkillAcrobatics;
+char[] sSkillLightarmor;
+char[] sSkillShortblade;
+char[] sSkillMarksman;
+char[] sSkillMercantile;
+char[] sSkillSpeechcraft;
+char[] sSkillHandtohand;
+char[] sHealth;
+char[] sRace;
+char[] sLevel;
+char[] sLevels;
+char[] sFaction;
+char[] sBirthSign;
+char[] sBounty;
+char[] sReputation;
+char[] sSchool;
+char[] sSkill;
+char[] sSkillProgress;
+char[] sSkillMaxReached;
+char[] sLevelProgress;
+char[] sMagic;
+char[] sMagicMenu;
+char[] sFatigue;
+char[] sSkillsMenuReputationHelp;
+char[] sStrDesc;
+char[] sIntDesc;
+char[] sWilDesc;
+char[] sAgiDesc;
+char[] sSpdDesc;
+char[] sEndDesc;
+char[] sPerDesc;
+char[] sLucDesc;
+char[] sFatDesc;
+char[] sHealthDesc;
+char[] sMagDesc;
+char[] sDefaultCellname;
+char[] sTargetCriticalStrike;
+char[] sEffectWaterBreathing;
+char[] sEffectSwiftSwim;
+char[] sEffectWaterWalking;
+char[] sEffectShield;
+char[] sEffectFireShield;
+char[] sEffectLightningShield;
+char[] sEffectFrostShield;
+char[] sEffectBurden;
+char[] sEffectFeather;
+char[] sEffectJump;
+char[] sEffectLevitate;
+char[] sEffectSlowFall;
+char[] sEffectLock;
+char[] sEffectOpen;
+char[] sEffectFireDamage;
+char[] sEffectShockDamage;
+char[] sEffectFrostDamage;
+char[] sEffectDrainAttribute;
+char[] sEffectDrainHealth;
+char[] sEffectDrainSpellpoints;
+char[] sEffectDrainFatigue;
+char[] sEffectDrainSkill;
+char[] sEffectDamageAttribute;
+char[] sEffectDamageHealth;
+char[] sEffectDamageMagicka;
+char[] sEffectDamageFatigue;
+char[] sEffectDamageSkill;
+char[] sEffectPoison;
+char[] sEffectWeaknessToFire;
+char[] sEffectWeaknessToFrost;
+char[] sEffectWeaknessToShock;
+char[] sEffectWeaknessToMagicka;
+char[] sEffectWeaknessToCommonDisease;
+char[] sEffectWeaknessToBlightDisease;
+char[] sEffectWeaknessToCorprusDisease;
+char[] sEffectWeaknessToPoison;
+char[] sEffectWeaknessToNormalWeapons;
+char[] sEffectDisintegrateWeapon;
+char[] sEffectDisintegrateArmor;
+char[] sEffectInvisibility;
+char[] sEffectChameleon;
+char[] sEffectLight;
+char[] sEffectSanctuary;
+char[] sEffectNightEye;
+char[] sEffectCharm;
+char[] sEffectParalyze;
+char[] sEffectSilence;
+char[] sEffectBlind;
+char[] sEffectSound;
+char[] sEffectCalmHumanoid;
+char[] sEffectCalmCreature;
+char[] sEffectFrenzyHumanoid;
+char[] sEffectFrenzyCreature;
+char[] sEffectDemoralizeHumanoid;
+char[] sEffectDemoralizeCreature;
+char[] sEffectRallyHumanoid;
+char[] sEffectRallyCreature;
+char[] sEffectDispel;
+char[] sEffectSoultrap;
+char[] sEffectTelekinesis;
+char[] sEffectMark;
+char[] sEffectRecall;
+char[] sEffectDivineIntervention;
+char[] sEffectAlmsiviIntervention;
+char[] sEffectDetectAnimal;
+char[] sEffectDetectEnchantment;
+char[] sEffectDetectKey;
+char[] sEffectSpellAbsorption;
+char[] sEffectReflect;
+char[] sEffectCureCommonDisease;
+char[] sEffectCureBlightDisease;
+char[] sEffectCureCorprusDisease;
+char[] sEffectCurePoison;
+char[] sEffectCureParalyzation;
+char[] sEffectRestoreAttribute;
+char[] sEffectRestoreHealth;
+char[] sEffectRestoreSpellPoints;
+char[] sEffectRestoreFatigue;
+char[] sEffectRestoreSkill;
+char[] sEffectFortifyAttribute;
+char[] sEffectFortifyHealth;
+char[] sEffectFortifySpellpoints;
+char[] sEffectFortifyFatigue;
+char[] sEffectFortifySkill;
+char[] sEffectFortifyMagickaMultiplier;
+char[] sEffectAbsorbAttribute;
+char[] sEffectAbsorbHealth;
+char[] sEffectAbsorbSpellPoints;
+char[] sEffectAbsorbFatigue;
+char[] sEffectAbsorbSkill;
+char[] sEffectResistFire;
+char[] sEffectResistFrost;
+char[] sEffectResistShock;
+char[] sEffectResistMagicka;
+char[] sEffectResistCommonDisease;
+char[] sEffectResistBlightDisease;
+char[] sEffectResistCorprusDisease;
+char[] sEffectResistPoison;
+char[] sEffectResistNormalWeapons;
+char[] sEffectResistParalysis;
+char[] sEffectRemoveCurse;
+char[] sEffectTurnUndead;
+char[] sEffectSummonScamp;
+char[] sEffectSummonClannfear;
+char[] sEffectSummonDaedroth;
+char[] sEffectSummonDremora;
+char[] sEffectSummonAncestralGhost;
+char[] sEffectSummonSkeletalMinion;
+char[] sEffectSummonLeastBonewalker;
+char[] sEffectSummonGreaterBonewalker;
+char[] sEffectSummonBonelord;
+char[] sEffectSummonWingedTwilight;
+char[] sEffectSummonHunger;
+char[] sEffectSummonGoldensaint;
+char[] sEffectSummonFlameAtronach;
+char[] sEffectSummonFrostAtronach;
+char[] sEffectSummonStormAtronach;
+char[] sEffectFortifyAttackBonus;
+char[] sEffectCommandCreatures;
+char[] sEffectCommandHumanoids;
+char[] sEffectBoundDagger;
+char[] sEffectBoundLongsword;
+char[] sEffectBoundMace;
+char[] sEffectBoundBattleAxe;
+char[] sEffectBoundSpear;
+char[] sEffectBoundLongbow;
+char[] sEffectExtraSpell;
+char[] sEffectBoundCuirass;
+char[] sEffectBoundHelm;
+char[] sEffectBoundBoots;
+char[] sEffectBoundShield;
+char[] sEffectBoundGloves;
+char[] sEffectCorpus;
+char[] sEffectVampirism;
+char[] sEffectSummonCenturionSphere;
+char[] sEffectSunDamage;
+char[] sEffectStuntedMagicka;
+char[] sSchoolAlteration;
+char[] sSchoolConjuration;
+char[] sSchoolDestruction;
+char[] sSchoolIllusion;
+char[] sSchoolMysticism;
+char[] sSchoolRestoration;
+char[] sTypeSpell;
+char[] sTypeAbility;
+char[] sTypeBlightDisease;
+char[] sTypeDisease;
+char[] sTypeCurse;
+char[] sTypePower;
+char[] sItemCastOnce;
+char[] sItemCastWhenStrikes;
+char[] sItemCastWhenUsed;
+char[] sItemCastConstant;
+char[] sRangeSelf;
+char[] sRangeTouch;
+char[] sRangeTarget;
+char[] sMagicSkillFail;
+char[] sMagicInsufficientSP;
+char[] sMagicInsufficientCharge;
+char[] sPowerAlreadyUsed;
+char[] sMagicInvalidTarget;
+char[] sMagicLockSuccess;
+char[] sMagicOpenSuccess;
+char[] sMagicTargetResistsWeapons;
+char[] sMagicContractDisease;
+char[] sMagicScampID;
+char[] sMagicClannfearID;
+char[] sMagicDaedrothID;
+char[] sMagicDremoraID;
+char[] sMagicAncestralGhostID;
+char[] sMagicSkeletalMinionID;
+char[] sMagicLeastBonewalkerID;
+char[] sMagicGreaterBonewalkerID;
+char[] sMagicBonelordID;
+char[] sMagicWingedTwilightID;
+char[] sMagicHungerID;
+char[] sMagicGoldenSaintID;
+char[] sMagicFlameAtronachID;
+char[] sMagicFrostAtronachID;
+char[] sMagicStormAtronachID;
+char[] sMagicCenturionSphereID;
+char[] sMagicBoundDaggerID;
+char[] sMagicBoundLongswordID;
+char[] sMagicBoundMaceID;
+char[] sMagicBoundBattleAxeID;
+char[] sMagicBoundSpearID;
+char[] sMagicBoundLongbowID;
+char[] sMagicBoundCuirassID;
+char[] sMagicBoundHelmID;
+char[] sMagicBoundBootsID;
+char[] sMagicBoundShieldID;
+char[] sMagicBoundLeftGauntletID;
+char[] sMagicBoundRightGauntletID;
+char[] sMagicCorprusWorsens;
+char[] sMagicCannotRecast;
+char[] sMagicPCResisted;
+char[] sMagicTargetResisted;
+char[] sMagicInvalidEffect;
+char[] sAcrobat;
+char[] sAgent;
+char[] sArcher;
+char[] sAssassin;
+char[] sBarbarian;
+char[] sBard;
+char[] sBattlemage;
+char[] sCrusader;
+char[] sCustom;
+char[] sHealer;
+char[] sKnight;
+char[] sMage;
+char[] sMonk;
+char[] sNightblade;
+char[] sPilgrim;
+char[] sRogue;
+char[] sScout;
+char[] sSorceror;
+char[] sSpellsword;
+char[] sThief;
+char[] sWarrior;
+char[] sWitchhunter;
+
+// Not documented, from Tribunal.esm (after installing Bloodmoon)
+char[] sTeleportDisabled;
+char[] sLevitateDisabled;
+char[] sWerewolfRefusal;
+char[] sWerewolfPopup;
+char[] sWerewolfRestMessage;
+char[] sWerewolfAlarmMessage;
+char[] sMaxSale;
+char[] sDeleteNote;
+char[] sEditNote;
+char[] sProfitValue;
+char[] sCompanionShare;
+char[] sCompanionWarningMessage;
+char[] sCompanionWarningButtonOne;
+char[] sCompanionWarningButtonTwo;
+float fWereWolfMagicka;
+float fWereWolfIntellegence;
+float fWereWolfHeavyArmor;
+float fWereWolfMerchantile;
+float fCombatDistanceWerewolfMod;
+char[] sEffectSummonFabricant;
+char[] sEffectSummonCreature01;
+char[] sEffectSummonCreature02;
+char[] sEffectSummonCreature03;
+char[] sEffectSummonCreature04;
+char[] sEffectSummonCreature05;
+char[] sMagicFabricantID;
+char[] sMagicCreature01ID;
+char[] sMagicCreature02ID;
+char[] sMagicCreature03ID;
+char[] sMagicCreature04ID;
+char[] sMagicCreature05ID;
+
+test()
+{
+  // Print out some random variables. If you want these not to get
+  // lost in a see of output from OGRE, run openmw with the -n switch
+  // to disable rendering.
+  print();
+  print("Some random GSMT variables:");
+  print("sThief: ", sThief);
+  print("iAlchemyMod: ", iAlchemyMod);
+  print("sBribe_100_Gold: ", sBribe_100_Gold);
+  print("fMaxWalkSpeed: ", fMaxWalkSpeed);
+  print("fWereWolfMagicka: ", fWereWolfMagicka);
+  print("sEffectSummonFabricant: ", sEffectSummonFabricant);
+  print();
+}
