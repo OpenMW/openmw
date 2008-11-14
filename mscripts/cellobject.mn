@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (object.mn) is part of the OpenMW package.
+  This file (cellobject.mn) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,19 +21,40 @@
 
  */
 
-// This is the base class of all OpenMW Monster classes.
-class Object;
+// An object that exists inside a cell. All cell objects must have a
+// position in space.
+class CellObject : Object;
 
-// TODO: These are temporary hacks. A more elegant solution will be
-// used once the language supports it.
-native Config config();
-native Music music();
+// Position and rotation in space
+float x, y, z;
+float r1, r2, r3;
 
-// Sleeps a given amount of time
-idle sleep(float seconds);
+float scale;
 
-// Print a message to screen
-native print(char[][] msg...);
+// Various variables that are currently unused. Most of the strings
+// will be replaced by object references at some point.
 
-// Get a random number between a and b (inclusive)
-native int randInt(int a, int b);
+// Owner of an object / activator
+char[] owner;
+
+// A global variable? Don't know what it's used for.
+char[] global;
+
+// Reference to a soul trapped creature?
+char[] soul;
+
+// Faction owner? Rank?
+char[] cnam;
+int indx;
+
+// Magic value / health / uses of an item?
+float xchg;
+
+// ?? See comment below
+int intv, nam9;
+
+// ??
+int fltv;
+int unam;
+
+// TODO: Scripts

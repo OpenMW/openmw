@@ -2096,12 +2096,12 @@ test()
   // lost in a see of output from OGRE, run openmw with the -n switch
   // to disable rendering.
   print();
-  print("Some random GSMT variables:");
-  print("sThief: ", sThief);
-  print("iAlchemyMod: ", iAlchemyMod);
-  print("sBribe_100_Gold: ", sBribe_100_Gold);
-  print("fMaxWalkSpeed: ", fMaxWalkSpeed);
-  print("fWereWolfMagicka: ", fWereWolfMagicka);
-  print("sEffectSummonFabricant: ", sEffectSummonFabricant);
+  print("Some random GMST variables:");
+  print("sThief:", sThief);
+  print("iAlchemyMod:", iAlchemyMod);
+  print("sBribe_100_Gold:", sBribe_100_Gold);
+  print("fMaxWalkSpeed:", fMaxWalkSpeed);
+  print("fWereWolfMagicka:", fWereWolfMagicka);
+  print("sEffectSummonFabricant:", sEffectSummonFabricant);
   print();
 }

@@ -152,8 +152,8 @@ struct ResourceManager
 	return res;
        }
 
-    jukebox.setPlaylist(getDir(config.musDir));
-    battleMusic.setPlaylist(getDir(config.musDir2));
+    Music.setPlaylists(getDir(config.musDir),
+                       getDir(config.musDir2));
 
     meshLookup.reset();
     textureLookup.reset();

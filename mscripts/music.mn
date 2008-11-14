@@ -1,0 +1,104 @@
+/*
+  OpenMW - The completely unofficial reimplementation of Morrowind
+  Copyright (C) 2008  Nicolay Korslund
+  Email: < korslund@gmail.com >
+  WWW: http://openmw.snaptoad.com/
+
+  This file (jukebox.mn) is part of the OpenMW package.
+
+  OpenMW is distributed as free software: you can redistribute it
+  and/or modify it under the terms of the GNU General Public License
+  version 3, as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  version 3 along with this program. If not, see
+  http://www.gnu.org/licenses/ .
+
+ */
+
+// This class controls all the music.
+class Music : Object;
+
+// Create one jukebox for normal music, and one for battle music. This
+// way we can pause / fade out one while the other resumes / fades in.
+Jukebox jukebox, battle;
+
+bool isBattle;
+bool isMuted;
+
+// Toggle between normal and battle music
+toggle()
+{
+  if(isBattle)
+    {
+      print("Switching to normal music");
+      battle.pause();
+      jukebox.resume();
+      isBattle = false;
+    }
+  else
+    {
+      print("Switching to battle music");
+      jukebox.pause();
+      battle.resume();
+      isBattle = true;
+    }
+}
+
+toggleMute()
+{
+  if(!isMuted)
+    {
+      jukebox.updateVolume(0);
+      battle.updateVolume(0);
+      print("Muted");
+      isMuted = true;
+    }
+  else
+    {
+      updateVolume();
+      isMuted = false;
+      print("Mute off");
+    }
+}
+
+setup()
+{
+  jukebox = new Jukebox;
+  battle = new Jukebox;
+
+  jukebox.name = "Main";
+  battle.name = "Battle";
+
+  isBattle = false;
+
+  updateVolume();
+}
+
+play()
+{
+  if(isBattle) battle.play();
+  else jukebox.play();
+}
+
+// Called at startup, listing the files in the "explore" and "battle"
+// music directories respectively.
+setPlaylists(char[][] normal, char[][] battlelist)
+{
+  jukebox.setPlaylist(normal);
+  battle.setPlaylist(battlelist);
+}
+
+// Called whenever the volume settings (music volume or main volume)
+// have been changed by the user.
+updateVolume()
+{
+  float v = config().calcMusicVolume();
+  jukebox.updateVolume(v);
+  battle.updateVolume(v);
+}

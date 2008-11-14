@@ -28,6 +28,7 @@ import std.stdio;
 public import esm.esmmain;
 
 import core.memory;
+import monster.monster;
 
 import util.reglist;
 
@@ -38,71 +39,26 @@ import sound.audio;
 
 import scene.player;
 
-// Base properties common to all live objects. Currently extremely
-// sketchy. TODO: This will all be handled in Monster script at some
-// point.
-struct LiveObjectBase
-{
-  // Should this stuff be in here?
-  bool disabled; // Disabled in game
-  bool deleted; // Deleted relative to plugin file
-
-  // Used for objects created in-game, like custom potions or
-  // enchanted items. These can be completely deleted. It is also used
-  // for creatures created from leveled lists.
-  bool transient;
-
-  // Is this a door that teleports to another cell?
-  bool teleport;
-
-  // Scale, 1.0 is normal.
-  float scale;
-
-  // Owner of an object / activator
-  char[] owner;
-
-  // A global variable? Don't know what it's used for.
-  char[] global;
-
-  // Reference to a soul trapped creature?
-  char[] soul;
-
-  // Faction owner? Rank?
-  char[] cnam;
-  int indx;
-
-  // Magic value / health / uses of an item?
-  float xchg;
-
-  // ?? See comment below
-  int intv, nam9;
-
-  // Destination for a door
-  Placement destPos;
-  char[] destCell;
-
-  // Lock level?
-  int fltv;
-
-  // For locked doors and containers
-  char[] key, trap;
-
-  // Position in 3D world
-  Placement pos;
-
-  // ??
-  byte unam;
-
-  // TODO: Scripts
-}
-
 // Generic version of a "live" object
 struct GenLive(T)
 {
-  // This HAS to be a pointer, since we load the LOB after copying the
-  // LiveWhatever into the linked list.
-  LiveObjectBase *base;
+  // Instance of class CellObject or a derived class (depending on
+  // object type)
+  MonsterObject *obj;
   T *m;
+
+  Placement *getPos()
+    {
+      assert(obj !is null);
+      // This belongs in HACK-land
+      return cast(Placement*)obj.getFloatPtr("x");
+    }
+
+  float getScale()
+    {
+      assert(obj !is null);
+      return obj.getFloat("scale");
+    }
 }
 
 alias GenLive!(Static) LiveStatic;
@@ -121,16 +77,27 @@ alias GenLive!(Door) LiveDoor;
 alias GenLive!(Misc) LiveMisc;
 alias GenLive!(Container) LiveContainer;
 
+// TODO: This is sort of redundant. Eliminate or rework it later.
 struct LiveLight
 {
-  LiveObjectBase *base;
+  MonsterObject *obj;
   Light *m;
+
+  Placement *getPos()
+    {
+      assert(obj !is null);
+      // This belongs in HACK-land
+      return cast(Placement*)obj.getFloatPtr("x");
+    }
+
+  float getScale()
+    {
+      assert(obj !is null);
+      return obj.getFloat("scale");
+    }
 
   NodePtr lightNode;
   SoundInstance *loopSound;
-
-  // Lifetime left, in seconds?
-  float time;
 }
 
 class CellData
@@ -172,6 +139,9 @@ class CellData
     {
       reg = r;
       killCell(); // Make sure all data is initialized.
+
+      // Set up the Monster classes if it's not done already
+      setup();
     }
 
   // Kills all data and initialize the object for reuse.
@@ -286,7 +256,22 @@ class CellData
       loadReferences();
     }
 
-  private void loadReferences()
+ private:
+
+  static
+    MonsterClass cellObjC, doorC, lightC, lockedC;
+
+  void setup()
+    {
+      if(cellObjC !is null) return;
+
+      cellObjC = new MonsterClass("CellObject");
+      doorC = new MonsterClass("Door");
+      lightC = new MonsterClass("Light");
+      lockedC = new MonsterClass("LockedObject");
+    }
+
+  void loadReferences()
     {
       with(esFile)
       {
@@ -315,19 +300,18 @@ class CellData
 	    Item itm = cellRefs.lookup(refr);
             ItemT it = ItemT(itm);
 
-	    // Create a new base object that holds all our reference
-	    // data.
-	    LiveObjectBase *base = reg.newT!(LiveObjectBase)();
+            MonsterObject *mo;
 
 	    // These should be ordered according to how commonly they
-	    // occur and how large the reference lists are.
+	    // occur.
 
-	    // Static mesh - probably the most common
+	    // Static mesh - probably the most common object type
 	    if(Static *s = it.getStatic())
 	      {
 		LiveStatic ls;
 		ls.m = s;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		statics.insert(ls);
 		stat = true;
 	      }
@@ -336,7 +320,8 @@ class CellData
 	      {
 		LiveMisc ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		miscItems.insert(ls);
 	      }
 	    // Lights and containers too
@@ -344,20 +329,25 @@ class CellData
 	      {
 		LiveLight ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = lightC.createObject;
+                mo = ls.obj;
 
-		ls.time = m.data.time;
+		mo.setFloat("lifetime", m.data.time);
+                bool carry = (m.data.flags&Light.Flags.Carry) != 0;
+                mo.setBool("carry", carry);
 
-		if(m.data.flags&Light.Flags.Carry)
+		if(carry)
 		  lights.insert(ls);
 		else
 		  statLights.insert(ls);
 	      }
+
 	    else if(Container *c = it.getContainer())
 	      {
 		LiveContainer ls;
 		ls.m = c;
-		ls.base = base;
+		ls.obj = lockedC.createObject;
+                mo = ls.obj;
 		containers.insert(ls);
 		container = true;
 	      }
@@ -366,7 +356,8 @@ class CellData
 	      {
 		LiveDoor ls;
 		ls.m = d;
-		ls.base = base;
+		ls.obj = doorC.createObject;
+                mo = ls.obj;
 		doors.insert(ls);
 		door = true;
 	      }
@@ -375,7 +366,8 @@ class CellData
 	      {
 		LiveActivator ls;
 		ls.m = a;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		activators.insert(ls);
 		activator = true;
 	      }
@@ -384,84 +376,96 @@ class CellData
 	      {
 		LiveNPC ls;
 		ls.m = n;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		npcs.insert(ls);
 	      }
 	    else if(Potion *p = it.getPotion())
 	      {
 		LivePotion ls;
 		ls.m = p;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		potions.insert(ls);
 	      }
 	    else if(Apparatus *m = it.getApparatus())
 	      {
 		LiveApparatus ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		appas.insert(ls);
 	      }
 	    else if(Ingredient *m = it.getIngredient())
 	      {
 		LiveIngredient ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		ingredients.insert(ls);
 	      }
 	    else if(Armor *m = it.getArmor())
 	      {
 		LiveArmor ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		armors.insert(ls);
 	      }
 	    else if(Weapon *m = it.getWeapon())
 	      {
 		LiveWeapon ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		weapons.insert(ls);
 	      }
 	    else if(Book *m = it.getBook())
 	      {
 		LiveBook ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		books.insert(ls);
 	      }
 	    else if(Clothing *m = it.getClothing())
 	      {
 		LiveClothing ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		clothes.insert(ls);
 	      }
 	    else if(Tool *m = it.getPick())
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		tools.insert(ls);
 	      }
 	    else if(Tool *m = it.getProbe())
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		tools.insert(ls);
 	      }
 	    else if(Tool *m = it.getRepair())
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		tools.insert(ls);
 	      }
 	    else if(Creature *c = it.getCreature())
 	      {
 		LiveCreature ls;
 		ls.m = c;
-		ls.base = base;
+		ls.obj = cellObjC.createObject;
+                mo = ls.obj;
 		creatures.insert(ls);
 	      }
 	    else if(LeveledCreatures *l = it.getCreatureList)
@@ -471,7 +475,7 @@ class CellData
 		ls.m = l.instCreature(playerData.level);
 		if(ls.m != null)
 		  {
-		    ls.base = base;
+		    ls.obj = cellObjC.createObject; mo = ls.obj;
 		    creatures.insert(ls);
 		  }
 	      }
@@ -480,16 +484,10 @@ class CellData
 	    // Now that the object has found it's place, load data
 	    // into base.
 
-	    with(*base)
+	    with(*mo)
 	      {
-		// ALL variables must be initialized here
-		disabled = false;
-		deleted = false;
-		transient = false;
-		teleport = false;
-
 		// Scale
-		scale = getHNOFloat("XSCL", 1.0);
+		setFloat("scale", getHNOFloat("XSCL", 1.0));
 
 		// Statics only need the position data. Skip the
 		// unneeded calls to isNextSub() as an optimization.
@@ -497,25 +495,28 @@ class CellData
 
 		// An NPC that owns this object (and will get angry if
 		// you steal it)
-		owner = getHNOString("ANAM");
+		setString8("owner", getHNOString("ANAM"));
 		
-		// ??? I have no idea, link to a global variable
-		global = getHNOString("BNAM");
+		// I have no idea, link to a global variable perhaps?
+		setString8("global", getHNOString("BNAM"));
 
 		// ID of creature trapped in a soul gem (?)
-		soul = getHNOString("XSOL");
+		setString8("soul", getHNOString("XSOL"));
 
 		// ?? CNAM has a faction name, might be for
 		// objects/beds etc belonging to a faction.
-		cnam = getHNOString("CNAM");
+                {
+                  char[] cnam = getHNOString("CNAM");
+                  setString8("cnam", cnam);
 
-		// INDX might be PC faction rank required to use the
-		// item? Sometimes is -1.
-		if(cnam.length) indx = getHNInt("INDX");
+                  // INDX might be PC faction rank required to use the
+                  // item? Sometimes is -1.
+                  if(cnam.length) setInt("indx", getHNInt("INDX"));
+                }
 
 		// Possibly weapon health, number of uses left or
 		// weapon magic charge?
-		xchg = getHNOFloat("XCHG", 0.0);
+                setFloat("xchg", getHNOFloat("XCHG", 0.0));
 
 		// I have no idea, these are present some times, often
 		// along with owner (ANAM) and sometimes otherwise. Is
@@ -523,57 +524,71 @@ class CellData
 		// lights. Perhaps something to do with remaining
 		// light "charge". I haven't tried reading it as a
 		// float in those cases.
-		intv = getHNOInt("INTV", 0);
-		nam9 = getHNOInt("NAM9", 0);
+                setInt("intv", getHNOInt("INTV", 0));
+                setInt("nam9", getHNOInt("NAM9", 0));
 
 		// Present for doors that teleport you to another
 		// cell.
 		if(door && isNextSub("DODT"))
 		  {
-		    teleport = true;
-		    readHExact(&destPos, destPos.sizeof);
+		    setBool("teleport", true);
 
-		    // Destination cell (optitional?)
-		    destCell = getHNOString("DNAM");
+                    // Warning, HACK! Will be fixed when we implement
+                    // structs in Monster.
+                    Placement *p = cast(Placement*)getFloatPtr("destx");
+		    readHExact(p, Placement.sizeof);
+
+                    // Destination cell (optional?)
+		    setString8("destCell", getHNOString("DNAM"));
 		  }
 
 		if(door || container)
 		  {
 		    // Lock level (I think)
-		    fltv = getHNOInt("FLTV", 0);
+		    setInt("lockLevel", getHNOInt("FLTV", 0));
 
 		    // For locked doors and containers
-		    key = getHNOString("KNAM");
-		    trap = getHNOString("TNAM");
+		    setString8("key", getHNOString("KNAM"));
+		    setString8("trap", getHNOString("TNAM"));
 		  }
 
 		if(activator)
 		  {
 		    // Occurs ONCE in Morrowind.esm, for an activator.
-		    unam = getHNOByte("UNAM", 0);
+		    setInt("unam", getHNOByte("UNAM", 0));
 
 		    // Occurs in Tribunal.esm, eg. in the cell
 		    // "Mournhold, Plaza Brindisi Dorom", where it has
 		    // the value 100.
-		    fltv = getHNOInt("FLTV", 0);
+		    setInt("fltv", getHNOInt("FLTV", 0));
 		  }
 
 		readpos:
-		// Position of this object within the cell
-		readHNExact(&pos, Placement.sizeof, "DATA");
+
+		// Position and rotation of this object within the
+		// cell
+
+                // TODO: This is a HACK. It assumes the class variable
+                // floats are placed consecutively in memory in the
+                // right order. This is true, but is a very bug prone
+                // method of doing this. Will fix when Monster gets
+                // structs. (See the DODT record above also.)
+                Placement *pos = cast(Placement*)getFloatPtr("x");
+		readHNExact(pos, Placement.sizeof, "DATA");
 
 		// TODO/FIXME: Very temporary. Set player position at
 		// the first door we find.
 		if(door && !playerData.posSet)
 		  {
 		    playerData.posSet = true;
-		    playerData.position = pos;
+		    playerData.position = *pos;
 		  }
-	      }
-	  }
+              }
+          } // End of while(hasMoreSubs)
       }
-    }
-}
+
+    } // End of loadReferences()
+} // End of class CellData
 
 CellFreelist cellList;
 

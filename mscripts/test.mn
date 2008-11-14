@@ -10,8 +10,11 @@ state printMessage
 {
   // This state code will run as long as the object is in this state.
  begin:
-  sleep(15);
+  sleep(10);
+
+ loop:
   print("Howdy from the world of Monster scripts!");
   print("This script is located in mscripts/test.mn. Check it out!");
-  goto begin;
+  sleep(60);
+  goto loop;
 }

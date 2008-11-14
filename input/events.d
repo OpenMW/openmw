@@ -50,49 +50,8 @@ import input.ois;
 // TODO: Jukebox controls and other state-related data will later be
 // handled entirely in script code, as will some of the key bindings.
 
-// Are we currently playing battle music?
-bool battle = false;
-
 // Pause?
 bool pause = false;
-
-// Temporarily store volume while muted
-float muteVolume = -1;
-
-void toggleMute()
-{
-  if(muteVolume < 0)
-    {
-      muteVolume = config.mainVolume;
-      config.setMainVolume(0);
-      writefln("Muted");
-    }
-  else
-    {
-      config.setMainVolume(muteVolume);
-      muteVolume = -1;
-      writefln("Mute off");
-    }
-}
-
-// Switch between normal and battle music
-void toggleBattle()
-{
-  if(battle)
-    {
-      writefln("Changing to normal music");
-      jukebox.resume();
-      battleMusic.pause();
-      battle=false;
-    }
-  else
-    {
-      writefln("Changing to battle music");
-      jukebox.pause();
-      battleMusic.resume();
-      battle=true;
-    }
-}
 
 void toggleFullscreen()
 {
@@ -105,24 +64,24 @@ void musVolume(bool increase)
 {
   float diff = -volDiff;
   if(increase) diff = -diff;
-  config.setMusicVolume(diff + config.musicVolume);
-  writefln(increase?"Increasing":"Decreasing", " music volume to ", config.musicVolume);
+  config.setMusicVolume(diff + config.getMusicVolume);
+  writefln(increase?"Increasing":"Decreasing", " music volume to ", config.getMusicVolume);
 }
 
 void sfxVolume(bool increase)
 {
   float diff = -volDiff;
   if(increase) diff = -diff;
-  config.setSfxVolume(diff + config.sfxVolume);
-  writefln(increase?"Increasing":"Decreasing", " sound effect volume to ", config.sfxVolume);
+  config.setSfxVolume(diff + config.getSfxVolume);
+  writefln(increase?"Increasing":"Decreasing", " sound effect volume to ", config.getSfxVolume);
 }
 
 void mainVolume(bool increase)
 {
   float diff = -volDiff;
   if(increase) diff = -diff;
-  config.setMainVolume(diff + config.mainVolume);
-  writefln(increase?"Increasing":"Decreasing", " main volume to ", config.mainVolume);
+  config.setMainVolume(diff + config.getMainVolume);
+  writefln(increase?"Increasing":"Decreasing", " main volume to ", config.getMainVolume);
 }
 
 void takeScreenShot()
@@ -137,9 +96,9 @@ float effMX, effMY;
 
 void updateMouseSensitivity()
 {
-  effMX = config.mouseSensX;
-  effMY = config.mouseSensY;
-  if(config.flipMouseY) effMY = -effMY;
+  effMX = *config.mouseSensX;
+  effMY = *config.mouseSensY;
+  if(*config.flipMouseY) effMY = -effMY;
 }
 
 void togglePause()
@@ -212,7 +171,9 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
   if(k)
     switch(k)
       {
-      case Keys.ToggleBattleMusic: toggleBattle(); break;
+      case Keys.ToggleBattleMusic:
+        Music.toggle();
+        break;
 
       case Keys.MainVolUp: mainVolume(true); break;
       case Keys.MainVolDown: mainVolume(false); break;
@@ -220,7 +181,7 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
       case Keys.MusVolDown: musVolume(false); break;
       case Keys.SfxVolUp: sfxVolume(true); break;
       case Keys.SfxVolDown: sfxVolume(false); break;
-      case Keys.Mute: toggleMute(); break;
+      case Keys.Mute: Music.toggleMute(); break;
       case Keys.Fullscreen: toggleFullscreen(); break;
 
       case Keys.PhysMode: bullet_nextMode(); break;
@@ -298,8 +259,7 @@ extern(C) int d_frameStarted(float time)
   musCumTime += time;
   if(musCumTime > musRefresh)
     {
-      jukebox.updateBuffers();
-      battleMusic.updateBuffers();
+      Music.updateBuffers();
       musCumTime -= musRefresh;
     }
 

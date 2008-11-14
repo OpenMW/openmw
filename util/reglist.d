@@ -72,7 +72,6 @@ struct RegionList(Value)
 
  public:
 
-
   alias Node* Iterator;
 
   // Equivalent to calling remove() on all elements

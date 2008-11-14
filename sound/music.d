@@ -42,30 +42,121 @@ class Idle_waitUntilFinished : IdleFunction
 
   bool hasFinished(MonsterObject *mo)
   {
-    MusicManager *mgr = cast(MusicManager*)mo.extra;
+    Jukebox mgr = cast(Jukebox)mo.extra;
 
     // Return when the music is no longer playing
     return !mgr.isPlaying();
   }
 }
 
-// Simple music player, has a playlist and can pause/resume music.
-struct MusicManager
+struct Music
+{
+  private:
+  static:
+
+  // The Monster classes and objects
+  MonsterClass jukeC, controlC;
+
+  public:
+
+  MonsterObject *controlM;
+
+  void init()
+  {
+    assert(jukeC is null);
+    assert(controlC is null);
+    assert(controlM is null);
+
+    jukeC = MonsterClass.get("Jukebox");
+    jukeC.bind("waitUntilFinished",
+            new Idle_waitUntilFinished);
+
+    jukeC.bind("setSound", { Jukebox.get().setSound(); });
+    jukeC.bind("setVolume", { Jukebox.get().setVolume(); });
+    jukeC.bind("playSound", { Jukebox.get().playSound(); });
+    jukeC.bind("stopSound", { Jukebox.get().stopSound(); });
+
+    jukeC.bindConst({new Jukebox(params.obj()); });
+
+    controlC = MonsterClass.get("Music");
+    controlM = controlC.createObject;
+    controlM.call("setup");
+  }
+
+  private void pushSArray(char[][] strs)
+  {
+    AIndex arr[];
+    arr.length = strs.length;
+
+    // Create the array indices for each element string
+    foreach(i, ref elm; arr)
+      elm = arrays.create(strs[i]).getIndex();
+
+    // Push the final array
+    stack.pushArray(arr);
+  }
+
+  void setPlaylists(char[][] normal, char[][] battle)
+  {
+    pushSArray(normal);
+    pushSArray(battle);
+    controlM.call("setPlaylists");
+  }
+
+  void play()
+  {
+    if(controlM !is null)
+      controlM.call("play");
+  }
+
+  void toggle()
+  {
+    if(controlM !is null)
+      controlM.call("toggle");
+  }
+
+  void toggleMute()
+  {
+    if(controlM !is null)
+      controlM.call("toggleMute");
+  }
+
+  void updateBuffers()
+  {
+    foreach(ref MonsterObject b; jukeC)
+      Jukebox.get(b).updateBuffers();
+  }
+
+  void shutdown()
+  {
+    foreach(ref MonsterObject b; jukeC)
+      Jukebox.get(b).shutdown();
+  }
+}
+
+// Simple music player, has a playlist and can pause/resume
+// music. Most of the high-level code is in mscripts/jukebox.mn.
+class Jukebox
 {
   private:
 
   // Maximum buffer length, divided up among OpenAL buffers
   const uint bufLength = 128*1024;
+  const uint numBufs = 4;
 
-  char[] name;
+  char[] getName()
+    {
+      if(mo is null) return "(no name)";
+      else return mo.getString8("name");
+    }
 
   void fail(char[] msg)
   {
-    throw new SoundException(name ~ " Jukebox", msg);
+    throw new SoundException(getName() ~ " Jukebox", msg);
   }
 
   ALuint sID; // Sound id
-  ALuint bIDs[4]; // Buffers
+  ALuint bIDs[numBufs]; // Buffers
 
   ALenum bufFormat;
   ALint bufRate;
@@ -75,82 +166,61 @@ struct MusicManager
 
   static ubyte[] outData;
 
-  // The Jukebox class
-  static MonsterClass mc;
+  static this()
+  {
+    outData.length = bufLength / numBufs;
+  }
 
   // The jukebox Monster object
   MonsterObject *mo;
 
   public:
 
-  static MusicManager *get()
-  { return cast(MusicManager*)params.obj().extra; }
-
-  static void sinit()
+  this(MonsterObject *m)
   {
-    assert(mc is null);
-    mc = new MonsterClass("Jukebox", "jukebox.mn");
-    mc.bind("waitUntilFinished",
-            new Idle_waitUntilFinished);
+    mo = m;
+    m.extra = cast(void*)this;
 
-    mc.bind("setSound", { get().setSound(); });
-    mc.bind("setVolume", { get().setVolume(); });
-    mc.bind("playSound", { get().playSound(); });
-    mc.bind("stopSound", { get().stopSound(); });
-
-    outData.length = bufLength / bIDs.length;
-  }
-
-  // Initialize the jukebox
-  void initialize(char[] name)
-  {
-    this.name = name;
     sID = 0;
     bIDs[] = 0;
+  }
+
+  static Jukebox get(MonsterObject *m)
+    {
+      auto j = cast(Jukebox)m.extra;
+      assert(j !is null);
+      assert(j.mo == m);
+      return j;
+    }
+
+  static Jukebox get(ref MonsterObject m)
+    { return get(&m); }
+
+  static Jukebox get()
+  { return get(params.obj()); }
+
+  private:
+
+  // Disable music
+  void shutdown()
+  {
+    mo.call("stop");
+
+    if(fileHandle) avc_closeAVFile(fileHandle);
     fileHandle = null;
+    audioHandle = null;
 
-    mo = mc.createObject();
-    mo.extra = this;
-  }
+    if(sID)
+      {
+        alSourceStop(sID);
+        alDeleteSources(1, &sID);
+        checkALError("disabling music");
+        sID = 0;
 
-  // Called whenever the volume configuration values are changed by
-  // the user.
-  void updateVolume()
-  {
-    stack.pushFloat(config.calcMusicVolume());
-    mo.call("updateVolume");
-  }
-
-  // Give a music play list
-  void setPlaylist(char[][] pl)
-  {
-    AIndex arr[];
-    arr.length = pl.length;
-
-    // Create the array indices for each element string
-    foreach(i, ref elm; arr)
-      elm = arrays.create(pl[i]).getIndex();
-
-    // Push the final array
-    stack.pushArray(arr);
-
-    mo.call("setPlaylist");
-  }
-
-  // Pause current track
-  void pause() { mo.call("pause"); }
-
-  // Resume. Starts playing sound, with fade in
-  void resume()
-  {
-    if(!config.useMusic) return;
-    mo.call("resume");
-  }
-
-  void play()
-  {
-    if(!config.useMusic) return;
-    mo.call("play");
+        alDeleteBuffers(bIDs.length, bIDs.ptr);
+        checkALError("deleting buffers");
+        bIDs[] = 0;
+      }
   }
 
   void setSound()
@@ -158,7 +228,7 @@ struct MusicManager
     char[] fname = stack.popString8();
 
     // Generate a source to play back with if needed
-    if(!sID)
+    if(sID == 0)
       {
         alGenSources(1, &sID);
         checkALError("generating buffers");
@@ -167,17 +237,17 @@ struct MusicManager
         alSourcei(sID, AL_SOURCE_RELATIVE, AL_TRUE);
 
         alGenBuffers(bIDs.length, bIDs.ptr);
-
-        updateVolume();
       }
     else
       {
         // Kill current track, but keep the sID source.
         alSourceStop(sID);
+        checkALError("stopping current track");
+
         alSourcei(sID, AL_BUFFER, 0);
         //alDeleteBuffers(bIDs.length, bIDs.ptr);
         //bIDs[] = 0;
-        checkALError("killing current track");
+        checkALError("resetting buffer");
       }
 
     if(fileHandle) avc_closeAVFile(fileHandle);
@@ -230,7 +300,8 @@ struct MusicManager
       }
 
     if(bufFormat == 0)
-      fail(format("Unhandled format (%d channels, %d bits) for music track %s", ch, bits, fname));
+      fail(format("Unhandled format (%d channels, %d bits) for music track %s",
+                  ch, bits, fname));
 
     // Fill the buffers
     foreach(int i, ref b; bIDs)
@@ -257,14 +328,15 @@ struct MusicManager
   {
     float volume = stack.popFloat();
 
+    volume = saneVol(volume);
+
     // Set the new volume
     if(sID) alSourcef(sID, AL_GAIN, volume);
   }
 
   void playSound()
   {
-    if(!sID || !config.useMusic)
-      return;
+    if(!sID) return;
 
     alSourcePlay(sID);
     checkALError("starting music");
@@ -280,6 +352,7 @@ struct MusicManager
   {
     ALint state;
     alGetSourcei(sID, AL_SOURCE_STATE, &state);
+    checkALError("getting status");
 
     return state == AL_PLAYING;
   }
@@ -293,7 +366,7 @@ struct MusicManager
     ALint count;
     alGetSourcei(sID, AL_BUFFERS_PROCESSED, &count);
 
-    checkALError();
+    checkALError("getting number of unprocessed buffers");
 
     for(int i = 0;i < count;i++)
       {
@@ -307,30 +380,8 @@ struct MusicManager
           {
             alBufferData(bid, bufFormat, outData.ptr, length, bufRate);
             alSourceQueueBuffers(sID, 1, &bid);
-            checkALError();
+            checkALError("queueing buffers");
           }
       }
-  }
-
-  // Disable music
-  void shutdown()
-  {
-    mo.call("stop");
-
-    if(fileHandle) avc_closeAVFile(fileHandle);
-    fileHandle = null;
-    audioHandle = null;
-
-    if(sID)
-      {
-        alSourceStop(sID);
-        alDeleteSources(1, &sID);
-        checkALError("disabling music");
-        sID = 0;
-      }
-
-    alDeleteBuffers(bIDs.length, bIDs.ptr);
-    checkALError();
-    bIDs[] = 0;
   }
 }

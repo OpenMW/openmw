@@ -37,9 +37,6 @@ class SoundException : Exception
   this(char[] caller, char[] msg) { super(caller ~ " SoundException: " ~ msg); }
 }
 
-MusicManager jukebox;
-MusicManager battleMusic;
-
 ALCdevice  *Device = null;
 ALCcontext *Context = null;
 
@@ -54,16 +51,12 @@ void initializeSound()
 
   alcMakeContextCurrent(Context);
 
-  MusicManager.sinit();
-
-  jukebox.initialize("Main");
-  battleMusic.initialize("Battle");
+  Music.init();
 }
 
 void shutdownSound()
 {
-  jukebox.shutdown();
-  battleMusic.shutdown();
+  Music.shutdown();
 
   alcMakeContextCurrent(null);
   if(Context) alcDestroyContext(Context);
@@ -72,10 +65,17 @@ void shutdownSound()
   Device = null;
 }
 
-void checkALError(char[] what = "")
+float saneVol(float vol)
+{
+  if(!(vol >= 0)) vol = 0;
+  else if(!(vol <= 1)) vol = 1;
+  return vol;
+}
+
+void checkALError(char[] what)
 {
   ALenum err = alGetError();
-  if(what.length) what = " while " ~ what;
+  what = " while " ~ what;
   if(err != AL_NO_ERROR)
     throw new Exception(format("OpenAL error%s: (%x) %s", what, err,
                toString(alGetString(err))));

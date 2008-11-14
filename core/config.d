@@ -28,6 +28,7 @@ import std.file;
 import std.path;
 import std.stdio;
 
+import monster.monster;
 import monster.util.string;
 
 import core.inifile;
@@ -37,10 +38,6 @@ import sound.audio;
 
 import input.keys;
 import input.ois;
-
-//import sdl.Keysym;
-
-//import input.events : updateMouseSensitivity;
 
 ConfigManager config;
 
@@ -52,20 +49,25 @@ ConfigManager config;
  * from Morrowind.ini and for configuring OGRE. It doesn't currently
  * DO all of this, but it is supposed to in the future.
  */
+
 struct ConfigManager
 {
+  MonsterObject *mo;
+
   IniWriter iniWriter;
 
   // Sound setting
+  /*
   float musicVolume;
   float sfxVolume;
   float mainVolume;
   bool useMusic;
+  //*/
 
   // Mouse sensitivity
-  float mouseSensX;
-  float mouseSensY;
-  bool flipMouseY;
+  float *mouseSensX;
+  float *mouseSensY;
+  bool *flipMouseY;
 
   // Ogre configuration
   bool showOgreConfig; // The configuration setting
@@ -97,50 +99,31 @@ struct ConfigManager
   // Cell to load at startup
   char[] defaultCell;
 
-  // Check that a given volume is within sane limits (0.0-1.0)
-  private static float saneVol(float vol)
-  {
-    if(!(vol >= 0)) vol = 0;
-    else if(!(vol <= 1)) vol = 1;
-    return vol;
-  }
-
   // These set the volume to a new value and updates all sounds to
   // take notice.
   void setMusicVolume(float vol)
   {
-    musicVolume = saneVol(vol);
-
-    jukebox.updateVolume();
-    battleMusic.updateVolume();
+    stack.pushFloat(vol);
+    mo.call("setMusicVolume");
   }
+  float getMusicVolume()
+  { return mo.getFloat("musicVolume"); }
 
   void setSfxVolume(float vol)
   {
-    sfxVolume = saneVol(vol);
-
-    // TODO: Call some sound manager here to adjust all active sounds
+    stack.pushFloat(vol);
+    mo.call("setSfxVolume");
   }
+  float getSfxVolume()
+  { return mo.getFloat("sfxVolume"); }
 
   void setMainVolume(float vol)
   {
-    mainVolume = saneVol(vol);
-
-    // Update the sound managers
-    setMusicVolume(musicVolume);
-    setSfxVolume(sfxVolume);
+    stack.pushFloat(vol);
+    mo.call("setMainVolume");
   }
-
-  // These calculate the "effective" volumes.
-  float calcMusicVolume()
-  {
-    return musicVolume * mainVolume;
-  }
-
-  float calcSfxVolume()
-  {
-    return sfxVolume * mainVolume;
-  }
+  float getMainVolume()
+  { return mo.getFloat("mainVolume"); }
 
   // Initialize the config manager. Send a 'true' parameter to reset
   // all keybindings to the default. A lot of this stuff will be moved
@@ -149,6 +132,12 @@ struct ConfigManager
   // all setup and control should be handled in script code.
   void initialize(bool reset = false)
   {
+    // Initialize variables from Monster.
+    assert(mo !is null);
+    mouseSensX = mo.getFloatPtr("mouseSensX");
+    mouseSensY = mo.getFloatPtr("mouseSensY");
+    flipMouseY = mo.getBoolPtr("flipMouseY");
+
     // Initialize the key binding manager
     keyBindings.initKeys();
 
@@ -189,14 +178,19 @@ struct ConfigManager
     ini.readFile(confFile);
 
     screenShotNum = ini.getInt("General", "Screenshots", 0);
-    mainVolume = saneVol(ini.getFloat("Sound", "Main Volume", 0.7));
-    musicVolume = saneVol(ini.getFloat("Sound", "Music Volume", 0.5));
-    sfxVolume = saneVol(ini.getFloat("Sound", "SFX Volume", 0.5));
-    useMusic = ini.getBool("Sound", "Enable Music", true);
+    float mainVolume = saneVol(ini.getFloat("Sound", "Main Volume", 0.7));
+    float musicVolume = saneVol(ini.getFloat("Sound", "Music Volume", 0.5));
+    float sfxVolume = saneVol(ini.getFloat("Sound", "SFX Volume", 0.5));
+    bool useMusic = ini.getBool("Sound", "Enable Music", true);
 
-    mouseSensX = ini.getFloat("Controls", "Mouse Sensitivity X", 0.2);
-    mouseSensY = ini.getFloat("Controls", "Mouse Sensitivity Y", 0.2);
-    flipMouseY = ini.getBool("Controls", "Flip Mouse Y Axis", false);
+    *mouseSensX = ini.getFloat("Controls", "Mouse Sensitivity X", 0.2);
+    *mouseSensY = ini.getFloat("Controls", "Mouse Sensitivity Y", 0.2);
+    *flipMouseY = ini.getBool("Controls", "Flip Mouse Y Axis", false);
+
+    mo.setFloat("mainVolume", mainVolume);
+    mo.setFloat("musicVolume", musicVolume);
+    mo.setFloat("sfxVolume", sfxVolume);
+    mo.setBool("useMusic", useMusic);
 
     defaultCell = ini.getString("General", "Default Cell", "Assu");
 
@@ -356,9 +350,9 @@ struct ConfigManager
         writeBool("First Run", false);
 
 	section("Controls");
-	writeFloat("Mouse Sensitivity X", mouseSensX);
-	writeFloat("Mouse Sensitivity Y", mouseSensY);
-	writeBool("Flip Mouse Y Axis", flipMouseY);
+	writeFloat("Mouse Sensitivity X", *mouseSensX);
+	writeFloat("Mouse Sensitivity Y", *mouseSensY);
+	writeBool("Flip Mouse Y Axis", *flipMouseY);
 
 	section("Bindings");
 	comment("Key bindings. The strings must match exactly.");
@@ -370,10 +364,10 @@ struct ConfigManager
 	  }
 
 	section("Sound");
-	writeFloat("Main Volume", mainVolume);
-	writeFloat("Music Volume", musicVolume);
-	writeFloat("SFX Volume", sfxVolume);
-	writeBool("Enable Music", useMusic);
+	writeFloat("Main Volume", mo.getFloat("mainVolume"));
+	writeFloat("Music Volume", mo.getFloat("musicVolume"));
+	writeFloat("SFX Volume", mo.getFloat("sfxVolume"));
+	writeBool("Enable Music", mo.getBool("useMusic"));
 
 	section("Game Files");
 	foreach(int i, ref s; gameFiles)

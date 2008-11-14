@@ -260,11 +260,11 @@ void main(char[][] args)
 
       // Insert the meshes of statics into the scene
       foreach(ref LiveStatic ls; cd.statics)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale, true);
+	putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
       // Inventory lights
       foreach(ref LiveLight ls; cd.lights)
 	{
-	  NodePtr n = putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	  NodePtr n = putObject(ls.m.model, ls.getPos(), ls.getScale());
 	  ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
 	  if(!noSound)
 	  {
@@ -274,16 +274,19 @@ void main(char[][] args)
 	      writefln("Dynamic light %s has sound %s", ls.m.id, s.id);
 	      ls.loopSound = soundScene.insert(s, true);
 	      if(ls.loopSound)
-		ls.loopSound.setPos(ls.base.pos.position[0],
-				    ls.base.pos.position[1],
-				    ls.base.pos.position[2]);
+                {
+                  auto p = ls.getPos();
+                  ls.loopSound.setPos(p.position[0],
+                                      p.position[1],
+                                      p.position[2]);
+                }
 	    }
 	  }
 	}
       // Static lights
       foreach(ref LiveLight ls; cd.statLights)
 	{
-	  NodePtr n = putObject(ls.m.model, &ls.base.pos, ls.base.scale, true);
+	  NodePtr n = putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
 	  ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
           if(!noSound)
           {
@@ -293,56 +296,59 @@ void main(char[][] args)
 	      writefln("Static light %s has sound %s", ls.m.id, s.id);
               ls.loopSound = soundScene.insert(s, true);
               if(ls.loopSound)
-                ls.loopSound.setPos(ls.base.pos.position[0],
-                                    ls.base.pos.position[1],
-                                    ls.base.pos.position[2]);
+                {
+                  auto p = ls.getPos();
+                  ls.loopSound.setPos(p.position[0],
+                                      p.position[1],
+                                      p.position[2]);
+                }
 	    }
           }
 	}
       // Misc items
       foreach(ref LiveMisc ls; cd.miscItems)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       /*
       // NPCs (these are complicated, usually do not have normal meshes)
       foreach(ref LiveNPC ls; cd.npcs)
-      putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+      putObject(ls.m.model, ls.getPos(), ls.getScale());
       */
       // Containers
       foreach(ref LiveContainer ls; cd.containers)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale, true);
+	putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
       // Doors
       foreach(ref LiveDoor ls; cd.doors)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Activators (including beds etc)
       foreach(ref LiveActivator ls; cd.activators)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale, true);
+	putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
       // Potions
       foreach(ref LivePotion ls; cd.potions)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Apparatus
       foreach(ref LiveApparatus ls; cd.appas)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Ingredients
       foreach(ref LiveIngredient ls; cd.ingredients)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Armors
       foreach(ref LiveArmor ls; cd.armors)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Weapons
       foreach(ref LiveWeapon ls; cd.weapons)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Books
       foreach(ref LiveBook ls; cd.books)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Clothes
       foreach(ref LiveClothing ls; cd.clothes)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Tools
       foreach(ref LiveTool ls; cd.tools)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
       // Creatures (not displayed very well yet)
       foreach(ref LiveCreature ls; cd.creatures)
-	putObject(ls.m.model, &ls.base.pos, ls.base.scale);
+	putObject(ls.m.model, ls.getPos(), ls.getScale());
 
       // Initialize the internal input and event manager. The
       // lower-level input system (OIS) is initialized by the
@@ -350,7 +356,8 @@ void main(char[][] args)
       initializeInput();
 
       // Start swangin'
-      if(!noSound) jukebox.play();
+      if(!noSound)
+        Music.play();
 
       // Run it until the user tells us to quit
       startRendering();

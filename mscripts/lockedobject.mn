@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (object.mn) is part of the OpenMW package.
+  This file (lockedobject.mn) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,19 +21,10 @@
 
  */
 
-// This is the base class of all OpenMW Monster classes.
-class Object;
+// Objects that can have a lock level and a trap
+class LockedObject : CellObject;
 
-// TODO: These are temporary hacks. A more elegant solution will be
-// used once the language supports it.
-native Config config();
-native Music music();
+// ID of key and trap type.
+char[] key, trap;
 
-// Sleeps a given amount of time
-idle sleep(float seconds);
-
-// Print a message to screen
-native print(char[][] msg...);
-
-// Get a random number between a and b (inclusive)
-native int randInt(int a, int b);
+int lockLevel;

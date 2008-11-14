@@ -27,6 +27,8 @@ import monster.monster;
 import std.stdio;
 import std.date;
 import core.resource : rnd;
+import core.config;
+import sound.music;
 
 // Set up the base Monster classes we need in OpenMW
 void initMonsterScripts()
@@ -37,12 +39,20 @@ void initMonsterScripts()
   // Make sure the Object class is loaded
   auto mc = new MonsterClass("Object", "object.mn");
 
+  // Create the config object too (only needed here because Object
+  // refers to Config. This will change.)
+  config.mo = (new MonsterClass("Config")).createObject;
+
   // Bind various functions
   mc.bind("print", { print(); });
   mc.bind("randInt",
   { stack.pushInt(rnd.randInt
     (stack.popInt,stack.popInt));});
   mc.bind("sleep", new IdleSleep);
+
+  // Temporary hacks
+  mc.bind("config", { stack.pushObject(config.mo); });
+  mc.bind("music", { stack.pushObject(Music.controlM); });
 
   // Load and run the test script
   mc = new MonsterClass("Test");

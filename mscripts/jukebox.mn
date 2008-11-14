@@ -41,12 +41,15 @@ float fadeInterval = 0.2;
 // List of sounds to play
 char[][] playlist;
 
+// Name used for error messages
+char[] name;
+
 // Index of current song
 int index;
 
 // The music volume, set by the user. Does NOT change to adjust for
-// fading, etc. TODO: This should be stored in a configuration class,
-// not here.
+// fading, it is only updated when the user changes the volume
+// settings. Updated from Config through updateVolume().
 float musVolume;
 
 bool isPlaying; // Is a song currently playing?
@@ -69,6 +72,8 @@ pause()
 
 resume()
 {
+  if(!config().useMusic) return;
+
   if(isPaused) playSound();
   else next();
 
@@ -89,10 +94,13 @@ stop()
 
 play()
 {
+  if(!config().useMusic) return;
+
   if(index >= playlist.length)
     return;
 
   setSound(playlist[index]);
+  setVolume(musVolume*fadeLevel);
   playSound();
 
   isPlaying = true;
@@ -104,6 +112,8 @@ play()
 // Play the next song in the playlist
 next()
 {
+  if(!config().useMusic) return;
+
   if(isPlaying)
     stop();
 
@@ -119,11 +129,10 @@ next()
   play();
 }
 
-// Set the new music volume setting. TODO: This should be read from a
-// config object instead.
-updateVolume(float vol)
+// Set the new music volume setting.
+updateVolume(float f)
 {
-  musVolume = vol;
+  musVolume = f;
   if(isPlaying)
     setVolume(musVolume*fadeLevel);
 }
