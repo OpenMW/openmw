@@ -33,8 +33,10 @@ import sound.music;
 // Set up the base Monster classes we need in OpenMW
 void initMonsterScripts()
 {
-  // Add the script directory
+  // Add the script directories
   MonsterClass.addPath("mscripts/");
+  MonsterClass.addPath("mscripts/cellobjects/");
+  MonsterClass.addPath("mscripts/sound/");
 
   // Make sure the Object class is loaded
   auto mc = new MonsterClass("Object", "object.mn");

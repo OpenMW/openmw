@@ -26,43 +26,40 @@
 // (v9).
 class GameSettings : Object;
 
-// TODO / FIXME: This file is NOT completely edited. We need to read
-// through this entire file, alongside with the Scripting for Dummies
-// PDF, to make sure the comments have been copied and placed
-// correctly. Also, there's a question of what we should do with
-// default values - eg. if the user doesn't have Tribunal, do we still
-// need the tribunal-only GMSTs? They should be initialized to their
-// "normal" value by defailt. Dirty GMST entries are handled
-// automatically by the plugin loader, so we don't have to worry about
-// this here.
+// Most of the comments are copied from MSfD. A bit of cleanup is
+// still needed.
 
-// All string values are currently missing. Fix that too.
+// Dirty GMST entries are handled automatically by the plugin loader,
+// so we don't have to worry about this here.
 
+// Sets the general effectiveness of the repair skill of the
+// character, via the armorer's hammer used
+float fRepairMult;
 
-float fRepairMult; // Sets the general effectiveness of the repair
-                   // skill of the character, via the armorer's hammer
-                   // used
-float fRepairAmountMult; // Tells the game how many points of
-                         // health are returned to the item when
-                         // repaired
-
-// Determines cost for repairing items (Whether calculated from Max
-// Item Health or Item Cost, I'm not sure)
+// Tells the game how many points of health are returned to the item
+// when repaired
+float fRepairAmountMult;
 
 float fSpellValueMult;
 float fSpellMakingValueMult;
-float fEnchantmentValueMult; // The setting for the price you pay at an enchanter to enchant an item. Linear.
-float fTravelMult; // Sets the cost of Silt Strider and boat travel (I think)
 
-// Multiplies cost of Travel. Unsure why the number is so high, but
-// raising it raises the cost of Fast Travel
+// The setting for the price you pay at an enchanter to enchant an item. Linear.
+float fEnchantmentValueMult;
 
-float fTravelTimeMult; // Tells the game how much time elapses during
-                       // this sort of travel
-float fMagesGuildTravel; // Sets the cost of Guild Guide travel
-float fWortChanceValue; // Is compared to your alchemy skill to
-                        // determine which of the effects of an
-                        // ingredient you can see. -(Wakim, Iudas)
+// Sets the cost of Silt Strider and boat travel (I think). Multiplies
+// cost of Travel. Raising it raises the cost of Fast Travel
+float fTravelMult;
+
+// Tells the game how much time elapses during this sort of travel
+float fTravelTimeMult;
+
+// Sets the cost of Guild Guide travel
+float fMagesGuildTravel;
+
+// Is compared to your alchemy skill to determine which of the effects
+// of an ingredient you can see. -(Wakim, Iudas)
+float fWortChanceValue;
+
 float fMinWalkSpeed; // This is the minimum walking speed of the PC,
                      // regardless of stats, skills or encumbrance
 float fMaxWalkSpeed; // This is the maximum walking speed of the PC,
@@ -2057,7 +2054,7 @@ char[] sThief;
 char[] sWarrior;
 char[] sWitchhunter;
 
-// Not documented, from Tribunal.esm (after installing Bloodmoon)
+// Not documented, from Tribunal and Bloodmoon
 char[] sTeleportDisabled;
 char[] sLevitateDisabled;
 char[] sWerewolfRefusal;
