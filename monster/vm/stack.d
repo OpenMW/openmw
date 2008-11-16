@@ -256,6 +256,7 @@ struct CodeStack
   void pushFArray(float[] str) { pushArray(arrays.create(str)); }
   void pushDArray(double[] str) { pushArray(arrays.create(str)); }
   void pushAArray(AIndex[] str) { pushArray(arrays.create(str)); }
+  void pushMArray(AIndex[] str) { pushArray(arrays.create(str)); }
 
   alias pushCArray pushArray, pushString;
   alias pushIArray pushArray;
@@ -277,7 +278,6 @@ struct CodeStack
   // For multibyte arrays
   void pushArray(int[] str, int size)
   { pushArray(arrays.create(str, size)); }
-
 
   // Various convenient conversion templates. These will be inlined,
   // so don't worry :) The *4() functions are for types that are 4
@@ -321,9 +321,9 @@ struct CodeStack
 
   // Template conversions
 
-  alias push4!(MIndex) pushIndex;
-  alias pop4!(MIndex) popIndex;
-  alias get4!(MIndex) getIndex;
+  alias push4!(MIndex) pushMIndex;
+  alias pop4!(MIndex) popMIndex;
+  alias get4!(MIndex) getMIndex;
 
   alias push4!(AIndex) pushAIndex;
   alias pop4!(AIndex) popAIndex;
@@ -391,6 +391,7 @@ struct CodeStack
     writefln();
   }
 
+  private:
   void overflow(char[] func)
   {
     char[] res;

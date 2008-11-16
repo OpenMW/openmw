@@ -23,6 +23,8 @@
  */
 
 module monster.util.string;
+
+import std.utf;
 import std.string;
 
 // These functions check whether a string begins or ends with a

@@ -26,6 +26,7 @@ import monster.vm.stack;
 import monster.util.freelist;
 import monster.util.flags;
 import monster.vm.error;
+import monster.vm.mobject;
 
 import std.string;
 import std.uni;
@@ -152,6 +153,7 @@ struct Arrays
   alias createT!(double) create;
   alias createT!(dchar) create;
   alias createT!(AIndex) create;
+  alias createT!(MIndex) create;
 
   ArrayRef *create(char[] arg)
   { return create(toUTF32(arg)); }

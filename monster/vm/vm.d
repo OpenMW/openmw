@@ -304,7 +304,7 @@ struct CodeThread
     // reference is on the stack.
     if(type == PT.FarDataOffs)
       {
-        int clsIndex = stack.popIndex();
+        int clsIndex = stack.popInt();
 
 	// Get the object reference from the stack
 	MonsterObject *tmp = stack.popObject();
@@ -321,7 +321,7 @@ struct CodeThread
       {
         assert(index==0);
         // Array indices are on the stack, not in the opcode.
-        index = stack.popIndex();
+        index = stack.popInt();
         ArrayRef *arf = stack.popArray();
         assert(!arf.isNull);
         if(arf.isConst)
@@ -537,7 +537,7 @@ struct CodeThread
 
 	  case BC.PushThis:
 	    // Push the index of this object.
-	    stack.pushIndex(obj.getIndex());
+	    stack.pushObject(obj);
 	    break;
 
 	  case BC.Pop: stack.popInt(); break;
@@ -957,7 +957,7 @@ struct CodeThread
 
           case BC.CastO2S:
             {
-              MIndex idx = stack.popIndex();
+              MIndex idx = stack.popMIndex();
               if(idx != 0)
                 stack.pushArray(format("%s#%s", getMObject(idx).cls.getName,
                                        cast(int)idx));

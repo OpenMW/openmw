@@ -107,7 +107,7 @@ enum TT
     Switch,
     Select,
     State,
-    Singleton,
+    Singleton, Clone,
     This, New, Static, Const, Out, Ref, Abstract, Idle,
     Public, Private, Protected, True, False, Native, Null,
     Goto, Halt, Auto, Var, In,
@@ -218,6 +218,7 @@ const char[][] tokenList =
     TT.State            : "state",
     TT.Typeof           : "typeof",
     TT.Singleton        : "singleton",
+    TT.Singleton        : "clone",
     TT.Static           : "static",
     TT.Const            : "const",
     TT.Abstract         : "abstract",
@@ -360,6 +361,13 @@ class StreamTokenizer
 	}
 
       assert(line.length > 0);
+
+      // Skip the first line if it begins with #!
+      if(lineNum == 1 && line.begins("#!"))
+          {
+            line = null;
+            goto restart;
+          }
 
       if(mode == Block)
 	{

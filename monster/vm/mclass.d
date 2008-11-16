@@ -97,7 +97,7 @@ final class MonsterClass
   // TODO: These will probably be moved elsewhere.
 
   // Path to search for script files. Extremely simple at the moment.
-  static char[][] includes = [""];
+  private static char[][] includes = [""];
 
   static void addPath(char[] path)
   {
@@ -216,7 +216,7 @@ final class MonsterClass
 
   // By default we leave the loadType at None. This leaves us open to
   // define the class later. Calling eg. setName will define the class
-  // as a manual class.
+  // as a manual class. This isn't supported yet though.
   this() {}
 
   this(MC type, char[] name1, char[] name2 = "", bool usePath = true)
@@ -265,9 +265,6 @@ final class MonsterClass
 
   this(char[] nam1, char[] nam2 = "", bool usePath=true)
     { this(MC.File, nam1, nam2, usePath); }
-
-  // Used when binding to classes in other languages.
-  this(MClass cpp, char* nam1, char* nam2 = null) { assert(0); }
 
 
   /*******************************************************
@@ -324,7 +321,7 @@ final class MonsterClass
     { bind_locate(name, FuncType.NativeDFunc).natFunc_fn = nf; }
 
   // Used for C functions
-  void bind(char[] name, c_callback nf)
+  void bind_c(char[] name, c_callback nf)
     { bind_locate(name, FuncType.NativeCFunc).natFunc_c = nf; }
 
   // Bind an idle function
@@ -390,7 +387,7 @@ final class MonsterClass
       fn_const = nf;
     }
 
-  void bindConst(c_callback nf)
+  void bindConst_c(c_callback nf)
     {
       assert(constType == FuncType.Native,
              "Cannot set native constructor for " ~ toString ~ ": already set");
