@@ -218,7 +218,7 @@ const char[][] tokenList =
     TT.State            : "state",
     TT.Typeof           : "typeof",
     TT.Singleton        : "singleton",
-    TT.Singleton        : "clone",
+    TT.Clone            : "clone",
     TT.Static           : "static",
     TT.Const            : "const",
     TT.Abstract         : "abstract",
