@@ -36,10 +36,8 @@ import esm.imports;
 
 struct Activator
 {
-  char[] id;
-  LoadState state;
+  mixin LoadT!();
 
-  char[] name;
   Script *script;
   MeshIndex model;
 
@@ -48,6 +46,8 @@ struct Activator
     model = getMesh();
     name = getHNString("FNAM");
     script = getHNOPtr!(Script)("SCRI", scripts);
+
+    makeProto();
   }}
 }
 ListID!(Activator) activators;

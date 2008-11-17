@@ -39,7 +39,8 @@ import sound.audio;
 
 import scene.player;
 
-// Generic version of a "live" object
+// Generic version of a "live" object. Do we even need this at all?
+// No, I don't think so.
 struct GenLive(T)
 {
   // Instance of class GameObject or a derived class (depending on
@@ -259,16 +260,13 @@ class CellData
  private:
 
   static
-    MonsterClass gameObjC, doorC, lightC, lockedC;
+    MonsterClass gameObjC;
 
   void setup()
     {
       if(gameObjC !is null) return;
 
-      gameObjC = new MonsterClass("GameObject");
-      doorC = new MonsterClass("Door");
-      lightC = new MonsterClass("Light");
-      lockedC = new MonsterClass("LockedObject");
+      gameObjC = MonsterClass.find("GameObject");
     }
 
   void loadReferences()
@@ -329,24 +327,20 @@ class CellData
 	      {
 		LiveLight ls;
 		ls.m = m;
-		ls.obj = lightC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 
-		mo.setFloat("lifetime", m.data.time);
                 bool carry = (m.data.flags&Light.Flags.Carry) != 0;
-                mo.setBool("carry", carry);
-
 		if(carry)
 		  lights.insert(ls);
 		else
 		  statLights.insert(ls);
 	      }
-
 	    else if(Container *c = it.getContainer())
 	      {
 		LiveContainer ls;
 		ls.m = c;
-		ls.obj = lockedC.createObject;
+		ls.obj = c.proto.clone();
                 mo = ls.obj;
 		containers.insert(ls);
 		container = true;
@@ -356,7 +350,7 @@ class CellData
 	      {
 		LiveDoor ls;
 		ls.m = d;
-		ls.obj = doorC.createObject;
+		ls.obj = d.proto.clone();
                 mo = ls.obj;
 		doors.insert(ls);
 		door = true;
@@ -416,7 +410,7 @@ class CellData
 	      {
 		LiveWeapon ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		weapons.insert(ls);
 	      }

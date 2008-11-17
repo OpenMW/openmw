@@ -30,9 +30,6 @@ import esm.imports;
 
 struct Apparatus
 {
-  char[] id, name;
-  LoadState state;
-
   enum AppaType : int
     {
       MortarPestle	= 0,
@@ -50,6 +47,8 @@ struct Apparatus
 
     static assert(AADTstruct.sizeof == 16);
   }
+  mixin LoadT!();
+
   AADTstruct data;
   MeshIndex model;
   IconIndex icon;
@@ -62,6 +61,11 @@ struct Apparatus
       readHNExact(&data, data.sizeof, "AADT");
       script = getHNOPtr!(Script)("SCRI", scripts);
       icon = getIcon();
+
+      makeProto();
+
+      proto.setFloat("quality", data.quality);
+      proto.setInt("type", data.type);
     }}
 }
 ListID!(Apparatus) appas;

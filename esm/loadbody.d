@@ -74,8 +74,8 @@ struct BodyPart
 
   BYDTstruct data;
 
-  char[] name, id;
-  LoadState state;
+  mixin LoadT;
+
   MeshIndex model;
 
   void load()
@@ -83,6 +83,9 @@ struct BodyPart
       model = getMesh();
       name = getHNString("FNAM");
       readHNExact(&data, data.sizeof, "BYDT");
+
+      // don't need to run makeProto here yet, no BodyPart monster
+      // class.
     }}
 
 }

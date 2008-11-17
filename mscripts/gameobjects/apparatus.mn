@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (loaddoor.d) is part of the OpenMW package.
+  This file (apparatus.mn) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,30 +21,8 @@
 
  */
 
-module esm.loaddoor;
-import esm.imports;
+// Covers all alchemy apparatus - mortars, retorts, etc
+class Apparatus : InventoryItem;
 
-/*
- * Doors
- */
-
-struct Door
-{
-  MeshIndex model;
-  Script *script;
-  Sound* openSound, closeSound;
-
-  mixin LoadT!();
-
-  void load()
-  {with(esFile){
-    model = getMesh();
-    name = getHNOString("FNAM");
-    script = getHNOPtr!(Script)("SCRI", scripts);
-    openSound = getHNOPtr!(Sound)("SNAM", sounds);
-    closeSound = getHNOPtr!(Sound)("ANAM", sounds);
-
-    makeProto();
-  }}
-}
-ListID!(Door) doors; // Break on through
+float quality;
+int type;

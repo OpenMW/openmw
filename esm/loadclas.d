@@ -72,8 +72,9 @@ struct Class
     static assert(CLDTstruct.sizeof == 60);
   }
 
-  LoadState state;
-  char[] id, name, description;
+  mixin LoadT;
+
+  char[] description;
   CLDTstruct data;
 
   void load()
@@ -85,6 +86,8 @@ struct Class
 	esFile.fail("Unknown bool value");
 
       description = esFile.getHNOString("DESC");
+
+      // no makeProto yet
     }
 }
 ListID!(Class) classes;

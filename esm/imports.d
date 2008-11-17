@@ -1,8 +1,8 @@
 module esm.imports;
 
 /* This is a file that imports common modules used by the load*.d
-   record loaders. It is really a cut down version of the start of
-   records.d.
+   record loaders. It is really a cut down version of what used to be
+   the start of records.d.
 
    This file MUST NOT import records.d - directly or indirectly -
    because that will trigger a nice three page long list of template
@@ -41,4 +41,7 @@ import esm.loadscpt;
 import esm.loadsoun;
 import esm.loadspel;
 import esm.loadench;
+
+import monster.monster;
 }
+

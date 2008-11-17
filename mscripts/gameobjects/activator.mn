@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (equipitem.mn) is part of the OpenMW package.
+  This file (activator.mn) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,7 +21,5 @@
 
  */
 
-// Anything that can be equiped, like clothes, armor and weapons.
-class EquipItem : InventoryItem;
+class Activator : GameObject;
 
-int enchant;

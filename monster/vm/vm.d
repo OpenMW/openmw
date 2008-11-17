@@ -480,6 +480,10 @@ struct CodeThread
                              .createObject());
 	    break;
 
+          case BC.Clone:
+            stack.pushObject(stack.popObject().clone());
+            break;
+
 	  case BC.Jump:
 	    code.jump(code.getInt);
 	    break;

@@ -44,7 +44,9 @@ struct Book
   IconIndex icon;
   Script *script;
   Enchantment *enchant;
-  char[] name, text, id;
+
+  mixin LoadT;
+  char[] text;
 
   LoadState state;
 
@@ -57,6 +59,11 @@ struct Book
       icon = getIcon();
       text = getHNOString("TEXT");
       enchant = getHNOPtr!(Enchantment)("ENAM", enchants);
+
+      makeProto();
+
+      proto.setInt("skillID", data.skillID);
+      proto.setBool("isScroll", data.isScroll != 0);
     }}
 }
 ListID!(Book) books;

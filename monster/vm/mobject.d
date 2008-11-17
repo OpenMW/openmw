@@ -69,6 +69,7 @@ struct MonsterObject
   // the MonsterClass.
   MonsterObject* tree[];
 
+
   /*******************************************************
    *                                                     *
    *     Functions for object handling                   *
@@ -96,6 +97,16 @@ struct MonsterObject
   void deleteSelf()
   {
     cls.deleteObject(this);
+  }
+
+  // Create a clone of this object. Note that this will always clone
+  // and return the top object (thread.topObj), regardless of which
+  // object in the list it is called on. In other words, the class
+  // mo.cls is not always the same as mo.clone().cls.
+  MonsterObject *clone()
+  {
+    auto t = thread.topObj;
+    return t.cls.createClone(t);
   }
 
   /*******************************************************

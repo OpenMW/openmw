@@ -71,8 +71,7 @@ struct Weapon
 
   WPDTstruct data;
 
-  LoadState state;
-  char[] name, id;
+  mixin LoadT!();
 
   MeshIndex model;
   IconIndex icon;
@@ -87,6 +86,11 @@ struct Weapon
       script = getHNOPtr!(Script)("SCRI", scripts);
       icon = getOIcon();
       enchant = getHNOPtr!(Enchantment)("ENAM", enchants);
+
+      makeProto();
+
+      proto.setFloat("speed", data.speed);
+      proto.setFloat("reach", data.reach);
     }}
 }
 ListID!(Weapon) weapons;

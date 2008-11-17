@@ -537,6 +537,41 @@ final class MonsterClass
       return top;
     }
 
+  // Create a new object based on an existing object
+  MonsterObject* createClone(MonsterObject *source)
+    {
+      requireCompile();
+
+      assert(source.tree.length == tree.length);
+      assert(source.thread.topObj == source,
+             "createClone can only clone the topmost object");
+
+      // Create a new thread
+      CodeThread *trd = threads.getNew();
+
+      // Loop through the objects in the source tree, and clone each
+      // of them
+      MonsterObject* otree[] = source.tree.dup;
+      foreach(i, ref obj; otree)
+        {
+          obj = obj.cls.getClone(obj);
+          obj.tree = otree[0..i+1];
+          obj.thread = trd;
+        }
+
+      // Pick out the top object
+      MonsterObject* top = otree[$-1];
+      assert(top !is null);
+
+      // Initialize the thread
+      trd.initialize(top);
+
+      // Set the same state
+      trd.setState(source.thread.getState(), null);
+
+      return top;
+    }
+
   // Free an object and its thread
   void deleteObject(MonsterObject *obj)
     {
@@ -757,6 +792,46 @@ final class MonsterClass
 
       // Point to the static data segment
       obj.sdata = sdata;
+      obj.extra = null;
+
+      // Call the custom native constructor
+      if(constType != FuncType.Native)
+        {
+          fstack.pushNConst(obj);
+          if(constType == FuncType.NativeDDel)
+            dg_const();
+          else if(constType == FuncType.NativeDFunc)
+            fn_const();
+          else if(constType == FuncType.NativeCFunc)
+            c_const();
+          fstack.pop();
+        }
+
+      return obj;
+    }
+
+  // Clone an existing object
+  MonsterObject *getClone(MonsterObject *source)
+    {
+      assert(source !is null);
+      assert(source.cls is this);
+      assert(source.data.length == data.length);
+      assert(source.sdata.ptr is sdata.ptr);
+
+      requireCompile();
+
+      MonsterObject *obj = objects.getNew();
+
+      // Set the class
+      obj.cls = this;
+
+      // TODO: Fix memory management here too.
+      // Copy the data segment from the source
+      obj.data = source.data.dup;
+
+      // Point to the static data segment
+      obj.sdata = sdata;
+      obj.extra = null;
 
       // Call the custom native constructor
       if(constType != FuncType.Native)

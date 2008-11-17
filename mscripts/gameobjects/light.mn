@@ -26,5 +26,6 @@ class Light : InventoryItem;
 // Time left in seconds (for carried lights)
 float lifetime;
 
-// Is this a carryable light?
-bool carry;
+int radius;
+uint flags;
+

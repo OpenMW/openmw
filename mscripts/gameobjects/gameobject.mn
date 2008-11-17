@@ -40,6 +40,8 @@ float r1, r2, r3;
 
 float scale;
 
+char[] name, id;
+
 // Various variables that are currently unused. Most of the strings
 // will be replaced by object references at some point.
 

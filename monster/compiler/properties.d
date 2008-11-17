@@ -159,6 +159,8 @@ class ClassProperties : SimplePropertyScope
     {
       super("ClassProperties");
 
+      insert("clone", "owner", { tasm.cloneObj(); });
+
       // For testing purposes. Makes 'singleton' an alias for the
       // first variable in the data segment. This might actually not
       // be far from how the end result would work - the singleton

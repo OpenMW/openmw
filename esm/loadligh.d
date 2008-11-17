@@ -29,9 +29,6 @@ import esm.imports;
 
 struct Light
 {
-  char[] id;
-  LoadState state;
-
   enum Flags : uint
     {
       Dynamic		= 0x001,
@@ -59,13 +56,13 @@ struct Light
 
   LHDTstruct data;
 
-  char[] name;
-
-  MeshIndex model;
-  IconIndex icon;
+  mixin LoadT!();
 
   Sound* sound;
   Script* script;
+
+  MeshIndex model;
+  IconIndex icon;
 
   void load()
     {with(esFile){
@@ -77,6 +74,14 @@ struct Light
 
       script = getHNOPtr!(Script)("SCRI", scripts);
       sound = getHNOPtr!(Sound)("SNAM", sounds);
+
+      // Stash the data in the Monster object prototype
+
+      makeProto();
+
+      proto.setUint("flags", data.flags);
+      proto.setFloat("lifetime", data.time);
+      proto.setInt("radius", data.radius);
     }}
 }
 ListID!(Light) lights;

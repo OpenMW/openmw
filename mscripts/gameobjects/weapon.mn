@@ -21,11 +21,11 @@
 
  */
 
-// Weapons (This is just an example, it's not used for anything yet.)
-class Weapon : EquipItem;
+// Covers all weapons and carry-able projectiles.
+class Weapon : Repairable;
 
 float speed, reach;
 
+// Not set yet.
 bool magical, silver;
-bool isTwohanded;
-
+bool twoHanded;

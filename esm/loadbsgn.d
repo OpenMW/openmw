@@ -30,9 +30,9 @@ import esm.imports;
 
 struct BirthSign
 {
-  LoadState state;
+  char[] description;
 
-  char[] id, name, description;
+  mixin LoadT;
 
   TextureIndex texture;
 
@@ -48,6 +48,8 @@ struct BirthSign
     description = getHNOString("DESC");
 
     powers.load();
+
+    // No monster class equivalent yet
   }}
 }
 ListID!(BirthSign) birthSigns;

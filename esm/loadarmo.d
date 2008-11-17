@@ -116,8 +116,7 @@ struct Armor
 
   AODTstruct data;
 
-  char[] name, id;
-  LoadState state;
+  mixin LoadT!();
 
   PartReferenceList parts;
 
@@ -138,6 +137,11 @@ struct Armor
     parts.load();
 
     enchant = getHNOPtr!(Enchantment)("ENAM", enchants);
+
+    makeProto();
+
+    proto.setInt("type", data.type);
+    proto.setInt("armor", data.armor);
   }}
 }
 ListID!(Armor) armors;

@@ -69,6 +69,12 @@ enum BC
                         // giving the class index (in the file lookup
                         // table)
 
+    Clone,              // Clones an object - create a new object of
+                        // the same class, then copy variable values
+                        // and state from the old object to the
+                        // new. Replaces the object index on the stack
+                        // with the new index.
+
     Jump,               // Jump to given position (int)
 
     JumpZ,              // Pop a value, if it is zero then jump to

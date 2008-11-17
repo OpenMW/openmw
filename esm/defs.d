@@ -25,6 +25,7 @@ module esm.defs;
 
 public import std.string;
 public import monster.util.string;
+import monster.monster;
 
 /*
  *  Types and definitions related to parsing esm and esp files
@@ -135,3 +136,50 @@ align(1) struct ENAMstruct
 
   static assert(ENAMstruct.sizeof==24);
 }
+
+// Common stuff for all the load* structs
+template LoadTT(T)
+{
+  LoadState state;
+  char[] name, id;
+
+  MonsterObject *proto;
+  static MonsterClass mc;
+
+  void makeProto(char[] clsName = null)
+    {
+      // Use the template type name as the Monster class name if none
+      // is specified.
+      if(clsName == "")
+        {
+          clsName = typeid(T).toString;
+
+          // Remove the module name
+          int i = clsName.rfind('.');
+          if(i != -1)
+            clsName = clsName[i+1..$];
+        }
+
+      // Set up a prototype object
+      if(mc is null)
+        mc = MonsterClass.find(clsName);
+      proto = mc.createObject();
+
+      proto.setString8("id", id);
+      proto.setString8("name", name);
+
+      static if(is(typeof(data.weight) == float))
+        {
+          proto.setFloat("weight", data.weight);
+          proto.setInt("value", data.value);
+        }
+
+      static if(is(typeof(data.enchant)==int))
+        proto.setInt("enchant", data.enchant);
+
+      static if(is(typeof(data.health)==int))
+        proto.setInt("health", data.health);
+    }
+}
+
+template LoadT() { mixin LoadTT!(typeof(*this)); }

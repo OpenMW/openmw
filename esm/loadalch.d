@@ -30,9 +30,6 @@ import esm.imports;
 
 struct Potion
 {
-  char[] id;
-  LoadState state;
-
   align(1) struct ALDTstruct
   {
     float weight;
@@ -43,7 +40,7 @@ struct Potion
 
   ALDTstruct data;
 
-  char[] name;
+  mixin LoadT!();
 
   MeshIndex model;
   IconIndex icon;
@@ -69,6 +66,8 @@ struct Potion
 	  readHExact(&effects.array[$-1], effects.array[$-1].sizeof);
 	}
 
+      makeProto();
+      proto.setInt("autoCalc", data.autoCalc);
     }}
 }
 ListID!(Potion) potions;

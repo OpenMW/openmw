@@ -1004,6 +1004,7 @@ class VariableExpr : MemberExpression
         isNext(toks, TT.Identifier) ||
         isNext(toks, TT.Singleton) ||
         isNext(toks, TT.State) ||
+        isNext(toks, TT.Clone) ||
         isNext(toks, TT.Const);
     }
 
@@ -1145,6 +1146,9 @@ class VariableExpr : MemberExpression
 
       if(name.type == TT.Const)
         fail("Cannot use const as a variable", name.loc);
+
+      if(name.type == TT.Clone)
+        fail("Cannot use clone as a variable", name.loc);
 
       // These are special cases that work both as properties
       // (object.state) and as non-member variables (state=...) inside

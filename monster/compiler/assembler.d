@@ -393,6 +393,8 @@ struct Assembler
     addi(i);
   }
 
+  void cloneObj() { cmd(BC.Clone); }
+
   // Copy the topmost int on the stack
   void dup() { cmd(BC.Dup); }
 

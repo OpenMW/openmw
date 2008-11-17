@@ -69,15 +69,14 @@ struct Container
       Unknown	= 8
     }
 
-  char[] id, name;
-  LoadState state;
-
   MeshIndex model;
   Script *script;
 
   float weight; // Not sure, might be max total weight allowed?
   Flags flags;
   InventoryList inventory;
+
+  mixin LoadT!();
 
   void load()
     {with(esFile){
@@ -100,6 +99,9 @@ struct Container
       script = getHNOPtr!(Script)("SCRI", scripts);
 
       inventory.load();
+
+      makeProto();
+      proto.setFloat("weight", weight);
     }}
 }
 

@@ -50,15 +50,15 @@ struct Clothing
     Type type;
     float weight;
     short value;
-    short enchantPoints;
+    short enchant;
 
     static assert(CTDTstruct.sizeof == 12);
   }
 
   CTDTstruct data;
 
-  LoadState state;
-  char[] id, name;
+  mixin LoadT;
+
   PartReferenceList parts;
 
   MeshIndex model;
@@ -78,6 +78,9 @@ struct Clothing
     parts.load();
 
     enchant = getHNOPtr!(Enchantment)("ENAM", enchants);
+
+    makeProto();
+    proto.setInt("type", data.type);
   }}
 }
 ListID!(Clothing) clothes;
