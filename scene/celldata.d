@@ -42,7 +42,7 @@ import scene.player;
 // Generic version of a "live" object
 struct GenLive(T)
 {
-  // Instance of class CellObject or a derived class (depending on
+  // Instance of class GameObject or a derived class (depending on
   // object type)
   MonsterObject *obj;
   T *m;
@@ -259,13 +259,13 @@ class CellData
  private:
 
   static
-    MonsterClass cellObjC, doorC, lightC, lockedC;
+    MonsterClass gameObjC, doorC, lightC, lockedC;
 
   void setup()
     {
-      if(cellObjC !is null) return;
+      if(gameObjC !is null) return;
 
-      cellObjC = new MonsterClass("CellObject");
+      gameObjC = new MonsterClass("GameObject");
       doorC = new MonsterClass("Door");
       lightC = new MonsterClass("Light");
       lockedC = new MonsterClass("LockedObject");
@@ -310,7 +310,7 @@ class CellData
 	      {
 		LiveStatic ls;
 		ls.m = s;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		statics.insert(ls);
 		stat = true;
@@ -320,7 +320,7 @@ class CellData
 	      {
 		LiveMisc ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		miscItems.insert(ls);
 	      }
@@ -366,7 +366,7 @@ class CellData
 	      {
 		LiveActivator ls;
 		ls.m = a;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		activators.insert(ls);
 		activator = true;
@@ -376,7 +376,7 @@ class CellData
 	      {
 		LiveNPC ls;
 		ls.m = n;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		npcs.insert(ls);
 	      }
@@ -384,7 +384,7 @@ class CellData
 	      {
 		LivePotion ls;
 		ls.m = p;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		potions.insert(ls);
 	      }
@@ -392,7 +392,7 @@ class CellData
 	      {
 		LiveApparatus ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		appas.insert(ls);
 	      }
@@ -400,7 +400,7 @@ class CellData
 	      {
 		LiveIngredient ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		ingredients.insert(ls);
 	      }
@@ -408,7 +408,7 @@ class CellData
 	      {
 		LiveArmor ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		armors.insert(ls);
 	      }
@@ -416,7 +416,7 @@ class CellData
 	      {
 		LiveWeapon ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		weapons.insert(ls);
 	      }
@@ -424,7 +424,7 @@ class CellData
 	      {
 		LiveBook ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		books.insert(ls);
 	      }
@@ -432,7 +432,7 @@ class CellData
 	      {
 		LiveClothing ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		clothes.insert(ls);
 	      }
@@ -440,7 +440,7 @@ class CellData
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		tools.insert(ls);
 	      }
@@ -448,7 +448,7 @@ class CellData
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		tools.insert(ls);
 	      }
@@ -456,7 +456,7 @@ class CellData
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		tools.insert(ls);
 	      }
@@ -464,7 +464,7 @@ class CellData
 	      {
 		LiveCreature ls;
 		ls.m = c;
-		ls.obj = cellObjC.createObject;
+		ls.obj = gameObjC.createObject;
                 mo = ls.obj;
 		creatures.insert(ls);
 	      }
@@ -475,7 +475,7 @@ class CellData
 		ls.m = l.instCreature(playerData.level);
 		if(ls.m != null)
 		  {
-		    ls.obj = cellObjC.createObject; mo = ls.obj;
+		    ls.obj = gameObjC.createObject; mo = ls.obj;
 		    creatures.insert(ls);
 		  }
 	      }

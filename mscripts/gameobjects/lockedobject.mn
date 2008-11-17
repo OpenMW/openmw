@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (light.mn) is part of the OpenMW package.
+  This file (lockedobject.mn) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,10 +21,10 @@
 
  */
 
-class Light : CellObject;
+// Objects that can have a lock level and a trap
+class LockedObject : GameObject;
 
-// Time left in seconds (for carried lights)
-float lifetime;
+// ID of key and trap type.
+char[] key, trap;
 
-// Is this a carryable light?
-bool carry;
+int lockLevel;

@@ -1,0 +1,69 @@
+/*
+  OpenMW - The completely unofficial reimplementation of Morrowind
+  Copyright (C) 2008  Nicolay Korslund
+  Email: < korslund@gmail.com >
+  WWW: http://openmw.snaptoad.com/
+
+  This file (gameobject.mn) is part of the OpenMW package.
+
+  OpenMW is distributed as free software: you can redistribute it
+  and/or modify it under the terms of the GNU General Public License
+  version 3, as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  version 3 along with this program. If not, see
+  http://www.gnu.org/licenses/ .
+
+ */
+
+// An object that exists inside a cell. All cell objects must have a
+// position in space.
+class GameObject : Object;
+
+// Is this object placed in a cell? isPlaced is true if the object is
+// displayed inside a cell with a mesh and given 3D coordinates, and
+// false otherwise (eg. if it is part of the player's inventory or in
+// a container.)
+
+// TODO: This will change to an actual cell reference later on, and be
+// null if the object is not placed.
+bool isPlaced;
+
+// Position and rotation in space (only valid if isPlaced is true.)
+float x, y, z;
+float r1, r2, r3;
+
+float scale;
+
+// Various variables that are currently unused. Most of the strings
+// will be replaced by object references at some point.
+
+// Owner of an object / activator
+char[] owner;
+
+// A global variable? Don't know what it's used for.
+char[] global;
+
+// Reference to a soul trapped creature?
+char[] soul;
+
+// Faction owner? Rank?
+char[] cnam;
+int indx;
+
+// Magic value / health / uses of an item?
+float xchg;
+
+// ?? See comment below
+int intv, nam9;
+
+// ??
+int fltv;
+int unam;
+
+// TODO: Scripts

@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (cellobject.mn) is part of the OpenMW package.
+  This file (weapon.mn) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,40 +21,11 @@
 
  */
 
-// An object that exists inside a cell. All cell objects must have a
-// position in space.
-class CellObject : Object;
+// Weapons (This is just an example, it's not used for anything yet.)
+class Weapon : EquipItem;
 
-// Position and rotation in space
-float x, y, z;
-float r1, r2, r3;
+float speed, reach;
 
-float scale;
+bool magical, silver;
+bool isTwohanded;
 
-// Various variables that are currently unused. Most of the strings
-// will be replaced by object references at some point.
-
-// Owner of an object / activator
-char[] owner;
-
-// A global variable? Don't know what it's used for.
-char[] global;
-
-// Reference to a soul trapped creature?
-char[] soul;
-
-// Faction owner? Rank?
-char[] cnam;
-int indx;
-
-// Magic value / health / uses of an item?
-float xchg;
-
-// ?? See comment below
-int intv, nam9;
-
-// ??
-int fltv;
-int unam;
-
-// TODO: Scripts

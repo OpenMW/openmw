@@ -35,7 +35,7 @@ void initMonsterScripts()
 {
   // Add the script directories
   MonsterClass.addPath("mscripts/");
-  MonsterClass.addPath("mscripts/cellobjects/");
+  MonsterClass.addPath("mscripts/gameobjects/");
   MonsterClass.addPath("mscripts/sound/");
 
   // Make sure the Object class is loaded

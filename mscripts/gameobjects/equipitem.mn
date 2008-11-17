@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (lockedobject.mn) is part of the OpenMW package.
+  This file (equipitem.mn) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,10 +21,7 @@
 
  */
 
-// Objects that can have a lock level and a trap
-class LockedObject : CellObject;
+// Anything that can be equiped, like clothes, armor and weapons.
+class EquipItem : InventoryItem;
 
-// ID of key and trap type.
-char[] key, trap;
-
-int lockLevel;
+int enchant;
