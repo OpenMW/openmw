@@ -176,9 +176,6 @@ template LoadTT(T)
 
       static if(is(typeof(data.enchant)==int))
         proto.setInt("enchant", data.enchant);
-
-      static if(is(typeof(data.health)==int))
-        proto.setInt("health", data.health);
     }
 }
 

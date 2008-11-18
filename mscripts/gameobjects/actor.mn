@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (loadstat.d) is part of the OpenMW package.
+  This file (actor.mn) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,34 +21,20 @@
 
  */
 
-module esm.loadstat;
+// Actors are a common base class for creatures, NPCs and the player.
+class Actor : GameObject;
 
-import esm.imports;
+// The actor's level
+int level;
 
-/*
- * Definition of static object.
- *
- * A stat record is basically just a reference to a nif file. Some
- * esps seem to contain copies of the STAT entries from the esms, and
- * the esms themselves contain several identical entries. Perhaps all
- * statics referenced in a file is also put in the file? Since we are
- * only reading files it doesn't much matter to us, but it would if we
- * were writing. You can check some files later, when you decode the
- * CELL blocks, if you want to test this hypothesis.
- */
+// Stats. These are the base values, before any positive or negative
+// effects are applied.
+int
+  baseStrength, baseIntelligence, baseWillpower, baseAgility,
+  baseSpeed, baseEndurance, basePersonality, baseLuck;
 
-struct Static
-{
-  mixin LoadT;
+// Maximum health values, before any effects are applied.
+int baseMaxHealth, baseMaxMana, baseMaxFatigue;
 
-  MeshIndex model;
-
-  void load()
-  {
-    model = esFile.getMesh();
-
-    makeProto();
-  }
-}
-
-ListID!(Static) statics;
+// Amount of gold this actor is carrying
+int gold;

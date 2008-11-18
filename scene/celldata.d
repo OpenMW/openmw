@@ -140,9 +140,6 @@ class CellData
     {
       reg = r;
       killCell(); // Make sure all data is initialized.
-
-      // Set up the Monster classes if it's not done already
-      setup();
     }
 
   // Kills all data and initialize the object for reuse.
@@ -259,16 +256,6 @@ class CellData
 
  private:
 
-  static
-    MonsterClass gameObjC;
-
-  void setup()
-    {
-      if(gameObjC !is null) return;
-
-      gameObjC = MonsterClass.find("GameObject");
-    }
-
   void loadReferences()
     {
       with(esFile)
@@ -308,7 +295,7 @@ class CellData
 	      {
 		LiveStatic ls;
 		ls.m = s;
-		ls.obj = gameObjC.createObject;
+		ls.obj = s.proto.clone();
                 mo = ls.obj;
 		statics.insert(ls);
 		stat = true;
@@ -318,7 +305,7 @@ class CellData
 	      {
 		LiveMisc ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		miscItems.insert(ls);
 	      }
@@ -360,7 +347,7 @@ class CellData
 	      {
 		LiveActivator ls;
 		ls.m = a;
-		ls.obj = gameObjC.createObject;
+		ls.obj = a.proto.clone();
                 mo = ls.obj;
 		activators.insert(ls);
 		activator = true;
@@ -370,7 +357,7 @@ class CellData
 	      {
 		LiveNPC ls;
 		ls.m = n;
-		ls.obj = gameObjC.createObject;
+		ls.obj = n.proto.clone();
                 mo = ls.obj;
 		npcs.insert(ls);
 	      }
@@ -378,7 +365,7 @@ class CellData
 	      {
 		LivePotion ls;
 		ls.m = p;
-		ls.obj = gameObjC.createObject;
+		ls.obj = p.proto.clone();
                 mo = ls.obj;
 		potions.insert(ls);
 	      }
@@ -386,7 +373,7 @@ class CellData
 	      {
 		LiveApparatus ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		appas.insert(ls);
 	      }
@@ -394,7 +381,7 @@ class CellData
 	      {
 		LiveIngredient ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		ingredients.insert(ls);
 	      }
@@ -402,7 +389,7 @@ class CellData
 	      {
 		LiveArmor ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		armors.insert(ls);
 	      }
@@ -418,7 +405,7 @@ class CellData
 	      {
 		LiveBook ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		books.insert(ls);
 	      }
@@ -426,7 +413,7 @@ class CellData
 	      {
 		LiveClothing ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		clothes.insert(ls);
 	      }
@@ -434,7 +421,7 @@ class CellData
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		tools.insert(ls);
 	      }
@@ -442,7 +429,7 @@ class CellData
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		tools.insert(ls);
 	      }
@@ -450,7 +437,7 @@ class CellData
 	      {
 		LiveTool ls;
 		ls.m = m;
-		ls.obj = gameObjC.createObject;
+		ls.obj = m.proto.clone();
                 mo = ls.obj;
 		tools.insert(ls);
 	      }
@@ -458,7 +445,7 @@ class CellData
 	      {
 		LiveCreature ls;
 		ls.m = c;
-		ls.obj = gameObjC.createObject;
+		ls.obj = c.proto.clone();
                 mo = ls.obj;
 		creatures.insert(ls);
 	      }
@@ -469,7 +456,9 @@ class CellData
 		ls.m = l.instCreature(playerData.level);
 		if(ls.m != null)
 		  {
-		    ls.obj = gameObjC.createObject; mo = ls.obj;
+                    // Note that this clones a creature object, not a
+                    // leveled list object.
+		    ls.obj = ls.m.proto.clone(); mo = ls.obj;
 		    creatures.insert(ls);
 		  }
 	      }
@@ -480,8 +469,9 @@ class CellData
 
 	    with(*mo)
 	      {
-		// Scale
-		setFloat("scale", getHNOFloat("XSCL", 1.0));
+		// Scale. Multiply with the existing scale value.
+                float scale = getFloat("scale");
+		setFloat("scale", scale*getHNOFloat("XSCL", 1.0));
 
 		// Statics only need the position data. Skip the
 		// unneeded calls to isNextSub() as an optimization.
@@ -495,7 +485,7 @@ class CellData
 		setString8("global", getHNOString("BNAM"));
 
 		// ID of creature trapped in a soul gem (?)
-		setString8("soul", getHNOString("XSOL"));
+		setString8("soulID", getHNOString("XSOL"));
 
 		// ?? CNAM has a faction name, might be for
 		// objects/beds etc belonging to a faction.

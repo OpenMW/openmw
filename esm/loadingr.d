@@ -43,9 +43,8 @@ struct Ingredient
 
   IRDTstruct data;
 
-  LoadState state;
+  mixin LoadT;
 
-  char[] id, name;
   MeshIndex model;
   IconIndex icon;
   Script *script;
@@ -58,6 +57,8 @@ struct Ingredient
 
     script = getHNOPtr!(Script)("SCRI", scripts);
     icon = getOIcon();
+
+    makeProto();
   }}
 }
 ListID!(Ingredient) ingreds;

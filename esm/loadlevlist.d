@@ -27,40 +27,16 @@ import esm.loadcrea;
 
 import util.random;
 
-/* Outdated comments:
- *
+/*
  * Leveled lists. Since these have identical layout, I only bothered
  * to implement it once.
  *
  * We should later implement the ability to merge leveled lists from
  * several files. 
  *
- * The Item indices can point to several different lists (potions,
- * weapons, armor, etc.) and this is a problem also for npcs,
- * containers and cells. Deal with it in a uniform way. In fact, we
- * won't have to make any difference between the creature and item
- * lists.
- *
- * EDIT 2007.08.18: Looks like DMD is exploding from template forward
- * references again. It works for very small cases, so I assume it
- * should be legal in our case also, and that this is a BUG. I have
- * cut it down and am going to report it. Moving ListItem out of the
- * struct helped, but I get the same problem in other places, where it
- * is not possible to fix. I should probably cut down the other case
- * as well...
- *
- * EDIT 2007.09.09: In Monster we managed to cut down template
- * forwarding with LinkedList by making the list use Value pointers
- * instead of Node pointers. If I do the same for HashTable and move
- * the value to the top, I JUST might be able to work around this DMD
- * bug.
- *
- * UPDATE: Well, it works now, but only if you compile with DMD using
- * the all-files-on-one-line approach. It will not work with DSSS
- * until these bugs are gone.
  */
 
-// Moved here for template bug reasons...
+// Moved here for template / DMD bug reasons...
 struct _ListItem
 {
   Item item; // Definded in records.d

@@ -78,8 +78,7 @@ struct Creature
 
   Flags flags;
 
-  LoadState state;
-  char[] id, name;
+  mixin LoadT;
 
   MeshIndex model;
 
@@ -121,6 +120,36 @@ struct Creature
       //*
       skipRecord();
       //*/
+
+      makeProto();
+
+      proto.setInt("level", data.level);
+      proto.setInt("gold", data.gold);
+
+      proto.setInt("baseStrength", data.strength);
+      proto.setInt("baseIntelligence", data.intelligence);
+      proto.setInt("baseWillpower", data.willpower);
+      proto.setInt("baseAgility", data.agility);
+      proto.setInt("baseSpeed", data.speed);
+      proto.setInt("baseEndurance", data.endurance);
+      proto.setInt("basePersonality", data.personality);
+      proto.setInt("baseLuck", data.luck);
+
+      proto.setInt("baseMaxHealth", data.health);
+      proto.setInt("baseMaxMana", data.mana);
+      proto.setInt("baseMaxFatigue", data.fatigue);
+
+      proto.setInt("combat", data.combat);
+      proto.setInt("magic", data.magic);
+      proto.setInt("stealth", data.stealth);
+      proto.setInt("soul", data.soul);
+
+      proto.setInt("attackMin1", data.attack[0]);
+      proto.setInt("attackMax1", data.attack[1]);
+      proto.setInt("attackMin2", data.attack[2]);
+      proto.setInt("attackMax2", data.attack[3]);
+      proto.setInt("attackMin3", data.attack[4]);
+      proto.setInt("attackMax3", data.attack[5]);
     }}
  
 }

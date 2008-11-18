@@ -507,12 +507,22 @@ final class MonsterClass
 
       assert(otree.length > 0);
 
+      // Create one buffer big enough for all the data segments here,
+      // and let getObject slice it. TODO: This can be optimized even
+      // further, by using a freelist or other preallocation, and by
+      // precalculating the result and the slicing. Not important at
+      // the moment.
+      int[] totalData = new int[totalDataSize];
+
       // Fill the list with objects, and assign the thread.
       foreach(i, ref obj; otree)
         {
-          obj = tree[i].getObject();
+          obj = tree[i].getObject(totalData);
           obj.thread = trd;
         }
+
+      // Make sure we used the entire buffer
+      assert(totalData.length == 0);
 
       // Pick out the top object
       MonsterObject* top = otree[$-1];
@@ -549,15 +559,22 @@ final class MonsterClass
       // Create a new thread
       CodeThread *trd = threads.getNew();
 
+      // Create one buffer big enough for all the data segments here,
+      // and let getClone slice it.
+      int[] totalData = new int[totalDataSize];
+
       // Loop through the objects in the source tree, and clone each
       // of them
       MonsterObject* otree[] = source.tree.dup;
       foreach(i, ref obj; otree)
         {
-          obj = obj.cls.getClone(obj);
+          obj = obj.cls.getClone(obj, totalData);
           obj.tree = otree[0..i+1];
           obj.thread = trd;
         }
+
+      // Make sure we used the entire buffer
+      assert(totalData.length == 0);
 
       // Pick out the top object
       MonsterObject* top = otree[$-1];
@@ -697,6 +714,12 @@ final class MonsterClass
   uint sdSize; // Number of ints reserved for the static data, that
                // have not yet been used.
 
+  // Size of the data segment
+  uint dataSize;
+
+  // Total for this class + all base classes.
+  uint totalDataSize;
+
   // Direct parents of this class
   MonsterClass parents[];
   Token parentNames[];
@@ -732,7 +755,8 @@ final class MonsterClass
   int[] getDataSegment()
     {
       assert(sc !is null && sc.isClass(), "Class does not have a class scope");
-      int[] data = new int[sc.getDataSize];
+      assert(dataSize == sc.getDataSize);
+      int[] data = new int[dataSize];
       int totSize = 0;
 
       foreach(VarDeclStatement vds; vardecs)
@@ -767,7 +791,7 @@ final class MonsterClass
     }
 
   // Get an object from this class (but do not assign a thread to it)
-  MonsterObject *getObject()
+  MonsterObject *getObject(ref int[] dataBuf)
     {
       requireCompile();
 
@@ -787,8 +811,12 @@ final class MonsterClass
       // to see what sizes are actually used. The entire structure can
       // reside inside it's own region.
 
-      // Copy the data segment
-      obj.data = data.dup;
+      // Copy the data segment into the buffer
+      assert(data.length == dataSize);
+      assert(dataBuf.length >= dataSize);
+      obj.data = dataBuf[0..dataSize];
+      obj.data[] = data[];
+      dataBuf = dataBuf[dataSize..$];
 
       // Point to the static data segment
       obj.sdata = sdata;
@@ -811,7 +839,7 @@ final class MonsterClass
     }
 
   // Clone an existing object
-  MonsterObject *getClone(MonsterObject *source)
+  MonsterObject *getClone(MonsterObject *source, ref int[] dataBuf)
     {
       assert(source !is null);
       assert(source.cls is this);
@@ -825,9 +853,13 @@ final class MonsterClass
       // Set the class
       obj.cls = this;
 
-      // TODO: Fix memory management here too.
       // Copy the data segment from the source
-      obj.data = source.data.dup;
+      assert(data.length == dataSize);
+      assert(dataBuf.length >= dataSize);
+      assert(dataSize == source.data.length);
+      obj.data = dataBuf[0..dataSize];
+      obj.data[] = source.data[];
+      dataBuf = dataBuf[dataSize..$];
 
       // Point to the static data segment
       obj.sdata = sdata;
@@ -1079,7 +1111,8 @@ final class MonsterClass
       parents.length = parentNames.length;
       foreach(int i, pName; parentNames)
         {
-          // Find the class
+          // Find the class. findClass guarantees that the returned
+          // class is scoped.
           MonsterClass mc = global.findClass(pName);
 
           assert(mc !is null);
@@ -1161,6 +1194,16 @@ final class MonsterClass
       states.length = statedecs.length;
       foreach(st; statedecs)
         states[st.st.index] = st.st;
+
+      // Set the data segment size and the total data size for all
+      // base classes.
+      dataSize = sc.getDataSize();
+
+      totalDataSize = 0;
+      foreach(t; tree)
+        totalDataSize += t.dataSize;
+
+      assert(totalDataSize >= dataSize);
 
       flags.unset(CFlags.InScope);
     }

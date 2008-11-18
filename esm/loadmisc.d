@@ -43,9 +43,7 @@ struct Misc
   }
   MCDTstruct data;
 
-  char[] id, name;
-
-  LoadState state;
+  mixin LoadT;
 
   MeshIndex model;
   IconIndex icon;
@@ -57,7 +55,10 @@ struct Misc
     name = getHNOString("FNAM");
     readHNExact(&data, data.sizeof, "MCDT");
     script = getHNOPtr!(Script)("SCRI", scripts);
-    icon = getOIcon();;
+    icon = getOIcon();
+
+    makeProto();
+    proto.setInt("isKey", data.isKey);
   }}
 }
 ListID!(Misc) miscItems;

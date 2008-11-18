@@ -38,7 +38,7 @@ bool isPlaced;
 float x, y, z;
 float r1, r2, r3;
 
-float scale;
+float scale = 1.0;
 
 char[] name, id;
 
@@ -52,7 +52,7 @@ char[] owner;
 char[] global;
 
 // Reference to a soul trapped creature?
-char[] soul;
+char[] soulID;
 
 // Faction owner? Rank?
 char[] cnam;

@@ -49,7 +49,7 @@ struct Skill
 
   SKDTstruct data;
 
-  char[] description; // Description
+  char[] description;
 
   void load()
     {

@@ -480,7 +480,7 @@ final class PackageScope : Scope
 
   // Find a class given its name. The class must be parsed or a file
   // must exist which can be parsed, otherwise the function
-  // fails. createScope is also called on the class before it'xs
+  // fails. createScope is also called on the class before it is
   // returned.
   MonsterClass findClass(Token t) { return findClass(t.str, t.loc); }
   MonsterClass findClass(char[] name, Floc loc = Floc.init)

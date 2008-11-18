@@ -142,6 +142,8 @@ struct Armor
 
     proto.setInt("type", data.type);
     proto.setInt("armor", data.armor);
+
+    proto.setInt("health", data.health);
   }}
 }
 ListID!(Armor) armors;

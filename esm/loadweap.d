@@ -91,6 +91,8 @@ struct Weapon
 
       proto.setFloat("speed", data.speed);
       proto.setFloat("reach", data.reach);
+
+      proto.setInt("health", data.health);
     }}
 }
 ListID!(Weapon) weapons;

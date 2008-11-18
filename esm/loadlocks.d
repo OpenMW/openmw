@@ -45,9 +45,8 @@ struct Tool
 
   Data data;
 
-  LoadState state;
+  mixin LoadT;
 
-  char[] name, id;
   MeshIndex model;
   IconIndex icon;
   Script* script;
@@ -57,13 +56,22 @@ struct Tool
       model = getMesh();
       name = getHNString("FNAM");
 
-      if(isNextSub("LKDT") || isNextSub("PBDT"))
-	readHExact(&data, data.sizeof);
-      else
-	{
-	  getSubNameIs("RIDT");
-	  readHExact(&data, data.sizeof);
+      char[] type;
+      bool isRep = false;
 
+      if(isNextSub("LKDT")) type = "Lockpick";
+      else if(isNextSub("PBDT")) type = "Probe";
+      else
+        {
+	  getSubNameIs("RIDT");
+          type = "RepairItem";
+          isRep = true;
+        }
+
+      readHExact(&data, data.sizeof);
+
+      if(isRep)
+        {
 	  // Swap t.data.quality and t.data.uses (sigh)
 	  float tmp = *(cast(float*)&data.uses);
 	  data.uses = *(cast(int*)&data.quality);
@@ -72,6 +80,11 @@ struct Tool
 
       script = getHNOPtr!(Script)("SCRI", scripts);
       icon = getOIcon();
+
+      
+      makeProto(type);
+      proto.setFloat("quality", data.quality);
+      proto.setInt("uses", data.uses);
     }}
 }
 ListID!(Tool) lockpicks, probes, repairs;

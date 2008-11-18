@@ -28,6 +28,11 @@ import esm.imports;
  *  Game setting
  */
 
+// TODO: It's likely that we don't need this struct any longer, given
+// that game settings are now stored in Monster code. We will still
+// use the loading code and the dirty value cleaning code of course,
+// but there's no longer any need to store it in a separate lookup
+// list, since Monster variables can be looked up just as fast.
 struct GameSetting
 {
   LoadState state;
@@ -79,10 +84,12 @@ struct GameSetting
   // really shouldn't have to. In this file we choose instead to
   // reject all the corrupt values at load time.
 
-  // Checks if the current game setting is one of the "dirty" ones as
-  // described above. TODO: I have not checked this against other
-  // sources yet, do that later. Currently recognizes 22 values for
-  // tribunal and 50 for bloodmoon.
+  // These functions checks if the current game setting is one of the
+  // "dirty" ones as described above. TODO: I have not checked this
+  // against other sources yet, do that later. Currently recognizes 22
+  // values for tribunal and 50 for bloodmoon. Legitimate GMSTs in
+  // mods (setting values other than the default "dirty" ones) are not
+  // affected and will work correctly.
 
   // Checks for dirty tribunal values. These will be ignored if found
   // in any file except when they are found in "Tribunal.esm".

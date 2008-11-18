@@ -79,7 +79,6 @@ struct NPC
     byte strength, intelligence, willpower, agility,
       speed, endurance, personality, luck;
     byte skills[27];
-    //byte reputation; // Total confusion!
     short health, mana, fatigue;
     byte disposition;
     byte reputation; // Was "factionID", but that makes no sense.
@@ -121,9 +120,7 @@ struct NPC
   AIDTstruct AI;
   bool hasAI;
 
-  LoadState state;
-
-  char[] name, id;
+  mixin LoadT;
 
   MeshIndex model;
   Race* race;
@@ -166,6 +163,41 @@ struct NPC
       else hasAI = false;
 
     skipRecord();
+
+    makeProto("Person");
+
+    // Clean this up a little later, eg. no point in storing the
+    // structs outside the function any longer. Same goes for most of
+    // the load*.d structures.
+    if(npdt52.gold == -10)
+      {
+        proto.setInt("level", npdt12.level);
+        proto.setInt("gold", npdt12.gold);
+
+        proto.setInt("disposition", npdt12.disposition);
+        proto.setInt("reputation", npdt12.reputation);
+        proto.setInt("rank", npdt12.rank);
+
+        // TODO: Autocalculate the rest?
+      }
+    else
+      {
+        proto.setInt("level", npdt52.level);
+        proto.setInt("gold", npdt52.gold);
+
+        proto.setInt("baseStrength", npdt52.strength);
+        proto.setInt("baseIntelligence", npdt52.intelligence);
+        proto.setInt("baseWillpower", npdt52.willpower);
+        proto.setInt("baseAgility", npdt52.agility);
+        proto.setInt("baseSpeed", npdt52.speed);
+        proto.setInt("baseEndurance", npdt52.endurance);
+        proto.setInt("basePersonality", npdt52.personality);
+        proto.setInt("baseLuck", npdt52.luck);
+
+        proto.setInt("baseMaxHealth", npdt52.health);
+        proto.setInt("baseMaxMana", npdt52.mana);
+        proto.setInt("baseMaxFatigue", npdt52.fatigue);
+      }
   }}
 }
 ListID!(NPC) npcs;
