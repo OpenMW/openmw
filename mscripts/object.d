@@ -85,13 +85,13 @@ class IdleSleep : IdleFunction
   bool initiate(MonsterObject *mo)
     {
       // Get the parameter
-      double secs = stack.popFloat;
+      float secs = stack.popFloat;
 
       // Get current time
       long newTime = getUTCtime();
 
       // Calculate when we should return
-      newTime += secs*TicksPerSecond;
+      newTime += cast(long)secs*TicksPerSecond;
 
       // Store it
       if(mo.extra == null) mo.extra = new long;
