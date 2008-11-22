@@ -355,7 +355,11 @@ void printRaw()
 		{
 		  writefln("'%s'", getHString());
 		}
-	      else if(subName == "FLTV" || subName == "XSCL") writefln(getHFloat());
+	      else if(subName == "FLTV" || subName == "XSCL")
+                {
+                  float f = getHFloat();
+                  writefln("f=", f, " i=", *(cast(int*)&f));
+                }
 	      else if(subName == "INTV" /*|| subName == "NAM0"*/ || subName == "FRMR")
 		writefln(getHVUint());
 	      else

@@ -200,17 +200,6 @@ class ListID(Type) : ListKeeper
     }
 }
 
-/*
-class Dummy : ListKeeper
-{
-  this() {}
-  void load() {}
-  void* lookup(char[] s) { return null; }
-  void endFile() {}
-  uint length() { return 0; }
-}
-*/
-
 // A pointer to an item
 struct ItemBase
 {
@@ -284,10 +273,6 @@ struct ItemBaseList
   }
 }
 
-// Um... I think this code is double up because I had to split it into
-// separate files to avoid template stuff. I don't think we need to do
-// that anymore.
-
 // An item. Contains a reference to an ItemBase, which again is a
 // reference to an item. The ItemBase might change after we have
 // looked it up (for forward references), so we have to use a pointer.
@@ -305,29 +290,6 @@ struct Item
   {
     return cast(T*)getPtr(Type);
   }
-
-  /* Avoid the templates for now
-  alias getType!(Potion, ItemType.Potion) getPotion;
-  alias getType!(Apparatus, ItemType.Apparatus) getApparatus;
-  alias getType!(Armor, ItemType.Armor) getArmor;
-  alias getType!(Weapon, ItemType.Weapon) getWeapon;
-  alias getType!(Book, ItemType.Book) getBook;
-  alias getType!(Clothing, ItemType.Clothing) getClothing;
-  alias getType!(Light, ItemType.Light) getLight;
-  alias getType!(Ingredient, ItemType.Ingredient) getIngredient;
-  alias getType!(Tool, ItemType.Pick) getPick;
-  alias getType!(Tool, ItemType.Probe) getProbe;
-  alias getType!(Tool, ItemType.Repair) getRepair;
-  alias getType!(Misc, ItemType.Misc) getMisc;
-  alias getType!(LeveledItems, ItemType.ItemList) getItemList;
-  alias getType!(Creature, ItemType.Creature) getCreature;
-  alias getType!(LeveledCreatures, ItemType.CreatureList) getCreatureList;
-  alias getType!(NPC, ItemType.NPC) getNPC;
-  alias getType!(Door, ItemType.Door) getDoor;
-  alias getType!(Activator, ItemType.Activator) getActivator;
-  alias getType!(Static, ItemType.Static) getStatic;
-  alias getType!(Container, ItemType.Container) getContainer;
-  */
 }
 
 struct ItemList

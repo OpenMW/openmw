@@ -55,6 +55,8 @@ struct Global
 
     type = t;
 
+    // The value looks like a float in many cases, and like an integer
+    // in others (for the s type at least.) Figure it out.
     value = esFile.getHNFloat("FLTV");
   }
 }
