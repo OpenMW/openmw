@@ -28,6 +28,7 @@ import std.stdio;
 import core.memory;
 import esm.esmmain;
 import monster.util.string;
+import mscripts.object;
 
 import std.gc;
 import gcstats;
@@ -102,6 +103,7 @@ void main(char[][] args)
   if(scptShow && scptName == "") return help("No script name given");
 
   initializeMemoryRegions();
+  initMonsterScripts();
 
   if(raw)
     {
