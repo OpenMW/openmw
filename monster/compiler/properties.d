@@ -151,6 +151,7 @@ class ArrayProperties: SimplePropertyScope
     }
 }
 
+// TODO: Rename to ObjectProperties
 class ClassProperties : SimplePropertyScope
 {
   static ClassProperties singleton;

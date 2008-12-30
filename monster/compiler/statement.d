@@ -56,8 +56,7 @@ class ExprStatement : Statement
   void parse(ref TokenArray toks)
     {
       exp = Expression.identify(toks);
-      if(!isNext(toks, TT.Semicolon, loc))
-	fail("Statement expected ;", toks);
+      reqNext(toks, TT.Semicolon, loc);
     }
 
   char[] toString() { return "ExprStatement: " ~ exp.toString(); }
@@ -65,89 +64,6 @@ class ExprStatement : Statement
   void resolve(Scope sc) { exp.resolve(sc); }
 
   void compile() { exp.evalPop(); }
-}
-
-// A variable declaration that works as a statement. Supports multiple
-// variable declarations, ie. int i, j; but they must be the same
-// type, so int i, j[]; is not allowed.
-class VarDeclStatement : Statement
-{
-  VarDeclaration[] vars;
-
-  static bool canParse(TokenArray toks)
-    {
-      if(Type.canParseRem(toks) &&
-	 isNext(toks, TT.Identifier))
-	return true;
-      return false;
-    }
-
-  void parse(ref TokenArray toks)
-    {
-      VarDeclaration varDec;
-      varDec = new VarDeclaration;
-      varDec.parse(toks);
-      vars ~= varDec;
-      loc = varDec.var.name.loc;
-
-      int arr = varDec.arrays();
-
-      // Are there more?
-      while(isNext(toks, TT.Comma))
-	{
-	  // Read a variable, but with the same type as the last
-	  varDec = new VarDeclaration(varDec.var.type);
-	  varDec.parse(toks);
-	  if(varDec.arrays() != arr)
-	    fail("Multiple declarations must have same type",
-                 varDec.var.name.loc);
-	  vars ~= varDec;
-	}
-
-      if(!isNext(toks, TT.Semicolon))
-	fail("Declaration statement expected ;", toks);
-    }
-
-  char[] toString()
-    {
-      char[] res = "Variable declaration: ";
-      foreach(vd; vars) res ~= vd.toString ~" ";
-      return res;
-    }
-
-  // Special version used for function parameters, to set the number
-  // explicitly.
-  void resolve(Scope sc, int num)
-    {
-      assert(vars.length == 1);
-      vars[0].resolve(sc, num);
-    }
-
-  void resolve(Scope sc)
-    {
-      if(sc.isStateCode())
-	fail("Variable declarations not allowed in state code", loc);
-
-      // Add variables to the scope.
-      foreach(vd; vars)
-	vd.resolve(sc);
-    }
-
-  // Validate types
-  void validate()
-    {
-      assert(vars.length >= 1);
-      vars[0].var.type.validate();
-    }
-
-  // Insert local variable(s) on the stack.
-  void compile()
-    {
-      // Compile the variable declarations, they will push the right
-      // values to the stack.
-      foreach(vd; vars)
-	vd.compile();
-    }
 }
 
 // Destination for a goto statement, on the form 'label:'. This
@@ -226,10 +142,8 @@ class LabelStatement : Statement
     {
       // canParse has already checked the token types, all we need to
       // do is to fetch the name.
-      if(!isNext(toks, TT.Identifier, lb.name))
-        assert(0, "Internal error");
-      if(!isNext(toks, TT.Colon))
-        assert(0, "Internal error");
+      reqNext(toks, TT.Identifier, lb.name);
+      reqNext(toks, TT.Colon);
 
       loc = lb.name.loc;
     }
@@ -325,15 +239,13 @@ class GotoStatement : Statement, LabelUser
 
   void parse(ref TokenArray toks)
     {
-      if(!isNext(toks, TT.Goto, loc))
-        assert(0, "Internal error");
+      reqNext(toks, TT.Goto, loc);
 
       // Read the label name
       if(!isNext(toks, TT.Identifier, labelName))
 	fail("goto expected label identifier", toks);
 
-      if(!isNext(toks, TT.Semicolon))
-        fail("goto statement expected ;", toks);
+      reqNext(toks, TT.Semicolon);
     }
 
   void resolve(Scope sc)
@@ -1299,7 +1211,9 @@ class IfStatement : Statement
       // Resolve all parts
       condition.resolve(sc);
 
-      if(!condition.type.isBool)
+      if(!condition.type.isBool &&
+         !condition.type.isArray &&
+         !condition.type.isObject)
 	fail("if condition " ~ condition.toString ~ " must be a bool, not "
 	     ~condition.type.toString, condition.loc);
 
@@ -1313,6 +1227,17 @@ class IfStatement : Statement
 
       // Push the conditionel expression
       condition.eval();
+
+      // For arrays, get the length
+      if(condition.type.isArray)
+        tasm.getArrayLength();
+
+      // TODO: For objects, the null reference will automatically
+      // evaluate to false. However, we should make a "isValid"
+      // instruction, both to check if the object is dead (deleted)
+      // and to guard against any future changes to the object index
+      // type.
+      assert(condition.type.getSize == 1);
 
       // Jump if the value is zero. Get a label reference.
       int label = tasm.jumpz();
@@ -1431,6 +1356,7 @@ class CodeBlock : Statement
   Floc endLine; // Last line, used in error messages
 
   bool isState; // True if this block belongs to a state
+  bool isFile; // True if this is a stand-alone file
 
  private:
 
@@ -1475,8 +1401,13 @@ class CodeBlock : Statement
 
  public:
 
-  this(bool isState = false)
-    { this.isState = isState; }
+  this(bool isState = false, bool isFile = false)
+    {
+      this.isState = isState;
+      this.isFile = isFile;
+
+      assert(!isFile || !isState);
+    }
 
   static bool canParse(TokenArray toks)
     {
@@ -1485,25 +1416,41 @@ class CodeBlock : Statement
 
   void parse(ref TokenArray toks)
     {
-      if(toks.length == 0)
-	fail("Code block expected, got end of file");
+      Token strt;
+      if(!isFile)
+        {
+          if(toks.length == 0)
+            fail("Code block expected, got end of file");
 
-      Token strt = toks[0];
-      if(strt.type != TT.LeftCurl)
-	fail("Code block expected a {", toks);
+          strt = toks[0];
+          if(strt.type != TT.LeftCurl)
+            fail("Code block expected a {", toks);
 
-      loc = strt.loc;
+          loc = strt.loc;
 
-      toks = toks[1..toks.length];
+          toks = toks[1..toks.length];
+        }
 
       // Are we parsing stuff that comes before the code? Only
       // applicable to state blocks.
       bool beforeCode = isState;
 
-      while(!isNext(toks, TT.RightCurl, endLine))
+      bool theEnd()
+        {
+          if(isFile)
+            return isNext(toks, TT.EOF, endLine);
+          else
+            return isNext(toks, TT.RightCurl, endLine);
+        }
+
+      while(!theEnd())
 	{
 	  if(toks.length == 0)
-	    fail(format("Unterminated code block (starting at line %s)", strt.loc));
+            {
+              if(!isFile)
+                fail(format("Unterminated code block (starting at line %s)", strt.loc));
+              else break;
+            }
 
           if(beforeCode)
             {
@@ -1570,4 +1517,14 @@ class CodeBlock : Statement
 	// Remove local variables from the stack
 	tasm.pop(sc.getLocals);
     }
+}
+
+// Used for declarations that create new types, like enum, struct,
+// etc.
+abstract class TypeDeclaration : Statement
+{
+  override void compile() {}
+
+  // Insert the type into the scope. This is called before resolve().
+  void insertType(TFVScope sc);
 }

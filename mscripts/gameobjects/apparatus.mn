@@ -24,5 +24,12 @@
 // Covers all alchemy apparatus - mortars, retorts, etc
 class Apparatus : InventoryItem;
 
+enum AppaType
+  {
+    MortarPestle = 0 : "Mortar and Pestle",
+    Albemic      = 1,
+    Calcinator   = 2
+  }
+
 float quality;
 int type;

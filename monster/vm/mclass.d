@@ -30,15 +30,18 @@ import monster.compiler.tokenizer;
 import monster.compiler.statement;
 import monster.compiler.variables;
 import monster.compiler.states;
+import monster.compiler.structs;
 import monster.compiler.block;
+import monster.compiler.enums;
 
-import monster.vm.vm;
+import monster.vm.thread;
 import monster.vm.codestream;
 import monster.vm.scheduler;
 import monster.vm.idlefunction;
 import monster.vm.fstack;
 import monster.vm.arrays;
 import monster.vm.error;
+import monster.vm.vm;
 import monster.vm.mobject;
 
 import monster.util.flags;
@@ -63,6 +66,8 @@ typedef void *MClass; // Pointer to C++ equivalent of MonsterClass.
 
 typedef int CIndex;
 
+alias FreeList!(CodeThread) ThreadList;
+
 // Parameter to the constructor. Decides how the class is created.
 enum MC
   {
@@ -84,6 +89,9 @@ enum CFlags
     Compiled  = 0x08, // Class body has been compiled
     InScope   = 0x10, // We are currently inside the createScope
                       // function
+    Module    = 0x20, // This is a module, not a class
+    Singleton = 0x40, // This is a singleton. Also set for modules.
+    Abstract  = 0x80, // No objects can be created from this class
   }
 
 // The class that handles 'classes' in Monster.
@@ -91,49 +99,11 @@ final class MonsterClass
 {
   /***********************************************
    *                                             *
-   *    Static path functions                    *
+   *    Static functions                         *
    *                                             *
    ***********************************************/
-  // TODO: These will probably be moved elsewhere.
 
-  // Path to search for script files. Extremely simple at the moment.
-  private static char[][] includes = [""];
-
-  static void addPath(char[] path)
-  {
-    // Make sure the path is slash terminated.
-    if(!path.ends("/") && !path.ends("\\"))
-      path ~= '/';
-
-    includes ~= path;
-  }
-
-  // Search for a file in the various paths. Returns true if found,
-  // false otherwise. Changes fname to point to the correct path.
-  static bool findFile(ref char[] fname)
-  {
-    // Check against our include paths. In the future we will replace
-    // this with a more flexible system, allowing virtual file systems,
-    // archive files, complete platform independence, improved error
-    // checking etc.
-    foreach(path; includes)
-      {
-        char[] res = path ~ fname;
-        if(exists(res))
-          {
-            fname = res;
-            return true;
-          }
-      }
-
-    return false;
-  }
-
-  /***********************************************
-   *                                             *
-   *    Static class functions                   *
-   *                                             *
-   ***********************************************/
+  // TODO: These should be moved to vm.vm
 
   // Get a class with the given name. It must already be loaded.
   static MonsterClass get(char[] name) { return global.getClass(name); }
@@ -141,6 +111,13 @@ final class MonsterClass
   // Find a class with the given name. Load the file if necessary, and
   // fail if the class cannot be found.
   static MonsterClass find(char[] name) { return global.findClass(name); }
+
+  static bool canParse(TokenArray tokens)
+    {
+      return
+        Block.isNext(tokens, TT.Class) ||
+        Block.isNext(tokens, TT.Module);
+    }
 
  final:
 
@@ -150,16 +127,10 @@ final class MonsterClass
    *                                                     *
    *******************************************************/
 
-  alias FreeList!(CodeThread) ThreadList;
   alias FreeList!(MonsterObject) ObjectList;
 
   // TODO: Put as many of these as possible in the private
   // section. Ie. move all of them and see what errors you get.
-
-  // Contains the entire class tree for this class, always with
-  // ourselves as the last entry. Any class in the list is always
-  // preceded by all the classes it inherits from.
-  MonsterClass tree[];
 
   // Index within the parent tree. This might become a list at some
   // point.
@@ -182,6 +153,10 @@ final class MonsterClass
   bool isResolved() { return flags.has(CFlags.Resolved); }
   bool isCompiled() { return flags.has(CFlags.Compiled); }
 
+  bool isSingleton() { return flags.has(CFlags.Singleton); }
+  bool isModule() { return flags.has(CFlags.Module); }
+  bool isAbstract() { return flags.has(CFlags.Abstract); }
+
   // Call whenever you require this function to have its scope in
   // order. If the scope is missing, this will call createScope if
   // possible, or fail if the class has not been loaded.
@@ -200,12 +175,6 @@ final class MonsterClass
   // when creating an object. Compiles the class if it isn't done
   // already.
   void requireCompile() { if(!isCompiled) compileBody(); }
-
-  // List of variables and functions declared in this class, ordered
-  // by index.
-  Function* functions[];
-  Variable* vars[];
-  State* states[];
 
 
   /*******************************************************
@@ -237,8 +206,7 @@ final class MonsterClass
 
       if(type == MC.String)
         {
-          assert(name2 == "", "MC.String only takes one parameter");
-          loadString(name1);
+          loadString(name1, name2);
 
           return;
         }
@@ -284,11 +252,12 @@ final class MonsterClass
   void loadCI(char[] name1, char[] name2 = "", bool usePath=true)
     { doLoad(name1, name2, false, usePath); }
 
-  void loadString(char[] str)
+  void loadString(char[] str, char[] fname="")
   {
     assert(str != "");
     auto ms = new MemoryStream(str);
-    loadStream(ms, "(string)");
+    if(fname == "") fname = "(string)";
+    loadStream(ms, fname);
   }
 
   // Load a script from a stream. The filename parameter is only used
@@ -338,7 +307,20 @@ final class MonsterClass
       return functions[index];
     }
 
-  // Find a given callable function.
+  // Find a virtual function by index. ctree is the tree index of the
+  // class where the function is defined, findex is the intra-class
+  // function index.
+  Function *findVirtualFunc(int ctree, int findex)
+    {
+      requireScope();
+      assert(ctree >= 0 && ctree <= treeIndex);
+      assert(findex >= 0 && findex < virtuals[ctree].length);
+      assert(virtuals[ctree][findex] !is null);
+
+      return virtuals[ctree][findex];
+    }
+
+  // Find a given callable function, virtually.
   Function *findFunction(char[] name)
   {
     requireScope();
@@ -493,10 +475,22 @@ final class MonsterClass
   MonsterObject* getFirst()
     { return objects.getHead(); }
 
+  // Get the singleton object
+  MonsterObject* getSing()
+    {
+      assert(isSingleton());
+      requireCompile();
+      assert(singObj !is null);
+      return singObj;
+    }
+
   // Create a new object, and assign a thread to it.
   MonsterObject* createObject()
     {
       requireCompile();
+
+      if(isAbstract)
+        fail("Cannot create objects from abstract class " ~ name.str);
 
       // Create the thread
       CodeThread *trd = threads.getNew();
@@ -652,48 +646,10 @@ final class MonsterClass
 
   // Get the global index of this class
   CIndex getIndex() { requireScope(); return gIndex; }
+  int getTreeIndex() { requireScope(); return treeIndex; }
   char[] getName() { assert(name.str != ""); return name.str; }
   char[] toString() { return getName(); }
 
-
-  /*******************************************************
-   *                                                     *
-   *     Private and lower-level members                 *
-   *                                                     *
-   *******************************************************/
-
-  void reserveStatic(int length)
-    {
-      assert(!isResolved);
-      assert(sdata.length == 0);
-
-      sdSize += length;
-    }
-
-  AIndex insertStatic(int[] array, int elemSize)
-    {
-      assert(isResolved);
-
-      // Allocate data, if it has not been done already.
-      if(sdata.length == 0 && sdSize != 0)
-        sdata.length = sdSize;
-
-      assert(array.length <= sdSize,
-             "Trying to allocate more than reserved size");
-
-      // How much will be left after inserting this array?
-      int newSize = sdSize - array.length;
-      assert(newSize >= 0);
-
-      int[] slice = sdata[$-sdSize..$-newSize];
-      sdSize = newSize;
-
-      // Copy the data
-      slice[] = array[];
-
-      ArrayRef *arf = arrays.createConst(slice, elemSize);
-      return arf.getIndex();
-    }
 
  private:
 
@@ -704,15 +660,32 @@ final class MonsterClass
    *                                                     *
    *******************************************************/
 
+  // Contains the entire class tree for this class, always with
+  // ourselves as the last entry. Any class in the list is always
+  // preceded by all the classes it inherits from.
+  MonsterClass tree[];
+
+  // List of variables and functions declared in this class, ordered
+  // by index.
+  Function* functions[];
+  Variable* vars[];
+  State* states[];
+
+  // Singleton object - used for singletons and modules only.
+  MonsterObject *singObj;
+
+  // Function table translation list. Same length as tree[]. For each
+  // class in the parent tree, this list holds a list equivalent to
+  // the functions[] list in that class. The difference is that all
+  // overrided functions have been replaced by their successors.
+  Function*[][] virtuals;
+
   // The freelists used for allocation of objects and threads.
   ObjectList objects;
   ThreadList threads;
 
   int[] data; // Contains the initial object data segment
   int[] sdata; // Static data segment
-
-  uint sdSize; // Number of ints reserved for the static data, that
-               // have not yet been used.
 
   // Size of the data segment
   uint dataSize;
@@ -724,13 +697,18 @@ final class MonsterClass
   MonsterClass parents[];
   Token parentNames[];
 
+  // Used at compile time
   VarDeclStatement[] vardecs;
   FuncDeclaration[] funcdecs;
   StateDeclaration[] statedecs;
+  StructDeclaration[] structdecs;
+  EnumDeclaration[] enumdecs;
 
+  // Current stage of the loading process
   MC loadType = MC.None;
 
-  // Native constructor type
+  // Native constructor type. Changed when the actual constructor is
+  // set.
   FuncType constType = FuncType.Native;
   union
   {
@@ -766,20 +744,7 @@ final class MonsterClass
           int[] val;
           totSize += size;
 
-          // Does this variable have an initializer?
-          if(vd.init !is null)
-            {
-              // And can it be evaluated at compile time?
-              if(!vd.init.isCTime)
-                fail("Expression " ~ vd.init.toString ~
-                     " is not computable at compile time", vd.init.loc);
-
-              val = vd.init.evalCTime();
-            }
-          // Use the default initializer.
-          else val = vd.var.type.defaultInit();
-
-          assert(val.length == size, "Size mismatch");
+          val = vd.getCTimeValue();
 
           data[vd.var.number..vd.var.number+size] = val[];
         }
@@ -953,7 +918,7 @@ final class MonsterClass
     if(!checkFileName())
       fail(format("Invalid class name %s (file %s)", cname, fname));
 
-    if(usePath && !findFile(fname))
+    if(usePath && !vm.findFile(fname))
       fail("Cannot find script file " ~ fname);
 
     // Create a temporary file stream and load it
@@ -1036,6 +1001,18 @@ final class MonsterClass
 	  sd.parse(toks);
 	  statedecs ~= sd;
 	}
+      else if(StructDeclaration.canParse(toks))
+        {
+          auto sd = new StructDeclaration;
+          sd.parse(toks);
+          structdecs ~= sd;
+        }
+      else if(EnumDeclaration.canParse(toks))
+        {
+          auto sd = new EnumDeclaration;
+          sd.parse(toks);
+          enumdecs ~= sd;
+        }
       else
         fail("Illegal type or declaration", toks);
     }
@@ -1044,18 +1021,42 @@ final class MonsterClass
   void parse(Stream str, char[] fname, int bom)
     { 
       assert(!isParsed(), "parse() called on a parsed class " ~ name.str);
-
       assert(str !is null);
 
       TokenArray tokens = tokenizeStream(fname, str, bom);
 
       alias Block.isNext isNext;
 
-      if(!isNext(tokens, TT.Class))
-	fail("File must begin with a valid class statement");
+      // TODO: Check for a list of keywords here. class, module,
+      // abstract, final. They can come in any order, but only certain
+      // combinations are legal. For example, class and module cannot
+      // both be present, and most other keywords only apply to
+      // classes. 'function' is not allowed at all, but should be
+      // checked for to make sure we're loading the right kind of
+      // file. If neither class nor module are found, that is also
+      // illegal in class files.
+
+      if(isNext(tokens, TT.Module))
+        {
+          flags.set(CFlags.Module);
+          flags.set(CFlags.Singleton);
+        }
+      else if(isNext(tokens, TT.Singleton))
+        flags.set(CFlags.Singleton);
+      else if(!isNext(tokens, TT.Class))
+	fail("File must begin with a class or module statement", tokens);
 
       if(!isNext(tokens, TT.Identifier, name))
 	fail("Class statement expected identifier", tokens);
+
+      if(isModule)
+        {
+          assert(isSingleton);
+          fail("Modules are not implement yet.", name.loc);
+        }
+
+      if(isSingleton && isAbstract)
+        fail("Modules and singletons cannot be abstract", name.loc);
 
       // Insert ourselves into the global scope. This will also
       // resolve forward references to this class, if any.
@@ -1064,6 +1065,9 @@ final class MonsterClass
       // Get the parent classes, if any
       if(isNext(tokens, TT.Colon))
         {
+          if(isModule)
+            fail("Inheritance not allowed for modules.");
+
           Token pName;
           do
             {
@@ -1125,6 +1129,9 @@ final class MonsterClass
             fail("Class " ~ name.str ~ " cannot inherit from itself",
                  name.loc);
 
+          if(mc.isModule)
+            fail("Cannot inherit from module " ~ mc.name.str);
+
           // If a parent class is not a forward reference and still
           // does not have a scope, it means that it is itself running
           // this function. This can only happen if we are a parent of
@@ -1165,10 +1172,22 @@ final class MonsterClass
 
       // Set the type
       objType = new ObjectType(this);
+      classType = objType.getMeta();
+
+      // Insert custom types first
+      foreach(dec; structdecs)
+        dec.insertType(sc);
+      foreach(dec; enumdecs)
+        dec.insertType(sc);
+
+      // Then resolve the headers.
+      foreach(dec; structdecs)
+        dec.resolve(sc);
+      foreach(dec; enumdecs)
+        dec.resolve(sc);
 
       // Resolve variable declarations. They will insert themselves
-      // into the scope. TODO: Init values will have to be handled as
-      // part of the body later.
+      // into the scope.
       foreach(dec; vardecs)
 	dec.resolve(sc);
 
@@ -1194,6 +1213,60 @@ final class MonsterClass
       states.length = statedecs.length;
       foreach(st; statedecs)
         states[st.st.index] = st.st;
+
+      // Now set up the virtual function table. It's elements
+      // correspond to the classes in tree[].
+
+      if(parents.length)
+        {
+          // This will get a lot trickier if we allow multiple inheritance
+          assert(parents.length == 1);
+
+          // Set up the virtuals list
+          auto pv = parents[0].virtuals;
+          virtuals.length = pv.length+1;
+
+          // We have to copy every single sublist, since we're not
+          // allowed to change our parent's data
+          foreach(i,l; pv)
+            virtuals[i] = l.dup;
+
+          // Add our own list
+          virtuals[$-1] = functions;
+        }
+      else
+        virtuals = [functions];
+
+      assert(virtuals.length == tree.length);
+
+      // Trace all our own functions back to their origin, and replace
+      // them. Since we've copied our parents list, and assume it is
+      // all set up, we only have to worry about our own
+      // functions. (For multiple inheritance this might be a bit more
+      // troublesome, but definitely doable.)
+      foreach(fn; functions)
+        {
+          auto o = fn.overrides;
+
+          // And we have to loop backwards through the overrides that
+          // o overrides as well.
+          while(o !is null)
+            {
+              // Find the owner class tree index of the function we're
+              // overriding
+              assert(o.owner !is this);
+              int clsInd = o.owner.treeIndex;
+              assert(clsInd < tree.length-1);
+              assert(tree[clsInd] == o.owner);
+
+              // Next, get the function index and replace the pointer
+              virtuals[clsInd][o.index] = fn;
+
+              // Get the function that o overrides too, and fix that
+              // one as well.
+              o = o.overrides;
+            }
+        }
 
       // Set the data segment size and the total data size for all
       // base classes.
@@ -1224,6 +1297,12 @@ final class MonsterClass
       foreach(state; statedecs)
 	state.resolve(sc);
 
+      // TODO: Resolve struct functions
+      /*
+      foredach(stru; structdecs)
+        stru.resolveBody(sc);
+      */
+
       // Validate all variable types
       foreach(var; vardecs)
         var.validate();
@@ -1248,6 +1327,13 @@ final class MonsterClass
       data = getDataSegment();
 
       flags.set(CFlags.Compiled);
+
+      // If it's a singleton, set up the object.
+      if(isSingleton)
+        {
+          assert(singObj is null);
+          singObj = createObject();
+        }
     }
 }
 

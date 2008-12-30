@@ -22,7 +22,7 @@
  */
 
 // This class controls all the music.
-class Music : Object;
+singleton Music : Object;
 
 // Create one jukebox for normal music, and one for battle music. This
 // way we can pause / fade out one while the other resumes / fades in.
@@ -98,7 +98,7 @@ setPlaylists(char[][] normal, char[][] battlelist)
 // have been changed by the user.
 updateVolume()
 {
-  float v = config().calcMusicVolume();
+  float v = Config.calcMusicVolume();
   jukebox.updateVolume(v);
   battle.updateVolume(v);
 }

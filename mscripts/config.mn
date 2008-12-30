@@ -21,8 +21,7 @@
 
  */
 
-// TODO: Should be a singleton
-class Config : Object;
+singleton Config : Object;
 
 // Only some config options have been moved into Monster. Key bindings
 // and other low-level settings are still handled in D.
@@ -42,13 +41,13 @@ bool flipMouseY;
 setMainVolume(float f)
 {
   mainVolume = f;
-  music().updateVolume();
+  Music.updateVolume();
 }
 
 setMusicVolume(float f)
 {
   musicVolume = f;
-  music().updateVolume();
+  Music.updateVolume();
 }
 
 setSfxVolume(float f)

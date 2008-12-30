@@ -29,6 +29,7 @@ import monster.compiler.assembler;
 import monster.compiler.tokenizer;
 import monster.compiler.scopes;
 import monster.compiler.types;
+import monster.compiler.functions;
 import monster.vm.error;
 import monster.vm.arrays;
 
@@ -584,8 +585,8 @@ class AssignOperator : BinaryOperator
       // Cast the right side to the left type, if possible.
       try type.typeCast(right);
       catch(TypeException)
-	fail("Assignment " ~tokenList[opType] ~ " not allowed for types " ~
-	     left.typeString() ~ " and " ~ right.typeString(), loc);
+	fail("Assignment " ~tokenList[opType] ~ ": cannot implicitly cast " ~
+	     right.typeString() ~ " to " ~ left.typeString(), loc);
 
       assert(left.type == right.type);
     }

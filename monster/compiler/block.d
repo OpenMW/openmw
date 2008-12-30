@@ -76,6 +76,25 @@ abstract class Block
       return true;
     }
 
+  static void reqNext(ref TokenArray toks, TT type, out Token tok)
+    {
+      if(!isNext(toks, type, tok))
+         fail("Expected " ~ tokenList[type], toks);
+    }
+
+  static void reqNext(ref TokenArray toks, TT type, out Floc loc)
+    {
+      Token t;
+      reqNext(toks, type, t);
+      loc = t.loc;
+    }
+
+  static void reqNext(ref TokenArray toks, TT type)
+    {
+      Token t;
+      reqNext(toks, type, t);
+    }
+
   // Sets the assembler debug line to the line belonging to this
   // block.
   final void setLine() { tasm.setLine(loc.line); }

@@ -79,7 +79,7 @@ struct Music
     jukeC.bindConst({new Jukebox(params.obj()); });
 
     controlC = MonsterClass.get("Music");
-    controlM = controlC.createObject;
+    controlM = controlC.getSing();
     controlM.call("setup");
   }
 

@@ -32,13 +32,17 @@ import monster.compiler.statement;
 import monster.compiler.expression;
 import monster.compiler.tokenizer;
 import monster.compiler.types;
+import monster.compiler.assembler;
 import monster.compiler.properties;
 import monster.compiler.functions;
 import monster.compiler.states;
+import monster.compiler.structs;
+import monster.compiler.enums;
 import monster.compiler.variables;
 
 import monster.vm.mclass;
 import monster.vm.error;
+import monster.vm.vm;
 
 // The global scope
 PackageScope global;
@@ -109,6 +113,7 @@ abstract class Scope
   bool isLoop() { return false; }
   bool isClass() { return false; }
   bool isArray() { return false; }
+  bool isStruct() { return false; }
   bool isPackage() { return false; }
   bool isProperty() { return false; }
 
@@ -200,6 +205,18 @@ abstract class Scope
     {
       if(isRoot()) return null;
       return parent.findFunc(name);
+    }
+
+  StructType findStruct(char[] name)
+    {
+      if(isRoot()) return null;
+      return parent.findStruct(name);
+    }
+
+  EnumType findEnum(char[] name)
+    {
+      if(isRoot()) return null;
+      return parent.findEnum(name);
     }
 
   void insertLabel(StateLabel *lb)
@@ -448,7 +465,7 @@ final class PackageScope : Scope
   // Find a parsed class of the given name. Looks in the list of
   // loaded classes and in the file system. Returns null if the class
   // cannot be found.
-  private MonsterClass findParsed(char[] name)
+  MonsterClass findParsed(char[] name)
     {
       MonsterClass result = null;
 
@@ -459,7 +476,7 @@ final class PackageScope : Scope
         {
           // Class not loaded. Check if the file exists.
           char[] fname = classToFile(name);
-          if(MonsterClass.findFile(fname))
+          if(vm.findFile(fname))
             {
               // File exists. Load it right away. If the class is
               // already forward referenced, this will be taken care
@@ -570,16 +587,207 @@ abstract class VarScope : Scope
   }
 }
 
-// A class scope. In addition to variables, they can contain states
-// and functions, and they keep track of the data segment size.
-final class ClassScope : VarScope
+// A scope that can contain functions and variables
+class FVScope : VarScope
+{
+ protected:
+  HashTable!(char[], Function*) functions;
+
+ public:
+  this(Scope last, char[] name)
+    { super(last, name); }
+
+  // Insert a function.
+  void insertFunc(Function* fd)
+  {
+    if(isClass)
+      {
+        // Are we overriding a function?
+        auto old = findFunc(fd.name.str);
+
+        // If there is no existing function, call clearId
+        if(old is null)
+          clearId(fd.name);
+        else
+          // We're overriding. Let fd know, and let it handle the
+          // details when it resolves.
+          fd.overrides = old;
+      }
+    else
+      // Non-class functions can never override anything
+      clearId(fd.name);
+
+    fd.index = functions.length;
+
+    // Store the function definition
+    functions[fd.name.str] = fd;
+  }
+
+  override:
+  void clearId(Token name)
+    {
+      assert(name.str != "");
+
+      Function* fd;
+
+      if(functions.inList(name.str, fd))
+        {
+          fail(format("Identifier '%s' already declared on line %s (as a function)",
+                      name.str, fd.name.loc),
+               name.loc);
+        }
+
+      // Let VarScope handle variables
+      super.clearId(name);
+    }
+
+  Function* findFunc(char[] name)
+  {
+    Function* fd;
+
+    if(functions.inList(name, fd))
+      return fd;
+
+    assert(!isRoot());
+    return parent.findFunc(name);
+  }
+}
+
+// Can contain types, functions and variables. 'Types' means structs,
+// enums and other user-generated sub-types (may also include classes
+// later.)
+
+// The TFV, FV and Var scopes might (probably will) be merged at some
+// point. I'm just keeping them separate for clearity while the scope
+// structure is being developed.
+class TFVScope : FVScope
+{
+ private:
+  HashTable!(char[], StructType) structs;
+  HashTable!(char[], EnumType) enums;
+
+ public:
+  this(Scope last, char[] name)
+    { super(last, name); }
+
+  void insertStruct(StructDeclaration sd)
+  {
+    clearId(sd.name);
+    structs[sd.name.str] = sd.type;
+  }
+
+  void insertEnum(EnumDeclaration sd)
+  {
+    clearId(sd.name);
+    enums[sd.name.str] = sd.type;
+  }
+
+  override:
+  void clearId(Token name)
+    {
+      assert(name.str != "");
+
+      StructType fd;
+      EnumType ed;
+
+      if(structs.inList(name.str, fd))
+        {
+          fail(format("Identifier '%s' already declared on line %s (as a struct)",
+                      name.str, fd.loc),
+               name.loc);
+        }
+
+      if(enums.inList(name.str, ed))
+        {
+          fail(format("Identifier '%s' already declared on line %s (as an enum)",
+                      name.str, ed.loc),
+               name.loc);
+        }
+
+      // Let VarScope handle variables
+      super.clearId(name);
+    }
+
+  StructType findStruct(char[] name)
+  {
+    StructType fd;
+
+    if(structs.inList(name, fd))
+      return fd;
+
+    assert(!isRoot());
+    return parent.findStruct(name);
+  }
+
+  EnumType findEnum(char[] name)
+  {
+    EnumType ed;
+
+    if(enums.inList(name, ed))
+      return ed;
+
+    assert(!isRoot());
+    return parent.findEnum(name);
+  }
+}
+
+// Lookup scope for enums. For simplicity we use the property system
+// to handle enum members.
+final class EnumScope : SimplePropertyScope
+{
+  this() { super("EnumScope"); }
+
+  int index; // Index in a global enum index list. Do whatever you do
+             // with global class indices here.
+
+  void setup()
+    {
+      /*
+      insert("name", ArrayType.getString(), { tasm.getEnumName(index); });
+
+      // Replace these with the actual fields of the enum
+      insert("value", type1, { tasm.getEnumValue(index, field); });
+
+      // Some of them are static
+      inserts("length", "int", { tasm.push(length); });
+      inserts("last", "owner", { tasm.push(last); });
+      inserts("first", "owner", { tasm.push(first); });
+      */
+    }
+}
+
+// Scope for the interior of structs
+final class StructScope : VarScope
+{
+  int offset;
+
+  StructType str;
+
+  this(Scope last, StructType t)
+    {
+      str = t;
+      assert(str !is null);
+      super(last, t.name);
+    }
+
+  bool isStruct() { return true; }
+
+  int addNewLocalVar(int varSize)
+    { return (offset+=varSize) - varSize; }
+
+  // Define it only here since we don't need it anywhere else.
+  Scope getParent() { return parent; }
+}
+
+// A class scope. In addition to variables, and functions, classes can
+// contain states and they keep track of the data segment size.
+final class ClassScope : TFVScope
 {
  private:
   // The class information for this class.
   MonsterClass cls;
 
   HashTable!(char[], State*) states;
-  HashTable!(char[], Function*) functions;
 
   int dataSize;    // Data segment size for this class
 
@@ -611,22 +819,14 @@ final class ClassScope : VarScope
     {
       assert(name.str != "");
 
-      Function* fd;
       State* sd;
-
-      if(functions.inList(name.str, fd))
-        {
-          fail(format("Identifier '%s' already declared on line %s (as a function)",
-                      name.str, fd.name.loc),
-               name.loc);
-        }
 
       if(states.inList(name.str, sd))
         fail(format("Identifier '%s' already declared on line %s (as a state)",
                     name.str, sd.name.loc),
              name.loc);
 
-      // Let VarScope handle variables and parent scopes
+      // Let the parent handle everything else
       super.clearId(name);
     }  
 
@@ -642,20 +842,6 @@ final class ClassScope : VarScope
     states[st.name.str] = st;
   }
 
-  // Insert a function.
-  void insertFunc(Function* fd)
-  {
-    // TODO: First check if we are legally overriding an existing
-    // function. If not, we are creating a new identifier and must
-    // call clearId.
-    clearId(fd.name);
-
-    fd.index = functions.length;
-
-    // Store the function definition
-    functions[fd.name.str] = fd;
-  }
-
   State* findState(char[] name)
   {
     State* st;
@@ -665,17 +851,6 @@ final class ClassScope : VarScope
 
     assert(!isRoot());
     return parent.findState(name);
-  }
-
-  Function* findFunc(char[] name)
-  {
-    Function* fd;
-
-    if(functions.inList(name, fd))
-      return fd;
-
-    assert(!isRoot());
-    return parent.findFunc(name);
   }
 }
 
@@ -745,6 +920,7 @@ abstract class StackScope : VarScope
   int getPos() { return getTotLocals() + getExpStack(); }
 }
 
+// Scope used for the inside of functions
 class FuncScope : StackScope
 {
   // Function definition, for function scopes

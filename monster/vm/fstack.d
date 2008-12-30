@@ -25,6 +25,7 @@ module monster.vm.fstack;
 
 import monster.vm.codestream;
 import monster.vm.mobject;
+import monster.vm.mclass;
 import monster.vm.stack;
 import monster.vm.error;
 import monster.compiler.states;
@@ -59,6 +60,7 @@ struct StackPoint
   SPType ftype;
 
   MonsterObject *obj; // "this"-pointer for the function
+  MonsterClass cls; // class owning the function
 
   int afterStack; // Where the stack should be when this function
                   // returns
@@ -109,12 +111,13 @@ struct FunctionStack
     cur.frame = stack.setFrame();
   }
 
-  // Set the stack point up as a function
+  // Set the stack point up as a function. Allows obj to be null.
   void push(Function *func, MonsterObject *obj)
   {
     push(obj);
     cur.ftype = SPType.Function;
     cur.func = func;
+    cur.cls = func.owner;
 
     // Point the code stream to the byte code, if any.
     if(func.isNormal)
@@ -130,6 +133,9 @@ struct FunctionStack
     cur.ftype = SPType.State;
     cur.state = st;
 
+    assert(obj !is null);
+    cur.cls = obj.cls;
+
     // Set up the byte code
     cur.code.setData(st.bcode, st.lines);
   }
@@ -137,12 +143,17 @@ struct FunctionStack
   // Native constructor
   void pushNConst(MonsterObject *obj)
   {
+    assert(obj !is null);
     push(obj);
     cur.ftype = SPType.NConst;
   }
 
   private void pushIdleCommon(Function *fn, MonsterObject *obj, SPType tp)
   {
+    // Not really needed - we will allow static idle functions later
+    // on.
+    assert(obj !is null);
+
     push(obj);
     cur.func = fn;
     assert(fn.isIdle, fn.name.str ~ "() is not an idle function");

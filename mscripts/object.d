@@ -34,16 +34,15 @@ import sound.music;
 void initMonsterScripts()
 {
   // Add the script directories
-  MonsterClass.addPath("mscripts/");
-  MonsterClass.addPath("mscripts/gameobjects/");
-  MonsterClass.addPath("mscripts/sound/");
+  vm.addPath("mscripts/");
+  vm.addPath("mscripts/gameobjects/");
+  vm.addPath("mscripts/sound/");
 
   // Make sure the Object class is loaded
   auto mc = new MonsterClass("Object", "object.mn");
 
-  // Create the config object too (only needed here because Object
-  // refers to Config. This will change.)
-  config.mo = (new MonsterClass("Config")).createObject;
+  // Get the Config singleton object
+  config.mo = (new MonsterClass("Config")).getSing();
 
   // Bind various functions
   mc.bind("print", { print(); });
@@ -51,10 +50,6 @@ void initMonsterScripts()
   { stack.pushInt(rnd.randInt
     (stack.popInt,stack.popInt));});
   mc.bind("sleep", new IdleSleep);
-
-  // Temporary hacks
-  mc.bind("config", { stack.pushObject(config.mo); });
-  mc.bind("music", { stack.pushObject(Music.controlM); });
 
   // Load and run the test script
   mc = new MonsterClass("Test");

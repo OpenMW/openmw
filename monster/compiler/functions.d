@@ -39,6 +39,7 @@ import monster.compiler.types;
 import monster.compiler.assembler;
 import monster.compiler.bytecode;
 import monster.compiler.scopes;
+import monster.compiler.expression;
 import monster.compiler.variables;
 import monster.compiler.tokenizer;
 import monster.compiler.linespec;
@@ -49,8 +50,11 @@ import monster.vm.idlefunction;
 import monster.vm.mclass;
 import monster.vm.error;
 import monster.vm.fstack;
+import monster.vm.vm;
 
 import std.stdio;
+import std.stream;
+import std.string;
 
 // One problem with these split compiler / vm classes is that we
 // likely end up with data (or at least pointers) we don't need, and a
@@ -81,7 +85,13 @@ struct Function
 
   int paramSize;
   int imprint; // Stack imprint of this function. Equals
-               // (type.getSize() - paramSize)
+               // (type.getSize() - paramSize) (NOT USED YET)
+
+  // Is this function final? (can not be overridden in child classes)
+  bool isFinal;
+
+  // What function we override (if any)
+  Function *overrides;
 
   union
   {
@@ -117,32 +127,16 @@ struct Function
   // you. A c++ version could be much more difficult to handle, and
   // might rely more on manual coding.
 
-  // Used to find the current virtual replacement for this
-  // function. The result will depend on the objects real class, and
-  // possibly on the object state. Functions might also be overridden
-  // explicitly.
-  Function *findVirtual(MonsterObject *obj)
-  {
-    assert(0, "not implemented");
-    //return obj.upcast(owner).getVirtual(index);
-  }
-
-  // Call the function virtually for the given object
-  void vcall(MonsterObject *obj)
-  {
-    assert(0, "not implemented");
-    //obj = obj.upcast(owner);
-    //obj.getVirtual(index).call(obj);
-  }
-
   // This is used to call the given function from native code. Note
   // that this is used internally for native functions, but not for
   // any other type. Idle functions can NOT be called directly from
   // native code.
   void call(MonsterObject *obj)
   {
+    assert(obj !is null);
+
     // Cast the object to the correct type for this function.
-    obj = obj.upcast(owner);
+    obj = obj.Cast(owner);
 
     // Push the function on the stack
     fstack.push(this, obj);
@@ -175,9 +169,84 @@ struct Function
     fstack.pop();
   }
 
+  // Call without an object. TODO: Only allowed for functions compiled
+  // without a class using compile() below, but in the future this
+  // will be replaced with a static function.
+  void call()
+  {
+    assert(owner is int_mc);
+    assert(owner !is null);
+    assert(int_mo !is null);
+    call(int_mo);
+  }
+
+  static Function opCall(char[] file, MonsterClass mc = null)
+  {
+    Function fn;
+    fn.compile(file, mc);
+    return fn;
+  }
+
+  // Compile the function script 'file' in the context of the class
+  // 'mc'. If no class is given, use an empty internal class.
+  void compile(char[] file, MonsterClass mc = null)
+  {
+    assert(name.str == "",
+           "Function " ~ name.str ~ " has already been set up");
+
+    // Check if the file exists
+    if(!vm.findFile(file))
+      fail("File not found: " ~ file);
+
+    // Set mc to an empty class if no class is given
+    if(mc is null)
+      {
+        if(int_mc is null)
+          {
+            assert(int_mo is null);
+
+            int_mc = new MonsterClass(MC.String, int_class);
+            int_mo = int_mc.createObject;
+          }
+        assert(int_mo !is null);
+
+        mc = int_mc;
+      }
+
+    // TODO: Maybe we should centralize this stuff somewhere.
+    // Especially since we have to reinvent loading from string or
+    // other custom streams, and so on. It's easier to put the tools
+    // for this here than to have them in MonsterClass. Fix this later
+    // when you see how things turn out.
+    auto bf = new BufferedFile(file);
+    auto ef = new EndianStream(bf);
+    int bom = ef.readBOM();
+    TokenArray tokens = tokenizeStream(file, ef, bom);
+    delete bf;
+
+    // Check if this is a class or a module file first
+    if(MonsterClass.canParse(tokens))
+      fail("Cannot run " ~ file ~ " - it is a class or module.");
+
+    auto fd = new FuncDeclaration;
+    // Parse and comile the function
+    fd.parseFile(tokens, this);
+    fd.resolve(mc.sc);
+    fd.resolveBody();
+    fd.compile();
+    assert(fd.fn == this);
+    delete fd;
+  }
+
   // Returns the function name, on the form Class.func()
   char[] toString()
   { return owner.name.str ~ "." ~ name.str ~ "()"; }
+
+  private:
+
+  static const char[] int_class = "class _Func_Internal_;";
+  static MonsterClass int_mc;
+  static MonsterObject *int_mo;
 }
 
 // Responsible for parsing, analysing and compiling functions.
@@ -191,7 +260,15 @@ class FuncDeclaration : Statement
   // the VM when the compiler is done working.
   Function *fn;
 
-  // Parse keywords allowed to be used on functions
+  // Is the 'override' keyword present
+  bool isOverride;
+
+  // Is this a stand-alone script file (not really needed)
+  bool isFile;
+
+  // Parse keywords allowed to be used on functions. This (and its
+  // borthers elsewhere) is definitely ripe for some pruning /
+  // refactoring.
   private void parseKeywords(ref TokenArray toks)
     {
       Floc loc;
@@ -213,7 +290,7 @@ class FuncDeclaration : Statement
 	    }
 	  if(isNext(toks, TT.Abstract, loc))
 	    {
-	      if(isNative)
+	      if(isAbstract)
 		fail("Multiple token 'abstract' in function declaration",
 		     loc);
 	      isAbstract = true;
@@ -227,10 +304,26 @@ class FuncDeclaration : Statement
 	      isIdle = true;
 	      continue;
 	    }
+	  if(isNext(toks, TT.Override, loc))
+	    {
+	      if(isOverride)
+		fail("Multiple token 'override' in function declaration",
+		     loc);
+	      isOverride = true;
+	      continue;
+	    }
+	  if(isNext(toks, TT.Final, loc))
+	    {
+	      if(fn.isFinal)
+		fail("Multiple token 'final' in function declaration",
+		     loc);
+	      fn.isFinal = true;
+	      continue;
+	    }
 	  break;
 	}
 
-      // Check that only one of the keywords are used
+      // Check that only one of the type keywords are used
       if( (isAbstract && isNative) ||
           (isAbstract && isIdle) ||
           (isNative && isIdle) )
@@ -241,6 +334,43 @@ class FuncDeclaration : Statement
       else if(isAbstract) fn.ftype = FuncType.Abstract;
       else if(isIdle) fn.ftype = FuncType.Idle;
       else assert(fn.isNormal);
+    }
+
+  void parseFile(ref TokenArray toks, Function *fnc)
+    {
+      isFile = true;
+      fn = fnc;
+      fn.ftype = FuncType.Normal;
+
+      // Is there an explicit function declaration?
+      if(isNext(toks, TT.Function))
+        {
+          TokenArray temp = toks;
+
+          reqNext(temp, TT.Identifier);
+
+          // Is this a function without type?
+          if(isFuncDec(toks))
+            // If so, set the type to void
+            fn.type = BasicType.getVoid;
+          else
+            // Otherwise, parse it
+            fn.type = Type.identify(toks);
+
+          // In any case, parse the rest of the declaration
+          parseParams(toks);
+
+          isNext(toks, TT.Semicolon);
+        }
+      else
+        {
+          // No type, no parameters
+          fn.type = BasicType.getVoid;
+          fn.name.str = "script-file";
+        }
+
+      code = new CodeBlock(false, true);
+      code.parse(toks);
     }
 
   void parse(ref TokenArray toks)
@@ -265,6 +395,33 @@ class FuncDeclaration : Statement
       // Parse any other keywords
       parseKeywords(toks);
 
+      parseParams(toks);
+
+      if(fn.isAbstract || fn.isNative || fn.isIdle)
+	{
+	  // Check that the function declaration ends with a ; rather
+	  // than a code block.
+	  if(!isNext(toks, TT.Semicolon))
+	  {
+	    if(fn.isAbstract)
+	      fail("Abstract function declaration expected ;", toks);
+	    else if(fn.isNative)
+	      fail("Native function declaration expected ;", toks);
+	    else if(fn.isIdle)
+	      fail("Idle function declaration expected ;", toks);
+	    else assert(0);
+	  }
+	}
+      else
+	{
+	  code = new CodeBlock;
+	  code.parse(toks);
+	}
+    }
+
+  // Parse function name and parameters
+  void parseParams(ref TokenArray toks)
+    {
       fn.name = next(toks);
       loc = fn.name.loc;
       if(fn.name.type != TT.Identifier)
@@ -297,27 +454,6 @@ class FuncDeclaration : Statement
 	  if(!isNext(toks, TT.RightParen))
 	    fail("Expected end of parameter list", toks);
 	}
-
-      if(fn.isAbstract || fn.isNative || fn.isIdle)
-	{
-	  // Check that the function declaration ends with a ; rather
-	  // than a code block.
-	  if(!isNext(toks, TT.Semicolon))
-	  {
-	    if(fn.isAbstract)
-	      fail("Abstract function declaration expected ;", toks);
-	    else if(fn.isNative)
-	      fail("Native function declaration expected ;", toks);
-	    else if(fn.isIdle)
-	      fail("Idle function declaration expected ;", toks);
-	    else assert(0);
-	  }
-	}
-      else
-	{
-	  code = new CodeBlock;
-	  code.parse(toks);
-	}
     }
 
   // Can the given tokens be parsed as the main function declaration?
@@ -334,6 +470,8 @@ class FuncDeclaration : Statement
 	  return
 	    isNext(toks, TT.Native) ||
 	    isNext(toks, TT.Abstract) ||
+	    isNext(toks, TT.Override) ||
+	    isNext(toks, TT.Final) ||
 	    isNext(toks, TT.Idle);
 	}
 
@@ -380,7 +518,15 @@ class FuncDeclaration : Statement
   // types). The rest is handed by resolveBody()
   void resolve(Scope last)
     {
+      assert(fn.type !is null);
+
       fn.type.resolve(last);
+
+      if(fn.type.isVar)
+        fail("var not allowed here", fn.type.loc);
+
+      if(fn.type.isReplacer)
+        fn.type = fn.type.getBase();
 
       // Create a local scope for this function
       sc = new FuncScope(last, fn);
@@ -389,9 +535,16 @@ class FuncDeclaration : Statement
       // in compile() and by external classes, so we store it.
       fn.paramSize = 0;
       foreach(vd; paramList)
-        fn.paramSize += vd.var.type.getSize();
+        {
+          // Resolve the variable first, to make sure we get the rigth
+          // size
+          vd.resolveParam(sc);
+          assert(!vd.var.type.isReplacer);
 
-      // Set the owner class.
+          fn.paramSize += vd.var.type.getSize();
+        }
+
+      // Set the owner class
       fn.owner = sc.getClass();
 
       // Parameters are given negative numbers according to their
@@ -403,18 +556,16 @@ class FuncDeclaration : Statement
       // TODO: Do fancy memory management
       fn.params.length = paramList.length;
 
-      // Add function parameters to scope.
+      // Set up function parameter numbers and insert them into the
+      // list.
       foreach(i, dec; paramList)
         {
-          if(dec.var.type.isArray())
-            dec.allowConst = true;
-
-          dec.resolve(sc, pos);
-
+          assert(pos < 0);
+          dec.setNumber(pos);
           pos += dec.var.type.getSize();
-
           fn.params[i] = dec.var;
         }
+      assert(pos == 0);
 
       // Vararg functions must have the last parameter as an array.
       if(fn.isVararg)
@@ -427,6 +578,56 @@ class FuncDeclaration : Statement
         }
 
       assert(pos == 0, "Variable positions didn't add up");
+
+      // Do we override a function?
+      if(fn.overrides)
+        {
+          Function *o = fn.overrides;
+          assert(fn.owner !is null);
+          assert(o.owner !is null,
+                 "overrided function must be resolved before us");
+
+          if(fn.owner is o.owner)
+            fail(format("Function %s is already declared on line %s",
+                        fn.name.str, o.name.loc.line), fn.name.loc);
+
+          // Check that the function we're overriding isn't final
+          if(o.isFinal)
+            fail("Cannot override final function " ~ o.toString, fn.name.loc);
+
+          // Check that signatures match
+          if(o.type != fn.type)
+            fail(format("Cannot override %s with different return type (%s -> %s)",
+                        fn.name.str, o.type, fn.type), fn.name.loc);
+
+          bool parFail = false;
+          if(o.params.length != fn.params.length) parFail = true;
+          else
+            foreach(i,p; fn.params)
+              if(p.type != o.params[i].type ||
+                 p.isVararg != o.params[i].isVararg)
+                {
+                  parFail = true;
+                  break;
+                }
+
+          if(parFail)
+            fail(format("Cannot override %s, parameter types do not match",
+                        o.toString), fn.name.loc);
+
+          // There's no big technical reason why this shouldn't be
+          // possible, but we haven't tested it or thought about it
+          // yet.
+          if(o.isIdle || fn.isIdle)
+            fail("Cannot override idle functions", fn.name.loc);
+        }
+      else
+        {
+          // No overriding. Make sure the 'override' flag isn't set.
+          if(isOverride)
+            fail("function " ~ fn.name.str ~
+                 " doesn't override anything", fn.name.loc);
+        }
     }
 
   // Resolve the interior of the function
@@ -466,5 +667,218 @@ class FuncDeclaration : Statement
 
       // Assemble the finished function
       fn.bcode = tasm.assemble(fn.lines);
+    }
+}
+
+// Expression representing a function call
+class FunctionCallExpr : MemberExpression
+{
+  Token name;
+  ExprArray params;
+  Function* fd;
+
+  bool isVararg;
+
+  static bool canParse(TokenArray toks)
+    {
+      return isNext(toks, TT.Identifier) && isNext(toks, TT.LeftParen);
+    }
+
+  // Read a parameter list (a,b,...)
+  static ExprArray getParams(ref TokenArray toks)
+    {
+      ExprArray res;
+      if(!isNext(toks, TT.LeftParen)) return res;
+
+      Expression exp;
+
+      // No parameters?
+      if(isNext(toks, TT.RightParen)) return res;
+
+      // Read the first parameter
+      res ~= Expression.identify(toks);
+
+      // Are there more?
+      while(isNext(toks, TT.Comma))
+        res ~= Expression.identify(toks);
+
+      if(!isNext(toks, TT.RightParen))
+	fail("Parameter list expected ')'", toks);
+
+      return res;
+    }
+
+  void parse(ref TokenArray toks)
+    {
+      name = next(toks);
+      loc = name.loc;
+
+      params = getParams(toks);
+    }
+
+  char[] toString()
+    {
+      char[] result = name.str ~ "(";
+      foreach(b; params)
+	result ~= b.toString ~" ";
+      return result ~ ")";
+    }
+
+  void resolve(Scope sc)
+    {
+      if(isMember) // Are we called as a member?
+	{
+          assert(leftScope !is null);
+	  fd = leftScope.findFunc(name.str);
+	  if(fd is null) fail(name.str ~ " is not a member function of "
+		       ~ leftScope.toString, loc);
+	}
+      else
+	{
+          assert(leftScope is null);
+	  fd = sc.findFunc(name.str);
+	  if(fd is null) fail("Undefined function "~name.str, name.loc);
+	}
+
+      // Is this an idle function?
+      if(fd.isIdle)
+        {
+          if(!sc.isStateCode)
+            fail("Idle functions can only be called from state code",
+                 name.loc);
+
+          if(isMember)
+            fail("Idle functions cannot be called as members", name.loc);
+        }
+
+      type = fd.type;
+      assert(type !is null);
+
+      isVararg = fd.isVararg;
+
+      if(isVararg)
+        {
+          // The vararg parameter can match a variable number of
+          // arguments, including zero.
+          if(params.length < fd.params.length-1)
+            fail(format("%s() expected at least %s parameters, got %s",
+                        name.str, fd.params.length-1, params.length),
+                 name.loc);
+        }
+      else
+        // Non-vararg functions must match function parameter number
+        // exactly
+        if(params.length != fd.params.length)
+          fail(format("%s() expected %s parameters, got %s",
+                      name.str, fd.params.length, params.length),
+               name.loc);
+
+      // Check parameter types
+      foreach(int i, par; fd.params)
+	{
+          // Handle varargs below
+          if(isVararg && i == fd.params.length-1)
+            break;
+
+	  params[i].resolve(sc);
+          try par.type.typeCast(params[i]);
+	  catch(TypeException)
+	    fail(format("%s() expected parameter %s to be type %s, not type %s",
+                        name.str, i+1, par.type.toString, params[i].typeString),
+                 name.loc);
+	}
+
+      // Loop through remaining arguments
+      if(isVararg)
+        {
+          int start = fd.params.length-1;
+
+          assert(fd.params[start].type.isArray);
+          Type base = fd.params[start].type.getBase();
+
+          foreach(int i, ref par; params[start..$])
+            {
+              par.resolve(sc);
+
+              // If the first and last vararg parameter is of the
+              // array type itself, then we are sending an actual
+              // array. Treat it like a normal parameter.
+              if(i == 0 && start == params.length-1 &&
+                 par.type == fd.params[start].type)
+                {
+                  isVararg = false;
+                  break;
+                }
+
+              // Otherwise, cast the type to the array base type.
+              try base.typeCast(par);
+              catch(TypeException)
+                fail(format("Cannot convert %s of type %s to %s", par.toString,
+                            par.typeString, base.toString), par.loc);
+            }
+        }
+    }
+
+  // Used in cases where the parameters need to be evaluated
+  // separately from the function call. This is done by DotOperator,
+  // in cases like obj.func(expr); Here expr is evaluated first, then
+  // obj, and then finally the far function call. This is because the
+  // far function call needs to read 'obj' off the top of the stack.
+  void evalParams()
+    {
+      assert(pdone == false);
+
+      foreach(i, ex; params)
+        {
+          ex.eval();
+
+          // Convert 'const' parameters to actual constant references
+          if(i < fd.params.length-1) // Skip the last parameter (in
+                                     // case of vararg functions)
+            if(fd.params[i].isConst)
+              {
+                assert(fd.params[i].type.isArray);
+                tasm.makeArrayConst();
+              }
+        }
+
+      if(isVararg)
+        {
+          // Compute the length of the vararg array.
+          int len = params.length - fd.params.length + 1;
+
+          // If it contains no elements, push a null array reference
+          // (0 is always null).
+          if(len == 0) tasm.push(0);
+          else
+            // Converte the pushed values to an array index
+            tasm.popToArray(len, params[$-1].type.getSize());
+        }
+
+      // Handle the last parameter after everything has been
+      // pushed. This will work for both normal and vararg parameters.
+      if(fd.params.length != 0 && fd.params[$-1].isConst)
+        {
+          assert(fd.params[$-1].type.isArray);
+          tasm.makeArrayConst();
+        }
+
+      pdone = true;
+    }
+
+  bool pdone;
+
+  void evalAsm()
+    {
+      if(!pdone) evalParams();
+      setLine();
+      assert(fd.owner !is null);
+
+      if(isMember)
+        tasm.callFarFunc(fd.index, fd.owner.getTreeIndex());
+      else if(fd.isIdle)
+        tasm.callIdle(fd.index, fd.owner.getIndex());
+      else
+        tasm.callFunc(fd.index, fd.owner.getTreeIndex());
     }
 }

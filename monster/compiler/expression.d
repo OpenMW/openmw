@@ -72,6 +72,7 @@ abstract class Expression : Block
       // The rest are not allowed for members (eg. con.(a+b) is not
       // allowed)
       else if(NewExpression.canParse(toks)) b = new NewExpression;
+      else if(TypeofExpression.canParse(toks)) b = new TypeofExpression;
       else if(LiteralExpr.canParse(toks)) b = new LiteralExpr;
       else if(ArrayLiteralExpr.canParse(toks)) b = new ArrayLiteralExpr;
       // Sub-expression (expr)
@@ -450,6 +451,32 @@ abstract class Expression : Block
   int[] evalCTime() { assert(0); return null; }
 }
 
+// Handles typeof(exp), returns an empty expression with the meta-type
+// of exp.
+class TypeofExpression : Expression
+{
+  TypeofType tt;
+
+  static bool canParse(TokenArray toks)
+    { return TypeofType.canParse(toks); }
+
+  void parse(ref TokenArray toks)
+    {
+      // Let TypeofType handle the details
+      tt = new TypeofType;
+      tt.parse(toks);
+    }
+
+  void resolve(Scope sc)
+    {
+      tt.resolve(sc);
+      type = tt.getBase().getMeta();
+    }
+
+  // Don't actually produce anything
+  void evalAsm() {}
+}
+
 // new-expressions, ie. (new Sometype[]).
 class NewExpression : Expression
 {
@@ -471,9 +498,7 @@ class NewExpression : Expression
 
   void parse(ref TokenArray toks)
     {
-      if(!isNext(toks, TT.New, loc))
-	assert(0, "Internal error in NewExpression");
-
+      reqNext(toks, TT.New, loc);
       type = Type.identify(toks, true, exArr);
     }
 
@@ -485,6 +510,9 @@ class NewExpression : Expression
   void resolve(Scope sc)
     {
       type.resolve(sc);
+
+      if(type.isReplacer)
+        type = type.getBase();
 
       if(type.isObject)
         {
@@ -600,12 +628,11 @@ class ArrayLiteralExpr : Expression
 
   void parse(ref TokenArray toks)
     {
-      if(!isNext(toks, TT.LeftSquare, loc))
-	assert(0, "Internal error in ArrayLiteralExpr");
+      reqNext(toks, TT.LeftSquare, loc);
 
       Floc loc2;
       if(isNext(toks, TT.RightSquare, loc2))
-	fail("Array literal cannot be empty", loc2);
+	fail("Array literal cannot be empty. Use 'null' instead.", loc2);
 
       // Read the first expression
       params ~= Expression.identify(toks);
@@ -614,8 +641,7 @@ class ArrayLiteralExpr : Expression
       while(isNext(toks, TT.Comma))
 	params ~= Expression.identify(toks);
 
-      if(!isNext(toks, TT.RightSquare))
-	fail("Array literal expected closing ]", toks);
+      reqNext(toks, TT.RightSquare);
     }
 
   char[] toString()
@@ -642,7 +668,7 @@ class ArrayLiteralExpr : Expression
 
       // Set the type
       Type base = params[0].type;
-      type = new ArrayType(base);
+      type = ArrayType.get(base);
 
       foreach(ref par; params)
 	{
@@ -656,8 +682,10 @@ class ArrayLiteralExpr : Expression
 
       cls = sc.getClass();
 
+      /*
       if(isCTime)
         cls.reserveStatic(params.length * base.getSize);
+      */
     }
 
   int[] evalCTime()
@@ -682,9 +710,8 @@ class ArrayLiteralExpr : Expression
       foreach(i, par; params)
         data[i*elem..(i+1)*elem] = par.evalCTime();
 
-      // Insert the array into the static data, and get the array
-      // reference
-      arrind = cls.insertStatic(data, elem);
+      // Create the array and get the index
+      arrind = arrays.createConst(data, elem).getIndex;
 
       // Delete the array, if necessary
       if(data.length > LEN)
@@ -877,7 +904,7 @@ class LiteralExpr : Expression
       // Strings
       if(value.type == TT.StringLiteral)
         {
-          type = new ArrayType(BasicType.getChar);
+          type = ArrayType.getString;
 
           // Check that we do indeed have '"'s at the ends of the
           // string. Special cases which we allow later (like wysiwig
@@ -887,7 +914,7 @@ class LiteralExpr : Expression
                  "Encountered invalid string literal token: " ~ value.str);
 
           strVal = toUTF32(value.str[1..$-1]);
-          cls.reserveStatic(strVal.length);
+          //cls.reserveStatic(strVal.length);
 
           return;
         }
@@ -914,9 +941,8 @@ class LiteralExpr : Expression
 
       if(type.isString)
         {
-          // Insert the array into the static data, and get the array
-          // reference
-          arrind = cls.insertStatic(cast(int[])strVal, 1);
+          // Create array index
+          arrind = arrays.createConst(cast(int[])strVal, 1).getIndex;
           // Create an array from it
           return (cast(int*)&arrind)[0..1];
         }
@@ -968,548 +994,6 @@ abstract class MemberExpression : Expression
       isMember = true;
 
       resolve(sc);
-    }
-}
-
-// Represents a reference to a variable. Simply stores the token
-// representing the identifier. Evaluation is handled by the variable
-// declaration itself. This allows us to use this class for local and
-// global variables as well as for properties, without handling each
-// case separately. The special names (currently __STACK__) are
-// handled internally.
-class VariableExpr : MemberExpression
-{
-  Token name;
-  Variable *var;
-  Property prop;
-
-  enum VType
-    {
-      None,             // Should never be set
-      LocalVar,         // Local variable
-      ThisVar,          // Variable in this object and this class
-      ParentVar,        // Variable in another class but this object
-      FarOtherVar,      // Another class, another object
-      Property,         // Property (like .length of arrays)
-      Special,          // Special name (like __STACK__)
-      Type,             // Typename
-    }
-
-  VType vtype;
-  int classIndex = -1;  // Index of the class that owns this variable.
-
-  static bool canParse(TokenArray toks)
-    {
-      return
-        isNext(toks, TT.Identifier) ||
-        isNext(toks, TT.Singleton) ||
-        isNext(toks, TT.State) ||
-        isNext(toks, TT.Clone) ||
-        isNext(toks, TT.Const);
-    }
-
-  void parse(ref TokenArray toks)
-    {
-      name = next(toks);
-      loc = name.loc;
-    }
-
-  // Does this variable name refer to a type name rather than an
-  // actual variable?
-  bool isType()
-    {
-      return type.isMeta();
-    }
-
-  bool isProperty()
-  out(res)
-  {
-    if(res)
-      {
-        assert(prop.name != "");
-        assert(var is null);
-        assert(!isSpecial);
-      }
-    else
-      {
-        assert(prop.name == "");
-      }
-  }
-  body
-  {
-    return vtype == VType.Property;
-  }
-
-  bool isSpecial() { return vtype == VType.Special; }
-
- override:
-  char[] toString() { return name.str; }
-
-  // Ask the variable if we can write to it.
-  bool isLValue()
-    {
-      // Specials are read only
-      if(isSpecial)
-        return false;
-
-      // Properties may or may not be changable
-      if(isProperty)
-        return prop.isLValue;
-
-      // Normal variables are always lvalues.
-      return true;
-    }
-
-  bool isStatic()
-    {
-      // Properties can be static
-      if(isProperty)
-        return prop.isStatic;
-
-      // Type names are always static (won't be true for type
-      // variables later, though.)
-      if(isType)
-        return true;
-
-      return false;
-    }
-
-  // TODO: isCTime - should be usable for static properties and members
-
-  void writeProperty()
-    {
-      assert(isProperty);
-      prop.setValue();
-    }
-
-  void resolve(Scope sc)
-    out
-    {
-      // Some sanity checks on the result
-      if(isProperty) assert(var is null);
-      if(var !is null)
-        {
-          assert(var.sc !is null);
-          assert(!isProperty);
-        }
-      assert(type !is null);
-      assert(vtype != VType.None);
-    }
-    body
-    {
-      if(isMember) // Are we called as a member?
-	{
-          // Look up the name in the scope belonging to the owner
-          assert(leftScope !is null);
-
-          // Check first if this is a variable
-          var = leftScope.findVar(name.str);
-          if(var !is null)
-            {
-              // We are a member variable
-              type = var.type;
-
-              // The object pointer is pushed on the stack. We must
-              // also provide the class index, so the variable is
-              // changed in the correct class (it could be a parent
-              // class of the given object.)
-              vtype = VType.FarOtherVar;
-              assert(var.sc.isClass);
-              classIndex = var.sc.getClass().getIndex();
-
-              return;
-            }
-
-          // Check for properties last
-          if(leftScope.findProperty(name, ownerType, prop))
-            {
-              // We are a property
-              vtype = VType.Property;
-              type = prop.getType;
-              return;
-            }
-
-          // No match
-          fail(name.str ~ " is not a member of " ~ ownerType.toString,
-               loc);
-        }
-
-      // Not a member
-
-      // Look for reserved names first.
-      if(name.str == "__STACK__")
-        {
-          vtype = VType.Special;
-          type = BasicType.getInt;
-          return;
-        }
-
-      if(name.type == TT.Const)
-        fail("Cannot use const as a variable", name.loc);
-
-      if(name.type == TT.Clone)
-        fail("Cannot use clone as a variable", name.loc);
-
-      // These are special cases that work both as properties
-      // (object.state) and as non-member variables (state=...) inside
-      // class functions / state code. Since we already handle them
-      // nicely as properties, treat them as properties.
-      if(name.type == TT.Singleton || name.type == TT.State)
-        {
-          if(!sc.isInClass)
-            fail(name.str ~ " can only be used in classes", name.loc);
-
-          if(!sc.findProperty(name, sc.getClass().objType, prop))
-            assert(0, "should have found property " ~ name.str ~
-                   " in scope " ~ sc.toString);
-
-          vtype = VType.Property;
-          type = prop.getType;
-          return;
-        }
-
-      // Not a member, property or a special name. Look ourselves up
-      // in the local variable scope.
-      var = sc.findVar(name.str);
-
-      if(var !is null)
-        {
-          type = var.type;
-
-          assert(var.sc !is null);
-
-          // Class variable?
-          if(var.sc.isClass)
-            {
-              // Check if it's in THIS class, which is a common
-              // case. If so, we can use a simplified instruction that
-              // doesn't have to look up the class.
-              if(var.sc.getClass is sc.getClass)
-                vtype = VType.ThisVar;
-              else
-                {
-                  // It's another class. For non-members this can only
-                  // mean a parent class.
-                  vtype = VType.ParentVar;
-                  classIndex = var.sc.getClass().getIndex();
-                }
-            }
-          else
-            vtype = VType.LocalVar;
-
-          return;
-        }
-
-      // We are not a variable. Maybe we're a basic type?
-      if(BasicType.isBasic(name.str))
-        {
-          // Yes!
-          type = MetaType.get(name.str);
-          vtype = VType.Type;
-          return;
-        }
-
-      // No match at all
-      fail("Undefined identifier "~name.str, name.loc);
-    }
-
-  void evalAsm()
-    {
-      // If we are a type, just do nothing. If the type is used for
-      // anything, it will be typecast and all the interesting stuff
-      // will be handled by the type system.
-      if(isType) return;
-
-      setLine();
-
-      // Special name
-      if(isSpecial)
-	{
-	  if(name.str == "__STACK__")
-	    tasm.getStack();
-          else assert(0, "Unknown special name " ~ name.str);
-	  return;
-	}
-
-      // Property
-      if(isProperty)
-        {
-          prop.getValue();
-          return;
-        }
-
-      // Normal variable
-
-      int s = type.getSize;
-
-      if(vtype == VType.LocalVar)
-        // This is a variable local to this function. The number gives
-        // the stack position.
-        tasm.pushLocal(var.number, s);
-
-      else if(vtype == VType.ThisVar)
-        // The var.number gives the offset into the data segment in
-        // this class
-        tasm.pushClass(var.number, s);
-
-      else if(vtype == VType.ParentVar)
-        // Variable in a parent but this object
-        tasm.pushParentVar(var.number, classIndex, s);
-
-      else if(vtype == VType.FarOtherVar)
-        // Push the value from a "FAR pointer". The class index should
-        // already have been pushed on the stack by DotOperator, we
-        // only push the index.
-        tasm.pushFarClass(var.number, classIndex, s);
-
-      else assert(0);
-    }
-
-  // Push the address of the variable rather than its value
-  void evalDest()
-    {
-      assert(!isType, "types can never be written to");
-      assert(isLValue());
-      assert(!isProperty);
-
-      setLine();
-
-      // No size information is needed for addresses.
-
-      if(vtype == VType.LocalVar)
-        tasm.pushLocalAddr(var.number);
-      else if(vtype == VType.ThisVar)
-        tasm.pushClassAddr(var.number);
-      else if(vtype == VType.ParentVar)
-        tasm.pushParentVarAddr(var.number, classIndex);
-      else if(vtype == VType.FarOtherVar)
-        tasm.pushFarClassAddr(var.number, classIndex);
-
-      else assert(0);
-    }
-
-  void postWrite()
-    {
-      assert(!isProperty);
-      assert(isLValue());
-      assert(var.sc !is null);
-      if(var.isRef)
-        // TODO: This assumes all ref variables are foreach values,
-        // which will probably not be true in the future.
-        tasm.iterateUpdate(var.sc.getLoopStack());
-    }
-}
-
-// Expression representing a function call
-class FunctionCallExpr : MemberExpression
-{
-  Token name;
-  ExprArray params;
-  Function* fd;
-
-  bool isVararg;
-
-  static bool canParse(TokenArray toks)
-    {
-      return isNext(toks, TT.Identifier) && isNext(toks, TT.LeftParen);
-    }
-
-  // Read a parameter list (a,b,...)
-  static ExprArray getParams(ref TokenArray toks)
-    {
-      ExprArray res;
-      if(!isNext(toks, TT.LeftParen)) return res;
-
-      Expression exp;
-
-      // No parameters?
-      if(isNext(toks, TT.RightParen)) return res;
-
-      // Read the first parameter
-      res ~= Expression.identify(toks);
-
-      // Are there more?
-      while(isNext(toks, TT.Comma))
-        res ~= Expression.identify(toks);
-
-      if(!isNext(toks, TT.RightParen))
-	fail("Parameter list expected ')'", toks);
-
-      return res;
-    }
-
-  void parse(ref TokenArray toks)
-    {
-      name = next(toks);
-      loc = name.loc;
-
-      params = getParams(toks);
-    }
-
-  char[] toString()
-    {
-      char[] result = name.str ~ "(";
-      foreach(b; params)
-	result ~= b.toString ~" ";
-      return result ~ ")";
-    }
-
-  void resolve(Scope sc)
-    {
-      if(isMember) // Are we called as a member?
-	{
-          assert(leftScope !is null);
-	  fd = leftScope.findFunc(name.str);
-	  if(fd is null) fail(name.str ~ " is not a member function of "
-		       ~ leftScope.toString, loc);
-	}
-      else
-	{
-          assert(leftScope is null);
-	  fd = sc.findFunc(name.str);
-	  if(fd is null) fail("Undefined function "~name.str, name.loc);
-	}
-
-      // Is this an idle function?
-      if(fd.isIdle)
-        {
-          if(!sc.isStateCode)
-            fail("Idle functions can only be called from state code",
-                 name.loc);
-
-          if(isMember)
-            fail("Idle functions cannot be called as members", name.loc);
-        }
-
-      type = fd.type;
-      assert(type !is null);
-
-      isVararg = fd.isVararg;
-
-      if(isVararg)
-        {
-          // The vararg parameter can match a variable number of
-          // arguments, including zero.
-          if(params.length < fd.params.length-1)
-            fail(format("%s() expected at least %s parameters, got %s",
-                        name.str, fd.params.length-1, params.length),
-                 name.loc);
-        }
-      else
-        // Non-vararg functions must match function parameter number
-        // exactly
-        if(params.length != fd.params.length)
-          fail(format("%s() expected %s parameters, got %s",
-                      name.str, fd.params.length, params.length),
-               name.loc);
-
-      // Check parameter types
-      foreach(int i, par; fd.params)
-	{
-          // Handle varargs below
-          if(isVararg && i == fd.params.length-1)
-            break;
-
-	  params[i].resolve(sc);
-          try par.type.typeCast(params[i]);
-	  catch(TypeException)
-	    fail(format("%s() expected parameter %s to be type %s, not type %s",
-                        name.str, i+1, par.type.toString, params[i].typeString),
-                 name.loc);
-	}
-
-      // Loop through remaining arguments
-      if(isVararg)
-        {
-          int start = fd.params.length-1;
-
-          assert(fd.params[start].type.isArray);
-          Type base = fd.params[start].type.getBase();
-
-          foreach(int i, ref par; params[start..$])
-            {
-              par.resolve(sc);
-
-              // If the first and last vararg parameter is of the
-              // array type itself, then we are sending an actual
-              // array. Treat it like a normal parameter.
-              if(i == 0 && start == params.length-1 &&
-                 par.type == fd.params[start].type)
-                {
-                  isVararg = false;
-                  break;
-                }
-
-              // Otherwise, cast the type to the array base type.
-              try base.typeCast(par);
-              catch(TypeException)
-                fail(format("Cannot convert %s of type %s to %s", par.toString,
-                            par.typeString, base.toString), par.loc);
-            }
-        }
-    }
-
-  // Used in cases where the parameters need to be evaluated
-  // separately from the function call. This is done by DotOperator,
-  // in cases like obj.func(expr); Here expr is evaluated first, then
-  // obj, and then finally the far function call. This is because the
-  // far function call needs to read 'obj' off the top of the stack.
-  void evalParams()
-    {
-      assert(pdone == false);
-
-      foreach(i, ex; params)
-        {
-          ex.eval();
-
-          // Convert 'const' parameters to actual constant references
-          if(i < fd.params.length-1) // Skip the last parameter (in
-                                     // case of vararg functions)
-            if(fd.params[i].isConst)
-              {
-                assert(fd.params[i].type.isArray);
-                tasm.makeArrayConst();
-              }
-        }
-
-      if(isVararg)
-        {
-          // Compute the length of the vararg array.
-          int len = params.length - fd.params.length + 1;
-
-          // If it contains no elements, push a null array reference
-          // (0 is always null).
-          if(len == 0) tasm.push(0);
-          else
-            // Converte the pushed values to an array index
-            tasm.popToArray(len, params[$-1].type.getSize());
-        }
-
-      // Handle the last parameter after everything has been
-      // pushed. This will work for both normal and vararg parameters.
-      if(fd.params.length != 0 && fd.params[$-1].isConst)
-        {
-          assert(fd.params[$-1].type.isArray);
-          tasm.makeArrayConst();
-        }
-
-      pdone = true;
-    }
-
-  bool pdone;
-
-  void evalAsm()
-    {
-      if(!pdone) evalParams();
-      setLine();
-      assert(fd.owner !is null);
-
-      if(isMember)
-        tasm.callFarFunc(fd.index, fd.owner.getIndex());
-      else if(fd.isIdle)
-        tasm.callIdle(fd.index, fd.owner.getIndex());
-      else
-        tasm.callFunc(fd.index, fd.owner.getIndex());
     }
 }
 

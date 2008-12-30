@@ -24,11 +24,6 @@
 // This is the base class of all OpenMW Monster classes.
 class Object;
 
-// TODO: These are temporary hacks. A more elegant solution will be
-// used once the language supports it.
-native Config config();
-native Music music();
-
 // Sleeps a given amount of time
 idle sleep(float seconds);
 

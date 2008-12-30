@@ -91,7 +91,7 @@ enum TT
     // Keywords. Note that we use Class as a separator below, so it
     // must be first in this list. All operator tokens must occur
     // before Class, and all keywords must come after Class.
-    Class,
+    Class, Module,
     For,
     If,
     Else,
@@ -107,10 +107,11 @@ enum TT
     Switch,
     Select,
     State,
-    Singleton, Clone,
+    Struct, Enum, Thread,
+    Singleton, Clone, Override, Final, Function,
     This, New, Static, Const, Out, Ref, Abstract, Idle,
     Public, Private, Protected, True, False, Native, Null,
-    Goto, Halt, Auto, Var, In,
+    Goto, Halt, Var, In,
 
     Last, // Tokens after this do not have a specific string
 	  // associated with them.
@@ -184,7 +185,7 @@ const char[][] tokenList =
     TT.MinusEq          : "-=",
     TT.MultEq           : "*=",
     TT.DivEq            : "/=",
-    TT.RemEq            : "%%=",
+    TT.RemEq            : "%=",
     TT.IDivEq           : "\\=",
     TT.CatEq            : "~=",
 
@@ -196,10 +197,11 @@ const char[][] tokenList =
     TT.Minus            : "-",
     TT.Mult             : "*",
     TT.Div              : "/",
-    TT.Rem              : "%%",
+    TT.Rem              : "%",
     TT.IDiv             : "\\",
 
     TT.Class            : "class",
+    TT.Module           : "module",
     TT.Return           : "return",
     TT.For              : "for",
     TT.This             : "this",
@@ -216,12 +218,18 @@ const char[][] tokenList =
     TT.Switch           : "switch",
     TT.Select           : "select",
     TT.State            : "state",
+    TT.Struct           : "struct",
+    TT.Enum             : "enum",
+    TT.Thread           : "thread",
     TT.Typeof           : "typeof",
     TT.Singleton        : "singleton",
     TT.Clone            : "clone",
     TT.Static           : "static",
     TT.Const            : "const",
     TT.Abstract         : "abstract",
+    TT.Override         : "override",
+    TT.Final            : "final",
+    TT.Function         : "function",
     TT.Idle             : "idle",
     TT.Out 	        : "out",
     TT.Ref	        : "ref",
@@ -234,7 +242,6 @@ const char[][] tokenList =
     TT.Null             : "null",
     TT.Goto             : "goto",
     TT.Halt             : "halt",
-    TT.Auto             : "auto",
     TT.Var              : "var",
     TT.In               : "in",
   ];
@@ -519,11 +526,13 @@ class StreamTokenizer
 	  // Treat the rest as we would an identifier - the actual
 	  // interpretation will be done later. We allow non-numerical
 	  // tokens in the literal, such as 0x0a or 1_000_000. We must
-	  // also explicitly allow '.' dots. A number literal can end
-	  // with a percentage sign '%'.
+	  // also explicitly allow '.' dots.
 	  int len = 1;
 	  bool lastDot = false; // Was the last char a '.'?
-          bool lastPer = false; // Was it a '%'?
+          // I've tried with percentage literals (10% = 0.10), but it
+          // conflicts with the remainder division operator (which
+          // shouldn't change), so I've disabled it for now.
+          //bool lastPer = false; // Was it a '%'?
 	  foreach(char ch; line[1..$])
 	    {
 	      if(ch == '.')
@@ -537,6 +546,7 @@ class StreamTokenizer
 		    }
 		  lastDot = true;
 		}
+              /*
               else if(ch == '%')
                 {
                   // Ditto for percentage signs. We allow '%' but not
@@ -548,11 +558,12 @@ class StreamTokenizer
                     }
                   lastPer = true;
                 }
+              */
 	      else
 		{
 		  if(!validIdentChar(ch)) break;
 		  lastDot = false;
-                  lastPer = false;
+                  //lastPer = false;
 		}
 
               // This was a valid character, count it

@@ -72,7 +72,7 @@ pause()
 
 resume()
 {
-  if(!config().useMusic) return;
+  if(!Config.useMusic) return;
 
   if(isPaused) playSound();
   else next();
@@ -94,7 +94,7 @@ stop()
 
 play()
 {
-  if(!config().useMusic) return;
+  if(!Config.useMusic) return;
 
   if(index >= playlist.length)
     return;
@@ -112,7 +112,7 @@ play()
 // Play the next song in the playlist
 next()
 {
-  if(!config().useMusic) return;
+  if(!Config.useMusic) return;
 
   if(isPlaying)
     stop();

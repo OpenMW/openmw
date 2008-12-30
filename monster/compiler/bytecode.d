@@ -108,6 +108,9 @@ enum BC
 
     PushThis,           // Push the 'this' object reference
 
+    PushSingleton,      // Push the singleton object. Takes the global
+                        // class index (int) as parameter.
+
     // The Push*8 instructions are not implemented yet as they are
     // just optimizations of existing features. The names are reserved
     // for future use.
@@ -136,10 +139,13 @@ enum BC
                         // the Ptr, and then pushes the value back.
 
     Store,              // Same as StoreRet but does not push the
-                        // value back. Not implemented.
+                        // value back. Not implemented, but will later
+                        // replace storeret completely.
 
     StoreRet8,          // Same as StoreRet except two ints are popped
                         // from the stack and moved into the data.
+
+    StoreRetMult,       // Takes the size as an int parameter
 
     IAdd,               // Standard addition, operates on the two next
                         // ints in the stack, and stores the result in
@@ -535,6 +541,7 @@ char[][] bcToString =
  BC.PushFarClassVar: "PushFarClassVar",
  BC.PushFarClassMulti: "PushFarClassMulti",
  BC.PushThis: "PushThis",
+ BC.PushSingleton: "PushSingleton",
  BC.Push8: "Push8",
  BC.PushLocal8: "PushLocal8",
  BC.PushClassVar8: "PushClassVar8",
@@ -545,6 +552,7 @@ char[][] bcToString =
  BC.StoreRet: "StoreRet",
  BC.Store: "Store",
  BC.StoreRet8: "StoreRet8",
+ BC.StoreRetMult: "StoreRetMult",
  BC.FetchElem: "FetchElem",
  BC.GetArrLen: "GetArrLen",
  BC.IMul: "IMul",

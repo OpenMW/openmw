@@ -625,6 +625,14 @@ struct Assembler
   // Push 'this', the current object reference
   void pushThis() { cmd(BC.PushThis); }
 
+  // Push the singleton object of the given class index
+  void pushSingleton(int classIndex)
+  {
+    assert(classIndex >= 0);
+    cmd(BC.PushSingleton);
+    addi(classIndex);
+  }
+
   private void pushPtr(PT pt, int index)
   {
     cmd(BC.PushData);
@@ -728,7 +736,11 @@ struct Assembler
       }
   }
 
-  void mov(int s) { cmd2(BC.StoreRet, BC.StoreRet8, s); }
+  void mov(int s)
+  {
+    if(s < 3) cmd2(BC.StoreRet, BC.StoreRet8, s);
+    else cmdmult(BC.StoreRet, BC.StoreRetMult, s);
+  }
 
   // Set object state to the given index
   void setState(int st, int label, int cls)
@@ -748,9 +760,8 @@ struct Assembler
   void catArrayLeft(int s) { cmd(BC.CatLeft); addi(s); }
   void catArrayRight(int s) { cmd(BC.CatRight); addi(s); }
 
-  // Get the length of an array. The parameter gives element size. For
-  // example, an array of six ints with an element size of 2 (eg. a
-  // double) has length 3.
+  // Get the length of an array. Converts the array index to an int
+  // (holding the length) on the stack.
   void getArrayLength() { cmd(BC.GetArrLen); }
 
   // Reverse an array in place

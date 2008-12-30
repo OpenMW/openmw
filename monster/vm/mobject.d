@@ -23,7 +23,7 @@
 
 module monster.vm.mobject;
 
-import monster.vm.vm;
+import monster.vm.thread;
 import monster.vm.error;
 import monster.vm.mclass;
 import monster.vm.arrays;
@@ -155,7 +155,7 @@ struct MonsterObject
    *                                                     *
    *******************************************************/
 
-  // Template versions first
+  // This is the work horse for all the set/get functions.
   T* getPtr(T)(char[] name)
   {
     // Find the variable
@@ -279,11 +279,11 @@ struct MonsterObject
 
   // Call a named function. The function is executed immediately, and
   // call() returns when the function is finished. The function is
-  // called virtually, so any sub-class function that overrides it in
-  // this object will take precedence.
+  // called virtually, so any child class function that overrides it
+  // will take precedence.
   void call(char[] name)
   {
-    cls.findFunction(name).call(this);
+    thread.topObj.cls.findFunction(name).call(this);
   }
 
   // Call a function non-virtually. In other words, ignore
@@ -344,12 +344,14 @@ struct MonsterObject
     MonsterObject *mo = null;
 
     if(index < ptree.length)
-      mo = ptree[index];
+      {
+        mo = ptree[index];
 
-    assert(mo !is this);
+        assert(mo !is this);
 
-    // It's only a match if the classes match
-    if(mo.cls !is toClass) mo = null;
+        // It's only a match if the classes match
+        if(mo.cls !is toClass) mo = null;
+      }
 
     // If no match was found, then the cast failed.
     if(mo is null)

@@ -24,6 +24,7 @@
 module monster.compiler.types;
 
 import monster.compiler.tokenizer;
+import monster.compiler.enums;
 import monster.compiler.scopes;
 import monster.compiler.expression;
 import monster.compiler.assembler;
@@ -32,6 +33,8 @@ import monster.compiler.block;
 import monster.compiler.functions;
 import monster.compiler.variables;
 import monster.compiler.states;
+import monster.compiler.structs;
+import monster.vm.arrays;
 import monster.vm.mclass;
 import monster.vm.error;
 
@@ -43,11 +46,18 @@ import std.string;
 
   Type (abstract)
   InternalType (abstract)
+  ReplacerType (abstract)
   NullType (null expression)
   BasicType (covers int, char, bool, float, void)
   ObjectType
   ArrayType
-  MetaType
+  StructType
+  EnumType
+  UserType (replacer for identifier-named types like structs and
+            classes)
+  TypeofType (replacer for typeof(x) when used as a type)
+  GenericType (var)
+  MetaType (type of type expressions, like writeln(int);)
 
  */
 class TypeException : Exception
@@ -77,10 +87,15 @@ abstract class Type : Block
   // tokens.)
   static bool canParseRem(ref TokenArray toks)
     {
-      // TODO: Parse typeof(exp) here. We have to do a hack here, as
-      // we have no hope of parsing every expression in here. Instead
-      // we require the first ( and then remove every token until the
-      // matching ), allowing matching () pairs on the inside.
+      if(isNext(toks, TT.Typeof))
+        {
+          reqNext(toks, TT.LeftParen);
+          Expression.identify(toks); // Possibly a bit wasteful...
+          reqNext(toks, TT.RightParen);
+          return true;
+        }
+
+      if(isNext(toks, TT.Var)) return true;
 
       if(!isNext(toks, TT.Identifier)) return false;
 
@@ -112,8 +127,9 @@ abstract class Type : Block
       // Find what kind of type this is and create an instance of the
       // corresponding class.
       if(BasicType.canParse(toks)) t = new BasicType();
-      else if(ObjectType.canParse(toks)) t = new ObjectType();
-      //else if(TypeofType.canParse(toks)) t = new TypeofType();
+      else if(UserType.canParse(toks)) t = new UserType();
+      else if(GenericType.canParse(toks)) t = new GenericType();
+      else if(TypeofType.canParse(toks)) t = new TypeofType();
       else fail("Cannot parse " ~ toks[0].str ~ " as a type", toks[0].loc);
 
       // Parse the actual tokens with our new and shiny object.
@@ -122,6 +138,9 @@ abstract class Type : Block
       // Add arrays here afterwards by wrapping the previous type in
       // an ArrayType.
       exps = VarDeclaration.getArray(toks, takeExpr);
+
+      if(t.isVar && exps.length)
+        fail("Cannot have arrays of var (yet)", t.loc);
 
       // Despite looking strange, this code is correct.
       foreach(e; exps)
@@ -140,6 +159,14 @@ abstract class Type : Block
   // The complete type name including specifiers, eg. "int[]".
   char[] name;
 
+  MetaType meta;
+  final MetaType getMeta()
+    {
+      if(meta is null)
+        meta = new MetaType(this);
+      return meta;
+    }
+
   // Used for easy checking
   bool isInt() { return false; }
   bool isUint() { return false; }
@@ -151,10 +178,15 @@ abstract class Type : Block
   bool isDouble() { return false; }
   bool isVoid() { return false; }
 
+  bool isVar() { return false; }
+
   bool isString() { return false; }
 
-  bool isObject() { return false; }
   bool isArray() { return arrays() != 0; }
+  bool isObject() { return false; }
+  bool isStruct() { return false; }
+
+  bool isReplacer() { return false; }
 
   bool isIntegral() { return isInt || isUint || isLong || isUlong; }
   bool isFloating() { return isFloat || isDouble; }
@@ -339,6 +371,9 @@ abstract class Type : Block
       assert(0, "doCastCTime not implemented for type " ~ toString);
     }
 
+  void parse(ref TokenArray toks) {assert(0, name);}
+  void resolve(Scope sc) {assert(0, name);}
+
   /* Cast two expressions to their common type, if any. Throw a
      TypeException exception if not possible. This exception should be
      caught elsewhere to give a more useful error message. Examples of
@@ -409,10 +444,8 @@ abstract class InternalType : Type
 {
  final:
   bool isLegal() { return false; }
-  int[] defaultInit() {assert(0);}
-  int getSize() { return 0; }
-  void parse(ref TokenArray toks) {assert(0);}
-  void resolve(Scope sc) {assert(0);}
+  int[] defaultInit() {assert(0, name);}
+  int getSize() {assert(0, name);}
 }
 
 // Handles the 'null' literal. This type is only used for
@@ -500,7 +533,6 @@ class BasicType : Type
     {
       Token t;
       if(!isNext(toks, TT.Identifier, t)) return false;
-
       return isBasic(t.str);
     }
 
@@ -509,8 +541,8 @@ class BasicType : Type
     {
       Token t;
 
-      if(!isNext(toks, TT.Identifier, t) || !isBasic(t.str))
-        assert(0, "Internal error in BasicType.parse()");
+      reqNext(toks, TT.Identifier, t);
+      assert(isBasic(t.str));
 
       // Get the name and the line from the token
       name = t.str;
@@ -730,19 +762,19 @@ class ObjectType : Type
 
  public:
 
-  this() {}
+  this(Token t)
+    {
+      // Get the name and the line from the token
+      name = t.str;
+      loc = t.loc;
+    }
+
   this(MonsterClass mc)
     {
       assert(mc !is null);
       name = mc.name.str;
       loc = mc.name.loc;
       clsIndex = mc.gIndex;
-    }
-
-  static bool canParse(TokenArray toks)
-    {
-      if(!isNext(toks, TT.Identifier)) return false;
-      return true;
     }
 
   MonsterClass getClass()
@@ -799,9 +831,6 @@ class ObjectType : Type
           assert(clsIndex !is tt.clsIndex);
           int cnum = tt.clsIndex;
 
-          // We have not decided what index to pass here yet. Think
-          // more about it when we implement full polymorphism.
-          assert(0, "not implemented");
           tasm.upcast(cnum);
           return;
         }
@@ -814,18 +843,6 @@ class ObjectType : Type
   Scope getMemberScope()
     {
       return getClass().sc;
-    }
-
-  void parse(ref TokenArray toks)
-    {
-      Token t;
-
-      if(!isNext(toks, TT.Identifier, t))
-        assert(0, "Internal error in ObjectType.parse()");
-
-      // Get the name and the line from the token
-      name = t.str;
-      loc = t.loc;
     }
 
   // This is called when the type is defined, and it can forward
@@ -843,6 +860,21 @@ class ArrayType : Type
 {
   // What type is this an array of?
   Type base;
+
+  static ArrayType str;
+
+  static ArrayType getString()
+    {
+      if(str is null)
+        str = new ArrayType(BasicType.getChar);
+      return str;
+    }
+
+  static ArrayType get(Type base)
+    {
+      // TODO: We can cache stuff here later
+      return new ArrayType(base);
+    }
 
   this(Type btype)
     {
@@ -869,81 +901,291 @@ class ArrayType : Type
       return base.isChar();
     }
 
-  void parse(ref TokenArray toks)
-    { assert(0, "array types aren't parsed"); }
-
   void resolve(Scope sc)
     {
       base.resolve(sc);
+
+      if(base.isReplacer())
+        base = base.getBase();
     }
 }
 
-// This type is given to type-names that are used as variables
-// (ie. they are gramatically parsed by VariableExpr.) It's only used
-// for expressions like int.max and p == int. Only basic types are
-// supported. Classes are handled in a separate type.
-class MetaType : InternalType
+class EnumType : Type
+{
+  // The scope contains the actual enum values
+  EnumScope sc;
+
+  this(EnumDeclaration ed)
+    {
+      name = ed.name.str;
+      loc = ed.name.loc;
+    }
+
+  int[] defaultInit() { return [0]; }
+  int getSize() { return 1; }
+
+  void resolve(Scope sc) {}
+
+  // can cast to int and to string, but not back
+
+  // Scope getMemberScope() { return sc; }
+  Scope getMemberScope()
+    { return GenericProperties.singleton; }
+}
+
+class StructType : Type
 {
  private:
-  static MetaType[char[]] store;
+  StructDeclaration sd;
 
-  BasicType base;
+  void setup()
+    {
+      if(!set)
+        sd.resolve(sc.getParent);
+      else
+        {
+          // We might get here if this function is being called
+          // recursively from sd.resolve. This only happens when the
+          // struct contains itself somehow. In that case, size will
+          // not have been set yet.
+          if(size == -1)
+            fail("Struct " ~ name ~ " indirectly contains itself", loc);
+        }
+
+      assert(set);
+      assert(size != -1);
+    }
 
  public:
 
-  // Get a basic type of the given name. This will not allocate a new
-  // instance if another instance already exists.
-  static MetaType get(char[] tn)
-    {
-      if(tn in store) return store[tn];
+  int size = -1;
+  StructScope sc; // Scope of the struct interior
+  int[] defInit;
+  bool set; // Have vars and defInit been set?
 
-      return new MetaType(tn);
+  // Member variables
+  Variable*[] vars;
+
+  this(StructDeclaration sdp)
+    {
+      sd = sdp;
+      name = sd.name.str;
+      loc = sd.name.loc;
     }
 
-  this(char[] baseType)
+ override:
+  // Calls validate for all member types
+  void validate()
     {
-      base = BasicType.get(baseType);
-      name = base.toString;
-      loc = base.loc;
-
-      store[name] = this;
+      foreach(v; vars)
+        v.type.validate();
     }
 
-  // Return the scope belonging to the base type. This makes int.max
-  // work just like i.max.
-  Scope getMemberScope() { return base.getMemberScope(); }
+  // Resolves member
+  void resolve(Scope sc) {}
 
-  Type getBase() { return base; }
+  bool isStruct() { return true; }
+
+  int getSize()
+    {
+      setup();
+      assert(size != -1);
+      return size;
+    }
+
+  int[] defaultInit()
+    {
+      setup();
+      assert(defInit.length == getSize);
+      return defInit;
+    }
+
+  Scope getMemberScope()
+    { return GenericProperties.singleton; }
+  // Scope getMemberScope() { return sc; }
+}
+
+/*
+// A type that mimics another after it is resolved. Used in cases
+// where we can't know the real type until the resolve phase.
+abstract class Doppelganger : Type
+{
+ private:
+  bool resolved;
+
+  Type realType;
+
+ public:
+ override:
+  int getSize()
+    {
+      assert(resolved);
+      return realType.getSize();
+    }
+}
+*/
+
+// A 'delayed lookup' type - can replace itself after resolve is
+// called.
+// OK - SCREW THIS. Make a doppelganger instead.
+abstract class ReplacerType : InternalType
+{
+ protected:
+  Type realType;
+
+ public:
+ override:
+  Type getBase() { assert(realType !is null); return realType; }
+  bool isReplacer() { return true; }
+}
+
+// Type names that consist of an identifier - classes, structs, enums,
+// etc. We can't know what type it is until we resolve it.
+class UserType : ReplacerType
+{
+ private:
+  Token id;
+
+ public:
+
+  static bool canParse(TokenArray toks)
+    {
+      if(!isNext(toks, TT.Identifier)) return false;
+      return true;
+    }
+
+  void parse(ref TokenArray toks)
+    {
+      reqNext(toks, TT.Identifier, id);
+
+      // Get the name and the line from the token
+      name = id.str~"(replacer)";
+      loc = id.loc;
+    }
+
+  void resolve(Scope sc)
+    {
+      realType = sc.findStruct(id.str);
+
+      if(realType is null)
+        // Not a struct. Maybe an enum?
+        realType = sc.findEnum(id.str);
+
+      if(realType is null)
+        // Default to class name if nothing else is found. We can't
+        // really check this here since it might be a forward
+        // reference. These are handled later on.
+        realType = new ObjectType(id);
+
+      realType.resolve(sc);
+
+      assert(realType !is this);
+      assert(!realType.isReplacer);
+    }
+}
+
+class TypeofType : ReplacerType
+{
+  static bool canParse(TokenArray toks)
+    { return isNext(toks, TT.Typeof); }
+
+  Expression exp;
+
+  void parse(ref TokenArray toks)
+    {
+      reqNext(toks, TT.Typeof, loc);
+      reqNext(toks, TT.LeftParen);
+      exp = Expression.identify(toks);
+      reqNext(toks, TT.RightParen);
+    }
+
+  void resolve(Scope sc)
+    {
+      // Resolve the expression in the context of the scope
+      exp.resolve(sc);
+      if(exp.type.isMeta)
+        fail("Cannot use typeof on a meta type", exp.loc);
+
+      realType = exp.type;
+    }
+}
+
+// The 'var' type - generic type. Currently just works like 'auto' in
+// D.
+class GenericType : InternalType
+{
+  this() { name = "var"; }
+
+  static bool canParse(TokenArray toks)
+    { return isNext(toks, TT.Var); }
+
+ override:
+  bool isVar() { return true; }
+
+  void parse(ref TokenArray toks)
+    {
+      reqNext(toks, TT.Var, loc);
+    }
+
+  void resolve(Scope sc) {}
+}
+
+// I never meta type I didn't like!
+class MetaType : InternalType
+{
+ protected:
+  Type base;
+  AIndex ai;
+
+ public:
+
+  static Type getBasic(char[] basic)
+    {
+      return BasicType.get(basic).getMeta();
+    }
+
+  this(Type b)
+    {
+      base = b;
+      name = "(meta)"~base.toString;
+      ai = 0;
+    }
+
   bool isMeta() { return true; }
 
   bool canCastTo(Type type)
     {
-      return false;// type.isString;
+      return type.isString;
     }
 
   void evalCastTo(Type to)
     {
       assert(to.isString);
-      // TODO: Fix static strings soon
-      assert(0, "not supported yet");
+
+      // Create an array index and store it for reuse later.
+      if(ai == 0)
+        {
+          auto arf = monster.vm.arrays.arrays.create(base.toString);
+          arf.flags.set(AFlags.Const);
+          ai = arf.getIndex();
+        }
+      assert(ai != 0);
+
+      tasm.push(cast(uint)ai);
     }
+
+  // Return the scope belonging to the base type. This makes int.max
+  // work just like i.max. Differentiation between static and
+  // non-static members is handled in the expression resolves.
+  Scope getMemberScope() { return base.getMemberScope(); }
+  Type getBase() { return base; }
 }
 
 /*
   Types we might add later:
 
-  ClassType - on the form 'class MyClass', variable may refer to
-              MyClass or to any subclass of MyClass.
-
-  ListType - lists on the form { a; b; c } or similar
-
-  AAType - associative array (hash map)
-
-  TableType - something similar to Lua tables
-
-  StructType - structs
-
-  EnumType - enums and flags
+  TableType - a combination of lists, structures, hashmaps and
+              arrays. Loosely based on Lua tables, but not the same.
 
   FunctionType - pointer to a function with a given header. Since all
                  Monster functions are object members (methods), all
