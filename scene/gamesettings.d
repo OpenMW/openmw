@@ -10,10 +10,10 @@ MonsterObject *gmstObj;
 
 void loadGameSettings()
 {
-  // Load the GameSettings Monster class, and create an instance.
-  MonsterClass mc = new MonsterClass("GameSettings");
-  MonsterObject *mo = mc.createObject;
-  gmstObj = mo;
+  // Load the GameSettings Monster class, and get the singleton
+  // instance
+  MonsterClass mc = MonsterClass.find("GMST");
+  gmstObj = mc.getSing();
 
   foreach(a, b; gameSettings.names)
     {
@@ -38,13 +38,13 @@ void loadGameSettings()
           continue;
         }
 
-      if(b.type == VarType.Int) mo.setInt(name, b.i);
-      else if(b.type == VarType.Float) mo.setFloat(name, b.f);
+      if(b.type == VarType.Int) gmstObj.setInt(name, b.i);
+      else if(b.type == VarType.Float) gmstObj.setFloat(name, b.f);
       // TODO: At some point we will probably translate strings into
       // UTF32 at load time, so string8 will not be needed here.
-      else if(b.type == VarType.String) mo.setString8(name, b.str);
+      else if(b.type == VarType.String) gmstObj.setString8(name, b.str);
     }
 
   // Call the test function
-  mo.call("test");
+  gmstObj.call("test");
 }

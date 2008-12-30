@@ -635,9 +635,9 @@ class FuncDeclaration : Statement
     {
       // Validate all types (make sure there are no dangling forward
       // references)
-      fn.type.validate();
+      fn.type.validate(fn.name.loc);
       foreach(p; fn.params)
-        p.type.validate();
+        p.type.validate(fn.name.loc);
 
       if(code !is null)
 	code.resolve(sc);

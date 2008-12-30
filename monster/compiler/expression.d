@@ -518,7 +518,13 @@ class NewExpression : Expression
         {
           // We need to find the index associated with this class, and
           // pass it to the assembler.
-          clsInd = (cast(ObjectType)type).getClass().getIndex();
+          auto mc = (cast(ObjectType)type).getClass();
+          assert(mc !is null);
+          clsInd = mc.getIndex();
+
+          // Don't create instances of modules!
+          if(mc.isModule)
+            fail("Cannot create instances of modules", loc);
         }
       else if(type.isArray)
         {

@@ -478,7 +478,8 @@ final class MonsterClass
   // Get the singleton object
   MonsterObject* getSing()
     {
-      assert(isSingleton());
+      if(!isSingleton)
+        fail("Class is not a singleton: " ~ name.str);
       requireCompile();
       assert(singObj !is null);
       return singObj;
@@ -491,6 +492,9 @@ final class MonsterClass
 
       if(isAbstract)
         fail("Cannot create objects from abstract class " ~ name.str);
+
+      if(isModule && singObj !is null)
+        fail("Cannot create instances of module " ~ name.str);
 
       // Create the thread
       CodeThread *trd = threads.getNew();
@@ -587,6 +591,9 @@ final class MonsterClass
   void deleteObject(MonsterObject *obj)
     {
       assert(obj.cls is this);
+
+      if(isModule)
+        fail("Cannot delete instances of module " ~ name.str);
 
       // Get the head object
       obj = obj.thread.topObj;
@@ -1049,11 +1056,8 @@ final class MonsterClass
       if(!isNext(tokens, TT.Identifier, name))
 	fail("Class statement expected identifier", tokens);
 
-      if(isModule)
-        {
-          assert(isSingleton);
-          fail("Modules are not implement yet.", name.loc);
-        }
+      // Module implies singleton
+      assert(isSingleton || !isModule);
 
       if(isSingleton && isAbstract)
         fail("Modules and singletons cannot be abstract", name.loc);

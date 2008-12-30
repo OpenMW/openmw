@@ -375,7 +375,7 @@ class VarDeclaration : Block
   void compile()
     {
       // Validate the type
-      var.type.validate();
+      var.type.validate(loc);
 
       setLine();
 
@@ -813,7 +813,7 @@ class VarDeclStatement : Statement
   void validate()
     {
       assert(vars.length >= 1);
-      vars[0].var.type.validate();
+      vars[0].var.type.validate(loc);
     }
 
   // Insert local variable(s) on the stack.

@@ -231,7 +231,7 @@ abstract class Type : Block
 
   // Validate that this type actually exists. This is used to make
   // sure that all forward references are resolved.
-  void validate() {}
+  void validate(Floc loc) {}
 
   // Check if this type is equivalent to the given D type
   final bool isDType(TypeInfo ti)
@@ -777,7 +777,7 @@ class ObjectType : Type
       clsIndex = mc.gIndex;
     }
 
-  MonsterClass getClass()
+  MonsterClass getClass(Floc loc = Floc.init)
     {
       assert(clsIndex != 0);
 
@@ -789,8 +789,15 @@ class ObjectType : Type
     }
 
  override:
-  // getClass does all the error checking we need
-  void validate() { getClass(); }
+  void validate(Floc loc)
+    {
+      // getClass does most of the error checking we need
+      auto mc = getClass(loc);
+
+      // check that we're not using a module as a type
+      if(mc.isModule)
+        fail("Cannot use module " ~ name ~ " as a type", loc);
+    }
 
   int getSize() { return 1; }
   bool isObject() { return true; }
@@ -847,8 +854,8 @@ class ObjectType : Type
 
   // This is called when the type is defined, and it can forward
   // reference classes that do not exist yet. The classes must exist
-  // by the time getClass() is called though, usually when class body
-  // (not just the header) is being resolved.
+  // by the time getClass() is called though, usually when the class
+  // body (not just the header) is being resolved.
   void resolve(Scope sc)
     {
       clsIndex = global.getForwardIndex(name);
@@ -884,7 +891,7 @@ class ArrayType : Type
     }
 
   override:
-  void validate() { assert(base !is null); base.validate(); }
+  void validate(Floc loc) { assert(base !is null); base.validate(loc); }
   int arrays() { return base.arrays() + 1; }
   int getSize() { return 1; }
   int[] defaultInit() { return makeData!(int)(0); }
@@ -975,10 +982,10 @@ class StructType : Type
 
  override:
   // Calls validate for all member types
-  void validate()
+  void validate(Floc loc)
     {
       foreach(v; vars)
-        v.type.validate();
+        v.type.validate(loc);
     }
 
   // Resolves member

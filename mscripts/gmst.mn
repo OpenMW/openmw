@@ -24,7 +24,7 @@
 // Contains all the game settings (GMST) variables of Morrowind,
 // Tribunal and Bloodmoon. Based on "Morrowind Scripting for Dummies"
 // (v9).
-singleton GameSettings : Object;
+singleton GMST : Object;
 
 // Most of the comments are copied from MSfD. A bit of cleanup is
 // still needed.
@@ -2090,7 +2090,7 @@ char[] sMagicCreature05ID;
 test()
 {
   // Print out some random variables. If you want these not to get
-  // lost in a see of output from OGRE, run openmw with the -n switch
+  // lost in a sea of output from OGRE, run openmw with the -n switch
   // to disable rendering.
   print();
   print("Some random GMST variables:");
