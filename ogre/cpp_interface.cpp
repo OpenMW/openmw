@@ -701,7 +701,7 @@ extern "C" SceneNode* ogre_createNode(
 
 /* Code currently not in use
 
-// We need this later for animated meshes. Boy will this be a mess.
+// We need this later for animated meshes.
 extern "C" void* ogre_setupSkeleton(char* name)
 {
   SkeletonPtr skel = SkeletonManager::getSingleton().create(
