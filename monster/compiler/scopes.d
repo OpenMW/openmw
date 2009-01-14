@@ -52,6 +52,111 @@ void initScope()
   global = new PackageScope(null, "global");
 }
 
+// List all identifier types
+enum LType
+  {
+    None,
+    Class,
+    Type,
+    Variable,
+    Function,
+    State,
+    StateLabel,
+    LoopLabel,
+    Property,
+    Import,
+  }
+
+const char[][] LTypeName =
+  [
+   LType.None: "",
+   LType.Class: "class",
+   LType.Type: "type",
+   LType.Variable: "variable",
+   LType.Function: "function",
+   LType.State: "state",
+   LType.StateLabel: "state label",
+   LType.LoopLabel: "loop label",
+   LType.Property: "property",
+   ];
+
+struct ScopeLookup
+{
+  Token name;
+  LType ltype;
+
+  Scope sc;
+  Type type;
+  union
+  {
+    MonsterClass mc;
+    Variable* var;
+    Function* func;
+    State* state;
+    StateLabel *slabel;
+    ImportHolder imphold;
+
+    void *ptr;
+    Object ob;
+  }
+
+  bool isClass() { return ltype == LType.Class; }
+  bool isType() { return ltype == LType.Type; }
+  bool isVar() { return ltype == LType.Variable; }
+  bool isFunc() { return ltype == LType.Function; }
+  bool isState() { return ltype == LType.State; }
+  bool isNone() { return ltype == LType.None; }
+  bool isImport() { return ltype == LType.Import; }
+  bool isProperty()
+  {
+    bool ret = (ltype == LType.Property);
+    assert( ret == (cast(PropertyScope)sc !is null) );
+    return ret;
+  }
+
+  // For properties only
+  Type getPropType(Type owner)
+  {
+    assert(type is null);
+    assert(owner !is null);
+    assert(name.str != "");
+    
+    type = owner;
+    return ps().getType(name.str, owner);
+  }
+  private PropertyScope ps()
+  {
+    assert(isProperty);
+    assert(type !is null);
+    return cast(PropertyScope)sc;
+  }
+  bool isPropLValue() { return ps().isLValue(name.str, type); }
+  bool isPropStatic() { return ps().isStatic(name.str, type); }
+  void getPropValue() { ps().getValue(name.str, type); }
+  void setPropValue() { ps().setValue(name.str, type); }
+
+  static ScopeLookup opCall(Token nm, LType lt, Type tp, Scope sc, Object ob)
+  {
+    auto sl = ScopeLookup(nm, lt, tp, sc);
+    sl.ob = ob;
+    return sl;
+  }
+
+  static ScopeLookup opCall(Token nm, LType lt, Type tp, Scope sc, void*p = null)
+  {
+    assert(nm.str != "");
+
+    ScopeLookup sl;
+    sl.name = nm;
+    sl.ltype = lt;
+    sl.type = tp;
+    sl.sc = sc;
+    sl.ptr = p;
+    return sl;
+  }
+}
+
+
 // TODO: Write here which of these should be kept around at runtime,
 // and which of them can be discarded after compilation.
 
@@ -65,16 +170,26 @@ abstract class Scope
   // global scope.
   Scope parent;
 
-  // Properties assigned to this scope (if any).
-  PropertyScope nextProp;
-
   // Verify that an identifier is not declared in this scope. If the
   // identifier is found, give a duplicate identifier compiler
   // error. Recurses through parent scopes.
-  void clearId(Token name)
+  final void clearId(Token name)
     {
-      assert(!isRoot());
-      parent.clearId(name);
+      // Lookup checks all parent scopes so we only have to call it
+      // once.
+      auto sl = lookup(name);
+      assert(sl.name.str == name.str);
+
+      if(!sl.isNone)
+        {
+          if(sl.isProperty)
+            fail(name.str ~ " is a property and cannot be redeclared",
+                 name.loc);
+
+          fail(format("%s is already declared (at %s) as a %s",
+                      name.str, name.loc, LTypeName[sl.ltype]),
+               name.loc);
+        }
     }
 
   // Made protected since it is so easy to confuse with isStateCode(),
@@ -87,6 +202,8 @@ abstract class Scope
   // mostly used for debugging.
   char[] scopeName;
 
+  ImportHolder importList[];
+
  public:
 
   this(Scope last, char[] name)
@@ -95,8 +212,11 @@ abstract class Scope
     parent = last;
 
     assert(last !is this, "scope cannot be it's own parent");
-
     assert(name != "");
+
+    // Copy the import list from our parent
+    if(!isRoot)
+      importList = parent.importList;
   }
 
   // Is this the root scope?
@@ -119,12 +239,6 @@ abstract class Scope
 
   // Is this scope allowed to be a root scope (without parent?)
   bool allowRoot() { return false; }
-
-  // Get a property from this scope
-  void getProperty(Token name, Type ownerType, ref Property p)
-    {
-      assert(0);
-    }
 
   // Get the function definition belonging to this scope.
   Function *getFunction()
@@ -164,76 +278,73 @@ abstract class Scope
   LabelStatement getBreak(char[] name = "") { return null; }
   LabelStatement getContinue(char[] name = "") { return null; }
 
-  // Does this scope have a property with the given name?
-  bool hasProperty(Token name)
+  final ScopeLookup lookupName(char[] name)
+    { return lookup(Token(name, Floc.init)); }
+
+  ScopeLookup lookup(Token name)
     {
-      assert(!isProperty);
-      return false;
+      if(isRoot()) return ScopeLookup(name, LType.None, null, null);
+      else return parent.lookup(name);
     }
 
-  final bool findProperty(Token name, Type ownerType, ref Property result)
+  // Look up an identifier, and check imported scopes as well.
+  ScopeLookup lookupImport(Token name)
     {
-      if(hasProperty(name))
+      auto l = lookup(name);
+      if(!l.isNone) return l;
+
+      // Nuttin' was found, try the imports
+      bool found = false;
+      auto old = l;
+      foreach(imp; importList)
         {
-          getProperty(name, ownerType, result);
-          return true;
+          l = imp.lookup(name);
+
+          // Only accept types, classes, variables and functions
+          if(l.isType || l.isClass || l.isVar || l.isFunc)
+            {
+              // Duplicate matches aren't allowed
+              if(found && l.sc !is old.sc)
+                fail(format(
+  "%s matches both %s.%s (at %s) and %s.%s (at %s)", name.str,
+  old.imphold.mc.name.str, old.name.str, old.name.loc,
+  imp.mc.name.str, l.name.str, l.name.loc),
+                     name.loc);
+
+              // First match
+              found = true;
+              old = l;
+              old.imphold = imp;
+            }
         }
 
-      if(nextProp !is null)
-        return nextProp.findProperty(name, ownerType, result);
+      if(!found)
+        return ScopeLookup(name, LType.None, null, null);
 
-      // No property in this scope. Check the parent.
-      if(!isRoot) return parent.findProperty(name, ownerType, result);
-
-      // No parent, property not found.
-      return false;
+      // Tell the caller that this is an import. We override the
+      // lookup struct, but it doesn't matter since the lookup will
+      // have to be performed again anyway.
+      old.ltype = LType.Import;
+      assert(old.imphold !is null);
+      return old;
     }
 
-  Variable* findVar(char[] name)
-    {
-      if(isRoot()) return null;
-      return parent.findVar(name);
-    }
+  // Add an import to this scope
+  void registerImport(ImportHolder s) { importList ~= s; }
 
-  State* findState(char[] name)
-    {
-      if(isRoot()) return null;
-      return parent.findState(name);
-    }
-
-  Function* findFunc(char[] name)
-    {
-      if(isRoot()) return null;
-      return parent.findFunc(name);
-    }
-
-  StructType findStruct(char[] name)
-    {
-      if(isRoot()) return null;
-      return parent.findStruct(name);
-    }
-
-  EnumType findEnum(char[] name)
-    {
-      if(isRoot()) return null;
-      return parent.findEnum(name);
-    }
-
-  void insertLabel(StateLabel *lb)
-    {
-      assert(!isRoot);
-      parent.insertLabel(lb);
-    }
-
-  void insertVar(Variable* dec) { assert(0); }
+  // More user-friendly version for API-defined
+  // imports. Eg. global.registerImport(myclass) -> makes myclass
+  // available in ALL classes.
+  void registerImport(MonsterClass mc)
+    { registerImport(new ImportHolder(mc)); }
 
   // Used for summing up stack level. Redeclared in StackScope.
   int getTotLocals() { return 0; }
   int getLocals() { assert(0); }
 
-  // These must be overridden in their respective scopes
-  int addNewDataVar(int varSize) { assert(0); }
-  int addNewLocalVar(int varSize) { assert(0); }
+  // This must be overridden in all scopes that allow variable
+  // declarations.
+  int addNewVar(int varSize) { assert(0); }
 
  final:
 
@@ -292,21 +403,6 @@ final class StateScope : Scope
       super(last, st.name.str);
     }
 
-  override:
-  void clearId(Token name)
-    {
-      assert(name.str != "");
-
-      // Check against labels. We are not allowed to shadow labels at
-      // any point.
-      StateLabel *lb;
-      if(st.labels.inList(name.str, lb))
-        fail(format("Identifier '%s' conflicts with label on line %s", name.str,
-                    lb.name.loc), name.loc);
-
-      super.clearId(name);
-    }  
-
   // Insert a label, check for name collisions.
   void insertLabel(StateLabel *lb)
     {
@@ -314,6 +410,19 @@ final class StateScope : Scope
       clearId(lb.name);
 
       st.labels[lb.name.str] = lb;
+    }
+
+  override:
+  ScopeLookup lookup(Token name)
+    {
+      assert(name.str != "");
+
+      // Check against state labels
+      StateLabel *lb;
+      if(st.labels.inList(name.str, lb))
+        return ScopeLookup(lb.name, LType.StateLabel, null, this, lb);
+
+      return super.lookup(name);
     }
 
   State* getState() { return st; }
@@ -414,13 +523,6 @@ final class PackageScope : Scope
   bool csInList(char[] name, ref MonsterClass cb)
     {
       return ciInList(name, cb) && cb.name.str == name;
-      //fail(format("Class name mismatch: wanted %s but found %s",
-      //            name, cb.name.str));
-    }
-  bool csInList(char[] name)
-    {
-      MonsterClass mc;
-      return csInList(name, mc);
     }
 
   // Get the class. It must exist and the case must match. getClass
@@ -448,18 +550,21 @@ final class PackageScope : Scope
       return mc;
     }
 
-  override void clearId(Token name)
+  override ScopeLookup lookup(Token name)
     {
-      assert(name.str != "");
-
       // Type names can never be overwritten, so we check findClass
       // and the built-in types. We might move the builtin type check
       // to a "global" scope at some point.
-      if(BasicType.isBasic(name.str) || csInList(name.str))
-        fail("Identifier '"~ name.str~ "' is a type and cannot be redeclared",
-             name.loc);
+      if(BasicType.isBasic(name.str))
+        return ScopeLookup(name, LType.Type, BasicType.get(name.str), this);
 
+      MonsterClass mc;
+      if(csInList(name.str, mc))
+        return ScopeLookup(mc.name, LType.Class, null, this, mc);
+
+      // No parents to check
       assert(isRoot());
+      return super.lookup(name);
     }
 
   // Find a parsed class of the given name. Looks in the list of
@@ -549,32 +654,6 @@ abstract class VarScope : Scope
   this(Scope last, char[] name)
     { super(last, name); }
 
- override:
-
-  // Find a variable, returns the declaration.
-  Variable* findVar(char[] name)
-  {
-    Variable* vd;
-
-    if(variables.inList(name, vd))
-      return vd;
-
-    return super.findVar(name);
-  }
-
-  void clearId(Token name)
-    {
-      assert(name.str != "");
-
-      Variable *vd;
-      if(variables.inList(name.str, vd))
-        fail(format("Identifier '%s' already declared on line %s (as a variable)",
-                    name.str, vd.name.loc),
-             name.loc);
-
-      super.clearId(name);
-    }  
-
   // Insert a variable, checks if it already exists.
   void insertVar(Variable* dec)
   {
@@ -585,6 +664,19 @@ abstract class VarScope : Scope
 
     variables[dec.name.str] = dec;
   }
+
+ override:
+
+  ScopeLookup lookup(Token name)
+    {
+      assert(name.str != "");
+
+      Variable *vd;
+      if(variables.inList(name.str, vd))
+        return ScopeLookup(vd.name, LType.Variable, vd.type, this, vd);
+
+      return super.lookup(name);
+    }  
 }
 
 // A scope that can contain functions and variables
@@ -603,15 +695,14 @@ class FVScope : VarScope
     if(isClass)
       {
         // Are we overriding a function?
-        auto old = findFunc(fd.name.str);
-
-        // If there is no existing function, call clearId
-        if(old is null)
-          clearId(fd.name);
-        else
+        auto look = lookup(fd.name);
+        if(look.isFunc)
           // We're overriding. Let fd know, and let it handle the
           // details when it resolves.
-          fd.overrides = old;
+          fd.overrides = look.func;
+        else
+          // No matching function. Check that the name is available.
+          clearId(fd.name);
       }
     else
       // Non-class functions can never override anything
@@ -624,33 +715,18 @@ class FVScope : VarScope
   }
 
   override:
-  void clearId(Token name)
+  ScopeLookup lookup(Token name)
     {
       assert(name.str != "");
 
       Function* fd;
 
       if(functions.inList(name.str, fd))
-        {
-          fail(format("Identifier '%s' already declared on line %s (as a function)",
-                      name.str, fd.name.loc),
-               name.loc);
-        }
+        return ScopeLookup(fd.name, LType.Function, fd.type, this, fd);
 
       // Let VarScope handle variables
-      super.clearId(name);
+      return super.lookup(name);
     }
-
-  Function* findFunc(char[] name)
-  {
-    Function* fd;
-
-    if(functions.inList(name, fd))
-      return fd;
-
-    assert(!isRoot());
-    return parent.findFunc(name);
-  }
 }
 
 // Can contain types, functions and variables. 'Types' means structs,
@@ -683,62 +759,33 @@ class TFVScope : FVScope
   }
 
   override:
-  void clearId(Token name)
+  ScopeLookup lookup(Token name)
     {
       assert(name.str != "");
 
-      StructType fd;
+      StructType sd;
       EnumType ed;
+      Type tp;
 
-      if(structs.inList(name.str, fd))
-        {
-          fail(format("Identifier '%s' already declared on line %s (as a struct)",
-                      name.str, fd.loc),
-               name.loc);
-        }
+      if(structs.inList(name.str, sd)) tp = sd;
+      else if(enums.inList(name.str, ed)) tp = ed;
 
-      if(enums.inList(name.str, ed))
-        {
-          fail(format("Identifier '%s' already declared on line %s (as an enum)",
-                      name.str, ed.loc),
-               name.loc);
-        }
+      if(tp !is null)
+        return ScopeLookup(Token(tp.name, tp.loc), LType.Type, tp, this);
 
-      // Let VarScope handle variables
-      super.clearId(name);
+      // Pass it on to the parent
+      return super.lookup(name);
     }
-
-  StructType findStruct(char[] name)
-  {
-    StructType fd;
-
-    if(structs.inList(name, fd))
-      return fd;
-
-    assert(!isRoot());
-    return parent.findStruct(name);
-  }
-
-  EnumType findEnum(char[] name)
-  {
-    EnumType ed;
-
-    if(enums.inList(name, ed))
-      return ed;
-
-    assert(!isRoot());
-    return parent.findEnum(name);
-  }
 }
 
 // Lookup scope for enums. For simplicity we use the property system
 // to handle enum members.
 final class EnumScope : SimplePropertyScope
 {
-  this() { super("EnumScope"); }
+  this() { super("EnumScope", GenericProperties.singleton); }
 
-  int index; // Index in a global enum index list. Do whatever you do
-             // with global class indices here.
+  int index; // Index in a global enum index list. Make a static list
+             // here or something.
 
   void setup()
     {
@@ -772,7 +819,7 @@ final class StructScope : VarScope
 
   bool isStruct() { return true; }
 
-  int addNewLocalVar(int varSize)
+  int addNewVar(int varSize)
     { return (offset+=varSize) - varSize; }
 
   // Define it only here since we don't need it anywhere else.
@@ -788,7 +835,6 @@ final class ClassScope : TFVScope
   MonsterClass cls;
 
   HashTable!(char[], State*) states;
-
   int dataSize;    // Data segment size for this class
 
  public:
@@ -797,16 +843,13 @@ final class ClassScope : TFVScope
     {
       cls = cl;
       super(last, cls.name.str);
-
-      // Connect a class property scope with this scope.
-      nextProp = ClassProperties.singleton;
     }
 
   bool isClass() { return true; }
   MonsterClass getClass() { return cls; }
 
   // Add a variable to the data segment, returns the offset.
-  int addNewDataVar(int varSize)
+  int addNewVar(int varSize)
   {
     int tmp = dataSize;
 
@@ -815,19 +858,22 @@ final class ClassScope : TFVScope
     return tmp;
   }
 
-  override void clearId(Token name)
+  override ScopeLookup lookup(Token name)
     {
       assert(name.str != "");
 
       State* sd;
 
       if(states.inList(name.str, sd))
-        fail(format("Identifier '%s' already declared on line %s (as a state)",
-                    name.str, sd.name.loc),
-             name.loc);
+        return ScopeLookup(sd.name, LType.State, null, this, sd);
+
+      // Check the property list
+      auto sl = ClassProperties.singleton.lookup(name);
+      if(sl.isProperty)
+        return sl;
 
       // Let the parent handle everything else
-      super.clearId(name);
+      return super.lookup(name);
     }  
 
   // Get total data segment size
@@ -840,17 +886,6 @@ final class ClassScope : TFVScope
 
     st.index = states.length;
     states[st.name.str] = st;
-  }
-
-  State* findState(char[] name)
-  {
-    State* st;
-
-    if(states.inList(name, st))
-      return st;
-
-    assert(!isRoot());
-    return parent.findState(name);
   }
 }
 
@@ -885,7 +920,7 @@ abstract class StackScope : VarScope
   // Allocate a local variable on the stack, and return the offset.
   // The parameter gives the size of the requested variable in ints (4
   // bytes.)
-  int addNewLocalVar(int varSize)
+  int addNewVar(int varSize)
   {
     assert(expStack == 0);
 
@@ -935,8 +970,6 @@ class FuncScope : StackScope
     }
 
  override:
-  void insertLabel(StateLabel *lb)
-    { assert(0, "cannot insert labels in function scopes"); }
 
   bool isFunc() { return true; }
   Function *getFunction() { return fnc; }
@@ -947,7 +980,10 @@ class CodeScope : StackScope
   this(Scope last, CodeBlock cb)
     {
       char[] name = "codeblock";
-      if(cb.isState) name = "stateblock";
+
+      assert(cb !is null);
+      if(cb.isState)
+        name = "stateblock";
 
       super(last, name);
     }
@@ -980,11 +1016,11 @@ class ArrayScope : StackScope
 // scope are defined in properties.d
 abstract class PropertyScope : Scope
 {
-  this(char[] n) { super(null, n); }
+  this(char[] n, PropertyScope last = null) { super(last, n); }
 
   // Override these in base classes.
 
-  Type getPropType(char[] name, Type oType);
+  Type getType(char[] name, Type oType);
   void getValue(char[] name, Type oType);
   bool hasProperty(char[] name);
   bool isStatic(char[] name, Type oType);
@@ -996,51 +1032,17 @@ abstract class PropertyScope : Scope
  override:
  final:
   bool isProperty() { return true; }
-
-  // No need for collision checks
-  void clearId(Token name)
-    { assert(isRoot()); }
-
   bool allowRoot() { return true; }
 
-  void getProperty(Token name, Type ownerType, ref Property p)
+  ScopeLookup lookup(Token name)
     {
-      assert(hasProperty(name));
+      // Does this scope contain the property?
+      if(hasProperty(name.str))
+        return ScopeLookup(name, LType.Property, null, this);
 
-      p.scp = this;
-      p.name = name.str;
-      p.oType = ownerType;
+      // Check the parent scope
+      return super.lookup(name);
     }
-
-  // Check if we have a given property.
-  bool hasProperty(Token name) { return hasProperty(name.str); }
-}
-
-// A reference to a property, used in VariableExpr.
-struct Property
-{
-  PropertyScope scp;
-  char[] name; // Name of the property
-  Type oType; // Type of the owner
-
-  // Get the type of this property
-  Type getType() { return scp.getPropType(name, oType); }
-
-  // Push the value (of type getType) onto the stack. Assumes the
-  // owner (of type oType) has already been pushed onto the stack,
-  // unless the property is static.
-  void getValue() { scp.getValue(name, oType); }
-
-  // Pops a value (of type getType) off the stack and sets the
-  // property. Can only be called for lvalues.
-  void setValue() { assert(isLValue); scp.setValue(name, oType); }
-
-  // Can we write to this property?
-  bool isLValue() { return scp.isLValue(name, oType); }
-
-  // Is this property static? If it is, we do not have to push the
-  // owner onto the stack before using the property.
-  bool isStatic() { return scp.isStatic(name, oType); }
 }
 
 // Scope inside of loops. Handles break and continue, loop labels, and
@@ -1108,21 +1110,21 @@ class LoopScope : CodeScope
       continueLabel = new LabelStatement(getTotLocals());
     }
 
-  override void clearId(Token name)
+  override ScopeLookup lookup(Token name)
     {
       assert(name.str != "");
 
-      // Check for loop labels as well
+      // Check for loop labels
       if(loopName.str == name.str)
-        fail(format("Identifier %s is a loop label on line %s and cannot be redefined.",
-                    name.str, loopName.loc),
-             name.loc);
+        return ScopeLookup(loopName, LType.LoopLabel, null, this);
 
-      super.clearId(name);
+      return super.lookup(name);
     }  
 
   // Get the break or continue label for the given named loop, or the
-  // innermost loop if name is empty or omitted.
+  // innermost loop if name is empty or omitted. TODO: Might fold
+  // these into lookup as well. For non-named labels we could use
+  // __closest_loop__ or something like that internally.
   LabelStatement getBreak(char[] name = "")
   {
     if(name == "" || name == loopName.str)

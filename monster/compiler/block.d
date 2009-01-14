@@ -79,7 +79,7 @@ abstract class Block
   static void reqNext(ref TokenArray toks, TT type, out Token tok)
     {
       if(!isNext(toks, type, tok))
-         fail("Expected " ~ tokenList[type], toks);
+        fail("Expected " ~ tokenList[type], toks);
     }
 
   static void reqNext(ref TokenArray toks, TT type, out Floc loc)

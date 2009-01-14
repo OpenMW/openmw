@@ -1,0 +1,12 @@
+/*
+  NOTE: This file is not used - it is here just for reference. The
+  real module is defined internally in io.d.
+ */
+
+module io;
+
+native write(char[][] args...);
+native writeln(char[][] args...);
+native writes(char[][] args...);
+native writelns(char[][] args...);
+native print(char[][] args...);

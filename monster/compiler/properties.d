@@ -48,12 +48,8 @@ class NumericProperties(T) : SimplePropertyScope
 {
   this()
     {
-      super(T.stringof ~ "Properties");
-
-      // Argh, this fails of course because we're trying to push a
-      // long value as an int. We can use a static if here to check
-      // the size, and use different instructions. Eg push8 that takes
-      // long and double.
+      super(T.stringof ~ "Properties",
+            GenericProperties.singleton);
 
       // Static properties of all numeric types
       static if(T.sizeof == 4)
@@ -67,8 +63,6 @@ class NumericProperties(T) : SimplePropertyScope
           inserts("max", T.stringof, { tasm.push8(T.max); });
         }
       else static assert(0);
-
-      nextProp = GenericProperties.singleton;
     }
 }
 
@@ -136,7 +130,7 @@ class ArrayProperties: SimplePropertyScope
 
   this()
     {
-      super("ArrayProperties");
+      super("ArrayProperties", GenericProperties.singleton);
 
       insert("length", "int",
           { tasm.getArrayLength(); },
@@ -146,8 +140,6 @@ class ArrayProperties: SimplePropertyScope
       insert("sort", "owner", { assert(0, "sort not implemented"); });
       insert("const", "owner", { tasm.makeArrayConst(); });
       insert("isConst", "bool", { tasm.isArrayConst(); });
-
-      nextProp = GenericProperties.singleton;
     }
 }
 
@@ -158,22 +150,10 @@ class ClassProperties : SimplePropertyScope
 
   this()
     {
-      super("ClassProperties");
+      super("ClassProperties",
+            GenericProperties.singleton);
 
       insert("clone", "owner", { tasm.cloneObj(); });
-
-      // For testing purposes. Makes 'singleton' an alias for the
-      // first variable in the data segment. This might actually not
-      // be far from how the end result would work - the singleton
-      // would just be a hidden variable, but in the variable list
-      // belonging to the class. We don't have to handle it using the
-      // property system at all, really, we only need to allow the
-      // special name 'singleton' as a variable.
-      /*
-      insert("singleton", "int",
-              { tasm.pushClass(0, 1); },
-              { tasm.pushClassAddr(0); tasm.movRet(); });
-      */
 
       // We should move handling of states here. This will mean
       // removing StateStatement and making states a propert type. We
@@ -191,8 +171,6 @@ class ClassProperties : SimplePropertyScope
       // differentiate between near and far properties too. Think more
       // about it.
       //insert("state", "int", { tasm.push(6); });
-
-      nextProp = GenericProperties.singleton;
     }
 }
 
@@ -238,7 +216,7 @@ class GenericProperties : SimplePropertyScope
 
 abstract class SimplePropertyScope : PropertyScope
 {
-  this(char[] n) { super(n); }
+  this(char[] n, PropertyScope ps = null) { super(n, ps); }
 
   private SP[char[]] propList;
 
@@ -277,7 +255,7 @@ abstract class SimplePropertyScope : PropertyScope
 
   // Return the stored type. If it is null, return the owner type
   // instead.
-  Type getPropType(char[] name, Type oType)
+  Type getType(char[] name, Type oType)
     {
       assert(hasProperty(name));
       Type tp = propList[name].type;

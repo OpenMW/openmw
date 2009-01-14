@@ -66,6 +66,103 @@ class ExprStatement : Statement
   void compile() { exp.evalPop(); }
 }
 
+/* Handles:
+   import type1, type2, ...; // module scope
+   import exp1, exp2, ...;   // local scope (not implemented yet)
+
+   Also handles:
+   with(exp1, etc) statement;
+   which is equivalent to:
+   {
+     import exp1, etc;
+     statement;
+   }
+*/
+class ImportStatement : Statement
+{
+  Type typeList[];
+
+  MonsterClass mc;
+
+  bool isLocal;
+  Statement stm;
+
+  this(bool local = false) { isLocal = local; }
+
+  // TODO: Things like this should be completely unnecessary - we'll
+  // fix a simpler and more concise parser-system later.
+  static bool canParse(TokenArray toks)
+    { return
+        isNext(toks, TT.Import) ||
+        isNext(toks, TT.With);
+    }
+
+  void parse(ref TokenArray toks)
+    {
+      void getList()
+        {
+          typeList = [Type.identify(toks)];
+          while(isNext(toks, TT.Comma))
+            typeList ~= Type.identify(toks);
+        }
+
+      if(isNext(toks, TT.Import, loc))
+      {
+        // form: import ImportList;
+        getList();
+        reqNext(toks, TT.Semicolon);
+      }
+      else if(isNext(toks, TT.With, loc))
+      {
+        // form: with(ImportList) statement
+        if(!isLocal)
+          fail("with(...) not allowed in class scopes", loc);
+
+        reqNext(toks, TT.LeftParen);
+        getList();
+        reqNext(toks, TT.RightParen);
+        stm = CodeBlock.identify(toks, false);
+      }
+      else assert(0);
+    }
+
+  void resolve(Scope sc)
+    {
+      // If a statement is present (ie. if this is a with-statement),
+      // wrap the imports in a code scope so they become temporary.
+      if(stm !is null)
+        sc = new CodeScope(sc, "with-scope");
+
+      // Add the imports to the scope
+      foreach(type; typeList)
+        {
+          type.resolve(sc);
+
+          if(type.isReplacer)
+            type = type.getBase();
+
+          if(!type.isObject)
+            fail("Can only import from classes", type.loc);
+
+          auto t = cast(ObjectType)type;
+          assert(t !is null);
+          mc = t.getClass(type.loc);
+
+          sc.registerImport(new ImportHolder(mc));
+        }
+
+      // Resolve the statement if present
+      if(stm !is null)
+        stm.resolve(sc);
+    }
+
+  void compile()
+    {
+      if(stm !is null)
+        stm.compile();
+    }
+}
+
 // Destination for a goto statement, on the form 'label:'. This
 // statement is actually a bit complicated, since it must handle jumps
 // occuring both above and below the label. Seeing as the assembler
@@ -157,7 +254,9 @@ class LabelStatement : Statement
 
       // Do the magic. Just tell the scope that we exist and let it
       // handle the rest.
-      sc.insertLabel(lb);
+      auto scp = sc.getState().sc;
+      assert(scp !is null);
+      scp.insertLabel(lb);
 
       stacklevel = sc.getTotLocals();
       assert(stacklevel == 0);
@@ -750,7 +849,7 @@ class ForeachStatement : Statement
                      index.var.type.toString, index.var.name.loc);
             }
           // If not, allocate a stack value for it anyway.
-          else sc.addNewLocalVar(1);
+          else sc.addNewVar(1);
 
           // Check that the array is in fact an array
           arrayExp.resolve(sc);
@@ -773,7 +872,7 @@ class ForeachStatement : Statement
       // a local variable. This is not the same as the index variable
       // above - the iterator index is an internal variable used by
       // the system for storing the iterator state.
-      sc.addNewLocalVar(1);
+      sc.addNewVar(1);
 
       // This defines the stack level of the loop internals. Break and
       // continue labels are set up so that they return to this level
@@ -1126,9 +1225,11 @@ class StateStatement : Statement, LabelUser
       // Check the state name.
       if(stateName.type == TT.Identifier)
 	{
-	  stt = sc.findState(stateName.str);
-	  if(stt is null)
+          auto sl = sc.lookup(stateName);
+	  if(!sl.isState)
 	    fail("Undefined state " ~ stateName.str, stateName.loc);
+
+	  stt = sl.state;
 
           // If a label is specified, tell the state that we are
           // asking for a label. The function will set label for us,
@@ -1159,7 +1260,7 @@ class StateStatement : Statement, LabelUser
           return;
         }
 
-      int cindex = stt.sc.getClass().getIndex();
+      int cindex = stt.owner.getTreeIndex();
 
       if(label is null)
         tasm.setState(stt.index, -1, cindex);
@@ -1387,6 +1488,7 @@ class CodeBlock : Statement
       else if(GotoStatement.canParse(toks)) b = new GotoStatement;
       else if(ContinueBreakStatement.canParse(toks)) b = new ContinueBreakStatement;
       else if(ForeachStatement.canParse(toks)) b = new ForeachStatement;
+      else if(ImportStatement.canParse(toks)) b = new ImportStatement(true);
       // switch / select
       // case
       // assert ?

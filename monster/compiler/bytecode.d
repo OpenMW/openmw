@@ -30,14 +30,19 @@ enum BC
     Exit = 1,           // Exit function.
 
     Call,               // Call function in this object. Takes a class
-                        // index and a function index, both ints
+                        // tree index and a function index, both ints.
 
     CallFar,            // Call function in another object. Takes a
-                        // class index and a function index. The
+                        // class index tree and a function index. The
                         // object must be pushed on the stack.
 
-    CallIdle,           // Calls an idle function (in this object.)
-                        // Takes a class index and a function index.
+    CallIdle,           // Calls an idle function in this object.
+                        // Takes a class tree index and a function
+                        // index.
+
+    CallIdleFar,        // Calls an idle function in another
+                        // object. Also takes an object index from the
+                        // stack.
 
     Return,             // Takes a parameter nr (int). Equivalent to:
                         // POPN nr (remove nr values of the stack)
@@ -95,11 +100,11 @@ enum BC
                         // object). Parameter is an int offset.
 
     PushParentVar,      // Push value in data segment of parent
-                        // object. int class index, int offset
+                        // object. int class tree index, int offset
 
     PushFarClassVar,    // Push value from the data segment in another
                         // object. The object reference is already on
-                        // the stack. int class index, int offset
+                        // the stack. int class tree index, int offset
 
     PushFarClassMulti,  // Pushes multiple ints from the data
                         // segment. Takes the variable size (int) as
@@ -243,27 +248,8 @@ enum BC
     CastUL2D,           // ulong to double
     CastF2D,            // float to double
 
-    CastI2S,            // int to char[]. Takes one byte giving the
-                        // int type: 1=int,2=uint,3=long,4=ulong
-    CastF2S,            // float to char[]. Takes one byte giving the
-                        // float size (1 or 2).
-    CastB2S,            // bool to char[]
-    CastO2S,            // an object to char[]
-
-    // The "Cast Type Array to String" instructions below are used to
-    // convert arrays of the form [1,2,3] and [[1,2,3],[4,5]] to a
-    // string. They all take a byte as parameter, specifying the array
-    // depth. They are NOT IMPLEMENTED YET!
-
-    CastIA2S,           // Cast int arrays to char[]
-    CastFA2S,           // Cast float arrays to char[]
-    CastBA2S,           // Cast bool arrays to char[]
-    CastCA2S,           // Cast char arrays to char[]
-    CastOA2S,           // Cast object arrays to char[]
-
-    Upcast,             // Implicitly cast an object to a parent class
-                        // type. Takes an int class index.
-
+    CastT2S,            // cast any type to string. Takes the type
+                        // index (int) as a parameter
 
     FetchElem,          // Get an element from an array. Pops the
                         // index, then the array reference, then
@@ -272,13 +258,6 @@ enum BC
 
     GetArrLen,          // Get the length of an array. Pops the array,
                         // pushes the length.
-
-    MakeArray,          // Takes an offset (int), the element size
-                        // (int) and the total raw length (number of
-                        // elements * elem size).  Reads data from the
-                        // data segment at offset and creates an array
-                        // of the given length (times the element
-                        // size). Pushes the array index.
 
     PopToArray,         // Takes a raw length n (int) and an element
                         // size (int). Creates an array from the last
@@ -433,8 +412,8 @@ enum PT
 
     DataOffsCls = 4, // Variable is in this object, but in another
                      // class. The class MUST be a parent class of the
-                     // current object. A class index follows this
-                     // pointer on the stack.
+                     // current object. A class tree index follows
+                     // this pointer on the stack.
 
     FarDataOffs = 5, // Another class, another object. The index is a
                      // data offset. Pop the class index off the
@@ -616,17 +595,7 @@ char[][] bcToString =
  BC.CastL2D: "CastL2D",
  BC.CastUL2D: "CastUL2D",
  BC.CastF2D: "CastF2D",
- BC.CastI2S: "CastI2S",
- BC.CastF2S: "CastF2S",
- BC.CastB2S: "CastB2S",
- BC.CastO2S: "CastO2S",
- BC.CastIA2S: "CastIA2S",
- BC.CastFA2S: "CastFA2S",
- BC.CastBA2S: "CastBA2S",
- BC.CastCA2S: "CastCA2S",
- BC.CastOA2S: "CastOA2S",
- BC.Upcast: "Upcast",
- BC.MakeArray: "MakeArray",
+ BC.CastT2S: "CastT2S",
  BC.PopToArray: "PopToArray",
  BC.NewArray: "NewArray",
  BC.CopyArray: "CopyArray",

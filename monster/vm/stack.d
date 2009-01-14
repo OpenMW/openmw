@@ -35,13 +35,13 @@ import monster.vm.mclass;
 import monster.vm.arrays;
 import monster.vm.error;
 
-// The stack. One nice attribue of our cooperative multithreading
-// scheme is that we only need one single stack frame. All functions
-// and code is required to "finish up" before returning or giving
-// control to other code. When we switch to "real" threads later, we
-// will need one stack per system thread, but many virtual threads
-// will still share each stack.
+// Stack
 CodeStack stack;
+
+void initStack()
+{
+  stack.init();
+}
 
 // A simple stack frame. All data are in chunks of 4 bytes
 struct CodeStack
@@ -204,13 +204,6 @@ struct CodeStack
 
   MonsterObject *popObject()
   { return getMObject(cast(MIndex)popInt()); }
-
-  // Push an object, and make sure it is cast to the right type
-  void pushCast(MonsterObject *obj, MonsterClass cls)
-  { pushObject(obj.Cast(cls)); }
-
-  void pushCast(MonsterObject *obj, char[] name)
-  { pushCast(obj, global.getClass(name)); }
 
   // Push arrays of objects. TODO: These do memory allocation, and I'm
   // not sure that belongs here. I will look into it later.

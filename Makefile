@@ -44,7 +44,8 @@ src := $(src) $(wildcard mscripts/*.d)
 src := $(src) monster/monster.d \
 $(wildcard monster/vm/*.d) \
 $(wildcard monster/compiler/*.d) \
-$(wildcard monster/util/*.d)
+$(wildcard monster/util/*.d) \
+$(wildcard monster/modules/*.d)
 obj := $(src:%.d=objs/%.o)
 
 # The NIF object files for niftool and bsatool are put in a separate

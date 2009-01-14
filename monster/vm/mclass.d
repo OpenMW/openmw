@@ -34,9 +34,7 @@ import monster.compiler.structs;
 import monster.compiler.block;
 import monster.compiler.enums;
 
-import monster.vm.thread;
 import monster.vm.codestream;
-import monster.vm.scheduler;
 import monster.vm.idlefunction;
 import monster.vm.fstack;
 import monster.vm.arrays;
@@ -45,38 +43,27 @@ import monster.vm.vm;
 import monster.vm.mobject;
 
 import monster.util.flags;
-import monster.util.freelist;
 import monster.util.string;
+import monster.util.list;
+import monster.util.freelist;
 
 import std.string;
 import std.stdio;
 import std.file;
 import std.stream;
 
-// TODO: Needed to fix DMD/GDC template problems. Remove if this bug
-// is fixed.
-import monster.util.list;
-alias _lstNode!(CodeThread) _tmp1;
-alias __FreeNode!(CodeThread) _tmp2;
-
-alias _lstNode!(MonsterObject) _tmp3;
-alias __FreeNode!(MonsterObject) _tmp4;
-
 typedef void *MClass; // Pointer to C++ equivalent of MonsterClass.
 
 typedef int CIndex;
 
-alias FreeList!(CodeThread) ThreadList;
-
-// Parameter to the constructor. Decides how the class is created.
+// Parameter to the constructor. Decides how the class is
+// created. TODO: This system will be removed again, because we'll
+// stop using constructors.
 enum MC
   {
-    None = 0,    // Initial value
-    File = 1,    // Load class from file (default)
-    NoCase = 2,  // Load class from file, case insensitive name match
-    String = 3,  // Load class from string
-    Stream = 4,  // Load class from stream
-    Manual = 5,  // Manually create class
+    File,    // Load class from file (default)
+    NoCase,  // Load class from file, case insensitive name match
+    String,  // Load class from string
   }
 
 enum CFlags
@@ -116,8 +103,11 @@ final class MonsterClass
     {
       return
         Block.isNext(tokens, TT.Class) ||
+        Block.isNext(tokens, TT.Singleton) ||
         Block.isNext(tokens, TT.Module);
     }
+
+  static uint getTotalObjects() { return allObjects.length; }
 
  final:
 
@@ -126,11 +116,6 @@ final class MonsterClass
    *     Variables                                       *
    *                                                     *
    *******************************************************/
-
-  alias FreeList!(MonsterObject) ObjectList;
-
-  // TODO: Put as many of these as possible in the private
-  // section. Ie. move all of them and see what errors you get.
 
   // Index within the parent tree. This might become a list at some
   // point.
@@ -146,7 +131,14 @@ final class MonsterClass
   Type classType; // Type for class references to this class (not
                   // implemented yet)
 
+ private:
+  // List of objects of this class. Includes objects of all subclasses
+  // as well.
+  PointerList objects;
+
   Flags!(CFlags) flags;
+
+ public:
 
   bool isParsed() { return flags.has(CFlags.Parsed); }
   bool isScoped() { return flags.has(CFlags.Scoped); }
@@ -183,19 +175,12 @@ final class MonsterClass
    *                                                     *
    *******************************************************/
 
-  // By default we leave the loadType at None. This leaves us open to
-  // define the class later. Calling eg. setName will define the class
-  // as a manual class. This isn't supported yet though.
   this() {}
 
   this(MC type, char[] name1, char[] name2 = "", bool usePath = true)
     {
-      loadType = type;
-
       if(type == MC.File || type == MC.NoCase)
         {
-          loadType = MC.File;
-
           if(type == MC.NoCase)
             loadCI(name1, name2, usePath);
           else
@@ -211,25 +196,18 @@ final class MonsterClass
           return;
         }
 
-      if(type == MC.Manual)
-        {
-          assert(name2 == "", "MC.Manual only takes one parameter");
-          setName(name1);
-          return;
-        }
-
       assert(0, "encountered unknown MC type");
     }
 
   this(MC type, Stream str, char[] nam = "")
     {
-      assert(type == MC.Stream);
-      loadType = type;
-      loadStream(str, nam);
     }
 
+  this(ref TokenArray toks, char[] nam="")
+    { loadTokens(toks, nam); }
+
   this(Stream str, char[] nam="")
-    { this(MC.Stream, str, nam); }
+    { loadStream(str, nam); }
 
   this(char[] nam1, char[] nam2 = "", bool usePath=true)
     { this(MC.File, nam1, nam2, usePath); }
@@ -264,6 +242,9 @@ final class MonsterClass
   // for error messages.
   void load(Stream str, char[] fname="(stream)")
     { loadStream(str, fname); }
+
+  void loadTokens(ref TokenArray toks, char[] name)
+    { parse(toks, name); }
 
   void loadStream(Stream str, char[] fname="(stream)", int bom = -1)
     {
@@ -326,10 +307,12 @@ final class MonsterClass
     requireScope();
 
     // Get the function from the scope
-    auto fn = sc.findFunc(name);
+    auto ln = sc.lookupName(name);
 
-    if(fn is null)
+    if(!ln.isFunc)
       fail("Function '" ~ name ~ "' not found.");
+
+    auto fn = ln.func;
 
     if(!fn.isNormal && !fn.isNative)
       {
@@ -388,10 +371,12 @@ final class MonsterClass
     {
       requireScope();
 
-      Variable *vb = sc.findVar(name);
+      auto ln = sc.lookupName(name);
 
-      if(vb is null)
+      if(!ln.isVar)
         fail("Variable " ~ name ~ " not found");
+
+      Variable *vb = ln.var;
 
       assert(vb.vtype == VarType.Class);
 
@@ -409,10 +394,11 @@ final class MonsterClass
   {
     requireScope();
 
-    State *st = sc.findState(name);
-
-    if(st is null)
+    auto ln = sc.lookupName(name);
+    if(!ln.isState)
       fail("State " ~ name ~ " not found");
+
+    State *st = ln.state;
 
     return st;
   }
@@ -467,13 +453,25 @@ final class MonsterClass
 
   // Loop through all objects of this type
   int opApply(int delegate(ref MonsterObject v) del)
-    { return objects.opApply(del); }
+    {
+      int dg(ref void *vp)
+        {
+          auto mop = cast(MonsterObject*)vp;
+          return del(*mop);
+        }
+      return objects.opApply(&dg);
+    }
 
-  // Get the first object in the 'objects' list. Used for
-  // iterator-like looping through objects, together with getNext in
-  // MonsterObject. Returns null if no objects exist.
+  // Get the first object in the list for this class
   MonsterObject* getFirst()
-    { return objects.getHead(); }
+    { return cast(MonsterObject*)objects.getHead().value; }
+
+  MonsterObject* getNext(MonsterObject *ob)
+    {
+      auto iter = (*getListPtr(ob, treeIndex)).getNext();
+      if(iter is null) return null;
+      return cast(MonsterObject*)iter.value;
+    }
 
   // Get the singleton object
   MonsterObject* getSing()
@@ -485,64 +483,21 @@ final class MonsterClass
       return singObj;
     }
 
-  // Create a new object, and assign a thread to it.
   MonsterObject* createObject()
+    { return createClone(null); }
+
+  // Get the whole allocated buffer belonging to this object
+  private int[] getDataBlock(MonsterObject *obj)
     {
-      requireCompile();
+      assert(obj !is null);
+      assert(obj.cls is this);
+      return (cast(int*)obj.data.ptr)[0..totalData.length];
+    }
 
-      if(isAbstract)
-        fail("Cannot create objects from abstract class " ~ name.str);
-
-      if(isModule && singObj !is null)
-        fail("Cannot create instances of module " ~ name.str);
-
-      // Create the thread
-      CodeThread *trd = threads.getNew();
-
-      // Create an object tree equivalent of the class tree
-      MonsterObject* otree[];
-      otree.length = tree.length;
-
-      assert(otree.length > 0);
-
-      // Create one buffer big enough for all the data segments here,
-      // and let getObject slice it. TODO: This can be optimized even
-      // further, by using a freelist or other preallocation, and by
-      // precalculating the result and the slicing. Not important at
-      // the moment.
-      int[] totalData = new int[totalDataSize];
-
-      // Fill the list with objects, and assign the thread.
-      foreach(i, ref obj; otree)
-        {
-          obj = tree[i].getObject(totalData);
-          obj.thread = trd;
-        }
-
-      // Make sure we used the entire buffer
-      assert(totalData.length == 0);
-
-      // Pick out the top object
-      MonsterObject* top = otree[$-1];
-
-      assert(tree[$-1] is this);
-      assert(top !is null);
-
-      // Initialize the thread
-      trd.initialize(top);
-
-      // For each object we assign a slice of the object list. TODO:
-      // In the future it's likely that these lists might have
-      // different contents from each other (eg. in the case of
-      // multiple inheritance), and simple slices will not be good
-      // enough. This is the main reason why we give each object its
-      // own tree, instead of using one shared list in the thread.
-      foreach(i, ref obj; otree)
-        obj.tree = otree[0..i+1];
-
-      assert(top.tree == otree);
-
-      return top;
+  private vpIter getListPtr(MonsterObject *obj, int i)
+    {
+      auto ep = cast(ExtraData*) &obj.data[i][$-MonsterObject.exSize];
+      return &ep.node;
     }
 
   // Create a new object based on an existing object
@@ -550,41 +505,97 @@ final class MonsterClass
     {
       requireCompile();
 
-      assert(source.tree.length == tree.length);
-      assert(source.thread.topObj == source,
-             "createClone can only clone the topmost object");
+      if(isModule && singObj !is null)
+        fail("Cannot create instances of module " ~ name.str);
 
-      // Create a new thread
-      CodeThread *trd = threads.getNew();
+      MonsterObject *obj = allObjects.getNew();
 
-      // Create one buffer big enough for all the data segments here,
-      // and let getClone slice it.
-      int[] totalData = new int[totalDataSize];
+      obj.state = null;
+      obj.cls = this;
 
-      // Loop through the objects in the source tree, and clone each
-      // of them
-      MonsterObject* otree[] = source.tree.dup;
-      foreach(i, ref obj; otree)
+      // Allocate the object data segment from a freelist
+      int[] odata = Buffers.getInt(totalData.length);
+
+      // Copy the data, either from the class (in case of new objects)
+      // or from the source (when cloning.)
+      if(source !is null)
         {
-          obj = obj.cls.getClone(obj, totalData);
-          obj.tree = otree[0..i+1];
-          obj.thread = trd;
+          assert(!isAbstract);
+          assert(source.cls is this);
+
+          assert(source.data.length == tree.length);
+
+          // Copy data from the object
+          odata[] = getDataBlock(source);
+        }
+      else
+        {
+          if(isAbstract)
+            fail("Cannot create objects from abstract class " ~ name.str);
+
+          // Copy init values from the class
+          odata[] = totalData[];
         }
 
-      // Make sure we used the entire buffer
-      assert(totalData.length == 0);
+      // Use this to get subslices of the data segment
+      int[] slice = odata;
+      int[] get(int ints)
+        {
+          assert(ints <= slice.length);
+          int[] res = slice[0..ints];
+          slice = slice[ints..$];
+          return res;
+        }
 
-      // Pick out the top object
-      MonsterObject* top = otree[$-1];
-      assert(top !is null);
+      // The beginning of the block is used for the int data[][]
+      // array.
+      obj.data = cast(int[][]) get(iasize*tree.length);
 
-      // Initialize the thread
-      trd.initialize(top);
+      // Set up the a slice for the data segment of each class
+      foreach(i, c; tree)
+        {
+          // Just get the slice - the actual data is already set up.
+          obj.data[i] = get(c.data.length + MonsterObject.exSize);
 
-      // Set the same state
-      trd.setState(source.thread.getState(), null);
+          // Insert ourselves into the per-class list. We've already
+          // allocated size for a node, we just have to add it to the
+          // list.
+          auto node = getListPtr(obj, i);
+          node.value = obj; // Store the object pointer
+          c.objects.insertNode(node);
+        }
 
-      return top;
+      // At this point we should have used up the entire slice
+      assert(slice.length == 0);
+
+      // Call constructors
+      foreach(c; tree)
+        {
+          // Custom native constructor
+          if(c.constType != FuncType.Native)
+            {
+              fstack.pushNConst(obj);
+              if(c.constType == FuncType.NativeDDel)
+                c.dg_const();
+              else if(c.constType == FuncType.NativeDFunc)
+                c.fn_const();
+              else if(c.constType == FuncType.NativeCFunc)
+                c.c_const();
+              fstack.pop();
+            }
+
+          // TODO: Call script-constructor here
+        }
+
+      // Set the same state as the source
+      if(source !is null)
+        obj.setState(source.state, null);
+
+      // Make sure that getDataBlock works
+      assert(getDataBlock(obj).ptr == odata.ptr &&
+             getDataBlock(obj).length == odata.length);
+
+      return obj;
     }
 
   // Free an object and its thread
@@ -595,18 +606,28 @@ final class MonsterClass
       if(isModule)
         fail("Cannot delete instances of module " ~ name.str);
 
-      // Get the head object
-      obj = obj.thread.topObj;
-
       // Shut down any active code in the thread
-      obj.thread.setState(null, null);
+      obj.clearState();
 
-      // Destruct the objects in reverse order
-      foreach_reverse(ob; obj.thread.topObj.tree)
-        ob.cls.returnObject(ob);
+      // clearState should also clear the thread
+      assert(obj.sthread is null);
 
-      // Put the thread back into the free list
-      threads.remove(obj.thread);
+      // This effectively marks the object as dead
+      obj.cls = null;
+
+      foreach_reverse(i, c; tree)
+        {
+          // TODO: Call destructors here
+
+          // Remove from class list
+          c.objects.removeNode(getListPtr(obj,i));
+        }
+
+      // Return it to the freelist
+      allObjects.remove(obj);
+
+      // Return the data segment
+      Buffers.free(getDataBlock(obj));
     }
 
 
@@ -615,23 +636,6 @@ final class MonsterClass
    *     Misc. functions                                 *
    *                                                     *
    *******************************************************/
-
-  /* For Manual classes. These are just ideas, not implemented yet
-  void addNative(char[] name, dg_callback dg) {}
-  void addNative(char[] name, fn_callback fn) {}
-
-  // Not for manual classes, but intended for reloading a changed
-  // file. It will replace the current class in the scope with a new
-  // one - and all new objects created will be of the new type
-  // (requires some work on vm.d and scope.d to get this to work). Old
-  // objects keep the old class. An alternative is to convert the old
-  // objects to the new class in some way, if possible.
-  void reload() {}
-  */
-
-  // Will set the name of the class. Can only be called on manual
-  // classes, and only once. Not implemented yet.
-  void setName(char[] name) {assert(0);}
 
   // Check if this class is a child of cls.
   bool childOf(MonsterClass cls)
@@ -651,15 +655,36 @@ final class MonsterClass
   bool parentOf(MonsterObject *obj)
     { return obj.cls.childOf(this); }
 
+  // Get the tree-index of a given parent class
+  int upcast(MonsterClass mc)
+    {
+      requireScope();
+
+      int ind = mc.treeIndex;
+      if(ind < tree.length && tree[ind] is mc)
+        return ind;
+
+      fail("Cannot upcast " ~ toString ~ " to " ~ mc.toString);
+    }
+
+  // Get the given class from a tree index
+  MonsterClass upcast(int ind)
+    {
+      requireScope();
+
+      if(ind < tree.length) return tree[ind];
+
+      fail("Cannot upcast " ~toString ~ " to index " ~ .toString(ind));
+    }
+
   // Get the global index of this class
   CIndex getIndex() { requireScope(); return gIndex; }
   int getTreeIndex() { requireScope(); return treeIndex; }
   char[] getName() { assert(name.str != ""); return name.str; }
   char[] toString() { return getName(); }
-
+  uint numObjects() { return objects.length; }
 
  private:
-
 
   /*******************************************************
    *                                                     *
@@ -687,18 +712,13 @@ final class MonsterClass
   // overrided functions have been replaced by their successors.
   Function*[][] virtuals;
 
-  // The freelists used for allocation of objects and threads.
-  ObjectList objects;
-  ThreadList threads;
-
   int[] data; // Contains the initial object data segment
   int[] sdata; // Static data segment
 
-  // Size of the data segment
-  uint dataSize;
-
-  // Total for this class + all base classes.
-  uint totalDataSize;
+  // The total data segment that's assigned to each object. It
+  // includes the data segment of all parent objects and some
+  // additional internal data.
+  int[] totalData;
 
   // Direct parents of this class
   MonsterClass parents[];
@@ -710,9 +730,7 @@ final class MonsterClass
   StateDeclaration[] statedecs;
   StructDeclaration[] structdecs;
   EnumDeclaration[] enumdecs;
-
-  // Current stage of the loading process
-  MC loadType = MC.None;
+  ImportStatement[] imports;
 
   // Native constructor type. Changed when the actual constructor is
   // set.
@@ -740,7 +758,7 @@ final class MonsterClass
   int[] getDataSegment()
     {
       assert(sc !is null && sc.isClass(), "Class does not have a class scope");
-      assert(dataSize == sc.getDataSize);
+      uint dataSize = sc.getDataSize;
       int[] data = new int[dataSize];
       int totSize = 0;
 
@@ -757,107 +775,9 @@ final class MonsterClass
         }
       // Make sure the total size of the variables match the total size
       // requested by variables through addNewDataVar.
-      assert(totSize == sc.getDataSize, "Data size mismatch in scope");
+      assert(totSize == dataSize, "Data size mismatch in scope");
 
       return data;
-    }
-
-  // Get an object from this class (but do not assign a thread to it)
-  MonsterObject *getObject(ref int[] dataBuf)
-    {
-      requireCompile();
-
-      MonsterObject *obj = objects.getNew();
-
-      // Set the class
-      obj.cls = this;
-
-      // TODO: Better memory management here. I have been thinking
-      // about a general freelist manager, that works with object
-      // sizes rather than with templates. That would work with
-      // objects of any size, and could also be used directly from C /
-      // C++. If we have one for every size we might end up with a
-      // whole lot freelists though. Maybe we can pool the sizes, for
-      // example use one for 16 bytes, one for 64, 128, 256, 1k, 4k,
-      // etc. We will have to make the system and do some statistics
-      // to see what sizes are actually used. The entire structure can
-      // reside inside it's own region.
-
-      // Copy the data segment into the buffer
-      assert(data.length == dataSize);
-      assert(dataBuf.length >= dataSize);
-      obj.data = dataBuf[0..dataSize];
-      obj.data[] = data[];
-      dataBuf = dataBuf[dataSize..$];
-
-      // Point to the static data segment
-      obj.sdata = sdata;
-      obj.extra = null;
-
-      // Call the custom native constructor
-      if(constType != FuncType.Native)
-        {
-          fstack.pushNConst(obj);
-          if(constType == FuncType.NativeDDel)
-            dg_const();
-          else if(constType == FuncType.NativeDFunc)
-            fn_const();
-          else if(constType == FuncType.NativeCFunc)
-            c_const();
-          fstack.pop();
-        }
-
-      return obj;
-    }
-
-  // Clone an existing object
-  MonsterObject *getClone(MonsterObject *source, ref int[] dataBuf)
-    {
-      assert(source !is null);
-      assert(source.cls is this);
-      assert(source.data.length == data.length);
-      assert(source.sdata.ptr is sdata.ptr);
-
-      requireCompile();
-
-      MonsterObject *obj = objects.getNew();
-
-      // Set the class
-      obj.cls = this;
-
-      // Copy the data segment from the source
-      assert(data.length == dataSize);
-      assert(dataBuf.length >= dataSize);
-      assert(dataSize == source.data.length);
-      obj.data = dataBuf[0..dataSize];
-      obj.data[] = source.data[];
-      dataBuf = dataBuf[dataSize..$];
-
-      // Point to the static data segment
-      obj.sdata = sdata;
-      obj.extra = null;
-
-      // Call the custom native constructor
-      if(constType != FuncType.Native)
-        {
-          fstack.pushNConst(obj);
-          if(constType == FuncType.NativeDDel)
-            dg_const();
-          else if(constType == FuncType.NativeDFunc)
-            fn_const();
-          else if(constType == FuncType.NativeCFunc)
-            c_const();
-          fstack.pop();
-        }
-
-      return obj;
-    }
-
-  // Delete an object belonging to this class
-  void returnObject(MonsterObject *obj)
-    {
-      // Put it back into the freelist
-      objects.remove(obj);
     }
 
   // Load file based on file name, class name, or both. The order of
@@ -956,9 +876,10 @@ final class MonsterClass
     requireScope();
 
     // Look the function up in the scope
-    auto fn = sc.findFunc(name);
+    auto ln = sc.lookupName(name);
+    auto fn = ln.func;
 
-    if(fn is null)
+    if(!ln.isFunc)
       fail("Cannot bind to '" ~ name ~ "': no such function");
 
     if(ft == FuncType.Idle)
@@ -988,8 +909,6 @@ final class MonsterClass
   // parse them, and store it in the appropriate list;
   void store(ref TokenArray toks)
     {
-      // canParse() is not ment as a complete syntax test, only to be
-      // enough to identify which Block parser to apply.
       if(FuncDeclaration.canParse(toks))
 	{
 	  auto fd = new FuncDeclaration;
@@ -1020,17 +939,28 @@ final class MonsterClass
           sd.parse(toks);
           enumdecs ~= sd;
         }
+      else if(ImportStatement.canParse(toks))
+        {
+          auto sd = new ImportStatement;
+          sd.parse(toks);
+          imports ~= sd;
+        }
       else
         fail("Illegal type or declaration", toks);
     }
 
   // Converts a stream to tokens and parses it.
   void parse(Stream str, char[] fname, int bom)
+    {
+      assert(str !is null);
+      TokenArray tokens = tokenizeStream(fname, str, bom);
+      parse(tokens, fname);
+    }
+
+  // Parses a list of tokens
+  void parse(ref TokenArray tokens, char[] fname)
     { 
       assert(!isParsed(), "parse() called on a parsed class " ~ name.str);
-      assert(str !is null);
-
-      TokenArray tokens = tokenizeStream(fname, str, bom);
 
       alias Block.isNext isNext;
 
@@ -1178,13 +1108,19 @@ final class MonsterClass
       objType = new ObjectType(this);
       classType = objType.getMeta();
 
-      // Insert custom types first
+      // Insert custom types first. This will never refer to other
+      // identifiers.
       foreach(dec; structdecs)
         dec.insertType(sc);
       foreach(dec; enumdecs)
         dec.insertType(sc);
 
-      // Then resolve the headers.
+      // Resolve imports next. May refer to custom types, but no other
+      // ids.
+      foreach(dec; imports)
+        dec.resolve(sc);
+
+      // Then resolve the type headers.
       foreach(dec; structdecs)
         dec.resolve(sc);
       foreach(dec; enumdecs)
@@ -1203,9 +1139,7 @@ final class MonsterClass
       foreach(dec; statedecs)
 	sc.insertState(dec.st);
 
-      // Resolve function headers. Here too, the init values will have
-      // to be moved to the body. We still need the parameter and
-      // return types though.
+      // Resolve function headers.
       foreach(func; funcdecs)
 	func.resolve(sc);
 
@@ -1272,16 +1206,6 @@ final class MonsterClass
             }
         }
 
-      // Set the data segment size and the total data size for all
-      // base classes.
-      dataSize = sc.getDataSize();
-
-      totalDataSize = 0;
-      foreach(t; tree)
-        totalDataSize += t.dataSize;
-
-      assert(totalDataSize >= dataSize);
-
       flags.unset(CFlags.InScope);
     }
 
@@ -1314,6 +1238,10 @@ final class MonsterClass
       flags.set(CFlags.Resolved);
     }
 
+  alias int[] ia;
+  // These are platform dependent:
+  static const iasize = ia.sizeof / int.sizeof;
+
   void compileBody()
     {
       assert(!isCompiled, getName() ~ " is already compiled");
@@ -1321,14 +1249,57 @@ final class MonsterClass
       // Resolve the class body if it's not already done
       if(!isResolved) resolveBody();
 
+      // Require that all parent classes are compiled before us
+      foreach(mc; tree[0..$-1])
+        mc.requireCompile();
+
       // Generate data segment and byte code for functions and
       // states. The result is stored in the respective objects.
       foreach(f; funcdecs) f.compile();
       foreach(s; statedecs) s.compile();
 
-      // Set the data segment. TODO: Separate static data from
-      // variables.
+      // Set the data segment for this class.
       data = getDataSegment();
+
+      // Calculate the total data size we need to allocate for each
+      // object
+      uint tsize = 0;
+      foreach(c; tree)
+        {
+          tsize += c.data.length; // Data segment size
+          tsize += MonsterObject.exSize; // Extra data per object
+          tsize += iasize; // The size of our entry in the data[]
+                           // table
+        }
+
+      // Allocate the buffer
+      totalData = new int[tsize];
+
+      // Use this to get subslices of the data segment
+      int[] slice = totalData;
+      int[] get(int ints)
+        {
+          assert(ints <= slice.length);
+          int[] res = slice[0..ints];
+          slice = slice[ints..$];
+          return res;
+        }
+
+      // Skip the data[] list
+      get(iasize*tree.length);
+
+      // Assign the data segment values
+      foreach(c; tree)
+        {
+          int[] d = get(c.data.length);
+          d[] = c.data[];
+
+          // Skip the extra data
+          get(MonsterObject.exSize);
+        }
+
+      // At this point we should have used up the entire slice
+      assert(slice.length == 0);
 
       flags.set(CFlags.Compiled);
 

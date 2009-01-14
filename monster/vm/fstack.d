@@ -39,7 +39,8 @@ enum SPType
     NConst,        // Native constructor
 
     // The idle function callbacks are split because they handle the
-    // stack differently.
+    // stack differently. We probably don't need to have one type for
+    // each though.
     Idle_Initiate, // IdleFunction.initiate()
     Idle_Reentry,  // IdleFunction.reentry()
     Idle_Abort,    // IdleFunction.abort()
@@ -65,6 +66,11 @@ struct StackPoint
   int afterStack; // Where the stack should be when this function
                   // returns
   int *frame; // Stack frame, stored when entering the function
+
+  bool isStatic()
+  {
+    return (ftype == SPType.Function) && func.isStatic;
+  }
 }
 
 FunctionStack fstack;
@@ -129,12 +135,15 @@ struct FunctionStack
   // Set the stack point up as a state
   void push(State *st, MonsterObject *obj)
   {
+    assert(st !is null);
+
     push(obj);
     cur.ftype = SPType.State;
     cur.state = st;
 
     assert(obj !is null);
-    cur.cls = obj.cls;
+    assert(st.owner.parentOf(obj.cls));
+    cur.cls = st.owner;
 
     // Set up the byte code
     cur.code.setData(st.bcode, st.lines);
@@ -156,11 +165,13 @@ struct FunctionStack
 
     push(obj);
     cur.func = fn;
+    cur.cls = fn.owner;
     assert(fn.isIdle, fn.name.str ~ "() is not an idle function");
     cur.ftype = tp;
   }
 
-  // These are used for the various idle callbacks
+  // These are used for the various idle callbacks. TODO: Probably
+  // overkill to have one for each, but leave it until you're sure.
   void pushIdleInit(Function *fn, MonsterObject *obj)
   { pushIdleCommon(fn, obj, SPType.Idle_Initiate); }
 

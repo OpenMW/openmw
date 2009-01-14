@@ -1,12 +1,13 @@
 /*
-  OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008  Nicolay Korslund
-  Email: < korslund@gmail.com >
-  WWW: http://openmw.snaptoad.com/
+  Monster - an advanced game scripting language
+  Copyright (C) 2007, 2008  Nicolay Korslund
+  Email: <korslund@gmail.com>
+  WWW: http://monster.snaptoad.com/
 
-  This file (object.mn) is part of the OpenMW package.
+  This file (gc.d) is part of the Monster script language
+  package.
 
-  OpenMW is distributed as free software: you can redistribute it
+  Monster is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
   version 3, as published by the Free Software Foundation.
 
@@ -21,10 +22,5 @@
 
  */
 
-// This is the base class of all OpenMW Monster classes.
-class Object;
-
-import io, timer;
-
-// Get a random number between a and b (inclusive)
-native int randInt(int a, int b);
+// This file will eventually contain the garbage collector.
+module monster.vm.gc;

@@ -87,10 +87,6 @@ class UnaryOperator : Expression
 
       if(opType == TT.PlusPlus || opType == TT.MinusMinus)
 	{
-          if(exp.isProperty)
-            fail("Operators ++ and -- not implemented for properties yet",
-                 loc);
-
 	  if(!type.isIntegral)
 	    fail("Operator " ~ tokenList[opType] ~ " not allowed for " ~
 		 exp.toString() ~ " of type " ~ exp.typeString(), loc);
@@ -162,26 +158,8 @@ class UnaryOperator : Expression
     {
       if(opType == TT.PlusPlus || opType == TT.MinusMinus)
 	{
-	  exp.evalDest();
-
-          assert(exp.type.isInt || exp.type.isUint ||
-                 exp.type.isLong || exp.type.isUlong);
-
           setLine();
-	  if(postfix)
-	    {
-	      if(opType == TT.PlusPlus) tasm.postInc(exp.type.getSize());
-	      else tasm.postDec(exp.type.getSize());
-	    }
-	  else
-	    {
-	      if(opType == TT.PlusPlus) tasm.preInc(exp.type.getSize());
-	      else tasm.preDec(exp.type.getSize());
-	    }
-
-          // The expression has been modified.
-          exp.postWrite();
-
+          exp.incDec(opType, postfix);
 	  return;
 	}
 
@@ -217,7 +195,9 @@ abstract class OperatorExpr : Expression
 // getList()[14], and array[2..$];
 class ArrayOperator : OperatorExpr
 {
-  bool isSlice;
+  bool isSlice; // Set if this is a slice
+  bool isFill;  // Set during assignment if we're filling the array
+                // with one single value
 
   // name[], name[index], name[index..index2]
   Expression name, index, index2;
@@ -242,11 +222,8 @@ class ArrayOperator : OperatorExpr
       return res ~= "])";
     }
 
-  // We can ALWAYS assign to elements of an array. There is no such
-  // thing as a constant array in Monster, only constant array
-  // references. Exceptions (such as strings in the static data area)
-  // must be dealt with at runtime. We might moderate this rule later
-  // though.
+  // We can ALWAYS assign to elements of an array. Const arrays are
+  // handled at runtime only at the moment.
   bool isLValue() { return true; }
 
   void resolve(Scope sc)
@@ -376,7 +353,7 @@ class ArrayOperator : OperatorExpr
 
           setLine();
           if(isDest) tasm.elementAddr();
-          else tasm.fetchElement(/*type.getSize*/);
+          else tasm.fetchElement();
 
           assert(!isSlice);
         }
@@ -390,13 +367,34 @@ class ArrayOperator : OperatorExpr
 
           setLine();
           tasm.makeSlice();
+
+          assert(isSlice);
         }
     }
 
   void evalDest()
     {
+      assert(isLValue);
       isDest = true;
       eval();
+    }
+
+  void store()
+    {
+      evalDest();
+
+      if(isSlice)
+        {
+          // Special case for left hand slices, of the type a[] or
+          // a[i..j]. In this case we use special commands to fill or
+          // copy the entire array data.
+
+          if(isFill)
+            tasm.fillArray(type.getBase().getSize());
+          else tasm.copyArray();
+        }
+      else
+        tasm.mov(type.getSize());
     }
 }
 
@@ -404,16 +402,18 @@ class ArrayOperator : OperatorExpr
 class DotOperator : OperatorExpr
 {
   // owner.member
-  Expression owner, member;
+  Expression owner;
+  MemberExpression member;
 
   this(Expression own, Expression memb, Floc loc)
     {
-      this.owner = own;
+      owner = own;
 
       assert(own !is null, "owner cannot be null");
       assert(memb !is null);
 
-      this.member = memb;
+      member = cast(MemberExpression)memb;
+      assert(member !is null);
 
       this.loc = loc;
     }
@@ -431,10 +431,6 @@ class DotOperator : OperatorExpr
       return member.isLValue;
     }
 
-  // We are a property if the member is a property
-  bool isProperty() { return member.isProperty; }
-  void writeProperty() { member.writeProperty(); }
-
   void resolve(Scope sc)
     {
       // In order to find the correct scope for the right side, we
@@ -451,6 +447,12 @@ class DotOperator : OperatorExpr
       member.resolveMember(sc, ot);
 
       type = member.type;
+
+      // Make sure we only call static members when the owner is a
+      // type.
+      if(ot.isMeta && !member.isStatic)
+        fail("Can only access static members for " ~ owner.toString,
+             loc);
     }
 
   // TODO: An evalMemberCTime() function could be used here
@@ -467,7 +469,17 @@ class DotOperator : OperatorExpr
       member.evalDest();
     }
 
-  void postWrite() { member.postWrite(); }
+  void store()
+    {
+      evalCommon();
+      member.store();
+    }
+
+  void incDec(TT o, bool b)
+    {
+      evalCommon();
+      member.incDec(o,b);
+    }
 
   void evalCommon()
     {
@@ -491,13 +503,6 @@ class DotOperator : OperatorExpr
 // Assignment operators, =, +=, *=, /=, %=, ~=
 class AssignOperator : BinaryOperator
 {
-  // Set to true if we are assigning to an array slice, eg.  a[1..3] =
-  // b[] or a[] = 3; This changes some rules, eg array data must be
-  // copied instead or just their reference, and we are allowed to
-  // assign a single value to a slice and fill the array that way.
-  bool isSlice;
-  bool isFill; // Used for filling elements with one value.
-
   bool catElem; // For concatinations (~=), true when the right hand
                 // side is a single element rather than an array.
 
@@ -527,7 +532,6 @@ class AssignOperator : BinaryOperator
       if(arr !is null && arr.isSlice)
         {
           assert(type.isArray);
-          isSlice = true;
 
           if(opType == TT.CatEq)
             fail("Cannot use ~= on array slice " ~ left.toString, loc);
@@ -555,8 +559,8 @@ class AssignOperator : BinaryOperator
                  ~ " to slice " ~ left.toString ~ " of type "
                  ~ left.typeString, loc);
 
-          // Inform eval() what to do
-          isFill = true;
+          // Inform arr.store() that we're filling in a single element
+          arr.isFill = true;
 
           return;
         }
@@ -644,43 +648,18 @@ class AssignOperator : BinaryOperator
 	}
       else right.eval();
 
-      // Special case for properties and other cases where the
-      // assignment is actually a function call. We don't call
-      // evalDest or mov, just let writeProperty handle everything.
-      if(left.isProperty)
-        {
-          left.writeProperty();
-          return;
-        }
-
+      // Store the value on the stack into the left expression.
+      setLine();
+      left.store();
+      /*
       left.evalDest();
 
       setLine();
 
-      // Special case for left hand slices, of the type a[] or
-      // a[i..j].
-      if(isSlice)
-        {
-          assert(type.isArray);
-
-          if(isFill)
-            {
-              // Fill the array with the result of the right-hand
-              // expression
-              tasm.fillArray(s);
-            }
-          else
-            // Copy array contents from the right array to the left
-            // array
-            tasm.copyArray();
-
-          return;
-        }
-
-      tasm.mov(right.type.getSize()); // Move the data
 
       // Left hand value has been modified, notify it.
       left.postWrite();
+      */
     }
 }
 

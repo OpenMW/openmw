@@ -28,6 +28,9 @@ import monster.vm.error;
 import monster.vm.mclass;
 import monster.vm.arrays;
 
+import monster.util.freelist;
+import monster.util.list;
+
 import monster.compiler.states;
 import monster.compiler.variables;
 import monster.compiler.scopes;
@@ -39,6 +42,25 @@ import std.utf;
 // An index to a monster object.
 typedef int MIndex;
 
+union SharedType
+{
+  int i;
+  uint ui;
+  long l;
+  ulong ul;
+  float f;
+  double d;
+
+  void *vptr;
+  Object obj;
+}
+
+struct ExtraData
+{
+  SharedType extra;
+  vpNode node;
+}
+
 struct MonsterObject
 {
   /*******************************************************
@@ -49,26 +71,28 @@ struct MonsterObject
 
   MonsterClass cls;
 
-  // Extra data. This allows you to assign additional data to an
-  // object. We might refine this concept a little later.
-  void *extra;
+  // Thread used for running state code. May be null if no code is
+  // running or scheduled.
+  Thread *sthread;
 
-  // The thread. Each object has its own thread, but not every
-  // MonsterObject has its own unique thread. For derived classes, we
-  // allocate a MonsterObject for each parent class, but only one
-  // thread for the object entire object.
-  CodeThread *thread;
+  // The following variables are "tree-indexed". This means that
+  // they're arrays, with one element for each class in the
+  // inheritance hierarchy. The corresponding class tree can be found
+  // in cls.tree.
 
-  // Object data segment
-  int[] data;
+  // Object data segment.
+  int[][] data;
 
-  // Static data segment. Do not write to this.
-  int[] sdata;
+  /*******************************************************
+   *                                                     *
+   *     Private variables                               *
+   *                                                     *
+   *******************************************************/
 
-  // Parent object tree. This reflects the equivalent 'tree' table in
-  // the MonsterClass.
-  MonsterObject* tree[];
+  //private:
+  State *state;  // Current state, null is the empty state.
 
+  public:
 
   /*******************************************************
    *                                                     *
@@ -76,20 +100,10 @@ struct MonsterObject
    *                                                     *
    *******************************************************/
 
-  // Get the next object in the objects list - used to iterate through
-  // objects of one class
-  MonsterObject *getNext()
-  {
-    // TODO: This syntax is rather hackish, and bug-prone if we
-    // suddenly change the list structure.
-    return cast(MonsterObject*)
-      ( cast(MonsterClass.ObjectList.TList.Iterator)this ).getNext();
-  }
-
   // Get the index of this object
   MIndex getIndex()
   {
-    return cast(MIndex)( MonsterClass.ObjectList.getIndex(this)+1 );
+    return cast(MIndex)( ObjectList.getIndex(this)+1 );
   }
 
   // Delete this object. Do not use the object after calling this
@@ -99,61 +113,27 @@ struct MonsterObject
     cls.deleteObject(this);
   }
 
-  // Create a clone of this object. Note that this will always clone
-  // and return the top object (thread.topObj), regardless of which
-  // object in the list it is called on. In other words, the class
-  // mo.cls is not always the same as mo.clone().cls.
+  // Create a clone of this object.
   MonsterObject *clone()
-  {
-    auto t = thread.topObj;
-    return t.cls.createClone(t);
-  }
-
-  /*******************************************************
-   *                                                     *
-   *     Casting / polymorphism functions                *
-   *                                                     *
-   *******************************************************/
-
-  // Cast this object to the given class, if possible. Both upcasts
-  // and downcasts are allowed.
-  MonsterObject *Cast(MonsterClass toClass)
-  { return doCast(toClass, thread.topObj.tree); }
-
-  // Upcast this object to the given class. Upcasting means that
-  // toClass must be the class of this object, or one of its parent
-  // classes.
-  MonsterObject *upcast(MonsterClass toClass)
-  {
-    assert(toClass !is null);
-    return doCast(toClass, tree);
-  }
-  // Special version used from bytecode. The index is the global class
-  // index.
-  MonsterObject *upcastIndex(int index)
-  {
-    // Convert the global class index to the tree index. TODO: Later
-    // on we should pass this index directly, but that is just
-    // optimization.
-    index = global.getClass(cast(CIndex)index).treeIndex;
-
-    assert(index < tree.length, "cannot upcast class " ~ cls.getName ~
-           " to index " ~ format(index));
-    return tree[index];
-  }
-
-  // Is this object part of a linked inheritance chain?
-  bool isBaseObject() {return !isTopObject(); }
-
-  // Is this object the topmost object in the inheritance chain?
-  bool isTopObject() { return thread.topObj is this; }
-
+  { return cls.createClone(this);  }
 
   /*******************************************************
    *                                                     *
    *     Member variable getters / setters               *
    *                                                     *
    *******************************************************/
+
+  // The last two ints of the data segment can be used to store extra
+  // data associated with the object. A typical example is the pointer
+  // to a D/C++ struct or class counterpart to the Monster class.
+  static const exSize = ExtraData.sizeof / int.sizeof;
+  static assert(exSize*4 == ExtraData.sizeof);
+  SharedType *getExtra(int index)
+  {
+    return & (cast(ExtraData*)&data[index][$-exSize]).extra;
+  }
+  SharedType *getExtra(MonsterClass mc)
+  { return getExtra(cls.upcast(mc)); }
 
   // This is the work horse for all the set/get functions.
   T* getPtr(T)(char[] name)
@@ -179,10 +159,9 @@ struct MonsterObject
     assert(vb.sc.isClass(), "variable must be a class variable");
     MonsterClass mc = vb.sc.getClass();
     assert(mc !is null);
-    MonsterObject *obj = upcast(mc);
 
     // Return the pointer
-    return cast(T*) obj.getDataInt(vb.number);
+    return cast(T*) getDataInt(mc.treeIndex, vb.number);
   }
   T getType(T)(char[] name)
   { return *getPtr!(T)(name); }
@@ -246,13 +225,16 @@ struct MonsterObject
    *******************************************************/
 
   // Get an int from the data segment
-  int *getDataInt(int pos)
+  int *getDataInt(int treeIndex, int pos)
   {
-    if(pos < 0 || pos>=data.length)
-      fail("MonsterObject: data pointer out of range: " ~ toString(pos));
-    return &data[pos];
+    assert(treeIndex >= 0 && treeIndex < data.length,
+           "tree index out of range: " ~ toString(treeIndex));
+    assert(pos >= 0 && pos<data[treeIndex].length,
+           "data pointer out of range: " ~ toString(pos));
+    return &data[treeIndex][pos];
   }
 
+  /* KILLME
   // Get a long (two ints) from the data segment
   long *getDataLong(int pos)
   {
@@ -260,14 +242,18 @@ struct MonsterObject
       fail("MonsterObject: data pointer out of range: " ~ toString(pos));
     return cast(long*)&data[pos];
   }
+  */
 
   // Get an array from the data segment
-  int[] getDataArray(int pos, int len)
+  int[] getDataArray(int treeIndex, int pos, int len)
   {
-    if(pos < 0 || len < 0 || (pos+len) > data.length)
-      fail("MonsterObject: data array out of range: pos=" ~ toString(pos) ~
+    assert(len > 0);
+    assert(treeIndex >= 0 && treeIndex < data.length,
+           "tree index out of range: " ~ toString(treeIndex));
+    assert(pos >= 0 && (pos+len)<=data[treeIndex].length,
+           "data pointer out of range: pos=" ~ toString(pos) ~
            ", len=" ~toString(len));
-    return data[pos..pos+len];
+    return data[treeIndex][pos..pos+len];
   }
 
 
@@ -283,7 +269,7 @@ struct MonsterObject
   // will take precedence.
   void call(char[] name)
   {
-    thread.topObj.cls.findFunction(name).call(this);
+    cls.findFunction(name).call(this);
   }
 
   // Call a function non-virtually. In other words, ignore
@@ -293,17 +279,120 @@ struct MonsterObject
     assert(0, "not implemented");
   }
 
-  // Set the current state of the object. If called from within state
-  // code, we have to return all the way back to the state code level
-  // before the new state is scheduled. If called when the object is
-  // idle (not actively running state code), the state is scheduled
-  // now, and the idle function is aborted. New state code does not
-  // start running until the next frame.
-  void setState(State *st, StateLabel *lb = null)
+  /* Set state. Invoked by the statement "state = statename;". This
+     function can be called in several situations, with various
+     results:
+
+     + setState called with current state, no label
+       -> no action is performed
+
+     + setState called with another state
+     + setState called with current state + a label
+       -> state is changed normally
+
+     If a state change takes place directly in state code, the code is
+     aborted immediately. If it takes place in a function called from
+     state code, then code flow is allowed to return normally back to
+     the state code level, but is aborted immediately once it reaches
+     state code.
+
+     State changes outside state code will always unschedule any
+     previously scheduled code (such as idle functions, or previous
+     calls to setState.)
+   */
+  void setState(State *st, StateLabel *label)
   {
-    assert(st !is null || lb is null,
-           "If state is null, label must also be null");
-    thread.setState(st, lb);
+    // Does the state actually change?
+    if(st !is state)
+      {
+        // Set the state
+        state = st;
+
+        // We must handle state functions and other magic here.
+      }
+    // If no label is specified and we are already in this state, then
+    // don't do anything.
+    else if(label is null) return;
+
+    // TODO: We can reorganize the entire function to deal with one
+    // sthread !is null test. Just do the label-checking first, and
+    // store the label offset
+
+    // Do we already have a thread?
+    if(sthread !is null)
+      {
+        // If we are already scheduled (if an idle function has
+        // scheduled us, or if setState has been called multiple
+        // times), unschedule. This will automatically cancel any
+        // scheduled idle functions and call their abort() functions.
+        if(sthread.isScheduled)
+          sthread.cancel();
+
+        assert(sthread.isActive || !sthread.stateChange,
+               "stateChange was set outside active code");
+
+        // If we are running from state code, signal it that we must
+        // now abort execution when we reach the state level.
+        sthread.stateChange = sthread.isActive;
+      }
+
+    // If we are jumping to anything but the empty state, we will have
+    // to schedule some code.
+    if(st !is null)
+      {
+        // Check that this state is valid
+        assert(st.owner.parentOf(cls), "state '" ~ st.name.str ~
+               "' is not part of class " ~ cls.getName());
+
+        if(label is null)
+          // findLabel will return null if the label is not found.
+          // TODO: The begin label should probably be cached within
+          // State.
+          label = st.findLabel("begin");
+
+        if(label !is null)
+          {
+            // Make sure there's a thread to run in
+            if(sthread is null)
+              sthread = Thread.getNew(this);
+
+            // Schedule the thread to start at the given label
+            sthread.schedule(label.offs);
+            assert(sthread.isScheduled);
+          }
+      }
+
+    // Don't leave an unused thread dangling - kill it instead.
+    if(sthread !is null && !sthread.isScheduled)
+      {
+        sthread.kill();
+        sthread = null;
+      }
+
+    assert(sthread is null || sthread.isScheduled);
+  }
+
+  void clearState() { setState(cast(State*)null, null); }
+
+  // Index version of setState - called from bytecode
+  void setState(int st, int label, int clsInd)
+  {
+    if(st == -1)
+      {
+        assert(label == -1);
+        clearState();
+        return;
+      }
+
+    auto cls = cls.upcast(clsInd);
+
+    // TODO: This does not support virtual states yet
+    auto pair = cls.findState(st, label);
+
+    assert(pair.state.index == st);
+    assert(pair.state.owner is cls);
+
+    setState(pair.state, pair.label);
   }
 
   // Named version of the above function. An empty string sets the
@@ -314,8 +403,8 @@ struct MonsterObject
   {
     if(label == "")
       {
-        if(name == "") thread.setState(null,null);
-        else setState(cls.findState(name));
+        if(name == "") clearState();
+        else setState(cls.findState(name), null);
         return;
       }
 
@@ -324,43 +413,13 @@ struct MonsterObject
     auto stl = cls.findState(name, label);
     setState(stl.state, stl.label);
   }
-
-  /*******************************************************
-   *                                                     *
-   *     Private functions                               *
-   *                                                     *
-   *******************************************************/
-  private:
-
-  MonsterObject *doCast(MonsterClass toClass, MonsterObject* ptree[])
-  {
-    assert(toClass !is null);
-
-    if(toClass is cls) return this;
-
-    // TODO: At some point, a class will have several possible tree
-    // indices. We will loop through the list and try them all.
-    int index = toClass.treeIndex;
-    MonsterObject *mo = null;
-
-    if(index < ptree.length)
-      {
-        mo = ptree[index];
-
-        assert(mo !is this);
-
-        // It's only a match if the classes match
-        if(mo.cls !is toClass) mo = null;
-      }
-
-    // If no match was found, then the cast failed.
-    if(mo is null)
-      fail("object of class " ~ cls.name.str ~
-           " cannot be cast to " ~ toClass.name.str);
-
-    return mo;
-  }
 }
+
+alias FreeList!(MonsterObject) ObjectList;
+
+// The freelist used for allocation of objects. This contains all
+// allocated and in-use objects.
+ObjectList allObjects;
 
 // Convert an index to an object pointer
 MonsterObject *getMObject(MIndex index)
@@ -368,22 +427,15 @@ MonsterObject *getMObject(MIndex index)
   if(index == 0)
     fail("Null object reference encountered");
 
-  if(index < 0 || index > getTotalObjects())
+  if(index < 0 || index > ObjectList.totLength())
     fail("Invalid object reference");
 
-  MonsterObject *obj = MonsterClass.ObjectList.getNode(index-1);
+  MonsterObject *obj = ObjectList.getNode(index-1);
 
-  if(obj.thread == null)
+  if(obj.cls is null)
     fail("Dead object reference (index " ~ toString(cast(int)index) ~ ")");
 
   assert(obj.getIndex() == index);
 
   return obj;
-}
-
-// Get the total number of MonsterObjects ever allocated for the free
-// list. Does NOT correspond to the number of objects in use.
-int getTotalObjects()
-{
-  return MonsterClass.ObjectList.totLength();
 }

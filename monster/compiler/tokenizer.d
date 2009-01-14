@@ -91,24 +91,17 @@ enum TT
     // Keywords. Note that we use Class as a separator below, so it
     // must be first in this list. All operator tokens must occur
     // before Class, and all keywords must come after Class.
-    Class, Module,
-    For,
-    If,
-    Else,
-    Foreach,
-    ForeachRev,
-    Do,
-    While,
-    Until,
+    Class, Module, Singleton,
+    If, Else,
+    For, Foreach, ForeachRev,
+    Do, While, Until,
+    Continue, Break,
     Typeof,
     Return,
-    Continue,
-    Break,
-    Switch,
-    Select,
+    Switch, Select,
     State,
     Struct, Enum, Thread,
-    Singleton, Clone, Override, Final, Function,
+    Import, Clone, Override, Final, Function, With,
     This, New, Static, Const, Out, Ref, Abstract, Idle,
     Public, Private, Protected, True, False, Native, Null,
     Goto, Halt, Var, In,
@@ -131,6 +124,17 @@ struct Token
   Floc loc;
 
   char[] toString() { return str; }
+
+  static Token opCall(char[] name, Floc loc)
+  { return Token(TT.Identifier, name, loc); }
+  static Token opCall(TT tt, char[] name, Floc loc)
+  {
+    Token t;
+    t.type = tt;
+    t.str = name;
+    t.loc = loc;
+    return t;
+  }
 }
 
 // Used to look up keywords.
@@ -221,6 +225,7 @@ const char[][] tokenList =
     TT.Struct           : "struct",
     TT.Enum             : "enum",
     TT.Thread           : "thread",
+    TT.Import           : "import",
     TT.Typeof           : "typeof",
     TT.Singleton        : "singleton",
     TT.Clone            : "clone",
@@ -230,6 +235,7 @@ const char[][] tokenList =
     TT.Override         : "override",
     TT.Final            : "final",
     TT.Function         : "function",
+    TT.With             : "with",
     TT.Idle             : "idle",
     TT.Out 	        : "out",
     TT.Ref	        : "ref",
@@ -244,6 +250,13 @@ const char[][] tokenList =
     TT.Halt             : "halt",
     TT.Var              : "var",
     TT.In               : "in",
+
+    // These are only used in error messages
+    TT.StringLiteral    : "string literal",
+    TT.NumberLiteral    : "number literal",
+    TT.CharLiteral      : "character literal",
+    TT.Identifier       : "identifier",
+    TT.EOF              : "end of file"
   ];
 
 class StreamTokenizer

@@ -35,6 +35,8 @@ import monster.compiler.functions;
 import monster.compiler.assembler;
 import monster.compiler.scopes;
 
+import monster.modules.timer;
+
 import std.file;
 import monster.util.string;
 
@@ -56,6 +58,14 @@ struct VM
         auto func = Function(file);
         func.call();
       }
+  }
+
+  void frame(float time = 0)
+  {
+    if(time != 0)
+      idleTime.add(time);
+
+    scheduler.doFrame();
   }
 
   // Path to search for script files. Extremely simple at the moment.
@@ -90,5 +100,4 @@ struct VM
 
     return false;
   }
-
 }

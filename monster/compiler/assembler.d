@@ -32,6 +32,7 @@ import monster.util.list;
 import monster.compiler.bytecode;
 import monster.compiler.linespec;
 import monster.compiler.types;
+import monster.compiler.tokenizer;
 
 import monster.vm.error;
 
@@ -364,23 +365,18 @@ struct Assembler
     assert(code != 0);
   }
 
-  void callFunc(int func, int cls)
+  void callFunc(int func, int cls, bool isFar)
   {
-    cmd(BC.Call);
+    if(isFar) cmd(BC.CallFar);
+    else cmd(BC.Call);
     addi(cls);
     addi(func);
   }
 
-  void callIdle(int func, int cls)
+  void callIdle(int func, int cls, bool isFar)
   {
-    cmd(BC.CallIdle);
-    addi(cls);
-    addi(func);
-  }
-
-  void callFarFunc(int func, int cls)
-  {
-    cmd(BC.CallFar);
+    if(isFar) cmd(BC.CallIdleFar);
+    else cmd(BC.CallIdle);
     addi(cls);
     addi(func);
   }
@@ -670,17 +666,6 @@ struct Assembler
   // already on the stack.
   void elementAddr() { pushPtr(PT.ArrayIndex,0); }
 
-  // Create an instruction that reads data from the data segment and
-  // creates an array from it at runtime. TODO: This might be
-  // decommissioned soon.
-  void makeArrayLit(int offset, int len, int elemSize)
-  {
-    cmd(BC.MakeArray);
-    addi(offset);
-    addi(elemSize);
-    addi(len*elemSize);
-  }
-
   // Convert an array index to a const reference
   void makeArrayConst() { cmd(BC.MakeConstArray); }
 
@@ -864,10 +849,17 @@ struct Assembler
     else assert(0);
   }
 
-  void preInc(int s) { cmd2(BC.PreInc, BC.PreInc8, s); }
-  void preDec(int s) { cmd2(BC.PreDec, BC.PreDec8, s); }
-  void postInc(int s) { cmd2(BC.PostInc, BC.PostInc8, s); }
-  void postDec(int s) { cmd2(BC.PostDec, BC.PostDec8, s); }
+  void incDec(TT op, bool postfix, int s)
+  {
+    if(op == TT.PlusPlus)
+      if(postfix) cmd2(BC.PostInc, BC.PostInc8, s);
+      else cmd2(BC.PreInc, BC.PreInc8, s);
+    else if(op == TT.MinusMinus)
+      if(postfix) cmd2(BC.PostDec, BC.PostDec8, s);
+      else cmd2(BC.PreDec, BC.PreDec8, s);
+    else
+      assert(0, "Illegal op type");
+  }
 
   // Type casting
   void castIntToLong(bool fromSign)
@@ -911,36 +903,13 @@ struct Assembler
     else assert(0);
   }
 
-  // Hmm, could as well merge the int and float versions. Later on
-  // we'll convert to a generic type instead of directly to string
-  // though.
-  void castIntToString(Type t)
+  // Cast a generic type to string
+  void castToString(int tindex)
   {
-    cmd(BC.CastI2S);
-    if(t.isInt) addb(1);
-    else if(t.isUint) addb(2);
-    else if(t.isLong) addb(3);
-    else if(t.isUlong) addb(4);
-    else assert(0);
+    cmd(BC.CastT2S);
+    addi(tindex);
   }
   
-  void castFloatToString(Type t)
-  {
-    assert(t.isFloating);
-    cmd(BC.CastF2S);
-    addb(t.getSize);
-  }
-
-  void castBoolToString() { cmd(BC.CastB2S); }
-  void castObjToString() { cmd(BC.CastO2S); }
-
-  // Cast an object to a parent class
-  void upcast(int cindex)
-  {
-    cmd(BC.Upcast);
-    addi(cindex);
-  }
-
   // Boolean operators
   void isEqual(int s) { cmdmult(BC.IsEqual, BC.IsEqualMulti, s); }
 

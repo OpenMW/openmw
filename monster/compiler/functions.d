@@ -36,6 +36,7 @@ enum FuncType
   }
 
 import monster.compiler.types;
+import monster.compiler.operators;
 import monster.compiler.assembler;
 import monster.compiler.bytecode;
 import monster.compiler.scopes;
@@ -50,6 +51,7 @@ import monster.vm.idlefunction;
 import monster.vm.mclass;
 import monster.vm.error;
 import monster.vm.fstack;
+import monster.vm.thread;
 import monster.vm.vm;
 
 import std.stdio;
@@ -89,6 +91,9 @@ struct Function
 
   // Is this function final? (can not be overridden in child classes)
   bool isFinal;
+
+  // If true, this function can be executed without an object
+  bool isStatic;
 
   // What function we override (if any)
   Function *overrides;
@@ -135,8 +140,13 @@ struct Function
   {
     assert(obj !is null);
 
-    // Cast the object to the correct type for this function.
-    obj = obj.Cast(owner);
+    // Make sure there's a thread to use
+    bool wasNew;
+    if(cthread is null)
+      {
+        wasNew = true;
+        cthread = Thread.getNew();
+      }
 
     // Push the function on the stack
     fstack.push(this, obj);
@@ -153,7 +163,7 @@ struct Function
         natFunc_c();
         break;
       case FuncType.Normal:
-        obj.thread.execute();
+        cthread.execute();
         break;
       case FuncType.Native:
         fail("Called unimplemented native function " ~ toString);
@@ -167,6 +177,19 @@ struct Function
 
     // Remove ourselves from the function stack
     fstack.pop();
+
+    assert(cthread !is null);
+
+    // Reset cthread, if we created it.
+    if(wasNew)
+      {
+        // If the thread is still in the unused list, we can safely
+        // kill it.
+        if(cthread.isUnused)
+          cthread.kill();
+
+        cthread = null;
+      }
   }
 
   // Call without an object. TODO: Only allowed for functions compiled
@@ -180,6 +203,8 @@ struct Function
     call(int_mo);
   }
 
+  // This allows you to compile a function file by writing fn =
+  // Function("filename").
   static Function opCall(char[] file, MonsterClass mc = null)
   {
     Function fn;
@@ -191,12 +216,34 @@ struct Function
   // 'mc'. If no class is given, use an empty internal class.
   void compile(char[] file, MonsterClass mc = null)
   {
-    assert(name.str == "",
-           "Function " ~ name.str ~ " has already been set up");
-
     // Check if the file exists
     if(!vm.findFile(file))
       fail("File not found: " ~ file);
+
+    // Create the stream and pass it on
+    auto bf = new BufferedFile(file);
+    compile(file, bf, mc);
+    delete bf;
+  }
+
+  void compile(char[] file, Stream str, MonsterClass mc = null)
+  {
+    // Get the BOM and tokenize the stream
+    auto ef = new EndianStream(str);
+    int bom = ef.readBOM();
+    TokenArray tokens = tokenizeStream(file, ef, bom);
+    compile(file, tokens, mc);
+    //delete ef;
+  }
+
+  void compile(char[] file, ref TokenArray tokens, MonsterClass mc = null)
+  {
+    assert(name.str == "",
+           "Function " ~ name.str ~ " has already been set up");
+
+    // Check if this is a class or a module file first
+    if(MonsterClass.canParse(tokens))
+      fail("Cannot run " ~ file ~ " - it is a class or module.");
 
     // Set mc to an empty class if no class is given
     if(mc is null)
@@ -212,21 +259,6 @@ struct Function
 
         mc = int_mc;
       }
-
-    // TODO: Maybe we should centralize this stuff somewhere.
-    // Especially since we have to reinvent loading from string or
-    // other custom streams, and so on. It's easier to put the tools
-    // for this here than to have them in MonsterClass. Fix this later
-    // when you see how things turn out.
-    auto bf = new BufferedFile(file);
-    auto ef = new EndianStream(bf);
-    int bom = ef.readBOM();
-    TokenArray tokens = tokenizeStream(file, ef, bom);
-    delete bf;
-
-    // Check if this is a class or a module file first
-    if(MonsterClass.canParse(tokens))
-      fail("Cannot run " ~ file ~ " - it is a class or module.");
 
     auto fd = new FuncDeclaration;
     // Parse and comile the function
@@ -679,6 +711,10 @@ class FunctionCallExpr : MemberExpression
 
   bool isVararg;
 
+  // Used to simulate a member for imported variables
+  DotOperator dotImport;
+  bool recurse = true;
+
   static bool canParse(TokenArray toks)
     {
       return isNext(toks, TT.Identifier) && isNext(toks, TT.LeftParen);
@@ -728,28 +764,36 @@ class FunctionCallExpr : MemberExpression
     {
       if(isMember) // Are we called as a member?
 	{
-          assert(leftScope !is null);
-	  fd = leftScope.findFunc(name.str);
-	  if(fd is null) fail(name.str ~ " is not a member function of "
-		       ~ leftScope.toString, loc);
+          assert(leftScope !is null); 
+	  auto l = leftScope.lookup(name);
+          fd = l.func;
+	  if(!l.isFunc)
+            fail(name.str ~ " is not a member function of "
+                 ~ leftScope.toString, loc);
 	}
       else
 	{
           assert(leftScope is null);
-	  fd = sc.findFunc(name.str);
-	  if(fd is null) fail("Undefined function "~name.str, name.loc);
+	  auto l = sc.lookupImport(name);
+
+          // For imported functions, we have to do some funky magic
+          if(l.isImport)
+            {
+              assert(l.imphold !is null);
+              dotImport = new DotOperator(l.imphold, this, loc);
+              dotImport.resolve(sc);
+              return;
+            }
+
+          fd = l.func;
+	  if(!l.isFunc)
+            fail("Undefined function "~name.str, name.loc);
 	}
 
       // Is this an idle function?
-      if(fd.isIdle)
-        {
-          if(!sc.isStateCode)
-            fail("Idle functions can only be called from state code",
-                 name.loc);
-
-          if(isMember)
-            fail("Idle functions cannot be called as members", name.loc);
-        }
+      if(fd.isIdle && !sc.isStateCode)
+        fail("Idle functions can only be called from state code",
+             name.loc);
 
       type = fd.type;
       assert(type !is null);
@@ -870,15 +914,20 @@ class FunctionCallExpr : MemberExpression
 
   void evalAsm()
     {
+      if(dotImport !is null && recurse)
+        {
+          recurse = false;
+          dotImport.evalAsm();
+          return;
+        }
+
       if(!pdone) evalParams();
       setLine();
       assert(fd.owner !is null);
 
-      if(isMember)
-        tasm.callFarFunc(fd.index, fd.owner.getTreeIndex());
-      else if(fd.isIdle)
-        tasm.callIdle(fd.index, fd.owner.getIndex());
+      if(fd.isIdle)
+        tasm.callIdle(fd.index, fd.owner.getTreeIndex(), isMember);
       else
-        tasm.callFunc(fd.index, fd.owner.getTreeIndex());
+        tasm.callFunc(fd.index, fd.owner.getTreeIndex(), isMember);
     }
 }

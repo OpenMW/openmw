@@ -1,5 +1,7 @@
 // A sample class
-class Test : Object;
+class Test;
+
+import io, timer;
 
 test()
 {
@@ -15,7 +17,6 @@ state printMessage
  loop:
   print("Howdy from the world of Monster scripts!");
   print("This script is located in mscripts/test.mn. Check it out!");
-  print("GMST.sThief: ", GMST.sThief);
   sleep(60);
   goto loop;
 }

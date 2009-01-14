@@ -46,6 +46,7 @@ struct State
   StateLabel* labelList[];
 
   StateScope sc; // Scope for this state
+  MonsterClass owner; // Class where this state was defined
 
   // State declaration - used to resolve forward references. Should
   // not be kept around when compilation is finished.
@@ -159,6 +160,7 @@ class StateDeclaration : Statement
       // rules, such as allowing idle functions and disallowing
       // variable declarations.
       st.sc = new StateScope(last, st);
+      st.owner = st.sc.getClass();
 
       // Resolve the interior of the code block
       assert(code !is null);

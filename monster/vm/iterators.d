@@ -58,6 +58,7 @@ struct IteratorRef
   bool isClass;
 
   MonsterObject *mo;
+  MonsterClass mc;
 
   // Array iterators
   bool firstArray(bool irev, bool iref, int *stk)
@@ -112,6 +113,7 @@ struct IteratorRef
     stk[1] = cast(int) getIndex();
 
     mo = mc.getFirst();
+    this.mc = mc;
 
     // Are there any objects?
     if(mo == null) return false;
@@ -136,7 +138,7 @@ struct IteratorRef
     // Handle class iterations seperately
     if(isClass)
       {
-        mo = mo.getNext();
+        mo = mc.getNext(mo);
         if(mo == null) return false;
 
         *sindex = cast(int)mo.getIndex();

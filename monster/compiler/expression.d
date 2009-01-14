@@ -64,7 +64,7 @@ abstract class Expression : Block
       Expression b;
       Floc ln;
 
-      // These are allowed for members (eg. a.hello().you())
+      // These are allowed for members (eg. hello().to.you())
       if(FunctionCallExpr.canParse(toks)) b = new FunctionCallExpr;
       else if(VariableExpr.canParse(toks)) b = new VariableExpr;
       else if(isMember) fail(toks[0].str ~ " can not be a member", toks[0].loc);
@@ -381,25 +381,11 @@ abstract class Expression : Block
   // messages.
   Floc getLoc() { return loc; }
 
-  // Special version of resolve that is called for members,
-  // ie. objname.member;. Most expressions cannot be members,
-  // but those that can must override this.
-  void resolveMember(Scope sc, Type ownerType)
-    { fail(toString() ~ " cannot be a member of " ~ ownerType.toString, loc); }
-
   // Used for error messages
   char[] typeString() { return type.toString(); }
 
   // Can this expression be assigned to? (most types can not)
   bool isLValue() { return false; }
-
-  // If true, assignments to this expression (for lvalues) are handled
-  // through writeProperty rather than with evalDest.
-  bool isProperty() { return false; }
-
-  // Static expressions. These can be evaluated as members without
-  // needing the owner pushed onto the stack.
-  bool isStatic() { return false; }
 
   // Evaluate this using run-time instructions. This is only used when
   // evalCTime can not be used (ie. when isCTime is false.)
@@ -431,18 +417,24 @@ abstract class Expression : Block
     }
 
   // Evaluate this expression as a destination (ie. push a pointer
-  // instead of a value). Only valid for LValues. TODO: This
-  // completely replaces the need for a separate isLValue member, but
-  // I think I will keep it. It belongs in the semantic level, while
-  // this is in the code generation level.
+  // instead of a value). Only valid for LValues.
   void evalDest() { assert(0, "evalDest() called for non-lvalue " ~ this.toString); }
 
-  // Called on all lvalue expressions after they have been
-  // modified, and must be stack-neutral.
-  void postWrite() { assert(isLValue()); }
+  // Pop values of the stack and store it in this expression. Only
+  // valid for lvalues. This is now used in place of evalDest in most
+  // places (although it may use evalDest internally.)
+  void store()
+    { assert(0, "store not implemented for " ~ toString()); }
 
-  // Assign to this property. Only called if isProperty returns true.
-  void writeProperty() { assert(0); }
+  // Handles ++ and --
+  void incDec(TT op, bool post)
+    {
+      assert(isLValue);
+      assert(type.isInt || type.isUint ||
+             type.isLong || type.isUlong);
+      evalDest();
+      tasm.incDec(op, post, type.getSize());
+    }
 
   // Can this expression be evaluated at compile time?
   bool isCTime() { return false; }
@@ -702,15 +694,7 @@ class ArrayLiteralExpr : Expression
       int elem = type.getBase().getSize();
       int num = params.length;
 
-      // Create a temporary array containing the data
-      const int LEN = 32;
-      int buf[LEN];
-      int data[];
-
-      if(num*elem <= LEN)
-        data = buf[0..num*elem];
-      else
-        data = new int[num*elem];
+      int data[] = new int[num*elem];
 
       // Set up the data
       foreach(i, par; params)
@@ -718,10 +702,6 @@ class ArrayLiteralExpr : Expression
 
       // Create the array and get the index
       arrind = arrays.createConst(data, elem).getIndex;
-
-      // Delete the array, if necessary
-      if(data.length > LEN)
-        delete data;
 
       // Create an array from the index and return it as the compile
       // time value
@@ -1001,6 +981,10 @@ abstract class MemberExpression : Expression
 
       resolve(sc);
     }
+
+  // Static members. These can be evaluated without needing the owner
+  // pushed onto the stack.
+  bool isStatic() { return false; }
 }
 
 // Expression that handles conversion from one type to another. This
@@ -1055,5 +1039,52 @@ class CastExpression : Expression
   char[] toString()
     {
       return "cast(" ~ type.toString ~ ")(" ~ orig.toString ~ ")";
+    }
+}
+
+// Used as the surrogate owner expression for imported
+// members. Example:
+// import x;
+// y = 3; // refers to x.y
+// y is resolved as x.y, where the owner (x) is an import holder.
+class ImportHolder : Expression
+{
+  MonsterClass mc;
+
+  this(MonsterClass pmc)
+    {
+      mc = pmc;
+
+      // Importing singletons and modules is like importing
+      // the object itself
+      if(mc.isSingleton)
+        type = mc.objType;
+      else
+        type = mc.classType;
+    }
+
+  // All lookups in this import is done through this function. Can be
+  // used to filter lookups later on.
+  ScopeLookup lookup(Token name)
+    {
+      assert(mc !is null);
+      mc.requireScope();
+      return mc.sc.lookup(name);
+    }
+
+ override:
+
+  void parse(ref TokenArray) { assert(0); }
+  void resolve(Scope sc) {}
+  void evalDest() { assert(0); }
+  char[] toString() { return "imported class " ~ mc.name.str ~ ""; }
+
+  void evalAsm()
+    {
+      if(mc.isSingleton)
+        {
+          assert(type.isObject);
+          tasm.pushSingleton(mc.getIndex());
+        }
     }
 }

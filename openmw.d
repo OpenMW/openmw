@@ -42,7 +42,7 @@ import core.memory;
 import core.config;
 
 import monster.util.string;
-import monster.vm.mobject;
+import monster.vm.mclass;
 import mscripts.object;
 
 import sound.audio;
@@ -417,5 +417,5 @@ void main(char[][] args)
   // Write some memory statistics
   poolSize();
   writefln(esmRegion);
-  writefln("Total objects: ", getTotalObjects);
+  writefln("Total objects: ", MonsterClass.getTotalObjects);
 }

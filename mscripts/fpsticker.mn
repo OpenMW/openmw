@@ -1,0 +1,18 @@
+// Small script that prints the FPS to screen with regular intervals.
+singleton FPSTicker;
+
+import io, timer;
+
+// This is updated automatically by input/events.d
+int frameCount;
+
+float delay = 1.5;
+
+state tick
+{
+ begin:
+  sleep(delay);
+  print("fps: ", frameCount / delay);
+  frameCount = 0;
+  goto begin;
+}

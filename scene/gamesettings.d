@@ -32,7 +32,7 @@ void loadGameSettings()
           assert(name != a);
         }
 
-      if(mc.sc.findVar(name) is null)
+      if(!mc.sc.lookupName(name).isVar)
         {
           writefln("WARNING: GMST %s not supported!", name);
           continue;

@@ -30,6 +30,7 @@ import monster.compiler.expression;
 import monster.compiler.scopes;
 import monster.compiler.statement;
 import monster.compiler.block;
+import monster.compiler.operators;
 import monster.compiler.assembler;
 
 import std.string;
@@ -266,15 +267,8 @@ class VarDeclaration : Block
     {
       var.type.resolve(sc);
 
-      //writefln("Type is: %s", var.type);
-
       if(var.type.isReplacer)
-        {
-          //writefln("  (we're here!)");
-          var.type = var.type.getBase();
-        }
-
-      //writefln("  now it is: %s", var.type);
+        var.type = var.type.getBase();
 
       // Allow 'const' for function array parameters
       if(isParam && var.type.isArray())
@@ -310,7 +304,7 @@ class VarDeclaration : Block
               // We are inside ourselves
               assert(sc.isStruct);
 
-              fail("Struct variables cannot be used inside the struct itself!",
+              fail("Struct variables cannot be declared inside the struct itself!",
                    loc);
             }
         }
@@ -331,21 +325,14 @@ class VarDeclaration : Block
       assert(var.sc !is null, "variables can only be declared in VarScopes");
 
       if(!isParam)
-	{
-	  // If we are not a function parameter, we must get
-	  // var.number from the scope.
-	  if(sc.isClass())
-	    // Class variable. Get a position in the data segment.
-	    var.number = sc.addNewDataVar(var.type.getSize());
-	  else
-	    // We're a local variable. Ask the scope what number we
-	    // should have.
-	    var.number = sc.addNewLocalVar(var.type.getSize());
-	}
-      else assert(sc.isFunc());
+        // If we are not a function parameter, we must get
+        // var.number from the scope.
+        var.number = sc.addNewVar(var.type.getSize());
+      else
+        assert(sc.isFunc());
 
       // Insert ourselves into the scope.
-      sc.insertVar(var);
+      var.sc.insertVar(var);
     }
 
   int[] getCTimeValue()
@@ -397,8 +384,12 @@ class VarDeclaration : Block
 class VariableExpr : MemberExpression
 {
   Token name;
-  Variable *var;
-  Property prop;
+
+  ScopeLookup look;
+
+  // Used to simulate a member for imported variables
+  DotOperator dotImport;
+  bool recurse = true;
 
   enum VType
     {
@@ -413,7 +404,6 @@ class VariableExpr : MemberExpression
     }
 
   VType vtype;
-  int classIndex = -1;  // Index of the class that owns this variable.
 
   CIndex singCls = -1;  // Singleton class index
 
@@ -428,29 +418,23 @@ class VariableExpr : MemberExpression
     }
 
   // Does this variable name refer to a type name rather than an
-  // actual variable?
-  bool isType()
-    {
-      return type.isMeta();
-    }
+  // actual variable? TODO: Could be swapped for "requireStatic" or
+  // similar in expression instead.
+  bool isType() { return type.isMeta(); }
 
   bool isProperty()
   out(res)
   {
     if(res)
       {
-        assert(prop.name != "");
-        assert(var is null);
+        assert(vtype == VType.Property);
         assert(!isSpecial);
       }
-    else
-      {
-        assert(prop.name == "");
-      }
+    else assert(vtype != VType.Property);
   }
   body
   {
-    return vtype == VType.Property;
+    return look.isProperty();
   }
 
   bool isSpecial() { return vtype == VType.Special; }
@@ -467,7 +451,7 @@ class VariableExpr : MemberExpression
 
       // Properties may or may not be changable
       if(isProperty)
-        return prop.isLValue;
+        return look.isPropLValue;
 
       // Normal variables are always lvalues.
       return true;
@@ -477,18 +461,17 @@ class VariableExpr : MemberExpression
     {
       // Properties can be static
       if(isProperty)
-        return prop.isStatic;
+        return look.isPropStatic;
 
-      // Type names are always static. However, isType will return
-      // false for type names of eg. singletons, since these will not
-      // resolve to a meta type.
+      // Type names are always static.
       if(isType)
         return true;
 
+      // Currently no other static variables
       return false;
     }
 
-  // TODO: isCTime - should be usable for static properties and members
+  bool isCTime() { return isType; }
 
   void parse(ref TokenArray toks)
     {
@@ -496,20 +479,13 @@ class VariableExpr : MemberExpression
       loc = name.loc;
     }
 
-  void writeProperty()
-    {
-      assert(isProperty);
-      prop.setValue();
-    }
-
   void resolve(Scope sc)
     out
     {
       // Some sanity checks on the result
-      if(isProperty) assert(var is null);
-      if(var !is null)
+      if(look.isVar)
         {
-          assert(var.sc !is null);
+          assert(look.var.sc !is null);
           assert(!isProperty);
         }
       assert(type !is null);
@@ -521,36 +497,40 @@ class VariableExpr : MemberExpression
 	{
           // Look up the name in the scope belonging to the owner
           assert(leftScope !is null);
+          look = leftScope.lookup(name);
+
+          type = look.type;
 
           // Check first if this is a variable
-          var = leftScope.findVar(name.str);
-          if(var !is null)
+          if(look.isVar)
             {
-              // We are a member variable
-              type = var.type;
-
-              // The object pointer is pushed on the stack. We must
-              // also provide the class index, so the variable is
-              // changed in the correct class (it could be a parent
-              // class of the given object.)
+              // We are a class member variable.
               vtype = VType.FarOtherVar;
-              assert(var.sc.isClass);
-              classIndex = var.sc.getClass().getIndex();
+              assert(look.sc.isClass);
 
               return;
             }
 
-          // Check for properties last
-          if(leftScope.findProperty(name, ownerType, prop))
+          // Check for properties
+          if(look.isProperty)
             {
-              // We are a property
+              // TODO: Need to account for ownerType here somehow -
+              // rewrite the property system
               vtype = VType.Property;
-              type = prop.getType;
+              type = look.getPropType(ownerType);
+              return;
+            }
+
+          // Check types too
+          if(look.isType)
+            {
+              vtype = VType.Type;
+              type = look.type.getMeta();
               return;
             }
 
           // No match
-          fail(name.str ~ " is not a member of " ~ ownerType.toString,
+          fail(name.str ~ " is not a variable member of " ~ ownerType.toString,
                loc);
         }
 
@@ -564,54 +544,61 @@ class VariableExpr : MemberExpression
           return;
         }
 
-      if(name.type == TT.Const)
-        fail("Cannot use const as a variable", name.loc);
+      if(name.type == TT.Const || name.type == TT.Clone)
+        fail("Cannot use " ~ name.str ~ " as a variable", name.loc);
 
-      if(name.type == TT.Clone)
-        fail("Cannot use clone as a variable", name.loc);
+      // Not a member or a special name. Look ourselves up in the
+      // local scope, and include imported scopes.
+      look = sc.lookupImport(name);
+
+      if(look.isImport)
+        {
+          // We're imported from another scope. This means we're
+          // essentially a member variable. Let DotOperator handle
+          // this.
+
+          dotImport = new DotOperator(look.imphold, this, loc);
+          dotImport.resolve(sc);
+          return;
+        }
 
       // These are special cases that work both as properties
       // (object.state) and as non-member variables (state=...) inside
       // class functions / state code. Since we already handle them
-      // nicely as properties, treat them as properties.
+      // nicely as properties, treat them as properties even if
+      // they're not members.
       if(name.type == TT.Singleton || name.type == TT.State)
         {
           if(!sc.isInClass)
             fail(name.str ~ " can only be used in classes", name.loc);
 
-          if(!sc.findProperty(name, sc.getClass().objType, prop))
-            assert(0, "should have found property " ~ name.str ~
-                   " in scope " ~ sc.toString);
+          assert(look.isProperty, name.str ~ " expression not implemented yet");
 
           vtype = VType.Property;
-          type = prop.getType;
+          type = look.getPropType(ownerType);
           return;
         }
 
-      // Not a member, property or a special name. Look ourselves up
-      // in the local variable scope.
-      var = sc.findVar(name.str);
+      type = look.type;
 
-      if(var !is null)
+      if(look.isVar)
         {
-          type = var.type;
-
-          assert(var.sc !is null);
+          assert(look.sc !is null);
+          assert(look.sc is look.var.sc);
 
           // Class variable?
-          if(var.sc.isClass)
+          if(look.sc.isClass)
             {
               // Check if it's in THIS class, which is a common
               // case. If so, we can use a simplified instruction that
               // doesn't have to look up the class.
-              if(var.sc.getClass is sc.getClass)
+              if(look.sc.getClass is sc.getClass)
                 vtype = VType.ThisVar;
               else
                 {
                   // It's another class. For non-members this can only
                   // mean a parent class.
                   vtype = VType.ParentVar;
-                  classIndex = var.sc.getClass().getIndex();
                 }
             }
           else
@@ -620,46 +607,64 @@ class VariableExpr : MemberExpression
           return;
         }
 
-      // We are not a variable. Our last chance is a type name.
-      vtype = VType.Type;
-      if(BasicType.isBasic(name.str))
+      // We are not a variable. Last chance is a type name / class.
+      if(!look.isType && !look.isClass)
         {
-          // Yes! Basic type.
-          type = MetaType.getBasic(name.str);
+          // Still no match. Might be an unloaded class however,
+          // lookup() doesn't load classes. Try loading it.
+          if(global.findParsed(name.str) is null)
+            // No match at all.
+            fail("Undefined identifier "~name.str, name.loc);
+
+          // We found a class! Check that we can look it up now
+          look = sc.lookup(name);
+          assert(look.isClass);
         }
+
+      vtype = VType.Type;
+
       // Class name?
-      else if(auto mc = global.findParsed(name.str))
+      if(look.isClass)
         {
-          // This doesn't allow forward references.
-          mc.requireScope();
-          type = mc.classType;
+          assert(look.mc !is null);
+          look.mc.requireScope();
+
+          type = look.mc.classType;
 
           // Singletons are treated differently - the class name can
           // be used to access the singleton object
-          if(mc.isSingleton)
+          if(look.mc.isSingleton)
             {
-              type = mc.objType;
-              singCls = mc.getIndex();
+              type = look.mc.objType;
+              singCls = look.mc.getIndex();
             }
         }
-      // Struct?
-      else if(auto tp = sc.findStruct(name.str))
-        {
-          type = tp.getMeta();
-        }
-      // Err, enum?
-      else if(auto tp = sc.findEnum(name.str))
-        {
-          type = tp.getMeta();
-        }
       else
-        // No match at all
-        fail("Undefined identifier "~name.str, name.loc);
+        {
+          assert(look.type !is null);
+          type = look.type.getMeta();
+        }
+    }
+
+  int[] evalCTime()
+    {
+      assert(isCTime);
+      assert(isType);
+      assert(type.getSize == 0);
+      return null;
     }
 
   void evalAsm()
     {
-      assert(!isType);
+      // Hairy. But does the trick for now.
+      if(dotImport !is null && recurse)
+        {
+          recurse = false;
+          dotImport.evalAsm();
+          return;
+        }
+
+      if(isType) return;
 
       setLine();
 
@@ -675,7 +680,7 @@ class VariableExpr : MemberExpression
       // Property
       if(isProperty)
         {
-          prop.getValue();
+          look.getPropValue();
           return;
         }
 
@@ -692,6 +697,7 @@ class VariableExpr : MemberExpression
       // Normal variable
 
       int s = type.getSize;
+      auto var = look.var;
 
       if(vtype == VType.LocalVar)
         // This is a variable local to this function. The number gives
@@ -705,13 +711,13 @@ class VariableExpr : MemberExpression
 
       else if(vtype == VType.ParentVar)
         // Variable in a parent but this object
-        tasm.pushParentVar(var.number, classIndex, s);
+        tasm.pushParentVar(var.number, var.sc.getClass().getTreeIndex(), s);
 
       else if(vtype == VType.FarOtherVar)
         // Push the value from a "FAR pointer". The class index should
         // already have been pushed on the stack by DotOperator, we
         // only push the index.
-        tasm.pushFarClass(var.number, classIndex, s);
+        tasm.pushFarClass(var.number, var.sc.getClass().getTreeIndex(), s);
 
       else assert(0);
     }
@@ -719,6 +725,13 @@ class VariableExpr : MemberExpression
   // Push the address of the variable rather than its value
   void evalDest()
     {
+      if(dotImport !is null && recurse)
+        {
+          recurse = false;
+          dotImport.evalDest();
+          return;
+        }
+
       assert(!isType, "types can never be written to");
       assert(isLValue());
       assert(!isProperty);
@@ -726,28 +739,71 @@ class VariableExpr : MemberExpression
       setLine();
 
       // No size information is needed for addresses.
+      auto var = look.var;
 
       if(vtype == VType.LocalVar)
         tasm.pushLocalAddr(var.number);
       else if(vtype == VType.ThisVar)
         tasm.pushClassAddr(var.number);
       else if(vtype == VType.ParentVar)
-        tasm.pushParentVarAddr(var.number, classIndex);
+        tasm.pushParentVarAddr(var.number, var.sc.getClass().getTreeIndex());
       else if(vtype == VType.FarOtherVar)
-        tasm.pushFarClassAddr(var.number, classIndex);
+        tasm.pushFarClassAddr(var.number, var.sc.getClass().getTreeIndex());
 
       else assert(0);
     }
 
-  void postWrite()
+  void store()
     {
-      assert(!isProperty);
-      assert(isLValue());
-      assert(var.sc !is null);
-      if(var.isRef)
-        // TODO: This assumes all ref variables are foreach values,
-        // which will probably not be true in the future.
-        tasm.iterateUpdate(var.sc.getLoopStack());
+      if(dotImport !is null && recurse)
+        {
+          recurse = false;
+          dotImport.store();
+          return;
+        }
+
+      assert(isLValue);
+
+      if(isProperty)
+        look.setPropValue();
+      else
+        {
+          assert(look.isVar);
+          auto var = look.var;
+
+          // Get the destination and move the data
+          evalDest();
+          tasm.mov(type.getSize());
+
+          assert(var.sc !is null);
+          if(var.isRef)
+            // TODO: This assumes all ref variables are foreach values,
+            // which will probably not be true in the future.
+            tasm.iterateUpdate(var.sc.getLoopStack());
+        }
+    }
+
+  void incDec(TT op, bool post)
+    {
+      if(dotImport !is null && recurse)
+        {
+          recurse = false;
+          dotImport.incDec(op, post);
+          return;
+        }
+
+      if(!isProperty)
+        {
+          assert(look.isVar);
+          auto var = look.var;
+
+          super.incDec(op, post);
+
+          assert(var.sc !is null);
+          if(var.isRef)
+            tasm.iterateUpdate(var.sc.getLoopStack());
+        }
+      else fail("Cannot use ++ and -- on properties yet", loc);
     }
 }
 

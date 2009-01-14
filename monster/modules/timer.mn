@@ -1,0 +1,7 @@
+/*
+  NOTE: This file is not used - it is here just for reference. The
+  real module is defined internally in timer.d.
+ */
+
+singleton timer;
+idle sleep(float secs);

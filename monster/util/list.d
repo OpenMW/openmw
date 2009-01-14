@@ -27,8 +27,7 @@ module monster.util.list;
 // Set this to enable some more extensive list checks. These will loop
 // through the entire list on every insert and remove, so they are
 // very slow for large lists. But they are very handy bug catchers
-// when doing a little dirty list hacking, and they have saved me in
-// the past.
+// when doing a little dirty list hacking.
 
 // debug=slowcheck;
 
@@ -582,6 +581,10 @@ struct LinkedList(Value, alias Alloc = GCAlloc)
       return res;
     }
 }
+
+alias LinkedList!(void*, NoAlloc) PointerList;
+alias PointerList.Node vpNode;
+alias PointerList.Iterator vpIter;
 
 /* This test is NOT very complete */
 unittest

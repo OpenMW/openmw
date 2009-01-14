@@ -27,15 +27,17 @@ module monster.monster;
 public
 {
   // These should contain all you need for normal usage.
-  import monster.vm.mclass;
   import monster.vm.mobject;
+  import monster.vm.mclass;
   import monster.vm.stack;
   import monster.vm.vm;
-  import monster.vm.scheduler;
+  import monster.vm.thread;
   import monster.vm.idlefunction;
   import monster.vm.arrays;
   import monster.vm.params;
   import monster.vm.error;
+
+  import monster.modules.all;
 }
 
 private import monster.compiler.tokenizer;
@@ -54,6 +56,6 @@ static this()
 
   // Initialize VM
   scheduler.init();
-  stack.init();
+  initStack();
   arrays.initialize();
 }

@@ -38,11 +38,12 @@ import core.resource;
 class Idle_waitUntilFinished : IdleFunction
 {
  override:
-  bool initiate(MonsterObject *mo) { return true; }
+  bool initiate(Thread*) { return true; }
 
-  bool hasFinished(MonsterObject *mo)
+  bool hasFinished(Thread* trd)
   {
-    Jukebox mgr = cast(Jukebox)mo.extra;
+    Jukebox mgr = cast(Jukebox)trd.extraData.obj;
+    assert(mgr !is null);
 
     // Return when the music is no longer playing
     return !mgr.isPlaying();
@@ -179,7 +180,7 @@ class Jukebox
   this(MonsterObject *m)
   {
     mo = m;
-    m.extra = cast(void*)this;
+    m.getExtra(Music.jukeC).obj = this;
 
     sID = 0;
     bIDs[] = 0;
@@ -187,7 +188,7 @@ class Jukebox
 
   static Jukebox get(MonsterObject *m)
     {
-      auto j = cast(Jukebox)m.extra;
+      auto j = cast(Jukebox)m.getExtra(Music.jukeC).obj;
       assert(j !is null);
       assert(j.mo == m);
       return j;

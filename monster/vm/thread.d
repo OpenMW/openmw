@@ -28,17 +28,19 @@ import std.stdio;
 import std.uni;
 import std.c.string;
 
+import monster.util.freelist;
+
 import monster.compiler.bytecode;
 import monster.compiler.linespec;
 import monster.compiler.states;
 import monster.compiler.functions;
 import monster.compiler.scopes;
+import monster.compiler.types;
 
 import monster.vm.mclass;
 import monster.vm.mobject;
 import monster.vm.codestream;
 import monster.vm.stack;
-import monster.vm.scheduler;
 import monster.vm.idlefunction;
 import monster.vm.arrays;
 import monster.vm.iterators;
@@ -50,10 +52,18 @@ extern(C) void* memmove(void *dest, void *src, size_t n);
 
 extern(C) double floor(double d);
 
+import monster.util.list;
+alias _lstNode!(Thread) _tmp1;
+alias __FreeNode!(Thread) _tmp2;
+alias FreeList!(Thread) NodeList;
+
+// Current thread
+Thread *cthread;
+
 // This represents an execution 'thread' in the system. Each object
 // has its own thread. The thread contains a link to the object and
 // the class, along with some other data.
-struct CodeThread
+struct Thread
 {
   /*******************************************************
    *                                                     *
@@ -61,15 +71,114 @@ struct CodeThread
    *                                                     *
    *******************************************************/
 
-  // The object that "owns" this thread. This can only point to the
-  // top-most object in the linked parent object chain.
-  MonsterObject* topObj;
+  // This has been copied from ScheduleStruct, which is now merged
+  // with Thread. We'll sort it out later.
 
-  // Pointer to our current scheduling point. If null, we are not
-  // currently sceduled. Only applies to state code, not scheduled
-  // function calls.
-  CallNode scheduleNode;
+  // Some generic variables that idle functions can use to store
+  // temporary data off the stack.
+  SharedType idleData;
 
+  // The contents of idleObj's extra data for the idle's owner class.
+  SharedType extraData;
+
+  // Temporarily needed since we need a state and an object to push on
+  // the stack to return to state code. This'll change soon (we won't
+  // need to push anything to reenter, since the function stack will
+  // already be set up for us.)
+  MonsterObject * theObj;
+
+  Function *idle;
+  MonsterObject *idleObj; // Object owning the idle function
+  NodeList * list; // List owning this thread
+  int retPos; // Return position in byte code.
+
+  bool isActive; // Set to true whenever we are running from state
+		 // code. If we are inside the state itself, this will
+		 // be true and 'next' will be 1.
+  bool stateChange; // Set to true when a state change is in
+		    // progress. Only used when state is changed from
+		    // within a function in active code.
+
+  // Unschedule this node from the runlist or waitlist it belongs to,
+  // but don't kill it. Any idle function connected to this node is
+  // aborted.
+  void cancel()
+  {
+    if(idle !is null)
+      {
+        fstack.pushIdleAbort(idle, idleObj);
+        idle.idleFunc.abort(this);
+        fstack.pop();
+        idle = null;
+      }
+    retPos = -1;
+    moveTo(&scheduler.unused);
+
+    assert(!isScheduled);
+  }
+
+  static Thread* getNew(MonsterObject *obj = null)
+  {
+    auto cn = scheduler.unused.getNew();
+    cn.list = &scheduler.unused;
+    cn.initialize(obj);
+    return cn;
+  }
+
+  // Remove the thread comletely
+  void kill()
+  {
+    cancel();
+    list.remove(this);
+    list = null;
+  }
+
+  // Schedule this thread to run next frame
+  void schedule(uint offs)
+  {
+    assert(!isScheduled,
+           "cannot schedule an already scheduled thread");
+
+    retPos = offs;
+    moveTo(scheduler.runNext);
+  }
+
+  // Move this node to another list.
+  void moveTo(NodeList *to)
+  {
+    assert(list !is null);
+    list.moveTo(*to, this);
+    list = to;
+  }
+
+  // Are we currently scheduled?
+  bool isScheduled()
+  {
+    // The node is per definition scheduled if it is in one of these
+    // lists
+    return
+      list is &scheduler.wait ||
+      list is scheduler.run ||
+      list is scheduler.runNext;
+  }
+
+  bool isUnused()
+  {
+    return list is &scheduler.unused;
+  }
+
+  bool isIdle() { return idle !is null; }
+
+  // Get the next node in the freelist
+  Thread* getNext()
+  {
+    // Simple hack. The Thread (pointed at by the Thread*) is the
+    // first part of, and therefore in the same location as, the
+    // iterator struct for the FreeList. This is per design, so it's
+    // ok to cast the pointer.
+    return cast(Thread*)
+      ( cast(NodeList.TList.Iterator)this ).getNext();
+  }
 
   /*******************************************************
    *                                                     *
@@ -77,43 +186,70 @@ struct CodeThread
    *                                                     *
    *******************************************************/
 
-  void initialize(MonsterObject* top)
+  void initialize(MonsterObject *obj)
   {
-    topObj = top;
+    theObj = obj;
 
     // Initialize other variables
-    state = null; // Start in the empty state
-    scheduleNode = null;
+    idle = null;
+    idleObj = null;
     isActive = false;
     stateChange = false;
+    retPos = -1;
   }
 
-  State* getState() { return state; }
-
-  // Call state code for this object. 'pos' gives the byte position
-  // within the bytecode. It is called when a new state is entered, or
-  // when an idle funtion returns. The state must already be set with
-  // setState
-  void callState(int pos)
+  // Reenter this thread to the point where it was previously stopped.
+  void reenter()
   {
-    assert(state !is null, "attempted to call the empty state");
-    assert(!isActive,
-           "callState cannot be called when object is already active");
-    assert(fstack.isEmpty,
-	   "ctate code can only run at the bottom of the function stack");
+    assert(theObj !is null,
+           "cannot reenter a non-state thread yet");
 
-    // Set a bool to indicate that we are now actively running state
-    // code.
+    // Most if not all of these checks will have to be removed in the
+    // future
+    assert(theObj.state !is null, "attempted to call the empty state");
+    assert(!isActive,
+           "reenter cannot be called when object is already active");
+    assert(fstack.isEmpty,
+	   "state code can only run at the bottom of the function stack");
+    assert(isScheduled);
+
+    if(isIdle)
+      {
+        assert(idle !is null);
+        assert(idleObj !is null || idle.isStatic);
+
+        // Tell the idle function that we we are reentering
+        fstack.pushIdleReentry(idle, idleObj);
+        idle.idleFunc.reentry(this);
+        fstack.pop();
+
+        // We're no longer idle
+        idle = null;
+      }
+
+    // Remove the current node from the run list
+    moveTo(&scheduler.unused);
+
+    // Set the active flat to indicate that we are now actively
+    // running. (Might not be needed in the future)
     isActive = true;
 
-    // Set up the code stack
-    fstack.push(state, topObj.upcast(state.sc.getClass()));
+    // Set the thread
+    assert(cthread is null);
+    cthread = this;
+
+    // Set up the code stack for state code.
+    fstack.push(theObj.state, theObj);
 
     // Set the position
-    fstack.cur.code.jump(pos);
+    assert(retPos >= 0);
+    fstack.cur.code.jump(retPos);
 
     // Run the code
     execute();
+
+    // Reset the thread
+    cthread = null;
 
     // We are no longer active
     isActive = false;
@@ -123,98 +259,10 @@ struct CodeThread
                   stack.getPos));
 
     fstack.pop();
+
   }
 
-  /* Set state. Invoked by the statement "state = statename;". This
-     function can be called in several situations, with various
-     results:
-
-     + setState called with current state, no label
-       -> no action is performed
-
-     + setState called with another state
-     + setState called with current state + a label
-       -> state is changed normally
-
-     If a state change takes place directly in state code, the code is
-     aborted immediately. If it takes place in a function called from
-     state code, then code flow is allowed to return normally back to
-     the state code level, but is aborted immediately once it reaches
-     state code.
-
-     State changes outside state code will always unschedule any
-     previously scheduled code (such as idle functions, or previous
-     calls to setState.)
-   */
-  void setState(State *st, StateLabel *label)
-  {
-    // If no label is specified and we are already in this state, then
-    // do nothing.
-    if(st is state && label is null)
-      return;
-
-    // Does the state actually change?
-    if(st !is state)
-      {
-        // If so, we must handle state functions and other magic here.
-      }
-
-    // Set the state
-    state = st;
-
-    // If we are already scheduled (if an idle function has scheduled
-    // us, or if setState has been called multiple times),
-    // unschedule. This will automatically cancel any scheduled idle
-    // functions and call their abort() functions.
-    if(scheduleNode)
-      scheduleNode.cancel();
-
-    // If we are jumping to anything but the empty state, we might
-    // have to schedule some code.
-    if(st !is null)
-      {
-        // Check that this state is valid
-        assert(st.sc.getClass().parentOf(topObj), "state '" ~ st.name.str ~
-               "' is not part of class " ~ topObj.cls.getName());
-
-        if(label is null)
-          // findLabel will return null if the label is not found.
-          // TODO: The begin label should probably be cached within
-          // State.
-          label = st.findLabel("begin");
-
-        // Reschedule the new state for the next frame, if a label is
-        // specified. We have to cast to find the right object first
-        // though.
-        auto mo = topObj.upcast(st.sc.getClass());
-
-        if(label !is null)
-          scheduler.scheduleState(mo, label.offs);
-      }
-
-    assert(isActive || !stateChange,
-           "stateChange was set outside active code");
-
-    // If we are running from state code, signal it that we must now
-    // abort execution when we reach the state level.
-    stateChange = isActive;
-  }
-
-  /*******************************************************
-   *                                                     *
-   *     Private variables                               *
-   *                                                     *
-   *******************************************************/
   private:
-
-  bool isActive; // Set to true whenever we are running from state
-		 // code. If we are inside the state itself, this will
-		 // be true and 'next' will be 1.
-  bool stateChange; // Set to true when a state change is in
-		    // progress. Only used when state is changed from
-		    // within a function in active code.
-  State *state;  // Current state, null is the empty state.
-
   /*******************************************************
    *                                                     *
    *     Private helper functions                        *
@@ -234,113 +282,47 @@ struct CodeThread
     .fail(msg, file, line);
   }
 
-  // Index version of setState - called from bytecode
-  void setState(int st, int label, int cls)
-  {
-    if(st == -1)
-      {
-        assert(label == -1);
-        setState(null, null);
-        return;
-      }
-
-    auto mo = topObj.upcastIndex(cls);
-
-    auto pair = mo.cls.findState(st, label);
-    setState(pair.state, pair.label);
-
-    assert(pair.state.index == st);
-    assert(pair.state.sc.getClass().getIndex == cls);
-  }
-
-  void callIdle()
+  // Parse the BC.CallIdle instruction parameters and call schedule
+  // the given idle function.
+  void callIdle(MonsterObject *iObj)
   {
     assert(isActive && fstack.isStateCode,
-           "Byte code attempted to call an idle function outside of state code.");
+           "Byte code attempted to call an idle function outside of state code.");    assert(!isScheduled, "Thread is already scheduled");
 
     CodeStream *code = &fstack.cur.code;
 
-    // Get the correct object
-    MonsterObject *mo = topObj.upcastIndex(code.getInt());
+    // Store the object
+    idleObj = iObj;
+    assert(idleObj !is null);
 
-    // And the function
-    Function *fn = mo.cls.findFunction(code.getInt());
-    assert(fn !is null && fn.isIdle);
+    // Get the class from the index
+    auto cls = iObj.cls.upcast(code.getInt());
+
+    // Get the function
+    idle = cls.findFunction(code.getInt());
+    assert(idle !is null && idle.isIdle);
+    assert(cls is idle.owner);
+    assert(idleObj.cls.childOf(cls));
 
     // The IdleFunction object bound to this function is stored in
-    // fn.idleFunc
-    if(fn.idleFunc is null)
-      fail("Called unimplemented idle function '" ~ fn.name.str ~ "'");
+    // idle.idleFunc
+    if(idle.idleFunc is null)
+      fail("Called unimplemented idle function '" ~ idle.name.str ~ "'");
 
-    // Tell the scheduler that an idle function was called. It
-    // will reschedule us as needed.
-    scheduler.callIdle(mo, fn, fstack.cur.code.getPos);
+    // Set the return position
+    retPos = fstack.cur.code.getPos();
+
+    // Set up extraData
+    extraData = *idleObj.getExtra(idle.owner);
+
+    // Notify the idle function
+    fstack.pushIdleInit(idle, idleObj);
+    if(idle.idleFunc.initiate(this))
+      moveTo(&scheduler.wait);
+    fstack.pop();
   }
 
-  // Pops a pointer off the stack. Null pointers will throw an
-  // exception.
-  int *popPtr(MonsterObject *obj)
-  {
-    PT type;
-    int index;
-    decodePtr(stack.popInt(), type, index);
-
-    // Null pointer?
-    if(type == PT.Null)
-      fail("Cannot access value, null pointer");
-  
-    // Local variable?
-    if(type == PT.Stack)
-      return stack.getFrameInt(index);
-
-    // Variable in this object
-    if(type == PT.DataOffs)
-      return obj.getDataInt(index);
-
-    // This object, but another (parent) class
-    if(type == PT.DataOffsCls)
-      {
-        // We have to pop the class index of the stack as well
-        return obj.upcastIndex(stack.popInt()).getDataInt(index);
-      }
-
-    // Far pointer, with offset. Both the class index and the object
-    // reference is on the stack.
-    if(type == PT.FarDataOffs)
-      {
-        int clsIndex = stack.popInt();
-
-	// Get the object reference from the stack
-	MonsterObject *tmp = stack.popObject();
-
-        // Cast the object to the correct class
-        tmp = tmp.upcastIndex(clsIndex);
-
-	// Return the correct pointer
-	return tmp.getDataInt(index);
-      }
-
-    // Array pointer
-    if(type == PT.ArrayIndex)
-      {
-        assert(index==0);
-        // Array indices are on the stack, not in the opcode.
-        index = stack.popInt();
-        ArrayRef *arf = stack.popArray();
-        assert(!arf.isNull);
-        if(arf.isConst)
-          fail("Cannot assign to constant array");
-        index *= arf.elemSize;
-        if(index < 0 || index >= arf.iarr.length)
-          fail("Array index " ~ .toString(index/arf.elemSize) ~
-               " out of bounds (array length " ~ .toString(arf.length) ~ ")");
-        return &arf.iarr[index];
-      }
-
-    fail("Unable to handle pointer type " ~ toString(cast(int)type));
-  }
-
-  bool shouldExitState()
+  bool shouldExit()
   {
     if(fstack.isStateCode && stateChange)
       {
@@ -372,21 +354,87 @@ struct CodeThread
   {
     // The maximum amount of instructions we execute before assuming
     // an infinite loop.
-    const long limit = 10000000;
+    static const long limit = 10000000;
 
     assert(fstack.cur !is null,
-	   "CodeThread.execute called but there is no code on the function stack.");
+	   "Thread.execute called but there is no code on the function stack.");
+
+    assert(cthread == this,
+           "can only run the current thread");
 
     // Get some values from the function stack
     CodeStream *code = &fstack.cur.code;
     MonsterObject *obj = fstack.cur.obj;
     MonsterClass cls = fstack.cur.cls;
+    int clsInd = cls.getTreeIndex();
 
     // Only an object belonging to this thread can be passed to
     // execute() on the function stack.
-    assert(obj is null || cls.parentOf(topObj));
+    assert(obj is null || cls.parentOf(obj));
+    assert(obj is null || obj.cls.upcast(cls) == clsInd);
+    assert(obj !is null || fstack.cur.isStatic);
 
-    // Reduce or remove as many of these as possible
+    // Pops a pointer off the stack. Null pointers will throw an
+    // exception.
+    int *popPtr()
+      {
+        PT type;
+        int index;
+        decodePtr(stack.popInt(), type, index);
+
+        // Null pointer?
+        if(type == PT.Null)
+          fail("Cannot access value, null pointer");
+  
+        // Stack variable?
+        if(type == PT.Stack)
+          return stack.getFrameInt(index);
+
+        // Variable in this object
+        if(type == PT.DataOffs)
+          return obj.getDataInt(clsInd, index);
+
+        // This object, but another (parent) class
+        if(type == PT.DataOffsCls)
+          // We have to pop the class index of the stack as well
+          return obj.getDataInt(stack.popInt, index);
+
+        // Far pointer, with offset. Both the class index and the object
+        // reference is on the stack.
+        if(type == PT.FarDataOffs)
+          {
+            int clsIndex = stack.popInt();
+
+            // Get the object reference from the stack
+            MonsterObject *tmp = stack.popObject();
+
+            // Return the correct pointer
+            return tmp.getDataInt(clsIndex, index);
+          }
+
+        // Array pointer
+        if(type == PT.ArrayIndex)
+          {
+            assert(index==0);
+            // Array indices are on the stack
+            index = stack.popInt();
+            ArrayRef *arf = stack.popArray();
+            assert(!arf.isNull);
+
+            if(arf.isConst)
+              fail("Cannot assign to constant array");
+
+            index *= arf.elemSize;
+            if(index < 0 || index >= arf.iarr.length)
+              fail("Array index " ~ .toString(index/arf.elemSize) ~
+               " out of bounds (array length " ~ .toString(arf.length) ~ ")");
+            return &arf.iarr[index];
+          }
+
+        fail("Unable to handle pointer type " ~ toString(cast(int)type));
+      }
+
+    // Various temporary stuff
     int *ptr;
     long *lptr;
     float *fptr;
@@ -396,7 +444,7 @@ struct CodeThread
     int val, val2;
     long lval;
 
-    // Disable this for now. It should be a per-function option, perhaps,
+    // Disable this for now.
     // or at least a compile time option.
     //for(long i=0;i<limit;i++)
     for(;;)
@@ -416,25 +464,22 @@ struct CodeThread
 
 	  case BC.Call:
             {
-              // Lots of potential for optimization here. But DON'T do
-              // that yet.
-
               // Get the correct function from the virtual table
               val = code.getInt(); // Class index
-              auto fn = topObj.cls.findVirtualFunc(val, code.getInt());
+              auto fn = obj.cls.findVirtualFunc(val, code.getInt());
 
               // Finally, call
-              fn.call(topObj);
+              fn.call(obj);
 
-              if(shouldExitState()) return;
+              if(shouldExit()) return;
               break;
             }
 
           case BC.CallFar:
             {
-              // Get the correct function from the virtual table
-              auto mo = stack.popObject().thread.topObj;
+              auto mo = stack.popObject();
 
+              // Get the correct function from the virtual table
               val = code.getInt(); // Class index
               auto fn = mo.cls.findVirtualFunc(val, code.getInt());
 
@@ -442,15 +487,16 @@ struct CodeThread
               fn.call(mo);
 
               // Exit state code if the state was changed
-              if(shouldExitState()) return;
+              if(shouldExit()) return;
               break;
             }
 
           case BC.CallIdle:
-            // Initiate the idle function.
-            assert(isActive && fstack.isStateCode,
-                   "idle call encountered outside state code.");
-            callIdle();
+            callIdle(obj);
+            return;
+
+          case BC.CallIdleFar:
+            callIdle(stack.popObject());
             return;
 
 	  case BC.Return:
@@ -473,8 +519,8 @@ struct CodeThread
             val = code.getInt(); // State index
             val2 = code.getInt(); // Label index
 	    // Get the class index and let setState handle everything
-	    setState(val, val2, code.getInt());
-            if(shouldExitState()) return;
+	    obj.setState(val, val2, code.getInt());
+            if(shouldExit()) return;
 	    break;
 
           case BC.Halt:
@@ -520,33 +566,34 @@ struct CodeThread
 	    break;
 
 	  case BC.PushClassVar:
-	    stack.pushInt(*obj.getDataInt(code.getInt()));
+	    stack.pushInt(*obj.getDataInt(clsInd, code.getInt()));
 	    break;
 
           case BC.PushParentVar:
-            {
-              // Get object to work on.
-              MonsterObject *mo = obj.upcastIndex(code.getInt());
-              assert(mo !is obj, "should use PushClassVar");
-              stack.pushInt(*mo.getDataInt(code.getInt()));
-            }
+            // Get the tree index
+            val = code.getInt();
+            stack.pushInt(*obj.getDataInt(val, code.getInt()));
             break;
 
 	  case BC.PushFarClassVar:
             {
               // Get object to work on
-              MonsterObject *mo = stack.popObject().upcastIndex(code.getInt());
-              stack.pushInt(*mo.getDataInt(code.getInt()));
+              MonsterObject *mo = stack.popObject();
+              // And the tree index
+              val = code.getInt();
+              stack.pushInt(*mo.getDataInt(val, code.getInt()));
             }
 	    break;
 
 	  case BC.PushFarClassMulti:
             {
-              val = code.getInt(); // Variable size
+              int siz = code.getInt(); // Variable size
               // Get object to work on
-              MonsterObject *mo = stack.popObject().upcastIndex(code.getInt());
+              MonsterObject *mo = stack.popObject();
+              // And the tree index
+              val = code.getInt();  // Class tree index
               val2 = code.getInt(); // Data segment offset
-              stack.pushInts(mo.getDataArray(val2,val));
+              stack.pushInts(mo.getDataArray(val,val2,siz));
             }
 	    break;
 
@@ -556,7 +603,6 @@ struct CodeThread
 	    break;
 
 	  case BC.PushSingleton:
-	    // Push the index of this object.
 	    stack.pushObject(global.getClass(cast(CIndex)code.getInt).getSing);
 	    break;
 
@@ -569,19 +615,19 @@ struct CodeThread
 	  case BC.StoreRet:
 	    // Get the pointer off the stack, and convert it to a real
 	    // pointer.
-	    ptr = popPtr(obj);
+	    ptr = popPtr();
 	    // Read the value and store it, but leave it in the stack
 	    *ptr = *stack.getInt(0);
 	    break;
 
 	  case BC.StoreRet8:
-            ptr = popPtr(obj);
+            ptr = popPtr();
             *(cast(long*)ptr) = *stack.getLong(1);
             break;
 
           case BC.StoreRetMult:
             val = code.getInt(); // Size
-            ptr = popPtr(obj);
+            ptr = popPtr();
             ptr[0..val] = stack.getInts(val-1, val);
             break;
 
@@ -816,42 +862,42 @@ struct CodeThread
             break;
 
 	  case BC.PreInc:
-	    ptr = popPtr(obj);
+	    ptr = popPtr();
 	    stack.pushInt(++(*ptr));
 	    break;
 
 	  case BC.PreDec:
-	    ptr = popPtr(obj);
+	    ptr = popPtr();
 	    stack.pushInt(--(*ptr));
 	    break;
 
 	  case BC.PostInc:
-	    ptr = popPtr(obj);
+	    ptr = popPtr();
 	    stack.pushInt((*ptr)++);
 	    break;
 
 	  case BC.PostDec:
-	    ptr = popPtr(obj);
+	    ptr = popPtr();
 	    stack.pushInt((*ptr)--);
 	    break;
 
 	  case BC.PreInc8:
-	    lptr = cast(long*)popPtr(obj);
+	    lptr = cast(long*)popPtr();
 	    stack.pushLong(++(*lptr));
 	    break;
 
 	  case BC.PreDec8:
-	    lptr = cast(long*)popPtr(obj);
+	    lptr = cast(long*)popPtr();
 	    stack.pushLong(--(*lptr));
 	    break;
 
 	  case BC.PostInc8:
-	    lptr = cast(long*)popPtr(obj);
+	    lptr = cast(long*)popPtr();
 	    stack.pushLong((*lptr)++);
 	    break;
 
 	  case BC.PostDec8:
-	    lptr = cast(long*)popPtr(obj);
+	    lptr = cast(long*)popPtr();
 	    stack.pushLong((*lptr)--);
 	    break;
 
@@ -953,49 +999,18 @@ struct CodeThread
             stack.pushDouble(stack.popFloat);
             break;
 
-          case BC.CastI2S:
+          case BC.CastT2S:
             {
-              val = code.get();
-              char[] res;
-              if(val == 1) res = .toString(stack.popInt);
-              else if(val == 2) res = .toString(stack.popUint);
-              else if(val == 3) res = .toString(stack.popLong);
-              else if(val == 4) res = .toString(stack.popUlong);
-              else assert(0);
-              stack.pushArray(res);
+              // Get the type to cast from
+              val = code.getInt();
+              Type t = Type.typeList[val];
+              // Get the data
+              iarr = stack.popInts(t.getSize());
+              // Let the type convert to string
+              char[] str = t.valToString(iarr);
+              // And push it back
+              stack.pushArray(str);
             }
-            break;
-
-          case BC.CastF2S:
-            {
-              val = code.get();
-              char[] res;
-              if(val == 1) res = .toString(stack.popFloat);
-              else if(val == 2) res = .toString(stack.popDouble);
-              else assert(0);
-              stack.pushArray(res);
-            }
-            break;
-
-          case BC.CastB2S:
-            stack.pushArray(.toString(stack.popBool));
-            break;
-
-          case BC.CastO2S:
-            {
-              MIndex idx = stack.popMIndex();
-              if(idx != 0)
-                stack.pushArray(format("%s#%s", getMObject(idx).cls.getName,
-                                       cast(int)idx));
-              else
-                stack.pushCArray("(null object)");
-            }
-            break;
-
-          case BC.Upcast:
-            // TODO: If classes ever get more than one index, it might
-            // be more sensible to use the global class index here.
-            stack.pushObject(stack.popObject().upcastIndex(code.getInt()));
             break;
 
           case BC.FetchElem:
@@ -1012,14 +1027,6 @@ struct CodeThread
 
           case BC.GetArrLen:
             stack.pushInt(stack.popArray().length);
-            break;
-
-          case BC.MakeArray:
-            val = code.getInt(); // The data segment offset
-            val2 = code.getInt(); // Element size
-            // Get the raw length (array length * elem size) and
-            // create the new array from data.
-            stack.pushArray(obj.getDataArray(val, code.getInt()), val2);
             break;
 
           case BC.PopToArray:
@@ -1266,4 +1273,128 @@ void swap(int[] a, int[] b)
       a[] = b[];
       b[] = buf[0..len];
     }
+}
+
+// The scheduler singleton
+Scheduler scheduler;
+
+struct Scheduler
+{
+  // Run lists - threads that run this or the next round.
+  NodeList run1, run2;
+
+  // Waiting list - idle threads that are actively checked each frame.
+  NodeList wait;
+
+  // List of unused nodes. Any thread in this list (that is not
+  // actively running) can and will be deleted eventually.
+  NodeList unused;
+
+  // The run lists for this and the next round. We use pointers to the
+  // actual lists, since we want to swap them easily.
+  NodeList* runNext, run;
+
+  void init()
+  {
+    // Assign the run list pointers
+    run = &run1;
+    runNext = &run2;
+  }
+
+  // Statistics:
+
+  // Number of elements in the waiting list
+  int numWait() { return wait.length; }
+
+  // Number of elements scheduled to run the next frame
+  int numRun() { return runNext.length; }
+
+  // Number of remaining elements this frame
+  int numLeft() { return run.length; }
+
+  // Total number of objects scheduled or waiting
+  int numTotal()
+  { return numRun() + numWait() + numLeft(); }
+
+  // Do a complete frame. TODO: Make a distinction between a round and
+  // a frame later. We could for example do several rounds per frame,
+  // measured by some criterion of how much time we want to spend on
+  // script code or whether there are any pending items in the run
+  // list. We could do several runs of the run-list (to handle state
+  // changes etc) but only one run on the condition list (actually
+  // that is a good idea.) We also do not have to execute everything in
+  // the run list if it is long (otoh, allowing a build-up is not
+  // good.) But all this falls in the "optimization" category.
+  void doFrame()
+  {
+    checkConditions();
+    dispatch();
+  }
+
+  void checkConditions()
+  {
+    // Go through the condition list for this round.
+    Thread* cn = wait.getHead();
+    Thread* next;
+    while(cn != null)
+      {
+	// Get the next node here, since the current node might move
+	// somewhere else during this iteration, and then getNext will
+	// point to another list.
+	next = cn.getNext();
+
+        assert(cn.isScheduled);
+
+	// This is an idle function and it is finished. Note that
+	// hasFinished() is NOT allowed to change the wait list in any
+	// way, ie to change object states or interact with the
+	// scheduler. In fact, hasFinished() should do as little as
+	// possible.
+	if(cn.isIdle)
+	  {
+            fstack.pushIdleCheck(cn.idle, cn.idleObj);
+            if(cn.idle.idleFunc.hasFinished(cn))
+              // Schedule the code to start running again this round. We
+              // move it from the wait list to the run list.
+              cn.moveTo(runNext);
+
+            fstack.pop();
+	  }
+	// Set the next item
+	cn = next;
+      }
+  }
+
+  void dispatch()
+  {
+    // Swap the runlist for the next frame with the current one. All
+    // code that is scheduled after this point is executed the next
+    // frame.
+    auto tmp = runNext;
+    runNext = run;
+    run = tmp;
+
+    // Now execute the run list for this frame. Note that items might
+    // be removed from the run list as we go (eg. if a scheduled
+    // object has it's state changed) but this is handled. New nodes
+    // might also be scheduled, but these are added to the runNext
+    // list.
+
+    // First element
+    Thread* cn = run.getHead();
+    while(cn != null)
+      {
+        // Execute
+        cn.reenter();
+
+        // The function stack should now be at zero
+        assert(fstack.isEmpty());
+
+	// Get the next item.
+	cn = run.getHead();
+      }
+
+    // Check that we cleared the run list
+    assert(run.length == 0);
+  }
 }
