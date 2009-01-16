@@ -27,7 +27,6 @@ module monster.vm.codestream;
 import std.string;
 import std.stdio;
 import monster.vm.error;
-import monster.compiler.linespec;
 
 // CodeStream is a simple utility structure for reading data
 // sequentially. It holds a piece of byte compiled code, and keeps
@@ -39,24 +38,11 @@ struct CodeStream
   int len;
   ubyte *pos;
 
-  // Position of the last instruction
-  ubyte *cmdPos;
-
-  // Used to convert position to the corresponding source code line,
-  // for error messages.
-  LineSpec[] lines;
-
-  // Size of debug output
-  const int preView = 50;
-  const int perLine = 16;
-
   public:
 
-  void setData(ubyte[] data,
-               LineSpec[] lines)
+  void setData(ubyte[] data)
   {
     this.data = data;
-    this.lines = lines;
     len = data.length;
     pos = data.ptr;
   }
@@ -64,32 +50,9 @@ struct CodeStream
   // Called when the end of the stream was unexpectedly encountered
   void eos(char[] func)
   {
-    char[] res = format("Premature end of input:\nCodeStream.%s() missing %s byte(s)\n",
+    char[] res = format("Premature end of input: %s() missing %s byte(s)",
 			func, -len);
-
-    res ~= debugString();
-
     fail(res);
-  }
-
-  char[] debugString()
-  {
-    int start = data.length - preView;
-    if(start < 0) start = 0;
-
-    char[] res = format("\nLast %s bytes of byte code:\n", data.length-start);
-    foreach(int i, ubyte val; data[start..$])
-      {
-	if(i%perLine == 0)
-	  res ~= format("\n 0x%-4x:   ", i+start);
-	res ~= format("%-4x", val);
-      }
-    return res;
-  }
-
-  void debugPrint()
-  {
-    writefln(debugString());
   }
 
   // Jump to given position
@@ -107,25 +70,10 @@ struct CodeStream
     return pos-data.ptr;
   }
 
-  // Get the current line
-  int getLine()
-  {
-    // call shared.linespec.findLine
-    return findLine(lines, cmdPos-data.ptr);
-  }
-
   ubyte get()
   {
     if(len--) return *(pos++);
     eos("get");
-  }
-
-  // Used for getting an instruction. It stores the offset which can
-  // be used to infer the line number later.
-  ubyte getCmd()
-  {
-    cmdPos = pos;
-    return get();
   }
 
   int getInt()

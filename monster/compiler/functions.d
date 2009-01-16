@@ -78,16 +78,32 @@ typedef extern(C) void function() c_callback;
 
 struct Function
 {
+  // These three variables (owner, lines and bcode) are common between
+  // Function and State. They MUST be placed and ordered equally in
+  // both structs because we're use some unsafe pointer trickery.
+  MonsterClass owner;
+  LineSpec[] lines; // Line specifications for byte code
+  union
+  {
+    ubyte[] bcode; // Final compiled code (normal functions)
+    dg_callback natFunc_dg; // Various types of native functions
+    fn_callback natFunc_fn;
+    c_callback natFunc_c;
+    IdleFunction idleFunc; // Idle function callback
+  }
+
+  Token name;
   Type type; // Return type
   FuncType ftype; // Function type
-  Token name;
   Variable* params[]; // List of parameters
-  MonsterClass owner;
   int index; // Unique function identifier within its class
 
   int paramSize;
+
+  /*
   int imprint; // Stack imprint of this function. Equals
-               // (type.getSize() - paramSize) (NOT USED YET)
+               // (type.getSize() - paramSize) (not implemented yet)
+  */
 
   // Is this function final? (can not be overridden in child classes)
   bool isFinal;
@@ -97,16 +113,6 @@ struct Function
 
   // What function we override (if any)
   Function *overrides;
-
-  union
-  {
-    ubyte[] bcode; // Final compiled code (normal functions)
-    dg_callback natFunc_dg; // Various types of native functions
-    fn_callback natFunc_fn;
-    c_callback natFunc_c;
-    IdleFunction idleFunc; // Idle function callback
-  }
-  LineSpec[] lines; // Line specifications for byte code
 
   bool isNormal() { return ftype == FuncType.Normal; }
   bool isNative()
@@ -138,7 +144,7 @@ struct Function
   // native code.
   void call(MonsterObject *obj)
   {
-    assert(obj !is null);
+    assert(obj !is null || isStatic);
 
     // Make sure there's a thread to use
     bool wasNew;
@@ -187,9 +193,18 @@ struct Function
         // kill it.
         if(cthread.isUnused)
           cthread.kill();
+        else
+          // Otherwise, store the stack
+          cthread.acquireStack();
 
         cthread = null;
+
+        assert(fstack.isEmpty);
       }
+    // I think we could also check fstack if it's empty instead of
+    // using wasNew. Leave these checks here to see if this assumtion
+    // is correct.
+    else assert(!fstack.isEmpty);
   }
 
   // Call without an object. TODO: Only allowed for functions compiled

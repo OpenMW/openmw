@@ -36,6 +36,7 @@ import monster.compiler.assembler;
 import monster.compiler.scopes;
 
 import monster.modules.timer;
+import monster.modules.frames;
 
 import std.file;
 import monster.util.string;
@@ -64,6 +65,8 @@ struct VM
   {
     if(time != 0)
       idleTime.add(time);
+
+    updateFrames(time);
 
     scheduler.doFrame();
   }

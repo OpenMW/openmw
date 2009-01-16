@@ -224,15 +224,7 @@ void initializeInput()
   // put another import in core.config. I should probably check the
   // bug list and report it.
   updateMouseSensitivity();
-
-  // Set up the FPS ticker
-  auto mo = (new MonsterClass("FPSTicker")).getSing();
-  frameCount = mo.getIntPtr("frameCount");
-  mo.setState("tick");
 }
-
-// Points directly to FPSTicker.frameCounter in Monster
-int *frameCount;
 
 extern(C) int ois_isPressed(int keysym);
 
@@ -247,8 +239,6 @@ bool isPressed(Keys key)
 
 extern(C) int d_frameStarted(float time)
 {
-  (*frameCount)++;
-
   if(doExit) return 0;
 
   // Run the Monster scheduler

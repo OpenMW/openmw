@@ -3,8 +3,7 @@ singleton FPSTicker;
 
 import io, timer;
 
-// This is updated automatically by input/events.d
-int frameCount;
+ulong lastFrame;
 
 float delay = 1.5;
 
@@ -12,7 +11,7 @@ state tick
 {
  begin:
   sleep(delay);
-  print("fps: ", frameCount / delay);
-  frameCount = 0;
+  print("fps:", (frames.counter-lastFrame) / delay);
+  lastFrame = frames.counter;
   goto begin;
 }

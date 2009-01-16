@@ -38,6 +38,13 @@ import std.stdio;
 
 struct State
 {
+  // These three variables (owner, lines and bcode) are common between
+  // Function and State. They MUST be placed and ordered equally in
+  // both structs because we're use some unsafe pointer trickery.
+  MonsterClass owner;
+  LineSpec[] lines; // Line specifications for byte code
+  ubyte[] bcode; // Final compiled code
+
   Token name;
   int index;
 
@@ -45,15 +52,15 @@ struct State
   HashTable!(char[], StateLabel*) labels;
   StateLabel* labelList[];
 
+  // Cache the begin label since it has special meaning and is looked
+  // up often.
+  StateLabel* begin;
+
   StateScope sc; // Scope for this state
-  MonsterClass owner; // Class where this state was defined
 
   // State declaration - used to resolve forward references. Should
   // not be kept around when compilation is finished.
   StateDeclaration stateDec;
-
-  ubyte[] bcode;
-  LineSpec[] lines;
 
   StateLabel* findLabel(char[] name)
     {
@@ -209,6 +216,13 @@ class StateDeclaration : Statement
           assert(name == sl.name.str, "label name mismatch");
           sl.index = cnt++;
           st.labelList[sl.index] = sl;
+
+          // Cache the 'begin:' label
+          if(name == "begin")
+            {
+              assert(st.begin is null);
+              st.begin = sl;
+            }
         }
     }
 

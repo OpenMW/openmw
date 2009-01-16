@@ -54,7 +54,11 @@ void initMonsterScripts()
   mc.bind("randInt",
   { stack.pushInt(rnd.randInt
     (stack.popInt,stack.popInt));});
- 
+
+  // Set up and run the fps ticker
+  auto mo = (new MonsterClass("FPSTicker")).getSing();
+  mo.setState("tick");
+
   // Load and run the test script
   mc = new MonsterClass("Test");
   mc.createObject().call("test");

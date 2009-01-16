@@ -314,10 +314,6 @@ struct MonsterObject
     // don't do anything.
     else if(label is null) return;
 
-    // TODO: We can reorganize the entire function to deal with one
-    // sthread !is null test. Just do the label-checking first, and
-    // store the label offset
-
     // Do we already have a thread?
     if(sthread !is null)
       {
@@ -345,10 +341,9 @@ struct MonsterObject
                "' is not part of class " ~ cls.getName());
 
         if(label is null)
-          // findLabel will return null if the label is not found.
-          // TODO: The begin label should probably be cached within
-          // State.
-          label = st.findLabel("begin");
+          // Use the 'begin:' label, if any. It will be null there's
+          // no begin label.
+          label = st.begin;
 
         if(label !is null)
           {
@@ -363,7 +358,7 @@ struct MonsterObject
       }
 
     // Don't leave an unused thread dangling - kill it instead.
-    if(sthread !is null && !sthread.isScheduled)
+    if(sthread !is null && sthread.isUnused)
       {
         sthread.kill();
         sthread = null;

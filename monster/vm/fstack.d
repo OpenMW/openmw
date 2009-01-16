@@ -30,21 +30,15 @@ import monster.vm.stack;
 import monster.vm.error;
 import monster.compiler.states;
 import monster.compiler.functions;
+import monster.compiler.linespec;
 
 // "friendly" parameter and stack handling.
 enum SPType
   {
     Function,      // A function (script or native)
+    Idle,          // Idle function
     State,         // State code
     NConst,        // Native constructor
-
-    // The idle function callbacks are split because they handle the
-    // stack differently. We probably don't need to have one type for
-    // each though.
-    Idle_Initiate, // IdleFunction.initiate()
-    Idle_Reentry,  // IdleFunction.reentry()
-    Idle_Abort,    // IdleFunction.abort()
-    Idle_Check     // IdleFunction.hasFinished()
   }
 
 // One entry in the function stack
@@ -61,15 +55,46 @@ struct StackPoint
   SPType ftype;
 
   MonsterObject *obj; // "this"-pointer for the function
-  MonsterClass cls; // class owning the function
 
-  int afterStack; // Where the stack should be when this function
-                  // returns
+  // Could have an afterStack to check that the function has the
+  // correct imprint (corresponding to an imprint-var in Function.)
+
   int *frame; // Stack frame, stored when entering the function
 
-  bool isStatic()
+  // Get the class owning the function
+  MonsterClass getCls()
   {
-    return (ftype == SPType.Function) && func.isStatic;
+    assert(isFunc || isState);
+    assert(func !is null);
+    return func.owner;
+  }
+
+  bool isStatic()
+  { return isFunc() && func.isStatic; }
+
+  bool isFunc()
+  { return (ftype == SPType.Function) || (ftype == SPType.Idle); }
+
+  bool isState()
+  { return ftype == SPType.State; }
+
+  // Get the current source position (file name and line
+  // number). Mostly used for error messages.
+  Floc getFloc()
+  {
+    assert(isFunc || isState);
+
+    Floc fl;
+    fl.fname = getCls().name.loc.fname;
+
+    // Subtract one to make sure we get the last instruction executed,
+    // not the next.
+    int pos = code.getPos() - 1;
+    if(pos < 0) pos = 0;
+
+    fl.line = findLine(func.lines, pos);
+
+    return fl;
   }
 }
 
@@ -123,11 +148,12 @@ struct FunctionStack
     push(obj);
     cur.ftype = SPType.Function;
     cur.func = func;
-    cur.cls = func.owner;
+
+    assert(obj is null || func.owner.parentOf(obj.cls));
 
     // Point the code stream to the byte code, if any.
     if(func.isNormal)
-      cur.code.setData(func.bcode, func.lines);
+      cur.code.setData(func.bcode);
 
     assert(!func.isIdle, "don't use fstack.push() on idle functions");
   }
@@ -143,10 +169,9 @@ struct FunctionStack
 
     assert(obj !is null);
     assert(st.owner.parentOf(obj.cls));
-    cur.cls = st.owner;
 
     // Set up the byte code
-    cur.code.setData(st.bcode, st.lines);
+    cur.code.setData(st.bcode);
   }
 
   // Native constructor
@@ -157,32 +182,15 @@ struct FunctionStack
     cur.ftype = SPType.NConst;
   }
 
-  private void pushIdleCommon(Function *fn, MonsterObject *obj, SPType tp)
+  void pushIdle(Function *fn, MonsterObject *obj)
   {
-    // Not really needed - we will allow static idle functions later
-    // on.
-    assert(obj !is null);
-
     push(obj);
     cur.func = fn;
-    cur.cls = fn.owner;
+    cur.ftype = SPType.Idle;
+
+    assert(obj is null || fn.owner.parentOf(obj.cls));
     assert(fn.isIdle, fn.name.str ~ "() is not an idle function");
-    cur.ftype = tp;
   }
-
-  // These are used for the various idle callbacks. TODO: Probably
-  // overkill to have one for each, but leave it until you're sure.
-  void pushIdleInit(Function *fn, MonsterObject *obj)
-  { pushIdleCommon(fn, obj, SPType.Idle_Initiate); }
-
-  void pushIdleReentry(Function *fn, MonsterObject *obj)
-  { pushIdleCommon(fn, obj, SPType.Idle_Reentry); }
-
-  void pushIdleAbort(Function *fn, MonsterObject *obj)
-  { pushIdleCommon(fn, obj, SPType.Idle_Abort); }
-
-  void pushIdleCheck(Function *fn, MonsterObject *obj)
-  { pushIdleCommon(fn, obj, SPType.Idle_Check); }
 
   // Pops one entry of the stack. Checks that the stack level has been
   // returned to the correct position.

@@ -33,15 +33,12 @@ import monster.compiler.scopes;
 import monster.vm.mobject;
 import monster.vm.mclass;
 import monster.vm.arrays;
+import monster.vm.fstack;
 import monster.vm.error;
 
-// Stack
+// Stack. There's only one global instance, but threads will make
+// copies when they need it.
 CodeStack stack;
-
-void initStack()
-{
-  stack.init();
-}
 
 // A simple stack frame. All data are in chunks of 4 bytes
 struct CodeStack
@@ -71,8 +68,7 @@ struct CodeStack
     frame = null;
   }
 
-  // Get the current position index. Used mostly for debugging and
-  // error checking.
+  // Get the current position index.
   int getPos()
   {
     return total-left;
@@ -110,7 +106,11 @@ struct CodeStack
     left = total;
     pos = data.ptr;
 
-    assert(fleft == left);
+    if(fleft != 0)
+      writefln("left=%s total=%s fleft=%s", left, total, fleft);
+    assert(frame is null);
+    assert(fleft == 0);
+    assert(fstack.isEmpty);
   }
 
   void pushInt(int i)
@@ -174,6 +174,7 @@ struct CodeStack
     assert(len > 0);
     int[] r = getInts(len-1, len);
     pop(len);
+    assert(r.length == len);
     return r;
   }
 

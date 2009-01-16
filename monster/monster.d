@@ -56,6 +56,6 @@ static this()
 
   // Initialize VM
   scheduler.init();
-  initStack();
+  stack.init();
   arrays.initialize();
 }
