@@ -78,16 +78,16 @@ struct Thread
   // temporary data off the stack.
   SharedType idleData;
 
-  // The contents of idleObj's extra data for the idle's owner class.
+  // The contents of the idle object's extra data for the idle's owner
+  // class.
   SharedType extraData;
-
-  // Set to true whenever we are running from state code. If we are
-  // inside the state itself, this will be true and 'next' will be 1.
-  bool isActive; 
 
   // Set to true when a state change is in progress. Only used when
   // state is changed from within a function in active code.
-  bool stateChange;
+  bool shouldExit;
+
+  // Function stack for this thread
+  FunctionStack fstack;
 
   /*******************************************************
    *                                                     *
@@ -96,20 +96,10 @@ struct Thread
    *******************************************************/
 
   private:
-  // Temporarily needed since we need a state and an object to push on
-  // the stack to return to state code. This'll change soon (we won't
-  // need to push anything to reenter, since the function stack will
-  // already be set up for us.)
-  MonsterObject * theObj;
-
-  Function *idle;
-  MonsterObject *idleObj; // Object owning the idle function
-  NodeList * list; // List owning this thread
-  int retPos; // Return position in byte code.
+  NodeList *list; // List owning this thread
 
   // Stored copy of the stack. Used when the thread is not running.
   int[] sstack;
-
 
   public:
   /*******************************************************
@@ -118,91 +108,120 @@ struct Thread
    *                                                     *
    *******************************************************/
 
-  // Get a new thread. It starts in the 'unused' list.
-  static Thread* getNew(MonsterObject *obj = null)
+  // Get a new thread. It starts in the 'transient' list.
+  static Thread* getNew()
   {
-    auto cn = scheduler.unused.getNew();
-    cn.list = &scheduler.unused;
+    auto cn = scheduler.transient.getNew();
+    cn.list = &scheduler.transient;
 
     with(*cn)
       {
-        theObj = obj;
-
         // Initialize other variables
-        idle = null;
-        idleObj = null;
-        isActive = false;
-        stateChange = false;
-        retPos = -1;
+        shouldExit = false;
         sstack = null;
       }
-
-    /*
-    if(obj !is null)
-      writefln("Got a new state thread");
-    else
-      writefln("Got a new non-state thread");
-    */
 
     return cn;
   }
 
-  // Unschedule this node from the runlist or waitlist it belongs to,
-  // but don't kill it. Any idle function connected to this node is
-  // aborted.
-  void cancel()
+  // Stop the thread and return it to the freelist
+  void kill()
   {
-    if(idle !is null)
-      {
-        fstack.pushIdle(idle, idleObj);
-        idle.idleFunc.abort(this);
-        fstack.pop();
-        idle = null;
-      }
-    retPos = -1;
-    moveTo(&scheduler.unused);
+    stop();
+    assert(fstack.isEmpty);
+    list.remove(this);
+    list = null;
+    assert(isDead);
+  }
 
+  // Stop the execution of a thread and cancel any scheduling.
+  void stop()
+  {
+    assert(!isDead);
+
+    // TODO: We also have to handle (forbid) cases where we are
+    // the caller of another thread.
+
+    if(isRunning)
+      {
+        // We are running.
+        assert(sstack.length == 0);
+
+        // Forbid stopping the thread if there are native functions on
+        // the function stack.
+        if(fstack.hasNatives)
+          fail("Cannot stop thread, there are native functions on the stack.");
+
+        // Kill the stack tell execute() to stop running
+        stack.reset();
+        shouldExit = true;
+      }
+    else
+      {
+        // We are not running
+
+        // Free the stack buffers
+        if(sstack.length)
+          Buffers.free(sstack);
+        sstack = null;
+
+        // Abort any idle function
+        if(fstack.isIdle)
+          {
+            // Abort the idle function and pop it
+            getIdle().abort(this);
+            fstack.pop();
+          }
+        assert(!fstack.hasNatives);
+      }
+
+    // Kill the function stack
+    fstack.killAll();
+
+    // Move to the transient list (signalling that the thread is
+    // unused.)
+    moveTo(&scheduler.transient);
     assert(!isScheduled);
   }
 
-  // Remove the thread comletely
-  void kill()
+  // Schedule this thread to run state code the next frame
+  void scheduleState(MonsterObject *obj, int offs)
   {
-    /*
-    if(theObj is null)
-      writefln("Killing non-state thread");
-    else
-      writefln("Killing state thread");
-    */
-
-    cancel();
-    list.remove(this);
-    list = null;
-
-    if(sstack.length)
-      Buffers.free(sstack);
-    sstack = null;
-
-    /*
-    writefln("Thread lists:");
-    writefln("  run:     ", scheduler.run.length);
-    writefln("  runNext: ", scheduler.runNext.length);
-    writefln("  wait:    ", scheduler.wait.length);
-    writefln("  unused:  ", scheduler.unused.length);
-    */
-  }
-
-  bool isDead() { return list is null; }
-
-  // Schedule this thread to run next frame
-  void schedule(int offs)
-  {
+    assert(!isDead);
     assert(!isScheduled,
            "cannot schedule an already scheduled thread");
-
-    retPos = offs;
+    assert(!fstack.isIdle);
+    assert(fstack.isEmpty);
     assert(offs >= 0);
+    assert(obj !is null);
+
+    assert(isRunning == shouldExit);
+
+    // Move to the runlist
     moveTo(scheduler.runNext);
+
+    // Set up the function stack
+    fstack.push(obj.state, obj);
+    fstack.cur.code.jump(offs);
+  }
+
+  // Push a function and pause the thread
+  void pushFunc(Function *fn, MonsterObject *obj)
+  {
+    assert(!isDead);
+    assert(!isScheduled,
+           "cannot schedule an already scheduled thread");
+    assert(fstack.isEmpty);
+    assert(!fstack.isIdle);
+    assert(fn !is null);
+    assert(obj !is null);
+    assert(!fn.isIdle);
+
+    // Set up the function stack
+    assert(fn.owner.parentOf(obj));
+    fstack.push(fn, obj);
+
+    moveTo(&scheduler.paused);
   }
 
   // Are we currently scheduled?
@@ -211,17 +230,15 @@ struct Thread
     // The node is per definition scheduled if it is in one of these
     // lists
     return
-      list is &scheduler.wait ||
-      list is scheduler.run ||
-      list is scheduler.runNext;
+      !isDead && (list is &scheduler.wait ||
+                  list is scheduler.run ||
+                  list is scheduler.runNext);
   }
 
-  bool isUnused()
-  {
-    return list is &scheduler.unused;
-  }
-
-  bool isIdle() { return idle !is null; }
+  bool isTransient() { return list is &scheduler.transient; }
+  bool isRunning() { return cthread is this; }
+  bool isDead() { return list is null; }
+  bool isPaused() { return list is &scheduler.paused; }
 
   // Get the next node in the freelist
   Thread* getNext()
@@ -237,98 +254,130 @@ struct Thread
   // Reenter this thread to the point where it was previously stopped.
   void reenter()
   {
-    assert(theObj !is null,
-           "cannot reenter a non-state thread yet");
+    assert(!isDead);
+    assert(cthread is null,
+           "cannot reenter when another thread is running");
+    assert(!isRunning,
+           "reenter cannot be called when thread is already running");
+    assert(isScheduled || isPaused);
+    assert(!fstack.isEmpty);
 
-    // Most if not all of these checks will have to be removed in the
-    // future
-    assert(theObj.state !is null, "attempted to call the empty state");
-    assert(!isActive,
-           "reenter cannot be called when object is already active");
-    assert(fstack.isEmpty,
-	   "can only reenter at the bottom of the function stack");
-    assert(isScheduled);
+    // Put the thread in the foreground
+    foreground();
+    assert(isRunning);
 
-    if(isIdle)
+    // Notify the idle function, if any
+    if(fstack.isIdle)
       {
-        assert(idle !is null);
-        assert(idleObj !is null || idle.isStatic);
-
         // Tell the idle function that we we are reentering
-        fstack.pushIdle(idle, idleObj);
-        idle.idleFunc.reentry(this);
-        fstack.pop();
+        assert(fstack.isIdle);
+        getIdle().reentry(this);
 
-        // We're no longer idle
-        idle = null;
+        // Remove the idle function
+        fstack.pop();
       }
 
-    // Set the active flat to indicate that we are now actively
-    // running. (Might not be needed in the future)
-    isActive = true;
-
-    // Set the thread
-    assert(cthread is null);
-    cthread = this;
+    assert(fstack.cur.isNormal,
+           "can only reenter script code");
 
     // Remove the current thread from the run list
-    moveTo(&scheduler.unused);
-
-    // Restore the stack
-    restoreStack();
-
-    // Set up the code stack for state code.
-    fstack.push(theObj.state, theObj);
-
-    // Set the position
-    assert(retPos >= 0);
-    fstack.cur.code.jump(retPos);
+    moveTo(&scheduler.transient);
 
     // Run the code
     execute();
 
-    // Reset the thread
-    cthread = null;
+    // Exit immediately if the thread committed suicide.
+    if(isDead) return;
 
-    fstack.pop();
+    shouldExit = false;
 
-    // We are no longer active
-    isActive = false;
-
-    assert(stack.getPos == 0,
-           format("Stack not returned to zero after state code, __STACK__=",
-                  stack.getPos));
-
-    if(!isUnused)
-      // Store the stack
-      acquireStack();
-    else
-      // If the thread is not used for anything, might as well kill it
-      kill();
+    // Background the thread
+    background();
   }
 
-  // Make a copy of the stack and store it for later. Reset the global
-  // stack.
-  void acquireStack()
+  // Put this thread in the background. Acquires the stack and
+  // function stack.
+  void background()
   {
-    assert(!isUnused(),
-           "unused threads should never need to aquire the stack");
+    assert(!isDead);
     assert(sstack.length == 0,
            "Thread already has a stack");
-    assert(fstack.isEmpty);
+    assert(isRunning,
+           "cannot put a non-running thread in the background");
+    assert(!fstack.hasNatives);
 
-    // This can be optimized later
-    int len = stack.getPos();
-    if(len)
+    // We're no longer the current thread
+    cthread = null;
+
+    if(isTransient)
       {
-        writefln("acquiring %s ints", len);
+        // The thread is not scheduled and will not be used
+        // anymore. Might as well kill it.
+        assert(!isRunning);
+        kill();
+      }
+    else
+      {
+        // The thread will possibly be restored at some point. Store
+        // the stack and fstack for later.
 
-        // Get a new buffer, and copy the stack
-        sstack = Buffers.getInt(len);
-        sstack[] = stack.popInts(len);
+        // Stack.
+        int len = stack.getPos();
+        if(len)
+          {
+            // Get a new buffer, and copy the stack
+            sstack = Buffers.getInt(len);
+            sstack[] = stack.popInts(len);
+          }
       }
 
+    // Clear out our stack values
     stack.reset();
+
+    assert(!isRunning);
+  }
+
+  // Put the thread in the foreground. Restore any stored stack
+  // values.
+  void foreground()
+  {
+    assert(!isDead);
+    assert(cthread is null,
+           "cannot restore thread, another thread is running");
+    assert(!isRunning,
+           "cannot restore thread, it is already running");
+
+    assert((isTransient && fstack.isEmpty) ||
+           stack.getPos() == 0,
+           "only empty transient threads kan restore into a non-empty stack");
+
+    if(sstack.length)
+      {
+        assert(stack.getPos() == 0,
+               "cannot restore into a non-empty stack");
+        assert(!isTransient,
+               "cannot restore a transent thread with stack");
+
+        // Push the values back, and free the buffer
+        stack.pushInts(sstack);
+        Buffers.free(sstack);
+        assert(stack.getPos == sstack.length);
+        sstack = null;
+      }
+
+    // Restore the stack frame pointer
+    fstack.restoreFrame();
+
+    // Set ourselves as the running thread
+    cthread = this;
+  }
+
+  // Move this node to another list.
+  void moveTo(NodeList *to)
+  {
+    assert(list !is null);
+    list.moveTo(*to, this);
+    list = to;
   }
 
   private:
@@ -338,27 +387,12 @@ struct Thread
    *                                                     *
    *******************************************************/
 
-  void restoreStack()
+  IdleFunction getIdle()
   {
-    assert(stack.getPos() == 0,
-           "cannot restore into a non-empty stack");
-
-    if(sstack.length)
-      {
-        // Push the values back, and free the buffer
-        stack.pushInts(sstack);
-        Buffers.free(sstack);
-        assert(stack.getPos == sstack.length);
-        sstack = null;
-      }
-  }
-
-  // Move this node to another list.
-  void moveTo(NodeList *to)
-  {
-    assert(list !is null);
-    list.moveTo(*to, this);
-    list = to;
+    assert(fstack.isIdle);
+    assert(fstack.cur.func !is null);
+    assert(fstack.cur.func.idleFunc !is null);
+    return fstack.cur.func.idleFunc;
   }
 
   void fail(char[] msg)
@@ -371,61 +405,72 @@ struct Thread
   }
 
   // Parse the BC.CallIdle instruction parameters and schedule the
-  // given idle function.
-  void callIdle(MonsterObject *iObj)
+  // given idle function. Return true if we should exit execute()
+  bool callIdle(MonsterObject *iObj)
   {
-    assert(isActive && fstack.isStateCode,
-           "Byte code attempted to call an idle function outside of state code.");    assert(!isScheduled, "Thread is already scheduled");
+    assert(isRunning);
+    assert(!isScheduled, "Thread is already scheduled");
+    assert(iObj !is null);
+
+    if(fstack.hasNatives)
+      fail("Cannot run idle function: there are native functions on the stack");
 
     CodeStream *code = &fstack.cur.code;
-
-    // Store the object
-    idleObj = iObj;
-    assert(idleObj !is null);
 
     // Get the class from the index
     auto cls = iObj.cls.upcast(code.getInt());
 
     // Get the function
-    idle = cls.findFunction(code.getInt());
+    Function *idle = cls.findFunction(code.getInt());
     assert(idle !is null && idle.isIdle);
     assert(cls is idle.owner);
-    assert(idleObj.cls.childOf(cls));
+    assert(iObj.cls.childOf(cls));
 
     // The IdleFunction object bound to this function is stored in
     // idle.idleFunc
     if(idle.idleFunc is null)
       fail("Called unimplemented idle function '" ~ idle.name.str ~ "'");
 
-    // Set the return position
-    retPos = fstack.cur.code.getPos();
-
     // Set up extraData
-    extraData = *idleObj.getExtra(idle.owner);
+    extraData = *iObj.getExtra(idle.owner);
 
-    // Notify the idle function
-    fstack.pushIdle(idle, idleObj);
-    if(idle.idleFunc.initiate(this))
-      moveTo(&scheduler.wait);
-    fstack.pop();
-  }
+    // Push the idle function on the stack, with iObj as the 'this'
+    // object.
+    fstack.pushIdle(idle, iObj);
 
-  bool shouldExit()
-  {
-    if(fstack.isStateCode && stateChange)
+    // Notify the idle function that it was called
+    auto res = idle.idleFunc.initiate(this);
+    //writefln("Called %s, result was %s", idle.name, res);
+
+    if(res == IS.Poll)
       {
-        assert(isActive);
-
-        // The state was changed while in state code. Abort the code.
-        stateChange = false;
-
-        // There might be dangling stack values
-        stack.reset();
+        moveTo(&scheduler.wait);
         return true;
       }
-    return false;
-  }
 
+    if(res == IS.Return)
+      {
+        // If we're returning, call reenter immediately
+        idle.idleFunc.reentry(this);
+
+        // The function is done, pop it back of the stack
+        fstack.pop();
+
+        // 'false' means continue running
+        return false;
+      }
+
+    assert(res == IS.Manual || res == IS.Kill);
+
+    // The only difference between Manual and Kill is what list the
+    // thread ends in. If the thread is in the transient list, it will
+    // be killed automatically when it's no longer running.
+    assert( (res == IS.Kill) == isTransient,
+            res == IS.Manual ? "Manually scheduled threads must be moved to another list." : "Killed threads cannot be moved to another list.");
+
+    // 'true' means exit execute()
+    return true;
+  }
 
   /*******************************************************
    *                                                     *
@@ -444,10 +489,12 @@ struct Thread
     // an infinite loop.
     static const long limit = 10000000;
 
+    assert(!isDead);
     assert(fstack.cur !is null,
 	   "Thread.execute called but there is no code on the function stack.");
-
-    assert(cthread == this,
+    assert(fstack.cur.isNormal,
+           "execute() can only run script code");
+    assert(isRunning,
            "can only run the current thread");
 
     // Get some values from the function stack
@@ -544,77 +591,96 @@ struct Thread
 	  {
 
 	  case BC.Exit:
-            // Exit execute(). The function stack cleanup is handled
-            // by Our Glorious Caller.
-            return;
+            // Step down once on the function stack
+            fstack.pop();
 
-	  case BC.Call:
+            if(!fstack.isNormal())
+              // The current function isn't a script function, so
+              // exit.
+              return;
+
+            assert(!shouldExit);
+
+            // Set up the variables and continue running.
+            assert(fstack.cur !is null);
+            cls = fstack.cur.getCls();
+            code = &fstack.cur.code;
+            obj = fstack.cur.obj;
+
+            break;
+
+            // Start a block so these variables are local
             {
+              MonsterObject *mo;
+              Function *fn;
+
+            case BC.Call:
+              mo = obj;
+              goto CallCommon;
+
+            case BC.CallFar:
+              mo = stack.popObject();
+
+            CallCommon:
+
               // Get the correct function from the virtual table
               val = code.getInt(); // Class index
-              auto fn = obj.cls.findVirtualFunc(val, code.getInt());
+              fn = mo.cls.findVirtualFunc(val, code.getInt());
 
-              // Finally, call
-              fn.call(obj);
-
-              if(shouldExit()) return;
-              break;
-            }
-
-          case BC.CallFar:
-            {
-              auto mo = stack.popObject();
-
-              // Get the correct function from the virtual table
-              val = code.getInt(); // Class index
-              auto fn = mo.cls.findVirtualFunc(val, code.getInt());
-
-              // Call the function
-              fn.call(mo);
-
-              // Exit state code if the state was changed
-              if(shouldExit()) return;
+              if(fn.isNormal)
+                {
+                  // Normal (script) function. We don't need to exit
+                  // execute(), just change the function stack and the
+                  // cls and code pointers. Then keep running.
+                  fstack.push(fn, mo);
+                  cls = fstack.cur.getCls();
+                  code = &fstack.cur.code;
+                  obj = mo;
+                  assert(obj is fstack.cur.obj);
+                }
+              else
+                {
+                  // Native function. Let Function handle it.
+                  assert(fn.isNative);
+                  fn.call(mo);
+                  if(shouldExit) return;
+                }
               break;
             }
 
           case BC.CallIdle:
-            callIdle(obj);
-            return;
+            if(callIdle(obj))
+              return;
+            break;
 
           case BC.CallIdleFar:
-            callIdle(stack.popObject());
-            return;
+            if(callIdle(stack.popObject()))
+              return;
+            break;
 
 	  case BC.Return:
 	    // Remove the given number of bytes from the stack, and
 	    // exit the function.
 	    stack.pop(code.getInt());
-            return;
+            goto case BC.Exit;
 
 	  case BC.ReturnVal:
 	    stack.pop(code.getInt(), 1);
-            return;
+            goto case BC.Exit;
 
 	  case BC.ReturnValN:
 	    val = code.getInt(); // Get the value first, since order
 				 // of evaluation is important.
 	    stack.pop(val, code.getInt());
-            return;
+            goto case BC.Exit;
 
 	  case BC.State:
             val = code.getInt(); // State index
             val2 = code.getInt(); // Label index
 	    // Get the class index and let setState handle everything
 	    obj.setState(val, val2, code.getInt());
-            if(shouldExit()) return;
+            if(shouldExit) return;
 	    break;
-
-          case BC.Halt:
-            // A halt statement was encountered, and we should stop
-            // execution. This is only allowed in state code.
-            assert(isActive && fstack.isStateCode,
-                   "halt command encountered outside state code.");
-            return;
 
 	  case BC.New:
 	    // Create a new object. Look up the class index in the
@@ -1372,9 +1438,14 @@ struct Scheduler
   // Waiting list - idle threads that are actively checked each frame.
   NodeList wait;
 
-  // List of unused nodes. Any thread in this list (that is not
-  // actively running) can and will be deleted eventually.
-  NodeList unused;
+  // List of transient nodes. Any thread in this list (that is not
+  // actively running) can and will be deleted when it goes into the
+  // background.
+  NodeList transient;
+
+  // List of threads that are not running or scheduled, but should not
+  // be deleted.
+  NodeList paused;
 
   // The run lists for this and the next round. We use pointers to the
   // actual lists, since we want to swap them easily.
@@ -1413,6 +1484,8 @@ struct Scheduler
   // good.) But all this falls in the "optimization" category.
   void doFrame()
   {
+    assert(cthread is null,
+           "cannot run doFrame while another thread is running");
     checkConditions();
     dispatch();
   }
@@ -1436,15 +1509,12 @@ struct Scheduler
 	// way, ie to change object states or interact with the
 	// scheduler. In fact, hasFinished() should do as little as
 	// possible.
-	if(cn.isIdle)
+	if(cn.fstack.isIdle)
 	  {
-            fstack.pushIdle(cn.idle, cn.idleObj);
-            if(cn.idle.idleFunc.hasFinished(cn))
+            if(cn.getIdle().hasFinished(cn))
               // Schedule the code to start running again this round. We
               // move it from the wait list to the run list.
               cn.moveTo(runNext);
-
-            fstack.pop();
 	  }
 	// Set the next item
 	cn = next;
@@ -1472,9 +1542,6 @@ struct Scheduler
       {
         // Execute
         cn.reenter();
-
-        // The function stack should now be at zero
-        assert(fstack.isEmpty());
 
 	// Get the next item.
 	cn = run.getHead();

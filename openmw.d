@@ -234,7 +234,6 @@ void main(char[][] args)
       initBullet();
       scope(exit) cleanupBullet();
 
-
       if(cd.inCell)
 	{
 	  setAmbient(cd.ambi.ambient, cd.ambi.sunlight,
@@ -414,7 +413,7 @@ void main(char[][] args)
   // This isn't necessary but it's here for testing purposes.
   cellList.release(cd);
 
-  // Write some memory statistics
+  // Write some statistics
   poolSize();
   writefln(esmRegion);
   writefln("Total objects: ", MonsterClass.getTotalObjects);

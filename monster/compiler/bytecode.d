@@ -68,8 +68,6 @@ enum BC
                         // index must also be -1, and the class index
                         // is ignored.
 
-    Halt,               // Halt execution. Only allowed in state code.
-
     New,                // Create a new object. Followed by an int
                         // giving the class index (in the file lookup
                         // table)
@@ -508,7 +506,6 @@ char[][] bcToString =
  BC.ReturnVal: "ReturnVal",
  BC.ReturnValN: "ReturnValN",
  BC.State: "State",
- BC.Halt: "Halt",
  BC.New: "New",
  BC.Jump: "Jump",
  BC.JumpZ: "JumpZ",

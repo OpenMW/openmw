@@ -38,7 +38,7 @@ import core.resource;
 class Idle_waitUntilFinished : IdleFunction
 {
  override:
-  bool initiate(Thread*) { return true; }
+  IS initiate(Thread*) { return IS.Poll; }
 
   bool hasFinished(Thread* trd)
   {

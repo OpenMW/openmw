@@ -36,7 +36,6 @@ import monster.compiler.enums;
 
 import monster.vm.codestream;
 import monster.vm.idlefunction;
-import monster.vm.fstack;
 import monster.vm.arrays;
 import monster.vm.error;
 import monster.vm.vm;
@@ -327,6 +326,7 @@ final class MonsterClass
         assert(0);
       }
 
+    assert(fn !is null);
     return fn;
   }
 
@@ -338,26 +338,26 @@ final class MonsterClass
 
   void bindConst(dg_callback nf)
     {
-      assert(constType == FuncType.Native,
+      assert(natConst.ftype == FuncType.Native,
              "Cannot set native constructor for " ~ toString ~ ": already set");
-      constType = FuncType.NativeDDel;
-      dg_const = nf;
+      natConst.ftype = FuncType.NativeDDel;
+      natConst.natFunc_dg = nf;
     }
 
   void bindConst(fn_callback nf)
     {
-      assert(constType == FuncType.Native,
+      assert(natConst.ftype == FuncType.Native,
              "Cannot set native constructor for " ~ toString ~ ": already set");
-      constType = FuncType.NativeDFunc;
-      fn_const = nf;
+      natConst.ftype = FuncType.NativeDFunc;
+      natConst.natFunc_fn = nf;
     }
 
   void bindConst_c(c_callback nf)
     {
-      assert(constType == FuncType.Native,
+      assert(natConst.ftype == FuncType.Native,
              "Cannot set native constructor for " ~ toString ~ ": already set");
-      constType = FuncType.NativeCFunc;
-      c_const = nf;
+      natConst.ftype = FuncType.NativeCFunc;
+      natConst.natFunc_c = nf;
     }
 
 
@@ -572,19 +572,10 @@ final class MonsterClass
       foreach(c; tree)
         {
           // Custom native constructor
-          if(c.constType != FuncType.Native)
-            {
-              fstack.pushNConst(obj);
-              if(c.constType == FuncType.NativeDDel)
-                c.dg_const();
-              else if(c.constType == FuncType.NativeDFunc)
-                c.fn_const();
-              else if(c.constType == FuncType.NativeCFunc)
-                c.c_const();
-              fstack.pop();
-            }
+          if(c.natConst.ftype != FuncType.Native)
+            natConst.call(obj);
 
-          // TODO: Call script-constructor here
+          // TODO: Call script constructors here
         }
 
       // Set the same state as the source
@@ -732,16 +723,8 @@ final class MonsterClass
   EnumDeclaration[] enumdecs;
   ImportStatement[] imports;
 
-  // Native constructor type. Changed when the actual constructor is
-  // set.
-  FuncType constType = FuncType.Native;
-  union
-  {
-    dg_callback dg_const;
-    fn_callback fn_const;
-    c_callback c_const;
-  }
-
+  // Native constructor, if any
+  Function natConst;
 
   /*******************************************************
    *                                                     *
@@ -957,12 +940,16 @@ final class MonsterClass
       parse(tokens, fname);
     }
 
-  // Parses a list of tokens
+  // Parses a list of tokens, and do other setup.
   void parse(ref TokenArray tokens, char[] fname)
     { 
       assert(!isParsed(), "parse() called on a parsed class " ~ name.str);
 
       alias Block.isNext isNext;
+
+      natConst.ftype = FuncType.Native;
+      natConst.name.str = "native constructor";
+      natConst.owner = this;
 
       // TODO: Check for a list of keywords here. class, module,
       // abstract, final. They can come in any order, but only certain

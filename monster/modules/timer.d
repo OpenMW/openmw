@@ -26,7 +26,7 @@ idle sleep(float secs);
 class IdleSleep_SystemClock : IdleFunction
 {
  override:
-  bool initiate(Thread* cn)
+  IS initiate(Thread* cn)
     {
       // Get the parameter
       float secs = stack.popFloat;
@@ -38,7 +38,7 @@ class IdleSleep_SystemClock : IdleFunction
       cn.idleData.l += secs*TicksPerSecond;
 
       // Schedule us
-      return true;
+      return IS.Poll;
     }
 
   bool hasFinished(Thread* cn)
@@ -56,7 +56,7 @@ class IdleSleep_SystemClock : IdleFunction
 class IdleSleep_Timer : IdleFunction
 {
  override:
-  bool initiate(Thread* cn)
+  IS initiate(Thread* cn)
     {
       // The timer is stored in the object's 'extra' pointer
       auto t = cast(SleepManager)cn.extraData.obj;
@@ -66,7 +66,7 @@ class IdleSleep_Timer : IdleFunction
       cn.idleData.l = t.current + cast(long)(t.tickSize*stack.popFloat);
 
       // Schedule us
-      return true;
+      return IS.Poll;
     }
 
   bool hasFinished(Thread* cn)

@@ -1,17 +1,27 @@
 // Small script that prints the FPS to screen with regular intervals.
-singleton FPSTicker;
 
-import io, timer;
+import io, timer, frames;
 
-ulong lastFrame;
+// Sleep one frame. This makes sure that we won't start running until
+// the rendering begins. Not critically important, but it prevents the
+// first printed value from being 'nan'.
+fsleep(1);
+
+ulong lastFrame  = counter;
+float lastTime   = totalTime;
 
 float delay = 1.5;
 
-state tick
+while(true)
 {
- begin:
   sleep(delay);
-  print("fps:", (frames.counter-lastFrame) / delay);
-  lastFrame = frames.counter;
-  goto begin;
+
+  // Calculate differences since last frame
+  ulong fdiff = counter-lastFrame;
+  float tdiff = totalTime-lastTime;
+
+  print("fps:", fdiff / tdiff);
+
+  lastFrame = counter;
+  lastTime = totalTime;
 }

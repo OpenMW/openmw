@@ -24,7 +24,6 @@
 module monster.vm.vm;
 
 import monster.vm.error;
-import monster.vm.fstack;
 import monster.vm.thread;
 import monster.vm.mclass;
 import monster.vm.mobject;
@@ -47,18 +46,21 @@ struct VM
 {
   // Run a script file in the context of the object obj. If no object
   // is given, an instance of an empty class is used.
-  void run(char[] file, MonsterObject *obj = null)
+  Thread *run(char[] file, MonsterObject *obj = null)
   {
+    Thread *trd;
+    auto func = new Function;
     if(obj !is null)
       {
-        auto func = Function(file, obj.cls);
-        func.call(obj);
+        *func = Function(file, obj.cls);
+        trd = func.call(obj);
       }
     else
       {
-        auto func = Function(file);
-        func.call();
+        *func = Function(file);
+        trd = func.call();
       }
+    return trd;
   }
 
   void frame(float time = 0)

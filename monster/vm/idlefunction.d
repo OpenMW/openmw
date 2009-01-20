@@ -26,6 +26,18 @@ module monster.vm.idlefunction;
 
 import monster.vm.thread;
 
+// Idle scheduling actions - returned from initiate()
+enum IS
+  {
+    Poll,    // Poll the hasFinished function regularily
+    Return,  // Return to the thread immediately - reenter() is called
+             // first
+    Kill,    // Kill the thread
+    Manual,  // Handle the scheduling ourselves. We have to schedule
+             // or move the thread to another ThreadList before the
+             // end of initiate()
+  }
+
 // A callback class for idle functions. A child object of this class
 // is what you "bind" to idle functions (rather than just a delegate,
 // like for native functions.) Note that instances are not bound to
@@ -43,7 +55,7 @@ abstract class IdleFunction
   // idea. For functions which never "return", and for event driven
   // idle functions (which handle their own scheduling), you should
   // return false.
-  bool initiate(Thread*) { return true; }
+  abstract IS initiate(Thread*);
 
   // This is called whenever the idle function is about to "return" to
   // state code. It has to push the return value, if any, but
@@ -65,5 +77,5 @@ abstract class IdleFunction
   // should return false in initiate and instead reschedule the object
   // manually when the event occurs. (A nice interface for this has
   // not been created yet, though.)
-  abstract bool hasFinished(Thread*);
+  bool hasFinished(Thread*) { assert(0, "empty hasFinished()"); }
 }

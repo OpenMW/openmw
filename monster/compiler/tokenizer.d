@@ -100,11 +100,11 @@ enum TT
     Return,
     Switch, Select,
     State,
-    Struct, Enum, Thread,
+    Struct, Enum,
     Import, Clone, Override, Final, Function, With,
     This, New, Static, Const, Out, Ref, Abstract, Idle,
     Public, Private, Protected, True, False, Native, Null,
-    Goto, Halt, Var, In,
+    Goto, Var, In,
 
     Last, // Tokens after this do not have a specific string
 	  // associated with them.
@@ -224,7 +224,6 @@ const char[][] tokenList =
     TT.State            : "state",
     TT.Struct           : "struct",
     TT.Enum             : "enum",
-    TT.Thread           : "thread",
     TT.Import           : "import",
     TT.Typeof           : "typeof",
     TT.Singleton        : "singleton",
@@ -247,7 +246,6 @@ const char[][] tokenList =
     TT.Native           : "native",
     TT.Null             : "null",
     TT.Goto             : "goto",
-    TT.Halt             : "halt",
     TT.Var              : "var",
     TT.In               : "in",
 

@@ -381,8 +381,6 @@ struct Assembler
     addi(func);
   }
 
-  void halt() { cmd(BC.Halt); }
-
   void newObj(int i)
   {
     cmd(BC.New);

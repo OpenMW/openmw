@@ -32,7 +32,6 @@ import core.resource : rnd;
 import core.config;
 import sound.music;
 
-
 // Set up the base Monster classes we need in OpenMW
 void initMonsterScripts()
 {
@@ -55,11 +54,9 @@ void initMonsterScripts()
   { stack.pushInt(rnd.randInt
     (stack.popInt,stack.popInt));});
 
-  // Set up and run the fps ticker
-  auto mo = (new MonsterClass("FPSTicker")).getSing();
-  mo.setState("tick");
+  // Run the fps ticker
+  vm.run("fpsticker.mn");
 
-  // Load and run the test script
-  mc = new MonsterClass("Test");
-  mc.createObject().call("test");
+  // Run the test script
+  vm.run("test.mn");
 }

@@ -19,7 +19,7 @@ float totalTime; // Time since rendering started
 ulong counter;   // Number of frames since program startup
 
 // Sleep a given number of frames
-idle sleep(int frameNum);
+idle fsleep(int frameNum);
 "; //"
 
 // Keep local copies of these, since we don't want Monster code to
@@ -54,13 +54,13 @@ void updateFrames(float time, int frmCount = 1)
 class IdleFrameSleep : IdleFunction
 {
  override:
-  bool initiate(Thread* cn)
+  IS initiate(Thread* cn)
     {
       // Calculate the return frame
       cn.idleData.l = frames + stack.popInt;
 
       // Schedule us
-      return true;
+      return IS.Poll;
     }
 
   bool hasFinished(Thread* cn)
@@ -78,7 +78,7 @@ void initFramesModule()
   mc = new MonsterClass(MC.String, moduleDef, "frames");
 
   // Bind the idle
-  mc.bind("sleep", new IdleFrameSleep);
+  mc.bind("fsleep", new IdleFrameSleep);
 
   // Get pointers to the variables so we can write to them easily.
   auto mo = mc.getSing();

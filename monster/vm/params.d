@@ -24,7 +24,7 @@
 module monster.vm.params;
 
 import monster.vm.mobject;
-import monster.vm.fstack;
+import monster.vm.thread;
 
 /* This module offers a "friendly" interface for dealing with
    parameters and return values on the stack. It is meant to be an
@@ -44,8 +44,9 @@ struct Params
   // function)
   MonsterObject *obj()
   {
-    assert(fstack.cur !is null);
-    assert(fstack.cur.obj !is null);
-    return fstack.cur.obj;
+    assert(cthread !is null);
+    assert(cthread.fstack.cur !is null);
+    assert(cthread.fstack.cur.obj !is null);
+    return cthread.fstack.cur.obj;
   }
 }

@@ -112,8 +112,8 @@ class FloatingProperties(T) : NumericProperties!(T)
       inserts("mant_bits", "int", { tasm.push(T.mant_dig); });
       inserts("mant_dig", "int", { tasm.push(T.mant_dig); });
 
-      // Lets add in number of bits in the exponent as well
-      inserts("exp_bits", "int", { tasm.push(8*T.sizeof-T.mant_dig); });
+      // Lets add in number of bits in the exponent as well.
+      inserts("exp_bits", "int", { tasm.push(cast(uint)(8*T.sizeof-T.mant_dig)); });
     }
 }
 

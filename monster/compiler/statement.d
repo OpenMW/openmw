@@ -438,37 +438,6 @@ class ContinueBreakStatement : Statement
     }
 }
 
-// halt; stops the execution of state code (without changing the
-// state)
-class HaltStatement : Statement
-{
-  static bool canParse(TokenArray toks)
-    {
-      return isNext(toks, TT.Halt);
-    }
-
-  void parse(ref TokenArray toks)
-    {
-      if(!isNext(toks, TT.Halt, loc))
-        assert(0, "Internal error");
-
-      if(!isNext(toks, TT.Semicolon))
-        fail("halt expected ;", toks);
-    }
-
-  void resolve(Scope sc)
-    {
-      if(!sc.isStateCode)
-        fail("Halt statements are only allowed in state code", loc);
-    }
-
-  void compile()
-    {
-      setLine();
-      tasm.halt();
-    }
-}
-
 // do-while loop  (might also support do-until loops in the future)
 // do statement while (expression)
 // do : label statement while (expression)
@@ -1396,9 +1365,19 @@ class ReturnStatement : Statement
 
   void resolve(Scope sc)
     {
+      /*
       // Not allowed in state code.
       if(sc.isStateCode)
 	fail("return not allowed in state code", loc);
+      */
+      // Return in state code is handled as a special case
+      if(sc.isStateCode)
+        {
+          assert(!sc.isInFunc);
+          if(exp !is null)
+            fail("Cannot return an expression in state code", loc);
+          return;
+        }
 
       // Store the number of local variables we have to pop of the
       // stack
@@ -1437,13 +1416,15 @@ class ReturnStatement : Statement
   void compile()
     {
       setLine();
-      if(exp !is null)
+      if(exp !is null && fn !is null)
 	{
 	  assert(!fn.type.isVoid);
 	  exp.eval();
+          // Return an expression
 	  tasm.exit(locals, exp.type.getSize);
 	}
       else
+        // Return without an expression
 	tasm.exit(locals);
     }
 }
@@ -1483,7 +1464,6 @@ class CodeBlock : Statement
       else if(WhileStatement.canParse(toks)) b = new WhileStatement;
       else if(ForStatement.canParse(toks)) b = new ForStatement;
       else if(StateStatement.canParse(toks)) b = new StateStatement;
-      else if(HaltStatement.canParse(toks)) b = new HaltStatement;
       else if(LabelStatement.canParse(toks)) b = new LabelStatement;
       else if(GotoStatement.canParse(toks)) b = new GotoStatement;
       else if(ContinueBreakStatement.canParse(toks)) b = new ContinueBreakStatement;
@@ -1607,9 +1587,9 @@ class CodeBlock : Statement
       setLine();
 
       // If this is the main block at the state level, we must finish
-      // it with a halt instruction.
+      // it with an exit instruction.
       if(isState)
-        tasm.halt();
+        tasm.exit();
 
       // Local variables are forbidden in any state block, no matter
       // at what level they are

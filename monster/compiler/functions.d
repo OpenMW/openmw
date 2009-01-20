@@ -50,8 +50,8 @@ import monster.vm.mobject;
 import monster.vm.idlefunction;
 import monster.vm.mclass;
 import monster.vm.error;
-import monster.vm.fstack;
 import monster.vm.thread;
+import monster.vm.stack;
 import monster.vm.vm;
 
 import std.stdio;
@@ -78,10 +78,8 @@ typedef extern(C) void function() c_callback;
 
 struct Function
 {
-  // These three variables (owner, lines and bcode) are common between
-  // Function and State. They MUST be placed and ordered equally in
-  // both structs because we're use some unsafe pointer trickery.
-  MonsterClass owner;
+  MonsterClass owner; // Must be the first entry
+
   LineSpec[] lines; // Line specifications for byte code
   union
   {
@@ -91,8 +89,8 @@ struct Function
     c_callback natFunc_c;
     IdleFunction idleFunc; // Idle function callback
   }
-
   Token name;
+
   Type type; // Return type
   FuncType ftype; // Function type
   Variable* params[]; // List of parameters
@@ -128,48 +126,49 @@ struct Function
   // this is a function that takes a variable number of arguments.
   bool isVararg() { return params.length && params[$-1].isVararg; }
 
-  // It would be cool to have a template version of call that took and
-  // returned the correct parameters, and could even check
-  // them. However, doing generic type inference is either very
-  // dangerous or would involve complicated checks (think basing an
-  // ulong or a a byte to float parameters.) The best thing to do is
-  // to handle types at the binding stage, allowing things like
-  // bind!(int,float,int)("myfunc", myfunc) - does type checking for
-  // you. A c++ version could be much more difficult to handle, and
-  // might rely more on manual coding.
-
   // This is used to call the given function from native code. Note
   // that this is used internally for native functions, but not for
   // any other type. Idle functions can NOT be called directly from
-  // native code.
-  void call(MonsterObject *obj)
+  // native code. Returns the thread, which is never null but might be
+  // dead.
+  Thread *call(MonsterObject *obj)
   {
-    assert(obj !is null || isStatic);
-
     // Make sure there's a thread to use
-    bool wasNew;
     if(cthread is null)
       {
-        wasNew = true;
-        cthread = Thread.getNew();
+        // Get a new thread and put it in the foreground
+        auto tr = Thread.getNew();
+        tr.foreground();
+        assert(tr is cthread);
       }
 
+    assert(cthread !is null);
+    assert(!cthread.isDead);
+
+    bool wasEmpty = cthread.fstack.isEmpty;
+
     // Push the function on the stack
-    fstack.push(this, obj);
+    cthread.fstack.push(this, obj);
 
     switch(ftype)
       {
       case FuncType.NativeDDel:
         natFunc_dg();
-        break;
+        goto pop;
       case FuncType.NativeDFunc:
         natFunc_fn();
-        break;
+        goto pop;
       case FuncType.NativeCFunc:
         natFunc_c();
+      pop:
+        // Remove ourselves from the function stack
+        cthread.fstack.pop();
         break;
       case FuncType.Normal:
         cthread.execute();
+        assert(!cthread.shouldExit,
+               "shouldExit should only be set for state threads");
+        // Execute will pop itself if necessary
         break;
       case FuncType.Native:
         fail("Called unimplemented native function " ~ toString);
@@ -181,41 +180,38 @@ struct Function
         assert(0, "unknown FuncType for " ~ toString);
       }
 
-    // Remove ourselves from the function stack
-    fstack.pop();
-
+    // If we started at the bottom of the function stack, put the
+    // thread in the background now. This will automatically delete
+    // the thread if it's not used.
     assert(cthread !is null);
-
-    // Reset cthread, if we created it.
-    if(wasNew)
+    auto ct = cthread;
+    if(wasEmpty)
       {
-        // If the thread is still in the unused list, we can safely
-        // kill it.
-        if(cthread.isUnused)
-          cthread.kill();
+        if(cthread.fstack.isEmpty && stack.getPos != 0)
+          {
+            assert(cthread.isTransient);
+
+            // We have to do some trickery to retain the stack in
+            // cases where the function exits completely.
+            cthread = null; // This will prevent kill() from clearing
+                            // the stack.
+            ct.kill();
+          }
         else
-          // Otherwise, store the stack
-          cthread.acquireStack();
-
-        cthread = null;
-
-        assert(fstack.isEmpty);
+          cthread.background();
       }
-    // I think we could also check fstack if it's empty instead of
-    // using wasNew. Leave these checks here to see if this assumtion
-    // is correct.
-    else assert(!fstack.isEmpty);
+    return ct;
   }
 
   // Call without an object. TODO: Only allowed for functions compiled
-  // without a class using compile() below, but in the future this
-  // will be replaced with a static function.
-  void call()
+  // without a class using compile() below, but in the future it will
+  // be allowed for static function.
+  Thread* call()
   {
     assert(owner is int_mc);
     assert(owner !is null);
     assert(int_mo !is null);
-    call(int_mo);
+    return call(int_mo);
   }
 
   // This allows you to compile a function file by writing fn =
@@ -662,11 +658,12 @@ class FuncDeclaration : Statement
             fail(format("Cannot override %s, parameter types do not match",
                         o.toString), fn.name.loc);
 
-          // There's no big technical reason why this shouldn't be
-          // possible, but we haven't tested it or thought about it
-          // yet.
-          if(o.isIdle || fn.isIdle)
-            fail("Cannot override idle functions", fn.name.loc);
+          if(o.isIdle && !fn.isIdle)
+            fail("Cannot override idle function " ~ o.name.str ~
+                 " with a non-idle function", fn.name.loc);
+          if(!o.isIdle && fn.isIdle)
+            fail("Cannot override normal function " ~ o.name.str ~
+                 " with an idle function", fn.name.loc);
         }
       else
         {
@@ -805,11 +802,6 @@ class FunctionCallExpr : MemberExpression
             fail("Undefined function "~name.str, name.loc);
 	}
 
-      // Is this an idle function?
-      if(fd.isIdle && !sc.isStateCode)
-        fail("Idle functions can only be called from state code",
-             name.loc);
-
       type = fd.type;
       assert(type !is null);
 
@@ -933,6 +925,7 @@ class FunctionCallExpr : MemberExpression
         {
           recurse = false;
           dotImport.evalAsm();
+          recurse = true;
           return;
         }
 
@@ -944,5 +937,8 @@ class FunctionCallExpr : MemberExpression
         tasm.callIdle(fd.index, fd.owner.getTreeIndex(), isMember);
       else
         tasm.callFunc(fd.index, fd.owner.getTreeIndex(), isMember);
+
+      // Reset pdone incase the expression is evaluated again
+      pdone = false;
     }
 }

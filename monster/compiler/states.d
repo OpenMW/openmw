@@ -38,13 +38,12 @@ import std.stdio;
 
 struct State
 {
-  // These three variables (owner, lines and bcode) are common between
-  // Function and State. They MUST be placed and ordered equally in
-  // both structs because we're use some unsafe pointer trickery.
-  MonsterClass owner;
+  MonsterClass owner; // This must be the first entry, since we're
+                      // using some pointer trickery with Function and
+                      // State.
+
   LineSpec[] lines; // Line specifications for byte code
   ubyte[] bcode; // Final compiled code
-
   Token name;
   int index;
 

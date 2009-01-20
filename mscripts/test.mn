@@ -1,22 +1,12 @@
-// A sample class
-class Test;
+// A short example script
 
 import io, timer;
 
-test()
-{
-  state = printMessage;
-}
+sleep(6);
 
-state printMessage
+while(true)
 {
-  // This state code will run as long as the object is in this state.
- begin:
-  sleep(6);
-
- loop:
   print("Howdy from the world of Monster scripts!");
   print("This script is located in mscripts/test.mn. Check it out!");
   sleep(60);
-  goto loop;
 }

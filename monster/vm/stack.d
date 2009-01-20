@@ -33,7 +33,6 @@ import monster.compiler.scopes;
 import monster.vm.mobject;
 import monster.vm.mclass;
 import monster.vm.arrays;
-import monster.vm.fstack;
 import monster.vm.error;
 
 // Stack. There's only one global instance, but threads will make
@@ -74,21 +73,19 @@ struct CodeStack
     return total-left;
   }
 
-  // Sets the current position as the 'frame pointer', and return
-  // previous value.
+  // Sets the current position as the 'frame pointer', and return it.
   int *setFrame()
   {
-    auto old = frame;
     frame = pos;
     fleft = left;
     //writefln("setFrame(): new=%s, old=%s", frame, old);
-    return old;
+    return frame;
   }
 
   // Sets the given frame pointer
   void setFrame(int *frm)
   {
-    //writefln("setFrame(%s)", frm);
+    //writefln("restoring frame: %s", frm);
     frame = frm;
     if(frm is null)
       {
@@ -99,18 +96,14 @@ struct CodeStack
     assert(fleft >= 0 && fleft <= total);
   }
 
-  // Reset the stack level to zero. Should only be called when the
-  // frame pointer is already zero (we use it in state code only.)
+  // Reset the stack level to zero.
   void reset()
   {
     left = total;
     pos = data.ptr;
 
-    if(fleft != 0)
-      writefln("left=%s total=%s fleft=%s", left, total, fleft);
-    assert(frame is null);
-    assert(fleft == 0);
-    assert(fstack.isEmpty);
+    fleft = 0;
+    frame = null;
   }
 
   void pushInt(int i)
@@ -143,6 +136,15 @@ struct CodeStack
     if(left>total) overflow("popLong");
     pos-=2;
     return *(cast(long*)pos);
+  }
+
+  // Get the pointer from the start of the stack
+  int *getStartInt(int pos)
+  {
+    if(pos < 0 || pos >= getPos)
+      fail("CodeStack.getStartInt() pointer out of range");
+
+    return &data[pos];
   }
 
   // Get the pointer to an int at the given position backwards from

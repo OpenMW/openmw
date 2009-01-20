@@ -391,9 +391,14 @@ struct FreeList(T)
   // Get the first element in the list
   T* getHead() { return &nodes.getHead().value; }
 
+  // Get the next element in the list
+  T* getNext(T* nd)
+    {
+      auto node = cast(TNode*)nd;
+      return cast(T*) node.getNext();
+    }
+
   // Loop through the structs in this list
   int opApply(int delegate(ref T) dg)
-    {
-      return nodes.opApply(dg);
-    }
+    { return nodes.opApply(dg); }
 }

@@ -234,16 +234,6 @@ struct MonsterObject
     return &data[treeIndex][pos];
   }
 
-  /* KILLME
-  // Get a long (two ints) from the data segment
-  long *getDataLong(int pos)
-  {
-    if(pos < 0 || pos+1>=data.length)
-      fail("MonsterObject: data pointer out of range: " ~ toString(pos));
-    return cast(long*)&data[pos];
-  }
-  */
-
   // Get an array from the data segment
   int[] getDataArray(int treeIndex, int pos, int len)
   {
@@ -317,19 +307,13 @@ struct MonsterObject
     // Do we already have a thread?
     if(sthread !is null)
       {
-        // If we are already scheduled (if an idle function has
-        // scheduled us, or if setState has been called multiple
-        // times), unschedule. This will automatically cancel any
-        // scheduled idle functions and call their abort() functions.
-        if(sthread.isScheduled)
-          sthread.cancel();
-
-        assert(sthread.isActive || !sthread.stateChange,
-               "stateChange was set outside active code");
-
-        // If we are running from state code, signal it that we must
-        // now abort execution when we reach the state level.
-        sthread.stateChange = sthread.isActive;
+        // Check if the thread has gone and died on us while we were
+        // away.
+        if(sthread.isDead)
+          sthread = null;
+        else
+          // Still alive. Stop any execution of the thread
+          sthread.stop();
       }
 
     // If we are jumping to anything but the empty state, we will have
@@ -349,18 +333,24 @@ struct MonsterObject
           {
             // Make sure there's a thread to run in
             if(sthread is null)
-              sthread = Thread.getNew(this);
+              sthread = Thread.getNew();
 
-            // Schedule the thread to start at the given label
-            sthread.schedule(label.offs);
+            // Schedule the thread to start at the given state and
+            // label
+            sthread.scheduleState(this, label.offs);
             assert(sthread.isScheduled);
           }
       }
 
-    // Don't leave an unused thread dangling - kill it instead.
-    if(sthread !is null && sthread.isUnused)
+    // If nothing is scheduled, kill the thread
+    if(sthread !is null && !sthread.isScheduled)
       {
+        assert(sthread.isTransient);
         sthread.kill();
+
+        // Zero out any pointers to the thread.
+        if(sthread is cthread)
+          cthread = null;
         sthread = null;
       }
 

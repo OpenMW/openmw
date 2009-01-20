@@ -1,0 +1,42 @@
+singleton thread;
+
+// Used to kill or pause our own or other threads.
+idle kill();
+idle pause();
+
+// Get status information about a thread
+native bool isScheduled();
+native bool isPaused();
+native bool isIdle();
+native bool isDead();
+bool isAlive() { return !isDead(); }
+
+// Create a new (paused) thread for a given function
+native thread create(char[] name);
+
+// Schedule a (paused) thread to run the next frame
+native restart();
+
+// Call a (paused) thread directly - returns when the thread exits or
+// calls an idle function.
+idle resume();
+
+// Wait for a thread to finish. Will not return until the thread is
+// dead.
+idle wait();
+
+// Call a function as a thread
+thread call(char[] name)
+{
+  var t = create(name);
+  t.resume();
+  return t;
+}
+
+// Start a function as a thread in the background
+thread start(char[] name)
+{
+  var t = create(name);
+  t.restart();
+  return t;
+}
