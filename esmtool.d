@@ -28,7 +28,7 @@ import std.stdio;
 import core.memory;
 import esm.esmmain;
 import monster.util.string;
-import mscripts.object;
+import mscripts.setup;
 
 import std.gc;
 import gcstats;

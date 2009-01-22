@@ -1,7 +1,5 @@
 // A short example script
 
-import io, timer;
-
 sleep(6);
 
 while(true)

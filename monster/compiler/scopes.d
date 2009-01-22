@@ -338,6 +338,13 @@ abstract class Scope
   void registerImport(MonsterClass mc)
     { registerImport(new ImportHolder(mc)); }
 
+  // Even more user-friendly version. Takes a list of class names.
+  void registerImport(char[][] cls ...)
+    {
+      foreach(c; cls)
+        registerImport(MonsterClass.find(c));
+    }
+
   // Used for summing up stack level. Redeclared in StackScope.
   int getTotLocals() { return 0; }
   int getLocals() { assert(0); }

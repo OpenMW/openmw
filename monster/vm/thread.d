@@ -124,6 +124,20 @@ struct Thread
     return cn;
   }
 
+  // Schedule the function to run the next frame. Can only be used on
+  // paused threads.
+  void restart()
+  {
+    if(isDead)
+      fail("Cannot restart a dead thread");
+
+    if(!isPaused)
+      fail("Can only use restart() on paused threads");
+
+    // Move to the runlist
+    moveTo(scheduler.runNext);
+  }
+
   // Stop the thread and return it to the freelist
   void kill()
   {
@@ -238,6 +252,7 @@ struct Thread
   bool isTransient() { return list is &scheduler.transient; }
   bool isRunning() { return cthread is this; }
   bool isDead() { return list is null; }
+  bool isAlive() { return !isDead; }
   bool isPaused() { return list is &scheduler.paused; }
 
   // Get the next node in the freelist
@@ -293,6 +308,7 @@ struct Thread
 
     // Background the thread
     background();
+    assert(cthread is null);
   }
 
   // Put this thread in the background. Acquires the stack and
@@ -400,6 +416,8 @@ struct Thread
     Floc fl;
     if(fstack.cur !is null)
       fl = fstack.cur.getFloc();
+
+    msg ~= '\n' ~ fstack.toString();
 
     .fail(msg, fl);
   }

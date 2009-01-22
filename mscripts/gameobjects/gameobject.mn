@@ -23,7 +23,7 @@
 
 // An object that exists inside a cell. All cell objects must have a
 // position in space.
-class GameObject : Object;
+class GameObject;
 
 // Is this object placed in a cell? isPlaced is true if the object is
 // displayed inside a cell with a mesh and given 3D coordinates, and

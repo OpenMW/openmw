@@ -1,0 +1,8 @@
+module random;
+
+native uint rand();   // Return a number between 0 and uint.max, inclusive
+native float frand(); // Return a number between 0 and 1, inclusive
+
+// Return a random number between a and b, inclusive. Allows negative
+// numbers, and works with a>b, a<b and a==b
+native int randInt(int a, int b);

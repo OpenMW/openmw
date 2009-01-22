@@ -26,7 +26,7 @@
    fade in and fade out, and adjust volume.
 */
 
-class Jukebox : Object;
+class Jukebox;
 
 // Between 0 (off) and 1 (full volume)
 float fadeLevel = 0.0;

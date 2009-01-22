@@ -24,7 +24,7 @@
 // Contains all the game settings (GMST) variables of Morrowind,
 // Tribunal and Bloodmoon. Based on "Morrowind Scripting for Dummies"
 // (v9).
-singleton GMST : Object;
+singleton GMST;
 
 // Most of the comments are copied from MSfD. A bit of cleanup is
 // still needed.

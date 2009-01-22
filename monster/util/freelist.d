@@ -175,8 +175,6 @@ struct BufferList(int size)
   void free(void* p) { remove(cast(ValuePtr)p); }
 }
 
-import std.stdio;
-
 struct Buffers
 {
   static:
@@ -204,8 +202,7 @@ struct Buffers
     // Too large for our lists - just use malloc
     else
       {
-        writefln("WARNING: using malloc for %s ints (%s bytes)",
-                 size, size*int.sizeof);
+        //writefln("WARNING: using malloc for %s ints (%s bytes)", size, size*int.sizeof);
         return ( cast(int*)malloc(size*int.sizeof) )[0..size];
       }
   }

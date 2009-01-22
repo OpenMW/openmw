@@ -21,16 +21,13 @@
 
  */
 
-module mscripts.object;
+module mscripts.setup;
 
 import monster.monster;
+import monster.compiler.scopes : global;
 import monster.modules.timer;
 
-import std.stdio;
-import std.date;
-import core.resource : rnd;
 import core.config;
-import sound.music;
 
 // Set up the base Monster classes we need in OpenMW
 void initMonsterScripts()
@@ -43,16 +40,12 @@ void initMonsterScripts()
   vm.addPath("mscripts/gameobjects/");
   vm.addPath("mscripts/sound/");
 
-  // Make sure the Object class is loaded
-  auto mc = new MonsterClass("Object", "object.mn");
+  // Import some modules into the global scope, so we won't have to
+  // import them manually in each script.
+  global.registerImport("io", "random", "timer");
 
   // Get the Config singleton object
   config.mo = (new MonsterClass("Config")).getSing();
-
-  // Bind various functions
-  mc.bind("randInt",
-  { stack.pushInt(rnd.randInt
-    (stack.popInt,stack.popInt));});
 
   // Run the fps ticker
   vm.run("fpsticker.mn");

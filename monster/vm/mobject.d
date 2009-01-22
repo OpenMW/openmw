@@ -27,6 +27,7 @@ import monster.vm.thread;
 import monster.vm.error;
 import monster.vm.mclass;
 import monster.vm.arrays;
+import monster.vm.stack;
 
 import monster.util.freelist;
 import monster.util.list;
@@ -34,6 +35,7 @@ import monster.util.list;
 import monster.compiler.states;
 import monster.compiler.variables;
 import monster.compiler.scopes;
+import monster.compiler.functions;
 
 import std.string;
 import std.stdio;
@@ -260,6 +262,44 @@ struct MonsterObject
   void call(char[] name)
   {
     cls.findFunction(name).call(this);
+  }
+
+  // Create a paused thread that's set up to call the given
+  // function. It must be started with Thread.call() or
+  // Thread.restart().
+  Thread *thread(char[] name)
+  { return thread(cls.findFunction(name)); }
+  Thread *thread(Function *fn)
+  {
+    assert(fn !is null);
+    if(fn.paramSize > 0)
+      fail("thread(): function " ~ fn.name.str ~ " cannot have parameters");
+
+    Thread *trd = Thread.getNew();
+
+    // Schedule the function to run the next frame
+    trd.pushFunc(fn, this);
+    assert(trd.isPaused);
+    assert(trd.fstack.cur !is null);
+
+    // pushFunc will mess with the stack frame though, so fix it.
+    trd.fstack.cur.frame = stack.getStart();
+    if(cthread !is null)
+      cthread.fstack.restoreFrame();
+
+    return trd;
+  }
+
+  // Create a thread containing the function and schedule it to start
+  // the next frame
+  Thread *start(char[] name)
+  { return start(cls.findFunction(name)); }
+  Thread *start(Function *fn)
+  {
+    assert(fn !is null);
+    auto trd = thread(fn);
+    trd.restart();
+    return trd;
   }
 
   // Call a function non-virtually. In other words, ignore

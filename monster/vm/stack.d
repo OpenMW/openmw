@@ -139,12 +139,9 @@ struct CodeStack
   }
 
   // Get the pointer from the start of the stack
-  int *getStartInt(int pos)
+  int *getStart()
   {
-    if(pos < 0 || pos >= getPos)
-      fail("CodeStack.getStartInt() pointer out of range");
-
-    return &data[pos];
+    return cast(int*)data.ptr;
   }
 
   // Get the pointer to an int at the given position backwards from

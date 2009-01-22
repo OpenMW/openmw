@@ -28,19 +28,11 @@ native restart();
 
 // Call a (paused) thread directly - returns when the thread exits or
 // calls an idle function.
-idle resume();
+idle call();
 
 // Wait for a thread to finish. Will not return until the thread is
 // dead.
 idle wait();
-
-// Call a function as a thread
-thread call(char[] name)
-{
-  var t = create(name);
-  t.resume();
-  return t;
-}
 
 // Start a function as a thread in the background
 thread start(char[] name)
@@ -50,6 +42,18 @@ thread start(char[] name)
   return t;
 }
 "; //"
+
+/*
+  The char[] name stuff above will of course be replaced with real
+  function pointers once those are done. We will also add:
+
+  function() wrap(function f())
+  {
+    var t = create(f);
+    return {{ t.call(); }
+  }
+
+*/
 
 MonsterObject *trdSing;
 
@@ -134,49 +138,34 @@ void create()
     nd = cthread.fstack.list.getNext(nd);
   auto mo = nd.obj;
 
-  // Find the function
-  auto fn = mo.cls.findFunction(name);
-
-  if(fn.paramSize > 0)
-    fail("create(): function " ~ name ~ " cannot have parameters");
-
-  // Create a new thread
-  Thread *trd = Thread.getNew();
-
-  // Schedule the thread run the next frame
-  trd.pushFunc(fn, mo);
-  assert(trd.isPaused);
-
-  // This will mess with the stack frame though, so set it up
-  // correctly.
-  trd.fstack.cur.frame = stack.getStartInt(0);
-  cthread.fstack.restoreFrame();
+  auto trd = mo.thread(name);
 
   stack.pushObject(createObj(trd));
 }
 
-// Resume is used to restore a thread that was previously paused. It
-// will enter the thread immediately, like call. If you wish to run it
-// later, use restart instead.
-class Resume : IdleFunction
+// Call is used to restore a thread that was previously paused. It
+// will enter the thread immediately, like a normal function call, but
+// it will still run in its own thread. If you only wish to schedule
+// it for later, use restart instead.
+class Call : IdleFunction
 {
  override:
   IS initiate(Thread *t)
     {
       if(params.obj is trdSing)
-        fail("Cannot use resume() on our own thread.");
+        fail("Cannot use call() on our own thread.");
 
       // Get the thread we're resuming
       auto trd = getOwner();
 
       if(trd is t)
-        fail("Cannot use resume() on our own thread.");
+        fail("Cannot use call() on our own thread.");
 
       if(trd.isDead)
-        fail("Cannot resume a dead thread.");
+        fail("Cannot call a dead thread.");
 
       if(!trd.isPaused)
-        fail("Can only use resume() on paused threads");
+        fail("Can only use call() on paused threads");
 
       // Background the current thread. Move it to the pause list
       // first, so background doesn't inadvertently delete it.
@@ -234,18 +223,7 @@ class Wait : IdleFunction
 }
 
 void restart()
-{
-  auto trd = getOwner();
-
-  if(trd.isDead)
-    fail("Cannot restart a dead thread");
-
-  if(!trd.isPaused)
-    fail("Can only use restart() on paused threads");
-
-  // Move to the runlist
-  trd.moveTo(scheduler.runNext);
-}
+{ getOwner().restart(); }
 
 void isDead()
 { stack.pushBool(getOwner().isDead); }
@@ -270,7 +248,7 @@ void initThreadModule()
   trdSing = _threadClass.getSing();
 
   _threadClass.bind("kill", new Kill);
-  _threadClass.bind("resume", new Resume);
+  _threadClass.bind("call", new Call);
   _threadClass.bind("pause", new Pause);
   _threadClass.bind("wait", new Wait);
 

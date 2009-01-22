@@ -1,12 +1,14 @@
 // Small script that prints the FPS to screen with regular intervals.
 
-import io, timer, frames;
+import frames;
 
 // Sleep one frame. This makes sure that we won't start running until
 // the rendering begins. Not critically important, but it prevents the
 // first printed value from being 'nan'.
 fsleep(1);
 
+// counter and totalTime (in the 'frames' module) are updated
+// automatically by the system.
 ulong lastFrame  = counter;
 float lastTime   = totalTime;
 

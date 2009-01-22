@@ -43,7 +43,7 @@ import core.config;
 
 import monster.util.string;
 import monster.vm.mclass;
-import mscripts.object;
+import mscripts.setup;
 
 import sound.audio;
 

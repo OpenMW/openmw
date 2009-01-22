@@ -131,7 +131,9 @@ struct StackPoint
         name = func.name.str;
 
         if(isIdle) type = "idle";
-        else type = "function";
+        else if(isNormal) type = "script";
+        else if(isNative) type = "native";
+        else assert(0);
       }
 
     // Function location and name
@@ -322,8 +324,17 @@ struct FunctionStack
   {
     char[] res;
 
+    int i;
     foreach(ref c; list)
-      res = c.toString ~ '\n' ~ res;
+      {
+        char[] msg;
+        if(i == 0)
+          msg = " (<---- current function)";
+        else if(i == list.length-1)
+          msg = " (<---- start of function stack)";
+        res = c.toString ~ msg ~ '\n' ~ res;
+        i++;
+      }
 
     return "Trace:\n" ~ res;
   }

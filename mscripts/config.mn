@@ -21,7 +21,7 @@
 
  */
 
-singleton Config : Object;
+singleton Config;
 
 // Only some config options have been moved into Monster. Key bindings
 // and other low-level settings are still handled in D.

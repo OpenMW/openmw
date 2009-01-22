@@ -274,6 +274,8 @@ struct Function
     auto fd = new FuncDeclaration;
     // Parse and comile the function
     fd.parseFile(tokens, this);
+    name.str = file;
+    name.loc.fname = file;
     fd.resolve(mc.sc);
     fd.resolveBody();
     fd.compile();
@@ -287,7 +289,7 @@ struct Function
 
   private:
 
-  static const char[] int_class = "class _Func_Internal_;";
+  static const char[] int_class = "class _ScriptFile_;";
   static MonsterClass int_mc;
   static MonsterObject *int_mo;
 }

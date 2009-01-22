@@ -25,7 +25,7 @@ module esm.loadlevlist;
 import esm.imports;
 import esm.loadcrea;
 
-import util.random;
+import monster.modules.random : randInt;
 
 /*
  * Leveled lists. Since these have identical layout, I only bothered
@@ -103,7 +103,7 @@ struct LeveledListT(bool creature)
  
       // TODO: Find out if this is indeed correct. 
       // Test if no creature is to be selected
-      if(rnd.randInt(0, 255) < chanceNone) return -1;
+      if(randInt(0, 255) < chanceNone) return -1;
 
       // Find the highest item below or equal to the Player level
       for(i=list.length-1; i>=0; i--)
@@ -126,7 +126,7 @@ struct LeveledListT(bool creature)
 	}
 
       // Select a random item
-      return rnd.randInt(bottom, top);
+      return randInt(bottom, top);
     }
 
   void load()

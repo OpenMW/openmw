@@ -22,7 +22,7 @@
  */
 
 // This class controls all the music.
-singleton Music : Object;
+singleton Music;
 
 // Create one jukebox for normal music, and one for battle music. This
 // way we can pause / fade out one while the other resumes / fades in.

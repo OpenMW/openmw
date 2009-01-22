@@ -31,7 +31,6 @@ import std.path;
 
 import monster.util.aa;
 import monster.util.string;
-import util.random;
 
 import bsa.bsafile;
 
@@ -50,9 +49,6 @@ import nif.nif;
 
 import core.filefinder;
 //import core.config;
-
-// Random number generator
-DRand rnd;
 
 // These are handles for various resources. They may refer to a file
 // in the file system, an entry in a BSA archive, or point to an
@@ -129,8 +125,6 @@ struct ResourceManager
 
   void initResources()
   {
-    rnd = new DRand;
-
     bsa = new FileFinder(config.bsaDir, "bsa", Recurse.No);
     archives.length = bsa.length;
     foreach(int i, ref BSAFile f; archives)
