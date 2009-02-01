@@ -28,6 +28,9 @@ import monster.compiler.scopes : global;
 import monster.modules.timer;
 
 import core.config;
+import ogre.bindings;
+
+import std.string;
 
 // Set up the base Monster classes we need in OpenMW
 void initMonsterScripts()
@@ -48,8 +51,23 @@ void initMonsterScripts()
   config.mo = (new MonsterClass("Config")).getSing();
 
   // Run the fps ticker
-  vm.run("fpsticker.mn");
+  //vm.run("fpsticker.mn");
+  auto mc = new MonsterClass("fpsticker.mn");
+  mc.bind("setText", &setFpsText);
+  mc.createObject().call("run");
 
   // Run the test script
   vm.run("test.mn");
+}
+
+void setFpsText()
+{
+  AIndex[] args = stack.popAArray();
+
+  char[] res;
+
+  foreach(AIndex ind; args)
+    res ~= format("%s", arrays.getRef(ind).carr);
+
+  gui_setFpsText(res.ptr);
 }

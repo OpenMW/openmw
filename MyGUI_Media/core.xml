@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI>
+
+    <MyGUI type="List">
+	    <List file="core.lang" group="General"/>
+	    <List file="core.layer" group="General"/>
+	    <List file="core.skin" group="General"/>
+	    <List file="core.font" group="General"/>
+	    <List file="core.pointer" group="General"/>
+	    <List file="core.plugin"/>
+
+            <List file="openmw_windows.skin" group="General"/>
+    </MyGUI>
+
+</MyGUI>

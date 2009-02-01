@@ -147,14 +147,10 @@ extern "C" void ogre_initWindow()
   mMouse = static_cast<Mouse*>(mInputManager->createInputObject
                                ( OISMouse, bufferedMouse ));
 
-  unsigned int width, height, depth;
-  int left, top;
-  mWindow->getMetrics(width, height, depth, left, top);
-
   // Set mouse region
   const MouseState &ms = mMouse->getMouseState();
-  ms.width = width;
-  ms.height = height;
+  ms.width = mWindow->getWidth();
+  ms.height = mWindow->getHeight();
 
   // Register the input listener
   mKeyboard -> setEventCallback( &mInput );
@@ -207,6 +203,9 @@ extern "C" void ogre_makeScene()
   g_light->setDiffuseColour(1,0.7,0.3);
   g_light->setAttenuation(2000, 0, 0.008, 0);
   */
+
+  // Finally, set up the GUI
+  setupGUI();
 }
 
 /*
@@ -447,9 +446,6 @@ public:
   }
 } dummyLoader;
 
-  // TODO/FIXME/DEBUG (MURDER/DEATH/KILL)
-String LASTNAME;
-
 // Load the contents of a mesh
 extern "C" void ogre_createMesh(
 		char* name,		// Name of the mesh
@@ -652,9 +648,6 @@ extern "C" void ogre_createMaterial(char *name,	    // Name to give
       // like crap so it's not enabled right now.
 
       //material->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-
-      // Temporary, just to store the name of one valid material.
-      LASTNAME = material->getName();
 }
 
 extern "C" SceneNode *ogre_getDetachedNode()

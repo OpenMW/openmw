@@ -97,16 +97,33 @@ public:
   }
 
   // Gets called once for each of the ogre formats, *.program,
-  // *.material etc. We can ignore this.
+  // *.material etc. It's also called by MyGUI to find textures, so we
+  // have to channel it through exists().
   FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
                                bool dirs = false)
   {
-    //std::cout << "findFileInfo(" << pattern << ", " << recursive
-    //          << ", " << dirs << ")\n";
-
+    /*
+    std::cout << "findFileInfo(" << pattern << ", " << recursive
+              << ", " << dirs << ")\n";
+    */
 
     FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-    //std::cout << "BSAArchive::findFileInfo is not implemented!\n";
+
+    // Check if the file exists (only works for single files - wild
+    // cards and recursive search isn't implemented.)
+    if(exists(pattern))
+      {
+        FileInfo fi;
+        fi.archive = this;
+        fi.filename = pattern;
+        fi.path = "";
+        // It apparently doesn't matter that we return bogus
+        // information
+        fi.compressedSize = fi.uncompressedSize = 0;
+
+        ptr->push_back(fi);
+      }
+
     return ptr;
   }
 

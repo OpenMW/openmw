@@ -160,5 +160,5 @@ void ogre_getCameraPos(float *x, float *y, float *z);
 void ogre_getCameraOrientation(float *fx, float *fy, float *fz, float *ux, float *uy, float *uz);
 void ogre_moveCameraRel(float x, float y, float z);
 
-// Do some debug action. Check the menu for today's specials!
-void ogre_debug(int i);
+// Test
+void gui_setFpsText(char *str);

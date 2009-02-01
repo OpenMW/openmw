@@ -28,11 +28,12 @@
 #include <OgreConfigFile.h>
 #include <OgreStringConverter.h>
 #include <OgreException.h>
-#include <OgreOverlayElementFactory.h>
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
 
 #include <OIS/OIS.h>
+
+#include <MyGUI.h>
 
 using namespace Ogre;
 
@@ -54,13 +55,17 @@ OIS::InputManager *mInputManager;
 OIS::Mouse *mMouse;
 OIS::Keyboard *mKeyboard;
 
+// The global GUI object
+MyGUI::Gui *mGUI;
+int guiMode = 0;
+
 // Root node for all objects added to the scene. This is rotated so
 // that the OGRE coordinate system matches that used internally in
 // Morrowind.
 SceneNode *root;
 
 // Include the other parts of the code, and make one big object file.
+#include "cpp_mygui.cpp"
 #include "cpp_framelistener.cpp"
 #include "cpp_bsaarchive.cpp"
 #include "cpp_interface.cpp"
-#include "cpp_overlay.cpp"

@@ -48,6 +48,10 @@ public:
     mKeyboard->capture();
     mMouse->capture();
 
+    // Notify the GUI
+    mGUI->injectFrameEntered(evt.timeSinceLastFrame);
+
+    // Turn over control to the D code
     return d_frameStarted(evt.timeSinceLastFrame);
   }
 };
@@ -75,7 +79,12 @@ public:
               << s.X.abs << ", " << s.Y.abs << ", " << s.Z.abs << ") Rel("
               << s.X.rel << ", " << s.Y.rel << ", " << s.Z.rel << ")\n";
     */
-    d_handleMouseMove(&arg.state);
+    // TODO: this should be handled elsewhere later on, most likely in
+    // Monster script.
+    if(guiMode)
+      mGUI->injectMouseMove(arg);
+    else
+      d_handleMouseMove(&arg.state);
     return true;
   }
 
@@ -87,13 +96,22 @@ public:
               << s.X.abs << ", " << s.Y.abs << ", " << s.Z.abs << ") Rel("
               << s.X.rel << ", " << s.Y.rel << ", " << s.Z.rel << ")\n";
     */
-    d_handleMouseButton(&arg.state, id);
+    if(guiMode)
+      mGUI->injectMousePress(arg, id);
+    else
+      d_handleMouseButton(&arg.state, id);
+    return true;
+  }
+
+  bool mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
+  {
+    if(guiMode)
+      mGUI->injectMouseRelease(arg, id);
     return true;
   }
 
   // Unused
   bool keyReleased( const OIS::KeyEvent &arg ) { return true; }
-  bool mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id ) { return true; }
 };
 
 MorroFrameListener mFrameListener;

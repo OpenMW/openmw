@@ -187,7 +187,7 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
       case Keys.PhysMode: bullet_nextMode(); break;
       case Keys.Nighteye: ogre_toggleLight(); break;
 
-      case Keys.Debug: ogre_debug(0); break;
+      case Keys.Debug: break;
       case Keys.ScreenShot: takeScreenShot(); break;
       case Keys.Pause: togglePause(); break;
       case Keys.Exit: exitProgram(); break;

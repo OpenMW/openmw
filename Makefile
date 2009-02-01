@@ -1,15 +1,15 @@
 # Designed for GNU Make
 
 # Compiler settings
-CXXFLAGS?= -Wall -g
+CXXFLAGS?= -g
 DMD=gdmd -version=Posix
 #DMD=dmd -version=Posix
 
 # Some extra flags for niftool and bsatool
 NIFFLAGS=-debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose
 
-# Compiler settings for Ogre + OIS.
-CF_OIS=$(shell pkg-config --cflags OIS OGRE)
+# Compiler settings for Ogre, OIS and MyGUI
+CF_OIS=$(shell pkg-config --cflags OIS OGRE MyGUI)
 OGCC=$(CXX) $(CXXFLAGS) $(CF_OIS)
 
 # Compiler settings for ffmpeg.
@@ -22,7 +22,7 @@ BGCC=$(CXX) $(CXXFLAGS) $(CF_BULLET)
 
 # Ogre C++ files, on the form ogre/cpp_X.cpp. Only the first file is
 # passed to the compiler, the rest are dependencies.
-ogre_cpp=ogre framelistener interface overlay bsaarchive
+ogre_cpp=ogre framelistener interface bsaarchive mygui
 
 # FFmpeg files, in the form sound/cpp_X.cpp.
 avcodec_cpp=avcodec
@@ -82,10 +82,10 @@ nifobjs/%.o: %.d
 	$(DMD) $(NIFFLAGS) -c $< -of$@
 
 openmw: openmw.d cpp_ogre.o cpp_avcodec.o cpp_bullet.o $(obj)
-	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
+	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
 
 esmtool: esmtool.d cpp_ogre.o cpp_avcodec.o cpp_bullet.o $(obj)
-	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
+	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
 
 niftool: niftool.d $(obj_nif)
 	$(DMD) $^ -of$@
