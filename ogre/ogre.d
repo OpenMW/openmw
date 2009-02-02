@@ -116,6 +116,9 @@ void setupOgre()
   // exterior cells differently, etc.
   ogre_makeScene();
 
+  // Load the GUI elements
+  gui_setupGUI();
+
   ogreSetup = true;
 }
 

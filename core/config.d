@@ -90,6 +90,7 @@ struct ConfigManager
   char[] esmDir;
   char[] bsaDir;
   char[] sndDir;
+  char[] fontDir;
   char[] musDir; // Explore music
   char[] musDir2; // Battle music
 
@@ -266,6 +267,7 @@ struct ConfigManager
     bsaDir = dataDir;
     esmDir = dataDir;
     sndDir = dataDir ~ "Sound/";
+    fontDir = dataDir ~ "Fonts/";
     musDir = dataDir ~ "Music/Explore/";
     musDir2 = dataDir ~ "Music/Battle/";
 

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Font">
-	<Font name="MyGUI_CoreFont.18" source="Comic.TTF" size="18" resolution="72" antialias_colour="false" space_width="a" tab_count="4" spacer="5">
+	<Font name="MyGUI_CoreFont.18" source="Comic.TTF" size="18" resolution="72" antialias_colour="false" space_width="4" tab_count="4" spacer="5">
 		<Code range="33 126"/>
 		<Code range="1025 1105"/>
 		<Code range="8470 8470" help="№"/>

@@ -10,28 +10,28 @@
 
     <!-- These define the window borders -->
     <Skin name="TB_B" size="512 4" texture="menu_thick_border_bottom.dds">
-        <Property key="Pointer" value = "size_left" />
+        <Property key="Pointer" value = "vresize" />
         <BasisSkin type="MainSkin" offset = "0 0 512 4">
             <State name="normal" offset = "0 0 512 4"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_R" size="4 512" texture="menu_thick_border_right.dds">
-        <Property key="Pointer" value = "size_left" />
+        <Property key="Pointer" value = "hresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 512">
             <State name="normal" offset = "0 0 4 512"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_T" size="512 4" texture="menu_thick_border_top.dds">
-        <Property key="Pointer" value = "size_left" />
+        <Property key="Pointer" value = "vresize" />
         <BasisSkin type="MainSkin" offset = "0 0 512 4">
             <State name="normal" offset = "0 0 512 4"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_L" size="4 512" texture="menu_thick_border_left.dds">
-        <Property key="Pointer" value = "size_left" />
+        <Property key="Pointer" value = "hresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 512">
             <State name="normal" offset = "0 0 4 512"/>
         </BasisSkin>
@@ -39,27 +39,70 @@
 
     <!-- Window border corners -->
     <Skin name="TB_BR" size="4 4" texture="menu_thick_border_bottom_right_corner.dds">
-        <Property key="Pointer" value = "size_left" />
+        <Property key="Pointer" value = "dresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
     <Skin name="TB_BL" size="4 4" texture="menu_thick_border_bottom_left_corner.dds">
-        <Property key="Pointer" value = "size_left" />
+        <Property key="Pointer" value = "dresize2" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
     <Skin name="TB_TR" size="4 4" texture="menu_thick_border_top_right_corner.dds">
-        <Property key="Pointer" value = "size_left" />
+        <Property key="Pointer" value = "dresize2" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
     <Skin name="TB_TL" size="4 4" texture="menu_thick_border_top_left_corner.dds">
-        <Property key="Pointer" value = "size_left" />
+        <Property key="Pointer" value = "dresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+
+    <!-- Inner borders -->
+
+    <Skin name="IB_T" size="512 2" texture="menu_thin_border_top.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 512 2">
+            <State name="normal" offset = "0 0 512 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_B" size="512 2" texture="menu_thin_border_bottom.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 512 2">
+            <State name="normal" offset = "0 0 512 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_L" size="2 512" texture="menu_thin_border_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 512">
+            <State name="normal" offset = "0 0 2 512"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_R" size="2 512" texture="menu_thin_border_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 512">
+            <State name="normal" offset = "0 0 2 512"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_TL" size="2 2" texture="menu_thin_border_top_left_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_TR" size="2 2" texture="menu_thin_border_top_right_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_BL" size="2 2" texture="menu_thin_border_bottom_left_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_BR" size="2 2" texture="menu_thin_border_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>
     </Skin>
 
@@ -116,20 +159,24 @@
     </Skin>
 
     <Skin name="HB_ALL" size="260 20">
-        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="ALIGN_TOP ALIGN_HSTRETCH"></Child>
-        <Child type="Widget" skin="HB_TOP" offset="2 0 256 2" align="ALIGN_TOP ALIGN_HSTRETCH"></Child>
-        <Child type="Widget" skin="HB_BOTTOM" offset="2 18 256 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"></Child>
-        <Child type="Widget" skin="HB_LEFT" offset="0 2 2 16" align="ALIGN_TOP ALIGN_LEFT"></Child>
-        <Child type="Widget" skin="HB_RIGHT" offset="258 2 2 16" align="ALIGN_TOP ALIGN_RIGHT"></Child>
-        <Child type="Widget" skin="HB_TR" offset="258 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"></Child>
-        <Child type="Widget" skin="HB_TL" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"></Child>
-        <Child type="Widget" skin="HB_BR" offset="258 18 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"></Child>
-        <Child type="Widget" skin="HB_BL" offset="0 18 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"></Child>
+        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="ALIGN_TOP ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="HB_TOP" offset="2 0 256 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="HB_BOTTOM" offset="2 18 256 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="HB_LEFT" offset="0 2 2 16" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_RIGHT" offset="258 2 2 16" align="ALIGN_TOP ALIGN_RIGHT"/>
+        <Child type="Widget" skin="HB_TR" offset="258 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
+        <Child type="Widget" skin="HB_TL" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_BR" offset="258 18 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
+        <Child type="Widget" skin="HB_BL" offset="0 18 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
     </Skin>
 
-    <!-- The actual caption. It contains the edges of each of the blocks on
+    <!-- The actual caption. It contains the edges of the blocks on
          its sides as well -->
     <Skin name = "MW_Caption" size = "88 20" texture = "black.png" >
+        <!--
+        <Property key="FontName" value = "dorcla" />
+        <Property key="FontHeight" value = "20" />
+        -->
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_CENTER" />
@@ -141,22 +188,28 @@
         <BasisSkin type="SimpleText" offset = "2 0 84 20" align = "ALIGN_STRETCH"/>
 
         <!-- Add the borders of the surrounding blocks -->
-        <Child type="Widget" skin="HB_LEFT" offset="86 2 2 16" align="ALIGN_TOP ALIGN_RIGHT"></Child>
-        <Child type="Widget" skin="HB_RIGHT" offset="0 2 2 16" align="ALIGN_TOP ALIGN_LEFT"></Child>
-        <Child type="Widget" skin="HB_TR" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"></Child>
-        <Child type="Widget" skin="HB_TL" offset="86 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"></Child>
-        <Child type="Widget" skin="HB_BR" offset="0 18 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"></Child>
-        <Child type="Widget" skin="HB_BL" offset="86 18 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"></Child>
+        <Child type="Widget" skin="HB_LEFT" offset="86 2 2 16" align="ALIGN_TOP ALIGN_RIGHT"/>
+        <Child type="Widget" skin="HB_RIGHT" offset="0 2 2 16" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_TR" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_TL" offset="86 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
+        <Child type="Widget" skin="HB_BR" offset="0 18 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_BL" offset="86 18 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
     </Skin>
+
+<!-- ----------------------------------------------------
+
+                 WINDOW DEFINITION
+
+------------------------------------------------------ -->
 
     <Skin name = "MW_Window" size = "256 54">
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_CENTER" />
-        <Property key="Colour" value = "0 0 0" />
+        <Property key="Colour" value = "0.8 0.8 0.8" />
         <Property key="ToStick" value = "true" />
 
-        <Child type="Widget" skin="MW_WindowBG" offset = "4 24 248 26" align = "ALIGN_STRETCH" name = "Client">
+        <Child type="Widget" skin="MW_WindowBG" offset = "6 26 244 22" align = "ALIGN_STRETCH" name = "Client">
         </Child>
 
         <!-- Outer orders -->
@@ -187,6 +240,14 @@
         </Child>
 
         <!-- Inner borders -->
+        <Child type="Widget" skin="IB_T" offset="6 24 244 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="IB_B" offset="6 48 244 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="IB_L" offset="4 26 2 22" align="ALIGN_LEFT ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="IB_R" offset="250 26 2 22" align="ALIGN_RIGHT ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="IB_TL" offset="4 24 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="IB_TR" offset="250 24 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
+        <Child type="Widget" skin="IB_BL" offset="4 48 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
+        <Child type="Widget" skin="IB_BR" offset="250 48 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
 
         <!-- Caption -->
         <Child type="Widget" skin="HB_ALL" offset="4 4 248 20" align = "ALIGN_TOP ALIGN_HSTRETCH">
@@ -202,13 +263,9 @@
             <Property key="Scale" value = "1 1 0 0"/>
         </Child>
 
-        
 
 
-        <!--
-        <Child type="Button" skin="WindowCaption" offset = "5 50 10 30" align = "ALIGN_HSTRETCH ALIGN_TOP" name = "Caption">
-            <Property key="Scale" value = "1 1 0 0"/>
-        </Child>
+        <!-- Leftover code - remove later
         <Child type="Button" skin="WindowX" offset = "20 80 24 30" align = "ALIGN_LEFT ALIGN_TOP" name = "Button">
             <Property key="Event" value = "close"/>
         </Child>

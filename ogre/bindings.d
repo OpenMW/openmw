@@ -160,5 +160,10 @@ void ogre_getCameraPos(float *x, float *y, float *z);
 void ogre_getCameraOrientation(float *fx, float *fy, float *fz, float *ux, float *uy, float *uz);
 void ogre_moveCameraRel(float x, float y, float z);
 
+// Insert a raw RGBA image into the texture system.
+//void ogre_insertTexture(char *name, int width, int height, void *data);
+
+void gui_setupGUI();
+
 // Test
 void gui_setFpsText(char *str);

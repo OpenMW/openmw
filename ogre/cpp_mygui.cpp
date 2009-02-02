@@ -19,10 +19,10 @@ void turnGuiOff(MyGUI::WidgetPtr sender)
     }
 }
 
-void setupGUI()
+extern "C" void gui_setupGUI()
 {
   ResourceGroupManager::getSingleton().
-    addResourceLocation("MyGUI_Media", "FileSystem", "General");
+    addResourceLocation("media_mygui", "FileSystem", "General");
 
   mGUI = new MyGUI::Gui();
   mGUI->initialise(mWindow);
@@ -40,11 +40,12 @@ void setupGUI()
      MyGUI::ALIGN_RIGHT | MyGUI::ALIGN_TOP,
      "Statistic");
   FPSText->setTextAlign(MyGUI::ALIGN_RIGHT);
-  FPSText->setColour(Ogre::ColourValue::White);
   FPSText->setNeedMouseFocus(false);
 
-  // TESTING WINDOW WITH BUTTON
   guiMode = 1;
+  MyGUI::WidgetPtr tmp;
+  /*
+  // TESTING WINDOW WITH BUTTON
   width = 300;
   height = 200;
   window = mGUI->createWidget<MyGUI::Window>
@@ -52,35 +53,44 @@ void setupGUI()
      (mWidth-width)/4, (mHeight-height)/4, // Position
      width, height, // Size
      MyGUI::ALIGN_DEFAULT, "Overlapped");
-  //window->setColour(Ogre::ColourValue::White);
   //window->setFontName("ManualFont");
   window->setCaption("GUI Demo");
-  window->setMinMax(180, 160, 1000, 1000);
   window->setAlpha(0.7);
 
   width = 150;
   height = 30;
-  MyGUI::WidgetPtr tmp;
   tmp = window->createWidget<MyGUI::Button>
     ("ButtonSmall",
      40, 100, // Position
      width, height, // Size
      MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
-     "Main");
+     "QuitButton");
   tmp->setCaption("Press this button");
   tmp->eventMouseButtonClick = MyGUI::newDelegate(&turnGuiOff);
+  */
 
   // TESTING MORROWIND SKIN
   width = 300;
   height = 190;
   mwindow = mGUI->createWidget<MyGUI::Window>
     ("MW_Window",
-     mWidth-width-120, mHeight-height-160, // Position
+     (mWidth-width)/4, (mHeight-height)/4, // Position
      width, height, // Size
      MyGUI::ALIGN_DEFAULT, "Overlapped");
   mwindow->setCaption("Skin test");
   mwindow->setMinMax(100, 140, 1000, 1000);
   mwindow->setAlpha(1);
+
+  width = 45;
+  height = 24;
+  tmp = mwindow->createWidget<MyGUI::Button>
+    ("MW_Button",
+     10, 32, // Position
+     width, height, // Size
+     MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
+     "MWButton1");
+  tmp->setCaption("Close");
+  tmp->eventMouseButtonClick = MyGUI::newDelegate(&turnGuiOff);
 
   // TESTING BITMAP FONT
   /*
@@ -91,7 +101,6 @@ void setupGUI()
      MyGUI::ALIGN_LEFT | MyGUI::ALIGN_BOTTOM,
      "Statistic");
   tmp->setTextAlign(MyGUI::ALIGN_LEFT);
-  tmp->setColour(Ogre::ColourValue::White);
   tmp->setFontName("ManualFont");
   tmp->setCaption("ABC");
   //*/

@@ -7,10 +7,12 @@
 	    <List file="core.layer" group="General"/>
 	    <List file="core.skin" group="General"/>
 	    <List file="core.font" group="General"/>
-	    <List file="core.pointer" group="General"/>
 	    <List file="core.plugin"/>
 
+	    <List file="openmw.pointer" group="General"/>
             <List file="openmw_windows.skin" group="General"/>
+            <List file="openmw_button.skin" group="General"/>
+	    <List file="openmw.font" group="General"/>
     </MyGUI>
 
 </MyGUI>

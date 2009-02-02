@@ -203,9 +203,6 @@ extern "C" void ogre_makeScene()
   g_light->setDiffuseColour(1,0.7,0.3);
   g_light->setAttenuation(2000, 0, 0.008, 0);
   */
-
-  // Finally, set up the GUI
-  setupGUI();
 }
 
 /*
@@ -694,6 +691,35 @@ extern "C" SceneNode* ogre_createNode(
 
 /* Code currently not in use
 
+// Insert a raw RGBA image into the texture system.
+extern "C" void ogre_insertTexture(char* name, uint32_t width, uint32_t height, void *data)
+{
+  TexturePtr texture = TextureManager::getSingleton().createManual(
+      name, 		// name
+      "General",	// group
+      TEX_TYPE_2D,     	// type
+      width, height,    // width & height
+      0,                // number of mipmaps
+      PF_BYTE_RGBA,     // pixel format
+      TU_DEFAULT);      // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
+                        // textures updated very often (e.g. each frame)
+
+  // Get the pixel buffer
+  HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
+
+  // Lock the pixel buffer and get a pixel box
+  pixelBuffer->lock(HardwareBuffer::HBL_NORMAL); // for best performance use HBL_DISCARD!
+  const PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+
+  void *dest = pixelBox.data;
+
+  // Copy the data
+  memcpy(dest, data, width*height*4);
+
+  // Unlock the pixel buffer
+  pixelBuffer->unlock();
+}
+
 // We need this later for animated meshes.
 extern "C" void* ogre_setupSkeleton(char* name)
 {
@@ -706,51 +732,6 @@ extern "C" void* ogre_setupSkeleton(char* name)
   // since our submeshes each have their own model space. We must
   // move the bones after creating an entity, then copy this entity.
   return (void*)skel->createBone();  
-}
-
-// Use this later when loading textures directly from NIF files
-extern "C" void ogre_createTexture(char* name, uint32_t width, uint32_t height)
-{
-  TexturePtr texture = TextureManager::getSingleton().createManual(
-      name, 		// name
-      "ManualTexture",	// group
-      TEX_TYPE_2D,     	// type
-      width, hight,     // width & height
-      0,                // number of mipmaps
-      PF_BYTE_BGRA,     // pixel format
-      TU_DEFAULT);      // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
-                        // textures updated very often (e.g. each frame)
-
-  // Get the pixel buffer
-  HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
-
-  // Lock the pixel buffer and get a pixel box
-  pixelBuffer->lock(HardwareBuffer::HBL_NORMAL); // for best performance use HBL_DISCARD!
-  const PixelBox& pixelBox = pixelBuffer->getCurrentLock();
-
-  uint8* pDest = static_cast<uint8*>(pixelBox.data);
-
-  // Fill in some pixel data. This will give a semi-transparent blue,
-  // but this is of course dependent on the chosen pixel format.
-  for (size_t j = 0; j < 256; j++)
-    for(size_t i = 0; i < 256; i++)
-      {
-        *pDest++ = 255; // B
-        *pDest++ =   0; // G
-        *pDest++ =   0; // R
-        *pDest++ = 127; // A
-      }
-
-  // Unlock the pixel buffer
-  pixelBuffer->unlock();
-
-  // Create a material using the texture
-  MaterialPtr material = MaterialManager::getSingleton().create(
-	"DynamicTextureMaterial", // name
-	ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-  material->getTechnique(0)->getPass(0)->createTextureUnitState("DynamicTexture");
-  material->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 }
 
 extern "C" void *ogre_insertBone(char* name, void* rootBone, int32_t index)

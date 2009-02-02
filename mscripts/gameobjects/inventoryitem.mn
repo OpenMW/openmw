@@ -26,3 +26,6 @@ class InventoryItem : GameObject;
 float weight;
 int value;
 
+// Reference to current container. Player / NPC inventories are also
+// containers. Not used yet.
+Container holder;
