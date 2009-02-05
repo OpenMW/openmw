@@ -266,20 +266,10 @@ struct ResourceManager
 
     // Create a new resource locator
     ti = esmRegion.newT!(TextureResource);
-
+    
     ti.name = esmRegion.copyz(id);
     ti.newName = ti.name;
     ti.type = ti.name[$-3..$];
-
-    char tmp[];
-    if(id.length < 70)
-      {
-	// See comment in lookupMesh
-	texBuffer[9..9+id.length] = id;
-	tmp = texBuffer[0..9+id.length];
-      }
-    else
-      tmp = "textures\\" ~ id;
 
     void searchBSAs(char[] search)
       {
@@ -297,28 +287,52 @@ struct ResourceManager
 	  }
       }
 
-    searchBSAs(tmp);
-
-    // If we can't find it, try the same filename but with .dds as the
-    // extension. Bethesda did at some point convert all their
-    // textures to dds to improve loading times. However, they did not
-    // update their esm-files or require them to use the correct
-    // extention (if they had, it would have broken a lot of user
-    // mods). So we must support files that are referenced as eg .tga
-    // but stored as .dds.
-    if(ti.bsaIndex == -1 && ti.type != "dds")
+    void searchWithDDS(char[] search)
       {
-	tmp[$-3..$] = "dds";
-	searchBSAs(tmp);
-	if(ti.bsaIndex != -1)
-          {
-            // Store the real name in newName.
-            ti.newName = esmRegion.copyz(ti.name);
+        searchBSAs(search);
 
-            // Get a slice of the extension and overwrite it.
-            ti.type = ti.newName[$-3..$];
-            ti.type[] = "dds";
+        // If we can't find it, try the same filename but with .dds as
+        // the extension. Bethesda did at some point convert all their
+        // textures to dds to improve loading times. However, they did
+        // not update their esm-files or require them to use the
+        // correct extention (if they had, it would have broken a lot
+        // of user mods). So we must support files that are referenced
+        // as eg .tga but stored as .dds.
+        if(ti.bsaIndex == -1 && ti.type != "dds")
+          {
+            search[$-3..$] = "dds";
+            searchBSAs(search);
+            if(ti.bsaIndex != -1)
+              {
+                // Store the real name in newName.
+                ti.newName = esmRegion.copyz(ti.name);
+
+                // Get a slice of the extension and overwrite it.
+                ti.type = ti.newName[$-3..$];
+                ti.type[] = "dds";
+              }
           }
+      }
+
+    // Search for 'texture\name' first
+    char[] tmp;
+    if(id.length < 70)
+      {
+        tmp = texBuffer[0..9+id.length];
+        tmp[9..$] = id;
+      }
+    else 
+      tmp = "textures\\" ~ id;
+
+    searchWithDDS(tmp);
+
+    // Not found? If so, try without the 'texture\'
+    if(ti.bsaIndex == -1)
+      {
+        tmp = tmp[9..$];
+        tmp[] = id; // Reset the name (replace .dds with the original)
+
+        searchWithDDS(tmp);
       }
 
     // Check that extensions match, to be on the safe side

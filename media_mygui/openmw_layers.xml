@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layer">
+    <Layer name="Scene" overlapped="false" peek="true"/>
+    <Layer name="HUD" overlapped="false" peek="true"/>
+    <Layer name="Windows" overlapped="true" peek="true"/>
+    <Layer name="Journal" overlapped="false" peek="false"/>
+    <Layer name="MainMenu" overlapped="false" peek="false"/>
+    <Layer name="Console" overlapped="false" peek="false"/>
+    <Layer name="Pointer" overlapped="false" peek="false"/>
+    <Layer name="Statistic" overlapped="false" peek="false"/>
+</MyGUI>

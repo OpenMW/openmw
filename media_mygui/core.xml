@@ -3,16 +3,19 @@
 <MyGUI>
 
     <MyGUI type="List">
-	    <List file="core.lang" group="General"/>
-	    <List file="core.layer" group="General"/>
+	    <!--List file="core.lang" group="General"/-->
+	    <!--List file="core.layer" group="General"/-->
 	    <List file="core.skin" group="General"/>
 	    <List file="core.font" group="General"/>
-	    <List file="core.plugin"/>
 
-	    <List file="openmw.pointer" group="General"/>
-            <List file="openmw_windows.skin" group="General"/>
-            <List file="openmw_button.skin" group="General"/>
-	    <List file="openmw.font" group="General"/>
+	    <List file="openmw_layers.xml" group="General"/>
+	    <List file="openmw.pointer.xml" group="General"/>
+	    <List file="openmw.font.xml" group="General"/>
+	    <List file="openmw_text.skin.xml" group="General"/>
+            <List file="openmw_windows.skin.xml" group="General"/>
+            <List file="openmw_button.skin.xml" group="General"/>
+            <List file="openmw_hud_energybar.skin.xml" group="General"/>
+            <List file="openmw_hud_box.skin.xml" group="General"/>
     </MyGUI>
 
 </MyGUI>

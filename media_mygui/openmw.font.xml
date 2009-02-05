@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Font">
-<!--
 	<Font name="gothic" source="gothic.ttf" size="18" resolution="72" antialias_colour="false" space_width="4" tab_count="4" spacer="5">
 		<Code range="33 126"/>
 		<Code range="1025 1105"/>
@@ -12,6 +11,13 @@
 	</Font>
 
 	<Font name="daedric" source="daedric.ttf" size="18" resolution="72" antialias_colour="false" space_width="4" tab_count="4" spacer="5">
+		<Code range="33 98"/>
+		<Code hide="128"/>
+		<Code hide="1026 1039"/>
+		<Code hide="1104"/>
+	</Font>
+
+	<Font name="daedric_orig" source="daedric_orig.ttf" size="18" resolution="72" antialias_colour="false" space_width="4" tab_count="4" spacer="5">
 		<Code range="33 98"/>
 		<Code hide="128"/>
 		<Code hide="1026 1039"/>
@@ -39,5 +45,4 @@
 		<Code hide="1026 1039"/>
 		<Code hide="1104"/>
 	</Font>
--->
 </MyGUI>

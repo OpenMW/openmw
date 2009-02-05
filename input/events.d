@@ -186,6 +186,7 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
 
       case Keys.PhysMode: bullet_nextMode(); break;
       case Keys.Nighteye: ogre_toggleLight(); break;
+      case Keys.ToggleGui: gui_toggleGui(); break;
 
       case Keys.Debug: break;
       case Keys.ScreenShot: takeScreenShot(); break;
@@ -237,7 +238,7 @@ bool isPressed(Keys key)
   return false;
 }
 
-extern(C) int d_frameStarted(float time)
+extern(C) int d_frameStarted(float time, int guiMode)
 {
   if(doExit) return 0;
 
@@ -251,8 +252,8 @@ extern(C) int d_frameStarted(float time)
       musCumTime -= musRefresh;
     }
 
-  // The rest is ignored in pause mode
-  if(pause) return 1;
+  // The rest is ignored in pause or GUI mode
+  if(pause || guiMode == 1) return 1;
 
   // Walking / floating speed, in points per second.
   const float speed = 300;
@@ -267,7 +268,7 @@ extern(C) int d_frameStarted(float time)
   if(isPressed(Keys.MoveBackward)) moveZ += speed;
 
   // TODO: These should be enabled for floating modes (like swimming
-  // and levitation) only.
+  // and levitation) and disabled for everything else.
   if(isPressed(Keys.MoveUp)) moveY += speed;
   if(isPressed(Keys.MoveDown)) moveY -= speed;
 
@@ -300,6 +301,7 @@ extern(C) int d_frameStarted(float time)
   bullet_getPlayerPos(&x, &y, &z);
   ogre_moveCamera(x,y,z);
 
+  // Tell the sound scene that the player has moved
   sndCumTime += time;
   if(sndCumTime > sndRefresh)
     {

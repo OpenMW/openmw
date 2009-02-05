@@ -60,7 +60,7 @@
         <Child type="Widget" skin="BTN_BottomLeft" offset="0 20 4 4" align="ALIGN_BOTTOM ALIGN_LEFT"/>
         <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
 
-        <BasisSkin type="SimpleText" offset = "4 4 128 16" align = "ALIGN_STRETCH">
+        <BasisSkin type="SimpleText" offset="4 4 128 16" align="ALIGN_STRETCH">
             <!--State name="disable" colour="0.87 0.87 0.87"/-->
             <!--State name="normal" colour="0 0 0"/-->
             <State name="active" colour="FF0000"/>

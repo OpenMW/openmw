@@ -25,12 +25,13 @@
 // Callbacks to D code.
 
 // Called once each frame
-extern "C" int32_t d_frameStarted(float time);
+extern "C" int32_t d_frameStarted(float time, int guiMode);
 
 // Handle events
 extern "C" void d_handleKey(int keycode, uint32_t text);
 extern "C" void d_handleMouseMove(const OIS::MouseState *state);
-extern "C" void d_handleMouseButton(const OIS::MouseState *state, int32_t button);
+extern "C" void d_handleMouseButton(const OIS::MouseState *state,
+                                    int32_t button);
 
 // Frame listener, passed to Ogre. The only thing we use this for is
 // to capture input and pass control to D code.
@@ -52,7 +53,7 @@ public:
     mGUI->injectFrameEntered(evt.timeSinceLastFrame);
 
     // Turn over control to the D code
-    return d_frameStarted(evt.timeSinceLastFrame);
+    return d_frameStarted(evt.timeSinceLastFrame, guiMode);
   }
 };
 
@@ -98,8 +99,8 @@ public:
     */
     if(guiMode)
       mGUI->injectMousePress(arg, id);
-    else
-      d_handleMouseButton(&arg.state, id);
+
+    d_handleMouseButton(&arg.state, id);
     return true;
   }
 

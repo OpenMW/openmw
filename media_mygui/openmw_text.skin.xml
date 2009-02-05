@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Skin">
+    <Skin name = "DaedricText" size = "16 16">
+        <Property key="FontName" value = "daedric" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_DEFAULT" />
+        <Property key="Colour" value = "1 1 1" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
+    <Skin name = "DaedricText_orig" size = "16 16">
+        <Property key="FontName" value = "daedric_orig" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_DEFAULT" />
+        <Property key="Colour" value = "1 1 1" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+</MyGUI>

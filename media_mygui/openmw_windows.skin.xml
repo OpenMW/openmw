@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
-    <!-- Defines the window background. Use a pure black image -->
-    <Skin name = "MW_WindowBG" size = "8 8" texture = "black.png">
+    <!-- Defines a pure black background -->
+    <Skin name = "BlackBG" size = "8 8" texture = "black.png">
         <BasisSkin type="MainSkin" offset = "0 0 8 8">
             <State name="normal" offset = "0 0 8 8"/>
         </BasisSkin>
@@ -159,7 +159,11 @@
     </Skin>
 
     <Skin name="HB_ALL" size="260 20">
-        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="ALIGN_TOP ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_MID" offset="258 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_MID" offset="514 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_MID" offset="770 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="HB_MID" offset="1026 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
         <Child type="Widget" skin="HB_TOP" offset="2 0 256 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
         <Child type="Widget" skin="HB_BOTTOM" offset="2 18 256 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
         <Child type="Widget" skin="HB_LEFT" offset="0 2 2 16" align="ALIGN_TOP ALIGN_LEFT"/>
@@ -209,8 +213,7 @@
         <Property key="Colour" value = "0.8 0.8 0.8" />
         <Property key="ToStick" value = "true" />
 
-        <Child type="Widget" skin="MW_WindowBG" offset = "6 26 244 22" align = "ALIGN_STRETCH" name = "Client">
-        </Child>
+        <Child type="Widget" skin="BlackBG" offset = "6 26 244 22" align = "ALIGN_STRETCH" name = "Client"/>
 
         <!-- Outer orders -->
         <Child type="Widget" skin="TB_T" offset="4 0 248 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Action">

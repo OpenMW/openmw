@@ -237,6 +237,7 @@ struct ConfigManager
 	bind(Keys.ToggleBattleMusic, KC.SPACE);
         bind(Keys.PhysMode, KC.T);
         bind(Keys.Nighteye, KC.N);
+        bind(Keys.ToggleGui, KC.Mouse1);
         bind(Keys.Debug, KC.G);
 
 	bind(Keys.Pause, KC.PAUSE, KC.P);
