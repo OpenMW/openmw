@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This file defines the box you see around many GUI elements, such
+as around the sections of the stats window, or around popup info windows -->
+
+<MyGUI type="Skin">
+    <!-- Box borders -->
+    <Skin name="IB_T" size="512 2" texture="menu_thin_border_top.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 512 2">
+            <State name="normal" offset = "0 0 512 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_B" size="512 2" texture="menu_thin_border_bottom.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 512 2">
+            <State name="normal" offset = "0 0 512 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_L" size="2 512" texture="menu_thin_border_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 512">
+            <State name="normal" offset = "0 0 2 512"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_R" size="2 512" texture="menu_thin_border_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 512">
+            <State name="normal" offset = "0 0 2 512"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_TL" size="2 2" texture="menu_thin_border_top_left_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_TR" size="2 2" texture="menu_thin_border_top_right_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_BL" size="2 2" texture="menu_thin_border_bottom_left_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="IB_BR" size="2 2" texture="menu_thin_border_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+
+    <!-- Main box definition -->
+    <Skin name="MW_Box" size="516 516">
+        <Child type="Widget" skin="IB_T" offset="2 0 512 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="IB_B" offset="2 514 512 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="IB_L" offset="0 2 2 512" align="ALIGN_LEFT ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="IB_R" offset="514 2 2 512" align="ALIGN_RIGHT ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="IB_TL" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="IB_TR" offset="514 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
+        <Child type="Widget" skin="IB_BL" offset="0 514 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
+        <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
+    </Skin>
+</MyGUI>

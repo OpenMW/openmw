@@ -224,6 +224,10 @@ void main(char[][] args)
       return null;
     }
 
+  if(cd.inCell !is null)
+    // Set the name for the GUI (temporary hack)
+    gui_setCellName(cd.inCell.id.ptr);
+
   if(render)
     {
       // Warm up OGRE

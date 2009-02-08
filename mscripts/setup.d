@@ -28,7 +28,7 @@ import monster.compiler.scopes : global;
 import monster.modules.timer;
 
 import core.config;
-import ogre.bindings;
+import ogre.gui;
 
 import std.string;
 
@@ -50,24 +50,20 @@ void initMonsterScripts()
   // Get the Config singleton object
   config.mo = (new MonsterClass("Config")).getSing();
 
-  // Run the fps ticker
-  //vm.run("fpsticker.mn");
-  auto mc = new MonsterClass("fpsticker.mn");
-  mc.bind("setText", &setFpsText);
-  mc.createObject().call("run");
+  // Set up the GUI Monster module
+  setupGUIScripts();
 
   // Run the test script
   vm.run("test.mn");
 }
 
-void setFpsText()
+// Run the GUI scripts. These should be run only after the
+// GUI/rendering system has been initialized
+void runGUIScripts()
 {
-  AIndex[] args = stack.popAArray();
+  // Create the HUD and windows
+  vm.run("makegui.mn");
 
-  char[] res;
-
-  foreach(AIndex ind; args)
-    res ~= format("%s", arrays.getRef(ind).carr);
-
-  gui_setFpsText(res.ptr);
+  // Run the fps ticker
+  vm.run("fpsticker.mn");
 }

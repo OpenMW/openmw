@@ -1,17 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
-    <Skin name = "DaedricText" size = "16 16">
-        <Property key="FontName" value = "daedric" />
+    <Skin name = "NormalText" size = "16 16">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_LEFT ALIGN_BOTTOM" />
+        <Property key="Colour" value = "0.62 0.78 0.87" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16" align = "ALIGN_STRETCH"/>
+    </Skin>
+
+    <Skin name = "SandText" size = "16 16">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_LEFT ALIGN_BOTTOM" />
+        <Property key="Colour" value = "0.35 0.6 0.75" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
+    <Skin name = "SandTextRight" size = "16 16">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_RIGHT ALIGN_BOTTOM" />
+        <Property key="Colour" value = "0.35 0.6 0.75" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
+    <Skin name = "DaedricText" size = "16 16">
+        <Property key="FontName" value = "daedric36" />
+        <Property key="FontHeight" value = "36" />
         <Property key="AlignText" value = "ALIGN_DEFAULT" />
         <Property key="Colour" value = "1 1 1" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
     </Skin>
 
     <Skin name = "DaedricText_orig" size = "16 16">
-        <Property key="FontName" value = "daedric_orig" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "daedric_orig36" />
+        <Property key="FontHeight" value = "36" />
         <Property key="AlignText" value = "ALIGN_DEFAULT" />
         <Property key="Colour" value = "1 1 1" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>

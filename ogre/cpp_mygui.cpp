@@ -1,37 +1,82 @@
-MyGUI::WidgetPtr FPSText;
-
-MyGUI::WindowPtr mwindow;
-
-OIS::MouseState state;
-
-extern "C" void gui_toggleGui()
+// TODO: KILLME
+char *cellName;
+extern "C" void gui_setCellName(char *str)
 {
-  if(guiMode == 1)
-    {
-      guiMode = 0;
-      mGUI->hidePointer();
-      if(mwindow)
-        mwindow->setVisible(false);
-      state = mMouse->getMouseState();
-    }
-  else
-    {
-      // Restore the GUI mouse position. This is a hack because silly
-      // OIS doesn't allow us to set the mouse position ourselves.
-      *((OIS::MouseState*)&(mMouse->getMouseState())) = state;
-      mGUI->injectMouseMove(state.X.abs, state.Y.abs, 0);
-
-      guiMode = 1;
-      mGUI->showPointer();
-      if(mwindow)
-        mwindow->setVisible(true);
-    }
+  cellName = str;
 }
 
-void turnGuiOff(MyGUI::WidgetPtr sender)
+// Get the widget type, as a string
+extern "C" const char *gui_widgetType(MyGUI::WidgetPtr p)
+{ return p->getTypeName().c_str(); }
+
+extern "C" int32_t gui_getHeight(MyGUI::WidgetPtr p)
 {
-  guiMode = 1;
-  gui_toggleGui();
+  if(p == NULL) mWindow->getHeight();
+  return p->getHeight();
+}
+
+extern "C" int32_t gui_getWidth(MyGUI::WidgetPtr p)
+{
+  if(p == NULL) return mWindow->getWidth();
+  return p->getWidth();
+}
+
+// Set various properties of a given widget
+extern "C" void gui_setCaption(MyGUI::WidgetPtr p, char* s)
+{ p->setCaption(s); }
+
+extern "C" void gui_setNeedMouseFocus(MyGUI::WidgetPtr p, int32_t b)
+{ p->setNeedMouseFocus(b); }
+
+extern "C" void gui_setTextColor(MyGUI::WidgetPtr p, float r,float g,float b)
+{ p->setTextColour(Ogre::ColourValue(b,g,r)); }
+
+extern "C" void gui_setCoord(MyGUI::WidgetPtr p,
+                             int32_t x,int32_t y,int32_t w,int32_t h)
+{ p->setCoord(x,y,w,h); }
+
+// Various ways to get or create widgets
+extern "C" MyGUI::WidgetPtr gui_loadLayout(char *file, char *prefix,
+                                           MyGUI::WidgetPtr parent)
+{
+  // Get the list of Widgets in this layout
+  MyGUI::VectorWidgetPtr wlist;
+  wlist = MyGUI::LayoutManager::getInstance().
+    loadLayout(file, prefix, parent);
+
+  MyGUI::VectorWidgetPtr::iterator iter;
+  iter = wlist.begin();
+
+  // Return null if the list is empty
+  if(wlist.end() == iter)
+    return NULL;
+
+  MyGUI::WidgetPtr res = *iter;
+
+  ++iter;
+
+  if(iter != wlist.end())
+    std::cout << "WARNING: Layout '" << file
+              << "' has more than one root widget. Ignored.\n";
+
+  return res;
+}
+
+extern "C" MyGUI::WidgetPtr gui_getChild(MyGUI::WidgetPtr p, char* name)
+{
+  return p->findWidget(name);
+}
+
+extern "C" MyGUI::WidgetPtr gui_createText(const char *skin,
+                                           int32_t x, int32_t y,
+                                           int32_t w, int32_t h,
+                                           const char *layer)
+{
+  return mGUI->createWidget<MyGUI::StaticText>
+    (skin,
+     x,y,w,h,
+     MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
+     layer);
 }
 
 // Copied from MyGUI demo code, with a few modifications
@@ -110,9 +155,35 @@ public:
     mMainWidget->setCoord(x,y,w,h);
   }
 
+  void setVisible(bool b)
+  {
+    mMainWidget->setVisible(b);
+  }
+
   virtual ~Layout()
   {
     shutdown();
+  }
+
+  void setText(const char* name, const char* caption)
+  {
+    MyGUI::WidgetPtr pt;
+    getWidget(pt, name);
+    pt->setCaption(caption);
+  }
+
+  void setColor(const char* name, float r, float g, float b)
+  {
+    MyGUI::WidgetPtr pt;
+    getWidget(pt, name);
+    pt->setTextColour(Ogre::ColourValue(b,g,r));
+  }
+
+  void setImage(const char* name, const char* imgName)
+  {
+    MyGUI::StaticImagePtr pt;
+    getWidget(pt, name);
+    pt->setImageTexture(imgName);
   }
 
 protected:
@@ -197,7 +268,135 @@ public:
   MyGUI::StaticImagePtr compass;
 };
 
+class MapWindow : public Layout
+{
+public:
+  MapWindow()
+    : Layout("openmw_map_window_layout.xml")
+  {
+    setCoord(500,0,320,300);
+    mMainWidget->setCaption(cellName);
+    setText("WorldButton", "World");
+    setColor("WorldButton", 0.75, 0.6, 0.35);
+    setImage("Compass", "compass.dds");
+  }
+};
+
+class MainMenu : public Layout
+{
+public:
+  MainMenu()
+    : Layout("openmw_mainmenu_layout.xml")
+  {
+    setCoord(0,0,
+             mWindow->getWidth(),
+             mWindow->getHeight());
+  }
+};
+
+class StatsWindow : public Layout
+{
+public:
+  void setBar(const char* name, const char* tname, int val, int max)
+  {
+    MyGUI::ProgressPtr pt;
+    getWidget(pt, name);
+    pt->setProgressRange(max);
+    pt->setProgressPosition(val);
+
+    std::stringstream out;
+    out << val << "/" << max;
+    setText(tname, out.str().c_str());
+  }
+
+  StatsWindow()
+    : Layout("openmw_stats_window_layout.xml")
+  {
+    setCoord(0,0,498, 342);
+    mMainWidget->setCaption("Playername");
+
+    setText("Health_str", "Health");
+    setText("Magicka_str", "Magicka");
+    setText("Fatigue_str", "Fatigue");
+
+    setText("Level_str", "Level");
+    setText("Race_str", "Race");
+    setText("Class_str", "Class");
+
+    setText("LevelText", "5");
+    setText("RaceText", "Wood Elf");
+    setText("ClassText", "Pilgrim");
+
+    setBar("HBar", "HBarT", 60, 100);
+    setBar("MBar", "MBarT", 30, 100);
+    setBar("FBar", "FBarT", 80, 100);
+
+    setText("Attrib1", "Strength");
+    setText("Attrib2", "Intelligence");
+    setText("Attrib3", "Willpower");
+    setText("Attrib4", "Agility");
+    setText("Attrib5", "Speed");
+    setText("Attrib6", "Endurance");
+    setText("Attrib7", "Personality");
+    setText("Attrib8", "Luck");
+
+    setText("AttribVal1", "30");
+    setText("AttribVal2", "40");
+    setText("AttribVal3", "30");
+    setText("AttribVal4", "75");
+    setText("AttribVal5", "50");
+    setText("AttribVal6", "40");
+    setText("AttribVal7", "50");
+    setText("AttribVal8", "40");
+  }
+};
+
 HUD *hud;
+StatsWindow *stats;
+MapWindow *map;
+MyGUI::WidgetPtr FPSText;
+MyGUI::WindowPtr mwindow;
+OIS::MouseState state;
+
+// KILLME
+extern "C" void gui_toggleGui()
+{
+  if(guiMode == 1)
+    {
+      guiMode = 0;
+      mGUI->hidePointer();
+      if(mwindow)
+        mwindow->setVisible(false);
+      if(stats)
+        stats->setVisible(false);
+      if(map)
+        map->setVisible(false);
+      state = mMouse->getMouseState();
+    }
+  else
+    {
+      // Restore the GUI mouse position. This is a hack because silly
+      // OIS doesn't allow us to set the mouse position ourselves.
+      *((OIS::MouseState*)&(mMouse->getMouseState())) = state;
+      mGUI->injectMouseMove(state.X.abs, state.Y.abs, 0);
+
+      guiMode = 1;
+      mGUI->showPointer();
+      if(mwindow)
+        mwindow->setVisible(true);
+      if(stats)
+        stats->setVisible(true);
+      if(map)
+        map->setVisible(true);
+    }
+}
+
+// KILLME
+void turnGuiOff(MyGUI::WidgetPtr sender)
+{
+  guiMode = 1;
+  gui_toggleGui();
+}
 
 extern "C" void gui_setupGUI()
 {
@@ -209,29 +408,19 @@ extern "C" void gui_setupGUI()
 
   int mWidth = mWindow->getWidth();
   int mHeight = mWindow->getHeight();
-  int width = 120;
-  int height = 30;
 
-  // FPS Ticker
-  FPSText = mGUI->createWidget<MyGUI::Widget>
-    ("StaticText",
-     mWidth - width -10, 10, // Position
-     width, height, // Size
-     MyGUI::ALIGN_RIGHT | MyGUI::ALIGN_TOP,
-     "Statistic");
-  FPSText->setTextAlign(MyGUI::ALIGN_RIGHT);
-  FPSText->setNeedMouseFocus(false);
-  FPSText->setTextColour(Ogre::ColourValue::White);
+  stats = new StatsWindow();
+  map = new MapWindow();
 
+  /*
   // Window with Morrowind skin
   mwindow = mGUI->createWidget<MyGUI::Window>
     ("MW_Window",
-     (mWidth-width)/4, (mHeight-height)/4, // Position
-     300, 190, // Size
+     (mWidth-width)/2, (mHeight-height)/2, // Position
+     400, 190, // Size
      MyGUI::ALIGN_DEFAULT, "Windows");
   mwindow->setCaption("Skin test");
   mwindow->setMinSize(120, 140);
-  mwindow->getClientWidget()->setAlpha(0.6);
 
   MyGUI::WidgetPtr tmp;
   tmp = mwindow->createWidget<MyGUI::Button>
@@ -242,23 +431,23 @@ extern "C" void gui_setupGUI()
      "MWButton1");
   tmp->setCaption("Close");
   tmp->eventMouseButtonClick = MyGUI::newDelegate(&turnGuiOff);
-  tmp->setInheritsAlpha(false);
 
   tmp = mwindow->createWidget<MyGUI::StaticText>
     ("DaedricText_orig",
-     10,70,
-     300, 20,
+     20,80,
+     500, 30,
      MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
      "Daed1");
   tmp->setCaption("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
   tmp = mwindow->createWidget<MyGUI::StaticText>
     ("DaedricText",
-     10,100,
-     300, 20,
+     20,130,
+     500, 30,
      MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
      "Daed2");
   tmp->setCaption("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  */
 
   // Turn the GUI off at startup
   turnGuiOff(NULL);
@@ -266,8 +455,7 @@ extern "C" void gui_setupGUI()
   state.X.abs = mWidth / 2;
   state.Y.abs = mHeight / 2;
 
-  MyGUI::ProgressPtr prog;
-
+  //*
   // Set up the HUD
   hud = new HUD();
 
@@ -281,10 +469,7 @@ extern "C" void gui_setupGUI()
   hud->setSpellStatus(65, 100);
 
   hud->setEffect("icons\\s\\tx_s_chameleon.dds");
-}
+  //*/
 
-extern "C" void gui_setFpsText(char *str)
-{
-  if(FPSText != NULL)
-    FPSText->setCaption(str);
+  //new MainMenu();
 }

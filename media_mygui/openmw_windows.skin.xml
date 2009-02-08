@@ -2,7 +2,7 @@
 
 <MyGUI type="Skin">
     <!-- Defines a pure black background -->
-    <Skin name = "BlackBG" size = "8 8" texture = "black.png">
+    <Skin name = "BlackBG" size = "8 8" texture = "transparent.png">
         <BasisSkin type="MainSkin" offset = "0 0 8 8">
             <State name="normal" offset = "0 0 8 8"/>
         </BasisSkin>
@@ -60,49 +60,6 @@
         <Property key="Pointer" value = "dresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
-        </BasisSkin>
-    </Skin>
-
-    <!-- Inner borders -->
-
-    <Skin name="IB_T" size="512 2" texture="menu_thin_border_top.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 512 2">
-            <State name="normal" offset = "0 0 512 2"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="IB_B" size="512 2" texture="menu_thin_border_bottom.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 512 2">
-            <State name="normal" offset = "0 0 512 2"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="IB_L" size="2 512" texture="menu_thin_border_left.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 512">
-            <State name="normal" offset = "0 0 2 512"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="IB_R" size="2 512" texture="menu_thin_border_right.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 512">
-            <State name="normal" offset = "0 0 2 512"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="IB_TL" size="2 2" texture="menu_thin_border_top_left_corner.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 2">
-            <State name="normal" offset = "0 0 2 2"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="IB_TR" size="2 2" texture="menu_thin_border_top_right_corner.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 2">
-            <State name="normal" offset = "0 0 2 2"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="IB_BL" size="2 2" texture="menu_thin_border_bottom_left_corner.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 2">
-            <State name="normal" offset = "0 0 2 2"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="IB_BR" size="2 2" texture="menu_thin_border_bottom_right_corner.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 2">
-            <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>
     </Skin>
 
@@ -213,7 +170,7 @@
         <Property key="Colour" value = "0.8 0.8 0.8" />
         <Property key="ToStick" value = "true" />
 
-        <Child type="Widget" skin="BlackBG" offset = "6 26 244 22" align = "ALIGN_STRETCH" name = "Client"/>
+        <Child type="Widget" skin="BlackBG" offset = "8 28 240 18" align = "ALIGN_STRETCH" name = "Client"/>
 
         <!-- Outer orders -->
         <Child type="Widget" skin="TB_T" offset="4 0 248 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Action">
@@ -243,14 +200,30 @@
         </Child>
 
         <!-- Inner borders -->
-        <Child type="Widget" skin="IB_T" offset="6 24 244 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
-        <Child type="Widget" skin="IB_B" offset="6 48 244 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
-        <Child type="Widget" skin="IB_L" offset="4 26 2 22" align="ALIGN_LEFT ALIGN_VSTRETCH"/>
-        <Child type="Widget" skin="IB_R" offset="250 26 2 22" align="ALIGN_RIGHT ALIGN_VSTRETCH"/>
-        <Child type="Widget" skin="IB_TL" offset="4 24 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="IB_TR" offset="250 24 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
-        <Child type="Widget" skin="IB_BL" offset="4 48 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
-        <Child type="Widget" skin="IB_BR" offset="250 48 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
+        <Child type="Widget" skin="TB_T" offset="8 24 240 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Action">
+            <Property key="Scale" value = "0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="4 28 4 18" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Action">
+            <Property key="Scale" value = "1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="8 46 240 4" align="ALIGN_BOTTOM ALIGN_HSTRETCH" name="Action">
+            <Property key="Scale" value = "0 0 0 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="248 28 4 18" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="Action">
+            <Property key="Scale" value = "0 0 1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_BR" offset="248 46 4 4" align="ALIGN_BOTTOM ALIGN_RIGHT" name="Action">
+            <Property key="Scale" value = "0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="4 46 4 4" align="ALIGN_BOTTOM ALIGN_LEFT" name="Action">
+            <Property key="Scale" value = "1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="248 24 4 4" align="ALIGN_TOP ALIGN_RIGHT" name="Action">
+            <Property key="Scale" value = "0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="4 24 4 4" align="ALIGN_TOP ALIGN_LEFT" name="Action">
+            <Property key="Scale" value = "1 1 -1 -1"/>
+        </Child>
 
         <!-- Caption -->
         <Child type="Widget" skin="HB_ALL" offset="4 4 248 20" align = "ALIGN_TOP ALIGN_HSTRETCH">

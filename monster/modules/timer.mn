@@ -4,4 +4,6 @@
  */
 
 singleton timer;
+
+// Sleep the given number of seconds
 idle sleep(float secs);

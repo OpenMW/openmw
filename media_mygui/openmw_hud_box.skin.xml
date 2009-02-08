@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
-    <!-- The 'box' frame that surrounds various HUD items -->
+    <!-- The 'box' frame that surrounds various HUD items and other elements -->
     <Skin name="HUD_Box" size="40 40" texture="menu_icon_equip.dds">
         <BasisSkin type="SubSkin" offset="0 0 40 2" align= "ALIGN_TOP ALIGN_HSTRETCH">
             <State name="normal" offset="2 2 40 2"/>
@@ -15,7 +15,6 @@
         <BasisSkin type="SubSkin" offset="38 2 2 36" align= "ALIGN_RIGHT ALIGN_VSTRETCH">
             <State name="normal" offset="40 4 2 36"/>
         </BasisSkin>
-
         <!-- The interior of the box -->
         <Child type="Widget" skin="BlackBG" offset="2 2 36 36" align="ALIGN_STRETCH" name="Client"/>
     </Skin>

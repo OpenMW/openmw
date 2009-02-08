@@ -1,6 +1,6 @@
 /*
   Monster - an advanced game scripting language
-  Copyright (C) 2007, 2008  Nicolay Korslund
+  Copyright (C) 2007-2009  Nicolay Korslund
   Email: <korslund@gmail.com>
   WWW: http://monster.snaptoad.com/
 
@@ -811,31 +811,16 @@ class LiteralExpr : Expression
 	  return;
 	}
 
-      bool hasPercent()
-        {
-          int i = value.str.find('%');
-          if(i == -1) return false;
-
-          // Make sure it is at the end
-          if(i != value.str.length-1)
-            fail("Number literals can only have a percentage sign (%) at the end. Perhaps you meant the reminder operator '%%' ?", value.loc);
-
-          return true;
-        }
-
       // Numeric literal.
       if(value.type == TT.NumberLiteral)
 	{
 	  // Parse number strings. Simple hack for now, assume it's an
 	  // int unless it contains a period, then it's a float. TODO:
 	  // Improve this later, see how it is done elsewhere.
-	  if(value.str.find('.') != -1 || hasPercent())
+	  if(value.str.find('.') != -1)
 	    {
               type = BasicType.getFloat;
 	      fval = atof(value.str);
-
-              if(hasPercent())
-                fval /= 100;
 
 	      return;
 	    }

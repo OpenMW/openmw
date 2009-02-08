@@ -65,13 +65,13 @@ all: openmw esmtool niftool bsatool bored
 cpp: cpp_ogre.o cpp_avcodec.o cpp_bullet.o
 
 cpp_ogre.o: $(ogre_cpp_files)
-	$(OGCC) -c $<
+	$(OGCC) -o $@ -c $<
 
 cpp_avcodec.o: $(avcodec_cpp_files)
-	$(AVGCC) -c $<
+	$(AVGCC) -o $@ -c $<
 
 cpp_bullet.o: $(bullet_cpp_files)
-	$(BGCC) -c $<
+	$(BGCC) -o $@ -c $<
 
 objs/%.o: %.d
 	dirname $@ | xargs mkdir -p

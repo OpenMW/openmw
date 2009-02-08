@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Skin">
+    <!-- Progress bar track, various colors -->
+    <Skin name = "MW_BigTrack_Red" size = "2 14" texture = "bigbars.png" >
+        <BasisSkin type="MainSkin" offset = "0 0 2 14" align = "ALIGN_STRETCH">
+            <State name="normal" offset = "0 0 2 14"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name = "MW_BigTrack_Green" size = "2 14" texture = "bigbars.png" >
+        <BasisSkin type="MainSkin" offset = "0 0 2 14" align = "ALIGN_STRETCH">
+            <State name="normal" offset = "0 14 2 14"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name = "MW_BigTrack_Blue" size = "2 14" texture = "bigbars.png" >
+        <BasisSkin type="MainSkin" offset = "0 0 2 14" align = "ALIGN_STRETCH">
+            <State name="normal" offset = "0 28 2 14"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name = "ProgressText" size = "16 16">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_CENTER" />
+        <Property key="Colour" value = "0.35 0.6 0.75" />
+        
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
+    <!-- Main energy bar widget definitions. There's one for each color.-->
+
+    <Skin name="MW_Progress_Red" size="64 12">
+        <Property key="TrackSkin" value = "MW_BigTrack_Red" />
+        <Property key="TrackWidth" value = "1" />
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="ALIGN_STRETCH"/>
+        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "ALIGN_STRETCH" name="Client"/>
+    </Skin>
+
+    <Skin name="MW_Progress_Green" size="64 12">
+        <Property key="TrackSkin" value = "MW_BigTrack_Green" />
+        <Property key="TrackWidth" value = "1" />
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="ALIGN_STRETCH"/>
+        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "ALIGN_STRETCH" name="Client"/>
+    </Skin>
+
+    <Skin name="MW_Progress_Blue" size="64 12">
+        <Property key="TrackSkin" value = "MW_BigTrack_Blue" />
+        <Property key="TrackWidth" value = "1" />
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="ALIGN_STRETCH"/>
+        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "ALIGN_STRETCH" name="Client"/>
+    </Skin>
+</MyGUI>

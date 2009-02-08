@@ -150,7 +150,7 @@ extern "C" int32_t bullet_init()
   // ------- SET UP THE PLAYER -------
 
   // Create the player collision shape.
-  float width = 50;
+  float width = 30;
 
   /*
   float height = 50;

@@ -5,8 +5,13 @@
 
 module io;
 
+// Write to console, with or without a newline
 native write(char[][] args...);
 native writeln(char[][] args...);
+
+// Automatically inserts spaces between arguments
 native writes(char[][] args...);
 native writelns(char[][] args...);
+
+// Identical to writelns
 native print(char[][] args...);

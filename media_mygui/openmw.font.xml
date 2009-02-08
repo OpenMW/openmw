@@ -24,6 +24,14 @@
 		<Code hide="1104"/>
 	</Font>
 
+	<Font name="daedric36" source="daedric.ttf" size="36" resolution="72" antialias_colour="false" space_width="4" tab_count="4" spacer="5">
+		<Code range="33 98"/>
+	</Font>
+
+	<Font name="daedric_orig36" source="daedric_orig.ttf" size="36" resolution="72" antialias_colour="false" space_width="4" tab_count="4" spacer="5">
+		<Code range="33 98"/>
+	</Font>
+
         <Font name="cards" default_height="17" source="magiccards.ttf" size="18" resolution="50" antialias_colour="false" space_width="4" tab_width="8" cursor_width="2" distance="5" offset_height="0">
                 <Code range="33 98"/>
         </Font>

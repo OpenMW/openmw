@@ -1,6 +1,6 @@
 /*
   Monster - an advanced game scripting language
-  Copyright (C) 2004, 2007, 2008  Nicolay Korslund
+  Copyright (C) 2004, 2007-2009  Nicolay Korslund
   Email: <korslund@gmail.com>
   WWW: http://monster.snaptoad.com/
 

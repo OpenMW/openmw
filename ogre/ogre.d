@@ -1,6 +1,6 @@
 /*
   OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008  Nicolay Korslund
+  Copyright (C) 2008-2009  Nicolay Korslund
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
@@ -27,6 +27,8 @@ import core.resource;
 import core.config;
 
 import ogre.bindings;
+import mscripts.setup;
+
 import bullet.bindings;
 import util.uniquename;
 import std.stdio;
@@ -116,8 +118,11 @@ void setupOgre()
   // exterior cells differently, etc.
   ogre_makeScene();
 
-  // Load the GUI elements
+  // Load the GUI system
   gui_setupGUI();
+
+  // Run the GUI scripts
+  runGUIScripts();
 
   ogreSetup = true;
 }

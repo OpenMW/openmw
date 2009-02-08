@@ -1,0 +1,11 @@
+// GUI module. Only covers some very basic functions.
+module gui;
+
+// Later, we'll have singleton gui : Widget; with most of the
+// functions defined in Widget.
+
+native Widget loadLayout(char[] file);
+native Widget text(char[] skin, int x, int y, int w, int h,
+                   char[] layer);
+native int getWidth();
+native int getHeight();

@@ -1,0 +1,5 @@
+/*
+Widget hud;
+hud = gui.loadLayout("openmw_hud_layout.xml");
+hud.setCoord(10,10,500,500);
+*/

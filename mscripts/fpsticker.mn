@@ -1,38 +1,36 @@
 // Small script that prints the FPS to screen with regular intervals.
-class FPSTicker;
-
 import frames;
 
-// Set the FPS widget text
-native setText(char[][] args...);
+// Set up the text widget
+Widget txt = gui.text("StaticText",
+                      gui.getWidth()-90, 10, 120, 30,
+                      "Statistic");
+txt.setNeedMouseFocus(false);
+txt.setTextColor(1,1,1);
+txt.setCaption("hello!");
 
-run()
+// Sleep one frame. This makes sure we only start running after
+// rendering begins. It prevents the first printed value from being
+// 'nan'
+fsleep(1);
+
+// counter and totalTime (in the 'frames' module) are updated
+// automatically by the system.
+ulong lastFrame  = counter;
+float lastTime   = totalTime;
+
+float delay = 1.5;
+
+while(true)
 {
-  // Sleep one frame. This makes sure that we won't start running until
-  // the rendering begins. Not critically important, but it prevents the
-  // first printed value from being 'nan'.
-  fsleep(1);
+  sleep(delay);
 
-  setText("hello!");
+  // Calculate differences since last frame
+  ulong fdiff = counter-lastFrame;
+  float tdiff = totalTime-lastTime;
 
-  // counter and totalTime (in the 'frames' module) are updated
-  // automatically by the system.
-  ulong lastFrame  = counter;
-  float lastTime   = totalTime;
+  txt.setCaption("fps: ", fdiff/tdiff);
 
-  float delay = 1.5;
-
-  while(true)
-    {
-      sleep(delay);
-
-      // Calculate differences since last frame
-      ulong fdiff = counter-lastFrame;
-      float tdiff = totalTime-lastTime;
-
-      setText("fps: ", fdiff / tdiff);
-
-      lastFrame = counter;
-      lastTime = totalTime;
-    }
+  lastFrame = counter;
+  lastTime = totalTime;
 }

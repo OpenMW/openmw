@@ -1,6 +1,6 @@
 /*
   Monster - an advanced game scripting language
-  Copyright (C) 2007, 2008  Nicolay Korslund
+  Copyright (C) 2007-2009  Nicolay Korslund
   Email: <korslund@gmail.com>
   WWW: http://monster.snaptoad.com/
 
@@ -43,7 +43,7 @@ bool validIdentChar(char c)
 }
 
 // Same as above, except numbers are not allowed as the first
-// character. Will extend to support UTF8 later.
+// character. Will extend to support full Unicode later.
 bool validFirstIdentChar(char c)
 {
   if((c >= 'a' && c <= 'z') ||
@@ -104,7 +104,7 @@ enum TT
     Import, Clone, Override, Final, Function, With,
     This, New, Static, Const, Out, Ref, Abstract, Idle,
     Public, Private, Protected, True, False, Native, Null,
-    Goto, Var, In,
+    Goto, Var,
 
     Last, // Tokens after this do not have a specific string
 	  // associated with them.
@@ -247,7 +247,6 @@ const char[][] tokenList =
     TT.Null             : "null",
     TT.Goto             : "goto",
     TT.Var              : "var",
-    TT.In               : "in",
 
     // These are only used in error messages
     TT.StringLiteral    : "string literal",
@@ -540,10 +539,6 @@ class StreamTokenizer
 	  // also explicitly allow '.' dots.
 	  int len = 1;
 	  bool lastDot = false; // Was the last char a '.'?
-          // I've tried with percentage literals (10% = 0.10), but it
-          // conflicts with the remainder division operator (which
-          // shouldn't change), so I've disabled it for now.
-          //bool lastPer = false; // Was it a '%'?
 	  foreach(char ch; line[1..$])
 	    {
 	      if(ch == '.')
@@ -557,19 +552,6 @@ class StreamTokenizer
 		    }
 		  lastDot = true;
 		}
-              /*
-              else if(ch == '%')
-                {
-                  // Ditto for percentage signs. We allow '%' but not
-                  // '%%'
-                  if(lastPer)
-                    {
-                      len--;
-                      break;
-                    }
-                  lastPer = true;
-                }
-              */
 	      else
 		{
 		  if(!validIdentChar(ch)) break;

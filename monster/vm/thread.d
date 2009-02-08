@@ -1,6 +1,6 @@
 /*
   Monster - an advanced game scripting language
-  Copyright (C) 2007, 2008  Nicolay Korslund
+  Copyright (C) 2007-2009  Nicolay Korslund
   Email: <korslund@gmail.com>
   WWW: http://monster.snaptoad.com/
 
@@ -47,10 +47,10 @@ import monster.vm.iterators;
 import monster.vm.error;
 import monster.vm.fstack;
 
+import std.math : floor;
+
 // Used for array copy below. It handles overlapping data for us.
 extern(C) void* memmove(void *dest, void *src, size_t n);
-
-extern(C) double floor(double d);
 
 import monster.util.list;
 alias _lstNode!(Thread) _tmp1;
