@@ -137,6 +137,8 @@
         <!--
         <Property key="FontName" value = "dorcla" />
         <Property key="FontHeight" value = "20" />
+        <Property key="FontName" value = "albertis" />
+        <Property key="FontName" value = "cards2" />
         -->
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />

@@ -62,6 +62,11 @@ Soft, which has a less hardware-dependent implementation. If you
 experience sound problems (like stuttering music), try switching to
 OpenAL Soft.
 
+Note to UBUNTU 8.10 users: There's a problem with Pulseaudio in this
+Ubuntu version. If you find that sound doesn't work or you get error
+messages related to sound, try this page:
+http://idyllictux.wordpress.com/2008/10/29/alsa-instead-of-pulseaudio-for-ubuntu-810-intrepid-a-non-destructive-way/
+
 libavcodec and libavformat are part of the FFmpeg package, which is
 part of the 'mplayer' project. Note that some of the codecs might be
 patent protected in your country or area.

@@ -19,7 +19,7 @@
     </Skin>
 
     <Skin name = "ProgressText" size = "16 16">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontName" value = "MyGUI_CoreFont.18"/>
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_CENTER" />
         <Property key="Colour" value = "0.35 0.6 0.75" />

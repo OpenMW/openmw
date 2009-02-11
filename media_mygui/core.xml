@@ -3,10 +3,7 @@
 <MyGUI>
 
     <MyGUI type="List">
-	    <!--List file="core.lang" group="General"/-->
-	    <!--List file="core.layer" group="General"/-->
 	    <List file="core.skin" group="General"/>
-	    <List file="core.font" group="General"/>
 
 	    <List file="openmw_layers.xml" group="General"/>
 	    <List file="openmw.pointer.xml" group="General"/>
