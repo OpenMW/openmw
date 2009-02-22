@@ -185,8 +185,11 @@ void main(char[][] args)
       try cd.loadIntCell(cName);
       catch(Exception e)
 	{
-	  writefln(e);
-	  writefln("\nUnable to load cell '%s'. Aborting", cName);
+	  writefln("\nUnable to load cell '%s'.", cName);
+	  writefln("\nDetails: %s", e);
+          writefln("
+Perhaps this cell does not exist in your Morrowind language version?
+Try specifying another cell name on the command line, or edit openmw.ini.");
 	  return;
 	}
     }

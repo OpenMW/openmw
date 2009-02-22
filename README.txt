@@ -3,10 +3,10 @@ OpenMW - the completely unofficial reimplementation of Morrowind
 
 Written by Nicolay Korslund
 Email: korslund@gmail.com
-WWW: http://openmw.snaptoad.com
+WWW: http://openmw.sourceforge.net
 License: See GPL3.txt
-Current version: 0.5
-Date: 2008 nov. 5
+Current version: 0.6
+Date: 2009 feb. 23
 
 
 QUICK NOTE: You must own and install Morrowind before you can use
@@ -28,7 +28,8 @@ COMPILE-win32.txt   - instructions for building from source on Windows
 COMPILE-linux.tx    - instructions for building from source on Linux / Unix
 
 Linux 64 does NOT work, because of problems with the D compiler. We
-hope to sort this out at some point, but right now it's not supported.
+hope to sort this out at some point, but right now it's simply not
+supported.
 
 
 
@@ -47,28 +48,19 @@ niftool     - Decodes one or more NIF files and prints the details.
 
 
 
-Acknowledgements
-================
-
-Thanks go out to:
-
-- Bethesda Softworks for creating Morrowind!
-
-- The NifTools group / NIFLA for their great work on decoding the NIF
-  file format.
-
-- Dmitry Marakasov for testing and porting to FreeBSD.
-- Bastien Jansen for testing on 64 bit linux.
-- Chris Robinson for OpenAL and MP3 support
-- Jacob Essex for landscape code (still in progress)
-- Many others for testing, ideas and patches
-
-
-
 Changelog:
 ==========
 
-0.5 (2008 nov. 5) - latest release
+0.6 (2009 feb. 23) - latest release
+
+- coded a GUI system using MyGUI
+- skinned MyGUI to look like Morrowind (work in progress)
+- integrated Monster script
+- rewrote some parts into script code
+- very early MyGUI <-> Monster binding
+- fixed Windows sound problems (replaced old openal32.dll)
+
+0.5 (2008 nov. 5)
 
 - Collision detection with Bullet
 - Experimental walk & fall character physics

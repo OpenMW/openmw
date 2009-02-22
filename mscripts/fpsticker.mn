@@ -9,10 +9,9 @@ txt.setNeedMouseFocus(false);
 txt.setTextColor(1,1,1);
 txt.setCaption("hello!");
 
-// Sleep one frame. This makes sure we only start running after
-// rendering begins. It prevents the first printed value from being
-// 'nan'
-fsleep(1);
+// Sleep until rendering begins. This just prevents the first printed
+// value from being 'nan'
+fsleep(0);
 
 // counter and totalTime (in the 'frames' module) are updated
 // automatically by the system.
