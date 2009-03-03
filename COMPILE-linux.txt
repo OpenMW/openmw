@@ -39,7 +39,9 @@ Dependencies needed to build OpenMW:
 
 OGRE 1.4.5         (3d engine)
 OIS-1.0.0          (input system)
+MyGUI              (GUI system for OGRE)
 Bullet 2.72        (collision and physics library)
+Monster 0.11       (scripting engine, included)
 OpenAL             (3d sound system)
 libavcodec,
   libavformat      (For MP3 playback)
@@ -75,11 +77,13 @@ If you want to install Ogre, Bullet, OpenAL, OIS or FFmpeg manually,
 try:
 
 OGRE:             http://ogre3d.org/
+MyGUI:            http://www.ogre3d.org/wiki/index.php/MyGUI
 OpenAL:           http://openal.org/
   Linux source:   http://kcat.strangesoft.net/openal.html
 OIS:              http://sourceforge.net/projects/wgois/
 FFmpeg:           http://ffmpeg.mplayerhq.hu/download.html
 Bullet:           http://bulletphysics.com/
+Monster:          Included with OpenMW.
 
 
 Setting up Bullet
@@ -106,6 +110,20 @@ cd openmw
 mkdir -p include
 cd include
 ln -s ~/software/bullet-2.72/src bullet
+
+
+Setting up MyGUI
+----------------
+
+Like Bullet, MyGUI is still too fresh to be prepackaged with the major
+Linux distros. To make matters worse, there's not even a recent source
+package. You'll need to get the source from svn (at
+https://my-gui.svn.sourceforge.net/svnroot/my-gui/trunk ). Revisions
+at around 1738 should work, but newer revisions are probably better.
+
+Once you've compiled the sources, install normally using 'make
+install' (check the MyGUI docs for any instructions), and the OpenMW
+makefile should pick up its location automatically.
 
 
 Choosing a D compiler

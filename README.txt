@@ -6,7 +6,7 @@ Email: korslund@gmail.com
 WWW: http://openmw.sourceforge.net
 License: See GPL3.txt
 Current version: 0.6
-Date: 2009 feb. 23
+Date: 2009 mar. 2
 
 
 QUICK NOTE: You must own and install Morrowind before you can use
@@ -51,14 +51,15 @@ niftool     - Decodes one or more NIF files and prints the details.
 Changelog:
 ==========
 
-0.6 (2009 feb. 23) - latest release
+0.6 (2009 mar. 2) - latest release
 
 - coded a GUI system using MyGUI
 - skinned MyGUI to look like Morrowind (work in progress)
-- integrated Monster script
+- integrated the Monster-script engine
 - rewrote some parts into script code
 - very early MyGUI <-> Monster binding
 - fixed Windows sound problems (replaced old openal32.dll)
+
 
 0.5 (2008 nov. 5)
 

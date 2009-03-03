@@ -16,8 +16,9 @@ Building from source
 Supported Windows platforms:
 ----------------------------
 
-Only tested on Windows XP. If you manage to compile or run OpenMW on
-another Windows platform (9x/Me/NT/2000/Vista), please let me know!
+Mostly tested on Windows XP, but Vista is also rumored to work. If you
+manage to compile or run OpenMW on another Windows platform
+(9x/Me/NT/2000), please let me know.
 
 At the moment, only command line building is supported.
 
@@ -64,54 +65,6 @@ directory.
 Make sure the commands g++ and gdc work (should output "no input
 files".)
 
-
-
-Manually installing dependencies:
----------------------------------
-
-If you download the DLL pack mentioned above, you can skip this
-section. If you wish to install dependencies manually, here is a list
-of dependencies and where you can find them:
-
-OGRE:     http://ogre3d.org
-OIS:      Comes with the Ogre SDK
-OpenAL:   http://openal.org/
-FFmpeg:   http://ffmpeg.mplayerhq.hu/
-Bullet:   http://bulletphysics.com/
-
-The biggest problem is the lack of a prebuilt SDKs for FFmpeg and
-Bullet. You must build these yourself.
-
-FFmpeg:
-
-FFmpeg must be built under Mingw (not Cygwin!). I found the following
-link helpful (read the comments as well, not just the post itself):
-http://www.gooli.org/blog/building-ffmpeg-for-windows-with-msys-and-mingw/
-
-After building, place the dlls in the openmw "root" (same place as
-build_openmw.bat) and the include files in includes/ffmpeg. Refer to
-build_openmw.bat for the exact names and locations of expected files.
-
-Bullet:
-
-Bullet must also be built with Mingw. I used the MSYS shell for this,
-and the following commands:
-
-cmake -G "MinGW Makefiles"
-make
-
-There might be errors building the demos, but as long as the library
-files are built, this is OK. Use the command "find -iname *.a" to
-locate the libraries. The files you need are libLibBulletDynamics.a,
-libLibBulletCollision.a and libLibLinearMath.a. Copy these to the
-"root" openmw directory and rename them to:
-libbulletdynamics.a
-libbulletcollision.a
-libbulletmath.a
-
-Move or copy the entire src/ folder to openmw/includes/ and rename it
-to bullet/. Only the .h files are needed, you can delete everything
-else if you want.
 
 
 Building

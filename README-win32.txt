@@ -45,7 +45,8 @@ setting fullscreen mode on the first run. You can bring up the
 dialogue at any time by using the -oc switch.
 
 Move around with WASD or arrow keys, change physics mode (walking,
-flying, ghost) with 't', exit with 'q' or escape.
+flying, ghost) with 't', exit with 'q' or escape. You can change key
+bindings in the openmw.ini file.
 
 You start in a cell called "Assu". You can change this in openmw.ini or
 by specifying a cell name on the command line.
