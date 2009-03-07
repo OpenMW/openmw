@@ -301,7 +301,7 @@ extern "C" void ogre_setFog(float rf, float gf, float bf, // Fog color
   mCamera->setFarClipDistance(fhigh + 10);
 
   // Leave this out for now
-  //vp->setBackgroundColour(fogColor);
+  vp->setBackgroundColour(fogColor);
 }
 
 extern "C" void ogre_startRendering()

@@ -22,7 +22,7 @@
         <Property key="FontName" value = "MyGUI_CoreFont.18"/>
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_CENTER" />
-        <Property key="Colour" value = "0.35 0.6 0.75" />
+        <Property key="Colour" value = "0.75 0.6 0.35" />
         
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
     </Skin>

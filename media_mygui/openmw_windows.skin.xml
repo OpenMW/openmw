@@ -143,7 +143,7 @@
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_CENTER" />
-        <Property key="Colour" value = "0.36 0.62 0.75" />
+        <Property key="Colour" value = "0.75 0.62 0.36" />
 
         <BasisSkin type="SubSkin" offset="0 0 88 20" align="ALIGN_STRETCH">
             <State name="normal" offset = "0 0 8 8"/>
