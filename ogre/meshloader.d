@@ -66,6 +66,8 @@ struct MeshLoader
   {
     baseName = name;
 
+    writefln("Loading mesh '%s'", name);
+
     // Check if the first record is a node
     Node n = cast(Node) nifMesh.records[0];
 
@@ -134,9 +136,12 @@ struct MeshLoader
     NiStringExtraData d = cast(NiStringExtraData) data.extra;
     if(d !is null)
       {
+        // Marker objects are only visible in the editor. We
+        // completely ignore them.
         if(d.string == "MRK")
           return;
 
+        // No collision
         if(d.string == "NCO")
           flags |= 0x800; // Temporary internal marker
       }
@@ -149,6 +154,47 @@ struct MeshLoader
     // first insert the nodes normally, and then create the
     // skeleton. The nodes can then be moved one by one over to the
     // appropriate bones.
+
+    // Check the controller
+    auto cont = data.controller;
+    while(cont !is null)
+      {
+        auto kc = cast(NiKeyframeController)data.controller;
+        auto pc = cast(NiPathController)data.controller;
+        if(kc !is null)
+          {
+            writefln("Found keyframe controller");
+            writefln("   Node name was: %s", data.name);
+            assert(cont.target is data);
+
+            auto kcd = kc.data;
+            writefln("   Types: %s %s %s",
+                     kcd.rotType, kcd.traType, kcd.scaleType);
+
+            /*
+              Adding keyframes:
+
+              Skeleton -> Animation -> NodeAnimationTrack nt;
+
+              TransformKeyFrame * tf = nt->createNodeKeyFrame(time);
+              tf->setTranslate(Vector3);
+              tf->setScale(Vector3);
+              tf->setRotation(Quaternion);
+
+              nt->applyToNode(node, time);
+              evt
+              Animation an;
+              an->apply(skeleton, time);
+             */
+          }
+        else if(pc !is null)
+          {
+            writefln("Found path controller");
+            assert(cont.target is data);
+          }
+        else writefln("Other controller (%s)", cont);
+        cont = cont.next;
+      }
 
     // Loop through children
     foreach(Node n; data.children)

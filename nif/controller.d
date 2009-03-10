@@ -219,7 +219,6 @@ class NiUVController : Controller
     }
 }
 
-//*
 // If there was more than four of these, I would template it.
 class NiKeyframeController : Controller
 {

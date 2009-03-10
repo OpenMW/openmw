@@ -25,16 +25,8 @@
 #include <string.h>
 
 extern "C" { // the headers don't do this..
-#ifdef WIN32
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#else
-// FIXME: This works on Ubuntu (given the switches from pkg-config),
-// but apparently there are some problems on other systems (eg
-// Archlinux).
-#include <avcodec.h>
-#include <avformat.h>
-#endif
 }
 
 #include <vector>
