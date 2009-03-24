@@ -1,5 +1,6 @@
 // TODO: KILLME
-char *cellName;
+std::string cellName;
+
 extern "C" void gui_setCellName(char *str)
 {
   cellName = str;

@@ -58,6 +58,21 @@ try typing:
 
 sudo apt-get install libogre-dev libavcodec-dev libavformat-dev libois-dev build-essential g++ gdc
 
+On Arch Linux, get the following packages from AUR:
+ogre
+mygui-svn
+bullet-2.75
+openal
+ffmpeg
+ois
+dmd
+libphobos
+dsss
+
+(On Arch you also need to change the Bullet libraries to
+-llBulletDynamics -llBulletCollision -llLinearMath in dsss.conf, or
+similarily in the Makefile if you prefer building with make.)
+
 A note about OpenAL: The library found in most Linux distributions
 (0.0.8 SI) is outdated. Some distributions are now changing to OpenAL
 Soft, which has a less hardware-dependent implementation. If you

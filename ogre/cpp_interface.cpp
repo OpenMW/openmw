@@ -420,7 +420,6 @@ extern "C" void ogre_createWater(float level)
            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
            Plane(Vector3::UNIT_Z, level),
 	   150000,150000
-	   //,20,20,true,1,5,5,Vector3::UNIT_Z
 	   );
     Entity *ent = mSceneMgr->createEntity( "WaterEntity", "water" );
     root->createChildSceneNode()->attachObject(ent);

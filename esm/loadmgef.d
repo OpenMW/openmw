@@ -65,7 +65,7 @@ struct MagicEffect
   {with(esFile){
     readHNExact(&data, data.sizeof,"MEDT");
 
-    icon = getIcon();
+    icon = getOIcon();
     particle = getOTexture("PTEX");
 
     boltSound = getHNOPtr!(Sound)("BSND", sounds);
