@@ -99,6 +99,8 @@ struct Music
 
   void setPlaylists(char[][] normal, char[][] battle)
   {
+    if(controlM is null) return;
+
     pushSArray(normal);
     pushSArray(battle);
     controlM.call("setPlaylists");
@@ -124,12 +126,16 @@ struct Music
 
   void updateBuffers()
   {
+    if(controlM is null) return;
+
     foreach(ref MonsterObject b; jukeC)
       Jukebox.get(b).updateBuffers();
   }
 
   void shutdown()
   {
+    if(controlM is null) return;
+
     foreach(ref MonsterObject b; jukeC)
       Jukebox.get(b).shutdown();
   }
