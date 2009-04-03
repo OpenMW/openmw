@@ -53,10 +53,10 @@ struct Book
   void load()
     {with(esFile){
       model = getMesh();
-      name = getHNString("FNAM");
+      name = getHNOString("FNAM");
       readHNExact(&data, data.sizeof, "BKDT");
       script = getHNOPtr!(Script)("SCRI", scripts);
-      icon = getIcon();
+      icon = getOIcon();
       text = getHNOString("TEXT");
       enchant = getHNOPtr!(Enchantment)("ENAM", enchants);
 

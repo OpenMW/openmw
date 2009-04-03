@@ -81,7 +81,7 @@ struct Container
   void load()
     {with(esFile){
       model = getMesh();
-      name = getHNString("FNAM");
+      name = getHNOString("FNAM");
       weight = getHNFloat("CNDT");
       flags = cast(Flags)getHNUint("FLAG");
 
