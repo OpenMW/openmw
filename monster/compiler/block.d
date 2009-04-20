@@ -76,6 +76,21 @@ abstract class Block
       return true;
     }
 
+  // Is the next token a separator, ie. a ; or a new line
+  static bool isSep(ref TokenArray toks, TT symbol = TT.Semicolon)
+    {
+      if( toks.length == 0 ) return true;
+      if( toks[0].newline ) return true;
+      return isNext(toks, symbol);
+    }
+
+  // Require either a line break or a given character (default ;)
+  static void reqSep(ref TokenArray toks, TT symbol = TT.Semicolon)
+    {
+      if(!isSep(toks, symbol))
+        fail("Expected '" ~ tokenList[symbol] ~ "' or newline", toks);
+    }
+
   static void reqNext(ref TokenArray toks, TT type, out Token tok)
     {
       if(!isNext(toks, type, tok))

@@ -148,6 +148,18 @@ struct GrowArray(T)
       return *this;
     }
 
+  // Get a contiguous array copy containg all the elements.
+  T[] arrayCopy()
+    {
+      T[] res = new T[length()];
+
+      // Non-optimized!
+      foreach(i, ref r; res)
+        r = opIndex(i);
+
+      return res;
+    }
+
   int opApply(int delegate(ref int, ref T) dg)
     {
       int res;

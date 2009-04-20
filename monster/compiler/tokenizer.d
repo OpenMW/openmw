@@ -31,6 +31,7 @@ import std.stdio;
 import monster.util.string : begins;
 
 import monster.vm.error;
+import monster.options;
 
 alias Token[] TokenArray;
 
@@ -109,11 +110,14 @@ enum TT
     Last, // Tokens after this do not have a specific string
 	  // associated with them.
 
-    StringLiteral,	// "something"
-    NumberLiteral,	// Anything that starts with a number
-    CharLiteral,	// 'a'
-    Identifier,		// user-named identifier
-    EOF			// end of file
+    StringLiteral,      // "something"
+    IntLiteral,         // Anything that starts with a number, except
+                        // floats
+    FloatLiteral,       // Any number which contains a period symbol
+    CharLiteral,        // 'a'
+    Identifier,         // user-named identifier
+    EOF,                // end of file
+    EMPTY               // empty line (not stored)
   }
 
 
@@ -122,6 +126,9 @@ struct Token
   TT type;
   char[] str;
   Floc loc;
+
+  // True if this token was the first on its line.
+  bool newline;
 
   char[] toString() { return str; }
 
@@ -139,9 +146,12 @@ struct Token
 
 // Used to look up keywords.
 TT keywordLookup[char[]];
+bool lookupSetup = false;
 
 void initTokenizer()
 {
+  assert(!lookupSetup);
+
   // Insert the keywords into the lookup table
   for(TT t = TT.Class; t < TT.Last; t++)
     {
@@ -150,6 +160,8 @@ void initTokenizer()
       assert((tok in keywordLookup) == null);
       keywordLookup[tok] = t;
     }
+
+  lookupSetup = true;
 }
 
 // Index table of all the tokens
@@ -172,10 +184,12 @@ const char[][] tokenList =
 
     TT.IsEqual          : "==",
     TT.NotEqual         : "!=",
+
     TT.IsCaseEqual      : "=i=",
     TT.IsCaseEqual2     : "=I=",
     TT.NotCaseEqual     : "!=i=",
     TT.NotCaseEqual2    : "!=I=",
+
     TT.Less             : "<",
     TT.More             : ">",
     TT.LessEq           : "<=",
@@ -250,13 +264,15 @@ const char[][] tokenList =
 
     // These are only used in error messages
     TT.StringLiteral    : "string literal",
-    TT.NumberLiteral    : "number literal",
+    TT.IntLiteral       : "integer literal",
+    TT.FloatLiteral     : "floating point literal",
     TT.CharLiteral      : "character literal",
     TT.Identifier       : "identifier",
-    TT.EOF              : "end of file"
+    TT.EOF              : "end of file",
+    TT.EMPTY            : "empty line - you should never see this"
   ];
 
-class StreamTokenizer
+class Tokenizer
 {
  private:
   // Line buffer. Don't worry, this is perfectly safe. It is used by
@@ -267,8 +283,9 @@ class StreamTokenizer
   char[300] buffer;
   char[] line; // The rest of the current line
   Stream inf;
-  uint lineNum;
+  int lineNum=-1;
   char[] fname;
+  bool newline;
 
   // Make a token of given type with given string, and remove it from
   // the input line.
@@ -277,6 +294,7 @@ class StreamTokenizer
       Token t;
       t.type = type;
       t.str = str;
+      t.newline = newline;
       t.loc.fname = fname;
       t.loc.line = lineNum;
 
@@ -284,6 +302,9 @@ class StreamTokenizer
       // !=i=.
       if(type == TT.IsCaseEqual2) t.type = TT.IsCaseEqual;
       if(type == TT.NotCaseEqual2) t.type = TT.NotCaseEqual;
+
+      // Treat } as a separator
+      if(type == TT.RightCurl) t.newline = true;
 
       // Remove the string from 'line', along with any following witespace
       remWord(str);
@@ -306,13 +327,17 @@ class StreamTokenizer
       Token t;
       t.str = "<end of file>";
       t.type = TT.EOF;
+      t.newline = true;
       t.loc.line = lineNum;
       t.loc.fname = fname;
       return t;
     }
 
+  Token empty;
+
  public:
  final:
+  // Used when reading tokens from a file or a stream
   this(char[] fname, Stream inf, int bom)
     {
       assert(inf !is null);
@@ -339,52 +364,51 @@ class StreamTokenizer
 
       this.inf = inf;
       this.fname = fname;
+
+      empty.type = TT.EMPTY;
+    }
+
+  // This is used for single-line mode, such as in a console.
+  this()
+    {
+      empty.type = TT.EMPTY;
+    }
+
+  void setLine(char[] ln)
+    {
+      assert(inf is null, "setLine only supported in line mode");
+      line = ln;
     }
 
   ~this() { if(inf !is null) delete inf; }
 
   void fail(char[] msg)
     {
-      throw new MonsterException(format("%s:%s: %s", fname, lineNum, msg));
+      if(inf !is null)
+        // File mode
+        throw new MonsterException(format("%s:%s: %s", fname, lineNum, msg));
+      else
+        // Line mode
+        throw new MonsterException(msg);
     }
 
-  Token getNext()
+  // Various parsing modes
+  enum
     {
-      // Various parsing modes
-      enum
-	{
-	  Normal,	// Normal mode
-	  Block,	// Block comment
-	  Nest		// Nested block comment
-	}
-      int mode = Normal;
-      int nests = 0;    // Nest level
+      Normal,   // Normal mode
+      Block,    // Block comment
+      Nest      // Nested block comment
+    }
+  int mode = Normal;
+  int nests = 0; // Nest level
+
+  // Get the next token from the line, if any
+  Token getNextFromLine()
+    {
+      assert(lookupSetup,
+             "Internal error: The tokenizer lookup table has not been set up!");
 
     restart:
-      // Get the next line, if the current is empty
-      while(line.length == 0)
-	{
-	  // No more information, we're done
-	  if(inf.eof())
-	    {
-	      if(mode == Block) fail("Unterminated block comment");
-	      if(mode == Nest) fail("Unterminated nested comment");
-	      return eofToken();
-	    }
-
-	  // Read a line and remove leading and trailing whitespace
-	  line = inf.readLine(buffer).strip();
-	  lineNum++;
-	}
-
-      assert(line.length > 0);
-
-      // Skip the first line if it begins with #!
-      if(lineNum == 1 && line.begins("#!"))
-          {
-            line = null;
-            goto restart;
-          }
 
       if(mode == Block)
 	{
@@ -395,27 +419,23 @@ class StreamTokenizer
 	    {
 	      mode = Normal;
 
-	      // Cut it the comment from the input
+	      // Cut the comment from the input
 	      remWord("*/", index);
 	    }
 	  else
 	    {
-	      // Comment not ended on this line, try the next
+	      // Comment was not terminated on this line, try the next
 	      line = null;
 	    }
-
-	  // Start over
-	  goto restart;
 	}
-
-      if(mode == Nest)
+      else if(mode == Nest)
 	{
 	  // Check for nested /+ and +/ in here, but go to restart if
 	  // none is found (meaning the comment continues on the next
 	  // line), or reset mode and go to restart if nest level ever
 	  // gets to 0.
 
-	  do
+	  while(line.length >= 2)
 	    {
 	      int incInd = -1;
 	      int decInd = -1;
@@ -443,7 +463,7 @@ class StreamTokenizer
 		}
 
 	      // Remove a nest level when '+/' is found
-	      if(decInd != -1)
+	      else if(decInd != -1)
 		{
 		  // Remove the +/ from input
 		  remWord("+/", decInd);
@@ -461,20 +481,23 @@ class StreamTokenizer
 		}
 
 	      // Nothing found on this line, try the next
-	      line = null;
 	      break;
 	    }
-	  while(line.length >= 2);
 
-	  goto restart;
+          // If we're still in nested comment mode, ignore the rest of
+          // the line
+          if(mode == Nest)
+            line = null;
 	}
 
-      // Comment - start next line
+      // Comment - ignore the rest of the line
       if(line.begins("//"))
-	{
-	  line = null;
-	  goto restart;
-	}
+        line = null;
+
+      // If the line is empty at this point, there's nothing more to
+      // be done
+      if(line == "")
+        return empty;
 
       // Block comment
       if(line.begins("/*"))
@@ -519,13 +542,13 @@ class StreamTokenizer
       // '\n', '\'', or unicode stuff won't work.)
       if(line[0] == '\'')
 	{
-	  if(line.length < 2 || line[2] != '\'')
+	  if(line.length < 3 || line[2] != '\'')
 	    fail("Malformed character literal " ~line);
 	  return retToken(TT.CharLiteral, line[0..3].dup);
 	}
 
       // Numerical literals - if it starts with a number, we accept
-      // it, until it is interupted by an unacceptible character. We
+      // it, until it is interupted by an unacceptable character. We
       // also accept numbers on the form .NUM. We do not try to parse
       // the number here.
       if(numericalChar(line[0]) ||
@@ -539,6 +562,7 @@ class StreamTokenizer
 	  // also explicitly allow '.' dots.
 	  int len = 1;
 	  bool lastDot = false; // Was the last char a '.'?
+          int dots; // Number of dots
 	  foreach(char ch; line[1..$])
 	    {
 	      if(ch == '.')
@@ -547,10 +571,13 @@ class StreamTokenizer
 		  // operator.
 		  if(lastDot)
 		    {
-		      len--; // Remove the last dot and exit.
+                      // Remove the last dot and exit.
+		      len--;
+                      dots--;
 		      break;
 		    }
 		  lastDot = true;
+                  dots++;
 		}
 	      else
 		{
@@ -562,7 +589,10 @@ class StreamTokenizer
               // This was a valid character, count it
 	      len++;
 	    }
-	  return retToken(TT.NumberLiteral, line[0..len].dup);
+          if(dots != 0)
+            return retToken(TT.FloatLiteral, line[0..len].dup);
+	  else
+            return retToken(TT.IntLiteral, line[0..len].dup);
 	}
 
       // Check for identifiers
@@ -603,12 +633,22 @@ class StreamTokenizer
       TT match;
       int mlen = 0;
       foreach(int i, char[] tok; tokenList[0..TT.Class])
-        if(line.begins(tok) && tok.length >= mlen)
-          {
-            assert(tok.length > mlen, "Two matching tokens of the same length");
-            mlen = tok.length;
-            match = cast(TT) i;
-          }
+        {
+          // Skip =i= and family, if monster.options tells us to
+          static if(!ciStringOps)
+            {
+              if(i == TT.IsCaseEqual || i == TT.IsCaseEqual2 ||
+                 i == TT.NotCaseEqual || i == TT.NotCaseEqual2)
+                continue;
+            }
+
+          if(line.begins(tok) && tok.length >= mlen)
+            {
+              assert(tok.length > mlen, "Two matching tokens of the same length");
+              mlen = tok.length;
+              match = cast(TT) i;
+            }
+        }
 
       if(mlen) return retToken(match, tokenList[match]);
 
@@ -616,14 +656,50 @@ class StreamTokenizer
       fail("Invalid token " ~ line);
     }
 
-  // Require a specific token
-  bool isToken(TT tok)
+  // Get the next token from a stream
+  Token getNext()
     {
-      Token tt = getNext();
-      return tt.type == tok;
-    }
+      assert(inf !is null, "getNext() found a null stream");
 
-  bool notToken(TT tok) { return !isToken(tok); }
+      if(lineNum == -1) lineNum = 0;
+
+    restart:
+      newline = false;
+      // Get the next line, if the current is empty
+      while(line.length == 0)
+	{
+	  // No more information, we're done
+	  if(inf.eof())
+	    {
+	      if(mode == Block) fail("Unterminated block comment");
+	      if(mode == Nest) fail("Unterminated nested comment");
+	      return eofToken();
+	    }
+
+	  // Read a line and remove leading and trailing whitespace
+	  line = inf.readLine(buffer).strip();
+	  lineNum++;
+          newline = true;
+	}
+
+      assert(line.length > 0);
+
+      static if(skipHashes)
+        {
+          // Skip the line if it begins with #.
+          if(/*lineNum == 1 && */line.begins("#"))
+            {
+              line = null;
+              goto restart;
+            }
+        }
+
+      Token tt = getNextFromLine();
+      if(tt.type == TT.EMPTY)
+        goto restart;
+
+      return tt;
+    }
 }
 
 // Read the entire file into an array of tokens. This includes the EOF
@@ -632,7 +708,7 @@ TokenArray tokenizeStream(char[] fname, Stream stream, int bom)
 {
   TokenArray tokenArray;
 
-  StreamTokenizer tok = new StreamTokenizer(fname, stream, bom);
+  Tokenizer tok = new Tokenizer(fname, stream, bom);
   Token tt;
   do
     {

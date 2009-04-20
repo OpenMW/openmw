@@ -80,7 +80,7 @@ void initIOModule()
   static MonsterClass mc;
   if(mc !is null) return;
 
-  mc = new MonsterClass(MC.String, moduleDef, "io");
+  mc = vm.loadString(moduleDef, "io");
 
   mc.bind("write",    { doWrite(false);             });
   mc.bind("writeln",  { doWrite(false); writefln(); });

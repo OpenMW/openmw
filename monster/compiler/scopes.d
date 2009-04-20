@@ -45,11 +45,11 @@ import monster.vm.error;
 import monster.vm.vm;
 
 // The global scope
-PackageScope global;
+RootScope global;
 
 void initScope()
 {
-  global = new PackageScope(null, "global");
+  global = new RootScope;
 }
 
 // List all identifier types
@@ -170,28 +170,6 @@ abstract class Scope
   // global scope.
   Scope parent;
 
-  // Verify that an identifier is not declared in this scope. If the
-  // identifier is found, give a duplicate identifier compiler
-  // error. Recurses through parent scopes.
-  final void clearId(Token name)
-    {
-      // Lookup checks all parent scopes so we only have to call it
-      // once.
-      auto sl = lookup(name);
-      assert(sl.name.str == name.str);
-
-      if(!sl.isNone)
-        {
-          if(sl.isProperty)
-            fail(name.str ~ " is a property and cannot be redeclared",
-                 name.loc);
-
-          fail(format("%s is already declared (at %s) as a %s",
-                      name.str, name.loc, LTypeName[sl.ltype]),
-               name.loc);
-        }
-    }
-
   // Made protected since it is so easy to confuse with isStateCode(),
   // and we never actually need it anywhere outside this file.
   bool isState() { return false; }
@@ -218,6 +196,28 @@ abstract class Scope
     if(!isRoot)
       importList = parent.importList;
   }
+
+  // Verify that an identifier is not declared in this scope. If the
+  // identifier is found, give a duplicate identifier compiler
+  // error. Recurses through parent scopes.
+  final void clearId(Token name)
+    {
+      // Lookup checks all parent scopes so we only have to call it
+      // once.
+      auto sl = lookup(name);
+      assert(sl.name.str == name.str);
+
+      if(!sl.isNone)
+        {
+          if(sl.isProperty)
+            fail(name.str ~ " is a property and cannot be redeclared",
+                 name.loc);
+
+          fail(format("%s is already declared (at %s) as a %s",
+                      name.str, name.loc, LTypeName[sl.ltype]),
+               name.loc);
+        }
+    }
 
   // Is this the root scope?
   final bool isRoot()
@@ -342,7 +342,7 @@ abstract class Scope
   void registerImport(char[][] cls ...)
     {
       foreach(c; cls)
-        registerImport(MonsterClass.find(c));
+        registerImport(vm.load(c));
     }
 
   // Used for summing up stack level. Redeclared in StackScope.
@@ -437,24 +437,73 @@ final class StateScope : Scope
   bool isState() { return true; }
 }
 
-// A package scope is a scope that can contain classes.
-final class PackageScope : Scope
+final class RootScope : PackageScope
 {
+ private:
+  // Lookup by integer index. The indices are global, that is why they
+  // are stored in the root scope rather than in the individual
+  // packages.
+  HashTable!(CIndex, MonsterClass) indexList;
+
+  // Forward references. Refers to unloaded and non-existing
+  // classes. TODO: This mechanism probably won't work very well with
+  // multiple packages. It should be possible to have forward
+  // references to multiple classes with the same name, as long as
+  // they are in the correct packages. Think it over some more.
+  HashTable!(char[], CIndex) forwards;
+
+  // Unique global index to give the next class.
+  CIndex next = 1;
+
+ public:
+  this() { super(null, "global"); }
+  bool allowRoot() { return true; }
+
+  // Get a class by index
+  MonsterClass getClass(CIndex ind)
+    {
+      MonsterClass mc;
+      if(!indexList.inList(ind, mc))
+        fail("Invalid class index encountered");
+      mc.requireScope();
+      return mc;
+    }
+
+  // Gets the index of a class, or inserts a forward reference to it
+  // if cannot be found. Subsequent calls for the same name will
+  // insert the same index, and when/if the class is actually loaded
+  // it will get the same index.
+  CIndex getForwardIndex(char[] name)
+    {
+      MonsterClass mc;
+      mc = vm.loadNoFail(name);
+      if(mc !is null) return mc.getIndex();
+
+      // Called when an existing forward does not exist
+      void inserter(ref CIndex v)
+        { v = next++; }
+
+      // Return the index in forwards, or create a new one if none
+      // exists.
+      return forwards.get(name, &inserter);
+    }
+
+  // Returns true if a given class has been inserted into the scope.
+  bool isLoaded(CIndex ci)
+    {
+      return indexList.inList(ci);
+    }
+}
+
+// A package scope is a scope that can contain classes.
+class PackageScope : Scope
+{
+ private:
   // List of classes in this package. This is case insensitive, so we
   // can look up file names too.
   HashTable!(char[], MonsterClass, GCAlloc, CITextHash) classes;
 
-  // Lookup by integer index. TODO: This should be in a global scope
-  // rather than per package. We can think about that when we
-  // implement packages.
-  HashTable!(CIndex, MonsterClass) indexList;
-
-  // Forward references. Refers to unloaded and non-existing classes.
-  HashTable!(char[], CIndex) forwards;
-
-  // Unique global index to give the next class. TODO: Ditto
-  CIndex next = 1;
-
+ public:
   this(Scope last, char[] name)
     {
       super(last, name);
@@ -463,7 +512,6 @@ final class PackageScope : Scope
     }
 
   bool isPackage() { return true; }
-  bool allowRoot() { return true; }
 
   // Insert a new class into the scope. The class is given a unique
   // global index. If the class was previously forward referenced, the
@@ -476,7 +524,7 @@ final class PackageScope : Scope
 
     // Are we already in the list?
     MonsterClass c2;
-    if(global.ciInList(cls.name.str, c2))
+    if(ciInList(cls.name.str, c2))
       {
         // That's not allowed. Determine what error message to give.
 
@@ -498,24 +546,24 @@ final class PackageScope : Scope
     // referenced, then an index has already been assigned.
     CIndex ci;
 
-    if(forwards.inList(cls.name.str, ci))
+    if(global.forwards.inList(cls.name.str, ci))
       {
         // ci is set, remove the entry from the forwards hashmap
         assert(ci != 0);
-        forwards.remove(cls.name.str);
+        global.forwards.remove(cls.name.str);
       }
     else
       // Get a new index
-      ci = next++;
+      ci = global.next++;
 
-    assert(!indexList.inList(ci));
+    assert(!global.indexList.inList(ci));
 
     // Assign the index and insert class into both lists
     cls.gIndex = ci;
     classes[cls.name.str] = cls;
-    indexList[ci] = cls;
+    global.indexList[ci] = cls;
 
-    assert(indexList.inList(ci));
+    assert(global.indexList.inList(ci));
   }
 
   // Case insensitive lookups. Used for comparing with file names,
@@ -548,20 +596,10 @@ final class PackageScope : Scope
       return mc;
     }
 
-  MonsterClass getClass(CIndex ind)
-    {
-      MonsterClass mc;
-      if(!indexList.inList(ind, mc))
-        fail("Invalid class index encountered");
-      mc.requireScope();
-      return mc;
-    }
-
   override ScopeLookup lookup(Token name)
     {
-      // Type names can never be overwritten, so we check findClass
-      // and the built-in types. We might move the builtin type check
-      // to a "global" scope at some point.
+      // Type names can never be overwritten, so we check the class
+      // list and the built-in types.
       if(BasicType.isBasic(name.str))
         return ScopeLookup(name, LType.Type, BasicType.get(name.str), this);
 
@@ -572,81 +610,6 @@ final class PackageScope : Scope
       // No parents to check
       assert(isRoot());
       return super.lookup(name);
-    }
-
-  // Find a parsed class of the given name. Looks in the list of
-  // loaded classes and in the file system. Returns null if the class
-  // cannot be found.
-  MonsterClass findParsed(char[] name)
-    {
-      MonsterClass result = null;
-
-      // TODO: We must handle package structures etc later.
-
-      // Check if class is already loaded.
-      if(!classes.inList(name, result))
-        {
-          // Class not loaded. Check if the file exists.
-          char[] fname = classToFile(name);
-          if(vm.findFile(fname))
-            {
-              // File exists. Load it right away. If the class is
-              // already forward referenced, this will be taken care
-              // of automatically by the load process, through
-              // insertClass. The last parameter makes sure findFile
-              // isn't called twice.
-              result = new MonsterClass(name, fname, false);
-              assert(classes.inList(name));
-            }
-          else
-            return null;
-        }
-
-      assert(result !is null);
-      assert(result.isParsed);
-      return result;
-    }
-
-  // Find a class given its name. The class must be parsed or a file
-  // must exist which can be parsed, otherwise the function
-  // fails. createScope is also called on the class before it is
-  // returned.
-  MonsterClass findClass(Token t) { return findClass(t.str, t.loc); }
-  MonsterClass findClass(char[] name, Floc loc = Floc.init)
-    {
-      MonsterClass res = findParsed(name);
-
-      if(res is null)
-        fail("Failed to find class '" ~ name ~ "'", loc);
-
-      res.requireScope();
-      assert(res.isScoped);
-      return res;
-    }
-
-  // Gets the index of a class, or inserts a forward reference to it
-  // if cannot be found. Subsequent calls for the same name will
-  // insert the same index, and when/if the class is actually loaded
-  // it will get the same index.
-  CIndex getForwardIndex(char[] name)
-    {
-      MonsterClass mc;
-      mc = findParsed(name);
-      if(mc !is null) return mc.getIndex();
-
-      // Called when an existing forward does not exist
-      void inserter(ref CIndex v)
-        { v = next++; }
-
-      // Return the index in forwards, or create a new one if none
-      // exists.
-      return forwards.get(name, &inserter);
-    }
-
-  // Returns true if a given class has been inserted into the scope.
-  bool isLoaded(CIndex ci)
-    {
-      return indexList.inList(ci);
     }
 }
 
@@ -759,10 +722,10 @@ class TFVScope : FVScope
     structs[sd.name.str] = sd.type;
   }
 
-  void insertEnum(EnumDeclaration sd)
+  void insertEnum(EnumType sd)
   {
-    clearId(sd.name);
-    enums[sd.name.str] = sd.type;
+    clearId(sd.nameTok);
+    enums[sd.name] = sd;
   }
 
   override:
@@ -789,24 +752,126 @@ class TFVScope : FVScope
 // to handle enum members.
 final class EnumScope : SimplePropertyScope
 {
-  this() { super("EnumScope", GenericProperties.singleton); }
-
-  int index; // Index in a global enum index list. Make a static list
-             // here or something.
-
-  void setup()
+  this(EnumType _et)
     {
-      /*
-      insert("name", ArrayType.getString(), { tasm.getEnumName(index); });
+      super("EnumScope", GenericProperties.singleton);
+      et = _et;
 
-      // Replace these with the actual fields of the enum
-      insert("value", type1, { tasm.getEnumValue(index, field); });
+      insert("value", "long", &enumVal);
+      inserts("length", "int", &enumLen);
+      inserts("first", et, &enumFirst);
+      inserts("last", et, &enumLast);
+      inserts("min", "long", &enumMin);
+      inserts("max", "long", &enumMax);
+    }
 
-      // Some of them are static
-      inserts("length", "int", { tasm.push(length); });
-      inserts("last", "owner", { tasm.push(last); });
-      inserts("first", "owner", { tasm.push(first); });
-      */
+  void enumMin()
+    { tasm.push8(et.minVal); }
+
+  void enumMax()
+    { tasm.push8(et.maxVal); }
+
+  void enumFirst()
+    { tasm.push(et.entries[0].index); }
+
+  void enumLast()
+    { tasm.push(et.entries[$-1].index); }
+
+  void enumLen()
+    { tasm.push(et.entries.length); }
+
+  void enumVal()
+    { tasm.getEnumValue(et.tIndex); }
+
+  EnumType et;
+
+ override:
+
+  // Intercept all the enum entry names when used as properties
+  Type getType(char[] name, Type oType)
+    {
+      // Is it one of the enum values?
+      auto ee = et.lookup(name);
+      if(ee !is null)
+        {
+          assert(et is oType ||
+                 et.getMeta() is oType);
+          return et;
+        }
+
+      // Maybe one of the fields?
+      int fe = et.findField(name);
+      if(fe != -1)
+        return et.fields[fe].type;
+
+      return super.getType(name, oType);
+    }
+
+  void getValue(char[] name, Type oType)
+    {
+      auto ee = et.lookup(name);
+      if(ee !is null)
+        {
+          assert(et is oType ||
+                 et.getMeta() is oType);
+          tasm.push(ee.index);
+          return;
+        }
+
+      int fe = et.findField(name);
+      if(fe != -1)
+        {
+          // We're getting a field from a variable. Eg.
+          // en.errorString. The enum index is on the stack, and
+          // getEnumValue supplies the enum type and the field
+          // index. The VM can find the correct field value from that.
+          tasm.getEnumValue(et.tIndex, fe);
+          return;
+        }
+
+      super.getValue(name, oType);
+    }
+
+  bool hasProperty(char[] name)
+    {
+      auto ee = et.lookup(name);
+      if(ee !is null) return true;
+      if(et.findField(name) != -1)
+        return true;
+      return super.hasProperty(name);
+    }
+
+  bool isStatic(char[] name, Type oType)
+    {
+      auto ee = et.lookup(name);
+      if(ee !is null)
+        {
+          assert(et is oType ||
+                 et.getMeta() is oType);
+          return true;
+        }
+
+      // The fields are always non-static, they depend on the actual
+      // enum value supplied.
+      if(et.findField(name) != -1)
+        return false;
+
+      return super.isStatic(name, oType);
+    }
+
+  bool isLValue(char[] name, Type oType)
+    {
+      // We can't override anything in an enum
+      auto ee = et.lookup(name);
+      if(ee !is null)
+        {
+          assert(et is oType ||
+                 et.getMeta() is oType);
+          return false;
+        }
+      if(et.findField(name) != -1)
+        return false;
+      return super.isLValue(name, oType);
     }
 }
 
@@ -939,10 +1004,12 @@ abstract class StackScope : VarScope
     return tmp;
   }
 
+  /*
   void push(int i) { expStack += i; }
   void push(Type t) { push(t.getSize); }
   void pop(int i) { expStack -= i; }
   void pop(Type t) { pop(t.getSize); }
+  */
 
   // Get the number of local variables in the current scope. In
   // reality it gives the number of ints. A variable 8 bytes long will
@@ -954,7 +1021,7 @@ abstract class StackScope : VarScope
   // blocks (break and continue.)
   int getTotLocals() { return sumLocals; }
 
-  // Get instra-expression stack
+  // Get intra-expression stack (not used yet)
   int getExpStack() { return expStack; }
 
   // Get total stack position, including expression stack values. This

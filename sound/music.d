@@ -68,7 +68,7 @@ struct Music
     assert(controlC is null);
     assert(controlM is null);
 
-    jukeC = MonsterClass.get("Jukebox");
+    jukeC = vm.load("Jukebox");
     jukeC.bind("waitUntilFinished",
             new Idle_waitUntilFinished);
 
@@ -79,7 +79,7 @@ struct Music
 
     jukeC.bindConst({new Jukebox(params.obj()); });
 
-    controlC = MonsterClass.get("Music");
+    controlC = vm.load("Music");
     controlM = controlC.getSing();
     controlM.call("setup");
   }

@@ -68,9 +68,23 @@ enum BC
                         // index must also be -1, and the class index
                         // is ignored.
 
+    EnumValue,          // Get the 'value' field of the enum variable
+                        // on the stack. Takes an enum type index.
+
+    EnumField,          // Get the given field of an enum. Takes the
+                        // field number and the enum type index, both
+                        // ints.
+
+    EnumValToIndex,     // Used to look up enum names (string index)
+    EnumNameToIndex,    // or value (long) and returns the enum index.
+
+
     New,                // Create a new object. Followed by an int
                         // giving the class index (in the file lookup
-                        // table)
+                        // table) and one giving the paramter
+                        // number. The parameter indices, class
+                        // indices and values are popped of the stack,
+                        // see NewExpression.evalAsm for details.
 
     Clone,              // Clones an object - create a new object of
                         // the same class, then copy variable values
@@ -136,19 +150,15 @@ enum BC
                         // stack. Equivalent to: a=pop; push a; push
                         // a;
 
-    StoreRet,           // Basic operation for moving data to
+    Store,              // Basic operation for moving data to
                         // memory. Schematically pops a Ptr of the
                         // stack, pops a value, moves the value into
-                        // the Ptr, and then pushes the value back.
+                        // the Ptr.
 
-    Store,              // Same as StoreRet but does not push the
-                        // value back. Not implemented, but will later
-                        // replace storeret completely.
-
-    StoreRet8,          // Same as StoreRet except two ints are popped
+    Store8,             // Same as Store except two ints are popped
                         // from the stack and moved into the data.
 
-    StoreRetMult,       // Takes the size as an int parameter
+    StoreMult,          // Takes the size as an int parameter
 
     IAdd,               // Standard addition, operates on the two next
                         // ints in the stack, and stores the result in
@@ -275,12 +285,11 @@ enum BC
                         // pushed as 1 then 2.
 
     CopyArray,          // Pops two array indices from the stack, and
-                        // copies the data from one to another. Pushes
-                        // back the array index of the
-                        // destination. The destination array is
-                        // popped first, then the source. The lengths
-                        // must match. If the arrays may overlap in
-                        // memory without unexpected effects.
+                        // copies the data from one to another. The
+                        // destination array is popped first, then the
+                        // source. The lengths must match. The arrays
+                        // may overlap in memory without unexpected
+                        // effects.
 
     DupArray,           // Pops an array index of the stack, creates a
                         // copy of the array, and pushes the index of
@@ -298,10 +307,9 @@ enum BC
                         // new array that is a slice of the original.
 
     FillArray,          // Fill an array. Pop an array index, then a
-                        // value (int). Sets all the elements in the
-                        // array to the value. Pushes the array index
-                        // back. Takes an int specifying the element
-                        // size.
+                        // value. Sets all the elements in the array
+                        // to the value. Takes an int specifying the
+                        // element/value size.
 
     CatArray,           // Concatinate two arrays, on the stack.
 
@@ -464,7 +472,8 @@ int codePtr(PT type, int index)
   t.type = type;
   t.val24 = index;
 
-  assert(t.remains == 0);
+  assert((index >= 0 && t.remains == 0) ||
+         (index <  0 && t.remains == 255));
 
   return t.val32;
 }
@@ -473,6 +482,13 @@ void decodePtr(int ptr, out PT type, out int index)
 {
   _CodePtr t;
   t.val32 = ptr;
+
+  // Manage negative numbers
+  if(t.val24 >= 0x800000)
+    {
+      t.remains = 255;
+      assert(t.val24 < 0);
+    }
 
   type = cast(PT) t.type;
   index = t.val24;
@@ -506,6 +522,10 @@ char[][] bcToString =
  BC.ReturnVal: "ReturnVal",
  BC.ReturnValN: "ReturnValN",
  BC.State: "State",
+ BC.EnumValue: "EnumValue",
+ BC.EnumField: "EnumField",
+ BC.EnumValToIndex: "EnumValToIndex",
+ BC.EnumNameToIndex: "EnumNameToIndex",
  BC.New: "New",
  BC.Jump: "Jump",
  BC.JumpZ: "JumpZ",
@@ -525,10 +545,9 @@ char[][] bcToString =
  BC.Pop: "Pop",
  BC.PopN: "PopN",
  BC.Dup: "Dup",
- BC.StoreRet: "StoreRet",
  BC.Store: "Store",
- BC.StoreRet8: "StoreRet8",
- BC.StoreRetMult: "StoreRetMult",
+ BC.Store8: "Store8",
+ BC.StoreMult: "StoreMult",
  BC.FetchElem: "FetchElem",
  BC.GetArrLen: "GetArrLen",
  BC.IMul: "IMul",

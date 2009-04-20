@@ -36,26 +36,7 @@ public
   import monster.vm.arrays;
   import monster.vm.params;
   import monster.vm.error;
-
-  import monster.modules.all;
 }
-
-private import monster.compiler.tokenizer;
-private import monster.compiler.properties;
-private import monster.compiler.scopes;
 
 version(LittleEndian) {}
 else static assert(0, "This library does not yet support big endian systems.");
-
-static this()
-{
-  // Initialize compiler constructs
-  initTokenizer();
-  initProperties();
-  initScope();
-
-  // Initialize VM
-  scheduler.init();
-  stack.init();
-  arrays.initialize();
-}

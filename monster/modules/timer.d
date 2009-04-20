@@ -28,7 +28,6 @@
 module monster.modules.timer;
 
 import std.stdio;
-import std.date;
 
 // For some utterly idiotic reason, DMD's public imports will suddenly
 // stop working from time to time.
@@ -39,14 +38,18 @@ import monster.vm.thread;
 import monster.vm.idlefunction;
 
 import monster.monster;
+import monster.options;
 
 const char[] moduleDef =
 "singleton timer;
 idle sleep(float secs);
 "; //"
 
+static if(timer_useClock)
+{
 // Sleep a given amount of time. This implementation uses the system
-// clock and is the default.
+// clock.
+import std.date;
 class IdleSleep_SystemClock : IdleFunction
 {
  override:
@@ -72,9 +75,11 @@ class IdleSleep_SystemClock : IdleFunction
     }
 }
 
+} else { // If timer_useClock is NOT set:
+
 // This implementation uses a user-driven timer instead of the system
 // clock. It's more efficient, but requires the user to update the
-// given timer manuall each frame. The default sleep (timer.sleep) is
+// given timer manually each frame. The default sleep (timer.sleep) is
 // bound to the default timer, but it's possible to create multiple
 // independent timers.
 class IdleSleep_Timer : IdleFunction
@@ -161,35 +166,25 @@ class SleepManager
 }
 
 SleepManager idleTime;
+}
 
 MonsterClass _timerClass;
 
 void initTimerModule()
 {
   if(_timerClass !is null)
+    return;
+
+  _timerClass = vm.loadString(moduleDef, "timer");
+
+  static if(timer_useClock)
     {
-      assert(idleTime !is null);
-      return;
+      _timerClass.bind("sleep", new IdleSleep_SystemClock);
     }
-
-  _timerClass = new MonsterClass(MC.String, moduleDef, "timer");
-
-  assert(idleTime is null);
-  idleTime = new SleepManager(_timerClass.getSing());
-
-  setSleepMethod(SleepMethod.Clock);
-}
-
-enum SleepMethod
-  { Clock, Timer }
-
-void setSleepMethod(SleepMethod meth)
-{
-  initTimerModule();
-
-  if(meth == SleepMethod.Clock)
-    _timerClass.bind("sleep", new IdleSleep_SystemClock);
-  else if(meth == SleepMethod.Timer)
-    _timerClass.bind("sleep", new IdleSleep_Timer);
-  else assert(0, "unknown timer method");
+  else
+    {
+      assert(idleTime is null);
+      idleTime = new SleepManager(_timerClass.getSing());
+      _timerClass.bind("sleep", new IdleSleep_Timer);
+    }
 }

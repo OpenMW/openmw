@@ -28,6 +28,10 @@
 module monster.modules.threads;
 
 import monster.monster;
+import monster.vm.mobject;
+import monster.vm.idlefunction;
+import monster.vm.thread;
+import monster.vm.mclass;
 import std.stdio;
 
 const char[] moduleDef =
@@ -69,12 +73,13 @@ thread start(char[] name)
 
 /*
   The char[] name stuff above will of course be replaced with real
-  function pointers once those are done. We will also add:
+  function pointers once those are done. When closures are done we
+  will also add:
 
   function() wrap(function f())
   {
     var t = create(f);
-    return {{ t.call(); }
+    return { t.call(); }
   }
 
 */
@@ -268,7 +273,7 @@ void initThreadModule()
   if(_threadClass !is null)
     return;
 
-  _threadClass = new MonsterClass(MC.String, moduleDef, "thread");
+  _threadClass = vm.loadString(moduleDef, "thread");
   trdSing = _threadClass.getSing();
 
   _threadClass.bind("kill", new Kill);

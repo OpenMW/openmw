@@ -31,12 +31,28 @@ import monster.modules.frames;
 import monster.modules.random;
 import monster.modules.threads;
 
+import monster.options;
+
+bool has(char[] str, char[] sub)
+{
+  if(sub.length == 0) return false;
+
+  int diff = str.length;
+  int sln = sub.length;
+
+  diff -= sln;
+  for(int i=0; i<=diff; i++)
+    if(str[i..i+sln] == sub[])
+      return true;
+  return false;
+}
+
 void initAllModules()
 {
-  initIOModule();
-  initTimerModule();
-  initFramesModule();
-  initThreadModule();
-  initRandomModule();
-  initMathModule();
+  static if(moduleList.has("io")) initIOModule();
+  static if(moduleList.has("timer")) initTimerModule();
+  static if(moduleList.has("frames")) initFramesModule();
+  static if(moduleList.has("thread")) initThreadModule();
+  static if(moduleList.has("random")) initRandomModule();
+  static if(moduleList.has("math")) initMathModule();
 }

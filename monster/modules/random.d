@@ -62,7 +62,7 @@ void initRandomModule()
   static MonsterClass mc;
   if(mc !is null) return;
 
-  mc = new MonsterClass(MC.String, moduleDef, "random");
+  mc = vm.loadString(moduleDef, "random");
 
   mc.bind("rand",    { stack.pushInt(rand()); });
   mc.bind("frand",   { stack.pushFloat(rand()*_frandFactor); });

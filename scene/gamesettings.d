@@ -12,7 +12,7 @@ void loadGameSettings()
 {
   // Load the GameSettings Monster class, and get the singleton
   // instance
-  MonsterClass mc = MonsterClass.find("GMST");
+  MonsterClass mc = vm.load("GMST");
   gmstObj = mc.getSing();
 
   foreach(a, b; gameSettings.names)

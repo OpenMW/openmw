@@ -9,3 +9,5 @@ for a in $(find -iname \*.d); do
 done
 
 svn st
+
+svn diff options.openmw options.d

@@ -24,6 +24,7 @@
 module ogre.gui;
 
 import monster.monster;
+import monster.vm.mclass;
 import ogre.bindings;
 import std.string;
 
@@ -232,8 +233,8 @@ void setupGUIScripts()
 {
   vm.addPath("mscripts/gui/");
   vm.addPath("mscripts/gui/module/");
-  gmc = new MonsterClass("gui", "gui.mn");
-  wid_mc = new MonsterClass("Widget", "widget.mn");
+  gmc = vm.load("gui", "gui.mn");
+  wid_mc = vm.load("Widget", "widget.mn");
   /*
   but_mc = new MonsterClass("Button", "button.mn");
   tex_mc = new MonsterClass("Text", "text.mn");

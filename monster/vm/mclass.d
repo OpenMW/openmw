@@ -39,6 +39,8 @@ import monster.vm.idlefunction;
 import monster.vm.arrays;
 import monster.vm.error;
 import monster.vm.vm;
+import monster.vm.stack;
+import monster.vm.thread;
 import monster.vm.mobject;
 
 import monster.util.flags;
@@ -48,22 +50,11 @@ import monster.util.freelist;
 
 import std.string;
 import std.stdio;
-import std.file;
 import std.stream;
 
 typedef void *MClass; // Pointer to C++ equivalent of MonsterClass.
 
 typedef int CIndex;
-
-// Parameter to the constructor. Decides how the class is
-// created. TODO: This system will be removed again, because we'll
-// stop using constructors.
-enum MC
-  {
-    File,    // Load class from file (default)
-    NoCase,  // Load class from file, case insensitive name match
-    String,  // Load class from string
-  }
 
 enum CFlags
   {
@@ -88,15 +79,6 @@ final class MonsterClass
    *    Static functions                         *
    *                                             *
    ***********************************************/
-
-  // TODO: These should be moved to vm.vm
-
-  // Get a class with the given name. It must already be loaded.
-  static MonsterClass get(char[] name) { return global.getClass(name); }
-
-  // Find a class with the given name. Load the file if necessary, and
-  // fail if the class cannot be found.
-  static MonsterClass find(char[] name) { return global.findClass(name); }
 
   static bool canParse(TokenArray tokens)
     {
@@ -125,6 +107,7 @@ final class MonsterClass
   CIndex gIndex; // Global index of this class
 
   ClassScope sc;
+  PackageScope pack;
 
   ObjectType objType; // Type for objects of this class
   Type classType; // Type for class references to this class (not
@@ -167,92 +150,11 @@ final class MonsterClass
   // already.
   void requireCompile() { if(!isCompiled) compileBody(); }
 
-
-  /*******************************************************
-   *                                                     *
-   *     Constructors                                    *
-   *                                                     *
-   *******************************************************/
-
-  this() {}
-
-  this(MC type, char[] name1, char[] name2 = "", bool usePath = true)
-    {
-      if(type == MC.File || type == MC.NoCase)
-        {
-          if(type == MC.NoCase)
-            loadCI(name1, name2, usePath);
-          else
-            load(name1, name2, usePath);
-
-          return;
-        }
-
-      if(type == MC.String)
-        {
-          loadString(name1, name2);
-
-          return;
-        }
-
-      assert(0, "encountered unknown MC type");
-    }
-
-  this(MC type, Stream str, char[] nam = "")
-    {
-    }
-
-  this(ref TokenArray toks, char[] nam="")
-    { loadTokens(toks, nam); }
-
-  this(Stream str, char[] nam="")
-    { loadStream(str, nam); }
-
-  this(char[] nam1, char[] nam2 = "", bool usePath=true)
-    { this(MC.File, nam1, nam2, usePath); }
-
-
-  /*******************************************************
-   *                                                     *
-   *     Class loaders                                   *
-   *                                                     *
-   *******************************************************/
-
-  // Load from file system. The names must specify a class name, a
-  // file name, or both. The class name, if specified, must match the
-  // loaded class name exactly. If usePath is true (default), the
-  // include paths are searched.
-  void load(char[] name1, char[] name2 = "", bool usePath=true)
-    { doLoad(name1, name2, true, usePath); }
-
-  // Same as above, except the class name check is case insensitive.
-  void loadCI(char[] name1, char[] name2 = "", bool usePath=true)
-    { doLoad(name1, name2, false, usePath); }
-
-  void loadString(char[] str, char[] fname="")
-  {
-    assert(str != "");
-    auto ms = new MemoryStream(str);
-    if(fname == "") fname = "(string)";
-    loadStream(ms, fname);
-  }
-
-  // Load a script from a stream. The filename parameter is only used
-  // for error messages.
-  void load(Stream str, char[] fname="(stream)")
-    { loadStream(str, fname); }
-
-  void loadTokens(ref TokenArray toks, char[] name)
-    { parse(toks, name); }
-
-  void loadStream(Stream str, char[] fname="(stream)", int bom = -1)
-    {
-      assert(str !is null);
-
-      // Parse the stream
-      parse(str, fname, bom);
-    }
-
+  // Constructor that only exists to keep people from using it. It's
+  // much safer to use the vm.load functions, since these check if the
+  // class already exists.
+  this(int internal = 0) { assert(internal == -14,
+                                  "Don't create MonsterClasses directly, use vm.load()"); }
 
   /*******************************************************
    *                                                     *
@@ -276,6 +178,20 @@ final class MonsterClass
   // Bind an idle function
   void bind(char[] name, IdleFunction idle)
     { bind_locate(name, FuncType.Idle).idleFunc = idle; }
+
+  void bindT(alias func)(char[] name="")
+    {
+      // Get the name from the alias parameter directly, if not
+      // specified.
+      if(name == "")
+        // Sort of a hack. func.stringof won't work (parses as a
+        // function call). (&func).stringof parses as "& funcname",
+        // but this could be implementation specific.
+        name = ((&func).stringof)[2..$];
+
+      // Let the Function handle the rest
+      findFunction(name).bindT!(func)();
+    }
 
   // Find a function by index. Used internally, and works for all
   // function types.
@@ -332,9 +248,21 @@ final class MonsterClass
 
   /*******************************************************
    *                                                     *
-   *     Binding of constructors                         *
+   *     Binding of native constructors                  *
    *                                                     *
    *******************************************************/
+
+  // bindConst binds a native function that is run on all new
+  // objects. It is executed before the constructor defined in script
+  // code (if any.)
+
+  // bindNew binds a function that is run on all objects created
+  // within script code (with the 'new' expression or the 'clone'
+  // property), but not on objects that are created in native code
+  // through createObject/createClone. This is handy when you want to
+  // bind with a native class, and want to be able to create objects
+  // in both places. It's executed before both bindConst and the
+  // script constructor.
 
   void bindConst(dg_callback nf)
     {
@@ -358,6 +286,30 @@ final class MonsterClass
              "Cannot set native constructor for " ~ toString ~ ": already set");
       natConst.ftype = FuncType.NativeCFunc;
       natConst.natFunc_c = nf;
+    }
+
+  void bindNew(dg_callback nf)
+    {
+      assert(natNew.ftype == FuncType.Native,
+             "Cannot set native constructor for " ~ toString ~ ": already set");
+      natNew.ftype = FuncType.NativeDDel;
+      natNew.natFunc_dg = nf;
+    }
+
+  void bindNew(fn_callback nf)
+    {
+      assert(natNew.ftype == FuncType.Native,
+             "Cannot set native constructor for " ~ toString ~ ": already set");
+      natNew.ftype = FuncType.NativeDFunc;
+      natNew.natFunc_fn = nf;
+    }
+
+  void bindNew_c(c_callback nf)
+    {
+      assert(natNew.ftype == FuncType.Native,
+             "Cannot set native constructor for " ~ toString ~ ": already set");
+      natNew.ftype = FuncType.NativeCFunc;
+      natNew.natFunc_c = nf;
     }
 
 
@@ -482,9 +434,39 @@ final class MonsterClass
       assert(singObj !is null);
       return singObj;
     }
+  alias getSing getSingleton;
 
-  MonsterObject* createObject()
-    { return createClone(null); }
+  MonsterObject* createObject(bool callConst = true)
+    { return createClone(null, callConst); }
+
+  // Call constructors on an object. If scriptNew is true, also call
+  // the natNew bindings (if any)
+  void callConstOn(MonsterObject *obj, bool scriptNew = false)
+    {
+      assert(obj.cls is this);
+
+      // Needed to make sure execute() exits when the constructor is
+      // done.
+      vm.pushExt("callConst");
+
+      // Call constructors
+      foreach(c; tree)
+        {
+          // Call 'new' callback if the object was created in script
+          if(scriptNew && c.natNew.ftype != FuncType.Native)
+            c.natNew.call(obj);
+
+          // Call native constructor
+          if(c.natConst.ftype != FuncType.Native)
+            c.natConst.call(obj);
+
+          // Call script constructor
+          if(c.scptConst !is null)
+            c.scptConst.fn.call(obj);
+        }
+
+      vm.popExt();
+    }
 
   // Get the whole allocated buffer belonging to this object
   private int[] getDataBlock(MonsterObject *obj)
@@ -501,7 +483,7 @@ final class MonsterClass
     }
 
   // Create a new object based on an existing object
-  MonsterObject* createClone(MonsterObject *source)
+  MonsterObject* createClone(MonsterObject *source, bool callConst = true)
     {
       requireCompile();
 
@@ -555,7 +537,7 @@ final class MonsterClass
       foreach(i, c; tree)
         {
           // Just get the slice - the actual data is already set up.
-          obj.data[i] = get(c.data.length + MonsterObject.exSize);
+          obj.data[i] = get(c.dataSize + MonsterObject.exSize);
 
           // Insert ourselves into the per-class list. We've already
           // allocated size for a node, we just have to add it to the
@@ -568,23 +550,20 @@ final class MonsterClass
       // At this point we should have used up the entire slice
       assert(slice.length == 0);
 
-      // Call constructors
-      foreach(c; tree)
-        {
-          // Custom native constructor
-          if(c.natConst.ftype != FuncType.Native)
-            natConst.call(obj);
-
-          // TODO: Call script constructors here
-        }
-
       // Set the same state as the source
       if(source !is null)
         obj.setState(source.state, null);
+      else
+        // Use the default state and label
+        obj.setState(defState, defLabel);
 
       // Make sure that getDataBlock works
       assert(getDataBlock(obj).ptr == odata.ptr &&
              getDataBlock(obj).length == odata.length);
+
+      // Call constructors
+      if(callConst)
+        callConstOn(obj);
 
       return obj;
     }
@@ -675,261 +654,25 @@ final class MonsterClass
   char[] toString() { return getName(); }
   uint numObjects() { return objects.length; }
 
- private:
-
-  /*******************************************************
-   *                                                     *
-   *     Private variables                               *
-   *                                                     *
-   *******************************************************/
-
-  // Contains the entire class tree for this class, always with
-  // ourselves as the last entry. Any class in the list is always
-  // preceded by all the classes it inherits from.
-  MonsterClass tree[];
-
-  // List of variables and functions declared in this class, ordered
-  // by index.
-  Function* functions[];
-  Variable* vars[];
-  State* states[];
-
-  // Singleton object - used for singletons and modules only.
-  MonsterObject *singObj;
-
-  // Function table translation list. Same length as tree[]. For each
-  // class in the parent tree, this list holds a list equivalent to
-  // the functions[] list in that class. The difference is that all
-  // overrided functions have been replaced by their successors.
-  Function*[][] virtuals;
-
-  int[] data; // Contains the initial object data segment
-  int[] sdata; // Static data segment
-
-  // The total data segment that's assigned to each object. It
-  // includes the data segment of all parent objects and some
-  // additional internal data.
-  int[] totalData;
-
-  // Direct parents of this class
-  MonsterClass parents[];
-  Token parentNames[];
-
-  // Used at compile time
-  VarDeclStatement[] vardecs;
-  FuncDeclaration[] funcdecs;
-  StateDeclaration[] statedecs;
-  StructDeclaration[] structdecs;
-  EnumDeclaration[] enumdecs;
-  ImportStatement[] imports;
-
-  // Native constructor, if any
-  Function natConst;
-
-  /*******************************************************
-   *                                                     *
-   *     Various private functions                       *
-   *                                                     *
-   *******************************************************/
-
-  // Create the data segment for this class. TODO: We will have to
-  // handle string literals and other array constants later. This is
-  // called at the very end, after all code has been compiled. That
-  // means that array literals can be inserted into the class in the
-  // compile phase and still "make it" into the data segment as static
-  // data.
-  int[] getDataSegment()
+  // Used internally. Use the string version below instead if you want
+  // to change the default state of a class.
+  void setDefaultState(State *st, StateLabel *lb)
     {
-      assert(sc !is null && sc.isClass(), "Class does not have a class scope");
-      uint dataSize = sc.getDataSize;
-      int[] data = new int[dataSize];
-      int totSize = 0;
-
-      foreach(VarDeclStatement vds; vardecs)
-        foreach(VarDeclaration vd; vds.vars)
-        {
-          int size = vd.var.type.getSize();
-          int[] val;
-          totSize += size;
-
-          val = vd.getCTimeValue();
-
-          data[vd.var.number..vd.var.number+size] = val[];
-        }
-      // Make sure the total size of the variables match the total size
-      // requested by variables through addNewDataVar.
-      assert(totSize == dataSize, "Data size mismatch in scope");
-
-      return data;
+      defState = st;
+      defLabel = lb;
     }
 
-  // Load file based on file name, class name, or both. The order of
-  // the strings doesn't matter, and name2 can be empty. useCase
-  // determines if we require a case sensitive match between the given
-  // class name and the loaded name. If usePath is true we search the
-  // include paths for scripts.
-  void doLoad(char[] name1, char[] name2, bool useCase, bool usePath)
-  {
-    char[] fname, cname;
-
-    if(name1 == "")
-      fail("Cannot give empty first parameter to load()");
-
-    if(name1.iEnds(".mn"))
-      {
-        fname = name1;
-        cname = name2;
-      }
-    else
-      {
-        fname = name2;
-        cname = name1;
-      }
-
-    if(cname.iEnds(".mn"))
-      fail("load() recieved two filenames: " ~ fname ~ " and " ~ cname);
-
-    // The filename must either be empty, or end with .mn
-    if(fname != "" && !fname.iEnds(".mn"))
-      fail("Neither " ~ name1 ~ " nor " ~ name2 ~
-           " is a valid script filename.");
-
-    // Remember if cname was originally set
-    bool cNameSet = (cname != "");
-
-    // Make sure both cname and fname have values.
-    if(!cNameSet)
-      cname = classFromFile(fname);
-    else if(fname == "")
-      fname = classToFile(cname);
-    else
-      // Both values were given, make sure they are sensible
-      if(icmp(classFromFile(fname),cname) != 0)
-        fail(format("Class name %s does not match file name %s",
-                    cname, fname));
-
-    assert(cname != "" && !cname.iEnds(".mn"));
-    assert(fname.iEnds(".mn"));
-
-    bool checkFileName()
-      {
-        if(cname.length == 0)
-          return false;
-
-        if(!validFirstIdentChar(cname[0]))
-          return false;
-
-        foreach(char c; cname)
-          if(!validIdentChar(c)) return false;
-
-        return true;
-      }
-
-    if(!checkFileName())
-      fail(format("Invalid class name %s (file %s)", cname, fname));
-
-    if(usePath && !vm.findFile(fname))
-      fail("Cannot find script file " ~ fname);
-
-    // Create a temporary file stream and load it
-    auto bf = new BufferedFile(fname);
-    auto ef = new EndianStream(bf);
-    int bom = ef.readBOM();
-    loadStream(ef, fname, bom);
-    delete bf;
-
-    // After the class is loaded, we can check it's real name.
-
-    // If the name matches, we're done.
-    if(cname == name.str) return;
-
-    // Allow a case insensitive match if useCase is false or the name
-    // was not given.
-    if((!useCase || !cNameSet) && (icmp(cname, name.str) == 0)) return;
-
-    // Oops, name mismatch
-    fail(format("%s: Expected class name %s does not match loaded name %s",
-                fname, cname, name.str));
-    assert(0);
-  }
-
-  // Helper function for the bind() variants
-  Function* bind_locate(char[] name, FuncType ft)
-  {
-    requireScope();
-
-    // Look the function up in the scope
-    auto ln = sc.lookupName(name);
-    auto fn = ln.func;
-
-    if(!ln.isFunc)
-      fail("Cannot bind to '" ~ name ~ "': no such function");
-
-    if(ft == FuncType.Idle)
-      {
-        if(!fn.isIdle())
-          fail("Cannot bind to non-idle function '" ~ name ~ "'");
-      }
-    else
-      {
-        if(!fn.isNative())
-          fail("Cannot bind to non-native function '" ~ name ~ "'");
-      }
-
-    fn.ftype = ft;
-
-    return fn;
-  }
-
-
-  /*******************************************************
-   *                                                     *
-   *     Compiler-related private functions              *
-   *                                                     *
-   *******************************************************/
-
-  // Identify what kind of block the given set of tokens represent,
-  // parse them, and store it in the appropriate list;
-  void store(ref TokenArray toks)
+  // Set the initial state and label for this class. This will affect
+  // all newly created objects, but not cloned objects.
+  void setDefaultState(char[] st, char[] lb="")
     {
-      if(FuncDeclaration.canParse(toks))
-	{
-	  auto fd = new FuncDeclaration;
-	  funcdecs ~= fd;
-	  fd.parse(toks);
-	}
-      else if(VarDeclStatement.canParse(toks))
-	{
-	  auto vd = new VarDeclStatement;
-	  vd.parse(toks);
-	  vardecs ~= vd;
-	}
-      else if(StateDeclaration.canParse(toks))
-	{
-	  auto sd = new StateDeclaration;
-	  sd.parse(toks);
-	  statedecs ~= sd;
-	}
-      else if(StructDeclaration.canParse(toks))
+      if(lb == "")
         {
-          auto sd = new StructDeclaration;
-          sd.parse(toks);
-          structdecs ~= sd;
+          setDefaultState(findState(st), null);
+          return;
         }
-      else if(EnumDeclaration.canParse(toks))
-        {
-          auto sd = new EnumDeclaration;
-          sd.parse(toks);
-          enumdecs ~= sd;
-        }
-      else if(ImportStatement.canParse(toks))
-        {
-          auto sd = new ImportStatement;
-          sd.parse(toks);
-          imports ~= sd;
-        }
-      else
-        fail("Illegal type or declaration", toks);
+      auto pr = findState(st, lb);
+      setDefaultState(pr.state, pr.label);
     }
 
   // Converts a stream to tokens and parses it.
@@ -950,6 +693,9 @@ final class MonsterClass
       natConst.ftype = FuncType.Native;
       natConst.name.str = "native constructor";
       natConst.owner = this;
+      natNew.ftype = FuncType.Native;
+      natNew.name.str = "native 'new' callback";
+      natNew.owner = this;
 
       // TODO: Check for a list of keywords here. class, module,
       // abstract, final. They can come in any order, but only certain
@@ -1000,8 +746,11 @@ final class MonsterClass
           while(isNext(tokens, TT.Comma));
         }
 
+      isNext(tokens, TT.Semicolon);
+      /*
       if(!isNext(tokens, TT.Semicolon))
 	fail("Missing semicolon after class statement", name.loc);
+      */
 
       if(parents.length > 1)
         fail("Multiple inheritance is currently not supported", name.loc);
@@ -1013,6 +762,181 @@ final class MonsterClass
       assert(tokens.length == 0, "found tokens after end of file");
 
       flags.set(CFlags.Parsed);
+    }
+
+ private:
+
+  /*******************************************************
+   *                                                     *
+   *     Private variables                               *
+   *                                                     *
+   *******************************************************/
+
+  // Contains the entire class tree for this class, always with
+  // ourselves as the last entry. Any class in the list is always
+  // preceded by all the classes it inherits from.
+  MonsterClass tree[];
+
+  // List of variables and functions declared in this class, ordered
+  // by index.
+  Function* functions[];
+  Variable* vars[];
+  State* states[];
+
+  // Singleton object - used for singletons and modules only.
+  MonsterObject *singObj;
+
+  // Function table translation list. Same length as tree[]. For each
+  // class in the parent tree, this list holds a list equivalent to
+  // the functions[] list in that class. The difference is that all
+  // overrided functions have been replaced by their successors.
+  Function*[][] virtuals;
+
+  // Default state and label
+  State *defState = null;
+  StateLabel *defLabel = null;
+
+  // The total data segment that's assigned to each object. It
+  // includes the data segment of all parent objects and some
+  // additional internal data.
+  int[] totalData;
+
+  // Data segment size for *this* class, not including parents or
+  // extra information.
+  public int dataSize;
+
+  // Total data, sliced up to match the class tree
+  int[][] totalSliced;
+
+  // Direct parents of this class
+  public MonsterClass parents[];
+  Token parentNames[];
+
+  // Used at compile time
+  VarDeclStatement[] vardecs;
+  FuncDeclaration[] funcdecs;
+  StateDeclaration[] statedecs;
+  StructDeclaration[] structdecs;
+  EnumDeclaration[] enumdecs;
+  ImportStatement[] imports;
+  ClassVarSet[] varsets;
+
+  // Native constructors, if any
+  Function natConst, natNew;
+
+  // Script constructor, if any
+  public Constructor scptConst;
+
+  /*******************************************************
+   *                                                     *
+   *     Various private functions                       *
+   *                                                     *
+   *******************************************************/
+
+  // Helper function for the bind() variants
+  Function* bind_locate(char[] name, FuncType ft)
+  {
+    requireScope();
+
+    // Look the function up in the scope
+    auto ln = sc.lookupName(name);
+    auto fn = ln.func;
+
+    if(!ln.isFunc)
+      fail("Cannot bind to '" ~ name ~ "': no such function");
+
+    if(ft == FuncType.Idle)
+      {
+        if(!fn.isIdle())
+          fail("Cannot bind to non-idle function '" ~ name ~ "'");
+      }
+    else
+      {
+        if(!fn.isNative())
+          fail("Cannot bind to non-native function '" ~ name ~ "'");
+      }
+
+    fn.ftype = ft;
+
+    return fn;
+  }
+
+
+  /*******************************************************
+   *                                                     *
+   *     Compiler-related private functions              *
+   *                                                     *
+   *******************************************************/
+
+  // Identify what kind of block the given set of tokens represent,
+  // parse them, and store it in the appropriate list;
+  void store(ref TokenArray toks)
+    {
+      if(FuncDeclaration.canParse(toks))
+	{
+	  auto fd = new FuncDeclaration;
+	  funcdecs ~= fd;
+	  fd.parse(toks);
+	}
+      else if(Constructor.canParse(toks))
+        {
+          auto fd = new Constructor;
+          if(scptConst !is null)
+            fail("Class " ~ name.str ~ " cannot have more than one constructor", toks[0].loc);
+          scptConst = fd;
+          fd.parse(toks);
+        }
+      else if(ClassVarSet.canParse(toks))
+        {
+          auto cv = new ClassVarSet;
+          cv.parse(toks);
+
+          // Check if this variable is already set in this class
+          foreach(ocv; varsets)
+            {
+              if(cv.isState && ocv.isState)
+                fail(format("State already set on line %s",
+                            ocv.loc.line), cv.loc);
+              else if(ocv.name.str == cv.name.str)
+                fail(format("Variable %s is already set on line %s",
+                            cv.name.str, ocv.loc.line),
+                     cv.loc);
+            }
+
+          varsets ~= cv;
+        }
+      else if(VarDeclStatement.canParse(toks))
+	{
+	  auto vd = new VarDeclStatement;
+	  vd.parse(toks);
+	  vardecs ~= vd;
+	}
+      else if(StateDeclaration.canParse(toks))
+	{
+	  auto sd = new StateDeclaration;
+	  sd.parse(toks);
+	  statedecs ~= sd;
+	}
+      else if(StructDeclaration.canParse(toks))
+        {
+          auto sd = new StructDeclaration;
+          sd.parse(toks);
+          structdecs ~= sd;
+        }
+      else if(EnumDeclaration.canParse(toks))
+        {
+          auto sd = new EnumDeclaration;
+          sd.parse(toks);
+          enumdecs ~= sd;
+        }
+      else if(ImportStatement.canParse(toks))
+        {
+          auto sd = new ImportStatement;
+          sd.parse(toks);
+          imports ~= sd;
+        }
+      else
+        fail("Illegal type or declaration", toks);
     }
 
   // Insert the class into the scope system. All parent classes must
@@ -1036,9 +960,10 @@ final class MonsterClass
       parents.length = parentNames.length;
       foreach(int i, pName; parentNames)
         {
-          // Find the class. findClass guarantees that the returned
-          // class is scoped.
-          MonsterClass mc = global.findClass(pName);
+          // Find the class. vm.load() returns the existing class if
+          // it has already been loaded.
+          MonsterClass mc = vm.load(pName.str);
+          mc.requireScope();
 
           assert(mc !is null);
           assert(mc.isScoped);
@@ -1208,6 +1133,13 @@ final class MonsterClass
       foreach(func; funcdecs)
         func.resolveBody();
 
+      // Including the constructor
+      if(scptConst !is null)
+        {
+          scptConst.resolve(sc);
+          assert(scptConst.fn.owner is this);
+        }
+
       // Resolve states
       foreach(state; statedecs)
 	state.resolve(sc);
@@ -1222,12 +1154,40 @@ final class MonsterClass
       foreach(var; vardecs)
         var.validate();
 
+      // Resolve variable and state overrides. No other declarations
+      // depend on these (the values are only relevant at the
+      // compilation stage), so we can resolve these last.
+      foreach(dec; varsets)
+        dec.resolve(sc);
+
       flags.set(CFlags.Resolved);
     }
 
   alias int[] ia;
-  // These are platform dependent:
+  // This is platform dependent:
   static const iasize = ia.sizeof / int.sizeof;
+
+  // Fill the data segment for this class.
+  void getDataSegment(int[] data)
+    {
+      assert(data.length == dataSize);
+      int totSize = 0;
+
+      foreach(VarDeclStatement vds; vardecs)
+        foreach(VarDeclaration vd; vds.vars)
+        {
+          int size = vd.var.type.getSize();
+          int[] val;
+          totSize += size;
+
+          val = vd.getCTimeValue();
+
+          data[vd.var.number..vd.var.number+size] = val[];
+        }
+      // Make sure the total size of the variables match the total size
+      // requested by variables through addNewDataVar.
+      assert(totSize == dataSize, "Data size mismatch in scope");
+    }
 
   void compileBody()
     {
@@ -1240,20 +1200,21 @@ final class MonsterClass
       foreach(mc; tree[0..$-1])
         mc.requireCompile();
 
-      // Generate data segment and byte code for functions and
-      // states. The result is stored in the respective objects.
+      // Generate byte code for functions and states.
       foreach(f; funcdecs) f.compile();
       foreach(s; statedecs) s.compile();
+      if(scptConst !is null) scptConst.compile();
 
-      // Set the data segment for this class.
-      data = getDataSegment();
+      // Get the data segment size for this class
+      assert(sc !is null && sc.isClass(), "Class does not have a class scope");
+      dataSize = sc.getDataSize;
 
       // Calculate the total data size we need to allocate for each
       // object
       uint tsize = 0;
       foreach(c; tree)
         {
-          tsize += c.data.length; // Data segment size
+          tsize += c.dataSize; // Data segment size
           tsize += MonsterObject.exSize; // Extra data per object
           tsize += iasize; // The size of our entry in the data[]
                            // table
@@ -1262,7 +1223,7 @@ final class MonsterClass
       // Allocate the buffer
       totalData = new int[tsize];
 
-      // Use this to get subslices of the data segment
+      // Used below to get subslices of the data segment
       int[] slice = totalData;
       int[] get(int ints)
         {
@@ -1272,14 +1233,16 @@ final class MonsterClass
           return res;
         }
 
-      // Skip the data[] list
+      // The first part of the buffer is used for storing the obj.data
+      // array itself - skip that now.
       get(iasize*tree.length);
 
-      // Assign the data segment values
-      foreach(c; tree)
+      // Set up the slice list
+      totalSliced.length = tree.length;
+      foreach(i,c; tree)
         {
-          int[] d = get(c.data.length);
-          d[] = c.data[];
+          // Data segment slice
+          totalSliced[i] = get(c.dataSize);
 
           // Skip the extra data
           get(MonsterObject.exSize);
@@ -1287,6 +1250,44 @@ final class MonsterClass
 
       // At this point we should have used up the entire slice
       assert(slice.length == 0);
+      // Sanity check on the size
+      assert(totalSliced[$-1].length == dataSize);
+
+      // Fill our own data segment
+      getDataSegment(totalSliced[$-1]);
+
+      // The next part is only implemented for single inheritance
+      assert(parents.length <= 1);
+      if(parents.length == 1)
+        {
+          auto p = parents[0];
+
+          // Go through the parent's tree, and copy its data
+          // segments. This will make sure we include all cumulative
+          // variable changes from past classes.
+          assert(p.tree.length == tree.length - 1);
+
+          foreach(i,c; p.tree)
+            {
+              assert(tree[i] is c);
+
+              // Copy updated data segment for c from parent class
+              totalSliced[i][] = p.totalSliced[i][];
+            }
+
+          // Apply all variable changes defined in this class
+          foreach(vs; varsets)
+            {
+              if(vs.isState) continue;
+
+              assert(vs.cls !is null);
+              int ind = vs.cls.treeIndex;
+              assert(ind < p.tree.length);
+              assert(tree[ind] is vs.cls);
+
+              vs.apply(totalSliced[ind]);
+            }
+        }
 
       flags.set(CFlags.Compiled);
 
@@ -1297,38 +1298,4 @@ final class MonsterClass
           singObj = createObject();
         }
     }
-}
-
-// Convert between class name and file name. These are currently just
-// guesses. TODO: Move these into MC, into the user functions, or
-// eliminate them completely.
-char[] classToFile(char[] cname)
-{
-  return tolower(cname) ~ ".mn";
-}
-
-char[] classFromFile(char[] fname)
-{
-  fname = getBaseName(fname);
-  assert(fname.ends(".mn"));
-  return fname[0..$-3];
-}
-
-// Utility functions, might move elsewhere.
-char[] getBaseName(char[] fullname)
-{
-  foreach_reverse(i, c; fullname)
-    {
-      version(Win32)
-        {
-          if(c == ':' || c == '\\' || c == '/')
-            return fullname[i+1..$];
-        }
-      version(Posix)
-        {
-          if (fullname[i] == '/')
-            return fullname[i+1..$];
-        }
-    }
-  return fullname;
 }

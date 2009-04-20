@@ -35,9 +35,6 @@ import std.string;
 // Set up the base Monster classes we need in OpenMW
 void initMonsterScripts()
 {
-  initAllModules();
-  setSleepMethod(SleepMethod.Timer);
-
   // Add the script directories
   vm.addPath("mscripts/");
   vm.addPath("mscripts/gameobjects/");
@@ -48,7 +45,7 @@ void initMonsterScripts()
   global.registerImport("io", "random", "timer");
 
   // Get the Config singleton object
-  config.mo = (new MonsterClass("Config")).getSing();
+  config.mo = vm.load("Config").getSing();
 
   // Set up the GUI Monster module
   setupGUIScripts();

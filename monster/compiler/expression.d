@@ -30,6 +30,7 @@ import monster.compiler.operators;
 import monster.compiler.types;
 import monster.compiler.assembler;
 import monster.compiler.block;
+import monster.compiler.statement;
 import monster.compiler.variables;
 import monster.compiler.functions;
 
@@ -87,7 +88,13 @@ abstract class Expression : Block
       else if(isNext(toks, TT.Semicolon, ln))
 	fail("Use {} for empty statements, not ;", ln);
 
-      else fail("Cannot interpret expression " ~ toks[0].str, toks[0].loc);
+      else
+        {
+          if(toks.length != 0)
+            fail("Cannot interpret expression " ~ toks[0].str, toks[0].loc);
+          else
+            fail("Missing expression");
+        }
 
       b.parse(toks);
 
@@ -175,19 +182,13 @@ abstract class Expression : Block
     Floc loc;
   }
 
-  // Operators handled below. Don't really need a special function for
-  // this...
+  // Operators handled below.
   static bool getNextOp(ref TokenArray toks, ref Token t)
     {
       if(toks.length == 0) return false;
       TT tt = toks[0].type;
-      if(/*tt == TT.Dot || */tt == TT.Equals || tt == TT.Plus ||
-	 tt == TT.Minus || tt == TT.Mult || tt == TT.Div ||
-	 tt == TT.Rem || tt == TT.IDiv ||
-
-	 tt == TT.PlusEq || tt == TT.MinusEq || tt == TT.MultEq ||
-	 tt == TT.DivEq || tt == TT.RemEq || tt == TT.IDivEq ||
-         tt == TT.CatEq ||
+      if(tt == TT.Plus || tt == TT.Minus || tt == TT.Mult ||
+         tt == TT.Div || tt == TT.Rem || tt == TT.IDiv ||
 
 	 tt == TT.Cat || 
 
@@ -257,12 +258,8 @@ abstract class Expression : Block
 
 	  // Create the compound expression. Replace the right node,
 	  // since it already has the correct operator.
-	  if(assign)
-	    right.value.exp = new AssignOperator(left.value.exp,
-						 right.value.exp,
-						 left.value.nextOp,
-						 left.value.loc);
-	  else if(boolop)
+          assert(!assign);
+          if(boolop)
 	    right.value.exp = new BooleanOperator(left.value.exp,
 						 right.value.exp,
 						 left.value.nextOp,
@@ -320,26 +317,6 @@ abstract class Expression : Block
 	    }
 	}
 
-      // As find(), but searches from the right, and inserts
-      // assignment operators.
-      void findAssign(TT types[] ...)
-	{
-	  auto it = exprList.getTail();
-	  while(it !is null)
-	    {
-	      // Is it the right operator?
-	      if(types.has(it.value.nextOp))
-		{
-		  // Find the next element to the left
-		  auto nxt = it.getPrev();
-		  replace(it.getNext(), true);
-		  it=nxt;
-		}
-	      else
-		it = it.getPrev();
-	    }
-	}
-
       // Now sort through the operators according to precedence. This
       // is the precedence I use, it should be ok. (Check it against
       // something else)
@@ -367,11 +344,6 @@ abstract class Expression : Block
                TT.IsCaseEqual, TT.NotCaseEqual);
 
       findBool(TT.Or, TT.And);
-
-      // Find assignment operators. These use a different Expression
-      // class and are searched in reverse order.
-      findAssign(TT.Equals, TT.PlusEq, TT.MinusEq, TT.MultEq, TT.DivEq,
-		  TT.RemEq, TT.IDivEq, TT.CatEq);
 
       assert(exprList.length == 1, "Cannot reduce expression list to one element");
       return exprList.getHead().value.exp;
@@ -465,8 +437,15 @@ class TypeofExpression : Expression
       type = tt.getBase().getMeta();
     }
 
-  // Don't actually produce anything
-  void evalAsm() {}
+  // We can always determine the type at compile time
+  bool isCTime() { return true; }
+
+  int[] evalCTime() { return null; }
+
+  char[] toString()
+    {
+      return "typeof(" ~ tt.exp.toString ~ ")";
+    }
 }
 
 // new-expressions, ie. (new Sometype[]).
@@ -485,6 +464,9 @@ class NewExpression : Expression
 
   CIndex clsInd;
 
+  NamedParam[] params;
+  Variable* varlist[];
+
   static bool canParse(TokenArray toks)
     { return isNext(toks, TT.New); }
 
@@ -492,16 +474,38 @@ class NewExpression : Expression
     {
       reqNext(toks, TT.New, loc);
       type = Type.identify(toks, true, exArr);
+
+      // Parameters?
+      ExprArray exps;
+      FunctionCallExpr.getParams(toks, exps, params);
+
+      if(exps.length != 0)
+        fail("'new' can only take names parameters", loc);
     }
 
   char[] toString()
     {
-      return "(new " ~ typeString ~ ")";
+      char[] res = "new " ~ typeString ~ "";
+      if(params.length)
+        {
+          res ~= "(";
+          foreach(i, v; params)
+            {
+              res ~= v.name.str;
+              res ~= "=";
+              res ~= v.value.toString;
+              if(i < params.length-1)
+                res ~= ", ";
+            }
+          res ~= ")";
+        }
+      return res;
     }
 
   void resolve(Scope sc)
     {
       type.resolve(sc);
+      MonsterClass mc;
 
       if(type.isReplacer)
         type = type.getBase();
@@ -510,7 +514,7 @@ class NewExpression : Expression
         {
           // We need to find the index associated with this class, and
           // pass it to the assembler.
-          auto mc = (cast(ObjectType)type).getClass();
+          mc = (cast(ObjectType)type).getClass();
           assert(mc !is null);
           clsInd = mc.getIndex();
 
@@ -545,9 +549,7 @@ class NewExpression : Expression
                 e.resolve(sc);
 
                 // Check the type
-                try intType.typeCast(e);
-                catch(TypeException)
-                  fail("Cannot convert array index " ~ e.toString ~ " to int", loc);
+                intType.typeCast(e, "array index");
               }
             else
               {
@@ -576,6 +578,33 @@ class NewExpression : Expression
         }
       else
 	fail("Cannot use 'new' with type " ~ type.toString, loc);
+
+      // Resolve the parameters
+      if(params.length != 0)
+        {
+          if(!type.isObject)
+            fail("New can take parameters to class types, not " ~ type.toString, loc);
+
+          assert(mc !is null);
+
+          varlist.length = params.length;
+          foreach(int i, ref v; params)
+            {
+              // Lookup the variable in the class
+              auto look = mc.sc.lookup(v.name);
+              if(!look.isVar)
+                fail(v.name.str ~ " is not a variable in class " ~ type.toString, loc);
+
+              // Store the looked up variable
+              varlist[i] = look.var;
+
+              // Next resolve the expression
+              v.value.resolve(sc);
+
+              // Finally, convert the type
+              look.type.typeCast(v.value, v.name.str);
+            }
+        }
     }
 
   void evalAsm()
@@ -584,12 +613,28 @@ class NewExpression : Expression
 
       if(type.isObject)
         {
+          // Then push the variable pointers and values on the stack
+          foreach(i, v; params)
+            {
+              auto lvar = varlist[i];
+
+              assert(v.value !is null);
+              assert(lvar !is null);
+              assert(lvar.sc !is null);
+
+              v.value.eval();
+              tasm.push(v.value.type.getSize); // Type size
+              tasm.push(lvar.number); // Var number
+              tasm.push(lvar.sc.getClass().getTreeIndex()); // Class index
+            }
           // Create a new object. This is done through a special byte code
           // instruction.
-          tasm.newObj(clsInd);
+          tasm.newObj(clsInd, params.length);
         }
       else if(type.isArray)
         {
+          assert(params.length == 0);
+
           int initVal[] = baseType.defaultInit();
 
           int rank = exArr.length; // Array nesting level
@@ -672,10 +717,7 @@ class ArrayLiteralExpr : Expression
 	{
 	  // Check that all elements are of a usable type, and convert
 	  // if necessary.
-          try base.typeCast(par);
-          catch(TypeException)
-            fail(format("Cannot convert %s of type %s to type %s", par,
-                        par.typeString(), params[0].typeString()), getLoc);
+          base.typeCast(par, "array element");
 	}
 
       cls = sc.getClass();
@@ -730,7 +772,7 @@ class ArrayLiteralExpr : Expression
 }
 
 // Expression representing a literal or other special single-token
-// values. Supported tokens are StringLiteral, NumberLiteral,
+// values. Supported tokens are StringLiteral, Int/FloatLiteral,
 // CharLiteral, True, False, Null, Dollar and This. Array literals are
 // handled by ArrayLiteralExpr.
 class LiteralExpr : Expression
@@ -773,7 +815,8 @@ class LiteralExpr : Expression
     {
       return
 	isNext(toks, TT.StringLiteral) ||
-	isNext(toks, TT.NumberLiteral) ||
+	isNext(toks, TT.IntLiteral) ||
+	isNext(toks, TT.FloatLiteral) ||
 	isNext(toks, TT.CharLiteral) ||
 	isNext(toks, TT.True) ||
 	isNext(toks, TT.False) ||
@@ -795,6 +838,14 @@ class LiteralExpr : Expression
 
   bool isRes = false;
 
+  // Convert a token to an integer. TODO: Will do base conversions etc
+  // later on.
+  static long parseIntLiteral(Token t)
+    {
+      assert(t.type == TT.IntLiteral);
+      return atoi(t.str);
+    }
+
   void resolve(Scope sc)
     {
       isRes = true;
@@ -811,23 +862,20 @@ class LiteralExpr : Expression
 	  return;
 	}
 
-      // Numeric literal.
-      if(value.type == TT.NumberLiteral)
+      // Numeric literals
+      if(value.type == TT.IntLiteral)
 	{
-	  // Parse number strings. Simple hack for now, assume it's an
-	  // int unless it contains a period, then it's a float. TODO:
-	  // Improve this later, see how it is done elsewhere.
-	  if(value.str.find('.') != -1)
-	    {
-              type = BasicType.getFloat;
-	      fval = atof(value.str);
-
-	      return;
-	    }
-
           type = BasicType.getInt;
-	  ival = atoi(value.str);
+	  ival = parseIntLiteral(value);
 	  return;
+        }
+
+      // Floats
+      if(value.type == TT.FloatLiteral)
+	{
+          type = BasicType.getFloat;
+          fval = atof(value.str);
+          return;
 	}
 
       // The $ token. Only allowed in array indices.
@@ -1008,7 +1056,7 @@ class CastExpression : Expression
   int[] evalCTime()
     {
       // Let the type do the conversion
-      int[] res = type.typeCastCTime(orig);
+      int[] res = type.typeCastCTime(orig, "");
 
       return res;      
     }
@@ -1040,12 +1088,17 @@ class ImportHolder : Expression
     {
       mc = pmc;
 
+      // The imported class must be resolved at this point
+      mc.requireScope();
+
       // Importing singletons and modules is like importing
       // the object itself
       if(mc.isSingleton)
         type = mc.objType;
       else
         type = mc.classType;
+
+      assert(type !is null);
     }
 
   // All lookups in this import is done through this function. Can be
@@ -1066,10 +1119,216 @@ class ImportHolder : Expression
 
   void evalAsm()
     {
+      mc.requireCompile();
       if(mc.isSingleton)
         {
           assert(type.isObject);
           tasm.pushSingleton(mc.getIndex());
         }
+    }
+}
+
+// An expression that works as a statement. This also handles all
+// assignments, ie. expr1 = expr2. Supported operators are
+// =, +=, *= /=, %=, ~=
+class ExprStatement : Statement
+{
+  Expression left;
+
+  // For assignment
+  TT opType;
+  Expression right;
+  Type type;
+
+  bool catElem; // For concatinations (~=), true when the right hand
+                // side is a single element rather than an array.
+
+  // Require a terminating semicolon or line break
+  bool term = true;
+
+  void parse(ref TokenArray toks)
+    {
+      if(toks.length == 0)
+        fail("Expected statement, found end of stream.");
+      loc = toks[0].loc;
+      left = Expression.identify(toks);
+
+      Token tok;
+
+      if(toks.isNext(TT.Equals, tok) ||
+         toks.isNext(TT.PlusEq, tok) ||
+         toks.isNext(TT.MinusEq, tok) ||
+         toks.isNext(TT.MultEq, tok) ||
+         toks.isNext(TT.DivEq, tok) ||
+         toks.isNext(TT.RemEq, tok) ||
+         toks.isNext(TT.IDivEq, tok) ||
+         toks.isNext(TT.CatEq, tok))
+        {
+          opType = tok.type;
+
+          right = Expression.identify(toks);
+        }
+
+      if(term) reqSep(toks);
+    }
+
+  char[] toString()
+    {
+      char[] res = left.toString();
+      if(right !is null)
+        {
+          res ~= tokenList[opType];
+          res ~= right.toString();
+        }
+      return res;
+    }
+
+  void resolve(Scope sc)
+    {
+      left.resolve(sc);
+
+      loc = left.loc;
+      type = left.type;
+
+      // If this isn't an assignment, we're done.
+      if(right is null)
+        return;
+
+      right.resolve(sc);
+
+      // Check that we are allowed assignment
+      if(!left.isLValue)
+	fail("Cannot assign to expression '" ~ left.toString ~ "'", loc);
+
+      // Operators other than = and ~= are only allowed for numerical
+      // types.
+      if(opType != TT.Equals && opType != TT.CatEq && !type.isNumerical)
+	fail("Assignment " ~tokenList[opType] ~
+	     " not allowed for non-numerical type " ~ left.toString(), loc);
+
+      // Is the left hand expression a sliced array?
+      auto arr = cast(ArrayOperator) left;
+      if(arr !is null && arr.isSlice)
+        {
+          assert(type.isArray);
+
+          if(opType == TT.CatEq)
+            fail("Cannot use ~= on array slice " ~ left.toString, loc);
+
+          // For array slices on the right hand side, the left hand
+          // type must macth exactly, without implisit casting. For
+          // example, the following is not allowed, even though 3 can
+          // implicitly be cast to char[]:
+          // char[] a;
+          // a[] = 3; // Error
+
+          // We are, on the other hand, allowed to assign a single
+          // value to a slice, eg:
+          // int[] i = new int[5];
+          // i[] = 3; // Set all elements to 3.
+          // In this case we ARE allowed to typecast, though.
+
+          if(right.type == left.type) return;
+
+          Type base = type.getBase();
+
+          base.typeCast(right, left.toString);
+
+          // Inform arr.store() that we're filling in a single element
+          arr.isFill = true;
+
+          return;
+        }
+
+      // Handle concatination ~=
+      if(opType == TT.CatEq)
+        {
+          if(!left.type.isArray)
+            fail("Opertaor ~= can only be used on arrays, not " ~ left.toString ~
+                 " of type " ~ left.typeString, left.loc);
+
+          // Array with array
+          if(left.type == right.type) catElem = false;
+          // Array with element
+          else if(right.type.canCastOrEqual(left.type.getBase()))
+            {
+              left.type.getBase().typeCast(right, "");
+              catElem = true;
+            }
+          else
+            fail("Cannot use operator ~= on types " ~ left.typeString ~
+                 " and " ~ right.typeString, left.loc);
+          return;
+        }
+
+      // Cast the right side to the left type, if possible.
+      type.typeCast(right, left.toString);
+
+      assert(left.type == right.type);
+    }
+
+  void compile()
+    {
+      if(right is null)
+        {
+          // Simple expression, no assignment.
+          left.evalPop();
+          return;
+        }
+
+      int s = right.type.getSize;
+
+      // += -= etc are implemented without adding new
+      // instructions. This might change later. The "downside" to this
+      // approach is that the left side is evaluated two times, which
+      // might not matter much for lvalues anyway, but it does give
+      // more M-code vs native code, and thus more overhead. I'm not
+      // sure if a function call can ever be an lvalue or if lvalues
+      // can otherwise have side effects in the future. If that
+      // becomes the case, then this implementation will have to
+      // change. Right now, the expression i += 3 will be exactly
+      // equivalent to i = i + 3.
+
+      if(opType != TT.Equals)
+	{
+	  // Get the values of both sides
+	  left.eval();
+	  right.eval();
+
+          setLine();
+
+          // Concatination
+          if(opType == TT.CatEq)
+            {
+              assert(type.isArray);
+
+              if(catElem)
+                // Append one element onto the array
+                tasm.catArrayRight(s);
+              else
+                // Concatinate two arrays.
+                tasm.catArray();
+            }
+
+	  // Perform the arithmetic operation. This puts the result of
+	  // the addition on the stack. The evalDest() and mov() below
+	  // will store it in the right place.
+	  else if(type.isNumerical)
+	    {
+	      if(opType == TT.PlusEq) tasm.add(type);
+	      else if(opType == TT.MinusEq) tasm.sub(type);
+	      else if(opType == TT.MultEq) tasm.mul(type);
+	      else if(opType == TT.DivEq) tasm.div(type);
+	      else if(opType == TT.IDivEq) tasm.idiv(type);
+	      else if(opType == TT.RemEq) tasm.divrem(type);
+	      else fail("Unhandled assignment operator", loc);
+	    }
+	  else assert(0, "Type not handled");
+	}
+      else right.eval();
+
+      // Store the value on the stack into the left expression.
+      setLine();
+      left.store();
     }
 }

@@ -24,7 +24,7 @@
 // Covers all alchemy apparatus - mortars, retorts, etc
 class Apparatus : InventoryItem;
 
-enum AppaType
+enum AppaType : char[] altName
   {
     MortarPestle = 0 : "Mortar and Pestle",
     Albemic      = 1,

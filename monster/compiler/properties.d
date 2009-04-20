@@ -251,6 +251,17 @@ abstract class SimplePropertyScope : PropertyScope
   void inserts(char[] name, char[] tp, Action push)
     { inserts(name, getType(tp), push); }
 
+  // TODO: These are hacks to work around a silly but irritating DMD
+  // feature. Whenever there's an error somewhere, function literals
+  // like { something; } get resolved as int delegate() instead of
+  // void delegate() for some reason. This gives a ton of error
+  // messages, but these overloads will prevent that.
+  alias int delegate() FakeIt;
+  void insert(char[],char[],FakeIt,FakeIt pop = null) {assert(0);}
+  void insert(char[],Type,FakeIt,FakeIt pop = null) {assert(0);}
+  void inserts(char[],char[],FakeIt) {assert(0);}
+  void inserts(char[],Type,FakeIt) {assert(0);}
+
  override:
 
   // Return the stored type. If it is null, return the owner type

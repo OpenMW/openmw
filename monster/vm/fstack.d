@@ -33,6 +33,7 @@ import monster.compiler.states;
 import monster.compiler.functions;
 import monster.compiler.linespec;
 
+import monster.options;
 import monster.util.freelist;
 
 import std.stdio;
@@ -44,6 +45,7 @@ enum SPType
     Function,      // A function (script or native)
     Idle,          // Idle function
     State,         // State code
+    External,      // An external function represented on the function stack
   }
 
 // One entry in the function stack
@@ -55,6 +57,7 @@ struct StackPoint
   {
     Function *func; // What function we are in (if any)
     State *state; // What state the function belongs to (if any)
+    char[] extName; // Name of external function
   }
 
   SPType ftype;
@@ -92,6 +95,9 @@ struct StackPoint
   bool isNormal()
   { return isState || (isFunc && func.isNormal); }
 
+  bool isExternal()
+  { return ftype == SPType.External; }
+
   // Get the current source position (file name and line
   // number). Mostly used for error messages.
   Floc getFloc()
@@ -116,6 +122,9 @@ struct StackPoint
 
   char[] toString()
   {
+    if(isExternal)
+      return "external function " ~ extName;
+
     assert(func !is null);
 
     char[] type, cls, name;
@@ -144,11 +153,14 @@ struct StackPoint
 alias FreeList!(StackPoint) StackList;
 alias StackList.TNode *StackNode;
 
+// External functions that are pushed when there is no active
+// thread. These will not prevent any future thread from being put in
+// the background.
+FunctionStack externals;
+
 struct FunctionStack
 {
   private:
-  // Guard against infinite recursion
-  static const maxStack = 100;
 
   // Number of native functions on the stack
   int natives;
@@ -185,8 +197,7 @@ struct FunctionStack
 
   void killAll()
   {
-    assert(natives == 0);
-
+    natives = 0;
     while(list.length)
       {
         assert(cur !is null);
@@ -215,7 +226,7 @@ struct FunctionStack
   // Sets up the next stack point and assigns the given object
   private void push(MonsterObject *obj)
   {
-    if(list.length >= maxStack)
+    if(list.length >= maxFStack)
       fail("Function stack overflow - infinite recursion?");
 
     assert(cur is null || !cur.isIdle,
@@ -276,6 +287,16 @@ struct FunctionStack
     cur.code.setData(st.bcode);
   }
 
+  // Push an external (non-scripted) function on the function
+  // stack.
+  void pushExt(char[] name)
+  {
+    push(null);
+    natives++;
+    cur.ftype = SPType.External;
+    cur.extName = name;
+  }
+
   void pushIdle(Function *func, MonsterObject *obj)
   {
     push(obj);
@@ -299,7 +320,7 @@ struct FunctionStack
 
     assert(list.length >= 1);
 
-    if(cur.isNative)
+    if(cur.isNative || cur.isExternal)
       natives--;
     assert(natives >= 0);
 
@@ -331,9 +352,23 @@ struct FunctionStack
         if(i == 0)
           msg = " (<---- current function)";
         else if(i == list.length-1)
-          msg = " (<---- start of function stack)";
-        res = c.toString ~ msg ~ '\n' ~ res;
+          msg = " (<---- first Monster function)";
+        res ~= c.toString ~ msg ~ '\n';
         i++;
+      }
+
+    // If we're not the externals list, add that one too
+    i = 0;
+    if(this !is &externals)
+      {
+        foreach(ref c; externals.list)
+          {
+            char[] msg;
+            if(i == externals.list.length-1)
+              msg = " (<---- first external function)";
+            res ~= c.toString ~ msg ~ '\n';
+            i++;
+          }
       }
 
     return "Trace:\n" ~ res;

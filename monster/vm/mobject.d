@@ -255,14 +255,37 @@ struct MonsterObject
    *                                                     *
    *******************************************************/
 
-  // Call a named function. The function is executed immediately, and
-  // call() returns when the function is finished. The function is
-  // called virtually, so any child class function that overrides it
-  // will take precedence.
+  // Call a named function directly. The function is executed
+  // immediately, and call() returns when the function is
+  // finished. The function is called virtually, so any child class
+  // function that overrides it will take precedence. This is the 'low
+  // level' way to call functions, meaning that you have to handle
+  // parameters and return values on the stack manually. Use the
+  // template functions below for a more high level interface.
   void call(char[] name)
   {
     cls.findFunction(name).call(this);
   }
+
+  template callT(T)
+  {
+    T callT(A ...)(char[] name, A a)
+      {
+        return cls.findFunction(name).callT!(T)(this, a);
+      }
+  }
+
+  alias callT!(void) callVoid;
+
+  alias callT!(int) callInt;
+  alias callT!(uint) callUint;
+  alias callT!(float) callFloat;
+  alias callT!(double) callDouble;
+  alias callT!(long) callLong;
+  alias callT!(ulong) callUlong;
+  alias callT!(dchar) callChar;
+  alias callT!(MIndex) callMIndex;
+  alias callT!(AIndex) callAIndex;
 
   // Create a paused thread that's set up to call the given
   // function. It must be started with Thread.call() or
@@ -300,13 +323,6 @@ struct MonsterObject
     auto trd = thread(fn);
     trd.restart();
     return trd;
-  }
-
-  // Call a function non-virtually. In other words, ignore
-  // derived objects.
-  void nvcall(char[] name)
-  {
-    assert(0, "not implemented");
   }
 
   /* Set state. Invoked by the statement "state = statename;". This

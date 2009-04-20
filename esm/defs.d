@@ -162,7 +162,7 @@ template LoadTT(T)
 
       // Set up a prototype object
       if(mc is null)
-        mc = MonsterClass.find(clsName);
+        mc = vm.load(clsName);
       proto = mc.createObject();
 
       proto.setString8("id", id);

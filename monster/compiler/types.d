@@ -61,18 +61,6 @@ import std.string;
   MetaType (type of type expressions, like writeln(int);)
 
  */
-class TypeException : Exception
-{
-  Type type1, type2;
-
-  this(Type t1, Type t2)
-    {
-      type1 = t1;
-      type2 = t2;
-      super("Unhandled TypeException on types " ~ type1.toString ~ " and " ~
-            type2.toString ~ ".");
-    }
-}
 
 // A class that represents a type. The Type class is abstract, and the
 // different types are actually handled by various subclasses of Type
@@ -197,6 +185,7 @@ abstract class Type : Block
   bool isArray() { return arrays() != 0; }
   bool isObject() { return false; }
   bool isStruct() { return false; }
+  bool isEnum() { return false; }
 
   bool isReplacer() { return false; }
 
@@ -322,7 +311,7 @@ abstract class Type : Block
 
   // Cast the expression orig to this type. Uses canCastTo to
   // determine if a cast is possible.
-  final void typeCast(ref Expression orig)
+  final void typeCast(ref Expression orig, char[] to)
     {
       if(orig.type == this) return;
 
@@ -332,12 +321,14 @@ abstract class Type : Block
       if(orig.type.canCastTo(this))
         orig = new CastExpression(orig, this);
       else
-        throw new TypeException(this, orig.type);
+        fail(format("Cannot cast %s of type %s to %s of type %s",
+                    orig.toString, orig.typeString,
+                    to, this), orig.loc);
     }
 
   // Do compile-time type casting. Gets orig.evalCTime() and returns
   // the converted result.
-  final int[] typeCastCTime(Expression orig)
+  final int[] typeCastCTime(Expression orig, char[] to)
     {
       int[] res = orig.evalCTime();
 
@@ -346,7 +337,9 @@ abstract class Type : Block
       if(orig.type.canCastTo(this))
         res = orig.type.doCastCTime(res, this);
       else
-        throw new TypeException(this, orig.type);
+        fail(format("Cannot cast %s of type %s to %s of type %s",
+                    orig.toString, orig.typeString,
+                    to, this), orig.loc);
 
       assert(res.length == getSize);
 
@@ -398,10 +391,8 @@ abstract class Type : Block
   void parse(ref TokenArray toks) {assert(0, name);}
   void resolve(Scope sc) {assert(0, name);}
 
-  /* Cast two expressions to their common type, if any. Throw a
-     TypeException exception if not possible. This exception should be
-     caught elsewhere to give a more useful error message. Examples of
-     possible outcomes:
+  /* Cast two expressions to their common type, if any. Fail if not
+     possible. Examples of possible outcomes:
   
      int, int           -> does nothing
      float, int         -> converts the second paramter to float
@@ -451,13 +442,13 @@ abstract class Type : Block
         {
           // Find the common type
           if(t1.canCastTo(t2)) common = t2; else
-          if(t2.canCastTo(t1)) common = t1;
-          else throw new TypeException(t1, t2);
+          if(t2.canCastTo(t1)) common = t1; else
+            fail(format("Cannot cast %s of type %s to %s of type %s, or vice versa.", e1, t1, e2, t2), e1.loc);
         }
 
       // Wrap the expressions in CastExpression blocks if necessary.
-      common.typeCast(e1);
-      common.typeCast(e2);
+      common.typeCast(e1, "");
+      common.typeCast(e2, "");
     }
 }
 
@@ -480,7 +471,7 @@ class NullType : InternalType
 
   bool canCastTo(Type to)
     {
-      return to.isArray || to.isObject;
+      return to.isArray || to.isObject || to.isEnum;
     }
 
   void evalCastTo(Type to)
@@ -921,6 +912,8 @@ class ObjectType : Type
   // Members of objects are resolved in the class scope.
   Scope getMemberScope()
     {
+      assert(getClass !is null);
+      assert(getClass.sc !is null);
       return getClass().sc;
     }
 
@@ -1036,25 +1029,178 @@ class ArrayType : Type
 
 class EnumType : Type
 {
-  // The scope contains the actual enum values
+  // Enum entries
+  EnumEntry[] entries;
   EnumScope sc;
+  char[] initString = " (not set)";
 
-  this(EnumDeclaration ed)
+  // Lookup tables
+  EnumEntry* nameAA[char[]];
+  EnumEntry* valueAA[long];
+
+  // Fields
+  FieldDef fields[];
+
+  long
+    minVal = long.max,
+    maxVal = long.min;
+
+  Token nameTok;
+
+  EnumEntry *lookup(long val)
     {
-      name = ed.name.str;
-      loc = ed.name.loc;
+      auto p = val in valueAA;
+      if(p is null)
+        return null;
+      return *p;
     }
+
+  EnumEntry *lookup(char[] str)
+    {
+      auto p = str in nameAA;
+      if(p is null) return null;
+      return *p;
+    }
+
+  int findField(char[] str)
+    {
+      foreach(i, fd; fields)
+        if(fd.name.str == str)
+          return i;
+      return -1;
+    }
+
+ override:
+
+  bool isEnum() { return true; }
 
   int[] defaultInit() { return [0]; }
   int getSize() { return 1; }
 
-  void resolve(Scope sc) {}
+  void resolve(Scope last)
+  {
+    assert(sc is null, "resolve() called more than once");
 
-  // can cast to int and to string, but not back
+    initString = name ~ initString;
 
-  // Scope getMemberScope() { return sc; }
+    foreach(i, ref ent; entries)
+      {
+        // Make sure there are no naming conflicts.
+        last.clearId(ent.name);
+
+        // Assign an internal value to each entry
+        ent.index = i+1;
+
+        // Set the printed value to be "Enum.Name"
+        ent.stringValue = name ~ "." ~ ent.name.str;
+
+        // Create an AA for values, and one for the names. This is also
+        // where we check for duplicates in both.
+        if(ent.name.str in nameAA)
+          fail("Duplicate entry '" ~ ent.name.str ~ "' in enum", ent.name.loc);
+        if(ent.value in valueAA)
+          fail("Duplicate value " ~ .toString(ent.value) ~ " in enum", ent.name.loc);
+        nameAA[ent.name.str] = &ent;
+        valueAA[ent.value] = &ent;
+
+        if(ent.value > maxVal) maxVal = ent.value;
+        if(ent.value < minVal) minVal = ent.value;
+      }
+
+    // Create the scope
+    sc = new EnumScope(this);
+
+    // Check the fields
+    foreach(ref fd; fields)
+      {
+        last.clearId(fd.name);
+        if(fd.name.str in nameAA)
+          fail("Field name cannot match value name " ~ fd.name.str, fd.name.loc);
+
+        fd.type.resolve(last);
+        if(fd.type.isReplacer)
+          fd.type = fd.type.getBase();
+
+        fd.type.validate(fd.name.loc);
+      }
+
+    // Resolve and check field expressions.
+    foreach(ref ent; entries)
+      {
+        // Check number of expressions
+        if(ent.exp.length > fields.length)
+          fail(format("Too many fields in enum line (expected %s, found %s)",
+                      fields.length, ent.exp.length),
+               ent.name.loc);
+
+        ent.fields.length = fields.length;
+
+        foreach(i, ref fe; ent.exp)
+          {
+            assert(fe !is null);
+            fe.resolve(last);
+
+            // Check the types
+            fields[i].type.typeCast(fe, format("field %s (%s)",
+                                               i+1, fields[i].name.str));
+
+            // And that they are all compile time expressions
+            if(!fe.isCTime)
+              fail("Cannot evaluate " ~ fe.toString ~ " at compile time", fe.loc);
+          }
+
+        // Finally, get the values
+        foreach(i, ref int[] data; ent.fields)
+          {
+            if(i < ent.exp.length)
+              data = ent.exp[i].evalCTime();
+            else
+              // Use the init value if no field is value is given
+              data = fields[i].type.defaultInit();
+
+            assert(data.length == fields[i].type.getSize);
+          }
+
+        // Clear the expression array since we don't need it anymore
+        ent.exp = null;
+      }
+  }
+
+  // Can only cast to string for now
+  bool canCastTo(Type to)
+    { return to.isString; }
+
+  void evalCastTo(Type to)
+    {
+      assert(to.isString);
+      tasm.castToString(tIndex);
+    }
+
+  int[] doCastCTime(int[] data, Type to)
+    {
+      assert(to.isString);
+      return [valToStringIndex(data)];
+    }
+
+  // TODO: In this case, we could override valToStringIndex as well,
+  // and return a cached, constant string index to further optimize
+  // memory usage.
+  char[] valToString(int[] data)
+    {
+      assert(data.length == 1);
+      int v = data[0];
+      assert(v >= 0 && v <= entries.length);
+
+      // v == 0 means that no value is set - return a default string
+      // value
+      if(v == 0)
+        return initString;
+
+      else return entries[v-1].stringValue;
+    }
+
   Scope getMemberScope()
-    { return GenericProperties.singleton; }
+    { return sc; }
 }
 
 class StructType : Type

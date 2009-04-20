@@ -99,7 +99,7 @@ void initFramesModule()
   static MonsterClass mc;
   if(mc !is null) return;
 
-  mc = new MonsterClass(MC.String, moduleDef, "frames");
+  mc = vm.loadString(moduleDef, "frames");
 
   // Bind the idle
   mc.bind("fsleep", new IdleFrameSleep);

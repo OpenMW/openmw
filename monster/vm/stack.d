@@ -29,6 +29,7 @@ import std.stdio;
 import std.utf;
 
 import monster.compiler.scopes;
+import monster.options;
 
 import monster.vm.mobject;
 import monster.vm.mclass;
@@ -56,13 +57,9 @@ struct CodeStack
   public:
   void init()
   {
-    // 100 is just a random number - it should probably be quite a bit
-    // larger (but NOT dynamic, since we want to catch run-away code.)
-    const int size = 100;
-
-    data.length = size;
-    left = size;
-    total = size;
+    data.length = maxStack;
+    left = maxStack;
+    total = maxStack;
     pos = data.ptr;
     frame = null;
   }
@@ -343,6 +340,46 @@ struct CodeStack
   alias push4!(dchar) pushChar;
   alias pop4!(dchar) popChar;
   alias get4!(dchar) getChar;
+
+  void pushFail(T)(T t)
+  {
+    static assert(0, "pushType not yet implemented for " ~ T.stringof);
+  }
+
+  T popFail(T)()
+  {
+    static assert(0, "popType not yet implemented for " ~ T.stringof);
+  }
+
+  // Generic push template
+  template pushType(T)
+  {
+    static if(is(T == MIndex) || is(T == AIndex) ||
+              is(T == int) || is(T == uint) || is(T == float))
+      alias push4!(T) pushType;
+
+    else static if(is(T == long) || is(T == ulong) ||
+                   is(T == double) || is(T == dchar))
+      alias push8!(T) pushType;
+
+    else
+      alias pushFail!(T) pushType;
+  }
+
+  // Ditto for pop
+  template popType(T)
+  {
+    static if(is(T == MIndex) || is(T == AIndex) ||
+              is(T == int) || is(T == uint) || is(T == float))
+      alias pop4!(T) popType;
+
+    else static if(is(T == long) || is(T == ulong) ||
+                   is(T == double) || is(T == dchar))
+      alias pop8!(T) popType;
+
+    else
+      alias popFail!(T) popType;
+  }
 
   // Pop off and ignore a given amount of values
   void pop(int num)

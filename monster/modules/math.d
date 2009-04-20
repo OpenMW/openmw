@@ -28,6 +28,7 @@ module monster.modules.math;
 
 import monster.monster;
 import std.math;
+import monster.vm.mclass;
 
 const char[] moduleDef =
 "module math;
@@ -85,7 +86,7 @@ void initMathModule()
   static MonsterClass mc;
   if(mc !is null) return;
 
-  mc = new MonsterClass(MC.String, moduleDef, "math");
+  mc = vm.loadString(moduleDef, "math");
 
   mc.bind("sin", { stack.pushDouble(sin(stack.popDouble)); });
   mc.bind("cos", { stack.pushDouble(cos(stack.popDouble)); });

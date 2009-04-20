@@ -34,11 +34,13 @@ import monster.compiler.types;
 import monster.compiler.block;
 import monster.compiler.variables;
 import monster.compiler.states;
+import monster.compiler.operators;
 import monster.compiler.functions;
 import monster.compiler.assembler;
 
 import monster.vm.error;
 import monster.vm.mclass;
+import monster.vm.vm;
 
 alias Statement[] StateArray;
 
@@ -46,24 +48,6 @@ abstract class Statement : Block
 {
   // Generate byte code from this statement
   void compile();
-}
-
-// An expression that works as a statement
-class ExprStatement : Statement
-{
-  Expression exp;
-
-  void parse(ref TokenArray toks)
-    {
-      exp = Expression.identify(toks);
-      reqNext(toks, TT.Semicolon, loc);
-    }
-
-  char[] toString() { return "ExprStatement: " ~ exp.toString(); }
-
-  void resolve(Scope sc) { exp.resolve(sc); }
-
-  void compile() { exp.evalPop(); }
 }
 
 /* Handles:
@@ -110,7 +94,7 @@ class ImportStatement : Statement
       {
         // form: import ImportList;
         getList();
-        reqNext(toks, TT.Semicolon);
+        reqSep(toks);
       }
       else if(isNext(toks, TT.With, loc))
       {
@@ -344,7 +328,7 @@ class GotoStatement : Statement, LabelUser
       if(!isNext(toks, TT.Identifier, labelName))
 	fail("goto expected label identifier", toks);
 
-      reqNext(toks, TT.Semicolon);
+      reqSep(toks);
     }
 
   void resolve(Scope sc)
@@ -400,13 +384,12 @@ class ContinueBreakStatement : Statement
       if(isBreak) errName = "break";
       else errName = "continue";
 
-      if(!isNext(toks, TT.Semicolon))
+      if(!isSep(toks))
         {
           if(!isNext(toks, TT.Identifier, labelName))
             fail(errName ~ " expected ; or label", toks);
 
-          if(!isNext(toks, TT.Semicolon))
-            fail(errName ~ " expected ;", toks);
+          reqSep(toks);
         }
     }
 
@@ -774,9 +757,9 @@ class ForeachStatement : Statement
       if(isClass)
         {
           // Class loops
-
-          clsInfo = global.findClass(className);
+          clsInfo = vm.load(className.str);
           assert(clsInfo !is null);
+          clsInfo.requireScope();
 
           if(index !is null)
             fail("Index not allowed in class iteration");
@@ -977,7 +960,8 @@ class ForeachStatement : Statement
 */
 class ForStatement : Statement
 {
-  Expression init, condition, iter;
+  ExprStatement init, iter;
+  Expression condition;
   VarDeclStatement varDec;
 
   Token labelName;
@@ -993,25 +977,26 @@ class ForStatement : Statement
 
   void parse(ref TokenArray toks)
     {
-      if(!isNext(toks, TT.For, loc))
-	assert(0);
-
-      if(!isNext(toks, TT.LeftParen))
-	fail("for statement expected '('", toks);
+      reqNext(toks, TT.For, loc);
+      reqNext(toks, TT.LeftParen);
 
       // Check if the init as a variable declaration, if so then parse
       // it as a statement (since that takes care of multiple
       // variables as well.)
       if(VarDeclStatement.canParse(toks))
 	{
-	  varDec = new VarDeclStatement;
+	  varDec = new VarDeclStatement(true);
 	  varDec.parse(toks); // This also kills the trailing ;
 	}
       // Is it an empty init statement?
       else if(!isNext(toks, TT.Semicolon))
 	{
 	  // If not, then assume it's an expression
-	  init = Expression.identify(toks);
+	  // statement. (Expression statements also handle
+	  // assignments.)
+          init = new ExprStatement;
+          init.term = false;
+          init.parse(toks);
 	  if(!isNext(toks, TT.Semicolon))
 	    fail("initialization expression " ~ init.toString() ~
 		 " must be followed by a ;", toks);
@@ -1026,13 +1011,13 @@ class ForStatement : Statement
 		 " must be followed by a ;", toks);
 	}
 
-      // Finally the last expression
+      // Finally the last expression statement
       if(!isNext(toks, TT.RightParen))
 	{
-	  iter = Expression.identify(toks);
-
-	  if(!isNext(toks, TT.RightParen))
-	    fail("for statement expected ')'", toks);
+          iter = new ExprStatement;
+          iter.term = false;
+          iter.parse(toks);
+          reqNext(toks, TT.RightParen);
 	}
 
       // Is there a loop label?
@@ -1094,7 +1079,7 @@ class ForStatement : Statement
       // Push any local variables on the stack, or do initialization.
       if(varDec !is null) varDec.compile();
       else if(init !is null)
-        init.evalPop();
+        init.compile();
 
       int outer;
 
@@ -1120,7 +1105,7 @@ class ForStatement : Statement
       cont.compile();
 
       // Do the iteration step, if any
-      if(iter !is null) iter.evalPop();
+      if(iter !is null) iter.compile();
 
       // Push the conditionel expression, or assume it's true if
       // missing.
@@ -1175,8 +1160,7 @@ class StateStatement : Statement, LabelUser
           if(!isNext(toks, TT.Identifier, labelName))
             fail("state label expected after .", toks);
 
-      if(!isNext(toks, TT.Semicolon))
-	fail("state statement expected ;", toks);
+      reqSep(toks);
     }
 
   // Set the label to jump to. This is called from the state
@@ -1348,12 +1332,11 @@ class ReturnStatement : Statement
       if(!isNext(toks, TT.Return, loc))
 	assert(0, "Internal error in ReturnStatement");
 
-      if(!isNext(toks, TT.Semicolon))
+      if(!isSep(toks))
 	{
 	  exp = Expression.identify(toks);
 
-	  if(!isNext(toks, TT.Semicolon))
-	    fail("Return statement expected ;", toks);
+          reqSep(toks);
 	}
     }
 
@@ -1404,13 +1387,7 @@ class ReturnStatement : Statement
 
       exp.resolve(sc);
 
-      try fn.type.typeCast(exp);
-      catch(TypeException)
-	fail(format(
-            "Function '%s' expected return type '%s', not '%s' of type '%s'",
-                    fn.name.str, fn.type.toString(),
-                    exp, exp.type.toString()),
-             exp.getLoc);
+      fn.type.typeCast(exp, "return value");
     }
 
   void compile()

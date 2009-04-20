@@ -29,6 +29,7 @@ import monster.compiler.tokenizer;
 import monster.compiler.expression;
 import monster.compiler.scopes;
 import monster.compiler.statement;
+import monster.compiler.states;
 import monster.compiler.block;
 import monster.compiler.operators;
 import monster.compiler.assembler;
@@ -38,6 +39,7 @@ import std.stdio;
 
 import monster.vm.mclass;
 import monster.vm.error;
+import monster.vm.vm;
 
 enum VarType
   {
@@ -54,7 +56,10 @@ struct Variable
 
   VarScope sc; // Scope that owns this variable
 
-  int number; // Index used in bytecode to reference this variable
+  int number; // Index used in bytecode to reference this variable. It
+              // corresponds to the stack offset for local variables /
+              // parameters, and the data segment offset internally
+              // for the given class for class variables.
 
   bool isRef; // Is this a reference variable?
   bool isConst; // Used for function parameters
@@ -274,10 +279,15 @@ class VarDeclaration : Block
       if(isParam && var.type.isArray())
         allowConst = true;
 
-      // Handle initial value normally
+      // Handle initial value, if present
       if(init !is null)
         {
           init.resolve(sc);
+
+          // For now, var is disallowed for function parameters (will
+          // be enabled again when dynamic types are implemented.)
+          if(var.type.isVar && isParam)
+            fail("var type not allowed in parameters", var.type.loc);
 
           // If 'var' is present, just copy the type of the init value
           if(var.type.isVar)
@@ -285,11 +295,7 @@ class VarDeclaration : Block
           else
             {
               // Convert type, if necessary.
-              try var.type.typeCast(init);
-              catch(TypeException)
-                fail(format("Cannot initialize %s of type %s with %s of type %s",
-                            var.name.str, var.type,
-                            init, init.type), loc);
+              var.type.typeCast(init, var.name.str);
             }
           assert(init.type == var.type);
         }
@@ -372,6 +378,158 @@ class VarDeclaration : Block
       else
         // Default initializer
         var.type.pushInit();
+    }
+}
+
+// Declaration that overrides a default variable value in a parent
+// class. Only used at the class scope. Takes the form
+// varname=expression; Is also used to set the default state.
+class ClassVarSet : Block
+{
+  Token name;
+  Expression value;
+  Variable *var;
+
+  StateStatement stateSet;
+
+  // The class owning the variable. NOT the same as the class we're
+  // defined in.
+  MonsterClass cls;
+
+  static bool canParse(TokenArray toks)
+    {
+      if(isNext(toks, TT.Identifier) &&
+         isNext(toks, TT.Equals))
+        return true;
+      if(isNext(toks, TT.State) &&
+         isNext(toks, TT.Equals))
+        return true;
+
+      return false;
+    }
+
+  bool isState()
+    { return stateSet !is null; }
+
+  void parse(ref TokenArray toks)
+    {
+      if(isNext(toks, TT.Identifier, name))
+        {
+          // Setting normal variable
+          reqNext(toks, TT.Equals);
+          value = Expression.identify(toks);
+          loc = name.loc;
+        }
+      else
+        {
+          // Setting the state - use a StateStatement to handle
+          // everything.
+          assert(toks.length >= 1 && toks[0].type == TT.State);
+          stateSet = new StateStatement;
+          stateSet.parse(toks);
+          loc = stateSet.loc;
+        }
+      reqSep(toks);
+    }
+
+  void resolve(Scope sc)
+    {
+      // Get the class we're defined in
+      assert(sc.isClass);
+      auto lc = sc.getClass();
+      assert(lc !is null);
+
+      // Are we setting the state?
+      if(stateSet !is null)
+        {
+          assert(value is null);
+
+          // Make stateSet find the state and label pointers
+          stateSet.resolve(sc);
+
+          // Tell the class about us
+          StateLabel *lb = null;
+          if(stateSet.label !is null)
+            lb = stateSet.label.lb;
+          lc.setDefaultState(stateSet.stt, lb);
+          return;
+        }
+
+      // We're setting a normal variable
+      assert(stateSet is null);
+
+      // Find the variable
+      assert(lc.parents.length <= 1);
+      var = null;
+
+      // TODO: If we do mi later, create a parentLookup which handles
+      // standard error cases for us.
+      if(lc.parents.length == 1)
+        {
+          auto ln = lc.parents[0].sc.lookup(name);
+          if(ln.isVar)
+            {
+              var = ln.var;
+              cls = ln.sc.getClass();
+            }
+        }
+
+      if(var is null)
+        {
+          // No var found. It's possible that there's a match in our
+          // own class though - that's still an error, but should give
+          // a slightly different error message
+          auto ln = lc.sc.lookup(name);
+          if(ln.isVar)
+            fail("Cannot override variable " ~ name.str ~
+                 " because it was defined in the same class", name.loc);
+
+          fail("No variable named " ~ name.str ~
+               " in parent classes of " ~ lc.name.str, name.loc);
+        }
+
+      assert(var.vtype == VarType.Class);
+      assert(cls !is null);
+      assert(cls.parentOf(lc));
+      value.resolve(sc);
+
+      // Convert the type
+      var.type.typeCast(value, var.name.str);
+
+      if(!value.isCTime)
+        fail("Expression " ~ value.toString ~ " cannot be computed at compile time", value.loc);
+    }
+
+  // Apply this data change to the given data segment
+  void apply(int[] data)
+    {
+      assert(!isState);
+
+      assert(var !is null);
+      assert(cls.dataSize == data.length);
+      assert(var.number >= 0);
+      assert(var.number+var.type.getSize <= data.length);
+
+      // Copy the data
+      int start = var.number;
+      int end = var.number + var.type.getSize;
+      data[start..end] = value.evalCTime();
+    }
+
+  char[] toString()
+    {
+      char[] res;
+      if(cls !is null)
+        res = cls.getName() ~ ".";
+      if(isState)
+        {
+          res ~= "state=" ~ stateSet.stateName.str;
+          if(stateSet.labelName.str != "")
+            res ~= "." ~ stateSet.labelName.str;
+        }
+      else
+        res ~= name.str ~ "=" ~ value.toString;
+      return res;
     }
 }
 
@@ -612,7 +770,7 @@ class VariableExpr : MemberExpression
         {
           // Still no match. Might be an unloaded class however,
           // lookup() doesn't load classes. Try loading it.
-          if(global.findParsed(name.str) is null)
+          if(vm.loadNoFail(name.str) is null)
             // No match at all.
             fail("Undefined identifier "~name.str, name.loc);
 
@@ -813,6 +971,14 @@ class VariableExpr : MemberExpression
 class VarDeclStatement : Statement
 {
   VarDeclaration[] vars;
+  bool reqSemi;
+
+  // Pass 'true' to the constructor to require a semi-colon (used eg
+  // in for loops)
+  this(bool rs=false)
+    {
+      reqSemi = rs;
+    }
 
   static bool canParse(TokenArray toks)
     {
@@ -844,8 +1010,14 @@ class VarDeclStatement : Statement
 	  vars ~= varDec;
 	}
 
+      if(reqSemi)
+        reqNext(toks, TT.Semicolon);
+      else
+        reqSep(toks);
+      /*
       if(!isNext(toks, TT.Semicolon))
 	fail("Declaration statement expected ;", toks);
+      */
     }
 
   char[] toString()

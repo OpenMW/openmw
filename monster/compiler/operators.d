@@ -30,10 +30,13 @@ import monster.compiler.tokenizer;
 import monster.compiler.scopes;
 import monster.compiler.types;
 import monster.compiler.functions;
+import monster.compiler.enums;
 import monster.vm.error;
 import monster.vm.arrays;
 
 import std.stdio;
+import std.string;
+import std.utf;
 
 // Handles - ! ++ --
 class UnaryOperator : Expression
@@ -199,6 +202,8 @@ class ArrayOperator : OperatorExpr
   bool isFill;  // Set during assignment if we're filling the array
                 // with one single value
 
+  int isEnum;  // Used for enum types
+
   // name[], name[index], name[index..index2]
   Expression name, index, index2;
 
@@ -233,6 +238,41 @@ class ArrayOperator : OperatorExpr
       // Copy the type of the name expression
       type = name.type;
 
+      // May be used on enums as well
+      if(type.isEnum ||
+         (type.isMeta && type.getBase.isEnum))
+        {
+          if(type.isMeta)
+            type = type.getBase();
+
+          assert(type.isEnum);
+
+          if(index is null)
+            fail("Missing lookup value", loc);
+
+          if(index2 !is null)
+            fail("Slices are not allowed for enums", loc);
+
+          index.resolve(sc);
+
+          // The indices must be ints
+          Type lng = BasicType.getLong();
+          if(index.type.canCastTo(lng))
+            {
+              lng.typeCast(index, "");
+              isEnum = 1;
+            }
+          else
+            {
+              if(!index.type.isString)
+                fail("Enum lookup value must be a number or a string, not type "
+                     ~index.typeString, loc);
+              isEnum = 2;
+            }
+
+          return;
+        }
+
       // Check that we are indeed an array.
       if(!type.isArray)
 	fail("Expression '" ~ name.toString ~ "' of type '" ~ name.typeString
@@ -252,17 +292,13 @@ class ArrayOperator : OperatorExpr
 
           // The indices must be ints
           Type tpint = BasicType.getInt();
-          try tpint.typeCast(index);
-          catch(TypeException)
-            fail("Cannot convert array index " ~ index.toString ~ " to int");
+          tpint.typeCast(index, "array index");
 
           if(index2 !is null)
             {
               // slice, name[index..index2]
               index2.resolve(isc);
-              try tpint.typeCast(index2);
-              catch(TypeException)
-                fail("Cannot convert array index " ~ index2.toString ~ " to int");
+              tpint.typeCast(index2, "array index");
               isSlice = true;
             }
           else
@@ -276,6 +312,8 @@ class ArrayOperator : OperatorExpr
 
   bool isCTime()
     {
+      if(isEnum) return index.isCTime;
+
       if(isDest) return false;
 
       // a[b] and a[b..c]; is compile time if a, b and c is.
@@ -288,6 +326,32 @@ class ArrayOperator : OperatorExpr
 
   int[] evalCTime()
     {
+      if(isEnum)
+        {
+          assert(index !is null && index2 is null);
+          auto et = cast(EnumType)type;
+          assert(et !is null);
+          EnumEntry *ptr;
+
+          if(isEnum == 1)
+            {
+              long val = *(cast(long*)index.evalCTime().ptr);
+              ptr = et.lookup(val);
+              if(ptr is null)
+                fail("No matching value " ~ .toString(val) ~ " in enum", loc);
+            }
+          else
+            {
+              assert(isEnum == 2);
+              AIndex ai = cast(AIndex)index.evalCTime()[0];
+              char[] str = toUTF8(arrays.getRef(ai).carr);
+              ptr = et.lookup(str);
+              if(ptr is null)
+                fail("No matching value " ~ str ~ " in enum", loc);
+            }
+          return (&(ptr.index))[0..1];
+        }
+
       // Get the array index
       int[] arr = name.evalCTime();
       assert(arr.length == 1);
@@ -331,6 +395,23 @@ class ArrayOperator : OperatorExpr
 
   void evalAsm()
     {
+      if(isEnum)
+        {
+          assert(index !is null && index2 is null);
+          assert(type.isEnum);
+          assert((isEnum == 1 && index.type.isLong) ||
+                 (isEnum == 2 && index.type.isString));
+
+          // All we need is the index value
+          index.eval();
+
+          if(isEnum == 1)
+            tasm.enumValToIndex(type.tIndex);
+          else
+            tasm.enumNameToIndex(type.tIndex);
+          return;
+        }
+
       // Push the array index first
       name.eval();
 
@@ -438,6 +519,9 @@ class DotOperator : OperatorExpr
       owner.resolve(sc);
 
       Type ot = owner.type;
+      assert(ot !is null);
+
+      ot.getMemberScope();
 
       if(ot.getMemberScope() is null)
         fail(owner.toString() ~ " of type " ~ owner.typeString()
@@ -500,190 +584,91 @@ class DotOperator : OperatorExpr
     }
 }
 
-// Assignment operators, =, +=, *=, /=, %=, ~=
-class AssignOperator : BinaryOperator
-{
-  bool catElem; // For concatinations (~=), true when the right hand
-                // side is a single element rather than an array.
-
-  this(Expression left, Expression right, TT opType, Floc loc)
-    { super(left, right, opType, loc); }
-
-  void resolve(Scope sc)
-    {
-      left.resolve(sc);
-      right.resolve(sc);
-
-      // The final type is always from the left expression
-      type = left.type;
-
-      // Check that we are allowed assignment
-      if(!left.isLValue)
-	fail("Cannot assign to expression '" ~ left.toString ~ "'", loc);
-
-      // Operators other than = and ~= are only allowed for numerical
-      // types.
-      if(opType != TT.Equals && opType != TT.CatEq && !type.isNumerical)
-	fail("Assignment " ~tokenList[opType] ~
-	     " not allowed for non-numerical type " ~ typeString(), loc);
-
-      // Is the left hand expression a sliced array?
-      auto arr = cast(ArrayOperator) left;
-      if(arr !is null && arr.isSlice)
-        {
-          assert(type.isArray);
-
-          if(opType == TT.CatEq)
-            fail("Cannot use ~= on array slice " ~ left.toString, loc);
-
-          // For array slices on the right hand side, the left hand
-          // type must macth exactly, without implisit casting. For
-          // example, the following is not allowed, even though 3 can
-          // implicitly be cast to char[]:
-          // char[] a;
-          // a[] = 3; // Error
-
-          // We are, on the other hand, allowed to assign a single
-          // value to a slice, eg:
-          // int[] i = new int[5];
-          // i[] = 3; // Set all elements to 3.
-          // In this case we ARE allowed to typecast, though.
-
-          if(right.type == left.type) return;
-
-          Type base = type.getBase();
-
-          try base.typeCast(right);
-          catch(TypeException)
-            fail("Cannot assign " ~ right.toString ~ " of type " ~ right.typeString
-                 ~ " to slice " ~ left.toString ~ " of type "
-                 ~ left.typeString, loc);
-
-          // Inform arr.store() that we're filling in a single element
-          arr.isFill = true;
-
-          return;
-        }
-
-      // Handle concatination ~=
-      if(opType == TT.CatEq)
-        {
-          if(!left.type.isArray)
-            fail("Opertaor ~= can only be used on arrays, not " ~ left.toString ~
-                 " of type " ~ left.typeString, left.loc);
-
-          // Array with array
-          if(left.type == right.type) catElem = false;
-          // Array with element
-          else if(right.type.canCastOrEqual(left.type.getBase()))
-            {
-              left.type.getBase().typeCast(right);
-              catElem = true;
-            }
-          else
-            fail("Cannot use operator ~= on types " ~ left.typeString ~
-                 " and " ~ right.typeString, left.loc);
-          return;
-        }
-
-      // Cast the right side to the left type, if possible.
-      try type.typeCast(right);
-      catch(TypeException)
-	fail("Assignment " ~tokenList[opType] ~ ": cannot implicitly cast " ~
-	     right.typeString() ~ " to " ~ left.typeString(), loc);
-
-      assert(left.type == right.type);
-    }
-
+// KILLME
+/*
   void evalAsm()
     {
-      int s = right.type.getSize;
-
-      // += -= etc are implemented without adding new
-      // instructions. This might change later. The "downside" to this
-      // approach is that the left side is evaluated two times, which
-      // might not matter much for lvalues anyway, but it does give
-      // more M-code vs native code, and thus more overhead. I'm not
-      // sure if a function call can ever be an lvalue or if lvalues
-      // can otherwise have side effects in the future. If that
-      // becomes the case, then this implementation will have to
-      // change. Right now, the expression i += 3 will be exactly
-      // equivalent to i = i + 3.
-
-      if(opType != TT.Equals)
-	{
-	  // Get the values of both sides
-	  left.eval();
-	  right.eval();
-
-          setLine();
-
-          // Concatination
-          if(opType == TT.CatEq)
-            {
-              assert(type.isArray);
-
-              if(catElem)
-                // Append one element onto the array
-                tasm.catArrayRight(s);
-              else
-                // Concatinate two arrays.
-                tasm.catArray();
-            }
-
-	  // Perform the arithmetic operation. This puts the result of
-	  // the addition on the stack. The evalDest() and mov() below
-	  // will store it in the right place.
-	  else if(type.isNumerical)
-	    {
-	      if(opType == TT.PlusEq) tasm.add(type);
-	      else if(opType == TT.MinusEq) tasm.sub(type);
-	      else if(opType == TT.MultEq) tasm.mul(type);
-	      else if(opType == TT.DivEq) tasm.div(type);
-	      else if(opType == TT.IDivEq) tasm.idiv(type);
-	      else if(opType == TT.RemEq) tasm.divrem(type);
-	      else fail("Unhandled assignment operator", loc);
-	    }
-	  else assert(0, "Type not handled");
-	}
-      else right.eval();
-
-      // Store the value on the stack into the left expression.
-      setLine();
-      left.store();
-      /*
-      left.evalDest();
-
-      setLine();
-
-
-      // Left hand value has been modified, notify it.
-      left.postWrite();
-      */
     }
 }
+// */
 
 // Boolean operators: ==, !=, <, >, <=, >=, &&, ||, =i=, =I=, !=i=, !=I=
 class BooleanOperator : BinaryOperator
 {
+  bool leftIs(bool t)
+    {
+      if(!left.isCTime) return false;
+      int[] val = left.evalCTime();
+      assert(val.length == 1);
+      if(val[0]) return t;
+      else return !t;
+    }
+  bool rightIs(bool t)
+    {
+      if(!right.isCTime) return false;
+      int[] val = right.evalCTime();
+      assert(val.length == 1);
+      if(val[0]) return t;
+      else return !t;
+    }
+
+  bool ctimeval;
+
+  bool isMeta = false;
+
+ public:
+
   this(Expression left, Expression right, TT opType, Floc loc)
     { super(left, right, opType, loc); }
+
+ override:
 
   void resolve(Scope sc)
     {
       left.resolve(sc);
       right.resolve(sc);
 
+      type = BasicType.getBool;
+
+      // Check if one or both types are meta-types first
+      if(left.type.isMeta || right.type.isMeta)
+        {
+          isMeta = true;
+
+          if(opType != TT.IsEqual && opType != TT.NotEqual)
+            fail("Cannot use operator " ~ tokenList[opType] ~ " on types", loc);
+
+          assert(isCTime());
+
+          // This means we have one of the following cases:
+          // i == int
+          // int == int
+
+          // In these cases, we compare the types only, and ignore the
+          // values of any expressions (they are not computed.)
+
+          // Get base types
+          Type lb = left.type;
+          Type rb = right.type;
+          if(lb.isMeta) lb = lb.getBase();
+          if(rb.isMeta) rb = rb.getBase();
+
+          // Compare the base types and store the result
+          ctimeval = (lb == rb) != 0;
+
+          if(opType == TT.NotEqual)
+            ctimeval = !ctimeval;
+          else
+            assert(opType == TT.IsEqual);
+
+          return;
+        }
+
       // Cast to a common type
-      try Type.castCommon(left, right);
-      catch(TypeException)
-	fail("Boolean operator " ~tokenList[opType] ~ " not allowed for types " ~
-	     left.typeString() ~ " and " ~ right.typeString(), loc);
+      Type.castCommon(left, right);
 
       // At this point the types must match
       assert(left.type == right.type);
-
-      type = BasicType.getBool;
 
       // TODO: We might allow < and > for strings at some point.
       if(opType == TT.Less || opType == TT.More || opType == TT.LessEq ||
@@ -724,6 +709,10 @@ class BooleanOperator : BinaryOperator
   // static initialization.
   bool isCTime()
     {
+      // If both types are meta-types, then we might be ctime.
+      if(isMeta)
+        return (opType == TT.IsEqual || opType == TT.NotEqual);
+
       // Only compute && and || for now, add the rest later.
       if(!(opType == TT.And || opType == TT.Or)) return false;
 
@@ -744,34 +733,15 @@ class BooleanOperator : BinaryOperator
       return false;
     }
 
-  private
-    {
-      bool leftIs(bool t)
-        {
-          if(!left.isCTime) return false;
-          int[] val = left.evalCTime();
-          assert(val.length == 1);
-          if(val[0]) return t;
-          else return !t;
-        }
-      bool rightIs(bool t)
-        {
-          if(!right.isCTime) return false;
-          int[] val = right.evalCTime();
-          assert(val.length == 1);
-          if(val[0]) return t;
-          else return !t;
-        }
-
-      bool ctimeval;
-    }
-
   int[] evalCTime()
     {
       if(opType == TT.And)
         ctimeval = !(leftIs(false) || rightIs(false));
       else if(opType == TT.Or)
         ctimeval = (leftIs(true) || rightIs(true));
+      else
+        // For meta types, ctimeval is already set
+        assert(isMeta);
 
       return (cast(int*)&ctimeval)[0..1];
     }
@@ -939,7 +909,7 @@ class BinaryOperator : OperatorExpr
           // Element with array?
           if(right.type.isArray && left.type.canCastOrEqual(right.type.getBase()))
             {
-              right.type.getBase().typeCast(left);
+              right.type.getBase().typeCast(left, "");
               type = right.type;
               cat = CatElem.Left;
               return;
@@ -948,7 +918,7 @@ class BinaryOperator : OperatorExpr
           // Array with element?
           if(left.type.isArray && right.type.canCastOrEqual(left.type.getBase()))
             {
-              left.type.getBase().typeCast(right);
+              left.type.getBase().typeCast(right, "");
               type = left.type;
               cat = CatElem.Right;
               return;
@@ -963,14 +933,11 @@ class BinaryOperator : OperatorExpr
       // case correctly.)
 
       // Cast to a common type
-      bool doFail = false;
-      try Type.castCommon(left, right);
-      catch(TypeException)
-        doFail = true;
+      Type.castCommon(left, right);
 
       type = right.type;
 
-      if(!type.isNumerical || doFail)
+      if(!type.isNumerical)
 	fail("Operator " ~tokenList[opType] ~ " not allowed for types " ~
 	     left.typeString() ~ " and " ~ right.typeString(), loc);
 

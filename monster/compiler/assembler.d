@@ -381,10 +381,11 @@ struct Assembler
     addi(func);
   }
 
-  void newObj(int i)
+  void newObj(int clsIndex, int params)
   {
     cmd(BC.New);
-    addi(i);
+    addi(clsIndex);
+    addi(params);
   }
 
   void cloneObj() { cmd(BC.Clone); }
@@ -721,8 +722,8 @@ struct Assembler
 
   void mov(int s)
   {
-    if(s < 3) cmd2(BC.StoreRet, BC.StoreRet8, s);
-    else cmdmult(BC.StoreRet, BC.StoreRetMult, s);
+    if(s < 3) cmd2(BC.Store, BC.Store8, s);
+    else cmdmult(BC.Store, BC.StoreMult, s);
   }
 
   // Set object state to the given index
@@ -732,6 +733,38 @@ struct Assembler
     addi(st);
     addi(label);
     addi(cls);
+  }
+
+  // Get the given field of an enum. If field is -1, get the "value"
+  // field.
+  void getEnumValue(int tIndex, int field=-1)
+  {
+    assert(Type.typeList[tIndex].isEnum,
+           "given type index is not an enum");
+    if(field == -1)
+      cmd(BC.EnumValue);
+    else
+      {
+        cmd(BC.EnumField);
+        addi(field);
+      }
+    addi(tIndex);
+  }
+
+  void enumValToIndex(int tIndex)
+  {
+    assert(Type.typeList[tIndex].isEnum,
+           "given type index is not an enum");
+    cmd(BC.EnumValToIndex);
+    addi(tIndex);
+  }
+
+  void enumNameToIndex(int tIndex)
+  {
+    assert(Type.typeList[tIndex].isEnum,
+           "given type index is not an enum");
+    cmd(BC.EnumNameToIndex);
+    addi(tIndex);
   }
 
   // Fetch an element from an array

@@ -29,6 +29,7 @@ import std.uni;
 import std.c.string;
 
 import monster.util.freelist;
+import monster.options;
 
 import monster.compiler.bytecode;
 import monster.compiler.linespec;
@@ -46,11 +47,14 @@ import monster.vm.arrays;
 import monster.vm.iterators;
 import monster.vm.error;
 import monster.vm.fstack;
+import monster.vm.vm;
 
 import std.math : floor;
 
 // Used for array copy below. It handles overlapping data for us.
 extern(C) void* memmove(void *dest, void *src, size_t n);
+
+//debug=traceOps;
 
 import monster.util.list;
 alias _lstNode!(Thread) _tmp1;
@@ -111,6 +115,8 @@ struct Thread
   // Get a new thread. It starts in the 'transient' list.
   static Thread* getNew()
   {
+    vm.init();
+
     auto cn = scheduler.transient.getNew();
     cn.list = &scheduler.transient;
 
@@ -121,6 +127,14 @@ struct Thread
         sstack = null;
       }
 
+    return cn;
+  }
+
+  // Get a paused thread
+  static Thread *getPaused()
+  {
+    auto cn = getNew();
+    cn.moveTo(&scheduler.paused);
     return cn;
   }
 
@@ -320,7 +334,8 @@ struct Thread
            "Thread already has a stack");
     assert(isRunning,
            "cannot put a non-running thread in the background");
-    assert(!fstack.hasNatives);
+    assert(!fstack.hasNatives,
+           "cannot put thread in the background, there are native functions on the stack");
 
     // We're no longer the current thread
     cthread = null;
@@ -391,6 +406,7 @@ struct Thread
   // Move this node to another list.
   void moveTo(NodeList *to)
   {
+    if(list is to) return;
     assert(list !is null);
     list.moveTo(*to, this);
     list = to;
@@ -500,13 +516,9 @@ struct Thread
   // Execute instructions in the current function stack entry. This is
   // the main workhorse of the VM, the "byte-code CPU". The function
   // is called (possibly recursively) whenever a byte-code function is
-  // called, and returns when the function exits.
+  // called, and returns when the function exits. Function calls
   void execute()
   {
-    // The maximum amount of instructions we execute before assuming
-    // an infinite loop.
-    static const long limit = 10000000;
-
     assert(!isDead);
     assert(fstack.cur !is null,
 	   "Thread.execute called but there is no code on the function stack.");
@@ -595,26 +607,37 @@ struct Thread
     int val, val2;
     long lval;
 
-    // Disable this for now.
-    // or at least a compile time option.
-    //for(long i=0;i<limit;i++)
+    static if(enableExecLimit)
+      long count = 0;
+
     for(;;)
       {
+        static if(enableExecLimit)
+          {
+            count++;
+
+            if(count > execLimit)
+              fail(format("Execution unterminated after %s instructions. ",
+                          execLimit, " Possibly an infinite loop, aborting."));
+          }
+
 	ubyte opCode = code.get();
 
-        //writefln("stack=", stack.getPos);
-        //writefln("exec(%s): %s", code.getLine, bcToString[opCode]);
+        debug(traceOps)
+          {
+            writefln("exec: %s", bcToString[opCode]);
+              writefln("stack=", stack.getPos);
+          }
 
 	switch(opCode)
 	  {
-
 	  case BC.Exit:
             // Step down once on the function stack
             fstack.pop();
 
+            // Leave execute() when the next level down is not a
+            // script function
             if(!fstack.isNormal())
-              // The current function isn't a script function, so
-              // exit.
               return;
 
             assert(!shouldExit);
@@ -700,15 +723,101 @@ struct Thread
             if(shouldExit) return;
 	    break;
 
+          case BC.EnumValue:
+            {
+              auto t = cast(EnumType)Type.typeList[code.getInt()];
+              assert(t !is null, "invalid type index");
+              val = stack.popInt(); // Get enum index
+              if(val-- == 0)
+                fail("'Null' enum encountered, cannot get value (type " ~ t.name ~ ")");
+              assert(val >= 0 && val < t.entries.length);
+              stack.pushLong(t.entries[val].value);
+            }
+            break;
+
+          case BC.EnumField:
+            {
+              val2 = code.getInt(); // Field index
+              auto t = cast(EnumType)Type.typeList[code.getInt()];
+              assert(t !is null, "invalid type index");
+              assert(val2 >= 0 && val2 < t.fields.length);
+              val = stack.popInt(); // Get enum index
+              if(val-- == 0)
+                fail("'Null' enum encountered, cannot get field '" ~ t.fields[val2].name.str ~ "' (type " ~ t.name ~ ")");
+              assert(val >= 0 && val < t.entries.length);
+              assert(t.entries[val].fields.length == t.fields.length);
+              stack.pushInts(t.entries[val].fields[val2]);
+            }
+            break;
+
+          case BC.EnumValToIndex:
+            {
+              auto t = cast(EnumType)Type.typeList[code.getInt()];
+              assert(t !is null, "invalid type index");
+              lval = stack.popLong(); // The value
+              auto eptr = t.lookup(lval);
+              if(eptr is null)
+                fail("No matching value " ~ .toString(lval) ~ " in enum");
+              stack.pushInt(eptr.index);
+            }
+            break;
+
+          case BC.EnumNameToIndex:
+            {
+              auto t = cast(EnumType)Type.typeList[code.getInt()];
+              assert(t !is null, "invalid type index");
+              auto str = stack.popString8(); // The value
+              auto eptr = t.lookup(str);
+              if(eptr is null)
+                fail("No matching value " ~ str ~ " in enum");
+              stack.pushInt(eptr.index);
+            }
+            break;
+
 	  case BC.New:
-	    // Create a new object. Look up the class index in the
-	    // global class table, and create an object from it.
-	    stack.pushObject(global.getClass(cast(CIndex)code.getInt())
-                             .createObject());
+            {
+              // Create a new object. Look up the class index in the
+              // global class table, and create an object from it. Do
+              // not call constructors yet.
+              auto mo = global.getClass(cast(CIndex)code.getInt())
+                              .createObject(false);
+
+              // Set up the variable parameters
+              val = code.getInt();
+              for(;val>0;val--)
+                {
+                  // Get the variable pointer
+                  int cIndex = stack.popInt();
+                  int vIndex = stack.popInt();
+                  int size = stack.popInt();
+                  int[] dest = mo.getDataArray(cIndex, vIndex, size);
+
+                  // Copy the value from the stack into place
+                  dest[] = stack.popInts(size);
+                }
+
+              // Now we can call the constructors
+              mo.cls.callConstOn(mo, true);
+
+              // Push the resulting object
+              stack.pushObject(mo);
+            }
 	    break;
 
           case BC.Clone:
-            stack.pushObject(stack.popObject().clone());
+            {
+              auto mo = stack.popObject();
+
+              // Create a clone but don't call constructors
+              mo = mo.cls.createClone(mo, false);
+
+              // Call them manually, and make sure the natNew bindings
+              // are invoked
+              mo.cls.callConstOn(mo, true);
+
+              // Push the resulting object
+              stack.pushObject(mo);
+            }
             break;
 
 	  case BC.Jump:
@@ -782,23 +891,23 @@ struct Thread
 
 	  case BC.Dup: stack.pushInt(*stack.getInt(0)); break;
 
-	  case BC.StoreRet:
+	  case BC.Store:
 	    // Get the pointer off the stack, and convert it to a real
 	    // pointer.
 	    ptr = popPtr();
-	    // Read the value and store it, but leave it in the stack
-	    *ptr = *stack.getInt(0);
+	    // Pop the value and store it
+	    *ptr = stack.popInt();
 	    break;
 
-	  case BC.StoreRet8:
+	  case BC.Store8:
             ptr = popPtr();
-            *(cast(long*)ptr) = *stack.getLong(1);
+            *(cast(long*)ptr) = stack.popLong();
             break;
 
-          case BC.StoreRetMult:
+          case BC.StoreMult:
             val = code.getInt(); // Size
             ptr = popPtr();
-            ptr[0..val] = stack.getInts(val-1, val);
+            ptr[0..val] = stack.popInts(val);
             break;
 
             // Int / uint operations
@@ -1224,8 +1333,6 @@ struct Thread
             if(arf.iarr.length != iarr.length)
               fail(format("Array length mismatch (%s != %s)",
                           arf.iarr.length, iarr.length));
-            // Push back the destination
-            stack.pushArray(arf);
 
             // Use memmove, since it will handle overlapping data
             memmove(arf.iarr.ptr, iarr.ptr, iarr.length*4);
@@ -1298,8 +1405,6 @@ struct Thread
             assert(arf.iarr.length % val == 0);
             for(int i=0; i<arf.iarr.length; i+=val)
               arf.iarr[i..i+val] = iarr[];
-
-            stack.pushArray(arf);
             break;
 
           case BC.CatArray:
@@ -1411,8 +1516,7 @@ struct Thread
                           bcToString[opCode], opCode));
 	  }
       }
-    fail(format("Execution unterminated after %s instructions.", limit,
-		" Possibly an infinite loop, aborting."));
+    assert(0);
   }
 }
 

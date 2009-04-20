@@ -58,6 +58,9 @@ import std.stdio;
 import std.stream;
 import std.string;
 
+// TODO/FIXME: Make tango compatible before release
+import std.traits;
+
 // One problem with these split compiler / vm classes is that we
 // likely end up with data (or at least pointers) we don't need, and a
 // messy interface. The problem with splitting is that we duplicate
@@ -94,6 +97,7 @@ struct Function
   Type type; // Return type
   FuncType ftype; // Function type
   Variable* params[]; // List of parameters
+  int[][] defaults; // Default parameter values (if specified, null otherwise)
   int index; // Unique function identifier within its class
 
   int paramSize;
@@ -125,6 +129,108 @@ struct Function
   // True if the last parameter is a vararg parameter, meaning that
   // this is a function that takes a variable number of arguments.
   bool isVararg() { return params.length && params[$-1].isVararg; }
+
+  // Bind the given function template parameter to this Function. The
+  // function is assumed to have compatible parameter and return
+  // types, and the values are pushed and popped of the Monster stack
+  // automatically.
+  void bindT(alias func)()
+  {
+    assert(isNative, "cannot bind to non-native function " ~ name.str);
+
+    alias ParameterTypeTuple!(func) P;
+    alias ReturnType!(func) R;
+
+    assert(P.length == params.length, format("function %s has %s parameters, but binding function has %s", name.str, params.length, P.length));
+
+    // Check parameter types
+    foreach(int i, p; P)
+      assert(params[i].type.isDType(typeid(p)), format(
+        "binding %s: type mismatch in parameter %s, %s != %s",
+        name.str, i, params[i].type, typeid(p)));
+
+    // Check the return type
+    static if(is(R == void))
+      {
+        assert(type.isVoid, format("binding %s: expected to return type %s",
+                                   name.str, type));
+      }
+    else
+      {
+        assert(!type.isVoid, format(
+          "binding %s: function does not have return value %s",
+          name.str, typeid(R)));
+
+        assert(type.isDType(typeid(R)), format(
+          "binding %s: mismatch in return type, %s != %s",
+          name.str, type, typeid(R)));
+      }
+
+    // This is the actual function that is bound, and called each time
+    // the native function is invoked.
+    void delegate() dg =
+      {
+        P parr;
+
+        foreach_reverse(int i, PT; P)
+        {
+          parr[i] = stack.popType!(PT)();
+        }
+
+        static if(is(R == void))
+        {
+          func(parr);
+        }
+        else
+        {
+          R r = func(parr);
+          stack.pushType!(R)(r);
+        }
+      };
+
+    // Store the function
+    ftype = FuncType.NativeDDel;
+    natFunc_dg = dg;
+  }
+
+  template callT(T)
+  {
+    T callT(A...)(MonsterObject *mo, A a)
+      {
+        // Check parameter types
+        foreach(int i, p; A)
+          assert(params[i].type.isDType(typeid(p)), format(
+            "calling %s: type mismatch in parameter %s, %s != %s",
+            name.str, i, params[i].type, typeid(p)));
+
+        // Check the return type
+        static if(is(T == void))
+          {
+            assert(type.isVoid, format("calling %s: expected to return type %s",
+                                       name.str, type));
+          }
+        else
+          {
+            assert(!type.isVoid, format(
+              "calling %s: function does not have return value %s",
+              name.str, typeid(T)));
+
+            assert(type.isDType(typeid(T)), format(
+              "calling %s: mismatch in return type, %s != %s",
+              name.str, type, typeid(T)));
+          }
+
+        // Push all the values
+        foreach(i, AT; A)
+          stack.pushType!(AT)(a[i]);
+
+        call(mo);
+
+        static if(!is(T == void))
+          // Get the return value
+          return stack.popType!(T)();
+      }
+  }
 
   // This is used to call the given function from native code. Note
   // that this is used internally for native functions, but not for
@@ -227,18 +333,22 @@ struct Function
   // 'mc'. If no class is given, use an empty internal class.
   void compile(char[] file, MonsterClass mc = null)
   {
+    vm.init();
+
     // Check if the file exists
-    if(!vm.findFile(file))
+    if(!vm.vfs.has(file))
       fail("File not found: " ~ file);
 
     // Create the stream and pass it on
-    auto bf = new BufferedFile(file);
+    auto bf = vm.vfs.open(file);
     compile(file, bf, mc);
     delete bf;
   }
 
   void compile(char[] file, Stream str, MonsterClass mc = null)
   {
+    vm.init();
+
     // Get the BOM and tokenize the stream
     auto ef = new EndianStream(str);
     int bom = ef.readBOM();
@@ -249,6 +359,8 @@ struct Function
 
   void compile(char[] file, ref TokenArray tokens, MonsterClass mc = null)
   {
+    vm.init();
+
     assert(name.str == "",
            "Function " ~ name.str ~ " has already been set up");
 
@@ -256,20 +368,9 @@ struct Function
     if(MonsterClass.canParse(tokens))
       fail("Cannot run " ~ file ~ " - it is a class or module.");
 
-    // Set mc to an empty class if no class is given
+    // Set mc to the empty class if no class is given
     if(mc is null)
-      {
-        if(int_mc is null)
-          {
-            assert(int_mo is null);
-
-            int_mc = new MonsterClass(MC.String, int_class);
-            int_mo = int_mc.createObject;
-          }
-        assert(int_mo !is null);
-
-        mc = int_mc;
-      }
+      mc = getIntMC();
 
     auto fd = new FuncDeclaration;
     // Parse and comile the function
@@ -283,15 +384,87 @@ struct Function
     delete fd;
   }
 
+  static MonsterClass getIntMC()
+  {
+    if(int_mc is null)
+      {
+        assert(int_mo is null);
+        int_mc = vm.loadString(int_class);
+        int_mo = int_mc.createObject;
+      }
+    assert(int_mo !is null);
+    return int_mc;
+  }
+
+  static MonsterObject *getIntMO()
+  {
+    getIntMC();
+    return int_mo;
+  }
+
   // Returns the function name, on the form Class.func()
   char[] toString()
   { return owner.name.str ~ "." ~ name.str ~ "()"; }
 
   private:
 
+  // Empty class / object used internally
   static const char[] int_class = "class _ScriptFile_;";
   static MonsterClass int_mc;
   static MonsterObject *int_mo;
+}
+
+// A specialized function declaration that handles class constructors
+class Constructor : FuncDeclaration
+{
+  static bool canParse(TokenArray toks)
+    { return toks.isNext(TT.New); }
+
+  void parse(ref TokenArray toks)
+    {
+      // Create a Function struct.
+      fn = new Function;
+
+      // Default function type is normal
+      fn.ftype = FuncType.Normal;
+
+      // No return value
+      fn.type = BasicType.getVoid;
+
+      // Parse
+      toks.reqNext(TT.New, fn.name);
+      loc = fn.name.loc;
+      code = new CodeBlock;
+      code.parse(toks);
+    }
+
+  char[] toString()
+    {
+      char[] res = "Constructor:\n";
+      assert(code !is null);
+      res ~= code.toString();
+      return res;
+    }
+
+  // Resolve the constructor
+  void resolve(Scope last)
+    {
+      assert(fn.type !is null);
+
+      // Create a local scope for this function
+      sc = new FuncScope(last, fn);
+
+      // Set the owner class
+      auto cls = sc.getClass();
+      fn.owner = cls;
+
+      // Make sure we're assigned to the class
+      assert(cls.scptConst is this);
+
+      // Resolve the function body
+      assert(code !is null);
+      code.resolve(sc);
+    }
 }
 
 // Responsible for parsing, analysing and compiling functions.
@@ -405,7 +578,7 @@ class FuncDeclaration : Statement
           // In any case, parse the rest of the declaration
           parseParams(toks);
 
-          isNext(toks, TT.Semicolon);
+          reqSep(toks);
         }
       else
         {
@@ -420,7 +593,7 @@ class FuncDeclaration : Statement
 
   void parse(ref TokenArray toks)
     {
-      // Create a Function struct. Will change later.
+      // Create a Function struct.
       fn = new Function;
 
       // Default function type is normal
@@ -444,8 +617,10 @@ class FuncDeclaration : Statement
 
       if(fn.isAbstract || fn.isNative || fn.isIdle)
 	{
+          reqSep(toks);
 	  // Check that the function declaration ends with a ; rather
 	  // than a code block.
+          /*
 	  if(!isNext(toks, TT.Semicolon))
 	  {
 	    if(fn.isAbstract)
@@ -456,6 +631,7 @@ class FuncDeclaration : Statement
 	      fail("Idle function declaration expected ;", toks);
 	    else assert(0);
 	  }
+          */
 	}
       else
 	{
@@ -568,7 +744,7 @@ class FuncDeclaration : Statement
       fn.type.resolve(last);
 
       if(fn.type.isVar)
-        fail("var not allowed here", fn.type.loc);
+        fail("var not allowed as function return type", fn.type.loc);
 
       if(fn.type.isReplacer)
         fn.type = fn.type.getBase();
@@ -581,7 +757,7 @@ class FuncDeclaration : Statement
       fn.paramSize = 0;
       foreach(vd; paramList)
         {
-          // Resolve the variable first, to make sure we get the rigth
+          // Resolve the variable first, to make sure we get the right
           // size
           vd.resolveParam(sc);
           assert(!vd.var.type.isReplacer);
@@ -674,6 +850,24 @@ class FuncDeclaration : Statement
             fail("function " ~ fn.name.str ~
                  " doesn't override anything", fn.name.loc);
         }
+
+      // Get the values of parameters which have default values
+      // assigned
+      fn.defaults.length = paramList.length;
+      foreach(i, dec; paramList)
+        {
+          if(dec.init !is null)
+            {
+              if(fn.isVararg)
+                fail("Vararg functions cannot have default parameter values", fn.name.loc);
+
+              // Get the value and store it. Fails if the expression
+              // is not computable at compile time.
+              fn.defaults[i] = dec.getCTimeValue();
+              assert(fn.defaults[i].length > 0);
+            }
+        }
+
     }
 
   // Resolve the interior of the function
@@ -685,6 +879,7 @@ class FuncDeclaration : Statement
       foreach(p; fn.params)
         p.type.validate(fn.name.loc);
 
+      // Resolve the function body
       if(code !is null)
 	code.resolve(sc);
     }
@@ -716,11 +911,23 @@ class FuncDeclaration : Statement
     }
 }
 
+struct NamedParam
+{
+  Token name;
+  Expression value;
+}
+
 // Expression representing a function call
 class FunctionCallExpr : MemberExpression
 {
   Token name;
-  ExprArray params;
+  ExprArray params;   // Normal (non-named) parameters
+  NamedParam[] named; // Named parameters
+
+  ExprArray coverage; // Expressions sorted in the same order as the
+                      // function parameter list. Null expressions
+                      // means we must use the default value. Never
+                      // used for vararg functions.
   Function* fd;
 
   bool isVararg;
@@ -734,28 +941,50 @@ class FunctionCallExpr : MemberExpression
       return isNext(toks, TT.Identifier) && isNext(toks, TT.LeftParen);
     }
 
-  // Read a parameter list (a,b,...)
-  static ExprArray getParams(ref TokenArray toks)
+  // Read a function parameter list (a,b,v1=c,v2=d,...)
+  static void getParams(ref TokenArray toks,
+                        out ExprArray parms,
+                        out NamedParam[] named)
     {
-      ExprArray res;
-      if(!isNext(toks, TT.LeftParen)) return res;
+      parms = null;
+      named = null;
 
-      Expression exp;
+      if(!isNext(toks, TT.LeftParen)) return;
 
       // No parameters?
-      if(isNext(toks, TT.RightParen)) return res;
+      if(isNext(toks, TT.RightParen)) return;
 
-      // Read the first parameter
-      res ~= Expression.identify(toks);
+      // Read the comma-separated list of parameters
+      do
+        {
+          if(toks.length < 2)
+            fail("Unexpected end of stream");
 
-      // Are there more?
+          // Named paramter?
+          if(toks[1].type == TT.Equals)
+            {
+              NamedParam np;
+
+              reqNext(toks, TT.Identifier, np.name);
+              reqNext(toks, TT.Equals);
+              np.value = Expression.identify(toks);
+
+              named ~= np;
+            }
+          else
+            {
+              // Normal parameter
+              if(named.length)
+                fail("Cannot use non-named parameters after a named one",
+                     toks[0].loc);
+
+              parms ~= Expression.identify(toks);
+            }
+        }
       while(isNext(toks, TT.Comma))
-        res ~= Expression.identify(toks);
 
       if(!isNext(toks, TT.RightParen))
 	fail("Parameter list expected ')'", toks);
-
-      return res;
     }
 
   void parse(ref TokenArray toks)
@@ -763,7 +992,7 @@ class FunctionCallExpr : MemberExpression
       name = next(toks);
       loc = name.loc;
 
-      params = getParams(toks);
+      getParams(toks, params, named);
     }
 
   char[] toString()
@@ -804,10 +1033,9 @@ class FunctionCallExpr : MemberExpression
             fail("Undefined function "~name.str, name.loc);
 	}
 
+      isVararg = fd.isVararg;
       type = fd.type;
       assert(type !is null);
-
-      isVararg = fd.isVararg;
 
       if(isVararg)
         {
@@ -817,33 +1045,15 @@ class FunctionCallExpr : MemberExpression
             fail(format("%s() expected at least %s parameters, got %s",
                         name.str, fd.params.length-1, params.length),
                  name.loc);
-        }
-      else
-        // Non-vararg functions must match function parameter number
-        // exactly
-        if(params.length != fd.params.length)
-          fail(format("%s() expected %s parameters, got %s",
-                      name.str, fd.params.length, params.length),
-               name.loc);
 
-      // Check parameter types
-      foreach(int i, par; fd.params)
-	{
-          // Handle varargs below
-          if(isVararg && i == fd.params.length-1)
-            break;
+          // Check parameter types except for the vararg parameter
+          foreach(int i, par; fd.params[0..$-1])
+            {
+              params[i].resolve(sc);
+              par.type.typeCast(params[i], "parameter " ~ par.name.str);
+            }
 
-	  params[i].resolve(sc);
-          try par.type.typeCast(params[i]);
-	  catch(TypeException)
-	    fail(format("%s() expected parameter %s to be type %s, not type %s",
-                        name.str, i+1, par.type.toString, params[i].typeString),
-                 name.loc);
-	}
-
-      // Loop through remaining arguments
-      if(isVararg)
-        {
+          // Loop through remaining arguments
           int start = fd.params.length-1;
 
           assert(fd.params[start].type.isArray);
@@ -853,23 +1063,85 @@ class FunctionCallExpr : MemberExpression
             {
               par.resolve(sc);
 
-              // If the first and last vararg parameter is of the
+              // If the first and only vararg parameter is of the
               // array type itself, then we are sending an actual
               // array. Treat it like a normal parameter.
               if(i == 0 && start == params.length-1 &&
                  par.type == fd.params[start].type)
                 {
                   isVararg = false;
+                  coverage = params;
                   break;
                 }
 
               // Otherwise, cast the type to the array base type.
-              try base.typeCast(par);
-              catch(TypeException)
-                fail(format("Cannot convert %s of type %s to %s", par.toString,
-                            par.typeString, base.toString), par.loc);
+              base.typeCast(par, "array base type");
             }
+          return;
         }
+
+      // Non-vararg case. Non-vararg functions must cover at least all
+      // the non-optional function parameters.
+
+      // Make the coverage list of all the parameters.
+      int parNum = fd.params.length;
+      coverage = new Expression[parNum];
+
+      // Mark all the parameters which are present
+      foreach(i,p; params)
+        {
+          assert(coverage[i] is null);
+          assert(p !is null);
+          coverage[i] = p;
+        }
+
+      // Add named parameters to the list
+      foreach(p; named)
+        {
+          // Look up the named parameter
+          int index = -1;
+          foreach(i, fp; fd.params)
+            if(fp.name.str == p.name.str)
+              {
+                index = i;
+                break;
+              }
+          if(index == -1)
+            fail(format("Function %s() has no paramter named %s",
+                        name.str, p.name.str),
+                 p.name.loc);
+
+          assert(index<parNum);
+
+          // Check that the parameter isn't already set
+          if(coverage[index] !is null)
+            fail("Parameter " ~ p.name.str ~ " set multiple times ",
+                 p.name.loc);
+
+          // Finally, set the parameter
+          coverage[index] = p.value;
+          assert(coverage[index] !is null);
+        }
+
+      // Check that all non-optional parameters are present
+      assert(fd.defaults.length == coverage.length);
+      foreach(i, cv; coverage)
+        if(cv is null && fd.defaults[i].length == 0)
+          fail(format("Non-optional parameter %s is missing in call to %s()",
+                      fd.params[i].name.str, name.str),
+               name.loc);
+
+      // Check parameter types
+      foreach(int i, ref cov; coverage)
+	{
+          auto par = fd.params[i];
+
+          // Skip missing parameters
+          if(cov is null) continue;
+
+	  cov.resolve(sc);
+          par.type.typeCast(cov, "parameter " ~ par.name.str);
+	}
     }
 
   // Used in cases where the parameters need to be evaluated
@@ -877,26 +1149,34 @@ class FunctionCallExpr : MemberExpression
   // in cases like obj.func(expr); Here expr is evaluated first, then
   // obj, and then finally the far function call. This is because the
   // far function call needs to read 'obj' off the top of the stack.
+  bool pdone;
   void evalParams()
     {
       assert(pdone == false);
+      pdone = true;
 
-      foreach(i, ex; params)
-        {
-          ex.eval();
-
-          // Convert 'const' parameters to actual constant references
-          if(i < fd.params.length-1) // Skip the last parameter (in
-                                     // case of vararg functions)
-            if(fd.params[i].isConst)
-              {
-                assert(fd.params[i].type.isArray);
-                tasm.makeArrayConst();
-              }
-        }
-
+      // Again, let's handle the vararg case separately
       if(isVararg)
         {
+          assert(coverage is null);
+
+          // Eval the parameters
+          foreach(i, ex; params)
+            {
+              ex.eval();
+
+              // The rest only applies to non-vararg parameters
+              if(i >= fd.params.length-1)
+                continue;
+
+              // Convert 'const' parameters to actual constant references
+              if(fd.params[i].isConst)
+                {
+                  assert(fd.params[i].type.isArray);
+                  tasm.makeArrayConst();
+                }
+            }
+
           // Compute the length of the vararg array.
           int len = params.length - fd.params.length + 1;
 
@@ -904,22 +1184,47 @@ class FunctionCallExpr : MemberExpression
           // (0 is always null).
           if(len == 0) tasm.push(0);
           else
-            // Converte the pushed values to an array index
-            tasm.popToArray(len, params[$-1].type.getSize());
+            {
+              // Convert the pushed values to an array index
+              tasm.popToArray(len, params[$-1].type.getSize());
+
+              // Convert the vararg array to 'const' if needed
+              if(fd.params[$-1].isConst)
+                {
+                  assert(fd.params[$-1].type.isArray);
+                  tasm.makeArrayConst();
+                }
+            }
+          return;
         }
 
-      // Handle the last parameter after everything has been
-      // pushed. This will work for both normal and vararg parameters.
-      if(fd.params.length != 0 && fd.params[$-1].isConst)
+      // Non-vararg case
+      assert(!isVararg);
+      assert(coverage.length == fd.params.length);
+      foreach(i, ex; coverage)
         {
-          assert(fd.params[$-1].type.isArray);
-          tasm.makeArrayConst();
+          if(ex !is null)
+            {
+              assert(ex.type == fd.params[i].type);
+              ex.eval();
+            }
+          else
+            {
+              // No param specified, use default value
+              assert(fd.defaults[i].length ==
+                     fd.params[i].type.getSize);
+              assert(fd.params[i].type.getSize > 0);
+              tasm.pushArray(fd.defaults[i]);
+            }
+
+          // Convert 'const' parameters to actual constant references
+          if(fd.params[i].isConst)
+            {
+              assert(fd.params[i].type.isArray);
+              tasm.makeArrayConst();
+            }
         }
-
-      pdone = true;
     }
-
-  bool pdone;
 
   void evalAsm()
     {
