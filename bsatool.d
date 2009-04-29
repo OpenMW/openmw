@@ -53,6 +53,26 @@ void scanAllNifs(BSAFile f)
   writefln("Total NIF/KF size in this archive: ", totSize);
 }
 
+void dumpAllFiles(BSAFile f)
+{
+  File o = new File();
+
+  auto files = f.getFiles();
+
+  foreach(int ind, file; files)
+    {
+      void[] s = cast(ubyte[]) f.findSlice(ind);
+      char[] name = file.name;
+      assert(s !is null);
+      name = getWinBaseName(name);
+
+      o.open(name, FileMode.OutNew);
+      o.writeExact(s.ptr, s.length);
+      o.close();
+      writefln("Wrote '%s'", name);
+    }
+}
+
 void listFiles(BSAFile f)
 {
   BSAFile.FileStruct[] files = f.getFiles();
@@ -69,6 +89,7 @@ int main(char[][] args)
       writefln("%s", msg);
       writefln("Format: bsatool archive.bsa [-x filename] [-l] [-n]");
       writefln("  -x filename     extract file");
+      writefln("  -xa             extract everything");
       writefln("  -l              list all files");
       writefln("  -n              scan through all nifs");
       return 1;
@@ -79,11 +100,12 @@ int main(char[][] args)
   initializeMemoryRegions();
 
   char[] filename, ext;
-  bool list, nifs, extract;
+  bool list, nifs, extract, dumpAll;
   foreach(char[] a; args[1..$])
     if(a == "-l") list = true;
     else if(a == "-n") nifs = true;
     else if(a == "-x") extract = true;
+    else if(a == "-xa") dumpAll = true;
     else if(extract && ext == "") ext = a;
     else if(filename == "") filename = a;
     else return help("Unknown option " ~ a);
@@ -94,6 +116,7 @@ int main(char[][] args)
 
   if(list) listFiles(f);
   if(nifs) scanAllNifs(f);
+  if(dumpAll) dumpAllFiles(f);
   if(extract)
     {
       if(ext == "") return help("No file to extract");

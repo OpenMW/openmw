@@ -127,6 +127,8 @@ void main(char[][] args)
       return;
     }
 
+  writefln("At: ", __FILE__, ":", __LINE__);
+
   initializeMemoryRegions();
   initMonsterScripts();
 
@@ -135,6 +137,8 @@ void main(char[][] args)
   importSavegame("data/Perm1hal0000.ess");
   return;
   */
+
+  writefln("At: ", __FILE__, ":", __LINE__);
 
   config.initialize(resetKeys);
   scope(exit) config.writeConfig();
@@ -164,8 +168,12 @@ void main(char[][] args)
       return;
     }
 
+  writefln("At: ", __FILE__, ":", __LINE__);
+
   if(!noSound) initializeSound();
   resources.initResources();
+
+  writefln("At: ", __FILE__, ":", __LINE__);
 
   // Load all ESM and ESP files
   loadTESFiles(config.gameFiles);
