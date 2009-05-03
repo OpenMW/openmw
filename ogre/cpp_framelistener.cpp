@@ -21,6 +21,7 @@
 
  */
 
+#include <stdint.h>
 
 // Callbacks to D code.
 

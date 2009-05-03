@@ -98,7 +98,7 @@ extern "C" void ogre_initWindow()
   std::cout << "ogre_initWindow()\n";
 
   // Initialize OGRE.
-  mWindow = mRoot->initialise(true);
+  mWindow = mRoot->initialise(true, "OpenMW", "");
 
   // Set up the input system
 
