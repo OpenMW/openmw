@@ -84,6 +84,13 @@ abstract class Block
       return isNext(toks, symbol);
     }
 
+  // Returns true if the next token is on a new line. Does not remove
+  // any tokens.
+  static bool isNewline(ref TokenArray toks)
+    // TT.EMPTY never occurs in the stream, so it's safe to check for
+    // it.
+    { return isSep(toks, TT.EMPTY); }
+
   // Require either a line break or a given character (default ;)
   static void reqSep(ref TokenArray toks, TT symbol = TT.Semicolon)
     {

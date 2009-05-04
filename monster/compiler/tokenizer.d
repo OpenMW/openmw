@@ -53,6 +53,20 @@ bool validFirstIdentChar(char c)
   return false;
 }
 
+bool isValidIdent(char[] iname)
+{
+  if(iname.length == 0)
+    return false;
+
+  if(!validFirstIdentChar(iname[0]))
+    return false;
+
+  foreach(char c; iname)
+    if(!validIdentChar(c)) return false;
+
+  return true;
+}
+
 bool numericalChar(char c)
 {
   return c >= '0' && c <= '9';
@@ -365,7 +379,7 @@ class Tokenizer
       this.inf = inf;
       this.fname = fname;
 
-      empty.type = TT.EMPTY;
+      this();
     }
 
   // This is used for single-line mode, such as in a console.
@@ -695,6 +709,8 @@ class Tokenizer
         }
 
       Token tt = getNextFromLine();
+
+      // Skip empty lines, don't return them into the token list.
       if(tt.type == TT.EMPTY)
         goto restart;
 

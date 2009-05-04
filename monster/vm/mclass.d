@@ -113,6 +113,10 @@ final class MonsterClass
   Type classType; // Type for class references to this class (not
                   // implemented yet)
 
+  // Pointer to the C++ wrapper class, if any. Could be used for other
+  // wrapper languages at well, but only one at a time.
+  MClass cppClassPtr;
+
  private:
   // List of objects of this class. Includes objects of all subclasses
   // as well.
@@ -150,11 +154,15 @@ final class MonsterClass
   // already.
   void requireCompile() { if(!isCompiled) compileBody(); }
 
-  // Constructor that only exists to keep people from using it. It's
-  // much safer to use the vm.load functions, since these check if the
-  // class already exists.
-  this(int internal = 0) { assert(internal == -14,
-                                  "Don't create MonsterClasses directly, use vm.load()"); }
+  // Create a class belonging to the given package scope. Do not call
+  // this yourself, use vm.load* to load classes.
+  this(PackageScope psc = null)
+    {
+      assert(psc !is null,
+             "Don't create MonsterClasses directly, use vm.load()");
+
+      pack = psc;
+    }
 
   /*******************************************************
    *                                                     *
@@ -727,7 +735,7 @@ final class MonsterClass
 
       // Insert ourselves into the global scope. This will also
       // resolve forward references to this class, if any.
-      global.insertClass(this);
+      pack.insertClass(this);
 
       // Get the parent classes, if any
       if(isNext(tokens, TT.Colon))
@@ -1005,11 +1013,11 @@ final class MonsterClass
       assert(tree[treeIndex] is this);
 
       // The parent scope is the scope of the parent class, or the
-      // global scope if there is no parent.
+      // package scope if there is no parent.
       Scope parSc;
       if(parents.length != 0) parSc = parents[0].sc;
       // TODO: Should only be allowed for Object
-      else parSc = global;
+      else parSc = pack;
 
       assert(parSc !is null);
 
@@ -1189,9 +1197,12 @@ final class MonsterClass
       assert(totSize == dataSize, "Data size mismatch in scope");
     }
 
+  bool compiling = false;
   void compileBody()
     {
       assert(!isCompiled, getName() ~ " is already compiled");
+      assert(!compiling, "compileBody called recursively");
+      compiling = true;
  
       // Resolve the class body if it's not already done
       if(!isResolved) resolveBody();
@@ -1297,5 +1308,6 @@ final class MonsterClass
           assert(singObj is null);
           singObj = createObject();
         }
+      compiling = false;
     }
 }

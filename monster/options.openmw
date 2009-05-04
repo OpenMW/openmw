@@ -60,8 +60,16 @@ bool ciStringOps = true;
 // Skip lines beginning with a hash character '#'
 bool skipHashes = true;
 
+// Do we allow implicit downcasting of classes? Downcasting means
+// casting from a parent class to a child class. The actual object
+// type is checked at runtime. In any case you can always downcast
+// explicitly, using ClassName(obj).
+bool implicitDowncast = true;
 
-
+// Allow implicit conversion from float to int (and similar
+// conversions). If false, you must use explicit casting,
+// ie. int(value)
+bool implicitTruncate = false;
 
 
 /*********************************************************

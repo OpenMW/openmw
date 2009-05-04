@@ -58,8 +58,8 @@ import std.stdio;
 import std.stream;
 import std.string;
 
-// TODO/FIXME: Make tango compatible before release
-import std.traits;
+version(Tango) import tango.core.Traits;
+else import std.traits;
 
 // One problem with these split compiler / vm classes is that we
 // likely end up with data (or at least pointers) we don't need, and a
@@ -138,8 +138,16 @@ struct Function
   {
     assert(isNative, "cannot bind to non-native function " ~ name.str);
 
-    alias ParameterTypeTuple!(func) P;
-    alias ReturnType!(func) R;
+    version(Tango)
+      {
+        alias ParameterTypleOf!(func) P;
+        alias ReturnTypeOf!(func) R;
+      }
+    else
+      {
+        alias ParameterTypeTuple!(func) P;
+        alias ReturnType!(func) R;
+      }
 
     assert(P.length == params.length, format("function %s has %s parameters, but binding function has %s", name.str, params.length, P.length));
 
@@ -918,9 +926,9 @@ struct NamedParam
 }
 
 // Expression representing a function call
-class FunctionCallExpr : MemberExpression
+class FunctionCallExpr : Expression
 {
-  Token name;
+  Expression fname;   // Function name or pointer value
   ExprArray params;   // Normal (non-named) parameters
   NamedParam[] named; // Named parameters
 
@@ -930,26 +938,20 @@ class FunctionCallExpr : MemberExpression
                       // used for vararg functions.
   Function* fd;
 
+  bool isCast;        // If true, this is an explicit typecast, not a
+                      // function call.
+
   bool isVararg;
 
-  // Used to simulate a member for imported variables
-  DotOperator dotImport;
-  bool recurse = true;
-
-  static bool canParse(TokenArray toks)
-    {
-      return isNext(toks, TT.Identifier) && isNext(toks, TT.LeftParen);
-    }
-
-  // Read a function parameter list (a,b,v1=c,v2=d,...)
+  // Read a function parameter list (a,b,v1=c,v2=d,...). The function
+  // expects that you have already removed the initial left paren '('
+  // token.
   static void getParams(ref TokenArray toks,
                         out ExprArray parms,
                         out NamedParam[] named)
     {
       parms = null;
       named = null;
-
-      if(!isNext(toks, TT.LeftParen)) return;
 
       // No parameters?
       if(isNext(toks, TT.RightParen)) return;
@@ -987,51 +989,80 @@ class FunctionCallExpr : MemberExpression
 	fail("Parameter list expected ')'", toks);
     }
 
-  void parse(ref TokenArray toks)
+  
+  this(Expression func, ref TokenArray toks)
     {
-      name = next(toks);
-      loc = name.loc;
+      assert(func !is null);
+      fname = func;
+      loc = fname.loc;
 
+      // Parse the parameter list
       getParams(toks, params, named);
     }
 
+  /* Might be used for D-like implicit function calling, eg. someFunc;
+     or (obj.prop)
+  this(Expression func) {}
+
+  We might also allow a special free-form function call syntax, eg.
+  func 1 2 3
+
+  where parens and commas are optional, and the list is terminated by
+  isSep (newline or ;). This is useful mostly for console mode.
+  */
+
+  void parse(ref TokenArray toks) { assert(0); }
+
   char[] toString()
     {
-      char[] result = name.str ~ "(";
+      char[] result = fname.toString ~ "(";
       foreach(b; params)
-	result ~= b.toString ~" ";
+	result ~= b.toString ~", ";
+      foreach(b; named)
+        result ~= b.name.str ~ "=" ~ b.value.toString ~ ", ";
       return result ~ ")";
     }
 
+  char[] name() { assert(fname !is null); return fname.toString(); }
+
   void resolve(Scope sc)
     {
-      if(isMember) // Are we called as a member?
-	{
-          assert(leftScope !is null); 
-	  auto l = leftScope.lookup(name);
-          fd = l.func;
-	  if(!l.isFunc)
-            fail(name.str ~ " is not a member function of "
-                 ~ leftScope.toString, loc);
-	}
-      else
-	{
-          assert(leftScope is null);
-	  auto l = sc.lookupImport(name);
+      // Resolve the function lookup first
+      fname.resolve(sc);
 
-          // For imported functions, we have to do some funky magic
-          if(l.isImport)
-            {
-              assert(l.imphold !is null);
-              dotImport = new DotOperator(l.imphold, this, loc);
-              dotImport.resolve(sc);
-              return;
-            }
+      // Is the 'function' really a type name?
+      if(fname.type.isMeta)
+        {
+          // If so, it's a type cast! Get the type we're casting to.
+          type = fname.type.getBase();
+          assert(type !is null);
 
-          fd = l.func;
-	  if(!l.isFunc)
-            fail("Undefined function "~name.str, name.loc);
-	}
+          // Only one (non-named) parameter is allowed
+          if(params.length != 1 || named.length != 0)
+            fail("Invalid parameter list to type cast", loc);
+
+          isCast = true;
+
+          // Resolve the expression we're converting
+          params[0].resolve(sc);
+
+          // Cast it
+          type.typeCastExplicit(params[0]);
+
+          return;
+        }
+
+      // TODO: Do typecasting here. That will take care of polysemous
+      // types later as well.
+      if(!fname.type.isFunc)
+        fail(format("Expression '%s' of type %s is not a function",
+                    fname, fname.typeString), loc);
+
+      // In the future, we will probably use a global function
+      // index. Right now, just get the function from the type.
+      auto ft = cast(FunctionType)fname.type;
+      assert(ft !is null);
+      fd = ft.func;
 
       isVararg = fd.isVararg;
       type = fd.type;
@@ -1043,8 +1074,8 @@ class FunctionCallExpr : MemberExpression
           // arguments, including zero.
           if(params.length < fd.params.length-1)
             fail(format("%s() expected at least %s parameters, got %s",
-                        name.str, fd.params.length-1, params.length),
-                 name.loc);
+                        name, fd.params.length-1, params.length),
+                 loc);
 
           // Check parameter types except for the vararg parameter
           foreach(int i, par; fd.params[0..$-1])
@@ -1108,7 +1139,7 @@ class FunctionCallExpr : MemberExpression
               }
           if(index == -1)
             fail(format("Function %s() has no paramter named %s",
-                        name.str, p.name.str),
+                        name, p.name.str),
                  p.name.loc);
 
           assert(index<parNum);
@@ -1128,8 +1159,8 @@ class FunctionCallExpr : MemberExpression
       foreach(i, cv; coverage)
         if(cv is null && fd.defaults[i].length == 0)
           fail(format("Non-optional parameter %s is missing in call to %s()",
-                      fd.params[i].name.str, name.str),
-               name.loc);
+                      fd.params[i].name.str, name),
+               loc);
 
       // Check parameter types
       foreach(int i, ref cov; coverage)
@@ -1144,17 +1175,9 @@ class FunctionCallExpr : MemberExpression
 	}
     }
 
-  // Used in cases where the parameters need to be evaluated
-  // separately from the function call. This is done by DotOperator,
-  // in cases like obj.func(expr); Here expr is evaluated first, then
-  // obj, and then finally the far function call. This is because the
-  // far function call needs to read 'obj' off the top of the stack.
-  bool pdone;
+  // Evaluate the parameters
   void evalParams()
     {
-      assert(pdone == false);
-      pdone = true;
-
       // Again, let's handle the vararg case separately
       if(isVararg)
         {
@@ -1228,15 +1251,30 @@ class FunctionCallExpr : MemberExpression
 
   void evalAsm()
     {
-      if(dotImport !is null && recurse)
+      if(isCast)
         {
-          recurse = false;
-          dotImport.evalAsm();
-          recurse = true;
+          // Just evaluate the expression. CastExpression takes care
+          // of everything automatically.
+
+          assert(params.length == 1);
+          assert(params[0] !is null);
+          params[0].eval();
+
           return;
         }
 
-      if(!pdone) evalParams();
+      // Push parameters first
+      evalParams();
+
+      // Then push the function expression, to get the object (if any)
+      // and later to get the function pointer value well.
+      assert(fname.type.isFunc);
+      fname.eval();
+
+      auto ft = cast(FunctionType)fname.type;
+      assert(ft !is null);
+      bool isMember = ft.isMember;
+
       setLine();
       assert(fd.owner !is null);
 
@@ -1244,8 +1282,5 @@ class FunctionCallExpr : MemberExpression
         tasm.callIdle(fd.index, fd.owner.getTreeIndex(), isMember);
       else
         tasm.callFunc(fd.index, fd.owner.getTreeIndex(), isMember);
-
-      // Reset pdone incase the expression is evaluated again
-      pdone = false;
     }
 }

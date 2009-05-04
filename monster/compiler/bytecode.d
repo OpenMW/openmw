@@ -244,20 +244,35 @@ enum BC
 
     CastI2L,            // int to long (signed)
 
+    CastD2F,            // double to float
+    CastF2D,            // float to double
+
     CastI2F,            // int to float
     CastU2F,            // uint to float
     CastL2F,            // long to float
     CastUL2F,           // ulong to float
-    CastD2F,            // double to float
 
     CastI2D,            // int to double
     CastU2D,            // uint to double
     CastL2D,            // long to double
     CastUL2D,           // ulong to double
-    CastF2D,            // float to double
+
+    CastF2I,            // float to int
+    CastF2U,            // float to uint
+    CastF2L,            // float to long
+    CastF2UL,           // float to ulong
+
+    CastD2I,            // double to int
+    CastD2U,            // double to uint
+    CastD2L,            // double to long
+    CastD2UL,           // double to ulong
 
     CastT2S,            // cast any type to string. Takes the type
                         // index (int) as a parameter
+
+    DownCast,           // Takes a global class index (int). Checks if
+                        // the object on the stack is an instance of
+                        // the given class.
 
     FetchElem,          // Get an element from an array. Pops the
                         // index, then the array reference, then
@@ -611,7 +626,16 @@ char[][] bcToString =
  BC.CastL2D: "CastL2D",
  BC.CastUL2D: "CastUL2D",
  BC.CastF2D: "CastF2D",
+ BC.CastF2I: "CastF2I",
+ BC.CastF2U: "CastF2U",
+ BC.CastF2L: "CastF2L",
+ BC.CastF2UL: "CastF2UL",
+ BC.CastD2I: "CastD2I",
+ BC.CastD2U: "CastD2U",
+ BC.CastD2L: "CastD2L",
+ BC.CastD2UL: "CastD2UL",
  BC.CastT2S: "CastT2S",
+ BC.DownCast: "DownCast",
  BC.PopToArray: "PopToArray",
  BC.NewArray: "NewArray",
  BC.CopyArray: "CopyArray",

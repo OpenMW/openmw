@@ -95,7 +95,7 @@ class Console
   char[] cmt_prompt = "(comment) ";
 
  public:
-  bool allowVar = false;
+  bool allowVar = true;
 
   this(MonsterObject *ob = null)
     {
@@ -134,9 +134,12 @@ class Console
 
   void putln(char[] str) { put(str, true); }
 
-  Statement parse(TokenArray toks)
+  Statement[] parse(TokenArray toks)
     {
       Statement b = null;
+      Statement[] res;
+
+    repeat:
 
       if(VarDeclStatement.canParse(toks))
 	{
@@ -156,7 +159,13 @@ class Console
       else b = new ExprStatement;
 
       b.parse(toks);
-      return b;
+      res ~= b;
+
+      // Are there more tokens waiting for us?
+      if(toks.length > 0)
+        goto repeat;
+
+      return res;
     }
 
   int sumParen()
@@ -208,6 +217,8 @@ class Console
       // Restore the previous thread (if any)
       if(store !is null)
         store.foreground();
+
+      store = null;
     }
 
   // Push the input into the compiler and run it
@@ -260,38 +271,9 @@ class Console
 
       // Phase II, parse
       TokenArray toks = tokArr.arrayCopy();
-      Statement st = parse(toks);
+      Statement[] sts = parse(toks);
       delete toks;
-
-      // Phase III, resolve
-      st.resolve(sc);
-
-      // Phase IV, compile
-      tasm.newFunc();
-
-      // Is it an expression?
-      auto es = cast(ExprStatement)st;
-      if(es !is null)
-        {
-          // Yes. But is the type usable?
-          if(es.left.type.canCastTo(ArrayType.getString())
-             && es.right is null)
-            {
-              // Yup. Get the type, and cast the expression to string.
-              scope auto ce = new CastExpression(es.left, ArrayType.getString());
-              ce.eval();
-            }
-          else es = null;
-        }
-
-      // No expression is being used, so compile the statement
-      if(es is null)
-        st.compile();
-
-      fn.bcode = tasm.assemble(fn.lines);
-      fn.bcode ~= cast(ubyte)BC.Exit; // Non-optimal hack
-
-      // Phase V, call the function
+      assert(sts.length >= 1);
 
       // First, background the current thread (if any) and bring up
       // our own.
@@ -305,40 +287,81 @@ class Console
       // will see that it's empty and kill the thread upon exit
       trd.fstack.pushExt("Console");
 
-      fn.call(obj);
-
-      trd.fstack.pop();
-
-      // Finally, get the expression result, if any, and print it
-      if(es !is null)
-        putln(stack.popString8());
-
-      // In the case of new variable declarations, we have to make
-      // sure they are accessible to any subsequent calls to the
-      // function. Since the stack frame gets set at each call, we
-      // have to access the variables outside the function frame,
-      // ie. the same way we treat function parameters. We do this by
-      // giving the variables negative indices.
-      auto vs = cast(VarDeclStatement)st;
-      if(vs !is null)
+      // The rest must be performed separately for each statement on
+      // the line.
+      foreach(st; sts)
         {
-          // Add the new vars to the list
-          foreach(v; vs.vars)
-            {
-              varList ~= v.var;
+          // Phase III, resolve
+          st.resolve(sc);
 
-              // Add the size as well
-              varSize += v.var.type.getSize;
+          // Phase IV, compile
+          tasm.newFunc();
+
+          // Is it an expression?
+          auto es = cast(ExprStatement)st;
+          if(es !is null)
+            {
+              // Yes. But is the type usable?
+              if(es.left.type.canCastTo(ArrayType.getString())
+                 && es.right is null)
+                {
+                  // Yup. Get the type, and cast the expression to string.
+                  scope auto ce = new
+                    CastExpression(es.left, ArrayType.getString());
+                  ce.eval();
+                }
+              else es = null;
             }
 
-          // Recalculate all the indices backwards from zero
-          int place = 0;
-          foreach_reverse(v; varList)
+          // No expression is being used, so compile the statement
+          if(es is null)
+            st.compile();
+
+          // Gather all the statements into one function and get the
+          // bytecode.
+          fn.bcode = tasm.assemble(fn.lines);
+          fn.bcode ~= cast(ubyte)BC.Exit; // Non-optimal hack
+
+          // Phase V, call the function
+          fn.call(obj);
+
+          // Finally, get the expression result, if any, and print it.
+          if(es !is null)
+            putln(stack.popString8());
+
+          // In the case of new a variable declaration, we have to
+          // make sure they are accessible to any subsequent calls to
+          // the function. Since the stack frame gets set at each
+          // call, we have to access the variables outside the
+          // function frame, ie. the same way we treat function
+          // parameters. We do this by giving the variables negative
+          // indices.
+          auto vs = cast(VarDeclStatement)st;
+          if(vs !is null)
             {
-              place -= v.type.getSize;
-              v.number = place;
+              // Add the new vars to the list
+              foreach(v; vs.vars)
+                {
+                  varList ~= v.var;
+
+                  // Add the size as well
+                  varSize += v.var.type.getSize;
+                }
+
+              // Recalculate all the indices backwards from zero
+              int place = 0;
+              foreach_reverse(v; varList)
+                {
+                  place -= v.type.getSize;
+                  v.number = place;
+                }
+
+              // Reset the scope stack counters
+              sc.reset();
             }
         }
+
+      trd.fstack.pop();
 
       // Reset the console to a usable state
       reset();

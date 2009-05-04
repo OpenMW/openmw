@@ -125,14 +125,24 @@ class ImportStatement : Statement
           if(type.isReplacer)
             type = type.getBase();
 
-          if(!type.isObject)
-            fail("Can only import from classes", type.loc);
+          if(type.isObject)
+            {
+              auto t = cast(ObjectType)type;
+              assert(t !is null);
+              mc = t.getClass(type.loc);
 
-          auto t = cast(ObjectType)type;
-          assert(t !is null);
-          mc = t.getClass(type.loc);
+              sc.registerImport(new ClassImpHolder(mc));
+            }
+          else if(type.isPackage)
+            {
+              auto t = cast(PackageType)type;
+              assert(t !is null);
+              auto psc = t.sc;
 
-          sc.registerImport(new ImportHolder(mc));
+              sc.registerImport(new PackageImpHolder(psc));
+            }
+          else
+            fail("Can only import from classes and packages", type.loc);
         }
 
       // Resolve the statement if present

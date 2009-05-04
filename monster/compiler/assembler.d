@@ -904,6 +904,29 @@ struct Assembler
 
   void castLongToInt() { pop(); }
 
+  void castFloatToInt(Type fr, Type to)
+  {
+    assert(fr.isFloating);
+    assert(to.isIntegral);
+    if(fr.isFloat)
+      {
+        if(to.isInt) cmd(BC.CastF2I);
+        else if(to.isUint) cmd(BC.CastF2U);
+        else if(to.isLong) cmd(BC.CastF2L);
+        else if(to.isUlong) cmd(BC.CastF2UL);
+        else assert(0);
+      }
+    else
+      {
+        assert(fr.isDouble);
+        if(to.isInt) cmd(BC.CastD2I);
+        else if(to.isUint) cmd(BC.CastD2U);
+        else if(to.isLong) cmd(BC.CastD2L);
+        else if(to.isUlong) cmd(BC.CastD2UL);
+        else assert(0);
+      }
+  }
+
   void castIntToFloat(Type fr, Type to)
   {
     assert(fr.isIntegral);
@@ -941,6 +964,15 @@ struct Assembler
     addi(tindex);
   }
   
+  // Cast an object to a given class. Takes a global class index. The
+  // object on the stack isn't changed in any way, but the VM checks
+  // if a cast is valid.
+  void downCast(int cindex)
+  {
+    cmd(BC.DownCast);
+    addi(cindex);
+  }
+
   // Boolean operators
   void isEqual(int s) { cmdmult(BC.IsEqual, BC.IsEqualMulti, s); }
 

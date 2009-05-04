@@ -231,8 +231,8 @@ void getHeight()
 
 void setupGUIScripts()
 {
-  vm.addPath("mscripts/gui/");
-  vm.addPath("mscripts/gui/module/");
+  vm.addPath("mscripts/guiscripts/");
+  vm.addPath("mscripts/guiscripts/module/");
   gmc = vm.load("gui", "gui.mn");
   wid_mc = vm.load("Widget", "widget.mn");
   /*

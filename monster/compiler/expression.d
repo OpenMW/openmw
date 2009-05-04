@@ -65,9 +65,9 @@ abstract class Expression : Block
       Expression b;
       Floc ln;
 
-      // These are allowed for members (eg. hello().to.you())
-      if(FunctionCallExpr.canParse(toks)) b = new FunctionCallExpr;
-      else if(VariableExpr.canParse(toks)) b = new VariableExpr;
+      // Only identifiers (variables, properties, etc) are allowed as
+      // members.
+      if(MemberExpr.canParse(toks)) b = new MemberExpr;
       else if(isMember) fail(toks[0].str ~ " can not be a member", toks[0].loc);
 
       // The rest are not allowed for members (eg. con.(a+b) is not
@@ -145,6 +145,13 @@ abstract class Expression : Block
                         fail("Array expected closing ]", toks);
                     }
                 }
+              // Any expression followed by a left parenthesis is
+              // interpreted as a function call. We do not allow it to
+              // be on the next line however, as this could be
+              // gramatically ambiguous.
+              else if(!isNewline(toks) && isNext(toks,TT.LeftParen))
+                b = new FunctionCallExpr(b, toks);
+
               else break;
             }
           // Finally, check for a single ++ or -- following an expression.
@@ -477,10 +484,11 @@ class NewExpression : Expression
 
       // Parameters?
       ExprArray exps;
-      FunctionCallExpr.getParams(toks, exps, params);
+      if(isNext(toks, TT.LeftParen))
+        FunctionCallExpr.getParams(toks, exps, params);
 
       if(exps.length != 0)
-        fail("'new' can only take names parameters", loc);
+        fail("'new' can only take named parameters", loc);
     }
 
   char[] toString()
@@ -997,29 +1005,6 @@ class LiteralExpr : Expression
     }
 }
 
-// Expressions that can be members of other types. Can be variables,
-// types or functions.
-abstract class MemberExpression : Expression
-{
-  Scope leftScope;
-  bool isMember = false;
-  Type ownerType;
-
-  void resolveMember(Scope sc, Type ownerT)
-    {
-      assert(ownerT !is null);
-      leftScope = ownerT.getMemberScope();
-      ownerType = ownerT;
-      isMember = true;
-
-      resolve(sc);
-    }
-
-  // Static members. These can be evaluated without needing the owner
-  // pushed onto the stack.
-  bool isStatic() { return false; }
-}
-
 // Expression that handles conversion from one type to another. This
 // is used for implisit casts (eg. when using ints and floats
 // together) and in the future it will also parse explisit casts. It
@@ -1040,13 +1025,13 @@ class CastExpression : Expression
       type = newType;
 
       assert(type !is null);
-      assert(orig.type.canCastTo(type));
+      assert(orig.type.canCastTo(type) || orig.type.canCastToExplicit(type));
     }
 
-  // These are only needed for explisit casts, and will be used when
-  // "cast(Type)" expressions are implemented (if ever)
-  void parse(ref TokenArray) { assert(0, "Cannot parse casts yet"); }
-  void resolve(Scope sc) { assert(0, "Cannot resolve casts yet"); }
+  // These would only be used if typecasts got their own unique
+  // syntax, eg. "cast(Type) expression" like in D.
+  void parse(ref TokenArray) { assert(0, "Cannot parse casts"); }
+  void resolve(Scope sc) { assert(0, "Cannot resolve casts"); }
 
   bool isCTime()
     {
@@ -1055,6 +1040,8 @@ class CastExpression : Expression
 
   int[] evalCTime()
     {
+      assert(isCTime());
+
       // Let the type do the conversion
       int[] res = type.typeCastCTime(orig, "");
 
@@ -1080,7 +1067,52 @@ class CastExpression : Expression
 // import x;
 // y = 3; // refers to x.y
 // y is resolved as x.y, where the owner (x) is an import holder.
-class ImportHolder : Expression
+abstract class ImportHolder : Expression
+{
+  // All lookups in this import is done through this function.
+  abstract ScopeLookup lookup(Token name, bool autoLoad=false);
+
+  // Get a short name (for error messages)
+  abstract char[] getName();
+
+ override:
+
+  // Override these
+  char[] toString() {assert(0);}
+  void evalAsm() {}
+
+  // These aren't needed
+ final:
+  void parse(ref TokenArray) { assert(0); }
+  void resolve(Scope sc) {}
+  void evalDest() { assert(0); }
+}
+
+// Import holder for packages
+class PackageImpHolder : ImportHolder
+{
+  PackageScope sc;
+
+  this(PackageScope psc)
+    {
+      sc = psc;
+      assert(sc !is null);
+    }
+
+ override:
+
+  ScopeLookup lookup(Token name, bool autoLoad=false)
+    {
+      return sc.lookup(name, autoLoad);
+    }
+
+  char[] getName() { return sc.toString(); }
+
+  char[] toString() { return "imported package " ~ sc.toString(); }
+}
+
+// Import holder for classes
+class ClassImpHolder : ImportHolder
 {
   MonsterClass mc;
 
@@ -1101,25 +1133,24 @@ class ImportHolder : Expression
       assert(type !is null);
     }
 
-  // All lookups in this import is done through this function. Can be
-  // used to filter lookups later on.
-  ScopeLookup lookup(Token name)
+ override:
+
+  char[] getName() { return mc.name.str; }
+
+  ScopeLookup lookup(Token name, bool autoLoad=false)
     {
       assert(mc !is null);
       mc.requireScope();
-      return mc.sc.lookup(name);
+      return mc.sc.lookup(name, autoLoad);
     }
 
- override:
 
-  void parse(ref TokenArray) { assert(0); }
-  void resolve(Scope sc) {}
-  void evalDest() { assert(0); }
-  char[] toString() { return "imported class " ~ mc.name.str ~ ""; }
+  char[] toString() { return "imported class " ~ mc.name.str; }
 
   void evalAsm()
     {
-      mc.requireCompile();
+      assert(mc !is null);
+      mc.requireScope();
       if(mc.isSingleton)
         {
           assert(type.isObject);

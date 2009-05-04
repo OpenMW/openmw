@@ -36,6 +36,11 @@ import monster.vm.vm;
 import monster.modules.all;
 import monster.options;
 
+version(Tango)
+{}
+else
+{
+
 // D runtime stuff
 version(Posix)
 {
@@ -55,6 +60,9 @@ extern (C) void _moduleCtor();
 extern (C) void _moduleUnitTests();
 
 //extern (C) bool no_catch_exceptions;
+
+} // end version(Tango) .. else
+
 
 bool initHasRun = false;
 
@@ -83,21 +91,30 @@ void doMonsterInit()
       // Nope. This is normal though if we're running as a C++
       // library. We have to init the D runtime manually.
 
-      version (Posix)
+      // But this is not supported in Tango at the moment.
+      version(Tango)
         {
-          _STI_monitor_staticctor();
-          _STI_critical_init();
+          assert(0, "tango-compiled C++ library not supported yet");
         }
-
-      gc_init();
-
-      version (Win32)
+      else
         {
-          _minit();
-        }
 
-      _moduleCtor();
-      _moduleUnitTests();
+          version (Posix)
+            {
+              _STI_monitor_staticctor();
+              _STI_critical_init();
+            }
+
+          gc_init();
+
+          version (Win32)
+            {
+              _minit();
+            }
+
+          _moduleCtor();
+          _moduleUnitTests();
+        }
     }
 
   assert(stHasRun, "D library initializion failed");
@@ -107,10 +124,12 @@ void doMonsterInit()
   // Initialize compiler constructs
   initTokenizer();
   initProperties();
+
+  // initScope depends on doVMInit setting vm.vfs
+  vm.doVMInit();
   initScope();
 
-  // Initialize VM
-  vm.doVMInit();
+  // The rest of the VM
   scheduler.init();
   stack.init();
   arrays.initialize();

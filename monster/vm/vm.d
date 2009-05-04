@@ -86,51 +86,7 @@ struct VM
     scheduler.doFrame();
   }
 
-  // Execute a single statement. Context-dependent statements such as
-  // 'return' or 'goto' are not allowed, and neither are
-  // declarations. Any return value (in case of expressions) is
-  // discarded. An optional monster object may be given as context.
-  void execute(char[] statm, MonsterObject *mo = null)
-  {
-    init();
-
-    // Get an empty object if none was specified
-    if(mo is null)
-      mo = Function.getIntMO();
- 
-    // Push a dummy function on the stack, tokenize the statement, and
-    // parse the various statement types we allow. Assemble it and
-    // store the code in the dummy function. The VM handles the rest.
-    assert(0, "not done");
-  }
-
-  // This doesn't cover the 'console mode', or 'line mode', which is a
-  // bit more complicated. (It would search for matching brackets in
-  // the token list, print values back out, possibly allow variable
-  // declarations, etc.) I think we need a separate Console class to
-  // handle this, especially to store temporary values for
-  // optimization.
-
-  // Execute an expression and return the value. The template
-  // parameter gives the desired type, which must match the type of
-  // the expression. An optional object may be given as context.
-  T expressionT(T)(char[] expr, MonsterObject *mo = null)
-  {
-    init();
-
-    // Get an empty object if none was specified
-    if(mo is null)
-      mo = Function.getIntMO();
-
-    // Push a dummy function on the stack, tokenize and parse the
-    // expression. Get the type after resolving, and check it against
-    // the template parameter. Execute like for statements, and pop
-    // the return value.
-    assert(0, "not done");
-  }
-
-  // TODO: These have to check for existing classes first. Simply move
-  // doLoad over here and fix it up.
+  // Load a class based on class name, file name, or both.
   MonsterClass load(char[] nam1, char[] nam2 = "")
   { return doLoad(nam1, nam2, true, true); }
 
@@ -139,7 +95,7 @@ struct VM
   { return doLoad(nam1, nam2, false, true); }
 
   // Does not fail if the class is not found, just returns null. It
-  // will still fail if the class exists and contains errors though.
+  // will still fail if the class exists and contains errors.
   MonsterClass loadNoFail(char[] nam1, char[] nam2 = "")
   { return doLoad(nam1, nam2, true, false); }
 
@@ -150,7 +106,7 @@ struct VM
     init();
 
     assert(s !is null, "Cannot load from null stream");
-    auto mc = new MonsterClass(-14);
+    auto mc = new MonsterClass(global);
     mc.parse(s, name, bom);
     return mc;
   }
@@ -161,7 +117,7 @@ struct VM
   {
     init();
 
-    auto mc = new MonsterClass(-14);
+    auto mc = new MonsterClass(global);
     mc.parse(toks, name);
     return mc;
   }
@@ -276,6 +232,9 @@ struct VM
     char[] fname, cname;
     MonsterClass mc;
 
+    PackageScope pack = global;
+    assert(pack !is null);
+
     if(name1 == "")
       fail("Cannot give empty first parameter to load()");
 
@@ -304,42 +263,85 @@ struct VM
     // Was a filename given?
     if(fname != "")
       {
-        // Derive the class name from the file name
-        char[] nameTmp = vfs.getBaseName(fname);
-        assert(fname.iEnds(".mn"));
-        nameTmp = fname[0..$-3];
+        // Derive the class and package names from the given file name.
+        VFS.checkForEscape(fname);
+
+        char[] file = fname;
+
+        while(true)
+          {
+            // Find a path separator
+            int ind = file.find('/');
+            if(ind == -1)
+              ind = file.find('\\');
+
+            if(ind == -1) break;
+
+            // The file is in a directory. Add it as a package.
+            char[] packname = file[0..ind];
+            file = file[ind+1..$];
+
+            // Empty directory name (eg. dir//file.mn or
+            // dir/./file.mn) should not be added as packages.
+            if(packname != "" && packname != ".")
+              pack = pack.insertPackage(packname);
+
+            // Did we end with a path separator?
+            if(file == "")
+              fail("File name " ~ fname ~ " is a directory");
+          }
+
+        // 'file' now contains the base filename, without the
+        // directory
+        assert(file.iEnds(".mn"));
+
+        // Pick away the extension
+        file = file[0..$-3];
 
         if(!cNameSet)
           // No class name given, set it to the derived name
-          cname = nameTmp;
+          cname = file;
         else
-          // Both names were given, make sure they match
-          if(icmp(nameTmp,cname) != 0)
-            fail(format("Class name %s does not match file name %s",
-                        cname, fname));
+          {
+            // Both names were given, make sure they match
+            if(cname.find('.') != -1)
+              fail(format("Don't use a package specifier in the class name when the file name is also given (class %s, file %s)",
+                          cname, fname));
+
+            if(icmp(file,cname) != 0)
+              fail(format("Class name %s does not match file name %s",
+                          cname, fname));
+          }
       }
     else
-      // No filename given. Derive it from the given class name.
-      fname = tolower(cname) ~ ".mn";
+      {
+        // Pick out the package part of the class name.
+        char[] pname = cname;
+        while(true)
+          {
+            int ind = find(pname, '.');
+            if(ind != -1)
+              {
+                // Found a package name separator. Insert the package.
+                pack = pack.insertPackage(pname[0..ind]);
+                pname = pname[ind+1..$];
+
+                if(pname == "")
+                  fail("Class name cannot end with a period: " ~ cname);
+              }
+            else break;
+          }
+
+        cname = pname;
+
+        // Derive the file name from the given class name.
+        fname = pack.getPath(tolower(cname)) ~ ".mn";
+      }
 
     assert(cname != "" && !cname.iEnds(".mn"));
     assert(fname.iEnds(".mn"));
 
-    bool checkFileName()
-      {
-        if(cname.length == 0)
-          return false;
-
-        if(!validFirstIdentChar(cname[0]))
-          return false;
-
-        foreach(char c; cname)
-          if(!validIdentChar(c)) return false;
-
-        return true;
-      }
-
-    if(!checkFileName())
+    if(!isValidIdent(cname))
       fail(format("Invalid class name %s (file %s)", cname, fname));
 
     // At this point, check if the class already exists.
@@ -369,7 +371,7 @@ struct VM
     auto bf = vfs.open(fname);
     auto ef = new EndianStream(bf);
     int bom = ef.readBOM();
-    mc = new MonsterClass(-14);
+    mc = new MonsterClass(pack);
     mc.parse(ef, fname, bom);
     delete bf;
 

@@ -317,11 +317,15 @@ class VarDeclaration : Block
 
       // We can't have var at this point
       if(var.type.isVar)
-        fail("cannot implicitly determine type", loc);
+        fail("Cannot implicitly determine type", loc);
+
+      // Nor can we have void types
+      if(var.type.isVoid)
+        fail("Cannot declare variables with no type", loc);
 
       // Illegal types are illegal
       if(!var.type.isLegal)
-        fail("Cannot create variables of type " ~ var.type.toString, loc);
+        fail("Cannot create variables of type '" ~ var.type.toString ~ "'", loc);
 
       if(!allowConst && var.isConst)
         fail("'const' is not allowed here", loc);
@@ -533,13 +537,11 @@ class ClassVarSet : Block
     }
 }
 
-// Represents a reference to a variable. Simply stores the token
-// representing the identifier. Evaluation is handled by the variable
-// declaration itself. This allows us to use this class for local and
-// global variables as well as for properties, without handling each
-// case separately. The special names (currently __STACK__) are
-// handled internally.
-class VariableExpr : MemberExpression
+// Represents a reference to an identifier member, such as a variable,
+// function or property. Can also refer to type names. Simply stores
+// the token representing the identifier. Special names (currently
+// only __STACK__) are also handled.
+class MemberExpr : Expression
 {
   Token name;
 
@@ -558,7 +560,9 @@ class VariableExpr : MemberExpression
       FarOtherVar,      // Another class, another object
       Property,         // Property (like .length of arrays)
       Special,          // Special name (like __STACK__)
+      Function,         // Function
       Type,             // Typename
+      Package,          // Package
     }
 
   VType vtype;
@@ -596,6 +600,152 @@ class VariableExpr : MemberExpression
   }
 
   bool isSpecial() { return vtype == VType.Special; }
+  bool isPackage() { return vtype == VType.Package; }
+
+  // Is this a static member
+  bool isStatic()
+    {
+      // Properties can be static
+      if(isProperty)
+        return look.isPropStatic;
+
+      // Type names are always static.
+      if(isType)
+        return true;
+
+      // Ditto for packages
+      if(isPackage)
+        return true;
+
+      // Currently no other static variables
+      return false;
+    }
+
+  void resolveMember(Scope sc, Type ownerType)
+    {
+      assert(ownerType !is null);
+      assert(sc !is null);
+
+      Scope leftScope;
+
+      leftScope = ownerType.getMemberScope();
+
+      // Look up the name in the scope belonging to the owner
+      assert(leftScope !is null);
+      look = leftScope.lookupClass(name);
+
+      type = look.type;
+
+      // Check for member properties
+      if(look.isProperty)
+        {
+          // TODO: Need to account for ownerType here somehow -
+          // rewrite the property system
+          vtype = VType.Property;
+          type = look.getPropType(ownerType);
+          return;
+        }
+
+      // The rest is common
+      resolveCommon(ownerType, leftScope);
+    }
+
+  // Common parts for members and non-members
+  void resolveCommon(Type ownerType, Scope sc)
+    {
+      bool isMember = (ownerType !is null);
+
+      // Package name?
+      if(look.isPackage)
+        {
+          vtype = VType.Package;
+          return;
+        }
+
+      // Variable?
+      if(look.isVar)
+        {
+          assert(look.sc !is null);
+          assert(look.sc is look.var.sc);
+
+          if(isMember)
+            {
+              // We are a class member variable.
+              vtype = VType.FarOtherVar;
+              assert(look.sc.isClass);
+            }
+          // This/parent class variable?
+          else if(look.sc.isClass)
+            {
+              // Check if it's in THIS class, which is a common
+              // case. If so, we can use a simplified instruction that
+              // doesn't have to look up the class.
+              if(look.sc.getClass is sc.getClass)
+                vtype = VType.ThisVar;
+              else
+                {
+                  // It's another class. For non-members this can only
+                  // mean a parent class.
+                  vtype = VType.ParentVar;
+                }
+            }
+          else
+            // Local stack variable
+            vtype = VType.LocalVar;
+        }
+
+      // Function?
+      else if(look.isFunc)
+        {
+          // The Function* is stored in the lookup variable
+          type = new FunctionType(look.func, isMember);
+          vtype = VType.Function;
+
+          // TODO: Make the scope set the type for us. In fact, the
+          // type should contain the param/return type information
+          // rather than the Function itself, the function should just
+          // refer to it. This would make checking type compatibility
+          // easy.
+        }
+      // Class name?
+      else if(look.isClass)
+        {
+          if(isMember && !ownerType.isPackage)
+            fail(format("%s cannot have class member %s",
+                        ownerType, name), loc);
+
+          assert(look.mc !is null);
+          look.mc.requireScope();
+
+          type = look.mc.classType;
+          vtype = VType.Type;
+
+          // Singletons are treated differently - the class name can
+          // be used to access the singleton object
+          if(look.mc.isSingleton)
+            {
+              type = look.mc.objType;
+              singCls = look.mc.getIndex();
+            }
+        }
+      // Type name?
+      else if(look.isType)
+        {
+          assert(look.isType);
+          assert(look.type !is null);
+          type = look.type.getMeta();
+          vtype = VType.Type;
+        }
+      else
+        {
+          // Nothing useful was found.
+          if(isMember)
+            fail(name.str ~ " is not a member of " ~ ownerType.toString,
+                 loc);
+          else
+            fail("Undefined identifier "~name.str, name.loc);
+        }
+    }
 
  override:
   char[] toString() { return name.str; }
@@ -613,20 +763,6 @@ class VariableExpr : MemberExpression
 
       // Normal variables are always lvalues.
       return true;
-    }
-
-  bool isStatic()
-    {
-      // Properties can be static
-      if(isProperty)
-        return look.isPropStatic;
-
-      // Type names are always static.
-      if(isType)
-        return true;
-
-      // Currently no other static variables
-      return false;
     }
 
   bool isCTime() { return isType; }
@@ -651,49 +787,6 @@ class VariableExpr : MemberExpression
     }
     body
     {
-      if(isMember) // Are we called as a member?
-	{
-          // Look up the name in the scope belonging to the owner
-          assert(leftScope !is null);
-          look = leftScope.lookup(name);
-
-          type = look.type;
-
-          // Check first if this is a variable
-          if(look.isVar)
-            {
-              // We are a class member variable.
-              vtype = VType.FarOtherVar;
-              assert(look.sc.isClass);
-
-              return;
-            }
-
-          // Check for properties
-          if(look.isProperty)
-            {
-              // TODO: Need to account for ownerType here somehow -
-              // rewrite the property system
-              vtype = VType.Property;
-              type = look.getPropType(ownerType);
-              return;
-            }
-
-          // Check types too
-          if(look.isType)
-            {
-              vtype = VType.Type;
-              type = look.type.getMeta();
-              return;
-            }
-
-          // No match
-          fail(name.str ~ " is not a variable member of " ~ ownerType.toString,
-               loc);
-        }
-
-      // Not a member
-
       // Look for reserved names first.
       if(name.str == "__STACK__")
         {
@@ -705,8 +798,8 @@ class VariableExpr : MemberExpression
       if(name.type == TT.Const || name.type == TT.Clone)
         fail("Cannot use " ~ name.str ~ " as a variable", name.loc);
 
-      // Not a member or a special name. Look ourselves up in the
-      // local scope, and include imported scopes.
+      // Look ourselves up in the local scope, and include imported
+      // scopes.
       look = sc.lookupImport(name);
 
       if(look.isImport)
@@ -714,9 +807,9 @@ class VariableExpr : MemberExpression
           // We're imported from another scope. This means we're
           // essentially a member variable. Let DotOperator handle
           // this.
-
           dotImport = new DotOperator(look.imphold, this, loc);
           dotImport.resolve(sc);
+          assert(dotImport.type is type);
           return;
         }
 
@@ -733,75 +826,14 @@ class VariableExpr : MemberExpression
           assert(look.isProperty, name.str ~ " expression not implemented yet");
 
           vtype = VType.Property;
-          type = look.getPropType(ownerType);
+          assert(0); // FIXME: This can't be right!? Was ownerType.
+          type = look.getPropType(null);
           return;
         }
 
       type = look.type;
 
-      if(look.isVar)
-        {
-          assert(look.sc !is null);
-          assert(look.sc is look.var.sc);
-
-          // Class variable?
-          if(look.sc.isClass)
-            {
-              // Check if it's in THIS class, which is a common
-              // case. If so, we can use a simplified instruction that
-              // doesn't have to look up the class.
-              if(look.sc.getClass is sc.getClass)
-                vtype = VType.ThisVar;
-              else
-                {
-                  // It's another class. For non-members this can only
-                  // mean a parent class.
-                  vtype = VType.ParentVar;
-                }
-            }
-          else
-            vtype = VType.LocalVar;
-
-          return;
-        }
-
-      // We are not a variable. Last chance is a type name / class.
-      if(!look.isType && !look.isClass)
-        {
-          // Still no match. Might be an unloaded class however,
-          // lookup() doesn't load classes. Try loading it.
-          if(vm.loadNoFail(name.str) is null)
-            // No match at all.
-            fail("Undefined identifier "~name.str, name.loc);
-
-          // We found a class! Check that we can look it up now
-          look = sc.lookup(name);
-          assert(look.isClass);
-        }
-
-      vtype = VType.Type;
-
-      // Class name?
-      if(look.isClass)
-        {
-          assert(look.mc !is null);
-          look.mc.requireScope();
-
-          type = look.mc.classType;
-
-          // Singletons are treated differently - the class name can
-          // be used to access the singleton object
-          if(look.mc.isSingleton)
-            {
-              type = look.mc.objType;
-              singCls = look.mc.getIndex();
-            }
-        }
-      else
-        {
-          assert(look.type !is null);
-          type = look.type.getMeta();
-        }
+      resolveCommon(null, sc);
     }
 
   int[] evalCTime()
@@ -823,6 +855,8 @@ class VariableExpr : MemberExpression
         }
 
       if(isType) return;
+
+      if(type.isFunc) return;
 
       setLine();
 

@@ -36,7 +36,10 @@ import monster.compiler.states;
 import monster.compiler.structs;
 import monster.vm.arrays;
 import monster.vm.mclass;
+import monster.vm.mobject;
 import monster.vm.error;
+
+import monster.options;
 
 import std.stdio;
 import std.utf;
@@ -54,6 +57,8 @@ import std.string;
   ArrayType
   StructType
   EnumType
+  FunctionType
+  PackageType
   UserType (replacer for identifier-named types like structs and
             classes)
   TypeofType (replacer for typeof(x) when used as a type)
@@ -76,6 +81,7 @@ abstract class Type : Block
   // tokens.)
   static bool canParseRem(ref TokenArray toks)
     {
+      // We allow typeof(expression) as a type
       if(isNext(toks, TT.Typeof))
         {
           reqNext(toks, TT.LeftParen);
@@ -84,10 +90,17 @@ abstract class Type : Block
           return true;
         }
 
+      // The 'var' keyword can be used as a type
       if(isNext(toks, TT.Var)) return true;
 
+      // Allow typename
       if(!isNext(toks, TT.Identifier)) return false;
 
+      // Allow a.b.c
+      while(isNext(toks, TT.Dot))
+        if(!isNext(toks, TT.Identifier)) return false;
+
+      // Allow a[][]
       while(isNext(toks,TT.LeftSquare))
 	if(!isNext(toks,TT.RightSquare))
 	  return false;
@@ -184,8 +197,10 @@ abstract class Type : Block
 
   bool isArray() { return arrays() != 0; }
   bool isObject() { return false; }
+  bool isPackage() { return false; }
   bool isStruct() { return false; }
   bool isEnum() { return false; }
+  bool isFunc() { return false; }
 
   bool isReplacer() { return false; }
 
@@ -310,7 +325,8 @@ abstract class Type : Block
   final char[] toString() { return name; }
 
   // Cast the expression orig to this type. Uses canCastTo to
-  // determine if a cast is possible.
+  // determine if a cast is possible. The 'to' parameter is used in
+  // error messages to describe the destination.
   final void typeCast(ref Expression orig, char[] to)
     {
       if(orig.type == this) return;
@@ -321,9 +337,23 @@ abstract class Type : Block
       if(orig.type.canCastTo(this))
         orig = new CastExpression(orig, this);
       else
-        fail(format("Cannot cast %s of type %s to %s of type %s",
+        fail(format("Cannot implicitly cast %s of type %s to %s of type %s",
                     orig.toString, orig.typeString,
                     to, this), orig.loc);
+    }
+
+  // Do explicit type casting. This allows for a wider range of type
+  // conversions.
+  final void typeCastExplicit(ref Expression orig)
+    {
+      if(orig.type == this) return;
+
+      if(orig.type.canCastToExplicit(this) || orig.type.canCastTo(this))
+        orig = new CastExpression(orig, this);
+      else
+        fail(format("Cannot cast %s of type %s to type %s",
+                    orig.toString, orig.typeString,
+                    this), orig.loc);
     }
 
   // Do compile-time type casting. Gets orig.evalCTime() and returns
@@ -334,10 +364,10 @@ abstract class Type : Block
 
       assert(res.length == orig.type.getSize);
 
-      if(orig.type.canCastTo(this))
+      if(orig.type.canCastCTime(this))
         res = orig.type.doCastCTime(res, this);
       else
-        fail(format("Cannot cast %s of type %s to %s of type %s",
+        fail(format("Cannot cast %s of type %s to %s of type %s (at compile time)",
                     orig.toString, orig.typeString,
                     to, this), orig.loc);
 
@@ -353,10 +383,17 @@ abstract class Type : Block
       return false; // By default we can't cast anything
     }
 
+  // Can the type be explicitly cast? Is not required to handle cases
+  // where canCastTo is true.
+  bool canCastToExplicit(Type to)
+    {
+      return false;
+    }
+
   // Returns true if the cast can be performed at compile time. This
-  // is usually true.
+  // is usually true if we can cast at runtime.
   bool canCastCTime(Type to)
-    { return canCastTo(to); }
+    { return canCastTo(to) || canCastToExplicit(to); }
 
   // Returns true if the types are equal or if canCastTo returns true.
   final bool canCastOrEqual(Type to)
@@ -364,13 +401,15 @@ abstract class Type : Block
       return to == this || canCastTo(to);
     }
 
-  // Do the cast in the assembler. Rename to compileCastTo, perhaps.
+  // Do the cast in the assembler. Must handle both implicit and
+  // explicit casts.
   void evalCastTo(Type to)
     {
       assert(0, "evalCastTo not implemented for type " ~ toString);
     }
 
-  // Do the cast in the compiler.
+  // Do the cast in the compiler. Must handle both implicit and
+  // explicit casts.
   int[] doCastCTime(int[] data, Type to)
     {
       assert(0, "doCastCTime not implemented for type " ~ toString);
@@ -443,7 +482,7 @@ abstract class Type : Block
           // Find the common type
           if(t1.canCastTo(t2)) common = t2; else
           if(t2.canCastTo(t1)) common = t1; else
-            fail(format("Cannot cast %s of type %s to %s of type %s, or vice versa.", e1, t1, e2, t2), e1.loc);
+            fail(format("Cannot implicitly cast %s of type %s to %s of type %s, or vice versa.", e1, t1, e2, t2), e1.loc);
         }
 
       // Wrap the expressions in CastExpression blocks if necessary.
@@ -454,13 +493,35 @@ abstract class Type : Block
 
 // Internal types are types that are used internally by the compiler,
 // eg. for type conversion or for special syntax. They can not be used
-// for variables, neither directly nor indirectly.
+// for variables or values, neither directly nor indirectly.
 abstract class InternalType : Type
 {
  final:
   bool isLegal() { return false; }
   int[] defaultInit() {assert(0, name);}
   int getSize() { return 0; }
+}
+
+// Handles package names, in expressions like Package.ClassName. It is
+// only used for these expressions and never for anything else.
+class PackageType : InternalType
+{
+  PackageScope sc;
+
+  this(PackageScope _sc)
+    {
+      sc = _sc;
+      name = sc.toString() ~ " (package)";
+    }
+
+ override:
+  Scope getMemberScope()
+    {
+      assert(sc !is null);
+      return sc;
+    }
+
+  bool isPackage() { return true; }
 }
 
 // Handles the 'null' literal. This type is only used for
@@ -529,10 +590,11 @@ class BasicType : Type
   // be created.
   this(char[] tn)
     {
-      if(!isBasic(tn))
-        fail("BasicType does not support type " ~ tn);
-
       name = tn;
+      if(name == "") name = "(none)";
+
+      if(!isBasic(name))
+        fail("BasicType does not support type " ~ tn);
 
       // Cache the class to save some overhead
       store[tn] = this;
@@ -582,7 +644,7 @@ class BasicType : Type
 
   static bool isBasic(char[] tn)
     {
-      return (tn == "" || tn == "int" || tn == "float" || tn == "char" ||
+      return (tn == "(none)" || tn == "int" || tn == "float" || tn == "char" ||
               tn == "bool" || tn == "uint" || tn == "long" ||
               tn == "ulong" || tn == "double");
     }
@@ -605,6 +667,8 @@ class BasicType : Type
       // Get the name and the line from the token
       name = t.str;
       loc = t.loc;
+
+      if(name == "") name = "(none)";
     }
 
   bool isInt() { return name == "int"; }
@@ -615,7 +679,7 @@ class BasicType : Type
   bool isBool() { return name == "bool"; }
   bool isFloat() { return name == "float"; }
   bool isDouble() { return name == "double"; }
-  bool isVoid() { return name == ""; }
+  bool isVoid() { return name == "(none)"; }
 
   Scope getMemberScope()
     {
@@ -636,6 +700,14 @@ class BasicType : Type
   // List the implisit conversions that are possible
   bool canCastTo(Type to)
     {
+      // If options.d allow it, we can implicitly convert back from
+      // floats to integral types.
+      static if(implicitTruncate)
+        {
+          if(isFloating && to.isIntegral)
+            return true;
+        }
+
       // We can convert between all integral types
       if(to.isIntegral) return isIntegral;
 
@@ -649,6 +721,14 @@ class BasicType : Type
       return false;
     }
 
+  bool canCastToExplicit(Type to)
+    {
+      if(isFloating && to.isIntegral)
+        return true;
+
+      return false;
+    }
+
   void evalCastTo(Type to)
     {
       assert(this != to);
@@ -658,7 +738,9 @@ class BasicType : Type
       int toSize = to.getSize();
       bool fromSign = isInt || isLong || isFloat || isBool;
 
-      if(to.isInt || to.isUint)
+      if(isFloating && to.isIntegral)
+        tasm.castFloatToInt(this, to);
+      else if(to.isInt || to.isUint)
         {
           assert(isIntegral);
           if(isLong || isUlong)
@@ -714,17 +796,49 @@ class BasicType : Type
       assert(data.length == fromSize);
       bool fromSign = isInt || isLong || isFloat || isBool;
 
-      if(to.isInt || to.isUint)
+      // Set up a new array to hold the result
+      int[] toData = new int[toSize];
+
+      if(isFloating && to.isIntegral)
+        {
+          int *iptr = cast(int*)toData.ptr;
+          uint *uptr = cast(uint*)toData.ptr;
+          long *lptr = cast(long*)toData.ptr;
+          ulong *ulptr = cast(ulong*)toData.ptr;
+
+          if(isFloat)
+            {
+              float f = *(cast(float*)data.ptr);
+              if(to.isInt) *iptr = cast(int) f;
+              else if(to.isUint) *uptr = cast(uint) f;
+              else if(to.isLong) *lptr = cast(long) f;
+              else if(to.isUlong) *ulptr = cast(ulong) f;
+              else assert(0);
+            }
+          else if(isDouble)
+            {
+              double f = *(cast(double*)data.ptr);
+              if(to.isInt) *iptr = cast(int) f;
+              else if(to.isUint) *uptr = cast(uint) f;
+              else if(to.isLong) *lptr = cast(long) f;
+              else if(to.isUlong) *ulptr = cast(ulong) f;
+              else assert(0);
+            }
+          else assert(0);
+        }
+      else if(to.isInt || to.isUint)
         {
           assert(isIntegral);
-          data = data[0..1];
+          // Just pick out the least significant int
+          toData[] = data[0..1];
         }
       else if(to.isLong || to.isUlong)
         {
           if(isInt || isUint)
             {
-              if(fromSign && to.isLong && data[0] < 0) data ~= -1;
-              else data ~= 0;
+              toData[0] = data[0];
+              if(fromSign && to.isLong && data[0] < 0) toData[1] = -1;
+              else toData[1] = 0;
             }
           else assert(isUlong || isLong);
         }
@@ -732,7 +846,7 @@ class BasicType : Type
         {
           assert(isNumerical);
 
-          float *fptr = cast(float*)data.ptr;
+          float *fptr = cast(float*)toData.ptr;
 
           if(isInt) *fptr = data[0];
           else if(isUint) *fptr = cast(uint)data[0];
@@ -740,14 +854,13 @@ class BasicType : Type
           else if(isUlong) *fptr = *(cast(ulong*)data.ptr);
           else if(isDouble) *fptr = *(cast(double*)data.ptr);
           else assert(0);
-          data = data[0..1];
         }
       else if(to.isDouble)
         {
           assert(isNumerical);
 
-          if(data.length < 2) data.length = 2;
-          double *fptr = cast(double*)data.ptr;
+          assert(toData.length == 2);
+          double *fptr = cast(double*)toData.ptr;
 
           if(isInt) *fptr = data[0];
           else if(isUint) *fptr = cast(uint)data[0];
@@ -755,14 +868,14 @@ class BasicType : Type
           else if(isUlong) *fptr = *(cast(ulong*)data.ptr);
           else if(isFloat) *fptr = *(cast(float*)data.ptr);
           else assert(0);
-          data = data[0..2];
         }
       else
         fail("Compile time conversion " ~ toString ~ " to " ~ to.toString ~
              " not implemented.");
 
-      assert(data.length == toSize);
-      return data;
+      assert(toData.length == toSize);
+      assert(toData.ptr !is data.ptr);
+      return toData;
     }
 
   int getSize()
@@ -804,10 +917,7 @@ class BasicType : Type
   }
 }
 
-// Represents a normal class name. The reason this is called
-// "ObjectType" is because an actual variable (of this type) points to
-// an object, not to a class. The meta-type ClassType should be used
-// for variables that point to classes.
+// Represents a normal class name.
 class ObjectType : Type
 {
  final:
@@ -859,8 +969,11 @@ class ObjectType : Type
 
   char[] valToString(int[] data)
     {
+      // Use the object's toString function
       assert(data.length == 1);
-      return format("%s#%s", name, data[0]);
+      if(data[0] == 0) return "(null object)";
+      auto mo = getMObject(cast(MIndex)data[0]);
+      return mo.toString();
     }
 
   int getSize() { return 1; }
@@ -868,6 +981,19 @@ class ObjectType : Type
   int[] defaultInit() { return makeData!(int)(0); }
 
   bool canCastCTime(Type to) { return false; }
+
+  // Used internally below, to get the class from another object type.
+  private MonsterClass getOther(Type other)
+    {
+      assert(other !is this);
+      assert(other.isObject);
+      auto ot = cast(ObjectType)other;
+      assert(ot !is null);
+      auto cls = ot.getClass();
+      assert(cls !is null);
+      assert(cls !is getClass());
+      return cls;
+    }
 
   bool canCastTo(Type type)
     {
@@ -877,31 +1003,58 @@ class ObjectType : Type
 
       if(type.isObject)
         {
-          auto ot = cast(ObjectType)type;
-          assert(ot !is null);
-
           MonsterClass us = getClass();
-          MonsterClass other = ot.getClass();
+          MonsterClass other = getOther(type);
 
-          assert(us != other);
+          // Allow implicit downcasting if options.d says so.
+          static if(implicitDowncast)
+            {
+              if(other.childOf(us))
+                return true;
+            }
 
-          // We can only upcast
+          // We can always upcast implicitly
           return other.parentOf(us);
         }
 
       return false;
     }
 
+  bool canCastToExplicit(Type type)
+    {
+      // We can explicitly cast to a child class, and let the VM
+      // handle any errors.
+      if(type.isObject)
+        {
+          auto us = getClass();
+          auto other = getOther(type);
+
+          return other.childOf(us);
+        }
+    }
+
   void evalCastTo(Type to)
     {
       assert(clsIndex != 0);
-      assert(canCastTo(to));
+      assert(canCastTo(to) || canCastToExplicit(to));
 
       if(to.isObject)
         {
-          auto tt = cast(ObjectType)to;
-          assert(tt !is null);
-          assert(clsIndex !is tt.clsIndex);
+          auto us = getClass();
+          auto other = getOther(to);
+
+          // Upcasting doesn't require any action
+          if(other.parentOf(us)) {}
+
+          // Downcasting (from parent to child) requires that VM
+          // checks the runtime type of the object.
+          else if(other.childOf(us))
+            // Use the global class index
+            tasm.downCast(other.getIndex());
+
+          // We should never get here
+          else assert(0);
+
           return;
         }
 
@@ -923,7 +1076,12 @@ class ObjectType : Type
   // body (not just the header) is being resolved.
   void resolve(Scope sc)
     {
-      clsIndex = global.getForwardIndex(name);
+      // Insert the class into the global scope as a forward
+      // reference. Note that this means the class may not be part of
+      // any other package than 'global' when it is loaded later.
+      if(clsIndex == 0)
+        clsIndex = global.getForwardIndex(name);
+
       assert(clsIndex != 0);
     }
 }
@@ -980,7 +1138,6 @@ class ArrayType : Type
   int[] doCastCTime(int[] data, Type to)
     {
       assert(to.isString);
-
       return [valToStringIndex(data)];
     }
 
@@ -1025,6 +1182,26 @@ class ArrayType : Type
         base = base.getBase();
       name = base.name ~ "[]";
     }
+}
+
+// Type used for references to functions. Will later contain type
+// information, but right now it's just used as an internal flag.
+class FunctionType : InternalType
+{
+  Function *func;
+  bool isMember;
+
+  this(Function *fn, bool isMemb)
+    {
+      func = fn;
+      assert(fn !is null);
+      isMember = isMemb;
+
+      name="Function";
+    }
+
+ override:
+  bool isFunc() { return true; }
 }
 
 class EnumType : Type
@@ -1166,20 +1343,111 @@ class EnumType : Type
       }
   }
 
-  // Can only cast to string for now
   bool canCastTo(Type to)
-    { return to.isString; }
+    {
+      // Can always cast to string
+      if(to.isString) return true;
+
+      // The value is a long, so we can always cast to types that long
+      // can be cast to.
+      if(BasicType.getLong().canCastOrEqual(to)) return true;
+
+      // Check each field from left to right. If the field can be cast
+      // to the given type, then it's ok.
+      foreach(f; fields)
+        if(f.type.canCastOrEqual(to))
+          return true;
+
+      return false;
+    }
 
   void evalCastTo(Type to)
     {
-      assert(to.isString);
-      tasm.castToString(tIndex);
+      // Convert the enum name to a string
+      if(to.isString)
+        {
+          tasm.castToString(tIndex);
+          return;
+        }
+
+      auto lng = BasicType.getLong();
+      if(lng.canCastOrEqual(to))
+        {
+          // Get the value
+          tasm.getEnumValue(tIndex);
+          // Cast it if necessary
+          if(to != lng)
+            lng.evalCastTo(to);
+          return;
+        }
+
+      // Check the fields
+      foreach(i, f; fields)
+        if(f.type.canCastOrEqual(to))
+          {
+            // Get the field value from the enum
+            tasm.getEnumValue(tIndex, i);
+
+            // If the type doesn't match exactly, convert it.
+            if(f.type != to)
+              f.type.evalCastTo(to);
+
+            return;
+          }
+
+      assert(0);
     }
 
   int[] doCastCTime(int[] data, Type to)
     {
-      assert(to.isString);
-      return [valToStringIndex(data)];
+      if(to.isString)
+        return [valToStringIndex(data)];
+
+      // This code won't run yet, because the enum fields are
+      // properties and we haven't implemented ctime property reading
+      // yet. Leave this assert in here so that we remember to test it
+      // later.
+      assert(0, "finished, but not tested");
+
+      // Get the enum index
+      assert(data.length == 1);
+      int v = data[0];
+
+      // Check that we were not given a zero index
+      if(v-- == 0)
+        fail("Cannot get value of fields from an empty Enum variable.");
+
+      // Get the entry
+      assert(v >= 0 && v < entries.length);
+      auto ent = &entries[v];
+
+      auto lng = BasicType.getLong();
+      if(lng.canCastOrEqual(to))
+        {
+          // Get the value
+          int[] val = (cast(int*)&ent.value)[0..2];
+          // Cast it if necessary
+          if(to != lng)
+            val = lng.doCastCTime(val, to);
+
+          return val;
+        }
+
+      // Check the fields
+      foreach(i, f; fields)
+        if(f.type.canCastOrEqual(to))
+          {
+            // Get the field value from the enum
+            int[] val = ent.fields[i];
+
+            // If the type doesn't match exactly, convert it.
+            if(f.type != to)
+              val = f.type.doCastCTime(val, to);
+
+            return val;
+          }
+
+      assert(0);
     }
 
   // TODO: In this case, we could override valToStringIndex as well,
@@ -1293,7 +1561,7 @@ abstract class ReplacerType : InternalType
 class UserType : ReplacerType
 {
  private:
-  Token id;
+  Token ids[];
 
  public:
 
@@ -1305,19 +1573,66 @@ class UserType : ReplacerType
 
   void parse(ref TokenArray toks)
     {
+      Token id;
       reqNext(toks, TT.Identifier, id);
 
-      // Get the name and the line from the token
+      // Get the name and the line from the first token
       name = id.str~"(replacer)";
       loc = id.loc;
+
+      ids ~= id;
+
+      // Parse any following identifiers, separated by dots.
+      while(isNext(toks,TT.Dot))
+        {
+          reqNext(toks, TT.Identifier, id);
+          ids ~= id;
+        }
     }
 
   void resolve(Scope sc)
     {
-      auto sl = sc.lookupImport(id);
+      assert(ids.length >= 1);
 
+      // The top-most identifier is looked up in imported scopes
+      auto first = ids[0];
+      auto sl = sc.lookupImport(first);
       if(sl.isImport)
-        sl = sl.imphold.mc.sc.lookup(id);
+        sl = sl.imphold.lookup(first);
+
+      // The scope in which to resolve the class lookup.
+      Scope lastScope = sc;
+
+      // Loop through the list and look up each member.
+      foreach(int ind, idt; ids)
+        {
+          if(ind == 0) continue;
+
+          if(sl.isClass)
+            {
+              // Look up the next identifier in the class scope
+              assert(sl.mc !is null);
+              sl.mc.requireScope();
+              assert(sl.mc.sc !is null);
+              sl = sl.mc.sc.lookupClass(idt);
+            }
+          else if(sl.isPackage)
+            {
+              lastScope = sl.sc;
+              assert(sl.sc.isPackage);
+              sl = sl.sc.lookupClass(idt);
+            }
+          // Was anything found at all?
+          else if(!sl.isNone)
+            fail(sl.name.str ~ " (which is a " ~ LTypeName[sl.ltype]
+                 ~ ") does not have a type member called " ~ idt.str,
+                 idt.loc);
+          else
+            fail("Unknown type " ~ sl.name.str, sl.name.loc);
+        }
+
+      // sl should now contain the lookup result of the last
+      // identifier in the list.
 
       // Is it a type?
       if(sl.isType)
@@ -1326,21 +1641,30 @@ class UserType : ReplacerType
 
       // If not, maybe a class?
       else if(sl.isClass)
-        // Splendid
-        realType = sl.mc.objType;
+        {
+          // Splendid
+          sl.mc.requireScope();
+          realType = sl.mc.objType;
+          assert(realType !is null);
+        }
+
+      // Allow packages used as type names in some situations
+      else if(sl.isPackage)
+        realType = sl.sc.getPackage().type;
 
       // Was anything found at all?
       else if(!sl.isNone)
         // Ouch, something was found that's not a type or class.
         fail("Cannot use " ~ sl.name.str ~ " (which is a " ~
-             LTypeName[sl.ltype] ~ ") as a type!", id.loc);
+             LTypeName[sl.ltype] ~ ") as a type!", sl.name.loc);
 
       if(realType is null)
         {
           // Nothing was found. Assume it's a forward reference to a
           // class. These are handled later on.
-          realType = new ObjectType(id);
-          realType.resolve(sc);
+          realType = new ObjectType(sl.name);
+          assert(lastScope !is null);
+          realType.resolve(lastScope);
         }
 
       assert(realType !is this);
@@ -1462,15 +1786,3 @@ class MetaType : InternalType
   Scope getMemberScope() { return base.getMemberScope(); }
   Type getBase() { return base; }
 }
-
-/*
-  Types we might add later:
-
-  TableType - a combination of lists, structures, hashmaps and
-              arrays. Loosely based on Lua tables, but not the same.
-
-  FunctionType - pointer to a function with a given header. Since all
-                 Monster functions are object members (methods), all
-                 function pointers are in effect delegates.
-
-*/

@@ -230,9 +230,9 @@ struct MonsterObject
   int *getDataInt(int treeIndex, int pos)
   {
     assert(treeIndex >= 0 && treeIndex < data.length,
-           "tree index out of range: " ~ toString(treeIndex));
+           "tree index out of range: " ~ .toString(treeIndex));
     assert(pos >= 0 && pos<data[treeIndex].length,
-           "data pointer out of range: " ~ toString(pos));
+           "data pointer out of range: " ~ .toString(pos));
     return &data[treeIndex][pos];
   }
 
@@ -241,10 +241,10 @@ struct MonsterObject
   {
     assert(len > 0);
     assert(treeIndex >= 0 && treeIndex < data.length,
-           "tree index out of range: " ~ toString(treeIndex));
+           "tree index out of range: " ~ .toString(treeIndex));
     assert(pos >= 0 && (pos+len)<=data[treeIndex].length,
-           "data pointer out of range: pos=" ~ toString(pos) ~
-           ", len=" ~toString(len));
+           "data pointer out of range: pos=" ~ .toString(pos) ~
+           ", len=" ~.toString(len));
     return data[treeIndex][pos..pos+len];
   }
 
@@ -453,6 +453,11 @@ struct MonsterObject
 
     auto stl = cls.findState(name, label);
     setState(stl.state, stl.label);
+  }
+
+  char[] toString()
+  {
+    return cls.toString ~ "#" ~ .toString(cast(int)getIndex());
   }
 }
 

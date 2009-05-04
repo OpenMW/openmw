@@ -36,26 +36,21 @@ abstract class VFS
   // Return true if a file exists. Should not return true for
   // directories.
   abstract bool has(char[] file);
+  abstract bool hasDir(char[] dir);
 
   // Open the given file and return it as a stream.
   abstract Stream open(char[] file);
 
-  static final char[] getBaseName(char[] fullname)
+  // Check for invalid file names. This makes sure the caller cannot
+  // read files outside the designated subdirectory.
+  final static void checkForEscape(char[] file)
     {
-      foreach_reverse(i, c; fullname)
-        {
-          version(Win32)
-            {
-              if(c == ':' || c == '\\' || c == '/')
-                return fullname[i+1..$];
-            }
-          version(Posix)
-            {
-              if (fullname[i] == '/')
-                return fullname[i+1..$];
-            }
-        }
-      return fullname;
+      if(file.begins("/") || file.begins("\\"))
+        fail("Filename " ~ file ~ " cannot begin with a path separator");
+      if(file.find(":") != -1)
+        fail("Filename " ~ file ~ " cannot contain colons");
+      if(file.find("..") != -1)
+        fail("Filename " ~ file ~ " cannot contain '..'");
     }
 }
 
@@ -79,6 +74,13 @@ class ListVFS : VFS
     {
       foreach(l; list)
         if(l.has(file)) return true;
+      return false;
+    }
+
+  bool hasDir(char[] file)
+    {
+      foreach(l; list)
+        if(l.hasDir(file)) return true;
       return false;
     }
 
@@ -109,14 +111,7 @@ class FileVFS : VFS
       if(buffer.length < file.length+sysPath.length)
         buffer.length = file.length + sysPath.length + 50;
 
-      // Check for invalid file names. This makes sure the caller
-      // cannot read files outside the designated subdirectory.
-      if(file.begins([from]) || file.begins([to]))
-        fail("Filename " ~ file ~ " cannot begin with a path separator");
-      if(file.find(":") != -1)
-        fail("Filename " ~ file ~ " cannot contain colons");
-      if(file.find("..") != -1)
-        fail("Filename " ~ file ~ " cannot contain '..'");
+      checkForEscape(file);
 
       // Copy the file name over
       buffer[sysPath.length .. sysPath.length+file.length]
@@ -172,7 +167,16 @@ class FileVFS : VFS
     }
 
   bool has(char[] file)
-    { return exists(getPath(file)) != 0; }
+    {
+      char[] pt = getPath(file);
+      return exists(pt) && isfile(pt);
+    }
+
+  bool hasDir(char[] file)
+    {
+      char[] pt = getPath(file);
+      return exists(pt) && isdir(pt);
+    }
 
   Stream open(char[] file)
     { return new BufferedFile(getPath(file)); }

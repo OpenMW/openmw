@@ -54,6 +54,7 @@ import std.math : floor;
 // Used for array copy below. It handles overlapping data for us.
 extern(C) void* memmove(void *dest, void *src, size_t n);
 
+// Enable this to print bytecode instructions to stdout
 //debug=traceOps;
 
 import monster.util.list;
@@ -625,8 +626,8 @@ struct Thread
 
         debug(traceOps)
           {
-            writefln("exec: %s", bcToString[opCode]);
-              writefln("stack=", stack.getPos);
+            writefln("exec: %s   (at stack %s)",
+                     bcToString[opCode], stack.getPos);
           }
 
 	switch(opCode)
@@ -838,10 +839,19 @@ struct Thread
 
 	  case BC.PushData:
 	    stack.pushInt(code.getInt());
+            debug(traceOps) writefln("  Data: %s", *stack.getInt(0));
 	    break;
 
 	  case BC.PushLocal:
-	    stack.pushInt(*stack.getFrameInt(code.getInt()));
+            debug(traceOps)
+              {
+                auto p = code.getInt();
+                auto v = *stack.getFrameInt(p);
+                stack.pushInt(v);
+                writefln("  Pushed %s from position %s",v,p);
+              }
+            else
+              stack.pushInt(*stack.getFrameInt(code.getInt()));
 	    break;
 
 	  case BC.PushClassVar:
@@ -1232,7 +1242,7 @@ struct Thread
             //stack.pushLong(stack.popInt());
             break;
 
-            // Castint to float
+            // Cast int to float
           case BC.CastI2F:
             ptr = stack.getInt(0);
             fptr = cast(float*) ptr;
@@ -1257,7 +1267,7 @@ struct Thread
             stack.pushFloat(stack.popDouble);
             break;
 
-            // Castint to double
+            // Cast int to double
           case BC.CastI2D:
             stack.pushDouble(stack.popInt);
             break;
@@ -1278,6 +1288,43 @@ struct Thread
             stack.pushDouble(stack.popFloat);
             break;
 
+            // Cast floating point types back to integral ones
+          case BC.CastF2I:
+            ptr = stack.getInt(0);
+            fptr = cast(float*) ptr;
+            *ptr = cast(int)*fptr;
+            break;
+
+          case BC.CastF2U:
+            ptr = stack.getInt(0);
+            fptr = cast(float*) ptr;
+            *(cast(uint*)ptr) = cast(uint)*fptr;
+            break;
+
+          case BC.CastF2L:
+            stack.pushLong(cast(long)stack.popFloat);
+            break;
+
+          case BC.CastF2UL:
+            stack.pushUlong(cast(ulong)stack.popFloat);
+            break;
+
+          case BC.CastD2I:
+            stack.pushInt(cast(int)stack.popDouble);
+            break;
+
+          case BC.CastD2U:
+            stack.pushUint(cast(uint)stack.popDouble);
+            break;
+
+          case BC.CastD2L:
+            stack.pushLong(cast(long)stack.popDouble);
+            break;
+
+          case BC.CastD2UL:
+            stack.pushUlong(cast(ulong)stack.popDouble);
+            break;
+
           case BC.CastT2S:
             {
               // Get the type to cast from
@@ -1289,6 +1336,18 @@ struct Thread
               char[] str = t.valToString(iarr);
               // And push it back
               stack.pushArray(str);
+            }
+            break;
+
+          case BC.DownCast:
+            {
+              // Get the object on the stack
+              auto mo = getMObject(cast(MIndex)*stack.getInt(0));
+              // And the class we're checking against
+              auto mc = global.getClass(cast(CIndex)code.getInt());
+
+              if(!mc.parentOf(mo))
+                fail("Cannot cast object " ~ mo.toString ~ " to class " ~ mc.toString);
             }
             break;
 

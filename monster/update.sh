@@ -10,4 +10,4 @@ done
 
 svn st
 
-svn diff options.openmw options.d
+diff options.openmw options.d

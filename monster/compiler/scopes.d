@@ -44,6 +44,8 @@ import monster.vm.mclass;
 import monster.vm.error;
 import monster.vm.vm;
 
+//debug=lookupTrace;
+
 // The global scope
 RootScope global;
 
@@ -65,6 +67,7 @@ enum LType
     LoopLabel,
     Property,
     Import,
+    Package,
   }
 
 const char[][] LTypeName =
@@ -78,6 +81,7 @@ const char[][] LTypeName =
    LType.StateLabel: "state label",
    LType.LoopLabel: "loop label",
    LType.Property: "property",
+   LType.Package: "package",
    ];
 
 struct ScopeLookup
@@ -107,6 +111,7 @@ struct ScopeLookup
   bool isState() { return ltype == LType.State; }
   bool isNone() { return ltype == LType.None; }
   bool isImport() { return ltype == LType.Import; }
+  bool isPackage() { return ltype == LType.Package; }
   bool isProperty()
   {
     bool ret = (ltype == LType.Property);
@@ -202,10 +207,12 @@ abstract class Scope
   // error. Recurses through parent scopes.
   final void clearId(Token name)
     {
+      debug(lookupTrace)
+        writefln("ClearId %s in %s (line %s)", name, this, __LINE__);
+
       // Lookup checks all parent scopes so we only have to call it
       // once.
-      auto sl = lookup(name);
-      assert(sl.name.str == name.str);
+      auto sl = lookup(name, false);
 
       if(!sl.isNone)
         {
@@ -213,10 +220,18 @@ abstract class Scope
             fail(name.str ~ " is a property and cannot be redeclared",
                  name.loc);
 
-          fail(format("%s is already declared (at %s) as a %s",
-                      name.str, name.loc, LTypeName[sl.ltype]),
+          char[] oldLoc = name.loc.toString;
+
+          // There might be a case insensitive match. In that case we
+          // should print the original name as well.
+          if(sl.name.str != name.str)
+            oldLoc ~= " as " ~ sl.name.str;
+
+          fail(format("%s is already declared as a %s (at %s)",
+                      name.str, LTypeName[sl.ltype], oldLoc),
                name.loc);
         }
+      assert(sl.name.str == name.str);
     }
 
   // Is this the root scope?
@@ -266,6 +281,12 @@ abstract class Scope
     return parent.getArray();
   }
 
+  PackageScope getPackage()
+  {
+    assert(!isRoot(), "getPackage called on the wrong scope type");
+    return parent.getPackage();
+  }
+
   int getLoopStack()
   {
     assert(!isRoot(), "getLoopStack called on wrong scope type");
@@ -278,19 +299,38 @@ abstract class Scope
   LabelStatement getBreak(char[] name = "") { return null; }
   LabelStatement getContinue(char[] name = "") { return null; }
 
+  // Lookup a string
   final ScopeLookup lookupName(char[] name)
     { return lookup(Token(name, Floc.init)); }
 
-  ScopeLookup lookup(Token name)
+  // Look up a token in this scope. If autoLoad is true, load classes
+  // automatically if a file exists.
+  ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
       if(isRoot()) return ScopeLookup(name, LType.None, null, null);
-      else return parent.lookup(name);
+      else return parent.lookup(name, autoLoad);
     }
 
-  // Look up an identifier, and check imported scopes as well.
-  ScopeLookup lookupImport(Token name)
+  // Look up a token in this scope. If the token is not found, try the
+  // lookup again and check the file system for classes.
+  ScopeLookup lookupClass(Token name)
     {
-      auto l = lookup(name);
+      auto sl = lookup(name);
+      if(sl.isNone)
+        sl = lookup(name, true);
+      return sl;
+    }
+
+  // Look up an identifier, and check imported scopes as well. If the
+  // token is not found, do the lookup again but this time check the
+  // file system for classes as well.
+  ScopeLookup lookupImport(Token name, bool second=false)
+    {
+      debug(lookupTrace)
+        writefln("LookupImport %s in %s (line %s)", name, this, __LINE__);
+      auto l = lookup(name, second);
       if(!l.isNone) return l;
 
       // Nuttin' was found, try the imports
@@ -298,7 +338,7 @@ abstract class Scope
       auto old = l;
       foreach(imp; importList)
         {
-          l = imp.lookup(name);
+          l = imp.lookup(name, second);
 
           // Only accept types, classes, variables and functions
           if(l.isType || l.isClass || l.isVar || l.isFunc)
@@ -307,8 +347,8 @@ abstract class Scope
               if(found && l.sc !is old.sc)
                 fail(format(
   "%s matches both %s.%s (at %s) and %s.%s (at %s)", name.str,
-  old.imphold.mc.name.str, old.name.str, old.name.loc,
-  imp.mc.name.str, l.name.str, l.name.loc),
+  old.imphold.getName(), old.name.str, old.name.loc,
+  imp.getName(), l.name.str, l.name.loc),
                      name.loc);
 
               // First match
@@ -319,7 +359,14 @@ abstract class Scope
         }
 
       if(!found)
-        return ScopeLookup(name, LType.None, null, null);
+        {
+          // If we haven't tried searching the file system for
+          // classes, try that.
+          if(!second)
+            return lookupImport(name, true);
+
+          return ScopeLookup(name, LType.None, null, null);
+        }
 
       // Tell the caller that this is an import. We override the
       // lookup struct, but it doesn't matter since the lookup will
@@ -336,7 +383,7 @@ abstract class Scope
   // imports. Eg. global.registerImport(myclass) -> makes myclass
   // available in ALL classes.
   void registerImport(MonsterClass mc)
-    { registerImport(new ImportHolder(mc)); }
+    { registerImport(new ClassImpHolder(mc)); }
 
   // Even more user-friendly version. Takes a list of class names.
   void registerImport(char[][] cls ...)
@@ -420,8 +467,11 @@ final class StateScope : Scope
     }
 
   override:
-  ScopeLookup lookup(Token name)
+  ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
       assert(name.str != "");
 
       // Check against state labels
@@ -429,7 +479,7 @@ final class StateScope : Scope
       if(st.labels.inList(name.str, lb))
         return ScopeLookup(lb.name, LType.StateLabel, null, this, lb);
 
-      return super.lookup(name);
+      return super.lookup(name, autoLoad);
     }
 
   State* getState() { return st; }
@@ -456,7 +506,7 @@ final class RootScope : PackageScope
   CIndex next = 1;
 
  public:
-  this() { super(null, "global"); }
+  this() { super(null, "global", ""); }
   bool allowRoot() { return true; }
 
   // Get a class by index
@@ -475,10 +525,6 @@ final class RootScope : PackageScope
   // it will get the same index.
   CIndex getForwardIndex(char[] name)
     {
-      MonsterClass mc;
-      mc = vm.loadNoFail(name);
-      if(mc !is null) return mc.getIndex();
-
       // Called when an existing forward does not exist
       void inserter(ref CIndex v)
         { v = next++; }
@@ -493,6 +539,24 @@ final class RootScope : PackageScope
     {
       return indexList.inList(ci);
     }
+
+  override ScopeLookup lookup(Token name, bool autoLoad=false)
+    {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
+      // Basic types are looked up here
+      if(BasicType.isBasic(name.str))
+        return ScopeLookup(name, LType.Type, BasicType.get(name.str), this);
+
+      // Return ourselves as the package named 'global'
+      if(name.str == "global")
+        return ScopeLookup(name, LType.Package, type, this);
+
+      // No parents to check
+      assert(isRoot());
+      return super.lookup(name, autoLoad);
+    }
 }
 
 // A package scope is a scope that can contain classes.
@@ -503,15 +567,85 @@ class PackageScope : Scope
   // can look up file names too.
   HashTable!(char[], MonsterClass, GCAlloc, CITextHash) classes;
 
+  // List of sub-packages
+  HashTable!(char[], PackageScope, GCAlloc, CITextHash) children;
+
+  char[] path;
+
  public:
-  this(Scope last, char[] name)
+  // The type is used for expression lookups, eg. packname.Class(obj);
+  PackageType type;
+
+  this(Scope last, char[] name, char[] dir)
     {
       super(last, name);
 
-      assert(last is null);
+      auto ps = cast(PackageScope) last;
+      assert(last is null || ps !is null,
+             "Packages can only have other packages as parent scopes");
+
+      path = dir;
+      assert(!path.begins("/"));
+
+      assert(vm.vfs !is null);
+      if(dir != "" && !vm.vfs.hasDir(dir))
+        fail("Cannot create package "~toString~": directory "
+             ~dir~" not found");
+
+      type = new PackageType(this);
     }
 
   bool isPackage() { return true; }
+
+  PackageScope getPackage()
+    {
+      return this;
+    }
+
+  char[] getPath(char[] file)
+    {
+      if(path == "") return file;
+
+      file = path ~ "/" ~ file;
+      assert(file[0] != '/');
+      return file;
+    }
+
+  // Insert a new sub-package, or find an existing one. All package
+  // names are case insensitive. Returns the package scope. Fails if
+  // there are naming conflicts with other identifiers.
+  PackageScope insertPackage(char[] name)
+    {
+      auto sl = lookupName(name);
+
+      if(!sl.isPackage)
+        fail(format("Package name %s is already declared (at %s) as a %s",
+                    sl.name.str, sl.name.loc, LTypeName[sl.ltype]));
+      if(sl.isNone)
+        fail("Cannot find package " ~ name);
+
+      auto ps = cast(PackageScope)sl.sc;
+      assert(ps !is null);
+      return ps;
+    }
+
+  // Used internally from lookup()
+  private PackageScope makeSubPackage(char[] name)
+    {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
+      if(!isValidIdent(name))
+        fail("Cannot create package " ~ name ~ ": not a valid identifier");
+
+      assert(!children.inList(name));
+
+      PackageScope ps;
+      ps = new PackageScope(this, name, getPath(name));
+      children[name] = ps;
+
+      return ps;
+    }
 
   // Insert a new class into the scope. The class is given a unique
   // global index. If the class was previously forward referenced, the
@@ -548,6 +682,9 @@ class PackageScope : Scope
 
     if(global.forwards.inList(cls.name.str, ci))
       {
+        if(this !is global)
+          fail("Class " ~ cls.name.str ~ " was forward referenced and can only be added to the 'global' package, not to " ~ toString);
+
         // ci is set, remove the entry from the forwards hashmap
         assert(ci != 0);
         global.forwards.remove(cls.name.str);
@@ -570,46 +707,62 @@ class PackageScope : Scope
   // before the actual class is loaded.
   bool ciInList(char[] name)
     { return classes.inList(name); }
-  bool ciInList(char[] name, ref MonsterClass cb)
+  bool ciInList(char[] name, out MonsterClass cb)
     { return classes.inList(name, cb); }
 
   // Case sensitive versions. If a class is found that does not match
   // in case, it is an error.
-  bool csInList(char[] name, ref MonsterClass cb)
+  bool csInList(char[] name, out MonsterClass cb)
     {
-      return ciInList(name, cb) && cb.name.str == name;
+      bool result = ciInList(name, cb) && cb.name.str == name;
+
+      // The caller depends on the output to be null if the search
+      // fails.
+      if(!result) cb = null;
+
+      return result;
     }
 
-  // Get the class. It must exist and the case must match. getClass
-  // will set up the class scope if this is not already done.
-  MonsterClass getClass(char[] name)
+  override ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
+      // Look up packages
+      PackageScope psc;
+      if(!children.inList(name.str, psc))
+        // Check the file system if there is a matching directory
+        if(vm.vfs.hasDir(getPath(name.str)))
+          psc = makeSubPackage(name.str);
+
+      if(psc !is null)
+        return ScopeLookup(name, LType.Package, psc.type, psc);
+
+      // Look up classes
       MonsterClass mc;
-      if(!csInList(name, mc))
+      if(!csInList(name.str, mc) && autoLoad)
         {
-          char[] msg = "Class '" ~ name ~ "' not found.";
-          if(ciInList(name, mc))
-            msg ~= " (Perhaps you meant " ~ mc.name.str ~ "?)";
-          fail(msg);
+          // Load the class from file, if it exists
+          mc = vm.loadNoFail(name.str,
+                             tolower(getPath(name.str))~".mn");
         }
-      mc.requireScope();
-      return mc;
-    }
 
-  override ScopeLookup lookup(Token name)
-    {
-      // Type names can never be overwritten, so we check the class
-      // list and the built-in types.
-      if(BasicType.isBasic(name.str))
-        return ScopeLookup(name, LType.Type, BasicType.get(name.str), this);
-
-      MonsterClass mc;
-      if(csInList(name.str, mc))
+      if(mc !is null)
         return ScopeLookup(mc.name, LType.Class, null, this, mc);
 
-      // No parents to check
-      assert(isRoot());
-      return super.lookup(name);
+      // Unlike other scopes, a package scope doesn't check through
+      // all its parent packages. That would mean that a name search
+      // for a package or a class could 'leak' out of a directory and
+      // find the wrong match. Instead we jump directly to the root
+      // scope.
+
+      // If we're the root scope, super.lookup will return an empty
+      // result.
+      if(isRoot()) return super.lookup(name, autoLoad);
+
+      // Otherwise, jump directly to root, do not collect 200 dollars.
+      assert(global !is this);
+      return global.lookup(name, autoLoad);
     }
 }
 
@@ -637,15 +790,18 @@ abstract class VarScope : Scope
 
  override:
 
-  ScopeLookup lookup(Token name)
+  ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
       assert(name.str != "");
 
       Variable *vd;
       if(variables.inList(name.str, vd))
         return ScopeLookup(vd.name, LType.Variable, vd.type, this, vd);
 
-      return super.lookup(name);
+      return super.lookup(name, autoLoad);
     }  
 }
 
@@ -685,8 +841,11 @@ class FVScope : VarScope
   }
 
   override:
-  ScopeLookup lookup(Token name)
+  ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
       assert(name.str != "");
 
       Function* fd;
@@ -695,7 +854,7 @@ class FVScope : VarScope
         return ScopeLookup(fd.name, LType.Function, fd.type, this, fd);
 
       // Let VarScope handle variables
-      return super.lookup(name);
+      return super.lookup(name, autoLoad);
     }
 }
 
@@ -729,8 +888,11 @@ class TFVScope : FVScope
   }
 
   override:
-  ScopeLookup lookup(Token name)
+  ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
       assert(name.str != "");
 
       StructType sd;
@@ -744,7 +906,7 @@ class TFVScope : FVScope
         return ScopeLookup(Token(tp.name, tp.loc), LType.Type, tp, this);
 
       // Pass it on to the parent
-      return super.lookup(name);
+      return super.lookup(name, autoLoad);
     }
 }
 
@@ -930,8 +1092,11 @@ final class ClassScope : TFVScope
     return tmp;
   }
 
-  override ScopeLookup lookup(Token name)
+  override ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
       assert(name.str != "");
 
       State* sd;
@@ -945,7 +1110,7 @@ final class ClassScope : TFVScope
         return sl;
 
       // Let the parent handle everything else
-      return super.lookup(name);
+      return super.lookup(name, autoLoad);
     }  
 
   // Get total data segment size
@@ -1003,6 +1168,13 @@ abstract class StackScope : VarScope
 
     return tmp;
   }
+
+  // Reset the stack counters. Used from the console.
+  void reset()
+    {
+      locals = 0;
+      sumLocals = 0;
+    }
 
   /*
   void push(int i) { expStack += i; }
@@ -1108,14 +1280,17 @@ abstract class PropertyScope : Scope
   bool isProperty() { return true; }
   bool allowRoot() { return true; }
 
-  ScopeLookup lookup(Token name)
+  ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
       // Does this scope contain the property?
       if(hasProperty(name.str))
         return ScopeLookup(name, LType.Property, null, this);
 
       // Check the parent scope
-      return super.lookup(name);
+      return super.lookup(name, autoLoad);
     }
 }
 
@@ -1184,15 +1359,18 @@ class LoopScope : CodeScope
       continueLabel = new LabelStatement(getTotLocals());
     }
 
-  override ScopeLookup lookup(Token name)
+  override ScopeLookup lookup(Token name, bool autoLoad=false)
     {
+      debug(lookupTrace)
+        writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
+
       assert(name.str != "");
 
       // Check for loop labels
       if(loopName.str == name.str)
         return ScopeLookup(loopName, LType.LoopLabel, null, this);
 
-      return super.lookup(name);
+      return super.lookup(name, autoLoad);
     }  
 
   // Get the break or continue label for the given named loop, or the

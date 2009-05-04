@@ -31,6 +31,7 @@ import monster.compiler.scopes;
 import monster.compiler.types;
 import monster.compiler.functions;
 import monster.compiler.enums;
+import monster.compiler.variables;
 import monster.vm.error;
 import monster.vm.arrays;
 
@@ -484,7 +485,7 @@ class DotOperator : OperatorExpr
 {
   // owner.member
   Expression owner;
-  MemberExpression member;
+  MemberExpr member;
 
   this(Expression own, Expression memb, Floc loc)
     {
@@ -493,7 +494,7 @@ class DotOperator : OperatorExpr
       assert(own !is null, "owner cannot be null");
       assert(memb !is null);
 
-      member = cast(MemberExpression)memb;
+      member = cast(MemberExpr)memb;
       assert(member !is null);
 
       this.loc = loc;
@@ -567,12 +568,6 @@ class DotOperator : OperatorExpr
 
   void evalCommon()
     {
-      // If the the expression is a function call, we must push the
-      // parameters first
-      auto fc = cast(FunctionCallExpr)member;
-      if(fc !is null)
-	fc.evalParams();
-
       // Ask the rhs if it needs the lhs. It says no if the rhs is
       // staic or evaluatable at compile time, eg a type name, part of
       // an enum, a static function or a static property. So if you
@@ -583,14 +578,6 @@ class DotOperator : OperatorExpr
         owner.eval();
     }
 }
-
-// KILLME
-/*
-  void evalAsm()
-    {
-    }
-}
-// */
 
 // Boolean operators: ==, !=, <, >, <=, >=, &&, ||, =i=, =I=, !=i=, !=I=
 class BooleanOperator : BinaryOperator
