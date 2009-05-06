@@ -345,7 +345,7 @@ struct VM
       fail(format("Invalid class name %s (file %s)", cname, fname));
 
     // At this point, check if the class already exists.
-    if(global.ciInList(cname, mc))
+    if(pack.ciInList(cname, mc))
       {
         // Match!
         assert(mc !is null);

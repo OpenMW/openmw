@@ -27,8 +27,8 @@ class Apparatus : InventoryItem;
 enum AppaType : char[] altName
   {
     MortarPestle = 0 : "Mortar and Pestle",
-    Albemic      = 1,
-    Calcinator   = 2
+    Albemic      = 1 : "Albemic"
+    Calcinator   = 2 : "Calcinator"
   }
 
 float quality;

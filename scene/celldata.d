@@ -465,24 +465,24 @@ class CellData
 	    else fail(format("  UNKNOWN REFERENCE! Type ", cast(int)it.i.type));
 
 	    // Now that the object has found it's place, load data
-	    // into base.
+	    // into the object.
 
 	    with(*mo)
 	      {
 		// Scale. Multiply with the existing scale value.
-                float scale = getFloat("scale");
-		setFloat("scale", scale*getHNOFloat("XSCL", 1.0));
+                float *scale = getFloatPtr("scale");
+		*scale *= getHNOFloat("XSCL", 1.0);
 
-		// Statics only need the position data. Skip the
-		// unneeded calls to isNextSub() as an optimization.
+		// Statics only need the position data. Skip the rest
+		// as an optimization.
 		if(stat) goto readpos;
 
-		// An NPC that owns this object (and will get angry if
-		// you steal it)
+		// The NPC that owns this object (and will get angry
+		// if you steal it)
 		setString8("owner", getHNOString("ANAM"));
 		
 		// I have no idea, link to a global variable perhaps?
-		setString8("global", getHNOString("BNAM"));
+		setString8("glob", getHNOString("BNAM"));
 
 		// ID of creature trapped in a soul gem (?)
 		setString8("soulID", getHNOString("XSOL"));

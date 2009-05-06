@@ -148,21 +148,26 @@ template LoadTT(T)
 
   void makeProto(char[] clsName = null)
     {
-      // Use the template type name as the Monster class name if none
-      // is specified.
-      if(clsName == "")
-        {
-          clsName = typeid(T).toString;
-
-          // Remove the module name
-          int i = clsName.rfind('.');
-          if(i != -1)
-            clsName = clsName[i+1..$];
-        }
-
       // Set up a prototype object
       if(mc is null)
-        mc = vm.load(clsName);
+        {
+          // Use the template type name as the Monster class name if
+          // none is specified.
+          if(clsName == "")
+            {
+              clsName = typeid(T).toString;
+
+              // Remove the module name
+              int i = clsName.rfind('.');
+              if(i != -1)
+                clsName = clsName[i+1..$];
+            }
+
+          // All the game objects are in the 'game' package
+          clsName = "game." ~ clsName;
+          mc = vm.load(clsName);
+        }
+
       proto = mc.createObject();
 
       proto.setString8("id", id);

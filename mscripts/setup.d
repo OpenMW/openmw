@@ -37,8 +37,6 @@ void initMonsterScripts()
 {
   // Add the script directories
   vm.addPath("mscripts/");
-  vm.addPath("mscripts/gameobjects/");
-  vm.addPath("mscripts/sound/");
 
   // Import some modules into the global scope, so we won't have to
   // import them manually in each script.

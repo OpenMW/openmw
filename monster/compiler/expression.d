@@ -1097,6 +1097,9 @@ class PackageImpHolder : ImportHolder
     {
       sc = psc;
       assert(sc !is null);
+
+      type = psc.type;
+      assert(type !is null);
     }
 
  override:

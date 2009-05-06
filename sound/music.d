@@ -68,7 +68,7 @@ struct Music
     assert(controlC is null);
     assert(controlM is null);
 
-    jukeC = vm.load("Jukebox");
+    jukeC = vm.load("sound.Jukebox");
     jukeC.bind("waitUntilFinished",
             new Idle_waitUntilFinished);
 
@@ -79,7 +79,7 @@ struct Music
 
     jukeC.bindConst({new Jukebox(params.obj()); });
 
-    controlC = vm.load("Music");
+    controlC = vm.load("sound.Music");
     controlM = controlC.getSing();
     controlM.call("setup");
   }

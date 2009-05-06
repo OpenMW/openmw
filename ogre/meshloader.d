@@ -163,6 +163,7 @@ struct MeshLoader
         auto pc = cast(NiPathController)data.controller;
         if(kc !is null)
           {
+            /*
             writefln("Found keyframe controller");
             writefln("   Node name was: %s", data.name);
             assert(cont.target is data);
@@ -170,6 +171,7 @@ struct MeshLoader
             auto kcd = kc.data;
             writefln("   Types: %s %s %s",
                      kcd.rotType, kcd.traType, kcd.scaleType);
+            */
 
             /*
               Adding keyframes:
@@ -189,7 +191,7 @@ struct MeshLoader
           }
         else if(pc !is null)
           {
-            writefln("Found path controller");
+            //writefln("Found path controller");
             assert(cont.target is data);
           }
         else writefln("Other controller (%s)", cont);

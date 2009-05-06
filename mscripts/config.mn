@@ -35,6 +35,8 @@ float mouseSensX;
 float mouseSensY;
 bool flipMouseY;
 
+import sound;
+
 // TODO: This could be replaced by some sort of hook placed on
 // mainVolume. Writing to the variable would automatically update
 // everything.

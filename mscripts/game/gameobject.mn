@@ -49,7 +49,7 @@ char[] name, id;
 char[] owner;
 
 // A global variable? Don't know what it's used for.
-char[] global;
+char[] glob;
 
 // Reference to a soul trapped creature?
 char[] soulID;
@@ -61,10 +61,8 @@ int indx;
 // Magic value / health / uses of an item?
 float xchg;
 
-// ?? See comment below
+// These depend on the item in question
 int intv, nam9;
-
-// ??
 int fltv;
 int unam;
 

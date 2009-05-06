@@ -520,7 +520,7 @@ class DotOperator : OperatorExpr
       owner.resolve(sc);
 
       Type ot = owner.type;
-      assert(ot !is null);
+      assert(ot !is null, "owner " ~ owner.toString ~ " has no type!");
 
       ot.getMemberScope();
 

@@ -36,7 +36,7 @@ import esm.imports;
 
 struct Activator
 {
-  mixin LoadT!();
+  mixin LoadT;
 
   Script *script;
   MeshIndex model;

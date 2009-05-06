@@ -613,6 +613,11 @@ class MemberExpr : Expression
       if(isType)
         return true;
 
+      // Singletons are also static members (of packages), even if the
+      // type is not a meta type
+      if(singCls != -1)
+        return true;
+
       // Ditto for packages
       if(isPackage)
         return true;
@@ -911,7 +916,7 @@ class MemberExpr : Expression
         // only push the index.
         tasm.pushFarClass(var.number, var.sc.getClass().getTreeIndex(), s);
 
-      else assert(0);
+      else assert(0, "called evalAsm on " ~ toString());
     }
 
   // Push the address of the variable rather than its value

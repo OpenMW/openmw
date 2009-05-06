@@ -952,7 +952,7 @@ final class MonsterClass
   void createScope()
     {
       // Since debugging self inheritance can be a little icky, add an
-      // explisit recursion check.
+      // explicit recursion check.
       assert(!flags.has(CFlags.InScope), "createScope called recursively");
       flags.set(CFlags.InScope);
 
@@ -968,9 +968,15 @@ final class MonsterClass
       parents.length = parentNames.length;
       foreach(int i, pName; parentNames)
         {
-          // Find the class. vm.load() returns the existing class if
-          // it has already been loaded.
-          MonsterClass mc = vm.load(pName.str);
+          // Find the parent class.
+          assert(pack !is null);
+          auto sl = pack.lookupClass(pName);
+          if(!sl.isClass)
+            fail("Cannot inherit from " ~ pName.str ~ ": No such class.",
+                 pName.loc);
+          auto mc = sl.mc;
+          assert(mc !is null);
+          //MonsterClass mc = vm.load(pName.str);
           mc.requireScope();
 
           assert(mc !is null);
