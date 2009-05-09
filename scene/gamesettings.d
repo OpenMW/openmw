@@ -44,7 +44,4 @@ void loadGameSettings()
       // UTF32 at load time, so string8 will not be needed here.
       else if(b.type == VarType.String) gmstObj.setString8(name, b.str);
     }
-
-  // Call the test function
-  gmstObj.call("test");
 }

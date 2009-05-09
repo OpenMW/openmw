@@ -281,10 +281,7 @@ struct ConfigManager
       {
         char[] s = ini.getString("Game Files", format("GameFile[%d]",i), null);
         if(s != null && srch.has(s))
-          {
-            writefln("Adding game file %s", s);
-            gameFiles ~= esmDir ~ s;
-          }
+          gameFiles ~= esmDir ~ s;
       }
     delete srch;
 

@@ -37,8 +37,8 @@ module monster.options;
   the language, let us know!
 */
 
-const:
 static:
+const:
 
 
 /*********************************************************
@@ -97,7 +97,8 @@ int maxFStack = 100;
 // can run at once. Enabling this will prevent infinite loops.
 bool enableExecLimit = true;
 
-// Maximum number of instructions to allow in once call to execute() (if 
+// Maximum number of instructions to allow in each call to execute()
+// (if enableExecLimit is true)
 long execLimit = 10000000;
 
 
@@ -109,17 +110,14 @@ long execLimit = 10000000;
 
  *********************************************************/
 
-// Enable tracing of external functions on the function stack. If
-// true, you may use vm.trace() and vm.untrace() to add your own
-// functions to the internal Monster function stack for debug purposes
-// (the functions will show up in debug output.) If false, these
-// functions will be empty and most likely optimized away completely
-// by the D compiler (in release builds).
-bool enableTrace = true;
+// If true, set the log output to standard out. If false, logging is
+// disabled by default and must be activated (through monster.vm.dbg)
+// at runtime.
+bool defaultLogToStdout = false;
 
-
-
-
+// If true, all function stack operations (pushes and pops) are logged
+// with dbg.log().
+bool logFStack = true;
 
 /*********************************************************
 

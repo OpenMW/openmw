@@ -94,7 +94,7 @@ static ~this()
 }
 
 // Loads ogre configurations, creats the root, etc.
-void setupOgre()
+void setupOgre(bool debugOut)
 {
   char[] plugincfg;
 
@@ -108,7 +108,7 @@ void setupOgre()
 
   // Later we will send more config info from core.config along with
   // this function
-  if(ogre_configure(config.finalOgreConfig, toStringz(plugincfg)))
+  if(ogre_configure(config.finalOgreConfig, toStringz(plugincfg), debugOut))
     OgreException("Configuration abort");
 
   ogre_initWindow();
@@ -119,7 +119,7 @@ void setupOgre()
   ogre_makeScene();
 
   // Load the GUI system
-  gui_setupGUI();
+  gui_setupGUI(debugOut);
 
   // Run the GUI scripts
   runGUIScripts();
@@ -148,8 +148,8 @@ void startRendering()
   ogre_startRendering();
 }
 
-// Cleans up after OGRE. Resets things like screen resolution and
-// mouse control.
+// Cleans up after OGRE. Resets things like screen resolution, mouse
+// control and keyboard repeat rate.
 void cleanupOgre()
 {
   if(ogreSetup)

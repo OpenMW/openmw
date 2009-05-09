@@ -30,7 +30,11 @@ extern "C" void gui_setNeedMouseFocus(MyGUI::WidgetPtr p, int32_t b)
 { p->setNeedMouseFocus(b); }
 
 extern "C" void gui_setTextColor(MyGUI::WidgetPtr p, float r,float g,float b)
-{ p->setTextColour(Ogre::ColourValue(b,g,r)); }
+{
+  MyGUI::StaticText *st = dynamic_cast<MyGUI::StaticText*>(p);
+  if(st != NULL)
+    st->setTextColour(Ogre::ColourValue(b,g,r));
+}
 
 extern "C" void gui_setCoord(MyGUI::WidgetPtr p,
                              int32_t x,int32_t y,int32_t w,int32_t h)
@@ -177,7 +181,7 @@ public:
   {
     MyGUI::WidgetPtr pt;
     getWidget(pt, name);
-    pt->setTextColour(Ogre::ColourValue(b,g,r));
+    gui_setTextColor(pt,r,g,b);
   }
 
   void setImage(const char* name, const char* imgName)
@@ -278,7 +282,6 @@ public:
     setCoord(500,0,320,300);
     mMainWidget->setCaption(cellName);
     setText("WorldButton", "World");
-    setColor("WorldButton", 0.75, 0.6, 0.35);
     setImage("Compass", "compass.dds");
   }
 };
@@ -399,10 +402,14 @@ void turnGuiOff(MyGUI::WidgetPtr sender)
   gui_toggleGui();
 }
 
-extern "C" void gui_setupGUI()
+extern "C" void gui_setupGUI(int32_t debugOut)
 {
   ResourceGroupManager::getSingleton().
     addResourceLocation("media_mygui", "FileSystem", "General");
+
+  // Enable/disable logging to stdout
+  MyGUI::LogManager::initialise();
+  MyGUI::LogManager::setSTDOutputEnabled(debugOut);
 
   mGUI = new MyGUI::Gui();
   mGUI->initialise(mWindow);

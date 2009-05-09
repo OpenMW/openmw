@@ -36,6 +36,7 @@ import scene.player;
 import bullet.bindings;
 
 import monster.monster;
+import monster.vm.dbg;
 
 import ogre.bindings;
 
@@ -241,6 +242,9 @@ bool isPressed(Keys key)
 extern(C) int d_frameStarted(float time, int guiMode)
 {
   if(doExit) return 0;
+
+  dbg.trace("d_frameStarted");
+  scope(exit) dbg.untrace();
 
   // Run the Monster scheduler
   vm.frame(time);

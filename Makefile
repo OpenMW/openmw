@@ -1,9 +1,8 @@
 # Designed for GNU Make
 
 # Compiler settings
-CXXFLAGS?= -g
+CXXFLAGS?= -g -Iutil/
 DMD=gdmd -version=Posix
-#DMD=dmd -version=Posix
 
 # Some extra flags for niftool and bsatool
 NIFFLAGS=-debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose

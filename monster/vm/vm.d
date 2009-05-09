@@ -28,7 +28,6 @@ import monster.vm.thread;
 import monster.vm.mclass;
 import monster.vm.mobject;
 import monster.vm.init;
-import monster.vm.fstack;
 
 import monster.compiler.tokenizer;
 import monster.compiler.linespec;
@@ -134,63 +133,6 @@ struct VM
 
     return load(ms, name);
   }
-
-  static if(enableTrace)
-  {
-    // Push the given string onto the function stack as an external
-    // function.
-    void tracef(...)
-      {
-        char[] s;
-
-        void putc(dchar c)
-          {
-            std.utf.encode(s, c);
-          }
-
-        std.format.doFormat(&putc, _arguments, _argptr);
-        trace(s);
-      }
-
-    void trace(char[] name) { pushExt(name); }
-    void untrace() { popExt(); }
-  }
-  else
-  {
-    void tracef(...) {}
-    void trace(char[]) {}
-    void untrace() {}
-  }
-
-  void pushExt(char[] name)
-  {
-    getFStack().pushExt(name);
-  }
-
-  // Pop the last function pushed by pushExt()
-  void popExt()
-  {
-    auto fs = getFStack();
-    assert(fs.cur !is null && fs.cur.isExternal,
-           "vm.untrace() used on a non-external function stack entry");
-    fs.pop();
-  }
-
-  // Get the active function stack, or the externals stack if no
-  // thread is active.
-  FunctionStack *getFStack()
-  {
-    if(cthread !is null)
-      {
-        assert(!cthread.fstack.isEmpty);
-        return &cthread.fstack;
-      }
-    return &externals;
-  }
-
-  // Return the current function stack printout
-  char[] getTrace()
-  { return getFStack().toString(); }
 
   void addPath(char[] path)
   {

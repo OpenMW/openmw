@@ -29,6 +29,7 @@ import monster.vm.mclass;
 import monster.vm.stack;
 import monster.vm.error;
 import monster.vm.thread;
+import monster.vm.dbg;
 import monster.compiler.states;
 import monster.compiler.functions;
 import monster.compiler.linespec;
@@ -123,7 +124,7 @@ struct StackPoint
   char[] toString()
   {
     if(isExternal)
-      return "external function " ~ extName;
+      return "external " ~ extName;
 
     assert(func !is null);
 
@@ -241,18 +242,11 @@ struct FunctionStack
   // Set the stack point up as a function. Allows obj to be null.
   void push(Function *func, MonsterObject *obj)
   {
-    //assert(cthread !is null && this is &cthread.fstack);
-
     push(obj);
 
     assert(func !is null);
     cur.ftype = SPType.Function;
     cur.func = func;
-
-    /*
-    writefln("Pushing ", func.name);
-    writefln(toString, "\n");
-    */
 
     assert(func.owner !is null);
     assert(obj is null || func.owner.parentOf(obj.cls));
@@ -264,6 +258,11 @@ struct FunctionStack
       natives++;
 
     assert(!func.isIdle, "don't use fstack.push() on idle functions");
+
+    static if(logFStack)
+      {
+        dbg.log("+++ " ~ cur.toString());
+      }
   }
 
   // Set the stack point up as a state
@@ -272,8 +271,6 @@ struct FunctionStack
     assert(st !is null);
     assert(isEmpty,
            "state code can only run at the bottom of the function stack");
-
-    //writefln("Pushing state ", st.name);
 
     push(obj);
     cur.ftype = SPType.State;
@@ -285,6 +282,11 @@ struct FunctionStack
 
     // Set up the byte code
     cur.code.setData(st.bcode);
+
+    static if(logFStack)
+      {
+        dbg.log("+++ " ~ cur.toString());
+      }
   }
 
   // Push an external (non-scripted) function on the function
@@ -295,6 +297,11 @@ struct FunctionStack
     natives++;
     cur.ftype = SPType.External;
     cur.extName = name;
+
+    static if(logFStack)
+      {
+        dbg.log("+++ " ~ cur.toString());
+      }
   }
 
   void pushIdle(Function *func, MonsterObject *obj)
@@ -304,11 +311,14 @@ struct FunctionStack
     cur.func = func;
     cur.ftype = SPType.Idle;
 
-    //writefln("Pushing idle ", func.name);
-
     assert(func.owner !is null);
     assert(obj is null || func.owner.parentOf(obj.cls));
     assert(func.isIdle, func.name.str ~ "() is not an idle function");
+
+    static if(logFStack)
+      {
+        dbg.log("+++ " ~ cur.toString());
+      }
   }
 
   // Pops one entry of the stack. Checks that the stack level has been
@@ -324,11 +334,10 @@ struct FunctionStack
       natives--;
     assert(natives >= 0);
 
-    /*
-    if(cur.isFunc) writefln("popping function ", cur.func.name);
-    else if(cur.isState) writefln("popping state ", cur.state.name);
-    writefln(toString, "\n");
-    */
+    static if(logFStack)
+      {
+        dbg.log(" -- " ~ cur.toString());
+      }
 
     // Remove the topmost node from the list, and set cur.
     assert(cur == list.getHead());
@@ -338,6 +347,11 @@ struct FunctionStack
     restoreFrame();
 
     assert(list.length != 0 || cur is null);
+
+    static if(logFStack)
+      {
+        dbg.log("");
+      }
   }
 
   // Get a stack trace (pretty basic at the moment)

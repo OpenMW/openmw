@@ -50,8 +50,8 @@ extern(C):
 // Do engine configuration. Returns 0 if we should continue, 1 if
 // not.
 int ogre_configure(int showConfig, // Do we show the config dialogue?
-                   char *plugincfg // Name of 'plugin.cfg' file
-                   );
+                   char *plugincfg,// Name of 'plugin.cfg' file
+                   int debutOut);  // Enable or disable debug output
 
 // Sets up the window
 void ogre_initWindow();
@@ -116,14 +116,16 @@ NodePtr ogre_attachLight(char* name, NodePtr parent,
                          float radius);
 
 // Create the specified material
-void ogre_createMaterial(char *name,	// Name to give resource
-                         float *ambient, // Ambient RBG value
+void ogre_createMaterial(char *name,	  // Name to give resource
+                         float *ambient,  // Ambient RBG value
                          float *diffuse,
                          float *specular,
-                         float *emissive,// Self illumination
+                         float *emissive, // Self illumination
                          float glossiness,// Same as shininess?
-                         float alpha,    // Use this in all alpha values?
-                         char *texture); // Texture name
+                         float alpha,     // Reflection alpha?
+                         char *texture,   // Texture name
+                         int alphaFlags,  // Alpha settings (see
+                         ubyte alphaTest);// NiAlphaProperty in nif/)
 
 // Creates a mesh and gives it a bounding box. Also creates an entity
 // and attached it to the given SceneNode 'owner'.
@@ -165,7 +167,7 @@ void ogre_moveCameraRel(float x, float y, float z);
 
 // GUI functions. Under development.
 typedef void* WidgetPtr;
-void gui_setupGUI();
+void gui_setupGUI(int debugOut);
 void gui_toggleGui();
 void gui_setCellName(char *str);
 

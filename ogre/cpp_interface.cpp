@@ -43,10 +43,21 @@ extern "C" void ogre_cleanup()
 
 extern "C" int32_t ogre_configure(
                    int32_t showConfig, // Do we show the config dialogue?
-                   char *plugincfg     // Name of 'plugin.cfg' file
-                   )
+                   char *plugincfg,    // Name of 'plugin.cfg' file
+                   int32_t debugOut)   // Enable or disable logging
 {
-  mRoot = new Root(plugincfg);
+  // Set up logging first
+  new LogManager;
+  Log *log = LogManager::getSingleton().createLog("default");
+
+  if(debugOut)
+    // Full log detail
+    log->setLogDetail(LL_BOREME);
+  else
+    // Disable logging
+    log->setDebugOutputEnabled(false);
+
+  mRoot = new Root(plugincfg, "ogre.cfg", "");
 
   // Add the BSA archive manager before reading the config file.
   ArchiveManager::getSingleton().addArchiveFactory( &mBSAFactory );
@@ -95,7 +106,7 @@ extern "C" int32_t ogre_configure(
 // Initialize window. This will create and show the actual window.
 extern "C" void ogre_initWindow()
 {
-  std::cout << "ogre_initWindow()\n";
+  TRACE("ogre_initWindow");
 
   // Initialize OGRE.
   mWindow = mRoot->initialise(true, "OpenMW", "");
@@ -155,8 +166,6 @@ extern "C" void ogre_initWindow()
   // Register the input listener
   mKeyboard -> setEventCallback( &mInput );
   mMouse    -> setEventCallback( &mInput );
-
-  std::cout << "ogre_initWindow finished\n";
 }
 
 // Make a scene
@@ -619,7 +628,10 @@ extern "C" void ogre_createMaterial(char *name,	    // Name to give
 				   float alpha,     // Use this in all
 						    // alpha values?
 
-				   char* texture)   // Texture
+				   char* texture,   // Texture
+
+                                   int32_t alphaFlags,
+                                   uint8_t alphaTest) // Alpha settings
 {
       MaterialPtr material = MaterialManager::getSingleton().create(
         name,
@@ -630,7 +642,30 @@ extern "C" void ogre_createMaterial(char *name,	    // Name to give
       // directory), it will automatically be loaded when needed. If
       // not, we should already have inserted a manual loader for the texture.
       if(texture)
-	material->getTechnique(0)->getPass(0)->createTextureUnitState(texture);
+        {
+          Pass *pass = material->getTechnique(0)->getPass(0);
+          TextureUnitState *txt = pass->createTextureUnitState(texture);
+
+          // Add transparencly.
+
+          if(alphaFlags != -1)
+            {
+              // The 237 alpha flags are by far the most common. Check
+              // NiAlphaProperty in nif/properties.d if you need to
+              // decode other values. 237 basically means normal
+              // transparencly.
+              if(alphaFlags == 237)
+                {
+                  // Enable transparency
+                  pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+
+                  //pass->setDepthCheckEnabled(false);
+                  pass->setDepthWriteEnabled(false);
+                }
+              else
+                std::cout << "UNHANDLED ALPHA FOR " << texture << ": " << alphaFlags << "\n";
+            }
+        }
 
       // Set bells and whistles
       material->setAmbient(ambient[0], ambient[1], ambient[2]);
@@ -638,12 +673,6 @@ extern "C" void ogre_createMaterial(char *name,	    // Name to give
       material->setSpecular(specular[0], specular[1], specular[2], alpha);
       material->setSelfIllumination(emissive[0], emissive[1], emissive[2]);
       material->setShininess(glossiness);
-
-      // Enable transparancy? This is just guesswork. Perhaps we
-      // should use NiAlphaProperty or something instead. This looks
-      // like crap so it's not enabled right now.
-
-      //material->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 }
 
 extern "C" SceneNode *ogre_getDetachedNode()

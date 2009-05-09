@@ -25,6 +25,8 @@
 
 #include <iostream>
 
+#include "dbg.h"
+
 using namespace std;
 
 class CustomOverlappingPairCallback;
@@ -406,7 +408,7 @@ extern "C" void bullet_insertStatic(btConcaveShape *shape,
   // Are we scaled?
   if(scale != 1.0)
     {
-      cout << "Scaling shape " << shape << " by " << scale << endl;
+      //cout << "Scaling shape " << shape << " by " << scale << endl;
 
       // Not quite sure how to handle local scaling yet. Our initial
       // attempt was to create a wrapper that showed a scale mesh to
@@ -454,6 +456,7 @@ extern "C" void bullet_insertStatic(btConcaveShape *shape,
 // Move the physics simulation 'delta' seconds forward in time
 extern "C" void bullet_timeStep(float delta)
 {
+  TRACE("bullet_timeStep");
   // TODO: We might experiment with the number of time steps. Remember
   // that the function also returns the number of steps performed.
   g_dynamicsWorld->stepSimulation(delta,2);

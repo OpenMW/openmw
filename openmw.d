@@ -43,6 +43,7 @@ import core.config;
 
 import monster.util.string;
 import monster.vm.mclass;
+import monster.vm.dbg;
 import mscripts.setup;
 
 import sound.audio;
@@ -69,6 +70,7 @@ void main(char[][] args)
   bool resetKeys = false;
   bool showOgreFlag = false;
   bool noSound = false;
+  bool debugOut = false;
 
   // Some examples to try:
   //
@@ -99,6 +101,14 @@ void main(char[][] args)
     else if(a == "-rk") resetKeys = true;
     else if(a == "-oc") showOgreFlag = true;
     else if(a == "-ns") noSound = true;
+    else if(a == "-debug")
+      {
+        // Enable Monster debug output
+        dbg.dbgOut = dout;
+
+        // Tell OGRE to do the same later on
+        debugOut = true;
+      }
     else cells ~= a;
 
   if(cells.length + eCells.length/2 > 1 )
@@ -116,6 +126,7 @@ void main(char[][] args)
       writefln("    -rk           Reset key bindings to default");
       writefln("    -oc           Show the Ogre config dialogue");
       writefln("    -ns           Completely disable sound");
+      writefln("    -debug        Print debug information");
       writefln("    -h            Show this help");
       writefln("");
       writefln("Specifying more than one cell implies -n");
@@ -205,7 +216,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
       // Get a cell data holder and load an interior cell
       cd = cellList.get();
 
-      writefln("Will load %s,%s", x, y);
+      if(debugOut) writefln("Will load %s,%s", x, y);
       try cd.loadExtCell(x,y);
       catch(Exception e)
 	{
@@ -219,11 +230,12 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
   NodePtr putObject(MeshIndex m, Placement *pos, float scale,
                     bool collide=false)
     {
-      if(m == null)
+      if(m is null)
 	writefln("WARNING: CANNOT PUT NULL OBJECT");
-      else if(m.isEmpty)
-	writefln("WARNING: CANNOT INSERT EMPTY MESH '%s'", m.getName);
-      else return placeObject(m, pos, scale, collide);
+      else if(!m.isEmpty)
+        return placeObject(m, pos, scale, collide);
+
+      //writefln("WARNING: CANNOT INSERT EMPTY MESH '%s'", m.getName);
       return null;
     }
 
@@ -234,7 +246,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
   if(render)
     {
       // Warm up OGRE
-      setupOgre();
+      setupOgre(debugOut);
       scope(exit) cleanupOgre();
 
       // Set up Bullet
@@ -278,7 +290,6 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
             Sound *s = ls.m.sound;
             if(s)
 	    {
-	      writefln("Dynamic light %s has sound %s", ls.m.id, s.id);
 	      ls.loopSound = soundScene.insert(s, true);
 	      if(ls.loopSound)
                 {
@@ -300,7 +311,6 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
 	  Sound *s = ls.m.sound;
 	  if(s)
 	    {
-	      writefln("Static light %s has sound %s", ls.m.id, s.id);
               ls.loopSound = soundScene.insert(s, true);
               if(ls.loopSound)
                 {
@@ -369,7 +379,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
       // Run it until the user tells us to quit
       startRendering();
     }
-  else debug(verbose) writefln("Skipping rendering");
+  else if(debugOut) writefln("Skipping rendering");
 
   if(!noSound)
     {
@@ -377,7 +387,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
       shutdownSound();
     }
 
-  debug(verbose)
+  if(debugOut)
     {
       writefln();
       writefln("%d statics", cd.statics.length);
@@ -421,7 +431,10 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
   cellList.release(cd);
 
   // Write some statistics
-  poolSize();
-  writefln(esmRegion);
-  writefln("Total objects: ", MonsterClass.getTotalObjects);
+  if(debugOut)
+    {
+      poolSize();
+      writefln(esmRegion);
+      writefln("Total objects: ", MonsterClass.getTotalObjects);
+    }
 }

@@ -87,7 +87,7 @@ int main(char[][] args)
   int help(char[] msg)
     {
       writefln("%s", msg);
-      writefln("Format: bsatool archive.bsa [-x filename] [-l] [-n]");
+      writefln("Format: bsatool archive.bsa [-x filename] [-l] [-n] [-xa]");
       writefln("  -x filename     extract file");
       writefln("  -xa             extract everything");
       writefln("  -l              list all files");

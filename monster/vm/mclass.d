@@ -455,7 +455,8 @@ final class MonsterClass
 
       // Needed to make sure execute() exits when the constructor is
       // done.
-      vm.pushExt("callConst");
+      if(cthread !is null)
+        cthread.fstack.pushExt("callConst");
 
       // Call constructors
       foreach(c; tree)
@@ -473,7 +474,8 @@ final class MonsterClass
             c.scptConst.fn.call(obj);
         }
 
-      vm.popExt();
+      if(cthread !is null)
+        cthread.fstack.pop();
     }
 
   // Get the whole allocated buffer belonging to this object

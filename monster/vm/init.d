@@ -32,6 +32,7 @@ import monster.vm.thread;
 import monster.vm.stack;
 import monster.vm.arrays;
 import monster.vm.vm;
+import monster.vm.dbg;
 
 import monster.modules.all;
 import monster.options;
@@ -120,6 +121,9 @@ void doMonsterInit()
   assert(stHasRun, "D library initializion failed");
 
   // Next, initialize the Monster library
+
+  // Initialize the debugger structure
+  dbg.init();
 
   // Initialize compiler constructs
   initTokenizer();

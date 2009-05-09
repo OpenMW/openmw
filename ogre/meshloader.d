@@ -66,8 +66,6 @@ struct MeshLoader
   {
     baseName = name;
 
-    writefln("Loading mesh '%s'", name);
-
     // Check if the first record is a node
     Node n = cast(Node) nifMesh.records[0];
 
@@ -194,7 +192,7 @@ struct MeshLoader
             //writefln("Found path controller");
             assert(cont.target is data);
           }
-        else writefln("Other controller (%s)", cont);
+        //else writefln("Other controller (%s)", cont);
         cont = cont.next;
       }
 
@@ -209,6 +207,10 @@ struct MeshLoader
     char[] material;
     char[] newName = UniqueName(baseName);
     NiMaterialProperty mp;
+
+    // Special alpha settings, if the NiAlphaProperty is present
+    int alphaFlags = -1;
+    ubyte alphaTest;
 
     bool hidden = (flags & 0x01) != 0; // Not displayed
     bool collide = (flags & 0x02) != 0; // Use this mesh for collision
@@ -260,6 +262,16 @@ struct MeshLoader
 	    }
 	}
 
+        // NiAlphaProperty
+        {
+          NiAlphaProperty a = cast(NiAlphaProperty) p;
+          if(a !is null)
+            {
+              alphaFlags = a.flags;
+              alphaTest = a.threshold;
+            }
+        }
+
 	// NiMaterialProperty block
 	{
 	  NiMaterialProperty tmp = cast(NiMaterialProperty) p;
@@ -270,11 +282,8 @@ struct MeshLoader
 	      material = newName;
 	      continue;
 	    }
-	  //writefln("Unknown property found: ", p);
 	}
       }
-    //if(!texture.length) writefln("No texture found");
-
     // Get a pointer to the texture name
     char* texturePtr;
     if(texture.length) texturePtr = toStringz(texture);
@@ -282,9 +291,12 @@ struct MeshLoader
 
     // Create the material
     if(material.length)
-      ogre_createMaterial(material.ptr, mp.ambient.array.ptr, mp.diffuse.array.ptr,
-			 mp.specular.array.ptr, mp.emissive.array.ptr,
-			 mp.glossiness, mp.alpha, texturePtr);
+      // A material is present. Use it.
+      ogre_createMaterial(material.ptr, mp.ambient.array.ptr,
+                          mp.diffuse.array.ptr,
+                          mp.specular.array.ptr, mp.emissive.array.ptr,
+                          mp.glossiness, mp.alpha, texturePtr,
+                          alphaFlags, alphaTest);
     else if(texturePtr)
       {
 	// Texture, but no material. Make a default one.
@@ -294,8 +306,8 @@ struct MeshLoader
 	zero[] = 0.0;
 	one[] = 1.0;
 
-	ogre_createMaterial(newName.ptr, one.ptr, one.ptr, zero.ptr, zero.ptr, 0.0, 1.0,
-			   texturePtr);
+	ogre_createMaterial(newName.ptr, one.ptr, one.ptr, zero.ptr, zero.ptr,
+                            0.0, 1.0, texturePtr, alphaFlags, alphaTest);
       }
 
   nomaterial:

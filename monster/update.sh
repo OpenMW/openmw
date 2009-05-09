@@ -10,4 +10,6 @@ done
 
 svn st
 
-diff options.openmw options.d
+diff options.openmw options.d || $EDITOR options.d
+mv options.openmw options.openmw_last
+cp options.d options.openmw

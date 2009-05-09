@@ -35,6 +35,8 @@
 
 #include <MyGUI.h>
 
+#include "dbg.h"
+
 using namespace Ogre;
 
 RenderWindow* mWindow;

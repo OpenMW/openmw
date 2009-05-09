@@ -37,11 +37,11 @@ Dependencies:
 
 Dependencies needed to build OpenMW:
 
-OGRE 1.4.5         (3d engine)
+OGRE 1.6.2         (3d engine)
 OIS-1.0.0          (input system)
-MyGUI              (GUI system for OGRE)
-Bullet 2.72        (collision and physics library)
-Monster 0.11       (scripting engine, included)
+MyGUI 2.2.2        (GUI system for OGRE)
+Bullet 2.74        (collision and physics library)
+Monster 0.12       (scripting engine, included)
 OpenAL             (3d sound system)
 libavcodec,
   libavformat      (For MP3 playback)
@@ -116,7 +116,7 @@ the libbulletdynamics.a etc if necessary.)
 
 Example:
 cd openmw/bullet
-ln -s ~/software/bullet-2.72/src/BulletCollision/libbulletcollision.a .
+ln -s ~/software/bullet-2.74/src/BulletCollision/libbulletcollision.a .
 
 Next, create a link to the "src" directory in openmw/include/bullet/ .
 
@@ -124,7 +124,7 @@ Example:
 cd openmw
 mkdir -p include
 cd include
-ln -s ~/software/bullet-2.72/src bullet
+ln -s ~/software/bullet-2.74/src bullet
 
 
 Setting up MyGUI

@@ -47,9 +47,6 @@ void initMonsterScripts()
 
   // Set up the GUI Monster module
   setupGUIScripts();
-
-  // Run the test script
-  vm.run("test.mn");
 }
 
 // Run the GUI scripts. These should be run only after the
@@ -62,3 +59,11 @@ void runGUIScripts()
   // Run the fps ticker
   vm.run("fpsticker.mn");
 }
+
+// This should probably not be here:
+import monster.vm.dbg;
+import std.string;
+
+extern(C):
+void dbg_trace(char*str) { dbg.trace(toString(str)); }
+void dbg_untrace() { dbg.untrace(); }

@@ -42,6 +42,7 @@ import monster.vm.mclass;
 import monster.vm.mobject;
 import monster.vm.codestream;
 import monster.vm.stack;
+import monster.vm.dbg;
 import monster.vm.idlefunction;
 import monster.vm.arrays;
 import monster.vm.iterators;
@@ -137,6 +138,11 @@ struct Thread
     auto cn = getNew();
     cn.moveTo(&scheduler.paused);
     return cn;
+  }
+
+  int getIndex()
+  {
+    return NodeList.getIndex(this)+1;
   }
 
   // Schedule the function to run the next frame. Can only be used on
@@ -366,6 +372,10 @@ struct Thread
     // Clear out our stack values
     stack.reset();
 
+    static if(logThreads)
+      dbg.log(format("------ deactivate thread=%s (stack=%s) ------",
+                     getIndex, sstack.length));
+
     assert(!isRunning);
   }
 
@@ -383,12 +393,18 @@ struct Thread
            stack.getPos() == 0,
            "only empty transient threads kan restore into a non-empty stack");
 
+    static if(logThreads)
+      dbg.log(format("------ activate thread=%s (stack=%s) ------",
+                     getIndex, sstack.length));
+
     if(sstack.length)
       {
         assert(stack.getPos() == 0,
                "cannot restore into a non-empty stack");
         assert(!isTransient,
                "cannot restore a transent thread with stack");
+
+
 
         // Push the values back, and free the buffer
         stack.pushInts(sstack);
