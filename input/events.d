@@ -213,7 +213,7 @@ void initializeInput()
 {
   // Move the player into place. TODO: This isn't really input-related
   // at all, and should be moved.
-  with(playerData.position)
+  with(*playerData.position)
     {
       ogre_moveCamera(position[0], position[1], position[2]);
       ogre_setCameraRotation(rotation[0], rotation[1], rotation[2]);
@@ -304,6 +304,11 @@ extern(C) int d_frameStarted(float time, int guiMode)
   // Get the final (actual) player position and update the camera
   bullet_getPlayerPos(&x, &y, &z);
   ogre_moveCamera(x,y,z);
+
+  // Store it in the player object
+  playerData.position.position[0] = x;
+  playerData.position.position[1] = y;
+  playerData.position.position[2] = z;
 
   // Tell the sound scene that the player has moved
   sndCumTime += time;

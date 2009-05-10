@@ -164,7 +164,7 @@ struct NPC
 
     skipRecord();
 
-    makeProto("Person");
+    makeProto();
 
     // Clean this up a little later, eg. no point in storing the
     // structs outside the function any longer. Same goes for most of

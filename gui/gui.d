@@ -21,11 +21,11 @@
 
  */
 
-module ogre.gui;
+module gui.gui;
 
 import monster.monster;
 import monster.vm.mclass;
-import ogre.bindings;
+import gui.bindings;
 import std.string;
 
 // Widget class and gui module
@@ -57,7 +57,7 @@ class MWidget
     isLayout = true;
     prefix = format("%s", cast(void*)this);
 
-    widget = gui_loadLayout(layout.ptr, prefix.ptr, parent);
+    widget = gui_loadLayout(layout.toStringz(), prefix.toStringz(), parent);
     if(widget is null)
       fail("Layout " ~ layout ~ " is empty");
 
@@ -91,7 +91,7 @@ class MWidget
       name = prefix ~ name;
 
     // Get the child widget
-    auto pt = gui_getChild(widget, name.ptr);
+    auto pt = gui_getChild(widget, name.toStringz());
 
     if(pt is null)
       fail("Widget has no child named " ~ name);
@@ -163,7 +163,7 @@ void setCaption()
   foreach(AIndex ind; args)
     res ~= format("%s", arrays.getRef(ind).carr);
 
-  gui_setCaption(getOwner(), res.ptr);
+  gui_setCaption(getOwner(), toStringz(res));
 }
 void setNeedMouseFocus()
 { gui_setNeedMouseFocus(getOwner(), stack.popBool); }
@@ -211,9 +211,9 @@ void text()
   int y = stack.popInt();
   int x = stack.popInt();
   char[] skin = stack.popString8();
-  WidgetPtr ptr = gui_createText(skin.ptr,
+  WidgetPtr ptr = gui_createText(skin.toStringz(),
                                  x,y,w,h,
-                                 layer.ptr);
+                                 layer.toStringz());
   assert(widgetType(ptr) == "StaticText");
   MWidget mw = new MWidget(ptr);
   stack.pushObject(mw.mo);

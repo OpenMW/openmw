@@ -38,7 +38,7 @@ bullet_cpp_files=$(bullet_cpp:%=bullet/cpp_%.cpp)
 # All object files needed by openmw and esmtool
 src := $(wildcard bsa/*.d) $(wildcard bullet/*.d) $(wildcard core/*.d) \
 $(wildcard esm/*.d) $(wildcard input/*.d) $(wildcard nif/*.d) $(wildcard ogre/*.d) \
-$(wildcard scene/*.d) $(wildcard sound/*.d) $(wildcard util/*.d)
+$(wildcard scene/*.d) $(wildcard sound/*.d) $(wildcard util/*.d) $(wildcard gui/*.d)
 src := $(src) $(wildcard mscripts/*.d)
 src := $(src) monster/monster.d \
 $(wildcard monster/vm/*.d) \

@@ -48,7 +48,7 @@ extern "C" int32_t ogre_configure(
 {
   // Set up logging first
   new LogManager;
-  Log *log = LogManager::getSingleton().createLog("default");
+  Log *log = LogManager::getSingleton().createLog("Ogre.log");
 
   if(debugOut)
     // Full log detail

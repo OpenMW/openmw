@@ -116,8 +116,12 @@ long execLimit = 10000000;
 bool defaultLogToStdout = false;
 
 // If true, all function stack operations (pushes and pops) are logged
-// with dbg.log().
+// with dbg.log(), and all logged messages are indented according to
+// the current fstack level.
 bool logFStack = true;
+
+// If true, log when threads are put into the background/forground.
+bool logThreads = true;
 
 /*********************************************************
 

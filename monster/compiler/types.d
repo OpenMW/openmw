@@ -1702,10 +1702,20 @@ class TypeofType : ReplacerType
 // D.
 class GenericType : InternalType
 {
+  static GenericType sing;
+
   this() { name = "var"; }
 
   static bool canParse(TokenArray toks)
     { return isNext(toks, TT.Var); }
+
+  static GenericType getSingleton()
+    {
+      if(sing is null)
+        sing = new GenericType;
+
+      return sing;
+    }
 
  override:
   bool isVar() { return true; }

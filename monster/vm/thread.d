@@ -167,6 +167,9 @@ struct Thread
     list.remove(this);
     list = null;
     assert(isDead);
+
+    static if(logThreads)
+      dbg.log(format("------ killing thread=%s ------", getIndex));
   }
 
   // Stop the execution of a thread and cancel any scheduling.

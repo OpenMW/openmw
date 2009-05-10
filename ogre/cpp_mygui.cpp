@@ -24,7 +24,9 @@ extern "C" int32_t gui_getWidth(MyGUI::WidgetPtr p)
 
 // Set various properties of a given widget
 extern "C" void gui_setCaption(MyGUI::WidgetPtr p, char* s)
-{ p->setCaption(s); }
+{
+  p->setCaption(s);
+}
 
 extern "C" void gui_setNeedMouseFocus(MyGUI::WidgetPtr p, int32_t b)
 { p->setNeedMouseFocus(b); }

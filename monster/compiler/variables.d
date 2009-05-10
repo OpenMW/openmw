@@ -576,6 +576,7 @@ class MemberExpr : Expression
         isNext(toks, TT.Singleton) ||
         isNext(toks, TT.State) ||
         isNext(toks, TT.Clone) ||
+        isNext(toks, TT.Var) ||
         isNext(toks, TT.Const);
     }
 
@@ -803,6 +804,13 @@ class MemberExpr : Expression
       if(name.type == TT.Const || name.type == TT.Clone)
         fail("Cannot use " ~ name.str ~ " as a variable", name.loc);
 
+      if(name.type == TT.Var)
+        {
+          type = GenericType.getSingleton();
+          vtype = VType.Special;
+          return;
+        }
+
       // Look ourselves up in the local scope, and include imported
       // scopes.
       look = sc.lookupImport(name);
@@ -851,6 +859,9 @@ class MemberExpr : Expression
 
   void evalAsm()
     {
+      if(type.isVar)
+        fail("Cannot use 'var' as an expression", loc);
+
       // Hairy. But does the trick for now.
       if(dotImport !is null && recurse)
         {
@@ -1011,12 +1022,19 @@ class VarDeclStatement : Statement
 {
   VarDeclaration[] vars;
   bool reqSemi;
+  Type preKnownType = null;
 
   // Pass 'true' to the constructor to require a semi-colon (used eg
   // in for loops)
   this(bool rs=false)
     {
       reqSemi = rs;
+    }
+
+  // Used from the console, when the type is already known
+  this(Type type)
+    {
+      preKnownType = type;
     }
 
   static bool canParse(TokenArray toks)
@@ -1030,7 +1048,12 @@ class VarDeclStatement : Statement
   void parse(ref TokenArray toks)
     {
       VarDeclaration varDec;
-      varDec = new VarDeclaration;
+
+      if(preKnownType !is null)
+        varDec = new VarDeclaration(preKnownType);
+      else
+        varDec = new VarDeclaration;
+
       varDec.parse(toks);
       vars ~= varDec;
       loc = varDec.var.name.loc;

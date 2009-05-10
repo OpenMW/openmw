@@ -1180,12 +1180,26 @@ class ExprStatement : Statement
   // Require a terminating semicolon or line break
   bool term = true;
 
+  // True if 'left' was set in the constructor
+  bool leftSet = false;
+
+  this(Expression lft=null)
+    {
+      left = lft;
+      if(left !is null)
+        leftSet = true;
+    }
+
   void parse(ref TokenArray toks)
     {
-      if(toks.length == 0)
-        fail("Expected statement, found end of stream.");
-      loc = toks[0].loc;
-      left = Expression.identify(toks);
+      if(left is null)
+        {
+          if(toks.length == 0)
+            fail("Expected statement, found end of stream.");
+          left = Expression.identify(toks);
+        }
+
+      loc = left.loc;
 
       Token tok;
 
@@ -1219,7 +1233,8 @@ class ExprStatement : Statement
 
   void resolve(Scope sc)
     {
-      left.resolve(sc);
+      if(!leftSet)
+        left.resolve(sc);
 
       loc = left.loc;
       type = left.type;

@@ -164,28 +164,3 @@ void ogre_moveCameraRel(float x, float y, float z);
 
 // Insert a raw RGBA image into the texture system.
 //void ogre_insertTexture(char *name, int width, int height, void *data);
-
-// GUI functions. Under development.
-typedef void* WidgetPtr;
-void gui_setupGUI(int debugOut);
-void gui_toggleGui();
-void gui_setCellName(char *str);
-
-// Get the widget type, as a string
-char *gui_widgetType(WidgetPtr);
-
-// Get the height or width of a widget. If the argument is null,
-// return the size of the screen.
-int gui_getHeight(WidgetPtr);
-int gui_getWidth(WidgetPtr);
-
-// Set various properties of a given widget
-void gui_setCaption(WidgetPtr, char*);
-void gui_setNeedMouseFocus(WidgetPtr, int);
-void gui_setTextColor(WidgetPtr, float,float,float);
-void gui_setCoord(WidgetPtr, int,int,int,int);
-
-// Various ways to get or create widgets
-WidgetPtr gui_loadLayout(char *file, char *prefix, WidgetPtr parent);
-WidgetPtr gui_getChild(WidgetPtr, char*);
-WidgetPtr gui_createText(char *skin, int x, int y, int w, int h, char *layer);

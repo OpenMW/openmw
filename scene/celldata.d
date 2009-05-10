@@ -453,7 +453,7 @@ class CellData
 	      {
 		// Create a creature, based on current player level.
 		LiveCreature ls;
-		ls.m = l.instCreature(playerData.level);
+		ls.m = l.instCreature(*playerData.level);
 		if(ls.m != null)
 		  {
                     // Note that this clones a creature object, not a
@@ -565,7 +565,7 @@ class CellData
 		if(door && !playerData.posSet)
 		  {
 		    playerData.posSet = true;
-		    playerData.position = *pos;
+		    *playerData.position = *pos;
 		  }
               }
           } // End of while(hasMoreSubs)

@@ -989,26 +989,66 @@ class FunctionCallExpr : Expression
 	fail("Parameter list expected ')'", toks);
     }
 
-  
-  this(Expression func, ref TokenArray toks)
+  // Special version of getParams that allow 'console-mode' grammar.
+  static void getParamsConsole(ref TokenArray toks,
+                               out ExprArray parms,
+                               out NamedParam[] named)
+    {
+      parms = null;
+      named = null;
+
+      // The param list is terminated by a semicolon or a newline
+      while(!isSep(toks))
+        {
+          if(toks.length == 0)
+            fail("Unexpected end of stream");
+
+          // Named paramter?
+          if(toks.length >= 3 && toks[1].type == TT.Equals)
+            {
+              NamedParam np;
+
+              reqNext(toks, TT.Identifier, np.name);
+              reqNext(toks, TT.Equals);
+              np.value = Expression.identify(toks);
+
+              named ~= np;
+            }
+          else
+            {
+              // Normal parameter
+              if(named.length)
+                fail("Cannot use non-named parameters after a named one",
+                     toks[0].loc);
+
+              parms ~= Expression.identify(toks);
+            }
+
+          // Allow optional commas between parameters
+          isNext(toks, TT.Comma);
+        }
+    }
+
+  this(Expression func, ref TokenArray toks, bool console=false)
     {
       assert(func !is null);
       fname = func;
       loc = fname.loc;
 
-      // Parse the parameter list
-      getParams(toks, params, named);
+      // Parse the parameter list. The 'console' parameter determines
+      // whether we're using normal grammar rules:
+      //     func(param1,param2)
+      // or console rules
+      //     func param1 param2
+      if(console)
+        getParamsConsole(toks, params, named);
+      else
+        getParams(toks, params, named);
     }
 
   /* Might be used for D-like implicit function calling, eg. someFunc;
      or (obj.prop)
   this(Expression func) {}
-
-  We might also allow a special free-form function call syntax, eg.
-  func 1 2 3
-
-  where parens and commas are optional, and the list is terminated by
-  isSep (newline or ;). This is useful mostly for console mode.
   */
 
   void parse(ref TokenArray toks) { assert(0); }
@@ -1176,7 +1216,7 @@ class FunctionCallExpr : Expression
     }
 
   // Evaluate the parameters
-  void evalParams()
+  private void evalParams()
     {
       // Again, let's handle the vararg case separately
       if(isVararg)
@@ -1253,9 +1293,10 @@ class FunctionCallExpr : Expression
     {
       if(isCast)
         {
+          // This is a type cast, not a function call.
+
           // Just evaluate the expression. CastExpression takes care
           // of everything automatically.
-
           assert(params.length == 1);
           assert(params[0] !is null);
           params[0].eval();

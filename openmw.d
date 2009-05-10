@@ -30,6 +30,7 @@ import std.file;
 
 import ogre.ogre;
 import ogre.bindings;
+import gui.bindings;
 
 import bullet.bullet;
 

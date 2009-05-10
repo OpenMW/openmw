@@ -28,9 +28,11 @@ import monster.compiler.scopes : global;
 import monster.modules.timer;
 
 import core.config;
-import ogre.gui;
+import gui.gui;
+import scene.player;
 
 import std.string;
+import std.stdio;
 
 // Set up the base Monster classes we need in OpenMW
 void initMonsterScripts()
@@ -44,6 +46,9 @@ void initMonsterScripts()
 
   // Get the Config singleton object
   config.mo = vm.load("Config").getSing();
+
+  // Set up the player object.
+  playerData.setup();
 
   // Set up the GUI Monster module
   setupGUIScripts();
@@ -62,7 +67,6 @@ void runGUIScripts()
 
 // This should probably not be here:
 import monster.vm.dbg;
-import std.string;
 
 extern(C):
 void dbg_trace(char*str) { dbg.trace(toString(str)); }

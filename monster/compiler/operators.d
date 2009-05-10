@@ -534,8 +534,8 @@ class DotOperator : OperatorExpr
       type = member.type;
 
       // Make sure we only call static members when the owner is a
-      // type.
-      if(ot.isMeta && !member.isStatic)
+      // type or a package.
+      if((ot.isMeta || ot.isPackage) && !member.isStatic)
         fail("Can only access static members for " ~ owner.toString,
              loc);
     }

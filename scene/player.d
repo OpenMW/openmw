@@ -24,6 +24,7 @@
 module scene.player;
 
 import ogre.ogre;
+import monster.monster;
 
 /*
  * Contains essential data about the player and other current game
@@ -34,14 +35,30 @@ PlayerData playerData;
 
 struct PlayerData
 {
-  // Position and rotation. The rotation is not updated continuously,
-  // only the position.
-  Placement position;
+  MonsterObject *mo;
 
-  // Just an example value, we use it for resolving leveled lists
-  // (lists that determine eg. what creatures to put in a cave based
-  // on what level the player is.)
-  short level = 5;
+  Placement *position;
+  int *level;
+
+  // Set up the player object. This is still pretty hackish and
+  // temporary.
+  void setup()
+  {
+    assert(mo is null);
+    mo = vm.load("game.player").createObject;
+    level = mo.getIntPtr("level");
+
+    // Still an ugly hack
+    position = cast(Placement*)mo.getFloatPtr("x");
+  }
+
+  /*
+  char[] getName()
+  {
+    assert(mo !is null);
+    return mo.getString8("name");
+  }
+  */
 
   // Temp. way of selecting start point - used in celldata
   bool posSet = false;

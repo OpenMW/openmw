@@ -134,19 +134,16 @@ class Console
 
   void putln(char[] str) { put(str, true); }
 
-  Statement[] parse(TokenArray toks)
+  Statement[] parse(TokenArray toks, Scope sc)
     {
-      Statement b = null;
+      Statement b;
       Statement[] res;
 
     repeat:
 
-      if(VarDeclStatement.canParse(toks))
-	{
-	  if(!allowVar) fail("Variable declaration not allowed here");
-	  b = new VarDeclStatement;
-	}
-      else if(CodeBlock.canParse(toks)) b = new CodeBlock;
+      b = null;
+
+      if(CodeBlock.canParse(toks)) b = new CodeBlock;
       else if(IfStatement.canParse(toks)) b = new IfStatement;
       else if(DoWhileStatement.canParse(toks)) b = new DoWhileStatement;
       else if(WhileStatement.canParse(toks)) b = new WhileStatement;
@@ -154,11 +151,24 @@ class Console
       else if(ForeachStatement.canParse(toks)) b = new ForeachStatement;
       else if(ImportStatement.canParse(toks)) b = new ImportStatement(true);
 
-      // If this is not one of the above, default to an expression
-      // statement.
-      else b = new ExprStatement;
+      if(b !is null)
+        {
+          // Parse and resolve
+          b.parse(toks);
+          b.resolve(sc);
+        }
+        else
+        {
+          // If this is not one of the above, default to a console
+          // statement.
+          auto es = new ConsoleStatement;
+          b = es;
 
-      b.parse(toks);
+          // Parse and resolve in one operation.
+          es.parseResolve(toks, sc, allowVar);
+        }
+
+      assert(b !is null);
       res ~= b;
 
       // Are there more tokens waiting for us?
@@ -269,51 +279,58 @@ class Console
       if(tokArr.length == 0)
         return CR.Empty;
 
-      // Phase II, parse
+      // Phase II & III, parse and resolve
       TokenArray toks = tokArr.arrayCopy();
-      Statement[] sts = parse(toks);
+      Statement[] sts = parse(toks, sc);
       delete toks;
       assert(sts.length >= 1);
 
       // First, background the current thread (if any) and bring up
-      // our own.
+      // our own. This is necessary in order to keep the stack
+      // variables we make.
       store = cthread;
       if(store !is null)
         store.background();
       assert(trd !is null);
       trd.foreground();
 
-      // We have to push ourselves on the function stack, or call()
-      // will see that it's empty and kill the thread upon exit
+      // We have to push ourselves on the function stack, or
+      // Function.call() will see that it's empty and kill the thread
+      // upon exit
       trd.fstack.pushExt("Console");
 
       // The rest must be performed separately for each statement on
       // the line.
       foreach(st; sts)
         {
-          // Phase III, resolve
-          st.resolve(sc);
-
           // Phase IV, compile
           tasm.newFunc();
 
-          // Is it an expression?
-          auto es = cast(ExprStatement)st;
-          if(es !is null)
+          ExprStatement es;
+
+          // Is it an special console statement?
+          auto cs = cast(ConsoleStatement)st;
+          if(cs !is null)
             {
-              // Yes. But is the type usable?
-              if(es.left.type.canCastTo(ArrayType.getString())
-                 && es.right is null)
+              // Yes. Is the client an expression?
+              es = cast(ExprStatement)cs.client;
+              if(es !is null)
                 {
-                  // Yup. Get the type, and cast the expression to string.
-                  scope auto ce = new
-                    CastExpression(es.left, ArrayType.getString());
-                  ce.eval();
+                  // Ok. But is the type usable?
+                  if(es.left.type.canCastTo(ArrayType.getString())
+                     && es.right is null)
+                    {
+                      // Yup. Get the type, and cast the expression to string.
+                      scope auto ce = new
+                        CastExpression(es.left, ArrayType.getString());
+                      ce.eval();
+                    }
+                  else es = null;
                 }
-              else es = null;
             }
 
           // No expression is being used, so compile the statement
+          // normally.
           if(es is null)
             st.compile();
 
@@ -336,28 +353,31 @@ class Console
           // function frame, ie. the same way we treat function
           // parameters. We do this by giving the variables negative
           // indices.
-          auto vs = cast(VarDeclStatement)st;
-          if(vs !is null)
+          if(cs !is null)
             {
-              // Add the new vars to the list
-              foreach(v; vs.vars)
+              auto vs = cast(VarDeclStatement)cs.client;
+              if(vs !is null)
                 {
-                  varList ~= v.var;
+                  // Add the new vars to the list
+                  foreach(v; vs.vars)
+                    {
+                      varList ~= v.var;
 
-                  // Add the size as well
-                  varSize += v.var.type.getSize;
+                      // Add the size as well
+                      varSize += v.var.type.getSize;
+                    }
+
+                  // Recalculate all the indices backwards from zero
+                  int place = 0;
+                  foreach_reverse(v; varList)
+                    {
+                      place -= v.type.getSize;
+                      v.number = place;
+                    }
+
+                  // Reset the scope stack counters
+                  sc.reset();
                 }
-
-              // Recalculate all the indices backwards from zero
-              int place = 0;
-              foreach_reverse(v; varList)
-                {
-                  place -= v.type.getSize;
-                  v.number = place;
-                }
-
-              // Reset the scope stack counters
-              sc.reset();
             }
         }
 
@@ -441,5 +461,73 @@ class Console
           reset();
           return CR.Error;
         }
+    }
+}
+
+// Statement that handles variable declarations, function calls and
+// expression statements in consoles. Since these are gramatically
+// similar, we need the type to determine which
+class ConsoleStatement : Statement
+{
+  // Used for variables and expression statements
+  Statement client;
+
+  // Used for function calls
+  FunctionCallExpr func;
+
+  void parseResolve(ref TokenArray toks, Scope sc, bool allowVar)
+    {
+      assert(toks.length != 0);
+
+      // Get the first expression
+      auto first = Expression.identify(toks);
+
+      // And the type right away
+      first.resolve(sc);
+      auto type = first.type;
+      assert(type !is null);
+
+      // Type? If so, it's a variable declaration
+      if((type.isMeta || type.isVar) && allowVar)
+        {
+          if(type.isMeta) type = type.getBase();
+
+          client = new VarDeclStatement(type);
+        }
+
+      // Function?
+      else if(type.isFunc)
+        func = new FunctionCallExpr(first, toks, true);
+
+      // It's an expression statement
+      else
+        client = new ExprStatement(first);
+
+      if(client !is null)
+        {
+          client.parse(toks);
+          client.resolve(sc);
+        }
+      else
+        {
+          assert(func !is null);
+          func.resolve(sc);
+        }
+    }
+
+ override:
+  void parse(ref TokenArray) { assert(0); }
+  void resolve(Scope sc) { assert(0); }
+
+  void compile()
+    {
+      if(client !is null)
+        {
+          client.compile();
+          return;
+        }
+
+      assert(func !is null);
+      func.evalPop();
     }
 }

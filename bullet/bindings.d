@@ -35,8 +35,11 @@ extern(C):
 // Initialize the dynamic world. Returns non-zero if an error occurs.
 int bullet_init();
 
-// Switch to the next physics mode
+// Set physics modes
 void bullet_nextMode();
+void bullet_walk();
+void bullet_fly();
+void bullet_ghost();
 
 // Warp the player to a specific location.
 void bullet_movePlayer(float x, float y, float z);

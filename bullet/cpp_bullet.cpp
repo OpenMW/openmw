@@ -206,29 +206,45 @@ extern "C" int32_t bullet_init()
   return 0;
 }
 
+// Set physics modes
+extern "C" void bullet_walk()
+{
+  g_physMode = PHYS_WALK;
+  cout << "Walk mode\n";
+}
+
+extern "C" void bullet_fly()
+{
+  g_physMode = PHYS_FLY;
+  cout << "Fly mode\n";
+}
+
+extern "C" void bullet_ghost()
+{
+  g_physMode = PHYS_GHOST;
+  cout << "Ghost mode\n";
+}
+
 // Switch to the next physics mode
 extern "C" void bullet_nextMode()
 {
-  g_physMode++;
-  if(g_physMode > PHYS_GHOST)
-    g_physMode = PHYS_WALK;
-
   switch(g_physMode)
     {
     case PHYS_WALK:
-      cout << "Entering walking mode\n";
+      bullet_fly();
       break;
     case PHYS_FLY:
-      cout << "Entering flying mode\n";
+      bullet_ghost();
       break;
     case PHYS_GHOST:
-      cout << "Entering ghost mode\n";
+      bullet_walk();
       break;
     }
 }
 
 // Warp the player to a specific location. We do not bother setting
-// rotation, since it's completely irrelevant for collision detection.
+// rotation, since it's completely irrelevant for collision detection,
+// and doubly so since the collision mesh is a sphere.
 extern "C" void bullet_movePlayer(float x, float y, float z)
 {
   btTransform tr;
