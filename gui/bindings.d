@@ -26,15 +26,19 @@ module gui.bindings;
 extern(C):
 
 // GUI functions. Under development. The corresponding C++ functions
-// are in ogre/cpp_mygui.cpp
+// are in cpp_mygui.cpp
 
 typedef void* WidgetPtr;
 void gui_setupGUI(int debugOut);
 void gui_toggleGui();
+void gui_toggleConsole();
 void gui_setCellName(char *str);
 
 // Get the widget type, as a string
 char *gui_widgetType(WidgetPtr);
+
+// Get the guiMode flag
+int *gui_getGuiModePtr();
 
 // Get the height or width of a widget. If the argument is null,
 // return the size of the screen.

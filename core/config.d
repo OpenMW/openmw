@@ -56,14 +56,6 @@ struct ConfigManager
 
   IniWriter iniWriter;
 
-  // Sound setting
-  /*
-  float musicVolume;
-  float sfxVolume;
-  float mainVolume;
-  bool useMusic;
-  //*/
-
   // Mouse sensitivity
   float *mouseSensX;
   float *mouseSensY;
@@ -157,11 +149,6 @@ struct ConfigManager
     */
 
     readIni(reset);
-
-    // I think DMD is on the brink of collapsing here. This has been
-    // moved elsewhere, because DMD couldn't handle one more import in
-    // this file.
-    //updateMouseSensitivity();
   }
 
   // Read config from morro.ini, if it exists. The reset parameter is
@@ -171,10 +158,6 @@ struct ConfigManager
   {
     // Read configuration file, if it exists.
     IniReader ini;
-
-    // TODO: Right now we have to specify each option twice, once for
-    // reading and once for writing. Fix it? Nah. Don't do anything,
-    // this entire configuration scheme is likely to change anyway.
 
     ini.readFile(confFile);
 
@@ -209,13 +192,9 @@ struct ConfigManager
     finalOgreConfig = showOgreConfig || firstRun ||
                       !exists("ogre.cfg");
 
-    // Set default key bindings if the user specified the -rk setting,
-    // or if no config file was found.
-    if(reset || !ini.wasRead) with(keyBindings)
+    // Set default key bindings first.
+    with(keyBindings)
       {
-        // Remove all existing key bindings
-        //clear();
-
 	// Bind some default keys
 	bind(Keys.MoveLeft, KC.A, KC.LEFT);
 	bind(Keys.MoveRight, KC.D, KC.RIGHT);
@@ -238,20 +217,32 @@ struct ConfigManager
         bind(Keys.PhysMode, KC.T);
         bind(Keys.Nighteye, KC.N);
         bind(Keys.ToggleGui, KC.Mouse1);
+        bind(Keys.Console, KC.F1);
         bind(Keys.Debug, KC.G);
 
 	bind(Keys.Pause, KC.PAUSE, KC.P);
 	bind(Keys.ScreenShot, KC.SYSRQ);
 	bind(Keys.Exit, KC.Q, KC.ESCAPE);
       }
-    else
+
+    // Unless the ini file was missing or we were asked to reset all
+    // keybindings to default, replace all present bindings with the
+    // values from the ini.
+    if(!reset && ini.wasRead)
       {
         // Read key bindings
         for(int i; i<Keys.Length; i++)
           {
             char[] s = keyToString[i];
             if(s.length)
-              keyBindings.bindComma(cast(Keys)i, ini.getString("Bindings", s, ""));
+              {
+                char[] iniVal = ini.getString("Bindings", s, "_def");
+
+                // Was the setting present in the ini file?
+                if(iniVal != "_def")
+                  // If so, bind it!
+                  keyBindings.bindComma(cast(Keys)i, iniVal);
+              }
           }
       }
 

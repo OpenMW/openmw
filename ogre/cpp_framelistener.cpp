@@ -26,7 +26,7 @@
 // Callbacks to D code.
 
 // Called once each frame
-extern "C" int32_t d_frameStarted(float time, int guiMode);
+extern "C" int32_t d_frameStarted(float time);
 
 // Handle events
 extern "C" void d_handleKey(int keycode, uint32_t text);
@@ -54,7 +54,7 @@ public:
     mGUI->injectFrameEntered(evt.timeSinceLastFrame);
 
     // Turn over control to the D code
-    return d_frameStarted(evt.timeSinceLastFrame, guiMode);
+    return d_frameStarted(evt.timeSinceLastFrame);
   }
 };
 
@@ -69,6 +69,9 @@ public:
               << ", " << ((OIS::Keyboard*)(arg.device))->getAsString(arg.key)
               << "} || Character (" << (char)arg.text << ")\n";
     //*/
+    if(guiMode)
+      mGUI->injectKeyPress(arg);
+
     d_handleKey(arg.key, arg.text);
     return true;
   }
@@ -85,8 +88,8 @@ public:
     // Monster script.
     if(guiMode)
       mGUI->injectMouseMove(arg);
-    else
-      d_handleMouseMove(&arg.state);
+
+    d_handleMouseMove(&arg.state);
     return true;
   }
 
@@ -112,8 +115,12 @@ public:
     return true;
   }
 
-  // Unused
-  bool keyReleased( const OIS::KeyEvent &arg ) { return true; }
+  bool keyReleased( const OIS::KeyEvent &arg )
+  {
+    if(guiMode)
+      mGUI->injectKeyRelease(arg);
+    return true;
+  }
 };
 
 MorroFrameListener mFrameListener;

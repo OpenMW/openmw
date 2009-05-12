@@ -59,7 +59,11 @@ OIS::Keyboard *mKeyboard;
 
 // The global GUI object
 MyGUI::Gui *mGUI;
-int guiMode = 0;
+
+// This is used to determine if we are displaying any gui elements
+// right now. If we are (and guiMode > 0), we redirect mouse/keyboard
+// input into MyGUI.
+int32_t guiMode = 0;
 
 // Root node for all objects added to the scene. This is rotated so
 // that the OGRE coordinate system matches that used internally in
@@ -67,7 +71,7 @@ int guiMode = 0;
 SceneNode *root;
 
 // Include the other parts of the code, and make one big object file.
-#include "cpp_mygui.cpp"
+#include "../gui/cpp_mygui.cpp"
 #include "cpp_framelistener.cpp"
 #include "cpp_bsaarchive.cpp"
 #include "cpp_interface.cpp"

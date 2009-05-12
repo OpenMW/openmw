@@ -27,5 +27,13 @@ class Console
 // This class contains all the functions available to the ingame
 // console.
 
-import io;
-import game;
+import game
+
+native walk()
+native fly()
+native ghost()
+
+native wireframe()
+tvf() { wireframe() }
+
+native fontsize(int size)

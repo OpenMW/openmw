@@ -1,3 +1,26 @@
+/*
+  OpenMW - The completely unofficial reimplementation of Morrowind
+  Copyright (C) 2008  Nicolay Korslund
+  Email: < korslund@gmail.com >
+  WWW: http://openmw.snaptoad.com/
+
+  This file (cpp_mygui.cpp) is part of the OpenMW package.
+
+  OpenMW is distributed as free software: you can redistribute it
+  and/or modify it under the terms of the GNU General Public License
+  version 3, as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  version 3 along with this program. If not, see
+  http://www.gnu.org/licenses/ .
+
+ */
+
 // TODO: KILLME
 std::string cellName;
 
@@ -134,16 +157,17 @@ public:
         mPrefix = MyGUI::utility::toString(this, "_");
         mListWindowRoot = MyGUI::LayoutManager::getInstance().loadLayout(mLayoutName, mPrefix, _parent);
 
-      const std::string main_name = mPrefix + MAIN_WINDOW;
-      for (MyGUI::VectorWidgetPtr::iterator iter=mListWindowRoot.begin(); iter!=mListWindowRoot.end(); ++iter) {
-        if ((*iter)->getName() == main_name)
+        const std::string main_name = mPrefix + MAIN_WINDOW;
+        for (MyGUI::VectorWidgetPtr::iterator iter=mListWindowRoot.begin(); iter!=mListWindowRoot.end(); ++iter)
           {
-            mMainWidget = (*iter);
-            break;
+            if ((*iter)->getName() == main_name)
+              {
+                mMainWidget = (*iter);
+                break;
+              }
           }
+        MYGUI_ASSERT(mMainWidget, "root widget name '" << MAIN_WINDOW << "' in layout '" << mLayoutName << "' not found.");
       }
-      MYGUI_ASSERT(mMainWidget, "root widget name '" << MAIN_WINDOW << "' in layout '" << mLayoutName << "' not found.");
-    }
   }
 
   void shutdown()
@@ -361,48 +385,70 @@ HUD *hud;
 StatsWindow *stats;
 MapWindow *map;
 MyGUI::WidgetPtr FPSText;
-MyGUI::WindowPtr mwindow;
 OIS::MouseState state;
+bool consoleMode = false;
+bool inventoryMode = false;
 
-// KILLME
-extern "C" void gui_toggleGui()
+void enterGui()
 {
+  guiMode++;
+
   if(guiMode == 1)
     {
-      guiMode = 0;
-      mGUI->hidePointer();
-      if(mwindow)
-        mwindow->setVisible(false);
-      if(stats)
-        stats->setVisible(false);
-      if(map)
-        map->setVisible(false);
-      state = mMouse->getMouseState();
-    }
-  else
-    {
+      // If we just entered GUI mode, enable the pointer
+      mGUI->showPointer();
+
       // Restore the GUI mouse position. This is a hack because silly
       // OIS doesn't allow us to set the mouse position ourselves.
       *((OIS::MouseState*)&(mMouse->getMouseState())) = state;
       mGUI->injectMouseMove(state.X.abs, state.Y.abs, 0);
+    }
+}
 
-      guiMode = 1;
-      mGUI->showPointer();
-      if(mwindow)
-        mwindow->setVisible(true);
+void leaveGui()
+{
+  guiMode--;
+
+  if(guiMode < 0)
+    {
+      std::cout << "WARNING: guiMode is " << guiMode << "\n";
+      guiMode = 0;
+    }
+
+  // Are we done with all GUI windows?
+  if(guiMode == 0)
+    {
+      // If so, hide the pointer and store the mouse state for later.
+      mGUI->hidePointer();
+      state = mMouse->getMouseState();
+    }
+}
+
+#include "cpp_console.cpp"
+
+extern "C" void gui_toggleGui()
+{
+  if(inventoryMode)
+    {
+      leaveGui();
+      if(stats)
+        stats->setVisible(false);
+      if(map)
+        map->setVisible(false);
+    }
+  else
+    {
+      enterGui();
       if(stats)
         stats->setVisible(true);
       if(map)
         map->setVisible(true);
     }
+
+  inventoryMode = !inventoryMode;
 }
 
-// KILLME
-void turnGuiOff(MyGUI::WidgetPtr sender)
-{
-  guiMode = 1;
-  gui_toggleGui();
-}
+extern "C" int32_t* gui_getGuiModePtr() { return &guiMode; }
 
 extern "C" void gui_setupGUI(int32_t debugOut)
 {
@@ -421,46 +467,15 @@ extern "C" void gui_setupGUI(int32_t debugOut)
 
   stats = new StatsWindow();
   map = new MapWindow();
+  cons = new Console();
 
-  /*
-  // Window with Morrowind skin
-  mwindow = mGUI->createWidget<MyGUI::Window>
-    ("MW_Window",
-     (mWidth-width)/2, (mHeight-height)/2, // Position
-     400, 190, // Size
-     MyGUI::ALIGN_DEFAULT, "Windows");
-  mwindow->setCaption("Skin test");
-  mwindow->setMinSize(120, 140);
+  // Hide all the windows at startup
+  stats->setVisible(false);
+  map->setVisible(false);
+  cons->setVisible(false);
+  guiMode = 1;
+  leaveGui();
 
-  MyGUI::WidgetPtr tmp;
-  tmp = mwindow->createWidget<MyGUI::Button>
-    ("MW_Button",
-     10, 32, // Position
-     45, 24, // Size
-     MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
-     "MWButton1");
-  tmp->setCaption("Close");
-  tmp->eventMouseButtonClick = MyGUI::newDelegate(&turnGuiOff);
-
-  tmp = mwindow->createWidget<MyGUI::StaticText>
-    ("DaedricText_orig",
-     20,80,
-     500, 30,
-     MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
-     "Daed1");
-  tmp->setCaption("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-
-  tmp = mwindow->createWidget<MyGUI::StaticText>
-    ("DaedricText",
-     20,130,
-     500, 30,
-     MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
-     "Daed2");
-  tmp->setCaption("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  */
-
-  // Turn the GUI off at startup
-  turnGuiOff(NULL);
   // Start the mouse in the middle of the screen
   state.X.abs = mWidth / 2;
   state.Y.abs = mHeight / 2;

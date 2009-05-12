@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
-
-    <Skin name = "EditClient" size = "10 10">
-        <Property key="Pointer" value = "beam" />
-    </Skin>
-
     <Skin name = "StaticText" size = "16 16">
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_DEFAULT" />
-        <Property key="Colour" value = "0.7 0.7 0.7" />
+        <Property key="TextColour" value = "0.7 0.7 0.7" />
         
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
     </Skin>
@@ -18,4 +13,5 @@
     <Skin name = "StaticImage" size = "16 16">
         <BasisSkin type="MainSkin" offset = "0 0 16 16"/>
     </Skin>
+
 </MyGUI>

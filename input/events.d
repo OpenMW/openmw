@@ -39,6 +39,7 @@ import monster.monster;
 import monster.vm.dbg;
 
 import ogre.bindings;
+import gui.bindings;
 
 import input.keys;
 import input.ois;
@@ -53,6 +54,7 @@ import input.ois;
 
 // Pause?
 bool pause = false;
+int *guiMode;
 
 void toggleFullscreen()
 {
@@ -123,6 +125,8 @@ extern(C) void d_handleMouseMove(MouseState *state)
              state.X.abs, state.Y.abs, state.Z.abs,
              state.X.rel, state.Y.rel, state.Z.rel);
 
+  if(*guiMode) return;
+
   ogre_rotateCamera( state.X.rel * effMX,
                      state.Y.rel * effMY );
 }
@@ -169,35 +173,45 @@ extern(C) void d_handleKey(KC keycode, dchar text = 0)
   // text.
   Keys k = keyBindings.findMatch(keycode, text);
 
+  // These are handled even if we are in gui mode:
+  if(k)
+    switch(k)
+      {
+      case Keys.ToggleGui: gui_toggleGui(); return;
+      case Keys.Console: gui_toggleConsole(); return;
+      case Keys.ScreenShot: takeScreenShot(); return;
+      default:
+      }
+
+  if(*guiMode) return;
+
   if(k)
     switch(k)
       {
       case Keys.ToggleBattleMusic:
         Music.toggle();
-        break;
+        return;
 
-      case Keys.MainVolUp: mainVolume(true); break;
-      case Keys.MainVolDown: mainVolume(false); break;
-      case Keys.MusVolUp: musVolume(true); break;
-      case Keys.MusVolDown: musVolume(false); break;
-      case Keys.SfxVolUp: sfxVolume(true); break;
-      case Keys.SfxVolDown: sfxVolume(false); break;
-      case Keys.Mute: Music.toggleMute(); break;
-      case Keys.Fullscreen: toggleFullscreen(); break;
+      case Keys.MainVolUp: mainVolume(true); return;
+      case Keys.MainVolDown: mainVolume(false); return;
+      case Keys.MusVolUp: musVolume(true); return;
+      case Keys.MusVolDown: musVolume(false); return;
+      case Keys.SfxVolUp: sfxVolume(true); return;
+      case Keys.SfxVolDown: sfxVolume(false); return;
+      case Keys.Mute: Music.toggleMute(); return;
+      case Keys.Fullscreen: toggleFullscreen(); return;
 
-      case Keys.PhysMode: bullet_nextMode(); break;
-      case Keys.Nighteye: ogre_toggleLight(); break;
-      case Keys.ToggleGui: gui_toggleGui(); break;
+      case Keys.PhysMode: bullet_nextMode(); return;
+      case Keys.Nighteye: ogre_toggleLight(); return;
 
-      case Keys.Debug: break;
-      case Keys.ScreenShot: takeScreenShot(); break;
-      case Keys.Pause: togglePause(); break;
-      case Keys.Exit: exitProgram(); break;
+      case Keys.Debug: return;
+      case Keys.Pause: togglePause(); return;
+      case Keys.Exit: exitProgram(); return;
       default:
         assert(k >= 0 && k < keyToString.length);
         writefln("WARNING: Event %s has no effect", keyToString[k]);
       }
-  return false;
+  return;
 }
 
 // Refresh rate for sfx placements, in seconds.
@@ -226,6 +240,9 @@ void initializeInput()
   // put another import in core.config. I should probably check the
   // bug list and report it.
   updateMouseSensitivity();
+
+  // Get a pointer to the 'guiMode' flag in cpp_ogre.cpp
+  guiMode = gui_getGuiModePtr();
 }
 
 extern(C) int ois_isPressed(int keysym);
@@ -239,7 +256,7 @@ bool isPressed(Keys key)
   return false;
 }
 
-extern(C) int d_frameStarted(float time, int guiMode)
+extern(C) int d_frameStarted(float time)
 {
   if(doExit) return 0;
 
@@ -257,7 +274,7 @@ extern(C) int d_frameStarted(float time, int guiMode)
     }
 
   // The rest is ignored in pause or GUI mode
-  if(pause || guiMode == 1) return 1;
+  if(pause || *guiMode > 0) return 1;
 
   // Walking / floating speed, in points per second.
   const float speed = 300;

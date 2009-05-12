@@ -21,7 +21,11 @@ BGCC=$(CXX) $(CXXFLAGS) $(CF_BULLET)
 
 # Ogre C++ files, on the form ogre/cpp_X.cpp. Only the first file is
 # passed to the compiler, the rest are dependencies.
-ogre_cpp=ogre framelistener interface bsaarchive mygui
+ogre_cpp=ogre framelistener interface bsaarchive
+
+# MyGUI C++ files, gui/cpp_X.cpp. These are currently included into
+# with cpp_ogre.cpp.
+mygui_cpp=mygui console
 
 # FFmpeg files, in the form sound/cpp_X.cpp.
 avcodec_cpp=avcodec
@@ -31,7 +35,7 @@ bullet_cpp=bullet player scale
 
 #### No modifications should be required below this line. ####
 
-ogre_cpp_files=$(ogre_cpp:%=ogre/cpp_%.cpp)
+ogre_cpp_files=$(ogre_cpp:%=ogre/cpp_%.cpp) $(mygui_cpp:%=gui/cpp_%.cpp)
 avcodec_cpp_files=$(avcodec_cpp:%=sound/cpp_%.cpp)
 bullet_cpp_files=$(bullet_cpp:%=bullet/cpp_%.cpp)
 

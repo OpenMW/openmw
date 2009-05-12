@@ -16,6 +16,7 @@
             <List file="openmw_hud_energybar.skin.xml" group="General"/>
             <List file="openmw_hud_box.skin.xml" group="General"/>
             <List file="openmw_mainmenu_skin.xml" group="General"/>
+            <List file="openmw_console.skin.xml" group="General"/>
     </MyGUI>
 
 </MyGUI>

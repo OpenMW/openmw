@@ -174,7 +174,7 @@
 
         <Child type="Widget" skin="BlackBG" offset = "8 28 240 18" align = "ALIGN_STRETCH" name = "Client"/>
 
-        <!-- Outer orders -->
+        <!-- Outer borders -->
         <Child type="Widget" skin="TB_T" offset="4 0 248 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Action">
             <Property key="Scale" value = "0 1 0 -1"/>
         </Child>
@@ -240,14 +240,5 @@
         <Child type="Button" offset="4 4 248 20" align="ALIGN_HSTRETCH ALIGN_TOP" name="Action">
             <Property key="Scale" value = "1 1 0 0"/>
         </Child>
-
-
-
-        <!-- Leftover code - remove later
-        <Child type="Button" skin="WindowX" offset = "20 80 24 30" align = "ALIGN_LEFT ALIGN_TOP" name = "Button">
-            <Property key="Event" value = "close"/>
-        </Child>
-        -->
-
     </Skin>
 </MyGUI>
