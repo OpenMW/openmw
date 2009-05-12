@@ -27,6 +27,7 @@ import core.resource;
 import core.config;
 
 import ogre.bindings;
+import gui.bindings;
 import mscripts.setup;
 
 import bullet.bindings;

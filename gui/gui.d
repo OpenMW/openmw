@@ -25,8 +25,12 @@ module gui.gui;
 
 import monster.monster;
 import monster.vm.mclass;
+import monster.modules.console;
+import input.events : exitProgram;
 import gui.bindings;
+import bullet.bindings;
 import std.string;
+import std.stdio;
 
 // Widget class and gui module
 MonsterClass
@@ -253,4 +257,35 @@ void setupGUIScripts()
   gmc.bind("loadLayout", &loadLayout);
   gmc.bind("getWidth", &getWidth);
   gmc.bind("getHeight", &getHeight);
+
+  // Set up the console
+  auto cmc = vm.load("Console");
+  auto cmo = cmc.createObject;
+  cons = new Console(cmo);
+
+  // Bind native functions
+  cmc.bind("walk", { bullet_walk(); });
+  cmc.bind("fly", { bullet_fly(); });
+  cmc.bind("ghost", { bullet_ghost(); });
+  cmc.bind("setfont", { gui_setConsoleFont(toStringz(stack.popString8())); });
+  cmc.bind("clear", { gui_clearConsole(); });
+  cmc.bind("exit", { exitProgram(); });
+  cmc.bind("wireframe", { writefln("Wireframe not fixed yet"); });
+}
+
+Console cons;
+
+// Some glue code that will go away later when we use the C++
+// interface to Monster directly.
+extern(C):
+int console_input(char* str)
+{
+  char[] dstr = toString(str);
+  return cons.input(dstr);
+}
+
+char* console_output()
+{
+  char[] dstr = cons.output();
+  return toStringz(dstr);
 }

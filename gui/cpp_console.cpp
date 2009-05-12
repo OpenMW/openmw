@@ -21,12 +21,26 @@
 
  */
 
+// These are defined in gui/gui.d. At some point later we will just
+// use the C++ bindings included with Monster, but these don't cover
+// the console stuff yet.
+enum
+  {
+    CR_OK = 1,      // Command was executed
+    CR_ERROR = 2,   // An error occured
+    CR_MORE = 3,    // More input is needed
+    CR_EMPTY = 4    // The line had no effect
+  };
+
+extern "C" int32_t console_input(const char* command);
+extern "C" char* console_output();
+
 class Console : public Layout
 {
+public:
   MyGUI::EditPtr command;
   MyGUI::EditPtr history;
 
-public:
   Console()
     : Layout("openmw_console_layout.xml")
   {
@@ -58,16 +72,34 @@ public:
     const Ogre::UTFString &cm = command->getCaption();
     if(cm.empty()) return;
 
-    if(cm == "big")
-      history->setFontName("youtube");
+    history->addText("#FFFFFF" + cm + "\n");
 
-    history->addText(cm + "\n");
-    history->addText("this is a fake output result\n");
+    int res = console_input(cm.asUTF8_c_str());
+    Ogre::UTFString out = console_output();
+
+    if(res == CR_OK)
+      history->addText("#FF00FF" + out);
+    else if(res == CR_ERROR)
+      history->addText("#FF2222" + out);
+    else if(res == CR_MORE)
+      history->addText("#1111FF... more input needed");
+
+  exit:
     command->setCaption("");
   }
 };
 
 Console *cons;
+
+extern "C" void gui_setConsoleFont(const char* fntName)
+{
+  cons->history->setFontName(fntName);
+}
+
+extern "C" void gui_clearConsole()
+{
+  cons->history->setCaption("");
+}
 
 extern "C" void gui_toggleConsole()
 {

@@ -29,11 +29,22 @@ class Console
 
 import game
 
-native walk()
-native fly()
-native ghost()
+// Change player physics mode
+native walk();
+native fly();
+native ghost();
 
-native wireframe()
-tvf() { wireframe() }
+// Clear the console
+native clear();
 
-native fontsize(int size)
+// Set the console log font
+native setfont(char[] name);
+
+// Exit the game
+native exit();
+quit() { exit(); }
+
+// Toggle wireframe mode
+native wireframe();
+twf() { wireframe() }
+

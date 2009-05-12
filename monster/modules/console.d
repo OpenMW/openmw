@@ -53,11 +53,11 @@ import monster.monster;
 // Console results
 enum CR
   {
-    Ok,    // Command was executed
-    Error, // An error occurred
-    More,  // An unterminated multi-line statement was entered, need
-           // more input
-    Empty, // The line was empty (nothing was executed)
+    Ok = 1,    // Command was executed
+    Error = 2, // An error occurred
+    More = 3,  // An unterminated multi-line statement was entered, need
+               // more input
+    Empty = 4, // The line was empty (nothing was executed)
   }
 
 class Console

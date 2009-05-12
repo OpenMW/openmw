@@ -31,8 +31,12 @@ extern(C):
 typedef void* WidgetPtr;
 void gui_setupGUI(int debugOut);
 void gui_toggleGui();
-void gui_toggleConsole();
 void gui_setCellName(char *str);
+
+// Console stuff
+void gui_toggleConsole();
+void gui_setConsoleFont(char*);
+void gui_clearConsole();
 
 // Get the widget type, as a string
 char *gui_widgetType(WidgetPtr);
