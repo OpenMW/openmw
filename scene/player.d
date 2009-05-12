@@ -45,7 +45,7 @@ struct PlayerData
   void setup()
   {
     assert(mo is null);
-    mo = vm.load("game.player").createObject;
+    mo = vm.load("game.player").getSing;
     level = mo.getIntPtr("level");
 
     // Still an ugly hack

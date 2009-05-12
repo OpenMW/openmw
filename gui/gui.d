@@ -264,13 +264,18 @@ void setupGUIScripts()
   cons = new Console(cmo);
 
   // Bind native functions
-  cmc.bind("walk", { bullet_walk(); });
-  cmc.bind("fly", { bullet_fly(); });
-  cmc.bind("ghost", { bullet_ghost(); });
-  cmc.bind("setfont", { gui_setConsoleFont(toStringz(stack.popString8())); });
+  cmc.bind("walk", { bullet_walk(); cons.putln("Walk mode enabled");});
+  cmc.bind("fly", { bullet_fly(); cons.putln("Fly mode enabled");});
+  cmc.bind("ghost", { bullet_ghost(); cons.putln("Ghost mode enabled");});
+  cmc.bind("setfont",
+  {
+    char[] fnt = stack.popString8();
+    gui_setConsoleFont(toStringz(fnt));
+    cons.putln("Setting font " ~ fnt);
+  });
   cmc.bind("clear", { gui_clearConsole(); });
   cmc.bind("exit", { exitProgram(); });
-  cmc.bind("wireframe", { writefln("Wireframe not fixed yet"); });
+  cmc.bind("wireframe", { cons.putln("Wireframe mode not implemented yet"); });
 }
 
 Console cons;

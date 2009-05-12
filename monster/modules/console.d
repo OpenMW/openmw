@@ -115,7 +115,6 @@ class Console
       trd = Thread.getPaused();
     }
 
- private:
   void put(char[] str, bool newLine=false)
     {
       if(hasCallback)
@@ -133,6 +132,8 @@ class Console
     }
 
   void putln(char[] str) { put(str, true); }
+
+ private:
 
   Statement[] parse(TokenArray toks, Scope sc)
     {

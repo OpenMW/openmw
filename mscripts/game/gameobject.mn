@@ -67,3 +67,13 @@ int fltv;
 int unam;
 
 // TODO: Scripts
+
+// Cute hack for the console
+char[] pos()
+{
+  // TODO: Make this simpler
+  char[] xx = x;
+  char[] yy = y;
+  char[] zz = z;
+  return "X:" ~ xx ~ " Y:" ~ yy ~ " Z:" ~ zz;
+}

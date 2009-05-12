@@ -44,7 +44,7 @@ public:
   Console()
     : Layout("openmw_console_layout.xml")
   {
-    setCoord(0,0,
+    setCoord(10,10,
              mWindow->getWidth()*2/3, mWindow->getHeight()/2);
 
     getWidget(command, "edit_Command");
@@ -72,7 +72,7 @@ public:
     const Ogre::UTFString &cm = command->getCaption();
     if(cm.empty()) return;
 
-    history->addText("#FFFFFF" + cm + "\n");
+    history->addText("#FFFFFF> " + cm + "\n");
 
     int res = console_input(cm.asUTF8_c_str());
     Ogre::UTFString out = console_output();

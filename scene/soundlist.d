@@ -25,6 +25,7 @@ module scene.soundlist;
 
 import esm.loadsoun;
 import sound.audio;
+import sound.sfx;
 
 SoundList soundScene;
 
