@@ -100,6 +100,6 @@ bored: bored.d
 	$(DMD) $^
 
 clean:
-	-rm -f cpp_ogre.o cpp_avcodec.o bored.o bsafile.o bsatool.o esmtool.o niftool.o openmw.o
+	-rm -f cpp_bullet.o cpp_ogre.o cpp_avcodec.o bored.o bsafile.o bsatool.o esmtool.o niftool.o openmw.o
 	-rm -f openmw esmtool niftool bsatool bored
 	-rm -rf objs/ nifobjs/ dsss_objs/
