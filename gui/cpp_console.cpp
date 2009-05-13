@@ -135,7 +135,7 @@ public:
     else if(res == CR_ERROR)
       history->addText("#FF2222" + out);
     else if(res == CR_MORE)
-      history->addText("#1111FF... more input needed");
+      history->addText("#1111FF... more input needed\n");
 
   exit:
     command->setCaption("");

@@ -217,7 +217,7 @@ struct ConfigManager
         bind(Keys.PhysMode, KC.T);
         bind(Keys.Nighteye, KC.N);
         bind(Keys.ToggleGui, KC.Mouse1);
-        bind(Keys.Console, KC.F1);
+        bind(Keys.Console, KC.F1, KC.GRAVE);
         bind(Keys.Debug, KC.G);
 
 	bind(Keys.Pause, KC.PAUSE, KC.P);
