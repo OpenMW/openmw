@@ -32,6 +32,8 @@ enum
     CR_EMPTY = 4    // The line had no effect
   };
 
+#include <list>
+
 extern "C" int32_t console_input(const char* command);
 extern "C" char* console_output();
 
@@ -40,6 +42,13 @@ class Console : public Layout
 public:
   MyGUI::EditPtr command;
   MyGUI::EditPtr history;
+
+  typedef std::list<Ogre::UTFString> StringList;
+
+  // History of previous entered commands
+  StringList command_history;
+  StringList::iterator current;
+  Ogre::UTFString editString;
 
   Console()
     : Layout("openmw_console_layout.xml")
@@ -50,9 +59,11 @@ public:
     getWidget(command, "edit_Command");
     getWidget(history, "list_History");
 
-    // Set up the command line combobox
+    // Set up the command line box
     command->eventEditSelectAccept =
       newDelegate(this, &Console::acceptCommand);
+    command->eventKeyButtonPressed =
+      newDelegate(this, &Console::keyPress);
 
     // Set up the log window
     history->setOverflowToTheLeft(true);
@@ -67,11 +78,53 @@ public:
     MyGUI::InputManager::getInstance().setKeyFocusWidget(command);
   }
 
+  void keyPress(MyGUI::WidgetPtr _sender,
+                MyGUI::KeyCode key,
+                MyGUI::Char _char)
+  {
+    if(command_history.empty()) return;
+
+    // Traverse history with up and down arrows
+    if(key == MyGUI::KeyCode::ArrowUp)
+      {
+        // If the user was editing a string, store it for later
+        if(current == command_history.end())
+          editString = command->getCaption();
+
+        if(current != command_history.begin())
+          {
+            current--;
+            command->setCaption(*current);
+          }
+      }
+    else if(key == MyGUI::KeyCode::ArrowDown)
+      {
+        if(current != command_history.end())
+          {
+            current++;
+
+            if(current != command_history.end())
+              command->setCaption(*current);
+            else
+              // Restore the edit string
+              command->setCaption(editString);
+          }
+      }
+  }
+
+
   void acceptCommand(MyGUI::EditPtr _sender)
   {
     const Ogre::UTFString &cm = command->getCaption();
     if(cm.empty()) return;
 
+    // Add the command to the history, and set the current pointer to
+    // the end of the list
+    command_history.push_back(cm);
+    current = command_history.end();
+    editString.clear();
+
+    // Log the command and result
     history->addText("#FFFFFF> " + cm + "\n");
 
     int res = console_input(cm.asUTF8_c_str());
