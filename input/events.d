@@ -40,6 +40,7 @@ import monster.vm.dbg;
 
 import ogre.bindings;
 import gui.bindings;
+import gui.gui;
 
 import input.keys;
 import input.ois;
@@ -109,13 +110,6 @@ void togglePause()
   pause = !pause;
   if(pause) writefln("Pause");
   else writefln("Pause off");
-}
-
-bool doExit = false;
-
-void exitProgram()
-{
-  doExit = true;
 }
 
 extern(C) void d_handleMouseMove(MouseState *state)

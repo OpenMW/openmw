@@ -26,7 +26,6 @@ module gui.gui;
 import monster.monster;
 import monster.vm.mclass;
 import monster.modules.console;
-import input.events : exitProgram;
 import gui.bindings;
 import bullet.bindings;
 import std.string;
@@ -279,6 +278,14 @@ void setupGUIScripts()
 }
 
 Console cons;
+
+// Checked from input/events.d. Shouldn't really be here, but it's a
+// workaround for a DMD import issue.
+bool doExit = false;
+void exitProgram()
+{
+  doExit = true;
+}
 
 // Some glue code that will go away later when we use the C++
 // interface to Monster directly.
