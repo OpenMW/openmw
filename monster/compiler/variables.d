@@ -749,7 +749,7 @@ class MemberExpr : Expression
             fail(name.str ~ " is not a member of " ~ ownerType.toString,
                  loc);
           else
-            fail("Undefined identifier "~name.str, name.loc);
+            fail("Unknown identifier "~name.str, name.loc);
         }
     }
 

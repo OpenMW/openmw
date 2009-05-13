@@ -36,14 +36,14 @@ toggle()
 {
   if(isBattle)
     {
-      print("Switching to normal music");
+      io.print("Switching to normal music");
       battle.pause();
       jukebox.resume();
       isBattle = false;
     }
   else
     {
-      print("Switching to battle music");
+      io.print("Switching to battle music");
       jukebox.pause();
       battle.resume();
       isBattle = true;
@@ -56,14 +56,14 @@ toggleMute()
     {
       jukebox.updateVolume(0);
       battle.updateVolume(0);
-      print("Muted");
+      io.print("Muted");
       isMuted = true;
     }
   else
     {
       updateVolume();
       isMuted = false;
-      print("Mute off");
+      io.print("Mute off");
     }
 }
 

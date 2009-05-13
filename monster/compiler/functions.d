@@ -943,6 +943,8 @@ class FunctionCallExpr : Expression
 
   bool isVararg;
 
+  bool fResolved;     // True if fname is already resolved
+
   // Read a function parameter list (a,b,v1=c,v2=d,...). The function
   // expects that you have already removed the initial left paren '('
   // token.
@@ -1044,6 +1046,7 @@ class FunctionCallExpr : Expression
         getParamsConsole(toks, params, named);
       else
         getParams(toks, params, named);
+      fResolved = console;
     }
 
   /* Might be used for D-like implicit function calling, eg. someFunc;
@@ -1068,7 +1071,9 @@ class FunctionCallExpr : Expression
   void resolve(Scope sc)
     {
       // Resolve the function lookup first
-      fname.resolve(sc);
+      if(!fResolved)
+        fname.resolve(sc);
+      assert(fname.type !is null);
 
       // Is the 'function' really a type name?
       if(fname.type.isMeta)
@@ -1154,8 +1159,15 @@ class FunctionCallExpr : Expression
       // Non-vararg case. Non-vararg functions must cover at least all
       // the non-optional function parameters.
 
-      // Make the coverage list of all the parameters.
+
       int parNum = fd.params.length;
+
+      // Sanity check on the parameter number
+      if(params.length > parNum)
+        fail(format("Too many parameters to function %s(): expected %s, got %s",
+                    name, parNum, params.length), fname.loc);
+
+      // Make the coverage list of all the parameters.
       coverage = new Expression[parNum];
 
       // Mark all the parameters which are present

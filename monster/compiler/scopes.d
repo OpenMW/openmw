@@ -377,7 +377,11 @@ abstract class Scope
     }
 
   // Add an import to this scope
-  void registerImport(ImportHolder s) { importList ~= s; }
+  void registerImport(ImportHolder s)
+    {
+      //writefln("Registering import %s in scope %s", s, this);
+      importList ~= s;
+    }
 
   // More user-friendly version for API-defined
   // imports. Eg. global.registerImport(myclass) -> makes myclass

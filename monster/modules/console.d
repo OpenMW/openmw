@@ -107,7 +107,7 @@ class Console
         obj = Function.getIntMO();
 
       // Next set up the function and the scope
-      fn.name.str = "console";
+      fn.name.str = "__console";
       fn.owner = obj.cls;
       sc = new FuncScope(obj.cls.sc, &fn);
 
