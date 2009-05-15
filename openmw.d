@@ -1,6 +1,6 @@
 /*
   OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008  Nicolay Korslund
+  Copyright (C) 2008-2009  Nicolay Korslund
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
@@ -31,6 +31,7 @@ import std.file;
 import ogre.ogre;
 import ogre.bindings;
 import gui.bindings;
+import gui.gui;
 
 import bullet.bullet;
 
@@ -50,6 +51,8 @@ import mscripts.setup;
 import sound.audio;
 
 import input.events;
+
+import terrain.terrain;
 
 //*
 import std.gc;
@@ -72,6 +75,7 @@ void main(char[][] args)
   bool showOgreFlag = false;
   bool noSound = false;
   bool debugOut = false;
+  bool extTest = false;
 
   // Some examples to try:
   //
@@ -88,16 +92,10 @@ void main(char[][] args)
 
   // Cells to load
   char[][] cells;
-  int[] eCells;
 
   foreach(char[] a; args[1..$])
     if(a == "-n") render = false;
-    else if(a.begins("-e"))
-      {
-	int i = find(a,',');
-	eCells ~= atoi(a[2..i]);
-	eCells ~= atoi(a[i+1..$]);
-      }
+    else if(a == "-ex") extTest = true;
     else if(a == "-h") help=true;
     else if(a == "-rk") resetKeys = true;
     else if(a == "-oc") showOgreFlag = true;
@@ -112,7 +110,7 @@ void main(char[][] args)
       }
     else cells ~= a;
 
-  if(cells.length + eCells.length/2 > 1 )
+  if(cells.length > 1)
     {
       writefln("More than one cell specified, rendering disabled");
       render=false;
@@ -123,7 +121,7 @@ void main(char[][] args)
       writefln("Syntax: %s [options] cell-name [cell-name]", args[0]);
       writefln("  Options:");
       writefln("    -n            Only load, do not render");
-      writefln("    -ex,y         Load exterior cell (x,y)");
+      writefln("    -ex           Test the terrain system");
       writefln("    -rk           Reset key bindings to default");
       writefln("    -oc           Show the Ogre config dialogue");
       writefln("    -ns           Completely disable sound");
@@ -163,14 +161,14 @@ void main(char[][] args)
   // setting.
   if(showOgreFlag) config.finalOgreConfig = true;
 
-  if(cells.length == 0 && eCells.length == 0)
+  if(cells.length == 0)
     if(config.defaultCell.length)
       cells ~= config.defaultCell;
 
   if(cells.length == 1)
     config.defaultCell = cells[0];
 
-  if(cells.length == 0 && eCells.length == 0)
+  if(cells.length == 0)
     {
       showHelp();
       return;
@@ -206,27 +204,6 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
 	}
     }
 
-  for(int i; i<eCells.length; i+=2)
-    {
-      int x = eCells[i];
-      int y = eCells[i+1];
-
-      // Release the last cell data
-      cellList.release(cd);
-
-      // Get a cell data holder and load an interior cell
-      cd = cellList.get();
-
-      if(debugOut) writefln("Will load %s,%s", x, y);
-      try cd.loadExtCell(x,y);
-      catch(Exception e)
-	{
-	  writefln(e);
-	  writefln("\nUnable to load cell (%s,%s). Aborting", x,y);
-	  return;
-	}
-    }
-	    
   // Simple safety hack
   NodePtr putObject(MeshIndex m, Placement *pos, float scale,
                     bool collide=false)
@@ -250,21 +227,23 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
       setupOgre(debugOut);
       scope(exit) cleanupOgre();
 
+      // Create the GUI system
+      initGUI(debugOut);
+
       // Set up Bullet
       initBullet();
       scope(exit) cleanupBullet();
 
-      if(cd.inCell)
-	{
-	  setAmbient(cd.ambi.ambient, cd.ambi.sunlight,
-		     cd.ambi.fog, cd.ambi.fogDensity);
+      // Initialize the internal input and event manager. The
+      // lower-level input system (OIS) is initialized by the
+      // setupOgre() call further up.
+      initializeInput();
 
-	  // Not all interior cells have water
-	  if(cd.inCell.flags & CellFlags.HasWater)
-	    ogre_createWater(cd.water);
-	}
-      else
-	{
+      // Play some old tunes
+      if(extTest)
+        {
+          // Exterior cell
+          /*
 	  Color c;
 	  c.red = 180;
 	  c.green = 180;
@@ -276,104 +255,118 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
 
 	  // Create an ugly sky
 	  ogre_makeSky();
-	}
+          */
 
-      // Insert the meshes of statics into the scene
-      foreach(ref LiveStatic ls; cd.statics)
-	putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
-      // Inventory lights
-      foreach(ref LiveLight ls; cd.lights)
-	{
-	  NodePtr n = putObject(ls.m.model, ls.getPos(), ls.getScale());
-	  ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
-	  if(!noSound)
-	  {
-            Sound *s = ls.m.sound;
-            if(s)
-	    {
-	      ls.loopSound = soundScene.insert(s, true);
-	      if(ls.loopSound)
+          initTerrain();
+        }
+      else
+        {
+          // Interior cell
+          assert(cd.inCell !is null);
+	  setAmbient(cd.ambi.ambient, cd.ambi.sunlight,
+		     cd.ambi.fog, cd.ambi.fogDensity);
+
+	  // Not all interior cells have water
+	  if(cd.inCell.flags & CellFlags.HasWater)
+	    ogre_createWater(cd.water);
+
+          // Insert the meshes of statics into the scene
+          foreach(ref LiveStatic ls; cd.statics)
+            putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
+          // Inventory lights
+          foreach(ref LiveLight ls; cd.lights)
+            {
+              NodePtr n = putObject(ls.m.model, ls.getPos(), ls.getScale());
+              ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
+              if(!noSound)
                 {
-                  auto p = ls.getPos();
-                  ls.loopSound.setPos(p.position[0],
-                                      p.position[1],
-                                      p.position[2]);
+                  Sound *s = ls.m.sound;
+                  if(s)
+                    {
+                      ls.loopSound = soundScene.insert(s, true);
+                      if(ls.loopSound)
+                        {
+                          auto p = ls.getPos();
+                          ls.loopSound.setPos(p.position[0],
+                                              p.position[1],
+                                              p.position[2]);
+                        }
+                    }
                 }
-	    }
-	  }
-	}
-      // Static lights
-      foreach(ref LiveLight ls; cd.statLights)
-	{
-	  NodePtr n = putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
-	  ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
-          if(!noSound)
-          {
-	  Sound *s = ls.m.sound;
-	  if(s)
-	    {
-              ls.loopSound = soundScene.insert(s, true);
-              if(ls.loopSound)
+            }
+          // Static lights
+          foreach(ref LiveLight ls; cd.statLights)
+            {
+              NodePtr n = putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
+              ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
+              if(!noSound)
                 {
-                  auto p = ls.getPos();
-                  ls.loopSound.setPos(p.position[0],
-                                      p.position[1],
-                                      p.position[2]);
+                  Sound *s = ls.m.sound;
+                  if(s)
+                    {
+                      ls.loopSound = soundScene.insert(s, true);
+                      if(ls.loopSound)
+                        {
+                          auto p = ls.getPos();
+                          ls.loopSound.setPos(p.position[0],
+                                              p.position[1],
+                                              p.position[2]);
+                        }
+                    }
                 }
-	    }
-          }
-	}
-      // Misc items
-      foreach(ref LiveMisc ls; cd.miscItems)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      /*
-      // NPCs (these are complicated, usually do not have normal meshes)
-      foreach(ref LiveNPC ls; cd.npcs)
-      putObject(ls.m.model, ls.getPos(), ls.getScale());
-      */
-      // Containers
-      foreach(ref LiveContainer ls; cd.containers)
-	putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
-      // Doors
-      foreach(ref LiveDoor ls; cd.doors)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Activators (including beds etc)
-      foreach(ref LiveActivator ls; cd.activators)
-	putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
-      // Potions
-      foreach(ref LivePotion ls; cd.potions)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Apparatus
-      foreach(ref LiveApparatus ls; cd.appas)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Ingredients
-      foreach(ref LiveIngredient ls; cd.ingredients)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Armors
-      foreach(ref LiveArmor ls; cd.armors)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Weapons
-      foreach(ref LiveWeapon ls; cd.weapons)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Books
-      foreach(ref LiveBook ls; cd.books)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Clothes
-      foreach(ref LiveClothing ls; cd.clothes)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Tools
-      foreach(ref LiveTool ls; cd.tools)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
-      // Creatures (not displayed very well yet)
-      foreach(ref LiveCreature ls; cd.creatures)
-	putObject(ls.m.model, ls.getPos(), ls.getScale());
+            }
+          // Misc items
+          foreach(ref LiveMisc ls; cd.miscItems)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          /*
+          // NPCs (these are complicated, usually do not have normal meshes)
+          foreach(ref LiveNPC ls; cd.npcs)
+          putObject(ls.m.model, ls.getPos(), ls.getScale());
+          */
+          // Containers
+          foreach(ref LiveContainer ls; cd.containers)
+            putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
+          // Doors
+          foreach(ref LiveDoor ls; cd.doors)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Activators (including beds etc)
+          foreach(ref LiveActivator ls; cd.activators)
+            putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
+          // Potions
+          foreach(ref LivePotion ls; cd.potions)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Apparatus
+          foreach(ref LiveApparatus ls; cd.appas)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Ingredients
+          foreach(ref LiveIngredient ls; cd.ingredients)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Armors
+          foreach(ref LiveArmor ls; cd.armors)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Weapons
+          foreach(ref LiveWeapon ls; cd.weapons)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Books
+          foreach(ref LiveBook ls; cd.books)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Clothes
+          foreach(ref LiveClothing ls; cd.clothes)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Tools
+          foreach(ref LiveTool ls; cd.tools)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
+          // Creatures (not displayed very well yet)
+          foreach(ref LiveCreature ls; cd.creatures)
+            putObject(ls.m.model, ls.getPos(), ls.getScale());
 
-      // Initialize the internal input and event manager. The
-      // lower-level input system (OIS) is initialized by the
-      // setupOgre() call further up.
-      initializeInput();
+          // End of interior cell
+        }
 
-      // Start swangin'
+      // Run GUI system
+      startGUI();
+
+      // Play some old tunes
       if(!noSound)
         Music.play();
 
@@ -410,23 +403,6 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
       writefln("%d creatures", cd.creatures.length);
       writefln();
     }
-  /*
-  writefln("Races:");
-  foreach(s; races.names)
-    {
-      writefln("%s:", s.id);
-      writefln("  strength: ", s.data.strength[0]);
-      writefln("  intelligence: ", s.data.intelligence[0]);
-      writefln("  willpower: ", s.data.willpower[0]);
-      writefln("  agility: ", s.data.agility[0]);
-      writefln("  speed: ", s.data.speed[0]);
-      writefln("  endurance: ", s.data.endurance[0]);
-      writefln("  personality: ", s.data.personality[0]);
-      writefln("  luck: ", s.data.luck[0]);
-      writefln("  height: ", s.data.height[0]);
-      writefln("  weight: ", s.data.weight[0]);
-    }
-  */
 
   // This isn't necessary but it's here for testing purposes.
   cellList.release(cd);

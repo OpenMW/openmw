@@ -70,8 +70,11 @@ int32_t guiMode = 0;
 // Morrowind.
 SceneNode *root;
 
-// Include the other parts of the code, and make one big object file.
+// Include the other parts of the code, and make one big happy object
+// file. This is extremely against the grain of C++ "recomended
+// practice", but I don't care.
 #include "../gui/cpp_mygui.cpp"
 #include "cpp_framelistener.cpp"
 #include "cpp_bsaarchive.cpp"
 #include "cpp_interface.cpp"
+#include "../terrain/cpp_terrain.cpp"

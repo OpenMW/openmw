@@ -119,12 +119,6 @@ void setupOgre(bool debugOut)
   // exterior cells differently, etc.
   ogre_makeScene();
 
-  // Load the GUI system
-  gui_setupGUI(debugOut);
-
-  // Run the GUI scripts
-  runGUIScripts();
-
   ogreSetup = true;
 }
 

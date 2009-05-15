@@ -7,8 +7,12 @@ DMD=gdmd -version=Posix
 # Some extra flags for niftool and bsatool
 NIFFLAGS=-debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose
 
+# Linker flags
+LFLAGS= -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a -L-lboost_serialization
+
 # Compiler settings for Ogre, OIS and MyGUI
-CF_OIS=$(shell pkg-config --cflags OIS OGRE MyGUI)
+# TODO: the -I when we're done
+CF_OIS=$(shell pkg-config --cflags OIS OGRE MyGUI) -Iterrain/
 OGCC=$(CXX) $(CXXFLAGS) $(CF_OIS)
 
 # Compiler settings for ffmpeg.
@@ -23,9 +27,14 @@ BGCC=$(CXX) $(CXXFLAGS) $(CF_BULLET)
 # passed to the compiler, the rest are dependencies.
 ogre_cpp=ogre framelistener interface bsaarchive
 
-# MyGUI C++ files, gui/cpp_X.cpp. These are currently included into
-# with cpp_ogre.cpp.
+# MyGUI C++ files, gui/cpp_X.cpp. These are currently included
+# cpp_ogre.o with cpp_ogre.cpp.
 mygui_cpp=mygui console
+
+# Ditto for the landscape engine, in terrain/cpp_X.cpp
+terrain_cpp=baseland esm framelistener generator index landdata\
+materialgen meshinterface mwheightmap mwquadmatgen palette point2\
+quad quaddata quadsegment terraincls terrain terrainmesh
 
 # FFmpeg files, in the form sound/cpp_X.cpp.
 avcodec_cpp=avcodec
@@ -35,7 +44,10 @@ bullet_cpp=bullet player scale
 
 #### No modifications should be required below this line. ####
 
-ogre_cpp_files=$(ogre_cpp:%=ogre/cpp_%.cpp) $(mygui_cpp:%=gui/cpp_%.cpp)
+ogre_cpp_files=\
+	$(ogre_cpp:%=ogre/cpp_%.cpp) \
+	$(mygui_cpp:%=gui/cpp_%.cpp) \
+	$(terrain_cpp:%=terrain/cpp_%.cpp)
 avcodec_cpp_files=$(avcodec_cpp:%=sound/cpp_%.cpp)
 bullet_cpp_files=$(bullet_cpp:%=bullet/cpp_%.cpp)
 
@@ -43,7 +55,7 @@ bullet_cpp_files=$(bullet_cpp:%=bullet/cpp_%.cpp)
 src := $(wildcard bsa/*.d) $(wildcard bullet/*.d) $(wildcard core/*.d) \
 $(wildcard esm/*.d) $(wildcard input/*.d) $(wildcard nif/*.d) $(wildcard ogre/*.d) \
 $(wildcard scene/*.d) $(wildcard sound/*.d) $(wildcard util/*.d) $(wildcard gui/*.d)
-src := $(src) $(wildcard mscripts/*.d)
+src := $(src) $(wildcard mscripts/*.d) $(wildcard terrain/*.d)
 src := $(src) monster/monster.d \
 $(wildcard monster/vm/*.d) \
 $(wildcard monster/compiler/*.d) \
@@ -85,10 +97,10 @@ nifobjs/%.o: %.d
 	$(DMD) $(NIFFLAGS) -c $< -of$@
 
 openmw: openmw.d cpp_ogre.o cpp_avcodec.o cpp_bullet.o $(obj)
-	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
+	$(DMD) $^ -of$@ $(LFLAGS)
 
 esmtool: esmtool.d cpp_ogre.o cpp_avcodec.o cpp_bullet.o $(obj)
-	$(DMD) $^ -of$@ -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
+	$(DMD) $^ -of$@ $(LFLAGS)
 
 niftool: niftool.d $(obj_nif)
 	$(DMD) $^ -of$@

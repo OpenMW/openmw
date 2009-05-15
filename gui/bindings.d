@@ -32,6 +32,7 @@ typedef void* WidgetPtr;
 void gui_setupGUI(int debugOut);
 void gui_toggleGui();
 void gui_setCellName(char *str);
+void gui_showHUD();
 
 // Console stuff
 void gui_toggleConsole();

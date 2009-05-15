@@ -54,17 +54,6 @@ void initMonsterScripts()
   setupGUIScripts();
 }
 
-// Run the GUI scripts. These should be run only after the
-// GUI/rendering system has been initialized
-void runGUIScripts()
-{
-  // Create the HUD and windows
-  vm.run("makegui.mn");
-
-  // Run the fps ticker
-  vm.run("fpsticker.mn");
-}
-
 // This should probably not be here:
 import monster.vm.dbg;
 

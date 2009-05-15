@@ -59,34 +59,9 @@ extern "C" int32_t ogre_configure(
 
   mRoot = new Root(plugincfg, "ogre.cfg", "");
 
-  // Add the BSA archive manager before reading the config file.
+  // Add the BSA archive manager
   ArchiveManager::getSingleton().addArchiveFactory( &mBSAFactory );
 
-  /* The only entry we use from resources.cfg is the "BSA=internal"
-     entry, which we can put in manually.
-
-  // Load resource paths from config file
-  ConfigFile cf;
-  cf.load("resources.cfg");
-
-  // Go through all sections & settings in the file
-  ConfigFile::SectionIterator seci = cf.getSectionIterator();
-
-  String secName, typeName, archName;
-  while (seci.hasMoreElements())
-    {
-      secName = seci.peekNextKey();
-      ConfigFile::SettingsMultiMap *settings = seci.getNext();
-      ConfigFile::SettingsMultiMap::iterator i;
-      for (i = settings->begin(); i != settings->end(); ++i)
-	{
-	  typeName = i->first;
-	  archName = i->second;
-	  ResourceGroupManager::getSingleton().addResourceLocation(
-			     archName, typeName, secName);
-	}
-    }
-  */
   ResourceGroupManager::getSingleton().
     addResourceLocation("internal", "BSA", "General");
 
@@ -328,10 +303,7 @@ void cloneNode(SceneNode *from, SceneNode *to, char* name)
   SceneNode::ObjectIterator it = from->getAttachedObjectIterator();
   while(it.hasMoreElements())
     {
-      // We can't handle non-entities. To be honest I have no idea
-      // what dynamic_cast does or if it's correct here. I used to be
-      // a C++ person but after discovering D I dropped C++ like it
-      // was red hot iron and never looked back.
+      // We can't handle non-entities.
       Entity *e = dynamic_cast<Entity*> (it.getNext());
       if(e)
         {

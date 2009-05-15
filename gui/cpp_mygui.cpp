@@ -450,6 +450,12 @@ extern "C" void gui_toggleGui()
 
 extern "C" int32_t* gui_getGuiModePtr() { return &guiMode; }
 
+extern "C" void gui_showHUD()
+{
+  if(hud)
+    hud->setVisible(true);
+}
+
 extern "C" void gui_setupGUI(int32_t debugOut)
 {
   ResourceGroupManager::getSingleton().
@@ -480,7 +486,6 @@ extern "C" void gui_setupGUI(int32_t debugOut)
   state.X.abs = mWidth / 2;
   state.Y.abs = mHeight / 2;
 
-  //*
   // Set up the HUD
   hud = new HUD();
 
@@ -494,7 +499,8 @@ extern "C" void gui_setupGUI(int32_t debugOut)
   hud->setSpellStatus(65, 100);
 
   hud->setEffect("icons\\s\\tx_s_chameleon.dds");
-  //*/
+
+  hud->setVisible(false);
 
   //new MainMenu();
 }

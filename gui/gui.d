@@ -232,6 +232,24 @@ void getHeight()
   stack.pushInt(gui_getHeight(null));
 }
 
+void initGUI(bool debugOut)
+{
+  // Load the GUI system
+  gui_setupGUI(debugOut);
+}
+
+void startGUI()
+{
+  gui_showHUD();
+
+  // Run GUI scripts
+  // Create the HUD and windows
+  vm.run("makegui.mn");
+
+  // Run the fps ticker
+  vm.run("fpsticker.mn");
+}
+
 void setupGUIScripts()
 {
   vm.addPath("mscripts/guiscripts/");

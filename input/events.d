@@ -214,10 +214,14 @@ const float sndRefresh = 0.17;
 // Refresh rate for music fadeing, seconds.
 const float musRefresh = 0.05;
 
+// Walking / floating speed, in points per second.
+float speed = 300;
+
 float sndCumTime = 0;
 float musCumTime = 0;
 
-void initializeInput()
+// Move the player according to playerData.position
+void movePlayer()
 {
   // Move the player into place. TODO: This isn't really input-related
   // at all, and should be moved.
@@ -228,6 +232,11 @@ void initializeInput()
 
       bullet_movePlayer(position[0], position[1], position[2]);
     }
+}
+
+void initializeInput()
+{
+  movePlayer();
 
   // TODO/FIXME: This should have been in config, but DMD's module
   // system is on the brink of collapsing, and it won't compile if I
@@ -250,6 +259,22 @@ bool isPressed(Keys key)
   return false;
 }
 
+// Enable superman mode, ie. flight and super-speed. This is getting
+// very spaghetti-ish.
+extern(C) void d_superman()
+{
+  bullet_fly();
+  speed = 8000;
+
+  with(*playerData.position)
+    {
+      position[0] = 0;
+      position[1] = 0;
+      position[2] = 12000;
+    }
+  movePlayer();
+}
+
 extern(C) int d_frameStarted(float time)
 {
   if(doExit) return 0;
@@ -269,9 +294,6 @@ extern(C) int d_frameStarted(float time)
 
   // The rest is ignored in pause or GUI mode
   if(pause || *guiMode > 0) return 1;
-
-  // Walking / floating speed, in points per second.
-  const float speed = 300;
 
   // Check if the movement keys are pressed
   float moveX = 0, moveY = 0, moveZ = 0;
