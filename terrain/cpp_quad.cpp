@@ -1,16 +1,25 @@
 /**
- * @brief defines an area of Landscape
+ * defines an area of Landscape
  *
- * A quad can either hold a mesh, or 4 other sub quads
- * The functions split and unslip either break the current quad into smaller quads, or
- * alternatively remove the lower quads and create the terrain mesh on the the current (now the lowest) level
+ * A quad can either hold a mesh, or 4 other sub quads The functions
+ * split and unsplit either break the current quad into smaller quads,
+ * or alternatively remove the lower quads and create the terrain mesh
+ * on the the current (now the lowest) level
  *
- * needUnsplit and needSplit query the state of the meshes to see if it needs spliting or unspliting
+ * needUnsplit and needSplit query the state of the meshes to see if
+ * it needs spliting or unspliting
  *
+ */
+/* Previously for MeshInterface:
+ * Interface between the quad and the terrain renderble classes, to the
+ * quad it looks like this rendereds a single mesh for the quad. This
+ * may not be the case.
+ *
+ * It also could allow several optimizations (e.g. multiple splits)
  */
 class Quad
 {
-public:
+  enum SplitState { SS_NONE, SS_SPLIT, SS_UNSPLIT };
 
   /**
    * when each quad is split, the children can be one of 4 places,
@@ -19,9 +28,12 @@ public:
    * and should always have 4 children.
    */
 
+  typedef std::list<TerrainMesh*> MeshList;
+
+public:
+
   // FIXME: There's probably a better way to do this
   enum QuadLocation { QL_NW, QL_NE, QL_SW, QL_SE, QL_ROOT };
-
   /**
    * @param l the location of the quad
    * @param p the parent quad. Leave 0 if it is root
@@ -29,9 +41,10 @@ public:
    *
    * Constructor mainly sets up the position variables/depth etc
    */
-  Quad(QuadLocation l, Quad* p, Terrain* t)
-    : mParent(p), mTerrain(t), mTerrainMesh(0), mLocation(l)
+  Quad(QuadLocation l, Quad* p)
+    : mParent(p), mLocation(l), mQuadData(NULL)
   {
+    TRACE("Quad");
     //as mentioned elsewhere, the children should all be null.
     memset(mChildren, NULL, sizeof(Quad*)*NUM_CHILDREN);
 
@@ -44,46 +57,45 @@ public:
         mSideLength = p->getSideLength()/2;
 
         //horrible bit of code
+        // FIXME
         switch (l) {
         case Quad::QL_NE:
-            mPosition.x += mSideLength/2;
-            mPosition.y += mSideLength/2;
-            break;
+          mPosition.x += mSideLength/2;
+          mPosition.y += mSideLength/2;
+          break;
         case Quad::QL_NW:
-            mPosition.x -= mSideLength/2;
-            mPosition.y += mSideLength/2;
-            break;
+          mPosition.x -= mSideLength/2;
+          mPosition.y += mSideLength/2;
+          break;
         case Quad::QL_SE:
-            mPosition.x += mSideLength/2;
-            mPosition.y -= mSideLength/2;
-            break;
+          mPosition.x += mSideLength/2;
+          mPosition.y -= mSideLength/2;
+          break;
         case Quad::QL_SW:
-            mPosition.x -= mSideLength/2;
-            mPosition.y -= mSideLength/2;
-            break;
+          mPosition.x -= mSideLength/2;
+          mPosition.y -= mSideLength/2;
+          break;
         default:
-            break;//get rid of warning
+          break;
         }
 
         //set after positions have been retrived
-        TerrainHeightmap* d = mTerrain->getTerrainData();
-        mMaxDepth = d->getMaxDepth();
-        mHasData = d->hasData(this);
+        mMaxDepth = g_heightMap->getMaxDepth();
+        mHasData = g_heightMap->hasData(mPosition.x, mPosition.y);
 
         if ( needSplit() ) //need to "semi" build terrain
-            split();
+          split();
         else if ( mHasData )
           {
             buildTerrain();
-            getMesh()->justSplit();
+            justSplit();
           }
-
       }
     else
-      { //assume it is root node, get data and possition
+      { //assume it is root node, get data and position
         mDepth = 0; //root
-        mSideLength = mTerrain->getTerrainData()->getRootSideLength();
-        mPosition = Point2<long>(0,0); //see Quad::getPosition as to why this is always 0
+        mSideLength = g_heightMap->getRootSideLength();
+        mPosition = Point2<long>(0,0);
 
         mHasData = false;
 
@@ -100,34 +112,10 @@ public:
    */
   ~Quad()
   {
+    TRACE("~Quad");
     destroyTerrain();
     for (size_t i = 0; i < NUM_CHILDREN; i++)
       delete mChildren[i];
-  }
-
-  void update(Ogre::Real t)
-  {
-    if (  needSplit()  )
-      {
-        split();
-        return;
-      }
-    else if ( needUnsplit() )
-      {
-        unsplit();
-        return;
-      }
-
-    //deal with updating the mesh.
-    if ( mTerrainMesh )
-      mTerrainMesh->update(t);
-    else if ( hasChildren() )
-      {
-        for (size_t i = 0; i < NUM_CHILDREN; ++i) {
-          assert( mChildren[i] );
-          mChildren[i]->update(t);
-        }
-      }
   }
 
   /**
@@ -139,22 +127,13 @@ public:
    */
   bool needSplit()
   {
+    TRACE("needSplit");
     if ( hasChildren() ||
          getDepth() == mMaxDepth ||
          !hasData() )
       return false;
-    return ( mTerrainMesh && mTerrainMesh->getSplitState()
-             == MeshInterface::SS_SPLIT );
+    return ( mQuadData && (mSplitState == SS_SPLIT) );
   }
-
-  /**
-   * The functions preforms work on the quad tree state. There is no
-   * requirement for this to be called every frame, but it is not
-   * thread safe due to interacting with OGRE The function checks if a
-   * split or unsplit is needed. It also calls update on all children
-
-   * @param t the time since the last frame
-   */
 
   /**
    * Deletes the landscape, if there is any
@@ -162,11 +141,12 @@ public:
    */
   void split()
   {
+    TRACE("split");
     destroyTerrain();
 
     //create a new terrain
     for ( size_t i = 0; i < NUM_CHILDREN; ++i )
-        mChildren[i] = new Quad((QuadLocation)i, this, mTerrain);
+      mChildren[i] = new Quad((QuadLocation)i, this);
 
     assert(!needUnsplit());
   }
@@ -176,17 +156,20 @@ public:
    */
   void unsplit()
   {
+    TRACE("unsplit");
     //shouldn't unsplit 0 depth
     assert(getDepth());
 
-    for ( size_t i = 0; i < NUM_CHILDREN; i++ )//{
+    for ( size_t i = 0; i < NUM_CHILDREN; i++ )
       delete mChildren[i];
     memset(mChildren, NULL, sizeof(Quad*)*NUM_CHILDREN);
 
-    if ( mHasData ) {
-      buildTerrain();
-      getMesh()->justUnsplit();
-    }
+    if ( mHasData )
+      {
+        buildTerrain();
+        justUnsplit();
+      }
+
     assert(!needSplit());
   }
 
@@ -196,17 +179,21 @@ public:
    */
   bool needUnsplit()
   {
-    if ( hasChildren() && getDepth() ) {
-      for (size_t i=0;i< NUM_CHILDREN;i++) {
-        if ( mChildren[i]->hasData()  ) {
-          if ( !mChildren[i]->hasMesh() )
-            return false;
-          else if ( mChildren[i]->getMesh()->getSplitState() != MeshInterface::SS_UNSPLIT)
-            return false;
-        }
+    TRACE("needUnsplit");
+    if ( hasChildren() && getDepth() )
+      {
+        for (size_t i=0;i< NUM_CHILDREN;i++)
+          {
+            if ( mChildren[i]->hasData()  )
+              {
+                if ( !mChildren[i]->hasMesh() )
+                  return false;
+                else if ( mChildren[i]->getSplitState() != SS_UNSPLIT)
+                  return false;
+              }
+          }
+        return true;
       }
-      return true;
-    }
 
     //get depth ensures the root doesn't try and unsplit
     if ( getDepth() && !hasData() )
@@ -221,10 +208,41 @@ public:
    */
   void buildTerrain()
   {
+    TRACE("buildTerrain");
+    assert(!mQuadData);
     assert(hasData());
-    assert(getMesh() == NULL); //the terrain sould not exist
-    mTerrainMesh = new MeshInterface(this, mTerrain);
-    mTerrainMesh->create();
+
+    // This was in MeshInterface().
+
+    mMax = 0;
+    mMin = 0;
+    mSplitState = SS_NONE;
+
+    long qx = mPosition.x;
+    long qy = mPosition.y;
+    mQuadData = g_heightMap->getData(qx, qy);
+
+    //the mesh is created at zero, so an offset is applied
+    const Ogre::Vector3 pos(qx - mSideLength/2,
+                            0,qy - mSideLength/2);
+
+    mSceneNode = g_Terrain->getTerrainSceneNode()->createChildSceneNode(pos);
+
+    // This was in create()
+
+    if ( mDepth == g_Terrain->getMaxDepth() )
+      for ( int y = 0; y < 4; ++y )
+        for ( int x = 0; x < 4; ++x )
+          {
+            addNewObject(Ogre::Vector3(x*16*128, 0, y*16*128), //pos
+                         17, //size
+                         false, //skirts
+                         0.25f, float(x)/4.0f, float(y)/4.0f);//quad seg location
+          }
+    else
+      addNewObject(Ogre::Vector3(0,0,0), 65);
+
+    getBounds();
   }
 
   /**
@@ -232,8 +250,25 @@ public:
    */
   void destroyTerrain()
   {
-    delete mTerrainMesh;
-    mTerrainMesh = NULL;
+    TRACE("destroyTerrain");
+    if(!mQuadData)
+      return;
+
+    // From ~MeshInterface()
+    for ( MeshList::iterator itr =
+            mMeshList.begin();
+          itr != mMeshList.end();
+          ++itr )
+      delete *itr;
+    mMeshList.clear();
+
+    mSceneNode->removeAndDestroyAllChildren();
+    mSceneMgr->destroySceneNode(mSceneNode);
+
+    g_Terrain->getTerrainSceneNode()->detachAllObjects();
+
+    delete mQuadData;
+    mQuadData = NULL;
   }
 
   /**
@@ -286,7 +321,7 @@ public:
   /**
    * @return true if their is a terrain mesh alocated
    */
-  inline bool hasMesh() const{ return mTerrainMesh != 0; }
+  inline bool hasMesh() const{ return mQuadData; }
 
   /**
    * @return true if there are any children
@@ -294,27 +329,161 @@ public:
   inline bool hasChildren() const { return mChildren[0] != 0; }
 
   /**
-   * @return the mesh. 0 if there is no mesh
-   */
-  MeshInterface* getMesh()
-  {
-    if ( mTerrainMesh == 0 ) return 0;
-    return mTerrainMesh;
-  }
-
-  /**
    * @brief checks if the quad has any data (i.e. a mesh avaible for rendering
    */
   inline bool hasData() const{ return mHasData; }
 
+
+  /**
+   * @brief updates all meshes.
+   * @remarks the camera distance is calculated here so that all terrain has the correct morph levels etc
+   */
+  void update(Ogre::Real time)
+  {
+    TRACE("Quad::update");
+    if (  needSplit()  )
+      {
+        split();
+        return;
+      }
+    else if ( needUnsplit() )
+      {
+        unsplit();
+        return;
+      }
+
+    //deal with updating the mesh.
+    if ( !mQuadData )
+      {
+        // We don't have a mesh
+        if ( hasChildren() )
+          {
+            for (size_t i = 0; i < NUM_CHILDREN; ++i) {
+              assert( mChildren[i] );
+              mChildren[i]->update(time);
+            }
+          }
+        return;
+      }
+
+    // We have a mesh. Update it.
+
+    const Ogre::Vector3 cpos = mCamera->getDerivedPosition();
+    Ogre::Vector3 diff(0, 0, 0);
+
+    //copy?
+    Ogre::AxisAlignedBox worldBounds = mBounds;
+    worldBounds.transformAffine(mSceneNode->_getFullTransform());
+
+    diff.makeFloor(cpos - worldBounds.getMinimum() );
+    diff.makeCeil(cpos - worldBounds.getMaximum() );
+    const Ogre::Real camDist = diff.squaredLength();
+
+    mSplitState = SS_NONE;
+    if ( camDist < mSplitDistance )             mSplitState = SS_SPLIT;
+    else if ( camDist > mUnsplitDistance )      mSplitState = SS_UNSPLIT;
+
+    for ( MeshList::iterator itr = mMeshList.begin();
+          itr != mMeshList.end();
+          ++itr )
+      {
+        assert(*itr);
+        (*itr)->update(time, camDist, mUnsplitDistance, mMorphDistance);
+      }
+  }
+
+  inline SplitState getSplitState() {
+    return mSplitState;
+  }
+
+  /**
+   * @brief propergates the just split through all terrain
+   */
+  inline void justSplit() {
+    for ( MeshList::iterator itr = mMeshList.begin();
+          itr != mMeshList.end();
+          ++itr )
+      (*itr)->justSplit();
+  }
+  /**
+   * @brief propergates the just unsplit through all terrain
+   */
+  inline void justUnsplit() {
+    for ( MeshList::iterator itr = mMeshList.begin();
+          itr != mMeshList.end();
+          ++itr )
+      (*itr)->justUnsplit();
+  }
+
 private:
+
+  ///Must be a ptr, else it destorys before we are ready
+  MeshList mMeshList;
+
+  Ogre::SceneNode* mSceneNode;
+
+  ///use for split distances
+  Ogre::Real mBoundingRadius;
+  Ogre::AxisAlignedBox mBounds;
+
+  ///max and min heights
+  float mMax, mMin;
+
+  Ogre::Real mSplitDistance,mUnsplitDistance,mMorphDistance;
+
+  SplitState mSplitState;
+  QuadData* mQuadData;
+
+  /**
+   * @brief sets the bounds and split radius of the object
+   */
+  void getBounds()
+  {
+    mBounds.setExtents( 0,
+                        mMin,
+                        0,
+                        (65 - 1) * mQuadData->getVertexSeperation(),
+                        mMax,
+                        (65 - 1) * mQuadData->getVertexSeperation());
+
+    mBoundingRadius = (mBounds.getMaximum() - mBounds.getMinimum()).length() / 2;
+
+    mSplitDistance = pow(mBoundingRadius * SPLIT_FACTOR, 2);
+    mUnsplitDistance = pow(mBoundingRadius * UNSPLIT_FACTOR, 2);
+    mMorphDistance = pow(mBoundingRadius * 1.5, 2);
+  }
+
+  /**
+   * @brief Adds a new mesh
+   * @param pos the position in relation to mSceneNode
+   * @param terrainSize the size of the terrain in verts. Should be n^2+1
+   * @param skirts true if the terrain should have skirts
+   * @param segmentSize the size of the segment. So if splitting terrain into 4*4, it should be 0.25
+   * @param startX, startY the start position of this segment (0 <= startX < 1)
+   */
+  void addNewObject(const Ogre::Vector3& pos,  int terrainSize,
+                    bool skirts = true, float segmentSize = 1,
+                    float startX = 0, float startY = 0 )
+  {
+    assert(mQuadData);
+
+    TerrainMesh *tm = new TerrainMesh(mQuadData, segmentSize,
+                                      startX, startY, pos,
+                                      terrainSize, mDepth, skirts,
+                                      mSceneNode);
+
+    mMax = std::max(tm->getMax(), mMax);
+    mMin = std::max(tm->getMin(), mMin);
+
+    mMeshList.push_back(tm);
+  }
+
   static const size_t NUM_CHILDREN = 4;
 
   Quad* mParent; /// this is the node above this. 0 if this is root
-  Quad* mChildren[4]; ///optionaly the children. Should be 0 if not exist
+  Quad* mChildren[NUM_CHILDREN]; ///optionaly the children. Should be
+                                 ///0 if not exist
 
-  Terrain* mTerrain; ///the pointer to the root terrain
-  MeshInterface* mTerrainMesh; ///the terrain mesh, only used if this is the bottom node
   Quad::QuadLocation mLocation; ///the location within the quad (ne, se, nw, sw). See Quad::QuadLocation
   Point2<long> mPosition; ///the center of the mesh. this is a long so can be used as comparison. See Quad::getPosition
   long mSideLength; ///the length in units of one side of the quad. See Quad::getSideLength
@@ -323,5 +492,3 @@ private:
   bool mHasData; ///holds if there is terrain data about this quad
   int mMaxDepth; ///the maxmium depth. Cached. This is not valid is mDepth == 0
 };
-
-//const size_t Quad::NUM_CHILDREN = 4;

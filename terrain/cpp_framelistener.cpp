@@ -1,15 +1,12 @@
 class TerrainFrameListener : public FrameListener
 {
 protected:
-  Terrain* mTerrain;
-  MWHeightmap* mHeights;
-
   /**
    * Updates the quad tree
    */
   bool frameEnded(const FrameEvent& evt)
   {
-    mTerrain->update(evt.timeSinceLastFrame);
+    g_Terrain->update(evt.timeSinceLastFrame);
     return true;
   }
 
@@ -20,19 +17,18 @@ public:
     mRoot->addFrameListener(this);
 
     //our derived heightmap
-    mHeights = new MWHeightmap();
-    mHeights->load(TERRAIN_OUTPUT);
+    g_heightMap = new MWHeightmap();
+    g_heightMap->load(TERRAIN_OUTPUT);
 
     //setup terrain
-    mTerrain = new Terrain( mHeights, //heightmap
-                            mSceneMgr->getRootSceneNode()->createChildSceneNode("TERRAIN_ROOT"));  //root scene node
+    g_Terrain = new Terrain(mSceneMgr->getRootSceneNode()->createChildSceneNode("TERRAIN_ROOT"));  //root scene node
 
     //fix settings
-    mTerrain->setMorphingEnabled(false);
-    mTerrain->setTextureFadingEnabled(false);
+    g_Terrain->setMorphingEnabled(false);
+    g_Terrain->setTextureFadingEnabled(false);
 
     //create the quad node
-    mTerrain->create();
+    g_Terrain->create();
   }
 
   /* KILLME

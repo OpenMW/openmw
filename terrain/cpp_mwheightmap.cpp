@@ -3,22 +3,29 @@
  * major improvment would be to store the data as a quad tree. It might
  * improve lookup times. Then again. Might not
  */
-class MWHeightmap : public TerrainHeightmap
+class MWHeightmap
 {
 public:
-  QuadData* getData(Quad* q)
+  /**
+   * loads the quad data from the disk
+   */
+  QuadData* getData(long x, long y)
   {
-    MWQuadData* data = loadQuad(q->getPosition().x,q->getPosition().y);
-
-    if ( !data )
+    long offset = mIndex.getOffset(x,y);
+    if ( offset == -1 ) //check we have xy
       assert(0);
 
-    return data;
+    mDataIFS.seekg(offset);
+
+    //load the quad from the file
+    QuadData* q = new QuadData();
+    boost::archive::binary_iarchive oa(mDataIFS);
+    oa >> *q;
+    return q;
   }
 
-  inline bool hasData(Quad* q) {
-    return hasQuad(q->getPosition().x,q->getPosition().y);
-  }
+  inline bool hasData(long x, long y)
+  { return (mIndex.getOffset(x,y) != -1 ); }
 
   inline long getRootSideLength() {
     return mIndex.getRootSideLength();
@@ -42,9 +49,7 @@ public:
       boost::archive::binary_iarchive oa(ifs);
       oa >> mPalette;
     }
-    mMaterialGen.setTexturePaths(mPalette.getPalette());
-
-    mMaterialGenerator = new MWQuadMaterialGen(&mMaterialGen);
+    g_materialGen->setTexturePaths(mPalette.getPalette());
 
     mDataIFS.open(std::string(fn + ".data").c_str(), std::ios::binary);
     return true;
@@ -52,33 +57,10 @@ public:
 
 private:
 
-  inline long hasQuad(long x, long y) {
-    return (mIndex.getOffset(x,y) != -1 ) ;
-  }
-
-  /**
-   * @brief loads the quad data from the disk
-   */
-  MWQuadData* loadQuad(long x, long y)
-  {
-    long offset = mIndex.getOffset(x,y);
-    if ( offset == -1 ) //check we have xy
-      return 0;
-
-    mDataIFS.seekg(offset);
-
-    //load the quad from the file
-    MWQuadData* q = new MWQuadData(this);
-    boost::archive::binary_iarchive oa(mDataIFS);
-    oa >> *q;
-    return q;
-  }
-
   ///ifs for the data file. Opned on load
   std::ifstream mDataIFS;
   ///holds the offsets of the quads
   Index mIndex;
   TexturePalette mPalette;
-  ///material generator. gens a ogre::material from quad data
-  MaterialGenerator mMaterialGen;
+
 };

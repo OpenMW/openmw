@@ -76,6 +76,7 @@ void main(char[][] args)
   bool noSound = false;
   bool debugOut = false;
   bool extTest = false;
+  bool doGen = false;
 
   // Some examples to try:
   //
@@ -96,6 +97,7 @@ void main(char[][] args)
   foreach(char[] a; args[1..$])
     if(a == "-n") render = false;
     else if(a == "-ex") extTest = true;
+    else if(a == "-gen") doGen = true;
     else if(a == "-h") help=true;
     else if(a == "-rk") resetKeys = true;
     else if(a == "-oc") showOgreFlag = true;
@@ -122,6 +124,7 @@ void main(char[][] args)
       writefln("  Options:");
       writefln("    -n            Only load, do not render");
       writefln("    -ex           Test the terrain system");
+      writefln("    -gen          Generate landscape cache");
       writefln("    -rk           Reset key bindings to default");
       writefln("    -oc           Show the Ogre config dialogue");
       writefln("    -ns           Completely disable sound");
@@ -257,7 +260,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
 	  ogre_makeSky();
           */
 
-          initTerrain();
+          initTerrain(doGen);
         }
       else
         {

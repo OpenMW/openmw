@@ -87,7 +87,7 @@ public:
     int cellDist = pow((float)2, mIndex.getMaxDepth());
 
     // Temporary storage
-    MWQuadData qd(0);
+    QuadData qd;
     qd.setVertexSeperation(128*halfLevel); //dist between two verts
 
     std::vector<float>& gh = qd.getHeightsRef(); //ref to the data storage in the quad
@@ -207,6 +207,8 @@ public:
     boost::archive::binary_oarchive oap(ofp);
     oai << mIndex;
     oap << mPalette;
+
+    mDataO.close();
   }
 
 private:
@@ -333,13 +335,14 @@ private:
     assert(Ogre::Math::Sqrt(ltex.size())==alphaSize);
     std::list<Ogre::ResourcePtr> createdResources;
 
+    // FIXME: Move out of this function?
     MaterialGenerator mg;
     mg.setTexturePaths(mPalette.getPalette());
 
     const int scaleDiv = alphaSize/LAND_LTEX_WIDTH;
 
     //genetate material/aplahas
-    Ogre::MaterialPtr mp = mg.getAlphaMat("Rtt_Alpha1", ltex, alphaSize, 0, scaleDiv,createdResources);
+    Ogre::MaterialPtr mp = mg.getAlphaMat(ltex, alphaSize, 0, scaleDiv,createdResources);
     Ogre::TexturePtr tex1 = getRenderedTexture(mp, "RTT_TEX_1",texSize, Ogre::PF_R8G8B8);
     tex1->getBuffer()->getRenderTarget()->writeContentsToFile(outputName);
     Ogre::MaterialManager::getSingleton().remove(mp->getHandle());

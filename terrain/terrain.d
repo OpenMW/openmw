@@ -55,11 +55,13 @@ void makePath(char[] pt)
     makeDir(pt);
 }
 
-void initTerrain()
+void initTerrain(bool doGen)
 {
   makePath("cache/terrain");
 
-  //terr_genData();
+  if(doGen)
+    terr_genData();
+
   terr_setupRendering();
 }
 

@@ -43,13 +43,27 @@ const int LAND_NUM_VERTS = LAND_VERT_WIDTH*LAND_VERT_WIDTH;
 const int LAND_LTEX_WIDTH = 16;
 const int LAND_NUM_LTEX = LAND_LTEX_WIDTH*LAND_LTEX_WIDTH;
 
+// Multiplied with the size of the quad. If these are too close, a
+// quad might end up splitting/unsplitting continuously, since the
+// quad size changes when we split.
+const float SPLIT_FACTOR = 0.5;
+const float UNSPLIT_FACTOR = 2.0;
+
 //stops it crashing, now it leaks.
 #define ENABLED_CRASHING 0
 
 class Quad;
 class QuadData;
-class QuadSegment;
 class Terrain;
+class MaterialGenerator;
+class MWHeightmap;
+
+MWHeightmap *g_heightMap;
+MaterialGenerator *g_materialGen;
+Terrain *g_Terrain;
+
+#undef TRACE
+#define TRACE(x)
 
 // Prerequisites
 #include <vector>
@@ -66,33 +80,29 @@ class Terrain;
 #include <boost/serialization/map.hpp>
 
 // For generation
+#include "cpp_materialgen.cpp"
 #include "cpp_esm.cpp"
 #include "cpp_landdata.cpp"
 #include "cpp_quaddata.cpp"
-#include "cpp_point2.cpp"
-#include "cpp_materialgen.cpp"
 #include "cpp_index.cpp"
 #include "cpp_palette.cpp"
+#include "cpp_point2.cpp"
 #include "cpp_generator.cpp"
 
 // For rendering
-#include "cpp_quadsegment.cpp"
 #include "cpp_baseland.cpp"
-#include "cpp_mwquadmatgen.cpp"
+#include "cpp_mwheightmap.cpp"
 
 // These depend on each other, so our usual hackery won't work. We
 // need the header files first.
 #include "cpp_terrainmesh.h"
-#include "cpp_meshinterface.h"
 #include "cpp_terraincls.h"
 
 #include "cpp_quad.cpp"
 
 #include "cpp_terraincls.cpp"
 #include "cpp_terrainmesh.cpp"
-#include "cpp_meshinterface.cpp"
 
-#include "cpp_mwheightmap.cpp"
 #include "cpp_framelistener.cpp"
 
 TerrainFrameListener terrainListener;
@@ -102,6 +112,9 @@ extern "C" void d_superman();
 // Set up the rendering system
 extern "C" void terr_setupRendering()
 {
+  if(!g_materialGen)
+    g_materialGen = new MaterialGenerator;
+
   // Add the terrain directory
   ResourceGroupManager::getSingleton().
     addResourceLocation(TEXTURE_OUTPUT, "FileSystem", "General");
@@ -116,7 +129,10 @@ extern "C" void terr_setupRendering()
 
 // Generate all cached data.
 extern "C" void terr_genData()
-{
+{ 
+  if(!g_materialGen)
+    g_materialGen = new MaterialGenerator;
+
   Ogre::Root::getSingleton().renderOneFrame();
 
   Generator mhm(TERRAIN_OUTPUT);

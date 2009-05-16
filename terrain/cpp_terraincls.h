@@ -11,7 +11,7 @@ public:
    * The terrain is create in the constructor.
    * @todo change quad root creation to create/destroy funcs?
    */
-  explicit Terrain(TerrainHeightmap* d, Ogre::SceneNode* r);
+  explicit Terrain(Ogre::SceneNode* r);
   /**
    * @brief deletes the quad tree
    */
@@ -29,7 +29,7 @@ public:
    * @remarks this is very slow, as it drops all created alpha maps and meshes.
    * @todo check this works
    */
-  void reload();
+  //void reload();
 
   /**
    * @brief sets the scene node that all of the terrain nodes are based off
@@ -52,36 +52,29 @@ public:
   void update(Ogre::Real t);
 
   /**
-   * @return the heightmap data
-   */
-  inline TerrainHeightmap* getTerrainData(){ return mTerrainData; }
-
-  /**
    * @brief handles the actions to take on the creation of a terrain mesh
    * @param qd the quad data. It is valid until the same variable is passed to _quadDestroyed
-   */
   void _quadCreated(QuadData* qd);
 
   /**
    * @brief The quad as defined by the quad data qd has been destroyed
    * @param qd the quad that has been destroyed. This is only valid for this function. Is is deleted just after
-   */
   void _quadDestroyed(QuadData* qd);
 
   /**
    * @brief sets the function to be used in the callback when a quad is created
    * @param f the function to use. Set to null to disable callbacks
-   */
+
   inline void setQuadCreateFunction(void (*f)(QuadData*)){
     mQuadCreateFunction = f;
   }
   /**
    * @brief sets the function to be used in the callback when a quad is destroyed
    * @param f the function to use. Set to null to disable callbacks
-   */
   inline void setQuadDestroyFunction(void (*f)(QuadData*)){
     mQuadDestroyFunction = f;
   }
+   */
 
   /**
    * @brief time in seconds to morph to full detail after an unsplit.
@@ -131,8 +124,6 @@ public:
     return mTextureFadingEnabled;
   }
 protected:
-  TerrainHeightmap* mTerrainData;
-
   /// the scenenode that every other node is decended from. This
   /// should be surplied by the user
   Ogre::SceneNode* mTerrainSceneNode;
@@ -140,10 +131,12 @@ protected:
   ///the root node for all the quads.
   Quad* mQuadRoot;
 
+  /*
   ///quad callback function
   void (*mQuadCreateFunction)(QuadData*);
   ///quad callback function
   void (*mQuadDestroyFunction)(QuadData*);
+  */
 
   bool mMorphingEnabled;
   bool mTextureFadingEnabled;

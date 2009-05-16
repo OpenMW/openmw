@@ -1,76 +1,22 @@
 /**
- * @brief gets a material for the quad data
- */
-class QuadMaterialGenerator
-{
-public:
-  virtual Ogre::MaterialPtr getMaterial(QuadData* qd) = 0;
-  /**
-   * @brief can't overload :(
-   */
-  virtual Ogre::MaterialPtr getMaterialSegment(QuadData* qd,QuadSegment* qs) = 0;
-private:
-  /**
-   * @brief fix for gcc not putting the vtable anywhere unless there is a none inline, none virtual function
-   *   @remarks does absolutly nothing ofc
-   */
-  void _vtablefix();
-};
-
-/**
- * @brief abstract class used for getting LOD data.
+ * holds data that is passed to the mesh renderer. heights normals etc
  *
- * This class enables storing of data in whatever form is wanted
- */
-class TerrainHeightmap {
-public:
-  TerrainHeightmap() : mMaterialGenerator(0){
-  }
-  virtual ~TerrainHeightmap() {
-    delete mMaterialGenerator;
-  }
-
-  /**
-   * @brief called to load some data for the given quad
-   * @return NULL if the data doesn't exist
-   *
-   * The deleting of the memory is handled by TerrainMesh
-   */
-  virtual QuadData* getData(Quad* q) = 0;
-
-  /**
-   * @brief check if any data exists for this level
-   * @param q the quad that is asking for the data
-   */
-  virtual bool hasData(Quad* q) = 0;
-
-  /**
-   * @brief get the distance from one end of the map to the other
-   */
-  virtual long getRootSideLength() = 0;
-  virtual int getMaxDepth() = 0;
-
-  inline QuadMaterialGenerator* getMaterialGenerator(){
-    assert(mMaterialGenerator);
-    return mMaterialGenerator;
-  }
-protected:
-  QuadMaterialGenerator* mMaterialGenerator;
-};
-
-/**
- * @brief holds data that is passed to the mesh renderer. heights normals etc
- *
- * This needs a rework, as really the mesh renderer should accept just a set of verts
- * Normals and indicies to allow us to pass optoizied meshes
+ * This needs a rework, as really the mesh renderer should accept just
+ * a set of verts Normals and indicies to allow us to pass optimized
+ * meshes
  */
 class QuadData
 {
-public:
-  QuadData(TerrainHeightmap* p)
-    : mHeightmap(p) {}
+  typedef std::list<Ogre::ResourcePtr> ResourceList;
+  typedef std::list<Ogre::ResourcePtr>::const_iterator ResourceListCItr;
 
-  virtual ~QuadData() {}
+public:
+  virtual ~QuadData()
+  {
+    const ResourceListCItr end = mResources.end();
+    for ( ResourceListCItr itr = mResources.begin(); itr != end; ++itr )
+      (*itr)->getCreator()->remove((*itr)->getHandle());
+  }
 
   /**
    * How many vertes wide the qd is. Usally 65.
@@ -93,8 +39,20 @@ public:
     return getNormalsRef().at(offset);
   }
 
+  inline ResourceList& getUsedResourcesRef()
+  { return mResources; }
+
+  inline void setTexture(const std::string& t)
+  { mTexture = t; }
+
+  inline std::string& getTexture()
+  { return mTexture; }
+
+  inline std::vector<int>& getTextureIndexRef()
+  { return mTextureIndex; }
+
   /**
-   * @brief should be removed when we get around to developing optomized meshes
+   * @brief should be removed when we get around to developing optimized meshes
    */
   inline int getVertexSeperation() {
     return mVertexSeperation;
@@ -104,17 +62,13 @@ public:
   }
 
   /**
-   * @brief lazy get function. Avoids creating materail until requested
+   * @brief lazy get function. Avoids creating material until requested
    */
   inline Ogre::MaterialPtr getMaterial() {
     if ( mMaterial.isNull() )
       createMaterial();
     assert(!mMaterial.isNull());
     return mMaterial;
-  }
-  QuadMaterialGenerator* getMaterialGenerator()
-  {
-    return mHeightmap->getMaterialGenerator();
   }
 
   /**
@@ -130,12 +84,14 @@ public:
     mParentTexture = c;
   }
 
-protected:
+private:
   void createMaterial()
   {
-    mMaterial = getMaterialGenerator()->getMaterial(this);
+    assert(mTexture.length());
+
+    mMaterial = g_materialGen->generateSingleTexture(mTexture, mResources);
   }
-  TerrainHeightmap* mHeightmap;
+
   Ogre::MaterialPtr mMaterial;
 
   std::string mParentTexture;
@@ -143,43 +99,11 @@ protected:
   int mVertexSeperation;
   std::vector<float> mHeights;
   std::vector<char> mNormals;
-};
 
-class MWQuadData : public QuadData
-{
-public:
-  typedef std::list<Ogre::ResourcePtr> ResourceList;
-  typedef std::list<Ogre::ResourcePtr>::const_iterator ResourceListCItr;
-
-  MWQuadData(TerrainHeightmap* thm) : QuadData(thm) {}
-
-  ~MWQuadData ()
-  {
-    const ResourceListCItr end = mResources.end();
-    for ( ResourceListCItr itr = mResources.begin(); itr != end; ++itr )
-      (*itr)->getCreator()->remove((*itr)->getHandle());
-  }
-
-  /**
-   * @return a ref to the list of used resourcs
-   */
-  inline ResourceList& getUsedResourcesRef()
-  { return mResources; }
-
-  inline void setTexture(const std::string& t)
-  { mTexture = t; }
-
-  inline std::string& getTexture()
-  { return mTexture; }
-
-  inline std::vector<int>& getTextureIndexRef()
-  { return mTextureIndex; }
-
-private:
   ///Holds the resources used by the quad
   ResourceList mResources;
 
-  std::vector<int> mTextureIndex; ///holds index that corespond the the palette
+  std::vector<int> mTextureIndex; ///holds index that correspond to the palette
   std::string mTexture; ///The land texture. Mutally exclusive with the above
 
   friend class boost::serialization::access;
@@ -200,4 +124,4 @@ private:
   }
 };
 
-BOOST_CLASS_TRACKING(MWQuadData, boost::serialization::track_never);
+BOOST_CLASS_TRACKING(QuadData, boost::serialization::track_never);

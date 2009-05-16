@@ -13,4 +13,4 @@ class MTrace
     { dbg_untrace(); }
 };
 
-#define TRACE(x) MTrace _trc(x);
+#define TRACE(x) MTrace __trc(x);

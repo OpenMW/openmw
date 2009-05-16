@@ -1,10 +1,6 @@
-Terrain::Terrain(TerrainHeightmap* d,
-                 Ogre::SceneNode* r)
-  :  mTerrainData(d),
-     mTerrainSceneNode(r),
+Terrain::Terrain(Ogre::SceneNode* r)
+  :  mTerrainSceneNode(r),
      mQuadRoot(0),
-     mQuadCreateFunction(0),
-     mQuadDestroyFunction(0),
      mMorphingEnabled(true),
      mTextureFadingEnabled(true),
      mBaseLand(r)
@@ -17,7 +13,7 @@ Terrain::~Terrain(){
 }
 //----------------------------------------------
 void Terrain::create(){
-  mQuadRoot = new Quad(Quad::QL_ROOT, 0, this); //cleaned in Terrain::~Terrain
+  mQuadRoot = new Quad(Quad::QL_ROOT, 0);
 }
 //----------------------------------------------
 void Terrain::update(Ogre::Real t){
@@ -26,20 +22,14 @@ void Terrain::update(Ogre::Real t){
   mBaseLand.update();
 }
 //----------------------------------------------
-void Terrain::_quadCreated(QuadData* qd){
-  if ( mQuadCreateFunction ) (*mQuadCreateFunction)(qd);
-}
-//----------------------------------------------
-void Terrain::_quadDestroyed(QuadData* qd){
-  if ( mQuadDestroyFunction ) (*mQuadDestroyFunction)(qd);
-}
-//----------------------------------------------
 int Terrain::getMaxDepth(){
-  return mTerrainData->getMaxDepth();
+  return g_heightMap->getMaxDepth();
 }
+/*
 //----------------------------------------------
 void Terrain::reload(){
   delete mQuadRoot;
-  mQuadRoot = new Quad(Quad::QL_ROOT, 0, this);
+  mQuadRoot = new Quad(Quad::QL_ROOT, 0);
 }
 //----------------------------------------------
+*/
