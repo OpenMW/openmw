@@ -6,6 +6,7 @@ protected:
    */
   bool frameEnded(const FrameEvent& evt)
   {
+    g_rootQuad->update(evt.timeSinceLastFrame);
     g_heightMap->update(evt.timeSinceLastFrame);
     return true;
   }
@@ -29,7 +30,7 @@ public:
     g_heightMap->setTextureFadingEnabled(false);
 
     //create the quad node
-    g_heightMap->create();
+    g_rootQuad = new Quad(Quad::QL_ROOT, 0);
   }
 
   /* KILLME

@@ -56,8 +56,10 @@ class Quad;
 class QuadData;
 class MaterialGenerator;
 class HeightMap;
+class TerrainMesh;
 
 HeightMap *g_heightMap;
+Quad *g_rootQuad;
 MaterialGenerator *g_materialGen;
 
 #undef TRACE
@@ -89,15 +91,9 @@ MaterialGenerator *g_materialGen;
 
 // For rendering
 #include "cpp_baseland.cpp"
-
-// These depend on each other, so our usual hackery won't work. We
-// need the header files first.
 #include "cpp_heightmap.cpp"
 #include "cpp_terrainmesh.cpp"
 #include "cpp_quad.cpp"
-#include "cpp_heightmap2.cpp"
-#include "cpp_terrainmesh2.cpp"
-
 #include "cpp_framelistener.cpp"
 
 TerrainFrameListener terrainListener;

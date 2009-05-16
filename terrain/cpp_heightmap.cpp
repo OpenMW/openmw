@@ -1,9 +1,12 @@
 class HeightMap
 {
 public:
-  HeightMap(Ogre::SceneNode* r);
-
-  ~HeightMap();
+  HeightMap(Ogre::SceneNode* r)
+  :  mTerrainSceneNode(r),
+     mMorphingEnabled(false),
+     mTextureFadingEnabled(false),
+     mBaseLand(r)
+  {}
 
   /**
    * loads the quad data from the disk
@@ -54,11 +57,12 @@ public:
     return true;
   }
 
-  void create();
-
   inline Ogre::SceneNode* getTerrainSceneNode(){return mTerrainSceneNode;}
 
-  void update(Ogre::Real t);
+  void update(Ogre::Real t)
+  {
+    mBaseLand.update();
+  }
 
   inline Ogre::Real getMorphSpeed(){return 1.0f;}
   inline Ogre::Real getTextureFadeSpeed(){ return 2.0f;}
@@ -80,7 +84,6 @@ public:
 
   private:
   Ogre::SceneNode* mTerrainSceneNode;
-  Quad* mQuadRoot;
   bool mMorphingEnabled;
   bool mTextureFadingEnabled;
 

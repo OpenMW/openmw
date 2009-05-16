@@ -34,7 +34,7 @@ mygui_cpp=mygui console
 # Ditto for the landscape engine, in terrain/cpp_X.cpp
 terrain_cpp=baseland esm framelistener generator index landdata\
 materialgen heightmap palette point2\
-quad quaddata terrain terrainmesh terrainmesh2 heightmap2
+quad quaddata terrain terrainmesh
 
 # FFmpeg files, in the form sound/cpp_X.cpp.
 avcodec_cpp=avcodec
