@@ -54,13 +54,11 @@ const float UNSPLIT_FACTOR = 2.0;
 
 class Quad;
 class QuadData;
-class Terrain;
 class MaterialGenerator;
-class MWHeightmap;
+class HeightMap;
 
-MWHeightmap *g_heightMap;
+HeightMap *g_heightMap;
 MaterialGenerator *g_materialGen;
-Terrain *g_Terrain;
 
 #undef TRACE
 #define TRACE(x)
@@ -91,17 +89,14 @@ Terrain *g_Terrain;
 
 // For rendering
 #include "cpp_baseland.cpp"
-#include "cpp_mwheightmap.cpp"
 
 // These depend on each other, so our usual hackery won't work. We
 // need the header files first.
-#include "cpp_terrainmesh.h"
-#include "cpp_terraincls.h"
-
-#include "cpp_quad.cpp"
-
-#include "cpp_terraincls.cpp"
+#include "cpp_heightmap.cpp"
 #include "cpp_terrainmesh.cpp"
+#include "cpp_quad.cpp"
+#include "cpp_heightmap2.cpp"
+#include "cpp_terrainmesh2.cpp"
 
 #include "cpp_framelistener.cpp"
 

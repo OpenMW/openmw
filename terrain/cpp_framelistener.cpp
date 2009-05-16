@@ -6,7 +6,7 @@ protected:
    */
   bool frameEnded(const FrameEvent& evt)
   {
-    g_Terrain->update(evt.timeSinceLastFrame);
+    g_heightMap->update(evt.timeSinceLastFrame);
     return true;
   }
 
@@ -16,19 +16,20 @@ public:
     // Add the frame listener
     mRoot->addFrameListener(this);
 
-    //our derived heightmap
-    g_heightMap = new MWHeightmap();
+    // Create a root scene node first
+    Ogre::SceneNode *node = mSceneMgr->getRootSceneNode()
+      ->createChildSceneNode("TERRAIN_ROOT");
+
+    // The main terrain object
+    g_heightMap = new HeightMap(node);
     g_heightMap->load(TERRAIN_OUTPUT);
 
-    //setup terrain
-    g_Terrain = new Terrain(mSceneMgr->getRootSceneNode()->createChildSceneNode("TERRAIN_ROOT"));  //root scene node
-
     //fix settings
-    g_Terrain->setMorphingEnabled(false);
-    g_Terrain->setTextureFadingEnabled(false);
+    g_heightMap->setMorphingEnabled(false);
+    g_heightMap->setTextureFadingEnabled(false);
 
     //create the quad node
-    g_Terrain->create();
+    g_heightMap->create();
   }
 
   /* KILLME

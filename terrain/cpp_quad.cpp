@@ -19,7 +19,6 @@
  */
 class Quad
 {
-  enum SplitState { SS_NONE, SS_SPLIT, SS_UNSPLIT };
 
   /**
    * when each quad is split, the children can be one of 4 places,
@@ -226,11 +225,11 @@ public:
     const Ogre::Vector3 pos(qx - mSideLength/2,
                             0,qy - mSideLength/2);
 
-    mSceneNode = g_Terrain->getTerrainSceneNode()->createChildSceneNode(pos);
+    mSceneNode = g_heightMap->getTerrainSceneNode()->createChildSceneNode(pos);
 
     // This was in create()
 
-    if ( mDepth == g_Terrain->getMaxDepth() )
+    if ( mDepth == g_heightMap->getMaxDepth() )
       for ( int y = 0; y < 4; ++y )
         for ( int x = 0; x < 4; ++x )
           {
@@ -265,7 +264,7 @@ public:
     mSceneNode->removeAndDestroyAllChildren();
     mSceneMgr->destroySceneNode(mSceneNode);
 
-    g_Terrain->getTerrainSceneNode()->detachAllObjects();
+    g_heightMap->getTerrainSceneNode()->detachAllObjects();
 
     delete mQuadData;
     mQuadData = NULL;

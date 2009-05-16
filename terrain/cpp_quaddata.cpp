@@ -5,6 +5,8 @@
  * a set of verts Normals and indicies to allow us to pass optimized
  * meshes
  */
+enum SplitState { SS_NONE, SS_SPLIT, SS_UNSPLIT };
+
 class QuadData
 {
   typedef std::list<Ogre::ResourcePtr> ResourceList;

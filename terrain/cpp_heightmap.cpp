@@ -1,11 +1,10 @@
-/**
- * @brief the class that deals with loading quads from the disk @todo a
- * major improvment would be to store the data as a quad tree. It might
- * improve lookup times. Then again. Might not
- */
-class MWHeightmap
+class HeightMap
 {
 public:
+  HeightMap(Ogre::SceneNode* r);
+
+  ~HeightMap();
+
   /**
    * loads the quad data from the disk
    */
@@ -55,12 +54,41 @@ public:
     return true;
   }
 
-private:
+  void create();
+
+  inline Ogre::SceneNode* getTerrainSceneNode(){return mTerrainSceneNode;}
+
+  void update(Ogre::Real t);
+
+  inline Ogre::Real getMorphSpeed(){return 1.0f;}
+  inline Ogre::Real getTextureFadeSpeed(){ return 2.0f;}
+  inline void setMorphingEnabled(bool enabled){
+    mMorphingEnabled = enabled;
+  }
+  inline bool isMorphingEnabled() const{
+    return mMorphingEnabled;
+  }
+  inline void setTextureFadingEnabled(bool enabled){
+    if ( enabled && !mMorphingEnabled )
+      OGRE_EXCEPT(Ogre::Exception::ERR_NOT_IMPLEMENTED, "Cannot have fading but not morphing active", "Terrain::setTextureFadingEnabled");
+    mTextureFadingEnabled = enabled;
+  }
+
+  inline bool isTextureFadingEnabled() const{
+    return mTextureFadingEnabled;
+  }
+
+  private:
+  Ogre::SceneNode* mTerrainSceneNode;
+  Quad* mQuadRoot;
+  bool mMorphingEnabled;
+  bool mTextureFadingEnabled;
+
+  BaseLand mBaseLand;
 
   ///ifs for the data file. Opned on load
   std::ifstream mDataIFS;
   ///holds the offsets of the quads
   Index mIndex;
   TexturePalette mPalette;
-
 };
