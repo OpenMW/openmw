@@ -14,18 +14,18 @@ public:
     destroyMesh();
   }
 
-  /**
-   * @brief repositions the mesh, and ensures that it is the right size
-   */
+  // Repositions the mesh based on camera location
   void update()
   {
     Ogre::Real vd = mCamera->getFarClipDistance();
-    if ( vd > mMeshDistance  ) {
-      destroyMaterial();
-      destroyMesh();
-      createMaterial();
-      createMesh();
-    }
+    // Recreate the mesh if the view distance has increased
+    if ( vd > mMeshDistance  )
+      {
+        destroyMaterial();
+        destroyMesh();
+        createMaterial();
+        createMesh();
+      }
 
     Ogre::Vector3 p = mCamera->getDerivedPosition();
     p.x -= ((int)p.x % 8192);
@@ -49,7 +49,6 @@ private:
 
     mMeshDistance = vd;
 
-
     mObject->position(-vd,-2048, vd);
     mObject->textureCoord(0, 1);
 
@@ -66,7 +65,6 @@ private:
 
     mObject->end();
 
-
     mNode = mTerrainSceneNode->createChildSceneNode();
     mNode->attachObject(mObject);
   }
@@ -78,6 +76,11 @@ private:
     mNode->getParentSceneNode()->removeAndDestroyChild(mNode->getName());
   }
 
+  // FIXME: We destroy and recreate the material (and mesh) when the
+  // view distance changes. If we make a built-in auto-adjusting FPS
+  // optimizer, this will happen quite a lot, so it's worth trying to
+  // optimize this. This might be moot however when we implement
+  // water, since BaseLand may not be needed anymore.
   void createMaterial()
   {
     float vd = mCamera->getFarClipDistance();

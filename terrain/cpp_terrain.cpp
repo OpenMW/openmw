@@ -43,6 +43,9 @@ const int LAND_NUM_VERTS = LAND_VERT_WIDTH*LAND_VERT_WIDTH;
 const int LAND_LTEX_WIDTH = 16;
 const int LAND_NUM_LTEX = LAND_LTEX_WIDTH*LAND_LTEX_WIDTH;
 
+// Can be used to turn of landscape data generation
+#define GEN_LANDDATA 1
+
 // Multiplied with the size of the quad. If these are too close, a
 // quad might end up splitting/unsplitting continuously, since the
 // quad size changes when we split.
@@ -147,12 +150,12 @@ extern "C" void terr_genData()
 
   mhm.beginGeneration();
 
-  mhm.generateLODLevel(6, true, 1024);
-  mhm.generateLODLevel(5, true, 512);
-  mhm.generateLODLevel(4, true, 256);
-  mhm.generateLODLevel(3, true, 256);
-  mhm.generateLODLevel(2, true, 256);
-  mhm.generateLODLevel(1, false, 128);
+  mhm.generateLODLevel(6, 1024);
+  mhm.generateLODLevel(5, 512);
+  mhm.generateLODLevel(4, 256);
+  mhm.generateLODLevel(3, 256);
+  mhm.generateLODLevel(2, 256);
+  mhm.generateLODLevel(1, 128);
 
   mhm.endGeneration();
 }

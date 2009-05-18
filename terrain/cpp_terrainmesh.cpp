@@ -14,7 +14,6 @@ public:
       Ogre::MovableObject(),
       mWidth(width),
       mUseSkirts(skirts),
-      mBuilt(false),
       mDepth(depth),
       mVertexes(0),
       mIndices(0),
@@ -74,14 +73,10 @@ public:
 
     if ( g_heightMap->isMorphingEnabled() )
       calculateDeltaValues();
-
-    mBuilt = true;
   }
 
   ~TerrainMesh()
   {
-    if ( !mBuilt ) return;
-
     //deleting null values is fine iirc
     delete mIndices;
 
@@ -96,8 +91,6 @@ public:
       }
     }
 #   endif
-
-    mBuilt = false;
 
     assert(node);
 
@@ -323,17 +316,24 @@ private:
 
     std::vector<int> ti;
 
+    /*
     ti.resize((size+2)*(size+2), -1);
-
     for ( int y = 0; y < size+2; ++y ){
       for ( int x = 0; x < size+2; ++x ){
         ti[(y)*(size+2)+(x)] = tref.at((y+yoff)*(indexSize)+(x+xoff));
       }
     }
+    */
+    ti.resize(size*size, -1);
+    for ( int y = 0; y < size; ++y ){
+      for ( int x = 0; x < size; ++x ){
+        ti[y*size+x] = tref.at((1+y+yoff)*(indexSize)+(1+x+xoff));
+      }
+    }
 
     mMaterial = g_materialGen->getAlphaMat
       (ti,size,
-       1, 1.0f/size,
+       1.0f/size,
        mQuadData->getUsedResourcesRef());
   }
 
@@ -711,9 +711,6 @@ else                pDeltas[( y)*vw+ x] = v;
 
   const int mWidth;
   const bool mUseSkirts;
-
-  ///true if the land has been built
-  bool mBuilt;
 
   int mDepth;
 

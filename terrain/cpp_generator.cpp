@@ -1,6 +1,6 @@
 /*
   OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2009  Jacob Essex
+  Copyright (C) 2009  Jacob Essex, Nicolay Korslund
   WWW: http://openmw.sourceforge.net/
 
   This file (cpp_generator.cpp) is part of the OpenMW package.
@@ -26,7 +26,9 @@ public:
   Generator(const std::string& baseFileName) :
     mBaseFileName(baseFileName)
   {
+#if GEN_LANDDATA
     mDataO.open(std::string(baseFileName+".data").c_str(), std::ios::binary);
+#endif
   }
 
   inline void addLandData(RecordPtr record, const std::string& source)
@@ -37,7 +39,7 @@ public:
 
   void beginGeneration()
   {
-    //maxiumum distance form 0, 0 in any direction
+    // Find the maxiumum distance from (0,0) in any direction
     int max = 0;
     max = std::max<int>(mMWLand.getMaxX(), max);
     max = std::max<int>(mMWLand.getMaxY(), max);
@@ -61,13 +63,14 @@ public:
 
     //Keep deviding the root side length by 2 (thereby simulating a
     //split) until we reach the width of the base cell (or the
-    //smallest quad)
+    //smallest quad). TODO: We should make sure that the right number
+    //of levels are actually generated automatically, of course.
     for (long i = mIndex.getRootSideLength(); i > 8192; i/=2 )
       maxDepth++;
     mIndex.setMaxDepth(maxDepth);
   }
 
-  void generateLODLevel(int level, bool createTexture, int textureSize)
+  void generateLODLevel(int level, int textureSize)
   {
     std::cout << "Generating Level " << level << "\n";
 
@@ -80,26 +83,33 @@ public:
 
     // FIXME: Should probably use another name than 'level' here
     level = pow((float)2, level); //gap between verts that we want
+    // Use this instead
+    assert(level == 1 << initialLevel);
+
     const int halfLevel = level/2;
     assert(halfLevel > 0 );
 
-    // FIXME. Just search for all pow() calls, really
+    // FIXME. Search for all pow() calls and fix them
     int cellDist = pow((float)2, mIndex.getMaxDepth());
 
     // Temporary storage
     QuadData qd;
+#if GEN_LANDDATA
     qd.setVertexSeperation(128*halfLevel); //dist between two verts
 
-    std::vector<float>& gh = qd.getHeightsRef(); //ref to the data storage in the quad
+    std::vector<float>& gh = qd.getHeightsRef(); //ref to the data
+                                                 //storage in the quad
     std::vector<char>& gn  = qd.getNormalsRef();
     gh.resize(LAND_NUM_VERTS); //allocate memory for mesh functions
     gn.resize(LAND_NUM_VERTS*3);
+#endif
 
-    //the 16*16 array used for holding the LTEX records (what texure is splatted where)
+    //the 16*16 array used for holding the LTEX records (what texure
+    //is splatted where)
     std::vector<int>& gl = qd.getTextureIndexRef();
     gl.resize((LAND_LTEX_WIDTH+2)*(LAND_LTEX_WIDTH+2));
 
-    const std::string stringLevel(Ogre::StringConverter::toString(level)); //cache this
+    const std::string stringLevel(Ogre::StringConverter::toString(level));
     const std::string defaultTexture(stringLevel + "_default.png");
     bool hasUsedDefault = false;
 
@@ -107,21 +117,22 @@ public:
     for(   int y = -(cellDist/2); y < (cellDist/2); y+=halfLevel )
       for( int x = -(cellDist/2); x < (cellDist/2); x+=halfLevel )
         {
-
           qd.setParentTexture("");
           bool usingDefaultTexture = false;
 
           if ( initialLevel == 1 )
+            // For level one (up close), there's no need to generate
+            // any textures, as we can use the textures from the BSAs
+            // directly.
             generateLTEXData(x, y, gl);
-          else if ( createTexture )
+          else
             {
-              //this is the name of the file that OGRE will
-              //look for
-              std::string name =	stringLevel + "_" +
+              // Texture file name
+              std::string name = stringLevel + "_" +
                 Ogre::StringConverter::toString(x)  + "_" +
                 Ogre::StringConverter::toString(y) + ".png";
 
-              //where as the arg1 here is the file name to save it.
+              // Generate the texture
               bool hasGen = generateTexture(std::string(TEXTURE_OUTPUT) + name, textureSize, x, y, halfLevel);
 
               if ( hasGen ) qd.setTexture(name);
@@ -133,17 +144,20 @@ public:
                 }
             }
 
-          //calculate parent texture
+          // Calculate parent texture
           if ( initialLevel != mIndex.getMaxDepth() )
             {
+              // FIXME: This can definitely be improved, although it
+              // doesn't matter performance wise
+
               //calcualte the level one higher
+              // FIXME: pow() again...
               int higherLevel = pow((float)2, (initialLevel+1));
               int highHalfLevel = higherLevel/2;
 
               int higherX = x;
               if ( (higherX-halfLevel) % highHalfLevel == 0 )
                 higherX -= halfLevel;
-
 
               int higherY = y;
               if ( (higherY-halfLevel) % highHalfLevel  == 0 )
@@ -153,7 +167,7 @@ public:
                 Ogre::StringConverter::toString(higherX)  + "_" +
                 Ogre::StringConverter::toString(higherY) + ".png";
 
-              //check file exists without needing boost filesystenm libs
+              //check file exists without needing boost filesystem libs
               FILE* fp = fopen((std::string(TEXTURE_OUTPUT) + higherName).c_str(), "r");
               if ( fp )
                 {
@@ -163,6 +177,8 @@ public:
               else
                 qd.setParentTexture("");
             }
+
+#if GEN_LANDDATA
           generateMesh(gh, gn, x, y, halfLevel );
 
           bool isEmptyQuad = true;
@@ -187,6 +203,8 @@ public:
                            mDataO.tellp());
           boost::archive::binary_oarchive oa(mDataO); //using boost fs to write the quad
           oa << qd;
+#endif
+
         }
 
     //check if we have used a default texture
@@ -201,20 +219,27 @@ public:
   void endGeneration()
   {
     // FIXME: Just write one file?
-    std::ofstream ofi(std::string(mBaseFileName + ".index").c_str(), std::ios::binary);
-    std::ofstream ofp(std::string(mBaseFileName + ".palette").c_str(), std::ios::binary);
-    boost::archive::binary_oarchive oai(ofi);
-    boost::archive::binary_oarchive oap(ofp);
-    oai << mIndex;
-    oap << mPalette;
-
+#if GEN_LANDDATA
     mDataO.close();
+    std::ofstream ofi(std::string(mBaseFileName + ".index").c_str(), std::ios::binary);
+    boost::archive::binary_oarchive oai(ofi);
+    oai << mIndex;
+#endif
+
+    std::ofstream ofp(std::string(mBaseFileName + ".palette").c_str(), std::ios::binary);
+    boost::archive::binary_oarchive oap(ofp);
+    oap << mPalette;
   }
 
 private:
 
+  // Generate texture data for level 1.
   void generateLTEXData(int x, int y, std::vector<int>& index)
   {
+    // All this does is to loop through all the 16x16 'land grid
+    // points' in the cell (plus the outer border of grid points from
+    // the surrounding cells) and store the texture names in the
+    // index.
     for ( int texY = 0; texY < LAND_LTEX_WIDTH+2; texY++ )
       for ( int texX = 0; texX < LAND_LTEX_WIDTH+2; texX++ )
         {
@@ -269,47 +294,58 @@ private:
         }
   }
 
+  // Create a cache texture.
   bool generateTexture(const std::string& name, int size,
                        int blockX, int blockY, int halfLevel)
   {
     int width = size/(halfLevel*LAND_LTEX_WIDTH);
     assert(width>=1);
 
-    std::vector<int> ltex; //prealloc, as we know exactly what size it needs to be
+    // Preallocate a buffer of texture indices
+    std::vector<int> ltex;
     ltex.resize(halfLevel*LAND_LTEX_WIDTH*halfLevel*LAND_LTEX_WIDTH, 0);
 
-    //for each cell
+    // This loop collection is just to gather the texture indices for
+    // this quad. All texture paths are inserted into the
     for ( int y = 0; y < halfLevel; y++ )
       for ( int x = 0; x < halfLevel; x++ )
-        //for each texture in the cell
-        for ( int texY = 0; texY < LAND_LTEX_WIDTH; texY++ )
-          for ( int texX = 0; texX < LAND_LTEX_WIDTH; texX++ )
-            {
-              std::string source;
-              short texID = 0;
+        {
+          // And loop over all 16x16 textures in each cell
+          for ( int texY = 0; texY < LAND_LTEX_WIDTH; texY++ )
+            for ( int texX = 0; texX < LAND_LTEX_WIDTH; texX++ )
+              {
+                std::string source;
+                short texID = 0;
 
-              if ( mMWLand.hasData(x + blockX, y + blockY) )
-                {
-                  source = mMWLand.getSource(x + blockX, y + blockY);
-                  texID = mMWLand.getLTEXIndex(x + blockX, y + blockY, texX, texY);
-                }
+                // Get the data from the ESM
+                if ( mMWLand.hasData(x + blockX, y + blockY) )
+                  {
+                    source = mMWLand.getSource(x + blockX, y + blockY);
+                    texID = mMWLand.getLTEXIndex(x + blockX, y + blockY, texX, texY);
+                  }
 
-              std::string texturePath = "_land_default.dds";
-              if ( texID != 0 && mMWLand.hasLTEXRecord(source,--texID) )
-                texturePath = mMWLand.getLTEXRecord(source,texID);
+                std::string texturePath = "_land_default.dds";
+                if ( texID != 0 && mMWLand.hasLTEXRecord(source,--texID) )
+                  texturePath = mMWLand.getLTEXRecord(source,texID);
 
-              //textures given as tga, when they are a dds. I hate that "feature"
-              //FIXME: ditto earlier comment
-              size_t d = texturePath.find_last_of(".") + 1;
-              texturePath = texturePath.substr(0, d) + "dds";
-              //FIXME: BTW, didn't we make the BSA reader case insensitive?
-              std::transform(texturePath.begin(), texturePath.end(), texturePath.begin(), tolower);
-              const int index = (y*LAND_LTEX_WIDTH+texY)*halfLevel*LAND_LTEX_WIDTH + x*LAND_LTEX_WIDTH+texX;
-              ltex[index] = mPalette.getOrAddIndex(texturePath);
-            }
+                // Convert .tga to .dds
+                // FIXME: ditto earlier comment.
+                size_t d = texturePath.find_last_of(".") + 1;
+                texturePath = texturePath.substr(0, d) + "dds";
+                //FIXME2: BTW, didn't we make the BSA reader case insensitive?
+                std::transform(texturePath.begin(), texturePath.end(), texturePath.begin(), tolower);
+                const int index = (y*LAND_LTEX_WIDTH+texY)*halfLevel*LAND_LTEX_WIDTH + x*LAND_LTEX_WIDTH+texX;
 
-    //see if we have used anything at all
-    // FIXME: Now, I KNOW this isn't needed :)
+                // FIXME: In any case, we should let mPalette do the
+                // name conversion. So if the texture is already
+                // inserted (which will almost always be the case) we
+                // can avoid costly string operations.
+                ltex[index] = mPalette.getOrAddIndex(texturePath);
+              }
+        }
+
+    // See if we have used anything at all. FIXME: This isn't needed
+    // as a separate loop
     int sum = 0;
     for ( std::vector<int>::iterator i = ltex.begin(); i != ltex.end(); ++i )
       sum += *i;
@@ -327,6 +363,9 @@ private:
   // dependent, when it should be a simple computational exercise. But
   // understand what it actually does, before you change anything.
 
+  // This function (and it's sub calls) is where most of the time is
+  // spent in the gen process, so this is also where we need to
+  // optimize.
   void renderTexture(const std::string& outputName, std::vector<int>& ltex,
                      int texSize, int alphaSize)
   {
@@ -339,10 +378,12 @@ private:
     MaterialGenerator mg;
     mg.setTexturePaths(mPalette.getPalette());
 
+    // Aaand, this is just halfLevel again, which already is a very
+    // poor name for the number of cells along the side of the quad.
     const int scaleDiv = alphaSize/LAND_LTEX_WIDTH;
 
     //genetate material/aplahas
-    Ogre::MaterialPtr mp = mg.getAlphaMat(ltex, alphaSize, 0, scaleDiv,createdResources);
+    Ogre::MaterialPtr mp = mg.getAlphaMat(ltex, alphaSize, scaleDiv,createdResources);
     Ogre::TexturePtr tex1 = getRenderedTexture(mp, "RTT_TEX_1",texSize, Ogre::PF_R8G8B8);
     tex1->getBuffer()->getRenderTarget()->writeContentsToFile(outputName);
     Ogre::MaterialManager::getSingleton().remove(mp->getHandle());
@@ -359,6 +400,7 @@ private:
     }
   }
 
+  // Does everything in OGRE
   Ogre::TexturePtr getRenderedTexture(Ogre::MaterialPtr mp, const std::string& name,
                                       int texSize, Ogre::PixelFormat tt)
   {
@@ -393,8 +435,7 @@ private:
 
     renderTexture->update();
 
-    //required for some reason?
-    //Not implementing resulted in a black tex using openGL, Linux, and a nvidia 6150 in 1.4.?
+    // Call the OGRE renderer.
     Ogre::Root::getSingleton().renderOneFrame();
 
     Ogre::CompositorManager::getSingleton().removeCompositor(vp, "Rtt_Comp");
