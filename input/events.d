@@ -268,9 +268,9 @@ extern(C) void d_superman()
 
   with(*playerData.position)
     {
-      position[0] = 0;
-      position[1] = 0;
-      position[2] = 12000;
+      position[0] = 20000;
+      position[1] = -70000;
+      position[2] = 30000;
     }
   movePlayer();
 }

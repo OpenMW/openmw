@@ -20,6 +20,7 @@
   http://www.gnu.org/licenses/ .
 
  */
+
 module bsa.bsafile;
 
 //debug=checkHash;
@@ -67,7 +68,9 @@ class BSAFile
   // equivalent to find this (include the word "granularity" when you
   // google for it.) For now I just assume 4K is ok on UNIX, but on
   // Windows we need 64K. (Hands up if you agree that MMFile should
-  // handle this internally!)
+  // handle this internally!). UPDATE: This is now duplicated in
+  // util.c_mmfile, if we make it more fancy we should collect it in
+  // one place.
   version(Windows)
     static int pageSize = 64*1024;
   else

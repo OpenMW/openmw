@@ -43,6 +43,8 @@ public:
   // Start of frame
   bool frameStarted(const FrameEvent& evt)
   {
+    TRACE("frameStarted (Input)");
+
     if(mWindow->isClosed())
       return false;
 

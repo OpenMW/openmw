@@ -20,14 +20,6 @@
 
 */
 
-// Shader names
-#define MORPH_VERTEX_PROGRAM "mw_terrain_VS"
-#define FADE_FRAGMENT_PROGRAM "mw_terrain_texfade_FP"
-
-// Directories
-#define TEXTURE_OUTPUT "cache/terrain/"
-#define TERRAIN_OUTPUT "cache/terrain/landscape"
-
 ///no texture assigned
 const int LAND_LTEX_NONE = 0;
 
@@ -43,8 +35,14 @@ const int LAND_NUM_VERTS = LAND_VERT_WIDTH*LAND_VERT_WIDTH;
 const int LAND_LTEX_WIDTH = 16;
 const int LAND_NUM_LTEX = LAND_LTEX_WIDTH*LAND_LTEX_WIDTH;
 
-// Can be used to turn of landscape data generation
-#define GEN_LANDDATA 1
+const int CELL_WIDTH = 8192;
+
+// Scaling factor to apply to textures on once cell. A factor of 1/16
+// gives one repetition per square, since there are 16x16 texture
+// 'squares' in acell. For reference, Yacoby's scaling was equivalent
+// to having 1.0/10 here, or 10 repititions per cell. TODO: This looks
+// a little blocky. Compare with screenshots from TES-CS.
+const float TEX_SCALE = 1.0/16;
 
 // Multiplied with the size of the quad. If these are too close, a
 // quad might end up splitting/unsplitting continuously, since the
@@ -56,17 +54,18 @@ const float UNSPLIT_FACTOR = 2.0;
 #define ENABLED_CRASHING 0
 
 class Quad;
-class QuadData;
-class MaterialGenerator;
-class HeightMap;
 class TerrainMesh;
+class BaseLand;
 
-HeightMap *g_heightMap;
-Quad *g_rootQuad;
-MaterialGenerator *g_materialGen;
+// Cache directory and file
+std::string g_cacheDir;
+std::string g_cacheFile;
 
-#undef TRACE
-#define TRACE(x)
+// Enable or disable tracing of runtime functions. Making RTRACE do a
+// trace slows down the code significantly even when -debug is off, so
+// lets disable it for normal use.
+#define RTRACE(x)
+//#define RTRACE TRACE
 
 // Prerequisites
 #include <vector>
@@ -75,61 +74,82 @@ MaterialGenerator *g_materialGen;
 #include <string>
 #include <list>
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/map.hpp>
+
+// Located in ../util/
+#include "mmfile.h"
+#include "outbuffer.h"
+
+// Reading and writing the cache files
+#include "cpp_archive.cpp"
+#include "cpp_cachewriter.cpp"
 
 // For generation
-#include "cpp_materialgen.cpp"
 #include "cpp_esm.cpp"
 #include "cpp_landdata.cpp"
-#include "cpp_quaddata.cpp"
-#include "cpp_index.cpp"
-#include "cpp_palette.cpp"
-#include "cpp_point2.cpp"
 #include "cpp_generator.cpp"
 
 // For rendering
+Quad *g_rootQuad;
+BaseLand *g_baseLand;
+SceneNode *g_rootTerrainNode;
+
 #include "cpp_baseland.cpp"
-#include "cpp_heightmap.cpp"
 #include "cpp_terrainmesh.cpp"
 #include "cpp_quad.cpp"
-#include "cpp_framelistener.cpp"
 
-TerrainFrameListener terrainListener;
+class TerrainFrameListener : public FrameListener
+{
+protected:
+  bool frameEnded(const FrameEvent& evt)
+  {
+    g_rootQuad->update();
+    g_baseLand->update();
+    return true;
+  }
+};
 
 extern "C" void d_superman();
+
+extern "C" void terr_setCacheDir(char *cacheDir)
+{
+  g_cacheDir = cacheDir;
+  g_cacheFile = g_cacheDir + "terrain.cache";
+}
 
 // Set up the rendering system
 extern "C" void terr_setupRendering()
 {
-  if(!g_materialGen)
-    g_materialGen = new MaterialGenerator;
-
   // Add the terrain directory
   ResourceGroupManager::getSingleton().
-    addResourceLocation(TEXTURE_OUTPUT, "FileSystem", "General");
+    addResourceLocation(g_cacheDir, "FileSystem", "General");
 
-  // Set up the terrain frame listener
-  terrainListener.setup();
+  // Create a root scene node first. The 'root' node is rotated to
+  // match the MW coordinate system
+  g_rootTerrainNode = root->createChildSceneNode("TERRAIN_ROOT");
+
+  // Open the archive file
+  g_archive.openFile(g_cacheFile);
+
+  // Create the root quad.
+  g_rootQuad = new Quad();
+
+  g_baseLand = new BaseLand(g_rootTerrainNode);
+
+  // Add the frame listener
+  mRoot->addFrameListener(new TerrainFrameListener);
 
   // Enter superman mode
-  mCamera->setFarClipDistance(32*8192);
+  mCamera->setFarClipDistance(32*CELL_WIDTH);
+  //ogre_setFog(0.7, 0.7, 0.7, 200, 32*CELL_WIDTH);
   d_superman();
 }
 
 // Generate all cached data.
 extern "C" void terr_genData()
 { 
-  if(!g_materialGen)
-    g_materialGen = new MaterialGenerator;
-
   Ogre::Root::getSingleton().renderOneFrame();
 
-  Generator mhm(TERRAIN_OUTPUT);
+  Generator mhm;
   {
     ESM esm;
 
@@ -139,23 +159,14 @@ extern "C" void terr_genData()
     esm.addRecordType("LTEX", "INTV");
 
     esm.loadFile(fn);
-    RecordListPtr land = esm.getRecordsByType("LAND");
+    RecordList* land = esm.getRecordsByType("LAND");
     for ( RecordListItr itr = land->begin(); itr != land->end(); ++itr )
       mhm.addLandData(*itr, fn);
 
-    RecordListPtr ltex = esm.getRecordsByType("LTEX");
+    RecordList* ltex = esm.getRecordsByType("LTEX");
     for ( RecordListItr itr = ltex->begin(); itr != ltex->end(); ++itr )
       mhm.addLandTextureData(*itr, fn);
   }
 
-  mhm.beginGeneration();
-
-  mhm.generateLODLevel(6, 1024);
-  mhm.generateLODLevel(5, 512);
-  mhm.generateLODLevel(4, 256);
-  mhm.generateLODLevel(3, 256);
-  mhm.generateLODLevel(2, 256);
-  mhm.generateLODLevel(1, 128);
-
-  mhm.endGeneration();
+  mhm.generate(g_cacheFile);
 }

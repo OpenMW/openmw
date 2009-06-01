@@ -65,12 +65,10 @@ private:
 
 };
 
-typedef boost::shared_ptr<Record> RecordPtr;
-typedef std::list<RecordPtr> RecordList;
+typedef std::list<Record*> RecordList;
 typedef RecordList::iterator RecordListItr;
-typedef boost::shared_ptr<RecordList> RecordListPtr;
 
-typedef std::map<std::string, RecordPtr> RecordMap;
+typedef std::map<std::string, Record*> RecordMap;
 typedef RecordMap::iterator RecordMapItr;
 
 ///top level class for loading and saving esp files.
@@ -124,7 +122,7 @@ public:
       long endPos = recordSize +  esp.tellg();
 
       if ( loadType(type) ) {
-        RecordPtr record = RecordPtr(new Record(type));
+        Record* record = new Record(type);
 
         //load all subrecords
         while ( esp.tellg() < endPos ) {
@@ -156,11 +154,11 @@ public:
     return true;
   }
 
-  inline RecordPtr getRecord(const std::string& id){ return mRecords[id]; }
+  inline Record* getRecord(const std::string& id){ return mRecords[id]; }
 
-  RecordListPtr getRecordsByType(const std::string& t)
+  RecordList* getRecordsByType(const std::string& t)
   {
-    RecordListPtr r = RecordListPtr(new RecordList); //need pointer....
+    RecordList* r = new RecordList;
     for ( RecordMapItr iter = mRecords.begin(); iter != mRecords.end(); ++iter)
       if ( t == iter->second->getType() )
         r->push_back(iter->second);

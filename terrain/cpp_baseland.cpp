@@ -28,11 +28,11 @@ public:
       }
 
     Ogre::Vector3 p = mCamera->getDerivedPosition();
-    p.x -= ((int)p.x % 8192);
-    p.z -= ((int)p.z % 8192);
+    p.x -= ((int)p.x % CELL_WIDTH);
+    p.z -= ((int)p.z % CELL_WIDTH);
 
     float h = p.y + 2048;
-    h = pow(h/8192*2,2);
+    h = pow(h/CELL_WIDTH*2,2);
     if ( h < 0 ) h = 0;
 
     mNode->setPosition(p.x, -32 - h, p.z);
@@ -45,7 +45,7 @@ private:
     mObject->begin("BaseLandMat", Ogre::RenderOperation::OT_TRIANGLE_LIST);
 
     Ogre::Real vd = mCamera->getFarClipDistance();
-    vd += 8192 - ((int)vd % 8192);
+    vd += CELL_WIDTH - ((int)vd % CELL_WIDTH);
 
     mMeshDistance = vd;
 
@@ -84,8 +84,8 @@ private:
   void createMaterial()
   {
     float vd = mCamera->getFarClipDistance();
-    vd += 8192 - ((int)vd % 8192);
-    vd = vd/8192 * 2;
+    vd += CELL_WIDTH - ((int)vd % CELL_WIDTH);
+    vd = vd/CELL_WIDTH * 2;
 
     mMat = Ogre::MaterialManager::getSingleton().
       create(std::string("BaseLandMat"),

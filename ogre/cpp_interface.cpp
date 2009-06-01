@@ -50,6 +50,7 @@ extern "C" int32_t ogre_configure(
   new LogManager;
   Log *log = LogManager::getSingleton().createLog("Ogre.log");
 
+  g_isDebug = debugOut;
   if(debugOut)
     // Full log detail
     log->setLogDetail(LL_BOREME);
@@ -99,28 +100,29 @@ extern "C" void ogre_initWindow()
   windowHndStr << windowHnd;
   pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
 
-  // Non-exclusive mouse and keyboard input
-  /*
+  // Non-exclusive mouse and keyboard input in debug mode
+  if(g_isDebug)
+    {
 #if defined OIS_WIN32_PLATFORM
-    pl.insert(std::make_pair(std::string("w32_mouse"),
-                             std::string("DISCL_FOREGROUND" )));
-    pl.insert(std::make_pair(std::string("w32_mouse"),
-                             std::string("DISCL_NONEXCLUSIVE")));
-    pl.insert(std::make_pair(std::string("w32_keyboard"),
-                             std::string("DISCL_FOREGROUND")));
-    pl.insert(std::make_pair(std::string("w32_keyboard"),
-                             std::string("DISCL_NONEXCLUSIVE")));
+      pl.insert(std::make_pair(std::string("w32_mouse"),
+                               std::string("DISCL_FOREGROUND" )));
+      pl.insert(std::make_pair(std::string("w32_mouse"),
+                               std::string("DISCL_NONEXCLUSIVE")));
+      pl.insert(std::make_pair(std::string("w32_keyboard"),
+                               std::string("DISCL_FOREGROUND")));
+      pl.insert(std::make_pair(std::string("w32_keyboard"),
+                               std::string("DISCL_NONEXCLUSIVE")));
 #elif defined OIS_LINUX_PLATFORM
-    pl.insert(std::make_pair(std::string("x11_mouse_grab"),
-                             std::string("true")));
-    pl.insert(std::make_pair(std::string("x11_mouse_hide"),
-                             std::string("true")));
-    pl.insert(std::make_pair(std::string("x11_keyboard_grab"),
-                             std::string("true")));
-    pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
-                             std::string("false")));
+      pl.insert(std::make_pair(std::string("x11_mouse_grab"),
+                               std::string("false")));
+      pl.insert(std::make_pair(std::string("x11_mouse_hide"),
+                               std::string("false")));
+      pl.insert(std::make_pair(std::string("x11_keyboard_grab"),
+                               std::string("false")));
+      pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
+                               std::string("true")));
 #endif
-  */
+    }
 
   mInputManager = InputManager::createInputSystem( pl );
 

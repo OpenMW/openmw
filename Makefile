@@ -8,7 +8,7 @@ DMD=gdmd -version=Posix
 NIFFLAGS=-debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose
 
 # Linker flags
-LFLAGS= -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a -L-lboost_serialization
+LFLAGS= -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
 
 # Compiler settings for Ogre, OIS and MyGUI
 # TODO: the -I when we're done
@@ -32,9 +32,8 @@ ogre_cpp=ogre framelistener interface bsaarchive
 mygui_cpp=mygui console
 
 # Ditto for the landscape engine, in terrain/cpp_X.cpp
-terrain_cpp=baseland esm framelistener generator index landdata\
-materialgen heightmap palette point2\
-quad quaddata terrain terrainmesh
+terrain_cpp=baseland esm generator landdata quad terrain terrainmesh \
+archive cachewriter
 
 # FFmpeg files, in the form sound/cpp_X.cpp.
 avcodec_cpp=avcodec
@@ -47,7 +46,7 @@ bullet_cpp=bullet player scale
 ogre_cpp_files=\
 	$(ogre_cpp:%=ogre/cpp_%.cpp) \
 	$(mygui_cpp:%=gui/cpp_%.cpp) \
-	$(terrain_cpp:%=terrain/cpp_%.cpp)
+	$(terrain_cpp:%=terrain/cpp_%.cpp) util/outbuffer.h util/mmfile.h
 avcodec_cpp_files=$(avcodec_cpp:%=sound/cpp_%.cpp)
 bullet_cpp_files=$(bullet_cpp:%=bullet/cpp_%.cpp)
 

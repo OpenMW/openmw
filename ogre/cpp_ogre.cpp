@@ -53,6 +53,9 @@ int g_spotOn = 0;
 Light *g_light;
 */
 
+// Set to nonzero if debug mode is enabled
+int g_isDebug = 0;
+
 OIS::InputManager *mInputManager;
 OIS::Mouse *mMouse;
 OIS::Keyboard *mKeyboard;

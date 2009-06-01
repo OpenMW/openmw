@@ -23,48 +23,15 @@
 
 module terrain.terrain;
 
-import std.stdio;
-import std.file;
-import monster.util.string;
-
-void fail(char[] msg)
-{
-  throw new Exception(msg);
-}
-
-// Move elsewhere, make part of the general cache system later
-void makeDir(char[] pt)
-{
-  if(exists(pt))
-    {
-      if(!isdir(pt))
-        fail(pt ~ " is not a directory");
-    }
-  else
-    mkdir(pt);
-}
-
-void makePath(char[] pt)
-{
-  assert(!pt.begins("/"));
-  foreach(int i, char c; pt)
-    if(c == '/')
-      makeDir(pt[0..i]);
-
-  if(!pt.ends("/"))
-    makeDir(pt);
-}
+import terrain.generator;
 
 void initTerrain(bool doGen)
 {
-  makePath("cache/terrain");
-
   if(doGen)
-    terr_genData();
+    generate();
 
   terr_setupRendering();
 }
 
 extern(C):
-void terr_genData();
 void terr_setupRendering();

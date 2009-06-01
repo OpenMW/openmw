@@ -1,3 +1,11 @@
+struct VHGT
+{ ///height data
+  float heightOffset;
+  char  heightData[LAND_NUM_VERTS];
+  short unknown1;
+  char unknown2;
+};
+
 class MWLand
 {
 public:
@@ -6,7 +14,7 @@ public:
     mMaxX = mMaxY = mMinX = mMinY = 0;
   }
 
-  void addLandTextureData(RecordPtr record, const std::string& source)
+  void addLandTextureData(Record* record, const std::string& source)
   {
     LandTexture l;
     l.name = record->getSubRecordData("NAME");
@@ -15,19 +23,21 @@ public:
     mLTEXRecords[source][l.intv] = l;
   }
 
-  void addLandData(RecordPtr record, const std::string& source)
+  void addLandData(Record* record, const std::string& source)
   {
     if ( !record->hasSubRecord("VHGT") || !record->hasSubRecord("VTEX") ) //ensure all records exist
       return;
 
     //copy these, else we end up with invliad data
     LAND::INTV intv = *(LAND::INTV*)record->getSubRecordData("INTV").c_str();
-    LAND::VHGT vhgt = *(LAND::VHGT*)record->getSubRecordData("VHGT").c_str();
+    VHGT *vhgt      =  (VHGT*)      record->getSubRecordData("VHGT").c_str();
     LAND::VNML vnml = *(LAND::VNML*)record->getSubRecordData("VNML").c_str();
     LAND::VTEX vtex = *(LAND::VTEX*)record->getSubRecordData("VTEX").c_str();
 
-    //GridPosition gp(intv.x, intv.y);
-    mLandRecords[intv.x][intv.y].heights = parseHeights(&vhgt); //convert into a format we want
+    // FIXME: What happens to the memory allocation of vhgt here?
+    // Doesn't matter much, we're killing this entire file soon
+    // anyway.
+    mLandRecords[intv.x][intv.y].heights = vhgt;
     mLandRecords[intv.x][intv.y].normals = parseNormals(&vnml);
     mLandRecords[intv.x][intv.y].textures = parseTextures(&vtex);
     mLandRecords[intv.x][intv.y].source = source;
@@ -47,20 +57,18 @@ public:
   ///see others
   inline int getMinY() const { return mMinY; }
 
-  inline std::vector<float>& getHeights(int x, int y)
+  inline VHGT *getHeights(int x, int y)
   {
     if ( hasData(x,y) )
       return mLandRecords[x][y].heights;
-    static std::vector<float> e(LAND_NUM_VERTS, LAND_DEFAULT_HEIGHT);
-    return e;
+    assert(0);
   }
 
   inline std::vector<char>& getNormals(int x, int y)
   {
     if ( hasData(x,y) )
       return mLandRecords[x][y].normals;
-    static std::vector<char> e(LAND_NUM_VERTS*3,0);
-    return e;
+    assert(0);
   }
 
   inline const std::string& getSource(int x, int y)
@@ -126,12 +134,6 @@ private:
       };
       NORMAL normals[LAND_NUM_VERTS];
     };
-    struct VHGT { ///height data
-      float heightOffset;
-      char  heightData[LAND_NUM_VERTS];
-      short unknown1;
-      char unknown2;
-    };
     struct VTEX { ///splat texture data
       short index[LAND_NUM_LTEX];
     };
@@ -141,22 +143,34 @@ private:
     VTEX* vtex;
   };
 
+  /*
   std::vector<float> parseHeights(LAND::VHGT* vhgt)
   {
     std::vector<float> ph;
     ph.resize(LAND_NUM_VERTS, LAND_DEFAULT_HEIGHT);
+
+    // heightOffset offsets the entire cell
     float offset = vhgt->heightOffset;
-    for (int y = 0; y < LAND_VERT_WIDTH; y++) { //code from MGE
-      offset += vhgt->heightData[y*LAND_VERT_WIDTH];
-      ph[y*LAND_VERT_WIDTH] =+ (float)offset*8;
-      float pos = offset;
-      for (int x = 1; x < LAND_VERT_WIDTH; x++) {
-        pos += vhgt->heightData[y*LAND_VERT_WIDTH+x];
-        ph[y*LAND_VERT_WIDTH+x] = pos*8; //flipped x
+
+    for (int y = 0; y < LAND_VERT_WIDTH; y++)
+      {
+        // The first vertex in each row gives the difference relative
+        // to the last row start
+        offset += vhgt->heightData[y*LAND_VERT_WIDTH];
+        ph[y*LAND_VERT_WIDTH] =+ (float)offset*8;
+
+        float pos = offset;
+        for (int x = 1; x < LAND_VERT_WIDTH; x++)
+          {
+            // And each vertex within a row gives the difference
+            // relative to the previous one
+            pos += vhgt->heightData[y*LAND_VERT_WIDTH+x];
+            ph[y*LAND_VERT_WIDTH+x] = pos*8; //flipped x
+          }
       }
-    }
     return ph;
   }
+  */
 
   std::vector<char> parseNormals( LAND::VNML* vnml )
   {
@@ -193,7 +207,7 @@ private:
   struct LandData
   {
     std::string source; //data file the data is from
-    std::vector<float> heights;
+    VHGT *heights;
     std::vector<char> normals;
     std::vector<short> textures;
   };
