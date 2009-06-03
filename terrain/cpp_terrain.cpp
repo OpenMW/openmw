@@ -67,6 +67,7 @@ std::string g_cacheFile;
 #define RTRACE(x)
 //#define RTRACE TRACE
 
+/*
 // Prerequisites
 #include <vector>
 #include <map>
@@ -94,7 +95,7 @@ BaseLand *g_baseLand;
 SceneNode *g_rootTerrainNode;
 
 #include "cpp_baseland.cpp"
-#include "cpp_terrainmesh.cpp"
+#include "cpp_mesh.cpp"
 #include "cpp_quad.cpp"
 
 class TerrainFrameListener : public FrameListener
@@ -109,6 +110,7 @@ protected:
 };
 
 extern "C" void d_superman();
+*/
 
 extern "C" void terr_setCacheDir(char *cacheDir)
 {
@@ -119,6 +121,7 @@ extern "C" void terr_setCacheDir(char *cacheDir)
 // Set up the rendering system
 extern "C" void terr_setupRendering()
 {
+  /*
   // Add the terrain directory
   ResourceGroupManager::getSingleton().
     addResourceLocation(g_cacheDir, "FileSystem", "General");
@@ -142,8 +145,10 @@ extern "C" void terr_setupRendering()
   mCamera->setFarClipDistance(32*CELL_WIDTH);
   //ogre_setFog(0.7, 0.7, 0.7, 200, 32*CELL_WIDTH);
   d_superman();
+  */
 }
 
+/*
 // Generate all cached data.
 extern "C" void terr_genData()
 { 
@@ -170,3 +175,4 @@ extern "C" void terr_genData()
 
   mhm.generate(g_cacheFile);
 }
+*/

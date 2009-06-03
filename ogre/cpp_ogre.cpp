@@ -35,7 +35,7 @@
 
 #include <MyGUI.h>
 
-#include "dbg.h"
+#include "../util/dbg.h"
 
 using namespace Ogre;
 

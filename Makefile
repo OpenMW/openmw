@@ -1,7 +1,7 @@
 # Designed for GNU Make
 
 # Compiler settings
-CXXFLAGS?= -g -Iutil/
+CXXFLAGS?= -g
 DMD=gdmd -version=Posix
 
 # Some extra flags for niftool and bsatool
@@ -32,8 +32,7 @@ ogre_cpp=ogre framelistener interface bsaarchive
 mygui_cpp=mygui console
 
 # Ditto for the landscape engine, in terrain/cpp_X.cpp
-terrain_cpp=baseland esm generator landdata quad terrain terrainmesh \
-archive cachewriter
+terrain_cpp=baseland terrain mesh
 
 # FFmpeg files, in the form sound/cpp_X.cpp.
 avcodec_cpp=avcodec
@@ -46,7 +45,7 @@ bullet_cpp=bullet player scale
 ogre_cpp_files=\
 	$(ogre_cpp:%=ogre/cpp_%.cpp) \
 	$(mygui_cpp:%=gui/cpp_%.cpp) \
-	$(terrain_cpp:%=terrain/cpp_%.cpp) util/outbuffer.h util/mmfile.h
+	$(terrain_cpp:%=terrain/cpp_%.cpp)
 avcodec_cpp_files=$(avcodec_cpp:%=sound/cpp_%.cpp)
 bullet_cpp_files=$(bullet_cpp:%=bullet/cpp_%.cpp)
 

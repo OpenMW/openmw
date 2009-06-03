@@ -72,7 +72,7 @@ class RegionBuffer(T)
   // Check if the buffer can hold 'size' more elements. If not,
   // increase it. NOTE: This works even if data = null, and inUse
   // is not. This allows us to make copy-on-resize slices.
-  private void alloc(uint size)
+  private void alloc(ulong size)
     {
       if(inUse.length + size <= buffer.length)
 	{
@@ -137,9 +137,9 @@ class RegionBuffer(T)
       return b;
     }
 
-  uint length() { return inUse.length; }
+  ulong length() { return inUse.length; }
 
-  void length(uint size)
+  void length(ulong size)
     {
       // Grow array
       if(size > inUse.length) alloc(size - inUse.length);
@@ -169,15 +169,15 @@ class RegionManager
   char[] name;
 
   // Use a default buffer size of one meg. Might change later.
-  const uint defaultBufferSize = 1024*1024;
+  const ulong defaultBufferSize = 1024*1024;
 
   // The size to use for new buffers.
-  uint bufferSize;
+  ulong bufferSize;
 
   // Current amount of space that is 'lost' in unused end-of-buffer
   // areas. Since we have proceeded to other buffers, this space will
   // remain unused until freeAll is called.
-  uint lost;
+  ulong lost;
 
   ubyte[][] buffers; // Actual memory buffers
   void *gcRanges[]; // List of ranges added to gc
@@ -222,7 +222,7 @@ class RegionManager
 
  public:
 
-  this(char[] name = "", uint bufferSize = defaultBufferSize)
+  this(char[] name = "", ulong bufferSize = defaultBufferSize)
     {
       this.name = name;
       this.bufferSize = bufferSize;
@@ -249,8 +249,10 @@ class RegionManager
       delete gcRanges;
     }
 
+  ulong getBufferSize() { return bufferSize; }
+
   // Allocates an array from the region.
-  ubyte[] allocate(uint size)
+  ubyte[] allocate(ulong size)
     {
       if(size > bufferSize)
 	fail(format("Tried to allocate %d, but maximum allowed allocation size is %d",
@@ -271,7 +273,7 @@ class RegionManager
   // Allocate an array and add it to the GC as a root region. This
   // should be used for classes and other data that might contain
   // pointers / class references to GC-managed data.
-  ubyte[] allocateGC(uint size)
+  ubyte[] allocateGC(ulong size)
     {
       if(currentRange >= gcRanges.length)
 	fail("No more available GC ranges");
@@ -290,7 +292,7 @@ class RegionManager
   // int[] array = allocateT!(int)(4);
   template allocateT(T)
     {
-      T[] allocateT(uint number)
+      T[] allocateT(ulong number)
 	{
 	  return cast(T[])allocate(number * T.sizeof);
 	}
@@ -309,7 +311,7 @@ class RegionManager
 
   template allocateGCT(T)
     {
-      T[] allocateGCT(uint number)
+      T[] allocateGCT(ulong number)
 	{
 	  return cast(T[])allocateGC(number * T.sizeof);
 	}
@@ -359,12 +361,12 @@ class RegionManager
     }
 
   // Number of used buffers, including the current one
-  uint usedBuffers() { return currentBuffer; }
+  ulong usedBuffers() { return currentBuffer; }
 
   // Total number of allocated buffers
-  uint totalBuffers()
+  ulong totalBuffers()
     {
-      uint i;
+      ulong i;
 
       // Count number of allocated buffers
       while(i < buffers.length && buffers[i].length) i++;
@@ -373,7 +375,7 @@ class RegionManager
     }
 
   // Total number of allocated bytes
-  uint poolSize()
+  ulong poolSize()
     {
       return bufferSize * totalBuffers();
     }
@@ -381,25 +383,25 @@ class RegionManager
   // Total number of bytes that are unavailable for use. (They might
   // not be used, as such, if they are at the end of a buffer but the
   // next buffer is in use.)
-  uint usedSize()
+  ulong usedSize()
     {
       return currentBuffer*bufferSize - left.length;
     }
 
   // The total size of data that the user has requested.
-  uint dataSize()
+  ulong dataSize()
     {
       return usedSize() - lostSize();
     }
 
   // Number of lost bytes
-  uint lostSize()
+  ulong lostSize()
     {
       return lost;
     }
 
   // Total amount of allocated space that is not used
-  uint wastedSize()
+  ulong wastedSize()
     {
       return poolSize() - dataSize();
     }

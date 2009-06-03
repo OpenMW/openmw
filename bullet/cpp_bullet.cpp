@@ -25,7 +25,7 @@
 
 #include <iostream>
 
-#include "dbg.h"
+#include "../util/dbg.h"
 
 using namespace std;
 

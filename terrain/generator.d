@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.snaptoad.com/
 
-  This file (terrain.d) is part of the OpenMW package.
+  This file (generator.d) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,18 +21,48 @@
 
  */
 
-module terrain.terrain;
+// This module is responsible for generating the cache files.
+module terrain.generator;
 
-import terrain.generator;
+import std.stdio;
+import std.file;
+import monster.util.string;
 
-void initTerrain(bool doGen)
+char[] cacheDir = "cache/terrain/";
+
+void generate()
 {
-  if(doGen)
-    generate();
+  makePath(cacheDir);
+  terr_setCacheDir(cacheDir.ptr);
+}
 
-  //terr_setupRendering();
+// Move elsewhere, make part of the general cache system later
+void makeDir(char[] pt)
+{
+  if(exists(pt))
+    {
+      if(!isdir(pt))
+        fail(pt ~ " is not a directory");
+    }
+  else
+    mkdir(pt);
+}
+
+void fail(char[] msg)
+{
+  throw new Exception(msg);
+}
+
+void makePath(char[] pt)
+{
+  assert(!pt.begins("/"));
+  foreach(int i, char c; pt)
+    if(c == '/')
+      makeDir(pt[0..i]);
+
+  if(!pt.ends("/"))
+    makeDir(pt);
 }
 
 extern(C):
-void terr_genData();
-void terr_setupRendering();
+void terr_setCacheDir(char *dir);
