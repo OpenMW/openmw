@@ -272,6 +272,14 @@ class NiAlphaProperty : Property
 
     Taken from:
     http://niftools.sourceforge.net/doc/nif/NiAlphaProperty.html
+
+    Right now we only use standard alpha blending (see the Ogre code
+    that sets it up) and it appears that this is the only blending
+    used in the original game. Bloodmoon (along with several mods) do
+    however use other settings, such as discarding pixel values with
+    alpha < 1.0. This is faster because we don't have to mess with the
+    depth stuff like we did for blending. And OGRE has settings for
+    this too.
   */
 
   // Tested against when certain flags are set (see above.)

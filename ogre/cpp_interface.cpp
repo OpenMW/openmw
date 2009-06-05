@@ -22,6 +22,29 @@
  */
 
 //-----------------------------------------------------------------------
+//               E X P O R T E D    V A R I A B L E S
+//-----------------------------------------------------------------------
+
+extern "C"
+{
+  int lightConst;
+  float lightConstValue;
+
+  int lightLinear;
+  int lightLinearMethod;
+  float lightLinearValue;
+  float lightLinearRadiusMult;
+
+  int lightQuadratic;
+  int lightQuadraticMethod;
+  float lightQuadraticValue;
+  float lightQuadraticRadiusMult;
+
+  int lightOutQuadInLin;
+}
+
+
+//-----------------------------------------------------------------------
 //               E X P O R T E D    F U N C T I O N S
 //-----------------------------------------------------------------------
 
@@ -244,12 +267,37 @@ extern "C" Light* ogre_attachLight(char *name, SceneNode* base,
 				  float radius)
 {
   Light *l = mSceneMgr->createLight(name);
-
   l->setDiffuseColour(r,g,b);
 
-  // This seems to look reasonably ok.
-  l->setAttenuation(3*radius, 0, 0, 12.0/(radius*radius));
-  //l->setAttenuation(5*radius, 0, 0, 8.0/(radius*radius));
+  radius /= 4.0f;
+
+  float cval=0.0f, lval=0.0f, qval=0.0f;
+  if(lightConst)
+    cval = lightConstValue;
+  if(!lightOutQuadInLin)
+  {
+    if(lightLinear)
+      radius *= lightLinearRadiusMult;
+    if(lightQuadratic)
+      radius *= lightQuadraticRadiusMult;
+
+    if(lightLinear)
+      lval = lightLinearValue / pow(radius, lightLinearMethod);
+    if(lightQuadratic)
+      qval = lightQuadraticValue / pow(radius, lightQuadraticMethod);
+  }
+  else
+  {
+    // FIXME:
+    // Do quadratic or linear, depending if we're in an exterior or interior
+    // cell, respectively. Ignore lightLinear and lightQuadratic.
+  }
+
+  // The first parameter is a cutoff value on which meshes to
+  // light. If it's set to small, some meshes will end up 'flashing'
+  // in and out of light depending on the camera distance from the
+  // light.
+  l->setAttenuation(10*radius, cval, lval, qval);
 
   // base might be null, sometimes lights don't have meshes
   if(base) base->attachObject(l);

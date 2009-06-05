@@ -39,6 +39,8 @@ import sound.audio;
 import input.keys;
 import input.ois;
 
+import ogre.ogre;
+
 ConfigManager config;
 
 /*
@@ -166,6 +168,23 @@ struct ConfigManager
     float musicVolume = saneVol(ini.getFloat("Sound", "Music Volume", 0.5));
     float sfxVolume = saneVol(ini.getFloat("Sound", "SFX Volume", 0.5));
     bool useMusic = ini.getBool("Sound", "Enable Music", true);
+
+
+    lightConst = ini.getInt("LightAttenuation", "UseConstant", 0);
+    lightConstValue = ini.getFloat("LightAttenuation", "ConstantValue", 0.0);
+
+    lightLinear = ini.getInt("LightAttenuation", "UseLinear", 1);
+    lightLinearMethod = ini.getInt("LightAttenuation", "LinearMethod", 1);
+    lightLinearValue = ini.getFloat("LightAttenuation", "LinearValue", 3.0);
+    lightLinearRadiusMult = ini.getFloat("LightAttenuation", "LinearRadiusMult", 1.0);
+
+    lightQuadratic = ini.getInt("LightAttenuation", "UseQuadratic", 0);
+    lightQuadraticMethod = ini.getInt("LightAttenuation", "QuadraticMethod", 2);
+    lightQuadraticValue = ini.getFloat("LightAttenuation", "QuadraticValue", 16.0);
+    lightQuadraticRadiusMult = ini.getFloat("LightAttenuation", "QuadraticRadiusMult", 1.0);
+
+    lightOutQuadInLin = ini.getInt("LightAttenuation", "OutQuadInLin", 0);
+
 
     *mouseSensX = ini.getFloat("Controls", "Mouse Sensitivity X", 0.2);
     *mouseSensY = ini.getFloat("Controls", "Mouse Sensitivity Y", 0.2);
@@ -359,6 +378,23 @@ struct ConfigManager
 	writeFloat("Music Volume", mo.getFloat("musicVolume"));
 	writeFloat("SFX Volume", mo.getFloat("sfxVolume"));
 	writeBool("Enable Music", mo.getBool("useMusic"));
+
+	section("LightAttenuation");
+    comment("For constant attenuation");
+	writeInt("UseConstant", lightConst);
+	writeFloat("ConstantValue", lightConstValue);
+    comment("For linear attenuation");
+	writeInt("UseLinear", lightLinear);
+	writeInt("LinearMethod", lightLinearMethod);
+	writeFloat("LinearValue", lightLinearValue);
+	writeFloat("LinearRadiusMult", lightLinearRadiusMult);
+    comment("For quadratic attenuation");
+	writeInt("UseQuadratic", lightQuadratic);
+	writeInt("QuadraticMethod", lightQuadraticMethod);
+	writeFloat("QuadraticValue", lightQuadraticValue);
+	writeFloat("QuadraticRadiusMult", lightQuadraticRadiusMult);
+    comment("For quadratic in exteriors and linear in interiors");
+	writeInt("OutQuadInLin", lightOutQuadInLin);
 
 	section("Game Files");
 	foreach(int i, ref s; gameFiles)

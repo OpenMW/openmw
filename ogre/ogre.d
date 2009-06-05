@@ -36,6 +36,25 @@ import std.stdio;
 
 import esm.defs;
 
+
+extern(C) {
+extern int lightConst;
+extern float lightConstValue;
+
+extern int lightLinear;
+extern int lightLinearMethod;
+extern float lightLinearValue;
+extern float lightLinearRadiusMult;
+
+extern int lightQuadratic;
+extern int lightQuadraticMethod;
+extern float lightQuadraticValue;
+extern float lightQuadraticRadiusMult;
+
+extern int lightOutQuadInLin;
+}
+
+
 class OgreException : Exception
 {
   this(char[] msg) {super("OgreException: " ~ msg);}

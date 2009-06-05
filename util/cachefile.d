@@ -2,9 +2,9 @@
   OpenMW - The completely unofficial reimplementation of Morrowind
   Copyright (C) 2008-2009  Nicolay Korslund
   Email: < korslund@gmail.com >
-  WWW: http://openmw.snaptoad.com/
+  WWW: http://openmw.sourceforge.net/
 
-  This file (terrain.d) is part of the OpenMW package.
+  This file (cachefile.d) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -19,22 +19,30 @@
   version 3 along with this program. If not, see
   http://www.gnu.org/licenses/ .
 
- */
+*/
 
-module terrain.terrain;
+module util.cachefile;
+import monster.util.string;
+import std.file;
 
-import terrain.generator;
-
-void initTerrain(bool doGen)
+void makeDir(char[] pt)
 {
-  /*
-  if(doGen)
-    generate();
-  */
-
-  //terr_setupRendering();
+  if(exists(pt))
+    {
+      if(!isdir(pt))
+        throw new Exception(pt ~ " is not a directory");
+    }
+  else
+    mkdir(pt);
 }
 
-extern(C):
-void terr_genData();
-void terr_setupRendering();
+void makePath(char[] pt)
+{
+  assert(!pt.begins("/"));
+  foreach(int i, char c; pt)
+    if(c == '/')
+      makeDir(pt[0..i]);
+
+  if(!pt.ends("/"))
+    makeDir(pt);
+}
