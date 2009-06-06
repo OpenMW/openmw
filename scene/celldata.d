@@ -192,21 +192,6 @@ class CellData
 
       loadReferences();
 
-      // TODO: Set up landscape system here.
-      /*
-      with(esFile)
-      {
-        restoreContext(exCell.land.context, reg);
-
-        // TODO: Not all of these will be present at all times
-        readHNExact(,12675, "VNML");
-        readHNExact(,4232, "VHGT");
-        readHNExact(,81, "WNAM");
-        readHNExact(,12675, "VCLR");
-        readHNExact(,512, "VTEX");
-      }
-      */
-
       const float cellWidth = 8192;
 
       // TODO/FIXME: This is temporary

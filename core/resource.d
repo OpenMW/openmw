@@ -48,7 +48,6 @@ import sound.sfx;
 import nif.nif;
 
 import core.filefinder;
-//import core.config;
 
 // These are handles for various resources. They may refer to a file
 // in the file system, an entry in a BSA archive, or point to an
@@ -255,6 +254,9 @@ struct ResourceManager
 
   char[80] texBuffer;
 
+  // Checks the BSAs / file system for a given texture name. Tries
+  // various Morrowind-specific hacks, like changing the extension to
+  // .dds and adding a 'textures\' prefix. Does not load the texture.
   TextureIndex lookupTexture(char[] id)
   {
     if(dummy) return null;
@@ -318,15 +320,19 @@ struct ResourceManager
     char[] tmp;
     if(id.length < 70)
       {
+        // Avoid memory allocations if possible.
         tmp = texBuffer[0..9+id.length];
         tmp[9..$] = id;
       }
-    else 
-      tmp = "textures\\" ~ id;
+    else
+      {
+        tmp = "textures\\" ~ id;
+        writefln("WARNING: Did an allocation on %s", tmp);
+      }
 
     searchWithDDS(tmp);
 
-    // Not found? If so, try without the 'texture\'
+    // Not found? Try without the 'texture\'
     if(ti.bsaIndex == -1)
       {
         tmp = tmp[9..$];
@@ -469,18 +475,9 @@ struct TextureResource
   {
     return bsaIndex == -1;
   }
-
-  /*KILLME
-  // Returns true if resource is loaded
-  bool isLoaded()
-  {
-    return ml != null;
-  }
-  */
 }
 
 // OLD STUFF
-
 /+
 
   void initResourceManager()

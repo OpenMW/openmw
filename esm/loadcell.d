@@ -26,6 +26,11 @@ module esm.loadcell;
 import esm.imports;
 import esm.loadregn;
 
+import std.math : abs;
+
+int max(int x, int y)
+{ return x>=y?x:y; }
+
 /* Cells can be seen as a collection of several records, and holds
  * data about objects, creatures, statics and landscape (for exterior
  * cells). This data can be huge, and has to be loaded when we need
@@ -88,9 +93,9 @@ struct ExteriorCell
 
   Region* region;
 
-  // We currently don't load all cell data (these can be huge!),
-  // anyway it makes sense to only load these when accessed. Use this
-  // to reopen the file later.
+  // We currently don't load all cell data (these can be huge!), and
+  // it makes sense to only load these when accessed. Use this to
+  // reopen the file later.
   TES3FileContext context;
 
   // Landscape and path grid data
@@ -98,6 +103,12 @@ struct ExteriorCell
 	     // misunderstood something. Need to check what it means.
 
   PathGrid paths;
+
+  // Return true if we have land data
+  bool hasLand()
+  {
+    return land.state == LoadState.Loaded && land.hasData;
+  }
 
   void load()
     {with(esFile){
@@ -118,6 +129,10 @@ struct ExteriorCell
       // Land can also be here instead. In fact, it can be both
       // places. I have to figure out what it means.
       if(isNextHRec("LAND")) land.load();
+
+      if(land.state == LoadState.Loaded)
+        if(gridX != land.X || gridY != land.Y)
+          writefln("WARNING: Grid mismatch at %s,%s!", gridX, gridY);
     }}
 }
 
@@ -144,6 +159,10 @@ class CellList : ListKeeper
 
   HashTable!(char[], InteriorCell, ESMRegionAlloc) in_cells;
   HashTable!(uint, ExteriorCell, ESMRegionAlloc, ExtCellHash) ex_cells;
+
+  // Store the maximum x or y coordinate (in absolute value). This is
+  // used in the landscape pregen process.
+  int maxXY;
 
   this()
     {
@@ -176,6 +195,12 @@ class CellList : ListKeeper
       return ex_cells.getPtr(compound(x,y));
     }
 
+  // Check whether we have a given exterior cell
+  bool hasExt(int x, int y)
+    {
+      return ex_cells.inList(compound(x,y));
+    }
+
   void *lookup(char[] s)
     { assert(0); }
 
@@ -203,7 +228,6 @@ class CellList : ListKeeper
     }
 
   uint length() { return numInt() + numExt(); }
-
   uint numInt() { return in_cells.length; }
   uint numExt() { return ex_cells.length; }
 
@@ -223,7 +247,8 @@ class CellList : ListKeeper
     {with(esFile){
       char[] id = getHNString("NAME");
 
-      // Just ignore this, don't know what it does.
+      // Just ignore this, don't know what it does. I assume it
+      // deletes the cell, but we can't handle that yet.
       if(isNextSub("DELE")) getHInt();
 
       readHNExact(&data, data.sizeof, "DATA");
@@ -244,7 +269,7 @@ class CellList : ListKeeper
 	    // Overloading an existing cell
 	    {
 	      if(p.state != LoadState.Previous)
-		fail("Duplicate internal cell " ~ id);
+		fail("Duplicate interior cell " ~ id);
 
 	      assert(id == p.id);
 	      p.load();
@@ -266,6 +291,9 @@ class CellList : ListKeeper
 	      p.gridY = data.gridY;
 	      p.load();
 	      p.state = LoadState.Loaded;
+
+              int mx = max(abs(p.gridX), abs(p.gridY));
+              maxXY = max(maxXY, mx);
 	    }
 	  else
 	    {
@@ -282,34 +310,46 @@ class CellList : ListKeeper
 }
 
 /*
- * Landscape data. The landscape is stored as a hight map, and that is
- * pretty much all I know at the moment.
+ * Landscape data.
  */
 
 struct Land
 {
   LoadState state;
 
-  uint flags; // ?? - only first four bits seem to be used?
+  uint flags; // ?? - only first four bits seem to be used
+
+  // Map coordinates.
+  int X, Y;
 
   TES3FileContext context;
 
+  bool hasData = false;
+
   void load()
   {with(esFile){
-    getHNUlong("INTV"); // Grid location. See next line.
-    //writefln("x=%d, y=%d", *(cast(int*)&grid), *(cast(int*)&grid+1));
+    // Get the grid location
+    ulong grid = getHNUlong("INTV");
+    X = grid & uint.max;
+    Y = (grid >> 32);
 
     flags = getHNInt("DATA");
 
     // Save file position
     getContext(context);
 
+    int cnt;
+
     // Skip these here. Load the actual data when the cell is loaded.
-    if(isNextSub("VNML")) skipHSubSize(12675);
-    if(isNextSub("VHGT")) skipHSubSize(4232);
+    if(isNextSub("VNML")) {skipHSubSize(12675);cnt++;}
+    if(isNextSub("VHGT")) {skipHSubSize(4232);cnt++;}
     if(isNextSub("WNAM")) skipHSubSize(81);
     if(isNextSub("VCLR")) skipHSubSize(12675);
-    if(isNextSub("VTEX")) skipHSubSize(512);
+    if(isNextSub("VTEX")) {skipHSubSize(512);cnt++;}
+
+    // We need all three of VNML, VHGT and VTEX in order to use the
+    // landscape.
+    hasData = (cnt == 3);
 
     if(state == LoadState.Loaded)
       writefln("Duplicate landscape data in " ~ getFilename());

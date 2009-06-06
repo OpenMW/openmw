@@ -50,7 +50,7 @@ class LandTextureList : ListKeeper
   // Contains the list of land textures for each file, indexed by
   // file. TODO: Use some handle system here too instead of raw
   // filename?
-  HashTable!(char[], TextureList, ESMRegionAlloc) files;
+  HashTable!(char[], TextureList, ESMRegionAlloc, CITextHash) files;
 
   // The texture list for the current file
   TextureList current;
@@ -62,11 +62,7 @@ class LandTextureList : ListKeeper
 
       // The first file (Morrowind.esm) typically needs a little more
       // than most others
-
       current = esmRegion.getBuffer!(TextureIndex)(0,120);
-
-      // Overkill, just leave it as it is
-      //files.rehash(resources.esm.length + resources.esp.length);
     }
 
   void load()

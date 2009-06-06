@@ -24,6 +24,7 @@
 module terrain.terrain;
 
 import terrain.generator;
+import terrain.bindings;
 
 void initTerrain(bool doGen)
 {
@@ -34,7 +35,3 @@ void initTerrain(bool doGen)
 
   //terr_setupRendering();
 }
-
-extern(C):
-void terr_genData();
-void terr_setupRendering();

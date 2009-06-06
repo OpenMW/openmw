@@ -27,15 +27,14 @@ module terrain.generator;
 /+
 import std.stdio;
 import std.string;
+
 import terrain.cachewriter;
+import terrain.esmland;
 import util.cachefile;
 
 const float TEX_SCALE = 1.0/16;
 
 char[] cacheDir = "cache/terrain/";
-
-// Interface to the ESM landscape data
-MWLand mwland;
 
 int mCount;
 
@@ -328,11 +327,11 @@ void genLevel1Meshes(ref GenLevelResult res)
   mi.worldWidth = vertSep*intervals;
   assert(mi.worldWidth == 8192);
 
-  auto land = mwland.getData(cellX, cellY);
+  auto land = mwland.getLandData(cellX, cellY);
 
-  byte[] heightData = land.heights;
+  byte[] heightData = land.vhgt.heights;
   byte[] normals = land.normals;
-  mi.heightOffset = land.heightOffset;
+  mi.heightOffset = land.vhgt.heightOffset;
 
   float max=-1000000.0;
   float min=1000000.0;
