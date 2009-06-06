@@ -7,12 +7,12 @@
             <State name="normal" offset = "0 0 2 14"/>
         </BasisSkin>
     </Skin>
-    <Skin name = "MW_BigTrack_Green" size = "2 14" texture = "bigbars.png" >
+    <Skin name = "MW_BigTrack_Blue" size = "2 14" texture = "bigbars.png" >
         <BasisSkin type="MainSkin" offset = "0 0 2 14" align = "ALIGN_STRETCH">
             <State name="normal" offset = "0 14 2 14"/>
         </BasisSkin>
     </Skin>
-    <Skin name = "MW_BigTrack_Blue" size = "2 14" texture = "bigbars.png" >
+    <Skin name = "MW_BigTrack_Green" size = "2 14" texture = "bigbars.png" >
         <BasisSkin type="MainSkin" offset = "0 0 2 14" align = "ALIGN_STRETCH">
             <State name="normal" offset = "0 28 2 14"/>
         </BasisSkin>

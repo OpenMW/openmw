@@ -20,26 +20,28 @@
 
 */
 
-/*
+const int CELL_WIDTH = 8192;
+
 #include "cpp_baseland.cpp"
-#include "cpp_mesh.cpp"
+//#include "cpp_mesh.cpp"
+
+BaseLand *g_baseLand;
+SceneNode *g_rootTerrainNode;
 
 class TerrainFrameListener : public FrameListener
 {
 protected:
   bool frameEnded(const FrameEvent& evt)
   {
-    g_rootQuad->update();
+    //g_rootQuad->update();
     g_baseLand->update();
     return true;
   }
 };
 
-extern "C" void d_superman();
-*/
-
 extern "C"
 {
+  void d_superman();
 
   SceneNode* terr_createChildNode(float relX, float relY,
                                   SceneNode *parent)
@@ -64,22 +66,25 @@ extern "C"
   // Set up the rendering system
   void terr_setupRendering()
   {
+    // Create a root scene node first. The 'root' node is rotated to
+    // match the MW coordinate system
+    g_rootTerrainNode = root->createChildSceneNode("TERRAIN_ROOT");
+
+    // Add the base land. This is the ground beneath the actual
+    // terrain mesh that makes the terrain look infinite.
+    g_baseLand = new BaseLand(g_rootTerrainNode);
+
     /*
     // Add the terrain directory
     ResourceGroupManager::getSingleton().
       addResourceLocation(g_cacheDir, "FileSystem", "General");
-
-    // Create a root scene node first. The 'root' node is rotated to
-    // match the MW coordinate system
-    g_rootTerrainNode = root->createChildSceneNode("TERRAIN_ROOT");
 
     // Open the archive file
     g_archive.openFile(g_cacheFile);
 
     // Create the root quad.
     g_rootQuad = new Quad();
-
-    g_baseLand = new BaseLand(g_rootTerrainNode);
+    */
 
     // Add the frame listener
     mRoot->addFrameListener(new TerrainFrameListener);
@@ -88,6 +93,5 @@ extern "C"
     mCamera->setFarClipDistance(32*CELL_WIDTH);
     //ogre_setFog(0.7, 0.7, 0.7, 200, 32*CELL_WIDTH);
     d_superman();
-    */
   }
 }

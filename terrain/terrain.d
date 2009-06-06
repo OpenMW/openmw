@@ -33,5 +33,5 @@ void initTerrain(bool doGen)
     generate();
   */
 
-  //terr_setupRendering();
+  terr_setupRendering();
 }
