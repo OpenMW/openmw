@@ -259,9 +259,9 @@ bool isPressed(Keys key)
   return false;
 }
 
-// Enable superman mode, ie. flight and super-speed. This is getting
-// very spaghetti-ish.
-extern(C) void d_superman()
+// Enable superman mode, ie. flight and super-speed. Only used for
+// debugging the terrain mode.
+extern(C) void d_terr_superman()
 {
   bullet_fly();
   speed = 8000;

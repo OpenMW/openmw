@@ -3,18 +3,13 @@ class TerrainMesh : public Ogre::Renderable, public Ogre::MovableObject
 {
 public:
 
-  TerrainMesh(int segNum, Ogre::SceneNode *parent)
+  TerrainMesh(Ogre::SceneNode *parent, const MeshInfo &info,
+              int level, float scale)
     : Ogre::Renderable(),
       Ogre::MovableObject()
   {
-    using namespace Ogre;
-
-    // Get the mesh properties from the archive. The pointer is only
-    // valid for the duration of this function.
-    const MeshInfo &info = *g_archive.getMeshInfo(segNum);
-
-    // Split all this off into sub-functions again later when you're
-    // finished.
+    // This is a bit messy, with everything in one function. We could
+    // split it up later.
 
     // Use MW coordinates all the way
     mBounds.setExtents(0,0,info.minHeight,
@@ -93,8 +88,7 @@ public:
     Pass* pass = mMaterial->getTechnique(0)->getPass(0);
     pass->setLightingEnabled(false);
 
-    int lev = info.getLevel();
-    if(lev != 1)
+    if(level != 1)
       {
         // This material just has a normal texture
         pass->createTextureUnitState(texName)
@@ -103,15 +97,16 @@ public:
       }
     else
       {
-        // We have to use alpha splatting
-        float scale = info.getTexScale();
+        // Get the background texture. TODO: We should get this from
+        // somewhere, no file names should be hard coded. The texture
+        // might exist as a .tga in earlier versions of the game, and
+        // we might also want to specify a different background
+        // texture on some meshes.
+        //const char *bgTex = info.getBackgroundTex();
 
-        // Get the background texture
-        const char *bgTex = info.getBackgroundTex();
+        const char *bgTex = "_land_default.dds";
         pass->createTextureUnitState(bgTex)
           ->setTextureScale(scale,scale);
-
-        int alphaSize = info.getAlphaSize();
 
         // Loop through all the textures in this mesh
         for(int tnum=0; tnum<info.alphaNum; tnum++)
@@ -131,7 +126,7 @@ public:
               (alphaName,
                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                Ogre::TEX_TYPE_2D,
-               alphaSize,alphaSize,
+               g_alphaSize,g_alphaSize,
                1,0, // depth, mipmaps
                Ogre::PF_A8, // One-channel alpha
                Ogre::TU_STATIC_WRITE_ONLY);
@@ -180,17 +175,13 @@ public:
 
   ~TerrainMesh()
   {
-    delete mIndices;
+    assert(mNode);
+    mNode->detachAllObjects();
+    mNode->getCreator()->destroySceneNode(mNode);
 
     // TODO: This used to crash. See what happens now.
     delete mVertices;
-
-    assert(mNode);
-
-    // We haven't tried moving this further up - there's an off chance
-    // it might have something to do with the crash.
-    mNode->detachAllObjects();
-    mNode->getCreator()->destroySceneNode(mNode);
+    delete mIndices;
   }
 
   //-----------------------------------------------------------------------

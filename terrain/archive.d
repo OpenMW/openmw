@@ -32,6 +32,28 @@ version(Windows)
 else
   static int pageSize = 4*1024;
 
+extern(C)
+{
+  // Convert a texture index to string
+  char *d_terr_getTexName(int index)
+    { return g_archive.getString(index).ptr; }
+
+  // Fill various hardware buffers from cache
+  void d_terr_fillVertexBuffer(MeshInfo *mi, float *buffer)
+    { mi.fillVertexBuffer(buffer); }
+
+  void d_terr_fillIndexBuffer(MeshInfo *mi, ushort *buffer)
+    { mi.fillIndexBuffer(buffer); }
+
+  void d_terr_fillAlphaBuffer(AlphaInfo *mi, ubyte *buffer)
+    { mi.fillAlphaBuffer(buffer); }
+
+  // Get a given alpha map struct belonging to a mesh
+  AlphaInfo *d_terr_getAlphaInfo(MeshInfo *mi, int index)
+    { return mi.getAlphaInfo(index); }
+
+}
+
 // Info about the entire quad. TODO: Some of this (such as the texture
 // scale and probably the width and radius) can be generated at
 // loadtime and is common for all quads on the same level. We could
@@ -62,11 +84,11 @@ struct QuadInfo
   size_t offset, size;
 }
 
-
 // Info about an alpha map belonging to a mesh
 struct AlphaInfo
 {
-  size_t bufSize, bufOffset;
+  // Position of the actual image data
+  ulong bufSize, bufOffset;
 
   // The texture name for this layer. The actual string is stored in
   // the archive's string buffer.
@@ -78,21 +100,11 @@ struct AlphaInfo
   {
     g_archive.copy(abuf, bufOffset, bufSize);
   }
-
-  // Get the texture for this alpha layer
-  char[] getTexName()
-  {
-    return g_archive.getString(texName);
-  }
-
-  // Get the material name to give the alpha texture
-  char[] getAlphaName()
-  {
-    return g_archive.getString(alphaName);
-  }
 }
+static assert(AlphaInfo.sizeof == 6*4);
 
 // Info about each submesh
+align(1)
 struct MeshInfo
 {
   // Bounding box info
@@ -110,11 +122,11 @@ struct MeshInfo
   float heightOffset;
 
   // Size and offset of the vertex buffer
-  size_t vertBufSize, vertBufOffset;
+  ulong vertBufSize, vertBufOffset;
 
   // Number and offset of AlphaInfo blocks
   int alphaNum;
-  size_t alphaOffset;
+  ulong alphaOffset;
 
   // Texture name. Index to the string table.
   int texName;
@@ -208,21 +220,9 @@ struct MeshInfo
     res += num;
     return res;
   }
-
-  // Get the size of the alpha textures (in pixels).
-  int getAlphaSize()
-  { return g_archive.alphaSize; }
-
-  // Get the texture and material name to use for this mesh.
-  char[] getTexName()
-  { return g_archive.getString(texName); }
-
-  float getTexScale()
-  { return g_archive.curQuad.texScale; }
-
-  char[] getBackgroundTex()
-  { return "_land_default.dds"; }
 }
+static assert(MeshInfo.sizeof == 17*4);
+
 
 struct ArchiveHeader
 {

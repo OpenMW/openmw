@@ -24,14 +24,41 @@
 module terrain.terrain;
 
 import terrain.generator;
+import terrain.archive;
 import terrain.bindings;
+import terrain.quad;
+import std.file, std.stdio;
+
+char[] cacheDir = "cache/terrain/";
 
 void initTerrain(bool doGen)
 {
-  /*
+  char[] fname = cacheDir ~ "landscape.cache";
+
+  if(!exists(fname))
+    {
+      writefln("Cache file '%s' not found. Creating:",
+               fname);
+      doGen = true;
+    }
+
   if(doGen)
-    generate();
-  */
+    generate(fname);
+
+  // Load the archive file
+  g_archive.openFile(fname);
 
   terr_setupRendering();
+
+  // Create the root quad
+  rootQuad = new Quad;
 }
+
+extern(C) void d_terr_terrainUpdate()
+{
+  // Update the root quad each frame.
+  assert(rootQuad !is null);
+  rootQuad.update();
+}
+
+Quad rootQuad;

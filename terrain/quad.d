@@ -40,12 +40,6 @@ class Quad
           mNode = terr_createChildNode(relX*CELL_WIDTH,
                                        relY*CELL_WIDTH,
                                        parent.mNode);
-          /*
-          Ogre::Vector3 pos(relX * CELL_WIDTH,
-                                  relY * CELL_WIDTH,
-                                  0);
-          mNode = parent.mNode.createChildSceneNode(pos);
-          */
 
           // Get the archive data for this quad.
           mInfo = g_archive.getQuad(mCellX,mCellY,mLevel);
@@ -63,10 +57,6 @@ class Quad
           mNode = terr_createChildNode(cellX*CELL_WIDTH,
                                        cellY*CELL_WIDTH,
                                        null);
-          /*
-          mNode = g_rootTerrainNode.
-            createChildSceneNode(pos);
-          */
 
           // Split up
           split();
@@ -78,20 +68,12 @@ class Quad
       assert(mLevel >= 1);
       assert(mNode !is null);
 
-      // TODO: How do we store the C++ bounding box?
+      // Set up the bounding box. Use MW coordinates all the way
       mBounds = terr_makeBounds(mInfo.minHeight,
                                 mInfo.maxHeight,
-                                mInfo.worldWidth);
-      /*
-      // Set up the bounding box. Use MW coordinates all the way
-      mBounds.setExtents(0,0,mInfo.minHeight,
-                         mInfo.worldWidth,mInfo.worldWidth,
-                         mInfo.maxHeight);
+                                mInfo.worldWidth,
+                                mNode);
 
-      // Transform the box to world coordinates, so it can be compared
-      // with the camera later.
-      mBounds.transformAffine(mNode._getFullTransform());
-      */
       float radius = mInfo.boundingRadius;
 
       mSplitDistance   = radius * SPLIT_FACTOR;
@@ -119,10 +101,7 @@ class Quad
           delete mChildren[i];
     
       terr_destroyNode(mNode);
-      /*
-      mNode.removeAndDestroyAllChildren();
-      mSceneMgr.destroySceneNode(mNode);
-      */
+      terr_killBounds(mBounds);
     }
 
   // Remove the landscape for this quad, and create children.
@@ -187,15 +166,6 @@ class Quad
           // Get (squared) camera distance. TODO: shouldn't this just
           // be a simple vector difference from the mesh center?
           float camDist = terr_getSqCamDist(mBounds);
-          /*
-          {
-            Ogre::Vector3 cpos = mCamera.getDerivedPosition();
-            Ogre::Vector3 diff(0, 0, 0);
-            diff.makeFloor(cpos - mBounds.getMinimum() );
-            diff.makeCeil(cpos - mBounds.getMaximum() );
-            camDist = diff.squaredLength();
-          }
-          */
 
           // No children?
           if(!hasChildren)
@@ -249,7 +219,10 @@ class Quad
       // care of the loading.
       meshList.length = mInfo.meshNum;
       foreach(i, ref m; meshList)
-        m = terr_makeMesh(i, mNode);
+        {
+          MeshInfo *mi = g_archive.getMeshInfo(i);
+          m = terr_makeMesh(mNode, mi, mInfo.level, mInfo.texScale);
+        }
 
       hasMesh = true;
     }
@@ -275,7 +248,6 @@ class Quad
 
   // Bounding box, transformed to world coordinates. Used to calculate
   // camera distance.
-  //Ogre::AxisAlignedBox mBounds;
   Bounds mBounds;
 
   float mSplitDistance,mUnsplitDistance;

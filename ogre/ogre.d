@@ -132,10 +132,6 @@ void setupOgre(bool debugOut)
     OgreException("Configuration abort");
 
   ogre_initWindow();
-
-  // We set up the scene manager in a separate function, since we
-  // might have to do that for every new cell later on, and handle
-  // exterior cells differently, etc.
   ogre_makeScene();
 
   ogreSetup = true;

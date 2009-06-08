@@ -71,7 +71,7 @@ int32_t guiMode = 0;
 // Root node for all objects added to the scene. This is rotated so
 // that the OGRE coordinate system matches that used internally in
 // Morrowind.
-SceneNode *root;
+SceneNode *mwRoot;
 
 // Include the other parts of the code, and make one big happy object
 // file. This is extremely against the grain of C++ "recomended

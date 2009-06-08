@@ -24,17 +24,15 @@
 // This module is responsible for generating the cache files.
 module terrain.generator;
 
-/+
 import std.stdio;
 import std.string;
 
 import terrain.cachewriter;
 import terrain.esmland;
+import terrain.terrain;
 import util.cachefile;
 
 const float TEX_SCALE = 1.0/16;
-
-char[] cacheDir = "cache/terrain/";
 
 int mCount;
 
@@ -43,21 +41,18 @@ int mCount;
 // than a final texture.
 int[] texSizes;
 
-// Default textures
-GenLevelResult[] defaults;
-
 CacheWriter cache;
 
-void generate()
+void generate(char[] filename)
 {
   makePath(cacheDir);
 
-  cache.openFile(filename);
+  //cache.openFile(filename);
 
   // Find the maxiumum distance from (0,0) in any direction
   int max = mwland.getMaxCoord();
 
-  // Round up to nearest binary
+  // Round up to nearest power of 2
   int depth=1;
   while(max)
     {
@@ -73,7 +68,7 @@ void generate()
 
   // Set the texture sizes. TODO: These should be config options,
   // perhaps - or maybe a result of some higher-level detail setting.
-  texSizes.resize(depth+1, 0);
+  texSizes.length = depth+1;
   texSizes[6] = 1024;
   texSizes[5] = 512;
   texSizes[4] = 256;
@@ -81,9 +76,12 @@ void generate()
   texSizes[2] = 256;
   texSizes[1] = 64;
 
+  writefln("Data generation not implemented yet");
+
   // Set some general parameters for the runtime
   cache.setParams(depth+1, texSizes[1]);
 
+  /*
   // Create some common data first
   writefln("Generating common data");
   genDefaults();
@@ -97,7 +95,13 @@ void generate()
   writefln("Writing index file");
   cache.finish();
   writefln("Pregeneration done. Results written to ", filename);
+  */
 }
+
+/+
+
+// Default textures
+GenLevelResult[] defaults;
 
 // Generates the default texture images "2_default.png" etc
 void genDefaults()

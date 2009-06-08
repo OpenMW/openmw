@@ -204,8 +204,8 @@ extern "C" void ogre_makeScene()
   // Morrowind uses, and it automagically makes everything work as it
   // should.
   SceneNode *rt = mSceneMgr->getRootSceneNode();
-  root = rt->createChildSceneNode();
-  root->pitch(Degree(-90));
+  mwRoot = rt->createChildSceneNode();
+  mwRoot->pitch(Degree(-90));
 
   /*
   g_light = mSceneMgr->createLight("carry");
@@ -397,7 +397,7 @@ extern "C" SceneNode *ogre_insertNode(SceneNode *base, char* name,
                                       float scale)
 {
   //std::cout << "ogre_insertNode(" << name << ")\n";
-  SceneNode *node = root->createChildSceneNode(name);
+  SceneNode *node = mwRoot->createChildSceneNode(name);
 
   // Make a copy of the node
   cloneNode(base, node, name);
@@ -453,7 +453,7 @@ extern "C" void ogre_createWater(float level)
 	   150000,150000
 	   );
     Entity *ent = mSceneMgr->createEntity( "WaterEntity", "water" );
-    root->createChildSceneNode()->attachObject(ent);
+    mwRoot->createChildSceneNode()->attachObject(ent);
     ent->setCastShadows(false);
 }
 
@@ -699,8 +699,8 @@ extern "C" void ogre_createMaterial(char *name,	    // Name to give
 
 extern "C" SceneNode *ogre_getDetachedNode()
 {
-  SceneNode *node = root->createChildSceneNode();
-  root->removeChild(node);
+  SceneNode *node = mwRoot->createChildSceneNode();
+  mwRoot->removeChild(node);
   return node;
 }
 
