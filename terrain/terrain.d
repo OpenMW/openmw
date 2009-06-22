@@ -31,6 +31,9 @@ import std.file, std.stdio;
 
 char[] cacheDir = "cache/terrain/";
 
+// Enable this to render one single terrain mesh
+//debug=singleMesh;
+
 void initTerrain(bool doGen)
 {
   char[] fname = cacheDir ~ "landscape.cache";
@@ -50,12 +53,26 @@ void initTerrain(bool doGen)
 
   terr_setupRendering();
 
-  // Create the root quad
-  rootQuad = new Quad;
+  debug(singleMesh)
+    {
+      // Used for debugging single terrain meshes
+      auto node = terr_createChildNode(20000,-60000,null);
+      auto info = g_archive.getQuad(0,0,1);
+      g_archive.mapQuad(info);
+      auto mi = g_archive.getMeshInfo(0);
+      auto m = terr_makeMesh(node, mi, info.level, TEX_SCALE);
+    }
+  else
+    {
+      // Create the root quad
+      rootQuad = new Quad;
+    }
 }
 
 extern(C) void d_terr_terrainUpdate()
 {
+  debug(singleMesh) return;
+
   // Update the root quad each frame.
   assert(rootQuad !is null);
   rootQuad.update();

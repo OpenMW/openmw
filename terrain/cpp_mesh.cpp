@@ -8,15 +8,19 @@ public:
     : Ogre::Renderable(),
       Ogre::MovableObject()
   {
+    TRACE("TerrainMesh()");
+
+    mLevel = level;
+
     // This is a bit messy, with everything in one function. We could
     // split it up later.
 
     // Use MW coordinates all the way
+    assert(info.worldWidth > 0);
+    assert(info.minHeight <= info.maxHeight);
     mBounds.setExtents(0,0,info.minHeight,
-                       // was (mWidth-1) * vertexSeparation
                        info.worldWidth, info.worldWidth,
                        info.maxHeight);
-
     mCenter = mBounds.getCenter();
     mBoundingRadius = mBounds.getHalfSize().length();
 
@@ -56,16 +60,16 @@ public:
     // Fill the buffer
     float* verts = static_cast<float*>
       (mMainBuffer->lock(HardwareBuffer::HBL_DISCARD));
-    info.fillVertexBuffer(verts);
+    info.fillVertexBuffer(verts,8*mVertices->vertexCount);
     mMainBuffer->unlock();
 
     // Create the index data holder
     mIndices = new IndexData();
-    mIndices->indexCount = info.indexCount;
+    mIndices->indexCount = 64*64*6; // TODO: Shouldn't be hard-coded
     mIndices->indexBuffer =
       HardwareBufferManager::getSingleton().createIndexBuffer
       ( HardwareIndexBuffer::IT_16BIT,
-        info.indexCount,
+        mIndices->indexCount,
         HardwareBuffer::HBU_STATIC_WRITE_ONLY,
         false);
 
@@ -74,17 +78,16 @@ public:
       (mIndices->indexBuffer->lock
        (0, mIndices->indexBuffer->getSizeInBytes(),
         HardwareBuffer::HBL_DISCARD));
-    info.fillIndexBuffer(indices);
+    info.fillIndexBuffer(indices,mIndices->indexCount);
     mIndices->indexBuffer->unlock();
 
     // Finally, create the material
     const std::string texName = info.getTexName();
 
-    // TODO: A better thing to do here is to keep the material loaded
-    // and retrieve it if it exists.
-    assert(!MaterialManager::getSingleton().resourceExists(texName));
-    mMaterial = MaterialManager::getSingleton().create
-      (texName, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    // Create or retrieve the material
+    mMaterial = MaterialManager::getSingleton().createOrRetrieve
+          (texName, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME).first;
+
     Pass* pass = mMaterial->getTechnique(0)->getPass(0);
     pass->setLightingEnabled(false);
 
@@ -119,29 +122,32 @@ public:
             // Name of the texture
             std::string tname = alpha.getTexName();
 
-            // TODO: Need to store the result and either delete it in
-            // the destructor or fetch it again the next time we run.
-            Ogre::TexturePtr texPtr = Ogre::TextureManager::
-              getSingleton().createManual
-              (alphaName,
-               Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-               Ogre::TEX_TYPE_2D,
-               g_alphaSize,g_alphaSize,
-               1,0, // depth, mipmaps
-               Ogre::PF_A8, // One-channel alpha
-               Ogre::TU_STATIC_WRITE_ONLY);
+            // Create the alpha texture if it doesn't exist
+            if(!TextureManager::getSingleton().resourceExists(alphaName))
+              {
+                TexturePtr texPtr = Ogre::TextureManager::
+                  getSingleton().createManual
+                  (alphaName,
+                   Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                   Ogre::TEX_TYPE_2D,
+                   g_alphaSize,g_alphaSize,
+                   1,0, // depth, mipmaps
+                   Ogre::PF_A8, // One-channel alpha
+                   Ogre::TU_STATIC_WRITE_ONLY);
 
-            // Get the pointer
-            Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texPtr->getBuffer();
-            pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
-            const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
-            Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
+                // Get the pointer
+                Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texPtr->getBuffer();
+                pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+                const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+                Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
 
-            // Copy alpha data from file
-            alpha.fillAlphaBuffer(pDest);
+                // Copy alpha data from file
+                alpha.fillAlphaBuffer(pDest,g_alphaSize*g_alphaSize);
 
-            // Finish everything up with a lot of Ogre-code
-            pixelBuffer->unlock();
+                // Close the buffer
+                pixelBuffer->unlock();
+              }
+
             pass = mMaterial->getTechnique(0)->createPass();
             pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
             pass->setLightingEnabled(false);
@@ -169,7 +175,7 @@ public:
       }
 
     // Finally, set up the scene node.
-    mNode = parent->createChildSceneNode(Vector3(info.x, info.y, 0.0));
+    mNode = parent->createChildSceneNode();
     mNode->attachObject(this);
   }
 
@@ -179,8 +185,8 @@ public:
     mNode->detachAllObjects();
     mNode->getCreator()->destroySceneNode(mNode);
 
-    // TODO: This used to crash. See what happens now.
-    delete mVertices;
+    // TODO: This still crashes on level1 meshes. Find out why!
+    if(mLevel!=1)delete mVertices;
     delete mIndices;
   }
 
@@ -237,9 +243,11 @@ public:
     mLightListDirty = true;
     queue->addRenderable(this, mRenderQueueID);
   }
-  const Ogre::AxisAlignedBox& getBoundingBox( void ) const {
+  const Ogre::AxisAlignedBox& getBoundingBox( void ) const
+  {
     return mBounds;
-  };
+  }
+
   Ogre::Real getBoundingRadius(void) const {
     return mBoundingRadius;
   }
@@ -250,6 +258,8 @@ public:
   //-----------------------------------------------------------------------
 
 private:
+
+  int mLevel;
 
   Ogre::SceneNode* mNode;
 

@@ -55,7 +55,7 @@ class NiTexturingProperty : Property
     bool inUse;
     NiSourceTexture texture;
 
-    /* Clamp mode (i don't understand this)
+    /* Clamp mode
        0 - clampS clampT
        1 - clampS wrapT
        2 - wrapS clampT
@@ -89,8 +89,11 @@ class NiTexturingProperty : Property
       filter = nifFile.getIntIs(0,1,2);
       set = nifFile.getInt;
 
-      ps2L = nifFile.getShortIs(0);
-      ps2K = nifFile.getShortIs(-75,-2);
+      // The combination 1222, 322, 212 was used in a bump map
+      // NIF. Might just be bogus numbers, I should probably allow all
+      // values here since we ignore them anyway.
+      ps2L = nifFile.getShortIs(0,1222);
+      ps2K = nifFile.getShortIs(-75,-2,322);
 
       debug(verbose)
 	{
@@ -101,7 +104,7 @@ class NiTexturingProperty : Property
 	  writefln("  ps2K ", ps2K);
 	}
 
-      unknown2 = nifFile.wgetShortIs(0,257);
+      unknown2 = nifFile.wgetShortIs(0,257,212);
     }
   }
 

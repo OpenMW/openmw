@@ -23,8 +23,11 @@
 import terrain.archive;
 
 import terrain.outbuffer;
-import std.stream;
+import std.stdio, std.stream, std.string;
+import terrain.myfile;
+import std.math2;
 import monster.util.string;
+import monster.vm.dbg;
 
 // Helper structs
 struct AlphaHolder
@@ -41,9 +44,6 @@ struct MeshHolder
 
   // Actual buffers
   byte[] vertexBuffer;
-
-  // Texture name
-  char[] texName;
 
   // Alpha maps (if any)
   AlphaHolder alphas[];
@@ -74,7 +74,6 @@ struct CacheWriter
     alphaSize = alphSize;
 
     vertBuf.length = maxLevel;
-    indexBuf.length = maxLevel;
   }
 
   // Closes the main archive file and writes the index.
@@ -83,7 +82,7 @@ struct CacheWriter
     mainFile.close();
 
     // Write the index file
-    scope File ofile = new File(iname, FileMode.OutNew);
+    scope MyFile ofile = new MyFile(iname, FileMode.OutNew);
 
     // Header first
     ArchiveHeader head;
@@ -93,11 +92,10 @@ struct CacheWriter
     head.alphaSize = alphaSize;
     head.stringNum = stringList.length;
     head.stringSize = totalStringLength;
-    ofile.writeExact(&head, head.sizeof);
+    ofile.dump(head);
 
     // Write the quads
-    foreach(qi; quadList)
-      ofile.writeExact(&qi, qi.sizeof);
+    ofile.dumpArray(quadList);
 
     // String table next. We need to sort it in order of the indices
     // first.
@@ -117,6 +115,10 @@ struct CacheWriter
         // Add one byte for the zero terminator
         int len = strVector[i].length + 1;
         char *ptr = strVector[i].ptr;
+
+        if(ptr[len-1] != 0)
+          ptr = toStringz(strVector[i]);
+
         assert(ptr[len-1] == 0);
 
         ofile.writeExact(ptr, len);
@@ -130,29 +132,19 @@ struct CacheWriter
     assert(curOffs == head.stringSize);
 
     // Finally, write the offset table itself
-    ofile.writeExact(offsets.ptr, offsets.length * int.sizeof);
+    ofile.dumpArray(offsets);
 
     // Write the common vertex and index buffers
+    assert(maxLevel == 7);
     for(int i=1;i<maxLevel;i++)
       {
-        int size;
-        void *ptr;
-
         // Write vertex buffer
-        ptr = vertBuf[i].ptr;
-        size = vertBuf[i].length;
-        ofile.write(size);
-        ofile.writeExact(ptr, size);
-
-        // Then the index buffer
-        ptr = indexBuf[i].ptr;
-        size = indexBuf[i].length;
-        ofile.write(size);
-        ofile.writeExact(ptr, size);
-
+        ofile.writeArray(vertBuf[i]);
         delete vertBuf[i];
-        delete indexBuf[i];
       }
+
+    // Then the index buffer
+    ofile.writeArray(indexBuf);
 
     // Don't need these anymore
     delete offsets;
@@ -165,17 +157,16 @@ struct CacheWriter
   }
 
   // Add a common vertex buffer for a given level
-  void addVertexBuffer(int level, void[] buf)
+  void addVertexBuffer(int level, float[] buf)
   {
     assert(vertBuf.length > level);
     vertBuf[level] = buf;
   }
 
-  // Add a common vertex buffer for a given level
-  void addIndexBuffer(int level, void[] buf)
+  // Add a common index buffer
+  void setIndexBuffer(ushort[] buf)
   {
-    assert(indexBuf.length > level);
-    indexBuf[level] = buf;
+    indexBuf = buf;
   }
 
   // Write a finished quad to the archive file. All the offsets and
@@ -183,14 +174,15 @@ struct CacheWriter
   // the additional data in the Holder structs.
   void writeQuad(ref QuadHolder qh)
   {
-    // Make outbuffer a simple struct that uses a region and keeps
-    // track of all the slices we allocate.
-    OutBuffer buf;
+    scope auto _trc = new MTrace("writeQuad");
 
     // Write the MeshInfo's first
     int meshNum = qh.meshes.length;
 
     MeshInfo meshes[] = buf.write!(MeshInfo)(meshNum);
+
+    float minh = float.infinity;
+    float maxh = -float.infinity;
 
     // Then write the mesh data in approximately the order it's read
     for(int i=0; i<meshNum; i++)
@@ -202,15 +194,18 @@ struct CacheWriter
         // Copy the basic data first
         meshes[i] = mh.info;
 
+        minh = min(minh,mh.info.minHeight);
+        maxh = max(maxh,mh.info.maxHeight);
+
         // Set everything else except the offsets
         int alphaNum = mh.alphas.length;
         meshes[i].alphaNum = alphaNum;
-        //meshes[i].texName = addString(mh.texName);
 
         // Write the vertex buffer
         meshes[i].vertBufOffset = buf.size;
         meshes[i].vertBufSize = mh.vertexBuffer.length;
         writeBuf(mh.vertexBuffer);
+        assert(buf.size == meshes[i].vertBufOffset + meshes[i].vertBufSize);
 
         // Next write the alpha maps, if any
         meshes[i].alphaOffset = buf.size;
@@ -231,13 +226,22 @@ struct CacheWriter
     // Finally set up the QuadInfo itself
     QuadInfo qi;
 
-    // Basic info
+    // Copy basic info
     qi = qh.info;
 
     // Derived info
     qi.meshNum = meshNum;
     qi.offset = fileOffset;
     qi.size = buf.size;
+    qi.minHeight = minh;
+    qi.maxHeight = maxh;
+
+    // Get the side length, or the height difference if that is bigger
+    qi.boundingRadius = max(maxh-minh,qi.worldWidth);
+
+    // Multiply with roughly sqrt(1/2), converts from side length to
+    // radius with some extra slack
+    qi.boundingRadius *= 0.8;
 
     // The quad cache is done, write it to file
     buf.writeTo(mainFile);
@@ -307,8 +311,8 @@ private:
 
   // Common vertex and index buffers for all quads. One buffer per
   // level.
-  void[][] vertBuf;
-  void[][] indexBuf;
+  float[][] vertBuf;
+  ushort[] indexBuf;
 
   // Variables that must be set during the gen phase
   int maxLevel;

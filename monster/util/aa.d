@@ -333,7 +333,7 @@ struct HashTable(Key, Value, Alloc = GCAlloc, Hash = DefHash,
   // Get a pointer to value of given key, or insert a new. Useful for
   // large value types when you want to avoid copying the value around
   // needlessly. Also useful if you want to do in-place
-  // editing. Returns true if a value was inserted.
+  // editing. Returns true if a new value was inserted.
   bool insertEdit(Key k, out Value *ptr)
     {
       Node *p;

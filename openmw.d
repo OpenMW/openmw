@@ -54,6 +54,20 @@ import input.events;
 
 import terrain.terrain;
 
+// Set up exit handler
+alias void function() c_func;
+extern(C) int atexit(c_func);
+
+bool cleanExit = false;
+
+void exitHandler()
+{
+  // If we exit uncleanly, print the function stack.
+  if(!cleanExit)
+    writefln(dbg.getTrace());
+}
+
+
 //*
 import std.gc;
 import gcstats;
@@ -223,6 +237,10 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
   if(cd.inCell !is null)
     // Set the name for the GUI (temporary hack)
     gui_setCellName(cd.inCell.id.ptr);
+
+  // Set up the exit handler
+  atexit(&exitHandler);
+  scope(exit) cleanExit = true;
 
   if(render)
     {

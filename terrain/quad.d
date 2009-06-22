@@ -2,6 +2,8 @@ module terrain.quad;
 
 import terrain.archive;
 import terrain.bindings;
+import std.stdio;
+import monster.vm.dbg;
 
 const int CELL_WIDTH = 8192;
 const float SPLIT_FACTOR = 0.5;
@@ -11,6 +13,8 @@ class Quad
 {
   this(int cellX=0, int cellY=0, Quad parent = null)
     {
+      scope auto _trc = new MTrace("Quad.this");
+
       mCellX = cellX;
       mCellY = cellY;
 
@@ -18,13 +22,6 @@ class Quad
       if(parent !is null)
         {
           mLevel = parent.mLevel-1;
-
-          if(mLevel == 1)
-            {
-              // Create the terrain and leave it there.
-              buildTerrain();
-              isStatic = true;
-            }
 
           // Coordinates relative to our parent
           int relX = cellX - parent.mCellX;
@@ -43,12 +40,36 @@ class Quad
 
           // Get the archive data for this quad.
           mInfo = g_archive.getQuad(mCellX,mCellY,mLevel);
+
+          // Set up the bounding box. Use MW coordinates all the
+          // way.
+          mBounds = terr_makeBounds(mInfo.minHeight,
+                                    mInfo.maxHeight,
+                                    mInfo.worldWidth,
+                                    mNode);
+
+          float radius = mInfo.boundingRadius;
+
+          mSplitDistance   = radius * SPLIT_FACTOR;
+          mUnsplitDistance = radius * UNSPLIT_FACTOR;
+
+          // Square the distances
+          mSplitDistance *= mSplitDistance;
+          mUnsplitDistance *= mUnsplitDistance;
+
+          if(mLevel == 1)
+            {
+              // Create the terrain and leave it there.
+              buildTerrain();
+              isStatic = true;
+            }
         }
       else
         {
           // No parent, this is the top-most quad. Get all the info from
           // the archive.
           mInfo = g_archive.rootQuad;
+          assert(mInfo);
 
           mLevel = mInfo.level;
           cellX = mCellX = mInfo.cellX;
@@ -68,21 +89,6 @@ class Quad
       assert(mLevel >= 1);
       assert(mNode !is null);
 
-      // Set up the bounding box. Use MW coordinates all the way
-      mBounds = terr_makeBounds(mInfo.minHeight,
-                                mInfo.maxHeight,
-                                mInfo.worldWidth,
-                                mNode);
-
-      float radius = mInfo.boundingRadius;
-
-      mSplitDistance   = radius * SPLIT_FACTOR;
-      mUnsplitDistance = radius * UNSPLIT_FACTOR;
-
-      // Square the distances
-      mSplitDistance *= mSplitDistance;
-      mUnsplitDistance *= mUnsplitDistance;
-
       // Update the terrain. This will create the mesh or children if
       // necessary.
       update();
@@ -90,6 +96,8 @@ class Quad
 
   ~this()
     {
+      scope auto _trc = new MTrace("Quad.~this");
+
       // TODO: We might rewrite the code so that the quads are never
       // actually destroyed, just 'inactivated' by hiding their scene
       // node. We only call update on our children if we don't have a
@@ -101,12 +109,14 @@ class Quad
           delete mChildren[i];
     
       terr_destroyNode(mNode);
-      terr_killBounds(mBounds);
+      if(mBounds !is null)
+        terr_killBounds(mBounds);
     }
 
   // Remove the landscape for this quad, and create children.
   void split()
     {
+      scope auto _trc = new MTrace("split");
       // Never split a static quad or a quad that already has children.
       assert(!isStatic);
       assert(!hasChildren);
@@ -136,6 +146,7 @@ class Quad
   // Removes children and rebuilds terrain
   void unsplit()
     {
+      scope auto _trc = new MTrace("unsplit");
       // Never unsplit the root quad
       assert(mLevel < g_archive.rootQuad.level);
       // Never unsplit a static or quad that isn't split.
@@ -158,6 +169,8 @@ class Quad
   // does it.
   void update()
     {
+      scope auto _trc = new MTrace("Quad.update()");
+
       // Static quads don't change
       if(!isStatic)
         {
@@ -165,6 +178,7 @@ class Quad
 
           // Get (squared) camera distance. TODO: shouldn't this just
           // be a simple vector difference from the mesh center?
+          assert(mBounds !is null);
           float camDist = terr_getSqCamDist(mBounds);
 
           // No children?
@@ -209,10 +223,13 @@ class Quad
   // Build the terrain for this quad
   void buildTerrain()
     {
+      scope auto _trc = new MTrace("buildTerrain");
+
       assert(!hasMesh);
       assert(!isStatic);
 
       // Map the terrain data into memory.
+      assert(mInfo);
       g_archive.mapQuad(mInfo);
 
       // Create one mesh for each segment in the quad. TerrainMesh takes
@@ -221,7 +238,7 @@ class Quad
       foreach(i, ref m; meshList)
         {
           MeshInfo *mi = g_archive.getMeshInfo(i);
-          m = terr_makeMesh(mNode, mi, mInfo.level, mInfo.texScale);
+          m = terr_makeMesh(mNode, mi, mInfo.level, TEX_SCALE);
         }
 
       hasMesh = true;
@@ -229,6 +246,8 @@ class Quad
 
   void destroyTerrain()
     {
+      scope auto _trc = new MTrace("destroyTerrain");
+
       assert(hasMesh);
 
       foreach(m; meshList)

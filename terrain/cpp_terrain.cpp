@@ -36,11 +36,13 @@ extern "C"
 
   char *d_terr_getTexName(int32_t);
 
-  void d_terr_fillVertexBuffer(const MeshInfo*,float*);
-  void d_terr_fillIndexBuffer(const MeshInfo*,uint16_t*);
+  void d_terr_fillVertexBuffer(const MeshInfo*,float*,uint64_t);
+  void d_terr_fillIndexBuffer(const MeshInfo*,uint16_t*,uint64_t);
   AlphaInfo *d_terr_getAlphaInfo(const MeshInfo*,int32_t);
 
-  void d_terr_fillAlphaBuffer(const AlphaInfo*,uint8_t*);
+  void d_terr_fillAlphaBuffer(const AlphaInfo*,uint8_t*,uint64_t);
+
+  int32_t d_terr_getAlphaSize();
 }
 
 // Info about a submesh. This is a clone of the struct defined in
@@ -54,10 +56,6 @@ struct MeshInfo
 
   // Vertex and index numbers
   int32_t vertRows, vertCols;
-  int32_t indexCount;
-
-  // Scene node position (relative to the parent node)
-  float x, y;
 
   // Height offset to apply to all vertices
   float heightOffset;
@@ -72,14 +70,14 @@ struct MeshInfo
   // Texture name. Index to the string table.
   int32_t texName;
 
-  inline void fillVertexBuffer(float *buffer) const
+  inline void fillVertexBuffer(float *buffer, uint64_t size) const
   {
-    d_terr_fillVertexBuffer(this, buffer);
+    d_terr_fillVertexBuffer(this, buffer, size);
   }
 
-  inline void fillIndexBuffer(uint16_t *buffer) const
+  inline void fillIndexBuffer(uint16_t *buffer, uint64_t size) const
   {
-    d_terr_fillIndexBuffer(this, buffer);
+    d_terr_fillIndexBuffer(this, buffer, size);
   }
 
   inline char* getTexName() const
@@ -114,9 +112,9 @@ struct AlphaInfo
     return d_terr_getTexName(alphaName);
   }
 
-  inline void fillAlphaBuffer(uint8_t *buffer) const
+  inline void fillAlphaBuffer(uint8_t *buffer, uint64_t size) const
   {
-    return d_terr_fillAlphaBuffer(this, buffer);
+    return d_terr_fillAlphaBuffer(this, buffer, size);
   }
 };
 
@@ -130,11 +128,66 @@ class TerrainFrameListener : public FrameListener
 protected:
   bool frameEnded(const FrameEvent& evt)
   {
+    TRACE("Terrain frame");
     d_terr_terrainUpdate();
     g_baseLand->update();
     return true;
   }
 };
+
+// Renders a material into a texture
+Ogre::TexturePtr getRenderedTexture(Ogre::MaterialPtr mp,
+                                    const std::string& name,
+                                    int texSize, Ogre::PixelFormat tt)
+{
+  Ogre::CompositorPtr cp = Ogre::CompositorManager::getSingleton().
+    create("Rtt_Comp",
+           Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+  Ogre::CompositionTargetPass* ctp = cp->createTechnique()->getOutputTargetPass();
+  Ogre::CompositionPass* cpass = ctp->createPass();
+  cpass->setType(Ogre::CompositionPass::PT_RENDERQUAD);
+  cpass->setMaterial(mp);
+
+  // Create the destination texture
+  Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().
+    createManual(name + "_T",
+                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                 Ogre::TEX_TYPE_2D,
+                 texSize,
+                 texSize,
+                 0,
+                 tt,
+                 Ogre::TU_RENDERTARGET
+                 );
+
+  Ogre::RenderTexture* renderTexture = texture->getBuffer()->getRenderTarget();
+  Ogre::Viewport* vp = renderTexture->addViewport(mCamera);
+
+  Ogre::CompositorManager::getSingleton().addCompositor(vp, "Rtt_Comp");
+  Ogre::CompositorManager::getSingleton().setCompositorEnabled(vp,"Rtt_Comp", true);
+
+  renderTexture->update();
+
+  // Call the OGRE renderer.
+  Ogre::Root::getSingleton().renderOneFrame();
+
+  Ogre::CompositorManager::getSingleton().removeCompositor(vp, "Rtt_Comp");
+  Ogre::CompositorManager::getSingleton().remove(cp->getHandle());
+
+  renderTexture->removeAllViewports();
+
+  return texture;
+}
+
+// These are used between some functions below. Kinda messy. Since
+// these are GLOBAL instances, they are terminated at program
+// exit. However, OGRE itself is terminated before that, so we have to
+// make sure we have no 'active' shared pointers after OGRE is
+// finished (otherwise we get a segfault at exit.)
+std::list<Ogre::ResourcePtr> createdResources;
+Ogre::HardwarePixelBuffer *pixelBuffer;
+MaterialPtr mat;
 
 // Functions called from D
 extern "C"
@@ -163,7 +216,10 @@ extern "C"
   Ogre::AxisAlignedBox *terr_makeBounds(float minHeight, float maxHeight,
                                         float width, SceneNode* node)
   {
+    TRACE("terr_makeBounds");
     AxisAlignedBox *mBounds = new AxisAlignedBox;
+
+    assert(maxHeight >= minHeight);
 
     mBounds->setExtents(0,0,minHeight,
                         width,width,maxHeight);
@@ -177,11 +233,13 @@ extern "C"
 
   void terr_killBounds(AxisAlignedBox *bounds)
   {
+    TRACE("terr_killBounds");
     delete bounds;
   }
 
   float terr_getSqCamDist(AxisAlignedBox *mBounds)
   {
+    TRACE("terr_getSqCamDist");
     Ogre::Vector3 cpos = mCamera->getDerivedPosition();
     Ogre::Vector3 diff(0, 0, 0);
     diff.makeFloor(cpos - mBounds->getMinimum() );
@@ -193,19 +251,22 @@ extern "C"
                              MeshInfo *info,
                              int level, float scale)
   {
-    
     return new TerrainMesh(parent, *info, level, scale);
   }
 
   void terr_killMesh(TerrainMesh *mesh)
-  { delete mesh; }
+  {
+    TRACE("terr_killMesh");
+    delete mesh;
+  }
 
   // Set up the rendering system
   void terr_setupRendering()
   {
+    TRACE("terr_setupRendering()");
     // Make sure the C++ sizes match the D sizes, since the structs
-    // will be shared between the two.
-    assert(sizeof(MeshInfo) == 17*4);
+    // are shared between the two.
+    assert(sizeof(MeshInfo) == 14*4);
     assert(sizeof(AlphaInfo) == 6*4);
 
     // Add the terrain directory as a resource location. TODO: Get the
@@ -226,7 +287,126 @@ extern "C"
     // terrain mesh that makes the terrain look infinite.
     g_baseLand = new BaseLand();
 
+    g_alphaSize = d_terr_getAlphaSize();
+
     // Add the frame listener
     mRoot->addFrameListener(new TerrainFrameListener);
+  }
+
+  // The next four functions are called in the function genLevel2Map()
+  // only. This is very top-down-programming-ish and a bit messy, but
+  // that's what I get for mixing C++ and D like this.
+  void terr_makeLandMaterial(const char* name, float scale)
+  {
+    // Get a new material
+    mat = Ogre::MaterialManager::getSingleton().
+      create(name,
+             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+    // Put the default texture in the bottom 'layer', so that we don't
+    // end up seeing through the landscape.
+    Ogre::Pass* np = mat->getTechnique(0)->getPass(0);
+    np->setLightingEnabled(false);
+    np->createTextureUnitState("_land_default.dds")
+      ->setTextureScale(scale,scale);    
+  }
+
+  uint8_t *terr_makeAlphaLayer(const char* name, int32_t width)
+  {
+    // Create alpha map for this texture.
+    Ogre::TexturePtr texPtr = Ogre::TextureManager::getSingleton().
+      createManual(name,
+                   Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                   Ogre::TEX_TYPE_2D,
+                   width, width,
+                   1,0, // depth, mipmaps
+                   Ogre::PF_A8, // One-channel alpha
+                   Ogre::TU_STATIC_WRITE_ONLY);
+
+    createdResources.push_back(texPtr);
+
+    pixelBuffer = texPtr->getBuffer().get();
+    pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+    const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+
+    return static_cast<Ogre::uint8*>(pixelBox.data);
+  }
+
+  void terr_closeAlpha(const char *alphaName,
+                       const char *texName, float scale)
+  {
+    // Close the alpha pixel buffer opened in the previous function
+    pixelBuffer->unlock();
+
+    // Create a pass containing the alpha map
+    Pass *np = mat->getTechnique(0)->createPass();
+    np->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+    np->setLightingEnabled(false);
+    np->setDepthFunction(Ogre::CMPF_EQUAL);
+    Ogre::TextureUnitState* tus = np->createTextureUnitState(alphaName);
+    tus->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+
+    // Set various blending options
+    tus->setAlphaOperation(Ogre::LBX_BLEND_TEXTURE_ALPHA,
+                           Ogre::LBS_TEXTURE,
+                           Ogre::LBS_TEXTURE);
+    tus->setColourOperationEx(Ogre::LBX_BLEND_DIFFUSE_ALPHA,
+                              Ogre::LBS_TEXTURE,
+                              Ogre::LBS_TEXTURE);
+    tus->setIsAlpha(true);
+
+    // Add the terrain texture to the pass and scale it.
+    tus = np->createTextureUnitState(texName);
+    tus->setColourOperationEx(Ogre::LBX_BLEND_DIFFUSE_ALPHA,
+                              Ogre::LBS_TEXTURE,
+                              Ogre::LBS_CURRENT);
+    tus->setTextureScale(scale, scale);
+  }
+
+  // Clean up after the above functions, render the material to
+  // texture and save the data in outdata and in the file outname.
+  void terr_cleanupAlpha(const char *outname,
+                         void *outData, int32_t toSize)
+  {
+    TexturePtr tex1 = getRenderedTexture(mat,outname,
+                                         toSize,Ogre::PF_R8G8B8);
+
+    // Blit the texture into the given memory buffer
+    PixelBox pb = PixelBox(toSize, toSize, 1, PF_R8G8B8);
+    pb.data = outData;
+    tex1->getBuffer()->blitToMemory(pb);
+
+    // Clean up
+    TextureManager::getSingleton().remove(tex1->getHandle());
+    const std::list<Ogre::ResourcePtr>::const_iterator iend = createdResources.end();
+    for ( std::list<Ogre::ResourcePtr>::const_iterator itr = createdResources.begin();
+          itr != iend;
+          ++itr)
+      (*itr)->getCreator()->remove((*itr)->getHandle());
+    createdResources.clear();
+
+    MaterialManager::getSingleton().remove(mat->getHandle());
+    mat.setNull();
+  }
+
+  void terr_resize(void* srcPtr, void* dstPtr, int32_t fromW, int32_t toW)
+  {
+    // Create pixelboxes
+    PixelBox src = PixelBox(fromW, fromW, 1, PF_R8G8B8);
+    PixelBox dst = PixelBox(toW,   toW,   1, PF_R8G8B8);
+
+    src.data = srcPtr;
+    dst.data = dstPtr;
+
+    // Resize the image. The nearest neighbour filter makes sure
+    // there is no blurring.
+    Image::scale(src, dst, Ogre::Image::FILTER_NEAREST);
+  }
+
+  void terr_saveImage(void *data, int32_t width, const char* name)
+  {
+    Image img;
+    img.loadDynamicImage((uchar*)data, width, width, PF_R8G8B8);
+    img.save(name);
   }
 }

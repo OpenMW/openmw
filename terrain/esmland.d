@@ -5,6 +5,8 @@ import esm.loadcell;
 import util.regions;
 import esm.filereader;
 
+import std.stdio;
+
 const int LAND_NUM_VERTS = 65*65;
 
 MWLand mwland;
@@ -49,23 +51,27 @@ struct MWLand
   // Texture data for one cell
   struct LTEXData
   {
-    // TODO: Store the source file here too, so we can get the list
-    // from the right file. The source file is the same as the one we
-    // load the landscape from in loadCell().
+    // Global list of land textures from the source ES file
+    LandTextureList.TextureList source;
+
+    // Texture indices for this cell
     VTEX vtex;
 
     // Get the texture x2,y2 from the sub map x1,x2
     char[] getTexture(int x1, int y1, int x2, int y2)
     {
       // Get the texture index relative to the current esm/esp file
-      short texID = vtex[y1][x1][y2][x2];
+      short texID = vtex[y1][x1][y2][x2] - 1;
 
-      // Hack, will only work for Morrowind.esm. Fix this later.
-      auto tl = landTextures.files["Morrowind.esm"];
+      if(texID == -1)
+        return null;
 
-      // Return the 'new' texture name. This name has automatically
-      // been converted to .dds if the .tga file was not found.
-      return tl[texID].getNewName();
+      // Return the 'new' texture name. This name was automatically
+      // been converted to .dds at load time if the .tga file was not
+      // found.
+      assert(source !is null);
+      assert(texID >= 0 && texID < source.length);
+      return source[texID].getNewName();
     }
 
     // Get a texture from the 16x16 grid in one cell
@@ -127,6 +133,9 @@ struct MWLand
     // skip to the right part of the ESM file.
     auto cont = cells.getExt(x,y).land.context;
 
+    // Get the land texture list from the file
+    currentLtex.source = landTextures.files[cont.filename];
+
     // We should use an existing region later, or at least delete this
     // once we're done with the gen process.
     if(reg is null)
@@ -135,7 +144,7 @@ struct MWLand
     // Open the ESM at this cell
     esFile.restoreContext(cont, reg);
 
-    // Store the data
+    // Store the cell-specific data
     esFile.readHNExact(currentLand.normals.ptr,
                        currentLand.normals.length, "VNML");
     esFile.readHNExact(&currentLand.vhgt, VHGT.sizeof, "VHGT");

@@ -27,12 +27,19 @@ module terrain.generator;
 import std.stdio;
 import std.string;
 
+import std.c.string;
+
 import terrain.cachewriter;
+import terrain.archive;
 import terrain.esmland;
 import terrain.terrain;
+import terrain.bindings;
+
 import util.cachefile;
 
-const float TEX_SCALE = 1.0/16;
+import monster.util.aa;
+import monster.util.string;
+import monster.vm.dbg;
 
 int mCount;
 
@@ -47,7 +54,7 @@ void generate(char[] filename)
 {
   makePath(cacheDir);
 
-  //cache.openFile(filename);
+  cache.openFile(filename);
 
   // Find the maxiumum distance from (0,0) in any direction
   int max = mwland.getMaxCoord();
@@ -76,12 +83,9 @@ void generate(char[] filename)
   texSizes[2] = 256;
   texSizes[1] = 64;
 
-  writefln("Data generation not implemented yet");
-
   // Set some general parameters for the runtime
   cache.setParams(depth+1, texSizes[1]);
 
-  /*
   // Create some common data first
   writefln("Generating common data");
   genDefaults();
@@ -89,16 +93,186 @@ void generate(char[] filename)
 
   writefln("Generating quad data");
   GenLevelResult gen;
-  // Start at one level above the top, but don't generate a mesh for
-  // it
+
+  // Start at one level above the top, but don't generate data for it
   genLevel(depth+1, -max, -max, gen, false);
+
   writefln("Writing index file");
   cache.finish();
   writefln("Pregeneration done. Results written to ", filename);
-  */
 }
 
-/+
+struct GenLevelResult
+{
+  QuadHolder quad;
+
+  bool hasMesh;
+  bool isAlpha;
+
+  int width;
+
+  ubyte[] data;
+
+  void allocImage(int _width)
+  {
+    assert(isEmpty());
+
+    width = _width;
+    data.length = width*width*3;
+    quad.meshes.length = 1;
+
+    assert(!hasAlpha());
+  }
+
+  void allocAlphas(int _width, int texNum)
+  {
+    assert(isEmpty() || hasMesh);
+
+    width = _width;
+    data.length = width*width*texNum;
+    isAlpha = true;
+
+    // Set up the alpha images. TODO: We have to split these over
+    // several meshes, but for now pretend that we're using only
+    // one.
+    assert(quad.meshes.length == 1);
+    quad.meshes[0].alphas.length = texNum;
+    assert(alphaNum() == texNum);
+
+    int s = width*width;
+    for(int i=0;i<texNum;i++)
+      quad.meshes[0].alphas[i].buffer = data[i*s..(i+1)*s];
+  }
+
+  bool isEmpty()
+  {
+    return (data.length == 0) && !hasMesh;
+  }
+
+  bool hasAlpha()
+  {
+    assert(isAlpha == (quad.info.level==1));
+    return isAlpha;
+  }
+
+  int alphaNum()
+  {
+    assert(hasAlpha());
+    assert(quad.meshes.length == 1);
+    return quad.meshes[0].alphas.length;
+  }
+
+  int getAlphaTex(int alpha)
+  {
+    return quad.meshes[0].alphas[alpha].info.texName;
+  }
+
+  void setAlphaTex(int alpha, int index)
+  {
+    quad.meshes[0].alphas[alpha].info.texName = index;
+
+    // Create the alpha material name.
+    char[] aname =
+      "ALPHA_" ~ .toString(quad.info.cellX)
+      ~ "_" ~ .toString(quad.info.cellY)
+      ~ "_" ~ .toString(alpha)
+      ~ "_" ~ .toString(index);
+
+    quad.meshes[0].alphas[alpha].info.alphaName = cache.addString(aname);
+  }
+
+  void setTexName(char[] tex)
+  {
+    assert(!isEmpty());
+    assert(quad.meshes.length == 1);
+    quad.meshes[0].info.texName = cache.addString(tex);    
+  }
+
+  void save(char[] tex)
+  {
+    assert(!isEmpty());
+    assert(!hasAlpha());
+
+    // Store the filename in the cache, so the runtime can find the
+    // file
+    setTexName(tex);
+
+    tex = cacheDir ~ tex;
+
+    writefln("  Creating ", tex);
+
+    terr_saveImage(data.ptr, width, toStringz(tex));
+  }
+
+  // Calculate the texture name for this quad
+  char[] getPNGName(bool isDefault)
+  {
+    int X = quad.info.cellX;
+    int Y = quad.info.cellY;
+    int level = quad.info.level;
+
+    char[] outname = toString(level) ~ "_";
+
+    if(isDefault)
+      outname ~= "default";
+    else
+      outname ~= toString(X) ~ "_" ~ toString(Y);
+
+    outname ~= ".png";
+
+    return outname;
+  }
+
+  // Resize the image
+  void resize(int toSize)
+  {
+    assert(!isEmpty());
+    assert(!hasAlpha());
+
+    // Make sure we're scaling down, since we never gain anything by
+    // scaling up.
+    assert(toSize < width);
+
+    ubyte newBuf[] = new ubyte[toSize*toSize*3];
+
+    // Resize
+    terr_resize(data.ptr, newBuf.ptr, width, toSize);
+
+    // Replace the old buffer
+    delete data;
+    width = toSize;
+    data = newBuf;
+  }
+
+  void kill()
+  {
+    if(!isEmpty())
+      {
+        // This takes care of both normal image data and alpha maps.
+        delete data;
+
+        if(hasMesh)
+          delete quad.meshes[0].vertexBuffer;
+      }
+  }
+
+  void allocMesh(int size)
+  {
+    quad.meshes.length = 1;
+
+    MeshHolder *mh = &quad.meshes[0];
+    MeshInfo *mi = &mh.info;
+
+    mi.vertRows = size;
+    mi.vertCols = size;
+    // 1 height + 3 normal components = 4 bytes per vertex. The reader
+    // algorithm (fillVertexBuffer) needs 1 extra byte so add that
+    // too.
+    mh.vertexBuffer = new byte[4*size*size+1];
+
+    hasMesh = true;
+  }
+}
 
 // Default textures
 GenLevelResult[] defaults;
@@ -106,6 +280,8 @@ GenLevelResult[] defaults;
 // Generates the default texture images "2_default.png" etc
 void genDefaults()
 {
+  scope auto _trc = new MTrace("genDefaults");
+
   int size = texSizes.length-1;
   defaults.length = size;
 
@@ -126,6 +302,8 @@ void genDefaults()
 // the u/v texture coordinates, and the triangle index data.
 void genIndexData()
 {
+  scope auto _trc = new MTrace("genIndexData");
+
   // Generate mesh data for each level.
 
   /*
@@ -145,32 +323,32 @@ void genIndexData()
       // Make a new buffer to store the data
       int size = 65*65*4;
       auto vertList = new float[size];
-      float *vertPtr = vertList.ptr;
+      int index = 0;
 
       // Find the vertex separation for this level. The vertices are
-      // 128 units apart in each cell, and for each level above that
-      // we double the distance. This gives 128 * 2^(lev-1) =
-      // 64*2^lev.
-      const int vertSep = 64 << lev;
+      // 128 units apart in each cell (level 1), and for each level
+      // above that we double the distance. This gives 128 * 2^(lev-1)
+      // = 64*2^lev.
+      int vertSep = 64 << lev;
 
       // Loop over all the vertices in the mesh.
       for(int y=0; y<65; y++)
         for(int x=0; x<65; x++)
           {
             // X and Y
-            *vertPtr++ = x*vertSep;
-            *vertPtr++ = y*vertSep;
+            vertList[index++] = x*vertSep;
+            vertList[index++] = y*vertSep;
 
             // U and V (texture coordinates)
-            const float u = x/64.0;
-            const float v = y/64.0;
+            float u = x/64.0;
+            float v = y/64.0;
             assert(u>=0&&v>=0);
             assert(u<=1&&v<=1);
     
-            *vertPtr++ = u;
-            *vertPtr++ = v;
+            vertList[index++] = u;
+            vertList[index++] = v;
           }
-      assert(vertPtr-vertList.ptr == size);
+      assert(index == vertList.length);
       // Store the buffer
       cache.addVertexBuffer(lev,vertList);
     }
@@ -178,7 +356,7 @@ void genIndexData()
   // Next up, triangle indices
   int size = 64*64*6;
   auto indList = new ushort[size];
-  ushort *indPtr = indList.ptr;
+  int index = 0;
 
   bool flag = false;
   for ( int y = 0; y < 64; y++ )
@@ -190,45 +368,41 @@ void genIndexData()
 
           if ( flag )
             {
-              *indPtr++ = line1;
-              *indPtr++ = line2;
-              *indPtr++ = line1 + 1;
+              indList[index++] = line1;
+              indList[index++] = line1 + 1;
+              indList[index++] = line2;
 
-              *indPtr++ = line1 + 1;
-              *indPtr++ = line2;
-              *indPtr++ = line2 + 1;
+              indList[index++] = line2;
+              indList[index++] = line1 + 1;
+              indList[index++] = line2 + 1;
             }
           else
             {
-              *indPtr++ = line1;
-              *indPtr++ = line2;
-              *indPtr++ = line2 + 1;
+              indList[index++] = line1;
+              indList[index++] = line2 + 1;
+              indList[index++] = line2;
 
-              *indPtr++ = line1;
-              *indPtr++ = line2 + 1;
-              *indPtr++ = line1 + 1;
+              indList[index++] = line1;
+              indList[index++] = line1 + 1;
+              indList[index++] = line2 + 1;
             }
           flag = !flag; //flip tris for next time
         }
       flag = !flag; //flip tries for next row
     }
-  assert(indPtr-indList.ptr==size);
+  assert(index == indList.length);
 
-  // The index buffers are the same for all levels
-  cache.addIndexBuffer(1,indList);
-  cache.addIndexBuffer(2,indList);
-  cache.addIndexBuffer(3,indList);
-  cache.addIndexBuffer(4,indList);
-  cache.addIndexBuffer(5,indList);
-  cache.addIndexBuffer(6,indList);
+  cache.setIndexBuffer(indList);
 }
 
 void genLevel(int level, int X, int Y, ref GenLevelResult result,
               bool makeData = true)
 {
+  scope auto _trc = new MTrace(format("genLevel(%s,%s,%s)",level,X,Y));
   result.quad.info.cellX = X;
   result.quad.info.cellY = Y;
   result.quad.info.level = level;
+  result.quad.info.worldWidth = 8192 << (level-1);
 
   assert(result.isEmpty);
 
@@ -270,6 +444,7 @@ void genLevel(int level, int X, int Y, ref GenLevelResult result,
   genLevel(level-1, X, Y+cells, sub[2]);       // SW
   genLevel(level-1, X+cells, Y+cells, sub[3]); // SE
 
+  // Make sure we deallocate everything when the function exists
   scope(exit)
     {
       foreach(ref s; sub)
@@ -314,9 +489,9 @@ void genLevel(int level, int X, int Y, ref GenLevelResult result,
 void genLevel1Meshes(ref GenLevelResult res)
 {
   // Constants
-  const int intervals = 64;
-  const int vertNum = intervals+1;
-  const int vertSep = 128;
+  int intervals = 64;
+  int vertNum = intervals+1;
+  int vertSep = 128;
 
   // Allocate the mesh buffer
   res.allocMesh(vertNum);
@@ -328,20 +503,21 @@ void genLevel1Meshes(ref GenLevelResult res)
   MeshHolder *mh = &res.quad.meshes[0];
   MeshInfo *mi = &mh.info;
 
+  // Set some basic data
   mi.worldWidth = vertSep*intervals;
   assert(mi.worldWidth == 8192);
 
   auto land = mwland.getLandData(cellX, cellY);
 
-  byte[] heightData = land.vhgt.heights;
+  byte[] heightData = land.vhgt.heightData;
   byte[] normals = land.normals;
   mi.heightOffset = land.vhgt.heightOffset;
 
   float max=-1000000.0;
   float min=1000000.0;
 
-  byte *vertPtr = mh.vertexBuffer.ptr;
-  assert(vertPtr !is null);
+  byte[] verts = mh.vertexBuffer;
+  int index = 0;
 
   // Loop over all the vertices in the mesh
   float rowheight = mi.heightOffset;
@@ -356,7 +532,7 @@ void genLevel1Meshes(ref GenLevelResult res)
         byte data = heightData[offs];
 
         // Write the height byte
-        *vertPtr++ = data;
+        verts[index++] = data;
 
         // Calculate the height here, even though we don't store
         // it. We use it to find the min and max values.
@@ -368,8 +544,7 @@ void genLevel1Meshes(ref GenLevelResult res)
             // First value in each row adjusts the row height
             rowheight += data;
           }
-        // Adjust the accumulated height with the new data. The
-        // adjustment is a signed number.
+        // Adjust the accumulated height with the new data.
         height += data;
 
         // Calculate the min and max
@@ -378,12 +553,11 @@ void genLevel1Meshes(ref GenLevelResult res)
 
         // Store the normals
         for(int k=0; k<3; k++)
-          *vertPtr++ = normals[offs*3+k];
+          verts[index++] = normals[offs*3+k];
       }
 
   // Make sure we wrote exactly the right amount of data
-  assert(vertPtr-mh.vertexBuffer.ptr ==
-         mh.vertexBuffer.length - 1);
+  assert(index == verts.length-1);
 
   // Store the min/max values
   mi.minHeight = min * 8;
@@ -393,9 +567,16 @@ void genLevel1Meshes(ref GenLevelResult res)
 // Generate the alpha splatting bitmap for one cell.
 void genCellAlpha(ref GenLevelResult res)
 {
+  scope auto _trc = new MTrace("genCellAlpha");
+
   int cellX = res.quad.info.cellX;
   int cellY = res.quad.info.cellY;
   assert(res.quad.info.level == 1);
+
+  // Set the texture name - it's used internally as the material name
+  // at runtime.
+  assert(res.quad.meshes.length == 1);
+  res.setTexName("AMAT_"~toString(cellX)~"_"~toString(cellY));
 
   // List of texture indices for this cell. A cell has 16x16 texture
   // squares.
@@ -417,10 +598,15 @@ void genCellAlpha(ref GenLevelResult res)
         // Get the texture in a given cell
         char[] textureName = ltexData.getTexture(tx,ty);
 
+        // If the default texture is used, skip it. The background
+        // texture covers it (for now - we might change that later.)
         if(textureName == "")
-          textureName = "_land_default.dds";
-        else
-          isDef = false;
+          {
+            ltex[ty][tx] = -1;
+            continue;
+          }
+
+        isDef = false;
 
         // Store the global index
         int index = cache.addTexture(textureName);
@@ -430,6 +616,7 @@ void genCellAlpha(ref GenLevelResult res)
         if(!(index in textureMap))
           textureMap[index] = texNum++;
       }
+
   assert(texNum == textureMap.length);
 
   // If we only found default textures, exit now.
@@ -450,20 +637,26 @@ void genCellAlpha(ref GenLevelResult res)
   assert(texNum >= 1);
 
   // Allocate the alpha images
-  ubyte *uptr = res.allocAlphas(imageRes, texNum);
-
+  res.allocAlphas(imageRes, texNum);
   assert(res.hasAlpha() && !res.isEmpty());
 
   // Write the indices to the result list
   foreach(int global, int local; textureMap)
     res.setAlphaTex(local, global);
 
+  ubyte *uptr = res.data.ptr;
+
   // Loop over all textures again. This time, do alpha splatting.
   for(int ty = 0; ty < 16; ty++)
     for(int tx = 0; tx < 16; tx++)
       {
-        // Get the local index for this square
-        int index = textures[ltex[ty][tx]];
+        // Get the global texture index for this square, if any.
+        int index = ltex[ty][tx];
+        if(index == -1)
+          continue;
+
+        // Get the local index
+        index = textureMap[index];
 
         // Get the offset of this square
         long offs = index*dataSize + pps*(ty*imageRes + tx);
@@ -484,109 +677,79 @@ void genCellAlpha(ref GenLevelResult res)
 
 // Generate a texture for level 2 from four alpha maps generated in
 // level 1.
-void genLevel2Map(GenLevelResult *maps, ref GenLevelResult res)
+void genLevel2Map(GenLevelResult maps[], ref GenLevelResult res)
 {
   int fromSize = texSizes[1];
   int toSize = texSizes[2];
 
-  // Create a new int type that's automatcially initialized to -1.
-  typedef int mint=-1;
-  static assert(mint.init == -1);
-  typedef mint[4] LtexList;
+  struct LtexList
+  {
+    int[4] inds;
+  }
 
   // Create an overview of which texture is used where. The 'key' is
   // the global texture index, the 'value' is the corresponding
   // local indices in each of the four submaps.
-  LtexList[int] lmap;
+  HashTable!(int, LtexList) lmap;
 
-  if(maps !is null) // NULL means only render default
+  if(maps.length) // An empty list means use the default texture
     for(int mi=0;mi<4;mi++)
       {
         if(maps[mi].isEmpty())
           continue;
 
-        assert(maps[mi].hasAlpha() &&
-               maps[mi].image.getWidth() == fromSize);
+        assert(maps[mi].hasAlpha());
+        assert(maps[mi].width == fromSize);
 
         for(int ltex=0;ltex<maps[mi].alphaNum();ltex++)
           {
             // Global index for this texture
             int gIndex = maps[mi].getAlphaTex(ltex);
 
-            // Store it in the map. TODO: This won't work I think :(
-            lmap[gIndex].inds[mi] = ltex;
+            // Store it in the map.
+            LtexList *v;
+            if(lmap.insertEdit(gIndex, v))
+              // If a new value was inserted, set all the values to -1
+              v.inds[] = -1;
+
+            v.inds[mi] = ltex;
           }
       }
 
-  const float scale = TEX_SCALE/2;
+  float scale = TEX_SCALE/2;
 
   char[] materialName = "MAT" ~ toString(mCount++);
 
-  auto mat = cpp_makeMaterial(materialName);
-
-  /*
-  // Get a new material
-  Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().
-    create(materialName,
-           Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-  // Put the default texture in the bottom 'layer', so that we don't
-  // end up seeing through the landscape.
-  Ogre::Pass* np = mp->getTechnique(0)->getPass(0);
-  np->setLightingEnabled(false);
-  np->createTextureUnitState("_land_default.dds")
-    ->setTextureScale(scale,scale);
-
-  // List of resources created
-  std::list<Ogre::ResourcePtr> createdResources;
-  */
+  terr_makeLandMaterial(toStringz(materialName),scale);
 
   // Loop through all our textures
-  if(maps !is null)
+  if(maps.length)
     foreach(int gIndex, LtexList inds; lmap)
       {
         char[] name = cache.getString(gIndex);
-        if ( name == "_land_default.dds" )
+
+        // Skip default image, if present
+        if ( name.iBegins("_land_default.") )
           continue;
 
-        // Instead of passing 'mat', it's better to just make it
-        // global in C++ even if it's messy and definitely not thread
-        // safe.
-        auto pDest = cpp_makeAlphaLayer(mat, materialName ~ "_A_" ~ name);
-
-        /*
-        // Create alpha map for this texture
-        std::string alphaName(materialName + "_A_" + tn);
-        Ogre::TexturePtr texPtr = Ogre::TextureManager::getSingleton().
-          createManual(alphaName,
-                       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                       Ogre::TEX_TYPE_2D,
-                       2*fromSize,2*fromSize,
-                       1,0, // depth, mipmaps
-                       Ogre::PF_A8, // One-channel alpha
-                       Ogre::TU_STATIC_WRITE_ONLY);
-        
-        createdResources.push_back(texPtr);
-
-        Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texPtr->getBuffer();
-        pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
-        const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
-
-        Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
-        */
+        // Create a new alpha texture and get a pointer to the pixel
+        // data
+        char *alphaName = toStringz(materialName ~ "_A_" ~ name);
+        auto pDest = terr_makeAlphaLayer(alphaName, 2*fromSize);
 
         // Fill in the alpha values. TODO: Do all this with slices instead.
         memset(pDest, 0, 4*fromSize*fromSize);
         for(int i=0;i<4;i++)
           {
             // Does this sub-image have this texture?
-            if(inds[i] == -1) continue;
+            int index = inds.inds[i];
+            if(index == -1) continue;
 
             assert(!maps[i].isEmpty());
 
             // Find the right sub-texture in the alpha map
-            ubyte *from = maps[i].image.data +
-              (fromSize*fromSize)*inds[i];
+            ubyte *from = maps[i].data.ptr +
+              (fromSize*fromSize)*index;
 
             // Find the right destination pointer
             int x = i%2;
@@ -603,77 +766,20 @@ void genLevel2Map(GenLevelResult *maps, ref GenLevelResult res)
               }
           }
 
-        cpp_closeAlpha(name, scale);
-        /*
-        pixelBuffer->unlock();
-        np = mp->getTechnique(0)->createPass();
-        np->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-        np->setLightingEnabled(false);
-        np->setDepthFunction(Ogre::CMPF_EQUAL);
-
-        Ogre::TextureUnitState* tus = np->createTextureUnitState(alphaName);
-        tus->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
-
-        tus->setAlphaOperation(	Ogre::LBX_BLEND_TEXTURE_ALPHA,
-                                Ogre::LBS_TEXTURE,
-                                Ogre::LBS_TEXTURE);
-        tus->setColourOperationEx(	Ogre::LBX_BLEND_DIFFUSE_ALPHA,
-                                        Ogre::LBS_TEXTURE,
-                                        Ogre::LBS_TEXTURE);
-        tus->setIsAlpha(true);
-
-        tus = np->createTextureUnitState(tn);
-        tus->setColourOperationEx(	Ogre::LBX_BLEND_DIFFUSE_ALPHA,
-                                        Ogre::LBS_TEXTURE,
-                                        Ogre::LBS_CURRENT);
-
-        tus->setTextureScale(scale, scale);
-        */
+        terr_closeAlpha(alphaName, toStringz(name), scale);
       }
 
   // Create the result buffer
   res.allocImage(toSize);
 
-  // Output file name. TODO: The result structure can do this for us
-  // now, it knows both the level and the cell coords. Figure out
-  // what to do in the default case though.
-  int X = res.quad.info.cellX;
-  int Y = res.quad.info.cellY;
-  char[] outname =
-    "2_" ~ toString(X) ~ "_" ~ toString(Y) ~ ".png";
+  // Texture file name
+  char[] outname = res.getPNGName(maps.length == 0);
 
-  // Override for the default image
-  if(maps == NULL)
-    outname = "2_default.png";
-
-  outname = g_cacheDir + outname;
-
-  // TODO: Store the file name in the cache (ie. in res), so we don't
-  // have to generate it at runtime.
-
-  cpp_cleanupAlpha(outname);
-
-  /*
-  Ogre::TexturePtr tex1 = getRenderedTexture(mp,materialName + "_T",
-                                             toSize,Ogre::PF_R8G8B8);
-  // Blit the texture over
-  tex1->getBuffer()->blitToMemory(res.image);
-
-  // Clean up
-  Ogre::MaterialManager::getSingleton().remove(mp->getHandle());
-  Ogre::TextureManager::getSingleton().remove(tex1->getHandle());
-  const std::list<Ogre::ResourcePtr>::const_iterator iend = createdResources.end();
-  for ( std::list<Ogre::ResourcePtr>::const_iterator itr = createdResources.begin();
-        itr != iend;
-        ++itr) {
-    (*itr)->getCreator()->remove((*itr)->getHandle());
-  }
-
+  terr_cleanupAlpha(toStringz(outname), res.data.ptr, toSize);
   res.save(outname);
-  */
 }
 
-void mergeMaps(GenLevelResult *maps, ref GenLevelResult res)
+void mergeMaps(GenLevelResult[] maps, ref GenLevelResult res)
 {
   int level = res.quad.info.level;
 
@@ -689,94 +795,65 @@ void mergeMaps(GenLevelResult *maps, ref GenLevelResult res)
   // Add the four sub-textures
   for(int mi=0;mi<4;mi++)
     {
-      // Need to do this in pure D. Oh well.
-      PixelBox src;
+      ubyte[] src;
 
       // Use default texture if no source is present
-      if(maps == NULL || maps[mi].isEmpty())
-        src = defaults[level-1].image;
+      if(maps.length == 0 || maps[mi].isEmpty())
+        src = defaults[level-1].data;
       else
-        src = maps[mi].image;
+        src = maps[mi].data;
+
+      assert(src.length == 3*fromSize*fromSize);
 
       // Find the sub-part of the destination buffer to write to
       int x = (mi%2) * fromSize;
       int y = (mi/2) * fromSize;
-      PixelBox dst = res.image.getSubVolume(Box(x,y,x+fromSize,y+fromSize));
 
-      // Copy the image to the box. Might as well rewrite this to do
-      // what we want.
-      copyBox(dst, src);
+      // Copy the image into the new buffer
+      copyBox(src, res.data, fromSize, fromSize*2, x, y, 3);
     }
 
   // Resize image if necessary
   if(toSize != 2*fromSize)
     res.resize(toSize);
 
-  int X = res.quad.info.cellX;
-  int Y = res.quad.info.cellY;
-
   // Texture file name
-  char[] outname = res.getPNGName(maps==NULL);
-
-  outname = g_cacheDir + outname;
+  char[] outname = res.getPNGName(maps.length == 0);
 
   // Save the image
   res.save(outname);
 }
 
-/*
-// Renders a material into a texture
-Ogre::TexturePtr getRenderedTexture(Ogre::MaterialPtr mp, const std::string& name,
-                                    int texSize, Ogre::PixelFormat tt)
+// Copy from one buffer into a sub-region of another buffer
+void copyBox(ubyte[] src, ubyte[] dst,
+             int srcWidth, int dstWidth,
+             int dstX, int dstY, int pixSize)
 {
-  TRACE("getRenderedTexture");
+  int fskip = srcWidth * pixSize;
+  int tskip = dstWidth * pixSize;
+  int rows = srcWidth;
+  int rowSize = srcWidth*pixSize;
 
-  Ogre::CompositorPtr cp = Ogre::CompositorManager::getSingleton().
-    create("Rtt_Comp",
-           Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+  assert(src.length == pixSize*srcWidth*srcWidth);
+  assert(dst.length == pixSize*dstWidth*dstWidth);
+  assert(srcWidth <= dstWidth);
+  assert(dstX <= dstWidth-srcWidth && dstY <= dstWidth-srcWidth);
 
-  //output pass
-  Ogre::CompositionTargetPass* ctp = cp->createTechnique()->getOutputTargetPass();
-  Ogre::CompositionPass* cpass = ctp->createPass();
-  cpass->setType(Ogre::CompositionPass::PT_RENDERQUAD);
-  cpass->setMaterial(mp);
+  // Source and destination pointers
+  ubyte *from = src.ptr;
+  ubyte *to = dst.ptr + dstY*tskip + dstX*pixSize;
 
-  //create a texture to write the texture to...
-  Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().
-    createManual(
-                 name,
-                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                 Ogre::TEX_TYPE_2D,
-                 texSize,
-                 texSize,
-                 0,
-                 tt,
-                 Ogre::TU_RENDERTARGET
-                 );
-
-  Ogre::RenderTexture* renderTexture = texture->getBuffer()->getRenderTarget();
-  Ogre::Viewport* vp = renderTexture->addViewport(mCamera);
-
-  Ogre::CompositorManager::getSingleton().addCompositor(vp, "Rtt_Comp");
-  Ogre::CompositorManager::getSingleton().setCompositorEnabled(vp,"Rtt_Comp", true);
-
-  renderTexture->update();
-
-  // Call the OGRE renderer.
-  Ogre::Root::getSingleton().renderOneFrame();
-
-  Ogre::CompositorManager::getSingleton().removeCompositor(vp, "Rtt_Comp");
-  Ogre::CompositorManager::getSingleton().remove(cp->getHandle());
-
-  renderTexture->removeAllViewports();
-
-  return texture;
+  for(;rows>0;rows--)
+    {
+      memcpy(to, from, rowSize);
+      to += tskip;
+      from += fskip;
+    }
 }
-*/
 
 // Create the mesh for this level, by merging the meshes from the
 // previous levels.
-void mergeMesh(GenLevelResult *sub, ref GenLevelResult res)
+void mergeMesh(GenLevelResult[] sub, ref GenLevelResult res)
 {
   // How much to shift various numbers to the left at this level
   // (ie. multiply by 2^shift). The height at each vertex is
@@ -799,9 +876,9 @@ void mergeMesh(GenLevelResult *sub, ref GenLevelResult res)
   MeshHolder *mh = &res.quad.meshes[0];
   MeshInfo *mi = &mh.info;
 
+  // Basic info
   mi.worldWidth = vertSep*intervals;
   assert(mi.worldWidth == 8192<<shift);
-  byte *vertPtr = mh.vertexBuffer;
 
   // Get the height from the first cell
   float rowheight;
@@ -813,12 +890,26 @@ void mergeMesh(GenLevelResult *sub, ref GenLevelResult res)
   // This is also the offset for the entire mesh
   mi.heightOffset = rowheight;
 
+  // Just set bogus data for now
+  int[] tmp = cast(int[])mh.vertexBuffer[0..$-1];
+  tmp[] = 0x7f000000;
+  float scale = 8.0 * (1<<shift);
+  mi.minHeight = mi.maxHeight = mi.heightOffset * scale;
+  return;
+
+  byte *vertPtr = mh.vertexBuffer.ptr;
+
+  // First off, rewrite this to use indices instead of pointers. It's
+  // much safer and clearer.
+
   // Loop through each 'row' of submeshes
   for(int subY=0; subY<2; subY++)
     {
       // Loop through each row of vertices
       for(int row=0; row<65; row++)
         {
+          // FIXME: Ok, we have to skip each other row as well, of course.
+
           // Loop through both sub meshes, left and right
           for(int subX=0; subX<2; subX++)
             {
@@ -828,7 +919,7 @@ void mergeMesh(GenLevelResult *sub, ref GenLevelResult res)
               if(!s.isEmpty() && 0)
                 {
                   MeshHolder *smh = &s.quad.meshes[0];
-                  byte* inPtr = smh.vertexBuffer;
+                  byte* inPtr = smh.vertexBuffer.ptr;
 
                   // Loop through each vertex in this mesh. We skip two
                   // at a time.
@@ -875,186 +966,9 @@ void mergeMesh(GenLevelResult *sub, ref GenLevelResult res)
             }
         }
     }
-  assert(vertPtr == mh.vertexBuffer + mi.vertBufSize);
+  assert(vertPtr == mh.vertexBuffer.ptr + mh.vertexBuffer.length - 1);
 
   // Set max and min values here
-}
-
-struct GenLevelResult
-{
-  bool isAlpha;
-
-  QuadHolder quad;
-  //PixelBox image;
-  bool hasMesh;
-
-  void kill()
-  {
-    if(!isEmpty())
-      {
-        // This takes care of both normal image data and alpha maps.
-        free(image.data);
-
-        if(hasMesh)
-          free(quad.meshes[0].vertexBuffer);
-      }
-  }
-
-  ubyte *allocAlphas(int width, int texNum)
-  {
-    assert(isEmpty() || hasMesh);
-    //image = PixelBox(width, width, texNum, Ogre::PF_A8);
-
-    image.data = calloc(width*width*texNum, 1);
-    isAlpha = true;
-
-    // Set up the alpha images. TODO: We have to split these over
-    // several meshes, but for now pretend that we're using only
-    // one. This is going to be a bit messy... Perhaps having only
-    // separate buffers is good enough, without using the pixel box at
-    // all.
-    assert(quad.meshes.size() == 1);
-    quad.meshes[0].alphas.resize(texNum);
-
-    for(int i=0;i<texNum;i++)
-      {
-        ubyte *ptr = image.data;
-        quad.meshes[0].alphas[i].buffer = ptr + width*width*i;
-        quad.meshes[0].alphas[i].info.bufSize = width*width;
-      }
-
-    return image.data;
-  }
-
-  void allocMesh(int size)
-  {
-    quad.meshes.resize(1);
-
-    MeshHolder *mh = &quad.meshes[0];
-    MeshInfo *mi = &mh.info;
-
-    mi.vertRows = size;
-    mi.vertCols = size;
-    // 1 height, 3 normal components = 4 bytes per vertex. The reader
-    // algorithm (fillVertexBuffer) needs 1 extra byte so add that
-    // too.
-    mi.vertBufSize = 4 * size*size + 1;
-    mh.vertexBuffer = malloc(mi.vertBufSize);
-
-    hasMesh = true;
-  }
-
-  void allocImage(int width)
-  {
-    assert(isEmpty());
-
-    //image = PixelBox(width, width, 1, Ogre::PF_R8G8B8);
-    image.data = calloc(width*width*4, 1);
-
-    assert(!hasAlpha());
-  }
-
-  bool hasAlpha()
-  {
-    assert(isAlpha == (quad.info.level==1));
-    return isAlpha;
-  }
-
-  bool isEmpty()
-  {
-    return (image.data == NULL) && !hasMesh;
-  }
-
-  int alphaNum()
-  {
-    assert(hasAlpha());
-    assert(quad.meshes.size() == 1);
-    return quad.meshes[0].alphas.size();
-  }
-
-  int getAlphaTex(int alpha)
-  {
-    return quad.meshes[0].alphas[alpha].info.texName;
-  }
-
-  int setAlphaTex(int alpha, int index)
-  {
-    quad.meshes[0].alphas[alpha].info.texName = index;
-  }
-
-  // Resize the image
-  void resize(int newSize)
-  {
-    assert(!isEmpty());
-    assert(!hasAlpha());
-
-    // Make sure we're scaling down, since we never gain anything by
-    // scaling up.
-    assert(newSize < image.getWidth());
-
-    // Create a new pixel box to hold the data
-    //PixelBox nbox = PixelBox(newSize, newSize, 1, Ogre::PF_R8G8B8);
-    nbox.data = malloc(newSize*newSize*4);
-
-    // Resize the image. The nearest neighbour filter makes sure
-    // there is no blurring.
-    //Image::scale(image, nbox, Ogre::Image::FILTER_NEAREST);
-
-    // Kill and replace the old buffer
-    free(image.data);
-    image = nbox;
-  }
-
-  // TODO: Handle file naming internally
-  void save(char[] name)
-  {
-    assert(!isEmpty());
-    assert(!hasAlpha());
-
-    writefln("  Creating ", name);
-
-    // Create an image from the pixelbox data
-    Image img;
-    img.loadDynamicImage(image.data,
-                         image.getWidth(), image.getHeight(),
-                         image.format);
-
-    // and save it
-    img.save(name);
-  }
-}
-
-// Copy from one pixel box to another
-void copyBox(PixelBox *dst, PixelBox *src)
-{
-  // Some sanity checks first
-  assert(src.format == dst.format);
-  assert(src.data !is null);
-  assert(dst.data !is null);
-
-  // Memory size of one pixel
-  //int pixSize = Ogre::PixelUtil::getNumElemBytes(src.format);
-
-  int fskip = src.rowPitch * pixSize;
-  int tskip = dst.rowPitch * pixSize;
-  int rows = src.getHeight();
-  int rowSize = src.getWidth()*pixSize;
-
-  assert(rows == dst.getHeight());
-  assert(src.getWidth() == dst.getWidth());
-  assert(dst.left == 0);
-  assert(dst.top == 0);
-
-  // Source and destination pointers
-  ubyte *from = src.data;
-  ubyte *to = dst.data;
-
-  for(;rows>0;rows--)
-    {
-      memcpy(to, from, rowSize);
-      to += tskip;
-      from += fskip;
-    }
 }
 
 // ------- OLD CODE - use these snippets later -------
@@ -1188,4 +1102,3 @@ false, //skirts
  //return mIndices;
  }
 */
-+/

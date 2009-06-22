@@ -20,12 +20,17 @@
 
 */
 
-// This should also be part of the generic cache system.
+module terrain.archive;
+
+const float TEX_SCALE = 1.0/16;
+
+// This should be part of the generic cache system.
 const int CACHE_MAGIC = 0x345AF815;
 
 import std.mmfile;
-import std.stream;
 import std.string;
+import std.stdio;
+import terrain.myfile;
 
 version(Windows)
   static int pageSize = 64*1024;
@@ -39,19 +44,20 @@ extern(C)
     { return g_archive.getString(index).ptr; }
 
   // Fill various hardware buffers from cache
-  void d_terr_fillVertexBuffer(MeshInfo *mi, float *buffer)
-    { mi.fillVertexBuffer(buffer); }
+  void d_terr_fillVertexBuffer(MeshInfo *mi, float *buffer, ulong size)
+    { mi.fillVertexBuffer(buffer[0..size]); }
 
-  void d_terr_fillIndexBuffer(MeshInfo *mi, ushort *buffer)
-    { mi.fillIndexBuffer(buffer); }
+  void d_terr_fillIndexBuffer(MeshInfo *mi, ushort *buffer, ulong size)
+    { mi.fillIndexBuffer(buffer[0..size]); }
 
-  void d_terr_fillAlphaBuffer(AlphaInfo *mi, ubyte *buffer)
-    { mi.fillAlphaBuffer(buffer); }
+  void d_terr_fillAlphaBuffer(AlphaInfo *mi, ubyte *buffer, ulong size)
+    { mi.fillAlphaBuffer(buffer[0..size]); }
 
   // Get a given alpha map struct belonging to a mesh
   AlphaInfo *d_terr_getAlphaInfo(MeshInfo *mi, int index)
     { return mi.getAlphaInfo(index); }
 
+  int d_terr_getAlphaSize() { return g_archive.alphaSize; }
 }
 
 // Info about the entire quad. TODO: Some of this (such as the texture
@@ -68,9 +74,6 @@ struct QuadInfo
   float minHeight, maxHeight;
   float worldWidth;
   float boundingRadius;
-
-  // Texture scale for this quad
-  float texScale;
 
   // True if we should make the given child
   bool hasChild[4];
@@ -92,13 +95,14 @@ struct AlphaInfo
 
   // The texture name for this layer. The actual string is stored in
   // the archive's string buffer.
-  int texName;
-  int alphaName;
+  int texName = -1;
+  int alphaName = -1;
 
   // Fill the alpha texture buffer
-  void fillAlphaBuffer(ubyte *abuf)
+  void fillAlphaBuffer(ubyte abuf[])
   {
-    g_archive.copy(abuf, bufOffset, bufSize);
+    assert(abuf.length == bufSize);
+    g_archive.copy(abuf.ptr, bufOffset, bufSize);
   }
 }
 static assert(AlphaInfo.sizeof == 6*4);
@@ -113,10 +117,6 @@ struct MeshInfo
 
   // Vertex and index numbers
   int vertRows, vertCols;
-  int indexCount;
-
-  // Scene node position (relative to the parent node)
-  float x, y;
 
   // Height offset to apply to all vertices
   float heightOffset;
@@ -129,21 +129,20 @@ struct MeshInfo
   ulong alphaOffset;
 
   // Texture name. Index to the string table.
-  int texName;
+  int texName = -1;
 
   // Fill the given vertex buffer
-  void fillVertexBuffer(float *vbuf)
+  void fillVertexBuffer(float vdest[])
   {
-    //g_archive.copy(vbuf, vertBufOffset, vertBufSize);
-
     // The height map and normals from the archive
-    char *hmap = cast(char*)g_archive.getRelSlice(vertBufOffset, vertBufSize).ptr;
-
-    int level = getLevel();
-
+    byte *hmap = cast(byte*)g_archive.getRelSlice(vertBufOffset, vertBufSize).ptr;
     // The generic part, containing the x,y coordinates and the uv
     // maps.
-    float *gmap = g_archive.getVertexBuffer(level).ptr;
+    float *gmap = g_archive.getVertexBuffer(getLevel()).ptr;
+
+    // Destination pointer
+    float *vbuf = vdest.ptr;
+    assert(vdest.length == vertRows*vertCols*8);
 
     // Calculate the factor to multiply each height value with. The
     // heights are very limited in range as they are stored in a
@@ -151,7 +150,7 @@ struct MeshInfo
     // double this for each successive level since we're splicing
     // several vertices together and need to allow larger differences
     // for each vertex. The formula is 8*2^(level-1).
-    float scale = 4.0 * (1<<level);
+    float scale = 4.0 * (1<<getLevel());
 
     // Merge the two data sets together into the output buffer.
     float offset = heightOffset;
@@ -178,7 +177,6 @@ struct MeshInfo
             *vbuf++ = rowofs * scale;
 
             // Normal vector.
-            // TODO: Normalize?
             *vbuf++ = *hmap++;
             *vbuf++ = *hmap++;
             *vbuf++ = *hmap++;
@@ -196,12 +194,13 @@ struct MeshInfo
   }
 
   // Fill the index buffer
-  void fillIndexBuffer(ushort *ibuf)
+  void fillIndexBuffer(ushort ibuf[])
   {
     // The index buffer is pregenerated. It is identical for all
     // meshes on the same level, so just copy it over.
-    ushort generic[] = g_archive.getIndexBuffer(getLevel());
-    ibuf[0..generic.length] = generic[];
+    ushort generic[] = g_archive.getIndexBuffer();
+    assert(ibuf.length == generic.length);
+    ibuf[] = generic[];
   }
 
   int getLevel()
@@ -221,9 +220,9 @@ struct MeshInfo
     return res;
   }
 }
-static assert(MeshInfo.sizeof == 17*4);
+static assert(MeshInfo.sizeof == 14*4);
 
-
+// The first part of the .index file
 struct ArchiveHeader
 {
   // "Magic" number to make sure we're actually reading an archive
@@ -263,10 +262,13 @@ struct TerrainArchive
                      0, null, pageSize);
 
     // Read the index file first
-    File ifile = new File(name ~ ".index");
+    MyFile ifile = new MyFile(name ~ ".index");
 
     ArchiveHeader head;
-    ifile.readExact(&head, head.sizeof);
+    ifile.fill(head);
+
+    // Reads data into an array. Would be better if this was part of
+    // the stream.
 
     // Sanity check
     assert(head.magic == CACHE_MAGIC);
@@ -277,7 +279,7 @@ struct TerrainArchive
 
     // Read all the quads
     quadList = new QuadInfo[head.quads];
-    ifile.readExact(quadList.ptr, head.quads*QuadInfo.sizeof);
+    ifile.fillArray(quadList);
 
     // Create an index of all the quads
     foreach(int index, qn; quadList)
@@ -289,6 +291,7 @@ struct TerrainArchive
         assert(l >= 1);
 
         quadMap[l][x][y] = index;
+        assert(index == quadMap[l][x][y]);
 
         // Store the root quad
         if(l == head.rootLevel)
@@ -303,24 +306,24 @@ struct TerrainArchive
     // Make sure the root was set
     assert(rootQuad !is null);
 
-    // Next read the string table
+    // Next read the string table. First read the main string buffer.
     stringBuf = new char[head.stringSize];
-    strings.length = head.stringNum;
-
-    // First read the main string buffer
-    ifile.readExact(stringBuf.ptr, head.stringSize);
+    ifile.fillArray(stringBuf);
 
     // Then read the string offsets
     int[] offsets = new int[head.stringNum];
-    ifile.readExact(offsets.ptr, offsets.length*int.sizeof);
+    ifile.fillArray(offsets);
 
     // Set up the string table
     char *strptr = stringBuf.ptr;
+    strings.length = head.stringNum;
     foreach(int i, ref str; strings)
       {
         // toString(char*) returns the string up to the zero
         // terminator byte
         str = toString(strptr + offsets[i]);
+        assert(str.ptr + str.length <=
+               stringBuf.ptr + stringBuf.length);
       }
     delete offsets;
 
@@ -328,23 +331,16 @@ struct TerrainArchive
     int bufNum = head.rootLevel;
     assert(bufNum == 7);
     vertBufData.length = bufNum;
-    indexBufData.length = bufNum;
 
-    // Fill the buffers. Start at level 1.
+    // Fill the vertex buffers. Start at level 1.
     for(int i=1;i<bufNum;i++)
       {
-        int size;
-
         // Vertex buffer
-        ifile.read(size);
-        vertBufData[i].length = size;
-        ifile.readExact(vertBufData[i].ptr, size);
-
-        // Index buffer
-        ifile.read(size);
-        indexBufData[i].length = size;
-        ifile.readExact(indexBufData[i].ptr, size);
+        ifile.readArray(vertBufData[i]);
       }
+
+    // Index buffer
+    ifile.readArray(indexBufData);
   }
 
   // Get info about a given quad from the index.
@@ -389,10 +385,9 @@ struct TerrainArchive
     return vertBufData[level];
   }
 
-  ushort[] getIndexBuffer(int level)
+  ushort[] getIndexBuffer()
   {
-    assert(level>=1 && level<indexBufData.length);
-    return indexBufData[level];
+    return indexBufData;
   }
 
 private:
@@ -406,7 +401,7 @@ private:
   // These contain pregenerated mesh data that is common for all
   // meshes on a given level.
   float[][] vertBufData;
-  ushort[][] indexBufData;
+  ushort[] indexBufData;
 
   // Used for the mmapped file
   MmFile mmf;
@@ -448,10 +443,10 @@ private:
 
   // Copy a given buffer from the file. The buffer might be a
   // compressed stream, so it's important that the buffers are written
-  // the same as they are read. (Ie. you can't write a buffer as one
-  // operation and read it as two, or vice versa. Also, buffers cannot
-  // overlap.) The offset is relative to the current mapped file
-  // window.
+  // in the same block sizes as they are read. (Ie. you can't write a
+  // buffer as one operation and read it as two, or vice versa. Also,
+  // buffers cannot overlap.) The offset is relative to the current
+  // mapped file window.
   void copy(void *dst, size_t offset, size_t inSize)
   {
     ubyte source[] = getRelSlice(offset, inSize);
