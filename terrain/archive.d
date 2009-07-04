@@ -144,14 +144,6 @@ struct MeshInfo
     float *vbuf = vdest.ptr;
     assert(vdest.length == vertRows*vertCols*8);
 
-    // Calculate the factor to multiply each height value with. The
-    // heights are very limited in range as they are stored in a
-    // single byte. Normal MW data uses a factor of 8, but we have to
-    // double this for each successive level since we're splicing
-    // several vertices together and need to allow larger differences
-    // for each vertex. The formula is 8*2^(level-1).
-    float scale = 4.0 * (1<<getLevel());
-
     // Merge the two data sets together into the output buffer.
     float offset = heightOffset;
     for(int y=0; y<vertRows; y++)
@@ -160,21 +152,21 @@ struct MeshInfo
         // height value. All the values in a row gives the height
         // relative to the previous value, and the first value in each
         // row is relative to the first value in the previous row.
-        offset += *hmap;
+        offset += *cast(short*)hmap;
 
         // This is the 'sliding offset' for this row. It's adjusted
         // for each vertex that's added, but only affects this row.
         float rowofs = offset;
         for(int x=0; x<vertCols; x++)
           {
-            hmap++; // Skip the byte we just read
+            hmap+=2; // Skip the height we just read
 
             // X and Y from the pregenerated buffer
             *vbuf++ = *gmap++;
             *vbuf++ = *gmap++;
 
             // The height is calculated from the current offset
-            *vbuf++ = rowofs * scale;
+            *vbuf++ = rowofs * 8;
 
             // Normal vector.
             *vbuf++ = *hmap++;
@@ -185,10 +177,9 @@ struct MeshInfo
             *vbuf++ = *gmap++;
             *vbuf++ = *gmap++;
 
-            // Adjust the offset for the next vertex. On the last
-            // iteration this will read past the current row, but
-            // that's OK since rowofs is discarded afterwards.
-            rowofs += *hmap;
+            // Adjust the offset for the next vertex.
+            if(x < vertCols-1)
+              rowofs += *cast(short*)hmap;
           }
       }
   }
@@ -343,9 +334,20 @@ struct TerrainArchive
     ifile.readArray(indexBufData);
   }
 
+  bool hasQuad(int X, int Y, int level)
+  {
+    if((level in quadMap) is null ||
+       (X in quadMap[level]) is null ||
+       (Y in quadMap[level][X]) is null)
+      return false;
+    return true;
+  }
+
   // Get info about a given quad from the index.
   QuadInfo *getQuad(int X, int Y, int level)
   {
+    assert(hasQuad(X,Y,level), format("Cannot find quad %s %s level %s",
+                                      X, Y, level));
     int ind = quadMap[level][X][Y];
     QuadInfo *res = &quadList[ind];
     assert(res);

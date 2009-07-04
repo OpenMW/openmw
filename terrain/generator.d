@@ -26,7 +26,7 @@ module terrain.generator;
 
 import std.stdio;
 import std.string;
-
+import std.math2;
 import std.c.string;
 
 import terrain.cachewriter;
@@ -80,7 +80,7 @@ void generate(char[] filename)
   texSizes[5] = 512;
   texSizes[4] = 256;
   texSizes[3] = 256;
-  texSizes[2] = 256;
+  texSizes[2] = 512;
   texSizes[1] = 64;
 
   // Set some general parameters for the runtime
@@ -142,6 +142,20 @@ struct GenLevelResult
     int s = width*width;
     for(int i=0;i<texNum;i++)
       quad.meshes[0].alphas[i].buffer = data[i*s..(i+1)*s];
+  }
+
+  // Get the height offset
+  float getHeight()
+  {
+    if(hasMesh)
+      {
+        assert(quad.meshes.length == 1);
+        return quad.meshes[0].info.heightOffset;
+      }
+    else
+      // The default mesh starts at 2048 = 256*8 units below water
+      // level.
+      return -256;
   }
 
   bool isEmpty()
@@ -265,10 +279,8 @@ struct GenLevelResult
 
     mi.vertRows = size;
     mi.vertCols = size;
-    // 1 height + 3 normal components = 4 bytes per vertex. The reader
-    // algorithm (fillVertexBuffer) needs 1 extra byte so add that
-    // too.
-    mh.vertexBuffer = new byte[4*size*size+1];
+    // 2 height bytes + 3 normal components = 5 bytes per vertex.
+    mh.vertexBuffer = new byte[5*size*size];
 
     hasMesh = true;
   }
@@ -304,20 +316,7 @@ void genIndexData()
 {
   scope auto _trc = new MTrace("genIndexData");
 
-  // Generate mesh data for each level.
-
-  /*
-    TODO: The mesh data is very easy to generate, and we haven't
-    really tested whether it's worth it to pregenerate it rather than
-    to just calculate it at runtime. Unlike the index buffer below
-    (which is just a memcpy at runtime, and definitely worth
-    pregenerating), we have to loop through all the vertices at
-    runtime anyway in order to splice this with the height data. It's
-    possible that the additional memory use, pluss the slowdown
-    (CPU-cache-wise) of reading from two buffers instead of one, makes
-    it worthwhile to generate this data at runtime instead. However I
-    guess the differences will be very small either way.
-  */
+  // FIXME: Do this at runtime.
   for(int lev=1; lev<=6; lev++)
     {
       // Make a new buffer to store the data
@@ -353,7 +352,7 @@ void genIndexData()
       cache.addVertexBuffer(lev,vertList);
     }
 
-  // Next up, triangle indices
+  // Pregenerate triangle indices
   int size = 64*64*6;
   auto indList = new ushort[size];
   int index = 0;
@@ -531,8 +530,9 @@ void genLevel1Meshes(ref GenLevelResult res)
         // The vertex data from the ESM
         byte data = heightData[offs];
 
-        // Write the height byte
-        verts[index++] = data;
+        // Write the height value as a short (2 bytes)
+        *(cast(short*)&verts[index]) = data;
+        index+=2;
 
         // Calculate the height here, even though we don't store
         // it. We use it to find the min and max values.
@@ -557,7 +557,7 @@ void genLevel1Meshes(ref GenLevelResult res)
       }
 
   // Make sure we wrote exactly the right amount of data
-  assert(index == verts.length-1);
+  assert(index == verts.length);
 
   // Store the min/max values
   mi.minHeight = min * 8;
@@ -864,111 +864,160 @@ void mergeMesh(GenLevelResult[] sub, ref GenLevelResult res)
   // level above the cell level.
   int shift = res.quad.info.level - 1;
   assert(shift >= 1);
-
-  // Constants
-  int intervals = 64;
-  int vertNum = intervals+1;
-  int vertSep = 128 << shift;
+  assert(sub.length == 4);
 
   // Allocate the result buffer
-  res.allocMesh(vertNum);
+  res.allocMesh(65);
 
   MeshHolder *mh = &res.quad.meshes[0];
   MeshInfo *mi = &mh.info;
 
   // Basic info
-  mi.worldWidth = vertSep*intervals;
-  assert(mi.worldWidth == 8192<<shift);
+  mi.worldWidth = 8192 << shift;
 
-  // Get the height from the first cell
-  float rowheight;
-  if(sub[0].isEmpty())
-    rowheight = 0.0;
-  else
-    rowheight = sub[0].quad.meshes[0].info.heightOffset;
+  // Copy the mesh height from the top left mesh
+  mi.heightOffset = sub[0].getHeight();
 
-  // This is also the offset for the entire mesh
-  mi.heightOffset = rowheight;
+  // Output buffer
+  byte verts[] = mh.vertexBuffer;
 
-  // Just set bogus data for now
-  int[] tmp = cast(int[])mh.vertexBuffer[0..$-1];
-  tmp[] = 0x7f000000;
-  float scale = 8.0 * (1<<shift);
-  mi.minHeight = mi.maxHeight = mi.heightOffset * scale;
-  return;
+  // Bytes per vertex
+  const int VSIZE = 5;
 
-  byte *vertPtr = mh.vertexBuffer.ptr;
+  // Used to calculate the max and min heights
+  float minh = 300000.0;
+  float maxh = -300000.0;
 
-  // First off, rewrite this to use indices instead of pointers. It's
-  // much safer and clearer.
-
-  // Loop through each 'row' of submeshes
-  for(int subY=0; subY<2; subY++)
+  foreach(si, s; sub)
     {
-      // Loop through each row of vertices
-      for(int row=0; row<65; row++)
+      int SX = si % 2;
+      int SY = si / 2;
+
+      // Find the offset in the destination buffer
+      int dest = SX*32 + SY*65*32;
+      dest *= VSIZE;
+
+      void putValue(int val)
         {
-          // FIXME: Ok, we have to skip each other row as well, of course.
+          assert(val >= short.min && val <= short.max);
+          *(cast(short*)&verts[dest]) = val;
+          dest += 2;
+        }
 
-          // Loop through both sub meshes, left and right
-          for(int subX=0; subX<2; subX++)
+      if(s.hasMesh)
+        {
+          auto m = &s.quad.meshes[0];
+          auto i = &m.info;
+
+          minh = min(minh, i.minHeight);
+          maxh = max(maxh, i.maxHeight);
+
+          byte[] source = m.vertexBuffer;
+          int src = 0;
+
+          int getValue()
             {
-              GenLevelResult *s = &sub[subX+2*subY];
+              int s = *(cast(short*)&source[src]);
+              src += 2;
+              return s;
+            }
 
-              // Check if we have any data
-              if(!s.isEmpty() && 0)
+          // Loop through all the vertices in the mesh
+          for(int y=0;y<33;y++)
+            {
+              // Skip the first row in the mesh if there was a mesh
+              // above us. We assume that the previously written row
+              // already has the correct information.
+              if(y==0 && SY != 0)
                 {
-                  MeshHolder *smh = &s.quad.meshes[0];
-                  byte* inPtr = smh.vertexBuffer.ptr;
-
-                  // Loop through each vertex in this mesh. We skip two
-                  // at a time.
-                  for(int v=0; v<64; v+=2)
-                    {
-                      // Handle the v=0 case
-
-                      // Count the height from the two next vertices
-                      int data = *inPtr++;
-                      inPtr++;inPtr++;inPtr++; // Skip the first normal
-                      data += *inPtr++;
-
-                      // Divide by two, since the result needs to fit in
-                      // one byte. We compensate for this when we regen
-                      // the mesh at runtime.
-                      data >>= 1;
-                      assert(data < 128 && data >= -128);
-
-                      *vertPtr++ = data;
-
-                      // Copy over the normal
-                      *vertPtr++ = *inPtr++;
-                      *vertPtr++ = *inPtr++;
-                      *vertPtr++ = *inPtr++;
-                    }
-                  // Store the last one here. It _should_ be the
-                  // same as the first in the next section, if
-                  // present.
+                  src += 65*VSIZE;
+                  dest += 65*VSIZE;
+                  continue;
                 }
-              else
+
+              // Handle the first vertex of the row outside the
+              // loop.
+              int height = getValue();
+
+              // If this isn't the very first row, sum up two row
+              // heights and skip the first row.
+              if(y!=0)
                 {
-                  // No data in this mesh. Just write zeros.
-                  for(int v=0; v<32; v++)
-                    {
-                      // Height
-                      *vertPtr++ = 0;
+                  // Skip the rest of the row.
+                  src += 64*VSIZE + 3;
 
-                      // Normal, pointing straight upwards
-                      *vertPtr++ = 0;
-                      *vertPtr++ = 0;
-                      *vertPtr++ = 0x7f;
-                    }
+                  // Add the second height
+                  height += getValue();
                 }
+
+              putValue(height);
+
+              // Copy the normal
+              verts[dest++] = source[src++];
+              verts[dest++] = source[src++];
+              verts[dest++] = source[src++];
+
+              // Loop through the remaining 64 vertices in this row,
+              // processing two at a time.
+              for(int x=0;x<32;x++)
+                {
+                  height = getValue();
+
+                  // Sum up the next two heights
+                  src += 3; // Skip normal
+                  height += getValue();
+
+                  // Set the height
+                  putValue(height);
+
+                  // Copy the normal
+                  verts[dest++] = source[src++];
+                  verts[dest++] = source[src++];
+                  verts[dest++] = source[src++];
+                }
+              // Skip to the next row
+              dest += 32*VSIZE;
+            }
+          assert(src == source.length);
+        }
+      else
+        {
+          minh = min(minh, -2048);
+          maxh = max(maxh, -2048);
+
+          // Set all the vertices to zero.
+          for(int y=0;y<33;y++)
+            {
+              if(y==0 && SY != 0)
+                {
+                  dest += 65*VSIZE;
+                  continue;
+                }
+
+              for(int x=0;x<33;x++)
+                {
+                  if(x==0 && SX != 0)
+                    {
+                      dest += VSIZE;
+                      continue;
+                    }
+
+                  // Zero height and vertical normal
+                  verts[dest++] = 0;
+                  verts[dest++] = 0;
+                  verts[dest++] = 0;
+                  verts[dest++] = 0;
+                  verts[dest++] = 0x7f;
+                }
+              // Skip to the next row
+              dest += 32*VSIZE;
             }
         }
     }
-  assert(vertPtr == mh.vertexBuffer.ptr + mh.vertexBuffer.length - 1);
 
-  // Set max and min values here
+  mi.minHeight = minh;
+  mi.maxHeight = maxh;
+  assert(minh <= maxh);
 }
 
 // ------- OLD CODE - use these snippets later -------

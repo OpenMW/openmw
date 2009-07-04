@@ -29,7 +29,7 @@ public:
     float h = (p.y + 2048)*2.0/CELL_WIDTH;
     h *= h;
 
-    mNode->setPosition(p.x, -p.z, -32 - h);
+    mNode->setPosition(p.x, -p.z, -32 -h);
   }
 
 private:
@@ -55,16 +55,18 @@ private:
 
     vd = mMeshDistance;
 
-    mObject->position(-vd,vd,-2048);
+    const int HEIGHT = -2048 - 10;
+
+    mObject->position(-vd,vd,HEIGHT);
     mObject->textureCoord(0, 1);
 
-    mObject->position(-vd,-vd,-2048);
+    mObject->position(-vd,-vd,HEIGHT);
     mObject->textureCoord(0, 0);
 
-    mObject->position(vd,-vd,-2048);
+    mObject->position(vd,-vd,HEIGHT);
     mObject->textureCoord(1, 0);
 
-    mObject->position(vd,vd,-2048);
+    mObject->position(vd,vd,HEIGHT);
     mObject->textureCoord(1, 1);
 
     mObject->quad(0,1,2,3);

@@ -84,14 +84,26 @@ public:
     // Finally, create the material
     const std::string texName = info.getTexName();
 
-    // Create or retrieve the material
-    mMaterial = MaterialManager::getSingleton().createOrRetrieve
-          (texName, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME).first;
+    // Set up the scene node.
+    mNode = parent->createChildSceneNode();
+    mNode->attachObject(this);
+
+    // Finally, create or retrieve the material
+    if(MaterialManager::getSingleton().resourceExists(texName))
+      {
+        mMaterial = MaterialManager::getSingleton().getByName
+          (texName);
+        return;
+      }
+
+    // No existing material. Create a new one.
+    mMaterial = MaterialManager::getSingleton().create
+      (texName, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
     Pass* pass = mMaterial->getTechnique(0)->getPass(0);
     pass->setLightingEnabled(false);
 
-    if(level != 1)
+    if(level > 1)
       {
         // This material just has a normal texture
         pass->createTextureUnitState(texName)
@@ -100,6 +112,8 @@ public:
       }
     else
       {
+        assert(level == 1);
+
         // Get the background texture. TODO: We should get this from
         // somewhere, no file names should be hard coded. The texture
         // might exist as a .tga in earlier versions of the game, and
@@ -173,10 +187,6 @@ public:
             tus->setTextureScale(scale, scale);
           }
       }
-
-    // Finally, set up the scene node.
-    mNode = parent->createChildSceneNode();
-    mNode->attachObject(this);
   }
 
   ~TerrainMesh()

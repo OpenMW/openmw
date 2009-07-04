@@ -31,7 +31,8 @@ import std.file, std.stdio;
 
 char[] cacheDir = "cache/terrain/";
 
-// Enable this to render one single terrain mesh
+// Enable this to render single terrain meshes instead of the entire
+// data set
 //debug=singleMesh;
 
 void initTerrain(bool doGen)
@@ -55,12 +56,37 @@ void initTerrain(bool doGen)
 
   debug(singleMesh)
     {
-      // Used for debugging single terrain meshes
-      auto node = terr_createChildNode(20000,-60000,null);
-      auto info = g_archive.getQuad(0,0,1);
-      g_archive.mapQuad(info);
-      auto mi = g_archive.getMeshInfo(0);
-      auto m = terr_makeMesh(node, mi, info.level, TEX_SCALE);
+      int X = 22;
+      int Y = 0;
+      bool next = false;
+
+      void doQuad(int x, int y, int lev)
+        {
+          if(!g_archive.hasQuad(x,y,lev))
+            return;
+
+          int diffx = x-X;
+          int diffy = y-Y;
+
+          diffx *= 8192;
+          diffy *= 8192;
+
+          if(diffx == 0 && lev == 2)
+            diffx = 8192 * 2;
+
+          auto node = terr_createChildNode(20000+diffx,-60000+diffy,null);
+          auto info = g_archive.getQuad(x,y,lev);
+          g_archive.mapQuad(info);
+          auto mi = g_archive.getMeshInfo(0);
+          terr_makeMesh(node, mi, info.level, TEX_SCALE);
+        }
+
+      doQuad(X,Y,1);
+      doQuad(X+1,Y,1);
+      doQuad(X,Y+1,1);
+      doQuad(X+1,Y+1,1);
+
+      doQuad(X + (next?2:0),Y,2);
     }
   else
     {

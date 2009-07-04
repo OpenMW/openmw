@@ -275,7 +275,7 @@ extern "C"
       addResourceLocation("cache/terrain/", "FileSystem", "General");
 
     // Enter superman mode
-    mCamera->setFarClipDistance(32*CELL_WIDTH);
+    mCamera->setFarClipDistance(40*CELL_WIDTH);
     //ogre_setFog(0.7, 0.7, 0.7, 200, 32*CELL_WIDTH);
     d_terr_superman();
 
