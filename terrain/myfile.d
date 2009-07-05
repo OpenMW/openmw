@@ -20,6 +20,8 @@
 
 */
 
+module terrain.myfile;
+
 import std.stream;
 import std.stdio;
 

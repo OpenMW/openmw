@@ -28,6 +28,8 @@
   buffer to a stream in one operation.
  */
 
+module terrain.outbuffer;
+
 import util.regions;
 import std.stream;
 

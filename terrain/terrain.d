@@ -60,19 +60,13 @@ void initTerrain(bool doGen)
       int Y = 0;
       bool next = false;
 
-      void doQuad(int x, int y, int lev)
+      void doQuad(int x, int y, int lev, int diffx, int diffy)
         {
           if(!g_archive.hasQuad(x,y,lev))
             return;
 
-          int diffx = x-X;
-          int diffy = y-Y;
-
           diffx *= 8192;
           diffy *= 8192;
-
-          if(diffx == 0 && lev == 2)
-            diffx = 8192 * 2;
 
           auto node = terr_createChildNode(20000+diffx,-60000+diffy,null);
           auto info = g_archive.getQuad(x,y,lev);
@@ -81,12 +75,14 @@ void initTerrain(bool doGen)
           terr_makeMesh(node, mi, info.level, TEX_SCALE);
         }
 
-      doQuad(X,Y,1);
-      doQuad(X+1,Y,1);
-      doQuad(X,Y+1,1);
-      doQuad(X+1,Y+1,1);
+      doQuad(X,Y,1, 0,0);
+      doQuad(X+1,Y,1, 1,0);
+      doQuad(X,Y+1,1, 0,1);
+      doQuad(X+1,Y+1,1, 1,1);
 
-      doQuad(X + (next?2:0),Y,2);
+      doQuad(X + (next?2:0),Y,2, 2,0);
+
+      doQuad(20,Y,3, 0,2);
     }
   else
     {

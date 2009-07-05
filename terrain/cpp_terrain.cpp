@@ -130,7 +130,8 @@ protected:
   {
     TRACE("Terrain frame");
     d_terr_terrainUpdate();
-    g_baseLand->update();
+    if(g_baseLand)
+      g_baseLand->update();
     return true;
   }
 };
@@ -285,7 +286,7 @@ extern "C"
 
     // Add the base land. This is the ground beneath the actual
     // terrain mesh that makes the terrain look infinite.
-    g_baseLand = new BaseLand();
+    //g_baseLand = new BaseLand();
 
     g_alphaSize = d_terr_getAlphaSize();
 

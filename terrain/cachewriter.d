@@ -20,6 +20,8 @@
 
 */
 
+module terrain.cachewriter;
+
 import terrain.archive;
 
 import terrain.outbuffer;
