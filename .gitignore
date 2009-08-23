@@ -1,0 +1,65 @@
+
+# /
+/cache
+/later
+/openmw.ini.*
+/rr.sh
+/fontdump
+/MyGUI.log
+/upm.sh
+/raw.txt
+/vids
+/include
+/includes
+/data_english
+/data_russian
+/.thumbnails
+/*.jpg
+/*.dll
+/*.exe
+/*.def
+/*.a
+/*.map
+/*.rsp
+/ogre.cfg
+/openmw
+/bored
+/private
+/data
+/bsatool
+/niftool
+/esmtool
+/bored.highscores
+/Ogre.log
+/openmw.ini
+/openmw.ini.old
+/dsss_*
+/dsss.last
+/objs
+/nifobjs
+
+# /bullet/
+/bullet/OgreOpcode*
+/bullet/demo
+/bullet/*.a
+
+# /media_mygui/
+/media_mygui/core.skin.orig
+/media_mygui/.thumbnails
+
+# /monster/
+/monster/*openmw_last
+
+# /mscripts/
+/mscripts/draft
+
+# /nif/
+/nif/bumpmap
+/nif/*.nif
+
+# /ogre/
+/ogre/*.nif
+/ogre/cs
+
+# /util/
+/util/iconv
