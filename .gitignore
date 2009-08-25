@@ -63,3 +63,8 @@
 
 # /util/
 /util/iconv
+
+*.o
+*.patch
+*.diff
+.directory
