@@ -52,6 +52,10 @@ void initMonsterScripts()
 
   // Set up the GUI Monster module
   setupGUIScripts();
+
+  // Add test cases for scripts here. This allows them to be tested
+  // without engaging the rendering engine (specify the -n command
+  // line switch.)
 }
 
 // This should probably not be here:
