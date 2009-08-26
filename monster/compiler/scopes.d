@@ -944,7 +944,7 @@ final class EnumScope : SimplePropertyScope
     { tasm.push(et.entries[$-1].index); }
 
   void enumLen()
-    { tasm.push(et.entries.length); }
+    { tasm.push(cast(uint)et.entries.length); }
 
   void enumVal()
     { tasm.getEnumValue(et.tIndex); }
