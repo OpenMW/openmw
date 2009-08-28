@@ -108,6 +108,7 @@ struct AlphaInfo
 static assert(AlphaInfo.sizeof == 6*4);
 
 // Info about each submesh
+// If you change this struct please check whether align(1) still fits.
 align(1)
 struct MeshInfo
 {
@@ -124,12 +125,12 @@ struct MeshInfo
   // Size and offset of the vertex buffer
   ulong vertBufSize, vertBufOffset;
 
+  // Texture name. Index to the string table.
+  int texName = -1;
+
   // Number and offset of AlphaInfo blocks
   int alphaNum;
   ulong alphaOffset;
-
-  // Texture name. Index to the string table.
-  int texName = -1;
 
   // Fill the given vertex buffer
   void fillVertexBuffer(float vdest[])

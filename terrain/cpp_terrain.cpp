@@ -63,12 +63,12 @@ struct MeshInfo
   // Size and offset of the vertex buffer
   int64_t vertBufSize, vertBufOffset;
 
+  // Texture name. Index to the string table.
+  int32_t texName;
+
   // Number and offset of AlphaInfo blocks
   int32_t alphaNum;
   uint64_t alphaOffset;
-
-  // Texture name. Index to the string table.
-  int32_t texName;
 
   inline void fillVertexBuffer(float *buffer, uint64_t size) const
   {
@@ -309,7 +309,7 @@ extern "C"
     Ogre::Pass* np = mat->getTechnique(0)->getPass(0);
     np->setLightingEnabled(false);
     np->createTextureUnitState("_land_default.dds")
-      ->setTextureScale(scale,scale);    
+      ->setTextureScale(scale,scale);
   }
 
   uint8_t *terr_makeAlphaLayer(const char* name, int32_t width)
