@@ -1,14 +1,14 @@
 # Designed for GNU Make
 
 # Compiler settings
-CXXFLAGS?= -g -m32
-DMD=gdmd -version=Posix -m32
+CXXFLAGS?= -g
+DMD=gdmd -version=Posix
 
 # Some extra flags for niftool and bsatool
 NIFFLAGS=-debug=warnstd -debug=check -debug=statecheck -debug=strict -debug=verbose
 
 # Linker flags
-LFLAGS= -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a -m32
+LFLAGS= -L-lopenal -L-lOgreMain -L-lOIS -L-lmygui -L-luuid -L-lavcodec -L-lavformat bullet/libbulletdynamics.a bullet/libbulletcollision.a bullet/libbulletmath.a
 
 # Compiler settings for Ogre, OIS and MyGUI
 # TODO: the -I when we're done
