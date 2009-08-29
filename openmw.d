@@ -21,7 +21,7 @@
 
  */
 
-module morro;
+module openmw;
 
 import std.stdio;
 import std.string;
@@ -81,13 +81,14 @@ void poolSize()
 }
 //*/
 
+bool noSound = false;
+
 void main(char[][] args)
 {
   bool render = true;
   bool help = false;
   bool resetKeys = false;
   bool showOgreFlag = false;
-  bool noSound = false;
   bool debugOut = false;
   bool extTest = false;
   bool doGen = false;

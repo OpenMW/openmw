@@ -45,6 +45,8 @@ import gui.gui;
 import input.keys;
 import input.ois;
 
+import openmw;
+
 // Debug output
 //debug=printMouse;      // Mouse button events
 //debug=printMouseMove;  // Mouse movement events
@@ -343,19 +345,21 @@ extern(C) int d_frameStarted(float time)
   playerData.position.position[1] = y;
   playerData.position.position[2] = z;
 
-  // Tell the sound scene that the player has moved
-  sndCumTime += time;
-  if(sndCumTime > sndRefresh)
+  if(!noSound)
     {
-      float fx, fy, fz;
-      float ux, uy, uz;
+      // Tell the sound scene that the player has moved
+      sndCumTime += time;
+      if(sndCumTime > sndRefresh)
+        {
+          float fx, fy, fz;
+          float ux, uy, uz;
 
-      ogre_getCameraOrientation(&fx, &fy, &fz, &ux, &uy, &uz);
+          ogre_getCameraOrientation(&fx, &fy, &fz, &ux, &uy, &uz);
 
-      soundScene.update(x,y,z,fx,fy,fz,ux,uy,uz);
-      sndCumTime -= sndRefresh;
+          soundScene.update(x,y,z,fx,fy,fz,ux,uy,uz);
+          sndCumTime -= sndRefresh;
+        }
     }
-
   return 1;
 }
 
