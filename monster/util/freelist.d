@@ -19,6 +19,7 @@
   You should have received a copy of the GNU General Public License
   version 3 along with this program. If not, see
   http://www.gnu.org/licenses/ .
+
  */
 
 module monster.util.freelist;
@@ -181,6 +182,16 @@ struct Buffers
   BufferList!(128) b128;
   BufferList!(256) b256;
   BufferList!(768) b768;
+
+  /*
+  static this()
+  {
+    writefln("64: ints=%s bytes=%s", b64.ints, b64.bytes);
+    writefln("128: ints=%s bytes=%s", b128.ints, b128.bytes);
+    writefln("256: ints=%s bytes=%s", b256.ints, b256.bytes);
+    writefln("768: ints=%s bytes=%s", b768.ints, b768.bytes);
+  }
+  */
 
   int[] getInt(uint size)
   {

@@ -68,16 +68,21 @@ struct Dbg
   void init()
   {
     static if(defaultLogToStdout)
-      dbgOut = dout;
+      enableStdout();
   }
 
-  void log(char[] msg)
+  void enableStdout()
+  {
+    dbgOut = dout;
+  }
+
+  void log(char[] msg, Thread *tr = null)
   {
     if(dbgOut !is null)
       {
         int logLevel = getFStackLevel();
         int extLevel = getExtLevel();
-        int trdIndex = getThreadIndex();
+        int trdIndex = getThreadIndex(tr);
 
         char[] str = format("(trd=%s,ext=%s,lev=%s)",
                             trdIndex,
@@ -134,9 +139,11 @@ struct Dbg
     return 0;
   }
 
-  int getThreadIndex()
+  int getThreadIndex(Thread *tr = null)
   {
-    if(cthread !is null)
+    if(tr !is null)
+      return tr.getIndex();
+    else if(cthread !is null)
       return cthread.getIndex();
     else return 0;
   }

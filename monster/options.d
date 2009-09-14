@@ -123,6 +123,38 @@ bool logFStack = true;
 // If true, log when threads are put into the background/forground.
 bool logThreads = true;
 
+// The following options control more low-level debugging. Most of
+// these will enable tracing of various internal function calls and
+// parameters directly to stdout.
+
+// Trace the thread system
+bool traceThreads = false;
+
+// Trace scope lookups
+bool traceLookups = false;
+
+// Trace resolve() calls
+bool traceResolve = false;
+
+// Print completed output from the assembler
+bool printAsmOutput = false;
+
+// Trace VM opcode execution
+bool traceVMOps = false;
+
+
+/*********************************************************
+
+
+                     Optimization options
+
+
+ *********************************************************/
+
+// Enable assembler optimizations
+bool optimizeAsm = true;
+
+
 /*********************************************************
 
 

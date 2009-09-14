@@ -1,3 +1,8 @@
+/*
+  NOTE: This file is not used - it is here just for reference. The
+  real module is defined internally in io.d.
+ */
+
 singleton thread;
 
 // Used to kill or pause our own or other threads.
@@ -12,31 +17,23 @@ native bool isDead();
 bool isAlive() { return !isDead(); }
 
 // Create a new (paused) thread for a given function
-native thread create(char[] name);
+native thread create(function() f);
 
 // Schedule a (paused) thread to run the next frame
 native restart();
 
 // Call a (paused) thread directly - returns when the thread exits or
 // calls an idle function.
-idle resume();
+idle call();
 
 // Wait for a thread to finish. Will not return until the thread is
 // dead.
 idle wait();
 
-// Call a function as a thread
-thread call(char[] name)
-{
-  var t = create(name);
-  t.resume();
-  return t;
-}
-
 // Start a function as a thread in the background
-thread start(char[] name)
+thread start(function() f)
 {
-  var t = create(name);
+  var t = create(f);
   t.restart();
   return t;
 }

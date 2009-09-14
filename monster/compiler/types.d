@@ -45,28 +45,6 @@ import std.stdio;
 import std.utf;
 import std.string;
 
-/*
-  List of all type classes:
-
-  Type (abstract)
-  InternalType (abstract)
-  ReplacerType (abstract)
-  NullType (null expression)
-  BasicType (covers int, char, bool, float, void)
-  ObjectType
-  ArrayType
-  StructType
-  EnumType
-  FunctionType
-  PackageType
-  UserType (replacer for identifier-named types like structs and
-            classes)
-  TypeofType (replacer for typeof(x) when used as a type)
-  GenericType (var)
-  MetaType (type of type expressions, like writeln(int);)
-
- */
-
 // A class that represents a type. The Type class is abstract, and the
 // different types are actually handled by various subclasses of Type
 // (see below.) The static function identify() is used to figure out
@@ -81,17 +59,22 @@ abstract class Type : Block
   // tokens.)
   static bool canParseRem(ref TokenArray toks)
     {
+      // This function is a bit messy unfortunately. We should improve
+      // the process so we can clean it up. Preferably we should
+      // rewrite the entire parser.
+
       // We allow typeof(expression) as a type
       if(isNext(toks, TT.Typeof))
         {
-          reqNext(toks, TT.LeftParen);
-          Expression.identify(toks); // Possibly a bit wasteful...
-          reqNext(toks, TT.RightParen);
+          skipParens(toks);
           return true;
         }
 
       // The 'var' keyword can be used as a type
       if(isNext(toks, TT.Var)) return true;
+
+      if(FuncRefType.canParseRem(toks))
+        return true;
 
       // Allow typename
       if(!isNext(toks, TT.Identifier)) return false;
@@ -133,6 +116,7 @@ abstract class Type : Block
       else if(UserType.canParse(toks)) t = new UserType();
       else if(GenericType.canParse(toks)) t = new GenericType();
       else if(TypeofType.canParse(toks)) t = new TypeofType();
+      else if(FuncRefType.canParse(toks)) t = new FuncRefType();
       else fail("Cannot parse " ~ toks[0].str ~ " as a type", toks[0].loc);
 
       // Parse the actual tokens with our new and shiny object.
@@ -178,6 +162,7 @@ abstract class Type : Block
     {
       tIndex = typeList.length;
       typeList[tIndex] = this;
+      name = "UNNAMED TYPE";
     }
 
   // Used for easy checking
@@ -200,7 +185,8 @@ abstract class Type : Block
   bool isPackage() { return false; }
   bool isStruct() { return false; }
   bool isEnum() { return false; }
-  bool isFunc() { return false; }
+  bool isIntFunc() { return false; }
+  bool isFuncRef() { return false; }
 
   bool isReplacer() { return false; }
 
@@ -218,9 +204,7 @@ abstract class Type : Block
 
   // Is this a legal type for variables? If this is false, you cannot
   // create variables of this type, neither directly or indirectly
-  // (through automatic type inference.) This isn't currently used
-  // anywhere, but we will need it later when we implement automatic
-  // types.
+  // (through automatic type inference.)
   bool isLegal() { return true; }
 
   // Get base type (used for arrays and meta-types)
@@ -239,11 +223,11 @@ abstract class Type : Block
   //                    returns the class scope, where func is resolved.
   // array.length -> getMemberScope called for ArrayType, returns a
   //                 special scope that contains the 'length' property
-  Scope getMemberScope() 
-    {
-      // Returning null means this type does not have any members.
-      return null;
-    }
+  // Returning null means that this type does not have any members.
+  Scope getMemberScope()
+    // By default we return a minimal property scope (containing
+    // .sizeof etc)
+    { return GenericProperties.singleton; }
 
   // Validate that this type actually exists. This is used to make
   // sure that all forward references are resolved.
@@ -365,7 +349,7 @@ abstract class Type : Block
       assert(res.length == orig.type.getSize);
 
       if(orig.type.canCastCTime(this))
-        res = orig.type.doCastCTime(res, this);
+        res = orig.type.doCastCTime(res, this, orig.loc);
       else
         fail(format("Cannot cast %s of type %s to %s of type %s (at compile time)",
                     orig.toString, orig.typeString,
@@ -383,8 +367,10 @@ abstract class Type : Block
       return false; // By default we can't cast anything
     }
 
-  // Can the type be explicitly cast? Is not required to handle cases
-  // where canCastTo is true.
+  // Can the type be explicitly cast? This function does not have to
+  // handle cases where canCastTo is true. You only need to use it in
+  // cases where explicit casting is allowed but implicit is not, such
+  // as casting from float to int.
   bool canCastToExplicit(Type to)
     {
       return false;
@@ -403,14 +389,14 @@ abstract class Type : Block
 
   // Do the cast in the assembler. Must handle both implicit and
   // explicit casts.
-  void evalCastTo(Type to)
+  void evalCastTo(Type to, Floc lc)
     {
       assert(0, "evalCastTo not implemented for type " ~ toString);
     }
 
   // Do the cast in the compiler. Must handle both implicit and
   // explicit casts.
-  int[] doCastCTime(int[] data, Type to)
+  int[] doCastCTime(int[] data, Type to, Floc lc)
     {
       assert(0, "doCastCTime not implemented for type " ~ toString);
     }
@@ -496,6 +482,8 @@ abstract class Type : Block
 // for variables or values, neither directly nor indirectly.
 abstract class InternalType : Type
 {
+ override:
+  Scope getMemberScope() { return null; }
  final:
   bool isLegal() { return false; }
   int[] defaultInit() {assert(0, name);}
@@ -532,23 +520,22 @@ class NullType : InternalType
 
   bool canCastTo(Type to)
     {
-      return to.isArray || to.isObject || to.isEnum;
+      return to.isArray || to.isObject || to.isEnum || to.isFuncRef;
     }
 
-  void evalCastTo(Type to)
+  void evalCastTo(Type to, Floc lc)
     {
-      assert(to.getSize == 1);
-
-      // The value of null is always zero. There is no value on the
-      // stack to convert, so just push it.
-      tasm.push(0);
+      // Always evaluable at compile time - there is no runtime value
+      // to convert.
+      tasm.pushArray(doCastCTime(null, to, lc));
     }
 
-  int[] doCastCTime(int[] data, Type to)
+  int[] doCastCTime(int[] data, Type to, Floc lc)
     {
-      assert(to.getSize == 1);
+      // For all the types we currently support, 'null' is always
+      // equal to the type's default initializer.
       assert(data.length == 0);
-      return [0];
+      return to.defaultInit();
     }
 }
 
@@ -729,7 +716,7 @@ class BasicType : Type
       return false;
     }
 
-  void evalCastTo(Type to)
+  void evalCastTo(Type to, Floc lc)
     {
       assert(this != to);
       assert(!isVoid);
@@ -766,11 +753,11 @@ class BasicType : Type
           // Create an array from one element on the stack
           if(isChar) tasm.popToArray(1, 1);
           else
-            tasm.castToString(tIndex);
+            tasm.castToString(this);
         }
       else
         fail("Conversion " ~ toString ~ " to " ~ to.toString ~
-             " not implemented.");
+             " not implemented.", lc);
     }
 
   char[] valToString(int[] data)
@@ -781,7 +768,7 @@ class BasicType : Type
       return getHolder().getString(data);
     }
 
-  int[] doCastCTime(int[] data, Type to)
+  int[] doCastCTime(int[] data, Type to, Floc lc)
     {
       assert(this != to);
       assert(!isVoid);
@@ -871,7 +858,7 @@ class BasicType : Type
         }
       else
         fail("Compile time conversion " ~ toString ~ " to " ~ to.toString ~
-             " not implemented.");
+             " not implemented.", lc);
 
       assert(toData.length == toSize);
       assert(toData.ptr !is data.ptr);
@@ -885,6 +872,9 @@ class BasicType : Type
 
       if( isLong || isUlong || isDouble )
         return 2;
+
+      if( isVoid )
+        return 0;
 
       assert(0, "getSize() does not handle type '" ~ name ~ "'");
     }
@@ -905,7 +895,7 @@ class BasicType : Type
     else if(isLong || isUlong) data = makeData!(long)(0);
     // Chars default to an illegal utf-32 value
     else if(isChar) data = makeData!(int)(0x0000FFFF);
-    // Floats default to not a number
+    // Floats default to NaN
     else if(isFloat) data = makeData!(float)(float.nan);
     else if(isDouble) data = makeData!(double)(double.nan);
     else
@@ -1033,7 +1023,7 @@ class ObjectType : Type
         }
     }
 
-  void evalCastTo(Type to)
+  void evalCastTo(Type to, Floc lc)
     {
       assert(clsIndex != 0);
       assert(canCastTo(to) || canCastToExplicit(to));
@@ -1059,7 +1049,7 @@ class ObjectType : Type
         }
 
       assert(to.isString);
-      tasm.castToString(tIndex);
+      tasm.castToString(this);
     }
 
   // Members of objects are resolved in the class scope.
@@ -1113,6 +1103,12 @@ class ArrayType : Type
       loc = base.loc;
     }
 
+  ArrayRef *getArray(int[] data)
+    {
+      assert(data.length == 1);
+      return monster.vm.arrays.arrays.getRef(cast(AIndex)data[0]);
+    }
+
   override:
   void validate(Floc loc) { assert(base !is null); base.validate(loc); }
   int arrays() { return base.arrays() + 1; }
@@ -1127,26 +1123,125 @@ class ArrayType : Type
 
   // All arrays can be cast to string
   bool canCastTo(Type to)
-    { return to.isString; }
-
-  void evalCastTo(Type to)
     {
-      assert(to.isString);
-      tasm.castToString(tIndex);
+      // Strings can be cast to char, but the conversion is only valid
+      // if the string is one char long.
+      if(isString) return to.isChar;
+
+      // Conversion to string is always allowed, and overrides other
+      // array conversions. TODO: This will change later when we get
+      // the generic 'var' type. Then implicit casting to string will
+      // be unnecessary.
+      if(to.isString)
+        return true;
+
+      if(to.isArray)
+        return getBase().canCastTo(to.getBase());
+
+      return false;
     }
 
-  int[] doCastCTime(int[] data, Type to)
+  void evalCastTo(Type to, Floc lc)
     {
-      assert(to.isString);
-      return [valToStringIndex(data)];
+      if(isString)
+        {
+          assert(to.isChar);
+          tasm.castStrToChar();
+          return;
+        }
+
+      if(to.isString)
+        {
+          tasm.castToString(this);
+          return;
+        }
+
+      if(to.isArray && getBase().canCastTo(to.getBase()))
+        fail("Casting arrays at runtime not implemented yet", lc);
+
+      assert(0);
+    }
+
+  int[] doCastCTime(int[] data, Type to, Floc lc)
+    {
+      if(isString)
+        {
+          assert(to.isChar);
+
+          // When casting from string to char, we pick out the first
+          // (and only) character from the string.
+
+          auto arf = getArray(data);
+
+          // FIXME: These error messages don't produce a file/line
+          // number. Using our own loc doesn't work. I think we need
+          // to pass it on to doCastCTime.
+
+          if(arf.carr.length == 0)
+            fail("Cannot cast empty string to 'char'", lc);
+
+          assert(arf.elemSize == 1);
+
+          if(arf.carr.length > 1)
+            fail("Cannot cast string " ~ valToString(data) ~
+                 " to 'char': too long", lc);
+
+          return [arf.iarr[0]];
+        }
+
+      if(to.isArray && getBase().canCastTo(to.getBase()))
+        {
+          auto arf = getArray(data);
+          assert(arf.iarr.length > 0, "shouldn't need to cast an empty array");
+
+          // The types
+          Type oldt = getBase();
+          Type newt = to.getBase();
+
+          assert(oldt.canCastCTime(newt),
+                 "oops, cannot cast at compile time");
+
+          // Set up the source and destination array data
+          int len = arf.length();
+          int olds = oldt.getSize();
+          int news = newt.getSize();
+
+          int[] src = arf.iarr;
+          int[] dst = new int[len * news];
+
+          assert(src.length == len * olds);
+
+          for(int i=0; i<len; i++)
+            {
+              int[] slice = src[i*olds..(i+1)*olds];
+              slice = oldt.doCastCTime(slice, newt, lc);
+              assert(slice.length == news);
+              dst[i*news..(i+1)*news] = slice;
+            }
+
+          // Create the array index
+          bool wasConst = arf.isConst();
+          arf = monster.vm.arrays.arrays.create(dst, news);
+          assert(arf.length() == len);
+
+          // Copy the const setting from the original array
+          if(wasConst)
+            arf.flags.set(AFlags.Const);
+
+          // Return the index
+          return [arf.getIndex()];
+        }
+
+      if(to.isString)
+        return [valToStringIndex(data)];
+
+      assert(0);
     }
 
   char[] valToString(int[] data)
     {
-      assert(data.length == 1);
-
       // Get the array reference
-      ArrayRef *arf = monster.vm.arrays.arrays.getRef(cast(AIndex)data[0]);
+      ArrayRef *arf = getArray(data);
 
       // Empty array?
       if(arf.iarr.length == 0) return "[]";
@@ -1184,9 +1279,137 @@ class ArrayType : Type
     }
 }
 
-// Type used for references to functions. Will later contain type
-// information, but right now it's just used as an internal flag.
-class FunctionType : InternalType
+// Type used for function references. Variables of this type consists
+// of a object index followed by a global function index.
+class FuncRefType : Type
+{
+  // Function signature information
+  Type retType;
+  Type params[];
+  bool isConst[];
+  bool isVararg;
+
+  // For parsed types
+  this() {}
+
+  this(IntFuncType f)
+    {
+      auto fn = f.func;
+
+      retType = fn.type;
+      isVararg = fn.isVararg();
+      params.length = fn.params.length;
+      isConst.length = params.length;
+
+      foreach(i, v; fn.params)
+        {
+          params[i] = v.type;
+          isConst[i] = v.isConst;
+        }
+
+      createName();
+    }
+
+  void createName()
+    {
+      name = "function";
+      if(!retType.isVoid)
+        name ~= " " ~ retType.toString();
+      name ~= "(";
+
+      foreach(i, v; params)
+        {
+          if(i > 0)
+            name ~= ",";
+          name ~= v.toString();
+
+          if(isVararg && i == params.length-1)
+            name ~= "...";
+        }
+
+      name ~= ")";
+    }
+
+  static bool canParseRem(ref TokenArray toks)
+    {
+      if(!isNext(toks, TT.Function))
+        return false;
+
+      // Return type?
+      if(toks.length && toks[0].type != TT.LeftParen)
+        Type.canParseRem(toks);
+
+      skipParens(toks);
+      return true;
+    }
+
+  // Same as the above but it doesn't change the array (no 'ref'
+  // parameter)
+  static bool canParse(TokenArray toks)
+    { return canParseRem(toks); }
+
+  // Calculate the stack imprint
+  int getImprint()
+    {
+      assert(retType !is null);
+      int res = retType.getSize();
+
+      foreach(p; params)
+        res -= p.getSize();
+
+      return res;
+    }
+
+ override:
+  void parse(ref TokenArray toks)
+    {
+      reqNext(toks, TT.Function);
+
+      if(!isNext(toks, TT.LeftParen))
+        {
+          retType = Type.identify(toks);
+          reqNext(toks, TT.LeftParen);
+        }
+      else
+        retType = BasicType.getVoid();
+
+      if(!isNext(toks, TT.RightParen))
+        {
+          do
+            {
+              params ~= Type.identify(toks);
+            }
+          while(isNext(toks, TT.Comma));
+          reqNext(toks, TT.RightParen);
+        }
+    }
+
+  void resolve(Scope sc)
+    {
+      retType.resolve(sc);
+      foreach(p; params)
+        p.resolve(sc);
+
+      createName();
+    }
+
+  void validate(Floc f)
+    {
+      retType.validate(f);
+      foreach(p; params)
+        p.validate(f);
+    }
+
+  int getSize() { return 2; }
+  bool isFuncRef() { return true; }
+  int[] defaultInit() { return [0, -1]; }
+  Scope getMemberScope() { return FuncRefProperties.singleton; }
+}
+
+// Type used for internal references to functions. This is NOT the
+// same as the type used for function references ("pointers") - see
+// FuncRefType for that.
+class IntFuncType : InternalType
 {
   Function *func;
   bool isMember;
@@ -1201,7 +1424,7 @@ class FunctionType : InternalType
     }
 
  override:
-  bool isFunc() { return true; }
+  bool isIntFunc() { return true; }
 }
 
 class EnumType : Type
@@ -1361,12 +1584,12 @@ class EnumType : Type
       return false;
     }
 
-  void evalCastTo(Type to)
+  void evalCastTo(Type to, Floc lc)
     {
       // Convert the enum name to a string
       if(to.isString)
         {
-          tasm.castToString(tIndex);
+          tasm.castToString(this);
           return;
         }
 
@@ -1374,10 +1597,10 @@ class EnumType : Type
       if(lng.canCastOrEqual(to))
         {
           // Get the value
-          tasm.getEnumValue(tIndex);
+          tasm.getEnumValue(this);
           // Cast it if necessary
           if(to != lng)
-            lng.evalCastTo(to);
+            lng.evalCastTo(to, lc);
           return;
         }
 
@@ -1386,11 +1609,11 @@ class EnumType : Type
         if(f.type.canCastOrEqual(to))
           {
             // Get the field value from the enum
-            tasm.getEnumValue(tIndex, i);
+            tasm.getEnumValue(this, i);
 
             // If the type doesn't match exactly, convert it.
             if(f.type != to)
-              f.type.evalCastTo(to);
+              f.type.evalCastTo(to, lc);
 
             return;
           }
@@ -1398,7 +1621,7 @@ class EnumType : Type
       assert(0);
     }
 
-  int[] doCastCTime(int[] data, Type to)
+  int[] doCastCTime(int[] data, Type to, Floc lc)
     {
       if(to.isString)
         return [valToStringIndex(data)];
@@ -1406,7 +1629,7 @@ class EnumType : Type
       // This code won't run yet, because the enum fields are
       // properties and we haven't implemented ctime property reading
       // yet. Leave this assert in here so that we remember to test it
-      // later.
+      // later. TODO.
       assert(0, "finished, but not tested");
 
       // Get the enum index
@@ -1415,7 +1638,7 @@ class EnumType : Type
 
       // Check that we were not given a zero index
       if(v-- == 0)
-        fail("Cannot get value of fields from an empty Enum variable.");
+        fail("Cannot get value of fields from an empty Enum variable.", lc);
 
       // Get the entry
       assert(v >= 0 && v < entries.length);
@@ -1428,7 +1651,7 @@ class EnumType : Type
           int[] val = (cast(int*)&ent.value)[0..2];
           // Cast it if necessary
           if(to != lng)
-            val = lng.doCastCTime(val, to);
+            val = lng.doCastCTime(val, to, lc);
 
           return val;
         }
@@ -1442,7 +1665,7 @@ class EnumType : Type
 
             // If the type doesn't match exactly, convert it.
             if(f.type != to)
-              val = f.type.doCastCTime(val, to);
+              val = f.type.doCastCTime(val, to, lc);
 
             return val;
           }
@@ -1538,8 +1761,6 @@ class StructType : Type
       return defInit;
     }
 
-  Scope getMemberScope()
-    { return GenericProperties.singleton; }
   // Scope getMemberScope() { return sc; }
 }
 
@@ -1650,7 +1871,11 @@ class UserType : ReplacerType
 
       // Allow packages used as type names in some situations
       else if(sl.isPackage)
-        realType = sl.sc.getPackage().type;
+        {
+          auto psc = cast(PackageScope)sl.sc;
+          assert(psc !is null);
+          realType = psc.type;
+        }
 
       // Was anything found at all?
       else if(!sl.isNone)
@@ -1764,7 +1989,7 @@ class MetaType : InternalType
 
   int[] cache;
 
-  int[] doCastCTime(int[] data, Type to)
+  int[] doCastCTime(int[] data, Type to, Floc lc)
     {
       assert(to.isString);
 
@@ -1774,7 +1999,7 @@ class MetaType : InternalType
       return cache;
     }
 
-  void evalCastTo(Type to)
+  void evalCastTo(Type to, Floc lc)
     {
       assert(to.isString);
 

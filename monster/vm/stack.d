@@ -29,6 +29,7 @@ import std.stdio;
 import std.utf;
 
 import monster.compiler.scopes;
+import monster.compiler.functions;
 import monster.options;
 
 import monster.vm.mobject;
@@ -40,7 +41,35 @@ import monster.vm.error;
 // copies when they need it.
 CodeStack stack;
 
-// A simple stack frame. All data are in chunks of 4 bytes
+struct FunctionRef
+{
+  MIndex obj;
+  int fIndex;
+
+  MonsterObject *getObject()
+  { return getMObject(obj); }
+
+  Function *getFunctionNonVirtual()
+  { return functionList[fIndex]; }
+
+  Function *getFunction()
+  {
+    auto f = getFunctionNonVirtual();
+    return f.findVirtual(getObject());
+  }
+
+  void set(Function* fn, MonsterObject *mo)
+  {
+    assert(fn !is null);
+    assert(mo !is null);
+    assert(mo.cls.childOf(fn.owner));
+    fIndex = fn.getGIndex();
+    obj = mo.getIndex();
+  }
+}
+static assert(FunctionRef.sizeof == 8);
+
+// A simple stack. All data are in chunks of 4 bytes
 struct CodeStack
 {
   private:
@@ -49,11 +78,6 @@ struct CodeStack
   int left, total;
   int *pos; // Current position
 
-  // Frame pointer, used for accessing local variables and parameters
-  int *frame;
-  int fleft; // A security measure to make sure we don't access
-	     // variables outside the stack
-
   public:
   void init()
   {
@@ -61,7 +85,6 @@ struct CodeStack
     left = maxStack;
     total = maxStack;
     pos = data.ptr;
-    frame = null;
   }
 
   // Get the current position index.
@@ -70,37 +93,11 @@ struct CodeStack
     return total-left;
   }
 
-  // Sets the current position as the 'frame pointer', and return it.
-  int *setFrame()
-  {
-    frame = pos;
-    fleft = left;
-    //writefln("setFrame(): new=%s, old=%s", frame, old);
-    return frame;
-  }
-
-  // Sets the given frame pointer
-  void setFrame(int *frm)
-  {
-    //writefln("restoring frame: %s", frm);
-    frame = frm;
-    if(frm is null)
-      {
-        fleft = 0;
-        return;
-      }
-    fleft = left + (pos-frm);
-    assert(fleft >= 0 && fleft <= total);
-  }
-
   // Reset the stack level to zero.
   void reset()
   {
     left = total;
     pos = data.ptr;
-
-    fleft = 0;
-    frame = null;
   }
 
   void pushInt(int i)
@@ -133,12 +130,6 @@ struct CodeStack
     if(left>total) overflow("popLong");
     pos-=2;
     return *(cast(long*)pos);
-  }
-
-  // Get the pointer from the start of the stack
-  int *getStart()
-  {
-    return cast(int*)data.ptr;
   }
 
   // Get the pointer to an int at the given position backwards from
@@ -182,18 +173,6 @@ struct CodeStack
     pos+=arr.length;
   }
 
-  // Get an int a given position from frame pointer. Can be negative
-  // or positive. 0 means the int at the pointer, -1 is the one before
-  // and 1 the one after, etc.
-  int *getFrameInt(int ptr)
-  {
-    assert(frame !is null);
-    assert(frame <= pos);
-    if(ptr < (fleft-total) || ptr >= fleft)
-      fail("CodeStack.getFrameInt() pointer out of range");
-    return frame+ptr;
-  }
-
   // Pushing and poping objects of the stack - will actually push/pop
   // their index.
   void pushObject(MonsterObject *mo)
@@ -201,6 +180,9 @@ struct CodeStack
 
   MonsterObject *popObject()
   { return getMObject(cast(MIndex)popInt()); }
+
+  MonsterObject *peekObject()
+  { return getMObject(cast(MIndex)peekInt()); }
 
   // Push arrays of objects. TODO: These do memory allocation, and I'm
   // not sure that belongs here. I will look into it later.
@@ -234,6 +216,8 @@ struct CodeStack
   { return arrays.getRef(cast(AIndex)popInt()); }
   ArrayRef *getArray(int i)
   { return arrays.getRef(cast(AIndex)*getInt(i)); }
+  ArrayRef *peekArray()
+  { return getArray(0); }
 
   // More easy versions. Note that pushArray() will create a new array
   // reference each time it is called! Only use it if this is what you
@@ -264,6 +248,8 @@ struct CodeStack
   { pushArray(toUTF32(str)); }
   char[] popString8()
   { return toUTF8(popString()); }
+  char[] peekString8()
+  { return toUTF8(peekArray().carr); }
 
   // For multibyte arrays
   void pushArray(int[] str, int size)
@@ -271,9 +257,7 @@ struct CodeStack
 
   // Various convenient conversion templates. These will be inlined,
   // so don't worry :) The *4() functions are for types that are 4
-  // bytes long. These are mostly intended for use in native
-  // functions, so there is no equivalent of getFrameInt and similar
-  // functions.
+  // bytes long.
   void push4(T)(T var)
   {
     static assert(T.sizeof == 4);
@@ -285,7 +269,14 @@ struct CodeStack
     int i = popInt();
     return *(cast(T*)&i);
   }
+  // Gets a pointer to a given stack value. Counts from the head - 0
+  // is the first int, 1 is the second, etc. Note that it counts in
+  // ints (four bytes) no matter what the type T is - this is by
+  // design.
   T* get4(T)(int ptr) { return cast(T*)getInt(ptr); }
+
+  // Returns the first value on the stack without poping it
+  T peek4(T)() { return *(cast(T*)getInt(0)); }
 
   // 64 bit version
   void push8(T)(T var)
@@ -314,32 +305,54 @@ struct CodeStack
   alias push4!(MIndex) pushMIndex;
   alias pop4!(MIndex) popMIndex;
   alias get4!(MIndex) getMIndex;
+  alias peek4!(MIndex) peekMIndex;
 
   alias push4!(AIndex) pushAIndex;
   alias pop4!(AIndex) popAIndex;
   alias get4!(AIndex) getAIndex;
+  alias peek4!(AIndex) peekAIndex;
+
+  alias peek4!(int) peekInt;
 
   alias push4!(uint) pushUint;
   alias pop4!(uint) popUint;
   alias get4!(uint) getUint;
+  alias peek4!(uint) peekUint;
 
   alias get4!(long) getLong;
+  alias peek4!(long) peekLong;
 
   alias push8!(ulong) pushUlong;
   alias pop8!(ulong) popUlong;
   alias get4!(ulong) getUlong;
+  alias peek4!(ulong) peekUlong;
 
   alias push4!(float) pushFloat;
   alias pop4!(float) popFloat;
   alias get4!(float) getFloat;
+  alias peek4!(float) peekFloat;
 
   alias push8!(double) pushDouble;
   alias pop8!(double) popDouble;
   alias get4!(double) getDouble;
+  alias peek4!(double) peekDouble;
 
   alias push4!(dchar) pushChar;
   alias pop4!(dchar) popChar;
   alias get4!(dchar) getChar;
+  alias peek4!(dchar) peekDchar;
+
+  alias push8!(FunctionRef) pushFuncRef;
+  alias pop8!(FunctionRef) popFuncRef;
+  alias get4!(FunctionRef) getFuncRef;
+  alias peek4!(FunctionRef) peekFuncRef;
+
+  void pushFuncRef(Function *fn, MonsterObject *obj)
+  {
+    FunctionRef f;
+    f.set(fn,obj);
+    pushFuncRef(f);
+  }
 
   void pushFail(T)(T t)
   {
@@ -389,7 +402,10 @@ struct CodeStack
     pos -= num;
   }
 
-  // Pop off and ignore given values, but remember the top values
+  // Pop off and ignore given values, but remember the top
+  // values. Equivalent to popping of (and storing) 'keep' ints, then
+  // poping away 'num' ints, and finally pushing the kept ints
+  // back. The final stack imprint is -num.
   void pop(uint num, uint keep)
   {
     assert(keep>0);

@@ -298,17 +298,14 @@ struct MonsterObject
     if(fn.paramSize > 0)
       fail("thread(): function " ~ fn.name.str ~ " cannot have parameters");
 
+    fn = fn.findVirtual(this);
+
     Thread *trd = Thread.getNew();
 
     // Schedule the function to run the next frame
     trd.pushFunc(fn, this);
     assert(trd.isPaused);
     assert(trd.fstack.cur !is null);
-
-    // pushFunc will mess with the stack frame though, so fix it.
-    trd.fstack.cur.frame = stack.getStart();
-    if(cthread !is null)
-      cthread.fstack.restoreFrame();
 
     return trd;
   }

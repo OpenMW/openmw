@@ -42,6 +42,8 @@ import monster.vm.error;
 import monster.vm.mclass;
 import monster.vm.vm;
 
+import monster.options;
+
 alias Statement[] StateArray;
 
 abstract class Statement : Block
@@ -131,7 +133,7 @@ class ImportStatement : Statement
               assert(t !is null);
               mc = t.getClass(type.loc);
 
-              sc.registerImport(new ClassImpHolder(mc));
+              sc.registerImport(mc);
             }
           else if(type.isPackage)
             {
@@ -139,7 +141,7 @@ class ImportStatement : Statement
               assert(t !is null);
               auto psc = t.sc;
 
-              sc.registerImport(new PackageImpHolder(psc));
+              sc.registerImport(psc);
             }
           else
             fail("Can only import from classes and packages", type.loc);
@@ -1328,9 +1330,11 @@ class ReturnStatement : Statement
   Expression exp;
   Function *fn;
 
-  // Number of local variables to unwind from the stack. Calculated
-  // both in resolve and in compile.
+  // Number of local variables to unwind from the stack, and the
+  // number of parameters. (Counts number of ints / stack values, not
+  // actual number of variables.)
   int locals;
+  int params;
 
   static bool canParse(TokenArray toks)
     {
@@ -1380,7 +1384,7 @@ class ReturnStatement : Statement
       assert(fn !is null, "return called outside a function scope");
 
       // Get the size of all parameters
-      locals += fn.paramSize;
+      params = fn.paramSize;
 
       // Next, we must check that the returned expression, if any, is
       // of the right type.
@@ -1408,11 +1412,11 @@ class ReturnStatement : Statement
 	  assert(!fn.type.isVoid);
 	  exp.eval();
           // Return an expression
-	  tasm.exit(locals, exp.type.getSize);
+	  tasm.exit(params, locals, exp.type.getSize);
 	}
       else
         // Return without an expression
-	tasm.exit(locals);
+	tasm.exit(params, locals, 0);
     }
 }
 
@@ -1560,7 +1564,11 @@ class CodeBlock : Statement
       assert(!isState || sc.isStateCode());
 
       foreach(int i, stats; contents)
-        stats.resolve(sc);
+        {
+          static if(traceResolve)
+            writefln("Resolving %s at %s", stats, stats.loc);
+          stats.resolve(sc);
+        }
 
       // TODO: Check that state code contains at least one idle
       // function call. We could do that through the scope.
@@ -1576,7 +1584,7 @@ class CodeBlock : Statement
       // If this is the main block at the state level, we must finish
       // it with an exit instruction.
       if(isState)
-        tasm.exit();
+        tasm.exit(0,0,0);
 
       // Local variables are forbidden in any state block, no matter
       // at what level they are

@@ -56,7 +56,6 @@ import std.math : floor;
 extern(C) void* memmove(void *dest, void *src, size_t n);
 
 // Enable this to print bytecode instructions to stdout
-//debug=traceOps;
 
 import monster.util.list;
 alias _lstNode!(Thread) _tmp1;
@@ -77,8 +76,9 @@ struct Thread
    *                                                     *
    *******************************************************/
 
-  // This has been copied from ScheduleStruct, which is now merged
-  // with Thread. We'll sort it out later.
+  // Function stack for this thread. This MUST be the first member of
+  // Thread, to make sure fstack.getThread() works properly.
+  FunctionStack fstack;
 
   // Some generic variables that idle functions can use to store
   // temporary data off the stack.
@@ -91,9 +91,6 @@ struct Thread
   // Set to true when a state change is in progress. Only used when
   // state is changed from within a function in active code.
   bool shouldExit;
-
-  // Function stack for this thread
-  FunctionStack fstack;
 
   /*******************************************************
    *                                                     *
@@ -175,6 +172,11 @@ struct Thread
   // Stop the execution of a thread and cancel any scheduling.
   void stop()
   {
+    static if(traceThreads)
+      {
+        dbg.log("Thread.stop()");
+      }
+
     assert(!isDead);
 
     // TODO: We also have to handle (forbid) cases where we are
@@ -190,7 +192,7 @@ struct Thread
         if(fstack.hasNatives)
           fail("Cannot stop thread, there are native functions on the stack.");
 
-        // Kill the stack tell execute() to stop running
+        // Kill the stack and tell execute() to stop running
         stack.reset();
         shouldExit = true;
       }
@@ -225,6 +227,9 @@ struct Thread
   // Schedule this thread to run state code the next frame
   void scheduleState(MonsterObject *obj, int offs)
   {
+    static if(logThreads)
+      dbg.log(format("------ scheduling state in thread %s ------", getIndex));
+
     assert(!isDead);
     assert(!isScheduled,
            "cannot schedule an already scheduled thread");
@@ -293,6 +298,11 @@ struct Thread
   // Reenter this thread to the point where it was previously stopped.
   void reenter()
   {
+    static if(traceThreads)
+      {
+        dbg.log("Thread.reenter()");
+      }
+
     assert(!isDead);
     assert(cthread is null,
            "cannot reenter when another thread is running");
@@ -407,17 +417,12 @@ struct Thread
         assert(!isTransient,
                "cannot restore a transent thread with stack");
 
-
-
         // Push the values back, and free the buffer
         stack.pushInts(sstack);
         Buffers.free(sstack);
         assert(stack.getPos == sstack.length);
         sstack = null;
       }
-
-    // Restore the stack frame pointer
-    fstack.restoreFrame();
 
     // Set ourselves as the running thread
     cthread = this;
@@ -458,10 +463,15 @@ struct Thread
     .fail(msg, fl);
   }
 
-  // Parse the BC.CallIdle instruction parameters and schedule the
-  // given idle function. Return true if we should exit execute()
-  bool callIdle(MonsterObject *iObj)
+  // Handle the call and scheduling of an given idle function. Return
+  // true if we should exit execute().
+  bool callIdle(MonsterObject *iObj, Function *idle)
   {
+    static if(traceThreads)
+      {
+        dbg.log("Thread.callIdle()");
+      }
+
     assert(isRunning);
     assert(!isScheduled, "Thread is already scheduled");
     assert(iObj !is null);
@@ -469,16 +479,8 @@ struct Thread
     if(fstack.hasNatives)
       fail("Cannot run idle function: there are native functions on the stack");
 
-    CodeStream *code = &fstack.cur.code;
-
-    // Get the class from the index
-    auto cls = iObj.cls.upcast(code.getInt());
-
-    // Get the function
-    Function *idle = cls.findFunction(code.getInt());
-    assert(idle !is null && idle.isIdle);
-    assert(cls is idle.owner);
-    assert(iObj.cls.childOf(cls));
+    assert(idle !is null);
+    assert(idle.isIdle);
 
     // The IdleFunction object bound to this function is stored in
     // idle.idleFunc
@@ -517,8 +519,11 @@ struct Thread
     assert(res == IS.Manual || res == IS.Kill);
 
     // The only difference between Manual and Kill is what list the
-    // thread ends in. If the thread is in the transient list, it will
-    // be killed automatically when it's no longer running.
+    // thread ends in. The idle function itself is responsible for
+    // putting the thread in the correct list when returning
+    // IS.Manual. If the thread is left in the transient list (ie. if
+    // the idle doesn't move the thread), it will be killed
+    // automatically when it is no longer running.
     assert( (res == IS.Kill) == isTransient,
             res == IS.Manual ? "Manually scheduled threads must be moved to another list." : "Killed threads cannot be moved to another list.");
 
@@ -561,9 +566,16 @@ struct Thread
     // exception.
     int *popPtr()
       {
+        // TODO: A better optimization here would be to pop the entire
+        // structure all at once. Once we work more on references,
+        // create a structure that takes care of all the conversions
+        // for us.
+
         PT type;
         int index;
         decodePtr(stack.popInt(), type, index);
+
+        int *res;
 
         // Null pointer?
         if(type == PT.Null)
@@ -571,20 +583,29 @@ struct Thread
   
         // Stack variable?
         if(type == PT.Stack)
-          return stack.getFrameInt(index);
+          {
+            res = stack.getInt(index);
+            stack.pop(2);
+          }
 
         // Variable in this object
-        if(type == PT.DataOffs)
-          return obj.getDataInt(cls.treeIndex, index);
+        else if(type == PT.DataOffs)
+          {
+            res = obj.getDataInt(cls.treeIndex, index);
+            stack.pop(2);
+          }
 
         // This object, but another (parent) class
-        if(type == PT.DataOffsCls)
-          // We have to pop the class index of the stack as well
-          return obj.getDataInt(stack.popInt, index);
+        else if(type == PT.DataOffsCls)
+          {
+            // We have to pop the class index of the stack as well
+            res = obj.getDataInt(stack.popInt, index);
+            stack.popInt();
+          }
 
         // Far pointer, with offset. Both the class index and the object
         // reference is on the stack.
-        if(type == PT.FarDataOffs)
+        else if(type == PT.FarDataOffs)
           {
             int clsIndex = stack.popInt();
 
@@ -592,11 +613,11 @@ struct Thread
             MonsterObject *tmp = stack.popObject();
 
             // Return the correct pointer
-            return tmp.getDataInt(clsIndex, index);
+            res = tmp.getDataInt(clsIndex, index);
           }
 
         // Array pointer
-        if(type == PT.ArrayIndex)
+        else if(type == PT.ArrayIndex)
           {
             assert(index==0);
             // Array indices are on the stack
@@ -611,10 +632,13 @@ struct Thread
             if(index < 0 || index >= arf.iarr.length)
               fail("Array index " ~ .toString(index/arf.elemSize) ~
                " out of bounds (array length " ~ .toString(arf.length) ~ ")");
-            return &arf.iarr[index];
+            res = &arf.iarr[index];
           }
+        else
+          fail("Unable to handle pointer type " ~ toString(cast(int)type));
 
-        fail("Unable to handle pointer type " ~ toString(cast(int)type));
+        assert(res !is null);
+        return res;
       }
 
     // Various temporary stuff
@@ -643,7 +667,7 @@ struct Thread
 
 	ubyte opCode = code.get();
 
-        debug(traceOps)
+        static if(traceVMOps)
           {
             writefln("exec: %s   (at stack %s)",
                      bcToString[opCode], stack.getPos);
@@ -675,18 +699,20 @@ struct Thread
               MonsterObject *mo;
               Function *fn;
 
+              // Call function in this object
             case BC.Call:
+              fn = Function.fromIndex(stack.popInt());
               mo = obj;
-              goto CallCommon;
+              goto FindFunc;
 
+              // Call function in another object
             case BC.CallFar:
+              fn = Function.fromIndex(stack.popInt());
               mo = stack.popObject();
 
-            CallCommon:
-
+            FindFunc:
               // Get the correct function from the virtual table
-              val = code.getInt(); // Class index
-              fn = mo.cls.findVirtualFunc(val, code.getInt());
+              fn = fn.findVirtual(mo);
 
               if(fn.isNormal)
                 {
@@ -699,6 +725,12 @@ struct Thread
                   obj = mo;
                   assert(obj is fstack.cur.obj);
                 }
+              else if(fn.isIdle)
+                {
+                  if(callIdle(mo, fn)) return;
+                }
+              else if(fn.isAbstract)
+                fail("Cannot call abstract function " ~ fn.toString());
               else
                 {
                   // Native function. Let Function handle it.
@@ -708,16 +740,6 @@ struct Thread
                 }
               break;
             }
-
-          case BC.CallIdle:
-            if(callIdle(obj))
-              return;
-            break;
-
-          case BC.CallIdleFar:
-            if(callIdle(stack.popObject()))
-              return;
-            break;
 
 	  case BC.Return:
 	    // Remove the given number of bytes from the stack, and
@@ -730,8 +752,7 @@ struct Thread
             goto case BC.Exit;
 
 	  case BC.ReturnValN:
-	    val = code.getInt(); // Get the value first, since order
-				 // of evaluation is important.
+	    val = code.getInt(); // Get the param number
 	    stack.pop(val, code.getInt());
             goto case BC.Exit;
 
@@ -739,6 +760,7 @@ struct Thread
             val = code.getInt(); // State index
             val2 = code.getInt(); // Label index
 	    // Get the class index and let setState handle everything
+
 	    obj.setState(val, val2, code.getInt());
             if(shouldExit) return;
 	    break;
@@ -858,19 +880,19 @@ struct Thread
 
 	  case BC.PushData:
 	    stack.pushInt(code.getInt());
-            debug(traceOps) writefln("  Data: %s", *stack.getInt(0));
+            static if(traceVMOps) writefln("  Data: %s", *stack.getInt(0));
 	    break;
 
 	  case BC.PushLocal:
-            debug(traceOps)
+            static if(traceVMOps)
               {
                 auto p = code.getInt();
-                auto v = *stack.getFrameInt(p);
+                auto v = *stack.getInt(p);
                 stack.pushInt(v);
                 writefln("  Pushed %s from position %s",v,p);
               }
             else
-              stack.pushInt(*stack.getFrameInt(code.getInt()));
+              stack.pushInt(*stack.getInt(code.getInt()));
 	    break;
 
 	  case BC.PushClassVar:
@@ -1258,7 +1280,6 @@ struct Thread
           case BC.CastI2L:
             if(*stack.getInt(0) < 0) stack.pushInt(-1);
             else stack.pushInt(0);
-            //stack.pushLong(stack.popInt());
             break;
 
             // Cast int to float
@@ -1344,6 +1365,17 @@ struct Thread
             stack.pushUlong(cast(ulong)stack.popDouble);
             break;
 
+          case BC.CastS2C:
+            arf = stack.popArray(); // Get array
+            if(arf.carr.length == 0)
+              fail("Cannot cast empty string to 'char'");
+            assert(arf.elemSize == 1);
+            if(arf.carr.length > 1)
+              fail("Cannot cast string of non-unit length " ~
+                   .toString(arf.carr.length) ~ " to char");
+            stack.pushChar(arf.carr[0]);
+            break;
+
           case BC.CastT2S:
             {
               // Get the type to cast from
@@ -1368,6 +1400,13 @@ struct Thread
               if(!mc.parentOf(mo))
                 fail("Cannot cast object " ~ mo.toString ~ " to class " ~ mc.toString);
             }
+            break;
+
+          case BC.RefFunc:
+            // Convert function reference into name
+            val = stack.popInt(); // Function index
+            stack.popInt(); // Ignore the object index
+            stack.pushString(functionList[val].toString());
             break;
 
           case BC.FetchElem:
@@ -1489,7 +1528,7 @@ struct Thread
             arf = stack.popArray(); // Right array
             if(arf.isNull)
               {
-                // right is empty, just copy the left
+                // Right is empty, just copy the left
                 arf = stack.popArray();
                 if(arf.isNull) stack.pushArray(arf);
                 else stack.pushArray(arf.iarr.dup, arf.elemSize);
@@ -1570,7 +1609,7 @@ struct Thread
           case BC.IterUpdate:
 	    val = code.getInt(); // Get stack index of iterator reference
             if(val < 0) fail("Invalid argument to IterUpdate");
-	    val = *stack.getFrameInt(val); // Iterator index
+	    val = *stack.getInt(val); // Iterator index
             iterators.update(cast(IIndex)val); // Do the update
             break;
 

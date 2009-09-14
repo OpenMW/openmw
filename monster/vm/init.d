@@ -30,6 +30,7 @@ import monster.compiler.properties;
 import monster.compiler.scopes;
 import monster.vm.thread;
 import monster.vm.stack;
+import monster.vm.mclass;
 import monster.vm.arrays;
 import monster.vm.vm;
 import monster.vm.dbg;
@@ -125,9 +126,8 @@ void doMonsterInit()
   // Initialize the debugger structure
   dbg.init();
 
-  // Initialize compiler constructs
+  // Initialize tokenizer
   initTokenizer();
-  initProperties();
 
   // initScope depends on doVMInit setting vm.vfs
   vm.doVMInit();
@@ -137,6 +137,12 @@ void doMonsterInit()
   scheduler.init();
   stack.init();
   arrays.initialize();
+
+  // Compiles the 'Object' class
+  MonsterClass.initialize();
+
+  // Depends on 'Object'
+  initProperties();
 
   // Load modules
   static if(loadModules)

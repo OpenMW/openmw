@@ -27,6 +27,7 @@ import std.stdio;
 import std.string;
 
 import monster.util.aa;
+import monster.options;
 
 import monster.compiler.statement;
 import monster.compiler.expression;
@@ -38,13 +39,12 @@ import monster.compiler.functions;
 import monster.compiler.states;
 import monster.compiler.structs;
 import monster.compiler.enums;
+import monster.compiler.operators;
 import monster.compiler.variables;
 
 import monster.vm.mclass;
 import monster.vm.error;
 import monster.vm.vm;
-
-//debug=lookupTrace;
 
 // The global scope
 RootScope global;
@@ -199,7 +199,7 @@ abstract class Scope
 
     // Copy the import list from our parent
     if(!isRoot)
-      importList = parent.importList;
+      importList = parent.importList.dup;
   }
 
   // Verify that an identifier is not declared in this scope. If the
@@ -207,7 +207,7 @@ abstract class Scope
   // error. Recurses through parent scopes.
   final void clearId(Token name)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("ClearId %s in %s (line %s)", name, this, __LINE__);
 
       // Lookup checks all parent scopes so we only have to call it
@@ -275,16 +275,10 @@ abstract class Scope
     return parent.getState();
   }
 
-  Expression getArray()
+  ArrayOperator getArray()
   {
     assert(!isRoot(), "getArray called on wrong scope type");
     return parent.getArray();
-  }
-
-  PackageScope getPackage()
-  {
-    assert(!isRoot(), "getPackage called on the wrong scope type");
-    return parent.getPackage();
   }
 
   int getLoopStack()
@@ -307,7 +301,7 @@ abstract class Scope
   // automatically if a file exists.
   ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
       if(isRoot()) return ScopeLookup(name, LType.None, null, null);
       else return parent.lookup(name, autoLoad);
@@ -323,12 +317,10 @@ abstract class Scope
       return sl;
     }
 
-  // Look up an identifier, and check imported scopes as well. If the
-  // token is not found, do the lookup again but this time check the
-  // file system for classes as well.
+  // Look up an identifier, and check imported scopes as well.
   ScopeLookup lookupImport(Token name, bool second=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("LookupImport %s in %s (line %s)", name, this, __LINE__);
       auto l = lookup(name, second);
       if(!l.isNone) return l;
@@ -336,8 +328,13 @@ abstract class Scope
       // Nuttin' was found, try the imports
       bool found = false;
       auto old = l;
-      foreach(imp; importList)
+      foreach(ind, imp; importList)
         {
+          static if(traceLookups)
+            {
+              writefln("  LI: Import is: %s, index %s of %s",
+                       imp, ind, importList.length-1);
+            }
           l = imp.lookup(name, second);
 
           // Only accept types, classes, variables and functions
@@ -376,20 +373,38 @@ abstract class Scope
       return old;
     }
 
-  // Add an import to this scope
-  void registerImport(ImportHolder s)
+  // More user-friendly version for API-defined import of classes.
+  // Eg. global.registerImport(myclass) -> makes myclass available in
+  // ALL classes.
+  void registerImport(MonsterClass mc)
     {
-      //writefln("Registering import %s in scope %s", s, this);
-      importList ~= s;
+      // Check if this class is already implemented
+      foreach(imp; importList)
+        if(imp.isClass(mc)) return;
+
+      static if(traceLookups)
+        writefln("Importing class %s into %s", mc, this);
+      importList ~= new ClassImpHolder(mc);
     }
 
-  // More user-friendly version for API-defined
-  // imports. Eg. global.registerImport(myclass) -> makes myclass
-  // available in ALL classes.
-  void registerImport(MonsterClass mc)
-    { registerImport(new ClassImpHolder(mc)); }
+  // Ditto for packages
+  void registerImport(PackageScope psc)
+    {
+      // Never import the global scope - it's already implied as a
+      // parent scope of most other scopes
+      //if(psc is global) return;
 
-  // Even more user-friendly version. Takes a list of class names.
+      foreach(imp; importList)
+        if(imp.isPack(psc)) return;
+
+      static if(traceLookups)
+        writefln("Importing package %s into %s", psc, this);
+
+      importList ~= new PackageImpHolder(psc);
+    }
+
+  // Even more user-friendly version for classes. Takes a list of
+  // class names.
   void registerImport(char[][] cls ...)
     {
       foreach(c; cls)
@@ -473,7 +488,7 @@ final class StateScope : Scope
   override:
   ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       assert(name.str != "");
@@ -546,7 +561,7 @@ final class RootScope : PackageScope
 
   override ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       // Basic types are looked up here
@@ -601,11 +616,6 @@ class PackageScope : Scope
 
   bool isPackage() { return true; }
 
-  PackageScope getPackage()
-    {
-      return this;
-    }
-
   char[] getPath(char[] file)
     {
       if(path == "") return file;
@@ -636,7 +646,7 @@ class PackageScope : Scope
   // Used internally from lookup()
   private PackageScope makeSubPackage(char[] name)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       if(!isValidIdent(name))
@@ -729,7 +739,7 @@ class PackageScope : Scope
 
   override ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       // Look up packages
@@ -796,7 +806,7 @@ abstract class VarScope : Scope
 
   ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       assert(name.str != "");
@@ -847,7 +857,7 @@ class FVScope : VarScope
   override:
   ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       assert(name.str != "");
@@ -894,7 +904,7 @@ class TFVScope : FVScope
   override:
   ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       assert(name.str != "");
@@ -947,7 +957,7 @@ final class EnumScope : SimplePropertyScope
     { tasm.push(cast(uint)et.entries.length); }
 
   void enumVal()
-    { tasm.getEnumValue(et.tIndex); }
+    { tasm.getEnumValue(et); }
 
   EnumType et;
 
@@ -991,7 +1001,7 @@ final class EnumScope : SimplePropertyScope
           // en.errorString. The enum index is on the stack, and
           // getEnumValue supplies the enum type and the field
           // index. The VM can find the correct field value from that.
-          tasm.getEnumValue(et.tIndex, fe);
+          tasm.getEnumValue(et, fe);
           return;
         }
 
@@ -1081,6 +1091,12 @@ final class ClassScope : TFVScope
     {
       cls = cl;
       super(last, cls.name.str);
+
+      // Make sure the class has a valid package
+      assert(cl.pack !is null);
+
+      // Import the package into this scope
+      registerImport(cl.pack);
     }
 
   bool isClass() { return true; }
@@ -1098,7 +1114,7 @@ final class ClassScope : TFVScope
 
   override ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       assert(name.str != "");
@@ -1246,20 +1262,20 @@ class CodeScope : StackScope
   LabelStatement getContinue(char[] name = "") { return parent.getContinue(name); }
 }
 
-// Experimental! Used to recompute the array expression for $. NOT a
-// permanent solution.
+// A special scope used inside arrays that allow the $ token to be
+// used as a shorthand for the array length.
 class ArrayScope : StackScope
 {
-  private Expression expArray;
+  private ArrayOperator arrOp;
 
-  this(Scope last, Expression arr)
+  this(Scope last, ArrayOperator op)
     {
       super(last, "arrayscope");
-      expArray = arr;
+      arrOp = op;
     }
 
   bool isArray() { return true; }
-  Expression getArray() { return expArray; }
+  ArrayOperator getArray() { return arrOp; }
 }
 
 // Base class for scopes that have properties. The instances of this
@@ -1286,7 +1302,7 @@ abstract class PropertyScope : Scope
 
   ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       // Does this scope contain the property?
@@ -1365,7 +1381,7 @@ class LoopScope : CodeScope
 
   override ScopeLookup lookup(Token name, bool autoLoad=false)
     {
-      debug(lookupTrace)
+      static if(traceLookups)
         writefln("Lookup %s in %s (line %s)", name, this, __LINE__);
 
       assert(name.str != "");

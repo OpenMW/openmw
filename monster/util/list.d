@@ -28,7 +28,6 @@ module monster.util.list;
 // through the entire list on every insert and remove, so they are
 // very slow for large lists. But they are very handy bug catchers
 // when doing a little dirty list hacking.
-
 // debug=slowcheck;
 
 private import std.c.stdlib;
@@ -222,8 +221,7 @@ struct LinkedList(Value, alias Alloc = GCAlloc)
   Iterator insertNode(Node *p)
     in
     {
-      //debug(slowcheck)
-        assert(!hasIterator(p), "inserNode: Node is already in the list");
+      assert(!hasIterator(p), "inserNode: Node is already in the list");
     }
   body
     {

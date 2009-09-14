@@ -27,6 +27,7 @@ module monster.compiler.tokenizer;
 import std.string;
 import std.stream;
 import std.stdio;
+import std.utf;
 
 import monster.util.string : begins;
 
@@ -84,6 +85,9 @@ enum TT
     // Array length symbol
     Dollar,
 
+    // 'at' sign, @
+    Alpha,
+
     // Conditional expressions
     IsEqual, NotEqual,
     IsCaseEqual, IsCaseEqual2,
@@ -124,22 +128,23 @@ enum TT
     Last, // Tokens after this do not have a specific string
 	  // associated with them.
 
-    StringLiteral,      // "something"
+    StringLiteral,      // "something" or 'something'
     IntLiteral,         // Anything that starts with a number, except
                         // floats
     FloatLiteral,       // Any number which contains a period symbol
-    CharLiteral,        // 'a'
     Identifier,         // user-named identifier
     EOF,                // end of file
     EMPTY               // empty line (not stored)
   }
-
 
 struct Token
 {
   TT type;
   char[] str;
   Floc loc;
+
+  // Translated string literal (with resolved escape codes.)
+  dchar[] str32;
 
   // True if this token was the first on its line.
   bool newline;
@@ -195,6 +200,8 @@ const char[][] tokenList =
     TT.Colon            : ":",
 
     TT.Dollar           : "$",
+
+    TT.Alpha            : "@",
 
     TT.IsEqual          : "==",
     TT.NotEqual         : "!=",
@@ -280,7 +287,6 @@ const char[][] tokenList =
     TT.StringLiteral    : "string literal",
     TT.IntLiteral       : "integer literal",
     TT.FloatLiteral     : "floating point literal",
-    TT.CharLiteral      : "character literal",
     TT.Identifier       : "identifier",
     TT.EOF              : "end of file",
     TT.EMPTY            : "empty line - you should never see this"
@@ -534,31 +540,229 @@ class Tokenizer
       if(line.begins("+/")) fail("Unexpected end of nested comment");
 
       // String literals (multi-line literals not implemented yet)
-      if(line.begins("\""))
+      if(line.begins("\"") ||     // Standard string: "abc"
+         line.begins("r\"") ||    // Wysiwig string: r"c:\dir"
+         line.begins("\\\"") ||   // ditto: \"c:\dir"
+         line.begins("'") ||
+         line.begins("r'") ||     // Equivalent ' versions
+         line.begins("\\'"))
 	{
-	  int len = 1;
 	  bool found = false;
-	  foreach(char ch; line[1..$])
-	    {
-	      len++;
-	      // No support for escape sequences as of now
-	      if(ch == '"')
-		{
-		  found = true;
-		  break;
-		}
-	    }
-	  if(!found) fail("Unterminated string literal '" ~line~"'");
-	  return retToken(TT.StringLiteral, line[0..len].dup);
-	}
+          bool wysiwig = false;
 
-      // Character literals (not parsed yet, so escape sequences like
-      // '\n', '\'', or unicode stuff won't work.)
-      if(line[0] == '\'')
-	{
-	  if(line.length < 3 || line[2] != '\'')
-	    fail("Malformed character literal " ~line);
-	  return retToken(TT.CharLiteral, line[0..3].dup);
+          // Quote character that terminates this string.
+          char quote;
+
+          char[] slice = line;
+
+          // Removes the first num chars from the line
+          void skip(int num)
+            {
+              assert(num <= line.length);
+              slice = slice[num..$];
+            }
+
+          // Parse the first quotation
+          if(slice[0] == '"' || slice[0] == '\'')
+            {
+              quote = slice[0];
+              skip(1);
+            }
+          else
+            {
+              // Check for wysiwig strings
+              if(slice[0] == '\\' || slice[0] == 'r')
+                wysiwig = true;
+              else assert(0);
+
+              quote = slice[1];
+              skip(2);
+            }
+
+          assert(quote == '"' || quote == '\'');
+
+          // This will store the result
+          dchar[] result;
+
+          // Stores a single character in the result string, and
+          // removes a given number of input characters.
+          void store(dchar ch, int slen)
+            {
+              result ~= ch;
+              skip(slen);
+            }
+
+          // Convert a given code into 'ch', if it is found.
+          void convert(char[] code, dchar ch)
+            {
+              if(slice.begins(code))
+                store(ch, code.length);
+            }
+
+          // Convert given escape character to 'res'
+          void escape(char ch, dchar res)
+            {
+              if(slice.length >= 2 &&
+                 slice[0] == '\\' &&
+                 slice[1] == ch)
+                store(res, 2);
+            }
+
+          // Interpret string
+          while(slice.length)
+            {
+              int startLen = slice.length;
+
+              // Convert "" to " (or '' to ' in single-quote strings)
+              convert(""~quote~quote, quote);
+
+              // Interpret backslash escape codes if we're not in
+              // wysiwig mode
+              if(!wysiwig)
+                {
+                  escape('"', '"');      // \" == literal "
+                  escape('\'', '\'');    // \' == literal '
+                  escape('\\', '\\');    // \\ == literal \ 
+
+                  escape('a', 7);        // \a == bell
+                  escape('b', 8);        // \b == backspace
+                  escape('f', 12);       // \f == feed form
+                  escape('n', '\n');     // \n == newline
+                  escape('r', '\r');     // \r == carriage return
+                  escape('t', '\t');     // \t == tab
+                  escape('v', '\v');     // \v == vertical tab
+                  escape('e', 27);       // \e == ANSI escape
+
+                  // Check for numerical escapes
+
+                  // If either of these aren't met, this isn't a valid
+                  // escape code.
+                  if(slice.length < 2 ||
+                     slice[0] != '\\')
+                    goto nocode;
+
+                  // Checks and converts the digits in slice[] into a
+                  // character.
+                  void convertNumber(int skp, int maxLen, int base,
+                                     char[] pattern, char[] name)
+                    {
+                      assert(base <= 16);
+
+                      // Skip backslash and other leading characters
+                      skip(skp);
+
+                      int len; // Number of digits found
+                      uint result = 0;
+
+                      for(len=0; len<maxLen; len++)
+                        {
+                          if(slice.length <= len) break;
+
+                          char digit = slice[len];
+
+                          // Does the digit qualify?
+                          if(!inPattern(digit, pattern))
+                            break;
+
+                          // Multiply up the existing number to
+                          // make room for the digit.
+                          result *= base;
+
+                          // Convert single digit to a number
+                          if(digit >= '0' && digit <= '9')
+                            digit -= '0';
+                          else if(digit >= 'a' && digit <= 'z')
+                            digit -= 'a' - 10;
+                          else if(digit >= 'A' && digit <= 'Z')
+                            digit -= 'A' - 10;
+                          assert(digit >= 0 && digit < base);
+
+                          // Add inn the digit
+                          result += digit;
+                        }
+
+                      if(len > 0)
+                        {
+                          // We got something. Convert it and store
+                          // it.
+                          store(result, len);
+                        }
+                      else
+                        fail("Invalid " ~ name ~ " escape code");
+                    }
+
+                  const Dec = "0-9";
+                  const Oct = "0-7";
+                  const Hex = "0-9a-fA-F";
+
+                  // Octal escapes: \0N, \0NN or \0NNN where N are
+                  // octal digits (0-7). Also accepts \o instead of
+                  // \0.
+                  if(slice[1] == '0' || slice[1] == 'o')
+                    convertNumber(2, 3, 8, Oct, "octal");
+
+                  // Decimal escapes: \N \NN and \NNN, where N are
+                  // digits and the first digit is not zero.
+                  else if(inPattern(slice[1], Dec))
+                    convertNumber(1, 3, 10, Dec, "decimal");
+
+                  // Hex escape codes: \xXX where X are hex digits
+                  else if(slice[1] == 'x')
+                    convertNumber(2, 2, 16, Hex, "hex");
+
+                  // Unicode escape codes:
+                  // \uXXXX
+                  else if(slice[1] == 'u')
+                    convertNumber(2, 4, 16, Hex, "Unicode hex");
+
+                  // \UXXXXXXXX
+                  else if(slice[1] == 'U')
+                    convertNumber(2, 8, 16, Hex, "Unicode hex");
+
+                }
+            nocode:
+
+              // If something was converted this round, start again
+              // from the top.
+              if(startLen != slice.length)
+                continue;
+
+              assert(slice.length > 0);
+
+              // Nothing was done. Are we at the end of the string?
+              if(slice[0] == quote)
+                {
+                  skip(1);
+                  found = true;
+                  break;
+                }
+
+              // Unhandled escape code?
+              if(slice[0] == '\\' && !wysiwig)
+                {
+                  if(slice.length == 0)
+                    // Just a single \ at the end of the line
+                    fail("Multiline string literals not implemented");
+                  else
+                    fail("Unhandled escape code: \\" ~ slice[1]);
+                }
+
+              // Nope. It's just a normal character. Decode it from
+              // UTF8.
+              size_t clen = 0;
+              dchar cres;
+              cres = decode(slice,clen);
+              store(cres, clen);
+            }
+	  if(!found) fail("Unterminated string literal '" ~line~ "'");
+
+          // Set 'slice' to contain the original string
+          slice = line[0..(line.length-slice.length)];
+
+          // Set up the token
+	  auto t = retToken(TT.StringLiteral, slice.dup);
+          t.str32 = result;
+          return t;
 	}
 
       // Numerical literals - if it starts with a number, we accept

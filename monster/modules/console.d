@@ -134,7 +134,6 @@ class Console
   void putln(char[] str) { put(str, true); }
 
  private:
-
   Statement[] parse(TokenArray toks, Scope sc)
     {
       Statement b;
@@ -307,32 +306,52 @@ class Console
           // Phase IV, compile
           tasm.newFunc();
 
-          ExprStatement es;
+          // Expression to print, if any
+          Expression printExp = null;
 
-          // Is it an special console statement?
+          // Is it a special console statement?
           auto cs = cast(ConsoleStatement)st;
           if(cs !is null)
             {
-              // Yes. Is the client an expression?
-              es = cast(ExprStatement)cs.client;
+              // Get the client expression, if any.
+              ExprStatement es = cast(ExprStatement)cs.client;
               if(es !is null)
                 {
-                  // Ok. But is the type usable?
-                  if(es.left.type.canCastTo(ArrayType.getString())
-                     && es.right is null)
-                    {
-                      // Yup. Get the type, and cast the expression to string.
-                      scope auto ce = new
-                        CastExpression(es.left, ArrayType.getString());
-                      ce.eval();
-                    }
-                  else es = null;
+                  // It's a normal expression
+                  if(es.right is null)
+                    printExp = es.left;
+                }
+              // Not an expression, maybe a function?
+              else if(cs.func !is null)
+                {
+                  // Yup, store it
+                  printExp = cs.func;
                 }
             }
 
-          // No expression is being used, so compile the statement
-          // normally.
-          if(es is null)
+          // Ok, we got an expression. But is the type usable?
+          if(printExp !is null)
+            {
+              auto tp = printExp.type;
+              auto strt = ArrayType.getString();
+              assert(tp !is null);
+              assert(strt !is null);
+
+              if(tp == strt || tp.canCastTo(strt))
+                {
+                  // Yup, it is! Cast the expression to string.
+                  strt.typeCast(printExp, "console output");
+                  printExp.eval();
+                }
+              else
+                // Type isn't usable, so set printExp to null to flag
+                // this.
+                printExp = null;
+            }
+
+          if(printExp is null)
+            // No expression is being used, so compile the statement
+            // normally.
             st.compile();
 
           // Gather all the statements into one function and get the
@@ -344,7 +363,7 @@ class Console
           fn.call(obj);
 
           // Finally, get the expression result, if any, and print it.
-          if(es !is null)
+          if(printExp !is null)
             putln(stack.popString8());
 
           // In the case of new a variable declaration, we have to
@@ -467,7 +486,7 @@ class Console
 
 // Statement that handles variable declarations, function calls and
 // expression statements in consoles. Since these are gramatically
-// similar, we need the type to determine which
+// similar, we need the type to determine which it is.
 class ConsoleStatement : Statement
 {
   // Used for variables and expression statements
@@ -497,7 +516,7 @@ class ConsoleStatement : Statement
         }
 
       // Function?
-      else if(type.isFunc)
+      else if(type.isIntFunc)
         func = new FunctionCallExpr(first, toks, true);
 
       // It's an expression statement

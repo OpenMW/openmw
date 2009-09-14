@@ -390,6 +390,14 @@ abstract class Expression : Block
   final void evalPop()
     {
       eval();
+
+      // Internal types never come from expressions that have any
+      // effect. Leaving them dangling without a reciever can cause
+      // stack bugs in some cases (since the owner and other internal
+      // data is never popped), so we forbid them.
+      if(!type.isLegal)
+        fail("Expression " ~ toString() ~ " has no effect", loc);
+
       setLine();
       if(!type.isVoid)
         tasm.pop(type.getSize());
@@ -621,7 +629,10 @@ class NewExpression : Expression
 
       if(type.isObject)
         {
-          // Then push the variable pointers and values on the stack
+          // Total stack size of parameters
+          int imprint = 0;
+
+          // Push the variable pointers and values on the stack
           foreach(i, v; params)
             {
               auto lvar = varlist[i];
@@ -630,14 +641,19 @@ class NewExpression : Expression
               assert(lvar !is null);
               assert(lvar.sc !is null);
 
+              // Push the expression and some meta info
               v.value.eval();
               tasm.push(v.value.type.getSize); // Type size
               tasm.push(lvar.number); // Var number
               tasm.push(lvar.sc.getClass().getTreeIndex()); // Class index
+
+              // Tally up the casualties
+              imprint += v.value.type.getSize() + 3;
             }
-          // Create a new object. This is done through a special byte code
-          // instruction.
-          tasm.newObj(clsInd, params.length);
+
+          // Create a new object. This is done through a special byte
+          // code instruction.
+          tasm.newObj(clsInd, params.length, imprint);
         }
       else if(type.isArray)
         {
@@ -780,9 +796,9 @@ class ArrayLiteralExpr : Expression
 }
 
 // Expression representing a literal or other special single-token
-// values. Supported tokens are StringLiteral, Int/FloatLiteral,
-// CharLiteral, True, False, Null, Dollar and This. Array literals are
-// handled by ArrayLiteralExpr.
+// values. Supported tokens are StringLiteral, Int/FloatLiteral, True,
+// False, Null, Dollar and This. Array literals are handled by
+// ArrayLiteralExpr.
 class LiteralExpr : Expression
 {
   Token value;
@@ -792,22 +808,11 @@ class LiteralExpr : Expression
   dchar dval; // Characters are handled internally as dchars
   float fval;
 
-  // TODO/FIXME: When evalutationg the array length symbol $, we
-  // evaluate the array expression again, and the find its
-  // length. This is a TEMPORARY solution - if the array expression is
-  // a complicated expression or if it has side effects, then
-  // evaluating it more than once is obviously not a good idea. Example:
-  // myfunc()[$-4..$]; // myfunc() is called three times!
+  // The array operator expression for $ symbols (ie. a[b] or a[b..c])
+  ArrayOperator arrOp;
 
-  // A better solution is to store the array index on the stack for
-  // the entire duration of the array expression and remember the
-  // position, just like we do for foreach. Since the index has
-  // already been pushed, this is pretty trivial to do through the
-  // scope system.
-  Expression arrayExp;
-
-  // TODO: Does not support double, long or unsigned types yet. A much
-  // more complete implementation will come later.
+  // This is set if the array that $ refers to is ctime.
+  bool arrayCTime;
 
   // String, with decoded escape characters etc and converted to
   // utf32. We need the full dchar string here, since we might have to
@@ -825,7 +830,6 @@ class LiteralExpr : Expression
 	isNext(toks, TT.StringLiteral) ||
 	isNext(toks, TT.IntLiteral) ||
 	isNext(toks, TT.FloatLiteral) ||
-	isNext(toks, TT.CharLiteral) ||
 	isNext(toks, TT.True) ||
 	isNext(toks, TT.False) ||
 	isNext(toks, TT.Null) ||
@@ -893,7 +897,13 @@ class LiteralExpr : Expression
             fail("Array length $ not allowed here", loc);
 
           type = BasicType.getInt;
-          arrayExp = sc.getArray();
+          arrOp = sc.getArray();
+
+          // If the array itself is compile time, then so is the
+          // length.
+          assert(arrOp.name !is null);
+          assert(arrOp.name.type.isArray());
+          arrayCTime = arrOp.name.isCTime();
           return;
         }
 
@@ -916,32 +926,12 @@ class LiteralExpr : Expression
 	  return;
 	}
 
-      // Single character
-      if(value.type == TT.CharLiteral)
-	{
-          type = BasicType.getChar;
-
-          // Decode the unicode character. TODO: Error checking?
-          // Unicode sanity checks should be handled in the tokenizer.
-          size_t idx = 1;
-	  dval = decode(value.str, idx);
-	  return;
-	}
-
       // Strings
       if(value.type == TT.StringLiteral)
         {
           type = ArrayType.getString;
 
-          // Check that we do indeed have '"'s at the ends of the
-          // string. Special cases which we allow later (like wysiwig
-          // strings, @"c:\") will have their special characters
-          // removed in the tokenizer.
-          assert(value.str.length >=2 && value.str[0] == '"' && value.str[$-1] == '"',
-                 "Encountered invalid string literal token: " ~ value.str);
-
-          strVal = toUTF32(value.str[1..$-1]);
-          //cls.reserveStatic(strVal.length);
+          strVal = value.str32;
 
           return;
         }
@@ -952,7 +942,9 @@ class LiteralExpr : Expression
   // We currently support a few kinds of constants
   bool isCTime()
     {
-      if(value.type == TT.Dollar) return false;
+      // If the array value itself is ctime, then $ is too.
+      if(value.type == TT.Dollar)
+        return arrayCTime;
 
       return
         type.isInt() || type.isBool() || type.isFloat || type.isChar ||
@@ -961,6 +953,19 @@ class LiteralExpr : Expression
 
   int[] evalCTime()
     {
+      if(value.type == TT.Dollar)
+        {
+          // Get the array
+          assert(arrOp.name.isCTime());
+          int res[] = arrOp.name.evalCTime().dup;
+          assert(res.length == 1);
+          auto arf = arrays.getRef(cast(AIndex)res[0]);
+
+          // Return the length
+          res[0] = arf.length();
+          return res;
+        }
+
       // Return a slice of the value
       if(type.isInt || type.isBool) return (&ival)[0..1];
       if(type.isChar) return (cast(int*)&dval)[0..1];
@@ -988,14 +993,11 @@ class LiteralExpr : Expression
 
       if(value.type == TT.Dollar)
         {
-          // Get the array. TODO/FIXME: This is a very bad solution,
-          // the entire array expression is recomputed whenever we use
-          // the $ symbol. If the expression has side effects (like a
-          // function call), this can give unexpected results. This is
-          // a known bug that will be fixed later. The simplest
-          // solution is to let ArrayExpression create a new scope,
-          // which stores the stack position of the array index.
-          arrayExp.eval();
+          // The array index should already be on the stack. Get it.
+          auto sMark = arrOp.stackMark;
+          assert(sMark !is null);
+          tasm.pushMark(sMark);
+
           // Convert it to the length
           setLine();
           tasm.getArrayLength();
@@ -1053,7 +1055,7 @@ class CastExpression : Expression
       orig.eval();
 
       // The type does the low-level stuff
-      orig.type.evalCastTo(type);
+      orig.type.evalCastTo(type, orig.loc);
     }
 
   char[] toString()
@@ -1074,6 +1076,10 @@ abstract class ImportHolder : Expression
 
   // Get a short name (for error messages)
   abstract char[] getName();
+
+  // Override these to avoid duplicate imports
+  bool isClass(MonsterClass mc) { return false; }
+  bool isPack(PackageScope sc) { return false; }
 
  override:
 
@@ -1112,6 +1118,8 @@ class PackageImpHolder : ImportHolder
   char[] getName() { return sc.toString(); }
 
   char[] toString() { return "imported package " ~ sc.toString(); }
+
+  bool isPack(PackageScope s) { return s is sc; }
 }
 
 // Import holder for classes
@@ -1160,6 +1168,8 @@ class ClassImpHolder : ImportHolder
           tasm.pushSingleton(mc.getIndex());
         }
     }
+
+  bool isClass(MonsterClass m) { return m is mc; }
 }
 
 // An expression that works as a statement. This also handles all

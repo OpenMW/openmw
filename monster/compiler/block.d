@@ -117,6 +117,35 @@ abstract class Block
       reqNext(toks, type, t);
     }
 
+  // Skip any matching set of parens (), [] or {}, and anything inside
+  // it.
+  static void skipParens(ref TokenArray toks, TT type = TT.LeftParen)
+    {
+      TT endType;
+      if(type == TT.LeftParen)
+        endType = TT.RightParen;
+      else if(type == TT.LeftCurl)
+        endType = TT.RightCurl;
+      else if(type == TT.LeftSquare)
+        endType = TT.RightSquare;
+      else assert(0);
+
+      int count = 0;
+
+      while(toks.length != 0)
+        {
+          if(toks[0].type == type)
+            count++;
+          else if(toks[0].type == endType)
+            count--;
+
+          toks = toks[1..$];
+
+          if(count <= 0)
+            return;
+        }
+    }
+
   // Sets the assembler debug line to the line belonging to this
   // block.
   final void setLine() { tasm.setLine(loc.line); }

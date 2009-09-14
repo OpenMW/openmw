@@ -40,9 +40,9 @@ void initMonsterScripts()
   // Add the script directories
   vm.addPath("mscripts/");
 
-  // Import some modules into the global scope, so we won't have to
-  // import them manually in each script.
-  global.registerImport("io", "random", "timer");
+  // Import some modules into scope of Object, so we won't have to
+  // import them manually into each script.
+  MonsterClass.getObject().sc.registerImport("random", "timer");
 
   // Get the Config singleton object
   config.mo = vm.load("Config").getSing();

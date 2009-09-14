@@ -39,12 +39,15 @@ import std.stdio;
 import std.string;
 import std.utf;
 
-// Handles - ! ++ --
+// Handles - ! ++ -- @
 class UnaryOperator : Expression
 {
   TT opType;
   Expression exp;
   bool postfix;
+
+  // Original function type (for @)
+  IntFuncType ift;
 
   this()
     {
@@ -65,6 +68,7 @@ class UnaryOperator : Expression
       return
 	isNext(toks, TT.Minus) ||
 	isNext(toks, TT.Not) ||
+        isNext(toks, TT.Alpha) ||
 	isNext(toks, TT.PlusPlus) ||
 	isNext(toks, TT.MinusMinus);
     }
@@ -81,13 +85,38 @@ class UnaryOperator : Expression
       return tokenList[opType] ~ "(" ~ exp.toString ~ ")";
     }
 
-  // Copy everything from the sub expression
   void resolve(Scope sc)
     {
       exp.resolve(sc);
 
+      // Copy everything from the sub expression
       type = exp.type;
       loc = exp.getLoc;
+
+      if(opType == TT.Alpha)
+        {
+          if(!type.isIntFunc)
+            fail("Operator @ cannot be used on non-function " ~
+                 exp.toString() ~ " (of type " ~ exp.typeString() ~
+                 ")", loc);
+
+          ift = cast(IntFuncType)type;
+          assert(ift !is null);
+
+          // Make sure this function has an index
+          if(!ift.func.hasGIndex())
+            fail("Cannot create reference to function " ~ ift.func.toString(),
+                 loc);
+
+          // Replace the internal function type with a function
+          // reference.
+          type = new FuncRefType(ift);
+
+          // If the function is not a member, make sure it's a class
+          // function in our current class (or one of our parents.)
+          assert(ift.isMember || (sc.getClass().childOf(ift.func.owner)),
+                 "oops, found the wrong owner class");
+        }
 
       if(opType == TT.PlusPlus || opType == TT.MinusMinus)
 	{
@@ -120,7 +149,8 @@ class UnaryOperator : Expression
 
   bool isCTime()
     {
-      if(opType == TT.PlusPlus || opType == TT.MinusMinus)
+      if(opType == TT.PlusPlus || opType == TT.MinusMinus ||
+         opType == TT.Alpha)
 	return false;
 
       return exp.isCTime();
@@ -168,10 +198,22 @@ class UnaryOperator : Expression
 	}
 
       exp.eval();
-
       setLine();
 
-      if(opType == TT.Minus)
+      if(opType == TT.Alpha)
+        {
+          assert(ift !is null);
+
+          // If the function is a member, the object will already have
+          // been pushed on the stack. If not, push this.
+          if(!ift.isMember)
+            tasm.pushThis();
+
+          // Push the function index
+          tasm.push(ift.func.getGIndex());
+        }
+
+      else if(opType == TT.Minus)
         {
           if(type.isInt || type.isLong || type.isFloat || type.isDouble)
             tasm.neg(type);
@@ -203,7 +245,10 @@ class ArrayOperator : OperatorExpr
   bool isFill;  // Set during assignment if we're filling the array
                 // with one single value
 
-  int isEnum;  // Used for enum types
+  int isEnum;   // Used for enum types
+
+  // A stack mark giving the position of the array index on the stack.
+  CodeElement *stackMark;
 
   // name[], name[index], name[index..index2]
   Expression name, index, index2;
@@ -287,7 +332,7 @@ class ArrayOperator : OperatorExpr
           // either name[index] or name[index..index2]
 
           // Create an inner scope where $ is a valid character.
-          ArrayScope isc = new ArrayScope(sc, name);
+          ArrayScope isc = new ArrayScope(sc, this);
 
           index.resolve(isc);
 
@@ -317,7 +362,7 @@ class ArrayOperator : OperatorExpr
 
       if(isDest) return false;
 
-      // a[b] and a[b..c]; is compile time if a, b and c is.
+      // a[b] and a[b..c]; are compile time if a, b and c is.
       if(index !is null && !index.isCTime) return false;
       if(index2 !is null && !index2.isCTime) return false;
       return name.isCTime();
@@ -413,7 +458,11 @@ class ArrayOperator : OperatorExpr
           return;
         }
 
-      // Push the array index first
+      // Get a stack mark. This may be used by $ to get the array
+      // index later.
+      stackMark = tasm.markStack();
+
+      // Push the array index
       name.eval();
 
       setLine();
@@ -435,7 +484,7 @@ class ArrayOperator : OperatorExpr
 
           setLine();
           if(isDest) tasm.elementAddr();
-          else tasm.fetchElement();
+          else tasm.fetchElement(type.getSize());
 
           assert(!isSlice);
         }

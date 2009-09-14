@@ -85,10 +85,36 @@ final class MonsterClass
       return
         Block.isNext(tokens, TT.Class) ||
         Block.isNext(tokens, TT.Singleton) ||
+        Block.isNext(tokens, TT.Abstract) ||
         Block.isNext(tokens, TT.Module);
     }
 
   static uint getTotalObjects() { return allObjects.length; }
+
+  // Sets up the Object class, which is the parent of all other
+  // classes.
+  static void initialize()
+    {
+      assert(baseObject is null,
+             "MonsterClass.initialize() run more than once");
+      assert(global !is null);
+
+      // The Object class is empty
+      baseObject = vm.loadString("abstract class Object;", "Object");
+      assert(baseObject !is null);
+
+      // Set up the class. createScope() etc will make a special case
+      // for us when it detects that it is running on baseObject.
+      baseObject.requireCompile();
+    }
+
+  private static MonsterClass baseObject;
+
+  // Returns the class called 'Object'
+  static MonsterClass getObject()
+    {
+      return baseObject;
+    }
 
  final:
 
@@ -110,8 +136,7 @@ final class MonsterClass
   PackageScope pack;
 
   ObjectType objType; // Type for objects of this class
-  Type classType; // Type for class references to this class (not
-                  // implemented yet)
+  Type classType; // Type for class references to this class
 
   // Pointer to the C++ wrapper class, if any. Could be used for other
   // wrapper languages at well, but only one at a time.
@@ -125,34 +150,6 @@ final class MonsterClass
   Flags!(CFlags) flags;
 
  public:
-
-  bool isParsed() { return flags.has(CFlags.Parsed); }
-  bool isScoped() { return flags.has(CFlags.Scoped); }
-  bool isResolved() { return flags.has(CFlags.Resolved); }
-  bool isCompiled() { return flags.has(CFlags.Compiled); }
-
-  bool isSingleton() { return flags.has(CFlags.Singleton); }
-  bool isModule() { return flags.has(CFlags.Module); }
-  bool isAbstract() { return flags.has(CFlags.Abstract); }
-
-  // Call whenever you require this function to have its scope in
-  // order. If the scope is missing, this will call createScope if
-  // possible, or fail if the class has not been loaded.
-  void requireScope()
-    {
-      if(isScoped) return;
-      if(!isParsed)
-        fail("Cannot use class '" ~ name.str ~
-             "': not found or forward reference",
-             name.loc);
-
-      createScope();
-    }
-
-  // Called whenever we need a completely compiled class, for example
-  // when creating an object. Compiles the class if it isn't done
-  // already.
-  void requireCompile() { if(!isCompiled) compileBody(); }
 
   // Create a class belonging to the given package scope. Do not call
   // this yourself, use vm.load* to load classes.
@@ -224,7 +221,8 @@ final class MonsterClass
       return virtuals[ctree][findex];
     }
 
-  // Find a given callable function, virtually.
+  // Find a given callable function, looking up parent classes if
+  // necessary.
   Function *findFunction(char[] name)
   {
     requireScope();
@@ -617,6 +615,34 @@ final class MonsterClass
    *                                                     *
    *******************************************************/
 
+  bool isParsed() { return flags.has(CFlags.Parsed); }
+  bool isScoped() { return flags.has(CFlags.Scoped); }
+  bool isResolved() { return flags.has(CFlags.Resolved); }
+  bool isCompiled() { return flags.has(CFlags.Compiled); }
+
+  bool isSingleton() { return flags.has(CFlags.Singleton); }
+  bool isModule() { return flags.has(CFlags.Module); }
+  bool isAbstract() { return flags.has(CFlags.Abstract); }
+
+  // Call whenever you require this function to have its scope in
+  // order. If the scope is missing, this will call createScope if
+  // possible, or fail if the class has not been loaded.
+  void requireScope()
+    {
+      if(isScoped) return;
+      if(!isParsed)
+        fail("Cannot use class '" ~ name.str ~
+             "': not found or forward reference",
+             name.loc);
+
+      createScope();
+    }
+
+  // Called whenever we need a completely compiled class, for example
+  // when creating an object. Compiles the class if it isn't done
+  // already.
+  void requireCompile() { if(!isCompiled) compileBody(); }
+
   // Check if this class is a child of cls.
   bool childOf(MonsterClass cls)
     {
@@ -707,35 +733,87 @@ final class MonsterClass
       natNew.name.str = "native 'new' callback";
       natNew.owner = this;
 
-      // TODO: Check for a list of keywords here. class, module,
-      // abstract, final. They can come in any order, but only certain
-      // combinations are legal. For example, class and module cannot
-      // both be present, and most other keywords only apply to
-      // classes. 'function' is not allowed at all, but should be
-      // checked for to make sure we're loading the right kind of
-      // file. If neither class nor module are found, that is also
-      // illegal in class files.
+      // Parse keywords. Uses a few local variables, so let's start a
+      // block.
+      {
+        assert(tokens.length > 0);
+        Floc loc = tokens[0].loc;
 
-      if(isNext(tokens, TT.Module))
-        {
-          flags.set(CFlags.Module);
-          flags.set(CFlags.Singleton);
-        }
-      else if(isNext(tokens, TT.Singleton))
-        flags.set(CFlags.Singleton);
-      else if(!isNext(tokens, TT.Class))
-	fail("File must begin with a class or module statement", tokens);
+        // Check for / set a given keyword flag. Returns true if it
+        // was NOT found.
+        bool check(TT type, ref bool flag)
+          {
+            Token tok;
+            if(isNext(tokens, type, tok))
+              {
+                if(flag)
+                  fail("Keyword '" ~ tok.str ~
+                       "' was specified twice", tok.loc);
+                flag = true;
+                return false;
+              }
+            return true;
+          }
+
+        // Flags for the various keywords
+        bool absSet;
+        bool classSet;
+        bool moduleSet;
+        bool singleSet;
+        bool something;
+
+        while(true)
+          {
+            if(check(TT.Class, classSet) &&
+               check(TT.Abstract, absSet) &&
+               check(TT.Module, moduleSet) &&
+               check(TT.Singleton, singleSet))
+              // Abort if nothing was found this round
+              break;
+
+            // If we get here at least once, then one of the keywords
+            // were present.
+            something = true;
+          }
+
+        // Was anything found?
+        if(!something)
+          fail("File must begin with a class or module statement", tokens);
+
+        // Module and singleton imply class as well
+        if(moduleSet || singleSet)
+          classSet = true;
+
+        // Do error checking
+        if(moduleSet && singleSet)
+          fail("Cannot specify both 'module' and 'singleton' (module implies singleton)",
+               loc);
+        if(!classSet)
+          fail("Class must start with one of 'class', 'singleton' or 'module'",
+               loc);
+
+        // Module implies singleton
+        if(moduleSet)
+          singleSet = true;
+
+        // But singletons cannot be abstract
+        if(singleSet && absSet)
+          fail("Modules and singletons cannot be abstract", loc);
+
+        // Process flags
+        if(singleSet) flags.set(CFlags.Singleton);
+        if(moduleSet) flags.set(CFlags.Module);
+        if(absSet) flags.set(CFlags.Abstract);
+      }
 
       if(!isNext(tokens, TT.Identifier, name))
 	fail("Class statement expected identifier", tokens);
 
       // Module implies singleton
       assert(isSingleton || !isModule);
+      assert(!isSingleton || !isAbstract);
 
-      if(isSingleton && isAbstract)
-        fail("Modules and singletons cannot be abstract", name.loc);
-
-      // Insert ourselves into the global scope. This will also
+      // Insert ourselves into the package scope. This will also
       // resolve forward references to this class, if any.
       pack.insertClass(this);
 
@@ -757,10 +835,6 @@ final class MonsterClass
         }
 
       isNext(tokens, TT.Semicolon);
-      /*
-      if(!isNext(tokens, TT.Semicolon))
-	fail("Missing semicolon after class statement", name.loc);
-      */
 
       if(parents.length > 1)
         fail("Multiple inheritance is currently not supported", name.loc);
@@ -865,6 +939,13 @@ final class MonsterClass
         if(!fn.isNative())
           fail("Cannot bind to non-native function '" ~ name ~ "'");
       }
+
+    // Check that the function really belongs to this class. We cannot
+    // bind functions belonging to parent classes.
+    assert(fn.owner !is null);
+    if(fn.owner !is this)
+      fail("Cannot bind to function " ~ fn.toString() ~
+           " - it is not a direct member of class " ~ toString());
 
     fn.ftype = ft;
 
@@ -978,7 +1059,6 @@ final class MonsterClass
                  pName.loc);
           auto mc = sl.mc;
           assert(mc !is null);
-          //MonsterClass mc = vm.load(pName.str);
           mc.requireScope();
 
           assert(mc !is null);
@@ -1006,9 +1086,21 @@ final class MonsterClass
       // For now we only support one parent class.
       assert(parents.length <= 1);
 
-      // Since there's only one parent, we can copy its tree and add
-      // ourselv to the list. TODO: At some point we need to
-      // automatically add Object to this list.
+      // initialize() must already have been called before we get here
+      assert(baseObject !is null);
+
+      // If we don't have a parent, and we aren't Object, then set
+      // Object as our parent.
+      if(parents.length != 1 && this !is baseObject)
+        parents = [baseObject];
+
+      // So at this point we either have a parent, or we are Object.
+      assert(parents.length == 1 ||
+             this is baseObject);
+
+      // Since there are only linear (single) inheritance graphs at
+      // the moment, we can just copy our parent's tree list and add
+      // ourself to it.
       if(parents.length == 1)
         tree = parents[0].tree;
       else
@@ -1024,8 +1116,14 @@ final class MonsterClass
       // package scope if there is no parent.
       Scope parSc;
       if(parents.length != 0) parSc = parents[0].sc;
-      // TODO: Should only be allowed for Object
-      else parSc = pack;
+      else
+        {
+          // For Object, use the package scope (which should be the
+          // global scope)
+          assert(this is baseObject);
+          assert(pack is global);
+          parSc = pack;
+        }
 
       assert(parSc !is null);
 
@@ -1140,8 +1238,7 @@ final class MonsterClass
   // This calls resolve on the interior of functions and states.
   void resolveBody()
     {
-      if(!isScoped)
-        createScope();
+      requireScope();
 
       assert(!isResolved, getName() ~ " is already resolved");
 

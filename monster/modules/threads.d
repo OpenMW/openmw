@@ -32,6 +32,7 @@ import monster.vm.mobject;
 import monster.vm.idlefunction;
 import monster.vm.thread;
 import monster.vm.mclass;
+import monster.compiler.functions;
 import std.stdio;
 
 const char[] moduleDef =
@@ -49,7 +50,7 @@ native bool isDead();
 bool isAlive() { return !isDead(); }
 
 // Create a new (paused) thread for a given function
-native thread create(char[] name);
+native thread create(function() f);
 
 // Schedule a (paused) thread to run the next frame
 native restart();
@@ -63,20 +64,19 @@ idle call();
 idle wait();
 
 // Start a function as a thread in the background
-thread start(char[] name)
+thread start(function() f)
 {
-  var t = create(name);
+  var t = create(f);
   t.restart();
   return t;
-}
-"; //"
+}"; //"
 
 /*
   The char[] name stuff above will of course be replaced with real
   function pointers once those are done. When closures are done we
   will also add:
 
-  function() wrap(function f())
+  function() wrap(function() f)
   {
     var t = create(f);
     return { t.call(); }
@@ -154,20 +154,8 @@ void create()
   if(params.obj !is trdSing)
     fail("Can only use create() on the global thread object.");
 
-  char[] name = stack.popString8();
-
-  assert(cthread !is null);
-
-  // This is a dirty hack that's only needed because we haven't
-  // implemented function pointers yet. Gets the caller object.
-  assert(cthread.fstack.list.length >= 2);
-  auto nd = cthread.fstack.cur;
-  nd = cthread.fstack.list.getNext(nd);
-  if(nd.getCls() is _threadClass)
-    nd = cthread.fstack.list.getNext(nd);
-  auto mo = nd.obj;
-
-  auto trd = mo.thread(name);
+  auto fn = stack.popFuncRef();
+  auto trd = fn.getObject().thread(fn.getFunction());
 
   stack.pushObject(createObj(trd));
 }

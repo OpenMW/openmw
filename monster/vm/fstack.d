@@ -65,11 +65,6 @@ struct StackPoint
 
   MonsterObject *obj; // "this"-pointer for the function
 
-  // Could have an afterStack to check that the function has the
-  // correct imprint (corresponding to an imprint-var in Function.)
-
-  int *frame; // Stack frame for this function
-
   // Get the class owning the function
   MonsterClass getCls()
   {
@@ -185,15 +180,22 @@ struct FunctionStack
     else assert(list.length == 0);
   }
 
-  // Set the global stack frame pointer to correspond to the current
-  // entry in the fstack. Must be called when putting a thread in the
-  // foreground.
-  void restoreFrame()
+  // Get the thread associated with this function stack. Depends on
+  // the fact that we are the first member of the Thread, so our
+  // pointers are the same. If this changes, you MUST change this
+  // function as well.
+  Thread *getThread()
   {
-    if(cur !is null)
-      stack.setFrame(cur.frame);
-    else
-      stack.setFrame(null);
+    return cast(Thread*)this;
+  }
+
+  // Used for debug logging
+  void log(char[] msg)
+  {
+    static if(logFStack)
+      {
+        dbg.log(msg, getThread());
+      }
   }
 
   void killAll()
@@ -236,7 +238,6 @@ struct FunctionStack
     // Puts a new node at the beginning of the list
     cur = list.getNew();
     cur.obj = obj;
-    cur.frame = stack.setFrame();
   }
 
   // Set the stack point up as a function. Allows obj to be null.
@@ -261,7 +262,7 @@ struct FunctionStack
 
     static if(logFStack)
       {
-        dbg.log("+++ " ~ cur.toString());
+        log("+++ " ~ cur.toString());
       }
   }
 
@@ -285,7 +286,7 @@ struct FunctionStack
 
     static if(logFStack)
       {
-        dbg.log("+++ " ~ cur.toString());
+        log("+++ " ~ cur.toString());
       }
   }
 
@@ -300,7 +301,7 @@ struct FunctionStack
 
     static if(logFStack)
       {
-        dbg.log("+++ " ~ cur.toString());
+        log("+++ " ~ cur.toString());
       }
   }
 
@@ -317,7 +318,7 @@ struct FunctionStack
 
     static if(logFStack)
       {
-        dbg.log("+++ " ~ cur.toString());
+        log("+++ " ~ cur.toString());
       }
   }
 
@@ -336,7 +337,7 @@ struct FunctionStack
 
     static if(logFStack)
       {
-        dbg.log(" -- " ~ cur.toString());
+        log(" -- " ~ cur.toString());
       }
 
     // Remove the topmost node from the list, and set cur.
@@ -344,13 +345,11 @@ struct FunctionStack
     list.remove(cur);
     cur = list.getHead();
 
-    restoreFrame();
-
     assert(list.length != 0 || cur is null);
 
     static if(logFStack)
       {
-        dbg.log("");
+        log("");
       }
   }
 

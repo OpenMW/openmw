@@ -24,7 +24,10 @@
 
 module monster.util.growarray;
 
-// Array that grows without reallocations.
+// Array that grows without reallocations. It does this by
+// block-allocation and by stringing several blocks together to work
+// like one single array. Elements are not guaranteed to be stored
+// continuously in memory.
 struct GrowArray(T)
 {
   const defSize = 128;

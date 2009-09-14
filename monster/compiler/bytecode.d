@@ -29,20 +29,12 @@ enum BC
   {
     Exit = 1,           // Exit function.
 
-    Call,               // Call function in this object. Takes a class
-                        // tree index and a function index, both ints.
+    Call,               // Call function in this object. Takes a
+                        // global function index on the stack, int.
 
-    CallFar,            // Call function in another object. Takes a
-                        // class index tree and a function index. The
-                        // object must be pushed on the stack.
-
-    CallIdle,           // Calls an idle function in this object.
-                        // Takes a class tree index and a function
-                        // index.
-
-    CallIdleFar,        // Calls an idle function in another
-                        // object. Also takes an object index from the
-                        // stack.
+    CallFar,            // Call function in another object. The object
+                        // must be pushed on the stack, followed by
+                        // the global function index.
 
     Return,             // Takes a parameter nr (int). Equivalent to:
                         // POPN nr (remove nr values of the stack)
@@ -267,12 +259,17 @@ enum BC
     CastD2L,            // double to long
     CastD2UL,           // double to ulong
 
+    CastS2C,            // string to char - string must have length 1
+
     CastT2S,            // cast any type to string. Takes the type
                         // index (int) as a parameter
 
     DownCast,           // Takes a global class index (int). Checks if
                         // the object on the stack is an instance of
                         // the given class.
+
+    RefFunc,            // Pop an array reference (two ints) and push
+                        // the corresponding function name as a string
 
     FetchElem,          // Get an element from an array. Pops the
                         // index, then the array reference, then
@@ -397,7 +394,7 @@ enum BC
                         // (byte) defined below. The library user will
                         // later be able to choose whether this halts
                         // execution entirely or just kills the
-                        // offending object.
+                        // offending vthread.
 
     Last
   }
@@ -418,12 +415,12 @@ enum Err
 // Used for coded pointers. The first byte in a coded pointer gives
 // the pointer type, and the remaining 24 bits gives an index whose
 // meaning is determined by the type. The pointers can be used both
-// for variables and for functions.
+// for variables and for functions. All pointers are 3 ints in size on
+// the stack. The comments below defines what the indices mean - the
+// ones that are not mentioned are zero.
 enum PT
   {
     Null        = 0, // Null pointer. The index must also be zero.
-
-    // Variable pointers
 
     Stack       = 1, // Index is relative to function stack
                      // frame. Used for local variables.
@@ -532,7 +529,6 @@ char[][] bcToString =
  BC.Exit: "Exit",
  BC.Call: "Call",
  BC.CallFar: "CallFar",
- BC.CallIdle: "CallIdle",
  BC.Return: "Return",
  BC.ReturnVal: "ReturnVal",
  BC.ReturnValN: "ReturnValN",
@@ -563,6 +559,7 @@ char[][] bcToString =
  BC.Store: "Store",
  BC.Store8: "Store8",
  BC.StoreMult: "StoreMult",
+ BC.RefFunc: "RefFunc",
  BC.FetchElem: "FetchElem",
  BC.GetArrLen: "GetArrLen",
  BC.IMul: "IMul",
@@ -634,6 +631,7 @@ char[][] bcToString =
  BC.CastD2U: "CastD2U",
  BC.CastD2L: "CastD2L",
  BC.CastD2UL: "CastD2UL",
+ BC.CastS2C: "CastS2C",
  BC.CastT2S: "CastT2S",
  BC.DownCast: "DownCast",
  BC.PopToArray: "PopToArray",

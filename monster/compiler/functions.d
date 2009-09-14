@@ -54,6 +54,8 @@ import monster.vm.thread;
 import monster.vm.stack;
 import monster.vm.vm;
 
+import monster.util.growarray;
+
 import std.stdio;
 import std.stream;
 import std.string;
@@ -100,12 +102,38 @@ struct Function
   int[][] defaults; // Default parameter values (if specified, null otherwise)
   int index; // Unique function identifier within its class
 
-  int paramSize;
+  // Register this function in the global function list. This can only
+  // be done once, but it's required before functions can be
+  // referenced by function pointers in script code. Don't call this
+  // if you don't know what you're doing.
+  void register()
+  {
+    assert(!hasGIndex(), "Don't call register() more than once.");
 
-  /*
-  int imprint; // Stack imprint of this function. Equals
-               // (type.getSize() - paramSize) (not implemented yet)
-  */
+    gIndex = functionList.length();
+    functionList ~= this;
+  }
+
+  int getGIndex()
+  {
+    assert(hasGIndex(), "This function doesn't have a global index");
+    return gIndex;
+  }
+
+  bool hasGIndex() { return gIndex != -1; }
+
+  static Function *fromIndex(int index)
+  {
+    if(index < 0)
+      fail("Null function reference encountered");
+
+    if(index > functionList.length)
+      fail("Invalid function index encountered");
+
+    return functionList[index];
+  }
+
+  int paramSize;
 
   // Is this function final? (can not be overridden in child classes)
   bool isFinal;
@@ -115,6 +143,21 @@ struct Function
 
   // What function we override (if any)
   Function *overrides;
+
+  // Find the virtual replacement for this function in the context of
+  // the object mo.
+  Function *findVirtual(MonsterObject *mo)
+  {
+    assert(mo !is null);
+    return findVirtual(mo.cls);
+  }
+
+  // Find virtual replacement in the context of class cls.
+  Function *findVirtual(MonsterClass cls)
+  {
+    assert(cls.childOf(owner));
+    return cls.findVirtualFunc(owner.getTreeIndex(), index);
+  }
 
   bool isNormal() { return ftype == FuncType.Normal; }
   bool isNative()
@@ -416,6 +459,9 @@ struct Function
 
   private:
 
+  // Global unique function index
+  int gIndex = -1;
+
   // Empty class / object used internally
   static const char[] int_class = "class _ScriptFile_;";
   static MonsterClass int_mc;
@@ -474,6 +520,9 @@ class Constructor : FuncDeclaration
       code.resolve(sc);
     }
 }
+
+// Global list of functions.
+GrowArray!(Function*) functionList;
 
 // Responsible for parsing, analysing and compiling functions.
 class FuncDeclaration : Statement
@@ -604,6 +653,10 @@ class FuncDeclaration : Statement
       // Create a Function struct.
       fn = new Function;
 
+      // Register a global index for all class functions
+      fn.register();
+      assert(fn.getGIndex() != -1);
+
       // Default function type is normal
       fn.ftype = FuncType.Normal;
 
@@ -626,20 +679,6 @@ class FuncDeclaration : Statement
       if(fn.isAbstract || fn.isNative || fn.isIdle)
 	{
           reqSep(toks);
-	  // Check that the function declaration ends with a ; rather
-	  // than a code block.
-          /*
-	  if(!isNext(toks, TT.Semicolon))
-	  {
-	    if(fn.isAbstract)
-	      fail("Abstract function declaration expected ;", toks);
-	    else if(fn.isNative)
-	      fail("Native function declaration expected ;", toks);
-	    else if(fn.isIdle)
-	      fail("Idle function declaration expected ;", toks);
-	    else assert(0);
-	  }
-          */
 	}
       else
 	{
@@ -656,7 +695,6 @@ class FuncDeclaration : Statement
       if(fn.name.type != TT.Identifier)
 	fail("Token '" ~ fn.name.str ~ "' cannot be used as a function name",
 	     loc);
-
 
       if(!isNext(toks, TT.LeftParen))
 	fail("Function expected parameter list", toks);
@@ -907,11 +945,11 @@ class FuncDeclaration : Statement
 
       if(fn.type.isVoid)
         // Remove parameters from the stack at the end of the function
-        tasm.exit(fn.paramSize);
+        tasm.exit(fn.paramSize,0,0);
       else
-	// Functions with return types must have a return statement
-	// and should never reach the end of the function. Fail if we
-	// do.
+	// Functions with return types must have a return statement,
+	// so we should never reach the end of the function. Fail if
+	// we do.
 	tasm.error(Err.NoReturn);
 
       // Assemble the finished function
@@ -936,7 +974,12 @@ class FunctionCallExpr : Expression
                       // function parameter list. Null expressions
                       // means we must use the default value. Never
                       // used for vararg functions.
+
+  // These are used to get information about the function and
+  // parameters. If this is a function reference call, fd is null and
+  // only frt is set.
   Function* fd;
+  FuncRefType frt;
 
   bool isCast;        // If true, this is an explicit typecast, not a
                       // function call.
@@ -1049,11 +1092,6 @@ class FunctionCallExpr : Expression
       fResolved = console;
     }
 
-  /* Might be used for D-like implicit function calling, eg. someFunc;
-     or (obj.prop)
-  this(Expression func) {}
-  */
-
   void parse(ref TokenArray toks) { assert(0); }
 
   char[] toString()
@@ -1099,41 +1137,75 @@ class FunctionCallExpr : Expression
 
       // TODO: Do typecasting here. That will take care of polysemous
       // types later as well.
-      if(!fname.type.isFunc)
+      if(!fname.type.isIntFunc && !fname.type.isFuncRef)
         fail(format("Expression '%s' of type %s is not a function",
                     fname, fname.typeString), loc);
 
-      // In the future, we will probably use a global function
-      // index. Right now, just get the function from the type.
-      auto ft = cast(FunctionType)fname.type;
-      assert(ft !is null);
-      fd = ft.func;
+      if(fname.type.isFuncRef)
+        {
+          // Set frt to the reference type
+          frt = cast(FuncRefType)fname.type;
+          assert(frt !is null);
+          fd = null;
+        }
+      else if(fname.type.isIntFunc)
+        {
+          // Get the function from the type
+          auto ft = cast(IntFuncType)fname.type;
+          assert(ft !is null);
+          fd = ft.func;
 
-      isVararg = fd.isVararg;
-      type = fd.type;
+          // Create a temporary reference type
+          frt = new FuncRefType(ft);
+        }
+
+      isVararg = frt.isVararg;
+      type = frt.retType;
       assert(type !is null);
+
+      if(fd is null && named.length != 0)
+        fail("Cannot use named parameters when calling function references",
+             loc);
+
+      // Get the best parameter name possible from the available
+      // information
+      char[] getParName(int i)
+        {
+          char[] dst = "parameter ";
+          if(fd !is null)
+            dst ~= fd.params[i].name.str;
+          else
+            dst ~= .toString(i);
+          return dst;
+        }
 
       if(isVararg)
         {
+          if(named.length)
+            fail("Cannot give named parameters to vararg functions", loc);
+
           // The vararg parameter can match a variable number of
           // arguments, including zero.
-          if(params.length < fd.params.length-1)
+          if(params.length < frt.params.length-1)
             fail(format("%s() expected at least %s parameters, got %s",
-                        name, fd.params.length-1, params.length),
+                        name, frt.params.length-1, params.length),
                  loc);
 
           // Check parameter types except for the vararg parameter
-          foreach(int i, par; fd.params[0..$-1])
+          foreach(int i, par; frt.params[0..$-1])
             {
               params[i].resolve(sc);
-              par.type.typeCast(params[i], "parameter " ~ par.name.str);
+
+              // The info about each parameter depends on whether this
+              // is a direct function call or a func reference call.
+              par.typeCast(params[i], getParName(i));
             }
 
           // Loop through remaining arguments
-          int start = fd.params.length-1;
+          int start = frt.params.length-1;
 
-          assert(fd.params[start].type.isArray);
-          Type base = fd.params[start].type.getBase();
+          assert(frt.params[start].isArray);
+          Type base = frt.params[start].getBase();
 
           foreach(int i, ref par; params[start..$])
             {
@@ -1143,7 +1215,7 @@ class FunctionCallExpr : Expression
               // array type itself, then we are sending an actual
               // array. Treat it like a normal parameter.
               if(i == 0 && start == params.length-1 &&
-                 par.type == fd.params[start].type)
+                 par.type == frt.params[start])
                 {
                   isVararg = false;
                   coverage = params;
@@ -1151,7 +1223,7 @@ class FunctionCallExpr : Expression
                 }
 
               // Otherwise, cast the type to the array base type.
-              base.typeCast(par, "array base type");
+              base.typeCast(par, "vararg array base type");
             }
           return;
         }
@@ -1159,10 +1231,17 @@ class FunctionCallExpr : Expression
       // Non-vararg case. Non-vararg functions must cover at least all
       // the non-optional function parameters.
 
+      int parNum = frt.params.length;
 
-      int parNum = fd.params.length;
+      // When calling a function reference, we can't use named
+      // parameters, and we don't know the function's default
+      // values. Because of this, all parameters must be present.
+      if(fd is null && params.length != parNum)
+        fail(format("Function reference %s (of type '%s') expected %s arguments, got %s",
+                    name, frt, parNum, params.length), fname.loc);
 
-      // Sanity check on the parameter number
+      // Sanity check on the parameter number for normal function
+      // calls
       if(params.length > parNum)
         fail(format("Too many parameters to function %s(): expected %s, got %s",
                     name, parNum, params.length), fname.loc);
@@ -1170,7 +1249,8 @@ class FunctionCallExpr : Expression
       // Make the coverage list of all the parameters.
       coverage = new Expression[parNum];
 
-      // Mark all the parameters which are present
+      // Mark all the parameters which are present. Start with the
+      // sequential (non-named) paramteres.
       foreach(i,p; params)
         {
           assert(coverage[i] is null);
@@ -1178,59 +1258,71 @@ class FunctionCallExpr : Expression
           coverage[i] = p;
         }
 
-      // Add named parameters to the list
-      foreach(p; named)
+      if(fd !is null)
         {
-          // Look up the named parameter
-          int index = -1;
-          foreach(i, fp; fd.params)
-            if(fp.name.str == p.name.str)
-              {
-                index = i;
-                break;
-              }
-          if(index == -1)
-            fail(format("Function %s() has no paramter named %s",
-                        name, p.name.str),
-                 p.name.loc);
+          // This part (named and optional parameters) does not apply
+          // when calling function references
 
-          assert(index<parNum);
+          assert(fd !is null);
 
-          // Check that the parameter isn't already set
-          if(coverage[index] !is null)
-            fail("Parameter " ~ p.name.str ~ " set multiple times ",
-                 p.name.loc);
+          // Add named parameters to the list
+          foreach(p; named)
+            {
+              // Look up the named parameter
+              int index = -1;
+              foreach(i, fp; fd.params)
+                if(fp.name.str == p.name.str)
+                  {
+                    index = i;
+                    break;
+                  }
+              if(index == -1)
+                fail(format("Function %s() has no parameter named %s",
+                            name, p.name.str),
+                     p.name.loc);
 
-          // Finally, set the parameter
-          coverage[index] = p.value;
-          assert(coverage[index] !is null);
+              assert(index<parNum);
+
+              // Check that the parameter isn't already set
+              if(coverage[index] !is null)
+                fail("Parameter " ~ p.name.str ~ " set multiple times ",
+                     p.name.loc);
+
+              // Finally, set the parameter
+              coverage[index] = p.value;
+              assert(coverage[index] !is null);
+            }
+
+          // Check that all non-optional parameters are present
+          assert(fd.defaults.length == coverage.length);
+          foreach(i, cv; coverage)
+            if(cv is null && fd.defaults[i].length == 0)
+              fail(format("Non-optional parameter %s is missing in call to %s()",
+                          fd.params[i].name.str, name),
+                   loc);
         }
-
-      // Check that all non-optional parameters are present
-      assert(fd.defaults.length == coverage.length);
-      foreach(i, cv; coverage)
-        if(cv is null && fd.defaults[i].length == 0)
-          fail(format("Non-optional parameter %s is missing in call to %s()",
-                      fd.params[i].name.str, name),
-               loc);
 
       // Check parameter types
       foreach(int i, ref cov; coverage)
 	{
-          auto par = fd.params[i];
-
           // Skip missing parameters
-          if(cov is null) continue;
+          if(cov is null)
+            {
+              assert(fd !is null);
+              continue;
+            }
+
+          auto par = frt.params[i];
 
 	  cov.resolve(sc);
-          par.type.typeCast(cov, "parameter " ~ par.name.str);
+          par.typeCast(cov, getParName(i));
 	}
     }
 
   // Evaluate the parameters
   private void evalParams()
     {
-      // Again, let's handle the vararg case separately
+      // Handle the vararg case separately
       if(isVararg)
         {
           assert(coverage is null);
@@ -1241,19 +1333,19 @@ class FunctionCallExpr : Expression
               ex.eval();
 
               // The rest only applies to non-vararg parameters
-              if(i >= fd.params.length-1)
+              if(i >= frt.params.length-1)
                 continue;
 
               // Convert 'const' parameters to actual constant references
-              if(fd.params[i].isConst)
+              if(frt.isConst[i])
                 {
-                  assert(fd.params[i].type.isArray);
+                  assert(frt.params[i].isArray);
                   tasm.makeArrayConst();
                 }
             }
 
           // Compute the length of the vararg array.
-          int len = params.length - fd.params.length + 1;
+          int len = params.length - frt.params.length + 1;
 
           // If it contains no elements, push a null array reference
           // (0 is always null).
@@ -1264,9 +1356,9 @@ class FunctionCallExpr : Expression
               tasm.popToArray(len, params[$-1].type.getSize());
 
               // Convert the vararg array to 'const' if needed
-              if(fd.params[$-1].isConst)
+              if(frt.isConst[$-1])
                 {
-                  assert(fd.params[$-1].type.isArray);
+                  assert(frt.params[$-1].isArray);
                   tasm.makeArrayConst();
                 }
             }
@@ -1275,16 +1367,23 @@ class FunctionCallExpr : Expression
 
       // Non-vararg case
       assert(!isVararg);
-      assert(coverage.length == fd.params.length);
+      assert(coverage.length == frt.params.length);
       foreach(i, ex; coverage)
         {
           if(ex !is null)
             {
-              assert(ex.type == fd.params[i].type);
+              assert(ex.type !is null);
+              assert(frt.params[i] !is null);
+              assert(ex.type == frt.params[i]);
+
               ex.eval();
             }
           else
             {
+              // resolve() should already have caught this
+              assert(fd !is null,
+                     "cannot use default parameters with reference calls");
+
               // No param specified, use default value
               assert(fd.defaults[i].length ==
                      fd.params[i].type.getSize);
@@ -1293,9 +1392,9 @@ class FunctionCallExpr : Expression
             }
 
           // Convert 'const' parameters to actual constant references
-          if(fd.params[i].isConst)
+          if(frt.isConst[i])
             {
-              assert(fd.params[i].type.isArray);
+              assert(frt.params[i].isArray);
               tasm.makeArrayConst();
             }
         }
@@ -1315,25 +1414,51 @@ class FunctionCallExpr : Expression
 
           return;
         }
+      assert(frt !is null);
 
       // Push parameters first
       evalParams();
 
-      // Then push the function expression, to get the object (if any)
-      // and later to get the function pointer value well.
-      assert(fname.type.isFunc);
+      // Then push the function expression or reference.
       fname.eval();
-
-      auto ft = cast(FunctionType)fname.type;
-      assert(ft !is null);
-      bool isMember = ft.isMember;
-
       setLine();
-      assert(fd.owner !is null);
 
-      if(fd.isIdle)
-        tasm.callIdle(fd.index, fd.owner.getTreeIndex(), isMember);
+      bool isFar;
+
+      // Total stack imprint of the function call
+      int imprint;
+
+      if(fd !is null)
+        {
+          // Direct function call
+          assert(fname.type.isIntFunc);
+          auto ft = cast(IntFuncType)fname.type;
+          assert(ft !is null);
+
+          assert(fd.owner !is null);
+
+          // Calculate the stack imprint
+          imprint = fd.type.getSize() - fd.paramSize;
+
+          // Push the function index. For far function calls, we have
+          // in effect pushed a function reference (object+function)
+          tasm.push(fd.getGIndex());
+
+          isFar = ft.isMember;
+        }
       else
-        tasm.callFunc(fd.index, fd.owner.getTreeIndex(), isMember);
+        {
+          // Function reference call
+          assert(fname.type.isFuncRef);
+          isFar = true;
+
+          // Let the type calculate the stack imprint
+          auto frt = cast(FuncRefType)fname.type;
+          assert(frt !is null);
+
+          imprint = frt.getImprint();
+        }
+
+      tasm.call(isFar, imprint);
     }
 }

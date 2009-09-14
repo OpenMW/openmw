@@ -41,6 +41,8 @@ import monster.vm.mclass;
 import monster.vm.error;
 import monster.vm.vm;
 
+import monster.options;
+
 enum VarType
   {
     Class,
@@ -325,7 +327,15 @@ class VarDeclaration : Block
 
       // Illegal types are illegal
       if(!var.type.isLegal)
-        fail("Cannot create variables of type '" ~ var.type.toString ~ "'", loc);
+        {
+          char[] msg = "Cannot create variables of type '" ~ 
+            var.type.toString ~ "'";
+
+          if(var.type.isIntFunc)
+            msg ~= "\nPerhaps you meant @func ? Use @ to create function references.";
+
+          fail(msg, loc);
+        }
 
       if(!allowConst && var.isConst)
         fail("'const' is not allowed here", loc);
@@ -704,7 +714,7 @@ class MemberExpr : Expression
       else if(look.isFunc)
         {
           // The Function* is stored in the lookup variable
-          type = new FunctionType(look.func, isMember);
+          type = new IntFuncType(look.func, isMember);
           vtype = VType.Function;
 
           // TODO: Make the scope set the type for us. In fact, the
@@ -793,6 +803,9 @@ class MemberExpr : Expression
     }
     body
     {
+      static if(traceResolve)
+        writefln("Resolving member expression %s", this);
+
       // Look for reserved names first.
       if(name.str == "__STACK__")
         {
@@ -872,7 +885,9 @@ class MemberExpr : Expression
 
       if(isType) return;
 
-      if(type.isFunc) return;
+      // If we're a function name, don't push anything. Everything is
+      // handled through the type system.
+      if(type.isIntFunc) return;
 
       setLine();
 
@@ -1058,17 +1073,12 @@ class VarDeclStatement : Statement
       vars ~= varDec;
       loc = varDec.var.name.loc;
 
-      int arr = varDec.arrays();
-
       // Are there more?
       while(isNext(toks, TT.Comma))
 	{
 	  // Read a variable, but with the same type as the last
 	  varDec = new VarDeclaration(varDec.var.type);
 	  varDec.parse(toks);
-	  if(varDec.arrays() != arr)
-	    fail("Multiple declarations must have same type",
-                 varDec.var.name.loc);
 	  vars ~= varDec;
 	}
 
@@ -1076,10 +1086,6 @@ class VarDeclStatement : Statement
         reqNext(toks, TT.Semicolon);
       else
         reqSep(toks);
-      /*
-      if(!isNext(toks, TT.Semicolon))
-	fail("Declaration statement expected ;", toks);
-      */
     }
 
   char[] toString()
@@ -1097,6 +1103,15 @@ class VarDeclStatement : Statement
       // Add variables to the scope.
       foreach(vd; vars)
 	vd.resolve(sc);
+
+      // Check that all the vars are in fact the same type
+      assert(vars.length >= 1);
+      Type t = vars[0].var.type;
+      foreach(vd; vars[1..$])
+        {
+          if(t != vd.var.type)
+            fail("Multiple declarations must have the same type", loc);
+        }
     }
 
   // Validate types

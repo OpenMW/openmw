@@ -26,6 +26,7 @@ module monster.compiler.properties;
 import monster.compiler.scopes;
 import monster.compiler.types;
 import monster.compiler.assembler;
+import monster.vm.mclass;
 
 import std.stdio;
 
@@ -123,6 +124,29 @@ class FloatProperties : FloatingProperties!(float)
 class DoubleProperties : FloatingProperties!(double)
 { static DoubleProperties singleton; }
 
+// Function pointers / references
+class FuncRefProperties : SimplePropertyScope
+{
+  static FuncRefProperties singleton;
+
+  this()
+    {
+      super("FuncRefProperties", GenericProperties.singleton);
+
+      // A function ref is object + function index. Just pop away the
+      // function and the object is left on the stack. Since we cannot
+      // possibly know the type of the object at compile time, we
+      // default to 'Object' as the class type.
+      auto ot = MonsterClass.getObject().objType;
+      assert(ot !is null);
+      insert("obj", ot, { tasm.pop(); });
+
+      // TODO: Replace this with something else later (like a Function
+      // class or similar)
+      insert("func", ArrayType.getString(), { tasm.refFunc(); });
+    }
+}
+
 // Handles .length, .dup, etc for arrays
 class ArrayProperties: SimplePropertyScope
 {
@@ -212,6 +236,10 @@ class GenericProperties : SimplePropertyScope
    property, the left hand side (eg an int value) is never
    evaluated. If the type is "" or "owner", then the property type
    will be the same as the owner type.
+
+   It's likely that parts of this will be simplified or rewritten
+   later. One thing that's missing is compile time properties, for
+   example.
  */
 
 abstract class SimplePropertyScope : PropertyScope
@@ -345,4 +373,5 @@ void initProperties()
   FloatProperties.singleton = new FloatProperties;
   DoubleProperties.singleton = new DoubleProperties;
   ClassProperties.singleton = new ClassProperties;
+  FuncRefProperties.singleton = new FuncRefProperties;
 }
