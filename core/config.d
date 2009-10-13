@@ -72,6 +72,9 @@ struct ConfigManager
   // Other settings
   bool firstRun;
 
+  // Set to true if sound is completely disabled
+  bool noSound = false;
+
   // Number of current screen shot. Saved upon exit, so that shots
   // from separate sessions don't overwrite each other.
   int screenShotNum;

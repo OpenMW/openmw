@@ -81,8 +81,6 @@ void poolSize()
 }
 //*/
 
-bool noSound = false;
-
 void main(char[][] args)
 {
   bool render = true;
@@ -116,7 +114,7 @@ void main(char[][] args)
     else if(a == "-h") help=true;
     else if(a == "-rk") resetKeys = true;
     else if(a == "-oc") showOgreFlag = true;
-    else if(a == "-ns") noSound = true;
+    else if(a == "-ns") config.noSound = true;
     else if(a == "-debug")
       {
         // Enable Monster debug output
@@ -192,7 +190,7 @@ void main(char[][] args)
       return;
     }
 
-  if(!noSound) initializeSound();
+  if(!config.noSound) initializeSound();
   resources.initResources();
 
   // Load all ESM and ESP files
@@ -300,7 +298,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
             {
               NodePtr n = putObject(ls.m.model, ls.getPos(), ls.getScale());
               ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
-              if(!noSound)
+              if(!config.noSound)
                 {
                   Sound *s = ls.m.sound;
                   if(s)
@@ -321,7 +319,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
             {
               NodePtr n = putObject(ls.m.model, ls.getPos(), ls.getScale(), true);
               ls.lightNode = attachLight(n, ls.m.data.color, ls.m.data.radius);
-              if(!noSound)
+              if(!config.noSound)
                 {
                   Sound *s = ls.m.sound;
                   if(s)
@@ -389,7 +387,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
       startGUI();
 
       // Play some old tunes
-      if(!noSound)
+      if(!config.noSound)
         Music.play();
 
       // Run it until the user tells us to quit
@@ -397,7 +395,7 @@ Try specifying another cell name on the command line, or edit openmw.ini.");
     }
   else if(debugOut) writefln("Skipping rendering");
 
-  if(!noSound)
+  if(!config.noSound)
     {
       soundScene.kill();
       shutdownSound();

@@ -45,8 +45,6 @@ import gui.gui;
 import input.keys;
 import input.ois;
 
-import openmw;
-
 // Debug output
 //debug=printMouse;      // Mouse button events
 //debug=printMouseMove;  // Mouse movement events
@@ -345,7 +343,7 @@ extern(C) int d_frameStarted(float time)
   playerData.position.position[1] = y;
   playerData.position.position[2] = z;
 
-  if(!noSound)
+  if(!config.noSound)
     {
       // Tell the sound scene that the player has moved
       sndCumTime += time;
