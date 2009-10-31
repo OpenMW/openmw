@@ -255,7 +255,10 @@ public:
     getWidget(minimap, "MiniMap");
     getWidget(compass, "Compass");
 
+    getWidget(crosshair, "Crosshair");
+
     compass->setImageTexture("compass.dds");
+    crosshair->setImageTexture("target.dds");
   }
 
   void setStats(int h, int hmax, int m, int mmax, int s, int smax)
@@ -297,6 +300,8 @@ public:
 
   MyGUI::StaticImagePtr minimap;
   MyGUI::StaticImagePtr compass;
+
+  MyGUI::StaticImagePtr crosshair;
 };
 
 class MapWindow : public Layout

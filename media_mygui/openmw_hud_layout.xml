@@ -43,5 +43,10 @@
             <Widget type="StaticImage" skin="StaticImage" position="17 18 32 32" align="Left Bottom"
                 name="Compass"/>
         </Widget>
+
+        <!-- Crosshair -->
+
+        <Widget type="StaticImage" skin="StaticImage" position="0 0 32
+            32" align="Center Center" name="Crosshair"/>
     </Widget>
 </MyGUI>

@@ -100,7 +100,8 @@ struct ExteriorCell
 
   // Landscape and path grid data
   Land land; // There can be TWO landscapes! Or maybe I have
-	     // misunderstood something. Need to check what it means.
+	     // misunderstood something. Need to check what it
+	     // means. UPDATE: See comment further down.
 
   PathGrid paths;
 
@@ -127,7 +128,11 @@ struct ExteriorCell
       if(isNextHRec("PGRD")) paths.load();
 
       // Land can also be here instead. In fact, it can be both
-      // places. I have to figure out what it means.
+      // places. I have to figure out what it means. UPDATE: Since
+      // both the LAND and PGRD records have X/Y coordinates of their
+      // own, a much more robust solution is to not depend on
+      // order. Nevertheless, I still think there are a couple of
+      // instances of duplicate LAND structures in esm files.
       if(isNextHRec("LAND")) land.load();
 
       if(land.state == LoadState.Loaded)
