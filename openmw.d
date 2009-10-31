@@ -38,6 +38,7 @@ import bullet.bullet;
 import scene.celldata;
 import scene.soundlist;
 import scene.gamesettings;
+import scene.player;
 
 import core.resource;
 import core.memory;
@@ -90,6 +91,8 @@ void main(char[][] args)
   bool debugOut = false;
   bool extTest = false;
   bool doGen = false;
+  bool nextSave = false;
+  bool loadSave = false;
 
   // Some examples to try:
   //
@@ -107,6 +110,9 @@ void main(char[][] args)
   // Cells to load
   char[][] cells;
 
+  // Savegame to load
+  char[] savefile;
+
   foreach(char[] a; args[1..$])
     if(a == "-n") render = false;
     else if(a == "-ex") extTest = true;
@@ -115,6 +121,7 @@ void main(char[][] args)
     else if(a == "-rk") resetKeys = true;
     else if(a == "-oc") showOgreFlag = true;
     else if(a == "-ns") config.noSound = true;
+    else if(a == "-save") nextSave = true;
     else if(a == "-debug")
       {
         // Enable Monster debug output
@@ -122,6 +129,11 @@ void main(char[][] args)
 
         // Tell OGRE to do the same later on
         debugOut = true;
+      }
+    else if(nextSave)
+      {
+        savefile = a;
+        nextSave = false;
       }
     else cells ~= a;
 
@@ -142,6 +154,7 @@ void main(char[][] args)
       writefln("    -oc           Show the Ogre config dialogue");
       writefln("    -ns           Completely disable sound");
       writefln("    -debug        Print debug information");
+      writefln("    -save <file>  Load cell/pos from savegame");
       writefln("    -h            Show this help");
       writefln("");
       writefln("Specifying more than one cell implies -n");
@@ -156,11 +169,28 @@ void main(char[][] args)
   initializeMemoryRegions();
   initMonsterScripts();
 
-  /*
-  importSavegame("data/quiksave.ess");
-  importSavegame("data/Perm1hal0000.ess");
-  return;
-  */
+  // This is getting increasingly hackish, but this entire engine
+  // design is now quickly outgrowing its usefulness, and a rewrite is
+  // coming soon anyway.
+  PlayerSaveInfo pi;
+  if(savefile != "")
+    {
+      if(cells.length)
+        {
+          writefln("Please don't specify both a savegame file (%s) and cell names (%s)", savefile, cells);
+          return;
+        }
+
+      loadSave = true;
+      writefln("Loading savegame %s", savefile);
+      pi = importSavegame(savefile);
+      writefln("    Player name: %s", pi.playerName);
+      writefln("    Cell name:   %s", pi.cellName);
+      writefln("    Pos:         %s", pi.pos.position);
+      writefln("    Rot:         %s", pi.pos.rotation);
+
+      cells = [pi.cellName];
+    }
 
   config.initialize(resetKeys);
   scope(exit) config.writeConfig();
@@ -181,7 +211,7 @@ void main(char[][] args)
     if(config.defaultCell.length)
       cells ~= config.defaultCell;
 
-  if(cells.length == 1)
+  if(cells.length == 1 && !loadSave)
     config.defaultCell = cells[0];
 
   if(cells.length == 0)
@@ -218,6 +248,10 @@ Perhaps this cell does not exist in your Morrowind language version?
 Try specifying another cell name on the command line, or edit openmw.ini.");
 	  return;
 	}
+
+      // If we're loading from save, override the player position
+      if(loadSave)
+        *playerData.position = pi.pos;
     }
 
   // Simple safety hack

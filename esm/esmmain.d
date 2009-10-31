@@ -25,6 +25,8 @@ module esm.esmmain;
 
 public import esm.records;
 
+import ogre.ogre;
+
 /* This file is the main module for loading from ESM, ESP and ESS
    files. It stores all the data in the appropriate data structures
    for later referal. TODO: Put this in a class or whatever? Nah, we
@@ -115,11 +117,21 @@ void loadTESFiles(char[][] files)
   hyperlinks.sort();
 }
 
-// Load a TES savegame file (.ess). Currently VERY limited, only reads
-// the header.
-void importSavegame(char[] file)
+// Contains the small bits of information that we currently extract
+// from savegames.
+struct PlayerSaveInfo
 {
-  writefln("Loading savegame %s", file);
+  char[] cellName;
+  char[] playerName;
+  Placement pos;
+}
+
+// Load a TES savegame file (.ess). Currently VERY limited, reads the
+// player's cell name and position
+PlayerSaveInfo importSavegame(char[] file)
+{
+  PlayerSaveInfo pi;
+
   esFile.open(file, esmRegion);
   scope(exit) esFile.close();
 
@@ -128,14 +140,28 @@ void importSavegame(char[] file)
 
   with(esFile.saveData)
     {
-      writefln("Floats:");
-      foreach(i, f; unknown)
-        writefln("  %s: %s", i, f);
-
-      writefln("Cell name: ", stripz(cell));
-
-      writefln("Strange value: ", unk2);
-      writefln("Player name: ", stripz(player));
+      pi.cellName = stripz(cell);
+      pi.playerName = stripz(player);
     }
-  writefln();
+
+  with(esFile)
+    {
+      while(hasMoreRecs())
+        {
+          if(isNextHRec("REFR"))
+            {
+              while(hasMoreSubs())
+                {
+                  getSubName();
+                  if(retSubName() == "DATA")
+                    readHExact(&pi.pos, pi.pos.sizeof);
+                  else
+                    skipHSub();
+                }
+            }
+          else
+            skipHRecord();
+        }
+    }
+  return pi;
 }

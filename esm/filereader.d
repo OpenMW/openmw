@@ -174,7 +174,7 @@ struct TES3File
   // name.
   struct _saveData
   {
-    float[6] unknown; // 24 bytes
+    float[6] unknown;
     char[64] cell; // Cell name
     float unk2; // Unknown value
     char[32] player; // Player name
@@ -534,12 +534,25 @@ struct TES3File
   // Size of current sub record
   uint getSubSize() { return leftSub; }
 
-  // Skip the rest of this record
+  // Skip the rest of this record. Assumes the name and header have
+  // already been read
   void skipRecord()
     {
       file.seekCur(leftRec);
       leftRec = 0;
     }
+
+  // Skip an entire record
+  void skipHRecord()
+  {
+    if(!leftFile) return;
+
+    uint flags;
+
+    getRecName();
+    getRecHeader(flags);
+    skipRecord();
+  }
 
   // Skip current sub record and return size
   uint skipHSub()

@@ -160,7 +160,7 @@ struct NPC
 	readHExact(&AI, AI.sizeof);
 	hasAI = true;
       }
-      else hasAI = false;
+    else hasAI = false;
 
     skipRecord();
 
