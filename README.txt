@@ -1,21 +1,21 @@
-Welcome to GOOI v0.1
---------------------
+Welcome to Mangle v0.1
+----------------------
 
 Written by:      Nicolay Korslund (korslund@gmail.com)
 License:         zlib/png (see LICENSE.txt)
-WWW:             http://asm-soft.com/gooi/
-Documentation:   http://asm-soft.com/gooi/docs
+WWW:             http://asm-soft.com/mangle/
+Documentation:   http://asm-soft.com/mangle/docs
 
 
 
-GOOI stands for Game-Oriented Object Interfaces. It is meant to become
-a small set of generic interfaces for various game middleware
+Mangle stands for Minimal Abstraction Game Layer, and it's meant to
+become a small set of generic interfaces for various game middleware
 libraries, such as sound, input, graphics, and so on. It consists of
 several independent modules, one for each of these areas. These may be
 used together to build an entire game engine, or they can be used
 individually as separate libraries.
 
-However, GOOI does NOT actually implement a game engine, or any new
+However, Mangle does NOT actually implement a game engine, or any new
 fundamental functionality. More on that below.
 
 Currently there is only the Sound module, but more will come in the
@@ -53,24 +53,23 @@ possible.
 What is it good for
 -------------------
 
-The main point of GOOI, as we said above, is that it connects to any
+The main point of Mangle, as we said above, is that it connects to any
 library of your choice "behind the scenes" but provides the same,
 super-simple interface front-end for all of them. There can benefit
 you in many ways:
 
-- If you want to use a new library that GOOI support. You don't
-  have to scour the net for tutorials and usage examples, since much
-  of the common usage code is already included in the implementation
-  classes.
+- If you want to use a new library that Mangle support. You don't have
+  to scour the net for tutorials and usage examples, since much of the
+  common usage code is already included in the implementation classes.
 
 - If you don't want to pollute your code with library-specific code.
-  The GOOI interfaces can help you keep your code clean, and its user
-  interface is often simpler than the exteral library one.
+  The Mangle interfaces can help you keep your code clean, and its
+  user interface is often simpler than the exteral library one.
 
 - If you are creating a library that depends on a specific feature
   (such as sound), but you don't want to lock your users into any
-  specific sound library. GOOI works as an abstraction that lets your
-  users select their own implementation. My own Monster scripting
+  specific sound library. Mangle works as an abstraction that lets
+  your users select their own implementation. My own Monster scripting
   language ( http://monsterscript.net ) will use this tactic, to
   provide native-but-generic sound, input and GUI support, among other
   features.
@@ -82,7 +81,7 @@ you in many ways:
   that your favorite backend doesn't work on all the platforms you
   want to reach.
 
-The GOOI implementations are extremely light-weight - often just one
+The Mangle implementations are extremely light-weight - often just one
 or two cpp/h pairs. You plug them directly into your program, there's
 no separate build step required.
 
@@ -95,22 +94,23 @@ come crashing down, because there is no big 'system' to speak of.
 Past and future 
 ---------------
 
-GOOI started out as a spin-off from OpenMW, another project of mine
+Mangle started out as a spin-off from OpenMW, another project of mine
 ( http://openmw.sourceforge.net ). OpenMW is an attempt to recreate
 the engine behind the commercial game Morrowind, using only open
 source software.
 
 The projects are still tightly interlinked, and the will continue to
 be until OpenMW is finished. That means that all near-future work on
-GOOI for my part will be more or less guided by what OpenMW needs. But
-I'll gladly accept external contributions that are not OpenMW-related.
+Mangle for my part will be more or less guided by what OpenMW
+needs. But I'll gladly accept external contributions that are not
+OpenMW-related.
 
 
 Conclusion
 ----------
 
-As you might have guessed, GOOI is more a concept in development than
-a finished library right now.
+As you might have guessed, Mangle is more a concept in development
+than a finished library right now.
 
 All feedback, ideas, concepts, questions and code are very
 welcome. Send them to: korslund@gmail.com

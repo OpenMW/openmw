@@ -1,6 +1,6 @@
 #include "audiere_imp.h"
 
-using namespace GOOI::Sound;
+using namespace Mangle::Sound;
 
 AudiereManager mg;
 

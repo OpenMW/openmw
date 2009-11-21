@@ -18,7 +18,7 @@ static void fail(const std::string &msg)
 }
 
 using namespace audiere;
-using namespace GOOI::Sound;
+using namespace Mangle::Sound;
 
 AudiereManager::AudiereManager()
 {

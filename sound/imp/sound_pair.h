@@ -1,11 +1,11 @@
-#ifndef GOOI_SOUND_PAIR_H
-#define GOOI_SOUND_PAIR_H
+#ifndef MANGLE_SOUND_PAIR_H
+#define MANGLE_SOUND_PAIR_H
 
 #include "sound.h"
 
 #include <assert.h>
 
-namespace GOOI {
+namespace Mangle {
 namespace Sound {
 
 /**

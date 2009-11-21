@@ -1,11 +1,11 @@
-#ifndef GOOI_FFMPEG_OPENAL_H
-#define GOOI_FFMPEG_OPENAL_H
+#ifndef MANGLE_FFMPEG_OPENAL_H
+#define MANGLE_FFMPEG_OPENAL_H
 
 #include "sound_pair.h"
 #include "input_ffmpeg.h"
 #include "output_openal.h"
 
-namespace GOOI {
+namespace Mangle {
 namespace Sound {
 
 /// A PairManager filter that adds FFmpeg decoding to OpenAL

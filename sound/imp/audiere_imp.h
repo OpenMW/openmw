@@ -1,12 +1,12 @@
-#ifndef GOOI_SOUND_AUDIERE_H
-#define GOOI_SOUND_AUDIERE_H
+#ifndef MANGLE_SOUND_AUDIERE_H
+#define MANGLE_SOUND_AUDIERE_H
 
 #include "../sound.h"
 
 #include <assert.h>
 #include <audiere.h>
 
-namespace GOOI {
+namespace Mangle {
 namespace Sound {
 
 /// Implementation of Sound::Manager for Audiere

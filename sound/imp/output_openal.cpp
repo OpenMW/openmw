@@ -3,7 +3,7 @@
 
 #include <vector>
 
-using namespace GOOI::Sound;
+using namespace Mangle::Sound;
 
 
 // ---- Helper functions and classes ----

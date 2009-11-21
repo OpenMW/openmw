@@ -1,7 +1,7 @@
 #include "input_ffmpeg.h"
 #include <assert.h>
 
-using namespace GOOI::Sound;
+using namespace Mangle::Sound;
 
 // Static output buffer. Not thread safe, but supports multiple
 // streams operated from the same thread.

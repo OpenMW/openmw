@@ -1,5 +1,5 @@
-#ifndef GOOI_SOUND_FFMPEG_H
-#define GOOI_SOUND_FFMPEG_H
+#ifndef MANGLE_SOUND_FFMPEG_H
+#define MANGLE_SOUND_FFMPEG_H
 
 #include "../input.h"
 #include <exception>
@@ -11,7 +11,7 @@ extern "C"
 #include <libavformat/avformat.h>
 }
 
-namespace GOOI {
+namespace Mangle {
 namespace Sound {
 
 /// FFmpeg exception

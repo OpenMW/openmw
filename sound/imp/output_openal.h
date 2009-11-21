@@ -1,5 +1,5 @@
-#ifndef GOOI_SOUND_OPENAL_H
-#define GOOI_SOUND_OPENAL_H
+#ifndef MANGLE_SOUND_OPENAL_H
+#define MANGLE_SOUND_OPENAL_H
 
 #include "../sound.h"
 
@@ -7,7 +7,7 @@
 #include <AL/alc.h>
 #include <list>
 
-namespace GOOI {
+namespace Mangle {
 namespace Sound {
 
 class OpenAL_Stream_Instance;

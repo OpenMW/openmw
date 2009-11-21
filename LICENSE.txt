@@ -1,4 +1,4 @@
-Game-oriented object interfaces (GOOI) is licensed under the
+Minimal Abstraction Game Layer (Mangle) is licensed under the
 'zlib/libpng' license:
 
 ----

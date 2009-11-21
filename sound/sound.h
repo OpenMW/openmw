@@ -1,10 +1,10 @@
-#ifndef GOOI_SOUND_SOUND_H
-#define GOOI_SOUND_SOUND_H
+#ifndef MANGLE_SOUND_SOUND_H
+#define MANGLE_SOUND_SOUND_H
 
 #include <string>
 #include "input.h"
 
-namespace GOOI {
+namespace Mangle {
 namespace Sound {
 
 /// Abstract interface for sound instances

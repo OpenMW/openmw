@@ -1,10 +1,10 @@
-#ifndef GOOI_SOUND_INPUT_H
-#define GOOI_SOUND_INPUT_H
+#ifndef MANGLE_SOUND_INPUT_H
+#define MANGLE_SOUND_INPUT_H
 
 #include <string>
 #include <stdint.h>
 
-namespace GOOI {
+namespace Mangle {
 namespace Sound {
 
 /// An abstract interface for a read-once stream of audio data.
