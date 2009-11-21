@@ -1,5 +1,5 @@
-#ifndef MANGLE_SOUND_PAIR_H
-#define MANGLE_SOUND_PAIR_H
+#ifndef MANGLE_INPUT_FILTER_H
+#define MANGLE_INPUT_FILTER_H
 
 #include "sound.h"
 
@@ -19,15 +19,15 @@ namespace Sound {
    Example:
    \code
 
-   // Combine FFmpeg input and OpenAL output. OpenAL cannot decode
-   // sound files on its own.
-   SoundPairManager mg(new FFM_InputManager, new OpenAL_Manager);
+   // Add FFmpeg input to an OpenAL soud output manager. OpenAL cannot
+   // decode sound files on its own.
+   InputFilter mg(new OpenAL_Manager, new FFM_InputManager);
 
    // We can now load filenames directly.
    mg.load("file1.mp3");
    \endcode
 */
-class PairManager : public Manager
+class InputFilter : public Manager
 {
  protected:
   Manager *snd;
@@ -35,14 +35,14 @@ class PairManager : public Manager
 
  public:
   /// Empty constructor
-  PairManager() {}
+  InputFilter() {}
 
   /// Assign an input manager and a sound manager to this object
-  PairManager(InputManager *_inp, Manager *_snd)
-    { set(_inp, _snd); }
+  InputFilter(Manager *_snd, InputManager *_inp)
+    { set(_snd, _inp); }
 
   /// Assign an input manager and a sound manager to this object
-  void set(InputManager *_inp, Manager *_snd)
+  void set(Manager *_snd, InputManager *_inp)
     {
       inp = _inp;
       snd = _snd;
