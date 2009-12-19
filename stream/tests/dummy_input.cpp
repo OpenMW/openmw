@@ -1,5 +1,5 @@
 // This file is shared between several test programs
-#include "input.h"
+#include "../input.h"
 #include <assert.h>
 #include <string.h>
 
