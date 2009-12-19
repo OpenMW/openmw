@@ -18,9 +18,9 @@ individually as separate libraries.
 However, Mangle does NOT actually implement a game engine, or any new
 fundamental functionality. More on that below.
 
-Currently there is only the Sound module, but more will come in the
-future (including input, 2D/3D graphics, GUI, physics, file
-system/archive access, and more.)
+Currently there's modules for sound and streams / archives (file
+access). More will come in the future (including input, 2D/3D
+graphics, GUI, physics, and more.)
 
 
 Main idea
