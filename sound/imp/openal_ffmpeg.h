@@ -8,7 +8,7 @@
 namespace Mangle {
 namespace Sound {
 
-/// A PairManager filter that adds FFmpeg decoding to OpenAL
+/// An InputFilter that adds FFmpeg decoding to OpenAL
 class OpenAL_FFM_Manager : public InputFilter
 {
  public:
