@@ -34,6 +34,9 @@ class FFM_InputManager : public InputManager
  public:
   FFM_InputManager();
   virtual InputSource *load(const std::string &file);
+
+  /// not supported
+  virtual InputSource *load(Stream::InputStream *input) { assert(0); }
 };
 
 /// FFMpeg implementation of InputSource

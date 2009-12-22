@@ -18,7 +18,6 @@ namespace VFS {
 class MangleArchive : public Ogre::Archive, _Wrapper
 {
  public:
-  /// Constructor without name
   MangleArchive(VFS *vfs, const std::string &name,
                 const std::string &archType = "Mangle",
                 bool autoDel=false)

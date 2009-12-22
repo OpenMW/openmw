@@ -27,6 +27,7 @@ AudiereManager::AudiereManager()
   canRepeatStream = true;
   canLoadFile = true;
   canLoadSource = false;
+  canLoadStream = false;
 
   device = OpenDevice("");
 

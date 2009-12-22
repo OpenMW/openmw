@@ -4,6 +4,8 @@
 #include <string>
 #include "input.h"
 
+#include "../stream/input.h"
+
 namespace Mangle {
 namespace Sound {
 
@@ -115,6 +117,9 @@ class Manager
   /// true if we can load sounds from an InputSource
   bool canLoadSource;
 
+  /// If true, we can lound sound files from a Stream
+  bool canLoadStream;
+
   /**
      @brief Load a sound from an input source. Only valid if
      canLoadSource is true.
@@ -131,6 +136,16 @@ class Manager
      @return a new Sound object
   */
   virtual Sound *load(InputSource *input, bool stream=false) = 0;
+
+  /**
+     @brief Load a sound directly from file. Only valid if canLoadStream
+     is true.
+
+     @param input audio file stream
+     @param stream true if the file should be streamed
+     @see load(InputSource*,bool)
+  */
+  virtual Sound *load(Stream::InputStream *input, bool stream=false) = 0;
 
   /**
      @brief Load a sound directly from file. Only valid if canLoadFile
