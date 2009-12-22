@@ -19,6 +19,10 @@ class AudiereManager : public Manager
 
   virtual Sound *load(const std::string &file, bool stream=false);
 
+  /// not implemented yet
+  virtual Sound *load(Stream::InputStream *input, bool stream=false)
+    { assert(0); }
+
   /// disabled
   virtual Sound *load(InputSource *input, bool stream=false)
     { assert(0); }

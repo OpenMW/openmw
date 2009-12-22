@@ -43,26 +43,31 @@ class InputFilter : public Manager
 
   /// Assign an input manager and a sound manager to this object
   void set(Manager *_snd, InputManager *_inp)
-    {
-      inp = _inp;
-      snd = _snd;
+  {
+    inp = _inp;
+    snd = _snd;
 
-      needsUpdate = snd->needsUpdate;
-      has3D = snd->has3D;
-      canRepeatStream = snd->canRepeatStream;
+    // Set capabilities
+    needsUpdate = snd->needsUpdate;
+    has3D = snd->has3D;
+    canRepeatStream = snd->canRepeatStream;
+    canLoadStream = inp->canLoadStream;
 
-      // Both these should be true, or the use of this class is pretty
-      // pointless
-      canLoadSource = snd->canLoadSource;
-      canLoadFile = canLoadSource;
-      assert(canLoadSource && canLoadFile);
-    }
+    // Both these should be true, or the use of this class is pretty
+    // pointless
+    canLoadSource = snd->canLoadSource;
+    canLoadFile = canLoadSource;
+    assert(canLoadSource && canLoadFile);
+  }
 
   virtual Sound *load(const std::string &file, bool stream=false)
-    { return load(inp->load(file), stream); }
+  { return load(inp->load(file), stream); }
+
+  virtual Sound *load(Stream::InputStream *input, bool stream=false)
+  { return load(inp->load(input), stream); }
 
   virtual Sound *load(InputSource *input, bool stream=false)
-    { return snd->load(input, stream); }
+  { return snd->load(input, stream); }
 
   virtual void update() { snd->update(); }
   virtual void setListenerPos(float x, float y, float z,

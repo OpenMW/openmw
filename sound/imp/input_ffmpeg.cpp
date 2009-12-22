@@ -32,6 +32,8 @@ FFM_InputManager::FFM_InputManager()
       av_log_set_level(AV_LOG_ERROR);
       init = true;
     }
+
+  canLoadStream = false;
 }
 
 InputSource *FFM_InputManager::load(const std::string &file)

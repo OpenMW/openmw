@@ -97,6 +97,9 @@ OpenAL_Manager::~OpenAL_Manager()
 Sound *OpenAL_Manager::load(const std::string &file, bool stream)
 { assert(0 && "OpenAL cannot decode files"); }
 
+Sound *OpenAL_Manager::load(Stream::InputStream*,bool)
+{ assert(0 && "OpenAL cannot decode streams"); }
+
 Sound *OpenAL_Manager::load(InputSource *source, bool stream)
 { return new OpenAL_Sound(source, this, stream); }
 
