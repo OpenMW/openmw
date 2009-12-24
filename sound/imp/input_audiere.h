@@ -12,7 +12,13 @@ namespace Sound {
 class AudiereInput : public InputManager
 {
  public:
+  AudiereInput();
+
+  /// Load a source from a file
   InputSource *load(const std::string &file);
+
+  /// Load a source from a stream
+  virtual InputSource *load(Stream::InputStream *input);
 };
 
 /// Audiere InputSource implementation

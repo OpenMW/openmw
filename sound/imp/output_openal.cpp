@@ -75,6 +75,7 @@ OpenAL_Manager::OpenAL_Manager()
   canRepeatStream = false;
   canLoadFile = false;
   canLoadSource = true;
+  canLoadStream = false;
 
   // Set up sound system
   Device = alcOpenDevice(NULL);

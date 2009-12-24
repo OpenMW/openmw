@@ -4,6 +4,7 @@
 #include "../input.h"
 #include <exception>
 #include <vector>
+#include <assert.h>
 
 extern "C"
 {

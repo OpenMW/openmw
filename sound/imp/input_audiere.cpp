@@ -23,8 +23,16 @@ using namespace Mangle::Sound;
 
 // --- InputManager ---
 
+AudiereInput::AudiereInput()
+{
+  canLoadStream = false;
+}
+
 InputSource *AudiereInput::load(const std::string &file)
 { return new AudiereSource(file); }
+
+InputSource *AudiereInput::load(Stream::InputStream *input)
+{ assert(0 && "not implemented yet"); }
 
 // --- InputSource ---
 
