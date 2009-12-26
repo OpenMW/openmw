@@ -30,32 +30,6 @@ void find(const std::string &fileName)
 
   cout << "Size: " << data->size() << endl;
   cout << "First line: " << data->getLine() << "\n";
-
-
-  // Alternative - not used / fixed yet
-
-  /* This won't work, since we don't have access to Ogre
-     internals. That's a shame.
-
-  LocationList::iterator li, liend;
-  liend = grp->locationList.end();
-  for (li = grp->locationList.begin(); li != liend; ++li)
-    {
-      Archive* arch = (*li)->archive;
-
-      // The rest is client code - using an archive. We might make a
-      // shared implementation, or possibly convert the archives into
-      // a vfs list at load time (although that isn't very flexible.)
-
-      // Do we perform these searches in each function? I guess we
-      // have to.
-      if (arch->exists(resourceName))
-        {
-          DataStreamPtr ptr = arch->open(resourceName);
-          return ptr;
-        }
-    }
-  */
 }
 
 int main()

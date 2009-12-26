@@ -1,5 +1,5 @@
 #include "dummy_vfs.cpp"
-#include "ogre_archive.h"
+#include "../imp_client/ogre_archive.h"
 #include <iostream>
 
 using namespace Ogre;
