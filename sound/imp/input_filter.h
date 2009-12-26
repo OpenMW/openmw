@@ -1,7 +1,7 @@
 #ifndef MANGLE_INPUT_FILTER_H
 #define MANGLE_INPUT_FILTER_H
 
-#include "sound.h"
+#include "../sound.h"
 
 #include <assert.h>
 
