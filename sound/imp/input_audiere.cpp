@@ -1,6 +1,8 @@
 #include "input_audiere.h"
 #include <assert.h>
 
+#include "../../stream/imp_client/audiere_file.h"
+
 // Exception handling
 class Audiere_Exception : public std::exception
 {
@@ -25,14 +27,14 @@ using namespace Mangle::Sound;
 
 AudiereInput::AudiereInput()
 {
-  canLoadStream = false;
+  canLoadStream = true;
 }
 
 InputSource *AudiereInput::load(const std::string &file)
 { return new AudiereSource(file); }
 
 InputSource *AudiereInput::load(Stream::InputStream *input)
-{ assert(0 && "not implemented yet"); }
+{ return new AudiereSource(input); }
 
 // --- InputSource ---
 
@@ -43,6 +45,16 @@ AudiereSource::AudiereSource(const std::string &file)
     fail("Couldn't load file " + file);
 
   buf = CreateSampleBuffer(sample);
+}
+
+AudiereSource::AudiereSource(Stream::InputStream *input)
+{
+  SampleSourcePtr sample = OpenSampleSource
+    (new Stream::AudiereFile(input));
+  if(!sample)
+    fail("Couldn't load stream");
+
+  buf = CreateSampleBuffer(sample);  
 }
 
 InputStream *AudiereSource::getStream()

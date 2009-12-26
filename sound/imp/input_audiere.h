@@ -28,6 +28,7 @@ class AudiereSource : public InputSource
 
  public:
   AudiereSource(const std::string &file);
+  AudiereSource(Stream::InputStream *input);
   InputStream *getStream();
   void drop() { delete this; }
 };

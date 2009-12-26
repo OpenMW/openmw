@@ -9,7 +9,7 @@ L_AUDIERE=-laudiere
 ffmpeg_openal_test: ffmpeg_openal_test.cpp ../imp/input_ffmpeg.cpp ../imp/output_openal.cpp
 	$(GCC) $^ -o $@ $(L_FFMPEG) $(L_OPENAL)
 
-openal_audiere_test: openal_audiere_test.cpp ../imp/input_audiere.cpp ../imp/output_openal.cpp
+openal_audiere_test: openal_audiere_test.cpp ../imp/input_audiere.cpp ../imp/output_openal.cpp ../../stream/imp_client/audiere_file.cpp
 	$(GCC) $^ -o $@ $(L_AUDIERE) $(L_OPENAL)
 
 audiere_test: audiere_test.cpp ../imp/audiere_imp.cpp
