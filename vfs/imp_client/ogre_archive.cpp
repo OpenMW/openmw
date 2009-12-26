@@ -37,6 +37,7 @@ static void fill(Ogre::StringVector &out, FileInfoList &in)
 
 Ogre::StringVectorPtr MangleArchive::list(bool recursive, bool dirs)
 {
+  assert(vfs->hasList);
   FileInfoList lst = vfs->list("", recursive, dirs);
   Ogre::StringVector *res = new Ogre::StringVector;
 
@@ -47,6 +48,7 @@ Ogre::StringVectorPtr MangleArchive::list(bool recursive, bool dirs)
 
 Ogre::FileInfoListPtr MangleArchive::listFileInfo(bool recursive, bool dirs)
 {
+  assert(vfs->hasList);
   FileInfoList lst = vfs->list("", recursive, dirs);
   Ogre::FileInfoList *res = new Ogre::FileInfoList;
 

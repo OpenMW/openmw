@@ -37,7 +37,10 @@ class VFS
  public:
   // Feature options. These should be set in the constructor.
 
-  /// If true, the find*() functions work
+  /// If true, the list() function work
+  bool hasList;
+
+  /// If true, the find() function work
   bool hasFind;
 
   /// If true, the file system is case sensitive

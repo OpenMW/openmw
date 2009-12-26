@@ -25,7 +25,8 @@ class OgreVFS : public VFS
  public:
   OgreVFS()
     {
-      hasFind = true;
+      hasList = false;
+      hasFind = false;
       isCaseSensitive = true;
     }
 
