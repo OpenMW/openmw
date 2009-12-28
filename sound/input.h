@@ -4,7 +4,7 @@
 #include <string>
 #include <stdint.h>
 
-#include "../stream/input.h"
+#include "../stream/stream.h"
 
 namespace Mangle {
 namespace Sound {
@@ -73,7 +73,7 @@ class InputManager
   virtual InputSource *load(const std::string &file) = 0;
 
   /// Load a sound input source from stream (if canLoadStream is true)
-  virtual InputSource *load(Stream::InputStream *input) = 0;
+  virtual InputSource *load(Stream::Stream *input) = 0;
 
   /// Virtual destructor
   virtual ~InputManager() {}

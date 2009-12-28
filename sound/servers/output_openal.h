@@ -26,7 +26,7 @@ public:
   void remove_stream(LST::iterator);
 
   virtual Sound *load(const std::string &file, bool stream=false);
-  virtual Sound *load(Stream::InputStream *input, bool stream=false);
+  virtual Sound *load(Stream::Stream *input, bool stream=false);
   virtual Sound *load(InputSource* input, bool stream=false);
   virtual void update();
   virtual void setListenerPos(float x, float y, float z,

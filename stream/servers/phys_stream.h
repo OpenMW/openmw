@@ -7,7 +7,7 @@ namespace Mangle {
 namespace Stream {
 
 /// A Stream wrapping a PHYSFS_file stream from the PhysFS library.
-class PhysFile : public InputStream
+class PhysFile : public Stream
 {
   PHYSFS_file *file;
 

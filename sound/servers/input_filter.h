@@ -63,7 +63,7 @@ class InputFilter : public Manager
   virtual Sound *load(const std::string &file, bool stream=false)
   { return load(inp->load(file), stream); }
 
-  virtual Sound *load(Stream::InputStream *input, bool stream=false)
+  virtual Sound *load(Stream::Stream *input, bool stream=false)
   { return load(inp->load(input), stream); }
 
   virtual Sound *load(InputSource *input, bool stream=false)

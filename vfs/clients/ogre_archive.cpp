@@ -1,6 +1,6 @@
 #include "ogre_archive.h"
 
-#include "../../stream/imp_client/ogre_datastream.h"
+#include "../../stream/clients/ogre_datastream.h"
 
 using namespace Mangle::VFS;
 using namespace Mangle::Stream;

@@ -1,7 +1,7 @@
 #ifndef MANGLE_VFS_H
 #define MANGLE_VFS_H
 
-#include "../stream/input.h"
+#include "../stream/stream.h"
 #include <string>
 #include <vector>
 
@@ -51,7 +51,7 @@ class VFS
 
   /// Open a new data stream. Deleting the object should be enough to
   /// close it.
-  virtual Stream::InputStream *open(const std::string &name) = 0;
+  virtual Stream::Stream *open(const std::string &name) = 0;
 
   /// Check for the existence of a file
   virtual bool isFile(const std::string &name) const = 0;

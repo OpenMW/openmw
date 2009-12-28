@@ -18,7 +18,7 @@ class AudiereInput : public InputManager
   InputSource *load(const std::string &file);
 
   /// Load a source from a stream
-  virtual InputSource *load(Stream::InputStream *input);
+  virtual InputSource *load(Stream::Stream *input);
 };
 
 /// Audiere InputSource implementation
@@ -28,7 +28,7 @@ class AudiereSource : public InputSource
 
  public:
   AudiereSource(const std::string &file);
-  AudiereSource(Stream::InputStream *input);
+  AudiereSource(Stream::Stream *input);
   InputStream *getStream();
   void drop() { delete this; }
 };

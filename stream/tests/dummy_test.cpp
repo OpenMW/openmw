@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-  InputStream *inp = new DummyInput();
+  Stream *inp = new DummyInput();
 
   cout << "Size: " << inp->size() << endl;
   cout << "Pos: " << inp->tell() << "\nSeeking...\n";

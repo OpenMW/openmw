@@ -14,7 +14,7 @@ namespace Stream {
     to make your own modifications if you're working with newer (or
     older) versions.
  */
-class MangleDataStream : public Ogre::DataStream, _IWrapper
+class MangleDataStream : public Ogre::DataStream, _SWrapper
 {
   void init()
     {
@@ -25,12 +25,12 @@ class MangleDataStream : public Ogre::DataStream, _IWrapper
 
  public:
   /// Constructor without name
-  MangleDataStream(InputStream *inp, bool autoDel=false)
-    : _IWrapper(inp, autoDel) { init(); }
+  MangleDataStream(Stream *inp, bool autoDel=false)
+    : _SWrapper(inp, autoDel) { init(); }
 
   /// Constructor for a named data stream
-  MangleDataStream(const Ogre::String &name, InputStream *inp, bool autoDel=false)
-    : _IWrapper(inp, autoDel), Ogre::DataStream(name) { init(); }
+  MangleDataStream(const Ogre::String &name, Stream *inp, bool autoDel=false)
+    : _SWrapper(inp, autoDel), Ogre::DataStream(name) { init(); }
 
 
   // Only implement the DataStream functions we have to implement

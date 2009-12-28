@@ -17,7 +17,7 @@ public:
   }
 
   // We only support opening 'file1' at the moment.
-  Mangle::Stream::InputStream *open(const std::string &name)
+  Mangle::Stream::Stream *open(const std::string &name)
   {
     assert(name == "file1");
     return new DummyInput();

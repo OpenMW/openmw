@@ -12,7 +12,7 @@ namespace Stream {
     to make your own modifications if you're working with newer (or
     older) versions.
  */
-class OgreStream : public InputStream
+class OgreStream : public Stream
 {
   Ogre::DataStreamPtr inp;
 

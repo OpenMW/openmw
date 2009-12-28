@@ -1,7 +1,7 @@
 #include "input_audiere.h"
 #include <assert.h>
 
-#include "../../stream/imp_client/audiere_file.h"
+#include "../../stream/clients/audiere_file.h"
 
 // Exception handling
 class Audiere_Exception : public std::exception
@@ -33,7 +33,7 @@ AudiereInput::AudiereInput()
 InputSource *AudiereInput::load(const std::string &file)
 { return new AudiereSource(file); }
 
-InputSource *AudiereInput::load(Stream::InputStream *input)
+InputSource *AudiereInput::load(Stream::Stream *input)
 { return new AudiereSource(input); }
 
 // --- InputSource ---
@@ -47,7 +47,7 @@ AudiereSource::AudiereSource(const std::string &file)
   buf = CreateSampleBuffer(sample);
 }
 
-AudiereSource::AudiereSource(Stream::InputStream *input)
+AudiereSource::AudiereSource(Stream::Stream *input)
 {
   SampleSourcePtr sample = OpenSampleSource
     (new Stream::AudiereFile(input));

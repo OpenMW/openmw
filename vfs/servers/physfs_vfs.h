@@ -2,7 +2,7 @@
 #define MANGLE_VFS_PHYSFS_SERVER_H
 
 #include "../vfs.h"
-#include "../../stream/imp_server/phys_stream.h"
+#include "../../stream/servers/phys_stream.h"
 
 #include <physfs.h>
 #include <assert.h>
@@ -26,7 +26,7 @@ class PhysVFS : public VFS
 
   /// Open a new data stream. Deleting the object should be enough to
   /// close it.
-  virtual Stream::InputStream *open(const std::string &name)
+  virtual Stream::Stream *open(const std::string &name)
     { return new Stream::PhysFile(PHYSFS_openRead(name.c_str())); }
 
   /// Check for the existence of a file

@@ -1,5 +1,5 @@
 #include "ogre_vfs.h"
-#include "../../stream/imp_server/ogre_datastream.h"
+#include "../../stream/servers/ogre_datastream.h"
 
 using namespace Mangle::VFS;
 
@@ -18,7 +18,7 @@ OgreVFS::OgreVFS(const std::string &_group)
     group = gm->getWorldResourceGroupName();
 }
 
-Mangle::Stream::InputStream *OgreVFS::open(const std::string &name)
+Mangle::Stream::Stream *OgreVFS::open(const std::string &name)
 {
   Ogre::DataStreamPtr data = gm->openResource(name, group);
   return new Stream::OgreStream(data);

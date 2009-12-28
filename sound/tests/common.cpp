@@ -6,7 +6,7 @@
 
 using namespace std;
 
-class TestStream : public Mangle::Stream::InputStream
+class TestStream : public Mangle::Stream::Stream
 {
   ifstream io;
 

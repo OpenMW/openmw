@@ -36,7 +36,7 @@ class OgreVFS : public VFS
 
   /// Open a new data stream. Deleting the object should be enough to
   /// close it.
-  virtual Stream::InputStream *open(const std::string &name);
+  virtual Stream::Stream *open(const std::string &name);
 
   /// Check for the existence of a file
   virtual bool isFile(const std::string &name) const

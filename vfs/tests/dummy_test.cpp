@@ -33,7 +33,7 @@ int main()
   cout << endl;
   print(vfs.stat("dir"));
 
-  InputStream *inp = vfs.open("file1");
+  Stream *inp = vfs.open("file1");
   cout << "filesize: " << inp->size() << endl;
 
   return 0;

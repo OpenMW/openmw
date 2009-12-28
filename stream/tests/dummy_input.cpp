@@ -1,5 +1,5 @@
 // This file is shared between several test programs
-#include "../input.h"
+#include "../stream.h"
 #include <assert.h>
 #include <string.h>
 
@@ -8,7 +8,7 @@ using namespace Mangle::Stream;
 // A simple dummy stream
 const char _data[12] = "hello world";
 
-class DummyInput : public InputStream
+class DummyInput : public Stream
 {
 private:
   int pos;

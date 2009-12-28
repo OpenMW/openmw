@@ -7,7 +7,7 @@ namespace Mangle {
 namespace Stream {
 
 /// An abstract interface for a stream data.
-class InputStream
+class Stream
 {
  public:
   // Feature options. These should be set in the constructor.
@@ -22,7 +22,7 @@ class InputStream
   bool hasSize;
 
   /// Virtual destructor
-  virtual ~InputStream() {}
+  virtual ~Stream() {}
 
   /** Read a given number of bytes from the stream. Returns the actual
       number read. If the return value is less than count, then the

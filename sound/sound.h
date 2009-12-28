@@ -4,7 +4,7 @@
 #include <string>
 #include "input.h"
 
-#include "../stream/input.h"
+#include "../stream/stream.h"
 
 namespace Mangle {
 namespace Sound {
@@ -145,7 +145,7 @@ class Manager
      @param stream true if the file should be streamed
      @see load(InputSource*,bool)
   */
-  virtual Sound *load(Stream::InputStream *input, bool stream=false) = 0;
+  virtual Sound *load(Stream::Stream *input, bool stream=false) = 0;
 
   /**
      @brief Load a sound directly from file. Only valid if canLoadFile

@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-  InputStream *inp = new DummyInput();
+  Stream *inp = new DummyInput();
   DataStreamPtr p(new MangleDataStream("hello", inp, true));
   cout << "Name: " << p->getName() << endl;
   cout << "As string: " << p->getAsString() << endl;

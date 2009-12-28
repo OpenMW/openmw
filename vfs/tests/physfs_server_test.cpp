@@ -1,4 +1,4 @@
-#include "../imp_server/physfs_vfs.h"
+#include "../servers/physfs_vfs.h"
 
 #include "server_common.cpp"
 

@@ -1,5 +1,5 @@
 #include "dummy_input.cpp"
-#include "../imp_client/audiere_file.h"
+#include "../clients/audiere_file.h"
 #include <audiere.h>
 #include <iostream>
 
@@ -10,7 +10,7 @@ int main()
 {
   char str[12];
   memset(str, 0, 12);
-  InputStream *inp = new DummyInput();
+  Stream *inp = new DummyInput();
   FilePtr p(new AudiereFile(inp, true));
   cout << "pos=" << p->tell() << endl;
   p->read(str, 2);
