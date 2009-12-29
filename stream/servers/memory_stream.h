@@ -54,6 +54,25 @@ class MemoryStream : public Stream
   size_t tell() const { return pos; }
   size_t size() const { return length; }
   bool eof() const { return pos == length; }
+
+  // New members in MemoryStream:
+
+  /// Get the base pointer to the entire buffer
+  const void *getPtr() const { return data; }
+
+  /// Clone this memory stream
+  /** Make a new stream of the same buffer. If setPos is true, we also
+      set the clone's position to be the same as ours.
+
+      No memory is copied during this operation, the new stream is
+      just another 'view' into the same shared memory buffer.
+  */
+  MemoryStream *clone(bool setPos=false) const
+  {
+    MemoryStream *res = new MemoryStream(data, length);
+    if(setPos) res->seek(pos);
+    return res;
+  }
 };
 
 }} // namespaces
