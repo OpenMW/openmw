@@ -1,7 +1,7 @@
 #ifndef SSL_TEMPL_H
 #define SSL_TEMPL_H
 
-template <class X, bool stream, bool file>
+template <class SourceT, bool stream, bool file>
 class SSL_Template : public SampleSourceLoader
 {
   SSL_Template()
@@ -13,13 +13,13 @@ class SSL_Template : public SampleSourceLoader
   SampleSource *load(const std::string &file)
   {
     assert(canLoadFile);
-    return new X(file);
+    return new SourceT(file);
   }
 
   SampleSource *load(Stream::Stream *input)
   {
     assert(canLoadStream);
-    return new X(input);
+    return new SourceT(input);
   }
 };
 
