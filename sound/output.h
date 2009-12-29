@@ -1,21 +1,24 @@
-#ifndef MANGLE_SOUND_SOUND_H
-#define MANGLE_SOUND_SOUND_H
+#ifndef MANGLE_SOUND_OUTPUT_H
+#define MANGLE_SOUND_OUTPUT_H
 
 #include <string>
-#include "input.h"
+#include "source.h"
 
 #include "../stream/stream.h"
 
 namespace Mangle {
 namespace Sound {
 
-/// Abstract interface for sound instances
-/** This class represents one sound instance, which may be played,
-    stopped, paused and so on. Instances are created from the Sound
-    class. All instances must be terminated manually using the drop()
-    function when they are no longer in use.
+/// Abstract interface for a single playable sound
+/** This class represents one sound outlet, which may be played,
+    stopped, paused and so on.
+
+    Sound instances are created from the SoundFactory class. Sounds
+    may be connected to a SampleSource or read directly from a file,
+    and they may support 3d sounds, looping and other features
+    depending on the capabilities of the backend system.
 */
-class Instance
+class Sound
 {
  public:
   /// Play or resume the sound
@@ -36,63 +39,26 @@ class Instance
   /// Set the position. May not have any effect on 2D sounds.
   virtual void setPos(float x, float y, float z) = 0;
 
-  /// Kill the current object
-  virtual void drop() = 0;
-
-  /// Virtual destructor
-  virtual ~Instance() {}
-};
-
-/// Abstract interface for sound files or sources
-/** This class acts as a factory for sound Instance objects.
-    Implementations may choose to store shared sound buffers or other
-    optimizations in subclasses of Sound. Objects of this class are
-    created through the Manager class. All objects of this class
-    should be terminated manually using the drop() function when they
-    are no longer in use.
-*/
-class Sound
-{
- public:
-  /**
-     @brief Create an instance of this sound
-
-     See also the capability flags in the Manager class.
-
-     @param is3d true if this the sound is to be 3d enabled
-     @param repeat true if the sound should loop
-     @return new Instance object
-  */
-  virtual Instance *getInstance(bool is3d, bool repeat) = 0;
-
-  // Some prefab functions
-
-  /// Shortcut for creating 3D instances
-  Instance *get3D(bool loop=false)
-    { return getInstance(true, loop); }
-  /// Shortcut for creating 2D instances
-  Instance *get2D(bool loop=false)
-    { return getInstance(false, loop); }
-
-  /// Kill the current object
-  virtual void drop() = 0;
-
   /// Virtual destructor
   virtual ~Sound() {}
 };
 
-/// Abstract interface for the main sound manager class
-/** The sound manager is used to load sound files and is a factory for
-    Sound objects. It is the main entry point to a given sound system
-    implementation.
+/// Factory interface for creating Sound objects
+/** The SoundFactory is the main entry point to a given sound output
+    system. It is used to create Sound objects, which may be connected
+    to a sound file or stream, and which may be individually played,
+    paused, and so on.
 
     The class also contains a set of public bools which describe the
     capabilities the particular system. These should be set by
     implementations (base classes) in their respective constructors.
  */
-class Manager
+class SoundFactory
 {
  public:
+  /// Virtual destructor
+  virtual ~SoundFactory() {}
+
   /** @brief If set to true, you should call update() regularly (every frame
       or so) on this sound manager. If false, update() should not be
       called.
@@ -111,23 +77,21 @@ class Manager
   */
   bool canRepeatStream;
 
-  /// true if we can load sounds directly from file
+  /// true if we can load sounds directly from file (containing encoded data)
   bool canLoadFile;
 
-  /// true if we can load sounds from an InputSource
-  bool canLoadSource;
-
-  /// If true, we can lound sound files from a Stream
+  /// If true, we can lound sound files from a Stream (containing encoded data)
   bool canLoadStream;
 
+  /// true if we can load sounds from a SampleSource (containing raw data)
+  bool canLoadSource;
+
   /**
-     @brief Load a sound from an input source. Only valid if
+     @brief Load a sound from a sample source. Only valid if
      canLoadSource is true.
 
      This function loads a sound from a given stream as defined by
-     InputSource and InputStream. The InputSource and all streams
-     created from it will be dropped when drop() is called on the
-     owning sound / instance.
+     SampleSource.
 
      @param input the input source
      @param stream true if the file should be streamed.
@@ -135,10 +99,10 @@ class Manager
             large files, but they are not required to.
      @return a new Sound object
   */
-  virtual Sound *load(InputSource *input, bool stream=false) = 0;
+  virtual Sound *load(SampleSource *input, bool stream=false) = 0;
 
   /**
-     @brief Load a sound directly from file. Only valid if canLoadStream
+     @brief Load a sound file from stream. Only valid if canLoadStream
      is true.
 
      @param input audio file stream
@@ -159,10 +123,10 @@ class Manager
 
   /// Call this every frame if needsUpdate is true
   /**
-     Update function that should be called regularly (about every
-     frame in a normal game setting.) Implementions may use this to
-     fill streaming buffers and similar.  Implementations that do not
-     need this should set needsUpdate to false.
+     This should be called regularly (about every frame in a normal
+     game setting.) Implementions may use this for filling streaming
+     buffers and similar tasks. Implementations that do not need this
+     should set needsUpdate to false.
   */
   virtual void update() = 0;
 
@@ -177,9 +141,6 @@ class Manager
   virtual void setListenerPos(float x, float y, float z,
                               float fx, float fy, float fz,
                               float ux, float uy, float uz) = 0;
-
-  /// Virtual destructor
-  virtual ~Manager() {}
 };
 
 }} // Namespaces

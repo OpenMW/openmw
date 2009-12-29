@@ -1,10 +1,9 @@
-#include "output_openal.h"
+#include "openal_out.h"
 #include <assert.h>
 
-#include <vector>
+//  ALuint bufferID;
 
 using namespace Mangle::Sound;
-
 
 // ---- Helper functions and classes ----
 
@@ -64,97 +63,71 @@ static void getALFormat(InputStream *inp, int &fmt, int &rate)
     fail("Unsupported input format");
 }
 
+// ---- OpenAL_Sound ----
 
-// ---- Manager ----
-
-OpenAL_Manager::OpenAL_Manager()
-  : Context(NULL), Device(NULL)
+OpenAL_Sound::OpenAL_Sound(SampleSource *input)
 {
-  needsUpdate = true;
-  has3D = true;
-  canRepeatStream = false;
-  canLoadFile = false;
-  canLoadSource = true;
-  canLoadStream = false;
-
-  // Set up sound system
-  Device = alcOpenDevice(NULL);
-  Context = alcCreateContext(Device, NULL);
-
-  if(!Device || !Context)
-    fail("Failed to initialize context or device");
-
-  alcMakeContextCurrent(Context);
+  
 }
 
-OpenAL_Manager::~OpenAL_Manager()
+void OpenAL_Sound::play()
 {
-  // Deinitialize sound system
-  alcMakeContextCurrent(NULL);
-  if(Context) alcDestroyContext(Context);
-  if(Device) alcCloseDevice(Device);
+  alSourcePlay(inst);
+  checkALError("starting playback");
 }
 
-Sound *OpenAL_Manager::load(const std::string &file, bool stream)
-{ assert(0 && "OpenAL cannot decode files"); }
-
-Sound *OpenAL_Manager::load(Stream::Stream*,bool)
-{ assert(0 && "OpenAL cannot decode streams"); }
-
-Sound *OpenAL_Manager::load(InputSource *source, bool stream)
-{ return new OpenAL_Sound(source, this, stream); }
-
-void OpenAL_Manager::update()
+void OpenAL_Sound::stop()
 {
-  // Loop through all the streaming sounds and update them
-  LST::iterator it, next;
-  for(it = streaming.begin();
-      it != streaming.end();
-      it++)
-    {
-      (*it)->update();
-    }
+  alSourceStop(inst);
+  checkALError("stopping");
 }
 
-void OpenAL_Manager::setListenerPos(float x, float y, float z,
-                                    float fx, float fy, float fz,
-                                    float ux, float uy, float uz)
+void OpenAL_Sound::pause()
 {
-  ALfloat orient[6];
-  orient[0] = fx;
-  orient[1] = fy;
-  orient[2] = fz;
-  orient[3] = ux;
-  orient[4] = uy;
-  orient[5] = uz;
-  alListener3f(AL_POSITION, x, y, z);
-  alListenerfv(AL_ORIENTATION, orient);
-  checkALError("setting listener position");
+  alSourcePause(inst);
+  checkALError("pausing");
 }
 
-OpenAL_Manager::LST::iterator OpenAL_Manager::add_stream(OpenAL_Stream_Instance* inst)
+bool OpenAL_Sound::isPlaying()
 {
-  streaming.push_front(inst);
-  return streaming.begin();
+  ALint state;
+  alGetSourcei(inst, AL_SOURCE_STATE, &state);
+
+  return state == AL_PLAYING;
 }
 
-void OpenAL_Manager::remove_stream(LST::iterator it)
+void OpenAL_Sound::setVolume(float volume)
 {
-  streaming.erase(it);
+  if(volume > 1.0) volume = 1.0;
+  if(volume < 0.0) volume = 0.0;
+  alSourcef(inst, AL_GAIN, volume);
+  checkALError("setting volume");
+}
+
+void OpenAL_Sound::setPos(float x, float y, float z)
+{
+  alSource3f(inst, AL_POSITION, x, y, z);
+  checkALError("setting position");
 }
 
 
-// ---- Sound ----
 
-OpenAL_Sound::~OpenAL_Sound()
-{
-  // Kill the input source
-  if(source) source->drop();
 
-  // And any allocated buffers
-  if(bufferID)
-    alDeleteBuffers(1, &bufferID);
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Instance *OpenAL_Sound::getInstance(bool is3d, bool repeat)
 {
@@ -214,49 +187,6 @@ Instance *OpenAL_Sound::getInstance(bool is3d, bool repeat)
   assert(bufferID != 0);
 
   return new OpenAL_Simple_Instance(bufferID);
-}
-
-
-// ---- OpenAL_Instance_Base ----
-
-void OpenAL_Instance_Base::play()
-{
-  alSourcePlay(inst);
-  checkALError("starting playback");
-}
-
-void OpenAL_Instance_Base::stop()
-{
-  alSourceStop(inst);
-  checkALError("stopping");
-}
-
-void OpenAL_Instance_Base::pause()
-{
-  alSourcePause(inst);
-  checkALError("pausing");
-}
-
-bool OpenAL_Instance_Base::isPlaying()
-{
-  ALint state;
-  alGetSourcei(inst, AL_SOURCE_STATE, &state);
-
-  return state == AL_PLAYING;
-}
-
-void OpenAL_Instance_Base::setVolume(float volume)
-{
-  if(volume > 1.0) volume = 1.0;
-  if(volume < 0.0) volume = 0.0;
-  alSourcef(inst, AL_GAIN, volume);
-  checkALError("setting volume");
-}
-
-void OpenAL_Instance_Base::setPos(float x, float y, float z)
-{
-  alSource3f(inst, AL_POSITION, x, y, z);
-  checkALError("setting position");
 }
 
 

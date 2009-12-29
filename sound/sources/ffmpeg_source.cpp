@@ -1,12 +1,22 @@
 #include "input_ffmpeg.h"
-#include <assert.h>
 
 using namespace Mangle::Sound;
 
 // Static output buffer. Not thread safe, but supports multiple
 // streams operated from the same thread.
 static uint8_t outBuf[AVCODEC_MAX_AUDIO_FRAME_SIZE];
-bool FFM_InputManager::init = false;
+
+/// FFmpeg exception.
+class FFM_Exception : public std::exception
+{
+  std::string msg;
+
+ public:
+
+  FFM_Exception(const std::string &m);
+  ~FFM_Exception() throw();
+  virtual const char* what() const throw();
+};
 
 FFM_Exception::FFM_Exception(const std::string &m)
   : msg(m) {}
@@ -21,44 +31,23 @@ static void fail(const std::string &msg)
   throw FFM_Exception("FFMpeg exception: " + msg);
 }
 
+// --- Loader ---
 
-// --- Manager ---
+static bool init = false;
 
-FFM_InputManager::FFM_InputManager()
+FFMpegLoader::FFMpegLoader(bool setup)
 {
-  if(!init)
+  if(setup && !init)
     {
       av_register_all();
       av_log_set_level(AV_LOG_ERROR);
       init = true;
     }
-
-  canLoadStream = false;
 }
-
-InputSource *FFM_InputManager::load(const std::string &file)
-{ return new FFM_InputSource(file); }
-
 
 // --- Source ---
 
-FFM_InputSource::FFM_InputSource(const std::string &file)
-{
-  // FFmpeg doesn't handle several instances from one source. So we
-  // just store the filename.
-  name = file;
-}
-
-InputStream *FFM_InputSource::getStream()
-{ return new FFM_InputStream(name); }
-
-void FFM_InputSource::drop()
-{ delete this; }
-
-
-// --- Stream ---
-
-FFM_InputStream::FFM_InputStream(const std::string &file)
+FFMpegSource::FFMpegSource(const std::string &file)
 {
   std::string msg;
   AVCodec *codec;
@@ -83,7 +72,7 @@ FFM_InputStream::FFM_InputStream(const std::string &file)
     }
 
   if(StreamNum == FmtCtx->nb_streams)
-    fail("File " + file + " didn't contain any audio streams");
+    fail("File '" + file + "' didn't contain any audio streams");
 
   // Open the decoder
   CodecCtx = FmtCtx->streams[StreamNum]->codec;
@@ -91,7 +80,7 @@ FFM_InputStream::FFM_InputStream(const std::string &file)
 
   if(!codec || avcodec_open(CodecCtx, codec) < 0)
     {
-      msg = "Error loading " + file + ": ";
+      msg = "Error loading '" + file + "': ";
       if(codec)
         msg += "coded error";
       else
@@ -108,24 +97,24 @@ FFM_InputStream::FFM_InputStream(const std::string &file)
   fail(msg);
 }
 
-FFM_InputStream::~FFM_InputStream()
+FFMpegSource::~FFMpegSource()
 {
   avcodec_close(CodecCtx);
   av_close_input_file(FmtCtx);
 }
 
-void FFM_InputStream::getInfo(int32_t *rate, int32_t *channels, int32_t *bits)
+void FFMpegSource::getInfo(int32_t *rate, int32_t *channels, int32_t *bits)
 {
   if(rate) *rate = CodecCtx->sample_rate;
   if(channels) *channels = CodecCtx->channels;
   if(bits) *bits = 16;
 }
 
-uint32_t FFM_InputStream::getData(void *data, uint32_t length)
+size_t FFMpegSource::read(void *data, size_t length)
 {
-  if(empty) return 0;
+  if(isEof) return 0;
 
-  uint32_t left = length;
+  size_t left = length;
   uint8_t *outPtr = (uint8_t*)data;
 
   // First, copy over any stored data we might be sitting on
@@ -195,7 +184,7 @@ uint32_t FFM_InputStream::getData(void *data, uint32_t length)
           memcpy(outPtr, outBuf, copy);
 
           // left = how much space is left in the caller output
-          // buffer
+          // buffer. This loop repeats as long left is > 0
           left -= copy;
           outPtr += copy;
           assert(left >= 0);
@@ -215,10 +204,7 @@ uint32_t FFM_InputStream::getData(void *data, uint32_t length)
 
   // If we're returning less than asked for, then we're done
   if(left > 0)
-    empty = true;
+    isEof = true;
 
   return length - left;
 }
-
-void FFM_InputStream::drop()
-{ delete this; }
