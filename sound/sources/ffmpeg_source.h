@@ -20,7 +20,6 @@ class FFMpegSource : public SampleSource
   AVFormatContext *FmtCtx;
   AVCodecContext *CodecCtx;
   int StreamNum;
-  bool empty;
 
   std::vector<uint8_t> storage;
 
@@ -41,7 +40,14 @@ class FFMpegSource : public SampleSource
 #include "loadertemplate.h"
 
 /// A factory that loads FFMpegSources from file
-typedef SSL_Template<AudiereSource,false,true> AudiereLoader;
+class FFMpegLoader : public SSL_Template<AudiereSource,false,true>
+{
+ public:
+
+  /// Sets up the libavcodec library. If you want to do your own
+  /// setup, send a setup=false parameter.
+  FFMpegLoader(bool setup=true);
+};
 
 }} // namespaces
 #endif
