@@ -1,13 +1,14 @@
-#include "dummy_input.cpp"
+#include "../servers/memory_stream.h"
 #include "ogre_datastream.h"
 #include <iostream>
 
+using namespace Mangle::Stream;
 using namespace Ogre;
 using namespace std;
 
 int main()
 {
-  Stream *inp = new DummyInput();
+  Stream *inp = new MemoryStream("hello world", 11);
   DataStreamPtr p(new MangleDataStream("hello", inp, true));
   cout << "Name: " << p->getName() << endl;
   cout << "As string: " << p->getAsString() << endl;

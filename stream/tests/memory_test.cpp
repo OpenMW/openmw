@@ -1,13 +1,14 @@
-#include "dummy_input.cpp"
-
 #include <iostream>
 #include <string.h>
 
+#include "../servers/memory_stream.h"
+
+using namespace Mangle::Stream;
 using namespace std;
 
 int main()
 {
-  Stream *inp = new DummyInput();
+  Stream *inp = new MemoryStream("hello world", 11);
 
   cout << "Size: " << inp->size() << endl;
   cout << "Pos: " << inp->tell() << "\nSeeking...\n";
