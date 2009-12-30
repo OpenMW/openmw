@@ -3,15 +3,14 @@
 
 #include <assert.h>
 #include "../stream.h"
-#include <boost/smart_ptr.h>
 
 namespace Mangle {
 namespace Stream {
 
 // Do this before the class declaration, since the class itself
-// depends on it
-class MemoryStream;
-typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
+// depends on it. TODO: Postponed for later
+//class MemoryStream;
+//typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
 
 /** A Stream wrapping a memory buffer
 
@@ -33,7 +32,7 @@ class MemoryStream : public Stream
   }
 
   MemoryStream()
-    : data(NULL), length(0), pos(0);
+    : data(NULL), length(0), pos(0)
   {
     isSeekable = true;
     hasPosition = true;
@@ -89,10 +88,12 @@ class MemoryStream : public Stream
 
       No memory is copied during this operation, the new stream is
       just another 'view' into the same shared memory buffer.
+
+      TODO: Rewrite to use smart pointers
   */
-  MemoryStreamPtr clone(bool setPos=false) const
+  MemoryStream* clone(bool setPos=false) const
   {
-    MemoryStreamPtr res = new MemoryStream(data, length);
+    MemoryStream* res = new MemoryStream(data, length);
     if(setPos) res->seek(pos);
     return res;
   }

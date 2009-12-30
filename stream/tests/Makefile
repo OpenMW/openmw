@@ -15,5 +15,8 @@ audiere_client_test: audiere_client_test.cpp ../stream.h ../clients/iwrapper.h .
 memory_test: memory_test.cpp ../stream.h ../servers/memory_stream.h
 	$(GCC) $< -o $@
 
+buffer_test: buffer_test.cpp ../stream.h ../servers/memory_stream.h ../filters/buffer_stream.h
+	$(GCC) $< -o $@
+
 clean:
 	rm *_test
