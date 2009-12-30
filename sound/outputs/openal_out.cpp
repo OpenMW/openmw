@@ -103,6 +103,28 @@ void OpenAL_Sound::setPos(float x, float y, float z)
   checkALError("setting position");
 }
 
+void OpenAL_Sound::setRepeat(bool rep)
+{
+  alSourcei(Source, AL_LOOPING, rep?AL_TRUE:AL_FALSE);
+}
+
+void OpenAL_Sound::setup()
+{
+}
+
+// Constructor used for cloned sounds
+OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref)
+  : refCnt(ref), bufferID(buf)
+{
+  // Increase the reference count
+  assert(ref != NULL);
+  *refCnt++;
+
+  // Create a source
+  alGenSources(1, &inst);
+  alSourcei(inst, AL_BUFFER, bufferID);
+}
+
 OpenAL_Sound::OpenAL_Sound(SampleSource *input)
 {
   // Get the format
@@ -120,7 +142,11 @@ OpenAL_Sound::OpenAL_Sound(SampleSource *input)
 
   // Create a source
   alGenSources(1, &inst);
-  alSourcei(inst, AL_BUFFER, buf);
+  alSourcei(inst, AL_BUFFER, bufferID);
+
+  // Create a cheap reference counter for the buffer
+  refCnt = new int;
+  *refCnt = 1;
 }
 
 OpenAL_Sound::~OpenAL_Sound()
@@ -131,6 +157,12 @@ OpenAL_Sound::~OpenAL_Sound()
   // Return sound
   alDeleteSources(1, &inst);
 
-  // Delete buffer
-  alDeleteBuffers(1, &bufferID);
+  // Decrease the reference
+  if(--(*refCnt))
+    {
+      // We're the last owner. Delete the buffer and the counter
+      // itself.
+      alDeleteBuffers(1, &bufferID);
+      delete refCnt;
+    }
 }

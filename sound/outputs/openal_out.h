@@ -18,27 +18,26 @@ class OpenAL_Sound : public Sound
   ALuint inst;
   ALuint bufferID;
 
+  // Poor mans reference counting. Might improve this later.
+  int *refCnt;
+
  public:
   OpenAL_Sound(SampleSource *input);
+  OpenAL_Sound(ALuint buf, int *ref); // Used for cloning
   ~OpenAL_Sound();
 
-  /// Play or resume the sound
   void play();
-
-  /// Stop the sound
   void stop();
-
-  /// Pause the sound, may be resumed later
   void pause();
-
-  /// Check if the sound is still playing
-  bool isPlaying();
-
-  /// Set the volume. The parameter must be between 0.0 and 1.0.
+  bool isPlaying() const;
   void setVolume(float);
-
-  /// Set the 3D position.
   void setPos(float x, float y, float z);
+  void setRepeat(bool);
+  void setStreaming(bool) {} // Not implemented yet
+  Sound* clone() const;
+
+  /// Not implemented
+  void setPan(float) {}
 };
 
 class OpenAL_Factory : public SoundFactory
@@ -56,7 +55,6 @@ class OpenAL_Factory : public SoundFactory
     {
       needsUpdate = false;
       has3D = true;
-      canRepeatStream = false;
       canLoadFile = false;
       canLoadStream = false;
       canLoadSource = true;

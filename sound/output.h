@@ -17,6 +17,11 @@ namespace Sound {
     may be connected to a SampleSource or read directly from a file,
     and they may support 3d sounds, looping and other features
     depending on the capabilities of the backend system.
+
+    To create multiple instances of one sound, it is recommended to
+    'clone' an existing instance instead of reloading it from
+    file. Cloned sounds will often (depending on the back-end) use
+    less memory due to shared buffers.
 */
 class Sound
 {
@@ -31,13 +36,32 @@ class Sound
   virtual void pause() = 0;
 
   /// Check if the sound is still playing
-  virtual bool isPlaying() = 0;
+  virtual bool isPlaying() = 0 const;
 
   /// Set the volume. The parameter must be between 0.0 and 1.0.
   virtual void setVolume(float) = 0;
 
-  /// Set the position. May not have any effect on 2D sounds.
+  /// Set left/right pan. -1.0 is left, 0.0 is center and 1.0 is right.
+  virtual void setPan(float) = 0;
+
+  /// Set the position. May not work with all backends.
   virtual void setPos(float x, float y, float z) = 0;
+
+  /// Set loop mode
+  virtual void setRepeat(bool) = 0;
+
+  /// Set streaming mode.
+  /** This may be used by implementations to optimize for very large
+      files. If streaming mode is off (default), most implementations
+      will load the entire file into memory before starting playback.
+   */
+  virtual void setStreaming(bool) = 0;
+
+  /// Create a new instance of this sound.
+  /** Playback status is not cloned, only the sound data
+      itself. Back-ends can use this as a means of sharing data and
+      saving memory. */
+  virtual Sound* clone() const = 0;
 
   /// Virtual destructor
   virtual ~Sound() {}
@@ -71,12 +95,6 @@ class SoundFactory
   */
   bool has3D;
 
-  /** @brief true if 'repeat' and 'stream' can be used simultaneously.
-      If false, repeating a streamed sound will give undefined
-      behavior.
-  */
-  bool canRepeatStream;
-
   /// true if we can load sounds directly from file (containing encoded data)
   bool canLoadFile;
 
@@ -99,7 +117,7 @@ class SoundFactory
             large files, but they are not required to.
      @return a new Sound object
   */
-  virtual Sound *load(SampleSource *input, bool stream=false) = 0;
+  virtual Sound *load(SampleSource *input) = 0;
 
   /**
      @brief Load a sound file from stream. Only valid if canLoadStream
@@ -109,7 +127,7 @@ class SoundFactory
      @param stream true if the file should be streamed
      @see load(InputSource*,bool)
   */
-  virtual Sound *load(Stream::Stream *input, bool stream=false) = 0;
+  virtual Sound *load(Stream::Stream *input) = 0;
 
   /**
      @brief Load a sound directly from file. Only valid if canLoadFile
@@ -119,7 +137,7 @@ class SoundFactory
      @param stream true if the file should be streamed
      @see load(InputSource*,bool)
   */
-  virtual Sound *load(const std::string &file, bool stream=false) = 0;
+  virtual Sound *load(const std::string &file) = 0;
 
   /// Call this every frame if needsUpdate is true
   /**
