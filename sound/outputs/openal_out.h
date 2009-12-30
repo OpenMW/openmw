@@ -2,6 +2,7 @@
 #define MANGLE_SOUND_OPENAL_OUT_H
 
 #include "../output.h"
+#include "../../stream/filters/buffer_stream.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -15,6 +16,7 @@ class OpenAL_Sound : public Sound
 {
  protected:
   ALuint inst;
+  ALuint bufferID;
 
  public:
   OpenAL_Sound(SampleSource *input);
@@ -39,7 +41,7 @@ class OpenAL_Sound : public Sound
   void setPos(float x, float y, float z);
 };
 
-class OpenALFactory : public SoundFactory
+class OpenAL_Factory : public SoundFactory
 {
   ALCdevice  *Device;
   ALCcontext *Context;
@@ -49,7 +51,7 @@ class OpenALFactory : public SoundFactory
   /// Initialize object. Pass true (default) if you want the
   /// constructor to set up the current ALCdevice and ALCcontext for
   /// you.
-  OpenALFactory(bool doSetup = true)
+  OpenAL_Factory(bool doSetup = true)
    : didSetup(doSetup)
     {
       needsUpdate = false;
@@ -72,7 +74,7 @@ class OpenALFactory : public SoundFactory
         }
     }
 
-  ~OpenALFactory()
+  ~OpenAL_Factory()
     {
       // Deinitialize sound system
       if(didSetup)

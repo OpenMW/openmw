@@ -1,7 +1,7 @@
-#include "openal_audiere.h"
+#include "../filters/openal_audiere.h"
 
 using namespace Mangle::Sound;
 
-OpenAL_Audiere_Manager mg;
+OpenAL_Audiere_Factory mg;
 
 #include "common.cpp"

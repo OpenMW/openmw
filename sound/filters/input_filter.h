@@ -1,7 +1,7 @@
 #ifndef MANGLE_INPUT_FILTER_H
 #define MANGLE_INPUT_FILTER_H
 
-#include "../sound.h"
+#include "../output.h"
 
 #include <assert.h>
 
@@ -10,39 +10,29 @@ namespace Sound {
 
 /**
    @brief This filter class adds file loading capabilities to a
-   Sound::Manager class, by associating an InputManager with it.
+   Sound::SoundFactory class, by associating an SampleSourceLoader
+   with it.
 
-   The class takes an existing Manager able to load streams, and
-   associates an InputManager with it. The combined class is able to
-   load files directly.
-
-   Example:
-   \code
-
-   // Add FFmpeg input to an OpenAL soud output manager. OpenAL cannot
-   // decode sound files on its own.
-   InputFilter mg(new OpenAL_Manager, new FFM_InputManager);
-
-   // We can now load filenames directly.
-   mg.load("file1.mp3");
-   \endcode
+   The class takes an existing SoundFactory able to load streams, and
+   associates an SampleSourceLoader with it. The combined class is
+   able to load files directly.
 */
-class InputFilter : public Manager
+class InputFilter : public SoundFactory
 {
  protected:
-  Manager *snd;
-  InputManager *inp;
+  SoundFactory *snd;
+  SampleSourceLoader *inp;
 
  public:
   /// Empty constructor
   InputFilter() {}
 
   /// Assign an input manager and a sound manager to this object
-  InputFilter(Manager *_snd, InputManager *_inp)
+  InputFilter(SoundFactory *_snd, SampleSourceLoader *_inp)
     { set(_snd, _inp); }
 
   /// Assign an input manager and a sound manager to this object
-  void set(Manager *_snd, InputManager *_inp)
+  void set(SoundFactory *_snd, SampleSourceLoader *_inp)
   {
     inp = _inp;
     snd = _snd;

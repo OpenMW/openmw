@@ -1,8 +1,6 @@
 #include "openal_out.h"
 #include <assert.h>
 
-//  ALuint bufferID;
-
 using namespace Mangle::Sound;
 
 // ---- Helper functions and classes ----
@@ -65,11 +63,6 @@ static void getALFormat(InputStream *inp, int &fmt, int &rate)
 
 // ---- OpenAL_Sound ----
 
-OpenAL_Sound::OpenAL_Sound(SampleSource *input)
-{
-  
-}
-
 void OpenAL_Sound::play()
 {
   alSourcePlay(inst);
@@ -110,174 +103,34 @@ void OpenAL_Sound::setPos(float x, float y, float z)
   checkALError("setting position");
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Instance *OpenAL_Sound::getInstance(bool is3d, bool repeat)
+OpenAL_Sound::OpenAL_Sound(SampleSource *input)
 {
-  assert((!repeat || !stream) && "OpenAL implementation does not support looping streams");
+  // Get the format
+  int fmt, rate;
+  getALFormat(inp, fmt, rate);
 
-  if(stream)
-    return new OpenAL_Stream_Instance(source->getStream(), owner);
+  // Read the entire stream into a buffer
+  BufferStream buf(input);
 
-  // Load the buffer if it hasn't been done already
-  if(bufferID == 0)
-    {
-      // Get an input stream and load the file from it
-      InputStream *inp = source->getStream();
-
-      std::vector<unsigned char> buffer;
-
-      // Add 32 kb at each increment
-      const int ADD = 32*1024;
-
-      // Fill the buffer. We increase the buffer until it's large
-      // enough to fit all the data.
-      while(true)
-        {
-          // Increase the buffer
-          int oldlen = buffer.size();
-          buffer.resize(oldlen+ADD);
-
-          // Read the data
-          size_t len = inp->getData(&buffer[oldlen], ADD);
-
-          // If we read less than requested, we're done.
-          if(len < ADD)
-            {
-              // Downsize the buffer to the right size
-              buffer.resize(oldlen+len);
-              break;
-            }
-        }
-
-      // Get the format
-      int fmt, rate;
-      getALFormat(inp, fmt, rate);
-
-      // We don't need the file anymore
-      inp->drop();
-      source->drop();
-      source = NULL;
-
-      // Move the data into OpenAL
-      alGenBuffers(1, &bufferID);
-      alBufferData(bufferID, fmt, &buffer[0], buffer.size(), rate);
-      checkALError("loading sound buffer");
-    } // End of buffer loading
-
-  // At this point, the file data has been loaded into the buffer
-  // in 'bufferID', and we should be ready to go.
+  // Move the data into OpenAL
+  alGenBuffers(1, &bufferID);
   assert(bufferID != 0);
+  alBufferData(bufferID, fmt, &buf.getPtr(), buf.size(), rate);
+  checkALError("loading sound buffer");
 
-  return new OpenAL_Simple_Instance(bufferID);
-}
-
-
-// ---- OpenAL_Simple_Instance ----
-
-OpenAL_Simple_Instance::OpenAL_Simple_Instance(ALuint buf)
-{
-  // Create instance and associate buffer
+  // Create a source
   alGenSources(1, &inst);
   alSourcei(inst, AL_BUFFER, buf);
 }
 
-OpenAL_Simple_Instance::~OpenAL_Simple_Instance()
+OpenAL_Sound::~OpenAL_Sound()
 {
   // Stop
   alSourceStop(inst);
 
   // Return sound
   alDeleteSources(1, &inst);
-}
 
-
-// ---- OpenAL_Stream_Instance ----
-
-OpenAL_Stream_Instance::OpenAL_Stream_Instance(InputStream *_stream,
-                                               OpenAL_Manager *_owner)
-  : stream(_stream), owner(_owner)
-{
-  // Deduce the file format from the stream info
-  getALFormat(stream, fmt, rate);
-
-  // Create the buffers and the sound instance
-  alGenBuffers(BUFS, bufs);
-  alGenSources(1, &inst);
-
-  checkALError("initializing");
-
-  // Fill the buffers and que them
-  for(int i=0; i<BUFS; i++)
-    queueBuffer(bufs[i]);
-
-  checkALError("buffering initial data");
-
-  // Add ourselves to the stream list
-  lit = owner->add_stream(this);
-}
-
-void OpenAL_Stream_Instance::queueBuffer(ALuint bId)
-{
-  char buf[SIZE];
-
-  // Get the data
-  int len = stream->getData(buf, SIZE);
-  if(len == 0)
-    return;
-
-  // .. and stash it
-  alBufferData(bId, fmt, buf, len, rate);
-  alSourceQueueBuffers(inst, 1, &bId);
-}
-
-OpenAL_Stream_Instance::~OpenAL_Stream_Instance()
-{
-  // Remove ourselves from streaming list
-  owner->remove_stream(lit);
-
-  // Stop
-  alSourceStop(inst);
-
-  // Kill the input stream
-  stream->drop();
-
-  // Return sound
-  alDeleteSources(1, &inst);
-
-  // Delete buffers
-  alDeleteBuffers(BUFS, bufs);
-}
-
-void OpenAL_Stream_Instance::update()
-{
-  ALint count;
-  alGetSourcei(inst, AL_BUFFERS_PROCESSED, &count);
-
-  for(int i = 0;i < count;i++)
-    {
-      // Unque a finished buffer
-      ALuint bId;
-      alSourceUnqueueBuffers(inst, 1, &bId);
-
-      // Queue a new buffer
-      queueBuffer(bId);
-    }
+  // Delete buffer
+  alDeleteBuffers(1, &bufferID);
 }
