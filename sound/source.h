@@ -33,7 +33,8 @@ class SampleSource : public Stream::Stream
 
   bool eof() const { return isEof; }
 
-  // Disabled functions
+  // Disabled functions by default. You can still override them in
+  // subclasses.
   void seek(size_t pos) const { assert(0); }
   size_t tell() const { assert(0); }
   size_t size() const { assert(0); }

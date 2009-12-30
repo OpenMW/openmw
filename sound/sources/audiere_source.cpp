@@ -28,11 +28,14 @@ void AudiereSource::getInfo(int32_t *rate, int32_t *channels, int32_t *bits)
 {
   SampleFormat fmt;
   sample->getFormat(*channels, *rate, fmt);
-  if(fmt == SF_U8)
-    *bits = 8;
-  else if(fmt == SF_S16)
-    *bits = 16;
-  else assert(0);
+  if(bits)
+    {
+      if(fmt == SF_U8)
+        *bits = 8;
+      else if(fmt == SF_S16)
+        *bits = 16;
+      else assert(0);
+    }
 }
 
 /*
@@ -103,7 +106,7 @@ AudiereSource::AudiereSource(const std::string &file)
   if(!sample)
     fail("Couldn't load file " + file);
 
-  getFormat();
+  setup();
 }
 
 AudiereSource::AudiereSource(Stream::Stream *input)
@@ -114,15 +117,15 @@ AudiereSource::AudiereSource(Stream::Stream *input)
   if(!sample)
     fail("Couldn't load stream");
 
-  getFormat();
+  setup();
 }
 
 AudiereSource::AudiereSource(audiere::SampleSourcePtr src)
   : sample(src)
-{ assert(sample); getFormat(); }
+{ assert(sample); setup(); }
 
 // Common function called from all constructors
-AudiereSource::getFormat()
+AudiereSource::setup()
 {
   assert(sample);
 
@@ -136,4 +139,8 @@ AudiereSource::getFormat()
   // Make sure that our pullover hack will work. Increase this size if
   // this doesn't work in all cases.
   assert(frameSize <= PSIZE);
+
+  isSeekable = sample->isSeekable();
+  hasPosition = true;
+  hasSize = true;
 }

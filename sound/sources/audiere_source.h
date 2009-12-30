@@ -40,6 +40,10 @@ class AudiereSource : public SampleSource
 
   void getInfo(int32_t *rate, int32_t *channels, int32_t *bits);
   size_t read(void *data, size_t length);
+
+  void seek(size_t pos) const { sample->setPosition(pos); }
+  size_t tell() const { return sample->getPosition(); }
+  size_t size() const { return sample->getLength(); }
 };
 
 #include "loadertemplate.h"
