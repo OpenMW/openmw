@@ -31,5 +31,7 @@ class OgreStream : public Stream
   bool eof() const { return inp->eof(); }
 };
 
+typedef boost::shared_ptr<OgreStream> OgreStreamPtr;
+
 }} // namespaces
 #endif

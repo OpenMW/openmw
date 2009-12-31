@@ -3,7 +3,7 @@
 
 #include <OgreDataStream.h>
 #include <assert.h>
-#include "iwrapper.h"
+#include "../stream.h"
 
 namespace Mangle {
 namespace Stream {
@@ -14,8 +14,10 @@ namespace Stream {
     to make your own modifications if you're working with newer (or
     older) versions.
  */
-class MangleDataStream : public Ogre::DataStream, _SWrapper
+class MangleDataStream : public Ogre::DataStream
 {
+  StreamPtr inp;
+
   void init()
     {
       // Get the size, if possible
@@ -25,13 +27,12 @@ class MangleDataStream : public Ogre::DataStream, _SWrapper
 
  public:
   /// Constructor without name
-  MangleDataStream(Stream *inp, bool autoDel=false)
-    : _SWrapper(inp, autoDel) { init(); }
+  MangleDataStream(StreamPtr _inp)
+    : inp(_inp) { init(); }
 
   /// Constructor for a named data stream
-  MangleDataStream(const Ogre::String &name, Stream *inp, bool autoDel=false)
-    : _SWrapper(inp, autoDel), Ogre::DataStream(name) { init(); }
-
+  MangleDataStream(const Ogre::String &name, StreamPtr _inp)
+    : inp(_inp), Ogre::DataStream(name) { init(); }
 
   // Only implement the DataStream functions we have to implement
 

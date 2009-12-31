@@ -8,9 +8,9 @@ namespace Mangle {
 namespace Stream {
 
 // Do this before the class declaration, since the class itself
-// depends on it. TODO: Postponed for later
-//class MemoryStream;
-//typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
+// depends on it.
+class MemoryStream;
+typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
 
 /** A Stream wrapping a memory buffer
 
@@ -88,12 +88,10 @@ class MemoryStream : public Stream
 
       No memory is copied during this operation, the new stream is
       just another 'view' into the same shared memory buffer.
-
-      TODO: Rewrite to use smart pointers
   */
-  MemoryStream* clone(bool setPos=false) const
+  MemoryStreamPtr clone(bool setPos=false) const
   {
-    MemoryStream* res = new MemoryStream(data, length);
+    MemoryStreamPtr res(new MemoryStream(data, length));
     if(setPos) res->seek(pos);
     return res;
   }

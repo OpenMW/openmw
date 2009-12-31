@@ -18,11 +18,6 @@ class OpenAL_Audiere_Factory : public InputFilter
       set(new OpenAL_Factory,
           new AudiereLoader);
     }
-  ~OpenAL_Audiere_Factory()
-    {
-      delete snd;
-      delete inp;
-    }
 };
 
 }}

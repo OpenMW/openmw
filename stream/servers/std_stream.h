@@ -51,5 +51,7 @@ class StdStream : public Stream
   { return inf->eof(); }
 };
 
+typedef boost::shared_ptr<StdStream> StdStreamPtr;
+
 }} // namespaces
 #endif

@@ -20,19 +20,19 @@ namespace Sound {
 class InputFilter : public SoundFactory
 {
  protected:
-  SoundFactory *snd;
-  SampleSourceLoader *inp;
+  SoundFactoryPtr snd;
+  SampleSourceLoaderPtr inp;
 
  public:
   /// Empty constructor
   InputFilter() {}
 
   /// Assign an input manager and a sound manager to this object
-  InputFilter(SoundFactory *_snd, SampleSourceLoader *_inp)
+  InputFilter(SoundFactoryPtr _snd, SampleSourceLoaderPtr _inp)
     { set(_snd, _inp); }
 
   /// Assign an input manager and a sound manager to this object
-  void set(SoundFactory *_snd, SampleSourceLoader *_inp)
+  void set(SoundFactoryPtr _snd, SampleSourceLoaderPtr _inp)
   {
     inp = _inp;
     snd = _snd;
@@ -50,13 +50,13 @@ class InputFilter : public SoundFactory
     assert(canLoadSource && canLoadFile);
   }
 
-  virtual Sound *load(const std::string &file, bool stream=false)
+  virtual SoundPtr load(const std::string &file)
   { return load(inp->load(file), stream); }
 
-  virtual Sound *load(Stream::Stream *input, bool stream=false)
+  virtual SoundPtr load(Stream::StreamPtr input)
   { return load(inp->load(input), stream); }
 
-  virtual Sound *load(InputSource *input, bool stream=false)
+  virtual SoundPtr load(SampleSourcePtr input)
   { return snd->load(input, stream); }
 
   virtual void update() { snd->update(); }

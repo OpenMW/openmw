@@ -23,6 +23,9 @@ namespace Sound {
     file. Cloned sounds will often (depending on the back-end) use
     less memory due to shared buffers.
 */
+class Sound;
+typedef boost::shared_ptr<Sound> SoundPtr;
+
 class Sound
 {
  public:
@@ -61,7 +64,7 @@ class Sound
   /** Playback status is not cloned, only the sound data
       itself. Back-ends can use this as a means of sharing data and
       saving memory. */
-  virtual Sound* clone() const = 0;
+  virtual SoundPtr clone() const = 0;
 
   /// Virtual destructor
   virtual ~Sound() {}
@@ -117,7 +120,7 @@ class SoundFactory
             large files, but they are not required to.
      @return a new Sound object
   */
-  virtual Sound *load(SampleSource *input) = 0;
+  virtual SoundPtr load(SampleSource *input) = 0;
 
   /**
      @brief Load a sound file from stream. Only valid if canLoadStream
@@ -127,7 +130,7 @@ class SoundFactory
      @param stream true if the file should be streamed
      @see load(InputSource*,bool)
   */
-  virtual Sound *load(Stream::Stream *input) = 0;
+  virtual SoundPtr load(Stream::Stream *input) = 0;
 
   /**
      @brief Load a sound directly from file. Only valid if canLoadFile
@@ -137,7 +140,7 @@ class SoundFactory
      @param stream true if the file should be streamed
      @see load(InputSource*,bool)
   */
-  virtual Sound *load(const std::string &file) = 0;
+  virtual SoundPtr load(const std::string &file) = 0;
 
   /// Call this every frame if needsUpdate is true
   /**
@@ -160,6 +163,8 @@ class SoundFactory
                               float fx, float fy, float fz,
                               float ux, float uy, float uz) = 0;
 };
+
+typedef boost::shared_ptr<SoundFactory> SoundFactoryPtr;
 
 }} // Namespaces
 

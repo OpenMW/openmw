@@ -15,7 +15,7 @@ class BufferStream : public MemoryStream
   std::vector<char> buffer;
 
  public:
-  BufferStream(Stream *input)
+  BufferStream(StreamPtr input)
     {
       // Allocate memory, read the stream into it. Then call set()
       if(input->hasSize)
@@ -61,6 +61,8 @@ class BufferStream : public MemoryStream
       set(&buffer[0], buffer.size());
     }
 };
+
+typedef boost::shared_ptr<BufferStream> BufferStreamPtr;
 
 }} // namespaces
 #endif

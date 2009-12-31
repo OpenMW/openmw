@@ -2,6 +2,7 @@
 #define MANGLE_STREAM_INPUT_H
 
 #include <stdlib.h>
+#include "../tools/shared_ptr.h"
 
 namespace Mangle {
 namespace Stream {
@@ -45,6 +46,8 @@ class Stream
   /// Returns true if the stream is empty
   virtual bool eof() const = 0;
 };
+
+typedef boost::shared_ptr<Stream> StreamPtr;
 
 }} // namespaces
 #endif

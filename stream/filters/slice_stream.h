@@ -10,11 +10,11 @@ namespace Stream {
  */
 class SliceStream : public Stream
 {
-  Stream *src;
+  StreamPtr src;
   size_t offset, length, pos;
 
  public:
-  SliceStream(Stream *_src, size_t _offset, size_t _length)
+  SliceStream(StreamPtr _src, size_t _offset, size_t _length)
     : src(_src), offset(_offset), length(_length), pos(0)
     {
       assert(src->hasSize);
@@ -49,6 +49,8 @@ class SliceStream : public Stream
   size_t tell() { return pos; }
   size_t size() { return length; }
 };
+
+typedef boost::shared_ptr<SliceStream> SliceStreamPtr;
 
 }} // namespaces
 #endif

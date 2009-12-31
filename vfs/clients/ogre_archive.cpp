@@ -38,10 +38,10 @@ static void fill(Ogre::StringVector &out, FileInfoList &in)
 Ogre::StringVectorPtr MangleArchive::list(bool recursive, bool dirs)
 {
   assert(vfs->hasList);
-  FileInfoList lst = vfs->list("", recursive, dirs);
+  FileInfoListPtr lst = vfs->list("", recursive, dirs);
   Ogre::StringVector *res = new Ogre::StringVector;
 
-  fill(*res, lst);
+  fill(*res, *lst);
 
   return Ogre::StringVectorPtr(res);
 }
@@ -49,10 +49,10 @@ Ogre::StringVectorPtr MangleArchive::list(bool recursive, bool dirs)
 Ogre::FileInfoListPtr MangleArchive::listFileInfo(bool recursive, bool dirs)
 {
   assert(vfs->hasList);
-  FileInfoList lst = vfs->list("", recursive, dirs);
+  FileInfoListPtr lst = vfs->list("", recursive, dirs);
   Ogre::FileInfoList *res = new Ogre::FileInfoList;
 
-  fill(*res, lst);
+  fill(*res, *lst);
 
   return Ogre::FileInfoListPtr(res);
 }
@@ -63,10 +63,10 @@ Ogre::StringVectorPtr MangleArchive::find(const Ogre::String& pattern,
                                 bool dirs)
 {
   assert(vfs->hasFind);
-  FileInfoList lst = vfs->find(pattern, recursive, dirs);
+  FileInfoListPtr lst = vfs->find(pattern, recursive, dirs);
   Ogre::StringVector *res = new Ogre::StringVector;
 
-  fill(*res, lst);
+  fill(*res, *lst);
 
   return Ogre::StringVectorPtr(res);
 }
@@ -76,10 +76,10 @@ Ogre::FileInfoListPtr MangleArchive::findFileInfo(const Ogre::String& pattern,
                                         bool dirs)
 {
   assert(vfs->hasFind);
-  FileInfoList lst = vfs->find(pattern, recursive, dirs);
+  FileInfoListPtr lst = vfs->find(pattern, recursive, dirs);
   Ogre::FileInfoList *res = new Ogre::FileInfoList;
 
-  fill(*res, lst);
+  fill(*res, *lst);
 
   return Ogre::FileInfoListPtr(res);
 }

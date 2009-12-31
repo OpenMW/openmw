@@ -3,7 +3,7 @@
 
 #include <OgreArchive.h>
 #include <assert.h>
-#include "wrapper.h"
+#include "../vfs.h"
 
 namespace Mangle {
 namespace VFS {
@@ -15,13 +15,14 @@ namespace VFS {
     to make your own modifications if you're working with newer (or
     older) versions.
  */
-class MangleArchive : public Ogre::Archive, _Wrapper
+class MangleArchive : public Ogre::Archive
 {
+  VFSPtr vfs;
+
  public:
-  MangleArchive(VFS *vfs, const std::string &name,
-                const std::string &archType = "Mangle",
-                bool autoDel=false)
-    : _Wrapper(vfs, autoDel), Ogre::Archive(name, archType) {}
+  MangleArchive(VFSPtr _vfs, const std::string &name,
+                const std::string &archType = "Mangle")
+    : vfs(_vfs), Ogre::Archive(name, archType) {}
 
   bool isCaseSensitive() const { return vfs->isCaseSensitive; }
 

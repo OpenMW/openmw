@@ -22,5 +22,7 @@ class FileStream : public StdStream
   ~FileStream() { file.close(); }
 };
 
+typedef boost::shared_ptr<FileStream> FileStreamPtr;
+
 }} // namespaces
 #endif

@@ -36,7 +36,7 @@ class OgreVFS : public VFS
 
   /// Open a new data stream. Deleting the object should be enough to
   /// close it.
-  virtual Stream::Stream *open(const std::string &name);
+  virtual Stream::StreamPtr open(const std::string &name);
 
   /// Check for the existence of a file
   virtual bool isFile(const std::string &name) const
@@ -47,23 +47,23 @@ class OgreVFS : public VFS
     { return false; }
 
   /// This doesn't work.
-  virtual FileInfo stat(const std::string &name) const
-    { return FileInfo(); }
+  virtual FileInfoPtr stat(const std::string &name) const
+    { return FileInfoPtr(); }
 
   /// List all entries in a given directory. A blank dir should be
   /// interpreted as a the root/current directory of the archive. If
   /// dirs is true, list directories instead of files. OGRE note: The
   /// ogre resource systemd does not support recursive listing of
   /// files. We might make a separate filter for this later.
-  virtual FileInfoList list(const std::string& dir = "",
-                            bool recurse=true,
-                            bool dirs=false) const;
+  virtual FileInfoListPtr list(const std::string& dir = "",
+                               bool recurse=true,
+                               bool dirs=false) const;
 
   /// Find files after a given pattern. Wildcards (*) are
   /// supported.
-  virtual FileInfoList find(const std::string& pattern,
-                            bool recursive=true,
-                            bool dirs=false) const;
+  virtual FileInfoListPtr find(const std::string& pattern,
+                               bool recursive=true,
+                               bool dirs=false) const;
 };
 
 }} // namespaces

@@ -26,8 +26,8 @@ class PhysVFS : public VFS
 
   /// Open a new data stream. Deleting the object should be enough to
   /// close it.
-  virtual Stream::Stream *open(const std::string &name)
-    { return new Stream::PhysFile(PHYSFS_openRead(name.c_str())); }
+  virtual Stream::StreamPtr open(const std::string &name)
+    { return new Stream::StreamPtr(Stream::PhysFile(PHYSFS_openRead(name.c_str()))); }
 
   /// Check for the existence of a file
   virtual bool isFile(const std::string &name) const
@@ -38,15 +38,15 @@ class PhysVFS : public VFS
     { return PHYSFS_isDirectory(name.c_str()); }
 
   /// This doesn't work
-  virtual FileInfo stat(const std::string &name) const
-    { assert(0); return FileInfo(); }
+  virtual FileInfoPtr stat(const std::string &name) const
+    { assert(0); return FileInfoPtr(); }
 
-  virtual FileInfoList list(const std::string& dir = "",
+  virtual FileInfoListPtr list(const std::string& dir = "",
                             bool recurse=true,
                             bool dirs=false) const
     {
       char **files = PHYSFS_enumerateFiles(dir.c_str());
-      FileInfoList lst;
+      FileInfoListPtr lst(new FileInfoList);
 
       // Add all teh files
       int i = 0;
@@ -56,14 +56,14 @@ class PhysVFS : public VFS
           fi.name = files[i];
           fi.isDir = false;
 
-          lst.push_back(fi);
+          lst->push_back(fi);
         }
       return lst;
     }
 
-  virtual FileInfoList find(const std::string& pattern,
-                            bool recursive=true,
-                            bool dirs=false) const
+  virtual FileInfoListPtr find(const std::string& pattern,
+                               bool recursive=true,
+                               bool dirs=false) const
     { assert(0); }
 };
 

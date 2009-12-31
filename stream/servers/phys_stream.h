@@ -30,5 +30,7 @@ class PhysFile : public Stream
   bool eof() const { return PHYSFS_eof(file); }
 };
 
+typedef boost::shared_ptr<PhysFile> PhysFilePtr;
+
 }} // namespaces
 #endif

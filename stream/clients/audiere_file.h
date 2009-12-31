@@ -3,7 +3,6 @@
 
 #include <audiere.h>
 #include <assert.h>
-#include "iwrapper.h"
 
 namespace Mangle {
 namespace Stream {
@@ -13,11 +12,13 @@ namespace Stream {
     This lets Audiere read sound files from any generic archive or
     file manager that supports Mangle streams.
  */
-class AudiereFile : public audiere::RefImplementation<audiere::File>, _SWrapper
+class AudiereFile : public audiere::RefImplementation<audiere::File>
 {
+  StreamPtr inp;
+
  public:
-  AudiereFile(Stream *inp, bool autoDel=false)
-    : _SWrapper(inp, autoDel) {}
+  AudiereFile(StreamPtr _inp)
+    : inp(_inp) {}
 
   /// Read 'count' bytes, return bytes successfully read
   int read(void *buf, int count)

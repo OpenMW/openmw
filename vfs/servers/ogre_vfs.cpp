@@ -18,10 +18,10 @@ OgreVFS::OgreVFS(const std::string &_group)
     group = gm->getWorldResourceGroupName();
 }
 
-Mangle::Stream::Stream *OgreVFS::open(const std::string &name)
+Mangle::Stream::StreamPtr OgreVFS::open(const std::string &name)
 {
   Ogre::DataStreamPtr data = gm->openResource(name, group);
-  return new Stream::OgreStream(data);
+  return Strea::StreamPtr(new Stream::OgreStream(data));
 }
 
 static void fill(FileInfoList &out, Ogre::FileInfoList &in, bool dirs)
@@ -44,8 +44,8 @@ FileInfoList OgreVFS::list(const std::string& dir,
                             bool dirs) const
 {
   Ogre::FileInfoListPtr olist = gm->listResourceFileInfo(group, dirs);
-  FileInfoList res;
-  fill(res, *olist, dirs);
+  FileInfoListPtr res(new FileInfoList);
+  fill(*res, *olist, dirs);
   return res;
 }
 
@@ -54,7 +54,7 @@ FileInfoList OgreVFS::find(const std::string& pattern,
                             bool dirs) const
 {
   Ogre::FileInfoListPtr olist = gm->findResourceFileInfo(group, pattern, dirs);
-  FileInfoList res;
-  fill(res, *olist, dirs);
+  FileInfoListPtr res(new FileInfoList);
+  fill(*res, *olist, dirs);
   return res;
 }

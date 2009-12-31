@@ -29,6 +29,9 @@ struct FileInfo
 
 typedef std::vector<FileInfo> FileInfoList;
 
+typedef boost::shared_ptr<FileInfo> FileInfoPtr;
+typedef boost::shared_ptr<FileInfoList> FileInfoListPtr;
+
 /** An interface to any file system or other provider of named data
     streams
 */
@@ -49,9 +52,9 @@ class VFS
   /// Virtual destructor
   virtual ~VFS() {}
 
-  /// Open a new data stream. Deleting the object should be enough to
-  /// close it.
-  virtual Stream::Stream *open(const std::string &name) = 0;
+  /// Open a new data stream. Deleting the object (letting all the
+  /// pointers to it go out of scope) should be enough to close it.
+  virtual Stream::StreamPtr open(const std::string &name) = 0;
 
   /// Check for the existence of a file
   virtual bool isFile(const std::string &name) const = 0;
@@ -60,23 +63,25 @@ class VFS
   virtual bool isDir(const std::string &name) const = 0;
 
   /// Get info about a single file
-  virtual FileInfo stat(const std::string &name) const = 0;
+  virtual FileInfoPtr stat(const std::string &name) const = 0;
 
   /// List all entries in a given directory. A blank dir should be
   /// interpreted as a the root/current directory of the archive. If
   /// dirs is true, list directories instead of files.
-  virtual FileInfoList list(const std::string& dir = "",
-                            bool recurse=true,
-                            bool dirs=false) const = 0;
+  virtual FileInfoListPtr list(const std::string& dir = "",
+                               bool recurse=true,
+                               bool dirs=false) const = 0;
 
   /// Find files after a given pattern. Wildcards (*) are
   /// supported. Only valid if 'hasFind' is true. Don't implement your
   /// own pattern matching here if the backend doesn't support it
   /// natively; use a filter instead.
-  virtual FileInfoList find(const std::string& pattern,
-                            bool recursive=true,
-                            bool dirs=false) const = 0;
+  virtual FileInfoListPtr find(const std::string& pattern,
+                               bool recursive=true,
+                               bool dirs=false) const = 0;
 };
+
+typedef boost::shared_ptr<VFS> VFSPtr;
 
 }} // namespaces
 #endif

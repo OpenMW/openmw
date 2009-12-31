@@ -40,6 +40,8 @@ class SampleSource : public Stream::Stream
   size_t size() const { assert(0); }
 };
 
+typedef boost::shared_ptr<SampleSource> SampleSourcePtr;
+
 /// A factory interface for loading SampleSources from file or stream
 class SampleSourceLoader
 {
@@ -51,14 +53,16 @@ class SampleSourceLoader
   bool canLoadFile;
 
   /// Load a sound input source from file (if canLoadFile is true)
-  virtual SampleSource *load(const std::string &file) = 0;
+  virtual SampleSourcePtr load(const std::string &file) = 0;
 
   /// Load a sound input source from stream (if canLoadStream is true)
-  virtual SampleSource *load(Stream::Stream *input) = 0;
+  virtual SampleSourcePtr load(Stream::StreamPtr input) = 0;
 
   /// Virtual destructor
   virtual ~SampleSourceLoader() {}
 };
+
+typedef boost::shared_ptr<SampleSourceLoader> SampleSourceLoaderPtr;
 
 }} // namespaces
 #endif
