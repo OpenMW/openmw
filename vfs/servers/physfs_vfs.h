@@ -27,7 +27,7 @@ class PhysVFS : public VFS
   /// Open a new data stream. Deleting the object should be enough to
   /// close it.
   virtual Stream::StreamPtr open(const std::string &name)
-    { return new Stream::StreamPtr(Stream::PhysFile(PHYSFS_openRead(name.c_str()))); }
+    { return Stream::StreamPtr(new Stream::PhysFile(PHYSFS_openRead(name.c_str()))); }
 
   /// Check for the existence of a file
   virtual bool isFile(const std::string &name) const

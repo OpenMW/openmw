@@ -7,8 +7,8 @@ using namespace Mangle::Stream;
 
 Ogre::DataStreamPtr MangleArchive::open(const Ogre::String& filename) const
 {
-  return Ogre::DataStreamPtr(new MangleDataStream
-                             (filename, vfs->open(filename), true));
+  return Ogre::DataStreamPtr(new Mangle2OgreStream
+                             (filename, vfs->open(filename)));
 }
 
 static void fill(Ogre::FileInfoList &out, FileInfoList &in)

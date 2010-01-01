@@ -14,7 +14,7 @@ void find(VFS &vfs, const std::string &file)
       return;
     }
 
-  Stream *data = vfs.open(file);
+  StreamPtr data = vfs.open(file);
 
   cout << "Size: " << data->size() << endl;
 

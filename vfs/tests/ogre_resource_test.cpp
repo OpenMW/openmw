@@ -6,7 +6,7 @@
   This isn't really a test of our implementation, but a test of using
   the Ogre resource system to find files. If the Ogre interface
   changes and you have to change this test, you will have to change
-  the ogre_vfs.cpp implementation equivalently.
+  the servers/ogre_vfs.cpp implementation equivalently.
 
  */
 

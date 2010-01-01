@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void print(FileInfo inf)
+void print(FileInfo &inf)
 {
   cout << "name: " << inf.name << endl;
   cout << "basename: " << inf.basename << endl;
@@ -13,12 +13,14 @@ void print(FileInfo inf)
   cout << "size: " << inf.size << endl;
   cout << "time: " << inf.time << endl;
 }
+void print(FileInfoPtr inf) { print(*inf); }
 
-void print(FileInfoList lst)
+void print(FileInfoList &lst)
 {
   for(int i=0; i<lst.size(); i++)
     print(lst[i]);
 }
+void print(FileInfoListPtr lst) { print(*lst); }
 
 int main()
 {
@@ -33,7 +35,7 @@ int main()
   cout << endl;
   print(vfs.stat("dir"));
 
-  Stream *inp = vfs.open("file1");
+  StreamPtr inp = vfs.open("file1");
   cout << "filesize: " << inp->size() << endl;
 
   return 0;

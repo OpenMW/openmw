@@ -6,7 +6,7 @@ I_OGRE=$(shell pkg-config --cflags OGRE)
 L_OGRE=$(shell pkg-config --libs OGRE)
 L_PHYSFS=-lphysfs
 
-ogre_client_test: ogre_client_test.cpp dummy_vfs.cpp ../vfs.h ../clients/wrapper.h ../clients/ogre_archive.h ../clients/ogre_archive.cpp
+ogre_client_test: ogre_client_test.cpp dummy_vfs.cpp ../vfs.h ../clients/ogre_archive.h ../clients/ogre_archive.cpp
 	$(GCC) $< ../clients/ogre_archive.cpp -o $@ $(I_OGRE) $(L_OGRE)
 
 ogre_resource_test: ogre_resource_test.cpp

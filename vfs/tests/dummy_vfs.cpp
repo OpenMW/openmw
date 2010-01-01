@@ -3,9 +3,10 @@
 #include <assert.h>
 #include <string.h>
 
-#include "../../stream/tests/dummy_input.cpp"
+#include "../../stream/servers/memory_stream.h"
 
 using namespace Mangle::VFS;
+using namespace Mangle::Stream;
 
 class DummyVFS : public VFS
 {
@@ -13,14 +14,15 @@ public:
   DummyVFS()
   {
     hasFind = false;
+    hasList = true;
     isCaseSensitive = true;
   }
 
   // We only support opening 'file1' at the moment.
-  Mangle::Stream::Stream *open(const std::string &name)
+  StreamPtr open(const std::string &name)
   {
     assert(name == "file1");
-    return new DummyInput();
+    return StreamPtr(new MemoryStream("hello world", 11));
   }
 
   bool isFile(const std::string &name) const
@@ -35,31 +37,31 @@ public:
   }
 
   /// Get info about a single file
-  FileInfo stat(const std::string &name) const
+  FileInfoPtr stat(const std::string &name) const
   {
-    FileInfo fi;
-    fi.name = name;
-    fi.time = 0;
+    FileInfoPtr fi(new FileInfo);
+    fi->name = name;
+    fi->time = 0;
 
     if(isFile(name))
       {
         if(name == "dir/file2")
           {
-            fi.basename = "file2";
-            fi.size = 2;
+            fi->basename = "file2";
+            fi->size = 2;
           }
         else
           {
-            fi.basename = "file1";
-            fi.size = 1;
+            fi->basename = "file1";
+            fi->size = 1;
           }
-        fi.isDir = false;
+        fi->isDir = false;
       }
     else if(isDir(name))
       {
-        fi.basename = "dir";
-        fi.isDir = true;
-        fi.size = 0;
+        fi->basename = "dir";
+        fi->isDir = true;
+        fi->size = 0;
       }
     else assert(0);
 
@@ -69,13 +71,13 @@ public:
   /// List all entries in a given directory. A blank dir should be
   /// interpreted as a the root/current directory of the archive. If
   /// dirs is true, list directories instead of files.
-  virtual FileInfoList list(const std::string& dir = "",
-                            bool recurse=true,
-                            bool dirs=false) const
+  virtual FileInfoListPtr list(const std::string& dir = "",
+                               bool recurse=true,
+                               bool dirs=false) const
   {
     assert(dir == "");
 
-    FileInfoList fl;
+    FileInfoListPtr fl(new FileInfoList);
 
     FileInfo fi;
 
@@ -86,14 +88,14 @@ public:
         fi.isDir = false;
         fi.size = 1;
         fi.time = 0;
-        fl.push_back(fi);
+        fl->push_back(fi);
 
         if(recurse)
           {
             fi.name = "dir/file2";
             fi.basename = "file2";
             fi.size = 2;
-            fl.push_back(fi);
+            fl->push_back(fi);
           }
       }
     else
@@ -103,13 +105,13 @@ public:
         fi.isDir = true;
         fi.size = 0;
         fi.time = 0;
-        fl.push_back(fi);
+        fl->push_back(fi);
       }
     return fl;
   }
 
-  FileInfoList find(const std::string& pattern,
+  FileInfoListPtr find(const std::string& pattern,
                     bool recursive=true,
                     bool dirs=false) const
-  { assert(0); return FileInfoList(); }
+  { assert(0); }
 };

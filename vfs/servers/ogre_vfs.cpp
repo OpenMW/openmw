@@ -2,6 +2,7 @@
 #include "../../stream/servers/ogre_datastream.h"
 
 using namespace Mangle::VFS;
+using namespace Mangle::Stream;
 
 OgreVFS::OgreVFS(const std::string &_group)
   : group(_group)
@@ -18,10 +19,10 @@ OgreVFS::OgreVFS(const std::string &_group)
     group = gm->getWorldResourceGroupName();
 }
 
-Mangle::Stream::StreamPtr OgreVFS::open(const std::string &name)
+StreamPtr OgreVFS::open(const std::string &name)
 {
   Ogre::DataStreamPtr data = gm->openResource(name, group);
-  return Strea::StreamPtr(new Stream::OgreStream(data));
+  return StreamPtr(new OgreStream(data));
 }
 
 static void fill(FileInfoList &out, Ogre::FileInfoList &in, bool dirs)
@@ -39,7 +40,7 @@ static void fill(FileInfoList &out, Ogre::FileInfoList &in, bool dirs)
     }
 }
 
-FileInfoList OgreVFS::list(const std::string& dir,
+FileInfoListPtr OgreVFS::list(const std::string& dir,
                             bool recurse,
                             bool dirs) const
 {
@@ -49,7 +50,7 @@ FileInfoList OgreVFS::list(const std::string& dir,
   return res;
 }
 
-FileInfoList OgreVFS::find(const std::string& pattern,
+FileInfoListPtr OgreVFS::find(const std::string& pattern,
                             bool recursive,
                             bool dirs) const
 {

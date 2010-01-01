@@ -26,7 +26,8 @@ class MangleArchive : public Ogre::Archive
 
   bool isCaseSensitive() const { return vfs->isCaseSensitive; }
 
-  // These do nothing. You have to load / unload the archive manually.
+  // These do nothing. You have to load / unload the archive in the
+  // constructor/destructor.
   void load() {}
   void unload() {}
 
@@ -34,7 +35,7 @@ class MangleArchive : public Ogre::Archive
     { return vfs->isFile(filename); }
 
   time_t getModifiedTime(const Ogre::String& filename)
-    { return vfs->stat(filename).time; }
+    { return vfs->stat(filename)->time; }
 
   Ogre::DataStreamPtr open(const Ogre::String& filename) const;
 

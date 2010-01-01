@@ -17,7 +17,7 @@ void print(StringVectorPtr lst)
 
 int main()
 {
-  VFS *vfs = new DummyVFS();
+  VFSPtr vfs(new DummyVFS());
   MangleArchive arc(vfs, "dummy");
 
   cout << "Case: " << arc.isCaseSensitive() << endl;
