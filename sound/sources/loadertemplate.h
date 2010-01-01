@@ -16,7 +16,7 @@ class SSL_Template : public SampleSourceLoader
     return new SourceT(file);
   }
 
-  SampleSource *load(Stream::Stream *input)
+  SampleSource *load(Stream::StreamPtr input)
   {
     assert(canLoadStream);
     return new SourceT(input);

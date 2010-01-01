@@ -33,7 +33,7 @@ class AudiereSource : public SampleSource
   AudiereSource(const std::string &file);
 
   /// Decode the given sound stream
-  AudiereSource(Stream::Stream *src);
+  AudiereSource(Stream::StreamPtr src);
 
   /// Read directly from an existing audiere::SampleSource
   AudiereSource(audiere::SampleSourcePtr src);

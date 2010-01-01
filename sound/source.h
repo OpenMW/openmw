@@ -17,15 +17,7 @@ class SampleSource : public Stream::Stream
   bool isEof;
 
  public:
-  SampleSource()
-    {
-      // These are usually not needed for sound data
-      isSeekable = false;
-      hasPosition = false;
-      hasSize = false;
-
-      isEof = false;
-    }
+  SampleSource() : isEof(false) {}
 
   /// Get the sample rate, number of channels, and bits per
   /// sample. NULL parameters are ignored.

@@ -22,7 +22,7 @@ class OpenAL_Sound : public Sound
   int *refCnt;
 
  public:
-  OpenAL_Sound(SampleSource *input);
+  OpenAL_Sound(SampleSourcePtr input);
   OpenAL_Sound(ALuint buf, int *ref); // Used for cloning
   ~OpenAL_Sound();
 
@@ -83,10 +83,10 @@ class OpenAL_Factory : public SoundFactory
         }
     }
 
-  Sound *load(const std::string &file, bool stream=false) { assert(0); }
-  Sound *load(Stream::Stream *input, bool stream=false) { assert(0); }
-  Sound *load(SampleSource* input, bool stream=false)
-  { return new OpenAL_Sound(input); }
+  SoundPtr load(const std::string &file, bool stream=false) { assert(0); }
+  SoundPtr load(Stream::StreamPtr input, bool stream=false) { assert(0); }
+  SoundPtr load(SampleSourcePtr input, bool stream=false)
+  { return SoundPtr(new OpenAL_Sound(input)); }
 
   void update() {}
   setListenerPos(float x, float y, float z,

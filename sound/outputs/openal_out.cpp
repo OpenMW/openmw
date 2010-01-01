@@ -108,10 +108,6 @@ void OpenAL_Sound::setRepeat(bool rep)
   alSourcei(Source, AL_LOOPING, rep?AL_TRUE:AL_FALSE);
 }
 
-void OpenAL_Sound::setup()
-{
-}
-
 // Constructor used for cloned sounds
 OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref)
   : refCnt(ref), bufferID(buf)
@@ -125,19 +121,31 @@ OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref)
   alSourcei(inst, AL_BUFFER, bufferID);
 }
 
-OpenAL_Sound::OpenAL_Sound(SampleSource *input)
+OpenAL_Sound::OpenAL_Sound(SampleSourcePtr input)
 {
   // Get the format
   int fmt, rate;
   getALFormat(inp, fmt, rate);
 
-  // Read the entire stream into a buffer
-  BufferStream buf(input);
-
-  // Move the data into OpenAL
+  // Set up the OpenAL buffer
   alGenBuffers(1, &bufferID);
   assert(bufferID != 0);
-  alBufferData(bufferID, fmt, &buf.getPtr(), buf.size(), rate);
+
+  // Does the stream support pointer operations?
+  if(input->hasPtr)
+    {
+      // If so, we can read the data directly from the stream
+      alBufferData(bufferID, fmt, &input.getPtr(), input.size(), rate);
+    }
+  else
+    {
+      // Read the entire stream into a temporary buffer first
+      BufferStream buf(input);
+
+      // Then copy that into OpenAL
+      alBufferData(bufferID, fmt, &buf.getPtr(), buf.size(), rate);
+    }
+
   checkALError("loading sound buffer");
 
   // Create a source

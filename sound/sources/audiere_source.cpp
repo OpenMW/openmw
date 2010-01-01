@@ -109,7 +109,7 @@ AudiereSource::AudiereSource(const std::string &file)
   setup();
 }
 
-AudiereSource::AudiereSource(Stream::Stream *input)
+AudiereSource::AudiereSource(Stream::StreamPtr input)
 {
   // Use our Stream::AudiereFile implementation to convert a Mangle
   // 'Stream' to an Audiere 'File'

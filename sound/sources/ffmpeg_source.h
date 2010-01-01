@@ -28,7 +28,7 @@ class FFMpegSource : public SampleSource
   FFMpegSource(const std::string &file);
 
   /// Decode the given sound stream (not supported by FFmpeg)
-  FFMpegSource(Stream::Stream *src) { assert(0); }
+  FFMpegSource(Stream::StreamPtr src) { assert(0); }
 
   ~FFMpegSource();
 
