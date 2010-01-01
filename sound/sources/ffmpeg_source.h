@@ -1,8 +1,7 @@
 #ifndef MANGLE_SOUND_FFMPEG_H
 #define MANGLE_SOUND_FFMPEG_H
 
-#include "../input.h"
-#include <exception>
+#include "../source.h"
 #include <vector>
 #include <assert.h>
 
@@ -28,7 +27,7 @@ class FFMpegSource : public SampleSource
   FFMpegSource(const std::string &file);
 
   /// Decode the given sound stream (not supported by FFmpeg)
-  FFMpegSource(Stream::StreamPtr src) { assert(0); }
+  FFMpegSource(Mangle::Stream::StreamPtr src) { assert(0); }
 
   ~FFMpegSource();
 
@@ -40,7 +39,7 @@ class FFMpegSource : public SampleSource
 #include "loadertemplate.h"
 
 /// A factory that loads FFMpegSources from file
-class FFMpegLoader : public SSL_Template<AudiereSource,false,true>
+class FFMpegLoader : public SSL_Template<FFMpegSource,false,true>
 {
  public:
 

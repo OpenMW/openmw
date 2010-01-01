@@ -1,4 +1,5 @@
-#include "input_ffmpeg.h"
+#include "ffmpeg_source.h"
+#include <exception>
 
 using namespace Mangle::Sound;
 
@@ -51,8 +52,6 @@ FFMpegSource::FFMpegSource(const std::string &file)
 {
   std::string msg;
   AVCodec *codec;
-
-  empty = false;
 
   if(av_open_input_file(&FmtCtx, file.c_str(), NULL, 0, NULL) != 0)
     fail("Error loading audio file " + file);

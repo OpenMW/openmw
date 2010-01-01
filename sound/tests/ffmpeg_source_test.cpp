@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "../../stream/servers/file_stream.h"
-#include "../sources/audiere_source.h"
+#include "../sources/ffmpeg_source.h"
 
 #include <assert.h>
 #include <string.h>
@@ -16,18 +16,16 @@ size_t orig_size;
 
 void run(SampleSourcePtr &src)
 {
-  size_t ss = src->size();
-  assert(ss == orig_size);
-
-  cout << "Source size: " << ss << endl;
   int rate, channels, bits;
   src->getInfo(&rate, &channels, &bits);
   cout << "rate=" << rate << "\nchannels=" << channels
        << "\nbits=" << bits << endl;
 
   cout << "Reading entire buffer into memory\n";
-  void *buf = malloc(ss);
-  src->read(buf, ss);
+  void *buf = malloc(orig_size);
+  size_t ss = src->read(buf, orig_size);
+  cout << "Actually read: " << ss << endl;
+  assert(ss == orig_size);
 
   cout << "Comparing...\n";
   if(memcmp(buf, orig, ss) != 0)
@@ -51,17 +49,13 @@ int main()
     cout << "Done\n";
   }
 
-  {
-    cout << "\nLoading cow.wav by filename:\n";
-    SampleSourcePtr cow_file( new AudiereSource("cow.wav") );
-    run(cow_file);
-  }
+  // Initializes the library, not used for anything else.
+  FFMpegLoader fm;
 
   {
-    cout << "\nLoading cow.wav by stream:\n";
-    StreamPtr inp( new FileStream("cow.wav") );
-    SampleSourcePtr cow_stream( new AudiereSource(inp) );
-    run(cow_stream);
+    cout << "\nLoading cow.wav by filename:\n";
+    SampleSourcePtr cow_file( new FFMpegSource("cow.wav") );
+    run(cow_file);
   }
 
   return 0;
