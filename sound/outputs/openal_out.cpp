@@ -27,7 +27,13 @@ static void checkALError(const std::string &msg)
 {
   ALenum err = alGetError();
   if(err != AL_NO_ERROR)
-    fail("\"" + std::string(alGetString(err)) + "\" while " + msg);
+    {
+      const ALchar* errmsg = alGetString(err);
+      if(errmsg)
+        fail("\"" + std::string(alGetString(err)) + "\" while " + msg);
+      else
+        fail("non-specified error while " + msg + " (did you forget to initialize OpenAL?)");
+    }
 }
 
 static void getALFormat(SampleSourcePtr inp, int &fmt, int &rate)

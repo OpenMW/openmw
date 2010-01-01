@@ -21,8 +21,13 @@ class OpenAL_Sound : public Sound
   int *refCnt;
 
  public:
+  /// Read samples from the given input buffer
   OpenAL_Sound(SampleSourcePtr input);
-  OpenAL_Sound(ALuint buf, int *ref); // Used for cloning
+
+  /// Play an existing buffer, with a given ref counter. Used
+  /// internally for cloning.
+  OpenAL_Sound(ALuint buf, int *ref);
+
   ~OpenAL_Sound();
 
   void play();

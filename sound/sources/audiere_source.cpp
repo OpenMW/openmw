@@ -135,6 +135,8 @@ void AudiereSource::setup()
   int channels, rate;
   sample->getFormat(channels, rate, fmt);
 
+  pullSize = 0;
+
   // Calculate the size of one frame
   frameSize = GetSampleSize(fmt) * channels;
 

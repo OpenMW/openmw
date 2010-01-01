@@ -1,9 +1,7 @@
 #include <iostream>
-#include <fstream>
 #include <exception>
 
 #include "../../stream/servers/file_stream.h"
-#include "../../stream/filters/buffer_stream.h"
 #include "../filters/openal_audiere.h"
 
 using namespace std;

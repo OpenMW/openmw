@@ -10,10 +10,10 @@ namespace Sound {
 class Stream2Samples : public SampleSource
 {
   int32_t rate, channels, bits;
-  Stream::StreamPtr inp;
+  Mangle::Stream::StreamPtr inp;
 
  public:
-  Stream2Samples(Stream::StreamPtr _inp, int32_t _rate, int32_t _channels, int32_t _bits)
+  Stream2Samples(Mangle::Stream::StreamPtr _inp, int32_t _rate, int32_t _channels, int32_t _bits)
    : inp(_inp), rate(_rate), channels(_channels), bits(_bits)
     {
       isSeekable = inp->isSeekable;
@@ -24,7 +24,7 @@ class Stream2Samples : public SampleSource
 
   /// Get the sample rate, number of channels, and bits per
   /// sample. NULL parameters are ignored.
-  void getInfo(int32_t *_rate, int32_t *_channels, int32_t *_bits) const
+  void getInfo(int32_t *_rate, int32_t *_channels, int32_t *_bits)
   {
     if(_rate) *_rate = rate;
     if(_channels) *_channels = channels;
