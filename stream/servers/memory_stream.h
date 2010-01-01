@@ -37,6 +37,7 @@ class MemoryStream : public Stream
     isSeekable = true;
     hasPosition = true;
     hasSize = true;
+    hasPtr = true;
   }
 
   size_t read(void *buf, size_t count)
@@ -69,6 +70,15 @@ class MemoryStream : public Stream
   size_t size() const { return length; }
   bool eof() const { return pos == length; }
 
+  /// Get the base pointer to the entire buffer
+  const void *getPtr() const { return data; }
+  const void *getPtr(size_t size) const { return ((char*)data)+pos; }
+  const void *getPtr(size_t pos, size_t size)
+    {
+      if(pos > length) pos = length;
+      return ((char*)data)+pos;
+    }
+
   // New members in MemoryStream:
 
   /// Set a new buffer and length. This will rewind the position to zero.
@@ -78,9 +88,6 @@ class MemoryStream : public Stream
     length = _length;
     pos = 0;
   }
-
-  /// Get the base pointer to the entire buffer
-  const void *getPtr() const { return data; }
 
   /// Clone this memory stream
   /** Make a new stream of the same buffer. If setPos is true, we also

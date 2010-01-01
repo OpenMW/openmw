@@ -22,6 +22,11 @@ class SliceStream : public Stream
 
       // Make sure we can actually fit inside the source stream
       assert(src->size() <= offset+length);
+
+      isSeekable = true;
+      hasPosition = true;
+      hasSize = true;
+      hasPtr = src->hasPtr;
     }
 
   size_t read(void *buf, size_t count)
@@ -48,6 +53,21 @@ class SliceStream : public Stream
   bool eof() { return pos == length; }
   size_t tell() { return pos; }
   size_t size() { return length; }
+
+  void *getPtr() { return getPtr(0, length); }
+  void *getPtr(size_t size) { return getPtr(pos, size); }
+  void *getPtr(size_t pos, size_t size)
+    {
+      // Boundry checks on pos and size. Bounding the size is
+      // important even when getting pointers, as the source stream
+      // may use the size parameter for something (such as memory
+      // mapping or buffering.)
+      if(pos > length) pos = length;
+      if(pos+size > length) size = length-pos;
+
+      // Ask the source to kindly give us a pointer
+      return src->getPtr(offset+pos, size);
+    }
 };
 
 typedef boost::shared_ptr<SliceStream> SliceStreamPtr;

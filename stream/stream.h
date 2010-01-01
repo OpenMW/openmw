@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include "../tools/shared_ptr.h"
+#include <assert.h>
 
 namespace Mangle {
 namespace Stream {
@@ -21,6 +22,14 @@ class Stream
 
   /// If true, size() works
   bool hasSize;
+
+  /// If true, the getPtr() functions work
+  bool hasPtr;
+
+  /// Initialize all bools to false by default
+  Stream() :
+    isSeekable(false), hasPosition(false), hasSize(false),
+    hasPtr(false) {}
 
   /// Virtual destructor
   virtual ~Stream() {}
@@ -45,6 +54,19 @@ class Stream
 
   /// Returns true if the stream is empty
   virtual bool eof() const = 0;
+
+  /// Return a pointer to the entire stream. This function (and the
+  /// other getPtr() variants below) should only be implemented for
+  /// memory-based streams where using them would be an optimization.
+  virtual void *getPtr() const { assert(0); }
+
+  /// Get a pointer to a memory region of 'size' bytes from the
+  /// current position.
+  virtual void *getPtr(size_t size) const { assert(0); }
+
+  /// Get a pointer to a memory region of 'size' bytes starting from
+  /// position 'pos'
+  virtual void *getPtr(size_t pos, size_t size) const { assert(0); }
 };
 
 typedef boost::shared_ptr<Stream> StreamPtr;
