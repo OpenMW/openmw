@@ -4,6 +4,8 @@
 #include <audiere.h>
 #include <assert.h>
 
+#include "../stream.h"
+
 namespace Mangle {
 namespace Stream {
 

@@ -1,5 +1,5 @@
 #include "../servers/memory_stream.h"
-#include "ogre_datastream.h"
+#include "../clients/ogre_datastream.h"
 #include <iostream>
 
 using namespace Mangle::Stream;
@@ -8,8 +8,8 @@ using namespace std;
 
 int main()
 {
-  Stream *inp = new MemoryStream("hello world", 11);
-  DataStreamPtr p(new MangleDataStream("hello", inp, true));
+  StreamPtr inp(new MemoryStream("hello world", 11));
+  DataStreamPtr p(new Mangle2OgreStream("hello", inp));
   cout << "Name: " << p->getName() << endl;
   cout << "As string: " << p->getAsString() << endl;
   cout << "pos=" << p->tell() << " eof=" << p->eof() << endl;

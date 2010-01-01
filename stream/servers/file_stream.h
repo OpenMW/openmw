@@ -17,7 +17,7 @@ class FileStream : public StdStream
   FileStream(const std::string &name)
     : StdStream(&file)
     {
-      file.open(name, ios::binary);
+      file.open(name.c_str(), std::ios::binary);
     }
   ~FileStream() { file.close(); }
 };

@@ -1,5 +1,5 @@
-#ifndef MANGLE_SOUND_MEMSOURCE_H
-#define MANGLE_SOUND_MEMSOURCE_H
+#ifndef MANGLE_SOUND_STREAMSOURCE_H
+#define MANGLE_SOUND_STREAMSOURCE_H
 
 #include "../source.h"
 
@@ -38,9 +38,9 @@ class Stream2Samples : public SampleSource
   size_t tell() const { return inp->tell(); }
   size_t size() const { return inp->size(); }
   bool eof() const { return inp->eof(); }
-  void *getPtr() const { return inp->getPtr(); }
-  void *getPtr(size_t size) const { return inp->getPtr(size); }
-  void *getPtr(size_t pos, size_t size) const { return inp->getPtr(pos, size); }
+  const void *getPtr() { return inp->getPtr(); }
+  const void *getPtr(size_t size) { return inp->getPtr(size); }
+  const void *getPtr(size_t pos, size_t size) { return inp->getPtr(pos, size); }
 };
 
 }} // namespaces

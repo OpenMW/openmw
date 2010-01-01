@@ -11,8 +11,8 @@ int main()
 {
   char str[12];
   memset(str, 0, 12);
-  Stream *inp = new MemoryStream("hello world", 11);
-  FilePtr p(new AudiereFile(inp, true));
+  StreamPtr inp(new MemoryStream("hello world", 11));
+  FilePtr p(new AudiereFile(inp));
   cout << "pos=" << p->tell() << endl;
   p->read(str, 2);
   cout << "2 bytes: " << str << endl;

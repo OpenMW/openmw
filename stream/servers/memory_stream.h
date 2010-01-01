@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include "../stream.h"
+#include <string.h>
 
 namespace Mangle {
 namespace Stream {
@@ -71,8 +72,8 @@ class MemoryStream : public Stream
   bool eof() const { return pos == length; }
 
   /// Get the base pointer to the entire buffer
-  const void *getPtr() const { return data; }
-  const void *getPtr(size_t size) const { return ((char*)data)+pos; }
+  const void *getPtr() { return data; }
+  const void *getPtr(size_t size) { return ((char*)data)+pos; }
   const void *getPtr(size_t pos, size_t size)
     {
       if(pos > length) pos = length;

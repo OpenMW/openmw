@@ -14,7 +14,7 @@ namespace Stream {
     to make your own modifications if you're working with newer (or
     older) versions.
  */
-class MangleDataStream : public Ogre::DataStream
+class Mangle2OgreStream : public Ogre::DataStream
 {
   StreamPtr inp;
 
@@ -27,11 +27,11 @@ class MangleDataStream : public Ogre::DataStream
 
  public:
   /// Constructor without name
-  MangleDataStream(StreamPtr _inp)
+  Mangle2OgreStream(StreamPtr _inp)
     : inp(_inp) { init(); }
 
   /// Constructor for a named data stream
-  MangleDataStream(const Ogre::String &name, StreamPtr _inp)
+  Mangle2OgreStream(const Ogre::String &name, StreamPtr _inp)
     : inp(_inp), Ogre::DataStream(name) { init(); }
 
   // Only implement the DataStream functions we have to implement

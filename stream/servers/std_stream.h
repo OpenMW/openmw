@@ -1,5 +1,5 @@
-#ifndef MANGLE_STREAM_FILESERVER_H
-#define MANGLE_STREAM_FILESERVER_H
+#ifndef MANGLE_STREAM_STDIOSERVER_H
+#define MANGLE_STREAM_STDIOSERVER_H
 
 #include "../stream.h"
 #include <iostream>
@@ -41,7 +41,7 @@ class StdStream : public Stream
   {
     // Use the standard iostream size hack, terrible as it is.
     std::streampos pos = inf->tellg();
-    inf->seekg(0, ios_base::end);
+    inf->seekg(0, std::ios::end);
     size_t res = inf->tellg();
     inf->seekg(pos);
     return res;

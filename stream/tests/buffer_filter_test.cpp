@@ -8,8 +8,8 @@ using namespace std;
 
 int main()
 {
-  Stream *orig = new MemoryStream("hello world", 11);
-  Stream *inp = new BufferStream(orig);
+  StreamPtr orig (new MemoryStream("hello world", 11));
+  StreamPtr inp (new BufferStream(orig));
 
   cout << "Size: " << inp->size() << endl;
   cout << "Pos: " << inp->tell() << "\nSeeking...\n";

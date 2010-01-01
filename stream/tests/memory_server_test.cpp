@@ -8,7 +8,7 @@ using namespace std;
 
 int main()
 {
-  Stream *inp = new MemoryStream("hello world", 11);
+  Stream* inp = new MemoryStream("hello world\0", 12);
 
   cout << "Size: " << inp->size() << endl;
   cout << "Pos: " << inp->tell() << "\nSeeking...\n";
@@ -35,6 +35,8 @@ int main()
   cout << "Result: " << data << endl;
   cout << "Eof: " << inp->eof() << endl;
   cout << "Pos: " << inp->tell() << endl;
+
+  cout << "Entire stream from pointer: " << (char*)inp->getPtr() << endl;
   
   return 0;
 }

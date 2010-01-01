@@ -21,7 +21,7 @@ class SliceStream : public Stream
       assert(src->isSeekable);
 
       // Make sure we can actually fit inside the source stream
-      assert(src->size() <= offset+length);
+      assert(src->size() >= offset+length);
 
       isSeekable = true;
       hasPosition = true;
@@ -50,13 +50,13 @@ class SliceStream : public Stream
     if(pos > length) pos = length;
   }
 
-  bool eof() { return pos == length; }
-  size_t tell() { return pos; }
-  size_t size() { return length; }
+  bool eof() const { return pos == length; }
+  size_t tell() const { return pos; }
+  size_t size() const { return length; }
 
-  void *getPtr() { return getPtr(0, length); }
-  void *getPtr(size_t size) { return getPtr(pos, size); }
-  void *getPtr(size_t pos, size_t size)
+  const void *getPtr() { return getPtr(0, length); }
+  const void *getPtr(size_t size) { return getPtr(pos, size); }
+  const void *getPtr(size_t pos, size_t size)
     {
       // Boundry checks on pos and size. Bounding the size is
       // important even when getting pointers, as the source stream
