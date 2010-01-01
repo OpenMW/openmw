@@ -40,7 +40,6 @@ class InputFilter : public SoundFactory
     // Set capabilities
     needsUpdate = snd->needsUpdate;
     has3D = snd->has3D;
-    canRepeatStream = snd->canRepeatStream;
     canLoadStream = inp->canLoadStream;
 
     // Both these should be true, or the use of this class is pretty
@@ -51,13 +50,13 @@ class InputFilter : public SoundFactory
   }
 
   virtual SoundPtr load(const std::string &file)
-  { return load(inp->load(file), stream); }
+  { return loadRaw(inp->load(file)); }
 
   virtual SoundPtr load(Stream::StreamPtr input)
-  { return load(inp->load(input), stream); }
+  { return loadRaw(inp->load(input)); }
 
-  virtual SoundPtr load(SampleSourcePtr input)
-  { return snd->load(input, stream); }
+  virtual SoundPtr loadRaw(SampleSourcePtr input)
+  { return snd->loadRaw(input); }
 
   virtual void update() { snd->update(); }
   virtual void setListenerPos(float x, float y, float z,

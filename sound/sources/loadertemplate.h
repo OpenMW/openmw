@@ -4,22 +4,24 @@
 template <class SourceT, bool stream, bool file>
 class SSL_Template : public SampleSourceLoader
 {
+ public:
+
   SSL_Template()
     {
       canLoadStream = stream;
       canLoadFile = file;
     }
 
-  SampleSource *load(const std::string &file)
+  SampleSourcePtr load(const std::string &filename)
   {
     assert(canLoadFile);
-    return new SourceT(file);
+    return SampleSourcePtr(new SourceT(filename));
   }
 
-  SampleSource *load(Stream::StreamPtr input)
+  SampleSourcePtr load(Stream::StreamPtr input)
   {
     assert(canLoadStream);
-    return new SourceT(input);
+    return SampleSourcePtr(new SourceT(input));
   }
 };
 

@@ -21,13 +21,13 @@ class SampleSource : public Stream::Stream
 
   /// Get the sample rate, number of channels, and bits per
   /// sample. NULL parameters are ignored.
-  virtual void getInfo(int32_t *rate, int32_t *channels, int32_t *bits) const = 0;
+  virtual void getInfo(int32_t *rate, int32_t *channels, int32_t *bits) = 0;
 
   bool eof() const { return isEof; }
 
   // Disabled functions by default. You can still override them in
   // subclasses.
-  void seek(size_t pos) const { assert(0); }
+  void seek(size_t pos) { assert(0); }
   size_t tell() const { assert(0); }
   size_t size() const { assert(0); }
 };

@@ -2,6 +2,8 @@
 
 #include "../../stream/clients/audiere_file.h"
 
+using namespace Mangle::Stream;
+
 // Exception handling
 class Audiere_Exception : public std::exception
 {
@@ -109,11 +111,11 @@ AudiereSource::AudiereSource(const std::string &file)
   setup();
 }
 
-AudiereSource::AudiereSource(Stream::StreamPtr input)
+AudiereSource::AudiereSource(StreamPtr input)
 {
   // Use our Stream::AudiereFile implementation to convert a Mangle
   // 'Stream' to an Audiere 'File'
-  sample = OpenSampleSource(new Stream::AudiereFile(input));
+  sample = OpenSampleSource(new AudiereFile(input));
   if(!sample)
     fail("Couldn't load stream");
 
@@ -125,7 +127,7 @@ AudiereSource::AudiereSource(audiere::SampleSourcePtr src)
 { assert(sample); setup(); }
 
 // Common function called from all constructors
-AudiereSource::setup()
+void AudiereSource::setup()
 {
   assert(sample);
 

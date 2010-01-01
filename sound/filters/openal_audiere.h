@@ -15,8 +15,8 @@ class OpenAL_Audiere_Factory : public InputFilter
  public:
   OpenAL_Audiere_Factory()
     {
-      set(new OpenAL_Factory,
-          new AudiereLoader);
+      set(SoundFactoryPtr(new OpenAL_Factory),
+          SampleSourceLoaderPtr(new AudiereLoader));
     }
 };
 

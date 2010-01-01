@@ -10,6 +10,7 @@ namespace Stream {
 /** A Stream that reads another Stream into a buffer, and serves it as
     a MemoryStream. Might be expanded with other capabilities later.
  */
+
 class BufferStream : public MemoryStream
 {
   std::vector<char> buffer;
@@ -17,6 +18,8 @@ class BufferStream : public MemoryStream
  public:
   BufferStream(StreamPtr input)
     {
+      assert(input);
+
       // Allocate memory, read the stream into it. Then call set()
       if(input->hasSize)
         {

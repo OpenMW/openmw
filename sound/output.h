@@ -39,7 +39,7 @@ class Sound
   virtual void pause() = 0;
 
   /// Check if the sound is still playing
-  virtual bool isPlaying() = 0 const;
+  virtual bool isPlaying() const = 0;
 
   /// Set the volume. The parameter must be between 0.0 and 1.0.
   virtual void setVolume(float) = 0;
@@ -120,7 +120,7 @@ class SoundFactory
             large files, but they are not required to.
      @return a new Sound object
   */
-  virtual SoundPtr load(SampleSource *input) = 0;
+  virtual SoundPtr loadRaw(SampleSourcePtr input) = 0;
 
   /**
      @brief Load a sound file from stream. Only valid if canLoadStream
@@ -130,7 +130,7 @@ class SoundFactory
      @param stream true if the file should be streamed
      @see load(InputSource*,bool)
   */
-  virtual SoundPtr load(Stream::Stream *input) = 0;
+  virtual SoundPtr load(Stream::StreamPtr input) = 0;
 
   /**
      @brief Load a sound directly from file. Only valid if canLoadFile

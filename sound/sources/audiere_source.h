@@ -26,14 +26,14 @@ class AudiereSource : public SampleSource
   // How much of the above buffer is in use
   int pullSize;
 
-  void getFormat();
+  void setup();
 
  public:
   /// Decode the given sound file
   AudiereSource(const std::string &file);
 
   /// Decode the given sound stream
-  AudiereSource(Stream::StreamPtr src);
+  AudiereSource(Mangle::Stream::StreamPtr src);
 
   /// Read directly from an existing audiere::SampleSource
   AudiereSource(audiere::SampleSourcePtr src);
@@ -41,9 +41,9 @@ class AudiereSource : public SampleSource
   void getInfo(int32_t *rate, int32_t *channels, int32_t *bits);
   size_t read(void *data, size_t length);
 
-  void seek(size_t pos) const { sample->setPosition(pos); }
-  size_t tell() const { return sample->getPosition(); }
-  size_t size() const { return sample->getLength(); }
+  void seek(size_t pos) { sample->setPosition(pos/frameSize); }
+  size_t tell() const { return sample->getPosition()*frameSize; }
+  size_t size() const { return sample->getLength()*frameSize; }
 };
 
 #include "loadertemplate.h"
