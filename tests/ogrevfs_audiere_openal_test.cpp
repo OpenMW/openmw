@@ -7,7 +7,7 @@
 
  */
 
-#include "sound/servers/openal_audiere.h"
+#include "sound/filters/openal_audiere.h"
 #include "vfs/servers/ogre_vfs.h"
 #include <Ogre.h>
 #include <iostream>
@@ -32,21 +32,18 @@ int main()
   // Ogre file system
   VFS::OgreVFS vfs;
 
-  Sound::OpenAL_Audiere_Manager mg;
-  Sound::Sound *snd = mg.load(vfs.open("owl.ogg"));
+  // The main sound system
+  Sound::OpenAL_Audiere_Factory mg;
+  Sound::SoundPtr snd = mg.load(vfs.open("owl.ogg"));
 
-  Sound::Instance *s = snd->getInstance(false, false);
   cout << "Playing 'owl.ogg' from 'sound.zip'\n";
-  s->play();
+  snd->play();
 
-  while(s->isPlaying())
+  while(snd->isPlaying())
     {
       usleep(10000);
       if(mg.needsUpdate) mg.update();
     }
-
-  if(s) s->drop();
-  if(snd) snd->drop();
 
   return 0;
 }
