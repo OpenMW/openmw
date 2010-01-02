@@ -30,7 +30,12 @@
 */
 
 #include <OgreArchive.h>
+#include <OgreArchiveFactory.h>
 #include "bsa_file.h"
+#include "../mangle/stream/clients/ogre_datastream.h"
+
+using namespace Ogre;
+using namespace Mangle::Stream;
 
 /// An OGRE Archive wrapping a BSAFile archive
 class BSAArchive : public Archive
@@ -51,8 +56,17 @@ public:
   // Open a file in the archive.
   DataStreamPtr open(const String& filename) const
   {
-    // Open the file, and wrap it into an Ogre::DataStream.
-    return DataStreamPtr(new MangleDataStream(getFile(filename.c_str()));
+    // Get a non-const reference to arc. This is a hack and it's all
+    // OGRE's fault. You should NOT expect an open() command not to
+    // have any side effects on the archive, and hence this function
+    // should not have been declared const in the first place.
+    BSAFile *narc = (BSAFile*)&arc;
+
+    // Open the file
+    StreamPtr strm = narc->getFile(filename.c_str());
+
+    // Wrap it into an Ogre::DataStream.
+    return DataStreamPtr(new Mangle2OgreStream(strm));
   }
 
   // This is never called as far as I can see.
@@ -128,8 +142,6 @@ public:
 class BSAArchiveFactory : public ArchiveFactory
 {
 public:
-  virtual ~BSAArchiveFactory() {}
-
   const String& getType() const
   {
     static String name = "BSA";
