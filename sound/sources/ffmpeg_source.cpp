@@ -1,5 +1,6 @@
 #include "ffmpeg_source.h"
-#include <exception>
+
+#include "../../tools/str_exception.h"
 
 using namespace Mangle::Sound;
 
@@ -7,30 +8,8 @@ using namespace Mangle::Sound;
 // streams operated from the same thread.
 static uint8_t outBuf[AVCODEC_MAX_AUDIO_FRAME_SIZE];
 
-/// FFmpeg exception.
-class FFM_Exception : public std::exception
-{
-  std::string msg;
-
- public:
-
-  FFM_Exception(const std::string &m);
-  ~FFM_Exception() throw();
-  virtual const char* what() const throw();
-};
-
-FFM_Exception::FFM_Exception(const std::string &m)
-  : msg(m) {}
-
-const char* FFM_Exception::what() const throw()
-{ return msg.c_str(); }
-
-FFM_Exception::~FFM_Exception() throw() {}
-
 static void fail(const std::string &msg)
-{
-  throw FFM_Exception("FFMpeg exception: " + msg);
-}
+{ throw str_exception("FFMpeg exception: " + msg); }
 
 // --- Loader ---
 

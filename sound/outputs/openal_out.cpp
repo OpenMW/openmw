@@ -2,26 +2,14 @@
 #include <assert.h>
 
 #include "../../stream/filters/buffer_stream.h"
+#include "../../tools/str_exception.h"
 
 using namespace Mangle::Sound;
 
 // ---- Helper functions and classes ----
 
-class OpenAL_Exception : public std::exception
-{
-  std::string msg;
-
- public:
-
-  OpenAL_Exception(const std::string &m) : msg(m) {}
-  ~OpenAL_Exception() throw() {}
-  virtual const char* what() const throw() { return msg.c_str(); }
-};
-
 static void fail(const std::string &msg)
-{
-  throw OpenAL_Exception("OpenAL exception: " + msg);
-}
+{ throw str_exception("OpenAL exception: " + msg); }
 
 static void checkALError(const std::string &msg)
 {

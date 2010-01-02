@@ -18,6 +18,9 @@ class FileStream : public StdStream
     : StdStream(&file)
     {
       file.open(name.c_str(), std::ios::binary);
+
+      if(file.fail())
+        throw str_exception("FileStream: failed to open file " + name);
     }
   ~FileStream() { file.close(); }
 };
