@@ -10,3 +10,7 @@ bsatool: bsatool.cpp ../bsa_file.cpp bsatool_cmd.c
 
 bsatool_cmd.c: bsatool.ggo
 	gengetopt < bsatool.ggo
+
+clean:
+	rm *_test
+	rm bsatool

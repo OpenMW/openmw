@@ -25,11 +25,10 @@
 
 #include "../mangle/stream/servers/file_stream.h"
 #include "../mangle/stream/filters/slice_stream.h"
+#include "../mangle/tools/str_exception.h"
 
 #include <stdlib.h>
 #include <assert.h>
-
-#include "../tools/str_exception.h"
 
 using namespace std;
 using namespace Mangle::Stream;
