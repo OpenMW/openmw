@@ -12,6 +12,7 @@ class str_exception : public std::exception
  public:
 
   str_exception(const std::string &m) : msg(m) {}
+  ~str_exception() throw() {}
   const char* what() const throw() { return msg.c_str(); }
 };
 

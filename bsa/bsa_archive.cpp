@@ -32,8 +32,7 @@
 #include <OgreArchive.h>
 #include "bsa_file.h"
 
-// This archive does not cover one .bsa file, instead it interacts
-// with the all the loaded bsas and treates them as one archive.
+/// An OGRE Archive wrapping a BSAFile archive
 class BSAArchive : public Archive
 {
   BSAFile arc;
@@ -43,7 +42,7 @@ public:
              : Archive(name, "BSA")
   { arc.open(name); }
 
-  bool isCaseSensitive(void) const { return false; }
+  bool isCaseSensitive() const { return false; }
 
   // The archive is loaded in the constructor, and never unloaded.
   void load() {}
@@ -144,7 +143,5 @@ public:
 
   void destroyInstance( Archive* arch) { delete arch; }
 };
-
-BSAArchiveFactory mBSAFactory;
 
 #endif

@@ -24,24 +24,20 @@
 #ifndef _BSA_FILE_H_
 #define _BSA_FILE_H_
 
-#include "mangle/stream/servers/file_stream.h"
-#include "mangle/stream/filters/slice_stream.h"
+#include "../mangle/stream/stream.h"
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <strings.h>
-#include <assert.h>
+#include <string>
 #include <vector>
 #include <map>
-
-#include "../tools/str_exception.h"
 
 /**
    This class is used to read "Bethesda Archive Files", or BSAs.
  */
 class BSAFile
 {
- private:
+ public:
 
   /// Represents one file entry in the archive
   struct FileStruct
@@ -55,11 +51,15 @@ class BSAFile
     char* name;
   };
 
+  typedef std::vector<FileStruct> FileList;
+
+ private:
+
   /// The archive source
-  Mangle::Stream::Stream *input;
+  Mangle::Stream::StreamPtr input;
 
   /// Table of files in this archive
-  std::vector<FileStruct> files;
+  FileList files;
 
   /// Filename string buffer
   std::vector<char> stringBuf;
@@ -85,133 +85,13 @@ class BSAFile
   Lookup lookup;
 
   /// Error handling
-  void fail(const std::string &msg)
-    {
-      throw str_exception("BSA Error: " + msg + "\nArchive: " + filename);
-    }
+  void fail(const std::string &msg);
 
   /// Read header information from the input source
-  void readHeader()
-  {
-    /*
-     * The layout of a BSA archive is as follows:
-     *
-     * - 12 bytes header, contains 3 ints:
-     *         id number - equal to 0x100
-     *         dirsize - size of the directory block (see below)
-     *         numfiles - number of files
-     *
-     * ---------- start of directory block -----------
-     *
-     * - 8 bytes*numfiles, each record contains:
-     *         fileSize
-     *         offset into data buffer (see below)
-     *
-     * - 4 bytes*numfiles, each record is an offset into the following name buffer
-     *
-     * - name buffer, indexed by the previous table, each string is
-     *   null-terminated. Size is (dirsize - 12*numfiles).
-     *
-     * ---------- end of directory block -------------
-     *
-     * - 8*filenum - hash table block, we currently ignore this
-     *
-     * ----------- start of data buffer --------------
-     *
-     * - The rest of the archive is file data, indexed by the
-     *   offsets in the directory block. The offsets start at 0 at
-     *   the beginning of this buffer.
-     *
-     */
-    assert(!isLoaded);
-    assert(input);
-    assert(input->hasSize);
-    assert(input->hasPosition);
-    assert(input->isSeekable);
-
-    // Total archive size
-    size_t fsize = input->size();
-
-    if( fsize < 12 )
-      fail("File too small to be a valid BSA archive");
-
-    // Get essential header numbers
-    size_t dirsize, filenum;
-
-    {
-      // First 12 bytes
-      uint32_t head[3];
-
-      input->read(head, 12);
-
-      if(head[0] != 0x100)
-	fail("Unrecognized BSA header");
-
-      // Total number of bytes used in size/offset-table + filename
-      // sections.
-      dirsize = head[1];
-
-      // Number of files
-      filenum = head[2];
-    }
-
-    // Each file must take up at least 21 bytes of data in the
-    // bsa. So if files*21 overflows the file size then we are
-    // guaranteed that the archive is corrupt.
-    if( (filenum*21 > fsize -12) ||
-        (dirsize+8*filenum > fsize -12) )
-      fail("Directory information larger than entire archive");
-
-    // Read the offset info into a temporary buffer
-    std::vector<uint32_t> offsets;
-    offsets.resize(3*filenum);
-    input->read(&offsets[0], 12*filenum);
-
-    // Read the string table
-    stringBuf.resize(dirsize-12*filenum);
-    input->read(&stringBuf[0], stringBuf.size());
-
-    // Check our position
-    assert(size->tell() == 12+dirsize);
-
-    // Calculate the offset of the data buffer. All file offsets are
-    // relative to this. 12 header bytes + directory + hash table
-    // (skipped)
-    size_t fileDataOffset = 12 + dirsize + 8*filenum;
-
-    // Set up the the FileStruct table
-    files.resize(filenum);
-    for(int i=0;i<filenum;i++)
-      {
-        FileStruct &fs = files[i];
-        fs.fileSize = offsets[i*2];
-        fs.offset = offsets[i*2+1] + fileDataOffset;
-        fs.name = &stringBuf[offsets[2*numfiles+i]];
-
-        if(fs.offset + fs.fileSize > fsize)
-          fail("Archive contains offsets outside itself");
-
-        // Add the file name to the lookup
-        lookup[fs.name] = i;
-      }
-
-    isLoaded = true;
-  }
+  void readHeader();
 
   /// Get the index of a given file name, or -1 if not found
-  int getIndex(const char *str)
-  {
-    Lookup::iterator it;
-    it = lookup.find(str);
-
-    if(it == lookup.end()) return -1;
-    else
-      {
-        int res = it->second;
-        assert(res >= 0 && res < files.size());
-        return res;
-      }
-  }
+  int getIndex(const char *str);
 
  public:
 
@@ -221,25 +101,15 @@ class BSAFile
    */
 
   BSAFile()
-    : input(NULL), isLoaded(false) {}
+    : input(), isLoaded(false) {}
 
   /// Open an archive file.
-  void open(const std::string &file)
-  {
-    filename = file;
-    input = new Mangle::Stream::FileStream(file);
-    read();
-  }
+  void open(const std::string &file);
 
   /** Open an archive from a generic stream. The 'name' parameter is
       used for error messages.
   */
-  void open(Mangle::Stream::Stream* inp, const std::string &name)
-  {
-    filename = name;
-    input = inp;
-    read();
-  }
+  void open(Mangle::Stream::StreamPtr inp, const std::string &name);
 
   /* -----------------------------------
    * Archive file routines
@@ -247,10 +117,7 @@ class BSAFile
    */
 
   /// Check if a file exists
-  bool exists(const char *file)
-  {
-    return getIndex(file) != -1;
-  }
+  bool exists(const char *file) { return getIndex(file) != -1; }
 
   /** Open a file contained in the archive. Throws an exception if the
       file doesn't exist.
@@ -258,16 +125,11 @@ class BSAFile
       NOTE: All files opened from one archive will share a common file
       handle. This is NOT thread safe.
    */
-  Mangle::Stream::Stream *getFile(const char *file)
-  {
-    int i = getIndex(file);
-    if(i == -1)
-      fail("File not found: " + std::string(file));
+  Mangle::Stream::StreamPtr getFile(const char *file);
 
-    FileStruct &fs = files[i];
-
-    return new SliceStream(input, fs.offset, fs.fileSize);
-  }
+  /// Get a list of all files
+  const FileList &getList() const
+    { return files; }
 };
 
 #endif
