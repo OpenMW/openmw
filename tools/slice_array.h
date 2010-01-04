@@ -33,8 +33,19 @@ struct SliceArray
   const T* ptr;
   size_t length;
 
+  /// Initialize to zero length
+  SliceArray() : ptr(0), length(0) {}
+
+  /// Initialize from pointer + length
   SliceArray(const T* _ptr, size_t _length)
     : ptr(_ptr), length(_length) {}
+
+  /// Initialize from null-terminated string
+  SliceArray(const char* str)
+  {
+    ptr = str;
+    length = strlen(str);
+  }
 
   bool operator==(SliceArray &t)
   {
@@ -52,8 +63,7 @@ struct SliceArray
   }
 
   /** This allocates a copy of the data. Only use this for debugging
-      and error messages.
-  */
+      and error messages. */
   std::string toString()
   { return std::string(ptr,length); }
 };
