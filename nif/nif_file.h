@@ -33,6 +33,8 @@
 #include <vector>
 #include <string>
 
+#include "record.h"
+
 using namespace Mangle::Stream;
 
 class NIFFile
@@ -52,7 +54,6 @@ class NIFFile
   std::string filename;
 
   /// Record list
-  typedef void NifRecord;
   std::vector<NifRecord*> records;
 
   /// Used for error handling

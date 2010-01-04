@@ -50,7 +50,12 @@ void NIFFile::parse()
       
       cout << i << ": " << rec.toString() << endl;
 
+      NifRecord *r = NULL;
+
       if(rec == "NiNode") cout << " got a node!\n";
+
+      if(r) r->read(this);
+      else cout << "No record was created\n";
 
       break;
     }

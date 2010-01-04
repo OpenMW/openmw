@@ -2,7 +2,7 @@ GCC=g++
 
 all: niftool
 
-niftool: niftool.cpp ../nif_file.h
+niftool: niftool.cpp ../nif_file.h ../nif_file.cpp ../record.h
 	$(GCC) $< ../nif_file.cpp ../../tools/stringops.cpp -o $@
 
 clean:
