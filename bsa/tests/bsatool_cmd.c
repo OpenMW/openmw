@@ -30,6 +30,7 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help            Print help and exit",
   "  -V, --version         Print version and exit",
   "  -x, --extract=STRING  Extract file from archive",
+  "  -l, --long            Include extra information in archive listing",
   "\nIf no option is given, the default action is to list all files in the archive.",
     0
 };
@@ -57,6 +58,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->extract_given = 0 ;
+  args_info->long_given = 0 ;
 }
 
 static
@@ -75,6 +77,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->extract_help = gengetopt_args_info_help[2] ;
+  args_info->long_help = gengetopt_args_info_help[3] ;
   
 }
 
@@ -198,6 +201,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "version", 0, 0 );
   if (args_info->extract_given)
     write_into_file(outfile, "extract", args_info->extract_orig, 0);
+  if (args_info->long_given)
+    write_into_file(outfile, "long", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -1054,6 +1059,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "extract",	1, NULL, 'x' },
+        { "long",	0, NULL, 'l' },
         { NULL,	0, NULL, 0 }
       };
 
@@ -1062,7 +1068,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVx:", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVx:l", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1091,6 +1097,18 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
               &(local_args_info.extract_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "extract", 'x',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'l':	/* Include extra information in archive listing.  */
+        
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->long_given),
+              &(local_args_info.long_given), optarg, 0, 0, ARG_NO,
+              check_ambiguity, override, 0, 0,
+              "long", 'l',
               additional_error))
             goto failure;
         

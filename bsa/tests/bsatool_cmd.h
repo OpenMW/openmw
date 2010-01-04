@@ -37,10 +37,12 @@ struct gengetopt_args_info
   char * extract_arg;	/**< @brief Extract file from archive.  */
   char * extract_orig;	/**< @brief Extract file from archive original value given at command line.  */
   const char *extract_help; /**< @brief Extract file from archive help description.  */
+  const char *long_help; /**< @brief Include extra information in archive listing help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int extract_given ;	/**< @brief Whether extract was given.  */
+  unsigned int long_given ;	/**< @brief Whether long was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

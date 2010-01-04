@@ -3,6 +3,7 @@
 #include "bsatool_cmd.h"
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <exception>
 
@@ -73,7 +74,17 @@ int main(int argc, char** argv)
   // List all files
   const BSAFile::FileList &files = bsa.getList();
   for(int i=0; i<files.size(); i++)
-    cout << files[i].name << endl;
+    {
+      if(info.long_given)
+        {
+          // Long format
+          cout << setw(50) << left << files[i].name;
+          cout << setw(8) << left << dec << files[i].fileSize;
+          cout << "@ 0x" << hex << files[i].offset << endl;
+        }
+      else
+        cout << files[i].name << endl;
+    }
 
   // Done!
   return 0;
