@@ -57,7 +57,7 @@ class SliceStream : public Stream
   const void *getPtr() { return getPtr(0, length); }
   const void *getPtr(size_t size)
     {
-      void *ptr = getPtr(pos, size);
+      const void *ptr = getPtr(pos, size);
       seek(pos+size);
       return ptr;
     }
