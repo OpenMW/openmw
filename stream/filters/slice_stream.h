@@ -55,7 +55,12 @@ class SliceStream : public Stream
   size_t size() const { return length; }
 
   const void *getPtr() { return getPtr(0, length); }
-  const void *getPtr(size_t size) { return getPtr(pos, size); }
+  const void *getPtr(size_t size)
+    {
+      void *ptr = getPtr(pos, size);
+      seek(pos+size);
+      return ptr;
+    }
   const void *getPtr(size_t pos, size_t size)
     {
       // Boundry checks on pos and size. Bounding the size is

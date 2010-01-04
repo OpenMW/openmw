@@ -71,9 +71,15 @@ class MemoryStream : public Stream
   size_t size() const { return length; }
   bool eof() const { return pos == length; }
 
-  /// Get the base pointer to the entire buffer
   const void *getPtr() { return data; }
-  const void *getPtr(size_t size) { return ((char*)data)+pos; }
+  const void *getPtr(size_t size)
+    {
+      // This variant of getPtr must move the position pointer
+      size_t opos = pos;
+      pos += size;
+      if(pos > length) pos = length;
+      return ((char*)data)+opos;
+    }
   const void *getPtr(size_t pos, size_t size)
     {
       if(pos > length) pos = length;
