@@ -24,52 +24,16 @@
 #ifndef _NIF_FILE_H_
 #define _NIF_FILE_H_
 
-#include <string>
 #include "../mangle/stream/stream.h"
 #include "../mangle/stream/filters/buffer_stream.h"
 #include "../mangle/tools/str_exception.h"
 
+#include "../tools/slice_array.h"
+
 #include <vector>
+#include <string>
 
 using namespace Mangle::Stream;
-
-// A simple array implementation containing a pointer and a
-// length. Used for holding slices into a data buffer.
-#include <string.h>
-template <class T>
-struct SliceArray
-{
-  const T* ptr;
-  size_t length;
-
-  SliceArray(const T* _ptr, size_t _length)
-    : ptr(_ptr), length(_length) {}
-
-  bool operator==(SliceArray &t)
-  {
-    return
-      length == t.length &&
-      (memcmp(ptr,t.ptr, length*sizeof(T)) == 0);
-  }
-
-  /// Only use this for stings
-  bool operator==(const char* str)
-  {
-    return
-      str[length] == 0 &&
-      (strncmp(ptr, str, length) == 0);
-  }
-
-  /** This allocates a copy of the data. Only use this for debugging
-      and error messages.
-  */
-  std::string toString()
-  { return std::string(ptr,length); }
-};
-
-typedef SliceArray<char> SString;
-typedef SliceArray<int> IntArray;
-typedef SliceArray<float> FloatArray;
 
 class NIFFile
 {
