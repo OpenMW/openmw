@@ -28,13 +28,8 @@
 #include "../mangle/stream/stream.h"
 #include "../mangle/stream/filters/buffer_stream.h"
 #include "../mangle/tools/str_exception.h"
-#include "../tools/stringops.h"
 
 #include <vector>
-
-// Only used during development. Remove later.
-#include <iostream>
-using namespace std;
 
 using namespace Mangle::Stream;
 
@@ -105,33 +100,7 @@ class NIFFile
     }
 
   /// Parse the file
-  void parse()
-    {
-      // Check the header string
-      const char* head = getString(40);
-      if(!begins(head, "NetImmerse File Format"))
-        fail("Invalid NIF header");
-
-      // Get BCD version
-      ver = getInt();
-      if(ver != VER_MW)
-        fail("Unsupported NIF version");
-
-      // Number of records
-      int recNum = getInt();
-      records.resize(recNum);
-
-      for(int i=0;i<recNum;i++)
-        {
-          SString rec = getString();
-
-          cout << i << ": " << rec.toString() << endl;
-
-          if(rec == "NiNode") cout << " got a node!\n";
-
-          break;
-        }
-    }
+  void parse();
 
  public:
   /// Open a NIF stream. The name is used for error messages.
@@ -176,5 +145,4 @@ class NIFFile
   const char *getString(int size)
     { return (const char*)inp->getPtr(size); }
 };
-
 #endif
