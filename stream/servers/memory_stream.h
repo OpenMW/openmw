@@ -30,6 +30,7 @@ class MemoryStream : public Stream
     isSeekable = true;
     hasPosition = true;
     hasSize = true;
+    hasPtr = true;
   }
 
   MemoryStream()
