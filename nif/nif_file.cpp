@@ -28,6 +28,8 @@
 #include "extra.h"
 #include "controlled.h"
 #include "node.h"
+#include "property.h"
+#include "data.h"
 
 #include <iostream>
 using namespace std;
@@ -53,7 +55,7 @@ void NIFFile::parse()
     {
       SString rec = getString();
       
-      cout << endl << i << ": " << rec.toString() << endl;
+      cout << i << ": " << rec.toString() << endl;
 
       Record *r;
 
@@ -62,6 +64,8 @@ void NIFFile::parse()
       // node names.
       if(rec == "NiNode") r = new NiNode;
       else if(rec == "NiTriShape") r = new NiTriShape;
+      else if(rec == "NiTexturingProperty") r = new NiTexturingProperty;
+      else if(rec == "NiSourceTexture") r = new NiSourceTexture;
       else break;
 
       r->read(this);

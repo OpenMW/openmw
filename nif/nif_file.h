@@ -108,10 +108,14 @@ class NIFFile
 
   ****************************************************/
 
+  void skip(size_t size) { inp->getPtr(size); }
+
   template<class X> const X* getPtr() { return (const X*)inp->getPtr(sizeof(X)); }
   template<class X> X getType() { return *getPtr<X>(); }
   unsigned short getUshort() { return getType<unsigned short>(); }
   int getInt() { return getType<int>(); }
+  float getFloat() { return getType<float>(); }
+  char getByte() { return getType<char>(); }
 
   template<class X>
   SliceArray<X> getArray()
@@ -125,6 +129,7 @@ class NIFFile
   const Vector *getVector() { return getPtr<Vector>(); }
   const Matrix *getMatrix() { return getPtr<Matrix>(); }
   const Transformation *getTrafo() { return getPtr<Transformation>(); }
+  const Vector4 *getVector4() { return getPtr<Vector4>(); }
 
   // For fixed-size strings where you already know the size
   const char *getString(int size)

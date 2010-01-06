@@ -127,14 +127,18 @@ class Node;
 class Extra;
 class Property;
 class Controller;
+class NiPixelData;
 class NiTriShapeData;
 class NiSkinInstance;
+class NiSourceTexture;
 
 typedef RecordPtrT<Node> NodePtr;
 typedef RecordPtrT<Extra> ExtraPtr;
 typedef RecordPtrT<Controller> ControllerPtr;
+typedef RecordPtrT<NiPixelData> NiPixelDataPtr;
 typedef RecordPtrT<NiTriShapeData> NiTriShapeDataPtr;
 typedef RecordPtrT<NiSkinInstance> NiSkinInstancePtr;
+typedef RecordPtrT<NiSourceTexture> NiSourceTexturePtr;
 
 typedef RecordListT<Node> NodeList;
 typedef RecordListT<Property> PropertyList;
