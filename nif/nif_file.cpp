@@ -53,14 +53,17 @@ void NIFFile::parse()
     {
       SString rec = getString();
       
-      cout << i << ": " << rec.toString() << endl;
+      cout << endl << i << ": " << rec.toString() << endl;
 
-      Node r;
-      r.read(this);
-      cout << r.name.toString() << endl;
-      cout << r.extra.getIndex() << endl;
-      cout << r.controller.getIndex() << endl;
+      Record *r;
 
-      break;
+      // This can be heavily optimized later if needed. For example, a
+      // hash table or a FSM-based parser could be used to look up
+      // node names.
+      if(rec == "NiNode") r = new NiNode;
+      else if(rec == "NiTriShape") r = new NiTriShape;
+      else break;
+
+      r->read(this);
     }
 }

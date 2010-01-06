@@ -25,9 +25,15 @@
 #define _NIF_RECORD_PTR_H_
 
 #include "nif_file.h"
+#include <vector>
 
 namespace Nif
 {
+
+/** A reference to another record. It is read as an index from the
+    NIF, and later looked up in the index table to get an actual
+    pointer.
+*/
 template <class X>
 class RecordPtrT
 {
@@ -53,7 +59,7 @@ class RecordPtrT
   }
 
   /// Look up the actual object from the index
-  X* operator->()
+  X* getPtr()
   {
     // Have we found the pointer already?
     if(ptr == NULL)
@@ -69,20 +75,69 @@ class RecordPtrT
     return ptr;
   }
 
+  /// Syntactic sugar
+  X* operator->() { return getPtr(); }
+  X& get() { return *getPtr(); }
+
   /// Pointers are allowed to be empty
   bool empty() { return index == -1; }
 
   int getIndex() { return index; }
 };
 
+/** A list of references to other records. These are read as a list,
+    and later converted to pointers as needed. Not an optimized
+    implementation.
+ */
+template <class X>
+class RecordListT
+{
+  typedef RecordPtrT<X> Ptr;
+  std::vector<Ptr> list;
 
-class Extra;
-class Controller;
+ public:
+
+  void read(NIFFile *nif)
+  {
+    int len = nif->getInt();
+    list.resize(len);
+
+    assert(len >= 0 && len < 1000);
+    for(int i=0;i<len;i++)
+      list[i].read(nif);
+  }
+
+  X& operator[](int index)
+    {
+      assert(index >= 0 && index < list.size());
+      return list[index].get();
+    }
+
+  bool has(int index)
+  {
+    assert(index >= 0 && index < list.size());
+    return !list[index].empty();
+  }
+
+  int length() { return list.size(); }
+};
+
+
 class Node;
+class Extra;
+class Property;
+class Controller;
+class NiTriShapeData;
+class NiSkinInstance;
 
+typedef RecordPtrT<Node> NodePtr;
 typedef RecordPtrT<Extra> ExtraPtr;
 typedef RecordPtrT<Controller> ControllerPtr;
-typedef RecordPtrT<Node> NodePtr;
+typedef RecordPtrT<NiTriShapeData> NiTriShapeDataPtr;
+typedef RecordPtrT<NiSkinInstance> NiSkinInstancePtr;
+
+typedef RecordListT<Node> NodeList;
+typedef RecordListT<Property> PropertyList;
 
 } // Namespace
 #endif

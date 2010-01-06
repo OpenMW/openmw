@@ -35,6 +35,7 @@
 #include <assert.h>
 
 #include "record.h"
+#include "nif_types.h"
 
 using namespace Mangle::Stream;
 
@@ -107,7 +108,9 @@ class NIFFile
 
   ****************************************************/
 
-  template<class X> X getType() { return *((X*)inp->getPtr(sizeof(X))); }
+  template<class X> const X* getPtr() { return (const X*)inp->getPtr(sizeof(X)); }
+  template<class X> X getType() { return *getPtr<X>(); }
+  unsigned short getUshort() { return getType<unsigned short>(); }
   int getInt() { return getType<int>(); }
 
   template<class X>
@@ -119,6 +122,11 @@ class NIFFile
 
   SString getString() { return getArray<char>(); }
 
+  const Vector *getVector() { return getPtr<Vector>(); }
+  const Matrix *getMatrix() { return getPtr<Matrix>(); }
+  const Transformation *getTrafo() { return getPtr<Transformation>(); }
+
+  // For fixed-size strings where you already know the size
   const char *getString(int size)
     { return (const char*)inp->getPtr(size); }
 };

@@ -35,11 +35,59 @@ namespace Nif
  */
 struct Node : Named
 {
-  // Not done
+  // Node flags. Interpretation depends somewhat on the type of node.
+  int flags;
+  const Transformation *trafo;
+  PropertyList props;
+
+  // Bounding box info
+  bool hasBounds;
+  const Vector *boundPos;
+  const Matrix *boundRot;
+  const Vector *boundXYZ;
 
   void read(NIFFile *nif)
   {
     Named::read(nif);
+
+    flags = nif->getUshort();
+    trafo = nif->getTrafo();
+    props.read(nif);
+
+    hasBounds = nif->getInt();
+    if(hasBounds)
+      {
+        nif->getInt();
+        boundPos = nif->getVector();
+        boundRot = nif->getMatrix();
+        boundXYZ = nif->getVector();
+      }
+  }
+};
+
+struct NiNode : Node
+{
+  NodeList children;
+  NodeList effects;
+
+  void read(NIFFile *nif)
+  {
+    Node::read(nif);
+    children.read(nif);
+    effects.read(nif);
+  }
+};
+
+struct NiTriShape : Node
+{
+  NiTriShapeDataPtr data;
+  NiSkinInstancePtr skin;
+
+  void read(NIFFile *nif)
+  {
+    Node::read(nif);
+    data.read(nif);
+    skin.read(nif);
   }
 };
 
