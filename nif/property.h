@@ -130,5 +130,101 @@ struct NiTexturingProperty : Property
   }
 };
 
+// These contain no other data than the 'flags' field in Property
+typedef Property NiShadeProperty;
+typedef Property NiDitherProperty;
+typedef Property NiZBufferProperty;
+typedef Property NiSpecularProperty;
+typedef Property NiWireframeProperty;
+
+// The rest are all struct-based
+template <typename Struct>
+struct StructPropT : Property
+{
+  const Struct* data;
+
+  void read(NIFFile *nif)
+  {
+    Property::read(nif);
+    data = nif->getPtr<Struct>();
+  }
+};
+
+struct S_MaterialProperty
+{
+  // The vector components are R,G,B
+  Vector ambient, diffuse, specular, emissive;
+  float glossiness, alpha;
+};
+
+struct S_VertexColorProperty
+{
+  /* Vertex mode:
+     0 - source ignore
+     1 - source emmisive
+     2 - source amb diff
+
+     Lighting mode
+     0 - lighting emmisive
+     1 - lighting emmisive ambient/diffuse
+  */
+  int vertmode, lightmode;
+};
+
+struct S_AlphaProperty
+{
+  /*
+    In NiAlphaProperty, the flags have the following meaning.
+
+    Bit 0 : alpha blending enable
+    Bits 1-4 : source blend mode
+    Bits 5-8 : destination blend mode
+    Bit 9 : alpha test enable
+    Bit 10-12 : alpha test mode
+    Bit 13 : no sorter flag ( disables triangle sorting )
+
+    blend modes (glBlendFunc):
+    0000 GL_ONE
+    0001 GL_ZERO
+    0010 GL_SRC_COLOR
+    0011 GL_ONE_MINUS_SRC_COLOR
+    0100 GL_DST_COLOR
+    0101 GL_ONE_MINUS_DST_COLOR
+    0110 GL_SRC_ALPHA
+    0111 GL_ONE_MINUS_SRC_ALPHA
+    1000 GL_DST_ALPHA
+    1001 GL_ONE_MINUS_DST_ALPHA
+    1010 GL_SRC_ALPHA_SATURATE
+
+    test modes (glAlphaFunc):
+    000 GL_ALWAYS
+    001 GL_LESS
+    010 GL_EQUAL
+    011 GL_LEQUAL
+    100 GL_GREATER
+    101 GL_NOTEQUAL
+    110 GL_GEQUAL
+    111 GL_NEVER
+
+    Taken from:
+    http://niftools.sourceforge.net/doc/nif/NiAlphaProperty.html
+
+    Right now we only use standard alpha blending (see the Ogre code
+    that sets it up) and it appears that this is the only blending
+    used in the original game. Bloodmoon (along with several mods) do
+    however use other settings, such as discarding pixel values with
+    alpha < 1.0. This is faster because we don't have to mess with the
+    depth stuff like we did for blending. And OGRE has settings for
+    this too.
+  */
+
+  // Tested against when certain flags are set (see above.)
+  unsigned char threshold;
+};
+
+typedef StructPropT<S_AlphaProperty> NiAlphaProperty;
+typedef StructPropT<S_MaterialProperty> NiMaterialProperty;
+typedef StructPropT<S_VertexColorProperty> NiVertexColorProperty;
+
 } // Namespace
 #endif

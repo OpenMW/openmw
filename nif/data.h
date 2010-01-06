@@ -82,5 +82,73 @@ struct NiSourceTexture : Named
   }
 };
 
+// Common ancestor for several data classes
+struct ShapeData : Record
+{
+  FloatArray vertices, normals, colors, uvlist;
+  const Vector *center;
+  float radius;
+
+  void read(NIFFile *nif)
+  {
+    int verts = nif->getUshort();
+
+    if(nif->getInt())
+      vertices = nif->getFloatLen(verts*3);
+
+    if(nif->getInt())
+      normals = nif->getFloatLen(verts*3);
+
+    center = nif->getVector();
+    radius = nif->getFloat();
+
+    if(nif->getInt())
+      colors = nif->getFloatLen(verts*4);
+
+    int uvs = nif->getUshort();
+
+    // Only the first 6 bits are used as a count. I think the rest are
+    // flags of some sort.
+    uvs &= 0x3f;
+
+    if(nif->getInt())
+      uvlist = nif->getFloatLen(uvs*verts*2);
+  }
+};
+
+struct NiTriShapeData : ShapeData
+{
+  // Triangles, three vertex indices per triangle
+  SliceArray<short> triangles;
+
+  void read(NIFFile *nif)
+  {
+    ShapeData::read(nif);
+
+    int tris = nif->getUshort();
+    if(tris)
+      {
+        // We have three times as many vertices as triangles, so this
+        // is always equal to tris*3.
+        int cnt = nif->getInt();
+        triangles = nif->getArrayLen<short>(cnt);
+      }
+
+    // Read the match list, which lists the vertices that are equal to
+    // vertices. We don't actually need need this for anything, so
+    // just skip it.
+    int verts = nif->getUshort();
+    if(verts)
+      {
+        for(int i=0;i<verts;i++)
+          {
+            // Number of vertices matching vertex 'i'
+            short num = nif->getUshort();
+            nif->skip(num*sizeof(short));
+          }
+      }
+  }
+};
+
 } // Namespace
 #endif

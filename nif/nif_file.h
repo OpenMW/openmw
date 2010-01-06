@@ -118,10 +118,14 @@ class NIFFile
   char getByte() { return getType<char>(); }
 
   template<class X>
+  SliceArray<X> getArrayLen(int num)
+    { return SliceArray<X>((const X*)inp->getPtr(num*sizeof(X)),num); }
+
+  template<class X>
   SliceArray<X> getArray()
     {
       int len = getInt();
-      return SliceArray<X>((const X*)inp->getPtr(len), len);
+      return getArrayLen<X>(len);
     }
 
   SString getString() { return getArray<char>(); }
@@ -130,6 +134,9 @@ class NIFFile
   const Matrix *getMatrix() { return getPtr<Matrix>(); }
   const Transformation *getTrafo() { return getPtr<Transformation>(); }
   const Vector4 *getVector4() { return getPtr<Vector4>(); }
+
+  FloatArray getFloatLen(int num)
+    { return getArrayLen<float>(num); }
 
   // For fixed-size strings where you already know the size
   const char *getString(int size)
