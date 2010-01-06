@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.sourceforge.net/
 
-  This file (record.h) is part of the OpenMW package.
+  This file (controlled.h) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,25 +21,36 @@
 
  */
 
-#ifndef _NIF_RECORD_H_
-#define _NIF_RECORD_H_
+#ifndef _NIF_CONTROLLED_H_
+#define _NIF_CONTROLLED_H_
+
+#include "extra.h"
 
 namespace Nif
 {
 
-class NIFFile;
-
-/// Base class for all records
-struct Record
+/// Anything that has a controller
+struct Controlled : Extra
 {
-  virtual void read(NIFFile *nif) = 0;
+  ControllerPtr controller;
 
-  /*
-    Use these later if you want custom allocation of all NIF objects
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+    controller.read(nif);
+  }
+};
 
-  static void* operator new(size_t size);
-  static void operator delete(void *p);
-  */
+/// Has name, extra-data and controller
+struct Named : Controlled
+{
+  SString name;
+
+  void read(NIFFile *nif)
+  {
+    name = nif->getString();
+    Controlled::read(nif);
+  }
 };
 
 } // Namespace

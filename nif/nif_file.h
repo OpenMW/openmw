@@ -32,10 +32,14 @@
 
 #include <vector>
 #include <string>
+#include <assert.h>
 
 #include "record.h"
 
 using namespace Mangle::Stream;
+
+namespace Nif
+{
 
 class NIFFile
 {
@@ -54,7 +58,7 @@ class NIFFile
   std::string filename;
 
   /// Record list
-  std::vector<NifRecord*> records;
+  std::vector<Record*> records;
 
   /// Used for error handling
   void fail(const std::string &msg)
@@ -88,6 +92,14 @@ class NIFFile
       parse();
     }
 
+  Record *getRecord(int index)
+  {
+    assert(index >= 0 && index < records.size());
+    Record *res = records[index];
+    assert(res != NULL);
+    return res;
+  }
+
 
   /* ************************************************
 
@@ -110,4 +122,6 @@ class NIFFile
   const char *getString(int size)
     { return (const char*)inp->getPtr(size); }
 };
+
+} // Namespace
 #endif

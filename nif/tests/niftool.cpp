@@ -9,6 +9,7 @@
 
 using namespace Mangle::Stream;
 using namespace std;
+using namespace Nif;
 
 int main(int argc, char **args)
 {

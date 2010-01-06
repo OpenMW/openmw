@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.sourceforge.net/
 
-  This file (record.h) is part of the OpenMW package.
+  This file (node.h) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,25 +21,26 @@
 
  */
 
-#ifndef _NIF_RECORD_H_
-#define _NIF_RECORD_H_
+#ifndef _NIF_NODE_H_
+#define _NIF_NODE_H_
+
+#include "controlled.h"
 
 namespace Nif
 {
 
-class NIFFile;
-
-/// Base class for all records
-struct Record
+/** A Node is an object that's part of the main NIF tree. It has
+    parent node (unless it's the root), and transformation (location
+    and rotation) relative to it's parent.
+ */
+struct Node : Named
 {
-  virtual void read(NIFFile *nif) = 0;
+  // Not done
 
-  /*
-    Use these later if you want custom allocation of all NIF objects
-
-  static void* operator new(size_t size);
-  static void operator delete(void *p);
-  */
+  void read(NIFFile *nif)
+  {
+    Named::read(nif);
+  }
 };
 
 } // Namespace

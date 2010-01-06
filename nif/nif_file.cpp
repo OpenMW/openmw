@@ -22,11 +22,16 @@
  */
 
 #include "nif_file.h"
-
+#include "record.h"
 #include "../tools/stringops.h"
+
+#include "extra.h"
+#include "controlled.h"
+#include "node.h"
 
 #include <iostream>
 using namespace std;
+using namespace Nif;
 
 void NIFFile::parse()
 {
@@ -50,12 +55,11 @@ void NIFFile::parse()
       
       cout << i << ": " << rec.toString() << endl;
 
-      NifRecord *r = NULL;
-
-      if(rec == "NiNode") cout << " got a node!\n";
-
-      if(r) r->read(this);
-      else cout << "No record was created\n";
+      Node r;
+      r.read(this);
+      cout << r.name.toString() << endl;
+      cout << r.extra.getIndex() << endl;
+      cout << r.controller.getIndex() << endl;
 
       break;
     }

@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.sourceforge.net/
 
-  This file (record.h) is part of the OpenMW package.
+  This file (extra.h) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,25 +21,25 @@
 
  */
 
-#ifndef _NIF_RECORD_H_
-#define _NIF_RECORD_H_
+#ifndef _NIF_EXTRA_H_
+#define _NIF_EXTRA_H_
+
+#include "record.h"
+#include "nif_file.h"
+#include "record_ptr.h"
 
 namespace Nif
 {
 
-class NIFFile;
-
-/// Base class for all records
-struct Record
+/** A record that can have extra data. The extra data objects
+    themselves decend from the Extra class, and all the extra data
+    connected to an object form a linked list
+*/
+struct Extra : Record
 {
-  virtual void read(NIFFile *nif) = 0;
+  ExtraPtr extra;
 
-  /*
-    Use these later if you want custom allocation of all NIF objects
-
-  static void* operator new(size_t size);
-  static void operator delete(void *p);
-  */
+  void read(NIFFile *nif) { extra.read(nif); }
 };
 
 } // Namespace
