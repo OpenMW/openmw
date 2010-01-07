@@ -56,7 +56,6 @@ void NIFFile::parse()
   for(int i=0;i<recNum;i++)
     {
       SString rec = getString();
-      
       //cout << i << ": " << rec.toString() << endl;
 
       Record *r;

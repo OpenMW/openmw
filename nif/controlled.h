@@ -52,8 +52,68 @@ struct Named : Controlled
     Controlled::read(nif);
   }
 };
-
 typedef Named NiSequenceStreamHelper;
+
+
+struct NiParticleGrowFade : Controlled
+{
+  void read(NIFFile *nif)
+  {
+    Controlled::read(nif);
+
+    // Two floats.
+    nif->skip(8);
+  }
+};
+
+struct NiParticleColorModifier : Controlled
+{
+  NiColorDataPtr data;
+
+  void read(NIFFile *nif)
+  {
+    Controlled::read(nif);
+    data.read(nif);
+  }
+};
+
+struct NiGravity : Controlled
+{
+  void read(NIFFile *nif)
+  {
+    Controlled::read(nif);
+
+    // two floats, one int, six floats
+    nif->skip(9*4);
+  }
+};
+
+// NiPinaColada
+struct NiPlanarCollider : Controlled
+{
+  void read(NIFFile *nif)
+  {
+    Controlled::read(nif);
+
+    // (I think) 4 floats + 4 vectors
+    nif->skip(4*16);
+  }
+};
+
+struct NiParticleRotation : Controlled
+{
+  void read(NIFFile *nif)
+  {
+    Controlled::read(nif);
+
+    /*
+      byte (0 or 1)
+      float (1)
+      float*3
+     */
+    nif->skip(17);
+  }
+};
 
 } // Namespace
 #endif
