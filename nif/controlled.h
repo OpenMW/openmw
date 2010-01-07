@@ -53,5 +53,7 @@ struct Named : Controlled
   }
 };
 
+typedef Named NiSequenceStreamHelper;
+
 } // Namespace
 #endif

@@ -150,5 +150,195 @@ struct NiTriShapeData : ShapeData
   }
 };
 
+struct NiAutoNormalParticlesData : ShapeData
+{
+  int activeCount;
+
+  void read(NIFFile *nif)
+  {
+    ShapeData::read(nif);
+
+    // Should always match the number of vertices
+    activeCount = nif->getUshort();
+
+    // Skip all the info, we don't support particles yet
+    nif->getFloat();  // Active radius ?
+    nif->getUshort(); // Number of valid entries in the following arrays ?
+
+    if(nif->getInt())
+      // Particle sizes
+      nif->getFloatLen(activeCount);
+  }
+};
+
+struct NiRotatingParticlesData : NiAutoNormalParticlesData
+{
+  void read(NIFFile *nif)
+  {
+    NiAutoNormalParticlesData::read(nif);
+
+    if(nif->getInt())
+      // Rotation quaternions. I THINK activeCount is correct here,
+      // but verts (vertex number) might also be correct, if there is
+      // any case where the two don't match.
+      nif->getArrayLen<Vector4>(activeCount);
+  }
+};
+
+struct NiPosData : Record
+{
+  void read(NIFFile *nif)
+  {
+    int count = nif->getInt();
+    int type = nif->getInt();
+    if(type != 1 && type != 2)
+      fail("Cannot handle NiPosData type");
+
+    // TODO: Could make structs of these. Seems to be identical to
+    // translation in NiKeyframeData.
+    for(int i=0; i<count; i++)
+      {
+        float time = nif->getFloat();
+        nif->getVector(); // This isn't really shared between type 1
+                          // and type 2, most likely
+        if(type == 2)
+          {
+            nif->getVector();
+            nif->getVector();
+          }
+      }
+  }
+}
+
+struct NiUVData : Record
+{
+  void read(NIFFile *nif)
+  {
+    // TODO: This is claimed to be a "float animation key", which is
+    // also used in FloatData and KeyframeData. We could probably
+    // reuse and refactor a lot of this if we actually use it at some
+    // point.
+
+    for(int i=0; i<2; i++)
+      {
+        int count = nif->getInt();
+
+        if(count)
+          {
+            nif->getInt(); // always 2
+            nif->getArrayLen<Vector4>(count); // Really one time float + one vector
+          }
+      }
+    // Always 0
+    nif->getInt();
+    nif->getInt();
+  }
+};
+
+struct NiFloatData : Record
+{
+  void read(NIFFile *nif)
+  {
+    int count = nif->getInt();
+    nif->getInt(); // always 2
+    nif->getArrayLen<Vector4>(count); // Really one time float + one vector
+  }
+};
+
+struct NiPixelData : Record
+{
+  unsigned int rmask, gmask, bmask, amask;
+  int bpp, mips;
+
+  void read(NIFFile *nif)
+  {
+    nif->getInt(); // always 0 or 1
+
+    rmask = nif->getInt(); // usually 0xff
+    gmask = nif->getInt(); // usually 0xff00
+    bmask = nif->getInt(); // usually 0xff0000
+    amask = nif->getInt(); // usually 0xff000000 or zero
+
+    bpp = nif->getInt();
+
+    // Unknown
+    nif->skip(12);
+
+    mips = nif->getInt();
+
+    // Bytes per pixel, should be bpp * 8
+    int bytes = nif->getInt();
+
+    for(int i=0; i<mips; i++)
+      {
+        // Image size and offset in the following data field
+        int x = nif->getInt();
+        int y = nif->getInt();
+        int offset = nif->getInt();
+      }
+
+    // Skip the data
+    unsigned int dataSize = nif->getInt();
+    nif->skip(dataSize);
+  }
+};
+
+struct NiColorData : Record
+{
+  struct ColorData
+  {
+    float time;
+    Vector4 rgba;
+  };
+
+  void read(NIFFile *nif)
+  {
+    int count = nif->getInt();
+    nif->getInt(); // always 1
+
+    // Skip the data
+    assert(ColorData.sizeof = 4*5);
+    nif->skip(ColorData.sizeof * count);
+  }
+};
+
+struct NiVisData : Record
+{
+  void read(NIFFile *nif)
+  {
+    int count = nif->getInt();
+    /*
+      Each VisData consists of:
+        float time;
+        byte isSet;
+
+      If you implement this, make sure you use a packed struct
+      (sizeof==5), or read each element individually.
+     */
+    nif->skip(count*5);
+  }
+};
+
+struct NiSkinData : Record
+{
+  void read(NIFFile *nif)
+  {
+  }
+};
+
+struct NiMorphData : Record
+{
+  void read(NIFFile *nif)
+  {
+  }
+};
+
+struct NiKeyframeData : Record
+{
+  void read(NIFFile *nif)
+  {
+  }
+};
+
 } // Namespace
 #endif
