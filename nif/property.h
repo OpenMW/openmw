@@ -37,7 +37,7 @@ struct Property : Named
   void read(NIFFile *nif)
   {
     Named::read(nif);
-    flags = nif->getUshort();
+    flags = nif->getShort();
   }
 };
 

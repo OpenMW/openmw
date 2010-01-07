@@ -91,7 +91,7 @@ struct ShapeData : Record
 
   void read(NIFFile *nif)
   {
-    int verts = nif->getUshort();
+    int verts = nif->getShort();
 
     if(nif->getInt())
       vertices = nif->getFloatLen(verts*3);
@@ -105,7 +105,7 @@ struct ShapeData : Record
     if(nif->getInt())
       colors = nif->getFloatLen(verts*4);
 
-    int uvs = nif->getUshort();
+    int uvs = nif->getShort();
 
     // Only the first 6 bits are used as a count. I think the rest are
     // flags of some sort.
@@ -125,7 +125,7 @@ struct NiTriShapeData : ShapeData
   {
     ShapeData::read(nif);
 
-    int tris = nif->getUshort();
+    int tris = nif->getShort();
     if(tris)
       {
         // We have three times as many vertices as triangles, so this
@@ -137,13 +137,13 @@ struct NiTriShapeData : ShapeData
     // Read the match list, which lists the vertices that are equal to
     // vertices. We don't actually need need this for anything, so
     // just skip it.
-    int verts = nif->getUshort();
+    int verts = nif->getShort();
     if(verts)
       {
         for(int i=0;i<verts;i++)
           {
             // Number of vertices matching vertex 'i'
-            short num = nif->getUshort();
+            short num = nif->getShort();
             nif->skip(num*sizeof(short));
           }
       }
@@ -159,11 +159,11 @@ struct NiAutoNormalParticlesData : ShapeData
     ShapeData::read(nif);
 
     // Should always match the number of vertices
-    activeCount = nif->getUshort();
+    activeCount = nif->getShort();
 
     // Skip all the info, we don't support particles yet
     nif->getFloat();  // Active radius ?
-    nif->getUshort(); // Number of valid entries in the following arrays ?
+    nif->getShort(); // Number of valid entries in the following arrays ?
 
     if(nif->getInt())
       // Particle sizes
@@ -192,7 +192,7 @@ struct NiPosData : Record
     int count = nif->getInt();
     int type = nif->getInt();
     if(type != 1 && type != 2)
-      fail("Cannot handle NiPosData type");
+      nif->fail("Cannot handle NiPosData type");
 
     // TODO: Could make structs of these. Seems to be identical to
     // translation in NiKeyframeData.
@@ -208,7 +208,7 @@ struct NiPosData : Record
           }
       }
   }
-}
+};
 
 struct NiUVData : Record
 {
@@ -297,8 +297,8 @@ struct NiColorData : Record
     nif->getInt(); // always 1
 
     // Skip the data
-    assert(ColorData.sizeof = 4*5);
-    nif->skip(ColorData.sizeof * count);
+    assert(sizeof(ColorData) == 4*5);
+    nif->skip(sizeof(ColorData) * count);
   }
 };
 
@@ -323,6 +323,28 @@ struct NiSkinData : Record
 {
   void read(NIFFile *nif)
   {
+    // Not really decoded fully.
+    nif->getMatrix(); // global skin rotation?
+    nif->getVector(); // skin translation
+    nif->getFloat();  // probably scale (always 1)
+
+    int bones = nif->getInt();
+    nif->getInt(); // -1
+
+    for(int i=0;i<bones;i++)
+      {
+        nif->getMatrix(); // skin rotation offset from this bone
+        nif->getVector(); // translation
+        nif->getFloat();  // scale
+
+        nif->getVector4();
+
+        // Number of vertex weights
+        int count = nif->getShort();
+
+        // Each weight is a vertex index (short) and a weight (float)
+        nif->skip(count*6);
+      }
   }
 };
 
@@ -330,6 +352,20 @@ struct NiMorphData : Record
 {
   void read(NIFFile *nif)
   {
+    int morphCount = nif->getInt();
+    int vertCount  = nif->getInt();
+    nif->getByte();
+
+    for(int i=0; i<morphCount; i++)
+      {
+        int magic = nif->getInt();
+        nif->getInt();
+        if(magic)
+          // Time, data, forward, backward tangents
+          nif->getFloatLen(4*magic);
+
+        nif->getFloatLen(vertCount*3);
+      }
   }
 };
 
@@ -337,6 +373,63 @@ struct NiKeyframeData : Record
 {
   void read(NIFFile *nif)
   {
+    // Rotations first
+    int count = nif->getInt();
+    if(count)
+      {
+        int type = nif->getInt();
+
+        if(type == 1)
+          nif->skip(count*4*5); // time + quaternion
+        else if(type == 3)
+          nif->skip(count*4*8); // rot1 + tension+bias+continuity
+        else if(type == 4)
+          {
+            for(int j=0;j<count;j++)
+              {
+                nif->getFloat(); // time
+                for(int i=0; i<3; i++)
+                  {
+                    int cnt = nif->getInt();
+                    int type = nif->getInt();
+                    if(type == 1)
+                      nif->skip(cnt*4*2); // time + unknown
+                    else if(type == 2)
+                      nif->skip(cnt*4*4); // time + unknown vector
+                    else nif->fail("Unknown sub-rotation type");
+                  }
+              }
+          }
+        else nif->fail("Unknown rotation type in NiKeyframeData");
+      }
+
+    // Then translation
+    count = nif->getInt();
+    if(count)
+      {
+        int type = nif->getInt();
+
+        if(type == 1) nif->getFloatLen(count*4); // time + translation
+        else if(type == 2)
+          nif->getFloatLen(count*10); // trans1 + forward + backward
+        else if(type == 3)
+          nif->getFloatLen(count*7); // trans1 + tension,bias,continuity
+        else nif->fail("Unknown translation type");
+      }
+
+    // Finally, scalings
+    count = nif->getInt();
+    if(count)
+      {
+        int type = nif->getInt();
+
+        int size;
+        if(type == 1) size = 2; // time+scale
+        else if(type == 2) size = 4; // 1 + forward + backward (floats)
+        else if(type == 3) size = 5; // 1 + tbc
+        else nif->fail("Unknown scaling type");
+        nif->getFloatLen(count*size);
+      }
   }
 };
 

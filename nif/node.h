@@ -50,7 +50,7 @@ struct Node : Named
   {
     Named::read(nif);
 
-    flags = nif->getUshort();
+    flags = nif->getShort();
     trafo = nif->getTrafo();
     props.read(nif);
 
@@ -88,6 +88,57 @@ struct NiTriShape : Node
     Node::read(nif);
     data.read(nif);
     skin.read(nif);
+  }
+};
+
+struct NiCamera : Node
+{
+  struct Camera
+  {
+    // Camera frustrum
+    float left, right, top, bottom, near, far;
+
+    // Viewport
+    float vleft, vright, vtop, vbottom;
+
+    // Level of detail modifier
+    float LOD;
+  };
+
+  const Camera *cam;
+
+  void read(NIFFile *nif)
+  {
+    Node::read(nif);
+
+    nif->getPtr<Camera>();
+
+    nif->getInt(); // -1
+    nif->getInt(); // 0
+  }
+};
+
+struct NiAutoNormalParticles : Node
+{
+  NiAutoNormalParticlesDataPtr data;
+
+  void read(NIFFile *nif)
+  {
+    Node::read(nif);
+    data.read(nif);
+    nif->getInt(); // -1
+  }
+};
+
+struct NiRotatingParticles : Node
+{
+  NiRotatingParticlesDataPtr data;
+
+  void read(NIFFile *nif)
+  {
+    Node::read(nif);
+    data.read(nif);
+    nif->getInt(); // -1
   }
 };
 

@@ -42,5 +42,114 @@ struct Extra : Record
   void read(NIFFile *nif) { extra.read(nif); }
 };
 
+struct NiVertWeigthsExtraData : Extra
+{
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+
+    // We should have s*4+2 == i, for some reason. Might simply be the
+    // size of the rest of the record, unhelpful as that may be.
+    int i = nif->getInt();
+    int s = nif->getShort();
+
+    nif->getFloatLen(s);
+  }
+};
+
+struct NiTextKeyExtraData : Extra
+{
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+
+    nif->getInt(); // 0
+
+    int keynum = nif->getInt();
+    for(int i=0; i<keynum; i++)
+      {
+        nif->getFloat();  // time
+        nif->getString(); // key text
+      }
+  }
+};
+
+struct NiStringExtraData : Extra
+{
+  /* Two known meanings:
+     "MRK" - marker, only visible in the editor, not rendered in-game
+     "NCO" - no collision
+   */
+  SString string;
+
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+
+    nif->getInt(); // size of string + 4. Really useful...
+    string = nif->getString();
+  }
+};
+
+struct NiParticleGrowFade : Extra
+{
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+
+    // Two floats.
+    nif->skip(8);
+  }
+};
+
+struct NiParticleColorModifier : Extra
+{
+  NiColorDataPtr data;
+
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+    data.read(nif);
+  }
+};
+
+struct NiGravity : Extra
+{
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+
+    // two floats, one int, six floats
+    nif->skip(9*4);
+  }
+};
+
+// NiPinaColada
+struct NiPlanarCollider : Extra
+{
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+
+    // (I think) 4 floats + 4 vectors
+    nif->skip(4*16);
+  }
+};
+
+struct NiParticleRotation : Extra
+{
+  void read(NIFFile *nif)
+  {
+    Extra::read(nif);
+
+    /*
+      byte (0 or 1)
+      float (1)
+      float*3
+     */
+    nif->skip(17);
+  }
+};
+
 } // Namespace
 #endif

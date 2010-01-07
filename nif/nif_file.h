@@ -61,6 +61,10 @@ class NIFFile
   /// Record list
   std::vector<Record*> records;
 
+  /// Parse the file
+  void parse();
+
+ public:
   /// Used for error handling
   void fail(const std::string &msg)
     {
@@ -69,10 +73,6 @@ class NIFFile
       throw str_exception(err);
     }
 
-  /// Parse the file
-  void parse();
-
- public:
   /// Open a NIF stream. The name is used for error messages.
   NIFFile(StreamPtr nif, const std::string &name)
     : filename(name)
@@ -112,7 +112,7 @@ class NIFFile
 
   template<class X> const X* getPtr() { return (const X*)inp->getPtr(sizeof(X)); }
   template<class X> X getType() { return *getPtr<X>(); }
-  unsigned short getUshort() { return getType<unsigned short>(); }
+  unsigned short getShort() { return getType<unsigned short>(); }
   int getInt() { return getType<int>(); }
   float getFloat() { return getType<float>(); }
   char getByte() { return getType<char>(); }
