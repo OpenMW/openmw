@@ -42,7 +42,7 @@ struct Extra : Record
   void read(NIFFile *nif) { extra.read(nif); }
 };
 
-struct NiVertWeigthsExtraData : Extra
+struct NiVertWeightsExtraData : Extra
 {
   void read(NIFFile *nif)
   {

@@ -433,5 +433,19 @@ struct NiKeyframeData : Record
   }
 };
 
+struct NiSkinInstance : Record
+{
+  NiSkinDataPtr data;
+  NodePtr root;
+  NodeList bones;
+
+  void read(NIFFile *nif)
+  {
+    data.read(nif);
+    root.read(nif);
+    bones.read(nif);
+  }
+};
+
 } // Namespace
 #endif

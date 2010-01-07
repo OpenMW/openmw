@@ -30,6 +30,8 @@
 #include "node.h"
 #include "property.h"
 #include "data.h"
+#include "effect.h"
+#include "controller.h"
 
 #include <iostream>
 using namespace std;
