@@ -70,7 +70,7 @@ class BSAFile
   /// Used for error messages
   std::string filename;
 
-  /// Non-case sensitive string comparison
+  /// Case insensitive string comparison
   struct iltstr
   {
     bool operator()(const char *s1, const char *s2) const
@@ -79,7 +79,7 @@ class BSAFile
 
   /** A map used for fast file name lookup. The value is the index into
       the files[] vector above. The iltstr ensures that file name
-      checks are non-case sensitive.
+      checks are case insensitive.
   */
   typedef std::map<const char*, int, iltstr> Lookup;
   Lookup lookup;

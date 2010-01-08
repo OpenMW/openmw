@@ -1,0 +1,13 @@
+GCC=g++
+
+all: ogre_manualresource_test
+
+I_OGRE=$(shell pkg-config --cflags OGRE)
+L_OGRE=$(shell pkg-config --libs OGRE)
+
+ogre_manualresource_test: ogre_manualresource_test.cpp
+	$(GCC) $^ -o $@ $(I_OGRE) $(L_OGRE)
+
+clean:
+	rm *_test
+
