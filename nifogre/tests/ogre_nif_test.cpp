@@ -5,7 +5,6 @@
 using namespace std;
 using namespace Ogre;
 
-// Why doesn't it work? Bad code, BAD!
 struct MyMeshLoader : ManualResourceLoader
 {
   void loadResource(Resource *resource)
