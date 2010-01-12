@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: http://openmw.sourceforge.net/
 
-  This file (record.h) is part of the OpenMW package.
+  This file (cpp_bsaarchive.h) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,29 +21,24 @@
 
  */
 
-#ifndef _NIF_RECORD_H_
-#define _NIF_RECORD_H_
+#ifndef _BSA_ARCHIVE_H_
+#define _BSA_ARCHIVE_H_
 
-namespace Nif
-{
+/** Insert the archive manager for .bsa files into the OGRE resource
+    loading system. You only need to call this function once.
 
-class NIFFile;
+    After calling it, you can do:
 
-/// Base class for all records
-struct Record
-{
-  // Record type name
-  SString recType;
+    ResourceGroupManager::getSingleton().
+      addResourceLocation("Morrowind.bsa", "BSA", "General");
 
-  virtual void read(NIFFile *nif) = 0;
+    or add BSA files to resources.cfg, etc. You can also use the
+    shortcut addBSA() below, which will call insertBSAFactory() for
+    you.
+*/
+void insertBSAFactory();
 
-  /*
-    Use these later if you want custom allocation of all NIF objects
+/// Add the given BSA file to the Ogre resource system.
+void addBSA(const char* file, const char* group="General");
 
-  static void* operator new(size_t size);
-  static void operator delete(void *p);
-  */
-};
-
-} // Namespace
 #endif

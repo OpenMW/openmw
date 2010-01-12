@@ -93,6 +93,7 @@ class NIFFile
       parse();
     }
 
+  /// Get a given record
   Record *getRecord(int index)
   {
     assert(index >= 0 && index < records.size());
@@ -101,6 +102,8 @@ class NIFFile
     return res;
   }
 
+  /// Number of records
+  int numRecords() { return records.size(); }
 
   /* ************************************************
 

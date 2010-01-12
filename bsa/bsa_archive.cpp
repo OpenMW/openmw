@@ -21,16 +21,11 @@
 
  */
 
-#ifndef _BSA_ARCHIVE_H_
-#define _BSA_ARCHIVE_H_
-
-
-/* This file inserts an archive manager for .bsa files into the OGRE
-   resource loading system.
-*/
+#include "bsa_archive.h"
 
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
+#include <OgreArchiveManager.h>
 #include "bsa_file.h"
 #include "../mangle/stream/clients/ogre_datastream.h"
 
@@ -156,4 +151,21 @@ public:
   void destroyInstance( Archive* arch) { delete arch; }
 };
 
-#endif
+static bool init = false;
+
+// This is the only publicly exposed part in this file
+void insertBSAFactory()
+{
+  if(!init)
+    {
+      ArchiveManager::getSingleton().addArchiveFactory( new BSAArchiveFactory );
+      init = true;
+    }
+}
+
+void addBSA(const char* name, const char* group)
+{
+  insertBSAFactory();
+  ResourceGroupManager::getSingleton().
+    addResourceLocation(name, "BSA", "General");
+}
