@@ -5,6 +5,7 @@
 using namespace std;
 using namespace Ogre;
 
+// Why doesn't it work? Bad code, BAD!
 struct MyMeshLoader : ManualResourceLoader
 {
   void loadResource(Resource *resource)
@@ -17,13 +18,13 @@ struct MyMeshLoader : ManualResourceLoader
 
     // Create the mesh here
     int numVerts = 4;
-    int numFaces = 2;
+    int numFaces = 2*3;
     const float vertices[] =
       { -1,-1,0, 1,-1,0,
         1,1,0,   -1,1,0 };
 
     const short faces[] =
-      { 0,1,2,  0,3,2 };
+      { 0,2,1,  0,3,2 };
 
     mesh->sharedVertexData = new VertexData();
     mesh->sharedVertexData->vertexCount = numVerts;
@@ -53,15 +54,13 @@ struct MyMeshLoader : ManualResourceLoader
     /// Upload the index data to the card
     ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
 
-    SubMesh* sub = mesh->createSubMesh("tris");
+    SubMesh* sub = mesh->createSubMesh(name+"tris");
     sub->useSharedVertices = true;
 
     /// Set parameters of the submesh
     sub->indexData->indexBuffer = ibuf;
     sub->indexData->indexCount = numFaces;
     sub->indexData->indexStart = 0;
-
-    sub->setMaterialName(MaterialManager::getSingleton().getDefaultSettings()->getName());
 
     mesh->_setBounds(AxisAlignedBox(-1.1,-1.1,-1.1,1.1,1.1,1.1));
     mesh->_setBoundingSphereRadius(2);
@@ -83,7 +82,7 @@ struct QuitListener : FrameListener
   }
 } qlistener;
 
-int main()
+int main(int argc, char**args)
 {
   // When the test is done, consider disabling the rendering part
   // unless a command line parameter is given (and write a note about
@@ -100,44 +99,71 @@ int main()
   Root *root = new Root("plugins.cfg","ogre.cfg","");
 
   if(!root->restoreConfig())
-    if(!root->showConfigDialog())
-      return 1;
+    {
+      cout << "WARNING: we do NOT recommend fullscreen mode!\n";
+      if(!root->showConfigDialog())
+        return 1;
+    }
+
+  SceneManager *mgr = root->createSceneManager(ST_GENERIC);
+
+  // Only render if there are arguments on the command line (we don't
+  // care what they are.)
+  bool render = (argc>=2);
 
   // Create a window
   window = root->initialise(true, "Test");
+  if(render)
+    {
+      // More initialization
+      Camera *cam = mgr->createCamera("cam");
+      Viewport *vp = window->addViewport(cam);
+      cam->setAspectRatio(Real(vp->getActualWidth()) / Real(vp->getActualHeight()));
+      cam->setFOVy(Degree(55));
+      cam->setPosition(0,0,0);
+      cam->lookAt(0,0,10);
+      cam->setNearClipDistance(1);
 
-  // We might need input managment too
+      root->addFrameListener(&qlistener);
 
-  // More initialization
-  SceneManager *mgr = root->createSceneManager(ST_GENERIC);
-  Camera *cam = mgr->createCamera("cam");
-  Viewport *vp = window->addViewport(cam);
-  cam->setAspectRatio(Real(vp->getActualWidth()) / Real(vp->getActualHeight()));
-  cam->setFOVy(Degree(55));
-  cam->setPosition(0,0,0);
-  cam->lookAt(0,0,10);
-  cam->setNearClipDistance(1);
+      // Background color
+      vp->setBackgroundColour(ColourValue(0.5,0.5,0.5));
 
-  root->addFrameListener(&qlistener);
-
-  // Background color
-  vp->setBackgroundColour(ColourValue(0.5,0.5,0.5));
-
-  mgr->setAmbientLight(ColourValue(1,1,1));
+      mgr->setAmbientLight(ColourValue(1,1,1));
+    }
 
   // Create a couple of manual meshes
   MeshManager::getSingleton().createManual("mesh1.mm", "General", &mml);
   MeshManager::getSingleton().createManual("mesh2.mm", "General", &mml);
+  MeshManager::getSingleton().createManual("mesh3.mm", "General", &mml);
 
   // Display the meshes
-  SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node");
-  Entity *ent1 = mgr->createEntity("Mesh1", "mesh1.mm");
-  node->attachObject(ent1);
+  {
+    SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node");
+    Entity *ent = mgr->createEntity("Mesh1", "mesh1.mm");
+    node->attachObject(ent);
+    node->setPosition(3,1,8);
+  }
 
-  node->setPosition(0,0,30);
+  {
+    SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node2");
+    Entity *ent = mgr->createEntity("Mesh2", "mesh2.mm");
+    node->attachObject(ent);
+    node->setPosition(-3,1,8);
+  }
+  {
+    SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node3");
+    Entity *ent = mgr->createEntity("Mesh3", "mesh3.mm");
+    node->attachObject(ent);
+    node->setPosition(0,-2,8);
+  }
 
   // Render loop
-  root->startRendering();
+  if(render)
+    {
+      cout << "Rendering. Close the window to exit.\n";
+      root->startRendering();
+    }
 
   // Cleanup
   delete root;

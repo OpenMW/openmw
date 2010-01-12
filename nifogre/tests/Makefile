@@ -1,6 +1,6 @@
 GCC=g++
 
-all: ogre_manualresource_test
+all: ogre_manualresource_test ogre_nif_test
 
 I_OGRE=$(shell pkg-config --cflags OGRE)
 L_OGRE=$(shell pkg-config --libs OGRE)
