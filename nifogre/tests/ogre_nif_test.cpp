@@ -81,7 +81,7 @@ int main(int argc, char**args)
   SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node");
   Entity *ent = mgr->createEntity("Mesh1", mesh);
   node->attachObject(ent);
-  node->setPosition(0,0,8);
+  node->setPosition(0,0,100);
 
   // Render loop
   if(render)

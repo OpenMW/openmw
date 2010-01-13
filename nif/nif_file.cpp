@@ -81,7 +81,7 @@ void NIFFile::parse()
       else if(rec == "NiCamera") { r = new NiCamera; r->recType = RC_NiCamera; }
 
       // Properties
-      else if(rec == "NiTexturingProperty") { r = new NiTexturingProperty; r->recType = RC_NitexturingProperty; }
+      else if(rec == "NiTexturingProperty") { r = new NiTexturingProperty; r->recType = RC_NiTexturingProperty; }
       else if(rec == "NiMaterialProperty") { r = new NiMaterialProperty; r->recType = RC_NiMaterialProperty; }
       else if(rec == "NiZBufferProperty") { r = new NiZBufferProperty; r->recType = RC_NiZBufferProperty; }
       else if(rec == "NiAlphaProperty") { r = new NiAlphaProperty; r->recType = RC_NiAlphaProperty; }

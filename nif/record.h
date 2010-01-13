@@ -37,7 +37,7 @@ enum RecordType
   RC_NiRotatingParticles,
   RC_NiAutoNormalParticles,
   RC_NiCamera,
-  RC_NitexturingProperty,
+  RC_NiTexturingProperty,
   RC_NiMaterialProperty,
   RC_NiZBufferProperty,
   RC_NiAlphaProperty,

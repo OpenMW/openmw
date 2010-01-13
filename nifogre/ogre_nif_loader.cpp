@@ -27,6 +27,8 @@
 #include "../mangle/vfs/servers/ogre_vfs.h"
 #include "../nif/nif_file.h"
 #include "../nif/node.h"
+#include "../nif/data.h"
+#include "../nif/property.h"
 
 // For warning messages
 #include <iostream>
@@ -49,6 +51,94 @@ static void warn(const string &msg)
   cout << "WARNING (NIF): " << msg << endl;
 }
 
+// Convert Nif::NiTriShape to Ogre::SubMesh, attached the given mesh.
+static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material)
+{
+  NiTriShapeData *data = shape->data.getPtr();
+  SubMesh *sub = mesh->createSubMesh(shape->name.toString());
+
+  int nextBuf = 0;
+
+  // This function is just one long stream of Ogre-barf, but it works
+  // great.
+
+  // Add vertices
+  int numVerts = data->vertices.length / 3;
+  sub->vertexData = new VertexData();
+  sub->vertexData->vertexCount = numVerts;
+  sub->useSharedVertices = false;
+  VertexDeclaration *decl = sub->vertexData->vertexDeclaration;
+  decl->addElement(nextBuf, 0, VET_FLOAT3, VES_POSITION);
+  HardwareVertexBufferSharedPtr vbuf =
+    HardwareBufferManager::getSingleton().createVertexBuffer(
+      VertexElement::getTypeSize(VET_FLOAT3),
+      numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+  vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, true);
+  VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
+  bind->setBinding(nextBuf++, vbuf);
+
+  // Vertex normals
+  if(data->normals.length)
+    {
+      decl->addElement(nextBuf, 0, VET_FLOAT3, VES_NORMAL);
+      vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
+          VertexElement::getTypeSize(VET_FLOAT3),
+          numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+      vbuf->writeData(0, vbuf->getSizeInBytes(), data->normals.ptr, true);
+      bind->setBinding(nextBuf++, vbuf);
+    }
+
+  // Vertex colors
+  if(data->colors.length)
+    {
+      const float *colors = data->colors.ptr;
+      RenderSystem* rs = Root::getSingleton().getRenderSystem();
+      RGBA colorsRGB[numVerts];
+      RGBA *pColour = colorsRGB;
+      for(int i=0; i<numVerts; i++)
+	{
+	  rs->convertColourValue(ColourValue(colors[0],colors[1],colors[2],
+                                             colors[3]),pColour++);
+	  colors += 4;
+	}
+      decl->addElement(nextBuf, 0, VET_COLOUR, VES_DIFFUSE);
+      vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
+          VertexElement::getTypeSize(VET_COLOUR),
+	  numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+      vbuf->writeData(0, vbuf->getSizeInBytes(), colorsRGB, true);
+      bind->setBinding(nextBuf++, vbuf);
+    }
+
+  // Texture UV coordinates
+  if(data->uvlist.length)
+    {
+      decl->addElement(nextBuf, 0, VET_FLOAT2, VES_TEXTURE_COORDINATES);
+      vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
+          VertexElement::getTypeSize(VET_FLOAT2),
+          numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+
+      vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, true);
+      bind->setBinding(nextBuf++, vbuf);
+    }
+
+  // Triangle faces
+  int numFaces = data->triangles.length;
+  if(numFaces)
+    {
+      HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
+	createIndexBuffer(HardwareIndexBuffer::IT_16BIT,
+			  numFaces,
+			  HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+      ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, true);
+      sub->indexData->indexBuffer = ibuf;
+      sub->indexData->indexCount = numFaces;
+      sub->indexData->indexStart = 0;
+    }
+
+  // Set material if one was given
+  if(!material.empty()) sub->setMaterialName(material);
+}
+
 static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
 {
   // Interpret flags
@@ -68,13 +158,56 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
   if(flags & 0x800)
     { collide = false; bbcollide = false; }
 
-  // Skip the entire material phase for hidden nodes
-  if(hidden) goto nomaterial;
+  if(!collide && !bbcollide && hidden)
+    // This mesh apparently isn't being used for anything, so don't
+    // bother setting it up.
+    return;
 
-  nomaterial:
+  // Material name for this submesh, if any
+  String material;
+
+  // Skip the entire material phase for hidden nodes
+  if(!hidden)
+    {
+      // These are set below if present
+      NiTexturingProperty *p = NULL;
+      NiMaterialProperty *m = NULL;
+      NiAlphaProperty *a = NULL;
+
+      // Scan the property list for material information
+      PropertyList &list = shape->props;
+      int n = list.length();
+      for(int i=0; i<n; i++)
+        {
+          if(!list.has(i)) continue;
+          Property *pr = &list[i];
+
+          if(pr->recType == RC_NiTexturingProperty)
+            p = (NiTexturingProperty*)pr;
+          else if(pr->recType == RC_NiMaterialProperty)
+            m = (NiMaterialProperty*)pr;
+          else if(pr->recType == RC_NiAlphaProperty)
+            a = (NiAlphaProperty*)pr;
+        }
+
+      if(p) cout << "texture present\n";
+      if(m) cout << "material present\n";
+      if(a) cout << "alpha present\n";
+    }
+
+  // TODO: Do in-place transformation of all the vertices and
+  // normals. This is pretty messy stuff, but we need it to make the
+  // sub-meshes appear in the correct place. We also need to do it
+  // anyway for collision meshes. Since all the pointers in the NIF
+  // structures are pointing to an internal temporary memory buffer,
+  // it's OK to overwrite them (even though the pointers technically
+  // are const.)
+
+  if(!hidden)
+    createOgreMesh(mesh, shape, "");
 }
 
-static void handleNode(Mesh* mesh, Node *node, int flags)
+static void handleNode(Mesh* mesh, Nif::Node *node, int flags)
 {
   // Accumulate the flags from all the child nodes. This works for all
   // the flags we currently use, at least.
@@ -85,7 +218,7 @@ static void handleNode(Mesh* mesh, Node *node, int flags)
   while(!e->extra.empty())
     {
       // Get the next extra data in the list
-      e = e.extra.getPtr();
+      e = e->extra.getPtr();
       assert(e != NULL);
 
       if(e->recType == RC_NiStringExtraData)
@@ -159,7 +292,11 @@ void NIFLoader::loadResource(Resource *resource)
     }
 
   // Handle the node
-  handleNode(mesh, (Node*)r, 0);
+  handleNode(mesh, (Nif::Node*)r, 0);
+
+  // Finally, set the bounding value. Just use bogus info right now.
+  mesh->_setBounds(AxisAlignedBox(-10,-10,-10,10,10,10));
+  mesh->_setBoundingSphereRadius(10);
 }
 
 MeshPtr NIFLoader::load(const char* name, const char* group)
