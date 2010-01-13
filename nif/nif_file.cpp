@@ -72,77 +72,78 @@ void NIFFile::parse()
          rec == "RootCollisionNode" ||
          rec == "NiBSParticleNode" ||
          rec == "NiBSAnimationNode" ||
-         rec == "NiBillboardNode") r = new NiNode;
+         rec == "NiBillboardNode") { r = new NiNode; r->recType = RC_NiNode; }
 
       // Other nodes
-      else if(rec == "NiTriShape") r = new NiTriShape;
-      else if(rec == "NiRotatingParticles") r = new NiRotatingParticles;
-      else if(rec == "NiAutoNormalParticles") r = new NiAutoNormalParticles;
-      else if(rec == "NiCamera") r = new NiCamera;
+      else if(rec == "NiTriShape") { r = new NiTriShape; r->recType = RC_NiTriShape; }
+      else if(rec == "NiRotatingParticles") { r = new NiRotatingParticles; r->recType = RC_NiRotatingParticles; }
+      else if(rec == "NiAutoNormalParticles") { r = new NiAutoNormalParticles; r->recType = RC_NiAutoNormalParticles; }
+      else if(rec == "NiCamera") { r = new NiCamera; r->recType = RC_NiCamera; }
 
       // Properties
-      else if(rec == "NiTexturingProperty") r = new NiTexturingProperty;
-      else if(rec == "NiMaterialProperty") r = new NiMaterialProperty;
-      else if(rec == "NiZBufferProperty") r = new NiZBufferProperty;
-      else if(rec == "NiAlphaProperty") r = new NiAlphaProperty;
-      else if(rec == "NiVertexColorProperty") r = new NiVertexColorProperty;
-      else if(rec == "NiShadeProperty") r = new NiShadeProperty;
-      else if(rec == "NiDitherProperty") r = new NiDitherProperty;
-      else if(rec == "NiWireframeProperty") r = new NiWireframeProperty;
-      else if(rec == "NiSpecularProperty") r = new NiSpecularProperty;
+      else if(rec == "NiTexturingProperty") { r = new NiTexturingProperty; r->recType = RC_NitexturingProperty; }
+      else if(rec == "NiMaterialProperty") { r = new NiMaterialProperty; r->recType = RC_NiMaterialProperty; }
+      else if(rec == "NiZBufferProperty") { r = new NiZBufferProperty; r->recType = RC_NiZBufferProperty; }
+      else if(rec == "NiAlphaProperty") { r = new NiAlphaProperty; r->recType = RC_NiAlphaProperty; }
+      else if(rec == "NiVertexColorProperty") { r = new NiVertexColorProperty; r->recType = RC_NiVertexColorProperty; }
+      else if(rec == "NiShadeProperty") { r = new NiShadeProperty; r->recType = RC_NiShadeProperty; }
+      else if(rec == "NiDitherProperty") { r = new NiDitherProperty; r->recType = RC_NiDitherProperty; }
+      else if(rec == "NiWireframeProperty") { r = new NiWireframeProperty; r->recType = RC_NiWireframeProperty; }
+      else if(rec == "NiSpecularProperty") { r = new NiSpecularProperty; r->recType = RC_NiSpecularProperty; }
 
       // Controllers
-      else if(rec == "NiVisController") r = new NiVisController;
-      else if(rec == "NiGeomMorpherController") r = new NiGeomMorpherController;
-      else if(rec == "NiKeyframeController") r = new NiKeyframeController;
-      else if(rec == "NiAlphaController") r = new NiAlphaController;
-      else if(rec == "NiUVController") r = new NiUVController;
-      else if(rec == "NiPathController") r = new NiPathController;
-      else if(rec == "NiMaterialColorController") r = new NiMaterialColorController;
-      else if(rec == "NiBSPArrayController") r = new NiBSPArrayController;
-      else if(rec == "NiParticleSystemController") r = new NiParticleSystemController;
+      else if(rec == "NiVisController") { r = new NiVisController; r->recType = RC_NiVisController; }
+      else if(rec == "NiGeomMorpherController") { r = new NiGeomMorpherController; r->recType = RC_NiGeomMorpherController; }
+      else if(rec == "NiKeyframeController") { r = new NiKeyframeController; r->recType = RC_NiKeyframeController; }
+      else if(rec == "NiAlphaController") { r = new NiAlphaController; r->recType = RC_NiAlphaController; }
+      else if(rec == "NiUVController") { r = new NiUVController; r->recType = RC_NiUVController; }
+      else if(rec == "NiPathController") { r = new NiPathController; r->recType = RC_NiPathController; }
+      else if(rec == "NiMaterialColorController") { r = new NiMaterialColorController; r->recType = RC_NiMaterialColorController; }
+      else if(rec == "NiBSPArrayController") { r = new NiBSPArrayController; r->recType = RC_NiBSPArrayController; }
+      else if(rec == "NiParticleSystemController") { r = new NiParticleSystemController; r->recType = RC_NiParticleSystemController; }
 
       // Effects
       else if(rec == "NiAmbientLight" ||
-              rec == "NiDirectionalLight") r = new NiLight;
-      else if(rec == "NiTextureEffect") r = new NiTextureEffect;
+              rec == "NiDirectionalLight") { r = new NiLight; r->recType = RC_NiLight; }
+      else if(rec == "NiTextureEffect") { r = new NiTextureEffect; r->recType = RC_NiTextureEffect; }
 
       // Extra Data
-      else if(rec == "NiVertWeightsExtraData") r = new NiVertWeightsExtraData;
-      else if(rec == "NiTextKeyExtraData") r = new NiTextKeyExtraData;
-      else if(rec == "NiStringExtraData") r = new NiStringExtraData;
+      else if(rec == "NiVertWeightsExtraData") { r = new NiVertWeightsExtraData; r->recType = RC_NiVertWeightsExtraData; }
+      else if(rec == "NiTextKeyExtraData") { r = new NiTextKeyExtraData; r->recType = RC_NiTextKeyExtraData; }
+      else if(rec == "NiStringExtraData") { r = new NiStringExtraData; r->recType = RC_NiStringExtraData; }
 
-      else if(rec == "NiGravity") r = new NiGravity;
-      else if(rec == "NiPlanarCollider") r = new NiPlanarCollider;
-      else if(rec == "NiParticleGrowFade") r = new NiParticleGrowFade;
-      else if(rec == "NiParticleColorModifier") r = new NiParticleColorModifier;
-      else if(rec == "NiParticleRotation") r = new NiParticleRotation;
+      else if(rec == "NiGravity") { r = new NiGravity; r->recType = RC_NiGravity; }
+      else if(rec == "NiPlanarCollider") { r = new NiPlanarCollider; r->recType = RC_NiPlanarCollider; }
+      else if(rec == "NiParticleGrowFade") { r = new NiParticleGrowFade; r->recType = RC_NiParticleGrowFade; }
+      else if(rec == "NiParticleColorModifier") { r = new NiParticleColorModifier; r->recType = RC_NiParticleColorModifier; }
+      else if(rec == "NiParticleRotation") { r = new NiParticleRotation; r->recType = RC_NiParticleRotation; }
 
       // Data
-      else if(rec == "NiFloatData") r = new NiFloatData;
-      else if(rec == "NiTriShapeData") r = new NiTriShapeData;
-      else if(rec == "NiVisData") r = new NiVisData;
-      else if(rec == "NiColorData") r = new NiColorData;
-      else if(rec == "NiPixelData") r = new NiPixelData;
-      else if(rec == "NiMorphData") r = new NiMorphData;
-      else if(rec == "NiKeyframeData") r = new NiKeyframeData;
-      else if(rec == "NiSkinData") r = new NiSkinData;
-      else if(rec == "NiUVData") r = new NiUVData;
-      else if(rec == "NiPosData") r = new NiPosData;
-      else if(rec == "NiRotatingParticlesData") r = new NiRotatingParticlesData;
-      else if(rec == "NiAutoNormalParticlesData") r = new NiAutoNormalParticlesData;
+      else if(rec == "NiFloatData") { r = new NiFloatData; r->recType = RC_NiFloatData; }
+      else if(rec == "NiTriShapeData") { r = new NiTriShapeData; r->recType = RC_NiTriShapeData; }
+      else if(rec == "NiVisData") { r = new NiVisData; r->recType = RC_NiVisData; }
+      else if(rec == "NiColorData") { r = new NiColorData; r->recType = RC_NiColorData; }
+      else if(rec == "NiPixelData") { r = new NiPixelData; r->recType = RC_NiPixelData; }
+      else if(rec == "NiMorphData") { r = new NiMorphData; r->recType = RC_NiMorphData; }
+      else if(rec == "NiKeyframeData") { r = new NiKeyframeData; r->recType = RC_NiKeyframeData; }
+      else if(rec == "NiSkinData") { r = new NiSkinData; r->recType = RC_NiSkindata; }
+      else if(rec == "NiUVData") { r = new NiUVData; r->recType = RC_NiUVData; }
+      else if(rec == "NiPosData") { r = new NiPosData; r->recType = RC_NiPosData; }
+      else if(rec == "NiRotatingParticlesData") { r = new NiRotatingParticlesData; r->recType = RC_NiRotatingParticlesData; }
+      else if(rec == "NiAutoNormalParticlesData") { r = new NiAutoNormalParticlesData; r->recType = RC_NiAutoNormalParticlesData; }
 
       // Other
-      else if(rec == "NiSequenceStreamHelper") r = new NiSequenceStreamHelper;
-      else if(rec == "NiSourceTexture") r = new NiSourceTexture;
-      else if(rec == "NiSkinInstance") r = new NiSkinInstance;
+      else if(rec == "NiSequenceStreamHelper") { r = new NiSequenceStreamHelper; r->recType = RC_NiSequenceStreamHelper; }
+      else if(rec == "NiSourceTexture") { r = new NiSourceTexture; r->recType = RC_NiSourceTexture; }
+      else if(rec == "NiSkinInstance") { r = new NiSkinInstance; r->recType = RC_NiSkinInstance; }
 
       // Failure
       else
         fail("Unknown record type " + rec.toString());
 
       assert(r != NULL);
-      r->recType = rec;
+      assert(r->recType != RC_NONE);
+      r->recName = rec;
       records[i] = r;
       r->read(this);
     }

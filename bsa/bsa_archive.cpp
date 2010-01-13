@@ -153,7 +153,8 @@ public:
 
 static bool init = false;
 
-// This is the only publicly exposed part in this file
+// The functions below are the only publicly exposed part of this file
+
 void insertBSAFactory()
 {
   if(!init)
@@ -167,5 +168,5 @@ void addBSA(const char* name, const char* group)
 {
   insertBSAFactory();
   ResourceGroupManager::getSingleton().
-    addResourceLocation(name, "BSA", "General");
+    addResourceLocation(name, "BSA", group);
 }

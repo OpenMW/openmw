@@ -29,11 +29,67 @@ namespace Nif
 
 class NIFFile;
 
+enum RecordType
+{
+  RC_NONE = 0,
+  RC_NiNode,
+  RC_NiTriShape,
+  RC_NiRotatingParticles,
+  RC_NiAutoNormalParticles,
+  RC_NiCamera,
+  RC_NitexturingProperty,
+  RC_NiMaterialProperty,
+  RC_NiZBufferProperty,
+  RC_NiAlphaProperty,
+  RC_NiVertexColorProperty,
+  RC_NiShadeProperty,
+  RC_NiDitherProperty,
+  RC_NiWireframeProperty,
+  RC_NiSpecularProperty,
+  RC_NiVisController,
+  RC_NiGeomMorpherController,
+  RC_NiKeyframeController,
+  RC_NiAlphaController,
+  RC_NiUVController,
+  RC_NiPathController,
+  RC_NiMaterialColorController,
+  RC_NiBSPArrayController,
+  RC_NiParticleSystemController,
+  RC_NiLight,
+  RC_NiTextureEffect,
+  RC_NiVertWeightsExtraData,
+  RC_NiTextKeyExtraData,
+  RC_NiStringExtraData,
+  RC_NiGravity,
+  RC_NiPlanarCollider,
+  RC_NiParticleGrowFade,
+  RC_NiParticleColorModifier,
+  RC_NiParticleRotation,
+  RC_NiFloatData,
+  RC_NiTriShapeData,
+  RC_NiVisData,
+  RC_NiColorData,
+  RC_NiPixelData,
+  RC_NiMorphData,
+  RC_NiKeyframeData,
+  RC_NiSkindata,
+  RC_NiUVData,
+  RC_NiPosData,
+  RC_NiRotatingParticlesData,
+  RC_NiAutoNormalParticlesData,
+  RC_NiSequenceStreamHelper,
+  RC_NiSourceTexture,
+  RC_NiSkinInstance
+};
+
 /// Base class for all records
 struct Record
 {
-  // Record type name
-  SString recType;
+  // Record type and type name
+  int recType;
+  SString recName;
+
+  Record() : recType(RC_NONE) {}
 
   virtual void read(NIFFile *nif) = 0;
 

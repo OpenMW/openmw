@@ -72,7 +72,7 @@ void NIFLoader::loadResource(Resource *resource)
   int n = nif.numRecords();
   cout << "Number of records: " << n << endl;
   if(n)
-    cout << "First record type: " << nif.getRecord(0)->recType.toString() << endl;
+    cout << "First record type: " << nif.getRecord(0)->recName.toString() << endl;
 }
 
 MeshPtr NIFLoader::load(const char* name, const char* group)
