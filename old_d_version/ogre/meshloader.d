@@ -157,8 +157,8 @@ struct MeshLoader
     auto cont = data.controller;
     while(cont !is null)
       {
-        auto kc = cast(NiKeyframeController)data.controller;
-        auto pc = cast(NiPathController)data.controller;
+        auto kc = cast(NiKeyframeController)cont;
+        auto pc = cast(NiPathController)cont;
         if(kc !is null)
           {
             /*
@@ -350,7 +350,7 @@ struct MeshLoader
 	    if( vertices[i+2] > maxZ) maxZ = vertices[i+2];
 	  }
 
-        // TODO: Get the node world transformation, needed to set up
+        // Get the node world transformation, needed to set up
         // the collision shape properly.
         float[3] trans;
         float[9] matrix;

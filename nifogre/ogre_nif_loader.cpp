@@ -26,6 +26,7 @@
 
 #include "../mangle/vfs/servers/ogre_vfs.h"
 #include "../nif/nif_file.h"
+#include "../nif/node.h"
 
 // For warning messages
 #include <iostream>
@@ -48,6 +49,78 @@ static void warn(const string &msg)
   cout << "WARNING (NIF): " << msg << endl;
 }
 
+static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
+{
+  // Interpret flags
+  bool hidden    = (flags & 0x01) != 0; // Not displayed
+  bool collide   = (flags & 0x02) != 0; // Use mesh for collision
+  bool bbcollide = (flags & 0x04) != 0; // Use bounding box for collision
+
+  // Bounding box collision isn't implemented, always use mesh for now.
+  if(bbcollide)
+    {
+      collide = true;
+      bbcollide = false;
+    }
+
+  // If the object was marked "NCO" earlier, it shouldn't collide with
+  // anything.
+  if(flags & 0x800)
+    { collide = false; bbcollide = false; }
+
+  // Skip the entire material phase for hidden nodes
+  if(hidden) goto nomaterial;
+
+  nomaterial:
+}
+
+static void handleNode(Mesh* mesh, Node *node, int flags)
+{
+  // Accumulate the flags from all the child nodes. This works for all
+  // the flags we currently use, at least.
+  flags |= node->flags;
+
+  // Check for extra data
+  Extra *e = node;
+  while(!e->extra.empty())
+    {
+      // Get the next extra data in the list
+      e = e.extra.getPtr();
+      assert(e != NULL);
+
+      if(e->recType == RC_NiStringExtraData)
+        {
+          // String markers may contain important information
+          // affecting the entire subtree of this node
+          NiStringExtraData *sd = (NiStringExtraData*)e;
+
+          if(sd->string == "NCO")
+            // No collision. Use an internal flag setting to mark this.
+            flags |= 0x800;
+          else if(sd->string == "MRK")
+            // Marker objects. These are only visible in the
+            // editor. Until and unless we add an editor component to
+            // the engine, just skip this entire node.
+            return;
+        }
+    }
+
+  // For NiNodes, loop through children
+  if(node->recType == RC_NiNode)
+    {
+      NodeList &list = ((NiNode*)node)->children;
+      int n = list.length();
+      for(int i=0; i<n; i++)
+        {
+          if(list.has(i))
+            handleNode(mesh, &list[i], flags);
+        }
+    }
+  else if(node->recType == RC_NiTriShape)
+    // For shapes
+    handleNiTriShape(mesh, (NiTriShape*)node, flags);
+}
+
 void NIFLoader::loadResource(Resource *resource)
 {
   // Set up the VFS if it hasn't been done already
@@ -66,13 +139,27 @@ void NIFLoader::loadResource(Resource *resource)
     }
 
   // Load the NIF
-  cout << "Loading " << name << endl;
   NIFFile nif(vfs->open(name), name);
 
-  int n = nif.numRecords();
-  cout << "Number of records: " << n << endl;
-  if(n)
-    cout << "First record type: " << nif.getRecord(0)->recName.toString() << endl;
+  if(nif.numRecords() < 1)
+    {
+      warn("Found no records in " + name);
+      return;
+    }
+
+  // The first record is assumed to be the root node
+  Record *r = nif.getRecord(0);
+  assert(r != NULL);
+
+  if(r->recType != RC_NiNode)
+    {
+      warn("First record in " + name + " was not a NiNode, but a " +
+           r->recName.toString() + ". Skipping file.");
+      return;
+    }
+
+  // Handle the node
+  handleNode(mesh, (Node*)r, 0);
 }
 
 MeshPtr NIFLoader::load(const char* name, const char* group)
