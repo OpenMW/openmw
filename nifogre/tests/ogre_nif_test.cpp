@@ -75,6 +75,7 @@ int main(int argc, char**args)
   // Insert the mesh
   const char* mesh = "meshes\\a\\towershield_steel.nif";
   NIFLoader::load(mesh);
+  NIFLoader::load(mesh);
 
   // Display it
   SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node");

@@ -164,5 +164,13 @@ void NIFLoader::loadResource(Resource *resource)
 
 MeshPtr NIFLoader::load(const char* name, const char* group)
 {
+  MeshManager *m = MeshManager::getSingletonPtr();
+
+  // Check if the resource already exists
+  ResourcePtr ptr = m->getByName(name/*, group*/);
+  if(!ptr.isNull())
+    return MeshPtr(ptr);
+
+  // Nope, create a new one.
   return MeshManager::getSingleton().createManual(name, group, &g_sing);
 }
