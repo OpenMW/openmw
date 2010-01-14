@@ -23,6 +23,7 @@
 
 #include "ogre_nif_loader.h"
 #include <Ogre.h>
+#include <stdio.h>
 
 #include "../mangle/vfs/servers/ogre_vfs.h"
 #include "../nif/nif_file.h"
@@ -40,18 +41,104 @@ using namespace Mangle::VFS;
 
 // This is the interface to the Ogre resource system. It allows us to
 // load NIFs from BSAs, in the file system and in any other place we
-// tell Ogre to look (eg. in zip or rar files.)
+// tell Ogre to look (eg. in zip or rar files.) It's also used to
+// check for the existence of texture files, so we can exchange the
+// extension from .tga to .dds if the texture is missing.
 OgreVFS *vfs;
 
 // Singleton instance used by load()
 static NIFLoader g_sing;
 
+static string errName;
+
 static void warn(const string &msg)
 {
-  cout << "WARNING (NIF): " << msg << endl;
+  cout << "WARNING (NIF:" << errName << "): " << msg << endl;
 }
 
-// Convert Nif::NiTriShape to Ogre::SubMesh, attached the given mesh.
+static void createMaterial(const String &material,
+                           const Vector &ambient,
+                           const Vector &diffuse,
+                           const Vector &specular,
+                           const Vector &emissive,
+                           float glossiness, float alpha,
+                           float alphaFlags, float alphaTest,
+                           const String &texName)
+{
+  MaterialPtr material = MaterialManager::getSingleton().create(material, "General");
+
+  // This assigns the texture to this material. If the texture name is
+  // a file name, and this file exists (in a resource directory), it
+  // will automatically be loaded when needed. If not (such as for
+  // internal NIF textures that we might support later), we should
+  // already have inserted a manual loader for the texture.
+  if(!texName.empty())
+    {
+      Pass *pass = material->getTechnique(0)->getPass(0);
+      TextureUnitState *txt = pass->createTextureUnitState(texName);
+
+      // Add transparency if NiAlphaProperty was present
+      if(alphaFlags != -1)
+        {
+          // The 237 alpha flags are by far the most common. Check
+          // NiAlphaProperty in nif/property.h if you need to decode
+          // other values. 237 basically means normal transparencly.
+          if(alphaFlags == 237)
+            {
+              // Enable transparency
+              pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+
+              //pass->setDepthCheckEnabled(false);
+              pass->setDepthWriteEnabled(false);
+            }
+          else
+            warn("Unhandled alpha setting for texture " + texName);
+        }
+    }
+
+  // Add material bells and whistles
+  material->setAmbient(ambient.array[0], ambient.array[1], ambient.array[2]);
+  material->setDiffuse(diffuse.array[0], diffuse.array[1], diffuse.array[2], alpha);
+  material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
+  material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
+  material->setShininess(glossiness);
+}
+
+// Takes a name and adds a unique part to it. This is just used to
+// make sure that all materials are given unique names.
+static String getUniqueName(const String &input)
+{
+  static int addon = 0;
+  static char buf[8];
+  snprintf(buf,8,"_%d", addon++);
+
+  // Don't overflow the buffer
+  if(addon > 1999999) addon = 0;
+
+  return input + buf;
+}
+
+// Check if the given texture name exists in the real world. If it
+// does not, change the string IN PLACE to say .dds instead and try
+// that. The texture may still not exist, but no information of value
+// is lost in that case.
+static findRealTexture(String &texName)
+{
+  assert(vfs);
+  if(vfs.isFile(texName)) return;
+
+  int len = texName.size();
+  if(len < 4) return;
+
+  // In-place string changing hack
+  char *ptr = (char*)texName.c_str();
+  strcpy(ptr-3, "dds");
+
+  cout << "Replaced with " << texName << endl;
+}
+
+// Convert Nif::NiTriShape to Ogre::SubMesh, attached to the given
+// mesh.
 static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material)
 {
   NiTriShapeData *data = shape->data.getPtr();
@@ -170,7 +257,7 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
   if(!hidden)
     {
       // These are set below if present
-      NiTexturingProperty *p = NULL;
+      NiTexturingProperty *t = NULL;
       NiMaterialProperty *m = NULL;
       NiAlphaProperty *a = NULL;
 
@@ -179,20 +266,87 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
       int n = list.length();
       for(int i=0; i<n; i++)
         {
+          // Entries may be empty
           if(!list.has(i)) continue;
+
           Property *pr = &list[i];
 
           if(pr->recType == RC_NiTexturingProperty)
-            p = (NiTexturingProperty*)pr;
+            t = (NiTexturingProperty*)pr;
           else if(pr->recType == RC_NiMaterialProperty)
             m = (NiMaterialProperty*)pr;
           else if(pr->recType == RC_NiAlphaProperty)
             a = (NiAlphaProperty*)pr;
         }
 
-      if(p) cout << "texture present\n";
-      if(m) cout << "material present\n";
-      if(a) cout << "alpha present\n";
+      // Texture
+      String texName;
+      if(t && t->textures[0].inUse)
+        {
+          NiSourceTexture *st = t->textures[0].texture.getPtr();
+          if(st->external)
+            {
+              SString tname = st->filename;
+
+              /* findRealTexture checks if the file actually
+                 exists. If it doesn't, and the name ends in .tga, it
+                 will try replacing the extension with .dds instead
+                 and search for that. Bethesda at some at some point
+                 converted all their BSA textures from tga to dds for
+                 increased load speed, but all texture file name
+                 references were kept as .tga.
+
+                 The function replaces the name in place (that's why
+                 we cast away the const modifier), but this is no
+                 problem since all the nif data is stored in a local
+                 throwaway buffer.
+               */
+              texName = tname.toString();
+              findRealTexture(texName);
+            }
+          else warn("Found internal texture, ignoring.");
+        }
+
+      // Alpha modifiers
+      int alphaFlags = -1;
+      ubyte alphaTest;
+      if(a)
+        {
+          alphaFlags = a->flags;
+          alphaTest  = a->data->threshold;
+        }
+
+      // Material
+      if(m || !texName.empty())
+        {
+          // If we're here, then this mesh has a material. Thus we
+          // need to calculate a snappy material name. It should
+          // contain the mesh name (mesh->getName()) but also has to
+          // be unique. One mesh may use many materials.
+          material = getUniqueName(mesh->getName());
+
+          if(m)
+            {
+              // Use NiMaterialProperty data to create the data
+              const S_MaterialProperty *d = m->data;
+              createMaterial(material, d->ambient, d->diffuse, d->specular, d->emissive,
+                             d->glossiness, d->alpha, alphaFlags, alphaTest, texName);
+            }
+          else
+            {
+              // We only have a texture name. Create a default
+              // material for it.
+              Vector zero, one;
+              for(int i=0; i<3;i++)
+                {
+                  zero[i] = 0.0;
+                  one[i] = 1.0;
+                }
+
+              createMaterial(material, one, one, zero, zero, 0.0, 1.0,
+                             alphaFlags, alphaTest, texName);
+            }
+        }
     }
 
   // TODO: Do in-place transformation of all the vertices and
@@ -204,7 +358,7 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
   // are const.)
 
   if(!hidden)
-    createOgreMesh(mesh, shape, "");
+    createOgreMesh(mesh, shape, material);
 }
 
 static void handleNode(Mesh* mesh, Nif::Node *node, int flags)
@@ -265,9 +419,10 @@ void NIFLoader::loadResource(Resource *resource)
 
   // Look it up
   const String &name = mesh->getName();
+  errName = name; // Set name for error messages
   if(!vfs->isFile(name))
     {
-      warn("File not found: " + name);
+      warn("File not found.");
       return;
     }
 
@@ -276,7 +431,7 @@ void NIFLoader::loadResource(Resource *resource)
 
   if(nif.numRecords() < 1)
     {
-      warn("Found no records in " + name);
+      warn("Found no records in NIF.");
       return;
     }
 
@@ -286,7 +441,7 @@ void NIFLoader::loadResource(Resource *resource)
 
   if(r->recType != RC_NiNode)
     {
-      warn("First record in " + name + " was not a NiNode, but a " +
+      warn("First record in file was not a NiNode, but a " +
            r->recName.toString() + ". Skipping file.");
       return;
     }
