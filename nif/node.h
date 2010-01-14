@@ -57,7 +57,7 @@ struct Node : Named
     hasBounds = nif->getInt();
     if(hasBounds)
       {
-        nif->getInt();
+        nif->getInt(); // always 1
         boundPos = nif->getVector();
         boundRot = nif->getMatrix();
         boundXYZ = nif->getVector();
@@ -70,6 +70,15 @@ struct NiNode : Node
   NodeList children;
   NodeList effects;
 
+  /* Known NiNode flags:
+
+     0x01 hidden
+     0x02 use mesh for collision
+     0x04 use bounding box for collision (?)
+     0x08 unknown, but common
+     0x20, 0x40, 0x80 unknown
+   */
+
   void read(NIFFile *nif)
   {
     Node::read(nif);
@@ -80,6 +89,13 @@ struct NiNode : Node
 
 struct NiTriShape : Node
 {
+  /* Possible flags:
+     0x40 - mesh has no vertex normals ?
+
+     Only flags included in 0x47 (ie. 0x01, 0x02, 0x04 and 0x40) have
+     been observed so far.
+   */
+
   NiTriShapeDataPtr data;
   NiSkinInstancePtr skin;
 

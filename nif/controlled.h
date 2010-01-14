@@ -54,7 +54,6 @@ struct Named : Controlled
 };
 typedef Named NiSequenceStreamHelper;
 
-
 struct NiParticleGrowFade : Controlled
 {
   void read(NIFFile *nif)

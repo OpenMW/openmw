@@ -53,6 +53,15 @@ void NIFFile::parse()
   int recNum = getInt();
   records.resize(recNum);
 
+  /* The format for 10.0.1.0 seems to be a bit different. After the
+     header, it contains the number of records, r (int), just like
+     4.0.0.2, but following that it contains a short x, followed by x
+     strings. Then again by r shorts, one for each record, giving
+     which of the above strings to use to identify the record. After
+     this follows two ints (zero?) and then the record data. However
+     we do not support or plan to support other versions yet.
+  */
+
   for(int i=0;i<recNum;i++)
     {
       SString rec = getString();
@@ -147,4 +156,9 @@ void NIFFile::parse()
       records[i] = r;
       r->read(this);
     }
+
+  /* After the data, the nif contains an int N and then a list of N
+     ints following it. This might be a list of the root nodes in the
+     tree, but for the moment we ignore it.
+   */
 }

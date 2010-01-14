@@ -174,7 +174,7 @@ struct S_VertexColorProperty
 struct S_AlphaProperty
 {
   /*
-    In NiAlphaProperty, the flags have the following meaning.
+    In NiAlphaProperty, the flags have the following meaning:
 
     Bit 0 : alpha blending enable
     Bits 1-4 : source blend mode
