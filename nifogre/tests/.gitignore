@@ -1,2 +1,4 @@
+*.png
+meshlist.txt
 ogre.cfg
 *_test

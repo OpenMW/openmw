@@ -8,11 +8,20 @@ using namespace Ogre;
 
 RenderWindow *window;
 
+//const char* mesh = "meshes\\a\\towershield_steel.nif";
+//const char* mesh = "meshes\\r\\bonelord.nif";
+const char* mesh = "meshes\\m\\text_scroll_open_01.nif";
+
+int shot = 0;
+
 // Lets you quit by closing the window
 struct QuitListener : FrameListener
 {
   bool frameStarted(const FrameEvent& evt)
   {
+    if(shot == 1) window->writeContentsToFile("nif.png");
+    if(shot < 2) shot++;
+
     if(window->isClosed())
       return false;
     return true;
@@ -73,15 +82,33 @@ int main(int argc, char**args)
   addBSA("../../data/Morrowind.bsa");
 
   // Insert the mesh
-  const char* mesh = "meshes\\a\\towershield_steel.nif";
   NIFLoader::load(mesh);
   NIFLoader::load(mesh);
 
-  // Display it
+  //*
   SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node");
   Entity *ent = mgr->createEntity("Mesh1", mesh);
   node->attachObject(ent);
-  node->setPosition(0,0,100);
+  node->setPosition(0,4,50);
+  node->pitch(Degree(20));
+  node->roll(Degree(10));
+  node->yaw(Degree(-10));
+  /*
+  node->setPosition(0,-70,170);
+  node->pitch(Degree(-90));
+  /*
+  // Display it from two different angles
+  const int sep = 45;
+  SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node");
+  Entity *ent = mgr->createEntity("Mesh1", mesh);
+  node->attachObject(ent);
+  node->setPosition(sep,0,100);
+  node = node->createChildSceneNode("node2");
+  ent = mgr->createEntity("Mesh2", mesh);
+  node->attachObject(ent);
+  node->setPosition(-2*sep,0,0);
+  node->yaw(Degree(180));
+  //*/
 
   // Render loop
   if(render)

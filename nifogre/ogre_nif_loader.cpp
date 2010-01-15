@@ -34,10 +34,14 @@
 // For warning messages
 #include <iostream>
 
+typedef unsigned char ubyte;
+
 using namespace std;
 using namespace Ogre;
 using namespace Nif;
 using namespace Mangle::VFS;
+
+#define TRANSLATE 1
 
 // This is the interface to the Ogre resource system. It allows us to
 // load NIFs from BSAs, in the file system and in any other place we
@@ -56,7 +60,7 @@ static void warn(const string &msg)
   cout << "WARNING (NIF:" << errName << "): " << msg << endl;
 }
 
-static void createMaterial(const String &material,
+static void createMaterial(const String &name,
                            const Vector &ambient,
                            const Vector &diffuse,
                            const Vector &specular,
@@ -65,7 +69,7 @@ static void createMaterial(const String &material,
                            float alphaFlags, float alphaTest,
                            const String &texName)
 {
-  MaterialPtr material = MaterialManager::getSingleton().create(material, "General");
+  MaterialPtr material = MaterialManager::getSingleton().create(name, "General");
 
   // This assigns the texture to this material. If the texture name is
   // a file name, and this file exists (in a resource directory), it
@@ -122,19 +126,18 @@ static String getUniqueName(const String &input)
 // does not, change the string IN PLACE to say .dds instead and try
 // that. The texture may still not exist, but no information of value
 // is lost in that case.
-static findRealTexture(String &texName)
+static void findRealTexture(String &texName)
 {
   assert(vfs);
-  if(vfs.isFile(texName)) return;
+  if(vfs->isFile(texName)) return;
 
   int len = texName.size();
   if(len < 4) return;
 
-  // In-place string changing hack
-  char *ptr = (char*)texName.c_str();
-  strcpy(ptr-3, "dds");
-
-  cout << "Replaced with " << texName << endl;
+  // Change texture extension to .dds
+  texName[len-3] = 'd';
+  texName[len-2] = 'd';
+  texName[len-1] = 's';
 }
 
 // Convert Nif::NiTriShape to Ogre::SubMesh, attached to the given
@@ -237,9 +240,9 @@ static void matrixMul(const Matrix &A, Matrix &B)
       float b = B.v[1].array[i];
       float c = B.v[2].array[i];
 
-      B.v[0].array[i] = a*A[0].array[0] + b*A[0].array[1] + c*A[0].array[2];
-      B.v[1].array[i] = a*A[1].array[0] + b*A[1].array[1] + c*A[1].array[2];
-      B.v[2].array[i] = a*A[2].array[0] + b*A[2].array[1] + c*A[2].array[2];
+      B.v[0].array[i] = a*A.v[0].array[0] + b*A.v[0].array[1] + c*A.v[0].array[2];
+      B.v[1].array[i] = a*A.v[1].array[0] + b*A.v[1].array[1] + c*A.v[1].array[2];
+      B.v[2].array[i] = a*A.v[2].array[0] + b*A.v[2].array[1] + c*A.v[2].array[2];
     }
 }
 
@@ -253,7 +256,7 @@ static void vectorMulAdd(const Matrix &A, const Vector &B, float *C, float scale
 
   // Perform matrix multiplication, scaling and addition
   for(int i=0;i<3;i++)
-    C[i] = B.array[i] + (a*A[i].array[0] + b*A[i].array[1] + c*A[i].array[2])*scale;
+    C[i] = B.array[i] + (a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2])*scale;
 }
 
 // Computes B = AxB (matrix*vector)
@@ -266,7 +269,7 @@ static void vectorMul(const Matrix &A, float *C)
 
   // Perform matrix multiplication, scaling and addition
   for(int i=0;i<3;i++)
-    C[i] = a*A[i].array[0] + b*A[i].array[1] + c*A[i].array[2];
+    C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
 }
 
 static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
@@ -344,7 +347,7 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
                  problem since all the nif data is stored in a local
                  throwaway buffer.
                */
-              texName = tname.toString();
+              texName = "textures\\" + tname.toString();
               findRealTexture(texName);
             }
           else warn("Found internal texture, ignoring.");
@@ -382,8 +385,8 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
               Vector zero, one;
               for(int i=0; i<3;i++)
                 {
-                  zero[i] = 0.0;
-                  one[i] = 1.0;
+                  zero.array[i] = 0.0;
+                  one.array[i] = 1.0;
                 }
 
               createMaterial(material, one, one, zero, zero, 0.0, 1.0,
@@ -392,7 +395,7 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
         }
     }
 
-  if(0) // TODO FIXME TEMP
+  if(TRANSLATE) // TODO FIXME TEMP
   {
     /* Do in-place transformation of all the vertices and normals. This
        is pretty messy stuff, but we need it to make the sub-meshes
@@ -403,11 +406,11 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
     NiTriShapeData *data = shape->data.getPtr();
     int numVerts = data->vertices.length / 3;
 
-    float *ptr = data->vertices.ptr;
+    float *ptr = (float*)data->vertices.ptr;
 
     // Rotate, scale and translate all the vertices
     const Matrix &rot = shape->trafo->rotation;
-    const Vector &pos = shape->trafo->position;
+    const Vector &pos = shape->trafo->pos;
     float scale = shape->trafo->scale;
     for(int i=0; i<numVerts; i++)
       {
@@ -418,7 +421,7 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
     // Remember to rotate all the vertex normals as well
     if(data->normals.length)
       {
-        ptr = data->normals.ptr;
+        ptr = (float*)data->normals.ptr;
         for(int i=0; i<numVerts; i++)
           {
             vectorMul(rot, ptr);
@@ -464,7 +467,7 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformat
 
   // Apply the parent transformation to this node. We overwrite the
   // existing data with the final transformation.
-  if(0) // TODO FIXME TEMP
+  if(TRANSLATE) // TODO FIXME TEMP
   if(trafo)
     {
       // Get a non-const reference to the node's data, since we're
