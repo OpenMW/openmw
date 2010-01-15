@@ -226,6 +226,49 @@ static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material
   if(!material.empty()) sub->setMaterialName(material);
 }
 
+// Helper math functions. Reinventing linear algebra for the win!
+
+// Computes B = AxB (matrix*matrix)
+static void matrixMul(const Matrix &A, Matrix &B)
+{
+  for(int i=0;i<3;i++)
+    {
+      float a = B.v[0].array[i];
+      float b = B.v[1].array[i];
+      float c = B.v[2].array[i];
+
+      B.v[0].array[i] = a*A[0].array[0] + b*A[0].array[1] + c*A[0].array[2];
+      B.v[1].array[i] = a*A[1].array[0] + b*A[1].array[1] + c*A[1].array[2];
+      B.v[2].array[i] = a*A[2].array[0] + b*A[2].array[1] + c*A[2].array[2];
+    }
+}
+
+// Computes C = B + AxC*scale
+static void vectorMulAdd(const Matrix &A, const Vector &B, float *C, float scale)
+{
+  // Keep the original values
+  float a = C[0];
+  float b = C[1];
+  float c = C[2];
+
+  // Perform matrix multiplication, scaling and addition
+  for(int i=0;i<3;i++)
+    C[i] = B.array[i] + (a*A[i].array[0] + b*A[i].array[1] + c*A[i].array[2])*scale;
+}
+
+// Computes B = AxB (matrix*vector)
+static void vectorMul(const Matrix &A, float *C)
+{
+  // Keep the original values
+  float a = C[0];
+  float b = C[1];
+  float c = C[2];
+
+  // Perform matrix multiplication, scaling and addition
+  for(int i=0;i<3;i++)
+    C[i] = a*A[i].array[0] + b*A[i].array[1] + c*A[i].array[2];
+}
+
 static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
 {
   // Interpret flags
@@ -349,19 +392,46 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
         }
     }
 
-  // TODO: Do in-place transformation of all the vertices and
-  // normals. This is pretty messy stuff, but we need it to make the
-  // sub-meshes appear in the correct place. We also need to do it
-  // anyway for collision meshes. Since all the pointers in the NIF
-  // structures are pointing to an internal temporary memory buffer,
-  // it's OK to overwrite them (even though the pointers technically
-  // are const.)
+  if(0) // TODO FIXME TEMP
+  {
+    /* Do in-place transformation of all the vertices and normals. This
+       is pretty messy stuff, but we need it to make the sub-meshes
+       appear in the correct place. Neither Ogre nor Bullet support
+       nested levels of sub-meshes with transformations applied to each
+       level.
+    */
+    NiTriShapeData *data = shape->data.getPtr();
+    int numVerts = data->vertices.length / 3;
+
+    float *ptr = data->vertices.ptr;
+
+    // Rotate, scale and translate all the vertices
+    const Matrix &rot = shape->trafo->rotation;
+    const Vector &pos = shape->trafo->position;
+    float scale = shape->trafo->scale;
+    for(int i=0; i<numVerts; i++)
+      {
+        vectorMulAdd(rot, pos, ptr, scale);
+        ptr += 3;
+      }
+
+    // Remember to rotate all the vertex normals as well
+    if(data->normals.length)
+      {
+        ptr = data->normals.ptr;
+        for(int i=0; i<numVerts; i++)
+          {
+            vectorMul(rot, ptr);
+            ptr += 3;
+          }
+      }
+  }
 
   if(!hidden)
     createOgreMesh(mesh, shape, material);
 }
 
-static void handleNode(Mesh* mesh, Nif::Node *node, int flags)
+static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformation *trafo = NULL)
 {
   // Accumulate the flags from all the child nodes. This works for all
   // the flags we currently use, at least.
@@ -392,6 +462,28 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags)
         }
     }
 
+  // Apply the parent transformation to this node. We overwrite the
+  // existing data with the final transformation.
+  if(0) // TODO FIXME TEMP
+  if(trafo)
+    {
+      // Get a non-const reference to the node's data, since we're
+      // overwriting it.
+      Transformation &final = *((Transformation*)node->trafo);
+
+      // For both position and rotation we have that:
+      // final_vector = old_vector + old_rotation*new_vector*old_scale
+      vectorMulAdd(trafo->rotation, trafo->pos, final.pos.array, trafo->scale);
+      vectorMulAdd(trafo->rotation, trafo->velocity, final.velocity.array, trafo->scale);
+
+      // Merge the rotations together
+      matrixMul(trafo->rotation, final.rotation);
+
+      // Scalar values are so nice to deal with. Why can't everything
+      // just be scalars?
+      final.scale *= trafo->scale;
+    }
+
   // For NiNodes, loop through children
   if(node->recType == RC_NiNode)
     {
@@ -400,7 +492,7 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags)
       for(int i=0; i<n; i++)
         {
           if(list.has(i))
-            handleNode(mesh, &list[i], flags);
+            handleNode(mesh, &list[i], flags, node->trafo);
         }
     }
   else if(node->recType == RC_NiTriShape)
