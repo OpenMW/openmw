@@ -44,7 +44,7 @@ struct Node : Named
   bool hasBounds;
   const Vector *boundPos;
   const Matrix *boundRot;
-  const Vector *boundXYZ;
+  const Vector *boundXYZ; // Box size
 
   void read(NIFFile *nif)
   {

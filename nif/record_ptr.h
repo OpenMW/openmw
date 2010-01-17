@@ -119,6 +119,12 @@ class RecordListT
     return !list[index].empty();
   }
 
+  int getIndex(int index)
+    {
+      if(has(index)) return list[index].getIndex();
+      else return -1;
+    }
+
   int length() { return list.size(); }
 };
 

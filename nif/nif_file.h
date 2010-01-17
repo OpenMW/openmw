@@ -93,6 +93,14 @@ class NIFFile
       parse();
     }
 
+  ~NIFFile()
+    {
+      for(int i=0; i<records.size(); i++)
+        {
+          delete records[i];
+        }
+    }
+
   /// Get a given record
   Record *getRecord(int index)
   {

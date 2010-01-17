@@ -59,6 +59,14 @@ struct NiVertWeightsExtraData : Extra
 
 struct NiTextKeyExtraData : Extra
 {
+  struct TextKey
+  {
+    float time;
+    SString text;
+  };
+
+  std::vector<TextKey> list;
+
   void read(NIFFile *nif)
   {
     Extra::read(nif);
@@ -66,10 +74,11 @@ struct NiTextKeyExtraData : Extra
     nif->getInt(); // 0
 
     int keynum = nif->getInt();
+    list.resize(keynum);
     for(int i=0; i<keynum; i++)
       {
-        nif->getFloat();  // time
-        nif->getString(); // key text
+        list[i].time = nif->getFloat();
+        list[i].text = nif->getString();
       }
   }
 };
