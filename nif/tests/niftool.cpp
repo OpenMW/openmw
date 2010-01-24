@@ -90,6 +90,15 @@ void doNode(Node *n)
       doMatrix(n->boundRot);
       doVector(n->boundXYZ);
     }
+
+  if(n->boneTrafo)
+    {
+      cout << "This is a bone: ";
+      if(n->boneIndex == -1)
+        cout << "root bone\n";
+      else
+        cout << "index " << n->boneIndex << endl;
+    }
 }
 
 void doNiTriShape(NiTriShape *n)
@@ -122,11 +131,11 @@ void doNiSkinData(NiSkinData *n)
       cout << "Weight number: " << bi.weights.length << endl;
 
       if(verbose)
-      for(int j=0; j<bi.weights.length; j++)
-        {
-          const NiSkinData::VertWeight &w = bi.weights.ptr[j];
-          cout << "  vert:" << w.vertex << " weight:" << w.weight << endl;
-        }
+        for(int j=0; j<bi.weights.length; j++)
+          {
+            const NiSkinData::VertWeight &w = bi.weights.ptr[j];
+            cout << "  vert:" << w.vertex << " weight:" << w.weight << endl;
+          }
     }
 }
 

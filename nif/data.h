@@ -319,6 +319,25 @@ struct NiVisData : Record
   }
 };
 
+struct NiSkinInstance : Record
+{
+  NiSkinDataPtr data;
+  NodePtr root;
+  NodeList bones;
+
+  void read(NIFFile *nif)
+  {
+    data.read(nif);
+    root.read(nif);
+    bones.read(nif);
+
+    if(data.empty() || root.empty())
+      nif->fail("NiSkinInstance missing root or data");
+  }
+
+  void post(NIFFile *nif);
+};
+
 struct NiSkinData : Record
 {
   // This is to make sure the structs are packed, ie. that the
@@ -458,20 +477,6 @@ struct NiKeyframeData : Record
         else nif->fail("Unknown scaling type");
         nif->getFloatLen(count*size);
       }
-  }
-};
-
-struct NiSkinInstance : Record
-{
-  NiSkinDataPtr data;
-  NodePtr root;
-  NodeList bones;
-
-  void read(NIFFile *nif)
-  {
-    data.read(nif);
-    root.read(nif);
-    bones.read(nif);
   }
 };
 

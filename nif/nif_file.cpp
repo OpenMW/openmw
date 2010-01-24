@@ -37,6 +37,11 @@
 using namespace std;
 using namespace Nif;
 
+/* This file implements functions from the NIFFile class. It is also
+   where we stash all the functions we couldn't add as inline
+   definitions in the record types.
+ */
+
 void NIFFile::parse()
 {
   // Check the header string
@@ -161,4 +166,28 @@ void NIFFile::parse()
      ints following it. This might be a list of the root nodes in the
      tree, but for the moment we ignore it.
    */
+
+  // TODO: Set up kf file here first, if applicable. It needs its own
+  // code to link it up with the main NIF structure.
+
+  // Once parsing is done, do post-processing.
+  for(int i=0; i<recNum; i++)
+    records[i]->post(this);
+}
+
+void NiSkinInstance::post(NIFFile *nif)
+{
+  int bnum = bones.length();
+  if(bnum != data->bones.size())
+    nif->fail("Mismatch in NiSkinData bone count");
+
+  root->makeRootBone(data->trafo);
+
+  for(int i=0; i<bnum; i++)
+    {
+      if(!bones.has(i))
+        nif->fail("Oops: Missing bone! Don't know how to handle this.");
+
+      bones[i].makeBone(i, data->bones[i]);
+    }
 }

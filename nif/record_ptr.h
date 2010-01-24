@@ -58,6 +58,15 @@ class RecordPtrT
     index = nif->getInt();
   }
 
+  /** Set the pointer explicitly. May be used when you are pointing to
+      records in another file, eg. when you have a .nif / .kf pair.
+  */
+  void set(X *p)
+  {
+    ptr = p;
+    index = -1;
+  }
+
   /// Look up the actual object from the index
   X* getPtr()
   {
@@ -80,7 +89,7 @@ class RecordPtrT
   X& get() { return *getPtr(); }
 
   /// Pointers are allowed to be empty
-  bool empty() { return index == -1; }
+  bool empty() { return index == -1 && ptr == NULL; }
 
   int getIndex() { return index; }
 };

@@ -521,7 +521,10 @@ void NIFLoader::loadResource(Resource *resource)
       return;
     }
 
-  // Load the NIF
+  // Load the NIF. TODO: Wrap this in a try-catch block once we're out
+  // of the early stages of development. Right now we WANT to catch
+  // every error as early and intrusively as possible, as it's most
+  // likely a sign of incomplete code rather than faulty input.
   NIFFile nif(vfs->open(name), name);
 
   if(nif.numRecords() < 1)

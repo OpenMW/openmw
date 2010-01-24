@@ -91,7 +91,11 @@ struct Record
 
   Record() : recType(RC_NONE) {}
 
+  /// Parses the record from file
   virtual void read(NIFFile *nif) = 0;
+
+  /// Does post-processing, after the entire tree is loaded
+  virtual void post(NIFFile *nif) {}
 
   /*
     Use these later if you want custom allocation of all NIF objects

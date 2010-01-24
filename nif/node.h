@@ -25,6 +25,7 @@
 #define _NIF_NODE_H_
 
 #include "controlled.h"
+#include "data.h"
 
 namespace Nif
 {
@@ -62,6 +63,33 @@ struct Node : Named
         boundRot = nif->getMatrix();
         boundXYZ = nif->getVector();
       }
+
+    boneTrafo = NULL;
+    boneIndex = -1;
+  }
+
+  // Bone transformation. If set, node is a part of a skeleton.
+  const NiSkinData::BoneTrafo *boneTrafo;
+
+  // Bone weight info, from NiSkinData
+  const NiSkinData::BoneInfo *boneInfo;
+
+  // Bone index. If -1, this node is either not a bone, or the root
+  // bone in the skeleton.
+  short boneIndex;
+
+  // Make this the root animation bone
+  void makeRootBone(const NiSkinData::BoneTrafo *tr)
+  {
+    boneTrafo = tr;
+    boneIndex = -1;
+  }
+
+  void makeBone(short ind, const NiSkinData::BoneInfo &bi)
+  {
+    boneInfo = &bi;
+    boneTrafo = bi.trafo;
+    boneIndex = ind;
   }
 };
 
