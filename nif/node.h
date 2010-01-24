@@ -74,11 +74,10 @@ struct Node : Named
   // Bone weight info, from NiSkinData
   const NiSkinData::BoneInfo *boneInfo;
 
-  // Bone index. If -1, this node is either not a bone, or the root
-  // bone in the skeleton.
+  // Bone index. If -1, this node is either not a bone, or if
+  // boneTrafo is set it is the root bone in the skeleton.
   short boneIndex;
 
-  // Make this the root animation bone
   void makeRootBone(const NiSkinData::BoneTrafo *tr)
   {
     boneTrafo = tr;

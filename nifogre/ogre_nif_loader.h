@@ -38,7 +38,9 @@
     NIFLoader::load("somemesh.nif");
 
     Afterwards, you can use the mesh name "somemesh.nif" normally to
-    create entities etc.
+    create entities and so on. The mesh isn't loaded from disk until
+    OGRE needs it for rendering. Thus the above load() command is not
+    very resource intensive.
  */
 struct NIFLoader : Ogre::ManualResourceLoader
 {

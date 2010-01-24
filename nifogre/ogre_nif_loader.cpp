@@ -41,8 +41,6 @@ using namespace Ogre;
 using namespace Nif;
 using namespace Mangle::VFS;
 
-#define TRANSLATE 1
-
 // This is the interface to the Ogre resource system. It allows us to
 // load NIFs from BSAs, in the file system and in any other place we
 // tell Ogre to look (eg. in zip or rar files.) It's also used to
@@ -395,7 +393,6 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
         }
     }
 
-  if(TRANSLATE) // TODO FIXME TEMP
   {
     /* Do in-place transformation of all the vertices and normals. This
        is pretty messy stuff, but we need it to make the sub-meshes
@@ -467,7 +464,6 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformat
 
   // Apply the parent transformation to this node. We overwrite the
   // existing data with the final transformation.
-  if(TRANSLATE) // TODO FIXME TEMP
   if(trafo)
     {
       // Get a non-const reference to the node's data, since we're
