@@ -321,29 +321,57 @@ struct NiVisData : Record
 
 struct NiSkinData : Record
 {
+  // This is to make sure the structs are packed, ie. that the
+  // compiler doesn't mess them up with extra alignment bytes.
+#pragma pack(push)
+#pragma pack(1)
+
+  struct BoneTrafo
+  {
+    Matrix rotation; // Rotation offset from bone?
+    Vector trans;    // Translation
+    float scale;     // Probably scale (always 1)
+  };
+
+  struct VertWeight
+  {
+    short vertex;
+    float weight;
+  };
+#pragma pack(pop)
+
+  struct BoneInfo
+  {
+    const BoneTrafo *trafo;
+    const Vector4 *unknown;
+    SliceArray<VertWeight> weights;
+  };
+
+  const BoneTrafo *trafo;
+  std::vector<BoneInfo> bones;
+
   void read(NIFFile *nif)
   {
-    // Not really decoded fully.
-    nif->getMatrix(); // global skin rotation?
-    nif->getVector(); // skin translation
-    nif->getFloat();  // probably scale (always 1)
+    assert(sizeof(BoneTrafo) == 4*(9+3+1));
+    assert(sizeof(VertWeight) == 6);
 
-    int bones = nif->getInt();
+    trafo = nif->getPtr<BoneTrafo>();
+
+    int boneNum = nif->getInt();
     nif->getInt(); // -1
 
-    for(int i=0;i<bones;i++)
-      {
-        nif->getMatrix(); // skin rotation offset from this bone
-        nif->getVector(); // translation
-        nif->getFloat();  // scale
+    bones.resize(boneNum);
 
-        nif->getVector4();
+    for(int i=0;i<boneNum;i++)
+      {
+        BoneInfo &bi = bones[i];
+
+        bi.trafo = nif->getPtr<BoneTrafo>();
+        bi.unknown = nif->getVector4();
 
         // Number of vertex weights
         int count = nif->getShort();
-
-        // Each weight is a vertex index (short) and a weight (float)
-        nif->skip(count*6);
+        bi.weights = nif->getArrayLen<VertWeight>(count);
       }
   }
 };

@@ -72,7 +72,7 @@ enum RecordType
   RC_NiPixelData,
   RC_NiMorphData,
   RC_NiKeyframeData,
-  RC_NiSkindata,
+  RC_NiSkinData,
   RC_NiUVData,
   RC_NiPosData,
   RC_NiRotatingParticlesData,

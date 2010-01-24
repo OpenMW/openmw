@@ -8,10 +8,14 @@
 #include "../../mangle/stream/servers/file_stream.h"
 #include "../node.h"
 #include "../controller.h"
+#include "../data.h"
 
 using namespace Mangle::Stream;
 using namespace std;
 using namespace Nif;
+
+// Display very verbose information
+bool verbose = false;
 
 void doVector(const Vector *vec)
 {
@@ -19,6 +23,15 @@ void doVector(const Vector *vec)
        << vec->array[0] << ","
        << vec->array[1] << ","
        << vec->array[2] << "]\n";
+}
+
+void doVector4(const Vector4 *vec)
+{
+  cout << "["
+       << vec->array[0] << ","
+       << vec->array[1] << ","
+       << vec->array[2] << ","
+       << vec->array[3] << "]\n";
 }
 
 void doMatrix(const Matrix *mat)
@@ -77,6 +90,54 @@ void doNode(Node *n)
       doMatrix(n->boundRot);
       doVector(n->boundXYZ);
     }
+}
+
+void doNiTriShape(NiTriShape *n)
+{
+  doNode(n);
+
+  cout << "Shape data: " << n->data.getIndex() << endl;
+  cout << "Skin instance: " << n->skin.getIndex() << endl;
+}
+
+void doNiSkinData(NiSkinData *n)
+{
+  int c = n->bones.size();
+
+  cout << "Global transformation:\n";
+  doMatrix(&n->trafo->rotation);
+  doVector(&n->trafo->trans);
+  cout << "Scale: " << n->trafo->scale << endl;
+
+  cout << "Bone number: " << c << endl;
+  for(int i=0; i<c; i++)
+    {
+      NiSkinData::BoneInfo &bi = n->bones[i];
+
+      cout << "-- Bone " << i << ":\n";
+      doMatrix(&bi.trafo->rotation);
+      doVector(&bi.trafo->trans);
+      cout << "Scale: " << bi.trafo->scale << endl;
+      cout << "Unknown: "; doVector4(bi.unknown);
+      cout << "Weight number: " << bi.weights.length << endl;
+
+      if(verbose)
+      for(int j=0; j<bi.weights.length; j++)
+        {
+          const NiSkinData::VertWeight &w = bi.weights.ptr[j];
+          cout << "  vert:" << w.vertex << " weight:" << w.weight << endl;
+        }
+    }
+}
+
+void doNiSkinInstance(NiSkinInstance *n)
+{
+  cout << "Data: " << n->data.getIndex() << endl;
+  cout << "Root: " << n->root.getIndex() << endl;
+  cout << "Bones:";
+  for(int i=0; i<n->bones.length(); i++)
+    cout << " " << n->bones.getIndex(i);
+  cout << endl;
 }
 
 void doNiNode(NiNode *n)
@@ -148,6 +209,9 @@ int main(int argc, char **args)
       switch(r->recType)
         {
         case RC_NiNode: doNiNode((NiNode*)r); break;
+        case RC_NiSkinData: doNiSkinData((NiSkinData*)r); break;
+        case RC_NiSkinInstance: doNiSkinInstance((NiSkinInstance*)r); break;
+        case RC_NiTriShape: doNiTriShape((NiTriShape*)r); break;
         case RC_NiStringExtraData: doNiStringExtraData((NiStringExtraData*)r); break;
         case RC_NiSequenceStreamHelper: doNamed((Named*)r); break;
         case RC_NiTextKeyExtraData: doNiTextKeyExtraData((NiTextKeyExtraData*)r); break;

@@ -135,7 +135,7 @@ void NIFFile::parse()
       else if(rec == "NiPixelData") { r = new NiPixelData; r->recType = RC_NiPixelData; }
       else if(rec == "NiMorphData") { r = new NiMorphData; r->recType = RC_NiMorphData; }
       else if(rec == "NiKeyframeData") { r = new NiKeyframeData; r->recType = RC_NiKeyframeData; }
-      else if(rec == "NiSkinData") { r = new NiSkinData; r->recType = RC_NiSkindata; }
+      else if(rec == "NiSkinData") { r = new NiSkinData; r->recType = RC_NiSkinData; }
       else if(rec == "NiUVData") { r = new NiUVData; r->recType = RC_NiUVData; }
       else if(rec == "NiPosData") { r = new NiPosData; r->recType = RC_NiPosData; }
       else if(rec == "NiRotatingParticlesData") { r = new NiRotatingParticlesData; r->recType = RC_NiRotatingParticlesData; }
