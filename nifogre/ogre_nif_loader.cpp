@@ -60,6 +60,46 @@ static void warn(const string &msg)
   cout << "WARNING (NIF:" << errName << "): " << msg << endl;
 }
 
+// Conversion of blend / test mode from NIF -> OGRE. Not in use yet.
+static SceneBlendFactor getBlendFactor(int mode)
+{
+  switch(mode)
+    {
+    case 0: return SBF_ONE;
+    case 1: return SBF_ZERO;
+    case 2: return SBF_SOURCE_COLOUR;
+    case 3: return SBF_ONE_MINUS_SOURCE_COLOUR;
+    case 4: return SBF_DEST_COLOUR;
+    case 5: return SBF_ONE_MINUS_DEST_COLOUR;
+    case 6: return SBF_SOURCE_ALPHA;
+    case 7: return SBF_ONE_MINUS_SOURCE_ALPHA;
+    case 8: return SBF_DEST_ALPHA;
+    case 9: return SBF_ONE_MINUS_DEST_ALPHA;
+    /* [Comment from Chris Robinson:] Can't handle this mode? :/
+    case 10: return SBF_SOURCE_ALPHA_SATURATE;
+    */
+    default:
+      return SBF_SOURCE_ALPHA;
+    }
+}
+
+static CompareFunction getTestMode(int mode)
+{
+  switch(mode)
+    {
+    case 0: return CMPF_ALWAYS_PASS;
+    case 1: return CMPF_LESS;
+    case 2: return CMPF_EQUAL;
+    case 3: return CMPF_LESS_EQUAL;
+    case 4: return CMPF_GREATER;
+    case 5: return CMPF_NOT_EQUAL;
+    case 6: return CMPF_GREATER_EQUAL;
+    case 7: return CMPF_ALWAYS_FAIL;
+    default:
+      return CMPF_ALWAYS_PASS;
+    }
+}
+
 static void createMaterial(const String &name,
                            const Vector &ambient,
                            const Vector &diffuse,
@@ -80,6 +120,33 @@ static void createMaterial(const String &name,
     {
       Pass *pass = material->getTechnique(0)->getPass(0);
       TextureUnitState *txt = pass->createTextureUnitState(texName);
+
+      /* As of yet UNTESTED code from Chris:
+      pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
+      pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
+      pass->setDepthCheckEnabled(true);
+
+      // Add transparency if NiAlphaProperty was present
+      if(alphaFlags != -1)
+        {
+          if((alphaFlags&1))
+            {
+              pass->setDepthWriteEnabled(false);
+              pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
+                                     getBlendFactor((alphaFlags>>5)&0xf));
+            }
+          else
+            pass->setDepthWriteEnabled(true);
+
+          if((alphaFlags>>9)&1)
+            pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
+                                         alphaTest);
+
+          pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
+        }
+      else
+        pass->setDepthWriteEnabled(true);
+      */
 
       // Add transparency if NiAlphaProperty was present
       if(alphaFlags != -1)
@@ -117,7 +184,7 @@ static String getUniqueName(const String &input)
   snprintf(buf,8,"_%d", addon++);
 
   // Don't overflow the buffer
-  if(addon > 1999999) addon = 0;
+  if(addon > 999999) addon = 0;
 
   return input + buf;
 }
