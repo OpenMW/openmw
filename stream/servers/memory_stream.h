@@ -9,13 +9,13 @@ namespace Mangle {
 namespace Stream {
 
 // Do this before the class declaration, since the class itself
-// depends on it.
+// uses it.
 class MemoryStream;
 typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
 
 /** A Stream wrapping a memory buffer
 
-    This will create a fully seekable stream out any pointer/length
+    This will create a fully seekable stream out of any pointer/length
     pair you give it.
  */
 class MemoryStream : public Stream
