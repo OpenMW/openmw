@@ -9,6 +9,8 @@ using namespace std;
 #include "../mangle/stream/servers/file_stream.h"
 #include "../mangle/tools/str_exception.h"
 
+#include "../tools/stringops.h"
+
 /* A structure used for holding fixed-length strings. In the case of
    LEN=4, it can be more efficient to match the string as a 32 bit
    number, therefore the struct is implemented as a union with an int.
@@ -87,6 +89,7 @@ class ESMReader
 
   HEDRstruct header;
   SaveData saveData;
+  int spf; // Special file signifier (see SpecialFile below)
 
 public:
   enum Version
@@ -102,6 +105,17 @@ public:
       FT_ESS = 32       // Savegame
     };
 
+  // Used to mark special files. The original ESM files are given
+  // special treatment in a few places, most noticably in loading and
+  // filtering out "dirtly" GMST entries correctly.
+  enum SpecialFile
+    {
+      SF_Other,
+      SF_Morrowind,
+      SF_Tribunal,
+      SF_Bloodmoon
+    };
+
   void open(Mangle::Stream::StreamPtr _esm, const string &name)
   {
     esm = _esm;
@@ -113,7 +127,13 @@ public:
     recName.val = 0;
     subName.val = 0;
 
-    // TODO: determine special file status from file name
+    // Flag certain files for special treatment, based on the file
+    // name.
+    const char *cstr = filename.c_str();
+    if(iends(cstr, "Morrowind.esm")) spf = SF_Morrowind;
+    else if(iends(cstr, "Tribunal.esm")) spf = SF_Tribunal;
+    else if(iends(cstr, "Bloodmoon.esm")) spf = SF_Bloodmoon;
+    else spf = SF_Other;
 
     if(getRecName() != "TES3")
       fail("Not a valid Morrowind file");
