@@ -14,9 +14,6 @@ using namespace std;
 /* A structure used for holding fixed-length strings. In the case of
    LEN=4, it can be more efficient to match the string as a 32 bit
    number, therefore the struct is implemented as a union with an int.
-
-   TODO: Merge with SliceArray, find how to do string-specific
-   template specializations in a useful manner.
  */
 template <int LEN>
 union NAME_T
