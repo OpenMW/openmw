@@ -1,0 +1,5 @@
+*.esp
+*.esm
+*.ess
+*_test
+esmtool

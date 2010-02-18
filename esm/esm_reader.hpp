@@ -1,14 +1,15 @@
-#include <iostream>
+#ifndef _ESM_READER_H
+#define _ESM_READER_H
+
 #include <string>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-using namespace std;
+#include <vector>
 
 #include "../mangle/stream/stream.h"
 #include "../mangle/stream/servers/file_stream.h"
 #include "../mangle/tools/str_exception.h"
-
 #include "../tools/stringops.h"
 
 /* A structure used for holding fixed-length strings. In the case of
@@ -30,16 +31,16 @@ union NAME_T
   }
   bool operator!=(const char *str) { return !((*this)==str); }
 
-  bool operator==(const string &str)
+  bool operator==(const std::string &str)
   {
     return (*this) == str.c_str();
   }
-  bool operator!=(const string &str) { return !((*this)==str); }
+  bool operator!=(const std::string &str) { return !((*this)==str); }
 
   bool operator==(int v) { return v == val; }
   bool operator!=(int v) { return v != val; }
 
-  string toString() { return string(name, strnlen(name, LEN)); }
+  std::string toString() { return std::string(name, strnlen(name, LEN)); }
 };
 
 typedef NAME_T<4> NAME;
@@ -49,15 +50,13 @@ typedef NAME_T<256> NAME256;
 
 class ESMReader
 {
-  Mangle::Stream::StreamPtr esm;
-  size_t leftFile;
-  uint32_t leftRec, leftSub;
-  string filename;
+public:
 
-  NAME recName, subName;
-
-  // True if subName has been read but not used.
-  bool subCached;
+  /*************************************************************************
+   *
+   *  Public type definitions
+   *
+   *************************************************************************/
 
 #pragma pack(push)
 #pragma pack(1)
@@ -74,6 +73,14 @@ class ESMReader
     int records;        // Number of records? Not used.
   };
 
+  // Defines another files (esm or esp) that this file depends upon.
+  struct MasterData
+  {
+    std::string name;
+    uint64_t size;
+  };
+
+  // Data that is only present in save game files
   struct SaveData
   {
     float pos[6];     // Player position and rotation
@@ -84,11 +91,8 @@ class ESMReader
   };
 #pragma pack(pop)
 
-  HEDRstruct header;
-  SaveData saveData;
-  int spf; // Special file signifier (see SpecialFile below)
+  typedef std::vector<MasterData> MasterList;
 
-public:
   enum Version
     {
       VER_12 = 0x3f99999a,
@@ -113,16 +117,48 @@ public:
       SF_Bloodmoon
     };
 
-  void open(Mangle::Stream::StreamPtr _esm, const string &name)
+  /*************************************************************************
+   *
+   *  Information retrieval
+   *
+   *************************************************************************/
+
+  int getVer() { return header.version; }
+  float getFVer() { return *((float*)&header.version); }
+  int getSpecial() { return spf; }
+  const std::string getAuthor() { return header.author.toString(); }
+  const std::string getDesc() { return header.desc.toString(); }
+  const SaveData &getSaveData() { return saveData; }
+  const MasterList &getMasters() { return masters; }
+
+
+  /*************************************************************************
+   *
+   *  Opening and closing
+   *
+   *************************************************************************/
+
+  /// Close the file, resets all information. After calling close()
+  /// the structure may be reused to load a new file.
+  void close()
   {
-    esm = _esm;
-    filename = name;
-    leftFile = esm->size();
+    esm.reset();
+    filename.clear();
+    leftFile = 0;
     leftRec = 0;
     leftSub = 0;
     subCached = false;
     recName.val = 0;
     subName.val = 0;
+  }
+
+  /// Load ES file from a new stream. Calls close() automatically.
+  void open(Mangle::Stream::StreamPtr _esm, const std::string &name)
+  {
+    close();
+    esm = _esm;
+    filename = name;
+    leftFile = esm->size();
 
     // Flag certain files for special treatment, based on the file
     // name.
@@ -135,9 +171,7 @@ public:
     if(getRecName() != "TES3")
       fail("Not a valid Morrowind file");
 
-    // The flags are always zero
-    uint32_t flags;
-    getRecHeader(flags);
+    getRecHeader();
 
     // Get the header
     getHNT(header, "HEDR");
@@ -146,13 +180,12 @@ public:
        header.version != VER_13)
       fail("Unsupported file format version");
 
-    cout << "Description: " << header.desc.toString() << endl;
-    cout << "Author: " << header.author.toString() << endl;
-
     while(isNextSub("MAST"))
       {
-        cout << "Master: " << getHString() << endl;
-        cout << "  size: " << getHNLong("DATA") << endl;
+        MasterData m;
+        m.name = getHString();
+        m.size = getHNLong("DATA");
+        masters.push_back(m);
       }
 
     if(header.type == FT_ESS)
@@ -180,7 +213,7 @@ public:
       }
   }
 
-  void open(const string &file)
+  void open(const std::string &file)
   {
     using namespace Mangle::Stream;
     open(StreamPtr(new FileStream(file)), file);
@@ -217,7 +250,13 @@ public:
     getT(x);
   }
 
-  string getHString()
+  std::string getHNString(const char* name)
+  {
+    getSubNameIs(name);
+    return getHString();
+  }
+
+  std::string getHString()
   {
     getSubHeader();
 
@@ -249,7 +288,7 @@ public:
   {
     getSubName();
     if(subName != name)
-      fail("Expected subrecord " + string(name) + " but got " + subName.toString());
+      fail("Expected subrecord " + std::string(name) + " but got " + subName.toString());
   }
 
   /** Checks if the next sub record name matches the parameter. If it
@@ -293,7 +332,7 @@ public:
   void skipHSub()
     {
       getSubHeader();
-      esm->seek(esm->tell()+leftSub);
+      skip(leftSub);
     }
 
   // Skip sub record and check its size
@@ -340,10 +379,27 @@ public:
     return recName;
   }
 
+  // Skip the rest of this record. Assumes the name and header have
+  // already been read
+  void skipRecord()
+    {
+      skip(leftRec);
+      leftRec = 0;
+    }
+
+  // Skip an entire record, including the header (but not the name)
+  void skipHRecord()
+  {
+    if(!leftFile) return;
+    getRecHeader();
+    skipRecord();
+  }
+
   /* Read record header. This updatesleftFile BEYOND the data that
      follows the header, ie beyond the entire record. You should use
      leftRec to orient yourself inside the record itself.
   */
+  void getRecHeader() { uint32_t u; getRecHeader(u); }
   void getRecHeader(uint32_t &flags)
     {
       // General error checking
@@ -390,10 +446,12 @@ public:
     // Not very optimized, but we'll fix that later
     char *ptr = new char[size];
     esm->read(ptr,size);
-    string res(ptr,size);
+    std::string res(ptr,size);
     delete[] ptr;
     return res;
   }
+
+  void skip(int bytes) { esm->seek(esm->tell()+bytes); }
 
   /// Used for error handling
   void fail(const std::string &msg)
@@ -404,18 +462,22 @@ public:
       err += "\n  Subrecord: " + subName.toString();
       throw str_exception(err);
     }
+
+private:
+  Mangle::Stream::StreamPtr esm;
+  size_t leftFile;
+  uint32_t leftRec, leftSub;
+  std::string filename;
+
+  NAME recName, subName;
+
+  // True if subName has been read but not used.
+  bool subCached;
+
+  HEDRstruct header;
+  SaveData saveData;
+  MasterList masters;
+  int spf; // Special file signifier (see SpecialFile below)
 };
 
-int main(int argc, char**argv)
-{
-  if(argc != 2)
-    {
-      cout << "Specify an ES file\n";
-      return 1;
-    }
-
-  ESMReader esm;
-  esm.open(argv[1]);
-
-  return 0;
-}
+#endif
