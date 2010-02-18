@@ -1,8 +1,10 @@
 #ifndef _ESM_RECORDS_H
 #define _ESM_RECORDS_H
 
-//#include "loadarmo.hpp"
+#include "loadarmo.hpp"
 #include "loadbody.hpp"
+#include "loadbsgn.hpp"
+#include "loadsoun.hpp"
 
 // Integer versions of all the record names, used for faster lookup
 enum RecNameInts

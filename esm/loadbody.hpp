@@ -52,7 +52,7 @@ struct BodyPart
   {
     model = esm.getHNString("MODL");
     name = esm.getHNString("FNAM");
-    esm.getHNT(data, "BYDT");
+    esm.getHNT(data, "BYDT", 4);
   }
 };
 

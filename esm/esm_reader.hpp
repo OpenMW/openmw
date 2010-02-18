@@ -174,7 +174,7 @@ public:
     getRecHeader();
 
     // Get the header
-    getHNT(header, "HEDR");
+    getHNT(header, "HEDR", 300);
 
     if(header.version != VER_12 &&
        header.version != VER_13)
@@ -193,7 +193,7 @@ public:
         // Savegame-related data
 
         // Player position etc
-        getHNT(saveData, "GMDT");
+        getHNT(saveData, "GMDT", 124);
 
         /* Image properties, five ints. Is always:
            Red-mask:   0xff0000
@@ -233,6 +233,16 @@ public:
     getHT(x);
   }
 
+  // Version with extra size checking, to make sure the compiler
+  // doesn't mess up our struct padding.
+  template <typename X>
+  void getHNT(X &x, const char* name, int size)
+  {
+    assert(sizeof(X) == size);
+    getSubNameIs(name);
+    getHT(x);
+  }
+
   int64_t getHNLong(const char *name)
   {
     int64_t val;
@@ -250,12 +260,22 @@ public:
     getT(x);
   }
 
+  // Read a string by the given name if it is the next record.
+  std::string getHNOString(const char* name)
+  {
+    if(isNextSub(name))
+      return getHString();
+    return "";
+  }
+
+  // Read a string with the given sub-record name
   std::string getHNString(const char* name)
   {
     getSubNameIs(name);
     return getHString();
   }
 
+  // Read a string, including the sub-record header (but not the name)
   std::string getHString()
   {
     getSubHeader();
@@ -431,10 +451,12 @@ public:
    *************************************************************************/
 
   template <typename X>
-  void getT(X &x)
+  void getT(X &x) { getExact(&x, sizeof(X)); }
+
+  void getExact(void*x, int size)
   {
-    int t = esm->read(&x, sizeof(X));
-    if(t != sizeof(X))
+    int t = esm->read(x, size);
+    if(t != size)
       fail("Read error");
   }
   void getName(NAME &name) { getT(name); }

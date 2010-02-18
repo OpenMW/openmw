@@ -1,9 +1,8 @@
+#include <iostream>
+using namespace std;
+
 #include "../esm_reader.hpp"
 #include "../records.hpp"
-
-#include <iostream>
-
-using namespace std;
 
 int main(int argc, char**argv)
 {
@@ -36,6 +35,19 @@ int main(int argc, char**argv)
 
       switch(n.val)
         {
+        case REC_ARMO:
+          {
+            Armor am;
+            am.load(esm);
+            cout << "  Name: " << am.name << endl;
+            cout << "  Mesh: " << am.model << endl;
+            cout << "  Icon: " << am.icon << endl;
+            cout << "  Script: " << am.script << endl;
+            cout << "  Enchantment: " << am.enchant << endl;
+            cout << "  Type: " << am.data.type << endl;
+            cout << "  Weight: " << am.data.weight << endl;
+            break;
+          }
         case REC_BODY:
           {
             BodyPart bp;
