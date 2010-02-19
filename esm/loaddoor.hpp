@@ -3,6 +3,8 @@
 
 #include "esm_reader.hpp"
 
+namespace ESM {
+
 struct Door
 {
   std::string name, model, script, openSound, closeSound;
@@ -16,4 +18,5 @@ struct Door
     closeSound = esm.getHNOString("ANAM");
   }
 };
+}
 #endif

@@ -3,6 +3,8 @@
 
 #include "esm_reader.hpp"
 
+namespace ESM {
+
 enum PartReferenceType
   {
     PRT_Head            = 0,
@@ -98,5 +100,5 @@ struct Armor
     enchant = esm.getHNOString("ENAM");
   }
 };
-
+}
 #endif

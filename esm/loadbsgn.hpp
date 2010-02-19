@@ -2,14 +2,16 @@
 #define _ESM_BSGN_H
 
 #include "esm_reader.hpp"
-//#include "loadspel.hpp"
+#include "loadspel.hpp"
+
+namespace ESM {
 
 struct BirthSign
 {
   std::string name, description, texture;
 
   // List of powers and abilities that come with this birth sign.
-  //SpellList powers;
+  SpellList powers;
 
   void load(ESMReader &esm)
   {
@@ -17,8 +19,8 @@ struct BirthSign
     texture = esm.getHNOString("TNAM");
     description = esm.getHNOString("DESC");
 
-    //powers.load(esm);
+    powers.load(esm);
   };
 };
-
+}
 #endif

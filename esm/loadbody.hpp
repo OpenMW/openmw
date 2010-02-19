@@ -3,6 +3,8 @@
 
 #include "esm_reader.hpp"
 
+namespace ESM {
+
 struct BodyPart
 {
   enum MeshPart
@@ -55,5 +57,5 @@ struct BodyPart
     esm.getHNT(data, "BYDT", 4);
   }
 };
-
+}
 #endif

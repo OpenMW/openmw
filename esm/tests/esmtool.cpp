@@ -4,7 +4,9 @@
 #include "esmtool_cmd.h"
 
 #include <iostream>
+
 using namespace std;
+using namespace ESM;
 
 void printRaw(ESMReader &esm);
 
@@ -83,8 +85,36 @@ int main(int argc, char**argv)
             cout << "  Mesh: " << bp.model << endl;
             break;
           }
+        case REC_BSGN:
+          {
+            BirthSign bs;
+            bs.load(esm);
+            cout << "  Name: " << bs.name << endl;
+            cout << "  Texture: " << bs.texture << endl;
+            cout << "  Description: " << bs.description << endl;
+            break;
+          }
+        case REC_DOOR:
+          {
+            Door d;
+            d.load(esm);
+            cout << "  Name: " << d.name << endl;
+            cout << "  Mesh: " << d.model << endl;
+            cout << "  Script: " << d.script << endl;
+            cout << "  OpenSound: " << d.openSound << endl;
+            cout << "  CloseSound: " << d.closeSound << endl;
+            break;
+          }
+        case REC_SOUN:
+          {
+            Sound d;
+            d.load(esm);
+            cout << "  Sound: " << d.sound << endl;
+            cout << "  Volume: " << (int)d.data.volume << endl;
+            break;
+          }
         default:
-          //cout << "  Skipping\n";
+          cout << "  Skipping\n";
           esm.skipRecord();
         }
     }

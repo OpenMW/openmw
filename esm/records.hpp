@@ -1,11 +1,15 @@
 #ifndef _ESM_RECORDS_H
 #define _ESM_RECORDS_H
 
+#include "loadacti.hpp"
 #include "loadarmo.hpp"
 #include "loadbody.hpp"
 #include "loadbsgn.hpp"
 #include "loaddoor.hpp"
 #include "loadsoun.hpp"
+#include "loadspel.hpp"
+
+namespace ESM {
 
 // Integer versions of all the record names, used for faster lookup
 enum RecNameInts
@@ -53,5 +57,5 @@ enum RecNameInts
     REC_STAT = 0x54415453,
     REC_WEAP = 0x50414557
   };
-
+}
 #endif

@@ -3,6 +3,8 @@
 
 #include "esm_reader.hpp"
 
+namespace ESM {
+
 struct SOUNstruct
 {
   unsigned char volume, minRange, maxRange;
@@ -19,4 +21,5 @@ struct Sound
       esm.getHNT(data, "DATA", 3);
     }
 };
+}
 #endif

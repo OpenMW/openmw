@@ -14,6 +14,8 @@
 #include "../mangle/tools/str_exception.h"
 #include "../tools/stringops.h"
 
+namespace ESM {
+
 /* A structure used for holding fixed-length strings. In the case of
    LEN=4, it can be more efficient to match the string as a 32 bit
    number, therefore the struct is implemented as a union with an int.
@@ -532,5 +534,5 @@ private:
   MasterList masters;
   int spf; // Special file signifier (see SpecialFile below)
 };
-
+}
 #endif
