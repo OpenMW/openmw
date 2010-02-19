@@ -4,6 +4,7 @@
 #include "loadarmo.hpp"
 #include "loadbody.hpp"
 #include "loadbsgn.hpp"
+#include "loaddoor.hpp"
 #include "loadsoun.hpp"
 
 // Integer versions of all the record names, used for faster lookup

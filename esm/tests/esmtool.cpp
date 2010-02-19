@@ -1,21 +1,47 @@
-#include <iostream>
-using namespace std;
-
 #include "../esm_reader.hpp"
 #include "../records.hpp"
 
+#include "esmtool_cmd.h"
+
+#include <iostream>
+using namespace std;
+
+void printRaw(ESMReader &esm);
+
 int main(int argc, char**argv)
 {
-  if(argc != 2)
+  gengetopt_args_info info;
+
+  if(cmdline_parser(argc, argv, &info) != 0)
+    return 1;
+
+  if(info.inputs_num != 1)
     {
-      cout << "Specify an ES file\n";
+      if(info.inputs_num == 0)
+        cout << "ERROR: missing ES file\n\n";
+      else
+        cout << "ERROR: more than one ES file specified\n\n";
+      cmdline_parser_print_help();
       return 1;
     }
 
   ESMReader esm;
-  esm.open(argv[1]);
+  const char* filename = info.inputs[0];
+  cout << "\nFile: " << filename << endl;
 
-  cout << "\nFile: " << argv[1] << endl;
+  if(info.raw_given)
+    {
+      cout << "RAW file listing:\n";
+
+      esm.openRaw(filename);
+
+      printRaw(esm);
+
+      return 0;
+    }
+
+  esm.open(filename);
+
   cout << "Author: " << esm.getAuthor() << endl;
   cout << "Description: " << esm.getDesc() << endl;
   cout << "File format version: " << esm.getFVer() << endl;
@@ -31,7 +57,8 @@ int main(int argc, char**argv)
       NAME n = esm.getRecName();
       cout << "\nRecord: " << n.toString();
       esm.getRecHeader();
-      cout << " '" << esm.getHNString("NAME") << "'\n";
+      string id = esm.getHNOString("NAME");
+      cout << " '" << id << "'\n";
 
       switch(n.val)
         {
@@ -57,10 +84,29 @@ int main(int argc, char**argv)
             break;
           }
         default:
-          cout << "  Skipping\n";
+          //cout << "  Skipping\n";
           esm.skipRecord();
         }
     }
 
   return 0;
+}
+
+void printRaw(ESMReader &esm)
+{
+  while(esm.hasMoreRecs())
+    {
+      NAME n = esm.getRecName();
+      cout << "Record: " << n.toString() << endl;
+      esm.getRecHeader();
+      while(esm.hasMoreSubs())
+        {
+          uint64_t offs = esm.getOffset();
+          esm.getSubName();
+          esm.skipHSub();
+          n = esm.retSubName();
+          cout << "    " << n.toString() << " - " << esm.getSubSize()
+               << " bytes @ 0x" << hex << offs << "\n";
+        }
+    }
 }

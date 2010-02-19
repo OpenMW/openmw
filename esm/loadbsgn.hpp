@@ -1,5 +1,5 @@
-#ifndef _ESM_SOUN_H
-#define _ESM_SOUN_H
+#ifndef _ESM_BSGN_H
+#define _ESM_BSGN_H
 
 #include "esm_reader.hpp"
 //#include "loadspel.hpp"

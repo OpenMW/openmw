@@ -6,6 +6,8 @@
 #include <string.h>
 #include <assert.h>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 
 #include "../mangle/stream/stream.h"
 #include "../mangle/stream/servers/file_stream.h"
@@ -130,7 +132,8 @@ public:
   const std::string getDesc() { return header.desc.toString(); }
   const SaveData &getSaveData() { return saveData; }
   const MasterList &getMasters() { return masters; }
-
+  NAME retSubName() { return subName; }
+  uint32_t getSubSize() { return leftSub; }
 
   /*************************************************************************
    *
@@ -152,8 +155,9 @@ public:
     subName.val = 0;
   }
 
-  /// Load ES file from a new stream. Calls close() automatically.
-  void open(Mangle::Stream::StreamPtr _esm, const std::string &name)
+  /// Raw opening. Opens the file and sets everything up but doesn't
+  /// parse the header.
+  void openRaw(Mangle::Stream::StreamPtr _esm, const std::string &name)
   {
     close();
     esm = _esm;
@@ -167,6 +171,13 @@ public:
     else if(iends(cstr, "Tribunal.esm")) spf = SF_Tribunal;
     else if(iends(cstr, "Bloodmoon.esm")) spf = SF_Bloodmoon;
     else spf = SF_Other;
+  }
+
+  /// Load ES file from a new stream, parses the header. Calls close()
+  /// automatically.
+  void open(Mangle::Stream::StreamPtr _esm, const std::string &name)
+  {
+    openRaw(_esm, name);
 
     if(getRecName() != "TES3")
       fail("Not a valid Morrowind file");
@@ -217,6 +228,12 @@ public:
   {
     using namespace Mangle::Stream;
     open(StreamPtr(new FileStream(file)), file);
+  }
+
+  void openRaw(const std::string &file)
+  {
+    using namespace Mangle::Stream;
+    openRaw(StreamPtr(new FileStream(file)), file);
   }
 
   /*************************************************************************
@@ -396,6 +413,12 @@ public:
       fail("No more records, getRecName() failed");
     getName(recName);
     leftFile -= 4;
+
+    // Make sure we don't carry over any old cached subrecord
+    // names. This can happen in some cases when we skip parts of a
+    // record.
+    subCached = false;
+
     return recName;
   }
 
@@ -442,6 +465,7 @@ public:
     }
 
   bool hasMoreRecs() { return leftFile > 0; }
+  bool hasMoreSubs() { return leftRec > 0; }
 
 
   /*************************************************************************
@@ -474,15 +498,22 @@ public:
   }
 
   void skip(int bytes) { esm->seek(esm->tell()+bytes); }
+  uint64_t getOffset() { return esm->tell(); }
 
   /// Used for error handling
   void fail(const std::string &msg)
     {
-      std::string err = "ESM Error: " + msg;
-      err += "\n  File: " + filename;
-      err += "\n  Record: " + recName.toString();
-      err += "\n  Subrecord: " + subName.toString();
-      throw str_exception(err);
+      using namespace std;
+
+      stringstream ss;
+
+      ss << "ESM Error: " << msg;
+      ss << "\n  File: " << filename;
+      ss << "\n  Record: " << recName.toString();
+      ss << "\n  Subrecord: " << subName.toString();
+      if(esm != NULL)
+        ss << "\n  Offset: 0x" << hex << esm->tell();
+      throw str_exception(ss.str());
     }
 
 private:
