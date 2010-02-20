@@ -5,25 +5,6 @@
 
 namespace ESM {
 
-/** A list of references to spells and spell effects. This is shared
-    between the records BSGN, NPC and RACE.
-
-    TODO: This should also be part of a shared definition file
- */
-struct SpellList
-{
-  std::vector<std::string> list;
-
-  void load(ESMReader &esm)
-  {
-    while(esm.isNextSub("NPCS"))
-      list.push_back(esm.getHString());
-  }
-};
-
-  /* TODO: Not completely ported yet - depends on EffectList, which
-     should be defined in a shared definition file.
-
 struct Spell
 {
   enum SpellType
@@ -51,26 +32,15 @@ struct Spell
   };
 
   SPDTstruct data;
-
   std::string name;
-
   EffectList effects;
 
-  void load()
-    {with(esFile){
-      name = getHNOString("FNAM");
-      getHNT(data, "SPDT", 12);
-
-      effects = getRegion().getBuffer!(ENAMstruct)(0,1);
-
-      while(isNextSub("ENAM"))
-	{
-	  effects.length = effects.length + 1;
-	  readHExact(&effects.array[$-1], effects.array[$-1].sizeof);
-	}
-    }}
-
-}
-  */
+  void load(ESMReader &esm)
+  {
+    name = esm.getHNOString("FNAM");
+    esm.getHNT(data, "SPDT", 12);
+    effects.load(esm);
+  }
+};
 }
 #endif

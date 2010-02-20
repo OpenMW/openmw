@@ -64,6 +64,15 @@ int main(int argc, char**argv)
 
       switch(n.val)
         {
+        case REC_ACTI:
+          {
+            Activator ac;
+            ac.load(esm);
+            cout << "  Name: " << ac.name << endl;
+            cout << "  Mesh: " << ac.model << endl;
+            cout << "  Script: " << ac.script << endl;
+            break;
+          }
         case REC_ARMO:
           {
             Armor am;
@@ -111,6 +120,13 @@ int main(int argc, char**argv)
             d.load(esm);
             cout << "  Sound: " << d.sound << endl;
             cout << "  Volume: " << (int)d.data.volume << endl;
+            break;
+          }
+        case REC_SPEL:
+          {
+            Spell s;
+            s.load(esm);
+            cout << "  Name: " << s.name << endl;
             break;
           }
         default:

@@ -279,6 +279,15 @@ public:
     getT(x);
   }
 
+  // Version with extra size checking, to make sure the compiler
+  // doesn't mess up our struct padding.
+  template <typename X>
+  void getHT(X &x, int size)
+  {
+    assert(sizeof(X) == size);
+    getHT(x);
+  }
+
   // Read a string by the given name if it is the next record.
   std::string getHNOString(const char* name)
   {
