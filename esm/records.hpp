@@ -2,12 +2,27 @@
 #define _ESM_RECORDS_H
 
 #include "loadacti.hpp"
+#include "loadalch.hpp"
+#include "loadappa.hpp"
 #include "loadarmo.hpp"
 #include "loadbody.hpp"
+#include "loadbook.hpp"
 #include "loadbsgn.hpp"
+#include "loadclot.hpp"
+#include "loadcrec.hpp"
 #include "loaddoor.hpp"
+#include "loadench.hpp"
+#include "loadglob.hpp"
+#include "loadingr.hpp"
+#include "loadligh.hpp"
+#include "loadmisc.hpp"
+#include "loadrace.hpp"
+#include "loadskil.hpp"
+#include "loadsndg.hpp"
 #include "loadsoun.hpp"
 #include "loadspel.hpp"
+#include "loadsscr.hpp"
+#include "loadstat.hpp"
 
 namespace ESM {
 
@@ -24,6 +39,7 @@ enum RecNameInts
     REC_CELL = 0x4c4c4543,
     REC_CLAS = 0x53414c43,
     REC_CLOT = 0x544f4c43,
+    REC_CNTC = 0x43544e43,
     REC_CONT = 0x544e4f43,
     REC_CREA = 0x41455243,
     REC_CREC = 0x43455243,

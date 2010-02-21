@@ -5,6 +5,25 @@
 
 namespace ESM {
 
+enum VarType
+  {
+    VT_Unknown,
+    VT_None,
+    VT_Short,
+    VT_Int,
+    VT_Long,
+    VT_Float,
+    VT_String,
+    VT_Ignored
+  };
+
+enum Specialization
+  {
+    SPC_Combat  = 0,
+    SPC_Magic   = 1,
+    SPC_Stealth = 2
+  };
+
 /** A list of references to spells and spell effects. This is shared
     between the records BSGN, NPC and RACE.
 */
