@@ -8,13 +8,17 @@
 #include "loadbody.hpp"
 #include "loadbook.hpp"
 #include "loadbsgn.hpp"
+#include "loadclas.hpp"
 #include "loadclot.hpp"
+#include "loadcont.hpp"
 #include "loadcrec.hpp"
 #include "loaddoor.hpp"
 #include "loadench.hpp"
+#include "loadfact.hpp"
 #include "loadglob.hpp"
 #include "loadingr.hpp"
 #include "loadligh.hpp"
+#include "loadlocks.hpp"
 #include "loadmisc.hpp"
 #include "loadrace.hpp"
 #include "loadskil.hpp"
@@ -23,6 +27,7 @@
 #include "loadspel.hpp"
 #include "loadsscr.hpp"
 #include "loadstat.hpp"
+#include "loadweap.hpp"
 
 namespace ESM {
 

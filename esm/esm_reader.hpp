@@ -391,7 +391,7 @@ public:
 	fail("skipHSubSize() mismatch");
     }
 
-  /* Sub-record head This updates leftRec beyond the current
+  /* Sub-record header. This updates leftRec beyond the current
      sub-record as well. leftSub contains size of current sub-record.
   */
   void getSubHeader()
@@ -410,6 +410,14 @@ public:
 	fail("Not enough bytes left in record for this subrecord.");
     }
 
+  /** Get sub header and check the size
+   */
+  void getSubHeaderIs(int size)
+  {
+    getSubHeader();
+    if(size != leftSub)
+      fail("getSubHeaderIs(): Sub header mismatch");
+  }
 
   /*************************************************************************
    *
