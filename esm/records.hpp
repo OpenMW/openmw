@@ -17,6 +17,7 @@
 #include "loadench.hpp"
 #include "loadfact.hpp"
 #include "loadglob.hpp"
+#include "loadgmst.hpp"
 #include "loadingr.hpp"
 #include "loadligh.hpp"
 #include "loadlocks.hpp"
@@ -62,6 +63,7 @@ enum RecNameInts
     REC_GMST = 0x54534d47,
     REC_INFO = 0x4f464e49,
     REC_INGR = 0x52474e49,
+    REC_LAND = 0x0,
     REC_LEVC = 0x4356454c,
     REC_LEVI = 0x4956454c,
     REC_LIGH = 0x4847494c,
@@ -71,6 +73,7 @@ enum RecNameInts
     REC_MISC = 0x4353494d,
     REC_NPC_ = 0x5f43504e,
     REC_NPCC = 0x4343504e,
+    REC_PGRC = 0x0,
     REC_PROB = 0x424f5250,
     REC_RACE = 0x45434152,
     REC_REGN = 0x4e474552,
