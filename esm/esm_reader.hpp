@@ -16,6 +16,12 @@
 
 namespace ESM {
 
+enum Version
+  {
+    VER_12 = 0x3f99999a,
+    VER_13 = 0x3fa66666
+  };
+
 /* A structure used for holding fixed-length strings. In the case of
    LEN=4, it can be more efficient to match the string as a 32 bit
    number, therefore the struct is implemented as a union with an int.
@@ -96,12 +102,6 @@ public:
 #pragma pack(pop)
 
   typedef std::vector<MasterData> MasterList;
-
-  enum Version
-    {
-      VER_12 = 0x3f99999a,
-      VER_13 = 0x3fa66666
-    };
 
   enum FileType
     {
@@ -252,6 +252,14 @@ public:
     getHT(x);
   }
 
+  // Optional version of getHNT
+  template <typename X>
+  void getHNOT(X &x, const char* name)
+  {
+    if(isNextSub(name))
+      getHT(x);
+  }
+
   // Version with extra size checking, to make sure the compiler
   // doesn't mess up our struct padding.
   template <typename X>
@@ -323,6 +331,22 @@ public:
       }
 
     return getString(leftSub);
+  }
+
+  // Read the given number of bytes from a subrecord
+  void getHExact(void*p, int size)
+  {
+    getSubHeader();
+    if(size != leftSub)
+      fail("getHExact() size mismatch");
+    getExact(p,size);
+  }
+
+  // Read the given number of bytes from a named subrecord
+  void getHNExact(void*p, int size, const char* name)
+  {
+    getSubNameIs(name);
+    getHExact(p,size);
   }
 
   /*************************************************************************

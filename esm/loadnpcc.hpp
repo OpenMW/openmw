@@ -1,28 +1,9 @@
-/*
-  OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008  Nicolay Korslund
-  Email: < korslund@gmail.com >
-  WWW: http://openmw.snaptoad.com/
+#ifndef _ESM_NPCC_H
+#define _ESM_NPCC_H
 
-  This file (loadnpcc.d) is part of the OpenMW package.
+#include "esm_reader.hpp"
 
-  OpenMW is distributed as free software: you can redistribute it
-  and/or modify it under the terms of the GNU General Public License
-  version 3, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 3 along with this program. If not, see
-  http://www.gnu.org/licenses/ .
-
- */
-
-module esm.loadnpcc;
-import esm.imports;
+namespace ESM {
 
 /*
  * NPC change information (found in savegame files only). We can't
@@ -51,14 +32,14 @@ import esm.imports;
  *
  * FMAP - MAPH and MAPD, probably map data.
  *
- * JOUR - the entire bloody journal in html
+ * JOUR - the entire journal in html
  *
  * QUES - seems to contain all the quests in the game, not just the
  * ones you have done or begun.
  *
  * REGN - lists all regions in the game, even unvisited ones.
  *
- * The DIAL/INFO blocks contain changes to characters dialog status.
+ * The DIAL/INFO blocks contain changes to characters' dialog status.
  *
  * Dammit there's a lot of stuff in there! Should really have
  * suspected as much. The strategy further is to completely ignore
@@ -91,14 +72,10 @@ import esm.imports;
 
 struct LoadNPCC
 {
-  void load(TES3File f)
-    {
-      writefln("NPC-changer: %s", f.getHNString("NAME"));
-
-      while(f.hasMoreSubs)
-	{
-	  f.getSubName();
-	  f.skipHSub();
-	}
-    }
+  void load(ESMReader &esm)
+  {
+    esm.skipRecord();
+  }
+};
 }
+#endif
