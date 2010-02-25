@@ -76,6 +76,61 @@ typedef NAME_T<32> NAME32;
 typedef NAME_T<64> NAME64;
 typedef NAME_T<256> NAME256;
 
+#pragma pack(push)
+#pragma pack(1)
+/// File header data for all ES files
+struct HEDRstruct
+{
+  /* File format version. This is actually a float, the supported
+     versions are 1.2 and 1.3. These correspond to:
+     1.2 = 0x3f99999a and 1.3 = 0x3fa66666
+  */
+  int version;
+  int type;           // 0=esp, 1=esm, 32=ess
+  NAME32 author;      // Author's name
+  NAME256 desc;       // File description
+  int records;        // Number of records? Not used.
+};
+
+// Defines another files (esm or esp) that this file depends upon.
+struct MasterData
+{
+  std::string name;
+  uint64_t size;
+};
+
+// Data that is only present in save game files
+struct SaveData
+{
+  float pos[6];     // Player position and rotation
+  NAME64 cell;      // Cell name
+  float unk2;       // Unknown value - possibly game time?
+  NAME32 player;    // Player name
+};
+#pragma pack(pop)
+
+
+/* This struct defines a file 'context' which can be saved and later
+   restored by an ESMReader instance. It will save the position within
+   a file, and when restored will let you read from that position as
+   if you never left it.
+ */
+struct ESM_Context
+{
+  std::string filename;
+  uint32_t leftRec, leftSub;
+  size_t leftFile;
+  NAME recName, subName;
+  HEDRstruct header;
+
+  // True if subName has been read but not used.
+  bool subCached;
+
+  // File position. Only used for stored contexts, not regularly
+  // updated within the reader itself.
+  size_t filePos;
+};
+
 class ESMReader
 {
 public:
@@ -86,39 +141,6 @@ public:
    *
    *************************************************************************/
 
-#pragma pack(push)
-#pragma pack(1)
-  struct HEDRstruct
-  {
-    /* File format version. This is actually a float, the supported
-       versions are 1.2 and 1.3. These correspond to:
-       1.2 = 0x3f99999a and 1.3 = 0x3fa66666
-     */
-    int version;
-    int type;           // 0=esp, 1=esm, 32=ess
-    NAME32 author;      // Author's name
-    NAME256 desc;       // File description
-    int records;        // Number of records? Not used.
-  };
-
-  // Defines another files (esm or esp) that this file depends upon.
-  struct MasterData
-  {
-    std::string name;
-    uint64_t size;
-  };
-
-  // Data that is only present in save game files
-  struct SaveData
-  {
-    float pos[6];     // Player position and rotation
-    NAME64 cell;      // Cell name
-    float unk2;       // Unknown value - possibly game time?
-    NAME32 player;    // Player name
-
-  };
-#pragma pack(pop)
-
   typedef std::vector<MasterData> MasterList;
 
   /*************************************************************************
@@ -127,15 +149,15 @@ public:
    *
    *************************************************************************/
 
-  int getVer() { return header.version; }
-  float getFVer() { return *((float*)&header.version); }
+  int getVer() { return c.header.version; }
+  float getFVer() { return *((float*)&c.header.version); }
   int getSpecial() { return spf; }
-  const std::string getAuthor() { return header.author.toString(); }
-  const std::string getDesc() { return header.desc.toString(); }
+  const std::string getAuthor() { return c.header.author.toString(); }
+  const std::string getDesc() { return c.header.desc.toString(); }
   const SaveData &getSaveData() { return saveData; }
   const MasterList &getMasters() { return masters; }
-  NAME retSubName() { return subName; }
-  uint32_t getSubSize() { return leftSub; }
+  NAME retSubName() { return c.subName; }
+  uint32_t getSubSize() { return c.leftSub; }
 
   /*************************************************************************
    *
@@ -143,18 +165,43 @@ public:
    *
    *************************************************************************/
 
-  /// Close the file, resets all information. After calling close()
-  /// the structure may be reused to load a new file.
+  /** Save the current file position and information in a ESM_Context
+      struct
+   */
+  ESM_Context getContext()
+  {
+    // Update the file position before returning
+    c.filePos = esm->tell();
+    return c;
+  }
+
+  /** Restore a previously saved context */
+  void restoreContext(const ESM_Context &rc)
+  {
+    // Reopen the file if necessary
+    if(c.filename != rc.filename)
+      openRaw(rc.filename);
+
+    // Copy the data
+    c = rc;
+
+    // Make sure we seek to the right place
+    esm->seek(c.filePos);
+  }
+
+  /** Close the file, resets all information. After calling close()
+      the structure may be reused to load a new file.
+  */
   void close()
   {
     esm.reset();
-    filename.clear();
-    leftFile = 0;
-    leftRec = 0;
-    leftSub = 0;
-    subCached = false;
-    recName.val = 0;
-    subName.val = 0;
+    c.filename.clear();
+    c.leftFile = 0;
+    c.leftRec = 0;
+    c.leftSub = 0;
+    c.subCached = false;
+    c.recName.val = 0;
+    c.subName.val = 0;
   }
 
   /// Raw opening. Opens the file and sets everything up but doesn't
@@ -163,12 +210,12 @@ public:
   {
     close();
     esm = _esm;
-    filename = name;
-    leftFile = esm->size();
+    c.filename = name;
+    c.leftFile = esm->size();
 
     // Flag certain files for special treatment, based on the file
     // name.
-    const char *cstr = filename.c_str();
+    const char *cstr = c.filename.c_str();
     if(iends(cstr, "Morrowind.esm")) spf = SF_Morrowind;
     else if(iends(cstr, "Tribunal.esm")) spf = SF_Tribunal;
     else if(iends(cstr, "Bloodmoon.esm")) spf = SF_Bloodmoon;
@@ -187,10 +234,10 @@ public:
     getRecHeader();
 
     // Get the header
-    getHNT(header, "HEDR", 300);
+    getHNT(c.header, "HEDR", 300);
 
-    if(header.version != VER_12 &&
-       header.version != VER_13)
+    if(c.header.version != VER_12 &&
+       c.header.version != VER_13)
       fail("Unsupported file format version");
 
     while(isNextSub("MAST"))
@@ -201,7 +248,7 @@ public:
         masters.push_back(m);
       }
 
-    if(header.type == FT_ESS)
+    if(c.header.type == FT_ESS)
       {
         // Savegame-related data
 
@@ -282,7 +329,7 @@ public:
   void getHT(X &x)
   {
     getSubHeader();
-    if(leftSub != sizeof(X))
+    if(c.leftSub != sizeof(X))
       fail("getHT(): subrecord size mismatch");
     getT(x);
   }
@@ -321,23 +368,23 @@ public:
     // them. For some reason, they break the rules, and contain a byte
     // (value 0) even if the header says there is no data. If
     // Morrowind accepts it, so should we.
-    if(leftSub == 0)
+    if(c.leftSub == 0)
       {
         // Skip the following zero byte
-        leftRec--;
+        c.leftRec--;
         char c;
         esm->read(&c,1);
         return "";
       }
 
-    return getString(leftSub);
+    return getString(c.leftSub);
   }
 
   // Read the given number of bytes from a subrecord
   void getHExact(void*p, int size)
   {
     getSubHeader();
-    if(size != leftSub)
+    if(size != c.leftSub)
       fail("getHExact() size mismatch");
     getExact(p,size);
   }
@@ -359,8 +406,8 @@ public:
   void getSubNameIs(const char* name)
   {
     getSubName();
-    if(subName != name)
-      fail("Expected subrecord " + std::string(name) + " but got " + subName.toString());
+    if(c.subName != name)
+      fail("Expected subrecord " + std::string(name) + " but got " + c.subName.toString());
   }
 
   /** Checks if the next sub record name matches the parameter. If it
@@ -370,16 +417,16 @@ public:
    */
   bool isNextSub(const char* name)
   {
-    if(!leftRec) return false;
+    if(!c.leftRec) return false;
 
     getSubName();
 
     // If the name didn't match, then mark the it as 'cached' so it's
     // available for the next call to getSubName.
-    subCached = (subName != name);
+    c.subCached = (c.subName != name);
 
     // If subCached is false, then subName == name.
-    return !subCached;
+    return !c.subCached;
   }
 
   // Read subrecord name. This gets called a LOT, so I've optimized it
@@ -387,16 +434,16 @@ public:
   void getSubName()
     {
       // If the name has already been read, do nothing
-      if(subCached)
+      if(c.subCached)
         {
-          subCached = false;
+          c.subCached = false;
           return;
         }
 
       // Don't bother with error checking, we will catch an EOF upon
       // reading the subrecord data anyway.
-      esm->read(subName.name, 4);
-      leftRec -= 4;
+      esm->read(c.subName.name, 4);
+      c.leftRec -= 4;
     }
 
   // Skip current sub record, including header (but not including
@@ -404,14 +451,14 @@ public:
   void skipHSub()
     {
       getSubHeader();
-      skip(leftSub);
+      skip(c.leftSub);
     }
 
   // Skip sub record and check its size
   void skipHSubSize(int size)
     {
       skipHSub();
-      if(leftSub != size)
+      if(c.leftSub != size)
 	fail("skipHSubSize() mismatch");
     }
 
@@ -420,17 +467,17 @@ public:
   */
   void getSubHeader()
     {
-      if(leftRec < 4)
+      if(c.leftRec < 4)
 	fail("End of record while reading sub-record header");
 
       // Get subrecord size
-      getT(leftSub);
+      getT(c.leftSub);
 
       // Adjust number of record bytes left
-      leftRec -= leftSub + 4;
+      c.leftRec -= c.leftSub + 4;
 
       // Check that sizes added up
-      if(leftRec < 0)
+      if(c.leftRec < 0)
 	fail("Not enough bytes left in record for this subrecord.");
     }
 
@@ -439,7 +486,7 @@ public:
   void getSubHeaderIs(int size)
   {
     getSubHeader();
-    if(size != leftSub)
+    if(size != c.leftSub)
       fail("getSubHeaderIs(): Sub header mismatch");
   }
 
@@ -454,29 +501,29 @@ public:
   {
     if(!hasMoreRecs())
       fail("No more records, getRecName() failed");
-    getName(recName);
-    leftFile -= 4;
+    getName(c.recName);
+    c.leftFile -= 4;
 
     // Make sure we don't carry over any old cached subrecord
     // names. This can happen in some cases when we skip parts of a
     // record.
-    subCached = false;
+    c.subCached = false;
 
-    return recName;
+    return c.recName;
   }
 
   // Skip the rest of this record. Assumes the name and header have
   // already been read
   void skipRecord()
     {
-      skip(leftRec);
-      leftRec = 0;
+      skip(c.leftRec);
+      c.leftRec = 0;
     }
 
   // Skip an entire record, including the header (but not the name)
   void skipHRecord()
   {
-    if(!leftFile) return;
+    if(!c.leftFile) return;
     getRecHeader();
     skipRecord();
   }
@@ -489,26 +536,26 @@ public:
   void getRecHeader(uint32_t &flags)
     {
       // General error checking
-      if(leftFile < 12)
+      if(c.leftFile < 12)
 	fail("End of file while reading record header");
-      if(leftRec)
+      if(c.leftRec)
 	fail("Previous record contains unread bytes");
 
-      getUint(leftRec);
+      getUint(c.leftRec);
       getUint(flags);// This header entry is always zero
       getUint(flags);
-      leftFile -= 12;
+      c.leftFile -= 12;
 
       // Check that sizes add up
-      if(leftFile < leftRec)
+      if(c.leftFile < c.leftRec)
 	fail("Record size is larger than rest of file");
 
-      // Adjust number of bytes left in file
-      leftFile -= leftRec;
+      // Adjust number of bytes c.left in file
+      c.leftFile -= c.leftRec;
     }
 
-  bool hasMoreRecs() { return leftFile > 0; }
-  bool hasMoreSubs() { return leftRec > 0; }
+  bool hasMoreRecs() { return c.leftFile > 0; }
+  bool hasMoreSubs() { return c.leftRec > 0; }
 
 
   /*************************************************************************
@@ -551,9 +598,9 @@ public:
       stringstream ss;
 
       ss << "ESM Error: " << msg;
-      ss << "\n  File: " << filename;
-      ss << "\n  Record: " << recName.toString();
-      ss << "\n  Subrecord: " << subName.toString();
+      ss << "\n  File: " << c.filename;
+      ss << "\n  Record: " << c.recName.toString();
+      ss << "\n  Subrecord: " << c.subName.toString();
       if(esm != NULL)
         ss << "\n  Offset: 0x" << hex << esm->tell();
       throw str_exception(ss.str());
@@ -561,19 +608,14 @@ public:
 
 private:
   Mangle::Stream::StreamPtr esm;
-  size_t leftFile;
-  uint32_t leftRec, leftSub;
-  std::string filename;
 
-  NAME recName, subName;
+  ESM_Context c;
 
-  // True if subName has been read but not used.
-  bool subCached;
+  // Special file signifier (see SpecialFile enum above)
+  int spf;
 
-  HEDRstruct header;
   SaveData saveData;
   MasterList masters;
-  int spf; // Special file signifier (see SpecialFile below)
 };
 }
 #endif
