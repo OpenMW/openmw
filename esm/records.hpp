@@ -19,6 +19,7 @@
 #include "loadfact.hpp"
 #include "loadglob.hpp"
 #include "loadgmst.hpp"
+#include "loadinfo.hpp"
 #include "loadingr.hpp"
 #include "loadland.hpp"
 #include "loadlevlist.hpp"

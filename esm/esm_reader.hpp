@@ -68,7 +68,7 @@ union NAME_T
   bool operator==(int v) { return v == val; }
   bool operator!=(int v) { return v != val; }
 
-  std::string toString() { return std::string(name, strnlen(name, LEN)); }
+  std::string toString() const { return std::string(name, strnlen(name, LEN)); }
 };
 
 typedef NAME_T<4> NAME;
@@ -156,7 +156,7 @@ public:
   const std::string getDesc() { return c.header.desc.toString(); }
   const SaveData &getSaveData() { return saveData; }
   const MasterList &getMasters() { return masters; }
-  NAME retSubName() { return c.subName; }
+  const NAME &retSubName() { return c.subName; }
   uint32_t getSubSize() { return c.leftSub; }
 
   /*************************************************************************
@@ -444,6 +444,18 @@ public:
       // reading the subrecord data anyway.
       esm->read(c.subName.name, 4);
       c.leftRec -= 4;
+    }
+
+  // This is specially optimized for LoadINFO.
+  bool isEmptyOrGetName()
+    {
+      if(c.leftRec)
+	{
+	  esm->read(c.subName.name, 4);
+	  c.leftRec -= 4;
+	  return false;
+	}
+      return true;
     }
 
   // Skip current sub record, including header (but not including

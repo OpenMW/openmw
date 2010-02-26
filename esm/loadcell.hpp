@@ -6,12 +6,16 @@
 namespace ESM {
 
 /* Cells hold data about objects, creatures, statics (rocks, walls,
- * buildings) and landscape (for exterior cells). Cells frequently
- * also has other associated LAND and PGRD records. Combined, all this
- * data can be huge, and we cannot load it all at startup. Instead,
- * the strategy we use is to remember the file position of each cell
- * (using ESMReader::getContext()) and jumping back into place
- * whenever we need to load a given cell.
+   buildings) and landscape (for exterior cells). Cells frequently
+   also has other associated LAND and PGRD records. Combined, all this
+   data can be huge, and we cannot load it all at startup. Instead,
+   the strategy we use is to remember the file position of each cell
+   (using ESMReader::getContext()) and jumping back into place
+   whenever we need to load a given cell.
+
+   TODO: We should handle the actual cell content loading in this file
+   too, although the solution should be as open as possible and let
+   the user handle all data storage.
  */
 
 struct Cell
@@ -48,7 +52,8 @@ struct Cell
     // This is implicit?
     //name = esm.getHNString("NAME");
 
-    // Ignore this for now, I assume it might mean we delete the entire cell?
+    // Ignore this for now, it might mean we should delete the entire
+    // cell?
     if(esm.isNextSub("DELE")) esm.skipHSub();
 
     esm.getHNT(data, "DATA", 12);
