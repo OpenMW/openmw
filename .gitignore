@@ -1,4 +1,8 @@
 *.o
 *~
 data
-mw-scripts
+CMakeFiles
+CMakeCache.txt
+Makefile
+cmake*.cmake
+openmw
