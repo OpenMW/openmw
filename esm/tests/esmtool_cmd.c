@@ -34,6 +34,7 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help     Print help and exit",
   "  -V, --version  Print version and exit",
   "  -r, --raw      Show an unformattet list of all records and subrecords",
+  "  -q, --quiet    Supress all record information. Useful for speed tests.",
   "\nIf no option is given, the default action is to parse the entire archive and \ndiplay diagnostic information.",
     0
 };
@@ -60,6 +61,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
   args_info->raw_given = 0 ;
+  args_info->quiet_given = 0 ;
 }
 
 static
@@ -77,6 +79,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->help_help = gengetopt_args_info_help[0] ;
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->raw_help = gengetopt_args_info_help[2] ;
+  args_info->quiet_help = gengetopt_args_info_help[3] ;
   
 }
 
@@ -192,6 +195,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "version", 0, 0 );
   if (args_info->raw_given)
     write_into_file(outfile, "raw", 0, 0 );
+  if (args_info->quiet_given)
+    write_into_file(outfile, "quiet", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -1019,6 +1024,7 @@ cmdline_parser_internal (
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
         { "raw",	0, NULL, 'r' },
+        { "quiet",	0, NULL, 'q' },
         { 0,  0, 0, 0 }
       };
 
@@ -1027,7 +1033,7 @@ cmdline_parser_internal (
       custom_opterr = opterr;
       custom_optopt = optopt;
 
-      c = custom_getopt_long (argc, argv, "hVr", long_options, &option_index);
+      c = custom_getopt_long (argc, argv, "hVrq", long_options, &option_index);
 
       optarg = custom_optarg;
       optind = custom_optind;
@@ -1056,6 +1062,18 @@ cmdline_parser_internal (
               &(local_args_info.raw_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "raw", 'r',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'q':	/* Supress all record information. Useful for speed tests..  */
+        
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->quiet_given),
+              &(local_args_info.quiet_given), optarg, 0, 0, ARG_NO,
+              check_ambiguity, override, 0, 0,
+              "quiet", 'q',
               additional_error))
             goto failure;
         

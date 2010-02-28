@@ -4,5 +4,6 @@ purpose "Inspect and extract from Morrowind ES files (ESM, ESP, ESS)"
 args "--unamed-opts=ES-FILE -F esmtool_cmd -G"
 
 option "raw" r "Show an unformattet list of all records and subrecords" optional
+option "quiet" q "Supress all record information. Useful for speed tests." optional
 
 text "\nIf no option is given, the default action is to parse the entire archive and diplay diagnostic information."

@@ -22,9 +22,9 @@ struct InventoryList
   void load(ESMReader &esm)
   {
     ContItem ci;
-    while(esm.hasMoreSubs())
+    while(esm.isNextSub("NPCO"))
       {
-        esm.getHNT(ci, "NPCO", 36);
+        esm.getHT(ci, 36);
         list.push_back(ci);
       }
   }	

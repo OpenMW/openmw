@@ -72,6 +72,7 @@ struct Creature
     esm.getHNT(data, "NPDT", 96);
 
     esm.getHNT(flags, "FLAG");
+    scale = 1.0;
     esm.getHNOT(scale, "XSCL");
 
     inventory.load(esm);

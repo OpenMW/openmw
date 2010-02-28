@@ -6,7 +6,7 @@
 namespace ESM {
 
 /*
- * Books
+ * Books, magic scrolls, notes and so on
  */
 
 struct Book

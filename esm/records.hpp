@@ -14,6 +14,7 @@
 #include "loadcont.hpp"
 #include "loadcrea.hpp"
 #include "loadcrec.hpp"
+#include "loaddial.hpp"
 #include "loaddoor.hpp"
 #include "loadench.hpp"
 #include "loadfact.hpp"

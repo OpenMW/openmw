@@ -40,10 +40,12 @@ struct gengetopt_args_info
   const char *help_help; /**< @brief Print help and exit help description.  */
   const char *version_help; /**< @brief Print version and exit help description.  */
   const char *raw_help; /**< @brief Show an unformattet list of all records and subrecords help description.  */
+  const char *quiet_help; /**< @brief Supress all record information. Useful for speed tests. help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
   unsigned int raw_given ;	/**< @brief Whether raw was given.  */
+  unsigned int quiet_given ;	/**< @brief Whether quiet was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

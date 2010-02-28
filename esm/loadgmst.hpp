@@ -203,6 +203,8 @@ struct GameSetting
 
   void load(ESMReader &esm)
   {
+    assert(id != "");
+
     dirty = false;
 
     // We are apparently allowed to be empty

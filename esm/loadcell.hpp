@@ -57,12 +57,11 @@ struct Cell
     if(esm.isNextSub("DELE")) esm.skipHSub();
 
     esm.getHNT(data, "DATA", 12);
+    region = esm.getHNOString("RGNN");
 
     // Save position and move on
     context = esm.getContext();
     esm.skipRecord();
-
-    region = esm.getHNOString("RGNN");
   }
 };
 }
