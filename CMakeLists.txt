@@ -9,9 +9,10 @@ set(MANGLE_VFS mangle/vfs/servers/ogre_vfs.cpp)
 set(GAME game/main.cpp)
 
 # Dependencies
-# Not exactly platform independent, FIXME!
-add_definitions(-I/usr/local/include/OGRE)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(OGRE REQUIRED OGRE)
+include_directories(${OGRE_INCLUDE_DIRS})
 
 # Main executable
 add_executable(openmw ${BSA} ${TOOLS} ${GAME})
-target_link_libraries(openmw OgreMain)
+target_link_libraries(openmw ${OGRE_LIBRARIES})
