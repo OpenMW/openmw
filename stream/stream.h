@@ -58,16 +58,16 @@ class Stream
   /// Return a pointer to the entire stream. This function (and the
   /// other getPtr() variants below) should only be implemented for
   /// memory-based streams where using them would be an optimization.
-  virtual const void *getPtr() { assert(0); }
+  virtual const void *getPtr() { assert(0); return NULL; }
 
   /// Get a pointer to a memory region of 'size' bytes starting from
   /// position 'pos'
-  virtual const void *getPtr(size_t pos, size_t size) { assert(0); }
+  virtual const void *getPtr(size_t pos, size_t size) { assert(0); return NULL; }
 
   /// Get a pointer to a memory region of 'size' bytes from the
   /// current position. Unlike the two other getPtr variants, this
   /// will advance the position past the returned area.
-  virtual const void *getPtr(size_t size) { assert(0); }
+  virtual const void *getPtr(size_t size) { assert(0); return NULL; }
 };
 
 typedef boost::shared_ptr<Stream> StreamPtr;
