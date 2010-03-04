@@ -5,5 +5,6 @@ args "--unamed-opts=ES-FILE -F esmtool_cmd -G"
 
 option "raw" r "Show an unformattet list of all records and subrecords" optional
 option "quiet" q "Supress all record information. Useful for speed tests." optional
+option "loadcells" C "Browse through contents of all cells." optional
 
-text "\nIf no option is given, the default action is to parse the entire archive and diplay diagnostic information."
+text "\nIf no option is given, the default action is to parse all records in the archive and display diagnostic information."

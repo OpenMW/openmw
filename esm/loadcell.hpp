@@ -41,10 +41,9 @@ struct CellRef
   float charge;
 
   // I have no idea, these are present some times, often along with
-  // owner (ANAM) and sometimes otherwise. Is NAM9 is always 1?  INTV
-  // is usually one, but big for lights. Perhaps something to do with
-  // remaining light "charge". I haven't tried reading it as a float
-  // in those cases.
+  // owner (ANAM) and sometimes otherwise. They are often (but not
+  // always) 1. INTV is big for lights (possibly a float?), might have
+  // something to do with remaining light "charge".
   int intv, nam9;
 
   // For doors - true if this door teleports to somewhere else, false
@@ -180,8 +179,8 @@ struct Cell
     esm.getHNT(ref.refnum, "FRMR");
     ref.refID = esm.getHNString("NAME");
 
-    // getHNOT will not change the existing value (1.0) if the
-    // subrecord is missing
+    // getHNOT will not change the existing value if the subrecord is
+    // missing
     ref.scale = 1.0;
     esm.getHNOT(ref.scale, "XSCL");
 
@@ -190,9 +189,10 @@ struct Cell
     ref.soul = esm.getHNOString("XSOL");
 
     ref.faction = esm.getHNOString("CNAM");
+    ref.factIndex = -1;
     esm.getHNOT(ref.factIndex, "INDX");
 
-    ref.charge = 0.0;
+    ref.charge = -1.0;
     esm.getHNOT(ref.charge, "XCHG");
 
     ref.intv = 0;
@@ -209,7 +209,8 @@ struct Cell
       }
     else ref.teleport = false;
 
-    esm.getHNOT(ref.lockLevel, "FLTV"); // int, despite the name
+    // Integer, despite the name suggesting otherwise
+    esm.getHNOT(ref.lockLevel, "FLTV");
     ref.key = esm.getHNOString("KNAM");
     ref.trap = esm.getHNOString("TNAM");
 

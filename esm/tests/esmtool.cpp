@@ -9,6 +9,7 @@ using namespace std;
 using namespace ESM;
 
 void printRaw(ESMReader &esm);
+void loadCell(Cell &cell, ESMReader &esm, bool quiet);
 
 int main(int argc, char**argv)
 {
@@ -31,6 +32,8 @@ int main(int argc, char**argv)
   const char* filename = info.inputs[0];
   cout << "\nFile: " << filename << endl;
 
+  try {
+
   if(info.raw_given)
     {
       cout << "RAW file listing:\n";
@@ -43,6 +46,7 @@ int main(int argc, char**argv)
     }
 
   bool quiet = info.quiet_given;
+  bool loadCells = info.loadcells_given;
 
   esm.open(filename);
 
@@ -139,9 +143,13 @@ int main(int argc, char**argv)
           {
             Cell b;
             b.load(esm);
-            if(quiet) break;
-            cout << "  Name: " << b.name << endl;
-            cout << "  Region: " << b.region << endl;
+            if(!quiet)
+              {
+                cout << "  Name: " << b.name << endl;
+                cout << "  Region: " << b.region << endl;
+              }
+            if(loadCells)
+              loadCell(b, esm, quiet);
             break;
           }
         case REC_CLAS:
@@ -250,7 +258,32 @@ int main(int argc, char**argv)
         }
     }
 
+  } catch(exception &e)
+    {
+      cout << "\nERROR:\n\n  " << e.what() << endl;
+      return 1;
+    }
+
   return 0;
+}
+
+void loadCell(Cell &cell, ESMReader &esm, bool quiet)
+{
+  // Skip back to the beginning of the reference list
+  cell.restore(esm);
+
+  // Loop through all the references
+  CellRef ref;
+  if(!quiet) cout << "  References:\n";
+  while(cell.getNextRef(esm, ref))
+    {
+      if(quiet) continue;
+
+      cout << "    Refnum: " << ref.refnum << endl;
+      cout << "    ID: '" << ref.refID << "'\n";
+      cout << "    Owner: '" << ref.owner << "'\n";
+      cout << "    INTV: " << ref.intv << "   NAM9: " << ref.intv << endl;
+    }
 }
 
 void printRaw(ESMReader &esm)
