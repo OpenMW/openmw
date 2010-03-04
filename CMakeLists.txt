@@ -1,5 +1,10 @@
+project(OpenMW)
+
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
+
+# Add path for CMake scripts
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
 # Local files
 set(BSA bsa/bsa_archive.cpp bsa/bsa_file.cpp)
@@ -8,10 +13,17 @@ set(TOOLS tools/stringops.cpp)
 set(MANGLE_VFS mangle/vfs/servers/ogre_vfs.cpp)
 set(GAME game/main.cpp)
 
+# Platform specific
+if (WIN32)
+set(PLATFORM_INCLUDE_DIR "platform")
+else (WIN32)
+set(PLATFORM_INCLUDE_DIR "")
+endif (WIN32)
+
 # Dependencies
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(OGRE REQUIRED OGRE)
-include_directories(${OGRE_INCLUDE_DIRS})
+find_package(OGRE REQUIRED)
+include_directories("." "bsa" "esm" "game" "mangle" "nif" "nifogre" "tools" ${OGRE_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
+link_directories(${OGRE_LIB_DIR})
 
 # Main executable
 add_executable(openmw ${BSA} ${TOOLS} ${GAME})
