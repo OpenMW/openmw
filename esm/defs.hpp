@@ -5,6 +5,9 @@
 
 namespace ESM {
 
+// Pixel color value. Standard four-byte rr,gg,bb,aa format.
+typedef int32_t Color;
+
 enum VarType
   {
     VT_Unknown,
@@ -43,6 +46,14 @@ struct SpellList
 */
 #pragma pack(push)
 #pragma pack(1)
+
+// Position and rotation
+struct Position
+{
+  float pos[3];
+  float rot[3];
+};
+
 struct ENAMstruct
 {
   // Magical effect, hard-coded ID
