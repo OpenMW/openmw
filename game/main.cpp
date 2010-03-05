@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "../bsa/bsa_archive.h"
-#include "../esm/records.hpp"
+#include "bsa/bsa_archive.h"
+#include "esm/records.hpp"
 
 #include "Ogre.h"
 

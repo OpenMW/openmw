@@ -22,7 +22,7 @@ endif (WIN32)
 
 # Dependencies
 find_package(OGRE REQUIRED)
-include_directories("." "bsa" "esm" "game" "mangle" "nif" "nifogre" "tools" ${OGRE_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
+include_directories("." ${OGRE_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
 link_directories(${OGRE_LIB_DIR})
 
 # Main executable
