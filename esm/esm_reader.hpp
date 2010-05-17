@@ -222,8 +222,8 @@ public:
     else spf = SF_Other;
   }
 
-  /// Load ES file from a new stream, parses the header. Calls close()
-  /// automatically.
+  /// Load ES file from a new stream, parses the header. Closes the
+  /// currently open file first, if any.
   void open(Mangle::Stream::StreamPtr _esm, const std::string &name)
   {
     openRaw(_esm, name);

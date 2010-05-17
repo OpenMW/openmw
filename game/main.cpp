@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "bsa/bsa_archive.h"
-#include "esm/records.hpp"
+#include "esm_store.hpp"
 
 #include "Ogre.h"
 
@@ -34,9 +34,11 @@ void maintest()
   cout << "Adding " << bsaFile << endl;
   addBSA(bsaFile);
 
-  cout << "Loading ESM " << esmFile << " (header only)\n";
+  cout << "Loading ESM " << esmFile << "\n";
   ESM::ESMReader esm;
   esm.open(esmFile);
+  storeESM(esm);
+  esm.close();
 
   cout << "\nThat's all for now!\n";
 }
