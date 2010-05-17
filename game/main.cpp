@@ -37,7 +37,8 @@ void maintest()
   cout << "Loading ESM " << esmFile << "\n";
   ESM::ESMReader esm;
   esm.open(esmFile);
-  storeESM(esm);
+  ESMS::ESMStore store;
+  store.load(esm);
   esm.close();
 
   cout << "\nThat's all for now!\n";
