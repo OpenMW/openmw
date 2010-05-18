@@ -2,6 +2,7 @@
 
 function run()
 {
+  echo "$1/tests/:"
   cd "$1/tests/"
   ./test.sh
   cd ../../
