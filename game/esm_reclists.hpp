@@ -64,6 +64,8 @@ namespace ESMS
     // Just count them for now
     int count;
 
+    CellList() : count(0) {}
+
     /*
       What to do here:
 
@@ -79,6 +81,12 @@ namespace ESMS
 
     void load(ESMReader &esm)
     {
+      // All cells have a name record, even nameless exterior cells.
+      std::string id = esm.getHNString("NAME");
+
+      using namespace std;
+      cout << id << endl;
+
       count++;
       esm.skipRecord();
     }
