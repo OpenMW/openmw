@@ -64,6 +64,19 @@ namespace ESMS
     // Just count them for now
     int count;
 
+    /*
+      What to do here:
+
+      load() reads the appropriate records to determine if this is an
+      interior or exterior cell. The old D code should be straight
+      forward to port here. Unlike the lists above, this struct
+      contains two lists, one for each cell type. We will have to hack
+      around again to get good indexing of exterior cells, but I think
+      a hash thingie like we did in D will work. An alternative is
+      just a map<map<>>, so we can do ext_cells[X][Y].whatever. Hmm, I
+      think I like that better actually.
+     */
+
     void load(ESMReader &esm)
     {
       count++;
