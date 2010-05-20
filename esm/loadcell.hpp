@@ -118,6 +118,9 @@ struct Cell
 
   void load(ESMReader &esm)
   {
+    // All cells have a name record, even nameless exterior cells.
+    name = esm.getHNString("NAME");
+
     // Ignore this for now, it might mean we should delete the entire
     // cell?
     if(esm.isNextSub("DELE")) esm.skipHSub();

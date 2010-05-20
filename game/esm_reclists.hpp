@@ -61,42 +61,42 @@ namespace ESMS
   // separately.
   struct CellList : RecList
   {
-    // Just count them for now
+    // Total cell count. Used for statistics.
     int count;
-
     CellList() : count(0) {}
+    int getSize() { return count; }
 
-    /*
-      What to do here:
+    // List of interior cells. Indexed by cell name.
+    std::map<std::string,Cell> intCells;
 
-      load() reads the appropriate records to determine if this is an
-      interior or exterior cell. The old D code should be straight
-      forward to port here. Unlike the lists above, this struct
-      contains two lists, one for each cell type. We will have to hack
-      around again to get good indexing of exterior cells, but I think
-      a hash thingie like we did in D will work. An alternative is
-      just a map<map<>>, so we can do ext_cells[X][Y].whatever. Hmm, I
-      think I like that better actually.
-     */
+    // List of exterior cells. Indexed as extCells[gridX][gridY].
+    std::map<int, std::map<int, Cell> > extCells;
 
     void load(ESMReader &esm)
     {
-      // All cells have a name record, even nameless exterior cells.
-      std::string id = esm.getHNString("NAME");
-
       using namespace std;
-      cout << id << endl;
 
       count++;
-      esm.skipRecord();
-    }
 
-    int getSize() { return count; }
+      // The cell itself takes care of all the hairy details
+      Cell cell;
+      cell.load(esm);
+
+      if(cell.data.flags & Cell::Interior)
+        {
+          // Store interior cell by name
+          intCells[cell.name] = cell;
+        }
+      else
+        {
+          // Store exterior cells by grid position
+          extCells[cell.data.gridX][cell.data.gridY] = cell;
+        }
+    }
   };
 
   /* We need special lists for:
 
-     Cells (in progress)
      Magic effects
      Skills
      Dialog / Info combo

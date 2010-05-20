@@ -591,9 +591,16 @@ public:
   // Read the next size bytes and return them as a string
   std::string getString(int size)
   {
-    // Not very optimized, but we'll fix that later
+    // Not very optimized, but we can fix that later
     char *ptr = new char[size];
     esm->read(ptr,size);
+
+    // Remove any zero terminators
+    for(int i=0; i<size; i++)
+      if(ptr[i] == 0)
+        size = i;
+
+    // Convert to std::string and return
     std::string res(ptr,size);
     delete[] ptr;
     return res;
