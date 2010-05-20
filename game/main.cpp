@@ -1,45 +1,28 @@
 #include <iostream>
 
-#include "bsa/bsa_archive.h"
 #include "esm_store.hpp"
-
-#include "Ogre.h"
+#include "cell_store.hpp"
 
 using namespace std;
 
-// Absolute minimal OGRE setup
-void ogre_setup()
-{
-  using namespace Ogre;
-
-  // Disable Ogre logging
-  new LogManager;
-  Log *log = LogManager::getSingleton().createLog("");
-  log->setDebugOutputEnabled(false);
-
-  // Set up Root.
-  new Root();
-}
+// See setup.cpp
+void main_setup(const char* bsaFile);
 
 void maintest()
 {
-  const char* bsaFile = "data/Morrowind.bsa";
   const char* esmFile = "data/Morrowind.esm";
+  const char* bsaFile = "data/Morrowind.bsa";
 
-  cout << "Hello, fellow traveler!\n";
-
-  cout << "Initializing OGRE\n";
-  ogre_setup();
-
-  cout << "Adding " << bsaFile << endl;
-  addBSA(bsaFile);
+  main_setup(bsaFile);
 
   cout << "Loading ESM " << esmFile << "\n";
   ESM::ESMReader esm;
-  esm.open(esmFile);
   ESMS::ESMStore store;
+  ESMS::CellStore cell;
+
+  esm.open(esmFile);
   store.load(esm);
-  esm.close();
+  cell.loadInt("Beshara", store, esm);
 
   cout << "\nThat's all for now!\n";
 }

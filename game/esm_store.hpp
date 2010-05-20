@@ -1,6 +1,19 @@
 #ifndef _GAME_ESM_STORE_H
 #define _GAME_ESM_STORE_H
 
+/*
+  The ESM storage module.
+
+  This is separate from the ESM loader module, located in esm/. It is
+  also unaware of the cell loading and storage module.
+
+  The advantage of this, as with all other modularizations, is that
+  you can replace the storage method later without touching the
+  loading code. Cutting down dependencies also help on the general
+  maintainability.
+
+ */
+
 #include "esm/records.hpp"
 #include "esm_reclists.hpp"
 

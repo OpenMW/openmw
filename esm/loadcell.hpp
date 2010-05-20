@@ -162,12 +162,16 @@ struct Cell
   // somewhere other than the file system, you need to pre-open the
   // ESMReader, and the filename must match the stored filename
   // exactly.
-  void restore(ESMReader &esm)
+  void restore(ESMReader &esm) const
   { esm.restoreContext(context); }
 
-  // Get the next reference in this cell, if any. Returns false when
-  // there are no more references in the cell.
-  bool getNextRef(ESMReader &esm, CellRef &ref)
+  /* Get the next reference in this cell, if any. Returns false when
+     there are no more references in the cell.
+
+     All fields of the CellRef struct are overwritten. You can safely
+     reuse one memory location without blanking it between calls.
+  */
+  static bool getNextRef(ESMReader &esm, CellRef &ref)
   {
     if(!esm.hasMoreSubs()) return false;
 

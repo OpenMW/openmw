@@ -4,6 +4,7 @@
 #include "esm/records.hpp"
 #include <map>
 #include <string>
+#include <assert.h>
 
 namespace ESMS
 {
@@ -24,12 +25,21 @@ namespace ESMS
 
     MapType list;
 
+    // Load one object of this type
     void load(ESMReader &esm)
     {
       std::string id = esm.getHNString("NAME");
 
       X &ref = list[id];
       ref.load(esm);
+    }
+
+    // Find the given object ID, or return NULL if not found.
+    const X* find(const std::string &id) const
+    {
+      if(list.find(id) == list.end())
+        return NULL;
+      return &list.find(id)->second;
     }
 
     int getSize() { return list.size(); }
@@ -67,10 +77,22 @@ namespace ESMS
     int getSize() { return count; }
 
     // List of interior cells. Indexed by cell name.
-    std::map<std::string,Cell> intCells;
+    typedef std::map<std::string,Cell> IntCells;
+    IntCells intCells;
 
     // List of exterior cells. Indexed as extCells[gridX][gridY].
-    std::map<int, std::map<int, Cell> > extCells;
+    typedef std::map<int, std::map<int, Cell> > ExtCells;
+    ExtCells extCells;
+
+    const Cell* findInt(const std::string &id) const
+    {
+      IntCells::const_iterator it = intCells.find(id);
+
+      if(it == intCells.end())
+        return NULL;
+
+      return &it->second;
+    }
 
     void load(ESMReader &esm)
     {
