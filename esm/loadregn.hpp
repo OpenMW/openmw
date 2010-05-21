@@ -11,6 +11,8 @@ namespace ESM {
 
 struct Region
 {
+#pragma pack(push)
+#pragma pack(1)
   struct WEATstruct
   {
     // I guess these are probabilities
@@ -27,6 +29,7 @@ struct Region
     NAME32 sound;
     char chance;
   }; // 33 bytes
+#pragma pack(pop)
 
   WEATstruct data;
   int mapColor; // RGBA
