@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include "esm_store.hpp"
 #include "cell_store.hpp"
 
 using namespace std;

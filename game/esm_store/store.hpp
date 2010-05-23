@@ -15,7 +15,7 @@
  */
 
 #include "esm/records.hpp"
-#include "esm_reclists.hpp"
+#include "reclists.hpp"
 
 namespace ESMS
 {
@@ -77,6 +77,19 @@ namespace ESMS
     //RecListT<Script>      scripts;
     //RecListT<Skill>       skills;
     //RecListT<PathGrid>    pathgrids;
+
+    // Lookup of all IDs. Makes looking up references faster. Just
+    // maps the id name to the record type.
+    typedef std::map<std::string, int> AllMap;
+    AllMap all;
+
+    // Look up the given ID in 'all'. Returns 0 if not found.
+    int find(const std::string &id) const
+    {
+      AllMap::const_iterator it = all.find(id);
+      if(it == all.end()) return 0;
+      return it->second;
+    }
 
     ESMStore()
     {

@@ -12,7 +12,7 @@ namespace ESMS
 
   struct RecList
   {
-    virtual void load(ESMReader &esm) = 0;
+    virtual void load(ESMReader &esm, const std::string &id) = 0;
     virtual int getSize() = 0;
   };
 
@@ -26,10 +26,8 @@ namespace ESMS
     MapType list;
 
     // Load one object of this type
-    void load(ESMReader &esm)
+    void load(ESMReader &esm, const std::string &id)
     {
-      std::string id = esm.getHNString("NAME");
-
       X &ref = list[id];
       ref.load(esm);
     }
@@ -55,10 +53,8 @@ namespace ESMS
 
     MapType list;
 
-    void load(ESMReader &esm)
+    void load(ESMReader &esm, const std::string &id)
     {
-      std::string id = esm.getHNString("NAME");
-
       X &ref = list[id];
       ref.id = id;
       ref.load(esm);
@@ -94,20 +90,23 @@ namespace ESMS
       return &it->second;
     }
 
-    void load(ESMReader &esm)
+    void load(ESMReader &esm, const std::string &id)
     {
       using namespace std;
 
       count++;
 
-      // The cell itself takes care of all the hairy details
+      // All cells have a name record, even nameless exterior cells.
       Cell cell;
+      cell.name = id;
+
+      // The cell itself takes care of all the hairy details
       cell.load(esm);
 
       if(cell.data.flags & Cell::Interior)
         {
           // Store interior cell by name
-          intCells[cell.name] = cell;
+          intCells[id] = cell;
         }
       else
         {

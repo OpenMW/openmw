@@ -1,6 +1,6 @@
 #include <set>
 #include <iostream>
-#include "esm_store.hpp"
+#include "store.hpp"
 
 using namespace std;
 using namespace ESM;
@@ -36,7 +36,12 @@ void ESMStore::load(ESMReader &esm)
         }
 
       // Load it
-      it->second->load(esm);
+      std::string id = esm.getHNOString("NAME");
+      it->second->load(esm, id);
+
+      // Insert the reference into the global lookup
+      if(!id.empty())
+        all[id] = n.val;
     }
 
   cout << "\n" << recLists.size() << " record types:\n";

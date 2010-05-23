@@ -10,8 +10,9 @@
   (looking up references.) Neither of these modules depend on us.
  */
 
-#include "esm_store.hpp"
+#include "esm_store/store.hpp"
 #include "esm/records.hpp"
+#include "mangle/tools/str_exception.h"
 #include <list>
 
 namespace ESMS
@@ -45,12 +46,13 @@ namespace ESMS
 
     // Search for the given reference in the given reclist from
     // ESMStore. Insert the reference into the list if a match is
-    // found, and returns false. Returns true if no match is found.
+    // found. If not, throw an exception.
     template <typename Y>
-    bool find(CellRef &ref, Y recList)
+    void find(CellRef &ref, Y recList)
     {
       const X* obj = recList.find(ref.refID);
-      if(obj == NULL) return true;
+      if(obj == NULL)
+        throw str_exception("Error resolving cell reference " + ref.refID);
 
       LiveRef lr;
       lr.ref = ref;
@@ -58,8 +60,6 @@ namespace ESMS
       lr.custom = NULL;
 
       list.push_back(lr);
-
-      return false;
     }
   };
 
