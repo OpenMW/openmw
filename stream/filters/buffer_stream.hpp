@@ -1,7 +1,7 @@
 #ifndef MANGLE_STREAM_BUFFER_H
 #define MANGLE_STREAM_BUFFER_H
 
-#include "../servers/memory_stream.h"
+#include "../servers/memory_stream.hpp"
 #include <vector>
 
 namespace Mangle {

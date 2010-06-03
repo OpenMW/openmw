@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "../../stream/servers/file_stream.h"
-#include "../sources/ffmpeg_source.h"
+#include "../../stream/servers/file_stream.hpp"
+#include "../sources/ffmpeg_source.hpp"
 
 #include <assert.h>
 #include <string.h>

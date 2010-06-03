@@ -1,7 +1,7 @@
 #ifndef MANGLE_INPUT_FILTER_H
 #define MANGLE_INPUT_FILTER_H
 
-#include "../output.h"
+#include "../output.hpp"
 
 #include <assert.h>
 

@@ -2,7 +2,7 @@
 #define MANGLE_STREAM_INPUT_H
 
 #include <stdlib.h>
-#include "../tools/shared_ptr.h"
+#include "../tools/shared_ptr.hpp"
 #include <assert.h>
 
 namespace Mangle {

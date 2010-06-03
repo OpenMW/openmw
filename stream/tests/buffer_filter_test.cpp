@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string.h>
 
-#include "../filters/buffer_stream.h"
+#include "../filters/buffer_stream.hpp"
 
 using namespace Mangle::Stream;
 using namespace std;

@@ -1,7 +1,7 @@
 #ifndef MANGLE_SOUND_OPENAL_OUT_H
 #define MANGLE_SOUND_OPENAL_OUT_H
 
-#include "../output.h"
+#include "../output.hpp"
 
 #include <AL/al.h>
 #include <AL/alc.h>

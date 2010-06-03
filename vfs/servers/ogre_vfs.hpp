@@ -1,7 +1,7 @@
 #ifndef MANGLE_VFS_OGRESERVER_H
 #define MANGLE_VFS_OGRESERVER_H
 
-#include "../vfs.h"
+#include "../vfs.hpp"
 #include <OgreResourceGroupManager.h>
 
 namespace Mangle {

@@ -1,7 +1,7 @@
 #ifndef MANGLE_SOUND_AUDIERE_SOURCE_H
 #define MANGLE_SOUND_AUDIERE_SOURCE_H
 
-#include "../source.h"
+#include "../source.hpp"
 
 #include <audiere.h>
 
@@ -46,7 +46,7 @@ class AudiereSource : public SampleSource
   size_t size() const { return sample->getLength()*frameSize; }
 };
 
-#include "loadertemplate.h"
+#include "loadertemplate.hpp"
 
 /// A factory that loads AudiereSources from file and stream
 typedef SSL_Template<AudiereSource,true,true> AudiereLoader;

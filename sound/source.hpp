@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "../stream/stream.h"
+#include "../stream/stream.hpp"
 
 namespace Mangle {
 namespace Sound {

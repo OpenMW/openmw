@@ -3,7 +3,7 @@
 
 #include <OgreArchive.h>
 #include <assert.h>
-#include "../vfs.h"
+#include "../vfs.hpp"
 
 namespace Mangle {
 namespace VFS {

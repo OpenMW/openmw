@@ -1,7 +1,7 @@
 #ifndef MANGLE_STREAM_FILESERVER_H
 #define MANGLE_STREAM_FILESERVER_H
 
-#include "std_stream.h"
+#include "std_stream.hpp"
 #include <fstream>
 
 namespace Mangle {

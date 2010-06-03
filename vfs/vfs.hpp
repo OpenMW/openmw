@@ -1,7 +1,7 @@
 #ifndef MANGLE_VFS_H
 #define MANGLE_VFS_H
 
-#include "../stream/stream.h"
+#include "../stream/stream.hpp"
 #include <string>
 #include <vector>
 

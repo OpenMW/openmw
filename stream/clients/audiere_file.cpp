@@ -1,4 +1,4 @@
-#include "audiere_file.h"
+#include "audiere_file.hpp"
 
 using namespace audiere;
 using namespace Mangle::Stream;

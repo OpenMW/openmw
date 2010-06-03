@@ -1,6 +1,6 @@
-#include "ffmpeg_source.h"
+#include "ffmpeg_source.hpp"
 
-#include "../../tools/str_exception.h"
+#include "../../tools/str_exception.hpp"
 
 using namespace Mangle::Sound;
 

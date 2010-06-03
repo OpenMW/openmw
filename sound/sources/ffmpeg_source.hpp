@@ -1,7 +1,7 @@
 #ifndef MANGLE_SOUND_FFMPEG_H
 #define MANGLE_SOUND_FFMPEG_H
 
-#include "../source.h"
+#include "../source.hpp"
 #include <vector>
 #include <assert.h>
 
@@ -36,7 +36,7 @@ class FFMpegSource : public SampleSource
   size_t read(void *data, size_t length);
 };
 
-#include "loadertemplate.h"
+#include "loadertemplate.hpp"
 
 /// A factory that loads FFMpegSources from file
 class FFMpegLoader : public SSL_Template<FFMpegSource,false,true>

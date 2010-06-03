@@ -1,9 +1,9 @@
 #ifndef MANGLE_FFMPEG_OPENAL_H
 #define MANGLE_FFMPEG_OPENAL_H
 
-#include "input_filter.h"
-#include "../sources/audiere_source.h"
-#include "../outputs/openal_out.h"
+#include "input_filter.hpp"
+#include "../sources/audiere_source.hpp"
+#include "../outputs/openal_out.hpp"
 
 namespace Mangle {
 namespace Sound {

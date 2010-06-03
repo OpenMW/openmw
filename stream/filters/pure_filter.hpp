@@ -1,7 +1,7 @@
 #ifndef MANGLE_STREAM_FILTER_H
 #define MANGLE_STREAM_FILTER_H
 
-#include "../stream.h"
+#include "../stream.hpp"
 
 namespace Mangle {
 namespace Stream {

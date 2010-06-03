@@ -1,4 +1,4 @@
-#include "../servers/ogre_vfs.h"
+#include "../servers/ogre_vfs.hpp"
 
 #include <Ogre.h>
 

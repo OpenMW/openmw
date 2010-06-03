@@ -1,5 +1,5 @@
-#include "../servers/memory_stream.h"
-#include "../clients/ogre_datastream.h"
+#include "../servers/memory_stream.hpp"
+#include "../clients/ogre_datastream.hpp"
 #include <iostream>
 
 using namespace Mangle::Stream;

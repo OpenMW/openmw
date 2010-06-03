@@ -4,7 +4,7 @@
 #include <audiere.h>
 #include <assert.h>
 
-#include "../stream.h"
+#include "../stream.hpp"
 
 namespace Mangle {
 namespace Stream {

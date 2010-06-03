@@ -1,8 +1,8 @@
-#include "openal_out.h"
+#include "openal_out.hpp"
 #include <assert.h>
 
-#include "../../stream/filters/buffer_stream.h"
-#include "../../tools/str_exception.h"
+#include "../../stream/filters/buffer_stream.hpp"
+#include "../../tools/str_exception.hpp"
 
 using namespace Mangle::Sound;
 

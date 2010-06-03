@@ -2,9 +2,9 @@
 #define MANGLE_SOUND_OUTPUT_H
 
 #include <string>
-#include "source.h"
+#include "source.hpp"
 
-#include "../stream/stream.h"
+#include "../stream/stream.hpp"
 
 namespace Mangle {
 namespace Sound {

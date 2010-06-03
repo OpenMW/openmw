@@ -1,5 +1,5 @@
-#include "../servers/memory_stream.h"
-#include "../clients/audiere_file.h"
+#include "../servers/memory_stream.hpp"
+#include "../clients/audiere_file.hpp"
 #include <audiere.h>
 #include <iostream>
 

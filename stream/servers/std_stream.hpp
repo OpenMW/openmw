@@ -1,9 +1,9 @@
 #ifndef MANGLE_STREAM_STDIOSERVER_H
 #define MANGLE_STREAM_STDIOSERVER_H
 
-#include "../stream.h"
+#include "../stream.hpp"
 #include <iostream>
-#include "../../tools/str_exception.h"
+#include "../../tools/str_exception.hpp"
 
 namespace Mangle {
 namespace Stream {

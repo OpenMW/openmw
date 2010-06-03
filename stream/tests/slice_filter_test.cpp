@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string.h>
 
-#include "../filters/slice_stream.h"
-#include "../servers/memory_stream.h"
+#include "../filters/slice_stream.hpp"
+#include "../servers/memory_stream.hpp"
 
 using namespace Mangle::Stream;
 using namespace std;

@@ -1,7 +1,7 @@
-#include "audiere_source.h"
+#include "audiere_source.hpp"
 
-#include "../../stream/clients/audiere_file.h"
-#include "../../tools/str_exception.h"
+#include "../../stream/clients/audiere_file.hpp"
+#include "../../tools/str_exception.hpp"
 
 using namespace Mangle::Stream;
 

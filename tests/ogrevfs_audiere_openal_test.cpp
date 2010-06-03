@@ -7,8 +7,8 @@
 
  */
 
-#include "sound/filters/openal_audiere.h"
-#include "vfs/servers/ogre_vfs.h"
+#include "sound/filters/openal_audiere.hpp"
+#include "vfs/servers/ogre_vfs.hpp"
 #include <Ogre.h>
 #include <iostream>
 

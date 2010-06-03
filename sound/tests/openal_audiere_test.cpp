@@ -1,8 +1,8 @@
 #include <iostream>
 #include <exception>
 
-#include "../../stream/servers/file_stream.h"
-#include "../filters/openal_audiere.h"
+#include "../../stream/servers/file_stream.hpp"
+#include "../filters/openal_audiere.hpp"
 
 using namespace std;
 using namespace Mangle::Stream;

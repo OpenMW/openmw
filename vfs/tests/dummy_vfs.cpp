@@ -1,9 +1,9 @@
 // This file is shared between several test programs
-#include "vfs.h"
+#include "vfs.hpp"
 #include <assert.h>
 #include <string.h>
 
-#include "../../stream/servers/memory_stream.h"
+#include "../../stream/servers/memory_stream.hpp"
 
 using namespace Mangle::VFS;
 using namespace Mangle::Stream;

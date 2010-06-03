@@ -1,6 +1,6 @@
 
 File: Makefile
-Size: 814
+Size: 828
 First line: GCC=g++ -I../
 
 File: ogre_resource_test.cpp

@@ -1,5 +1,5 @@
-#include "ogre_vfs.h"
-#include "../../stream/servers/ogre_datastream.h"
+#include "ogre_vfs.hpp"
+#include "../../stream/servers/ogre_datastream.hpp"
 
 using namespace Mangle::VFS;
 using namespace Mangle::Stream;

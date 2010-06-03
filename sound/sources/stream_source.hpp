@@ -1,7 +1,7 @@
 #ifndef MANGLE_SOUND_STREAMSOURCE_H
 #define MANGLE_SOUND_STREAMSOURCE_H
 
-#include "../source.h"
+#include "../source.hpp"
 
 namespace Mangle {
 namespace Sound {

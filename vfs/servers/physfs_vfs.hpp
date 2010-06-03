@@ -1,8 +1,8 @@
 #ifndef MANGLE_VFS_PHYSFS_SERVER_H
 #define MANGLE_VFS_PHYSFS_SERVER_H
 
-#include "../vfs.h"
-#include "../../stream/servers/phys_stream.h"
+#include "../vfs.hpp"
+#include "../../stream/servers/phys_stream.hpp"
 
 #include <physfs.h>
 #include <assert.h>

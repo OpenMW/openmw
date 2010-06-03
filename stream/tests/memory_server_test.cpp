@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string.h>
 
-#include "../servers/memory_stream.h"
+#include "../servers/memory_stream.hpp"
 
 using namespace Mangle::Stream;
 using namespace std;

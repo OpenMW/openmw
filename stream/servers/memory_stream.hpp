@@ -2,7 +2,7 @@
 #define MANGLE_STREAM_MEMSERVER_H
 
 #include <assert.h>
-#include "../stream.h"
+#include "../stream.hpp"
 #include <string.h>
 
 namespace Mangle {

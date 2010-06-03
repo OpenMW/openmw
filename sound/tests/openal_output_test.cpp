@@ -1,9 +1,9 @@
 #include <iostream>
 #include <exception>
 
-#include "../../stream/servers/file_stream.h"
-#include "../sources/stream_source.h"
-#include "../outputs/openal_out.h"
+#include "../../stream/servers/file_stream.hpp"
+#include "../sources/stream_source.hpp"
+#include "../outputs/openal_out.hpp"
 
 using namespace std;
 using namespace Mangle::Stream;
