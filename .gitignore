@@ -8,3 +8,4 @@ cmake*.cmake
 openmw
 Ogre.log
 ogre.cfg
+build

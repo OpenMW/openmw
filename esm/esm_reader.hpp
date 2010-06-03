@@ -14,6 +14,12 @@
 #include "../mangle/tools/str_exception.hpp"
 #include "../tools/stringops.hpp"
 
+static size_t strnlen(const char *s, size_t n)
+{
+  const char *p = (const char *)memchr(s, 0, n);
+  return(p ? p-s : n);
+}
+
 namespace ESM {
 
 enum Version
