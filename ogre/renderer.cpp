@@ -1,10 +1,18 @@
-#include "render.hpp"
+#include "renderer.hpp"
 
 using namespace Ogre;
+using namespace Render;
+
+void OgreRenderer::cleanup()
+{
+  if(mRoot)
+    delete mRoot;
+  mRoot = NULL;
+}
 
 bool OgreRenderer::configure(bool showConfig,
                              const std::string &pluginCfg,
-                             bool _logging);
+                             bool _logging)
 {
   // Set up logging first
   new LogManager;
@@ -18,7 +26,7 @@ bool OgreRenderer::configure(bool showConfig,
     // Disable logging
     log->setDebugOutputEnabled(false);
 
-  mRoot = new Root(plugincfg, "ogre.cfg", "");
+  mRoot = new Root(pluginCfg, "ogre.cfg", "");
 
   // Show the configuration dialog and initialise the system, if the
   // showConfig parameter is specified. The settings are stored in
@@ -31,4 +39,10 @@ bool OgreRenderer::configure(bool showConfig,
     result = mRoot->restoreConfig();
 
   return !result;
+}
+
+void OgreRenderer::createWindow(const std::string &title)
+{
+  // Initialize OGRE window
+  mWindow = mRoot->initialise(true, title, "");
 }

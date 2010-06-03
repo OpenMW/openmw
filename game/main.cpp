@@ -3,41 +3,30 @@
 #include "cell_store.hpp"
 #include "render/cell.hpp"
 #include "bsa/bsa_archive.hpp"
-#include <Ogre.h>
+#include "ogre/renderer.hpp"
+#include "tools/fileops.hpp"
 
 using namespace std;
-
-// Absolute minimal OGRE setup
-void ogre_setup()
-{
-  using namespace Ogre;
-
-  // Disable Ogre logging
-  new LogManager;
-  Log *log = LogManager::getSingleton().createLog("");
-  log->setDebugOutputEnabled(false);
-
-  // Set up Root.
-  new Root();
-}
-
-void main_setup(const char* bsaFile)
-{
-  cout << "Hello, fellow traveler!\n";
-
-  cout << "Initializing OGRE\n";
-  ogre_setup();
-
-  cout << "Adding " << bsaFile << endl;
-  addBSA(bsaFile);
-}
 
 void maintest()
 {
   const char* esmFile = "data/Morrowind.esm";
   const char* bsaFile = "data/Morrowind.bsa";
 
-  main_setup(bsaFile);
+#ifdef _WIN32
+  const char* plugCfg = "plugins.cfg.win32";
+#else
+  const char* plugCfg = "plugins.cfg.linux";
+#endif
+
+  cout << "Hello, fellow traveler!\n";
+
+  cout << "Initializing OGRE\n";
+  Render::OgreRenderer ogre;
+  ogre.configure(!isFile("ogre.cfg"), plugCfg, false);
+
+  cout << "Adding " << bsaFile << endl;
+  addBSA(bsaFile);
 
   cout << "Loading ESM " << esmFile << "\n";
   ESM::ESMReader esm;
@@ -48,6 +37,8 @@ void maintest()
   esm.open(esmFile);
   store.load(esm);
   cell.loadInt("Beshara", store, esm);
+
+  ogre.createWindow("OpenMW");
 
   cout << "\nThat's all for now!\n";
 }

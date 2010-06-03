@@ -6,3 +6,5 @@ CMakeCache.txt
 Makefile
 cmake*.cmake
 openmw
+Ogre.log
+ogre.cfg

@@ -56,50 +56,7 @@ extern "C" void ogre_cleanup()
   mInputManager->destroyInputObject(mMouse);
   OIS::InputManager::destroyInputSystem(mInputManager);
 
-  // Kill OGRE
-  if (mRoot)
-    {
-      delete mRoot;
-      mRoot = 0;
-    }
-}
-
-extern "C" int32_t ogre_configure(
-                   int32_t showConfig, // Do we show the config dialogue?
-                   char *plugincfg,    // Name of 'plugin.cfg' file
-                   int32_t debugOut)   // Enable or disable logging
-{
-  // Set up logging first
-  new LogManager;
-  Log *log = LogManager::getSingleton().createLog("Ogre.log");
-
-  g_isDebug = debugOut;
-  if(debugOut)
-    // Full log detail
-    log->setLogDetail(LL_BOREME);
-  else
-    // Disable logging
-    log->setDebugOutputEnabled(false);
-
-  mRoot = new Root(plugincfg, "ogre.cfg", "");
-
-  // Add the BSA archive manager
-  ArchiveManager::getSingleton().addArchiveFactory( &mBSAFactory );
-
-  ResourceGroupManager::getSingleton().
-    addResourceLocation("internal", "BSA", "General");
-
-  // Show the configuration dialog and initialise the system, if the
-  // showConfig parameter is specified. The settings are stored in
-  // ogre.cfg. If showConfig is false, the settings are assumed to
-  // already exist in ogre.cfg.
-  int result;
-  if(showConfig)
-    result = mRoot->showConfigDialog();
-  else
-    result = mRoot->restoreConfig();
-
-  return !result;
+  // Code killing ogre has been ported already
 }
 
 // Initialize window. This will create and show the actual window.

@@ -9,8 +9,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 # Local files
 set(BSA bsa/bsa_archive.cpp bsa/bsa_file.cpp)
 set(NIF nif/nif_file.cpp nifogre/ogre_nif_loader.cpp)
-set(TOOLS tools/stringops.cpp)
+set(TOOLS tools/stringops.cpp tools/fileops.cpp)
 set(MANGLE_VFS mangle/vfs/servers/ogre_vfs.cpp)
+set(OGRE ogre/renderer.cpp)
 set(GAME game/main.cpp game/esm_store/store.cpp game/cell_store.cpp)
 
 # Platform specific
@@ -26,5 +27,5 @@ include_directories("." ${OGRE_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
 link_directories(${OGRE_LIB_DIR})
 
 # Main executable
-add_executable(openmw ${BSA} ${TOOLS} ${GAME})
+add_executable(openmw ${BSA} ${TOOLS} ${OGRE} ${GAME})
 target_link_libraries(openmw ${OGRE_LIBRARIES})
