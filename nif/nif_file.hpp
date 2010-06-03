@@ -24,18 +24,18 @@
 #ifndef _NIF_FILE_H_
 #define _NIF_FILE_H_
 
-#include "../mangle/stream/stream.h"
-#include "../mangle/stream/filters/buffer_stream.h"
-#include "../mangle/tools/str_exception.h"
+#include "../mangle/stream/stream.hpp"
+#include "../mangle/stream/filters/buffer_stream.hpp"
+#include "../mangle/tools/str_exception.hpp"
 
-#include "../tools/slice_array.h"
+#include "../tools/slice_array.hpp"
 
 #include <vector>
 #include <string>
 #include <assert.h>
 
-#include "record.h"
-#include "nif_types.h"
+#include "record.hpp"
+#include "nif_types.hpp"
 
 using namespace Mangle::Stream;
 

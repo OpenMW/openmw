@@ -11,7 +11,7 @@ set(BSA bsa/bsa_archive.cpp bsa/bsa_file.cpp)
 set(NIF nif/nif_file.cpp nifogre/ogre_nif_loader.cpp)
 set(TOOLS tools/stringops.cpp)
 set(MANGLE_VFS mangle/vfs/servers/ogre_vfs.cpp)
-set(GAME game/main.cpp game/esm_store/store.cpp game/cell_store.cpp game/setup.cpp)
+set(GAME game/main.cpp game/esm_store/store.cpp game/cell_store.cpp)
 
 # Platform specific
 if (WIN32)

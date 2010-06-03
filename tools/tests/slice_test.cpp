@@ -4,7 +4,7 @@ using namespace std;
 
 #include <assert.h>
 
-#include "../slice_array.h"
+#include "../slice_array.hpp"
 
 int main()
 {

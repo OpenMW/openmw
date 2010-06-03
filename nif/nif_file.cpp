@@ -21,17 +21,17 @@
 
  */
 
-#include "nif_file.h"
-#include "record.h"
-#include "../tools/stringops.h"
+#include "nif_file.hpp"
+#include "record.hpp"
+#include "../tools/stringops.hpp"
 
-#include "extra.h"
-#include "controlled.h"
-#include "node.h"
-#include "property.h"
-#include "data.h"
-#include "effect.h"
-#include "controller.h"
+#include "extra.hpp"
+#include "controlled.hpp"
+#include "node.hpp"
+#include "property.hpp"
+#include "data.hpp"
+#include "effect.hpp"
+#include "controller.hpp"
 
 #include <iostream>
 using namespace std;

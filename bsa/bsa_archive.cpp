@@ -21,13 +21,13 @@
 
  */
 
-#include "bsa_archive.h"
+#include "bsa_archive.hpp"
 
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
-#include "bsa_file.h"
-#include "../mangle/stream/clients/ogre_datastream.h"
+#include "bsa_file.hpp"
+#include "../mangle/stream/clients/ogre_datastream.hpp"
 
 using namespace Ogre;
 using namespace Mangle::Stream;
@@ -152,10 +152,7 @@ public:
 };
 
 static bool init = false;
-
-// The functions below are the only publicly exposed part of this file
-
-void insertBSAFactory()
+static void insertBSAFactory()
 {
   if(!init)
     {
@@ -163,6 +160,8 @@ void insertBSAFactory()
       init = true;
     }
 }
+
+// The function below is the only publicly exposed part of this file
 
 void addBSA(const char* name, const char* group)
 {

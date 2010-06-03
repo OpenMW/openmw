@@ -1,5 +1,5 @@
-#include "../ogre_nif_loader.h"
-#include "../../bsa/bsa_archive.h"
+#include "../ogre_nif_loader.hpp"
+#include "../../bsa/bsa_archive.hpp"
 
 //#define SCREENSHOT
 

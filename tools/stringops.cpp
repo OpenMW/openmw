@@ -1,4 +1,4 @@
-#include "stringops.h"
+#include "stringops.hpp"
 
 #include <string.h>
 #include <strings.h>

@@ -2,9 +2,9 @@
   Runs NIFFile through all the NIFs in Morrowind.bsa.
  */
 
-#include "../nif_file.h"
-#include "../../bsa/bsa_file.h"
-#include "../../tools/stringops.h"
+#include "../nif_file.hpp"
+#include "../../bsa/bsa_file.hpp"
+#include "../../tools/stringops.hpp"
 #include <iostream>
 
 using namespace Mangle::Stream;

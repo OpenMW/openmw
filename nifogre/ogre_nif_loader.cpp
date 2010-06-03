@@ -21,15 +21,15 @@
 
  */
 
-#include "ogre_nif_loader.h"
+#include "ogre_nif_loader.hpp"
 #include <Ogre.h>
 #include <stdio.h>
 
-#include "../mangle/vfs/servers/ogre_vfs.h"
-#include "../nif/nif_file.h"
-#include "../nif/node.h"
-#include "../nif/data.h"
-#include "../nif/property.h"
+#include "../mangle/vfs/servers/ogre_vfs.hpp"
+#include "../nif/nif_file.hpp"
+#include "../nif/node.hpp"
+#include "../nif/data.hpp"
+#include "../nif/property.hpp"
 
 // For warning messages
 #include <iostream>

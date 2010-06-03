@@ -24,9 +24,9 @@
 #ifndef _NIF_CONTROLLER_H_
 #define _NIF_CONTROLLER_H_
 
-#include "record.h"
-#include "nif_file.h"
-#include "record_ptr.h"
+#include "record.hpp"
+#include "nif_file.hpp"
+#include "record_ptr.hpp"
 
 namespace Nif
 {

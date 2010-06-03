@@ -1,6 +1,6 @@
 #include <assert.h>
 
-#include "../stringops.h"
+#include "../stringops.hpp"
 
 int main()
 {

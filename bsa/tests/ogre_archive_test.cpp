@@ -3,7 +3,7 @@
 
 // This is a test of the BSA archive handler for OGRE.
 
-#include "../bsa_archive.h"
+#include "../bsa_archive.hpp"
 
 using namespace Ogre;
 using namespace std;

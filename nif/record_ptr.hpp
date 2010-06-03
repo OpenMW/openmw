@@ -24,7 +24,7 @@
 #ifndef _NIF_RECORD_PTR_H_
 #define _NIF_RECORD_PTR_H_
 
-#include "nif_file.h"
+#include "nif_file.hpp"
 #include <vector>
 
 namespace Nif

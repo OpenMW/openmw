@@ -2,13 +2,13 @@
   Test of the NIFFile class
  */
 
-#include "../nif_file.h"
+#include "../nif_file.hpp"
 #include <iostream>
 #include <iomanip>
-#include "../../mangle/stream/servers/file_stream.h"
-#include "../node.h"
-#include "../controller.h"
-#include "../data.h"
+#include "../../mangle/stream/servers/file_stream.hpp"
+#include "../node.hpp"
+#include "../controller.hpp"
+#include "../data.hpp"
 
 using namespace Mangle::Stream;
 using namespace std;

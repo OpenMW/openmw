@@ -12,7 +12,7 @@
 
 #include "esm_store/store.hpp"
 #include "esm/records.hpp"
-#include "mangle/tools/str_exception.h"
+#include "mangle/tools/str_exception.hpp"
 #include <list>
 
 namespace ESMS

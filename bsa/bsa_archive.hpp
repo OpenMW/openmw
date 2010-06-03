@@ -24,21 +24,8 @@
 #ifndef _BSA_ARCHIVE_H_
 #define _BSA_ARCHIVE_H_
 
-/** Insert the archive manager for .bsa files into the OGRE resource
-    loading system. You only need to call this function once.
-
-    After calling it, you can do:
-
-    ResourceGroupManager::getSingleton().
-      addResourceLocation("Morrowind.bsa", "BSA", "General");
-
-    or add BSA files to resources.cfg, etc. You can also use the
-    shortcut addBSA() below, which will call insertBSAFactory() for
-    you.
-*/
-void insertBSAFactory();
-
-/// Add the given BSA file to the Ogre resource system.
+/// Add the given BSA file as an input archive in the Ogre resource
+/// system.
 void addBSA(const char* file, const char* group="General");
 
 #endif

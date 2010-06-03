@@ -1,6 +1,6 @@
 #include "cell_store.hpp"
 #include <iostream>
-#include "mangle/tools/str_exception.h"
+#include "mangle/tools/str_exception.hpp"
 
 using namespace ESMS;
 using namespace std;

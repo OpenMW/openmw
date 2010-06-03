@@ -1,11 +1,36 @@
 #include <iostream>
 
 #include "cell_store.hpp"
+#include "render/cell.hpp"
+#include "bsa/bsa_archive.hpp"
+#include <Ogre.h>
 
 using namespace std;
 
-// See setup.cpp
-void main_setup(const char* bsaFile);
+// Absolute minimal OGRE setup
+void ogre_setup()
+{
+  using namespace Ogre;
+
+  // Disable Ogre logging
+  new LogManager;
+  Log *log = LogManager::getSingleton().createLog("");
+  log->setDebugOutputEnabled(false);
+
+  // Set up Root.
+  new Root();
+}
+
+void main_setup(const char* bsaFile)
+{
+  cout << "Hello, fellow traveler!\n";
+
+  cout << "Initializing OGRE\n";
+  ogre_setup();
+
+  cout << "Adding " << bsaFile << endl;
+  addBSA(bsaFile);
+}
 
 void maintest()
 {
@@ -18,6 +43,7 @@ void maintest()
   ESM::ESMReader esm;
   ESMS::ESMStore store;
   ESMS::CellStore cell;
+  Render::CellRender rend(cell);
 
   esm.open(esmFile);
   store.load(esm);

@@ -1,4 +1,4 @@
-#include "../bsa_file.h"
+#include "../bsa_file.hpp"
 
 #include "bsatool_cmd.h"
 
@@ -7,7 +7,7 @@
 #include <fstream>
 #include <exception>
 
-#include "../../mangle/stream/filters/buffer_stream.h"
+#include "../../mangle/stream/filters/buffer_stream.hpp"
 
 using namespace std;
 using namespace Mangle::Stream;

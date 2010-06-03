@@ -21,11 +21,11 @@
 
  */
 
-#include "bsa_file.h"
+#include "bsa_file.hpp"
 
-#include "../mangle/stream/servers/file_stream.h"
-#include "../mangle/stream/filters/slice_stream.h"
-#include "../mangle/tools/str_exception.h"
+#include "../mangle/stream/servers/file_stream.hpp"
+#include "../mangle/stream/filters/slice_stream.hpp"
+#include "../mangle/tools/str_exception.hpp"
 
 #include <stdlib.h>
 #include <assert.h>

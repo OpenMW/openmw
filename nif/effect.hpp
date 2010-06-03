@@ -24,7 +24,7 @@
 #ifndef _NIF_EFFECT_H_
 #define _NIF_EFFECT_H_
 
-#include "node.h"
+#include "node.hpp"
 
 namespace Nif
 {

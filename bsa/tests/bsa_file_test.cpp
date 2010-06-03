@@ -1,4 +1,4 @@
-#include "../bsa_file.h"
+#include "../bsa_file.hpp"
 
 /*
   Test of the BSAFile class

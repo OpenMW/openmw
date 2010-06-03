@@ -9,10 +9,10 @@
 #include <sstream>
 #include <iomanip>
 
-#include "../mangle/stream/stream.h"
-#include "../mangle/stream/servers/file_stream.h"
-#include "../mangle/tools/str_exception.h"
-#include "../tools/stringops.h"
+#include "../mangle/stream/stream.hpp"
+#include "../mangle/stream/servers/file_stream.hpp"
+#include "../mangle/tools/str_exception.hpp"
+#include "../tools/stringops.hpp"
 
 namespace ESM {
 

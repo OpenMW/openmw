@@ -24,8 +24,8 @@
 #ifndef _NIF_NODE_H_
 #define _NIF_NODE_H_
 
-#include "controlled.h"
-#include "data.h"
+#include "controlled.hpp"
+#include "data.hpp"
 
 namespace Nif
 {
