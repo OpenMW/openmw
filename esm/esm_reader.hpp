@@ -14,11 +14,15 @@
 #include "../mangle/tools/str_exception.hpp"
 #include "../tools/stringops.hpp"
 
+#ifdef __APPLE__
+// need our own implementation of strnlen
 static size_t strnlen(const char *s, size_t n)
 {
   const char *p = (const char *)memchr(s, 0, n);
   return(p ? p-s : n);
 }
+
+#endif
 
 namespace ESM {
 
