@@ -31,34 +31,17 @@
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
 
-#include <OIS/OIS.h>
-
 #include <MyGUI.h>
 
 #include "../util/dbg.h"
 
 using namespace Ogre;
 
-RenderWindow* mWindow;
-Root *mRoot;
-SceneManager *mSceneMgr;
-Camera *mCamera;
-Viewport *vp;
-
 ColourValue g_ambient;
 int g_lightOn = 0;
 
-/*
-int g_spotOn = 0;
-Light *g_light;
-*/
-
 // Set to nonzero if debug mode is enabled
 int g_isDebug = 0;
-
-OIS::InputManager *mInputManager;
-OIS::Mouse *mMouse;
-OIS::Keyboard *mKeyboard;
 
 // The global GUI object
 MyGUI::Gui *mGUI;
@@ -67,11 +50,6 @@ MyGUI::Gui *mGUI;
 // right now. If we are (and guiMode > 0), we redirect mouse/keyboard
 // input into MyGUI.
 int32_t guiMode = 0;
-
-// Root node for all objects added to the scene. This is rotated so
-// that the OGRE coordinate system matches that used internally in
-// Morrowind.
-SceneNode *mwRoot;
 
 // Include the other parts of the code, and make one big happy object
 // file. This is extremely against the grain of C++ "recomended

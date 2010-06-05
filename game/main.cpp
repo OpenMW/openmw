@@ -2,9 +2,11 @@
 
 #include "cell_store.hpp"
 #include "render/cell.hpp"
+#include "render/mwscene.hpp"
 #include "bsa/bsa_archive.hpp"
 #include "ogre/renderer.hpp"
 #include "tools/fileops.hpp"
+#include "input/oismanager.hpp"
 
 using namespace std;
 
@@ -39,6 +41,15 @@ void maintest()
   cell.loadInt("Beshara", store, esm);
 
   ogre.createWindow("OpenMW");
+
+  Render::MWScene scene;
+  scene.setup(&ogre);
+
+  Input::OISManager input;
+  input.setup(&ogre);
+
+  // Add the frame listener
+  //root->addFrameListener(&mFrameListener);
 
   cout << "\nThat's all for now!\n";
 }
