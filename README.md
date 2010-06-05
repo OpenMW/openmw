@@ -16,8 +16,8 @@ Getting OpenMW Working
 1. Clone this repository.
 2. Install `bjam` through MacPorts.
 3. Download [boost][] 1.43 and install it with the following command:
-    
-        $ mkdir build && sudo bjam --build-dir=build --layout=versioned --toolset=darwin --architecture=combined --address-model=32 --link=shared,static install
+
+        $ mkdir build && sudo bjam --build-dir=build --layout=versioned --toolset=darwin architecture=i386 address-model=32 --link=shared,static install
 
 4. Download [Ogre][] 1.7.1 and build and Xcode project with CMake:
 
@@ -28,7 +28,7 @@ Getting OpenMW Working
 6. Generate the Makefile for OpenMW as follows:
 
         $ mkdir build && cd build && BOOST_INCLUDEDIR=/usr/local/include/boost-1_43 BOOST_LIBRARYDIR=/usr/local/lib CMAKE_OSX_ARCHITECTURES=i386 cmake ..
-        
+
 7. Move your Morrowind `Data Files` directory into `build`, renamed as `data`.
 
 [boost]: http://www.boost.org
