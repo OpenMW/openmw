@@ -5,8 +5,13 @@
   Ogre renderer class
  */
 
-#include <Ogre.h>
 #include <string>
+
+namespace Ogre
+{
+    class Root;
+    class RenderWindow;
+}
 
 namespace Render
 {

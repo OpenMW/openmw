@@ -1,5 +1,10 @@
 #include "renderer.hpp"
 
+#include "OgreRoot.h"
+#include "OgreRenderWindow.h"
+#include "OgreLogManager.h"
+#include "OgreLog.h"
+
 using namespace Ogre;
 using namespace Render;
 

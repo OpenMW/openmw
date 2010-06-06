@@ -2,6 +2,13 @@
 
 #include <assert.h>
 
+#include "OgreRoot.h"
+#include "OgreRenderWindow.h"
+#include "OgreSceneManager.h"
+#include "OgreViewport.h"
+#include "OgreCamera.h"
+#include "OgreTextureManager.h"
+
 using namespace Render;
 using namespace Ogre;
 
