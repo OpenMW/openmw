@@ -46,13 +46,13 @@ using namespace Mangle::VFS;
 // tell Ogre to look (eg. in zip or rar files.) It's also used to
 // check for the existence of texture files, so we can exchange the
 // extension from .tga to .dds if the texture is missing.
-OgreVFS *vfs;
+static OgreVFS *vfs;
 
 // Singleton instance used by load()
 static NIFLoader g_sing;
 
+// Makeshift error reporting system
 static string errName;
-
 static void warn(const string &msg)
 {
   cout << "WARNING (NIF:" << errName << "): " << msg << endl;
@@ -615,12 +615,13 @@ void NIFLoader::loadResource(Resource *resource)
   mesh->_setBoundingSphereRadius(10);
 }
 
-MeshPtr NIFLoader::load(const char* name, const char* group)
+MeshPtr NIFLoader::load(const std::string &name,
+                        const std::string &group)
 {
   MeshManager *m = MeshManager::getSingletonPtr();
 
   // Check if the resource already exists
-  ResourcePtr ptr = m->getByName(name/*, group*/);
+  ResourcePtr ptr = m->getByName(name, group);
   if(!ptr.isNull())
     return MeshPtr(ptr);
 

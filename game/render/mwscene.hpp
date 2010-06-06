@@ -32,6 +32,9 @@ namespace Render
 
   public:
     MWScene(OgreRenderer &_rend);
+
+    Ogre::SceneNode *getRoot() { return mwRoot; }
+    Ogre::SceneManager *getMgr() { return sceneMgr; }
   };
 }
 

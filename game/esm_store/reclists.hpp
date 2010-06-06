@@ -21,15 +21,24 @@ namespace ESMS
   template <typename X>
   struct RecListT : RecList
   {
-    typedef std::map<std::string,X> MapType;
+    typedef std::map<std::string,X*> MapType;
 
     MapType list;
 
     // Load one object of this type
     void load(ESMReader &esm, const std::string &id)
     {
-      X &ref = list[id];
-      ref.load(esm);
+      X *ref;
+
+      if(list.find(id) == list.end())
+        {
+          ref = new X;
+          list[id] = ref;
+        }
+      else
+        ref = list[id];
+
+      ref->load(esm);
     }
 
     // Find the given object ID, or return NULL if not found.
@@ -37,7 +46,7 @@ namespace ESMS
     {
       if(list.find(id) == list.end())
         return NULL;
-      return &list.find(id)->second;
+      return list.find(id)->second;
     }
 
     int getSize() { return list.size(); }
@@ -49,15 +58,24 @@ namespace ESMS
   template <typename X>
   struct RecIDListT : RecList
   {
-    typedef std::map<std::string,X> MapType;
+    typedef std::map<std::string,X*> MapType;
 
     MapType list;
 
     void load(ESMReader &esm, const std::string &id)
     {
-      X &ref = list[id];
-      ref.id = id;
-      ref.load(esm);
+      X *ref;
+
+      if(list.find(id) == list.end())
+        {
+          ref = new X;
+          list[id] = ref;
+        }
+      else
+        ref = list[id];
+
+      ref->id = id;
+      ref->load(esm);
     }
 
     int getSize() { return list.size(); }
@@ -73,11 +91,11 @@ namespace ESMS
     int getSize() { return count; }
 
     // List of interior cells. Indexed by cell name.
-    typedef std::map<std::string,Cell> IntCells;
+    typedef std::map<std::string,Cell*> IntCells;
     IntCells intCells;
 
     // List of exterior cells. Indexed as extCells[gridX][gridY].
-    typedef std::map<int, std::map<int, Cell> > ExtCells;
+    typedef std::map<int, std::map<int, Cell*> > ExtCells;
     ExtCells extCells;
 
     const Cell* findInt(const std::string &id) const
@@ -87,7 +105,7 @@ namespace ESMS
       if(it == intCells.end())
         return NULL;
 
-      return &it->second;
+      return it->second;
     }
 
     void load(ESMReader &esm, const std::string &id)
@@ -97,13 +115,13 @@ namespace ESMS
       count++;
 
       // All cells have a name record, even nameless exterior cells.
-      Cell cell;
-      cell.name = id;
+      Cell *cell = new Cell;
+      cell->name = id;
 
       // The cell itself takes care of all the hairy details
-      cell.load(esm);
+      cell->load(esm);
 
-      if(cell.data.flags & Cell::Interior)
+      if(cell->data.flags & Cell::Interior)
         {
           // Store interior cell by name
           intCells[id] = cell;
@@ -111,7 +129,7 @@ namespace ESMS
       else
         {
           // Store exterior cells by grid position
-          extCells[cell.data.gridX][cell.data.gridY] = cell;
+          extCells[cell->data.gridX][cell->data.gridY] = cell;
         }
     }
   };

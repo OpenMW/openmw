@@ -42,7 +42,8 @@ namespace ESMS
   struct CellRefList
   {
     typedef LiveCellRef<X> LiveRef;
-    std::list<LiveRef> list;
+    typedef std::list<LiveRef> List;
+    List list;
 
     // Search for the given reference in the given reclist from
     // ESMStore. Insert the reference into the list if a match is

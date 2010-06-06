@@ -35,18 +35,22 @@ void maintest()
   // This parses the ESM file and loads a sample cell
   esm.open(esmFile);
   store.load(esm);
+
   cell.loadInt("Beshara", store, esm);
 
   // Create the window
   ogre.createWindow("OpenMW");
 
-  cout << "\nSetting up cell rendering (not done)\n";
+  cout << "\nSetting up cell rendering\n";
 
   // Sets up camera, scene manager etc
   Render::MWScene scene(ogre);
 
-  // This doesn't do anything yet.
-  Render::CellRender rend(cell);
+  // This connects the cell data with the rendering scene.
+  Render::CellRender rend(cell, scene);
+
+  // Load the cell and insert it into the renderer
+  rend.show();
 
   cout << "Setting up input system\n";
 

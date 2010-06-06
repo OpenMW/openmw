@@ -11,11 +11,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 set(BSA bsa/bsa_archive.cpp bsa/bsa_file.cpp)
 set(BSA_HEADER bsa/bsa_archive.hpp bsa/bsa_file.hpp)
 
-set(NIF nif/nif_file.cpp nifogre/ogre_nif_loader.cpp)
+set(NIF nif/nif_file.cpp)
 set(NIF_HEADER nif/controlled.hpp nif/effect.hpp nif/nif_types.hpp  nif/record.hpp
     nif/controller.hpp nif/extra.hpp nif/node.hpp nif/record_ptr.hpp
     nif/data.hpp nif/nif_file.hpp nif/property.hpp)
-    
+
+set(NIFOGRE nifogre/ogre_nif_loader.cpp)
+set(NIFOGRE_HEADER nifogre/ogre_nif_loader.hpp)
+
 set(TOOLS tools/stringops.cpp tools/fileops.cpp)
 set(TOOLS_HEADER tools/fileops.hpp tools/slice_array.hpp tools/stringops.hpp)
 
@@ -30,7 +33,7 @@ set(INPUT_HEADER input/oismanager.hpp input/listener.hpp)
 set(GAME game/main.cpp game/esm_store/store.cpp game/cell_store.cpp)
 set(GAME_HEADER game/cell_store.hpp game/esm_store/reclists.hpp  game/esm_store/store.hpp)
 
-set(GAMEREND game/render/mwscene.cpp)
+set(GAMEREND game/render/mwscene.cpp game/render/cell.cpp)
 set(GAMEREND_HEADER game/render/cell.hpp game/render/mwscene.hpp)
 
 # Platform specific
@@ -70,6 +73,9 @@ add_executable(openmw
     ${TOOLS} ${TOOLS_HEADER}
     ${OGRE} ${OGRE_HEADER}
     ${INPUT} ${INPUT_HEADER}
+    ${NIF} ${NIF_HEADER}
+    ${NIFOGRE} ${NIFOGRE_HEADER}
+    ${MANGLE_VFS}
     ${GAME} ${GAME_HEADER}
     ${GAMEREND} ${GAMEREND_HEADER})
 

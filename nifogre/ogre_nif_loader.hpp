@@ -47,7 +47,8 @@ struct NIFLoader : Ogre::ManualResourceLoader
 {
   void loadResource(Ogre::Resource *resource);
 
-  static Ogre::MeshPtr load(const char* name, const char* group="General");
+  static Ogre::MeshPtr load(const std::string &name,
+                            const std::string &group="General");
 };
 
 #endif
