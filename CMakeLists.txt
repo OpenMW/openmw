@@ -25,11 +25,13 @@ endif (WIN32)
 
 # Dependencies
 find_package(OGRE REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem)
 find_package(OIS REQUIRED)
 include_directories("." ${OGRE_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
 # Main executable
 add_executable(openmw ${BSA} ${TOOLS} ${OGRE} ${INPUT} ${GAME} ${GAMEREND})
-target_link_libraries(openmw ${OGRE_LIBRARIES} ${OIS_LIBRARIES})
+target_link_libraries(openmw ${OGRE_LIBRARIES})
+target_link_libraries(openmw ${OIS_LIBRARIES})
+target_link_libraries(openmw ${Boost_LIBRARIES})
