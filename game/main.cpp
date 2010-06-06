@@ -12,14 +12,10 @@ using namespace std;
 
 void maintest()
 {
-  const char* esmFile = "data/Morrowind.esm";
-  const char* bsaFile = "data/Morrowind.bsa";
+  const char* esmFile = "../data/Morrowind.esm";
+  const char* bsaFile = "../data/Morrowind.bsa";
 
-#ifdef _WIN32
-  const char* plugCfg = "plugins.cfg.win32";
-#else
-  const char* plugCfg = "plugins.cfg.linux";
-#endif
+  const char* plugCfg = "plugins.cfg";
 
   cout << "Hello, fellow traveler!\n";
 

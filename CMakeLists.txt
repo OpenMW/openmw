@@ -24,11 +24,31 @@ set(PLATFORM_INCLUDE_DIR "")
 endif (WIN32)
 
 # Dependencies
+
 find_package(OGRE REQUIRED)
+find_package(OIS REQUIRED)
 find_package(Boost REQUIRED)
-include_directories("." ${OGRE_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
+
+include_directories("."
+    ${OGRE_INCLUDE_DIR} ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
+    ${PLATFORM_INCLUDE_DIR})
+
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
+
+# Specify build paths
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}/bin")
+
+# Other files
+
+if (WIN32)
+configure_file(${OpenMW_SOURCE_DIR}/plugins.cfg.win32
+    "${OpenMW_BINARY_DIR}/bin/plugins.cfg" COPY_ONLY)
+else (WIN32)
+configure_file(${OpenMW_SOURCE_DIR}/plugins.cfg.linux
+    "${OpenMW_BINARY_DIR}/bin/plugins.cfg" COPY_ONLY)
+endif (WIN32)
 
 # Main executable
 add_executable(openmw ${BSA} ${TOOLS} ${OGRE} ${INPUT} ${GAME} ${GAMEREND})
-target_link_libraries(openmw ${OGRE_LIBRARIES})
+target_link_libraries(openmw ${OGRE_LIBRARIES} ${OIS_LIBRARIES})
