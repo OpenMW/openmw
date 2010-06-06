@@ -34,16 +34,20 @@ void maintest()
   ESM::ESMReader esm;
   ESMS::ESMStore store;
   ESMS::CellStore cell;
-  Render::CellRender rend(cell);
 
+  // This parses the ESM file and loads a sample cell
   esm.open(esmFile);
   store.load(esm);
   cell.loadInt("Beshara", store, esm);
 
+  // Create the window
   ogre.createWindow("OpenMW");
 
   Render::MWScene scene;
   scene.setup(&ogre);
+
+  // This doesn't do anything yet.
+  Render::CellRender rend(cell);
 
   Input::OISManager input;
   input.setup(&ogre);
