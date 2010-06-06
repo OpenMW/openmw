@@ -42,11 +42,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}/bin")
 # Other files
 
 if (WIN32)
-configure_file(${OpenMW_SOURCE_DIR}/plugins.cfg.win32
-    "${OpenMW_BINARY_DIR}/bin/plugins.cfg" COPY_ONLY)
+configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
+    "${OpenMW_BINARY_DIR}/bin/plugins.cfg" COPYONLY)
 else (WIN32)
-configure_file(${OpenMW_SOURCE_DIR}/plugins.cfg.linux
-    "${OpenMW_BINARY_DIR}/bin/plugins.cfg" COPY_ONLY)
+configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
+    "${OpenMW_BINARY_DIR}/bin/plugins.cfg" COPYONLY)
 endif (WIN32)
 
 # Main executable
