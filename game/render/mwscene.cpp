@@ -5,13 +5,11 @@
 using namespace Render;
 using namespace Ogre;
 
-void MWScene::setup(OgreRenderer *_rend)
+MWScene::MWScene(OgreRenderer &_rend)
+  : rend(_rend)
 {
-  rend = _rend;
-  assert(rend);
-
-  Root *root = rend->getRoot();
-  RenderWindow *window = rend->getWindow();
+  Root *root = rend.getRoot();
+  RenderWindow *window = rend.getWindow();
 
   // Get the SceneManager, in this case a generic one
   sceneMgr = root->createSceneManager(ST_GENERIC);

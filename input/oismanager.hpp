@@ -6,15 +6,14 @@
 
 namespace Input
 {
-  class OISManager
+  struct OISManager
   {
     OIS::InputManager *inputMgr;
     OIS::Mouse *mouse;
     OIS::Keyboard *keyboard;
 
-  public:
-    void setup(Render::OgreRenderer *rend);
-    void cleanup();
+    OISManager(Render::OgreRenderer &rend);
+    ~OISManager();
   };
 }
 #endif

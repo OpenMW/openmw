@@ -6,10 +6,13 @@
 namespace Render
 {
   /** Class responsible for Morrowind-specific interfaces to OGRE.
+
+      This might be refactored partially into a non-mw specific
+      counterpart in ogre/ at some point.
    */
   class MWScene
   {
-    OgreRenderer *rend;
+    OgreRenderer &rend;
     Ogre::SceneManager *sceneMgr;
     Ogre::Camera *camera;
     Ogre::Viewport *vp;
@@ -20,7 +23,7 @@ namespace Render
     Ogre::SceneNode *mwRoot;
 
   public:
-    void setup(OgreRenderer *_rend);
+    MWScene(OgreRenderer &_rend);
   };
 }
 

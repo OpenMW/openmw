@@ -10,11 +10,9 @@ using namespace OIS;
 #include <iostream>
 using namespace std;
 
-void OISManager::setup(Render::OgreRenderer *rend)
+OISManager::OISManager(Render::OgreRenderer &rend)
 {
-  assert(rend);
-
-  RenderWindow *window = rend->getWindow();
+  RenderWindow *window = rend.getWindow();
   assert(window);
 
   size_t windowHnd;
@@ -62,15 +60,9 @@ void OISManager::setup(Render::OgreRenderer *rend)
   const MouseState &ms = mouse->getMouseState();
   ms.width  = window->getWidth();
   ms.height = window->getHeight();
-
-  /*
-  // Register the input listener
-  keyboard -> setEventCallback( &mInput );
-  mouse    -> setEventCallback( &mInput );
-  */
 }
 
-void OISManager::cleanup()
+OISManager::~OISManager()
 {
   if(inputMgr == NULL) return;
 

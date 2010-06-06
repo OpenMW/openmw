@@ -148,11 +148,6 @@ extern "C" void ogre_setFog(float rf, float gf, float bf, // Fog color
   vp->setBackgroundColour(fogColor);
 }
 
-extern "C" void ogre_startRendering()
-{
-  mRoot->startRendering();
-}
-
 // Copy a scene node and all its children
 void cloneNode(SceneNode *from, SceneNode *to, char* name)
 {

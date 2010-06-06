@@ -33,7 +33,13 @@ namespace Render
     /// Kill the renderer.
     void cleanup();
 
+    /// Start the main rendering loop
+    void start() { mRoot->startRendering(); }
+
+    /// Get the Root
     Ogre::Root *getRoot() { return mRoot; }
+
+    /// Get the rendering window
     Ogre::RenderWindow *getWindow() { return mWindow; }
   };
 }

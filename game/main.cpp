@@ -7,6 +7,7 @@
 #include "ogre/renderer.hpp"
 #include "tools/fileops.hpp"
 #include "input/oismanager.hpp"
+#include "input/listener.hpp"
 
 using namespace std;
 
@@ -43,17 +44,26 @@ void maintest()
   // Create the window
   ogre.createWindow("OpenMW");
 
-  Render::MWScene scene;
-  scene.setup(&ogre);
+  cout << "\nSetting up cell rendering (not done)\n";
+
+  // Sets up camera, scene manager etc
+  Render::MWScene scene(ogre);
 
   // This doesn't do anything yet.
   Render::CellRender rend(cell);
 
-  Input::OISManager input;
-  input.setup(&ogre);
+  cout << "Setting up input system\n";
 
-  // Add the frame listener
-  //root->addFrameListener(&mFrameListener);
+  // Sets up the input system
+  Input::OISManager input(ogre);
+
+  // Add the frame and input listener
+  Input::ExitListener frame(ogre, input);
+
+  cout << "\nStart! Press Q/ESC or close window to exit.\n";
+
+  // Start the main rendering loop
+  ogre.start();
 
   cout << "\nThat's all for now!\n";
 }
