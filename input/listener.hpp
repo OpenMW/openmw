@@ -4,7 +4,10 @@
 #include "oismanager.hpp"
 #include "ogre/renderer.hpp"
 
-#include <iostream>
+#include <OgreFrameListener.h>
+#include <OgreRenderWindow.h>
+
+//#include <iostream>
 
 namespace Input
 {

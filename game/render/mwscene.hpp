@@ -3,6 +3,14 @@
 
 #include "ogre/renderer.hpp"
 
+namespace Ogre
+{
+    class Camera;
+    class Viewport;
+    class SceneManager;
+    class SceneNode;
+}
+
 namespace Render
 {
   /** Class responsible for Morrowind-specific interfaces to OGRE.

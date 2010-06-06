@@ -2,12 +2,14 @@
 #include <assert.h>
 #include <string>
 #include <sstream>
+#include <iostream>
+
+#include "OgreRenderWindow.h"
 
 using namespace Input;
 using namespace Ogre;
 using namespace OIS;
 
-#include <iostream>
 using namespace std;
 
 OISManager::OISManager(Render::OgreRenderer &rend)
