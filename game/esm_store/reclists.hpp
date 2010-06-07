@@ -21,24 +21,14 @@ namespace ESMS
   template <typename X>
   struct RecListT : RecList
   {
-    typedef std::map<std::string,X*> MapType;
+    typedef std::map<std::string,X> MapType;
 
     MapType list;
 
     // Load one object of this type
     void load(ESMReader &esm, const std::string &id)
     {
-      X *ref;
-
-      if(list.find(id) == list.end())
-        {
-          ref = new X;
-          list[id] = ref;
-        }
-      else
-        ref = list[id];
-
-      ref->load(esm);
+      list[id].load(esm);
     }
 
     // Find the given object ID, or return NULL if not found.
@@ -46,7 +36,7 @@ namespace ESMS
     {
       if(list.find(id) == list.end())
         return NULL;
-      return list.find(id)->second;
+      return &list.find(id)->second;
     }
 
     int getSize() { return list.size(); }
@@ -58,24 +48,16 @@ namespace ESMS
   template <typename X>
   struct RecIDListT : RecList
   {
-    typedef std::map<std::string,X*> MapType;
+    typedef std::map<std::string,X> MapType;
 
     MapType list;
 
     void load(ESMReader &esm, const std::string &id)
     {
-      X *ref;
+      X& ref = list[id];
 
-      if(list.find(id) == list.end())
-        {
-          ref = new X;
-          list[id] = ref;
-        }
-      else
-        ref = list[id];
-
-      ref->id = id;
-      ref->load(esm);
+      ref.id = id;
+      ref.load(esm);
     }
 
     int getSize() { return list.size(); }
