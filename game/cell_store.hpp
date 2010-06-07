@@ -49,7 +49,7 @@ namespace ESMS
     // ESMStore. Insert the reference into the list if a match is
     // found. If not, throw an exception.
     template <typename Y>
-    void find(CellRef &ref, Y recList)
+    void find(CellRef &ref, const Y& recList)
     {
       const X* obj = recList.find(ref.refID);
       if(obj == NULL)
