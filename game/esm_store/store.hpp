@@ -12,6 +12,10 @@
   loading code. Cutting down dependencies also help on the general
   maintainability.
 
+  TODO FIXME: Cleanup. The RecLists store pointers to new'd objects,
+  but these are never deleted anywhere. Right now this data is
+  persistant through the application lifetime so it doesn't matter,
+  but fix it later.
  */
 
 #include "esm/records.hpp"

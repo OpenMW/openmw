@@ -48,8 +48,7 @@ public:
   void load() {}
   void unload() {}
 
-  // Open a file in the archive.
-  DataStreamPtr open(const String& filename) const
+  DataStreamPtr open(const String& filename, bool recursive = true) const
   {
     // Get a non-const reference to arc. This is a hack and it's all
     // OGRE's fault. You should NOT expect an open() command not to
@@ -64,6 +63,10 @@ public:
     return DataStreamPtr(new Mangle2OgreStream(strm));
   }
 
+  // Check if the file exists.
+  bool exists(const String& filename) { return arc.exists(filename.c_str()); }
+  time_t getModifiedTime(const String&) { return 0; }
+
   // This is never called as far as I can see.
   StringVectorPtr list(bool recursive = true, bool dirs = false)
   {
@@ -71,6 +74,7 @@ public:
     StringVectorPtr ptr = StringVectorPtr(new StringVector());
     return ptr;
   }
+
   // Also never called.
   FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false)
   {
@@ -78,8 +82,6 @@ public:
     FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
     return ptr;
   }
-
-  time_t getModifiedTime(const String&) { return 0; }
 
   // After load() is called, find("*") is called once. It doesn't seem
   // to matter that we return an empty list, exists() gets called on
@@ -104,11 +106,6 @@ public:
   FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
                                bool dirs = false)
   {
-    /*
-    std::cout << "findFileInfo(" << pattern << ", " << recursive
-              << ", " << dirs << ")\n";
-    */
-
     FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
 
     // Check if the file exists (only works for single files - wild
@@ -128,66 +125,6 @@ public:
 
     return ptr;
   }
-
-  // Check if the file exists.
-  bool exists(const String& filename) { return arc.exists(filename.c_str()); }
-  
-  // Fill out all types of virtual members from Ogre framework
-  StringVectorPtr list(bool recursive = true)
-  {
-    StringVectorPtr ptr = StringVectorPtr(new StringVector());
-    return ptr;
-  }
-  
-  StringVectorPtr find(const String& pattern, bool recursive = true)
-  {
-    StringVectorPtr ptr = StringVectorPtr(new StringVector());
-    return ptr;
-  }
-  
-  FileInfoListPtr listFileInfo(bool recursive = true)
-  {
-    FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-    return ptr;
-  }
-
-  FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true)
-  {
-    FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-
-    // Check if the file exists (only works for single files - wild
-    // cards and recursive search isn't implemented.)
-    if(exists(pattern)) {
-        FileInfo fi;
-        fi.archive = this;
-        fi.filename = pattern;
-        // It apparently doesn't matter that we return bogus
-        // information
-        fi.path = "";
-        fi.compressedSize = fi.uncompressedSize = 0;
-
-        ptr->push_back(fi);
-    }
-
-    return ptr;
-  }
-
-  DataStreamPtr open(const String& filename, bool recursive = true) const
-  {
-    // Get a non-const reference to arc. This is a hack and it's all
-    // OGRE's fault. You should NOT expect an open() command not to
-    // have any side effects on the archive, and hence this function
-    // should not have been declared const in the first place.
-    BSAFile *narc = (BSAFile*)&arc;
-
-    // Open the file
-    StreamPtr strm = narc->getFile(filename.c_str());
-
-    // Wrap it into an Ogre::DataStream.
-    return DataStreamPtr(new Mangle2OgreStream(strm));
-  }
-
-  
 };
 
 // An archive factory for BSA archives

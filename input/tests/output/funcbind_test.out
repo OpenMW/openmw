@@ -1,0 +1,19 @@
+This will test the function binding system
+
+Calling 0
+Calling 'This is action 1'
+In f1()
+
+Calling 1
+Calling ''
+In f2()
+
+Calling 2
+Calling 'This is action 3'
+In f1()
+
+Calling 3
+No function
+
+Calling 4
+No function

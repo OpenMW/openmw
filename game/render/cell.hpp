@@ -11,6 +11,7 @@ namespace Render
      rendering objects from the given cell into the given rendering
      scene.
 
+     TODO FIXME: Doesn't do full cleanup yet.
    */
   class CellRender
   {

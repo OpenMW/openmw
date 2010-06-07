@@ -2,6 +2,7 @@
 
 function run()
 {
+  echo
   echo "$1/tests/:"
   cd "$1/tests/"
   ./test.sh
@@ -9,6 +10,7 @@ function run()
 }
 
 run tools
+run input
 run bsa
 run nif
 run nifogre
