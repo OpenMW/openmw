@@ -77,8 +77,24 @@ namespace ESMS
     IntCells intCells;
 
     // List of exterior cells. Indexed as extCells[gridX][gridY].
-    typedef std::map<int, std::map<int, Cell*> > ExtCells;
+    typedef std::map<int, Cell*> ExtCellsCol;
+    typedef std::map<int, ExtCellsCol> ExtCells;
     ExtCells extCells;
+
+    ~CellList()
+    {
+      for (IntCells::iterator it = intCells.begin(); it!=intCells.end(); ++it)
+        delete it->second;
+
+      for (ExtCells::iterator it = extCells.begin(); it!=extCells.end(); ++it)
+      {
+        ExtCellsCol& col = it->second;
+        for (ExtCellsCol::iterator it = col.begin(); it!=col.end(); ++it)
+        {
+          delete it->second;
+        }
+      }
+    }
 
     const Cell* findInt(const std::string &id) const
     {
