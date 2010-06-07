@@ -36,6 +36,17 @@ set(GAME_HEADER game/cell_store.hpp game/esm_store/reclists.hpp  game/esm_store/
 set(GAMEREND game/render/mwscene.cpp game/render/cell.cpp)
 set(GAMEREND_HEADER game/render/cell.hpp game/render/mwscene.hpp)
 
+set(ESM_HEADER esm/defs.hpp esm/loadcell.hpp esm/loadfact.hpp esm/loadltex.hpp
+    esm/loadskil.hpp
+    esm/esm_reader.hpp esm/loadclas.hpp esm/loadglob.hpp esm/loadmgef.hpp esm/loadsndg.hpp
+    esm/loadacti.hpp esm/loadclot.hpp esm/loadgmst.hpp esm/loadmisc.hpp esm/loadsoun.hpp
+    esm/loadalch.hpp esm/loadcont.hpp esm/loadinfo.hpp esm/loadnpcc.hpp esm/loadspel.hpp
+    esm/loadappa.hpp esm/loadcrea.hpp esm/loadingr.hpp esm/loadnpc.hpp esm/loadsscr.hpp
+    esm/loadarmo.hpp esm/loadcrec.hpp esm/loadland.hpp esm/loadpgrd.hpp esm/loadstat.hpp
+    esm/loadbody.hpp esm/loaddial.hpp esm/loadlevlist.hpp esm/loadrace.hpp esm/loadweap.hpp
+    esm/loadbook.hpp esm/loaddoor.hpp esm/loadligh.hpp esm/loadregn.hpp esm/records.hpp
+    esm/loadbsgn.hpp esm/loadench.hpp esm/loadlocks.hpp esm/loadscpt.hpp)
+
 # Platform specific
 if (WIN32)
 set(PLATFORM_INCLUDE_DIR "platform")
@@ -77,7 +88,8 @@ add_executable(openmw
     ${NIFOGRE} ${NIFOGRE_HEADER}
     ${MANGLE_VFS}
     ${GAME} ${GAME_HEADER}
-    ${GAMEREND} ${GAMEREND_HEADER})
+    ${GAMEREND} ${GAMEREND_HEADER}
+    ${ESM_HEADER})
 
 target_link_libraries(openmw
   ${OGRE_LIBRARIES}
