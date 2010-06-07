@@ -1,84 +1,47 @@
 #include <iostream>
 using namespace std;
 
-#include <string>
-#include <vector>
-#include <boost/function.hpp>
-#include <assert.h>
+#include "../func_binder.hpp"
 
-typedef boost::function<void()> Action;
-
-struct FuncBind
+void f1(int i, void *p)
 {
-  std::string name;
-  Action action;
-};
+  cout << "  F1 i=" << i << endl;
 
-class Binder
-{
-  std::vector<FuncBind> bindings;
-
-public:
-  /**
-     Initialize the struct by telling it how many functions you have
-     to bind. The largest index you intend to use should be number-1.
-  */
-  Binder(int number) : bindings(number) {}
-
-  void bind(int index, Action action, const std::string &name="")
-  {
-    assert(index >= 0 && index < bindings.size());
-    FuncBind &fb = bindings[index];
-    fb.action = action;
-    fb.name = name;
-  }
-
-  void unbind(int index)
-  {
-    assert(index >= 0 && index < bindings.size());
-    FuncBind &fb = bindings[index];
-    fb = FuncBind();
-  }
-
-  void call(int index)
-  {
-    assert(index >= 0 && index < bindings.size());
-    FuncBind &fb = bindings[index];
-    if(fb.action)
-      {
-        cout << "Calling '" << fb.name << "'\n";
-        fb.action();
-      }
-    else
-      cout << "No function\n";
-  }
-};
-
-void f1()
-{
-  cout << "In f1()\n";
+  if(p)
+    cout << "  Got a nice gift: "
+         << *((float*)p) << endl;
 }
 
-void f2()
+void f2(int i, void *p)
 {
-  cout << "In f2()\n";
+  cout << "  F2 i=" << i << endl;
 }
+
+using namespace Input;
 
 int main()
 {
   cout << "This will test the function binding system\n";
 
-  Binder bnd(5);
+  FuncBinder bnd(5);
 
   bnd.bind(0, &f1, "This is action 1");
   bnd.bind(1, &f2);
   bnd.bind(2, &f1, "This is action 3");
+  bnd.bind(3, &f2, "This is action 4");
+
+  bnd.unbind(2);
 
   for(int i=0; i<5; i++)
     {
-      cout << "\nCalling " << i << endl;
+      cout << "Calling " << i << ": '" << bnd.getName(i) << "'\n";
       bnd.call(i);
+      if(!bnd.isBound(i)) cout << "  (not bound)\n";
     }
+
+  cout << "\nCalling with parameter:\n";
+  float f = 3.1415;
+  bnd.call(0, &f);
 
   return 0;
 }

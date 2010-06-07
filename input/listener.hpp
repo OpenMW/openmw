@@ -7,8 +7,6 @@
 #include <OgreFrameListener.h>
 #include <OgreRenderWindow.h>
 
-//#include <iostream>
-
 namespace Input
 {
   struct ExitListener : Ogre::FrameListener,

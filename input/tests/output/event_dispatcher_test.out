@@ -1,0 +1,30 @@
+Testing the event dispatcher
+
+Duty calls:
+  Calling event 1:
+  Calling event 2:
+  Calling event 3:
+  Calling event 4:
+
+Duty calls:
+  Calling event 1:
+    Got event: in=1 out=10
+  Calling event 2:
+    Got event: in=2 out=-137
+    Got event: in=2 out=1
+  Calling event 3:
+  Calling event 4:
+
+Duty calls:
+  Calling event 1:
+  Calling event 2:
+  Calling event 3:
+  Calling event 4:
+
+Duty calls:
+  Calling event 1:
+  Calling event 2:
+  Calling event 3:
+    Got event: in=3 out=19
+  Calling event 4:
+    Got event: in=4 out=18
