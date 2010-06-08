@@ -3,19 +3,21 @@
 
 #include "oismanager.hpp"
 #include "ogre/renderer.hpp"
+#include "dispatcher.hpp"
 
 #include <OgreFrameListener.h>
 #include <OgreRenderWindow.h>
 
 namespace Input
 {
-  struct ExitListener : Ogre::FrameListener,
-                        OIS::KeyListener,
-                        OIS::MouseListener
+  struct InputListener : Ogre::FrameListener,
+                         OIS::KeyListener,
+                         OIS::MouseListener
   {
-    ExitListener(Render::OgreRenderer &rend,
-                 Input::OISManager &input)
-      : doExit(false)
+    InputListener(Render::OgreRenderer &rend,
+                  Input::OISManager &input,
+                  const Input::Dispatcher &_disp)
+      : doExit(false), disp(_disp)
     {
       // Set up component pointers
       mWindow = rend.getWindow();
@@ -45,17 +47,8 @@ namespace Input
 
     bool keyPressed( const OIS::KeyEvent &arg )
     {
-      /*
-      std::cout << "KeyPressed {" << arg.key
-                << ", " << ((OIS::Keyboard*)(arg.device))->getAsString(arg.key)
-                << "} || Character (" << (char)arg.text << ")\n";
-      */
-      using namespace OIS;
-
-      if(arg.key == KC_Q ||
-         arg.key == KC_ESCAPE)
-        exitNow();
-
+      // Pass the event to the dispatcher
+      disp.event(arg.key, &arg);
       return true;
     }
 
@@ -81,6 +74,7 @@ namespace Input
 
     private:
 
+    const Dispatcher &disp;
     Ogre::RenderWindow *mWindow;
     OIS::Mouse *mMouse;
     OIS::Keyboard *mKeyboard;

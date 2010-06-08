@@ -4,7 +4,7 @@
 
 #include "nifogre/ogre_nif_loader.hpp"
 
-using namespace Render;
+using namespace MWRender;
 using namespace Ogre;
 using namespace ESMS;
 

@@ -1,3 +1,7 @@
+NOTE: This README is for ardekantur's Mac branch of OpenMW. A README
+for the main branch has yet to be written. If you want to submit one,
+please send me a message!
+
 OpenMW
 ======
 

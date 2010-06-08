@@ -28,13 +28,16 @@ set(OGRE ogre/renderer.cpp)
 set(OGRE_HEADER ogre/renderer.hpp)
 
 set(INPUT input/oismanager.cpp)
-set(INPUT_HEADER input/oismanager.hpp input/listener.hpp)
+set(INPUT_HEADER input/oismanager.hpp input/listener.hpp input/func_binder.hpp input/dispatch_map.hpp input/dispatcher.hpp)
 
-set(GAME game/main.cpp game/esm_store/store.cpp game/cell_store.cpp)
-set(GAME_HEADER game/cell_store.hpp game/esm_store/reclists.hpp  game/esm_store/store.hpp)
+set(GAME game/main.cpp)
+set(GAME_HEADER game/mwinput/inputmanager.hpp)
 
-set(GAMEREND game/render/mwscene.cpp game/render/cell.cpp)
-set(GAMEREND_HEADER game/render/cell.hpp game/render/mwscene.hpp)
+set(ESM_STORE esm_store/store.cpp esm_store/cell_store.cpp)
+set(ESM_STORE_HEADER esm_store/cell_store.hpp esm_store/reclists.hpp esm_store/store.hpp)
+
+set(GAMEREND game/mwrender/mwscene.cpp game/mwrender/cell.cpp)
+set(GAMEREND_HEADER game/mwrender/cell.hpp game/mwrender/mwscene.hpp)
 
 set(ESM_HEADER esm/defs.hpp esm/loadcell.hpp esm/loadfact.hpp esm/loadltex.hpp
     esm/loadskil.hpp
@@ -87,7 +90,8 @@ add_executable(openmw
     ${NIF} ${NIF_HEADER}
     ${NIFOGRE} ${NIFOGRE_HEADER}
     ${MANGLE_VFS}
-    ${GAME} ${GAME_HEADER}
+    ${GAME}
+    ${ESM_STORE} ${ESM_STORE_HEADER}
     ${GAMEREND} ${GAMEREND_HEADER}
     ${ESM_HEADER})
 

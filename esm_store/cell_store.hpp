@@ -10,7 +10,7 @@
   (looking up references.) Neither of these modules depend on us.
  */
 
-#include "esm_store/store.hpp"
+#include "store.hpp"
 #include "esm/records.hpp"
 #include "mangle/tools/str_exception.hpp"
 #include <list>

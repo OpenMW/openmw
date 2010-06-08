@@ -1,10 +1,10 @@
 #ifndef _GAME_RENDER_CELL_H
 #define _GAME_RENDER_CELL_H
 
-#include "../cell_store.hpp"
+#include "esm_store/cell_store.hpp"
 #include "mwscene.hpp"
 
-namespace Render
+namespace MWRender
 {
   /**
      This class is responsible for inserting meshes and other

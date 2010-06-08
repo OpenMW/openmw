@@ -1,13 +1,13 @@
 #include <iostream>
 
-#include "cell_store.hpp"
-#include "render/cell.hpp"
-#include "render/mwscene.hpp"
+#include "esm_store/cell_store.hpp"
 #include "bsa/bsa_archive.hpp"
 #include "ogre/renderer.hpp"
 #include "tools/fileops.hpp"
-#include "input/oismanager.hpp"
-#include "input/listener.hpp"
+
+#include "mwrender/cell.hpp"
+#include "mwrender/mwscene.hpp"
+#include "mwinput/inputmanager.hpp"
 
 using namespace std;
 
@@ -44,10 +44,10 @@ void maintest()
   cout << "\nSetting up cell rendering\n";
 
   // Sets up camera, scene manager etc
-  Render::MWScene scene(ogre);
+  MWRender::MWScene scene(ogre);
 
   // This connects the cell data with the rendering scene.
-  Render::CellRender rend(cell, scene);
+  MWRender::CellRender rend(cell, scene);
 
   // Load the cell and insert it into the renderer
   rend.show();
@@ -55,10 +55,7 @@ void maintest()
   cout << "Setting up input system\n";
 
   // Sets up the input system
-  Input::OISManager input(ogre);
-
-  // Add the frame and input listener
-  Input::ExitListener frame(ogre, input);
+  MWInput::MWInputManager input(ogre);
 
   cout << "\nStart! Press Q/ESC or close window to exit.\n";
 

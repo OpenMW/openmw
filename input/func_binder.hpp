@@ -22,7 +22,7 @@ namespace Input {
    permanent references to it unless you've planning for this on the
    calling side as well.
  */
-typedef boost::function<void(int,void*)> Action;
+typedef boost::function<void(int,const void*)> Action;
 
 /**
    The FuncBinder is a simple struct that binds user-defined indices
@@ -73,22 +73,22 @@ public:
      Call a specific action. Takes an optional parameter that is
      passed to the action.
    */
-  void call(int index, void *p=NULL)
+  void call(int index, const void *p=NULL) const
   {
     assert(index >= 0 && index < bindings.size());
-    FuncBinding &fb = bindings[index];
+    const FuncBinding &fb = bindings[index];
     if(fb.action) fb.action(index, p);
   }
 
   /// Check if a given index is bound to anything
-  bool isBound(int index)
+  bool isBound(int index) const
   {
     assert(index >= 0 && index < bindings.size());
     return !bindings[index].action.empty();
   }
 
   /// Return the name associated with an action (empty if not bound)
-  const std::string &getName(int index)
+  const std::string &getName(int index) const
   {
     assert(index >= 0 && index < bindings.size());
     return bindings[index].name;

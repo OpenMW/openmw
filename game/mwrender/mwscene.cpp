@@ -9,10 +9,10 @@
 #include "OgreCamera.h"
 #include "OgreTextureManager.h"
 
-using namespace Render;
+using namespace MWRender;
 using namespace Ogre;
 
-MWScene::MWScene(OgreRenderer &_rend)
+MWScene::MWScene(Render::OgreRenderer &_rend)
   : rend(_rend)
 {
   Root *root = rend.getRoot();

@@ -3,16 +3,16 @@ using namespace std;
 
 #include "../func_binder.hpp"
 
-void f1(int i, void *p)
+void f1(int i, const void *p)
 {
   cout << "  F1 i=" << i << endl;
 
   if(p)
     cout << "  Got a nice gift: "
-         << *((float*)p) << endl;
+         << *((const float*)p) << endl;
 }
 
-void f2(int i, void *p)
+void f2(int i, const void *p)
 {
   cout << "  F2 i=" << i << endl;
 }

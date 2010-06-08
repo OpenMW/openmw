@@ -48,7 +48,7 @@ struct DispatchMap
   }
 
   /// Check if a given input is bound to anything
-  bool isBound(int in)
+  bool isBound(int in) const
   {
     return map.find(in) != map.end();
   }
@@ -60,10 +60,12 @@ struct DispatchMap
      The returned set is only intended for immediate iteration. Do not
      store references to it.
   */
-  const OutList &getList(int in)
+  const OutList &getList(int in) const
   {
     assert(isBound(in));
-    const OutList &out = map[in];
+    InMap::const_iterator it = map.find(in);
+    assert(it != map.end());
+    const OutList &out = it->second;
     assert(!out.empty());
     return out;
   }
