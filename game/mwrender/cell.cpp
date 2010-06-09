@@ -9,10 +9,8 @@ using namespace Ogre;
 using namespace ESMS;
 
 // Inserts one mesh into the scene
-static void insertObj(SceneNode *base,          // Parent scene node
-                      SceneManager *mgr,        // Scene manager
-                      const std::string mesh,   // NIF file
-                      const CellRef &ref)       // Reference information
+void CellRender::insertMesh(const std::string mesh,   // NIF file
+                           const CellRef &ref)       // Reference information
 {
   // Create and place scene node for this object
   SceneNode *node = base->createChildSceneNode();
@@ -38,7 +36,7 @@ static void insertObj(SceneNode *base,          // Parent scene node
 
   // Finally, load the NIF mesh and attach it to the node
   NIFLoader::load(mesh);
-  MovableObject *ent = mgr->createEntity(mesh);
+  MovableObject *ent = scene.getMgr()->createEntity(mesh);
   node->attachObject(ent);
 }
 
@@ -53,32 +51,27 @@ void CellRender::show()
 
   base = scene.getRoot()->createChildSceneNode();
 
-  // Loop through all statics in the cell
-  CellRefList<Static>::List::const_iterator it;
-  for(it = cell.statics.list.begin();
-      it != cell.statics.list.end();
-      it++)
-    {
-      assert(it->base != NULL);
-      insertObj(base, scene.getMgr(),
-                "meshes\\" + it->base->model,
-                it->ref);
-    }
-
-  /*
-  // Containers
-  CellRefList<Container>::List::const_iterator it;
-
-  for(it = cell.containers.list.begin();
-      it != cell.containers.list.end();
-      it++)
-    {
-      assert(it->base != NULL);
-
-      cout << "refID = " << it->ref.refID << " x" << it->ref.scale << endl;
-      cout << "flags = " << it->base->flags << endl;
-    }
-  */
+  // Loop through all references in the cell
+  insertCellRefList (cell.activators);
+  insertCellRefList (cell.potions);
+  insertCellRefList (cell.appas);
+  insertCellRefList (cell.armors);
+  insertCellRefList (cell.books);
+  insertCellRefList (cell.clothes);
+  insertCellRefList (cell.containers);
+  insertCellRefList (cell.creatures);
+  insertCellRefList (cell.doors);
+  insertCellRefList (cell.ingreds);
+//  insertCellRefList (cell.creatureLists);
+//  insertCellRefList (cell.itemLists);
+  insertCellRefList (cell.lights);
+  insertCellRefList (cell.lockpicks);
+  insertCellRefList (cell.miscItems);
+  insertCellRefList (cell.npcs);
+  insertCellRefList (cell.probes);
+  insertCellRefList (cell.repairs);
+  insertCellRefList (cell.statics);
+  insertCellRefList (cell.weapons);
 }
 
 void CellRender::hide()
