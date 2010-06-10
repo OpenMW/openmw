@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "boost/program_options.hpp"
+
 #include "esm_store/cell_store.hpp"
 #include "bsa/bsa_archive.hpp"
 #include "ogre/renderer.hpp"
@@ -65,9 +67,30 @@ void maintest()
   cout << "\nThat's all for now!\n";
 }
 
-int main(/*int argc, char**argv*/)
+int main(int argc, char**argv)
 {
-  try { maintest(); }
+  try
+  {
+    boost::program_options::options_description desc (
+      "Syntax: openmw <options>\nAllowed options");
+
+    desc.add_options()
+      ("help", "print help message");
+  
+    boost::program_options::variables_map variables;
+    boost::program_options::store (
+      boost::program_options::parse_command_line (argc, argv, desc), variables);
+    boost::program_options::notify (variables);
+
+    if (variables.count ("help"))
+    {
+      std::cout << desc << std::endl;
+    }
+    else
+    {          
+      maintest();
+    }  
+  }
   catch(exception &e)
     {
       cout << "\nERROR: " << e.what() << endl;

@@ -60,7 +60,7 @@ endif (WIN32)
 # Dependencies
 
 find_package(OGRE REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system filesystem)
+find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
 find_package(OIS REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
