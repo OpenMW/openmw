@@ -27,7 +27,7 @@
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
 #include "bsa_file.hpp"
-#include "../mangle/stream/clients/ogre_datastream.hpp"
+#include <mangle/stream/clients/ogre_datastream.hpp>
 
 using namespace Ogre;
 using namespace Mangle::Stream;

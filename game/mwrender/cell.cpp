@@ -9,7 +9,7 @@ using namespace Ogre;
 using namespace ESMS;
 
 // Inserts one mesh into the scene
-void CellRender::insertMesh(const std::string mesh,   // NIF file
+void CellRender::insertMesh(const std::string &mesh, // NIF file
                            const CellRef &ref)       // Reference information
 {
   // Create and place scene node for this object

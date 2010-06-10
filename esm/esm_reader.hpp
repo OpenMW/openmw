@@ -9,10 +9,10 @@
 #include <sstream>
 #include <iomanip>
 
-#include "../mangle/stream/stream.hpp"
-#include "../mangle/stream/servers/file_stream.hpp"
-#include "../mangle/tools/str_exception.hpp"
-#include "../tools/stringops.hpp"
+#include <mangle/stream/stream.hpp>
+#include <mangle/stream/servers/file_stream.hpp>
+#include <mangle/tools/str_exception.hpp>
+#include "tools/stringops.hpp"
 
 #ifdef __APPLE__
 // need our own implementation of strnlen

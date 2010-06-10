@@ -24,7 +24,7 @@ namespace MWRender
     /// cell.
     Ogre::SceneNode *base;
 
-    void insertMesh(const std::string mesh,    // NIF file
+    void insertMesh(const std::string &mesh,   // NIF file
                     const ESMS::CellRef &ref); // Reference information
                    
     template<typename T>   

@@ -25,11 +25,11 @@
 #include <Ogre.h>
 #include <stdio.h>
 
-#include "../mangle/vfs/servers/ogre_vfs.hpp"
-#include "../nif/nif_file.hpp"
-#include "../nif/node.hpp"
-#include "../nif/data.hpp"
-#include "../nif/property.hpp"
+#include <mangle/vfs/servers/ogre_vfs.hpp>
+#include "nif/nif_file.hpp"
+#include "nif/node.hpp"
+#include "nif/data.hpp"
+#include "nif/property.hpp"
 
 // For warning messages
 #include <iostream>

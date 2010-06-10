@@ -24,7 +24,7 @@
 #ifndef _BSA_FILE_H_
 #define _BSA_FILE_H_
 
-#include "../mangle/stream/stream.hpp"
+#include <mangle/stream/stream.hpp>
 
 #include <stdint.h>
 #include <strings.h>
