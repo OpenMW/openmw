@@ -31,7 +31,9 @@ namespace MWRender
     void insertObj(const T& liveRef)
     {
         assert (liveRef.base != NULL);
-        insertMesh ("meshes\\" + liveRef.base->model, liveRef.ref);
+        const std::string &model = liveRef.base->model;
+        if(!model.empty())
+          insertMesh ("meshes\\" + model, liveRef.ref);
     }
     
     template<typename T>
