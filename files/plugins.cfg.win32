@@ -7,7 +7,6 @@ PluginFolder=.\
 Plugin=RenderSystem_Direct3D9_d
 Plugin=RenderSystem_GL_d
 Plugin=Plugin_ParticleFX_d
-Plugin=Plugin_BSPSceneManager_d
 Plugin=Plugin_OctreeSceneManager_d
 Plugin=Plugin_CgProgramManager_d
 
