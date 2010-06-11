@@ -81,6 +81,9 @@ configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
     "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
 endif (WIN32)
 
+configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+    "${OpenMW_BINARY_DIR}/openmw.cfg" COPYONLY)
+    
 # Main executable
 add_executable(openmw
     ${BSA} ${BSA_HEADER}

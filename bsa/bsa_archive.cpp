@@ -157,7 +157,7 @@ static void insertBSAFactory()
 
 // The function below is the only publicly exposed part of this file
 
-void addBSA(const char* name, const char* group)
+void addBSA(const std::string& name, const std::string& group)
 {
   insertBSAFactory();
   ResourceGroupManager::getSingleton().

@@ -1,5 +1,8 @@
 #include <iostream>
 
+#include <string>
+#include <fstream>
+
 #include "boost/program_options.hpp"
 
 #include "esm_store/cell_store.hpp"
@@ -13,21 +16,28 @@
 
 using namespace std;
 
-void maintest()
+void maintest (std::string dataDir)
 {
-  const char* esmFile = "data/Morrowind.esm";
-  const char* bsaFile = "data/Morrowind.bsa";
+  assert (!dataDir.empty());
+  
+  if (dataDir[dataDir.size()-1]!='/' && dataDir[dataDir.size()-1]!='\\')
+    dataDir += "/";
+
+  const char* esmFile = "Morrowind.esm";
+  const char* bsaFile = "Morrowind.bsa";
 
   const char* plugCfg = "plugins.cfg";
 
   cout << "Hello, fellow traveler!\n";
+  
+  cout << "Your data directory for today is: " << dataDir << "\n";
 
   cout << "Initializing OGRE\n";
   Render::OgreRenderer ogre;
   ogre.configure(!isFile("ogre.cfg"), plugCfg, false);
 
   cout << "Adding " << bsaFile << endl;
-  addBSA(bsaFile);
+  addBSA(dataDir + bsaFile);
 
   cout << "Loading ESM " << esmFile << "\n";
   ESM::ESMReader esm;
@@ -35,7 +45,7 @@ void maintest()
   ESMS::CellStore cell;
 
   // This parses the ESM file and loads a sample cell
-  esm.open(esmFile);
+  esm.open(dataDir + esmFile);
   store.load(esm);
 
   cell.loadInt("Beshara", store, esm);
@@ -75,12 +85,22 @@ int main(int argc, char**argv)
       "Syntax: openmw <options>\nAllowed options");
 
     desc.add_options()
-      ("help", "print help message");
+      ("help", "print help message")
+      ("data", boost::program_options::value<std::string>()->default_value ("data"),
+        "set data directory"
+      );
   
     boost::program_options::variables_map variables;
+    
+    std::ifstream configFile ("openmw.cfg");
+
     boost::program_options::store (
       boost::program_options::parse_command_line (argc, argv, desc), variables);
     boost::program_options::notify (variables);
+
+    if (configFile.is_open())
+      boost::program_options::store (
+        boost::program_options::parse_config_file (configFile, desc), variables);
 
     if (variables.count ("help"))
     {
@@ -88,7 +108,7 @@ int main(int argc, char**argv)
     }
     else
     {          
-      maintest();
+      maintest (variables["data"].as<std::string>());
     }  
   }
   catch(exception &e)
