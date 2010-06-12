@@ -16,7 +16,7 @@
 
 using namespace std;
 
-void maintest (std::string dataDir)
+void maintest (std::string dataDir, const std::string& cellName)
 {
   assert (!dataDir.empty());
   
@@ -48,7 +48,7 @@ void maintest (std::string dataDir)
   esm.open(dataDir + esmFile);
   store.load(esm);
 
-  cell.loadInt("Beshara", store, esm);
+  cell.loadInt(cellName, store, esm);
 
   // Create the window
   ogre.createWindow("OpenMW");
@@ -87,8 +87,10 @@ int main(int argc, char**argv)
     desc.add_options()
       ("help", "print help message")
       ("data", boost::program_options::value<std::string>()->default_value ("data"),
-        "set data directory"
-      );
+        "set data directory")
+      ("start", boost::program_options::value<std::string>()->default_value ("Beshara"),
+        "set initial cell (only interior cells supported at the moment")
+      ;
   
     boost::program_options::variables_map variables;
     
@@ -108,7 +110,7 @@ int main(int argc, char**argv)
     }
     else
     {          
-      maintest (variables["data"].as<std::string>());
+      maintest (variables["data"].as<std::string>(), variables["start"].as<std::string>());
     }  
   }
   catch(exception &e)
