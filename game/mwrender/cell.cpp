@@ -1,6 +1,53 @@
 #include "cell.hpp"
 
+#include <cassert>
+
+#include "esm_store/cell_store.hpp"
+
 using namespace MWRender;
+
+template<typename T>   
+void insertObj(CellRender& cellRender, const T& liveRef)
+{
+  assert (liveRef.base != NULL);
+  const std::string &model = liveRef.base->model;
+  if(!model.empty())
+  {
+    cellRender.insertBegin (liveRef.ref);
+    cellRender.insertMesh ("meshes\\" + model);
+    cellRender.insertEnd();
+  }
+}
+  
+template<>   
+void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& liveRef)
+{
+  assert (liveRef.base != NULL);
+  const std::string &model = liveRef.base->model;
+  if(!model.empty())
+  {
+    cellRender.insertBegin (liveRef.ref);
+    
+    cellRender.insertMesh ("meshes\\" + model);
+    
+    int color = liveRef.base->data.color;
+    
+    cellRender.insertLight ((color >> 24) & 255, (color >> 16) & 255, (color >> 8) & 255,
+        liveRef.base->data.radius);
+    
+    cellRender.insertEnd();
+  }  
+}
+
+template<typename T>
+void insertCellRefList (CellRender& cellRender, const T& cellRefList)
+{
+  for(typename T::List::const_iterator it = cellRefList.list.begin();
+    it != cellRefList.list.end(); it++)
+  {
+    insertObj (cellRender, *it);
+  }    
+}    
 
 void CellRender::insertCell(const ESMS::CellStore &cell)
 {
@@ -27,16 +74,4 @@ void CellRender::insertCell(const ESMS::CellStore &cell)
   insertCellRefList (*this, cell.weapons);
 }
 
-template<>   
-void MWRender::insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& liveRef)
-{
-  assert (liveRef.base != NULL);
-  const std::string &model = liveRef.base->model;
-  if(!model.empty())
-  {
-    cellRender.insertBegin (liveRef.ref);
-    cellRender.insertMesh ("meshes\\" + model);
-    cellRender.insertEnd();
-  }  
-}
 

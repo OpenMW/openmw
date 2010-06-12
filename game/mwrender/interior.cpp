@@ -1,9 +1,10 @@
 #include "interior.hpp"
 
-
 #include <OgreEntity.h>
+#include <OgreLight.h>
 
 #include "nifogre/ogre_nif_loader.hpp"
+#include "mwscene.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -11,7 +12,7 @@ using namespace ESMS;
 
 // start inserting a new reference.
 
-void InteriorCellRender::insertBegin (const ESMS::CellRef &ref)
+void InteriorCellRender::insertBegin (const ESM::CellRef &ref)
 {
   assert (!insert);
     
@@ -47,6 +48,21 @@ void InteriorCellRender::insertMesh(const std::string &mesh)
   NIFLoader::load(mesh);
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   insert->attachObject(ent);
+}
+
+// insert a light related to the most recent insertBegin call.
+void InteriorCellRender::insertLight(float r, float g, float b, float radius)
+{
+  assert (insert);
+
+  Ogre::Light *light = scene.getMgr()->createLight();
+  light->setDiffuseColour (r, g, b);
+
+  float cval=0.0f, lval=0.0f, qval=0.0f;
+  
+  light->setAttenuation(10*radius, cval, lval, qval);
+  
+  insert->attachObject(light);
 }
 
 // finish inserting a new reference and return a handle to it.

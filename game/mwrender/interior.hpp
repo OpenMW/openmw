@@ -2,9 +2,17 @@
 #define _GAME_RENDER_INTERIOR_H
 
 #include "cell.hpp"
+#include "esm_store/cell_store.hpp"
+
+namespace Ogre
+{
+  class SceneNode;
+}
 
 namespace MWRender
 {
+  class MWScene;
+  
   /**
      This class is responsible for inserting meshes and other
      rendering objects from the given cell into the given rendering
@@ -25,10 +33,13 @@ namespace MWRender
     Ogre::SceneNode *insert;
 
     /// start inserting a new reference.
-    virtual void insertBegin (const ESMS::CellRef &ref);
+    virtual void insertBegin (const ESM::CellRef &ref);
 
     /// insert a mesh related to the most recent insertBegin call.
     virtual void insertMesh(const std::string &mesh);
+    
+    /// insert a light related to the most recent insertBegin call.
+    virtual void insertLight(float r, float g, float b, float radius);
     
     /// finish inserting a new reference and return a handle to it.
     virtual std::string insertEnd();

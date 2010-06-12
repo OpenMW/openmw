@@ -12,6 +12,7 @@
 
 #include "store.hpp"
 #include "esm/records.hpp"
+#include "esm/loadcell.hpp"
 #include <mangle/tools/str_exception.hpp>
 #include <list>
 
