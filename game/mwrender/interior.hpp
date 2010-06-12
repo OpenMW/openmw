@@ -43,26 +43,7 @@ namespace MWRender
     
     /// finish inserting a new reference and return a handle to it.
     virtual std::string insertEnd();
-                   
-    template<typename T>   
-    void insertObj(const T& liveRef)
-    {
-        assert (liveRef.base != NULL);
-        const std::string &model = liveRef.base->model;
-        if(!model.empty())
-          insertMesh ("meshes\\" + model, liveRef.ref);
-    }
-    
-    template<typename T>
-    void insertCellRefList (const T& cellRefList)
-    {
-      for(typename T::List::const_iterator it = cellRefList.list.begin();
-          it != cellRefList.list.end(); it++)
-      {
-        insertObj (*it);
-      }    
-    }  
-  
+                    
   public:
       
     InteriorCellRender(const ESMS::CellStore &_cell, MWScene &_scene)
