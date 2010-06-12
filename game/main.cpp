@@ -10,7 +10,7 @@
 #include "ogre/renderer.hpp"
 #include "tools/fileops.hpp"
 
-#include "mwrender/cell.hpp"
+#include "mwrender/interior.hpp"
 #include "mwrender/mwscene.hpp"
 #include "mwinput/inputmanager.hpp"
 
@@ -59,7 +59,7 @@ void maintest (std::string dataDir, const std::string& cellName)
   MWRender::MWScene scene(ogre);
 
   // This connects the cell data with the rendering scene.
-  MWRender::CellRender rend(cell, scene);
+  MWRender::InteriorCellRender rend(cell, scene);
 
   // Load the cell and insert it into the renderer
   rend.show();

@@ -36,8 +36,9 @@ set(GAME_HEADER game/mwinput/inputmanager.hpp)
 set(ESM_STORE esm_store/store.cpp esm_store/cell_store.cpp)
 set(ESM_STORE_HEADER esm_store/cell_store.hpp esm_store/reclists.hpp esm_store/store.hpp)
 
-set(GAMEREND game/mwrender/mwscene.cpp game/mwrender/cell.cpp)
-set(GAMEREND_HEADER game/mwrender/cell.hpp game/mwrender/mwscene.hpp)
+set(GAMEREND game/mwrender/mwscene.cpp game/mwrender/cell.cpp game/mwrender/interior.cpp)
+set(GAMEREND_HEADER game/mwrender/cell.hpp game/mwrender/mwscene.hpp
+    game/mwrender/interior.hpp)
 
 set(ESM_HEADER esm/defs.hpp esm/loadcell.hpp esm/loadfact.hpp esm/loadltex.hpp
     esm/loadskil.hpp

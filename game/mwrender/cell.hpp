@@ -8,60 +8,52 @@
 
 namespace MWRender
 {
-  /**
-     This class is responsible for inserting meshes and other
-     rendering objects from the given cell into the given rendering
-     scene.
+  /// Base class for cell render, that implements inserting references into a cell in a
+  /// cell type- and render-engine-independent way.
 
-     TODO FIXME: Doesn't do full cleanup yet.
-   */
   class CellRender
   {
-    const ESMS::CellStore &cell;
-    MWScene &scene;
-
-    /// The scene node that contains all objects belonging to this
-    /// cell.
-    Ogre::SceneNode *base;
-
-    void insertMesh(const std::string &mesh,   // NIF file
-                    const ESMS::CellRef &ref); // Reference information
-                   
-    template<typename T>   
-    void insertObj(const T& liveRef)
-    {
-        assert (liveRef.base != NULL);
-        const std::string &model = liveRef.base->model;
-        if(!model.empty())
-          insertMesh ("meshes\\" + model, liveRef.ref);
-    }
-    
-    template<typename T>
-    void insertCellRefList (const T& cellRefList)
-    {
-      for(typename T::List::const_iterator it = cellRefList.list.begin();
-          it != cellRefList.list.end(); it++)
-      {
-        insertObj (*it);
-      }    
-    }
-                      
   public:
-    CellRender(const ESMS::CellStore &_cell,
-               MWScene &_scene)
-      : cell(_cell), scene(_scene), base(NULL) {}
-    ~CellRender() { destroy(); }
+    CellRender() {}
+    virtual ~CellRender() {}
 
-    /// Make the cell visible. Load the cell if necessary.
-    void show();
+    /// start inserting a new reference.
+    virtual void insertBegin (const ESMS::CellRef &ref) = 0;
 
-    /// Remove the cell from rendering, but don't remove it from
-    /// memory.
-    void hide();
-
-    /// Destroy all rendering objects connected with this cell.
-    void destroy();
+    /// insert a mesh related to the most recent insertBegin call.
+    virtual void insertMesh(const std::string &mesh) = 0;
+    
+    /// finish inserting a new reference and return a handle to it.
+    virtual std::string insertEnd() = 0;
+      
+    void insertCell(const ESMS::CellStore &cell);
   };
+  
+  template<typename T>   
+  void insertObj(CellRender& cellRender, const T& liveRef)
+  {
+      assert (liveRef.base != NULL);
+      const std::string &model = liveRef.base->model;
+      if(!model.empty())
+      {
+        cellRender.insertBegin (liveRef.ref);
+        cellRender.insertMesh ("meshes\\" + model);
+        cellRender.insertEnd();
+      }
+  }
+
+  template<>   
+  void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& liveRef);
+    
+  template<typename T>
+  void insertCellRefList (CellRender& cellRender, const T& cellRefList)
+  {
+    for(typename T::List::const_iterator it = cellRefList.list.begin();
+        it != cellRefList.list.end(); it++)
+    {
+      insertObj (cellRender, *it);
+    }    
+  }    
 }
 
 #endif
