@@ -9,27 +9,29 @@ void CellStore::loadInt(const std::string &name, const ESMStore &store, ESMReade
 {
   cout << "loading cell '" << name << "'\n";
 
-  const Cell *ref = store.cells.findInt(name);
+  cell = store.cells.findInt(name);
 
-  if(ref == NULL)
+  if(cell == NULL)
     throw str_exception("Cell not found - " + name);
 
-  loadRefs(*ref, store, esm);
+  loadRefs(store, esm);
 }
 
 void CellStore::loadExt(int X, int Y, const ESMStore &store, ESMReader &esm)
 {
 }
 
-void CellStore::loadRefs(const Cell &cell, const ESMStore &store, ESMReader &esm)
+void CellStore::loadRefs(const ESMStore &store, ESMReader &esm)
 {
+  assert (cell);
+  
   // Reopen the ESM reader and seek to the right position.
-  cell.restore(esm);
+  cell->restore(esm);
 
   CellRef ref;
 
   // Get each reference in turn
-  while(cell.getNextRef(esm, ref))
+  while(cell->getNextRef(esm, ref))
     {
       int rec = store.find(ref.refID);
 

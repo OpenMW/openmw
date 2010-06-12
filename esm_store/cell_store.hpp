@@ -68,6 +68,10 @@ namespace ESMS
   /// A storage struct for one single cell reference.
   struct CellStore
   {
+    CellStore() : cell (0) {}
+  
+    const ESM::Cell *cell;
+  
     // Lists for each individual object type
     CellRefList<Activator>         activators;
     CellRefList<Potion>            potions;
@@ -98,7 +102,7 @@ namespace ESMS
     void loadExt(int X, int Y, const ESMStore &data, ESMReader &esm);
 
   private:
-    void loadRefs(const Cell &cell, const ESMStore &data, ESMReader &esm);
+    void loadRefs(const ESMStore &data, ESMReader &esm);
   };
 }
 

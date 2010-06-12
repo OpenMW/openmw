@@ -78,6 +78,63 @@ std::string InteriorCellRender::insertEnd()
   return handle;
 }     
            
+// configure lighting according to cell
+
+void InteriorCellRender::configureAmbient()
+{
+  ambientColor.setAsRGBA (cell.cell->ambi.ambient);
+  setAmbientMode();
+  
+  if (cell.cell->data.flags & ESM::Cell::QuasiEx)
+  {
+    // Create a "sun" that shines light downwards. It doesn't look
+    // completely right, but leave it for now.
+    Ogre::Light *light = scene.getMgr()->createLight();
+    Ogre::ColourValue colour;
+    colour.setAsRGBA (cell.cell->ambi.sunlight);
+    light->setDiffuseColour (colour);
+    light->setType(Ogre::Light::LT_DIRECTIONAL);
+    light->setDirection(0,-1,0);
+    // TODO: update position on regular basis or attach to camera scene node
+  }
+}
+                
+// configure fog according to cell
+
+void InteriorCellRender::configureFog()
+{
+  Ogre::ColourValue color;
+  color.setAsRGBA (cell.cell->ambi.fog);
+  
+  float high = 1000;
+  float low = 100;
+  
+  scene.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
+  scene.getCamera()->setFarClipDistance (high + 10);
+  scene.getViewport()->setBackgroundColour (color);
+}
+                
+void InteriorCellRender::setAmbientMode()
+{
+  switch (ambientMode)
+  {
+    case 0:
+    
+      scene.getMgr()->setAmbientLight(ambientColor);
+      break;
+    
+    case 1:
+
+      scene.getMgr()->setAmbientLight(0.7*ambientColor + 0.3*ColourValue(1,1,1));
+      break;
+          
+    case 2:
+  
+      scene.getMgr()->setAmbientLight(ColourValue(1,1,1));
+      break;
+  }
+}
+           
 void InteriorCellRender::show()
 {
   // If already loaded, just make the cell visible.
@@ -88,6 +145,9 @@ void InteriorCellRender::show()
     }
 
   base = scene.getRoot()->createChildSceneNode();
+
+  configureAmbient();
+  configureFog();
 
   insertCell(cell);
 }
@@ -107,6 +167,25 @@ void InteriorCellRender::destroy()
     }
 
   base = NULL;
+}
+
+// Switch through lighting modes.
+
+void InteriorCellRender::toggleLight()
+{
+  if (ambientMode==2)
+    ambientMode = 0;
+  else
+    ++ambientMode;
+    
+  switch (ambientMode)
+  {
+    case 0: std::cout << "Setting lights to normal\n"; break;
+    case 1: std::cout << "Turning the lights up\n"; break;
+    case 2: std::cout << "Turning the lights to full\n"; break;
+  }
+    
+  setAmbientMode();
 }
 
 // Magic function from the internets. Might need this later.

@@ -4,6 +4,8 @@
 #include "cell.hpp"
 #include "esm_store/cell_store.hpp"
 
+#include "OgreColourValue.h"
+
 namespace Ogre
 {
   class SceneNode;
@@ -32,6 +34,11 @@ namespace MWRender
     
     Ogre::SceneNode *insert;
 
+    // 0 normal, 1 more bright, 2 max
+    int ambientMode;
+    
+    Ogre::ColourValue ambientColor;
+
     /// start inserting a new reference.
     virtual void insertBegin (const ESM::CellRef &ref);
 
@@ -44,10 +51,18 @@ namespace MWRender
     /// finish inserting a new reference and return a handle to it.
     virtual std::string insertEnd();
                     
+    /// configure lighting according to cell
+    void configureAmbient();                    
+                    
+    /// configure fog according to cell
+    void configureFog();
+                    
+    void setAmbientMode();
+                    
   public:
       
     InteriorCellRender(const ESMS::CellStore &_cell, MWScene &_scene)
-    : cell(_cell), scene(_scene), base(NULL), insert(NULL) {}
+    : cell(_cell), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
       
     virtual ~InteriorCellRender() { destroy(); }
   
@@ -60,6 +75,9 @@ namespace MWRender
 
     /// Destroy all rendering objects connected with this cell.
     void destroy();  
+    
+    /// Switch through lighting modes.
+    void toggleLight();
   };
 }
 

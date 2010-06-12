@@ -28,8 +28,6 @@ MWScene::MWScene(Render::OgreRenderer &_rend)
 
   // Create one viewport, entire window
   vp = window->addViewport(camera);
-  // Give the backround a healthy shade of green
-  vp->setBackgroundColour(ColourValue(0,0.1,0));
 
   // Alter the camera aspect ratio to match the viewport
   camera->setAspectRatio(Real(vp->getActualWidth()) / Real(vp->getActualHeight()));

@@ -35,6 +35,8 @@ namespace MWRender
 
     Ogre::SceneNode *getRoot() { return mwRoot; }
     Ogre::SceneManager *getMgr() { return sceneMgr; }
+    Ogre::Camera *getCamera() { return camera; }
+    Ogre::Viewport *getViewport() { return vp; }
   };
 }
 
