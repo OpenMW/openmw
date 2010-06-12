@@ -156,7 +156,7 @@ void NIFFile::parse()
         fail("Unknown record type " + rec.toString());
 
       assert(r != NULL);
-      assert(r->recType != RC_NONE);
+      assert(r->recType != RC_MISSING);
       r->recName = rec;
       records[i] = r;
       r->read(this);

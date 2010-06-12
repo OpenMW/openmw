@@ -420,7 +420,7 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
 
       // Alpha modifiers
       int alphaFlags = -1;
-      ubyte alphaTest;
+      ubyte alphaTest = 0;
       if(a)
         {
           alphaFlags = a->flags;

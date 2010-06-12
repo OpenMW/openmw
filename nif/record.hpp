@@ -31,7 +31,7 @@ class NIFFile;
 
 enum RecordType
 {
-  RC_NONE = 0,
+  RC_MISSING = 0,
   RC_NiNode,
   RC_NiTriShape,
   RC_NiRotatingParticles,
@@ -89,7 +89,7 @@ struct Record
   int recType;
   SString recName;
 
-  Record() : recType(RC_NONE) {}
+  Record() : recType(RC_MISSING) {}
 
   /// Parses the record from file
   virtual void read(NIFFile *nif) = 0;

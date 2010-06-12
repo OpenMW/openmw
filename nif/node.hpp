@@ -139,7 +139,7 @@ struct NiCamera : Node
   struct Camera
   {
     // Camera frustrum
-    float left, right, top, bottom, near, far;
+    float left, right, top, bottom, nearDist, farDist;
 
     // Viewport
     float vleft, vright, vtop, vbottom;
