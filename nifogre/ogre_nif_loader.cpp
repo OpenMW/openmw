@@ -183,7 +183,7 @@ static String getUniqueName(const String &input)
 
   static int addon = 0;
   static char buf[8];
-  sprintf(buf, "_%d", addon++);
+  snprintf(buf, 8, "_%d", addon++);
 
   // Don't overflow the buffer
   if(addon > 999999) addon = 0;
