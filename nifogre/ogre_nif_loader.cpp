@@ -177,9 +177,13 @@ static void createMaterial(const String &name,
 // make sure that all materials are given unique names.
 static String getUniqueName(const String &input)
 {
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
+
   static int addon = 0;
   static char buf[8];
-  snprintf(buf,8,"_%d", addon++);
+  sprintf(buf, "_%d", addon++);
 
   // Don't overflow the buffer
   if(addon > 999999) addon = 0;
@@ -248,8 +252,8 @@ static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material
     {
       const float *colors = data->colors.ptr;
       RenderSystem* rs = Root::getSingleton().getRenderSystem();
-      RGBA colorsRGB[numVerts];
-      RGBA *pColour = colorsRGB;
+      std::vector<RGBA> colorsRGB(numVerts);
+      RGBA *pColour = &colorsRGB.front();
       for(int i=0; i<numVerts; i++)
 	{
 	  rs->convertColourValue(ColourValue(colors[0],colors[1],colors[2],
@@ -260,7 +264,7 @@ static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material
       vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
           VertexElement::getTypeSize(VET_COLOUR),
 	  numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-      vbuf->writeData(0, vbuf->getSizeInBytes(), colorsRGB, true);
+      vbuf->writeData(0, vbuf->getSizeInBytes(), &colorsRGB.front(), true);
       bind->setBinding(nextBuf++, vbuf);
     }
 
