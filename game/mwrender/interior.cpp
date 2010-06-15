@@ -142,8 +142,8 @@ void InteriorCellRender::configureFog()
   Ogre::ColourValue color;
   color.setAsRGBA (cell.cell->ambi.fog);
   
-  float high = 1000;
-  float low = 100;
+  float high = 10000;
+  float low = 8000;
   
   scene.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
   scene.getCamera()->setFarClipDistance (high + 10);
