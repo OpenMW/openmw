@@ -21,57 +21,6 @@
 
  */
 
-//-----------------------------------------------------------------------
-//               E X P O R T E D    V A R I A B L E S
-//-----------------------------------------------------------------------
-
-extern "C"
-{
-  int lightConst;
-  float lightConstValue;
-
-  int lightLinear;
-  int lightLinearMethod;
-  float lightLinearValue;
-  float lightLinearRadiusMult;
-
-  int lightQuadratic;
-  int lightQuadraticMethod;
-  float lightQuadraticValue;
-  float lightQuadraticRadiusMult;
-
-  int lightOutQuadInLin;
-}
-
-
-//-----------------------------------------------------------------------
-//               E X P O R T E D    F U N C T I O N S
-//-----------------------------------------------------------------------
-
-// Toggle ambient light
-extern "C" void ogre_toggleLight()
-{
-  if(g_lightOn == 0)
-    {
-      std::cout << "Turning the lights up\n";
-      ColourValue half = 0.7*g_ambient + 0.3*ColourValue(1,1,1);
-      mSceneMgr->setAmbientLight(half);
-      g_lightOn = 1;
-    }
-  else if(g_lightOn == 1)
-    {
-      std::cout << "Turning the lights to full\n";
-      g_lightOn = 2;
-      mSceneMgr->setAmbientLight(ColourValue(1,1,1));
-    }
-  else
-    {
-      std::cout << "Setting lights to normal\n";
-      g_lightOn = 0;
-      mSceneMgr->setAmbientLight(g_ambient);
-    }
-}
-
 extern "C" Light* ogre_attachLight(char *name, SceneNode* base,
 				  float r, float g, float b,
 				  float radius)
@@ -113,12 +62,6 @@ extern "C" Light* ogre_attachLight(char *name, SceneNode* base,
   if(base) base->attachObject(l);
 
   return l;
-}
-
-// Toggle between fullscreen and windowed mode.
-extern "C" void ogre_toggleFullscreen()
-{
-  std::cout << "Not implemented yet\n";
 }
 
 extern "C" void ogre_setAmbient(float r, float g, float b, // Ambient light
@@ -173,26 +116,6 @@ void cloneNode(SceneNode *from, SceneNode *to, char* name)
     {
       cloneNode((SceneNode*)it2.getNext(), to->createChildSceneNode(), name);
     }
-}
-
-// Convert a Morrowind rotation (3 floats) to a quaternion (4 floats)
-extern "C" void ogre_mwToQuaternion(float *mw, float *quat)
-{
-  // Rotate around X axis
-  Quaternion xr(Radian(-mw[0]), Vector3::UNIT_X);
-
-  // Rotate around Y axis
-  Quaternion yr(Radian(-mw[1]), Vector3::UNIT_Y);
-
-  // Rotate around Z axis
-  Quaternion zr(Radian(-mw[2]), Vector3::UNIT_Z);
-
-  // Rotates first around z, then y, then x
-  Quaternion res = xr*yr*zr;
-
-  // Copy result back to caller
-  for(int i=0; i<4; i++)
-    quat[i] = res[i];
 }
 
 // Supposed to insert a copy of the node, for now it just inserts the

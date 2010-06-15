@@ -118,33 +118,28 @@ std::string InteriorCellRender::insertEnd()
 
 void InteriorCellRender::configureAmbient()
 {
-  ambientColor.setAsRGBA (cell.cell->ambi.ambient);
+  ambientColor.setAsABGR (cell.cell->ambi.ambient);
   setAmbientMode();
   
-  if (cell.cell->data.flags & ESM::Cell::QuasiEx)
-  {
-    // Create a "sun" that shines light downwards. It doesn't look
-    // completely right, but leave it for now.
-    Ogre::Light *light = scene.getMgr()->createLight();
-    Ogre::ColourValue colour;
-    colour.setAsRGBA (cell.cell->ambi.sunlight);
-    light->setDiffuseColour (colour);
-    light->setType(Ogre::Light::LT_DIRECTIONAL);
-    light->setDirection(0,-1,0);
-    // TODO: update position on regular basis or attach to camera scene node
-  }
+  // Create a "sun" that shines light downwards. It doesn't look
+  // completely right, but leave it for now.
+  Ogre::Light *light = scene.getMgr()->createLight();
+  Ogre::ColourValue colour;
+  colour.setAsABGR (cell.cell->ambi.sunlight);
+  light->setDiffuseColour (colour);
+  light->setType(Ogre::Light::LT_DIRECTIONAL);
+  light->setDirection(0,-1,0);
 }
                 
 // configure fog according to cell
-
 void InteriorCellRender::configureFog()
 {
   Ogre::ColourValue color;
-  color.setAsRGBA (cell.cell->ambi.fog);
-  
-  float high = 10000;
-  float low = 8000;
-  
+  color.setAsABGR (cell.cell->ambi.fog);
+
+  float high = 4500 + 9000 * (1-cell.cell->ambi.fogDensity);
+  float low = 200;
+
   scene.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
   scene.getCamera()->setFarClipDistance (high + 10);
   scene.getViewport()->setBackgroundColour (color);

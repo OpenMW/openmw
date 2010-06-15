@@ -32,8 +32,10 @@ void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& live
     
     int color = liveRef.base->data.color;
     
-    cellRender.insertLight ((color >> 24) & 255, (color >> 16) & 255, (color >> 8) & 255,
-        liveRef.base->data.radius);
+    cellRender.insertLight(color & 255,
+                           (color >> 8) & 255,
+                           (color >> 16) & 255,
+                           liveRef.base->data.radius);
     
     cellRender.insertEnd();
   }  
