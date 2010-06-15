@@ -3,7 +3,8 @@
 #include <string>
 #include <fstream>
 
-#include "boost/program_options.hpp"
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 
 #include "esm_store/cell_store.hpp"
 #include "bsa/bsa_archive.hpp"
@@ -16,65 +17,85 @@
 
 using namespace std;
 
-void maintest (std::string dataDir, const std::string& cellName)
+void maintest (boost::filesystem::path dataDir, const std::string& cellName,
+    std::string master)
 {
-  assert (!dataDir.empty());
+    assert (!dataDir.empty());
   
-  if (dataDir[dataDir.size()-1]!='/' && dataDir[dataDir.size()-1]!='\\')
-    dataDir += "/";
+    dataDir = boost::filesystem::system_complete (dataDir);
 
-  const char* esmFile = "Morrowind.esm";
-  const char* bsaFile = "Morrowind.bsa";
+    std::string masterName; // name without extension
+    
+    std::string::size_type sep = master.find_last_of (".");
+    
+    if (sep==std::string::npos)
+    {
+        masterName = master;
+        master += ".esm";
+    }
+    else
+    {
+        masterName = master.substr (0, sep);
+    }
 
-  const char* plugCfg = "plugins.cfg";
+    boost::filesystem::path masterPath (dataDir);
+    masterPath /= master;
 
-  cout << "Hello, fellow traveler!\n";
+    boost::filesystem::path bsa (dataDir);
+    bsa /= masterName + ".bsa";
+
+    const char* plugCfg = "plugins.cfg";
+
+    cout << "Hello, fellow traveler!\n";
   
-  cout << "Your data directory for today is: " << dataDir << "\n";
+    cout << "Your data directory for today is: " << dataDir << "\n";
 
-  cout << "Initializing OGRE\n";
-  Render::OgreRenderer ogre;
-  ogre.configure(!isFile("ogre.cfg"), plugCfg, false);
+    cout << "Initializing OGRE\n";
+    Render::OgreRenderer ogre;
+    ogre.configure(!isFile("ogre.cfg"), plugCfg, false);
 
-  cout << "Adding " << bsaFile << endl;
-  addBSA(dataDir + bsaFile);
+    if (boost::filesystem::exists (bsa))
+    {
+        cout << "Adding " << bsa.string() << endl;
+        addBSA(bsa.file_string());
+    }
 
-  cout << "Loading ESM " << esmFile << "\n";
-  ESM::ESMReader esm;
-  ESMS::ESMStore store;
-  ESMS::CellStore cell;
+    cout << "Loading ESM " << masterPath.string() << "\n";
+    ESM::ESMReader esm;
+    ESMS::ESMStore store;
+    ESMS::CellStore cell;
 
-  // This parses the ESM file and loads a sample cell
-  esm.open(dataDir + esmFile);
-  store.load(esm);
+    // This parses the ESM file and loads a sample cell
+    esm.open(masterPath.file_string());
+    store.load(esm);
 
-  cell.loadInt(cellName, store, esm);
+    cell.loadInt(cellName, store, esm);
 
-  // Create the window
-  ogre.createWindow("OpenMW");
+    // Create the window
+    ogre.createWindow("OpenMW");
 
-  cout << "\nSetting up cell rendering\n";
+    cout << "\nSetting up cell rendering\n";
 
-  // Sets up camera, scene manager etc
-  MWRender::MWScene scene(ogre);
+    // Sets up camera, scene manager etc
+    MWRender::MWScene scene(ogre);
 
-  // This connects the cell data with the rendering scene.
-  MWRender::InteriorCellRender rend(cell, scene);
+    // This connects the cell data with the rendering scene.
+    MWRender::InteriorCellRender rend(cell, scene);
 
-  // Load the cell and insert it into the renderer
-  rend.show();
+    // Load the cell and insert it into the renderer
+    rend.show();
 
-  cout << "Setting up input system\n";
+    cout << "Setting up input system\n";
 
-  // Sets up the input system
-  MWInput::MWInputManager input(ogre);
+    // Sets up the input system
+    MWInput::MWInputManager input(ogre);
 
-  cout << "\nStart! Press Q/ESC or close window to exit.\n";
+    cout << "\nStart! Press Q/ESC or close window to exit.\n";
 
-  // Start the main rendering loop
-  ogre.start();
+    // Start the main rendering loop
+    ogre.start();
 
-  cout << "\nThat's all for now!\n";
+    cout << "\nThat's all for now!\n";
 }
 
 int main(int argc, char**argv)
@@ -90,6 +111,8 @@ int main(int argc, char**argv)
         "set data directory")
       ("start", boost::program_options::value<std::string>()->default_value ("Beshara"),
         "set initial cell (only interior cells supported at the moment")
+      ("master", boost::program_options::value<std::string>()->default_value ("Morrowind"),
+        "master file")
       ;
   
     boost::program_options::variables_map variables;
@@ -110,7 +133,8 @@ int main(int argc, char**argv)
     }
     else
     {          
-      maintest (variables["data"].as<std::string>(), variables["start"].as<std::string>());
+      maintest (variables["data"].as<std::string>(), variables["start"].as<std::string>(),
+        variables["master"].as<std::string>());
     }  
   }
   catch(exception &e)
