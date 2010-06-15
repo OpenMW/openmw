@@ -10,6 +10,21 @@ using namespace MWRender;
 using namespace Ogre;
 using namespace ESMS;
 
+bool InteriorCellRender::lightConst = false;
+float InteriorCellRender::lightConstValue = 0.0;
+
+bool InteriorCellRender::lightLinear = true;
+int InteriorCellRender::lightLinearMethod = 1;
+float InteriorCellRender::lightLinearValue = 3;
+float InteriorCellRender::lightLinearRadiusMult = 1;
+
+bool InteriorCellRender::lightQuadratic = false;
+int InteriorCellRender::lightQuadraticMethod = 2;
+float InteriorCellRender::lightQuadraticValue = 16;
+float InteriorCellRender::lightQuadraticRadiusMult = 1;
+
+bool InteriorCellRender::lightOutQuadInLin = false;
+
 // start inserting a new reference.
 
 void InteriorCellRender::insertBegin (const ESM::CellRef &ref)
@@ -59,6 +74,27 @@ void InteriorCellRender::insertLight(float r, float g, float b, float radius)
   light->setDiffuseColour (r, g, b);
 
   float cval=0.0f, lval=0.0f, qval=0.0f;
+  
+  if(lightConst)
+    cval = lightConstValue;
+  if(!lightOutQuadInLin)
+  {
+    if(lightLinear)
+      radius *= lightLinearRadiusMult;
+    if(lightQuadratic)
+      radius *= lightQuadraticRadiusMult;
+
+    if(lightLinear)
+      lval = lightLinearValue / pow(radius, lightLinearMethod);
+    if(lightQuadratic)
+      qval = lightQuadraticValue / pow(radius, lightQuadraticMethod);
+  }
+  else
+  {
+    // FIXME:
+    // Do quadratic or linear, depending if we're in an exterior or interior
+    // cell, respectively. Ignore lightLinear and lightQuadratic.
+  }
   
   light->setAttenuation(10*radius, cval, lval, qval);
   

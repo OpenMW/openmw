@@ -25,6 +25,22 @@ namespace MWRender
    
   class InteriorCellRender : private CellRender
   {
+  
+    static bool lightConst;
+    static float lightConstValue;
+
+    static bool lightLinear;
+    static int lightLinearMethod;
+    static float lightLinearValue;
+    static float lightLinearRadiusMult;
+
+    static bool lightQuadratic;
+    static int lightQuadraticMethod;
+    static float lightQuadraticValue;
+    static float lightQuadraticRadiusMult;
+
+    static bool lightOutQuadInLin;
+  
     const ESMS::CellStore &cell;
     MWScene &scene;
 
