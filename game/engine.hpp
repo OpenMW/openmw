@@ -25,6 +25,10 @@ namespace OMW
             /// adjust name and load bsa
             void prepareMaster();
     
+            /// add resources directory
+            /// \note This function works recursively.
+            void addResourcesDirectory (const boost::filesystem::path& path);
+    
         public:
 
             Engine();

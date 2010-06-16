@@ -45,6 +45,15 @@ void OMW::Engine::prepareMaster()
     }
 }
     
+// add resources directory
+// \note This function works recursively.
+
+void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
+{
+    mOgre.getRoot()->addResourceLocation (path.file_string(), "FileSystem",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+}      
+    
 // Set data dir
 
 void OMW::Engine::setDataDir (const boost::filesystem::path& dataDir)
@@ -87,6 +96,9 @@ void OMW::Engine::go()
     const char* plugCfg = "plugins.cfg";
 
     mOgre.configure(!isFile("ogre.cfg"), plugCfg, false);
+    
+    addResourcesDirectory (mDataDir / "Meshes");
+    addResourcesDirectory (mDataDir / "Textures");
     
     prepareMaster();
     
