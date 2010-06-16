@@ -6,14 +6,7 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
-#include "esm_store/cell_store.hpp"
-#include "bsa/bsa_archive.hpp"
-#include "ogre/renderer.hpp"
-#include "tools/fileops.hpp"
-
-#include "mwrender/interior.hpp"
-#include "mwrender/mwscene.hpp"
-#include "mwinput/inputmanager.hpp"
+#include "engine.hpp"
 
 using namespace std;
 
@@ -22,80 +15,15 @@ void maintest (boost::filesystem::path dataDir, const std::string& cellName,
 {
     assert (!dataDir.empty());
   
-    dataDir = boost::filesystem::system_complete (dataDir);
+    OMW::Engine engine;
 
-    std::string masterName; // name without extension
-    
-    std::string::size_type sep = master.find_last_of (".");
-    
-    if (sep==std::string::npos)
-    {
-        masterName = master;
-        master += ".esm";
-    }
-    else
-    {
-        masterName = master.substr (0, sep);
-    }
+    engine.setDataDir (dataDir);
 
-    boost::filesystem::path masterPath (dataDir);
-    masterPath /= master;
+    engine.setCell (cellName);
 
-    boost::filesystem::path bsa (dataDir);
-    bsa /= masterName + ".bsa";
+    engine.addMaster (master);
 
-    const char* plugCfg = "plugins.cfg";
-
-    cout << "Hello, fellow traveler!\n";
-  
-    cout << "Your data directory for today is: " << dataDir << "\n";
-
-    cout << "Initializing OGRE\n";
-    Render::OgreRenderer ogre;
-    ogre.configure(!isFile("ogre.cfg"), plugCfg, false);
-
-    if (boost::filesystem::exists (bsa))
-    {
-        cout << "Adding " << bsa.string() << endl;
-        addBSA(bsa.file_string());
-    }
-
-    cout << "Loading ESM " << masterPath.string() << "\n";
-    ESM::ESMReader esm;
-    ESMS::ESMStore store;
-    ESMS::CellStore cell;
-
-    // This parses the ESM file and loads a sample cell
-    esm.open(masterPath.file_string());
-    store.load(esm);
-
-    cell.loadInt(cellName, store, esm);
-
-    // Create the window
-    ogre.createWindow("OpenMW");
-
-    cout << "\nSetting up cell rendering\n";
-
-    // Sets up camera, scene manager etc
-    MWRender::MWScene scene(ogre);
-
-    // This connects the cell data with the rendering scene.
-    MWRender::InteriorCellRender rend(cell, scene);
-
-    // Load the cell and insert it into the renderer
-    rend.show();
-
-    cout << "Setting up input system\n";
-
-    // Sets up the input system
-    MWInput::MWInputManager input(ogre);
-
-    cout << "\nStart! Press Q/ESC or close window to exit.\n";
-
-    // Start the main rendering loop
-    ogre.start();
-
-    cout << "\nThat's all for now!\n";
+    engine.go();
 }
 
 int main(int argc, char**argv)
