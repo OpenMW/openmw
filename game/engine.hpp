@@ -29,6 +29,9 @@ namespace OMW
             /// \note This function works recursively.
             void addResourcesDirectory (const boost::filesystem::path& path);
     
+            /// Load all BSA files in data directory.
+            void loadBSA();
+    
         public:
 
             Engine();
@@ -41,7 +44,6 @@ namespace OMW
             
             /// Set master file (esm)
             /// - If the given name does not have an extension, ".esm" is added automatically
-            /// - If there is a bsa file with the same name, OpenMW will load it.
             /// - Currently OpenMW only supports one master at the same time.
             void addMaster (const std::string& master);
 

@@ -18,33 +18,30 @@ OMW::Engine::Engine() {}
 
 void OMW::Engine::prepareMaster()
 {
-    assert (!mDataDir.empty());
-    
-    std::string masterName; // name without extension
-
     std::string::size_type sep = mMaster.find_last_of (".");
     
     if (sep==std::string::npos)
     {
-        masterName = mMaster;
         mMaster += ".esm";
-    }
-    else
-    {
-        masterName = mMaster.substr (0, sep);
-    }
-
-    // bsa
-    boost::filesystem::path bsa (mDataDir);
-    bsa /= masterName + ".bsa";
-
-    if (boost::filesystem::exists (bsa))
-    {
-        std::cout << "Adding " << bsa.string() << std::endl;
-        addBSA(bsa.file_string());
     }
 }
     
+// Load all BSA files in data directory.
+
+void OMW::Engine::loadBSA()
+{
+    boost::filesystem::directory_iterator end;
+    
+    for (boost::filesystem::directory_iterator iter (mDataDir); iter!=end; ++iter)
+    {
+        if (boost::filesystem::extension (iter->path())==".bsa")
+        {
+            std::cout << "Adding " << iter->path().string() << std::endl;
+            addBSA(iter->path().file_string());        
+        }
+    }
+}
+        
 // add resources directory
 // \note This function works recursively.
 
@@ -70,7 +67,6 @@ void OMW::Engine::setCell (const std::string& cellName)
 
 // Set master file (esm)
 // - If the given name does not have an extension, ".esm" is added automatically
-// - If there is a bsa file with the same name, OpenMW will load it.
 // - Currently OpenMW only supports one master at the same time.
 
 void OMW::Engine::addMaster (const std::string& master)
@@ -101,6 +97,7 @@ void OMW::Engine::go()
     addResourcesDirectory (mDataDir / "Textures");
     
     prepareMaster();
+    loadBSA();
     
     boost::filesystem::path masterPath (mDataDir);
     masterPath /= mMaster;
