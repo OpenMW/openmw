@@ -6,6 +6,10 @@
 
 #include "OgreRenderWindow.h"
 
+#ifdef __APPLE_CC__
+#include <Carbon/Carbon.h>
+#endif
+
 using namespace Input;
 using namespace Ogre;
 using namespace OIS;
@@ -49,6 +53,13 @@ OISManager::OISManager(Render::OgreRenderer &rend)
                                std::string("true")));
 #endif
     }
+
+#ifdef __APPLE_CC__
+  // Give the application window focus to receive input events
+  ProcessSerialNumber psn = { 0, kCurrentProcess };
+  TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+  SetFrontProcess(&psn);
+#endif
 
   inputMgr = InputManager::createInputSystem( pl );
 

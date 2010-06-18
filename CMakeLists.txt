@@ -82,6 +82,10 @@ configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
     "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
 endif (WIN32)
 
+if (APPLE)
+    find_library(CARBON_FRAMEWORK Carbon)
+endif (APPLE)
+
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg" COPYONLY)
     
@@ -103,3 +107,8 @@ target_link_libraries(openmw
   ${OGRE_LIBRARIES}
   ${OIS_LIBRARIES}
   ${Boost_LIBRARIES})
+
+if (APPLE)
+  target_link_libraries(openmw
+    ${CARBON_FRAMEWORK})
+endif (APPLE)
