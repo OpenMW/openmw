@@ -82,15 +82,20 @@ configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
     "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
 endif (WIN32)
 
-if (APPLE)
-    find_library(CARBON_FRAMEWORK Carbon)
-endif (APPLE)
-
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg" COPYONLY)
-    
+
+if (APPLE)
+  set(APPLE_BUNDLE_RESOURCES
+    ${CMAKE_SOURCE_DIR}/files/openmw.cfg
+#    ${CMAKE_SOURCE_DIR}/files/ogre.cfg
+    ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
+  )
+endif (APPLE)
+
 # Main executable
 add_executable(openmw
+    MACOSX_BUNDLE
     ${BSA} ${BSA_HEADER}
     ${TOOLS} ${TOOLS_HEADER}
     ${OGRE} ${OGRE_HEADER}
@@ -101,7 +106,9 @@ add_executable(openmw
     ${GAME}
     ${ESM_STORE} ${ESM_STORE_HEADER}
     ${GAMEREND} ${GAMEREND_HEADER}
-    ${ESM_HEADER})
+    ${ESM_HEADER}
+    ${APPLE_BUNDLE_RESOURCES}
+    )
 
 target_link_libraries(openmw
   ${OGRE_LIBRARIES}
@@ -109,6 +116,22 @@ target_link_libraries(openmw
   ${Boost_LIBRARIES})
 
 if (APPLE)
-  target_link_libraries(openmw
-    ${CARBON_FRAMEWORK})
+    find_library(CARBON_FRAMEWORK Carbon)
+    target_link_libraries(openmw ${CARBON_FRAMEWORK})
+endif (APPLE)
+
+# Apple bundling
+if (APPLE)
+  set_source_files_properties(
+    ${CMAKE_SOURCE_DIR}/files/openmw.cfg
+    ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
+    ${CMAKE_SOURCE_DIR}/files/o
+    PROPERTIES
+    MACOSX_PACKAGE_LOCATION MacOS
+  )
+  set_target_properties(
+    openmw
+    PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_NAME "OpenMW"
+  )
 endif (APPLE)
