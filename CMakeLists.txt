@@ -88,7 +88,6 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 if (APPLE)
   set(APPLE_BUNDLE_RESOURCES
     ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-#    ${CMAKE_SOURCE_DIR}/files/ogre.cfg
     ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
   )
 endif (APPLE)
@@ -125,7 +124,6 @@ if (APPLE)
   set_source_files_properties(
     ${CMAKE_SOURCE_DIR}/files/openmw.cfg
     ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
-    ${CMAKE_SOURCE_DIR}/files/o
     PROPERTIES
     MACOSX_PACKAGE_LOCATION MacOS
   )
