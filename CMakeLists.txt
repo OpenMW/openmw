@@ -30,8 +30,8 @@ set(OGRE_HEADER ogre/renderer.hpp)
 set(INPUT input/oismanager.cpp)
 set(INPUT_HEADER input/oismanager.hpp input/listener.hpp input/func_binder.hpp input/dispatch_map.hpp input/dispatcher.hpp)
 
-set(GAME game/main.cpp)
-set(GAME_HEADER game/mwinput/inputmanager.hpp)
+set(GAME game/main.cpp game/engine.cpp)
+set(GAME_HEADER game/mwinput/inputmanager.hpp game/engine.hpp)
 
 set(ESM_STORE esm_store/store.cpp esm_store/cell_store.cpp)
 set(ESM_STORE_HEADER esm_store/cell_store.hpp esm_store/reclists.hpp esm_store/store.hpp)

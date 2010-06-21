@@ -26,7 +26,7 @@ struct Potion
   void load(ESMReader &esm)
   {
     model = esm.getHNString("MODL");
-    icon = esm.getHNString("TEXT"); // not ITEX here for some reason
+    icon = esm.getHNOString("TEXT"); // not ITEX here for some reason
     script = esm.getHNOString("SCRI");
     name = esm.getHNOString("FNAM");
     esm.getHNT(data, "ALDT", 12);

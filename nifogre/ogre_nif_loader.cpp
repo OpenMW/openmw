@@ -604,7 +604,7 @@ void NIFLoader::loadResource(Resource *resource)
   Record *r = nif.getRecord(0);
   assert(r != NULL);
 
-  if(r->recType != RC_NiNode)
+  if(r->recType != RC_NiNode && r->recType != RC_NiTriShape)
     {
       warn("First record in file was not a NiNode, but a " +
            r->recName.toString() + ". Skipping file.");
