@@ -130,11 +130,6 @@ InputListener mInput;
 
 // Functions called from D during event handling
 
-extern "C" int32_t ois_isPressed(int32_t keysym)
-{
-  return mKeyboard->isKeyDown((OIS::KeyCode)keysym);
-}
-
 // Dump screen contents to file
 extern "C" void ogre_screenshot(char* filename)
 {
@@ -158,15 +153,6 @@ extern "C" void ogre_rotateCamera(float x, float y)
   if(mCamera->getUp()[1] <= 0.1)
     // If so, undo the last pitch
     mCamera->setOrientation(nopitch);
-}
-
-// Get current camera position
-extern "C" void ogre_getCameraPos(float *x, float *y, float *z)
-{
-  Vector3 pos = mCamera->getPosition();
-  *x = pos[0];
-  *y = -pos[2];
-  *z = pos[1];
 }
 
 // Get current camera orientation, in the form of 'front' and 'up'
@@ -211,13 +197,4 @@ extern "C" void ogre_setCameraRotation(float r1, float r2, float r3)
 
   // Rotates first around z, then y, then x
   mCamera->setOrientation(xr*yr*zr);
-}
-
-// Move camera relative to its own axis set.
-extern "C" void ogre_moveCameraRel(float x, float y, float z)
-{
-  mCamera->moveRelative(Vector3(x,0,z));
-
-  // up/down movement is always done relative the world axis
-  mCamera->move(Vector3(0,y,0));
 }

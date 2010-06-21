@@ -24,6 +24,9 @@ namespace Input
       mMouse = input.mouse;
       mKeyboard = input.keyboard;
 
+      assert(mKeyboard);
+      assert(mWindow);
+
       // Add ourself to the managers
       rend.getRoot() -> addFrameListener(this);
       mKeyboard      -> setEventCallback(this);

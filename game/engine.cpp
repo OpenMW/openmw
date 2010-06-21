@@ -11,6 +11,7 @@
 
 #include "mwrender/interior.hpp"
 #include "mwinput/inputmanager.hpp"
+#include "mwrender/playerpos.hpp"
 
 OMW::Engine::Engine() {}
 
@@ -118,8 +119,11 @@ void OMW::Engine::go()
 
     std::cout << "\nSetting up cell rendering\n";
 
-    // Sets up camera, scene manager etc
+    // Sets up camera, scene manager, and viewport.
     MWRender::MWScene scene(mOgre);
+
+    // Used to control the player camera and position
+    MWRender::PlayerPos player(scene.getCamera());
 
     // This connects the cell data with the rendering scene.
     MWRender::InteriorCellRender rend(cell, scene);
@@ -130,7 +134,7 @@ void OMW::Engine::go()
     std::cout << "Setting up input system\n";
 
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre);
+    MWInput::MWInputManager input(mOgre, player);
 
     std::cout << "\nStart! Press Q/ESC or close window to exit.\n";
 

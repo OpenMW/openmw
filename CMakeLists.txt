@@ -28,7 +28,7 @@ set(OGRE ogre/renderer.cpp)
 set(OGRE_HEADER ogre/renderer.hpp)
 
 set(INPUT input/oismanager.cpp)
-set(INPUT_HEADER input/oismanager.hpp input/listener.hpp input/func_binder.hpp input/dispatch_map.hpp input/dispatcher.hpp)
+set(INPUT_HEADER input/oismanager.hpp input/listener.hpp input/func_binder.hpp input/dispatch_map.hpp input/dispatcher.hpp input/poller.hpp)
 
 set(GAME game/main.cpp game/engine.cpp)
 set(GAME_HEADER game/mwinput/inputmanager.hpp game/engine.hpp)
@@ -38,7 +38,7 @@ set(ESM_STORE_HEADER esm_store/cell_store.hpp esm_store/reclists.hpp esm_store/s
 
 set(GAMEREND game/mwrender/mwscene.cpp game/mwrender/cell.cpp game/mwrender/interior.cpp)
 set(GAMEREND_HEADER game/mwrender/cell.hpp game/mwrender/mwscene.hpp
-    game/mwrender/interior.hpp)
+    game/mwrender/interior.hpp game/mwrender/playerpos.hpp)
 
 set(ESM_HEADER esm/defs.hpp esm/loadcell.hpp esm/loadfact.hpp esm/loadltex.hpp
     esm/loadskil.hpp
