@@ -34,6 +34,9 @@
 // For warning messages
 #include <iostream>
 
+// float infinity
+#include <limits>
+
 typedef unsigned char ubyte;
 
 using namespace std;
@@ -57,6 +60,78 @@ static void warn(const string &msg)
 {
   cout << "WARNING (NIF:" << errName << "): " << msg << endl;
 }
+
+// Helper class that computes the bounding box and of a mesh
+class BoundsFinder
+{
+  struct MaxMinFinder
+  {
+    float max, min;
+
+    MaxMinFinder()
+    {
+      min = numeric_limits<float>::infinity();
+      max = -min;
+    }
+
+    void add(float f)
+    {
+      if(f > max) max = f;
+      if(f < min) min = f;
+    }
+
+    // Return Max(max**2, min**2)
+    float getMaxSquared()
+    {
+      float m1 = max*max;
+      float m2 = min*min;
+      if(m1 >= m2) return m1;
+      return m2;
+    }
+  };
+
+  MaxMinFinder X, Y, Z;
+
+public:
+  // Add 'verts' vertices to the calculation. The 'data' pointer is
+  // expected to point to 3*verts floats representing x,y,z for each
+  // point.
+  void add(float *data, int verts)
+  {
+    for(int i=0;i<verts;i++)
+      {
+        X.add(*(data++));
+        Y.add(*(data++));
+        Z.add(*(data++));
+      }
+  }
+
+  // True if this structure has valid values
+  bool isValid()
+  {
+    return
+      minX() <= maxX() &&
+      minY() <= maxY() &&
+      minZ() <= maxZ();
+  }
+
+  // Compute radius
+  float getRadius()
+  {
+    assert(isValid());
+
+    // The radius is computed from the origin, not from the geometric
+    // center of the mesh.
+    return sqrt(X.getMaxSquared() + Y.getMaxSquared() + Z.getMaxSquared());
+  }
+
+  float minX() { return X.min; }
+  float maxX() { return X.max; }
+  float minY() { return Y.min; }
+  float maxY() { return Y.max; }
+  float minZ() { return Z.min; }
+  float maxZ() { return Z.max; }
+};
 
 // Conversion of blend / test mode from NIF -> OGRE. Not in use yet.
 static SceneBlendFactor getBlendFactor(int mode)
@@ -296,6 +371,22 @@ static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material
 
   // Set material if one was given
   if(!material.empty()) sub->setMaterialName(material);
+
+  /* Old commented D code. Might be useful when reimplementing
+     animation.
+  // Assign this submesh to the given bone
+  VertexBoneAssignment v;
+  v.boneIndex = ((Bone*)bone)->getHandle();
+  v.weight = 1.0;
+
+  std::cerr << "+ Assigning bone index " << v.boneIndex << "\n";
+
+  for(int i=0; i < numVerts; i++)
+    {
+      v.vertexIndex = i;
+      sub->addBoneAssignment(v);
+    }
+  */
 }
 
 // Helper math functions. Reinventing linear algebra for the win!
@@ -341,8 +432,10 @@ static void vectorMul(const Matrix &A, float *C)
     C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
 }
 
-static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
+static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags, BoundsFinder &bounds)
 {
+  assert(shape != NULL);
+
   // Interpret flags
   bool hidden    = (flags & 0x01) != 0; // Not displayed
   bool collide   = (flags & 0x02) != 0; // Use mesh for collision
@@ -462,47 +555,53 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
                              alphaFlags, alphaTest, texName);
             }
         }
+    } // End of material block, if(!hidden) ...
+
+  /* Do in-place transformation of all the vertices and normals. This
+     is pretty messy stuff, but we need it to make the sub-meshes
+     appear in the correct place. Neither Ogre nor Bullet support
+     nested levels of sub-meshes with transformations applied to each
+     level.
+  */
+  NiTriShapeData *data = shape->data.getPtr();
+  int numVerts = data->vertices.length / 3;
+
+  float *ptr = (float*)data->vertices.ptr;
+  float *optr = ptr;
+
+  // Rotate, scale and translate all the vertices
+  const Matrix &rot = shape->trafo->rotation;
+  const Vector &pos = shape->trafo->pos;
+  float scale = shape->trafo->scale;
+  for(int i=0; i<numVerts; i++)
+    {
+      vectorMulAdd(rot, pos, ptr, scale);
+      ptr += 3;
     }
 
-  {
-    /* Do in-place transformation of all the vertices and normals. This
-       is pretty messy stuff, but we need it to make the sub-meshes
-       appear in the correct place. Neither Ogre nor Bullet support
-       nested levels of sub-meshes with transformations applied to each
-       level.
-    */
-    NiTriShapeData *data = shape->data.getPtr();
-    int numVerts = data->vertices.length / 3;
-
-    float *ptr = (float*)data->vertices.ptr;
-
-    // Rotate, scale and translate all the vertices
-    const Matrix &rot = shape->trafo->rotation;
-    const Vector &pos = shape->trafo->pos;
-    float scale = shape->trafo->scale;
-    for(int i=0; i<numVerts; i++)
-      {
-        vectorMulAdd(rot, pos, ptr, scale);
-        ptr += 3;
-      }
-
-    // Remember to rotate all the vertex normals as well
-    if(data->normals.length)
-      {
-        ptr = (float*)data->normals.ptr;
-        for(int i=0; i<numVerts; i++)
-          {
-            vectorMul(rot, ptr);
-            ptr += 3;
-          }
-      }
-  }
+  // Remember to rotate all the vertex normals as well
+  if(data->normals.length)
+    {
+      ptr = (float*)data->normals.ptr;
+      for(int i=0; i<numVerts; i++)
+        {
+          vectorMul(rot, ptr);
+          ptr += 3;
+        }
+    }
 
   if(!hidden)
-    createOgreMesh(mesh, shape, material);
+    {
+      // Add this vertex set to the bounding box
+      bounds.add(optr, numVerts);
+
+      // Create the submesh
+      createOgreMesh(mesh, shape, material);
+    }
 }
 
-static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformation *trafo = NULL)
+static void handleNode(Mesh* mesh, Nif::Node *node, int flags,
+                       const Transformation *trafo, BoundsFinder &bounds)
 {
   // Accumulate the flags from all the child nodes. This works for all
   // the flags we currently use, at least.
@@ -538,7 +637,7 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformat
   if(trafo)
     {
       // Get a non-const reference to the node's data, since we're
-      // overwriting it.
+      // overwriting it. TODO: Is this necessary?
       Transformation &final = *((Transformation*)node->trafo);
 
       // For both position and rotation we have that:
@@ -550,7 +649,7 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformat
       matrixMul(trafo->rotation, final.rotation);
 
       // Scalar values are so nice to deal with. Why can't everything
-      // just be scalars?
+      // just be scalar?
       final.scale *= trafo->scale;
     }
 
@@ -562,12 +661,12 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformat
       for(int i=0; i<n; i++)
         {
           if(list.has(i))
-            handleNode(mesh, &list[i], flags, node->trafo);
+            handleNode(mesh, &list[i], flags, node->trafo, bounds);
         }
     }
   else if(node->recType == RC_NiTriShape)
     // For shapes
-    handleNiTriShape(mesh, (NiTriShape*)node, flags);
+    handleNiTriShape(mesh, dynamic_cast<NiTriShape*>(node), flags, bounds);
 }
 
 void NIFLoader::loadResource(Resource *resource)
@@ -588,6 +687,9 @@ void NIFLoader::loadResource(Resource *resource)
       return;
     }
 
+  // Helper that computes bounding boxes for us.
+  BoundsFinder bounds;
+
   // Load the NIF. TODO: Wrap this in a try-catch block once we're out
   // of the early stages of development. Right now we WANT to catch
   // every error as early and intrusively as possible, as it's most
@@ -604,19 +706,25 @@ void NIFLoader::loadResource(Resource *resource)
   Record *r = nif.getRecord(0);
   assert(r != NULL);
 
-  if(r->recType != RC_NiNode && r->recType != RC_NiTriShape)
+  Nif::Node *node = dynamic_cast<Nif::Node*>(r);
+
+  if(node == NULL)
     {
-      warn("First record in file was not a NiNode, but a " +
+      warn("First record in file was not a node, but a " +
            r->recName.toString() + ". Skipping file.");
       return;
     }
 
   // Handle the node
-  handleNode(mesh, (Nif::Node*)r, 0);
+  handleNode(mesh, node, 0, NULL, bounds);
 
-  // Finally, set the bounding value. Just use bogus info right now.
-  mesh->_setBounds(AxisAlignedBox(-10,-10,-10,10,10,10));
-  mesh->_setBoundingSphereRadius(10);
+  // Finally, set the bounding value.
+  if(bounds.isValid())
+    {
+      mesh->_setBounds(AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
+                                      bounds.maxX(), bounds.maxY(), bounds.maxZ()));
+      mesh->_setBoundingSphereRadius(bounds.getRadius());
+    }
 }
 
 MeshPtr NIFLoader::load(const std::string &name,
@@ -632,3 +740,109 @@ MeshPtr NIFLoader::load(const std::string &name,
   // Nope, create a new one.
   return MeshManager::getSingleton().createManual(name, group, &g_sing);
 }
+
+/* More code currently not in use, from the old D source. This was
+   used in the first attempt at loading NIF meshes, where each submesh
+   in the file was given a separate bone in a skeleton. Unfortunately
+   the OGRE skeletons can't hold more than 256 bones, and some NIFs go
+   way beyond that. The code might be of use if we implement animated
+   submeshes like this (the part of the NIF that is animated is
+   usually much less than the entire file, but the method might still
+   not be water tight.)
+
+// Insert a raw RGBA image into the texture system.
+extern "C" void ogre_insertTexture(char* name, uint32_t width, uint32_t height, void *data)
+{
+  TexturePtr texture = TextureManager::getSingleton().createManual(
+      name, 		// name
+      "General",	// group
+      TEX_TYPE_2D,     	// type
+      width, height,    // width & height
+      0,                // number of mipmaps
+      PF_BYTE_RGBA,     // pixel format
+      TU_DEFAULT);      // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
+                        // textures updated very often (e.g. each frame)
+
+  // Get the pixel buffer
+  HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
+
+  // Lock the pixel buffer and get a pixel box
+  pixelBuffer->lock(HardwareBuffer::HBL_NORMAL); // for best performance use HBL_DISCARD!
+  const PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+
+  void *dest = pixelBox.data;
+
+  // Copy the data
+  memcpy(dest, data, width*height*4);
+
+  // Unlock the pixel buffer
+  pixelBuffer->unlock();
+}
+
+// We need this later for animated meshes.
+extern "C" void* ogre_setupSkeleton(char* name)
+{
+  SkeletonPtr skel = SkeletonManager::getSingleton().create(
+    name, "Closet", true);
+
+  skel->load();
+
+  // Create all bones at the origin and unrotated. This is necessary
+  // since our submeshes each have their own model space. We must
+  // move the bones after creating an entity, then copy this entity.
+  return (void*)skel->createBone();
+}
+
+extern "C" void *ogre_insertBone(char* name, void* rootBone, int32_t index)
+{
+  return (void*) ( ((Bone*)rootBone)->createChild(index) );
+}
+*/
+/* This was the D part:
+
+    // Create a skeleton and get the root bone (index 0)
+    BonePtr bone = ogre_setupSkeleton(name);
+
+    // Reset the bone index. The next bone to be created has index 1.
+    boneIndex = 1;
+    // Create a mesh and assign the skeleton to it
+    MeshPtr mesh = ogre_setupMesh(name);
+
+    // Loop through the nodes, creating submeshes, materials and
+    // skeleton bones in the process.
+    handleNode(node, bone, mesh);
+
+  // Create the "template" entity
+  EntityPtr entity = ogre_createEntity(name);
+
+  // Loop through once again, this time to set the right
+  // transformations on the entity's SkeletonInstance. The order of
+  // children will be the same, allowing us to reference bones using
+  // their boneIndex.
+  int lastBone = boneIndex;
+  boneIndex = 1;
+  transformBones(node, entity);
+  if(lastBone != boneIndex) writefln("WARNING: Bone number doesn't match");
+
+  if(!hasBBox)
+    ogre_setMeshBoundingBox(mesh, minX, minY, minZ, maxX, maxY, maxZ);
+
+  return entity;
+}
+void handleNode(Node node, BonePtr root, MeshPtr mesh)
+{
+  // Insert a new bone for this node
+  BonePtr bone = ogre_insertBone(node.name, root, boneIndex++);
+
+}
+
+void transformBones(Node node, EntityPtr entity)
+{
+  ogre_transformBone(entity, &node.trafo, boneIndex++);
+
+  NiNode n = cast(NiNode)node;
+  if(n !is null)
+    foreach(Node nd; n.children)
+      transformBones(nd, entity);
+}
+*/

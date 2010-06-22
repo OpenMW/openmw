@@ -1,39 +1,3 @@
-/*
-  OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008  Nicolay Korslund
-  Email: < korslund@gmail.com >
-  WWW: http://openmw.snaptoad.com/
-
-  This file (cpp_framelistener.cpp) is part of the OpenMW package.
-
-  OpenMW is distributed as free software: you can redistribute it
-  and/or modify it under the terms of the GNU General Public License
-  version 3, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 3 along with this program. If not, see
-  http://www.gnu.org/licenses/ .
-
- */
-
-#include <stdint.h>
-
-// Callbacks to D code.
-
-// Called once each frame
-extern "C" int32_t d_frameStarted(float time);
-
-// Handle events
-extern "C" void d_handleKey(int keycode, uint32_t text);
-extern "C" void d_handleMouseMove(const OIS::MouseState *state);
-extern "C" void d_handleMouseButton(const OIS::MouseState *state,
-                                    int32_t button);
-
 // Frame listener, passed to Ogre. The only thing we use this for is
 // to capture input and pass control to D code.
 class MorroFrameListener: public FrameListener
@@ -134,25 +98,6 @@ InputListener mInput;
 extern "C" void ogre_screenshot(char* filename)
 {
   mWindow->writeContentsToFile(filename);
-
-  //This doesn't work, I think I have to set up an overlay or
-  //something first and display the text manually.
-  //mWindow->setDebugText(String("Wrote ") + filename);
-}
-
-// Rotate camera as result of mouse movement
-extern "C" void ogre_rotateCamera(float x, float y)
-{
-  mCamera->yaw(Degree(-x));
-
-  Quaternion nopitch = mCamera->getOrientation();
-
-  mCamera->pitch(Degree(-y));
-
-  // Is the camera close to being upside down?
-  if(mCamera->getUp()[1] <= 0.1)
-    // If so, undo the last pitch
-    mCamera->setOrientation(nopitch);
 }
 
 // Get current camera orientation, in the form of 'front' and 'up'
@@ -177,8 +122,6 @@ extern "C" void ogre_moveCamera(float x, float y, float z)
   // is not affected by the rotation of the root node, so we must
   // transform this manually.
   mCamera->setPosition(Vector3(x,z+90,-y));
-
-  //g_light->setPosition(mCamera->getPosition());
 }
 
 // Rotate camera using Morrowind rotation specifiers

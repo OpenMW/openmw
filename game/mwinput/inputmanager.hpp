@@ -54,6 +54,9 @@ namespace MWInput
       // Add ourselves as a frame listener, to catch movement keys
       ogre.getRoot()->addFrameListener(this);
 
+      // Tell the input listener about the camera
+      listener.setCamera(player.getCamera());
+
       // Key bindings
       disp.bind(KC_Q, A_Quit);
       disp.bind(KC_ESCAPE, A_Quit);
