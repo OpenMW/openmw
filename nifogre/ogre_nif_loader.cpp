@@ -34,6 +34,9 @@
 // For warning messages
 #include <iostream>
 
+// float infinity
+#include <limits>
+
 typedef unsigned char ubyte;
 
 using namespace std;
@@ -57,6 +60,78 @@ static void warn(const string &msg)
 {
   cout << "WARNING (NIF:" << errName << "): " << msg << endl;
 }
+
+// Helper class that computes the bounding box and of a mesh
+class BoundsFinder
+{
+  struct MaxMinFinder
+  {
+    float max, min;
+
+    MaxMinFinder()
+    {
+      min = numeric_limits<float>::infinity();
+      max = -min;
+    }
+
+    void add(float f)
+    {
+      if(f > max) max = f;
+      if(f < min) min = f;
+    }
+
+    // Return Max(max**2, min**2)
+    float getMaxSquared()
+    {
+      float m1 = max*max;
+      float m2 = min*min;
+      if(m1 >= m2) return m1;
+      return m2;
+    }
+  };
+
+  MaxMinFinder X, Y, Z;
+
+public:
+  // Add 'verts' vertices to the calculation. The 'data' pointer is
+  // expected to point to 3*verts floats representing x,y,z for each
+  // point.
+  void add(float *data, int verts)
+  {
+    for(int i=0;i<verts;i++)
+      {
+        X.add(*(data++));
+        Y.add(*(data++));
+        Z.add(*(data++));
+      }
+  }
+
+  // True if this structure has valid values
+  bool isValid()
+  {
+    return
+      minX() <= maxX() &&
+      minY() <= maxY() &&
+      minZ() <= maxZ();
+  }
+
+  // Compute radius
+  float getRadius()
+  {
+    assert(isValid());
+
+    // The radius is computed from the origin, not from the geometric
+    // center of the mesh.
+    return sqrt(X.getMaxSquared() + Y.getMaxSquared() + Z.getMaxSquared());
+  }
+
+  float minX() { return X.min; }
+  float maxX() { return X.max; }
+  float minY() { return Y.min; }
+  float maxY() { return Y.max; }
+  float minZ() { return Z.min; }
+  float maxZ() { return Z.max; }
+};
 
 // Conversion of blend / test mode from NIF -> OGRE. Not in use yet.
 static SceneBlendFactor getBlendFactor(int mode)
@@ -357,8 +432,10 @@ static void vectorMul(const Matrix &A, float *C)
     C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
 }
 
-static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
+static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags, BoundsFinder &bounds)
 {
+  assert(shape != NULL);
+
   // Interpret flags
   bool hidden    = (flags & 0x01) != 0; // Not displayed
   bool collide   = (flags & 0x02) != 0; // Use mesh for collision
@@ -478,47 +555,53 @@ static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags)
                              alphaFlags, alphaTest, texName);
             }
         }
+    } // End of material block, if(!hidden) ...
+
+  /* Do in-place transformation of all the vertices and normals. This
+     is pretty messy stuff, but we need it to make the sub-meshes
+     appear in the correct place. Neither Ogre nor Bullet support
+     nested levels of sub-meshes with transformations applied to each
+     level.
+  */
+  NiTriShapeData *data = shape->data.getPtr();
+  int numVerts = data->vertices.length / 3;
+
+  float *ptr = (float*)data->vertices.ptr;
+  float *optr = ptr;
+
+  // Rotate, scale and translate all the vertices
+  const Matrix &rot = shape->trafo->rotation;
+  const Vector &pos = shape->trafo->pos;
+  float scale = shape->trafo->scale;
+  for(int i=0; i<numVerts; i++)
+    {
+      vectorMulAdd(rot, pos, ptr, scale);
+      ptr += 3;
     }
 
-  {
-    /* Do in-place transformation of all the vertices and normals. This
-       is pretty messy stuff, but we need it to make the sub-meshes
-       appear in the correct place. Neither Ogre nor Bullet support
-       nested levels of sub-meshes with transformations applied to each
-       level.
-    */
-    NiTriShapeData *data = shape->data.getPtr();
-    int numVerts = data->vertices.length / 3;
-
-    float *ptr = (float*)data->vertices.ptr;
-
-    // Rotate, scale and translate all the vertices
-    const Matrix &rot = shape->trafo->rotation;
-    const Vector &pos = shape->trafo->pos;
-    float scale = shape->trafo->scale;
-    for(int i=0; i<numVerts; i++)
-      {
-        vectorMulAdd(rot, pos, ptr, scale);
-        ptr += 3;
-      }
-
-    // Remember to rotate all the vertex normals as well
-    if(data->normals.length)
-      {
-        ptr = (float*)data->normals.ptr;
-        for(int i=0; i<numVerts; i++)
-          {
-            vectorMul(rot, ptr);
-            ptr += 3;
-          }
-      }
-  }
+  // Remember to rotate all the vertex normals as well
+  if(data->normals.length)
+    {
+      ptr = (float*)data->normals.ptr;
+      for(int i=0; i<numVerts; i++)
+        {
+          vectorMul(rot, ptr);
+          ptr += 3;
+        }
+    }
 
   if(!hidden)
-    createOgreMesh(mesh, shape, material);
+    {
+      // Add this vertex set to the bounding box
+      bounds.add(optr, numVerts);
+
+      // Create the submesh
+      createOgreMesh(mesh, shape, material);
+    }
 }
 
-static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformation *trafo = NULL)
+static void handleNode(Mesh* mesh, Nif::Node *node, int flags,
+                       const Transformation *trafo, BoundsFinder &bounds)
 {
   // Accumulate the flags from all the child nodes. This works for all
   // the flags we currently use, at least.
@@ -554,7 +637,7 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformat
   if(trafo)
     {
       // Get a non-const reference to the node's data, since we're
-      // overwriting it.
+      // overwriting it. TODO: Is this necessary?
       Transformation &final = *((Transformation*)node->trafo);
 
       // For both position and rotation we have that:
@@ -566,7 +649,7 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformat
       matrixMul(trafo->rotation, final.rotation);
 
       // Scalar values are so nice to deal with. Why can't everything
-      // just be scalars?
+      // just be scalar?
       final.scale *= trafo->scale;
     }
 
@@ -578,12 +661,12 @@ static void handleNode(Mesh* mesh, Nif::Node *node, int flags, const Transformat
       for(int i=0; i<n; i++)
         {
           if(list.has(i))
-            handleNode(mesh, &list[i], flags, node->trafo);
+            handleNode(mesh, &list[i], flags, node->trafo, bounds);
         }
     }
   else if(node->recType == RC_NiTriShape)
     // For shapes
-    handleNiTriShape(mesh, (NiTriShape*)node, flags);
+    handleNiTriShape(mesh, dynamic_cast<NiTriShape*>(node), flags, bounds);
 }
 
 void NIFLoader::loadResource(Resource *resource)
@@ -604,6 +687,9 @@ void NIFLoader::loadResource(Resource *resource)
       return;
     }
 
+  // Helper that computes bounding boxes for us.
+  BoundsFinder bounds;
+
   // Load the NIF. TODO: Wrap this in a try-catch block once we're out
   // of the early stages of development. Right now we WANT to catch
   // every error as early and intrusively as possible, as it's most
@@ -620,19 +706,25 @@ void NIFLoader::loadResource(Resource *resource)
   Record *r = nif.getRecord(0);
   assert(r != NULL);
 
-  if(r->recType != RC_NiNode && r->recType != RC_NiTriShape)
+  Nif::Node *node = dynamic_cast<Nif::Node*>(r);
+
+  if(node == NULL)
     {
-      warn("First record in file was not a NiNode, but a " +
+      warn("First record in file was not a node, but a " +
            r->recName.toString() + ". Skipping file.");
       return;
     }
 
   // Handle the node
-  handleNode(mesh, (Nif::Node*)r, 0);
+  handleNode(mesh, node, 0, NULL, bounds);
 
-  // Finally, set the bounding value. Just use bogus info right now.
-  mesh->_setBounds(AxisAlignedBox(-10,-10,-10,10,10,10));
-  mesh->_setBoundingSphereRadius(10);
+  // Finally, set the bounding value.
+  if(bounds.isValid())
+    {
+      mesh->_setBounds(AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
+                                      bounds.maxX(), bounds.maxY(), bounds.maxZ()));
+      mesh->_setBoundingSphereRadius(bounds.getRadius());
+    }
 }
 
 MeshPtr NIFLoader::load(const std::string &name,
