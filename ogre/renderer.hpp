@@ -42,6 +42,9 @@ namespace Render
     /// Start the main rendering loop
     void start() { mRoot->startRendering(); }
 
+    /// Write a screenshot to file
+    void screenshot(const std::string &file);
+
     /// Get the Root
     Ogre::Root *getRoot() { return mRoot; }
 

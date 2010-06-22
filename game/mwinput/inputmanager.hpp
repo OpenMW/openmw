@@ -6,12 +6,15 @@
 #include "input/poller.hpp"
 #include "boost/bind.hpp"
 #include "game/mwrender/playerpos.hpp"
+#include "platform/strings.h"
 
 namespace MWInput
 {
   enum Actions
     {
       A_Quit,           // Exit the program
+
+      A_Screenshot,     // Take a screenshot
 
       A_MoveLeft,       // Move player left / right
       A_MoveRight,
@@ -29,27 +32,45 @@ namespace MWInput
     // Note: the order here is important. The OISManager must be
     // initialized before poller and listener.
     Input::Dispatcher disp;
+    Render::OgreRenderer &ogre;
     Input::OISManager input;
     Input::Poller poller;
     Input::InputListener listener;
     MWRender::PlayerPos &player;
 
+    // Count screenshots. TODO: We should move this functionality to
+    // OgreRender or somewhere else.
+    int shotCount;
+
+    // Write screenshot to file.
+    void screenshot()
+    {
+      // TODO: add persistent counting so we don't overwrite shots
+      // from previous runs.
+      char buf[50];
+      snprintf(buf,50, "screenshot%d.png", shotCount++);
+      ogre.screenshot(buf);
+    }
+
   public:
-    MWInputManager(Render::OgreRenderer &ogre,
+    MWInputManager(Render::OgreRenderer &_ogre,
                    MWRender::PlayerPos &_player)
       : disp(A_LAST),
-        input(ogre),
+        ogre(_ogre),
+        input(_ogre),
         poller(input),
-        listener(ogre, input, disp),
-        player(_player)
+        listener(_ogre, input, disp),
+        player(_player),
+        shotCount(0)
     {
       using namespace Input;
       using namespace OIS;
 
       // Bind MW-specific functions
-      disp.funcs.bind(A_Quit,
-                      boost::bind(&InputListener::exitNow, &listener),
+      disp.funcs.bind(A_Quit, boost::bind(&InputListener::exitNow, &listener),
                       "Quit program");
+      disp.funcs.bind(A_Screenshot, boost::bind(&MWInputManager::screenshot, this),
+                      "Screenshot");
 
       // Add ourselves as a frame listener, to catch movement keys
       ogre.getRoot()->addFrameListener(this);
@@ -60,6 +81,7 @@ namespace MWInput
       // Key bindings
       disp.bind(KC_Q, A_Quit);
       disp.bind(KC_ESCAPE, A_Quit);
+      disp.bind(KC_SYSRQ, A_Screenshot);
 
       // Key bindings for polled keys
 

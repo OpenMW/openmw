@@ -30,6 +30,7 @@
 #include "nif/node.hpp"
 #include "nif/data.hpp"
 #include "nif/property.hpp"
+#include "platform/strings.h"
 
 // For warning messages
 #include <iostream>
@@ -252,10 +253,6 @@ static void createMaterial(const String &name,
 // make sure that all materials are given unique names.
 static String getUniqueName(const String &input)
 {
-#ifdef WIN32
-#define snprintf _snprintf
-#endif
-
   static int addon = 0;
   static char buf[8];
   snprintf(buf, 8, "_%d", addon++);
