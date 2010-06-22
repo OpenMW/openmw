@@ -100,21 +100,6 @@ extern "C" void ogre_screenshot(char* filename)
   mWindow->writeContentsToFile(filename);
 }
 
-// Rotate camera as result of mouse movement
-extern "C" void ogre_rotateCamera(float x, float y)
-{
-  mCamera->yaw(Degree(-x));
-
-  Quaternion nopitch = mCamera->getOrientation();
-
-  mCamera->pitch(Degree(-y));
-
-  // Is the camera close to being upside down?
-  if(mCamera->getUp()[1] <= 0.1)
-    // If so, undo the last pitch
-    mCamera->setOrientation(nopitch);
-}
-
 // Get current camera orientation, in the form of 'front' and 'up'
 // vectors.
 extern "C" void ogre_getCameraOrientation(float *fx, float *fy, float *fz,

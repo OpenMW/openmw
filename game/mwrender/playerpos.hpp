@@ -27,6 +27,8 @@ namespace MWRender
       // TODO: Update sound listener
     }
 
+    Ogre::Camera *getCamera() { return camera; }
+
     // Move the player relative to her own position and
     // orientation. After the call, the new position is returned.
     void moveRel(float &relX, float &relY, float &relZ)

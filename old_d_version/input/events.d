@@ -57,11 +57,6 @@ import input.ois;
 bool pause = false;
 int *guiMode;
 
-void toggleFullscreen()
-{
-  ogre_toggleFullscreen();
-}
-
 const float volDiff = 0.05;
 
 void musVolume(bool increase)
@@ -88,16 +83,6 @@ void mainVolume(bool increase)
   writefln(increase?"Increasing":"Decreasing", " main volume to ", config.getMainVolume);
 }
 
-void takeScreenShot()
-{
-  char[] file = format("screenshot_%06d.png", config.screenShotNum++);
-  ogre_screenshot(toStringz(file));
-  writefln("Wrote '%s'", file);
-}
-
-// Mouse sensitivity
-float effMX, effMY;
-
 void updateMouseSensitivity()
 {
   effMX = *config.mouseSensX;
@@ -110,19 +95,6 @@ void togglePause()
   pause = !pause;
   if(pause) writefln("Pause");
   else writefln("Pause off");
-}
-
-extern(C) void d_handleMouseMove(MouseState *state)
-{
-  debug(printMouseMove)
-    writefln("handleMouseMove: Abs(%s, %s, %s) Rel(%s, %s, %s)",
-             state.X.abs, state.Y.abs, state.Z.abs,
-             state.X.rel, state.Y.rel, state.Z.rel);
-
-  if(*guiMode) return;
-
-  ogre_rotateCamera( state.X.rel * effMX,
-                     state.Y.rel * effMY );
 }
 
 extern(C) void d_handleMouseButton(MouseState *state, int button)
