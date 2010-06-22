@@ -296,6 +296,22 @@ static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material
 
   // Set material if one was given
   if(!material.empty()) sub->setMaterialName(material);
+
+  /* Old commented D code. Might be useful when reimplementing
+     animation.
+  // Assign this submesh to the given bone
+  VertexBoneAssignment v;
+  v.boneIndex = ((Bone*)bone)->getHandle();
+  v.weight = 1.0;
+
+  std::cerr << "+ Assigning bone index " << v.boneIndex << "\n";
+
+  for(int i=0; i < numVerts; i++)
+    {
+      v.vertexIndex = i;
+      sub->addBoneAssignment(v);
+    }
+  */
 }
 
 // Helper math functions. Reinventing linear algebra for the win!
@@ -632,3 +648,109 @@ MeshPtr NIFLoader::load(const std::string &name,
   // Nope, create a new one.
   return MeshManager::getSingleton().createManual(name, group, &g_sing);
 }
+
+/* More code currently not in use, from the old D source. This was
+   used in the first attempt at loading NIF meshes, where each submesh
+   in the file was given a separate bone in a skeleton. Unfortunately
+   the OGRE skeletons can't hold more than 256 bones, and some NIFs go
+   way beyond that. The code might be of use if we implement animated
+   submeshes like this (the part of the NIF that is animated is
+   usually much less than the entire file, but the method might still
+   not be water tight.)
+
+// Insert a raw RGBA image into the texture system.
+extern "C" void ogre_insertTexture(char* name, uint32_t width, uint32_t height, void *data)
+{
+  TexturePtr texture = TextureManager::getSingleton().createManual(
+      name, 		// name
+      "General",	// group
+      TEX_TYPE_2D,     	// type
+      width, height,    // width & height
+      0,                // number of mipmaps
+      PF_BYTE_RGBA,     // pixel format
+      TU_DEFAULT);      // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
+                        // textures updated very often (e.g. each frame)
+
+  // Get the pixel buffer
+  HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
+
+  // Lock the pixel buffer and get a pixel box
+  pixelBuffer->lock(HardwareBuffer::HBL_NORMAL); // for best performance use HBL_DISCARD!
+  const PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+
+  void *dest = pixelBox.data;
+
+  // Copy the data
+  memcpy(dest, data, width*height*4);
+
+  // Unlock the pixel buffer
+  pixelBuffer->unlock();
+}
+
+// We need this later for animated meshes.
+extern "C" void* ogre_setupSkeleton(char* name)
+{
+  SkeletonPtr skel = SkeletonManager::getSingleton().create(
+    name, "Closet", true);
+
+  skel->load();
+
+  // Create all bones at the origin and unrotated. This is necessary
+  // since our submeshes each have their own model space. We must
+  // move the bones after creating an entity, then copy this entity.
+  return (void*)skel->createBone();
+}
+
+extern "C" void *ogre_insertBone(char* name, void* rootBone, int32_t index)
+{
+  return (void*) ( ((Bone*)rootBone)->createChild(index) );
+}
+*/
+/* This was the D part:
+
+    // Create a skeleton and get the root bone (index 0)
+    BonePtr bone = ogre_setupSkeleton(name);
+
+    // Reset the bone index. The next bone to be created has index 1.
+    boneIndex = 1;
+    // Create a mesh and assign the skeleton to it
+    MeshPtr mesh = ogre_setupMesh(name);
+
+    // Loop through the nodes, creating submeshes, materials and
+    // skeleton bones in the process.
+    handleNode(node, bone, mesh);
+
+  // Create the "template" entity
+  EntityPtr entity = ogre_createEntity(name);
+
+  // Loop through once again, this time to set the right
+  // transformations on the entity's SkeletonInstance. The order of
+  // children will be the same, allowing us to reference bones using
+  // their boneIndex.
+  int lastBone = boneIndex;
+  boneIndex = 1;
+  transformBones(node, entity);
+  if(lastBone != boneIndex) writefln("WARNING: Bone number doesn't match");
+
+  if(!hasBBox)
+    ogre_setMeshBoundingBox(mesh, minX, minY, minZ, maxX, maxY, maxZ);
+
+  return entity;
+}
+void handleNode(Node node, BonePtr root, MeshPtr mesh)
+{
+  // Insert a new bone for this node
+  BonePtr bone = ogre_insertBone(node.name, root, boneIndex++);
+
+}
+
+void transformBones(Node node, EntityPtr entity)
+{
+  ogre_transformBone(entity, &node.trafo, boneIndex++);
+
+  NiNode n = cast(NiNode)node;
+  if(n !is null)
+    foreach(Node nd; n.children)
+      transformBones(nd, entity);
+}
+*/
