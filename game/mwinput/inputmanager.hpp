@@ -70,7 +70,7 @@ namespace MWInput
       poller.bind(A_MoveLeft, KC_A);
       poller.bind(A_MoveRight, KC_D);
       poller.bind(A_MoveForward, KC_W);
-      poller.bind(A_MoveBackward, KC_D);
+      poller.bind(A_MoveBackward, KC_S);
 
       // Use shift and ctrl for up and down
       poller.bind(A_MoveUp, KC_LSHIFT);
