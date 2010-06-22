@@ -92,14 +92,6 @@ public:
 MorroFrameListener mFrameListener;
 InputListener mInput;
 
-// Functions called from D during event handling
-
-// Dump screen contents to file
-extern "C" void ogre_screenshot(char* filename)
-{
-  mWindow->writeContentsToFile(filename);
-}
-
 // Get current camera orientation, in the form of 'front' and 'up'
 // vectors.
 extern "C" void ogre_getCameraOrientation(float *fx, float *fy, float *fz,
