@@ -45,10 +45,14 @@ namespace MWInput
     // Write screenshot to file.
     void screenshot()
     {
-      // TODO: add persistent counting so we don't overwrite shots
-      // from previous runs.
-      char buf[50];
-      snprintf(buf,50, "screenshot%d.png", shotCount++);
+      // Find the first unused filename.
+      //
+      char buf[50];      
+      do
+      {
+        snprintf(buf, 50, "screenshot%03d.png", shotCount++);
+      } while (boost::filesystem::exists(buf));
+
       ogre.screenshot(buf);
     }
 
@@ -108,8 +112,6 @@ namespace MWInput
       float speed = 300 * evt.timeSinceLastFrame;
       float moveX = 0, moveY = 0, moveZ = 0;
 
-      using namespace std;
-
       if(poller.isDown(A_MoveLeft)) moveX -= speed;
       if(poller.isDown(A_MoveRight)) moveX += speed;
       if(poller.isDown(A_MoveForward)) moveZ -= speed;
@@ -120,10 +122,8 @@ namespace MWInput
       if(poller.isDown(A_MoveUp)) moveY += speed;
       if(poller.isDown(A_MoveDown)) moveY -= speed;
 
-      if(moveX == 0 && moveY == 0 && moveZ == 0)
-        return true;
-
-      player.moveRel(moveX, moveY, moveZ);
+      if(moveX != 0 || moveY != 0 || moveZ != 0)
+        player.moveRel(moveX, moveY, moveZ);
 
       return true;
     }

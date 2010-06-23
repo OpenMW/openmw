@@ -29,13 +29,14 @@ void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& live
     cellRender.insertBegin (liveRef.ref);
     
     cellRender.insertMesh ("meshes\\" + model);
-    
-    int color = liveRef.base->data.color;
-    
-    cellRender.insertLight(color & 255,
-                           (color >> 8) & 255,
-                           (color >> 16) & 255,
-                           liveRef.base->data.radius);
+        
+    // Extract the color and convert to floating point
+    const int color = liveRef.base->data.color;
+    const float r = ((color >>  0) & 0xFF) / 255.0f;
+    const float g = ((color >>  8) & 0xFF) / 255.0f;
+    const float b = ((color >> 16) & 0xFF) / 255.0f;
+    const float radius = float(liveRef.base->data.radius);
+    cellRender.insertLight(r, g, b, radius);
     
     cellRender.insertEnd();
   }  

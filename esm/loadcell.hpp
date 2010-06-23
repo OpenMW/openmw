@@ -11,8 +11,9 @@ namespace ESM {
    loading process, but are rather loaded later on demand when we are
    setting up a specific cell.
  */
-struct CellRef
+class CellRef
 {
+public:
   int refnum;           // Reference number
   std::string refID;    // ID of object being referenced
 

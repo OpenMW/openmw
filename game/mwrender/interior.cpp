@@ -156,7 +156,7 @@ void InteriorCellRender::setAmbientMode()
     
     case 1:
 
-      scene.getMgr()->setAmbientLight(0.7*ambientColor + 0.3*ColourValue(1,1,1));
+      scene.getMgr()->setAmbientLight(0.7f*ambientColor + 0.3f*ColourValue(1,1,1));
       break;
           
     case 2:

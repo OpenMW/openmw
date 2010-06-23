@@ -66,8 +66,9 @@ namespace ESMS
   };
 
   /// A storage struct for one single cell reference.
-  struct CellStore
+  class CellStore
   {
+  public:
     CellStore() : cell (0) {}
   
     const ESM::Cell *cell;
