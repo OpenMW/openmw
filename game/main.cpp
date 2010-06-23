@@ -49,6 +49,8 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     engine.setDataDir (variables["data"].as<std::string>());
     engine.setCell (variables["start"].as<std::string>());
     engine.addMaster (variables["master"].as<std::string>());
+
+    return true;
 }
 
 int main(int argc, char**argv)
