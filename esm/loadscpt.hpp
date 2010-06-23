@@ -67,7 +67,7 @@ struct Script
         // The tmp buffer is a null-byte separated string list, we
         // just have to pick out one string at a time.
         char* str = tmp;
-        for(int i=0; i< varNames.size(); i++)
+        for(size_t i=0; i< varNames.size(); i++)
           {
             varNames[i] = std::string(str);
             str += varNames[i].size()+1;

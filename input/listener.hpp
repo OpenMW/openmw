@@ -68,7 +68,7 @@ namespace Input
       assert(camera);
 
       // Mouse sensitivity. Should be a config option later.
-      const float MS = 0.2;
+      const float MS = 0.2f;
 
       float x = arg.state.X.rel * MS;
       float y = arg.state.Y.rel * MS;
