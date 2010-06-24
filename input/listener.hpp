@@ -24,11 +24,16 @@ namespace Input
       mMouse = input.mouse;
       mKeyboard = input.keyboard;
 
+      assert(mKeyboard);
+      assert(mWindow);
+
       // Add ourself to the managers
       rend.getRoot() -> addFrameListener(this);
       mKeyboard      -> setEventCallback(this);
       mMouse         -> setEventCallback(this);
     }
+
+    void setCamera(Ogre::Camera *cam) { camera = cam; }
 
     // Call this to exit the main loop
     void exitNow() { doExit = true; }
@@ -59,6 +64,29 @@ namespace Input
 
     bool mouseMoved( const OIS::MouseEvent &arg )
     {
+      using namespace Ogre;
+      assert(camera);
+
+      // Mouse sensitivity. Should be a config option later.
+      const float MS = 0.2f;
+
+      float x = arg.state.X.rel * MS;
+      float y = arg.state.Y.rel * MS;
+
+      camera->yaw(Degree(-x));
+
+      // The camera before pitching
+      Quaternion nopitch = camera->getOrientation();
+
+      camera->pitch(Degree(-y));
+
+      // Apply some failsafe measures against the camera flipping
+      // upside down. Is the camera close to pointing straight up or
+      // down?
+      if(camera->getUp()[1] <= 0.1)
+        // If so, undo the last pitch
+        camera->setOrientation(nopitch);
+
       return true;
     }
 
@@ -76,6 +104,7 @@ namespace Input
 
     const Dispatcher &disp;
     Ogre::RenderWindow *mWindow;
+    Ogre::Camera *camera;
     OIS::Mouse *mMouse;
     OIS::Keyboard *mKeyboard;
     bool doExit;

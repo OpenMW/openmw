@@ -15,6 +15,11 @@ void OgreRenderer::cleanup()
   mRoot = NULL;
 }
 
+void OgreRenderer::screenshot(const std::string &file)
+{
+  mWindow->writeContentsToFile(file);
+}
+
 bool OgreRenderer::configure(bool showConfig,
                              const std::string &pluginCfg,
                              bool _logging)

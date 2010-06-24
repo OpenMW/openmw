@@ -60,7 +60,7 @@ struct LeveledListBase
     // items. Also, some times we don't want to merge lists, just
     // overwrite. Figure out a way to give the user this option.
  
-    for(int i=0; i<list.size(); i++)
+    for(size_t i=0; i<list.size(); i++)
       {
         LevelItem &li = list[i];
         li.id = esm.getHNString(recName);

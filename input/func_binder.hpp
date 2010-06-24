@@ -54,7 +54,8 @@ public:
    */
   void bind(int index, Action action, const std::string &name="")
   {
-    assert(index >= 0 && index < bindings.size());
+    assert(index >= 0 && index < (int)bindings.size());
+
     FuncBinding &fb = bindings[index];
     fb.action = action;
     fb.name = name;
@@ -65,7 +66,8 @@ public:
    */
   void unbind(int index)
   {
-    assert(index >= 0 && index < bindings.size());
+    assert(index >= 0 && index < (int)bindings.size());
+
     bindings[index] = FuncBinding();
   }
 
@@ -75,7 +77,8 @@ public:
    */
   void call(int index, const void *p=NULL) const
   {
-    assert(index >= 0 && index < bindings.size());
+    assert(index >= 0 && index < (int)bindings.size());
+
     const FuncBinding &fb = bindings[index];
     if(fb.action) fb.action(index, p);
   }
@@ -83,14 +86,16 @@ public:
   /// Check if a given index is bound to anything
   bool isBound(int index) const
   {
-    assert(index >= 0 && index < bindings.size());
+    assert(index >= 0 && index < (int)bindings.size());
+
     return !bindings[index].action.empty();
   }
 
   /// Return the name associated with an action (empty if not bound)
   const std::string &getName(int index) const
   {
-    assert(index >= 0 && index < bindings.size());
+    assert(index >= 0 && index < (int)bindings.size());
+
     return bindings[index].name;
   }
 };
