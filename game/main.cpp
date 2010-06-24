@@ -96,9 +96,11 @@ int main(int argc, char**argv)
     
     std::ifstream configFile ("openmw.cfg");
 
-    boost::program_options::store (
-      boost::program_options::parse_command_line (argc, argv, desc), variables);
-    boost::program_options::notify (variables);
+    boost::program_options::parsed_options valid_opts = 
+      boost::program_options::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+
+    boost::program_options::store(valid_opts, variables);
+    boost::program_options::notify(variables);
 
     if (configFile.is_open())
       boost::program_options::store (
