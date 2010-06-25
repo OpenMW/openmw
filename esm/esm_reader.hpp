@@ -394,7 +394,7 @@ public:
   void getHExact(void*p, int size)
   {
     getSubHeader();
-    if(size != c.leftSub)
+    if(size !=static_cast<int> (c.leftSub))
       fail("getHExact() size mismatch");
     getExact(p,size);
   }
@@ -480,7 +480,7 @@ public:
   void skipHSubSize(int size)
     {
       skipHSub();
-      if(c.leftSub != size)
+      if(static_cast<int> (c.leftSub) != size)
 	fail("skipHSubSize() mismatch");
     }
 
@@ -508,7 +508,7 @@ public:
   void getSubHeaderIs(int size)
   {
     getSubHeader();
-    if(size != c.leftSub)
+    if(size != static_cast<int> (c.leftSub))
       fail("getSubHeaderIs(): Sub header mismatch");
   }
 

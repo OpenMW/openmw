@@ -129,7 +129,7 @@ void BSAFile::readHeader()
 
   // Set up the the FileStruct table
   files.resize(filenum);
-  for(int i=0;i<filenum;i++)
+  for(size_t i=0;i<filenum;i++)
     {
       FileStruct &fs = files[i];
       fs.fileSize = offsets[i*2];
@@ -156,7 +156,7 @@ int BSAFile::getIndex(const char *str)
   else
     {
       int res = it->second;
-      assert(res >= 0 && res < files.size());
+      assert(res >= 0 && res < static_cast<int> (files.size()));
       return res;
     }
 }

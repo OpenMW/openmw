@@ -193,7 +193,7 @@ static void createMaterial(const String &name,
   if(!texName.empty())
     {
       Pass *pass = material->getTechnique(0)->getPass(0);
-      TextureUnitState *txt = pass->createTextureUnitState(texName);
+      /*TextureUnitState *txt =*/ pass->createTextureUnitState(texName);
 
       /* As of yet UNTESTED code from Chris:
       pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);

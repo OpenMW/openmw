@@ -178,7 +178,7 @@ void NIFFile::parse()
 void NiSkinInstance::post(NIFFile *nif)
 {
   int bnum = bones.length();
-  if(bnum != data->bones.size())
+  if(bnum != static_cast<int> (data->bones.size()))
     nif->fail("Mismatch in NiSkinData bone count");
 
   root->makeRootBone(data->trafo);

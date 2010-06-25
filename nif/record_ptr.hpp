@@ -118,13 +118,13 @@ class RecordListT
 
   X& operator[](int index)
     {
-      assert(index >= 0 && index < list.size());
+      assert(index >= 0 && index < static_cast<int> (list.size()));
       return list[index].get();
     }
 
   bool has(int index)
   {
-    assert(index >= 0 && index < list.size());
+    assert(index >= 0 && index < static_cast<int> (list.size()));
     return !list[index].empty();
   }
 

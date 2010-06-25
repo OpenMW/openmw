@@ -17,7 +17,7 @@ namespace Input
     InputListener(Render::OgreRenderer &rend,
                   Input::OISManager &input,
                   const Input::Dispatcher &_disp)
-      : doExit(false), disp(_disp)
+      : disp(_disp), doExit(false)
     {
       // Set up component pointers
       mWindow = rend.getWindow();

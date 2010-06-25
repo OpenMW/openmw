@@ -103,6 +103,11 @@ if (APPLE)
   )
 endif (APPLE)
 
+# Compiler settings
+if (CMAKE_COMPILER_IS_GNUCC)
+    add_definitions (-Wall)
+endif (CMAKE_COMPILER_IS_GNUCC)
+
 # Main executable
 add_executable(openmw
     MACOSX_BUNDLE

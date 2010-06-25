@@ -50,7 +50,7 @@ struct NiVertWeightsExtraData : Extra
 
     // We should have s*4+2 == i, for some reason. Might simply be the
     // size of the rest of the record, unhelpful as that may be.
-    int i = nif->getInt();
+    /*int i =*/ nif->getInt();
     int s = nif->getShort(); // number of vertices
 
     nif->getFloatLen(s);     // vertex weights I guess

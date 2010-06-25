@@ -15,7 +15,7 @@ namespace MWRender
 
   public:
     PlayerPos(Ogre::Camera *cam) :
-      camera(cam), x(0), y(0), z(0) {}
+      x(0), y(0), z(0), camera(cam) {}
 
     // Set the player position. Uses Morrowind coordinates.
     void setPos(float _x, float _y, float _z)

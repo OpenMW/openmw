@@ -122,9 +122,9 @@ struct NiTexturingProperty : Property
     if(textures[5].inUse)
       {
         // Ignore these at the moment
-        float lumaScale = nif->getFloat();
-        float lumaOffset = nif->getFloat();
-        const Vector4 *lumaMatrix = nif->getVector4();
+        /*float lumaScale =*/ nif->getFloat();
+        /*float lumaOffset =*/ nif->getFloat();
+        /*const Vector4 *lumaMatrix =*/ nif->getVector4();
       }
     textures[6].read(nif); // Decal
   }

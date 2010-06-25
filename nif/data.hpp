@@ -198,7 +198,7 @@ struct NiPosData : Record
     // translation in NiKeyframeData.
     for(int i=0; i<count; i++)
       {
-        float time = nif->getFloat();
+        /*float time =*/ nif->getFloat();
         nif->getVector(); // This isn't really shared between type 1
                           // and type 2, most likely
         if(type == 2)
@@ -267,14 +267,14 @@ struct NiPixelData : Record
     mips = nif->getInt();
 
     // Bytes per pixel, should be bpp * 8
-    int bytes = nif->getInt();
+    /*int bytes =*/ nif->getInt();
 
     for(int i=0; i<mips; i++)
       {
         // Image size and offset in the following data field
-        int x = nif->getInt();
-        int y = nif->getInt();
-        int offset = nif->getInt();
+        /*int x =*/ nif->getInt();
+        /*int y =*/ nif->getInt();
+        /*int offset =*/ nif->getInt();
       }
 
     // Skip the data

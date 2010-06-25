@@ -95,7 +95,7 @@ class NIFFile
 
   ~NIFFile()
     {
-      for(int i=0; i<records.size(); i++)
+      for(std::size_t i=0; i<records.size(); i++)
         {
           delete records[i];
         }
@@ -104,7 +104,7 @@ class NIFFile
   /// Get a given record
   Record *getRecord(int index)
   {
-    assert(index >= 0 && index < records.size());
+    assert(index >= 0 && index < static_cast<int> (records.size()));
     Record *res = records[index];
     assert(res != NULL);
     return res;
