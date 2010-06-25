@@ -3,7 +3,7 @@
 #include <OgreEntity.h>
 #include <OgreLight.h>
 
-#include "nifogre/ogre_nif_loader.hpp"
+#include "components/nifogre/ogre_nif_loader.hpp"
 #include "mwscene.hpp"
 
 using namespace MWRender;
@@ -30,7 +30,7 @@ bool InteriorCellRender::lightOutQuadInLin = false;
 void InteriorCellRender::insertBegin (const ESM::CellRef &ref)
 {
   assert (!insert);
-    
+
   // Create and place scene node for this object
   insert = base->createChildSceneNode();
 
@@ -59,7 +59,7 @@ void InteriorCellRender::insertBegin (const ESM::CellRef &ref)
 void InteriorCellRender::insertMesh(const std::string &mesh)
 {
   assert (insert);
-    
+
   NIFLoader::load(mesh);
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   insert->attachObject(ent);
@@ -74,7 +74,7 @@ void InteriorCellRender::insertLight(float r, float g, float b, float radius)
   light->setDiffuseColour (r, g, b);
 
   float cval=0.0f, lval=0.0f, qval=0.0f;
-  
+
   if(lightConst)
     cval = lightConstValue;
   if(!lightOutQuadInLin)
@@ -95,9 +95,9 @@ void InteriorCellRender::insertLight(float r, float g, float b, float radius)
     // Do quadratic or linear, depending if we're in an exterior or interior
     // cell, respectively. Ignore lightLinear and lightQuadratic.
   }
-  
+
   light->setAttenuation(10*radius, cval, lval, qval);
-  
+
   insert->attachObject(light);
 }
 
@@ -108,19 +108,19 @@ std::string InteriorCellRender::insertEnd()
   assert (insert);
 
   std::string handle = insert->getName();
-  
+
   insert = 0;
-  
+
   return handle;
-}     
-           
+}
+
 // configure lighting according to cell
 
 void InteriorCellRender::configureAmbient()
 {
   ambientColor.setAsABGR (cell.cell->ambi.ambient);
   setAmbientMode();
-  
+
   // Create a "sun" that shines light downwards. It doesn't look
   // completely right, but leave it for now.
   Ogre::Light *light = scene.getMgr()->createLight();
@@ -130,7 +130,7 @@ void InteriorCellRender::configureAmbient()
   light->setType(Ogre::Light::LT_DIRECTIONAL);
   light->setDirection(0,-1,0);
 }
-                
+
 // configure fog according to cell
 void InteriorCellRender::configureFog()
 {
@@ -144,28 +144,28 @@ void InteriorCellRender::configureFog()
   scene.getCamera()->setFarClipDistance (high + 10);
   scene.getViewport()->setBackgroundColour (color);
 }
-                
+
 void InteriorCellRender::setAmbientMode()
 {
   switch (ambientMode)
   {
     case 0:
-    
+
       scene.getMgr()->setAmbientLight(ambientColor);
       break;
-    
+
     case 1:
 
       scene.getMgr()->setAmbientLight(0.7f*ambientColor + 0.3f*ColourValue(1,1,1));
       break;
-          
+
     case 2:
-  
+
       scene.getMgr()->setAmbientLight(ColourValue(1,1,1));
       break;
   }
 }
-           
+
 void InteriorCellRender::show()
 {
   // If already loaded, just make the cell visible.
@@ -208,14 +208,14 @@ void InteriorCellRender::toggleLight()
     ambientMode = 0;
   else
     ++ambientMode;
-    
+
   switch (ambientMode)
   {
     case 0: std::cout << "Setting lights to normal\n"; break;
     case 1: std::cout << "Turning the lights up\n"; break;
     case 2: std::cout << "Turning the lights to full\n"; break;
   }
-    
+
   setAmbientMode();
 }
 

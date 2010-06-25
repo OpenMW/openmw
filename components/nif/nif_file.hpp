@@ -24,11 +24,11 @@
 #ifndef _NIF_FILE_H_
 #define _NIF_FILE_H_
 
-#include <mangle/stream/stream.hpp>
-#include <mangle/stream/filters/buffer_stream.hpp>
-#include <mangle/tools/str_exception.hpp>
+#include <libs/mangle/stream/stream.hpp>
+#include <libs/mangle/stream/filters/buffer_stream.hpp>
+#include <libs/mangle/tools/str_exception.hpp>
 
-#include "../tools/slice_array.hpp"
+#include "../misc/slice_array.hpp"
 
 #include <vector>
 #include <string>

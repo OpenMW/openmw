@@ -2,7 +2,7 @@
 #define _INPUT_LISTENER_H
 
 #include "oismanager.hpp"
-#include "ogre/renderer.hpp"
+#include "components/engine/ogre/renderer.hpp"
 #include "dispatcher.hpp"
 
 #include <OgreFrameListener.h>

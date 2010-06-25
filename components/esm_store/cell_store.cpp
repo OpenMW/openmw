@@ -1,6 +1,6 @@
 #include "cell_store.hpp"
 #include <iostream>
-#include "mangle/tools/str_exception.hpp"
+#include "libs/mangle/tools/str_exception.hpp"
 
 using namespace ESMS;
 using namespace std;
@@ -24,7 +24,7 @@ void CellStore::loadExt(int X, int Y, const ESMStore &store, ESMReader &esm)
 void CellStore::loadRefs(const ESMStore &store, ESMReader &esm)
 {
   assert (cell);
-  
+
   // Reopen the ESM reader and seek to the right position.
   cell->restore(esm);
 

@@ -1,12 +1,12 @@
 #ifndef _MWINPUT_MWINPUTMANAGER_H
 #define _MWINPUT_MWINPUTMANAGER_H
 
-#include "input/listener.hpp"
-#include "input/dispatcher.hpp"
-#include "input/poller.hpp"
+#include "components/engine/input/listener.hpp"
+#include "components/engine/input/dispatcher.hpp"
+#include "components/engine/input/poller.hpp"
 #include "boost/bind.hpp"
-#include "game/mwrender/playerpos.hpp"
-#include "platform/strings.h"
+#include "apps/openmw/mwrender/playerpos.hpp"
+#include "libs/platform/strings.h"
 
 namespace MWInput
 {
@@ -47,7 +47,7 @@ namespace MWInput
     {
       // Find the first unused filename.
       //
-      char buf[50];      
+      char buf[50];
       do
       {
         snprintf(buf, 50, "screenshot%03d.png", shotCount++);

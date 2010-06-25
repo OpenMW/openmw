@@ -1,7 +1,7 @@
 #ifndef _INPUT_OISMANAGER_H
 #define _INPUT_OISMANAGER_H
 
-#include "ogre/renderer.hpp"
+#include "components/engine/ogre/renderer.hpp"
 #include <OIS/OIS.h>
 
 namespace Input

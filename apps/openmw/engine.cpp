@@ -4,14 +4,14 @@
 
 #include <iostream>
 
-#include "esm_store/cell_store.hpp"
-#include "bsa/bsa_archive.hpp"
-#include "ogre/renderer.hpp"
-#include "tools/fileops.hpp"
+#include "components/esm_store/cell_store.hpp"
+#include "components/bsa/bsa_archive.hpp"
+#include "components/engine/ogre/renderer.hpp"
+#include "components/misc/fileops.hpp"
 
-#include "mwrender/interior.hpp"
+#include "apps/openmw/mwrender/interior.hpp"
 #include "mwinput/inputmanager.hpp"
-#include "mwrender/playerpos.hpp"
+#include "apps/openmw/mwrender/playerpos.hpp"
 
 OMW::Engine::Engine() {}
 
@@ -20,29 +20,29 @@ OMW::Engine::Engine() {}
 void OMW::Engine::prepareMaster()
 {
     std::string::size_type sep = mMaster.find_last_of (".");
-    
+
     if (sep==std::string::npos)
     {
         mMaster += ".esm";
     }
 }
-    
+
 // Load all BSA files in data directory.
 
 void OMW::Engine::loadBSA()
 {
     boost::filesystem::directory_iterator end;
-    
+
     for (boost::filesystem::directory_iterator iter (mDataDir); iter!=end; ++iter)
     {
         if (boost::filesystem::extension (iter->path())==".bsa")
         {
             std::cout << "Adding " << iter->path().string() << std::endl;
-            addBSA(iter->path().file_string());        
+            addBSA(iter->path().file_string());
         }
     }
 }
-        
+
 // add resources directory
 // \note This function works recursively.
 
@@ -50,8 +50,8 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 {
     mOgre.getRoot()->addResourceLocation (path.file_string(), "FileSystem",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
-}      
-    
+}
+
 // Set data dir
 
 void OMW::Engine::setDataDir (const boost::filesystem::path& dataDir)
@@ -83,9 +83,9 @@ void OMW::Engine::go()
     assert (!mDataDir.empty());
     assert (!mCellName.empty());
     assert (!mMaster.empty());
-    
+
     std::cout << "Hello, fellow traveler!\n";
-  
+
     std::cout << "Your data directory for today is: " << mDataDir << "\n";
 
     std::cout << "Initializing OGRE\n";
@@ -93,16 +93,16 @@ void OMW::Engine::go()
     const char* plugCfg = "plugins.cfg";
 
     mOgre.configure(!isFile("ogre.cfg"), plugCfg, false);
-    
+
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");
-    
+
     prepareMaster();
     loadBSA();
-    
+
     boost::filesystem::path masterPath (mDataDir);
     masterPath /= mMaster;
-    
+
     std::cout << "Loading ESM " << masterPath.string() << "\n";
     ESM::ESMReader esm;
     ESMS::ESMStore store;
@@ -141,6 +141,6 @@ void OMW::Engine::go()
     // Start the main rendering loop
     mOgre.start();
 
-    std::cout << "\nThat's all for now!\n";        
+    std::cout << "\nThat's all for now!\n";
 }
 

@@ -2,11 +2,11 @@
 
 #include <cassert>
 
-#include "esm_store/cell_store.hpp"
+#include "components/esm_store/cell_store.hpp"
 
 using namespace MWRender;
 
-template<typename T>   
+template<typename T>
 void insertObj(CellRender& cellRender, const T& liveRef)
 {
   assert (liveRef.base != NULL);
@@ -18,8 +18,8 @@ void insertObj(CellRender& cellRender, const T& liveRef)
     cellRender.insertEnd();
   }
 }
-  
-template<>   
+
+template<>
 void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& liveRef)
 {
   assert (liveRef.base != NULL);
@@ -27,9 +27,9 @@ void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& live
   if(!model.empty())
   {
     cellRender.insertBegin (liveRef.ref);
-    
+
     cellRender.insertMesh ("meshes\\" + model);
-        
+
     // Extract the color and convert to floating point
     const int color = liveRef.base->data.color;
     const float r = ((color >>  0) & 0xFF) / 255.0f;
@@ -37,9 +37,9 @@ void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& live
     const float b = ((color >> 16) & 0xFF) / 255.0f;
     const float radius = float(liveRef.base->data.radius);
     cellRender.insertLight(r, g, b, radius);
-    
+
     cellRender.insertEnd();
-  }  
+  }
 }
 
 template<typename T>
@@ -49,8 +49,8 @@ void insertCellRefList (CellRender& cellRender, const T& cellRefList)
     it != cellRefList.list.end(); it++)
   {
     insertObj (cellRender, *it);
-  }    
-}    
+  }
+}
 
 void CellRender::insertCell(const ESMS::CellStore &cell)
 {

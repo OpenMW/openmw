@@ -5,7 +5,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include "mwrender/mwscene.hpp"
+#include "apps/openmw/mwrender/mwscene.hpp"
 
 namespace OMW
 {
@@ -17,21 +17,21 @@ namespace OMW
             Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;
-            
+
             // not implemented
             Engine (const Engine&);
             Engine& operator= (const Engine&);
-    
+
             /// adjust name and load bsa
             void prepareMaster();
-    
+
             /// add resources directory
             /// \note This function works recursively.
             void addResourcesDirectory (const boost::filesystem::path& path);
-    
+
             /// Load all BSA files in data directory.
             void loadBSA();
-    
+
         public:
 
             Engine();
@@ -41,7 +41,7 @@ namespace OMW
 
             /// Set start cell name (only interiors for now)
             void setCell (const std::string& cellName);
-            
+
             /// Set master file (esm)
             /// - If the given name does not have an extension, ".esm" is added automatically
             /// - Currently OpenMW only supports one master at the same time.

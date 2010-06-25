@@ -11,9 +11,9 @@
  */
 
 #include "store.hpp"
-#include "esm/records.hpp"
-#include "esm/loadcell.hpp"
-#include <mangle/tools/str_exception.hpp>
+#include "components/esm/records.hpp"
+#include "components/esm/loadcell.hpp"
+#include <libs/mangle/tools/str_exception.hpp>
 #include <list>
 
 namespace ESMS
@@ -70,9 +70,9 @@ namespace ESMS
   {
   public:
     CellStore() : cell (0) {}
-  
+
     const ESM::Cell *cell;
-  
+
     // Lists for each individual object type
     CellRefList<Activator>         activators;
     CellRefList<Potion>            potions;

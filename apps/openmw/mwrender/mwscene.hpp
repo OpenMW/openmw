@@ -1,7 +1,7 @@
 #ifndef _GAME_RENDER_MWSCENE_H
 #define _GAME_RENDER_MWSCENE_H
 
-#include "ogre/renderer.hpp"
+#include "components/engine/ogre/renderer.hpp"
 
 namespace Ogre
 {

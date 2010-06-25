@@ -23,9 +23,9 @@
 
 #include "bsa_file.hpp"
 
-#include <mangle/stream/servers/file_stream.hpp>
-#include <mangle/stream/filters/slice_stream.hpp>
-#include <mangle/tools/str_exception.hpp>
+#include <libs/mangle/stream/servers/file_stream.hpp>
+#include <libs/mangle/stream/filters/slice_stream.hpp>
+#include <libs/mangle/tools/str_exception.hpp>
 
 #include <stdlib.h>
 #include <assert.h>

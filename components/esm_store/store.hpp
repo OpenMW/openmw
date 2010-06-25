@@ -13,7 +13,7 @@
   maintainability.
  */
 
-#include "esm/records.hpp"
+#include "components/esm/records.hpp"
 #include "reclists.hpp"
 
 namespace ESMS

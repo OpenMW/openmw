@@ -1,7 +1,7 @@
 #ifndef _GAME_ESM_RECLISTS_H
 #define _GAME_ESM_RECLISTS_H
 
-#include "esm/records.hpp"
+#include "components/esm/records.hpp"
 #include <map>
 #include <string>
 #include <assert.h>

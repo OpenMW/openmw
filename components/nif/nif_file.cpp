@@ -23,7 +23,7 @@
 
 #include "nif_file.hpp"
 #include "record.hpp"
-#include "tools/stringops.hpp"
+#include "components/misc/stringops.hpp"
 
 #include "extra.hpp"
 #include "controlled.hpp"
