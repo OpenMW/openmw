@@ -134,7 +134,8 @@ public:
   float maxZ() { return Z.max; }
 };
 
-// Conversion of blend / test mode from NIF -> OGRE. Not in use yet.
+// Conversion of blend / test mode from NIF -> OGRE.
+/* Not in use yet, so let's comment it out.
 static SceneBlendFactor getBlendFactor(int mode)
 {
   switch(mode)
@@ -149,14 +150,15 @@ static SceneBlendFactor getBlendFactor(int mode)
     case 7: return SBF_ONE_MINUS_SOURCE_ALPHA;
     case 8: return SBF_DEST_ALPHA;
     case 9: return SBF_ONE_MINUS_DEST_ALPHA;
-    /* [Comment from Chris Robinson:] Can't handle this mode? :/
-    case 10: return SBF_SOURCE_ALPHA_SATURATE;
-    */
+      // [Comment from Chris Robinson:] Can't handle this mode? :/
+      // case 10: return SBF_SOURCE_ALPHA_SATURATE;
     default:
       return SBF_SOURCE_ALPHA;
     }
 }
+*/
 
+/* This is also unused
 static CompareFunction getTestMode(int mode)
 {
   switch(mode)
@@ -173,6 +175,7 @@ static CompareFunction getTestMode(int mode)
       return CMPF_ALWAYS_PASS;
     }
 }
+*/
 
 static void createMaterial(const String &name,
                            const Vector &ambient,
