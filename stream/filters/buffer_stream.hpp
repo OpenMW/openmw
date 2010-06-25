@@ -37,7 +37,7 @@ class BufferStream : public MemoryStream
         {
           // We DON'T know how big the stream is. We'll have to read
           // it in increments.
-          const int ADD = 32*1024;
+          const unsigned int ADD = 32*1024;
           size_t len=0, newlen;
 
           while(!input->eof())

@@ -32,7 +32,7 @@ class Mangle2OgreStream : public Ogre::DataStream
 
   /// Constructor for a named data stream
   Mangle2OgreStream(const Ogre::String &name, StreamPtr _inp)
-    : inp(_inp), Ogre::DataStream(name) { init(); }
+    : Ogre::DataStream(name), inp(_inp) { init(); }
 
   // Only implement the DataStream functions we have to implement
 

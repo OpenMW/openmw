@@ -4,7 +4,13 @@
 #include <exception>
 #include <string>
 
-/// A simple exception that takes and holds a string
+/** @brief A simple exception that takes and holds a string
+
+    Usage:
+
+      throw str_exception("message");
+
+ */
 class str_exception : public std::exception
 {
   std::string msg;
