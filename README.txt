@@ -34,7 +34,7 @@ implementation of your choice (or of your making.)
 
 The Sound module, for example, currently has backends for OpenAL
 (output only), FFmpeg (input only) and for Audiere. Hopefully we'll
-add IrrKlang, FMod, DirectSound, Miles and more in the future It can
+add IrrKlang, FMod, DirectSound, Miles and more in the future. It can
 combine libraries to get more complete functionality (like using
 OpenAL for output and FFmpeg to decode sound files), and it's also
 easy to write your own backend if you're using a different (or
@@ -74,22 +74,23 @@ you in many ways:
   user interface is often simpler than the exteral library one.
 
 - If you want to quickly connect different libraries together, it
-  really helps if they have speak a common language. The Mangle
-  interfaces are exactly that. Need to load Audiere sounds from a
-  weird archive format only implemented for PhysFS, all channeled
-  through the OGRE resource system? No problem!
+  really helps if they speak a common language. The Mangle interfaces
+  are exactly that - a common language between libraries. Do you need
+  Audiere to load sounds from a weird archive format only implemented
+  for PhysFS, all channeled through the OGRE resource system? No
+  problem!
 
 - If you are creating a library that depends on a specific feature
   (such as sound), but you don't want to lock your users into any
   specific sound library. Mangle works as an abstraction that lets
   your users select their own implementation.
 
-- If you want to support multiple backends, or make it possible to
-  easily switch backends later. You can select backends at compile
-  time or even at runtime. For example you might want to switch to to
-  a commercial sound library at a later stage in development, or you
-  may want to use a different input library on console platforms than
-  on PC.
+- If you want to support multiple backends for your game/app, or want
+  to make it possible to easily switch backends later. You can select
+  backends at compile time or even at runtime. For example you might
+  want to switch to to a commercial sound library at a later stage in
+  development, or you may want to use a different input library on
+  console platforms than on PC.
 
 The Mangle implementations are extremely light-weight - often just one
 or two cpp/h pairs per module. You can plug them directly into your
@@ -105,15 +106,15 @@ Past and future
 ---------------
 
 Mangle started out as (and still is) a spin-off from OpenMW, another
-project I am personally working on ( http://openmw.sourceforge.net ).
-OpenMW is an attempt to recreate the engine behind the commercial game
+project I am personally working on ( http://openmw.com/ ). OpenMW is
+an attempt to recreate the engine behind the commercial game
 Morrowind, using only open source software.
 
 The projects are still tightly interlinked, and they will continue to
 be until OpenMW is finished. Most near-future work on Mangle will be
-focused chiefly on OpenMW at the moment. However I will gladly
-implement external contributions and suggestions that are not
-OpenMW-related.
+focused chiefly on OpenMW at the moment. However I will gladly include
+external contributions and suggestions that are not OpenMW-related if
+someone sends them to me.
 
 
 Conclusion
