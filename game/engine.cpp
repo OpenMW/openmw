@@ -56,7 +56,12 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 
 void OMW::Engine::setDataDir (const boost::filesystem::path& dataDir)
 {
-    mDataDir = boost::filesystem::system_complete (dataDir);
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+	mDataDir = boost::filesystem::system_complete (macBundlePath() + "/Contents/MacOS/" + dataDir.directory_string());
+#else
+    mDataDir = boost::filesystem::system_complete (dataDir);	
+#endif
+
 }
 
 // Set start cell name (only interiors for now)
@@ -85,14 +90,21 @@ void OMW::Engine::go()
     assert (!mMaster.empty());
     
     std::cout << "Hello, fellow traveler!\n";
-  
+	
     std::cout << "Your data directory for today is: " << mDataDir << "\n";
 
     std::cout << "Initializing OGRE\n";
+	
+	std::string plugin_cfg_location = "plugins.cfg";
+	std::string ogre_cfg_location = "ogre.cfg";
 
-    const char* plugCfg = "plugins.cfg";
+#ifdef OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+	std::cout << "[Apple]" << std::endl;
+	plugin_cfg_location = macBundlePath() + "/Contents/MacOS/" + plugin_cfg_location;
+	ogre_cfg_location =   macBundlePath() + "/Contents/MacOS/" + ogre_cfg_location;
+#endif
 
-    mOgre.configure(!isFile("ogre.cfg"), plugCfg, false);
+    mOgre.configure(!isFile(ogre_cfg_location.c_str()), plugin_cfg_location.c_str(), false);
     
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");

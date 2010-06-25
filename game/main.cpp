@@ -5,6 +5,7 @@
 
 #include <boost/program_options.hpp>
 
+#include "tools/fileops.hpp"
 #include "engine.hpp"
 
 using namespace std;
@@ -30,18 +31,18 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
   
     boost::program_options::variables_map variables;
     
-    std::ifstream configFile ("openmw.cfg");
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+	std::string configFilePath(macBundlePath() + "/Contents/MacOS/openmw.cfg");
+	std::ifstream configFile (configFilePath.c_str());
+#else
+	std::ifstream configFile ("openmw.cfg");
+#endif    
 
     boost::program_options::parsed_options valid_opts = 
       boost::program_options::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
 
     boost::program_options::store(valid_opts, variables);
     boost::program_options::notify(variables);
-	/*
-    boost::program_options::store (
-        boost::program_options::parse_command_line (argc, argv, desc), variables);
-    boost::program_options::notify (variables);
-	*/
 
     if (configFile.is_open())
         boost::program_options::store (
