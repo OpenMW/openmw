@@ -105,7 +105,6 @@ endif (APPLE)
 
 # Main executable
 add_executable(openmw
-    MACOSX_BUNDLE
     ${BSA} ${BSA_HEADER}
     ${TOOLS} ${TOOLS_HEADER}
     ${OGRE} ${OGRE_HEADER}
@@ -132,15 +131,26 @@ endif (APPLE)
 
 # Apple bundling
 if (APPLE)
-  set_source_files_properties(
-    ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-    ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
-    PROPERTIES
-    MACOSX_PACKAGE_LOCATION MacOS
-  )
-  set_target_properties(
-    openmw
-    PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_NAME "OpenMW"
-  )
+  set(MISC_FILES 
+		  ${CMAKE_SOURCE_DIR}/files/openmw.cfg
+		  ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
+		  ${CMAKE_SOURCE_DIR}/files/mac/ogre.cfg)
+install(TARGETS openmw 
+		BUNDLE DESTINATION .
+		RUNTIME DESTINATION ../MacOS 
+		COMPONENT Runtime)
+install(FILES ${MISC_FILES} DESTINATION ../MacOS)
+set(CPACK_GENERATOR "Bundle")
+set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
+set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
+set(CPACK_BUNDLE_NAME "OpenMW")
+set(CPACK_PACKAGE_VERSION "0.07")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "07")
+set(CPACK_PACKAGE_VERSION_PATCH "")
+
+include(CPack)
+
 endif (APPLE)
+
+
