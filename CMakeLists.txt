@@ -76,7 +76,8 @@ find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
 find_package(OIS REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
-    ${PLATFORM_INCLUDE_DIR})
+    ${PLATFORM_INCLUDE_DIR}
+    ${CMAKE_HOME_DIRECTORY}/extern/caelum/include )
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
 # Specify build paths
@@ -123,7 +124,8 @@ add_executable(openmw
 target_link_libraries(openmw
   ${OGRE_LIBRARIES}
   ${OIS_LIBRARIES}
-  ${Boost_LIBRARIES})
+  ${Boost_LIBRARIES}
+  caelum)
 
 if (APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
@@ -144,3 +146,5 @@ if (APPLE)
     MACOSX_BUNDLE_BUNDLE_NAME "OpenMW"
   )
 endif (APPLE)
+
+ADD_SUBDIRECTORY( extern/caelum )

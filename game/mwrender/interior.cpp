@@ -11,7 +11,7 @@ using namespace Ogre;
 using namespace ESMS;
 
 bool InteriorCellRender::lightConst = false;
-float InteriorCellRender::lightConstValue = 0.0;
+float InteriorCellRender::lightConstValue = 0.0f;
 
 bool InteriorCellRender::lightLinear = true;
 int InteriorCellRender::lightLinearMethod = 1;
@@ -141,7 +141,7 @@ void InteriorCellRender::configureFog()
   float low = 200;
 
   scene.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
-  scene.getCamera()->setFarClipDistance (high + 10);
+  scene.getCamera()->setFarClipDistance (high + 10 * 1000);
   scene.getViewport()->setBackgroundColour (color);
 }
                 

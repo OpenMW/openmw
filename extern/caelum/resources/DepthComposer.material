@@ -1,0 +1,302 @@
+//
+// This file is part of Caelum.
+// See http://www.ogre3d.org/wiki/index.php/Caelum 
+// 
+// Copyright (c) 2008 Caelum team. See Contributors.txt for details.
+// 
+// Caelum is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// Caelum is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with Caelum. If not, see <http://www.gnu.org/licenses/>.
+//
+
+fragment_program Caelum/DepthComposerFP_Dummy cg
+{
+	source DepthComposer.cg
+	entry_point MainFP
+	profiles ps_3_0 arbfp1
+	
+	default_params
+	{
+    }
+}
+
+fragment_program Caelum/DepthComposerFP_DebugDepthRender cg
+{
+	source DepthComposer.cg
+	entry_point MainFP
+	profiles ps_3_0 arbfp1
+	compile_arguments -DDEBUG_DEPTH_RENDER=1
+	
+	default_params
+	{
+        param_named invViewProjMatrix float4x4 0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0
+    }
+}
+
+fragment_program Caelum/DepthComposerFP_ExpGroundFog cg
+{
+	source DepthComposer.cg
+	entry_point MainFP
+	profiles ps_3_0 arbfp1
+	compile_arguments -DEXP_GROUND_FOG=1
+	
+	default_params
+	{
+        param_named invViewProjMatrix float4x4 0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0
+
+        param_named worldCameraPos float4 0 0 0 0
+
+        param_named groundFogDensity float 0.1
+        param_named groundFogVerticalDecay float 0.2
+        param_named groundFogBaseLevel float 5
+		param_named groundFogColour float4 1 0 1 1
+    }
+}
+
+fragment_program Caelum/DepthComposerFP_SkyDomeHaze cg
+{
+	source DepthComposer.cg
+	entry_point MainFP
+	profiles ps_3_0 arbfp1
+	compile_arguments -DSKY_DOME_HAZE=1 -DHAZE_DEPTH_TEXTURE=s2
+	
+	default_params
+	{
+        param_named invViewProjMatrix float4x4 0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0
+
+        param_named worldCameraPos float4 0 0 0 0
+
+        param_named sunDirection float3 0 1 0
+        param_named hazeColour float3 0.1 0.2 0.6
+    }
+}
+
+fragment_program Caelum/DepthComposerFP_SkyDomeHaze_ExpGroundFog cg
+{
+	source DepthComposer.cg
+	entry_point MainFP
+	profiles ps_3_0 arbfp1
+	compile_arguments -DEXP_GROUND_FOG=1 -DSKY_DOME_HAZE=1 -DHAZE_DEPTH_TEXTURE=s2
+	
+	default_params
+	{
+        param_named invViewProjMatrix float4x4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+        param_named worldCameraPos float4 0 0 0 0
+
+        param_named sunDirection float3 0 1 0
+        param_named hazeColour float3 0.1 0.2 0.6
+
+        param_named groundFogDensity float 0.1
+        param_named groundFogVerticalDecay float 0.2
+        param_named groundFogBaseLevel float 5
+		param_named groundFogColour float4 1 0 1 1
+    }
+}
+
+material Caelum/DepthRender
+{
+    technique Default
+    {
+        pass Main
+        {
+            // This is required!
+            depth_write on
+            depth_check on
+            
+            vertex_program_ref Caelum/DepthRenderVP
+            {
+            }
+
+            fragment_program_ref Caelum/DepthRenderFP
+            {
+            }
+        }
+    }
+}
+
+// Material for rendering depth of an alpha-rejection material.
+//
+// Unlike the regular Caelum/DepthRender this also outputs alpha from a texture.
+// The shaders (VP/FP) can be trivially used in more complex materials.
+material Caelum/DepthRenderAlphaRejection
+{
+    technique Default
+    {
+        pass Main
+        {
+            depth_write on
+            depth_check on
+            
+            vertex_program_ref Caelum/DepthRenderAlphaRejectionVP
+            {
+            }
+
+            fragment_program_ref Caelum/DepthRenderAlphaRejectionFP
+            {
+            }
+
+            alpha_rejection greater 128
+            texture_unit Main
+            {
+            }
+        }
+    }
+}
+
+material Caelum/DepthComposer_Dummy
+{
+	technique Default
+	{
+		pass Main
+		{	
+			vertex_program_ref Caelum/MinimalCompositorVP
+			{
+			}
+			
+			fragment_program_ref Caelum/DepthComposerFP_Dummy
+			{
+			}
+			
+			texture_unit Screen
+			{		
+			    filtering none	
+			}
+
+			texture_unit Depth
+			{		
+			    filtering none	
+			}
+		}
+	}
+}
+
+material Caelum/DepthComposer_DebugDepthRender
+{
+	technique Default
+	{
+		pass Main
+		{	
+			vertex_program_ref Caelum/MinimalCompositorVP
+			{
+			}
+			
+			fragment_program_ref Caelum/DepthComposerFP_DebugDepthRender
+			{
+			}
+			
+			texture_unit Screen
+			{
+			    filtering none		
+			}
+
+			texture_unit Depth
+			{			
+			    filtering none		
+			}
+		}
+	}
+}
+
+material Caelum/DepthComposer_ExpGroundFog
+{
+	technique Default
+	{
+		pass Main
+		{	
+			vertex_program_ref Caelum/MinimalCompositorVP
+			{
+			}
+			
+			fragment_program_ref Caelum/DepthComposerFP_ExpGroundFog
+			{
+			}
+			
+			texture_unit Screen
+			{			
+			    filtering none		
+			}
+
+			texture_unit Depth
+			{			
+			    filtering none		
+			}
+		}
+	}
+}
+
+material Caelum/DepthComposer_SkyDomeHaze
+{
+	technique Default
+	{
+		pass Main
+		{	
+			vertex_program_ref Caelum/MinimalCompositorVP
+			{
+			}
+			
+			fragment_program_ref Caelum/DepthComposerFP_SkyDomeHaze
+			{
+			}
+			
+			texture_unit Screen
+			{			
+			    filtering none		
+			}
+
+			texture_unit Depth
+			{			
+			    filtering none		
+			}
+
+			texture_unit AtmosphereDepth
+			{			
+				texture AtmosphereDepth.png 1d
+				tex_address_mode clamp
+			}
+		}
+	}
+}
+
+material Caelum/DepthComposer_SkyDomeHaze_ExpGroundFog
+{
+	technique Default
+	{
+		pass Main
+		{	
+			vertex_program_ref Caelum/MinimalCompositorVP
+			{
+			}
+			
+			fragment_program_ref Caelum/DepthComposerFP_SkyDomeHaze_ExpGroundFog
+			{
+			}
+			
+			texture_unit Screen
+			{			
+			    filtering none		
+			}
+
+			texture_unit Depth
+			{			
+			    filtering none		
+			}
+
+			texture_unit AtmosphereDepth
+			{			
+				texture AtmosphereDepth.png 1d
+			    filtering bilinear		
+				tex_address_mode clamp
+			}
+		}
+	}
+}

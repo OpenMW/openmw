@@ -1,0 +1,39 @@
+//
+// This file is part of Caelum.
+// See http://www.ogre3d.org/wiki/index.php/Caelum 
+// 
+// Copyright (c) 2008 Caelum team. See Contributors.txt for details.
+// 
+// Caelum is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// Caelum is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with Caelum. If not, see <http://www.gnu.org/licenses/>.
+//
+
+// Fixed function does not always work.
+// This is a the minimal compositor VP required.
+void MinimalCompositorVP
+(
+    in float4 in_pos : POSITION,
+    
+    uniform float4x4 worldviewproj_matrix,
+    
+    out float2 out_uv0 : TEXCOORD0,
+    out float4 out_pos : POSITION
+)
+{
+    // Use standard transform.
+    out_pos = mul(worldviewproj_matrix, in_pos);
+
+    // Convert to image-space
+    in_pos.xy = sign(in_pos.xy);
+    out_uv0 = (float2(in_pos.x, -in_pos.y) + 1.0f) * 0.5f;    
+}
