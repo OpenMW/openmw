@@ -73,7 +73,7 @@ namespace ESMS
     //RecListT<Land>        lands;
     //RecListT<LandTexture> landTexts;
     //RecListT<MagicEffect> magicEffects;
-    //RecListT<Script>      scripts;
+    ScriptListT<Script>      scripts;
     //RecListT<Skill>       skills;
     //RecListT<PathGrid>    pathgrids;
 
@@ -130,7 +130,7 @@ namespace ESMS
       recLists[REC_RACE] = &races;
       recLists[REC_REGN] = &regions;
       recLists[REC_REPA] = &repairs;
-      //recLists[REC_SCPT] = &scripts;
+      recLists[REC_SCPT] = &scripts;
       //recLists[REC_SKIL] = &skills;
       recLists[REC_SNDG] = &soundGens;
       recLists[REC_SOUN] = &sounds;
