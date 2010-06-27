@@ -63,7 +63,7 @@ namespace Compiler
             mLoc.mLiteral.clear();
             return true;
         }
-        else if (std::isdigit (c) || c=='-')
+        else if (std::isdigit (c))
         {
             bool cont = false;
 
