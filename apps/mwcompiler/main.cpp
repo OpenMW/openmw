@@ -17,7 +17,7 @@ int main (int argc, char **argv)
         Compiler::StreamErrorHandler errorHandler (std::cout);
         Compiler::FileParser parser (errorHandler, context);
         
-        std::ifstream file ("test.mwscript");
+        std::ifstream file (argc>1 ? argv[1] : "test.mwscript");
         Compiler::Scanner scanner (errorHandler, file);
         
         scanner.scan (parser);
