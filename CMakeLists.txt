@@ -65,11 +65,18 @@ set(MISC components/misc/stringops.cpp components/misc/fileops.cpp)
 set(MISC_HEADER components/misc/fileops.hpp components/misc/slice_array.hpp
     components/misc/stringops.hpp)
 source_group(misc FILES ${MISC} ${MISC_HEADER})    
-
-set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC})
-set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
-    ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER})
     
+set(COMPILER components/compiler/errorhandler.cpp
+    components/compiler/fileparser.cpp
+    components/compiler/parser.cpp components/compiler/scanner.cpp
+    components/compiler/streamerrorhandler.cpp)
+file(GLOB COMPILER_HEADER components/compiler/*.hpp)
+source_group(compiler FILES ${COMPILER} ${COMPILER_HEADER})    
+
+set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC} ${COMPILER})
+set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
+    ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER} ${COMPILER_HEADER})
+
 # source directory: libs
 
 set(MANGLE_VFS libs/mangle/vfs/servers/ogre_vfs.cpp)
@@ -163,7 +170,7 @@ endif (APPLE)
 option(BUILD_MWCOMPILER "build standalone Morrowind script compiler" ON)
 
 if (BUILD_MWCOMPILER)
-set(TOOLS_MWCOMPILER apps/mwcompiler/main.cpp)
+set(TOOLS_MWCOMPILER ${COMPILER} apps/mwcompiler/main.cpp)
 
 add_executable(mwcompiler ${TOOLS_MWCOMPILER})
 endif()
