@@ -158,3 +158,13 @@ if (APPLE)
     MACOSX_BUNDLE_BUNDLE_NAME "OpenMW"
   )
 endif (APPLE)
+
+# Tools
+option(BUILD_MWCOMPILER "build standalone Morrowind script compiler" ON)
+
+if (BUILD_MWCOMPILER)
+set(TOOLS_MWCOMPILER apps/mwcompiler/main.cpp)
+
+add_executable(mwcompiler ${TOOLS_MWCOMPILER})
+endif()
+
