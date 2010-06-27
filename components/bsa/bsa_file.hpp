@@ -25,9 +25,8 @@
 #define _BSA_FILE_H_
 
 #include <libs/mangle/stream/stream.hpp>
-
-#include <stdint.h>
-#include <strings.h>
+#include <libs/platform/stdint.h>
+#include <libs/platform/strings.h>
 #include <string>
 #include <vector>
 #include <map>

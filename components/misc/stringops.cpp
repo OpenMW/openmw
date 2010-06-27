@@ -1,7 +1,7 @@
 #include "stringops.hpp"
 
 #include <string.h>
-#include <strings.h>
+#include <libs/platform/strings.h>
 
 bool begins(const char* str1, const char* str2)
 {

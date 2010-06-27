@@ -2,7 +2,7 @@
 #define _ESM_READER_H
 
 #include <string>
-#include <stdint.h>
+#include <libs/platform/stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <vector>

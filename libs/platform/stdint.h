@@ -2,10 +2,12 @@
 #ifndef _STDINT_WRAPPER_H
 #define _STDINT_WRAPPER_H
 
-typedef int int32_t;
-typedef unsigned int uint32_t;
+#include <boost/cstdint.hpp>
 
-typedef long long int64_t;
-typedef unsigned long long uint64_t;
+// Pull the boost names into the global namespace for convenience
+using boost::int32_t;
+using boost::uint32_t;
+using boost::int64_t;
+using boost::uint64_t;
 
 #endif
