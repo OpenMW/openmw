@@ -386,6 +386,9 @@ namespace Compiler
         else
             return false;
 
+        if (special==S_newline)
+            mLoc.mLiteral = "<newline>"; 
+            
         TokenLoc loc (mLoc);
         mLoc.mLiteral.clear();
 

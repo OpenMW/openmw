@@ -8,6 +8,7 @@
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/fileparser.hpp>
 #include <components/compiler/context.hpp>
+#include <components/compiler/exception.hpp>
 
 int main (int argc, char **argv)
 {
@@ -17,12 +18,42 @@ int main (int argc, char **argv)
         Compiler::StreamErrorHandler errorHandler (std::cout);
         Compiler::FileParser parser (errorHandler, context);
         
-        std::ifstream file (argc>1 ? argv[1] : "test.mwscript");
-        Compiler::Scanner scanner (errorHandler, file);
+        try
+        {
+            std::string filename = argc>1 ? argv[1] : "test.mwscript";
         
-        scanner.scan (parser);
+            std::ifstream file (filename.c_str());
+            
+            if (!file.is_open())
+            {
+                std::cout << "can't open script file: " << filename << std::endl;
+                return 1;
+            }
+            
+            Compiler::Scanner scanner (errorHandler, file);
         
-        std::cout << "parsed script: " << parser.getName() << std::endl;
+            scanner.scan (parser);
+        }
+        catch (const Compiler::SourceException&)
+        {
+            // ignore exception (problem has already been reported to the user)
+        }
+        
+        if (errorHandler.countErrors() || errorHandler.countWarnings())
+        {
+            std::cout
+                << errorHandler.countErrors() << " error(s), "
+                << errorHandler.countWarnings() << " warning(s)" << std::endl
+                << std::endl;
+        }
+        
+        if (errorHandler.isGood())
+        {
+            std::cout << "parsed script: " << parser.getName() << std::endl;
+            return 0;
+        }
+        
+        return 1;
     }
     catch (const std::exception &e)
     {
