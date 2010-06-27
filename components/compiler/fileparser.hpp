@@ -5,19 +5,25 @@
 
 namespace Compiler
 {
+    // Top-level parser, to be used for global scripts, local scripts and targeted scripts
+    
     class FileParser : public Parser
     {
+            enum State
+            {
+                BeginState, NameState, BeginCompleteState, EndState, EndNameState,
+                EndCompleteState
+            };
+            
+            State mState;
+            std::string mName;
+            
         public:
         
             FileParser (ErrorHandler& errorHandler, Context& context);
 
-            virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
-            ///< Handle an int token.
-            /// \return fetch another token?
-
-            virtual bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner);
-            ///< Handle a double token.
-            /// \return fetch another token?
+            std::string getName() const;
+            ///< Return script name.
 
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);
@@ -34,6 +40,9 @@ namespace Compiler
 
             virtual void parseEOF (Scanner& scanner);
             ///< Handle EOF token.    
+            
+            void reset();
+            ///< Reset parser to clean state.
     };
 }
 

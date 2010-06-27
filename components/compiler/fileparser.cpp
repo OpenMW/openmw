@@ -3,54 +3,90 @@
 #include <iostream>
 
 #include "tokenloc.hpp"
-
-
 #include "scanner.hpp"
 
 namespace Compiler
 {
     FileParser::FileParser (ErrorHandler& errorHandler, Context& context)
-    : Parser (errorHandler, context)
+    : Parser (errorHandler, context), mState (BeginState)
     {}
 
-    bool FileParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
+    std::string FileParser::getName() const
     {
-        std::cout << "integer: " << value << std::endl;
-        return true;
-    }
-
-    bool FileParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
-    {
-        std::cout << "float: " << value << std::endl;
-        return true;
+        return mName;
     }
 
     bool FileParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        std::cout << "name: " << name << std::endl;
-        return true;
+        if (mState==NameState)
+        {
+            mName = name;
+            mState = BeginCompleteState;
+            return true;
+        }
+        
+        if (mState==EndNameState)
+        {
+            // optional repeated name after end statement
+            if (mName!=name)
+                reportWarning ("Names for script " + mName + " do not match", loc);
+            
+            mState = EndCompleteState;
+            return true;
+        }
+        
+        return Parser::parseName (name, loc, scanner);
     }
 
     bool FileParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
-        std::cout << "keyword: " << loc.mLiteral << std::endl;
-        return true;
+        if (mState==BeginState && keyword==Scanner::K_begin)
+        {
+            mState = NameState;
+            return true;
+        }
+        
+        if (mState==EndState && keyword==Scanner::K_end)
+        {
+            mState = EndNameState;
+            return true;
+        }
+        
+        return Parser::parseKeyword (keyword, loc, scanner);
     }
 
     bool FileParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
         if (code==Scanner::S_newline)
-            std::cout << "newline" << std::endl;
-        else
-            std::cout << "special: " << loc.mLiteral << std::endl;
+        {
+            if (mState==BeginCompleteState)
+            {
+                // TODO: add script parser here
+                mState = EndState;
+                return true;
+            }
             
-        return true;
+            if (mState==EndCompleteState || mState==EndNameState)
+            {
+                // we are done here -> ignore the rest of the script
+                return false;
+            }
+        }
+        
+        return Parser::parseSpecial (code, loc, scanner);
     }
 
     void FileParser::parseEOF (Scanner& scanner)
     {
-        std::cout << "end of file" << std::endl;
+        if (mState!=EndNameState && mState!=EndCompleteState)
+            Parser::parseEOF (scanner);
+    }
+    
+    void FileParser::reset()
+    {
+        mState = BeginState;
+        mName.clear();
     }
 }
 

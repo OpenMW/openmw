@@ -21,6 +21,8 @@ int main (int argc, char **argv)
         Compiler::Scanner scanner (errorHandler, file);
         
         scanner.scan (parser);
+        
+        std::cout << "parsed script: " << parser.getName() << std::endl;
     }
     catch (const std::exception &e)
     {
