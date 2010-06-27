@@ -15,36 +15,40 @@ using namespace std;
 
 bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 {
-    boost::program_options::options_description desc (
+    // Create a local alias for brevity
+    namespace bpo = boost::program_options;    
+
+    bpo::options_description desc (
         "Syntax: openmw <options>\nAllowed options");
 
     desc.add_options()
         ("help", "print help message")
-        ("data", boost::program_options::value<std::string>()->default_value ("data"),
+        ("data", bpo::value<std::string>()->default_value ("data"),
             "set data directory")
-        ("start", boost::program_options::value<std::string>()->default_value ("Beshara"),
+        ("start", bpo::value<std::string>()->default_value ("Beshara"),
             "set initial cell (only interior cells supported at the moment")
-        ("master", boost::program_options::value<std::string>()->default_value ("Morrowind"),
+        ("master", bpo::value<std::string>()->default_value ("Morrowind"),
             "master file")
+        ("enablesky", "enable rendering of the sky")
         ;
   
-    boost::program_options::variables_map variables;
+    bpo::variables_map variables;
     
     std::ifstream configFile ("openmw.cfg");
 
-    boost::program_options::store (
-        boost::program_options::parse_command_line (argc, argv, desc), variables);
-    boost::program_options::notify (variables);
+    bpo::store ( bpo::parse_command_line (argc, argv, desc), variables );
+    bpo::notify (variables);
 
     if (configFile.is_open())
-        boost::program_options::store (
-            boost::program_options::parse_config_file (configFile, desc), variables);
+        bpo::store ( bpo::parse_config_file (configFile, desc), variables);
 
     if (variables.count ("help"))
     {
         std::cout << desc << std::endl;
         return false;
     }
+
+    engine.enableSky(!!variables.count("enablesky"));
 
     engine.setDataDir (variables["data"].as<std::string>());
     engine.setCell (variables["start"].as<std::string>());

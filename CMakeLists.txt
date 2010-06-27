@@ -12,10 +12,17 @@ set(GAME apps/openmw/main.cpp apps/openmw/engine.cpp)
 set(GAME_HEADER apps/openmw/mwinput/inputmanager.hpp apps/openmw/engine.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
-set(GAMEREND apps/openmw/mwrender/mwscene.cpp apps/openmw/mwrender/cell.cpp
-    apps/openmw/mwrender/interior.cpp)
-set(GAMEREND_HEADER apps/openmw/mwrender/cell.hpp apps/openmw/mwrender/mwscene.hpp
-    apps/openmw/mwrender/interior.hpp apps/openmw/mwrender/playerpos.hpp)
+set(GAMEREND 
+    apps/openmw/mwrender/mwscene.cpp 
+    apps/openmw/mwrender/cell.cpp
+    apps/openmw/mwrender/interior.cpp
+    apps/openmw/mwrender/sky.cpp)
+set(GAMEREND_HEADER 
+    apps/openmw/mwrender/cell.hpp 
+    apps/openmw/mwrender/mwscene.hpp
+    apps/openmw/mwrender/interior.hpp 
+    apps/openmw/mwrender/playerpos.hpp
+    apps/openmw/mwrender/sky.hpp)
 source_group(game_renderer FILES ${GAMEREND} ${GAMEREND_HEADER})    
 
 # set(GAMEINPUT)

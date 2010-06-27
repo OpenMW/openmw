@@ -7,6 +7,11 @@
 
 #include "apps/openmw/mwrender/mwscene.hpp"
 
+namespace MWRender
+{
+    class SkyManager;
+}
+
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
@@ -17,6 +22,9 @@ namespace OMW
             Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;
+            
+            bool                  mEnableSky;
+            MWRender::SkyManager* mpSkyManager;
 
             // not implemented
             Engine (const Engine&);
@@ -46,6 +54,9 @@ namespace OMW
             /// - If the given name does not have an extension, ".esm" is added automatically
             /// - Currently OpenMW only supports one master at the same time.
             void addMaster (const std::string& master);
+
+            /// Enables rendering of the sky (off by default).
+            void enableSky (bool bEnable);
 
             /// Initialise and enter main loop.
             void go();

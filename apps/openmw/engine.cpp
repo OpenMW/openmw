@@ -12,8 +12,13 @@
 #include "apps/openmw/mwrender/interior.hpp"
 #include "mwinput/inputmanager.hpp"
 #include "apps/openmw/mwrender/playerpos.hpp"
+#include "apps/openmw/mwrender/sky.hpp"
 
-OMW::Engine::Engine() {}
+OMW::Engine::Engine() 
+    : mEnableSky   (false)
+    , mpSkyManager (NULL)
+{
+}
 
 // adjust name and load bsa
 
@@ -76,6 +81,13 @@ void OMW::Engine::addMaster (const std::string& master)
     mMaster = master;
 }
 
+// Enables sky rendering
+//
+void OMW::Engine::enableSky (bool bEnable)
+{
+    mEnableSky = bEnable;
+}
+
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -125,6 +137,10 @@ void OMW::Engine::go()
     // Used to control the player camera and position
     MWRender::PlayerPos player(scene.getCamera());
 
+    // Optionally enable the sky
+    if (mEnableSky)
+        mpSkyManager = MWRender::SkyManager::create(mOgre.getWindow(), scene.getCamera());
+
     // This connects the cell data with the rendering scene.
     MWRender::InteriorCellRender rend(cell, scene);
 
@@ -140,6 +156,8 @@ void OMW::Engine::go()
 
     // Start the main rendering loop
     mOgre.start();
+
+    delete mpSkyManager;
 
     std::cout << "\nThat's all for now!\n";
 }
