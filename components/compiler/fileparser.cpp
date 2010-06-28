@@ -8,7 +8,9 @@
 namespace Compiler
 {
     FileParser::FileParser (ErrorHandler& errorHandler, Context& context)
-    : Parser (errorHandler, context), mState (BeginState)
+    : Parser (errorHandler, context), 
+      mScriptParser (errorHandler, context, true),
+      mState (BeginState)
     {}
 
     std::string FileParser::getName() const
@@ -47,12 +49,6 @@ namespace Compiler
             return true;
         }
         
-        if (mState==EndState && keyword==Scanner::K_end)
-        {
-            mState = EndNameState;
-            return true;
-        }
-        
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
@@ -62,8 +58,12 @@ namespace Compiler
         {
             if (mState==BeginCompleteState)
             {
-                // TODO: add script parser here
-                mState = EndState;
+                // parse the script body
+                mScriptParser.reset();
+                
+                scanner.scan (mScriptParser);
+                
+                mState = EndNameState;
                 return true;
             }
             
@@ -87,6 +87,7 @@ namespace Compiler
     {
         mState = BeginState;
         mName.clear();
+        mScriptParser.reset();
     }
 }
 

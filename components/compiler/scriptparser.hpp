@@ -1,32 +1,21 @@
-#ifndef COMPILER_FILEPARSER_H_INCLUDED
-#define COMPILER_FILEPARSER_H_INCLUDED
+#ifndef COMPILER_SCRIPTPARSER_H_INCLUDED
+#define COMPILER_SCRIPTPARSER_H_INCLUDED
 
 #include "parser.hpp"
-#include "scriptparser.hpp"
 
 namespace Compiler
 {
-    // Top-level parser, to be used for global scripts, local scripts and targeted scripts
+    // Script parser, to be used in dialogue scripts and as part of FileParser
     
-    class FileParser : public Parser
+    class ScriptParser : public Parser
     {
-            enum State
-            {
-                BeginState, NameState, BeginCompleteState, EndNameState,
-                EndCompleteState
-            };
-            
-            ScriptParser mScriptParser;
-            State mState;
-            std::string mName;
+            bool mEnd;
             
         public:
         
-            FileParser (ErrorHandler& errorHandler, Context& context);
-
-            std::string getName() const;
-            ///< Return script name.
-
+            /// \param end of script is marked by end keyword.
+            ScriptParser (ErrorHandler& errorHandler, Context& context, bool end = false);
+    
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);
             ///< Handle a name token.
@@ -41,7 +30,7 @@ namespace Compiler
             /// \return fetch another token?
 
             virtual void parseEOF (Scanner& scanner);
-            ///< Handle EOF token.    
+            ///< Handle EOF token.  
             
             void reset();
             ///< Reset parser to clean state.
@@ -49,3 +38,4 @@ namespace Compiler
 }
 
 #endif
+
