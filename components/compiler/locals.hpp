@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <iosfwd>
 
 namespace Compiler
 {
@@ -24,6 +25,9 @@ namespace Compiler
     
             char getType (const std::string& name) const;
             ///< 's': short, 'l': long, 'f': float, ' ': does not exist.
+            
+            void write (std::ostream& localFile) const;
+            ///< write declarations to file.
             
             void declare (char type, const std::string& name);
             ///< declares a variable.

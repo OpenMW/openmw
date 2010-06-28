@@ -60,6 +60,10 @@ int main (int argc, char **argv)
             codeFile.write (reinterpret_cast<const char *> (&code[0]),
                 code.size()*sizeof (Interpreter::Type_Code));
             
+            std::ofstream localFile ((filename + ".locals").c_str());
+            
+            parser.getLocals().write (localFile);
+            
             return 0;
         }
         

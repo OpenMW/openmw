@@ -31,6 +31,9 @@ namespace Compiler
 
             void getCode (std::vector<Interpreter::Type_Code>& code) const;
             ///< store generated code in \æ code.
+            
+            const Locals& getLocals() const;
+            ///< get local variable declarations.
 
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);

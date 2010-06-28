@@ -22,6 +22,11 @@ namespace Compiler
     {
         mScriptParser.getCode (code);
     }
+    
+    const Locals& FileParser::getLocals() const
+    {
+        return mLocals;
+    }
 
     bool FileParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)

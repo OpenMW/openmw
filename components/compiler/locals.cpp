@@ -4,6 +4,8 @@
 #include <cassert>
 #include <stdexcept>
 #include <algorithm>
+#include <ostream>
+#include <iterator>
 
 namespace Compiler
 {
@@ -50,6 +52,21 @@ namespace Compiler
             return 'f';
         
         return ' ';
+    }
+    
+    void Locals::write (std::ostream& localFile) const
+    {
+        localFile
+            << get ('s').size() << ' '
+            << get ('l').size() << ' '
+            << get ('f').size() << std::endl;
+            
+        std::copy (get ('s').begin(), get ('s').end(),
+            std::ostream_iterator<std::string> (localFile, " "));
+        std::copy (get ('l').begin(), get ('l').end(),
+            std::ostream_iterator<std::string> (localFile, " "));
+        std::copy (get ('f').begin(), get ('f').end(),
+            std::ostream_iterator<std::string> (localFile, " "));
     }
     
     void Locals::declare (char type, const std::string& name)
