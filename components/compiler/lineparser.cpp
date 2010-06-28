@@ -7,11 +7,12 @@
 #include "context.hpp"
 #include "errorhandler.hpp"
 #include "skipparser.hpp"
+#include "locals.hpp"
 
 namespace Compiler
 {
-    LineParser::LineParser (ErrorHandler& errorHandler, Context& context)
-    : Parser (errorHandler, context), mState (BeginState)
+    LineParser::LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals)
+    : Parser (errorHandler, context), mLocals (locals), mState (BeginState)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -37,7 +38,20 @@ namespace Compiler
                 return false;
             }
             
+            char type = mLocals.getType (name);
+            
+            if (type!=' ')
+            {
+                getErrorHandler().error ("can't re-declare local variable", loc);
+                SkipParser skip (getErrorHandler(), getContext());
+                scanner.scan (skip);
+                return false;
+            }
+            
             std::cout << "declaring local variable: " << name << std::endl;
+            mLocals.declare (mState==ShortState ? 's' : (mState==LongState ? 'l' : 'f'),
+                name);
+            
             mState = EndState;
             return true;
         }

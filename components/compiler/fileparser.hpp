@@ -3,6 +3,7 @@
 
 #include "parser.hpp"
 #include "scriptparser.hpp"
+#include "locals.hpp"
 
 namespace Compiler
 {
@@ -19,6 +20,7 @@ namespace Compiler
             ScriptParser mScriptParser;
             State mState;
             std::string mName;
+            Locals mLocals;
             
         public:
         

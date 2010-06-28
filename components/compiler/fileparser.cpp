@@ -9,7 +9,7 @@ namespace Compiler
 {
     FileParser::FileParser (ErrorHandler& errorHandler, Context& context)
     : Parser (errorHandler, context), 
-      mScriptParser (errorHandler, context, true),
+      mScriptParser (errorHandler, context, mLocals, true),
       mState (BeginState)
     {}
 
@@ -88,6 +88,7 @@ namespace Compiler
         mState = BeginState;
         mName.clear();
         mScriptParser.reset();
+        mLocals.clear();
     }
 }
 

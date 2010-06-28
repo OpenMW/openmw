@@ -6,17 +6,21 @@
 
 namespace Compiler
 {
+    class Locals;
+
     // Script parser, to be used in dialogue scripts and as part of FileParser
     
     class ScriptParser : public Parser
     {
             LineParser mLineParser;
+            Locals& mLocals;
             bool mEnd;
             
         public:
         
             /// \param end of script is marked by end keyword.
-            ScriptParser (ErrorHandler& errorHandler, Context& context, bool end = false);
+            ScriptParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+                bool end = false);
     
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);

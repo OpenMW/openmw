@@ -5,8 +5,10 @@
 
 namespace Compiler
 {
-    ScriptParser::ScriptParser (ErrorHandler& errorHandler, Context& context, bool end)
-    : Parser (errorHandler, context), mLineParser (errorHandler, context), mEnd (end)
+    ScriptParser::ScriptParser (ErrorHandler& errorHandler, Context& context,
+        Locals& locals, bool end)
+    : Parser (errorHandler, context), mLineParser (errorHandler, context, locals),
+        mLocals (locals), mEnd (end)
     {}
 
     bool ScriptParser::parseName (const std::string& name, const TokenLoc& loc,

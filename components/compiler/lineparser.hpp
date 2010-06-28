@@ -5,6 +5,8 @@
 
 namespace Compiler
 {
+    class Locals;
+    
     /// \brief Line parser, to be used in console scripts and as part of ScriptParser
     
     class LineParser : public Parser
@@ -15,12 +17,13 @@ namespace Compiler
                 ShortState, LongState, FloatState,
                 EndState
             };
-            
+
+            Locals& mLocals;            
             State mState;
     
         public:
         
-            LineParser (ErrorHandler& errorHandler, Context& context);
+            LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals);
     
             virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
             ///< Handle an int token.
