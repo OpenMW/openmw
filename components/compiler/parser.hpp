@@ -56,7 +56,7 @@ namespace Compiler
             /// - Default-implementation: Report an error.
 
             virtual bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner);
-            ///< Handle a double token.
+            ///< Handle a float token.
             /// \return fetch another token?
             ///
             /// - Default-implementation: Report an error.

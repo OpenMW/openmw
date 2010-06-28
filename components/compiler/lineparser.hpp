@@ -1,23 +1,26 @@
-#ifndef COMPILER_SCRIPTPARSER_H_INCLUDED
-#define COMPILER_SCRIPTPARSER_H_INCLUDED
+#ifndef COMPILER_LINEPARSER_H_INCLUDED
+#define COMPILER_LINEPARSER_H_INCLUDED
 
 #include "parser.hpp"
-#include "lineparser.hpp"
 
 namespace Compiler
 {
-    // Script parser, to be used in dialogue scripts and as part of FileParser
+    /// \brief Line parser, to be used in console scripts and as part of ScriptParser
     
-    class ScriptParser : public Parser
+    class LineParser : public Parser
     {
-            LineParser mLineParser;
-            bool mEnd;
-            
         public:
         
-            /// \param end of script is marked by end keyword.
-            ScriptParser (ErrorHandler& errorHandler, Context& context, bool end = false);
+            LineParser (ErrorHandler& errorHandler, Context& context);
     
+            virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
+            ///< Handle an int token.
+            /// \return fetch another token?
+
+            virtual bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner);
+            ///< Handle a float token.
+            /// \return fetch another token?
+
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);
             ///< Handle a name token.
@@ -30,14 +33,10 @@ namespace Compiler
             virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
             ///< Handle a special character token.
             /// \return fetch another token?
-
-            virtual void parseEOF (Scanner& scanner);
-            ///< Handle EOF token.  
             
             void reset();
-            ///< Reset parser to clean state.
+            ///< Reset parser to clean state.            
     };
 }
 
 #endif
-

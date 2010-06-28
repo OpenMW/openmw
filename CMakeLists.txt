@@ -68,6 +68,7 @@ source_group(misc FILES ${MISC} ${MISC_HEADER})
     
 set(COMPILER components/compiler/errorhandler.cpp
     components/compiler/fileparser.cpp components/compiler/scriptparser.cpp
+    components/compiler/lineparser.cpp
     components/compiler/parser.cpp components/compiler/scanner.cpp
     components/compiler/streamerrorhandler.cpp)
 file(GLOB COMPILER_HEADER components/compiler/*.hpp)

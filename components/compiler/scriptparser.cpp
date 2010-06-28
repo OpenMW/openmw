@@ -6,13 +6,17 @@
 namespace Compiler
 {
     ScriptParser::ScriptParser (ErrorHandler& errorHandler, Context& context, bool end)
-    : Parser (errorHandler, context), mEnd (end)
+    : Parser (errorHandler, context), mLineParser (errorHandler, context), mEnd (end)
     {}
 
     bool ScriptParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        return Parser::parseName (name, loc, scanner);
+        mLineParser.reset();
+        if (mLineParser.parseName (name, loc, scanner))
+            scanner.scan (mLineParser);
+        
+        return true;
     }
 
     bool ScriptParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
@@ -22,7 +26,11 @@ namespace Compiler
             return false;
         }
     
-        return Parser::parseKeyword (keyword, loc, scanner);
+        mLineParser.reset();
+        if (mLineParser.parseKeyword (keyword, loc, scanner))
+            scanner.scan (mLineParser);
+            
+        return true;
     }
 
     bool ScriptParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
@@ -30,7 +38,11 @@ namespace Compiler
         if (code==Scanner::S_newline) // empty line
             return true;
             
-        return Parser::parseSpecial (code, loc, scanner);
+        mLineParser.reset();
+        if (mLineParser.parseSpecial (code, loc, scanner))
+            scanner.scan (mLineParser);
+            
+        return true;
     }
 
     void ScriptParser::parseEOF (Scanner& scanner)
@@ -41,7 +53,7 @@ namespace Compiler
 
     void ScriptParser::reset()
     {
-    
+        mLineParser.reset();
     }
 }
 
