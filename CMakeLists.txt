@@ -76,10 +76,12 @@ set(COMPILER components/compiler/errorhandler.cpp
 file(GLOB COMPILER_HEADER components/compiler/*.hpp)
 source_group(compiler FILES ${COMPILER} ${COMPILER_HEADER})    
 
+set(INTERPRETER components/interpreter/runtime.cpp components/interpreter/interpreter.cpp)
 file(GLOB INTERPRETER_HEADER components/interpreter/*.hpp)
-source_group(interpreter FILES ${INTERPRETER_HEADER})    
+source_group(interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 
-set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC} ${COMPILER})
+set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC} ${COMPILER}
+    ${INTERPRETER})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
     ${INTERPRETER_HEADER})
@@ -183,3 +185,10 @@ set(TOOLS_MWCOMPILER ${COMPILER} apps/mwcompiler/main.cpp apps/mwcompiler/contex
 add_executable(mwcompiler ${TOOLS_MWCOMPILER})
 endif()
 
+option(BUILD_MWINTERPRETER "build standalone Morrowind script code interpreter" ON)
+
+if (BUILD_MWINTERPRETER)
+set(TOOLS_MWINTERPRETER ${INTERPRETER} apps/mwinterpreter/main.cpp)
+
+add_executable(mwinterpreter ${TOOLS_MWINTERPRETER})
+endif()
