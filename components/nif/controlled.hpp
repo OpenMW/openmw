@@ -30,8 +30,9 @@ namespace Nif
 {
 
 /// Anything that has a controller
-struct Controlled : Extra
+class Controlled : public Extra
 {
+public:
   ControllerPtr controller;
 
   void read(NIFFile *nif)
@@ -42,8 +43,9 @@ struct Controlled : Extra
 };
 
 /// Has name, extra-data and controller
-struct Named : Controlled
+class Named : public Controlled
 {
+public:
   SString name;
 
   void read(NIFFile *nif)
@@ -54,8 +56,9 @@ struct Named : Controlled
 };
 typedef Named NiSequenceStreamHelper;
 
-struct NiParticleGrowFade : Controlled
+class NiParticleGrowFade : public Controlled
 {
+public:
   void read(NIFFile *nif)
   {
     Controlled::read(nif);
@@ -65,8 +68,9 @@ struct NiParticleGrowFade : Controlled
   }
 };
 
-struct NiParticleColorModifier : Controlled
+class NiParticleColorModifier : public Controlled
 {
+public:
   NiColorDataPtr data;
 
   void read(NIFFile *nif)
@@ -76,8 +80,9 @@ struct NiParticleColorModifier : Controlled
   }
 };
 
-struct NiGravity : Controlled
+class NiGravity : public Controlled
 {
+public:
   void read(NIFFile *nif)
   {
     Controlled::read(nif);
@@ -88,8 +93,9 @@ struct NiGravity : Controlled
 };
 
 // NiPinaColada
-struct NiPlanarCollider : Controlled
+class NiPlanarCollider : public Controlled
 {
+public:
   void read(NIFFile *nif)
   {
     Controlled::read(nif);
@@ -99,8 +105,9 @@ struct NiPlanarCollider : Controlled
   }
 };
 
-struct NiParticleRotation : Controlled
+class NiParticleRotation : public Controlled
 {
+public:
   void read(NIFFile *nif)
   {
     Controlled::read(nif);

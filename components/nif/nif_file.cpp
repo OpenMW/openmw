@@ -23,7 +23,7 @@
 
 #include "nif_file.hpp"
 #include "record.hpp"
-#include "components/misc/stringops.hpp"
+#include "libs/platform/stringops.hpp"
 
 #include "extra.hpp"
 #include "controlled.hpp"
@@ -44,6 +44,8 @@ using namespace Nif;
 
 void NIFFile::parse()
 {
+  using namespace OMW::Platform;
+
   // Check the header string
   const char* head = getString(40);
   if(!begins(head, "NetImmerse File Format"))

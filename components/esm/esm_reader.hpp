@@ -12,7 +12,7 @@
 #include <libs/mangle/stream/stream.hpp>
 #include <libs/mangle/stream/servers/file_stream.hpp>
 #include <libs/mangle/tools/str_exception.hpp>
-#include "components/misc/stringops.hpp"
+#include "libs/platform/stringops.hpp"
 
 #ifdef __APPLE__
 // need our own implementation of strnlen
@@ -218,6 +218,8 @@ public:
   /// parse the header.
   void openRaw(Mangle::Stream::StreamPtr _esm, const std::string &name)
   {
+    using namespace OMW::Platform;
+    
     close();
     esm = _esm;
     c.filename = name;

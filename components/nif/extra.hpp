@@ -35,15 +35,17 @@ namespace Nif
     themselves decend from the Extra class, and all the extra data
     connected to an object form a linked list
 */
-struct Extra : Record
+class Extra : public Record
 {
+public:
   ExtraPtr extra;
 
   void read(NIFFile *nif) { extra.read(nif); }
 };
 
-struct NiVertWeightsExtraData : Extra
+class NiVertWeightsExtraData : public Extra
 {
+public:
   void read(NIFFile *nif)
   {
     Extra::read(nif);
@@ -57,8 +59,9 @@ struct NiVertWeightsExtraData : Extra
   }
 };
 
-struct NiTextKeyExtraData : Extra
+class NiTextKeyExtraData : public Extra
 {
+public:
   struct TextKey
   {
     float time;
@@ -83,8 +86,9 @@ struct NiTextKeyExtraData : Extra
   }
 };
 
-struct NiStringExtraData : Extra
+class NiStringExtraData : public Extra
 {
+public:
   /* Two known meanings:
      "MRK" - marker, only visible in the editor, not rendered in-game
      "NCO" - no collision

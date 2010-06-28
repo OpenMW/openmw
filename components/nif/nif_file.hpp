@@ -28,7 +28,7 @@
 #include <libs/mangle/stream/filters/buffer_stream.hpp>
 #include <libs/mangle/tools/str_exception.hpp>
 
-#include "../misc/slice_array.hpp"
+#include "libs/platform/slice_array.hpp"
 
 #include <vector>
 #include <string>

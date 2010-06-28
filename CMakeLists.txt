@@ -68,16 +68,13 @@ set(INPUT_HEADER components/engine/input/oismanager.hpp components/engine/input/
     components/engine/input/dispatcher.hpp components/engine/input/poller.hpp)
 source_group(input FILES ${INPUT} ${INPUT_HEADER})
 
-set(MISC components/misc/stringops.cpp components/misc/fileops.cpp)
-set(MISC_HEADER components/misc/fileops.hpp components/misc/slice_array.hpp
-    components/misc/stringops.hpp)
-source_group(misc FILES ${MISC} ${MISC_HEADER})    
-
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER})
     
 # source directory: libs
+
+ADD_SUBDIRECTORY( libs/platform )
 
 set(MANGLE_VFS libs/mangle/vfs/servers/ogre_vfs.cpp)
 source_group(mangle_vfs FILES ${MANGLE_VFS})
@@ -148,6 +145,7 @@ target_link_libraries(openmw
   ${OGRE_LIBRARIES}
   ${OIS_LIBRARIES}
   ${Boost_LIBRARIES}
+  platform
   caelum)
 
 if (APPLE)

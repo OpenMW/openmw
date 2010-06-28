@@ -29,8 +29,10 @@
 namespace Nif
 {
 
-struct NiSourceTexture : Named
+class NiSourceTexture : public Named
 {
+public:
+
   // Is this an external (references a separate texture file) or
   // internal (data is inside the nif itself) texture?
   bool external;
@@ -65,7 +67,7 @@ struct NiSourceTexture : Named
   {
     Named::read(nif);
 
-    external = nif->getByte();
+    external = !!nif->getByte();
 
     if(external) filename = nif->getString();
     else
@@ -83,8 +85,9 @@ struct NiSourceTexture : Named
 };
 
 // Common ancestor for several data classes
-struct ShapeData : Record
+class ShapeData : public Record
 {
+public:
   FloatArray vertices, normals, colors, uvlist;
   const Vector *center;
   float radius;
@@ -116,8 +119,9 @@ struct ShapeData : Record
   }
 };
 
-struct NiTriShapeData : ShapeData
+class NiTriShapeData : public ShapeData
 {
+public:
   // Triangles, three vertex indices per triangle
   SliceArray<short> triangles;
 
@@ -150,8 +154,9 @@ struct NiTriShapeData : ShapeData
   }
 };
 
-struct NiAutoNormalParticlesData : ShapeData
+class NiAutoNormalParticlesData : public ShapeData
 {
+public:
   int activeCount;
 
   void read(NIFFile *nif)
@@ -171,8 +176,9 @@ struct NiAutoNormalParticlesData : ShapeData
   }
 };
 
-struct NiRotatingParticlesData : NiAutoNormalParticlesData
+class NiRotatingParticlesData : public NiAutoNormalParticlesData
 {
+public:
   void read(NIFFile *nif)
   {
     NiAutoNormalParticlesData::read(nif);
@@ -185,8 +191,9 @@ struct NiRotatingParticlesData : NiAutoNormalParticlesData
   }
 };
 
-struct NiPosData : Record
+class NiPosData : public Record
 {
+public:
   void read(NIFFile *nif)
   {
     int count = nif->getInt();
@@ -210,8 +217,9 @@ struct NiPosData : Record
   }
 };
 
-struct NiUVData : Record
+class NiUVData : public Record
 {
+public:
   void read(NIFFile *nif)
   {
     // TODO: This is claimed to be a "float animation key", which is
@@ -235,8 +243,9 @@ struct NiUVData : Record
   }
 };
 
-struct NiFloatData : Record
+class NiFloatData : public Record
 {
+public:
   void read(NIFFile *nif)
   {
     int count = nif->getInt();
@@ -245,8 +254,9 @@ struct NiFloatData : Record
   }
 };
 
-struct NiPixelData : Record
+class NiPixelData : public Record
 {
+public:
   unsigned int rmask, gmask, bmask, amask;
   int bpp, mips;
 
@@ -283,8 +293,9 @@ struct NiPixelData : Record
   }
 };
 
-struct NiColorData : Record
+class NiColorData : public Record
 {
+public:
   struct ColorData
   {
     float time;
@@ -302,8 +313,9 @@ struct NiColorData : Record
   }
 };
 
-struct NiVisData : Record
+class NiVisData : public Record
 {
+public:
   void read(NIFFile *nif)
   {
     int count = nif->getInt();
@@ -319,8 +331,9 @@ struct NiVisData : Record
   }
 };
 
-struct NiSkinInstance : Record
+class NiSkinInstance : public Record
 {
+public:
   NiSkinDataPtr data;
   NodePtr root;
   NodeList bones;
@@ -338,8 +351,9 @@ struct NiSkinInstance : Record
   void post(NIFFile *nif);
 };
 
-struct NiSkinData : Record
+class NiSkinData : public Record
 {
+public:
   // This is to make sure the structs are packed, ie. that the
   // compiler doesn't mess them up with extra alignment bytes.
 #pragma pack(push)
@@ -395,8 +409,9 @@ struct NiSkinData : Record
   }
 };
 
-struct NiMorphData : Record
+class NiMorphData : public Record
 {
+public:
   void read(NIFFile *nif)
   {
     int morphCount = nif->getInt();
@@ -416,8 +431,9 @@ struct NiMorphData : Record
   }
 };
 
-struct NiKeyframeData : Record
+class NiKeyframeData : public Record
 {
+public:
   void read(NIFFile *nif)
   {
     // Rotations first

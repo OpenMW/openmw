@@ -29,8 +29,9 @@
 namespace Nif
 {
 
-struct Property : Named
+class Property : public Named
 {
+public:
   // The meaning of these depends on the actual property type.
   int flags;
 
@@ -41,8 +42,9 @@ struct Property : Named
   }
 };
 
-struct NiTexturingProperty : Property
+class NiTexturingProperty : public Property
 {
+public:
   // A sub-texture
   struct Texture
   {
@@ -67,7 +69,7 @@ struct NiTexturingProperty : Property
 
     void read(NIFFile *nif)
     {
-      inUse = nif->getInt();
+      inUse = !!nif->getInt();
       if(!inUse) return;
 
       texture.read(nif);
