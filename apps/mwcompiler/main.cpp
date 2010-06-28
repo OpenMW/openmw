@@ -7,14 +7,15 @@
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/fileparser.hpp>
-#include <components/compiler/context.hpp>
 #include <components/compiler/exception.hpp>
+
+#include "context.hpp"
 
 int main (int argc, char **argv)
 {
     try
     {
-        Compiler::Context context;
+        SACompiler::Context context;
         Compiler::StreamErrorHandler errorHandler (std::cout);
         Compiler::FileParser parser (errorHandler, context);
         

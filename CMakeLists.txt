@@ -171,7 +171,8 @@ endif (APPLE)
 option(BUILD_MWCOMPILER "build standalone Morrowind script compiler" ON)
 
 if (BUILD_MWCOMPILER)
-set(TOOLS_MWCOMPILER ${COMPILER} apps/mwcompiler/main.cpp)
+set(TOOLS_MWCOMPILER ${COMPILER} apps/mwcompiler/main.cpp apps/mwcompiler/context.cpp
+    apps/mwcompiler/context.hpp)
 
 add_executable(mwcompiler ${TOOLS_MWCOMPILER})
 endif()

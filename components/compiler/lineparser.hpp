@@ -9,6 +9,15 @@ namespace Compiler
     
     class LineParser : public Parser
     {
+            enum State
+            {
+                BeginState,
+                ShortState, LongState, FloatState,
+                EndState
+            };
+            
+            State mState;
+    
         public:
         
             LineParser (ErrorHandler& errorHandler, Context& context);
