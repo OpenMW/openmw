@@ -103,6 +103,8 @@ include_directories("."
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include )
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
+ADD_SUBDIRECTORY( extern/caelum )
+
 # Specify build paths
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
@@ -167,5 +169,3 @@ if (APPLE)
     MACOSX_BUNDLE_BUNDLE_NAME "OpenMW"
   )
 endif (APPLE)
-
-ADD_SUBDIRECTORY( extern/caelum )
