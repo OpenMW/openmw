@@ -1,5 +1,6 @@
 screenshot*.png
 *.o
+*.a
 *~
 data
 CMakeFiles

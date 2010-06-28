@@ -6,6 +6,8 @@
 #pragma warning(disable: 4996)
 #define strcasecmp stricmp
 #define snprintf _snprintf
+#else
+#include <strings.h>
 #endif
 
 #endif
