@@ -1,8 +1,5 @@
 project(Platform)
 
-file(GLOB_RECURSE SOURCES src/*)
-file(GLOB_RECURSE CAELUM_HDR include/*)
-
 set(SOURCES 
     fileops.cpp
     fileops.hpp
