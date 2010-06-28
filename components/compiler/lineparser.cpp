@@ -6,6 +6,7 @@
 #include "errorhandler.hpp"
 #include "skipparser.hpp"
 #include "locals.hpp"
+#include "generator.hpp"
 
 namespace Compiler
 {
@@ -17,6 +18,17 @@ namespace Compiler
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==SetLocalToState)
+        {
+            Generator::assignIntToLocal (mCode, mLiterals, mLocals.getType (mName),
+                mLocals.getIndex (mName), value);
+        
+            mState = EndState;
+            mName.clear();
+        
+            return true;
+        }
+    
         return Parser::parseInt (value, loc, scanner);
     }
 
@@ -55,6 +67,23 @@ namespace Compiler
             return true;
         }
         
+        if (mState==SetState)
+        {
+            // local variable?
+            char type = mLocals.getType (name);        
+            if (type!=' ')
+            {
+                mName = name;
+                mState = SetLocalVarState;
+                return true;
+            }
+            
+            getErrorHandler().error ("unknown variable", loc);
+            SkipParser skip (getErrorHandler(), getContext());
+            scanner.scan (skip);
+            return false;            
+        }
+        
         return Parser::parseName (name, loc, scanner);
     }
 
@@ -67,7 +96,13 @@ namespace Compiler
                 case Scanner::K_short: mState = ShortState; return true;
                 case Scanner::K_long: mState = LongState; return true;
                 case Scanner::K_float: mState = FloatState; return true;
+                case Scanner::K_set: mState = SetState; return true;
             }
+        }
+        else if (mState==SetLocalVarState && keyword==Scanner::K_to)
+        {
+            mState = SetLocalToState;
+            return true;
         }
         
         return Parser::parseKeyword (keyword, loc, scanner);
@@ -84,6 +119,7 @@ namespace Compiler
     void LineParser::reset()
     {
         mState = BeginState;
+        mName.clear();
     }
 }
 

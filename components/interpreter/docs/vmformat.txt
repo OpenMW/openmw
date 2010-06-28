@@ -1,0 +1,62 @@
+Note: a word is considered to be 32 bit long.
+
+Header (4 words):
+word: number of words in code block
+word: number of words in integer literal block
+word: number of words in float literal block
+word: number of words in string literal block
+
+Body (variable length):
+code block
+integer literal block (contains a collection of 1 word long integers)
+float literal block (contains a collection of 1 word long floating point numbers)
+string literal block (contains a collection of strings of variable length, word-padded)
+
+Code bit-patterns:
+
+3322222222221111111111
+10987654321098765432109876543210
+00ccccccAAAAAAAAAAAAAAAAAAAAAAAA segment 0: 64 opcodes, 1 24-bit argument
+01ccccccAAAAAAAAAAAABBBBBBBBBBBB segment 1: 64 opcodes, 2 12-bit arguments
+10ccccccccccAAAAAAAAAAAAAAAAAAAA segment 2: 1024 opcodes, 1 20-bit argument
+110000ccccccccccAAAAAAAAAAAAAAAA segment 3: 1024 opcodes, 1 16-bit argument
+110001ccccccccccAAAAAAAABBBBBBBB segment 4: 1024 opcodes, 2 8-bit arguments
+110010cccccccccccccccccccccccccc segment 5: 67108864 opcodes, no arguments
+other bit-patterns reserved
+
+legent:
+c: code
+A: argument 0
+B: argument 1
+
+Segment 0:
+op  0: push A
+opcodes 1-31 unused
+opcodes 32-63 reserved for extensions
+
+Segment 1:
+opcodes 0-31 unused
+opcodes 32-63 reserved for extensions
+
+Segment 2:
+opcodes 0-511 unused
+opcodes 512-1023 reserved for extensions
+
+Segment 3:
+opcodes 0-511 unused
+opcodes 512-1023 reserved for extensions
+
+Segment 4:
+opcodes 0-511 unused
+opcodes 512-1023 reserved for extensions
+
+Segment 5:
+op   0: store stack[0] in local short stack[1] and pop twice
+op   1: store stack[0] in local long stack[1] and pop twice
+op   2: store stack[0] in local float stack[1] and pop twice
+op   3: convert stack[0] from integer to float
+op   4: replace stack[0] with integer literal index stack[0]
+op   5: replace stack[0] with float literal index stack[0]
+opcodes 6-33554431 unused
+opcodes 33554432-67108863 reserved for extensions
+

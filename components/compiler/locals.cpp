@@ -21,11 +21,22 @@ namespace Compiler
         throw std::logic_error ("unknown variable type");
     }
     
-    bool Locals::search (char type, const std::string& name) const
+    int Locals::searchIndex (char type, const std::string& name) const
     {
         const std::vector<std::string>& collection = get (type);
         
-        return std::find (collection.begin(), collection.end(), name)!=collection.end();
+        std::vector<std::string>::const_iterator iter =
+            std::find (collection.begin(), collection.end(), name);
+            
+        if (iter==collection.end())
+            return -1;
+            
+        return iter-collection.begin();
+    }
+    
+    bool Locals::search (char type, const std::string& name) const
+    {        
+        return searchIndex (type, name)!=-1;
     }
 
     std::vector<std::string>& Locals::get (char type)
@@ -52,6 +63,21 @@ namespace Compiler
             return 'f';
         
         return ' ';
+    }
+    
+    int Locals::getIndex (const std::string& name) const
+    {
+        int index = searchIndex ('s', name);
+        
+        if (index!=-1)
+            return index;
+        
+        index = searchIndex ('l', name);
+
+        if (index!=-1)
+            return index;
+
+        return searchIndex ('f', name);        
     }
     
     void Locals::write (std::ostream& localFile) const

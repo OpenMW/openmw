@@ -20,6 +20,7 @@ namespace Compiler
             {
                 BeginState,
                 ShortState, LongState, FloatState,
+                SetState, SetLocalVarState, SetLocalToState,
                 EndState
             };
 
@@ -27,6 +28,7 @@ namespace Compiler
             Literals& mLiterals;
             std::vector<Interpreter::Type_Code>& mCode;
             State mState;
+            std::string mName;
     
         public:
         
