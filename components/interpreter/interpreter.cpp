@@ -165,7 +165,37 @@ namespace Interpreter
             delete iter->second;            
     }
     
-    void Interpreter::run (const Type_Code *code, int codeSize)
+    void Interpreter::installSegment0 (int code, Opcode1 *opcode)
+    {
+        mSegment0.insert (std::make_pair (code, opcode));
+    }
+
+    void Interpreter::installSegment1 (int code, Opcode2 *opcode)
+    {
+        mSegment1.insert (std::make_pair (code, opcode));
+    }
+
+    void Interpreter::installSegment2 (int code, Opcode1 *opcode)
+    {
+        mSegment2.insert (std::make_pair (code, opcode));
+    }
+
+    void Interpreter::installSegment3 (int code, Opcode1 *opcode)
+    {
+        mSegment3.insert (std::make_pair (code, opcode));
+    }
+
+    void Interpreter::installSegment4 (int code, Opcode2 *opcode)
+    {
+        mSegment4.insert (std::make_pair (code, opcode));
+    }
+
+    void Interpreter::installSegment5 (int code, Opcode0 *opcode)
+    {
+        mSegment5.insert (std::make_pair (code, opcode));
+    }
+            
+    void Interpreter::Interpreter::run (const Type_Code *code, int codeSize)
     {
         assert (codeSize>=4);
         

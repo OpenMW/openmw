@@ -8,6 +8,7 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/context.hpp>
 #include <components/interpreter/types.hpp>
+#include <components/interpreter/installopcodes.hpp>
 
 #include "context.hpp"
 
@@ -21,6 +22,7 @@ int main (int argc, char **argv)
         
         SAInterpreter::Context context (localfilename);
         Interpreter::Interpreter interpreter (context);
+        Interpreter::installOpcodes (interpreter);
 
         std::string codefilename = filename + ".code";
 

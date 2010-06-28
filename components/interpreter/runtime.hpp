@@ -1,6 +1,8 @@
 #ifndef INTERPRETER_RUNTIME_H_INCLUDED
 #define INTERPRETER_RUNTIME_H_INCLUDED
 
+#include <vector>
+
 #include "types.hpp"
 
 namespace Interpreter
@@ -15,6 +17,7 @@ namespace Interpreter
             const Type_Code *mCode;
             int mCodeSize;
             int mPC;
+            std::vector<Type_Data> mStack;
             
         public:
         
@@ -23,7 +26,11 @@ namespace Interpreter
             int getPC() const;
             ///< return program counter.
         
-            void configure (const Interpreter::Type_Code *code, int codeSize);
+            int getIntegerLiteral (int index) const;
+        
+            float getFloatLiteral (int index) const;
+                    
+            void configure (const Type_Code *code, int codeSize);
             ///< \a context and \a code must exist as least until either configure, clear or
             /// the destructor is called. \a codeSize is given in 32-bit words.
             
@@ -31,7 +38,17 @@ namespace Interpreter
             
             void setPC (int PC);
             ///< set program counter.
-    
+            
+            void push (Type_Data data);
+            ///< push data on stack
+            
+            void pop();
+            ///< pop stack
+            
+            Type_Data& operator[] (int Index);
+            ///< Access stack member, counted from the top.
+            
+            Context& getContext();
     };
 }
 

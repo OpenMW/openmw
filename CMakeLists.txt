@@ -76,7 +76,8 @@ set(COMPILER components/compiler/errorhandler.cpp
 file(GLOB COMPILER_HEADER components/compiler/*.hpp)
 source_group(compiler FILES ${COMPILER} ${COMPILER_HEADER})    
 
-set(INTERPRETER components/interpreter/runtime.cpp components/interpreter/interpreter.cpp)
+set(INTERPRETER components/interpreter/runtime.cpp components/interpreter/interpreter.cpp
+    components/interpreter/installopcodes.cpp)
 file(GLOB INTERPRETER_HEADER components/interpreter/*.hpp)
 source_group(interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 

@@ -38,6 +38,24 @@ namespace Interpreter
             
             ~Interpreter();
             
+            void installSegment0 (int code, Opcode1 *opcode);
+            ///< ownership of \a opcode is transferred to *this.
+
+            void installSegment1 (int code, Opcode2 *opcode);
+            ///< ownership of \a opcode is transferred to *this.
+
+            void installSegment2 (int code, Opcode1 *opcode);
+            ///< ownership of \a opcode is transferred to *this.
+
+            void installSegment3 (int code, Opcode1 *opcode);
+            ///< ownership of \a opcode is transferred to *this.
+
+            void installSegment4 (int code, Opcode2 *opcode);
+            ///< ownership of \a opcode is transferred to *this.
+
+            void installSegment5 (int code, Opcode0 *opcode);
+            ///< ownership of \a opcode is transferred to *this.
+            
             void run (const Type_Code *code, int codeSize);
     };
 }
