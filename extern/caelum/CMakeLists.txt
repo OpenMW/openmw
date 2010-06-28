@@ -10,7 +10,7 @@ set(SOURCES ${CAELUM_SRC} ${CAELUM_HDR})
 add_library(caelum STATIC ${SOURCES})
 
 #
-# Resources 
+# Resources
 #
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/AtmosphereDepth.png "${OpenMW_BINARY_DIR}/resources/caelum/AtmosphereDepth.png" COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/CaelumGroundFog.cg "${OpenMW_BINARY_DIR}/resources/caelum/CaelumGroundFog.cg" COPYONLY)

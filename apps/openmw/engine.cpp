@@ -7,7 +7,7 @@
 #include "components/esm_store/cell_store.hpp"
 #include "components/bsa/bsa_archive.hpp"
 #include "components/engine/ogre/renderer.hpp"
-#include "libs/platform/fileops.hpp"
+#include "components/misc/fileops.hpp"
 
 #include "apps/openmw/mwrender/interior.hpp"
 #include "mwinput/inputmanager.hpp"
@@ -104,7 +104,7 @@ void OMW::Engine::go()
 
     const char* plugCfg = "plugins.cfg";
 
-    mOgre.configure(!OMW::Platform::isFile("ogre.cfg"), plugCfg, false);
+    mOgre.configure(!isFile("ogre.cfg"), plugCfg, false);
 
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");

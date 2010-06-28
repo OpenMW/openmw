@@ -35,7 +35,7 @@ namespace MWRender
 
         // Load the Caelum resources
         //
-        ResourceGroupManager::getSingleton().addResourceLocation("resources\\caelum", "FileSystem", "Caelum");
+        ResourceGroupManager::getSingleton().addResourceLocation("resources/caelum", "FileSystem", "Caelum");
         ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
         // Load the Caelum resources
