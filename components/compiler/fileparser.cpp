@@ -98,7 +98,6 @@ namespace Compiler
         mState = BeginState;
         mName.clear();
         mScriptParser.reset();
-        mLocals.clear();
     }
 }
 

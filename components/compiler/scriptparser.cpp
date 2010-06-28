@@ -7,13 +7,14 @@ namespace Compiler
 {
     ScriptParser::ScriptParser (ErrorHandler& errorHandler, Context& context,
         Locals& locals, bool end)
-    : Parser (errorHandler, context), mLineParser (errorHandler, context, locals, mCode),
-        mLocals (locals), mEnd (end)
+    : Parser (errorHandler, context), mOutput (locals),
+      mLineParser (errorHandler, context, locals, mOutput.getLiterals(), mOutput.getCode()),
+      mEnd (end)
     {}
 
     void ScriptParser::getCode (std::vector<Interpreter::Type_Code>& code) const
     {
-        code = mCode;
+        mOutput.getCode (code);
     }
 
     bool ScriptParser::parseName (const std::string& name, const TokenLoc& loc,
@@ -61,7 +62,7 @@ namespace Compiler
     void ScriptParser::reset()
     {
         mLineParser.reset();
-        mCode.clear();
+        mOutput.clear();
     }
 }
 

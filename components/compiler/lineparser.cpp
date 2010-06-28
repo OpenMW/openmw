@@ -10,8 +10,9 @@
 namespace Compiler
 {
     LineParser::LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
-        std::vector<Interpreter::Type_Code>& code)
-    : Parser (errorHandler, context), mLocals (locals), mCode (code), mState (BeginState)
+        Literals& literals, std::vector<Interpreter::Type_Code>& code)
+    : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
+       mState (BeginState)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)

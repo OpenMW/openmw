@@ -1,12 +1,10 @@
 #ifndef COMPILER_SCRIPTPARSER_H_INCLUDED
 #define COMPILER_SCRIPTPARSER_H_INCLUDED
 
-#include <vector>
-
-#include <components/interpreter/types.hpp>
 
 #include "parser.hpp"
 #include "lineparser.hpp"
+#include "output.hpp"
 
 namespace Compiler
 {
@@ -16,11 +14,10 @@ namespace Compiler
     
     class ScriptParser : public Parser
     {
+            Output mOutput;
             LineParser mLineParser;
-            Locals& mLocals;
             bool mEnd;
-            std::vector<Interpreter::Type_Code> mCode;
-            
+
         public:
         
             /// \param end of script is marked by end keyword.

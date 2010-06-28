@@ -4,6 +4,7 @@
 #include "parser.hpp"
 #include "scriptparser.hpp"
 #include "locals.hpp"
+#include "literals.hpp"
 
 namespace Compiler
 {
@@ -21,7 +22,7 @@ namespace Compiler
             State mState;
             std::string mName;
             Locals mLocals;
-            
+
         public:
         
             FileParser (ErrorHandler& errorHandler, Context& context);

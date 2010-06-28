@@ -5,6 +5,11 @@ namespace Interpreter
 {
     typedef unsigned int Type_Code; // 32 bit
 
+    typedef unsigned int Type_Data; // 32 bit
+    
+    typedef unsigned int Type_Integer; // 32 bit
+    
+    typedef unsigned int Type_Float; // 32 bit
 }
 
 #endif

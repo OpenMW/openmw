@@ -10,6 +10,7 @@
 namespace Compiler
 {
     class Locals;
+    class Literals;
     
     /// \brief Line parser, to be used in console scripts and as part of ScriptParser
     
@@ -23,13 +24,14 @@ namespace Compiler
             };
 
             Locals& mLocals;  
+            Literals& mLiterals;
             std::vector<Interpreter::Type_Code>& mCode;
             State mState;
     
         public:
         
             LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
-                std::vector<Interpreter::Type_Code>& code);
+                Literals& literals, std::vector<Interpreter::Type_Code>& code);
     
             virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
             ///< Handle an int token.
