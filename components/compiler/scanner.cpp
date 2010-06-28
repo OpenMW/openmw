@@ -52,7 +52,14 @@ namespace Compiler
         }
         else if (c==';')
         {
-            while (get (c) && c!='\n');
+            while (get (c))
+            {
+                if (c=='\n')
+                {
+                    putback (c);
+                    break;
+                }
+            }
 
             mLoc.mLiteral.clear();
 
