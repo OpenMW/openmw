@@ -75,9 +75,13 @@ set(COMPILER components/compiler/errorhandler.cpp
 file(GLOB COMPILER_HEADER components/compiler/*.hpp)
 source_group(compiler FILES ${COMPILER} ${COMPILER_HEADER})    
 
+file(GLOB INTERPRETER_HEADER components/interpreter/*.hpp)
+source_group(interpreter FILES ${INTERPRETER_HEADER})    
+
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC} ${COMPILER})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
-    ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER} ${COMPILER_HEADER})
+    ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
+    ${INTERPRETER_HEADER})
 
 # source directory: libs
 

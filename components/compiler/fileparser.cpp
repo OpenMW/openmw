@@ -17,6 +17,11 @@ namespace Compiler
     {
         return mName;
     }
+    
+    void FileParser::getCode (std::vector<Interpreter::Type_Code>& code) const
+    {
+        mScriptParser.getCode (code);
+    }
 
     bool FileParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)

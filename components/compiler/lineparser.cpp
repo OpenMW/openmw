@@ -1,8 +1,6 @@
 
 #include "lineparser.hpp"
 
-#include <iostream>
-
 #include "scanner.hpp"
 #include "context.hpp"
 #include "errorhandler.hpp"
@@ -11,8 +9,9 @@
 
 namespace Compiler
 {
-    LineParser::LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals)
-    : Parser (errorHandler, context), mLocals (locals), mState (BeginState)
+    LineParser::LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+        std::vector<Interpreter::Type_Code>& code)
+    : Parser (errorHandler, context), mLocals (locals), mCode (code), mState (BeginState)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -48,7 +47,6 @@ namespace Compiler
                 return false;
             }
             
-            std::cout << "declaring local variable: " << name << std::endl;
             mLocals.declare (mState==ShortState ? 's' : (mState==LongState ? 'l' : 'f'),
                 name);
             

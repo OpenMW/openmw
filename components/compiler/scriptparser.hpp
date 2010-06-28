@@ -1,6 +1,10 @@
 #ifndef COMPILER_SCRIPTPARSER_H_INCLUDED
 #define COMPILER_SCRIPTPARSER_H_INCLUDED
 
+#include <vector>
+
+#include <components/interpreter/types.hpp>
+
 #include "parser.hpp"
 #include "lineparser.hpp"
 
@@ -15,12 +19,16 @@ namespace Compiler
             LineParser mLineParser;
             Locals& mLocals;
             bool mEnd;
+            std::vector<Interpreter::Type_Code> mCode;
             
         public:
         
             /// \param end of script is marked by end keyword.
             ScriptParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
                 bool end = false);
+    
+            void getCode (std::vector<Interpreter::Type_Code>& code) const;
+            ///< store generated code in \æ code.
     
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);

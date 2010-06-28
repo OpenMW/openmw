@@ -29,6 +29,9 @@ namespace Compiler
             std::string getName() const;
             ///< Return script name.
 
+            void getCode (std::vector<Interpreter::Type_Code>& code) const;
+            ///< store generated code in \æ code.
+
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);
             ///< Handle a name token.

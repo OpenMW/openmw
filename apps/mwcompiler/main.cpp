@@ -3,7 +3,9 @@
 #include <exception>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
+#include <components/interpreter/types.hpp>
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/fileparser.hpp>
@@ -18,11 +20,11 @@ int main (int argc, char **argv)
         SACompiler::Context context;
         Compiler::StreamErrorHandler errorHandler (std::cout);
         Compiler::FileParser parser (errorHandler, context);
-        
+
+        std::string filename = argc>1 ? argv[1] : "test.mwscript";
+
         try
         {
-            std::string filename = argc>1 ? argv[1] : "test.mwscript";
-        
             std::ifstream file (filename.c_str());
             
             if (!file.is_open())
@@ -50,7 +52,14 @@ int main (int argc, char **argv)
         
         if (errorHandler.isGood())
         {
-            std::cout << "parsed script: " << parser.getName() << std::endl;
+            std::vector<Interpreter::Type_Code> code;
+            parser.getCode (code);
+            
+            std::ofstream codeFile ((filename + ".code").c_str());
+            
+            codeFile.write (reinterpret_cast<const char *> (&code[0]),
+                code.size()*sizeof (Interpreter::Type_Code));
+            
             return 0;
         }
         

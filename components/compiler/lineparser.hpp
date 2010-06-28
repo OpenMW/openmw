@@ -1,6 +1,10 @@
 #ifndef COMPILER_LINEPARSER_H_INCLUDED
 #define COMPILER_LINEPARSER_H_INCLUDED
 
+#include <vector>
+
+#include <components/interpreter/types.hpp>
+
 #include "parser.hpp"
 
 namespace Compiler
@@ -18,12 +22,14 @@ namespace Compiler
                 EndState
             };
 
-            Locals& mLocals;            
+            Locals& mLocals;  
+            std::vector<Interpreter::Type_Code>& mCode;
             State mState;
     
         public:
         
-            LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals);
+            LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+                std::vector<Interpreter::Type_Code>& code);
     
             virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
             ///< Handle an int token.
