@@ -9,14 +9,18 @@
 #include <components/interpreter/context.hpp>
 #include <components/interpreter/types.hpp>
 
+#include "context.hpp"
+
 int main (int argc, char **argv)
 {
     try
-    {
-        Interpreter::Context context;
-        Interpreter::Interpreter interpreter (context);
-        
+    {      
         std::string filename = argc>1 ? argv[1] : "test.mwscript";
+    
+        std::string localfilename = filename + ".locals";
+        
+        SAInterpreter::Context context (localfilename);
+        Interpreter::Interpreter interpreter (context);
 
         std::string codefilename = filename + ".code";
 
@@ -39,6 +43,8 @@ int main (int argc, char **argv)
         codefile.read (reinterpret_cast<char *> (&code[4]), size * sizeof (Interpreter::Type_Code));
     
         interpreter.run (&code[0], size+4);
+        
+        context.report();
     }
     catch (const std::exception &e)
     {

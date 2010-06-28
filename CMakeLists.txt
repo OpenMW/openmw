@@ -188,7 +188,8 @@ endif()
 option(BUILD_MWINTERPRETER "build standalone Morrowind script code interpreter" ON)
 
 if (BUILD_MWINTERPRETER)
-set(TOOLS_MWINTERPRETER ${INTERPRETER} apps/mwinterpreter/main.cpp)
+set(TOOLS_MWINTERPRETER ${INTERPRETER} apps/mwinterpreter/main.cpp
+    apps/mwinterpreter/context.cpp apps/mwinterpreter/context.hpp)
 
 add_executable(mwinterpreter ${TOOLS_MWINTERPRETER})
 endif()

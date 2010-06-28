@@ -7,6 +7,8 @@ namespace Interpreter
 
     typedef unsigned int Type_Data; // 32 bit
     
+    typedef short Type_Short; // 16 bit
+    
     typedef int Type_Integer; // 32 bit
     
     typedef float Type_Float; // 32 bit
