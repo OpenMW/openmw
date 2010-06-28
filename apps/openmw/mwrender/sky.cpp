@@ -50,6 +50,9 @@ namespace MWRender
         // Disable fog since OpenMW is handling OGRE fog elsewhere
         mpCaelumSystem->setManageSceneFog(false);
 
+        // Change the camera far distance to make sure the sky is not clipped
+        pCamera->setFarClipDistance(50000);
+
         // Register Caelum as an OGRE listener
         pRenderWindow->addListener(mpCaelumSystem);
         Root::getSingletonPtr()->addFrameListener(mpCaelumSystem);

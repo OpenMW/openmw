@@ -23,7 +23,6 @@ MWScene::MWScene(Render::OgreRenderer &_rend)
 
   // Create the camera
   camera = sceneMgr->createCamera("PlayerCam");
-
   camera->setNearClipDistance(5);
   
   // Create one viewport, entire window
@@ -35,8 +34,6 @@ MWScene::MWScene(Render::OgreRenderer &_rend)
 
   // Set default mipmap level (NB some APIs ignore this)
   TextureManager::getSingleton().setDefaultNumMipmaps(5);
-
-
 
   // Load resources
   ResourceGroupManager::getSingleton().initialiseAllResourceGroups();

@@ -137,15 +137,15 @@ void OMW::Engine::go()
     // Used to control the player camera and position
     MWRender::PlayerPos player(scene.getCamera());
 
-    // Optionally enable the sky
-    if (mEnableSky)
-        mpSkyManager = MWRender::SkyManager::create(mOgre.getWindow(), scene.getCamera());
-
     // This connects the cell data with the rendering scene.
     MWRender::InteriorCellRender rend(cell, scene);
 
     // Load the cell and insert it into the renderer
     rend.show();
+
+    // Optionally enable the sky
+    if (mEnableSky)
+        mpSkyManager = MWRender::SkyManager::create(mOgre.getWindow(), scene.getCamera());
 
     std::cout << "Setting up input system\n";
 

@@ -141,7 +141,7 @@ void InteriorCellRender::configureFog()
   float low = 200;
 
   scene.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
-  scene.getCamera()->setFarClipDistance (high + 10 * 1000);
+  scene.getCamera()->setFarClipDistance (high + 10);
   scene.getViewport()->setBackgroundColour (color);
 }
 
