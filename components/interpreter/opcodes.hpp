@@ -22,7 +22,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime, unsigned int arg0) = 0;
             
-            virtual ~Opcode0() {}
+            virtual ~Opcode1() {}
     };
 
     /// opcode for 2 arguments
@@ -32,7 +32,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime, unsigned int arg1, unsigned int arg2) = 0;
             
-            virtual ~Opcode0() {}
+            virtual ~Opcode2() {}
     };
 
 }
