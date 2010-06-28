@@ -6,6 +6,7 @@
 #include "scanner.hpp"
 #include "context.hpp"
 #include "errorhandler.hpp"
+#include "skipparser.hpp"
 
 namespace Compiler
 {
@@ -29,7 +30,12 @@ namespace Compiler
         if (mState==ShortState || mState==LongState || mState==FloatState)
         {
             if (!getContext().canDeclareLocals())
+            {
                 getErrorHandler().error ("local variables can't be declared in this context", loc);
+                SkipParser skip (getErrorHandler(), getContext());
+                scanner.scan (skip);
+                return false;
+            }
             
             std::cout << "declaring local variable: " << name << std::endl;
             mState = EndState;
