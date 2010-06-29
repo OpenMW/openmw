@@ -84,6 +84,16 @@ namespace
     {
         code.push_back (segment5 (2));
     }        
+
+    void opNegateInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (7));
+    }
+
+    void opNegateFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (8));
+    }
 }
 
 namespace Compiler
@@ -140,6 +150,26 @@ namespace Compiler
                     opStoreLocalLong (code);
                     break;
             
+                default:
+                
+                    assert (0);
+            }
+        }
+
+        void negate (CodeContainer& code, char valueType)
+        {
+            switch (valueType)
+            {
+                case 'l':
+                
+                    opNegateInt (code);
+                    break;
+                
+                case 'f':
+                
+                    opNegateFloat (code);
+                    break;
+                
                 default:
                 
                     assert (0);

@@ -19,6 +19,8 @@ namespace Compiler
 
         void assignToLocal (CodeContainer& code, char localType,
             int localIndex, const CodeContainer& value, char valueType);
+            
+        void negate (CodeContainer& code, char valueType);
     }
 }
 

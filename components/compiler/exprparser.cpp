@@ -9,6 +9,36 @@
 
 namespace Compiler
 {
+    char ExprParser::popUnaryOperator()
+    {
+        if (mOperators.empty())
+            return 0;
+    
+        char op = mOperators[mOperators.size()-1];
+        
+        if (op!='m') // unary -
+            return 0;
+            
+        mOperators.resize (mOperators.size()-1);
+            
+        return op;
+    }
+    
+    char ExprParser::popOperand (std::vector<Interpreter::Type_Code>& code)
+    {
+        Operand operand = mOperands[mOperands.size()-1];
+        mOperands.resize (mOperands.size()-1);
+    
+        if (operand.mType=='l')
+            Generator::pushInt (code, mLiterals, operand.mInteger);
+        else if (operand.mType=='f')
+            Generator::pushFloat (code, mLiterals, operand.mFloat);
+        else
+            throw std::logic_error ("unknown expression type");     
+            
+       return operand.mType;       
+    }
+
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
@@ -18,7 +48,7 @@ namespace Compiler
     bool ExprParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
         if (mNextOperand)
-        {
+        {       
             Operand operand;
             operand.mType = 'l';
             operand.mInteger = value;
@@ -79,6 +109,17 @@ namespace Compiler
             return false;
         }
         
+        if (code==Scanner::S_minus)
+        {
+            if (mNextOperand)            
+            {
+                // unary
+                mOperators.push_back ('m');
+                mTokenLoc = loc;
+                return true;
+            }
+        }
+        
         return Parser::parseSpecial (code, loc, scanner);
     }
     
@@ -97,17 +138,24 @@ namespace Compiler
         if (mNextOperand)
             getErrorHandler().error ("syntax error in expression", mTokenLoc);
 
-        Operand operand = mOperands[mOperands.size()-1];
-        mOperands.clear();
+        char type = ' ';
+
+        while (!mOperands.empty())
+        {
+            type = popOperand (code);
+                
+            while (char op = popUnaryOperator())
+            {
+                if (op=='m')
+                {
+                    Generator::negate (code, type);
+                }
+                else
+                    throw std::logic_error ("unknown unary operator");
+            }
+        }
         
-        if (operand.mType=='l')
-            Generator::pushInt (code, mLiterals, operand.mInteger);
-        else if (operand.mType=='f')
-            Generator::pushFloat (code, mLiterals, operand.mFloat);
-        else
-            throw std::logic_error ("unknown expression type");
-        
-        return operand.mType;
+        return type;
     }    
 }
 

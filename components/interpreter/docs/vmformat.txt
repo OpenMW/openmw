@@ -58,6 +58,8 @@ op   3: convert stack[0] from integer to float
 op   4: replace stack[0] with integer literal index stack[0]
 op   5: replace stack[0] with float literal index stack[0]
 op   6: convert stack[0] from float to integer
-opcodes 7-33554431 unused
+op   7: invert sign of int value stack[0]
+op   8: invert sign of float value stack[0]
+opcodes 9-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

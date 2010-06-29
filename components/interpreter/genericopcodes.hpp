@@ -39,6 +39,30 @@ namespace Interpreter
                 runtime[0] = *reinterpret_cast<Type_Data *> (&integerValue);
             }           
     };    
+    
+    class OpNegateInt : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Integer data = *reinterpret_cast<Type_Integer *> (&runtime[0]);
+                data = -data;
+                runtime[0] = *reinterpret_cast<Type_Data *> (&data);
+            }           
+    };    
+    
+    class OpNegateFloat : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Float data = *reinterpret_cast<Type_Float *> (&runtime[0]);
+                data = -data;
+                runtime[0] = *reinterpret_cast<Type_Data *> (&data);
+            }           
+    };    
 }
 
 #endif

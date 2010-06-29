@@ -29,6 +29,11 @@ namespace Compiler
             bool mNextOperand;
             TokenLoc mTokenLoc;
             
+            char popUnaryOperator();
+            ///< returns 0 and not popping, if the next operator isn't unary
+            
+            char popOperand (std::vector<Interpreter::Type_Code>& code);
+            
         public:
     
             ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
