@@ -57,6 +57,7 @@ op   2: store stack[0] in local float stack[1] and pop twice
 op   3: convert stack[0] from integer to float
 op   4: replace stack[0] with integer literal index stack[0]
 op   5: replace stack[0] with float literal index stack[0]
-opcodes 6-33554431 unused
+op   6: convert stack[0] from float to integer
+opcodes 7-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

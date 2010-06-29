@@ -22,11 +22,23 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
+                Type_Integer data = *reinterpret_cast<Type_Integer *> (&runtime[0]);
                 Type_Float floatValue = static_cast<Type_Float> (data);
                 runtime[0] = *reinterpret_cast<Type_Data *> (&floatValue);
             }           
     };
+    
+    class OpFloatToInt : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Float data = *reinterpret_cast<Type_Float *> (&runtime[0]);
+                Type_Integer integerValue = static_cast<Type_Integer> (data);
+                runtime[0] = *reinterpret_cast<Type_Data *> (&integerValue);
+            }           
+    };    
 }
 
 #endif

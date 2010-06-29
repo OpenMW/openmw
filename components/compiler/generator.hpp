@@ -15,6 +15,8 @@ namespace Compiler
 
         void pushInt (CodeContainer& code, Literals& literals, int value);
 
+        void pushFloat (CodeContainer& code, Literals& literals, float value);
+
         void assignToLocal (CodeContainer& code, char localType,
             int localIndex, const CodeContainer& value, char valueType);
     }

@@ -25,7 +25,13 @@ namespace Compiler
 
     bool ExprParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
     {
-        return Parser::parseFloat (value, loc, scanner);
+        Operand operand;
+        operand.mType = 'f';
+        operand.mFloat = value;
+        
+        mOperands.push_back (operand);
+            
+        return false;
     }
 
     bool ExprParser::parseName (const std::string& name, const TokenLoc& loc,
@@ -57,7 +63,12 @@ namespace Compiler
         Operand operand = mOperands[mOperands.size()-1];
         mOperands.clear();
         
-        Generator::pushInt (code, mLiterals, operand.mInteger);
+        if (operand.mType=='l')
+            Generator::pushInt (code, mLiterals, operand.mInteger);
+        else if (operand.mType=='f')
+            Generator::pushFloat (code, mLiterals, operand.mFloat);
+        else
+            throw std::logic_error ("unknown expression type");
         
         return operand.mType;
     }    

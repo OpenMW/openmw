@@ -21,7 +21,7 @@ namespace Compiler
             {
                 BeginState,
                 ShortState, LongState, FloatState,
-                SetState, SetLocalVarState, SetLocalToState,
+                SetState, SetLocalVarState,
                 EndState
             };
 

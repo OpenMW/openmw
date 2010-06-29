@@ -67,7 +67,7 @@ namespace
     
     void opFloatToInt (Compiler::Generator::CodeContainer& code)
     {
-        assert (0); // not implemented
+        code.push_back (segment5 (6));
     }
         
     void opStoreLocalShort (Compiler::Generator::CodeContainer& code)
@@ -95,6 +95,13 @@ namespace Compiler
             int index = literals.addInteger (value);               
             opPushInt (code, index);
             opFetchIntLiteral (code);   
+        }
+        
+        void pushFloat (CodeContainer& code, Literals& literals, float value)
+        {
+            int index = literals.addFloat (value);               
+            opPushInt (code, index);
+            opFetchFloatLiteral (code);
         }
                 
         void assignToLocal (CodeContainer& code, char localType,
