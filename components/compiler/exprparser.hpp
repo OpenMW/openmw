@@ -43,6 +43,8 @@ namespace Compiler
             
             void pushBinaryOperator (char c);
                         
+            void close();
+                        
         public:
     
             ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,

@@ -14,6 +14,10 @@ namespace Compiler
     {
         switch (op)
         {
+            case '(':
+            
+                return 0;
+            
             case '+':
             case '-':
             
@@ -143,6 +147,14 @@ namespace Compiler
         mNextOperand = true;
     }
             
+    void ExprParser::close()
+    {
+        while (getOperator()!='(')
+            pop();
+            
+        popOperator();
+    }
+            
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
@@ -206,6 +218,19 @@ namespace Compiler
             // unary
             mOperators.push_back ('m');
             mTokenLoc = loc;
+            return true;
+        }
+        
+        if (code==Scanner::S_open && mNextOperand)
+        {
+            mOperators.push_back ('(');
+            mTokenLoc = loc;
+            return true;
+        }
+        
+        if (code==Scanner::S_close && !mNextOperand)
+        {
+            close();
             return true;
         }
         
