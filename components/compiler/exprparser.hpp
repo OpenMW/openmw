@@ -15,25 +15,34 @@ namespace Compiler
 
     class ExprParser : public Parser
     {
-            struct Operand
-            {
-                char mType;
-                int mInteger;
-                float mFloat;
-            };
-            
             Locals& mLocals;  
             Literals& mLiterals;
-            std::vector<Operand> mOperands;
+            std::vector<char> mOperands;
             std::vector<char> mOperators;
             bool mNextOperand;
             TokenLoc mTokenLoc;
+            std::vector<Interpreter::Type_Code> mCode;
             
-            char popUnaryOperator();
-            ///< returns 0 and not popping, if the next operator isn't unary
+            int getPriority (char op) const;
             
-            char popOperand (std::vector<Interpreter::Type_Code>& code);
+            char getOperandType (int Index = 0) const;           
+
+            char getOperator() const;
+                
+            void popOperator();
             
+            void popOperand();
+            
+            void replaceBinaryOperands();
+   
+            void pop();
+            
+            void pushIntegerLiteral (int value);
+            
+            void pushFloatLiteral (float value);
+            
+            void pushBinaryOperator (char c);
+                        
         public:
     
             ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
@@ -67,7 +76,7 @@ namespace Compiler
             void reset();
             ///< Reset parser to clean state.
             
-            char write (std::vector<Interpreter::Type_Code>& code);
+            char append (std::vector<Interpreter::Type_Code>& code);
             ///< Generate code for parsed expression.
             /// \return Type ('l': integer, 'f': float)
     };

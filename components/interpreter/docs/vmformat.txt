@@ -60,6 +60,16 @@ op   5: replace stack[0] with float literal index stack[0]
 op   6: convert stack[0] from float to integer
 op   7: invert sign of int value stack[0]
 op   8: invert sign of float value stack[0]
-opcodes 9-33554431 unused
+op   9: add (integer) stack[0] to stack[1], pop twice, push result
+op  10: add (float) stack[0] to stack[1], pop twice, push result
+op  11: sub (integer) stack[1] from stack[0], pop twice, push result
+op  12: sub (float) stack[1] from stack[0], pop twice, push result
+op  13: mul (integer) stack[0] with stack[1], pop twice, push result
+op  14: mul (float) stack[0] with stack[1], pop twice, push result
+op  15: div (integer) stack[1] by stack[0], pop twice, push result
+op  16: div (float) stack[1] by stack[0], pop twice, push result
+op  17: convert stack[1] from integer to float
+op  18: convert stack[1] from float to integer
+opcodes 19-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

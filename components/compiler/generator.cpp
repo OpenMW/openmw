@@ -94,6 +94,56 @@ namespace
     {
         code.push_back (segment5 (8));
     }
+
+    void opAddInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (9));
+    }
+
+    void opAddFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (10));
+    }
+
+    void opSubInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (11));
+    }
+
+    void opSubFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (12));
+    }
+
+    void opMulInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (13));
+    }
+
+    void opMulFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (14));
+    }
+
+    void opDivInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (15));
+    }
+
+    void opDivFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (16));
+    }
+    
+    void opIntToFloat1 (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (17));    
+    }
+    
+    void opFloatToInt1 (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (18));
+    }    
 }
 
 namespace Compiler
@@ -174,6 +224,78 @@ namespace Compiler
                 
                     assert (0);
             }
+        }
+        
+        void add (CodeContainer& code, char valueType1, char valueType2)
+        {
+            if (valueType1=='l' && valueType2=='l')
+            {
+                opAddInt (code);
+            }
+            else
+            {
+                if (valueType1=='l')
+                    opIntToFloat1 (code);
+
+                if (valueType2=='l')
+                    opIntToFloat (code);
+            
+                opAddFloat (code);
+            }
+        }
+
+        void sub (CodeContainer& code, char valueType1, char valueType2)
+        {
+            if (valueType1=='l' && valueType2=='l')
+            {
+                opSubInt (code);
+            }
+            else
+            {
+                if (valueType1=='l')
+                    opIntToFloat1 (code);
+
+                if (valueType2=='l')
+                    opIntToFloat (code);
+            
+                opSubFloat (code);
+            }
+        }
+        
+        void mul (CodeContainer& code, char valueType1, char valueType2)
+        {
+            if (valueType1=='l' && valueType2=='l')
+            {
+                opMulInt (code);
+            }
+            else
+            {
+                if (valueType1=='l')
+                    opIntToFloat1 (code);
+
+                if (valueType2=='l')
+                    opIntToFloat (code);
+            
+                opMulFloat (code);
+            }        
+        }      
+        
+        void div (CodeContainer& code, char valueType1, char valueType2)
+        {
+            if (valueType1=='l' && valueType2=='l')
+            {
+                opDivInt (code);
+            }
+            else
+            {
+                if (valueType1=='l')
+                    opIntToFloat1 (code);
+
+                if (valueType2=='l')
+                    opIntToFloat (code);
+            
+                opDivFloat (code);
+            }        
         }
     }
 }

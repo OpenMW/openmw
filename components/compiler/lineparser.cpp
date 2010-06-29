@@ -97,7 +97,7 @@ namespace Compiler
             scanner.scan (mExprParser);
             
             std::vector<Interpreter::Type_Code> code;
-            char type = mExprParser.write (code);
+            char type = mExprParser.append (code);
             
             Generator::assignToLocal (mCode, mLocals.getType (mName),
                 mLocals.getIndex (mName), code, type);

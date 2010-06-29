@@ -2,6 +2,7 @@
 #include "exprparser.hpp"
 
 #include <stdexcept>
+#include <cassert>
 
 #include "generator.hpp"
 #include "scanner.hpp"
@@ -9,36 +10,139 @@
 
 namespace Compiler
 {
-    char ExprParser::popUnaryOperator()
+    int ExprParser::getPriority (char op) const
     {
-        if (mOperators.empty())
-            return 0;
-    
-        char op = mOperators[mOperators.size()-1];
+        switch (op)
+        {
+            case '+':
+            case '-':
+            
+                return 1;
         
-        if (op!='m') // unary -
-            return 0;
+            case '*':
+            case '/':
             
-        mOperators.resize (mOperators.size()-1);
+                return 2;
+                
+            case 'm':
             
-        return op;
-    }
+                return 3;
+        }
     
-    char ExprParser::popOperand (std::vector<Interpreter::Type_Code>& code)
-    {
-        Operand operand = mOperands[mOperands.size()-1];
-        mOperands.resize (mOperands.size()-1);
-    
-        if (operand.mType=='l')
-            Generator::pushInt (code, mLiterals, operand.mInteger);
-        else if (operand.mType=='f')
-            Generator::pushFloat (code, mLiterals, operand.mFloat);
-        else
-            throw std::logic_error ("unknown expression type");     
-            
-       return operand.mType;       
+        return 0;
     }
 
+    char ExprParser::getOperandType (int Index) const
+    {
+        assert (!mOperands.empty());
+        assert (Index>=0);
+        assert (Index<static_cast<int> (mOperands.size()));
+        return mOperands[mOperands.size()-1-Index];
+    }
+    
+    char ExprParser::getOperator() const
+    {
+        assert (!mOperators.empty());
+        return mOperators[mOperators.size()-1];
+    }
+
+    void ExprParser::popOperator()
+    {
+        assert (!mOperators.empty());
+        mOperators.resize (mOperators.size()-1);        
+    }
+    
+    void ExprParser::popOperand()
+    {
+        assert (!mOperands.empty());
+        mOperands.resize (mOperands.size()-1);    
+    }
+
+    void ExprParser::replaceBinaryOperands()
+    {
+        char t1 = getOperandType (1);
+        char t2 = getOperandType();
+        
+        popOperand();
+        popOperand();
+        
+        if (t1==t2)
+            mOperands.push_back (t1);
+        else if (t1=='f' || t2=='f')
+            mOperands.push_back ('f');
+        else
+            std::logic_error ("failed to determine result operand type");
+    }
+
+    void ExprParser::pop()
+    {
+        char op = getOperator();
+        
+        switch (op)
+        {
+            case 'm':
+            
+                Generator::negate (mCode, getOperandType());
+                popOperator();
+                break;
+
+            case '+':
+                
+                Generator::add (mCode, getOperandType (1), getOperandType());
+                popOperator();
+                replaceBinaryOperands();
+                break;
+
+            case '-':
+                
+                Generator::sub (mCode, getOperandType (1), getOperandType());
+                popOperator();
+                replaceBinaryOperands();
+                break;
+                
+            case '*':
+                
+                Generator::mul (mCode, getOperandType (1), getOperandType());
+                popOperator();
+                replaceBinaryOperands();
+                break;                
+                
+            case '/':
+                
+                Generator::div (mCode, getOperandType (1), getOperandType());
+                popOperator();
+                replaceBinaryOperands();
+                break;
+                            
+            default:
+            
+                throw std::logic_error ("unknown operator");
+        }
+    }
+
+    void ExprParser::pushIntegerLiteral (int value)
+    {
+        mNextOperand = false;
+        mOperands.push_back ('l');
+        Generator::pushInt (mCode, mLiterals, value);
+    }
+    
+    void ExprParser::pushFloatLiteral (float value)
+    {
+        mNextOperand = false;
+        mOperands.push_back ('f');
+        Generator::pushFloat (mCode, mLiterals, value);    
+    }
+            
+    void ExprParser::pushBinaryOperator (char c)
+    {
+        while (!mOperators.empty() && getPriority (getOperator())>=getPriority (c))
+            pop();
+    
+        mOperators.push_back (c);
+        mNextOperand = true;
+    }
+            
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
@@ -49,13 +153,7 @@ namespace Compiler
     {
         if (mNextOperand)
         {       
-            Operand operand;
-            operand.mType = 'l';
-            operand.mInteger = value;
-        
-            mOperands.push_back (operand);
-            
-            mNextOperand = false;
+            pushIntegerLiteral (value);
             mTokenLoc = loc;
             return true;
         }
@@ -67,13 +165,7 @@ namespace Compiler
     {
         if (mNextOperand)
         {    
-            Operand operand;
-            operand.mType = 'f';
-            operand.mFloat = value;
-        
-            mOperands.push_back (operand);
-            
-            mNextOperand = false;
+            pushFloatLiteral (value);
             mTokenLoc = loc;
             return true;
         }            
@@ -109,15 +201,22 @@ namespace Compiler
             return false;
         }
         
-        if (code==Scanner::S_minus)
+        if (code==Scanner::S_minus && mNextOperand)
         {
-            if (mNextOperand)            
-            {
-                // unary
-                mOperators.push_back ('m');
-                mTokenLoc = loc;
-                return true;
-            }
+            // unary
+            mOperators.push_back ('m');
+            mTokenLoc = loc;
+            return true;
+        }
+        
+        mTokenLoc = loc;
+   
+        switch (code)
+        {
+            case Scanner::S_plus: pushBinaryOperator ('+'); return true;
+            case Scanner::S_minus: pushBinaryOperator ('-'); return true;
+            case Scanner::S_mult: pushBinaryOperator ('*'); return true;
+            case Scanner::S_div: pushBinaryOperator ('/'); return true;
         }
         
         return Parser::parseSpecial (code, loc, scanner);
@@ -128,34 +227,30 @@ namespace Compiler
         mOperands.clear();
         mOperators.clear();
         mNextOperand = true;
+        mCode.clear();
     }
     
-    char ExprParser::write (std::vector<Interpreter::Type_Code>& code)
+    char ExprParser::append (std::vector<Interpreter::Type_Code>& code)
     {
         if (mOperands.empty() && mOperators.empty())
-            getErrorHandler().error ("missing expression", mTokenLoc);
-            
-        if (mNextOperand)
-            getErrorHandler().error ("syntax error in expression", mTokenLoc);
-
-        char type = ' ';
-
-        while (!mOperands.empty())
         {
-            type = popOperand (code);
-                
-            while (char op = popUnaryOperator())
-            {
-                if (op=='m')
-                {
-                    Generator::negate (code, type);
-                }
-                else
-                    throw std::logic_error ("unknown unary operator");
-            }
+            getErrorHandler().error ("missing expression", mTokenLoc);
+            return 'l';
         }
-        
-        return type;
+            
+        if (mNextOperand || mOperands.empty())
+        {
+            getErrorHandler().error ("syntax error in expression", mTokenLoc);
+            return 'l';
+        }
+
+        while (!mOperators.empty())
+            pop();
+
+        std::copy (mCode.begin(), mCode.end(), std::back_inserter (code));
+
+        assert (mOperands.size()==1);
+        return mOperands[0];
     }    
 }
 

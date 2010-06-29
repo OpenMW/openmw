@@ -21,6 +21,14 @@ namespace Compiler
             int localIndex, const CodeContainer& value, char valueType);
             
         void negate (CodeContainer& code, char valueType);
+        
+        void add (CodeContainer& code, char valueType1, char valueType2);
+
+        void sub (CodeContainer& code, char valueType1, char valueType2);        
+        
+        void mul (CodeContainer& code, char valueType1, char valueType2);        
+        
+        void div (CodeContainer& code, char valueType1, char valueType2);        
     }
 }
 
