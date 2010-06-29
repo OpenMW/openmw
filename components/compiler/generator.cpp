@@ -2,6 +2,8 @@
 #include "generator.hpp"
 
 #include <cassert>
+#include <algorithm>
+#include <iterator>
 
 #include "literals.hpp"
 
@@ -63,6 +65,11 @@ namespace
         code.push_back (segment5 (3));    
     }
     
+    void opFloatToInt (Compiler::Generator::CodeContainer& code)
+    {
+        assert (0); // not implemented
+    }
+        
     void opStoreLocalShort (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (segment5 (0));    
@@ -83,20 +90,36 @@ namespace Compiler
 {
     namespace Generator
     {
-        void assignIntToLocal (CodeContainer& code, Literals& literals, char localType,
-            int localIndex, int value)
+        void pushInt (CodeContainer& code, Literals& literals, int value)
         {
-            int index = literals.addInteger (value);
-                
-            opPushInt (code, localIndex);
+            int index = literals.addInteger (value);               
             opPushInt (code, index);
-            opFetchIntLiteral (code);
+            opFetchIntLiteral (code);   
+        }
+                
+        void assignToLocal (CodeContainer& code, char localType,
+            int localIndex, const CodeContainer& value, char valueType)
+        {               
+            opPushInt (code, localIndex);
+
+            std::copy (value.begin(), value.end(), std::back_inserter (code));
+            
+            if (localType!=valueType)
+            {
+                if (localType=='f' && valueType=='l')
+                {
+                    opIntToFloat (code);
+                }
+                else if ((localType=='l' || localType=='s') && valueType=='f')
+                {
+                    opFloatToInt (code);
+                }
+            }
             
             switch (localType)
             {
                 case 'f':
                 
-                    opIntToFloat (code);
                     opStoreLocalFloat (code);
                     break;
                 
@@ -113,7 +136,7 @@ namespace Compiler
                 default:
                 
                     assert (0);
-            }               
+            }
         }
     }
 }

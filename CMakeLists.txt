@@ -66,18 +66,11 @@ set(MISC_HEADER components/misc/fileops.hpp components/misc/slice_array.hpp
     components/misc/stringops.hpp)
 source_group(misc FILES ${MISC} ${MISC_HEADER})    
     
-set(COMPILER components/compiler/errorhandler.cpp
-    components/compiler/fileparser.cpp components/compiler/scriptparser.cpp
-    components/compiler/lineparser.cpp components/compiler/skipparser.cpp
-    components/compiler/parser.cpp components/compiler/scanner.cpp
-    components/compiler/streamerrorhandler.cpp
-    components/compiler/locals.cpp components/compiler/literals.cpp
-    components/compiler/output.cpp components/compiler/generator.cpp)
+file(GLOB COMPILER components/compiler/*.cpp)
 file(GLOB COMPILER_HEADER components/compiler/*.hpp)
 source_group(compiler FILES ${COMPILER} ${COMPILER_HEADER})    
 
-set(INTERPRETER components/interpreter/runtime.cpp components/interpreter/interpreter.cpp
-    components/interpreter/installopcodes.cpp)
+file(GLOB INTERPRETER components/interpreter/*.cpp)
 file(GLOB INTERPRETER_HEADER components/interpreter/*.hpp)
 source_group(interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 

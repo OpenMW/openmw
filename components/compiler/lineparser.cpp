@@ -13,22 +13,11 @@ namespace Compiler
     LineParser::LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals, std::vector<Interpreter::Type_Code>& code)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
-       mState (BeginState)
+       mState (BeginState), mExprParser (errorHandler, context, locals, literals)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
-    {
-        if (mState==SetLocalToState)
-        {
-            Generator::assignIntToLocal (mCode, mLiterals, mLocals.getType (mName),
-                mLocals.getIndex (mName), value);
-        
-            mState = EndState;
-            mName.clear();
-        
-            return true;
-        }
-    
+    {   
         return Parser::parseInt (value, loc, scanner);
     }
 
@@ -104,7 +93,16 @@ namespace Compiler
         }
         else if (mState==SetLocalVarState && keyword==Scanner::K_to)
         {
-            mState = SetLocalToState;
+            mExprParser.reset();
+            scanner.scan (mExprParser);
+            
+            std::vector<Interpreter::Type_Code> code;
+            char type = mExprParser.write (code);
+            
+            Generator::assignToLocal (mCode, mLocals.getType (mName),
+                mLocals.getIndex (mName), code, type);
+                        
+            mState = EndState;
             return true;
         }
         

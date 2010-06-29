@@ -12,9 +12,11 @@ namespace Compiler
     namespace Generator
     {
         typedef std::vector<Interpreter::Type_Code> CodeContainer;
-    
-        void assignIntToLocal (CodeContainer& code, Literals& literals, char localType,
-            int localIndex, int value);
+
+        void pushInt (CodeContainer& code, Literals& literals, int value);
+
+        void assignToLocal (CodeContainer& code, char localType,
+            int localIndex, const CodeContainer& value, char valueType);
     }
 }
 
