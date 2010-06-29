@@ -70,6 +70,7 @@ op  15: div (integer) stack[1] by stack[0], pop twice, push result
 op  16: div (float) stack[1] by stack[0], pop twice, push result
 op  17: convert stack[1] from integer to float
 op  18: convert stack[1] from float to integer
-opcodes 19-33554431 unused
+op  19: take square root of stack[0] (float)
+opcodes 20-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

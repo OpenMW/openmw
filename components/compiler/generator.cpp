@@ -4,6 +4,7 @@
 #include <cassert>
 #include <algorithm>
 #include <iterator>
+#include <stdexcept>
 
 #include "literals.hpp"
 
@@ -143,6 +144,11 @@ namespace
     void opFloatToInt1 (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (segment5 (18));
+    }    
+
+    void opSquareRoot (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (19));
     }    
 }
 
@@ -296,6 +302,24 @@ namespace Compiler
             
                 opDivFloat (code);
             }        
+        }
+        
+        void convert (CodeContainer& code, char fromType, char toType)
+        {
+            if (fromType!=toType)
+            {
+                if (fromType=='f' && toType=='l')
+                    opFloatToInt (code);
+                else if (fromType=='l' && toType=='f')
+                    opIntToFloat (code);
+                else
+                    throw std::logic_error ("illegal type conversion");
+            }
+        }
+        
+        void squareRoot (CodeContainer& code)
+        {
+            opSquareRoot (code);
         }
     }
 }

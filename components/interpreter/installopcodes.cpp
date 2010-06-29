@@ -35,6 +35,7 @@ namespace Interpreter
         interpreter.installSegment5 (14, new OpMulInt<Type_Float>);
         interpreter.installSegment5 (15, new OpDivInt<Type_Integer>);
         interpreter.installSegment5 (16, new OpDivInt<Type_Float>);
+        interpreter.installSegment5 (19, new OpSquareRoot);        
     }
 }
 

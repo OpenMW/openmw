@@ -44,6 +44,8 @@ namespace Compiler
             void pushBinaryOperator (char c);
                         
             void close();
+            
+            void parseArguments (const std::string& arguments, Scanner& scanner);
                         
         public:
     

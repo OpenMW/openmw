@@ -2,6 +2,7 @@
 #define INTERPRETER_MATHOPCODES_H_INCLUDED
 
 #include <stdexcept>
+#include <cmath>
 
 #include "opcodes.hpp"
 #include "runtime.hpp"
@@ -84,6 +85,24 @@ namespace Interpreter
                 runtime[0] = *reinterpret_cast<Type_Data *> (&result);
             }           
     };
+    
+    class OpSquareRoot : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Float value = *reinterpret_cast<Type_Float *> (&runtime[0]);
+                
+                if (value<0)
+                    throw std::runtime_error (
+                        "square root of negative number (we aren't that imaginary)");
+                
+                value = std::sqrt (value);
+                
+                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+            }           
+    };    
 }
 
 #endif

@@ -155,6 +155,25 @@ namespace Compiler
         popOperator();
     }
             
+    void ExprParser::parseArguments (const std::string& arguments, Scanner& scanner)
+    {
+        ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
+        
+        for (std::string::const_iterator iter (arguments.begin()); iter!=arguments.end();
+            ++iter)
+        {
+            parser.reset();    
+            scanner.scan (parser);
+
+            char type = parser.append (mCode);
+
+            if (type!=*iter)
+                Generator::convert (mCode, type, *iter);
+                
+            mOperands.push_back (*iter);
+        }
+    }
+            
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
@@ -193,6 +212,17 @@ namespace Compiler
 
     bool ExprParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (keyword==Scanner::K_getsquareroot && mNextOperand)
+        {
+            mTokenLoc = loc;        
+            parseArguments ("f", scanner);
+
+            Generator::squareRoot (mCode);
+            
+            mNextOperand = false;
+            return true;
+        }
+        
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
@@ -234,14 +264,17 @@ namespace Compiler
             return true;
         }
         
-        mTokenLoc = loc;
-   
-        switch (code)
+        if (!mNextOperand)
         {
-            case Scanner::S_plus: pushBinaryOperator ('+'); return true;
-            case Scanner::S_minus: pushBinaryOperator ('-'); return true;
-            case Scanner::S_mult: pushBinaryOperator ('*'); return true;
-            case Scanner::S_div: pushBinaryOperator ('/'); return true;
+            mTokenLoc = loc;
+   
+            switch (code)
+            {
+                case Scanner::S_plus: pushBinaryOperator ('+'); return true;
+                case Scanner::S_minus: pushBinaryOperator ('-'); return true;
+                case Scanner::S_mult: pushBinaryOperator ('*'); return true;
+                case Scanner::S_div: pushBinaryOperator ('/'); return true;
+            }
         }
         
         return Parser::parseSpecial (code, loc, scanner);

@@ -29,6 +29,10 @@ namespace Compiler
         void mul (CodeContainer& code, char valueType1, char valueType2);        
         
         void div (CodeContainer& code, char valueType1, char valueType2);        
+        
+        void convert (CodeContainer& code, char fromType, char toType);
+        
+        void squareRoot (CodeContainer& code);
     }
 }
 
