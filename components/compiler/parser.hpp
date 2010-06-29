@@ -21,8 +21,6 @@ namespace Compiler
 
         protected:
 
-        // mutators
-
             void reportSeriousError (const std::string& message, const TokenLoc& loc);
             ///< Report the error and throw a exception.
 
@@ -40,6 +38,8 @@ namespace Compiler
 
             Context& getContext();
             ///< Return context
+
+            static std::string toLower (const std::string& name);
 
         public:
 

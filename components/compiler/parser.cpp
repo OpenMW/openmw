@@ -1,6 +1,9 @@
 
 #include "parser.hpp"
 
+#include <cctype>
+#include <algorithm>
+
 #include "errorhandler.hpp"
 #include "exception.hpp"
 
@@ -48,6 +51,16 @@ namespace Compiler
     Context& Parser::getContext()
     {
         return mContext;
+    }
+
+    std::string Parser::toLower (const std::string& name)
+    {
+        std::string lowerCase;
+        
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+            
+        return lowerCase;
     }
 
     Parser::Parser (ErrorHandler& errorHandler, Context& context)

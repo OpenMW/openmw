@@ -49,8 +49,10 @@ namespace Compiler
                 scanner.scan (skip);
                 return false;
             }
+         
+            std::string name2 = toLower (name);
             
-            char type = mLocals.getType (name);
+            char type = mLocals.getType (name2);
             
             if (type!=' ')
             {
@@ -61,7 +63,7 @@ namespace Compiler
             }
             
             mLocals.declare (mState==ShortState ? 's' : (mState==LongState ? 'l' : 'f'),
-                name);
+                name2);
             
             mState = EndState;
             return true;
@@ -70,10 +72,11 @@ namespace Compiler
         if (mState==SetState)
         {
             // local variable?
-            char type = mLocals.getType (name);        
+            std::string name2 = toLower (name);
+            char type = mLocals.getType (name2);
             if (type!=' ')
             {
-                mName = name;
+                mName = name2;
                 mState = SetLocalVarState;
                 return true;
             }
