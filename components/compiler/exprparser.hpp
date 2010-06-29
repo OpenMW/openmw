@@ -6,6 +6,7 @@
 #include <components/interpreter/types.hpp>
 
 #include "parser.hpp"
+#include "tokenloc.hpp"
 
 namespace Compiler
 {
@@ -24,6 +25,9 @@ namespace Compiler
             Locals& mLocals;  
             Literals& mLiterals;
             std::vector<Operand> mOperands;
+            std::vector<char> mOperators;
+            bool mNextOperand;
+            TokenLoc mTokenLoc;
             
         public:
     

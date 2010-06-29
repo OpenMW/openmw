@@ -43,6 +43,12 @@ namespace Compiler
 
     bool Scanner::scanToken (Parser& parser)
     {
+        if (mNewline)
+        {
+            mNewline = false;
+            return parser.parseSpecial (S_newline, mPutbackLoc, *this);
+        }
+    
         char c;
 
         if (!get (c))
@@ -412,13 +418,20 @@ namespace Compiler
     // constructor
 
     Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream)
-    : mErrorHandler (errorHandler), mStream (inputStream)
+    : mErrorHandler (errorHandler), mStream (inputStream), mNewline (false)
     {
     }
 
     void Scanner::scan (Parser& parser)
     {
+        mNewline = false;
         while (scanToken (parser));
+    }
+    
+    void Scanner::putbackNewline (const TokenLoc& loc)
+    {
+        mNewline = true;
+        mPutbackLoc = loc;
     }
 }
 

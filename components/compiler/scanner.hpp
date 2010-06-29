@@ -22,6 +22,8 @@ namespace Compiler
             TokenLoc mLoc;
             TokenLoc mPrevLoc;
             std::istream& mStream;
+            bool mNewline;
+            TokenLoc mPutbackLoc;
 
         public:
 
@@ -78,6 +80,9 @@ namespace Compiler
 
             void scan (Parser& parser);
             ///< Scan a token and deliver it to the parser.
+            
+            void putbackNewline (const TokenLoc& loc);
+            ///< put back a newline token
     };
 }
 
