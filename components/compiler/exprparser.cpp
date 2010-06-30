@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <algorithm>
 
 #include "generator.hpp"
 #include "scanner.hpp"
@@ -51,6 +52,11 @@ namespace Compiler
         return mOperators[mOperators.size()-1];
     }
 
+    bool ExprParser::isOpen() const
+    {
+        return std::find (mOperators.begin(), mOperators.end(), '(')!=mOperators.end();
+    }
+            
     void ExprParser::popOperator()
     {
         assert (!mOperators.empty());
@@ -293,8 +299,15 @@ namespace Compiler
         
         if (code==Scanner::S_close && !mNextOperand)
         {
-            close();
-            return true;
+            if (isOpen())
+            {
+                close();
+                return true;
+            }
+            
+            mTokenLoc = loc;
+            scanner.putbackSpecial (code, loc);
+            return false;
         }
         
         if (!mNextOperand)

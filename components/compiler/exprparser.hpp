@@ -30,6 +30,8 @@ namespace Compiler
 
             char getOperator() const;
                 
+            bool isOpen() const;
+                
             void popOperator();
             
             void popOperand();
