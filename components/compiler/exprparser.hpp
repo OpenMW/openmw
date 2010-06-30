@@ -22,6 +22,7 @@ namespace Compiler
             bool mNextOperand;
             TokenLoc mTokenLoc;
             std::vector<Interpreter::Type_Code> mCode;
+            bool mFirst;
             
             int getPriority (char op) const;
             

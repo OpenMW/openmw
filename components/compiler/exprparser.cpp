@@ -177,11 +177,13 @@ namespace Compiler
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
-      mNextOperand (true)
+      mNextOperand (true), mFirst (true)
     {}
 
     bool ExprParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
+        mFirst = false;
+        
         if (mNextOperand)
         {       
             pushIntegerLiteral (value);
@@ -194,6 +196,8 @@ namespace Compiler
 
     bool ExprParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
     {
+        mFirst = false;
+        
         if (mNextOperand)
         {    
             pushFloatLiteral (value);
@@ -207,11 +211,15 @@ namespace Compiler
     bool ExprParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
+        mFirst = false;
+        
         return Parser::parseName (name, loc, scanner);
     }
 
     bool ExprParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        mFirst = false;
+        
         if (keyword==Scanner::K_getsquareroot && mNextOperand)
         {
             mTokenLoc = loc;        
@@ -230,16 +238,27 @@ namespace Compiler
     {
         if (code==Scanner::S_comma)
         {
-            // end marker
             mTokenLoc = loc;
+
+            if (mFirst)
+            {
+                // leading comma
+                mFirst = false;
+                return true;
+            }
+            
+            // end marker
+            scanner.putbackSpecial (code, loc);
             return false;
         }
-        
+
+        mFirst = false;
+                
         if (code==Scanner::S_newline)
         {
             // end marker
             mTokenLoc = loc;
-            scanner.putbackNewline (loc);
+            scanner.putbackSpecial (code, loc);
             return false;
         }
         
@@ -286,6 +305,7 @@ namespace Compiler
         mOperators.clear();
         mNextOperand = true;
         mCode.clear();
+        mFirst = true;
     }
     
     char ExprParser::append (std::vector<Interpreter::Type_Code>& code)

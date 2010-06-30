@@ -43,10 +43,17 @@ namespace Compiler
 
     bool Scanner::scanToken (Parser& parser)
     {
-        if (mNewline)
+        switch (mPutback)
         {
-            mNewline = false;
-            return parser.parseSpecial (S_newline, mPutbackLoc, *this);
+            case Putback_Special:
+            {            
+                mPutback = Putback_None;            
+                return parser.parseSpecial (mPutbackCode, mPutbackLoc, *this);
+            }
+            
+            case Putback_None:
+            
+                break;
         }
     
         char c;
@@ -419,20 +426,20 @@ namespace Compiler
     // constructor
 
     Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream)
-    : mErrorHandler (errorHandler), mStream (inputStream), mNewline (false)
+    : mErrorHandler (errorHandler), mStream (inputStream), mPutback (Putback_None)
     {
     }
 
     void Scanner::scan (Parser& parser)
     {
-        mNewline = false;
         while (scanToken (parser));
     }
     
-    void Scanner::putbackNewline (const TokenLoc& loc)
+    void Scanner::putbackSpecial (int code, const TokenLoc& loc)
     {
-        mNewline = true;
-        mPutbackLoc = loc;
+        mPutback = Putback_Special;
+        mPutbackCode = code;
+        mPutbackLoc = loc;    
     }
 }
 

@@ -18,11 +18,17 @@ namespace Compiler
 
     class Scanner
     {
+            enum putback_type
+            {
+                Putback_None, Putback_Special,
+            };
+    
             ErrorHandler& mErrorHandler;
             TokenLoc mLoc;
             TokenLoc mPrevLoc;
             std::istream& mStream;
-            bool mNewline;
+            putback_type mPutback;
+            int mPutbackCode;
             TokenLoc mPutbackLoc;
 
         public:
@@ -81,9 +87,9 @@ namespace Compiler
 
             void scan (Parser& parser);
             ///< Scan a token and deliver it to the parser.
-            
-            void putbackNewline (const TokenLoc& loc);
-            ///< put back a newline token
+
+            void putbackSpecial (int code, const TokenLoc& loc); 
+            ///< put back a special token
     };
 }
 
