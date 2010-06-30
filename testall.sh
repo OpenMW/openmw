@@ -11,4 +11,5 @@ function run()
 run stream
 run vfs
 run sound
+run input
 run .
