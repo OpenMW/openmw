@@ -20,18 +20,6 @@ OMW::Engine::Engine()
 {
 }
 
-// adjust name and load bsa
-
-void OMW::Engine::prepareMaster()
-{
-    std::string::size_type sep = mMaster.find_last_of (".");
-
-    if (sep==std::string::npos)
-    {
-        mMaster += ".esm";
-    }
-}
-
 // Load all BSA files in data directory.
 
 void OMW::Engine::loadBSA()
@@ -79,6 +67,13 @@ void OMW::Engine::addMaster (const std::string& master)
 {
     assert (mMaster.empty());
     mMaster = master;
+
+    // Append .esm if not already there
+    std::string::size_type sep = mMaster.find_last_of (".");
+    if (sep == std::string::npos)
+    {
+        mMaster += ".esm";
+    }
 }
 
 // Enables sky rendering
@@ -109,7 +104,6 @@ void OMW::Engine::go()
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");
 
-    prepareMaster();
     loadBSA();
 
     boost::filesystem::path masterPath (mDataDir);
