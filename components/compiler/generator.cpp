@@ -150,6 +150,16 @@ namespace
     {
         code.push_back (segment5 (19));
     }    
+
+    void opReturn (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (20));
+    }       
+    
+    void opMessageBox (Compiler::Generator::CodeContainer& code, int buttons)
+    {
+        code.push_back (segment3 (0, buttons));
+    }
 }
 
 namespace Compiler
@@ -320,6 +330,22 @@ namespace Compiler
         void squareRoot (CodeContainer& code)
         {
             opSquareRoot (code);
+        }
+        
+        void exit (CodeContainer& code)
+        {
+            opReturn (code);
+        }        
+        
+        void message (CodeContainer& code, Literals& literals, const std::string& message,
+            int buttons)
+        {
+            assert (buttons==0);
+
+            int index = literals.addString (message);
+            
+            opPushInt (code, index);
+            opMessageBox (code, buttons);
         }
     }
 }

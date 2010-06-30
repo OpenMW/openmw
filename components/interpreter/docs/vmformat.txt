@@ -43,7 +43,12 @@ opcodes 0-511 unused
 opcodes 512-1023 reserved for extensions
 
 Segment 3:
-opcodes 0-511 unused
+op    0: show message box with message string literal index in stack[0];
+         buttons (if any) in stack[arg0]..stack[1];
+         additional arguments (if any) in stack[arg0+n]..stack[arg0+1];
+         n is determined according to the message string
+         all arguments are removed from stack
+opcodes 1-511 unused
 opcodes 512-1023 reserved for extensions
 
 Segment 4:
@@ -71,6 +76,7 @@ op  16: div (float) stack[1] by stack[0], pop twice, push result
 op  17: convert stack[1] from integer to float
 op  18: convert stack[1] from float to integer
 op  19: take square root of stack[0] (float)
-opcodes 20-33554431 unused
+op  20: return
+opcodes 21-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

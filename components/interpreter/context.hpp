@@ -19,7 +19,10 @@ namespace Interpreter
 
             virtual void setLocalLong (int index, int value) = 0;        
 
-            virtual void setLocalFloat (int index, float value) = 0;        
+            virtual void setLocalFloat (int index, float value) = 0;
+            
+            virtual void messageBox (const std::string& message,
+                const std::vector<std::string>& buttons) = 0; 
     };
 }
 

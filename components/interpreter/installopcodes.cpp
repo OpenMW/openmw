@@ -5,6 +5,8 @@
 #include "genericopcodes.hpp"
 #include "localopcodes.hpp"
 #include "mathopcodes.hpp"
+#include "controlopcodes.hpp"
+#include "miscopcodes.hpp"
 
 namespace Interpreter
 {
@@ -36,6 +38,12 @@ namespace Interpreter
         interpreter.installSegment5 (15, new OpDivInt<Type_Integer>);
         interpreter.installSegment5 (16, new OpDivInt<Type_Float>);
         interpreter.installSegment5 (19, new OpSquareRoot);        
+        
+        // control structures
+        interpreter.installSegment5 (20, new OpReturn);        
+        
+        // misc
+        interpreter.installSegment3 (0, new OpMessageBox);        
     }
 }
 

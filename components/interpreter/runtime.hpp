@@ -2,6 +2,7 @@
 #define INTERPRETER_RUNTIME_H_INCLUDED
 
 #include <vector>
+#include <string>
 
 #include "types.hpp"
 
@@ -29,7 +30,9 @@ namespace Interpreter
             int getIntegerLiteral (int index) const;
         
             float getFloatLiteral (int index) const;
-                    
+              
+            std::string getStringLiteral (int index) const;
+                                
             void configure (const Type_Code *code, int codeSize);
             ///< \a context and \a code must exist as least until either configure, clear or
             /// the destructor is called. \a codeSize is given in 32-bit words.

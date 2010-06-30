@@ -40,7 +40,7 @@ namespace Compiler
                 K_if, K_endif, K_else, K_elseif,
                 K_while, K_endwhile,
                 K_return,
-                K_messageBox,
+                K_messagebox,
                 K_set, K_to,
                 K_getsquareroot
             };

@@ -67,6 +67,14 @@ namespace SAInterpreter
         mFloats.at (index) = value;
     }    
     
+    void Context::messageBox (const std::string& message,
+        const std::vector<std::string>& buttons)
+    {
+        std::cout << "message box: " << message << std::endl;
+        for (std::size_t i=0; i<buttons.size(); ++i)
+            std::cout << "    button " << i << ": " << buttons[i] << std::endl;
+    }
+                    
     void Context::report()
     {
         std::size_t i = 0;

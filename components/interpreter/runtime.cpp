@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <cstring>
 
 namespace Interpreter
 {
@@ -29,6 +30,21 @@ namespace Interpreter
         const Type_Code *literalBlock = mCode + 4 + mCode[0] + mCode[1];
         
         return *reinterpret_cast<const float *> (&literalBlock[index]);
+    }
+    
+    std::string Runtime::getStringLiteral (int index) const
+    {
+        assert (index>=0 && index<static_cast<int> (mCode[3]));
+    
+        const char *literalBlock =
+            reinterpret_cast<const char *> (mCode + 4 + mCode[0] + mCode[1] + mCode[2]);
+    
+        for (; index; --index)
+        {
+            literalBlock += std::strlen (literalBlock) + 1;
+        }
+    
+        return literalBlock;
     }
                     
     void Runtime::configure (const Interpreter::Type_Code *code, int codeSize)

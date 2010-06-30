@@ -22,6 +22,7 @@ namespace Compiler
                 BeginState,
                 ShortState, LongState, FloatState,
                 SetState, SetLocalVarState,
+                MessageState, MessageCommaState,
                 EndState
             };
 

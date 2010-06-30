@@ -2,6 +2,7 @@
 #define COMPILER_GENERATOR_H_INCLUDED
 
 #include <vector>
+#include <string>
 
 #include <components/interpreter/types.hpp>
 
@@ -33,6 +34,11 @@ namespace Compiler
         void convert (CodeContainer& code, char fromType, char toType);
         
         void squareRoot (CodeContainer& code);
+
+        void exit (CodeContainer& code);        
+        
+        void message (CodeContainer& code, Literals& literals, const std::string& message,
+            int buttons);
     }
 }
 

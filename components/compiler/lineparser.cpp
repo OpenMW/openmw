@@ -76,6 +76,13 @@ namespace Compiler
             return false;            
         }
         
+        if (mState==MessageState || mState==MessageCommaState)
+        {
+            Generator::message (mCode, mLiterals, name, 0);
+            mState = EndState;
+            return false;
+        }
+        
         return Parser::parseName (name, loc, scanner);
     }
 
@@ -89,6 +96,13 @@ namespace Compiler
                 case Scanner::K_long: mState = LongState; return true;
                 case Scanner::K_float: mState = FloatState; return true;
                 case Scanner::K_set: mState = SetState; return true;
+                case Scanner::K_messagebox: mState = MessageState; return true;
+                
+                case Scanner::K_return:
+                
+                    Generator::exit (mCode);
+                    mState = EndState;
+                    return true;
             }
         }
         else if (mState==SetLocalVarState && keyword==Scanner::K_to)
@@ -113,6 +127,12 @@ namespace Compiler
     {
         if (code==Scanner::S_newline && mState==EndState)
             return false;
+            
+        if (code==Scanner::S_comma && mState==MessageState)
+        {
+            mState = MessageCommaState;
+            return true;
+        }
             
         return Parser::parseSpecial (code, loc, scanner);
     }

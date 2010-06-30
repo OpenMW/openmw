@@ -35,6 +35,9 @@ namespace SAInterpreter
 
             virtual void setLocalFloat (int index, float value);    
             
+            virtual void messageBox (const std::string& message,
+                const std::vector<std::string>& buttons); 
+                            
             void report();
             ///< Write state to std::cout   
     };
