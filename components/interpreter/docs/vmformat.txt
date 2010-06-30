@@ -30,8 +30,10 @@ A: argument 0
 B: argument 1
 
 Segment 0:
-op  0: push A
-opcodes 1-31 unused
+op  0: push arg0
+op  1: move pv ahead by arg0
+op  2: move pv back by arg0
+opcodes 3-31 unused
 opcodes 32-63 reserved for extensions
 
 Segment 1:
@@ -80,6 +82,8 @@ op  20: return
 op  21: replace stack[0] with local short stack[0]
 op  22: replace stack[0] with local long stack[0]
 op  23: replace stack[0] with local float stack[0]
-opcodes 24-33554431 unused
+op  24: skip next instruction if stack[0]==0; pop
+op  25: skip next instruction if stack[0]!=0; pop
+opcodes 26-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

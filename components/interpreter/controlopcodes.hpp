@@ -1,6 +1,8 @@
 #ifndef INTERPRETER_CONTROLOPCODES_H_INCLUDED
 #define INTERPRETER_CONTROLOPCODES_H_INCLUDED
 
+#include <stdexcept>
+
 #include "opcodes.hpp"
 #include "runtime.hpp"
 
@@ -15,6 +17,60 @@ namespace Interpreter
                 runtime.setPC (-1);
             }           
     };
+    
+    class OpSkipZero : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Data data = runtime[0];
+                runtime.pop();
+                
+                if (data==0)
+                    runtime.setPC (runtime.getPC()+1);
+            }           
+    };    
+    
+    class OpSkipNonZero : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Data data = runtime[0];
+                runtime.pop();
+                
+                if (data!=0)
+                    runtime.setPC (runtime.getPC()+1);
+            }           
+    };      
+    
+    class OpJumpForward : public Opcode1
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime, unsigned int arg0)
+            {
+                if (arg0==0)
+                    throw std::logic_error ("inifite loop");
+                
+                runtime.setPC (runtime.getPC()+arg0-1);
+            }           
+    };        
+
+    class OpJumpBackward : public Opcode1
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime, unsigned int arg0)
+            {
+                if (arg0==0)
+                    throw std::logic_error ("inifite loop");
+                
+                runtime.setPC (runtime.getPC()-arg0-1);
+            }           
+    };        
 }
 
 #endif

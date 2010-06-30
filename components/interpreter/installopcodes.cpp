@@ -44,6 +44,10 @@ namespace Interpreter
         
         // control structures
         interpreter.installSegment5 (20, new OpReturn);        
+        interpreter.installSegment5 (24, new OpSkipZero);
+        interpreter.installSegment5 (25, new OpSkipNonZero);
+        interpreter.installSegment0 (1, new OpJumpForward);
+        interpreter.installSegment0 (2, new OpJumpBackward);
         
         // misc
         interpreter.installSegment3 (0, new OpMessageBox);        

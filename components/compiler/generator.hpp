@@ -41,6 +41,12 @@ namespace Compiler
             int buttons);
             
         void fetchLocal (CodeContainer& code, char localType, int localIndex);
+
+        void jump (CodeContainer& code, int offset);
+         
+        void jumpOnZero (CodeContainer& code, int offset);
+        
+        void jumpOnNonZero (CodeContainer& code, int offset);
     }
 }
 

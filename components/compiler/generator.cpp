@@ -175,6 +175,26 @@ namespace
     {
         code.push_back (segment5 (23));
     }    
+
+    void opJumpForward (Compiler::Generator::CodeContainer& code, int offset)
+    {
+        code.push_back (segment0 (1, offset));
+    }
+
+    void opJumpBackward (Compiler::Generator::CodeContainer& code, int offset)
+    {
+        code.push_back (segment0 (2, offset));
+    }
+    
+    void opSkipOnZero (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (24));
+    }      
+    
+    void opSkipOnNonZero (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (25));
+    }      
 }
 
 namespace Compiler
@@ -388,6 +408,36 @@ namespace Compiler
                 
                     assert (0);
             }        
+        }
+        
+        void jump (CodeContainer& code, int offset)
+        {
+            if (offset>0)
+                opJumpForward (code, offset);
+            else if (offset<0)
+                opJumpBackward (code, offset);
+            else
+                throw std::logic_error ("inifite loop");
+        }
+                
+        void jumpOnZero (CodeContainer& code, int offset)
+        {
+            opSkipOnNonZero (code);
+            
+            if (offset<0)
+                --offset; // compensate for skip instruction
+            
+            jump (code, offset);
+        }
+
+        void jumpOnNonZero (CodeContainer& code, int offset)
+        {
+            opSkipOnZero (code);
+            
+            if (offset<0)
+                --offset; // compensate for skip instruction
+            
+            jump (code, offset);            
         }
     }
 }

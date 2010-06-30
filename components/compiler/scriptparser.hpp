@@ -4,6 +4,7 @@
 
 #include "parser.hpp"
 #include "lineparser.hpp"
+#include "controlparser.hpp"
 #include "output.hpp"
 
 namespace Compiler
@@ -16,6 +17,7 @@ namespace Compiler
     {
             Output mOutput;
             LineParser mLineParser;
+            ControlParser mControlParser;
             bool mEnd;
 
         public:
