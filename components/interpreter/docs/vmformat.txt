@@ -77,6 +77,9 @@ op  17: convert stack[1] from integer to float
 op  18: convert stack[1] from float to integer
 op  19: take square root of stack[0] (float)
 op  20: return
-opcodes 21-33554431 unused
+op  21: replace stack[0] with local short stack[0]
+op  22: replace stack[0] with local long stack[0]
+op  23: replace stack[0] with local float stack[0]
+opcodes 24-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

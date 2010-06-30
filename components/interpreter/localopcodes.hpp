@@ -76,6 +76,42 @@ namespace Interpreter
                 runtime[0] = *reinterpret_cast<Type_Data *> (&floatValue);
             }           
     };     
+    
+    class OpFetchLocalShort : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0];           
+                int value = runtime.getContext().getLocalShort (index);
+                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+            }           
+    };    
+
+    class OpFetchLocalLong : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0];           
+                int value = runtime.getContext().getLocalLong (index);
+                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+            }           
+    };    
+
+    class OpFetchLocalFloat : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0];           
+                float value = runtime.getContext().getLocalFloat (index);
+                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+            }           
+    };    
 }
 
 #endif

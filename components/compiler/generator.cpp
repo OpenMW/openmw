@@ -160,6 +160,21 @@ namespace
     {
         code.push_back (segment3 (0, buttons));
     }
+    
+    void opFetchLocalShort (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (21));    
+    }
+    
+    void opFetchLocalLong (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (22));
+    }
+    
+    void opFetchLocalFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (23));
+    }    
 }
 
 namespace Compiler
@@ -346,6 +361,33 @@ namespace Compiler
             
             opPushInt (code, index);
             opMessageBox (code, buttons);
+        }
+        
+        void fetchLocal (CodeContainer& code, char localType, int localIndex)
+        {
+            opPushInt (code, localIndex);
+
+            switch (localType)
+            {
+                case 'f':
+                
+                    opFetchLocalFloat (code);
+                    break;
+                
+                case 's':
+
+                    opFetchLocalShort (code);
+                    break;
+                
+                case 'l':
+
+                    opFetchLocalLong (code);
+                    break;
+            
+                default:
+                
+                    assert (0);
+            }        
         }
     }
 }

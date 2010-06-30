@@ -7,6 +7,7 @@
 #include "generator.hpp"
 #include "scanner.hpp"
 #include "errorhandler.hpp"
+#include "locals.hpp"
 
 namespace Compiler
 {
@@ -212,6 +213,19 @@ namespace Compiler
         Scanner& scanner)
     {
         mFirst = false;
+
+        if (mNextOperand)
+        {    
+            char type = mLocals.getType (name);
+            
+            if (type!=' ')
+            {
+                Generator::fetchLocal (mCode, type, mLocals.getIndex (name));
+                mNextOperand = false;
+                mOperands.push_back (type=='f' ? 'f' : 'l');    
+                return true;    
+            }
+        }
         
         return Parser::parseName (name, loc, scanner);
     }

@@ -39,6 +39,8 @@ namespace Compiler
         
         void message (CodeContainer& code, Literals& literals, const std::string& message,
             int buttons);
+            
+        void fetchLocal (CodeContainer& code, char localType, int localIndex);
     }
 }
 

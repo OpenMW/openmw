@@ -21,13 +21,16 @@ namespace Interpreter
         interpreter.installSegment5 (17, new OpIntToFloat1);
         interpreter.installSegment5 (18, new OpFloatToInt1);
                     
-        // local variables
+        // local variables & literals
         interpreter.installSegment5 (0, new OpStoreLocalShort);
         interpreter.installSegment5 (1, new OpStoreLocalLong);
         interpreter.installSegment5 (2, new OpStoreLocalFloat);        
         interpreter.installSegment5 (4, new OpFetchIntLiteral);            
         interpreter.installSegment5 (5, new OpFetchFloatLiteral);  
-        
+        interpreter.installSegment5 (21, new OpFetchLocalShort);
+        interpreter.installSegment5 (22, new OpFetchLocalLong);
+        interpreter.installSegment5 (23, new OpFetchLocalFloat); 
+                
         // math
         interpreter.installSegment5 (9, new OpAddInt<Type_Integer>);
         interpreter.installSegment5 (10, new OpAddInt<Type_Float>);
