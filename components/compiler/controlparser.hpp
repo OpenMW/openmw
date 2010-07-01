@@ -41,6 +41,10 @@ namespace Compiler
             ExprParser mExprParser;
             State mState;
                 
+            bool parseIfBody (int keyword, const TokenLoc& loc, Scanner& scanner);
+
+            bool parseWhileBody (int keyword, const TokenLoc& loc, Scanner& scanner);
+                
         public:
         
             ControlParser (ErrorHandler& errorHandler, Context& context, Locals& locals,

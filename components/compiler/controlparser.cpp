@@ -10,6 +10,153 @@
 
 namespace Compiler
 {
+    bool ControlParser::parseIfBody (int keyword, const TokenLoc& loc, Scanner& scanner)
+    {
+        if (keyword==Scanner::K_endif || keyword==Scanner::K_elseif ||
+            keyword==Scanner::K_else)
+        {
+            std::pair<Codes, Codes> entry;
+
+            if (mState!=IfElseBodyState)             
+                mExprParser.append (entry.first);
+
+            std::copy (mCodeBlock.begin(), mCodeBlock.end(),
+                std::back_inserter (entry.second));
+                
+            mIfCode.push_back (entry);
+
+            mCodeBlock.clear();
+            
+            if (keyword==Scanner::K_endif)
+            {
+                // store code for if-cascade
+                Codes codes;
+                
+                for (IfCodes::reverse_iterator iter (mIfCode.rbegin());
+                    iter!=mIfCode.rend(); ++iter)
+                {
+                    Codes block;
+
+                    if (iter!=mIfCode.rbegin())
+                        Generator::jump (iter->second, codes.size()+1);
+
+                    if (!iter->first.empty())
+                    {
+                        // if or elseif
+                        std::copy (iter->first.begin(), iter->first.end(),
+                            std::back_inserter (block));
+                        Generator::jumpOnZero (block, iter->second.size()+1);
+                    }
+                    
+                    std::copy (iter->second.begin(), iter->second.end(),
+                        std::back_inserter (block));
+                   
+                   std::swap (codes, block);
+                   
+                   std::copy (block.begin(), block.end(), std::back_inserter (codes));
+                }
+                
+                std::copy (codes.begin(), codes.end(), std::back_inserter (mCode));
+                
+                mIfCode.clear();
+                mState = IfEndifState;
+            }
+            else if (keyword==Scanner::K_elseif)
+            {
+                mExprParser.reset();
+                scanner.scan (mExprParser);
+
+                mState = IfElseifEndState;            
+            }
+            else if (keyword==Scanner::K_else)
+            {
+                mState = IfElseEndState;            
+            }                
+            
+            return true;
+        }
+        else if (keyword==Scanner::K_if || keyword==Scanner::K_while)
+        {
+            // nested
+            ControlParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
+            
+            if (parser.parseKeyword (keyword, loc, scanner))
+                scanner.scan (parser);  
+                
+            parser.appendCode (mCodeBlock);                    
+                
+            return true;
+        }
+        else
+        {
+            mLineParser.reset();
+            if (mLineParser.parseKeyword (keyword, loc, scanner))
+                scanner.scan (mLineParser);      
+                
+            return true;      
+        }    
+        
+        return false;
+    }
+
+    bool ControlParser::parseWhileBody (int keyword, const TokenLoc& loc, Scanner& scanner)
+    {
+        if (keyword==Scanner::K_endwhile)
+        {
+            Codes loop;
+            
+            Codes expr;
+            mExprParser.append (expr);
+            
+            Generator::jump (loop, -mCodeBlock.size()-expr.size());
+        
+            std::copy (expr.begin(), expr.end(), std::back_inserter (mCode));
+
+            Codes skip;
+            
+            Generator::jumpOnZero (skip, mCodeBlock.size()+loop.size()+1);
+            
+            std::copy (skip.begin(), skip.end(), std::back_inserter (mCode));
+            
+            std::copy (mCodeBlock.begin(), mCodeBlock.end(), std::back_inserter (mCode));
+            
+            Codes loop2;
+        
+            Generator::jump (loop2, -mCodeBlock.size()-expr.size()-skip.size());
+
+            if (loop.size()!=loop2.size())
+                throw std::logic_error (
+                    "internal compiler error: failed to generate a while loop");
+
+            std::copy (loop2.begin(), loop2.end(), std::back_inserter (mCode));
+        
+            mState = WhileEndwhileState;
+            return true;    
+        }
+        else if (keyword==Scanner::K_if || keyword==Scanner::K_while)
+        {
+            // nested
+            ControlParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
+            
+            if (parser.parseKeyword (keyword, loc, scanner))
+                scanner.scan (parser);  
+                
+            parser.appendCode (mCodeBlock);                    
+                
+            return true;
+        }
+        else
+        {
+            mLineParser.reset();
+            if (mLineParser.parseKeyword (keyword, loc, scanner))
+                scanner.scan (mLineParser);      
+                
+            return true;      
+        }            
+        
+        return false;
+    }
+
     ControlParser::ControlParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
@@ -48,144 +195,13 @@ namespace Compiler
         }
         else if (mState==IfBodyState || mState==IfElseifBodyState || mState==IfElseBodyState)
         {
-            if (keyword==Scanner::K_endif || keyword==Scanner::K_elseif ||
-                keyword==Scanner::K_else)
-            {
-                std::pair<Codes, Codes> entry;
-
-                if (mState!=IfElseBodyState)             
-                    mExprParser.append (entry.first);
-    
-                std::copy (mCodeBlock.begin(), mCodeBlock.end(),
-                    std::back_inserter (entry.second));
-                    
-                mIfCode.push_back (entry);
-
-                mCodeBlock.clear();
-                
-                if (keyword==Scanner::K_endif)
-                {
-                    // store code for if-cascade
-                    Codes codes;
-                    
-                    for (IfCodes::reverse_iterator iter (mIfCode.rbegin());
-                        iter!=mIfCode.rend(); ++iter)
-                    {
-                        Codes block;
-
-                        if (iter!=mIfCode.rbegin())
-                            Generator::jump (iter->second, codes.size()+1);
-
-                        if (!iter->first.empty())
-                        {
-                            // if or elseif
-                            std::copy (iter->first.begin(), iter->first.end(),
-                                std::back_inserter (block));
-                            Generator::jumpOnZero (block, iter->second.size()+1);
-                        }
-                        
-                        std::copy (iter->second.begin(), iter->second.end(),
-                            std::back_inserter (block));
-                       
-                       std::swap (codes, block);
-                       
-                       std::copy (block.begin(), block.end(), std::back_inserter (codes));
-                    }
-                    
-                    std::copy (codes.begin(), codes.end(), std::back_inserter (mCode));
-                    
-                    mIfCode.clear();
-                    mState = IfEndifState;
-                }
-                else if (keyword==Scanner::K_elseif)
-                {
-                    mExprParser.reset();
-                    scanner.scan (mExprParser);
-
-                    mState = IfElseifEndState;            
-                }
-                else if (keyword==Scanner::K_else)
-                {
-                    mState = IfElseEndState;            
-                }                
-                
-                return true;
-            }
-            else if (keyword==Scanner::K_if || keyword==Scanner::K_while)
-            {
-                // nested
-                ControlParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
-                
-                if (parser.parseKeyword (keyword, loc, scanner))
-                    scanner.scan (parser);  
-                    
-                parser.appendCode (mCodeBlock);                    
-                    
-                return true;
-            }
-            else
-            {
-                mLineParser.reset();
-                if (mLineParser.parseKeyword (keyword, loc, scanner))
-                    scanner.scan (mLineParser);      
-                    
-                return true;      
-            }
+            if (parseIfBody (keyword, loc, scanner))
+                return true;            
         }
         else if (mState==WhileBodyState)
         {
-            if (keyword==Scanner::K_endwhile)
-            {
-                Codes loop;
-                
-                Codes expr;
-                mExprParser.append (expr);
-                
-                Generator::jump (loop, -mCodeBlock.size()-expr.size());
-            
-                std::copy (expr.begin(), expr.end(), std::back_inserter (mCode));
-
-                Codes skip;
-                
-                Generator::jumpOnZero (skip, mCodeBlock.size()+loop.size()+1);
-                
-                std::copy (skip.begin(), skip.end(), std::back_inserter (mCode));
-                
-                std::copy (mCodeBlock.begin(), mCodeBlock.end(), std::back_inserter (mCode));
-                
-                Codes loop2;
-            
-                Generator::jump (loop2, -mCodeBlock.size()-expr.size()-skip.size());
-
-                if (loop.size()!=loop2.size())
-                    throw std::logic_error (
-                        "internal compiler error: failed to generate a while loop");
-
-                std::copy (loop2.begin(), loop2.end(), std::back_inserter (mCode));
-            
-                mState = WhileEndwhileState;
-                return true;    
-            }
-            else if (keyword==Scanner::K_if || keyword==Scanner::K_while)
-            {
-                // nested
-                ControlParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
-                
-                if (parser.parseKeyword (keyword, loc, scanner))
-                    scanner.scan (parser);  
-                    
-                parser.appendCode (mCodeBlock);                    
-                    
+            if ( parseWhileBody (keyword, loc, scanner))
                 return true;
-            }
-            else
-            {
-                mLineParser.reset();
-                if (mLineParser.parseKeyword (keyword, loc, scanner))
-                    scanner.scan (mLineParser);      
-                    
-                return true;      
-            }        
         }
         
         return Parser::parseKeyword (keyword, loc, scanner);
