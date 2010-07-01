@@ -14,7 +14,7 @@ set(GAME
 set(GAME_HEADER 
     apps/openmw/mwinput/inputmanager.hpp 
     apps/openmw/engine.hpp)
-source_group(game FILES ${GAME} ${GAME_HEADER})
+source_group(apps\\openmw FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND 
     apps/openmw/mwrender/mwscene.cpp 
@@ -27,12 +27,12 @@ set(GAMEREND_HEADER
     apps/openmw/mwrender/interior.hpp 
     apps/openmw/mwrender/playerpos.hpp
     apps/openmw/mwrender/sky.hpp)
-source_group(game_renderer FILES ${GAMEREND} ${GAMEREND_HEADER})    
+source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})    
 
 # set(GAMEINPUT)
 set(GAMEINPUT_HEADER 
     apps/openmw/mwinput/inputmanager.hpp)
-source_group(game_input FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})    
+source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})    
 
 set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT})
 set(APPS_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER})
@@ -45,7 +45,7 @@ set(BSA
 set(BSA_HEADER 
     components/bsa/bsa_archive.hpp 
     components/bsa/bsa_file.hpp)
-source_group(bsa FILES ${BSA} ${BSA_HEADER})
+source_group(components\\bsa FILES ${BSA} ${BSA_HEADER})
 
 set(NIF 
     components/nif/nif_file.cpp)
@@ -61,13 +61,13 @@ set(NIF_HEADER
     components/nif/data.hpp 
     components/nif/nif_file.hpp 
     components/nif/property.hpp)
-source_group(nif FILES ${NIF} ${NIF_HEADER})    
+source_group(components\\nif FILES ${NIF} ${NIF_HEADER})    
 
 set(NIFOGRE 
     components/nifogre/ogre_nif_loader.cpp)
 set(NIFOGRE_HEADER 
     components/nifogre/ogre_nif_loader.hpp)
-source_group(nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})    
+source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})    
 
 set(ESM_STORE 
     components/esm_store/store.cpp 
@@ -76,16 +76,16 @@ set(ESM_STORE_HEADER
     components/esm_store/cell_store.hpp
     components/esm_store/reclists.hpp 
     components/esm_store/store.hpp)
-source_group(esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
+source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 
 file(GLOB ESM_HEADER components/esm/*.hpp)
-source_group(esm_header FILES ${ESM_HEADER}) 
+source_group(components\\esm FILES ${ESM_HEADER}) 
 
 set(OGRE 
     components/engine/ogre/renderer.cpp)
 set(OGRE_HEADER 
     components/engine/ogre/renderer.hpp)
-source_group(ogre FILES ${OGRE} ${OGRE_HEADER})
+source_group(components\\engine\\ogre FILES ${OGRE} ${OGRE_HEADER})
 
 set(INPUT 
     components/engine/input/oismanager.cpp)
@@ -96,12 +96,12 @@ set(INPUT_HEADER
     components/engine/input/dispatch_map.hpp
     components/engine/input/dispatcher.hpp 
     components/engine/input/poller.hpp)
-source_group(input FILES ${INPUT} ${INPUT_HEADER})
+source_group(components\\engine\\input FILES ${INPUT} ${INPUT_HEADER})
 
 set(COMMANDSERVER
     components/commandserver/server.hpp
     components/commandserver/server.cpp)
-source_group(commandserver FILES ${COMMANDSERVER})    
+source_group(components\\commandserver FILES ${COMMANDSERVER})    
 
 set(MISC 
     components/misc/stringops.cpp 
@@ -111,15 +111,15 @@ set(MISC_HEADER
     components/misc/slice_array.hpp
     components/misc/stringops.hpp
     components/misc/tsdeque.hpp)
-source_group(misc FILES ${MISC} ${MISC_HEADER})   
+source_group(components\\misc FILES ${MISC} ${MISC_HEADER})   
     
 file(GLOB COMPILER components/compiler/*.cpp)
 file(GLOB COMPILER_HEADER components/compiler/*.hpp)
-source_group(compiler FILES ${COMPILER} ${COMPILER_HEADER})    
+source_group(components\\compiler FILES ${COMPILER} ${COMPILER_HEADER})    
 
 file(GLOB INTERPRETER components/interpreter/*.cpp)
 file(GLOB INTERPRETER_HEADER components/interpreter/*.hpp)
-source_group(interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
+source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC} 
     ${COMMANDSERVER}
@@ -132,7 +132,7 @@ set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_
 # source directory: libs
 
 set(MANGLE_VFS libs/mangle/vfs/servers/ogre_vfs.cpp)
-source_group(mangle_vfs FILES ${MANGLE_VFS})
+source_group(libs\\mangle_vfs FILES ${MANGLE_VFS})
 
 set(OPENMW_LIBS ${MANGLE_VFS})
 set(OPENMW_LIBS_HEADER)
