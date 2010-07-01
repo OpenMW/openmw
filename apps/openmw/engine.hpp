@@ -8,6 +8,7 @@
 #include "apps/openmw/mwrender/mwscene.hpp"
 #include "components/misc/tsdeque.hpp"
 #include "components/commandserver/server.hpp"
+#include "components/commandserver/command.hpp"
 
 
 namespace MWRender
@@ -31,7 +32,7 @@ namespace OMW
             bool                  mEnableSky;
             MWRender::SkyManager* mpSkyManager;
 
-            TsDeque<std::string>                      mCommands;
+            TsDeque<OMW::Command>                     mCommandQueue;
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
             // not implemented

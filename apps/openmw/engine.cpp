@@ -32,7 +32,8 @@ OMW::Engine::Engine()
     : mEnableSky   (false)
     , mpSkyManager (NULL)
 {
-    mspCommandServer.reset(new OMW::CommandServer::Server(&mCommands, kCommandServerPort));
+    mspCommandServer.reset(
+        new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
 }
 
 // Load all BSA files in data directory.
@@ -100,11 +101,16 @@ void OMW::Engine::enableSky (bool bEnable)
 
 void OMW::Engine::processCommands()
 {
-    std::string msg;
-    while (mCommands.pop_front(msg))
+    Command cmd;
+    while (mCommandQueue.try_pop_front(cmd))
     {
         ///\todo Add actual processing of the received command strings
-        std::cout << "Command: '" << msg << "'" << std::endl;
+        std::cout << "Command: '" << cmd.mCommand << "'" << std::endl;
+
+        ///\todo Replace with real output.  For now, echo back the string in uppercase
+        std::string reply(cmd.mCommand);
+        std::transform(reply.begin(), reply.end(), reply.begin(), toupper);
+        cmd.mReplyFunction(reply);
     } 
 }
 

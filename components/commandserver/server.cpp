@@ -9,6 +9,12 @@ using boost::asio::ip::tcp;
 //
 namespace OMW { namespace CommandServer { namespace Detail {
 
+    struct Header
+    {
+        char   magic[4];
+        size_t dataLength;
+    } header;
+
     ///
     /// Tracks an active connection to the CommandServer
     ///
@@ -19,7 +25,9 @@ namespace OMW { namespace CommandServer { namespace Detail {
 
         void         start();     
         void         stop();
+
         tcp::socket& socket();
+        void         reply (std::string s);
 
     protected:
         void handle ();
@@ -53,18 +61,29 @@ namespace OMW { namespace CommandServer { namespace Detail {
     {
         return mSocket;
     }
+
+    void Connection::reply (std::string reply)
+    {
+        const size_t plen = sizeof(Header) + reply.length() + 1;
+        
+        std::vector<char> packet(plen);
+        Header* pHeader = reinterpret_cast<Header*>(&packet[0]);
+        strncpy(pHeader->magic, "OMW0", 4);
+        pHeader->dataLength = reply.length() + 1;   // Include the null terminator
+        strncpy(&packet[8], reply.c_str(), pHeader->dataLength); 
+
+        boost::system::error_code ec;
+        boost::asio::write(mSocket, boost::asio::buffer(packet), 
+                           boost::asio::transfer_all(), ec);     
+        if (ec)
+            std::cout << "Error: " << ec.message() << std::endl;        
+    }
        
     void Connection::handle ()
     {
         bool bDone = false;
         while (!bDone)
         {
-            struct Header
-            {
-                char   magic[4];
-                size_t dataLength;
-            } header;
-
             // Read the header
             boost::system::error_code error;
             mSocket.read_some(boost::asio::buffer(&header, sizeof(Header)), error);
@@ -79,7 +98,7 @@ namespace OMW { namespace CommandServer { namespace Detail {
                     boost::system::error_code error;
                     mSocket.read_some(boost::asio::buffer(&msg[0], header.dataLength), error);
                     if (!error)
-                        mpServer->postMessage( &msg[0] );
+                        mpServer->postCommand(this, &msg[0]);
                     else
                         bDone = true;
                 }
@@ -98,10 +117,10 @@ namespace OMW { namespace CommandServer {
 
     using namespace Detail;
        
-    Server::Server (Deque* pDeque, const int port)
-        : mAcceptor   (mIOService, tcp::endpoint(tcp::v4(), port))
-        , mpCommands  (pDeque)
-        , mbStopping  (false)
+    Server::Server (Deque* pCommandQueue, const int port)
+        : mAcceptor      (mIOService, tcp::endpoint(tcp::v4(), port))
+        , mpCommandQueue (pCommandQueue)
+        , mbStopping     (false)
     {       
     }
        
@@ -149,9 +168,12 @@ namespace OMW { namespace CommandServer {
         delete ptr;
     }
 
-    void Server::postMessage (const char* s)
+    void Server::postCommand (Connection* pConnection, const char* s)
     {
-        mpCommands->push_back(s);
+        Command cmd;
+        cmd.mCommand = s;
+        cmd.mReplyFunction = std::bind1st(std::mem_fun(&Connection::reply), pConnection);
+        mpCommandQueue->push_back(cmd);
     }
 
     void Server::threadMain()

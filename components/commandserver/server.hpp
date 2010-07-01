@@ -9,6 +9,7 @@
 #include <boost/thread.hpp>
 
 #include "components/misc/tsdeque.hpp"
+#include "components/commandserver/command.hpp"
 
 namespace OMW { namespace CommandServer 
 {
@@ -27,9 +28,9 @@ namespace OMW { namespace CommandServer
     class Server
     { 
     public:
-        typedef TsDeque<std::string> Deque;
+        typedef TsDeque<Command> Deque;
 
-        Server (Deque* pDeque, const int port);
+        Server (Deque* pCommandQueue, const int port);
 
         void start();
         void stop();
@@ -39,7 +40,7 @@ namespace OMW { namespace CommandServer
         typedef std::set<Detail::Connection*> ConnectionSet;
 
         void removeConnection (Detail::Connection* ptr);
-        void postMessage      (const char* s);
+        void postCommand      (Detail::Connection*, const char* s);
 
         void threadMain();            
 
@@ -53,8 +54,8 @@ namespace OMW { namespace CommandServer
         ConnectionSet                   mConnections;
         mutable boost::mutex            mConnectionsMutex;
         
-        // Pointer to output queue in which to put received strings
-        Deque*                          mpCommands;
+        // Pointer to command queue
+        Deque*                          mpCommandQueue;
     };
 
 }}

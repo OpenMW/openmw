@@ -9,6 +9,12 @@ using boost::asio::ip::tcp;
 class Client
 {
 protected:
+    struct Header
+    {
+        char            magic[4];
+        boost::uint32_t dataLength;
+    };
+
     boost::asio::io_service mIOService;
     tcp::socket* mpSocket;
 
@@ -39,11 +45,6 @@ public:
 
     bool send (const char* msg)
     {
-        struct Header
-        {
-            char            magic[4];
-            boost::uint32_t dataLength;
-        };
         const size_t slen = strlen(msg);
         const size_t plen = sizeof(Header) + slen + 1;
         
@@ -60,6 +61,33 @@ public:
             std::cout << "Error: " << ec.message() << std::endl;
         
         return !ec;
+    }
+
+    bool receive (std::string& reply)
+    {
+        Header header;
+        boost::system::error_code error;
+        mpSocket->read_some(boost::asio::buffer(&header, sizeof(Header)), error);
+
+        if (error != boost::asio::error::eof)
+        {
+            if (strncmp(header.magic, "OMW0", 4) == 0)
+            {
+                std::vector<char> msg;
+                msg.resize(header.dataLength);
+                
+                boost::system::error_code error;
+                mpSocket->read_some(boost::asio::buffer(&msg[0], header.dataLength), error);
+                if (!error)
+                {
+                    reply = &msg[0];
+                    return true;
+                }
+            }
+            else
+                throw std::exception("Unexpected header!");
+        }       
+        return false;
     }
 };
 
@@ -79,14 +107,26 @@ int main(int argc, char* argv[])
         bool bDone = false;
         do
         {
-            std::cout << "> ";
-            char buffer[1024];
-            gets(buffer);
+            std::cout << "Client> ";
+            std::string buffer;
+            std::getline(std::cin, buffer);
 
-            if (std::string(buffer) != "quit")
-                bDone = !client.send(buffer);
-            else
+            if (buffer == "quit")
                 bDone = true;
+            else
+            {
+                if (client.send(buffer.c_str()))
+                {
+                    std::string reply;
+                    if (client.receive(reply))
+                        std::cout << "Server: " << reply << std::endl;
+                    else
+                        bDone = true;
+                }
+                else
+                    bDone = true;
+            }
+                
         } while (!bDone);
 
         client.disconnect();

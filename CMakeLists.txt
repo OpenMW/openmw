@@ -99,6 +99,7 @@ set(INPUT_HEADER
 source_group(components\\engine\\input FILES ${INPUT} ${INPUT_HEADER})
 
 set(COMMANDSERVER
+    components/commandserver/command.hpp
     components/commandserver/server.hpp
     components/commandserver/server.cpp)
 source_group(components\\commandserver FILES ${COMMANDSERVER})    
