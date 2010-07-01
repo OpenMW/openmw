@@ -14,10 +14,25 @@
 #include "apps/openmw/mwrender/playerpos.hpp"
 #include "apps/openmw/mwrender/sky.hpp"
 
+class ProcessCommandsHook : public Ogre::FrameListener
+{
+public:
+  ProcessCommandsHook(OMW::Engine* pEngine) : mpEngine (pEngine) {}
+  virtual bool frameStarted(const Ogre::FrameEvent& evt)
+  {
+      mpEngine->processCommands();
+      return true;
+  }
+protected:
+  OMW::Engine* mpEngine;
+};
+
+
 OMW::Engine::Engine() 
     : mEnableSky   (false)
     , mpSkyManager (NULL)
 {
+    mspCommandServer.reset(new OMW::CommandServer::Server(&mCommands, kCommandServerPort));
 }
 
 // Load all BSA files in data directory.
@@ -83,6 +98,16 @@ void OMW::Engine::enableSky (bool bEnable)
     mEnableSky = bEnable;
 }
 
+void OMW::Engine::processCommands()
+{
+    std::string msg;
+    while (mCommands.pop_front(msg))
+    {
+        ///\todo Add actual processing of the received command strings
+        std::cout << "Command: '" << msg << "'" << std::endl;
+    } 
+}
+
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -146,11 +171,17 @@ void OMW::Engine::go()
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, player);
 
+    // Launch the console server
+    std::cout << "Starting command server on port " << kCommandServerPort << std::endl;
+    mspCommandServer->start();
+    mOgre.getRoot()->addFrameListener( new ProcessCommandsHook(this) );
+
     std::cout << "\nStart! Press Q/ESC or close window to exit.\n";
 
     // Start the main rendering loop
     mOgre.start();
 
+    mspCommandServer->stop();
     delete mpSkyManager;
 
     std::cout << "\nThat's all for now!\n";

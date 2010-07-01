@@ -98,16 +98,22 @@ set(INPUT_HEADER
     components/engine/input/poller.hpp)
 source_group(input FILES ${INPUT} ${INPUT_HEADER})
 
+set(COMMANDSERVER
+    components/commandserver/server.hpp
+    components/commandserver/server.cpp)
+source_group(commandserver FILES ${COMMANDSERVER})    
+
 set(MISC 
     components/misc/stringops.cpp 
     components/misc/fileops.cpp)
 set(MISC_HEADER 
     components/misc/fileops.hpp 
     components/misc/slice_array.hpp
-    components/misc/stringops.hpp)
+    components/misc/stringops.hpp
+    components/misc/tsdeque.hpp)
 source_group(misc FILES ${MISC} ${MISC_HEADER})   
 
-set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC})
+set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${COMMANDSERVER} ${MISC})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER})
     
@@ -137,7 +143,7 @@ include_directories("."
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include)
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
-ADD_SUBDIRECTORY( extern/caelum )
+add_subdirectory( extern/caelum )
 
 # Specify build paths
 
@@ -188,6 +194,9 @@ if (APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
     target_link_libraries(openmw ${CARBON_FRAMEWORK})
 endif (APPLE)
+
+# Other apps and tools
+add_subdirectory( apps/clientconsole )
 
 # Apple bundling
 if (APPLE)

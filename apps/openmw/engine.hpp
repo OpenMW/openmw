@@ -6,6 +6,9 @@
 #include <boost/filesystem.hpp>
 
 #include "apps/openmw/mwrender/mwscene.hpp"
+#include "components/misc/tsdeque.hpp"
+#include "components/commandserver/server.hpp"
+
 
 namespace MWRender
 {
@@ -18,6 +21,8 @@ namespace OMW
 
     class Engine
     {
+            enum { kCommandServerPort = 27917 };
+
             boost::filesystem::path mDataDir;
             Render::OgreRenderer mOgre;
             std::string mCellName;
@@ -25,6 +30,9 @@ namespace OMW
             
             bool                  mEnableSky;
             MWRender::SkyManager* mpSkyManager;
+
+            TsDeque<std::string>                      mCommands;
+            std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
             // not implemented
             Engine (const Engine&);
@@ -54,6 +62,9 @@ namespace OMW
 
             /// Enables rendering of the sky (off by default).
             void enableSky (bool bEnable);
+
+            /// Process pending commands
+            void processCommands();
 
             /// Initialise and enter main loop.
             void go();
