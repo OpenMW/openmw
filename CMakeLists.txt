@@ -228,19 +228,11 @@ endif (APPLE)
 
 # Tools
 option(BUILD_MWCOMPILER "build standalone Morrowind script compiler" ON)
-
 if (BUILD_MWCOMPILER)
-set(TOOLS_MWCOMPILER ${COMPILER} apps/mwcompiler/main.cpp apps/mwcompiler/context.cpp
-    apps/mwcompiler/context.hpp)
-
-add_executable(mwcompiler ${TOOLS_MWCOMPILER})
+    add_subdirectory( apps/mwcompiler )
 endif()
 
 option(BUILD_MWINTERPRETER "build standalone Morrowind script code interpreter" ON)
-
 if (BUILD_MWINTERPRETER)
-set(TOOLS_MWINTERPRETER ${INTERPRETER} apps/mwinterpreter/main.cpp
-    apps/mwinterpreter/context.cpp apps/mwinterpreter/context.hpp)
-
-add_executable(mwinterpreter ${TOOLS_MWINTERPRETER})
+    add_subdirectory( apps/mwinterpreter )
 endif()
