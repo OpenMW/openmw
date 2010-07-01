@@ -415,7 +415,7 @@ namespace Compiler
             if (offset>0)
                 opJumpForward (code, offset);
             else if (offset<0)
-                opJumpBackward (code, offset);
+                opJumpBackward (code, -offset);
             else
                 throw std::logic_error ("inifite loop");
         }

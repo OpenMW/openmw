@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <stdexcept>
 
 #include "scanner.hpp"
 #include "generator.hpp"
@@ -35,6 +36,14 @@ namespace Compiler
 
                 mState = IfEndState;
                 return true;
+            }
+            else if (keyword==Scanner::K_while)
+            {
+                mExprParser.reset();
+                scanner.scan (mExprParser);
+
+                mState = WhileEndState;
+                return true;            
             }
         }
         else if (mState==IfBodyState || mState==IfElseifBodyState || mState==IfElseBodyState)
@@ -123,6 +132,61 @@ namespace Compiler
                 return true;      
             }
         }
+        else if (mState==WhileBodyState)
+        {
+            if (keyword==Scanner::K_endwhile)
+            {
+                Codes loop;
+                
+                Codes expr;
+                mExprParser.append (expr);
+                
+                Generator::jump (loop, -mCodeBlock.size()-expr.size());
+            
+                std::copy (expr.begin(), expr.end(), std::back_inserter (mCode));
+
+                Codes skip;
+                
+                Generator::jumpOnZero (skip, mCodeBlock.size()+loop.size()+1);
+                
+                std::copy (skip.begin(), skip.end(), std::back_inserter (mCode));
+                
+                std::copy (mCodeBlock.begin(), mCodeBlock.end(), std::back_inserter (mCode));
+                
+                Codes loop2;
+            
+                Generator::jump (loop2, -mCodeBlock.size()-expr.size()-skip.size());
+
+                if (loop.size()!=loop2.size())
+                    throw std::logic_error (
+                        "internal compiler error: failed to generate a while loop");
+
+                std::copy (loop2.begin(), loop2.end(), std::back_inserter (mCode));
+            
+                mState = WhileEndwhileState;
+                return true;    
+            }
+            else if (keyword==Scanner::K_if || keyword==Scanner::K_while)
+            {
+                // nested
+                ControlParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
+                
+                if (parser.parseKeyword (keyword, loc, scanner))
+                    scanner.scan (parser);  
+                    
+                parser.appendCode (mCodeBlock);                    
+                    
+                return true;
+            }
+            else
+            {
+                mLineParser.reset();
+                if (mLineParser.parseKeyword (keyword, loc, scanner))
+                    scanner.scan (mLineParser);      
+                    
+                return true;      
+            }        
+        }
         
         return Parser::parseKeyword (keyword, loc, scanner);
     }
@@ -136,13 +200,18 @@ namespace Compiler
                 case IfEndState: mState = IfBodyState; return true;
                 case IfElseifEndState: mState = IfElseifBodyState; return true;
                 case IfElseEndState: mState = IfElseBodyState; return true;
+
+                case WhileEndState: mState = WhileBodyState; return true;
                 
                 case IfBodyState:
                 case IfElseifBodyState:
                 case IfElseBodyState:
+                case WhileBodyState:
+                
                     return true; // empty line
             
                 case IfEndifState:
+                case WhileEndwhileState:
                 
                     return false;
                     

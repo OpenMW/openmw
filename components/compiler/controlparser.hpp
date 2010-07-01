@@ -21,10 +21,12 @@ namespace Compiler
             enum State
             {
                 StartState,
-                IfState, IfEndState, IfBodyState,
+                IfEndState, IfBodyState,
                 IfElseifEndState, IfElseifBodyState,
                 IfElseEndState, IfElseBodyState,
-                IfEndifState
+                IfEndifState,
+                WhileEndState, WhileBodyState,
+                WhileEndwhileState
             };
             
             typedef std::vector<Interpreter::Type_Code> Codes;
