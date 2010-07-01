@@ -131,6 +131,35 @@ namespace ESMS
         }
     }
   };
+  
+  template <typename X>
+  struct ScriptListT : RecList
+  {
+    typedef std::map<std::string,X> MapType;
+
+    MapType list;
+
+    // Load one object of this type
+    void load(ESMReader &esm, const std::string &id)
+    {
+      X ref;
+      ref.load (esm);
+      
+      std::string realId = ref.data.name.toString();
+      
+      std::swap (list[realId], ref);
+    }
+
+    // Find the given object ID, or return NULL if not found.
+    const X* find(const std::string &id) const
+    {
+      if(list.find(id) == list.end())
+        return NULL;
+      return &list.find(id)->second;
+    }
+
+    int getSize() { return list.size(); }
+  };  
 
   /* We need special lists for:
 
