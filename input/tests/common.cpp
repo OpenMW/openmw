@@ -8,7 +8,7 @@ Driver *input;
 
 struct MyCB : Event
 {
-  void event(Event::EventType type, int i, const void *p)
+  void event(Event::Type type, int i, const void *p)
   {
     cout << "got event: type=" << type << " index=" << i << endl;
   }

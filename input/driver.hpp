@@ -2,38 +2,12 @@
 #define MANGLE_INPUT_DRIVER_H
 
 #include "../tools/shared_ptr.hpp"
+#include "event.hpp"
 
 namespace Mangle
 {
   namespace Input
   {
-    /** Generic callback for input events. The meaning of the
-        parameters depend on the system producing the events.
-    */
-    struct Event
-    {
-      /// Event types
-      enum EventType
-        {
-          EV_Unknown    = -1,   // Unknown event type
-          EV_KeyDown    = 1,    // Key, mouse or other button was pressed
-          EV_KeyUp      = 2,    // Key, mouse or other button was released
-          EV_MouseMove  = 3,    // Mouse movement (all axis movement?)
-          EV_Other      = 4     // Other event
-        };
-
-      /**
-         Called upon all events. The first parameter give the event
-         type, the second gives additional data (usually the local
-         keysym as defined by the driver), and the pointer points to
-         the full custom event structure provided by the driver (the
-         type may vary depending on the EventType, this is defined in
-         the Driver documentation.)
-       */
-      virtual void event(EventType type, int index, const void *p) = 0;
-      virtual ~Event() {}
-    };
-
     /** Input::Driver is the main interface to any input system that
         handles keyboard and/or mouse input, along with any other
         input source like joysticks.
@@ -78,7 +52,7 @@ namespace Mangle
           can also be called from the outside to "fake" events from
           this driver.
       */
-      void makeEvent(Event::EventType type, int index, const void *p=NULL)
+      void makeEvent(Event::Type type, int index, const void *p=NULL)
       {
         if(event)
           event->event(type,index,p);

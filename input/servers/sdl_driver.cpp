@@ -10,7 +10,7 @@ void SDLDriver::capture()
   SDL_Event evt;
   while(SDL_PollEvent(&evt))
     {
-      Event::EventType type = Event::EV_Unknown;
+      Event::Type type = Event::EV_Unknown;
       int index = -1;
 
       switch(evt.type)
