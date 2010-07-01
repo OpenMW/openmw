@@ -84,6 +84,18 @@ op  22: replace stack[0] with local long stack[0]
 op  23: replace stack[0] with local float stack[0]
 op  24: skip next instruction if stack[0]==0; pop
 op  25: skip next instruction if stack[0]!=0; pop
-opcodes 26-33554431 unused
+op  26: compare (intger) stack[1] with stack[0]; pop twice; push 1 if equal, 0 else
+op  27: compare (intger) stack[1] with stack[0]; pop twice; push 1 if no equal, 0 else
+op  28: compare (intger) stack[1] with stack[0]; pop twice; push 1 if lesser than, 0 else
+op  29: compare (intger) stack[1] with stack[0]; pop twice; push 1 if lesser or equal, 0 else
+op  30: compare (intger) stack[1] with stack[0]; pop twice; push 1 if greater than, 0 else
+op  31: compare (intger) stack[1] with stack[0]; pop twice; push 1 if greater or equal, 0 else
+op  32: compare (float) stack[1] with stack[0]; pop twice; push 1 if equal, 0 else
+op  33: compare (float) stack[1] with stack[0]; pop twice; push 1 if no equal, 0 else
+op  34: compare (float) stack[1] with stack[0]; pop twice; push 1 if lesser than, 0 else
+op  35: compare (float) stack[1] with stack[0]; pop twice; push 1 if lesser or equal, 0 else
+op  36: compare (float) stack[1] with stack[0]; pop twice; push 1 if greater than, 0 else
+op  37: compare (float) stack[1] with stack[0]; pop twice; push 1 if greater or equal, 0 else
+opcodes 38-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

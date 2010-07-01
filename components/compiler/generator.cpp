@@ -195,6 +195,66 @@ namespace
     {
         code.push_back (segment5 (25));
     }      
+    
+    void opEqualInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (26));
+    }
+    
+    void opNonEqualInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (27)); 
+    }
+    
+    void opLessThanInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (28));     
+    }
+    
+    void opLessOrEqualInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (29));     
+    }
+    
+    void opGreaterThanInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (30));     
+    }
+    
+    void opGreaterOrEqualInt (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (31));     
+    }
+    
+    void opEqualFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (32));
+    }
+    
+    void opNonEqualFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (33)); 
+    }
+    
+    void opLessThanFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (34));     
+    }
+    
+    void opLessOrEqualFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (35));     
+    }
+    
+    void opGreaterThanFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (36));     
+    }
+    
+    void opGreaterOrEqualFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (segment5 (37));     
+    }    
 }
 
 namespace Compiler
@@ -438,6 +498,48 @@ namespace Compiler
                 --offset; // compensate for skip instruction
             
             jump (code, offset);            
+        }
+        
+        void compare (CodeContainer& code, char op, char valueType1, char valueType2)
+        {
+            if (valueType1=='l' && valueType2=='l')
+            {
+                switch (op)
+                {
+                    case 'e': opEqualInt (code); break;
+                    case 'n': opNonEqualInt (code); break;
+                    case 'l': opLessThanInt (code); break;
+                    case 'L': opLessOrEqualInt (code); break;
+                    case 'g': opGreaterThanInt (code); break;
+                    case 'G': opGreaterOrEqualInt (code); break;
+                
+                    default:
+                    
+                        assert (0);
+                }
+            }
+            else
+            {
+                if (valueType1=='l')
+                    opIntToFloat1 (code);
+
+                if (valueType2=='l')
+                    opIntToFloat (code);
+            
+                switch (op)
+                {
+                    case 'e': opEqualFloat (code); break;
+                    case 'n': opNonEqualFloat (code); break;
+                    case 'l': opLessThanFloat (code); break;
+                    case 'L': opLessOrEqualFloat (code); break;
+                    case 'g': opGreaterThanFloat (code); break;
+                    case 'G': opGreaterOrEqualFloat (code); break;
+                
+                    default:
+                    
+                        assert (0);
+                }
+            }          
         }
     }
 }

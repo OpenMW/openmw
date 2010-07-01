@@ -20,19 +20,28 @@ namespace Compiler
             
                 return 0;
             
+            case 'e': // ==
+            case 'n': // !=
+            case 'l': // <
+            case 'L': // <=
+            case 'g': // <
+            case 'G': // >=
+            
+                return 1;
+            
             case '+':
             case '-':
             
-                return 1;
+                return 2;
         
             case '*':
             case '/':
             
-                return 2;
+                return 3;
                 
             case 'm':
             
-                return 3;
+                return 4;
         }
     
         return 0;
@@ -125,6 +134,20 @@ namespace Compiler
                 replaceBinaryOperands();
                 break;
                             
+            case 'e':
+            case 'n':
+            case 'l':
+            case 'L':
+            case 'g':
+            case 'G':
+            
+                Generator::compare (mCode, op, getOperandType (1), getOperandType());
+                popOperator();
+                popOperand();
+                popOperand();
+                mOperands.push_back ('l');
+                break;
+                            
             default:
             
                 throw std::logic_error ("unknown operator");
@@ -164,7 +187,7 @@ namespace Compiler
             
     void ExprParser::parseArguments (const std::string& arguments, Scanner& scanner)
     {
-        ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
+        ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals, true);
         
         for (std::string::const_iterator iter (arguments.begin()); iter!=arguments.end();
             ++iter)
@@ -182,9 +205,9 @@ namespace Compiler
     }
             
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
-        Literals& literals)
+        Literals& literals, bool argument)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
-      mNextOperand (true), mFirst (true)
+      mNextOperand (true), mFirst (true), mArgument (argument)
     {}
 
     bool ExprParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -345,6 +368,7 @@ namespace Compiler
         if (!mNextOperand)
         {
             mTokenLoc = loc;
+            char c = 0; // comparison
    
             switch (code)
             {
@@ -352,6 +376,26 @@ namespace Compiler
                 case Scanner::S_minus: pushBinaryOperator ('-'); return true;
                 case Scanner::S_mult: pushBinaryOperator ('*'); return true;
                 case Scanner::S_div: pushBinaryOperator ('/'); return true;
+                case Scanner::S_cmpEQ: c = 'e'; break;
+                case Scanner::S_cmpNE: c = 'n'; break;
+                case Scanner::S_cmpLT: c = 'l'; break;
+                case Scanner::S_cmpLE: c = 'L'; break;
+                case Scanner::S_cmpGT: c = 'g'; break;
+                case Scanner::S_cmpGE: c = 'G'; break;
+            }
+            
+            if (c)
+            {
+                if (mArgument && !isOpen())
+                {
+                    // expression ends here
+                    // Thank you Morrowind for this rotten syntax :(
+                    scanner.putbackSpecial (code, loc);
+                    return false;
+                }
+            
+                pushBinaryOperator (c);
+                return true;
             }
         }
         

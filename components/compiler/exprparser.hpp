@@ -23,6 +23,7 @@ namespace Compiler
             TokenLoc mTokenLoc;
             std::vector<Interpreter::Type_Code> mCode;
             bool mFirst;
+            bool mArgument;
             
             int getPriority (char op) const;
             
@@ -53,8 +54,10 @@ namespace Compiler
         public:
     
             ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
-                Literals& literals);
+                Literals& literals, bool argument = false);
             ///< constructor
+            /// \param argument Parser is used to parse function- or instruction-
+            /// arguments (this influences the precedence rules).
 
             char getType() const;
             ///< Return type of parsed expression ('l' integer, 'f' float)

@@ -103,6 +103,23 @@ namespace Interpreter
                 runtime[0] = *reinterpret_cast<Type_Data *> (&value);
             }           
     };    
+    
+    template<typename T, typename C>
+    class OpCompare : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int result = C() (
+                    *reinterpret_cast<T *> (&runtime[1]),
+                    *reinterpret_cast<T *> (&runtime[0]));
+                
+                runtime.pop();
+                
+                runtime[0] = *reinterpret_cast<Type_Data *> (&result);
+            }           
+    };    
 }
 
 #endif

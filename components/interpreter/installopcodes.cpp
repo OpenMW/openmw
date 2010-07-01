@@ -1,6 +1,8 @@
 
 #include "installopcodes.hpp"
 
+#include <functional>
+
 #include "interpreter.hpp"
 #include "genericopcodes.hpp"
 #include "localopcodes.hpp"
@@ -40,8 +42,33 @@ namespace Interpreter
         interpreter.installSegment5 (14, new OpMulInt<Type_Float>);
         interpreter.installSegment5 (15, new OpDivInt<Type_Integer>);
         interpreter.installSegment5 (16, new OpDivInt<Type_Float>);
-        interpreter.installSegment5 (19, new OpSquareRoot);        
-        
+        interpreter.installSegment5 (19, new OpSquareRoot);   
+        interpreter.installSegment5 (26, 
+            new OpCompare<Type_Integer, std::equal_to<Type_Integer> >);     
+        interpreter.installSegment5 (27, 
+            new OpCompare<Type_Integer, std::not_equal_to<Type_Integer> >);     
+        interpreter.installSegment5 (28, 
+            new OpCompare<Type_Integer, std::less<Type_Integer> >);     
+        interpreter.installSegment5 (29, 
+            new OpCompare<Type_Integer, std::less_equal<Type_Integer> >);     
+        interpreter.installSegment5 (30, 
+            new OpCompare<Type_Integer, std::greater<Type_Integer> >);     
+        interpreter.installSegment5 (31, 
+            new OpCompare<Type_Integer, std::greater_equal<Type_Integer> >);     
+            
+        interpreter.installSegment5 (32, 
+            new OpCompare<Type_Float, std::equal_to<Type_Float> >);     
+        interpreter.installSegment5 (33, 
+            new OpCompare<Type_Float, std::not_equal_to<Type_Float> >);     
+        interpreter.installSegment5 (34, 
+            new OpCompare<Type_Float, std::less<Type_Float> >);     
+        interpreter.installSegment5 (35, 
+            new OpCompare<Type_Float, std::less_equal<Type_Float> >);     
+        interpreter.installSegment5 (36, 
+            new OpCompare<Type_Float, std::greater<Type_Float> >);     
+        interpreter.installSegment5 (37, 
+            new OpCompare<Type_Float, std::greater_equal<Type_Float> >); 
+                    
         // control structures
         interpreter.installSegment5 (20, new OpReturn);        
         interpreter.installSegment5 (24, new OpSkipZero);
