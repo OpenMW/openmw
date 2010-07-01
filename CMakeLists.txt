@@ -8,8 +8,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
 # source directory: apps
 
-set(GAME apps/openmw/main.cpp apps/openmw/engine.cpp)
-set(GAME_HEADER apps/openmw/mwinput/inputmanager.hpp apps/openmw/engine.hpp)
+set(GAME 
+    apps/openmw/main.cpp 
+    apps/openmw/engine.cpp)
+set(GAME_HEADER 
+    apps/openmw/mwinput/inputmanager.hpp 
+    apps/openmw/engine.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND 
@@ -26,7 +30,8 @@ set(GAMEREND_HEADER
 source_group(game_renderer FILES ${GAMEREND} ${GAMEREND_HEADER})    
 
 # set(GAMEINPUT)
-set(GAMEINPUT_HEADER apps/openmw/mwinput/inputmanager.hpp)
+set(GAMEINPUT_HEADER 
+    apps/openmw/mwinput/inputmanager.hpp)
 source_group(game_input FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})    
 
 set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT})
@@ -34,44 +39,73 @@ set(APPS_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER})
 
 # source directory: components
 
-set(BSA components/bsa/bsa_archive.cpp components/bsa/bsa_file.cpp)
-set(BSA_HEADER components/bsa/bsa_archive.hpp components/bsa/bsa_file.hpp)
+set(BSA 
+    components/bsa/bsa_archive.cpp 
+    components/bsa/bsa_file.cpp)
+set(BSA_HEADER 
+    components/bsa/bsa_archive.hpp 
+    components/bsa/bsa_file.hpp)
 source_group(bsa FILES ${BSA} ${BSA_HEADER})
 
-set(NIF components/nif/nif_file.cpp)
-set(NIF_HEADER components/nif/controlled.hpp components/nif/effect.hpp
-    components/nif/nif_types.hpp  components/nif/record.hpp
-    components/nif/controller.hpp components/nif/extra.hpp components/nif/node.hpp
+set(NIF 
+    components/nif/nif_file.cpp)
+set(NIF_HEADER 
+    components/nif/controlled.hpp 
+    components/nif/effect.hpp
+    components/nif/nif_types.hpp  
+    components/nif/record.hpp
+    components/nif/controller.hpp 
+    components/nif/extra.hpp 
+    components/nif/node.hpp
     components/nif/record_ptr.hpp
-    components/nif/data.hpp components/nif/nif_file.hpp components/nif/property.hpp)
+    components/nif/data.hpp 
+    components/nif/nif_file.hpp 
+    components/nif/property.hpp)
 source_group(nif FILES ${NIF} ${NIF_HEADER})    
 
-set(NIFOGRE components/nifogre/ogre_nif_loader.cpp)
-set(NIFOGRE_HEADER components/nifogre/ogre_nif_loader.hpp)
+set(NIFOGRE 
+    components/nifogre/ogre_nif_loader.cpp)
+set(NIFOGRE_HEADER 
+    components/nifogre/ogre_nif_loader.hpp)
 source_group(nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})    
 
-set(ESM_STORE components/esm_store/store.cpp components/esm_store/cell_store.cpp)
-set(ESM_STORE_HEADER components/esm_store/cell_store.hpp
-    components/esm_store/reclists.hpp components/esm_store/store.hpp)
+set(ESM_STORE 
+    components/esm_store/store.cpp 
+    components/esm_store/cell_store.cpp)
+set(ESM_STORE_HEADER 
+    components/esm_store/cell_store.hpp
+    components/esm_store/reclists.hpp 
+    components/esm_store/store.hpp)
 source_group(esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 
 file(GLOB ESM_HEADER components/esm/*.hpp)
 source_group(esm_header FILES ${ESM_HEADER}) 
 
-set(OGRE components/engine/ogre/renderer.cpp)
-set(OGRE_HEADER components/engine/ogre/renderer.hpp)
+set(OGRE 
+    components/engine/ogre/renderer.cpp)
+set(OGRE_HEADER 
+    components/engine/ogre/renderer.hpp)
 source_group(ogre FILES ${OGRE} ${OGRE_HEADER})
 
-set(INPUT components/engine/input/oismanager.cpp)
-set(INPUT_HEADER components/engine/input/oismanager.hpp components/engine/input/listener.hpp
-    components/engine/input/func_binder.hpp components/engine/input/dispatch_map.hpp
-    components/engine/input/dispatcher.hpp components/engine/input/poller.hpp)
+set(INPUT 
+    components/engine/input/oismanager.cpp)
+set(INPUT_HEADER 
+    components/engine/input/oismanager.hpp 
+    components/engine/input/listener.hpp
+    components/engine/input/func_binder.hpp 
+    components/engine/input/dispatch_map.hpp
+    components/engine/input/dispatcher.hpp 
+    components/engine/input/poller.hpp)
 source_group(input FILES ${INPUT} ${INPUT_HEADER})
 
-set(MISC components/misc/stringops.cpp components/misc/fileops.cpp)
-set(MISC_HEADER components/misc/fileops.hpp components/misc/slice_array.hpp
+set(MISC 
+    components/misc/stringops.cpp 
+    components/misc/fileops.cpp)
+set(MISC_HEADER 
+    components/misc/fileops.hpp 
+    components/misc/slice_array.hpp
     components/misc/stringops.hpp)
-source_group(misc FILES ${MISC} ${MISC_HEADER})    
+source_group(misc FILES ${MISC} ${MISC_HEADER})   
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
@@ -100,7 +134,7 @@ find_package(OIS REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
-    ${CMAKE_HOME_DIRECTORY}/extern/caelum/include )
+    ${CMAKE_HOME_DIRECTORY}/extern/caelum/include)
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
 ADD_SUBDIRECTORY( extern/caelum )

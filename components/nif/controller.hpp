@@ -31,8 +31,9 @@
 namespace Nif
 {
 
-struct Controller : Record
+class Controller : public Record
 {
+public:
   ControllerPtr next;
   int flags;
   float frequency, phase;
@@ -54,8 +55,9 @@ struct Controller : Record
   }
 };
 
-struct NiBSPArrayController : Controller
+class NiBSPArrayController : public Controller
 {
+public:
   void read(NIFFile *nif)
   {
     Controller::read(nif);
@@ -68,8 +70,9 @@ struct NiBSPArrayController : Controller
 };
 typedef NiBSPArrayController NiParticleSystemController;
 
-struct NiMaterialColorController : Controller
+class NiMaterialColorController : public Controller
 {
+public:
   NiPosDataPtr data;
 
   void read(NIFFile *nif)
@@ -79,8 +82,9 @@ struct NiMaterialColorController : Controller
   }
 };
 
-struct NiPathController : Controller
+class NiPathController : public Controller
 {
+public:
   NiPosDataPtr posData;
   NiFloatDataPtr floatData;
 
@@ -99,8 +103,9 @@ struct NiPathController : Controller
   }
 };
 
-struct NiUVController : Controller
+class NiUVController : public Controller
 {
+public:
   NiUVDataPtr data;
 
   void read(NIFFile *nif)
@@ -112,8 +117,9 @@ struct NiUVController : Controller
   }
 };
 
-struct NiKeyframeController : Controller
+class NiKeyframeController : public Controller
 {
+public:
   NiKeyframeDataPtr data;
 
   void read(NIFFile *nif)
@@ -123,8 +129,9 @@ struct NiKeyframeController : Controller
   }
 };
 
-struct NiAlphaController : Controller
+class NiAlphaController : public Controller
 {
+public:
   NiFloatDataPtr data;
 
   void read(NIFFile *nif)
@@ -134,8 +141,9 @@ struct NiAlphaController : Controller
   }
 };
 
-struct NiGeomMorpherController : Controller
+class NiGeomMorpherController : public Controller
 {
+public:
   NiMorphDataPtr data;
 
   void read(NIFFile *nif)
@@ -146,8 +154,9 @@ struct NiGeomMorpherController : Controller
   }
 };
 
-struct NiVisController : Controller
+class NiVisController : public Controller
 {
+public:
   NiVisDataPtr data;
 
   void read(NIFFile *nif)

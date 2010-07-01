@@ -34,8 +34,9 @@ namespace Nif
     parent node (unless it's the root), and transformation (location
     and rotation) relative to it's parent.
  */
-struct Node : Named
+class Node : public Named
 {
+public:
   // Node flags. Interpretation depends somewhat on the type of node.
   int flags;
   const Transformation *trafo;
@@ -55,7 +56,7 @@ struct Node : Named
     trafo = nif->getTrafo();
     props.read(nif);
 
-    hasBounds = nif->getInt();
+    hasBounds = !!nif->getInt();
     if(hasBounds)
       {
         nif->getInt(); // always 1
