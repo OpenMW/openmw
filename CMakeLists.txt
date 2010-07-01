@@ -112,11 +112,23 @@ set(MISC_HEADER
     components/misc/stringops.hpp
     components/misc/tsdeque.hpp)
 source_group(misc FILES ${MISC} ${MISC_HEADER})   
-
-set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${COMMANDSERVER} ${MISC})
-set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
-    ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER})
     
+file(GLOB COMPILER components/compiler/*.cpp)
+file(GLOB COMPILER_HEADER components/compiler/*.hpp)
+source_group(compiler FILES ${COMPILER} ${COMPILER_HEADER})    
+
+file(GLOB INTERPRETER components/interpreter/*.cpp)
+file(GLOB INTERPRETER_HEADER components/interpreter/*.hpp)
+source_group(interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
+
+set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC} 
+    ${COMMANDSERVER}
+    ${COMPILER}
+    ${INTERPRETER})
+set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
+    ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
+    ${INTERPRETER_HEADER})
+
 # source directory: libs
 
 set(MANGLE_VFS libs/mangle/vfs/servers/ogre_vfs.cpp)
@@ -212,3 +224,22 @@ if (APPLE)
     MACOSX_BUNDLE_BUNDLE_NAME "OpenMW"
   )
 endif (APPLE)
+
+# Tools
+option(BUILD_MWCOMPILER "build standalone Morrowind script compiler" ON)
+
+if (BUILD_MWCOMPILER)
+set(TOOLS_MWCOMPILER ${COMPILER} apps/mwcompiler/main.cpp apps/mwcompiler/context.cpp
+    apps/mwcompiler/context.hpp)
+
+add_executable(mwcompiler ${TOOLS_MWCOMPILER})
+endif()
+
+option(BUILD_MWINTERPRETER "build standalone Morrowind script code interpreter" ON)
+
+if (BUILD_MWINTERPRETER)
+set(TOOLS_MWINTERPRETER ${INTERPRETER} apps/mwinterpreter/main.cpp
+    apps/mwinterpreter/context.cpp apps/mwinterpreter/context.hpp)
+
+add_executable(mwinterpreter ${TOOLS_MWINTERPRETER})
+endif()

@@ -16,3 +16,5 @@ openmw.cfg
 Doxygen
 .thumbnails
 resources
+mwcompiler
+mwinterpreter
