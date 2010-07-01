@@ -197,8 +197,12 @@ namespace Compiler
             mTokenLoc = loc;
             return true;
         }
-        
-        return Parser::parseInt (value, loc, scanner);
+        else
+        {
+            // no comma was used between arguments
+            scanner.putbackInt (value, loc);
+            return false;
+        }
     }
 
     bool ExprParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
@@ -211,8 +215,12 @@ namespace Compiler
             mTokenLoc = loc;
             return true;
         }            
-            
-        return Parser::parseFloat (value, loc, scanner);
+        else
+        {
+            // no comma was used between arguments
+            scanner.putbackFloat (value, loc);
+            return false;
+        }
     }
 
     bool ExprParser::parseName (const std::string& name, const TokenLoc& loc,
@@ -232,6 +240,12 @@ namespace Compiler
                 return true;    
             }
         }
+        else
+        {
+            // no comma was used between arguments
+            scanner.putbackName (name, loc);
+            return false;
+        }
         
         return Parser::parseName (name, loc, scanner);
     }
@@ -239,16 +253,25 @@ namespace Compiler
     bool ExprParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
         mFirst = false;
-        
-        if (keyword==Scanner::K_getsquareroot && mNextOperand)
-        {
-            mTokenLoc = loc;        
-            parseArguments ("f", scanner);
 
-            Generator::squareRoot (mCode);
-            
-            mNextOperand = false;
-            return true;
+        if (mNextOperand)
+        {        
+            if (keyword==Scanner::K_getsquareroot)
+            {
+                mTokenLoc = loc;        
+                parseArguments ("f", scanner);
+
+                Generator::squareRoot (mCode);
+                
+                mNextOperand = false;
+                return true;
+            }
+        }
+        else
+        {
+            // no comma was used between arguments
+            scanner.putbackKeyword (keyword, loc);
+            return false;
         }
         
         return Parser::parseKeyword (keyword, loc, scanner);
@@ -290,11 +313,20 @@ namespace Compiler
             return true;
         }
         
-        if (code==Scanner::S_open && mNextOperand)
+        if (code==Scanner::S_open)
         {
-            mOperators.push_back ('(');
-            mTokenLoc = loc;
-            return true;
+            if (mNextOperand)
+            {
+                mOperators.push_back ('(');
+                mTokenLoc = loc;
+                return true;
+            }
+            else
+            {
+                // no comma was used between arguments
+                scanner.putbackKeyword (code, loc);
+                return false;
+            }
         }
         
         if (code==Scanner::S_close && !mNextOperand)

@@ -20,7 +20,8 @@ namespace Compiler
     {
             enum putback_type
             {
-                Putback_None, Putback_Special,
+                Putback_None, Putback_Special, Putback_Integer, Putback_Float,
+                Putback_Name, Putback_Keyword
             };
     
             ErrorHandler& mErrorHandler;
@@ -29,6 +30,9 @@ namespace Compiler
             std::istream& mStream;
             putback_type mPutback;
             int mPutbackCode;
+            int mPutbackInteger;
+            float mPutbackFloat;
+            std::string mPutbackName;
             TokenLoc mPutbackLoc;
 
         public:
@@ -90,6 +94,19 @@ namespace Compiler
 
             void putbackSpecial (int code, const TokenLoc& loc); 
             ///< put back a special token
+
+            void putbackInt (int value, const TokenLoc& loc); 
+            ///< put back an integer token            
+
+            void putbackFloat (float value, const TokenLoc& loc); 
+            ///< put back a float token            
+
+            void putbackName (const std::string& name, const TokenLoc& loc); 
+            ///< put back a name toekn
+
+            void putbackKeyword (int keyword, const TokenLoc& loc); 
+            ///< put back a keyword token
+            
     };
 }
 

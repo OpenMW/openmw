@@ -46,10 +46,29 @@ namespace Compiler
         switch (mPutback)
         {
             case Putback_Special:
-            {            
+           
                 mPutback = Putback_None;            
                 return parser.parseSpecial (mPutbackCode, mPutbackLoc, *this);
-            }
+            
+            case Putback_Integer:
+
+                mPutback = Putback_None;
+                return parser.parseInt (mPutbackInteger, mPutbackLoc, *this);
+            
+            case Putback_Float:
+
+                mPutback = Putback_None;
+                return parser.parseFloat (mPutbackFloat, mPutbackLoc, *this);
+                       
+            case Putback_Name:
+            
+                mPutback = Putback_None;
+                return parser.parseName (mPutbackName, mPutbackLoc, *this);
+            
+            case Putback_Keyword:
+
+                mPutback = Putback_None;
+                return parser.parseKeyword (mPutbackCode, mPutbackLoc, *this);
             
             case Putback_None:
             
@@ -441,5 +460,33 @@ namespace Compiler
         mPutbackCode = code;
         mPutbackLoc = loc;    
     }
+    
+    void Scanner::putbackInt (int value, const TokenLoc& loc)
+    {
+        mPutback = Putback_Integer;
+        mPutbackInteger = value;
+        mPutbackLoc = loc;    
+    }   
+
+    void Scanner::putbackFloat (float value, const TokenLoc& loc)
+    {
+        mPutback = Putback_Float;
+        mPutbackFloat = value;
+        mPutbackLoc = loc;    
+    }   
+
+    void Scanner::putbackName (const std::string& name, const TokenLoc& loc)
+    {
+        mPutback = Putback_Name;
+        mPutbackName = name;
+        mPutbackLoc = loc;    
+    }   
+
+    void Scanner::putbackKeyword (int keyword, const TokenLoc& loc)
+    {
+        mPutback = Putback_Keyword;
+        mPutbackCode = keyword;
+        mPutbackLoc = loc;    
+    }   
 }
 
