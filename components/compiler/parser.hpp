@@ -6,7 +6,7 @@
 namespace Compiler
 {
     class Scanner;
-    class TokenLoc;
+    struct TokenLoc;
     class ErrorHandler;
     class Context;
 
