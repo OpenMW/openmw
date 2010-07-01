@@ -275,6 +275,12 @@ namespace Compiler
             opFetchFloatLiteral (code);
         }
                 
+        void pushString (CodeContainer& code, Literals& literals, const std::string& value)
+        {
+            int index = literals.addString (value);               
+            opPushInt (code, index);
+        }
+        
         void assignToLocal (CodeContainer& code, char localType,
             int localIndex, const CodeContainer& value, char valueType)
         {               

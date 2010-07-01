@@ -4,11 +4,13 @@
 #include <stdexcept>
 #include <cassert>
 #include <algorithm>
+#include <stack>
 
 #include "generator.hpp"
 #include "scanner.hpp"
 #include "errorhandler.hpp"
 #include "locals.hpp"
+#include "stringparser.hpp"
 
 namespace Compiler
 {
@@ -184,24 +186,10 @@ namespace Compiler
             
         popOperator();
     }
-            
+    
     void ExprParser::parseArguments (const std::string& arguments, Scanner& scanner)
     {
-        ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals, true);
-        
-        for (std::string::const_iterator iter (arguments.begin()); iter!=arguments.end();
-            ++iter)
-        {
-            parser.reset();    
-            scanner.scan (parser);
-
-            char type = parser.append (mCode);
-
-            if (type!=*iter)
-                Generator::convert (mCode, type, *iter);
-                
-            mOperands.push_back (*iter);
-        }
+        parseArguments (arguments, scanner, mCode);
     }
             
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
@@ -285,6 +273,7 @@ namespace Compiler
                 parseArguments ("f", scanner);
 
                 Generator::squareRoot (mCode);
+                mOperands.push_back ('f');
                 
                 mNextOperand = false;
                 return true;
@@ -432,6 +421,61 @@ namespace Compiler
 
         assert (mOperands.size()==1);
         return mOperands[0];
+    }    
+            
+    void ExprParser::parseArguments (const std::string& arguments, Scanner& scanner,
+        std::vector<Interpreter::Type_Code>& code, bool invert)
+    {
+        ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals, true);
+        StringParser stringParser (getErrorHandler(), getContext(), mLiterals);
+        
+        std::stack<std::vector<Interpreter::Type_Code> > stack;
+        
+        for (std::string::const_iterator iter (arguments.begin()); iter!=arguments.end();
+            ++iter)
+        {
+            if (*iter=='S')
+            {
+                stringParser.reset();
+                scanner.scan (stringParser);            
+                
+                if (invert)
+                {
+                    std::vector<Interpreter::Type_Code> tmp;
+                    stringParser.append (tmp);
+                    
+                    stack.push (tmp);
+                }
+                else
+                    stringParser.append (code);
+            }
+            else
+            {
+                parser.reset();    
+                scanner.scan (parser);
+
+                std::vector<Interpreter::Type_Code> tmp;
+
+                char type = parser.append (tmp);
+
+                if (type!=*iter)
+                    Generator::convert (tmp, type, *iter);
+                    
+                if (invert)
+                    stack.push (tmp);
+                else
+                    std::copy (tmp.begin(), tmp.end(), std::back_inserter (code));
+            }
+        }
+        
+        while (!stack.empty())
+        {
+            std::vector<Interpreter::Type_Code>& tmp = stack.top();
+        
+            std::copy (tmp.begin(), tmp.end(), std::back_inserter (code));
+        
+            stack.pop();
+        }
     }    
 }
 

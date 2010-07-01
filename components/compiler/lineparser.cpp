@@ -78,6 +78,37 @@ namespace Compiler
         
         if (mState==MessageState || mState==MessageCommaState)
         {
+            std::string arguments;
+            
+            for (std::size_t i=0; i<name.size(); ++i)
+            {
+                if (name[i]=='%')
+                {
+                    ++i;
+                    if (i<name.size())
+                    {
+                        if (name[i]=='G' || name[i]=='g')
+                        {
+                            arguments += "l";
+                        }
+                        else if (name[i]=='S' || name[i]=='s')
+                        {
+                            arguments += 'S';
+                        }
+                        else if (name[i]=='.' || name[i]=='f')
+                        {
+                            arguments += 'f';
+                        }
+                    }
+                }
+            }
+
+            if (!arguments.empty())
+            {
+                mExprParser.reset();
+                mExprParser.parseArguments (arguments, scanner, mCode, true);
+            }
+
             Generator::message (mCode, mLiterals, name, 0);
             mState = EndState;
             return false;

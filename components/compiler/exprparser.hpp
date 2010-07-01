@@ -48,9 +48,9 @@ namespace Compiler
             void pushBinaryOperator (char c);
                         
             void close();
-            
-            void parseArguments (const std::string& arguments, Scanner& scanner);
-                        
+ 
+            void parseArguments (const std::string& arguments, Scanner& scanner);                  
+                             
         public:
     
             ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
@@ -89,6 +89,13 @@ namespace Compiler
             char append (std::vector<Interpreter::Type_Code>& code);
             ///< Generate code for parsed expression.
             /// \return Type ('l': integer, 'f': float)
+ 
+            void parseArguments (const std::string& arguments, Scanner& scanner,
+                std::vector<Interpreter::Type_Code>& code, bool invert = false);
+            ///< Parse sequence of arguments specified by \a arguments.
+            /// \param arguments Each character represents one arguments ('l': integer,
+            /// 'f': float, 'S': string)                
+            /// \param invert Store arguments in reverted order.
     };
 }
 
