@@ -24,7 +24,7 @@ namespace Compiler
     /// \brief Exception: EOF condition encountered
 
     class EOFException : public SourceException
-    {            virtual const char *what() const throw() { return "end of file"; }
+    {       virtual const char *what() const throw() { return "end of file"; }
             ///< Return error message
     };
 }
