@@ -11,8 +11,24 @@
 
 #include "world.hpp"
 
+class ProcessCommandsHook : public Ogre::FrameListener
+{
+public:
+  ProcessCommandsHook(OMW::Engine* pEngine) : mpEngine (pEngine) {}
+  virtual bool frameStarted(const Ogre::FrameEvent& evt)
+  {
+      mpEngine->processCommands();
+      return true;
+  }
+protected:
+  OMW::Engine* mpEngine;
+};
+
+
 OMW::Engine::Engine() 
 {
+    mspCommandServer.reset(
+        new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
 }
 
 // Load all BSA files in data directory.
@@ -71,6 +87,31 @@ void OMW::Engine::addMaster (const std::string& master)
     }
 }
 
+<<<<<<< HEAD
+=======
+// Enables sky rendering
+//
+void OMW::Engine::enableSky (bool bEnable)
+{
+    mEnableSky = bEnable;
+}
+
+void OMW::Engine::processCommands()
+{
+    Command cmd;
+    while (mCommandQueue.try_pop_front(cmd))
+    {
+        ///\todo Add actual processing of the received command strings
+        std::cout << "Command: '" << cmd.mCommand << "'" << std::endl;
+
+        ///\todo Replace with real output.  For now, echo back the string in uppercase
+        std::string reply(cmd.mCommand);
+        std::transform(reply.begin(), reply.end(), reply.begin(), toupper);
+        cmd.mReplyFunction(reply);
+    } 
+}
+
+>>>>>>> 450542b4b9a7cf6987c192abbf7e2cc44da286d2
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -106,11 +147,22 @@ void OMW::Engine::go()
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mWorld->getPlayerPos());
 
+    // Launch the console server
+    std::cout << "Starting command server on port " << kCommandServerPort << std::endl;
+    mspCommandServer->start();
+    mOgre.getRoot()->addFrameListener( new ProcessCommandsHook(this) );
+
     std::cout << "\nStart! Press Q/ESC or close window to exit.\n";
 
     // Start the main rendering loop
     mOgre.start();
 
+<<<<<<< HEAD
+=======
+    mspCommandServer->stop();
+    delete mpSkyManager;
+
+>>>>>>> 450542b4b9a7cf6987c192abbf7e2cc44da286d2
     std::cout << "\nThat's all for now!\n";
 }
 

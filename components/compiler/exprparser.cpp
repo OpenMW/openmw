@@ -5,6 +5,7 @@
 #include <cassert>
 #include <algorithm>
 #include <stack>
+#include <iterator>
 
 #include "generator.hpp"
 #include "scanner.hpp"

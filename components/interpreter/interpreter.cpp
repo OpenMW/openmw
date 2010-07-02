@@ -195,7 +195,7 @@ namespace Interpreter
         mSegment5.insert (std::make_pair (code, opcode));
     }
             
-    void Interpreter::Interpreter::run (const Type_Code *code, int codeSize)
+    void Interpreter::run (const Type_Code *code, int codeSize)
     {
         assert (codeSize>=4);
         

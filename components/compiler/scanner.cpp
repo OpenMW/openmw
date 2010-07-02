@@ -4,6 +4,7 @@
 #include <cctype>
 #include <sstream>
 #include <algorithm>
+#include <iterator>
 
 #include "exception.hpp"
 #include "errorhandler.hpp"

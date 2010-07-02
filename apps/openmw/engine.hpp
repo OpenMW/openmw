@@ -6,6 +6,16 @@
 #include <boost/filesystem.hpp>
 
 #include "components/engine/ogre/renderer.hpp"
+#include "apps/openmw/mwrender/mwscene.hpp"
+#include "components/misc/tsdeque.hpp"
+#include "components/commandserver/server.hpp"
+#include "components/commandserver/command.hpp"
+
+
+namespace MWRender
+{
+    class SkyManager;
+}
 
 namespace OMW
 {
@@ -15,12 +25,20 @@ namespace OMW
 
     class Engine
     {
+            enum { kCommandServerPort = 27917 };
+
             boost::filesystem::path mDataDir;
             Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;
             World *mWorld;
             
+            bool                  mEnableSky;
+            MWRender::SkyManager* mpSkyManager;
+
+            TsDeque<OMW::Command>                     mCommandQueue;
+            std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
+
             // not implemented
             Engine (const Engine&);
             Engine& operator= (const Engine&);
@@ -48,6 +66,12 @@ namespace OMW
             /// - If the given name does not have an extension, ".esm" is added automatically
             /// - Currently OpenMW only supports one master at the same time.
             void addMaster (const std::string& master);
+
+            /// Enables rendering of the sky (off by default).
+            void enableSky (bool bEnable);
+
+            /// Process pending commands
+            void processCommands();
 
             /// Initialise and enter main loop.
             void go();
