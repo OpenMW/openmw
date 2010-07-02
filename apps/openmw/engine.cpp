@@ -13,27 +13,39 @@
 
 #include "world.hpp"
 
-class ProcessCommandsHook : public Ogre::FrameListener
-{
-public:
-  ProcessCommandsHook(OMW::Engine* pEngine) : mpEngine (pEngine) {}
-  virtual bool frameStarted(const Ogre::FrameEvent& evt)
-  {
-      mpEngine->processCommands();
-      return true;
-  }
-protected:
-  OMW::Engine* mpEngine;
-};
-
 void OMW::Engine::executeLocalScripts()
 {
     for (World::ScriptList::const_iterator iter (mWorld->getLocalScripts().begin());
         iter!=mWorld->getLocalScripts().end(); ++iter)
     {
         mScriptManager->run (iter->first, *iter->second);
-    
     }
+}
+
+bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
+{
+    // console
+    processCommands();
+    
+    // local scripts
+    executeLocalScripts();
+
+    return true;
+}
+            
+void OMW::Engine::processCommands()
+{
+    Command cmd;
+    while (mCommandQueue.try_pop_front(cmd))
+    {
+        ///\todo Add actual processing of the received command strings
+        std::cout << "Command: '" << cmd.mCommand << "'" << std::endl;
+
+        ///\todo Replace with real output.  For now, echo back the string in uppercase
+        std::string reply(cmd.mCommand);
+        std::transform(reply.begin(), reply.end(), reply.begin(), toupper);
+        cmd.mReplyFunction(reply);
+    } 
 }
 
 OMW::Engine::Engine()
@@ -116,21 +128,6 @@ void OMW::Engine::enableVerboseScripts()
 {
     mVerboseScripts = true;
 }
-            
-void OMW::Engine::processCommands()
-{
-    Command cmd;
-    while (mCommandQueue.try_pop_front(cmd))
-    {
-        ///\todo Add actual processing of the received command strings
-        std::cout << "Command: '" << cmd.mCommand << "'" << std::endl;
-
-        ///\todo Replace with real output.  For now, echo back the string in uppercase
-        std::string reply(cmd.mCommand);
-        std::transform(reply.begin(), reply.end(), reply.begin(), toupper);
-        cmd.mReplyFunction(reply);
-    } 
-}
 
 // Initialise and enter main loop.
 
@@ -166,9 +163,7 @@ void OMW::Engine::go()
 
     mScriptManager = new MWScript::ScriptManager (mWorld->getStore(), mVerboseScripts,
         *mScriptContext);
-    
-    executeLocalScripts(); // TODO move into a framelistener
-    
+
     std::cout << "Setting up input system\n";
 
     // Sets up the input system
@@ -177,9 +172,10 @@ void OMW::Engine::go()
     // Launch the console server
     std::cout << "Starting command server on port " << kCommandServerPort << std::endl;
     mspCommandServer->start();
-    mOgre.getRoot()->addFrameListener( new ProcessCommandsHook(this) );
 
     std::cout << "\nStart! Press Q/ESC or close window to exit.\n";
+
+    mOgre.getRoot()->addFrameListener (this);
 
     // Start the main rendering loop
     mOgre.start();

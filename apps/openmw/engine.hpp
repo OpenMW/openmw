@@ -5,6 +5,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <OgreFrameListener.h>
+
 #include "components/engine/ogre/renderer.hpp"
 #include "components/misc/tsdeque.hpp"
 #include "components/commandserver/server.hpp"
@@ -28,7 +30,7 @@ namespace OMW
 
     /// \brief Main engine class, that brings together all the components of OpenMW
 
-    class Engine
+    class Engine : private Ogre::FrameListener
     {
             enum { kCommandServerPort = 27917 };
 
@@ -59,6 +61,11 @@ namespace OMW
 
             void executeLocalScripts();
 
+            virtual bool frameStarted(const Ogre::FrameEvent& evt);
+
+            /// Process pending commands
+            void processCommands();
+
         public:
 
             Engine();
@@ -82,9 +89,6 @@ namespace OMW
 
             /// Enable verbose script output
             void enableVerboseScripts();
-
-            /// Process pending commands
-            void processCommands();
 
             /// Initialise and enter main loop.
             void go();
