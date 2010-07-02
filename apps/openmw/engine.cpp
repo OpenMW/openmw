@@ -156,16 +156,13 @@ void OMW::Engine::go()
     // Start the main rendering loop
     mOgre.start();
 
-    // TODO/FIXME: This hangs
-    //mspCommandServer->stop();
-    // TODO/FIXME: This crashes
-    //delete mpSkyManager;
-
     std::cout << "\nThat's all for now!\n";
 }
 
 OMW::Engine::~Engine()
 {
+//    mspCommandServer->stop();
     delete mWorld;
+    delete mpSkyManager;
 }
 
