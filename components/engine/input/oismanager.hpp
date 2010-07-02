@@ -12,7 +12,7 @@ namespace Input
     OIS::Mouse *mouse;
     OIS::Keyboard *keyboard;
 
-    OISManager(Render::OgreRenderer &rend);
+    OISManager(Render::OgreRenderer &rend, bool debug);
     ~OISManager();
   };
 }

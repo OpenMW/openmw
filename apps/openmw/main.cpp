@@ -29,6 +29,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             "set initial cell (only interior cells supported at the moment")
         ("master", bpo::value<std::string>()->default_value ("Morrowind"),
             "master file")
+        ( "debug", "debug mode" )
         ;
   
     bpo::variables_map variables;
@@ -50,6 +51,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     engine.setDataDir (variables["data"].as<std::string>());
     engine.setCell (variables["start"].as<std::string>());
     engine.addMaster (variables["master"].as<std::string>());
+    
+    if (variables.count ("debug"))
+        engine.enableDebugMode();
 
     return true;
 }

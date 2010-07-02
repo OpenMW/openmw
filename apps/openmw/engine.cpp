@@ -11,8 +11,6 @@
 
 #include "world.hpp"
 
-#include "mwrender/sky.hpp"
-
 class ProcessCommandsHook : public Ogre::FrameListener
 {
 public:
@@ -27,10 +25,16 @@ protected:
 };
 
 
-OMW::Engine::Engine() : mWorld(NULL)
+OMW::Engine::Engine() : mWorld(NULL), mDebug (false)
 {
     mspCommandServer.reset(
         new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
+}
+
+OMW::Engine::~Engine()
+{
+//    mspCommandServer->stop();
+    delete mWorld;
 }
 
 // Load all BSA files in data directory.
@@ -89,13 +93,11 @@ void OMW::Engine::addMaster (const std::string& master)
     }
 }
 
-// Enables sky rendering
-//
-void OMW::Engine::enableSky (bool bEnable)
+void OMW::Engine::enableDebugMode()
 {
-    mEnableSky = bEnable;
+    mDebug = true;
 }
-
+            
 void OMW::Engine::processCommands()
 {
     Command cmd;
@@ -144,7 +146,7 @@ void OMW::Engine::go()
     std::cout << "Setting up input system\n";
 
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre, mWorld->getPlayerPos());
+    MWInput::MWInputManager input(mOgre, mWorld->getPlayerPos(), mDebug);
 
     // Launch the console server
     std::cout << "Starting command server on port " << kCommandServerPort << std::endl;
@@ -159,10 +161,4 @@ void OMW::Engine::go()
     std::cout << "\nThat's all for now!\n";
 }
 
-OMW::Engine::~Engine()
-{
-//    mspCommandServer->stop();
-    delete mWorld;
-    delete mpSkyManager;
-}
 

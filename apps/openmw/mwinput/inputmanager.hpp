@@ -58,10 +58,10 @@ namespace MWInput
 
   public:
     MWInputManager(Render::OgreRenderer &_ogre,
-                   MWRender::PlayerPos &_player)
+                   MWRender::PlayerPos &_player, bool debug)
       : disp(A_LAST),
         ogre(_ogre),
-        input(_ogre),
+        input(_ogre, debug),
         poller(input),
         listener(_ogre, input, disp),
         player(_player),

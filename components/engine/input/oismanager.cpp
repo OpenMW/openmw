@@ -16,7 +16,7 @@ using namespace OIS;
 
 using namespace std;
 
-OISManager::OISManager(Render::OgreRenderer &rend)
+OISManager::OISManager(Render::OgreRenderer &rend, bool debug)
 {
   RenderWindow *window = rend.getWindow();
   assert(window);
@@ -32,7 +32,7 @@ OISManager::OISManager(Render::OgreRenderer &rend)
 
   // Non-exclusive mouse and keyboard input in debug mode. Debug mode
   // isn't implemented yet though.
-  if(true)
+  if(debug)
     {
 #if defined OIS_WIN32_PLATFORM
       pl.insert(std::make_pair(std::string("w32_mouse"),

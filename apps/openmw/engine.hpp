@@ -11,12 +11,6 @@
 #include "components/commandserver/server.hpp"
 #include "components/commandserver/command.hpp"
 
-
-namespace MWRender
-{
-    class SkyManager;
-}
-
 namespace OMW
 {
     class World;
@@ -32,9 +26,7 @@ namespace OMW
             std::string mCellName;
             std::string mMaster;
             World *mWorld;
-            
-            bool                  mEnableSky;
-            MWRender::SkyManager* mpSkyManager;
+            bool mDebug;
 
             TsDeque<OMW::Command>                     mCommandQueue;
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
@@ -67,8 +59,9 @@ namespace OMW
             /// - Currently OpenMW only supports one master at the same time.
             void addMaster (const std::string& master);
 
-            /// Enables rendering of the sky (off by default).
-            void enableSky (bool bEnable);
+            /// Enable debug mode:
+            /// - non-exclusive input
+            void enableDebugMode();
 
             /// Process pending commands
             void processCommands();
