@@ -1,6 +1,8 @@
 #ifndef COMMANDSERVER_COMMAND_HPP
 #define COMMANDSERVER_COMMAND_HPP
 
+#include <boost/function.hpp>
+
 namespace OMW
 {
     ///
@@ -16,4 +18,4 @@ namespace OMW
     };
 }
 
-#endif COMMANDSERVER_COMMAND_HPP
+#endif //COMMANDSERVER_COMMAND_HPP

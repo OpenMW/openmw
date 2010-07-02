@@ -3,6 +3,8 @@
 
 using boost::asio::ip::tcp;
 
+#include <libs/mangle/tools/str_exception.hpp>
+
 //
 // Namespace for containing implementation details that the
 // rest of OpenMW doesn't need to worry about
@@ -103,7 +105,7 @@ namespace OMW { namespace CommandServer { namespace Detail {
                         bDone = true;
                 }
                 else
-                    throw std::exception("Unexpected header!");
+                    throw str_exception("Unexpected header!");
             }
             else
                 bDone = true;
@@ -119,8 +121,8 @@ namespace OMW { namespace CommandServer {
        
     Server::Server (Deque* pCommandQueue, const int port)
         : mAcceptor      (mIOService, tcp::endpoint(tcp::v4(), port))
-        , mpCommandQueue (pCommandQueue)
         , mbStopping     (false)
+        , mpCommandQueue (pCommandQueue)
     {       
     }
        

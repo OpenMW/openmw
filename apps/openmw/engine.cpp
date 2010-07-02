@@ -11,6 +11,8 @@
 
 #include "world.hpp"
 
+#include "mwrender/sky.hpp"
+
 class ProcessCommandsHook : public Ogre::FrameListener
 {
 public:
@@ -25,7 +27,7 @@ protected:
 };
 
 
-OMW::Engine::Engine() 
+OMW::Engine::Engine() : mWorld(NULL)
 {
     mspCommandServer.reset(
         new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
@@ -87,8 +89,6 @@ void OMW::Engine::addMaster (const std::string& master)
     }
 }
 
-<<<<<<< HEAD
-=======
 // Enables sky rendering
 //
 void OMW::Engine::enableSky (bool bEnable)
@@ -111,7 +111,6 @@ void OMW::Engine::processCommands()
     } 
 }
 
->>>>>>> 450542b4b9a7cf6987c192abbf7e2cc44da286d2
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -157,12 +156,11 @@ void OMW::Engine::go()
     // Start the main rendering loop
     mOgre.start();
 
-<<<<<<< HEAD
-=======
-    mspCommandServer->stop();
-    delete mpSkyManager;
+    // TODO/FIXME: This hangs
+    //mspCommandServer->stop();
+    // TODO/FIXME: This crashes
+    //delete mpSkyManager;
 
->>>>>>> 450542b4b9a7cf6987c192abbf7e2cc44da286d2
     std::cout << "\nThat's all for now!\n";
 }
 

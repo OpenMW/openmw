@@ -2,9 +2,13 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
+#include <libs/mangle/tools/str_exception.hpp>
+
 using boost::asio::ip::tcp;
 
+#ifdef WIN32
 #pragma warning( disable : 4966 )
+#endif
 
 class Client
 {
@@ -85,7 +89,7 @@ public:
                 }
             }
             else
-                throw std::exception("Unexpected header!");
+                throw str_exception("Unexpected header!");
         }       
         return false;
     }

@@ -32,7 +32,7 @@ OISManager::OISManager(Render::OgreRenderer &rend)
 
   // Non-exclusive mouse and keyboard input in debug mode. Debug mode
   // isn't implemented yet though.
-  if(false)
+  if(true)
     {
 #if defined OIS_WIN32_PLATFORM
       pl.insert(std::make_pair(std::string("w32_mouse"),
