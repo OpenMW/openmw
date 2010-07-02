@@ -27,7 +27,7 @@ bool InteriorCellRender::lightOutQuadInLin = false;
 
 // start inserting a new reference.
 
-void InteriorCellRender::insertBegin (const ESM::CellRef &ref)
+void InteriorCellRender::insertBegin (ESM::CellRef &ref)
 {
   assert (!insert);
 

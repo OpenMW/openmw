@@ -5,7 +5,7 @@
 using namespace MWRender;
 
 template<typename T>
-void insertObj(CellRenderImp& cellRender, const T& liveRef)
+void insertObj(CellRenderImp& cellRender, T& liveRef)
 {
   assert (liveRef.base != NULL);
   const std::string &model = liveRef.base->model;
@@ -13,12 +13,12 @@ void insertObj(CellRenderImp& cellRender, const T& liveRef)
   {
     cellRender.insertBegin (liveRef.ref);
     cellRender.insertMesh ("meshes\\" + model);
-    cellRender.insertEnd();
+    liveRef.mData.mHandle = cellRender.insertEnd();
   }
 }
 
 template<>
-void insertObj(CellRenderImp& cellRender, const ESMS::LiveCellRef<ESM::Light, OMW::RefData>& liveRef)
+void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::Light, OMW::RefData>& liveRef)
 {
   assert (liveRef.base != NULL);
   const std::string &model = liveRef.base->model;
@@ -36,21 +36,21 @@ void insertObj(CellRenderImp& cellRender, const ESMS::LiveCellRef<ESM::Light, OM
     const float radius = float(liveRef.base->data.radius);
     cellRender.insertLight(r, g, b, radius);
 
-    cellRender.insertEnd();
+    liveRef.mData.mHandle = cellRender.insertEnd();
   }
 }
 
 template<typename T>
-void insertCellRefList (CellRenderImp& cellRender, const T& cellRefList)
+void insertCellRefList (CellRenderImp& cellRender, T& cellRefList)
 {
-  for(typename T::List::const_iterator it = cellRefList.list.begin();
+  for(typename T::List::iterator it = cellRefList.list.begin();
     it != cellRefList.list.end(); it++)
   {
     insertObj (cellRender, *it);
   }
 }
 
-void CellRenderImp::insertCell(const ESMS::CellStore<OMW::RefData> &cell)
+void CellRenderImp::insertCell(ESMS::CellStore<OMW::RefData> &cell)
 {
   // Loop through all references in the cell
   insertCellRefList (*this, cell.activators);

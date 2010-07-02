@@ -24,7 +24,7 @@ namespace MWRender
     virtual ~CellRenderImp() {}
 
     /// start inserting a new reference.
-    virtual void insertBegin (const ESM::CellRef &ref) = 0;
+    virtual void insertBegin (ESM::CellRef &ref) = 0;
 
     /// insert a mesh related to the most recent insertBegin call.
     virtual void insertMesh(const std::string &mesh) = 0;
@@ -35,7 +35,7 @@ namespace MWRender
     /// finish inserting a new reference and return a handle to it.
     virtual std::string insertEnd() = 0;
       
-    void insertCell(const ESMS::CellStore<OMW::RefData> &cell);
+    void insertCell(ESMS::CellStore<OMW::RefData> &cell);
 
   };
 }

@@ -1,10 +1,13 @@
 #ifndef REFDATA_H
 #define REFDATA_H
 
+#include <string>
+
 namespace OMW
 {
-    class RefData
+    struct RefData
     {
+        std::string mHandle;
         
     
     };

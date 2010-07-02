@@ -42,7 +42,7 @@ namespace MWRender
 
     static bool lightOutQuadInLin;
 
-    const ESMS::CellStore<OMW::RefData> &cell;
+    ESMS::CellStore<OMW::RefData> &cell;
     MWScene &scene;
 
     /// The scene node that contains all objects belonging to this
@@ -57,7 +57,7 @@ namespace MWRender
     Ogre::ColourValue ambientColor;
 
     /// start inserting a new reference.
-    virtual void insertBegin (const ESM::CellRef &ref);
+    virtual void insertBegin (ESM::CellRef &ref);
 
     /// insert a mesh related to the most recent insertBegin call.
     virtual void insertMesh(const std::string &mesh);
@@ -78,7 +78,7 @@ namespace MWRender
 
   public:
 
-    InteriorCellRender(const ESMS::CellStore<OMW::RefData> &_cell, MWScene &_scene)
+    InteriorCellRender(ESMS::CellStore<OMW::RefData> &_cell, MWScene &_scene)
     : cell(_cell), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
 
     virtual ~InteriorCellRender() { destroy(); }
