@@ -2,6 +2,7 @@
 #define _GAME_RENDER_INTERIOR_H
 
 #include "cell.hpp"
+#include "cellimp.hpp"
 #include "components/esm_store/cell_store.hpp"
 
 #include "OgreColourValue.h"
@@ -23,7 +24,7 @@ namespace MWRender
      TODO FIXME: Doesn't do full cleanup yet.
    */
 
-  class InteriorCellRender : private CellRender
+  class InteriorCellRender : public CellRender, private CellRenderImp
   {
 
     static bool lightConst;
@@ -83,14 +84,14 @@ namespace MWRender
     virtual ~InteriorCellRender() { destroy(); }
 
     /// Make the cell visible. Load the cell if necessary.
-    void show();
+    virtual void show();
 
     /// Remove the cell from rendering, but don't remove it from
     /// memory.
     void hide();
 
     /// Destroy all rendering objects connected with this cell.
-    void destroy();
+    void destroy(); // comment by Zini: shouldn't this go into the destructor?
 
     /// Switch through lighting modes.
     void toggleLight();

@@ -10,19 +10,22 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
 set(GAME 
     apps/openmw/main.cpp 
-    apps/openmw/engine.cpp)
+    apps/openmw/engine.cpp
+    apps/openmw/world.cpp)
 set(GAME_HEADER 
     apps/openmw/mwinput/inputmanager.hpp 
-    apps/openmw/engine.hpp)
+    apps/openmw/engine.hpp
+    apps/openmw/world.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND 
     apps/openmw/mwrender/mwscene.cpp 
-    apps/openmw/mwrender/cell.cpp
+    apps/openmw/mwrender/cellimp.cpp
     apps/openmw/mwrender/interior.cpp
     apps/openmw/mwrender/sky.cpp)
 set(GAMEREND_HEADER 
     apps/openmw/mwrender/cell.hpp 
+    apps/openmw/mwrender/cellimp.hpp 
     apps/openmw/mwrender/mwscene.hpp
     apps/openmw/mwrender/interior.hpp 
     apps/openmw/mwrender/playerpos.hpp

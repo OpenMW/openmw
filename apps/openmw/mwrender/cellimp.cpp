@@ -1,4 +1,4 @@
-#include "cell.hpp"
+#include "cellimp.hpp"
 
 #include <cassert>
 
@@ -7,7 +7,7 @@
 using namespace MWRender;
 
 template<typename T>
-void insertObj(CellRender& cellRender, const T& liveRef)
+void insertObj(CellRenderImp& cellRender, const T& liveRef)
 {
   assert (liveRef.base != NULL);
   const std::string &model = liveRef.base->model;
@@ -20,7 +20,7 @@ void insertObj(CellRender& cellRender, const T& liveRef)
 }
 
 template<>
-void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& liveRef)
+void insertObj(CellRenderImp& cellRender, const ESMS::LiveCellRef<ESM::Light>& liveRef)
 {
   assert (liveRef.base != NULL);
   const std::string &model = liveRef.base->model;
@@ -43,7 +43,7 @@ void insertObj(CellRender& cellRender, const ESMS::LiveCellRef<ESM::Light>& live
 }
 
 template<typename T>
-void insertCellRefList (CellRender& cellRender, const T& cellRefList)
+void insertCellRefList (CellRenderImp& cellRender, const T& cellRefList)
 {
   for(typename T::List::const_iterator it = cellRefList.list.begin();
     it != cellRefList.list.end(); it++)
@@ -52,7 +52,7 @@ void insertCellRefList (CellRender& cellRender, const T& cellRefList)
   }
 }
 
-void CellRender::insertCell(const ESMS::CellStore &cell)
+void CellRenderImp::insertCell(const ESMS::CellStore &cell)
 {
   // Loop through all references in the cell
   insertCellRefList (*this, cell.activators);
