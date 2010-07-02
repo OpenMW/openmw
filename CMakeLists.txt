@@ -13,9 +13,9 @@ set(GAME
     apps/openmw/engine.cpp
     apps/openmw/world.cpp)
 set(GAME_HEADER 
-    apps/openmw/mwinput/inputmanager.hpp 
     apps/openmw/engine.hpp
-    apps/openmw/world.hpp)
+    apps/openmw/world.hpp
+    apps/openmw/refdata.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND 
@@ -73,8 +73,7 @@ set(NIFOGRE_HEADER
 source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})    
 
 set(ESM_STORE 
-    components/esm_store/store.cpp 
-    components/esm_store/cell_store.cpp)
+    components/esm_store/store.cpp)
 set(ESM_STORE_HEADER 
     components/esm_store/cell_store.hpp
     components/esm_store/reclists.hpp 

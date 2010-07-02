@@ -11,6 +11,8 @@
 #include "apps/openmw/mwrender/playerpos.hpp"
 #include "apps/openmw/mwrender/mwscene.hpp"
 
+#include "apps/openmw/refdata.hpp"
+
 namespace Render
 {
     class OgreRenderer;
@@ -28,7 +30,8 @@ namespace OMW
     
     class World
     {
-            typedef std::map<ESMS::CellStore *, MWRender::CellRender *> CellRenderCollection;
+            typedef ESMS::CellStore<RefData> CellStore;
+            typedef std::map<CellStore *, MWRender::CellRender *> CellRenderCollection;
     
             MWRender::SkyManager* mSkyManager;
             MWRender::MWScene mScene;
@@ -37,7 +40,7 @@ namespace OMW
             CellRenderCollection mBufferedCells; // loaded, but not active (buffering not implementd yet)
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
-            std::map<std::string, ESMS::CellStore> mInteriors;
+            std::map<std::string, CellStore> mInteriors;
     
             // not implemented
             World (const World&);

@@ -3,14 +3,13 @@
 
 #include <string>
 
+#include "components/esm_store/cell_store.hpp"
+
+#include "../refdata.hpp"
+
 namespace ESM
 {
   class CellRef;
-}
-
-namespace ESMS
-{
-  class CellStore;
 }
 
 namespace MWRender
@@ -36,7 +35,7 @@ namespace MWRender
     /// finish inserting a new reference and return a handle to it.
     virtual std::string insertEnd() = 0;
       
-    void insertCell(const ESMS::CellStore &cell);
+    void insertCell(const ESMS::CellStore<OMW::RefData> &cell);
 
   };
 }
