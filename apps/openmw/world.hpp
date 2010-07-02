@@ -11,7 +11,7 @@
 #include "apps/openmw/mwrender/playerpos.hpp"
 #include "apps/openmw/mwrender/mwscene.hpp"
 
-#include "apps/openmw/refdata.hpp"
+#include "refdata.hpp"
 
 namespace Render
 {
@@ -30,6 +30,12 @@ namespace OMW
     
     class World
     {
+        public:
+        
+            typedef std::vector<std::pair<std::string, MWScript::Locals *> > ScriptList;
+        
+        private:
+        
             typedef ESMS::CellStore<RefData> CellStore;
             typedef std::map<CellStore *, MWRender::CellRender *> CellRenderCollection;
     
@@ -41,10 +47,13 @@ namespace OMW
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
             std::map<std::string, CellStore> mInteriors;
+            ScriptList mLocalScripts;
     
             // not implemented
             World (const World&);
             World& operator= (const World&);
+    
+            void insertInteriorScripts (ESMS::CellStore<OMW::RefData>& cell);
     
         public:
         
@@ -54,8 +63,11 @@ namespace OMW
             ~World();
             
             MWRender::PlayerPos& getPlayerPos();
-    
-    
+            
+            ESMS::ESMStore& getStore();
+            
+            const ScriptList& getLocalScripts() const;
+            ///< Names and local variable state of all local scripts in active cells.
     };
 }
 

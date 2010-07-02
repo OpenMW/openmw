@@ -30,6 +30,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ("master", bpo::value<std::string>()->default_value ("Morrowind"),
             "master file")
         ( "debug", "debug mode" )
+        ( "script-verbose", "verbose script output" )
         ;
   
     bpo::variables_map variables;
@@ -54,6 +55,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     
     if (variables.count ("debug"))
         engine.enableDebugMode();
+        
+    if (variables.count ("script-verbose"))
+        engine.enableVerboseScripts();
 
     return true;
 }

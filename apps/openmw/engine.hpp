@@ -6,10 +6,16 @@
 #include <boost/filesystem.hpp>
 
 #include "components/engine/ogre/renderer.hpp"
-#include "apps/openmw/mwrender/mwscene.hpp"
 #include "components/misc/tsdeque.hpp"
 #include "components/commandserver/server.hpp"
 #include "components/commandserver/command.hpp"
+
+#include "mwrender/mwscene.hpp"
+
+namespace MWScript
+{
+    class ScriptManager;
+}
 
 namespace OMW
 {
@@ -27,9 +33,12 @@ namespace OMW
             std::string mMaster;
             World *mWorld;
             bool mDebug;
+            bool mVerboseScripts;
 
             TsDeque<OMW::Command>                     mCommandQueue;
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
+
+            MWScript::ScriptManager *mScriptManager;
 
             // not implemented
             Engine (const Engine&);
@@ -41,6 +50,8 @@ namespace OMW
 
             /// Load all BSA files in data directory.
             void loadBSA();
+
+            void executeLocalScripts();
 
         public:
 
@@ -62,6 +73,9 @@ namespace OMW
             /// Enable debug mode:
             /// - non-exclusive input
             void enableDebugMode();
+
+            /// Enable verbose script output
+            void enableVerboseScripts();
 
             /// Process pending commands
             void processCommands();

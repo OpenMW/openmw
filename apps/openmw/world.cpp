@@ -7,8 +7,50 @@
 #include "apps/openmw/mwrender/sky.hpp"
 #include "apps/openmw/mwrender/interior.hpp"
 
+namespace
+{
+    template<typename T>
+    void listCellScripts (ESMS::CellRefList<T, OMW::RefData>& cellRefList,
+        OMW::World::ScriptList& scriptList)
+    {
+        for (typename ESMS::CellRefList<T, OMW::RefData>::List::iterator iter (
+            cellRefList.list.begin());
+            iter!=cellRefList.list.end(); ++iter)
+        {
+            if (!iter->base->script.empty())
+                scriptList.push_back (
+                    std::make_pair (iter->base->script, static_cast<MWScript::Locals *> (0)));
+            
+            // TODO local variables
+        
+        
+        }
+    }
+}
+
 namespace OMW
 {
+    void World::insertInteriorScripts (ESMS::CellStore<OMW::RefData>& cell)
+    {
+        listCellScripts (cell.activators, mLocalScripts);
+        listCellScripts (cell.potions, mLocalScripts);
+        listCellScripts (cell.appas, mLocalScripts);
+        listCellScripts (cell.armors, mLocalScripts);
+        listCellScripts (cell.books, mLocalScripts);
+        listCellScripts (cell.clothes, mLocalScripts);
+        listCellScripts (cell.containers, mLocalScripts);
+        listCellScripts (cell.creatures, mLocalScripts);
+        listCellScripts (cell.doors, mLocalScripts);
+        listCellScripts (cell.ingreds, mLocalScripts);
+        listCellScripts (cell.lights, mLocalScripts);
+        listCellScripts (cell.lockpicks, mLocalScripts);
+        listCellScripts (cell.miscItems, mLocalScripts);
+        listCellScripts (cell.npcs, mLocalScripts);
+        listCellScripts (cell.probes, mLocalScripts);
+        listCellScripts (cell.repairs, mLocalScripts);
+        listCellScripts (cell.weapons, mLocalScripts);
+    }
+    
     World::World (Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, const std::string& startCell)
     : mSkyManager (0), mScene (renderer), mPlayerPos (mScene.getCamera())
@@ -23,6 +65,8 @@ namespace OMW
         mStore.load (mEsm);
         
         mInteriors[startCell].loadInt (startCell, mStore, mEsm);
+        
+        insertInteriorScripts (mInteriors[startCell]);
         
         std::cout << "\nSetting up cell rendering\n";
 
@@ -57,5 +101,15 @@ namespace OMW
     MWRender::PlayerPos& World::getPlayerPos()
     {
         return mPlayerPos;
+    }
+    
+    ESMS::ESMStore& World::getStore()
+    {
+        return mStore;
+    }
+    
+    const World::ScriptList& World::getLocalScripts() const
+    {
+        return mLocalScripts;
     }
 }
