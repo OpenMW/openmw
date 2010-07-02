@@ -23,7 +23,7 @@ namespace MWRender
      TODO FIXME: Doesn't do full cleanup yet.
    */
 
-  class InteriorCellRender : private CellRender
+  class InteriorCellRender : public CellRender
   {
 
     static bool lightConst;
@@ -83,7 +83,7 @@ namespace MWRender
     virtual ~InteriorCellRender() { destroy(); }
 
     /// Make the cell visible. Load the cell if necessary.
-    void show();
+    virtual void show();
 
     /// Remove the cell from rendering, but don't remove it from
     /// memory.

@@ -4,19 +4,14 @@
 
 #include <iostream>
 
-#include "components/esm_store/cell_store.hpp"
-#include "components/bsa/bsa_archive.hpp"
-#include "components/engine/ogre/renderer.hpp"
 #include "components/misc/fileops.hpp"
+#include "components/bsa/bsa_archive.hpp"
 
-#include "apps/openmw/mwrender/interior.hpp"
 #include "mwinput/inputmanager.hpp"
-#include "apps/openmw/mwrender/playerpos.hpp"
-#include "apps/openmw/mwrender/sky.hpp"
+
+#include "world.hpp"
 
 OMW::Engine::Engine() 
-    : mEnableSky   (false)
-    , mpSkyManager (NULL)
 {
 }
 
@@ -76,17 +71,11 @@ void OMW::Engine::addMaster (const std::string& master)
     }
 }
 
-// Enables sky rendering
-//
-void OMW::Engine::enableSky (bool bEnable)
-{
-    mEnableSky = bEnable;
-}
-
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
 {
+    assert (!mWorld);
     assert (!mDataDir.empty());
     assert (!mCellName.empty());
     assert (!mMaster.empty());
@@ -104,55 +93,29 @@ void OMW::Engine::go()
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");
 
-    loadBSA();
-
-    boost::filesystem::path masterPath (mDataDir);
-    masterPath /= mMaster;
-
-    std::cout << "Loading ESM " << masterPath.string() << "\n";
-    ESM::ESMReader esm;
-    ESMS::ESMStore store;
-    ESMS::CellStore cell;
-
-    // This parses the ESM file and loads a sample cell
-    esm.open(masterPath.file_string());
-    store.load(esm);
-
-    cell.loadInt(mCellName, store, esm);
-
     // Create the window
     mOgre.createWindow("OpenMW");
 
-    std::cout << "\nSetting up cell rendering\n";
+    loadBSA();
 
-    // Sets up camera, scene manager, and viewport.
-    MWRender::MWScene scene(mOgre);
-
-    // Used to control the player camera and position
-    MWRender::PlayerPos player(scene.getCamera());
-
-    // This connects the cell data with the rendering scene.
-    MWRender::InteriorCellRender rend(cell, scene);
-
-    // Load the cell and insert it into the renderer
-    rend.show();
-
-    // Optionally enable the sky
-    if (mEnableSky)
-        mpSkyManager = MWRender::SkyManager::create(mOgre.getWindow(), scene.getCamera());
-
+    // Create the world
+    mWorld = new World (mOgre, mDataDir, mMaster, mCellName);
+    
     std::cout << "Setting up input system\n";
 
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre, player);
+    MWInput::MWInputManager input(mOgre, mWorld->getPlayerPos());
 
     std::cout << "\nStart! Press Q/ESC or close window to exit.\n";
 
     // Start the main rendering loop
     mOgre.start();
 
-    delete mpSkyManager;
-
     std::cout << "\nThat's all for now!\n";
+}
+
+OMW::Engine::~Engine()
+{
+    delete mWorld;
 }
 

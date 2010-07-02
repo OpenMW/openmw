@@ -10,10 +10,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
 set(GAME 
     apps/openmw/main.cpp 
-    apps/openmw/engine.cpp)
+    apps/openmw/engine.cpp
+    apps/openmw/world.cpp)
 set(GAME_HEADER 
     apps/openmw/mwinput/inputmanager.hpp 
-    apps/openmw/engine.hpp)
+    apps/openmw/engine.hpp
+    apps/openmw/world.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND 

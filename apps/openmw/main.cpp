@@ -29,7 +29,6 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             "set initial cell (only interior cells supported at the moment")
         ("master", bpo::value<std::string>()->default_value ("Morrowind"),
             "master file")
-        ("enablesky", "enable rendering of the sky")
         ;
   
     bpo::variables_map variables;
@@ -47,8 +46,6 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         std::cout << desc << std::endl;
         return false;
     }
-
-    engine.enableSky(!!variables.count("enablesky"));
 
     engine.setDataDir (variables["data"].as<std::string>());
     engine.setCell (variables["start"].as<std::string>());

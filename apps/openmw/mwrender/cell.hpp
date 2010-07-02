@@ -37,6 +37,9 @@ namespace MWRender
     virtual std::string insertEnd() = 0;
       
     void insertCell(const ESMS::CellStore &cell);
+    
+    /// placeholder function -> need to do some heavy refactoring on the whole cell stuff
+    virtual void show() = 0;
   };
 }
 
