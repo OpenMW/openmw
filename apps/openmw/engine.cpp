@@ -9,6 +9,7 @@
 
 #include "mwinput/inputmanager.hpp"
 #include "mwscript/scriptmanager.hpp"
+#include "mwscript/compilercontextscript.hpp"
 
 #include "world.hpp"
 
@@ -30,12 +31,13 @@ void OMW::Engine::executeLocalScripts()
     for (World::ScriptList::const_iterator iter (mWorld->getLocalScripts().begin());
         iter!=mWorld->getLocalScripts().end(); ++iter)
     {
-        mScriptManager->run (iter->first);
+        mScriptManager->run (iter->first, *iter->second);
     
     }
 }
 
-OMW::Engine::Engine() : mWorld(NULL), mDebug (false), mScriptManager (0)
+OMW::Engine::Engine()
+: mWorld(NULL), mDebug (false), mScriptManager (0), mScriptContext (0)
 {
     mspCommandServer.reset(
         new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
@@ -46,6 +48,7 @@ OMW::Engine::~Engine()
 //    mspCommandServer->stop();
     delete mWorld;
     delete mScriptManager;
+    delete mScriptContext;
 }
 
 // Load all BSA files in data directory.
@@ -158,8 +161,11 @@ void OMW::Engine::go()
 
     // Create the world
     mWorld = new World (mOgre, mDataDir, mMaster, mCellName);
-    
-    mScriptManager = new MWScript::ScriptManager (mWorld->getStore(), mVerboseScripts);
+
+    mScriptContext = new MWScript::CompilerContextScript;
+
+    mScriptManager = new MWScript::ScriptManager (mWorld->getStore(), mVerboseScripts,
+        *mScriptContext);
     
     executeLocalScripts(); // TODO move into a framelistener
     

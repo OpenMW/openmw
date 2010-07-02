@@ -41,7 +41,9 @@ set(GAMESCRIPT
     apps/openmw/mwscript/scriptmanager.cpp)
 set(GAMESCRIPT_HEADER 
     apps/openmw/mwscript/locals.hpp
-    apps/openmw/mwscript/scriptmanager.hpp)
+    apps/openmw/mwscript/scriptmanager.hpp
+    apps/openmw/mwscript/compilercontext.hpp
+    apps/openmw/mwscript/compilercontextscript.hpp)
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})    
 
 set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT})

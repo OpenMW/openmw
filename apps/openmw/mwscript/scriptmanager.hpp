@@ -5,6 +5,9 @@
 #include <vector>
 #include <string>
 
+#include <components/compiler/streamerrorhandler.hpp>
+#include <components/compiler/fileparser.hpp>
+
 #include <components/interpreter/types.hpp>
 
 namespace ESMS
@@ -28,20 +31,25 @@ namespace MWScript
     
     class ScriptManager
     {
+            Compiler::StreamErrorHandler mErrorHandler;
             const ESMS::ESMStore& mStore;
             bool mVerbose;
+            Compiler::Context& mCompilerContext;
+            Compiler::FileParser mParser;
             
             std::map<std::string, std::vector<Interpreter::Type_Code> > mScripts;
             
+            bool compile (const std::string& name);
+            
         public:
         
-            ScriptManager (const ESMS::ESMStore& store, bool verbose);
+            ScriptManager (const ESMS::ESMStore& store, bool verbose,
+                Compiler::Context& compilerContext);
             
-            void run (const std::string& name/*, Compiler::Context& compilerContext,
-                Interpreter::Context& interpreterContext, Locals& locals*/);
+            void run (const std::string& name/*,
+                Interpreter::Context& interpreterContext*/, Locals& locals);
     };
 };
 
 #endif
-
 

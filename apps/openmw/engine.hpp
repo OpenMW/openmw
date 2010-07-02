@@ -12,6 +12,11 @@
 
 #include "mwrender/mwscene.hpp"
 
+namespace Compiler
+{
+    class Context;
+}
+
 namespace MWScript
 {
     class ScriptManager;
@@ -39,6 +44,7 @@ namespace OMW
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
             MWScript::ScriptManager *mScriptManager;
+            Compiler::Context *mScriptContext;
 
             // not implemented
             Engine (const Engine&);

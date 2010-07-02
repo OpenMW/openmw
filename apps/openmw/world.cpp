@@ -10,20 +10,23 @@
 namespace
 {
     template<typename T>
-    void listCellScripts (ESMS::CellRefList<T, OMW::RefData>& cellRefList,
-        OMW::World::ScriptList& scriptList)
+    void listCellScripts (const ESMS::ESMStore& store,
+        ESMS::CellRefList<T, OMW::RefData>& cellRefList, OMW::World::ScriptList& scriptList)
     {
         for (typename ESMS::CellRefList<T, OMW::RefData>::List::iterator iter (
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {
             if (!iter->base->script.empty())
-                scriptList.push_back (
-                    std::make_pair (iter->base->script, static_cast<MWScript::Locals *> (0)));
+            {
+                if (const ESM::Script *script = store.scripts.find (iter->base->script))
+                {           
+                    iter->mData.setLocals (*script);
             
-            // TODO local variables
-        
-        
+                    scriptList.push_back (
+                        std::make_pair (iter->base->script, &iter->mData.getLocals()));
+                }
+            }
         }
     }
 }
@@ -32,23 +35,23 @@ namespace OMW
 {
     void World::insertInteriorScripts (ESMS::CellStore<OMW::RefData>& cell)
     {
-        listCellScripts (cell.activators, mLocalScripts);
-        listCellScripts (cell.potions, mLocalScripts);
-        listCellScripts (cell.appas, mLocalScripts);
-        listCellScripts (cell.armors, mLocalScripts);
-        listCellScripts (cell.books, mLocalScripts);
-        listCellScripts (cell.clothes, mLocalScripts);
-        listCellScripts (cell.containers, mLocalScripts);
-        listCellScripts (cell.creatures, mLocalScripts);
-        listCellScripts (cell.doors, mLocalScripts);
-        listCellScripts (cell.ingreds, mLocalScripts);
-        listCellScripts (cell.lights, mLocalScripts);
-        listCellScripts (cell.lockpicks, mLocalScripts);
-        listCellScripts (cell.miscItems, mLocalScripts);
-        listCellScripts (cell.npcs, mLocalScripts);
-        listCellScripts (cell.probes, mLocalScripts);
-        listCellScripts (cell.repairs, mLocalScripts);
-        listCellScripts (cell.weapons, mLocalScripts);
+        listCellScripts (mStore, cell.activators, mLocalScripts);
+        listCellScripts (mStore, cell.potions, mLocalScripts);
+        listCellScripts (mStore, cell.appas, mLocalScripts);
+        listCellScripts (mStore, cell.armors, mLocalScripts);
+        listCellScripts (mStore, cell.books, mLocalScripts);
+        listCellScripts (mStore, cell.clothes, mLocalScripts);
+        listCellScripts (mStore, cell.containers, mLocalScripts);
+        listCellScripts (mStore, cell.creatures, mLocalScripts);
+        listCellScripts (mStore, cell.doors, mLocalScripts);
+        listCellScripts (mStore, cell.ingreds, mLocalScripts);
+        listCellScripts (mStore, cell.lights, mLocalScripts);
+        listCellScripts (mStore, cell.lockpicks, mLocalScripts);
+        listCellScripts (mStore, cell.miscItems, mLocalScripts);
+        listCellScripts (mStore, cell.npcs, mLocalScripts);
+        listCellScripts (mStore, cell.probes, mLocalScripts);
+        listCellScripts (mStore, cell.repairs, mLocalScripts);
+        listCellScripts (mStore, cell.weapons, mLocalScripts);
     }
     
     World::World (Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,

@@ -19,8 +19,11 @@ namespace OMW
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
                                       // we can make this a pointer later.
+            bool mHasLocals;
         
         public:
+        
+            RefData() : mHasLocals (false) {}
                          
             std::string getHandle()
             {
@@ -29,7 +32,11 @@ namespace OMW
                         
             void setLocals (const ESM::Script& script)
             {
-                mLocals.configure (script);
+                if (!mHasLocals)
+                {
+                    mLocals.configure (script);
+                    mHasLocals = true;
+                }
             }
             
             void setHandle (const std::string& handle)
