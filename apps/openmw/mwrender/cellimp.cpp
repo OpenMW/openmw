@@ -13,7 +13,7 @@ void insertObj(CellRenderImp& cellRender, T& liveRef)
   {
     cellRender.insertBegin (liveRef.ref);
     cellRender.insertMesh ("meshes\\" + model);
-    liveRef.mData.mHandle = cellRender.insertEnd();
+    liveRef.mData.setHandle (cellRender.insertEnd());
   }
 }
 
@@ -36,7 +36,7 @@ void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::Light, OMW::Ref
     const float radius = float(liveRef.base->data.radius);
     cellRender.insertLight(r, g, b, radius);
 
-    liveRef.mData.mHandle = cellRender.insertEnd();
+    liveRef.mData.setHandle (cellRender.insertEnd());
   }
 }
 

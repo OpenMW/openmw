@@ -37,8 +37,13 @@ set(GAMEINPUT_HEADER
     apps/openmw/mwinput/inputmanager.hpp)
 source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})    
 
-set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT})
-set(APPS_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER})
+# set(GAMESCRIPT)
+set(GAMESCRIPT_HEADER 
+    apps/openmw/mwscript/locals.hpp)
+source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})    
+
+set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT})
+set(APPS_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER})
 
 # source directory: components
 
