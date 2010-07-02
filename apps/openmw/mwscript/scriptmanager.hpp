@@ -26,9 +26,7 @@ namespace Interpreter
 }
 
 namespace MWScript
-{
-    struct Locals;
-    
+{    
     class ScriptManager
     {
             Compiler::StreamErrorHandler mErrorHandler;
@@ -46,8 +44,7 @@ namespace MWScript
             ScriptManager (const ESMS::ESMStore& store, bool verbose,
                 Compiler::Context& compilerContext);
             
-            void run (const std::string& name/*,
-                Interpreter::Context& interpreterContext*/, Locals& locals);
+            void run (const std::string& name, Interpreter::Context& interpreterContext);
     };
 };
 

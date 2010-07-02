@@ -10,6 +10,7 @@
 #include "mwinput/inputmanager.hpp"
 #include "mwscript/scriptmanager.hpp"
 #include "mwscript/compilercontextscript.hpp"
+#include "mwscript/interpretercontext.hpp"
 
 #include "world.hpp"
 
@@ -18,7 +19,8 @@ void OMW::Engine::executeLocalScripts()
     for (World::ScriptList::const_iterator iter (mWorld->getLocalScripts().begin());
         iter!=mWorld->getLocalScripts().end(); ++iter)
     {
-        mScriptManager->run (iter->first, *iter->second);
+        MWScript::InterpreterContext interpreterContext (*mWorld, iter->second);
+        mScriptManager->run (iter->first, interpreterContext);
     }
 }
 

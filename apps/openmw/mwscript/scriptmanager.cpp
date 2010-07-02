@@ -1,8 +1,6 @@
 
 #include "scriptmanager.hpp"
 
-#include <components/compiler/scanner.hpp>
-
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -10,6 +8,12 @@
 
 #include <components/esm/loadscpt.hpp>
 #include <components/esm_store/store.hpp>
+
+#include <components/compiler/scanner.hpp>
+
+#include <components/interpreter/installopcodes.hpp>
+#include <components/interpreter/interpreter.hpp>
+
 
 namespace MWScript
 {
@@ -70,8 +74,7 @@ namespace MWScript
         return false;    
     }
 
-    void ScriptManager::run (const std::string& name/*,
-        Interpreter::Context& interpreterContext*/, Locals& locals)
+    void ScriptManager::run (const std::string& name, Interpreter::Context& interpreterContext)
     {
         // compile script
         std::map<std::string, std::vector<Interpreter::Type_Code> >::iterator iter =
@@ -92,7 +95,18 @@ namespace MWScript
         }
     
         // execute script
-        
+        if (!iter->second.empty())
+            try
+            {
+                Interpreter::Interpreter interpreter (interpreterContext);
+                Interpreter::installOpcodes (interpreter);   
+                interpreter.run (&iter->second[0], iter->second.size());     
+            }
+            catch (...)
+            {
+                std::cerr << "exeution of script " << name << " failed." << std::endl;
+                iter->second.clear(); // don't execute again.
+            }
     }
 }
 

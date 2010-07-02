@@ -1,6 +1,9 @@
 #ifndef INTERPRETER_CONTEXT_H_INCLUDED
 #define INTERPRETER_CONTEXT_H_INCLUDED
 
+#include <string>
+#include <vector>
+
 namespace Interpreter
 {
     class Context
