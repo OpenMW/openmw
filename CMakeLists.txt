@@ -20,11 +20,12 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND 
     apps/openmw/mwrender/mwscene.cpp 
-    apps/openmw/mwrender/cell.cpp
+    apps/openmw/mwrender/cellimp.cpp
     apps/openmw/mwrender/interior.cpp
     apps/openmw/mwrender/sky.cpp)
 set(GAMEREND_HEADER 
     apps/openmw/mwrender/cell.hpp 
+    apps/openmw/mwrender/cellimp.hpp 
     apps/openmw/mwrender/mwscene.hpp
     apps/openmw/mwrender/interior.hpp 
     apps/openmw/mwrender/playerpos.hpp
