@@ -3,6 +3,7 @@
 
 #include <cctype>
 #include <algorithm>
+#include <iterator>
 
 #include "errorhandler.hpp"
 #include "exception.hpp"
