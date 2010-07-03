@@ -19,10 +19,17 @@ namespace Compiler
                 std::string mArguments;
                 int mCode;
             };
+            
+            struct Instruction
+            {
+                std::string mArguments;
+                int mCode;            
+            };
     
             int mNextKeywordIndex;
             std::map<std::string, int> mKeywords;
             std::map<int, Function> mFunctions;
+            std::map<int, Instruction> mInstructions;
         
         public:
     
@@ -36,6 +43,9 @@ namespace Compiler
             bool isFunction (int keyword, char& returnType, std::string& argumentType) const;
             ///< Is this keyword registered with a function? If yes, return return and argument
             /// types.
+
+            bool isInstruction (int keyword, std::string& argumentType) const;
+            ///< Is this keyword registered with a function? If yes, return argument types.
                         
             void registerFunction (const std::string& keyword, char returnType,
                 const std::string& argumentType, int segment5code);
@@ -44,9 +54,20 @@ namespace Compiler
             /// - keyword must be unique
             /// \note Currently only segment 5 opcodes are supported.
             
+            void registerInstruction (const std::string& keyword,
+                const std::string& argumentType, int segment5code);
+            ///< Register a custom instruction
+            /// - keyword must be all lower case.
+            /// - keyword must be unique
+            /// \note Currently only segment 5 opcodes are supported.
+            
             void generateFunctionCode (int keyword, std::vector<Interpreter::Type_Code>& code)
                 const;
             ///< Append code for function to \a code.
+            
+            void generateInstructionCode (int keyword, std::vector<Interpreter::Type_Code>& code)
+                const;
+            ///< Append code for function to \a code.            
     };
 }
 

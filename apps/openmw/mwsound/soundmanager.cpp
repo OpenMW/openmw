@@ -35,7 +35,7 @@ namespace MWSound
     }
 
     void SoundManager::playSound3D (MWWorld::Ptr reference, const std::string& soundId,
-        float volume, float pitch, Interpreter::Context& context)
+        float volume, float pitch, bool loop, Interpreter::Context& context)
     {
         std::cout
             << "sound effect: playing sound " << soundId

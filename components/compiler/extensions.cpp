@@ -31,7 +31,18 @@ namespace Compiler
         argumentType = iter->second.mArguments;
         return true;
     }
-    
+        
+    bool Extensions::isInstruction (int keyword, std::string& argumentType) const
+    {
+        std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
+        
+        if (iter==mInstructions.end())
+            return false;
+            
+        argumentType = iter->second.mArguments;
+        return true;
+    }
+        
     void Extensions::registerFunction (const std::string& keyword, char returnType,
         const std::string& argumentType, int segment5code)
     {
@@ -48,7 +59,23 @@ namespace Compiler
         
         mFunctions.insert (std::make_pair (code, function));
     }
+        
+    void Extensions::registerInstruction (const std::string& keyword,
+        const std::string& argumentType, int segment5code)
+    {
+        assert (segment5code>=33554432 && segment5code<=67108863);
     
+        int code = mNextKeywordIndex--;
+        
+        mKeywords.insert (std::make_pair (keyword, code));
+        
+        Instruction instruction;
+        instruction.mArguments = argumentType;
+        instruction.mCode = segment5code;
+        
+        mInstructions.insert (std::make_pair (code, instruction));
+    }
+        
     void Extensions::generateFunctionCode (int keyword, std::vector<Interpreter::Type_Code>& code)
         const
     {
@@ -57,6 +84,18 @@ namespace Compiler
         if (iter==mFunctions.end())
             throw std::logic_error ("unknown custom function keyword");
             
-        Generator::segment5 (iter->second.mCode);
+        code.push_back (Generator::segment5 (iter->second.mCode));
     }
+        
+    void Extensions::generateInstructionCode (int keyword,
+        std::vector<Interpreter::Type_Code>& code)
+        const
+    {
+        std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
+        
+        if (iter==mInstructions.end())
+            throw std::logic_error ("unknown custom instruction keyword");
+            
+        code.push_back (Generator::segment5 (iter->second.mCode));
+    }    
 }

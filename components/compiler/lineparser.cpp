@@ -7,6 +7,7 @@
 #include "skipparser.hpp"
 #include "locals.hpp"
 #include "generator.hpp"
+#include "extensions.hpp"
 
 namespace Compiler
 {
@@ -134,6 +135,21 @@ namespace Compiler
                     Generator::exit (mCode);
                     mState = EndState;
                     return true;
+            }
+            
+            // check for custom extensions
+            if (const Extensions *extensions = getContext().getExtensions())
+            {
+                std::string argumentType;
+                
+                if (extensions->isInstruction (keyword, argumentType))
+                {
+                    mExprParser.parseArguments (argumentType, scanner, mCode, true);
+                    
+                    extensions->generateInstructionCode (keyword, mCode);
+                    mState = EndState;
+                    return true;
+                }
             }
         }
         else if (mState==SetLocalVarState && keyword==Scanner::K_to)

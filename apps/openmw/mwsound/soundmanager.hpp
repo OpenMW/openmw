@@ -50,7 +50,7 @@ namespace MWSound
             ///< Play a sound, independently of 3D-position
             
             void playSound3D (MWWorld::Ptr reference, const std::string& soundId,
-                float volume, float pitch, Interpreter::Context& context);
+                float volume, float pitch, bool loop, Interpreter::Context& context);
             ///< Play a sound from an object
 
             void stopSound3D (MWWorld::Ptr reference, const std::string& soundId,

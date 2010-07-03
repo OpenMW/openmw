@@ -57,7 +57,8 @@ void OMW::Engine::processCommands()
 }
 
 OMW::Engine::Engine()
-: mWorld(NULL), mDebug (false), mSoundManager (0), mScriptManager (0), mScriptContext (0)
+: mWorld(NULL), mDebug (false), mVerboseScripts (false), mSoundManager (0), mScriptManager (0),
+  mScriptContext (0)
 {
     mspCommandServer.reset(
         new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));

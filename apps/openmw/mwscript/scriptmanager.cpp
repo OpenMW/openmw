@@ -17,6 +17,8 @@
 
 #include "../mwsound/extensions.hpp"
 
+#include "cellextensions.hpp"
+
 namespace MWScript
 {
     ScriptManager::ScriptManager (const ESMS::ESMStore& store, bool verbose,
@@ -104,9 +106,13 @@ namespace MWScript
                 installOpcodes (interpreter);
                 interpreter.run (&iter->second[0], iter->second.size());     
             }
-            catch (...)
+            catch (const std::exception& e)
             {
                 std::cerr << "exeution of script " << name << " failed." << std::endl;
+                    
+                if (mVerbose)
+                    std::cerr << "(" << e.what() << ")" << std::endl;
+                    
                 iter->second.clear(); // don't execute again.
             }
     }
@@ -114,6 +120,7 @@ namespace MWScript
     void ScriptManager::installOpcodes (Interpreter::Interpreter& interpreter)
     {
         Interpreter::installOpcodes (interpreter);
+        Cell::installOpcodes (interpreter);
         MWSound::installOpcodes (interpreter);
     }
 }

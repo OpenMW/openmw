@@ -76,7 +76,7 @@ namespace Interpreter
                 
                 if (iter==mSegment3.end())
                     abortUnknownCode (3, opcode);
-                
+                    
                 iter->second->execute (mRuntime, arg0);
                 
                 return;
@@ -106,7 +106,7 @@ namespace Interpreter
                 
                 if (iter==mSegment5.end())
                     abortUnknownCode (5, opcode);
-                
+                    
                 iter->second->execute (mRuntime);
                 
                 return;
