@@ -23,6 +23,7 @@ namespace Mangle
      */
     struct Driver
     {
+      Driver() : event(NULL) {}
       virtual ~Driver() {}
 
       /** Captures input and produces the relevant events from it. An
