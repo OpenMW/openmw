@@ -26,6 +26,12 @@ namespace Interpreter
             
             virtual void messageBox (const std::string& message,
                 const std::vector<std::string>& buttons) = 0; 
+                
+            void messageBox (const std::string& message)
+            {
+                std::vector<std::string> empty;
+                messageBox (message, empty);
+            }
     };
 }
 

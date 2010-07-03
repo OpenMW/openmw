@@ -70,9 +70,9 @@ namespace MWScript
             std::cerr << "error: message box buttons not supported" << std::endl;
     }
     
-    bool InterpreterContext::cellChanged()
+    OMW::World& InterpreterContext::getWorld()
     {
-        return mWorld.hasCellChanged();    
+        return mWorld;
     }
 }
 

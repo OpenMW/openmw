@@ -15,6 +15,7 @@
 #include <components/interpreter/installopcodes.hpp>
 #include <components/interpreter/interpreter.hpp>
 
+#include "../mwsound/extensions.hpp"
 
 namespace MWScript
 {
@@ -112,7 +113,8 @@ namespace MWScript
     
     void ScriptManager::installOpcodes (Interpreter::Interpreter& interpreter)
     {
-        Interpreter::installOpcodes (interpreter);   
+        Interpreter::installOpcodes (interpreter);
+        MWSound::installOpcodes (interpreter);
     }
 }
 

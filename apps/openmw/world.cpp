@@ -1,6 +1,8 @@
 
 #include "world.hpp"
 
+#include <iostream>
+
 #include "components/bsa/bsa_archive.hpp"
 #include "components/engine/ogre/renderer.hpp"
 
@@ -120,5 +122,10 @@ namespace OMW
     {
         // Cell change not implemented yet.
         return false;
+    }
+    
+    MWSound::SoundManager& World::getSoundManager()
+    {
+        return mSoundManager;
     }
 }

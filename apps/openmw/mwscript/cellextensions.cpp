@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../world.hpp"
+
 #include "interpretercontext.hpp"
 
 namespace MWScript
@@ -22,7 +24,7 @@ namespace MWScript
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
                         
-                    runtime.push (context.cellChanged() ? 1 : 0);
+                    runtime.push (context.getWorld().hasCellChanged() ? 1 : 0);
                 } 
         };
     

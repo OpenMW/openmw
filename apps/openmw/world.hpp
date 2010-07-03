@@ -11,6 +11,8 @@
 #include "apps/openmw/mwrender/playerpos.hpp"
 #include "apps/openmw/mwrender/mwscene.hpp"
 
+#include "mwsound/soundmanager.hpp"
+
 #include "refdata.hpp"
 
 namespace Render
@@ -47,6 +49,7 @@ namespace OMW
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
             std::map<std::string, CellStore> mInteriors;
+            MWSound::SoundManager mSoundManager;
             ScriptList mLocalScripts;
     
             // not implemented
@@ -71,6 +74,8 @@ namespace OMW
             
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
+            
+            MWSound::SoundManager& getSoundManager();           
     };
 }
 
