@@ -12,6 +12,8 @@
 #include "errorhandler.hpp"
 #include "locals.hpp"
 #include "stringparser.hpp"
+#include "extensions.hpp"
+#include "context.hpp"
 
 namespace Compiler
 {
@@ -278,6 +280,27 @@ namespace Compiler
                 
                 mNextOperand = false;
                 return true;
+            }
+            else
+            {
+                // check for custom extensions
+                if (const Extensions *extensions = getContext().getExtensions())
+                {
+                    char returnType;
+                    std::string argumentType;
+                    
+                    if (extensions->isFunction (keyword, returnType, argumentType))
+                    {
+                        mTokenLoc = loc;
+                        parseArguments (argumentType, scanner);
+                        
+                        extensions->generateFunctionCode (keyword, mCode);
+                        mOperands.push_back (returnType);
+                        
+                        mNextOperand = false;
+                        return true;
+                    }
+                }
             }
         }
         else
