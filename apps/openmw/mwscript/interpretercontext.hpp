@@ -3,6 +3,8 @@
 
 #include <components/interpreter/context.hpp>
 
+#include "../mwworld/ptr.hpp"
+
 namespace MWWorld
 {
     class World;
@@ -22,11 +24,12 @@ namespace MWScript
             MWWorld::World& mWorld;
             MWSound::SoundManager& mSoundManager;
             Locals *mLocals;
+            MWWorld::Ptr mReference;
         
         public:
         
             InterpreterContext (MWWorld::World& world, MWSound::SoundManager& soundManager,
-                MWScript::Locals *locals);
+                MWScript::Locals *locals, MWWorld::Ptr reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
     
             virtual int getLocalShort (int index) const;

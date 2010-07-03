@@ -12,6 +12,7 @@
 #include "../mwrender/mwscene.hpp"
 
 #include "refdata.hpp"
+#include "ptr.hpp"
 
 namespace Render
 {
@@ -32,7 +33,7 @@ namespace MWWorld
     {
         public:
         
-            typedef std::vector<std::pair<std::string, MWScript::Locals *> > ScriptList;
+            typedef std::vector<std::pair<std::string, Ptr> > ScriptList;
         
         private:
         

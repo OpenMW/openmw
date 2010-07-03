@@ -61,7 +61,8 @@ set(GAMEWORLD
     apps/openmw/mwworld/world.cpp)
 set(GAMEWORLD_HEADER 
     apps/openmw/mwworld/refdata.hpp
-    apps/openmw/mwworld/world.hpp)
+    apps/openmw/mwworld/world.hpp
+    apps/openmw/mwworld/ptr.hpp)
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER}) 
 
 

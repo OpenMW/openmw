@@ -26,7 +26,7 @@ namespace
                     iter->mData.setLocals (*script);
             
                     scriptList.push_back (
-                        std::make_pair (iter->base->script, &iter->mData.getLocals()));
+                        std::make_pair (iter->base->script, MWWorld::Ptr (&*iter)));
                 }
             }
         }

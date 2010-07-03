@@ -17,13 +17,15 @@
 #include "mwsound/soundmanager.hpp"
 
 #include "mwworld/world.hpp"
+#include "mwworld/ptr.hpp"
 
 void OMW::Engine::executeLocalScripts()
 {
     for (MWWorld::World::ScriptList::const_iterator iter (mWorld->getLocalScripts().begin());
         iter!=mWorld->getLocalScripts().end(); ++iter)
     {
-        MWScript::InterpreterContext interpreterContext (*mWorld, *mSoundManager, iter->second);
+        MWScript::InterpreterContext interpreterContext (*mWorld, *mSoundManager,
+            &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
         mScriptManager->run (iter->first, interpreterContext);
     }
 }
