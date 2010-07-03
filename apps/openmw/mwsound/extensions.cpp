@@ -206,11 +206,11 @@ namespace MWSound
         extensions.registerFunction ("saydone", 'l', "", Script::opcodeSayDone);
         extensions.registerInstruction ("streammusic", "S", Script::opcodeStreamMusic);
         extensions.registerInstruction ("playsound", "S", Script::opcodePlaySound);
-        extensions.registerInstruction ("playsoundvp", "Sll", Script::opcodePlaySoundVP);
+        extensions.registerInstruction ("playsoundvp", "Sff", Script::opcodePlaySoundVP);
         extensions.registerInstruction ("playsound3d", "S", Script::opcodePlaySound3D);
-        extensions.registerInstruction ("playsound3dvp", "Sll", Script::opcodePlaySound3DVP);
+        extensions.registerInstruction ("playsound3dvp", "Sff", Script::opcodePlaySound3DVP);
         extensions.registerInstruction ("playloopsound3d", "S", Script::opcodePlayLoopSound3D);
-        extensions.registerInstruction ("playloopsound3dvp", "Sll",
+        extensions.registerInstruction ("playloopsound3dvp", "Sff",
             Script::opcodePlayLoopSound3DVP);
         extensions.registerInstruction ("stopsound", "S", Script::opcodeStopSound);
         extensions.registerFunction ("getsoundplaying", 'l', "S", Script::opcodeGetSoundPlaying);   
