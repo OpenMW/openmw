@@ -37,7 +37,10 @@ class MangleArchive : public Ogre::Archive
   time_t getModifiedTime(const Ogre::String& filename)
     { return vfs->stat(filename)->time; }
 
+  // With both these we support both OGRE 1.6 and 1.7
   Ogre::DataStreamPtr open(const Ogre::String& filename) const;
+  Ogre::DataStreamPtr open(const Ogre::String& filename, bool readOnly) const
+  { return open(filename); }
 
   Ogre::StringVectorPtr list(bool recursive = true, bool dirs = false);
   Ogre::FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false);

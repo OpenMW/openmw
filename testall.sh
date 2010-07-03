@@ -12,4 +12,5 @@ run stream
 run vfs
 run sound
 run input
+run rend2d
 run .
