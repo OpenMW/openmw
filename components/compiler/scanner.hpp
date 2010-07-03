@@ -10,6 +10,7 @@ namespace Compiler
 {
     class ErrorHandler;
     class Parser;
+    class Extensions;
 
     /// \brief Scanner
     ///
@@ -28,6 +29,7 @@ namespace Compiler
             TokenLoc mLoc;
             TokenLoc mPrevLoc;
             std::istream& mStream;
+            const Extensions *mExtensions;
             putback_type mPutback;
             int mPutbackCode;
             int mPutbackInteger;
@@ -86,7 +88,8 @@ namespace Compiler
 
         public:
 
-            Scanner (ErrorHandler& errorHandler, std::istream& inputStream);
+            Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
+                const Extensions *extensions = 0);
 		    ///< constructor
 
             void scan (Parser& parser);

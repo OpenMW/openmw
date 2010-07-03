@@ -9,6 +9,7 @@
 #include "exception.hpp"
 #include "errorhandler.hpp"
 #include "parser.hpp"
+#include "extensions.hpp"
 
 namespace Compiler
 {
@@ -271,8 +272,22 @@ namespace Compiler
             if (lowerCase==keywords[i])
                 break;
 
-        cont =
-            keywords[i] ? parser.parseKeyword (i, loc, *this) : parser.parseName (name, loc, *this);
+        if (keywords[i])
+        {
+            cont = parser.parseKeyword (i, loc, *this);
+            return true;
+        }
+        
+        if (mExtensions)
+        {
+            if (int keyword = mExtensions->searchKeyword (lowerCase))
+            {
+                cont = parser.parseKeyword (keyword, loc, *this);
+                return true;            
+            }
+        }
+
+        cont = parser.parseName (name, loc, *this);
 
         return true;
     }
@@ -445,8 +460,10 @@ namespace Compiler
 
     // constructor
 
-    Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream)
-    : mErrorHandler (errorHandler), mStream (inputStream), mPutback (Putback_None)
+    Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
+        const Extensions *extensions)
+    : mErrorHandler (errorHandler), mStream (inputStream), mExtensions (extensions),
+      mPutback (Putback_None)
     {
     }
 
