@@ -11,6 +11,7 @@
 #include "components/misc/tsdeque.hpp"
 #include "components/commandserver/server.hpp"
 #include "components/commandserver/command.hpp"
+#include <components/compiler/extensions.hpp>
 
 #include "mwrender/mwscene.hpp"
 
@@ -46,6 +47,7 @@ namespace OMW
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
             MWScript::ScriptManager *mScriptManager;
+            Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
             // not implemented

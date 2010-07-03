@@ -115,4 +115,10 @@ namespace OMW
     {
         return mLocalScripts;
     }
+    
+    bool World::hasCellChanged() const
+    {
+        // Cell change not implemented yet.
+        return false;
+    }
 }

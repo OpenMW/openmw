@@ -36,6 +36,8 @@ namespace MWScript
             
             virtual void messageBox (const std::string& message,
                 const std::vector<std::string>& buttons);
+                
+            virtual bool cellChanged();
     };
 }
 

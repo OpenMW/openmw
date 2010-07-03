@@ -39,13 +39,17 @@ source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})
 
 set(GAMESCRIPT
     apps/openmw/mwscript/scriptmanager.cpp
-    apps/openmw/mwscript/interpretercontext.cpp)
+    apps/openmw/mwscript/interpretercontext.cpp
+    apps/openmw/mwscript/cellextensions.cpp
+    apps/openmw/mwscript/extensions.cpp)
 set(GAMESCRIPT_HEADER 
     apps/openmw/mwscript/locals.hpp
     apps/openmw/mwscript/scriptmanager.hpp
     apps/openmw/mwscript/compilercontext.hpp
     apps/openmw/mwscript/compilercontextscript.hpp
-    apps/openmw/mwscript/interpretercontext.hpp)
+    apps/openmw/mwscript/interpretercontext.hpp
+    apps/openmw/mwscript/cellextensions.hpp
+    apps/openmw/mwscript/extensions.hpp)
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})    
 
 set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT})

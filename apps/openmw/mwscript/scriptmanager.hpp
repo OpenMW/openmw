@@ -23,6 +23,7 @@ namespace Compiler
 namespace Interpreter
 {
     class Context;
+    class Interpreter;
 }
 
 namespace MWScript
@@ -45,6 +46,8 @@ namespace MWScript
                 Compiler::Context& compilerContext);
             
             void run (const std::string& name, Interpreter::Context& interpreterContext);
+            
+            static void installOpcodes (Interpreter::Interpreter& interpreter);
     };
 };
 

@@ -1,0 +1,26 @@
+OpenMW Extensions:
+
+Segment 0:
+(not implemented yet)
+opcodes 0x20-0x3f unused
+
+Segment 1:
+(not implemented yet)
+opcodes 0x20-0x3f unused
+
+Segment 2:
+(not implemented yet)
+opcodes 0x200-0x3ff unused
+
+Segment 3:
+(not implemented yet)
+opcodes 0x200-0x3ff unused
+
+Segment 4:
+(not implemented yet)
+opcodes 0x200-0x3ff unused
+
+Segment 5:
+op 2000000: push 1 if cell has changed since last frame, 0 if not
+opcodes 0x2000001-0x3ffffff unused
+

@@ -11,6 +11,7 @@
 #include "mwscript/scriptmanager.hpp"
 #include "mwscript/compilercontextscript.hpp"
 #include "mwscript/interpretercontext.hpp"
+#include "mwscript/extensions.hpp"
 
 #include "world.hpp"
 
@@ -161,7 +162,10 @@ void OMW::Engine::go()
     // Create the world
     mWorld = new World (mOgre, mDataDir, mMaster, mCellName);
 
+    MWScript::registerExtensions (mExtensions);
+
     mScriptContext = new MWScript::CompilerContextScript;
+    mScriptContext->setExtensions (&mExtensions);
 
     mScriptManager = new MWScript::ScriptManager (mWorld->getStore(), mVerboseScripts,
         *mScriptContext);

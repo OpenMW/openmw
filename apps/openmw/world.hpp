@@ -68,6 +68,9 @@ namespace OMW
             
             const ScriptList& getLocalScripts() const;
             ///< Names and local variable state of all local scripts in active cells.
+            
+            bool hasCellChanged() const;
+            ///< Has the player moved to a different cell, since the last frame?
     };
 }
 

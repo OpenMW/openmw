@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "locals.hpp"
+#include "../world.hpp"
 
 namespace MWScript
 {
@@ -67,6 +68,11 @@ namespace MWScript
         
         if (!buttons.empty())    
             std::cerr << "error: message box buttons not supported" << std::endl;
+    }
+    
+    bool InterpreterContext::cellChanged()
+    {
+        return mWorld.hasCellChanged();    
     }
 }
 

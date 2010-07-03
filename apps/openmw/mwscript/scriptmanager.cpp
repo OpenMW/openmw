@@ -10,6 +10,7 @@
 #include <components/esm_store/store.hpp>
 
 #include <components/compiler/scanner.hpp>
+#include <components/compiler/context.hpp>
 
 #include <components/interpreter/installopcodes.hpp>
 #include <components/interpreter/interpreter.hpp>
@@ -39,7 +40,7 @@ namespace MWScript
             {        
                 std::istringstream input (script->scriptText);
             
-                Compiler::Scanner scanner (mErrorHandler, input);
+                Compiler::Scanner scanner (mErrorHandler, input, mCompilerContext.getExtensions());
             
                 scanner.scan (mParser);
                 
@@ -99,7 +100,7 @@ namespace MWScript
             try
             {
                 Interpreter::Interpreter interpreter (interpreterContext);
-                Interpreter::installOpcodes (interpreter);   
+                installOpcodes (interpreter);
                 interpreter.run (&iter->second[0], iter->second.size());     
             }
             catch (...)
@@ -107,6 +108,11 @@ namespace MWScript
                 std::cerr << "exeution of script " << name << " failed." << std::endl;
                 iter->second.clear(); // don't execute again.
             }
+    }
+    
+    void ScriptManager::installOpcodes (Interpreter::Interpreter& interpreter)
+    {
+        Interpreter::installOpcodes (interpreter);   
     }
 }
 
