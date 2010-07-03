@@ -50,6 +50,9 @@ namespace MWScript
             MWWorld::World& getWorld();
             
             MWSound::SoundManager& getSoundManager();
+            
+            MWWorld::Ptr getReference();
+            ///< Reference, that the script is running from (can be empty)
     };
 }
 

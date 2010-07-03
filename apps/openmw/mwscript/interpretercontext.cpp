@@ -80,5 +80,10 @@ namespace MWScript
     {
         return mSoundManager;
     }
+    
+    MWWorld::Ptr InterpreterContext::getReference()
+    {
+        return mReference;
+    }
 }
 

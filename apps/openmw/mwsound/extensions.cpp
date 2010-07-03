@@ -26,7 +26,8 @@ namespace MWSound
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                         
-                    runtime.push (context.getSoundManager().sayDone ("", context));
+                    runtime.push (context.getSoundManager().sayDone (context.getReference(),
+                        context));
                 } 
         };    
     
@@ -43,7 +44,7 @@ namespace MWSound
                     runtime.pop();
                         
                     runtime.push (context.getSoundManager().getSoundPlaying (
-                        "", runtime.getStringLiteral (index), context));
+                        context.getReference(), runtime.getStringLiteral (index), context));
                 } 
         };
             
