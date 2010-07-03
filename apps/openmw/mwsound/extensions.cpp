@@ -9,7 +9,7 @@
 
 #include "../mwscript/interpretercontext.hpp"
 
-#include "../world.hpp"
+#include "../mwworld/world.hpp"
 
 #include "soundmanager.hpp"
 

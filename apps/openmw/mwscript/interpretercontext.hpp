@@ -3,7 +3,7 @@
 
 #include <components/interpreter/context.hpp>
 
-namespace OMW
+namespace MWWorld
 {
     class World;
 }
@@ -19,13 +19,13 @@ namespace MWScript
 
     class InterpreterContext : public Interpreter::Context
     {
-            OMW::World& mWorld;
+            MWWorld::World& mWorld;
             MWSound::SoundManager& mSoundManager;
             Locals *mLocals;
         
         public:
         
-            InterpreterContext (OMW::World& world, MWSound::SoundManager& soundManager,
+            InterpreterContext (MWWorld::World& world, MWSound::SoundManager& soundManager,
                 MWScript::Locals *locals);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
     
@@ -44,7 +44,7 @@ namespace MWScript
             virtual void messageBox (const std::string& message,
                 const std::vector<std::string>& buttons);   
 
-            OMW::World& getWorld();
+            MWWorld::World& getWorld();
             
             MWSound::SoundManager& getSoundManager();
     };

@@ -1,16 +1,15 @@
-#ifndef WORLD_H
-#define WORLD_H
+#ifndef GAME_MWWORLD_WORLD_H
+#define GAME_MWWORLD_WORLD_H
 
 #include <vector>
 #include <map>
 
 #include <boost/filesystem.hpp>
 
-#include "components/esm_store/cell_store.hpp"
+#include <components/esm_store/cell_store.hpp>
 
-#include "apps/openmw/mwrender/playerpos.hpp"
-#include "apps/openmw/mwrender/mwscene.hpp"
-
+#include "../mwrender/playerpos.hpp"
+#include "../mwrender/mwscene.hpp"
 
 #include "refdata.hpp"
 
@@ -25,7 +24,7 @@ namespace MWRender
     class CellRender;
 }
  
-namespace OMW
+namespace MWWorld
 {
     /// \brief The game world and its visual representation
     
@@ -54,7 +53,7 @@ namespace OMW
             World (const World&);
             World& operator= (const World&);
     
-            void insertInteriorScripts (ESMS::CellStore<OMW::RefData>& cell);
+            void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
     
         public:
         

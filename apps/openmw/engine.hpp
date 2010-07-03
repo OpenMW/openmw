@@ -7,10 +7,10 @@
 
 #include <OgreFrameListener.h>
 
-#include "components/engine/ogre/renderer.hpp"
-#include "components/misc/tsdeque.hpp"
-#include "components/commandserver/server.hpp"
-#include "components/commandserver/command.hpp"
+#include <components/engine/ogre/renderer.hpp>
+#include <components/misc/tsdeque.hpp>
+#include <components/commandserver/server.hpp>
+#include <components/commandserver/command.hpp>
 #include <components/compiler/extensions.hpp>
 
 namespace Compiler
@@ -28,10 +28,13 @@ namespace MWSound
     class SoundManager;
 }
 
-namespace OMW
+namespace MWWorld
 {
     class World;
+}
 
+namespace OMW
+{
     /// \brief Main engine class, that brings together all the components of OpenMW
 
     class Engine : private Ogre::FrameListener
@@ -42,7 +45,7 @@ namespace OMW
             Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;
-            World *mWorld;
+            MWWorld::World *mWorld;
             bool mDebug;
             bool mVerboseScripts;
 

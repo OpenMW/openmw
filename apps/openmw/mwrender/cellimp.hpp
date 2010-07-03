@@ -5,7 +5,7 @@
 
 #include "components/esm_store/cell_store.hpp"
 
-#include "../refdata.hpp"
+#include "../mwworld/refdata.hpp"
 
 namespace ESM
 {
@@ -35,7 +35,7 @@ namespace MWRender
     /// finish inserting a new reference and return a handle to it.
     virtual std::string insertEnd() = 0;
       
-    void insertCell(ESMS::CellStore<OMW::RefData> &cell);
+    void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
 
   };
 }

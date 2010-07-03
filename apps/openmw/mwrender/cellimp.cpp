@@ -18,7 +18,7 @@ void insertObj(CellRenderImp& cellRender, T& liveRef)
 }
 
 template<>
-void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::Light, OMW::RefData>& liveRef)
+void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::Light, MWWorld::RefData>& liveRef)
 {
   assert (liveRef.base != NULL);
   const std::string &model = liveRef.base->model;
@@ -50,7 +50,7 @@ void insertCellRefList (CellRenderImp& cellRender, T& cellRefList)
   }
 }
 
-void CellRenderImp::insertCell(ESMS::CellStore<OMW::RefData> &cell)
+void CellRenderImp::insertCell(ESMS::CellStore<MWWorld::RefData> &cell)
 {
   // Loop through all references in the cell
   insertCellRefList (*this, cell.activators);

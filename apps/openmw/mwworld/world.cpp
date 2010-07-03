@@ -13,9 +13,9 @@ namespace
 {
     template<typename T>
     void listCellScripts (const ESMS::ESMStore& store,
-        ESMS::CellRefList<T, OMW::RefData>& cellRefList, OMW::World::ScriptList& scriptList)
+        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::World::ScriptList& scriptList)
     {
-        for (typename ESMS::CellRefList<T, OMW::RefData>::List::iterator iter (
+        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {
@@ -33,9 +33,9 @@ namespace
     }
 }
 
-namespace OMW
+namespace MWWorld
 {
-    void World::insertInteriorScripts (ESMS::CellStore<OMW::RefData>& cell)
+    void World::insertInteriorScripts (ESMS::CellStore<RefData>& cell)
     {
         listCellScripts (mStore, cell.activators, mLocalScripts);
         listCellScripts (mStore, cell.potions, mLocalScripts);

@@ -1,16 +1,16 @@
-#ifndef REFDATA_H
-#define REFDATA_H
+#ifndef GAME_MWWORLD_REFDATA_H
+#define GAME_MWWORLD_REFDATA_H
 
 #include <string>
 
-#include "mwscript/locals.hpp"
+#include "../mwscript/locals.hpp"
 
 namespace ESM
 {
     class Script;
 }
 
-namespace OMW
+namespace MWWorld
 {
     class RefData
     {

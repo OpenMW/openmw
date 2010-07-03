@@ -4,10 +4,11 @@
 
 #include <iostream>
 
-#include "components/misc/fileops.hpp"
-#include "components/bsa/bsa_archive.hpp"
+#include <components/misc/fileops.hpp>
+#include <components/bsa/bsa_archive.hpp>
 
 #include "mwinput/inputmanager.hpp"
+
 #include "mwscript/scriptmanager.hpp"
 #include "mwscript/compilercontextscript.hpp"
 #include "mwscript/interpretercontext.hpp"
@@ -15,11 +16,11 @@
 
 #include "mwsound/soundmanager.hpp"
 
-#include "world.hpp"
+#include "mwworld/world.hpp"
 
 void OMW::Engine::executeLocalScripts()
 {
-    for (World::ScriptList::const_iterator iter (mWorld->getLocalScripts().begin());
+    for (MWWorld::World::ScriptList::const_iterator iter (mWorld->getLocalScripts().begin());
         iter!=mWorld->getLocalScripts().end(); ++iter)
     {
         MWScript::InterpreterContext interpreterContext (*mWorld, *mSoundManager, iter->second);
@@ -163,7 +164,7 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create the world
-    mWorld = new World (mOgre, mDataDir, mMaster, mCellName);
+    mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mCellName);
 
     mSoundManager = new MWSound::SoundManager;
 

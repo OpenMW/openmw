@@ -10,12 +10,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
 set(GAME 
     apps/openmw/main.cpp 
-    apps/openmw/engine.cpp
-    apps/openmw/world.cpp)
+    apps/openmw/engine.cpp)
 set(GAME_HEADER 
-    apps/openmw/engine.hpp
-    apps/openmw/world.hpp
-    apps/openmw/refdata.hpp)
+    apps/openmw/engine.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND 
@@ -60,9 +57,17 @@ set(GAMESOUND_HEADER
     apps/openmw/mwsound/extensions.hpp)
 source_group(apps\\openmw\\mwsound FILES ${GAMESOUND} ${GAMESOUND_HEADER}) 
 
-set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND})
+set(GAMEWORLD
+    apps/openmw/mwworld/world.cpp)
+set(GAMEWORLD_HEADER 
+    apps/openmw/mwworld/refdata.hpp
+    apps/openmw/mwworld/world.hpp)
+source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER}) 
+
+
+set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEWORLD})
 set(APPS_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
-    ${GAMESOUND_HEADER})
+    ${GAMESOUND_HEADER} ${GAMEWORLD_HEADER})
 
 # source directory: components
 

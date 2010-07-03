@@ -5,11 +5,11 @@
 #include <iostream>
 
 #include "locals.hpp"
-#include "../world.hpp"
+#include "../mwworld/world.hpp"
 
 namespace MWScript
 {
-    InterpreterContext::InterpreterContext (OMW::World& world,
+    InterpreterContext::InterpreterContext (MWWorld::World& world,
         MWSound::SoundManager& soundManager, MWScript::Locals *locals)
     : mWorld (world), mSoundManager (soundManager), mLocals (locals)
     {}
@@ -71,7 +71,7 @@ namespace MWScript
             std::cerr << "error: message box buttons not supported" << std::endl;
     }
     
-    OMW::World& InterpreterContext::getWorld()
+    MWWorld::World& InterpreterContext::getWorld()
     {
         return mWorld;
     }

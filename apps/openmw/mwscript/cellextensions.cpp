@@ -7,7 +7,7 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include "../world.hpp"
+#include "../mwworld/world.hpp"
 
 #include "interpretercontext.hpp"
 
