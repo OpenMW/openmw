@@ -13,8 +13,6 @@
 #include "components/commandserver/command.hpp"
 #include <components/compiler/extensions.hpp>
 
-#include "mwrender/mwscene.hpp"
-
 namespace Compiler
 {
     class Context;
@@ -23,6 +21,11 @@ namespace Compiler
 namespace MWScript
 {
     class ScriptManager;
+}
+
+namespace MWSound
+{
+    class SoundManager;
 }
 
 namespace OMW
@@ -46,6 +49,7 @@ namespace OMW
             TsDeque<OMW::Command>                     mCommandQueue;
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
+            MWSound::SoundManager *mSoundManager;
             MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;

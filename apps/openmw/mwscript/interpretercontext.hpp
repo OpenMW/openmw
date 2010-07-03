@@ -8,6 +8,11 @@ namespace OMW
     class World;
 }
 
+namespace MWSound
+{
+    class SoundManager;
+}
+
 namespace MWScript
 {
     struct Locals;
@@ -15,11 +20,13 @@ namespace MWScript
     class InterpreterContext : public Interpreter::Context
     {
             OMW::World& mWorld;
+            MWSound::SoundManager& mSoundManager;
             Locals *mLocals;
         
         public:
         
-            InterpreterContext (OMW::World& world, MWScript::Locals *locals);
+            InterpreterContext (OMW::World& world, MWSound::SoundManager& soundManager,
+                MWScript::Locals *locals);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
     
             virtual int getLocalShort (int index) const;
@@ -38,6 +45,8 @@ namespace MWScript
                 const std::vector<std::string>& buttons);   
 
             OMW::World& getWorld();
+            
+            MWSound::SoundManager& getSoundManager();
     };
 }
 

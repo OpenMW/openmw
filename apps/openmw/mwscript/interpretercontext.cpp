@@ -9,8 +9,9 @@
 
 namespace MWScript
 {
-    InterpreterContext::InterpreterContext (OMW::World& world, MWScript::Locals *locals)
-    : mWorld (world), mLocals (locals)
+    InterpreterContext::InterpreterContext (OMW::World& world,
+        MWSound::SoundManager& soundManager, MWScript::Locals *locals)
+    : mWorld (world), mSoundManager (soundManager), mLocals (locals)
     {}
 
     int InterpreterContext::getLocalShort (int index) const
@@ -73,6 +74,11 @@ namespace MWScript
     OMW::World& InterpreterContext::getWorld()
     {
         return mWorld;
+    }
+    
+    MWSound::SoundManager& InterpreterContext::getSoundManager()
+    {
+        return mSoundManager;
     }
 }
 

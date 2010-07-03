@@ -123,9 +123,4 @@ namespace OMW
         // Cell change not implemented yet.
         return false;
     }
-    
-    MWSound::SoundManager& World::getSoundManager()
-    {
-        return mSoundManager;
-    }
 }

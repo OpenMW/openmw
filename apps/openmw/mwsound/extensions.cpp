@@ -11,6 +11,8 @@
 
 #include "../world.hpp"
 
+#include "soundmanager.hpp"
+
 namespace MWSound
 {
     namespace Script
@@ -24,7 +26,7 @@ namespace MWSound
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                         
-                    runtime.push (context.getWorld().getSoundManager().sayDone ("", context));
+                    runtime.push (context.getSoundManager().sayDone ("", context));
                 } 
         };    
     
@@ -40,7 +42,7 @@ namespace MWSound
                     int index = runtime[0];
                     runtime.pop();
                         
-                    runtime.push (context.getWorld().getSoundManager().getSoundPlaying (
+                    runtime.push (context.getSoundManager().getSoundPlaying (
                         "", runtime.getStringLiteral (index), context));
                 } 
         };

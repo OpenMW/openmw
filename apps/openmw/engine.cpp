@@ -13,6 +13,8 @@
 #include "mwscript/interpretercontext.hpp"
 #include "mwscript/extensions.hpp"
 
+#include "mwsound/soundmanager.hpp"
+
 #include "world.hpp"
 
 void OMW::Engine::executeLocalScripts()
@@ -20,7 +22,7 @@ void OMW::Engine::executeLocalScripts()
     for (World::ScriptList::const_iterator iter (mWorld->getLocalScripts().begin());
         iter!=mWorld->getLocalScripts().end(); ++iter)
     {
-        MWScript::InterpreterContext interpreterContext (*mWorld, iter->second);
+        MWScript::InterpreterContext interpreterContext (*mWorld, *mSoundManager, iter->second);
         mScriptManager->run (iter->first, interpreterContext);
     }
 }
@@ -52,7 +54,7 @@ void OMW::Engine::processCommands()
 }
 
 OMW::Engine::Engine()
-: mWorld(NULL), mDebug (false), mScriptManager (0), mScriptContext (0)
+: mWorld(NULL), mDebug (false), mSoundManager (0), mScriptManager (0), mScriptContext (0)
 {
     mspCommandServer.reset(
         new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
@@ -62,6 +64,7 @@ OMW::Engine::~Engine()
 {
 //    mspCommandServer->stop();
     delete mWorld;
+    delete mSoundManager;
     delete mScriptManager;
     delete mScriptContext;
 }
@@ -161,6 +164,8 @@ void OMW::Engine::go()
 
     // Create the world
     mWorld = new World (mOgre, mDataDir, mMaster, mCellName);
+
+    mSoundManager = new MWSound::SoundManager;
 
     MWScript::registerExtensions (mExtensions);
 
