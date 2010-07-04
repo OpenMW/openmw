@@ -11,7 +11,7 @@ namespace ESM {
 
 struct Global
 {
-  float value;
+  unsigned value;
   VarType type;
 
   void load(ESMReader &esm)
@@ -24,8 +24,7 @@ struct Global
     else esm.fail("Illegal global variable type " + tmp);
     type = t;
 
-    // The value looks like a float in many cases, and like an integer
-    // in others (for the s type at least.) Figure it out.
+    // Note: Both floats and longs are represented as floats.
     esm.getHNT(value, "FLTV");
   }
 };

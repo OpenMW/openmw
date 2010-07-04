@@ -3,6 +3,11 @@
 
 #include <components/compiler/context.hpp>
 
+namespace MWWorld
+{
+    class Environment;
+}
+
 namespace MWScript
 {
     class CompilerContext : public Compiler::Context
@@ -19,19 +24,17 @@ namespace MWScript
         private:
         
             Type mType;
+            const MWWorld::Environment& mEnvironment;
     
         public:
         
-            CompilerContext (Type type) : mType (type) {}
+            CompilerContext (Type type, const MWWorld::Environment& environment);
         
-            // Is the compiler allowed to declare local variables?
-            virtual bool canDeclareLocals() const
-            {
-                return mType==Type_Full;
-            }    
+            /// Is the compiler allowed to declare local variables?
+            virtual bool canDeclareLocals() const;  
             
-            virtual char getGlobalType (const std::string& name) const { return ' '; }
-            ///< 'l: long, 's': short, 'f': float, ' ': does not exist.              
+            /// 'l: long, 's': short, 'f': float, ' ': does not exist.              
+            virtual char getGlobalType (const std::string& name) const;
     };
 }
 

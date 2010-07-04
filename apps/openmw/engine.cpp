@@ -180,7 +180,8 @@ void OMW::Engine::go()
 
     MWScript::registerExtensions (mExtensions);
 
-    mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
+    mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
+        mEnvironment);
     mScriptContext->setExtensions (&mExtensions);
 
     mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(), mVerboseScripts,

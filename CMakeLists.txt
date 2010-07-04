@@ -36,6 +36,7 @@ source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})
 
 set(GAMESCRIPT
     apps/openmw/mwscript/scriptmanager.cpp
+    apps/openmw/mwscript/compilercontext.cpp
     apps/openmw/mwscript/interpretercontext.cpp
     apps/openmw/mwscript/cellextensions.cpp
     apps/openmw/mwscript/extensions.cpp
