@@ -9,6 +9,11 @@ namespace MWScript
     : mStore (store), mScriptManager (scriptManager)
     {
         addScript ("Main");
+        
+        for (ESMS::RecListT<ESM::StartScript>::MapType::const_iterator iter 
+            (store.startScripts.list.begin()); 
+            iter != store.startScripts.list.end(); ++iter)
+            addScript (iter->second.script);
     }
 
     void GlobalScripts::addScript (const std::string& name)
