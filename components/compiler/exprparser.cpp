@@ -315,6 +315,17 @@ namespace Compiler
                 mNextOperand = false;
                 return true;            
             }
+            else if (keyword==Scanner::K_scriptrunning)
+            {
+                mTokenLoc = loc;
+                parseArguments ("c", scanner);
+                
+                Generator::scriptRunning (mCode);
+                mOperands.push_back ('l');
+                
+                mNextOperand = false;
+                return true;
+            }            
             else
             {
                 // check for custom extensions
@@ -492,9 +503,10 @@ namespace Compiler
         for (std::string::const_iterator iter (arguments.begin()); iter!=arguments.end();
             ++iter)
         {
-            if (*iter=='S')
+            if (*iter=='S' || *iter=='c')
             {
                 stringParser.reset();
+                if (*iter=='c') stringParser.smashCase();
                 scanner.scan (stringParser);            
                 
                 if (invert)

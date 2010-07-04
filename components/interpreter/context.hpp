@@ -45,7 +45,13 @@ namespace Interpreter
 
             virtual void setGlobalLong (const std::string& name, int value) = 0;        
 
-            virtual void setGlobalFloat (const std::string& name, float value) = 0;            
+            virtual void setGlobalFloat (const std::string& name, float value) = 0;     
+            
+            virtual bool isScriptRunning (const std::string& name) = 0;
+            
+            virtual void startScript (const std::string& name) = 0;
+            
+            virtual void stopScript (const std::string& name) = 0;       
     };
 }
 

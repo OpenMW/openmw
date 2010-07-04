@@ -21,6 +21,7 @@ namespace Compiler
             Literals& mLiterals;
             State mState;
             std::vector<Interpreter::Type_Code> mCode;
+            bool mSmashCase;
                 
         public:
         
@@ -38,8 +39,11 @@ namespace Compiler
             void append (std::vector<Interpreter::Type_Code>& code);
             ///< Append code for parsed string.
             
+            void smashCase();
+            ///< Transform all scanned strings to lower case
+            
             void reset();
-            ///< Reset parser to clean state.    
+            ///< Reset parser to clean state (this includes the smashCase function).    
     };
 }
 

@@ -52,6 +52,12 @@ namespace SAInterpreter
 
             virtual void setGlobalFloat (const std::string& name, float value);
             
+            virtual bool isScriptRunning (const std::string& name);
+            
+            virtual void startScript (const std::string& name);
+            
+            virtual void stopScript (const std::string& name);
+            
             void report();
             ///< Write state to std::cout   
     };

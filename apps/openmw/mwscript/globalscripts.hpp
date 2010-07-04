@@ -24,7 +24,7 @@ namespace MWScript
     {
             const ESMS::ESMStore& mStore;
             ScriptManager& mScriptManager;
-            std::map<std::string, Locals> mScripts;
+            std::map<std::string, std::pair<bool, Locals> > mScripts; // running, local variables
             
         public:
         
@@ -32,7 +32,12 @@ namespace MWScript
     
             void addScript (const std::string& name);
             
+            void removeScript (const std::string& name);
+            
+            bool isRunning (const std::string& name) const;
+            
             void run (MWWorld::Environment& environment);
+            ///< run all active global scripts
     };
 }
 

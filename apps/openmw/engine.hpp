@@ -23,7 +23,6 @@ namespace Compiler
 namespace MWScript
 {
     class ScriptManager;
-    class GlobalScripts;
 }
 
 namespace MWSound
@@ -50,13 +49,13 @@ namespace OMW
             std::string mMaster;
             bool mDebug;
             bool mVerboseScripts;
+            bool mNewGame;
 
             TsDeque<OMW::Command>                     mCommandQueue;
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
             MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
-            MWScript::GlobalScripts *mGlobalScripts;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
@@ -101,6 +100,9 @@ namespace OMW
 
             /// Enable verbose script output
             void enableVerboseScripts();
+            
+            /// Start as a new game.
+            void setNewGame();
 
             /// Initialise and enter main loop.
             void go();

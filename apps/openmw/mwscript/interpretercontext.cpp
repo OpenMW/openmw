@@ -6,12 +6,14 @@
 
 #include <components/interpreter/types.hpp>
 
-#include "locals.hpp"
 #include "../mwworld/world.hpp"
+
+#include "locals.hpp"
+#include "globalscripts.hpp"
 
 namespace MWScript
 {
-    InterpreterContext::InterpreterContext (const MWWorld::Environment& environment,
+    InterpreterContext::InterpreterContext (MWWorld::Environment& environment,
         MWScript::Locals *locals, MWWorld::Ptr reference)
     : mEnvironment (environment), mLocals (locals), mReference (reference)
     {}
@@ -119,7 +121,22 @@ namespace MWScript
          mEnvironment.mWorld->getGlobalVariable (name) =
             *reinterpret_cast<Interpreter::Type_Data *> (&value);    
     }
-                
+     
+    bool InterpreterContext::isScriptRunning (const std::string& name)
+    {
+        return mEnvironment.mGlobalScripts->isRunning (name);
+    }
+    
+    void InterpreterContext::startScript (const std::string& name)
+    {
+        mEnvironment.mGlobalScripts->addScript (name);
+    }
+    
+    void InterpreterContext::stopScript (const std::string& name)
+    {
+        mEnvironment.mGlobalScripts->removeScript (name);
+    }
+    
     MWWorld::World& InterpreterContext::getWorld()
     {
         return *mEnvironment.mWorld;

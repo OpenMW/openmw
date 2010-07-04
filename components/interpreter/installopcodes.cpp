@@ -9,6 +9,7 @@
 #include "mathopcodes.hpp"
 #include "controlopcodes.hpp"
 #include "miscopcodes.hpp"
+#include "scriptopcodes.hpp"
 
 namespace Interpreter
 {
@@ -86,6 +87,11 @@ namespace Interpreter
         interpreter.installSegment3 (0, new OpMessageBox);    
         interpreter.installSegment5 (38, new OpMenuMode);    
         interpreter.installSegment5 (45, new OpRandom);            
+        
+        // script control
+        interpreter.installSegment5 (46, new OpScriptRunning);
+        interpreter.installSegment5 (47, new OpStartScript);
+        interpreter.installSegment5 (48, new OpStopScript);
     }
 }
 

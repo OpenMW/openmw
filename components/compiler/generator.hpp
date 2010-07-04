@@ -100,6 +100,12 @@ namespace Compiler
             const std::string& name);            
             
         void random (CodeContainer& code);
+        
+        void scriptRunning (CodeContainer& code);
+        
+        void startScript (CodeContainer& code);
+
+        void stopScript (CodeContainer& code);
     }
 }
 

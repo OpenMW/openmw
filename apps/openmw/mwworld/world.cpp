@@ -57,7 +57,7 @@ namespace MWWorld
     }
     
     World::World (Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
-        const std::string& master, const std::string& startCell)
+        const std::string& master, const std::string& startCell, bool newGame)
     : mSkyManager (0), mScene (renderer), mPlayerPos (mScene.getCamera())
     {   
         boost::filesystem::path masterPath (dataDir);
@@ -78,6 +78,14 @@ namespace MWWorld
             (mStore.globals.list.begin()); 
             iter != mStore.globals.list.end(); ++iter)
             mGlobalVariables.insert (std::make_pair (iter->first, iter->second.value));
+        
+        if (newGame)
+        {      
+            // set new game mark
+            float newGameState = 1;
+            mGlobalVariables["chargenstate"] =
+                *reinterpret_cast<Interpreter::Type_Data *> (&newGameState);
+        }
         
         std::cout << "\nSetting up cell rendering\n";
 

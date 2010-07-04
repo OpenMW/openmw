@@ -145,6 +145,20 @@ namespace Compiler
                     Generator::exit (mCode);
                     mState = EndState;
                     return true;
+                    
+                case Scanner::K_startscript:
+
+                    mExprParser.parseArguments ("c", scanner, mCode, true);                   
+                    Generator::startScript (mCode);
+                    mState = EndState;
+                    return true;                
+                    
+                case Scanner::K_stopscript:
+
+                    mExprParser.parseArguments ("c", scanner, mCode, true);                   
+                    Generator::stopScript (mCode);
+                    mState = EndState;
+                    return true;                                
             }
             
             // check for custom extensions

@@ -22,13 +22,13 @@ namespace MWScript
 
     class InterpreterContext : public Interpreter::Context
     {   
-            MWWorld::Environment mEnvironment;
+            MWWorld::Environment& mEnvironment;
             Locals *mLocals;
             MWWorld::Ptr mReference;
         
         public:
         
-            InterpreterContext (const MWWorld::Environment& environment, 
+            InterpreterContext (MWWorld::Environment& environment, 
                 MWScript::Locals *locals, MWWorld::Ptr reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
     
@@ -61,6 +61,12 @@ namespace MWScript
 
             virtual void setGlobalFloat (const std::string& name, float value);
             
+            virtual bool isScriptRunning (const std::string& name);
+            
+            virtual void startScript (const std::string& name);
+            
+            virtual void stopScript (const std::string& name);
+                        
             MWWorld::World& getWorld();
             
             MWSound::SoundManager& getSoundManager();

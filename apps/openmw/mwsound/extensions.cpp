@@ -205,15 +205,15 @@ namespace MWSound
         extensions.registerInstruction ("say", "SS", Script::opcodeSay);
         extensions.registerFunction ("saydone", 'l', "", Script::opcodeSayDone);
         extensions.registerInstruction ("streammusic", "S", Script::opcodeStreamMusic);
-        extensions.registerInstruction ("playsound", "S", Script::opcodePlaySound);
-        extensions.registerInstruction ("playsoundvp", "Sff", Script::opcodePlaySoundVP);
-        extensions.registerInstruction ("playsound3d", "S", Script::opcodePlaySound3D);
-        extensions.registerInstruction ("playsound3dvp", "Sff", Script::opcodePlaySound3DVP);
-        extensions.registerInstruction ("playloopsound3d", "S", Script::opcodePlayLoopSound3D);
-        extensions.registerInstruction ("playloopsound3dvp", "Sff",
+        extensions.registerInstruction ("playsound", "c", Script::opcodePlaySound);
+        extensions.registerInstruction ("playsoundvp", "cff", Script::opcodePlaySoundVP);
+        extensions.registerInstruction ("playsound3d", "c", Script::opcodePlaySound3D);
+        extensions.registerInstruction ("playsound3dvp", "cff", Script::opcodePlaySound3DVP);
+        extensions.registerInstruction ("playloopsound3d", "c", Script::opcodePlayLoopSound3D);
+        extensions.registerInstruction ("playloopsound3dvp", "cff",
             Script::opcodePlayLoopSound3DVP);
-        extensions.registerInstruction ("stopsound", "S", Script::opcodeStopSound);
-        extensions.registerFunction ("getsoundplaying", 'l', "S", Script::opcodeGetSoundPlaying);   
+        extensions.registerInstruction ("stopsound", "c", Script::opcodeStopSound);
+        extensions.registerFunction ("getsoundplaying", 'l', "c", Script::opcodeGetSoundPlaying);   
     }
     
     void installOpcodes (Interpreter::Interpreter& interpreter)

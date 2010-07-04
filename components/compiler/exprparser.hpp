@@ -94,7 +94,7 @@ namespace Compiler
                 std::vector<Interpreter::Type_Code>& code, bool invert = false);
             ///< Parse sequence of arguments specified by \a arguments.
             /// \param arguments Each character represents one arguments ('l': integer,
-            /// 'f': float, 'S': string)                
+            /// 'f': float, 'S': string, 'c': string (case smashed))                
             /// \param invert Store arguments in reverted order.
     };
 }

@@ -244,6 +244,7 @@ namespace Compiler
             "getsquareroot",
             "menumode",
             "random",
+            "startscript", "stopscript", "scriptrunning",
             0
         };
 

@@ -101,6 +101,15 @@ namespace SAInterpreter
 
     void Context::setGlobalFloat (const std::string& name, float value) {}
                     
+    bool Context::isScriptRunning (const std::string& name)
+    {
+        return false;
+    }
+    
+    void Context::startScript (const std::string& name) {}
+    
+    void Context::stopScript (const std::string& name) {}
+    
     void Context::report()
     {
         std::size_t i = 0;

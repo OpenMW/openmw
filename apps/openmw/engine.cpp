@@ -42,7 +42,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     executeLocalScripts();
     
     // global scripts
-    mGlobalScripts->run (mEnvironment);
+    mEnvironment.mGlobalScripts->run (mEnvironment);
 
     return true;
 }
@@ -63,7 +63,7 @@ void OMW::Engine::processCommands()
 }
 
 OMW::Engine::Engine()
-: mDebug (false), mVerboseScripts (false), mScriptManager (0), mGlobalScripts (0),
+: mDebug (false), mVerboseScripts (false), mNewGame (false), mScriptManager (0),
   mScriptContext (0)
 {
     mspCommandServer.reset(
@@ -75,7 +75,7 @@ OMW::Engine::~Engine()
 //    mspCommandServer->stop();
     delete mEnvironment.mWorld;
     delete mEnvironment.mSoundManager;
-    delete mGlobalScripts;
+    delete mEnvironment.mGlobalScripts;
     delete mScriptManager;
     delete mScriptContext;
 }
@@ -146,6 +146,11 @@ void OMW::Engine::enableVerboseScripts()
     mVerboseScripts = true;
 }
 
+void OMW::Engine::setNewGame()
+{
+    mNewGame = true;
+}
+
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -174,7 +179,7 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mCellName);
+    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mCellName, mNewGame);
 
     mEnvironment.mSoundManager = new MWSound::SoundManager;
 
@@ -187,7 +192,8 @@ void OMW::Engine::go()
     mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(), mVerboseScripts,
         *mScriptContext);
         
-    mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(), *mScriptManager);
+    mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
+        *mScriptManager);
 
     std::cout << "Setting up input system\n";
 

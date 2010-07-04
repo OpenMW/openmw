@@ -31,6 +31,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             "master file")
         ( "debug", "debug mode" )
         ( "script-verbose", "verbose script output" )
+        ( "new-game", "activate char gen/new game mechanics" )
         ;
   
     bpo::variables_map variables;
@@ -59,6 +60,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     if (variables.count ("script-verbose"))
         engine.enableVerboseScripts();
 
+    if (variables.count ("new-game"))
+        engine.setNewGame();
+        
     return true;
 }
 

@@ -259,6 +259,21 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (45));
     }    
+    
+    void opScriptRunning (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (46));
+    }     
+    
+    void opStartScript (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (47));
+    }     
+    
+    void opStopScript (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (48));
+    }     
 }
 
 namespace Compiler
@@ -634,6 +649,21 @@ namespace Compiler
         void random (CodeContainer& code)
         {
             opRandom (code);
+        }
+        
+        void scriptRunning (CodeContainer& code)
+        {
+            opScriptRunning (code);
+        }
+        
+        void startScript (CodeContainer& code)
+        {
+            opStartScript (code);
+        }
+
+        void stopScript (CodeContainer& code)
+        {
+            opStopScript (code);
         }
     }
 }

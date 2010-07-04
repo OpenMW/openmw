@@ -62,7 +62,7 @@ namespace MWWorld
         public:
         
             World (Render::OgreRenderer& renderer, const boost::filesystem::path& master,
-                const std::string& dataDir, const std::string& startCell);
+                const std::string& dataDir, const std::string& startCell, bool newGame);
                 
             ~World();
             

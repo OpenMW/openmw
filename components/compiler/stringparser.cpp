@@ -10,7 +10,7 @@
 namespace Compiler
 {
     StringParser::StringParser (ErrorHandler& errorHandler, Context& context, Literals& literals)
-    : Parser (errorHandler, context), mLiterals (literals), mState (StartState)
+    : Parser (errorHandler, context), mLiterals (literals), mState (StartState), mSmashCase (false)
     {
     
     }
@@ -20,7 +20,11 @@ namespace Compiler
     {
         if (mState==StartState || mState==CommaState)
         {
-            Generator::pushString (mCode, mLiterals, name);
+            if (mSmashCase)
+                Generator::pushString (mCode, mLiterals, toLower (name)); 
+            else    
+                Generator::pushString (mCode, mLiterals, name);
+                
             return false;
         }
     
@@ -47,6 +51,12 @@ namespace Compiler
     {
         mState = StartState;
         mCode.clear();
+        mSmashCase = false;
+    }
+    
+    void StringParser::smashCase()
+    {
+        mSmashCase = false;
     }
 }
 
