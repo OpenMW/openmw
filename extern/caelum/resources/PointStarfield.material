@@ -1,0 +1,80 @@
+//
+//This file is part of Caelum.
+//See http://www.ogre3d.org/wiki/index.php/Caelum 
+//
+//Copyright (c) 2008 Caelum team. See Contributors.txt for details.
+//
+//Caelum is free software: you can redistribute it and/or modify
+//it under the terms of the GNU Lesser General Public License as published
+//by the Free Software Foundation, either version 3 of the License, or
+//(at your option) any later version.
+//
+//Caelum is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU Lesser General Public License for more details.
+//
+//You should have received a copy of the GNU Lesser General Public License
+//along with Caelum. If not, see <http://www.gnu.org/licenses/>.
+//
+
+vertex_program Caelum/StarPointVP cg
+{
+	source CaelumPointStarfield.cg
+	entry_point StarPointVP
+	profiles vs_2_0 arbvp1 vp30
+
+	default_params
+	{
+	    param_named_auto worldviewproj_matrix worldviewproj_matrix
+        param_named_auto render_target_flipping render_target_flipping
+	    
+	    // Default parameters only here to quiet ogre.
+	    param_named mag_scale float -1
+        param_named mag0_size float -1
+        param_named min_size float -1
+        param_named max_size float -1 
+        param_named aspect_ratio float -1
+	}
+}
+
+fragment_program Caelum/StarPointFP cg
+{
+	source CaelumPointStarfield.cg
+	entry_point StarPointFP
+	profiles ps_2_0 arbfp1 fp30
+
+	default_params
+	{
+	}
+}
+
+material Caelum/StarPoint
+{
+	receive_shadows off
+	
+	technique
+	{
+		pass
+		{
+			depth_check off
+			depth_write off
+
+            vertex_program_ref Caelum/StarPointVP
+            {
+            }
+            			
+            fragment_program_ref Caelum/StarPointFP
+            {
+            }
+            
+            scene_blend alpha_blend
+            
+            // Works with default culling:
+            cull_hardware clockwise
+            
+            // Override Direct3D shader fog.
+            fog_override true none
+        }
+	}
+}

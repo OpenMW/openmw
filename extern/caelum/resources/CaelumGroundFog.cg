@@ -1,0 +1,141 @@
+/*
+This file is part of Caelum.
+See http://www.ogre3d.org/wiki/index.php/Caelum 
+
+Copyright (c) 2006-2007 Caelum team. See Contributors.txt for details.
+
+Caelum is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Caelum is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with Caelum. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+// Returns (exp(x) - 1) / x; avoiding division by 0.
+// lim when x -> 0 is 1.
+float expdiv(float x) {
+    if (abs(x) < 0.0001) {
+        return 1;
+    } else {
+        return (exp(x) - 1) / x;
+    }
+}
+
+// Return fogging through a layer of fog which drops exponentially by height.
+//
+// Standard exp fog with constant density would return (1 - exp(-density * dist)).
+// This function assumes a variable density vd = exp(-verticalDecay * h - baseLevel)
+// Full computation is exp(density * dist / (h2 - h1) * int(h1, h2, exp(-verticalDecay * (h2 - h1)))).
+//
+// This will gracefully degrade to standard exp fog in verticalDecay is 0; without throwing NaNs.
+float ExpGroundFog (
+    float dist, float h1, float h2,
+    float density, float verticalDecay, float baseLevel)
+{
+    float deltaH = (h2 - h1);
+    return 1 - exp (-density * dist * exp(verticalDecay * (baseLevel - h1)) * expdiv(-verticalDecay * deltaH));
+}
+
+// Just like ExpGroundFog with h2 = positive infinity
+// When h2 == negative infinity the value is always +1.
+float ExpGroundFogInf (
+    float invSinView, float h1,
+    float density, float verticalDecay, float baseLevel)
+{
+    return 1 - exp (-density * invSinView * exp(verticalDecay * (baseLevel - h1)) * (1 / verticalDecay));
+}
+
+// Entry point for GroundFog vertex program.
+void GroundFog_vp
+(
+		float4 position : POSITION,
+		
+		out float4 oPosition : POSITION,
+		out float4 worldPos : TEXCOORD0,
+		
+		uniform float4x4 worldViewProj,
+		uniform float4x4 world
+) {
+	oPosition = mul(worldViewProj, position);
+	worldPos = mul(world, position);
+}
+
+// Entry point for GroundFog fragment program.
+void GroundFog_fp
+(
+		in float3 worldPos : TEXCOORD0,
+
+		uniform float3 camPos,
+		uniform float4 fogColour,
+		uniform float fogDensity,
+		uniform float fogVerticalDecay,
+		uniform float fogGroundLevel,
+				
+		out float4 oCol : COLOR
+) {
+	float h1 = camPos.y;
+	float h2 = worldPos.y;
+	float dist = length(camPos - worldPos);
+	float fog = ExpGroundFog(
+	        dist, h1, h2,
+	        fogDensity, fogVerticalDecay, fogGroundLevel);
+
+	oCol.rgb = fogColour.rgb;
+	oCol.a = fog;
+}
+
+// Entry point for GroundFogDome vertex program.
+void GroundFogDome_vp
+(
+		in float4 position : POSITION,
+		out float4 oPosition : POSITION,
+		out float3 relPosition : TEXCOORD0,
+		uniform float4x4 worldViewProj
+) {
+	oPosition = mul(worldViewProj, position);
+	relPosition = normalize(position.xyz);
+}
+
+// Entry point for the GroundFogDome fragment program.
+void GroundFogDome_fp
+(
+		in float3 relPosition : TEXCOORD0,
+
+		uniform float cameraHeight,
+		uniform float4 fogColour,
+		uniform float fogDensity,
+		uniform float fogVerticalDecay,
+		uniform float fogGroundLevel,
+
+		out float4 oCol : COLOR
+) {
+	// Fog magic.
+	float invSinView = 1 / (relPosition.y);
+	float h1 = cameraHeight;
+	float aFog;
+
+    if (fogVerticalDecay < 1e-7) {
+        // A value of zero of fogVerticalDecay would result in maximum (1) aFog everywhere.
+        // Output 0 zero instead to disable.
+        aFog = 0;
+    } else {
+	    if (invSinView < 0) {
+		    // Gazing into the abyss
+		    aFog = 1;
+	    } else {
+		    aFog = saturate (ExpGroundFogInf (
+			        invSinView, h1,
+			        fogDensity, fogVerticalDecay, fogGroundLevel));
+	    }
+    }
+	
+	oCol.a = aFog;
+	oCol.rgb = fogColour.rgb;
+}

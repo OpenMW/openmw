@@ -1,0 +1,132 @@
+//
+//This file is part of Caelum.
+//See http://www.ogre3d.org/wiki/index.php/Caelum 
+//
+//Copyright (c) 2006-2007 Caelum team. See Contributors.txt for details.
+//
+//Caelum is free software: you can redistribute it and/or modify
+//it under the terms of the GNU Lesser General Public License as published
+//by the Free Software Foundation, either version 3 of the License, or
+//(at your option) any later version.
+//
+//Caelum is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU Lesser General Public License for more details.
+//
+//You should have received a copy of the GNU Lesser General Public License
+//along with Caelum. If not, see <http://www.gnu.org/licenses/>.
+//
+
+vertex_program CaelumLayeredCloudsVP cg
+{
+	source CaelumLayeredClouds.cg
+	entry_point LayeredClouds_vp
+	profiles vs_3_0 vp40 arbvp1
+	
+	default_params
+	{
+		param_named_auto worldViewProj worldviewproj_matrix
+		param_named_auto worldMatrix world_matrix 
+		param_named sunDirection float3 -1 -1 0
+	}
+}
+
+fragment_program CaelumLayeredCloudsFP cg
+{
+	source CaelumLayeredClouds.cg
+    entry_point LayeredClouds_fp
+    profiles ps_3_0 fp40 arbfp1
+
+    default_params
+    {
+        // Caelum sky properties
+        param_named sunLightColour float4 1 1 1 1
+        param_named sunSphereColour float4 1 1 1 1
+        param_named sunDirection float4 1 1 1 1
+        
+        // Fog colour; used as the base cloud colour.
+        param_named fogColour float4 0 0 0 0
+        
+        
+        // The inverse of the cloud forms scale
+        param_named cloudMassInvScale float 1.2
+        // The inverse of the cloud details scale
+        param_named cloudDetailInvScale float 4.8
+        
+        // Cloud mass offset
+        param_named cloudMassOffset float2 0 0
+        // Cloud details offset
+        param_named cloudDetailOffset float2 0.5 0.5
+        
+        // Blending factor between Cloud1 and Cloud2
+        param_named cloudMassBlend float 0.9
+        // Cloud detail weight.
+        param_named cloudDetailBlend float 0.5
+        
+        
+        // Cloud coverage, between 0 and 1
+        param_named cloudCoverageThreshold float 0.9
+
+        // Cloud sharpness. Lower values result in softer clouds.
+        param_named cloudSharpness float 4
+        
+        // Cloud thickness. Bigger values results in darker clouds.
+        param_named cloudThickness float 3
+        
+        param_named_auto camera_position camera_position    
+        param_named layerHeight float 0
+        
+        param_named cloudUVFactor float -1
+        param_named heightRedFactor float -1
+
+        param_named nearFadeDist float -1
+        param_named farFadeDist float -1
+        
+        param_named fadeDistMeasurementVector float3 0 1 1
+    }
+}
+
+material CaelumLayeredClouds
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_check on                                     
+			depth_write off
+			scene_blend alpha_blend
+			fog_override true
+			cull_hardware none
+
+			vertex_program_ref CaelumLayeredCloudsVP
+			{
+			}
+			
+			fragment_program_ref CaelumLayeredCloudsFP
+			{
+			}
+
+			texture_unit Cloud1
+			{
+				texture noise1.dds
+                filtering trilinear
+                tex_coord_set 0
+			}
+			
+			texture_unit Cloud2
+			{
+				texture noise2.dds
+                filtering trilinear
+                tex_coord_set 1
+			}
+			
+			texture_unit Detail
+			{
+				texture noise4.dds
+                tex_coord_set 2
+			}
+		}
+	}
+}

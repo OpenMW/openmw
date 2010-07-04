@@ -1,0 +1,37 @@
+OpenMW Extensions:
+
+Segment 0:
+(not implemented yet)
+opcodes 0x20-0x3f unused
+
+Segment 1:
+(not implemented yet)
+opcodes 0x20-0x3f unused
+
+Segment 2:
+(not implemented yet)
+opcodes 0x200-0x3ff unused
+
+Segment 3:
+(not implemented yet)
+opcodes 0x200-0x3ff unused
+
+Segment 4:
+(not implemented yet)
+opcodes 0x200-0x3ff unused
+
+Segment 5:
+op 2000000: CellChanged
+op 2000001: Say
+op 2000002: SayDone
+op 2000003: StreamMusic
+op 2000004: PlaySound
+op 2000005: PlaySoundVP
+op 2000006: PlaySound3D
+op 2000007: PlaySound3DVP
+op 2000008: PlayLoopSound3D
+op 2000009: PlayLoopSound3DVP
+op 200000a: StopSound
+op 200000b: GetSoundPlaying
+opcodes 0x200000c-0x3ffffff unused
+

@@ -1,0 +1,102 @@
+//
+// This file is part of Caelum.
+// See http://www.ogre3d.org/wiki/index.php/Caelum 
+// 
+// Copyright (c) 2008 Caelum team. See Contributors.txt for details.
+// 
+// Caelum is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// Caelum is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with Caelum. If not, see <http://www.gnu.org/licenses/>.
+//
+
+sampler scene: register(s0);
+sampler samplerPrec: register(s1);
+
+uniform float intensity;
+uniform float4 ambient_light_colour;
+
+// - - corner
+uniform float4 corner1;
+// + - corner
+uniform float4 corner2;
+// - + corner
+uniform float4 corner3;
+// + + corner
+uniform float4 corner4;
+
+// The x and y coordinal deviations for all 3 layers of precipitation
+uniform float4 deltaX;
+uniform float4 deltaY;
+
+uniform float4 precColor;
+
+// Cartesian to cylindrical coordinates
+float2 CylindricalCoordinates(float4 dir) {
+	float R = 0.5;
+	float2 res;
+	//cubical root is used to counteract top/bottom circle effect
+	dir *= R / pow(length(dir.xz), 0.33);
+	res.y = -dir.y;
+	res.x = -atan2(dir.z, dir.x);
+	return res;
+}
+
+// Returns alpha value of a precipitation
+// view_direction is the direction vector resulting from the eye direction,wind direction and possibly other factors
+float Precipitation
+	(
+		float2 cCoords,
+		float intensity,
+		float2 delta
+	) {
+	cCoords -= delta;
+	float4 raincol = tex2D(samplerPrec, cCoords);
+	return (raincol.g<intensity) ? (raincol.r) : 1;
+}
+
+//main entry point
+void MainFP
+(
+	in float2 scr_pos : TEXCOORD0,
+	out float4 out_colour : COLOR	
+) {
+	float4 eye = lerp (
+		lerp(corner1, corner3, scr_pos.y),
+		lerp(corner2, corner4, scr_pos.y),
+		scr_pos.x ) ;
+	
+	float4 scenecol = tex2D(scene, scr_pos);
+	float2 cCoords = CylindricalCoordinates(eye);
+	float prec1 = Precipitation(cCoords, intensity/4, float2(deltaX.x,deltaY.x));
+	float prec2 = Precipitation(cCoords, intensity/4, float2(deltaX.y,deltaY.y));
+	float prec3 = Precipitation(cCoords, intensity/4, float2(deltaX.z,deltaY.z));
+	float prec = min( min (prec1, prec2), prec3);
+	out_colour = lerp(precColor, scenecol, prec );	
+}
+
+void MainVP
+(
+    in float4 in_pos : POSITION,
+    
+    uniform float4x4 worldviewproj_matrix,
+    
+    out float2 out_uv0 : TEXCOORD0,
+    out float4 out_pos : POSITION
+)
+{
+    // Use standard transform.
+    out_pos = mul(worldviewproj_matrix, in_pos);
+
+    // Convert to image-space
+    in_pos.xy = sign(in_pos.xy);
+    out_uv0 = (float2(in_pos.x, -in_pos.y) + 1.0f) * 0.5f;    
+}

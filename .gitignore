@@ -1,5 +1,6 @@
 screenshot*.png
 *.o
+*.a
 *~
 data
 CMakeFiles
@@ -13,4 +14,8 @@ build*
 plugins.cfg
 openmw.cfg
 Doxygen
-
+.thumbnails
+resources
+mwcompiler
+mwinterpreter
+clientconsole

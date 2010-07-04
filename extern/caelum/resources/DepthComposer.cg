@@ -1,0 +1,253 @@
+//
+// This file is part of Caelum.
+// See http://www.ogre3d.org/wiki/index.php/Caelum 
+// 
+// Copyright (c) 2008 Caelum team. See Contributors.txt for details.
+// 
+// Caelum is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// Caelum is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with Caelum. If not, see <http://www.gnu.org/licenses/>.
+//
+
+#ifdef EXP_GROUND_FOG
+
+// Returns (exp(x) - 1) / x; avoiding division by 0.
+// lim when x -> 0 is 1.
+float expdiv(float x) {
+    if (abs(x) < 0.0001) {
+        return 1;
+    } else {
+        return (exp(x) - 1) / x;
+    }
+}
+
+// Return fogging through a layer of fog which drops exponentially by height.
+//
+// Standard exp fog with constant density would return (1 - exp(-density * dist)).
+// This function assumes a variable density vd = exp(-verticalDecay * h - baseLevel)
+// Full computation is exp(density * dist / (h2 - h1) * int(h1, h2, exp(-verticalDecay * (h2 - h1)))).
+//
+// This will gracefully degrade to standard exp fog in verticalDecay is 0; without throwing NaNs.
+float ExpGroundFog (
+    float dist, float h1, float h2,
+    float density, float verticalDecay, float baseLevel)
+{
+    float deltaH = (h2 - h1);
+    return 1 - exp (-density * dist * exp(verticalDecay * (baseLevel - h1)) * expdiv(-verticalDecay * deltaH));
+}
+
+#endif // EXP_GROUND_FOG
+
+#ifdef SKY_DOME_HAZE
+
+float bias (float b, float x)
+{
+    return pow (x, log (b) / log (0.5));
+}
+
+float4 sunlightInscatter
+(
+    float4 sunColour,
+    float absorption,
+    float incidenceAngleCos,
+    float sunlightScatteringFactor
+)
+{
+    float scatteredSunlight = bias (sunlightScatteringFactor * 0.5, incidenceAngleCos);
+
+    sunColour = sunColour * (1 - absorption) * float4 (0.9, 0.5, 0.09, 1);
+    
+    return sunColour * scatteredSunlight;
+}
+
+float fogExp (float z, float density) {
+    return 1 - clamp (pow (2.71828, -z * density), 0, 1);
+}
+
+uniform sampler1D atmRelativeDepth : register(HAZE_DEPTH_TEXTURE);
+
+float4 CalcHaze
+(
+        float3 worldPos,
+        float3 worldCamPos,
+        float3 hazeColour,
+        float3 sunDirection
+)
+{
+    float haze = length (worldCamPos - worldPos);
+    float incidenceAngleCos = dot (-sunDirection, normalize (worldPos - worldCamPos));
+    float y = -sunDirection.y;
+
+    float4 sunColour = float4 (3, 2.5, 1, 1);
+
+    // Factor determining the amount of light lost due to absorption
+    float atmLightAbsorptionFactor = 0.1; 
+    float fogDensity = 15;
+
+    haze = fogExp (haze * 0.005, atmLightAbsorptionFactor);
+
+    // Haze amount calculation
+    float invHazeHeight = 100;
+    float hazeAbsorption = fogExp (pow (1 - y, invHazeHeight), fogDensity);
+
+    if (incidenceAngleCos > 0) {
+        // Factor determining the amount of scattering for the sun light
+        float sunlightScatteringFactor = 0.1;
+        // Factor determining the amount of sun light intensity lost due to scattering
+        float sunlightScatteringLossFactor = 0.3;   
+
+        float4 sunlightInscatterColour = sunlightInscatter (
+                sunColour, 
+                clamp ((1 - tex1D (atmRelativeDepth, y).r) * hazeAbsorption, 0, 1), 
+                clamp (incidenceAngleCos, 0, 1), 
+                sunlightScatteringFactor) * (1 - sunlightScatteringLossFactor);
+        hazeColour =
+                hazeColour * (1 - sunlightInscatterColour.a) +
+                sunlightInscatterColour.rgb * sunlightInscatterColour.a * haze;
+    }
+
+    return float4(hazeColour.rgb, haze);
+}
+
+#endif // SKY_DOME_HAZE
+
+void MainFP
+(
+    in float2 screenPos : TEXCOORD0,
+
+    uniform float4x4 invViewProjMatrix,
+    uniform float4 worldCameraPos,
+
+#if EXP_GROUND_FOG
+    uniform float groundFogDensity,
+    uniform float groundFogVerticalDecay,
+    uniform float groundFogBaseLevel,
+    uniform float4 groundFogColour,
+#endif // EXP_GROUND_FOG
+
+#if SKY_DOME_HAZE
+    uniform float3 hazeColour,
+    uniform float3 sunDirection,
+#endif // SKY_DOME_HAZE
+
+    sampler screenTexture: register(s0),
+    sampler depthTexture: register(s1),
+
+    out float4 outColor : COLOR 
+)
+{
+    float4 inColor = tex2D(screenTexture, screenPos);
+    float inDepth = tex2D(depthTexture, screenPos).r;
+
+    // Build normalized device coords; after the perspective divide.
+    //float4 devicePos = float4(1 - screenPos.x * 2, screenPos.y * 2 - 1, inDepth, 1);
+    //float4 devicePos = float4(screenPos.x * 2 - 1, 1 - screenPos.y * 2, 2 * inDepth - 1, 1);
+    float4 devicePos = float4(screenPos.x * 2 - 1, 1 - screenPos.y * 2, inDepth, 1);
+
+    // Go back from device to world coordinates.
+    float4 worldPos = mul(invViewProjMatrix, devicePos);
+
+    // Now undo the perspective divide and go back to "normal" space.
+    worldPos /= worldPos.w;
+    
+    float4 color = inColor;
+
+#if DEBUG_DEPTH_RENDER
+    //color = abs(float4(inDepth, inDepth, inDepth, 1));
+    color = worldPos * float4(0.001, 0.01, 0.001, 1);
+#endif // DEBUG_DEPTH_RENDER
+
+#if EXP_GROUND_FOG
+    // Ye olde ground fog.
+    float h1 = worldCameraPos.y;
+    float h2 = worldPos.y;
+    float dist = length(worldCameraPos - worldPos);
+    float fogFactor = ExpGroundFog(
+            dist, h1, h2,
+            groundFogDensity, groundFogVerticalDecay, groundFogBaseLevel);
+    color = lerp(color, groundFogColour, fogFactor);
+#endif // EXP_GROUND_FOG
+
+#if SKY_DOME_HAZE
+    float4 hazeValue = CalcHaze (
+            worldPos.xyz,
+            worldCameraPos.xyz,
+            hazeColour,
+            sunDirection);
+    color.rgb = lerp(color.rgb, hazeValue.rgb, hazeValue.a);
+#endif // SKY_DOME_HAZE
+
+    outColor = color;
+}
+
+void DepthRenderVP
+(
+    float4 inPos : POSITION,
+
+    uniform float4x4 wvpMatrix,
+
+    out float4 magic : TEXCOORD0,
+    out float4 outPos : POSITION
+)
+{
+    // Standard transform.
+    outPos = mul(wvpMatrix, inPos);
+
+    // Depth buffer is z/w.
+    // Let the GPU lerp the components of outPos.
+    magic = outPos;
+}
+
+void DepthRenderFP
+(
+    in float4 magic : TEXCOORD0,
+    out float4 output : COLOR   
+)
+{
+    output = float4(magic.z / magic.w);
+    //output = float4(magic.xy / magic.w, 1, 1);
+}
+
+void DepthRenderAlphaRejectionVP
+(
+    float4 inPos : POSITION,
+    float4 inTexcoord : TEXCOORD0,
+
+    uniform float4x4 wvpMatrix,
+
+    out float4 outTexcoord : TEXCOORD0,
+    out float4 magic : TEXCOORD1,
+    out float4 outPos : POSITION
+)
+{
+    // Standard transform.
+    outPos = mul(wvpMatrix, inPos);
+
+    // Depth buffer is z/w.
+    // Let the GPU lerp the components of outPos.
+    magic = outPos;
+
+    outTexcoord = inTexcoord;
+}
+
+void DepthRenderAlphaRejectionFP
+(
+    in float4 texcoord : TEXCOORD0,
+    in float4 magic : TEXCOORD1,
+    sampler mainTex: register(s0),
+    out float4 output : COLOR
+)
+{
+    float4 texvalue = tex2D(mainTex, texcoord.xy);
+//    texvalue.a = sin(100 * texcoord.x) + sin(100 * texcoord.y);
+    output = float4(float3(magic.z / magic.w), texvalue.a);
+}

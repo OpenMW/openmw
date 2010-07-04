@@ -1,0 +1,83 @@
+//
+//This file is part of Caelum.
+//See http://www.ogre3d.org/wiki/index.php/Caelum 
+//
+//Copyright (c) 2006-2007 Caelum team. See Contributors.txt for details.
+//
+//Caelum is free software: you can redistribute it and/or modify
+//it under the terms of the GNU Lesser General Public License as published
+//by the Free Software Foundation, either version 3 of the License, or
+//(at your option) any later version.
+//
+//Caelum is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU Lesser General Public License for more details.
+//
+//You should have received a copy of the GNU Lesser General Public License
+//along with Caelum. If not, see <http://www.gnu.org/licenses/>.
+//
+
+vertex_program CaelumGroundFogVP cg
+{
+	source CaelumGroundFog.cg
+	entry_point GroundFog_vp
+	profiles vs_2_x arbvp1 vp30
+
+	default_params
+	{
+		param_named_auto worldViewProj worldviewproj_matrix
+		param_named_auto world world_matrix
+	}
+}
+
+fragment_program CaelumGroundFogFP cg
+{
+	source CaelumGroundFog.cg
+	entry_point GroundFog_fp
+	profiles ps_2_x arbfp1 fp30
+	
+	default_params
+	{
+		param_named_auto camPos camera_position
+		
+		// _auto seems wrong here, since the fog formulas are different than
+		// for standard exp fog.
+		param_named fogDensity float 0
+		param_named fogVerticalDecay float 0
+		param_named fogGroundLevel float 0
+		param_named fogColour float4 0 0 0 0
+	}
+}
+
+vertex_program CaelumGroundFogDomeVP cg
+{
+	source CaelumGroundFog.cg
+	entry_point GroundFogDome_vp
+	profiles vs_2_0 arbvp1
+	
+	default_params
+	{
+		param_named_auto worldViewProj worldviewproj_matrix
+	}
+}
+
+fragment_program CaelumGroundFogDomeFP cg
+{
+	source CaelumGroundFog.cg
+	entry_point GroundFogDome_fp
+	profiles ps_2_0 arbfp1
+
+	default_params
+	{
+		// Fog parameters.
+		param_named fogColour float4 0 0 0 0
+		param_named fogDensity float 0
+		param_named fogVerticalDecay float 0
+		param_named fogGroundLevel float 0
+		
+		// Send camera height. We can't send camera_position because
+		// the entity is always moved with the camera. Joy.
+		param_named cameraHeight float 0
+	}
+}
