@@ -4,6 +4,8 @@
 #include "components/esm/records.hpp"
 #include <map>
 #include <string>
+#include <algorithm>
+#include <cctype>
 #include <assert.h>
 
 namespace ESMS
@@ -14,6 +16,16 @@ namespace ESMS
   {
     virtual void load(ESMReader &esm, const std::string &id) = 0;
     virtual int getSize() = 0;
+    
+    static std::string toLower (const std::string& name)
+    {
+        std::string lowerCase;
+        
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+            
+        return lowerCase;
+    }    
   };
 
   typedef std::map<int,RecList*> RecListList;
@@ -28,15 +40,17 @@ namespace ESMS
     // Load one object of this type
     void load(ESMReader &esm, const std::string &id)
     {
-      list[id].load(esm);
+      std::string id2 = toLower (id);
+      list[id2].load(esm);
     }
 
     // Find the given object ID, or return NULL if not found.
     const X* find(const std::string &id) const
     {
-      if(list.find(id) == list.end())
+      std::string id2 = toLower (id);
+      if(list.find(id2) == list.end())
         return NULL;
-      return &list.find(id)->second;
+      return &list.find(id2)->second;
     }
 
     int getSize() { return list.size(); }
@@ -54,7 +68,8 @@ namespace ESMS
 
     void load(ESMReader &esm, const std::string &id)
     {
-      X& ref = list[id];
+      std::string id2 = toLower (id);    
+      X& ref = list[id2];
 
       ref.id = id;
       ref.load(esm);
@@ -65,6 +80,8 @@ namespace ESMS
 
   // Cells aren't simply indexed by name. Exterior cells are treated
   // separately.
+  // TODO: case handling (cell names are case-insensitive, but they are also showen to the
+  // player, so we can't simply smash case.
   struct CellList : RecList
   {
     // Total cell count. Used for statistics.
@@ -145,7 +162,7 @@ namespace ESMS
       X ref;
       ref.load (esm);
       
-      std::string realId = ref.data.name.toString();
+      std::string realId = toLower (ref.data.name.toString());
       
       std::swap (list[realId], ref);
     }
@@ -153,9 +170,10 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* find(const std::string &id) const
     {
-      if(list.find(id) == list.end())
+      std::string id2 = toLower (id);    
+      if(list.find(id2) == list.end())
         return NULL;
-      return &list.find(id)->second;
+      return &list.find(id2)->second;
     }
 
     int getSize() { return list.size(); }
