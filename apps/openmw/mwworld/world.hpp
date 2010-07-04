@@ -8,6 +8,8 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include <components/interpreter/types.hpp>
+
 #include "../mwrender/playerpos.hpp"
 #include "../mwrender/mwscene.hpp"
 
@@ -49,6 +51,7 @@ namespace MWWorld
             ESMS::ESMStore mStore;
             std::map<std::string, CellStore> mInteriors;
             ScriptList mLocalScripts;
+            std::map<std::string, Interpreter::Type_Data> mGlobalVariables;
     
             // not implemented
             World (const World&);
@@ -72,6 +75,8 @@ namespace MWWorld
             
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
+            
+            Interpreter::Type_Data& getGlobalVariable (const std::string& name);
     };
 }
 

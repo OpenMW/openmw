@@ -72,6 +72,12 @@ namespace MWWorld
         mInteriors[startCell].loadInt (startCell, mStore, mEsm);
         
         insertInteriorScripts (mInteriors[startCell]);
+
+        // global variables
+        for (ESMS::RecListT<ESM::Global>::MapType::const_iterator iter
+            (mStore.globals.list.begin()); 
+            iter != mStore.globals.list.end(); ++iter)
+            mGlobalVariables.insert (std::make_pair (iter->first, iter->second.value));
         
         std::cout << "\nSetting up cell rendering\n";
 
@@ -122,5 +128,15 @@ namespace MWWorld
     {
         // Cell change not implemented yet.
         return false;
+    }
+    
+    Interpreter::Type_Data& World::getGlobalVariable (const std::string& name)
+    {
+        std::map<std::string, Interpreter::Type_Data>::iterator iter = mGlobalVariables.find (name);
+        
+        if (iter==mGlobalVariables.end())
+            throw std::runtime_error ("unknown global variable: " + name);
+            
+        return iter->second;
     }
 }

@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <iostream>
 
+#include <components/interpreter/types.hpp>
+
 #include "locals.hpp"
 #include "../mwworld/world.hpp"
 
@@ -78,32 +80,44 @@ namespace MWScript
     
     int InterpreterContext::getGlobalShort (const std::string& name) const
     {
-        return 0;
+        Interpreter::Type_Data value = mEnvironment.mWorld->getGlobalVariable (name);       
+        return static_cast<Interpreter::Type_Short> (
+            *reinterpret_cast<Interpreter::Type_Integer *> (&value));
     }
 
     int InterpreterContext::getGlobalLong (const std::string& name) const
     {
-        return 0;
+        // a global long is internally a float.
+        Interpreter::Type_Data value = mEnvironment.mWorld->getGlobalVariable (name);       
+        return static_cast<Interpreter::Type_Integer> (
+            *reinterpret_cast<Interpreter::Type_Float *> (&value));
     }
 
     float InterpreterContext::getGlobalFloat (const std::string& name) const
     {
-        return 0;
+        Interpreter::Type_Data value = mEnvironment.mWorld->getGlobalVariable (name);       
+        return *reinterpret_cast<Interpreter::Type_Float *> (&value);
     }
 
     void InterpreterContext::setGlobalShort (const std::string& name, int value)
     {
-    
+         mEnvironment.mWorld->getGlobalVariable (name) =
+            *reinterpret_cast<Interpreter::Type_Data *> (&value);
     }
 
     void InterpreterContext::setGlobalLong (const std::string& name, int value)
     {
-    
+        // a global long is internally a float.
+        float value2 = value;
+
+         mEnvironment.mWorld->getGlobalVariable (name) =
+            *reinterpret_cast<Interpreter::Type_Data *> (&value2);    
     }
 
     void InterpreterContext::setGlobalFloat (const std::string& name, float value)
     {
-    
+         mEnvironment.mWorld->getGlobalVariable (name) =
+            *reinterpret_cast<Interpreter::Type_Data *> (&value);    
     }
                 
     MWWorld::World& InterpreterContext::getWorld()
