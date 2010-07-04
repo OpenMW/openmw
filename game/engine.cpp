@@ -99,9 +99,11 @@ void OMW::Engine::go()
 	std::string ogre_cfg_location = "ogre.cfg";
 
 #ifdef OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-	std::cout << "[Apple]" << std::endl;
 	plugin_cfg_location = macBundlePath() + "/Contents/MacOS/" + plugin_cfg_location;
-	ogre_cfg_location =   macBundlePath() + "/Contents/MacOS/" + ogre_cfg_location;
+	ogre_cfg_location =   macBundlePath() + "/Contents/Resources/" + ogre_cfg_location;
+	std::cout << "[Apple]" << std::endl;
+	std::cout << "[Apple] plugins.cfg location: " << plugin_cfg_location << std::endl;
+	std::cout << "[Apple] ogre.cfg location:    " << ogre_cfg_location << std::endl;
 #endif
 
     mOgre.configure(!isFile(ogre_cfg_location.c_str()), plugin_cfg_location.c_str(), false);

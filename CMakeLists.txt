@@ -151,6 +151,7 @@ set(CPACK_PACKAGE_VERSION_PATCH "")
 
 include(CPack)
 
+set(CMAKE_EXE_LINKER_FLAGS "-arch i386")
+set(CMAKE_CXX_FLAGS "-arch i386")
+
 endif (APPLE)
-
-
