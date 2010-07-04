@@ -47,6 +47,20 @@ namespace MWScript
             virtual void messageBox (const std::string& message,
                 const std::vector<std::string>& buttons);   
 
+            virtual bool menuMode();
+            
+            virtual int getGlobalShort (const std::string& name) const;
+
+            virtual int getGlobalLong (const std::string& name) const;
+
+            virtual float getGlobalFloat (const std::string& name) const;
+
+            virtual void setGlobalShort (const std::string& name, int value);        
+
+            virtual void setGlobalLong (const std::string& name, int value);        
+
+            virtual void setGlobalFloat (const std::string& name, float value);
+            
             MWWorld::World& getWorld();
             
             MWSound::SoundManager& getSoundManager();

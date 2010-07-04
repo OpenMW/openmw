@@ -71,6 +71,41 @@ namespace MWScript
             std::cerr << "error: message box buttons not supported" << std::endl;
     }
     
+    bool InterpreterContext::menuMode()
+    {
+        return false;
+    }
+    
+    int InterpreterContext::getGlobalShort (const std::string& name) const
+    {
+        return 0;
+    }
+
+    int InterpreterContext::getGlobalLong (const std::string& name) const
+    {
+        return 0;
+    }
+
+    float InterpreterContext::getGlobalFloat (const std::string& name) const
+    {
+        return 0;
+    }
+
+    void InterpreterContext::setGlobalShort (const std::string& name, int value)
+    {
+    
+    }
+
+    void InterpreterContext::setGlobalLong (const std::string& name, int value)
+    {
+    
+    }
+
+    void InterpreterContext::setGlobalFloat (const std::string& name, float value)
+    {
+    
+    }
+                
     MWWorld::World& InterpreterContext::getWorld()
     {
         return *mEnvironment.mWorld;

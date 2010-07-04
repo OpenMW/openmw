@@ -219,6 +219,41 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (37));     
     }    
+
+    void opMenuMode (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (38));     
+    }      
+    
+    void opStoreGlobalShort (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (39));    
+    }
+    
+    void opStoreGlobalLong (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (40));
+    }
+    
+    void opStoreGlobalFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (41));
+    }              
+
+    void opFetchGlobalShort (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (42));    
+    }
+    
+    void opFetchGlobalLong (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (43));
+    }
+    
+    void opFetchGlobalFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (44));
+    }    
 }
 
 namespace Compiler
@@ -510,6 +545,85 @@ namespace Compiler
                         assert (0);
                 }
             }          
+        }
+        
+        void menuMode (CodeContainer& code)
+        {
+            opMenuMode (code);
+        }
+        
+        void assignToGlobal (CodeContainer& code, Literals& literals, char localType,
+            const std::string& name, const CodeContainer& value, char valueType)
+        {
+            int index = literals.addString (name);
+        
+            opPushInt (code, index);
+
+            std::copy (value.begin(), value.end(), std::back_inserter (code));
+            
+            if (localType!=valueType)
+            {
+                if (localType=='f' && valueType=='l')
+                {
+                    opIntToFloat (code);
+                }
+                else if ((localType=='l' || localType=='s') && valueType=='f')
+                {
+                    opFloatToInt (code);
+                }
+            }
+            
+            switch (localType)
+            {
+                case 'f':
+                
+                    opStoreGlobalFloat (code);
+                    break;
+                
+                case 's':
+
+                    opStoreGlobalShort (code);
+                    break;
+                
+                case 'l':
+
+                    opStoreGlobalLong (code);
+                    break;
+            
+                default:
+                
+                    assert (0);
+            }        
+        }
+            
+        void fetchGlobal (CodeContainer& code, Literals& literals, char localType,
+            const std::string& name)
+        {
+            int index = literals.addString (name);
+
+            opPushInt (code, index);
+
+            switch (localType)
+            {
+                case 'f':
+                
+                    opFetchGlobalFloat (code);
+                    break;
+                
+                case 's':
+
+                    opFetchGlobalShort (code);
+                    break;
+                
+                case 'l':
+
+                    opFetchGlobalLong (code);
+                    break;
+            
+                default:
+                
+                    assert (0);
+            }            
         }
     }
 }

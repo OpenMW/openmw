@@ -32,6 +32,20 @@ namespace Interpreter
                 std::vector<std::string> empty;
                 messageBox (message, empty);
             }
+            
+            virtual bool menuMode() = 0;
+
+            virtual int getGlobalShort (const std::string& name) const = 0;
+
+            virtual int getGlobalLong (const std::string& name) const = 0;
+
+            virtual float getGlobalFloat (const std::string& name) const = 0;
+
+            virtual void setGlobalShort (const std::string& name, int value) = 0;        
+
+            virtual void setGlobalLong (const std::string& name, int value) = 0;        
+
+            virtual void setGlobalFloat (const std::string& name, float value) = 0;            
     };
 }
 

@@ -48,7 +48,8 @@ namespace Compiler
                 K_return,
                 K_messagebox,
                 K_set, K_to,
-                K_getsquareroot
+                K_getsquareroot,
+                K_menumode
             };
 
             enum special

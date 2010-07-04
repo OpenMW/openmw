@@ -61,8 +61,9 @@ namespace Compiler
         
         if (mState==SetState)
         {
-            // local variable?
             std::string name2 = toLower (name);
+
+            // local variable?
             char type = mLocals.getType (name2);
             if (type!=' ')
             {
@@ -70,6 +71,15 @@ namespace Compiler
                 mState = SetLocalVarState;
                 return true;
             }
+            
+            type = getContext().getGlobalType (name2);
+            if (type!=' ')
+            {
+                mName = name2;
+                mType = type;
+                mState = SetGlobalVarState;
+                return true;
+            }                        
             
             getErrorHandler().error ("unknown variable", loc);
             SkipParser skip (getErrorHandler(), getContext());
@@ -166,7 +176,20 @@ namespace Compiler
             mState = EndState;
             return true;
         }
-        
+        else if (mState==SetGlobalVarState && keyword==Scanner::K_to)
+        {
+            mExprParser.reset();
+            scanner.scan (mExprParser);
+            
+            std::vector<Interpreter::Type_Code> code;
+            char type = mExprParser.append (code);
+            
+            Generator::assignToGlobal (mCode, mLiterals, mType, mName, code, type);
+                        
+            mState = EndState;
+            return true;
+        }
+                
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 

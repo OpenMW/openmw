@@ -29,6 +29,9 @@ namespace MWScript
             {
                 return mType==Type_Full;
             }    
+            
+            virtual char getGlobalType (const std::string& name) const { return ' '; }
+            ///< 'l: long, 's': short, 'f': float, ' ': does not exist.              
     };
 }
 

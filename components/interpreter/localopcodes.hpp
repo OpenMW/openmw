@@ -112,6 +112,99 @@ namespace Interpreter
                 runtime[0] = *reinterpret_cast<Type_Data *> (&value);
             }           
     };    
+    
+    class OpStoreGlobalShort : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Data data = runtime[0];
+                int index = runtime[1];
+
+                std::string name = runtime.getStringLiteral (index);
+
+                runtime.getContext().setGlobalShort (name, *reinterpret_cast<int *> (&data));
+
+                runtime.pop();
+                runtime.pop();
+            }           
+    };
+    
+    class OpStoreGlobalLong : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Data data = runtime[0];
+                int index = runtime[1];
+
+                std::string name = runtime.getStringLiteral (index);
+
+                runtime.getContext().setGlobalLong (name, *reinterpret_cast<int *> (&data));
+
+                runtime.pop();
+                runtime.pop();
+            }           
+    };    
+    
+    class OpStoreGlobalFloat : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                Type_Data data = runtime[0];
+                int index = runtime[1];
+
+                std::string name = runtime.getStringLiteral (index);
+
+                runtime.getContext().setGlobalFloat (name, *reinterpret_cast<float *> (&data));
+
+                runtime.pop();
+                runtime.pop();
+            }           
+    };
+    
+    class OpFetchGlobalShort : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0]; 
+                std::string name = runtime.getStringLiteral (index);
+                int value = runtime.getContext().getGlobalShort (name);
+                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+            }           
+    };    
+
+    class OpFetchGlobalLong : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0];           
+                std::string name = runtime.getStringLiteral (index);
+                int value = runtime.getContext().getGlobalLong (name);
+                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+            }           
+    };    
+
+    class OpFetchGlobalFloat : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0];           
+                std::string name = runtime.getStringLiteral (index);
+                float value = runtime.getContext().getGlobalFloat (name);
+                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+            }           
+    };        
 }
 
 #endif

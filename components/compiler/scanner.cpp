@@ -242,6 +242,7 @@ namespace Compiler
             "messagebox",
             "set", "to",
             "getsquareroot",
+            "menumode",
             0
         };
 

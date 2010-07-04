@@ -96,6 +96,13 @@ op  34: compare (float) stack[1] with stack[0]; pop twice; push 1 if lesser than
 op  35: compare (float) stack[1] with stack[0]; pop twice; push 1 if lesser or equal, 0 else
 op  36: compare (float) stack[1] with stack[0]; pop twice; push 1 if greater than, 0 else
 op  37: compare (float) stack[1] with stack[0]; pop twice; push 1 if greater or equal, 0 else
-opcodes 38-33554431 unused
+op  38: push 1 if game is in menu mode, 0 else
+op  39: store stack[0] in global short stack[1] and pop twice
+op  40: store stack[0] in global long stack[1] and pop twice
+op  41: store stack[0] in global float stack[1] and pop twice
+op  42: replace stack[0] with global short stack[0]
+op  43: replace stack[0] with global long stack[0]
+op  44: replace stack[0] with global float stack[0]
+opcodes 45-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

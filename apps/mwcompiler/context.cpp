@@ -7,5 +7,10 @@ namespace SACompiler
     {
         return true;
     }
+ 
+    char Context::getGlobalType (const std::string& name) const
+    {
+        return ' ';
+    }
 }
 

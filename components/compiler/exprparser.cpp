@@ -243,15 +243,28 @@ namespace Compiler
         mFirst = false;
 
         if (mNextOperand)
-        {    
-            char type = mLocals.getType (name);
+        {   
+            std::string name2 = toLower (name);
+                   
+            char type = mLocals.getType (name2);
             
             if (type!=' ')
             {
-                Generator::fetchLocal (mCode, type, mLocals.getIndex (name));
+                Generator::fetchLocal (mCode, type, mLocals.getIndex (name2));
                 mNextOperand = false;
                 mOperands.push_back (type=='f' ? 'f' : 'l');    
                 return true;    
+            }
+
+                 
+            type = getContext().getGlobalType (name2);
+            
+            if (type!=' ')
+            {
+                Generator::fetchGlobal (mCode, mLiterals, type, name2);
+                mNextOperand = false;
+                mOperands.push_back (type=='f' ? 'f' : 'l');    
+                return true;                
             }
         }
         else
@@ -277,6 +290,16 @@ namespace Compiler
 
                 Generator::squareRoot (mCode);
                 mOperands.push_back ('f');
+                
+                mNextOperand = false;
+                return true;
+            }
+            else if (keyword==Scanner::K_menumode)
+            {
+                mTokenLoc = loc;
+                
+                Generator::menuMode (mCode);
+                mOperands.push_back ('l');
                 
                 mNextOperand = false;
                 return true;

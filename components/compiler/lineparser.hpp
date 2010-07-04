@@ -21,7 +21,7 @@ namespace Compiler
             {
                 BeginState,
                 ShortState, LongState, FloatState,
-                SetState, SetLocalVarState,
+                SetState, SetLocalVarState, SetGlobalVarState,
                 MessageState, MessageCommaState,
                 EndState
             };
@@ -31,6 +31,7 @@ namespace Compiler
             std::vector<Interpreter::Type_Code>& mCode;
             State mState;
             std::string mName;
+            char mType;
             ExprParser mExprParser;
     
         public:

@@ -85,7 +85,17 @@ namespace Interpreter
                 std::vector<std::string> buttons;
                 
                 runtime.getContext().messageBox (formattedMessage, buttons);
-            }        
+            }     
+    };   
+            
+    class OpMenuMode : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                runtime.push (runtime.getContext().menuMode());
+            }            
     };
 }
 

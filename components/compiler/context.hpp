@@ -1,6 +1,8 @@
 #ifndef COMPILER_CONTEXT_H_INCLUDED
 #define COMPILER_CONTEXT_H_INCLUDED
 
+#include <string>
+
 namespace Compiler
 {
     class Extensions;
@@ -27,6 +29,9 @@ namespace Compiler
             {
                 return mExtensions;
             }
+            
+            virtual char getGlobalType (const std::string& name) const = 0;
+            ///< 'l: long, 's': short, 'f': float, ' ': does not exist.            
     };
 }
 

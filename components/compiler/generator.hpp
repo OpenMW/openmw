@@ -90,6 +90,14 @@ namespace Compiler
         void jumpOnNonZero (CodeContainer& code, int offset);
 
         void compare (CodeContainer& code, char op, char valueType1, char valueType2);
+        
+        void menuMode (CodeContainer& code);
+        
+        void assignToGlobal (CodeContainer& code, Literals& literals, char localType,
+            const std::string& name, const CodeContainer& value, char valueType);        
+            
+        void fetchGlobal (CodeContainer& code, Literals& literals, char localType,
+            const std::string& name);            
     }
 }
 

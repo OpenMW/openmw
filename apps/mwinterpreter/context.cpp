@@ -74,6 +74,32 @@ namespace SAInterpreter
         for (std::size_t i=0; i<buttons.size(); ++i)
             std::cout << "    button " << i << ": " << buttons[i] << std::endl;
     }
+    
+    bool Context::menuMode()
+    {
+        return false;
+    }
+    
+    int Context::getGlobalShort (const std::string& name) const
+    {
+        return 0;
+    }
+
+    int Context::getGlobalLong (const std::string& name) const
+    {
+        return 0;
+    }
+
+    float Context::getGlobalFloat (const std::string& name) const
+    {
+        return 0;
+    }
+
+    void Context::setGlobalShort (const std::string& name, int value) {}
+
+    void Context::setGlobalLong (const std::string& name, int value) {}     
+
+    void Context::setGlobalFloat (const std::string& name, float value) {}
                     
     void Context::report()
     {

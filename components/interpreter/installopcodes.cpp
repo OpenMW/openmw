@@ -23,7 +23,7 @@ namespace Interpreter
         interpreter.installSegment5 (17, new OpIntToFloat1);
         interpreter.installSegment5 (18, new OpFloatToInt1);
                     
-        // local variables & literals
+        // local variables, global variables & literals
         interpreter.installSegment5 (0, new OpStoreLocalShort);
         interpreter.installSegment5 (1, new OpStoreLocalLong);
         interpreter.installSegment5 (2, new OpStoreLocalFloat);        
@@ -32,6 +32,12 @@ namespace Interpreter
         interpreter.installSegment5 (21, new OpFetchLocalShort);
         interpreter.installSegment5 (22, new OpFetchLocalLong);
         interpreter.installSegment5 (23, new OpFetchLocalFloat); 
+        interpreter.installSegment5 (39, new OpStoreGlobalShort);
+        interpreter.installSegment5 (40, new OpStoreGlobalLong);
+        interpreter.installSegment5 (41, new OpStoreGlobalFloat);   
+        interpreter.installSegment5 (42, new OpFetchGlobalShort);
+        interpreter.installSegment5 (43, new OpFetchGlobalLong);
+        interpreter.installSegment5 (44, new OpFetchGlobalFloat);               
                 
         // math
         interpreter.installSegment5 (9, new OpAddInt<Type_Integer>);
@@ -77,7 +83,8 @@ namespace Interpreter
         interpreter.installSegment0 (2, new OpJumpBackward);
         
         // misc
-        interpreter.installSegment3 (0, new OpMessageBox);        
+        interpreter.installSegment3 (0, new OpMessageBox);    
+        interpreter.installSegment5 (38, new OpMenuMode);    
     }
 }
 
