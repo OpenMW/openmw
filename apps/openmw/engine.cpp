@@ -13,18 +13,21 @@
 #include "mwscript/compilercontext.hpp"
 #include "mwscript/interpretercontext.hpp"
 #include "mwscript/extensions.hpp"
+#include "mwscript/globalscripts.hpp"
 
 #include "mwsound/soundmanager.hpp"
 
 #include "mwworld/world.hpp"
 #include "mwworld/ptr.hpp"
+#include "mwworld/environment.hpp"
 
 void OMW::Engine::executeLocalScripts()
 {
-    for (MWWorld::World::ScriptList::const_iterator iter (mWorld->getLocalScripts().begin());
-        iter!=mWorld->getLocalScripts().end(); ++iter)
+    for (MWWorld::World::ScriptList::const_iterator iter (
+        mEnvironment.mWorld->getLocalScripts().begin());
+        iter!=mEnvironment.mWorld->getLocalScripts().end(); ++iter)
     {
-        MWScript::InterpreterContext interpreterContext (*mWorld, *mSoundManager,
+        MWScript::InterpreterContext interpreterContext (mEnvironment,
             &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
         mScriptManager->run (iter->first, interpreterContext);
     }
@@ -37,6 +40,9 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     
     // local scripts
     executeLocalScripts();
+    
+    // global scripts
+    mGlobalScripts->run (mEnvironment);
 
     return true;
 }
@@ -57,7 +63,7 @@ void OMW::Engine::processCommands()
 }
 
 OMW::Engine::Engine()
-: mWorld(NULL), mDebug (false), mVerboseScripts (false), mSoundManager (0), mScriptManager (0),
+: mDebug (false), mVerboseScripts (false), mScriptManager (0), mGlobalScripts (0),
   mScriptContext (0)
 {
     mspCommandServer.reset(
@@ -67,8 +73,9 @@ OMW::Engine::Engine()
 OMW::Engine::~Engine()
 {
 //    mspCommandServer->stop();
-    delete mWorld;
-    delete mSoundManager;
+    delete mEnvironment.mWorld;
+    delete mEnvironment.mSoundManager;
+    delete mGlobalScripts;
     delete mScriptManager;
     delete mScriptContext;
 }
@@ -143,7 +150,7 @@ void OMW::Engine::enableVerboseScripts()
 
 void OMW::Engine::go()
 {
-    assert (!mWorld);
+    assert (!mEnvironment.mWorld);
     assert (!mDataDir.empty());
     assert (!mCellName.empty());
     assert (!mMaster.empty());
@@ -167,22 +174,24 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create the world
-    mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mCellName);
+    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mCellName);
 
-    mSoundManager = new MWSound::SoundManager;
+    mEnvironment.mSoundManager = new MWSound::SoundManager;
 
     MWScript::registerExtensions (mExtensions);
 
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
     mScriptContext->setExtensions (&mExtensions);
 
-    mScriptManager = new MWScript::ScriptManager (mWorld->getStore(), mVerboseScripts,
+    mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(), mVerboseScripts,
         *mScriptContext);
+        
+    mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(), *mScriptManager);
 
     std::cout << "Setting up input system\n";
 
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre, mWorld->getPlayerPos(), mDebug);
+    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(), mDebug);
 
     // Launch the console server
     std::cout << "Starting command server on port " << kCommandServerPort << std::endl;

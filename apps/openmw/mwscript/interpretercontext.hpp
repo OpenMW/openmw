@@ -4,6 +4,7 @@
 #include <components/interpreter/context.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/environment.hpp"
 
 namespace MWWorld
 {
@@ -20,15 +21,14 @@ namespace MWScript
     struct Locals;
 
     class InterpreterContext : public Interpreter::Context
-    {
-            MWWorld::World& mWorld;
-            MWSound::SoundManager& mSoundManager;
+    {   
+            MWWorld::Environment mEnvironment;
             Locals *mLocals;
             MWWorld::Ptr mReference;
         
         public:
         
-            InterpreterContext (MWWorld::World& world, MWSound::SoundManager& soundManager,
+            InterpreterContext (const MWWorld::Environment& environment, 
                 MWScript::Locals *locals, MWWorld::Ptr reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
     

@@ -38,14 +38,18 @@ set(GAMESCRIPT
     apps/openmw/mwscript/scriptmanager.cpp
     apps/openmw/mwscript/interpretercontext.cpp
     apps/openmw/mwscript/cellextensions.cpp
-    apps/openmw/mwscript/extensions.cpp)
+    apps/openmw/mwscript/extensions.cpp
+    apps/openmw/mwscript/globalscripts.cpp
+    )
 set(GAMESCRIPT_HEADER 
     apps/openmw/mwscript/locals.hpp
     apps/openmw/mwscript/scriptmanager.hpp
     apps/openmw/mwscript/compilercontext.hpp
     apps/openmw/mwscript/interpretercontext.hpp
     apps/openmw/mwscript/cellextensions.hpp
-    apps/openmw/mwscript/extensions.hpp)
+    apps/openmw/mwscript/extensions.hpp
+    apps/openmw/mwscript/globalscripts.hpp
+    )
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})    
 
 set(GAMESOUND
@@ -61,7 +65,9 @@ set(GAMEWORLD
 set(GAMEWORLD_HEADER 
     apps/openmw/mwworld/refdata.hpp
     apps/openmw/mwworld/world.hpp
-    apps/openmw/mwworld/ptr.hpp)
+    apps/openmw/mwworld/ptr.hpp
+    apps/openmw/mwworld/environment.hpp
+    )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER}) 
 
 

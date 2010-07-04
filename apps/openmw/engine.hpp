@@ -13,6 +13,8 @@
 #include <components/commandserver/command.hpp>
 #include <components/compiler/extensions.hpp>
 
+#include "mwworld/environment.hpp"
+
 namespace Compiler
 {
     class Context;
@@ -21,6 +23,7 @@ namespace Compiler
 namespace MWScript
 {
     class ScriptManager;
+    class GlobalScripts;
 }
 
 namespace MWSound
@@ -45,15 +48,15 @@ namespace OMW
             Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;
-            MWWorld::World *mWorld;
             bool mDebug;
             bool mVerboseScripts;
 
             TsDeque<OMW::Command>                     mCommandQueue;
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
-            MWSound::SoundManager *mSoundManager;
+            MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
+            MWScript::GlobalScripts *mGlobalScripts;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
