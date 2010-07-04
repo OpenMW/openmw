@@ -7,6 +7,28 @@ namespace MWScript
 {
     class CompilerContext : public Compiler::Context
     {
+        public:
+        
+            enum Type
+            {
+                Type_Full, // global, local, targetted
+                Type_Dialgoue,
+                Type_Console
+            };
+            
+        private:
+        
+            Type mType;
+    
+        public:
+        
+            CompilerContext (Type type) : mType (type) {}
+        
+            // Is the compiler allowed to declare local variables?
+            virtual bool canDeclareLocals() const
+            {
+                return mType==Type_Full;
+            }    
     };
 }
 

@@ -10,7 +10,7 @@
 #include "mwinput/inputmanager.hpp"
 
 #include "mwscript/scriptmanager.hpp"
-#include "mwscript/compilercontextscript.hpp"
+#include "mwscript/compilercontext.hpp"
 #include "mwscript/interpretercontext.hpp"
 #include "mwscript/extensions.hpp"
 
@@ -173,7 +173,7 @@ void OMW::Engine::go()
 
     MWScript::registerExtensions (mExtensions);
 
-    mScriptContext = new MWScript::CompilerContextScript;
+    mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
     mScriptContext->setExtensions (&mExtensions);
 
     mScriptManager = new MWScript::ScriptManager (mWorld->getStore(), mVerboseScripts,

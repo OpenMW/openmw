@@ -43,7 +43,6 @@ set(GAMESCRIPT_HEADER
     apps/openmw/mwscript/locals.hpp
     apps/openmw/mwscript/scriptmanager.hpp
     apps/openmw/mwscript/compilercontext.hpp
-    apps/openmw/mwscript/compilercontextscript.hpp
     apps/openmw/mwscript/interpretercontext.hpp
     apps/openmw/mwscript/cellextensions.hpp
     apps/openmw/mwscript/extensions.hpp)
