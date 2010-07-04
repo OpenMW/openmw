@@ -9,7 +9,7 @@ cmake*.cmake
 openmw
 Ogre.log
 ogre.cfg
-build
+build*
 plugins.cfg
 openmw.cfg
 Doxygen
