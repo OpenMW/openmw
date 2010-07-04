@@ -18,7 +18,16 @@ namespace MWScript
     char CompilerContext::getGlobalType (const std::string& name) const
     {
         if (const ESM::Global *global = mEnvironment.mWorld->getStore().globals.find (name))
-            return global->type;
+        {
+            switch (global->type)
+            {
+                case ESM::VT_Short: return 's';
+                case ESM::VT_Int: return 'l';
+                case ESM::VT_Float: return 'f';
+                
+                default: return ' ';
+            }
+        }
 
         return ' ';
     }    

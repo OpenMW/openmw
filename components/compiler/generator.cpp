@@ -254,6 +254,11 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (44));
     }    
+    
+    void opRandom (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (45));
+    }    
 }
 
 namespace Compiler
@@ -624,6 +629,11 @@ namespace Compiler
                 
                     assert (0);
             }            
+        }
+        
+        void random (CodeContainer& code)
+        {
+            opRandom (code);
         }
     }
 }

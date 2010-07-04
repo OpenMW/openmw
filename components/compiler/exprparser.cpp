@@ -304,6 +304,17 @@ namespace Compiler
                 mNextOperand = false;
                 return true;
             }
+            else if (keyword==Scanner::K_random)
+            {
+                mTokenLoc = loc;        
+                parseArguments ("l", scanner);
+
+                Generator::random (mCode);
+                mOperands.push_back ('l');
+                
+                mNextOperand = false;
+                return true;            
+            }
             else
             {
                 // check for custom extensions

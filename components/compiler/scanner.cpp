@@ -243,6 +243,7 @@ namespace Compiler
             "set", "to",
             "getsquareroot",
             "menumode",
+            "random",
             0
         };
 

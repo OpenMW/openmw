@@ -1,6 +1,7 @@
 #ifndef INTERPRETER_MISCOPCODES_H_INCLUDED
 #define INTERPRETER_MISCOPCODES_H_INCLUDED
 
+#include <cstdlib>
 #include <stdexcept>
 #include <vector>
 #include <string>
@@ -97,6 +98,26 @@ namespace Interpreter
                 runtime.push (runtime.getContext().menuMode());
             }            
     };
+            
+    class OpRandom : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                double r = static_cast<double> (std::rand()) / RAND_MAX; // [0, 1)
+                
+                Type_Integer limit = *reinterpret_cast<Type_Integer *> (&runtime[0]);
+                
+                if (limit<0)
+                    throw std::runtime_error (
+                        "random: argument out of range (Don't be so negative!)");
+                
+                Type_Integer value = static_cast<Type_Integer> (r*limit); // [o, limit)
+                
+                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+            }            
+    };    
 }
 
 #endif

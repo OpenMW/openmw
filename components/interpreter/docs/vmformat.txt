@@ -103,6 +103,7 @@ op  41: store stack[0] in global float stack[1] and pop twice
 op  42: replace stack[0] with global short stack[0]
 op  43: replace stack[0] with global long stack[0]
 op  44: replace stack[0] with global float stack[0]
-opcodes 45-33554431 unused
+op  45: replace stack[0] with a random integer value in the range [0, stack[0]-1]
+opcodes 46-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

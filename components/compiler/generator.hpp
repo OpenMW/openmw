@@ -98,6 +98,8 @@ namespace Compiler
             
         void fetchGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name);            
+            
+        void random (CodeContainer& code);
     }
 }
 
