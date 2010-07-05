@@ -59,6 +59,15 @@ namespace Compiler
             return true;
         }
         
+        if (mState==NameState)
+        {
+            // keywords can be used as script names too. Thank you Morrowind for another
+            // syntactic perversity :(
+            mName = loc.mLiteral;
+            mState = BeginCompleteState;
+            return true;
+        }
+        
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
