@@ -3,6 +3,10 @@
 
 #include "OgreCamera.h"
 
+#include <components/esm_store/cell_store.hpp>
+
+#include "../mwworld/refdata.hpp"
+
 namespace MWRender
 {
   // This class keeps track of the player position. It takes care of
@@ -10,19 +14,22 @@ namespace MWRender
   // (to be done).
   class PlayerPos
   {
-    float x, y, z;
+    ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
     Ogre::Camera *camera;
 
   public:
-    PlayerPos(Ogre::Camera *cam) :
-      x(0), y(0), z(0), camera(cam) {}
+    PlayerPos(Ogre::Camera *cam, const ESM::NPC *player) :
+      camera(cam)
+    {
+        mPlayer.base = player;
+    }
 
     // Set the player position. Uses Morrowind coordinates.
     void setPos(float _x, float _y, float _z)
     {
-      x = _x;
-      y = _y;
-      z = _z;
+      mPlayer.ref.pos.pos[0] = _x;
+      mPlayer.ref.pos.pos[1] = _y;
+      mPlayer.ref.pos.pos[2] = _z;
 
       // TODO: Update sound listener
     }
@@ -33,6 +40,7 @@ namespace MWRender
     // orientation. After the call, the new position is returned.
     void moveRel(float &relX, float &relY, float &relZ)
     {
+      // TODO: Update mPlayer state
       using namespace Ogre;
 
       // Move camera relative to its own direction
@@ -53,6 +61,16 @@ namespace MWRender
       // Set the position
       setPos(relX, relY, relZ);
     }
+    
+        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *getPlayer()
+        {
+            return &mPlayer;
+        }
+
+        const ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *getPlayer() const
+        {
+            return &mPlayer;
+        }        
   };
 }
 #endif

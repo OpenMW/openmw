@@ -36,15 +36,15 @@ namespace MWWorld
         public:
         
             typedef std::vector<std::pair<std::string, Ptr> > ScriptList;
+            typedef ESMS::CellStore<RefData> CellStore;
         
         private:
         
-            typedef ESMS::CellStore<RefData> CellStore;
             typedef std::map<CellStore *, MWRender::CellRender *> CellRenderCollection;
     
             MWRender::SkyManager* mSkyManager;
             MWRender::MWScene mScene;
-            MWRender::PlayerPos mPlayerPos;
+            MWRender::PlayerPos *mPlayerPos;
             CellRenderCollection mActiveCells;
             CellRenderCollection mBufferedCells; // loaded, but not active (buffering not implementd yet)
             ESM::ESMReader mEsm;
@@ -58,6 +58,8 @@ namespace MWWorld
             World& operator= (const World&);
     
             void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
+    
+            Ptr getPtr (const std::string& name, CellStore& cellStore);
     
         public:
         
@@ -77,6 +79,10 @@ namespace MWWorld
             ///< Has the player moved to a different cell, since the last frame?
             
             Interpreter::Type_Data& getGlobalVariable (const std::string& name);
+            
+            std::pair<Ptr, CellStore *> getPtr (const std::string& name, bool activeOnly);
+            ///< Return a pointer to a liveCellRef with the given name.
+            /// \param activeOnly do non search inactive cells.
     };
 }
 

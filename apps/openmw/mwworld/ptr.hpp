@@ -23,6 +23,11 @@ namespace MWWorld
         
             Ptr() : mCellRef (0), mRefData (0) {}
             
+            bool isEmpty() const
+            {
+                return mPtr.empty();
+            }
+            
             template<typename T>
             Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef)
             {

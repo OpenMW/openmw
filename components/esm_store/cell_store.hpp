@@ -63,6 +63,17 @@ namespace ESMS
 
       list.push_back(lr);
     }
+    
+    LiveRef *find (const std::string& name)
+    {
+        for (typename std::list<LiveRef>::iterator iter (list.begin()); iter!=list.end(); ++iter)
+        {
+            if (iter->ref.refID==name)
+                return &*iter;
+        }
+        
+        return 0;
+    }    
   };
 
   /// A storage struct for one single cell reference.
