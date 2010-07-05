@@ -22,6 +22,7 @@ namespace MWRender
       camera(cam)
     {
         mPlayer.base = player;
+        mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2];
     }
 
     // Set the player position. Uses Morrowind coordinates.
