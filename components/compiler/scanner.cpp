@@ -245,6 +245,7 @@ namespace Compiler
             "menumode",
             "random",
             "startscript", "stopscript", "scriptrunning",
+            "getdistance",
             0
         };
 

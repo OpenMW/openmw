@@ -107,6 +107,7 @@ op  45: replace stack[0] with a random integer value in the range [0, stack[0]-1
 op  46: replace stack[0] with 1, if global script stack[0] is running, 0 else
 op  47: start script stack[0] and pop
 op  48: stop script stack[0] and pop
-opcodes 49-33554431 unused
+op  49: replace stack[0] with distance between implicit reference and a reference of ID stack[0]
+opcodes 50-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

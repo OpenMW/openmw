@@ -58,6 +58,8 @@ namespace SAInterpreter
             
             virtual void stopScript (const std::string& name);
             
+            virtual float getDistance (const std::string& name);
+            
             void report();
             ///< Write state to std::cout   
     };

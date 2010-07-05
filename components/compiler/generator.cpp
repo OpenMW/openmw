@@ -274,6 +274,11 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (48));
     }     
+    
+    void opGetDistance (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (49));
+    }        
 }
 
 namespace Compiler
@@ -665,6 +670,11 @@ namespace Compiler
         {
             opStopScript (code);
         }
+
+        void getDistance (CodeContainer& code)
+        {
+            opGetDistance (code);
+        }        
     }
 }
 

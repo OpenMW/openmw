@@ -51,7 +51,8 @@ namespace Compiler
                 K_getsquareroot,
                 K_menumode,
                 K_random,
-                K_startscript, K_stopscript, K_scriptrunning
+                K_startscript, K_stopscript, K_scriptrunning,
+                K_getdistance
             };
 
             enum special

@@ -1,6 +1,7 @@
 
 #include "interpretercontext.hpp"
 
+#include <cmath>
 #include <stdexcept>
 #include <iostream>
 
@@ -135,6 +136,22 @@ namespace MWScript
     void InterpreterContext::stopScript (const std::string& name)
     {
         mEnvironment.mGlobalScripts->removeScript (name);
+    }
+    
+    float InterpreterContext::getDistance (const std::string& name)
+    {
+        if (mReference.isEmpty())
+            throw std::runtime_error ("no implicit reference");
+            
+        std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> ref =
+            mEnvironment.mWorld->getPtr (name, true);
+                       
+        double diff[3];
+        
+        for (int i=0; i<3; ++i)                            
+            diff[i] = ref.first.getCellRef().pos.pos[i] - mReference.getCellRef().pos.pos[i];
+        
+        return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
     }
     
     MWWorld::World& InterpreterContext::getWorld()

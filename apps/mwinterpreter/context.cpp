@@ -110,6 +110,11 @@ namespace SAInterpreter
     
     void Context::stopScript (const std::string& name) {}
     
+    float Context::getDistance (const std::string& name)
+    {
+        return 0;
+    }
+    
     void Context::report()
     {
         std::size_t i = 0;

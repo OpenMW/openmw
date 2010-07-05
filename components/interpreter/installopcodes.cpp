@@ -10,6 +10,7 @@
 #include "controlopcodes.hpp"
 #include "miscopcodes.hpp"
 #include "scriptopcodes.hpp"
+#include "spatialopcodes.hpp"
 
 namespace Interpreter
 {
@@ -92,6 +93,9 @@ namespace Interpreter
         interpreter.installSegment5 (46, new OpScriptRunning);
         interpreter.installSegment5 (47, new OpStartScript);
         interpreter.installSegment5 (48, new OpStopScript);
+        
+        // spacial
+        interpreter.installSegment5 (49, new OpGetDistance);
     }
 }
 

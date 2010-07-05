@@ -106,6 +106,8 @@ namespace Compiler
         void startScript (CodeContainer& code);
 
         void stopScript (CodeContainer& code);
+        
+        void getDistance (CodeContainer& code);
     }
 }
 

@@ -67,6 +67,8 @@ namespace MWScript
             
             virtual void stopScript (const std::string& name);
                         
+            virtual float getDistance (const std::string& name);
+                        
             MWWorld::World& getWorld();
             
             MWSound::SoundManager& getSoundManager();

@@ -51,7 +51,9 @@ namespace Interpreter
             
             virtual void startScript (const std::string& name) = 0;
             
-            virtual void stopScript (const std::string& name) = 0;       
+            virtual void stopScript (const std::string& name) = 0;
+            
+            virtual float getDistance (const std::string& name) = 0; 
     };
 }
 
