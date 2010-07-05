@@ -119,6 +119,10 @@ namespace Compiler
                 mExprParser.reset();
                 mExprParser.parseArguments (arguments, scanner, mCode, true);
             }
+            
+            // for now skip buttons
+           SkipParser skip (getErrorHandler(), getContext());
+           scanner.scan (skip);            
 
             Generator::message (mCode, mLiterals, name, 0);
             mState = EndState;
