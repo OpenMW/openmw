@@ -52,6 +52,7 @@ namespace OMW
             bool mNewGame;
 
             TsDeque<OMW::Command>                     mCommandQueue;
+            bool                                      mEnableCommandServer;
             std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
             MWWorld::Environment mEnvironment;
@@ -97,6 +98,10 @@ namespace OMW
             /// Enable debug mode:
             /// - non-exclusive input
             void enableDebugMode();
+
+            /// Enable the command server so external apps can send commands to the console.
+            /// Must be set before go().
+            void enableCommandServer();
 
             /// Enable verbose script output
             void enableVerboseScripts();

@@ -87,7 +87,7 @@ namespace ESMS
     CellRefList<Ingredient, D>        ingreds;
     CellRefList<CreatureLevList, D>   creatureLists;
     CellRefList<ItemLevList, D>       itemLists;
-    CellRefList<Light, D>             lights;
+    CellRefList<ESM::Light, D>        lights;
     CellRefList<Tool, D>              lockpicks;
     CellRefList<Misc, D>              miscItems;
     CellRefList<NPC, D>               npcs;

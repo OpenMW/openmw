@@ -1,5 +1,3 @@
-project(clientconsole)
-find_package(Boost REQUIRED COMPONENTS system)
-link_directories(${Boost_LIBRARY_DIRS})
+
 add_executable(clientconsole client.cpp)
 target_link_libraries(clientconsole ${Boost_LIBRARIES})

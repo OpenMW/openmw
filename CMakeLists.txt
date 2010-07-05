@@ -178,7 +178,8 @@ set(OPENMW_LIBS_HEADER)
     
 # Platform specific
 if (WIN32)
-set(PLATFORM_INCLUDE_DIR "platform")
+    set(PLATFORM_INCLUDE_DIR "platform")
+    add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
 set(PLATFORM_INCLUDE_DIR "")
 endif (WIN32)
@@ -186,10 +187,11 @@ endif (WIN32)
 # Dependencies
 
 find_package(OGRE REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
+find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 include_directories("."
-    ${OGRE_INCLUDE_DIR} ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
+    ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include)
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})

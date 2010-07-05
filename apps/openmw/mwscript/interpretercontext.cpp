@@ -110,7 +110,7 @@ namespace MWScript
     void InterpreterContext::setGlobalLong (const std::string& name, int value)
     {
         // a global long is internally a float.
-        float value2 = value;
+        float value2 = float(value);
 
          mEnvironment.mWorld->getGlobalVariable (name) =
             *reinterpret_cast<Interpreter::Type_Data *> (&value2);    

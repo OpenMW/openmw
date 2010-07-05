@@ -16,8 +16,9 @@ namespace MWWorld
     class World;
 
     ///< Collection of script-accessable sub-systems
-    struct Environment
+    class Environment
     {   
+    public:
         Environment() : mWorld (0), mSoundManager (0), mGlobalScripts (0) {}
     
         World *mWorld;
