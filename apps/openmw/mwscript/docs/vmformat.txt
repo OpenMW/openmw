@@ -21,17 +21,18 @@ Segment 4:
 opcodes 0x200-0x3ff unused
 
 Segment 5:
-op 2000000: CellChanged
-op 2000001: Say
-op 2000002: SayDone
-op 2000003: StreamMusic
-op 2000004: PlaySound
-op 2000005: PlaySoundVP
-op 2000006: PlaySound3D
-op 2000007: PlaySound3DVP
-op 2000008: PlayLoopSound3D
-op 2000009: PlayLoopSound3DVP
-op 200000a: StopSound
-op 200000b: GetSoundPlaying
-opcodes 0x200000c-0x3ffffff unused
+op 0x2000000: CellChanged
+op 0x2000001: Say
+op 0x2000002: SayDone
+op 0x2000003: StreamMusic
+op 0x2000004: PlaySound
+op 0x2000005: PlaySoundVP
+op 0x2000006: PlaySound3D
+op 0x2000007: PlaySound3DVP
+op 0x2000008: PlayLoopSound3D
+op 0x2000009: PlayLoopSound3DVP
+op 0x200000a: StopSound
+op 0x200000b: GetSoundPlaying
+op 0x200000c: XBox (always 0)
+opcodes 0x200000d-0x3ffffff unused
 

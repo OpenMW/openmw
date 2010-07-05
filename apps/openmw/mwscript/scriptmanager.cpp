@@ -18,6 +18,7 @@
 #include "../mwsound/extensions.hpp"
 
 #include "cellextensions.hpp"
+#include "miscextensions.hpp"
 
 namespace MWScript
 {
@@ -121,6 +122,7 @@ namespace MWScript
     {
         Interpreter::installOpcodes (interpreter);
         Cell::installOpcodes (interpreter);
+        Misc::installOpcodes (interpreter);
         MWSound::installOpcodes (interpreter);
     }
 }

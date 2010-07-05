@@ -39,6 +39,7 @@ set(GAMESCRIPT
     apps/openmw/mwscript/compilercontext.cpp
     apps/openmw/mwscript/interpretercontext.cpp
     apps/openmw/mwscript/cellextensions.cpp
+    apps/openmw/mwscript/miscextensions.cpp
     apps/openmw/mwscript/extensions.cpp
     apps/openmw/mwscript/globalscripts.cpp
     )
@@ -48,6 +49,7 @@ set(GAMESCRIPT_HEADER
     apps/openmw/mwscript/compilercontext.hpp
     apps/openmw/mwscript/interpretercontext.hpp
     apps/openmw/mwscript/cellextensions.hpp
+    apps/openmw/mwscript/miscextensions.hpp
     apps/openmw/mwscript/extensions.hpp
     apps/openmw/mwscript/globalscripts.hpp
     )
