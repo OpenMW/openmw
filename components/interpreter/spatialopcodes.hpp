@@ -13,7 +13,10 @@ namespace Interpreter
             virtual void execute (Runtime& runtime)
             {
                 std::string name = runtime.getStringLiteral (runtime[0]);            
-                runtime[0] = runtime.getContext().getDistance (name);
+                
+                float distance = runtime.getContext().getDistance (name);
+                
+                runtime[0] = *reinterpret_cast<Type_Data *> (&distance);
             }            
     };
 }
