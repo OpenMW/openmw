@@ -56,7 +56,7 @@ namespace Compiler
     
     void StringParser::smashCase()
     {
-        mSmashCase = false;
+        mSmashCase = true;
     }
 }
 
