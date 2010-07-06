@@ -54,6 +54,7 @@ namespace OMW { namespace CommandServer { namespace Detail {
     void Connection::stop()
     {
         mSocket.shutdown(boost::asio::socket_base::shutdown_both);
+        mSocket.close();
         mpThread->join();
     }
 
