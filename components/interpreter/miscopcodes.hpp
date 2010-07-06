@@ -116,8 +116,20 @@ namespace Interpreter
                 Type_Integer value = static_cast<Type_Integer> (r*limit); // [o, limit)
                 
                 runtime[0] = *reinterpret_cast<Type_Data *> (&value);
-            }            
+            }    
     };    
+                
+    class OpGetSecondsPassed : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                float duration = runtime.getContext().getSecondsPassed();
+                
+                runtime.push (*reinterpret_cast<Type_Data *> (&duration));
+            }            
+    };
 }
 
 #endif

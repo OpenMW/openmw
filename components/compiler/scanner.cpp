@@ -246,6 +246,7 @@ namespace Compiler
             "random",
             "startscript", "stopscript", "scriptrunning",
             "getdistance",
+            "getsecondspassed",
             0
         };
 

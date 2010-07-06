@@ -279,6 +279,11 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (49));
     }        
+   
+    void opGetSecondsPassed (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (50));
+    }       
 }
 
 namespace Compiler
@@ -675,6 +680,11 @@ namespace Compiler
         {
             opGetDistance (code);
         }        
+        
+        void getSecondsPassed (CodeContainer& code)
+        {
+            opGetSecondsPassed (code);
+        }
     }
 }
 

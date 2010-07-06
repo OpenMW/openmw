@@ -159,6 +159,11 @@ namespace MWScript
         return false;
     }
     
+    float InterpreterContext::getSecondsPassed() const
+    {
+        return mEnvironment.mFrameDuration;
+    }
+    
     MWWorld::World& InterpreterContext::getWorld()
     {
         return *mEnvironment.mWorld;

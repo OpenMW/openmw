@@ -35,6 +35,8 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
+    mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
+
     // console
     processCommands();
     

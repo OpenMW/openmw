@@ -60,6 +60,8 @@ namespace SAInterpreter
             
             virtual float getDistance (const std::string& name);
             
+            virtual float getSecondsPassed() const;
+            
             void report();
             ///< Write state to std::cout   
     };

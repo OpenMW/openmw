@@ -115,6 +115,11 @@ namespace SAInterpreter
         return 0;
     }
     
+    float Context::getSecondsPassed() const
+    {
+        return 0;
+    }
+    
     void Context::report()
     {
         std::size_t i = 0;

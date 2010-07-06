@@ -31,7 +31,7 @@ namespace Compiler
             }
             
             virtual char getGlobalType (const std::string& name) const = 0;
-            ///< 'l: long, 's': short, 'f': float, ' ': does not exist.            
+            ///< 'l: long, 's': short, 'f': float, ' ': does not exist.           
     };
 }
 

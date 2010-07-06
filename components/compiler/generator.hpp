@@ -108,6 +108,8 @@ namespace Compiler
         void stopScript (CodeContainer& code);
         
         void getDistance (CodeContainer& code);
+
+        void getSecondsPassed (CodeContainer& code);
     }
 }
 

@@ -54,6 +54,8 @@ namespace Interpreter
             virtual void stopScript (const std::string& name) = 0;
             
             virtual float getDistance (const std::string& name) = 0; 
+            
+            virtual float getSecondsPassed() const = 0;             
     };
 }
 
