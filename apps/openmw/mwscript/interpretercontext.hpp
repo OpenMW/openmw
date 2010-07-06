@@ -69,6 +69,8 @@ namespace MWScript
                         
             virtual float getDistance (const std::string& name);
                         
+            virtual bool hasBeenActivated() const;
+                        
             MWWorld::World& getWorld();
             
             MWSound::SoundManager& getSoundManager();

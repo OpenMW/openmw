@@ -154,6 +154,11 @@ namespace MWScript
         return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
     }
     
+    bool InterpreterContext::hasBeenActivated() const
+    {
+        return false;
+    }
+    
     MWWorld::World& InterpreterContext::getWorld()
     {
         return *mEnvironment.mWorld;

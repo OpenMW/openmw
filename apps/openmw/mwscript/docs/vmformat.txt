@@ -34,5 +34,6 @@ op 0x2000009: PlayLoopSound3DVP
 op 0x200000a: StopSound
 op 0x200000b: GetSoundPlaying
 op 0x200000c: XBox (always 0)
-opcodes 0x200000d-0x3ffffff unused
+op 0x200000d: OnActivate
+opcodes 0x200000e-0x3ffffff unused
 
