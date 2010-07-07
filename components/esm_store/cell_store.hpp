@@ -172,7 +172,7 @@ namespace ESMS
 
             case 0: std::cout << "Cell reference " + ref.refID + " not found!\n"; break;
             default:
-              assert(0);
+              std::cout << "WARNING: Ignoring reference '" << ref.refID << "' of unhandled type\n";
             }
         }
 
