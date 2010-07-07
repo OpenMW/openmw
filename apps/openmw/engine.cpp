@@ -65,8 +65,12 @@ void OMW::Engine::processCommands()
 }
 
 OMW::Engine::Engine()
-: mDebug (false), mVerboseScripts (false), mNewGame (false), mScriptManager (0),
-  mScriptContext (0), mEnableCommandServer (false)
+  : mDebug (false)
+  , mVerboseScripts (false)
+  , mNewGame (false)
+  , mEnableCommandServer (false)
+  , mScriptManager (0)
+  , mScriptContext (0)
 {   
 }
 
