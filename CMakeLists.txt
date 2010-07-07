@@ -231,6 +231,16 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 
 # Main executable
 add_executable(openmw
+    ${BSA} ${BSA_HEADER}
+    ${TOOLS} ${TOOLS_HEADER}
+    ${OGRE} ${OGRE_HEADER}
+    ${INPUT} ${INPUT_HEADER}
+    ${NIF} ${NIF_HEADER}
+    ${NIFOGRE} ${NIFOGRE_HEADER}
+    ${MANGLE_VFS}
+    ${GAME}
+    ${ESM_STORE} ${ESM_STORE_HEADER}
+    ${GAMEREND} ${GAMEREND_HEADER}
     MACOSX_BUNDLE
     ${COMPONENTS} ${COMPONENTS_HEADER}
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
@@ -255,17 +265,29 @@ add_subdirectory( apps/clientconsole )
 
 # Apple bundling
 if (APPLE)
-  set_source_files_properties(
-    ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-    ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
-    PROPERTIES
-    MACOSX_PACKAGE_LOCATION MacOS
-  )
-  set_target_properties(
-    openmw
-    PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_NAME "OpenMW"
-  )
+  set(MISC_FILES 
+		  ${CMAKE_SOURCE_DIR}/files/openmw.cfg
+		  ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
+		  ${CMAKE_SOURCE_DIR}/files/mac/ogre.cfg)
+install(TARGETS openmw 
+		BUNDLE DESTINATION .
+		RUNTIME DESTINATION ../MacOS 
+		COMPONENT Runtime)
+install(FILES ${MISC_FILES} DESTINATION ../MacOS)
+set(CPACK_GENERATOR "Bundle")
+set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
+set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
+set(CPACK_BUNDLE_NAME "OpenMW")
+set(CPACK_PACKAGE_VERSION "0.07")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "07")
+set(CPACK_PACKAGE_VERSION_PATCH "")
+
+include(CPack)
+
+set(CMAKE_EXE_LINKER_FLAGS "-arch i386")
+set(CMAKE_CXX_FLAGS "-arch i386")
+
 endif (APPLE)
 
 # Tools
