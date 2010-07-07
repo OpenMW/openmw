@@ -47,13 +47,13 @@ namespace Interpreter
 
             virtual void setGlobalFloat (const std::string& name, float value) = 0;     
             
-            virtual bool isScriptRunning (const std::string& name) = 0;
+            virtual bool isScriptRunning (const std::string& name) const = 0;
             
             virtual void startScript (const std::string& name) = 0;
             
             virtual void stopScript (const std::string& name) = 0;
             
-            virtual float getDistance (const std::string& name) = 0; 
+            virtual float getDistance (const std::string& name) const = 0; 
             
             virtual float getSecondsPassed() const = 0;             
     };

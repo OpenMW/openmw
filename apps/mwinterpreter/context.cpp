@@ -101,7 +101,7 @@ namespace SAInterpreter
 
     void Context::setGlobalFloat (const std::string& name, float value) {}
                     
-    bool Context::isScriptRunning (const std::string& name)
+    bool Context::isScriptRunning (const std::string& name) const
     {
         return false;
     }
@@ -110,7 +110,7 @@ namespace SAInterpreter
     
     void Context::stopScript (const std::string& name) {}
     
-    float Context::getDistance (const std::string& name)
+    float Context::getDistance (const std::string& name) const
     {
         return 0;
     }

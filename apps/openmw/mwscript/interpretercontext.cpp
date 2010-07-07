@@ -125,7 +125,7 @@ namespace MWScript
             *reinterpret_cast<Interpreter::Type_Data *> (&value);    
     }
      
-    bool InterpreterContext::isScriptRunning (const std::string& name)
+    bool InterpreterContext::isScriptRunning (const std::string& name) const
     {
         return mEnvironment.mGlobalScripts->isRunning (name);
     }
@@ -140,7 +140,7 @@ namespace MWScript
         mEnvironment.mGlobalScripts->removeScript (name);
     }
     
-    float InterpreterContext::getDistance (const std::string& name)
+    float InterpreterContext::getDistance (const std::string& name) const
     {
         if (mReference.isEmpty())
             throw std::runtime_error ("no implicit reference");
