@@ -63,6 +63,12 @@ set(GAMESOUND_HEADER
     apps/openmw/mwsound/extensions.hpp)
 source_group(apps\\openmw\\mwsound FILES ${GAMESOUND} ${GAMESOUND_HEADER}) 
 
+set(GAMEGUI
+    apps/openmw/mwgui/guimanager.cpp)
+set(GAMEGUI_HEADER 
+    apps/openmw/mwgui/guimanager.hpp)
+source_group(apps\\openmw\\mwgui FILES ${GAMEGUI} ${GAMEGUI_HEADER}) 
+
 set(GAMEWORLD
     apps/openmw/mwworld/world.cpp)
 set(GAMEWORLD_HEADER 
@@ -74,9 +80,9 @@ set(GAMEWORLD_HEADER
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER}) 
 
 
-set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEWORLD})
+set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD})
 set(APPS_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
-    ${GAMESOUND_HEADER} ${GAMEWORLD_HEADER})
+    ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER})
 
 # source directory: components
 
@@ -231,22 +237,11 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 
 # Main executable
 add_executable(openmw
-    ${BSA} ${BSA_HEADER}
-    ${TOOLS} ${TOOLS_HEADER}
-    ${OGRE} ${OGRE_HEADER}
-    ${INPUT} ${INPUT_HEADER}
-    ${NIF} ${NIF_HEADER}
-    ${NIFOGRE} ${NIFOGRE_HEADER}
-    ${MANGLE_VFS}
-    ${GAME}
-    ${ESM_STORE} ${ESM_STORE_HEADER}
-    ${GAMEREND} ${GAMEREND_HEADER}
 # ???
 #   MACOSX_BUNDLE
     ${COMPONENTS} ${COMPONENTS_HEADER}
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
     ${APPS} ${APPS_HEADER}
-    ${ESM_HEADER}
     ${APPLE_BUNDLE_RESOURCES}
     )
 

@@ -17,6 +17,8 @@
 
 #include "mwsound/soundmanager.hpp"
 
+#include "mwgui/guimanager.hpp"
+
 #include "mwworld/world.hpp"
 #include "mwworld/ptr.hpp"
 #include "mwworld/environment.hpp"
@@ -80,6 +82,7 @@ OMW::Engine::~Engine()
         mspCommandServer->stop();
 
     delete mEnvironment.mWorld;
+    delete mEnvironment.mGuiManager;
     delete mEnvironment.mSoundManager;
     delete mEnvironment.mGlobalScripts;
     delete mScriptManager;
@@ -191,6 +194,8 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mCellName, mNewGame);
+
+    mEnvironment.mGuiManager = new MWGui::GuiManager;
 
     mEnvironment.mSoundManager = new MWSound::SoundManager;
 
