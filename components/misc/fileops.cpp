@@ -1,6 +1,5 @@
 #include "fileops.hpp"
 #include <boost/filesystem.hpp>
-
 #include <string>
 
 bool isFile(const char *name)
@@ -9,7 +8,7 @@ bool isFile(const char *name)
   return boost::filesystem::exists(cfg_file_path);
 }
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#ifdef __MACOSX__
 #include <CoreFoundation/CoreFoundation.h>
 
 std::string macBundlePath()
