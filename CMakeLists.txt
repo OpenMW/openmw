@@ -207,6 +207,7 @@ include_directories("."
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
 add_subdirectory( extern/caelum )
+add_subdirectory( extern/mygui_3.0.1 )
 
 # Specify build paths
 
@@ -251,7 +252,10 @@ target_link_libraries(openmw
   ${OGRE_LIBRARIES}
   ${OIS_LIBRARIES}
   ${Boost_LIBRARIES}
-  caelum)
+  caelum
+  MyGUIEngine
+  MyGUI.OgrePlatform
+)
 
 if (APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
