@@ -45,6 +45,7 @@ namespace OMW { namespace CommandServer
         void threadMain();            
 
         // Objects used to set up the listening server
+        int                             mPort;
         boost::asio::io_service         mIOService;
         boost::asio::ip::tcp::acceptor  mAcceptor;
         boost::thread*                  mpThread;

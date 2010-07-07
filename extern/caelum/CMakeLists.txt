@@ -1,7 +1,14 @@
 project(Caelum)
 
+IF(MSVC)
+    add_definitions("-D_SCL_SECURE_NO_WARNINGS /wd4305 /wd4244" )
+ENDIF(MSVC)
+
 ADD_DEFINITIONS(-DCAELUM_LIB)
-INCLUDE_DIRECTORIES( ${CMAKE_HOME_DIRECTORY}/extern/caelum/include )
+INCLUDE_DIRECTORIES( 
+    ${CMAKE_HOME_DIRECTORY}/extern/caelum/include 
+    ${OGRE_INCLUDE_DIR}/Ogre
+    )    
 
 file(GLOB_RECURSE CAELUM_SRC src/*)
 file(GLOB_RECURSE CAELUM_HDR include/*)

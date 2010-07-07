@@ -9,8 +9,9 @@ namespace ESM {
  * Script definitions
  */
 
-struct Script
+class Script
 {
+public:
   struct SCHDstruct
   {
     /* Script name.

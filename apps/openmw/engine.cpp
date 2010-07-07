@@ -66,15 +66,15 @@ void OMW::Engine::processCommands()
 
 OMW::Engine::Engine()
 : mDebug (false), mVerboseScripts (false), mNewGame (false), mScriptManager (0),
-  mScriptContext (0)
-{
-    mspCommandServer.reset(
-        new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
+  mScriptContext (0), mEnableCommandServer (false)
+{   
 }
 
 OMW::Engine::~Engine()
 {
-//    mspCommandServer->stop();
+    if (mspCommandServer.get())
+        mspCommandServer->stop();
+
     delete mEnvironment.mWorld;
     delete mEnvironment.mSoundManager;
     delete mEnvironment.mGlobalScripts;
@@ -142,6 +142,11 @@ void OMW::Engine::enableDebugMode()
 {
     mDebug = true;
 }
+
+void OMW::Engine::enableCommandServer()
+{
+    mEnableCommandServer = true;
+}
            
 void OMW::Engine::enableVerboseScripts()
 {
@@ -203,8 +208,14 @@ void OMW::Engine::go()
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(), mDebug);
 
     // Launch the console server
-    std::cout << "Starting command server on port " << kCommandServerPort << std::endl;
-    mspCommandServer->start();
+    if (mEnableCommandServer)
+    {
+        std::cout << "Starting command server on port " << kCommandServerPort << std::endl;
+        mspCommandServer.reset(new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
+        mspCommandServer->start();
+    }
+    else
+        std::cout << "Command server disabled" << std::endl;
 
     std::cout << "\nStart! Press Q/ESC or close window to exit.\n";
 

@@ -1,9 +1,7 @@
-
 #include "server.hpp"
+#include "libs/platform/strings.h"
 
 using boost::asio::ip::tcp;
-
-#include <libs/mangle/tools/str_exception.hpp>
 
 //
 // Namespace for containing implementation details that the
@@ -55,6 +53,7 @@ namespace OMW { namespace CommandServer { namespace Detail {
     ///
     void Connection::stop()
     {
+        mSocket.shutdown(boost::asio::socket_base::shutdown_both);
         mSocket.close();
         mpThread->join();
     }
@@ -105,7 +104,7 @@ namespace OMW { namespace CommandServer { namespace Detail {
                         bDone = true;
                 }
                 else
-                    throw str_exception("Unexpected header!");
+                    throw std::runtime_error("Unexpected header!");
             }
             else
                 bDone = true;
@@ -120,12 +119,12 @@ namespace OMW { namespace CommandServer {
     using namespace Detail;
        
     Server::Server (Deque* pCommandQueue, const int port)
-        : mAcceptor      (mIOService, tcp::endpoint(tcp::v4(), port))
+        : mPort          (port)
+        , mAcceptor      (mIOService, tcp::endpoint(tcp::v4(), mPort))
         , mbStopping     (false)
         , mpCommandQueue (pCommandQueue)
     {       
     }
-       
 
     void Server::start()
     {
@@ -133,8 +132,41 @@ namespace OMW { namespace CommandServer {
         mpThread = new boost::thread(boost::bind(&Server::threadMain, this));
     }
 
+    //
+    // Helper function - see Server::stop()
+    //
+    static void connectAndDisconnect (int port)
+    {
+        char portString[64];
+        snprintf(portString, 64, "%d", port);
+
+        boost::asio::io_service ioService;
+        tcp::resolver resolver(ioService);
+        tcp::resolver::query query("localhost", portString);
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+        tcp::resolver::iterator end;
+
+        tcp::socket socket(ioService);
+        boost::system::error_code error = boost::asio::error::host_not_found;
+        while (error && endpoint_iterator != end)
+        {
+            socket.close();
+            socket.connect(*endpoint_iterator++, error);
+        }
+
+        socket.close();
+        ioService.stop();
+    }
+
     void Server::stop()
     {
+        // Boost.Asio doesn't have a way to cancel the blocking accept() call
+        // in the listening thread.  Therefore, set an internal flag to let 
+        // the server know it's stopping and then unblock it via a do-nothing
+        // connect/disconnect.
+        mbStopping = true;
+        connectAndDisconnect(mPort);
+
         // (1) Stop accepting new connections
         // (2) Wait for the listener thread to finish
         mAcceptor.close();
@@ -144,7 +176,6 @@ namespace OMW { namespace CommandServer {
         // open connections
         {
             boost::mutex::scoped_lock lock(mConnectionsMutex);
-            mbStopping = true;
             for (ConnectionSet::iterator it = mConnections.begin(); 
                  it != mConnections.end();
                  ++it)
@@ -186,7 +217,7 @@ namespace OMW { namespace CommandServer {
             std::auto_ptr<Connection> spConnection(new Connection(mAcceptor.io_service(), this));
             boost::system::error_code ec;
             mAcceptor.accept(spConnection->socket(), ec);            
-            if (!ec)
+            if (!ec && !mbStopping)
             {
                 boost::mutex::scoped_lock lock(mConnectionsMutex);
                 mConnections.insert(spConnection.get());

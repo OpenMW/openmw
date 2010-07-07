@@ -166,8 +166,9 @@ namespace MWWorld
             iter->second->show();
 
         // Optionally enable the sky
-//        if (mEnableSky)
-//            mpSkyManager = MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera());
+        ///\todo FIXME
+        if (false)
+            mSkyManager = MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera());
         
     }
     
