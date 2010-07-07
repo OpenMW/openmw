@@ -7,38 +7,31 @@ namespace MWGui
     {
         public:
         
-            void showBirthDialogue();
-            ///< Birthsign (part of the character generation process)
+            enum GuiWindow
+            {
+                Gui_Inventory, Gui_Magic, Gui_Map, Gui_Status
+            };
             
-            void showClassDialogue();
-            ///< Class selection (part of the character generation process)
+            enum GuiOneTimeDialogue // used only once
+            {
+                // character generation
+                Gui_Birth, Gui_Class, Gui_Name, Gui_Race, Gui_Review
+            };
+                
+            enum GuiDialogue
+            {                
+                Gui_Rest
+            };
 
-            void showNameDialogue();
-            ///< Enter character name (part of the character generation process)
-    
-            void showRaceDialogue();
-            ///< Race selection (part of the character generation process)
+            void enableWindow (GuiWindow window);
+            ///< diabled by default.
             
-            void showReviewDialogue();
-            ///< Character generation review (final part of the character generation process) 
-    
-            void enableInventoryWindow();
-            ///< Initially disabled.
+            void showOneTimeDialogue (GuiOneTimeDialogue dialogue);
             
-            void enableMagicWindow();
-            ///< Initially disabled.
-
-            void enableMapWindow();
-            ///< Initially disabled.
-    
-            void enableStatsMenu();
-            ///< Initially disabled.            
+            void enableDialogue (GuiDialogue dialogue);
+            ///< disabled by default.
             
-            void enableLevelUpDialogue();
-            ///< Rest/Level-up. Initially disabled.
-            
-            void showRestDialogue();
-            ///< Rest dialogue: ask player how many hours he wants to sleep.
+            void showDialogue (GuiDialogue dialogue);
             
             bool isGuiActive() const;
             ///< Any non-HUD GUI element active (dialogues and windows)?

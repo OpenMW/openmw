@@ -9,6 +9,8 @@
 
 #include "../mwworld/world.hpp"
 
+#include "../mwgui/guimanager.hpp"
+
 #include "locals.hpp"
 #include "globalscripts.hpp"
 
@@ -78,7 +80,7 @@ namespace MWScript
     
     bool InterpreterContext::menuMode()
     {
-        return false;
+        return mEnvironment.mGuiManager->isGuiActive();
     }
     
     int InterpreterContext::getGlobalShort (const std::string& name) const
@@ -162,6 +164,11 @@ namespace MWScript
     float InterpreterContext::getSecondsPassed() const
     {
         return mEnvironment.mFrameDuration;
+    }
+    
+    MWGui::GuiManager& InterpreterContext::getGuiManager()
+    {
+        return *mEnvironment.mGuiManager;
     }
     
     MWWorld::World& InterpreterContext::getWorld()

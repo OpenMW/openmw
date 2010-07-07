@@ -5,61 +5,26 @@
 
 namespace MWGui
 {
-    void GuiManager::showBirthDialogue()
+    void GuiManager::enableWindow (GuiWindow window)
     {
-        std::cout << "" << std::endl;
+        std::cout << "enable window: " << window << std::endl;
     }
     
-    void GuiManager::showClassDialogue()
+    void GuiManager::showOneTimeDialogue (GuiOneTimeDialogue dialogue)
     {
-        std::cout << "" << std::endl;
-    }
-
-    void GuiManager::showNameDialogue()
-    {
-        std::cout << "" << std::endl;
-    }
-
-    void GuiManager::showRaceDialogue()
-    {
-        std::cout << "" << std::endl;
+        std::cout << "show one time dialogue: " << dialogue << std::endl;
     }
     
-    void GuiManager::showReviewDialogue()
+    void GuiManager::enableDialogue (GuiDialogue dialogue)
     {
-        std::cout << "" << std::endl;
-    }
-
-    void GuiManager::enableInventoryWindow()
-    {
-        std::cout << "" << std::endl;
+        std::cout << "enable dialogue: " << dialogue << std::endl;
     }
     
-    void GuiManager::enableMagicWindow()
+    void GuiManager::showDialogue (GuiDialogue dialogue)
     {
-        std::cout << "" << std::endl;
+        std::cout << "show dialogue: " << dialogue << std::endl;
     }
-
-    void GuiManager::enableMapWindow()
-    {
-        std::cout << "" << std::endl;
-    }
-
-    void GuiManager::enableStatsMenu()
-    {
-        std::cout << "" << std::endl;
-    }
-
-    void GuiManager::enableLevelUpDialogue()
-    {
-        std::cout << "" << std::endl;
-    }
-    
-    void GuiManager::showRestDialogue()
-    {
-        std::cout << "" << std::endl;
-    }
-    
+            
     bool GuiManager::isGuiActive() const
     {
         return false;

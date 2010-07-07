@@ -72,10 +72,12 @@ namespace MWScript
             virtual bool hasBeenActivated() const;
             
             virtual float getSecondsPassed() const;
-                        
+                               
             MWWorld::World& getWorld();
             
             MWSound::SoundManager& getSoundManager();
+
+            MWGui::GuiManager& getGuiManager();
             
             MWWorld::Ptr getReference();
             ///< Reference, that the script is running from (can be empty)

@@ -19,6 +19,7 @@
 
 #include "cellextensions.hpp"
 #include "miscextensions.hpp"
+#include "guiextensions.hpp"
 
 namespace MWScript
 {
@@ -123,6 +124,7 @@ namespace MWScript
         Interpreter::installOpcodes (interpreter);
         Cell::installOpcodes (interpreter);
         Misc::installOpcodes (interpreter);
+        Gui::installOpcodes (interpreter);
         MWSound::installOpcodes (interpreter);
     }
 }

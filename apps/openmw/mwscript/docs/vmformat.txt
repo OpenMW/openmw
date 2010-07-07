@@ -35,5 +35,16 @@ op 0x200000a: StopSound
 op 0x200000b: GetSoundPlaying
 op 0x200000c: XBox (always 0)
 op 0x200000d: OnActivate
-opcodes 0x200000e-0x3ffffff unused
+op 0x200000e: EnableBirthMenu
+op 0x200000f: EnableClassMenu
+op 0x2000010: EnableNameMenu
+op 0x2000011: EnableRaceMenu
+op 0x2000012: EnableStatsReviewMenu
+op 0x2000013: EnableInventoryMenu
+op 0x2000014: EnableMagicMenu
+op 0x2000015: EnableMapMenu
+op 0x2000016: EnableStatsMenu
+op 0x2000017: EnableRest
+op 0x2000018: ShowRestMenu
+opcodes 0x2000019-0x3ffffff unused
 
