@@ -24,3 +24,5 @@ if (MYGUI_USE_FREETYPE)
 		${FREETYPE_LIBRARIES}
 	)
 endif()
+
+target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS} uuid)
