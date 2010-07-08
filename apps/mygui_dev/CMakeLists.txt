@@ -1,0 +1,11 @@
+add_executable(mygui_test
+  main.cpp
+  ${OGRE}
+  ${OGRE_HEADER}
+)
+target_link_libraries(mygui_test
+  ${OGRE_LIBRARIES}
+  ${OIS_LIBRARIES}
+  MyGUIEngine
+  MyGUI.OgrePlatform
+)
