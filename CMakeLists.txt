@@ -6,86 +6,6 @@ cmake_minimum_required(VERSION 2.6)
 # Add path for CMake scripts
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
-# source directory: apps
-
-set(GAME 
-    apps/openmw/main.cpp
-    apps/openmw/engine.cpp)
-set(GAME_HEADER 
-    apps/openmw/engine.hpp)
-source_group(game FILES ${GAME} ${GAME_HEADER})
-
-set(GAMEREND 
-    apps/openmw/mwrender/mwscene.cpp
-    apps/openmw/mwrender/cellimp.cpp
-    apps/openmw/mwrender/interior.cpp
-    apps/openmw/mwrender/sky.cpp)
-set(GAMEREND_HEADER 
-    apps/openmw/mwrender/cell.hpp
-    apps/openmw/mwrender/cellimp.hpp
-    apps/openmw/mwrender/mwscene.hpp
-    apps/openmw/mwrender/interior.hpp
-    apps/openmw/mwrender/playerpos.hpp
-    apps/openmw/mwrender/sky.hpp)
-source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})    
-
-# set(GAMEINPUT)
-set(GAMEINPUT_HEADER 
-    apps/openmw/mwinput/inputmanager.hpp)
-source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})    
-
-set(GAMESCRIPT
-    apps/openmw/mwscript/scriptmanager.cpp
-    apps/openmw/mwscript/compilercontext.cpp
-    apps/openmw/mwscript/interpretercontext.cpp
-    apps/openmw/mwscript/cellextensions.cpp
-    apps/openmw/mwscript/miscextensions.cpp
-    apps/openmw/mwscript/guiextensions.cpp
-    apps/openmw/mwscript/extensions.cpp
-    apps/openmw/mwscript/globalscripts.cpp
-    )
-set(GAMESCRIPT_HEADER 
-    apps/openmw/mwscript/locals.hpp
-    apps/openmw/mwscript/scriptmanager.hpp
-    apps/openmw/mwscript/compilercontext.hpp
-    apps/openmw/mwscript/interpretercontext.hpp
-    apps/openmw/mwscript/cellextensions.hpp
-    apps/openmw/mwscript/miscextensions.hpp
-    apps/openmw/mwscript/guiextensions.hpp
-    apps/openmw/mwscript/extensions.hpp
-    apps/openmw/mwscript/globalscripts.hpp
-    )
-source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})    
-
-set(GAMESOUND
-    apps/openmw/mwsound/soundmanager.cpp
-    apps/openmw/mwsound/extensions.cpp)
-set(GAMESOUND_HEADER 
-    apps/openmw/mwsound/soundmanager.hpp
-    apps/openmw/mwsound/extensions.hpp)
-source_group(apps\\openmw\\mwsound FILES ${GAMESOUND} ${GAMESOUND_HEADER}) 
-
-set(GAMEGUI
-    apps/openmw/mwgui/guimanager.cpp)
-set(GAMEGUI_HEADER 
-    apps/openmw/mwgui/guimanager.hpp)
-source_group(apps\\openmw\\mwgui FILES ${GAMEGUI} ${GAMEGUI_HEADER}) 
-
-set(GAMEWORLD
-    apps/openmw/mwworld/world.cpp)
-set(GAMEWORLD_HEADER 
-    apps/openmw/mwworld/refdata.hpp
-    apps/openmw/mwworld/world.hpp
-    apps/openmw/mwworld/ptr.hpp
-    apps/openmw/mwworld/environment.hpp
-    )
-source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER}) 
-
-
-set(APPS ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD})
-set(APPS_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
-    ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER})
-
 # source directory: components
 set(COMP_DIR ${CMAKE_SOURCE_DIR}/components)
 
@@ -195,7 +115,8 @@ set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_
 
 # source directory: libs
 
-set(MANGLE_VFS libs/mangle/vfs/servers/ogre_vfs.cpp)
+set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
+set(MANGLE_VFS ${LIBDIR}/mangle/vfs/servers/ogre_vfs.cpp)
 source_group(libs\\mangle_vfs FILES ${MANGLE_VFS})
 
 set(OPENMW_LIBS ${MANGLE_VFS})
@@ -258,34 +179,6 @@ if (CMAKE_COMPILER_IS_GNUCC)
     add_definitions (-Wall)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
-# Main executable
-add_executable(openmw
-# ???
-#   MACOSX_BUNDLE
-    ${COMPONENTS} ${COMPONENTS_HEADER}
-    ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
-    ${APPS} ${APPS_HEADER}
-    ${APPLE_BUNDLE_RESOURCES}
-    )
-
-target_link_libraries(openmw
-  ${OGRE_LIBRARIES}
-  ${OIS_LIBRARIES}
-  ${Boost_LIBRARIES}
-  caelum
-  MyGUIEngine
-  MyGUI.OgrePlatform
-)
-
-if (APPLE)
-    find_library(CARBON_FRAMEWORK Carbon)
-    target_link_libraries(openmw ${CARBON_FRAMEWORK})
-endif (APPLE)
-
-# Other apps and tools
-add_subdirectory( apps/clientconsole )
-add_subdirectory( apps/mygui_dev )
-
 # Apple bundling
 if (APPLE)
   set(MISC_FILES 
@@ -313,7 +206,19 @@ set(CMAKE_CXX_FLAGS "-arch i386")
 
 endif (APPLE)
 
-# Tools
+# Apps and tools
+add_subdirectory( apps/openmw )
+
+option(BUILD_CLIENTCONSOLE "build external console for script interpreter" ON)
+if (BUILD_CLIENTCONSOLE)
+  add_subdirectory( apps/clientconsole )
+endif()
+
+option(BUILD_MYGUI_TEST "build test program for MyGUI" ON)
+if (BUILD_MYGUI_TEST)
+  add_subdirectory( apps/mygui_dev )
+endif()
+
 option(BUILD_MWCOMPILER "build standalone Morrowind script compiler" ON)
 if (BUILD_MWCOMPILER)
     add_subdirectory( apps/mwcompiler )
