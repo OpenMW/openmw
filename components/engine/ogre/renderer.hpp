@@ -12,6 +12,9 @@ namespace Ogre
 {
     class Root;
     class RenderWindow;
+    class SceneManager;
+    class Camera;
+    class Viewport;
 }
 
 namespace Render
@@ -20,11 +23,14 @@ namespace Render
   {
     Ogre::Root *mRoot;
     Ogre::RenderWindow *mWindow;
+    Ogre::SceneManager *mScene;
+    Ogre::Camera *mCamera;
+    Ogre::Viewport *mView;
     bool logging;
 
   public:
     OgreRenderer()
-      : mRoot(NULL) {}
+      : mRoot(NULL), mWindow(NULL), mScene(NULL) {}
     ~OgreRenderer() { cleanup(); }
 
     /** Configure the renderer. This will load configuration files and
@@ -35,6 +41,12 @@ namespace Render
 
     /// Create a window with the given title
     void createWindow(const std::string &title);
+
+    /// Set up the scene manager, camera and viewport
+    void createScene(const std::string camName="Camera",// Camera name
+                     float fov=55,                      // Field of view angle
+                     float nearClip=5                   // Near clip distance
+                     );
 
     /// Kill the renderer.
     void cleanup();
@@ -50,6 +62,15 @@ namespace Render
 
     /// Get the rendering window
     Ogre::RenderWindow *getWindow() { return mWindow; }
+
+    /// Get the scene manager
+    Ogre::SceneManager *getScene() { return mScene; }
+
+    /// Camera
+    Ogre::Camera *getCamera() { return mCamera; }
+
+    /// Viewport
+    Ogre::Viewport *getViewport() { return mView; }
   };
 }
 

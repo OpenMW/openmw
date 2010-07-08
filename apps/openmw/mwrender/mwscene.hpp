@@ -21,9 +21,6 @@ namespace MWRender
   class MWScene
   {
     Render::OgreRenderer &rend;
-    Ogre::SceneManager *sceneMgr;
-    Ogre::Camera *camera;
-    Ogre::Viewport *vp;
 
     // Root node for all objects added to the scene. This is rotated so
     // that the OGRE coordinate system matches that used internally in
@@ -33,10 +30,10 @@ namespace MWRender
   public:
     MWScene(Render::OgreRenderer &_rend);
 
+    Ogre::Camera *getCamera() { return rend.getCamera(); }
     Ogre::SceneNode *getRoot() { return mwRoot; }
-    Ogre::SceneManager *getMgr() { return sceneMgr; }
-    Ogre::Camera *getCamera() { return camera; }
-    Ogre::Viewport *getViewport() { return vp; }
+    Ogre::SceneManager *getMgr() { return rend.getScene(); }
+    Ogre::Viewport *getViewport() { return rend.getViewport(); }
   };
 }
 

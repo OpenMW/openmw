@@ -463,16 +463,6 @@ extern "C" void gui_showHUD()
 
 extern "C" void gui_setupGUI(int32_t debugOut)
 {
-  ResourceGroupManager::getSingleton().
-    addResourceLocation("media_mygui", "FileSystem", "General");
-
-  // Enable/disable logging to stdout
-  MyGUI::LogManager::initialise();
-  MyGUI::LogManager::setSTDOutputEnabled(debugOut);
-
-  mGUI = new MyGUI::Gui();
-  mGUI->initialise(mWindow);
-
   int mWidth = mWindow->getWidth();
   int mHeight = mWindow->getHeight();
 

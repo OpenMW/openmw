@@ -130,9 +130,9 @@ file(GLOB ESM_HEADER components/esm/*.hpp)
 source_group(components\\esm FILES ${ESM_HEADER}) 
 
 set(OGRE 
-    components/engine/ogre/renderer.cpp)
+    ${CMAKE_SOURCE_DIR}/components/engine/ogre/renderer.cpp)
 set(OGRE_HEADER 
-    components/engine/ogre/renderer.hpp)
+    ${CMAKE_SOURCE_DIR}/components/engine/ogre/renderer.hpp)
 source_group(components\\engine\\ogre FILES ${OGRE} ${OGRE_HEADER})
 
 set(INPUT 
@@ -203,7 +203,12 @@ include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
-    ${CMAKE_HOME_DIRECTORY}/extern/caelum/include)
+    ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
+    ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
+    ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
+)
+
+
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
 add_subdirectory( extern/caelum )
@@ -264,6 +269,7 @@ endif (APPLE)
 
 # Other apps and tools
 add_subdirectory( apps/clientconsole )
+add_subdirectory( apps/mygui_dev )
 
 # Apple bundling
 if (APPLE)

@@ -5,6 +5,8 @@
 #include "OgreLogManager.h"
 #include "OgreLog.h"
 
+#include <assert.h>
+
 using namespace Ogre;
 using namespace Render;
 
@@ -53,6 +55,26 @@ bool OgreRenderer::configure(bool showConfig,
 
 void OgreRenderer::createWindow(const std::string &title)
 {
+  assert(mRoot);
   // Initialize OGRE window
   mWindow = mRoot->initialise(true, title, "");
+}
+
+void OgreRenderer::createScene(const std::string camName, float fov, float nearClip)
+{
+  assert(mRoot);
+  assert(mWindow);
+  // Get the SceneManager, in this case a generic one
+  mScene = mRoot->createSceneManager(ST_GENERIC);
+
+  // Create the camera
+  mCamera = mScene->createCamera(camName);
+  mCamera->setNearClipDistance(nearClip);
+  mCamera->setFOVy(Degree(fov));
+  
+  // Create one viewport, entire window
+  mView = mWindow->addViewport(mCamera);
+
+  // Alter the camera aspect ratio to match the viewport
+  mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
 }
