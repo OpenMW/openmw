@@ -1,7 +1,20 @@
 #ifndef MWGUI_LAYOUTS_H
 #define MWGUI_LAYOUTS_H
 
-#include "layout.hpp"
+#include <components/engine/gui/layout.hpp>
+
+/*
+  This file contains classes corresponding to all the window layouts
+  defined in resources/mygui/ *.xml.
+
+  Each class inherites GUI::Layout and loads the XML file, and
+  provides some helper functions to manipulate the elements of the
+  window.
+
+  The windows are never created or destroyed (except at startup and
+  shutdown), they are only hid. You can control visibility with
+  setVisible().
+ */
 
 namespace MWGUI
 {

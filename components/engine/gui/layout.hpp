@@ -70,11 +70,6 @@ namespace GUI
 
     void shutdown()
     {
-      for (VectorBasePtr::iterator iter=mListBase.begin(); iter!=mListBase.end(); ++iter) {
-        delete (*iter);
-      }
-      mListBase.clear();
-
       MyGUI::LayoutManager::getInstance().unloadLayout(mListWindowRoot);
       mListWindowRoot.clear();
     }
@@ -118,8 +113,6 @@ namespace GUI
     std::string mPrefix;
     std::string mLayoutName;
     MyGUI::VectorWidgetPtr mListWindowRoot;
-    typedef std::vector<Layout*> VectorBasePtr;
-    VectorBasePtr mListBase;
   };
 }
 #endif

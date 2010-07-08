@@ -136,6 +136,19 @@ set(OGRE_HEADER
     ${COMP_DIR}/engine/ogre/renderer.hpp)
 source_group(components\\engine\\ogre FILES ${OGRE} ${OGRE_HEADER})
 
+# components/mw_gui
+set(MWGUI_HEADER
+    ${COMP_DIR}/mw_gui/mw_layouts.hpp)
+source_group(components\\mw_gui FILES ${MWGUI_HEADER})
+
+# components/engine/gui
+set(EGUI
+    ${COMP_DIR}/engine/gui/manager.cpp)
+set(EGUI_HEADER
+    ${COMP_DIR}/engine/gui/manager.hpp
+    ${COMP_DIR}/engine/gui/layout.hpp)
+source_group(components\\engine\\gui FILES ${EGUI} ${EGUI_HEADER})
+
 set(INPUT 
     ${COMP_DIR}/engine/input/oismanager.cpp)
 set(INPUT_HEADER 
@@ -171,13 +184,14 @@ file(GLOB INTERPRETER ${COMP_DIR}/interpreter/*.cpp)
 file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 
-set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC} 
+set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC}
+    ${EGUI}
     ${COMMANDSERVER}
     ${COMPILER}
     ${INTERPRETER})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
-    ${INTERPRETER_HEADER})
+    ${INTERPRETER_HEADER} ${EGUI_HEADER} ${MWGUI_HEADER})
 
 # source directory: libs
 
