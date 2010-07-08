@@ -1,9 +1,0 @@
-module frames;
-
-float time;      // Time since last frame
-float totalTime; // Time since rendering started
-
-ulong counter;   // Number of frames since program startup
-
-// Sleep a given number of frames
-idle fsleep(int frameNum);
