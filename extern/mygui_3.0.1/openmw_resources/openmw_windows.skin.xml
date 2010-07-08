@@ -9,28 +9,28 @@
     </Skin>
 
     <!-- These define the window borders -->
-    <Skin name="TB_B" size="512 4" texture="menu_thick_border_bottom.dds">
+    <Skin name="TB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">
         <Property key="Pointer" value = "vresize" />
         <BasisSkin type="MainSkin" offset = "0 0 512 4">
             <State name="normal" offset = "0 0 512 4"/>
         </BasisSkin>
     </Skin>
 
-    <Skin name="TB_R" size="4 512" texture="menu_thick_border_right.dds">
+    <Skin name="TB_R" size="4 512" texture="textures\menu_thick_border_right.dds">
         <Property key="Pointer" value = "hresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 512">
             <State name="normal" offset = "0 0 4 512"/>
         </BasisSkin>
     </Skin>
 
-    <Skin name="TB_T" size="512 4" texture="menu_thick_border_top.dds">
+    <Skin name="TB_T" size="512 4" texture="textures\menu_thick_border_top.dds">
         <Property key="Pointer" value = "vresize" />
         <BasisSkin type="MainSkin" offset = "0 0 512 4">
             <State name="normal" offset = "0 0 512 4"/>
         </BasisSkin>
     </Skin>
 
-    <Skin name="TB_L" size="4 512" texture="menu_thick_border_left.dds">
+    <Skin name="TB_L" size="4 512" texture="textures\menu_thick_border_left.dds">
         <Property key="Pointer" value = "hresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 512">
             <State name="normal" offset = "0 0 4 512"/>
@@ -38,25 +38,25 @@
     </Skin>
 
     <!-- Window border corners -->
-    <Skin name="TB_BR" size="4 4" texture="menu_thick_border_bottom_right_corner.dds">
+    <Skin name="TB_BR" size="4 4" texture="textures\menu_thick_border_bottom_right_corner.dds">
         <Property key="Pointer" value = "dresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
-    <Skin name="TB_BL" size="4 4" texture="menu_thick_border_bottom_left_corner.dds">
+    <Skin name="TB_BL" size="4 4" texture="textures\menu_thick_border_bottom_left_corner.dds">
         <Property key="Pointer" value = "dresize2" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
-    <Skin name="TB_TR" size="4 4" texture="menu_thick_border_top_right_corner.dds">
+    <Skin name="TB_TR" size="4 4" texture="textures\menu_thick_border_top_right_corner.dds">
         <Property key="Pointer" value = "dresize2" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
-    <Skin name="TB_TL" size="4 4" texture="menu_thick_border_top_left_corner.dds">
+    <Skin name="TB_TL" size="4 4" texture="textures\menu_thick_border_top_left_corner.dds">
         <Property key="Pointer" value = "dresize" />
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
@@ -64,52 +64,52 @@
     </Skin>
 
     <!-- These parts defines the 'blocks' to the left and right of the caption -->
-    <Skin name="HB_MID" size="256 16" texture="menu_head_block_middle.dds">
+    <Skin name="HB_MID" size="256 16" texture="textures\menu_head_block_middle.dds">
         <BasisSkin type="MainSkin" offset = "0 0 256 16">
             <State name="normal" offset = "0 0 256 16"/>
         </BasisSkin>
     </Skin>
 
-    <Skin name="HB_TOP" size="256 2" texture="menu_head_block_top.dds">
+    <Skin name="HB_TOP" size="256 2" texture="textures\menu_head_block_top.dds">
         <BasisSkin type="MainSkin" offset = "0 0 256 2">
             <State name="normal" offset = "0 0 256 2"/>
         </BasisSkin>
     </Skin>
 
-    <Skin name="HB_BOTTOM" size="256 2" texture="menu_head_block_bottom.dds">
+    <Skin name="HB_BOTTOM" size="256 2" texture="textures\menu_head_block_bottom.dds">
         <BasisSkin type="MainSkin" offset = "0 0 256 2">
             <State name="normal" offset = "0 0 256 2"/>
         </BasisSkin>
     </Skin>
 
-    <Skin name="HB_LEFT" size="2 16" texture="menu_head_block_left.dds">
+    <Skin name="HB_LEFT" size="2 16" texture="textures\menu_head_block_left.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 16">
             <State name="normal" offset = "0 0 2 16"/>
         </BasisSkin>
     </Skin>
 
-    <Skin name="HB_RIGHT" size="2 16" texture="menu_head_block_right.dds">
+    <Skin name="HB_RIGHT" size="2 16" texture="textures\menu_head_block_right.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 16">
             <State name="normal" offset = "0 0 2 16"/>
         </BasisSkin>
     </Skin>
 
-    <Skin name="HB_TR" size="2 2" texture="menu_head_block_top_right_corner.dds">
+    <Skin name="HB_TR" size="2 2" texture="textures\menu_head_block_top_right_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 2">
             <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="HB_TL" size="2 2" texture="menu_head_block_top_left_corner.dds">
+    <Skin name="HB_TL" size="2 2" texture="textures\menu_head_block_top_left_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 2">
             <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="HB_BR" size="2 2" texture="menu_head_block_bottom_right_corner.dds">
+    <Skin name="HB_BR" size="2 2" texture="textures\menu_head_block_bottom_right_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 2">
             <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="HB_BL" size="2 2" texture="menu_head_block_bottom_left_corner.dds">
+    <Skin name="HB_BL" size="2 2" texture="textures\menu_head_block_bottom_left_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 2">
             <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>

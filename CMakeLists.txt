@@ -9,22 +9,22 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 # source directory: apps
 
 set(GAME 
-    apps/openmw/main.cpp 
+    apps/openmw/main.cpp
     apps/openmw/engine.cpp)
 set(GAME_HEADER 
     apps/openmw/engine.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND 
-    apps/openmw/mwrender/mwscene.cpp 
+    apps/openmw/mwrender/mwscene.cpp
     apps/openmw/mwrender/cellimp.cpp
     apps/openmw/mwrender/interior.cpp
     apps/openmw/mwrender/sky.cpp)
 set(GAMEREND_HEADER 
-    apps/openmw/mwrender/cell.hpp 
-    apps/openmw/mwrender/cellimp.hpp 
+    apps/openmw/mwrender/cell.hpp
+    apps/openmw/mwrender/cellimp.hpp
     apps/openmw/mwrender/mwscene.hpp
-    apps/openmw/mwrender/interior.hpp 
+    apps/openmw/mwrender/interior.hpp
     apps/openmw/mwrender/playerpos.hpp
     apps/openmw/mwrender/sky.hpp)
 source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})    
@@ -87,87 +87,88 @@ set(APPS_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRI
     ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER})
 
 # source directory: components
+set(COMP_DIR ${CMAKE_SOURCE_DIR}/components)
 
 set(BSA 
-    components/bsa/bsa_archive.cpp 
-    components/bsa/bsa_file.cpp)
+    ${COMP_DIR}/bsa/bsa_archive.cpp
+    ${COMP_DIR}/bsa/bsa_file.cpp)
 set(BSA_HEADER 
-    components/bsa/bsa_archive.hpp 
-    components/bsa/bsa_file.hpp)
+    ${COMP_DIR}/bsa/bsa_archive.hpp
+    ${COMP_DIR}/bsa/bsa_file.hpp)
 source_group(components\\bsa FILES ${BSA} ${BSA_HEADER})
 
 set(NIF 
-    components/nif/nif_file.cpp)
+    ${COMP_DIR}/nif/nif_file.cpp)
 set(NIF_HEADER 
-    components/nif/controlled.hpp 
-    components/nif/effect.hpp
-    components/nif/nif_types.hpp  
-    components/nif/record.hpp
-    components/nif/controller.hpp 
-    components/nif/extra.hpp 
-    components/nif/node.hpp
-    components/nif/record_ptr.hpp
-    components/nif/data.hpp 
-    components/nif/nif_file.hpp 
-    components/nif/property.hpp)
+    ${COMP_DIR}/nif/controlled.hpp
+    ${COMP_DIR}/nif/effect.hpp
+    ${COMP_DIR}/nif/nif_types.hpp
+    ${COMP_DIR}/nif/record.hpp
+    ${COMP_DIR}/nif/controller.hpp
+    ${COMP_DIR}/nif/extra.hpp
+    ${COMP_DIR}/nif/node.hpp
+    ${COMP_DIR}/nif/record_ptr.hpp
+    ${COMP_DIR}/nif/data.hpp
+    ${COMP_DIR}/nif/nif_file.hpp
+    ${COMP_DIR}/nif/property.hpp)
 source_group(components\\nif FILES ${NIF} ${NIF_HEADER})    
 
 set(NIFOGRE 
-    components/nifogre/ogre_nif_loader.cpp)
+    ${COMP_DIR}/nifogre/ogre_nif_loader.cpp)
 set(NIFOGRE_HEADER 
-    components/nifogre/ogre_nif_loader.hpp)
+    ${COMP_DIR}/nifogre/ogre_nif_loader.hpp)
 source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})    
 
 set(ESM_STORE 
-    components/esm_store/store.cpp)
+    ${COMP_DIR}/esm_store/store.cpp)
 set(ESM_STORE_HEADER 
-    components/esm_store/cell_store.hpp
-    components/esm_store/reclists.hpp 
-    components/esm_store/store.hpp)
+    ${COMP_DIR}/esm_store/cell_store.hpp
+    ${COMP_DIR}/esm_store/reclists.hpp
+    ${COMP_DIR}/esm_store/store.hpp)
 source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 
-file(GLOB ESM_HEADER components/esm/*.hpp)
+file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 source_group(components\\esm FILES ${ESM_HEADER}) 
 
 set(OGRE 
-    ${CMAKE_SOURCE_DIR}/components/engine/ogre/renderer.cpp)
+    ${COMP_DIR}/engine/ogre/renderer.cpp)
 set(OGRE_HEADER 
-    ${CMAKE_SOURCE_DIR}/components/engine/ogre/renderer.hpp)
+    ${COMP_DIR}/engine/ogre/renderer.hpp)
 source_group(components\\engine\\ogre FILES ${OGRE} ${OGRE_HEADER})
 
 set(INPUT 
-    components/engine/input/oismanager.cpp)
+    ${COMP_DIR}/engine/input/oismanager.cpp)
 set(INPUT_HEADER 
-    components/engine/input/oismanager.hpp 
-    components/engine/input/listener.hpp
-    components/engine/input/func_binder.hpp 
-    components/engine/input/dispatch_map.hpp
-    components/engine/input/dispatcher.hpp 
-    components/engine/input/poller.hpp)
+    ${COMP_DIR}/engine/input/oismanager.hpp
+    ${COMP_DIR}/engine/input/listener.hpp
+    ${COMP_DIR}/engine/input/func_binder.hpp
+    ${COMP_DIR}/engine/input/dispatch_map.hpp
+    ${COMP_DIR}/engine/input/dispatcher.hpp
+    ${COMP_DIR}/engine/input/poller.hpp)
 source_group(components\\engine\\input FILES ${INPUT} ${INPUT_HEADER})
 
 set(COMMANDSERVER
-    components/commandserver/command.hpp
-    components/commandserver/server.hpp
-    components/commandserver/server.cpp)
+    ${COMP_DIR}/commandserver/command.hpp
+    ${COMP_DIR}/commandserver/server.hpp
+    ${COMP_DIR}/commandserver/server.cpp)
 source_group(components\\commandserver FILES ${COMMANDSERVER})    
 
 set(MISC 
-    components/misc/stringops.cpp 
-    components/misc/fileops.cpp)
+    ${COMP_DIR}/misc/stringops.cpp
+    ${COMP_DIR}/misc/fileops.cpp)
 set(MISC_HEADER 
-    components/misc/fileops.hpp 
-    components/misc/slice_array.hpp
-    components/misc/stringops.hpp
-    components/misc/tsdeque.hpp)
+    ${COMP_DIR}/misc/fileops.hpp
+    ${COMP_DIR}/misc/slice_array.hpp
+    ${COMP_DIR}/misc/stringops.hpp
+    ${COMP_DIR}/misc/tsdeque.hpp)
 source_group(components\\misc FILES ${MISC} ${MISC_HEADER})   
     
-file(GLOB COMPILER components/compiler/*.cpp)
-file(GLOB COMPILER_HEADER components/compiler/*.hpp)
+file(GLOB COMPILER ${COMP_DIR}/compiler/*.cpp)
+file(GLOB COMPILER_HEADER ${COMP_DIR}/compiler/*.hpp)
 source_group(components\\compiler FILES ${COMPILER} ${COMPILER_HEADER})    
 
-file(GLOB INTERPRETER components/interpreter/*.cpp)
-file(GLOB INTERPRETER_HEADER components/interpreter/*.hpp)
+file(GLOB INTERPRETER ${COMP_DIR}/interpreter/*.cpp)
+file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC} 

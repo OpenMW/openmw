@@ -2,7 +2,7 @@
 
 <MyGUI type="Skin">
     <!-- The 'box' frame that surrounds various HUD items and other elements -->
-    <Skin name="HUD_Box" size="40 40" texture="menu_icon_equip.dds">
+    <Skin name="HUD_Box" size="40 40" texture="textures\menu_icon_equip.dds">
         <BasisSkin type="SubSkin" offset="0 0 40 2" align= "ALIGN_TOP ALIGN_HSTRETCH">
             <State name="normal" offset="2 2 40 2"/>
         </BasisSkin>

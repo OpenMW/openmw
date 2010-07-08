@@ -5,42 +5,42 @@ as around the sections of the stats window, or around popup info windows -->
 
 <MyGUI type="Skin">
     <!-- Box borders -->
-    <Skin name="IB_T" size="512 2" texture="menu_thin_border_top.dds">
+    <Skin name="IB_T" size="512 2" texture="textures\menu_thin_border_top.dds">
         <BasisSkin type="MainSkin" offset = "0 0 512 2">
             <State name="normal" offset = "0 0 512 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="IB_B" size="512 2" texture="menu_thin_border_bottom.dds">
+    <Skin name="IB_B" size="512 2" texture="textures\menu_thin_border_bottom.dds">
         <BasisSkin type="MainSkin" offset = "0 0 512 2">
             <State name="normal" offset = "0 0 512 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="IB_L" size="2 512" texture="menu_thin_border_left.dds">
+    <Skin name="IB_L" size="2 512" texture="textures\menu_thin_border_left.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 512">
             <State name="normal" offset = "0 0 2 512"/>
         </BasisSkin>
     </Skin>
-    <Skin name="IB_R" size="2 512" texture="menu_thin_border_right.dds">
+    <Skin name="IB_R" size="2 512" texture="textures\menu_thin_border_right.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 512">
             <State name="normal" offset = "0 0 2 512"/>
         </BasisSkin>
     </Skin>
-    <Skin name="IB_TL" size="2 2" texture="menu_thin_border_top_left_corner.dds">
+    <Skin name="IB_TL" size="2 2" texture="textures\menu_thin_border_top_left_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 2">
             <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="IB_TR" size="2 2" texture="menu_thin_border_top_right_corner.dds">
+    <Skin name="IB_TR" size="2 2" texture="textures\menu_thin_border_top_right_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 2">
             <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="IB_BL" size="2 2" texture="menu_thin_border_bottom_left_corner.dds">
+    <Skin name="IB_BL" size="2 2" texture="textures\menu_thin_border_bottom_left_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 2">
             <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="IB_BR" size="2 2" texture="menu_thin_border_bottom_right_corner.dds">
+    <Skin name="IB_BR" size="2 2" texture="textures\menu_thin_border_bottom_right_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 2">
             <State name="normal" offset = "0 0 2 2"/>
         </BasisSkin>

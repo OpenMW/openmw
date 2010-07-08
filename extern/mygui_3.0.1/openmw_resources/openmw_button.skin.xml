@@ -2,42 +2,42 @@
 
 <MyGUI type="Skin">
     <!-- Button graphics -->
-    <Skin name="BTN_Top" size="128 4" texture="menu_button_frame_top.dds">
+    <Skin name="BTN_Top" size="128 4" texture="textures\menu_button_frame_top.dds">
         <BasisSkin type="MainSkin" offset = "0 0 128 4">
             <State name="normal" offset = "0 0 128 4"/>
         </BasisSkin>
     </Skin>
-    <Skin name="BTN_Bottom" size="128 4" texture="menu_button_frame_bottom.dds">
+    <Skin name="BTN_Bottom" size="128 4" texture="textures\menu_button_frame_bottom.dds">
         <BasisSkin type="MainSkin" offset = "0 0 128 4">
             <State name="normal" offset = "0 0 128 4"/>
         </BasisSkin>
     </Skin>
-    <Skin name="BTN_Left" size="4 16" texture="menu_button_frame_left.dds">
+    <Skin name="BTN_Left" size="4 16" texture="textures\menu_button_frame_left.dds">
         <BasisSkin type="MainSkin" offset = "0 0 4 16">
             <State name="normal" offset = "0 0 4 16"/>
         </BasisSkin>
     </Skin>
-    <Skin name="BTN_Right" size="4 16" texture="menu_button_frame_right.dds">
+    <Skin name="BTN_Right" size="4 16" texture="textures\menu_button_frame_right.dds">
         <BasisSkin type="MainSkin" offset = "0 0 4 16">
             <State name="normal" offset = "0 0 4 16"/>
         </BasisSkin>
     </Skin>
-    <Skin name="BTN_TopLeft" size="4 4" texture="menu_button_frame_top_left_corner.dds">
+    <Skin name="BTN_TopLeft" size="4 4" texture="textures\menu_button_frame_top_left_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
-    <Skin name="BTN_TopRight" size="4 4" texture="menu_button_frame_top_right_corner.dds">
+    <Skin name="BTN_TopRight" size="4 4" texture="textures\menu_button_frame_top_right_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
-    <Skin name="BTN_BottomLeft" size="4 4" texture="menu_button_frame_bottom_left_corner.dds">
+    <Skin name="BTN_BottomLeft" size="4 4" texture="textures\menu_button_frame_bottom_left_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>
     </Skin>
-    <Skin name="BTN_BottomRight" size="4 4" texture="menu_button_frame_bottom_right_corner.dds">
+    <Skin name="BTN_BottomRight" size="4 4" texture="textures\menu_button_frame_bottom_right_corner.dds">
         <BasisSkin type="MainSkin" offset = "0 0 4 4">
             <State name="normal" offset = "0 0 4 4"/>
         </BasisSkin>

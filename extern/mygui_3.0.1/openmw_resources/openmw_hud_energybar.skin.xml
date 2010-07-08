@@ -2,17 +2,17 @@
 
 <MyGUI type="Skin">
     <!-- Energy bar frame graphics -->
-    <Skin name="HUD_Bar_Top" size="64 2" texture="menu_small_energy_bar_top.dds">
+    <Skin name="HUD_Bar_Top" size="64 2" texture="textures\menu_small_energy_bar_top.dds">
         <BasisSkin type="MainSkin" offset = "0 0 64 2">
             <State name="normal" offset = "0 0 64 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="HUD_Bar_Bottom" size="64 2" texture="menu_small_energy_bar_bottom.dds">
+    <Skin name="HUD_Bar_Bottom" size="64 2" texture="textures\menu_small_energy_bar_bottom.dds">
         <BasisSkin type="MainSkin" offset = "0 0 64 2">
             <State name="normal" offset = "0 0 64 2"/>
         </BasisSkin>
     </Skin>
-    <Skin name="HUD_Bar_Side" size="2 8" texture="menu_small_energy_bar_vert.dds">
+    <Skin name="HUD_Bar_Side" size="2 8" texture="textures\menu_small_energy_bar_vert.dds">
         <BasisSkin type="MainSkin" offset = "0 0 2 8">
             <State name="normal" offset = "0 0 2 8"/>
         </BasisSkin>
