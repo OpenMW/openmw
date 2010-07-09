@@ -35,6 +35,9 @@ namespace MWScript
             
             /// 'l: long, 's': short, 'f': float, ' ': does not exist.              
             virtual char getGlobalType (const std::string& name) const;
+
+            virtual bool isId (const std::string& name) const;
+            ///< Does \a name match an ID, that can be referenced?            
     };
 }
 

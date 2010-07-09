@@ -129,7 +129,7 @@ namespace Compiler
             return false;
         }
         
-        if (mState==BeginState)
+        if (mState==BeginState && getContext().isId (name))
         {
             mState = PotentialExplicitState;
             mExplicit = toLower (name);

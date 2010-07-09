@@ -12,5 +12,10 @@ namespace SACompiler
     {
         return ' ';
     }
+    
+    bool Context::isId (const std::string& name) const
+    {
+        return false;
+    }
 }
 

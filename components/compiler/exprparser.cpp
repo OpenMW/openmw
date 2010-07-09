@@ -275,7 +275,7 @@ namespace Compiler
                 return true;                
             }
             
-            if (mOperands.empty() && mOperators.empty() && mExplicit.empty())
+            if (mExplicit.empty() && getContext().isId (name))
             {
                 mExplicit = name;
                 return true;

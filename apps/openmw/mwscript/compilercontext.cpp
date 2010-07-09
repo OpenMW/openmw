@@ -31,5 +31,30 @@ namespace MWScript
 
         return ' ';
     }    
+    
+    bool CompilerContext::isId (const std::string& name) const
+    {
+        return
+            mEnvironment.mWorld->getStore().activators.find (name) ||
+            mEnvironment.mWorld->getStore().potions.find (name) || 
+            mEnvironment.mWorld->getStore().appas.find (name) || 
+            mEnvironment.mWorld->getStore().armors.find (name) || 
+            mEnvironment.mWorld->getStore().books.find (name) || 
+            mEnvironment.mWorld->getStore().clothes.find (name) || 
+            mEnvironment.mWorld->getStore().containers.find (name) || 
+            mEnvironment.mWorld->getStore().creatures.find (name) || 
+            mEnvironment.mWorld->getStore().doors.find (name) || 
+            mEnvironment.mWorld->getStore().ingreds.find (name) || 
+            mEnvironment.mWorld->getStore().creatureLists.find (name) || 
+            mEnvironment.mWorld->getStore().itemLists.find (name) || 
+            mEnvironment.mWorld->getStore().lights.find (name) || 
+            mEnvironment.mWorld->getStore().lockpicks.find (name) || 
+            mEnvironment.mWorld->getStore().miscItems.find (name) || 
+            mEnvironment.mWorld->getStore().npcs.find (name) || 
+            mEnvironment.mWorld->getStore().probes.find (name) || 
+            mEnvironment.mWorld->getStore().repairs.find (name) || 
+            mEnvironment.mWorld->getStore().statics.find (name) || 
+            mEnvironment.mWorld->getStore().weapons.find (name);
+    }
 }
 

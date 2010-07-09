@@ -31,7 +31,10 @@ namespace Compiler
             }
             
             virtual char getGlobalType (const std::string& name) const = 0;
-            ///< 'l: long, 's': short, 'f': float, ' ': does not exist.           
+            ///< 'l: long, 's': short, 'f': float, ' ': does not exist.
+            
+            virtual bool isId (const std::string& name) const = 0;
+            ///< Does \a name match an ID, that can be referenced?
     };
 }
 
