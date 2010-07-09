@@ -58,7 +58,7 @@ namespace SAInterpreter
             
             virtual void stopScript (const std::string& name);
             
-            virtual float getDistance (const std::string& name) const;
+            virtual float getDistance (const std::string& name, const std::string& id = "") const;
             
             virtual float getSecondsPassed() const;
             

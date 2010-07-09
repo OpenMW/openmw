@@ -115,6 +115,8 @@ op  53: push 1, if implicit reference is disabled, 0 else
 op  54: explicit reference = stack[0]; pop; enable explicit reference
 op  55: explicit reference = stack[0]; pop; disable explicit reference
 op  56: explicit reference = stack[0]; pop; push 1, if explicit reference is disabled, 0 else
-opcodes 57-33554431 unused
+op  57: explicit reference = stack[0]; pop;
+        replace stack[0] with distance between explicit reference and a reference of ID stack[0]
+opcodes 58-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

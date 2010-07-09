@@ -311,6 +311,19 @@ namespace Compiler
                     mNextOperand = false;
                     return true;            
                 }            
+                else if (keyword==Scanner::K_getdistance)
+                {
+                    mTokenLoc = loc;
+                    parseArguments ("c", scanner);
+                    
+                    Generator::getDistance (mCode, mLiterals, mExplicit);
+                    mOperands.push_back ('f');
+                    mExplicit.clear();
+                    mRefOp = false;
+                    
+                    mNextOperand = false;
+                    return true;
+                }                   
             }
         
             return Parser::parseKeyword (keyword, loc, scanner);
@@ -360,18 +373,18 @@ namespace Compiler
                 
                 mNextOperand = false;
                 return true;
-            }            
+            }             
             else if (keyword==Scanner::K_getdistance)
             {
                 mTokenLoc = loc;
                 parseArguments ("c", scanner);
                 
-                Generator::getDistance (mCode);
+                Generator::getDistance (mCode, mLiterals, "");
                 mOperands.push_back ('f');
                 
                 mNextOperand = false;
                 return true;
-            }            
+            }                       
             else if (keyword==Scanner::K_getsecondspassed)
             {
                 mTokenLoc = loc;        

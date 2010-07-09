@@ -176,18 +176,18 @@ namespace MWScript
         mEnvironment.mGlobalScripts->removeScript (name);
     }
     
-    float InterpreterContext::getDistance (const std::string& name) const
+    float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
     {
-        if (mReference.isEmpty())
-            throw std::runtime_error ("no implicit reference");
-            
+        // TODO handle exterior cells (when ref and ref2 are located in different cells)
+        CPtrWithCell ref2 = getReference (id, false);
+                    
         std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> ref =
             mEnvironment.mWorld->getPtr (name, true);
                        
         double diff[3];
         
         for (int i=0; i<3; ++i)                            
-            diff[i] = ref.first.getCellRef().pos.pos[i] - mReference.getCellRef().pos.pos[i];
+            diff[i] = ref.first.getCellRef().pos.pos[i] - ref2.first.getCellRef().pos.pos[i];
         
         return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
     }
