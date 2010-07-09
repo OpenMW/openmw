@@ -9,6 +9,8 @@
 
 namespace Compiler
 {
+    class Literals;
+    
     /// \brief Collection of compiler extensions
     
     class Extensions
@@ -18,12 +20,14 @@ namespace Compiler
                 char mReturn;
                 std::string mArguments;
                 int mCode;
+                int mCodeExplicit;
             };
             
             struct Instruction
             {
                 std::string mArguments;
                 int mCode;            
+                int mCodeExplicit;
             };
     
             int mNextKeywordIndex;
@@ -48,25 +52,27 @@ namespace Compiler
             ///< Is this keyword registered with a function? If yes, return argument types.
                         
             void registerFunction (const std::string& keyword, char returnType,
-                const std::string& argumentType, int segment5code);
+                const std::string& argumentType, int segment5code, int segment5codeExplicit = -1);
             ///< Register a custom function
             /// - keyword must be all lower case.
             /// - keyword must be unique
+            /// - if explicit references are not supported, segment5codeExplicit must be set to -1
             /// \note Currently only segment 5 opcodes are supported.
             
             void registerInstruction (const std::string& keyword,
-                const std::string& argumentType, int segment5code);
+                const std::string& argumentType, int segment5code, int segment5codeExplicit = -1);
             ///< Register a custom instruction
             /// - keyword must be all lower case.
             /// - keyword must be unique
+            /// - if explicit references are not supported, segment5codeExplicit must be set to -1
             /// \note Currently only segment 5 opcodes are supported.
             
-            void generateFunctionCode (int keyword, std::vector<Interpreter::Type_Code>& code)
-                const;
+            void generateFunctionCode (int keyword, std::vector<Interpreter::Type_Code>& code,
+                Literals& literals, const std::string& id) const;
             ///< Append code for function to \a code.
             
-            void generateInstructionCode (int keyword, std::vector<Interpreter::Type_Code>& code)
-                const;
+            void generateInstructionCode (int keyword, std::vector<Interpreter::Type_Code>& code,
+                Literals& literals, const std::string& id) const;
             ///< Append code for function to \a code.            
     };
 }

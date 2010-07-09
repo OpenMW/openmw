@@ -324,6 +324,27 @@ namespace Compiler
                     mNextOperand = false;
                     return true;
                 }                   
+
+                // check for custom extensions
+                if (const Extensions *extensions = getContext().getExtensions())
+                {
+                    char returnType;
+                    std::string argumentType;
+                    
+                    if (extensions->isFunction (keyword, returnType, argumentType))
+                    {
+                        mTokenLoc = loc;
+                        parseArguments (argumentType, scanner);
+                        
+                        extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit);
+                        mOperands.push_back (returnType);
+                        mExplicit.clear();
+                        mRefOp = false;
+                    
+                        mNextOperand = false;
+                        return true;
+                    }
+                }
             }
         
             return Parser::parseKeyword (keyword, loc, scanner);
@@ -418,7 +439,7 @@ namespace Compiler
                         mTokenLoc = loc;
                         parseArguments (argumentType, scanner);
                         
-                        extensions->generateFunctionCode (keyword, mCode);
+                        extensions->generateFunctionCode (keyword, mCode, mLiterals, "");
                         mOperands.push_back (returnType);
                         
                         mNextOperand = false;
