@@ -300,6 +300,20 @@ namespace
         code.push_back (Compiler::Generator::segment5 (53));
     }       
 
+    void opEnableExplicit (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (54));
+    }       
+
+    void opDisableExplicit (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (55));
+    }       
+
+    void opGetDisabledExplicit (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (56));
+    }
 }
 
 namespace Compiler
@@ -702,19 +716,46 @@ namespace Compiler
             opGetSecondsPassed (code);
         }
         
-        void getDisabled (CodeContainer& code)
+        void getDisabled (CodeContainer& code, Literals& literals, const std::string id)
         {
-            opGetDisabled (code);
+            if (id.empty())
+            {
+                opGetDisabled (code);
+            }
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opGetDisabledExplicit (code);
+            }
         }
         
-        void enable (CodeContainer& code)
+        void enable (CodeContainer& code, Literals& literals, const std::string id)
         {
-            opEnable (code);
+            if (id.empty())
+            {        
+                opEnable (code);
+            }
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opEnableExplicit (code);
+            }     
         }
         
-        void disable (CodeContainer& code)
+        void disable (CodeContainer& code, Literals& literals, const std::string id)
         {
-            opDisable (code);
+            if (id.empty())
+            {        
+                opDisable (code);
+            }
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opDisableExplicit (code);
+            }
         }
     }
 }

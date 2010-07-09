@@ -16,6 +16,42 @@
 
 namespace MWScript
 {
+    InterpreterContext::PtrWithCell InterpreterContext::getReference (
+        const std::string& id, bool activeOnly)
+    {
+        PtrWithCell ref;
+
+        if (!id.empty())
+        {
+            return mEnvironment.mWorld->getPtr (id, activeOnly);
+        }
+        else
+        {
+            if (mReference.isEmpty())
+                throw std::runtime_error ("no implicit reference");
+    
+            return PtrWithCell (mReference, mEnvironment.mWorld->find (mReference));
+        }    
+    }
+
+    InterpreterContext::CPtrWithCell InterpreterContext::getReference (
+        const std::string& id, bool activeOnly) const
+    {
+        CPtrWithCell ref;
+
+        if (!id.empty())
+        {
+            return mEnvironment.mWorld->getPtr (id, activeOnly);
+        }
+        else
+        {
+            if (mReference.isEmpty())
+                throw std::runtime_error ("no implicit reference");
+    
+            return CPtrWithCell (mReference, mEnvironment.mWorld->find (mReference));
+        }    
+    }
+    
     InterpreterContext::InterpreterContext (MWWorld::Environment& environment,
         MWScript::Locals *locals, MWWorld::Ptr reference)
     : mEnvironment (environment), mLocals (locals), mReference (reference)
@@ -166,33 +202,21 @@ namespace MWScript
         return mEnvironment.mFrameDuration;
     }
     
-    bool InterpreterContext::isDisabled() const
+    bool InterpreterContext::isDisabled (const std::string& id) const
     {
-        if (mReference.isEmpty())
-            throw std::runtime_error ("no implicit reference");
-
-        return !mReference.getRefData().isEnabled();
+        CPtrWithCell ref = getReference (id, false);
+        return !ref.first.getRefData().isEnabled();
     }
     
-    void InterpreterContext::enable()
+    void InterpreterContext::enable (const std::string& id)
     {
-        if (mReference.isEmpty())
-            throw std::runtime_error ("no implicit reference");
-    
-        std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> ref
-            (mReference, mEnvironment.mWorld->find (mReference));
-    
+        PtrWithCell ref = getReference (id, false);
         mEnvironment.mWorld->enable (ref);
     }
     
-    void InterpreterContext::disable()
+    void InterpreterContext::disable (const std::string& id)
     {
-        if (mReference.isEmpty())
-            throw std::runtime_error ("no implicit reference");
-
-        std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> ref
-            (mReference, mEnvironment.mWorld->find (mReference));
-            
+        PtrWithCell ref = getReference (id, false);            
         mEnvironment.mWorld->disable (ref);
     }
     

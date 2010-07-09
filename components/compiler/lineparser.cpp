@@ -129,11 +129,36 @@ namespace Compiler
             return false;
         }
         
+        if (mState==BeginState)
+        {
+            mState = PotentialExplicitState;
+            mExplicit = toLower (name);
+            return true;
+        }
+        
         return Parser::parseName (name, loc, scanner);
     }
 
     bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==BeginState || mState==ExplicitState)
+        {
+            switch (keyword)
+            {        
+                case Scanner::K_enable:
+                
+                    Generator::enable (mCode, mLiterals, mExplicit);
+                    mState = EndState;
+                    return true;                           
+                    
+                case Scanner::K_disable:
+                
+                    Generator::disable (mCode, mLiterals, mExplicit);
+                    mState = EndState;
+                    return true;          
+            }
+        }
+        
         if (mState==BeginState)
         {
             switch (keyword)
@@ -163,18 +188,6 @@ namespace Compiler
                     Generator::stopScript (mCode);
                     mState = EndState;
                     return true;     
-                    
-                case Scanner::K_enable:
-                
-                    Generator::enable (mCode);
-                    mState = EndState;
-                    return true;                           
-                    
-                case Scanner::K_disable:
-                
-                    Generator::disable (mCode);
-                    mState = EndState;
-                    return true;                           
             }
             
             // check for custom extensions
@@ -233,6 +246,12 @@ namespace Compiler
             mState = MessageCommaState;
             return true;
         }
+        
+        if (code==Scanner::S_ref && mState==PotentialExplicitState)
+        {
+            mState = ExplicitState;
+            return true;
+        }
             
         return Parser::parseSpecial (code, loc, scanner);
     }
@@ -241,6 +260,7 @@ namespace Compiler
     {
         mState = BeginState;
         mName.clear();
+        mExplicit.clear();
     }
 }
 

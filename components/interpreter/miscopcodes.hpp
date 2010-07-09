@@ -161,6 +161,48 @@ namespace Interpreter
             }            
     };       
     
+    class OpEnableExplicit : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0];
+                runtime.pop();
+                std::string id = runtime.getStringLiteral (index);
+            
+                runtime.getContext().enable (id);
+            }            
+    };    
+    
+    class OpDisableExplicit : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0];
+                runtime.pop();
+                std::string id = runtime.getStringLiteral (index);
+            
+                runtime.getContext().disable (id);
+            }            
+    };    
+    
+    class OpGetDisabledExplicit : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                int index = runtime[0];
+                runtime.pop();
+                std::string id = runtime.getStringLiteral (index);
+            
+                runtime.push (runtime.getContext().isDisabled (id));
+            }            
+    };       
+   
 }
 
 #endif

@@ -5,11 +5,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/environment.hpp"
-
-namespace MWWorld
-{
-    class World;
-}
+#include "../mwworld/world.hpp"
 
 namespace MWSound
 {
@@ -26,6 +22,13 @@ namespace MWScript
             Locals *mLocals;
             MWWorld::Ptr mReference;
         
+            typedef std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> PtrWithCell;
+            typedef std::pair<const MWWorld::Ptr, const MWWorld::World::CellStore *> CPtrWithCell;
+        
+            PtrWithCell getReference (const std::string& id, bool activeOnly);
+            
+            CPtrWithCell getReference (const std::string& id, bool activeOnly) const;
+
         public:
         
             InterpreterContext (MWWorld::Environment& environment, 
@@ -73,11 +76,11 @@ namespace MWScript
             
             virtual float getSecondsPassed() const;
                                
-            virtual bool isDisabled() const;
+            virtual bool isDisabled (const std::string& id = "") const;
             
-            virtual void enable();
+            virtual void enable (const std::string& id = "");
             
-            virtual void disable();
+            virtual void disable (const std::string& id = "");
                                            
             MWWorld::World& getWorld();
             

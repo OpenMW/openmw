@@ -62,11 +62,11 @@ namespace SAInterpreter
             
             virtual float getSecondsPassed() const;
             
-            virtual bool isDisabled() const;
+            virtual bool isDisabled (const std::string& id = "") const;
             
-            virtual void enable();
+            virtual void enable (const std::string& id = "");
             
-            virtual void disable();
+            virtual void disable (const std::string& id = "");
                         
             void report();
             ///< Write state to std::cout   

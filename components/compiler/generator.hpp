@@ -111,11 +111,11 @@ namespace Compiler
 
         void getSecondsPassed (CodeContainer& code);
         
-        void getDisabled (CodeContainer& code);
+        void getDisabled (CodeContainer& code, Literals& literals, const std::string id);
         
-        void enable (CodeContainer& code);
+        void enable (CodeContainer& code, Literals& literals, const std::string id);
         
-        void disable (CodeContainer& code);
+        void disable (CodeContainer& code, Literals& literals, const std::string id);
     }
 }
 
