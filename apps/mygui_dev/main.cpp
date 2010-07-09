@@ -1,14 +1,12 @@
 #include <iostream>
-#include <string>
-#include <vector>
 using namespace std;
 
-#include "manager.hpp"
-#include "layout.hpp"
-#include "mw_layouts.hpp"
+#include <components/engine/gui/manager.hpp>
+#include <components/mw_gui/mw_layouts.hpp>
 
 #include <components/engine/ogre/renderer.hpp>
 #include <OgreResourceGroupManager.h>
+#include <OgreRenderWindow.h>
 
 #include <components/bsa/bsa_archive.hpp>
 
@@ -26,7 +24,7 @@ struct Listener : public Ogre::FrameListener
     total += evt.timeSinceLastFrame;
 
     // Countdown to exit
-    const int MAX = 5;
+    const int MAX = 4;
     if(total >= step)
       {
         step++;
