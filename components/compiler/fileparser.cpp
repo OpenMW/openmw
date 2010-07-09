@@ -75,6 +75,12 @@ namespace Compiler
     {
         if (code==Scanner::S_newline)
         {
+            if (mState==BeginState)
+            {
+                // ignore empty lines
+                return true;
+            }
+        
             if (mState==BeginCompleteState)
             {
                 // parse the script body
