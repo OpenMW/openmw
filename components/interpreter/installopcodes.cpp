@@ -89,6 +89,9 @@ namespace Interpreter
         interpreter.installSegment5 (38, new OpMenuMode);    
         interpreter.installSegment5 (45, new OpRandom);            
         interpreter.installSegment5 (50, new OpGetSecondsPassed);            
+        interpreter.installSegment5 (51, new OpEnable);
+        interpreter.installSegment5 (52, new OpDisable);
+        interpreter.installSegment5 (53, new OpGetDisabled);
         
         // script control
         interpreter.installSegment5 (46, new OpScriptRunning);

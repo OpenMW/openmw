@@ -162,7 +162,19 @@ namespace Compiler
                     mExprParser.parseArguments ("c", scanner, mCode, true);                   
                     Generator::stopScript (mCode);
                     mState = EndState;
-                    return true;                                
+                    return true;     
+                    
+                case Scanner::K_enable:
+                
+                    Generator::enable (mCode);
+                    mState = EndState;
+                    return true;                           
+                    
+                case Scanner::K_disable:
+                
+                    Generator::disable (mCode);
+                    mState = EndState;
+                    return true;                           
             }
             
             // check for custom extensions

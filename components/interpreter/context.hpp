@@ -55,7 +55,13 @@ namespace Interpreter
             
             virtual float getDistance (const std::string& name) const = 0; 
             
-            virtual float getSecondsPassed() const = 0;             
+            virtual float getSecondsPassed() const = 0;
+            
+            virtual bool isDisabled() const = 0;
+            
+            virtual void enable() = 0;
+            
+            virtual void disable() = 0;    
     };
 }
 

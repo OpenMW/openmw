@@ -66,7 +66,7 @@ namespace MWRender
     virtual void insertLight(float r, float g, float b, float radius);
 
     /// finish inserting a new reference and return a handle to it.
-    virtual std::string insertEnd();
+    virtual std::string insertEnd (bool Enable);
 
     /// configure lighting according to cell
     void configureAmbient();
@@ -88,13 +88,19 @@ namespace MWRender
 
     /// Remove the cell from rendering, but don't remove it from
     /// memory.
-    void hide();
+    virtual void hide();
 
     /// Destroy all rendering objects connected with this cell.
     void destroy(); // comment by Zini: shouldn't this go into the destructor?
 
     /// Switch through lighting modes.
     void toggleLight();
+
+    /// Make the reference with the given handle visible.
+    virtual void enable (const std::string& handle);
+    
+    /// Make the reference with the given handle invisible.
+    virtual void disable (const std::string& handle); 
   };
 }
 

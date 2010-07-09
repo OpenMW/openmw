@@ -20,10 +20,11 @@ namespace MWWorld
                                       // object in the refdata of refs without a script,
                                       // we can make this a pointer later.
             bool mHasLocals;
+            bool mEnabled;
         
         public:
         
-            RefData() : mHasLocals (false) {}
+            RefData() : mHasLocals (false), mEnabled (true) {}
                          
             std::string getHandle()
             {
@@ -47,6 +48,21 @@ namespace MWWorld
             MWScript::Locals& getLocals()
             {
                 return mLocals;
+            }
+            
+            bool isEnabled() const
+            {
+                return mEnabled;
+            }
+            
+            void enable()
+            {
+                mEnabled = true;
+            }
+            
+            void disable()
+            {
+                mEnabled = true;
             }
     };        
 }

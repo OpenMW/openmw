@@ -346,7 +346,17 @@ namespace Compiler
                 
                 mNextOperand = false;
                 return true;            
-            }            
+            }
+            else if (keyword==Scanner::K_getdisabled)
+            {
+                mTokenLoc = loc;        
+
+                Generator::getDisabled (mCode);
+                mOperands.push_back ('l');
+                
+                mNextOperand = false;
+                return true;            
+            }
             else
             {
                 // check for custom extensions

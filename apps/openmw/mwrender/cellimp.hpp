@@ -33,7 +33,7 @@ namespace MWRender
     virtual void insertLight(float r, float g, float b, float radius) = 0;
     
     /// finish inserting a new reference and return a handle to it.
-    virtual std::string insertEnd() = 0;
+    virtual std::string insertEnd (bool Enable) = 0;
       
     void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
 

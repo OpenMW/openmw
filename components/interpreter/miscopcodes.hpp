@@ -130,6 +130,37 @@ namespace Interpreter
                 runtime.push (*reinterpret_cast<Type_Data *> (&duration));
             }            
     };
+    
+    class OpEnable : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                runtime.getContext().enable();
+            }            
+    };    
+    
+    class OpDisable : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                runtime.getContext().disable();
+            }            
+    };    
+    
+    class OpGetDisabled : public Opcode0
+    {
+        public:
+        
+            virtual void execute (Runtime& runtime)
+            {
+                runtime.push (runtime.getContext().isDisabled());
+            }            
+    };       
+    
 }
 
 #endif

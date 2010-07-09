@@ -73,6 +73,12 @@ namespace MWScript
             
             virtual float getSecondsPassed() const;
                                
+            virtual bool isDisabled() const;
+            
+            virtual void enable();
+            
+            virtual void disable();
+                                           
             MWWorld::World& getWorld();
             
             MWSound::SoundManager& getSoundManager();

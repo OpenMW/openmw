@@ -103,11 +103,14 @@ void InteriorCellRender::insertLight(float r, float g, float b, float radius)
 
 // finish inserting a new reference and return a handle to it.
 
-std::string InteriorCellRender::insertEnd()
+std::string InteriorCellRender::insertEnd (bool enable)
 {
   assert (insert);
 
   std::string handle = insert->getName();
+
+  if (!enable)
+    insert->setVisible (false);
 
   insert = 0;
 
@@ -217,6 +220,18 @@ void InteriorCellRender::toggleLight()
   }
 
   setAmbientMode();
+}
+
+void InteriorCellRender::enable (const std::string& handle)
+{
+    if (!handle.empty())
+        scene.getMgr()->getSceneNode (handle)->setVisible (true);
+}
+
+void InteriorCellRender::disable (const std::string& handle)
+{
+    if (!handle.empty())
+        scene.getMgr()->getSceneNode (handle)->setVisible (false);
 }
 
 // Magic function from the internets. Might need this later.

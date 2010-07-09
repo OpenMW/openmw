@@ -166,6 +166,36 @@ namespace MWScript
         return mEnvironment.mFrameDuration;
     }
     
+    bool InterpreterContext::isDisabled() const
+    {
+        if (mReference.isEmpty())
+            throw std::runtime_error ("no implicit reference");
+
+        return !mReference.getRefData().isEnabled();
+    }
+    
+    void InterpreterContext::enable()
+    {
+        if (mReference.isEmpty())
+            throw std::runtime_error ("no implicit reference");
+    
+        std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> ref
+            (mReference, mEnvironment.mWorld->find (mReference));
+    
+        mEnvironment.mWorld->enable (ref);
+    }
+    
+    void InterpreterContext::disable()
+    {
+        if (mReference.isEmpty())
+            throw std::runtime_error ("no implicit reference");
+
+        std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> ref
+            (mReference, mEnvironment.mWorld->find (mReference));
+            
+        mEnvironment.mWorld->disable (ref);
+    }
+    
     MWGui::GuiManager& InterpreterContext::getGuiManager()
     {
         return *mEnvironment.mGuiManager;

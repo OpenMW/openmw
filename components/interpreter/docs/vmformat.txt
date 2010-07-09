@@ -109,6 +109,9 @@ op  47: start script stack[0] and pop
 op  48: stop script stack[0] and pop
 op  49: replace stack[0] with distance between implicit reference and a reference of ID stack[0]
 op  50: push frame duration (float)
-opcodes 51-33554431 unused
+op  51: enable implicit reference
+op  52: disable implicit reference
+op  53: push 1, if implicit reference is disabled, 0 else
+opcodes 54-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
 

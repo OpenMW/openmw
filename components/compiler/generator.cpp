@@ -284,6 +284,22 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (50));
     }       
+
+    void opEnable (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (51));
+    }       
+
+    void opDisable (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (52));
+    }       
+
+    void opGetDisabled (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (53));
+    }       
+
 }
 
 namespace Compiler
@@ -684,6 +700,21 @@ namespace Compiler
         void getSecondsPassed (CodeContainer& code)
         {
             opGetSecondsPassed (code);
+        }
+        
+        void getDisabled (CodeContainer& code)
+        {
+            opGetDisabled (code);
+        }
+        
+        void enable (CodeContainer& code)
+        {
+            opEnable (code);
+        }
+        
+        void disable (CodeContainer& code)
+        {
+            opDisable (code);
         }
     }
 }
