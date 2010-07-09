@@ -175,8 +175,6 @@ namespace ESMS
               std::cout << "WARNING: Ignoring reference '" << ref.refID << "' of unhandled type\n";
             }
         }
-
-      std::cout << "Statics in cell: " << statics.list.size() << std::endl;
     }
     
   };
