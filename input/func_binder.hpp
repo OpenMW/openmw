@@ -1,5 +1,5 @@
-#ifndef _INPUT_FUNCBINDER_H
-#define _INPUT_FUNCBINDER_H
+#ifndef OENGINE_INPUT_FUNCBINDER_H
+#define OENGINE_INPUT_FUNCBINDER_H
 
 #include <string>
 #include <vector>

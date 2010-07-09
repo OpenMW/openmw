@@ -1,5 +1,5 @@
-#ifndef _INPUT_POLLER_H
-#define _INPUT_POLLER_H
+#ifndef OENGINE_INPUT_POLLER_H
+#define OENGINE_INPUT_POLLER_H
 
 #include "dispatch_map.hpp"
 #include <mangle/input/driver.hpp>

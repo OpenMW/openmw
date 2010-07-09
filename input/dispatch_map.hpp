@@ -1,5 +1,5 @@
-#ifndef _INPUT_DISPATCHMAP_H
-#define _INPUT_DISPATCHMAP_H
+#ifndef OENGINE_INPUT_DISPATCHMAP_H
+#define OENGINE_INPUT_DISPATCHMAP_H
 
 #include <set>
 #include <map>

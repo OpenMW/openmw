@@ -1,5 +1,5 @@
-#ifndef _INPUT_DISPATCHER_H
-#define _INPUT_DISPATCHER_H
+#ifndef OENGINE_INPUT_DISPATCHER_H
+#define OENGINE_INPUT_DISPATCHER_H
 
 #include "dispatch_map.hpp"
 #include "func_binder.hpp"
