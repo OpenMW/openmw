@@ -35,14 +35,14 @@ struct Mangle::Input::OISListener : OIS::KeyListener, OIS::MouseListener
   {
     // Mouse button events are handled as key events
     // TODO: Translate mouse buttons into pseudo-keysyms
-    drv.makeEvent(Event::EV_KeyDown, -1, &arg);
+    drv.makeEvent(Event::EV_MouseDown, id, &arg);
     return true;
   }
 
   bool mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
   {
     // TODO: ditto
-    drv.makeEvent(Event::EV_KeyUp, -1, &arg);
+    drv.makeEvent(Event::EV_MouseUp, id, &arg);
     return true;
   }
 

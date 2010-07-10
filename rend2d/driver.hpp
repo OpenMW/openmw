@@ -34,10 +34,12 @@ namespace Mangle
       /// Set the window title
       void setWindowTitle(const std::string &title) { setWindowTitle(title,title); }
 
-      /// Load sprite from an image file
+      /// Load sprite from an image file. Thows an exception on
+      /// failure.
       virtual Sprite* loadImage(const std::string &file) = 0;
 
-      /// Load a sprite from an image file stored in memory.
+      /// Load a sprite from an image file stored in memory. Throws
+      /// exception on failure.
       virtual Sprite* loadImage(const void* data, size_t size) = 0;
 
       /** @brief Set gamma value for all colors.

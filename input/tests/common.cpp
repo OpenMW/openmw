@@ -12,11 +12,12 @@ struct MyCB : Event
   {
     cout << "got event: type=" << type << " index=" << i << endl;
   }
-} mycb;
+};
+
 void mainLoop(int argc, int quitKey)
 {
   cout << "Hold the Q key to quit:\n";
-  input->setEvent(&mycb);
+  input->setEvent(EventPtr(new MyCB));
   while(!input->isDown(quitKey))
     {
       input->capture();

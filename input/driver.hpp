@@ -1,7 +1,6 @@
 #ifndef MANGLE_INPUT_DRIVER_H
 #define MANGLE_INPUT_DRIVER_H
 
-#include "../tools/shared_ptr.hpp"
 #include "event.hpp"
 
 namespace Mangle
@@ -23,7 +22,7 @@ namespace Mangle
      */
     struct Driver
     {
-      Driver() : event(NULL) {}
+      Driver() {}
       virtual ~Driver() {}
 
       /** Captures input and produces the relevant events from it. An
@@ -46,7 +45,7 @@ namespace Mangle
           and *p parameters will be specific to each driver and to
           each input system.
        */
-      void setEvent(Event *evt)
+      void setEvent(EventPtr evt)
       { event = evt; }
 
       /** Instigate an event. Is used internally for all events, but
@@ -61,7 +60,7 @@ namespace Mangle
 
     private:
       /// Holds the event callback set byt setEvent()
-      Event *event;
+      EventPtr event;
     };
 
     typedef boost::shared_ptr<Driver> DriverPtr;
