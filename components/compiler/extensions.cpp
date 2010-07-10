@@ -89,6 +89,9 @@ namespace Compiler
             
         if (!id.empty())
         {
+            if (iter->second.mCodeExplicit==-1)
+                throw std::logic_error ("explicit references not supported");
+        
             int index = literals.addString (id);
             Generator::pushInt (code, literals, index);        
         }
@@ -108,6 +111,9 @@ namespace Compiler
             
         if (!id.empty())
         {
+            if (iter->second.mCodeExplicit==-1)
+                throw std::logic_error ("explicit references not supported");
+        
             int index = literals.addString (id);
             Generator::pushInt (code, literals, index);        
         }
