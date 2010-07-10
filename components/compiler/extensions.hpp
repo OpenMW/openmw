@@ -44,11 +44,13 @@ namespace Compiler
             /// - if no match is found 0 is returned.
             /// - keyword must be all lower case.
             
-            bool isFunction (int keyword, char& returnType, std::string& argumentType) const;
+            bool isFunction (int keyword, char& returnType, std::string& argumentType,
+                bool explicitReference) const;
             ///< Is this keyword registered with a function? If yes, return return and argument
             /// types.
 
-            bool isInstruction (int keyword, std::string& argumentType) const;
+            bool isInstruction (int keyword, std::string& argumentType,
+                bool explicitReference) const;
             ///< Is this keyword registered with a function? If yes, return argument types.
                         
             void registerFunction (const std::string& keyword, char returnType,

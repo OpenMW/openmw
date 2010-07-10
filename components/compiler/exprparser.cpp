@@ -331,7 +331,7 @@ namespace Compiler
                     char returnType;
                     std::string argumentType;
                     
-                    if (extensions->isFunction (keyword, returnType, argumentType))
+                    if (extensions->isFunction (keyword, returnType, argumentType, true))
                     {
                         mTokenLoc = loc;
                         parseArguments (argumentType, scanner);
@@ -434,7 +434,7 @@ namespace Compiler
                     char returnType;
                     std::string argumentType;
                     
-                    if (extensions->isFunction (keyword, returnType, argumentType))
+                    if (extensions->isFunction (keyword, returnType, argumentType, false))
                     {
                         mTokenLoc = loc;
                         parseArguments (argumentType, scanner);

@@ -21,11 +21,15 @@ namespace Compiler
         return iter->second;
     }
         
-    bool Extensions::isFunction (int keyword, char& returnType, std::string& argumentType) const
+    bool Extensions::isFunction (int keyword, char& returnType, std::string& argumentType,
+        bool explicitReference) const
     {
         std::map<int, Function>::const_iterator iter = mFunctions.find (keyword);
         
         if (iter==mFunctions.end())
+            return false;
+            
+        if (explicitReference && iter->second.mCodeExplicit==-1)
             return false;
             
         returnType = iter->second.mReturn;
@@ -33,11 +37,15 @@ namespace Compiler
         return true;
     }
         
-    bool Extensions::isInstruction (int keyword, std::string& argumentType) const
+    bool Extensions::isInstruction (int keyword, std::string& argumentType,
+        bool explicitReference) const
     {
         std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
         
         if (iter==mInstructions.end())
+            return false;
+
+        if (explicitReference && iter->second.mCodeExplicit==-1)
             return false;
             
         argumentType = iter->second.mArguments;

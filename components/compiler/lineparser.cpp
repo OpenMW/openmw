@@ -163,7 +163,7 @@ namespace Compiler
             {
                 std::string argumentType;
                 
-                if (extensions->isInstruction (keyword, argumentType))
+                if (extensions->isInstruction (keyword, argumentType, mState==ExplicitState))
                 {
                     mExprParser.parseArguments (argumentType, scanner, mCode, true);
                     
