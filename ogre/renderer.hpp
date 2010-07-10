@@ -5,7 +5,6 @@
   Ogre renderer class
  */
 
-#include <OgreRoot.h>
 #include <string>
 
 namespace Ogre
@@ -52,7 +51,7 @@ namespace Render
     void cleanup();
 
     /// Start the main rendering loop
-    void start() { mRoot->startRendering(); }
+    void start();
 
     /// Write a screenshot to file
     void screenshot(const std::string &file);

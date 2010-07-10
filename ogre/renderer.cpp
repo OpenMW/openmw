@@ -17,6 +17,11 @@ void OgreRenderer::cleanup()
   mRoot = NULL;
 }
 
+void OgreRenderer::start()
+{
+  mRoot->startRendering();
+}
+
 void OgreRenderer::screenshot(const std::string &file)
 {
   mWindow->writeContentsToFile(file);
