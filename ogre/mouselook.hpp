@@ -23,6 +23,7 @@ namespace Ogre
     class Camera;
 }
 
+namespace OEngine {
 namespace Render
 {
   class MouseLookEvent : public Mangle::Input::Event
@@ -49,6 +50,5 @@ namespace Render
 
     void event(Type type, int index, const void *p);
   };
-}
-
+}}
 #endif

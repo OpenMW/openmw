@@ -5,6 +5,7 @@
 #include "func_binder.hpp"
 #include <mangle/input/event.hpp>
 
+namespace OEngine {
 namespace Input {
 
 struct Dispatcher : Mangle::Input::Event
@@ -44,6 +45,5 @@ struct Dispatcher : Mangle::Input::Event
       funcs.call(*it, p);
   }
 };
-
-}
+}}
 #endif

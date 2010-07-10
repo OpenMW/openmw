@@ -6,6 +6,7 @@
 #include <boost/function.hpp>
 #include <assert.h>
 
+namespace OEngine {
 namespace Input {
 
 /**
@@ -99,6 +100,5 @@ public:
     return bindings[index].name;
   }
 };
-
-}
+}}
 #endif

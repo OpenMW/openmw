@@ -4,7 +4,7 @@
 
 #include "manager.hpp"
 
-using namespace GUI;
+using namespace OEngine::GUI;
 
 void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging)
 {

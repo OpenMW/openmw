@@ -5,6 +5,7 @@
 #include <map>
 #include <assert.h>
 
+namespace OEngine {
 namespace Input {
 
 /**
@@ -70,6 +71,5 @@ struct DispatchMap
     return out;
   }
 };
-
-}
+}}
 #endif

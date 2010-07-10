@@ -1,8 +1,11 @@
 #include <MyGUI.h>
 #include <OIS/OIS.h>
 
+#include "events.hpp"
+
 using namespace MyGUI;
 using namespace OIS;
+using namespace OEngine::GUI;
 
 void EventInjector::event(Type type, int index, const void *p)
 {

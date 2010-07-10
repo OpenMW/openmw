@@ -8,7 +8,7 @@
 #include <assert.h>
 
 using namespace Ogre;
-using namespace Render;
+using namespace OEngine::Render;
 
 void OgreRenderer::cleanup()
 {

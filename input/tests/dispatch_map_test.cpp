@@ -3,7 +3,7 @@ using namespace std;
 
 #include "../dispatch_map.hpp"
 
-using namespace Input;
+using namespace OEngine::Input;
 
 typedef DispatchMap::OutList OutList;
 typedef OutList::const_iterator Cit;

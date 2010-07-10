@@ -17,7 +17,7 @@ void f2(int i, const void *p)
   cout << "  F2 i=" << i << endl;
 }
 
-using namespace Input;
+using namespace OEngine::Input;
 
 int main()
 {

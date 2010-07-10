@@ -5,6 +5,7 @@
 
 using namespace OIS;
 using namespace Ogre;
+using namespace OEngine::Render;
 
 void MouseLookEvent::event(Type type, int index, const void *p)
 {

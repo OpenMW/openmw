@@ -16,6 +16,7 @@ namespace Ogre
     class Viewport;
 }
 
+namespace OEngine {
 namespace Render
 {
   class OgreRenderer
@@ -71,6 +72,5 @@ namespace Render
     /// Viewport
     Ogre::Viewport *getViewport() { return mView; }
   };
-}
-
+}}
 #endif

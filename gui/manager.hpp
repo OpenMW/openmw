@@ -13,6 +13,7 @@ namespace Ogre
   class SceneManager;
 }
 
+namespace OEngine {
 namespace GUI
 {
   class MyGUIManager
@@ -29,5 +30,5 @@ namespace GUI
     void setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false);
     void shutdown();
   };
-}
+}}
 #endif

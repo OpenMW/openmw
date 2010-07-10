@@ -10,6 +10,7 @@
 #include <OgreFrameListener.h>
 #include <OgreRenderWindow.h>
 
+namespace OEngine {
 namespace Render
 {
   struct ExitListener : Ogre::FrameListener
@@ -28,6 +29,5 @@ namespace Render
       return !exit;
     }
   };
-}
-
+}}
 #endif

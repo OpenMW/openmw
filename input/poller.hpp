@@ -4,6 +4,7 @@
 #include "dispatch_map.hpp"
 #include <mangle/input/driver.hpp>
 
+namespace OEngine {
 namespace Input {
 
 /** The poller is used to check (poll) for keys rather than waiting
@@ -41,6 +42,5 @@ struct Poller
     return false;
   }
 };
-
-}
+}}
 #endif

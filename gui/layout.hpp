@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <MyGUI.h>
 
+namespace OEngine {
 namespace GUI
 {
   /** The Layout class is an utility class used to load MyGUI layouts
@@ -114,5 +115,5 @@ namespace GUI
     std::string mLayoutName;
     MyGUI::VectorWidgetPtr mListWindowRoot;
   };
-}
+}}
 #endif

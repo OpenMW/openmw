@@ -6,7 +6,7 @@
 
 using namespace std;
 using namespace Mangle::Input;
-using namespace Input;
+using namespace OEngine::Input;
 
 enum Actions
   {
@@ -34,17 +34,17 @@ int main(int argc, char** argv)
   SDL_Init(SDL_INIT_VIDEO);
   SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
   SDLDriver input;
-  Dispatcher disp(A_LAST);
+  Dispatcher *disp = new Dispatcher(A_LAST);
   Poller poll(input);
 
-  input.setEvent(&disp);
+  input.setEvent(EventPtr(disp));
 
-  disp.funcs.bind(A_Quit, &doExit);
-  disp.funcs.bind(A_Left, &goLeft);
+  disp->funcs.bind(A_Quit, &doExit);
+  disp->funcs.bind(A_Left, &goLeft);
 
-  disp.bind(A_Quit, SDLK_q);
-  disp.bind(A_Left, SDLK_a);
-  disp.bind(A_Left, SDLK_LEFT);
+  disp->bind(A_Quit, SDLK_q);
+  disp->bind(A_Left, SDLK_a);
+  disp->bind(A_Left, SDLK_LEFT);
 
   poll.bind(A_Right, SDLK_d);
   poll.bind(A_Right, SDLK_RIGHT);
