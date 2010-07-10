@@ -15,8 +15,7 @@
 #include <components/interpreter/installopcodes.hpp>
 #include <components/interpreter/interpreter.hpp>
 
-#include "../mwsound/extensions.hpp"
-
+#include "soundextensions.hpp"
 #include "cellextensions.hpp"
 #include "miscextensions.hpp"
 #include "guiextensions.hpp"
@@ -125,7 +124,7 @@ namespace MWScript
         Cell::installOpcodes (interpreter);
         Misc::installOpcodes (interpreter);
         Gui::installOpcodes (interpreter);
-        MWSound::installOpcodes (interpreter);
+        Sound::installOpcodes (interpreter);
     }
 }
 

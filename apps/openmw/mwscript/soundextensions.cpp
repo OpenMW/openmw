@@ -7,15 +7,15 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include "../mwscript/interpretercontext.hpp"
+#include "interpretercontext.hpp"
 
 #include "../mwworld/world.hpp"
 
-#include "soundmanager.hpp"
+#include "../mwsound/soundmanager.hpp"
 
-namespace MWSound
+namespace MWScript
 {
-    namespace Script
+    namespace Sound
     {
         class OpSay : public Interpreter::Opcode0
         {
@@ -198,39 +198,35 @@ namespace MWSound
         const int opcodePlayLoopSound3DVP = 0x2000009;
         const int opcodeStopSound = 0x200000a;
         const int opcodeGetSoundPlaying = 0x200000b;
-    }
 
-    void registerExtensions (Compiler::Extensions& extensions)
-    {
-        extensions.registerInstruction ("say", "SS", Script::opcodeSay);
-        extensions.registerFunction ("saydone", 'l', "", Script::opcodeSayDone);
-        extensions.registerInstruction ("streammusic", "S", Script::opcodeStreamMusic);
-        extensions.registerInstruction ("playsound", "c", Script::opcodePlaySound);
-        extensions.registerInstruction ("playsoundvp", "cff", Script::opcodePlaySoundVP);
-        extensions.registerInstruction ("playsound3d", "c", Script::opcodePlaySound3D);
-        extensions.registerInstruction ("playsound3dvp", "cff", Script::opcodePlaySound3DVP);
-        extensions.registerInstruction ("playloopsound3d", "c", Script::opcodePlayLoopSound3D);
-        extensions.registerInstruction ("playloopsound3dvp", "cff",
-            Script::opcodePlayLoopSound3DVP);
-        extensions.registerInstruction ("stopsound", "c", Script::opcodeStopSound);
-        extensions.registerFunction ("getsoundplaying", 'l', "c", Script::opcodeGetSoundPlaying);   
-    }
-    
-    void installOpcodes (Interpreter::Interpreter& interpreter)
-    {
-        interpreter.installSegment5 (Script::opcodeSay, new Script::OpSay);
-        interpreter.installSegment5 (Script::opcodeSayDone, new Script::OpSayDone);
-        interpreter.installSegment5 (Script::opcodeStreamMusic, new Script::OpStreamMusic);
-        interpreter.installSegment5 (Script::opcodePlaySound, new Script::OpPlaySound);
-        interpreter.installSegment5 (Script::opcodePlaySoundVP, new Script::OpPlaySoundVP);
-        interpreter.installSegment5 (Script::opcodePlaySound3D, new Script::OpPlaySound3D (false));
-        interpreter.installSegment5 (Script::opcodePlaySound3DVP,
-            new Script::OpPlaySoundVP3D (false));
-        interpreter.installSegment5 (Script::opcodePlayLoopSound3D,
-            new Script::OpPlaySound3D (true));
-        interpreter.installSegment5 (Script::opcodePlayLoopSound3DVP,
-            new Script::OpPlaySoundVP3D (true));
-        interpreter.installSegment5 (Script::opcodeStopSound, new Script::OpStopSound);
-        interpreter.installSegment5 (Script::opcodeGetSoundPlaying, new Script::OpGetSoundPlaying);
-    }
+        void registerExtensions (Compiler::Extensions& extensions)
+        {
+            extensions.registerInstruction ("say", "SS", opcodeSay);
+            extensions.registerFunction ("saydone", 'l', "", opcodeSayDone);
+            extensions.registerInstruction ("streammusic", "S", opcodeStreamMusic);
+            extensions.registerInstruction ("playsound", "c", opcodePlaySound);
+            extensions.registerInstruction ("playsoundvp", "cff", opcodePlaySoundVP);
+            extensions.registerInstruction ("playsound3d", "c", opcodePlaySound3D);
+            extensions.registerInstruction ("playsound3dvp", "cff", opcodePlaySound3DVP);
+            extensions.registerInstruction ("playloopsound3d", "c", opcodePlayLoopSound3D);
+            extensions.registerInstruction ("playloopsound3dvp", "cff", opcodePlayLoopSound3DVP);
+            extensions.registerInstruction ("stopsound", "c", opcodeStopSound);
+            extensions.registerFunction ("getsoundplaying", 'l', "c", opcodeGetSoundPlaying);   
+        }
+        
+        void installOpcodes (Interpreter::Interpreter& interpreter)
+        {
+            interpreter.installSegment5 (opcodeSay, new OpSay);
+            interpreter.installSegment5 (opcodeSayDone, new OpSayDone);
+            interpreter.installSegment5 (opcodeStreamMusic, new OpStreamMusic);
+            interpreter.installSegment5 (opcodePlaySound, new OpPlaySound);
+            interpreter.installSegment5 (opcodePlaySoundVP, new OpPlaySoundVP);
+            interpreter.installSegment5 (opcodePlaySound3D, new OpPlaySound3D (false));
+            interpreter.installSegment5 (opcodePlaySound3DVP, new OpPlaySoundVP3D (false));
+            interpreter.installSegment5 (opcodePlayLoopSound3D, new OpPlaySound3D (true));
+            interpreter.installSegment5 (opcodePlayLoopSound3DVP, new OpPlaySoundVP3D (true));
+            interpreter.installSegment5 (opcodeStopSound, new OpStopSound);
+            interpreter.installSegment5 (opcodeGetSoundPlaying, new OpGetSoundPlaying);
+        }
+    }    
 }
