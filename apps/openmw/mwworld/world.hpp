@@ -36,20 +36,20 @@ namespace MWWorld
         public:
         
             typedef std::vector<std::pair<std::string, Ptr> > ScriptList;
-            typedef ESMS::CellStore<RefData> CellStore;
         
         private:
         
-            typedef std::map<CellStore *, MWRender::CellRender *> CellRenderCollection;
+            typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
     
             MWRender::SkyManager* mSkyManager;
             MWRender::MWScene mScene;
             MWRender::PlayerPos *mPlayerPos;
+            Ptr::CellStore *mCurrentCell; // the cell, the player is in
             CellRenderCollection mActiveCells;
             CellRenderCollection mBufferedCells; // loaded, but not active (buffering not implementd yet)
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
-            std::map<std::string, CellStore> mInteriors;
+            std::map<std::string, Ptr::CellStore> mInteriors;
             ScriptList mLocalScripts;
             std::map<std::string, Interpreter::Type_Data> mGlobalVariables;
     
@@ -59,9 +59,9 @@ namespace MWWorld
     
             void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
     
-            Ptr getPtr (const std::string& name, CellStore& cellStore);
+            Ptr getPtr (const std::string& name, Ptr::CellStore& cellStore);
     
-            MWRender::CellRender *searchRender (CellStore *store);
+            MWRender::CellRender *searchRender (Ptr::CellStore *store);
     
         public:
         
@@ -82,16 +82,13 @@ namespace MWWorld
             
             Interpreter::Type_Data& getGlobalVariable (const std::string& name);
             
-            std::pair<Ptr, CellStore *> getPtr (const std::string& name, bool activeOnly);
+            Ptr getPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
-            void enable (std::pair<Ptr, CellStore *>& reference);
+            void enable (Ptr reference);
             
-            void disable (std::pair<Ptr, CellStore *>& reference);
-            
-            CellStore *find (const Ptr& ptr);
-            ///< Only active cells are searched.
+            void disable (Ptr reference);
     };
 }
 

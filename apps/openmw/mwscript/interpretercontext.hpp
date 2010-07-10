@@ -22,12 +22,10 @@ namespace MWScript
             Locals *mLocals;
             MWWorld::Ptr mReference;
         
-            typedef std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> PtrWithCell;
-            typedef std::pair<const MWWorld::Ptr, const MWWorld::World::CellStore *> CPtrWithCell;
         
-            PtrWithCell getReference (const std::string& id, bool activeOnly);
-            
-            CPtrWithCell getReference (const std::string& id, bool activeOnly) const;
+            MWWorld::Ptr getReference (const std::string& id, bool activeOnly);
+
+            const MWWorld::Ptr getReference (const std::string& id, bool activeOnly) const;
 
         public:
         

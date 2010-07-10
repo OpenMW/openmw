@@ -16,11 +16,9 @@
 
 namespace MWScript
 {
-    InterpreterContext::PtrWithCell InterpreterContext::getReference (
+    MWWorld::Ptr InterpreterContext::getReference (
         const std::string& id, bool activeOnly)
     {
-        PtrWithCell ref;
-
         if (!id.empty())
         {
             return mEnvironment.mWorld->getPtr (id, activeOnly);
@@ -30,15 +28,13 @@ namespace MWScript
             if (mReference.isEmpty())
                 throw std::runtime_error ("no implicit reference");
     
-            return PtrWithCell (mReference, mEnvironment.mWorld->find (mReference));
+            return mReference;
         }    
     }
 
-    InterpreterContext::CPtrWithCell InterpreterContext::getReference (
+    const MWWorld::Ptr InterpreterContext::getReference (
         const std::string& id, bool activeOnly) const
     {
-        CPtrWithCell ref;
-
         if (!id.empty())
         {
             return mEnvironment.mWorld->getPtr (id, activeOnly);
@@ -48,7 +44,7 @@ namespace MWScript
             if (mReference.isEmpty())
                 throw std::runtime_error ("no implicit reference");
     
-            return CPtrWithCell (mReference, mEnvironment.mWorld->find (mReference));
+            return mReference;
         }    
     }
     
@@ -179,15 +175,14 @@ namespace MWScript
     float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
     {
         // TODO handle exterior cells (when ref and ref2 are located in different cells)
-        CPtrWithCell ref2 = getReference (id, false);
+        const MWWorld::Ptr ref2 = getReference (id, false);
                     
-        std::pair<MWWorld::Ptr, MWWorld::World::CellStore *> ref =
-            mEnvironment.mWorld->getPtr (name, true);
+        const MWWorld::Ptr ref = mEnvironment.mWorld->getPtr (name, true);
                        
         double diff[3];
         
         for (int i=0; i<3; ++i)                            
-            diff[i] = ref.first.getCellRef().pos.pos[i] - ref2.first.getCellRef().pos.pos[i];
+            diff[i] = ref.getCellRef().pos.pos[i] - ref2.getCellRef().pos.pos[i];
         
         return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
     }
@@ -204,19 +199,19 @@ namespace MWScript
     
     bool InterpreterContext::isDisabled (const std::string& id) const
     {
-        CPtrWithCell ref = getReference (id, false);
-        return !ref.first.getRefData().isEnabled();
+        const MWWorld::Ptr ref = getReference (id, false);
+        return !ref.getRefData().isEnabled();
     }
     
     void InterpreterContext::enable (const std::string& id)
     {
-        PtrWithCell ref = getReference (id, false);
+        MWWorld::Ptr ref = getReference (id, false);
         mEnvironment.mWorld->enable (ref);
     }
     
     void InterpreterContext::disable (const std::string& id)
     {
-        PtrWithCell ref = getReference (id, false);            
+        MWWorld::Ptr ref = getReference (id, false);            
         mEnvironment.mWorld->disable (ref);
     }
     

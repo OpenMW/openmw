@@ -205,7 +205,7 @@ namespace MWScript
                     std::string text = runtime.getStringLiteral (runtime[0]);
                     runtime.pop();
                         
-                    context.getSoundManager().say (context.getWorld().getPtr (id, true).first,
+                    context.getSoundManager().say (context.getWorld().getPtr (id, true),
                         file, text, context);
                 } 
         };   
@@ -223,8 +223,7 @@ namespace MWScript
                     runtime.pop();
                                             
                     runtime.push (context.getSoundManager().sayDone (
-                        context.getWorld().getPtr (id, true).first,
-                        context));
+                        context.getWorld().getPtr (id, true), context));
                 } 
         };    
         
@@ -248,8 +247,7 @@ namespace MWScript
                     runtime.pop();
                                             
                     context.getSoundManager().playSound3D (
-                        context.getWorld().getPtr (id, true).first, sound,
-                        1.0, 1.0, mLoop, context);
+                        context.getWorld().getPtr (id, true), sound, 1.0, 1.0, mLoop, context);
                 } 
         };      
     
@@ -279,8 +277,7 @@ namespace MWScript
                     runtime.pop();
                         
                     context.getSoundManager().playSound3D (
-                        context.getWorld().getPtr (id, true).first, sound, volume,
-                        pitch, mLoop, context);
+                        context.getWorld().getPtr (id, true), sound, volume, pitch, mLoop, context);
 
                 } 
         };     
@@ -301,7 +298,7 @@ namespace MWScript
                     runtime.pop();
                                             
                     context.getSoundManager().stopSound3D (
-                        context.getWorld().getPtr (id, true).first, sound, context);
+                        context.getWorld().getPtr (id, true), sound, context);
                 } 
         };      
                                 
@@ -321,7 +318,7 @@ namespace MWScript
                     runtime.pop();
                         
                     runtime.push (context.getSoundManager().getSoundPlaying (
-                        context.getWorld().getPtr (id, true).first,
+                        context.getWorld().getPtr (id, true),
                         runtime.getStringLiteral (index), context));
                 } 
         };        
