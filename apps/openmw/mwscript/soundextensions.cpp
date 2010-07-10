@@ -186,6 +186,145 @@ namespace MWScript
                         context.getReference(), runtime.getStringLiteral (index), context));
                 } 
         };
+        
+        class OpSayExplicit : public Interpreter::Opcode0
+        {
+            public:
+            
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                   
+                    std::string file = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+
+                    std::string text = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                        
+                    context.getSoundManager().say (context.getWorld().getPtr (id, true).first,
+                        file, text, context);
+                } 
+        };   
+            
+        class OpSayDoneExplicit : public Interpreter::Opcode0
+        {
+            public:
+            
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                                            
+                    runtime.push (context.getSoundManager().sayDone (
+                        context.getWorld().getPtr (id, true).first,
+                        context));
+                } 
+        };    
+        
+        class OpPlaySound3DExplicit : public Interpreter::Opcode0
+        {
+                bool mLoop;
+                
+            public:
+            
+                OpPlaySound3DExplicit (bool loop) : mLoop (loop) {}
+            
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                                       
+                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                                            
+                    context.getSoundManager().playSound3D (
+                        context.getWorld().getPtr (id, true).first, sound,
+                        1.0, 1.0, mLoop, context);
+                } 
+        };      
+    
+        class OpPlaySoundVP3DExplicit : public Interpreter::Opcode0
+        {
+                bool mLoop;
+                     
+            public:
+            
+                OpPlaySoundVP3DExplicit (bool loop) : mLoop (loop) {}
+            
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                                       
+                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                                        
+                    float volume = *reinterpret_cast<float *> (&runtime[0]);
+                    runtime.pop();
+
+                    float pitch = *reinterpret_cast<float *> (&runtime[0]);
+                    runtime.pop();
+                        
+                    context.getSoundManager().playSound3D (
+                        context.getWorld().getPtr (id, true).first, sound, volume,
+                        pitch, mLoop, context);
+
+                } 
+        };     
+
+        class OpStopSoundExplicit : public Interpreter::Opcode0
+        {
+            public:
+            
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();                   
+                    
+                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                                            
+                    context.getSoundManager().stopSound3D (
+                        context.getWorld().getPtr (id, true).first, sound, context);
+                } 
+        };      
+                                
+        class OpGetSoundPlayingExplicit : public Interpreter::Opcode0
+        {
+            public:
+            
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    runtime.pop();
+                                            
+                    int index = runtime[0];
+                    runtime.pop();
+                        
+                    runtime.push (context.getSoundManager().getSoundPlaying (
+                        context.getWorld().getPtr (id, true).first,
+                        runtime.getStringLiteral (index), context));
+                } 
+        };        
             
         const int opcodeSay = 0x2000001;
         const int opcodeSayDone = 0x2000002;
@@ -199,19 +338,34 @@ namespace MWScript
         const int opcodeStopSound = 0x200000a;
         const int opcodeGetSoundPlaying = 0x200000b;
 
+        const int opcodeSayExplicit = 0x2000019;
+        const int opcodeSayDoneExplicit = 0x200001a;
+        const int opcodePlaySound3DExplicit = 0x200001b;
+        const int opcodePlaySound3DVPExplicit = 0x200001c;
+        const int opcodePlayLoopSound3DExplicit = 0x200001d;
+        const int opcodePlayLoopSound3DVPExplicit = 0x200001e;
+        const int opcodeStopSoundExplicit = 0x200001f;
+        const int opcodeGetSoundPlayingExplicit = 0x2000020;
+        
         void registerExtensions (Compiler::Extensions& extensions)
         {
-            extensions.registerInstruction ("say", "SS", opcodeSay);
-            extensions.registerFunction ("saydone", 'l', "", opcodeSayDone);
+            extensions.registerInstruction ("say", "SS", opcodeSay, opcodeSayExplicit);
+            extensions.registerFunction ("saydone", 'l', "", opcodeSayDone, opcodeSayDoneExplicit);
             extensions.registerInstruction ("streammusic", "S", opcodeStreamMusic);
             extensions.registerInstruction ("playsound", "c", opcodePlaySound);
             extensions.registerInstruction ("playsoundvp", "cff", opcodePlaySoundVP);
-            extensions.registerInstruction ("playsound3d", "c", opcodePlaySound3D);
-            extensions.registerInstruction ("playsound3dvp", "cff", opcodePlaySound3DVP);
-            extensions.registerInstruction ("playloopsound3d", "c", opcodePlayLoopSound3D);
-            extensions.registerInstruction ("playloopsound3dvp", "cff", opcodePlayLoopSound3DVP);
-            extensions.registerInstruction ("stopsound", "c", opcodeStopSound);
-            extensions.registerFunction ("getsoundplaying", 'l', "c", opcodeGetSoundPlaying);   
+            extensions.registerInstruction ("playsound3d", "c", opcodePlaySound3D,
+                opcodePlaySound3DExplicit);
+            extensions.registerInstruction ("playsound3dvp", "cff", opcodePlaySound3DVP,
+                opcodePlaySound3DVPExplicit);
+            extensions.registerInstruction ("playloopsound3d", "c", opcodePlayLoopSound3D,
+                opcodePlayLoopSound3DExplicit);
+            extensions.registerInstruction ("playloopsound3dvp", "cff", opcodePlayLoopSound3DVP,
+                opcodePlayLoopSound3DVPExplicit);
+            extensions.registerInstruction ("stopsound", "c", opcodeStopSound,
+                opcodeStopSoundExplicit);
+            extensions.registerFunction ("getsoundplaying", 'l', "c", opcodeGetSoundPlaying,
+                opcodeGetSoundPlayingExplicit);   
         }
         
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -227,6 +381,21 @@ namespace MWScript
             interpreter.installSegment5 (opcodePlayLoopSound3DVP, new OpPlaySoundVP3D (true));
             interpreter.installSegment5 (opcodeStopSound, new OpStopSound);
             interpreter.installSegment5 (opcodeGetSoundPlaying, new OpGetSoundPlaying);
+            
+            interpreter.installSegment5 (opcodeSayExplicit, new OpSayExplicit);
+            interpreter.installSegment5 (opcodeSayDoneExplicit, new OpSayDoneExplicit);            
+            interpreter.installSegment5 (opcodePlaySound3DExplicit,
+                new OpPlaySound3DExplicit (false));
+            interpreter.installSegment5 (opcodePlaySound3DVPExplicit,
+                new OpPlaySoundVP3DExplicit (false));
+            interpreter.installSegment5 (opcodePlayLoopSound3DExplicit,
+                new OpPlaySound3DExplicit (true));
+            interpreter.installSegment5 (opcodePlayLoopSound3DVPExplicit,
+                new OpPlaySoundVP3DExplicit (true));
+            interpreter.installSegment5 (opcodeStopSoundExplicit, new OpStopSoundExplicit);
+            interpreter.installSegment5 (opcodeGetSoundPlayingExplicit,
+                new OpGetSoundPlayingExplicit);
         }
     }    
 }
+

@@ -46,5 +46,13 @@ op 0x2000015: EnableMapMenu
 op 0x2000016: EnableStatsMenu
 op 0x2000017: EnableRest
 op 0x2000018: ShowRestMenu
-opcodes 0x2000019-0x3ffffff unused
+op 0x2000019: Say, explicit reference
+op 0x200001a: SayDone, explicit reference
+op 0x200001b: PlaySound3D, explicit reference
+op 0x200001c: PlaySound3DVP, explicit reference
+op 0x200001d: PlayLoopSound3D, explicit reference
+op 0x200001e: PlayLoopSound3DVP, explicit reference
+op 0x200001f: StopSound, explicit reference
+op 0x2000020: GetSoundPlaying, explicit reference
+opcodes 0x2000021-0x3ffffff unused
 
