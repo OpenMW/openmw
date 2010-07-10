@@ -53,7 +53,8 @@ namespace Compiler
                 K_random,
                 K_startscript, K_stopscript, K_scriptrunning,
                 K_getdistance,
-                K_getsecondspassed
+                K_getsecondspassed,
+                K_enable, K_disable, K_getdisabled
             };
 
             enum special

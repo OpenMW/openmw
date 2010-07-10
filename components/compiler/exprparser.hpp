@@ -24,6 +24,8 @@ namespace Compiler
             std::vector<Interpreter::Type_Code> mCode;
             bool mFirst;
             bool mArgument;
+            std::string mExplicit;
+            bool mRefOp;
             
             int getPriority (char op) const;
             

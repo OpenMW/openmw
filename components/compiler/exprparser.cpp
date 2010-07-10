@@ -203,6 +203,9 @@ namespace Compiler
 
     bool ExprParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
+        if (!mExplicit.empty())
+            return Parser::parseInt (value, loc, scanner);
+    
         mFirst = false;
         
         if (mNextOperand)
@@ -221,6 +224,9 @@ namespace Compiler
 
     bool ExprParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
     {
+        if (!mExplicit.empty())
+            return Parser::parseFloat (value, loc, scanner);
+
         mFirst = false;
         
         if (mNextOperand)
@@ -240,6 +246,9 @@ namespace Compiler
     bool ExprParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
+        if (!mExplicit.empty())
+            return Parser::parseName (name, loc, scanner);
+
         mFirst = false;
 
         if (mNextOperand)
@@ -255,7 +264,6 @@ namespace Compiler
                 mOperands.push_back (type=='f' ? 'f' : 'l');    
                 return true;    
             }
-
                  
             type = getContext().getGlobalType (name2);
             
@@ -265,6 +273,12 @@ namespace Compiler
                 mNextOperand = false;
                 mOperands.push_back (type=='f' ? 'f' : 'l');    
                 return true;                
+            }
+            
+            if (mExplicit.empty() && getContext().isId (name))
+            {
+                mExplicit = name;
+                return true;
             }
         }
         else
@@ -280,7 +294,28 @@ namespace Compiler
     bool ExprParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
         mFirst = false;
+    
+        if (!mExplicit.empty())
+        {
+            if (mRefOp && mNextOperand)
+            {
+                if (keyword==Scanner::K_getdisabled)
+                {
+                    mTokenLoc = loc;        
 
+                    Generator::getDisabled (mCode, mLiterals, mExplicit);
+                    mOperands.push_back ('l');
+                    mExplicit.clear();
+                    mRefOp = false;
+                    
+                    mNextOperand = false;
+                    return true;            
+                }            
+            }
+        
+            return Parser::parseKeyword (keyword, loc, scanner);
+        }
+    
         if (mNextOperand)
         {        
             if (keyword==Scanner::K_getsquareroot)
@@ -346,7 +381,17 @@ namespace Compiler
                 
                 mNextOperand = false;
                 return true;            
-            }            
+            }
+            else if (keyword==Scanner::K_getdisabled)
+            {
+                mTokenLoc = loc;        
+
+                Generator::getDisabled (mCode, mLiterals, "");
+                mOperands.push_back ('l');
+                
+                mNextOperand = false;
+                return true;            
+            }
             else
             {
                 // check for custom extensions
@@ -381,6 +426,17 @@ namespace Compiler
 
     bool ExprParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
+        if (!mExplicit.empty())
+        {
+            if (!mRefOp && code==Scanner::S_ref)
+            {
+                mRefOp = true;
+                return true;
+            }
+        
+            return Parser::parseSpecial (code, loc, scanner);
+        }
+    
         if (code==Scanner::S_comma)
         {
             mTokenLoc = loc;
@@ -488,6 +544,8 @@ namespace Compiler
         mNextOperand = true;
         mCode.clear();
         mFirst = true;
+        mExplicit.clear();
+        mRefOp = false;
     }
     
     char ExprParser::append (std::vector<Interpreter::Type_Code>& code)

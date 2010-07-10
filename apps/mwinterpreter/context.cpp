@@ -120,6 +120,15 @@ namespace SAInterpreter
         return 0;
     }
     
+    bool Context::isDisabled (const std::string& id) const
+    {
+        return false;
+    }
+    
+    void Context::enable (const std::string& id) {}
+    
+    void Context::disable (const std::string& id) {}
+    
     void Context::report()
     {
         std::size_t i = 0;

@@ -284,6 +284,36 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (50));
     }       
+
+    void opEnable (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (51));
+    }       
+
+    void opDisable (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (52));
+    }       
+
+    void opGetDisabled (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (53));
+    }       
+
+    void opEnableExplicit (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (54));
+    }       
+
+    void opDisableExplicit (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (55));
+    }       
+
+    void opGetDisabledExplicit (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (56));
+    }
 }
 
 namespace Compiler
@@ -684,6 +714,48 @@ namespace Compiler
         void getSecondsPassed (CodeContainer& code)
         {
             opGetSecondsPassed (code);
+        }
+        
+        void getDisabled (CodeContainer& code, Literals& literals, const std::string id)
+        {
+            if (id.empty())
+            {
+                opGetDisabled (code);
+            }
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opGetDisabledExplicit (code);
+            }
+        }
+        
+        void enable (CodeContainer& code, Literals& literals, const std::string id)
+        {
+            if (id.empty())
+            {        
+                opEnable (code);
+            }
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opEnableExplicit (code);
+            }     
+        }
+        
+        void disable (CodeContainer& code, Literals& literals, const std::string id)
+        {
+            if (id.empty())
+            {        
+                opDisable (code);
+            }
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opDisableExplicit (code);
+            }
         }
     }
 }

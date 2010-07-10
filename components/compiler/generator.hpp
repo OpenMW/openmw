@@ -110,6 +110,12 @@ namespace Compiler
         void getDistance (CodeContainer& code);
 
         void getSecondsPassed (CodeContainer& code);
+        
+        void getDisabled (CodeContainer& code, Literals& literals, const std::string id);
+        
+        void enable (CodeContainer& code, Literals& literals, const std::string id);
+        
+        void disable (CodeContainer& code, Literals& literals, const std::string id);
     }
 }
 

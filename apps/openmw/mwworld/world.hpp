@@ -61,6 +61,8 @@ namespace MWWorld
     
             Ptr getPtr (const std::string& name, CellStore& cellStore);
     
+            MWRender::CellRender *searchRender (CellStore *store);
+    
         public:
         
             World (Render::OgreRenderer& renderer, const boost::filesystem::path& master,
@@ -83,6 +85,13 @@ namespace MWWorld
             std::pair<Ptr, CellStore *> getPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
+
+            void enable (std::pair<Ptr, CellStore *>& reference);
+            
+            void disable (std::pair<Ptr, CellStore *>& reference);
+            
+            CellStore *find (const Ptr& ptr);
+            ///< Only active cells are searched.
     };
 }
 

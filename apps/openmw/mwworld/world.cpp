@@ -9,6 +9,8 @@
 #include "apps/openmw/mwrender/sky.hpp"
 #include "apps/openmw/mwrender/interior.hpp"
 
+#include "ptr.hpp"
+
 namespace
 {
     template<typename T>
@@ -30,6 +32,20 @@ namespace
                 }
             }
         }
+    }
+    
+    template<typename T>
+    bool hasReference (ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, const MWWorld::Ptr& ptr)
+    {
+        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
+            cellRefList.list.begin());
+            iter!=cellRefList.list.end(); ++iter)
+        {    
+            if (&iter->mData==&ptr.getRefData())
+                return true;
+        }
+        
+        return false;
     }
 }
 
@@ -119,6 +135,24 @@ namespace MWWorld
             return ref;                
             
         return Ptr();
+    }
+    
+    MWRender::CellRender *World::searchRender (CellStore *store)
+    {
+        CellRenderCollection::iterator iter = mActiveCells.find (store);
+        
+        if (iter!=mActiveCells.end())
+        {
+            return iter->second;
+        }
+        else
+        {
+            iter = mBufferedCells.find (store);
+            if (iter!=mBufferedCells.end())
+                return iter->second;
+        }
+    
+        return 0;
     }
     
     World::World (Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
@@ -244,5 +278,60 @@ namespace MWWorld
         }
         
         throw std::runtime_error ("unknown ID: " + name);
+    }
+    
+    void World::enable (std::pair<Ptr, CellStore *>& reference)
+    {
+        if (!reference.first.getRefData().isEnabled())
+        {
+            reference.first.getRefData().enable();
+            
+            if (MWRender::CellRender *render = searchRender (reference.second))
+            {
+                render->enable (reference.first.getRefData().getHandle());
+            }
+        }
+    }
+    
+    void World::disable (std::pair<Ptr, CellStore *>& reference)
+    {
+        if (!reference.first.getRefData().isEnabled())
+        {
+            reference.first.getRefData().enable();
+            
+            if (MWRender::CellRender *render = searchRender (reference.second))
+            {
+                render->disable (reference.first.getRefData().getHandle());
+            }
+        }    
+    }
+    
+    World::CellStore *World::find (const Ptr& ptr)
+    {
+        for (CellRenderCollection::iterator iter (mActiveCells.begin()); iter!=mActiveCells.end();
+            ++iter)
+        {
+            if (
+                hasReference (iter->first->activators, ptr) ||
+                hasReference (iter->first->potions, ptr) ||
+                hasReference (iter->first->appas, ptr) ||
+                hasReference (iter->first->armors, ptr) ||
+                hasReference (iter->first->books, ptr) ||
+                hasReference (iter->first->clothes, ptr) ||
+                hasReference (iter->first->containers, ptr) ||
+                hasReference (iter->first->creatures, ptr) ||
+                hasReference (iter->first->doors, ptr) ||
+                hasReference (iter->first->ingreds, ptr) ||
+                hasReference (iter->first->lights, ptr) ||
+                hasReference (iter->first->lockpicks, ptr) ||
+                hasReference (iter->first->miscItems, ptr) ||
+                hasReference (iter->first->npcs, ptr) ||
+                hasReference (iter->first->probes, ptr) ||
+                hasReference (iter->first->repairs, ptr) ||
+                hasReference (iter->first->weapons, ptr))
+                return iter->first;            
+        }
+        
+        throw std::runtime_error ("failed to locate reference in active cell");
     }
 }
