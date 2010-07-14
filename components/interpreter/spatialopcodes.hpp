@@ -12,11 +12,11 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                std::string name = runtime.getStringLiteral (runtime[0]);            
+                std::string name = runtime.getStringLiteral (runtime[0].mInteger);            
                 
-                float distance = runtime.getContext().getDistance (name);
+                Type_Float distance = runtime.getContext().getDistance (name);
                 
-                runtime[0] = *reinterpret_cast<Type_Data *> (&distance);
+                runtime[0].mFloat = distance;
             }            
     };
     
@@ -26,15 +26,15 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];
+                int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string id = runtime.getStringLiteral (index);
                             
-                std::string name = runtime.getStringLiteral (runtime[0]);            
+                std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                 
-                float distance = runtime.getContext().getDistance (name, id);
+                Type_Float distance = runtime.getContext().getDistance (name, id);
                 
-                runtime[0] = *reinterpret_cast<Type_Data *> (&distance);
+                runtime[0].mFloat = distance;
             }            
     };    
 }

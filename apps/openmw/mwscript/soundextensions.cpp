@@ -26,10 +26,10 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                    
-                    std::string file = runtime.getStringLiteral (runtime[0]);
+                    std::string file = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    std::string text = runtime.getStringLiteral (runtime[0]);
+                    std::string text = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                         
                     context.getSoundManager().say (context.getReference(), file, text,
@@ -60,7 +60,7 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                    
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                         
                     context.getSoundManager().streamMusic (sound, context);
@@ -76,7 +76,7 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                    
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                         
                     context.getSoundManager().playSound (sound, 1.0, 1.0, context);
@@ -92,13 +92,13 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                    
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                     
-                    float volume = *reinterpret_cast<float *> (&runtime[0]);
+                    Interpreter::Type_Float volume = runtime[0].mFloat;
                     runtime.pop();
 
-                    float pitch = *reinterpret_cast<float *> (&runtime[0]);
+                    Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
                         
                     context.getSoundManager().playSound (sound, volume, pitch, context);
@@ -118,7 +118,7 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                    
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                             
                     context.getSoundManager().playSound3D (context.getReference(), sound,
@@ -139,13 +139,13 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                    
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                         
-                    float volume = *reinterpret_cast<float *> (&runtime[0]);
+                    Interpreter::Type_Float volume = runtime[0].mFloat;
                     runtime.pop();
 
-                    float pitch = *reinterpret_cast<float *> (&runtime[0]);
+                    Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
                         
                     context.getSoundManager().playSound3D (context.getReference(), sound, volume,
@@ -163,7 +163,7 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                    
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                             
                     context.getSoundManager().stopSound3D (context.getReference(), sound, context);
@@ -179,7 +179,7 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                         
-                    int index = runtime[0];
+                    int index = runtime[0].mInteger;
                     runtime.pop();
                         
                     runtime.push (context.getSoundManager().getSoundPlaying (
@@ -196,13 +196,13 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                    
-                    std::string file = runtime.getStringLiteral (runtime[0]);
+                    std::string file = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    std::string text = runtime.getStringLiteral (runtime[0]);
+                    std::string text = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                         
                     context.getSoundManager().say (context.getWorld().getPtr (id, true),
@@ -219,7 +219,7 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                             
                     runtime.push (context.getSoundManager().sayDone (
@@ -240,10 +240,10 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                        
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                             
                     context.getSoundManager().playSound3D (
@@ -264,16 +264,16 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                        
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                         
-                    float volume = *reinterpret_cast<float *> (&runtime[0]);
+                    Interpreter::Type_Float volume = runtime[0].mFloat;
                     runtime.pop();
 
-                    float pitch = *reinterpret_cast<float *> (&runtime[0]);
+                    Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
                         
                     context.getSoundManager().playSound3D (
@@ -291,10 +291,10 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();                   
                     
-                    std::string sound = runtime.getStringLiteral (runtime[0]);
+                    std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                             
                     context.getSoundManager().stopSound3D (
@@ -311,10 +311,10 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-                    std::string id = runtime.getStringLiteral (runtime[0]);
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                             
-                    int index = runtime[0];
+                    int index = runtime[0].mInteger;
                     runtime.pop();
                         
                     runtime.push (context.getSoundManager().getSoundPlaying (

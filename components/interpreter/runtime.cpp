@@ -68,9 +68,23 @@ namespace Interpreter
         mPC = PC;
     }    
     
-    void Runtime::push (Type_Data data)
+    void Runtime::push (const Data& data)
     {
         mStack.push_back (data);
+    }
+    
+    void Runtime::push (Type_Integer value)
+    {
+        Data data;
+        data.mInteger = value;
+        push (data);
+    }
+    
+    void Runtime::push (Type_Float value)
+    {
+        Data data;
+        data.mFloat = value;
+        push (data);
     }
     
     void Runtime::pop()
@@ -81,7 +95,7 @@ namespace Interpreter
         mStack.resize (mStack.size()-1);
     }
     
-    Type_Data& Runtime::operator[] (int Index)
+    Data& Runtime::operator[] (int Index)
     {
         if (Index<0 || Index>=static_cast<int> (mStack.size()))
             throw std::runtime_error ("stack index out of range");

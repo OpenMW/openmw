@@ -18,7 +18,7 @@ namespace Interpreter
             const Type_Code *mCode;
             int mCodeSize;
             int mPC;
-            std::vector<Type_Data> mStack;
+            std::vector<Data> mStack;
             
         public:
         
@@ -42,13 +42,19 @@ namespace Interpreter
             void setPC (int PC);
             ///< set program counter.
             
-            void push (Type_Data data);
+            void push (const Data& data);
             ///< push data on stack
+            
+            void push (Type_Integer value);
+            ///< push integer data on stack.
+            
+            void push (Type_Float value);
+            ///< push float data on stack.
             
             void pop();
             ///< pop stack
             
-            Type_Data& operator[] (int Index);
+            Data& operator[] (int Index);
             ///< Access stack member, counted from the top.
             
             Context& getContext();
