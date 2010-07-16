@@ -1,8 +1,8 @@
 add_executable(mygui_test
   main.cpp
   ${BSA}  ${BSA_HEADER}
-  ${OGRE} ${OGRE_HEADER}
-  ${EGUI} ${EGUI_HEADER}
+  ${OENGINE_OGRE}
+  ${OENGINE_GUI}
 )
 target_link_libraries(mygui_test
   ${OGRE_LIBRARIES}

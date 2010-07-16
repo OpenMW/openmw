@@ -50,35 +50,10 @@ source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 source_group(components\\esm FILES ${ESM_HEADER}) 
 
-set(OGRE 
-    ${COMP_DIR}/engine/ogre/renderer.cpp)
-set(OGRE_HEADER 
-    ${COMP_DIR}/engine/ogre/renderer.hpp)
-source_group(components\\engine\\ogre FILES ${OGRE} ${OGRE_HEADER})
-
 # components/mw_gui
 set(MWGUI_HEADER
     ${COMP_DIR}/mw_gui/mw_layouts.hpp)
 source_group(components\\mw_gui FILES ${MWGUI_HEADER})
-
-# components/engine/gui
-set(EGUI
-    ${COMP_DIR}/engine/gui/manager.cpp)
-set(EGUI_HEADER
-    ${COMP_DIR}/engine/gui/manager.hpp
-    ${COMP_DIR}/engine/gui/layout.hpp)
-source_group(components\\engine\\gui FILES ${EGUI} ${EGUI_HEADER})
-
-set(INPUT 
-    ${COMP_DIR}/engine/input/oismanager.cpp)
-set(INPUT_HEADER 
-    ${COMP_DIR}/engine/input/oismanager.hpp
-    ${COMP_DIR}/engine/input/listener.hpp
-    ${COMP_DIR}/engine/input/func_binder.hpp
-    ${COMP_DIR}/engine/input/dispatch_map.hpp
-    ${COMP_DIR}/engine/input/dispatcher.hpp
-    ${COMP_DIR}/engine/input/poller.hpp)
-source_group(components\\engine\\input FILES ${INPUT} ${INPUT_HEADER})
 
 set(COMMANDSERVER
     ${COMP_DIR}/commandserver/command.hpp
@@ -104,22 +79,35 @@ file(GLOB INTERPRETER ${COMP_DIR}/interpreter/*.cpp)
 file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 
-set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${OGRE} ${INPUT} ${MISC}
-    ${EGUI}
+set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC}
     ${COMMANDSERVER}
     ${COMPILER}
     ${INTERPRETER})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
-    ${ESM_HEADER} ${OGRE_HEADER} ${INPUT_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
-    ${INTERPRETER_HEADER} ${EGUI_HEADER} ${MWGUI_HEADER})
+    ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
+    ${INTERPRETER_HEADER} ${MWGUI_HEADER})
 
 # source directory: libs
 
 set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
-set(MANGLE_VFS ${LIBDIR}/mangle/vfs/servers/ogre_vfs.cpp)
-source_group(libs\\mangle_vfs FILES ${MANGLE_VFS})
 
-set(OPENMW_LIBS ${MANGLE_VFS})
+set(MANGLE_VFS ${LIBDIR}/mangle/vfs/servers/ogre_vfs.cpp)
+set(MANGLE_INPUT ${LIBDIR}/mangle/input/servers/ois_driver.cpp)
+set(MANGLE_ALL ${MANGLE_VFS} ${MANGLE_INPUT})
+source_group(libs\\mangle FILES ${MANGLE_ALL})
+
+set(OENGINE_OGRE
+  ${LIBDIR}/openengine/ogre/renderer.cpp
+  ${LIBDIR}/openengine/ogre/mouselook.cpp
+)
+set(OENGINE_GUI
+#  ${LIBDIR}/openengine/gui/events.cpp
+  ${LIBDIR}/openengine/gui/manager.cpp
+) # Not yet included in main executable
+set(OENGINE_ALL ${OENGINE_OGRE})
+source_group(libs\\openengine FILES ${OENGINE_ALL})
+
+set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
 set(OPENMW_LIBS_HEADER)
     
 # Platform specific
@@ -142,6 +130,7 @@ include_directories("."
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
+    ${LIBDIR}
 )
 
 

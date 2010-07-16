@@ -1,14 +1,16 @@
 #include <iostream>
 using namespace std;
 
-#include <components/engine/gui/manager.hpp>
-#include <components/mw_gui/mw_layouts.hpp>
+#include <openengine/gui/manager.hpp>
+#include <openengine/ogre/renderer.hpp>
 
-#include <components/engine/ogre/renderer.hpp>
+#include <components/mw_gui/mw_layouts.hpp>
+#include <components/bsa/bsa_archive.hpp>
+
 #include <OgreResourceGroupManager.h>
 #include <OgreRenderWindow.h>
-
-#include <components/bsa/bsa_archive.hpp>
+#include <OgreFrameListener.h>
+#include <OgreRoot.h>
 
 // Frame listener
 struct Listener : public Ogre::FrameListener
@@ -40,7 +42,7 @@ struct Listener : public Ogre::FrameListener
 
 int main()
 {
-  Render::OgreRenderer ogre;
+  OEngine::Render::OgreRenderer ogre;
   ogre.configure(false, "plugins.cfg", false);
   ogre.createWindow("MyGUI test");
   ogre.createScene();
@@ -60,7 +62,7 @@ int main()
   // Make sure you load the data paths BEFORE you initialize the
   // GUI. MyGUI depends on finding core.xml in resources/mygui/.
   cout << "Setting up MyGUI\n";
-  GUI::MyGUIManager gui(ogre.getWindow(), ogre.getScene());
+  OEngine::GUI::MyGUIManager gui(ogre.getWindow(), ogre.getScene());
 
   int w = ogre.getWindow()->getWidth();
   int h = ogre.getWindow()->getHeight();

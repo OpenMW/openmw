@@ -2,8 +2,11 @@
 
 #include <OgreEntity.h>
 #include <OgreLight.h>
+#include <OgreSceneNode.h>
+#include <OgreCamera.h>
+#include <OgreSceneManager.h>
 
-#include "components/nifogre/ogre_nif_loader.hpp"
+#include <components/nifogre/ogre_nif_loader.hpp>
 #include "mwscene.hpp"
 
 using namespace MWRender;

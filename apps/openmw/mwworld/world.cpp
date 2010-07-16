@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "components/bsa/bsa_archive.hpp"
-#include "components/engine/ogre/renderer.hpp"
 
 #include "apps/openmw/mwrender/sky.hpp"
 #include "apps/openmw/mwrender/interior.hpp"
@@ -142,7 +141,7 @@ namespace MWWorld
         return 0;
     }
     
-    World::World (Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
+    World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, const std::string& startCell, bool newGame)
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0)
     {   

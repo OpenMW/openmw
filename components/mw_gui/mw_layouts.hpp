@@ -1,7 +1,7 @@
 #ifndef MWGUI_LAYOUTS_H
 #define MWGUI_LAYOUTS_H
 
-#include <components/engine/gui/layout.hpp>
+#include <openengine/gui/layout.hpp>
 
 /*
   This file contains classes corresponding to all the window layouts
@@ -18,7 +18,7 @@
 
 namespace MWGUI
 {
-  class HUD : public GUI::Layout
+  class HUD : public OEngine::GUI::Layout
   {
   public:
     HUD(int width, int height)
@@ -103,7 +103,7 @@ namespace MWGUI
     MyGUI::StaticImagePtr crosshair;
   };
 
-  class MapWindow : public GUI::Layout
+  class MapWindow : public OEngine::GUI::Layout
   {
   public:
     MapWindow()
@@ -123,7 +123,7 @@ namespace MWGUI
     }
   };
 
-  class MainMenu : public GUI::Layout
+  class MainMenu : public OEngine::GUI::Layout
   {
   public:
     MainMenu(int w, int h)
@@ -133,7 +133,7 @@ namespace MWGUI
     }
   };
 
-  class StatsWindow : public GUI::Layout
+  class StatsWindow : public OEngine::GUI::Layout
   {
   public:
     void setBar(const char* name, const char* tname, int val, int max)

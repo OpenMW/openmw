@@ -7,7 +7,7 @@
 
 #include <OgreFrameListener.h>
 
-#include <components/engine/ogre/renderer.hpp>
+#include <openengine/ogre/renderer.hpp>
 #include <components/misc/tsdeque.hpp>
 #include <components/commandserver/server.hpp>
 #include <components/commandserver/command.hpp>
@@ -44,7 +44,7 @@ namespace OMW
             enum { kCommandServerPort = 27917 };
 
             boost::filesystem::path mDataDir;
-            Render::OgreRenderer mOgre;
+            OEngine::Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;
             bool mDebug;

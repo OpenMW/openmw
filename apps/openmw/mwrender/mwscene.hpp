@@ -1,7 +1,7 @@
 #ifndef _GAME_RENDER_MWSCENE_H
 #define _GAME_RENDER_MWSCENE_H
 
-#include "components/engine/ogre/renderer.hpp"
+#include <openengine/ogre/renderer.hpp>
 
 namespace Ogre
 {
@@ -20,7 +20,7 @@ namespace MWRender
    */
   class MWScene
   {
-    Render::OgreRenderer &rend;
+    OEngine::Render::OgreRenderer &rend;
 
     // Root node for all objects added to the scene. This is rotated so
     // that the OGRE coordinate system matches that used internally in
@@ -28,7 +28,7 @@ namespace MWRender
     Ogre::SceneNode *mwRoot;
 
   public:
-    MWScene(Render::OgreRenderer &_rend);
+    MWScene(OEngine::Render::OgreRenderer &_rend);
 
     Ogre::Camera *getCamera() { return rend.getCamera(); }
     Ogre::SceneNode *getRoot() { return mwRoot; }

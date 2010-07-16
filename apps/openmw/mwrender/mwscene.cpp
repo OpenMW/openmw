@@ -12,7 +12,7 @@
 using namespace MWRender;
 using namespace Ogre;
 
-MWScene::MWScene(Render::OgreRenderer &_rend)
+MWScene::MWScene(OEngine::Render::OgreRenderer &_rend)
   : rend(_rend)
 {
   rend.createScene("PlayerCam", 55, 5);
