@@ -15,7 +15,8 @@ namespace
 {
     template<typename T>
     void listCellScripts (const ESMS::ESMStore& store,
-        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::World::ScriptList& scriptList)
+        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::World::ScriptList& scriptList,
+        MWWorld::Ptr::CellStore *cell)
     {
         for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
             cellRefList.list.begin());
@@ -28,24 +29,10 @@ namespace
                     iter->mData.setLocals (*script);
             
                     scriptList.push_back (
-                        std::make_pair (iter->base->script, MWWorld::Ptr (&*iter)));
+                        std::make_pair (iter->base->script, MWWorld::Ptr (&*iter, cell)));
                 }
             }
         }
-    }
-    
-    template<typename T>
-    bool hasReference (ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, const MWWorld::Ptr& ptr)
-    {
-        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
-            cellRefList.list.begin());
-            iter!=cellRefList.list.end(); ++iter)
-        {    
-            if (&iter->mData==&ptr.getRefData())
-                return true;
-        }
-        
-        return false;
     }
 }
 
@@ -53,91 +40,91 @@ namespace MWWorld
 {
     void World::insertInteriorScripts (ESMS::CellStore<RefData>& cell)
     {
-        listCellScripts (mStore, cell.activators, mLocalScripts);
-        listCellScripts (mStore, cell.potions, mLocalScripts);
-        listCellScripts (mStore, cell.appas, mLocalScripts);
-        listCellScripts (mStore, cell.armors, mLocalScripts);
-        listCellScripts (mStore, cell.books, mLocalScripts);
-        listCellScripts (mStore, cell.clothes, mLocalScripts);
-        listCellScripts (mStore, cell.containers, mLocalScripts);
-        listCellScripts (mStore, cell.creatures, mLocalScripts);
-        listCellScripts (mStore, cell.doors, mLocalScripts);
-        listCellScripts (mStore, cell.ingreds, mLocalScripts);
-        listCellScripts (mStore, cell.lights, mLocalScripts);
-        listCellScripts (mStore, cell.lockpicks, mLocalScripts);
-        listCellScripts (mStore, cell.miscItems, mLocalScripts);
-        listCellScripts (mStore, cell.npcs, mLocalScripts);
-        listCellScripts (mStore, cell.probes, mLocalScripts);
-        listCellScripts (mStore, cell.repairs, mLocalScripts);
-        listCellScripts (mStore, cell.weapons, mLocalScripts);
+        listCellScripts (mStore, cell.activators, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.potions, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.appas, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.armors, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.books, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.clothes, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.containers, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.creatures, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.doors, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.ingreds, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.lights, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.lockpicks, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.miscItems, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.npcs, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.probes, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.repairs, mLocalScripts, &cell);
+        listCellScripts (mStore, cell.weapons, mLocalScripts, &cell);
     }
     
-    Ptr World::getPtr (const std::string& name, CellStore& cell)
+    Ptr World::getPtr (const std::string& name, Ptr::CellStore& cell)
     {
         if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref = cell.activators.find (name))
-            return ref;
+            return Ptr (ref, &cell);
 
         if (ESMS::LiveCellRef<ESM::Potion, RefData> *ref = cell.potions.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Apparatus, RefData> *ref = cell.appas.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Armor, RefData> *ref = cell.armors.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Book, RefData> *ref = cell.books.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Clothing, RefData> *ref = cell.clothes.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Container, RefData> *ref = cell.containers.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Creature, RefData> *ref = cell.creatures.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Door, RefData> *ref = cell.doors.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Ingredient, RefData> *ref = cell.ingreds.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::CreatureLevList, RefData> *ref = cell.creatureLists.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::ItemLevList, RefData> *ref = cell.itemLists.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Light, RefData> *ref = cell.lights.find (name))
-            return ref;
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = cell.lockpicks.find (name))
-            return ref;                
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Misc, RefData> *ref = cell.miscItems.find (name))
-            return ref;                
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = cell.npcs.find (name))
-            return ref;                
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = cell.probes.find (name))
-            return ref;                
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = cell.repairs.find (name))
-            return ref;                
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Static, RefData> *ref = cell.statics.find (name))
-            return ref;                
+            return Ptr (ref, &cell);
             
         if (ESMS::LiveCellRef<ESM::Weapon, RefData> *ref = cell.weapons.find (name))
-            return ref;                
+            return Ptr (ref, &cell);
             
         return Ptr();
     }
     
-    MWRender::CellRender *World::searchRender (CellStore *store)
+    MWRender::CellRender *World::searchRender (Ptr::CellStore *store)
     {
         CellRenderCollection::iterator iter = mActiveCells.find (store);
         
@@ -157,7 +144,7 @@ namespace MWWorld
     
     World::World (Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, const std::string& startCell, bool newGame)
-    : mSkyManager (0), mScene (renderer), mPlayerPos (0)
+    : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0)
     {   
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
@@ -169,6 +156,7 @@ namespace MWWorld
         mStore.load (mEsm);
         
         mInteriors[startCell].loadInt (startCell, mStore, mEsm);
+        mCurrentCell = &mInteriors[startCell];
         
         insertInteriorScripts (mInteriors[startCell]);
 
@@ -251,15 +239,12 @@ namespace MWWorld
         return iter->second;
     }
     
-    std::pair<Ptr, World::CellStore *> World::getPtr (const std::string& name, bool activeOnly)
+    Ptr World::getPtr (const std::string& name, bool activeOnly)
     {
         // the player is always in an active cell.
         if (name=="player")
         {
-            // TODO: find real cell (might need to be stored in playerPos). For now we
-            // use the first active cell. This will fail the moment we move into an
-            // exterior cell.
-            return std::make_pair (mPlayerPos->getPlayer(), mActiveCells.begin()->first);
+            return Ptr (mPlayerPos->getPlayer(), mCurrentCell);
         }
         
         // active cells
@@ -269,7 +254,7 @@ namespace MWWorld
             Ptr ptr = getPtr (name, *iter->first);
             
             if (!ptr.isEmpty())
-                return std::make_pair (ptr, iter->first);
+                return ptr;
         }
         
         if (!activeOnly)
@@ -280,58 +265,29 @@ namespace MWWorld
         throw std::runtime_error ("unknown ID: " + name);
     }
     
-    void World::enable (std::pair<Ptr, CellStore *>& reference)
+    void World::enable (Ptr reference)
     {
-        if (!reference.first.getRefData().isEnabled())
+        if (!reference.getRefData().isEnabled())
         {
-            reference.first.getRefData().enable();
+            reference.getRefData().enable();
             
-            if (MWRender::CellRender *render = searchRender (reference.second))
+            if (MWRender::CellRender *render = searchRender (reference.getCell()))
             {
-                render->enable (reference.first.getRefData().getHandle());
+                render->enable (reference.getRefData().getHandle());
             }
         }
     }
     
-    void World::disable (std::pair<Ptr, CellStore *>& reference)
+    void World::disable (Ptr reference)
     {
-        if (!reference.first.getRefData().isEnabled())
+        if (!reference.getRefData().isEnabled())
         {
-            reference.first.getRefData().enable();
+            reference.getRefData().enable();
             
-            if (MWRender::CellRender *render = searchRender (reference.second))
+            if (MWRender::CellRender *render = searchRender (reference.getCell()))
             {
-                render->disable (reference.first.getRefData().getHandle());
+                render->disable (reference.getRefData().getHandle());
             }
         }    
-    }
-    
-    World::CellStore *World::find (const Ptr& ptr)
-    {
-        for (CellRenderCollection::iterator iter (mActiveCells.begin()); iter!=mActiveCells.end();
-            ++iter)
-        {
-            if (
-                hasReference (iter->first->activators, ptr) ||
-                hasReference (iter->first->potions, ptr) ||
-                hasReference (iter->first->appas, ptr) ||
-                hasReference (iter->first->armors, ptr) ||
-                hasReference (iter->first->books, ptr) ||
-                hasReference (iter->first->clothes, ptr) ||
-                hasReference (iter->first->containers, ptr) ||
-                hasReference (iter->first->creatures, ptr) ||
-                hasReference (iter->first->doors, ptr) ||
-                hasReference (iter->first->ingreds, ptr) ||
-                hasReference (iter->first->lights, ptr) ||
-                hasReference (iter->first->lockpicks, ptr) ||
-                hasReference (iter->first->miscItems, ptr) ||
-                hasReference (iter->first->npcs, ptr) ||
-                hasReference (iter->first->probes, ptr) ||
-                hasReference (iter->first->repairs, ptr) ||
-                hasReference (iter->first->weapons, ptr))
-                return iter->first;            
-        }
-        
-        throw std::runtime_error ("failed to locate reference in active cell");
     }
 }

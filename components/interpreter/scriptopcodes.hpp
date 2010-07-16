@@ -13,8 +13,8 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                std::string name = runtime.getStringLiteral (runtime[0]);
-                runtime[0] = runtime.getContext().isScriptRunning (name);
+                std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime[0].mInteger = runtime.getContext().isScriptRunning (name);
             }           
     };
 
@@ -24,7 +24,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                std::string name = runtime.getStringLiteral (runtime[0]);
+                std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
                 runtime.getContext().startScript (name);
             }           
@@ -36,7 +36,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                std::string name = runtime.getStringLiteral (runtime[0]);
+                std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
                 runtime.getContext().stopScript (name);
             }           

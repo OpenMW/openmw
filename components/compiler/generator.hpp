@@ -107,7 +107,7 @@ namespace Compiler
 
         void stopScript (CodeContainer& code);
         
-        void getDistance (CodeContainer& code);
+        void getDistance (CodeContainer& code, Literals& literals, const std::string id);
 
         void getSecondsPassed (CodeContainer& code);
         

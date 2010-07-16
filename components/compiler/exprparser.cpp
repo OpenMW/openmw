@@ -311,6 +311,40 @@ namespace Compiler
                     mNextOperand = false;
                     return true;            
                 }            
+                else if (keyword==Scanner::K_getdistance)
+                {
+                    mTokenLoc = loc;
+                    parseArguments ("c", scanner);
+                    
+                    Generator::getDistance (mCode, mLiterals, mExplicit);
+                    mOperands.push_back ('f');
+                    mExplicit.clear();
+                    mRefOp = false;
+                    
+                    mNextOperand = false;
+                    return true;
+                }                   
+
+                // check for custom extensions
+                if (const Extensions *extensions = getContext().getExtensions())
+                {
+                    char returnType;
+                    std::string argumentType;
+                    
+                    if (extensions->isFunction (keyword, returnType, argumentType, true))
+                    {
+                        mTokenLoc = loc;
+                        parseArguments (argumentType, scanner);
+                        
+                        extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit);
+                        mOperands.push_back (returnType);
+                        mExplicit.clear();
+                        mRefOp = false;
+                    
+                        mNextOperand = false;
+                        return true;
+                    }
+                }
             }
         
             return Parser::parseKeyword (keyword, loc, scanner);
@@ -360,18 +394,18 @@ namespace Compiler
                 
                 mNextOperand = false;
                 return true;
-            }            
+            }             
             else if (keyword==Scanner::K_getdistance)
             {
                 mTokenLoc = loc;
                 parseArguments ("c", scanner);
                 
-                Generator::getDistance (mCode);
+                Generator::getDistance (mCode, mLiterals, "");
                 mOperands.push_back ('f');
                 
                 mNextOperand = false;
                 return true;
-            }            
+            }                       
             else if (keyword==Scanner::K_getsecondspassed)
             {
                 mTokenLoc = loc;        
@@ -400,12 +434,12 @@ namespace Compiler
                     char returnType;
                     std::string argumentType;
                     
-                    if (extensions->isFunction (keyword, returnType, argumentType))
+                    if (extensions->isFunction (keyword, returnType, argumentType, false))
                     {
                         mTokenLoc = loc;
                         parseArguments (argumentType, scanner);
                         
-                        extensions->generateFunctionCode (keyword, mCode);
+                        extensions->generateFunctionCode (keyword, mCode, mLiterals, "");
                         mOperands.push_back (returnType);
                         
                         mNextOperand = false;

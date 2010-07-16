@@ -314,6 +314,11 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (56));
     }
+    
+    void opGetDistanceExplicit (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (57));
+    }            
 }
 
 namespace Compiler
@@ -706,9 +711,18 @@ namespace Compiler
             opStopScript (code);
         }
 
-        void getDistance (CodeContainer& code)
+        void getDistance (CodeContainer& code, Literals& literals, const std::string id)
         {
-            opGetDistance (code);
+            if (id.empty())
+            {        
+                opGetDistance (code);
+            }
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opGetDistanceExplicit (code);
+            }          
         }        
         
         void getSecondsPassed (CodeContainer& code)

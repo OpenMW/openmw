@@ -110,7 +110,7 @@ namespace SAInterpreter
     
     void Context::stopScript (const std::string& name) {}
     
-    float Context::getDistance (const std::string& name) const
+    float Context::getDistance (const std::string& name, const std::string& id) const
     {
         return 0;
     }

@@ -1,8 +1,7 @@
 
 #include "extensions.hpp"
 
-#include "../mwsound/extensions.hpp"
-
+#include "soundextensions.hpp"
 #include "cellextensions.hpp"
 #include "miscextensions.hpp"
 #include "guiextensions.hpp"
@@ -14,7 +13,7 @@ namespace MWScript
         Cell::registerExtensions (extensions);
         Misc::registerExtensions (extensions);
         Gui::registerExtensions (extensions);
-        MWSound::registerExtensions (extensions);
+        Sound::registerExtensions (extensions);
     }
 }
 
