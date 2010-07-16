@@ -50,6 +50,8 @@ public:
   */
   FuncBinder(int number) : bindings(number) {}
 
+  unsigned int getSize() { return bindings.size(); }
+
   /**
      Bind an action to an index.
    */

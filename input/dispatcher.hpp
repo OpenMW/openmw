@@ -4,6 +4,7 @@
 #include "dispatch_map.hpp"
 #include "func_binder.hpp"
 #include <mangle/input/event.hpp>
+#include <assert.h>
 
 namespace OEngine {
 namespace Input {
@@ -19,8 +20,16 @@ struct Dispatcher : Mangle::Input::Event
   */
   Dispatcher(int actions) : funcs(actions) {}
 
-  void bind(int action, int key) { map.bind(key, action); }
-  void unbind(int action, int key) { map.unbind(key, action); }
+  void bind(unsigned int action, int key)
+  {
+    assert(action < funcs.getSize());
+    map.bind(key, action);
+  }
+  void unbind(unsigned int action, int key)
+  {
+    assert(action < funcs.getSize());
+    map.unbind(key, action);
+  }
   bool isBound(int key) const { return map.isBound(key); }
 
   /**
