@@ -101,10 +101,10 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/mouselook.cpp
 )
 set(OENGINE_GUI
-#  ${LIBDIR}/openengine/gui/events.cpp
+  ${LIBDIR}/openengine/gui/events.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
-) # Not yet included in main executable
-set(OENGINE_ALL ${OENGINE_OGRE})
+)
+set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
 
 set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})

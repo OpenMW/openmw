@@ -3,6 +3,7 @@ add_executable(mygui_test
   ${BSA}  ${BSA_HEADER}
   ${OENGINE_OGRE}
   ${OENGINE_GUI}
+  ${MANGLE_INPUT}
 )
 target_link_libraries(mygui_test
   ${OGRE_LIBRARIES}

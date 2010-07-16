@@ -2,7 +2,10 @@
 using namespace std;
 
 #include <openengine/gui/manager.hpp>
+#include <openengine/gui/events.hpp>
 #include <openengine/ogre/renderer.hpp>
+
+#include <mangle/input/servers/ois_driver.hpp>
 
 #include <components/mw_gui/mw_layouts.hpp>
 #include <components/bsa/bsa_archive.hpp>
@@ -12,29 +15,24 @@ using namespace std;
 #include <OgreFrameListener.h>
 #include <OgreRoot.h>
 
+#include <OIS/OISKeyboard.h>
+
 // Frame listener
 struct Listener : public Ogre::FrameListener
 {
   bool exit;
-  float total;
-  int step;
 
-  Listener() : exit(false), total(0.0), step(0) {}
+  Mangle::Input::Driver *input;
+
+  Listener() : exit(false) {}
 
   bool frameStarted(const Ogre::FrameEvent &evt)
   {
-    total += evt.timeSinceLastFrame;
+    if(input)
+      input->capture();
 
-    // Countdown to exit
-    const int MAX = 4;
-    if(total >= step)
-      {
-        step++;
-        if(step<MAX)
-          cout << "Exit in " << (MAX-step) << endl;
-        else
-          exit = true;
-      }
+    if(input->isDown(OIS::KC_ESCAPE))
+      exit = true;
 
     return !exit;
   }
@@ -59,6 +57,10 @@ int main()
   // there
   addBSA("data/Morrowind.bsa");
 
+  cout << "Setting up input with OIS\n";
+  Mangle::Input::OISDriver input(ogre.getWindow());
+  listener.input = &input;
+
   // Make sure you load the data paths BEFORE you initialize the
   // GUI. MyGUI depends on finding core.xml in resources/mygui/.
   cout << "Setting up MyGUI\n";
@@ -66,6 +68,10 @@ int main()
 
   int w = ogre.getWindow()->getWidth();
   int h = ogre.getWindow()->getHeight();
+
+  cout << "Connecting to input\n";
+  OEngine::GUI::EventInjector *evt = new OEngine::GUI::EventInjector(gui.getGui());
+  input.setEvent(Mangle::Input::EventPtr(evt));
 
   cout << "Setting up the window layouts\n";
   MWGUI::HUD hud(w,h);
@@ -79,24 +85,10 @@ int main()
   stats.setVisible(true);
 
   cout << "Starting rendering loop\n";
+  cout << "PRESS ESCAPE TO EXIT\n";
   ogre.start();
   ogre.screenshot("mygui_test.png");
 
   cout << "Done.\n";
   return 0;
 }
-
-/// Old D function
-/*
-extern "C" MyGUI::WidgetPtr gui_createText(const char *skin,
-                                           int32_t x, int32_t y,
-                                           int32_t w, int32_t h,
-                                           const char *layer)
-{
-  return mGUI->createWidget<MyGUI::StaticText>
-    (skin,
-     x,y,w,h,
-     MyGUI::ALIGN_LEFT | MyGUI::ALIGN_TOP,
-     layer);
-}
-*/
