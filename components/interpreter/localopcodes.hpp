@@ -13,10 +13,10 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
-                int index = runtime[1];
+                Type_Integer data = runtime[0].mInteger;
+                int index = runtime[1].mInteger;
 
-                runtime.getContext().setLocalShort (index, *reinterpret_cast<int *> (&data));
+                runtime.getContext().setLocalShort (index, data);
 
                 runtime.pop();
                 runtime.pop();
@@ -29,10 +29,10 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
-                int index = runtime[1];
+                Type_Integer data = runtime[0].mInteger;
+                int index = runtime[1].mInteger;
 
-                runtime.getContext().setLocalLong (index, *reinterpret_cast<int *> (&data));
+                runtime.getContext().setLocalLong (index, data);
 
                 runtime.pop();
                 runtime.pop();
@@ -45,10 +45,10 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
-                int index = runtime[1];
+                Type_Float data = runtime[0].mFloat;
+                int index = runtime[1].mInteger;
 
-                runtime.getContext().setLocalFloat (index, *reinterpret_cast<float *> (&data));
+                runtime.getContext().setLocalFloat (index, data);
 
                 runtime.pop();
                 runtime.pop();
@@ -61,8 +61,8 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int intValue = runtime.getIntegerLiteral (runtime[0]);
-                runtime[0] = intValue;
+                Type_Integer intValue = runtime.getIntegerLiteral (runtime[0].mInteger);
+                runtime[0].mInteger = intValue;
             }           
     };    
     
@@ -72,8 +72,8 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                float floatValue = runtime.getFloatLiteral (runtime[0]);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&floatValue);
+                Type_Float floatValue = runtime.getFloatLiteral (runtime[0].mInteger);
+                runtime[0].mFloat = floatValue;
             }           
     };     
     
@@ -83,9 +83,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];           
+                int index = runtime[0].mInteger;
                 int value = runtime.getContext().getLocalShort (index);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+                runtime[0].mInteger = value;
             }           
     };    
 
@@ -95,9 +95,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];           
+                int index = runtime[0].mInteger;  
                 int value = runtime.getContext().getLocalLong (index);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+                runtime[0].mInteger = value;
             }           
     };    
 
@@ -107,9 +107,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];           
+                int index = runtime[0].mInteger;
                 float value = runtime.getContext().getLocalFloat (index);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+                runtime[0].mFloat = value;
             }           
     };    
     
@@ -119,12 +119,12 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
-                int index = runtime[1];
+                Type_Integer data = runtime[0].mInteger;
+                int index = runtime[1].mInteger;
 
                 std::string name = runtime.getStringLiteral (index);
 
-                runtime.getContext().setGlobalShort (name, *reinterpret_cast<int *> (&data));
+                runtime.getContext().setGlobalShort (name, data);
 
                 runtime.pop();
                 runtime.pop();
@@ -137,12 +137,12 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
-                int index = runtime[1];
+                Type_Integer data = runtime[0].mInteger;
+                int index = runtime[1].mInteger;
 
                 std::string name = runtime.getStringLiteral (index);
 
-                runtime.getContext().setGlobalLong (name, *reinterpret_cast<int *> (&data));
+                runtime.getContext().setGlobalLong (name, data);
 
                 runtime.pop();
                 runtime.pop();
@@ -155,12 +155,12 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
-                int index = runtime[1];
+                Type_Float data = runtime[0].mFloat;
+                int index = runtime[1].mInteger;
 
                 std::string name = runtime.getStringLiteral (index);
 
-                runtime.getContext().setGlobalFloat (name, *reinterpret_cast<float *> (&data));
+                runtime.getContext().setGlobalFloat (name, data);
 
                 runtime.pop();
                 runtime.pop();
@@ -173,10 +173,10 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0]; 
+                int index = runtime[0].mInteger; 
                 std::string name = runtime.getStringLiteral (index);
-                int value = runtime.getContext().getGlobalShort (name);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+                Type_Integer value = runtime.getContext().getGlobalShort (name);
+                runtime[0].mInteger = value;
             }           
     };    
 
@@ -186,10 +186,10 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];           
+                int index = runtime[0].mInteger;          
                 std::string name = runtime.getStringLiteral (index);
-                int value = runtime.getContext().getGlobalLong (name);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+                Type_Integer value = runtime.getContext().getGlobalLong (name);
+                runtime[0].mInteger = value;
             }           
     };    
 
@@ -199,10 +199,10 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];           
+                int index = runtime[0].mInteger;
                 std::string name = runtime.getStringLiteral (index);
-                float value = runtime.getContext().getGlobalFloat (name);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+                Type_Float value = runtime.getContext().getGlobalFloat (name);
+                runtime[0].mFloat = value;
             }           
     };        
 }

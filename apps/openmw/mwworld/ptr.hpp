@@ -15,13 +15,18 @@ namespace MWWorld
     
     class Ptr
     {
+        public:
+        
+            typedef ESMS::CellStore<RefData> CellStore;
+    
             boost::any mPtr;
             ESM::CellRef *mCellRef;
             RefData *mRefData;
+            CellStore *mCell;
     
         public:
         
-            Ptr() : mCellRef (0), mRefData (0) {}
+            Ptr() : mCellRef (0), mRefData (0), mCell (0) {}
             
             bool isEmpty() const
             {
@@ -29,11 +34,12 @@ namespace MWWorld
             }
             
             template<typename T>
-            Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef)
+            Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
             {
                 mPtr = liveCellRef;
                 mCellRef = &liveCellRef->ref;
                 mRefData = &liveCellRef->mData;
+                mCell = cell;
             }
             
             template<typename T>
@@ -52,6 +58,12 @@ namespace MWWorld
             {
                 assert (mRefData);
                 return *mRefData;
+            }
+            
+            Ptr::CellStore *getCell() const
+            {
+                assert (mCell);
+                return mCell;
             }
     };
 }

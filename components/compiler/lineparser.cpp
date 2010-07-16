@@ -157,6 +157,21 @@ namespace Compiler
                     mState = EndState;
                     return true;          
             }
+            
+            // check for custom extensions
+            if (const Extensions *extensions = getContext().getExtensions())
+            {
+                std::string argumentType;
+                
+                if (extensions->isInstruction (keyword, argumentType, mState==ExplicitState))
+                {
+                    mExprParser.parseArguments (argumentType, scanner, mCode, true);
+                    
+                    extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit);
+                    mState = EndState;
+                    return true;
+                }
+            }            
         }
         
         if (mState==BeginState)
@@ -188,21 +203,6 @@ namespace Compiler
                     Generator::stopScript (mCode);
                     mState = EndState;
                     return true;     
-            }
-            
-            // check for custom extensions
-            if (const Extensions *extensions = getContext().getExtensions())
-            {
-                std::string argumentType;
-                
-                if (extensions->isInstruction (keyword, argumentType))
-                {
-                    mExprParser.parseArguments (argumentType, scanner, mCode, true);
-                    
-                    extensions->generateInstructionCode (keyword, mCode);
-                    mState = EndState;
-                    return true;
-                }
             }
         }
         else if (mState==SetLocalVarState && keyword==Scanner::K_to)

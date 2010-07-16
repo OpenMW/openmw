@@ -103,6 +103,7 @@ namespace Interpreter
         
         // spacial
         interpreter.installSegment5 (49, new OpGetDistance);
+        interpreter.installSegment5 (57, new OpGetDistanceExplicit);
     }
 }
 

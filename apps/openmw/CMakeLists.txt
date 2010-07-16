@@ -35,6 +35,7 @@ set(GAMESCRIPT
     mwscript/cellextensions.cpp
     mwscript/miscextensions.cpp
     mwscript/guiextensions.cpp
+    mwscript/soundextensions.cpp
     mwscript/extensions.cpp
     mwscript/globalscripts.cpp
     )
@@ -46,17 +47,16 @@ set(GAMESCRIPT_HEADER
     mwscript/cellextensions.hpp
     mwscript/miscextensions.hpp
     mwscript/guiextensions.hpp
+    mwscript/soundextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
     )
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})    
 
 set(GAMESOUND
-    mwsound/soundmanager.cpp
-    mwsound/extensions.cpp)
+    mwsound/soundmanager.cpp)
 set(GAMESOUND_HEADER 
-    mwsound/soundmanager.hpp
-    mwsound/extensions.hpp)
+    mwsound/soundmanager.hpp)
 source_group(apps\\openmw\\mwsound FILES ${GAMESOUND} ${GAMESOUND_HEADER}) 
 
 set(GAMEGUI

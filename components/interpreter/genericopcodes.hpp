@@ -12,7 +12,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime, unsigned int arg0)
             {
-                runtime.push (arg0);
+                runtime.push (static_cast<Type_Integer> (arg0));
             }        
     };
     
@@ -22,9 +22,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Integer data = *reinterpret_cast<Type_Integer *> (&runtime[0]);
+                Type_Integer data = runtime[0].mInteger;
                 Type_Float floatValue = static_cast<Type_Float> (data);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&floatValue);
+                runtime[0].mFloat = floatValue;
             }           
     };
     
@@ -34,9 +34,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Float data = *reinterpret_cast<Type_Float *> (&runtime[0]);
+                Type_Float data = runtime[0].mFloat;
                 Type_Integer integerValue = static_cast<Type_Integer> (data);
-                runtime[0] = *reinterpret_cast<Type_Data *> (&integerValue);
+                runtime[0].mInteger = integerValue;
             }           
     };    
     
@@ -46,9 +46,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Integer data = *reinterpret_cast<Type_Integer *> (&runtime[0]);
+                Type_Integer data = runtime[0].mInteger;
                 data = -data;
-                runtime[0] = *reinterpret_cast<Type_Data *> (&data);
+                runtime[0].mInteger = data;
             }           
     };    
     
@@ -58,9 +58,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Float data = *reinterpret_cast<Type_Float *> (&runtime[0]);
+                Type_Float data = runtime[0].mFloat;
                 data = -data;
-                runtime[0] = *reinterpret_cast<Type_Data *> (&data);
+                runtime[0].mFloat = data;
             }           
     };
     
@@ -70,9 +70,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Integer data = *reinterpret_cast<Type_Integer *> (&runtime[1]);
+                Type_Integer data = runtime[1].mInteger;
                 Type_Float floatValue = static_cast<Type_Float> (data);
-                runtime[1] = *reinterpret_cast<Type_Data *> (&floatValue);
+                runtime[1].mFloat = floatValue;
             }           
     };
     
@@ -82,9 +82,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Float data = *reinterpret_cast<Type_Float *> (&runtime[1]);
+                Type_Float data = runtime[1].mFloat;
                 Type_Integer integerValue = static_cast<Type_Integer> (data);
-                runtime[1] = *reinterpret_cast<Type_Data *> (&integerValue);
+                runtime[1].mInteger = integerValue;
             }           
     };            
 }

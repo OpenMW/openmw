@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "generator.hpp"
+#include "literals.hpp"
 
 namespace Compiler
 {
@@ -20,11 +21,15 @@ namespace Compiler
         return iter->second;
     }
         
-    bool Extensions::isFunction (int keyword, char& returnType, std::string& argumentType) const
+    bool Extensions::isFunction (int keyword, char& returnType, std::string& argumentType,
+        bool explicitReference) const
     {
         std::map<int, Function>::const_iterator iter = mFunctions.find (keyword);
         
         if (iter==mFunctions.end())
+            return false;
+            
+        if (explicitReference && iter->second.mCodeExplicit==-1)
             return false;
             
         returnType = iter->second.mReturn;
@@ -32,11 +37,15 @@ namespace Compiler
         return true;
     }
         
-    bool Extensions::isInstruction (int keyword, std::string& argumentType) const
+    bool Extensions::isInstruction (int keyword, std::string& argumentType,
+        bool explicitReference) const
     {
         std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
         
         if (iter==mInstructions.end())
+            return false;
+
+        if (explicitReference && iter->second.mCodeExplicit==-1)
             return false;
             
         argumentType = iter->second.mArguments;
@@ -44,7 +53,7 @@ namespace Compiler
     }
         
     void Extensions::registerFunction (const std::string& keyword, char returnType,
-        const std::string& argumentType, int segment5code)
+        const std::string& argumentType, int segment5code, int segment5codeExplicit)
     {
         assert (segment5code>=33554432 && segment5code<=67108863);
     
@@ -56,12 +65,13 @@ namespace Compiler
         function.mReturn = returnType;
         function.mArguments = argumentType;
         function.mCode = segment5code;
+        function.mCodeExplicit = segment5codeExplicit;
         
         mFunctions.insert (std::make_pair (code, function));
     }
         
     void Extensions::registerInstruction (const std::string& keyword,
-        const std::string& argumentType, int segment5code)
+        const std::string& argumentType, int segment5code, int segment5codeExplicit)
     {
         assert (segment5code>=33554432 && segment5code<=67108863);
     
@@ -72,23 +82,34 @@ namespace Compiler
         Instruction instruction;
         instruction.mArguments = argumentType;
         instruction.mCode = segment5code;
+        instruction.mCodeExplicit = segment5codeExplicit;
         
         mInstructions.insert (std::make_pair (code, instruction));
     }
         
-    void Extensions::generateFunctionCode (int keyword, std::vector<Interpreter::Type_Code>& code)
-        const
+    void Extensions::generateFunctionCode (int keyword, std::vector<Interpreter::Type_Code>& code,
+        Literals& literals, const std::string& id) const
     {
         std::map<int, Function>::const_iterator iter = mFunctions.find (keyword);
         
         if (iter==mFunctions.end())
             throw std::logic_error ("unknown custom function keyword");
             
-        code.push_back (Generator::segment5 (iter->second.mCode));
+        if (!id.empty())
+        {
+            if (iter->second.mCodeExplicit==-1)
+                throw std::logic_error ("explicit references not supported");
+        
+            int index = literals.addString (id);
+            Generator::pushInt (code, literals, index);        
+        }
+            
+        code.push_back (Generator::segment5 (
+            id.empty() ? iter->second.mCode : iter->second.mCodeExplicit));
     }
         
     void Extensions::generateInstructionCode (int keyword,
-        std::vector<Interpreter::Type_Code>& code)
+        std::vector<Interpreter::Type_Code>& code, Literals& literals, const std::string& id)
         const
     {
         std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
@@ -96,6 +117,16 @@ namespace Compiler
         if (iter==mInstructions.end())
             throw std::logic_error ("unknown custom instruction keyword");
             
-        code.push_back (Generator::segment5 (iter->second.mCode));
+        if (!id.empty())
+        {
+            if (iter->second.mCodeExplicit==-1)
+                throw std::logic_error ("explicit references not supported");
+        
+            int index = literals.addString (id);
+            Generator::pushInt (code, literals, index);        
+        }
+                        
+        code.push_back (Generator::segment5 (
+            id.empty() ? iter->second.mCode : iter->second.mCodeExplicit));
     }    
 }

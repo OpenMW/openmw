@@ -16,14 +16,11 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                T result =
-                    *reinterpret_cast<T *> (&runtime[1])
-                    + 
-                    *reinterpret_cast<T *> (&runtime[0]);
+                T result = getData<T> (runtime[1]) + getData<T> (runtime[0]);
                 
                 runtime.pop();
                 
-                runtime[0] = *reinterpret_cast<Type_Data *> (&result);
+                getData<T> (runtime[0]) = result;
             }           
     };
 
@@ -34,14 +31,11 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                T result =
-                    *reinterpret_cast<T *> (&runtime[1])
-                    - 
-                    *reinterpret_cast<T *> (&runtime[0]);
+                T result = getData<T> (runtime[1]) - getData<T> (runtime[0]);
                 
                 runtime.pop();
-                
-                runtime[0] = *reinterpret_cast<Type_Data *> (&result);
+
+                getData<T> (runtime[0]) = result;
             }           
     };
 
@@ -52,14 +46,11 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                T result =
-                    *reinterpret_cast<T *> (&runtime[1])
-                    * 
-                    *reinterpret_cast<T *> (&runtime[0]);
+                T result = getData<T> (runtime[1]) * getData<T> (runtime[0]);
                 
                 runtime.pop();
-                
-                runtime[0] = *reinterpret_cast<Type_Data *> (&result);
+
+                getData<T> (runtime[0]) = result;
             }           
     };
 
@@ -70,19 +61,16 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                T left = *reinterpret_cast<T *> (&runtime[0]);
+                T left = getData<T> (runtime[0]);
             
                 if (left==0)
                     throw std::runtime_error ("division by zero");
             
-                T result =
-                    *reinterpret_cast<T *> (&runtime[1])
-                    / 
-                    left;
+                T result = getData<T> (runtime[1]) / left;
                 
                 runtime.pop();
-                
-                runtime[0] = *reinterpret_cast<Type_Data *> (&result);
+
+                getData<T> (runtime[0]) = result;
             }           
     };
     
@@ -92,7 +80,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Float value = *reinterpret_cast<Type_Float *> (&runtime[0]);
+                Type_Float value = runtime[0].mFloat;
                 
                 if (value<0)
                     throw std::runtime_error (
@@ -100,7 +88,7 @@ namespace Interpreter
                 
                 value = std::sqrt (value);
                 
-                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+                runtime[0].mFloat = value;
             }           
     };    
     
@@ -111,13 +99,11 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int result = C() (
-                    *reinterpret_cast<T *> (&runtime[1]),
-                    *reinterpret_cast<T *> (&runtime[0]));
+                int result = C() (getData<T> (runtime[1]), getData<T> (runtime[0]));
                 
                 runtime.pop();
                 
-                runtime[0] = *reinterpret_cast<Type_Data *> (&result);
+                runtime[0].mInteger = result;
             }           
     };    
 }

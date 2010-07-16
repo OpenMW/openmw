@@ -22,7 +22,7 @@ namespace Interpreter
                     throw std::logic_error ("message box buttons not implemented yet");
                 
                 // message    
-                int index = runtime[0];
+                int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string message = runtime.getStringLiteral (index);
                 
@@ -44,13 +44,13 @@ namespace Interpreter
                             
                             if (c=='S' || c=='s')
                             {
-                                int index = runtime[0];
+                                int index = runtime[0].mInteger;
                                 runtime.pop();
                                 formattedMessage += runtime.getStringLiteral (index);
                             }
                             else if (c=='g' || c=='G')
                             {
-                                int value = *reinterpret_cast<const int *> (&runtime[0]);
+                                Type_Integer value = runtime[0].mInteger;
                                 runtime.pop();
                                 
                                 std::ostringstream out;
@@ -64,7 +64,7 @@ namespace Interpreter
                                     ++i;
                                 }
                             
-                                float value = *reinterpret_cast<const float *> (&runtime[0]);
+                                float value = runtime[0].mFloat;
                                 runtime.pop();
                                 
                                 std::ostringstream out;
@@ -107,7 +107,7 @@ namespace Interpreter
             {
                 double r = static_cast<double> (std::rand()) / RAND_MAX; // [0, 1)
                 
-                Type_Integer limit = *reinterpret_cast<Type_Integer *> (&runtime[0]);
+                Type_Integer limit = runtime[0].mInteger;
                 
                 if (limit<0)
                     throw std::runtime_error (
@@ -115,7 +115,7 @@ namespace Interpreter
                 
                 Type_Integer value = static_cast<Type_Integer> (r*limit); // [o, limit)
                 
-                runtime[0] = *reinterpret_cast<Type_Data *> (&value);
+                runtime[0].mInteger = value;
             }    
     };    
                 
@@ -125,9 +125,9 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                float duration = runtime.getContext().getSecondsPassed();
+                Type_Float duration = runtime.getContext().getSecondsPassed();
                 
-                runtime.push (*reinterpret_cast<Type_Data *> (&duration));
+                runtime.push (duration);
             }            
     };
     
@@ -167,7 +167,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];
+                int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string id = runtime.getStringLiteral (index);
             
@@ -181,7 +181,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];
+                int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string id = runtime.getStringLiteral (index);
             
@@ -195,7 +195,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                int index = runtime[0];
+                int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string id = runtime.getStringLiteral (index);
             

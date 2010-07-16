@@ -24,7 +24,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
+                Type_Integer data = runtime[0].mInteger;
                 runtime.pop();
                 
                 if (data==0)
@@ -38,7 +38,7 @@ namespace Interpreter
         
             virtual void execute (Runtime& runtime)
             {
-                Type_Data data = runtime[0];
+                Type_Integer data = runtime[0].mInteger;
                 runtime.pop();
                 
                 if (data!=0)
