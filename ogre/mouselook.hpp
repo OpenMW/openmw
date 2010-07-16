@@ -38,7 +38,7 @@ namespace Render
                    bool prot=true)
       : camera(cam)
       , sensX(sX)
-      , sensY(sy)
+      , sensY(sY)
       , flipProt(prot)
     {}
 
@@ -50,5 +50,7 @@ namespace Render
 
     void event(Type type, int index, const void *p);
   };
+
+  typedef boost::shared_ptr<MouseLookEvent> MouseLookEventPtr;
 }}
 #endif

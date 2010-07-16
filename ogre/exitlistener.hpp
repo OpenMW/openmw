@@ -21,13 +21,17 @@ namespace Render
     ExitListener(Ogre::RenderWindow *wnd)
       : window(wnd), exit(false) {}
 
-    bool frameStarted(const FrameEvent &evt)
+    bool frameStarted(const Ogre::FrameEvent &evt)
     {
       if(window->isClosed())
         exit = true;
 
       return !exit;
     }
+
+    // Function equivalent of setting exit=true. Handy when you need a
+    // delegate to bind to an event.
+    void exitNow() { exit = true; }
   };
 }}
 #endif

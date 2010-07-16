@@ -34,10 +34,6 @@ struct Dispatcher : Mangle::Input::Event
     if(!isBound(index))
       return;
 
-    // Only treat key-down events for now
-    if(type != EV_KeyDown)
-      return;
-
     // Get the mapped actions and execute them
     const _O &list = map.getList(index);
     _O::const_iterator it;
@@ -45,5 +41,10 @@ struct Dispatcher : Mangle::Input::Event
       funcs.call(*it, p);
   }
 };
+
+// This helps us play nice with Mangle's EventPtr, but it should
+// really be defined for all the classes in OEngine.
+  typedef boost::shared_ptr<Dispatcher> DispatcherPtr;
+
 }}
 #endif
