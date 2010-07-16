@@ -3,8 +3,19 @@
 
 namespace MWGui
 {
+  // Predeclarations, these are defined in mw_layouts.hpp
+    class HUD;
+    class MapWindow;
+    class MainMenu;
+    class StatsWindow;
+
     class GuiManager
     {
+        HUD *hud;
+        MapWindow *map;
+        MainMenu *menu;
+        StatsWindow *stats;
+
         public:
         
             enum GuiWindow

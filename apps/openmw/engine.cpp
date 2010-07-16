@@ -7,6 +7,8 @@
 #include <components/misc/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
 
+#include <components/mwgui/guimanager.hpp>
+
 #include "mwinput/inputmanager.hpp"
 
 #include "mwscript/scriptmanager.hpp"
@@ -16,8 +18,6 @@
 #include "mwscript/globalscripts.hpp"
 
 #include "mwsound/soundmanager.hpp"
-
-#include "mwgui/guimanager.hpp"
 
 #include "mwworld/world.hpp"
 #include "mwworld/ptr.hpp"

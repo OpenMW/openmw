@@ -7,7 +7,7 @@ using namespace std;
 
 #include <mangle/input/servers/ois_driver.hpp>
 
-#include <components/mw_gui/mw_layouts.hpp>
+#include <components/mwgui/mw_layouts.hpp>
 #include <components/bsa/bsa_archive.hpp>
 
 #include <OgreResourceGroupManager.h>
@@ -74,10 +74,10 @@ int main()
   input.setEvent(Mangle::Input::EventPtr(evt));
 
   cout << "Setting up the window layouts\n";
-  MWGUI::HUD hud(w,h);
-  MWGUI::MapWindow map;
-  MWGUI::MainMenu menu(w,h);
-  MWGUI::StatsWindow stats;
+  MWGui::HUD hud(w,h);
+  MWGui::MapWindow map;
+  MWGui::MainMenu menu(w,h);
+  MWGui::StatsWindow stats;
 
   hud.setVisible(true);
   map.setVisible(true);

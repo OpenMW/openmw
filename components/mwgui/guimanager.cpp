@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "mw_layouts.hpp"
+
 namespace MWGui
 {
     void GuiManager::enableWindow (GuiWindow window)

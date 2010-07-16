@@ -59,12 +59,6 @@ set(GAMESOUND_HEADER
     mwsound/soundmanager.hpp)
 source_group(apps\\openmw\\mwsound FILES ${GAMESOUND} ${GAMESOUND_HEADER}) 
 
-set(GAMEGUI
-    mwgui/guimanager.cpp)
-set(GAMEGUI_HEADER 
-    mwgui/guimanager.hpp)
-source_group(apps\\openmw\\mwgui FILES ${GAMEGUI} ${GAMEGUI_HEADER}) 
-
 set(GAMEWORLD
     mwworld/world.cpp)
 set(GAMEWORLD_HEADER 

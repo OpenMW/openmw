@@ -16,7 +16,7 @@
   setVisible().
  */
 
-namespace MWGUI
+namespace MWGui
 {
   class HUD : public OEngine::GUI::Layout
   {

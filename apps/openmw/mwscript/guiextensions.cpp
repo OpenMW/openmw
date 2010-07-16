@@ -7,9 +7,10 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include <components/mwgui/guimanager.hpp>
+
 #include "interpretercontext.hpp"
 
-#include "../mwgui/guimanager.hpp"
 
 namespace MWScript
 {
