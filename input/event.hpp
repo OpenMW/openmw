@@ -18,9 +18,12 @@ namespace Mangle
           EV_Unknown    = 1,    // Unknown event type
           EV_KeyDown    = 2,    // Keyboard button was pressed
           EV_KeyUp      = 4,    // Keyboard button was released
+          EV_Keyboard   = 6,    // All keyboard events
+
           EV_MouseMove  = 8,    // Mouse movement
           EV_MouseDown  = 16,   // Mouse button pressed
           EV_MouseUp    = 32,   // Mouse button released
+          EV_Mouse      = 56,   // All mouse events
 
           EV_ALL        = 63    // All events
         };
