@@ -13,7 +13,7 @@ namespace GUI
 {
   /** Event handler that injects OIS events into MyGUI
    */
-  class EventInjector : Mangle::Input::Event
+  class EventInjector : public Mangle::Input::Event
   {
     MyGUI::Gui *gui;
 

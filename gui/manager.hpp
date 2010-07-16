@@ -29,6 +29,8 @@ namespace GUI
 
     void setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false);
     void shutdown();
+
+    MyGUI::Gui *getGui() { return mGui; }
   };
 }}
 #endif
