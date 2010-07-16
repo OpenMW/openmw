@@ -1,3 +1,6 @@
 [submodule "libs/mangle"]
 	path = libs/mangle
 	url = git://github.com/korslund/mangle.git
+[submodule "libs/openengine"]
+	path = libs/openengine
+	url = git://github.com/korslund/OpenEngine

@@ -1,12 +1,17 @@
 #ifndef _MWINPUT_MWINPUTMANAGER_H
 #define _MWINPUT_MWINPUTMANAGER_H
 
-#include "components/engine/input/listener.hpp"
-#include "components/engine/input/dispatcher.hpp"
-#include "components/engine/input/poller.hpp"
-#include "boost/bind.hpp"
-#include "apps/openmw/mwrender/playerpos.hpp"
-#include "libs/platform/strings.h"
+#include <libs/openengine/input/dispatcher.hpp>
+#include <libs/openengine/input/poller.hpp>
+
+#include <libs/openengine/ogre/exitlistener.hpp>
+#include <libs/openengine/ogre/mouselook.hpp>
+
+#include <libs/mangle/input/drivers/ois_driver.hpp>
+
+#include <libs/platform/strings.h>
+#include <boost/bind.hpp>
+#include "../mwrender/playerpos.hpp"
 
 namespace MWInput
 {
@@ -29,13 +34,10 @@ namespace MWInput
   // Class that handles all input and key bindings for OpenMW
   class MWInputManager : public Ogre::FrameListener
   {
-    // Note: the order here is important. The OISManager must be
-    // initialized before poller and listener.
-    Input::Dispatcher disp;
+    Mangle::Input::EventPtr disp;
     Render::OgreRenderer &ogre;
-    Input::OISManager input;
-    Input::Poller poller;
-    Input::InputListener listener;
+    Mangle::Input::OISDriver input;
+    OEngine::Input::Poller poller;
     MWRender::PlayerPos &player;
 
     // Count screenshots. TODO: We should move this functionality to
@@ -59,21 +61,21 @@ namespace MWInput
   public:
     MWInputManager(Render::OgreRenderer &_ogre,
                    MWRender::PlayerPos &_player, bool debug)
-      : disp(A_LAST),
-        ogre(_ogre),
-        input(_ogre, debug),
+      : ogre(_ogre),
+        input(ogre.getWindow(), !debug),
         poller(input),
-        listener(_ogre, input, disp),
         player(_player),
         shotCount(0)
     {
-      using namespace Input;
+      using namespace OEngine::Input;
       using namespace OIS;
 
+      disp = EventPtr(new Dispatcher(A_LAST));
+
       // Bind MW-specific functions
-      disp.funcs.bind(A_Quit, boost::bind(&InputListener::exitNow, &listener),
+      disp->funcs.bind(A_Quit, boost::bind(&InputListener::exitNow, &listener),
                       "Quit program");
-      disp.funcs.bind(A_Screenshot, boost::bind(&MWInputManager::screenshot, this),
+      disp->funcs.bind(A_Screenshot, boost::bind(&MWInputManager::screenshot, this),
                       "Screenshot");
 
       // Add ourselves as a frame listener, to catch movement keys
@@ -83,9 +85,9 @@ namespace MWInput
       listener.setCamera(player.getCamera());
 
       // Key bindings
-      disp.bind(KC_Q, A_Quit);
-      disp.bind(KC_ESCAPE, A_Quit);
-      disp.bind(KC_SYSRQ, A_Screenshot);
+      disp->bind(KC_Q, A_Quit);
+      disp->bind(KC_ESCAPE, A_Quit);
+      disp->bind(KC_SYSRQ, A_Screenshot);
 
       // Key bindings for polled keys
 
@@ -109,6 +111,9 @@ namespace MWInput
     // Used to check for movement keys
     bool frameStarted(const Ogre::FrameEvent &evt)
     {
+      // Tell OIS to handle all input events
+      input.capture();
+
       float speed = 300 * evt.timeSinceLastFrame;
       float moveX = 0, moveY = 0, moveZ = 0;
 
