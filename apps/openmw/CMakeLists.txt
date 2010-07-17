@@ -23,7 +23,9 @@ set(GAMEREND_HEADER
     mwrender/sky.hpp)
 source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})    
 
-# set(GAMEINPUT)
+set(GAMEINPUT
+    mwinput/inputmanager.cpp
+)
 set(GAMEINPUT_HEADER 
     mwinput/inputmanager.hpp)
 source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})    

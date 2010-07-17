@@ -24,6 +24,8 @@
 #include "mwworld/ptr.hpp"
 #include "mwworld/environment.hpp"
 
+#include <OgreRoot.h>
+
 void OMW::Engine::executeLocalScripts()
 {
     for (MWWorld::World::ScriptList::const_iterator iter (
