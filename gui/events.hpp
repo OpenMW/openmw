@@ -23,5 +23,7 @@ namespace GUI
     EventInjector(MyGUI::Gui *g) : gui(g), enabled(true) {}
     void event(Type type, int index, const void *p);
   };
+
+  typedef boost::shared_ptr<EventInjector> EventInjectorPtr;
 }}
 #endif
