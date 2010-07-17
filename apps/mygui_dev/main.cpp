@@ -7,7 +7,7 @@ using namespace std;
 
 #include <mangle/input/servers/ois_driver.hpp>
 
-#include <components/mwgui/mw_layouts.hpp>
+#include <components/mwgui/window_manager.hpp>
 #include <components/bsa/bsa_archive.hpp>
 
 #include <OgreResourceGroupManager.h>
@@ -66,23 +66,14 @@ int main()
   cout << "Setting up MyGUI\n";
   OEngine::GUI::MyGUIManager gui(ogre.getWindow(), ogre.getScene());
 
-  int w = ogre.getWindow()->getWidth();
-  int h = ogre.getWindow()->getHeight();
-
   cout << "Connecting to input\n";
   OEngine::GUI::EventInjector *evt = new OEngine::GUI::EventInjector(gui.getGui());
   input.setEvent(Mangle::Input::EventPtr(evt));
 
-  cout << "Setting up the window layouts\n";
-  MWGui::HUD hud(w,h);
-  MWGui::MapWindow map;
-  MWGui::MainMenu menu(w,h);
-  MWGui::StatsWindow stats;
+  cout << "Setting up the window manager\n";
+  MWGui::WindowManager gm(gui.getGui());
 
-  hud.setVisible(true);
-  map.setVisible(true);
-  menu.setVisible(false);
-  stats.setVisible(true);
+  gm.setMode(MWGui::GM_Inventory);
 
   cout << "Starting rendering loop\n";
   cout << "PRESS ESCAPE TO EXIT\n";

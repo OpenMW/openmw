@@ -175,8 +175,6 @@ namespace MWWorld
                 *reinterpret_cast<Interpreter::Type_Data *> (&newGameState);
         }
         
-        std::cout << "\nSetting up cell rendering\n";
-
         // This connects the cell data with the rendering scene.
         mActiveCells.insert (std::make_pair (&mInteriors[startCell],
             new MWRender::InteriorCellRender (mInteriors[startCell], mScene)));

@@ -7,7 +7,8 @@
 #include <components/misc/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
 
-#include <components/mwgui/guimanager.hpp>
+#include <openengine/gui/manager.hpp>
+#include <components/mwgui/window_manager.hpp>
 
 #include "mwinput/inputmanager.hpp"
 
@@ -81,8 +82,8 @@ OMW::Engine::~Engine()
     if (mspCommandServer.get())
         mspCommandServer->stop();
 
+    delete mGuiManager;
     delete mEnvironment.mWorld;
-    delete mEnvironment.mGuiManager;
     delete mEnvironment.mSoundManager;
     delete mEnvironment.mGlobalScripts;
     delete mScriptManager;
@@ -174,11 +175,7 @@ void OMW::Engine::go()
     assert (!mCellName.empty());
     assert (!mMaster.empty());
 
-    std::cout << "Hello, fellow traveler!\n";
-
-    std::cout << "Your data directory for today is: " << mDataDir << "\n";
-
-    std::cout << "Initializing OGRE\n";
+    std::cout << "Data directory: " << mDataDir << "\n";
 
     const char* plugCfg = "plugins.cfg";
 
@@ -186,6 +183,10 @@ void OMW::Engine::go()
 
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");
+
+    // This has to be added BEFORE MyGUI is initialized, as it needs
+    // to find core.xml here.
+    addResourcesDirectory("resources/mygui/");
 
     // Create the window
     mOgre.createWindow("OpenMW");
@@ -195,7 +196,12 @@ void OMW::Engine::go()
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mCellName, mNewGame);
 
-    mEnvironment.mGuiManager = new MWGui::GuiManager;
+    // Set up the GUI system
+    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(),
+                                                 mOgre.getScene());
+
+    // Create window manager - this manages all the MW-specific GUI windows
+    mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui());
 
     mEnvironment.mSoundManager = new MWSound::SoundManager;
 
@@ -211,10 +217,9 @@ void OMW::Engine::go()
     mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
         *mScriptManager);
 
-    std::cout << "Setting up input system\n";
-
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(), mDebug);
+    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
+                                  *mEnvironment.mWindowManager, mDebug);
 
     // Launch the console server
     if (mEnableCommandServer)
@@ -226,14 +231,14 @@ void OMW::Engine::go()
     else
         std::cout << "Command server disabled" << std::endl;
 
-    std::cout << "\nStart! Press Q/ESC or close window to exit.\n";
+    std::cout << "\nPress Q/ESC or close window to exit.\n";
 
     mOgre.getRoot()->addFrameListener (this);
 
     // Start the main rendering loop
     mOgre.start();
 
-    std::cout << "\nThat's all for now!\n";
+    std::cout << "Quitting peacefully.\n";
 }
 
 

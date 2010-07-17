@@ -84,7 +84,7 @@ namespace MWScript
             
             MWSound::SoundManager& getSoundManager();
 
-            MWGui::GuiManager& getGuiManager();
+            MWGui::WindowManager& getWindowManager();
             
             MWWorld::Ptr getReference();
             ///< Reference, that the script is running from (can be empty)

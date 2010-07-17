@@ -13,7 +13,7 @@ namespace MWScript
 
 namespace MWGui
 {
-    class GuiManager;
+    class WindowManager;
 }
 
 namespace MWWorld
@@ -25,13 +25,13 @@ namespace MWWorld
     {   
     public:
         Environment()
-        : mWorld (0), mSoundManager (0), mGlobalScripts (0), mGuiManager (0), mFrameDuration (0)
+        : mWorld (0), mSoundManager (0), mGlobalScripts (0), mWindowManager (0), mFrameDuration (0)
         {}
 
         World *mWorld;
         MWSound::SoundManager *mSoundManager;
         MWScript::GlobalScripts *mGlobalScripts;
-        MWGui::GuiManager *mGuiManager;
+        MWGui::WindowManager *mWindowManager;
         float mFrameDuration;
     };
 }

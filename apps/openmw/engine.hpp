@@ -35,6 +35,19 @@ namespace MWWorld
     class World;
 }
 
+namespace MWGui
+{
+    class WindowManager;
+}
+
+namespace OEngine
+{
+  namespace GUI
+  {
+    class MyGUIManager;
+  }
+}
+
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
@@ -59,6 +72,7 @@ namespace OMW
             MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
+            OEngine::GUI::MyGUIManager *mGuiManager;
 
             // not implemented
             Engine (const Engine&);

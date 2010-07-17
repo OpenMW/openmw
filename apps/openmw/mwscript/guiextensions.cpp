@@ -7,10 +7,9 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include <components/mwgui/guimanager.hpp>
+#include <components/mwgui/window_manager.hpp>
 
 #include "interpretercontext.hpp"
-
 
 namespace MWScript
 {
@@ -18,47 +17,28 @@ namespace MWScript
     {    
         class OpEnableWindow : public Interpreter::Opcode0
         {
-                MWGui::GuiManager::GuiWindow mWindow;
+                MWGui::GuiWindow mWindow;
                 
             public:
             
-                OpEnableWindow (MWGui::GuiManager::GuiWindow window) : mWindow (window) {}
+                OpEnableWindow (MWGui::GuiWindow window) : mWindow (window) {}
             
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
                     
-                    context.getGuiManager().enableWindow (mWindow);
+                    context.getWindowManager().allow (mWindow);
                 } 
         };    
     
-        class OpShowOneTimeDialogue : public Interpreter::Opcode0
-        {
-                MWGui::GuiManager::GuiOneTimeDialogue mOneTimeDialogue;
-                
-            public:
-            
-                OpShowOneTimeDialogue (MWGui::GuiManager::GuiOneTimeDialogue OneTimeDialogue)
-                : mOneTimeDialogue (OneTimeDialogue)
-                {}
-            
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.getGuiManager().showOneTimeDialogue (mOneTimeDialogue);
-                } 
-        };    
-            
         class OpShowDialogue : public Interpreter::Opcode0
         {
-                MWGui::GuiManager::GuiDialogue mDialogue;
+                MWGui::GuiMode mDialogue;
                 
             public:
             
-                OpShowDialogue (MWGui::GuiManager::GuiDialogue dialogue)
+                OpShowDialogue (MWGui::GuiMode dialogue)
                 : mDialogue (dialogue)
                 {}
             
@@ -67,29 +47,10 @@ namespace MWScript
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
                     
-                    context.getGuiManager().enableDialogue (mDialogue);
+                    context.getWindowManager().setMode(mDialogue);
                 } 
         };  
 
-        class OpEnableDialogue : public Interpreter::Opcode0
-        {
-                MWGui::GuiManager::GuiDialogue mDialogue;
-                
-            public:
-            
-                OpEnableDialogue (MWGui::GuiManager::GuiDialogue dialogue)
-                : mDialogue (dialogue)
-                {}
-            
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.getGuiManager().showDialogue (mDialogue);               
-                } 
-        };  
-            
         const int opcodeEnableBirthMenu = 0x200000e;
         const int opcodeEnableClassMenu = 0x200000f;
         const int opcodeEnableNameMenu = 0x2000010;
@@ -125,30 +86,34 @@ namespace MWScript
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (opcodeEnableBirthMenu,
-                new OpShowOneTimeDialogue (MWGui::GuiManager::Gui_Birth));
+                new OpShowDialogue (MWGui::GM_Birth));
             interpreter.installSegment5 (opcodeEnableClassMenu,
-                new OpShowOneTimeDialogue (MWGui::GuiManager::Gui_Class));
+                new OpShowDialogue (MWGui::GM_Class));
             interpreter.installSegment5 (opcodeEnableNameMenu,
-                new OpShowOneTimeDialogue (MWGui::GuiManager::Gui_Name));
+                new OpShowDialogue (MWGui::GM_Name));
             interpreter.installSegment5 (opcodeEnableRaceMenu,
-                new OpShowOneTimeDialogue (MWGui::GuiManager::Gui_Race));
+                new OpShowDialogue (MWGui::GM_Race));
             interpreter.installSegment5 (opcodeEnableStatsReviewMenu,
-                new OpShowOneTimeDialogue (MWGui::GuiManager::Gui_Review));
+                new OpShowDialogue (MWGui::GM_Review));
 
             interpreter.installSegment5 (opcodeEnableInventoryMenu,
-                new OpEnableWindow (MWGui::GuiManager::Gui_Inventory));
+                new OpEnableWindow (MWGui::GW_Inventory));
             interpreter.installSegment5 (opcodeEnableMagicMenu,
-                new OpEnableWindow (MWGui::GuiManager:: Gui_Magic));
+                new OpEnableWindow (MWGui::GW_Magic));
             interpreter.installSegment5 (opcodeEnableMapMenu,
-                new OpEnableWindow (MWGui::GuiManager::Gui_Map));
+                new OpEnableWindow (MWGui::GW_Map));
             interpreter.installSegment5 (opcodeEnableStatsMenu,
-                new OpEnableWindow (MWGui::GuiManager::Gui_Status));
+                new OpEnableWindow (MWGui::GW_Stats));
+
+            /* Not done yet. Enabling rest mode is not really a gui
+               issue, it's a gameplay issue.
 
             interpreter.installSegment5 (opcodeEnableRest,
-                new OpEnableDialogue (MWGui::GuiManager::Gui_Rest));
+                new OpEnableDialogue (MWGui::GM_Rest));
+            */
 
             interpreter.installSegment5 (opcodeShowRestMenu,
-                new OpShowDialogue (MWGui::GuiManager::Gui_Rest));
+                new OpShowDialogue (MWGui::GM_Rest));
         }
     }
 }

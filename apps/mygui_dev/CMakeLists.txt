@@ -1,6 +1,7 @@
 add_executable(mygui_test
   main.cpp
   ${BSA}  ${BSA_HEADER}
+  ${MWGUI} ${MWGUI_HEADER}
   ${OENGINE_OGRE}
   ${OENGINE_GUI}
   ${MANGLE_INPUT}

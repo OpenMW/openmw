@@ -4,9 +4,13 @@
 #include <openengine/input/dispatcher.hpp>
 #include <openengine/input/poller.hpp>
 
+#include <openengine/gui/events.hpp>
+
 #include <openengine/ogre/exitlistener.hpp>
 #include <openengine/ogre/mouselook.hpp>
 #include <openengine/ogre/renderer.hpp>
+
+#include <components/mwgui/window_manager.hpp>
 
 #include <mangle/input/servers/ois_driver.hpp>
 #include <mangle/input/filters/eventlist.hpp>
@@ -27,6 +31,8 @@ namespace MWInput
 
       A_Screenshot,     // Take a screenshot
 
+      A_Inventory,      // Toggle inventory screen
+
       A_MoveLeft,       // Move player left / right
       A_MoveRight,
       A_MoveUp,         // Move up / down
@@ -46,10 +52,11 @@ namespace MWInput
     Mangle::Input::OISDriver input;
     OEngine::Input::Poller poller;
     OEngine::Render::MouseLookEventPtr mouse;
+    OEngine::GUI::EventInjectorPtr guiEvents;
     MWRender::PlayerPos &player;
+    MWGui::WindowManager &windows;
 
-    // Count screenshots. TODO: We should move this functionality to
-    // OgreRender or somewhere else.
+    // Count screenshots.
     int shotCount;
 
     // Write screenshot to file.
@@ -66,18 +73,67 @@ namespace MWInput
       ogre.screenshot(buf);
     }
 
+    // Switch between gui modes. Besides controlling the Gui windows
+    // this also makes sure input is directed to the right place
+    void setGuiMode(MWGui::GuiMode mode)
+    {
+      // Tell the GUI what to show (this also takes care of the mouse
+      // pointer)
+      windows.setMode(mode);
+
+      // Are we in GUI mode now?
+      if(windows.isGuiMode())
+        {
+          // Disable mouse look
+          mouse->setCamera(NULL);
+
+          // Enable GUI events
+          guiEvents->enabled = true;
+        }
+      else
+        {
+          // Start mouse-looking again. TODO: This should also allow
+          // for other ways to disable mouselook, like paralyzation.
+          mouse->setCamera(player.getCamera());
+
+          // Disable GUI events
+          guiEvents->enabled = false;
+        }
+    }
+
+    // Called when the user presses the button to toggle the inventory
+    // screen.
+    void toggleInventory()
+    {
+      using namespace MWGui;
+
+      GuiMode mode = windows.getMode();
+
+      // Toggle between game mode and inventory mode
+      if(mode == GM_Game)
+        setGuiMode(GM_Inventory);
+      else if(mode == GM_Inventory)
+        setGuiMode(GM_Game);
+
+      // .. but don't touch any other mode.
+    }
+
   public:
     MWInputManager(OEngine::Render::OgreRenderer &_ogre,
-                   MWRender::PlayerPos &_player, bool debug)
+                   MWRender::PlayerPos &_player,
+                   MWGui::WindowManager &_windows,
+                   bool debug)
       : ogre(_ogre),
         exit(ogre.getWindow()),
         input(ogre.getWindow(), !debug),
         poller(input),
         player(_player),
+        windows(_windows),
         shotCount(0)
     {
       using namespace OEngine::Input;
       using namespace OEngine::Render;
+      using namespace OEngine::GUI;
       using namespace Mangle::Input;
       using namespace OIS;
 
@@ -88,6 +144,8 @@ namespace MWInput
                       "Quit program");
       disp->funcs.bind(A_Screenshot, boost::bind(&MWInputManager::screenshot, this),
                       "Screenshot");
+      disp->funcs.bind(A_Inventory, boost::bind(&MWInputManager::toggleInventory, this),
+                       "Toggle inventory screen");
 
 
       // Add the exit listener
@@ -98,6 +156,9 @@ namespace MWInput
       // Set up the mouse handler and tell it about the player camera
       mouse = MouseLookEventPtr(new MouseLookEvent(player.getCamera()));
 
+      // This event handler pumps events into MyGUI
+      guiEvents = EventInjectorPtr(new EventInjector(windows.getGui()));
+
       // Hook 'mouse' and 'disp' up as event handlers into 'input'
       // (the OIS driver and event source.) We do this through an
       // EventList which dispatches the event to multiple handlers for
@@ -107,12 +168,25 @@ namespace MWInput
         input.setEvent(EventPtr(lst));
         lst->add(mouse,Event::EV_MouseMove);
         lst->add(disp,Event::EV_KeyDown);
+        lst->add(guiEvents,Event::EV_ALL);
       }
 
-      // Key bindings
+      // Start out in game mode
+      setGuiMode(MWGui::GM_Game);
+
+      /**********************************
+        Key binding section
+
+        The rest of this function has hard coded key bindings, and is
+        intended to be replaced by user defined bindings later.
+       **********************************/
+
+      // Key bindings for keypress events
+
       disp->bind(A_Quit, KC_Q);
       disp->bind(A_Quit, KC_ESCAPE);
       disp->bind(A_Screenshot, KC_SYSRQ);
+      disp->bind(A_Inventory, KC_I);
 
       // Key bindings for polled keys
 
@@ -138,6 +212,9 @@ namespace MWInput
     {
       // Tell OIS to handle all input events
       input.capture();
+
+      // Disable movement in Gui mode
+      if(windows.isGuiMode()) return true;
 
       float speed = 300 * evt.timeSinceLastFrame;
       float moveX = 0, moveY = 0, moveZ = 0;

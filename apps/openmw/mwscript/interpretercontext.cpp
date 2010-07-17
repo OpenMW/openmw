@@ -9,7 +9,7 @@
 
 #include "../mwworld/world.hpp"
 
-#include <components/mwgui/guimanager.hpp>
+#include <components/mwgui/window_manager.hpp>
 
 #include "locals.hpp"
 #include "globalscripts.hpp"
@@ -112,7 +112,7 @@ namespace MWScript
     
     bool InterpreterContext::menuMode()
     {
-        return mEnvironment.mGuiManager->isGuiActive();
+        return mEnvironment.mWindowManager->isGuiMode();
     }
     
     int InterpreterContext::getGlobalShort (const std::string& name) const
@@ -215,9 +215,9 @@ namespace MWScript
         mEnvironment.mWorld->disable (ref);
     }
     
-    MWGui::GuiManager& InterpreterContext::getGuiManager()
+    MWGui::WindowManager& InterpreterContext::getWindowManager()
     {
-        return *mEnvironment.mGuiManager;
+        return *mEnvironment.mWindowManager;
     }
     
     MWWorld::World& InterpreterContext::getWorld()

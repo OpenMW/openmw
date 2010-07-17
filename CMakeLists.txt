@@ -53,9 +53,11 @@ source_group(components\\esm FILES ${ESM_HEADER})
 # components/mw_gui
 set(MWGUI_HEADER
     ${COMP_DIR}/mwgui/mw_layouts.hpp
-    ${COMP_DIR}/mwgui/guimanager.hpp)
+    ${COMP_DIR}/mwgui/window_manager.hpp
+)
 set(MWGUI
-    ${COMP_DIR}/mwgui/guimanager.cpp)
+    ${COMP_DIR}/mwgui/window_manager.cpp
+)
 source_group(components\\mwgui FILES ${MWGUI_HEADER} ${MWGUI})
 
 set(COMMANDSERVER

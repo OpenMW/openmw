@@ -6,6 +6,7 @@ using namespace std;
 using namespace ESM;
 using namespace ESMS;
 
+/*
 static string toStr(int i)
 {
   char name[5];
@@ -13,6 +14,7 @@ static string toStr(int i)
   name[4] = 0;
   return std::string(name);
 }
+*/
 
 void ESMStore::load(ESMReader &esm)
 {
@@ -44,6 +46,9 @@ void ESMStore::load(ESMReader &esm)
         all[id] = n.val;
     }
 
+  /* This information isn't needed on screen. But keep the code around
+     for debugging purposes later.
+
   cout << "\n" << recLists.size() << " record types:\n";
   for(RecListList::iterator it = recLists.begin(); it != recLists.end(); it++)
     cout << "  " << toStr(it->first) << ": " << it->second->getSize() << endl;
@@ -52,4 +57,5 @@ void ESMStore::load(ESMReader &esm)
       it != missing.end(); it++ )
     cout << *it << " ";
   cout << endl;
+  */
 }
