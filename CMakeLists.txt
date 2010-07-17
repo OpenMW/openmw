@@ -206,11 +206,6 @@ if (BUILD_CLIENTCONSOLE)
   add_subdirectory( apps/clientconsole )
 endif()
 
-option(BUILD_MYGUI_TEST "build test program for MyGUI" ON)
-if (BUILD_MYGUI_TEST)
-  add_subdirectory( apps/mygui_dev )
-endif()
-
 option(BUILD_MWCOMPILER "build standalone Morrowind script compiler" ON)
 if (BUILD_MWCOMPILER)
     add_subdirectory( apps/mwcompiler )
