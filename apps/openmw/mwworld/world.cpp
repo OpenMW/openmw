@@ -1,6 +1,7 @@
 
 #include "world.hpp"
 
+#include <cmath>
 #include <iostream>
 
 #include "components/bsa/bsa_archive.hpp"
@@ -278,4 +279,47 @@ namespace MWWorld
             }
         }    
     }
+    
+    void World::advanceTime (double hours)
+    {
+        hours += mGlobalVariables->getFloat ("gamehour");
+        setHour (hours);
+    }
+    
+    void World::setHour (double hour)
+    {
+        if (hour<0)
+            hour = 0;
+    
+        int days = hour / 24;
+        
+        hour = std::fmod (hour, 24);
+     
+        mGlobalVariables->setFloat ("gamehour", hour);
+        
+        if (days>0)
+        {
+            setDay (days + mGlobalVariables->getInt ("year"));
+            
+            days += mGlobalVariables->getInt ("dayspassed");
+            mGlobalVariables->setInt ("dayspassed", days);
+        }
+    }
+    
+    void World::setDay (int day)
+    {
+        if (day<0)
+            day = 0;
+    
+        int year = day / 365;
+        day = day % 365;  
+                      
+        mGlobalVariables->setInt ("day", day);
+                
+        if (year>0)
+        {
+            year += mGlobalVariables->getInt ("year");
+            mGlobalVariables->setInt ("year", year);
+        }
+    }   
 }

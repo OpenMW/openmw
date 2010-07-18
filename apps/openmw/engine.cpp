@@ -51,6 +51,9 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     // global scripts
     mEnvironment.mGlobalScripts->run (mEnvironment);
 
+    // passing of time (30 times as fast as RL time)
+    mEnvironment.mWorld->advanceTime ((mEnvironment.mFrameDuration*30)/3600);
+
     return true;
 }
             

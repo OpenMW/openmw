@@ -88,6 +88,12 @@ namespace MWWorld
             void enable (Ptr reference);
             
             void disable (Ptr reference);
+            
+            void advanceTime (double hours);
+            
+            void setHour (double hour);
+            
+            void setDay (int day);
     };
 }
 

@@ -133,18 +133,32 @@ namespace MWScript
 
     void InterpreterContext::setGlobalShort (const std::string& name, int value)
     {
-         mEnvironment.mWorld->getGlobalVariable (name).mShort = value;
+        if (name=="gamehour")
+            mEnvironment.mWorld->setHour (value);
+        else if (name=="day")
+            mEnvironment.mWorld->setDay (value);
+        else
+            mEnvironment.mWorld->getGlobalVariable (name).mShort = value;
     }
 
     void InterpreterContext::setGlobalLong (const std::string& name, int value)
     {
-        // a global long is internally a float.
-         mEnvironment.mWorld->getGlobalVariable (name).mLong = value;
+        if (name=="gamehour")
+            mEnvironment.mWorld->setHour (value);
+        else if (name=="day")
+            mEnvironment.mWorld->setDay (value);
+        else
+            mEnvironment.mWorld->getGlobalVariable (name).mLong = value;
     }
 
     void InterpreterContext::setGlobalFloat (const std::string& name, float value)
     {
-         mEnvironment.mWorld->getGlobalVariable (name).mFloat = value;
+        if (name=="gamehour")
+            mEnvironment.mWorld->setHour (value);
+        else if (name=="day")
+            mEnvironment.mWorld->setDay (value);
+        else
+            mEnvironment.mWorld->getGlobalVariable (name).mFloat = value;
     }
      
     bool InterpreterContext::isScriptRunning (const std::string& name) const
