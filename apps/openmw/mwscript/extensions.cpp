@@ -1,6 +1,9 @@
 
 #include "extensions.hpp"
 
+#include <components/interpreter/interpreter.hpp>
+#include <components/interpreter/installopcodes.hpp>
+
 #include "soundextensions.hpp"
 #include "cellextensions.hpp"
 #include "miscextensions.hpp"
@@ -17,5 +20,15 @@ namespace MWScript
         Sound::registerExtensions (extensions);
         Sky::registerExtensions (extensions);
     }
+    
+    void installOpcodes (Interpreter::Interpreter& interpreter)
+    {
+        Interpreter::installOpcodes (interpreter);
+        Cell::installOpcodes (interpreter);
+        Misc::installOpcodes (interpreter);
+        Gui::installOpcodes (interpreter);
+        Sound::installOpcodes (interpreter);
+        Sky::installOpcodes (interpreter);
+    }    
 }
 

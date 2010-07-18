@@ -46,8 +46,6 @@ namespace MWScript
                 Compiler::Context& compilerContext);
             
             void run (const std::string& name, Interpreter::Context& interpreterContext);
-            
-            static void installOpcodes (Interpreter::Interpreter& interpreter);
     };
 };
 

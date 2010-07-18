@@ -6,9 +6,16 @@ namespace Compiler
     class Extensions;
 }
 
+namespace Interpreter
+{
+    class Interpreter;
+}
+
 namespace MWScript
 {
     void registerExtensions (Compiler::Extensions& extensions);
+    
+    void installOpcodes (Interpreter::Interpreter& interpreter);
 }
 
 #endif
