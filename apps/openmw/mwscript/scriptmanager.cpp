@@ -19,6 +19,7 @@
 #include "cellextensions.hpp"
 #include "miscextensions.hpp"
 #include "guiextensions.hpp"
+#include "skyextensions.hpp"
 
 namespace MWScript
 {
@@ -125,6 +126,7 @@ namespace MWScript
         Misc::installOpcodes (interpreter);
         Gui::installOpcodes (interpreter);
         Sound::installOpcodes (interpreter);
+        Sky::installOpcodes (interpreter);
     }
 }
 

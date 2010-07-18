@@ -51,6 +51,7 @@ namespace MWWorld
             std::map<std::string, Ptr::CellStore> mInteriors;
             ScriptList mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
+            bool mSky;
     
             // not implemented
             World (const World&);
@@ -94,6 +95,14 @@ namespace MWWorld
             void setHour (double hour);
             
             void setDay (int day);
+            
+            void toggleSky();
+            
+            int getMasserPhase() const;
+            
+            int getSecundaPhase() const;
+            
+            void setMoonColour (bool red);
     };
 }
 

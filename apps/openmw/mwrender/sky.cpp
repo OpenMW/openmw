@@ -21,6 +21,26 @@ namespace MWRender
                  CaelumManager (Ogre::RenderWindow* pRenderWindow, 
                                    Ogre::Camera* pCamera);
         virtual ~CaelumManager ();
+        
+        virtual void enable() {}
+        
+        virtual void disable() {}
+        
+        virtual void setHour (double hour) {}
+        ///< will be called even when sky is disabled.
+        
+        virtual void setDay (int day) {}
+        ///< will be called even when sky is disabled.
+        
+        virtual int getMasserPhase() const { return 0; }
+        ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
+        /// 3 waxing or waning gibbous, 4 full moon
+        
+        virtual int getSecundaPhase() const { return 0; }
+        ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
+        /// 3 waxing or waning gibbous, 4 full moon
+        
+        virtual void setMoonColour (bool red) {}
     };
 
     CaelumManager::CaelumManager (Ogre::RenderWindow* pRenderWindow, 

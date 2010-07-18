@@ -54,5 +54,10 @@ op 0x200001d: PlayLoopSound3D, explicit reference
 op 0x200001e: PlayLoopSound3DVP, explicit reference
 op 0x200001f: StopSound, explicit reference
 op 0x2000020: GetSoundPlaying, explicit reference
-opcodes 0x2000021-0x3ffffff unused
+op 0x2000021: ToggleSky
+op 0x2000022: TurnMoonWhite
+op 0x2000023: TurnMoonRed
+op 0x2000024: GetMasserPhase
+op 0x2000025: GetSecundaPhase
+opcodes 0x2000026-0x3ffffff unused
 

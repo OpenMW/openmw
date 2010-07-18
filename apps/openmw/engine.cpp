@@ -217,8 +217,8 @@ void OMW::Engine::go()
     mScriptContext->setExtensions (&mExtensions);
 
     mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(), mVerboseScripts,
-        *mScriptContext);
-        
+        *mScriptContext);       
+            
     mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
         *mScriptManager);
 

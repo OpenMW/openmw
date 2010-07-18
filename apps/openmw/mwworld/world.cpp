@@ -144,7 +144,8 @@ namespace MWWorld
     
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, const std::string& startCell, bool newGame)
-    : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0)
+    : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
+      mSky (false)
     {   
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
@@ -180,11 +181,10 @@ namespace MWWorld
             iter!=mActiveCells.end(); ++iter)
             iter->second->show();
 
-        // Optionally enable the sky
-        ///\todo FIXME
-        if (false)
-            mSkyManager = MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera());
-        
+        mSkyManager =
+            MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera());  
+            
+        toggleSky();      
     }
     
     World::~World()
@@ -297,6 +297,8 @@ namespace MWWorld
      
         mGlobalVariables->setFloat ("gamehour", hour);
         
+        mSkyManager->setHour (hour);
+        
         if (days>0)
         {
             setDay (days + mGlobalVariables->getInt ("year"));
@@ -316,10 +318,44 @@ namespace MWWorld
                       
         mGlobalVariables->setInt ("day", day);
                 
+        mSkyManager->setDay (day);
+                
         if (year>0)
         {
             year += mGlobalVariables->getInt ("year");
             mGlobalVariables->setInt ("year", year);
         }
     }   
+    
+    void World::toggleSky()
+    {
+        if (mSky)
+        {
+            mSky = false;
+            mSkyManager->disable();
+        }
+        else
+        {
+            mSky = true;
+            // TODO check for extorior or interior with sky.
+            mSkyManager->setHour (mGlobalVariables->getFloat ("gamehour"));
+            mSkyManager->setDay (mGlobalVariables->getInt ("day"));
+            mSkyManager->enable();
+        }
+    }
+    
+    int World::getMasserPhase() const
+    {
+        return mSkyManager->getMasserPhase();
+    }
+    
+    int World::getSecundaPhase() const
+    {
+        return mSkyManager->getSecundaPhase();
+    }
+    
+    void World::setMoonColour (bool red)
+    {
+        mSkyManager->setMoonColour (red);   
+    }
 }

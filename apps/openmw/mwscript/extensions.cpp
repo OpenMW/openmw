@@ -5,6 +5,7 @@
 #include "cellextensions.hpp"
 #include "miscextensions.hpp"
 #include "guiextensions.hpp"
+#include "skyextensions.hpp"
 
 namespace MWScript
 {
@@ -14,6 +15,7 @@ namespace MWScript
         Misc::registerExtensions (extensions);
         Gui::registerExtensions (extensions);
         Sound::registerExtensions (extensions);
+        Sky::registerExtensions (extensions);
     }
 }
 

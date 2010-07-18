@@ -18,6 +18,20 @@ namespace MWRender
         static SkyManager* create (Ogre::RenderWindow* pRenderWindow, 
                                    Ogre::Camera* pCamera);
         virtual ~SkyManager() {}
+        
+        virtual void enable() = 0;
+        
+        virtual void disable() = 0;
+        
+        virtual void setHour (double hour) = 0;
+        
+        virtual void setDay (int day) = 0;
+        
+        virtual int getMasserPhase() const = 0;
+        
+        virtual int getSecundaPhase() const = 0;
+        
+        virtual void setMoonColour (bool red) = 0;
     };
 }
 
