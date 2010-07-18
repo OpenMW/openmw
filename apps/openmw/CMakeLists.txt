@@ -62,12 +62,15 @@ set(GAMESOUND_HEADER
 source_group(apps\\openmw\\mwsound FILES ${GAMESOUND} ${GAMESOUND_HEADER}) 
 
 set(GAMEWORLD
-    mwworld/world.cpp)
+    mwworld/world.cpp
+    mwworld/globals.cpp
+    )
 set(GAMEWORLD_HEADER 
     mwworld/refdata.hpp
     mwworld/world.hpp
     mwworld/ptr.hpp
     mwworld/environment.hpp
+    mwworld/globals.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER}) 
 

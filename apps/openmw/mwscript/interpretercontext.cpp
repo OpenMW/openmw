@@ -117,44 +117,34 @@ namespace MWScript
     
     int InterpreterContext::getGlobalShort (const std::string& name) const
     {
-        Interpreter::Type_Data value = mEnvironment.mWorld->getGlobalVariable (name);       
-        return static_cast<Interpreter::Type_Short> (
-            *reinterpret_cast<Interpreter::Type_Integer *> (&value));
+        return mEnvironment.mWorld->getGlobalVariable (name).mShort;       
     }
 
     int InterpreterContext::getGlobalLong (const std::string& name) const
     {
         // a global long is internally a float.
-        Interpreter::Type_Data value = mEnvironment.mWorld->getGlobalVariable (name);       
-        return static_cast<Interpreter::Type_Integer> (
-            *reinterpret_cast<Interpreter::Type_Float *> (&value));
+        return mEnvironment.mWorld->getGlobalVariable (name).mLong;       
     }
 
     float InterpreterContext::getGlobalFloat (const std::string& name) const
     {
-        Interpreter::Type_Data value = mEnvironment.mWorld->getGlobalVariable (name);       
-        return *reinterpret_cast<Interpreter::Type_Float *> (&value);
+        return mEnvironment.mWorld->getGlobalVariable (name).mFloat; 
     }
 
     void InterpreterContext::setGlobalShort (const std::string& name, int value)
     {
-         mEnvironment.mWorld->getGlobalVariable (name) =
-            *reinterpret_cast<Interpreter::Type_Data *> (&value);
+         mEnvironment.mWorld->getGlobalVariable (name).mShort = value;
     }
 
     void InterpreterContext::setGlobalLong (const std::string& name, int value)
     {
         // a global long is internally a float.
-        float value2 = float(value);
-
-         mEnvironment.mWorld->getGlobalVariable (name) =
-            *reinterpret_cast<Interpreter::Type_Data *> (&value2);    
+         mEnvironment.mWorld->getGlobalVariable (name).mLong = value;
     }
 
     void InterpreterContext::setGlobalFloat (const std::string& name, float value)
     {
-         mEnvironment.mWorld->getGlobalVariable (name) =
-            *reinterpret_cast<Interpreter::Type_Data *> (&value);    
+         mEnvironment.mWorld->getGlobalVariable (name).mFloat = value;
     }
      
     bool InterpreterContext::isScriptRunning (const std::string& name) const

@@ -143,7 +143,7 @@ namespace MWWorld
     
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, const std::string& startCell, bool newGame)
-    : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0)
+    : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0)
     {   
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
@@ -162,17 +162,12 @@ namespace MWWorld
         mPlayerPos = new MWRender::PlayerPos (mScene.getCamera(), mStore.npcs.find ("player"));
 
         // global variables
-        for (ESMS::RecListT<ESM::Global>::MapType::const_iterator iter
-            (mStore.globals.list.begin()); 
-            iter != mStore.globals.list.end(); ++iter)
-            mGlobalVariables.insert (std::make_pair (iter->first, iter->second.value));
+        mGlobalVariables = new Globals (mStore);
         
         if (newGame)
         {      
             // set new game mark
-            float newGameState = 1;
-            mGlobalVariables["chargenstate"] =
-                *reinterpret_cast<Interpreter::Type_Data *> (&newGameState);
+            mGlobalVariables->setInt ("chargenstate", 1);
         }
         
         // This connects the cell data with the rendering scene.
@@ -203,6 +198,7 @@ namespace MWWorld
                         
         delete mPlayerPos;
         delete mSkyManager;
+        delete mGlobalVariables;
     }
     
     MWRender::PlayerPos& World::getPlayerPos()
@@ -226,14 +222,9 @@ namespace MWWorld
         return false;
     }
     
-    Interpreter::Type_Data& World::getGlobalVariable (const std::string& name)
+    Globals::Data& World::getGlobalVariable (const std::string& name)
     {
-        std::map<std::string, Interpreter::Type_Data>::iterator iter = mGlobalVariables.find (name);
-        
-        if (iter==mGlobalVariables.end())
-            throw std::runtime_error ("unknown global variable: " + name);
-            
-        return iter->second;
+        return (*mGlobalVariables)[name];
     }
     
     Ptr World::getPtr (const std::string& name, bool activeOnly)
