@@ -32,6 +32,8 @@ namespace MWInput
 
       A_Inventory,      // Toggle inventory screen
 
+      A_Console,        // Toggle console screen
+
       A_MoveLeft,       // Move player left / right
       A_MoveRight,
       A_MoveUp,         // Move up / down
@@ -117,6 +119,27 @@ namespace MWInput
       // .. but don't touch any other mode.
     }
 
+    // Toggle console
+    void toggleConsole()
+    {
+      using namespace MWGui;
+
+      GuiMode mode = windows.getMode();
+
+      // Switch to console mode no matter what mode we are currently
+      // in, except of course if we are already in console mode
+      if(mode == GM_Console)
+        setGuiMode(GM_Game);
+      else setGuiMode(GM_Console);
+    }
+
+    // Exit program now button (which is disabled in GUI mode)
+    void exitNow()
+    {
+      if(!windows.isGuiMode())
+        exit.exitNow();
+    }
+
   public:
     InputImpl(OEngine::Render::OgreRenderer &_ogre,
                    MWRender::PlayerPos &_player,
@@ -139,12 +162,14 @@ namespace MWInput
       disp = DispatcherPtr(new Dispatcher(A_LAST));
 
       // Bind MW-specific functions
-      disp->funcs.bind(A_Quit, boost::bind(&ExitListener::exitNow, &exit),
+      disp->funcs.bind(A_Quit, boost::bind(&InputImpl::exitNow, this),
                       "Quit program");
       disp->funcs.bind(A_Screenshot, boost::bind(&InputImpl::screenshot, this),
                       "Screenshot");
       disp->funcs.bind(A_Inventory, boost::bind(&InputImpl::toggleInventory, this),
                        "Toggle inventory screen");
+      disp->funcs.bind(A_Console, boost::bind(&InputImpl::toggleConsole, this),
+                       "Toggle console");
 
 
       // Add the exit listener
@@ -186,6 +211,7 @@ namespace MWInput
       disp->bind(A_Quit, KC_ESCAPE);
       disp->bind(A_Screenshot, KC_SYSRQ);
       disp->bind(A_Inventory, KC_I);
+      disp->bind(A_Console, KC_F1);
 
       // Key bindings for polled keys
 

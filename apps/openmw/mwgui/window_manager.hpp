@@ -21,12 +21,15 @@ namespace MWGui
   class MapWindow;
   class MainMenu;
   class StatsWindow;
+  class Console;
 
   enum GuiMode
     {
       GM_Game,          // Game mode, only HUD
       GM_Inventory,     // Inventory mode
       GM_MainMenu,      // Main menu mode
+
+      GM_Console,       // Console mode
 
       // None of the following are implemented yet
 
@@ -62,6 +65,7 @@ namespace MWGui
     MapWindow *map;
     MainMenu *menu;
     StatsWindow *stats;
+    Console *console;
 
     MyGUI::Gui *gui;
 

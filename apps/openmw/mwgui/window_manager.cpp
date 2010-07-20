@@ -1,6 +1,8 @@
 #include "window_manager.hpp"
 #include "mw_layouts.hpp"
 
+#include "console.hpp"
+
 #include <assert.h>
 
 using namespace MWGui;
@@ -17,6 +19,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui)
   menu = new MainMenu(w,h);
   map = new MapWindow();
   stats = new StatsWindow();
+  console = new Console(w,h);
 
   // The HUD is always on
   hud->setVisible(true);
@@ -27,6 +30,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui)
 
 WindowManager::~WindowManager()
 {
+  delete console;
   delete hud;
   delete map;
   delete menu;
@@ -39,6 +43,7 @@ void WindowManager::updateVisible()
   map->setVisible(false);
   menu->setVisible(false);
   stats->setVisible(false);
+  console->disable();
 
   // Mouse is visible whenever we're not in game mode
   gui->setVisiblePointer(isGuiMode());
@@ -53,6 +58,12 @@ void WindowManager::updateVisible()
     {
       // Enable the main menu
       menu->setVisible(true);
+      return;
+    }
+
+  if(mode == GM_Console)
+    {
+      console->enable();
       return;
     }
 

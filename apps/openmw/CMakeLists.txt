@@ -33,6 +33,7 @@ source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})
 set(GAMEGUI_HEADER
     mwgui/mw_layouts.hpp
     mwgui/window_manager.hpp
+    mwgui/console.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
