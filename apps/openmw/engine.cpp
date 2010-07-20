@@ -206,11 +206,12 @@ void OMW::Engine::go()
                                                  mOgre.getScene());
 
     // Create window manager - this manages all the MW-specific GUI windows
-    mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui());
+    MWScript::registerExtensions (mExtensions);
+
+    mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui(), mEnvironment,
+        mExtensions);
 
     mEnvironment.mSoundManager = new MWSound::SoundManager;
-
-    MWScript::registerExtensions (mExtensions);
 
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
         mEnvironment);

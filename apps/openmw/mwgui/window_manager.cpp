@@ -7,7 +7,8 @@
 
 using namespace MWGui;
 
-WindowManager::WindowManager(MyGUI::Gui *_gui)
+WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
+    const Compiler::Extensions& extensions)
   : gui(_gui), mode(GM_Game), shown(GW_ALL), allowed(GW_ALL)
 {
   // Get size info from the Gui object
@@ -19,7 +20,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui)
   menu = new MainMenu(w,h);
   map = new MapWindow();
   stats = new StatsWindow();
-  console = new Console(w,h);
+  console = new Console(w,h, environment, extensions);
 
   // The HUD is always on
   hud->setVisible(true);

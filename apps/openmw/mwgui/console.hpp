@@ -4,11 +4,70 @@
 #include <openengine/gui/layout.hpp>
 #include <list>
 #include <string>
+#include <vector>
+
+#include <components/compiler/errorhandler.hpp>
+#include <components/compiler/lineparser.hpp>
+#include <components/compiler/scanner.hpp>
+#include <components/compiler/locals.hpp>
+#include <components/compiler/literals.hpp>
+#include <components/compiler/exception.hpp>
+
+#include "../mwscript/compilercontext.hpp"
 
 namespace MWGui
 {
-  class Console : private OEngine::GUI::Layout
+  class Console : private OEngine::GUI::Layout, private Compiler::ErrorHandler
   {
+    private:
+    
+        MWScript::CompilerContext mCompilerContext;
+        
+        bool compile (const std::string& cmd)
+        {
+            try
+            {        
+                std::istringstream input (cmd + '\n');
+            
+                Compiler::Scanner scanner (*this, input, mCompilerContext.getExtensions());
+            
+                Compiler::Locals locals;
+                Compiler::Literals literals;
+                std::vector<Interpreter::Type_Code> code;
+                Compiler::LineParser parser (*this, mCompilerContext, locals, literals, code);
+            
+                scanner.scan (parser);
+                
+                return isGood();
+            }
+            catch (const Compiler::SourceException&)
+            {
+                // error has already been reported via error handler
+            }
+            catch (const std::exception& error)
+            {
+                printError (std::string ("An exception has been thrown: ") + error.what());
+            }
+                    
+            return false;
+        }
+
+        /// Report error to the user.
+        virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type)
+        {
+            std::ostringstream error;
+            error << "column " << loc.mColumn << " (" << loc.mLiteral << "):";
+        
+            printError (error.str());
+            printError ((type==ErrorMessage ? "error: " : "warning: ") + message);
+        }
+
+        /// Report a file related error
+        virtual void report (const std::string& message, Type type)
+        {
+            printError ((type==ErrorMessage ? "error: " : "warning: ") + message);
+        }
+                    
   public:
     MyGUI::EditPtr command;
     MyGUI::EditPtr history;
@@ -20,8 +79,9 @@ namespace MWGui
     StringList::iterator current;
     std::string editString;
 
-    Console(int w, int h)
-      : Layout("openmw_console_layout.xml")
+    Console(int w, int h, MWWorld::Environment& environment, const Compiler::Extensions& extensions)
+      : Layout("openmw_console_layout.xml"),
+        mCompilerContext (MWScript::CompilerContext::Type_Console, environment)
     {
       setCoord(10,10, w-10, h/2);
 
@@ -38,6 +98,9 @@ namespace MWGui
       history->setOverflowToTheLeft(true);
       history->setEditStatic(true);
       history->setVisibleVScroll(true);
+      
+      // compiler
+      mCompilerContext.setExtensions (&extensions);
     }
 
     void enable()
@@ -130,14 +193,10 @@ namespace MWGui
       // Log the command
       print("#FFFFFF> " + cm + "\n");
 
-      /* NOTE: This is where the console command should be
-         handled.
-
-         The console command is in the string 'cm'. Output from the
-         command should be put back into the console with the
-         printOK() or printError() functions.
-       */
-      printOK("OK - echoing line " + cm);
+      if (compile (cm))
+      {
+        // TODO execute command
+      }
 
       command->setCaption("");
     }
