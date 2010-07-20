@@ -7,7 +7,7 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include <components/mwgui/window_manager.hpp>
+#include "../mwgui/window_manager.hpp"
 
 #include "interpretercontext.hpp"
 

@@ -30,6 +30,15 @@ set(GAMEINPUT_HEADER
     mwinput/inputmanager.hpp)
 source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})    
 
+set(GAMEGUI_HEADER
+    mwgui/mw_layouts.hpp
+    mwgui/window_manager.hpp
+)
+set(GAMEGUI
+    mwgui/window_manager.cpp
+)
+source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
+
 set(GAMESCRIPT
     mwscript/scriptmanager.cpp
     mwscript/compilercontext.cpp
@@ -77,9 +86,9 @@ set(GAMEWORLD_HEADER
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER}) 
 
 
-set(OPENMW_CPP ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD})
+set(OPENMW_CPP ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD} ${GAMEGUI})
 set(OPENMW_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
-    ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER})
+    ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER} ${GAMEGUI_HEADER})
 
 # Main executable
 add_executable(openmw

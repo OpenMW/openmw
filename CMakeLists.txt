@@ -50,16 +50,6 @@ source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 source_group(components\\esm FILES ${ESM_HEADER}) 
 
-# components/mw_gui
-set(MWGUI_HEADER
-    ${COMP_DIR}/mwgui/mw_layouts.hpp
-    ${COMP_DIR}/mwgui/window_manager.hpp
-)
-set(MWGUI
-    ${COMP_DIR}/mwgui/window_manager.cpp
-)
-source_group(components\\mwgui FILES ${MWGUI_HEADER} ${MWGUI})
-
 set(COMMANDSERVER
     ${COMP_DIR}/commandserver/command.hpp
     ${COMP_DIR}/commandserver/server.hpp
@@ -85,10 +75,10 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC}
-    ${COMMANDSERVER} ${COMPILER} ${INTERPRETER} ${MWGUI})
+    ${COMMANDSERVER} ${COMPILER} ${INTERPRETER})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
-    ${INTERPRETER_HEADER} ${MWGUI_HEADER})
+    ${INTERPRETER_HEADER})
 
 # source directory: libs
 

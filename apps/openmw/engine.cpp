@@ -8,7 +8,7 @@
 #include <components/bsa/bsa_archive.hpp>
 
 #include <openengine/gui/manager.hpp>
-#include <components/mwgui/window_manager.hpp>
+#include "mwgui/window_manager.hpp"
 
 #include "mwinput/inputmanager.hpp"
 

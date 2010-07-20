@@ -9,7 +9,7 @@
 
 #include "../mwworld/world.hpp"
 
-#include <components/mwgui/window_manager.hpp>
+#include "../mwgui/window_manager.hpp"
 
 #include "locals.hpp"
 #include "globalscripts.hpp"

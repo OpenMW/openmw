@@ -9,7 +9,7 @@
 #include <openengine/ogre/mouselook.hpp>
 #include <openengine/ogre/renderer.hpp>
 
-#include <components/mwgui/window_manager.hpp>
+#include "../mwgui/window_manager.hpp"
 
 #include <mangle/input/servers/ois_driver.hpp>
 #include <mangle/input/filters/eventlist.hpp>
