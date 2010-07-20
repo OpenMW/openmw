@@ -1,10 +1,26 @@
 #include <MyGUI.h>
 #include <OIS/OIS.h>
+#include <assert.h>
 
 #include "events.hpp"
 
 using namespace OIS;
 using namespace OEngine::GUI;
+
+EventInjector::EventInjector(MyGUI::Gui *g)
+  : gui(g), mouseX(0), mouseY(0), enabled(true)
+{
+  assert(gui);
+  maxX = gui->getViewWidth();
+  maxY = gui->getViewHeight();
+}
+
+template <typename X>
+void setRange(X &x, X min, X max)
+{
+  if(x < min) x = min;
+  else if(x > max) x = max;
+}
 
 void EventInjector::event(Type type, int index, const void *p)
 {
@@ -17,13 +33,14 @@ void EventInjector::event(Type type, int index, const void *p)
       if(type == EV_KeyDown)
         {
           /*
-            This is just a first approximation. Apparently, OIS sucks
-            to such a degree that it's unable to provide any sort of
-            reliable unicode character on all platforms and for all
-            keys. At least that's what I surmise from the amount of
-            workaround that the MyGUI folks have put in place for
+            This is just a first approximation. Apparently, OIS is
+            unable to provide reliable unicode characters on all
+            platforms. At least that's what I surmise from the amount
+            of workaround that the MyGUI folks have put in place for
             this. See Common/Input/OIS/InputManager.cpp in the MyGUI
-            sources for details. If this is indeed necessary (I
+            sources for details.
+
+            If the work they have done there is indeed necessary (I
             haven't tested that it is, although I have had dubious
             experinces with OIS events in the past), then we should
             probably adapt all that code here. Or even better,
@@ -46,10 +63,12 @@ void EventInjector::event(Type type, int index, const void *p)
       MouseEvent *mouse = (MouseEvent*)p;
       MyGUI::MouseButton id = MyGUI::MouseButton::Enum(index);
 
-      // I'm not sure these should be used directly, MyGUI demo code
-      // use local mouse position variables.
-      int mouseX = mouse->state.X.abs;
-      int mouseY = mouse->state.Y.abs;
+      // Update mouse position
+      mouseX += mouse->state.X.rel;
+      mouseY += mouse->state.Y.rel;
+
+      setRange(mouseX,0,maxX);
+      setRange(mouseY,0,maxY);
 
       if(type == EV_MouseDown)
         gui->injectMousePress(mouseX, mouseY, id);

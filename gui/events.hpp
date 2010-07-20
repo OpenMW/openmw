@@ -16,11 +16,13 @@ namespace GUI
   class EventInjector : public Mangle::Input::Event
   {
     MyGUI::Gui *gui;
+    int mouseX, mouseY;
+    int maxX, maxY;
 
   public:
     bool enabled;
 
-    EventInjector(MyGUI::Gui *g) : gui(g), enabled(true) {}
+    EventInjector(MyGUI::Gui *g);
     void event(Type type, int index, const void *p);
   };
 
