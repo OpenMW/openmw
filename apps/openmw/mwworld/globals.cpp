@@ -40,7 +40,7 @@ namespace MWWorld
                 case ESM::VT_Short:
                     
                     type = 's';
-                    value.mShort = *reinterpret_cast<const Interpreter::Type_Integer *> (
+                    value.mShort = *reinterpret_cast<const Interpreter::Type_Float *> (
                         &iter->second.value);
                     break;
                     

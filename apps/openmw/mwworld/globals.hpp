@@ -21,7 +21,7 @@ namespace MWWorld
             {
                 Interpreter::Type_Float mFloat;
                 Interpreter::Type_Float mLong; // Why Morrowind, why? :(
-                Interpreter::Type_Integer mShort;
+                Interpreter::Type_Float mShort;
             };
         
             typedef std::map<std::string, std::pair<char, Data> > Collection;
