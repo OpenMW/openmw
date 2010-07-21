@@ -40,18 +40,20 @@ namespace MWGui
     {
         try
         {        
+            ErrorHandler::reset();
+        
             std::istringstream input (cmd + '\n');
         
             Compiler::Scanner scanner (*this, input, mCompilerContext.getExtensions());
         
             Compiler::LineParser parser (*this, mCompilerContext, output.getLocals(),
-                output.getLiterals(), output.getCode());
+                output.getLiterals(), output.getCode(), true);
         
             scanner.scan (parser);
             
             return isGood();
         }
-        catch (const Compiler::SourceException&)
+        catch (const Compiler::SourceException& error)
         {
             // error has already been reported via error handler
         }

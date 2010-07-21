@@ -11,19 +11,67 @@
 
 namespace Compiler
 {
+    void LineParser::parseExpression (Scanner& scanner, const TokenLoc& loc)
+    {
+        mExprParser.reset();
+        
+        if (!mExplicit.empty())
+        {
+            mExprParser.parseName (mExplicit, loc, scanner);
+            mExprParser.parseSpecial (Scanner::S_ref, loc, scanner);
+        }
+        
+        scanner.scan (mExprParser);
+        
+        char type = mExprParser.append (mCode);
+        mState = EndState; 
+        
+        switch (type)
+        {
+            case 'l':
+            
+                Generator::message (mCode, mLiterals, "%g", 0);       
+                break;
+                
+            case 'f':
+            
+                Generator::message (mCode, mLiterals, "%f", 0);                   
+                break;
+                
+            default:
+                
+                throw std::runtime_error ("unknown expression result type");
+        }
+    }
+
     LineParser::LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
-        Literals& literals, std::vector<Interpreter::Type_Code>& code)
+        Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
-       mState (BeginState), mExprParser (errorHandler, context, locals, literals)
+       mState (BeginState), mExprParser (errorHandler, context, locals, literals),
+       mAllowExpression (allowExpression)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {   
+        if (mAllowExpression && mState==BeginState)
+        {
+            scanner.putbackInt (value, loc);
+            parseExpression (scanner, loc);
+            return true;
+        }
+    
         return Parser::parseInt (value, loc, scanner);
     }
 
     bool LineParser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mAllowExpression && mState==BeginState)
+        {
+            scanner.putbackFloat (value, loc);
+            parseExpression (scanner, loc);
+            return true;
+        }
+            
         return Parser::parseFloat (value, loc, scanner);
     }
 
@@ -129,6 +177,29 @@ namespace Compiler
             return false;
         }
         
+        if (mState==BeginState && mAllowExpression)
+        {
+            std::string name2 = toLower (name);
+            
+            char type = mLocals.getType (name2);
+            
+            if (type!=' ')
+            {
+                scanner.putbackName (name, loc);
+                parseExpression (scanner, loc);
+                return true;               
+            }
+
+            type = getContext().getGlobalType (name2);
+            
+            if (type!=' ')
+            {
+                scanner.putbackName (name, loc);
+                parseExpression (scanner, loc);
+                return true;            
+            }        
+        }
+        
         if (mState==BeginState && getContext().isId (name))
         {
             mState = PotentialExplicitState;
@@ -172,6 +243,30 @@ namespace Compiler
                     return true;
                 }
             }            
+            
+            if (mAllowExpression)
+            {
+                if (keyword==Scanner::K_getdisabled || keyword==Scanner::K_getdistance)
+                {
+                    scanner.putbackKeyword (keyword, loc);
+                    parseExpression (scanner, loc);
+                    return true;                 
+                }
+
+                if (const Extensions *extensions = getContext().getExtensions())
+                {
+                    char returnType;
+                    std::string argumentType;
+                    
+                    if (extensions->isFunction (keyword, returnType, argumentType,
+                        !mExplicit.empty()))
+                    {
+                        scanner.putbackKeyword (keyword, loc);
+                        parseExpression (scanner, loc);
+                        return true;                
+                    }
+                }            
+            }
         }
         
         if (mState==BeginState)
@@ -232,13 +327,25 @@ namespace Compiler
             mState = EndState;
             return true;
         }
+        
+        if (mAllowExpression)
+        {
+            if (keyword==Scanner::K_getsquareroot || keyword==Scanner::K_menumode ||
+                keyword==Scanner::K_random || keyword==Scanner::K_scriptrunning ||
+                keyword==Scanner::K_getsecondspassed)
+            {
+                scanner.putbackKeyword (keyword, loc);
+                parseExpression (scanner, loc);
+                return true;                 
+            }        
+        }
                 
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
     bool LineParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
-        if (code==Scanner::S_newline && mState==EndState)
+        if (code==Scanner::S_newline && (mState==EndState || mState==BeginState))
             return false;
             
         if (code==Scanner::S_comma && mState==MessageState)
@@ -251,6 +358,14 @@ namespace Compiler
         {
             mState = ExplicitState;
             return true;
+        }
+        
+        if (mAllowExpression && mState==BeginState &&
+            (code==Scanner::S_open || code==Scanner::S_minus))
+        {
+            scanner.putbackSpecial (code, loc);
+            parseExpression (scanner, loc);
+            return true;        
         }
             
         return Parser::parseSpecial (code, loc, scanner);
