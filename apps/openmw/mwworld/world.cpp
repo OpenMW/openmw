@@ -228,6 +228,11 @@ namespace MWWorld
         return (*mGlobalVariables)[name];
     }
     
+    char World::getGlobalVariableType (const std::string& name) const
+    {
+        return mGlobalVariables->getType (name);
+    }    
+    
     Ptr World::getPtr (const std::string& name, bool activeOnly)
     {
         // the player is always in an active cell.

@@ -53,6 +53,9 @@ namespace MWWorld
                 
             float getFloat (const std::string& name) const;
             ///< Get value independently from real type.
+            
+            char getType (const std::string& name) const;
+            ///< If there is no global variable with this name, ' ' is returned.
     };
 }
 
