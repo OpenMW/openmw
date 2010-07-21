@@ -1,5 +1,5 @@
-#include "../esm_reader.hpp"
-#include "../records.hpp"
+#include <components/esm/esm_reader.hpp>
+#include <components/esm/records.hpp>
 
 #include "esmtool_cmd.h"
 

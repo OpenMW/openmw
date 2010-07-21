@@ -191,6 +191,11 @@ endif (APPLE)
 # Apps and tools
 add_subdirectory( apps/openmw )
 
+option(BUILD_ESMTOOL "build ESM inspector" ON)
+if (BUILD_ESMTOOL)
+  add_subdirectory( apps/esmtool )
+endif()
+
 option(BUILD_CLIENTCONSOLE "build external console for script interpreter" ON)
 if (BUILD_CLIENTCONSOLE)
   add_subdirectory( apps/clientconsole )
