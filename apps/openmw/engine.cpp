@@ -52,8 +52,9 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     mEnvironment.mGlobalScripts->run (mEnvironment);
 
     // passing of time
-    mEnvironment.mWorld->advanceTime (
-        mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
+    if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
+        mEnvironment.mWorld->advanceTime (
+            mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
 
     return true;
 }
