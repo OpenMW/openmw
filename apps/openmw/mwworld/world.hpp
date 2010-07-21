@@ -103,6 +103,8 @@ namespace MWWorld
             int getSecundaPhase() const;
             
             void setMoonColour (bool red);
+            
+            float getTimeScaleFactor() const;
     };
 }
 

@@ -358,4 +358,9 @@ namespace MWWorld
     {
         mSkyManager->setMoonColour (red);   
     }
+    
+    float World::getTimeScaleFactor() const
+    {
+        return mGlobalVariables->getInt ("timescale");
+    }
 }
