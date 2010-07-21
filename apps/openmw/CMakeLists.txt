@@ -37,6 +37,7 @@ set(GAMEGUI_HEADER
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
+    mwgui/console.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
