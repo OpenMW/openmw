@@ -9,6 +9,8 @@ namespace Compiler
 
     class SourceException : public std::exception
     {
+        public:
+        
             virtual const char *what() const throw() { return "compile error";} 
             ///< Return error message
     };
@@ -17,6 +19,8 @@ namespace Compiler
 
     class FileException : public SourceException
     {
+        public:
+        
             virtual const char *what() const throw() { return "can't read file"; }
             ///< Return error message
     };
@@ -24,7 +28,10 @@ namespace Compiler
     /// \brief Exception: EOF condition encountered
 
     class EOFException : public SourceException
-    {       virtual const char *what() const throw() { return "end of file"; }
+    {       
+        public:
+        
+            virtual const char *what() const throw() { return "end of file"; }
             ///< Return error message
     };
 }
