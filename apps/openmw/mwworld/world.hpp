@@ -82,6 +82,9 @@ namespace MWWorld
             
             Globals::Data& getGlobalVariable (const std::string& name);
             
+            char getGlobalVariableType (const std::string& name) const;
+            ///< Return ' ', if there is no global variable with this name.
+            
             Ptr getPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
@@ -103,6 +106,8 @@ namespace MWWorld
             int getSecundaPhase() const;
             
             void setMoonColour (bool red);
+            
+            float getTimeScaleFactor() const;
     };
 }
 

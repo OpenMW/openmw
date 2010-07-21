@@ -40,7 +40,7 @@ namespace MWWorld
                 case ESM::VT_Short:
                     
                     type = 's';
-                    value.mShort = *reinterpret_cast<const Interpreter::Type_Integer *> (
+                    value.mShort = *reinterpret_cast<const Interpreter::Type_Float *> (
                         &iter->second.value);
                     break;
                     
@@ -144,6 +144,16 @@ namespace MWWorld
 
             default: throw std::runtime_error ("unsupported global variable type");
         }    
+    }
+    
+    char Globals::getType (const std::string& name) const
+    {
+        Collection::const_iterator iter = mVariables.find (name);
+        
+        if (iter==mVariables.end())
+            return ' ';
+            
+        return iter->second.first;
     }
 }
 

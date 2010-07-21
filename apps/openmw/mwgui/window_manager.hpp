@@ -15,6 +15,16 @@ namespace MyGUI
   class Gui;
 }
 
+namespace Compiler
+{
+    class Extensions;
+}
+
+namespace MWWorld
+{
+    class Environment;
+}
+
 namespace MWGui
 {
   class HUD;
@@ -91,11 +101,15 @@ namespace MWGui
 
   public:
     /// The constructor needs the main Gui object
-    WindowManager(MyGUI::Gui *_gui);
+    WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
+        const Compiler::Extensions& extensions, bool newGame);
     virtual ~WindowManager();
 
     void setMode(GuiMode newMode)
     {
+      if (newMode==GM_Inventory && allowed==GW_None)
+        return;
+        
       mode = newMode;
       updateVisible();
     }

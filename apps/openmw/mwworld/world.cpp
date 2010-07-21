@@ -228,6 +228,11 @@ namespace MWWorld
         return (*mGlobalVariables)[name];
     }
     
+    char World::getGlobalVariableType (const std::string& name) const
+    {
+        return mGlobalVariables->getType (name);
+    }    
+    
     Ptr World::getPtr (const std::string& name, bool activeOnly)
     {
         // the player is always in an active cell.
@@ -357,5 +362,10 @@ namespace MWWorld
     void World::setMoonColour (bool red)
     {
         mSkyManager->setMoonColour (red);   
+    }
+    
+    float World::getTimeScaleFactor() const
+    {
+        return mGlobalVariables->getInt ("timescale");
     }
 }

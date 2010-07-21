@@ -35,11 +35,17 @@ namespace Compiler
             std::string mExplicit;
             char mType;
             ExprParser mExprParser;
+            bool mAllowExpression;
+    
+            void parseExpression (Scanner& scanner, const TokenLoc& loc);
     
         public:
         
             LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
-                Literals& literals, std::vector<Interpreter::Type_Code>& code);
+                Literals& literals, std::vector<Interpreter::Type_Code>& code,
+                bool allowExpression = false);
+            ///< \param allowExpression Allow lines consisting of a naked expression
+            /// (result is send to the messagebox interface)
     
             virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
             ///< Handle an int token.
