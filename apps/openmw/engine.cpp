@@ -209,7 +209,7 @@ void OMW::Engine::go()
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui(), mEnvironment,
-        mExtensions);
+        mExtensions, mNewGame);
 
     mEnvironment.mSoundManager = new MWSound::SoundManager;
 

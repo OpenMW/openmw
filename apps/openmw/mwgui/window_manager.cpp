@@ -8,8 +8,8 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-    const Compiler::Extensions& extensions)
-  : gui(_gui), mode(GM_Game), shown(GW_ALL), allowed(GW_ALL)
+    const Compiler::Extensions& extensions, bool newGame)
+  : gui(_gui), mode(GM_Game), shown(GW_ALL), allowed(newGame ? GW_None : GW_ALL)
 {
   // Get size info from the Gui object
   assert(gui);
