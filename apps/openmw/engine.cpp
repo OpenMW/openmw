@@ -45,9 +45,6 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
     mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
 
-    // console
-    processCommands();
-
     // global scripts
     mEnvironment.mGlobalScripts->run (mEnvironment);
 
@@ -68,27 +65,11 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
     return true;
 }
-            
-void OMW::Engine::processCommands()
-{
-    Command cmd;
-    while (mCommandQueue.try_pop_front(cmd))
-    {
-        ///\todo Add actual processing of the received command strings
-        std::cout << "Command: '" << cmd.mCommand << "'" << std::endl;
-
-        ///\todo Replace with real output.  For now, echo back the string in uppercase
-        std::string reply(cmd.mCommand);
-        std::transform(reply.begin(), reply.end(), reply.begin(), toupper);
-        cmd.mReplyFunction(reply);
-    } 
-}
 
 OMW::Engine::Engine()
   : mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
-  , mEnableCommandServer (false)
   , mScriptManager (0)
   , mScriptContext (0)
 {   
@@ -96,9 +77,6 @@ OMW::Engine::Engine()
 
 OMW::Engine::~Engine()
 {
-    if (mspCommandServer.get())
-        mspCommandServer->stop();
-
     delete mGuiManager;
     delete mEnvironment.mWorld;
     delete mEnvironment.mSoundManager;
@@ -167,11 +145,6 @@ void OMW::Engine::enableDebugMode()
 {
     mDebug = true;
 }
-
-void OMW::Engine::enableCommandServer()
-{
-    mEnableCommandServer = true;
-}
            
 void OMW::Engine::enableVerboseScripts()
 {
@@ -238,16 +211,6 @@ void OMW::Engine::go()
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
                                   *mEnvironment.mWindowManager, mDebug);
-
-    // Launch the console server
-    if (mEnableCommandServer)
-    {
-        std::cout << "Starting command server on port " << kCommandServerPort << std::endl;
-        mspCommandServer.reset(new OMW::CommandServer::Server(&mCommandQueue, kCommandServerPort));
-        mspCommandServer->start();
-    }
-    else
-        std::cout << "Command server disabled" << std::endl;
 
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 

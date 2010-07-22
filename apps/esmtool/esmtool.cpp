@@ -56,7 +56,7 @@ int main(int argc, char**argv)
   cout << "Special flag: " << esm.getSpecial() << endl;
   cout << "Masters:\n";
   ESMReader::MasterList m = esm.getMasters();
-  for(int i=0;i<m.size();i++)
+  for(unsigned int i=0;i<m.size();i++)
     cout << "  " << m[i].name << ", " << m[i].size << " bytes\n";
 
   // Loop through all records

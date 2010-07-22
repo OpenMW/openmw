@@ -50,20 +50,13 @@ source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 source_group(components\\esm FILES ${ESM_HEADER}) 
 
-set(COMMANDSERVER
-    ${COMP_DIR}/commandserver/command.hpp
-    ${COMP_DIR}/commandserver/server.hpp
-    ${COMP_DIR}/commandserver/server.cpp)
-source_group(components\\commandserver FILES ${COMMANDSERVER})    
-
 set(MISC 
     ${COMP_DIR}/misc/stringops.cpp
     ${COMP_DIR}/misc/fileops.cpp)
 set(MISC_HEADER 
     ${COMP_DIR}/misc/fileops.hpp
     ${COMP_DIR}/misc/slice_array.hpp
-    ${COMP_DIR}/misc/stringops.hpp
-    ${COMP_DIR}/misc/tsdeque.hpp)
+    ${COMP_DIR}/misc/stringops.hpp)
 source_group(components\\misc FILES ${MISC} ${MISC_HEADER})   
     
 file(GLOB COMPILER ${COMP_DIR}/compiler/*.cpp)
@@ -75,7 +68,7 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC}
-    ${COMMANDSERVER} ${COMPILER} ${INTERPRETER})
+    ${COMPILER} ${INTERPRETER})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
     ${INTERPRETER_HEADER})
@@ -194,19 +187,4 @@ add_subdirectory( apps/openmw )
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
-endif()
-
-option(BUILD_CLIENTCONSOLE "build external console for script interpreter" ON)
-if (BUILD_CLIENTCONSOLE)
-  add_subdirectory( apps/clientconsole )
-endif()
-
-option(BUILD_MWCOMPILER "build standalone Morrowind script compiler" ON)
-if (BUILD_MWCOMPILER)
-    add_subdirectory( apps/mwcompiler )
-endif()
-
-option(BUILD_MWINTERPRETER "build standalone Morrowind script code interpreter" ON)
-if (BUILD_MWINTERPRETER)
-    add_subdirectory( apps/mwinterpreter )
 endif()

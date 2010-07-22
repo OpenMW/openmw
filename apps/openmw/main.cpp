@@ -33,7 +33,6 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ( "debug", "debug mode" )
         ( "script-verbose", "verbose script output" )
         ( "new-game", "activate char gen/new game mechanics" )
-        ( "disable-command-server", "turn off the command server" )
         ;
   
     bpo::variables_map variables;
@@ -72,9 +71,6 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     if (variables.count ("new-game"))
         engine.setNewGame();
 
-    if (variables.count("disable-command-server") == 0)
-        engine.enableCommandServer();
-        
     return true;
 }
 

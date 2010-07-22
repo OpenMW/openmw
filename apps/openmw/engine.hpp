@@ -8,9 +8,6 @@
 #include <OgreFrameListener.h>
 
 #include <openengine/ogre/renderer.hpp>
-#include <components/misc/tsdeque.hpp>
-#include <components/commandserver/server.hpp>
-#include <components/commandserver/command.hpp>
 #include <components/compiler/extensions.hpp>
 
 #include "mwworld/environment.hpp"
@@ -54,8 +51,6 @@ namespace OMW
 
     class Engine : private Ogre::FrameListener
     {
-            enum { kCommandServerPort = 27917 };
-
             boost::filesystem::path mDataDir;
             OEngine::Render::OgreRenderer mOgre;
             std::string mCellName;
@@ -63,10 +58,6 @@ namespace OMW
             bool mDebug;
             bool mVerboseScripts;
             bool mNewGame;
-
-            TsDeque<OMW::Command>                     mCommandQueue;
-            bool                                      mEnableCommandServer;
-            std::auto_ptr<OMW::CommandServer::Server> mspCommandServer;
 
             MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
@@ -90,7 +81,6 @@ namespace OMW
             virtual bool frameStarted(const Ogre::FrameEvent& evt);
 
             /// Process pending commands
-            void processCommands();
 
         public:
 
@@ -115,7 +105,6 @@ namespace OMW
 
             /// Enable the command server so external apps can send commands to the console.
             /// Must be set before go().
-            void enableCommandServer();
 
             /// Enable verbose script output
             void enableVerboseScripts();
