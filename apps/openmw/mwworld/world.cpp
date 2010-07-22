@@ -142,6 +142,27 @@ namespace MWWorld
         return 0;
     }
     
+    int World::getDaysPerMonth (int month) const
+    {
+        switch (month)
+        {
+            case 0: return 31;
+            case 1: return 28;
+            case 2: return 31;
+            case 3: return 30;
+            case 4: return 31;
+            case 5: return 30;
+            case 6: return 31;
+            case 7: return 31;
+            case 8: return 30;
+            case 9: return 31;
+            case 10: return 30;
+            case 11: return 31;
+        }
+        
+        throw std::runtime_error ("month out of range");
+    }
+    
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, const std::string& startCell, bool newGame)
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
@@ -288,7 +309,13 @@ namespace MWWorld
     void World::advanceTime (double hours)
     {
         hours += mGlobalVariables->getFloat ("gamehour");
+
         setHour (hours);
+        
+        int days = hours / 24;
+        
+        if (days>0)
+            mGlobalVariables->setInt ("dayspassed", days + mGlobalVariables->getInt ("dayspassed"));
     }
     
     void World::setHour (double hour)
@@ -305,32 +332,61 @@ namespace MWWorld
         mSkyManager->setHour (hour);
         
         if (days>0)
-        {
-            setDay (days + mGlobalVariables->getInt ("year"));
-            
-            days += mGlobalVariables->getInt ("dayspassed");
-            mGlobalVariables->setInt ("dayspassed", days);
-        }
+            setDay (days + mGlobalVariables->getInt ("day"));
     }
     
     void World::setDay (int day)
     {
         if (day<0)
             day = 0;
+
+        int month = mGlobalVariables->getInt ("month");
     
-        int year = day / 365;
-        day = day % 365;  
-                      
-        mGlobalVariables->setInt ("day", day);
-                
-        mSkyManager->setDay (day);
-                
-        if (year>0)
+        while (true)
         {
-            year += mGlobalVariables->getInt ("year");
-            mGlobalVariables->setInt ("year", year);
-        }
+            int days = getDaysPerMonth (month);  
+            if (day<days)
+                break;
+    
+            if (month<11)
+            {
+                ++month;
+            }
+            else
+            {
+                month = 0;
+                mGlobalVariables->setInt ("year", mGlobalVariables->getInt ("year")+1);
+            }
+            
+            day -= days;
+        }            
+                          
+        mGlobalVariables->setInt ("day", day);    
+        mGlobalVariables->setInt ("month", month);
+
+        mSkyManager->setDate (day, month);
     }   
+    
+    void World::setMonth (int month)
+    {
+        if (month<0)
+            month = 0;
+            
+        int years = month / 12;
+        month = month % 12;
+        
+        int days = getDaysPerMonth (month);
+        
+        if (mGlobalVariables->getInt ("day")>=days)
+            mGlobalVariables->setInt ("day", days-1);
+        
+        mGlobalVariables->setInt ("month", month);
+        
+        if (years>0)
+            mGlobalVariables->setInt ("year", years+mGlobalVariables->getInt ("year"));
+
+        mSkyManager->setDate (mGlobalVariables->getInt ("day"), month);
+    }
     
     void World::toggleSky()
     {
@@ -344,7 +400,8 @@ namespace MWWorld
             mSky = true;
             // TODO check for extorior or interior with sky.
             mSkyManager->setHour (mGlobalVariables->getFloat ("gamehour"));
-            mSkyManager->setDay (mGlobalVariables->getInt ("day"));
+            mSkyManager->setDate (mGlobalVariables->getInt ("day"),
+                mGlobalVariables->getInt ("month"));
             mSkyManager->enable();
         }
     }

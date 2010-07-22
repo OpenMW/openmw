@@ -137,6 +137,8 @@ namespace MWScript
             mEnvironment.mWorld->setHour (value);
         else if (name=="day")
             mEnvironment.mWorld->setDay (value);
+        else if (name=="month")
+            mEnvironment.mWorld->setMonth (value);
         else
             mEnvironment.mWorld->getGlobalVariable (name).mShort = value;
     }
@@ -147,6 +149,8 @@ namespace MWScript
             mEnvironment.mWorld->setHour (value);
         else if (name=="day")
             mEnvironment.mWorld->setDay (value);
+        else if (name=="month")
+            mEnvironment.mWorld->setMonth (value);
         else
             mEnvironment.mWorld->getGlobalVariable (name).mLong = value;
     }
@@ -157,6 +161,8 @@ namespace MWScript
             mEnvironment.mWorld->setHour (value);
         else if (name=="day")
             mEnvironment.mWorld->setDay (value);
+        else if (name=="month")
+            mEnvironment.mWorld->setMonth (value);
         else
             mEnvironment.mWorld->getGlobalVariable (name).mFloat = value;
     }

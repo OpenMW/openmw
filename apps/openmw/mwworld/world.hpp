@@ -63,6 +63,8 @@ namespace MWWorld
     
             MWRender::CellRender *searchRender (Ptr::CellStore *store);
     
+            int getDaysPerMonth (int month) const;
+    
         public:
         
            World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& master,
@@ -96,6 +98,8 @@ namespace MWWorld
             void advanceTime (double hours);
             
             void setHour (double hour);
+            
+            void setMonth (int month);
             
             void setDay (int day);
             

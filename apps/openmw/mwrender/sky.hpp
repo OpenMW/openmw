@@ -25,7 +25,7 @@ namespace MWRender
         
         virtual void setHour (double hour) = 0;
         
-        virtual void setDay (int day) = 0;
+        virtual void setDate (int day, int month) = 0;
         
         virtual int getMasserPhase() const = 0;
         

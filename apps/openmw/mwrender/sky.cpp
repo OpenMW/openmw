@@ -29,7 +29,7 @@ namespace MWRender
         virtual void setHour (double hour) {}
         ///< will be called even when sky is disabled.
         
-        virtual void setDay (int day) {}
+        virtual void setDate (int day, int month) {}
         ///< will be called even when sky is disabled.
         
         virtual int getMasserPhase() const { return 0; }
