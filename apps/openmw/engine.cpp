@@ -35,6 +35,9 @@ void OMW::Engine::executeLocalScripts()
         MWScript::InterpreterContext interpreterContext (mEnvironment,
             &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
         mScriptManager->run (iter->first, interpreterContext);
+        
+        if (mEnvironment.mWorld->hasCellChanged())
+            break;
     }
 }
 
@@ -44,19 +47,24 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
     // console
     processCommands();
-    
-    // local scripts
-    executeLocalScripts();
-    
+
     // global scripts
     mEnvironment.mGlobalScripts->run (mEnvironment);
 
+    bool changed = mEnvironment.mWorld->hasCellChanged();
+
+    // local scripts
+    executeLocalScripts(); // This does not handle the case where a global script causes a cell
+                           // change, followed by a cell change in a local script during the same
+                           // frame.
+    
     // passing of time
     if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
         mEnvironment.mWorld->advanceTime (
             mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
 
-    mEnvironment.mWorld->markCellAsUnchanged();
+    if (changed) // keep change flag for another frame, if cell changed happend in local script
+        mEnvironment.mWorld->markCellAsUnchanged();
 
     return true;
 }
