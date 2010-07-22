@@ -166,7 +166,7 @@ namespace MWWorld
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, const std::string& startCell, bool newGame)
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
-      mSky (false)
+      mSky (false), mCellChanged (false)
     {   
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
@@ -240,8 +240,7 @@ namespace MWWorld
     
     bool World::hasCellChanged() const
     {
-        // Cell change not implemented yet.
-        return false;
+        return mCellChanged;
     }
     
     Globals::Data& World::getGlobalVariable (const std::string& name)
@@ -424,5 +423,52 @@ namespace MWWorld
     float World::getTimeScaleFactor() const
     {
         return mGlobalVariables->getInt ("timescale");
+    }
+    
+    void World::changeCell (const std::string& cellName, const ESM::Position& position)
+    {
+        // Load cell.       
+        mInteriors[cellName].loadInt (cellName, mStore, mEsm);
+     
+        // remove active
+        CellRenderCollection::iterator active = mActiveCells.begin();
+        
+        if (active!=mActiveCells.end())
+        {
+            active->second->destroy();
+            delete active->second;
+            mActiveCells.erase (active);
+        }
+
+        mLocalScripts.clear(); // FIXME won't work with exteriors        
+        insertInteriorScripts (mInteriors[cellName]);
+
+        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2]);
+        // TODO orientation
+
+        // This connects the cell data with the rendering scene.
+        std::pair<CellRenderCollection::iterator, bool> result =
+            mActiveCells.insert (std::make_pair (&mInteriors[cellName],
+            new MWRender::InteriorCellRender (mInteriors[cellName], mScene)));
+
+        if (result.second)
+        {        
+            // Load the cell and insert it into the renderer
+            result.first->second->show();
+        }
+
+        if (mSky)
+        {
+            toggleSky();
+            // TODO set weather
+            toggleSky();
+        }
+        
+        mCellChanged = true;
+    }
+    
+    void World::markCellAsUnchanged()
+    {
+        mCellChanged = false;    
     }
 }

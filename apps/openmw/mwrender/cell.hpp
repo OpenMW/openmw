@@ -18,6 +18,9 @@ namespace MWRender
             /// memory.
             virtual void hide() = 0; 
             
+            /// Destroy all rendering objects connected with this cell.
+            virtual void destroy() = 0;
+            
             /// Make the reference with the given handle visible.
             virtual void enable (const std::string& handle) = 0;
             

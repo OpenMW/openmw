@@ -91,7 +91,7 @@ namespace MWRender
     virtual void hide();
 
     /// Destroy all rendering objects connected with this cell.
-    void destroy(); // comment by Zini: shouldn't this go into the destructor?
+    virtual void destroy(); // comment by Zini: shouldn't this go into the destructor?
 
     /// Switch through lighting modes.
     void toggleLight();

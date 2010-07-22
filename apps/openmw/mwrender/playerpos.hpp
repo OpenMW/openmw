@@ -22,15 +22,21 @@ namespace MWRender
       camera(cam)
     {
         mPlayer.base = player;
-        mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2];
+        mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2] = 0;
     }
 
     // Set the player position. Uses Morrowind coordinates.
-    void setPos(float _x, float _y, float _z)
+    void setPos(float _x, float _y, float _z, bool updateCamera = false)
     {
       mPlayer.ref.pos.pos[0] = _x;
       mPlayer.ref.pos.pos[1] = _y;
       mPlayer.ref.pos.pos[2] = _z;
+
+        if (updateCamera)
+            camera->setPosition (Ogre::Vector3 (
+                mPlayer.ref.pos.pos[0],
+                mPlayer.ref.pos.pos[2],
+                mPlayer.ref.pos.pos[1]));
 
       // TODO: Update sound listener
     }

@@ -56,6 +56,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
         mEnvironment.mWorld->advanceTime (
             mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
 
+    mEnvironment.mWorld->markCellAsUnchanged();
+
     return true;
 }
             

@@ -59,5 +59,6 @@ op 0x2000022: TurnMoonWhite
 op 0x2000023: TurnMoonRed
 op 0x2000024: GetMasserPhase
 op 0x2000025: GetSecundaPhase
-opcodes 0x2000026-0x3ffffff unused
+op 0x2000026: COC
+opcodes 0x2000027-0x3ffffff unused
 

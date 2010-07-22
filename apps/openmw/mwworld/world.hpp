@@ -15,6 +15,11 @@
 #include "ptr.hpp"
 #include "globals.hpp"
 
+namespace ESM
+{
+    struct Position;
+}
+
 namespace Render
 {
     class OgreRenderer;
@@ -52,6 +57,7 @@ namespace MWWorld
             ScriptList mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
             bool mSky;
+            bool mCellChanged;
     
             // not implemented
             World (const World&);
@@ -112,6 +118,11 @@ namespace MWWorld
             void setMoonColour (bool red);
             
             float getTimeScaleFactor() const;
+            
+            void changeCell (const std::string& cellName, const ESM::Position& position);
+            ///< works only for interior cells currently.
+            
+            void markCellAsUnchanged();
     };
 }
 
