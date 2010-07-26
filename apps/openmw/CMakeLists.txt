@@ -90,7 +90,10 @@ source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 set(GAMEMECHANICS
     mwmechanics/mechanicsmanager.cpp)
 set(GAMEMECHANICS_HEADER 
-    mwmechanics/mechanicsmanager.hpp)
+    mwmechanics/mechanicsmanager.hpp
+    mwmechanics/stat.hpp
+    mwmechanics/creaturestats.hpp
+    )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER}) 
 
 set(OPENMW_CPP ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD}

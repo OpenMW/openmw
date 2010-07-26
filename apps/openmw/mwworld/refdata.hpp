@@ -3,11 +3,18 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include "../mwscript/locals.hpp"
 
 namespace ESM
 {
     class Script;
+}
+
+namespace MWMechanics
+{
+    struct CreatureStats;
 }
 
 namespace MWWorld
@@ -21,6 +28,12 @@ namespace MWWorld
                                       // we can make this a pointer later.
             bool mHasLocals;
             bool mEnabled;
+            
+            // we are using shared pointer here to avoid having to create custom copy-constructor,
+            // assignment operator and destructor. As a consequence though copying a RefData object
+            // manually will probably give unexcepted results. This is not a problem since RefData
+            // are never copied outside of container operations.
+            boost::shared_ptr<MWMechanics::CreatureStats> mCreatureStats;
         
         public:
         
@@ -63,6 +76,11 @@ namespace MWWorld
             void disable()
             {
                 mEnabled = true;
+            }
+            
+            boost::shared_ptr<MWMechanics::CreatureStats>& getCreatureStats()
+            {
+                return mCreatureStats;            
             }
     };        
 }
