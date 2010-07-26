@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cctype>
 #include <assert.h>
+#include <stdexcept>
 
 namespace ESMS
 {
@@ -45,12 +46,23 @@ namespace ESMS
     }
 
     // Find the given object ID, or return NULL if not found.
-    const X* find(const std::string &id) const
+    const X* search(const std::string &id) const
     {
       std::string id2 = toLower (id);
       if(list.find(id2) == list.end())
         return NULL;
       return &list.find(id2)->second;
+    }
+    
+    // Find the given object ID (throws an exception if not found)
+    const X* find(const std::string &id) const
+    {
+        const X *object = search (id);
+        
+        if (!object)
+            throw std::runtime_error ("object " + id + " not found");
+        
+        return object;
     }
 
     int getSize() { return list.size(); }
@@ -76,7 +88,7 @@ namespace ESMS
     }
 
     // Find the given object ID, or return NULL if not found.
-    const X* find(const std::string &id) const
+    const X* search(const std::string &id) const
     {
       std::string id2 = toLower (id);
       if(list.find(id2) == list.end())
@@ -84,6 +96,17 @@ namespace ESMS
       return &list.find(id2)->second;
     }
     
+    // Find the given object ID (throws an exception if not found)
+    const X* find(const std::string &id) const
+    {
+        const X *object = search (id);
+        
+        if (!object)
+            throw std::runtime_error ("object " + id + " not found");
+        
+        return object;
+    }
+        
     int getSize() { return list.size(); }
   };
 
@@ -177,12 +200,23 @@ namespace ESMS
     }
 
     // Find the given object ID, or return NULL if not found.
-    const X* find(const std::string &id) const
+    const X* search(const std::string &id) const
     {
       std::string id2 = toLower (id);    
       if(list.find(id2) == list.end())
         return NULL;
       return &list.find(id2)->second;
+    }
+
+    // Find the given object ID (throws an exception if not found)
+    const X* find(const std::string &id) const
+    {
+        const X *object = search (id);
+        
+        if (!object)
+            throw std::runtime_error ("object " + id + " not found");
+        
+        return object;
     }
 
     int getSize() { return list.size(); }
