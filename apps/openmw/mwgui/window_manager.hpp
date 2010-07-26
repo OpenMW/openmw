@@ -10,6 +10,8 @@
    this class.
  */
 
+#include <string>
+
 namespace MyGUI
 {
   class Gui;
@@ -134,6 +136,9 @@ namespace MWGui
     }
 
     MyGUI::Gui* getGui() const { return gui; }
+  
+    void setLabel (const std::string& id, const std::string& label);
+    ///< Set label text for the value with the given ID.
   };
 }
 #endif
