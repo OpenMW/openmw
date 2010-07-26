@@ -259,7 +259,7 @@ namespace MWWorld
         // the player is always in an active cell.
         if (name=="player")
         {
-            return Ptr (mPlayerPos->getPlayer(), mCurrentCell);
+            return mPlayerPos->getPlayer();
         }
         
         // active cells

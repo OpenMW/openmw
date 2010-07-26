@@ -76,15 +76,11 @@ namespace MWRender
       setPos(relX, relY, relZ);
     }
     
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *getPlayer()
+        MWWorld::Ptr getPlayer()
         {
-            return &mPlayer;
+            MWWorld::Ptr ptr (&mPlayer, mCellStore);
+            return ptr;
         }
-
-        const ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *getPlayer() const
-        {
-            return &mPlayer;
-        }        
   };
 }
 #endif
