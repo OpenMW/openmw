@@ -183,6 +183,7 @@ namespace MWWorld
         insertInteriorScripts (mInteriors[startCell]);
 
         mPlayerPos = new MWRender::PlayerPos (mScene.getCamera(), mStore.npcs.find ("player"));
+        mPlayerPos->setCell (&mInteriors[startCell]);
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -444,6 +445,7 @@ namespace MWWorld
         insertInteriorScripts (mInteriors[cellName]);
 
         mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2]);
+        mPlayerPos->setCell (&mInteriors[cellName]);
         // TODO orientation
 
         // This connects the cell data with the rendering scene.
