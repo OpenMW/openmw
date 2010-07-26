@@ -50,6 +50,7 @@ set(GAMESCRIPT
     mwscript/guiextensions.cpp
     mwscript/soundextensions.cpp
     mwscript/skyextensions.cpp
+    mwscript/statsextensions.cpp
     mwscript/extensions.cpp
     mwscript/globalscripts.cpp
     )
@@ -63,6 +64,7 @@ set(GAMESCRIPT_HEADER
     mwscript/guiextensions.hpp
     mwscript/soundextensions.hpp
     mwscript/skyextensions.hpp
+    mwscript/statsextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
     )
