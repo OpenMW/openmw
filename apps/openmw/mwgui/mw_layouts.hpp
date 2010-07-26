@@ -161,15 +161,6 @@ namespace MWGui
       setText("Race_str", "Race");
       setText("Class_str", "Class");
 
-      setText("Attrib1", "Strength");
-      setText("Attrib2", "Intelligence");
-      setText("Attrib3", "Willpower");
-      setText("Attrib4", "Agility");
-      setText("Attrib5", "Speed");
-      setText("Attrib6", "Endurance");
-      setText("Attrib7", "Personality");
-      setText("Attrib8", "Luck");
-
       // These are just demo values, you should replace these with
       // real calls from outside the class later.
       setPlayerName("ThePlayer");
@@ -195,6 +186,24 @@ namespace MWGui
     void setPlayerName(const std::string& playerName)
     {
       mMainWidget->setCaption(playerName);
+    }
+    
+    /// Set label text for the value with the given ID.
+    void setLabel (const std::string& id, const std::string& label)
+    {
+        static const char *ids[] =
+        {
+            "Attrib1", "Attrib2", "Attrib3", "Attrib4", "Attrib5", "Attrib6",
+            "Attrib7", "Attrib8",
+            0
+        };
+        
+        for (int i=0; ids[i]; ++i)
+            if (ids[i]==id)
+            {
+                setText (id, label);
+                break;
+            }
     }
   };
 }

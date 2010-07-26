@@ -24,6 +24,8 @@
 #include "mwworld/ptr.hpp"
 #include "mwworld/environment.hpp"
 
+#include "mwmechanics/mechanicsmanager.hpp"
+
 #include <OgreRoot.h>
 
 void OMW::Engine::executeLocalScripts()
@@ -81,6 +83,7 @@ OMW::Engine::~Engine()
     delete mEnvironment.mWorld;
     delete mEnvironment.mSoundManager;
     delete mEnvironment.mGlobalScripts;
+    delete mEnvironment.mMechanicsManager;
     delete mScriptManager;
     delete mScriptContext;
 }
@@ -196,8 +199,10 @@ void OMW::Engine::go()
     mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui(), mEnvironment,
         mExtensions, mNewGame);
 
+    // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager;
 
+    // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
         mEnvironment);
     mScriptContext->setExtensions (&mExtensions);
@@ -207,6 +212,12 @@ void OMW::Engine::go()
             
     mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
         *mScriptManager);
+        
+    // Create game mechanics system
+    mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (
+        mEnvironment.mWorld->getStore(), *mEnvironment.mWindowManager);
+    
+    mEnvironment.mMechanicsManager->configureGUI();
 
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),

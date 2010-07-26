@@ -84,3 +84,9 @@ void WindowManager::updateVisible()
 
   // All other modes are ignored
 }
+
+void WindowManager::setLabel (const std::string& id, const std::string& label)
+{
+    stats->setLabel (id, label);
+}
+

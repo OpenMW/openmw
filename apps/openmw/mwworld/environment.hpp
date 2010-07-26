@@ -16,6 +16,11 @@ namespace MWGui
     class WindowManager;
 }
 
+namespace MWMechanics
+{
+    class MechanicsManager;
+}
+
 namespace MWWorld
 {
     class World;
@@ -25,13 +30,15 @@ namespace MWWorld
     {   
     public:
         Environment()
-        : mWorld (0), mSoundManager (0), mGlobalScripts (0), mWindowManager (0), mFrameDuration (0)
+        : mWorld (0), mSoundManager (0), mGlobalScripts (0), mWindowManager (0),
+          mMechanicsManager (0), mFrameDuration (0)
         {}
 
         World *mWorld;
         MWSound::SoundManager *mSoundManager;
         MWScript::GlobalScripts *mGlobalScripts;
         MWGui::WindowManager *mWindowManager;
+        MWMechanics::MechanicsManager *mMechanicsManager;
         float mFrameDuration;
     };
 }

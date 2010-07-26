@@ -75,6 +75,15 @@ namespace ESMS
       ref.load(esm);
     }
 
+    // Find the given object ID, or return NULL if not found.
+    const X* find(const std::string &id) const
+    {
+      std::string id2 = toLower (id);
+      if(list.find(id2) == list.end())
+        return NULL;
+      return &list.find(id2)->second;
+    }
+    
     int getSize() { return list.size(); }
   };
 
