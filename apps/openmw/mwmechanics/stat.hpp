@@ -1,6 +1,8 @@
 #ifndef GAME_MWMECHANICS_STAT_H
 #define GAME_MWMECHANICS_STAT_H
 
+#include <limits>
+
 namespace MWMechanics
 {
     template<typename T>
@@ -35,6 +37,26 @@ namespace MWMechanics
                 T diff = value - mBase;
                 mBase = value;
                 mModified += diff;
+            }
+            
+            /// Set modified value an adjust base accordingly.
+            void setModified (T value, const T& min, const T& max = std::numeric_limits<T>::max())
+            {
+                T diff = value - mModified;
+                
+                if (mBase+diff<min)
+                {
+                    value = min + (mModified - mBase);
+                    diff = value - mModified;
+                }
+                else if (mBase>max-diff)
+                {
+                    value = max + (mModified - mBase);
+                    diff = value - mModified;
+                }
+                
+                mModified = value;
+                mBase += diff;
             }
             
             /// Change modified relatively.

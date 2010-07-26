@@ -242,7 +242,7 @@ namespace MWScript
     
     MWWorld::Ptr InterpreterContext::getReference()
     {
-        return mReference;
+        return getReference ("", true);
     }
 }
 

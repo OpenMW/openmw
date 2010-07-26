@@ -79,8 +79,8 @@ namespace MWWorld
                 {
                     if (mPtr.type()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData> *))
                     {
-                        boost::shared_ptr<MWMechanics::CreatureStats> stats;
-                        data.getCreatureStats() = stats;
+                        boost::shared_ptr<MWMechanics::CreatureStats> stats (
+                            new MWMechanics::CreatureStats);
                     
                         ESMS::LiveCellRef<ESM::Creature, RefData> *ref = get<ESM::Creature>();
                         
@@ -92,11 +92,13 @@ namespace MWWorld
                         stats->mAttributes[5].set (ref->base->data.endurance);
                         stats->mAttributes[6].set (ref->base->data.personality);
                         stats->mAttributes[7].set (ref->base->data.luck);
+
+                        data.getCreatureStats() = stats;
                     }
                     else if (mPtr.type()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData> *))
                     {
-                        boost::shared_ptr<MWMechanics::CreatureStats> stats;
-                        data.getCreatureStats() = stats;
+                        boost::shared_ptr<MWMechanics::CreatureStats> stats (
+                            new MWMechanics::CreatureStats);
                     
                         ESMS::LiveCellRef<ESM::NPC, RefData> *ref = get<ESM::NPC>();
                         
@@ -108,6 +110,8 @@ namespace MWWorld
                         stats->mAttributes[5].set (ref->base->npdt52.endurance);
                         stats->mAttributes[6].set (ref->base->npdt52.personality);
                         stats->mAttributes[7].set (ref->base->npdt52.luck);
+
+                        data.getCreatureStats() = stats;
                     }
                     else
                         throw std::runtime_error (

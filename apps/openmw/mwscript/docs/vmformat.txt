@@ -60,5 +60,11 @@ op 0x2000023: TurnMoonRed
 op 0x2000024: GetMasserPhase
 op 0x2000025: GetSecundaPhase
 op 0x2000026: COC
-opcodes 0x2000027-0x3ffffff unused
+op 0x2000027-0x200002e: GetAttribute
+op 0x200002f-0x2000036: GetAttribute, explicit reference
+op 0x2000037-0x200003e: SetAttribute
+op 0x200003f-0x2000046: SetAttribute, explicit reference
+op 0x2000047-0x200004e: ModAttribute
+op 0x200004f-0x2000056: ModAttribute, explicit reference
+opcodes 0x2000057-0x3ffffff unused
 
