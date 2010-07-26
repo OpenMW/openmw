@@ -6,6 +6,7 @@
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/refdata.hpp"
+#include "../mwworld/ptr.hpp"
 
 namespace MWRender
 {
@@ -15,11 +16,12 @@ namespace MWRender
   class PlayerPos
   {
     ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
+    MWWorld::Ptr::CellStore *mCellStore;
     Ogre::Camera *camera;
 
   public:
     PlayerPos(Ogre::Camera *cam, const ESM::NPC *player) :
-      camera(cam)
+      mCellStore (0), camera(cam)
     {
         mPlayer.base = player;
         mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2] = 0;
@@ -39,6 +41,11 @@ namespace MWRender
                 mPlayer.ref.pos.pos[1]));
 
       // TODO: Update sound listener
+    }
+    
+    void setCell (MWWorld::Ptr::CellStore *cellStore)
+    {
+        mCellStore = cellStore;
     }
 
     Ogre::Camera *getCamera() { return camera; }
