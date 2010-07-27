@@ -65,6 +65,19 @@ namespace MWMechanics
                 mModified += diff;            
             }
     };
+    
+    template<typename T>
+    inline bool operator== (const Stat<T>& left, const Stat<T>& right)
+    {
+        return left.getBase()==right.getBase() &&
+            left.getModified()==right.getModified();    
+    }
+    
+    template<typename T>
+    inline bool operator!= (const Stat<T>& left, const Stat<T>& right)
+    {
+        return !(left==right);
+    }
 }
 
 #endif

@@ -63,9 +63,33 @@ namespace MWMechanics
                 ++iter;
     }
     
+    void MechanicsManager::watchActor (const MWWorld::Ptr& ptr)
+    {
+        mWatched = ptr;
+    }
+    
     void MechanicsManager::update()
     {
-    
+        if (!mWatched.isEmpty())
+        {
+            MWMechanics::CreatureStats& stats = mWatched.getCreatureStats();
+            
+            static const char *attributeNames[8] =
+            {
+                "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
+                "AttribVal6", "AttribVal7", "AttribVal8"
+            };
+            
+            for (int i=0; i<8; ++i)
+            {
+                if (stats.mAttributes[i]!=mWatchedCreature.mAttributes[i])
+                {
+                    mWatchedCreature.mAttributes[i] = stats.mAttributes[i];
+
+                    mWindowManager.setValue (attributeNames[i], stats.mAttributes[i]);
+                }
+            }
+        }
     }
 }
 

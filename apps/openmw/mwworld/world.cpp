@@ -465,6 +465,7 @@ namespace MWWorld
         
         // Actors
         mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
+        mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
 
         for (ESMS::CellRefList<ESM::Creature, RefData>::List::iterator iter (
             cell->creatures.list.begin());

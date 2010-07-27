@@ -5,6 +5,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "creaturestats.hpp"
+
 namespace ESMS
 {
     class ESMStore;
@@ -22,6 +24,8 @@ namespace MWMechanics
             const ESMS::ESMStore& mStore;
             MWGui::WindowManager& mWindowManager;
             std::set<MWWorld::Ptr> mActors;
+            MWWorld::Ptr mWatched;
+            CreatureStats mWatchedCreature;
     
         public:
         
@@ -37,6 +41,10 @@ namespace MWMechanics
                         
             void dropActors (const MWWorld::Ptr::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
+            
+            void watchActor (const MWWorld::Ptr& ptr);
+            ///< On each update look for changes in a previously registered actor and update the
+            /// GUI accordingly.
             
             void update();
             ///< Update actor stats
