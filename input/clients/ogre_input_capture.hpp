@@ -15,15 +15,15 @@ namespace Input {
   {
     Mangle::Input::Driver &driver;
 
-    ExitListener(Mangle::Input::Driver &drv)
+    OgreInputCapture(Mangle::Input::Driver &drv)
       : driver(drv) {}
 
-    bool frameStarted(const FrameEvent &evt)
+    bool frameStarted(const Ogre::FrameEvent &evt)
     {
       driver.capture();
       return true;
     }
   };
-}
+}}
 
 #endif
