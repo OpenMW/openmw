@@ -33,6 +33,8 @@ namespace MWRender
  
 namespace MWWorld
 {
+    class Environment;
+
     /// \brief The game world and its visual representation
     
     class World
@@ -58,6 +60,7 @@ namespace MWWorld
             MWWorld::Globals *mGlobalVariables;
             bool mSky;
             bool mCellChanged;
+            Environment& mEnvironment;
     
             // not implemented
             World (const World&);
@@ -74,7 +77,7 @@ namespace MWWorld
         public:
         
            World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& master,
-                const std::string& dataDir, bool newGame);
+                const std::string& dataDir, bool newGame, Environment& environment);
                 
             ~World();
             

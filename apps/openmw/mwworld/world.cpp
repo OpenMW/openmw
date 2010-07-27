@@ -4,12 +4,15 @@
 #include <cmath>
 #include <iostream>
 
-#include "components/bsa/bsa_archive.hpp"
+#include <components/bsa/bsa_archive.hpp>
 
-#include "apps/openmw/mwrender/sky.hpp"
-#include "apps/openmw/mwrender/interior.hpp"
+#include "../mwrender/sky.hpp"
+#include "../mwrender/interior.hpp"
+
+#include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "ptr.hpp"
+#include "environment.hpp"
 
 namespace
 {
@@ -164,9 +167,9 @@ namespace MWWorld
     }
     
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
-        const std::string& master, bool newGame)
+        const std::string& master, bool newGame, Environment& environment)
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
-      mSky (false), mCellChanged (false)
+      mSky (false), mCellChanged (false), mEnvironment (environment)
     {   
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
@@ -413,35 +416,59 @@ namespace MWWorld
     {
         // Load cell.       
         mInteriors[cellName].loadInt (cellName, mStore, mEsm);
+        Ptr::CellStore *cell = &mInteriors[cellName];
      
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
         
         if (active!=mActiveCells.end())
         {
+            mEnvironment.mMechanicsManager->dropActors (active->first);
             active->second->destroy();
             delete active->second;
             mActiveCells.erase (active);
         }
 
+        // register local scripts
         mLocalScripts.clear(); // FIXME won't work with exteriors        
-        insertInteriorScripts (mInteriors[cellName]);
+        insertInteriorScripts (*cell);
 
+        // adjust player
         mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2]);
-        mPlayerPos->setCell (&mInteriors[cellName]);
+        mPlayerPos->setCell (cell);
         // TODO orientation
 
         // This connects the cell data with the rendering scene.
         std::pair<CellRenderCollection::iterator, bool> result =
-            mActiveCells.insert (std::make_pair (&mInteriors[cellName],
-            new MWRender::InteriorCellRender (mInteriors[cellName], mScene)));
+            mActiveCells.insert (std::make_pair (cell,
+            new MWRender::InteriorCellRender (*cell, mScene)));
 
         if (result.second)
         {        
             // Load the cell and insert it into the renderer
             result.first->second->show();
         }
+        
+        // Actors
+        mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
 
+        for (ESMS::CellRefList<ESM::Creature, RefData>::List::iterator iter (
+            cell->creatures.list.begin());
+            iter!=cell->creatures.list.end(); ++iter)
+        {
+            Ptr ptr (&*iter, cell);
+            mEnvironment.mMechanicsManager->addActor (ptr);
+        }
+
+        for (ESMS::CellRefList<ESM::NPC, RefData>::List::iterator iter (
+            cell->npcs.list.begin());
+            iter!=cell->npcs.list.end(); ++iter)
+        {
+            Ptr ptr (&*iter, cell);
+            mEnvironment.mMechanicsManager->addActor (ptr);
+        }
+
+        // Sky system
         if (mSky)
         {
             toggleSky();
