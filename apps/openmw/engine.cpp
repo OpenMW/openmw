@@ -64,6 +64,9 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
     if (changed) // keep change flag for another frame, if cell changed happend in local script
         mEnvironment.mWorld->markCellAsUnchanged();
+        
+    // update actors
+    mEnvironment.mMechanicsManager->update();
 
     return true;
 }

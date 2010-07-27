@@ -62,5 +62,10 @@ namespace MWMechanics
             else
                 ++iter;
     }
+    
+    void MechanicsManager::update()
+    {
+    
+    }
 }
 

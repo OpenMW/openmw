@@ -37,6 +37,9 @@ namespace MWMechanics
                         
             void dropActors (const MWWorld::Ptr::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
+            
+            void update();
+            ///< Update actor stats
     };
 }
 
