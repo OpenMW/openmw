@@ -31,7 +31,10 @@ namespace MWMechanics
             
             void addActor (const MWWorld::Ptr& ptr);
             ///< Register an actor for stats management
-            
+
+            void removeActor (const MWWorld::Ptr& ptr);
+            ///< Deregister an actor for stats management
+                        
             void dropActors (const MWWorld::Ptr::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
     };

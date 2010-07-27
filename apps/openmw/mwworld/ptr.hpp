@@ -37,6 +37,12 @@ namespace MWWorld
                 return mPtr.empty();
             }
             
+            const std::type_info& getType()
+            {
+                assert (!mPtr.empty());
+                return mPtr.type();
+            }
+            
             template<typename T>
             Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
             {

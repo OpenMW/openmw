@@ -45,6 +45,11 @@ namespace MWMechanics
         mActors.insert (ptr);
     }
     
+    void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
+    {
+        mActors.erase (ptr);
+    }
+    
     void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
     {
         std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
