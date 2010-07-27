@@ -121,6 +121,36 @@ namespace MWWorld
                 return *data.getCreatureStats();
             }            
     };
+    
+    inline bool operator== (const Ptr& left, const Ptr& right)
+    {
+        return left.mRefData==right.mRefData;
+    }
+    
+    inline bool operator!= (const Ptr& left, const Ptr& right)
+    {
+        return !(left==right);
+    }
+
+    inline bool operator< (const Ptr& left, const Ptr& right)
+    {
+        return left.mRefData<right.mRefData;
+    }
+
+    inline bool operator>= (const Ptr& left, const Ptr& right)
+    {
+        return !(left<right);
+    }
+
+    inline bool operator> (const Ptr& left, const Ptr& right)
+    {
+        return right<left;
+    }
+
+    inline bool operator<= (const Ptr& left, const Ptr& right)
+    {
+        return !(left>right);
+    }
 }
 
 #endif
