@@ -275,6 +275,13 @@ namespace MWWorld
             if (MWRender::CellRender *render = searchRender (reference.getCell()))
             {
                 render->enable (reference.getRefData().getHandle());
+                
+                if (mActiveCells.find (reference.getCell())!=mActiveCells.end() &&
+                    (reference.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
+                    reference.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
+                {
+                    mEnvironment.mMechanicsManager->addActor (reference);
+                }
             }
         }
     }
@@ -288,6 +295,13 @@ namespace MWWorld
             if (MWRender::CellRender *render = searchRender (reference.getCell()))
             {
                 render->disable (reference.getRefData().getHandle());
+                
+                if (mActiveCells.find (reference.getCell())!=mActiveCells.end() &&
+                    (reference.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
+                    reference.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
+                {
+                    mEnvironment.mMechanicsManager->removeActor (reference);
+                }                
             }
         }    
     }
@@ -456,16 +470,22 @@ namespace MWWorld
             cell->creatures.list.begin());
             iter!=cell->creatures.list.end(); ++iter)
         {
-            Ptr ptr (&*iter, cell);
-            mEnvironment.mMechanicsManager->addActor (ptr);
+            if (iter->mData.isEnabled())
+            {
+                Ptr ptr (&*iter, cell);
+                mEnvironment.mMechanicsManager->addActor (ptr);
+            }
         }
 
         for (ESMS::CellRefList<ESM::NPC, RefData>::List::iterator iter (
             cell->npcs.list.begin());
             iter!=cell->npcs.list.end(); ++iter)
         {
-            Ptr ptr (&*iter, cell);
-            mEnvironment.mMechanicsManager->addActor (ptr);
+            if (iter->mData.isEnabled())
+            {
+                Ptr ptr (&*iter, cell);
+                mEnvironment.mMechanicsManager->addActor (ptr);
+            }
         }
 
         // Sky system
