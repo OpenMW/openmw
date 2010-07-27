@@ -39,5 +39,23 @@ namespace MWMechanics
             mWindowManager.setLabel (names[i][0], label);
         }
     }
+    
+    void MechanicsManager::addActor (const MWWorld::Ptr& ptr)
+    {
+        mActors.insert (ptr);
+    }
+    
+    void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
+    {
+        std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
+        
+        while (iter!=mActors.end())
+            if (iter->getCell()==cellStore)
+            {
+                mActors.erase (iter++);
+            }
+            else
+                ++iter;
+    }
 }
 

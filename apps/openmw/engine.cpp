@@ -187,7 +187,7 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mNewGame);
+    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mNewGame, mEnvironment);
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(),
