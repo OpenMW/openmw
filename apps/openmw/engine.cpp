@@ -187,7 +187,7 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mCellName, mNewGame);
+    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mNewGame);
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(),
@@ -218,6 +218,12 @@ void OMW::Engine::go()
         mEnvironment.mWorld->getStore(), *mEnvironment.mWindowManager);
     
     mEnvironment.mMechanicsManager->configureGUI();
+
+    // load cell
+    ESM::Position pos;
+    pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
+    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;    
+    mEnvironment.mWorld->changeCell (mCellName, pos);
 
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),

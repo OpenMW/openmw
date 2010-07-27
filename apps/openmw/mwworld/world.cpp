@@ -164,7 +164,7 @@ namespace MWWorld
     }
     
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
-        const std::string& master, const std::string& startCell, bool newGame)
+        const std::string& master, bool newGame)
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false)
     {   
@@ -177,13 +177,7 @@ namespace MWWorld
         mEsm.open (masterPath.file_string());
         mStore.load (mEsm);
         
-        mInteriors[startCell].loadInt (startCell, mStore, mEsm);
-        mCurrentCell = &mInteriors[startCell];
-        
-        insertInteriorScripts (mInteriors[startCell]);
-
         mPlayerPos = new MWRender::PlayerPos (mScene.getCamera(), mStore.npcs.find ("player"));
-        mPlayerPos->setCell (&mInteriors[startCell]);
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -194,19 +188,8 @@ namespace MWWorld
             mGlobalVariables->setInt ("chargenstate", 1);
         }
         
-        // This connects the cell data with the rendering scene.
-        mActiveCells.insert (std::make_pair (&mInteriors[startCell],
-            new MWRender::InteriorCellRender (mInteriors[startCell], mScene)));
-        
-        // Load the cell and insert it into the renderer
-        for (CellRenderCollection::iterator iter (mActiveCells.begin());
-            iter!=mActiveCells.end(); ++iter)
-            iter->second->show();
-
         mSkyManager =
             MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera());  
-            
-        toggleSky();      
     }
     
     World::~World()
