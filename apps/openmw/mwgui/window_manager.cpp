@@ -90,3 +90,8 @@ void WindowManager::setLabel (const std::string& id, const std::string& label)
     stats->setLabel (id, label);
 }
 
+void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+{
+    stats->setValue (id, value);
+}
+

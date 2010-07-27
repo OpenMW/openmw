@@ -205,6 +205,35 @@ namespace MWGui
                 break;
             }
     }
+    
+    /// Set value for the given ID.
+    void setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    {
+        static const char *ids[] =
+        {
+            "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
+            "AttribVal6", "AttribVal7", "AttribVal8",
+            0
+        };    
+
+        for (int i=0; ids[i]; ++i)
+            if (ids[i]==id)
+            {
+                std::ostringstream valueString;
+                valueString << value.getModified();
+                setText (id, valueString.str());
+            
+                if (value.getModified()>value.getBase())
+                    setTextColor (id, 0, 1, 0);
+                else if (value.getModified()<value.getBase())
+                    setTextColor (id, 1, 0, 0);
+                else
+                    setTextColor (id, 1, 1, 1);
+            
+                break;
+            }    
+    }
+    
   };
 }
 #endif
