@@ -16,33 +16,33 @@
 namespace MWWorld
 {
     /// \brief Pointer to a LiveCellRef
-    
+
     class Ptr
     {
         public:
-        
+
             typedef ESMS::CellStore<RefData> CellStore;
-    
+
             boost::any mPtr;
             ESM::CellRef *mCellRef;
             RefData *mRefData;
             CellStore *mCell;
-    
+
         public:
-        
+
             Ptr() : mCellRef (0), mRefData (0), mCell (0) {}
-            
+
             bool isEmpty() const
             {
                 return mPtr.empty();
             }
-            
+
             const std::type_info& getType()
             {
                 assert (!mPtr.empty());
                 return mPtr.type();
             }
-            
+
             template<typename T>
             Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
             {
@@ -51,45 +51,45 @@ namespace MWWorld
                 mRefData = &liveCellRef->mData;
                 mCell = cell;
             }
-            
+
             template<typename T>
             ESMS::LiveCellRef<T, RefData> *get() const
             {
                 return boost::any_cast<ESMS::LiveCellRef<T, RefData>*> (mPtr);
             }
-    
+
             ESM::CellRef& getCellRef() const
             {
                 assert (mCellRef);
                 return *mCellRef;
             }
-    
+
             RefData& getRefData() const
             {
                 assert (mRefData);
                 return *mRefData;
             }
-            
+
             Ptr::CellStore *getCell() const
             {
                 assert (mCell);
                 return mCell;
             }
-            
+
             /// Throws an exception, if the ID type does not support creature stats.
             MWMechanics::CreatureStats& getCreatureStats() const
             {
                 RefData& data = getRefData();
-                
+
                 if (!data.getCreatureStats().get())
                 {
                     if (mPtr.type()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData> *))
                     {
                         boost::shared_ptr<MWMechanics::CreatureStats> stats (
                             new MWMechanics::CreatureStats);
-                    
+
                         ESMS::LiveCellRef<ESM::Creature, RefData> *ref = get<ESM::Creature>();
-                        
+
                         stats->mAttributes[0].set (ref->base->data.strength);
                         stats->mAttributes[1].set (ref->base->data.intelligence);
                         stats->mAttributes[2].set (ref->base->data.willpower);
@@ -98,6 +98,9 @@ namespace MWWorld
                         stats->mAttributes[5].set (ref->base->data.endurance);
                         stats->mAttributes[6].set (ref->base->data.personality);
                         stats->mAttributes[7].set (ref->base->data.luck);
+                        stats->mDynamic[0].set (ref->base->data.health);
+                        stats->mDynamic[1].set (ref->base->data.mana);
+                        stats->mDynamic[2].set (ref->base->data.fatigue);
 
                         data.getCreatureStats() = stats;
                     }
@@ -105,9 +108,9 @@ namespace MWWorld
                     {
                         boost::shared_ptr<MWMechanics::CreatureStats> stats (
                             new MWMechanics::CreatureStats);
-                    
+
                         ESMS::LiveCellRef<ESM::NPC, RefData> *ref = get<ESM::NPC>();
-                        
+
                         stats->mAttributes[0].set (ref->base->npdt52.strength);
                         stats->mAttributes[1].set (ref->base->npdt52.intelligence);
                         stats->mAttributes[2].set (ref->base->npdt52.willpower);
@@ -116,23 +119,26 @@ namespace MWWorld
                         stats->mAttributes[5].set (ref->base->npdt52.endurance);
                         stats->mAttributes[6].set (ref->base->npdt52.personality);
                         stats->mAttributes[7].set (ref->base->npdt52.luck);
+                        stats->mDynamic[0].set (ref->base->npdt52.health);
+                        stats->mDynamic[1].set (ref->base->npdt52.mana);
+                        stats->mDynamic[2].set (ref->base->npdt52.fatigue);
 
                         data.getCreatureStats() = stats;
                     }
                     else
                         throw std::runtime_error (
-                            "CreatureStats not available for this ID type");                
+                            "CreatureStats not available for this ID type");
                 }
-            
+
                 return *data.getCreatureStats();
-            }            
+            }
     };
-    
+
     inline bool operator== (const Ptr& left, const Ptr& right)
     {
         return left.mRefData==right.mRefData;
     }
-    
+
     inline bool operator!= (const Ptr& left, const Ptr& right)
     {
         return !(left==right);
@@ -160,4 +166,3 @@ namespace MWWorld
 }
 
 #endif
-
