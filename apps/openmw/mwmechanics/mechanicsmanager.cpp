@@ -6,12 +6,12 @@
 #include "../mwgui/window_manager.hpp"
 
 namespace MWMechanics
-{           
+{
     MechanicsManager::MechanicsManager (const ESMS::ESMStore& store,
         MWGui::WindowManager& windowManager)
     : mStore (store), mWindowManager (windowManager)
     {
-    
+
     }
 
     void MechanicsManager::configureGUI()
@@ -28,32 +28,32 @@ namespace MWMechanics
             { "Attrib8", "sAttributeLuck" },
             { 0, 0 }
         };
-    
+
         for (int i=0; names[i][0]; ++i)
         {
-// This crashes because of encoding problems:          
+// This crashes because of encoding problems:
 //            std::string label = mStore.gameSettings.find (names[i][1])->str;
 
             std::string label = names[i][1]; // until the problem is fixed, use the GMST ID as label
-            
+
             mWindowManager.setLabel (names[i][0], label);
         }
     }
-    
+
     void MechanicsManager::addActor (const MWWorld::Ptr& ptr)
     {
         mActors.insert (ptr);
     }
-    
+
     void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
     {
         mActors.erase (ptr);
     }
-    
+
     void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
     {
         std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
-        
+
         while (iter!=mActors.end())
             if (iter->getCell()==cellStore)
             {
@@ -62,24 +62,29 @@ namespace MWMechanics
             else
                 ++iter;
     }
-    
+
     void MechanicsManager::watchActor (const MWWorld::Ptr& ptr)
     {
         mWatched = ptr;
     }
-    
+
     void MechanicsManager::update()
     {
         if (!mWatched.isEmpty())
         {
             MWMechanics::CreatureStats& stats = mWatched.getCreatureStats();
-            
+
             static const char *attributeNames[8] =
             {
                 "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
                 "AttribVal6", "AttribVal7", "AttribVal8"
             };
-            
+
+            static const char *dynamicNames[3] =
+            {
+                "HBar", "MBar", "FBar"
+            };
+
             for (int i=0; i<8; ++i)
             {
                 if (stats.mAttributes[i]!=mWatchedCreature.mAttributes[i])
@@ -89,7 +94,16 @@ namespace MWMechanics
                     mWindowManager.setValue (attributeNames[i], stats.mAttributes[i]);
                 }
             }
+
+            for (int i=0; i<3; ++i)
+            {
+                if (stats.mDynamic[i]!=mWatchedCreature.mDynamic[i])
+                {
+                    mWatchedCreature.mDynamic[i] = stats.mDynamic[i];
+
+                    mWindowManager.setValue (dynamicNames[i], stats.mDynamic[i]);
+                }
+            }
         }
     }
 }
-
