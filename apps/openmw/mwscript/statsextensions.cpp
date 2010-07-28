@@ -533,9 +533,8 @@ namespace MWScript
                 extensions.registerInstruction (modCurrent + dynamics[i], "l",
                     opcodeModCurrentDynamic+i, opcodeModCurrentDynamicExplicit+i);
 
-                if (i==0) // GetMagickaGetRatio and GetFatigueGetRatio don't exist in original MW
-                    extensions.registerFunction (get + dynamics[i] + getRatio, 'f', "",
-                        opcodeGetDynamicGetRatio+i, opcodeGetDynamicGetRatioExplicit+i);
+                extensions.registerFunction (get + dynamics[i] + getRatio, 'f', "",
+                    opcodeGetDynamicGetRatio+i, opcodeGetDynamicGetRatioExplicit+i);
 
             }
         }
