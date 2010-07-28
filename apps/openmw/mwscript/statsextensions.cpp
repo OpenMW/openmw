@@ -310,6 +310,59 @@ namespace MWScript
                 }
         };
 
+
+        class OpModCurrentDynamic : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpModCurrentDynamic (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Integer diff = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWMechanics::CreatureStats& stats = context.getReference().getCreatureStats();
+
+                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
+
+                    stats.mDynamic[mIndex].setCurrent (diff + current);
+                }
+        };
+
+        class OpModCurrentDynamicExplicit : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpModCurrentDynamicExplicit (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer diff = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWMechanics::CreatureStats& stats =
+                        context.getWorld().getPtr (id, false).getCreatureStats();
+
+                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
+
+                    stats.mDynamic[mIndex].setCurrent (diff + current);
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -327,6 +380,8 @@ namespace MWScript
         const int opcodeSetDynamicExplicit = 0x2000060;
         const int opcodeModDynamic = 0x2000063;
         const int opcodeModDynamicExplicit = 0x2000066;
+        const int opcodeModCurrentDynamic = 0x2000069;
+        const int opcodeModCurrentDynamicExplicit = 0x200006c;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -344,6 +399,7 @@ namespace MWScript
             std::string get ("get");
             std::string set ("set");
             std::string mod ("mod");
+            std::string modCurrent ("modcurrent");
 
             for (int i=0; i<numberOfAttributes; ++i)
             {
@@ -367,6 +423,9 @@ namespace MWScript
 
                 extensions.registerInstruction (mod + dynamics[i], "l",
                     opcodeModDynamic+i, opcodeModDynamicExplicit+i);
+
+                extensions.registerInstruction (modCurrent + dynamics[i], "l",
+                    opcodeModCurrentDynamic+i, opcodeModCurrentDynamicExplicit+i);
             }
         }
 
@@ -400,6 +459,10 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeModDynamic+i, new OpModDynamic (i));
                 interpreter.installSegment5 (opcodeModDynamicExplicit+i,
                     new OpModDynamicExplicit (i));
+
+                interpreter.installSegment5 (opcodeModCurrentDynamic+i, new OpModCurrentDynamic (i));
+                interpreter.installSegment5 (opcodeModCurrentDynamicExplicit+i,
+                    new OpModCurrentDynamicExplicit (i));
             }
         }
     }
