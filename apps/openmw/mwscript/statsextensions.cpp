@@ -363,6 +363,62 @@ namespace MWScript
                 }
         };
 
+        class OpGetDynamicGetRatio : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpGetDynamicGetRatio (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    MWMechanics::CreatureStats& stats = context.getReference().getCreatureStats();
+
+                    Interpreter::Type_Float value = 0;
+
+                    Interpreter::Type_Float max = stats.mDynamic[mIndex].getModified();
+
+                    if (max>0)
+                        value = stats.mDynamic[mIndex].getCurrent() / max;
+
+                    runtime.push (value);
+                }
+        };
+
+        class OpGetDynamicGetRatioExplicit : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpGetDynamicGetRatioExplicit (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWMechanics::CreatureStats& stats =
+                        context.getWorld().getPtr (id, false).getCreatureStats();
+
+                    Interpreter::Type_Float value = 0;
+
+                    Interpreter::Type_Float max = stats.mDynamic[mIndex].getModified();
+
+                    if (max>0)
+                        value = stats.mDynamic[mIndex].getCurrent() / max;
+
+                    runtime.push (value);
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -382,6 +438,8 @@ namespace MWScript
         const int opcodeModDynamicExplicit = 0x2000066;
         const int opcodeModCurrentDynamic = 0x2000069;
         const int opcodeModCurrentDynamicExplicit = 0x200006c;
+        const int opcodeGetDynamicGetRatio = 0x200006f;
+        const int opcodeGetDynamicGetRatioExplicit = 0x2000072;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -400,6 +458,7 @@ namespace MWScript
             std::string set ("set");
             std::string mod ("mod");
             std::string modCurrent ("modcurrent");
+            std::string getRatio ("getratio");
 
             for (int i=0; i<numberOfAttributes; ++i)
             {
@@ -426,6 +485,11 @@ namespace MWScript
 
                 extensions.registerInstruction (modCurrent + dynamics[i], "l",
                     opcodeModCurrentDynamic+i, opcodeModCurrentDynamicExplicit+i);
+
+                if (i==0) // GetMagickaGetRatio and GetFatigueGetRatio don't exist in original MW
+                    extensions.registerFunction (get + dynamics[i] + getRatio, 'f', "",
+                        opcodeGetDynamicGetRatio+i, opcodeGetDynamicGetRatioExplicit+i);
+
             }
         }
 
@@ -463,6 +527,11 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeModCurrentDynamic+i, new OpModCurrentDynamic (i));
                 interpreter.installSegment5 (opcodeModCurrentDynamicExplicit+i,
                     new OpModCurrentDynamicExplicit (i));
+
+                interpreter.installSegment5 (opcodeGetDynamicGetRatio+i,
+                    new OpGetDynamicGetRatio (i));
+                interpreter.installSegment5 (opcodeGetDynamicGetRatioExplicit+i,
+                    new OpGetDynamicGetRatioExplicit (i));
             }
         }
     }
