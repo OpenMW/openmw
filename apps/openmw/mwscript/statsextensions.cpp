@@ -170,9 +170,29 @@ namespace MWScript
 
                     if (mIndex==0)
                     {
-                        // TODO health is a special case
+                        // health is a special case
+                        if (context.getReference().getType()==
+                            typeid (ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *))
+                        {
+                            ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+                                context.getReference().get<ESM::Weapon>();
 
+                            Interpreter::Type_Integer value = ref->base->data.health;
+                            runtime.push (value);
 
+                            return;
+                        }
+                        else if (context.getReference().getType()==
+                            typeid (ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *))
+                        {
+                            ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+                                context.getReference().get<ESM::Armor>();
+
+                            Interpreter::Type_Integer value = ref->base->data.health;
+                            runtime.push (value);
+
+                            return;
+                        }
                     }
 
                     Interpreter::Type_Integer value =
@@ -198,6 +218,33 @@ namespace MWScript
 
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+
+                    if (mIndex==0)
+                    {
+                        // health is a special case
+                        if (context.getWorld().getPtr (id, false).getType()==
+                            typeid (ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *))
+                        {
+                            ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+                                context.getWorld().getPtr (id, false).get<ESM::Weapon>();
+
+                            Interpreter::Type_Integer value = ref->base->data.health;
+                            runtime.push (value);
+
+                            return;
+                        }
+                        else if (context.getWorld().getPtr (id, false).getType()==
+                            typeid (ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *))
+                        {
+                            ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+                                context.getWorld().getPtr (id, false).get<ESM::Armor>();
+
+                            Interpreter::Type_Integer value = ref->base->data.health;
+                            runtime.push (value);
+
+                            return;
+                        }
+                    }
 
                     Interpreter::Type_Integer value =
                         context.getWorld().getPtr (id, false).getCreatureStats().mDynamic[mIndex].
