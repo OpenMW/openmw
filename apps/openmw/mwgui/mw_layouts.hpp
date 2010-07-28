@@ -89,6 +89,40 @@ namespace MWGui
     void setEffect(const char *img)
     { effect1->setImageTexture(img); }
 
+    void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
+    {
+        static const char *ids[] =
+        {
+            "HBar", "MBar", "FBar",
+            0
+        };
+
+        for (int i=0; ids[i]; ++i)
+            if (ids[i]==id)
+            {
+                switch (i)
+                {
+                    case 0:
+
+                      health->setProgressRange (value.getModified());
+                      health->setProgressPosition (value.getCurrent());
+                      break;
+
+                    case 1:
+
+                      magicka->setProgressRange (value.getModified());
+                      magicka->setProgressPosition (value.getCurrent());
+                      break;
+
+                    case 2:
+
+                      stamina->setProgressRange (value.getModified());
+                      stamina->setProgressPosition (value.getCurrent());
+                      break;
+                }
+            }
+    }
+
     MyGUI::ProgressPtr health, magicka, stamina;
 
     MyGUI::StaticImagePtr weapImage, spellImage;
@@ -136,7 +170,7 @@ namespace MWGui
   class StatsWindow : public OEngine::GUI::Layout
   {
   public:
-    void setBar(const char* name, const char* tname, int val, int max)
+    void setBar(const std::string& name, const std::string& tname, int val, int max)
     {
       MyGUI::ProgressPtr pt;
       getWidget(pt, name);
@@ -169,10 +203,6 @@ namespace MWGui
       setText("RaceText", "Wood Elf");
       setText("ClassText", "Pilgrim");
 
-      setBar("HBar", "HBarT", 60, 100);
-      setBar("MBar", "MBarT", 30, 100);
-      setBar("FBar", "FBarT", 80, 100);
-
       setText("AttribVal1", "30");
       setText("AttribVal2", "40");
       setText("AttribVal3", "30");
@@ -187,7 +217,7 @@ namespace MWGui
     {
       mMainWidget->setCaption(playerName);
     }
-    
+
     /// Set label text for the value with the given ID.
     void setLabel (const std::string& id, const std::string& label)
     {
@@ -197,7 +227,7 @@ namespace MWGui
             "Attrib7", "Attrib8",
             0
         };
-        
+
         for (int i=0; ids[i]; ++i)
             if (ids[i]==id)
             {
@@ -205,7 +235,7 @@ namespace MWGui
                 break;
             }
     }
-    
+
     /// Set value for the given ID.
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value)
     {
@@ -214,7 +244,7 @@ namespace MWGui
             "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
             "AttribVal6", "AttribVal7", "AttribVal8",
             0
-        };    
+        };
 
         for (int i=0; ids[i]; ++i)
             if (ids[i]==id)
@@ -222,18 +252,33 @@ namespace MWGui
                 std::ostringstream valueString;
                 valueString << value.getModified();
                 setText (id, valueString.str());
-            
+
                 if (value.getModified()>value.getBase())
                     setTextColor (id, 0, 1, 0);
                 else if (value.getModified()<value.getBase())
                     setTextColor (id, 1, 0, 0);
                 else
                     setTextColor (id, 1, 1, 1);
-            
+
                 break;
-            }    
+            }
     }
-    
+
+    void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
+    {
+        static const char *ids[] =
+        {
+            "HBar", "MBar", "FBar",
+            0
+        };
+
+        for (int i=0; ids[i]; ++i)
+            if (ids[i]==id)
+            {
+                std::string id (ids[i]);
+                setBar (id, id + "T", value.getCurrent(), value.getModified());
+            }
+    }
   };
 }
 #endif

@@ -87,6 +87,8 @@ namespace MWMechanics
 
         public:
 
+            DynamicStat() : mCurrent (0) {}
+
             const T& getBase() const
             {
                 return mStatic.getBase();
