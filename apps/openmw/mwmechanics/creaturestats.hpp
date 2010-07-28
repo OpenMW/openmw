@@ -8,6 +8,7 @@ namespace MWMechanics
     struct CreatureStats
     {
         Stat<int> mAttributes[8];
+        DynamicStat<int> mDynamic[3]; // health, magicka, fatigue
     };
 }
 

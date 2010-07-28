@@ -66,5 +66,10 @@ op 0x2000037-0x200003e: SetAttribute
 op 0x200003f-0x2000046: SetAttribute, explicit reference
 op 0x2000047-0x200004e: ModAttribute
 op 0x200004f-0x2000056: ModAttribute, explicit reference
-opcodes 0x2000057-0x3ffffff unused
-
+op 0x2000057-0x2000059: GetDynamic (health, magicka, fatigue)
+op 0x200005a-0x200005c: GetDynamic (health, magicka, fatigue), explicit reference
+op 0x200005d-0x200005f: SetDynamic (health, magicka, fatigue)
+op 0x2000060-0x2000062: SetDynamic (health, magicka, fatigue), explicit reference
+op 0x2000063-0x2000065: ModDynamic (health, magicka, fatigue)
+op 0x2000066-0x2000068: ModDynamic (health, magicka, fatigue), explicit reference
+opcodes 0x2000069-0x3ffffff unused
