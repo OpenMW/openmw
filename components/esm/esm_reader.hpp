@@ -8,6 +8,8 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <errno.h>
+#include <iconv.h>
 
 #include <libs/mangle/stream/stream.hpp>
 #include <libs/mangle/stream/servers/file_stream.hpp>
@@ -613,7 +615,91 @@ public:
     // Convert to std::string and return
     std::string res(ptr,size);
     delete[] ptr;
-    return res;
+    return convertToUTF8(res);
+  }
+
+  // Convert a string from ISO-8859-1 encoding to UTF-8
+  std::string convertToUTF8(std::string input)
+  {
+    std::string output = "";
+
+    //create convert description
+    iconv_t cd = iconv_open("UTF-8", "ISO-8859-1");
+
+    if (cd == (iconv_t)-1) 	//error handling
+    {
+      std::string errMsg = "Creating description for UTF-8 converting failed: ";
+
+      switch (errno) 		//detailed error messages (maybe it contains too much detail :)
+      {
+        case EMFILE:
+          errMsg += "{OPEN_MAX} files descriptors are currently open in the calling process.";
+        case ENFILE:
+          errMsg += "Too many files are currently open in the system.";
+        case ENOMEM:
+          errMsg +="Insufficient storage space is available.";
+        case EINVAL:
+          errMsg += "The conversion specified by fromcode and tocode is not supported by the implementation.";
+
+        default:
+          errMsg += "Unknown Error\n";
+      }
+
+      fail(errMsg);
+
+    }
+    else
+    {
+      const size_t inputSize = input.size();
+
+      if (inputSize) 	//input is not empty
+      {
+        //convert function doesn't accept const char *, therefore copy content into an char *
+        std::vector<char> inputBuffer(input.begin(), input.end());
+        char *inputBufferBegin = &inputBuffer[0];
+
+        size_t inputBytesLeft = inputSize;	//bytes to convert
+
+        static const size_t outputSize = 1000;
+        size_t outputBytesLeft;
+
+        char outputBuffer[outputSize];
+        char *outputBufferBegin;
+
+        while (inputBytesLeft > 0 )
+        {
+          outputBytesLeft = outputSize;
+          outputBufferBegin = outputBuffer;
+
+          if (iconv(cd, &inputBufferBegin, &inputBytesLeft, &outputBufferBegin, &outputBytesLeft) == (size_t)-1)
+          {
+            switch (errno)
+            {
+              case E2BIG:	//outputBuffer is full
+                output += std::string(outputBuffer, outputSize);
+                break;
+              case EILSEQ:
+                fail("Iconv: Invalid multibyte sequence.\n");
+                break;
+              case EINVAL:
+                fail("Iconv: Incomplete multibyte sequence.\n");
+                break;
+              default:
+                fail("Iconv: Unknown Error\n");
+            }
+
+          }
+        }
+
+        //read only relevant bytes from outputBuffer
+        output += std::string(outputBuffer, outputSize - outputBytesLeft);
+
+      }
+    }
+
+    iconv_close (cd);
+
+    return output;
   }
 
   void skip(int bytes) { esm->seek(esm->tell()+bytes); }
