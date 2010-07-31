@@ -31,10 +31,7 @@ namespace MWMechanics
 
         for (int i=0; names[i][0]; ++i)
         {
-// This crashes because of encoding problems:
-//            std::string label = mStore.gameSettings.find (names[i][1])->str;
-
-            std::string label = names[i][1]; // until the problem is fixed, use the GMST ID as label
+            std::string label = mStore.gameSettings.find (names[i][1])->str;
 
             mWindowManager.setLabel (names[i][0], label);
         }
