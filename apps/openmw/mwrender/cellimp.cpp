@@ -40,6 +40,20 @@ void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::Light, MWWorld:
   }
 }
 
+template<>
+void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>& liveRef )
+{
+    std::string skinName = "meshes\\b\\B_N_"    //some constants (seems so)
+        + liveRef.base->race
+        + "_"
+        + ((liveRef.base->flags & ESM::NPC::Female ) ? "F" : "M");
+    
+    cellRender.insertBegin(liveRef.ref);
+    cellRender.insertMesh(skinName + "_Skins.nif");
+    cellRender.insertMesh("meshes\\B\\" + liveRef.base->head + ".nif");
+    liveRef.mData.setHandle (cellRender.insertEnd (liveRef.mData.isEnabled()));
+}
+    
 template<typename T>
 void insertCellRefList (CellRenderImp& cellRender, T& cellRefList)
 {
