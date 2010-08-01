@@ -139,9 +139,6 @@ namespace MWGui
 
     MyGUI::Gui* getGui() const { return gui; }
 
-    void setLabel (const std::string& id, const std::string& label);
-    ///< Set label text for the value with the given ID.
-
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
     ///< Set value for the given ID.
 

@@ -37,7 +37,7 @@ void OMW::Engine::executeLocalScripts()
         MWScript::InterpreterContext interpreterContext (mEnvironment,
             &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
         mScriptManager->run (iter->first, interpreterContext);
-        
+
         if (mEnvironment.mWorld->hasCellChanged())
             break;
     }
@@ -56,7 +56,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     executeLocalScripts(); // This does not handle the case where a global script causes a cell
                            // change, followed by a cell change in a local script during the same
                            // frame.
-    
+
     // passing of time
     if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
         mEnvironment.mWorld->advanceTime (
@@ -64,7 +64,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
     if (changed) // keep change flag for another frame, if cell changed happend in local script
         mEnvironment.mWorld->markCellAsUnchanged();
-        
+
     // update actors
     mEnvironment.mMechanicsManager->update();
 
@@ -77,7 +77,7 @@ OMW::Engine::Engine()
   , mNewGame (false)
   , mScriptManager (0)
   , mScriptContext (0)
-{   
+{
 }
 
 OMW::Engine::~Engine()
@@ -151,7 +151,7 @@ void OMW::Engine::enableDebugMode()
 {
     mDebug = true;
 }
-           
+
 void OMW::Engine::enableVerboseScripts()
 {
     mVerboseScripts = true;
@@ -211,21 +211,19 @@ void OMW::Engine::go()
     mScriptContext->setExtensions (&mExtensions);
 
     mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(), mVerboseScripts,
-        *mScriptContext);       
-            
+        *mScriptContext);
+
     mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
         *mScriptManager);
-        
+
     // Create game mechanics system
     mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (
         mEnvironment.mWorld->getStore(), *mEnvironment.mWindowManager);
-    
-    mEnvironment.mMechanicsManager->configureGUI();
 
     // load cell
     ESM::Position pos;
     pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
-    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;    
+    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
     mEnvironment.mWorld->changeCell (mCellName, pos);
 
     // Sets up the input system
@@ -241,5 +239,3 @@ void OMW::Engine::go()
 
     std::cout << "Quitting peacefully.\n";
 }
-
-

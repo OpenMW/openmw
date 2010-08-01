@@ -1,6 +1,8 @@
 #ifndef MWGUI_LAYOUTS_H
 #define MWGUI_LAYOUTS_H
 
+#include <components/esm_store/store.hpp>
+
 #include <openengine/gui/layout.hpp>
 
 /*
@@ -50,9 +52,6 @@ namespace MWGui
 
       // These are just demo values, you should replace these with
       // real calls from outside the class later.
-      setStats(60, 100,
-               30, 100,
-               80, 100);
       setWeapIcon("icons\\w\\tx_knife_iron.dds");
       setWeapStatus(90, 100);
       setSpellIcon("icons\\s\\b_tx_s_rstor_health.dds");
@@ -182,18 +181,34 @@ namespace MWGui
       setText(tname, out.str().c_str());
     }
 
-    StatsWindow()
+    StatsWindow (const ESMS::ESMStore& store)
       : Layout("openmw_stats_window_layout.xml")
     {
       setCoord(0,0,498, 342);
 
-      setText("Health_str", "Health");
-      setText("Magicka_str", "Magicka");
-      setText("Fatigue_str", "Fatigue");
+        const char *names[][2] =
+        {
+            { "Attrib1", "sAttributeStrength" },
+            { "Attrib2", "sAttributeIntelligence" },
+            { "Attrib3", "sAttributeWillpower" },
+            { "Attrib4", "sAttributeAgility" },
+            { "Attrib5", "sAttributeSpeed" },
+            { "Attrib6", "sAttributeEndurance" },
+            { "Attrib7", "sAttributePersonality" },
+            { "Attrib8", "sAttributeLuck" },
+            { "Health_str", "sHealth" },
+            { "Magicka_str", "sMagic" },
+            { "Fatigue_str", "sFatigue" },
+            { "Level_str", "sLevel" },
+            { "Race_str", "sRace" },
+            { "Class_str", "sClass" },
+            { 0, 0 }
+        };
 
-      setText("Level_str", "Level");
-      setText("Race_str", "Race");
-      setText("Class_str", "Class");
+        for (int i=0; names[i][0]; ++i)
+        {
+            setText (names[i][0], store.gameSettings.find (names[i][1])->str);
+        }
 
       // These are just demo values, you should replace these with
       // real calls from outside the class later.
@@ -202,38 +217,11 @@ namespace MWGui
       setText("LevelText", "5");
       setText("RaceText", "Wood Elf");
       setText("ClassText", "Pilgrim");
-
-      setText("AttribVal1", "30");
-      setText("AttribVal2", "40");
-      setText("AttribVal3", "30");
-      setText("AttribVal4", "75");
-      setText("AttribVal5", "50");
-      setText("AttribVal6", "40");
-      setText("AttribVal7", "50");
-      setText("AttribVal8", "40");
     }
 
     void setPlayerName(const std::string& playerName)
     {
       mMainWidget->setCaption(playerName);
-    }
-
-    /// Set label text for the value with the given ID.
-    void setLabel (const std::string& id, const std::string& label)
-    {
-        static const char *ids[] =
-        {
-            "Attrib1", "Attrib2", "Attrib3", "Attrib4", "Attrib5", "Attrib6",
-            "Attrib7", "Attrib8",
-            0
-        };
-
-        for (int i=0; ids[i]; ++i)
-            if (ids[i]==id)
-            {
-                setText (id, label);
-                break;
-            }
     }
 
     /// Set value for the given ID.

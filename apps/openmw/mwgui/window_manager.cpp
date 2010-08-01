@@ -19,7 +19,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   hud = new HUD(w,h);
   menu = new MainMenu(w,h);
   map = new MapWindow();
-  stats = new StatsWindow();
+  stats = new StatsWindow (environment.mWorld->getStore());
   console = new Console(w,h, environment, extensions);
 
   // The HUD is always on
@@ -83,11 +83,6 @@ void WindowManager::updateVisible()
     }
 
   // All other modes are ignored
-}
-
-void WindowManager::setLabel (const std::string& id, const std::string& label)
-{
-    stats->setLabel (id, label);
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
