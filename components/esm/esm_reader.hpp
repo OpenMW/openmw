@@ -618,13 +618,13 @@ public:
     return convertToUTF8(res);
   }
 
-  // Convert a string from ISO-8859-1 encoding to UTF-8
+  // Convert a string from the encoding used by Morrowind to UTF-8
   std::string convertToUTF8(std::string input)
   {
     std::string output = "";
 
     //create convert description
-    iconv_t cd = iconv_open("UTF-8", "ISO-8859-1");
+    iconv_t cd = iconv_open("UTF-8", "WINDOWS-1252");
 
     if (cd == (iconv_t)-1) 	//error handling
     {
