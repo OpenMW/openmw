@@ -43,6 +43,7 @@ namespace MWRender
     static bool lightOutQuadInLin;
 
     ESMS::CellStore<MWWorld::RefData> &cell;
+    const ESMS::ESMStore &store;
     MWScene &scene;
 
     /// The scene node that contains all objects belonging to this
@@ -78,8 +79,8 @@ namespace MWRender
 
   public:
 
-    InteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWScene &_scene)
-    : cell(_cell), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
+    InteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, const ESMS::ESMStore& _store, MWScene &_scene)
+    : cell(_cell), store(_store), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
 
     virtual ~InteriorCellRender() { destroy(); }
 

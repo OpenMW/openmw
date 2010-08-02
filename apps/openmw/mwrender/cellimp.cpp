@@ -5,7 +5,7 @@
 using namespace MWRender;
 
 template<typename T>
-void insertObj(CellRenderImp& cellRender, T& liveRef)
+void insertObj(CellRenderImp& cellRender, T& liveRef, const ESMS::ESMStore& store)
 {
   assert (liveRef.base != NULL);
   const std::string &model = liveRef.base->model;
@@ -18,7 +18,7 @@ void insertObj(CellRenderImp& cellRender, T& liveRef)
 }
 
 template<>
-void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::Light, MWWorld::RefData>& liveRef)
+void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::Light, MWWorld::RefData>& liveRef, const ESMS::ESMStore& store)
 {
   assert (liveRef.base != NULL);
   const std::string &model = liveRef.base->model;
@@ -41,52 +41,56 @@ void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::Light, MWWorld:
 }
 
 template<>
-void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>& liveRef )
+void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>& liveRef, const ESMS::ESMStore& store)
 {
-    std::string skinName = "meshes\\b\\B_N_"    //some constants (seems so)
-        + liveRef.base->race
-        + "_"
-        + ((liveRef.base->flags & ESM::NPC::Female ) ? "F" : "M");
+    std::string headID = liveRef.base->head;
+
+    //get the part of the bodypart id which describes the race and the gender
+    std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
+    std::string headModel = "meshes\\" + store.bodyParts.find(headID)->model;
     
     cellRender.insertBegin(liveRef.ref);
-    cellRender.insertMesh(skinName + "_Skins.nif");
-    cellRender.insertMesh("meshes\\B\\" + liveRef.base->head + ".nif");
+    cellRender.insertMesh(headModel);
+
+    //TODO: define consts for each bodypart e.g. chest, foot, wrist... and put the parts in the right place
+    cellRender.insertMesh("meshes\\" + store.bodyParts.find(bodyRaceID + "chest")->model);
+    
     liveRef.mData.setHandle (cellRender.insertEnd (liveRef.mData.isEnabled()));
 }
     
 template<typename T>
-void insertCellRefList (CellRenderImp& cellRender, T& cellRefList)
+void insertCellRefList (CellRenderImp& cellRender, const ESMS::ESMStore& store, T& cellRefList)
 {
   for(typename T::List::iterator it = cellRefList.list.begin();
     it != cellRefList.list.end(); it++)
   {
-    insertObj (cellRender, *it);
+    insertObj (cellRender, *it, store);
   }
 }
 
-void CellRenderImp::insertCell(ESMS::CellStore<MWWorld::RefData> &cell)
+void CellRenderImp::insertCell(ESMS::CellStore<MWWorld::RefData> &cell, const ESMS::ESMStore& store)
 {
   // Loop through all references in the cell
-  insertCellRefList (*this, cell.activators);
-  insertCellRefList (*this, cell.potions);
-  insertCellRefList (*this, cell.appas);
-  insertCellRefList (*this, cell.armors);
-  insertCellRefList (*this, cell.books);
-  insertCellRefList (*this, cell.clothes);
-  insertCellRefList (*this, cell.containers);
-  insertCellRefList (*this, cell.creatures);
-  insertCellRefList (*this, cell.doors);
-  insertCellRefList (*this, cell.ingreds);
-//  insertCellRefList (*this, cell.creatureLists);
-//  insertCellRefList (*this, cell.itemLists);
-  insertCellRefList (*this, cell.lights);
-  insertCellRefList (*this, cell.lockpicks);
-  insertCellRefList (*this, cell.miscItems);
-  insertCellRefList (*this, cell.npcs);
-  insertCellRefList (*this, cell.probes);
-  insertCellRefList (*this, cell.repairs);
-  insertCellRefList (*this, cell.statics);
-  insertCellRefList (*this, cell.weapons);
+  insertCellRefList (*this, store, cell.activators);
+  insertCellRefList (*this, store, cell.potions);
+  insertCellRefList (*this, store, cell.appas);
+  insertCellRefList (*this, store, cell.armors);
+  insertCellRefList (*this, store, cell.books);
+  insertCellRefList (*this, store, cell.clothes);
+  insertCellRefList (*this, store, cell.containers);
+  insertCellRefList (*this, store, cell.creatures);
+  insertCellRefList (*this, store, cell.doors);
+  insertCellRefList (*this, store, cell.ingreds);
+  //  insertCellRefList (*this, store, cell.creatureLists);
+  //  insertCellRefList (*this, store, cell.itemLists);
+  insertCellRefList (*this, store, cell.lights);
+  insertCellRefList (*this, store, cell.lockpicks);
+  insertCellRefList (*this, store, cell.miscItems);
+  insertCellRefList (*this, store, cell.npcs);
+  insertCellRefList (*this, store, cell.probes);
+  insertCellRefList (*this, store, cell.repairs);
+  insertCellRefList (*this, store, cell.statics);
+  insertCellRefList (*this, store, cell.weapons);
 }
 
 

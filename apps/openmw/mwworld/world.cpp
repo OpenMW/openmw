@@ -455,7 +455,7 @@ namespace MWWorld
         // This connects the cell data with the rendering scene.
         std::pair<CellRenderCollection::iterator, bool> result =
             mActiveCells.insert (std::make_pair (cell,
-            new MWRender::InteriorCellRender (*cell, mScene)));
+            new MWRender::InteriorCellRender (*cell, mStore, mScene)));
 
         if (result.second)
         {        
