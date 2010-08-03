@@ -41,6 +41,8 @@ namespace MWInput
       A_MoveForward,    // Forward / Backward
       A_MoveBackward,
 
+      A_Activate,
+
       A_LAST            // Marker for the last item
     };
 
@@ -56,6 +58,10 @@ namespace MWInput
     OEngine::GUI::EventInjectorPtr guiEvents;
     MWRender::PlayerPos &player;
     MWGui::WindowManager &windows;
+
+    //may be better placed at OEngine::Renderer
+    Ogre::RaySceneQuery *mRaySceneQuery;
+    
 
     // Count screenshots.
     int shotCount;
@@ -133,6 +139,51 @@ namespace MWInput
       else setGuiMode(GM_Console);
     }
 
+    void activate()
+    {
+        Ogre::Camera *mCamera = ogre.getCamera();
+
+        //get a ray pointing to the center of the viewport
+        Ogre::Ray centerRay = mCamera->getCameraToViewportRay ( 0.5, 0.5 );
+
+        // get all objects touched by the ray
+        mRaySceneQuery->setRay ( centerRay );
+        Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
+        Ogre::RaySceneQueryResult::iterator itr = result.begin();
+
+        Ogre::RaySceneQueryResult::iterator nearest = result.end();
+
+        for ( ; itr != result.end(); itr++ )
+        {
+            /*if ( itr->worldFragment )  //world fragments aren't currently used by openw
+                {
+                Ogre::Vector3 location = itr->worldFragment->singleIntersection;
+                std::cout << "WorldFragment: (" << location.x << ", " << location.y << ", " << location.z << ")" << std::endl;
+                } //  if*/
+
+            // Is this result a MovableObject?
+            // there seem to be omnipresent objects like the caelum sky dom,
+            // the distance of these objects is always 0 so this if excludes these
+            if ( itr->movable && itr->distance >= 0.1)
+            {
+                std::cout << "Movobj: " << itr->movable->getName() << " dist: " << itr->distance << "\n";
+
+                if ( nearest == result.end() )  //if no object is set
+                {
+                    nearest = itr;
+                }
+                else if ( itr->distance < nearest->distance )
+                {
+                    nearest = itr;
+                }
+            }
+        }
+
+        if ( nearest != result.end() )
+            std::cout << "Nearest MovableObject: " << nearest->movable->getName()
+                      << " Distance: " << nearest->distance << std::endl;
+    }
+
     // Exit program now button (which is disabled in GUI mode)
     void exitNow()
     {
@@ -170,6 +221,8 @@ namespace MWInput
                        "Toggle inventory screen");
       disp->funcs.bind(A_Console, boost::bind(&InputImpl::toggleConsole, this),
                        "Toggle console");
+      disp->funcs.bind(A_Activate, boost::bind(&InputImpl::activate, this),
+                       "Activate");
 
 
       // Add the exit listener
@@ -198,6 +251,9 @@ namespace MWInput
       // Start out in game mode
       setGuiMode(MWGui::GM_Game);
 
+      //init rayscene query (would be also better placed at Oengine::Renderer)
+      mRaySceneQuery = ogre.getScene()->createRayQuery(Ogre::Ray());
+
       /**********************************
         Key binding section
 
@@ -212,6 +268,7 @@ namespace MWInput
       disp->bind(A_Screenshot, KC_SYSRQ);
       disp->bind(A_Inventory, KC_I);
       disp->bind(A_Console, KC_F1);
+      disp->bind(A_Activate, KC_SPACE);
 
       // Key bindings for polled keys
 
@@ -256,6 +313,7 @@ namespace MWInput
 
       if(moveX != 0 || moveY != 0 || moveZ != 0)
         player.moveRel(moveX, moveY, moveZ);
+
 
       return true;
     }
