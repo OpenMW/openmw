@@ -5,8 +5,6 @@
 
 #include <boost/any.hpp>
 
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loadnpc.hpp>
 #include <components/esm_store/cell_store.hpp>
 
 #include "refdata.hpp"
