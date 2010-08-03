@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+#include "ptr.hpp"
+
 namespace MWWorld
 {
     std::map<std::string, boost::shared_ptr<Class> > Class::sClasses;
@@ -10,6 +12,11 @@ namespace MWWorld
     Class::Class() {}
 
     Class::~Class() {}
+
+    MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have creature stats");
+    }
 
     const Class& Class::get (const std::string& key)
     {
@@ -19,6 +26,11 @@ namespace MWWorld
             throw std::logic_error ("unknown class key: " + key);
 
         return *iter->second;
+    }
+
+    const Class& Class::get (const Ptr& ptr)
+    {
+        return get (ptr.getTypeName());
     }
 
     void Class::registerClass (const std::string& key,  boost::shared_ptr<Class> instance)

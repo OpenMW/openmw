@@ -82,6 +82,8 @@ set(GAMEWORLD
     mwworld/class.cpp
     mwworld/classes.cpp
     mwworld/activator.cpp
+    mwworld/creature.cpp
+    mwworld/npc.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -92,6 +94,8 @@ set(GAMEWORLD_HEADER
     mwworld/class.hpp
     mwworld/classes.hpp
     mwworld/activator.hpp
+    mwworld/creature.hpp
+    mwworld/npc.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 

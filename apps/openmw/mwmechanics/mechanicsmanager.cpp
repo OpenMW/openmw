@@ -5,6 +5,8 @@
 
 #include "../mwgui/window_manager.hpp"
 
+#include "../mwworld/class.hpp"
+
 namespace MWMechanics
 {
     MechanicsManager::MechanicsManager (const ESMS::ESMStore& store,
@@ -46,7 +48,8 @@ namespace MWMechanics
     {
         if (!mWatched.isEmpty())
         {
-            MWMechanics::CreatureStats& stats = mWatched.getCreatureStats();
+            MWMechanics::CreatureStats& stats =
+                MWWorld::Class::get (mWatched).getCreatureStats (mWatched);
 
             static const char *attributeNames[8] =
             {
