@@ -36,10 +36,10 @@ MWScene::MWScene(OEngine::Render::OgreRenderer &_rend)
   mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
 }
 
-void MWScene::getFacedHandle(std::string& handle, float& distance)
+std::pair<std::string, float> MWScene::getFacedHandle()
 {
-    handle = "";
-    distance = -1;
+    std::string handle = "";
+    float distance = -1;
 
     //get a ray pointing to the center of the viewport
     Ray centerRay = getCamera()->getCameraToViewportRay(
@@ -74,11 +74,10 @@ void MWScene::getFacedHandle(std::string& handle, float& distance)
 
     if ( nearest != result.end() )
     {
-        std::cout << "Nearest MovableObject: " << nearest->movable->getParentSceneNode()->getName()
-        << " Distance: " << nearest->distance << std::endl;
-
         handle = nearest->movable->getParentSceneNode()->getName();
         distance = nearest->distance;
     }
+
+    return std::pair<std::string, float>(handle, distance);
 }
 

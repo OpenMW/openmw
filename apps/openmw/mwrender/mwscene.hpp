@@ -1,6 +1,7 @@
 #ifndef _GAME_RENDER_MWSCENE_H
 #define _GAME_RENDER_MWSCENE_H
 
+#include <utility>
 #include <openengine/ogre/renderer.hpp>
 
 namespace Ogre
@@ -39,7 +40,10 @@ namespace MWRender
     Ogre::RaySceneQuery *getRaySceneQuery() { return mRaySceneQuery; }
 
     //gets the handle of the object the player is looking at
-    void getFacedHandle(std::string& handle, float& distance);
+    //pair<name, distance>
+    //name is empty and distance = -1 if there is no object which
+    //can be faced
+    std::pair<std::string, float> getFacedHandle();
   };
 }
 

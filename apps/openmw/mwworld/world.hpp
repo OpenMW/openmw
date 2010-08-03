@@ -80,6 +80,8 @@ namespace MWWorld
                 const std::string& dataDir, bool newGame, Environment& environment);
                 
             ~World();
+
+            MWRender::MWScene* getMWScene() { return &mScene; }
             
             MWRender::PlayerPos& getPlayerPos();
             

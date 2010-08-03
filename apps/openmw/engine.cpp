@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include <iostream>
+#include <utility>
 
 #include <components/misc/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
@@ -67,6 +68,15 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
     // update actors
     mEnvironment.mMechanicsManager->update();
+
+    if (focusFrameCounter++ == focusUpdateFrame)
+    {
+        std::pair<std::string, float> handle = mEnvironment.mWorld->getMWScene()->getFacedHandle();
+        
+        std::cout << "Object: " << handle.first << ", distance: " << handle.second << std::endl;
+
+        focusFrameCounter = 0;
+    }
 
     return true;
 }
@@ -230,6 +240,8 @@ void OMW::Engine::go()
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
                                   *mEnvironment.mWindowManager, mDebug);
 
+    focusFrameCounter = 0;
+    
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 
     mOgre.getRoot()->addFrameListener (this);

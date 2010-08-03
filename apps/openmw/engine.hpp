@@ -65,6 +65,9 @@ namespace OMW
             Compiler::Context *mScriptContext;
             OEngine::GUI::MyGUIManager *mGuiManager;
 
+            int focusFrameCounter;
+            static const int focusUpdateFrame = 10;
+
             // not implemented
             Engine (const Engine&);
             Engine& operator= (const Engine&);
