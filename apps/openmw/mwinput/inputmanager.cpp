@@ -59,10 +59,6 @@ namespace MWInput
     MWRender::PlayerPos &player;
     MWGui::WindowManager &windows;
 
-    //may be better placed at OEngine::Renderer
-    Ogre::RaySceneQuery *mRaySceneQuery;
-    
-
     // Count screenshots.
     int shotCount;
 
@@ -141,47 +137,7 @@ namespace MWInput
 
     void activate()
     {
-        Ogre::Camera *mCamera = ogre.getCamera();
 
-        //get a ray pointing to the center of the viewport
-        Ogre::Ray centerRay = mCamera->getCameraToViewportRay ( 0.5, 0.5 );
-
-        // get all objects touched by the ray
-        mRaySceneQuery->setRay ( centerRay );
-        Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
-        Ogre::RaySceneQueryResult::iterator itr = result.begin();
-
-        Ogre::RaySceneQueryResult::iterator nearest = result.end();
-
-        for ( ; itr != result.end(); itr++ )
-        {
-            /*if ( itr->worldFragment )  //world fragments aren't currently used by openw
-                {
-                Ogre::Vector3 location = itr->worldFragment->singleIntersection;
-                std::cout << "WorldFragment: (" << location.x << ", " << location.y << ", " << location.z << ")" << std::endl;
-                } //  if*/
-
-            // Is this result a MovableObject?
-            // there seem to be omnipresent objects like the caelum sky dom,
-            // the distance of these objects is always 0 so this if excludes these
-            if ( itr->movable && itr->distance >= 0.1)
-            {
-                std::cout << "Movobj: " << itr->movable->getName() << " dist: " << itr->distance << "\n";
-
-                if ( nearest == result.end() )  //if no object is set
-                {
-                    nearest = itr;
-                }
-                else if ( itr->distance < nearest->distance )
-                {
-                    nearest = itr;
-                }
-            }
-        }
-
-        if ( nearest != result.end() )
-            std::cout << "Nearest MovableObject: " << nearest->movable->getName()
-                      << " Distance: " << nearest->distance << std::endl;
     }
 
     // Exit program now button (which is disabled in GUI mode)
@@ -250,9 +206,6 @@ namespace MWInput
 
       // Start out in game mode
       setGuiMode(MWGui::GM_Game);
-
-      //init rayscene query (would be also better placed at Oengine::Renderer)
-      mRaySceneQuery = ogre.getScene()->createRayQuery(Ogre::Ray());
 
       /**********************************
         Key binding section

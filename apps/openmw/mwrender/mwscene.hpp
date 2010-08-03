@@ -9,6 +9,7 @@ namespace Ogre
     class Viewport;
     class SceneManager;
     class SceneNode;
+    class RaySceneQuery;
 }
 
 namespace MWRender
@@ -26,6 +27,7 @@ namespace MWRender
     // that the OGRE coordinate system matches that used internally in
     // Morrowind.
     Ogre::SceneNode *mwRoot;
+    Ogre::RaySceneQuery *mRaySceneQuery;
 
   public:
     MWScene(OEngine::Render::OgreRenderer &_rend);
@@ -34,6 +36,10 @@ namespace MWRender
     Ogre::SceneNode *getRoot() { return mwRoot; }
     Ogre::SceneManager *getMgr() { return rend.getScene(); }
     Ogre::Viewport *getViewport() { return rend.getViewport(); }
+    Ogre::RaySceneQuery *getRaySceneQuery() { return mRaySceneQuery; }
+
+    //gets the handle of the object the player is looking at
+    void getFacedHandle(std::string& handle, float& distance);
   };
 }
 

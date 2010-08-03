@@ -31,4 +31,54 @@ MWScene::MWScene(OEngine::Render::OgreRenderer &_rend)
   SceneNode *rt = rend.getScene()->getRootSceneNode();
   mwRoot = rt->createChildSceneNode();
   mwRoot->pitch(Degree(-90));
+
+  //used to obtain ingame information of ogre objects (which are faced or selected)
+  mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
 }
+
+void MWScene::getFacedHandle(std::string& handle, float& distance)
+{
+    handle = "";
+    distance = -1;
+
+    //get a ray pointing to the center of the viewport
+    Ray centerRay = getCamera()->getCameraToViewportRay(
+        getViewport()->getWidth()/2,
+        getViewport()->getHeight()/2);
+
+    // get all objects touched by the ray
+    getRaySceneQuery()->setRay (centerRay );
+    RaySceneQueryResult &result = getRaySceneQuery()->execute();
+
+    RaySceneQueryResult::iterator nearest = result.end();
+
+    for (RaySceneQueryResult::iterator itr = result.begin();
+        itr != result.end(); itr++ )
+    {
+        // there seem to be omnipresent objects like the caelum sky dom,
+        // the distance of these objects is always 0 so this if excludes these
+        // TODO: Check if the object can be focused (ignore walls etc..
+        // in this state of openmw not possible)
+        if ( itr->movable && itr->distance >= 0.1)
+        {
+            if ( nearest == result.end() )  //if no object is set
+            {
+                nearest = itr;
+            }
+            else if ( itr->distance < nearest->distance )
+            {
+                nearest = itr;
+            }
+        }
+    }
+
+    if ( nearest != result.end() )
+    {
+        std::cout << "Nearest MovableObject: " << nearest->movable->getParentSceneNode()->getName()
+        << " Distance: " << nearest->distance << std::endl;
+
+        handle = nearest->movable->getParentSceneNode()->getName();
+        distance = nearest->distance;
+    }
+}
+
