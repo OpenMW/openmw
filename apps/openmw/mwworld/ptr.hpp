@@ -9,8 +9,6 @@
 #include <components/esm/loadnpc.hpp>
 #include <components/esm_store/cell_store.hpp>
 
-#include "../mwmechanics/creaturestats.hpp"
-
 #include "refdata.hpp"
 
 namespace MWWorld

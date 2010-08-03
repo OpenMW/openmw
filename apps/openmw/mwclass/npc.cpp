@@ -3,6 +3,8 @@
 
 #include <components/esm/loadnpc.hpp>
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/ptr.hpp"
 
 namespace MWClass

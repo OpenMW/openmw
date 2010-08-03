@@ -9,6 +9,8 @@
 
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "interpretercontext.hpp"
 
 namespace MWScript
