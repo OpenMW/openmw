@@ -29,12 +29,14 @@ namespace MWWorld
         throw std::runtime_error ("class does not have item health");
     }
 
-    boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
+    boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor,
+        const Environment& environment) const
     {
         return boost::shared_ptr<Action> (new NullAction);
     }
 
-    boost::shared_ptr<Action> Class::use (const Ptr& ptr) const
+    boost::shared_ptr<Action> Class::use (const Ptr& ptr,
+        const Environment& environment) const
     {
         return boost::shared_ptr<Action> (new NullAction);
     }

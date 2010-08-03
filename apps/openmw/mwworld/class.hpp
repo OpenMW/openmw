@@ -49,10 +49,12 @@ namespace MWWorld
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exceoption)
 
-            virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
+            virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor,
+                const Environment& environment) const;
             ///< Generate action for activation (default implementation: return a null action).
 
-            virtual boost::shared_ptr<Action> use (const Ptr& ptr) const;
+            virtual boost::shared_ptr<Action> use (const Ptr& ptr, const Environment& environment)
+                const;
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
 
