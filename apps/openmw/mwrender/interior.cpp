@@ -186,7 +186,7 @@ void InteriorCellRender::show()
   configureAmbient();
   configureFog();
 
-  insertCell(cell);
+  insertCell(cell, store);
 }
 
 void InteriorCellRender::hide()

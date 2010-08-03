@@ -12,6 +12,11 @@ namespace ESM
   class CellRef;
 }
 
+namespace ESMS
+{
+  class ESMStore;
+}
+
 namespace MWRender
 {
   /// Base class for cell render, that implements inserting references into a cell in a
@@ -35,7 +40,7 @@ namespace MWRender
     /// finish inserting a new reference and return a handle to it.
     virtual std::string insertEnd (bool Enable) = 0;
       
-    void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
+    void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, const ESMS::ESMStore& store);
 
   };
 }
