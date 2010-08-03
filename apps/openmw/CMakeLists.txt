@@ -96,12 +96,16 @@ set(GAMECLASS
     mwclass/activator.cpp
     mwclass/creature.cpp
     mwclass/npc.cpp
+    mwclass/weapon.cpp
+    mwclass/armor.cpp
     )
 set(GAMECLASS_HEADER
     mwclass/classes.hpp
     mwclass/activator.hpp
     mwclass/creature.hpp
     mwclass/npc.hpp
+    mwclass/weapon.hpp
+    mwclass/armor.hpp
     )
 source_group(apps\\openmw\\mwclass FILES ${GAMECLASS} ${GAMECLASS_HEADER})
 

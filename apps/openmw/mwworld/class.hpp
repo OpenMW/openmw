@@ -36,6 +36,12 @@ namespace MWWorld
             ///< Return creature stats or throw an exception, if class does not have creature stats
             /// (default implementation: throw an exceoption)
 
+            virtual bool hasItemHealth (const Ptr& ptr) const;
+            ///< \return Item health data available? (default implementation: false)
+
+            virtual int getItemMaxHealth (const Ptr& ptr) const;
+            ///< Return item max health or throw an exception, if class does not have item health
+            /// (default implementation: throw an exceoption)
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

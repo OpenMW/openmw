@@ -18,6 +18,16 @@ namespace MWWorld
         throw std::runtime_error ("class does not have creature stats");
     }
 
+    bool Class::hasItemHealth (const Ptr& ptr) const
+    {
+        return false;
+    }
+
+    int Class::getItemMaxHealth (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have item health");
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);

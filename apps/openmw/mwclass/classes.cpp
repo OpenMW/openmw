@@ -4,6 +4,8 @@
 #include "activator.hpp"
 #include "creature.hpp"
 #include "npc.hpp"
+#include "weapon.hpp"
+#include "armor.hpp"
 
 namespace MWClass
 {
@@ -12,5 +14,7 @@ namespace MWClass
         Activator::registerSelf();
         Creature::registerSelf();
         Npc::registerSelf();
+        Weapon::registerSelf();
+        Armor::registerSelf();
     }
 }
