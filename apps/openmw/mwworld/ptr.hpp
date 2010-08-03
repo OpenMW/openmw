@@ -5,11 +5,7 @@
 
 #include <boost/any.hpp>
 
-#include <components/esm/loadcrea.hpp>
-#include <components/esm/loadnpc.hpp>
 #include <components/esm_store/cell_store.hpp>
-
-#include "../mwmechanics/creaturestats.hpp"
 
 #include "refdata.hpp"
 
@@ -27,6 +23,7 @@ namespace MWWorld
             ESM::CellRef *mCellRef;
             RefData *mRefData;
             CellStore *mCell;
+            std::string mTypeName;
 
         public:
 
@@ -43,6 +40,11 @@ namespace MWWorld
                 return mPtr.type();
             }
 
+            const std::string& getTypeName() const
+            {
+                return mTypeName;
+            }
+
             template<typename T>
             Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
             {
@@ -50,6 +52,7 @@ namespace MWWorld
                 mCellRef = &liveCellRef->ref;
                 mRefData = &liveCellRef->mData;
                 mCell = cell;
+                mTypeName = typeid (T).name();
             }
 
             template<typename T>
@@ -74,63 +77,6 @@ namespace MWWorld
             {
                 assert (mCell);
                 return mCell;
-            }
-
-            /// Throws an exception, if the ID type does not support creature stats.
-            MWMechanics::CreatureStats& getCreatureStats() const
-            {
-                RefData& data = getRefData();
-
-                if (!data.getCreatureStats().get())
-                {
-                    if (mPtr.type()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData> *))
-                    {
-                        boost::shared_ptr<MWMechanics::CreatureStats> stats (
-                            new MWMechanics::CreatureStats);
-
-                        ESMS::LiveCellRef<ESM::Creature, RefData> *ref = get<ESM::Creature>();
-
-                        stats->mAttributes[0].set (ref->base->data.strength);
-                        stats->mAttributes[1].set (ref->base->data.intelligence);
-                        stats->mAttributes[2].set (ref->base->data.willpower);
-                        stats->mAttributes[3].set (ref->base->data.agility);
-                        stats->mAttributes[4].set (ref->base->data.speed);
-                        stats->mAttributes[5].set (ref->base->data.endurance);
-                        stats->mAttributes[6].set (ref->base->data.personality);
-                        stats->mAttributes[7].set (ref->base->data.luck);
-                        stats->mDynamic[0].set (ref->base->data.health);
-                        stats->mDynamic[1].set (ref->base->data.mana);
-                        stats->mDynamic[2].set (ref->base->data.fatigue);
-
-                        data.getCreatureStats() = stats;
-                    }
-                    else if (mPtr.type()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData> *))
-                    {
-                        boost::shared_ptr<MWMechanics::CreatureStats> stats (
-                            new MWMechanics::CreatureStats);
-
-                        ESMS::LiveCellRef<ESM::NPC, RefData> *ref = get<ESM::NPC>();
-
-                        stats->mAttributes[0].set (ref->base->npdt52.strength);
-                        stats->mAttributes[1].set (ref->base->npdt52.intelligence);
-                        stats->mAttributes[2].set (ref->base->npdt52.willpower);
-                        stats->mAttributes[3].set (ref->base->npdt52.agility);
-                        stats->mAttributes[4].set (ref->base->npdt52.speed);
-                        stats->mAttributes[5].set (ref->base->npdt52.endurance);
-                        stats->mAttributes[6].set (ref->base->npdt52.personality);
-                        stats->mAttributes[7].set (ref->base->npdt52.luck);
-                        stats->mDynamic[0].set (ref->base->npdt52.health);
-                        stats->mDynamic[1].set (ref->base->npdt52.mana);
-                        stats->mDynamic[2].set (ref->base->npdt52.fatigue);
-
-                        data.getCreatureStats() = stats;
-                    }
-                    else
-                        throw std::runtime_error (
-                            "CreatureStats not available for this ID type");
-                }
-
-                return *data.getCreatureStats();
             }
     };
 

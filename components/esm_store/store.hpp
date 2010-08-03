@@ -55,10 +55,10 @@ namespace ESMS
     RecListT<Misc>              miscItems;
     RecListT<NPC>               npcs;
     RecListT<LoadNPCC>          npcChange;
-    RecListT<Tool>              probes;
+    RecListT<Probe>             probes;
     RecListT<Race>              races;
     RecListT<Region>            regions;
-    RecListT<Tool>              repairs;
+    RecListT<Repair>            repairs;
     RecListT<SoundGenerator>    soundGens;
     RecListT<Sound>             sounds;
     RecListT<Spell>             spells;

@@ -120,10 +120,10 @@ namespace MWWorld
         if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = cell.npcs.find (name))
             return Ptr (ref, &cell);
 
-        if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = cell.probes.find (name))
+        if (ESMS::LiveCellRef<ESM::Probe, RefData> *ref = cell.probes.find (name))
             return Ptr (ref, &cell);
 
-        if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = cell.repairs.find (name))
+        if (ESMS::LiveCellRef<ESM::Repair, RefData> *ref = cell.repairs.find (name))
             return Ptr (ref, &cell);
 
         if (ESMS::LiveCellRef<ESM::Static, RefData> *ref = cell.statics.find (name))
@@ -183,10 +183,10 @@ namespace MWWorld
         if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = searchViaHandle (handle, cell.npcs))
             return Ptr (ref, &cell);
 
-        if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = searchViaHandle (handle, cell.probes))
+        if (ESMS::LiveCellRef<ESM::Probe, RefData> *ref = searchViaHandle (handle, cell.probes))
             return Ptr (ref, &cell);
 
-        if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = searchViaHandle (handle, cell.repairs))
+        if (ESMS::LiveCellRef<ESM::Repair, RefData> *ref = searchViaHandle (handle, cell.repairs))
             return Ptr (ref, &cell);
 
         if (ESMS::LiveCellRef<ESM::Static, RefData> *ref = searchViaHandle (handle, cell.statics))

@@ -24,6 +24,8 @@
 #include "mwworld/ptr.hpp"
 #include "mwworld/environment.hpp"
 
+#include "mwclass/classes.hpp"
+
 #include "mwmechanics/mechanicsmanager.hpp"
 
 #include <OgreRoot.h>
@@ -78,6 +80,7 @@ OMW::Engine::Engine()
   , mScriptManager (0)
   , mScriptContext (0)
 {
+    MWClass::registerClasses();
 }
 
 OMW::Engine::~Engine()
