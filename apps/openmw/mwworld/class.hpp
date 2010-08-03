@@ -6,6 +6,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "action.hpp"
+
 namespace MWMechanics
 {
     struct CreatureStats;
@@ -46,6 +48,13 @@ namespace MWWorld
             virtual int getItemMaxHealth (const Ptr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exceoption)
+
+            virtual boost::shared_ptr<Action> activate (const Ptr& ptr) const;
+            ///< Generate action for activation (default implementation: return a null action).
+
+            virtual boost::shared_ptr<Action> use (const Ptr& ptr) const;
+            ///< Generate action for using via inventory menu (default implementation: return a
+            /// null action).
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

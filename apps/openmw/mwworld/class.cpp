@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "ptr.hpp"
+#include "nullaction.hpp"
 
 namespace MWWorld
 {
@@ -26,6 +27,16 @@ namespace MWWorld
     int Class::getItemMaxHealth (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");
+    }
+
+    boost::shared_ptr<Action> Class::activate (const Ptr& ptr) const
+    {
+        return boost::shared_ptr<Action> (new NullAction);
+    }
+
+    boost::shared_ptr<Action> Class::use (const Ptr& ptr) const
+    {
+        return boost::shared_ptr<Action> (new NullAction);
     }
 
     const Class& Class::get (const std::string& key)

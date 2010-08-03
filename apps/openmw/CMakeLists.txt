@@ -88,6 +88,8 @@ set(GAMEWORLD_HEADER
     mwworld/environment.hpp
     mwworld/globals.hpp
     mwworld/class.hpp
+    mwworld/action.hpp
+    mwworld/nullaction.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
