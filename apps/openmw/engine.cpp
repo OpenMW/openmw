@@ -24,6 +24,7 @@
 #include "mwworld/world.hpp"
 #include "mwworld/ptr.hpp"
 #include "mwworld/environment.hpp"
+#include "mwworld/class.hpp"
 
 #include "mwclass/classes.hpp"
 
@@ -74,8 +75,21 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     if (focusFrameCounter++ == focusUpdateFrame)
     {
         std::pair<std::string, float> handle = mEnvironment.mWorld->getMWScene()->getFacedHandle();
-        
-        std::cout << "Object: " << handle.first << ", distance: " << handle.second << std::endl;
+
+        std::string name;
+
+        if (!handle.first.empty())
+        {
+            // TODO compare handle.second with max activation range (from a GMST)
+
+            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle.first);
+
+            if (!ptr.isEmpty())
+                name = MWWorld::Class::get (ptr).getName (ptr);
+        }
+
+        if (!name.empty())
+            std::cout << "Object: " << name << ", distance: " << handle.second << std::endl;
 
         focusFrameCounter = 0;
     }
@@ -244,7 +258,7 @@ void OMW::Engine::go()
                                   *mEnvironment.mWindowManager, mDebug);
 
     focusFrameCounter = 0;
-    
+
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 
     mOgre.getRoot()->addFrameListener (this);

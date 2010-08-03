@@ -42,6 +42,15 @@ namespace
     ESMS::LiveCellRef<T, MWWorld::RefData> *searchViaHandle (const std::string& handle,
         ESMS::CellRefList<T, MWWorld::RefData>& refList)
     {
+        typedef typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iterator;
+
+        for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
+        {
+            if (iter->mData.getHandle()==handle)
+            {
+                return &*iter;
+            }
+        }
 
         return 0;
     }
