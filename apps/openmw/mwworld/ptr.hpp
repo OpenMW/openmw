@@ -27,6 +27,7 @@ namespace MWWorld
             ESM::CellRef *mCellRef;
             RefData *mRefData;
             CellStore *mCell;
+            std::string mTypeName;
 
         public:
 
@@ -43,6 +44,11 @@ namespace MWWorld
                 return mPtr.type();
             }
 
+            const std::string& getTypeName() const
+            {
+                return mTypeName;
+            }
+
             template<typename T>
             Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
             {
@@ -50,6 +56,7 @@ namespace MWWorld
                 mCellRef = &liveCellRef->ref;
                 mRefData = &liveCellRef->mData;
                 mCell = cell;
+                mTypeName = typeid (T).name();
             }
 
             template<typename T>
