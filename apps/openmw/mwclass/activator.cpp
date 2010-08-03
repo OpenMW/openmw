@@ -3,7 +3,7 @@
 
 #include <components/esm/loadacti.hpp>
 
-namespace MWWorld
+namespace MWClass
 {
     void Activator::registerSelf()
     {

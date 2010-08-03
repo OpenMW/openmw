@@ -3,18 +3,18 @@
 
 #include <components/esm/loadnpc.hpp>
 
-#include "ptr.hpp"
+#include "../mwworld/ptr.hpp"
 
-namespace MWWorld
+namespace MWClass
 {
-    MWMechanics::CreatureStats& Npc::getCreatureStats (const Ptr& ptr) const
+    MWMechanics::CreatureStats& Npc::getCreatureStats (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCreatureStats().get())
         {
             boost::shared_ptr<MWMechanics::CreatureStats> stats (
                 new MWMechanics::CreatureStats);
 
-            ESMS::LiveCellRef<ESM::NPC, RefData> *ref = ptr.get<ESM::NPC>();
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
 
             stats->mAttributes[0].set (ref->base->npdt52.strength);
             stats->mAttributes[1].set (ref->base->npdt52.intelligence);

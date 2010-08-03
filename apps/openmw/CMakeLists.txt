@@ -80,10 +80,6 @@ set(GAMEWORLD
     mwworld/world.cpp
     mwworld/globals.cpp
     mwworld/class.cpp
-    mwworld/classes.cpp
-    mwworld/activator.cpp
-    mwworld/creature.cpp
-    mwworld/npc.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -92,12 +88,22 @@ set(GAMEWORLD_HEADER
     mwworld/environment.hpp
     mwworld/globals.hpp
     mwworld/class.hpp
-    mwworld/classes.hpp
-    mwworld/activator.hpp
-    mwworld/creature.hpp
-    mwworld/npc.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
+
+set(GAMECLASS
+    mwclass/classes.cpp
+    mwclass/activator.cpp
+    mwclass/creature.cpp
+    mwclass/npc.cpp
+    )
+set(GAMECLASS_HEADER
+    mwclass/classes.hpp
+    mwclass/activator.hpp
+    mwclass/creature.hpp
+    mwclass/npc.hpp
+    )
+source_group(apps\\openmw\\mwclass FILES ${GAMECLASS} ${GAMECLASS_HEADER})
 
 set(GAMEMECHANICS
     mwmechanics/mechanicsmanager.cpp)
@@ -109,10 +115,11 @@ set(GAMEMECHANICS_HEADER
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
 set(OPENMW_CPP ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD}
-    ${GAMEMECHANICS}
+    ${GAMECLASS} ${GAMEMECHANICS}
     )
 set(OPENMW_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
-    ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER} ${GAMEMECHANICS_HEADER}
+    ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER}  ${GAMECLASS_HEADER}
+    ${GAMEMECHANICS_HEADER}
     )
 
 # Main executable

@@ -5,7 +5,7 @@
 #include "creature.hpp"
 #include "npc.hpp"
 
-namespace MWWorld
+namespace MWClass
 {
     void registerClasses()
     {

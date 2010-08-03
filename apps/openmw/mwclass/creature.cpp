@@ -5,18 +5,18 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 
-#include "ptr.hpp"
+#include "../mwworld/ptr.hpp"
 
-namespace MWWorld
+namespace MWClass
 {
-    MWMechanics::CreatureStats& Creature::getCreatureStats (const Ptr& ptr) const
+    MWMechanics::CreatureStats& Creature::getCreatureStats (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCreatureStats().get())
         {
             boost::shared_ptr<MWMechanics::CreatureStats> stats (
                 new MWMechanics::CreatureStats);
 
-            ESMS::LiveCellRef<ESM::Creature, RefData> *ref = ptr.get<ESM::Creature>();
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref = ptr.get<ESM::Creature>();
 
             stats->mAttributes[0].set (ref->base->data.strength);
             stats->mAttributes[1].set (ref->base->data.intelligence);
