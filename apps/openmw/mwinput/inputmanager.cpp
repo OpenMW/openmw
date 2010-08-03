@@ -41,6 +41,8 @@ namespace MWInput
       A_MoveForward,    // Forward / Backward
       A_MoveBackward,
 
+      A_Activate,
+
       A_LAST            // Marker for the last item
     };
 
@@ -133,6 +135,11 @@ namespace MWInput
       else setGuiMode(GM_Console);
     }
 
+    void activate()
+    {
+
+    }
+
     // Exit program now button (which is disabled in GUI mode)
     void exitNow()
     {
@@ -170,6 +177,8 @@ namespace MWInput
                        "Toggle inventory screen");
       disp->funcs.bind(A_Console, boost::bind(&InputImpl::toggleConsole, this),
                        "Toggle console");
+      disp->funcs.bind(A_Activate, boost::bind(&InputImpl::activate, this),
+                       "Activate");
 
 
       // Add the exit listener
@@ -212,6 +221,7 @@ namespace MWInput
       disp->bind(A_Screenshot, KC_SYSRQ);
       disp->bind(A_Inventory, KC_I);
       disp->bind(A_Console, KC_F1);
+      disp->bind(A_Activate, KC_SPACE);
 
       // Key bindings for polled keys
 
@@ -256,6 +266,7 @@ namespace MWInput
 
       if(moveX != 0 || moveY != 0 || moveZ != 0)
         player.moveRel(moveX, moveY, moveZ);
+
 
       return true;
     }

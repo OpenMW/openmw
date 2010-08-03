@@ -83,6 +83,8 @@ namespace MWWorld
 
             ~World();
 
+            MWRender::MWScene* getMWScene() { return &mScene; }
+
             MWRender::PlayerPos& getPlayerPos();
 
             ESMS::ESMStore& getStore();
