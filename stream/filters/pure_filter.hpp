@@ -15,9 +15,13 @@ class PureFilter : public Stream
   StreamPtr src;
 
  public:
+  PureFilter() {}
   PureFilter(StreamPtr _src)
-    : src(_src)
+  { setStream(_src); }
+
+  void setStream(StreamPtr _src)
     {
+      src = _src;
       isSeekable = src->isSeekable;
       hasPosition = src->hasPosition;
       hasSize = src->hasSize;
