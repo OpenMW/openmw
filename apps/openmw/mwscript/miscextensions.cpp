@@ -16,37 +16,41 @@ namespace MWScript
         class OpXBox : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     runtime.push (0);
-                } 
+                }
         };
-    
+
         class OpOnActivate : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    runtime.push (static_cast<InterpreterContext&> (
-                        runtime.getContext()).hasBeenActivated());
-                } 
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    MWWorld::Ptr ptr = context.getReference();
+
+                    runtime.push (context.hasBeenActivated (ptr));
+                }
         };
-    
+
         const int opcodeXBox = 0x200000c;
-        const int opcodeOnActivate = 0x200000d;       
-    
+        const int opcodeOnActivate = 0x200000d;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
             extensions.registerFunction ("onactivate", 'l', "", opcodeOnActivate);
         }
-        
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (opcodeXBox, new OpXBox);
             interpreter.installSegment5 (opcodeOnActivate, new OpOnActivate);
-        }    
-    }        
+        }
+    }
 }
