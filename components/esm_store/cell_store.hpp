@@ -63,7 +63,7 @@ namespace ESMS
 
       list.push_back(lr);
     }
-    
+
     LiveRef *find (const std::string& name)
     {
         for (typename std::list<LiveRef>::iterator iter (list.begin()); iter!=list.end(); ++iter)
@@ -71,9 +71,9 @@ namespace ESMS
             if (iter->ref.refID==name)
                 return &*iter;
         }
-        
+
         return 0;
-    }    
+    }
   };
 
   /// A storage struct for one single cell reference.
@@ -102,8 +102,8 @@ namespace ESMS
     CellRefList<Tool, D>              lockpicks;
     CellRefList<Misc, D>              miscItems;
     CellRefList<NPC, D>               npcs;
-    CellRefList<Tool, D>              probes;
-    CellRefList<Tool, D>              repairs;
+    CellRefList<Probe, D>             probes;
+    CellRefList<Repair, D>            repairs;
     CellRefList<Static, D>            statics;
     CellRefList<Weapon, D>            weapons;
 
@@ -119,12 +119,12 @@ namespace ESMS
             throw str_exception("Cell not found - " + name);
 
         loadRefs(store, esm);
-    } 
+    }
 
     /** Ditto for exterior cell. */
     void loadExt(int X, int Y, const ESMStore &store, ESMReader &esm)
     {
-    
+
     }
 
   private:
@@ -176,7 +176,7 @@ namespace ESMS
             }
         }
     }
-    
+
   };
 }
 

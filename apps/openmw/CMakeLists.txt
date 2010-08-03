@@ -98,6 +98,21 @@ set(GAMECLASS
     mwclass/npc.cpp
     mwclass/weapon.cpp
     mwclass/armor.cpp
+    mwclass/potion.cpp
+    mwclass/apparatus.cpp
+    mwclass/book.cpp
+    mwclass/clothing.cpp
+    mwclass/container.cpp
+    mwclass/door.cpp
+    mwclass/ingredient.cpp
+    mwclass/creaturelevlist.cpp
+    mwclass/itemlevlist.cpp
+    mwclass/light.cpp
+    mwclass/lockpick.cpp
+    mwclass/misc.cpp
+    mwclass/probe.cpp
+    mwclass/repair.cpp
+    mwclass/static.cpp
     )
 set(GAMECLASS_HEADER
     mwclass/classes.hpp
@@ -106,6 +121,21 @@ set(GAMECLASS_HEADER
     mwclass/npc.hpp
     mwclass/weapon.hpp
     mwclass/armor.hpp
+    mwclass/potion.hpp
+    mwclass/apparatus.hpp
+    mwclass/book.hpp
+    mwclass/clothing.hpp
+    mwclass/container.hpp
+    mwclass/door.hpp
+    mwclass/ingredient.hpp
+    mwclass/creaturelevlist.hpp
+    mwclass/itemlevlist.hpp
+    mwclass/light.hpp
+    mwclass/lockpick.hpp
+    mwclass/misc.hpp
+    mwclass/probe.hpp
+    mwclass/repair.hpp
+    mwclass/static.hpp
     )
 source_group(apps\\openmw\\mwclass FILES ${GAMECLASS} ${GAMECLASS_HEADER})
 

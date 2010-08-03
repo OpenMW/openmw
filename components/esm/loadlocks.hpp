@@ -50,5 +50,16 @@ struct Tool
     icon = esm.getHNOString("ITEX");
   }
 };
+
+struct Probe : Tool
+{
+
+};
+
+struct Repair : Tool
+{
+
+};
+
 }
 #endif
