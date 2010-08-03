@@ -9,6 +9,14 @@
 
 namespace MWClass
 {
+    std::string Weapon::getName (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return ref->base->name;
+    }
+
     bool Weapon::hasItemHealth (const MWWorld::Ptr& ptr) const
     {
         return true;

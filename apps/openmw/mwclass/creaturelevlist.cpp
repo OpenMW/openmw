@@ -5,6 +5,11 @@
 
 namespace MWClass
 {
+    std::string CreatureLevList::getName (const MWWorld::Ptr& ptr) const
+    {
+        return "";
+    }
+
     void CreatureLevList::registerSelf()
     {
         boost::shared_ptr<Class> instance (new CreatureLevList);

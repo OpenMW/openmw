@@ -5,6 +5,11 @@
 
 namespace MWClass
 {
+    std::string ItemLevList::getName (const MWWorld::Ptr& ptr) const
+    {
+        return "";
+    }
+
     void ItemLevList::registerSelf()
     {
         boost::shared_ptr<Class> instance (new ItemLevList);

@@ -32,6 +32,10 @@ namespace MWWorld
 
             virtual ~Class();
 
+            virtual std::string getName (const Ptr& ptr) const = 0;
+            ///< \return name (the one that is to be presented to the user; not the internal one);
+            /// can return an empty string.
+
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
             /// (default implementation: throw an exceoption)

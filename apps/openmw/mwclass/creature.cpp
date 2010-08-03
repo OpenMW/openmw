@@ -9,6 +9,14 @@
 
 namespace MWClass
 {
+    std::string Creature::getName (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->base->name;
+    }
+
     MWMechanics::CreatureStats& Creature::getCreatureStats (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCreatureStats().get())
