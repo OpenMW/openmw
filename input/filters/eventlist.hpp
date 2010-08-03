@@ -40,6 +40,8 @@ namespace Mangle
           }
       }
     };
+
+    typedef boost::shared_ptr<EventList> EventListPtr;
   }
 }
 #endif
