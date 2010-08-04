@@ -48,24 +48,25 @@ void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::NPC, MWWorld::R
     //get the part of the bodypart id which describes the race and the gender
     std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
     std::string headModel = "meshes\\" + store.bodyParts.find(headID)->model;
-    
+
     cellRender.insertBegin(liveRef.ref);
     cellRender.insertMesh(headModel);
 
     //TODO: define consts for each bodypart e.g. chest, foot, wrist... and put the parts in the right place
     cellRender.insertMesh("meshes\\" + store.bodyParts.find(bodyRaceID + "chest")->model);
-    
+
     liveRef.mData.setHandle (cellRender.insertEnd (liveRef.mData.isEnabled()));
 }
-    
+
 template<typename T>
 void insertCellRefList (CellRenderImp& cellRender, const ESMS::ESMStore& store, T& cellRefList)
 {
-  for(typename T::List::iterator it = cellRefList.list.begin();
-    it != cellRefList.list.end(); it++)
-  {
-    insertObj (cellRender, *it, store);
-  }
+    for(typename T::List::iterator it = cellRefList.list.begin();
+        it != cellRefList.list.end(); it++)
+    {
+        if (it->mData.getCount())
+            insertObj (cellRender, *it, store);
+    }
 }
 
 void CellRenderImp::insertCell(ESMS::CellStore<MWWorld::RefData> &cell, const ESMS::ESMStore& store)
@@ -92,5 +93,3 @@ void CellRenderImp::insertCell(ESMS::CellStore<MWWorld::RefData> &cell, const ES
   insertCellRefList (*this, store, cell.statics);
   insertCellRefList (*this, store, cell.weapons);
 }
-
-

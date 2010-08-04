@@ -25,7 +25,7 @@ namespace
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {
-            if (!iter->base->script.empty())
+            if (!iter->base->script.empty() && iter->mData.getCount())
             {
                 if (const ESM::Script *script = store.scripts.find (iter->base->script))
                 {
