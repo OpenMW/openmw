@@ -1,5 +1,5 @@
-#ifndef MANGLE_STREAM_FILESERVER_H
-#define MANGLE_STREAM_FILESERVER_H
+#ifndef MANGLE_OSTREAM_FILESERVER_H
+#define MANGLE_OSTREAM_FILESERVER_H
 
 #include "std_ostream.hpp"
 #include <fstream>

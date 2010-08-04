@@ -1,5 +1,5 @@
-#ifndef MANGLE_STREAM_STDIOSERVER_H
-#define MANGLE_STREAM_STDIOSERVER_H
+#ifndef MANGLE_OSTREAM_STDIOSERVER_H
+#define MANGLE_OSTREAM_STDIOSERVER_H
 
 #include "../stream.hpp"
 #include <iostream>
