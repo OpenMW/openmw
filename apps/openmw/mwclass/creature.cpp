@@ -44,6 +44,22 @@ namespace MWClass
         return *ptr.getRefData().getCreatureStats();
     }
 
+    MWWorld::ContainerStore<MWWorld::RefData>& Creature::getContainerStore (const MWWorld::Ptr& ptr)
+        const
+    {
+        if (!ptr.getRefData().getContainerStore().get())
+        {
+            boost::shared_ptr<MWWorld::ContainerStore<MWWorld::RefData> > store (
+                new MWWorld::ContainerStore<MWWorld::RefData>);
+
+            // TODO add initial content
+
+            ptr.getRefData().getContainerStore() = store;
+        }
+
+        return *ptr.getRefData().getContainerStore();
+    }
+
     void Creature::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Creature);

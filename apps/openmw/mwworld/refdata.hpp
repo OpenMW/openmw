@@ -7,6 +7,8 @@
 
 #include "../mwscript/locals.hpp"
 
+#include "containerstore.hpp"
+
 namespace ESM
 {
     class Script;
@@ -35,6 +37,8 @@ namespace MWWorld
             // manually will probably give unexcepted results. This is not a problem since RefData
             // are never copied outside of container operations.
             boost::shared_ptr<MWMechanics::CreatureStats> mCreatureStats;
+
+            boost::shared_ptr<ContainerStore<RefData> > mContainerStore;
 
         public:
 
@@ -92,6 +96,11 @@ namespace MWWorld
             boost::shared_ptr<MWMechanics::CreatureStats>& getCreatureStats()
             {
                 return mCreatureStats;
+            }
+
+            boost::shared_ptr<ContainerStore<RefData> >& getContainerStore()
+            {
+                return mContainerStore;
             }
     };
 }

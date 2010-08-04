@@ -92,6 +92,7 @@ set(GAMEWORLD_HEADER
     mwworld/action.hpp
     mwworld/nullaction.hpp
     mwworld/actionteleport.hpp
+    mwworld/containerstore.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 

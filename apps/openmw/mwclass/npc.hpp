@@ -16,6 +16,10 @@ namespace MWClass
             virtual MWMechanics::CreatureStats& getCreatureStats (const MWWorld::Ptr& ptr) const;
             ///< Return creature stats
 
+            virtual MWWorld::ContainerStore<MWWorld::RefData>& getContainerStore (
+                const MWWorld::Ptr& ptr) const;
+            ///< Return container store
+
             static void registerSelf();
     };
 }
