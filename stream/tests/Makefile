@@ -1,6 +1,6 @@
 GCC=g++ -I../
 
-all: ogre_client_test audiere_client_test memory_server_test buffer_filter_test file_server_test slice_filter_test
+all: ogre_client_test audiere_client_test memory_server_test buffer_filter_test file_server_test slice_filter_test file_write_test
 
 I_OGRE=$(shell pkg-config --cflags OGRE)
 L_OGRE=$(shell pkg-config --libs OGRE)
@@ -13,6 +13,9 @@ audiere_client_test: audiere_client_test.cpp ../stream.hpp ../clients/audiere_fi
 	$(GCC) $< -o $@ ../clients/audiere_file.cpp $(L_AUDIERE)
 
 file_server_test: file_server_test.cpp ../stream.hpp ../servers/file_stream.hpp ../servers/std_stream.hpp
+	$(GCC) $< -o $@
+
+file_write_test: file_write_test.cpp ../stream.hpp ../servers/outfile_stream.hpp ../servers/std_ostream.hpp
 	$(GCC) $< -o $@
 
 memory_server_test: memory_server_test.cpp ../stream.hpp ../servers/memory_stream.hpp

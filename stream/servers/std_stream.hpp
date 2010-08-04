@@ -8,7 +8,7 @@
 namespace Mangle {
 namespace Stream {
 
-/** Simplest wrapper for std::istream.
+/** Simple wrapper for std::istream.
  */
 class StdStream : public Stream
 {

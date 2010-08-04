@@ -27,6 +27,7 @@ class SliceStream : public Stream
       hasPosition = true;
       hasSize = true;
       hasPtr = src->hasPtr;
+      isWritable = src->isWritable;
     }
 
   size_t read(void *buf, size_t count)
@@ -35,9 +36,27 @@ class SliceStream : public Stream
     if(count > length-pos)
       count = length-pos;
 
-    // Seek into place and reading
+    // Seek into place and start reading
     src->seek(offset+pos);
     count = src->read(buf, count);
+
+    pos += count;
+    assert(pos <= length);
+    return count;
+  }
+
+  // Note that writing to a slice does not allow you to append data,
+  // you may only overwrite existing data.
+  size_t write(const void *buf, size_t count)
+  {
+    assert(isWritable);
+    // Check that we're not reading past our slice
+    if(count > length-pos)
+      count = length-pos;
+
+    // Seek into place and action
+    src->seek(offset+pos);
+    count = src->write(buf, count);
 
     pos += count;
     assert(pos <= length);

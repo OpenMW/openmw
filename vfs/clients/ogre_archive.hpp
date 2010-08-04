@@ -11,9 +11,9 @@ namespace VFS {
 /** An OGRE Archive implementation that wraps a Mangle::VFS
     filesystem.
 
-    This has been built and tested against OGRE 1.6.2. You might have
-    to make your own modifications if you're working with newer (or
-    older) versions.
+    This has been built and tested against OGRE 1.6.2, and has been
+    extended for OGRE 1.7. You might have to make your own
+    modifications if you're working with newer (or older) versions.
  */
 class MangleArchive : public Ogre::Archive
 {

@@ -23,13 +23,17 @@ class Stream
   /// If true, size() works
   bool hasSize;
 
+  /// If true, write() works. Writing through pointer operations is
+  /// not supported.
+  bool isWritable;
+
   /// If true, the getPtr() functions work
   bool hasPtr;
 
   /// Initialize all bools to false by default
   Stream() :
     isSeekable(false), hasPosition(false), hasSize(false),
-    hasPtr(false) {}
+    isWritable(false), hasPtr(false) {}
 
   /// Virtual destructor
   virtual ~Stream() {}
@@ -39,6 +43,14 @@ class Stream
       stream is empty or an error occured.
   */
   virtual size_t read(void* buf, size_t count) = 0;
+
+  /** Write a given number of bytes from the stream. Semantics is
+      similar to read(). Only valid if isWritable is true
+
+      Since most implementations do NOT support writing we default to
+      an assert(0) here.
+  */
+  virtual size_t write(const void *buf, size_t count) { assert(0); return 0; }
 
   /// Seek to an absolute position in this stream. Not all streams are
   /// seekable.

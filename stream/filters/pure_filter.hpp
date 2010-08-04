@@ -23,12 +23,14 @@ class PureFilter : public Stream
     {
       src = _src;
       isSeekable = src->isSeekable;
+      isWritable = src->isWritable;
       hasPosition = src->hasPosition;
       hasSize = src->hasSize;
       hasPtr = src->hasPtr;
     }
 
   size_t read(void *buf, size_t count) { return src->read(buf, count); }
+  size_t write(const void *buf, size_t count) { return src->write(buf,count); }
   void seek(size_t pos) { src->seek(pos); }
   size_t tell() const { return src->tell(); }
   size_t size() const { return src->size(); }

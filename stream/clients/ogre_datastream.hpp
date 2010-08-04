@@ -23,6 +23,10 @@ class Mangle2OgreStream : public Ogre::DataStream
       // Get the size, if possible
       if(inp->hasSize)
         mSize = inp->size();
+
+      // Allow writing if inp supports it
+      if(inp->isWritable)
+        mAccess |= Ogre::DataStream::WRITE;
     }
 
  public:
@@ -37,7 +41,10 @@ class Mangle2OgreStream : public Ogre::DataStream
   // Only implement the DataStream functions we have to implement
 
   size_t read(void *buf, size_t count)
-    { return inp->read(buf,count); }
+  { return inp->read(buf,count); }
+
+  size_t write(const void *buf, size_t count)
+  { assert(inp->isWritable); return inp->write(buf,count); }
 
   void skip(long count)
     {
