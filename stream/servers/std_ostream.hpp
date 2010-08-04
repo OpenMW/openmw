@@ -37,11 +37,14 @@ class StdOStream : public Stream
     inf->write((const char*)buf, len);
     if(inf->fail())
       fail("error writing to stream");
-
-    // Unfortunately, stupid std::ostream doesn't have a pcount() to
-    // match gcount() for input. In general the std::iostream system
-    // is an idiotically designed stream library.
+    // Just return len, but that is ok. The only cases where we would
+    // return less than len is when an error occured.
     return len;
+  }
+
+  void flush()
+  {
+    inf->flush();
   }
 
   void seek(size_t pos)

@@ -31,6 +31,7 @@ class PureFilter : public Stream
 
   size_t read(void *buf, size_t count) { return src->read(buf, count); }
   size_t write(const void *buf, size_t count) { return src->write(buf,count); }
+  void flush() { src->flush(); }
   void seek(size_t pos) { src->seek(pos); }
   size_t tell() const { return src->tell(); }
   size_t size() const { return src->size(); }

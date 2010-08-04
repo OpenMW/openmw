@@ -72,6 +72,7 @@ class SliceStream : public Stream
   bool eof() const { return pos == length; }
   size_t tell() const { return pos; }
   size_t size() const { return length; }
+  void flush() { src->flush(); }
 
   const void *getPtr() { return getPtr(0, length); }
   const void *getPtr(size_t size)

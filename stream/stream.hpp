@@ -52,6 +52,9 @@ class Stream
   */
   virtual size_t write(const void *buf, size_t count) { assert(0); return 0; }
 
+  /// Flush an output stream. Does nothing for non-writing streams.
+  virtual void flush() {}
+
   /// Seek to an absolute position in this stream. Not all streams are
   /// seekable.
   virtual void seek(size_t pos) = 0;
