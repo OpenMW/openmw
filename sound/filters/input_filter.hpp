@@ -10,13 +10,12 @@ namespace Sound {
 
 /**
    @brief This filter class adds file loading capabilities to a
-   Sound::SoundFactory class, by associating an SampleSourceLoader
-   with it.
+   Sound::SoundFactory class, by associating a SampleSourceLoader with
+   it.
 
    The class takes an existing SoundFactory able to load streams, and
-   associates an SampleSourceLoader with it. The combined class is
-   able to load files directly.
-*/
+   associates a SampleSourceLoader with it. The combined class is able
+   to load files directly.  */
 class InputFilter : public SoundFactory
 {
  protected:
@@ -45,7 +44,7 @@ class InputFilter : public SoundFactory
     // Both these should be true, or the use of this class is pretty
     // pointless
     canLoadSource = snd->canLoadSource;
-    canLoadFile = canLoadSource;
+    canLoadFile = inp->canLoadFile;
     assert(canLoadSource && canLoadFile);
   }
 
