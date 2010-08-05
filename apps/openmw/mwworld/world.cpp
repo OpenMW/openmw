@@ -600,4 +600,15 @@ namespace MWWorld
     {
         mCellChanged = false;
     }
+
+    std::string World::getFacedHandle()
+    {
+        std::pair<std::string, float> result = mScene.getFacedHandle();
+
+        if (result.first.empty() ||
+            result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
+            return "";
+
+        return result.first;
+    }
 }

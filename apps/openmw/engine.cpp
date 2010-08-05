@@ -74,22 +74,20 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
     if (focusFrameCounter++ == focusUpdateFrame)
     {
-        std::pair<std::string, float> handle = mEnvironment.mWorld->getMWScene()->getFacedHandle();
+        std::string handle = mEnvironment.mWorld->getFacedHandle();
 
         std::string name;
 
-        if (!handle.first.empty())
+        if (!handle.empty())
         {
-            // TODO compare handle.second with max activation range (from a GMST)
-
-            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle.first);
+            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
             if (!ptr.isEmpty())
                 name = MWWorld::Class::get (ptr).getName (ptr);
         }
 
         if (!name.empty())
-            std::cout << "Object: " << name << ", distance: " << handle.second << std::endl;
+            std::cout << "Object: " << name << std::endl;
 
         focusFrameCounter = 0;
     }
