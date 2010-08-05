@@ -269,5 +269,19 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
-    std::cout << "activate" << std::endl;
+    std::string handle = mEnvironment.mWorld->getFacedHandle();
+
+    if (handle.empty())
+        return;
+
+    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+    if (ptr.isEmpty())
+        return;
+
+    boost::shared_ptr<MWWorld::Action> action =
+        MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
+        mEnvironment);
+
+    action->execute (mEnvironment);
 }
