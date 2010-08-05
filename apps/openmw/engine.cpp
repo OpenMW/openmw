@@ -253,7 +253,7 @@ void OMW::Engine::go()
 
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
-                                  *mEnvironment.mWindowManager, mDebug);
+                                  *mEnvironment.mWindowManager, mDebug, *this);
 
     focusFrameCounter = 0;
 
@@ -265,4 +265,9 @@ void OMW::Engine::go()
     mOgre.start();
 
     std::cout << "Quitting peacefully.\n";
+}
+
+void OMW::Engine::activate()
+{
+    std::cout << "activate" << std::endl;
 }

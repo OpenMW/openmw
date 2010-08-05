@@ -19,6 +19,11 @@ namespace MWGui
   class WindowManager;
 }
 
+namespace OMW
+{
+    class Engine;
+}
+
 namespace MWInput
 {
   // Forward declaration of the real implementation.
@@ -37,7 +42,8 @@ namespace MWInput
     MWInputManager(OEngine::Render::OgreRenderer &_ogre,
                    MWRender::PlayerPos &_player,
                    MWGui::WindowManager &_windows,
-                   bool debug);
+                   bool debug,
+                   OMW::Engine& engine);
     ~MWInputManager();
   };
 }

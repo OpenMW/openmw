@@ -111,12 +111,15 @@ namespace OMW
 
             /// Enable verbose script output
             void enableVerboseScripts();
-            
+
             /// Start as a new game.
             void setNewGame();
 
             /// Initialise and enter main loop.
             void go();
+
+            /// Activate the focussed object.
+            void activate();
     };
 }
 
