@@ -38,13 +38,18 @@ void OMW::Engine::executeLocalScripts()
         mEnvironment.mWorld->getLocalScripts().begin());
         iter!=mEnvironment.mWorld->getLocalScripts().end(); ++iter)
     {
-        MWScript::InterpreterContext interpreterContext (mEnvironment,
-            &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
-        mScriptManager->run (iter->first, interpreterContext);
+        if (!mIgnoreLocalPtr.isEmpty() && mIgnoreLocalPtr!=iter->second)
+        {
+            MWScript::InterpreterContext interpreterContext (mEnvironment,
+                &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
+            mScriptManager->run (iter->first, interpreterContext);
 
-        if (mEnvironment.mWorld->hasCellChanged())
-            break;
+            if (mEnvironment.mWorld->hasCellChanged())
+                break;
+        }
     }
+
+    mIgnoreLocalPtr = MWWorld::Ptr();
 }
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
@@ -291,7 +296,10 @@ void OMW::Engine::activate()
     std::string script = MWWorld::Class::get (ptr).getScript (ptr);
 
     if (!script.empty())
+    {
+        mIgnoreLocalPtr = ptr;
         mScriptManager->run (script, interpreterContext);
+    }
 
     if (!interpreterContext.hasActivationBeenHandled())
     {

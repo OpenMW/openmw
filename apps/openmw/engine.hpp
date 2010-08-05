@@ -11,6 +11,7 @@
 #include <components/compiler/extensions.hpp>
 
 #include "mwworld/environment.hpp"
+#include "mwworld/ptr.hpp"
 
 namespace Compiler
 {
@@ -67,6 +68,8 @@ namespace OMW
 
             int focusFrameCounter;
             static const int focusUpdateFrame = 10;
+
+            MWWorld::Ptr mIgnoreLocalPtr;
 
             // not implemented
             Engine (const Engine&);
