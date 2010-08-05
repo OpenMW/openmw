@@ -2,8 +2,9 @@
 #define MANGLE_SOUND_OUTPUT_H
 
 #include <string>
-#include "source.hpp"
+#include <assert.h>
 
+#include "source.hpp"
 #include "../stream/stream.hpp"
 
 namespace Mangle {
@@ -149,7 +150,7 @@ class SoundFactory
      buffers and similar tasks. Implementations that do not need this
      should set needsUpdate to false.
   */
-  virtual void update() = 0;
+  virtual void update() { assert(0); }
 
   /// Set listener position (coordinates, front and up vectors)
   /**
