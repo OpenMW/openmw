@@ -44,6 +44,14 @@ namespace MWClass
         return *ptr.getRefData().getCreatureStats();
     }
 
+    std::string Npc::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+            ptr.get<ESM::NPC>();
+
+        return ref->base->script;
+    }
+
     void Npc::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Npc);

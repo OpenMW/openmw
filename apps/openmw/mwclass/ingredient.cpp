@@ -17,6 +17,14 @@ namespace MWClass
         return ref->base->name;
     }
 
+    std::string Ingredient::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        return ref->base->script;
+    }
+
     void Ingredient::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Ingredient);

@@ -44,6 +44,14 @@ namespace MWClass
         return *ptr.getRefData().getCreatureStats();
     }
 
+    std::string Creature::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->base->script;
+    }
+
     void Creature::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Creature);

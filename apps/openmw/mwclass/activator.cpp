@@ -17,6 +17,14 @@ namespace MWClass
         return ref->base->name;
     }
 
+    std::string Activator::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+            ptr.get<ESM::Activator>();
+
+        return ref->base->script;
+    }
+
     void Activator::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Activator);

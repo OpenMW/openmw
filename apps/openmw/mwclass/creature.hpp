@@ -16,6 +16,9 @@ namespace MWClass
             virtual MWMechanics::CreatureStats& getCreatureStats (const MWWorld::Ptr& ptr) const;
             ///< Return creature stats
 
+            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            ///< Return name of the script attached to ptr
+
             static void registerSelf();
     };
 }

@@ -279,9 +279,22 @@ void OMW::Engine::activate()
     if (ptr.isEmpty())
         return;
 
+    MWScript::InterpreterContext interpreterContext (mEnvironment,
+        &ptr.getRefData().getLocals(), ptr);
+
     boost::shared_ptr<MWWorld::Action> action =
         MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
         mEnvironment);
 
-    action->execute (mEnvironment);
+    interpreterContext.activate (ptr, action);
+
+    std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+    if (!script.empty())
+        mScriptManager->run (script, interpreterContext);
+
+    if (!interpreterContext.hasActivationBeenHandled())
+    {
+        interpreterContext.executeActivation();
+    }
 }

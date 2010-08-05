@@ -58,6 +58,10 @@ namespace MWWorld
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
 
+            virtual std::string getScript (const Ptr& ptr) const;
+            ///< Return name of the script attached to ptr (default implementation: return an empty
+            /// string).
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 
