@@ -89,6 +89,7 @@ set(GAMEWORLD
     mwworld/globals.cpp
     mwworld/class.cpp
     mwworld/actionteleport.cpp
+    mwworld/actiontalk.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -101,6 +102,7 @@ set(GAMEWORLD_HEADER
     mwworld/nullaction.hpp
     mwworld/actionteleport.hpp
     mwworld/containerstore.hpp
+    mwworld/actiontalk.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
