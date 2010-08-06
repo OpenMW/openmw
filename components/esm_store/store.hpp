@@ -69,7 +69,6 @@ namespace ESMS
     // Lists that need special rules
     CellList                    cells;
     RecIDListT<GameSetting>     gameSettings;
-    //RecListT<DialInfo>    dialInfos;
     //RecListT<Land>        lands;
     //RecListT<LandTexture> landTexts;
     //RecListT<MagicEffect> magicEffects;
@@ -93,7 +92,6 @@ namespace ESMS
     ESMStore()
     {
       recLists[REC_ACTI] = &activators;
-      recLists[REC_ACTI] = &activators;
       recLists[REC_ALCH] = &potions;
       recLists[REC_APPA] = &appas;
       recLists[REC_ARMO] = &armors;
@@ -113,7 +111,6 @@ namespace ESMS
       recLists[REC_FACT] = &factions;
       recLists[REC_GLOB] = &globals;
       recLists[REC_GMST] = &gameSettings;
-      //recLists[REC_INFO] = &dialInfos;
       recLists[REC_INGR] = &ingreds;
       //recLists[REC_LAND] = &lands;
       recLists[REC_LEVC] = &creatureLists;
