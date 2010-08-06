@@ -21,17 +21,22 @@ namespace MWMechanics
     class MechanicsManager;
 }
 
+namespace MWDialog
+{
+    class DialogManager;
+}
+
 namespace MWWorld
 {
     class World;
 
     ///< Collection of script-accessable sub-systems
     class Environment
-    {   
+    {
     public:
         Environment()
         : mWorld (0), mSoundManager (0), mGlobalScripts (0), mWindowManager (0),
-          mMechanicsManager (0), mFrameDuration (0)
+          mMechanicsManager (0), mDialogManager (0), mFrameDuration (0)
         {}
 
         World *mWorld;
@@ -39,9 +44,9 @@ namespace MWWorld
         MWScript::GlobalScripts *mGlobalScripts;
         MWGui::WindowManager *mWindowManager;
         MWMechanics::MechanicsManager *mMechanicsManager;
+        MWDialog::DialogManager *mDialogManager;
         float mFrameDuration;
     };
 }
 
 #endif
-

@@ -41,6 +41,14 @@ set(GAMEGUI
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
+set(GAMEDIALOG_HEADER
+    mwdialog/dialogmanager.hpp
+)
+set(GAMEDIALOG
+    mwdialog/dialogmanager.cpp
+)
+source_group(apps\\openmw\\mwdialog FILES ${GAMEDIALOG_HEADER} ${GAMEDIALOG})
+
 set(GAMESCRIPT
     mwscript/scriptmanager.cpp
     mwscript/compilercontext.cpp
@@ -154,11 +162,11 @@ set(GAMEMECHANICS_HEADER
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
 set(OPENMW_CPP ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD}
-    ${GAMECLASS} ${GAMEMECHANICS}
+    ${GAMECLASS} ${GAMEMECHANICS} ${GAMEDIALOG}
     )
 set(OPENMW_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
     ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER}  ${GAMECLASS_HEADER}
-    ${GAMEMECHANICS_HEADER}
+    ${GAMEMECHANICS_HEADER} ${GAMEDIALOG_HEADER}
     )
 
 # Main executable

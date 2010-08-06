@@ -28,6 +28,8 @@
 
 #include "mwclass/classes.hpp"
 
+#include "mwdialog/dialogmanager.hpp"
+
 #include "mwmechanics/mechanicsmanager.hpp"
 
 #include <OgreRoot.h>
@@ -117,6 +119,7 @@ OMW::Engine::~Engine()
     delete mEnvironment.mSoundManager;
     delete mEnvironment.mGlobalScripts;
     delete mEnvironment.mMechanicsManager;
+    delete mEnvironment.mDialogManager;
     delete mScriptManager;
     delete mScriptContext;
 }
@@ -249,6 +252,9 @@ void OMW::Engine::go()
     // Create game mechanics system
     mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (
         mEnvironment.mWorld->getStore(), *mEnvironment.mWindowManager);
+
+    // Create dialog system
+    mEnvironment.mDialogManager = new MWDialog::DialogManager (mEnvironment);
 
     // load cell
     ESM::Position pos;
