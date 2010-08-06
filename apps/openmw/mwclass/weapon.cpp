@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "containerutil.hpp"
+
 namespace MWClass
 {
     std::string Weapon::getName (const MWWorld::Ptr& ptr) const
@@ -28,6 +30,12 @@ namespace MWClass
             ptr.get<ESM::Weapon>();
 
         return ref->base->data.health;
+    }
+
+    void Weapon::insertIntoContainer (const MWWorld::Ptr& ptr,
+        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+    {
+        insertIntoContainerStore (ptr, containerStore.weapons);
     }
 
     std::string Weapon::getScript (const MWWorld::Ptr& ptr) const

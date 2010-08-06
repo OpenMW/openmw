@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "containerutil.hpp"
+
 namespace MWClass
 {
     std::string Lockpick::getName (const MWWorld::Ptr& ptr) const
@@ -15,6 +17,12 @@ namespace MWClass
             ptr.get<ESM::Tool>();
 
         return ref->base->name;
+    }
+
+    void Lockpick::insertIntoContainer (const MWWorld::Ptr& ptr,
+        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+    {
+        insertIntoContainerStore (ptr, containerStore.lockpicks);
     }
 
     std::string Lockpick::getScript (const MWWorld::Ptr& ptr) const

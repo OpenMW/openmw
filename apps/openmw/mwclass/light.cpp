@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "containerutil.hpp"
+
 namespace MWClass
 {
     std::string Light::getName (const MWWorld::Ptr& ptr) const
@@ -18,6 +20,12 @@ namespace MWClass
             return "";
 
         return ref->base->name;
+    }
+
+    void Light::insertIntoContainer (const MWWorld::Ptr& ptr,
+        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+    {
+        insertIntoContainerStore (ptr, containerStore.lights);
     }
 
     std::string Light::getScript (const MWWorld::Ptr& ptr) const

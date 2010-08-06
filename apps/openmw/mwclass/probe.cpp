@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "containerutil.hpp"
+
 namespace MWClass
 {
     std::string Probe::getName (const MWWorld::Ptr& ptr) const
@@ -15,6 +17,12 @@ namespace MWClass
             ptr.get<ESM::Probe>();
 
         return ref->base->name;
+    }
+
+    void Probe::insertIntoContainer (const MWWorld::Ptr& ptr,
+        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+    {
+        insertIntoContainerStore (ptr, containerStore.probes);
     }
 
     std::string Probe::getScript (const MWWorld::Ptr& ptr) const

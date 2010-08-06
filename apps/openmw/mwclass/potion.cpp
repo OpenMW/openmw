@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "containerutil.hpp"
+
 namespace MWClass
 {
     std::string Potion::getName (const MWWorld::Ptr& ptr) const
@@ -15,6 +17,12 @@ namespace MWClass
             ptr.get<ESM::Potion>();
 
         return ref->base->name;
+    }
+
+    void Potion::insertIntoContainer (const MWWorld::Ptr& ptr,
+        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+    {
+        insertIntoContainerStore (ptr, containerStore.potions);
     }
 
     std::string Potion::getScript (const MWWorld::Ptr& ptr) const

@@ -141,6 +141,7 @@ set(GAMECLASS_HEADER
     mwclass/probe.hpp
     mwclass/repair.hpp
     mwclass/static.hpp
+    mwclass/containerutil.hpp
     )
 source_group(apps\\openmw\\mwclass FILES ${GAMECLASS} ${GAMECLASS_HEADER})
 

@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "containerutil.hpp"
+
 namespace MWClass
 {
     std::string Ingredient::getName (const MWWorld::Ptr& ptr) const
@@ -15,6 +17,12 @@ namespace MWClass
             ptr.get<ESM::Ingredient>();
 
         return ref->base->name;
+    }
+
+    void Ingredient::insertIntoContainer (const MWWorld::Ptr& ptr,
+        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+    {
+        insertIntoContainerStore (ptr, containerStore.ingreds);
     }
 
     std::string Ingredient::getScript (const MWWorld::Ptr& ptr) const

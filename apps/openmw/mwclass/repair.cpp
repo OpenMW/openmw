@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "containerutil.hpp"
+
 namespace MWClass
 {
     std::string Repair::getName (const MWWorld::Ptr& ptr) const
@@ -15,6 +17,12 @@ namespace MWClass
             ptr.get<ESM::Repair>();
 
         return ref->base->name;
+    }
+
+    void Repair::insertIntoContainer (const MWWorld::Ptr& ptr,
+        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+    {
+        insertIntoContainerStore (ptr, containerStore.repairs);
     }
 
     std::string Repair::getScript (const MWWorld::Ptr& ptr) const
