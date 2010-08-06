@@ -39,6 +39,8 @@ void ESMStore::load(ESMReader &esm)
                 {
                     ESM::DialInfo info;
                     info.load (esm);
+
+                    dialogue->mInfo.push_back (info);
                 }
                 else
                 {
