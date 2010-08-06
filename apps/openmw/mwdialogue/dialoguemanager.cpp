@@ -1,5 +1,5 @@
 
-#include "dialogmanager.hpp"
+#include "dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 

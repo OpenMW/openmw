@@ -28,7 +28,7 @@
 
 #include "mwclass/classes.hpp"
 
-#include "mwdialog/dialogmanager.hpp"
+#include "mwdialogue/dialoguemanager.hpp"
 
 #include "mwmechanics/mechanicsmanager.hpp"
 
