@@ -544,7 +544,7 @@ namespace MWWorld
         insertInteriorScripts (*cell);
 
         // adjust player
-        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2]);
+        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2], true);
         mPlayerPos->setCell (cell);
         // TODO orientation
 
@@ -599,5 +599,16 @@ namespace MWWorld
     void World::markCellAsUnchanged()
     {
         mCellChanged = false;
+    }
+
+    std::string World::getFacedHandle()
+    {
+        std::pair<std::string, float> result = mScene.getFacedHandle();
+
+        if (result.first.empty() ||
+            result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
+            return "";
+
+        return result.first;
     }
 }

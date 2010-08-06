@@ -17,6 +17,14 @@ namespace MWClass
         return ref->base->name;
     }
 
+    std::string Probe::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+            ptr.get<ESM::Probe>();
+
+        return ref->base->script;
+    }
+
     void Probe::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Probe);

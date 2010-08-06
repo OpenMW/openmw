@@ -30,6 +30,14 @@ namespace MWClass
         return ref->base->data.health;
     }
 
+    std::string Armor::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        return ref->base->script;
+    }
+
     void Armor::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Armor);

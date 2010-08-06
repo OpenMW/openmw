@@ -38,13 +38,18 @@ void OMW::Engine::executeLocalScripts()
         mEnvironment.mWorld->getLocalScripts().begin());
         iter!=mEnvironment.mWorld->getLocalScripts().end(); ++iter)
     {
-        MWScript::InterpreterContext interpreterContext (mEnvironment,
-            &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
-        mScriptManager->run (iter->first, interpreterContext);
+        if (!mIgnoreLocalPtr.isEmpty() && mIgnoreLocalPtr!=iter->second)
+        {
+            MWScript::InterpreterContext interpreterContext (mEnvironment,
+                &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
+            mScriptManager->run (iter->first, interpreterContext);
 
-        if (mEnvironment.mWorld->hasCellChanged())
-            break;
+            if (mEnvironment.mWorld->hasCellChanged())
+                break;
+        }
     }
+
+    mIgnoreLocalPtr = MWWorld::Ptr();
 }
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
@@ -74,22 +79,20 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
     if (focusFrameCounter++ == focusUpdateFrame)
     {
-        std::pair<std::string, float> handle = mEnvironment.mWorld->getMWScene()->getFacedHandle();
+        std::string handle = mEnvironment.mWorld->getFacedHandle();
 
         std::string name;
 
-        if (!handle.first.empty())
+        if (!handle.empty())
         {
-            // TODO compare handle.second with max activation range (from a GMST)
-
-            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle.first);
+            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
             if (!ptr.isEmpty())
                 name = MWWorld::Class::get (ptr).getName (ptr);
         }
 
         if (!name.empty())
-            std::cout << "Object: " << name << ", distance: " << handle.second << std::endl;
+            std::cout << "Object: " << name << std::endl;
 
         focusFrameCounter = 0;
     }
@@ -255,7 +258,7 @@ void OMW::Engine::go()
 
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
-                                  *mEnvironment.mWindowManager, mDebug);
+                                  *mEnvironment.mWindowManager, mDebug, *this);
 
     focusFrameCounter = 0;
 
@@ -267,4 +270,39 @@ void OMW::Engine::go()
     mOgre.start();
 
     std::cout << "Quitting peacefully.\n";
+}
+
+void OMW::Engine::activate()
+{
+    std::string handle = mEnvironment.mWorld->getFacedHandle();
+
+    if (handle.empty())
+        return;
+
+    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+    if (ptr.isEmpty())
+        return;
+
+    MWScript::InterpreterContext interpreterContext (mEnvironment,
+        &ptr.getRefData().getLocals(), ptr);
+
+    boost::shared_ptr<MWWorld::Action> action =
+        MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
+        mEnvironment);
+
+    interpreterContext.activate (ptr, action);
+
+    std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+    if (!script.empty())
+    {
+        mIgnoreLocalPtr = ptr;
+        mScriptManager->run (script, interpreterContext);
+    }
+
+    if (!interpreterContext.hasActivationBeenHandled())
+    {
+        interpreterContext.executeActivation();
+    }
 }

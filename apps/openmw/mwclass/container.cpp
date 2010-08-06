@@ -33,6 +33,14 @@ namespace MWClass
         return *ptr.getRefData().getContainerStore();
     }
 
+    std::string Container::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+            ptr.get<ESM::Container>();
+
+        return ref->base->script;
+    }
+
     void Container::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Container);

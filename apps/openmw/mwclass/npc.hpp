@@ -20,6 +20,9 @@ namespace MWClass
                 const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
+            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            ///< Return name of the script attached to ptr
+
             static void registerSelf();
     };
 }

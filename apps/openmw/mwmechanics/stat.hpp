@@ -49,7 +49,7 @@ namespace MWMechanics
                     value = min + (mModified - mBase);
                     diff = value - mModified;
                 }
-                else if (mBase>max-diff)
+                else if (mBase+diff>max)
                 {
                     value = max + (mModified - mBase);
                     diff = value - mModified;

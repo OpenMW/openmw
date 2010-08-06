@@ -20,6 +20,14 @@ namespace MWClass
         return ref->base->name;
     }
 
+    std::string Light::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+        return ref->base->script;
+    }
+
     void Light::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Light);

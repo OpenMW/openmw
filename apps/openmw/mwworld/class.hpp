@@ -64,6 +64,10 @@ namespace MWWorld
             ///< Return container store or throw an exception, if class does not have a
             /// container store (default implementation: throw an exceoption)
 
+            virtual std::string getScript (const Ptr& ptr) const;
+            ///< Return name of the script attached to ptr (default implementation: return an empty
+            /// string).
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 

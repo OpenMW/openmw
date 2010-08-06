@@ -44,6 +44,11 @@ namespace MWWorld
     ContainerStore<RefData>& Class::getContainerStore (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have a container store");
+	}
+
+    std::string Class::getScript (const Ptr& ptr) const
+    {
+        return "";
     }
 
     const Class& Class::get (const std::string& key)

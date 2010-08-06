@@ -44,7 +44,8 @@ namespace MWClass
         return *ptr.getRefData().getCreatureStats();
     }
 
-    MWWorld::ContainerStore<MWWorld::RefData>& Npc::getContainerStore (const MWWorld::Ptr& ptr) const
+    MWWorld::ContainerStore<MWWorld::RefData>& Npc::getContainerStore (const MWWorld::Ptr& ptr)
+        const
     {
         if (!ptr.getRefData().getContainerStore().get())
         {
@@ -57,6 +58,14 @@ namespace MWClass
         }
 
         return *ptr.getRefData().getContainerStore();
+    }
+
+    std::string Npc::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+            ptr.get<ESM::NPC>();
+
+        return ref->base->script;
     }
 
     void Npc::registerSelf()
