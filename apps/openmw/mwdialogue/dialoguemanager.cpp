@@ -5,11 +5,11 @@
 
 #include <iostream>
 
-namespace MWDialog
+namespace MWDialogue
 {
-    DialogManager::DialogManager (MWWorld::Environment& environment) : mEnvironment (environment) {}
+    DialogueManager::DialogueManager (MWWorld::Environment& environment) : mEnvironment (environment) {}
 
-    void DialogManager::startDialog (const MWWorld::Ptr& actor)
+    void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
         std::cout << "talking with " << MWWorld::Class::get (actor).getName (actor) << std::endl;
     }

@@ -1,5 +1,5 @@
-#ifndef GAME_MMDIALOG_DIALOGMANAGER_H
-#define GAME_MWDIALOG_DIALOGMANAGER_H
+#ifndef GAME_MMDIALOG_DIALOGUEMANAGER_H
+#define GAME_MWDIALOG_DIALOGUEMANAGER_H
 
 #include "../mwworld/ptr.hpp"
 
@@ -8,17 +8,17 @@ namespace MWWorld
     class Environment;
 }
 
-namespace MWDialog
+namespace MWDialogue
 {
-    class DialogManager
+    class DialogueManager
     {
             MWWorld::Environment& mEnvironment;
 
         public:
 
-            DialogManager (MWWorld::Environment& environment);
+            DialogueManager (MWWorld::Environment& environment);
 
-            void startDialog (const MWWorld::Ptr& actor);
+            void startDialogue (const MWWorld::Ptr& actor);
 
     };
 }

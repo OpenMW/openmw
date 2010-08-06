@@ -21,9 +21,9 @@ namespace MWMechanics
     class MechanicsManager;
 }
 
-namespace MWDialog
+namespace MWDialogue
 {
-    class DialogManager;
+    class DialogueManager;
 }
 
 namespace MWWorld
@@ -36,7 +36,7 @@ namespace MWWorld
     public:
         Environment()
         : mWorld (0), mSoundManager (0), mGlobalScripts (0), mWindowManager (0),
-          mMechanicsManager (0), mDialogManager (0), mFrameDuration (0)
+          mMechanicsManager (0), mDialogueManager (0), mFrameDuration (0)
         {}
 
         World *mWorld;
@@ -44,7 +44,7 @@ namespace MWWorld
         MWScript::GlobalScripts *mGlobalScripts;
         MWGui::WindowManager *mWindowManager;
         MWMechanics::MechanicsManager *mMechanicsManager;
-        MWDialog::DialogManager *mDialogManager;
+        MWDialogue::DialogueManager *mDialogueManager;
         float mFrameDuration;
     };
 }

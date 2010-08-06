@@ -119,7 +119,7 @@ OMW::Engine::~Engine()
     delete mEnvironment.mSoundManager;
     delete mEnvironment.mGlobalScripts;
     delete mEnvironment.mMechanicsManager;
-    delete mEnvironment.mDialogManager;
+    delete mEnvironment.mDialogueManager;
     delete mScriptManager;
     delete mScriptContext;
 }
@@ -254,7 +254,7 @@ void OMW::Engine::go()
         mEnvironment.mWorld->getStore(), *mEnvironment.mWindowManager);
 
     // Create dialog system
-    mEnvironment.mDialogManager = new MWDialog::DialogManager (mEnvironment);
+    mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment);
 
     // load cell
     ESM::Position pos;
