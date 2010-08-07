@@ -611,4 +611,25 @@ namespace MWWorld
 
         return result.first;
     }
+
+    void World::deleteObject (Ptr ptr)
+    {
+        if (ptr.getRefData().getCount()>0)
+        {
+            ptr.getRefData().setCount (0);
+
+            if (MWRender::CellRender *render = searchRender (ptr.getCell()))
+            {
+                render->deleteObject (ptr.getRefData().getHandle());
+                ptr.getRefData().setHandle ("");
+
+                if (mActiveCells.find (ptr.getCell())!=mActiveCells.end() &&
+                    (ptr.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
+                    ptr.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
+                {
+                    mEnvironment.mMechanicsManager->removeActor (ptr);
+                }
+            }
+        }
+    }
 }

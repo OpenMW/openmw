@@ -13,6 +13,10 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
+            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+                const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
+            ///< Generate action for activation
+
             virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const;
             ///< \return Item health data available?
 

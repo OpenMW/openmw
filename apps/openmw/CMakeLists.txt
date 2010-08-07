@@ -83,6 +83,7 @@ set(GAMEWORLD
     mwworld/globals.cpp
     mwworld/class.cpp
     mwworld/actionteleport.cpp
+    mwworld/actiontake.cpp
     mwworld/containerutil.cpp
     )
 set(GAMEWORLD_HEADER
@@ -95,6 +96,7 @@ set(GAMEWORLD_HEADER
     mwworld/action.hpp
     mwworld/nullaction.hpp
     mwworld/actionteleport.hpp
+    mwworld/actiontake.hpp
     mwworld/containerstore.hpp
     mwworld/manualref.hpp
     mwworld/containerutil.hpp
