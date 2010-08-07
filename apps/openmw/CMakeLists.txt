@@ -51,6 +51,7 @@ set(GAMESCRIPT
     mwscript/soundextensions.cpp
     mwscript/skyextensions.cpp
     mwscript/statsextensions.cpp
+    mwscript/containerextensions.cpp
     mwscript/extensions.cpp
     mwscript/globalscripts.cpp
     )
@@ -65,6 +66,7 @@ set(GAMESCRIPT_HEADER
     mwscript/soundextensions.hpp
     mwscript/skyextensions.hpp
     mwscript/statsextensions.hpp
+    mwscript/containerextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
     )
@@ -93,6 +95,7 @@ set(GAMEWORLD_HEADER
     mwworld/nullaction.hpp
     mwworld/actionteleport.hpp
     mwworld/containerstore.hpp
+    mwworld/manualref.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 

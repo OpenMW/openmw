@@ -77,4 +77,6 @@ op 0x200006c-0x200006e: ModDynamic (health, magicka, fatigue), explicit referenc
 op 0x200006f-0x2000071: GetDynamic (health, magicka, fatigue)
 op 0x2000072-0x2000074: GetDynamic (health, magicka, fatigue), explicit reference
 op 0x2000075: Activate
-opcodes 0x2000076-0x3ffffff unused
+op 0x2000076: AddItem
+op 0x2000077: AddItem, explicit reference
+opcodes 0x2000078-0x3ffffff unused
