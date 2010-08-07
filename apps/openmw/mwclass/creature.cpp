@@ -49,6 +49,22 @@ namespace MWClass
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
         return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
+	}
+
+    MWWorld::ContainerStore<MWWorld::RefData>& Creature::getContainerStore (const MWWorld::Ptr& ptr)
+        const
+    {
+        if (!ptr.getRefData().getContainerStore().get())
+        {
+            boost::shared_ptr<MWWorld::ContainerStore<MWWorld::RefData> > store (
+                new MWWorld::ContainerStore<MWWorld::RefData>);
+
+            // TODO add initial content
+
+            ptr.getRefData().getContainerStore() = store;
+        }
+
+        return *ptr.getRefData().getContainerStore();
     }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const

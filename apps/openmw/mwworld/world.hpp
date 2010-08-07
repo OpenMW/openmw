@@ -134,6 +134,8 @@ namespace MWWorld
 
             std::string getFacedHandle();
             ///< Return handle of the object the player is looking at
+
+            void deleteObject (Ptr ptr);
     };
 }
 

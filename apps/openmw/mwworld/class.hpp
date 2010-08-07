@@ -7,6 +7,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include "action.hpp"
+#include "containerstore.hpp"
+#include "refdata.hpp"
 
 namespace MWMechanics
 {
@@ -57,6 +59,15 @@ namespace MWWorld
                 const;
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
+
+            virtual ContainerStore<RefData>& getContainerStore (const Ptr& ptr) const;
+            ///< Return container store or throw an exception, if class does not have a
+            /// container store (default implementation: throw an exceoption)
+
+            virtual void insertIntoContainer (const Ptr& ptr, ContainerStore<RefData>& containerStore)
+                const;
+            ///< Insert into a container or throw an exception, if class does not support inserting into
+            /// a container.
 
             virtual std::string getScript (const Ptr& ptr) const;
             ///< Return name of the script attached to ptr (default implementation: return an empty

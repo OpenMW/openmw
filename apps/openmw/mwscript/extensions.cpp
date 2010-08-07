@@ -10,6 +10,7 @@
 #include "guiextensions.hpp"
 #include "skyextensions.hpp"
 #include "statsextensions.hpp"
+#include "containerextensions.hpp"
 
 namespace MWScript
 {
@@ -21,8 +22,9 @@ namespace MWScript
         Sound::registerExtensions (extensions);
         Sky::registerExtensions (extensions);
         Stats::registerExtensions (extensions);
+        Container::registerExtensions (extensions);
     }
-    
+
     void installOpcodes (Interpreter::Interpreter& interpreter)
     {
         Interpreter::installOpcodes (interpreter);
@@ -32,6 +34,6 @@ namespace MWScript
         Sound::installOpcodes (interpreter);
         Sky::installOpcodes (interpreter);
         Stats::installOpcodes (interpreter);
-    }    
+        Container::installOpcodes (interpreter);
+    }
 }
-

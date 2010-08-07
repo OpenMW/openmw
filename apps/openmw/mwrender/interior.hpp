@@ -99,11 +99,13 @@ namespace MWRender
 
     /// Make the reference with the given handle visible.
     virtual void enable (const std::string& handle);
-    
+
     /// Make the reference with the given handle invisible.
-    virtual void disable (const std::string& handle); 
+    virtual void disable (const std::string& handle);
+
+    /// Remove the reference with the given handle permanently from the scene.
+    virtual void deleteObject (const std::string& handle);
   };
 }
 
 #endif
-

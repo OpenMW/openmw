@@ -25,7 +25,7 @@ namespace
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {
-            if (!iter->base->script.empty())
+            if (!iter->base->script.empty() && iter->mData.getCount())
             {
                 if (const ESM::Script *script = store.scripts.find (iter->base->script))
                 {
@@ -610,5 +610,26 @@ namespace MWWorld
             return "";
 
         return result.first;
+    }
+
+    void World::deleteObject (Ptr ptr)
+    {
+        if (ptr.getRefData().getCount()>0)
+        {
+            ptr.getRefData().setCount (0);
+
+            if (MWRender::CellRender *render = searchRender (ptr.getCell()))
+            {
+                render->deleteObject (ptr.getRefData().getHandle());
+                ptr.getRefData().setHandle ("");
+
+                if (mActiveCells.find (ptr.getCell())!=mActiveCells.end() &&
+                    (ptr.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
+                    ptr.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
+                {
+                    mEnvironment.mMechanicsManager->removeActor (ptr);
+                }
+            }
+        }
     }
 }
