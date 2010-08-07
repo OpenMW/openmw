@@ -81,4 +81,6 @@ op 0x2000076: AddItem
 op 0x2000077: AddItem, explicit reference
 op 0x2000078: GetItemCount
 op 0x2000079: GetItemCount, explicit reference
-opcodes 0x200007a-0x3ffffff unused
+op 0x200007a: RemoveItem
+op 0x200007b: RemoveItem, explicit reference
+opcodes 0x200007c-0x3ffffff unused
