@@ -1,6 +1,8 @@
 
 #include "containerextensions.hpp"
 
+#include <stdexcept>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -32,6 +34,9 @@ namespace MWScript
                     Interpreter::Type_Integer count = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (count<0)
+                        throw std::runtime_error ("second argument for AddItem must be non-negative");
+
                     MWWorld::Ptr ptr = context.getReference();
 
                     MWWorld::ManualRef ref (context.getWorld().getStore(), item);
@@ -60,6 +65,9 @@ namespace MWScript
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
                     runtime.pop();
+
+                    if (count<0)
+                        throw std::runtime_error ("second argument for AddItem must be non-negative");
 
                     MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
 
