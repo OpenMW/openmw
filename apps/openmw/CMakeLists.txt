@@ -83,6 +83,7 @@ set(GAMEWORLD
     mwworld/globals.cpp
     mwworld/class.cpp
     mwworld/actionteleport.cpp
+    mwworld/containerutil.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -96,6 +97,7 @@ set(GAMEWORLD_HEADER
     mwworld/actionteleport.hpp
     mwworld/containerstore.hpp
     mwworld/manualref.hpp
+    mwworld/containerutil.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
