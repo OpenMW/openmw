@@ -384,9 +384,9 @@ namespace MWWorld
 
     void World::disable (Ptr reference)
     {
-        if (!reference.getRefData().isEnabled())
+        if (reference.getRefData().isEnabled())
         {
-            reference.getRefData().enable();
+            reference.getRefData().disable();
 
             if (MWRender::CellRender *render = searchRender (reference.getCell()))
             {
