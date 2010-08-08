@@ -36,6 +36,10 @@ namespace MWWorld
 
             virtual ~Class();
 
+            virtual std::string getId (const Ptr& ptr) const;
+            ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
+            /// (default implementation: throw an exception)
+
             virtual std::string getName (const Ptr& ptr) const = 0;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.

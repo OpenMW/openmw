@@ -14,6 +14,11 @@ namespace MWWorld
 
     Class::~Class() {}
 
+    std::string Class::getId (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support ID retrieval");
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");

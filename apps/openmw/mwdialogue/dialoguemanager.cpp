@@ -114,7 +114,11 @@ namespace MWDialogue
 
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const
     {
-        // TODO check actor id
+        // actor id
+        if (!info.actor.empty())
+            if (info.actor!=MWWorld::Class::get (actor).getId (actor))
+                return false;
+
         // TODO check actor race
         // TODO check actor class
         // TODO check actor faction
@@ -134,7 +138,6 @@ namespace MWDialogue
 
         std::cout
             << "unchecked entries:" << std::endl
-            << "    actor id: " << info.actor << std::endl
             << "    actor race: " << info.race << std::endl
             << "    actor class: " << info.clas << std::endl
             << "    actor faction: " << info.npcFaction << std::endl
