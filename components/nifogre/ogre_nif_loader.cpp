@@ -26,11 +26,11 @@
 #include <stdio.h>
 
 #include <libs/mangle/vfs/servers/ogre_vfs.hpp>
-#include "components/nif/nif_file.hpp"
-#include "components/nif/node.hpp"
-#include "components/nif/data.hpp"
-#include "components/nif/property.hpp"
-#include "libs/platform/strings.h"
+#include "../nif/nif_file.hpp"
+#include "../nif/node.hpp"
+#include "../nif/data.hpp"
+#include "../nif/property.hpp"
+#include <libs/platform/strings.h>
 
 // For warning messages
 #include <iostream>
@@ -45,93 +45,111 @@ using namespace Ogre;
 using namespace Nif;
 using namespace Mangle::VFS;
 
-// This is the interface to the Ogre resource system. It allows us to
-// load NIFs from BSAs, in the file system and in any other place we
-// tell Ogre to look (eg. in zip or rar files.) It's also used to
-// check for the existence of texture files, so we can exchange the
-// extension from .tga to .dds if the texture is missing.
-static OgreVFS *vfs;
-
-// Singleton instance used by load()
-static NIFLoader g_sing;
-
-// Makeshift error reporting system
-static string errName;
-static void warn(const string &msg)
+NIFLoader& NIFLoader::getSingleton()
 {
-  cout << "WARNING (NIF:" << errName << "): " << msg << endl;
+    static NIFLoader instance;
+
+    return instance;
+}
+
+NIFLoader* NIFLoader::getSingletonPtr()
+{
+    return &getSingleton();
+}
+
+void NIFLoader::warn(string msg)
+{
+    std::cerr << "NIFLoader: Warn:" << msg << "\n";
+}
+
+void NIFLoader::fail(string msg)
+{
+    std::cerr << "NIFLoader: Fail: "<< msg << std::endl;
+    assert(1);
 }
 
 // Helper class that computes the bounding box and of a mesh
 class BoundsFinder
 {
-  struct MaxMinFinder
-  {
-    float max, min;
-
-    MaxMinFinder()
+    struct MaxMinFinder
     {
-      min = numeric_limits<float>::infinity();
-      max = -min;
-    }
+        float max, min;
 
-    void add(float f)
-    {
-      if(f > max) max = f;
-      if(f < min) min = f;
-    }
+        MaxMinFinder()
+        {
+            min = numeric_limits<float>::infinity();
+            max = -min;
+        }
 
-    // Return Max(max**2, min**2)
-    float getMaxSquared()
-    {
-      float m1 = max*max;
-      float m2 = min*min;
-      if(m1 >= m2) return m1;
-      return m2;
-    }
-  };
+        void add(float f)
+        {
+            if (f > max) max = f;
+            if (f < min) min = f;
+        }
 
-  MaxMinFinder X, Y, Z;
+        // Return Max(max**2, min**2)
+        float getMaxSquared()
+        {
+            float m1 = max*max;
+            float m2 = min*min;
+            if (m1 >= m2) return m1;
+            return m2;
+        }
+    };
+
+    MaxMinFinder X, Y, Z;
 
 public:
-  // Add 'verts' vertices to the calculation. The 'data' pointer is
-  // expected to point to 3*verts floats representing x,y,z for each
-  // point.
-  void add(float *data, int verts)
-  {
-    for(int i=0;i<verts;i++)
-      {
-        X.add(*(data++));
-        Y.add(*(data++));
-        Z.add(*(data++));
-      }
-  }
+    // Add 'verts' vertices to the calculation. The 'data' pointer is
+    // expected to point to 3*verts floats representing x,y,z for each
+    // point.
+    void add(float *data, int verts)
+    {
+        for (int i=0;i<verts;i++)
+        {
+            X.add(*(data++));
+            Y.add(*(data++));
+            Z.add(*(data++));
+        }
+    }
 
-  // True if this structure has valid values
-  bool isValid()
-  {
-    return
-      minX() <= maxX() &&
-      minY() <= maxY() &&
-      minZ() <= maxZ();
-  }
+    // True if this structure has valid values
+    bool isValid()
+    {
+        return
+            minX() <= maxX() &&
+            minY() <= maxY() &&
+            minZ() <= maxZ();
+    }
 
-  // Compute radius
-  float getRadius()
-  {
-    assert(isValid());
+    // Compute radius
+    float getRadius()
+    {
+        assert(isValid());
 
-    // The radius is computed from the origin, not from the geometric
-    // center of the mesh.
-    return sqrt(X.getMaxSquared() + Y.getMaxSquared() + Z.getMaxSquared());
-  }
+        // The radius is computed from the origin, not from the geometric
+        // center of the mesh.
+        return sqrt(X.getMaxSquared() + Y.getMaxSquared() + Z.getMaxSquared());
+    }
 
-  float minX() { return X.min; }
-  float maxX() { return X.max; }
-  float minY() { return Y.min; }
-  float maxY() { return Y.max; }
-  float minZ() { return Z.min; }
-  float maxZ() { return Z.max; }
+    float minX() {
+        return X.min;
+    }
+    float maxX() {
+        return X.max;
+    }
+    float minY() {
+        return Y.min;
+    }
+    float maxY() {
+        return Y.max;
+    }
+    float minZ() {
+        return Z.min;
+    }
+    float maxZ() {
+        return Z.max;
+    }
 };
 
 // Conversion of blend / test mode from NIF -> OGRE.
@@ -177,7 +195,7 @@ static CompareFunction getTestMode(int mode)
 }
 */
 
-static void createMaterial(const String &name,
+void NIFLoader::createMaterial(const String &name,
                            const Vector &ambient,
                            const Vector &diffuse,
                            const Vector &specular,
@@ -186,207 +204,210 @@ static void createMaterial(const String &name,
                            float alphaFlags, float alphaTest,
                            const String &texName)
 {
-  MaterialPtr material = MaterialManager::getSingleton().create(name, "General");
+    MaterialPtr material = MaterialManager::getSingleton().create(name, resourceGroup);
 
-  // This assigns the texture to this material. If the texture name is
-  // a file name, and this file exists (in a resource directory), it
-  // will automatically be loaded when needed. If not (such as for
-  // internal NIF textures that we might support later), we should
-  // already have inserted a manual loader for the texture.
-  if(!texName.empty())
+    // This assigns the texture to this material. If the texture name is
+    // a file name, and this file exists (in a resource directory), it
+    // will automatically be loaded when needed. If not (such as for
+    // internal NIF textures that we might support later), we should
+    // already have inserted a manual loader for the texture.
+    if (!texName.empty())
     {
-      Pass *pass = material->getTechnique(0)->getPass(0);
-      /*TextureUnitState *txt =*/ pass->createTextureUnitState(texName);
+        Pass *pass = material->getTechnique(0)->getPass(0);
+        /*TextureUnitState *txt =*/
+        pass->createTextureUnitState(texName);
 
-      /* As of yet UNTESTED code from Chris:
-      pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
-      pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
-      pass->setDepthCheckEnabled(true);
+        /* As of yet UNTESTED code from Chris:
+        pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
+        pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
+        pass->setDepthCheckEnabled(true);
 
-      // Add transparency if NiAlphaProperty was present
-      if(alphaFlags != -1)
+        // Add transparency if NiAlphaProperty was present
+        if(alphaFlags != -1)
+          {
+            if((alphaFlags&1))
+              {
+                pass->setDepthWriteEnabled(false);
+                pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
+                                       getBlendFactor((alphaFlags>>5)&0xf));
+              }
+            else
+              pass->setDepthWriteEnabled(true);
+
+            if((alphaFlags>>9)&1)
+              pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
+                                           alphaTest);
+
+            pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
+          }
+        else
+          pass->setDepthWriteEnabled(true);
+        */
+
+        // Add transparency if NiAlphaProperty was present
+        if (alphaFlags != -1)
         {
-          if((alphaFlags&1))
+            // The 237 alpha flags are by far the most common. Check
+            // NiAlphaProperty in nif/property.h if you need to decode
+            // other values. 237 basically means normal transparencly.
+            if (alphaFlags == 237)
             {
-              pass->setDepthWriteEnabled(false);
-              pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
-                                     getBlendFactor((alphaFlags>>5)&0xf));
+                // Enable transparency
+                pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+
+                //pass->setDepthCheckEnabled(false);
+                pass->setDepthWriteEnabled(false);
             }
-          else
-            pass->setDepthWriteEnabled(true);
-
-          if((alphaFlags>>9)&1)
-            pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
-                                         alphaTest);
-
-          pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
-        }
-      else
-        pass->setDepthWriteEnabled(true);
-      */
-
-      // Add transparency if NiAlphaProperty was present
-      if(alphaFlags != -1)
-        {
-          // The 237 alpha flags are by far the most common. Check
-          // NiAlphaProperty in nif/property.h if you need to decode
-          // other values. 237 basically means normal transparencly.
-          if(alphaFlags == 237)
-            {
-              // Enable transparency
-              pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-
-              //pass->setDepthCheckEnabled(false);
-              pass->setDepthWriteEnabled(false);
-            }
-          else
-            warn("Unhandled alpha setting for texture " + texName);
+            else
+                warn("Unhandled alpha setting for texture " + texName);
         }
     }
 
-  // Add material bells and whistles
-  material->setAmbient(ambient.array[0], ambient.array[1], ambient.array[2]);
-  material->setDiffuse(diffuse.array[0], diffuse.array[1], diffuse.array[2], alpha);
-  material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
-  material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
-  material->setShininess(glossiness);
+    // Add material bells and whistles
+    material->setAmbient(ambient.array[0], ambient.array[1], ambient.array[2]);
+    material->setDiffuse(diffuse.array[0], diffuse.array[1], diffuse.array[2], alpha);
+    material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
+    material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
+    material->setShininess(glossiness);
 }
 
 // Takes a name and adds a unique part to it. This is just used to
 // make sure that all materials are given unique names.
-static String getUniqueName(const String &input)
+String NIFLoader::getUniqueName(const String &input)
 {
-  static int addon = 0;
-  static char buf[8];
-  snprintf(buf, 8, "_%d", addon++);
+    static int addon = 0;
+    static char buf[8];
+    snprintf(buf, 8, "_%d", addon++);
 
-  // Don't overflow the buffer
-  if(addon > 999999) addon = 0;
+    // Don't overflow the buffer
+    if (addon > 999999) addon = 0;
 
-  return input + buf;
+    return input + buf;
 }
 
 // Check if the given texture name exists in the real world. If it
 // does not, change the string IN PLACE to say .dds instead and try
 // that. The texture may still not exist, but no information of value
 // is lost in that case.
-static void findRealTexture(String &texName)
+void NIFLoader::findRealTexture(String &texName)
 {
-  assert(vfs);
-  if(vfs->isFile(texName)) return;
+    assert(vfs);
+    if (vfs->isFile(texName)) return;
 
-  int len = texName.size();
-  if(len < 4) return;
+    int len = texName.size();
+    if (len < 4) return;
 
-  // Change texture extension to .dds
-  texName[len-3] = 'd';
-  texName[len-2] = 'd';
-  texName[len-1] = 's';
+    // Change texture extension to .dds
+    texName[len-3] = 'd';
+    texName[len-2] = 'd';
+    texName[len-1] = 's';
 }
 
 // Convert Nif::NiTriShape to Ogre::SubMesh, attached to the given
 // mesh.
-static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material)
+void NIFLoader::createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material)
 {
-  NiTriShapeData *data = shape->data.getPtr();
-  SubMesh *sub = mesh->createSubMesh(shape->name.toString());
+    NiTriShapeData *data = shape->data.getPtr();
+    SubMesh *sub = mesh->createSubMesh(shape->name.toString());
 
-  int nextBuf = 0;
+    int nextBuf = 0;
 
-  // This function is just one long stream of Ogre-barf, but it works
-  // great.
+    // This function is just one long stream of Ogre-barf, but it works
+    // great.
 
-  // Add vertices
-  int numVerts = data->vertices.length / 3;
-  sub->vertexData = new VertexData();
-  sub->vertexData->vertexCount = numVerts;
-  sub->useSharedVertices = false;
-  VertexDeclaration *decl = sub->vertexData->vertexDeclaration;
-  decl->addElement(nextBuf, 0, VET_FLOAT3, VES_POSITION);
-  HardwareVertexBufferSharedPtr vbuf =
-    HardwareBufferManager::getSingleton().createVertexBuffer(
-      VertexElement::getTypeSize(VET_FLOAT3),
-      numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-  vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, true);
-  VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
-  bind->setBinding(nextBuf++, vbuf);
+    // Add vertices
+    int numVerts = data->vertices.length / 3;
+    sub->vertexData = new VertexData();
+    sub->vertexData->vertexCount = numVerts;
+    sub->useSharedVertices = false;
+    VertexDeclaration *decl = sub->vertexData->vertexDeclaration;
+    decl->addElement(nextBuf, 0, VET_FLOAT3, VES_POSITION);
+    HardwareVertexBufferSharedPtr vbuf =
+        HardwareBufferManager::getSingleton().createVertexBuffer(
+            VertexElement::getTypeSize(VET_FLOAT3),
+            numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, true);
+    VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
+    bind->setBinding(nextBuf++, vbuf);
 
-  // Vertex normals
-  if(data->normals.length)
+    // Vertex normals
+    if (data->normals.length)
     {
-      decl->addElement(nextBuf, 0, VET_FLOAT3, VES_NORMAL);
-      vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
-          VertexElement::getTypeSize(VET_FLOAT3),
-          numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-      vbuf->writeData(0, vbuf->getSizeInBytes(), data->normals.ptr, true);
-      bind->setBinding(nextBuf++, vbuf);
+        decl->addElement(nextBuf, 0, VET_FLOAT3, VES_NORMAL);
+        vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
+                   VertexElement::getTypeSize(VET_FLOAT3),
+                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+        vbuf->writeData(0, vbuf->getSizeInBytes(), data->normals.ptr, true);
+        bind->setBinding(nextBuf++, vbuf);
     }
 
-  // Vertex colors
-  if(data->colors.length)
+    // Vertex colors
+    if (data->colors.length)
     {
-      const float *colors = data->colors.ptr;
-      RenderSystem* rs = Root::getSingleton().getRenderSystem();
-      std::vector<RGBA> colorsRGB(numVerts);
-      RGBA *pColour = &colorsRGB.front();
-      for(int i=0; i<numVerts; i++)
-	{
-	  rs->convertColourValue(ColourValue(colors[0],colors[1],colors[2],
-                                             colors[3]),pColour++);
-	  colors += 4;
-	}
-      decl->addElement(nextBuf, 0, VET_COLOUR, VES_DIFFUSE);
-      vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
-          VertexElement::getTypeSize(VET_COLOUR),
-	  numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-      vbuf->writeData(0, vbuf->getSizeInBytes(), &colorsRGB.front(), true);
-      bind->setBinding(nextBuf++, vbuf);
+        const float *colors = data->colors.ptr;
+        RenderSystem* rs = Root::getSingleton().getRenderSystem();
+        std::vector<RGBA> colorsRGB(numVerts);
+        RGBA *pColour = &colorsRGB.front();
+        for (int i=0; i<numVerts; i++)
+        {
+            rs->convertColourValue(ColourValue(colors[0],colors[1],colors[2],
+                                               colors[3]),pColour++);
+            colors += 4;
+        }
+        decl->addElement(nextBuf, 0, VET_COLOUR, VES_DIFFUSE);
+        vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
+                   VertexElement::getTypeSize(VET_COLOUR),
+                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+        vbuf->writeData(0, vbuf->getSizeInBytes(), &colorsRGB.front(), true);
+        bind->setBinding(nextBuf++, vbuf);
     }
 
-  // Texture UV coordinates
-  if(data->uvlist.length)
+    // Texture UV coordinates
+    if (data->uvlist.length)
     {
-      decl->addElement(nextBuf, 0, VET_FLOAT2, VES_TEXTURE_COORDINATES);
-      vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
-          VertexElement::getTypeSize(VET_FLOAT2),
-          numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+        decl->addElement(nextBuf, 0, VET_FLOAT2, VES_TEXTURE_COORDINATES);
+        vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
+                   VertexElement::getTypeSize(VET_FLOAT2),
+                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
-      vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, true);
-      bind->setBinding(nextBuf++, vbuf);
+        vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, true);
+        bind->setBinding(nextBuf++, vbuf);
     }
 
-  // Triangle faces
-  int numFaces = data->triangles.length;
-  if(numFaces)
+    // Triangle faces
+    int numFaces = data->triangles.length;
+    if (numFaces)
     {
-      HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
-	createIndexBuffer(HardwareIndexBuffer::IT_16BIT,
-			  numFaces,
-			  HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-      ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, true);
-      sub->indexData->indexBuffer = ibuf;
-      sub->indexData->indexCount = numFaces;
-      sub->indexData->indexStart = 0;
+        HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
+                                            createIndexBuffer(HardwareIndexBuffer::IT_16BIT,
+                                                              numFaces,
+                                                              HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+        ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, true);
+        sub->indexData->indexBuffer = ibuf;
+        sub->indexData->indexCount = numFaces;
+        sub->indexData->indexStart = 0;
     }
 
-  // Set material if one was given
-  if(!material.empty()) sub->setMaterialName(material);
+    // Set material if one was given
+    if (!material.empty()) sub->setMaterialName(material);
 
-  /* Old commented D code. Might be useful when reimplementing
-     animation.
-  // Assign this submesh to the given bone
-  VertexBoneAssignment v;
-  v.boneIndex = ((Bone*)bone)->getHandle();
-  v.weight = 1.0;
-
-  std::cerr << "+ Assigning bone index " << v.boneIndex << "\n";
-
-  for(int i=0; i < numVerts; i++)
+    // Assign this submesh to the given bone
+    //TODO: Must use niskininstance!
+    /*if (bone)
     {
-      v.vertexIndex = i;
-      sub->addBoneAssignment(v);
-    }
-  */
+        VertexBoneAssignment v;
+        v.boneIndex = ((Bone*)bone)->getHandle();
+        v.weight = 1.0;
+
+        std::cerr << "+ Assigning bone index " << v.boneIndex << "\n";
+
+        for(int i=0; i < numVerts; i++)
+        {
+            v.vertexIndex = i;
+            sub->addBoneAssignment(v);
+        }
+    }*/
+
 }
 
 // Helper math functions. Reinventing linear algebra for the win!
@@ -394,351 +415,356 @@ static void createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material
 // Computes B = AxB (matrix*matrix)
 static void matrixMul(const Matrix &A, Matrix &B)
 {
-  for(int i=0;i<3;i++)
+    for (int i=0;i<3;i++)
     {
-      float a = B.v[0].array[i];
-      float b = B.v[1].array[i];
-      float c = B.v[2].array[i];
+        float a = B.v[0].array[i];
+        float b = B.v[1].array[i];
+        float c = B.v[2].array[i];
 
-      B.v[0].array[i] = a*A.v[0].array[0] + b*A.v[0].array[1] + c*A.v[0].array[2];
-      B.v[1].array[i] = a*A.v[1].array[0] + b*A.v[1].array[1] + c*A.v[1].array[2];
-      B.v[2].array[i] = a*A.v[2].array[0] + b*A.v[2].array[1] + c*A.v[2].array[2];
+        B.v[0].array[i] = a*A.v[0].array[0] + b*A.v[0].array[1] + c*A.v[0].array[2];
+        B.v[1].array[i] = a*A.v[1].array[0] + b*A.v[1].array[1] + c*A.v[1].array[2];
+        B.v[2].array[i] = a*A.v[2].array[0] + b*A.v[2].array[1] + c*A.v[2].array[2];
     }
 }
 
 // Computes C = B + AxC*scale
 static void vectorMulAdd(const Matrix &A, const Vector &B, float *C, float scale)
 {
-  // Keep the original values
-  float a = C[0];
-  float b = C[1];
-  float c = C[2];
+    // Keep the original values
+    float a = C[0];
+    float b = C[1];
+    float c = C[2];
 
-  // Perform matrix multiplication, scaling and addition
-  for(int i=0;i<3;i++)
-    C[i] = B.array[i] + (a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2])*scale;
+    // Perform matrix multiplication, scaling and addition
+    for (int i=0;i<3;i++)
+        C[i] = B.array[i] + (a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2])*scale;
 }
 
 // Computes B = AxB (matrix*vector)
 static void vectorMul(const Matrix &A, float *C)
 {
-  // Keep the original values
-  float a = C[0];
-  float b = C[1];
-  float c = C[2];
+    // Keep the original values
+    float a = C[0];
+    float b = C[1];
+    float c = C[2];
 
-  // Perform matrix multiplication, scaling and addition
-  for(int i=0;i<3;i++)
-    C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
+    // Perform matrix multiplication, scaling and addition
+    for (int i=0;i<3;i++)
+        C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
 }
 
-static void handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags, BoundsFinder &bounds)
+void NIFLoader::handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags, BoundsFinder &bounds)
 {
-  assert(shape != NULL);
+    assert(shape != NULL);
 
-  // Interpret flags
-  bool hidden    = (flags & 0x01) != 0; // Not displayed
-  bool collide   = (flags & 0x02) != 0; // Use mesh for collision
-  bool bbcollide = (flags & 0x04) != 0; // Use bounding box for collision
+    // Interpret flags
+    bool hidden    = (flags & 0x01) != 0; // Not displayed
+    bool collide   = (flags & 0x02) != 0; // Use mesh for collision
+    bool bbcollide = (flags & 0x04) != 0; // Use bounding box for collision
 
-  // Bounding box collision isn't implemented, always use mesh for now.
-  if(bbcollide)
+    // Bounding box collision isn't implemented, always use mesh for now.
+    if (bbcollide)
     {
-      collide = true;
-      bbcollide = false;
+        collide = true;
+        bbcollide = false;
     }
 
-  // If the object was marked "NCO" earlier, it shouldn't collide with
-  // anything.
-  if(flags & 0x800)
-    { collide = false; bbcollide = false; }
-
-  if(!collide && !bbcollide && hidden)
-    // This mesh apparently isn't being used for anything, so don't
-    // bother setting it up.
-    return;
-
-  // Material name for this submesh, if any
-  String material;
-
-  // Skip the entire material phase for hidden nodes
-  if(!hidden)
+    // If the object was marked "NCO" earlier, it shouldn't collide with
+    // anything.
+    if (flags & 0x800)
     {
-      // These are set below if present
-      NiTexturingProperty *t = NULL;
-      NiMaterialProperty *m = NULL;
-      NiAlphaProperty *a = NULL;
+        collide = false;
+        bbcollide = false;
+    }
 
-      // Scan the property list for material information
-      PropertyList &list = shape->props;
-      int n = list.length();
-      for(int i=0; i<n; i++)
+    if (!collide && !bbcollide && hidden)
+        // This mesh apparently isn't being used for anything, so don't
+        // bother setting it up.
+        return;
+
+    // Material name for this submesh, if any
+    String material;
+
+    // Skip the entire material phase for hidden nodes
+    if (!hidden)
+    {
+        // These are set below if present
+        NiTexturingProperty *t = NULL;
+        NiMaterialProperty *m = NULL;
+        NiAlphaProperty *a = NULL;
+
+        // Scan the property list for material information
+        PropertyList &list = shape->props;
+        int n = list.length();
+        for (int i=0; i<n; i++)
         {
-          // Entries may be empty
-          if(!list.has(i)) continue;
+            // Entries may be empty
+            if (!list.has(i)) continue;
 
-          Property *pr = &list[i];
+            Property *pr = &list[i];
 
-          if(pr->recType == RC_NiTexturingProperty)
-            t = (NiTexturingProperty*)pr;
-          else if(pr->recType == RC_NiMaterialProperty)
-            m = (NiMaterialProperty*)pr;
-          else if(pr->recType == RC_NiAlphaProperty)
-            a = (NiAlphaProperty*)pr;
+            if (pr->recType == RC_NiTexturingProperty)
+                t = (NiTexturingProperty*)pr;
+            else if (pr->recType == RC_NiMaterialProperty)
+                m = (NiMaterialProperty*)pr;
+            else if (pr->recType == RC_NiAlphaProperty)
+                a = (NiAlphaProperty*)pr;
         }
 
-      // Texture
-      String texName;
-      if(t && t->textures[0].inUse)
+        // Texture
+        String texName;
+        if (t && t->textures[0].inUse)
         {
-          NiSourceTexture *st = t->textures[0].texture.getPtr();
-          if(st->external)
+            NiSourceTexture *st = t->textures[0].texture.getPtr();
+            if (st->external)
             {
-              SString tname = st->filename;
+                SString tname = st->filename;
 
-              /* findRealTexture checks if the file actually
-                 exists. If it doesn't, and the name ends in .tga, it
-                 will try replacing the extension with .dds instead
-                 and search for that. Bethesda at some at some point
-                 converted all their BSA textures from tga to dds for
-                 increased load speed, but all texture file name
-                 references were kept as .tga.
+                /* findRealTexture checks if the file actually
+                   exists. If it doesn't, and the name ends in .tga, it
+                   will try replacing the extension with .dds instead
+                   and search for that. Bethesda at some at some point
+                   converted all their BSA textures from tga to dds for
+                   increased load speed, but all texture file name
+                   references were kept as .tga.
 
-                 The function replaces the name in place (that's why
-                 we cast away the const modifier), but this is no
-                 problem since all the nif data is stored in a local
-                 throwaway buffer.
-               */
-              texName = "textures\\" + tname.toString();
-              findRealTexture(texName);
+                   The function replaces the name in place (that's why
+                   we cast away the const modifier), but this is no
+                   problem since all the nif data is stored in a local
+                   throwaway buffer.
+                 */
+                texName = "textures\\" + tname.toString();
+                findRealTexture(texName);
             }
-          else warn("Found internal texture, ignoring.");
+            else warn("Found internal texture, ignoring.");
         }
 
-      // Alpha modifiers
-      int alphaFlags = -1;
-      ubyte alphaTest = 0;
-      if(a)
+        // Alpha modifiers
+        int alphaFlags = -1;
+        ubyte alphaTest = 0;
+        if (a)
         {
-          alphaFlags = a->flags;
-          alphaTest  = a->data->threshold;
+            alphaFlags = a->flags;
+            alphaTest  = a->data->threshold;
         }
 
-      // Material
-      if(m || !texName.empty())
+        // Material
+        if (m || !texName.empty())
         {
-          // If we're here, then this mesh has a material. Thus we
-          // need to calculate a snappy material name. It should
-          // contain the mesh name (mesh->getName()) but also has to
-          // be unique. One mesh may use many materials.
-          material = getUniqueName(mesh->getName());
+            // If we're here, then this mesh has a material. Thus we
+            // need to calculate a snappy material name. It should
+            // contain the mesh name (mesh->getName()) but also has to
+            // be unique. One mesh may use many materials.
+            material = getUniqueName(mesh->getName());
 
-          if(m)
+            if (m)
             {
-              // Use NiMaterialProperty data to create the data
-              const S_MaterialProperty *d = m->data;
-              createMaterial(material, d->ambient, d->diffuse, d->specular, d->emissive,
-                             d->glossiness, d->alpha, alphaFlags, alphaTest, texName);
+                // Use NiMaterialProperty data to create the data
+                const S_MaterialProperty *d = m->data;
+                createMaterial(material, d->ambient, d->diffuse, d->specular, d->emissive,
+                               d->glossiness, d->alpha, alphaFlags, alphaTest, texName);
             }
-          else
+            else
             {
-              // We only have a texture name. Create a default
-              // material for it.
-              Vector zero, one;
-              for(int i=0; i<3;i++)
+                // We only have a texture name. Create a default
+                // material for it.
+                Vector zero, one;
+                for (int i=0; i<3;i++)
                 {
-                  zero.array[i] = 0.0;
-                  one.array[i] = 1.0;
+                    zero.array[i] = 0.0;
+                    one.array[i] = 1.0;
                 }
 
-              createMaterial(material, one, one, zero, zero, 0.0, 1.0,
-                             alphaFlags, alphaTest, texName);
+                createMaterial(material, one, one, zero, zero, 0.0, 1.0,
+                               alphaFlags, alphaTest, texName);
             }
         }
     } // End of material block, if(!hidden) ...
 
-  /* Do in-place transformation of all the vertices and normals. This
-     is pretty messy stuff, but we need it to make the sub-meshes
-     appear in the correct place. Neither Ogre nor Bullet support
-     nested levels of sub-meshes with transformations applied to each
-     level.
-  */
-  NiTriShapeData *data = shape->data.getPtr();
-  int numVerts = data->vertices.length / 3;
+    /* Do in-place transformation of all the vertices and normals. This
+       is pretty messy stuff, but we need it to make the sub-meshes
+       appear in the correct place. Neither Ogre nor Bullet support
+       nested levels of sub-meshes with transformations applied to each
+       level.
+    */
+    NiTriShapeData *data = shape->data.getPtr();
+    int numVerts = data->vertices.length / 3;
 
-  float *ptr = (float*)data->vertices.ptr;
-  float *optr = ptr;
+    float *ptr = (float*)data->vertices.ptr;
+    float *optr = ptr;
 
-  // Rotate, scale and translate all the vertices
-  const Matrix &rot = shape->trafo->rotation;
-  const Vector &pos = shape->trafo->pos;
-  float scale = shape->trafo->scale;
-  for(int i=0; i<numVerts; i++)
+    // Rotate, scale and translate all the vertices
+    const Matrix &rot = shape->trafo->rotation;
+    const Vector &pos = shape->trafo->pos;
+    float scale = shape->trafo->scale;
+    for (int i=0; i<numVerts; i++)
     {
-      vectorMulAdd(rot, pos, ptr, scale);
-      ptr += 3;
+        vectorMulAdd(rot, pos, ptr, scale);
+        ptr += 3;
     }
 
-  // Remember to rotate all the vertex normals as well
-  if(data->normals.length)
+    // Remember to rotate all the vertex normals as well
+    if (data->normals.length)
     {
-      ptr = (float*)data->normals.ptr;
-      for(int i=0; i<numVerts; i++)
+        ptr = (float*)data->normals.ptr;
+        for (int i=0; i<numVerts; i++)
         {
-          vectorMul(rot, ptr);
-          ptr += 3;
+            vectorMul(rot, ptr);
+            ptr += 3;
         }
     }
 
-  if(!hidden)
+    if (!hidden)
     {
-      // Add this vertex set to the bounding box
-      bounds.add(optr, numVerts);
+        // Add this vertex set to the bounding box
+        bounds.add(optr, numVerts);
 
-      // Create the submesh
-      createOgreMesh(mesh, shape, material);
+        // Create the submesh
+        createOgreMesh(mesh, shape, material);
     }
 }
 
-static void handleNode(Mesh* mesh, Nif::Node *node, int flags,
-                       const Transformation *trafo, BoundsFinder &bounds)
+void NIFLoader::handleNode(Mesh* mesh, Nif::Node *node, int flags,
+                           const Transformation *trafo, BoundsFinder &bounds)
 {
-  // Accumulate the flags from all the child nodes. This works for all
-  // the flags we currently use, at least.
-  flags |= node->flags;
+    // Accumulate the flags from all the child nodes. This works for all
+    // the flags we currently use, at least.
+    flags |= node->flags;
 
-  // Check for extra data
-  Extra *e = node;
-  while(!e->extra.empty())
+    // Check for extra data
+    Extra *e = node;
+    while (!e->extra.empty())
     {
-      // Get the next extra data in the list
-      e = e->extra.getPtr();
-      assert(e != NULL);
+        // Get the next extra data in the list
+        e = e->extra.getPtr();
+        assert(e != NULL);
 
-      if(e->recType == RC_NiStringExtraData)
+        if (e->recType == RC_NiStringExtraData)
         {
-          // String markers may contain important information
-          // affecting the entire subtree of this node
-          NiStringExtraData *sd = (NiStringExtraData*)e;
+            // String markers may contain important information
+            // affecting the entire subtree of this node
+            NiStringExtraData *sd = (NiStringExtraData*)e;
 
-          if(sd->string == "NCO")
-            // No collision. Use an internal flag setting to mark this.
-            flags |= 0x800;
-          else if(sd->string == "MRK")
-            // Marker objects. These are only visible in the
-            // editor. Until and unless we add an editor component to
-            // the engine, just skip this entire node.
-            return;
+            if (sd->string == "NCO")
+                // No collision. Use an internal flag setting to mark this.
+                flags |= 0x800;
+            else if (sd->string == "MRK")
+                // Marker objects. These are only visible in the
+                // editor. Until and unless we add an editor component to
+                // the engine, just skip this entire node.
+                return;
         }
     }
 
-  // Apply the parent transformation to this node. We overwrite the
-  // existing data with the final transformation.
-  if(trafo)
+    // Apply the parent transformation to this node. We overwrite the
+    // existing data with the final transformation.
+    if (trafo)
     {
-      // Get a non-const reference to the node's data, since we're
-      // overwriting it. TODO: Is this necessary?
-      Transformation &final = *((Transformation*)node->trafo);
+        // Get a non-const reference to the node's data, since we're
+        // overwriting it. TODO: Is this necessary?
+        Transformation &final = *((Transformation*)node->trafo);
 
-      // For both position and rotation we have that:
-      // final_vector = old_vector + old_rotation*new_vector*old_scale
-      vectorMulAdd(trafo->rotation, trafo->pos, final.pos.array, trafo->scale);
-      vectorMulAdd(trafo->rotation, trafo->velocity, final.velocity.array, trafo->scale);
+        // For both position and rotation we have that:
+        // final_vector = old_vector + old_rotation*new_vector*old_scale
+        vectorMulAdd(trafo->rotation, trafo->pos, final.pos.array, trafo->scale);
+        vectorMulAdd(trafo->rotation, trafo->velocity, final.velocity.array, trafo->scale);
 
-      // Merge the rotations together
-      matrixMul(trafo->rotation, final.rotation);
+        // Merge the rotations together
+        matrixMul(trafo->rotation, final.rotation);
 
-      // Scalar values are so nice to deal with. Why can't everything
-      // just be scalar?
-      final.scale *= trafo->scale;
+        // Scalar values are so nice to deal with. Why can't everything
+        // just be scalar?
+        final.scale *= trafo->scale;
     }
 
-  // For NiNodes, loop through children
-  if(node->recType == RC_NiNode)
+    // For NiNodes, loop through children
+    if (node->recType == RC_NiNode)
     {
-      NodeList &list = ((NiNode*)node)->children;
-      int n = list.length();
-      for(int i=0; i<n; i++)
+
+
+        NodeList &list = ((NiNode*)node)->children;
+        int n = list.length();
+        for (int i=0; i<n; i++)
         {
-          if(list.has(i))
-            handleNode(mesh, &list[i], flags, node->trafo, bounds);
+            if (list.has(i))
+                handleNode(mesh, &list[i], flags, node->trafo, bounds);
         }
     }
-  else if(node->recType == RC_NiTriShape)
+    else if (node->recType == RC_NiTriShape)
     // For shapes
-    handleNiTriShape(mesh, dynamic_cast<NiTriShape*>(node), flags, bounds);
+        handleNiTriShape(mesh, dynamic_cast<NiTriShape*>(node), flags, bounds);
 }
 
 void NIFLoader::loadResource(Resource *resource)
 {
-  // Set up the VFS if it hasn't been done already
-  if(!vfs) vfs = new OgreVFS("General");
+    // Set up the VFS if it hasn't been done already
+    if (!vfs) vfs = new OgreVFS(resourceGroup);
 
-  // Get the mesh
-  Mesh *mesh = dynamic_cast<Mesh*>(resource);
-  assert(mesh);
+    // Get the mesh
+    Mesh *mesh = dynamic_cast<Mesh*>(resource);
+    assert(mesh);
 
-  // Look it up
-  const String &name = mesh->getName();
-  errName = name; // Set name for error messages
-  if(!vfs->isFile(name))
+    // Look it up
+    const String &name = mesh->getName();
+
+    if (!vfs->isFile(name))
     {
-      warn("File not found.");
-      return;
+        warn("File not found.");
+        return;
     }
 
-  // Helper that computes bounding boxes for us.
-  BoundsFinder bounds;
+    // Helper that computes bounding boxes for us.
+    BoundsFinder bounds;
 
-  // Load the NIF. TODO: Wrap this in a try-catch block once we're out
-  // of the early stages of development. Right now we WANT to catch
-  // every error as early and intrusively as possible, as it's most
-  // likely a sign of incomplete code rather than faulty input.
-  NIFFile nif(vfs->open(name), name);
+    // Load the NIF. TODO: Wrap this in a try-catch block once we're out
+    // of the early stages of development. Right now we WANT to catch
+    // every error as early and intrusively as possible, as it's most
+    // likely a sign of incomplete code rather than faulty input.
+    NIFFile nif(vfs->open(name), name);
 
-  if(nif.numRecords() < 1)
+    if (nif.numRecords() < 1)
     {
-      warn("Found no records in NIF.");
-      return;
+        warn("Found no records in NIF.");
+        return;
     }
 
-  // The first record is assumed to be the root node
-  Record *r = nif.getRecord(0);
-  assert(r != NULL);
+    // The first record is assumed to be the root node
+    Record *r = nif.getRecord(0);
+    assert(r != NULL);
 
-  Nif::Node *node = dynamic_cast<Nif::Node*>(r);
+    Nif::Node *node = dynamic_cast<Nif::Node*>(r);
 
-  if(node == NULL)
+    if (node == NULL)
     {
-      warn("First record in file was not a node, but a " +
-           r->recName.toString() + ". Skipping file.");
-      return;
+        warn("First record in file was not a node, but a " +
+             r->recName.toString() + ". Skipping file.");
+        return;
     }
 
-  // Handle the node
-  handleNode(mesh, node, 0, NULL, bounds);
+    // Handle the node
+    handleNode(mesh, node, 0, NULL, bounds);
 
-  // Finally, set the bounding value.
-  if(bounds.isValid())
+    // Finally, set the bounding value.
+    if (bounds.isValid())
     {
-      mesh->_setBounds(AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
-                                      bounds.maxX(), bounds.maxY(), bounds.maxZ()));
-      mesh->_setBoundingSphereRadius(bounds.getRadius());
+        mesh->_setBounds(AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
+                                        bounds.maxX(), bounds.maxY(), bounds.maxZ()));
+        mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
 }
 
 MeshPtr NIFLoader::load(const std::string &name,
                         const std::string &group)
 {
-  MeshManager *m = MeshManager::getSingletonPtr();
+    MeshManager *m = MeshManager::getSingletonPtr();
 
-  // Check if the resource already exists
-  ResourcePtr ptr = m->getByName(name, group);
-  if(!ptr.isNull())
-    return MeshPtr(ptr);
+    // Check if the resource already exists
+    ResourcePtr ptr = m->getByName(name, group);
+    if (!ptr.isNull())
+        return MeshPtr(ptr);
 
-  // Nope, create a new one.
-  return MeshManager::getSingleton().createManual(name, group, &g_sing);
+    // Nope, create a new one.
+    return MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
 }
 
 /* More code currently not in use, from the old D source. This was
