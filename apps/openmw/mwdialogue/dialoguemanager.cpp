@@ -21,7 +21,12 @@ namespace MWDialogue
         // TODO check actor class
         // TODO check actor faction
         // TODO check player faction
-        // TODO check cell
+
+        // check cell
+        if (!info.cell.empty())
+            if (mEnvironment.mWorld->getPlayerPos().getPlayer().getCell()->cell->name != info.cell)
+                return false;
+
         // TODO check DATAstruct
         // TODO check select structures
 
@@ -32,7 +37,6 @@ namespace MWDialogue
             << "    actor class: " << info.clas << std::endl
             << "    actor faction: " << info.npcFaction << std::endl
             << "    player faction: " << info.pcFaction << std::endl
-            << "    cell: " << info.cell << std::endl
             << "    DATAstruct" << std::endl;
 
         for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
