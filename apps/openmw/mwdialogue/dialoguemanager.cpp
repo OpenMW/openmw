@@ -197,7 +197,17 @@ namespace MWDialogue
                 return false;
         }
 
-        // TODO check actor class
+        if (!info.clas.empty())
+        {
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
+
+            if (!cellRef)
+                return false;
+
+            if (toLower (info.clas)!=toLower (cellRef->base->cls))
+                return false;
+        }
+
         // TODO check actor faction
         // TODO check player faction
 
@@ -215,7 +225,6 @@ namespace MWDialogue
 
         std::cout
             << "unchecked entries:" << std::endl
-            << "    actor class: " << info.clas << std::endl
             << "    actor faction: " << info.npcFaction << std::endl
             << "    player faction: " << info.pcFaction << std::endl
             << "    DATAstruct" << std::endl;
