@@ -62,8 +62,12 @@ struct Creature
   // Defined in loadcont.hpp
   InventoryList inventory;
 
-  void load(ESMReader &esm)
+    std::string mId;
+
+  void load(ESMReader &esm, const std::string& id)
   {
+    mId = id;
+
     model = esm.getHNString("MODL");
     original = esm.getHNOString("CNAM");
     name = esm.getHNOString("FNAM");
@@ -93,7 +97,7 @@ struct Creature
     // AI_A - activate?
 
     esm.skipRecord();
-  } 
+  }
 };
 }
 #endif

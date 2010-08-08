@@ -17,16 +17,16 @@ namespace ESMS
   {
     virtual void load(ESMReader &esm, const std::string &id) = 0;
     virtual int getSize() = 0;
-    
+
     static std::string toLower (const std::string& name)
     {
         std::string lowerCase;
-        
+
         std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
             (int(*)(int)) std::tolower);
-            
+
         return lowerCase;
-    }    
+    }
   };
 
   typedef std::map<int,RecList*> RecListList;
@@ -53,15 +53,53 @@ namespace ESMS
         return NULL;
       return &list.find(id2)->second;
     }
-    
+
     // Find the given object ID (throws an exception if not found)
     const X* find(const std::string &id) const
     {
         const X *object = search (id);
-        
+
         if (!object)
             throw std::runtime_error ("object " + id + " not found");
-        
+
+        return object;
+    }
+
+    int getSize() { return list.size(); }
+  };
+
+    /// Modified version of RecListT for records, that need to store their own ID
+  template <typename X>
+  struct RecListWithIDT : RecList
+  {
+    typedef std::map<std::string,X> MapType;
+
+    MapType list;
+
+    // Load one object of this type
+    void load(ESMReader &esm, const std::string &id)
+    {
+      std::string id2 = toLower (id);
+      list[id2].load(esm, id2);
+    }
+
+    // Find the given object ID, or return NULL if not found.
+    const X* search(const std::string &id) const
+    {
+      std::string id2 = toLower (id);
+      if(list.find(id2) == list.end())
+        return NULL;
+      return &list.find(id2)->second;
+    }
+
+    // Find the given object ID (throws an exception if not found)
+    const X* find(const std::string &id) const
+    {
+        const X *object = search (id);
+
+        if (!object)
+            throw std::runtime_error ("object " + id + " not found");
+
         return object;
     }
 
@@ -80,7 +118,7 @@ namespace ESMS
 
     void load(ESMReader &esm, const std::string &id)
     {
-      std::string id2 = toLower (id);    
+      std::string id2 = toLower (id);
       X& ref = list[id2];
 
       ref.id = id;
@@ -95,18 +133,18 @@ namespace ESMS
         return NULL;
       return &list.find(id2)->second;
     }
-    
+
     // Find the given object ID (throws an exception if not found)
     const X* find(const std::string &id) const
     {
         const X *object = search (id);
-        
+
         if (!object)
             throw std::runtime_error ("object " + id + " not found");
-        
+
         return object;
     }
-        
+
     int getSize() { return list.size(); }
   };
 
@@ -180,7 +218,7 @@ namespace ESMS
         }
     }
   };
-  
+
   template <typename X>
   struct ScriptListT : RecList
   {
@@ -193,16 +231,16 @@ namespace ESMS
     {
       X ref;
       ref.load (esm);
-      
+
       std::string realId = toLower (ref.data.name.toString());
-      
+
       std::swap (list[realId], ref);
     }
 
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);    
+      std::string id2 = toLower (id);
       if(list.find(id2) == list.end())
         return NULL;
       return &list.find(id2)->second;
@@ -212,15 +250,15 @@ namespace ESMS
     const X* find(const std::string &id) const
     {
         const X *object = search (id);
-        
+
         if (!object)
             throw std::runtime_error ("object " + id + " not found");
-        
+
         return object;
     }
 
     int getSize() { return list.size(); }
-  };  
+  };
 
   /* We need special lists for:
 

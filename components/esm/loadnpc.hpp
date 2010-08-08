@@ -97,8 +97,12 @@ struct NPC
   std::string name, model, race, cls, faction, script,
     hair, head; // body parts
 
-  void load(ESMReader &esm)
+    std::string mId;
+
+  void load(ESMReader &esm, const std::string& id)
   {
+    mId = id;
+
     npdt52.gold = -10;
 
     model = esm.getHNOString("MODL");

@@ -45,6 +45,12 @@ namespace MWClass
         return *ptr.getRefData().getCreatureStats();
     }
 
+    boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
+        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+    {
+        return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
+	}
+
     MWWorld::ContainerStore<MWWorld::RefData>& Creature::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
@@ -60,12 +66,6 @@ namespace MWClass
 
         return *ptr.getRefData().getContainerStore();
 	}
-
-    boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
-    {
-        return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
-    }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
     {

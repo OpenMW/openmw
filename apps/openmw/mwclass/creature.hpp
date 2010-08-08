@@ -16,13 +16,13 @@ namespace MWClass
             virtual MWMechanics::CreatureStats& getCreatureStats (const MWWorld::Ptr& ptr) const;
             ///< Return creature stats
 
-            virtual MWWorld::ContainerStore<MWWorld::RefData>& getContainerStore (
-                const MWWorld::Ptr& ptr) const;
-            ///< Return container store
-
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation
+
+            virtual MWWorld::ContainerStore<MWWorld::RefData>& getContainerStore (
+                const MWWorld::Ptr& ptr) const;
+            ///< Return container store
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
