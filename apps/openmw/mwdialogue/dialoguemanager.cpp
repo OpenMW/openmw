@@ -1,6 +1,10 @@
 
 #include "dialoguemanager.hpp"
 
+#include <cctype>
+#include <algorithm>
+#include <iterator>
+
 #include <components/esm/loaddial.hpp>
 
 #include <components/esm_store/store.hpp>
@@ -14,6 +18,16 @@
 
 namespace
 {
+    std::string toLower (const std::string& name)
+    {
+        std::string lowerCase;
+
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        return lowerCase;
+    }
+
     template<typename T1, typename T2>
     bool selectCompare (char comp, T1 value1, T2 value2)
     {
@@ -64,6 +78,36 @@ namespace
 
         return selectCompare (comp, locals.mFloats.at (i), value);
     }
+
+    template<typename T>
+    bool checkGlobal (char comp, const std::string& name, T value, MWWorld::World& world)
+    {
+        switch (world.getGlobalVariableType (name))
+        {
+            case 's':
+
+                return selectCompare (comp, value, world.getGlobalVariable (name).mShort);
+
+            case 'l':
+
+                return selectCompare (comp, value, world.getGlobalVariable (name).mLong);
+
+            case 'f':
+
+                return selectCompare (comp, value, world.getGlobalVariable (name).mFloat);
+
+            case ' ':
+
+                world.getGlobalVariable (name); // trigger exception
+                break;
+
+            default:
+
+                throw std::runtime_error ("unsupported gobal variable type");
+        }
+
+        return false;
+    }
 }
 
 namespace MWDialogue
@@ -78,7 +122,7 @@ namespace MWDialogue
             char comp = select.selectRule[4];
             std::string name = select.selectRule.substr (5);
 
-            // TODO types 1, 2, 4, 5, 6, 7, 8, 9, A, B, C
+            // TODO types 4, 5, 6, 7, 8, 9, A, B, C
 
             switch (type)
             {
@@ -86,18 +130,37 @@ namespace MWDialogue
 
                     return false; // TODO implement functions
 
+                case '2': // global
+
+                    if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
+                        select.type==ESM::VT_Long)
+                    {
+                        if (!checkGlobal (comp, toLower (name), select.i, *mEnvironment.mWorld))
+                            return false;
+                    }
+                    else if (select.type==ESM::VT_Float)
+                    {
+                        if (!checkGlobal (comp, toLower (name), select.f, *mEnvironment.mWorld))
+                            return false;
+                    }
+                    else
+                        throw std::runtime_error (
+                            "unsupported variable type in dialogue info select");
+
+                    return true;
+
                 case '3': // local
 
                     if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
                         select.type==ESM::VT_Long)
                     {
-                        if (!checkLocal (comp, name, select.i, actor,
+                        if (!checkLocal (comp, toLower (name), select.i, actor,
                             mEnvironment.mWorld->getStore()))
                             return false;
                     }
                     else if (select.type==ESM::VT_Float)
                     {
-                        if (!checkLocal (comp, name, select.f, actor,
+                        if (!checkLocal (comp, toLower (name), select.f, actor,
                             mEnvironment.mWorld->getStore()))
                             return false;
                     }
@@ -120,7 +183,7 @@ namespace MWDialogue
     {
         // actor id
         if (!info.actor.empty())
-            if (info.actor!=MWWorld::Class::get (actor).getId (actor))
+            if (toLower (info.actor)!=MWWorld::Class::get (actor).getId (actor))
                 return false;
 
         if (!info.race.empty())
@@ -130,7 +193,7 @@ namespace MWDialogue
             if (!cellRef)
                 return false;
 
-            if (info.race!=cellRef->base->race)
+            if (toLower (info.race)!=toLower (cellRef->base->race))
                 return false;
         }
 
@@ -185,6 +248,7 @@ namespace MWDialogue
 
                 if (!iter->resultScript.empty())
                 {
+                    std::cout << "script: " << iter->resultScript << std::endl;
                     // TODO execute script
                 }
 
