@@ -1,12 +1,9 @@
 #ifndef GAME_MMDIALOG_DIALOGUEMANAGER_H
 #define GAME_MWDIALOG_DIALOGUEMANAGER_H
 
-#include "../mwworld/ptr.hpp"
+#include <components/esm/loadinfo.hpp>
 
-namespace ESM
-{
-    struct DialInfo;
-}
+#include "../mwworld/ptr.hpp"
 
 namespace MWWorld
 {
@@ -18,6 +15,8 @@ namespace MWDialogue
     class DialogueManager
     {
             MWWorld::Environment& mEnvironment;
+
+            bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo::SelectStruct& select) const;
 
             bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const;
 
