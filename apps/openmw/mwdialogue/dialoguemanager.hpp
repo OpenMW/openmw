@@ -3,6 +3,11 @@
 
 #include "../mwworld/ptr.hpp"
 
+namespace ESM
+{
+    struct DialInfo;
+}
+
 namespace MWWorld
 {
     class Environment;
@@ -13,6 +18,8 @@ namespace MWDialogue
     class DialogueManager
     {
             MWWorld::Environment& mEnvironment;
+
+            bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const;
 
         public:
 
