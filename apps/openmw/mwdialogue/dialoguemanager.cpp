@@ -82,6 +82,10 @@ namespace MWDialogue
 
             switch (type)
             {
+                case '1': // function
+
+                    return false; // TODO implement functions
+
                 case '3': // local
 
                     if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
