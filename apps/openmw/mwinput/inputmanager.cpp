@@ -17,6 +17,8 @@
 #include <libs/platform/strings.h>
 #include "../mwrender/playerpos.hpp"
 
+#include "../engine.hpp"
+
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
 #include <OgreRoot.h>
@@ -58,6 +60,7 @@ namespace MWInput
     OEngine::GUI::EventInjectorPtr guiEvents;
     MWRender::PlayerPos &player;
     MWGui::WindowManager &windows;
+    OMW::Engine& mEngine;
 
     // Count screenshots.
     int shotCount;
@@ -137,7 +140,7 @@ namespace MWInput
 
     void activate()
     {
-
+        mEngine.activate();
     }
 
     // Exit program now button (which is disabled in GUI mode)
@@ -151,13 +154,15 @@ namespace MWInput
     InputImpl(OEngine::Render::OgreRenderer &_ogre,
                    MWRender::PlayerPos &_player,
                    MWGui::WindowManager &_windows,
-                   bool debug)
+                   bool debug,
+                   OMW::Engine& engine)
       : ogre(_ogre),
         exit(ogre.getWindow()),
         input(ogre.getWindow(), !debug),
         poller(input),
         player(_player),
         windows(_windows),
+        mEngine (engine),
         shotCount(0)
     {
       using namespace OEngine::Input;
@@ -275,9 +280,10 @@ namespace MWInput
   MWInputManager::MWInputManager(OEngine::Render::OgreRenderer &ogre,
                                  MWRender::PlayerPos &player,
                                  MWGui::WindowManager &windows,
-                                 bool debug)
+                                 bool debug,
+                                 OMW::Engine& engine)
   {
-    impl = new InputImpl(ogre,player,windows,debug);
+    impl = new InputImpl(ogre,player,windows,debug, engine);
   }
 
   MWInputManager::~MWInputManager()

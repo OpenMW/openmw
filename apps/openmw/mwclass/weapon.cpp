@@ -6,6 +6,9 @@
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/actiontake.hpp"
+
+#include "containerutil.hpp"
 
 namespace MWClass
 {
@@ -15,6 +18,13 @@ namespace MWClass
             ptr.get<ESM::Weapon>();
 
         return ref->base->name;
+    }
+
+    boost::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
+        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+    {
+        return boost::shared_ptr<MWWorld::Action> (
+            new MWWorld::ActionTake (ptr));
     }
 
     bool Weapon::hasItemHealth (const MWWorld::Ptr& ptr) const
@@ -28,6 +38,20 @@ namespace MWClass
             ptr.get<ESM::Weapon>();
 
         return ref->base->data.health;
+    }
+
+    void Weapon::insertIntoContainer (const MWWorld::Ptr& ptr,
+        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+    {
+        insertIntoContainerStore (ptr, containerStore.weapons);
+    }
+
+    std::string Weapon::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return ref->base->script;
     }
 
     void Weapon::registerSelf()

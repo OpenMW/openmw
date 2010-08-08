@@ -83,8 +83,6 @@ namespace MWWorld
 
             ~World();
 
-            MWRender::MWScene* getMWScene() { return &mScene; }
-
             MWRender::PlayerPos& getPlayerPos();
 
             ESMS::ESMStore& getStore();
@@ -133,6 +131,11 @@ namespace MWWorld
             ///< works only for interior cells currently.
 
             void markCellAsUnchanged();
+
+            std::string getFacedHandle();
+            ///< Return handle of the object the player is looking at
+
+            void deleteObject (Ptr ptr);
     };
 }
 

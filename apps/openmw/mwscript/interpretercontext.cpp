@@ -27,9 +27,9 @@ namespace MWScript
         {
             if (mReference.isEmpty())
                 throw std::runtime_error ("no implicit reference");
-    
+
             return mReference;
-        }    
+        }
     }
 
     const MWWorld::Ptr InterpreterContext::getReference (
@@ -43,21 +43,22 @@ namespace MWScript
         {
             if (mReference.isEmpty())
                 throw std::runtime_error ("no implicit reference");
-    
+
             return mReference;
-        }    
+        }
     }
-    
+
     InterpreterContext::InterpreterContext (MWWorld::Environment& environment,
         MWScript::Locals *locals, MWWorld::Ptr reference)
-    : mEnvironment (environment), mLocals (locals), mReference (reference)
+    : mEnvironment (environment), mLocals (locals), mReference (reference),
+      mActivationHandled (false)
     {}
 
     int InterpreterContext::getLocalShort (int index) const
     {
         if (!mLocals)
             throw std::runtime_error ("local variables not available in this context");
-     
+
         return mLocals->mShorts.at (index);
     }
 
@@ -65,7 +66,7 @@ namespace MWScript
     {
         if (!mLocals)
             throw std::runtime_error ("local variables not available in this context");
-    
+
         return mLocals->mLongs.at (index);
     }
 
@@ -73,7 +74,7 @@ namespace MWScript
     {
         if (!mLocals)
             throw std::runtime_error ("local variables not available in this context");
-    
+
         return mLocals->mFloats.at (index);
     }
 
@@ -90,45 +91,45 @@ namespace MWScript
         if (!mLocals)
             throw std::runtime_error ("local variables not available in this context");
 
-        mLocals->mLongs.at (index) = value;    
+        mLocals->mLongs.at (index) = value;
     }
 
     void InterpreterContext::setLocalFloat (int index, float value)
     {
         if (!mLocals)
             throw std::runtime_error ("local variables not available in this context");
-    
-        mLocals->mFloats.at (index) = value;    
+
+        mLocals->mFloats.at (index) = value;
     }
-    
+
     void InterpreterContext::messageBox (const std::string& message,
         const std::vector<std::string>& buttons)
     {
         std::cout << "message box: " << message << std::endl;
-        
-        if (!buttons.empty())    
+
+        if (!buttons.empty())
             std::cerr << "error: message box buttons not supported" << std::endl;
     }
-    
+
     bool InterpreterContext::menuMode()
     {
         return mEnvironment.mWindowManager->isGuiMode();
     }
-    
+
     int InterpreterContext::getGlobalShort (const std::string& name) const
     {
-        return mEnvironment.mWorld->getGlobalVariable (name).mShort;       
+        return mEnvironment.mWorld->getGlobalVariable (name).mShort;
     }
 
     int InterpreterContext::getGlobalLong (const std::string& name) const
     {
         // a global long is internally a float.
-        return mEnvironment.mWorld->getGlobalVariable (name).mLong;       
+        return mEnvironment.mWorld->getGlobalVariable (name).mLong;
     }
 
     float InterpreterContext::getGlobalFloat (const std::string& name) const
     {
-        return mEnvironment.mWorld->getGlobalVariable (name).mFloat; 
+        return mEnvironment.mWorld->getGlobalVariable (name).mFloat;
     }
 
     void InterpreterContext::setGlobalShort (const std::string& name, int value)
@@ -166,83 +167,117 @@ namespace MWScript
         else
             mEnvironment.mWorld->getGlobalVariable (name).mFloat = value;
     }
-     
+
     bool InterpreterContext::isScriptRunning (const std::string& name) const
     {
         return mEnvironment.mGlobalScripts->isRunning (name);
     }
-    
+
     void InterpreterContext::startScript (const std::string& name)
     {
         mEnvironment.mGlobalScripts->addScript (name);
     }
-    
+
     void InterpreterContext::stopScript (const std::string& name)
     {
         mEnvironment.mGlobalScripts->removeScript (name);
     }
-    
+
     float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
     {
         // TODO handle exterior cells (when ref and ref2 are located in different cells)
         const MWWorld::Ptr ref2 = getReference (id, false);
-                    
+
         const MWWorld::Ptr ref = mEnvironment.mWorld->getPtr (name, true);
-                       
+
         double diff[3];
-        
-        for (int i=0; i<3; ++i)                            
+
+        for (int i=0; i<3; ++i)
             diff[i] = ref.getCellRef().pos.pos[i] - ref2.getCellRef().pos.pos[i];
-        
+
         return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
     }
-    
-    bool InterpreterContext::hasBeenActivated() const
+
+    bool InterpreterContext::hasBeenActivated (const MWWorld::Ptr& ptr)
     {
+        if (!mActivated.isEmpty() && mActivated==ptr)
+        {
+            mActivationHandled = true;
+            return true;
+        }
+
         return false;
     }
-    
+
+    bool InterpreterContext::hasActivationBeenHandled() const
+    {
+        return mActivationHandled;
+    }
+
+    void InterpreterContext::activate (const MWWorld::Ptr& ptr,
+        boost::shared_ptr<MWWorld::Action> action)
+    {
+        mActivated = ptr;
+        mActivationHandled = false;
+        mAction = action;
+    }
+
+    void InterpreterContext::executeActivation()
+    {
+        if (!mAction.get())
+            throw std::runtime_error ("activation failed, because no action to perform");
+
+        mAction->execute (mEnvironment);
+        mActivationHandled = true;
+    }
+
+    void InterpreterContext::clearActivation()
+    {
+        mActivated = MWWorld::Ptr();
+        mActivationHandled = false;
+        mAction.reset();
+    }
+
     float InterpreterContext::getSecondsPassed() const
     {
         return mEnvironment.mFrameDuration;
     }
-    
+
     bool InterpreterContext::isDisabled (const std::string& id) const
     {
         const MWWorld::Ptr ref = getReference (id, false);
         return !ref.getRefData().isEnabled();
     }
-    
+
     void InterpreterContext::enable (const std::string& id)
     {
         MWWorld::Ptr ref = getReference (id, false);
         mEnvironment.mWorld->enable (ref);
     }
-    
+
     void InterpreterContext::disable (const std::string& id)
     {
-        MWWorld::Ptr ref = getReference (id, false);            
+        MWWorld::Ptr ref = getReference (id, false);
         mEnvironment.mWorld->disable (ref);
     }
-    
+
     MWGui::WindowManager& InterpreterContext::getWindowManager()
     {
         return *mEnvironment.mWindowManager;
     }
-    
+
     MWWorld::World& InterpreterContext::getWorld()
     {
         return *mEnvironment.mWorld;
     }
-    
+
     MWSound::SoundManager& InterpreterContext::getSoundManager()
     {
         return *mEnvironment.mSoundManager;
     }
-    
+
     MWWorld::Ptr InterpreterContext::getReference()
     {
         return getReference ("", true);
     }
 }
-

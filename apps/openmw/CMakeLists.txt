@@ -51,6 +51,7 @@ set(GAMESCRIPT
     mwscript/soundextensions.cpp
     mwscript/skyextensions.cpp
     mwscript/statsextensions.cpp
+    mwscript/containerextensions.cpp
     mwscript/extensions.cpp
     mwscript/globalscripts.cpp
     )
@@ -65,6 +66,7 @@ set(GAMESCRIPT_HEADER
     mwscript/soundextensions.hpp
     mwscript/skyextensions.hpp
     mwscript/statsextensions.hpp
+    mwscript/containerextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
     )
@@ -81,6 +83,9 @@ set(GAMEWORLD
     mwworld/globals.cpp
     mwworld/class.cpp
     mwworld/actionteleport.cpp
+    mwworld/actiontalk.cpp
+    mwworld/actiontake.cpp
+    mwworld/containerutil.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -92,6 +97,11 @@ set(GAMEWORLD_HEADER
     mwworld/action.hpp
     mwworld/nullaction.hpp
     mwworld/actionteleport.hpp
+    mwworld/actiontalk.hpp
+    mwworld/actiontake.hpp
+    mwworld/containerstore.hpp
+    mwworld/manualref.hpp
+    mwworld/containerutil.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
@@ -140,6 +150,7 @@ set(GAMECLASS_HEADER
     mwclass/probe.hpp
     mwclass/repair.hpp
     mwclass/static.hpp
+    mwclass/containerutil.hpp
     )
 source_group(apps\\openmw\\mwclass FILES ${GAMECLASS} ${GAMECLASS_HEADER})
 

@@ -53,6 +53,14 @@ namespace MWClass
         }
     }
 
+    std::string Door::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+            ptr.get<ESM::Door>();
+
+        return ref->base->script;
+    }
+
     void Door::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Door);

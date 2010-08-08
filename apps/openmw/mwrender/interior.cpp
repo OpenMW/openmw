@@ -237,6 +237,16 @@ void InteriorCellRender::disable (const std::string& handle)
         scene.getMgr()->getSceneNode (handle)->setVisible (false);
 }
 
+void InteriorCellRender::deleteObject (const std::string& handle)
+{
+    if (!handle.empty())
+    {
+        Ogre::SceneNode *node = scene.getMgr()->getSceneNode (handle);
+        node->removeAndDestroyAllChildren();
+        scene.getMgr()->destroySceneNode (node);
+    }
+}
+
 // Magic function from the internets. Might need this later.
 /*
 void Scene::DestroyAllAttachedMovableObjects( SceneNode* i_pSceneNode )

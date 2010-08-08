@@ -41,6 +41,21 @@ namespace MWWorld
         return boost::shared_ptr<Action> (new NullAction);
     }
 
+    ContainerStore<RefData>& Class::getContainerStore (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have a container store");
+    }
+
+    void Class::insertIntoContainer (const Ptr& ptr, ContainerStore<RefData>& containerStore) const
+    {
+        throw std::runtime_error ("class does not support inserting into a container");
+    }
+
+    std::string Class::getScript (const Ptr& ptr) const
+    {
+        return "";
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);

@@ -6,6 +6,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/actiontalk.hpp"
 
 namespace MWClass
 {
@@ -42,6 +43,36 @@ namespace MWClass
         }
 
         return *ptr.getRefData().getCreatureStats();
+    }
+
+    boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
+        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+    {
+        return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
+	}
+
+    MWWorld::ContainerStore<MWWorld::RefData>& Creature::getContainerStore (const MWWorld::Ptr& ptr)
+        const
+    {
+        if (!ptr.getRefData().getContainerStore().get())
+        {
+            boost::shared_ptr<MWWorld::ContainerStore<MWWorld::RefData> > store (
+                new MWWorld::ContainerStore<MWWorld::RefData>);
+
+            // TODO add initial content
+
+            ptr.getRefData().getContainerStore() = store;
+        }
+
+        return *ptr.getRefData().getContainerStore();
+    }
+
+    std::string Creature::getScript (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->base->script;
     }
 
     void Creature::registerSelf()
