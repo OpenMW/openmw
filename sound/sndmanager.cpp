@@ -104,8 +104,6 @@ public:
     if(mgr) lock();
   }
 
-  // Override stop() and pause()
-
   // Called regularly by the manager
   void update()
   {
@@ -117,9 +115,12 @@ public:
     // point.
   }
 
-  // Not implemented yet
   SoundPtr clone() const
-  { return SoundPtr(); }
+  {
+    // Cloning only works when we have a manager.
+    assert(mgr);
+    return mgr->wrap(client->clone());
+  }
 };
 
 struct SoundManager::SoundManagerList
