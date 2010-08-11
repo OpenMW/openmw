@@ -10,6 +10,7 @@ namespace Mangle
     // For use in writing other filters
     class SoundFilter : public Sound
     {
+    protected:
       SoundPtr client;
 
     public:
@@ -31,6 +32,7 @@ namespace Mangle
 
     class FactoryFilter : public SoundFactory
     {
+    protected:
       SoundFactoryPtr client;
 
     public:
