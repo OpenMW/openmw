@@ -48,35 +48,35 @@ namespace Compiler
         switch (mPutback)
         {
             case Putback_Special:
-           
-                mPutback = Putback_None;            
+
+                mPutback = Putback_None;
                 return parser.parseSpecial (mPutbackCode, mPutbackLoc, *this);
-            
+
             case Putback_Integer:
 
                 mPutback = Putback_None;
                 return parser.parseInt (mPutbackInteger, mPutbackLoc, *this);
-            
+
             case Putback_Float:
 
                 mPutback = Putback_None;
                 return parser.parseFloat (mPutbackFloat, mPutbackLoc, *this);
-                       
+
             case Putback_Name:
-            
+
                 mPutback = Putback_None;
                 return parser.parseName (mPutbackName, mPutbackLoc, *this);
-            
+
             case Putback_Keyword:
 
                 mPutback = Putback_None;
                 return parser.parseKeyword (mPutbackCode, mPutbackLoc, *this);
-            
+
             case Putback_None:
-            
+
                 break;
         }
-    
+
         char c;
 
         if (!get (c))
@@ -265,12 +265,12 @@ namespace Compiler
             cont = parser.parseName (name, loc, *this);
             return true;
         }
-        
+
         int i = 0;
 
         std::string lowerCase;
         lowerCase.reserve (name.size());
-        
+
         std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
             (int(*)(int)) std::tolower);
 
@@ -283,13 +283,13 @@ namespace Compiler
             cont = parser.parseKeyword (i, loc, *this);
             return true;
         }
-        
+
         if (mExtensions)
         {
             if (int keyword = mExtensions->searchKeyword (lowerCase))
             {
                 cont = parser.parseKeyword (keyword, loc, *this);
-                return true;            
+                return true;
             }
         }
 
@@ -316,19 +316,20 @@ namespace Compiler
                     name += c;
                     break;
                 }
-                else if (c=='\\')
-                {
-                    if (!get (c))
-                    {
-                        mErrorHandler.error ("incomplete escape sequence", mLoc);
-                        break;
-                    }
-                }
+// ignoring escape sequences for now, because they are messing up stupid Windows path names.
+//                else if (c=='\\')
+//                {
+//                    if (!get (c))
+//                    {
+//                        mErrorHandler.error ("incomplete escape sequence", mLoc);
+//                        break;
+//                    }
+//                }
                 else if (c=='\n')
                 {
                     mErrorHandler.error ("incomplete string or name", mLoc);
                     break;
-                }                
+                }
             }
             else if (!(c=='"' && name.empty()))
             {
@@ -341,7 +342,7 @@ namespace Compiler
                 if (first && std::isdigit (c))
                     error = true;
             }
-                
+
             name += c;
             first = false;
         }
@@ -374,7 +375,7 @@ namespace Compiler
             else
             {
                 putback (c);
-                return false;           
+                return false;
             }
         }
         else if (c=='!')
@@ -449,8 +450,8 @@ namespace Compiler
             return false;
 
         if (special==S_newline)
-            mLoc.mLiteral = "<newline>"; 
-            
+            mLoc.mLiteral = "<newline>";
+
         TokenLoc loc (mLoc);
         mLoc.mLiteral.clear();
 
@@ -477,40 +478,39 @@ namespace Compiler
     {
         while (scanToken (parser));
     }
-    
+
     void Scanner::putbackSpecial (int code, const TokenLoc& loc)
     {
         mPutback = Putback_Special;
         mPutbackCode = code;
-        mPutbackLoc = loc;    
+        mPutbackLoc = loc;
     }
-    
+
     void Scanner::putbackInt (int value, const TokenLoc& loc)
     {
         mPutback = Putback_Integer;
         mPutbackInteger = value;
-        mPutbackLoc = loc;    
-    }   
+        mPutbackLoc = loc;
+    }
 
     void Scanner::putbackFloat (float value, const TokenLoc& loc)
     {
         mPutback = Putback_Float;
         mPutbackFloat = value;
-        mPutbackLoc = loc;    
-    }   
+        mPutbackLoc = loc;
+    }
 
     void Scanner::putbackName (const std::string& name, const TokenLoc& loc)
     {
         mPutback = Putback_Name;
         mPutbackName = name;
-        mPutbackLoc = loc;    
-    }   
+        mPutbackLoc = loc;
+    }
 
     void Scanner::putbackKeyword (int keyword, const TokenLoc& loc)
     {
         mPutback = Putback_Keyword;
         mPutbackCode = keyword;
-        mPutbackLoc = loc;    
-    }   
+        mPutbackLoc = loc;
+    }
 }
-
