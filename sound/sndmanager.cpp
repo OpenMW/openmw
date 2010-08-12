@@ -1,6 +1,6 @@
 #include "sndmanager.hpp"
 
-#include <misc/list.hpp>
+#include "../misc/list.hpp"
 #include <boost/weak_ptr.hpp>
 
 using namespace OEngine::Sound;
