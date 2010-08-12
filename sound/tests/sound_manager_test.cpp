@@ -33,15 +33,38 @@ int main()
   assert(mg->numSounds() == 1);
 
   // Loop while there are still sounds to manage
-  int i=0;
   while(mg->numSounds() != 0)
     {
-      i++;
       assert(mg->numSounds() == 1);
       usleep(10000);
       if(mg->needsUpdate)
         mg->update();
     }
+
+  SoundPtr snd = mg->play(sound);
+  cout << "Replaying\n";
+  int i = 0;
+  while(mg->numSounds() != 0)
+    {
+      assert(mg->numSounds() == 1);
+      usleep(10000);
+      if(mg->needsUpdate)
+        mg->update();
+
+      if(i++ == 70)
+        {
+          cout << "pause\n";
+          snd->pause();
+        }
+      if(i == 130)
+        {
+          cout << "restart\n";
+          snd->play();
+          // Let the sound go out of scope
+          snd.reset();
+        }
+    }
+
   cout << "Done playing.\n";
 
   assert(mg->numSounds() == 0);
