@@ -38,7 +38,7 @@ void OMW::Engine::executeLocalScripts()
         mEnvironment.mWorld->getLocalScripts().begin());
         iter!=mEnvironment.mWorld->getLocalScripts().end(); ++iter)
     {
-        if (!mIgnoreLocalPtr.isEmpty() && mIgnoreLocalPtr!=iter->second)
+        if (mIgnoreLocalPtr.isEmpty() || mIgnoreLocalPtr!=iter->second)
         {
             MWScript::InterpreterContext interpreterContext (mEnvironment,
                 &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
