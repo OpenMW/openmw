@@ -14,10 +14,6 @@ namespace Ogre
 
 namespace MWSound
 {
-    // Note: the -> script syntax is not implemented yet ( script
-    // instructions of the type npc_x -> say "file", "text" aren't
-    // working)
-    
     class SoundManager
     {
             // Hide implementation details - engine.cpp is compiling
@@ -29,11 +25,9 @@ namespace MWSound
             SoundManager(Ogre::Root*, Ogre::Camera*);
             ~SoundManager();
         
-            void say (MWWorld::Ptr reference, const std::string& filename,
-                const std::string& text);
+            void say (MWWorld::Ptr reference, const std::string& filename);
             ///< Make an actor say some text.
             /// \param filename name of a sound file in "Sound/Vo/" in the data directory.
-            /// \param text Subtitle
             
             bool sayDone (MWWorld::Ptr reference) const;
             ///< Is actor not speaking?

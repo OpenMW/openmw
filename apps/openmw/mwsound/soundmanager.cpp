@@ -2,6 +2,8 @@
 #include "soundmanager.hpp"
 
 #include <openengine/sound/sndmanager.hpp>
+#include <mangle/sound/clients/ogre_listener_mover.hpp>
+#include <mangle/sound/clients/ogre_output_updater.hpp>
 
 /* Set up the sound manager to use Audiere for input (reading sound
    files) and OpenAL for output.
@@ -16,6 +18,8 @@
  */
 
 using namespace Mangle::Sound;
+typedef OEngine::Sound::SoundManager OEManager;
+typedef OEngine::Sound::SoundManagerPtr OEManagerPtr;
 
 /* Set the position on a sound based on a Ptr. TODO: We do not support
    tracking moving objects yet, once a sound is started it stays in
@@ -26,10 +30,10 @@ using namespace Mangle::Sound;
    frame is expensive, so there should be a special flag for sounds
    that need to track their attached object.
  */
-static void setPos(SoundPtr snd, MWWorld::Ptr ref)
+static void setPos(SoundPtr snd, const MWWorld::Ptr ref)
 {
     // Get sound position from the reference
-    float *pos = ref.getCellRef().pos.pos;
+    const float *pos = ref.getCellRef().pos.pos;
 
     // Move the sound. Might need to convert coordinates, test.
     snd->setPos(pos[0], pos[1], pos[2]);
@@ -39,20 +43,34 @@ namespace MWSound
 {
     struct SoundManager::SoundImpl
     {
-        OEngine::Sound::SoundManager mgr;
+        /* This is the sound manager. It loades, stores and deletes
+           sounds based on the sound factory it is given.
+         */
+        OEManagerPtr mgr;
+
+        /* This class calls update() on the sound manager each frame
+           using and Ogre::FrameListener
+         */
+        Mangle::Sound::OgreOutputUpdater updater;
+
+        /* This class tracks the movement of an Ogre::Camera and moves
+           a sound listener automatically to follow it.
+         */
+        Mangle::Sound::OgreListenerMover cameraTracker;
 
         SoundImpl()
-            : mgr(SoundFactoryPtr(new SOUND_FACTORY))
+          : mgr(new OEManager(SoundFactoryPtr(new SOUND_FACTORY)))
+          , updater(mgr)
+          , cameraTracker(mgr)
         {}
-
-        std::map<std::string, std::string> mSounds; // object, sound
     };
 
     SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera)
     {
         mData = new SoundImpl;
 
-        // TODO: Set up updater and camera listener.
+        // Attach the camera to the camera tracker
+        mData->cameraTracker.followCamera(camera);
     }
 
     SoundManager::~SoundManager()
@@ -60,61 +78,45 @@ namespace MWSound
         delete mData;
     }
 
-    void SoundManager::say (MWWorld::Ptr reference, const std::string& filename,
-        const std::string& text)
+    void SoundManager::say (MWWorld::Ptr reference, const std::string& filename)
     {
-        std::cout << "sound effect: " << reference.getRefData().getHandle() << " is speaking" << std::endl;
-        
+        // Play the sound at the correct position
+        SoundPtr snd = mData->mgr->play(filename);
+        setPos(snd, reference);
+        // TODO: We need to attach it to the reference somehow. A weak
+        // pointer is probably the best bet
     }
 
     bool SoundManager::sayDone (MWWorld::Ptr reference) const
     {
-        return false;
+        return true;
+        // TODO: Ask the reference to check its attached 'say' sound.
     }
 
     void SoundManager::streamMusic (const std::string& filename)
     {
-        std::cout << "sound effect: playing music" << filename << std::endl;
+        // Play the sound and tell it to stream, if possible.
+        mData->mgr->play(filename)->setStreaming(true);
     }
         
     void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
     {
-        std::cout
-            << "sound effect: playing sound " << soundId
-            << " at volume " << volume << ", at pitch " << pitch
-            << std::endl;
     }
 
     void SoundManager::playSound3D (MWWorld::Ptr reference, const std::string& soundId,
         float volume, float pitch, bool loop)
     {
-        std::cout
-            << "sound effect: playing sound " << soundId
-            << " from " << reference.getRefData().getHandle()
-            << " at volume " << volume << ", at pitch " << pitch
-            << std::endl;   
-            
-        mData->mSounds[reference.getRefData().getHandle()] = soundId;
+        // Not implemented - need both a way to find sounds by id and
+        // a way to attach them to the reference
     }
 
     void SoundManager::stopSound3D (MWWorld::Ptr reference, const std::string& soundId)
     {
-        std::cout
-            << "sound effect : stop playing sound " << soundId
-            << " from " << reference.getRefData().getHandle() << std::endl;
-            
-        mData->mSounds[reference.getRefData().getHandle()] = "";
     }
 
     bool SoundManager::getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId) const
     {
-         std::map<std::string, std::string>::const_iterator iter =
-            mData->mSounds.find (reference.getRefData().getHandle());
-         
-         if (iter==mData->mSounds.end())
-            return false;
-            
-         return iter->second==soundId;
+      return false;
     }
 }
 

@@ -267,6 +267,18 @@ void OMW::Engine::go()
 
     mOgre.getRoot()->addFrameListener (this);
 
+    // Play some good 'ol tunes
+    std::string music = (mDataDir / "Music/Explore/mx_explore_5.mp3").file_string();
+    try
+      {
+        std::cout << "Playing " << music << "\n";
+        mEnvironment.mSoundManager->streamMusic(music);
+      }
+    catch(std::exception &e)
+      {
+        std::cout << "  Music Error: " << e.what() << "\n";
+      }
+
     // Start the main rendering loop
     mOgre.start();
 

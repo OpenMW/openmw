@@ -32,7 +32,7 @@ namespace MWScript
                     std::string text = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    context.getSoundManager().say (context.getReference(), file, text);
+                    context.getSoundManager().say (context.getReference(), file);
                     context.messageBox (text);
                 } 
         };   
@@ -205,7 +205,7 @@ namespace MWScript
                     runtime.pop();
                         
                     context.getSoundManager().say (context.getWorld().getPtr (id, true),
-                        file, text);
+                        file);
                 } 
         };   
             
