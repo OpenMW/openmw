@@ -90,7 +90,15 @@ set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/events.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
 )
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI})
+set(OENGINE_SOUND
+  # Mangle and OEngine sound files are sort of intertwined, so put
+  # them together here
+  ${LIBDIR}/openengine/sound/sndmanager.cpp
+  ${LIBDIR}/mangle/sound/sources/audiere_source.cpp
+  ${LIBDIR}/mangle/sound/outputs/openal_out.cpp
+  ${LIBDIR}/mangle/stream/clients/audiere_file.cpp
+)
+set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_SOUND})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
 
 set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
@@ -110,6 +118,8 @@ find_package(OGRE REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(Iconv REQUIRED)
+find_package(OpenAL REQUIRED)
+find_package(Audiere REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}

@@ -183,6 +183,8 @@ target_link_libraries(openmw
   ${OGRE_LIBRARIES}
   ${OIS_LIBRARIES}
   ${Boost_LIBRARIES}
+  ${OPENAL_LIBRARY}
+  ${AUDIERE_LIBRARY}
   ${ICONV_LIBRARIES}
   caelum
   MyGUIEngine

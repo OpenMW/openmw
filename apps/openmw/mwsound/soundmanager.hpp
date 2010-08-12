@@ -11,26 +11,28 @@ namespace Interpreter
     class Context;
 }
 
+namespace Ogre
+{
+    class Root;
+    class Camera;
+}
+
 namespace MWSound
 {
-    // Note to the sound implementor (can be removed once the implementation is complete):
-    //
-    // - the dummy implementation allows only one sound effect per object at a time. I am
-    // not sure, if that is what Morrowind does. Beyond the dummy code in this class the script
-    // system does not make any assumption about the number of sound effects.
-    //
-    // - all text-output (error messages and such) must be directed through the
-    // context.messageBox interface.
-    //
-    // - the -> script syntax is not implemented yet ( script instructions of the type
-    // npc_x -> say "file", "text"
-    // aren't working)
+    // Note: the -> script syntax is not implemented yet ( script
+    // instructions of the type npc_x -> say "file", "text" aren't
+    // working)
     
     class SoundManager
     {
-            std::map<std::string, std::string> mSounds; // object, sound (for testing only)
+            // Hide implementation details - engine.cpp is compiling
+            // enough as it is.
+            struct SoundImpl;
+            SoundImpl *mData;
     
         public:
+            SoundManager(Ogre::Root*, Ogre::Camera*);
+            ~SoundManager();
         
             void say (MWWorld::Ptr reference, const std::string& filename,
                 const std::string& text, Interpreter::Context& context);
