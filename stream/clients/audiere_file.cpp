@@ -8,7 +8,7 @@ bool AudiereFile::seek(int pos, SeekMode mode)
   assert(inp->isSeekable);
   assert(inp->hasPosition);
 
-  int newPos;
+  size_t newPos;
 
   switch(mode)
     {

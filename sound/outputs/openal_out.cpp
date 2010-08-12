@@ -146,7 +146,7 @@ SoundPtr OpenAL_Sound::clone() const
 
 // Constructor used for cloned sounds
 OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref)
-  : refCnt(ref), bufferID(buf)
+  : bufferID(buf), refCnt(ref)
 {
   // Increase the reference count
   assert(ref != NULL);
