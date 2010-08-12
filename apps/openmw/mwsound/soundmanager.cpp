@@ -1,8 +1,6 @@
 
 #include "soundmanager.hpp"
 
-#include <components/interpreter/context.hpp>
-
 #include <openengine/sound/sndmanager.hpp>
 
 /* Set up the sound manager to use Audiere for input (reading sound
@@ -63,25 +61,23 @@ namespace MWSound
     }
 
     void SoundManager::say (MWWorld::Ptr reference, const std::string& filename,
-        const std::string& text, Interpreter::Context& context)
+        const std::string& text)
     {
         std::cout << "sound effect: " << reference.getRefData().getHandle() << " is speaking" << std::endl;
         
-        context.messageBox (text);
     }
 
-    bool SoundManager::sayDone (MWWorld::Ptr reference, Interpreter::Context& context) const
+    bool SoundManager::sayDone (MWWorld::Ptr reference) const
     {
         return false;
     }
 
-    void SoundManager::streamMusic (const std::string& filename, Interpreter::Context& context)
+    void SoundManager::streamMusic (const std::string& filename)
     {
         std::cout << "sound effect: playing music" << filename << std::endl;
     }
         
-    void SoundManager::playSound (const std::string& soundId, float volume, float pitch,
-        Interpreter::Context& context)
+    void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
     {
         std::cout
             << "sound effect: playing sound " << soundId
@@ -90,7 +86,7 @@ namespace MWSound
     }
 
     void SoundManager::playSound3D (MWWorld::Ptr reference, const std::string& soundId,
-        float volume, float pitch, bool loop, Interpreter::Context& context)
+        float volume, float pitch, bool loop)
     {
         std::cout
             << "sound effect: playing sound " << soundId
@@ -101,8 +97,7 @@ namespace MWSound
         mData->mSounds[reference.getRefData().getHandle()] = soundId;
     }
 
-    void SoundManager::stopSound3D (MWWorld::Ptr reference, const std::string& soundId,
-        Interpreter::Context& context)
+    void SoundManager::stopSound3D (MWWorld::Ptr reference, const std::string& soundId)
     {
         std::cout
             << "sound effect : stop playing sound " << soundId
@@ -111,8 +106,7 @@ namespace MWSound
         mData->mSounds[reference.getRefData().getHandle()] = "";
     }
 
-    bool SoundManager::getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId,
-        Interpreter::Context& context) const
+    bool SoundManager::getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId) const
     {
          std::map<std::string, std::string>::const_iterator iter =
             mData->mSounds.find (reference.getRefData().getHandle());

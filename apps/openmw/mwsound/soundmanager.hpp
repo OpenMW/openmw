@@ -6,11 +6,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace Interpreter
-{
-    class Context;
-}
-
 namespace Ogre
 {
     class Root;
@@ -35,32 +30,29 @@ namespace MWSound
             ~SoundManager();
         
             void say (MWWorld::Ptr reference, const std::string& filename,
-                const std::string& text, Interpreter::Context& context);
+                const std::string& text);
             ///< Make an actor say some text.
             /// \param filename name of a sound file in "Sound/Vo/" in the data directory.
             /// \param text Subtitle
             
-            bool sayDone (MWWorld::Ptr reference, Interpreter::Context& context) const;
+            bool sayDone (MWWorld::Ptr reference) const;
             ///< Is actor not speaking?
 
-            void streamMusic (const std::string& filename, Interpreter::Context& context);
+            void streamMusic (const std::string& filename);
             ///< Play a soundifle
             /// \param filename name of a sound file in "Music/" in the data directory.
                        
-            void playSound (const std::string& soundId, float volume, float pitch,
-                Interpreter::Context& context);
+            void playSound (const std::string& soundId, float volume, float pitch);
             ///< Play a sound, independently of 3D-position
             
             void playSound3D (MWWorld::Ptr reference, const std::string& soundId,
-                float volume, float pitch, bool loop, Interpreter::Context& context);
+                float volume, float pitch, bool loop);
             ///< Play a sound from an object
 
-            void stopSound3D (MWWorld::Ptr reference, const std::string& soundId,
-                Interpreter::Context& context);
+            void stopSound3D (MWWorld::Ptr reference, const std::string& soundId);
             ///< Stop the given object from playing the given sound.
 
-            bool getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId,
-                Interpreter::Context& context) const;
+            bool getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId) const;
             ///< Is the given sound currently playing on the given object?
     };
 }
