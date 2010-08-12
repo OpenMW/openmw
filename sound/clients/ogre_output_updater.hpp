@@ -14,15 +14,15 @@ namespace Sound {
 
   struct OgreOutputUpdater : Ogre::FrameListener
   {
-    Mangle::Sound::SoundFactory &driver;
+    Mangle::Sound::SoundFactoryPtr driver;
 
-    OgreOutputUpdater(Mangle::Sound::SoundFactory &drv)
+    OgreOutputUpdater(Mangle::Sound::SoundFactoryPtr drv)
       : driver(drv)
-    { assert(drv.needsUpdate); }
+    { assert(drv->needsUpdate); }
 
     bool frameStarted(const Ogre::FrameEvent &evt)
     {
-      driver.update();
+      driver->update();
       return true;
     }
   };
