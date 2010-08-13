@@ -2,7 +2,8 @@ project(OpenMW)
 
 # Sound source selection
 option(USE_AUDIERE "use Audiere for sound" OFF)
-option(USE_FFMPEG "use ffmpeg for sound" ON)
+option(USE_FFMPEG "use ffmpeg for sound" OFF)
+option(USE_MPG123 "use mpg123 for sound" ON)
 
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
@@ -106,7 +107,7 @@ if (USE_AUDIERE)
     find_package(Audiere REQUIRED)
     set(SOUND_INPUT_INCLUDES ${AUDIERE_INCLUDE_DIR})
     set(SOUND_INPUT_LIBRARY ${AUDIERE_LIBRARY})
-    add_definitions(-DOPENMW_USE_AUDIERE)
+    set(SOUND_DEFINE -DOPENMW_USE_AUDIERE)
 endif (USE_AUDIERE)
 
 if (USE_FFMPEG)
@@ -115,8 +116,17 @@ if (USE_FFMPEG)
     find_package(FFMPEG REQUIRED)
     set(SOUND_INPUT_INCLUDES ${FFMPEG_INCLUDE_DIR})
     set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
-    add_definitions(-DOPENMW_USE_FFMPEG)
+    set(SOUND_DEFINE -DOPENMW_USE_FFMPEG)
 endif (USE_FFMPEG)
+
+if (USE_MPG123)
+    set(MANGLE_SOUND_OUTPUT
+        ${LIBDIR}/mangle/sound/sources/mpg123_source.cpp)
+    find_package(MPG123 REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${MPG123_INCLUDE_DIR})
+    set(SOUND_INPUT_LIBRARY ${MPG123_LIBRARY})
+    set(SOUND_DEFINE -DOPENMW_USE_MPG123)
+endif (USE_MPG123)
 
 set(OENGINE_SOUND
   # Mangle and OEngine sound files are sort of intertwined, so put
@@ -150,7 +160,6 @@ include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
 	${ICONV_INCLUDE_DIR}
-    ${SOUND_INPUT_INCLUDES}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include

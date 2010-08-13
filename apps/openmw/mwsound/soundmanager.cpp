@@ -18,6 +18,11 @@
 #define SOUND_FACTORY OpenAL_FFMpeg_Factory
 #endif
 
+#ifdef OPENMW_USE_MPG123
+#include <mangle/sound/filters/openal_mpg123.hpp>
+#define SOUND_FACTORY OpenAL_Mpg123_Factory
+#endif
+
 using namespace Mangle::Sound;
 typedef OEngine::Sound::SoundManager OEManager;
 typedef OEngine::Sound::SoundManagerPtr OEManagerPtr;

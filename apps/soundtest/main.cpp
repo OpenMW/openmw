@@ -18,6 +18,11 @@ AudiereLoader loader;
 FFMpegLoader loader;
 #endif
 
+#ifdef OPENMW_USE_MPG123
+#include <mangle/sound/filters/openal_mpg123.hpp>
+Mpg123Loader loader;
+#endif
+
 OpenAL_Factory openal;
 
 void play(const char* name)
