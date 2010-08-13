@@ -94,8 +94,8 @@ Mpg123Source::Mpg123Source(const std::string &file)
 
   mpg123_handle *mhh = (mpg123_handle*)mh;
 
-  // Open the file
-  err = mpg123_open(mhh, file.c_str());
+  // Open the file (hack around constness)
+  err = mpg123_open(mhh, (char*)file.c_str());
   checkError(err, mh);
 
   // Get the format
