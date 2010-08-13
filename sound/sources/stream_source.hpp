@@ -9,8 +9,8 @@ namespace Sound {
 /// A class for reading raw samples directly from a stream.
 class Stream2Samples : public SampleSource
 {
-  int32_t rate, channels, bits;
   Mangle::Stream::StreamPtr inp;
+  int32_t rate, channels, bits;
 
  public:
   Stream2Samples(Mangle::Stream::StreamPtr _inp, int32_t _rate, int32_t _channels, int32_t _bits)
