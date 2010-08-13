@@ -11,11 +11,23 @@ using namespace Mangle::Sound;
 static void fail(const std::string &msg)
 { throw str_exception("OpenAL exception: " + msg); }
 
-static void checkALError(const std::string &msg)
+/*
+  Check for AL error. Since we're always calling this with string
+  literals, and it only makes sense to optimize for the non-error
+  case, the parameter is const char* rather than std::string.
+
+  This way we don't force the compiler to create a string object each
+  time we're called (since the string is never used unless there's an
+  error), although a good compiler might have optimized that away in
+  any case.
+ */
+static void checkALError(const char *where)
 {
   ALenum err = alGetError();
   if(err != AL_NO_ERROR)
     {
+      std::string msg = where;
+
       const ALchar* errmsg = alGetString(err);
       if(errmsg)
         fail("\"" + std::string(alGetString(err)) + "\" while " + msg);
@@ -154,7 +166,9 @@ OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref)
 
   // Create a source
   alGenSources(1, &inst);
+  checkALError("creating instance (clone)");
   alSourcei(inst, AL_BUFFER, bufferID);
+  checkALError("assigning buffer (clone)");
 }
 
 // Constructor used for original (non-cloned) sounds
@@ -166,6 +180,7 @@ OpenAL_Sound::OpenAL_Sound(SampleSourcePtr input)
 
   // Set up the OpenAL buffer
   alGenBuffers(1, &bufferID);
+  checkALError("generating buffer");
   assert(bufferID != 0);
 
   // Does the stream support pointer operations?
@@ -187,7 +202,9 @@ OpenAL_Sound::OpenAL_Sound(SampleSourcePtr input)
 
   // Create a source
   alGenSources(1, &inst);
+  checkALError("creating source");
   alSourcei(inst, AL_BUFFER, bufferID);
+  checkALError("assigning buffer");
 
   // Create a cheap reference counter for the buffer
   refCnt = new int;
@@ -208,6 +225,7 @@ OpenAL_Sound::~OpenAL_Sound()
       // We're the last owner. Delete the buffer and the counter
       // itself.
       alDeleteBuffers(1, &bufferID);
+      checkALError("deleting buffer");
       delete refCnt;
     }
 }
