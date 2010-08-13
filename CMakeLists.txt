@@ -48,7 +48,10 @@ set(ESM_STORE_HEADER
 source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
-source_group(components\\esm FILES ${ESM_HEADER}) 
+set(ESM
+    ${COMP_DIR}/esm/load_impl.cpp
+)
+source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 
 set(MISC 
     ${COMP_DIR}/misc/stringops.cpp
@@ -68,7 +71,7 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC}
-    ${COMPILER} ${INTERPRETER})
+    ${COMPILER} ${INTERPRETER} ${ESM})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
     ${INTERPRETER_HEADER})
