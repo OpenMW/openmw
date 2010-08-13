@@ -7,5 +7,5 @@ add_executable(sound_test main.cpp ${OENGINE_SOUND})
 
 target_link_libraries(sound_test
   ${OPENAL_LIBRARY}
-  ${AUDIERE_LIBRARY}
+  ${SOUND_INPUT_LIBRARY}
 )

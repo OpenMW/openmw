@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <mangle/stream/servers/file_stream.hpp>
-#include <mangle/sound/filters/openal_audiere.hpp>
 #include <mangle/sound/sources/stream_source.hpp>
 #include <mangle/stream/filters/buffer_stream.hpp>
 
@@ -9,14 +8,23 @@ using namespace std;
 using namespace Mangle::Stream;
 using namespace Mangle::Sound;
 
+#ifdef OPENMW_USE_AUDIERE
+#include <mangle/sound/filters/openal_audiere.hpp>
 AudiereLoader loader;
+#endif
+
+#ifdef OPENMW_USE_FFMPEG
+#include <mangle/sound/filters/openal_ffmpeg.hpp>
+FFMpegLoader loader;
+#endif
+
 OpenAL_Factory openal;
 
 void play(const char* name)
 {
   try
     {
-      cout << "Opening " << name << " via Audiere\n";
+      cout << "Opening " << name << "\n";
       SampleSourcePtr samples = loader.load(name);
       cout << "Loading entire file into memory\n";
       StreamPtr buf(new BufferStream(samples));

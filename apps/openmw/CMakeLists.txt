@@ -184,7 +184,7 @@ target_link_libraries(openmw
   ${OIS_LIBRARIES}
   ${Boost_LIBRARIES}
   ${OPENAL_LIBRARY}
-  ${AUDIERE_LIBRARY}
+  ${SOUND_INPUT_LIBRARY}
   ${ICONV_LIBRARIES}
   caelum
   MyGUIEngine

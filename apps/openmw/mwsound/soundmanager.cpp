@@ -5,17 +5,18 @@
 #include <mangle/sound/clients/ogre_listener_mover.hpp>
 #include <mangle/sound/clients/ogre_output_updater.hpp>
 
-/* Set up the sound manager to use Audiere for input (reading sound
-   files) and OpenAL for output.
+/* Set up the sound manager to use Audiere of FFMPEG for input. The
+   OPENMW_USE_x macros are set in CMakeLists.txt.
  */
+#ifdef OPENMW_USE_AUDIERE
 #include <mangle/sound/filters/openal_audiere.hpp>
 #define SOUND_FACTORY OpenAL_Audiere_Factory
-/*
-   We could allow several options for libraries via external #defines
-   if we like, controlled through CMake. The only things that need to
-   change is the include and #define above, and of course the linker
-   parameters.
- */
+#endif
+
+#ifdef OPENMW_USE_FFMPEG
+#include <mangle/sound/filters/openal_ffmpeg.hpp>
+#define SOUND_FACTORY OpenAL_FFMpeg_Factory
+#endif
 
 using namespace Mangle::Sound;
 typedef OEngine::Sound::SoundManager OEManager;

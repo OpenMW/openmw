@@ -1,5 +1,9 @@
 project(OpenMW)
 
+# Sound source selection
+set(USE_AUDIERE "no")
+set(USE_FFMPEG "yes")
+
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
@@ -93,13 +97,31 @@ set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/events.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
 )
+
+# Sound setup
+if (USE_AUDIERE)
+    set(MANGLE_SOUND_OUTPUT
+        ${LIBDIR}/mangle/sound/sources/audiere_source.cpp
+        ${LIBDIR}/mangle/stream/clients/audiere_file.cpp)
+    find_package(Audiere REQUIRED)
+    set(SOUND_INPUT_LIBRARY ${AUDIERE_LIBRARY})
+    add_definitions(-DOPENMW_USE_AUDIERE)
+endif (USE_AUDIERE)
+
+if (USE_FFMPEG)
+    set(MANGLE_SOUND_OUTPUT
+        ${LIBDIR}/mangle/sound/sources/ffmpeg_source.cpp)
+    find_package(FFMPEG REQUIRED)
+    set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
+    add_definitions(-DOPENMW_USE_FFMPEG)
+endif (USE_FFMPEG)
+
 set(OENGINE_SOUND
   # Mangle and OEngine sound files are sort of intertwined, so put
   # them together here
   ${LIBDIR}/openengine/sound/sndmanager.cpp
-  ${LIBDIR}/mangle/sound/sources/audiere_source.cpp
   ${LIBDIR}/mangle/sound/outputs/openal_out.cpp
-  ${LIBDIR}/mangle/stream/clients/audiere_file.cpp
+  ${MANGLE_SOUND_OUTPUT}
 )
 set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_SOUND})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
@@ -122,7 +144,6 @@ find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(Iconv REQUIRED)
 find_package(OpenAL REQUIRED)
-find_package(Audiere REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
