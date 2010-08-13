@@ -200,3 +200,5 @@ option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
+
+add_subdirectory( apps/soundtest ) 
