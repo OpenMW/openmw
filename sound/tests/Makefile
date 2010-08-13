@@ -1,6 +1,6 @@
 GCC=g++ -I../
 
-all: audiere_source_test ffmpeg_source_test openal_output_test openal_audiere_test
+all: audiere_source_test ffmpeg_source_test openal_output_test openal_audiere_test openal_ffmpeg_test
 
 L_FFMPEG=$(shell pkg-config --libs libavcodec libavformat)
 L_OPENAL=$(shell pkg-config --libs openal)
@@ -8,6 +8,9 @@ L_AUDIERE=-laudiere
 
 openal_audiere_test: openal_audiere_test.cpp ../sources/audiere_source.cpp ../outputs/openal_out.cpp ../../stream/clients/audiere_file.cpp
 	$(GCC) $^ -o $@ $(L_AUDIERE) $(L_OPENAL)
+
+openal_ffmpeg_test: openal_ffmpeg_test.cpp ../sources/ffmpeg_source.cpp ../outputs/openal_out.cpp
+	$(GCC) $^ -o $@ $(L_FFMPEG) $(L_OPENAL)
 
 openal_output_test: openal_output_test.cpp ../outputs/openal_out.cpp
 	$(GCC) $^ -o $@ $(L_OPENAL)

@@ -1,5 +1,5 @@
-#ifndef MANGLE_FFMPEG_OPENAL_H
-#define MANGLE_FFMPEG_OPENAL_H
+#ifndef MANGLE_AUDIERE_OPENAL_H
+#define MANGLE_AUDIERE_OPENAL_H
 
 #include "input_filter.hpp"
 #include "../sources/audiere_source.hpp"
