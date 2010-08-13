@@ -1,4 +1,4 @@
-GCC=g++ -I../
+GCC=g++ -I../ -Wall
 
 all: dummy_test ogre_client_test ogre_resource_test ogre_server_test physfs_server_test
 

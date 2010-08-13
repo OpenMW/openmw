@@ -1,4 +1,4 @@
-GCC=g++ -I../
+GCC=g++ -I../ -Wall
 
 all: audiere_source_test ffmpeg_source_test openal_output_test openal_audiere_test openal_ffmpeg_test
 

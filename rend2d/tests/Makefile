@@ -1,4 +1,4 @@
-GCC=g++
+GCC=g++ -Wall
 
 all: sdl_test
 

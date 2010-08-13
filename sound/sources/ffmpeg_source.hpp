@@ -18,7 +18,7 @@ class FFMpegSource : public SampleSource
 {
   AVFormatContext *FmtCtx;
   AVCodecContext *CodecCtx;
-  int StreamNum;
+  unsigned int StreamNum;
 
   std::vector<uint8_t> storage;
 

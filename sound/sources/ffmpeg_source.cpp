@@ -97,8 +97,8 @@ size_t FFMpegSource::read(void *data, size_t length)
 
   // First, copy over any stored data we might be sitting on
   {
-    int s = storage.size();
-    int copy = s;
+    size_t s = storage.size();
+    size_t copy = s;
     if(s)
       {
         // Make sure there's room
@@ -111,6 +111,7 @@ size_t FFMpegSource::read(void *data, size_t length)
         left -= copy;
 
         // Is there anything left in the storage?
+        assert(s>= copy);
         s -= copy;
         if(s)
           {
@@ -133,7 +134,7 @@ size_t FFMpegSource::read(void *data, size_t length)
         break;
 
       // We only allow one stream per file at the moment
-      assert(StreamNum == packet.stream_index);
+      assert((int)StreamNum == packet.stream_index);
 
       // Decode the packet
       int len = AVCODEC_MAX_AUDIO_FRAME_SIZE;
@@ -151,7 +152,7 @@ size_t FFMpegSource::read(void *data, size_t length)
       if(len > 0)
         {
           // copy = how many bytes do we copy now
-          int copy = len;
+          size_t copy = len;
           if(copy > left)
             copy = left;
 

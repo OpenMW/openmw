@@ -22,7 +22,9 @@ class MangleArchive : public Ogre::Archive
  public:
   MangleArchive(VFSPtr _vfs, const std::string &name,
                 const std::string &archType = "Mangle")
-    : vfs(_vfs), Ogre::Archive(name, archType) {}
+    : Ogre::Archive(name, archType)
+    , vfs(_vfs)
+  {}
 
   bool isCaseSensitive() const { return vfs->isCaseSensitive; }
 

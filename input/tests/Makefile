@@ -1,4 +1,4 @@
-GCC=g++
+GCC=g++ -Wall
 
 all: sdl_driver_test ois_driver_test evtlist_test
 

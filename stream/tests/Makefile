@@ -1,4 +1,4 @@
-GCC=g++ -I../
+GCC=g++ -I../ -Wall
 
 all: ogre_client_test audiere_client_test memory_server_test buffer_filter_test file_server_test slice_filter_test file_write_test
 

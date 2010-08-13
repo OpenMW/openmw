@@ -17,7 +17,7 @@ void print(FileInfoPtr inf) { print(*inf); }
 
 void print(FileInfoList &lst)
 {
-  for(int i=0; i<lst.size(); i++)
+  for(unsigned i=0; i<lst.size(); i++)
     print(lst[i]);
 }
 void print(FileInfoListPtr lst) { print(*lst); }
