@@ -1,8 +1,8 @@
 project(OpenMW)
 
 # Sound source selection
-set(USE_AUDIERE "no")
-set(USE_FFMPEG "yes")
+option(USE_AUDIERE "use Audiere for sound" OFF)
+option(USE_FFMPEG "use ffmpeg for sound" ON)
 
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
@@ -13,17 +13,17 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 # source directory: components
 set(COMP_DIR ${CMAKE_SOURCE_DIR}/components)
 
-set(BSA 
+set(BSA
     ${COMP_DIR}/bsa/bsa_archive.cpp
     ${COMP_DIR}/bsa/bsa_file.cpp)
-set(BSA_HEADER 
+set(BSA_HEADER
     ${COMP_DIR}/bsa/bsa_archive.hpp
     ${COMP_DIR}/bsa/bsa_file.hpp)
 source_group(components\\bsa FILES ${BSA} ${BSA_HEADER})
 
-set(NIF 
+set(NIF
     ${COMP_DIR}/nif/nif_file.cpp)
-set(NIF_HEADER 
+set(NIF_HEADER
     ${COMP_DIR}/nif/controlled.hpp
     ${COMP_DIR}/nif/effect.hpp
     ${COMP_DIR}/nif/nif_types.hpp
@@ -35,17 +35,17 @@ set(NIF_HEADER
     ${COMP_DIR}/nif/data.hpp
     ${COMP_DIR}/nif/nif_file.hpp
     ${COMP_DIR}/nif/property.hpp)
-source_group(components\\nif FILES ${NIF} ${NIF_HEADER})    
+source_group(components\\nif FILES ${NIF} ${NIF_HEADER})
 
-set(NIFOGRE 
+set(NIFOGRE
     ${COMP_DIR}/nifogre/ogre_nif_loader.cpp)
-set(NIFOGRE_HEADER 
+set(NIFOGRE_HEADER
     ${COMP_DIR}/nifogre/ogre_nif_loader.hpp)
-source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})    
+source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})
 
-set(ESM_STORE 
+set(ESM_STORE
     ${COMP_DIR}/esm_store/store.cpp)
-set(ESM_STORE_HEADER 
+set(ESM_STORE_HEADER
     ${COMP_DIR}/esm_store/cell_store.hpp
     ${COMP_DIR}/esm_store/reclists.hpp
     ${COMP_DIR}/esm_store/store.hpp)
@@ -57,22 +57,22 @@ set(ESM
 )
 source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 
-set(MISC 
+set(MISC
     ${COMP_DIR}/misc/stringops.cpp
     ${COMP_DIR}/misc/fileops.cpp)
-set(MISC_HEADER 
+set(MISC_HEADER
     ${COMP_DIR}/misc/fileops.hpp
     ${COMP_DIR}/misc/slice_array.hpp
     ${COMP_DIR}/misc/stringops.hpp)
-source_group(components\\misc FILES ${MISC} ${MISC_HEADER})   
-    
+source_group(components\\misc FILES ${MISC} ${MISC_HEADER})
+
 file(GLOB COMPILER ${COMP_DIR}/compiler/*.cpp)
 file(GLOB COMPILER_HEADER ${COMP_DIR}/compiler/*.hpp)
-source_group(components\\compiler FILES ${COMPILER} ${COMPILER_HEADER})    
+source_group(components\\compiler FILES ${COMPILER} ${COMPILER_HEADER})
 
 file(GLOB INTERPRETER ${COMP_DIR}/interpreter/*.cpp)
 file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
-source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})    
+source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC}
     ${COMPILER} ${INTERPRETER} ${ESM})
@@ -128,7 +128,7 @@ source_group(libs\\openengine FILES ${OENGINE_ALL})
 
 set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
 set(OPENMW_LIBS_HEADER)
-    
+
 # Platform specific
 if (WIN32)
     set(PLATFORM_INCLUDE_DIR "platform")
@@ -192,13 +192,13 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 
 # Apple bundling
 if (APPLE)
-  set(MISC_FILES 
+  set(MISC_FILES
 		  ${CMAKE_SOURCE_DIR}/files/openmw.cfg
 		  ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
 		  ${CMAKE_SOURCE_DIR}/files/mac/ogre.cfg)
-install(TARGETS openmw 
+install(TARGETS openmw
 		BUNDLE DESTINATION .
-		RUNTIME DESTINATION ../MacOS 
+		RUNTIME DESTINATION ../MacOS
 		COMPONENT Runtime)
 install(FILES ${MISC_FILES} DESTINATION ../MacOS)
 set(CPACK_GENERATOR "Bundle")
@@ -225,4 +225,4 @@ if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
 
-add_subdirectory( apps/soundtest ) 
+add_subdirectory( apps/soundtest )
