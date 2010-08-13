@@ -104,6 +104,7 @@ if (USE_AUDIERE)
         ${LIBDIR}/mangle/sound/sources/audiere_source.cpp
         ${LIBDIR}/mangle/stream/clients/audiere_file.cpp)
     find_package(Audiere REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${AUDIERE_INCLUDE_DIR})
     set(SOUND_INPUT_LIBRARY ${AUDIERE_LIBRARY})
     add_definitions(-DOPENMW_USE_AUDIERE)
 endif (USE_AUDIERE)
@@ -112,6 +113,7 @@ if (USE_FFMPEG)
     set(MANGLE_SOUND_OUTPUT
         ${LIBDIR}/mangle/sound/sources/ffmpeg_source.cpp)
     find_package(FFMPEG REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${FFMPEG_INCLUDE_DIR})
     set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
     add_definitions(-DOPENMW_USE_FFMPEG)
 endif (USE_FFMPEG)
@@ -148,6 +150,7 @@ include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
 	${ICONV_INCLUDE_DIR}
+    ${SOUND_INPUT_INCLUDES}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
