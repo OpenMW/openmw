@@ -104,7 +104,7 @@ namespace MWSound
         // Play the sound and tell it to stream, if possible.
         mData->mgr->play(filename)->setStreaming(true);
     }
-        
+
     void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
     {
     }
@@ -120,9 +120,14 @@ namespace MWSound
     {
     }
 
+    void stopSound (MWWorld::Ptr::CellStore *cell)
+    {
+        // Note to Nico: You can get the cell of a Ptr via the getCell function. Just iterate over all
+        // sounds and remove those with matching cell.
+    }
+
     bool SoundManager::getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId) const
     {
       return false;
     }
 }
-
