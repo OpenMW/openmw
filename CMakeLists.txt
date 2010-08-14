@@ -1,9 +1,9 @@
 project(OpenMW)
 
 # Sound source selection
-option(USE_AUDIERE "use Audiere for sound" OFF)
+option(USE_AUDIERE "use Audiere for sound" ON)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
-option(USE_MPG123 "use mpg123 for sound" ON)
+option(USE_MPG123 "use mpg123 for sound" OFF)
 
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)

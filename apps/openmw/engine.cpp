@@ -234,7 +234,9 @@ void OMW::Engine::go()
 
     // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),
-                                                           mOgre.getCamera());
+                                                           mOgre.getCamera(),
+                                                           mEnvironment.mWorld->getStore(),
+                                                           (mDataDir / "Sound").file_string());
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,

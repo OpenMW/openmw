@@ -12,6 +12,11 @@ namespace Ogre
     class Camera;
 }
 
+namespace ESMS
+{
+    struct ESMStore;
+}
+
 namespace MWSound
 {
     class SoundManager
@@ -22,7 +27,8 @@ namespace MWSound
             SoundImpl *mData;
 
         public:
-            SoundManager(Ogre::Root*, Ogre::Camera*);
+      SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
+                   const std::string &soundDir);
             ~SoundManager();
 
             void say (MWWorld::Ptr reference, const std::string& filename);
@@ -52,6 +58,9 @@ namespace MWSound
 
             bool getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId) const;
             ///< Is the given sound currently playing on the given object?
+
+            void updateObject(MWWorld::Ptr reference);
+            ///< Update the position of all sounds connected to the given object.
     };
 }
 
