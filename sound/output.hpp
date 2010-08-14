@@ -48,6 +48,9 @@ class Sound
   /// Set left/right pan. -1.0 is left, 0.0 is center and 1.0 is right.
   virtual void setPan(float) = 0;
 
+  /// Set pitch (1.0 is normal speed)
+  virtual void setPitch(float) = 0;
+
   /// Set the position. May not work with all backends.
   virtual void setPos(float x, float y, float z) = 0;
 

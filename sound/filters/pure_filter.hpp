@@ -23,6 +23,7 @@ namespace Mangle
       void setPan(float f) { client->setPan(f); }
       void setPos(float x, float y, float z)
       { client->setPos(x,y,z); }
+      void setPitch(float p) { client->setPitch(p); }
       void setRepeat(bool b) { client->setRepeat(b); }
       void setStreaming(bool b) { client->setStreaming(b); }
 

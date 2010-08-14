@@ -146,6 +146,12 @@ void OpenAL_Sound::setPos(float x, float y, float z)
   checkALError("setting position");
 }
 
+void OpenAL_Sound::setPitch(float pitch)
+{
+  alSourcef(inst, AL_PITCH, pitch);
+  checkALError("setting pitch");
+}
+
 void OpenAL_Sound::setRepeat(bool rep)
 {
   alSourcei(inst, AL_LOOPING, rep?AL_TRUE:AL_FALSE);

@@ -36,6 +36,7 @@ class OpenAL_Sound : public Sound
   bool isPlaying() const;
   void setVolume(float);
   void setPos(float x, float y, float z);
+  void setPitch(float);
   void setRepeat(bool);
   void setStreaming(bool) {} // Not implemented yet
   SoundPtr clone() const;
