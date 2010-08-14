@@ -392,7 +392,10 @@ namespace MWWorld
                 render->disable (reference.getRefData().getHandle());
 
                 if (mActiveCells.find (reference.getCell())!=mActiveCells.end())
+                {
                     Class::get (reference).disable (reference, mEnvironment);
+                    mEnvironment.mSoundManager->stopSound3D (reference);
+                }
             }
         }
     }
@@ -620,7 +623,10 @@ namespace MWWorld
                 ptr.getRefData().setHandle ("");
 
                 if (mActiveCells.find (ptr.getCell())!=mActiveCells.end())
+                {
                     Class::get (ptr).disable (ptr, mEnvironment);
+                    mEnvironment.mSoundManager->stopSound3D (ptr);
+                }
             }
         }
     }

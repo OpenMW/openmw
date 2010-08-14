@@ -8,8 +8,11 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/environment.hpp"
 
 #include "../mwrender/cellimp.hpp"
+
+#include "../mwsound/soundmanager.hpp"
 
 #include "containerutil.hpp"
 
@@ -38,6 +41,17 @@ namespace MWClass
             cellRender.insertLight (r, g, b, radius);
 
             ref->mData.setHandle (cellRender.insertEnd (ref->mData.isEnabled()));
+        }
+    }
+
+    void Light::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+        if (!ref->base->sound.empty())
+        {
+            environment.mSoundManager->playSound3D (ptr, ref->base->sound, 1.0, 1.0, true);
         }
     }
 
