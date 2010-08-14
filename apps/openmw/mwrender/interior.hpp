@@ -3,13 +3,17 @@
 
 #include "cell.hpp"
 #include "cellimp.hpp"
-#include "components/esm_store/cell_store.hpp"
 
 #include "OgreColourValue.h"
 
 namespace Ogre
 {
   class SceneNode;
+}
+
+namespace MWWorld
+{
+    class Environment;
 }
 
 namespace MWRender
@@ -43,7 +47,7 @@ namespace MWRender
     static bool lightOutQuadInLin;
 
     ESMS::CellStore<MWWorld::RefData> &cell;
-    const ESMS::ESMStore &store;
+    MWWorld::Environment &mEnvironment;
     MWScene &scene;
 
     /// The scene node that contains all objects belonging to this
@@ -79,8 +83,9 @@ namespace MWRender
 
   public:
 
-    InteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, const ESMS::ESMStore& _store, MWScene &_scene)
-    : cell(_cell), store(_store), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
+    InteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
+        MWScene &_scene)
+    : cell(_cell), mEnvironment (environment), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
 
     virtual ~InteriorCellRender() { destroy(); }
 

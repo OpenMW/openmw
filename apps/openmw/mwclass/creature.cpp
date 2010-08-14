@@ -7,9 +7,40 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
+#include "../mwworld/environment.hpp"
+
+#include "../mwrender/cellimp.hpp"
+
+#include "../mwmechanics/mechanicsmanager.hpp"
 
 namespace MWClass
 {
+    void Creature::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
+        MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+            ptr.get<ESM::Creature>();
+
+        assert (ref->base != NULL);
+        const std::string &model = ref->base->model;
+        if (!model.empty())
+        {
+            cellRender.insertBegin (ref->ref);
+            cellRender.insertMesh ("meshes\\" + model);
+            ref->mData.setHandle (cellRender.insertEnd (ref->mData.isEnabled()));
+        }
+    }
+
+    void Creature::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        environment.mMechanicsManager->addActor (ptr);
+    }
+
+    void Creature::disable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        environment.mMechanicsManager->removeActor (ptr);
+    }
+
     std::string Creature::getName (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =

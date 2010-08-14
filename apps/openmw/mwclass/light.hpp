@@ -9,6 +9,15 @@ namespace MWClass
     {
         public:
 
+            virtual void insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
+                MWWorld::Environment& environment) const;
+            ///< Add reference into a cell for rendering
+
+            virtual void enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            ///< Enable reference; only does the non-rendering part
+            /// \attention This is not the same as the script instruction with the same name. References
+            /// should only be enabled while in an active cell.
+
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
