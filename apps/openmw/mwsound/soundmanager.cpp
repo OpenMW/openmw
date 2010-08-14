@@ -120,7 +120,7 @@ namespace MWSound
     {
     }
 
-    void stopSound (MWWorld::Ptr::CellStore *cell)
+    void SoundManager::stopSound (MWWorld::Ptr::CellStore *cell)
     {
         // Note to Nico: You can get the cell of a Ptr via the getCell function. Just iterate over all
         // sounds and remove those with matching cell.
