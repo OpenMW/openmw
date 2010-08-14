@@ -12,9 +12,9 @@ namespace ESM
   class CellRef;
 }
 
-namespace ESMS
+namespace MWWorld
 {
-  class ESMStore;
+    class Environment;
 }
 
 namespace MWRender
@@ -33,14 +33,14 @@ namespace MWRender
 
     /// insert a mesh related to the most recent insertBegin call.
     virtual void insertMesh(const std::string &mesh) = 0;
-    
+
     /// insert a light related to the most recent insertBegin call.
     virtual void insertLight(float r, float g, float b, float radius) = 0;
-    
+
     /// finish inserting a new reference and return a handle to it.
     virtual std::string insertEnd (bool Enable) = 0;
-      
-    void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, const ESMS::ESMStore& store);
+
+    void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::Environment& environment);
 
   };
 }

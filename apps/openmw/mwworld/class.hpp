@@ -10,6 +10,11 @@
 #include "containerstore.hpp"
 #include "refdata.hpp"
 
+namespace MWRender
+{
+    class CellRenderImp;
+}
+
 namespace MWMechanics
 {
     struct CreatureStats;
@@ -18,6 +23,7 @@ namespace MWMechanics
 namespace MWWorld
 {
     class Ptr;
+    class Environment;
 
     /// \brief Base class for referenceable esm records
     class Class
@@ -35,6 +41,10 @@ namespace MWWorld
         public:
 
             virtual ~Class();
+
+            virtual void insertObj (const Ptr& ptr, MWRender::CellRenderImp& cellRender,
+                MWWorld::Environment& environment) const;
+            ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual std::string getName (const Ptr& ptr) const = 0;
             ///< \return name (the one that is to be presented to the user; not the internal one);

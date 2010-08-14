@@ -14,6 +14,12 @@ namespace MWWorld
 
     Class::~Class() {}
 
+    void Class::insertObj (const Ptr& ptr, MWRender::CellRenderImp& cellRender,
+        MWWorld::Environment& environment) const
+    {
+
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
