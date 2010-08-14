@@ -7,8 +7,11 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
+#include "../mwworld/environment.hpp"
 
 #include "../mwrender/cellimp.hpp"
+
+#include "../mwmechanics/mechanicsmanager.hpp"
 
 namespace MWClass
 {
@@ -26,6 +29,16 @@ namespace MWClass
             cellRender.insertMesh ("meshes\\" + model);
             ref->mData.setHandle (cellRender.insertEnd (ref->mData.isEnabled()));
         }
+    }
+
+    void Creature::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        environment.mMechanicsManager->addActor (ptr);
+    }
+
+    void Creature::disable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        environment.mMechanicsManager->removeActor (ptr);
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const

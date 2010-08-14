@@ -15,6 +15,7 @@
 
 #include "ptr.hpp"
 #include "environment.hpp"
+#include "class.hpp"
 
 namespace
 {
@@ -374,12 +375,8 @@ namespace MWWorld
             {
                 render->enable (reference.getRefData().getHandle());
 
-                if (mActiveCells.find (reference.getCell())!=mActiveCells.end() &&
-                    (reference.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
-                    reference.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
-                {
-                    mEnvironment.mMechanicsManager->addActor (reference);
-                }
+                if (mActiveCells.find (reference.getCell())!=mActiveCells.end())
+                    Class::get (reference).enable (reference, mEnvironment);
             }
         }
     }
@@ -394,12 +391,8 @@ namespace MWWorld
             {
                 render->disable (reference.getRefData().getHandle());
 
-                if (mActiveCells.find (reference.getCell())!=mActiveCells.end() &&
-                    (reference.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
-                    reference.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
-                {
-                    mEnvironment.mMechanicsManager->removeActor (reference);
-                }
+                if (mActiveCells.find (reference.getCell())!=mActiveCells.end())
+                    Class::get (reference).disable (reference, mEnvironment);
             }
         }
     }
@@ -626,12 +619,8 @@ namespace MWWorld
                 render->deleteObject (ptr.getRefData().getHandle());
                 ptr.getRefData().setHandle ("");
 
-                if (mActiveCells.find (ptr.getCell())!=mActiveCells.end() &&
-                    (ptr.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
-                    ptr.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
-                {
-                    mEnvironment.mMechanicsManager->removeActor (ptr);
-                }
+                if (mActiveCells.find (ptr.getCell())!=mActiveCells.end())
+                    Class::get (ptr).disable (ptr, mEnvironment);
             }
         }
     }

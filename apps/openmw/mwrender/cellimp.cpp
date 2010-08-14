@@ -20,7 +20,11 @@ void insertCellRefList (CellRenderImp& cellRender, MWWorld::Environment& environ
             it != cellRefList.list.end(); it++)
         {
             if (it->mData.getCount())
-                class_.insertObj (MWWorld::Ptr (&*it, &cell), cellRender, environment);
+            {
+                MWWorld::Ptr ptr (&*it, &cell);
+                class_.insertObj (ptr, cellRender, environment);
+                class_.enable (ptr, environment);
+            }
         }
     }
 }

@@ -12,6 +12,8 @@
 
 #include "../mwrender/cellimp.hpp"
 
+#include "../mwmechanics/mechanicsmanager.hpp"
+
 namespace MWClass
 {
     void Npc::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
@@ -41,6 +43,16 @@ namespace MWClass
             cellRender.insertMesh("meshes\\" + bodyPart->model);
 
         ref->mData.setHandle (cellRender.insertEnd (ref->mData.isEnabled()));
+    }
+
+    void Npc::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        environment.mMechanicsManager->addActor (ptr);
+    }
+
+    void Npc::disable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        environment.mMechanicsManager->removeActor (ptr);
     }
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
