@@ -119,13 +119,20 @@ namespace MWSound
                float min, float max,
                bool loop)
       {
-        SoundPtr snd = mgr->load(file);
-        snd->setRepeat(loop);
-        snd->setVolume(volume);
-        snd->setPitch(pitch);
-        snd->setRange(min,max);
-        setPos(snd, reference);
-        snd->play();
+        try
+          {
+            SoundPtr snd = mgr->load(file);
+            snd->setRepeat(loop);
+            snd->setVolume(volume);
+            snd->setPitch(pitch);
+            snd->setRange(min,max);
+            setPos(snd, reference);
+            snd->play();
+          }
+        catch(...)
+          {
+            cout << "Error loading " << file << ", skipping.\n";
+          }
       }
 
       // Stop a sound and remove it from the list. If id="" then
