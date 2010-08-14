@@ -19,9 +19,10 @@ void insertCellRefList (CellRenderImp& cellRender, MWWorld::Environment& environ
         for (typename T::List::iterator it = cellRefList.list.begin();
             it != cellRefList.list.end(); it++)
         {
-            if (it->mData.getCount())
+            if (it->mData.getCount() || it->mData.isEnabled())
             {
                 MWWorld::Ptr ptr (&*it, &cell);
+
                 class_.insertObj (ptr, cellRender, environment);
                 class_.enable (ptr, environment);
             }
