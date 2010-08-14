@@ -11,6 +11,8 @@
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
+#include "../mwsound/soundmanager.hpp"
+
 #include "ptr.hpp"
 #include "environment.hpp"
 
@@ -535,9 +537,9 @@ namespace MWWorld
         {
             mEnvironment.mMechanicsManager->dropActors (active->first);
             active->second->destroy();
+            mEnvironment.mSoundManager->stopSound (active->first);
             delete active->second;
             mActiveCells.erase (active);
-            // TODO remove sounds
         }
 
         // register local scripts
