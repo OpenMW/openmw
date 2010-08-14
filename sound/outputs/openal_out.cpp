@@ -140,6 +140,13 @@ void OpenAL_Sound::setVolume(float volume)
   checkALError("setting volume");
 }
 
+void OpenAL_Sound::setRange(float a, float b, float)
+{
+  alSourcef(inst, AL_REFERENCE_DISTANCE, a);
+  alSourcef(inst, AL_MAX_DISTANCE, b);
+  checkALError("setting sound ranges");
+}
+
 void OpenAL_Sound::setPos(float x, float y, float z)
 {
   alSource3f(inst, AL_POSITION, x, y, z);

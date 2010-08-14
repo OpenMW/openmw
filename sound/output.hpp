@@ -51,6 +51,10 @@ class Sound
   /// Set pitch (1.0 is normal speed)
   virtual void setPitch(float) = 0;
 
+  /// Set range factors for 3D sounds. The meaning of the fields
+  /// depend on implementation.
+  virtual void setRange(float a, float b=0.0, float c=0.0) = 0;
+
   /// Set the position. May not work with all backends.
   virtual void setPos(float x, float y, float z) = 0;
 

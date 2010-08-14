@@ -25,6 +25,8 @@ namespace Mangle
       { client->setPos(x,y,z); }
       void setPitch(float p) { client->setPitch(p); }
       void setRepeat(bool b) { client->setRepeat(b); }
+      void setRange(float a, float b=0, float c=0)
+      { client->setRange(a,b,c); }
       void setStreaming(bool b) { client->setStreaming(b); }
 
       // The clone() function is not implemented here, as you will

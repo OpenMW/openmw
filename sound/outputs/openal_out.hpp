@@ -41,6 +41,11 @@ class OpenAL_Sound : public Sound
   void setStreaming(bool) {} // Not implemented yet
   SoundPtr clone() const;
 
+  // a = AL_REFERENCE_DISTANCE
+  // b = AL_MAX_DISTANCE
+  // c = ignored
+  void setRange(float a, float b=0.0, float c=0.0);
+
   /// Not implemented
   void setPan(float) {}
 };
