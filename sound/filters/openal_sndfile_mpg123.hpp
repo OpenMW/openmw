@@ -1,5 +1,5 @@
-#ifndef MANGLE_MPG123_OPENAL_H
-#define MANGLE_MPG123_OPENAL_H
+#ifndef MANGLE_SNDFILE_MPG123_OPENAL_H
+#define MANGLE_SNDFILE_MPG123_OPENAL_H
 
 #include "input_filter.hpp"
 #include "source_splicer.hpp"
