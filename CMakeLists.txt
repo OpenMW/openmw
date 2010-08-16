@@ -1,9 +1,9 @@
 project(OpenMW)
 
 # Sound source selection
-option(USE_AUDIERE "use Audiere for sound" ON)
+option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
-option(USE_MPG123 "use mpg123 for sound" OFF)
+option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
@@ -103,6 +103,7 @@ set(OENGINE_GUI
 if (USE_AUDIERE)
     set(MANGLE_SOUND_OUTPUT
         ${LIBDIR}/mangle/sound/sources/audiere_source.cpp
+        ${LIBDIR}/mangle/sound/sources/sample_reader.cpp
         ${LIBDIR}/mangle/stream/clients/audiere_file.cpp)
     find_package(Audiere REQUIRED)
     set(SOUND_INPUT_INCLUDES ${AUDIERE_INCLUDE_DIR})
@@ -121,10 +122,13 @@ endif (USE_FFMPEG)
 
 if (USE_MPG123)
     set(MANGLE_SOUND_OUTPUT
-        ${LIBDIR}/mangle/sound/sources/mpg123_source.cpp)
+        ${LIBDIR}/mangle/sound/sources/mpg123_source.cpp
+        ${LIBDIR}/mangle/sound/sources/libsndfile.cpp
+        ${LIBDIR}/mangle/sound/sources/sample_reader.cpp)
     find_package(MPG123 REQUIRED)
-    set(SOUND_INPUT_INCLUDES ${MPG123_INCLUDE_DIR})
-    set(SOUND_INPUT_LIBRARY ${MPG123_LIBRARY})
+    find_package(SNDFILE REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
+    set(SOUND_INPUT_LIBRARY ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
     set(SOUND_DEFINE -DOPENMW_USE_MPG123)
 endif (USE_MPG123)
 
@@ -236,5 +240,3 @@ option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
-
-add_subdirectory( apps/soundtest )
