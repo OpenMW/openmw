@@ -52,9 +52,6 @@ void insertObj(CellRenderImp& cellRender, ESMS::LiveCellRef<ESM::NPC, MWWorld::R
     cellRender.insertBegin(liveRef.ref);
     cellRender.insertMesh(headModel);
 
-    //TODO: define consts for each bodypart e.g. chest, foot, wrist... and put the parts in the right place
-    cellRender.insertMesh("meshes\\" + store.bodyParts.find(bodyRaceID + "chest")->model);
-
     liveRef.mData.setHandle (cellRender.insertEnd (liveRef.mData.isEnabled()));
 }
 

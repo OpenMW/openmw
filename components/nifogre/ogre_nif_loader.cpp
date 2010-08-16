@@ -68,6 +68,22 @@ void NIFLoader::fail(string msg)
     assert(1);
 }
 
+Vector3 NIFLoader::convertVector3(const Nif::Vector& vec)
+{
+    return Ogre::Vector3(vec.array);
+}
+
+Quaternion NIFLoader::convertRotation(const Nif::Matrix& rot)
+{
+    Real matrix[3][3];
+    
+    for (int i=0; i<3; i++)
+        for (int j=0; j<3; j++)
+            matrix[i][j] = rot.v[i].array[j];
+        
+        return Quaternion(Matrix3(matrix));
+}
+
 // Helper class that computes the bounding box and of a mesh
 class BoundsFinder
 {
@@ -305,7 +321,7 @@ void NIFLoader::findRealTexture(String &texName)
 
 // Convert Nif::NiTriShape to Ogre::SubMesh, attached to the given
 // mesh.
-void NIFLoader::createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &material)
+void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material)
 {
     NiTriShapeData *data = shape->data.getPtr();
     SubMesh *sub = mesh->createSubMesh(shape->name.toString());
@@ -391,22 +407,32 @@ void NIFLoader::createOgreMesh(Mesh *mesh, NiTriShape *shape, const String &mate
     // Set material if one was given
     if (!material.empty()) sub->setMaterialName(material);
 
-    // Assign this submesh to the given bone
-    //TODO: Must use niskininstance!
-    /*if (bone)
+
+    // assigning bones if skindata is not empty
+    if (!shape->skin.empty())
     {
-        VertexBoneAssignment v;
-        v.boneIndex = ((Bone*)bone)->getHandle();
-        v.weight = 1.0;
+        NodeList *boneList = &shape->skin->bones;
 
-        std::cerr << "+ Assigning bone index " << v.boneIndex << "\n";
-
-        for(int i=0; i < numVerts; i++)
+        for (int i=0; i<boneList->length(); i++)
         {
-            v.vertexIndex = i;
-            sub->addBoneAssignment(v);
+            if (boneList->has(i))
+            {
+                Nif::Node *bone = &(*boneList)[i];
+
+                SkeletonPtr skel = SkeletonManager::getSingleton().getByName(getSkeletonName());
+
+                VertexBoneAssignment vba;
+                vba.boneIndex = skel->getBone(bone->name.toString())->getHandle();
+                vba.weight = 1.0;
+
+                for (unsigned int j=0; j<sub->vertexData->vertexCount; j++)  //assing every vertex
+                {
+                    vba.vertexIndex = j;
+                    sub->addBoneAssignment(vba);
+                }
+            }
         }
-    }*/
+    }
 
 }
 
@@ -453,7 +479,7 @@ static void vectorMul(const Matrix &A, float *C)
         C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
 }
 
-void NIFLoader::handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags, BoundsFinder &bounds)
+void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bounds)
 {
     assert(shape != NULL);
 
@@ -620,12 +646,12 @@ void NIFLoader::handleNiTriShape(Mesh *mesh, NiTriShape *shape, int flags, Bound
         bounds.add(optr, numVerts);
 
         // Create the submesh
-        createOgreMesh(mesh, shape, material);
+        createOgreSubMesh(shape, material);
     }
 }
 
-void NIFLoader::handleNode(Mesh* mesh, Nif::Node *node, int flags,
-                           const Transformation *trafo, BoundsFinder &bounds)
+void NIFLoader::handleNode(Nif::Node *node, int flags,
+                           const Transformation *trafo, BoundsFinder &bounds, Bone *parentBone)
 {
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
@@ -656,6 +682,36 @@ void NIFLoader::handleNode(Mesh* mesh, Nif::Node *node, int flags,
         }
     }
 
+    Bone *bone = 0;
+
+    // create skeleton or add bones
+    if (node->recType == RC_NiNode)
+    {
+        if (node->name == "Bip01")  //root node, create a skeleton
+        {
+            skel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
+        }
+
+        if (!skel.isNull())     //if there is a skeleton
+        {
+            bone = skel->createBone(node->name.toString());
+
+            if (parentBone)
+                parentBone->addChild(bone);
+
+            bone->setInheritOrientation(true);
+            bone->setPosition(convertVector3(node->trafo->pos));
+            bone->setOrientation(convertRotation(node->trafo->rotation));
+        }
+
+        //output for debuging purpose
+//         Ogre::Vector3 vec(node->trafo->pos.array);
+//         Ogre::Quaternion q = convertRotation(node->trafo->rotation);
+//         std::cout << node->name.toString() << ": " << vec.x << " " << vec.y << " " << vec.z << "\n";
+//         std::cout << " Y: " << q.getYaw().valueDegrees() << " P: " << q.getPitch().valueDegrees() << " R: " << q.getRoll().valueDegrees() << "\n";
+
+    }
+
     // Apply the parent transformation to this node. We overwrite the
     // existing data with the final transformation.
     if (trafo)
@@ -680,34 +736,36 @@ void NIFLoader::handleNode(Mesh* mesh, Nif::Node *node, int flags,
     // For NiNodes, loop through children
     if (node->recType == RC_NiNode)
     {
-
-
         NodeList &list = ((NiNode*)node)->children;
         int n = list.length();
         for (int i=0; i<n; i++)
         {
             if (list.has(i))
-                handleNode(mesh, &list[i], flags, node->trafo, bounds);
+                handleNode(&list[i], flags, node->trafo, bounds, bone);
         }
     }
     else if (node->recType == RC_NiTriShape)
     // For shapes
-        handleNiTriShape(mesh, dynamic_cast<NiTriShape*>(node), flags, bounds);
+        handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
 }
 
 void NIFLoader::loadResource(Resource *resource)
 {
+    resourceName = "";
+    mesh = 0;
+    skel.setNull();
+
     // Set up the VFS if it hasn't been done already
     if (!vfs) vfs = new OgreVFS(resourceGroup);
 
     // Get the mesh
-    Mesh *mesh = dynamic_cast<Mesh*>(resource);
+    mesh = dynamic_cast<Mesh*>(resource);
     assert(mesh);
 
     // Look it up
-    const String &name = mesh->getName();
+    resourceName = mesh->getName();
 
-    if (!vfs->isFile(name))
+    if (!vfs->isFile(resourceName))
     {
         warn("File not found.");
         return;
@@ -720,7 +778,7 @@ void NIFLoader::loadResource(Resource *resource)
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    NIFFile nif(vfs->open(name), name);
+    NIFFile nif(vfs->open(resourceName), resourceName);
 
     if (nif.numRecords() < 1)
     {
@@ -742,7 +800,11 @@ void NIFLoader::loadResource(Resource *resource)
     }
 
     // Handle the node
-    handleNode(mesh, node, 0, NULL, bounds);
+    handleNode(node, 0, NULL, bounds, 0);
+
+    //set skeleton
+    if (!skel.isNull())
+        mesh->setSkeletonName(getSkeletonName());
 
     // Finally, set the bounding value.
     if (bounds.isValid())

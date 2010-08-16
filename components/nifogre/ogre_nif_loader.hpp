@@ -38,6 +38,7 @@ namespace Nif
     class Transformation;
     class NiTriShape;
     class Vector;
+    class Matrix;
 }
 
 namespace Mangle
@@ -74,6 +75,9 @@ class NIFLoader : Ogre::ManualResourceLoader
         static Ogre::MeshPtr load(const std::string &name,
                                   const std::string &group="General");
 
+        Ogre::Vector3 convertVector3(const Nif::Vector& vec);
+        Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
+
     private:
         NIFLoader() : resourceGroup("General") {}
         NIFLoader(NIFLoader& n) {}
@@ -81,12 +85,12 @@ class NIFLoader : Ogre::ManualResourceLoader
         void warn(std::string msg);
         void fail(std::string msg);
 
-        void handleNode(Ogre::Mesh* mesh, Nif::Node *node, int flags,
-                        const Nif::Transformation *trafo, BoundsFinder &bounds);
+        void handleNode( Nif::Node *node, int flags,
+                        const Nif::Transformation *trafo, BoundsFinder &bounds, Ogre::Bone *parentBone);
 
-        void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape *shape, int flags, BoundsFinder &bounds);
+        void handleNiTriShape(Nif::NiTriShape *shape, int flags, BoundsFinder &bounds);
 
-        void createOgreMesh(Ogre::Mesh *mesh, Nif::NiTriShape *shape, const Ogre::String &material);
+        void createOgreSubMesh(Nif::NiTriShape *shape, const Ogre::String &material);
 
         void createMaterial(const Ogre::String &name,
                             const Nif::Vector &ambient,
@@ -100,6 +104,12 @@ class NIFLoader : Ogre::ManualResourceLoader
         void findRealTexture(Ogre::String &texName);
 
         Ogre::String getUniqueName(const Ogre::String &input);
+
+        //returns the skeleton name of this mesh
+        std::string getSkeletonName()
+        {
+            return resourceName + ".skel";
+        }
         
         // This is the interface to the Ogre resource system. It allows us to
         // load NIFs from BSAs, in the file system and in any other place we
@@ -108,7 +118,12 @@ class NIFLoader : Ogre::ManualResourceLoader
         // extension from .tga to .dds if the texture is missing.
         Mangle::VFS::OgreVFS *vfs;
 
+        std::string resourceName;
         std::string resourceGroup;
+
+        // pointer to the ogre mesh which is currently build
+        Ogre::Mesh *mesh;
+        Ogre::SkeletonPtr skel;
 };
 
 #endif
