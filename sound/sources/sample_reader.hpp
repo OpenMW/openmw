@@ -40,7 +40,7 @@ protected:
   virtual size_t readSamples(void *data, size_t num) = 0;
 
  public:
-  SampleReader() : pullOver(NULL), pullSize(0) {}
+  SampleReader() : pullSize(0), pullOver(NULL) {}
   ~SampleReader();
   size_t read(void *data, size_t length);
 };
