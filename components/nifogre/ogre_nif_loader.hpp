@@ -27,6 +27,27 @@
 #include <OgreResource.h>
 #include <OgreMesh.h>
 #include <assert.h>
+#include <string>
+
+
+class BoundsFinder;
+
+namespace Nif
+{
+    class Node;
+    class Transformation;
+    class NiTriShape;
+    class Vector;
+    class Matrix;
+}
+
+namespace Mangle
+{
+    namespace VFS
+    {
+        class OgreVFS;
+    }
+}
 
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
@@ -43,12 +64,66 @@
     very resource intensive, and can safely be done for a large number
     of meshes at load time.
  */
-struct NIFLoader : Ogre::ManualResourceLoader
+class NIFLoader : Ogre::ManualResourceLoader
 {
-  void loadResource(Ogre::Resource *resource);
+    public:
+        static NIFLoader& getSingleton();
+        static NIFLoader* getSingletonPtr();
 
-  static Ogre::MeshPtr load(const std::string &name,
-                            const std::string &group="General");
+        virtual void loadResource(Ogre::Resource *resource);
+
+        static Ogre::MeshPtr load(const std::string &name,
+                                  const std::string &group="General");
+
+        Ogre::Vector3 convertVector3(const Nif::Vector& vec);
+        Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
+
+    private:
+        NIFLoader() : resourceGroup("General") {}
+        NIFLoader(NIFLoader& n) {}
+
+        void warn(std::string msg);
+        void fail(std::string msg);
+
+        void handleNode( Nif::Node *node, int flags,
+                        const Nif::Transformation *trafo, BoundsFinder &bounds, Ogre::Bone *parentBone);
+
+        void handleNiTriShape(Nif::NiTriShape *shape, int flags, BoundsFinder &bounds);
+
+        void createOgreSubMesh(Nif::NiTriShape *shape, const Ogre::String &material);
+
+        void createMaterial(const Ogre::String &name,
+                            const Nif::Vector &ambient,
+                            const Nif::Vector &diffuse,
+                            const Nif::Vector &specular,
+                            const Nif::Vector &emissive,
+                            float glossiness, float alpha,
+                            float alphaFlags, float alphaTest,
+                            const Ogre::String &texName);
+
+        void findRealTexture(Ogre::String &texName);
+
+        Ogre::String getUniqueName(const Ogre::String &input);
+
+        //returns the skeleton name of this mesh
+        std::string getSkeletonName()
+        {
+            return resourceName + ".skel";
+        }
+        
+        // This is the interface to the Ogre resource system. It allows us to
+        // load NIFs from BSAs, in the file system and in any other place we
+        // tell Ogre to look (eg. in zip or rar files.) It's also used to
+        // check for the existence of texture files, so we can exchange the
+        // extension from .tga to .dds if the texture is missing.
+        Mangle::VFS::OgreVFS *vfs;
+
+        std::string resourceName;
+        std::string resourceGroup;
+
+        // pointer to the ogre mesh which is currently build
+        Ogre::Mesh *mesh;
+        Ogre::SkeletonPtr skel;
 };
 
 #endif
