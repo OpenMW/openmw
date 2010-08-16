@@ -13,8 +13,9 @@ using namespace std;
 
 #include <OgreRoot.h>
 
-/* Set up the sound manager to use Audiere, FFMPEG or MPG123 for
-   input. The OPENMW_USE_x macros are set in CMakeLists.txt.
+/* Set up the sound manager to use Audiere, FFMPEG or
+   MPG123/libsndfile for input. The OPENMW_USE_x macros are set in
+   CMakeLists.txt.
  */
 #ifdef OPENMW_USE_AUDIERE
 #include <mangle/sound/filters/openal_audiere.hpp>
@@ -27,8 +28,8 @@ using namespace std;
 #endif
 
 #ifdef OPENMW_USE_MPG123
-#include <mangle/sound/filters/openal_mpg123.hpp>
-#define SOUND_FACTORY OpenAL_Mpg123_Factory
+#include <mangle/sound/filters/openal_sndfile_mpg123.hpp>
+#define SOUND_FACTORY OpenAL_SndFile_Mpg123_Factory
 #endif
 
 using namespace Mangle::Sound;
@@ -104,8 +105,8 @@ namespace MWSound
 
         volume *= snd->data.volume / 255.0;
         // These factors are not very fine tuned.
-        min = snd->data.minRange * 4;
-        max = snd->data.maxRange * 1000;
+        min = snd->data.minRange * 7;
+        max = snd->data.maxRange * 2000;
         std::string file = dir + snd->sound;
         std::replace(file.begin(), file.end(), '\\', '/');
         return file;
@@ -188,7 +189,7 @@ namespace MWSound
       // control volume etc.
       SoundPtr music = mData->mgr->play(filename);
       music->setStreaming(true);
-      music->setVolume(0.6);
+      music->setVolume(0.4);
     }
 
     void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
