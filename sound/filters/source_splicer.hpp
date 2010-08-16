@@ -64,7 +64,7 @@ namespace Mangle
             if(diff < 0) continue;
 
             bool match = true;
-            for(int i=0; i<t.size(); i++)
+            for(unsigned i=0; i<t.size(); i++)
               if(!isMatch(t[i], file[i+diff]))
                 {
                   match = false;
