@@ -47,8 +47,8 @@ namespace MWGui
 
       getWidget(crosshair, "Crosshair");
 
-      compass->setImageTexture("compass.dds");
-      crosshair->setImageTexture("target.dds");
+      compass->setImageTexture("textures\\compass.dds");
+      crosshair->setImageTexture("textures\\target.dds");
 
       // These are just demo values, you should replace these with
       // real calls from outside the class later.

@@ -174,19 +174,12 @@ void InteriorCellRender::setAmbientMode()
 
 void InteriorCellRender::show()
 {
-  // If already loaded, just make the cell visible.
-  if(base)
-    {
-      base->setVisible(true);
-      return;
-    }
-
   base = scene.getRoot()->createChildSceneNode();
 
   configureAmbient();
   configureFog();
 
-  insertCell(cell, store);
+  insertCell(cell, mEnvironment);
 }
 
 void InteriorCellRender::hide()

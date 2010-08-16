@@ -38,7 +38,7 @@ void OMW::Engine::executeLocalScripts()
         mEnvironment.mWorld->getLocalScripts().begin());
         iter!=mEnvironment.mWorld->getLocalScripts().end(); ++iter)
     {
-        if (!mIgnoreLocalPtr.isEmpty() && mIgnoreLocalPtr!=iter->second)
+        if (mIgnoreLocalPtr.isEmpty() || mIgnoreLocalPtr!=iter->second)
         {
             MWScript::InterpreterContext interpreterContext (mEnvironment,
                 &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
@@ -233,7 +233,10 @@ void OMW::Engine::go()
         mExtensions, mNewGame);
 
     // Create sound system
-    mEnvironment.mSoundManager = new MWSound::SoundManager;
+    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),
+                                                           mOgre.getCamera(),
+                                                           mEnvironment.mWorld->getStore(),
+                                                           (mDataDir / "Sound").file_string());
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
@@ -265,6 +268,18 @@ void OMW::Engine::go()
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 
     mOgre.getRoot()->addFrameListener (this);
+
+    // Play some good 'ol tunes
+    std::string music = (mDataDir / "Music/Explore/mx_explore_5.mp3").file_string();
+    try
+      {
+        std::cout << "Playing " << music << "\n";
+        mEnvironment.mSoundManager->streamMusic(music);
+      }
+    catch(std::exception &e)
+      {
+        std::cout << "  Music Error: " << e.what() << "\n";
+      }
 
     // Start the main rendering loop
     mOgre.start();

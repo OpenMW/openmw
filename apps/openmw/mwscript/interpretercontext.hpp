@@ -51,6 +51,7 @@ namespace MWScript
 
             virtual void setLocalFloat (int index, float value);
 
+            using Interpreter::Context::messageBox;
             virtual void messageBox (const std::string& message,
                 const std::vector<std::string>& buttons);
 

@@ -36,6 +36,23 @@ namespace MWWorld
                 return false;
             }
 
+            template<typename T>
+            bool create (const ESMS::RecListWithIDT<T>& list, const std::string& name)
+            {
+                if (const T *instance = list.search (name))
+                {
+                    ESMS::LiveCellRef<T, RefData> ref;
+                    ref.base = instance;
+
+                    mRef = ref;
+                    mPtr = Ptr (&boost::any_cast<ESMS::LiveCellRef<T, RefData>&> (mRef), 0);
+
+                    return true;
+                }
+
+                return false;
+            }
+
         public:
 
             ManualRef (const ESMS::ESMStore& store, const std::string& name)

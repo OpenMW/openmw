@@ -179,10 +179,17 @@ add_executable(openmw
     ${APPLE_BUNDLE_RESOURCES}
     )
 
+# Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
+# when we change the backend.
+include_directories(${SOUND_INPUT_INCLUDES})
+add_definitions(${SOUND_DEFINE})
+
 target_link_libraries(openmw
   ${OGRE_LIBRARIES}
   ${OIS_LIBRARIES}
   ${Boost_LIBRARIES}
+  ${OPENAL_LIBRARY}
+  ${SOUND_INPUT_LIBRARY}
   ${ICONV_LIBRARIES}
   caelum
   MyGUIEngine
