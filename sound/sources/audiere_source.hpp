@@ -1,7 +1,7 @@
 #ifndef MANGLE_SOUND_AUDIERE_SOURCE_H
 #define MANGLE_SOUND_AUDIERE_SOURCE_H
 
-#include "../source.hpp"
+#include "sample_reader.hpp"
 
 #include <audiere.h>
 
@@ -9,24 +9,14 @@ namespace Mangle {
 namespace Sound {
 
 /// A sample source that decodes files using Audiere
-class AudiereSource : public SampleSource
+class AudiereSource : public SampleReader
 {
   audiere::SampleSourcePtr sample;
 
-  // Number of bytes we cache between reads. This should correspond to
-  // the maximum possible value of frameSize.
-  static const int PSIZE = 10;
+  size_t readSamples(void *data, size_t length)
+  { return sample->read(length, data); }
 
-  // Size of one frame, in bytes
-  int frameSize;
-
-  // Temporary storage for unevenly read samples. See the comment for
-  // read() in the .cpp file.
-  char pullOver[PSIZE];
-  // How much of the above buffer is in use
-  int pullSize;
-
-  void setup();
+  void doSetup();
 
  public:
   /// Decode the given sound file
@@ -39,7 +29,6 @@ class AudiereSource : public SampleSource
   AudiereSource(audiere::SampleSourcePtr src);
 
   void getInfo(int32_t *rate, int32_t *channels, int32_t *bits);
-  size_t read(void *data, size_t length);
 
   void seek(size_t pos) { sample->setPosition(pos/frameSize); }
   size_t tell() const { return sample->getPosition()*frameSize; }
