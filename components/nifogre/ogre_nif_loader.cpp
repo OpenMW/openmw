@@ -32,6 +32,7 @@
 #include "../nif/property.hpp"
 #include <libs/platform/strings.h>
 
+#include <vector>
 // For warning messages
 #include <iostream>
 
@@ -336,13 +337,16 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material)
     sub->vertexData = new VertexData();
     sub->vertexData->vertexCount = numVerts;
     sub->useSharedVertices = false;
+    
     VertexDeclaration *decl = sub->vertexData->vertexDeclaration;
     decl->addElement(nextBuf, 0, VET_FLOAT3, VES_POSITION);
+    
     HardwareVertexBufferSharedPtr vbuf =
         HardwareBufferManager::getSingleton().createVertexBuffer(
             VertexElement::getTypeSize(VET_FLOAT3),
             numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
     vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, true);
+    
     VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
     bind->setBinding(nextBuf++, vbuf);
 
@@ -406,34 +410,6 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material)
 
     // Set material if one was given
     if (!material.empty()) sub->setMaterialName(material);
-
-
-    // assigning bones if skindata is not empty
-    if (!shape->skin.empty())
-    {
-        NodeList *boneList = &shape->skin->bones;
-
-        for (int i=0; i<boneList->length(); i++)
-        {
-            if (boneList->has(i))
-            {
-                Nif::Node *bone = &(*boneList)[i];
-
-                SkeletonPtr skel = SkeletonManager::getSingleton().getByName(getSkeletonName());
-
-                VertexBoneAssignment vba;
-                vba.boneIndex = skel->getBone(bone->name.toString())->getHandle();
-                vba.weight = 1.0;
-
-                for (unsigned int j=0; j<sub->vertexData->vertexCount; j++)  //assing every vertex
-                {
-                    vba.vertexIndex = j;
-                    sub->addBoneAssignment(vba);
-                }
-            }
-        }
-    }
-
 }
 
 // Helper math functions. Reinventing linear algebra for the win!
@@ -619,24 +595,98 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     float *ptr = (float*)data->vertices.ptr;
     float *optr = ptr;
 
-    // Rotate, scale and translate all the vertices
-    const Matrix &rot = shape->trafo->rotation;
-    const Vector &pos = shape->trafo->pos;
-    float scale = shape->trafo->scale;
-    for (int i=0; i<numVerts; i++)
+    //use niskindata for the position of vertices.
+    if (!shape->skin.empty())
     {
-        vectorMulAdd(rot, pos, ptr, scale);
-        ptr += 3;
-    }
+        // vector that stores if the position if a vertex is absolute
+        std::vector<bool> vertexPosAbsolut(numVerts,false);
+        
 
-    // Remember to rotate all the vertex normals as well
-    if (data->normals.length)
+        float *ptrNormals = (float*)data->normals.ptr;
+        //the bone from skin->bones[boneIndex] is linked to skin->data->bones[boneIndex]
+        //the first one contains a link to the bone, the second vertex transformation
+        //relative to the bone
+        int boneIndex = 0;
+        Bone *bonePtr;
+        Vector3 vecPos;
+        Quaternion vecRot;
+
+        std::vector<NiSkinData::BoneInfo> boneList = shape->skin->data->bones;
+
+        /*
+        Iterate through the boneList which contains what vertices are linked to
+        the bone (it->weights array) and at what position (it->trafo)
+        That position is added to every vertex.
+        */
+        for (std::vector<NiSkinData::BoneInfo>::iterator it = boneList.begin();
+                it != boneList.end(); it++)
+        {
+            //get the bone from bones array of skindata
+            bonePtr = skel->getBone(shape->skin->bones[boneIndex].name.toString());
+
+            // final_vector = old_vector + old_rotation*new_vector*old_scale
+            vecPos = bonePtr->_getDerivedPosition() +
+                bonePtr->_getDerivedOrientation() * convertVector3(it->trafo->trans);
+
+            vecRot = bonePtr->_getDerivedOrientation() * convertRotation(it->trafo->rotation);
+
+            for (unsigned int i=0; i<it->weights.length; i++)
+            {
+                unsigned int verIndex = (it->weights.ptr + i)->vertex;
+
+                //Check if the vertex is relativ, FIXME: Is there a better solution?
+                if (vertexPosAbsolut[verIndex] == false)
+                {
+                    //apply transformation to the vertices
+                    Vector3 absVertPos = vecPos + vecRot * Vector3(ptr + verIndex *3);
+
+                    //convert it back to float *
+                    for (int j=0; j<3; j++)
+                        (ptr + verIndex*3)[j] = absVertPos[j];
+
+                    //apply rotation to the normals (not every vertex has a normal)
+                    //FIXME: I guessed that vertex[i] = normal[i], is that true?
+                    if (verIndex < data->normals.length)
+                    {
+                        Vector3 absNormalsPos = vecRot * Vector3(ptrNormals + verIndex *3);
+                        
+                        for (int j=0; j<3; j++)
+                            (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
+                    }
+
+                    
+                    //TODO: create vbas, and give them to createOgreSubMesh
+
+                    vertexPosAbsolut[verIndex] = true;
+                }
+            }
+
+            boneIndex++;
+            //it->trafo (pos, rot, scale) of the vertex
+            //it->weights array containt the vertices linked to the bone and the weight
+        }
+    }
+    else
     {
-        ptr = (float*)data->normals.ptr;
+        // Rotate, scale and translate all the vertices,
+        const Matrix &rot = shape->trafo->rotation;
+        const Vector &pos = shape->trafo->pos;
+        float scale = shape->trafo->scale;
         for (int i=0; i<numVerts; i++)
         {
-            vectorMul(rot, ptr);
+            vectorMulAdd(rot, pos, ptr, scale);
             ptr += 3;
+        }
+
+        // Remember to rotate all the vertex normals as well
+        if (data->normals.length)
+        {
+            ptr = (float*)data->normals.ptr;
+            for (int i=0; i<numVerts; i++)
+            {
+                vectorMul(rot, ptr);
+                ptr += 3;
+            }
         }
     }
 
@@ -703,13 +753,6 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
             bone->setPosition(convertVector3(node->trafo->pos));
             bone->setOrientation(convertRotation(node->trafo->rotation));
         }
-
-        //output for debuging purpose
-//         Ogre::Vector3 vec(node->trafo->pos.array);
-//         Ogre::Quaternion q = convertRotation(node->trafo->rotation);
-//         std::cout << node->name.toString() << ": " << vec.x << " " << vec.y << " " << vec.z << "\n";
-//         std::cout << " Y: " << q.getYaw().valueDegrees() << " P: " << q.getPitch().valueDegrees() << " R: " << q.getRoll().valueDegrees() << "\n";
-
     }
 
     // Apply the parent transformation to this node. We overwrite the
@@ -803,8 +846,8 @@ void NIFLoader::loadResource(Resource *resource)
     handleNode(node, 0, NULL, bounds, 0);
 
     //set skeleton
-    if (!skel.isNull())
-        mesh->setSkeletonName(getSkeletonName());
+//     if (!skel.isNull())
+//         mesh->setSkeletonName(getSkeletonName());
 
     // Finally, set the bounding value.
     if (bounds.isValid())
@@ -867,70 +910,5 @@ extern "C" void ogre_insertTexture(char* name, uint32_t width, uint32_t height, 
   pixelBuffer->unlock();
 }
 
-// We need this later for animated meshes.
-extern "C" void* ogre_setupSkeleton(char* name)
-{
-  SkeletonPtr skel = SkeletonManager::getSingleton().create(
-    name, "Closet", true);
 
-  skel->load();
-
-  // Create all bones at the origin and unrotated. This is necessary
-  // since our submeshes each have their own model space. We must
-  // move the bones after creating an entity, then copy this entity.
-  return (void*)skel->createBone();
-}
-
-extern "C" void *ogre_insertBone(char* name, void* rootBone, int32_t index)
-{
-  return (void*) ( ((Bone*)rootBone)->createChild(index) );
-}
-*/
-/* This was the D part:
-
-    // Create a skeleton and get the root bone (index 0)
-    BonePtr bone = ogre_setupSkeleton(name);
-
-    // Reset the bone index. The next bone to be created has index 1.
-    boneIndex = 1;
-    // Create a mesh and assign the skeleton to it
-    MeshPtr mesh = ogre_setupMesh(name);
-
-    // Loop through the nodes, creating submeshes, materials and
-    // skeleton bones in the process.
-    handleNode(node, bone, mesh);
-
-  // Create the "template" entity
-  EntityPtr entity = ogre_createEntity(name);
-
-  // Loop through once again, this time to set the right
-  // transformations on the entity's SkeletonInstance. The order of
-  // children will be the same, allowing us to reference bones using
-  // their boneIndex.
-  int lastBone = boneIndex;
-  boneIndex = 1;
-  transformBones(node, entity);
-  if(lastBone != boneIndex) writefln("WARNING: Bone number doesn't match");
-
-  if(!hasBBox)
-    ogre_setMeshBoundingBox(mesh, minX, minY, minZ, maxX, maxY, maxZ);
-
-  return entity;
-}
-void handleNode(Node node, BonePtr root, MeshPtr mesh)
-{
-  // Insert a new bone for this node
-  BonePtr bone = ogre_insertBone(node.name, root, boneIndex++);
-
-}
-
-void transformBones(Node node, EntityPtr entity)
-{
-  ogre_transformBone(entity, &node.trafo, boneIndex++);
-
-  NiNode n = cast(NiNode)node;
-  if(n !is null)
-    foreach(Node nd; n.children)
-      transformBones(nd, entity);
-}
 */
