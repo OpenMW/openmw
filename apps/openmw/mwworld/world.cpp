@@ -562,28 +562,6 @@ namespace MWWorld
         mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
         mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
 
-        for (ESMS::CellRefList<ESM::Creature, RefData>::List::iterator iter (
-            cell->creatures.list.begin());
-            iter!=cell->creatures.list.end(); ++iter)
-        {
-            if (iter->mData.isEnabled())
-            {
-                Ptr ptr (&*iter, cell);
-                mEnvironment.mMechanicsManager->addActor (ptr);
-            }
-        }
-
-        for (ESMS::CellRefList<ESM::NPC, RefData>::List::iterator iter (
-            cell->npcs.list.begin());
-            iter!=cell->npcs.list.end(); ++iter)
-        {
-            if (iter->mData.isEnabled())
-            {
-                Ptr ptr (&*iter, cell);
-                mEnvironment.mMechanicsManager->addActor (ptr);
-            }
-        }
-
         // Sky system
         if (mSky)
         {
