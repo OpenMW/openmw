@@ -2,15 +2,26 @@
 #define MANGLE_SOUND_OPENAL_OUT_H
 
 #include "../output.hpp"
+#include <list>
 
 namespace Mangle {
 namespace Sound {
+
+class OpenAL_Sound;
 
 class OpenAL_Factory : public SoundFactory
 {
   void *device;
   void *context;
   bool didSetup;
+
+  // List of streaming sounds that need to be updated every frame.
+  typedef std::list<OpenAL_Sound*> StreamList;
+  StreamList streaming;
+
+  friend class OpenAL_Sound;
+  void notifyStreaming(OpenAL_Sound*);
+  void notifyDelete(OpenAL_Sound*);
 
  public:
   /// Initialize object. Pass true (default) if you want the

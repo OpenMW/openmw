@@ -29,7 +29,7 @@ class StdStream : public Stream
   size_t read(void* buf, size_t len)
   {
     inf->read((char*)buf, len);
-    if(inf->fail())
+    if(inf->bad())
       fail("error reading from stream");
     return inf->gcount();
   }

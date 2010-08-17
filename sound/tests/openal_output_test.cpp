@@ -39,11 +39,16 @@ int main()
       snd->setVolume(0.8);
       snd->setPitch(0.9);
 
+      // Also test streaming, since all the other examples test
+      // non-streaming sounds.
+      snd->setStreaming(true);
+
       snd->play();
 
       while(snd->isPlaying())
         {
           usleep(10000);
+          mg.update();
         }
     }
   catch(exception &e)

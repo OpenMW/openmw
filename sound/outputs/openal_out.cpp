@@ -11,6 +11,20 @@ using namespace Mangle::Sound;
 
 // ---- Helper functions and classes ----
 
+// Static buffer used to shuffle sound data from the input into
+// OpenAL. The data is only stored temporarily and then immediately
+// shuffled off to the library. This is not thread safe, but it works
+// fine with multiple sounds in one thread. It could be made thread
+// safe simply by using thread local storage.
+const size_t BSIZE = 32*1024;
+static char tmp_buffer[BSIZE];
+
+// Number of buffers used (per sound) for streaming sounds. Each
+// buffer is of size BSIZE. Increasing this will make streaming sounds
+// more fault tolerant against temporary lapses in call to update(),
+// but will also increase memory usage. 4 should be ok.
+const int STREAM_BUF_NUM = 4;
+
 static void fail(const std::string &msg)
 { throw str_exception("OpenAL exception: " + msg); }
 
@@ -73,10 +87,18 @@ static void getALFormat(SampleSourcePtr inp, int &fmt, int &rate)
 }
 
 /// OpenAL sound output
-class OpenAL_Sound : public Sound
+class Mangle::Sound::OpenAL_Sound : public Sound
 {
   ALuint inst;
-  ALuint bufferID;
+
+  // Buffers. Only the first is used for non-streaming sounds.
+  ALuint bufferID[4];
+
+  // Number of buffers used
+  int bufNum;
+
+  // Parameters used for filling buffers
+  int fmt, rate;
 
   // Poor mans reference counting. Might improve this later. When
   // NULL, the buffer has not been set up yet.
@@ -87,17 +109,73 @@ class OpenAL_Sound : public Sound
   // Input stream
   SampleSourcePtr input;
 
+  OpenAL_Factory *owner;
+  bool ownerAlive;
+
+  // Used for streamed sound list
+  OpenAL_Sound *next, *prev;
+
   void setupBuffer();
+
+  // Fill data into the given buffer and queue it, if there is any
+  // data left to queue. Assumes the buffer is already unqueued, if
+  // necessary.
+  void queueBuffer(ALuint buf)
+  {
+    // If there is no more data, do nothing
+    if(!input) return;
+    if(input->eof())
+      {
+        input.reset();
+        return;
+      }
+
+    // Get some new data
+    size_t bytes = input->read(tmp_buffer, BSIZE);
+    if(bytes == 0)
+      {
+        input.reset();
+        return;
+      }
+
+    // Move data into the OpenAL buffer
+    alBufferData(buf, fmt, tmp_buffer, bytes, rate);
+    // Queue it
+    alSourceQueueBuffers(inst, 1, &buf);
+    checkALError("Queueing buffer data");
+  }
 
  public:
   /// Read samples from the given input buffer
-  OpenAL_Sound(SampleSourcePtr input);
+  OpenAL_Sound(SampleSourcePtr input, OpenAL_Factory *fact);
 
   /// Play an existing buffer, with a given ref counter. Used
   /// internally for cloning.
-  OpenAL_Sound(ALuint buf, int *ref);
+  OpenAL_Sound(ALuint buf, int *ref, OpenAL_Factory *fact);
 
   ~OpenAL_Sound();
+
+  // Must be called regularly on streamed sounds
+  void update()
+  {
+    if(!streaming) return;
+    if(!input) return;
+
+    // Get the number of processed buffers
+    ALint count;
+    alGetSourcei(inst, AL_BUFFERS_PROCESSED, &count);
+    checkALError("getting number of unprocessed buffers");
+
+    for(int i=0; i<count; i++)
+      {
+        ALuint buf;
+        // Unqueue one of the processed buffer
+        alSourceUnqueueBuffers(inst, 1, &buf);
+
+        // Then reload it with data (if any) and queue it up
+        queueBuffer(buf);
+      }
+  }
 
   void play();
   void stop();
@@ -107,7 +185,14 @@ class OpenAL_Sound : public Sound
   void setPos(float x, float y, float z);
   void setPitch(float);
   void setRepeat(bool);
-  void setStreaming(bool s) { streaming = s; }
+
+  void notifyOwnerDeath()
+  { ownerAlive = false; }
+
+  // We can enable streaming, but never disable it.
+  void setStreaming(bool s)
+  { if(s) streaming = true; }
+
   SoundPtr clone();
 
   // a = AL_REFERENCE_DISTANCE
@@ -123,11 +208,7 @@ class OpenAL_Sound : public Sound
 
 SoundPtr OpenAL_Factory::loadRaw(SampleSourcePtr input)
 {
-  return SoundPtr(new OpenAL_Sound(input));
-}
-
-void OpenAL_Factory::update()
-{
+  return SoundPtr(new OpenAL_Sound(input, this));
 }
 
 void OpenAL_Factory::setListenerPos(float x, float y, float z,
@@ -173,8 +254,33 @@ OpenAL_Factory::OpenAL_Factory(bool doSetup)
     }
 }
 
+void OpenAL_Factory::update()
+{
+  // Loop through all streaming sounds and update them
+  StreamList::iterator it = streaming.begin();
+  for(;it != streaming.end(); it++)
+    (*it)->update();
+}
+
+void OpenAL_Factory::notifyStreaming(OpenAL_Sound *snd)
+{
+  // Add the sound to the streaming list
+  streaming.push_back(snd);
+}
+
+void OpenAL_Factory::notifyDelete(OpenAL_Sound *snd)
+{
+  // Remove the sound from the stream list
+  streaming.remove(snd);
+}
+
 OpenAL_Factory::~OpenAL_Factory()
 {
+  // Notify remaining streamed sounds that we're dying
+  StreamList::iterator it = streaming.begin();
+  for(;it != streaming.end(); it++)
+    (*it)->notifyOwnerDeath();
+
   // Deinitialize sound system
   if(didSetup)
     {
@@ -249,27 +355,31 @@ SoundPtr OpenAL_Sound::clone()
 {
   setupBuffer();
   assert(!streaming && "cloning streamed sounds not supported");
-  return SoundPtr(new OpenAL_Sound(bufferID, refCnt));
+  return SoundPtr(new OpenAL_Sound(bufferID[0], refCnt, owner));
 }
 
 // Constructor used for cloned sounds
-OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref)
-  : bufferID(buf), refCnt(ref), streaming(false)
+OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref, OpenAL_Factory *fact)
+  : refCnt(ref), streaming(false), owner(fact), ownerAlive(false)
 {
   // Increase the reference count
   assert(ref != NULL);
   *refCnt++;
 
+  // Set up buffer
+  bufferID[0] = buf;
+  bufNum = 1;
+
   // Create a source
   alGenSources(1, &inst);
   checkALError("creating instance (clone)");
-  alSourcei(inst, AL_BUFFER, bufferID);
+  alSourcei(inst, AL_BUFFER, bufferID[0]);
   checkALError("assigning buffer (clone)");
 }
 
 // Constructor used for original (non-cloned) sounds
-OpenAL_Sound::OpenAL_Sound(SampleSourcePtr _input)
-  : bufferID(0), refCnt(NULL), streaming(false), input(_input)
+OpenAL_Sound::OpenAL_Sound(SampleSourcePtr _input, OpenAL_Factory *fact)
+  : refCnt(NULL), streaming(false), input(_input), owner(fact), ownerAlive(false)
 {
   // Create a source
   alGenSources(1, &inst);
@@ -287,46 +397,60 @@ void OpenAL_Sound::setupBuffer()
   assert(input);
 
   // Get the format
-  int fmt, rate;
   getALFormat(input, fmt, rate);
 
+  // Create a cheap reference counter for the buffer
+  refCnt = new int;
+  *refCnt = 1;
+
+  if(streaming) bufNum = STREAM_BUF_NUM;
+  else bufNum = 1;
+
+  // Set up the OpenAL buffer(s)
+  alGenBuffers(bufNum, bufferID);
+  checkALError("generating buffer(s)");
+  assert(bufferID[0] != 0);
+
+  // STREAMING.
   if(streaming)
     {
-      // To be done
+      // Just queue all the buffers with data and exit. queueBuffer()
+      // will work correctly also in the case where there is not
+      // enough data to fill all the buffers.
+      for(int i=0; i<bufNum; i++)
+        queueBuffer(bufferID[i]);
+
+      // Notify the manager what we're doing
+      owner->notifyStreaming(this);
+      ownerAlive = true;
+
+      return;
     }
 
-  // NON-STREAMING
-
-  // Set up the OpenAL buffer
-  alGenBuffers(1, &bufferID);
-  checkALError("generating buffer");
-  assert(bufferID != 0);
+  // NON-STREAMING. We have to load all the data and shove it into the
+  // buffer.
 
   // Does the stream support pointer operations?
   if(input->hasPtr)
     {
       // If so, we can read the data directly from the stream
-      alBufferData(bufferID, fmt, input->getPtr(), input->size(), rate);
+      alBufferData(bufferID[0], fmt, input->getPtr(), input->size(), rate);
     }
   else
     {
       // Read the entire stream into a temporary buffer first
-      Mangle::Stream::BufferStream buf(input, streaming?1024*1024:32*1024);
+      Mangle::Stream::BufferStream buf(input, 128*1024);
 
       // Then copy that into OpenAL
-      alBufferData(bufferID, fmt, buf.getPtr(), buf.size(), rate);
+      alBufferData(bufferID[0], fmt, buf.getPtr(), buf.size(), rate);
     }
-  checkALError("loading sound buffer");
+  checkALError("loading sound data");
 
   // We're done with the input stream, release the pointer
   input.reset();
 
-  alSourcei(inst, AL_BUFFER, bufferID);
+  alSourcei(inst, AL_BUFFER, bufferID[0]);
   checkALError("assigning buffer");
-
-  // Create a cheap reference counter for the buffer
-  refCnt = new int;
-  *refCnt = 1;
 }
 
 OpenAL_Sound::~OpenAL_Sound()
@@ -337,12 +461,19 @@ OpenAL_Sound::~OpenAL_Sound()
   // Return sound
   alDeleteSources(1, &inst);
 
+  // Notify the factory that we quit. You will hear from our union
+  // rep. The bool check is to handle cases where the manager goes out
+  // of scope before the sounds do. In that case, don't try to contact
+  // the factory.
+  if(ownerAlive)
+    owner->notifyDelete(this);
+
   // Decrease the reference counter
   if((-- *refCnt) == 0)
     {
-      // We're the last owner. Delete the buffer and the counter
+      // We're the last owner. Delete the buffer(s) and the counter
       // itself.
-      alDeleteBuffers(1, &bufferID);
+      alDeleteBuffers(bufNum, bufferID);
       checkALError("deleting buffer");
       delete refCnt;
     }
