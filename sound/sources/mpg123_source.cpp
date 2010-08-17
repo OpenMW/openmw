@@ -17,14 +17,13 @@ using namespace Mangle::Stream;
     support), but that's more messy.
 
   - the library also supports output, via various other sources,
-    including ALSO, OSS, PortAudio, PulseAudio and SDL. Using this
+    including ALSA, OSS, PortAudio, PulseAudio and SDL. Using this
     library as a pure output library (if that is possible) would be a
     nice shortcut over using those libraries - OTOH it's another
-    dependency. But it also means we could scavenge the mpg123 source
-    for these parts if we want them.
+    dependency.
 
   - we could implement seek(), tell() and size(), but they aren't
-    really necessary. Further more, since the returned size is only a
+    really necessary. Furthermore, since the returned size is only a
     guess, it is not safe to rely on it.
  */
 

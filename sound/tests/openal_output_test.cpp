@@ -25,15 +25,23 @@ int main()
 
   cout << "Playing\n";
 
-  // This initializes OpenAL for us, and serves no other purpose.
   OpenAL_Factory mg;
 
-  OpenAL_Sound snd(source);
+  SoundPtr snd = mg.loadRaw(source);
+
   try
     {
-      snd.play();
+      // Try setting all kinds of stuff before playing. OpenAL_Sound
+      // uses delayed buffer loading, but these should still work
+      // without a buffer.
+      snd->stop();
+      snd->pause();
+      snd->setVolume(0.8);
+      snd->setPitch(0.9);
 
-      while(snd.isPlaying())
+      snd->play();
+
+      while(snd->isPlaying())
         {
           usleep(10000);
         }

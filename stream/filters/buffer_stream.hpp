@@ -16,7 +16,11 @@ class BufferStream : public MemoryStream
   std::vector<char> buffer;
 
  public:
-  BufferStream(StreamPtr input)
+  /*
+    input = stream to copy
+    ADD = each read increment (for streams without size())
+   */
+  BufferStream(StreamPtr input, size_t ADD = 32*1024)
     {
       assert(input);
 
@@ -37,7 +41,6 @@ class BufferStream : public MemoryStream
         {
           // We DON'T know how big the stream is. We'll have to read
           // it in increments.
-          const unsigned int ADD = 32*1024;
           size_t len=0, newlen;
 
           while(!input->eof())
@@ -52,7 +55,7 @@ class BufferStream : public MemoryStream
 
               // If we read less than expected, we should be at the
               // end of the stream
-              assert(read == ADD || input->eof());
+              assert(read == ADD || (read < ADD && input->eof()));
             }
 
           // Downsize to match the real length

@@ -4,6 +4,9 @@
 #include "../../stream/filters/buffer_stream.hpp"
 #include "../../tools/str_exception.hpp"
 
+#include <AL/al.h>
+#include <AL/alc.h>
+
 using namespace Mangle::Sound;
 
 // ---- Helper functions and classes ----
@@ -69,16 +72,90 @@ static void getALFormat(SampleSourcePtr inp, int &fmt, int &rate)
     fail("Unsupported input format");
 }
 
+/// OpenAL sound output
+class OpenAL_Sound : public Sound
+{
+  ALuint inst;
+  ALuint bufferID;
+
+  // Poor mans reference counting. Might improve this later. When
+  // NULL, the buffer has not been set up yet.
+  int *refCnt;
+
+  bool streaming;
+
+  // Input stream
+  SampleSourcePtr input;
+
+  void setupBuffer();
+
+ public:
+  /// Read samples from the given input buffer
+  OpenAL_Sound(SampleSourcePtr input);
+
+  /// Play an existing buffer, with a given ref counter. Used
+  /// internally for cloning.
+  OpenAL_Sound(ALuint buf, int *ref);
+
+  ~OpenAL_Sound();
+
+  void play();
+  void stop();
+  void pause();
+  bool isPlaying() const;
+  void setVolume(float);
+  void setPos(float x, float y, float z);
+  void setPitch(float);
+  void setRepeat(bool);
+  void setStreaming(bool s) { streaming = s; }
+  SoundPtr clone();
+
+  // a = AL_REFERENCE_DISTANCE
+  // b = AL_MAX_DISTANCE
+  // c = ignored
+  void setRange(float a, float b=0.0, float c=0.0);
+
+  /// Not implemented
+  void setPan(float) {}
+};
+
 // ---- OpenAL_Factory ----
 
-OpenAL_Factory::OpenAL_Factory(bool doSetup)
-  : didSetup(doSetup)
+SoundPtr OpenAL_Factory::loadRaw(SampleSourcePtr input)
 {
-  needsUpdate = false;
+  return SoundPtr(new OpenAL_Sound(input));
+}
+
+void OpenAL_Factory::update()
+{
+}
+
+void OpenAL_Factory::setListenerPos(float x, float y, float z,
+                                    float fx, float fy, float fz,
+                                    float ux, float uy, float uz)
+{
+  ALfloat orient[6];
+  orient[0] = fx;
+  orient[1] = fy;
+  orient[2] = fz;
+  orient[3] = ux;
+  orient[4] = uy;
+  orient[5] = uz;
+  alListener3f(AL_POSITION, x, y, z);
+  alListenerfv(AL_ORIENTATION, orient);
+}
+
+OpenAL_Factory::OpenAL_Factory(bool doSetup)
+  : device(NULL), context(NULL), didSetup(doSetup)
+{
+  needsUpdate = true;
   has3D = true;
   canLoadFile = false;
   canLoadStream = false;
   canLoadSource = true;
+
+  ALCdevice *Device;
+  ALCcontext *Context;
 
   if(doSetup)
     {
@@ -90,6 +167,9 @@ OpenAL_Factory::OpenAL_Factory(bool doSetup)
         fail("Failed to initialize context or device");
 
       alcMakeContextCurrent(Context);
+
+      device = Device;
+      context = Context;
     }
 }
 
@@ -99,8 +179,8 @@ OpenAL_Factory::~OpenAL_Factory()
   if(didSetup)
     {
       alcMakeContextCurrent(NULL);
-      if(Context) alcDestroyContext(Context);
-      if(Device) alcCloseDevice(Device);
+      if(context) alcDestroyContext((ALCcontext*)context);
+      if(device) alcCloseDevice((ALCdevice*)device);
     }
 }
 
@@ -108,6 +188,7 @@ OpenAL_Factory::~OpenAL_Factory()
 
 void OpenAL_Sound::play()
 {
+  setupBuffer();
   alSourcePlay(inst);
   checkALError("starting playback");
 }
@@ -164,14 +245,16 @@ void OpenAL_Sound::setRepeat(bool rep)
   alSourcei(inst, AL_LOOPING, rep?AL_TRUE:AL_FALSE);
 }
 
-SoundPtr OpenAL_Sound::clone() const
+SoundPtr OpenAL_Sound::clone()
 {
+  setupBuffer();
+  assert(!streaming && "cloning streamed sounds not supported");
   return SoundPtr(new OpenAL_Sound(bufferID, refCnt));
 }
 
 // Constructor used for cloned sounds
 OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref)
-  : bufferID(buf), refCnt(ref)
+  : bufferID(buf), refCnt(ref), streaming(false)
 {
   // Increase the reference count
   assert(ref != NULL);
@@ -185,11 +268,34 @@ OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref)
 }
 
 // Constructor used for original (non-cloned) sounds
-OpenAL_Sound::OpenAL_Sound(SampleSourcePtr input)
+OpenAL_Sound::OpenAL_Sound(SampleSourcePtr _input)
+  : bufferID(0), refCnt(NULL), streaming(false), input(_input)
 {
+  // Create a source
+  alGenSources(1, &inst);
+  checkALError("creating source");
+
+  // By default, the sound starts out in a buffer-less mode. We don't
+  // create a buffer until the sound is played. This gives the user
+  // the chance to call setStreaming(true) first.
+}
+
+void OpenAL_Sound::setupBuffer()
+{
+  if(refCnt != NULL) return;
+
+  assert(input);
+
   // Get the format
   int fmt, rate;
   getALFormat(input, fmt, rate);
+
+  if(streaming)
+    {
+      // To be done
+    }
+
+  // NON-STREAMING
 
   // Set up the OpenAL buffer
   alGenBuffers(1, &bufferID);
@@ -205,17 +311,16 @@ OpenAL_Sound::OpenAL_Sound(SampleSourcePtr input)
   else
     {
       // Read the entire stream into a temporary buffer first
-      Mangle::Stream::BufferStream buf(input);
+      Mangle::Stream::BufferStream buf(input, streaming?1024*1024:32*1024);
 
       // Then copy that into OpenAL
       alBufferData(bufferID, fmt, buf.getPtr(), buf.size(), rate);
     }
-
   checkALError("loading sound buffer");
 
-  // Create a source
-  alGenSources(1, &inst);
-  checkALError("creating source");
+  // We're done with the input stream, release the pointer
+  input.reset();
+
   alSourcei(inst, AL_BUFFER, bufferID);
   checkALError("assigning buffer");
 

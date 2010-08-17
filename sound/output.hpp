@@ -72,7 +72,7 @@ class Sound
   /** Playback status is not cloned, only the sound data
       itself. Back-ends can use this as a means of sharing data and
       saving memory. */
-  virtual SoundPtr clone() const = 0;
+  virtual SoundPtr clone() = 0;
 
   /// Virtual destructor
   virtual ~Sound() {}
