@@ -176,9 +176,10 @@ namespace MWSound
     // Play the sound and tell it to stream, if possible. TODO:
     // Store the reference, the jukebox will need to check status,
     // control volume etc.
-    SoundPtr music = mData->mgr->play(filename);
+    SoundPtr music = mData->mgr->load(filename);
     music->setStreaming(true);
     music->setVolume(0.4);
+    music->play();
   }
 
   void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
