@@ -115,7 +115,7 @@ public:
     // point.
   }
 
-  SoundPtr clone() const
+  SoundPtr clone()
   {
     // Cloning only works when we have a manager.
     assert(mgr);
