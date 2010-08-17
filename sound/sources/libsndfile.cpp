@@ -19,10 +19,8 @@ void SndFileSource::getInfo(int32_t *_rate, int32_t *_channels, int32_t *_bits)
 
 size_t SndFileSource::readSamples(void *data, size_t length)
 {
-  // Read frames. We count channels as part of the frame, even though
-  // libsndfile does not. This is because the library still requires
-  // the number of frames read to be a multiple of channels.
-  return channels*sf_read_short((SNDFILE*)handle, (short*)data, length*channels);
+  // readf_* reads entire frames, including channels
+  return sf_readf_short((SNDFILE*)handle, (short*)data, length);
 }
 
 SndFileSource::SndFileSource(const std::string &file)

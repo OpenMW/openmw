@@ -29,6 +29,7 @@ void play(const char* name, bool stream=false)
       else
         snd = mg.load(name);
 
+      snd->setStreaming(true);
       snd->play();
 
       while(snd->isPlaying())

@@ -102,7 +102,7 @@ Mpg123Source::Mpg123Source(const std::string &file)
   err = mpg123_getformat(mhh, &rate, &channels, &encoding);
   checkError(err, mh);
   if(encoding != MPG123_ENC_SIGNED_16)
-    fail("Bad encoding");
+    fail("Unsupported encoding in " + file);
 
   // This is the only bit size we support.
   bits = 16;
