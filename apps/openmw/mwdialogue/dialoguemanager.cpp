@@ -273,6 +273,7 @@ namespace MWDialogue
                 }
 
                 mEnvironment.mWindowManager->setMode (MWGui::GM_Dialogue);
+                break;
             }
         }
     }
