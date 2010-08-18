@@ -28,6 +28,8 @@
 
 #include "mwclass/classes.hpp"
 
+#include "mwdialogue/dialoguemanager.hpp"
+
 #include "mwmechanics/mechanicsmanager.hpp"
 
 #include <OgreRoot.h>
@@ -104,6 +106,7 @@ OMW::Engine::Engine()
   : mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
+  , mUseSound (true)
   , mScriptManager (0)
   , mScriptContext (0)
 {
@@ -117,6 +120,7 @@ OMW::Engine::~Engine()
     delete mEnvironment.mSoundManager;
     delete mEnvironment.mGlobalScripts;
     delete mEnvironment.mMechanicsManager;
+    delete mEnvironment.mDialogueManager;
     delete mScriptManager;
     delete mScriptContext;
 }
@@ -236,7 +240,8 @@ void OMW::Engine::go()
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
-                                                           (mDataDir / "Sound").file_string());
+                                                           (mDataDir / "Sound").file_string(),
+                                                           mUseSound);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
@@ -252,6 +257,9 @@ void OMW::Engine::go()
     // Create game mechanics system
     mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (
         mEnvironment.mWorld->getStore(), *mEnvironment.mWindowManager);
+
+    // Create dialog system
+    mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment);
 
     // load cell
     ESM::Position pos;

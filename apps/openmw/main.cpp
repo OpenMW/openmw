@@ -31,6 +31,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ("master", bpo::value<std::string>()->default_value ("Morrowind"),
             "master file")
         ( "debug", "debug mode" )
+        ( "nosound", "disable all sound" )
         ( "script-verbose", "verbose script output" )
         ( "new-game", "activate char gen/new game mechanics" )
         ;
@@ -64,6 +65,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     
     if (variables.count ("debug"))
         engine.enableDebugMode();
+
+    if (variables.count ("nosound"))
+        engine.disableSound();
         
     if (variables.count ("script-verbose"))
         engine.enableVerboseScripts();

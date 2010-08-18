@@ -59,6 +59,7 @@ namespace OMW
             bool mDebug;
             bool mVerboseScripts;
             bool mNewGame;
+            bool mUseSound;
 
             MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
@@ -114,6 +115,9 @@ namespace OMW
 
             /// Enable verbose script output
             void enableVerboseScripts();
+
+            /// Disable all sound
+            void disableSound() { mUseSound = false; }
 
             /// Start as a new game.
             void setNewGame();

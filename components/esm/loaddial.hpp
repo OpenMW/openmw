@@ -1,7 +1,10 @@
 #ifndef _ESM_DIAL_H
 #define _ESM_DIAL_H
 
+#include <vector>
+
 #include "esm_reader.hpp"
+#include "loadinfo.hpp"
 
 namespace ESM {
 
@@ -23,6 +26,7 @@ struct Dialogue
     };
 
   char type;
+  std::vector<DialInfo> mInfo;
 
   void load(ESMReader &esm)
   {

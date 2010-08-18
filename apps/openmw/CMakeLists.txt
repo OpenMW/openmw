@@ -41,6 +41,14 @@ set(GAMEGUI
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
+set(GAMEDIALOGUE_HEADER
+    mwdialogue/dialoguemanager.hpp
+)
+set(GAMEDIALOGUE
+    mwdialogue/dialoguemanager.cpp
+)
+source_group(apps\\openmw\\mwdialogue FILES ${GAMEDIALOGUE_HEADER} ${GAMEDIALOGUE})
+
 set(GAMESCRIPT
     mwscript/scriptmanager.cpp
     mwscript/compilercontext.cpp
@@ -97,6 +105,7 @@ set(GAMEWORLD_HEADER
     mwworld/action.hpp
     mwworld/nullaction.hpp
     mwworld/actionteleport.hpp
+    mwworld/containerstore.hpp
     mwworld/actiontalk.hpp
     mwworld/actiontake.hpp
     mwworld/containerstore.hpp
@@ -164,11 +173,11 @@ set(GAMEMECHANICS_HEADER
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
 set(OPENMW_CPP ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD}
-    ${GAMECLASS} ${GAMEMECHANICS}
+    ${GAMECLASS} ${GAMEMECHANICS} ${GAMEDIALOGUE}
     )
 set(OPENMW_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
     ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER}  ${GAMECLASS_HEADER}
-    ${GAMEMECHANICS_HEADER}
+    ${GAMEMECHANICS_HEADER} ${GAMEDIALOG_HEADERUE}
     )
 
 # Main executable

@@ -20,16 +20,22 @@ using namespace std;
 #ifdef OPENMW_USE_AUDIERE
 #include <mangle/sound/filters/openal_audiere.hpp>
 #define SOUND_FACTORY OpenAL_Audiere_Factory
+#define SOUND_OUT "OpenAL"
+#define SOUND_IN "Audiere"
 #endif
 
 #ifdef OPENMW_USE_FFMPEG
 #include <mangle/sound/filters/openal_ffmpeg.hpp>
 #define SOUND_FACTORY OpenAL_FFMpeg_Factory
+#define SOUND_OUT "OpenAL"
+#define SOUND_IN "FFmpeg"
 #endif
 
 #ifdef OPENMW_USE_MPG123
 #include <mangle/sound/filters/openal_sndfile_mpg123.hpp>
 #define SOUND_FACTORY OpenAL_SndFile_Mpg123_Factory
+#define SOUND_OUT "OpenAL"
+#define SOUND_IN "mpg123,sndfile"
 #endif
 
 using namespace Mangle::Sound;
@@ -77,6 +83,9 @@ namespace MWSound
       , cameraTracker(mgr)
       , store(str)
     {
+      cout << "Sound output:  " << SOUND_OUT << endl;
+      cout << "Sound decoder: " << SOUND_IN << endl;
+
       // Attach the camera to the camera tracker
       cameraTracker.followCamera(camera);
 
@@ -150,29 +159,37 @@ namespace MWSound
 
   SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
                              const ESMS::ESMStore &store,
-                             const std::string &soundDir)
+                             const std::string &soundDir,
+                             bool useSound)
+    : mData(NULL)
   {
-    mData = new SoundImpl(root, camera, store, soundDir);
+    if(useSound)
+      mData = new SoundImpl(root, camera, store, soundDir);
   }
 
   SoundManager::~SoundManager()
   {
-    delete mData;
+    if(mData)
+      delete mData;
   }
 
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
     // The range values are not tested
+    if(!mData) return;
     mData->add(filename, ptr, "_say_sound", 1, 1, 100, 10000, false);
   }
 
   bool SoundManager::sayDone (MWWorld::Ptr ptr) const
   {
+    if(!mData) return false;
     return !mData->isPlaying(ptr, "_say_sound");
   }
 
   void SoundManager::streamMusic (const std::string& filename)
   {
+    if(!mData) return;
+
     // Play the sound and tell it to stream, if possible. TODO:
     // Store the reference, the jukebox will need to check status,
     // control volume etc.
@@ -184,6 +201,8 @@ namespace MWSound
 
   void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
   {
+    if(!mData) return;
+
     // Play and forget
     float min, max;
     const std::string &file = mData->lookup(soundId, volume, min, max);
@@ -199,6 +218,8 @@ namespace MWSound
   void SoundManager::playSound3D (MWWorld::Ptr ptr, const std::string& soundId,
                                   float volume, float pitch, bool loop)
   {
+    if(!mData) return;
+
     // Look up the sound in the ESM data
     float min, max;
     const std::string &file = mData->lookup(soundId, volume, min, max);
@@ -208,21 +229,28 @@ namespace MWSound
 
   void SoundManager::stopSound3D (MWWorld::Ptr ptr, const std::string& soundId)
   {
+    if(!mData) return;
     mData->remove(ptr, soundId);
   }
 
   void SoundManager::stopSound (MWWorld::Ptr::CellStore *cell)
   {
+    if(!mData) return;
     mData->removeCell(cell);
   }
 
   bool SoundManager::getSoundPlaying (MWWorld::Ptr ptr, const std::string& soundId) const
   {
+    // Mark all sounds as playing, otherwise the scripts will just
+    // keep trying to play them every frame.
+    if(!mData) return true;
+
     return mData->isPlaying(ptr, soundId);
   }
 
   void SoundManager::updateObject(MWWorld::Ptr ptr)
   {
+    if(!mData) return;
     mData->updatePositions(ptr);
   }
 }
