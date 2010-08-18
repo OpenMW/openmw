@@ -20,16 +20,22 @@ using namespace std;
 #ifdef OPENMW_USE_AUDIERE
 #include <mangle/sound/filters/openal_audiere.hpp>
 #define SOUND_FACTORY OpenAL_Audiere_Factory
+#define SOUND_OUT "OpenAL"
+#define SOUND_IN "Audiere"
 #endif
 
 #ifdef OPENMW_USE_FFMPEG
 #include <mangle/sound/filters/openal_ffmpeg.hpp>
 #define SOUND_FACTORY OpenAL_FFMpeg_Factory
+#define SOUND_OUT "OpenAL"
+#define SOUND_IN "FFmpeg"
 #endif
 
 #ifdef OPENMW_USE_MPG123
 #include <mangle/sound/filters/openal_sndfile_mpg123.hpp>
 #define SOUND_FACTORY OpenAL_SndFile_Mpg123_Factory
+#define SOUND_OUT "OpenAL"
+#define SOUND_IN "mpg123,sndfile"
 #endif
 
 using namespace Mangle::Sound;
@@ -77,6 +83,9 @@ namespace MWSound
       , cameraTracker(mgr)
       , store(str)
     {
+      cout << "Sound output:  " << SOUND_OUT << endl;
+      cout << "Sound decoder: " << SOUND_IN << endl;
+
       // Attach the camera to the camera tracker
       cameraTracker.followCamera(camera);
 
@@ -180,12 +189,6 @@ namespace MWSound
   void SoundManager::streamMusic (const std::string& filename)
   {
     if(!mData) return;
-
-#ifdef OPENMW_USE_MPG123
-    // Disable music
-    cout << "  - music is temporarily disabled -\n";
-    return;
-#endif
 
     // Play the sound and tell it to stream, if possible. TODO:
     // Store the reference, the jukebox will need to check status,
