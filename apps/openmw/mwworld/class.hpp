@@ -42,6 +42,10 @@ namespace MWWorld
 
             virtual ~Class();
 
+            virtual std::string getId (const Ptr& ptr) const;
+            ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
+            /// (default implementation: throw an exception)
+
             virtual void insertObj (const Ptr& ptr, MWRender::CellRenderImp& cellRender,
                 MWWorld::Environment& environment) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).

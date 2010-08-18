@@ -3,7 +3,7 @@
 
 #include "environment.hpp"
 
-#include "../mwgui/window_manager.hpp"
+#include "../mwdialogue/dialoguemanager.hpp"
 
 namespace MWWorld
 {
@@ -11,6 +11,6 @@ namespace MWWorld
 
     void ActionTalk::execute (Environment& environment)
     {
-        environment.mWindowManager->setMode (MWGui::GM_Dialogue);
+        environment.mDialogueManager->startDialogue (mActor);
     }
 }

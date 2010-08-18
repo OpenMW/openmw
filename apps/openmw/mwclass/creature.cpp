@@ -15,6 +15,14 @@
 
 namespace MWClass
 {
+    std::string Creature::getId (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->base->mId;
+    }
+
     void Creature::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
         MWWorld::Environment& environment) const
     {
@@ -96,7 +104,7 @@ namespace MWClass
         }
 
         return *ptr.getRefData().getContainerStore();
-    }
+	}
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
     {

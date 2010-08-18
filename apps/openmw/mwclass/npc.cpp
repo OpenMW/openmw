@@ -16,6 +16,14 @@
 
 namespace MWClass
 {
+    std::string Npc::getId (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+            ptr.get<ESM::NPC>();
+
+        return ref->base->mId;
+    }
+
     void Npc::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
         MWWorld::Environment& environment) const
     {
