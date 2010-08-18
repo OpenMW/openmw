@@ -44,6 +44,12 @@ set(NIFOGRE_HEADER
     ${COMP_DIR}/nifogre/ogre_nif_loader.hpp)
 source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})
 
+set(TO_UTF8
+    ${COMP_DIR}/to_utf8/to_utf8.cpp)
+set(TO_UTF8_HEADER
+    ${COMP_DIR}/to_utf8/to_utf8.hpp)
+source_group(components\\to_utf8 FILES ${TO_UTF8} ${TO_UTF8_HEADER})
+
 set(ESM_STORE
     ${COMP_DIR}/esm_store/store.cpp)
 set(ESM_STORE_HEADER
@@ -75,10 +81,10 @@ file(GLOB INTERPRETER ${COMP_DIR}/interpreter/*.cpp)
 file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
 
-set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC}
+set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC} ${TO_UTF8}
     ${COMPILER} ${INTERPRETER} ${ESM})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
-    ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER}
+    ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER} ${TO_UTF8_HEADER}
     ${INTERPRETER_HEADER})
 
 # source directory: libs
@@ -158,12 +164,10 @@ endif (WIN32)
 find_package(OGRE REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
-find_package(Iconv REQUIRED)
 find_package(OpenAL REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
-	${ICONV_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
