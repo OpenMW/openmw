@@ -98,15 +98,12 @@ namespace MWClass
         return *ptr.getRefData().getCreatureStats();
     }
 
-<<<<<<< HEAD:apps/openmw/mwclass/npc.cpp
-=======
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
         return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
 
->>>>>>> master:apps/openmw/mwclass/npc.cpp
     MWWorld::ContainerStore<MWWorld::RefData>& Npc::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
@@ -121,12 +118,6 @@ namespace MWClass
         }
 
         return *ptr.getRefData().getContainerStore();
-	}
-
-    boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
-    {
-        return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
