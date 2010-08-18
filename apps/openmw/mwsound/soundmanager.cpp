@@ -181,6 +181,12 @@ namespace MWSound
   {
     if(!mData) return;
 
+#ifdef OPENMW_USE_MPG123
+    // Disable music
+    cout << "  - music is temporarily disabled -\n";
+    return;
+#endif
+
     // Play the sound and tell it to stream, if possible. TODO:
     // Store the reference, the jukebox will need to check status,
     // control volume etc.
