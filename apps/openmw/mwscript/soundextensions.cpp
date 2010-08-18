@@ -25,15 +25,15 @@ namespace MWScript
                 {
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-                   
+
                     std::string file = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     std::string text = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                        
-                    context.getSoundManager().say (context.getReference(), file, text,
-                        context);
+
+                    context.getSoundManager().say (context.getReference(), file);
+                    context.messageBox (text);
                 } 
         };   
             
@@ -46,8 +46,7 @@ namespace MWScript
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                         
-                    runtime.push (context.getSoundManager().sayDone (context.getReference(),
-                        context));
+                    runtime.push (context.getSoundManager().sayDone (context.getReference()));
                 } 
         };    
     
@@ -63,7 +62,7 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                         
-                    context.getSoundManager().streamMusic (sound, context);
+                    context.getSoundManager().streamMusic (sound);
                 } 
         };      
 
@@ -79,7 +78,7 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                         
-                    context.getSoundManager().playSound (sound, 1.0, 1.0, context);
+                    context.getSoundManager().playSound (sound, 1.0, 1.0);
                 } 
         };      
     
@@ -101,7 +100,7 @@ namespace MWScript
                     Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
                         
-                    context.getSoundManager().playSound (sound, volume, pitch, context);
+                    context.getSoundManager().playSound (sound, volume, pitch);
                 } 
         };      
     
@@ -122,7 +121,7 @@ namespace MWScript
                     runtime.pop();
                                             
                     context.getSoundManager().playSound3D (context.getReference(), sound,
-                        1.0, 1.0, mLoop, context);
+                        1.0, 1.0, mLoop);
                 } 
         };      
     
@@ -149,7 +148,7 @@ namespace MWScript
                     runtime.pop();
                         
                     context.getSoundManager().playSound3D (context.getReference(), sound, volume,
-                        pitch, mLoop, context);
+                        pitch, mLoop);
 
                 } 
         };     
@@ -166,7 +165,7 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                                             
-                    context.getSoundManager().stopSound3D (context.getReference(), sound, context);
+                    context.getSoundManager().stopSound3D (context.getReference(), sound);
                 } 
         };      
                                 
@@ -183,7 +182,7 @@ namespace MWScript
                     runtime.pop();
                         
                     runtime.push (context.getSoundManager().getSoundPlaying (
-                        context.getReference(), runtime.getStringLiteral (index), context));
+                        context.getReference(), runtime.getStringLiteral (index)));
                 } 
         };
         
@@ -206,7 +205,7 @@ namespace MWScript
                     runtime.pop();
                         
                     context.getSoundManager().say (context.getWorld().getPtr (id, true),
-                        file, text, context);
+                        file);
                 } 
         };   
             
@@ -223,7 +222,7 @@ namespace MWScript
                     runtime.pop();
                                             
                     runtime.push (context.getSoundManager().sayDone (
-                        context.getWorld().getPtr (id, true), context));
+                        context.getWorld().getPtr (id, true)));
                 } 
         };    
         
@@ -247,7 +246,7 @@ namespace MWScript
                     runtime.pop();
                                             
                     context.getSoundManager().playSound3D (
-                        context.getWorld().getPtr (id, true), sound, 1.0, 1.0, mLoop, context);
+                        context.getWorld().getPtr (id, true), sound, 1.0, 1.0, mLoop);
                 } 
         };      
     
@@ -277,7 +276,7 @@ namespace MWScript
                     runtime.pop();
                         
                     context.getSoundManager().playSound3D (
-                        context.getWorld().getPtr (id, true), sound, volume, pitch, mLoop, context);
+                        context.getWorld().getPtr (id, true), sound, volume, pitch, mLoop);
 
                 } 
         };     
@@ -298,7 +297,7 @@ namespace MWScript
                     runtime.pop();
                                             
                     context.getSoundManager().stopSound3D (
-                        context.getWorld().getPtr (id, true), sound, context);
+                        context.getWorld().getPtr (id, true), sound);
                 } 
         };      
                                 
@@ -319,7 +318,7 @@ namespace MWScript
                         
                     runtime.push (context.getSoundManager().getSoundPlaying (
                         context.getWorld().getPtr (id, true),
-                        runtime.getStringLiteral (index), context));
+                        runtime.getStringLiteral (index)));
                 } 
         };        
             

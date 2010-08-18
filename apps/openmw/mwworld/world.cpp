@@ -11,8 +11,11 @@
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
+#include "../mwsound/soundmanager.hpp"
+
 #include "ptr.hpp"
 #include "environment.hpp"
+#include "class.hpp"
 
 namespace
 {
@@ -372,12 +375,8 @@ namespace MWWorld
             {
                 render->enable (reference.getRefData().getHandle());
 
-                if (mActiveCells.find (reference.getCell())!=mActiveCells.end() &&
-                    (reference.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
-                    reference.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
-                {
-                    mEnvironment.mMechanicsManager->addActor (reference);
-                }
+                if (mActiveCells.find (reference.getCell())!=mActiveCells.end())
+                    Class::get (reference).enable (reference, mEnvironment);
             }
         }
     }
@@ -392,11 +391,10 @@ namespace MWWorld
             {
                 render->disable (reference.getRefData().getHandle());
 
-                if (mActiveCells.find (reference.getCell())!=mActiveCells.end() &&
-                    (reference.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
-                    reference.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
+                if (mActiveCells.find (reference.getCell())!=mActiveCells.end())
                 {
-                    mEnvironment.mMechanicsManager->removeActor (reference);
+                    Class::get (reference).disable (reference, mEnvironment);
+                    mEnvironment.mSoundManager->stopSound3D (reference);
                 }
             }
         }
@@ -535,6 +533,7 @@ namespace MWWorld
         {
             mEnvironment.mMechanicsManager->dropActors (active->first);
             active->second->destroy();
+            mEnvironment.mSoundManager->stopSound (active->first);
             delete active->second;
             mActiveCells.erase (active);
         }
@@ -551,7 +550,7 @@ namespace MWWorld
         // This connects the cell data with the rendering scene.
         std::pair<CellRenderCollection::iterator, bool> result =
             mActiveCells.insert (std::make_pair (cell,
-            new MWRender::InteriorCellRender (*cell, mStore, mScene)));
+            new MWRender::InteriorCellRender (*cell, mEnvironment, mScene)));
 
         if (result.second)
         {
@@ -562,28 +561,6 @@ namespace MWWorld
         // Actors
         mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
         mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
-
-        for (ESMS::CellRefList<ESM::Creature, RefData>::List::iterator iter (
-            cell->creatures.list.begin());
-            iter!=cell->creatures.list.end(); ++iter)
-        {
-            if (iter->mData.isEnabled())
-            {
-                Ptr ptr (&*iter, cell);
-                mEnvironment.mMechanicsManager->addActor (ptr);
-            }
-        }
-
-        for (ESMS::CellRefList<ESM::NPC, RefData>::List::iterator iter (
-            cell->npcs.list.begin());
-            iter!=cell->npcs.list.end(); ++iter)
-        {
-            if (iter->mData.isEnabled())
-            {
-                Ptr ptr (&*iter, cell);
-                mEnvironment.mMechanicsManager->addActor (ptr);
-            }
-        }
 
         // Sky system
         if (mSky)
@@ -623,11 +600,10 @@ namespace MWWorld
                 render->deleteObject (ptr.getRefData().getHandle());
                 ptr.getRefData().setHandle ("");
 
-                if (mActiveCells.find (ptr.getCell())!=mActiveCells.end() &&
-                    (ptr.getType()==typeid (ESMS::LiveCellRef<ESM::NPC, RefData>) ||
-                    ptr.getType()==typeid (ESMS::LiveCellRef<ESM::Creature, RefData>)))
+                if (mActiveCells.find (ptr.getCell())!=mActiveCells.end())
                 {
-                    mEnvironment.mMechanicsManager->removeActor (ptr);
+                    Class::get (ptr).disable (ptr, mEnvironment);
+                    mEnvironment.mSoundManager->stopSound3D (ptr);
                 }
             }
         }

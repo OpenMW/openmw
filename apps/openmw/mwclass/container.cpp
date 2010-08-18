@@ -7,8 +7,26 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "../mwrender/cellimp.hpp"
+
 namespace MWClass
 {
+    void Container::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
+        MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+            ptr.get<ESM::Container>();
+
+        assert (ref->base != NULL);
+        const std::string &model = ref->base->model;
+        if (!model.empty())
+        {
+            cellRender.insertBegin (ref->ref);
+            cellRender.insertMesh ("meshes\\" + model);
+            ref->mData.setHandle (cellRender.insertEnd (ref->mData.isEnabled()));
+        }
+    }
+
     std::string Container::getName (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =

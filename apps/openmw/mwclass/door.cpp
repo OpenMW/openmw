@@ -13,8 +13,26 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
+#include "../mwrender/cellimp.hpp"
+
 namespace MWClass
 {
+    void Door::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
+        MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+            ptr.get<ESM::Door>();
+
+        assert (ref->base != NULL);
+        const std::string &model = ref->base->model;
+        if (!model.empty())
+        {
+            cellRender.insertBegin (ref->ref);
+            cellRender.insertMesh ("meshes\\" + model);
+            ref->mData.setHandle (cellRender.insertEnd (ref->mData.isEnabled()));
+        }
+    }
+
     std::string Door::getName (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =

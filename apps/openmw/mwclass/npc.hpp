@@ -12,6 +12,16 @@ namespace MWClass
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
             ///< Return ID of \a ptr
 
+            virtual void insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
+                MWWorld::Environment& environment) const;
+            ///< Add reference into a cell for rendering
+
+            virtual void enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            ///< Enable reference; only does the non-rendering part
+
+            virtual void disable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            ///< Enable reference; only does the non-rendering part
+
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
