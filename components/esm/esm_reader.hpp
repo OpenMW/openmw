@@ -3,21 +3,17 @@
 
 #include <string>
 #include <libs/platform/stdint.h>
-#include <string.h>
 #include <assert.h>
 #include <vector>
 #include <sstream>
-#include <iomanip>
-#include <errno.h>
-
-#ifndef __WIN32__
-    #include <iconv.h>
-#endif
+#include <string.h>
 
 #include <libs/mangle/stream/stream.hpp>
 #include <libs/mangle/stream/servers/file_stream.hpp>
 #include <libs/mangle/tools/str_exception.hpp>
 #include <components/misc/stringops.hpp>
+
+#include <components/to_utf8/to_utf8.hpp>
 
 #ifdef __APPLE__
 // need our own implementation of strnlen
@@ -603,111 +599,16 @@ public:
   void getName(NAME &name) { getT(name); }
   void getUint(uint32_t &u) { getT(u); }
 
-  // Read the next size bytes and return them as a string
+  // Read the next 'size' bytes and return them as a string. Converts
+  // them from native encoding to UTF8 in the process.
   std::string getString(int size)
   {
-    // Not very optimized, but we can fix that later
-    char *ptr = new char[size];
+    char *ptr = ToUTF8::getBuffer(size);
     esm->read(ptr,size);
 
-    // Remove any zero terminators
-    for(int i=0; i<size; i++)
-      if(ptr[i] == 0)
-        size = i;
-
-    // Convert to std::string and return
-    std::string res(ptr,size);
-    delete[] ptr;
-    return convertToUTF8(res);
+    // Convert to UTF8 and return
+    return ToUTF8::getUtf8(ToUTF8::WINDOWS_1252);
   }
-
-    // Convert a string from the encoding used by Morrowind to UTF-8
-    std::string convertToUTF8 (std::string input)
-    {
-#ifdef __WIN32__
-        return input;
-#else
-        std::string output = "";
-
-        //create convert description
-        iconv_t cd = iconv_open ("UTF-8", "WINDOWS-1252");
-
-        if (cd == (iconv_t)-1)  //error handling
-        {
-            std::string errMsg = "Creating description for UTF-8 converting failed: ";
-
-            switch (errno)   //detailed error messages (maybe it contains too much detail :)
-            {
-            case EMFILE:
-                errMsg += "{OPEN_MAX} files descriptors are currently open in the calling process.";
-            case ENFILE:
-                errMsg += "Too many files are currently open in the system.";
-            case ENOMEM:
-                errMsg +="Insufficient storage space is available.";
-            case EINVAL:
-                errMsg += "The conversion specified by fromcode and tocode is not supported by the implementation.";
-
-            default:
-                errMsg += "Unknown Error\n";
-            }
-
-            fail (errMsg);
-
-        }
-        else
-        {
-            const size_t inputSize = input.size();
-
-            if (inputSize)  //input is not empty
-            {
-                //convert function doesn't accept const char *, therefore copy content into an char *
-                std::vector<char> inputBuffer (input.begin(), input.end());
-                char *inputBufferBegin = &inputBuffer[0];
-
-                size_t inputBytesLeft = inputSize; //bytes to convert
-
-                static const size_t outputSize = 1000;
-                size_t outputBytesLeft;
-
-                char outputBuffer[outputSize];
-                char *outputBufferBegin;
-
-                while (inputBytesLeft > 0)
-                {
-                    outputBytesLeft = outputSize;
-                    outputBufferBegin = outputBuffer;
-
-                    if (iconv (cd, &inputBufferBegin, &inputBytesLeft, &outputBufferBegin, &outputBytesLeft) == (size_t)-1)
-                    {
-                        switch (errno)
-                        {
-                        case E2BIG: //outputBuffer is full
-                            output += std::string (outputBuffer, outputSize);
-                            break;
-                        case EILSEQ:
-                            fail ("Iconv: Invalid multibyte sequence.\n");
-                            break;
-                        case EINVAL:
-                            fail ("Iconv: Incomplete multibyte sequence.\n");
-                            break;
-                        default:
-                            fail ("Iconv: Unknown Error\n");
-                        }
-
-                    }
-                }
-
-                //read only relevant bytes from outputBuffer
-                output += std::string (outputBuffer, outputSize - outputBytesLeft);
-
-            }
-        }
-
-        iconv_close (cd);
-
-        return output;
-    }
-#endif
 
   void skip(int bytes) { esm->seek(esm->tell()+bytes); }
   uint64_t getOffset() { return esm->tell(); }

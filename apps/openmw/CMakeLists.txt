@@ -199,7 +199,6 @@ target_link_libraries(openmw
   ${Boost_LIBRARIES}
   ${OPENAL_LIBRARY}
   ${SOUND_INPUT_LIBRARY}
-  ${ICONV_LIBRARIES}
   caelum
   MyGUIEngine
   MyGUI.OgrePlatform

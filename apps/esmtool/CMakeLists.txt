@@ -9,6 +9,7 @@ source_group(apps\\esmtool FILES ${ESMTOOL})
 add_executable(esmtool
   ${ESMTOOL}
   ${MISC} ${MISC_HEADER}
+  ${TO_UTF8}
 )
 
 target_link_libraries(esmtool
