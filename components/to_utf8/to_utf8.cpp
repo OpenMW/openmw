@@ -39,9 +39,11 @@
 // Generated tables
 #include "tables_gen.hpp"
 
-// Shared global buffers, we love you.
-static std::vector<char> buf;
-static std::vector<char> output;
+// Shared global buffers, we love you. These initial sizes are large
+// enough to hold the largest books in Morrowind.esm, but we will
+// resize automaticall if necessary.
+static std::vector<char> buf    (50*1024);
+static std::vector<char> output (50*1024);
 static int size;
 
 // Make sure the given vector is large enough for 'size' bytes,

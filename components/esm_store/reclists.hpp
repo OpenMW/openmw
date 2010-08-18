@@ -8,6 +8,7 @@
 #include <cctype>
 #include <assert.h>
 #include <stdexcept>
+#include <iterator>
 
 namespace ESMS
 {

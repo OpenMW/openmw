@@ -926,10 +926,10 @@ int update_arg(void *field, char **orig_field,
                const char *long_opt, char short_opt,
                const char *additional_error)
 {
-  FIX_UNUSED (field);
   char *stop_char = 0;
   const char *val = value;
   int found;
+  FIX_UNUSED (field);
 
   stop_char = 0;
   found = 0;

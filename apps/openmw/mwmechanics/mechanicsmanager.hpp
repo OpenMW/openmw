@@ -9,7 +9,7 @@
 
 namespace ESMS
 {
-    class ESMStore;
+    struct ESMStore;
 }
 
 namespace MWGui
