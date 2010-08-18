@@ -14,6 +14,8 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/refdata.hpp"
 
+#include "../mwgui/window_manager.hpp"
+
 #include <iostream>
 
 namespace
@@ -270,7 +272,7 @@ namespace MWDialogue
                     // TODO execute script
                 }
 
-                break;
+                mEnvironment.mWindowManager->setMode (MWGui::GM_Dialogue);
             }
         }
     }
