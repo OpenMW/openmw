@@ -106,6 +106,7 @@ OMW::Engine::Engine()
   : mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
+  , mUseSound (true)
   , mScriptManager (0)
   , mScriptContext (0)
 {
@@ -239,7 +240,8 @@ void OMW::Engine::go()
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
-                                                           (mDataDir / "Sound").file_string());
+                                                           (mDataDir / "Sound").file_string(),
+                                                           mUseSound);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,

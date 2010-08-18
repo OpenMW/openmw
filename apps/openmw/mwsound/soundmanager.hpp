@@ -28,7 +28,7 @@ namespace MWSound
 
         public:
       SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
-                   const std::string &soundDir);
+                   const std::string &soundDir, bool useSound);
             ~SoundManager();
 
             void say (MWWorld::Ptr reference, const std::string& filename);
