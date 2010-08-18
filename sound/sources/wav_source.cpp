@@ -30,7 +30,10 @@ size_t WavSource::read(void *data, size_t length)
 {
   if(length > left)
     length = left;
-  input->read(data, length);
+  size_t read = input->read(data, length);
+  if(read < length)
+    // Something went wrong
+    fail("WAV read error");
   return length;
 }
 

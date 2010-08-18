@@ -17,9 +17,8 @@ namespace Sound {
       MP3: mpg123
       WAV: custom wav loader (PCM only)
 
-    This could be an alternative to using eg. libsndfile or other 3rd
-    party decoder libraries. (We implemented this for OpenMW because
-    we were experiencing crashes when using libsndfile.)
+    This could be an alternative to using eg. 3rd party decoder
+    libraries like libsndfile.
  */
 class OpenAL_Various_Factory : public InputFilter
 {

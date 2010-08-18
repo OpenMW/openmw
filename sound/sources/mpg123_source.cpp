@@ -106,11 +106,6 @@ Mpg123Source::Mpg123Source(const std::string &file)
 
   // This is the only bit size we support.
   bits = 16;
-
-  // Ensure the output format does not change. (The tutorial on the
-  // mpg123 site did this, I assume it's kosher.)
-  mpg123_format_none(mhh);
-  mpg123_format(mhh,rate,channels,encoding);
 }
 
 Mpg123Source::~Mpg123Source()
