@@ -10,6 +10,7 @@ using namespace std;
 
 #include <components/esm_store/store.hpp>
 #include <algorithm>
+#include <map>
 
 #include <OgreRoot.h>
 
@@ -75,6 +76,10 @@ namespace MWSound
     const ESMS::ESMStore &store;
     std::string dir;
 
+    typedef std::map<std::string,Mangle::Sound::WSoundPtr> IDMap;
+    typedef std::map<MWWorld::Ptr,IDMap> PtrMap;
+    PtrMap sounds;
+
     SoundImpl(Ogre::Root *root, Ogre::Camera *camera,
               const ESMS::ESMStore &str,
               const std::string &soundDir)
@@ -130,6 +135,8 @@ namespace MWSound
           snd->setRange(min,max);
           setPos(snd, ptr);
           snd->play();
+
+          sounds[ptr][id] = WSoundPtr(snd);
         }
       catch(...)
         {
@@ -137,23 +144,105 @@ namespace MWSound
         }
     }
 
+    // Clears all the sub-elements of a given iterator, and then
+    // removes it from 'sounds'.
+    void clearAll(PtrMap::iterator it)
+    {
+      IDMap::iterator sit = it->second.begin();
+
+      while(sit != it->second.end())
+        {
+          // Get sound pointer, if any
+          SoundPtr snd = sit->second.lock();
+
+          // Stop the sound
+          if(snd) snd->stop();
+
+          sit++;
+        }
+
+      // Remove the ptr reference
+      sounds.erase(it);
+    }
+
     // Stop a sound and remove it from the list. If id="" then
     // remove the entire object and stop all its sounds.
     void remove(MWWorld::Ptr ptr, const std::string &id = "")
     {
+      PtrMap::iterator it = sounds.find(ptr);
+      if(it != sounds.end())
+        {
+          if(id == "")
+            // Kill all references to 'ptr'
+            clearAll(it);
+          else
+            {
+              // Only find the id we're looking for
+              IDMap::iterator it2 = it->second.find(id);
+              if(it2 != it->second.end())
+                {
+                  // Stop the sound and remove it from the list
+                  SoundPtr snd = it2->second.lock();
+                  if(snd) snd->stop();
+                  it->second.erase(it2);
+                }
+            }
+        }
     }
 
     bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const
     {
-      return true;
+      PtrMap::const_iterator it = sounds.find(ptr);
+      if(it != sounds.end())
+        {
+          IDMap::const_iterator it2 = it->second.find(id);
+          if(it2 != it->second.end())
+            {
+              // Get a shared_ptr from the weak_ptr
+              SoundPtr snd = it2->second.lock();;
+
+              // Is it still alive?
+              if(snd)
+                {
+                  // Then return its status!
+                  return snd->isPlaying();
+                }
+            }
+        }
+      // Nothing found, sound is not playing
+      return false;
     }
 
+    // Remove all references to objects belonging to a given cell
     void removeCell(const MWWorld::Ptr::CellStore *cell)
     {
+      PtrMap::iterator it2, it = sounds.begin();
+      while(it != sounds.end())
+        {
+          // Make sure to increase the iterator before we erase it.
+          it2 = it++;
+          if(it->first.getCell() == cell)
+            clearAll(it2);
+        }
     }
 
     void updatePositions(MWWorld::Ptr ptr)
     {
+      // Find the reference (if any)
+      PtrMap::iterator it = sounds.find(ptr);
+      if(it != sounds.end())
+        {
+          // Then find all sounds in it (if any)
+          IDMap::iterator it2 = it->second.begin();
+          for(;it2 != it->second.end(); it2++)
+            {
+              // Get the sound (if it still exists)
+              SoundPtr snd = it2->second.lock();
+              if(snd)
+                // Update position
+                setPos(snd, ptr);
+            }
+        }
     }
   };
 
