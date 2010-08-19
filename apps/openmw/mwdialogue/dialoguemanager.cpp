@@ -238,7 +238,10 @@ namespace MWDialogue
         std::cout
             << "unchecked entries:" << std::endl
             << "    player faction: " << info.pcFaction << std::endl
-            << "    DATAstruct" << std::endl;
+            << "    disposition: " << info.data.disposition << std::endl
+            << "    NPC rank: " << static_cast<int> (info.data.rank) << std::endl
+            << "    gender: " << static_cast<int> (info.data.gender) << std::endl
+            << "    PC rank: " << static_cast<int> (info.data.PCrank) << std::endl;
 
         return true;
     }
