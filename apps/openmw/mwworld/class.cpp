@@ -40,6 +40,11 @@ namespace MWWorld
         throw std::runtime_error ("class does not have creature stats");
     }
 
+    MWMechanics::NpcStats& Class::getNpcStats (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have NPC stats");
+    }
+
     bool Class::hasItemHealth (const Ptr& ptr) const
     {
         return false;

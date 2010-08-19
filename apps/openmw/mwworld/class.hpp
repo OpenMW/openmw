@@ -18,6 +18,7 @@ namespace MWRender
 namespace MWMechanics
 {
     struct CreatureStats;
+    struct NpcStats;
 }
 
 namespace MWWorld
@@ -66,6 +67,10 @@ namespace MWWorld
 
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
+            /// (default implementation: throw an exceoption)
+
+            virtual MWMechanics::NpcStats& getNpcStats (const Ptr& ptr) const;
+            ///< Return NPC stats or throw an exception, if class does not have NPC stats
             /// (default implementation: throw an exceoption)
 
             virtual bool hasItemHealth (const Ptr& ptr) const;

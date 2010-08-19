@@ -4,6 +4,7 @@
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -96,6 +97,29 @@ namespace MWClass
         }
 
         return *ptr.getRefData().getCreatureStats();
+    }
+
+    MWMechanics::NpcStats& Npc::getNpcStats (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getNpcStats().get())
+        {
+            // xxx
+            boost::shared_ptr<MWMechanics::NpcStats> stats (
+                new MWMechanics::NpcStats);
+
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
+
+            if (!ref->base->faction.empty())
+            {
+                // TODO research how initial rank is stored. The information in loadnpc.hpp are at
+                // best very unclear.
+                stats->mFactionRank[ref->base->faction] = 0;
+            }
+
+            ptr.getRefData().getNpcStats() = stats;
+        }
+
+        return *ptr.getRefData().getNpcStats();
     }
 
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
