@@ -26,6 +26,7 @@ namespace Sound {
 */
 class Sound;
 typedef boost::shared_ptr<Sound> SoundPtr;
+typedef boost::weak_ptr  <Sound> WSoundPtr;
 
 class Sound
 {
