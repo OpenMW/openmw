@@ -104,17 +104,37 @@ namespace MWSound
       root->addFrameListener(&updater);
     }
 
+    std::string toMp3(const std::string &str)
+    {
+      std::string wav = str;
+      int i = str.size()-3;
+      wav[i++] = 'm';
+      wav[i++] = 'p';
+      wav[i++] = '3';
+      return wav;
+    }
+
     bool hasFile(const std::string &str)
     {
-      return files.has(str);
+      if(files.has(str)) return true;
+      // Not found? Try exchanging .wav with .mp3
+      return files.has(toMp3(str));
     }
 
     // Convert a Morrowind sound path (eg. Fx\funny.wav) to full path
     // with proper slash conversion (eg. datadir/Sound/Fx/funny.wav)
     std::string convertPath(const std::string &str)
     {
-      if(hasFile(str))
+      // Search and return
+      if(files.has(str))
         return files.lookup(str);
+
+      // Try mp3 if the wav wasn't found
+      std::string mp3 = toMp3(str);
+      if(files.has(mp3))
+        return files.lookup(mp3);
+
+      // Give up
       return "";
     }
 

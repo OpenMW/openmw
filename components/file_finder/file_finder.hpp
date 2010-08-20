@@ -8,13 +8,14 @@
 namespace FileFinder
 {
 
-class FileFinder
+template <typename LESS>
+class FileFinderT
 {
-  std::map<std::string, std::string, path_less> table;
+  std::map<std::string, std::string, LESS> table;
 
   struct Inserter : ReturnPath
   {
-    FileFinder *owner;
+    FileFinderT<LESS> *owner;
     int cut;
 
     void add(const boost::filesystem::path &pth)
@@ -28,7 +29,7 @@ class FileFinder
   Inserter inserter;
 
 public:
-  FileFinder(const boost::filesystem::path &path, bool recurse=true)
+  FileFinderT(const boost::filesystem::path &path, bool recurse=true)
   {
     inserter.owner = this;
 
@@ -58,5 +59,8 @@ public:
     return table.find(file)->second;
   }
 };
+
+// The default is to use path_less for equality checks
+typedef FileFinderT<path_less> FileFinder;
 }
 #endif
