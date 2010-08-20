@@ -13,6 +13,9 @@ namespace MWWorld
 
     void ActionTeleportPlayer::ActionTeleportPlayer::execute (Environment& environment)
     {
-        environment.mWorld->changeCell (mCellName, mPosition);
+        if (mCellName.empty())
+            environment.mWorld->changeToExteriorCell (mPosition);
+        else
+            environment.mWorld->changeCell (mCellName, mPosition);
     }
 }
