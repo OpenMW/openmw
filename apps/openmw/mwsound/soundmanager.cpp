@@ -100,6 +100,19 @@ namespace MWSound
       dir = soundDir + "/";
     }
 
+    // Convert a Morrowind sound path (eg. Fx\funny.wav) to full path
+    // with proper slash conversion (eg. datadir/Sound/Fx/funny.wav)
+    std::string convertPath(const std::string &str)
+    {
+      std::string file = dir + str;
+#ifndef WIN32
+      // Actually / path separators should work in Windows too, they
+      // just aren't necessary.
+      std::replace(file.begin(), file.end(), '\\', '/');
+#endif
+      return file;
+    }
+
     // Convert a soundId to file name, and modify the volume
     // according to the sounds local volume setting, minRange and
     // maxRange.
@@ -113,9 +126,7 @@ namespace MWSound
       // These factors are not very fine tuned.
       min = snd->data.minRange * 7;
       max = snd->data.maxRange * 2000;
-      std::string file = dir + snd->sound;
-      std::replace(file.begin(), file.end(), '\\', '/');
-      return file;
+      return convertPath(snd->sound);
     }
 
     // Add a sound to the list and play it
@@ -266,7 +277,7 @@ namespace MWSound
   {
     // The range values are not tested
     if(!mData) return;
-    mData->add(filename, ptr, "_say_sound", 1, 1, 100, 10000, false);
+    mData->add(mData->convertPath(filename), ptr, "_say_sound", 1, 1, 100, 10000, false);
   }
 
   bool SoundManager::sayDone (MWWorld::Ptr ptr) const
