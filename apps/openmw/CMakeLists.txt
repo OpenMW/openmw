@@ -13,12 +13,14 @@ set(GAMEREND
     mwrender/mwscene.cpp
     mwrender/cellimp.cpp
     mwrender/interior.cpp
+    mwrender/exterior.cpp
     mwrender/sky.cpp)
 set(GAMEREND_HEADER
     mwrender/cell.hpp
     mwrender/cellimp.hpp
     mwrender/mwscene.hpp
     mwrender/interior.hpp
+    mwrender/exterior.hpp
     mwrender/playerpos.hpp
     mwrender/sky.hpp)
 source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})

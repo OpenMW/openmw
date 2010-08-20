@@ -18,50 +18,79 @@ namespace MWScript
         class OpCellChanged : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
-                        
+
                     runtime.push (context.getWorld().hasCellChanged() ? 1 : 0);
-                } 
+                }
         };
 
         class OpCOC : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
-                        
+
                     std::string cell = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();                        
-                        
+                    runtime.pop();
+
                     ESM::Position pos;
                     pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
                     context.getWorld().changeCell (cell, pos);
-                } 
+                }
         };
-    
+
+        class OpCOE : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context
+                        = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Integer x = runtime[0].mInteger;
+                    runtime.pop();
+
+                    Interpreter::Type_Integer y = runtime[0].mInteger;
+                    runtime.pop();
+
+                    const int cellSize = 8192;
+
+                    ESM::Position pos;
+                    pos.pos[0] = cellSize * x;
+                    pos.pos[1] = cellSize * y;
+                    pos.pos[2] = 0;
+                    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+                    context.getWorld().changeToExteriorCell (pos);
+                }
+        };
+
         const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
-    
+        const int opcodeCOE = 0x200007c;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             extensions.registerFunction ("cellchanged", 'l', "", opcodeCellChanged);
             extensions.registerInstruction ("coc", "S", opcodeCOC);
             extensions.registerInstruction ("centeroncell", "S", opcodeCOC);
+            extensions.registerInstruction ("coe", "ll", opcodeCOE);
+            extensions.registerInstruction ("centeronexterior", "ll", opcodeCOE);
         }
-        
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (opcodeCellChanged, new OpCellChanged);
             interpreter.installSegment5 (opcodeCOC, new OpCOC);
+            interpreter.installSegment5 (opcodeCOE, new OpCOE);
         }
     }
 }
-

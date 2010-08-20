@@ -56,6 +56,7 @@ namespace MWWorld
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
             std::map<std::string, Ptr::CellStore> mInteriors;
+            std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
             ScriptList mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
             bool mSky;
@@ -129,6 +130,10 @@ namespace MWWorld
 
             void changeCell (const std::string& cellName, const ESM::Position& position);
             ///< works only for interior cells currently.
+
+            void changeCell (int X, int Y, const ESM::Position& position);
+
+            void changeToExteriorCell (const ESM::Position& position);
 
             void markCellAsUnchanged();
 

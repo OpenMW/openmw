@@ -8,6 +8,7 @@
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/interior.hpp"
+#include "../mwrender/exterior.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
@@ -571,6 +572,69 @@ namespace MWWorld
         }
 
         mCellChanged = true;
+    }
+
+    void World::changeCell (int X, int Y, const ESM::Position& position)
+    {
+        // Load cell.
+        mExteriors[std::make_pair (X, Y)].loadExt (X, Y, mStore, mEsm);
+        Ptr::CellStore *cell = &mExteriors[std::make_pair (X, Y)];
+
+        // remove active
+        CellRenderCollection::iterator active = mActiveCells.begin();
+
+        if (active!=mActiveCells.end())
+        {
+            mEnvironment.mMechanicsManager->dropActors (active->first);
+            active->second->destroy();
+            mEnvironment.mSoundManager->stopSound (active->first);
+            delete active->second;
+            mActiveCells.erase (active);
+        }
+
+        // register local scripts
+        mLocalScripts.clear(); // FIXME won't work with exteriors
+        insertInteriorScripts (*cell);
+
+        // adjust player
+        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2], true);
+        mPlayerPos->setCell (cell);
+        // TODO orientation
+
+        // This connects the cell data with the rendering scene.
+        std::pair<CellRenderCollection::iterator, bool> result =
+            mActiveCells.insert (std::make_pair (cell,
+            new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene)));
+
+        if (result.second)
+        {
+            // Load the cell and insert it into the renderer
+            result.first->second->show();
+        }
+
+        // Actors
+        mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
+        mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
+
+        // Sky system
+        if (mSky)
+        {
+            toggleSky();
+            // TODO set weather
+            toggleSky();
+        }
+
+        mCellChanged = true;
+    }
+
+    void World::changeToExteriorCell (const ESM::Position& position)
+    {
+        const int cellSize = 8192;
+
+        int x = static_cast<int> (position.pos[0] / cellSize);
+        int y = static_cast<int> (position.pos[1] / cellSize);
+
+        changeCell (x, y, position);
     }
 
     void World::markCellAsUnchanged()
