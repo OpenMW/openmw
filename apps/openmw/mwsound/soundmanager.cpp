@@ -257,7 +257,7 @@ namespace MWSound
         {
           // Make sure to increase the iterator before we erase it.
           it2 = it++;
-          if(it->first.getCell() == cell)
+          if(it2->first.getCell() == cell)
             clearAll(it2);
         }
     }
