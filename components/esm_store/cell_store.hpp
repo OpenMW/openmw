@@ -124,7 +124,14 @@ namespace ESMS
     /** Ditto for exterior cell. */
     void loadExt(int X, int Y, const ESMStore &store, ESMReader &esm)
     {
+        std::cout << "loading exterior cell '" << X << ", " << Y << "'\n";
 
+        cell = store.cells.searchExt (X, Y);
+
+        if(cell == NULL)
+            throw str_exception("Exterior cell not found");
+
+        loadRefs(store, esm);
     }
 
   private:
