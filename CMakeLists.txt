@@ -50,6 +50,14 @@ set(TO_UTF8_HEADER
     ${COMP_DIR}/to_utf8/to_utf8.hpp)
 source_group(components\\to_utf8 FILES ${TO_UTF8} ${TO_UTF8_HEADER})
 
+set(FILE_FINDER
+    ${COMP_DIR}/file_finder/search.cpp)
+set(FILE_FINDER_HEADER
+    ${COMP_DIR}/file_finder/file_finder.hpp
+    ${COMP_DIR}/file_finder/filename_less.hpp
+    ${COMP_DIR}/file_finder/search.hpp)
+source_group(components\\file_finder FILES ${FILE_FINDER} ${FILE_FINDER_HEADER})
+
 set(ESM_STORE
     ${COMP_DIR}/esm_store/store.cpp)
 set(ESM_STORE_HEADER
@@ -82,10 +90,10 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC} ${TO_UTF8}
-    ${COMPILER} ${INTERPRETER} ${ESM})
+    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER} ${TO_UTF8_HEADER}
-    ${INTERPRETER_HEADER})
+    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER})
 
 # source directory: libs
 

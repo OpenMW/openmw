@@ -1,4 +1,3 @@
-
 #include "soundmanager.hpp"
 
 #include <iostream>
@@ -8,6 +7,7 @@ using namespace std;
 #include <mangle/sound/clients/ogre_listener_mover.hpp>
 #include <mangle/sound/clients/ogre_output_updater.hpp>
 
+#include <components/file_finder/file_finder.hpp>
 #include <components/esm_store/store.hpp>
 #include <algorithm>
 #include <map>
@@ -74,11 +74,16 @@ namespace MWSound
     Mangle::Sound::OgreListenerMover cameraTracker;
 
     const ESMS::ESMStore &store;
-    std::string dir;
 
     typedef std::map<std::string,Mangle::Sound::WSoundPtr> IDMap;
     typedef std::map<MWWorld::Ptr,IDMap> PtrMap;
     PtrMap sounds;
+
+    // This is used for case insensitive and slash-type agnostic file
+    // finding. It takes DOS paths (any case, \\ slashes or / slashes)
+    // relative to the sound dir, and translates them into full paths
+    // of existing files in the filesystem, if they exist.
+    FileFinder::FileFinder files;
 
     SoundImpl(Ogre::Root *root, Ogre::Camera *camera,
               const ESMS::ESMStore &str,
@@ -87,6 +92,7 @@ namespace MWSound
       , updater(mgr)
       , cameraTracker(mgr)
       , store(str)
+      , files(soundDir)
     {
       cout << "Sound output:  " << SOUND_OUT << endl;
       cout << "Sound decoder: " << SOUND_IN << endl;
@@ -96,21 +102,20 @@ namespace MWSound
 
       // Tell Ogre to update the sound system each frame
       root->addFrameListener(&updater);
+    }
 
-      dir = soundDir + "/";
+    bool hasFile(const std::string &str)
+    {
+      return files.has(str);
     }
 
     // Convert a Morrowind sound path (eg. Fx\funny.wav) to full path
     // with proper slash conversion (eg. datadir/Sound/Fx/funny.wav)
     std::string convertPath(const std::string &str)
     {
-      std::string file = dir + str;
-#ifndef WIN32
-      // Actually / path separators should work in Windows too, they
-      // just aren't necessary.
-      std::replace(file.begin(), file.end(), '\\', '/');
-#endif
-      return file;
+      if(hasFile(str))
+        return files.lookup(str);
+      return "";
     }
 
     // Convert a soundId to file name, and modify the volume
@@ -277,7 +282,10 @@ namespace MWSound
   {
     // The range values are not tested
     if(!mData) return;
-    mData->add(mData->convertPath(filename), ptr, "_say_sound", 1, 1, 100, 10000, false);
+    if(mData->hasFile(filename))
+      mData->add(mData->convertPath(filename), ptr, "_say_sound", 1, 1, 100, 10000, false);
+    else
+      cout << "Sound file " << filename << " not found, skipping.\n";
   }
 
   bool SoundManager::sayDone (MWWorld::Ptr ptr) const
