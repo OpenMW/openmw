@@ -37,12 +37,12 @@ namespace MWRender
         if (updateCamera)
             camera->setPosition (Ogre::Vector3 (
                 mPlayer.ref.pos.pos[0],
-                mPlayer.ref.pos.pos[2],
+                -mPlayer.ref.pos.pos[2],
                 mPlayer.ref.pos.pos[1]));
 
       // TODO: Update sound listener
     }
-    
+
     void setCell (MWWorld::Ptr::CellStore *cellStore)
     {
         mCellStore = cellStore;
@@ -54,7 +54,6 @@ namespace MWRender
     // orientation. After the call, the new position is returned.
     void moveRel(float &relX, float &relY, float &relZ)
     {
-      // TODO: Update mPlayer state
       using namespace Ogre;
 
       // Move camera relative to its own direction
@@ -75,7 +74,7 @@ namespace MWRender
       // Set the position
       setPos(relX, relY, relZ);
     }
-    
+
         MWWorld::Ptr getPlayer()
         {
             MWWorld::Ptr ptr (&mPlayer, mCellStore);
