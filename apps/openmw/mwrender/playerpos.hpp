@@ -37,9 +37,9 @@ namespace MWRender
         if (updateCamera)
             camera->setPosition (Ogre::Vector3 (
                 mPlayer.ref.pos.pos[0],
-                -mPlayer.ref.pos.pos[2],
-                mPlayer.ref.pos.pos[1]));
-
+                mPlayer.ref.pos.pos[2],
+                -mPlayer.ref.pos.pos[1]));
+std::cout<<"camera: "<<camera->getPosition()<<std::endl;
       // TODO: Update sound listener
     }
 
@@ -65,8 +65,8 @@ namespace MWRender
       // Get new camera position, converting back to MW coords.
       Vector3 pos = camera->getPosition();
       relX = pos[0];
-      relY = -pos[2];
-      relZ = pos[1];
+      relY = pos[2];
+      relZ = -pos[1];
 
       // TODO: Collision detection must be used to find the REAL new
       // position.
