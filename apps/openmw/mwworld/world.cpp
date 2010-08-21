@@ -692,7 +692,28 @@ namespace MWWorld
         ptr.getCellRef().pos.pos[1] = y;
         ptr.getCellRef().pos.pos[2] = z;
 
+        if (ptr==mPlayerPos->getPlayer())
+        {
+            CellRenderCollection::iterator active = mActiveCells.begin();
+
+            if (active!=mActiveCells.end())
+            {
+                if (!(active->first->cell->data.flags & ESM::Cell::Interior))
+                {
+                    // exterior -> adjust loaded cells
+                    const int cellSize = 8192;
+
+                    int cellX = static_cast<int> (x/cellSize);
+                    int cellY = static_cast<int> (y/cellSize);
+
+                    if (active->first->cell->data.gridX!=cellX || active->first->cell->data.gridY!=cellY)
+                    {
+                        changeCell (cellX, cellY, mPlayerPos->getPlayer().getCellRef().pos);
+                    }
+                }
+            }
+        }
+
         // TODO cell change for non-player ref
-        // TODO cell change for player ref
     }
 }
