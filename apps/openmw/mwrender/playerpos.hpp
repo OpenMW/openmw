@@ -39,7 +39,6 @@ namespace MWRender
                 mPlayer.ref.pos.pos[0],
                 mPlayer.ref.pos.pos[2],
                 -mPlayer.ref.pos.pos[1]));
-std::cout<<"camera: "<<camera->getPosition()<<std::endl;
       // TODO: Update sound listener
     }
 
