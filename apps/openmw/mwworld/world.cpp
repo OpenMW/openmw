@@ -287,7 +287,7 @@ namespace MWWorld
         mEsm.open (masterPath.file_string());
         mStore.load (mEsm);
 
-        mPlayerPos = new MWRender::PlayerPos (mScene.getCamera(), mStore.npcs.find ("player"));
+        mPlayerPos = new MWRender::PlayerPos (mScene.getCamera(), mStore.npcs.find ("player"), *this);
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -684,5 +684,15 @@ namespace MWWorld
                 }
             }
         }
+    }
+
+    void World::moveObject (Ptr ptr, float x, float y, float z)
+    {
+        ptr.getCellRef().pos.pos[0] = x;
+        ptr.getCellRef().pos.pos[1] = y;
+        ptr.getCellRef().pos.pos[2] = z;
+
+        // TODO cell change for non-player ref
+        // TODO cell change for player ref
     }
 }

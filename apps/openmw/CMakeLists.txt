@@ -14,6 +14,7 @@ set(GAMEREND
     mwrender/cellimp.cpp
     mwrender/interior.cpp
     mwrender/exterior.cpp
+    mwrender/playerpos.cpp
     mwrender/sky.cpp)
 set(GAMEREND_HEADER
     mwrender/cell.hpp

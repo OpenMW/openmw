@@ -8,6 +8,11 @@
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
+namespace MWWorld
+{
+    class World;
+}
+
 namespace MWRender
 {
   // This class keeps track of the player position. It takes care of
@@ -18,29 +23,18 @@ namespace MWRender
     ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
     MWWorld::Ptr::CellStore *mCellStore;
     Ogre::Camera *camera;
+    MWWorld::World& mWorld;
 
   public:
-    PlayerPos(Ogre::Camera *cam, const ESM::NPC *player) :
-      mCellStore (0), camera(cam)
+    PlayerPos(Ogre::Camera *cam, const ESM::NPC *player, MWWorld::World& world) :
+      mCellStore (0), camera(cam), mWorld (world)
     {
         mPlayer.base = player;
         mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2] = 0;
     }
 
     // Set the player position. Uses Morrowind coordinates.
-    void setPos(float _x, float _y, float _z, bool updateCamera = false)
-    {
-      mPlayer.ref.pos.pos[0] = _x;
-      mPlayer.ref.pos.pos[1] = _y;
-      mPlayer.ref.pos.pos[2] = _z;
-
-        if (updateCamera)
-            camera->setPosition (Ogre::Vector3 (
-                mPlayer.ref.pos.pos[0],
-                mPlayer.ref.pos.pos[2],
-                -mPlayer.ref.pos.pos[1]));
-      // TODO: Update sound listener
-    }
+    void setPos(float _x, float _y, float _z, bool updateCamera = false);
 
     void setCell (MWWorld::Ptr::CellStore *cellStore)
     {
