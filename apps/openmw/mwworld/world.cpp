@@ -250,6 +250,29 @@ namespace MWWorld
         throw std::runtime_error ("month out of range");
     }
 
+    void World::removeScripts (Ptr::CellStore *cell)
+    {
+        ScriptList::iterator iter = mLocalScripts.begin();
+
+        while (iter!=mLocalScripts.end())
+        {
+            if (iter->second.getCell()==cell)
+                mLocalScripts.erase (iter++);
+            else
+                ++iter;
+        }
+    }
+
+    void World::unloadCell (CellRenderCollection::iterator iter)
+    {
+        removeScripts (iter->first);
+        mEnvironment.mMechanicsManager->dropActors (iter->first);
+        iter->second->destroy();
+        mEnvironment.mSoundManager->stopSound (iter->first);
+        delete iter->second;
+        mActiveCells.erase (iter);
+    }
+
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, bool newGame, Environment& environment)
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
@@ -532,15 +555,10 @@ namespace MWWorld
 
         if (active!=mActiveCells.end())
         {
-            mEnvironment.mMechanicsManager->dropActors (active->first);
-            active->second->destroy();
-            mEnvironment.mSoundManager->stopSound (active->first);
-            delete active->second;
-            mActiveCells.erase (active);
+            unloadCell (active);
         }
 
         // register local scripts
-        mLocalScripts.clear(); // FIXME won't work with exteriors
         insertInteriorScripts (*cell);
 
         // adjust player
@@ -585,15 +603,10 @@ namespace MWWorld
 
         if (active!=mActiveCells.end())
         {
-            mEnvironment.mMechanicsManager->dropActors (active->first);
-            active->second->destroy();
-            mEnvironment.mSoundManager->stopSound (active->first);
-            delete active->second;
-            mActiveCells.erase (active);
+            unloadCell (active);
         }
 
         // register local scripts
-        mLocalScripts.clear(); // FIXME won't work with exteriors
         insertInteriorScripts (*cell);
 
         // adjust player

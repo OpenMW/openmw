@@ -41,7 +41,7 @@ namespace MWWorld
     {
         public:
 
-            typedef std::vector<std::pair<std::string, Ptr> > ScriptList;
+            typedef std::list<std::pair<std::string, Ptr> > ScriptList;
 
         private:
 
@@ -76,6 +76,10 @@ namespace MWWorld
             MWRender::CellRender *searchRender (Ptr::CellStore *store);
 
             int getDaysPerMonth (int month) const;
+
+            void removeScripts (Ptr::CellStore *cell);
+
+            void unloadCell (CellRenderCollection::iterator iter);
 
         public:
 
