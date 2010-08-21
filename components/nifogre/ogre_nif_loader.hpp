@@ -90,7 +90,7 @@ class NIFLoader : Ogre::ManualResourceLoader
 
         void handleNiTriShape(Nif::NiTriShape *shape, int flags, BoundsFinder &bounds);
 
-        void createOgreSubMesh(Nif::NiTriShape *shape, const Ogre::String &material);
+        void createOgreSubMesh(Nif::NiTriShape *shape, const Ogre::String &material, std::list<Ogre::VertexBoneAssignment> &vertexBoneAssignments);
 
         void createMaterial(const Ogre::String &name,
                             const Nif::Vector &ambient,
@@ -98,7 +98,7 @@ class NIFLoader : Ogre::ManualResourceLoader
                             const Nif::Vector &specular,
                             const Nif::Vector &emissive,
                             float glossiness, float alpha,
-                            float alphaFlags, float alphaTest,
+                            int alphaFlags, float alphaTest,
                             const Ogre::String &texName);
 
         void findRealTexture(Ogre::String &texName);

@@ -30,9 +30,12 @@
 #include "../nif/node.hpp"
 #include "../nif/data.hpp"
 #include "../nif/property.hpp"
+#include "../nif/controller.hpp"
+#include "../nif/extra.hpp"
 #include <libs/platform/strings.h>
 
 #include <vector>
+#include <list>
 // For warning messages
 #include <iostream>
 
@@ -170,7 +173,8 @@ public:
 };
 
 // Conversion of blend / test mode from NIF -> OGRE.
-/* Not in use yet, so let's comment it out.
+// Not in use yet, so let's comment it out.
+/*
 static SceneBlendFactor getBlendFactor(int mode)
 {
   switch(mode)
@@ -191,9 +195,9 @@ static SceneBlendFactor getBlendFactor(int mode)
       return SBF_SOURCE_ALPHA;
     }
 }
-*/
 
-/* This is also unused
+
+// This is also unused
 static CompareFunction getTestMode(int mode)
 {
   switch(mode)
@@ -218,7 +222,7 @@ void NIFLoader::createMaterial(const String &name,
                            const Vector &specular,
                            const Vector &emissive,
                            float glossiness, float alpha,
-                           float alphaFlags, float alphaTest,
+                           int alphaFlags, float alphaTest,
                            const String &texName)
 {
     MaterialPtr material = MaterialManager::getSingleton().create(name, resourceGroup);
@@ -234,32 +238,33 @@ void NIFLoader::createMaterial(const String &name,
         /*TextureUnitState *txt =*/
         pass->createTextureUnitState(texName);
 
-        /* As of yet UNTESTED code from Chris:
-        pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
+        // As of yet UNTESTED code from Chris:
+        /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
         pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
         pass->setDepthCheckEnabled(true);
 
         // Add transparency if NiAlphaProperty was present
-        if(alphaFlags != -1)
-          {
-            if((alphaFlags&1))
-              {
+        if (alphaFlags != -1)
+        {
+            std::cout << "Alpha flags set!" << endl;
+            if ((alphaFlags&1))
+            {
                 pass->setDepthWriteEnabled(false);
                 pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
                                        getBlendFactor((alphaFlags>>5)&0xf));
-              }
+            }
             else
-              pass->setDepthWriteEnabled(true);
+                pass->setDepthWriteEnabled(true);
 
-            if((alphaFlags>>9)&1)
-              pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
-                                           alphaTest);
+            if ((alphaFlags>>9)&1)
+                pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
+                                             alphaTest);
 
             pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
-          }
+        }
         else
-          pass->setDepthWriteEnabled(true);
-        */
+            pass->setDepthWriteEnabled(true); */
+        
 
         // Add transparency if NiAlphaProperty was present
         if (alphaFlags != -1)
@@ -322,7 +327,7 @@ void NIFLoader::findRealTexture(String &texName)
 
 // Convert Nif::NiTriShape to Ogre::SubMesh, attached to the given
 // mesh.
-void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material)
+void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std::list<VertexBoneAssignment> &vertexBoneAssignments)
 {
     NiTriShapeData *data = shape->data.getPtr();
     SubMesh *sub = mesh->createSubMesh(shape->name.toString());
@@ -410,6 +415,14 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material)
 
     // Set material if one was given
     if (!material.empty()) sub->setMaterialName(material);
+
+    //add vertex bone assignments
+
+    for (std::list<VertexBoneAssignment>::iterator it = vertexBoneAssignments.begin();
+        it != vertexBoneAssignments.end(); it++)
+    {
+        sub->addBoneAssignment(*it);
+    }
 }
 
 // Helper math functions. Reinventing linear algebra for the win!
@@ -595,12 +608,13 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     float *ptr = (float*)data->vertices.ptr;
     float *optr = ptr;
 
+    std::list<VertexBoneAssignment> vertexBoneAssignments;
+
     //use niskindata for the position of vertices.
     if (!shape->skin.empty())
     {
         // vector that stores if the position if a vertex is absolute
         std::vector<bool> vertexPosAbsolut(numVerts,false);
-        
 
         float *ptrNormals = (float*)data->normals.ptr;
         //the bone from skin->bones[boneIndex] is linked to skin->data->bones[boneIndex]
@@ -654,16 +668,18 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                             (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
                     }
 
-                    
-                    //TODO: create vbas, and give them to createOgreSubMesh
-
                     vertexPosAbsolut[verIndex] = true;
                 }
+
+                VertexBoneAssignment vba;
+                vba.boneIndex = bonePtr->getHandle();
+                vba.vertexIndex = verIndex;
+                vba.weight = (it->weights.ptr + i)->weight;
+
+                vertexBoneAssignments.push_back(vba);
             }
 
             boneIndex++;
-            //it->trafo (pos, rot, scale) of the vertex
-            //it->weights array containt the vertices linked to the bone and the weight
         }
     }
     else
@@ -696,7 +712,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         bounds.add(optr, numVerts);
 
         // Create the submesh
-        createOgreSubMesh(shape, material);
+        createOgreSubMesh(shape, material, vertexBoneAssignments);
     }
 }
 
@@ -737,9 +753,16 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     // create skeleton or add bones
     if (node->recType == RC_NiNode)
     {
-        if (node->name == "Bip01")  //root node, create a skeleton
+        //FIXME: "Bip01" isn't every time the root bone
+        if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
             skel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
+
+            /*if (node->extra->recType == RC_NiTextKeyExtraData )
+            {
+                //TODO: Get animation names
+                std::cout << node->name.toString() << " is root bone and has textkeyextradata!\n";
+            }*/
         }
 
         if (!skel.isNull())     //if there is a skeleton
@@ -845,17 +868,17 @@ void NIFLoader::loadResource(Resource *resource)
     // Handle the node
     handleNode(node, 0, NULL, bounds, 0);
 
-    //set skeleton
-//     if (!skel.isNull())
-//         mesh->setSkeletonName(getSkeletonName());
-
-    // Finally, set the bounding value.
+    // set the bounding value.
     if (bounds.isValid())
     {
         mesh->_setBounds(AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
                                         bounds.maxX(), bounds.maxY(), bounds.maxZ()));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
+
+    // set skeleton
+//     if (!skel.isNull())
+//         mesh->setSkeletonName(getSkeletonName());
 }
 
 MeshPtr NIFLoader::load(const std::string &name,
