@@ -11,6 +11,7 @@
  */
 
 #include <string>
+#include <vector>
 
 #include "../mwmechanics/stat.hpp"
 
@@ -144,6 +145,8 @@ namespace MWGui
 
     void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
     ///< Set value for the given ID.
+
+    void messageBox (const std::string& message, const std::vector<std::string>& buttons);
   };
 }
 #endif

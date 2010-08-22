@@ -105,10 +105,7 @@ namespace MWScript
     void InterpreterContext::messageBox (const std::string& message,
         const std::vector<std::string>& buttons)
     {
-        std::cout << "message box: " << message << std::endl;
-
-        if (!buttons.empty())
-            std::cerr << "error: message box buttons not supported" << std::endl;
+        mEnvironment.mWindowManager->messageBox (message, buttons);
     }
 
     bool InterpreterContext::menuMode()
