@@ -61,6 +61,7 @@ set(GAMESCRIPT
     mwscript/statsextensions.cpp
     mwscript/containerextensions.cpp
     mwscript/aiextensions.cpp
+    mwscript/controlextensions.cpp
     mwscript/extensions.cpp
     mwscript/globalscripts.cpp
     )
@@ -77,6 +78,7 @@ set(GAMESCRIPT_HEADER
     mwscript/statsextensions.hpp
     mwscript/containerextensions.hpp
     mwscript/aiextensions.hpp
+    mwscript/controlextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
     )

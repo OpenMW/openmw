@@ -88,4 +88,6 @@ op 0x200007a: RemoveItem
 op 0x200007b: RemoveItem, explicit reference
 op 0x200007c: GetAiPackageDone
 op 0x200007d: GetAiPackageDone, explicit reference
-opcodes 0x200007e-0x3ffffff unused
+op 0x200007e-0x2000084: Enable Controls
+op 0x2000085-0x200008b: Disable Controls
+opcodes 0x200008c-0x3ffffff unused

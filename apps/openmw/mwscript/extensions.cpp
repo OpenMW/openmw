@@ -12,6 +12,7 @@
 #include "statsextensions.hpp"
 #include "containerextensions.hpp"
 #include "aiextensions.hpp"
+#include "controlextensions.hpp"
 
 namespace MWScript
 {
@@ -25,6 +26,7 @@ namespace MWScript
         Stats::registerExtensions (extensions);
         Container::registerExtensions (extensions);
         Ai::registerExtensions (extensions);
+        Control::registerExtensions (extensions);
     }
 
     void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -38,5 +40,6 @@ namespace MWScript
         Stats::installOpcodes (interpreter);
         Container::installOpcodes (interpreter);
         Ai::installOpcodes (interpreter);
+        Control::installOpcodes (interpreter);
     }
 }
