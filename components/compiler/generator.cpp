@@ -505,6 +505,11 @@ namespace Compiler
         void message (CodeContainer& code, Literals& literals, const std::string& message,
             int buttons)
         {
+            assert (buttons>=0);
+
+            if (buttons>=256)
+                throw std::runtime_error ("A message box can't have more than 255 buttons");
+
             int index = literals.addString (message);
 
             opPushInt (code, index);

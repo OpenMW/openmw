@@ -14,7 +14,7 @@ opcodes 0x200-0x3ff unused
 
 Segment 3:
 (not implemented yet)
-opcodes 0x200-0x3ff unused
+opcodes 0x20000-0x3ffff unused
 
 Segment 4:
 (not implemented yet)

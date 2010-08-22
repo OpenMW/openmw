@@ -19,7 +19,7 @@ Code bit-patterns:
 00ccccccAAAAAAAAAAAAAAAAAAAAAAAA segment 0: 64 opcodes, 1 24-bit argument
 01ccccccAAAAAAAAAAAABBBBBBBBBBBB segment 1: 64 opcodes, 2 12-bit arguments
 10ccccccccccAAAAAAAAAAAAAAAAAAAA segment 2: 1024 opcodes, 1 20-bit argument
-110000ccccccccccAAAAAAAAAAAAAAAA segment 3: 1024 opcodes, 1 16-bit argument
+110000ccccccccccccccccccAAAAAAAA segment 3: 262144 opcodes, 1 8-bit argument
 110001ccccccccccAAAAAAAABBBBBBBB segment 4: 1024 opcodes, 2 8-bit arguments
 110010cccccccccccccccccccccccccc segment 5: 67108864 opcodes, no arguments
 other bit-patterns reserved
@@ -50,8 +50,8 @@ op    0: show message box with message string literal index in stack[0];
          additional arguments (if any) in stack[arg0+n]..stack[arg0+1];
          n is determined according to the message string
          all arguments are removed from stack
-opcodes 1-511 unused
-opcodes 512-1023 reserved for extensions
+opcodes 1-131071 unused
+opcodes 131072-262143 reserved for extensions
 
 Segment 4:
 opcodes 0-511 unused
