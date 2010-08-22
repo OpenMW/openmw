@@ -11,6 +11,7 @@
 #include "skyextensions.hpp"
 #include "statsextensions.hpp"
 #include "containerextensions.hpp"
+#include "aiextensions.hpp"
 
 namespace MWScript
 {
@@ -23,6 +24,7 @@ namespace MWScript
         Sky::registerExtensions (extensions);
         Stats::registerExtensions (extensions);
         Container::registerExtensions (extensions);
+        Ai::registerExtensions (extensions);
     }
 
     void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -35,5 +37,6 @@ namespace MWScript
         Sky::installOpcodes (interpreter);
         Stats::installOpcodes (interpreter);
         Container::installOpcodes (interpreter);
+        Ai::installOpcodes (interpreter);
     }
 }

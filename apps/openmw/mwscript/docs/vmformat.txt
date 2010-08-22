@@ -13,8 +13,11 @@ Segment 2:
 opcodes 0x200-0x3ff unused
 
 Segment 3:
-(not implemented yet)
-opcodes 0x20000-0x3ffff unused
+op 0x20000: AiTravel
+op 0x20001: AiTravel, explicit reference
+op 0x20002: AiEscort
+op 0x20003: AiEscort, explicit reference
+opcodes 0x20004-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -83,4 +86,6 @@ op 0x2000078: GetItemCount
 op 0x2000079: GetItemCount, explicit reference
 op 0x200007a: RemoveItem
 op 0x200007b: RemoveItem, explicit reference
-opcodes 0x200007c-0x3ffffff unused
+op 0x200007c: GetAiPackageDone
+op 0x200007d: GetAiPackageDone, explicit reference
+opcodes 0x200007e-0x3ffffff unused
