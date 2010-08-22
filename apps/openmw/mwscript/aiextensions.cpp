@@ -10,6 +10,7 @@
 #include "interpretercontext.hpp"
 
 #include <iostream>
+
 namespace MWScript
 {
     namespace Ai
@@ -156,7 +157,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = context.getReference();
 
-                    Interpreter::Type_Integer value = 1;
+                    Interpreter::Type_Integer value = 0;
 
                     runtime.push (value);
                 }
@@ -176,7 +177,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
 
-                    Interpreter::Type_Integer value = 1;
+                    Interpreter::Type_Integer value = 0;
 
                     runtime.push (value);
                 }
@@ -192,7 +193,7 @@ namespace MWScript
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
-            extensions.registerInstruction ("aitravel", "cllll/l", opcodeAiTravel,
+            extensions.registerInstruction ("aitravel", "lll/l", opcodeAiTravel,
                 opcodeAiTravelExplicit);
             extensions.registerInstruction ("aiescort", "cllll/l", opcodeAiEscort,
                 opcodeAiEscortExplicit);
