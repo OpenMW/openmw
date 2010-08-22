@@ -19,6 +19,11 @@ namespace Interpreter
 
             virtual void execute (Runtime& runtime, unsigned int arg0)
             {
+                // message
+                int index = runtime[0].mInteger;
+                runtime.pop();
+                std::string message = runtime.getStringLiteral (index);
+
                 // buttons
                 std::vector<std::string> buttons;
 
@@ -30,11 +35,6 @@ namespace Interpreter
                 }
 
                 std::reverse (buttons.begin(), buttons.end());
-
-                // message
-                int index = runtime[0].mInteger;
-                runtime.pop();
-                std::string message = runtime.getStringLiteral (index);
 
                 // additional parameters
                 std::string formattedMessage;

@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <iostream>
+#include <iterator>
 
 using namespace MWGui;
 
@@ -102,5 +103,9 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
     std::cout << "message box: " << message << std::endl;
 
     if (!buttons.empty())
-        std::cerr << "error: message box buttons not supported" << std::endl;
+    {
+        std::cout << "buttons: ";
+        std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
+        std::cout << std::endl;
+    }
 }
