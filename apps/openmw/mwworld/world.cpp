@@ -273,6 +273,43 @@ namespace MWWorld
         mActiveCells.erase (iter);
     }
 
+    void World::loadCell (Ptr::CellStore *cell, MWRender::CellRender *render)
+    {
+        // register local scripts
+        insertInteriorScripts (*cell);
+
+        // This connects the cell data with the rendering scene.
+        std::pair<CellRenderCollection::iterator, bool> result =
+            mActiveCells.insert (std::make_pair (cell, render));
+
+        if (result.second)
+        {
+            // Load the cell and insert it into the renderer
+            result.first->second->show();
+        }
+    }
+
+    void World::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position)
+    {
+        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2], true);
+        mPlayerPos->setCell (cell);
+        // TODO orientation
+
+        mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
+        mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
+    }
+
+
+    void World::adjustSky()
+    {
+        if (mSky)
+        {
+            toggleSky();
+            // TODO set weather
+            toggleSky();
+        }
+    }
+
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, bool newGame, Environment& environment)
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
@@ -546,10 +583,6 @@ namespace MWWorld
 
     void World::changeCell (const std::string& cellName, const ESM::Position& position)
     {
-        // Load cell.
-        mInteriors[cellName].loadInt (cellName, mStore, mEsm);
-        Ptr::CellStore *cell = &mInteriors[cellName];
-
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
 
@@ -558,46 +591,23 @@ namespace MWWorld
             unloadCell (active);
         }
 
-        // register local scripts
-        insertInteriorScripts (*cell);
+        // Load cell.
+        mInteriors[cellName].loadInt (cellName, mStore, mEsm);
+        Ptr::CellStore *cell = &mInteriors[cellName];
+
+        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene));
 
         // adjust player
-        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2], true);
-        mPlayerPos->setCell (cell);
-        // TODO orientation
-
-        // This connects the cell data with the rendering scene.
-        std::pair<CellRenderCollection::iterator, bool> result =
-            mActiveCells.insert (std::make_pair (cell,
-            new MWRender::InteriorCellRender (*cell, mEnvironment, mScene)));
-
-        if (result.second)
-        {
-            // Load the cell and insert it into the renderer
-            result.first->second->show();
-        }
-
-        // Actors
-        mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
-        mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
+        playerCellChange (cell, position);
 
         // Sky system
-        if (mSky)
-        {
-            toggleSky();
-            // TODO set weather
-            toggleSky();
-        }
+        adjustSky();
 
         mCellChanged = true;
     }
 
     void World::changeCell (int X, int Y, const ESM::Position& position)
     {
-        // Load cell.
-        mExteriors[std::make_pair (X, Y)].loadExt (X, Y, mStore, mEsm);
-        Ptr::CellStore *cell = &mExteriors[std::make_pair (X, Y)];
-
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
 
@@ -606,36 +616,17 @@ namespace MWWorld
             unloadCell (active);
         }
 
-        // register local scripts
-        insertInteriorScripts (*cell);
+        // Load cell.
+        mExteriors[std::make_pair (X, Y)].loadExt (X, Y, mStore, mEsm);
+        Ptr::CellStore *cell = &mExteriors[std::make_pair (X, Y)];
+
+        loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
 
         // adjust player
-        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2], true);
-        mPlayerPos->setCell (cell);
-        // TODO orientation
-
-        // This connects the cell data with the rendering scene.
-        std::pair<CellRenderCollection::iterator, bool> result =
-            mActiveCells.insert (std::make_pair (cell,
-            new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene)));
-
-        if (result.second)
-        {
-            // Load the cell and insert it into the renderer
-            result.first->second->show();
-        }
-
-        // Actors
-        mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
-        mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
+        playerCellChange (cell, position);
 
         // Sky system
-        if (mSky)
-        {
-            toggleSky();
-            // TODO set weather
-            toggleSky();
-        }
+        adjustSky();
 
         mCellChanged = true;
     }

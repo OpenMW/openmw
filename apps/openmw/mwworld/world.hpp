@@ -81,6 +81,12 @@ namespace MWWorld
 
             void unloadCell (CellRenderCollection::iterator iter);
 
+            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
+
+            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position);
+
+            void adjustSky();
+
         public:
 
            World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& master,
