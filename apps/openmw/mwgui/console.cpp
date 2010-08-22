@@ -15,9 +15,6 @@ namespace MWGui
 
             ConsoleInterpreterContext (Console& console, MWWorld::Environment& environment,
                 MWWorld::Ptr reference);
-
-            virtual void messageBox (const std::string& message,
-                const std::vector<std::string>& buttons);
     };
 
     ConsoleInterpreterContext::ConsoleInterpreterContext (Console& console,
@@ -26,15 +23,6 @@ namespace MWGui
         reference.isEmpty() ? 0 : &reference.getRefData().getLocals(), reference),
       mConsole (console)
     {}
-
-    void ConsoleInterpreterContext::messageBox (const std::string& message,
-        const std::vector<std::string>& buttons)
-    {
-        if (!buttons.empty())
-            mConsole.printError ("MessageBox doesn't support buttons while in console mode");
-        else
-            mConsole.printOK (message);
-    }
 
     bool Console::compile (const std::string& cmd, Compiler::Output& output)
     {
