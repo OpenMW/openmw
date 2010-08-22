@@ -9,46 +9,46 @@
 #include "literals.hpp"
 
 namespace
-{   
+{
     void opPushInt (Compiler::Generator::CodeContainer& code, int value)
     {
         code.push_back (Compiler::Generator::segment0 (0, value));
     }
-    
+
     void opFetchIntLiteral (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (4));
     }
-    
+
     void opFetchFloatLiteral (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (5));
     }
-    
+
     void opIntToFloat (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (3));    
+        code.push_back (Compiler::Generator::segment5 (3));
     }
-    
+
     void opFloatToInt (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (6));
     }
-        
+
     void opStoreLocalShort (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (0));    
+        code.push_back (Compiler::Generator::segment5 (0));
     }
-    
+
     void opStoreLocalLong (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (1));
     }
-    
+
     void opStoreLocalFloat (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (2));
-    }        
+    }
 
     void opNegateInt (Compiler::Generator::CodeContainer& code)
     {
@@ -99,46 +99,46 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (16));
     }
-    
+
     void opIntToFloat1 (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (17));    
+        code.push_back (Compiler::Generator::segment5 (17));
     }
-    
+
     void opFloatToInt1 (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (18));
-    }    
+    }
 
     void opSquareRoot (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (19));
-    }    
+    }
 
     void opReturn (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (20));
-    }       
-    
+    }
+
     void opMessageBox (Compiler::Generator::CodeContainer& code, int buttons)
     {
         code.push_back (Compiler::Generator::segment3 (0, buttons));
     }
-    
+
     void opFetchLocalShort (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (21));    
+        code.push_back (Compiler::Generator::segment5 (21));
     }
-    
+
     void opFetchLocalLong (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (22));
     }
-    
+
     void opFetchLocalFloat (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (23));
-    }    
+    }
 
     void opJumpForward (Compiler::Generator::CodeContainer& code, int offset)
     {
@@ -149,176 +149,176 @@ namespace
     {
         code.push_back (Compiler::Generator::segment0 (2, offset));
     }
-    
+
     void opSkipOnZero (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (24));
-    }      
-    
+    }
+
     void opSkipOnNonZero (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (25));
-    }      
-    
+    }
+
     void opEqualInt (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (26));
     }
-    
+
     void opNonEqualInt (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (27)); 
+        code.push_back (Compiler::Generator::segment5 (27));
     }
-    
+
     void opLessThanInt (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (28));     
+        code.push_back (Compiler::Generator::segment5 (28));
     }
-    
+
     void opLessOrEqualInt (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (29));     
+        code.push_back (Compiler::Generator::segment5 (29));
     }
-    
+
     void opGreaterThanInt (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (30));     
+        code.push_back (Compiler::Generator::segment5 (30));
     }
-    
+
     void opGreaterOrEqualInt (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (31));     
+        code.push_back (Compiler::Generator::segment5 (31));
     }
-    
+
     void opEqualFloat (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (32));
     }
-    
+
     void opNonEqualFloat (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (33)); 
+        code.push_back (Compiler::Generator::segment5 (33));
     }
-    
+
     void opLessThanFloat (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (34));     
+        code.push_back (Compiler::Generator::segment5 (34));
     }
-    
+
     void opLessOrEqualFloat (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (35));     
+        code.push_back (Compiler::Generator::segment5 (35));
     }
-    
+
     void opGreaterThanFloat (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (36));     
+        code.push_back (Compiler::Generator::segment5 (36));
     }
-    
+
     void opGreaterOrEqualFloat (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (37));     
-    }    
+        code.push_back (Compiler::Generator::segment5 (37));
+    }
 
     void opMenuMode (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (38));     
-    }      
-    
+        code.push_back (Compiler::Generator::segment5 (38));
+    }
+
     void opStoreGlobalShort (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (39));    
+        code.push_back (Compiler::Generator::segment5 (39));
     }
-    
+
     void opStoreGlobalLong (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (40));
     }
-    
+
     void opStoreGlobalFloat (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (41));
-    }              
+    }
 
     void opFetchGlobalShort (Compiler::Generator::CodeContainer& code)
     {
-        code.push_back (Compiler::Generator::segment5 (42));    
+        code.push_back (Compiler::Generator::segment5 (42));
     }
-    
+
     void opFetchGlobalLong (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (43));
     }
-    
+
     void opFetchGlobalFloat (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (44));
-    }    
-    
+    }
+
     void opRandom (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (45));
-    }    
-    
+    }
+
     void opScriptRunning (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (46));
-    }     
-    
+    }
+
     void opStartScript (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (47));
-    }     
-    
+    }
+
     void opStopScript (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (48));
-    }     
-    
+    }
+
     void opGetDistance (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (49));
-    }        
-   
+    }
+
     void opGetSecondsPassed (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (50));
-    }       
+    }
 
     void opEnable (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (51));
-    }       
+    }
 
     void opDisable (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (52));
-    }       
+    }
 
     void opGetDisabled (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (53));
-    }       
+    }
 
     void opEnableExplicit (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (54));
-    }       
+    }
 
     void opDisableExplicit (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (55));
-    }       
+    }
 
     void opGetDisabledExplicit (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (56));
     }
-    
+
     void opGetDistanceExplicit (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (57));
-    }            
+    }
 }
 
 namespace Compiler
@@ -327,31 +327,31 @@ namespace Compiler
     {
         void pushInt (CodeContainer& code, Literals& literals, int value)
         {
-            int index = literals.addInteger (value);               
+            int index = literals.addInteger (value);
             opPushInt (code, index);
-            opFetchIntLiteral (code);   
+            opFetchIntLiteral (code);
         }
-        
+
         void pushFloat (CodeContainer& code, Literals& literals, float value)
         {
-            int index = literals.addFloat (value);               
+            int index = literals.addFloat (value);
             opPushInt (code, index);
             opFetchFloatLiteral (code);
         }
-                
+
         void pushString (CodeContainer& code, Literals& literals, const std::string& value)
         {
-            int index = literals.addString (value);               
+            int index = literals.addString (value);
             opPushInt (code, index);
         }
-        
+
         void assignToLocal (CodeContainer& code, char localType,
             int localIndex, const CodeContainer& value, char valueType)
-        {               
+        {
             opPushInt (code, localIndex);
 
             std::copy (value.begin(), value.end(), std::back_inserter (code));
-            
+
             if (localType!=valueType)
             {
                 if (localType=='f' && valueType=='l')
@@ -363,26 +363,26 @@ namespace Compiler
                     opFloatToInt (code);
                 }
             }
-            
+
             switch (localType)
             {
                 case 'f':
-                
+
                     opStoreLocalFloat (code);
                     break;
-                
+
                 case 's':
 
                     opStoreLocalShort (code);
                     break;
-                
+
                 case 'l':
 
                     opStoreLocalLong (code);
                     break;
-            
+
                 default:
-                
+
                     assert (0);
             }
         }
@@ -392,21 +392,21 @@ namespace Compiler
             switch (valueType)
             {
                 case 'l':
-                
+
                     opNegateInt (code);
                     break;
-                
+
                 case 'f':
-                
+
                     opNegateFloat (code);
                     break;
-                
+
                 default:
-                
+
                     assert (0);
             }
         }
-        
+
         void add (CodeContainer& code, char valueType1, char valueType2)
         {
             if (valueType1=='l' && valueType2=='l')
@@ -420,7 +420,7 @@ namespace Compiler
 
                 if (valueType2=='l')
                     opIntToFloat (code);
-            
+
                 opAddFloat (code);
             }
         }
@@ -438,11 +438,11 @@ namespace Compiler
 
                 if (valueType2=='l')
                     opIntToFloat (code);
-            
+
                 opSubFloat (code);
             }
         }
-        
+
         void mul (CodeContainer& code, char valueType1, char valueType2)
         {
             if (valueType1=='l' && valueType2=='l')
@@ -456,11 +456,11 @@ namespace Compiler
 
                 if (valueType2=='l')
                     opIntToFloat (code);
-            
+
                 opMulFloat (code);
-            }        
-        }      
-        
+            }
+        }
+
         void div (CodeContainer& code, char valueType1, char valueType2)
         {
             if (valueType1=='l' && valueType2=='l')
@@ -474,11 +474,11 @@ namespace Compiler
 
                 if (valueType2=='l')
                     opIntToFloat (code);
-            
+
                 opDivFloat (code);
-            }        
+            }
         }
-        
+
         void convert (CodeContainer& code, char fromType, char toType)
         {
             if (fromType!=toType)
@@ -491,28 +491,26 @@ namespace Compiler
                     throw std::logic_error ("illegal type conversion");
             }
         }
-        
+
         void squareRoot (CodeContainer& code)
         {
             opSquareRoot (code);
         }
-        
+
         void exit (CodeContainer& code)
         {
             opReturn (code);
-        }        
-        
+        }
+
         void message (CodeContainer& code, Literals& literals, const std::string& message,
             int buttons)
         {
-            assert (buttons==0);
-
             int index = literals.addString (message);
-            
+
             opPushInt (code, index);
             opMessageBox (code, buttons);
         }
-        
+
         void fetchLocal (CodeContainer& code, char localType, int localIndex)
         {
             opPushInt (code, localIndex);
@@ -520,26 +518,26 @@ namespace Compiler
             switch (localType)
             {
                 case 'f':
-                
+
                     opFetchLocalFloat (code);
                     break;
-                
+
                 case 's':
 
                     opFetchLocalShort (code);
                     break;
-                
+
                 case 'l':
 
                     opFetchLocalLong (code);
                     break;
-            
+
                 default:
-                
+
                     assert (0);
-            }        
+            }
         }
-        
+
         void jump (CodeContainer& code, int offset)
         {
             if (offset>0)
@@ -549,27 +547,27 @@ namespace Compiler
             else
                 throw std::logic_error ("inifite loop");
         }
-                
+
         void jumpOnZero (CodeContainer& code, int offset)
         {
             opSkipOnNonZero (code);
-            
+
             if (offset<0)
                 --offset; // compensate for skip instruction
-            
+
             jump (code, offset);
         }
 
         void jumpOnNonZero (CodeContainer& code, int offset)
         {
             opSkipOnZero (code);
-            
+
             if (offset<0)
                 --offset; // compensate for skip instruction
-            
-            jump (code, offset);            
+
+            jump (code, offset);
         }
-        
+
         void compare (CodeContainer& code, char op, char valueType1, char valueType2)
         {
             if (valueType1=='l' && valueType2=='l')
@@ -582,9 +580,9 @@ namespace Compiler
                     case 'L': opLessOrEqualInt (code); break;
                     case 'g': opGreaterThanInt (code); break;
                     case 'G': opGreaterOrEqualInt (code); break;
-                
+
                     default:
-                    
+
                         assert (0);
                 }
             }
@@ -595,7 +593,7 @@ namespace Compiler
 
                 if (valueType2=='l')
                     opIntToFloat (code);
-            
+
                 switch (op)
                 {
                     case 'e': opEqualFloat (code); break;
@@ -604,28 +602,28 @@ namespace Compiler
                     case 'L': opLessOrEqualFloat (code); break;
                     case 'g': opGreaterThanFloat (code); break;
                     case 'G': opGreaterOrEqualFloat (code); break;
-                
+
                     default:
-                    
+
                         assert (0);
                 }
-            }          
+            }
         }
-        
+
         void menuMode (CodeContainer& code)
         {
             opMenuMode (code);
         }
-        
+
         void assignToGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name, const CodeContainer& value, char valueType)
         {
             int index = literals.addString (name);
-        
+
             opPushInt (code, index);
 
             std::copy (value.begin(), value.end(), std::back_inserter (code));
-            
+
             if (localType!=valueType)
             {
                 if (localType=='f' && valueType=='l')
@@ -637,30 +635,30 @@ namespace Compiler
                     opFloatToInt (code);
                 }
             }
-            
+
             switch (localType)
             {
                 case 'f':
-                
+
                     opStoreGlobalFloat (code);
                     break;
-                
+
                 case 's':
 
                     opStoreGlobalShort (code);
                     break;
-                
+
                 case 'l':
 
                     opStoreGlobalLong (code);
                     break;
-            
+
                 default:
-                
+
                     assert (0);
-            }        
+            }
         }
-            
+
         void fetchGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name)
         {
@@ -671,36 +669,36 @@ namespace Compiler
             switch (localType)
             {
                 case 'f':
-                
+
                     opFetchGlobalFloat (code);
                     break;
-                
+
                 case 's':
 
                     opFetchGlobalShort (code);
                     break;
-                
+
                 case 'l':
 
                     opFetchGlobalLong (code);
                     break;
-            
+
                 default:
-                
+
                     assert (0);
-            }            
+            }
         }
-        
+
         void random (CodeContainer& code)
         {
             opRandom (code);
         }
-        
+
         void scriptRunning (CodeContainer& code)
         {
             opScriptRunning (code);
         }
-        
+
         void startScript (CodeContainer& code)
         {
             opStartScript (code);
@@ -714,7 +712,7 @@ namespace Compiler
         void getDistance (CodeContainer& code, Literals& literals, const std::string id)
         {
             if (id.empty())
-            {        
+            {
                 opGetDistance (code);
             }
             else
@@ -722,14 +720,14 @@ namespace Compiler
                 int index = literals.addString (id);
                 opPushInt (code, index);
                 opGetDistanceExplicit (code);
-            }          
-        }        
-        
+            }
+        }
+
         void getSecondsPassed (CodeContainer& code)
         {
             opGetSecondsPassed (code);
         }
-        
+
         void getDisabled (CodeContainer& code, Literals& literals, const std::string id)
         {
             if (id.empty())
@@ -743,11 +741,11 @@ namespace Compiler
                 opGetDisabledExplicit (code);
             }
         }
-        
+
         void enable (CodeContainer& code, Literals& literals, const std::string id)
         {
             if (id.empty())
-            {        
+            {
                 opEnable (code);
             }
             else
@@ -755,13 +753,13 @@ namespace Compiler
                 int index = literals.addString (id);
                 opPushInt (code, index);
                 opEnableExplicit (code);
-            }     
+            }
         }
-        
+
         void disable (CodeContainer& code, Literals& literals, const std::string id)
         {
             if (id.empty())
-            {        
+            {
                 opDisable (code);
             }
             else
@@ -773,4 +771,3 @@ namespace Compiler
         }
     }
 }
-
