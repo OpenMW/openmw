@@ -12,7 +12,7 @@ namespace Compiler
     StringParser::StringParser (ErrorHandler& errorHandler, Context& context, Literals& literals)
     : Parser (errorHandler, context), mLiterals (literals), mState (StartState), mSmashCase (false)
     {
-    
+
     }
 
     bool StringParser::parseName (const std::string& name, const TokenLoc& loc,
@@ -20,14 +20,15 @@ namespace Compiler
     {
         if (mState==StartState || mState==CommaState)
         {
+            start();
             if (mSmashCase)
-                Generator::pushString (mCode, mLiterals, toLower (name)); 
-            else    
+                Generator::pushString (mCode, mLiterals, toLower (name));
+            else
                 Generator::pushString (mCode, mLiterals, name);
-                
+
             return false;
         }
-    
+
         return Parser::parseName (name, loc, scanner);
     }
 
@@ -38,10 +39,10 @@ namespace Compiler
             mState = CommaState;
             return true;
         }
-        
+
         return Parser::parseSpecial (code, loc, scanner);
     }
-    
+
     void StringParser::append (std::vector<Interpreter::Type_Code>& code)
     {
         std::copy (mCode.begin(), mCode.end(), std::back_inserter (code));
@@ -52,11 +53,11 @@ namespace Compiler
         mState = StartState;
         mCode.clear();
         mSmashCase = false;
+        Parser::reset();
     }
-    
+
     void StringParser::smashCase()
     {
         mSmashCase = true;
     }
 }
-

@@ -18,6 +18,8 @@ namespace Compiler
     {
             ErrorHandler& mErrorHandler;
             Context& mContext;
+            bool mOptional;
+            bool mEmpty;
 
         protected:
 
@@ -47,7 +49,7 @@ namespace Compiler
             ///< constructor
 
             virtual ~Parser();
-		    ///< destructor
+            ///< destructor
 
             virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
             ///< Handle an int token.
@@ -84,6 +86,19 @@ namespace Compiler
             ///< Handle EOF token.
             ///
             /// - Default-implementation: Report an error.
+
+            virtual void reset();
+            ///< Reset parser to clean state.
+
+            void setOptional (bool optional);
+            ///< Optional mode: If nothign has been parsed yet and an unexpected token is delivered, stop
+            /// parsing without raising an exception (after a reset the parser is in non-optional mode).
+
+            void start();
+            ///< Mark parser as non-empty (at least one token has been parser).
+
+            bool isEmpty() const;
+            ///< Has anything been parsed?
     };
 }
 

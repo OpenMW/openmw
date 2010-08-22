@@ -8,7 +8,7 @@
 namespace Compiler
 {
     FileParser::FileParser (ErrorHandler& errorHandler, Context& context)
-    : Parser (errorHandler, context), 
+    : Parser (errorHandler, context),
       mScriptParser (errorHandler, context, mLocals, true),
       mState (BeginState)
     {}
@@ -17,12 +17,12 @@ namespace Compiler
     {
         return mName;
     }
-    
+
     void FileParser::getCode (std::vector<Interpreter::Type_Code>& code) const
     {
         mScriptParser.getCode (code);
     }
-    
+
     const Locals& FileParser::getLocals() const
     {
         return mLocals;
@@ -37,17 +37,17 @@ namespace Compiler
             mState = BeginCompleteState;
             return true;
         }
-        
+
         if (mState==EndNameState)
         {
             // optional repeated name after end statement
             if (mName!=name)
                 reportWarning ("Names for script " + mName + " do not match", loc);
-            
+
             mState = EndCompleteState;
             return true;
         }
-        
+
         return Parser::parseName (name, loc, scanner);
     }
 
@@ -58,7 +58,7 @@ namespace Compiler
             mState = NameState;
             return true;
         }
-        
+
         if (mState==NameState)
         {
             // keywords can be used as script names too. Thank you Morrowind for another
@@ -67,7 +67,7 @@ namespace Compiler
             mState = BeginCompleteState;
             return true;
         }
-        
+
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
@@ -80,25 +80,25 @@ namespace Compiler
                 // ignore empty lines
                 return true;
             }
-        
+
             if (mState==BeginCompleteState)
             {
                 // parse the script body
                 mScriptParser.reset();
-                
+
                 scanner.scan (mScriptParser);
-                
+
                 mState = EndNameState;
                 return true;
             }
-            
+
             if (mState==EndCompleteState || mState==EndNameState)
             {
                 // we are done here -> ignore the rest of the script
                 return false;
             }
         }
-        
+
         return Parser::parseSpecial (code, loc, scanner);
     }
 
@@ -107,12 +107,12 @@ namespace Compiler
         if (mState!=EndNameState && mState!=EndCompleteState)
             Parser::parseEOF (scanner);
     }
-    
+
     void FileParser::reset()
     {
         mState = BeginState;
         mName.clear();
         mScriptParser.reset();
+        Parser::reset();
     }
 }
-

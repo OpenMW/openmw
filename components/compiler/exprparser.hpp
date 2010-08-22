@@ -15,7 +15,7 @@ namespace Compiler
 
     class ExprParser : public Parser
     {
-            Locals& mLocals;  
+            Locals& mLocals;
             Literals& mLiterals;
             std::vector<char> mOperands;
             std::vector<char> mOperators;
@@ -26,35 +26,35 @@ namespace Compiler
             bool mArgument;
             std::string mExplicit;
             bool mRefOp;
-            
+
             int getPriority (char op) const;
-            
-            char getOperandType (int Index = 0) const;           
+
+            char getOperandType (int Index = 0) const;
 
             char getOperator() const;
-                
+
             bool isOpen() const;
-                
+
             void popOperator();
-            
+
             void popOperand();
-            
+
             void replaceBinaryOperands();
-   
+
             void pop();
-            
+
             void pushIntegerLiteral (int value);
-            
+
             void pushFloatLiteral (float value);
-            
+
             void pushBinaryOperator (char c);
-                        
+
             void close();
- 
-            void parseArguments (const std::string& arguments, Scanner& scanner);                  
-                             
+
+            int parseArguments (const std::string& arguments, Scanner& scanner);
+
         public:
-    
+
             ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
                 Literals& literals, bool argument = false);
             ///< constructor
@@ -84,20 +84,22 @@ namespace Compiler
             virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
             ///< Handle a special character token.
             /// \return fetch another token?
-            
+
             void reset();
             ///< Reset parser to clean state.
-            
+
             char append (std::vector<Interpreter::Type_Code>& code);
             ///< Generate code for parsed expression.
             /// \return Type ('l': integer, 'f': float)
- 
-            void parseArguments (const std::string& arguments, Scanner& scanner,
+
+            int parseArguments (const std::string& arguments, Scanner& scanner,
                 std::vector<Interpreter::Type_Code>& code, bool invert = false);
             ///< Parse sequence of arguments specified by \a arguments.
             /// \param arguments Each character represents one arguments ('l': integer,
-            /// 'f': float, 'S': string, 'c': string (case smashed))                
+            /// 'f': float, 'S': string, 'c': string (case smashed), '/': following arguments are
+            /// optional)
             /// \param invert Store arguments in reverted order.
+            /// \return number of optional arguments
     };
 }
 

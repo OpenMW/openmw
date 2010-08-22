@@ -17,21 +17,21 @@ namespace Compiler
         {
             std::pair<Codes, Codes> entry;
 
-            if (mState!=IfElseBodyState)             
+            if (mState!=IfElseBodyState)
                 mExprParser.append (entry.first);
 
             std::copy (mCodeBlock.begin(), mCodeBlock.end(),
                 std::back_inserter (entry.second));
-                
+
             mIfCode.push_back (entry);
 
             mCodeBlock.clear();
-            
+
             if (keyword==Scanner::K_endif)
             {
                 // store code for if-cascade
                 Codes codes;
-                
+
                 for (IfCodes::reverse_iterator iter (mIfCode.rbegin());
                     iter!=mIfCode.rend(); ++iter)
                 {
@@ -47,17 +47,17 @@ namespace Compiler
                             std::back_inserter (block));
                         Generator::jumpOnZero (block, iter->second.size()+1);
                     }
-                    
+
                     std::copy (iter->second.begin(), iter->second.end(),
                         std::back_inserter (block));
-                   
+
                    std::swap (codes, block);
-                   
+
                    std::copy (block.begin(), block.end(), std::back_inserter (codes));
                 }
-                
+
                 std::copy (codes.begin(), codes.end(), std::back_inserter (mCode));
-                
+
                 mIfCode.clear();
                 mState = IfEndifState;
             }
@@ -66,36 +66,36 @@ namespace Compiler
                 mExprParser.reset();
                 scanner.scan (mExprParser);
 
-                mState = IfElseifEndState;            
+                mState = IfElseifEndState;
             }
             else if (keyword==Scanner::K_else)
             {
-                mState = IfElseEndState;            
-            }                
-            
+                mState = IfElseEndState;
+            }
+
             return true;
         }
         else if (keyword==Scanner::K_if || keyword==Scanner::K_while)
         {
             // nested
             ControlParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
-            
+
             if (parser.parseKeyword (keyword, loc, scanner))
-                scanner.scan (parser);  
-                
-            parser.appendCode (mCodeBlock);                    
-                
+                scanner.scan (parser);
+
+            parser.appendCode (mCodeBlock);
+
             return true;
         }
         else
         {
             mLineParser.reset();
             if (mLineParser.parseKeyword (keyword, loc, scanner))
-                scanner.scan (mLineParser);      
-                
-            return true;      
-        }    
-        
+                scanner.scan (mLineParser);
+
+            return true;
+        }
+
         return false;
     }
 
@@ -104,24 +104,24 @@ namespace Compiler
         if (keyword==Scanner::K_endwhile)
         {
             Codes loop;
-            
+
             Codes expr;
             mExprParser.append (expr);
-            
+
             Generator::jump (loop, -mCodeBlock.size()-expr.size());
-        
+
             std::copy (expr.begin(), expr.end(), std::back_inserter (mCode));
 
             Codes skip;
-            
+
             Generator::jumpOnZero (skip, mCodeBlock.size()+loop.size()+1);
-            
+
             std::copy (skip.begin(), skip.end(), std::back_inserter (mCode));
-            
+
             std::copy (mCodeBlock.begin(), mCodeBlock.end(), std::back_inserter (mCode));
-            
+
             Codes loop2;
-        
+
             Generator::jump (loop2, -mCodeBlock.size()-expr.size()-skip.size());
 
             if (loop.size()!=loop2.size())
@@ -129,31 +129,31 @@ namespace Compiler
                     "internal compiler error: failed to generate a while loop");
 
             std::copy (loop2.begin(), loop2.end(), std::back_inserter (mCode));
-        
+
             mState = WhileEndwhileState;
-            return true;    
+            return true;
         }
         else if (keyword==Scanner::K_if || keyword==Scanner::K_while)
         {
             // nested
             ControlParser parser (getErrorHandler(), getContext(), mLocals, mLiterals);
-            
+
             if (parser.parseKeyword (keyword, loc, scanner))
-                scanner.scan (parser);  
-                
-            parser.appendCode (mCodeBlock);                    
-                
+                scanner.scan (parser);
+
+            parser.appendCode (mCodeBlock);
+
             return true;
         }
         else
         {
             mLineParser.reset();
             if (mLineParser.parseKeyword (keyword, loc, scanner))
-                scanner.scan (mLineParser);      
-                
-            return true;      
-        }            
-        
+                scanner.scan (mLineParser);
+
+            return true;
+        }
+
         return false;
     }
 
@@ -164,14 +164,14 @@ namespace Compiler
       mExprParser (errorHandler, context, locals, literals),
       mState (StartState)
     {
-    
+
     }
-  
+
     void ControlParser::appendCode (std::vector<Interpreter::Type_Code>& code) const
     {
         std::copy (mCode.begin(), mCode.end(), std::back_inserter (code));
     }
-    
+
     bool ControlParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
         if (mState==StartState)
@@ -190,20 +190,20 @@ namespace Compiler
                 scanner.scan (mExprParser);
 
                 mState = WhileEndState;
-                return true;            
+                return true;
             }
         }
         else if (mState==IfBodyState || mState==IfElseifBodyState || mState==IfElseBodyState)
         {
             if (parseIfBody (keyword, loc, scanner))
-                return true;            
+                return true;
         }
         else if (mState==WhileBodyState)
         {
             if ( parseWhileBody (keyword, loc, scanner))
                 return true;
         }
-        
+
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
@@ -218,24 +218,24 @@ namespace Compiler
                 case IfElseEndState: mState = IfElseBodyState; return true;
 
                 case WhileEndState: mState = WhileBodyState; return true;
-                
+
                 case IfBodyState:
                 case IfElseifBodyState:
                 case IfElseBodyState:
                 case WhileBodyState:
-                
+
                     return true; // empty line
-            
+
                 case IfEndifState:
                 case WhileEndwhileState:
-                
+
                     return false;
-                    
+
                 default: ;
             }
-        
+
         }
-    
+
         return Parser::parseSpecial (code, loc, scanner);
     }
 
@@ -245,6 +245,6 @@ namespace Compiler
         mCodeBlock.clear();
         mIfCode.clear();
         mState = StartState;
+        Parser::reset();
     }
 }
-
