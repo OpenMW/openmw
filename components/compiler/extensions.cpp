@@ -14,119 +14,197 @@ namespace Compiler
     int Extensions::searchKeyword (const std::string& keyword) const
     {
         std::map<std::string, int>::const_iterator iter = mKeywords.find (keyword);
-        
+
         if (iter==mKeywords.end())
             return 0;
-            
+
         return iter->second;
     }
-        
+
     bool Extensions::isFunction (int keyword, char& returnType, std::string& argumentType,
         bool explicitReference) const
     {
         std::map<int, Function>::const_iterator iter = mFunctions.find (keyword);
-        
+
         if (iter==mFunctions.end())
             return false;
-            
+
         if (explicitReference && iter->second.mCodeExplicit==-1)
             return false;
-            
+
         returnType = iter->second.mReturn;
         argumentType = iter->second.mArguments;
         return true;
     }
-        
+
     bool Extensions::isInstruction (int keyword, std::string& argumentType,
         bool explicitReference) const
     {
         std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
-        
+
         if (iter==mInstructions.end())
             return false;
 
         if (explicitReference && iter->second.mCodeExplicit==-1)
             return false;
-            
+
         argumentType = iter->second.mArguments;
         return true;
     }
-        
+
     void Extensions::registerFunction (const std::string& keyword, char returnType,
-        const std::string& argumentType, int segment5code, int segment5codeExplicit)
+        const std::string& argumentType, int code, int codeExplicit)
     {
-        assert (segment5code>=33554432 && segment5code<=67108863);
-    
-        int code = mNextKeywordIndex--;
-        
-        mKeywords.insert (std::make_pair (keyword, code));
-        
         Function function;
+
+        if (argumentType.find ('/')==std::string::npos)
+        {
+            function.mSegment = 5;
+            assert (code>=33554432 && code<=67108863);
+            assert (codeExplicit==-1 || (codeExplicit>=33554432 && codeExplicit<=67108863));
+        }
+        else
+        {
+            function.mSegment = 3;
+            assert (code>=0x20000 && code<=0x2ffff);
+            assert (codeExplicit==-1 || (codeExplicit>=0x20000 && codeExplicit<=0x2ffff));
+        }
+
+        int keywordIndex = mNextKeywordIndex--;
+
+        mKeywords.insert (std::make_pair (keyword, keywordIndex));
+
         function.mReturn = returnType;
         function.mArguments = argumentType;
-        function.mCode = segment5code;
-        function.mCodeExplicit = segment5codeExplicit;
-        
-        mFunctions.insert (std::make_pair (code, function));
+        function.mCode = code;
+        function.mCodeExplicit = codeExplicit;
+
+        mFunctions.insert (std::make_pair (keywordIndex, function));
     }
-        
+
     void Extensions::registerInstruction (const std::string& keyword,
-        const std::string& argumentType, int segment5code, int segment5codeExplicit)
+        const std::string& argumentType, int code, int codeExplicit)
     {
-        assert (segment5code>=33554432 && segment5code<=67108863);
-    
-        int code = mNextKeywordIndex--;
-        
-        mKeywords.insert (std::make_pair (keyword, code));
-        
         Instruction instruction;
+
+        if (argumentType.find ('/')==std::string::npos)
+        {
+            instruction.mSegment = 5;
+            assert (code>=33554432 && code<=67108863);
+            assert (codeExplicit==-1 || (codeExplicit>=33554432 && codeExplicit<=67108863));
+        }
+        else
+        {
+            instruction.mSegment = 3;
+            assert (code>=0x20000 && code<=0x2ffff);
+            assert (codeExplicit==-1 || (codeExplicit>=0x20000 && codeExplicit<=0x2ffff));
+        }
+
+        int keywordIndex = mNextKeywordIndex--;
+
+        mKeywords.insert (std::make_pair (keyword, keywordIndex));
+
         instruction.mArguments = argumentType;
-        instruction.mCode = segment5code;
-        instruction.mCodeExplicit = segment5codeExplicit;
-        
-        mInstructions.insert (std::make_pair (code, instruction));
+        instruction.mCode = code;
+        instruction.mCodeExplicit = codeExplicit;
+
+        mInstructions.insert (std::make_pair (keywordIndex, instruction));
     }
-        
+
     void Extensions::generateFunctionCode (int keyword, std::vector<Interpreter::Type_Code>& code,
-        Literals& literals, const std::string& id) const
+        Literals& literals, const std::string& id, int optionalArguments) const
     {
+        assert (optionalArguments>=0);
+
         std::map<int, Function>::const_iterator iter = mFunctions.find (keyword);
-        
+
         if (iter==mFunctions.end())
             throw std::logic_error ("unknown custom function keyword");
-            
+
+        if (optionalArguments && iter->second.mSegment!=3)
+            throw std::logic_error ("functions with optional arguments must be placed into segment 3");
+
         if (!id.empty())
         {
             if (iter->second.mCodeExplicit==-1)
                 throw std::logic_error ("explicit references not supported");
-        
+
             int index = literals.addString (id);
-            Generator::pushInt (code, literals, index);        
+            Generator::pushInt (code, literals, index);
         }
-            
-        code.push_back (Generator::segment5 (
-            id.empty() ? iter->second.mCode : iter->second.mCodeExplicit));
+
+        switch (iter->second.mSegment)
+        {
+            case 3:
+
+                if (optionalArguments>=256)
+                    throw std::logic_error ("number of optional arguments is too large for segment 3");
+
+                code.push_back (Generator::segment3 (
+                    id.empty() ? iter->second.mCode : iter->second.mCodeExplicit,
+                    optionalArguments));
+
+                break;
+
+            case 5:
+
+                code.push_back (Generator::segment5 (
+                    id.empty() ? iter->second.mCode : iter->second.mCodeExplicit));
+
+                break;
+
+            default:
+
+                throw std::logic_error ("unsupported code segment");
+        }
     }
-        
+
     void Extensions::generateInstructionCode (int keyword,
-        std::vector<Interpreter::Type_Code>& code, Literals& literals, const std::string& id)
-        const
+        std::vector<Interpreter::Type_Code>& code, Literals& literals, const std::string& id,
+        int optionalArguments) const
     {
+        assert (optionalArguments>=0);
+
         std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
-        
+
         if (iter==mInstructions.end())
             throw std::logic_error ("unknown custom instruction keyword");
-            
+
+        if (optionalArguments && iter->second.mSegment!=3)
+            throw std::logic_error ("instructions with optional arguments must be placed into segment 3");
+
         if (!id.empty())
         {
             if (iter->second.mCodeExplicit==-1)
                 throw std::logic_error ("explicit references not supported");
-        
+
             int index = literals.addString (id);
-            Generator::pushInt (code, literals, index);        
+            Generator::pushInt (code, literals, index);
         }
-                        
-        code.push_back (Generator::segment5 (
-            id.empty() ? iter->second.mCode : iter->second.mCodeExplicit));
-    }    
+
+        switch (iter->second.mSegment)
+        {
+            case 3:
+
+                if (optionalArguments>=256)
+                    throw std::logic_error ("number of optional arguments is too large for segment 3");
+
+                code.push_back (Generator::segment3 (
+                    id.empty() ? iter->second.mCode : iter->second.mCodeExplicit,
+                    optionalArguments));
+
+                break;
+
+            case 5:
+
+                code.push_back (Generator::segment5 (
+                    id.empty() ? iter->second.mCode : iter->second.mCodeExplicit));
+
+                break;
+
+            default:
+
+                throw std::logic_error ("unsupported code segment");
+        }
+    }
 }

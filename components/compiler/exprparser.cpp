@@ -346,9 +346,10 @@ namespace Compiler
                         start();
 
                         mTokenLoc = loc;
-                        parseArguments (argumentType, scanner);
+                        int optionals = parseArguments (argumentType, scanner);
 
-                        extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit);
+                        extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit,
+                            optionals);
                         mOperands.push_back (returnType);
                         mExplicit.clear();
                         mRefOp = false;
@@ -465,9 +466,9 @@ namespace Compiler
                     if (extensions->isFunction (keyword, returnType, argumentType, false))
                     {
                         mTokenLoc = loc;
-                        parseArguments (argumentType, scanner);
+                        int optionals = parseArguments (argumentType, scanner);
 
-                        extensions->generateFunctionCode (keyword, mCode, mLiterals, "");
+                        extensions->generateFunctionCode (keyword, mCode, mLiterals, "", optionals);
                         mOperands.push_back (returnType);
 
                         mNextOperand = false;

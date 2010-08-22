@@ -242,9 +242,9 @@ namespace Compiler
 
                 if (extensions->isInstruction (keyword, argumentType, mState==ExplicitState))
                 {
-                    mExprParser.parseArguments (argumentType, scanner, mCode, true);
+                    int optionals = mExprParser.parseArguments (argumentType, scanner, mCode, true);
 
-                    extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit);
+                    extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit, optionals);
                     mState = EndState;
                     return true;
                 }
