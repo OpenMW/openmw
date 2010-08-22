@@ -153,6 +153,12 @@ namespace MWWorld
             void deleteObject (Ptr ptr);
 
             void moveObject (Ptr ptr, float x, float y, float z);
+
+            void indexToPosition (int cellX, int cellY, float &x, float &y) const;
+            ///< Convert cell numbers to position.
+
+            void positionToIndex (float x, float y, int &cellX, int &cellY) const;
+            ///< Convert position to cell numbers
     };
 }
 

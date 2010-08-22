@@ -58,8 +58,8 @@ namespace MWRender
       // Get new camera position, converting back to MW coords.
       Vector3 pos = camera->getPosition();
       relX = pos[0];
-      relY = pos[2];
-      relZ = -pos[1];
+      relY = -pos[2];
+      relZ = pos[1];
 
       // TODO: Collision detection must be used to find the REAL new
       // position.

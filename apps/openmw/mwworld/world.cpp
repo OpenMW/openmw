@@ -633,10 +633,10 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
-        const int cellSize = 8192;
+        int x = 0;
+        int y = 0;
 
-        int x = static_cast<int> (position.pos[0] / cellSize);
-        int y = static_cast<int> (position.pos[1] / cellSize);
+        positionToIndex (position.pos[0], position.pos[1], x, y);
 
         changeCell (x, y, position);
     }
@@ -692,10 +692,10 @@ namespace MWWorld
                 if (!(active->first->cell->data.flags & ESM::Cell::Interior))
                 {
                     // exterior -> adjust loaded cells
-                    const int cellSize = 8192;
+                    int cellX = 0;
+                    int cellY = 0;
 
-                    int cellX = static_cast<int> (x/cellSize);
-                    int cellY = static_cast<int> (y/cellSize);
+                    positionToIndex (x, y, cellX, cellY);
 
                     if (active->first->cell->data.gridX!=cellX || active->first->cell->data.gridY!=cellY)
                     {
@@ -706,5 +706,28 @@ namespace MWWorld
         }
 
         // TODO cell change for non-player ref
+    }
+
+    void World::indexToPosition (int cellX, int cellY, float &x, float &y) const
+    {
+        const int cellSize = 8192;
+
+        x = cellSize * cellX;
+        y = cellSize * cellY;
+    }
+
+    void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
+    {
+        const int cellSize = 8192;
+
+        cellX = static_cast<int> (x/cellSize);
+
+        if (x<0)
+            --cellX;
+
+        cellY = static_cast<int> (y/cellSize);
+
+        if (y<0)
+            --cellY;
     }
 }

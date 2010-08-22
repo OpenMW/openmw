@@ -62,13 +62,13 @@ namespace MWScript
                     Interpreter::Type_Integer y = runtime[0].mInteger;
                     runtime.pop();
 
-                    const int cellSize = 8192;
-
                     ESM::Position pos;
-                    pos.pos[0] = cellSize * (x+0.5);
-                    pos.pos[1] = cellSize * (y+0.5);
+
+                    context.getWorld().indexToPosition (x, y, pos.pos[0], pos.pos[1]);
                     pos.pos[2] = 0;
+
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+
                     context.getWorld().changeToExteriorCell (pos);
                 }
         };
