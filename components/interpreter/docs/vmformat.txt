@@ -31,8 +31,8 @@ B: argument 1
 
 Segment 0:
 op  0: push arg0
-op  1: move pv ahead by arg0
-op  2: move pv back by arg0
+op  1: move pc ahead by arg0
+op  2: move pc back by arg0
 opcodes 3-31 unused
 opcodes 32-63 reserved for extensions
 
@@ -119,4 +119,3 @@ op  57: explicit reference = stack[0]; pop;
         replace stack[0] with distance between explicit reference and a reference of ID stack[0]
 opcodes 58-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
-
