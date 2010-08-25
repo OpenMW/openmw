@@ -1,6 +1,8 @@
 #include "cellimp.hpp"
 
 #include <cassert>
+#include <iostream>
+#include <exception>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
@@ -23,8 +25,16 @@ void insertCellRefList (CellRenderImp& cellRender, MWWorld::Environment& environ
             {
                 MWWorld::Ptr ptr (&*it, &cell);
 
-                class_.insertObj (ptr, cellRender, environment);
-                class_.enable (ptr, environment);
+                try
+                {
+                    class_.insertObj (ptr, cellRender, environment);
+                    class_.enable (ptr, environment);
+                }
+                catch (const std::exception& e)
+                {
+                    std::string error ("error during rendering: ");
+                    std::cerr << error + e.what() << std::endl;
+                }
             }
         }
     }
