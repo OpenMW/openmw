@@ -586,9 +586,9 @@ namespace MWWorld
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
 
-        if (active!=mActiveCells.end())
+        while (active!=mActiveCells.end())
         {
-            unloadCell (active);
+            unloadCell (active++);
         }
 
         // Load cell.
@@ -598,6 +598,7 @@ namespace MWWorld
         loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene));
 
         // adjust player
+        mCurrentCell = cell;
         playerCellChange (cell, position);
 
         // Sky system
@@ -611,19 +612,68 @@ namespace MWWorld
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
 
-        if (active!=mActiveCells.end())
+        while (active!=mActiveCells.end())
         {
-            unloadCell (active);
+            if (!(active->first->cell->data.flags & ESM::Cell::Interior))
+            {
+                if (std::abs (X-active->first->cell->data.gridX)<=1 &&
+                    std::abs (Y-active->first->cell->data.gridY)<=1)
+                {
+                    // keep cells within the new 3x3 grid
+                    ++active;
+                    continue;
+                }
+            }
+
+            unloadCell (active++);
         }
 
-        // Load cell.
-        mExteriors[std::make_pair (X, Y)].loadExt (X, Y, mStore, mEsm);
-        Ptr::CellStore *cell = &mExteriors[std::make_pair (X, Y)];
+        // Load cells
+        for (int x=X-1; x<=X+1; ++x)
+            for (int y=Y-1; y<=Y+1; ++y)
+            {
+                CellRenderCollection::iterator iter = mActiveCells.begin();
 
-        loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
+                while (iter!=mActiveCells.end())
+                {
+                    assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
+
+                    if (x==iter->first->cell->data.gridX &&
+                        y==iter->first->cell->data.gridY)
+                        break;
+
+                    ++iter;
+                }
+
+                if (iter==mActiveCells.end())
+                {
+                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mStore, mEsm);
+                    Ptr::CellStore *cell = &mExteriors[std::make_pair (x, y)];
+
+                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
+                }
+            }
+
+        // find current cell
+        CellRenderCollection::iterator iter = mActiveCells.begin();
+
+        while (iter!=mActiveCells.end())
+        {
+            assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
+
+            if (X==iter->first->cell->data.gridX &&
+                Y==iter->first->cell->data.gridY)
+                break;
+
+            ++iter;
+        }
+
+        assert (iter!=mActiveCells.end());
+
+        mCurrentCell = iter->first;
 
         // adjust player
-        playerCellChange (cell, position);
+        playerCellChange (&mExteriors[std::make_pair (X, Y)], position);
 
         // Sky system
         adjustSky();
@@ -685,11 +735,9 @@ namespace MWWorld
 
         if (ptr==mPlayerPos->getPlayer())
         {
-            CellRenderCollection::iterator active = mActiveCells.begin();
-
-            if (active!=mActiveCells.end())
+            if (mCurrentCell)
             {
-                if (!(active->first->cell->data.flags & ESM::Cell::Interior))
+                if (!(mCurrentCell->cell->data.flags & ESM::Cell::Interior))
                 {
                     // exterior -> adjust loaded cells
                     int cellX = 0;
@@ -697,7 +745,7 @@ namespace MWWorld
 
                     positionToIndex (x, y, cellX, cellY);
 
-                    if (active->first->cell->data.gridX!=cellX || active->first->cell->data.gridY!=cellY)
+                    if (mCurrentCell->cell->data.gridX!=cellX || mCurrentCell->cell->data.gridY!=cellY)
                     {
                         changeCell (cellX, cellY, mPlayerPos->getPlayer().getCellRef().pos);
                     }
