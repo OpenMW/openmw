@@ -9,6 +9,10 @@
 #include "OgreCamera.h"
 #include "OgreTextureManager.h"
 
+#include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
+#include "../mwworld/ptr.hpp"
+#include <components/esm/loadstat.hpp>
+
 using namespace MWRender;
 using namespace Ogre;
 
@@ -36,7 +40,7 @@ MWScene::MWScene(OEngine::Render::OgreRenderer &_rend)
   mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
 }
 
-std::pair<std::string, float> MWScene::getFacedHandle()
+std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
 {
     std::string handle = "";
     float distance = -1;
@@ -57,10 +61,14 @@ std::pair<std::string, float> MWScene::getFacedHandle()
     {
         // there seem to be omnipresent objects like the caelum sky dom,
         // the distance of these objects is always 0 so this if excludes these
-        // TODO: Check if the object can be focused (ignore walls etc..
-        // in this state of openmw not possible)
         if ( itr->movable && itr->distance >= 0.1)
         {
+            // horrible hack to exclude statics. this must be removed as soon as a replacement for the
+            // AABB raycasting is implemented (we should not ignore statics)
+            MWWorld::Ptr ptr = world.getPtrViaHandle (itr->movable->getParentSceneNode()->getName());
+            if (ptr.getType()==typeid (ESM::Static))
+                break;
+
             if ( nearest == result.end() )  //if no object is set
             {
                 nearest = itr;
@@ -80,4 +88,3 @@ std::pair<std::string, float> MWScene::getFacedHandle()
 
     return std::pair<std::string, float>(handle, distance);
 }
-

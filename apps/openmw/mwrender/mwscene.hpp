@@ -13,6 +13,11 @@ namespace Ogre
     class RaySceneQuery;
 }
 
+namespace MWWorld
+{
+    class World;
+}
+
 namespace MWRender
 {
   /** Class responsible for Morrowind-specific interfaces to OGRE.
@@ -43,7 +48,7 @@ namespace MWRender
     //pair<name, distance>
     //name is empty and distance = -1 if there is no object which
     //can be faced
-    std::pair<std::string, float> getFacedHandle();
+    std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
   };
 }
 

@@ -648,7 +648,7 @@ namespace MWWorld
 
     std::string World::getFacedHandle()
     {
-        std::pair<std::string, float> result = mScene.getFacedHandle();
+        std::pair<std::string, float> result = mScene.getFacedHandle (*this);
 
         if (result.first.empty() ||
             result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
