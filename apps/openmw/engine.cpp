@@ -109,6 +109,7 @@ OMW::Engine::Engine()
   , mUseSound (true)
   , mScriptManager (0)
   , mScriptContext (0)
+  , mGuiManager (0)
 {
     MWClass::registerClasses();
 }
