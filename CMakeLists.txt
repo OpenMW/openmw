@@ -8,6 +8,34 @@ option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
+
+#
+# Pre-built binaries being used?
+#
+IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/ogre_1_7_1")
+    message (STATUS "OpenMW pre-built binaries found.  Attempting to use pre-built binaries.")
+    
+    SET(ENV{OGRE_HOME} "${CMAKE_SOURCE_DIR}/prebuilt/ogre_1_7_1")
+    
+    SET(ENV{BOOST_ROOT} "${CMAKE_SOURCE_DIR}/prebuilt/boost_1_42_0")
+    set(Boost_USE_STATIC_LIBS   ON)
+    set(Boost_USE_MULTITHREADED ON)
+    set(ENV{BOOST_INCLUDEDIR} "${BOOST_ROOT}/include")
+    set(ENV{BOOST_LIBRARYDIR} "${BOOST_ROOT}/lib")
+    
+    set(ENV{FREETYPE_DIR} "${CMAKE_SOURCE_DIR}/prebuilt/freetype-2.3.5-1")
+    
+    set(USE_MPG123 OFF)
+    set(USE_AUDIERE ON)    
+    set(AUDIERE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/prebuilt/audiere-1.9.4/include")
+    set(AUDIERE_LIBRARY "${CMAKE_SOURCE_DIR}/prebuilt/audiere-1.9.4/lib/audiere.lib")
+    
+    set(ENV{OPENALDIR} "${CMAKE_SOURCE_DIR}/prebuilt/OpenAL 1.1 SDK")
+    
+ELSE()
+    message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
+ENDIF()
+
 # Add path for CMake scripts
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
@@ -166,6 +194,9 @@ if (WIN32)
 else (WIN32)
 set(PLATFORM_INCLUDE_DIR "")
 endif (WIN32)
+if (MSVC10)
+set(PLATFORM_INCLUDE_DIR "")
+endif()
 
 # Dependencies
 
@@ -180,9 +211,9 @@ include_directories("."
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
+    ${OPENAL_INCLUDE_DIR}
     ${LIBDIR}
 )
-
 
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
