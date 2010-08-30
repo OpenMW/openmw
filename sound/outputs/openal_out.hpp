@@ -30,8 +30,8 @@ class OpenAL_Factory : public SoundFactory
   OpenAL_Factory(bool doSetup = true);
   ~OpenAL_Factory();
 
-  SoundPtr load(const std::string &file) { assert(0); }
-  SoundPtr load(Stream::StreamPtr input) { assert(0); }
+  SoundPtr load(const std::string &file) { assert(0); return SoundPtr(); }
+  SoundPtr load(Stream::StreamPtr input) { assert(0); return SoundPtr(); }
   SoundPtr loadRaw(SampleSourcePtr input);
 
   void update();

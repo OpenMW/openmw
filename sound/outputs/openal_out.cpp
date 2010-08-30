@@ -4,8 +4,8 @@
 #include "../../stream/filters/buffer_stream.hpp"
 #include "../../tools/str_exception.hpp"
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#include "al.h"
+#include "alc.h"
 
 using namespace Mangle::Sound;
 
