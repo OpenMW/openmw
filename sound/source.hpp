@@ -28,8 +28,8 @@ class SampleSource : public Stream::Stream
   // Disabled functions by default. You can still override them in
   // subclasses.
   void seek(size_t pos) { assert(0); }
-  size_t tell() const { assert(0); }
-  size_t size() const { assert(0); }
+  size_t tell() const { assert(0); return 0; }
+  size_t size() const { assert(0); return 0; }
 };
 
 typedef boost::shared_ptr<SampleSource> SampleSourcePtr;

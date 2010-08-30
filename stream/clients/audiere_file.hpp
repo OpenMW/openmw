@@ -23,14 +23,14 @@ class AudiereFile : public audiere::RefImplementation<audiere::File>
     : inp(_inp) {}
 
   /// Read 'count' bytes, return bytes successfully read
-  int read(void *buf, int count)
+  int ADR_CALL read(void *buf, int count)
     { return inp->read(buf,count); }
 
   /// Seek, relative to specified seek mode. Returns true if successful.
-  bool seek(int pos, audiere::File::SeekMode mode);
+  bool ADR_CALL seek(int pos, audiere::File::SeekMode mode);
 
   /// Get current position
-  int tell()
+  int ADR_CALL tell()
     { assert(inp->hasPosition); return inp->tell(); }
 };
 
