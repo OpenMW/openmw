@@ -50,6 +50,9 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
             ptr.get<ESM::Door>();
 
+        // TODO check lock
+        // TODO check trap
+
         if (ref->ref.teleport)
         {
             // teleport door
@@ -72,6 +75,19 @@ namespace MWClass
             // TODO return action for rotating the door
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
+    }
+
+    void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
+    {
+        if (lockLevel<0)
+            lockLevel = 0;
+
+        ptr.getCellRef().lockLevel = lockLevel;
+    }
+
+    void Door::unlock (const MWWorld::Ptr& ptr) const
+    {
+        ptr.getCellRef().lockLevel = 0;
     }
 
     std::string Door::getScript (const MWWorld::Ptr& ptr) const
