@@ -149,15 +149,26 @@ public:
   // Update all sounds
   void updateAll()
   {
-    for(ManagedSound *s = list.getHead(); s != NULL; s=s->next)
-      s->update();
+    ManagedSound *s = list.getHead();
+    while(s)
+      {
+        ManagedSound *cur = s;
+        // Propagate first, since update() may delete object
+        s = s->next;
+        cur->update();
+      }
   }
 
   // Detach and unlock all sounds
   void detachAll()
   {
-    for(ManagedSound *s = list.getHead(); s != NULL; s=s->next)
-      s->detach();
+    ManagedSound *s = list.getHead();
+    while(s)
+      {
+        ManagedSound *cur = s;
+        s = s->next;
+        cur->detach();
+      }
   }
 };
 
