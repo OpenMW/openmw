@@ -183,6 +183,13 @@ namespace Compiler
             return true;
         }
 
+        if (mState==BeginState && getContext().isId (name))
+        {
+            mState = PotentialExplicitState;
+            mExplicit = toLower (name);
+            return true;
+        }
+
         if (mState==BeginState && mAllowExpression)
         {
             std::string name2 = toLower (name);
@@ -204,13 +211,6 @@ namespace Compiler
                 parseExpression (scanner, loc);
                 return true;
             }
-        }
-
-        if (mState==BeginState && getContext().isId (name))
-        {
-            mState = PotentialExplicitState;
-            mExplicit = toLower (name);
-            return true;
         }
 
         return Parser::parseName (name, loc, scanner);

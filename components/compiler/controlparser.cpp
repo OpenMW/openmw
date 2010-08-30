@@ -172,6 +172,20 @@ namespace Compiler
         std::copy (mCode.begin(), mCode.end(), std::back_inserter (code));
     }
 
+    bool ControlParser::parseName (const std::string& name, const TokenLoc& loc, Scanner& scanner)
+    {
+        if (mState==IfBodyState || mState==IfElseifBodyState || mState==IfElseBodyState ||
+            mState==WhileBodyState)
+        {
+            scanner.putbackName (name, loc);
+            mLineParser.reset();
+            scanner.scan (mLineParser);
+            return true;
+        }
+
+        return Parser::parseName (name, loc, scanner);
+    }
+
     bool ControlParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
         if (mState==StartState)
