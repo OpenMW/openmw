@@ -201,7 +201,7 @@ target_link_libraries(openmw
   ${SOUND_INPUT_LIBRARY}
   caelum
   MyGUIEngine
-  MyGUI.OgrePlatform
+  MyGUIOgrePlatform
 )
 
 if (APPLE)
