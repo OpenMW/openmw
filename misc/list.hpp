@@ -6,26 +6,22 @@
 namespace Misc{
 
 /*
-  This is just a suggested data structure for List. You can use
-  anything that has next and prev pointers.
- */
-template <typename X>
-struct ListElem
-{
-  X data;
-  ListElem *next;
-  ListElem *prev;
-};
-
-/*
-  A generic class that contains a doubly linked list of elements. It
-  does not do any allocation of elements, it just keeps pointers to
-  them.
+  A simple and completely allocation-less doubly linked list. The
+  class only manages pointers to and between elements. It leaving all
+  memory management to the user.
 */
 template <typename Elem>
 struct List
 {
   List() : head(0), tail(0), totalNum(0) {}
+
+  // Empty the list.
+  void reset()
+  {
+    head = 0;
+    tail = 0;
+    totalNum = 0;
+  }
 
   // Insert an element at the end of the list. The element cannot be
   // part of any other list when this is called.
@@ -95,9 +91,81 @@ struct List
     return res;
   }
 
-  Elem* getHead() { return head; }
-  Elem* getTail() { return tail; }
-  unsigned int getNum() { return totalNum; }
+  // Swap the contents of this list with another of the same type
+  void swap(List &other)
+  {
+    Elem *tmp;
+
+    tmp = head;
+    head = other.head;
+    other.head = tmp;
+
+    tmp = tail;
+    tail = other.tail;
+    other.tail = tmp;
+
+    unsigned int tmp2 = totalNum;
+    totalNum = other.totalNum;
+    other.totalNum = tmp2;
+  }
+
+  /* Absorb the contents of another list. All the elements from the
+     list are moved to the end of this list, and the other list is
+     cleared.
+   */
+  void absorb(List &other)
+  {
+    assert(&other != this);
+    if(other.totalNum)
+      {
+        absorb(other.head, other.tail, other.totalNum);
+        other.reset();
+      }
+    assert(other.totalNum == 0);
+  }
+
+  /* Absorb a range of elements, endpoints included. The elements are
+     assumed NOT to belong to any list, but they ARE assumed to be
+     connected with a chain between them.
+
+     The connection MUST run all the way from 'first' to 'last'
+     through the ->next pointers, and vice versa through ->prev
+     pointers.
+
+     The parameter 'num' must give the exact number of elements in the
+     chain.
+
+     Passing first == last, num == 1 is allowed and is equivalent to
+     calling insert().
+  */
+  void absorb(Elem* first, Elem *last, int num)
+  {
+    assert(first && last && num>=1);
+    if(tail)
+      {
+        // There are existing elements. Insert the first node at the
+        // end of the list.
+        assert(head && totalNum > 0);
+        tail->next = first;
+      }
+    else
+      {
+        // This is the first element
+        assert(head == 0 && totalNum == 0);
+        head = first;
+      }
+
+    // These have to be done in either case
+    first->prev = tail;
+    last->next = 0;
+    tail = last;
+
+    totalNum += num;
+  }
+
+  Elem* getHead() const { return head; }
+  Elem* getTail() const { return tail; }
+  unsigned int getNum() const { return totalNum; }
 
 private:
 
