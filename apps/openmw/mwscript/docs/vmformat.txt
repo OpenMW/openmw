@@ -17,7 +17,9 @@ op 0x20000: AiTravel
 op 0x20001: AiTravel, explicit reference
 op 0x20002: AiEscort
 op 0x20003: AiEscort, explicit reference
-opcodes 0x20004-0x3ffff unused
+op 0x20004: Lock
+op 0x20005: Lock, explicit reference
+opcodes 0x20006-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -90,4 +92,6 @@ op 0x200007c: GetAiPackageDone
 op 0x200007d: GetAiPackageDone, explicit reference
 op 0x200007e-0x2000084: Enable Controls
 op 0x2000085-0x200008b: Disable Controls
-opcodes 0x200008c-0x3ffffff unused
+op 0x200008c: Unlock
+op 0x200008d: Unlock, explicit reference
+opcodes 0x200008e-0x3ffffff unused
