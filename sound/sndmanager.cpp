@@ -1,6 +1,7 @@
 #include "sndmanager.hpp"
 
 #include "../misc/list.hpp"
+#include <set>
 #include <boost/weak_ptr.hpp>
 
 using namespace OEngine::Sound;
@@ -126,8 +127,8 @@ public:
 struct SoundManager::SoundManagerList
 {
 private:
-  // A linked list of ManagedSound objects.
-  typedef Misc::List<ManagedSound> SoundList;
+  // A list of ManagedSound objects.
+  typedef std::set<ManagedSound*> SoundList;
   SoundList list;
 
 public:
@@ -140,24 +141,38 @@ public:
   // Remove a sound from the list
   void remove(ManagedSound *snd)
   {
-    list.remove(snd);
+      SoundList::iterator it = list.find(snd);
+      if (it != list.end())
+        list.erase(it);
   }
 
   // Number of sounds in the list
-  int numSounds() { return list.getNum(); }
+  int numSounds() { return (int)list.size(); }
 
   // Update all sounds
   void updateAll()
   {
-    for(ManagedSound *s = list.getHead(); s != NULL; s=s->next)
-      s->update();
+      // Iterate over a copy of the list since sounds may remove themselves
+      // from the master list during the iteration
+      SoundList tmp = list;
+      for (SoundList::iterator it = tmp.begin(); it != tmp.end(); ++it)
+      {
+          ManagedSound* pSound = *it;
+          pSound->update();
+      }
   }
 
   // Detach and unlock all sounds
   void detachAll()
   {
-    for(ManagedSound *s = list.getHead(); s != NULL; s=s->next)
-      s->detach();
+      // Iterate over a copy of the list since sounds may remove themselves
+      // from the master list during the iteration
+      SoundList tmp = list;
+      for (SoundList::iterator it = tmp.begin(); it != tmp.end(); ++it)
+      {
+          ManagedSound* pSound = *it;
+          pSound->detach();
+      }
   }
 };
 
