@@ -57,15 +57,15 @@ namespace Compiler
     std::string Parser::toLower (const std::string& name)
     {
         std::string lowerCase;
-        
+
         std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
             (int(*)(int)) std::tolower);
-            
+
         return lowerCase;
     }
 
     Parser::Parser (ErrorHandler& errorHandler, Context& context)
-    : mErrorHandler (errorHandler), mContext (context)
+    : mErrorHandler (errorHandler), mContext (context), mOptional (false), mEmpty (true)
     {}
 
     // destructor
@@ -79,7 +79,9 @@ namespace Compiler
 
     bool Parser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
-        reportSeriousError ("Unexpected numeric value", loc);
+        if (!(mOptional && mEmpty))
+            reportSeriousError ("Unexpected numeric value", loc);
+
         return false;
     }
 
@@ -90,7 +92,9 @@ namespace Compiler
 
     bool Parser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
     {
-        reportSeriousError ("Unexpected floating point value", loc);
+        if (!(mOptional && mEmpty))
+            reportSeriousError ("Unexpected floating point value", loc);
+
         return false;
     }
 
@@ -102,7 +106,9 @@ namespace Compiler
     bool Parser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        reportSeriousError ("Unexpected name", loc);
+        if (!(mOptional && mEmpty))
+            reportSeriousError ("Unexpected name", loc);
+
         return false;
     }
 
@@ -113,7 +119,9 @@ namespace Compiler
 
     bool Parser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
-        reportSeriousError ("Unexpected keyword", loc);
+        if (!(mOptional && mEmpty))
+            reportSeriousError ("Unexpected keyword", loc);
+
         return false;
     }
 
@@ -124,7 +132,9 @@ namespace Compiler
 
     bool Parser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
-        reportSeriousError ("Unexpected special token", loc);
+        if (!(mOptional && mEmpty))
+            reportSeriousError ("Unexpected special token", loc);
+
         return false;
     }
 
@@ -136,5 +146,25 @@ namespace Compiler
     {
         reportEOF();
     }
-}
 
+    void Parser::reset()
+    {
+        mOptional = false;
+        mEmpty = true;
+    }
+
+    void Parser::setOptional (bool optional)
+    {
+        mOptional = optional;
+    }
+
+    void Parser::start()
+    {
+        mEmpty = false;
+    }
+
+    bool Parser::isEmpty() const
+    {
+        return mEmpty;
+    }
+}

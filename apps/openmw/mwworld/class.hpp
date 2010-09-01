@@ -98,6 +98,12 @@ namespace MWWorld
             ///< Insert into a container or throw an exception, if class does not support inserting into
             /// a container.
 
+            virtual void lock (const Ptr& ptr, int lockLevel) const;
+            ///< Lock object (default implementation: throw an exception)
+
+            virtual void unlock (const Ptr& ptr) const;
+            ///< Unlock object (default implementation: throw an exception)
+
             virtual std::string getScript (const Ptr& ptr) const;
             ///< Return name of the script attached to ptr (default implementation: return an empty
             /// string).

@@ -10,16 +10,13 @@ namespace MWGui
     class ConsoleInterpreterContext : public MWScript::InterpreterContext
     {
             Console& mConsole;
-            
-        public:
-        
-            ConsoleInterpreterContext (Console& console, MWWorld::Environment& environment, 
-                MWWorld::Ptr reference);
 
-            virtual void messageBox (const std::string& message,
-                const std::vector<std::string>& buttons);     
+        public:
+
+            ConsoleInterpreterContext (Console& console, MWWorld::Environment& environment,
+                MWWorld::Ptr reference);
     };
-    
+
     ConsoleInterpreterContext::ConsoleInterpreterContext (Console& console,
         MWWorld::Environment& environment, MWWorld::Ptr reference)
     : MWScript::InterpreterContext (environment,
@@ -27,30 +24,21 @@ namespace MWGui
       mConsole (console)
     {}
 
-    void ConsoleInterpreterContext::messageBox (const std::string& message,
-        const std::vector<std::string>& buttons)
-    {
-        if (!buttons.empty())
-            mConsole.printError ("MessageBox doesn't support buttons while in console mode");
-        else
-            mConsole.printOK (message);
-    }
-
     bool Console::compile (const std::string& cmd, Compiler::Output& output)
     {
         try
-        {        
+        {
             ErrorHandler::reset();
-        
+
             std::istringstream input (cmd + '\n');
-        
+
             Compiler::Scanner scanner (*this, input, mCompilerContext.getExtensions());
-        
+
             Compiler::LineParser parser (*this, mCompilerContext, output.getLocals(),
                 output.getLiterals(), output.getCode(), true);
-        
+
             scanner.scan (parser);
-            
+
             return isGood();
         }
         catch (const Compiler::SourceException& error)
@@ -61,7 +49,7 @@ namespace MWGui
         {
             printError (std::string ("An exception has been thrown: ") + error.what());
         }
-                
+
         return false;
     }
 
@@ -69,7 +57,7 @@ namespace MWGui
     {
         std::ostringstream error;
         error << "column " << loc.mColumn << " (" << loc.mLiteral << "):";
-    
+
         printError (error.str());
         printError ((type==ErrorMessage ? "error: " : "warning: ") + message);
     }
@@ -78,7 +66,7 @@ namespace MWGui
     {
         printError ((type==ErrorMessage ? "error: " : "warning: ") + message);
     }
-                
+
     Console::Console(int w, int h, MWWorld::Environment& environment,
         const Compiler::Extensions& extensions)
       : Layout("openmw_console_layout.xml"),
@@ -100,7 +88,7 @@ namespace MWGui
         history->setOverflowToTheLeft(true);
         history->setEditStatic(true);
         history->setVisibleVScroll(true);
-      
+
         // compiler
         mCompilerContext.setExtensions (&extensions);
     }
@@ -196,7 +184,7 @@ namespace MWGui
         Compiler::Locals locals;
         Compiler::Output output (locals);
 
-        if (compile (cm, output))
+        if (compile (cm + "\n", output))
         {
             try
             {
@@ -205,7 +193,7 @@ namespace MWGui
                 MWScript::installOpcodes (interpreter);
                 std::vector<Interpreter::Type_Code> code;
                 output.getCode (code);
-                interpreter.run (&code[0], code.size());  
+                interpreter.run (&code[0], code.size());
             }
             catch (const std::exception& error)
             {
@@ -216,4 +204,3 @@ namespace MWGui
         command->setCaption("");
     }
 }
-

@@ -21,6 +21,12 @@ namespace MWClass
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation
 
+            virtual void lock (const MWWorld::Ptr& ptr, int lockLevel) const;
+            ///< Lock object
+
+            virtual void unlock (const MWWorld::Ptr& ptr) const;
+            ///< Unlock object
+
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 

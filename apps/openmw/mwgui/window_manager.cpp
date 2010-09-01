@@ -4,6 +4,8 @@
 #include "console.hpp"
 
 #include <assert.h>
+#include <iostream>
+#include <iterator>
 
 using namespace MWGui;
 
@@ -94,4 +96,16 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicS
 {
     stats->setValue (id, value);
     hud->setValue (id, value);
+}
+
+void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
+{
+    std::cout << "message box: " << message << std::endl;
+
+    if (!buttons.empty())
+    {
+        std::cout << "buttons: ";
+        std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
+        std::cout << std::endl;
+    }
 }

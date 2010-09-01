@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <algorithm>
 
 #include "opcodes.hpp"
 #include "runtime.hpp"
@@ -15,24 +16,33 @@ namespace Interpreter
     class OpMessageBox : public Opcode1
     {
         public:
-        
+
             virtual void execute (Runtime& runtime, unsigned int arg0)
             {
-                if (arg0!=0)
-                    throw std::logic_error ("message box buttons not implemented yet");
-                
-                // message    
+                // message
                 int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string message = runtime.getStringLiteral (index);
-                
+
+                // buttons
+                std::vector<std::string> buttons;
+
+                for (std::size_t i=0; i<arg0; ++i)
+                {
+                    int index = runtime[0].mInteger;
+                    runtime.pop();
+                    buttons.push_back (runtime.getStringLiteral (index));
+                }
+
+                std::reverse (buttons.begin(), buttons.end());
+
                 // additional parameters
                 std::string formattedMessage;
-                
+
                 for (std::size_t i=0; i<message.size(); ++i)
                 {
                     char c = message[i];
-                    
+
                     if (c!='%')
                         formattedMessage += c;
                     else
@@ -41,7 +51,7 @@ namespace Interpreter
                         if (i<message.size())
                         {
                             c = message[i];
-                            
+
                             if (c=='S' || c=='s')
                             {
                                 int index = runtime[0].mInteger;
@@ -52,7 +62,7 @@ namespace Interpreter
                             {
                                 Type_Integer value = runtime[0].mInteger;
                                 runtime.pop();
-                                
+
                                 std::ostringstream out;
                                 out << value;
                                 formattedMessage += out.str();
@@ -63,10 +73,10 @@ namespace Interpreter
                                 {
                                     ++i;
                                 }
-                            
+
                                 float value = runtime[0].mFloat;
                                 runtime.pop();
-                                
+
                                 std::ostringstream out;
                                 out << value;
                                 formattedMessage += out.str();
@@ -75,135 +85,131 @@ namespace Interpreter
                                 formattedMessage += "%";
                             else
                             {
-                                formattedMessage += "%"; 
-                                formattedMessage += c;                    
+                                formattedMessage += "%";
+                                formattedMessage += c;
                             }
                         }
                     }
                 }
-                
-                // buttons (not implemented)
-                std::vector<std::string> buttons;
-                
+
                 runtime.getContext().messageBox (formattedMessage, buttons);
-            }     
-    };   
-            
+            }
+    };
+
     class OpMenuMode : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 runtime.push (runtime.getContext().menuMode());
-            }            
+            }
     };
-            
+
     class OpRandom : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 double r = static_cast<double> (std::rand()) / RAND_MAX; // [0, 1)
-                
+
                 Type_Integer limit = runtime[0].mInteger;
-                
+
                 if (limit<0)
                     throw std::runtime_error (
                         "random: argument out of range (Don't be so negative!)");
-                
+
                 Type_Integer value = static_cast<Type_Integer> (r*limit); // [o, limit)
-                
+
                 runtime[0].mInteger = value;
-            }    
-    };    
-                
+            }
+    };
+
     class OpGetSecondsPassed : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 Type_Float duration = runtime.getContext().getSecondsPassed();
-                
+
                 runtime.push (duration);
-            }            
+            }
     };
-    
+
     class OpEnable : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 runtime.getContext().enable();
-            }            
-    };    
-    
+            }
+    };
+
     class OpDisable : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 runtime.getContext().disable();
-            }            
-    };    
-    
+            }
+    };
+
     class OpGetDisabled : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 runtime.push (runtime.getContext().isDisabled());
-            }            
-    };       
-    
+            }
+    };
+
     class OpEnableExplicit : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string id = runtime.getStringLiteral (index);
-            
+
                 runtime.getContext().enable (id);
-            }            
-    };    
-    
+            }
+    };
+
     class OpDisableExplicit : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string id = runtime.getStringLiteral (index);
-            
+
                 runtime.getContext().disable (id);
-            }            
-    };    
-    
+            }
+    };
+
     class OpGetDisabledExplicit : public Opcode0
     {
         public:
-        
+
             virtual void execute (Runtime& runtime)
             {
                 int index = runtime[0].mInteger;
                 runtime.pop();
                 std::string id = runtime.getStringLiteral (index);
-            
+
                 runtime.push (runtime.getContext().isDisabled (id));
-            }            
-    };       
-   
+            }
+    };
+
 }
 
 #endif
-
