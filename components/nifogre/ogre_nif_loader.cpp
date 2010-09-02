@@ -767,14 +767,20 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
         if (!skel.isNull())     //if there is a skeleton
         {
-            bone = skel->createBone(node->name.toString());
+            std::string name = node->name.toString();
+            // Quick-n-dirty workaround for the fact that several
+            // bones may have the same name.
+            if(!skel->hasBone(name))
+            {
+                bone = skel->createBone(name);
 
-            if (parentBone)
-                parentBone->addChild(bone);
+                if (parentBone)
+                  parentBone->addChild(bone);
 
-            bone->setInheritOrientation(true);
-            bone->setPosition(convertVector3(node->trafo->pos));
-            bone->setOrientation(convertRotation(node->trafo->rotation));
+                bone->setInheritOrientation(true);
+                bone->setPosition(convertVector3(node->trafo->pos));
+                bone->setOrientation(convertRotation(node->trafo->rotation));
+            }
         }
     }
 
