@@ -3,6 +3,7 @@
 
 #include "std_stream.hpp"
 #include <fstream>
+#include <stdexcept>
 
 namespace Mangle {
 namespace Stream {
@@ -20,7 +21,7 @@ class FileStream : public StdStream
       file.open(name.c_str(), std::ios::binary);
 
       if(file.fail())
-        throw str_exception("FileStream: failed to open file " + name);
+        throw std::runtime_error("FileStream: failed to open file " + name);
     }
   ~FileStream() { file.close(); }
 };

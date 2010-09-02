@@ -1,6 +1,6 @@
 #include "mpg123_source.hpp"
 
-#include "../../tools/str_exception.hpp"
+#include <stdexcept>
 
 #include <mpg123.h>
 
@@ -28,7 +28,7 @@ using namespace Mangle::Stream;
  */
 
 static void fail(const std::string &msg)
-{ throw str_exception("Mangle::Mpg123 exception: " + msg); }
+{ throw std::runtime_error("Mangle::Mpg123 exception: " + msg); }
 
 static void checkError(int err, void *mh = NULL)
 {

@@ -1,6 +1,6 @@
 #include "ffmpeg_source.hpp"
 
-#include "../../tools/str_exception.hpp"
+#include <stdexcept>
 
 using namespace Mangle::Sound;
 
@@ -9,7 +9,7 @@ using namespace Mangle::Sound;
 static uint8_t outBuf[AVCODEC_MAX_AUDIO_FRAME_SIZE];
 
 static void fail(const std::string &msg)
-{ throw str_exception("FFMpeg exception: " + msg); }
+{ throw std::runtime_error("FFMpeg exception: " + msg); }
 
 // --- Loader ---
 

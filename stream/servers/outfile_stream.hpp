@@ -30,7 +30,7 @@ class OutFileStream : public StdOStream
       file.open(name.c_str(), mode);
 
       if(file.fail())
-        throw str_exception("OutFileStream: failed to open file " + name);
+        throw std::runtime_error("OutFileStream: failed to open file " + name);
     }
   ~OutFileStream() { file.close(); }
 };

@@ -3,7 +3,7 @@
 
 #include "../stream.hpp"
 #include <iostream>
-#include "../../tools/str_exception.hpp"
+#include <stdexcept>
 
 namespace Mangle {
 namespace Stream {
@@ -15,7 +15,7 @@ class StdStream : public Stream
   std::istream *inf;
 
   static void fail(const std::string &msg)
-    { throw str_exception("StdStream: " + msg); }
+  { throw std::runtime_error("StdStream: " + msg); }
 
  public:
  StdStream(std::istream *_inf)

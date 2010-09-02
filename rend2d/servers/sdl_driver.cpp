@@ -2,7 +2,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
-#include "../../tools/str_exception.hpp"
+#include <stdexcept>
 #include <assert.h>
 
 using namespace Mangle::Rend2D;
@@ -70,7 +70,7 @@ int SDL_Sprite::height() { return surface->h; }
 SDLDriver::SDLDriver() : display(NULL), realDisp(NULL), softDouble(false)
 {
   if (SDL_InitSubSystem( SDL_INIT_VIDEO ) == -1)
-    throw str_exception("Error initializing SDL video");
+    throw std::runtime_error("Error initializing SDL video");
 }
 SDLDriver::~SDLDriver()
 {
@@ -94,7 +94,7 @@ void SDLDriver::setVideoMode(int width, int height, int bpp, bool fullscreen)
   // Create the surface and check it
   realDisp = SDL_SetVideoMode(width, height, bpp, flags);
   if(realDisp == NULL)
-    throw str_exception("Failed setting SDL video mode");
+    throw std::runtime_error("Failed setting SDL video mode");
 
   // Code for software double buffering. I haven't found this to be
   // any speed advantage at all in windowed mode (it's slower, as one
@@ -160,7 +160,7 @@ Sprite* SDLDriver::loadImage(const std::string &file)
   SDL_Surface *surf = IMG_Load(file.c_str());
   surf = convertImage(surf);
   if(surf == NULL)
-    throw str_exception("SDL failed to load image file '" + file + "'");
+    throw std::runtime_error("SDL failed to load image file '" + file + "'");
   return spriteFromSDL(surf);
 }
 
@@ -171,7 +171,7 @@ Sprite* SDLDriver::loadImage(SDL_RWops *src, bool autoFree)
   SDL_Surface *surf = IMG_Load_RW(src, autoFree);
   surf = convertImage(surf);
   if(surf == NULL)
-    throw str_exception("SDL failed to load image");
+    throw std::runtime_error("SDL failed to load image");
   return spriteFromSDL(surf);
 }
 

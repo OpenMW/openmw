@@ -1,13 +1,14 @@
 #include "wav_source.hpp"
 
-#include "../../tools/str_exception.hpp"
 #include "../../stream/servers/file_stream.hpp"
+
+#include <stdexcept>
 
 using namespace Mangle::Stream;
 using namespace Mangle::Sound;
 
 static void fail(const std::string &msg)
-{ throw str_exception("Mangle::Wav exception: " + msg); }
+{ throw std::runtime_error("Mangle::Wav exception: " + msg); }
 
 void WavSource::getInfo(int32_t *pRate, int32_t *pChannels, int32_t *pBits)
 {

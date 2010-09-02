@@ -1,8 +1,8 @@
 #include "openal_out.hpp"
 #include <assert.h>
+#include <stdexcept>
 
 #include "../../stream/filters/buffer_stream.hpp"
-#include "../../tools/str_exception.hpp"
 
 #include "al.h"
 #include "alc.h"
@@ -26,7 +26,7 @@ static char tmp_buffer[BSIZE];
 const int STREAM_BUF_NUM = 4;
 
 static void fail(const std::string &msg)
-{ throw str_exception("OpenAL exception: " + msg); }
+{ throw std::runtime_error("OpenAL exception: " + msg); }
 
 /*
   Check for AL error. Since we're always calling this with string

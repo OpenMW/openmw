@@ -2,7 +2,7 @@
 #define MANGLE_SOUND_SOURCE_SPLICE_H
 
 #include "../source.hpp"
-#include "../../tools/str_exception.hpp"
+#include <stdexcept>
 #include <string>
 #include <list>
 #include <assert.h>
@@ -79,7 +79,7 @@ namespace Mangle
         if(catchAll)
           return catchAll->load(file);
 
-        throw str_exception("No handler for sound file " + file);
+        throw std::runtime_error("No handler for sound file " + file);
       }
 
       SampleSourcePtr load(Stream::StreamPtr input) { assert(0); }

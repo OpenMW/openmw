@@ -1,12 +1,12 @@
 #include "libsndfile.hpp"
 
-#include "../../tools/str_exception.hpp"
+#include <stdexcept>
 #include <sndfile.h>
 
 using namespace Mangle::Stream;
 
 static void fail(const std::string &msg)
-{ throw str_exception("Mangle::libsndfile: " + msg); }
+{ throw std::runtime_error("Mangle::libsndfile: " + msg); }
 
 using namespace Mangle::Sound;
 

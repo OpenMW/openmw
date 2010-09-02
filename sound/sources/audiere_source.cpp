@@ -1,12 +1,13 @@
 #include "audiere_source.hpp"
 
 #include "../../stream/clients/audiere_file.hpp"
-#include "../../tools/str_exception.hpp"
+
+#include <stdexcept>
 
 using namespace Mangle::Stream;
 
 static void fail(const std::string &msg)
-{ throw str_exception("Audiere exception: " + msg); }
+{ throw std::runtime_error("Audiere exception: " + msg); }
 
 using namespace audiere;
 using namespace Mangle::Sound;
