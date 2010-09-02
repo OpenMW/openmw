@@ -7,10 +7,10 @@
 #include <vector>
 #include <sstream>
 #include <string.h>
+#include <stdexcept>
 
 #include <libs/mangle/stream/stream.hpp>
 #include <libs/mangle/stream/servers/file_stream.hpp>
-#include <libs/mangle/tools/str_exception.hpp>
 #include <components/misc/stringops.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
@@ -626,7 +626,7 @@ public:
       ss << "\n  Subrecord: " << c.subName.toString();
       if(esm != NULL)
         ss << "\n  Offset: 0x" << hex << esm->tell();
-      throw str_exception(ss.str());
+      throw std::runtime_error(ss.str());
     }
 
 private:

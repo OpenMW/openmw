@@ -27,6 +27,8 @@
 // A simple array implementation containing a pointer and a
 // length. Used for holding slices into a data buffer.
 #include <string.h>
+#include <string>
+
 template <class T>
 struct SliceArray
 {
