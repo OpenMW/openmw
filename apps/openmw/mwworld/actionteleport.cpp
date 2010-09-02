@@ -11,7 +11,7 @@ namespace MWWorld
     : mCellName (cellName), mPosition (position)
     {}
 
-    void ActionTeleportPlayer::ActionTeleportPlayer::execute (Environment& environment)
+    void ActionTeleportPlayer::execute (Environment& environment)
     {
         environment.mWorld->changeCell (mCellName, mPosition);
     }

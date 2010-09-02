@@ -15,8 +15,8 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
 {
   // Get size info from the Gui object
   assert(gui);
-  int w = gui->getViewWidth();
-  int h = gui->getViewHeight();
+  int w = gui->getViewSize().width;
+  int h = gui->getViewSize().height;
 
   hud = new HUD(w,h);
   menu = new MainMenu(w,h);
