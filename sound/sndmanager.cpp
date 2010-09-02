@@ -35,7 +35,6 @@ private:
       where we poll to check if a resource is still needed, but where
       manual references are allowed.
   */
-  typedef boost::weak_ptr<Mangle::Sound::Sound> WSoundPtr;
   WSoundPtr weak;
   SoundPtr self;
 

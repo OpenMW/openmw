@@ -11,8 +11,8 @@ EventInjector::EventInjector(MyGUI::Gui *g)
   : gui(g), mouseX(0), mouseY(0), enabled(true)
 {
   assert(gui);
-  maxX = gui->getViewWidth();
-  maxY = gui->getViewHeight();
+  maxX = gui->getViewSize().width;
+  maxY = gui->getViewSize().height;
 }
 
 template <typename X>
