@@ -25,11 +25,7 @@ class StdOStream : public Stream
     hasPosition = true;
     hasSize = true;
     isWritable = true;
-  }
-
-  size_t read(void*,size_t)
-  {
-    assert(0&&"reading not supported by StdOStream");
+    isReadable = false;
   }
 
   size_t write(const void* buf, size_t len)
