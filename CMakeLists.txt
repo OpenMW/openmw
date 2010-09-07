@@ -247,7 +247,7 @@ endif (APPLE)
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions (-Wall)
+    add_definitions (-Wall -Werror)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 # Apple bundling

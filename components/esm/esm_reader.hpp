@@ -3,10 +3,10 @@
 
 #include <string>
 #include <libs/platform/stdint.h>
+#include <libs/platform/string.h>
 #include <assert.h>
 #include <vector>
 #include <sstream>
-#include <string.h>
 #include <stdexcept>
 
 #include <libs/mangle/stream/stream.hpp>
@@ -14,16 +14,6 @@
 #include <components/misc/stringops.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
-
-#ifdef __APPLE__
-// need our own implementation of strnlen
-static size_t strnlen(const char *s, size_t n)
-{
-  const char *p = (const char *)memchr(s, 0, n);
-  return(p ? p-s : n);
-}
-
-#endif
 
 namespace ESM {
 
