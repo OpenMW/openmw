@@ -46,7 +46,7 @@ public:
 
 void test2()
 {
-  cout << "Testing binary reading from non-memory:\n";
+  cout << "\nTesting binary reading from non-memory:\n";
 
   StreamPtr input(new Dummy);
   MangleIStream inp(input);
@@ -95,7 +95,7 @@ struct Dummy2 : Stream
 
 void test3()
 {
-  cout << "Writing to dummy stream:\n";
+  cout << "\nWriting to dummy stream:\n";
 
   cout << "  Pure dummy test:\n";
   StreamPtr output(new Dummy2);
@@ -123,10 +123,54 @@ void test3()
   out << "blah bleh blob";
 }
 
+struct Dummy3 : Stream
+{
+  int pos;
+
+  Dummy3() : pos(0)
+  {
+    hasPosition = true;
+    isSeekable = true;
+  }
+
+  size_t read(void*, size_t num)
+  {
+    cout << "    Reading " << num << " bytes from " << pos << endl;
+    pos += num;
+    return num;
+  }
+
+  void seek(size_t npos) { pos = npos; }
+  size_t tell() const { return pos; }
+};
+
+void test4()
+{
+  cout << "\nTesting seeking;\n";
+  StreamPtr input(new Dummy3);
+
+  cout << "  Direct reading:\n";
+  input->read(0,10);
+  input->read(0,5);
+
+  MangleIStream inp(input);
+
+  cout << "  Reading from istream:\n";
+  char buf[20];
+  inp.read(buf, 20);
+  inp.read(buf, 20);
+  inp.read(buf, 20);
+
+  cout << "  Seeking to 30 and reading again:\n";
+  inp.seekg(30);
+  inp.read(buf, 20);
+}
+
 int main()
 {
   test1();
   test2();
   test3();
+  test4();
   return 0;
 }

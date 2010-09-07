@@ -3,8 +3,10 @@ Got: hello
 Got: you
 Got: world
 Got: you
+
 Testing binary reading from non-memory:
   Done
+
 Writing to dummy stream:
   Pure dummy test:
     Got: t e s t i n g 
@@ -19,3 +21,12 @@ Writing to dummy stream:
     Got: z 
   Writing some more and exiting:
     Got: b l a h   b l e h   b l o b 
+
+Testing seeking;
+  Direct reading:
+    Reading 10 bytes from 0
+    Reading 5 bytes from 10
+  Reading from istream:
+    Reading 1024 bytes from 15
+  Seeking to 30 and reading again:
+    Reading 1024 bytes from 30
