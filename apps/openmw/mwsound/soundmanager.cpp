@@ -104,7 +104,7 @@ namespace MWSound
       root->addFrameListener(&updater);
     }
 
-    SoundImpl::~SoundImpl()
+    ~SoundImpl()
     {
         Ogre::Root::getSingleton().removeFrameListener(&updater);
         cameraTracker.unfollowCamera();
