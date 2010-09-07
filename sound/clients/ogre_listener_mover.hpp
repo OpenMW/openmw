@@ -9,7 +9,7 @@ namespace Mangle {
 namespace Sound {
 
   /** This class lets a sound listener (ie. the SoundFactory) track a
-      given camera in Ogre3D. The poisition and orientation of the
+      given camera in Ogre3D. The position and orientation of the
       listener will be updated to match the camera whenever the camera
       is moved.
    */
@@ -25,6 +25,16 @@ namespace Sound {
     {
       camera = cam;
       camera->addListener(this);
+    }
+
+    void unfollowCamera()
+    {
+        // If the camera is null, this object wasn't following a camera.
+        // It doesn't make sense to call unfollow
+        assert(camera != NULL);
+
+        camera->removeListener(this);
+        camera = NULL;
     }
 
   private:
