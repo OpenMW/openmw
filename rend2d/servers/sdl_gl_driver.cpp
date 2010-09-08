@@ -207,35 +207,25 @@ void SDLGLDriver::updateNoSwap()
 
   glBegin( GL_QUADS );
 
+  // Needed to move the screen into the right place
+  int diff = screen->h - realDisp->h;
+
   // Bottom-left vertex (corner)
-  glTexCoord2i( 0, 0 );
-  glVertex3f(0,0,0);
+  glTexCoord2i( 0, 1 );
+  glVertex3f(0,diff,0);
 	
   // Bottom-right vertex (corner)
-  glTexCoord2i( 1, 0 );
-  glVertex3f( realDisp->w, 0, 0.f );
+  glTexCoord2i( 1, 1 );
+  glVertex3f( realDisp->w, diff, 0.f );
 	
   // Top-right vertex (corner)
-  glTexCoord2i( 1, 1 );
-  glVertex3f( realDisp->w, realDisp->h, 0.f );
+  glTexCoord2i( 1, 0 );
+  glVertex3f( realDisp->w, screen->h, 0.f );
 	
   // Top-left vertex (corner)
-  glTexCoord2i( 0, 1 );
-  glVertex3f( 0, realDisp->h, 0.f );
+  glTexCoord2i( 0, 0 );
+  glVertex3f( 0, screen->h, 0.f );
   glEnd();
-
-  /*
-  glBegin(GL_TRIANGLES);
-    glColor3ub(255, 0, 0);
-    glVertex2d(0, 0);
-
-    glColor3ub(0, 255, 0);
-    glVertex2d(100,0);
-
-    glColor3ub(0, 0, 255);
-    glVertex2d(50, 50);
-  glEnd();
-  */
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();   
