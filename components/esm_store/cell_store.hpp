@@ -128,7 +128,7 @@ namespace ESMS
         cell = store.cells.searchExt (X, Y);
 
         if(cell == NULL)
-            throw str_exception("Exterior cell not found");
+            throw std::runtime_error("Exterior cell not found");
 
         loadRefs(store, esm);
     }
