@@ -13,9 +13,9 @@ namespace Compiler
 {
     class Locals;
     class Literals;
-    
+
     // Control structure parser
-    
+
     class ControlParser : public Parser
     {
             enum State
@@ -28,30 +28,35 @@ namespace Compiler
                 WhileEndState, WhileBodyState,
                 WhileEndwhileState
             };
-            
+
             typedef std::vector<Interpreter::Type_Code> Codes;
             typedef std::vector<std::pair<Codes, Codes> > IfCodes;
-            
-            Locals& mLocals;  
-            Literals& mLiterals;    
+
+            Locals& mLocals;
+            Literals& mLiterals;
             Codes mCode;
             Codes mCodeBlock;
             IfCodes mIfCode; // condition, body
             LineParser mLineParser;
             ExprParser mExprParser;
             State mState;
-                
+
             bool parseIfBody (int keyword, const TokenLoc& loc, Scanner& scanner);
 
             bool parseWhileBody (int keyword, const TokenLoc& loc, Scanner& scanner);
-                
+
         public:
-        
+
             ControlParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
                 Literals& literals);
 
             void appendCode (std::vector<Interpreter::Type_Code>& code) const;
             ///< store generated code in \æ code.
+
+            virtual bool parseName (const std::string& name, const TokenLoc& loc,
+                Scanner& scanner);
+            ///< Handle a name token.
+            /// \return fetch another token?
 
             virtual bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner);
             ///< Handle a keyword token.
@@ -67,4 +72,3 @@ namespace Compiler
 }
 
 #endif
-

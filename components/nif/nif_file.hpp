@@ -26,9 +26,9 @@
 
 #include <libs/mangle/stream/stream.hpp>
 #include <libs/mangle/stream/filters/buffer_stream.hpp>
-#include <libs/mangle/tools/str_exception.hpp>
 #include <components/misc/slice_array.hpp>
 
+#include <stdexcept>
 #include <vector>
 #include <string>
 #include <assert.h>
@@ -69,7 +69,7 @@ class NIFFile
     {
       std::string err = "NIFFile Error: " + msg;
       err += "\nFile: " + filename;
-      throw str_exception(err);
+      throw std::runtime_error(err);
     }
 
   /// Open a NIF stream. The name is used for error messages.

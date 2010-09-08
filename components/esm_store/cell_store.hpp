@@ -13,11 +13,10 @@
 #include "store.hpp"
 #include "components/esm/records.hpp"
 #include "components/esm/loadcell.hpp"
-#include <libs/mangle/tools/str_exception.hpp>
 #include <list>
 
 #include <iostream>
-#include "libs/mangle/tools/str_exception.hpp"
+#include <stdexcept>
 
 namespace ESMS
 {
@@ -55,7 +54,7 @@ namespace ESMS
     {
       const X* obj = recList.find(ref.refID);
       if(obj == NULL)
-        throw str_exception("Error resolving cell reference " + ref.refID);
+        throw std::runtime_error("Error resolving cell reference " + ref.refID);
 
       LiveRef lr;
       lr.ref = ref;
@@ -116,7 +115,7 @@ namespace ESMS
         cell = store.cells.findInt(name);
 
         if(cell == NULL)
-            throw str_exception("Cell not found - " + name);
+            throw std::runtime_error("Cell not found - " + name);
 
         loadRefs(store, esm);
     }

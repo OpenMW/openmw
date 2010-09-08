@@ -14,32 +14,32 @@ namespace Compiler
     void LineParser::parseExpression (Scanner& scanner, const TokenLoc& loc)
     {
         mExprParser.reset();
-        
+
         if (!mExplicit.empty())
         {
             mExprParser.parseName (mExplicit, loc, scanner);
             mExprParser.parseSpecial (Scanner::S_ref, loc, scanner);
         }
-        
+
         scanner.scan (mExprParser);
-        
+
         char type = mExprParser.append (mCode);
-        mState = EndState; 
-        
+        mState = EndState;
+
         switch (type)
         {
             case 'l':
-            
-                Generator::message (mCode, mLiterals, "%g", 0);       
+
+                Generator::message (mCode, mLiterals, "%g", 0);
                 break;
-                
+
             case 'f':
-            
-                Generator::message (mCode, mLiterals, "%f", 0);                   
+
+                Generator::message (mCode, mLiterals, "%f", 0);
                 break;
-                
+
             default:
-                
+
                 throw std::runtime_error ("unknown expression result type");
         }
     }
@@ -52,14 +52,14 @@ namespace Compiler
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
-    {   
+    {
         if (mAllowExpression && mState==BeginState)
         {
             scanner.putbackInt (value, loc);
             parseExpression (scanner, loc);
             return true;
         }
-    
+
         return Parser::parseInt (value, loc, scanner);
     }
 
@@ -71,7 +71,7 @@ namespace Compiler
             parseExpression (scanner, loc);
             return true;
         }
-            
+
         return Parser::parseFloat (value, loc, scanner);
     }
 
@@ -87,11 +87,11 @@ namespace Compiler
                 scanner.scan (skip);
                 return false;
             }
-         
+
             std::string name2 = toLower (name);
-            
+
             char type = mLocals.getType (name2);
-            
+
             if (type!=' ')
             {
                 getErrorHandler().error ("can't re-declare local variable", loc);
@@ -99,14 +99,14 @@ namespace Compiler
                 scanner.scan (skip);
                 return false;
             }
-            
+
             mLocals.declare (mState==ShortState ? 's' : (mState==LongState ? 'l' : 'f'),
                 name2);
-            
+
             mState = EndState;
             return true;
         }
-        
+
         if (mState==SetState)
         {
             std::string name2 = toLower (name);
@@ -119,7 +119,7 @@ namespace Compiler
                 mState = SetLocalVarState;
                 return true;
             }
-            
+
             type = getContext().getGlobalType (name2);
             if (type!=' ')
             {
@@ -127,18 +127,18 @@ namespace Compiler
                 mType = type;
                 mState = SetGlobalVarState;
                 return true;
-            }                        
-            
+            }
+
             getErrorHandler().error ("unknown variable", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
-            return false;            
+            return false;
         }
-        
+
         if (mState==MessageState || mState==MessageCommaState)
         {
             std::string arguments;
-            
+
             for (std::size_t i=0; i<name.size(); ++i)
             {
                 if (name[i]=='%')
@@ -167,46 +167,52 @@ namespace Compiler
                 mExprParser.reset();
                 mExprParser.parseArguments (arguments, scanner, mCode, true);
             }
-            
-            // for now skip buttons
-           SkipParser skip (getErrorHandler(), getContext());
-           scanner.scan (skip);            
 
-            Generator::message (mCode, mLiterals, name, 0);
-            mState = EndState;
-            return false;
+            mName = name;
+            mButtons = 0;
+
+            mState = MessageButtonState;
+            return true;
         }
-        
-        if (mState==BeginState && mAllowExpression)
+
+        if (mState==MessageButtonState || mState==MessageButtonCommaState)
         {
-            std::string name2 = toLower (name);
-            
-            char type = mLocals.getType (name2);
-            
-            if (type!=' ')
-            {
-                scanner.putbackName (name, loc);
-                parseExpression (scanner, loc);
-                return true;               
-            }
-
-            type = getContext().getGlobalType (name2);
-            
-            if (type!=' ')
-            {
-                scanner.putbackName (name, loc);
-                parseExpression (scanner, loc);
-                return true;            
-            }        
+            Generator::pushString (mCode, mLiterals, name);
+            mState = MessageButtonState;
+            ++mButtons;
+            return true;
         }
-        
+
         if (mState==BeginState && getContext().isId (name))
         {
             mState = PotentialExplicitState;
             mExplicit = toLower (name);
             return true;
         }
-        
+
+        if (mState==BeginState && mAllowExpression)
+        {
+            std::string name2 = toLower (name);
+
+            char type = mLocals.getType (name2);
+
+            if (type!=' ')
+            {
+                scanner.putbackName (name, loc);
+                parseExpression (scanner, loc);
+                return true;
+            }
+
+            type = getContext().getGlobalType (name2);
+
+            if (type!=' ')
+            {
+                scanner.putbackName (name, loc);
+                parseExpression (scanner, loc);
+                return true;
+            }
+        }
+
         return Parser::parseName (name, loc, scanner);
     }
 
@@ -215,60 +221,60 @@ namespace Compiler
         if (mState==BeginState || mState==ExplicitState)
         {
             switch (keyword)
-            {        
+            {
                 case Scanner::K_enable:
-                
+
                     Generator::enable (mCode, mLiterals, mExplicit);
                     mState = EndState;
-                    return true;                           
-                    
+                    return true;
+
                 case Scanner::K_disable:
-                
+
                     Generator::disable (mCode, mLiterals, mExplicit);
                     mState = EndState;
-                    return true;          
+                    return true;
             }
-            
+
             // check for custom extensions
             if (const Extensions *extensions = getContext().getExtensions())
             {
                 std::string argumentType;
-                
+
                 if (extensions->isInstruction (keyword, argumentType, mState==ExplicitState))
                 {
-                    mExprParser.parseArguments (argumentType, scanner, mCode, true);
-                    
-                    extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit);
+                    int optionals = mExprParser.parseArguments (argumentType, scanner, mCode, true);
+
+                    extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit, optionals);
                     mState = EndState;
                     return true;
                 }
-            }            
-            
+            }
+
             if (mAllowExpression)
             {
                 if (keyword==Scanner::K_getdisabled || keyword==Scanner::K_getdistance)
                 {
                     scanner.putbackKeyword (keyword, loc);
                     parseExpression (scanner, loc);
-                    return true;                 
+                    return true;
                 }
 
                 if (const Extensions *extensions = getContext().getExtensions())
                 {
                     char returnType;
                     std::string argumentType;
-                    
+
                     if (extensions->isFunction (keyword, returnType, argumentType,
                         !mExplicit.empty()))
                     {
                         scanner.putbackKeyword (keyword, loc);
                         parseExpression (scanner, loc);
-                        return true;                
+                        return true;
                     }
-                }            
+                }
             }
         }
-        
+
         if (mState==BeginState)
         {
             switch (keyword)
@@ -278,39 +284,39 @@ namespace Compiler
                 case Scanner::K_float: mState = FloatState; return true;
                 case Scanner::K_set: mState = SetState; return true;
                 case Scanner::K_messagebox: mState = MessageState; return true;
-                
+
                 case Scanner::K_return:
-                
+
                     Generator::exit (mCode);
                     mState = EndState;
                     return true;
-                    
+
                 case Scanner::K_startscript:
 
-                    mExprParser.parseArguments ("c", scanner, mCode, true);                   
+                    mExprParser.parseArguments ("c", scanner, mCode, true);
                     Generator::startScript (mCode);
                     mState = EndState;
-                    return true;                
-                    
+                    return true;
+
                 case Scanner::K_stopscript:
 
-                    mExprParser.parseArguments ("c", scanner, mCode, true);                   
+                    mExprParser.parseArguments ("c", scanner, mCode, true);
                     Generator::stopScript (mCode);
                     mState = EndState;
-                    return true;     
+                    return true;
             }
         }
         else if (mState==SetLocalVarState && keyword==Scanner::K_to)
         {
             mExprParser.reset();
             scanner.scan (mExprParser);
-            
+
             std::vector<Interpreter::Type_Code> code;
             char type = mExprParser.append (code);
-            
+
             Generator::assignToLocal (mCode, mLocals.getType (mName),
                 mLocals.getIndex (mName), code, type);
-                        
+
             mState = EndState;
             return true;
         }
@@ -318,16 +324,16 @@ namespace Compiler
         {
             mExprParser.reset();
             scanner.scan (mExprParser);
-            
+
             std::vector<Interpreter::Type_Code> code;
             char type = mExprParser.append (code);
-            
+
             Generator::assignToGlobal (mCode, mLiterals, mType, mName, code, type);
-                        
+
             mState = EndState;
             return true;
         }
-        
+
         if (mAllowExpression)
         {
             if (keyword==Scanner::K_getsquareroot || keyword==Scanner::K_menumode ||
@@ -336,10 +342,10 @@ namespace Compiler
             {
                 scanner.putbackKeyword (keyword, loc);
                 parseExpression (scanner, loc);
-                return true;                 
-            }        
+                return true;
+            }
         }
-                
+
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
@@ -347,30 +353,42 @@ namespace Compiler
     {
         if (code==Scanner::S_newline && (mState==EndState || mState==BeginState))
             return false;
-            
+
         if (code==Scanner::S_comma && mState==MessageState)
         {
             mState = MessageCommaState;
             return true;
         }
-        
+
         if (code==Scanner::S_ref && mState==PotentialExplicitState)
         {
             mState = ExplicitState;
             return true;
         }
-        
+
+        if (code==Scanner::S_newline && mState==MessageButtonState)
+        {
+            Generator::message (mCode, mLiterals, mName, mButtons);
+            return false;
+        }
+
+        if (code==Scanner::S_comma && mState==MessageButtonState)
+        {
+            mState = MessageButtonCommaState;
+            return true;
+        }
+
         if (mAllowExpression && mState==BeginState &&
             (code==Scanner::S_open || code==Scanner::S_minus))
         {
             scanner.putbackSpecial (code, loc);
             parseExpression (scanner, loc);
-            return true;        
+            return true;
         }
-            
+
         return Parser::parseSpecial (code, loc, scanner);
     }
-    
+
     void LineParser::reset()
     {
         mState = BeginState;
@@ -378,4 +396,3 @@ namespace Compiler
         mExplicit.clear();
     }
 }
-

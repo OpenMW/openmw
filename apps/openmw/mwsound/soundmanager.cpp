@@ -104,6 +104,12 @@ namespace MWSound
       root->addFrameListener(&updater);
     }
 
+    ~SoundImpl()
+    {
+        Ogre::Root::getSingleton().removeFrameListener(&updater);
+        cameraTracker.unfollowCamera();
+    }
+
     std::string toMp3(const std::string &str)
     {
       std::string wav = str;
@@ -147,10 +153,10 @@ namespace MWSound
       const ESM::Sound *snd = store.sounds.search(soundId);
       if(snd == NULL) return "";
 
-      volume *= snd->data.volume / 255.0;
+      volume *= snd->data.volume / 255.0f;
       // These factors are not very fine tuned.
-      min = snd->data.minRange * 7;
-      max = snd->data.maxRange * 2000;
+      min = snd->data.minRange * 7.0f;
+      max = snd->data.maxRange * 2000.0f;
       return convertPath(snd->sound);
     }
 

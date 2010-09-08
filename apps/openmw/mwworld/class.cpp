@@ -77,6 +77,16 @@ namespace MWWorld
         throw std::runtime_error ("class does not support inserting into a container");
     }
 
+    void Class::lock (const Ptr& ptr, int lockLevel) const
+    {
+        throw std::runtime_error ("class does not support locking");
+    }
+
+    void Class::unlock (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support unlocking");
+    }
+
     std::string Class::getScript (const Ptr& ptr) const
     {
         return "";

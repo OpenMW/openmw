@@ -15,6 +15,8 @@
 
 #include "../mwrender/cellimp.hpp"
 
+#include <iostream>
+
 namespace MWClass
 {
     void Door::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
@@ -50,6 +52,16 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
             ptr.get<ESM::Door>();
 
+        if (ptr.getCellRef().lockLevel>0)
+        {
+            // TODO check for key
+            // TODO report failure to player (message, sound?). Look up behaviour of original MW.
+            std::cout << "Locked!" << std::endl;
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+        }
+
+        // TODO check trap
+
         if (ref->ref.teleport)
         {
             // teleport door
@@ -72,6 +84,19 @@ namespace MWClass
             // TODO return action for rotating the door
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
+    }
+
+    void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
+    {
+        if (lockLevel<0)
+            lockLevel = 0;
+
+        ptr.getCellRef().lockLevel = lockLevel;
+    }
+
+    void Door::unlock (const MWWorld::Ptr& ptr) const
+    {
+        ptr.getCellRef().lockLevel = 0;
     }
 
     std::string Door::getScript (const MWWorld::Ptr& ptr) const

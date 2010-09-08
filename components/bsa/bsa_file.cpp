@@ -25,8 +25,8 @@
 
 #include <libs/mangle/stream/servers/file_stream.hpp>
 #include <libs/mangle/stream/filters/slice_stream.hpp>
-#include <libs/mangle/tools/str_exception.hpp>
 
+#include <stdexcept>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -36,7 +36,7 @@ using namespace Mangle::Stream;
 /// Error handling
 void BSAFile::fail(const string &msg)
 {
-  throw str_exception("BSA Error: " + msg + "\nArchive: " + filename);
+  throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + filename);
 }
 
 /// Read header information from the input source
