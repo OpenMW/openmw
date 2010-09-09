@@ -17,7 +17,10 @@ using namespace Mangle::Sound;
 void AudiereSource::getInfo(int32_t *rate, int32_t *channels, int32_t *bits)
 {
   SampleFormat fmt;
-  sample->getFormat(*channels, *rate, fmt);
+  int channels_, rate_;
+  sample->getFormat(channels_, rate_, fmt);
+  *channels = channels_;
+  *rate = rate_;
   if(bits)
     {
       if(fmt == SF_U8)

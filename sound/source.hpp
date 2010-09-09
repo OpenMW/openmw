@@ -2,13 +2,15 @@
 #define MANGLE_SOUND_SOURCE_H
 
 #include <string>
-#include <stdint.h>
+#include <boost/cstdint.hpp>
 #include <assert.h>
 
 #include "../stream/stream.hpp"
 
 namespace Mangle {
 namespace Sound {
+
+typedef boost::int32_t int32_t;
 
 /// A stream containing raw sound data and information about the format
 class SampleSource : public Stream::Stream
