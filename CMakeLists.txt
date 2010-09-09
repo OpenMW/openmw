@@ -5,6 +5,10 @@ option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
+# Location of morrowind data files
+set(MORROWIND_DATA_FILES "data"
+    CACHE PATH "location of Morrowind data files")
+
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
@@ -236,7 +240,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
 endif (WIN32)
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-    "${OpenMW_BINARY_DIR}/openmw.cfg" COPYONLY)
+    "${OpenMW_BINARY_DIR}/openmw.cfg")
 
 if (APPLE)
   set(APPLE_BUNDLE_RESOURCES
