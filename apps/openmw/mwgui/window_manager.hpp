@@ -36,6 +36,7 @@ namespace MWGui
   class MapWindow;
   class MainMenu;
   class StatsWindow;
+  class InventoryWindow;
   class Console;
 
   enum GuiMode
@@ -80,6 +81,7 @@ namespace MWGui
     MapWindow *map;
     MainMenu *menu;
     StatsWindow *stats;
+    InventoryWindow *inventory;
     Console *console;
 
     MyGUI::Gui *gui;
