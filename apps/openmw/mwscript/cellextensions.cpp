@@ -75,7 +75,7 @@ namespace MWScript
 
         const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
-        const int opcodeCOE = 0x200007c;
+        const int opcodeCOE = 0x200008e;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
