@@ -55,7 +55,7 @@ static void checkALError(const char *where)
 
 static void getALFormat(SampleSourcePtr inp, int &fmt, int &rate)
 {
-  int32_t rate_, ch, bits;
+  boost::int32_t rate_, ch, bits;
   inp->getInfo(&rate_, &ch, &bits);
   rate = rate_;
 
