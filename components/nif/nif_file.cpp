@@ -72,7 +72,7 @@ void NIFFile::parse()
       SString rec = getString();
       //cout << i << ": " << rec.toString() << endl;
 
-      Record *r;
+      Record *r = NULL;
 
       /* These are all the record types we know how to read.
 

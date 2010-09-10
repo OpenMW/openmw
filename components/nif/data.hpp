@@ -486,7 +486,7 @@ public:
       {
         int type = nif->getInt();
 
-        int size;
+        int size = 0;
         if(type == 1) size = 2; // time+scale
         else if(type == 2) size = 4; // 1 + forward + backward (floats)
         else if(type == 3) size = 5; // 1 + tbc
