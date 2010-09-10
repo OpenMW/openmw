@@ -29,9 +29,9 @@ namespace MWClass
         const std::string &model = ref->base->model;
         if (!model.empty())
         {
-            cellRender.insertBegin (ref->ref);
+            MWRender::Rendering rendering (cellRender, ref->ref);
             cellRender.insertMesh ("meshes\\" + model);
-            ref->mData.setHandle (cellRender.insertEnd (ref->mData.isEnabled()));
+            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
         }
     }
 

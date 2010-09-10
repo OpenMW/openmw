@@ -88,6 +88,10 @@ op 0x2000078: GetItemCount
 op 0x2000079: GetItemCount, explicit reference
 op 0x200007a: RemoveItem
 op 0x200007b: RemoveItem, explicit reference
+<<<<<<< HEAD:apps/openmw/mwscript/docs/vmformat.txt
+op 0x200007c: COC
+opcodes 0x200007d-0x3ffffff unused
+=======
 op 0x200007c: GetAiPackageDone
 op 0x200007d: GetAiPackageDone, explicit reference
 op 0x200007e-0x2000084: Enable Controls
@@ -95,3 +99,4 @@ op 0x2000085-0x200008b: Disable Controls
 op 0x200008c: Unlock
 op 0x200008d: Unlock, explicit reference
 opcodes 0x200008e-0x3ffffff unused
+>>>>>>> master:apps/openmw/mwscript/docs/vmformat.txt

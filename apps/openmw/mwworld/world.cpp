@@ -8,6 +8,7 @@
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/interior.hpp"
+#include "../mwrender/exterior.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
@@ -249,6 +250,66 @@ namespace MWWorld
         throw std::runtime_error ("month out of range");
     }
 
+    void World::removeScripts (Ptr::CellStore *cell)
+    {
+        ScriptList::iterator iter = mLocalScripts.begin();
+
+        while (iter!=mLocalScripts.end())
+        {
+            if (iter->second.getCell()==cell)
+                mLocalScripts.erase (iter++);
+            else
+                ++iter;
+        }
+    }
+
+    void World::unloadCell (CellRenderCollection::iterator iter)
+    {
+        removeScripts (iter->first);
+        mEnvironment.mMechanicsManager->dropActors (iter->first);
+        iter->second->destroy();
+        mEnvironment.mSoundManager->stopSound (iter->first);
+        delete iter->second;
+        mActiveCells.erase (iter);
+    }
+
+    void World::loadCell (Ptr::CellStore *cell, MWRender::CellRender *render)
+    {
+        // register local scripts
+        insertInteriorScripts (*cell);
+
+        // This connects the cell data with the rendering scene.
+        std::pair<CellRenderCollection::iterator, bool> result =
+            mActiveCells.insert (std::make_pair (cell, render));
+
+        if (result.second)
+        {
+            // Load the cell and insert it into the renderer
+            result.first->second->show();
+        }
+    }
+
+    void World::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position)
+    {
+        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2], true);
+        mPlayerPos->setCell (cell);
+        // TODO orientation
+
+        mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
+        mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
+    }
+
+
+    void World::adjustSky()
+    {
+        if (mSky)
+        {
+            toggleSky();
+            // TODO set weather
+            toggleSky();
+        }
+    }
+
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, bool newGame, Environment& environment)
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
@@ -263,7 +324,7 @@ namespace MWWorld
         mEsm.open (masterPath.file_string());
         mStore.load (mEsm);
 
-        mPlayerPos = new MWRender::PlayerPos (mScene.getCamera(), mStore.npcs.find ("player"));
+        mPlayerPos = new MWRender::PlayerPos (mScene.getCamera(), mStore.npcs.find ("player"), *this);
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -522,55 +583,112 @@ namespace MWWorld
 
     void World::changeCell (const std::string& cellName, const ESM::Position& position)
     {
+        // remove active
+        CellRenderCollection::iterator active = mActiveCells.begin();
+
+        while (active!=mActiveCells.end())
+        {
+            unloadCell (active++);
+        }
+
         // Load cell.
         mInteriors[cellName].loadInt (cellName, mStore, mEsm);
         Ptr::CellStore *cell = &mInteriors[cellName];
 
+        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene));
+
+        // adjust player
+        mCurrentCell = cell;
+        playerCellChange (cell, position);
+
+        // Sky system
+        adjustSky();
+
+        mCellChanged = true;
+    }
+
+    void World::changeCell (int X, int Y, const ESM::Position& position)
+    {
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
 
-        if (active!=mActiveCells.end())
+        while (active!=mActiveCells.end())
         {
-            mEnvironment.mMechanicsManager->dropActors (active->first);
-            active->second->destroy();
-            mEnvironment.mSoundManager->stopSound (active->first);
-            delete active->second;
-            mActiveCells.erase (active);
+            if (!(active->first->cell->data.flags & ESM::Cell::Interior))
+            {
+                if (std::abs (X-active->first->cell->data.gridX)<=1 &&
+                    std::abs (Y-active->first->cell->data.gridY)<=1)
+                {
+                    // keep cells within the new 3x3 grid
+                    ++active;
+                    continue;
+                }
+            }
+
+            unloadCell (active++);
         }
 
-        // register local scripts
-        mLocalScripts.clear(); // FIXME won't work with exteriors
-        insertInteriorScripts (*cell);
+        // Load cells
+        for (int x=X-1; x<=X+1; ++x)
+            for (int y=Y-1; y<=Y+1; ++y)
+            {
+                CellRenderCollection::iterator iter = mActiveCells.begin();
+
+                while (iter!=mActiveCells.end())
+                {
+                    assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
+
+                    if (x==iter->first->cell->data.gridX &&
+                        y==iter->first->cell->data.gridY)
+                        break;
+
+                    ++iter;
+                }
+
+                if (iter==mActiveCells.end())
+                {
+                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mStore, mEsm);
+                    Ptr::CellStore *cell = &mExteriors[std::make_pair (x, y)];
+
+                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
+                }
+            }
+
+        // find current cell
+        CellRenderCollection::iterator iter = mActiveCells.begin();
+
+        while (iter!=mActiveCells.end())
+        {
+            assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
+
+            if (X==iter->first->cell->data.gridX &&
+                Y==iter->first->cell->data.gridY)
+                break;
+
+            ++iter;
+        }
+
+        assert (iter!=mActiveCells.end());
+
+        mCurrentCell = iter->first;
 
         // adjust player
-        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2], true);
-        mPlayerPos->setCell (cell);
-        // TODO orientation
-
-        // This connects the cell data with the rendering scene.
-        std::pair<CellRenderCollection::iterator, bool> result =
-            mActiveCells.insert (std::make_pair (cell,
-            new MWRender::InteriorCellRender (*cell, mEnvironment, mScene)));
-
-        if (result.second)
-        {
-            // Load the cell and insert it into the renderer
-            result.first->second->show();
-        }
-
-        // Actors
-        mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
-        mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
+        playerCellChange (&mExteriors[std::make_pair (X, Y)], position);
 
         // Sky system
-        if (mSky)
-        {
-            toggleSky();
-            // TODO set weather
-            toggleSky();
-        }
+        adjustSky();
 
         mCellChanged = true;
+    }
+
+    void World::changeToExteriorCell (const ESM::Position& position)
+    {
+        int x = 0;
+        int y = 0;
+
+        positionToIndex (position.pos[0], position.pos[1], x, y);
+
+        changeCell (x, y, position);
     }
 
     void World::markCellAsUnchanged()
@@ -580,7 +698,7 @@ namespace MWWorld
 
     std::string World::getFacedHandle()
     {
-        std::pair<std::string, float> result = mScene.getFacedHandle();
+        std::pair<std::string, float> result = mScene.getFacedHandle (*this);
 
         if (result.first.empty() ||
             result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
@@ -607,5 +725,57 @@ namespace MWWorld
                 }
             }
         }
+    }
+
+    void World::moveObject (Ptr ptr, float x, float y, float z)
+    {
+        ptr.getCellRef().pos.pos[0] = x;
+        ptr.getCellRef().pos.pos[1] = y;
+        ptr.getCellRef().pos.pos[2] = z;
+
+        if (ptr==mPlayerPos->getPlayer())
+        {
+            if (mCurrentCell)
+            {
+                if (!(mCurrentCell->cell->data.flags & ESM::Cell::Interior))
+                {
+                    // exterior -> adjust loaded cells
+                    int cellX = 0;
+                    int cellY = 0;
+
+                    positionToIndex (x, y, cellX, cellY);
+
+                    if (mCurrentCell->cell->data.gridX!=cellX || mCurrentCell->cell->data.gridY!=cellY)
+                    {
+                        changeCell (cellX, cellY, mPlayerPos->getPlayer().getCellRef().pos);
+                    }
+                }
+            }
+        }
+
+        // TODO cell change for non-player ref
+    }
+
+    void World::indexToPosition (int cellX, int cellY, float &x, float &y) const
+    {
+        const int cellSize = 8192;
+
+        x = cellSize * cellX;
+        y = cellSize * cellY;
+    }
+
+    void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
+    {
+        const int cellSize = 8192;
+
+        cellX = static_cast<int> (x/cellSize);
+
+        if (x<0)
+            --cellX;
+
+        cellY = static_cast<int> (y/cellSize);
+
+        if (y<0)
+            --cellY;
     }
 }

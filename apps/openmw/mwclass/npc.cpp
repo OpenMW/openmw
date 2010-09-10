@@ -40,7 +40,8 @@ namespace MWClass
         std::string headModel = "meshes\\" +
             environment.mWorld->getStore().bodyParts.find(headID)->model;
 
-        cellRender.insertBegin (ref->ref);
+        MWRender::Rendering rendering (cellRender, ref->ref);
+
         cellRender.insertMesh (headModel);
 
         //TODO: define consts for each bodypart e.g. chest, foot, wrist... and put the parts in the
@@ -51,7 +52,7 @@ namespace MWClass
         if (bodyPart)
             cellRender.insertMesh("meshes\\" + bodyPart->model);
 
-        ref->mData.setHandle (cellRender.insertEnd (ref->mData.isEnabled()));
+        ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
     }
 
     void Npc::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const

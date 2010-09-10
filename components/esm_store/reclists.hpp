@@ -194,6 +194,21 @@ namespace ESMS
       return it->second;
     }
 
+    const Cell *searchExt (int x, int y) const
+    {
+        ExtCells::const_iterator it = extCells.find (x);
+
+        if (it==extCells.end())
+            return 0;
+
+        ExtCellsCol::const_iterator it2 = it->second.find (y);
+
+        if (it2 == it->second.end())
+            return 0;
+
+        return it2->second;
+    }
+
     void load(ESMReader &esm, const std::string &id)
     {
       using namespace std;

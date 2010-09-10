@@ -41,7 +41,7 @@ namespace MWWorld
     {
         public:
 
-            typedef std::vector<std::pair<std::string, Ptr> > ScriptList;
+            typedef std::list<std::pair<std::string, Ptr> > ScriptList;
 
         private:
 
@@ -56,6 +56,7 @@ namespace MWWorld
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
             std::map<std::string, Ptr::CellStore> mInteriors;
+            std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
             ScriptList mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
             bool mSky;
@@ -75,6 +76,16 @@ namespace MWWorld
             MWRender::CellRender *searchRender (Ptr::CellStore *store);
 
             int getDaysPerMonth (int month) const;
+
+            void removeScripts (Ptr::CellStore *cell);
+
+            void unloadCell (CellRenderCollection::iterator iter);
+
+            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
+
+            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position);
+
+            void adjustSky();
 
         public:
 
@@ -130,12 +141,24 @@ namespace MWWorld
             void changeCell (const std::string& cellName, const ESM::Position& position);
             ///< works only for interior cells currently.
 
+            void changeCell (int X, int Y, const ESM::Position& position);
+
+            void changeToExteriorCell (const ESM::Position& position);
+
             void markCellAsUnchanged();
 
             std::string getFacedHandle();
             ///< Return handle of the object the player is looking at
 
             void deleteObject (Ptr ptr);
+
+            void moveObject (Ptr ptr, float x, float y, float z);
+
+            void indexToPosition (int cellX, int cellY, float &x, float &y) const;
+            ///< Convert cell numbers to position.
+
+            void positionToIndex (float x, float y, int &cellX, int &cellY) const;
+            ///< Convert position to cell numbers
     };
 }
 

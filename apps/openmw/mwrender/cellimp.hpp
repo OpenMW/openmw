@@ -43,6 +43,38 @@ namespace MWRender
     void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::Environment& environment);
 
   };
+
+    /// Exception-safe rendering
+    class Rendering
+    {
+            CellRenderImp& mCellRender;
+            bool mEnd;
+
+            // not implemented
+            Rendering (const Rendering&);
+            Rendering& operator= (const Rendering&);
+
+        public:
+
+            Rendering (CellRenderImp& cellRender, ESM::CellRef &ref)
+            : mCellRender (cellRender), mEnd (false)
+            {
+                mCellRender.insertBegin (ref);
+            }
+
+            ~Rendering()
+            {
+                if (!mEnd)
+                    mCellRender.insertEnd (false);
+            }
+
+            std::string end (bool enable)
+            {
+                assert (!mEnd);
+                mEnd = true;
+                return mCellRender.insertEnd (enable);
+            }
+    };
 }
 
 #endif

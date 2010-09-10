@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_INTERIOR_H
-#define _GAME_RENDER_INTERIOR_H
+#ifndef _GAME_RENDER_EXTERIOR_H
+#define _GAME_RENDER_EXTERIOR_H
 
 #include "cell.hpp"
 #include "cellimp.hpp"
@@ -26,7 +26,7 @@ namespace MWRender
      scene.
    */
 
-  class InteriorCellRender : public CellRender, private CellRenderImp
+  class ExteriorCellRender : public CellRender, private CellRenderImp
   {
 
     static bool lightConst;
@@ -81,11 +81,11 @@ namespace MWRender
 
   public:
 
-    InteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
+    ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
         MWScene &_scene)
     : cell(_cell), mEnvironment (environment), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
 
-    virtual ~InteriorCellRender() { destroy(); }
+    virtual ~ExteriorCellRender() { destroy(); }
 
     /// Make the cell visible. Load the cell if necessary.
     virtual void show();
