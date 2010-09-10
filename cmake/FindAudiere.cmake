@@ -24,7 +24,9 @@
 
 FIND_PATH(AUDIERE_INCLUDE_DIR audiere.h
   HINTS
+  PATH_SUFFIXES include
   PATHS
+  $ENV{AUDIERE_DIR}
   ~/Library/Frameworks
   /Library/Frameworks
   /usr/local
@@ -40,6 +42,7 @@ FIND_LIBRARY(AUDIERE_LIBRARY
   HINTS
   PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
   PATHS
+  $ENV{AUDIERE_DIR}
   ~/Library/Frameworks
   /Library/Frameworks
   /usr/local

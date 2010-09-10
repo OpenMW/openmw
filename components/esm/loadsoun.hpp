@@ -15,11 +15,8 @@ struct Sound
   SOUNstruct data;
   std::string sound;
 
-  void load(ESMReader &esm)
-    {
-      sound = esm.getHNString("FNAM");
-      esm.getHNT(data, "DATA", 3);
-    }
+  // Body moved to load_impl.cpp
+  void load(ESMReader &esm);
 };
 }
 #endif
