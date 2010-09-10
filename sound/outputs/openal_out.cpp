@@ -364,7 +364,7 @@ OpenAL_Sound::OpenAL_Sound(ALuint buf, int *ref, OpenAL_Factory *fact)
 {
   // Increase the reference count
   assert(ref != NULL);
-  *refCnt++;
+  (*refCnt)++;
 
   // Set up buffer
   bufferID[0] = buf;
@@ -469,7 +469,7 @@ OpenAL_Sound::~OpenAL_Sound()
     owner->notifyDelete(this);
 
   // Decrease the reference counter
-  if((-- *refCnt) == 0)
+  if((-- (*refCnt)) == 0)
     {
       // We're the last owner. Delete the buffer(s) and the counter
       // itself.
