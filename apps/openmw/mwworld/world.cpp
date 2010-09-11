@@ -698,9 +698,19 @@ namespace MWWorld
             return cell;
 
         // didn't work -> now check for regions
-        if (mStore.regions.search (cellName))
-            if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (cellName))
-                return cell;
+        std::string cellName2 = ESMS::RecListT<ESM::Region>::toLower (cellName);
+
+        for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
+            iter!=mStore.regions.list.end(); ++iter)
+        {
+            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.name)==cellName2)
+            {
+                if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
+                    return cell;
+
+                break;
+            }
+        }
 
         return 0;
     }

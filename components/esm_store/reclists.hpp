@@ -226,12 +226,14 @@ namespace ESMS
 
     const Cell *searchExtByRegion (const std::string& id) const
     {
+        std::string id2 = toLower (id);
+
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
         {
             const ExtCellsCol& column = iter->second;
             for (ExtCellsCol::const_iterator iter = column.begin(); iter!=column.end(); ++iter)
             {
-                if (iter->second->region==id)
+                if (toLower (iter->second->region)==id)
                     return iter->second;
             }
         }
