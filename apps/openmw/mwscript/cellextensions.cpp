@@ -47,7 +47,7 @@ namespace MWScript
                     if (const ESM::Cell *exterior = context.getWorld().getExterior (cell))
                     {
                         context.getWorld().indexToPosition (exterior->data.gridX, exterior->data.gridY,
-                            pos.pos[0], pos.pos[1]);
+                            pos.pos[0], pos.pos[1], true);
                         context.getWorld().changeToExteriorCell (pos);
                     }
                     else
@@ -75,7 +75,7 @@ namespace MWScript
 
                     ESM::Position pos;
 
-                    context.getWorld().indexToPosition (x, y, pos.pos[0], pos.pos[1]);
+                    context.getWorld().indexToPosition (x, y, pos.pos[0], pos.pos[1], true);
                     pos.pos[2] = 0;
 
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;

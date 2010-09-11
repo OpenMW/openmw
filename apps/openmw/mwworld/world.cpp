@@ -770,12 +770,18 @@ namespace MWWorld
         // TODO cell change for non-player ref
     }
 
-    void World::indexToPosition (int cellX, int cellY, float &x, float &y) const
+    void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
     {
         const int cellSize = 8192;
 
         x = cellSize * cellX;
         y = cellSize * cellY;
+
+        if (centre)
+        {
+            x += cellSize/2;
+            y += cellSize/2;
+        }
     }
 
     void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
