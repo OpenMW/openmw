@@ -209,6 +209,36 @@ namespace ESMS
         return it2->second;
     }
 
+    const Cell *searchExtByName (const std::string& id) const
+    {
+        for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
+        {
+            const ExtCellsCol& column = iter->second;
+            for (ExtCellsCol::const_iterator iter = column.begin(); iter!=column.end(); ++iter)
+            {
+                if (iter->second->name==id)
+                    return iter->second;
+            }
+        }
+
+        return 0;
+    }
+
+    const Cell *searchExtByRegion (const std::string& id) const
+    {
+        for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
+        {
+            const ExtCellsCol& column = iter->second;
+            for (ExtCellsCol::const_iterator iter = column.begin(); iter!=column.end(); ++iter)
+            {
+                if (iter->second->region==id)
+                    return iter->second;
+            }
+        }
+
+        return 0;
+    }
+
     void load(ESMReader &esm, const std::string &id)
     {
       using namespace std;

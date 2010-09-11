@@ -41,9 +41,20 @@ namespace MWScript
                     runtime.pop();
 
                     ESM::Position pos;
-                    pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-                    context.getWorld().changeCell (cell, pos);
+                    pos.pos[2] = 0;
+
+                    if (const ESM::Cell *exterior = context.getWorld().getExterior (cell))
+                    {
+                        context.getWorld().indexToPosition (exterior->data.gridX, exterior->data.gridY,
+                            pos.pos[0], pos.pos[1]);
+                        context.getWorld().changeToExteriorCell (pos);
+                    }
+                    else
+                    {
+                        pos.pos[0] = pos.pos[1] = 0;
+                        context.getWorld().changeCell (cell, pos);
+                    }
                 }
         };
 

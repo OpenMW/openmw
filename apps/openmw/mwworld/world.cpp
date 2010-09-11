@@ -691,6 +691,20 @@ namespace MWWorld
         changeCell (x, y, position);
     }
 
+    const ESM::Cell *World::getExterior (const std::string& cellName) const
+    {
+        // first try named cells
+        if (const ESM::Cell *cell = mStore.cells.searchExtByName (cellName))
+            return cell;
+
+        // didn't work -> now check for regions
+        if (mStore.regions.search (cellName))
+            if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (cellName))
+                return cell;
+
+        return 0;
+    }
+
     void World::markCellAsUnchanged()
     {
         mCellChanged = false;
