@@ -34,7 +34,7 @@ struct Land
     context = esm.getContext();
 
     hasData = false;
-    int cnt;
+    int cnt = 0;
 
     // Skip these here. Load the actual data when the cell is loaded.
     if(esm.isNextSub("VNML")) {esm.skipHSubSize(12675);cnt++;}
