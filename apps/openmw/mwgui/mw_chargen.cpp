@@ -8,7 +8,7 @@ using namespace MWGui;
 
 RaceDialog::RaceDialog()
   : Layout("openmw_chargen_race_layout.xml")
-  , sexIndex(0)
+  , genderIndex(0)
   , faceIndex(0)
   , hairIndex(0)
   , faceCount(10)
@@ -31,10 +31,10 @@ RaceDialog::RaceDialog()
 	// Set up next/previous buttons
 	MyGUI::ButtonPtr prevButton, nextButton;
 
-	getWidget(prevButton, "PrevSexButton");
-	getWidget(nextButton, "NextSexButton");
-	prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousSex);
-	nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextSex);
+	getWidget(prevButton, "PrevGenderButton");
+	getWidget(nextButton, "NextGenderButton");
+	prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousGender);
+	nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextGender);
 
 	getWidget(prevButton, "PrevFaceButton");
 	getWidget(nextButton, "NextFaceButton");
@@ -53,11 +53,11 @@ RaceDialog::RaceDialog()
 	raceList->eventListMouseItemActivate = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
 	getWidget(skillList, "SkillList");
-	getWidget(specialsList, "SpecialsList");
+	getWidget(spellPowerList, "SpellPowerList");
 
 	updateRaces();
 	updateSkills();
-	updateSpecials();
+	updateSpellPowers();
 }
 
 int wrap(int index, int max)
@@ -70,14 +70,14 @@ int wrap(int index, int max)
 		return index;
 }
 
-void RaceDialog::selectPreviousSex()
+void RaceDialog::selectPreviousGender()
 {
-	sexIndex = wrap(sexIndex - 1, 2);
+	genderIndex = wrap(genderIndex - 1, 2);
 }
 
-void RaceDialog::selectNextSex()
+void RaceDialog::selectNextGender()
 {
-	sexIndex = wrap(sexIndex + 1, 2);
+	genderIndex = wrap(genderIndex + 1, 2);
 }
 
 void RaceDialog::selectPreviousFace()
@@ -107,14 +107,14 @@ void RaceDialog::onHeadRotate(MyGUI::VScroll*, size_t _position)
 	// TODO: Rotate head
 }
 
-void RaceDialog::onSelectPreviousSex(MyGUI::Widget*)
+void RaceDialog::onSelectPreviousGender(MyGUI::Widget*)
 {
-	selectPreviousSex();
+	selectPreviousGender();
 }
 
-void RaceDialog::onSelectNextSex(MyGUI::Widget*)
+void RaceDialog::onSelectNextGender(MyGUI::Widget*)
 {
-	selectNextSex();
+	selectNextGender();
 }
 
 void RaceDialog::onSelectPreviousFace(MyGUI::Widget*)
@@ -141,7 +141,7 @@ void RaceDialog::onSelectRace(MyGUI::List* _sender, size_t _index)
 {
 	// TODO: Select actual race
 	updateSkills();
-	updateSpecials();
+	updateSpellPowers();
 }
 
 // update widget content
@@ -167,7 +167,7 @@ void RaceDialog::updateSkills()
 	}
 	skillItems.clear();
 
-	MyGUI::StaticTextPtr skillName, skillLevel;
+	MyGUI::StaticTextPtr skillName, skillBonus;
 	const int lineHeight = 18;
 	MyGUI::IntCoord coord1(0, 0, skillList->getWidth() - (40 + 4), 18);
 	MyGUI::IntCoord coord2(coord1.left + coord1.width, 0, 40, 18);
@@ -187,28 +187,28 @@ void RaceDialog::updateSkills()
 	{
 		skillName = skillList->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default, "SkillName0");
 		skillName->setCaption(inputList[i][0]);
-		skillLevel = skillList->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default, "SkillLevel0");
-		skillLevel->setCaption(inputList[i][1]);
+		skillBonus = skillList->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default, "SkillBonus0");
+		skillBonus->setCaption(inputList[i][1]);
 
 		skillItems.push_back(skillName);
-		skillItems.push_back(skillLevel);
+		skillItems.push_back(skillBonus);
 
 		coord1.top += lineHeight;
 		coord2.top += lineHeight;
 	}
 }
 
-void RaceDialog::updateSpecials()
+void RaceDialog::updateSpellPowers()
 {
-	for (std::vector<MyGUI::WidgetPtr>::iterator it = specialsItems.begin(); it != specialsItems.end(); ++it)
+	for (std::vector<MyGUI::WidgetPtr>::iterator it = spellPowerItems.begin(); it != spellPowerItems.end(); ++it)
 	{
 		MyGUI::Gui::getInstance().destroyWidget(*it);
 	}
-	specialsItems.clear();
+	spellPowerItems.clear();
 
-	MyGUI::StaticTextPtr specialsName;
+	MyGUI::StaticTextPtr spellPowerName;
 	const int lineHeight = 18;
-	MyGUI::IntCoord coord(0, 0, specialsList->getWidth(), 18);
+	MyGUI::IntCoord coord(0, 0, spellPowerList->getWidth(), 18);
 
 	const char *inputList[] = {
 		"Depth Perception",
@@ -219,12 +219,12 @@ void RaceDialog::updateSpecials()
 
 	for (int i = 0; inputList[i]; ++i)
 	{
-		std::string name = "specialsName";
+		std::string name = "spellPowerName";
 		name += i;
-		specialsName = specialsList->createWidget<MyGUI::StaticText>("SandText", coord, MyGUI::Align::Default, name);
-		specialsName->setCaption(inputList[i]);
+		spellPowerName = spellPowerList->createWidget<MyGUI::StaticText>("SandText", coord, MyGUI::Align::Default, name);
+		spellPowerName->setCaption(inputList[i]);
 
-		specialsItems.push_back(specialsName);
+		spellPowerItems.push_back(spellPowerName);
 
 		coord.top += lineHeight;
 	}

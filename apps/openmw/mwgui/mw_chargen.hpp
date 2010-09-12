@@ -29,8 +29,8 @@ namespace MWGui
 	public:
 		RaceDialog();
 
-		void selectPreviousSex();
-		void selectNextSex();
+		void selectPreviousGender();
+		void selectNextGender();
 
 		void selectPreviousFace();
 		void selectNextFace();
@@ -41,8 +41,8 @@ namespace MWGui
 	protected:
 		void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
 
-		void onSelectPreviousSex(MyGUI::Widget* _sender);
-		void onSelectNextSex(MyGUI::Widget* _sender);
+		void onSelectPreviousGender(MyGUI::Widget* _sender);
+		void onSelectNextGender(MyGUI::Widget* _sender);
 
 		void onSelectPreviousFace(MyGUI::Widget* _sender);
 		void onSelectNextFace(MyGUI::Widget* _sender);
@@ -55,7 +55,7 @@ namespace MWGui
 	private:
 		void updateRaces();
 		void updateSkills();
-		void updateSpecials();
+		void updateSpellPowers();
 
 		MyGUI::CanvasPtr  appearanceBox;
 		MyGUI::ListPtr    raceList;
@@ -64,10 +64,10 @@ namespace MWGui
 		MyGUI::WidgetPtr skillList;
 		std::vector<MyGUI::WidgetPtr> skillItems;
 
-		MyGUI::WidgetPtr specialsList;
-		std::vector<MyGUI::WidgetPtr> specialsItems;
+		MyGUI::WidgetPtr spellPowerList;
+		std::vector<MyGUI::WidgetPtr> spellPowerItems;
 
-		int sexIndex, faceIndex, hairIndex;
+		int genderIndex, faceIndex, hairIndex;
 		int faceCount, hairCount;
 	};
 }
