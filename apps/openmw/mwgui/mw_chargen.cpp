@@ -185,9 +185,13 @@ void RaceDialog::updateSkills()
 
 	for (int i = 0; inputList[i][0]; ++i)
 	{
-		skillName = skillList->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default, "SkillName0");
+		std::ostringstream name;
+		name << std::string("SkillName") << i;
+		skillName = skillList->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default, name.str());
 		skillName->setCaption(inputList[i][0]);
-		skillBonus = skillList->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default, "SkillBonus0");
+		std::ostringstream bonus;
+		bonus << std::string("SkillBonus") << i;
+		skillBonus = skillList->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default, bonus.str());
 		skillBonus->setCaption(inputList[i][1]);
 
 		skillItems.push_back(skillName);
@@ -219,9 +223,9 @@ void RaceDialog::updateSpellPowers()
 
 	for (int i = 0; inputList[i]; ++i)
 	{
-		std::string name = "spellPowerName";
-		name += i;
-		spellPowerName = spellPowerList->createWidget<MyGUI::StaticText>("SandText", coord, MyGUI::Align::Default, name);
+		std::ostringstream name;
+		name << std::string("SpellPowerName") << i;
+		spellPowerName = spellPowerList->createWidget<MyGUI::StaticText>("SandText", coord, MyGUI::Align::Default, name.str());
 		spellPowerName->setCaption(inputList[i]);
 
 		spellPowerItems.push_back(spellPowerName);
