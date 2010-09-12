@@ -308,12 +308,53 @@ namespace ESMS
     int getSize() { return list.size(); }
   };
 
+  template <typename X>
+  struct IndexListT
+  {
+        typedef std::map<int, X> MapType;
+
+        MapType list;
+
+        void load(ESMReader &esm)
+        {
+            X ref;
+            ref.load (esm);
+            int index = ref.index;
+            list[index] = ref;
+        }
+
+        int getSize()
+        {
+            return list.size();
+        }
+
+        // Find the given object ID, or return NULL if not found.
+        const X* search (int id) const
+        {
+            if (list.find (id) == list.end())
+                return NULL;
+
+              return &list.find(id)->second;
+        }
+
+        // Find the given object ID (throws an exception if not found)
+        const X* find (int id) const
+        {
+            const X *object = search (id);
+
+            if (!object)
+            {
+                std::ostringstream error;
+                error << "object " << id << " not found";
+                throw std::runtime_error (error.str());
+            }
+
+            return object;
+        }
+  };
+
   /* We need special lists for:
 
-     Magic effects
-     Skills
-     Dialog / Info combo
-     Scripts
      Land
      Path grids
      Land textures

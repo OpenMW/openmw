@@ -32,6 +32,7 @@ struct Skill
 
   void load(ESMReader &esm)
     {
+      esm.getHNT(index, "INDX");
       esm.getHNT(data, "SKDT", 24);
       description = esm.getHNOString("DESC");
     }
