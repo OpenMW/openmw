@@ -49,10 +49,14 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);
-      if(list.find(id2) == list.end())
-        return NULL;
-      return &list.find(id2)->second;
+        std::string id2 = toLower (id);
+
+        typename MapType::const_iterator iter = list.find (id2);
+
+        if (iter == list.end())
+            return NULL;
+
+        return &iter->second;
     }
 
     // Find the given object ID (throws an exception if not found)
@@ -87,10 +91,13 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);
-      if(list.find(id2) == list.end())
-        return NULL;
-      return &list.find(id2)->second;
+        std::string id2 = toLower (id);
+
+        typename MapType::const_iterator iter = list.find (id2);
+
+        if (iter == list.end())
+            return NULL;
+        return &iter->second;
     }
 
     // Find the given object ID (throws an exception if not found)
@@ -129,10 +136,14 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);
-      if(list.find(id2) == list.end())
-        return NULL;
-      return &list.find(id2)->second;
+        std::string id2 = toLower (id);
+
+        typename MapType::const_iterator iter = list.find (id2);
+
+        if (iter == list.end())
+            return NULL;
+
+        return &iter->second;
     }
 
     // Find the given object ID (throws an exception if not found)
@@ -288,10 +299,14 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);
-      if(list.find(id2) == list.end())
-        return NULL;
-      return &list.find(id2)->second;
+        std::string id2 = toLower (id);
+
+        typename MapType::const_iterator iter = list.find (id2);
+
+        if (iter == list.end())
+            return NULL;
+
+        return &iter->second;
     }
 
     // Find the given object ID (throws an exception if not found)
@@ -331,10 +346,12 @@ namespace ESMS
         // Find the given object ID, or return NULL if not found.
         const X* search (int id) const
         {
-            if (list.find (id) == list.end())
+            typename MapType::const_iterator iter = list.find (id);
+
+            if (iter == list.end())
                 return NULL;
 
-              return &list.find(id)->second;
+            return &iter->second;
         }
 
         // Find the given object ID (throws an exception if not found)
