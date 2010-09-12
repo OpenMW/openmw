@@ -39,6 +39,8 @@ namespace MWGui
   class InventoryWindow;
   class Console;
 
+  class RaceDialog;
+
   enum GuiMode
     {
       GM_Game,          // Game mode, only HUD
@@ -83,6 +85,8 @@ namespace MWGui
     StatsWindow *stats;
     InventoryWindow *inventory;
     Console *console;
+
+	RaceDialog *raceDialog;
 
     MyGUI::Gui *gui;
 

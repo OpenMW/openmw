@@ -1,5 +1,6 @@
 #include "window_manager.hpp"
 #include "mw_layouts.hpp"
+#include "mw_chargen.hpp"
 
 #include "console.hpp"
 
@@ -25,6 +26,8 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   inventory = new InventoryWindow ();
   console = new Console(w,h, environment, extensions);
 
+  raceDialog = new RaceDialog ();
+
   // The HUD is always on
   hud->setVisible(true);
 
@@ -40,6 +43,8 @@ WindowManager::~WindowManager()
   delete menu;
   delete stats;
   delete inventory;
+
+  delete raceDialog;
 }
 
 void WindowManager::updateVisible()
@@ -50,6 +55,7 @@ void WindowManager::updateVisible()
   stats->setVisible(false);
   inventory->setVisible(false);
   console->disable();
+  raceDialog->setVisible(false);
 
   // Mouse is visible whenever we're not in game mode
   gui->setVisiblePointer(isGuiMode());
@@ -84,8 +90,11 @@ void WindowManager::updateVisible()
       // Show the windows we want
       map   -> setVisible( eff & GW_Map );
       stats -> setVisible( eff & GW_Stats );
-      inventory -> setVisible( eff & GW_Inventory );
-      return;
+//      inventory -> setVisible( eff & GW_Inventory );
+
+	  // Temporary, displays character generator dialogs when displaying inventory
+	  raceDialog -> setVisible( true );
+	  return;
     }
 
   // All other modes are ignored
