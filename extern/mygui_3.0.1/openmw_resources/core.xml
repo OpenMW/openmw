@@ -11,6 +11,7 @@
 	    <List file="openmw_text.skin.xml" group="General"/>
             <List file="openmw_windows.skin.xml" group="General"/>
             <List file="openmw_button.skin.xml" group="General"/>
+            <List file="openmw_list.skin.xml" group="General"/>
             <List file="openmw_box.skin.xml" group="General"/>
             <List file="openmw_progress.skin.xml" group="General"/>
             <List file="openmw_hud_energybar.skin.xml" group="General"/>

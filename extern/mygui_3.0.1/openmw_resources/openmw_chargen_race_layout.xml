@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <!-- correct size is 588 433, adjust when skin is changed to a dialog -->
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 596 461" name="_Main">
+
+        <!-- Appearance -->
+        <Widget type="StaticText" skin="HeaderText" position="8 16 241 18" name="AppearanceT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Widget_Caption" value="Appearance"/>
+            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
+        </Widget>
+        <Widget type="Canvas" skin="MW_Box" position="8 39 241 230" name="AppearanceBox"/>
+
+        <!-- Sliders -->
+        <!-- Rotation of head -->
+        <Widget type="HScroll" skin="MW_HScroll" position="8 276 241 14" name="HeadRotate"/>
+
+        <!-- Sex choice -->
+        <Widget type="Button" skin="MW_ScrollLeft" position="8 298 14 14" name="PrevSexButton"/>
+        <Widget type="StaticText" skin="HeaderText" position="14 298 227 14" name="SexChoiceT">
+            <Property key="Widget_Caption" value="Change Sex"/>
+        </Widget>
+        <Widget type="Button" skin="MW_ScrollRight" position="235 298 14 14" name="NextSexButton"/>
+
+        <!-- Face choice -->
+        <Widget type="Button" skin="MW_ScrollLeft" position="8 320 14 14" name="PrevFaceButton"/>
+        <Widget type="StaticText" skin="HeaderText" position="14 320 227 14" name="FaceChoiceT">
+            <Property key="Widget_Caption" value="Change Face"/>
+        </Widget>
+        <Widget type="Button" skin="MW_ScrollRight" position="235 320 14 14" name="NextFaceButton"/>
+
+        <!-- Hair choice -->
+        <Widget type="Button" skin="MW_ScrollLeft" position="8 342 14 14" name="PrevHairButton"/>
+        <Widget type="StaticText" skin="HeaderText" position="14 342 227 14" name="HairChoiceT">
+            <Property key="Widget_Caption" value="Change Hair"/>
+        </Widget>
+        <Widget type="Button" skin="MW_ScrollRight" position="235 342 14 14" name="NextHairButton"/>
+
+        <!-- Race -->
+        <Widget type="StaticText" skin="HeaderText" position="261 16 132 18" name="RaceT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Widget_Caption" value="Race"/>
+            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
+        </Widget>
+        <Widget type="List" skin="MW_List" position="264 39 132 161" name="RaceList">
+        </Widget>
+
+        <!-- Specials -->
+        <Widget type="StaticText" skin="HeaderText" position="261 200 132 18" name="SpecialsT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Widget_Caption" value="Specials"/>
+            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
+        </Widget>
+        <!-- Specials sub-widgets will be placed here, no skin to make it invisible -->
+        <Widget type="Widget" skin="" position="261 220 132 140" name="SpecialsList" />
+
+        <!-- Skill bonus -->
+        <Widget type="StaticText" skin="HeaderText" position="403 39 159 18" name="SkillsT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Widget_Caption" value="Skill Bonus"/>
+            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
+        </Widget>
+        <!-- Skill bonus sub-widgets will be placed here, no skin to make it invisible -->
+        <Widget type="Widget" skin="" position="403 59 159 360" name="SkillList" />
+
+        <!-- Dialog buttons -->
+        <Widget type="Button" skin="MW_Button" position="471 397 53 23" name="BackButton">
+            <Property key="Widget_Caption" value="Back"/>
+        </Widget>
+        <Widget type="Button" skin="MW_Button" position="532 397 42 23" name="OKButton">
+            <Property key="Widget_Caption" value="OK"/>
+        </Widget>
+    </Widget>
+</MyGUI>
