@@ -70,36 +70,6 @@ int wrap(int index, int max)
 		return index;
 }
 
-void RaceDialog::selectPreviousGender()
-{
-	genderIndex = wrap(genderIndex - 1, 2);
-}
-
-void RaceDialog::selectNextGender()
-{
-	genderIndex = wrap(genderIndex + 1, 2);
-}
-
-void RaceDialog::selectPreviousFace()
-{
-	faceIndex = wrap(faceIndex - 1, faceCount);
-}
-
-void RaceDialog::selectNextFace()
-{
-	faceIndex = wrap(faceIndex + 1, faceCount);
-}
-
-void RaceDialog::selectPreviousHair()
-{
-	hairIndex = wrap(hairIndex - 1, hairCount);
-}
-
-void RaceDialog::selectNextHair()
-{
-	hairIndex = wrap(hairIndex - 1, hairCount);
-}
-
 // widget controls
 
 void RaceDialog::onHeadRotate(MyGUI::VScroll*, size_t _position)
@@ -109,32 +79,32 @@ void RaceDialog::onHeadRotate(MyGUI::VScroll*, size_t _position)
 
 void RaceDialog::onSelectPreviousGender(MyGUI::Widget*)
 {
-	selectPreviousGender();
+	genderIndex = wrap(genderIndex - 1, 2);
 }
 
 void RaceDialog::onSelectNextGender(MyGUI::Widget*)
 {
-	selectNextGender();
+	genderIndex = wrap(genderIndex + 1, 2);
 }
 
 void RaceDialog::onSelectPreviousFace(MyGUI::Widget*)
 {
-	selectPreviousFace();
+	faceIndex = wrap(faceIndex - 1, faceCount);
 }
 
 void RaceDialog::onSelectNextFace(MyGUI::Widget*)
 {
-	selectNextFace();
+	faceIndex = wrap(faceIndex + 1, faceCount);
 }
 
 void RaceDialog::onSelectPreviousHair(MyGUI::Widget*)
 {
-	selectPreviousHair();
+	hairIndex = wrap(hairIndex - 1, hairCount);
 }
 
 void RaceDialog::onSelectNextHair(MyGUI::Widget*)
 {
-	selectNextHair();
+	hairIndex = wrap(hairIndex - 1, hairCount);
 }
 
 void RaceDialog::onSelectRace(MyGUI::List* _sender, size_t _index)

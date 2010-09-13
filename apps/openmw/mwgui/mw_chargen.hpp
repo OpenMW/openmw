@@ -29,15 +29,6 @@ namespace MWGui
 	public:
 		RaceDialog();
 
-		void selectPreviousGender();
-		void selectNextGender();
-
-		void selectPreviousFace();
-		void selectNextFace();
-
-		void selectPreviousHair();
-		void selectNextHair();
-
 	protected:
 		void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
 
