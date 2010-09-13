@@ -4,8 +4,16 @@
 
 #include "../../stream/filters/buffer_stream.hpp"
 
-#include "al.h"
-#include "alc.h"
+#ifdef _WIN32
+#include <al.h>
+#include <alc.h>
+#elif defined(__APPLE__)
+#include <OpenAL/alc.h>
+#include <OpenAL/al.h>
+#else
+#include <AL/al.h>
+#include <AL/alc.h>
+#endif
 
 using namespace Mangle::Sound;
 

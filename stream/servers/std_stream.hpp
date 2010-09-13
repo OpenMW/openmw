@@ -36,6 +36,7 @@ class StdStream : public Stream
 
   void seek(size_t pos)
   {
+    inf->clear();
     inf->seekg(pos);
     if(inf->fail())
       fail("seek error");
