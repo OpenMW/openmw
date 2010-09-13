@@ -83,4 +83,34 @@ namespace MWMechanics
             }
         }
     }
+
+    void MechanicsManager::setPlayerName (const std::string& name)
+    {
+
+    }
+
+    void MechanicsManager::setPlayerRace (const std::string& race, bool male)
+    {
+
+    }
+
+    void MechanicsManager::setPlayerBirthsign (const std::string& id)
+    {
+
+    }
+
+    void MechanicsManager::setPlayerClass (const std::string& id)
+    {
+
+    }
+
+    void MechanicsManager::setPlayerClass (const ESM::Class& class_)
+    {
+
+    }
+
+    void MechanicsManager::finalizePlayer()
+    {
+
+    }
 }
