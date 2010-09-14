@@ -145,6 +145,9 @@ namespace MWWorld
 
             void changeToExteriorCell (const ESM::Position& position);
 
+            const ESM::Cell *getExterior (const std::string& cellName) const;
+            ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
+
             void markCellAsUnchanged();
 
             std::string getFacedHandle();
@@ -154,7 +157,7 @@ namespace MWWorld
 
             void moveObject (Ptr ptr, float x, float y, float z);
 
-            void indexToPosition (int cellX, int cellY, float &x, float &y) const;
+            void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false) const;
             ///< Convert cell numbers to position.
 
             void positionToIndex (float x, float y, int &cellX, int &cellY) const;

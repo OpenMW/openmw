@@ -691,6 +691,30 @@ namespace MWWorld
         changeCell (x, y, position);
     }
 
+    const ESM::Cell *World::getExterior (const std::string& cellName) const
+    {
+        // first try named cells
+        if (const ESM::Cell *cell = mStore.cells.searchExtByName (cellName))
+            return cell;
+
+        // didn't work -> now check for regions
+        std::string cellName2 = ESMS::RecListT<ESM::Region>::toLower (cellName);
+
+        for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
+            iter!=mStore.regions.list.end(); ++iter)
+        {
+            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.name)==cellName2)
+            {
+                if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
+                    return cell;
+
+                break;
+            }
+        }
+
+        return 0;
+    }
+
     void World::markCellAsUnchanged()
     {
         mCellChanged = false;
@@ -756,12 +780,18 @@ namespace MWWorld
         // TODO cell change for non-player ref
     }
 
-    void World::indexToPosition (int cellX, int cellY, float &x, float &y) const
+    void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
     {
         const int cellSize = 8192;
 
         x = cellSize * cellX;
         y = cellSize * cellY;
+
+        if (centre)
+        {
+            x += cellSize/2;
+            y += cellSize/2;
+        }
     }
 
     void World::positionToIndex (float x, float y, int &cellX, int &cellY) const

@@ -71,9 +71,9 @@ namespace ESMS
     RecIDListT<GameSetting>     gameSettings;
     //RecListT<Land>        lands;
     //RecListT<LandTexture> landTexts;
-    //RecListT<MagicEffect> magicEffects;
+    IndexListT<MagicEffect>     magicEffects;
     ScriptListT<Script>      scripts;
-    //RecListT<Skill>       skills;
+    IndexListT<Skill>           skills;
     //RecListT<PathGrid>    pathgrids;
 
     // Lookup of all IDs. Makes looking up references faster. Just
@@ -118,7 +118,6 @@ namespace ESMS
       recLists[REC_LIGH] = &lights;
       recLists[REC_LOCK] = &lockpicks;
       //recLists[REC_LTEX] = &landTexts;
-      //recLists[REC_MGEF] = &magicEffects;
       recLists[REC_MISC] = &miscItems;
       recLists[REC_NPC_] = &npcs;
       recLists[REC_NPCC] = &npcChange;
@@ -128,7 +127,6 @@ namespace ESMS
       recLists[REC_REGN] = &regions;
       recLists[REC_REPA] = &repairs;
       recLists[REC_SCPT] = &scripts;
-      //recLists[REC_SKIL] = &skills;
       recLists[REC_SNDG] = &soundGens;
       recLists[REC_SOUN] = &sounds;
       recLists[REC_SPEL] = &spells;

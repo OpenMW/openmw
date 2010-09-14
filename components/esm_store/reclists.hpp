@@ -49,10 +49,14 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);
-      if(list.find(id2) == list.end())
-        return NULL;
-      return &list.find(id2)->second;
+        std::string id2 = toLower (id);
+
+        typename MapType::const_iterator iter = list.find (id2);
+
+        if (iter == list.end())
+            return NULL;
+
+        return &iter->second;
     }
 
     // Find the given object ID (throws an exception if not found)
@@ -87,10 +91,13 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);
-      if(list.find(id2) == list.end())
-        return NULL;
-      return &list.find(id2)->second;
+        std::string id2 = toLower (id);
+
+        typename MapType::const_iterator iter = list.find (id2);
+
+        if (iter == list.end())
+            return NULL;
+        return &iter->second;
     }
 
     // Find the given object ID (throws an exception if not found)
@@ -129,10 +136,14 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);
-      if(list.find(id2) == list.end())
-        return NULL;
-      return &list.find(id2)->second;
+        std::string id2 = toLower (id);
+
+        typename MapType::const_iterator iter = list.find (id2);
+
+        if (iter == list.end())
+            return NULL;
+
+        return &iter->second;
     }
 
     // Find the given object ID (throws an exception if not found)
@@ -209,6 +220,38 @@ namespace ESMS
         return it2->second;
     }
 
+    const Cell *searchExtByName (const std::string& id) const
+    {
+        for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
+        {
+            const ExtCellsCol& column = iter->second;
+            for (ExtCellsCol::const_iterator iter = column.begin(); iter!=column.end(); ++iter)
+            {
+                if (iter->second->name==id)
+                    return iter->second;
+            }
+        }
+
+        return 0;
+    }
+
+    const Cell *searchExtByRegion (const std::string& id) const
+    {
+        std::string id2 = toLower (id);
+
+        for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
+        {
+            const ExtCellsCol& column = iter->second;
+            for (ExtCellsCol::const_iterator iter = column.begin(); iter!=column.end(); ++iter)
+            {
+                if (toLower (iter->second->region)==id)
+                    return iter->second;
+            }
+        }
+
+        return 0;
+    }
+
     void load(ESMReader &esm, const std::string &id)
     {
       using namespace std;
@@ -256,10 +299,14 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-      std::string id2 = toLower (id);
-      if(list.find(id2) == list.end())
-        return NULL;
-      return &list.find(id2)->second;
+        std::string id2 = toLower (id);
+
+        typename MapType::const_iterator iter = list.find (id2);
+
+        if (iter == list.end())
+            return NULL;
+
+        return &iter->second;
     }
 
     // Find the given object ID (throws an exception if not found)
@@ -276,12 +323,55 @@ namespace ESMS
     int getSize() { return list.size(); }
   };
 
+  template <typename X>
+  struct IndexListT
+  {
+        typedef std::map<int, X> MapType;
+
+        MapType list;
+
+        void load(ESMReader &esm)
+        {
+            X ref;
+            ref.load (esm);
+            int index = ref.index;
+            list[index] = ref;
+        }
+
+        int getSize()
+        {
+            return list.size();
+        }
+
+        // Find the given object ID, or return NULL if not found.
+        const X* search (int id) const
+        {
+            typename MapType::const_iterator iter = list.find (id);
+
+            if (iter == list.end())
+                return NULL;
+
+            return &iter->second;
+        }
+
+        // Find the given object ID (throws an exception if not found)
+        const X* find (int id) const
+        {
+            const X *object = search (id);
+
+            if (!object)
+            {
+                std::ostringstream error;
+                error << "object " << id << " not found";
+                throw std::runtime_error (error.str());
+            }
+
+            return object;
+        }
+  };
+
   /* We need special lists for:
 
-     Magic effects
-     Skills
-     Dialog / Info combo
-     Scripts
      Land
      Path grids
      Land textures

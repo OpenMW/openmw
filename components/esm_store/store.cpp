@@ -46,15 +46,21 @@ void ESMStore::load(ESMReader &esm)
                 {
                     std::cerr << "error: info record without dialog" << std::endl;
                     esm.skipRecord();
-                    continue;
                 }
+            }
+            else if (n.val==ESM::REC_MGEF)
+            {
+                magicEffects.load (esm);
+            }
+            else if (n.val==ESM::REC_SKIL)
+            {
+                skills.load (esm);
             }
             else
             {
                 // Not found (this would be an error later)
                 esm.skipRecord();
                 missing.insert(n.toString());
-                continue;
             }
         }
         else
