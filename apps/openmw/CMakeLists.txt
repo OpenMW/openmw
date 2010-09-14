@@ -35,14 +35,14 @@ source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})
 
 set(GAMEGUI_HEADER
     mwgui/mw_layouts.hpp
-    mwgui/mw_chargen.hpp
+    mwgui/race.hpp
     mwgui/window_manager.hpp
     mwgui/console.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
     mwgui/console.cpp
-    mwgui/mw_chargen.cpp
+    mwgui/race.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
