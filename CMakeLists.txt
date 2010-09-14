@@ -225,6 +225,13 @@ link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 add_subdirectory( extern/caelum )
 add_subdirectory( extern/mygui_3.0.1 )
 
+# Make sure that certain libraries are used as static libraries
+# This is in effect turns off __declspec (dllexport) for windows
+# Each library will also need to be configured to build as a static lib
+
+# MyGUI: extern/mygui_3.0.0/
+add_definitions(-DMYGUI_STATIC)
+
 # Specify build paths
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
