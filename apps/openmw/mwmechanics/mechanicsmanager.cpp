@@ -108,9 +108,4 @@ namespace MWMechanics
     {
 
     }
-
-    void MechanicsManager::finalizePlayer()
-    {
-
-    }
 }

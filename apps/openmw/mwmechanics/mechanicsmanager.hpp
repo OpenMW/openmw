@@ -63,10 +63,6 @@ namespace MWMechanics
 
             void setPlayerClass (const ESM::Class& class_);
             ///< Set player class to custom class.
-
-            void finalizePlayer();
-            ///< Configure player according to previously called setPlayer functions.
-
     };
 }
 
