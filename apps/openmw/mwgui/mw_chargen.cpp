@@ -68,14 +68,16 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment, bool showNext)
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
     if (showNext)
     {
-    }
-    else
-    {
-        MyGUI::ButtonPtr okButton;
-        getWidget(okButton, "OKButton");
-        okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
+        okButton->setCaption("Next");
+
+        // Adjust back button when next is shown
+        backButton->setCoord(backButton->getCoord() + MyGUI::IntPoint(14, 0));
+        okButton->setCoord(okButton->getCoord() + MyGUI::IntSize(14, 0));
     }
 
 	updateRaces();
