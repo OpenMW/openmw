@@ -27,13 +27,13 @@ namespace MWWorld
 
 namespace MWGui
 {
-	using namespace MyGUI;
+    using namespace MyGUI;
 
     typedef delegates::CDelegate0 EventHandle_Void;
 
-	class RaceDialog : public OEngine::GUI::Layout
-	{
-	public:
+    class RaceDialog : public OEngine::GUI::Layout
+    {
+    public:
         RaceDialog(MWWorld::Environment& environment, bool showNext);
 
         enum Gender
@@ -55,53 +55,53 @@ namespace MWGui
         // Events
 
         /** Event : Back button clicked.\n
-			signature : void method()\n
-		*/
-		EventHandle_Void eventBack;
+            signature : void method()\n
+        */
+        EventHandle_Void eventBack;
 
         /** Event : Dialog finished, OK button clicked.\n
-			signature : void method()\n
-		*/
-		EventHandle_Void eventDone;
+            signature : void method()\n
+        */
+        EventHandle_Void eventDone;
 
     protected:
-		void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
+        void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
 
-		void onSelectPreviousGender(MyGUI::Widget* _sender);
-		void onSelectNextGender(MyGUI::Widget* _sender);
+        void onSelectPreviousGender(MyGUI::Widget* _sender);
+        void onSelectNextGender(MyGUI::Widget* _sender);
 
-		void onSelectPreviousFace(MyGUI::Widget* _sender);
-		void onSelectNextFace(MyGUI::Widget* _sender);
+        void onSelectPreviousFace(MyGUI::Widget* _sender);
+        void onSelectNextFace(MyGUI::Widget* _sender);
 
-		void onSelectPreviousHair(MyGUI::Widget* _sender);
-		void onSelectNextHair(MyGUI::Widget* _sender);
+        void onSelectPreviousHair(MyGUI::Widget* _sender);
+        void onSelectNextHair(MyGUI::Widget* _sender);
 
-		void onSelectRace(MyGUI::List* _sender, size_t _index);
+        void onSelectRace(MyGUI::List* _sender, size_t _index);
 
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
 
-	private:
-		void updateRaces();
-		void updateSkills();
-		void updateSpellPowers();
+    private:
+        void updateRaces();
+        void updateSkills();
+        void updateSpellPowers();
 
         MWWorld::Environment& environment;
 
-		MyGUI::CanvasPtr  appearanceBox;
-		MyGUI::ListPtr    raceList;
-		MyGUI::HScrollPtr headRotate;
+        MyGUI::CanvasPtr  appearanceBox;
+        MyGUI::ListPtr    raceList;
+        MyGUI::HScrollPtr headRotate;
 
-		MyGUI::WidgetPtr skillList;
-		std::vector<MyGUI::WidgetPtr> skillItems;
+        MyGUI::WidgetPtr skillList;
+        std::vector<MyGUI::WidgetPtr> skillItems;
 
-		MyGUI::WidgetPtr spellPowerList;
-		std::vector<MyGUI::WidgetPtr> spellPowerItems;
+        MyGUI::WidgetPtr spellPowerList;
+        std::vector<MyGUI::WidgetPtr> spellPowerItems;
 
         int genderIndex, faceIndex, hairIndex;
-		int faceCount, hairCount;
+        int faceCount, hairCount;
 
         std::string currentRace;
-	};
+    };
 }
 #endif

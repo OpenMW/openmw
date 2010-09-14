@@ -110,7 +110,7 @@ void WindowManager::updateVisible()
       map   -> setVisible( eff & GW_Map );
       stats -> setVisible( eff & GW_Stats );
 //      inventory -> setVisible( eff & GW_Inventory );
-	  return;
+      return;
     }
 
   // All other modes are ignored

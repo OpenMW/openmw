@@ -88,7 +88,7 @@ namespace MWGui
     Console *console;
 
     // Character creation
-	RaceDialog *raceDialog;
+    RaceDialog *raceDialog;
 
     // Which dialogs have been shown, controls back/next/ok buttons
     bool nameChosen;
