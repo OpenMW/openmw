@@ -1,5 +1,5 @@
-#ifndef MWGUI_CHARGEN_H
-#define MWGUI_CHARGEN_H
+#ifndef MWGUI_RACE_H
+#define MWGUI_RACE_H
 
 #include <components/esm_store/store.hpp>
 
