@@ -34,9 +34,23 @@ namespace MWGui
 	class RaceDialog : public OEngine::GUI::Layout
 	{
 	public:
-        RaceDialog(MWWorld::Environment& environment);
+        RaceDialog(MWWorld::Environment& environment, bool showNext);
+
+        enum Gender
+        {
+            GM_Male,
+            GM_Female
+        };
+
+        const std::string &getRace() const { return currentRace; }
+        Gender getGender() const { return genderIndex == 0 ? GM_Male : GM_Female; }
+        // getFace()
+        // getHair()
 
         void setRace(const std::string &race);
+        void setGender(Gender gender) { genderIndex = gender == GM_Male ? 0 : 1; }
+        // setFace()
+        // setHair()
 
         // Events
 
@@ -84,7 +98,7 @@ namespace MWGui
 		MyGUI::WidgetPtr spellPowerList;
 		std::vector<MyGUI::WidgetPtr> spellPowerItems;
 
-		int genderIndex, faceIndex, hairIndex;
+        int genderIndex, faceIndex, hairIndex;
 		int faceCount, hairCount;
 
         std::string currentRace;

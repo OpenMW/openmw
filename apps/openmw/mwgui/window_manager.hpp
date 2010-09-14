@@ -79,6 +79,7 @@ namespace MWGui
 
   class WindowManager
   {
+    MWWorld::Environment& environment;
     HUD *hud;
     MapWindow *map;
     MainMenu *menu;
@@ -86,7 +87,16 @@ namespace MWGui
     InventoryWindow *inventory;
     Console *console;
 
+    // Character creation
 	RaceDialog *raceDialog;
+
+    // Which dialogs have been shown, controls back/next/ok buttons
+    bool nameChosen;
+    bool raceChosen;
+    bool classChosen;
+    bool birthChosen;
+    bool reviewNext;
+    ///< If true then any click on Next will cause the summary to be shown
 
     MyGUI::Gui *gui;
 
@@ -155,6 +165,9 @@ namespace MWGui
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
 
   private:
+    void updateCharacterGeneration();
+    void checkCharacterGeneration(GuiMode mode);
+
     void onRaceDialogDone();
     void onRaceDialogBack();
   };

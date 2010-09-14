@@ -12,7 +12,7 @@
 
 using namespace MWGui;
 
-RaceDialog::RaceDialog(MWWorld::Environment& environment)
+RaceDialog::RaceDialog(MWWorld::Environment& environment, bool showNext)
   : Layout("openmw_chargen_race_layout.xml")
   , environment(environment)
   , genderIndex(0)
@@ -63,13 +63,20 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment)
 	getWidget(skillList, "SkillList");
 	getWidget(spellPowerList, "SpellPowerList");
 
-    MyGUI::ButtonPtr okButton;
-    getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
-
+    // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
+
+    if (showNext)
+    {
+    }
+    else
+    {
+        MyGUI::ButtonPtr okButton;
+        getWidget(okButton, "OKButton");
+        okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
+    }
 
 	updateRaces();
 	updateSkills();

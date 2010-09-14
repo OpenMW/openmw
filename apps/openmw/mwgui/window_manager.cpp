@@ -2,6 +2,8 @@
 #include "mw_layouts.hpp"
 #include "mw_chargen.hpp"
 
+#include "../mwmechanics/mechanicsmanager.hpp"
+
 #include "console.hpp"
 
 #include <assert.h>
@@ -12,7 +14,17 @@ using namespace MWGui;
 
 WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
     const Compiler::Extensions& extensions, bool newGame)
-  : gui(_gui), mode(GM_Game), shown(GW_ALL), allowed(newGame ? GW_None : GW_ALL)
+  : environment(environment)
+  , raceDialog(nullptr)
+  , nameChosen(false)
+  , raceChosen(false)
+  , classChosen(false)
+  , birthChosen(false)
+  , reviewNext(false)
+  , gui(_gui)
+  , mode(GM_Game)
+  , shown(GW_ALL)
+  , allowed(newGame ? GW_None : GW_ALL)
 {
   // Get size info from the Gui object
   assert(gui);
@@ -25,10 +37,6 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   stats = new StatsWindow (environment.mWorld->getStore());
   inventory = new InventoryWindow ();
   console = new Console(w,h, environment, extensions);
-
-  raceDialog = new RaceDialog (environment);
-  raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
-  raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
 
   // The HUD is always on
   hud->setVisible(true);
@@ -57,7 +65,6 @@ void WindowManager::updateVisible()
   stats->setVisible(false);
   inventory->setVisible(false);
   console->disable();
-  raceDialog->setVisible(false);
 
   // Mouse is visible whenever we're not in game mode
   gui->setVisiblePointer(isGuiMode());
@@ -80,6 +87,16 @@ void WindowManager::updateVisible()
       console->enable();
       return;
     }
+
+  if (mode == GM_Race)
+  {
+      if (!raceDialog)
+          raceDialog = new RaceDialog (environment, raceChosen);
+      raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
+      raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
+      raceDialog->setVisible(true);
+      return;
+  }
 
   if(mode == GM_Inventory)
     {
@@ -125,12 +142,47 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
     }
 }
 
+void WindowManager::updateCharacterGeneration()
+{
+    if (raceDialog)
+    {
+        // TOOD: Uncomment when methods in mechanics manager is implemented
+        //raceDialog->setRace(environment.mMechanicsManager->getPlayerRace());
+        //raceDialog->setGender(environment.mMechanicsManager->getPlayerMale() ? RaceDialog::GM_Male : RaceDialog::GM_Female);
+        // TODO: Face/Hair
+    }
+}
+
 void WindowManager::onRaceDialogDone()
 {
-    raceDialog->setVisible(false);
+    raceChosen = true;
+    if (raceDialog)
+    {
+        raceDialog->setVisible(false);
+        environment.mMechanicsManager->setPlayerRace(raceDialog->getRace(), raceDialog->getGender() == RaceDialog::GM_Male);
+    }
+    delete raceDialog;
+    raceDialog = nullptr;
+
+    updateCharacterGeneration();
+
+    if (reviewNext)
+        setMode(GM_Review);
+    else if (classChosen)
+        setMode(GM_Class);
 }
 
 void WindowManager::onRaceDialogBack()
 {
-    raceDialog->setVisible(false);
+    if (raceDialog)
+    {
+        raceDialog->setVisible(false);
+        environment.mMechanicsManager->setPlayerRace(raceDialog->getRace(), raceDialog->getGender() == RaceDialog::GM_Male);
+    }
+    delete raceDialog;
+    raceDialog = nullptr;
+
+    updateCharacterGeneration();
+
+    setMode(GM_Name);
 }
