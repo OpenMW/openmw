@@ -157,6 +157,10 @@ void RaceDialog::updateRaces()
 	for (; it != end; ++it)
 	{
         const ESM::Race &race = it->second;
+        bool playable = race.data.flags & ESM::Race::Playable;
+        if (!playable) // Only display playable races
+            continue;
+
         raceList->addItem(race.name);
 		if (boost::iequals(race.name, currentRace))
     		raceList->setIndexSelected(index);
