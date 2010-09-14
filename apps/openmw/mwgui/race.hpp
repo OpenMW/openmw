@@ -13,16 +13,8 @@ namespace MWWorld
 }
 
 /*
-  This file contains classes corresponding to all the dialogs
-  for the character generation, layouts are defined in resources/mygui/ *.xml.
-
-  Each class inherites GUI::Layout and loads the XML file, and
-  provides some helper functions to manipulate the elements of the
-  window.
-
-  The windows are never created or destroyed (except at startup and
-  shutdown), they are only hid. You can control visibility with
-  setVisible().
+  This file contains the dialog for choosing a race.
+  Layout is defined by resources/mygui/openmw_chargen_race_layout.xml.
  */
 
 namespace MWGui
