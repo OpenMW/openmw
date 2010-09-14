@@ -32,7 +32,10 @@ along with Caelum. If not, see <http://www.gnu.org/licenses/>.
 
 // Define the dll export qualifier if compiling for Windows
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-	#ifdef CAELUM_LIB
+	#ifdef CAELUM_STATIC
+        // Don't use dll export qualifier when built as a static lib
+		#define CAELUM_EXPORT
+	#elif CAELUM_LIB
 		#define CAELUM_EXPORT __declspec (dllexport)
 	#else
 		#ifdef __MINGW32__
