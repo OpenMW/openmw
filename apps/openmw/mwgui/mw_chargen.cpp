@@ -58,6 +58,7 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment)
 	raceList->setScrollVisible(true);
 	raceList->eventListSelectAccept = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 	raceList->eventListMouseItemActivate = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
+    raceList->eventListChangePosition = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
 	getWidget(skillList, "SkillList");
 	getWidget(spellPowerList, "SpellPowerList");
@@ -134,6 +135,9 @@ void RaceDialog::onSelectNextHair(MyGUI::Widget*)
 
 void RaceDialog::onSelectRace(MyGUI::List* _sender, size_t _index)
 {
+    if (_index == MyGUI::ITEM_NONE)
+        return;
+
     const std::string race = raceList->getItem(_index);
     if (boost::iequals(currentRace, race))
         return;
