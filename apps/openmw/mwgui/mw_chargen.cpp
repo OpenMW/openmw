@@ -63,6 +63,14 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment)
 	getWidget(skillList, "SkillList");
 	getWidget(spellPowerList, "SpellPowerList");
 
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
+
+    MyGUI::ButtonPtr backButton;
+    getWidget(backButton, "BackButton");
+    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
+
 	updateRaces();
 	updateSkills();
 	updateSpellPowers();
@@ -97,6 +105,16 @@ int wrap(int index, int max)
 }
 
 // widget controls
+
+void RaceDialog::onOkClicked(MyGUI::Widget* _sender)
+{
+    eventDone();
+}
+
+void RaceDialog::onBackClicked(MyGUI::Widget* _sender)
+{
+    eventBack();
+}
 
 void RaceDialog::onHeadRotate(MyGUI::VScroll*, size_t _position)
 {

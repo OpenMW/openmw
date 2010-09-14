@@ -27,6 +27,8 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   console = new Console(w,h, environment, extensions);
 
   raceDialog = new RaceDialog (environment);
+  raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
+  raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
 
   // The HUD is always on
   hud->setVisible(true);
@@ -121,4 +123,14 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
         std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
         std::cout << std::endl;
     }
+}
+
+void WindowManager::onRaceDialogDone()
+{
+    raceDialog->setVisible(false);
+}
+
+void WindowManager::onRaceDialogBack()
+{
+    raceDialog->setVisible(false);
 }

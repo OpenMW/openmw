@@ -153,6 +153,10 @@ namespace MWGui
     ///< Set value for the given ID.
 
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
+
+  private:
+    void onRaceDialogDone();
+    void onRaceDialogBack();
   };
 }
 #endif

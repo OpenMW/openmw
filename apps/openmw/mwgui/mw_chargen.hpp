@@ -29,6 +29,8 @@ namespace MWGui
 {
 	using namespace MyGUI;
 
+    typedef delegates::CDelegate0 EventHandle_Void;
+
 	class RaceDialog : public OEngine::GUI::Layout
 	{
 	public:
@@ -36,7 +38,19 @@ namespace MWGui
 
         void setRace(const std::string &race);
 
-	protected:
+        // Events
+
+        /** Event : Back button clicked.\n
+			signature : void method()\n
+		*/
+		EventHandle_Void eventBack;
+
+        /** Event : Dialog finished, OK button clicked.\n
+			signature : void method()\n
+		*/
+		EventHandle_Void eventDone;
+
+    protected:
 		void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
 
 		void onSelectPreviousGender(MyGUI::Widget* _sender);
@@ -49,6 +63,9 @@ namespace MWGui
 		void onSelectNextHair(MyGUI::Widget* _sender);
 
 		void onSelectRace(MyGUI::List* _sender, size_t _index);
+
+        void onOkClicked(MyGUI::Widget* _sender);
+        void onBackClicked(MyGUI::Widget* _sender);
 
 	private:
 		void updateRaces();
