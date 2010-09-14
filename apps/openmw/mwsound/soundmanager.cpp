@@ -110,20 +110,21 @@ namespace MWSound
         cameraTracker.unfollowCamera();
     }
 
-    std::string toMp3(const std::string &str)
+    static std::string toMp3(std::string str)
     {
-      std::string wav = str;
-      int i = str.size()-3;
-      wav[i++] = 'm';
-      wav[i++] = 'p';
-      wav[i++] = '3';
-      return wav;
+      std::string::size_type i = str.rfind('.');
+      if(str.find('/', i) == std::string::npos &&
+         str.find('\\', i) == std::string::npos)
+        str = str.substr(0, i) + ".mp3";
+      else
+        str += ".mp3";
+      return str;
     }
 
     bool hasFile(const std::string &str)
     {
       if(files.has(str)) return true;
-      // Not found? Try exchanging .wav with .mp3
+      // Not found? Try with .mp3
       return files.has(toMp3(str));
     }
 
@@ -153,10 +154,24 @@ namespace MWSound
       const ESM::Sound *snd = store.sounds.search(soundId);
       if(snd == NULL) return "";
 
-      volume *= snd->data.volume / 255.0f;
-      // These factors are not very fine tuned.
-      min = snd->data.minRange * 7.0f;
-      max = snd->data.maxRange * 2000.0f;
+      if(snd->data.volume == 0)
+          volume = 0.0f;
+      else
+          volume *= pow(10.0, (snd->data.volume/255.0f*3348.0 - 3348.0) / 2000.0);
+
+      if(snd->data.minRange == 0 && snd->data.maxRange == 0)
+      {
+        min = 100.0f;
+        max = 2000.0f;
+      }
+      else
+      {
+        min = snd->data.minRange * 20.0f;
+        max = snd->data.maxRange * 50.0f;
+        min = std::max(min, 1.0f);
+        max = std::max(min, max);
+      }
+
       return convertPath(snd->sound);
     }
 
@@ -309,7 +324,7 @@ namespace MWSound
     // The range values are not tested
     if(!mData) return;
     if(mData->hasFile(filename))
-      mData->add(mData->convertPath(filename), ptr, "_say_sound", 1, 1, 100, 10000, false);
+      mData->add(mData->convertPath(filename), ptr, "_say_sound", 1, 1, 100, 20000, false);
     else
       cout << "Sound file " << filename << " not found, skipping.\n";
   }
@@ -342,10 +357,11 @@ namespace MWSound
     const std::string &file = mData->lookup(soundId, volume, min, max);
     if(file != "")
       {
-        SoundPtr snd = mData->mgr->play(file);
+        SoundPtr snd = mData->mgr->load(file);
         snd->setVolume(volume);
         snd->setRange(min,max);
         snd->setPitch(pitch);
+        snd->play();
       }
   }
 
