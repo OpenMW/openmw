@@ -26,7 +26,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   inventory = new InventoryWindow ();
   console = new Console(w,h, environment, extensions);
 
-  raceDialog = new RaceDialog ();
+  raceDialog = new RaceDialog (environment);
 
   // The HUD is always on
   hud->setVisible(true);

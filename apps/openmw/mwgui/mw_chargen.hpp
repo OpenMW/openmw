@@ -7,6 +7,11 @@
 
 #include <boost/array.hpp>
 
+namespace MWWorld
+{
+    class Environment;
+}
+
 /*
   This file contains classes corresponding to all the dialogs
   for the character generation, layouts are defined in resources/mygui/ *.xml.
@@ -27,7 +32,9 @@ namespace MWGui
 	class RaceDialog : public OEngine::GUI::Layout
 	{
 	public:
-		RaceDialog();
+        RaceDialog(MWWorld::Environment& environment);
+
+        void setRace(const std::string &race);
 
 	protected:
 		void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
@@ -48,6 +55,8 @@ namespace MWGui
 		void updateSkills();
 		void updateSpellPowers();
 
+        MWWorld::Environment& environment;
+
 		MyGUI::CanvasPtr  appearanceBox;
 		MyGUI::ListPtr    raceList;
 		MyGUI::HScrollPtr headRotate;
@@ -60,6 +69,8 @@ namespace MWGui
 
 		int genderIndex, faceIndex, hairIndex;
 		int faceCount, hairCount;
+
+        std::string currentRace;
 	};
 }
 #endif

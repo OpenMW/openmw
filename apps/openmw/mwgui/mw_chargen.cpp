@@ -1,13 +1,20 @@
 #include "mw_chargen.hpp"
+#include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
+#include "components/esm_store/store.hpp"
 
 #include <assert.h>
 #include <iostream>
 #include <iterator>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
 using namespace MWGui;
 
-RaceDialog::RaceDialog()
+RaceDialog::RaceDialog(MWWorld::Environment& environment)
   : Layout("openmw_chargen_race_layout.xml")
+  , environment(environment)
   , genderIndex(0)
   , faceIndex(0)
   , hairIndex(0)
@@ -56,6 +63,24 @@ RaceDialog::RaceDialog()
 	getWidget(spellPowerList, "SpellPowerList");
 
 	updateRaces();
+	updateSkills();
+	updateSpellPowers();
+}
+
+void RaceDialog::setRace(const std::string &race)
+{
+    currentRace = race;
+    raceList->setIndexSelected(MyGUI::ITEM_NONE);
+    size_t count = raceList->getItemCount();
+    for (size_t i = 0; i < count; ++i)
+    {
+        if (boost::iequals(raceList->getItem(i), race))
+        {
+            raceList->setIndexSelected(i);
+            break;
+        }
+    }
+
 	updateSkills();
 	updateSpellPowers();
 }
@@ -109,8 +134,12 @@ void RaceDialog::onSelectNextHair(MyGUI::Widget*)
 
 void RaceDialog::onSelectRace(MyGUI::List* _sender, size_t _index)
 {
-	// TODO: Select actual race
-	updateSkills();
+    const std::string race = raceList->getItem(_index);
+    if (boost::iequals(currentRace, race))
+        return;
+
+    currentRace = race;
+    updateSkills();
 	updateSpellPowers();
 }
 
@@ -119,14 +148,20 @@ void RaceDialog::onSelectRace(MyGUI::List* _sender, size_t _index)
 void RaceDialog::updateRaces()
 {
 	raceList->removeAllItems();
-	raceList->addItem("Argonian");
-	raceList->addItem("Breton");
-	raceList->addItem("Dark Elf");
-	raceList->addItem("High Elf");
-	raceList->addItem("Imperial");
-	raceList->addItem("Khajiit");
-	raceList->addItem("Nord");
-	raceList->addItem("Orc");
+
+    ESMS::ESMStore &store = environment.mWorld->getStore();
+	
+    ESMS::RecListT<ESM::Race>::MapType::const_iterator it = store.races.list.begin();
+    ESMS::RecListT<ESM::Race>::MapType::const_iterator end = store.races.list.end();
+	int index = 0;
+	for (; it != end; ++it)
+	{
+        const ESM::Race &race = it->second;
+        raceList->addItem(race.name);
+		if (boost::iequals(race.name, currentRace))
+    		raceList->setIndexSelected(index);
+		++index;
+	}
 }
 
 void RaceDialog::updateSkills()
@@ -137,35 +172,35 @@ void RaceDialog::updateSkills()
 	}
 	skillItems.clear();
 
-	MyGUI::StaticTextPtr skillName, skillBonus;
+    if (currentRace.empty())
+        return;
+
+	MyGUI::StaticTextPtr skillNameWidget, skillBonusWidget;
 	const int lineHeight = 18;
 	MyGUI::IntCoord coord1(0, 0, skillList->getWidth() - (40 + 4), 18);
 	MyGUI::IntCoord coord2(coord1.left + coord1.width, 0, 40, 18);
 
-	const char *inputList[][2] = {
-		{"Athletics", "5"},
-		{"Destruction", "10"},
-		{"Light Armor", "5"},
-		{"Long Blade", "5"},
-		{"Marksman", "5"},
-		{"Mysticism", "5"},
-		{"Short Blade", "10"},
-		{0,0}
-	};
-
-	for (int i = 0; inputList[i][0]; ++i)
+    ESMS::ESMStore &store = environment.mWorld->getStore();
+    const ESM::Race *race = store.races.find(currentRace);
+    int count = sizeof(race->data.bonus)/sizeof(race->data.bonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
+    for (int i = 0; i < count; ++i)
 	{
-		std::ostringstream name;
-		name << std::string("SkillName") << i;
-		skillName = skillList->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default, name.str());
-		skillName->setCaption(inputList[i][0]);
-		std::ostringstream bonus;
-		bonus << std::string("SkillBonus") << i;
-		skillBonus = skillList->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default, bonus.str());
-		skillBonus->setCaption(inputList[i][1]);
+        int skillId = race->data.bonus[i].skill;
+        if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
+            continue;
 
-		skillItems.push_back(skillName);
-		skillItems.push_back(skillBonus);
+        skillNameWidget = skillList->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default,
+                                                                     std::string("SkillName") + boost::lexical_cast<std::string>(i));
+        assert(skillId >= 0 && skillId < ESM::Skill::Length);
+		skillNameWidget->setCaption(ESMS::Skill::sSkillNames[skillId]);
+
+		skillBonusWidget = skillList->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default,
+                                                                      std::string("SkillBonus") + boost::lexical_cast<std::string>(i));
+        int bonus = race->data.bonus[i].bonus;
+		skillBonusWidget->setCaption(boost::lexical_cast<std::string>(bonus));
+
+		skillItems.push_back(skillNameWidget);
+		skillItems.push_back(skillBonusWidget);
 
 		coord1.top += lineHeight;
 		coord2.top += lineHeight;
