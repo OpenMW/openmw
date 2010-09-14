@@ -114,6 +114,7 @@ void WindowManager::updateVisible()
     }
 
   // All other modes are ignored
+  mode = GM_Game;
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
