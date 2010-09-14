@@ -1,5 +1,5 @@
 #include "window_manager.hpp"
-#include "mw_layouts.hpp"
+#include "layouts.hpp"
 #include "race.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
