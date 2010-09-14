@@ -39,6 +39,7 @@ namespace MWGui
   class InventoryWindow;
   class Console;
 
+  class TextInputDialog;
   class RaceDialog;
 
   enum GuiMode
@@ -88,6 +89,7 @@ namespace MWGui
     Console *console;
 
     // Character creation
+    TextInputDialog *nameDialog;
     RaceDialog *raceDialog;
 
     // Which dialogs have been shown, controls back/next/ok buttons
@@ -168,6 +170,10 @@ namespace MWGui
     void updateCharacterGeneration();
     void checkCharacterGeneration(GuiMode mode);
 
+    // Character generation: Name dialog
+    void onNameDialogDone();
+
+    // Character generation: Race dialog
     void onRaceDialogDone();
     void onRaceDialogBack();
   };

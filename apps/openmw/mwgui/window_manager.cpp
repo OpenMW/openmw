@@ -1,5 +1,6 @@
 #include "window_manager.hpp"
 #include "layouts.hpp"
+#include "text_input.hpp"
 #include "race.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
@@ -15,6 +16,7 @@ using namespace MWGui;
 WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
     const Compiler::Extensions& extensions, bool newGame)
   : environment(environment)
+  , nameDialog(nullptr)
   , raceDialog(nullptr)
   , nameChosen(false)
   , raceChosen(false)
@@ -54,6 +56,7 @@ WindowManager::~WindowManager()
   delete stats;
   delete inventory;
 
+  delete nameDialog;
   delete raceDialog;
 }
 
@@ -87,6 +90,15 @@ void WindowManager::updateVisible()
       console->enable();
       return;
     }
+
+  if (mode == GM_Name)
+  {
+      if (!nameDialog)
+          nameDialog = new TextInputDialog(environment, "Name", nameChosen, gui->getViewSize());
+      nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
+      nameDialog->setVisible(true);
+      return;
+  }
 
   if (mode == GM_Race)
   {
@@ -149,6 +161,25 @@ void WindowManager::updateCharacterGeneration()
         //raceDialog->setGender(environment.mMechanicsManager->getPlayerMale() ? RaceDialog::GM_Male : RaceDialog::GM_Female);
         // TODO: Face/Hair
     }
+}
+
+void WindowManager::onNameDialogDone()
+{
+    nameChosen = true;
+    if (nameDialog)
+    {
+        nameDialog->setVisible(false);
+        environment.mMechanicsManager->setPlayerName(nameDialog->getTextInput());
+    }
+    delete nameDialog;
+    nameDialog = nullptr;
+
+    updateCharacterGeneration();
+
+    if (reviewNext)
+        setMode(GM_Review);
+    else if (raceChosen)
+        setMode(GM_Race);
 }
 
 void WindowManager::onRaceDialogDone()
