@@ -1,4 +1,4 @@
-#include "mw_chargen.hpp"
+#include "race.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "components/esm_store/store.hpp"

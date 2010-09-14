@@ -1,6 +1,6 @@
 #include "window_manager.hpp"
 #include "mw_layouts.hpp"
-#include "mw_chargen.hpp"
+#include "race.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
