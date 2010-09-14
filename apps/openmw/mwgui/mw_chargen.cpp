@@ -215,26 +215,29 @@ void RaceDialog::updateSpellPowers()
 	}
 	spellPowerItems.clear();
 
-	MyGUI::StaticTextPtr spellPowerName;
+    if (currentRace.empty())
+        return;
+
+	MyGUI::StaticTextPtr spellPowerWidget;
 	const int lineHeight = 18;
 	MyGUI::IntCoord coord(0, 0, spellPowerList->getWidth(), 18);
 
-	const char *inputList[] = {
-		"Depth Perception",
-		"Resist Fire",
-		"Ancestor Guardian",
-		0
-	};
+    ESMS::ESMStore &store = environment.mWorld->getStore();
+    const ESM::Race *race = store.races.find(currentRace);
 
-	for (int i = 0; inputList[i]; ++i)
+    std::vector<std::string>::const_iterator it = race->powers.list.begin();
+    std::vector<std::string>::const_iterator end = race->powers.list.end();
+	for (int i = 0; it != end; ++it)
 	{
-		std::ostringstream name;
-		name << std::string("SpellPowerName") << i;
-		spellPowerName = spellPowerList->createWidget<MyGUI::StaticText>("SandText", coord, MyGUI::Align::Default, name.str());
-		spellPowerName->setCaption(inputList[i]);
+        const std::string &spellpower = *it;
+        const ESM::Spell *spell = store.spells.find(spellpower);
+        assert(spell);
+        spellPowerWidget = spellPowerList->createWidget<MyGUI::StaticText>("SandText", coord, MyGUI::Align::Default, std::string("SpellPowerName") + boost::lexical_cast<std::string>(i));
+		spellPowerWidget->setCaption(spell->name);
 
-		spellPowerItems.push_back(spellPowerName);
+		spellPowerItems.push_back(spellPowerWidget);
 
 		coord.top += lineHeight;
+        ++i;
 	}
 }
