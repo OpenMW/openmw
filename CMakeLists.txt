@@ -102,6 +102,7 @@ source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 set(ESM
     ${COMP_DIR}/esm/load_impl.cpp
+    ${COMP_DIR}/esm/skill.cpp
 )
 source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 
