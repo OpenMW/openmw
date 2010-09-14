@@ -232,6 +232,9 @@ add_subdirectory( extern/mygui_3.0.1 )
 # MyGUI: extern/mygui_3.0.0/
 add_definitions(-DMYGUI_STATIC)
 
+# Caelum: extern/caelum/
+add_definitions(-DCAELUM_STATIC)
+
 # Specify build paths
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
