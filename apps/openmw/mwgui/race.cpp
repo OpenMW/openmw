@@ -99,7 +99,7 @@ void RaceDialog::setNextButtonShow(bool shown)
 
         // Adjust back button when next is shown
         backButton->setCoord(MyGUI::IntCoord(471 - 18, 397, 53, 23));
-        okButton->setCoord(MyGUI::IntCoord(532 - 18, 397 + 18, 42, 23));
+        okButton->setCoord(MyGUI::IntCoord(532 - 18, 397, 42 + 18, 23));
     }
     else
     {
