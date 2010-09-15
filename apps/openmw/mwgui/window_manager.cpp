@@ -94,7 +94,10 @@ void WindowManager::updateVisible()
   if (mode == GM_Name)
   {
       if (!nameDialog)
-          nameDialog = new TextInputDialog(environment, "Name", nameChosen, gui->getViewSize());
+      {
+          std::string sName = getGameSettingString("sName", "Name");
+          nameDialog = new TextInputDialog(environment, sName, nameChosen, gui->getViewSize());
+      }
       nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
       nameDialog->setVisible(true);
       return;
@@ -150,6 +153,14 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
         std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
         std::cout << std::endl;
     }
+}
+
+const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default)
+{
+    const ESM::GameSetting *setting = environment.mWorld->getStore().gameSettings.search(id);
+    if (setting && setting->type == ESM::VT_String)
+        return setting->str;
+    return default;
 }
 
 void WindowManager::updateCharacterGeneration()

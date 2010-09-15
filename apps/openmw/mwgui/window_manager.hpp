@@ -167,6 +167,15 @@ namespace MWGui
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
 
   private:
+    /**
+     * Fetches a GMST string from the store, if there is no setting with the given
+     * ID or it is not a string the default string is returned.
+     *
+     * @param id Identifier for the GMST setting, e.g. "aName"
+     * @param default Default value if the GMST setting cannot be used.
+     */
+    const std::string &getGameSettingString(const std::string &id, const std::string &default);
+
     void updateCharacterGeneration();
     void checkCharacterGeneration(GuiMode mode);
 
