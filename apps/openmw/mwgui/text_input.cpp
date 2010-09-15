@@ -47,6 +47,13 @@ void TextInputDialog::setTextLabel(const std::string &label)
     setText("LabelT", label);
 }
 
+void TextInputDialog::open()
+{
+    // Make sure the edit box has focus
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
+    setVisible(true);
+}
+
 // widget controls
 
 void TextInputDialog::onOkClicked(MyGUI::Widget* _sender)

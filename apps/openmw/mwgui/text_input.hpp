@@ -25,6 +25,7 @@ namespace MWGui
 
         void setNextButtonShow(bool shown);
         void setTextLabel(const std::string &label);
+        void open();
 
         // Events
         typedef delegates::CDelegate0 EventHandle_Void;

@@ -107,7 +107,7 @@ void WindowManager::updateVisible()
       nameDialog->setTextLabel(sName);
       nameDialog->setNextButtonShow(nameChosen);
       nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
-      nameDialog->setVisible(true);
+      nameDialog->open();
       return;
   }
 
