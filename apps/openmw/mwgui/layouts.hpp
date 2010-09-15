@@ -7,6 +7,8 @@
 
 #include <boost/array.hpp>
 
+#include <sstream>
+
 /*
   This file contains classes corresponding to all the window layouts
   defined in resources/mygui/ *.xml.
@@ -211,11 +213,6 @@ namespace MWGui
         {
             setText (names[i][0], store.gameSettings.find (names[i][1])->str);
         }
-
-      // These are just demo values, you should replace these with
-      // real calls from outside the class later.
-      setText("LevelText", "5");
-      setText("ClassText", "Pilgrim");
     }
 
     void setPlayerName(const std::string& playerName)
@@ -274,7 +271,17 @@ namespace MWGui
         else if (id=="race")
             setText ("RaceText", value);
         else if (id=="class")
-          setText ("ClassText", value);
+            setText ("ClassText", value);
+    }
+
+    void setValue (const std::string& id, int value)
+    {
+        if (id=="level")
+        {
+            std::ostringstream text;
+            text << value;
+            setText("LevelText", text.str());
+        }
     }
   };
 

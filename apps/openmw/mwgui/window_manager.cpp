@@ -145,6 +145,11 @@ void WindowManager::setValue (const std::string& id, const std::string& value)
     stats->setValue (id, value);
 }
 
+void WindowManager::setValue (const std::string& id, int value)
+{
+    stats->setValue (id, value);
+}
+
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
     std::cout << "message box: " << message << std::endl;

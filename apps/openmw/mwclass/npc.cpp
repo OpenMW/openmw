@@ -94,6 +94,8 @@ namespace MWClass
             stats->mDynamic[1].set (ref->base->npdt52.mana);
             stats->mDynamic[2].set (ref->base->npdt52.fatigue);
 
+            stats->mLevel = ref->base->npdt52.level;
+
             ptr.getRefData().getCreatureStats() = stats;
         }
 

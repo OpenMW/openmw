@@ -18,10 +18,10 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 //        MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
 
-//        const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
+        const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
 
         // reset
-
+        creatureStats.mLevel = player->npdt52.level;
 
         // race
         const ESM::Race *race =
@@ -153,6 +153,8 @@ namespace MWMechanics
                     mEnvironment.mWindowManager->setValue (dynamicNames[i], stats.mDynamic[i]);
                 }
             }
+
+            mEnvironment.mWindowManager->setValue ("level", stats.mLevel);
         }
 
         if (mUpdatePlayer)
