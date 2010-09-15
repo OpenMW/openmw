@@ -103,7 +103,7 @@ void RaceDialog::setNextButtonShow(bool shown)
     }
     else
     {
-        okButton->setCaption("ok");
+        okButton->setCaption("OK");
         backButton->setCoord(MyGUI::IntCoord(471, 397, 53, 23));
         okButton->setCoord(MyGUI::IntCoord(532, 397, 42, 23));
     }
