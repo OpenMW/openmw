@@ -130,7 +130,9 @@ namespace MWMechanics
         {
             // basic player profile; should not change anymore after the creation phase is finished.
             mEnvironment.mWindowManager->setValue ("name", mEnvironment.mWorld->getPlayerPos().getName());
-            mEnvironment.mWindowManager->setValue ("race", mEnvironment.mWorld->getPlayerPos().getRace());
+            mEnvironment.mWindowManager->setValue ("race",
+                mEnvironment.mWorld->getStore().races.find (mEnvironment.mWorld->getPlayerPos().
+                getRace())->name);
             mEnvironment.mWindowManager->setValue ("class",
                 mEnvironment.mWorld->getPlayerPos().getClass().name);
             mUpdatePlayer = false;
