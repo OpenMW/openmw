@@ -30,6 +30,9 @@ TextInputDialog::TextInputDialog(MWWorld::Environment& environment, const std::s
         // Adjust back button when next is shown
         okButton->setCoord(okButton->getCoord() + MyGUI::IntCoord(-18, 0, 18, 0));
     }
+
+    // Make sure the edit box has focus
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
 }
 
 // widget controls
