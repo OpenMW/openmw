@@ -11,10 +11,40 @@
 
 namespace MWMechanics
 {
+    void MechanicsManager::buildPlayer()
+    {
+        MWWorld::Ptr ptr = mEnvironment.mWorld->getPlayerPos().getPlayer();
+
+        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+//        MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
+
+        const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
+
+        // reset
+        creatureStats.mAttributes[0].setBase (player->npdt52.strength);
+        creatureStats.mAttributes[1].setBase (player->npdt52.intelligence);
+        creatureStats.mAttributes[2].setBase (player->npdt52.willpower);
+        creatureStats.mAttributes[3].setBase (player->npdt52.agility);
+        creatureStats.mAttributes[4].setBase (player->npdt52.speed);
+        creatureStats.mAttributes[5].setBase (player->npdt52.endurance);
+        creatureStats.mAttributes[6].setBase (player->npdt52.personality);
+        creatureStats.mAttributes[7].setBase (player->npdt52.luck);
+
+
+        // race
+
+        // birthsign
+
+        // class
+
+        // calculate dynamic stats
+
+    }
+
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
     : mEnvironment (environment), mSetName (true)
     {
-
+        buildPlayer();
     }
 
     void MechanicsManager::addActor (const MWWorld::Ptr& ptr)
@@ -100,20 +130,26 @@ namespace MWMechanics
     void MechanicsManager::setPlayerRace (const std::string& race, bool male)
     {
 
+
+        buildPlayer();
     }
 
     void MechanicsManager::setPlayerBirthsign (const std::string& id)
     {
 
+
+        buildPlayer();
     }
 
     void MechanicsManager::setPlayerClass (const std::string& id)
     {
 
+        buildPlayer();
     }
 
     void MechanicsManager::setPlayerClass (const ESM::Class& class_)
     {
 
+        buildPlayer();
     }
 }
