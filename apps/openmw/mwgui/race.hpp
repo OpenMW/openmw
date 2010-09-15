@@ -34,12 +34,12 @@ namespace MWGui
             GM_Female
         };
 
-        const std::string &getRace() const { return currentRace; }
+        const std::string &getRaceId() const { return currentRaceId; }
         Gender getGender() const { return genderIndex == 0 ? GM_Male : GM_Female; }
         // getFace()
         // getHair()
 
-        void setRace(const std::string &race);
+        void setRaceId(const std::string &raceId);
         void setGender(Gender gender) { genderIndex = gender == GM_Male ? 0 : 1; }
         // setFace()
         // setHair()
@@ -93,7 +93,7 @@ namespace MWGui
         int genderIndex, faceIndex, hairIndex;
         int faceCount, hairCount;
 
-        std::string currentRace;
+        std::string currentRaceId;
     };
 }
 #endif

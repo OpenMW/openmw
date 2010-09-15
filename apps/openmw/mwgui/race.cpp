@@ -92,14 +92,14 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment, bool showNext)
     updateSpellPowers();
 }
 
-void RaceDialog::setRace(const std::string &race)
+void RaceDialog::setRaceId(const std::string &raceId)
 {
-    currentRace = race;
+    currentRaceId = raceId;
     raceList->setIndexSelected(MyGUI::ITEM_NONE);
     size_t count = raceList->getItemCount();
     for (size_t i = 0; i < count; ++i)
     {
-        if (boost::iequals(raceList->getItem(i), race))
+        if (boost::iequals(raceList->getItem(i), raceId))
         {
             raceList->setIndexSelected(i);
             break;
@@ -172,11 +172,11 @@ void RaceDialog::onSelectRace(MyGUI::List* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
-    const std::string race = raceList->getItem(_index);
-    if (boost::iequals(currentRace, race))
+    const std::string *raceId = raceList->getItemDataAt<std::string>(_index);
+    if (boost::iequals(currentRaceId, *raceId))
         return;
 
-    currentRace = race;
+    currentRaceId = *raceId;
     updateSkills();
     updateSpellPowers();
 }
@@ -199,8 +199,8 @@ void RaceDialog::updateRaces()
         if (!playable) // Only display playable races
             continue;
 
-        raceList->addItem(race.name);
-        if (boost::iequals(race.name, currentRace))
+        raceList->addItem(race.name, it->first);
+        if (boost::iequals(race.name, currentRaceId))
             raceList->setIndexSelected(index);
         ++index;
     }
@@ -214,7 +214,7 @@ void RaceDialog::updateSkills()
     }
     skillItems.clear();
 
-    if (currentRace.empty())
+    if (currentRaceId.empty())
         return;
 
     MyGUI::StaticTextPtr skillNameWidget, skillBonusWidget;
@@ -223,7 +223,7 @@ void RaceDialog::updateSkills()
     MyGUI::IntCoord coord2(coord1.left + coord1.width, 0, 40, 18);
 
     ESMS::ESMStore &store = environment.mWorld->getStore();
-    const ESM::Race *race = store.races.find(currentRace);
+    const ESM::Race *race = store.races.find(currentRaceId);
     int count = sizeof(race->data.bonus)/sizeof(race->data.bonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
     for (int i = 0; i < count; ++i)
     {
@@ -257,7 +257,7 @@ void RaceDialog::updateSpellPowers()
     }
     spellPowerItems.clear();
 
-    if (currentRace.empty())
+    if (currentRaceId.empty())
         return;
 
     MyGUI::StaticTextPtr spellPowerWidget;
@@ -265,7 +265,7 @@ void RaceDialog::updateSpellPowers()
     MyGUI::IntCoord coord(0, 0, spellPowerList->getWidth(), 18);
 
     ESMS::ESMStore &store = environment.mWorld->getStore();
-    const ESM::Race *race = store.races.find(currentRace);
+    const ESM::Race *race = store.races.find(currentRaceId);
 
     std::vector<std::string>::const_iterator it = race->powers.list.begin();
     std::vector<std::string>::const_iterator end = race->powers.list.end();

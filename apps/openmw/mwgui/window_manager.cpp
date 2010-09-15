@@ -201,7 +201,7 @@ void WindowManager::onRaceDialogDone()
     if (raceDialog)
     {
         raceDialog->setVisible(false);
-        environment.mMechanicsManager->setPlayerRace(raceDialog->getRace(), raceDialog->getGender() == RaceDialog::GM_Male);
+        environment.mMechanicsManager->setPlayerRace(raceDialog->getRaceId(), raceDialog->getGender() == RaceDialog::GM_Male);
     }
     delete raceDialog;
     raceDialog = nullptr;
@@ -219,7 +219,7 @@ void WindowManager::onRaceDialogBack()
     if (raceDialog)
     {
         raceDialog->setVisible(false);
-        environment.mMechanicsManager->setPlayerRace(raceDialog->getRace(), raceDialog->getGender() == RaceDialog::GM_Male);
+        environment.mMechanicsManager->setPlayerRace(raceDialog->getRaceId(), raceDialog->getGender() == RaceDialog::GM_Male);
     }
     delete raceDialog;
     raceDialog = nullptr;
