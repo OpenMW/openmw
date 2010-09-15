@@ -1,6 +1,7 @@
 #include "race.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
+#include "window_manager.hpp"
 #include "components/esm_store/store.hpp"
 
 #include <assert.h>
@@ -26,7 +27,8 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment, bool showNext)
     // These are just demo values, you should replace these with
     // real calls from outside the class later.
 
-    setText("AppearanceT", "Appearance");
+    WindowManager *wm = environment.mWindowManager;
+    setText("AppearanceT", wm->getGameSettingString("sRaceMenu1", "Appearance"));
     getWidget(appearanceBox, "AppearanceBox");
 
     getWidget(headRotate, "HeadRotate");
@@ -38,29 +40,34 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment, bool showNext)
     // Set up next/previous buttons
     MyGUI::ButtonPtr prevButton, nextButton;
 
+    setText("GenderChoiceT", wm->getGameSettingString("sRaceMenu2", "Change Sex"));
     getWidget(prevButton, "PrevGenderButton");
     getWidget(nextButton, "NextGenderButton");
     prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousGender);
     nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextGender);
 
+    setText("FaceChoiceT", wm->getGameSettingString("sRaceMenu3", "Change Face"));
     getWidget(prevButton, "PrevFaceButton");
     getWidget(nextButton, "NextFaceButton");
     prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousFace);
     nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextFace);
 
+    setText("HairChoiceT", wm->getGameSettingString("sRaceMenu3", "Change Hair"));
     getWidget(prevButton, "PrevHairButton");
     getWidget(nextButton, "NextHairButton");
     prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
     nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextHair);
 
-    setText("RaceT", "Race");
+    setText("RaceT", wm->getGameSettingString("sRaceMenu4", "Race"));
     getWidget(raceList, "RaceList");
     raceList->setScrollVisible(true);
     raceList->eventListSelectAccept = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
     raceList->eventListMouseItemActivate = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
     raceList->eventListChangePosition = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
+    setText("SkillsT", wm->getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
     getWidget(skillList, "SkillList");
+    setText("SpellPowerT", wm->getGameSettingString("sRaceMenu7", "Specials"));
     getWidget(spellPowerList, "SpellPowerList");
 
     // TODO: These buttons should be managed by a Dialog class
