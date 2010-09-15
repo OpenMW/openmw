@@ -21,17 +21,34 @@ namespace MWMechanics
         const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
 
         // reset
-        creatureStats.mAttributes[0].setBase (player->npdt52.strength);
-        creatureStats.mAttributes[1].setBase (player->npdt52.intelligence);
-        creatureStats.mAttributes[2].setBase (player->npdt52.willpower);
-        creatureStats.mAttributes[3].setBase (player->npdt52.agility);
-        creatureStats.mAttributes[4].setBase (player->npdt52.speed);
-        creatureStats.mAttributes[5].setBase (player->npdt52.endurance);
-        creatureStats.mAttributes[6].setBase (player->npdt52.personality);
-        creatureStats.mAttributes[7].setBase (player->npdt52.luck);
 
 
         // race
+        const ESM::Race *race =
+            mEnvironment.mWorld->getStore().races.find (mEnvironment.mWorld->getPlayerPos().getRace());
+
+        bool male = mEnvironment.mWorld->getPlayerPos().isMale();
+
+        for (int i=0; i<8; ++i)
+        {
+            const ESM::Race::MaleFemale *attribute = 0;
+            switch (i)
+            {
+                case 0: attribute = &race->data.strength; break;
+                case 1: attribute = &race->data.intelligence; break;
+                case 2: attribute = &race->data.willpower; break;
+                case 3: attribute = &race->data.agility; break;
+                case 4: attribute = &race->data.speed; break;
+                case 5: attribute = &race->data.endurance; break;
+                case 6: attribute = &race->data.personality; break;
+                case 7: attribute = &race->data.luck; break;
+            }
+
+            creatureStats.mAttributes[i].setBase (
+                static_cast<int> (male ? attribute->male : attribute->female));
+        }
+
+
 
         // birthsign
 
