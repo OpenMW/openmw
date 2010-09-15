@@ -20,7 +20,7 @@ namespace MWMechanics
             std::set<MWWorld::Ptr> mActors;
             MWWorld::Ptr mWatched;
             CreatureStats mWatchedCreature;
-            bool mSetName;
+            bool mUpdatePlayer;
 
             void buildPlayer();
             ///< build player according to stored class/race/birthsign information. Will

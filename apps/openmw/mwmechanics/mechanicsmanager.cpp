@@ -54,7 +54,7 @@ namespace MWMechanics
     }
 
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
-    : mEnvironment (environment), mSetName (true)
+    : mEnvironment (environment), mUpdatePlayer (true)
     {
         buildPlayer();
     }
@@ -126,42 +126,48 @@ namespace MWMechanics
             }
         }
 
-        if (mSetName)
+        if (mUpdatePlayer)
         {
+            // basic player profile; should not change anymore after the creation phase is finished.
             mEnvironment.mWindowManager->setValue ("name", mEnvironment.mWorld->getPlayerPos().getName());
-            mSetName = false;
+            mEnvironment.mWindowManager->setValue ("race", mEnvironment.mWorld->getPlayerPos().getRace());
+            mEnvironment.mWindowManager->setValue ("class",
+                mEnvironment.mWorld->getPlayerPos().getClass().name);
+            mUpdatePlayer = false;
         }
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)
     {
         mEnvironment.mWorld->getPlayerPos().setName (name);
-        mSetName = true;
+        mUpdatePlayer = true;
     }
 
     void MechanicsManager::setPlayerRace (const std::string& race, bool male)
     {
-
-
+        mEnvironment.mWorld->getPlayerPos().setGender (male);
+        mEnvironment.mWorld->getPlayerPos().setRace (race);
         buildPlayer();
+        mUpdatePlayer = true;
     }
 
     void MechanicsManager::setPlayerBirthsign (const std::string& id)
     {
-
-
+        mEnvironment.mWorld->getPlayerPos().setBirthsign (id);
         buildPlayer();
     }
 
     void MechanicsManager::setPlayerClass (const std::string& id)
     {
-
+        mEnvironment.mWorld->getPlayerPos().setClass (*mEnvironment.mWorld->getStore().classes.find (id));
         buildPlayer();
+        mUpdatePlayer = true;
     }
 
     void MechanicsManager::setPlayerClass (const ESM::Class& class_)
     {
-
+        mEnvironment.mWorld->getPlayerPos().setClass (class_);
         buildPlayer();
+        mUpdatePlayer = true;
     }
 }

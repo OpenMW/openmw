@@ -25,15 +25,16 @@ namespace MWRender
     Ogre::Camera *camera;
     MWWorld::World& mWorld;
     std::string mName;
+    bool mMale;
+    std::string mRace;
+    std::string mBirthsign;
+    ESM::Class *mClass;
 
   public:
-    PlayerPos(Ogre::Camera *cam, const ESM::NPC *player, MWWorld::World& world) :
-      mCellStore (0), camera(cam), mWorld (world)
-    {
-        mPlayer.base = player;
-        mName = player->name;
-        mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2] = 0;
-    }
+
+    PlayerPos(Ogre::Camera *cam, const ESM::NPC *player, MWWorld::World& world);
+
+    ~PlayerPos();
 
     // Set the player position. Uses Morrowind coordinates.
     void setPos(float _x, float _y, float _z, bool updateCamera = false);
@@ -81,9 +82,46 @@ namespace MWRender
             mName = name;
         }
 
+        void setGender (bool male)
+        {
+            mMale = male;
+        }
+
+        void setRace (const std::string& race)
+        {
+            mRace = race;
+        }
+
+        void setBirthsign (const std::string& birthsign)
+        {
+            mBirthsign = birthsign;
+        }
+
+        void setClass (const ESM::Class& class_);
+
         std::string getName() const
         {
             return mName;
+        }
+
+        bool isMale() const
+        {
+            return mMale;
+        }
+
+        std::string getRace() const
+        {
+            return mRace;
+        }
+
+        std::string getBirthsign() const
+        {
+            return mBirthsign;
+        }
+
+        const ESM::Class& getClass() const
+        {
+            return *mClass;
         }
   };
 }

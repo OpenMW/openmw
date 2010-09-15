@@ -215,7 +215,6 @@ namespace MWGui
       // These are just demo values, you should replace these with
       // real calls from outside the class later.
       setText("LevelText", "5");
-      setText("RaceText", "Wood Elf");
       setText("ClassText", "Pilgrim");
     }
 
@@ -272,6 +271,8 @@ namespace MWGui
     {
         if (id=="name")
             setPlayerName (value);
+        else if (id=="race")
+            setText ("RaceText", value);
     }
   };
 
