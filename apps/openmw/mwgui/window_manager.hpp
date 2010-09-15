@@ -146,7 +146,7 @@ namespace MWGui
      * @param id Identifier for the GMST setting, e.g. "aName"
      * @param default Default value if the GMST setting cannot be used.
      */
-    const std::string &getGameSettingString(const std::string &id, const std::string &default);
+    const std::string &getGameSettingString(const std::string &id, const std::string &default_);
 
   private:
     void updateCharacterGeneration();

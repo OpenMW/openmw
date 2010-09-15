@@ -178,12 +178,12 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
     }
 }
 
-const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default)
+const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
     const ESM::GameSetting *setting = environment.mWorld->getStore().gameSettings.search(id);
     if (setting && setting->type == ESM::VT_String)
         return setting->str;
-    return default;
+    return default_;
 }
 
 void WindowManager::updateCharacterGeneration()
