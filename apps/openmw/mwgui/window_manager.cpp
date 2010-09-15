@@ -115,7 +115,7 @@ void WindowManager::updateVisible()
   {
       if (!raceDialog)
           raceDialog = new RaceDialog(environment);
-      nameDialog->setNextButtonShow(raceChosen);
+      raceDialog->setNextButtonShow(raceChosen);
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
       raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
       raceDialog->setVisible(true);
@@ -189,6 +189,8 @@ void WindowManager::updateCharacterGeneration()
 
 void WindowManager::onNameDialogDone()
 {
+    nameDialog->eventDone = MWGui::TextInputDialog::EventHandle_Void();
+
     bool goNext = nameChosen; // Go to next dialog if name was previously chosen
     nameChosen = true;
     if (nameDialog)
@@ -209,7 +211,9 @@ void WindowManager::onNameDialogDone()
 
 void WindowManager::onRaceDialogDone()
 {
-    bool goNext = nameChosen; // Go to next dialog if race was previously chosen
+    raceDialog->eventDone = MWGui::RaceDialog::EventHandle_Void();
+
+    bool goNext = raceChosen; // Go to next dialog if race was previously chosen
     raceChosen = true;
     if (raceDialog)
     {

@@ -21,8 +21,6 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    typedef delegates::CDelegate0 EventHandle_Void;
-
     class RaceDialog : public OEngine::GUI::Layout
     {
     public:
@@ -47,6 +45,7 @@ namespace MWGui
         void setNextButtonShow(bool shown);
 
         // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n

@@ -15,8 +15,6 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    typedef delegates::CDelegate0 EventHandle_Void;
-
     class TextInputDialog : public OEngine::GUI::Layout
     {
     public:
@@ -29,6 +27,7 @@ namespace MWGui
         void setTextLabel(const std::string &label);
 
         // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
 
         /** Event : Dialog finished, OK button clicked.\n
             signature : void method()\n
