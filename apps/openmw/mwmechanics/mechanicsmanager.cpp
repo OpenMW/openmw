@@ -38,7 +38,19 @@ namespace MWMechanics
         // class
 
         // calculate dynamic stats
+        int strength = creatureStats.mAttributes[0].getBase();
+        int intelligence = creatureStats.mAttributes[1].getBase();
+        int willpower = creatureStats.mAttributes[2].getBase();
+        int agility = creatureStats.mAttributes[3].getBase();
+        int endurance = creatureStats.mAttributes[5].getBase();
 
+        creatureStats.mDynamic[0].setBase (static_cast<int> (0.5 * (strength + endurance)));
+        // TODO: calculate factor
+        creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence + 1 * intelligence));
+        creatureStats.mDynamic[2].setBase (strength+willpower+agility+endurance);
+
+        for (int i=0; i<3; ++i)
+            creatureStats.mDynamic[i].setCurrent (creatureStats.mDynamic[i].getModified());
     }
 
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
