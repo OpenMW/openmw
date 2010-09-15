@@ -273,6 +273,8 @@ namespace MWGui
             setPlayerName (value);
         else if (id=="race")
             setText ("RaceText", value);
+        else if (id=="class")
+          setText ("ClassText", value);
     }
   };
 
