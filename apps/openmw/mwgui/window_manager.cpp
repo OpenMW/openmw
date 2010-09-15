@@ -128,8 +128,8 @@ void WindowManager::updateVisible()
       int eff = shown & allowed;
 
       // Show the windows we want
-      map   -> setVisible( eff & GW_Map );
-      stats -> setVisible( eff & GW_Stats );
+      map   -> setVisible( (eff & GW_Map) != 0 );
+      stats -> setVisible( (eff & GW_Stats) != 0 );
 #if 0
 //      inventory -> setVisible( eff & GW_Inventory );
 #endif
