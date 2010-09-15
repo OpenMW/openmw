@@ -222,6 +222,7 @@ void RaceDialog::updateSkills()
     MyGUI::IntCoord coord1(0, 0, skillList->getWidth() - (40 + 4), 18);
     MyGUI::IntCoord coord2(coord1.left + coord1.width, 0, 40, 18);
 
+    WindowManager *wm = environment.mWindowManager;
     ESMS::ESMStore &store = environment.mWorld->getStore();
     const ESM::Race *race = store.races.find(currentRaceId);
     int count = sizeof(race->data.bonus)/sizeof(race->data.bonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
@@ -234,7 +235,8 @@ void RaceDialog::updateSkills()
         skillNameWidget = skillList->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default,
                                                                      std::string("SkillName") + boost::lexical_cast<std::string>(i));
         assert(skillId >= 0 && skillId < ESM::Skill::Length);
-        skillNameWidget->setCaption(ESMS::Skill::sSkillNames[skillId]);
+        const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
+        skillNameWidget->setCaption(wm->getGameSettingString(skillNameId, skillNameId));
 
         skillBonusWidget = skillList->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default,
                                                                       std::string("SkillBonus") + boost::lexical_cast<std::string>(i));

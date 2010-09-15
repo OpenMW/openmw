@@ -61,7 +61,7 @@ struct Skill
         HandToHand = 26,
         Length
     };
-  static const std::string sSkillNames[Length];
+  static const std::string sSkillNameIds[Length];
 
   void load(ESMReader &esm)
     {
