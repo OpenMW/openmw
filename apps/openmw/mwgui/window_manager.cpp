@@ -101,10 +101,11 @@ void WindowManager::updateVisible()
   if (mode == GM_Name)
   {
       if (!nameDialog)
-      {
-          std::string sName = getGameSettingString("sName", "Name");
-          nameDialog = new TextInputDialog(environment, sName, nameChosen, gui->getViewSize());
-      }
+          nameDialog = new TextInputDialog(environment, gui->getViewSize());
+
+      std::string sName = getGameSettingString("sName", "Name");
+      nameDialog->setTextLabel(sName);
+      nameDialog->setNextButtonShow(nameChosen);
       nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
       nameDialog->setVisible(true);
       return;
@@ -113,7 +114,8 @@ void WindowManager::updateVisible()
   if (mode == GM_Race)
   {
       if (!raceDialog)
-          raceDialog = new RaceDialog (environment, raceChosen);
+          raceDialog = new RaceDialog(environment);
+      nameDialog->setNextButtonShow(raceChosen);
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
       raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
       raceDialog->setVisible(true);
@@ -194,8 +196,6 @@ void WindowManager::onNameDialogDone()
         nameDialog->setVisible(false);
         environment.mMechanicsManager->setPlayerName(nameDialog->getTextInput());
     }
-    delete nameDialog;
-    nameDialog = nullptr;
 
     updateCharacterGeneration();
 
@@ -216,8 +216,6 @@ void WindowManager::onRaceDialogDone()
         raceDialog->setVisible(false);
         environment.mMechanicsManager->setPlayerRace(raceDialog->getRaceId(), raceDialog->getGender() == RaceDialog::GM_Male);
     }
-    delete raceDialog;
-    raceDialog = nullptr;
 
     updateCharacterGeneration();
 
@@ -236,8 +234,6 @@ void WindowManager::onRaceDialogBack()
         raceDialog->setVisible(false);
         environment.mMechanicsManager->setPlayerRace(raceDialog->getRaceId(), raceDialog->getGender() == RaceDialog::GM_Male);
     }
-    delete raceDialog;
-    raceDialog = nullptr;
 
     updateCharacterGeneration();
 

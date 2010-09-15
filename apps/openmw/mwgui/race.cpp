@@ -13,7 +13,7 @@
 
 using namespace MWGui;
 
-RaceDialog::RaceDialog(MWWorld::Environment& environment, bool showNext)
+RaceDialog::RaceDialog(MWWorld::Environment& environment)
   : Layout("openmw_chargen_race_layout.xml")
   , environment(environment)
   , genderIndex(0)
@@ -78,19 +78,37 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment, bool showNext)
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
-    if (showNext)
-    {
-        okButton->setCaption("Next");
-
-        // Adjust back button when next is shown
-        backButton->setCoord(backButton->getCoord() - MyGUI::IntPoint(18, 0));
-        okButton->setCoord(okButton->getCoord() + MyGUI::IntCoord(-18, 0, 18, 0));
-    }
 
     updateRaces();
     updateSkills();
     updateSpellPowers();
 }
+
+void RaceDialog::setNextButtonShow(bool shown)
+{
+    MyGUI::ButtonPtr backButton;
+    getWidget(backButton, "BackButton");
+
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+
+    // TODO: All hardcoded coords for buttons are temporary, will be replaced with a dynamic system.
+    if (shown)
+    {
+        okButton->setCaption("Next");
+
+        // Adjust back button when next is shown
+        backButton->setCoord(MyGUI::IntCoord(471 - 18, 397, 53, 23));
+        okButton->setCoord(MyGUI::IntCoord(532 - 18, 397 + 18, 42, 23));
+    }
+    else
+    {
+        okButton->setCaption("ok");
+        backButton->setCoord(MyGUI::IntCoord(471, 397, 53, 23));
+        okButton->setCoord(MyGUI::IntCoord(532, 397, 42, 23));
+    }
+}
+
 
 void RaceDialog::setRaceId(const std::string &raceId)
 {

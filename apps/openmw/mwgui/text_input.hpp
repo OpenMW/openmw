@@ -20,10 +20,13 @@ namespace MWGui
     class TextInputDialog : public OEngine::GUI::Layout
     {
     public:
-        TextInputDialog(MWWorld::Environment& environment, const std::string &label, bool showNext, MyGUI::IntSize size);
+        TextInputDialog(MWWorld::Environment& environment, MyGUI::IntSize size);
 
         std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
         void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
+
+        void setNextButtonShow(bool shown);
+        void setTextLabel(const std::string &label);
 
         // Events
 

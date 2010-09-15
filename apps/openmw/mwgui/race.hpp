@@ -26,7 +26,7 @@ namespace MWGui
     class RaceDialog : public OEngine::GUI::Layout
     {
     public:
-        RaceDialog(MWWorld::Environment& environment, bool showNext);
+        RaceDialog(MWWorld::Environment& environment);
 
         enum Gender
         {
@@ -43,6 +43,8 @@ namespace MWGui
         void setGender(Gender gender) { genderIndex = gender == GM_Male ? 0 : 1; }
         // setFace()
         // setHair()
+
+        void setNextButtonShow(bool shown);
 
         // Events
 
