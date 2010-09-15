@@ -18,7 +18,7 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 //        MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
 
-        const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
+//        const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
 
         // reset
 
@@ -53,6 +53,18 @@ namespace MWMechanics
         // birthsign
 
         // class
+        const ESM::Class& class_ = mEnvironment.mWorld->getPlayerPos().getClass();
+
+        for (int i=0; i<2; ++i)
+        {
+            int attribute = class_.data.attribute[i];
+            if (attribute>=0 && attribute<8)
+            {
+                creatureStats.mAttributes[attribute].setBase (
+                    creatureStats.mAttributes[attribute].getBase() + 10);
+            }
+        }
+
 
         // calculate dynamic stats
         int strength = creatureStats.mAttributes[0].getBase();
