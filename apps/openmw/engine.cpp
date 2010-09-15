@@ -270,6 +270,7 @@ void OMW::Engine::go()
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
                                   *mEnvironment.mWindowManager, mDebug, *this);
+    mEnvironment.mInputManager = &input;
 
     focusFrameCounter = 0;
 

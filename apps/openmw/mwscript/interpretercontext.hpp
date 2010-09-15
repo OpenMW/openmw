@@ -15,6 +15,11 @@ namespace MWSound
     class SoundManager;
 }
 
+namespace MWInput
+{
+    struct MWInputManager;
+}
+
 namespace MWScript
 {
     struct Locals;
@@ -106,6 +111,8 @@ namespace MWScript
             MWSound::SoundManager& getSoundManager();
 
             MWGui::WindowManager& getWindowManager();
+
+            MWInput::MWInputManager& getInputManager();
 
             MWWorld::Ptr getReference();
             ///< Reference, that the script is running from (can be empty)

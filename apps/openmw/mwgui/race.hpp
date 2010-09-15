@@ -21,12 +21,10 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    typedef delegates::CDelegate0 EventHandle_Void;
-
     class RaceDialog : public OEngine::GUI::Layout
     {
     public:
-        RaceDialog(MWWorld::Environment& environment, bool showNext);
+        RaceDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
 
         enum Gender
         {
@@ -34,17 +32,21 @@ namespace MWGui
             GM_Female
         };
 
-        const std::string &getRace() const { return currentRace; }
+        const std::string &getRaceId() const { return currentRaceId; }
         Gender getGender() const { return genderIndex == 0 ? GM_Male : GM_Female; }
         // getFace()
         // getHair()
 
-        void setRace(const std::string &race);
+        void setRaceId(const std::string &raceId);
         void setGender(Gender gender) { genderIndex = gender == GM_Male ? 0 : 1; }
         // setFace()
         // setHair()
 
+        void setNextButtonShow(bool shown);
+        void open();
+
         // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -93,7 +95,7 @@ namespace MWGui
         int genderIndex, faceIndex, hairIndex;
         int faceCount, hairCount;
 
-        std::string currentRace;
+        std::string currentRaceId;
     };
 }
 #endif

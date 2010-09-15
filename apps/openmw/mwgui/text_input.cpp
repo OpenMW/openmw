@@ -4,32 +4,55 @@
 
 using namespace MWGui;
 
-TextInputDialog::TextInputDialog(MWWorld::Environment& environment, const std::string &label, bool showNext, MyGUI::IntSize size)
+TextInputDialog::TextInputDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
   : Layout("openmw_text_input_layout.xml")
   , environment(environment)
 {
     // Centre dialog
     MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (size.width - coord.width)/2;
-    coord.top = (size.height - coord.height)/2;
+    coord.left = (gameWindowSize.width - coord.width)/2;
+    coord.top = (gameWindowSize.height - coord.height)/2;
     mMainWidget->setCoord(coord);
 
-    setText("LabelT", label);
-
     getWidget(textEdit, "TextEdit");
-//    textEdit->eventEditSelectAccept = newDelegate(this, &TextInputDialog::onTextAccepted);
+    textEdit->eventEditSelectAccept = newDelegate(this, &TextInputDialog::onTextAccepted);
 
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &TextInputDialog::onOkClicked);
-    if (showNext)
+
+    // Make sure the edit box has focus
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
+}
+
+void TextInputDialog::setNextButtonShow(bool shown)
+{
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    if (shown)
     {
         okButton->setCaption("Next");
-
-        // Adjust back button when next is shown
-        okButton->setCoord(okButton->getCoord() + MyGUI::IntCoord(-18, 0, 18, 0));
+        okButton->setCoord(MyGUI::IntCoord(264 - 18, 60, 42 + 18, 23));
     }
+    else
+    {
+        okButton->setCaption("OK");
+        okButton->setCoord(MyGUI::IntCoord(264, 60, 42, 23));
+    }
+}
+
+void TextInputDialog::setTextLabel(const std::string &label)
+{
+    setText("LabelT", label);
+}
+
+void TextInputDialog::open()
+{
+    // Make sure the edit box has focus
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
+    textEdit->setOnlyText("");
+    setVisible(true);
 }
 
 // widget controls

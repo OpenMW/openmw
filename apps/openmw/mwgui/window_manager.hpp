@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "../mwmechanics/stat.hpp"
+#include "mode.hpp"
 
 namespace MyGUI
 {
@@ -42,42 +43,6 @@ namespace MWGui
   class TextInputDialog;
   class RaceDialog;
 
-  enum GuiMode
-    {
-      GM_Game,          // Game mode, only HUD
-      GM_Inventory,     // Inventory mode
-      GM_MainMenu,      // Main menu mode
-
-      GM_Console,       // Console mode
-
-      // None of the following are implemented yet
-
-      GM_Dialogue,      // NPC interaction
-      GM_Barter,
-      GM_Rest,
-      // .. more here ..
-
-      // Startup character creation dialogs
-      GM_Name,
-      GM_Race,
-      GM_Birth,
-      GM_Class,
-      GM_Review
-    };
-
-  // Windows shown in inventory mode
-  enum GuiWindow
-    {
-      GW_None           = 0,
-
-      GW_Map            = 0x01,
-      GW_Inventory      = 0x02,
-      GW_Magic          = 0x04,
-      GW_Stats          = 0x08,
-
-      GW_ALL            = 0xFF
-    };
-
   class WindowManager
   {
     MWWorld::Environment& environment;
@@ -85,7 +50,9 @@ namespace MWGui
     MapWindow *map;
     MainMenu *menu;
     StatsWindow *stats;
+#if 0
     InventoryWindow *inventory;
+#endif
     Console *console;
 
     // Character creation
@@ -171,6 +138,15 @@ namespace MWGui
     ///< set value for the given ID.
 
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
+
+    /**
+     * Fetches a GMST string from the store, if there is no setting with the given
+     * ID or it is not a string the default string is returned.
+     *
+     * @param id Identifier for the GMST setting, e.g. "aName"
+     * @param default Default value if the GMST setting cannot be used.
+     */
+    const std::string &getGameSettingString(const std::string &id, const std::string &default);
 
   private:
     void updateCharacterGeneration();

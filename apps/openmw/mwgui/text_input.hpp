@@ -15,17 +15,20 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    typedef delegates::CDelegate0 EventHandle_Void;
-
     class TextInputDialog : public OEngine::GUI::Layout
     {
     public:
-        TextInputDialog(MWWorld::Environment& environment, const std::string &label, bool showNext, MyGUI::IntSize size);
+        TextInputDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
 
         std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
         void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
 
+        void setNextButtonShow(bool shown);
+        void setTextLabel(const std::string &label);
+        void open();
+
         // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
 
         /** Event : Dialog finished, OK button clicked.\n
             signature : void method()\n
