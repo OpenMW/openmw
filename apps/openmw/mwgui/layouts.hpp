@@ -271,6 +271,7 @@ namespace MWGui
     }
   };
 
+#if 0
   class InventoryWindow : public OEngine::GUI::Layout
   {
   public:
@@ -389,5 +390,6 @@ namespace MWGui
     MyGUI::Colour activeColor;
     MyGUI::Colour inactiveColor;
   };
+#endif
 }
 #endif

@@ -37,7 +37,9 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   menu = new MainMenu(w,h);
   map = new MapWindow();
   stats = new StatsWindow (environment.mWorld->getStore());
+#if 0
   inventory = new InventoryWindow ();
+#endif
   console = new Console(w,h, environment, extensions);
 
   // The HUD is always on
@@ -54,7 +56,9 @@ WindowManager::~WindowManager()
   delete map;
   delete menu;
   delete stats;
+#if 0
   delete inventory;
+#endif
 
   delete nameDialog;
   delete raceDialog;
@@ -66,7 +70,9 @@ void WindowManager::updateVisible()
   map->setVisible(false);
   menu->setVisible(false);
   stats->setVisible(false);
+#if 0
   inventory->setVisible(false);
+#endif
   console->disable();
 
   // Mouse is visible whenever we're not in game mode
@@ -124,7 +130,9 @@ void WindowManager::updateVisible()
       // Show the windows we want
       map   -> setVisible( eff & GW_Map );
       stats -> setVisible( eff & GW_Stats );
+#if 0
 //      inventory -> setVisible( eff & GW_Inventory );
+#endif
       return;
     }
 

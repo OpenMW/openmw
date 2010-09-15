@@ -85,7 +85,9 @@ namespace MWGui
     MapWindow *map;
     MainMenu *menu;
     StatsWindow *stats;
+#if 0
     InventoryWindow *inventory;
+#endif
     Console *console;
 
     // Character creation
