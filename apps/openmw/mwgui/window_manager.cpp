@@ -176,6 +176,7 @@ void WindowManager::updateCharacterGeneration()
 
 void WindowManager::onNameDialogDone()
 {
+    bool goNext = nameChosen; // Go to next dialog if name was previously chosen
     nameChosen = true;
     if (nameDialog)
     {
@@ -189,12 +190,13 @@ void WindowManager::onNameDialogDone()
 
     if (reviewNext)
         setMode(GM_Review);
-    else if (raceChosen)
+    else if (goNext)
         setMode(GM_Race);
 }
 
 void WindowManager::onRaceDialogDone()
 {
+    bool goNext = nameChosen; // Go to next dialog if race was previously chosen
     raceChosen = true;
     if (raceDialog)
     {
@@ -208,7 +210,7 @@ void WindowManager::onRaceDialogDone()
 
     if (reviewNext)
         setMode(GM_Review);
-    else if (classChosen)
+    else if (goNext)
         setMode(GM_Class);
 }
 
