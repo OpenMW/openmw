@@ -192,6 +192,8 @@ void WindowManager::onNameDialogDone()
         setMode(GM_Review);
     else if (goNext)
         setMode(GM_Race);
+    else
+        setMode(GM_Game);
 }
 
 void WindowManager::onRaceDialogDone()
@@ -212,6 +214,8 @@ void WindowManager::onRaceDialogDone()
         setMode(GM_Review);
     else if (goNext)
         setMode(GM_Class);
+    else
+        setMode(GM_Game);
 }
 
 void WindowManager::onRaceDialogBack()
