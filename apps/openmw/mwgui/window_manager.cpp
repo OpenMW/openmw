@@ -4,6 +4,7 @@
 #include "race.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwinput/inputmanager.hpp"
 
 #include "console.hpp"
 
@@ -136,8 +137,10 @@ void WindowManager::updateVisible()
       return;
     }
 
-  // All other modes are ignored
-  mode = GM_Game;
+  // Unsupported mode, switch back to game
+  // Note: The call will eventually end up this method again but
+  // will stop at the check if(mode == GM_Game) above.
+  environment.mInputManager->setGuiMode(GM_Game);
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
@@ -197,11 +200,11 @@ void WindowManager::onNameDialogDone()
     updateCharacterGeneration();
 
     if (reviewNext)
-        setMode(GM_Review);
+        environment.mInputManager->setGuiMode(GM_Review);
     else if (goNext)
-        setMode(GM_Race);
+        environment.mInputManager->setGuiMode(GM_Race);
     else
-        setMode(GM_Game);
+        environment.mInputManager->setGuiMode(GM_Game);
 }
 
 void WindowManager::onRaceDialogDone()
@@ -219,11 +222,11 @@ void WindowManager::onRaceDialogDone()
     updateCharacterGeneration();
 
     if (reviewNext)
-        setMode(GM_Review);
+        environment.mInputManager->setGuiMode(GM_Review);
     else if (goNext)
-        setMode(GM_Class);
+        environment.mInputManager->setGuiMode(GM_Class);
     else
-        setMode(GM_Game);
+        environment.mInputManager->setGuiMode(GM_Game);
 }
 
 void WindowManager::onRaceDialogBack()
@@ -238,5 +241,5 @@ void WindowManager::onRaceDialogBack()
 
     updateCharacterGeneration();
 
-    setMode(GM_Name);
+    environment.mInputManager->setGuiMode(GM_Name);
 }

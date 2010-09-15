@@ -8,6 +8,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwgui/window_manager.hpp"
+#include "../mwinput/inputmanager.hpp"
 
 #include "interpretercontext.hpp"
 
@@ -47,7 +48,7 @@ namespace MWScript
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
                     
-                    context.getWindowManager().setMode(mDialogue);
+                    context.getInputManager().setGuiMode(mDialogue);
                 } 
         };  
 
