@@ -13,7 +13,7 @@
 
 using namespace MWGui;
 
-RaceDialog::RaceDialog(MWWorld::Environment& environment)
+RaceDialog::RaceDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
   : Layout("openmw_chargen_race_layout.xml")
   , environment(environment)
   , genderIndex(0)
@@ -22,7 +22,11 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment)
   , faceCount(10)
   , hairCount(14)
 {
-    mMainWidget->setCoord(mMainWidget->getCoord() + MyGUI::IntPoint(0, 100));
+    // Centre dialog
+    MyGUI::IntCoord coord = mMainWidget->getCoord();
+    coord.left = (gameWindowSize.width - coord.width)/2;
+    coord.top = (gameWindowSize.height - coord.height)/2;
+    mMainWidget->setCoord(coord);
 
     // These are just demo values, you should replace these with
     // real calls from outside the class later.

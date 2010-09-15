@@ -114,7 +114,7 @@ void WindowManager::updateVisible()
   if (mode == GM_Race)
   {
       if (!raceDialog)
-          raceDialog = new RaceDialog(environment);
+          raceDialog = new RaceDialog(environment, gui->getViewSize());
       raceDialog->setNextButtonShow(raceChosen);
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
       raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
