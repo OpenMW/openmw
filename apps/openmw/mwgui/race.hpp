@@ -43,6 +43,7 @@ namespace MWGui
         // setHair()
 
         void setNextButtonShow(bool shown);
+        void open();
 
         // Events
         typedef delegates::CDelegate0 EventHandle_Void;

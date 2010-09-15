@@ -118,7 +118,7 @@ void WindowManager::updateVisible()
       raceDialog->setNextButtonShow(raceChosen);
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
       raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
-      raceDialog->setVisible(true);
+      raceDialog->open();
       return;
   }
 

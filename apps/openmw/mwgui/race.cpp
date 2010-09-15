@@ -109,6 +109,14 @@ void RaceDialog::setNextButtonShow(bool shown)
     }
 }
 
+void RaceDialog::open()
+{
+    updateRaces();
+    updateSkills();
+    updateSpellPowers();
+    setVisible(true);
+}
+
 
 void RaceDialog::setRaceId(const std::string &raceId)
 {
