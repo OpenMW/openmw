@@ -164,6 +164,9 @@ namespace MWGui
     void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
     ///< Set value for the given ID.
 
+    void setValue (const std::string& id, const std::string& value);
+    ///< set value for the given ID.
+
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
 
   private:

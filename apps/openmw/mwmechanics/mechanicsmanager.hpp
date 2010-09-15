@@ -7,29 +7,24 @@
 
 #include "creaturestats.hpp"
 
-namespace ESMS
+namespace MWWorld
 {
-    struct ESMStore;
-}
-
-namespace MWGui
-{
-    class WindowManager;
+    class Environment;
 }
 
 namespace MWMechanics
 {
     class MechanicsManager
     {
-            const ESMS::ESMStore& mStore;
-            MWGui::WindowManager& mWindowManager;
+            MWWorld::Environment& mEnvironment;
             std::set<MWWorld::Ptr> mActors;
             MWWorld::Ptr mWatched;
             CreatureStats mWatchedCreature;
+            bool mSetName;
 
         public:
 
-            MechanicsManager (const ESMS::ESMStore& store, MWGui::WindowManager& windowManager);
+            MechanicsManager (MWWorld::Environment& environment);
 
             void configureGUI();
 

@@ -24,12 +24,14 @@ namespace MWRender
     MWWorld::Ptr::CellStore *mCellStore;
     Ogre::Camera *camera;
     MWWorld::World& mWorld;
+    std::string mName;
 
   public:
     PlayerPos(Ogre::Camera *cam, const ESM::NPC *player, MWWorld::World& world) :
       mCellStore (0), camera(cam), mWorld (world)
     {
         mPlayer.base = player;
+        mName = player->name;
         mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2] = 0;
     }
 
@@ -72,6 +74,16 @@ namespace MWRender
         {
             MWWorld::Ptr ptr (&mPlayer, mCellStore);
             return ptr;
+        }
+
+        void setName (const std::string& name)
+        {
+            mName = name;
+        }
+
+        std::string getName() const
+        {
+            return mName;
         }
   };
 }

@@ -214,8 +214,6 @@ namespace MWGui
 
       // These are just demo values, you should replace these with
       // real calls from outside the class later.
-      setPlayerName("ThePlayer");
-
       setText("LevelText", "5");
       setText("RaceText", "Wood Elf");
       setText("ClassText", "Pilgrim");
@@ -268,6 +266,12 @@ namespace MWGui
                 std::string id (ids[i]);
                 setBar (id, id + "T", value.getCurrent(), value.getModified());
             }
+    }
+
+    void setValue (const std::string& id, const std::string& value)
+    {
+        if (id=="name")
+            setPlayerName (value);
     }
   };
 

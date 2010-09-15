@@ -256,8 +256,7 @@ void OMW::Engine::go()
         *mScriptManager);
 
     // Create game mechanics system
-    mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (
-        mEnvironment.mWorld->getStore(), *mEnvironment.mWindowManager);
+    mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (mEnvironment);
 
     // Create dialog system
     mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment);

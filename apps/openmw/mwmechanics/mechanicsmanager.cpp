@@ -6,12 +6,13 @@
 #include "../mwgui/window_manager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
 
 namespace MWMechanics
 {
-    MechanicsManager::MechanicsManager (const ESMS::ESMStore& store,
-        MWGui::WindowManager& windowManager)
-    : mStore (store), mWindowManager (windowManager)
+    MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
+    : mEnvironment (environment), mSetName (true)
     {
 
     }
@@ -68,7 +69,7 @@ namespace MWMechanics
                 {
                     mWatchedCreature.mAttributes[i] = stats.mAttributes[i];
 
-                    mWindowManager.setValue (attributeNames[i], stats.mAttributes[i]);
+                    mEnvironment.mWindowManager->setValue (attributeNames[i], stats.mAttributes[i]);
                 }
             }
 
@@ -78,15 +79,22 @@ namespace MWMechanics
                 {
                     mWatchedCreature.mDynamic[i] = stats.mDynamic[i];
 
-                    mWindowManager.setValue (dynamicNames[i], stats.mDynamic[i]);
+                    mEnvironment.mWindowManager->setValue (dynamicNames[i], stats.mDynamic[i]);
                 }
             }
+        }
+
+        if (mSetName)
+        {
+            mEnvironment.mWindowManager->setValue ("name", mEnvironment.mWorld->getPlayerPos().getName());
+            mSetName = false;
         }
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)
     {
-
+        mEnvironment.mWorld->getPlayerPos().setName (name);
+        mSetName = true;
     }
 
     void MechanicsManager::setPlayerRace (const std::string& race, bool male)
