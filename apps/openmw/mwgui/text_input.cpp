@@ -4,14 +4,14 @@
 
 using namespace MWGui;
 
-TextInputDialog::TextInputDialog(MWWorld::Environment& environment, MyGUI::IntSize size)
+TextInputDialog::TextInputDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
   : Layout("openmw_text_input_layout.xml")
   , environment(environment)
 {
     // Centre dialog
     MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (size.width - coord.width)/2;
-    coord.top = (size.height - coord.height)/2;
+    coord.left = (gameWindowSize.width - coord.width)/2;
+    coord.top = (gameWindowSize.height - coord.height)/2;
     mMainWidget->setCoord(coord);
 
     getWidget(textEdit, "TextEdit");

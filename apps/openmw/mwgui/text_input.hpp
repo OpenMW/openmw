@@ -18,7 +18,7 @@ namespace MWGui
     class TextInputDialog : public OEngine::GUI::Layout
     {
     public:
-        TextInputDialog(MWWorld::Environment& environment, MyGUI::IntSize size);
+        TextInputDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
 
         std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
         void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
