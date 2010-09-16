@@ -83,12 +83,28 @@ static size_t getLength(const char *arr, const char* input, bool &ascii)
 {
   ascii = true;
   size_t len = 0;
-  unsigned char inp = *input;
-  while(inp)
+  const char* ptr = input;
+  unsigned char inp = *ptr;
+
+  // Do away with the ascii part of the string first (this is almost
+  // always the entire string.)
+  while(inp && inp < 128)
+    inp = *(++ptr);
+  len += (ptr-input);
+
+  // If we're not at the null terminator at this point, then there
+  // were some non-ascii characters to deal with. Go to slow-mode for
+  // the rest of the string.
+  if(inp)
     {
-      if(inp > 127) ascii = false;
-      len += arr[inp*6];
-      inp = *(++input);
+      ascii = false;
+      while(inp)
+        {
+          // Find the translated length of this character in the
+          // lookup table.
+          len += arr[inp*6];
+          inp = *(++ptr);
+        }
     }
   return len;
 }
