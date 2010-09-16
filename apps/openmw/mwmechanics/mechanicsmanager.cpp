@@ -16,12 +16,15 @@ namespace MWMechanics
         MWWorld::Ptr ptr = mEnvironment.mWorld->getPlayerPos().getPlayer();
 
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
-//        MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
 
         const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
 
         // reset
         creatureStats.mLevel = player->npdt52.level;
+
+        for (int i=0; i<27; ++i)
+            npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
 
         // race
         const ESM::Race *race =
@@ -48,6 +51,16 @@ namespace MWMechanics
                 static_cast<int> (male ? attribute->male : attribute->female));
         }
 
+        for (int i=0; i<7; ++i)
+        {
+            int index = race->data.bonus[i].skill;
+
+            if (index>=0 && index<27)
+            {
+                npcStats.mSkill[i].setBase (
+                    npcStats.mSkill[i].getBase() + race->data.bonus[i].bonus);
+            }
+        }
 
 
         // birthsign
@@ -64,6 +77,7 @@ namespace MWMechanics
                     creatureStats.mAttributes[attribute].getBase() + 10);
             }
         }
+
 
 
         // calculate dynamic stats

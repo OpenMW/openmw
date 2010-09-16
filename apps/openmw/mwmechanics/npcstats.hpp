@@ -3,6 +3,8 @@
 
 #include <map>
 
+#include "stat.hpp"
+
 namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
@@ -14,6 +16,8 @@ namespace MWMechanics
         // NPCs other than the player can only have one faction. But for the sake of consistency
         // we use the same data structure for the PC and the NPCs.
         std::map<std::string, int> mFactionRank;
+
+        Stat<float> mSkill[27];
     };
 }
 

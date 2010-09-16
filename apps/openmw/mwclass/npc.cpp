@@ -119,6 +119,9 @@ namespace MWClass
                 stats->mFactionRank[ref->base->faction] = 0;
             }
 
+            for (int i=0; i<27; ++i)
+                stats->mSkill[i].setBase (ref->base->npdt52.skills[i]);
+
             ptr.getRefData().getNpcStats() = stats;
         }
 
