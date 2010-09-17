@@ -246,4 +246,11 @@
         <Child type="Widget" skin="IB_BL" offset="0 514 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
         <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
     </Skin>
+
+    <!-- textures/menu_thin_border_top.dds -->
+    <Skin name = "MW_HLine" size = "512 18"  texture="mwgui.png">
+        <BasisSkin type="SubSkin" offset = "0 8 512 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
+            <State name="normal" offset = "20 106 512 2"/>
+        </BasisSkin>
+    </Skin>
 </MyGUI>

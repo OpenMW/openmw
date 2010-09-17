@@ -52,7 +52,8 @@
             <Widget type="StaticText" skin="SandTextRight" position="104 130 104 18" name="AttribVal8"/>
         </Widget>
 
-        <Widget type="Widget" skin="MW_Box" position="228 8 248 292" align="ALIGN_LEFT ALIGN_VSTRETCH">
+        <!-- Player skills, factions, birthsign and reputation -->
+        <Widget type="Widget" skin="MW_Box" position="228 8 248 292" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Skills">
         </Widget>
     </Widget>
 </MyGUI>
