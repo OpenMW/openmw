@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include "../mwmechanics/stat.hpp"
 #include "mode.hpp"
@@ -136,6 +137,10 @@ namespace MWGui
 
     void setValue (const std::string& id, int value);
     ///< set value for the given ID.
+
+    void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
+    ///< configure skill groups, each set contains the skill ID for that group.
+
 
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
 

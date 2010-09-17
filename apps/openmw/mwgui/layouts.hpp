@@ -8,6 +8,11 @@
 #include <boost/array.hpp>
 
 #include <sstream>
+#include <set>
+
+#include "../mwmechanics/stat.hpp"
+#include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
 
 /*
   This file contains classes corresponding to all the window layouts
@@ -185,8 +190,9 @@ namespace MWGui
       setText(tname, out.str().c_str());
     }
 
-    StatsWindow (const ESMS::ESMStore& store)
+    StatsWindow (MWWorld::Environment& environment)
       : Layout("openmw_stats_window_layout.xml")
+      , environment(environment)
     {
       setCoord(0,0,498, 342);
 
@@ -209,10 +215,13 @@ namespace MWGui
             { 0, 0 }
         };
 
+        const ESMS::ESMStore &store = environment.mWorld->getStore();
         for (int i=0; names[i][0]; ++i)
         {
             setText (names[i][0], store.gameSettings.find (names[i][1])->str);
         }
+
+        getWidget(skillAreaWidget, "Skills");
     }
 
     void setPlayerName(const std::string& playerName)
@@ -283,6 +292,17 @@ namespace MWGui
             setText("LevelText", text.str());
         }
     }
+
+      void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
+
+  private:
+      void updateSkillArea();
+      void addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+
+      MWWorld::Environment& environment;
+      MyGUI::WidgetPtr skillAreaWidget;
+      std::set<int> majorSkills, minorSkills, miscSkills;
+      std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
   };
 
 #if 0

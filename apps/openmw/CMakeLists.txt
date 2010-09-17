@@ -42,6 +42,7 @@ set(GAMEGUI_HEADER
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
+    mwgui/layouts.cpp
     mwgui/console.cpp
     mwgui/text_input.cpp
     mwgui/race.cpp

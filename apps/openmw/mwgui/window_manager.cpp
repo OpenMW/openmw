@@ -37,7 +37,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   hud = new HUD(w,h);
   menu = new MainMenu(w,h);
   map = new MapWindow();
-  stats = new StatsWindow (environment.mWorld->getStore());
+  stats = new StatsWindow (environment);
 #if 0
   inventory = new InventoryWindow ();
 #endif
@@ -164,6 +164,11 @@ void WindowManager::setValue (const std::string& id, const std::string& value)
 void WindowManager::setValue (const std::string& id, int value)
 {
     stats->setValue (id, value);
+}
+
+void WindowManager::configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc)
+{
+    stats->configureSkills (major, minor, misc);
 }
 
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
