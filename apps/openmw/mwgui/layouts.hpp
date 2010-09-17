@@ -307,6 +307,7 @@ namespace MWGui
       void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+      void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
 
       static const int lineHeight;
 

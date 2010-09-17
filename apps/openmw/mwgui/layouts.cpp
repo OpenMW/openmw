@@ -61,6 +61,19 @@ void StatsWindow::addValueItem(const std::string text, const std::string &value,
     coord2.top += lineHeight;
 }
 
+void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+{
+    MyGUI::StaticTextPtr skillNameWidget;
+
+    skillNameWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+    skillNameWidget->setCaption(text);
+
+    skillWidgets.push_back(skillNameWidget);
+
+    coord1.top += lineHeight;
+    coord2.top += lineHeight;
+}
+
 void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     // Get player and stats
@@ -122,4 +135,27 @@ void StatsWindow::updateSkillArea()
 
     if (!miscSkills.empty())
         addSkills(miscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
+
+    WindowManager *wm = environment.mWindowManager;
+
+    // Add a line separator if there are items above
+    if (!skillWidgets.empty())
+        addSeparator(coord1, coord2);
+
+    addGroup(wm->getGameSettingString("sFaction", "Faction"), coord1, coord2);
+    addItem("Temple", coord1, coord2);
+
+    // Add a line separator if there are items above
+    if (!skillWidgets.empty())
+        addSeparator(coord1, coord2);
+
+    addGroup(wm->getGameSettingString("sSign", "Sign"), coord1, coord2);
+    addItem("The Mage", coord1, coord2);
+
+    // Add a line separator if there are items above
+    if (!skillWidgets.empty())
+        addSeparator(coord1, coord2);
+
+    addValueItem(wm->getGameSettingString("sReputation", "Reputation"), boost::lexical_cast<std::string>(static_cast<int>(0)), CS_Normal, coord1, coord2);
+    addValueItem(wm->getGameSettingString("sBounty", "Bounty"), boost::lexical_cast<std::string>(static_cast<int>(0)), CS_Normal, coord1, coord2);
 }
