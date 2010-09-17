@@ -296,8 +296,19 @@ namespace MWGui
       void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
 
   private:
+      enum ColorStyle
+      {
+          CS_Sub,
+          CS_Normal,
+          CS_Super
+      };
       void updateSkillArea();
       void addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+      void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+      void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+      void addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+
+      static const int lineHeight;
 
       MWWorld::Environment& environment;
       MyGUI::WidgetPtr skillAreaWidget;

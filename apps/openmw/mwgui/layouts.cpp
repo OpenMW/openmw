@@ -8,6 +8,8 @@
 
 using namespace MWGui;
 
+const int StatsWindow::lineHeight = 18;
+
 void StatsWindow::configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc)
 {
     majorSkills = major;
@@ -15,6 +17,48 @@ void StatsWindow::configureSkills (const std::set<int>& major, const std::set<in
     miscSkills = misc;
 
     updateSkillArea();
+}
+
+void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+{
+    MyGUI::StaticImagePtr separator = skillAreaWidget->createWidget<MyGUI::StaticImage>("MW_HLine", MyGUI::IntCoord(2 + 10, coord1.top, coord1.width + coord2.width - 8, 18), MyGUI::Align::Default);
+    skillWidgets.push_back(separator);
+
+    coord1.top += separator->getHeight();
+    coord2.top += separator->getHeight();
+}
+
+void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+{
+    MyGUI::StaticTextPtr groupWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandBrightText", MyGUI::IntCoord(4, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
+    groupWidget->setCaption(label);
+    skillWidgets.push_back(groupWidget);
+
+    coord1.top += lineHeight;
+    coord2.top += lineHeight;
+}
+
+void StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+{
+    MyGUI::StaticTextPtr skillNameWidget, skillValueWidget;
+
+    skillNameWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default);
+    skillNameWidget->setCaption(text);
+
+    skillValueWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default);
+    skillValueWidget->setCaption(value);
+    if (style == CS_Super)
+        skillValueWidget->setTextColour(MyGUI::Colour(0, 1, 0));
+    else if (style == CS_Sub)
+        skillValueWidget->setTextColour(MyGUI::Colour(1, 0, 0));
+    else
+        skillValueWidget->setTextColour(MyGUI::Colour(1, 1, 1));
+
+    skillWidgets.push_back(skillNameWidget);
+    skillWidgets.push_back(skillValueWidget);
+
+    coord1.top += lineHeight;
+    coord2.top += lineHeight;
 }
 
 void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -28,26 +72,14 @@ void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titl
     MWMechanics::MechanicsManager *mm = environment.mMechanicsManager;
     ESMS::ESMStore &store = environment.mWorld->getStore();
 
-    MyGUI::StaticTextPtr skillNameWidget, skillValueWidget;
-    const int lineHeight = 18;
-
     // Add a line separator if there are items above
     if (!skillWidgets.empty())
     {
-        MyGUI::StaticImagePtr separator = skillAreaWidget->createWidget<MyGUI::StaticImage>("MW_HLine", MyGUI::IntCoord(2 + 10, coord1.top, coord1.width + coord2.width - 8, 18), MyGUI::Align::Default);
-        skillWidgets.push_back(separator);
-        coord1.top += separator->getHeight();
-        coord2.top += separator->getHeight();
+        addSeparator(coord1, coord2);
     }
 
-    skillNameWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandBrightText", MyGUI::IntCoord(4, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
-    skillNameWidget->setCaption(wm->getGameSettingString(titleId, titleDefault));
-    skillWidgets.push_back(skillNameWidget);
+    addGroup(wm->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
-    coord1.top += lineHeight;
-    coord2.top += lineHeight;
-
-    int i = 0;
     std::set<int>::const_iterator end = skills.end();
     for (std::set<int>::const_iterator it = skills.begin(); it != end; ++it)
     {
@@ -61,26 +93,12 @@ void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titl
         float base = stat.getBase();
         float modified = stat.getModified();
 
-        skillNameWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default,
-                                                                           std::string("SkillName") + boost::lexical_cast<std::string>(i));
-        skillNameWidget->setCaption(wm->getGameSettingString(skillNameId, skillNameId));
-
-        skillValueWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default,
-                                                                            std::string("SkillValue") + boost::lexical_cast<std::string>(i));
-        skillValueWidget->setCaption(boost::lexical_cast<std::string>(static_cast<int>(modified)));
+        ColorStyle style = CS_Normal;
         if (modified > base)
-            skillValueWidget->setTextColour(MyGUI::Colour(0, 1, 0));
+            style = CS_Super;
         else if (modified < base)
-            skillValueWidget->setTextColour(MyGUI::Colour(1, 0, 0));
-        else
-            skillValueWidget->setTextColour(MyGUI::Colour(1, 1, 1));
-
-        skillWidgets.push_back(skillNameWidget);
-        skillWidgets.push_back(skillValueWidget);
-
-        coord1.top += lineHeight;
-        coord2.top += lineHeight;
-        ++i;
+            style = CS_Sub;
+        addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
     }
 }
 
