@@ -25,6 +25,14 @@
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
     </Skin>
 
+    <Skin name = "SandBrightText" size = "16 16">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_LEFT ALIGN_BOTTOM" />
+        <Property key="Colour" value = "0.85 0.76 0.60" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
     <Skin name = "DaedricText" size = "16 16">
         <Property key="FontName" value = "daedric36" />
         <Property key="FontHeight" value = "36" />
