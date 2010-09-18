@@ -15,8 +15,16 @@ void StatsWindow::configureSkills (const std::set<int>& major, const std::set<in
     majorSkills = major;
     minorSkills = minor;
     miscSkills = misc;
+}
 
-    updateSkillArea();
+void StatsWindow::configureFactions (const std::vector<std::string>& factions)
+{
+    this->factions = factions;
+}
+
+void StatsWindow::configureBirthSign (const std::string& signId)
+{
+    birthSignId = signId;
 }
 
 void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -137,25 +145,38 @@ void StatsWindow::updateSkillArea()
         addSkills(miscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
     WindowManager *wm = environment.mWindowManager;
+    ESMS::ESMStore &store = environment.mWorld->getStore();
+
+    if (!factions.empty())
+    {
+        // Add a line separator if there are items above
+        if (!skillWidgets.empty())
+            addSeparator(coord1, coord2);
+
+        addGroup(wm->getGameSettingString("sFaction", "Faction"), coord1, coord2);
+        std::vector<std::string>::const_iterator end = factions.end();
+        for (std::vector<std::string>::const_iterator it = factions.begin(); it != end; ++it)
+        {
+            const ESM::Faction *faction = store.factions.find(*it);
+            addItem(faction->name, coord1, coord2);
+        }
+    }
+
+    if (!birthSignId.empty())
+    {
+        // Add a line separator if there are items above
+        if (!skillWidgets.empty())
+            addSeparator(coord1, coord2);
+
+        addGroup(wm->getGameSettingString("sSign", "Sign"), coord1, coord2);
+        const ESM::BirthSign *sign = store.birthSigns.find(birthSignId);
+        addItem(sign->name, coord1, coord2);
+    }
 
     // Add a line separator if there are items above
     if (!skillWidgets.empty())
         addSeparator(coord1, coord2);
 
-    addGroup(wm->getGameSettingString("sFaction", "Faction"), coord1, coord2);
-    addItem("Temple", coord1, coord2);
-
-    // Add a line separator if there are items above
-    if (!skillWidgets.empty())
-        addSeparator(coord1, coord2);
-
-    addGroup(wm->getGameSettingString("sSign", "Sign"), coord1, coord2);
-    addItem("The Mage", coord1, coord2);
-
-    // Add a line separator if there are items above
-    if (!skillWidgets.empty())
-        addSeparator(coord1, coord2);
-
-    addValueItem(wm->getGameSettingString("sReputation", "Reputation"), boost::lexical_cast<std::string>(static_cast<int>(0)), CS_Normal, coord1, coord2);
-    addValueItem(wm->getGameSettingString("sBounty", "Bounty"), boost::lexical_cast<std::string>(static_cast<int>(0)), CS_Normal, coord1, coord2);
+    addValueItem(wm->getGameSettingString("sReputation", "Reputation"), boost::lexical_cast<std::string>(static_cast<int>(reputation)), CS_Normal, coord1, coord2);
+    addValueItem(wm->getGameSettingString("sBounty", "Bounty"), boost::lexical_cast<std::string>(static_cast<int>(bounty)), CS_Normal, coord1, coord2);
 }

@@ -294,6 +294,11 @@ namespace MWGui
     }
 
       void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
+      void configureFactions (const std::vector<std::string>& factions);
+      void configureBirthSign (const std::string &signId);
+      void setReputation (int reputation) { this->reputation = reputation; }
+      void setBounty (int bounty) { this->bounty = bounty; }
+      void updateSkillArea();
 
   private:
       enum ColorStyle
@@ -302,7 +307,6 @@ namespace MWGui
           CS_Normal,
           CS_Super
       };
-      void updateSkillArea();
       void addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
@@ -314,6 +318,9 @@ namespace MWGui
       MWWorld::Environment& environment;
       MyGUI::WidgetPtr skillAreaWidget;
       std::set<int> majorSkills, minorSkills, miscSkills;
+      std::vector<std::string> factions;
+      std::string birthSignId;
+      int reputation, bounty;
       std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
   };
 

@@ -141,6 +141,20 @@ namespace MWGui
     void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
     ///< configure skill groups, each set contains the skill ID for that group.
 
+    void configureFactions (const std::vector<std::string>& factions);
+    ///< configure factions to display on stat window, use an empty set to disable
+
+    void configureBirthSign (const std::string &signId);
+    ///< configure birth sign to display on stat window, use an empty string to disable.
+
+    void setReputation (int reputation);
+    ///< set the current reputation value
+
+    void setBounty (int bounty);
+    ///< set the current bounty value
+
+    void updateSkillArea();
+    ///< update display of skills, factions, birth sign, reputation and bounty
 
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
 

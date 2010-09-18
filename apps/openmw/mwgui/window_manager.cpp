@@ -171,6 +171,31 @@ void WindowManager::configureSkills (const std::set<int>& major, const std::set<
     stats->configureSkills (major, minor, misc);
 }
 
+void WindowManager::configureFactions (const std::vector<std::string>& factions)
+{
+    stats->configureFactions (factions);
+}
+
+void WindowManager::configureBirthSign (const std::string &signId)
+{
+    stats->configureBirthSign (signId);
+}
+
+void WindowManager::setReputation (int reputation)
+{
+    stats->setReputation (reputation);
+}
+
+void WindowManager::setBounty (int bounty)
+{
+    stats->setBounty (bounty);
+}
+
+void WindowManager::updateSkillArea()
+{
+    stats->updateSkillArea();
+}
+
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
     std::cout << "message box: " << message << std::endl;
