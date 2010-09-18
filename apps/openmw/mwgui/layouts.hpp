@@ -197,45 +197,7 @@ namespace MWGui
       setText(tname, out.str().c_str());
     }
 
-    StatsWindow (MWWorld::Environment& environment)
-      : Layout("openmw_stats_window_layout.xml")
-      , environment(environment)
-    {
-      setCoord(0,0,498, 342);
-
-        const char *names[][2] =
-        {
-            { "Attrib1", "sAttributeStrength" },
-            { "Attrib2", "sAttributeIntelligence" },
-            { "Attrib3", "sAttributeWillpower" },
-            { "Attrib4", "sAttributeAgility" },
-            { "Attrib5", "sAttributeSpeed" },
-            { "Attrib6", "sAttributeEndurance" },
-            { "Attrib7", "sAttributePersonality" },
-            { "Attrib8", "sAttributeLuck" },
-            { "Health_str", "sHealth" },
-            { "Magicka_str", "sMagic" },
-            { "Fatigue_str", "sFatigue" },
-            { "Level_str", "sLevel" },
-            { "Race_str", "sRace" },
-            { "Class_str", "sClass" },
-            { 0, 0 }
-        };
-
-        const ESMS::ESMStore &store = environment.mWorld->getStore();
-        for (int i=0; names[i][0]; ++i)
-        {
-            setText (names[i][0], store.gameSettings.find (names[i][1])->str);
-        }
-
-        getWidget(skillAreaWidget, "Skills");
-
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-        {
-            skillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
-            skillWidgetMap.insert(std::pair<int, MyGUI::WidgetPtr>(i, nullptr));
-        }
-    }
+    StatsWindow (MWWorld::Environment& environment);
 
     void setPlayerName(const std::string& playerName)
     {
@@ -328,11 +290,18 @@ namespace MWGui
       void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       MyGUI::WidgetPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+      void updateScroller();
+
+      void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
+      void onWindowResize(MyGUI::WidgetPtr window);
 
       static const int lineHeight;
 
       MWWorld::Environment& environment;
-      MyGUI::WidgetPtr skillAreaWidget;
+      MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
+      MyGUI::VScrollPtr skillScrollerWidget;
+      int lastPos, clientHeight;
+
       SkillList majorSkills, minorSkills, miscSkills;
       std::map<int, MWMechanics::Stat<float> > skillValues;
       std::map<int, MyGUI::WidgetPtr> skillWidgetMap;

@@ -12,6 +12,74 @@ using namespace MWGui;
 
 const int StatsWindow::lineHeight = 18;
 
+StatsWindow::StatsWindow (MWWorld::Environment& environment)
+  : Layout("openmw_stats_window_layout.xml")
+  , environment(environment)
+  , lastPos(0)
+{
+    setCoord(0,0,498, 342);
+
+    const char *names[][2] =
+    {
+        { "Attrib1", "sAttributeStrength" },
+        { "Attrib2", "sAttributeIntelligence" },
+        { "Attrib3", "sAttributeWillpower" },
+        { "Attrib4", "sAttributeAgility" },
+        { "Attrib5", "sAttributeSpeed" },
+        { "Attrib6", "sAttributeEndurance" },
+        { "Attrib7", "sAttributePersonality" },
+        { "Attrib8", "sAttributeLuck" },
+        { "Health_str", "sHealth" },
+        { "Magicka_str", "sMagic" },
+        { "Fatigue_str", "sFatigue" },
+        { "Level_str", "sLevel" },
+        { "Race_str", "sRace" },
+        { "Class_str", "sClass" },
+        { 0, 0 }
+    };
+
+    const ESMS::ESMStore &store = environment.mWorld->getStore();
+    for (int i=0; names[i][0]; ++i)
+    {
+        setText (names[i][0], store.gameSettings.find (names[i][1])->str);
+    }
+
+    getWidget(skillAreaWidget, "Skills");
+    getWidget(skillClientWidget, "SkillClient");
+    getWidget(skillScrollerWidget, "SkillScroller");
+
+    skillScrollerWidget->eventScrollChangePosition = MyGUI::newDelegate(this, &StatsWindow::onScrollChangePosition);
+    updateScroller();
+
+    for (int i = 0; i < ESM::Skill::Length; ++i)
+    {
+        skillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
+        skillWidgetMap.insert(std::pair<int, MyGUI::WidgetPtr>(i, nullptr));
+    }
+
+    static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord = MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
+}
+
+void StatsWindow::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos)
+{
+    int diff = lastPos - pos;
+    // Adjust position of all widget according to difference
+    if (diff == 0)
+        return;
+    lastPos = pos;
+
+    std::vector<MyGUI::WidgetPtr>::const_iterator end = skillWidgets.end();
+    for (std::vector<MyGUI::WidgetPtr>::const_iterator it = skillWidgets.begin(); it != end; ++it)
+    {
+        (*it)->setCoord((*it)->getCoord() + MyGUI::IntPoint(0, diff));
+    }
+}
+
+void StatsWindow::onWindowResize(MyGUI::WidgetPtr window)
+{
+    updateScroller();
+}
+
 void StatsWindow::setStyledText(MyGUI::WidgetPtr widget, ColorStyle style, const std::string &value)
 {
     widget->setCaption(value);
@@ -110,7 +178,7 @@ void StatsWindow::setBirthSign (const std::string& signId)
 
 void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::StaticImagePtr separator = skillAreaWidget->createWidget<MyGUI::StaticImage>("MW_HLine", MyGUI::IntCoord(2 + 10, coord1.top, coord1.width + coord2.width - 8, 18), MyGUI::Align::Default);
+    MyGUI::StaticImagePtr separator = skillClientWidget->createWidget<MyGUI::StaticImage>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
     skillWidgets.push_back(separator);
 
     coord1.top += separator->getHeight();
@@ -119,7 +187,7 @@ void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 
 void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::StaticTextPtr groupWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandBrightText", MyGUI::IntCoord(4, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
+    MyGUI::StaticTextPtr groupWidget = skillClientWidget->createWidget<MyGUI::StaticText>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
     groupWidget->setCaption(label);
     skillWidgets.push_back(groupWidget);
 
@@ -131,10 +199,10 @@ MyGUI::WidgetPtr StatsWindow::addValueItem(const std::string text, const std::st
 {
     MyGUI::StaticTextPtr skillNameWidget, skillValueWidget;
 
-    skillNameWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default);
+    skillNameWidget = skillClientWidget->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
 
-    skillValueWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default);
+    skillValueWidget = skillClientWidget->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default);
     setStyledText(skillValueWidget, style, value);
 
     skillWidgets.push_back(skillNameWidget);
@@ -150,7 +218,7 @@ void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI
 {
     MyGUI::StaticTextPtr skillNameWidget;
 
-    skillNameWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+    skillNameWidget = skillClientWidget->createWidget<MyGUI::StaticText>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
 
     skillWidgets.push_back(skillNameWidget);
@@ -204,7 +272,7 @@ void StatsWindow::updateSkillArea()
     skillWidgets.clear();
 
     const int valueSize = 40;
-    MyGUI::IntCoord coord1(14, 4, skillAreaWidget->getWidth() - (14 + valueSize + 4), 18);
+    MyGUI::IntCoord coord1(10, 0, skillClientWidget->getWidth() - (10 + valueSize), 18);
     MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, coord1.height);
 
     if (!majorSkills.empty())
@@ -252,4 +320,13 @@ void StatsWindow::updateSkillArea()
 
     addValueItem(wm->getGameSettingString("sReputation", "Reputation"), boost::lexical_cast<std::string>(static_cast<int>(reputation)), CS_Normal, coord1, coord2);
     addValueItem(wm->getGameSettingString("sBounty", "Bounty"), boost::lexical_cast<std::string>(static_cast<int>(bounty)), CS_Normal, coord1, coord2);
+
+    clientHeight = coord1.top;
+    updateScroller();
+}
+
+void StatsWindow::updateScroller()
+{
+    skillScrollerWidget->setScrollRange(std::max(clientHeight - skillClientWidget->getHeight(), 0));
+    skillScrollerWidget->setScrollPage(std::max(skillClientWidget->getHeight() - lineHeight, 0));
 }
