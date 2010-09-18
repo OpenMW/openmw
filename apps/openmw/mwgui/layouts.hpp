@@ -185,88 +185,16 @@ namespace MWGui
 
     typedef std::vector<int> SkillList;
 
-    void setBar(const std::string& name, const std::string& tname, int val, int max)
-    {
-      MyGUI::ProgressPtr pt;
-      getWidget(pt, name);
-      pt->setProgressRange(max);
-      pt->setProgressPosition(val);
-
-      std::stringstream out;
-      out << val << "/" << max;
-      setText(tname, out.str().c_str());
-    }
-
     StatsWindow (MWWorld::Environment& environment);
 
-    void setPlayerName(const std::string& playerName)
-    {
-      mMainWidget->setCaption(playerName);
-    }
+    void setBar(const std::string& name, const std::string& tname, int val, int max);
+    void setPlayerName(const std::string& playerName);
 
     /// Set value for the given ID.
-    void setValue (const std::string& id, const MWMechanics::Stat<int>& value)
-    {
-        static const char *ids[] =
-        {
-            "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
-            "AttribVal6", "AttribVal7", "AttribVal8",
-            0
-        };
-
-        for (int i=0; ids[i]; ++i)
-            if (ids[i]==id)
-            {
-                std::ostringstream valueString;
-                valueString << value.getModified();
-                setText (id, valueString.str());
-
-                if (value.getModified()>value.getBase())
-                    setTextColor (id, 0, 1, 0);
-                else if (value.getModified()<value.getBase())
-                    setTextColor (id, 1, 0, 0);
-                else
-                    setTextColor (id, 1, 1, 1);
-
-                break;
-            }
-    }
-
-    void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
-    {
-        static const char *ids[] =
-        {
-            "HBar", "MBar", "FBar",
-            0
-        };
-
-        for (int i=0; ids[i]; ++i)
-            if (ids[i]==id)
-            {
-                std::string id (ids[i]);
-                setBar (id, id + "T", value.getCurrent(), value.getModified());
-            }
-    }
-
-    void setValue (const std::string& id, const std::string& value)
-    {
-        if (id=="name")
-            setPlayerName (value);
-        else if (id=="race")
-            setText ("RaceText", value);
-        else if (id=="class")
-            setText ("ClassText", value);
-    }
-
-    void setValue (const std::string& id, int value)
-    {
-        if (id=="level")
-        {
-            std::ostringstream text;
-            text << value;
-            setText("LevelText", text.str());
-        }
-    }
+    void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
+    void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
+    void setValue (const std::string& id, const std::string& value);
+    void setValue (const std::string& id, int value);
 
     void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
 
