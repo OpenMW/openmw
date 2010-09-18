@@ -56,47 +56,54 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
-    mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
-
-    // global scripts
-    mEnvironment.mGlobalScripts->run (mEnvironment);
-
-    bool changed = mEnvironment.mWorld->hasCellChanged();
-
-    // local scripts
-    executeLocalScripts(); // This does not handle the case where a global script causes a cell
-                           // change, followed by a cell change in a local script during the same
-                           // frame.
-
-    // passing of time
-    if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
-        mEnvironment.mWorld->advanceTime (
-            mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
-
-    if (changed) // keep change flag for another frame, if cell changed happend in local script
-        mEnvironment.mWorld->markCellAsUnchanged();
-
-    // update actors
-    mEnvironment.mMechanicsManager->update();
-
-    if (focusFrameCounter++ == focusUpdateFrame)
+    try
     {
-        std::string handle = mEnvironment.mWorld->getFacedHandle();
+        mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
 
-        std::string name;
+        // global scripts
+        mEnvironment.mGlobalScripts->run (mEnvironment);
 
-        if (!handle.empty())
+        bool changed = mEnvironment.mWorld->hasCellChanged();
+
+        // local scripts
+        executeLocalScripts(); // This does not handle the case where a global script causes a cell
+                               // change, followed by a cell change in a local script during the same
+                               // frame.
+
+        // passing of time
+        if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
+            mEnvironment.mWorld->advanceTime (
+                mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
+
+        if (changed) // keep change flag for another frame, if cell changed happend in local script
+            mEnvironment.mWorld->markCellAsUnchanged();
+
+        // update actors
+        mEnvironment.mMechanicsManager->update();
+
+        if (focusFrameCounter++ == focusUpdateFrame)
         {
-            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+            std::string handle = mEnvironment.mWorld->getFacedHandle();
 
-            if (!ptr.isEmpty())
-                name = MWWorld::Class::get (ptr).getName (ptr);
+            std::string name;
+
+            if (!handle.empty())
+            {
+                MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+                if (!ptr.isEmpty())
+                    name = MWWorld::Class::get (ptr).getName (ptr);
+            }
+
+            if (!name.empty())
+                std::cout << "Object: " << name << std::endl;
+
+            focusFrameCounter = 0;
         }
-
-        if (!name.empty())
-            std::cout << "Object: " << name << std::endl;
-
-        focusFrameCounter = 0;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
 
     return true;
