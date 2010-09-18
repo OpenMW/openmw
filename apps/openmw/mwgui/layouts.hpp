@@ -308,7 +308,7 @@ namespace MWGui
 
       void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
       void setFactions (const std::vector<Faction>& factions);
-      void configureBirthSign (const std::string &signId);
+      void setBirthSign (const std::string &signId);
       void setReputation (int reputation) { this->reputation = reputation; }
       void setBounty (int bounty) { this->bounty = bounty; }
       void updateSkillArea();

@@ -150,8 +150,8 @@ namespace MWGui
     void setFactions (const FactionList& factions);
     ///< set faction and rank to display on stat window, use an empty vector to disable
 
-    void configureBirthSign (const std::string &signId);
-    ///< configure birth sign to display on stat window, use an empty string to disable.
+    void setBirthSign (const std::string &signId);
+    ///< set birth sign to display on stat window, use an empty string to disable.
 
     void setReputation (int reputation);
     ///< set the current reputation value

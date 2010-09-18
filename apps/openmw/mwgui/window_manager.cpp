@@ -181,9 +181,9 @@ void WindowManager::setFactions (const FactionList& factions)
     stats->setFactions (factions);
 }
 
-void WindowManager::configureBirthSign (const std::string &signId)
+void WindowManager::setBirthSign (const std::string &signId)
 {
-    stats->configureBirthSign (signId);
+    stats->setBirthSign (signId);
 }
 
 void WindowManager::setReputation (int reputation)

@@ -89,7 +89,7 @@ void StatsWindow::setFactions (const std::vector<Faction>& factions)
     this->factions = factions;
 }
 
-void StatsWindow::configureBirthSign (const std::string& signId)
+void StatsWindow::setBirthSign (const std::string& signId)
 {
     birthSignId = signId;
 }
