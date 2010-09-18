@@ -171,9 +171,9 @@ void WindowManager::setValue (const std::string& id, int value)
     stats->setValue (id, value);
 }
 
-void WindowManager::configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc)
+void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
 {
-    stats->configureSkills (major, minor, misc);
+    stats->configureSkills (major, minor);
 }
 
 void WindowManager::setFactions (const FactionList& factions)

@@ -31,4 +31,33 @@ namespace ESM
         "sSkillSpeechcraft",
         "sSkillHandtohand",
     };
+    const boost::array<Skill::SkillEnum, Skill::Length> Skill::skillIds = {{
+        Block,
+        Armorer,
+        MediumArmor,
+        HeavyArmor,
+        BluntWeapon,
+        LongBlade,
+        Axe,
+        Spear,
+        Athletics,
+        Enchant,
+        Destruction,
+        Alteration,
+        Illusion,
+        Conjuration,
+        Mysticism,
+        Restoration,
+        Alchemy,
+        Unarmored,
+        Security,
+        Sneak,
+        Acrobatics,
+        LightArmor,
+        ShortBlade,
+        Marksman,
+        Mercantile,
+        Speechcraft,
+        HandToHand
+    }};
 }

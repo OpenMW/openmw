@@ -1,6 +1,8 @@
 #ifndef _ESM_SKIL_H
 #define _ESM_SKIL_H
 
+#include <boost/array.hpp>
+
 #include "esm_reader.hpp"
 #include "defs.hpp"
 
@@ -62,6 +64,7 @@ struct Skill
         Length
     };
   static const std::string sSkillNameIds[Length];
+  static const boost::array<SkillEnum, Length> skillIds;
 
   void load(ESMReader &esm)
     {

@@ -128,6 +128,7 @@ namespace MWGui
 
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
+    typedef std::vector<int> SkillList;
 
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
     ///< Set value for the given ID.
@@ -144,7 +145,7 @@ namespace MWGui
     void setValue (const std::string& id, int value);
     ///< set value for the given ID.
 
-    void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
+    void configureSkills (const SkillList& major, const SkillList& minor);
     ///< configure skill groups, each set contains the skill ID for that group.
 
     void setFactions (const FactionList& factions);

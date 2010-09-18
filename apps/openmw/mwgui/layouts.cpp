@@ -4,6 +4,8 @@
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwgui/window_manager.hpp"
 
+#include <algorithm>
+#include <iterator>
 #include <boost/lexical_cast.hpp>
 
 using namespace MWGui;
@@ -77,11 +79,23 @@ void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<float
     }
 }
 
-void StatsWindow::configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc)
+void StatsWindow::configureSkills (const std::vector<int>& major, const std::vector<int>& minor)
 {
     majorSkills = major;
     minorSkills = minor;
-    miscSkills = misc;
+
+    // Update misc skills with the remaining skills not in major or minor
+    std::set<int> skillSet;
+    std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
+    std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
+    boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator end = ESM::Skill::skillIds.end();
+    miscSkills.clear();
+    for (boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator it = ESM::Skill::skillIds.begin(); it != end; ++it)
+    {
+        int skill = *it;
+        if (skillSet.find(skill) == skillSet.end())
+            miscSkills.push_back(skill);
+    }
 }
 
 void StatsWindow::setFactions (const std::vector<Faction>& factions)
@@ -145,7 +159,7 @@ void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI
     coord2.top += lineHeight;
 }
 
-void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     WindowManager *wm = environment.mWindowManager;
     MWMechanics::MechanicsManager *mm = environment.mMechanicsManager;
@@ -159,8 +173,8 @@ void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titl
 
     addGroup(wm->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
-    std::set<int>::const_iterator end = skills.end();
-    for (std::set<int>::const_iterator it = skills.begin(); it != end; ++it)
+    SkillList::const_iterator end = skills.end();
+    for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
     {
         int skillId = *it;
         if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes

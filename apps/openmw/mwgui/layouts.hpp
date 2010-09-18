@@ -183,6 +183,8 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
+    typedef std::vector<int> SkillList;
+
     void setBar(const std::string& name, const std::string& tname, int val, int max)
     {
       MyGUI::ProgressPtr pt;
@@ -306,7 +308,7 @@ namespace MWGui
 
     void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
 
-      void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
+      void configureSkills (const SkillList& major, const SkillList& minor);
       void setFactions (const std::vector<Faction>& factions);
       void setBirthSign (const std::string &signId);
       void setReputation (int reputation) { this->reputation = reputation; }
@@ -321,7 +323,7 @@ namespace MWGui
           CS_Super
       };
       void setStyledText(MyGUI::WidgetPtr widget, ColorStyle style, const std::string &value);
-      void addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+      void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       MyGUI::WidgetPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
@@ -331,7 +333,7 @@ namespace MWGui
 
       MWWorld::Environment& environment;
       MyGUI::WidgetPtr skillAreaWidget;
-      std::set<int> majorSkills, minorSkills, miscSkills;
+      SkillList majorSkills, minorSkills, miscSkills;
       std::map<int, MWMechanics::Stat<float> > skillValues;
       std::map<int, MyGUI::WidgetPtr> skillWidgetMap;
       std::map<std::string, MyGUI::WidgetPtr> factionWidgetMap;
