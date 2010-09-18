@@ -10,6 +10,73 @@ using namespace MWGui;
 
 const int StatsWindow::lineHeight = 18;
 
+void StatsWindow::setStyledText(MyGUI::WidgetPtr widget, ColorStyle style, const std::string &value)
+{
+    widget->setCaption(value);
+    if (style == CS_Super)
+        widget->setTextColour(MyGUI::Colour(0, 1, 0));
+    else if (style == CS_Sub)
+        widget->setTextColour(MyGUI::Colour(1, 0, 0));
+    else
+        widget->setTextColour(MyGUI::Colour(1, 1, 1));
+}
+
+void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<float>& value)
+{
+    static struct {const char *id; ESM::Skill::SkillEnum skillId; } skillMap[] =
+    {
+        {"SkillBlock", ESM::Skill::Block},
+        {"SkillArmorer", ESM::Skill::Armorer},
+        {"SkillMediumArmor", ESM::Skill::MediumArmor},
+        {"SkillHeavyArmor", ESM::Skill::HeavyArmor},
+        {"SkillBluntWeapon", ESM::Skill::BluntWeapon},
+        {"SkillLongBlade", ESM::Skill::LongBlade},
+        {"SkillAxe", ESM::Skill::Axe},
+        {"SkillSpear", ESM::Skill::Spear},
+        {"SkillAthletics", ESM::Skill::Athletics},
+        {"SkillEnchant", ESM::Skill::Armorer},
+        {"SkillDestruction", ESM::Skill::Destruction},
+        {"SkillAlteration", ESM::Skill::Alteration},
+        {"SkillIllusion", ESM::Skill::Illusion},
+        {"SkillConjuration", ESM::Skill::Conjuration},
+        {"SkillMysticism", ESM::Skill::Mysticism},
+        {"SkillRestoration", ESM::Skill::Restoration},
+        {"SkillAlchemy", ESM::Skill::Alchemy},
+        {"SkillUnarmored", ESM::Skill::Unarmored},
+        {"SkillSecurity", ESM::Skill::Security},
+        {"SkillSneak", ESM::Skill::Sneak},
+        {"SkillAcrobatics", ESM::Skill::Acrobatics},
+        {"SkillLightArmor", ESM::Skill::LightArmor},
+        {"SkillShortBlade", ESM::Skill::ShortBlade},
+        {"SkillMarksman", ESM::Skill::Marksman},
+        {"SkillMercantile", ESM::Skill::Mercantile},
+        {"SkillSpeechcraft", ESM::Skill::Speechcraft},
+        {"SkillHandToHand", ESM::Skill::HandToHand},
+    };
+    for (int i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
+    {
+        if (skillMap[i].id == id)
+        {
+            int skillId = skillMap[i].skillId;
+            skillValues[skillId] = value;
+            MyGUI::WidgetPtr widget = skillWidgetMap[skillId];
+            if (widget)
+            {
+                float modified = value.getModified(), base = value.getBase();
+                std::string text = boost::lexical_cast<std::string>(std::floor(modified));
+                ColorStyle style = CS_Normal;
+                if (modified > base)
+                    style = CS_Super;
+                else if (modified < base)
+                    style = CS_Sub;
+
+                setStyledText(widget, style, text);
+            }
+            break;
+        }
+    }
+}
+
 void StatsWindow::configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc)
 {
     majorSkills = major;
@@ -46,7 +113,7 @@ void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, My
     coord2.top += lineHeight;
 }
 
-void StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::WidgetPtr StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::StaticTextPtr skillNameWidget, skillValueWidget;
 
@@ -54,19 +121,15 @@ void StatsWindow::addValueItem(const std::string text, const std::string &value,
     skillNameWidget->setCaption(text);
 
     skillValueWidget = skillAreaWidget->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default);
-    skillValueWidget->setCaption(value);
-    if (style == CS_Super)
-        skillValueWidget->setTextColour(MyGUI::Colour(0, 1, 0));
-    else if (style == CS_Sub)
-        skillValueWidget->setTextColour(MyGUI::Colour(1, 0, 0));
-    else
-        skillValueWidget->setTextColour(MyGUI::Colour(1, 1, 1));
+    setStyledText(skillValueWidget, style, value);
 
     skillWidgets.push_back(skillNameWidget);
     skillWidgets.push_back(skillValueWidget);
 
     coord1.top += lineHeight;
     coord2.top += lineHeight;
+
+    return skillValueWidget;
 }
 
 void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -84,11 +147,6 @@ void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI
 
 void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    // Get player and stats
-    MWWorld::Ptr ptr = environment.mWorld->getPlayerPos().getPlayer();
-    MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
-    MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
-
     WindowManager *wm = environment.mWindowManager;
     MWMechanics::MechanicsManager *mm = environment.mMechanicsManager;
     ESMS::ESMStore &store = environment.mWorld->getStore();
@@ -109,8 +167,7 @@ void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titl
             continue;
         assert(skillId >= 0 && skillId < ESM::Skill::Length);
         const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
-        assert(skillId < sizeof(npcStats.mSkill)/sizeof(npcStats.mSkill[0]));
-        MWMechanics::Stat<float> &stat = npcStats.mSkill[skillId];
+        const MWMechanics::Stat<float> &stat = skillValues.find(skillId)->second;
         float base = stat.getBase();
         float modified = stat.getModified();
 
@@ -119,7 +176,8 @@ void StatsWindow::addSkills(const std::set<int> &skills, const std::string &titl
             style = CS_Super;
         else if (modified < base)
             style = CS_Sub;
-        addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+        MyGUI::WidgetPtr widget = addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+        skillWidgetMap[skillId] = widget;
     }
 }
 

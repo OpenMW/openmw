@@ -222,6 +222,12 @@ namespace MWGui
         }
 
         getWidget(skillAreaWidget, "Skills");
+
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+        {
+            skillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
+            skillWidgetMap.insert(std::pair<int, MyGUI::WidgetPtr>(i, nullptr));
+        }
     }
 
     void setPlayerName(const std::string& playerName)
@@ -293,6 +299,8 @@ namespace MWGui
         }
     }
 
+    void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
+
       void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
       void configureFactions (const std::vector<std::string>& factions);
       void configureBirthSign (const std::string &signId);
@@ -307,10 +315,11 @@ namespace MWGui
           CS_Normal,
           CS_Super
       };
+      void setStyledText(MyGUI::WidgetPtr widget, ColorStyle style, const std::string &value);
       void addSkills(const std::set<int> &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-      void addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+      MyGUI::WidgetPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
       void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
 
       static const int lineHeight;
@@ -318,6 +327,8 @@ namespace MWGui
       MWWorld::Environment& environment;
       MyGUI::WidgetPtr skillAreaWidget;
       std::set<int> majorSkills, minorSkills, miscSkills;
+      std::map<int, MWMechanics::Stat<float> > skillValues;
+      std::map<int, MyGUI::WidgetPtr> skillWidgetMap;
       std::vector<std::string> factions;
       std::string birthSignId;
       int reputation, bounty;

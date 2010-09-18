@@ -150,6 +150,11 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
     stats->setValue (id, value);
 }
 
+void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<float>& value)
+{
+    stats->setValue (id, value);
+}
+
 void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
 {
     stats->setValue (id, value);
