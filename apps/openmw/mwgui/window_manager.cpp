@@ -176,9 +176,9 @@ void WindowManager::configureSkills (const std::set<int>& major, const std::set<
     stats->configureSkills (major, minor, misc);
 }
 
-void WindowManager::configureFactions (const std::vector<std::string>& factions)
+void WindowManager::setFactions (const FactionList& factions)
 {
-    stats->configureFactions (factions);
+    stats->setFactions (factions);
 }
 
 void WindowManager::configureBirthSign (const std::string &signId)

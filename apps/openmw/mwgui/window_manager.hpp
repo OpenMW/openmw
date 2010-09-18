@@ -126,6 +126,9 @@ namespace MWGui
 
     MyGUI::Gui* getGui() const { return gui; }
 
+    typedef std::pair<std::string, int> Faction;
+    typedef std::vector<Faction> FactionList;
+
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
     ///< Set value for the given ID.
 
@@ -144,8 +147,8 @@ namespace MWGui
     void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
     ///< configure skill groups, each set contains the skill ID for that group.
 
-    void configureFactions (const std::vector<std::string>& factions);
-    ///< configure factions to display on stat window, use an empty set to disable
+    void setFactions (const FactionList& factions);
+    ///< set faction and rank to display on stat window, use an empty vector to disable
 
     void configureBirthSign (const std::string &signId);
     ///< configure birth sign to display on stat window, use an empty string to disable.

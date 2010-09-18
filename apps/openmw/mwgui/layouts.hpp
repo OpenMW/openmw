@@ -9,6 +9,8 @@
 
 #include <sstream>
 #include <set>
+#include <string>
+#include <utility>
 
 #include "../mwmechanics/stat.hpp"
 #include "../mwworld/environment.hpp"
@@ -178,6 +180,9 @@ namespace MWGui
   class StatsWindow : public OEngine::GUI::Layout
   {
   public:
+    typedef std::pair<std::string, int> Faction;
+    typedef std::vector<Faction> FactionList;
+
     void setBar(const std::string& name, const std::string& tname, int val, int max)
     {
       MyGUI::ProgressPtr pt;
@@ -302,7 +307,7 @@ namespace MWGui
     void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
 
       void configureSkills (const std::set<int>& major, const std::set<int>& minor, const std::set<int>& misc);
-      void configureFactions (const std::vector<std::string>& factions);
+      void setFactions (const std::vector<Faction>& factions);
       void configureBirthSign (const std::string &signId);
       void setReputation (int reputation) { this->reputation = reputation; }
       void setBounty (int bounty) { this->bounty = bounty; }
@@ -329,7 +334,8 @@ namespace MWGui
       std::set<int> majorSkills, minorSkills, miscSkills;
       std::map<int, MWMechanics::Stat<float> > skillValues;
       std::map<int, MyGUI::WidgetPtr> skillWidgetMap;
-      std::vector<std::string> factions;
+      std::map<std::string, MyGUI::WidgetPtr> factionWidgetMap;
+      FactionList factions; ///< Stores a list of factions and the current rank
       std::string birthSignId;
       int reputation, bounty;
       std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information

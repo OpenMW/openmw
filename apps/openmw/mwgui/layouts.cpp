@@ -84,7 +84,7 @@ void StatsWindow::configureSkills (const std::set<int>& major, const std::set<in
     miscSkills = misc;
 }
 
-void StatsWindow::configureFactions (const std::vector<std::string>& factions)
+void StatsWindow::setFactions (const std::vector<Faction>& factions)
 {
     this->factions = factions;
 }
@@ -212,11 +212,12 @@ void StatsWindow::updateSkillArea()
             addSeparator(coord1, coord2);
 
         addGroup(wm->getGameSettingString("sFaction", "Faction"), coord1, coord2);
-        std::vector<std::string>::const_iterator end = factions.end();
-        for (std::vector<std::string>::const_iterator it = factions.begin(); it != end; ++it)
+        FactionList::const_iterator end = factions.end();
+        for (FactionList::const_iterator it = factions.begin(); it != end; ++it)
         {
-            const ESM::Faction *faction = store.factions.find(*it);
+            const ESM::Faction *faction = store.factions.find(it->first);
             addItem(faction->name, coord1, coord2);
+            // TODO: Faction rank should be placed in tooltip
         }
     }
 
