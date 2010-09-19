@@ -129,7 +129,7 @@ void RaceDialog::setRaceId(const std::string &raceId)
     size_t count = raceList->getItemCount();
     for (size_t i = 0; i < count; ++i)
     {
-        if (boost::iequals(raceList->getItem(i), raceId))
+        if (boost::iequals(*raceList->getItemDataAt<std::string>(i), raceId))
         {
             raceList->setIndexSelected(i);
             break;
@@ -230,7 +230,7 @@ void RaceDialog::updateRaces()
             continue;
 
         raceList->addItem(race.name, it->first);
-        if (boost::iequals(race.name, currentRaceId))
+        if (boost::iequals(it->first, currentRaceId))
             raceList->setIndexSelected(index);
         ++index;
     }
