@@ -7,7 +7,34 @@
 
 using namespace Mangle::Rend2D;
 
-// This is a really crappy and slow implementation
+const SpriteData *SDL_Sprite::lock()
+{
+  // Make sure we aren't already locked
+  assert(!data.pixels);
+
+  // Lock the surface and set up the data structure
+  SDL_LockSurface(surface);
+
+  data.pixels = surface->pixels;
+  data.w = surface->w;
+  data.h = surface->h;
+  data.pitch = surface->pitch;
+  data.bypp = surface->format->BytesPerPixel;
+
+  return &data;
+}
+
+void SDL_Sprite::unlock()
+{
+  if(data.pixels)
+    {
+      SDL_UnlockSurface(surface);
+      data.pixels = NULL;
+    }
+}
+
+// This is a really crappy and slow implementation, only intended for
+// testing purposes. Use lock/unlock for faster pixel drawing.
 void SDL_Sprite::pixel(int x, int y, int color)
 {
   SDL_LockSurface(surface);
@@ -83,6 +110,7 @@ SDL_Sprite::SDL_Sprite(SDL_Surface *s, bool autoDelete)
   : surface(s), autoDel(autoDelete)
 {
   assert(surface != NULL);
+  data.pixels = NULL;
 }
 
 SDL_Sprite::~SDL_Sprite()

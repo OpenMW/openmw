@@ -6,6 +6,17 @@ namespace Mangle
   namespace Rend2D
   {
     /**
+       A pointer to sprite data for direct drawing. Only to be used
+       while the corresponding sprite is locked.
+     */
+    struct SpriteData
+    {
+      void *pixels;     // Pixel data
+      int w, h;         // Width and height
+      int pitch, bypp;  // Pitch (bytes) and bytes per pixel
+    };
+
+    /**
        A Sprite is either a bitmap to be drawn or an output of area
        for blitting other bitmaps, or both. They are created by the
        Driver.
@@ -33,6 +44,13 @@ namespace Mangle
       /// format. This is not expected to be fast, and in some
       /// implementations may not work at all.
       virtual void pixel(int x, int y, int value) {}
+
+      /// Lock sprite for direct drawing, and return a struct
+      /// containing the necessary pointer.  When finished, unlock the
+      /// sprite with unlock(). May return NULL, if so then direct
+      /// drawing is not possible.
+      virtual const SpriteData *lock() { return NULL; }
+      virtual void unlock() {}
     };
   }
 }

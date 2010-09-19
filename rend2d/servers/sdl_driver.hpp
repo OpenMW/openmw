@@ -37,9 +37,15 @@ namespace Mangle
       // Set one pixel
       void pixel(int x, int y, int value);
 
+      const SpriteData *lock();
+      void unlock();
+
     private:
       // The SDL surface
       SDL_Surface* surface;
+
+      // Used for locking
+      SpriteData data;
 
       // If true, delete this surface when the canvas is destructed
       bool autoDel;
