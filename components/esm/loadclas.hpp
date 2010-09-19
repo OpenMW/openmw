@@ -35,6 +35,13 @@ struct Class
       RepairItem	= 0x20000
     };
 
+  enum Specialization
+    {
+      Combat = 0,
+      Magic = 1,
+      Stealth = 2
+    };
+
   struct CLDTstruct
   {
     int attribute[2];   // Attributes that get class bonus

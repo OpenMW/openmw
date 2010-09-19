@@ -43,6 +43,7 @@ namespace MWGui
 
   class TextInputDialog;
   class RaceDialog;
+  class PickClassDialog;
 
   class WindowManager
   {
@@ -59,6 +60,7 @@ namespace MWGui
     // Character creation
     TextInputDialog *nameDialog;
     RaceDialog *raceDialog;
+    PickClassDialog *pickClassDialog;
 
     // Which dialogs have been shown, controls back/next/ok buttons
     bool nameChosen;
@@ -184,6 +186,10 @@ namespace MWGui
     // Character generation: Race dialog
     void onRaceDialogDone();
     void onRaceDialogBack();
+
+    // Character generation: Pick Class dialog
+    void onPickClassDialogDone();
+    void onPickClassDialogBack();
   };
 }
 #endif

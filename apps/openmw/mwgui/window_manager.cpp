@@ -2,6 +2,7 @@
 #include "layouts.hpp"
 #include "text_input.hpp"
 #include "race.hpp"
+#include "class.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -19,6 +20,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   : environment(environment)
   , nameDialog(nullptr)
   , raceDialog(nullptr)
+  , pickClassDialog(nullptr)
   , nameChosen(false)
   , raceChosen(false)
   , classChosen(false)
@@ -63,6 +65,7 @@ WindowManager::~WindowManager()
 
   delete nameDialog;
   delete raceDialog;
+  delete pickClassDialog;
 }
 
 void WindowManager::updateVisible()
@@ -119,6 +122,17 @@ void WindowManager::updateVisible()
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
       raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
       raceDialog->open();
+      return;
+  }
+
+  if (mode == GM_Class)
+  {
+      if (!pickClassDialog)
+          pickClassDialog = new PickClassDialog(environment, gui->getViewSize());
+      pickClassDialog->setNextButtonShow(classChosen);
+      pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
+      pickClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogBack);
+      pickClassDialog->open();
       return;
   }
 
@@ -287,4 +301,39 @@ void WindowManager::onRaceDialogBack()
     updateCharacterGeneration();
 
     environment.mInputManager->setGuiMode(GM_Name);
+}
+
+void WindowManager::onPickClassDialogDone()
+{
+    pickClassDialog->eventDone = MWGui::PickClassDialog::EventHandle_Void();
+
+    bool goNext = classChosen; // Go to next dialog if class was previously chosen
+    classChosen = true;
+    if (pickClassDialog)
+    {
+        pickClassDialog->setVisible(false);
+        //environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
+    }
+
+    updateCharacterGeneration();
+
+    if (reviewNext)
+        environment.mInputManager->setGuiMode(GM_Review);
+    else if (goNext)
+        environment.mInputManager->setGuiMode(GM_Birth);
+    else
+        environment.mInputManager->setGuiMode(GM_Game);
+}
+
+void WindowManager::onPickClassDialogBack()
+{
+    if (pickClassDialog)
+    {
+        pickClassDialog->setVisible(false);
+        //environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
+    }
+
+    updateCharacterGeneration();
+
+    environment.mInputManager->setGuiMode(GM_Race);
 }
