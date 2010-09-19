@@ -34,6 +34,9 @@ namespace Mangle
       // Fill with a given pixel value
       void fill(int value);
 
+      // Set one pixel
+      void pixel(int x, int y, int value);
+
     private:
       // The SDL surface
       SDL_Surface* surface;

@@ -7,6 +7,38 @@
 
 using namespace Mangle::Rend2D;
 
+// This is a really crappy and slow implementation
+void SDL_Sprite::pixel(int x, int y, int color)
+{
+  SDL_LockSurface(surface);
+
+  int bpp = surface->format->BytesPerPixel;
+  char *p = (char*)surface->pixels + y*surface->pitch + x*bpp;
+
+  switch(bpp)
+    {
+    case 1: *p = color; break;
+    case 3:
+        if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+          {
+            p[0] = (color >> 16) & 0xff;
+            p[1] = (color >> 8) & 0xff;
+            p[2] = color & 0xff;
+          }
+        else
+          {
+            p[0] = color & 0xff;
+            p[1] = (color >> 8) & 0xff;
+            p[2] = (color >> 16) & 0xff;
+          }
+        break;
+    case 4:
+        *(int*)p = color;
+        break;
+    }
+  SDL_UnlockSurface(surface);
+}
+
 void SDL_Sprite::draw(Sprite *s,                // Must be SDL_Sprite
                       int x, int y,             // Destination position
                       int sx, int sy,           // Source position

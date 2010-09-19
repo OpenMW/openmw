@@ -28,6 +28,11 @@ namespace Mangle
       /// Fill the sprite with the given pixel value. The pixel format
       /// depends on the format of the sprite.
       virtual void fill(int value) = 0;
+
+      /// Set one pixel value. The pixel format depends on the sprite
+      /// format. This is not expected to be fast, and in some
+      /// implementations may not work at all.
+      virtual void pixel(int x, int y, int value) {}
     };
   }
 }
