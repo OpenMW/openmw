@@ -27,54 +27,30 @@
             <Property key="Widget_Caption" value="Favorite Attributes:"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
-        <Widget type="StaticText" skin="SandText" position="0 59 162 18" name="FavoriteAttribute0" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="0 77 162 18" name="FavoriteAttribute1" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
+        <Widget type="MWAttribute" skin="MW_StatName" position="0 59 162 18" name="FavoriteAttribute0" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWAttribute" skin="MW_StatName" position="0 77 162 18" name="FavoriteAttribute1" align="ALIGN_LEFT ALIGN_TOP" />
 
         <!-- Major Skills -->
         <Widget type="StaticText" skin="HeaderText" position="162 0 162 18" name="MajorSkillT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_Caption" value="Major Skills:"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
-        <Widget type="StaticText" skin="SandText" position="162 18 162 18" name="MajorSkill0" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="162 36 162 18" name="MajorSkill1" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="162 54 162 18" name="MajorSkill2" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="162 72 162 18" name="MajorSkill3" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="162 90 162 18" name="MajorSkill4" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
+        <Widget type="MWSkill" skin="MW_StatName" position="162 18 162 18" name="MajorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="162 36 162 18" name="MajorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="162 54 162 18" name="MajorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="162 72 162 18" name="MajorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="162 90 162 18" name="MajorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
 
         <!-- Minor Skills -->
         <Widget type="StaticText" skin="HeaderText" position="325 0 162 18" name="MinorSkillT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_Caption" value="Minor Skills:"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
-        <Widget type="StaticText" skin="SandText" position="325 18 162 18" name="MinorSkill0" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="325 36 162 18" name="MinorSkill1" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="325 54 162 18" name="MinorSkill2" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="325 72 162 18" name="MinorSkill3" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
-        <Widget type="StaticText" skin="SandText" position="325 90 162 18" name="MinorSkill4" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
+        <Widget type="MWSkill" skin="MW_StatName" position="325 18 162 18" name="MinorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="325 36 162 18" name="MinorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="325 54 162 18" name="MinorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="325 72 162 18" name="MinorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="325 90 162 18" name="MinorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
 
         </Widget>
 

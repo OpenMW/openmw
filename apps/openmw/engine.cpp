@@ -34,6 +34,9 @@
 
 #include <OgreRoot.h>
 
+#include <MyGUI_WidgetManager.h>
+#include "mwgui/class.hpp"
+
 void OMW::Engine::executeLocalScripts()
 {
     for (MWWorld::World::ScriptList::const_iterator iter (
@@ -237,6 +240,8 @@ void OMW::Engine::go()
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(),
                                                  mOgre.getScene());
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);

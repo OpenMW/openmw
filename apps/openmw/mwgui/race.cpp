@@ -2,6 +2,7 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "window_manager.hpp"
+#include "widgets.hpp"
 #include "components/esm_store/store.hpp"
 
 #include <assert.h>
@@ -12,6 +13,7 @@
 #include <boost/lexical_cast.hpp>
 
 using namespace MWGui;
+using namespace Widgets;
 
 RaceDialog::RaceDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
   : Layout("openmw_chargen_race_layout.xml")
@@ -247,10 +249,9 @@ void RaceDialog::updateSkills()
     if (currentRaceId.empty())
         return;
 
-    MyGUI::StaticTextPtr skillNameWidget, skillBonusWidget;
+    MWSkillPtr skillWidget;
     const int lineHeight = 18;
-    MyGUI::IntCoord coord1(0, 0, skillList->getWidth() - (40 + 4), 18);
-    MyGUI::IntCoord coord2(coord1.left + coord1.width, 0, 40, 18);
+    MyGUI::IntCoord coord1(0, 0, skillList->getWidth(), 18);
 
     WindowManager *wm = environment.mWindowManager;
     ESMS::ESMStore &store = environment.mWorld->getStore();
@@ -262,22 +263,15 @@ void RaceDialog::updateSkills()
         if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
             continue;
 
-        skillNameWidget = skillList->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default,
-                                                                     std::string("SkillName") + boost::lexical_cast<std::string>(i));
-        assert(skillId >= 0 && skillId < ESM::Skill::Length);
-        const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
-        skillNameWidget->setCaption(wm->getGameSettingString(skillNameId, skillNameId));
+        skillWidget = skillList->createWidget<MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default,
+                                                       std::string("Skill") + boost::lexical_cast<std::string>(i));
+        skillWidget->setWindowManager(wm);
+        skillWidget->setSkillNumber(skillId);
+        skillWidget->setSkillValue(MWSkill::SkillValue(race->data.bonus[i].bonus));
 
-        skillBonusWidget = skillList->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default,
-                                                                      std::string("SkillBonus") + boost::lexical_cast<std::string>(i));
-        int bonus = race->data.bonus[i].bonus;
-        skillBonusWidget->setCaption(boost::lexical_cast<std::string>(bonus));
-
-        skillItems.push_back(skillNameWidget);
-        skillItems.push_back(skillBonusWidget);
+        skillItems.push_back(skillWidget);
 
         coord1.top += lineHeight;
-        coord2.top += lineHeight;
     }
 }
 

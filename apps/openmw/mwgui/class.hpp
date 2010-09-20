@@ -5,6 +5,10 @@
 
 #include <openengine/gui/layout.hpp>
 
+#include <MyGUI.h>
+
+#include "widgets.hpp"
+
 namespace MWWorld
 {
     class Environment;
@@ -58,9 +62,9 @@ namespace MWGui
         MyGUI::StaticImagePtr classImage;
         MyGUI::ListPtr        classList;
         MyGUI::StaticTextPtr  specializationName;
-        MyGUI::StaticTextPtr  favoriteAttribute0, favoriteAttribute1;
-        MyGUI::StaticTextPtr  majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
-        MyGUI::StaticTextPtr  minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
+        Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
+        Widgets::MWSkillPtr   majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
+        Widgets::MWSkillPtr   minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
 
         std::string currentClassId;
     };

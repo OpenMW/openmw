@@ -22,7 +22,11 @@
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_RIGHT ALIGN_BOTTOM" />
         <Property key="Colour" value = "0.75 0.6 0.35" />
-        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH">
+            <State name="normal" colour = "0.75 0.6 0.35"/>
+            <State name="increased" colour = "0.757 0.679 0.539"/>
+            <State name="decreased" colour = "0.785 0.363 0.308"/>
+        </BasisSkin>
     </Skin>
 
     <Skin name = "SandBrightText" size = "16 16">
@@ -47,5 +51,14 @@
         <Property key="AlignText" value = "ALIGN_DEFAULT" />
         <Property key="Colour" value = "1 1 1" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
+    <Skin name = "MW_StatName" size = "200 18">
+        <Child type="StaticText" skin="SandText" offset = "0 0 200 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatName" />
+    </Skin>
+
+    <Skin name = "MW_StatNameValue" size = "200 18">
+        <Child type="StaticText" skin="SandText" offset = "0 0 160 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatName" />
+        <Child type="StaticText" skin="SandTextRight" offset = "160 0 40 18" align = "ALIGN_RIGHT ALIGN_TOP" name = "StatValue" />
     </Skin>
 </MyGUI>

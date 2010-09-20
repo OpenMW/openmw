@@ -36,6 +36,7 @@ source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})
 set(GAMEGUI_HEADER
     mwgui/layouts.hpp
     mwgui/text_input.hpp
+    mwgui/widgets.hpp
     mwgui/race.hpp
     mwgui/class.hpp
     mwgui/window_manager.hpp
@@ -46,6 +47,7 @@ set(GAMEGUI
     mwgui/layouts.cpp
     mwgui/console.cpp
     mwgui/text_input.cpp
+    mwgui/widgets.cpp
     mwgui/race.cpp
     mwgui/class.cpp
 )

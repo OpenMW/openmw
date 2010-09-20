@@ -29,6 +29,8 @@ PickClassDialog::PickClassDialog(MWWorld::Environment& environment, MyGUI::IntSi
     setText("FavoriteAttributesT", wm->getGameSettingString("sChooseClassMenu2", "Favorite Attributes:"));
     getWidget(favoriteAttribute0, "FavoriteAttribute0");
     getWidget(favoriteAttribute1, "FavoriteAttribute1");
+    favoriteAttribute0->setWindowManager(wm);
+    favoriteAttribute1->setWindowManager(wm);
 
     setText("MajorSkillT", wm->getGameSettingString("sChooseClassMenu3", "Major Skills:"));
     getWidget(majorSkill0, "MajorSkill0");
@@ -36,6 +38,11 @@ PickClassDialog::PickClassDialog(MWWorld::Environment& environment, MyGUI::IntSi
     getWidget(majorSkill2, "MajorSkill2");
     getWidget(majorSkill3, "MajorSkill3");
     getWidget(majorSkill4, "MajorSkill4");
+    majorSkill0->setWindowManager(wm);
+    majorSkill1->setWindowManager(wm);
+    majorSkill2->setWindowManager(wm);
+    majorSkill3->setWindowManager(wm);
+    majorSkill4->setWindowManager(wm);
 
     setText("MinorSkillT", wm->getGameSettingString("sChooseClassMenu4", "Minor Skills:"));
     getWidget(minorSkill0, "MinorSkill0");
@@ -43,6 +50,11 @@ PickClassDialog::PickClassDialog(MWWorld::Environment& environment, MyGUI::IntSi
     getWidget(minorSkill2, "MinorSkill2");
     getWidget(minorSkill3, "MinorSkill3");
     getWidget(minorSkill4, "MinorSkill4");
+    minorSkill0->setWindowManager(wm);
+    minorSkill1->setWindowManager(wm);
+    minorSkill2->setWindowManager(wm);
+    minorSkill3->setWindowManager(wm);
+    minorSkill4->setWindowManager(wm);
 
     getWidget(classList, "ClassList");
     classList->setScrollVisible(true);
@@ -182,41 +194,29 @@ void PickClassDialog::updateStats()
         "sSpecializationStealth"
     };
     specializationName->setCaption(wm->getGameSettingString(specIds[specialization], specIds[specialization]));
-    static const char *attributes[8] = {
-        "sAttributeStrength",
-        "sAttributeIntelligence",
-        "sAttributeWillpower",
-        "sAttributeAgility",
-        "sAttributeSpeed",
-        "sAttributeEndurance",
-        "sAttributePersonality",
-        "sAttributeLuck"
+
+    favoriteAttribute0->setAttributeId(klass->data.attribute[0]);
+    favoriteAttribute1->setAttributeId(klass->data.attribute[1]);
+
+    Widgets::MWSkillPtr majorSkills[5] = {
+        majorSkill0,
+        majorSkill1,
+        majorSkill2,
+        majorSkill3,
+        majorSkill4
     };
-
-    favoriteAttribute0->setCaption(wm->getGameSettingString(attributes[klass->data.attribute[0]], ""));
-    favoriteAttribute1->setCaption(wm->getGameSettingString(attributes[klass->data.attribute[1]], ""));
-
-    MyGUI::StaticTextPtr skills[2][5] = {
-        {
-            majorSkill0,
-            majorSkill1,
-            majorSkill2,
-            majorSkill3,
-            majorSkill4
-        },
-        {
-            minorSkill0,
-            minorSkill1,
-            minorSkill2,
-            minorSkill3,
-            minorSkill4
-        }
+    Widgets::MWSkillPtr minorSkills[5] = {
+        minorSkill0,
+        minorSkill1,
+        minorSkill2,
+        minorSkill3,
+        minorSkill4
     };
 
     for (int i = 0; i < 5; ++i)
     {
-        skills[0][i]->setCaption(wm->getGameSettingString(ESM::Skill::sSkillNameIds[klass->data.skills[i][0]], ""));
-        skills[1][i]->setCaption(wm->getGameSettingString(ESM::Skill::sSkillNameIds[klass->data.skills[i][1]], ""));
+        majorSkills[i]->setSkillNumber(klass->data.skills[i][0]);
+        minorSkills[i]->setSkillNumber(klass->data.skills[i][1]);
     }
 
     classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
