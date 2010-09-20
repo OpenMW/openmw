@@ -242,6 +242,7 @@ void OMW::Engine::go()
                                                  mOgre.getScene());
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);

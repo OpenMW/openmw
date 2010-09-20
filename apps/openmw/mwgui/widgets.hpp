@@ -7,6 +7,11 @@
 
 #include "../mwmechanics/stat.hpp"
 
+namespace MWWorld
+{
+    class Environment;
+}
+
 /*
   This file contains various custom widgets used in OpenMW.
  */
@@ -92,6 +97,40 @@ namespace MWGui
             MyGUI::StaticTextPtr attributeNameWidget, attributeValueWidget;
         };
         typedef MWAttribute* MWAttributePtr;
+
+        class MYGUI_EXPORT MWSpell : public Widget
+        {
+            MYGUI_RTTI_DERIVED( MWSpell );
+        public:
+            MWSpell();
+
+            typedef MWMechanics::Stat<int> SpellValue;
+
+            void setEnvironment(MWWorld::Environment *env_) { env = env_; }
+            void setSpellId(const std::string &id);
+
+            MWWorld::Environment *getEnvironment() const { return env; }
+            const std::string &getSpellId() const { return id; }
+
+        /*internal:*/
+		    virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
+
+        protected:
+		    virtual ~MWSpell();
+
+		    void baseChangeWidgetSkin(ResourceSkin* _info);
+
+	    private:
+		    void initialiseWidgetSkin(ResourceSkin* _info);
+		    void shutdownWidgetSkin();
+
+            void updateWidgets();
+
+            MWWorld::Environment *env;
+            std::string id;
+            MyGUI::StaticTextPtr spellNameWidget;
+        };
+        typedef MWSpell* MWSpellPtr;
     }
 }
 

@@ -286,7 +286,7 @@ void RaceDialog::updateSpellPowers()
     if (currentRaceId.empty())
         return;
 
-    MyGUI::StaticTextPtr spellPowerWidget;
+    MWSpellPtr spellPowerWidget;
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, spellPowerList->getWidth(), 18);
 
@@ -298,10 +298,9 @@ void RaceDialog::updateSpellPowers()
     for (int i = 0; it != end; ++it)
     {
         const std::string &spellpower = *it;
-        const ESM::Spell *spell = store.spells.find(spellpower);
-        assert(spell);
-        spellPowerWidget = spellPowerList->createWidget<MyGUI::StaticText>("SandText", coord, MyGUI::Align::Default, std::string("SpellPowerName") + boost::lexical_cast<std::string>(i));
-        spellPowerWidget->setCaption(spell->name);
+        spellPowerWidget = spellPowerList->createWidget<MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
+        spellPowerWidget->setEnvironment(&environment);
+        spellPowerWidget->setSpellId(spellpower);
 
         spellPowerItems.push_back(spellPowerWidget);
 
