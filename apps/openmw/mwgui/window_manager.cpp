@@ -326,7 +326,7 @@ void WindowManager::onPickClassDialogDone()
     if (pickClassDialog)
     {
         pickClassDialog->setVisible(false);
-        //environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
+        environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
     }
 
     updateCharacterGeneration();
@@ -344,7 +344,7 @@ void WindowManager::onPickClassDialogBack()
     if (pickClassDialog)
     {
         pickClassDialog->setVisible(false);
-        //environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
+        environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
     }
 
     updateCharacterGeneration();
