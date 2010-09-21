@@ -137,6 +137,9 @@ namespace MWMechanics
             MWMechanics::CreatureStats& stats =
                 MWWorld::Class::get (mWatched).getCreatureStats (mWatched);
 
+            MWMechanics::NpcStats& npcStats =
+                MWWorld::Class::get (mWatched).getNpcStats (mWatched);
+
             static const char *attributeNames[8] =
             {
                 "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
@@ -146,6 +149,17 @@ namespace MWMechanics
             static const char *dynamicNames[3] =
             {
                 "HBar", "MBar", "FBar"
+            };
+
+            static const char *skillNames[27] =
+            {
+                "SkillBlock", "SkillArmorer", "SkillMediumArmor", "SkillHeavyArmor",
+                "SkillBluntWeapon", "SkillLongBlade", "SkillAxe", "SkillSpear",
+                "SkillAthletics", "SkillEnchant", "SkillDestruction", "SkillAlteration",
+                "SkillIllusion", "SkillConjuration", "SkillMysticism", "SkillRestoration",
+                "SkillAlchemy", "SkillUnarmored", "SkillSecurity", "SkillSneak",
+                "SkillAcrobatics", "SkillLightArmor", "SkillShortBlade", "SkillMarksman",
+                "SkillMercantile", "SkillSpeechcraft", "SkillHandToHand",
             };
 
             for (int i=0; i<8; ++i)
@@ -168,6 +182,24 @@ namespace MWMechanics
                 }
             }
 
+            bool update = false;
+
+            for (int i=0; i<27; ++i)
+            {
+                if (npcStats.mSkill[i]!=mWatchedNpc.mSkill[i])
+                {
+                    update = true;
+
+                    mWatchedNpc.mSkill[i] = npcStats.mSkill[i];
+
+                    mEnvironment.mWindowManager->setValue (skillNames[i], npcStats.mSkill[i]);
+
+                }
+            }
+
+            if (update)
+                mEnvironment.mWindowManager->updateSkillArea();
+
             mEnvironment.mWindowManager->setValue ("level", stats.mLevel);
         }
 
@@ -181,6 +213,17 @@ namespace MWMechanics
             mEnvironment.mWindowManager->setValue ("class",
                 mEnvironment.mWorld->getPlayerPos().getClass().name);
             mUpdatePlayer = false;
+
+            MWGui::WindowManager::SkillList majorSkills (5);
+            MWGui::WindowManager::SkillList minorSkills (5);
+
+            for (int i=0; i<5; ++i)
+            {
+                minorSkills[i] = mEnvironment.mWorld->getPlayerPos().getClass().data.skills[i][0];
+                majorSkills[i] = mEnvironment.mWorld->getPlayerPos().getClass().data.skills[i][1];
+            }
+
+            mEnvironment.mWindowManager->configureSkills (majorSkills, minorSkills);
         }
     }
 

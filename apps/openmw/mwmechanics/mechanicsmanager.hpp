@@ -6,6 +6,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include "creaturestats.hpp"
+#include "npcstats.hpp"
 
 namespace MWWorld
 {
@@ -20,6 +21,7 @@ namespace MWMechanics
             std::set<MWWorld::Ptr> mActors;
             MWWorld::Ptr mWatched;
             CreatureStats mWatchedCreature;
+            NpcStats mWatchedNpc;
             bool mUpdatePlayer;
 
             void buildPlayer();
