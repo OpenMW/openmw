@@ -4,11 +4,24 @@
 #include "../mwworld/world.hpp"
 #include "components/esm_store/store.hpp"
 
-//#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace MWGui;
 using namespace MWGui::Widgets;
+
+/* Helper functions */
+
+/*
+ * Fixes the filename of a texture path to use the correct .dds extension.
+ * This is needed on some ESM entries which point to a .tga file instead.
+ */
+void MWGui::Widgets::fixTexturePath(std::string &path)
+{
+    int offset = path.rfind(".");
+    if (offset < 0)
+        return;
+    path.replace(offset, path.length() - offset, ".dds");
+}
 
 /* MWSkill */
 
@@ -224,6 +237,24 @@ void MWSpell::setSpellId(const std::string &spellId)
     updateWidgets();
 }
 
+void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord)
+{
+    ESMS::ESMStore &store = env->mWorld->getStore();
+    const ESM::Spell *spell = store.spells.search(id);
+    MYGUI_ASSERT(spell, "spell with id '" << id << "' not found");
+
+    MWSpellEffectPtr effect = nullptr;
+    std::vector<ESM::ENAMstruct>::const_iterator end = spell->effects.list.end();
+    for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->effects.list.begin(); it != end; ++it)
+    {
+        effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
+        effect->setEnvironment(env);
+        effect->setSpellEffect(*it);
+        effects.push_back(effect);
+        coord.top += effect->getHeight();
+    }
+}
+
 void MWSpell::updateWidgets()
 {
     if (spellNameWidget && env)
@@ -272,3 +303,124 @@ void MWSpell::initialiseWidgetSkin(ResourceSkin* _info)
 void MWSpell::shutdownWidgetSkin()
 {
 }
+
+/* MWSpellEffect */
+
+MWSpellEffect::MWSpellEffect()
+    : env(nullptr)
+    , imageWidget(nullptr)
+    , textWidget(nullptr)
+{
+}
+
+void MWSpellEffect::setSpellEffect(SpellEffectValue value)
+{
+    effect = value;
+    updateWidgets();
+}
+
+void MWSpellEffect::updateWidgets()
+{
+    if (!env)
+        return;
+
+    ESMS::ESMStore &store = env->mWorld->getStore();
+    WindowManager *wm = env->mWindowManager;
+    const ESM::MagicEffect *magicEffect = store.magicEffects.search(effect.effectID);
+    if (textWidget)
+    {
+        if (magicEffect)
+        {
+            // TODO: Get name of effect from GMST
+            std::string spellLine = "";
+            if (effect.skill >= 0 && effect.skill < ESM::Skill::Length)
+            {
+                spellLine += " " + wm->getGameSettingString(ESM::Skill::sSkillNameIds[effect.skill], "");
+            }
+            if (effect.attribute >= 0 && effect.attribute < 8)
+            {
+                static const char *attributes[8] = {
+                    "sAttributeStrength",
+                    "sAttributeIntelligence",
+                    "sAttributeWillpower",
+                    "sAttributeAgility",
+                    "sAttributeSpeed",
+                    "sAttributeEndurance",
+                    "sAttributePersonality",
+                    "sAttributeLuck"
+                };
+                spellLine += " " + wm->getGameSettingString(attributes[effect.attribute], "");
+            }
+            if (effect.magnMin >= 0 || effect.magnMax >= 0)
+            {
+                if (effect.magnMin == effect.magnMax)
+                    spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + " pts";
+                else
+                {
+                    spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + " to " + boost::lexical_cast<std::string>(effect.magnMin) + " pts";
+                }
+            }
+            if (effect.duration >= 0)
+            {
+                spellLine += " for " + boost::lexical_cast<std::string>(effect.duration) + " secs";
+            }
+            if (effect.range == ESM::RT_Self)
+                spellLine += " on Self";
+            else if (effect.range == ESM::RT_Touch)
+                spellLine += " on Touch";
+            else if (effect.range == ESM::RT_Target)
+                spellLine += " on Target";
+            textWidget->setCaption(spellLine);
+        }
+        else
+            textWidget->setCaption("");
+    }
+    if (imageWidget)
+    {
+        std::string path = std::string("icons\\") + magicEffect->icon;
+        fixTexturePath(path);
+        imageWidget->setImageTexture(path);
+    }
+}
+
+void MWSpellEffect::_initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name)
+{
+	Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
+
+	initialiseWidgetSkin(_info);
+}
+
+MWSpellEffect::~MWSpellEffect()
+{
+	shutdownWidgetSkin();
+}
+
+void MWSpellEffect::baseChangeWidgetSkin(ResourceSkin* _info)
+{
+	shutdownWidgetSkin();
+	Base::baseChangeWidgetSkin(_info);
+	initialiseWidgetSkin(_info);
+}
+
+void MWSpellEffect::initialiseWidgetSkin(ResourceSkin* _info)
+{
+    for (VectorWidgetPtr::iterator iter=mWidgetChildSkin.begin(); iter!=mWidgetChildSkin.end(); ++iter)
+	{
+        const std::string &name = *(*iter)->_getInternalData<std::string>();
+		if (name == "Text")
+		{
+			MYGUI_DEBUG_ASSERT( ! textWidget, "widget already assigned");
+			textWidget = (*iter)->castType<StaticText>();
+		}
+		else if (name == "Image")
+		{
+			MYGUI_DEBUG_ASSERT( ! imageWidget, "widget already assigned");
+			imageWidget = (*iter)->castType<StaticImage>();
+		}
+	}
+}
+
+void MWSpellEffect::shutdownWidgetSkin()
+{
+}
+

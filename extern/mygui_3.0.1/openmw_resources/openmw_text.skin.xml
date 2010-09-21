@@ -61,4 +61,9 @@
         <Child type="StaticText" skin="SandText" offset = "0 0 160 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatName" />
         <Child type="StaticText" skin="SandTextRight" offset = "160 0 40 18" align = "ALIGN_RIGHT ALIGN_TOP" name = "StatValue" />
     </Skin>
+
+    <Skin name = "MW_EffectImage" size = "200 24">
+        <Child type="StaticImage" skin="StaticImage" offset = "4 4 16 16" align = "ALIGN_LEFT ALIGN_TOP" name = "Image" />
+        <Child type="StaticText" skin="SandText" offset = "24 0 176 20" align = "ALIGN_VCENTRE ALIGN_HSTRETCH" name = "Text" />
+    </Skin>
 </MyGUI>

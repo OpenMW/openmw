@@ -44,6 +44,7 @@ namespace MWGui
   class TextInputDialog;
   class RaceDialog;
   class PickClassDialog;
+  class BirthDialog;
 
   class WindowManager
   {
@@ -61,12 +62,13 @@ namespace MWGui
     TextInputDialog *nameDialog;
     RaceDialog *raceDialog;
     PickClassDialog *pickClassDialog;
+    BirthDialog *birthSignDialog;
 
     // Which dialogs have been shown, controls back/next/ok buttons
     bool nameChosen;
     bool raceChosen;
     bool classChosen;
-    bool birthChosen;
+    bool birthSignChosen;
     bool reviewNext;
     ///< If true then any click on Next will cause the summary to be shown
 
@@ -190,6 +192,10 @@ namespace MWGui
     // Character generation: Pick Class dialog
     void onPickClassDialogDone();
     void onPickClassDialogBack();
+
+    // Character generation: Birth sign dialog
+    void onBirthSignDialogDone();
+    void onBirthSignDialogBack();
   };
 }
 #endif

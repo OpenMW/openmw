@@ -44,6 +44,7 @@ configure_file("${SDIR}/openmw_hud_layout.xml" "${DDIR}/openmw_hud_layout.xml" C
 configure_file("${SDIR}/openmw_text_input_layout.xml" "${DDIR}/openmw_text_input_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_race_layout.xml" "${DDIR}/openmw_chargen_race_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_class_layout.xml" "${DDIR}/openmw_chargen_class_layout.xml" COPYONLY)
+configure_file("${SDIR}/openmw_chargen_birth_layout.xml" "${DDIR}/openmw_chargen_birth_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_inventory_window_layout.xml" "${DDIR}/openmw_inventory_window_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_layers.xml" "${DDIR}/openmw_layers.xml" COPYONLY)
 configure_file("${SDIR}/openmw_mainmenu_layout.xml" "${DDIR}/openmw_mainmenu_layout.xml" COPYONLY)

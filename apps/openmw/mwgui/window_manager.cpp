@@ -3,6 +3,7 @@
 #include "text_input.hpp"
 #include "race.hpp"
 #include "class.hpp"
+#include "birth.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -21,10 +22,11 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , nameDialog(nullptr)
   , raceDialog(nullptr)
   , pickClassDialog(nullptr)
+  , birthSignDialog(nullptr)
   , nameChosen(false)
   , raceChosen(false)
   , classChosen(false)
-  , birthChosen(false)
+  , birthSignChosen(false)
   , reviewNext(false)
   , gui(_gui)
   , mode(GM_Game)
@@ -66,6 +68,7 @@ WindowManager::~WindowManager()
   delete nameDialog;
   delete raceDialog;
   delete pickClassDialog;
+  delete birthSignDialog;
 }
 
 void WindowManager::updateVisible()
@@ -133,6 +136,17 @@ void WindowManager::updateVisible()
       pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
       pickClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogBack);
       pickClassDialog->open();
+      return;
+  }
+
+  if (mode == GM_Birth)
+  {
+      if (!birthSignDialog)
+          birthSignDialog = new BirthDialog(environment, gui->getViewSize());
+      birthSignDialog->setNextButtonShow(birthSignChosen);
+      birthSignDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogDone);
+      birthSignDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogBack);
+      birthSignDialog->open();
       return;
   }
 
@@ -336,4 +350,37 @@ void WindowManager::onPickClassDialogBack()
     updateCharacterGeneration();
 
     environment.mInputManager->setGuiMode(GM_Race);
+}
+
+void WindowManager::onBirthSignDialogDone()
+{
+    birthSignDialog->eventDone = MWGui::BirthDialog::EventHandle_Void();
+
+    bool goNext = birthSignChosen; // Go to next dialog if birth sign was previously chosen
+    birthSignChosen = true;
+    if (birthSignDialog)
+    {
+        birthSignDialog->setVisible(false);
+        environment.mMechanicsManager->setPlayerBirthsign(birthSignDialog->getBirthId());
+    }
+
+    updateCharacterGeneration();
+
+    if (reviewNext || goNext)
+        environment.mInputManager->setGuiMode(GM_Review);
+    else
+        environment.mInputManager->setGuiMode(GM_Game);
+}
+
+void WindowManager::onBirthSignDialogBack()
+{
+    if (birthSignDialog)
+    {
+        birthSignDialog->setVisible(false);
+        environment.mMechanicsManager->setPlayerBirthsign(birthSignDialog->getBirthId());
+    }
+
+    updateCharacterGeneration();
+
+    environment.mInputManager->setGuiMode(GM_Class);
 }

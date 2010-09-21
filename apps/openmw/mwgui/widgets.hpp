@@ -23,6 +23,8 @@ namespace MWGui
 
     namespace Widgets
     {
+        void fixTexturePath(std::string &path);
+
         class MYGUI_EXPORT MWSkill : public Widget
         {
             MYGUI_RTTI_DERIVED( MWSkill );
@@ -98,6 +100,7 @@ namespace MWGui
         };
         typedef MWAttribute* MWAttributePtr;
 
+        class MWSpellEffect;
         class MYGUI_EXPORT MWSpell : public Widget
         {
             MYGUI_RTTI_DERIVED( MWSpell );
@@ -108,6 +111,7 @@ namespace MWGui
 
             void setEnvironment(MWWorld::Environment *env_) { env = env_; }
             void setSpellId(const std::string &id);
+            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord);
 
             MWWorld::Environment *getEnvironment() const { return env; }
             const std::string &getSpellId() const { return id; }
@@ -131,6 +135,41 @@ namespace MWGui
             MyGUI::StaticTextPtr spellNameWidget;
         };
         typedef MWSpell* MWSpellPtr;
+
+        class MYGUI_EXPORT MWSpellEffect : public Widget
+        {
+            MYGUI_RTTI_DERIVED( MWSpellEffect );
+        public:
+            MWSpellEffect();
+
+            typedef ESM::ENAMstruct SpellEffectValue;
+
+            void setEnvironment(MWWorld::Environment *env_) { env = env_; }
+            void setSpellEffect(SpellEffectValue value);
+
+            MWWorld::Environment *getEnvironment() const { return env; }
+            const SpellEffectValue &getSpellEffect() const { return effect; }
+
+        /*internal:*/
+		    virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
+
+        protected:
+		    virtual ~MWSpellEffect();
+
+		    void baseChangeWidgetSkin(ResourceSkin* _info);
+
+	    private:
+		    void initialiseWidgetSkin(ResourceSkin* _info);
+		    void shutdownWidgetSkin();
+
+            void updateWidgets();
+
+            MWWorld::Environment *env;
+            SpellEffectValue effect;
+            MyGUI::StaticImagePtr imageWidget;
+            MyGUI::StaticTextPtr textWidget;
+        };
+        typedef MWSpellEffect* MWSpellEffectPtr;
     }
 }
 
