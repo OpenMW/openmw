@@ -68,5 +68,48 @@ namespace MWGui
 
         std::string currentClassId;
     };
+
+    class CreateClassDialog : public OEngine::GUI::Layout
+    {
+    public:
+        CreateClassDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+
+//        const std::string &getClassId() const { return currentClassId; }
+//        void setClassId(const std::string &classId);
+
+        void setNextButtonShow(bool shown);
+        void open();
+
+        // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
+
+        /** Event : Back button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventBack;
+
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventDone;
+
+    protected:
+        void onDescriptionClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* _sender);
+        void onBackClicked(MyGUI::Widget* _sender);
+
+    private:
+        void updateStats();
+
+        MWWorld::Environment& environment;
+
+        MyGUI::EditPtr        editName;
+        MyGUI::StaticTextPtr  specializationName;
+        Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
+        Widgets::MWSkillPtr   majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
+        Widgets::MWSkillPtr   minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
+
+        std::string currentClassId;
+    };
 }
 #endif
