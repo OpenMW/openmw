@@ -42,6 +42,14 @@ namespace MWGui
             ESM::Skill::SkillEnum getSkillId() const { return skillId; }
             const SkillValue& getSkillValue() const { return value; }
 
+            // Events
+        	typedef delegates::CDelegate1<MWSkill*> EventHandle_SkillVoid;
+
+            /** Event : Skill clicked.\n
+                signature : void method(MWSkill* _sender)\n
+            */
+            EventHandle_SkillVoid eventClicked;
+
         /*internal:*/
 		    virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
 
@@ -49,6 +57,8 @@ namespace MWGui
 		    virtual ~MWSkill();
 
 		    void baseChangeWidgetSkin(ResourceSkin* _info);
+
+            void onClicked(MyGUI::Widget* _sender);
 
 	    private:
 		    void initialiseWidgetSkin(ResourceSkin* _info);
@@ -59,7 +69,7 @@ namespace MWGui
             WindowManager *manager;
             ESM::Skill::SkillEnum skillId;
             SkillValue value;
-            MyGUI::StaticTextPtr skillNameWidget, skillValueWidget;
+            MyGUI::WidgetPtr skillNameWidget, skillValueWidget;
         };
         typedef MWSkill* MWSkillPtr;
 
@@ -79,6 +89,14 @@ namespace MWGui
             int getAttributeId() const { return id; }
             const AttributeValue& getAttributeValue() const { return value; }
 
+            // Events
+        	typedef delegates::CDelegate1<MWAttribute*> EventHandle_AttributeVoid;
+
+            /** Event : Attribute clicked.\n
+                signature : void method(MWAttribute* _sender)\n
+            */
+            EventHandle_AttributeVoid eventClicked;
+
         /*internal:*/
 		    virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
 
@@ -86,6 +104,8 @@ namespace MWGui
 		    virtual ~MWAttribute();
 
 		    void baseChangeWidgetSkin(ResourceSkin* _info);
+
+            void onClicked(MyGUI::Widget* _sender);
 
 	    private:
 		    void initialiseWidgetSkin(ResourceSkin* _info);
@@ -96,7 +116,7 @@ namespace MWGui
             WindowManager *manager;
             int id;
             AttributeValue value;
-            MyGUI::StaticTextPtr attributeNameWidget, attributeValueWidget;
+            MyGUI::WidgetPtr attributeNameWidget, attributeValueWidget;
         };
         typedef MWAttribute* MWAttributePtr;
 

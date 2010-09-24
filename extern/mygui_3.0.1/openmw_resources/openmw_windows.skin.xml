@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
-    <!-- Defines a pure black background -->
+    <!-- Defines a transparent background -->
     <Skin name = "BlackBG" size = "8 8" texture = "transparent.png">
+        <BasisSkin type="MainSkin" offset = "0 0 8 8">
+            <State name="normal" offset = "0 0 8 8"/>
+        </BasisSkin>
+    </Skin>
+
+    <!-- Defines a pure black background -->
+    <Skin name = "DialogBG" size = "8 8" texture = "black.png">
         <BasisSkin type="MainSkin" offset = "0 0 8 8">
             <State name="normal" offset = "0 0 8 8"/>
         </BasisSkin>
@@ -239,6 +246,42 @@
              window by dragging the caption. -->
         <Child type="Button" offset="4 4 248 20" align="ALIGN_HSTRETCH ALIGN_TOP" name="Action">
             <Property key="Scale" value = "1 1 0 0"/>
+        </Child>
+    </Skin>
+
+    <Skin name = "MW_Dialog" size = "256 54">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_CENTER" />
+        <Property key="Colour" value = "0.8 0.8 0.8" />
+
+        <Child type="Widget" skin="DialogBG" offset = "4 4 248 46" align = "ALIGN_STRETCH" name = "Client"/>
+
+        <!-- Outer borders -->
+        <Child type="Widget" skin="TB_T" offset="4 0 248 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Border">
+            <Property key="Scale" value = "0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="0 4 4 46" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Border">
+            <Property key="Scale" value = "1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="4 50 248 4" align="ALIGN_BOTTOM ALIGN_HSTRETCH" name="Border">
+            <Property key="Scale" value = "0 0 0 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="252 4 4 46" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="Border">
+            <Property key="Scale" value = "0 0 1 0"/>
+        </Child>
+
+        <Child type="Widget" skin="TB_BR" offset="252 50 4 4" align="ALIGN_RIGHT ALIGN_BOTTOM" name="Border">
+            <Property key="Scale" value = "0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="0 50 4 4" align="ALIGN_LEFT ALIGN_BOTTOM" name="Border">
+            <Property key="Scale" value = "1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="252 0 4 4" align="ALIGN_RIGHT ALIGN_TOP" name="Border">
+            <Property key="Scale" value = "0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="0 0 4 4" align="ALIGN_LEFT ALIGN_TOP" name="Border">
+            <Property key="Scale" value = "1 1 -1 -1"/>
         </Child>
     </Skin>
 </MyGUI>

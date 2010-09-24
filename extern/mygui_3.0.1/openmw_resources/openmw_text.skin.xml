@@ -17,6 +17,14 @@
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
     </Skin>
 
+    <Skin name = "SandTextC" size = "16 16">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "TOP HCENTER" />
+        <Property key="Colour" value = "0.75 0.6 0.35" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
     <Skin name = "SandTextRight" size = "16 16">
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
@@ -57,9 +65,26 @@
         <Child type="StaticText" skin="SandText" offset = "0 0 200 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatName" />
     </Skin>
 
+    <Skin name = "MW_StatNameC" size = "200 18">
+        <Child type="StaticTextC" skin="SandText" offset = "0 0 200 18" align = "LEFT HSTRETCH" name = "StatName" />
+    </Skin>
+
     <Skin name = "MW_StatNameValue" size = "200 18">
         <Child type="StaticText" skin="SandText" offset = "0 0 160 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatName" />
         <Child type="StaticText" skin="SandTextRight" offset = "160 0 40 18" align = "ALIGN_RIGHT ALIGN_TOP" name = "StatValue" />
+    </Skin>
+
+    <Skin name = "MW_StatNameButtonC" size = "200 18">
+        <Child type="Button" skin="SandTextC" offset = "0 0 200 18" align = "LEFT HSTRETCH" name = "StatNameButton" />
+    </Skin>
+
+    <Skin name = "MW_StatNameButton" size = "200 18">
+        <Child type="Button" skin="SandText" offset = "0 0 200 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatNameButton" />
+    </Skin>
+
+    <Skin name = "MW_StatNameValueButton" size = "200 18">
+        <Child type="Button" skin="SandText" offset = "0 0 160 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatNameButton" />
+        <Child type="Button" skin="SandTextRight" offset = "160 0 40 18" align = "ALIGN_RIGHT ALIGN_TOP" name = "StatValueButton" />
     </Skin>
 
     <Skin name = "MW_EffectImage" size = "200 24">

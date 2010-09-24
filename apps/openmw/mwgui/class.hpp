@@ -69,10 +69,113 @@ namespace MWGui
         std::string currentClassId;
     };
 
+    class SelectSpecializationDialog : public OEngine::GUI::Layout
+    {
+    public:
+        SelectSpecializationDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+
+        ESM::Class::Specialization getSpecializationId() const { return specializationId; }
+
+        // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
+
+        /** Event : Cancel button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventCancel;
+
+        /** Event : Dialog finished, specialization selected.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventItemSelected;
+
+    protected:
+        void onSpecializationClicked(MyGUI::Widget* _sender);
+        void onCancelClicked(MyGUI::Widget* _sender);
+
+    private:
+        MyGUI::WidgetPtr      specialization0, specialization1, specialization2;
+
+        ESM::Class::Specialization specializationId;
+    };
+
+    class SelectAttributeDialog : public OEngine::GUI::Layout
+    {
+    public:
+        SelectAttributeDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+
+        ESM::Attribute::AttributeID getAttributeId() const { return attributeId; }
+        Widgets::MWAttributePtr getAffectedWidget() const { return affectedWidget; }
+        void setAffectedWidget(Widgets::MWAttributePtr widget) { affectedWidget = widget; }
+
+        // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
+
+        /** Event : Cancel button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventCancel;
+
+        /** Event : Dialog finished, attribute selected.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventItemSelected;
+
+    protected:
+        void onAttributeClicked(Widgets::MWAttributePtr _sender);
+        void onCancelClicked(MyGUI::Widget* _sender);
+
+    private:
+        Widgets::MWAttributePtr attribute0, attribute1, attribute2, attribute3,
+                                attribute4, attribute5, attribute6, attribute7;
+        Widgets::MWAttributePtr affectedWidget;
+
+        ESM::Attribute::AttributeID attributeId;
+    };
+
+    class SelectSkillDialog : public OEngine::GUI::Layout
+    {
+    public:
+        SelectSkillDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+
+        ESM::Skill::SkillEnum getSkillId() const { return skillId; }
+        Widgets::MWSkillPtr getAffectedWidget() const { return affectedWidget; }
+        void setAffectedWidget(Widgets::MWSkillPtr widget) { affectedWidget = widget; }
+
+        // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
+
+        /** Event : Cancel button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventCancel;
+
+        /** Event : Dialog finished, skill selected.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventItemSelected;
+
+    protected:
+        void onSkillClicked(Widgets::MWSkillPtr _sender);
+        void onCancelClicked(MyGUI::Widget* _sender);
+
+    private:
+        Widgets::MWSkillPtr combatSkill0, combatSkill1, combatSkill2, combatSkill3, combatSkill4,
+                            combatSkill5, combatSkill6, combatSkill7, combatSkill8;
+        Widgets::MWSkillPtr magicSkill0, magicSkill1, magicSkill2, magicSkill3, magicSkill4,
+                            magicSkill5, magicSkill6, magicSkill7, magicSkill8;
+        Widgets::MWSkillPtr stealthSkill0, stealthSkill1, stealthSkill2, stealthSkill3, stealthSkill4,
+                            stealthSkill5, stealthSkill6, stealthSkill7, stealthSkill8;
+        Widgets::MWSkillPtr affectedWidget;
+
+        ESM::Skill::SkillEnum skillId;
+    };
+
     class CreateClassDialog : public OEngine::GUI::Layout
     {
     public:
         CreateClassDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        virtual ~CreateClassDialog();
 
 //        const std::string &getClassId() const { return currentClassId; }
 //        void setClassId(const std::string &classId);
@@ -98,18 +201,29 @@ namespace MWGui
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
 
-    private:
-        void updateStats();
+        void onSpecializationClicked(MyGUI::WidgetPtr _sender);
+        void onSpecializationSelected();
+        void onAttributeClicked(Widgets::MWAttributePtr _sender);
+        void onAttributeSelected();
+        void onSkillClicked(Widgets::MWSkillPtr _sender);
+        void onSkillSelected();
+        void onDialogCancel();
 
+    private:
         MWWorld::Environment& environment;
 
-        MyGUI::EditPtr        editName;
-        MyGUI::StaticTextPtr  specializationName;
+        MyGUI::EditPtr          editName;
+        MyGUI::WidgetPtr        specializationName;
         Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
-        Widgets::MWSkillPtr   majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
-        Widgets::MWSkillPtr   minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
+        Widgets::MWSkillPtr     majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
+        Widgets::MWSkillPtr     minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
+        std::vector<Widgets::MWSkillPtr> skills;
 
-        std::string currentClassId;
+        SelectSpecializationDialog *specDialog;
+        SelectAttributeDialog *attribDialog;
+        SelectSkillDialog *skillDialog;
+
+        ESM::Class::Specialization specializationId;
     };
 }
 #endif

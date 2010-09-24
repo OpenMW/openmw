@@ -82,6 +82,11 @@ void MWSkill::updateWidgets()
     }
 }
 
+void MWSkill::onClicked(MyGUI::Widget* _sender)
+{
+    eventClicked(this);
+}
+
 void MWSkill::_initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name)
 {
 	Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
@@ -116,6 +121,20 @@ void MWSkill::initialiseWidgetSkin(ResourceSkin* _info)
 			MYGUI_DEBUG_ASSERT( ! skillValueWidget, "widget already assigned");
 			skillValueWidget = (*iter)->castType<StaticText>();
 		}
+		else if (name == "StatNameButton")
+		{
+			MYGUI_DEBUG_ASSERT( ! skillNameWidget, "widget already assigned");
+            MyGUI::ButtonPtr button = (*iter)->castType<Button>();
+            skillNameWidget = button;
+            button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWSkill::onClicked);
+		}
+		else if (name == "StatValueButton")
+		{
+			MYGUI_DEBUG_ASSERT( ! skillValueWidget, "widget already assigned");
+            MyGUI::ButtonPtr button = (*iter)->castType<Button>();
+            skillNameWidget = button;
+            button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWSkill::onClicked);
+		}
 	}
 }
 
@@ -143,6 +162,11 @@ void MWAttribute::setAttributeValue(const AttributeValue& value_)
 {
     value = value_;
     updateWidgets();
+}
+
+void MWAttribute::onClicked(MyGUI::Widget* _sender)
+{
+    eventClicked(this);
 }
 
 void MWAttribute::updateWidgets()
@@ -215,6 +239,20 @@ void MWAttribute::initialiseWidgetSkin(ResourceSkin* _info)
 		{
 			MYGUI_DEBUG_ASSERT( ! attributeValueWidget, "widget already assigned");
 			attributeValueWidget = (*iter)->castType<StaticText>();
+		}
+		else if (name == "StatNameButton")
+		{
+			MYGUI_DEBUG_ASSERT( ! attributeNameWidget, "widget already assigned");
+            MyGUI::ButtonPtr button = (*iter)->castType<Button>();
+            attributeNameWidget = button;
+            button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWAttribute::onClicked);
+		}
+		else if (name == "StatValue")
+		{
+			MYGUI_DEBUG_ASSERT( ! attributeValueWidget, "widget already assigned");
+            MyGUI::ButtonPtr button = (*iter)->castType<Button>();
+            attributeNameWidget = button;
+            button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWAttribute::onClicked);
 		}
 	}
 }

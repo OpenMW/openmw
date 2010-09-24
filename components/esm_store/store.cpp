@@ -90,6 +90,12 @@ void ESMStore::load(ESMReader &esm)
         }
     }
 
+    for (int i = 0; i < Attribute::Length; ++i)
+    {
+        Attribute::AttributeID id = Attribute::attributeIds[i];
+        attributes.list.insert(std::make_pair(id, Attribute(id, Attribute::gmstAttributeIds[i], Attribute::gmstAttributeDescIds[i])));
+    }
+
   /* This information isn't needed on screen. But keep the code around
      for debugging purposes later.
 

@@ -28,30 +28,30 @@
                 <Property key="Widget_Caption" value="Favorite Attributes:"/>
                 <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
             </Widget>
-            <Widget type="MWAttribute" skin="MW_StatName" position="0 59 156 18" name="FavoriteAttribute0" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWAttribute" skin="MW_StatName" position="0 77 156 18" name="FavoriteAttribute1" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 59 156 18" name="FavoriteAttribute0" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 77 156 18" name="FavoriteAttribute1" align="ALIGN_LEFT ALIGN_TOP" />
 
             <!-- Major Skills -->
             <Widget type="StaticText" skin="HeaderText" position="156 0 158 18" name="MajorSkillT" align="ALIGN_LEFT ALIGN_TOP">
                 <Property key="Widget_Caption" value="Major Skills:"/>
                 <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
             </Widget>
-            <Widget type="MWSkill" skin="MW_StatName" position="156 18 158 18" name="MajorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWSkill" skin="MW_StatName" position="156 36 158 18" name="MajorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWSkill" skin="MW_StatName" position="156 54 158 18" name="MajorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWSkill" skin="MW_StatName" position="156 72 158 18" name="MajorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWSkill" skin="MW_StatName" position="156 90 158 18" name="MajorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 18 158 18" name="MajorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 36 158 18" name="MajorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 54 158 18" name="MajorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 72 158 18" name="MajorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 90 158 18" name="MajorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
 
             <!-- Minor Skills -->
             <Widget type="StaticText" skin="HeaderText" position="314 0 140 18" name="MinorSkillT" align="ALIGN_LEFT ALIGN_TOP">
                 <Property key="Widget_Caption" value="Minor Skills:"/>
                 <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
             </Widget>
-            <Widget type="MWSkill" skin="MW_StatName" position="314 18 140 18" name="MinorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWSkill" skin="MW_StatName" position="341 36 140 18" name="MinorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWSkill" skin="MW_StatName" position="314 54 140 18" name="MinorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWSkill" skin="MW_StatName" position="314 72 140 18" name="MinorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
-            <Widget type="MWSkill" skin="MW_StatName" position="314 90 140 18" name="MinorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 18 140 18" name="MinorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 36 140 18" name="MinorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 54 140 18" name="MinorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 72 140 18" name="MinorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 90 140 18" name="MinorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
 
         </Widget>
 

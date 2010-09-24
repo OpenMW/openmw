@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 217 234" name="_Main">
+        <Widget type="Widget" skin="" position="14 14 186 203" align="ALIGN_STRETCH">
+
+            <!-- Label -->
+            <Widget type="StaticText" skin="HeaderText" position="0 0 186 18" name="LabelT" align="ALIGN_LEFT ALIGN_TOP">
+                <Property key="Widget_Caption" value="Choose a Specialization"/>
+                <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
+            </Widget>
+
+            <!-- Attribute list -->
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 28 186 18" name="Attribute0" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 46 186 18" name="Attribute1" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 64 186 18" name="Attribute2" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 82 186 18" name="Attribute3" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 100 186 18" name="Attribute4" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 118 186 18" name="Attribute5" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 136 186 18" name="Attribute6" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 154 186 18" name="Attribute7" align="ALIGN_LEFT ALIGN_TOP" />
+
+            <!-- Dialog buttons -->
+            <Widget type="Button" skin="MW_Button" position="120 180 66 21" name="CancelButton">
+                <Property key="Widget_Caption" value="Cancel"/>
+            </Widget>
+
+        </Widget>
+    </Widget>
+</MyGUI>

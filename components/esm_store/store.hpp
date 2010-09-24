@@ -76,6 +76,9 @@ namespace ESMS
     IndexListT<Skill>           skills;
     //RecListT<PathGrid>    pathgrids;
 
+    // Special entry which is hardcoded and not loaded from an ESM
+    IndexListT<Attribute>       attributes;
+
     // Lookup of all IDs. Makes looking up references faster. Just
     // maps the id name to the record type.
     typedef std::map<std::string, int> AllMap;
