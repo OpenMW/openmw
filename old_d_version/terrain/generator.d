@@ -352,46 +352,7 @@ void genIndexData()
       cache.addVertexBuffer(lev,vertList);
     }
 
-  // Pregenerate triangle indices
-  int size = 64*64*6;
-  auto indList = new ushort[size];
-  int index = 0;
-
-  bool flag = false;
-  for ( int y = 0; y < 64; y++ )
-    {
-      for ( int x = 0; x < 64; x++ )
-        {
-          int line1 = y*65 + x;
-          int line2 = (y+1)*65 + x;
-
-          if ( flag )
-            {
-              indList[index++] = line1;
-              indList[index++] = line1 + 1;
-              indList[index++] = line2;
-
-              indList[index++] = line2;
-              indList[index++] = line1 + 1;
-              indList[index++] = line2 + 1;
-            }
-          else
-            {
-              indList[index++] = line1;
-              indList[index++] = line2 + 1;
-              indList[index++] = line2;
-
-              indList[index++] = line1;
-              indList[index++] = line1 + 1;
-              indList[index++] = line2 + 1;
-            }
-          flag = !flag; //flip tris for next time
-        }
-      flag = !flag; //flip tries for next row
-    }
-  assert(index == indList.length);
-
-  cache.setIndexBuffer(indList);
+  // index stuff already ported
 }
 
 void genLevel(int level, int X, int Y, ref GenLevelResult result,
