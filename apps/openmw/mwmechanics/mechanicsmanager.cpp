@@ -77,7 +77,38 @@ namespace MWMechanics
             }
         }
 
+        for (int i=0; i<2; ++i)
+        {
+            int bonus = i==0 ? 10 : 25;
 
+            for (int i2=0; i2<5; ++i2)
+            {
+                int index = class_.data.skills[i2][i];
+
+                if (index>=0 && index<27)
+                {
+                    npcStats.mSkill[index].setBase (
+                        npcStats.mSkill[index].getBase() + bonus);
+                }
+            }
+        }
+
+        typedef ESMS::IndexListT<ESM::Skill>::MapType ContainerType;
+        const ContainerType& skills = mEnvironment.mWorld->getStore().skills.list;
+
+        for (ContainerType::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
+        {
+            if (iter->second.data.specialization==class_.data.specialization)
+            {
+                int index = iter->first;
+
+                if (index>=0 && index<27)
+                {
+                    npcStats.mSkill[index].setBase (
+                        npcStats.mSkill[index].getBase() + 5);
+                }
+            }
+        }
 
         // calculate dynamic stats
         int strength = creatureStats.mAttributes[0].getBase();
