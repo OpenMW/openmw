@@ -27,85 +27,98 @@ namespace MWMechanics
             npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
 
         // race
-        const ESM::Race *race =
-            mEnvironment.mWorld->getStore().races.find (mEnvironment.mWorld->getPlayerPos().getRace());
-
-        bool male = mEnvironment.mWorld->getPlayerPos().isMale();
-
-        for (int i=0; i<8; ++i)
+        if (mRaceSelected)
         {
-            const ESM::Race::MaleFemale *attribute = 0;
-            switch (i)
+            const ESM::Race *race =
+                mEnvironment.mWorld->getStore().races.find (
+                mEnvironment.mWorld->getPlayerPos().getRace());
+
+            bool male = mEnvironment.mWorld->getPlayerPos().isMale();
+
+            for (int i=0; i<8; ++i)
             {
-                case 0: attribute = &race->data.strength; break;
-                case 1: attribute = &race->data.intelligence; break;
-                case 2: attribute = &race->data.willpower; break;
-                case 3: attribute = &race->data.agility; break;
-                case 4: attribute = &race->data.speed; break;
-                case 5: attribute = &race->data.endurance; break;
-                case 6: attribute = &race->data.personality; break;
-                case 7: attribute = &race->data.luck; break;
+                const ESM::Race::MaleFemale *attribute = 0;
+                switch (i)
+                {
+                    case 0: attribute = &race->data.strength; break;
+                    case 1: attribute = &race->data.intelligence; break;
+                    case 2: attribute = &race->data.willpower; break;
+                    case 3: attribute = &race->data.agility; break;
+                    case 4: attribute = &race->data.speed; break;
+                    case 5: attribute = &race->data.endurance; break;
+                    case 6: attribute = &race->data.personality; break;
+                    case 7: attribute = &race->data.luck; break;
+                }
+
+                creatureStats.mAttributes[i].setBase (
+                    static_cast<int> (male ? attribute->male : attribute->female));
             }
 
-            creatureStats.mAttributes[i].setBase (
-                static_cast<int> (male ? attribute->male : attribute->female));
-        }
-
-        for (int i=0; i<7; ++i)
-        {
-            int index = race->data.bonus[i].skill;
-
-            if (index>=0 && index<27)
+            for (int i=0; i<7; ++i)
             {
-                npcStats.mSkill[index].setBase (
-                    npcStats.mSkill[index].getBase() + race->data.bonus[i].bonus);
+                int index = race->data.bonus[i].skill;
+
+                if (index>=0 && index<27)
+                {
+                    npcStats.mSkill[index].setBase (
+                        npcStats.mSkill[index].getBase() + race->data.bonus[i].bonus);
+                }
             }
+
+            // TODO handle magic effects
         }
 
         // birthsign
+        if (!mEnvironment.mWorld->getPlayerPos().getBirthsign().empty())
+        {
+            // TODO handle magic effects
+        }
 
         // class
-        const ESM::Class& class_ = mEnvironment.mWorld->getPlayerPos().getClass();
-
-        for (int i=0; i<2; ++i)
+        if (mClassSelected)
         {
-            int attribute = class_.data.attribute[i];
-            if (attribute>=0 && attribute<8)
+            const ESM::Class& class_ = mEnvironment.mWorld->getPlayerPos().getClass();
+
+            for (int i=0; i<2; ++i)
             {
-                creatureStats.mAttributes[attribute].setBase (
-                    creatureStats.mAttributes[attribute].getBase() + 10);
-            }
-        }
-
-        for (int i=0; i<2; ++i)
-        {
-            int bonus = i==0 ? 10 : 25;
-
-            for (int i2=0; i2<5; ++i2)
-            {
-                int index = class_.data.skills[i2][i];
-
-                if (index>=0 && index<27)
+                int attribute = class_.data.attribute[i];
+                if (attribute>=0 && attribute<8)
                 {
-                    npcStats.mSkill[index].setBase (
-                        npcStats.mSkill[index].getBase() + bonus);
+                    creatureStats.mAttributes[attribute].setBase (
+                        creatureStats.mAttributes[attribute].getBase() + 10);
                 }
             }
-        }
 
-        typedef ESMS::IndexListT<ESM::Skill>::MapType ContainerType;
-        const ContainerType& skills = mEnvironment.mWorld->getStore().skills.list;
-
-        for (ContainerType::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
-        {
-            if (iter->second.data.specialization==class_.data.specialization)
+            for (int i=0; i<2; ++i)
             {
-                int index = iter->first;
+                int bonus = i==0 ? 10 : 25;
 
-                if (index>=0 && index<27)
+                for (int i2=0; i2<5; ++i2)
                 {
-                    npcStats.mSkill[index].setBase (
-                        npcStats.mSkill[index].getBase() + 5);
+                    int index = class_.data.skills[i2][i];
+
+                    if (index>=0 && index<27)
+                    {
+                        npcStats.mSkill[index].setBase (
+                            npcStats.mSkill[index].getBase() + bonus);
+                    }
+                }
+            }
+
+            typedef ESMS::IndexListT<ESM::Skill>::MapType ContainerType;
+            const ContainerType& skills = mEnvironment.mWorld->getStore().skills.list;
+
+            for (ContainerType::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
+            {
+                if (iter->second.data.specialization==class_.data.specialization)
+                {
+                    int index = iter->first;
+
+                    if (index>=0 && index<27)
+                    {
+                        npcStats.mSkill[index].setBase (
+                            npcStats.mSkill[index].getBase() + 5);
+                    }
                 }
             }
         }
@@ -127,7 +140,8 @@ namespace MWMechanics
     }
 
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
-    : mEnvironment (environment), mUpdatePlayer (true)
+    : mEnvironment (environment), mUpdatePlayer (true), mClassSelected (false),
+      mRaceSelected (false)
     {
         buildPlayer();
     }
@@ -267,6 +281,7 @@ namespace MWMechanics
     {
         mEnvironment.mWorld->getPlayerPos().setGender (male);
         mEnvironment.mWorld->getPlayerPos().setRace (race);
+        mRaceSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
     }
@@ -280,6 +295,7 @@ namespace MWMechanics
     void MechanicsManager::setPlayerClass (const std::string& id)
     {
         mEnvironment.mWorld->getPlayerPos().setClass (*mEnvironment.mWorld->getStore().classes.find (id));
+        mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
     }
@@ -287,6 +303,7 @@ namespace MWMechanics
     void MechanicsManager::setPlayerClass (const ESM::Class& class_)
     {
         mEnvironment.mWorld->getPlayerPos().setClass (class_);
+        mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
     }

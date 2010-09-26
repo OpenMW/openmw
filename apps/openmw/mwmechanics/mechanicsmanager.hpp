@@ -23,6 +23,8 @@ namespace MWMechanics
             CreatureStats mWatchedCreature;
             NpcStats mWatchedNpc;
             bool mUpdatePlayer;
+            bool mClassSelected;
+            bool mRaceSelected;
 
             void buildPlayer();
             ///< build player according to stored class/race/birthsign information. Will
