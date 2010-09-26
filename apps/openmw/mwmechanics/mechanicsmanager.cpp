@@ -57,11 +57,10 @@ namespace MWMechanics
 
             if (index>=0 && index<27)
             {
-                npcStats.mSkill[i].setBase (
-                    npcStats.mSkill[i].getBase() + race->data.bonus[i].bonus);
+                npcStats.mSkill[index].setBase (
+                    npcStats.mSkill[index].getBase() + race->data.bonus[i].bonus);
             }
         }
-
 
         // birthsign
 
