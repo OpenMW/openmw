@@ -171,6 +171,31 @@ namespace MWGui
         ESM::Skill::SkillEnum skillId;
     };
 
+    class DescriptionDialog : public OEngine::GUI::Layout
+    {
+    public:
+        DescriptionDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+
+        std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
+        void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
+
+        // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
+
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventDone;
+
+    protected:
+        void onOkClicked(MyGUI::Widget* _sender);
+
+    private:
+        MWWorld::Environment& environment;
+
+        MyGUI::EditPtr textEdit;
+    };
+
     class CreateClassDialog : public OEngine::GUI::Layout
     {
     public:
@@ -197,7 +222,6 @@ namespace MWGui
         EventHandle_Void eventDone;
 
     protected:
-        void onDescriptionClicked(MyGUI::Widget* _sender);
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
 
@@ -207,6 +231,8 @@ namespace MWGui
         void onAttributeSelected();
         void onSkillClicked(Widgets::MWSkillPtr _sender);
         void onSkillSelected();
+        void onDescriptionClicked(MyGUI::Widget* _sender);
+        void onDescriptionEntered();
         void onDialogCancel();
 
     private:
@@ -218,10 +244,12 @@ namespace MWGui
         Widgets::MWSkillPtr     majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
         Widgets::MWSkillPtr     minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
         std::vector<Widgets::MWSkillPtr> skills;
+        std::string             description;
 
         SelectSpecializationDialog *specDialog;
         SelectAttributeDialog *attribDialog;
         SelectSkillDialog *skillDialog;
+        DescriptionDialog *descDialog;
 
         ESM::Class::Specialization specializationId;
     };

@@ -233,6 +233,7 @@ CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment, MyGUI::I
   , specDialog(nullptr)
   , attribDialog(nullptr)
   , skillDialog(nullptr)
+  , descDialog(nullptr)
 {
     // Centre dialog
     MyGUI::IntCoord coord = mMainWidget->getCoord();
@@ -327,6 +328,7 @@ CreateClassDialog::~CreateClassDialog()
     delete specDialog;
     delete attribDialog;
     delete skillDialog;
+    delete descDialog;
 }
 
 void CreateClassDialog::setNextButtonShow(bool shown)
@@ -374,6 +376,8 @@ void CreateClassDialog::onDialogCancel()
         attribDialog->setVisible(false);
     if (skillDialog)
         skillDialog->setVisible(false);
+    if (descDialog)
+        descDialog->setVisible(false);
     // TODO: Delete dialogs here
 }
 
@@ -458,7 +462,18 @@ void CreateClassDialog::onSkillSelected()
 
 void CreateClassDialog::onDescriptionClicked(MyGUI::Widget* _sender)
 {
-    // TODO: Show description dialog
+    if (descDialog)
+        delete descDialog;
+    descDialog = new DescriptionDialog(environment, environment.mWindowManager->getGui()->getViewSize());
+    descDialog->setTextInput(description);
+    descDialog->eventDone = MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionEntered);
+    descDialog->setVisible(true);
+}
+
+void CreateClassDialog::onDescriptionEntered()
+{
+    description = descDialog->getTextInput();
+    descDialog->setVisible(false);
 }
 
 void CreateClassDialog::onOkClicked(MyGUI::Widget* _sender)
@@ -701,4 +716,35 @@ void SelectSkillDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
 void SelectSkillDialog::onCancelClicked(MyGUI::Widget* _sender)
 {
     eventCancel();
+}
+
+/* DescriptionDialog */
+
+DescriptionDialog::DescriptionDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
+  : Layout("openmw_chargen_class_description_layout.xml")
+  , environment(environment)
+{
+    // Centre dialog
+    MyGUI::IntCoord coord = mMainWidget->getCoord();
+    coord.left = (gameWindowSize.width - coord.width)/2;
+    coord.top = (gameWindowSize.height - coord.height)/2;
+    mMainWidget->setCoord(coord);
+
+    getWidget(textEdit, "TextEdit");
+
+    // TODO: These buttons should be managed by a Dialog class
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &DescriptionDialog::onOkClicked);
+    okButton->setCaption(environment.mWindowManager->getGameSettingString("sInputMenu1", ""));
+
+    // Make sure the edit box has focus
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
+}
+
+// widget controls
+
+void DescriptionDialog::onOkClicked(MyGUI::Widget* _sender)
+{
+    eventDone();
 }
