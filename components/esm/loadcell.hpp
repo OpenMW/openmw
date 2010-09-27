@@ -215,6 +215,7 @@ struct Cell
     else ref.teleport = false;
 
     // Integer, despite the name suggesting otherwise
+    ref.lockLevel = 0;
     esm.getHNOT(ref.lockLevel, "FLTV");
     ref.key = esm.getHNOString("KNAM");
     ref.trap = esm.getHNOString("TNAM");

@@ -13,7 +13,7 @@ namespace Interpreter
 
 namespace MWScript
 {
-    /// \brief stats-related script functionality (creatures and NPCs)
+    /// \brief Container-related script functionality (chests, NPCs, creatures)
     namespace Container
     {
         void registerExtensions (Compiler::Extensions& extensions);
