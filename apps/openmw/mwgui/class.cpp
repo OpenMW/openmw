@@ -255,7 +255,7 @@ CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment, MyGUI::I
     favoriteAttribute0->eventClicked = MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
     favoriteAttribute1->eventClicked = MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
 
-    setText("MajorSkillT", wm->getGameSettingString("sChooseClassMenu3", "Major Skills:"));
+    setText("MajorSkillT", wm->getGameSettingString("sSkillClassMajor", ""));
     getWidget(majorSkill0, "MajorSkill0");
     getWidget(majorSkill1, "MajorSkill1");
     getWidget(majorSkill2, "MajorSkill2");
@@ -267,7 +267,7 @@ CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment, MyGUI::I
     skills.push_back(majorSkill3);
     skills.push_back(majorSkill4);
 
-    setText("MinorSkillT", wm->getGameSettingString("sChooseClassMenu4", "Minor Skills:"));
+    setText("MinorSkillT", wm->getGameSettingString("sSkillClassMinor", ""));
     getWidget(minorSkill0, "MinorSkill0");
     getWidget(minorSkill1, "MinorSkill1");
     getWidget(minorSkill2, "MinorSkill2");
