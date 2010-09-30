@@ -22,6 +22,7 @@ namespace MWMechanics
 
         // reset
         creatureStats.mLevel = player->npdt52.level;
+        creatureStats.mAbilities.clear();
 
         for (int i=0; i<27; ++i)
             npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
@@ -65,13 +66,25 @@ namespace MWMechanics
                 }
             }
 
-            // TODO handle magic effects
+            for (std::vector<std::string>::const_iterator iter (race->powers.list.begin());
+                iter!=race->powers.list.end(); ++iter)
+            {
+                insertSpell (*iter, ptr);
+            }
         }
 
         // birthsign
         if (!mEnvironment.mWorld->getPlayerPos().getBirthsign().empty())
         {
-            // TODO handle magic effects
+            const ESM::BirthSign *sign =
+                mEnvironment.mWorld->getStore().birthSigns.find (
+                mEnvironment.mWorld->getPlayerPos().getBirthsign());
+
+            for (std::vector<std::string>::const_iterator iter (sign->powers.list.begin());
+                iter!=sign->powers.list.end(); ++iter)
+            {
+                insertSpell (*iter, ptr);
+            }
         }
 
         // class
@@ -137,6 +150,35 @@ namespace MWMechanics
 
         for (int i=0; i<3; ++i)
             creatureStats.mDynamic[i].setCurrent (creatureStats.mDynamic[i].getModified());
+    }
+
+    void MechanicsManager::insertSpell (const std::string& id, MWWorld::Ptr& creature)
+    {
+        MWMechanics::CreatureStats& creatureStats =
+            MWWorld::Class::get (creature).getCreatureStats (creature);
+
+        const ESM::Spell *spell = mEnvironment.mWorld->getStore().spells.find (id);
+
+        switch (spell->data.type)
+        {
+            case ESM::Spell::ST_Ability:
+
+                if (creatureStats.mAbilities.find (id)==creatureStats.mAbilities.end())
+                {
+                    creatureStats.mAbilities.insert (id);
+                    // TODO apply effects
+                }
+
+                break;
+
+            // TODO ST_SPELL, ST_Blight, ST_Disease, ST_Curse, ST_Power
+
+            default:
+
+                std::cout
+                    << "adding unsupported spell type (" << spell->data.type
+                    << ") to creature: " << id << std::endl;
+        }
     }
 
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
