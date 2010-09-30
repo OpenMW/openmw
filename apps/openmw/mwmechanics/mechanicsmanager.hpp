@@ -32,6 +32,8 @@ namespace MWMechanics
 
             void insertSpell (const std::string& id, MWWorld::Ptr& creature);
 
+            void adjustMagicEffects (MWWorld::Ptr& creature);
+
         public:
 
             MechanicsManager (MWWorld::Environment& environment);

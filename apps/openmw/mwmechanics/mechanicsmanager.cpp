@@ -23,6 +23,7 @@ namespace MWMechanics
         // reset
         creatureStats.mLevel = player->npdt52.level;
         creatureStats.mAbilities.clear();
+        creatureStats.mMagicEffects = MagicEffects();
 
         for (int i=0; i<27; ++i)
             npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
@@ -136,6 +137,9 @@ namespace MWMechanics
             }
         }
 
+        // magic effects
+        adjustMagicEffects (ptr);
+
         // calculate dynamic stats
         int strength = creatureStats.mAttributes[0].getBase();
         int intelligence = creatureStats.mAttributes[1].getBase();
@@ -166,7 +170,6 @@ namespace MWMechanics
                 if (creatureStats.mAbilities.find (id)==creatureStats.mAbilities.end())
                 {
                     creatureStats.mAbilities.insert (id);
-                    // TODO apply effects
                 }
 
                 break;
@@ -179,6 +182,39 @@ namespace MWMechanics
                     << "adding unsupported spell type (" << spell->data.type
                     << ") to creature: " << id << std::endl;
         }
+    }
+
+    void MechanicsManager::adjustMagicEffects (MWWorld::Ptr& creature)
+    {
+        MWMechanics::CreatureStats& creatureStats =
+            MWWorld::Class::get (creature).getCreatureStats (creature);
+
+        MagicEffects now;
+
+        for (std::set<std::string>::const_iterator iter (creatureStats.mAbilities.begin());
+            iter!=creatureStats.mAbilities.end(); ++iter)
+        {
+            const ESM::Spell *spell = mEnvironment.mWorld->getStore().spells.find (*iter);
+
+            for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->effects.list.begin();
+                iter!=spell->effects.list.end(); ++iter)
+            {
+                if (iter->range==0) // self
+                {
+                    EffectParam param;
+                    param.mMagnitude = iter->magnMax; // TODO calculate magnitude
+                    now.add (EffectKey (*iter), param);
+                }
+            }
+        }
+
+        // TODO add effects from other spell types, active spells and equipment
+
+        MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
+
+        creatureStats.mMagicEffects = now;
+
+        // TODO apply diff to other stats
     }
 
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)

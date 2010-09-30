@@ -182,11 +182,14 @@ set(GAMECLASS_HEADER
 source_group(apps\\openmw\\mwclass FILES ${GAMECLASS} ${GAMECLASS_HEADER})
 
 set(GAMEMECHANICS
-    mwmechanics/mechanicsmanager.cpp)
+    mwmechanics/mechanicsmanager.cpp
+    mwmechanics/magiceffects.cpp
+    )
 set(GAMEMECHANICS_HEADER
     mwmechanics/mechanicsmanager.hpp
     mwmechanics/stat.hpp
     mwmechanics/creaturestats.hpp
+    mwmechanics/magiceffects.hpp
     )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
