@@ -66,6 +66,20 @@ namespace MWMechanics
         }
     }
 
+    EffectParam MagicEffects::get (const EffectKey& key) const
+    {
+        Collection::const_iterator iter = mCollection.find (key);
+
+        if (iter==mCollection.end())
+        {
+            return EffectParam();
+        }
+        else
+        {
+            return iter->second;
+        }
+    }
+
     MagicEffects MagicEffects::diff (const MagicEffects& prev, const MagicEffects& now)
     {
         MagicEffects result;

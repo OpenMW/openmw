@@ -17,6 +17,8 @@ namespace MWMechanics
 
         EffectKey();
 
+        EffectKey (int id, int arg = -1) : mId (id), mArg (arg) {}
+
         EffectKey (const ESM::ENAMstruct& effect);
     };
 
@@ -63,6 +65,9 @@ namespace MWMechanics
             Collection::const_iterator End() const { return mCollection.end(); }
 
             void add (const EffectKey& key, const EffectParam& param);
+
+            EffectParam get (const EffectKey& key) const;
+            ///< This function can safely be used for keys that are not present.
 
             static MagicEffects diff (const MagicEffects& prev, const MagicEffects& now);
             ///< Return changes from \a prev to \a now.
