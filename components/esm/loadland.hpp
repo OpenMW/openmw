@@ -25,8 +25,9 @@ struct Land
   {
     // Get the grid location
     esm.getSubNameIs("INTV");
-    esm.getT(X);
-    esm.getT(Y);
+    esm.getSubHeaderIs(8);
+    esm.getT<int>(X);
+    esm.getT<int>(Y);
 
     esm.getHNT(flags, "DATA");
 

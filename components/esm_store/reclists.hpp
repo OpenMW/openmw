@@ -149,6 +149,79 @@ namespace ESMS
     int getSize() { return list.size(); }
   };
 
+  /* Land textures are indexed by an integer number
+   */
+  struct LTexList : RecList
+  {
+    // TODO: For multiple ESM/ESP files we need one list per file.
+    std::vector<LandTexture> ltex;
+    int count;
+
+    LTexList() : count(0)
+    {
+      // More than enough to hold Morrowind.esm.
+      ltex.reserve(128);
+    }
+
+    int getSize() { return count; }
+
+    void load(ESMReader &esm, const std::string &id)
+    {
+      LandTexture lt;
+      lt.load(esm);
+      lt.id = id;
+
+      // Make sure we have room for the structure
+      if(lt.index + 1 > (int)ltex.size())
+        ltex.resize(lt.index+1);
+
+      // Store it
+      ltex[lt.index] = lt;
+    }
+  };
+
+  /* Landscapes are indexed by the X,Y coordinates of the exterior
+     cell they belong to.
+   */
+  struct LandList : RecList
+  {
+    // Map containing all landscapes
+    typedef std::map<int, Land*> LandsCol;
+    typedef std::map<int, LandsCol> Lands;
+    Lands lands;
+
+    int count;
+    LandList() : count(0) {}
+    int getSize() { return count; }
+
+    // Find land for the given coordinates. Return null if no data.
+    const Land *search(int x, int y) const
+    {
+      Lands::const_iterator it = lands.find(x);
+      if(it==lands.end())
+        return NULL;
+
+      LandsCol::const_iterator it2 = it->second.find(y);
+      if(it2 == it->second.end())
+        return NULL;
+
+      return it2->second;
+    }
+
+    void load(ESMReader &esm, const std::string &id)
+    {
+      count++;
+
+      // Create the structure and load it. This actually skips the
+      // landscape data and remembers the file position for later.
+      Land *land = new Land;
+      land->load(esm);
+
+      // Store the structure
+      lands[land->X][land->Y] = land;
+    }
+  };
+
   // Cells aren't simply indexed by name. Exterior cells are treated
   // separately.
   // TODO: case handling (cell names are case-insensitive, but they are also showen to the
@@ -243,8 +316,6 @@ namespace ESMS
 
     void load(ESMReader &esm, const std::string &id)
     {
-      using namespace std;
-
       count++;
 
       // All cells have a name record, even nameless exterior cells.
