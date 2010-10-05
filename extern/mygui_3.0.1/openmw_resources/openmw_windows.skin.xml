@@ -15,6 +15,54 @@
         </BasisSkin>
     </Skin>
 
+    <!-- These define the dialog borders -->
+    <Skin name="DB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 512 4">
+            <State name="normal" offset = "0 0 512 4"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="DB_R" size="4 512" texture="textures\menu_thick_border_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 4 512">
+            <State name="normal" offset = "0 0 4 512"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="DB_T" size="512 4" texture="textures\menu_thick_border_top.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 512 4">
+            <State name="normal" offset = "0 0 512 4"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="DB_L" size="4 512" texture="textures\menu_thick_border_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 4 512">
+            <State name="normal" offset = "0 0 4 512"/>
+        </BasisSkin>
+    </Skin>
+
+    <!-- Dialog border corners -->
+    <Skin name="DB_BR" size="4 4" texture="textures\menu_thick_border_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 4 4">
+            <State name="normal" offset = "0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="DB_BL" size="4 4" texture="textures\menu_thick_border_bottom_left_corner.dds">
+        <Property key="Pointer" value = "dresize2" />
+        <BasisSkin type="MainSkin" offset = "0 0 4 4">
+            <State name="normal" offset = "0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="DB_TR" size="4 4" texture="textures\menu_thick_border_top_right_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 4 4">
+            <State name="normal" offset = "0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="DB_TL" size="4 4" texture="textures\menu_thick_border_top_left_corner.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 4 4">
+            <State name="normal" offset = "0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+
     <!-- These define the window borders -->
     <Skin name="TB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">
         <Property key="Pointer" value = "vresize" />
@@ -258,29 +306,29 @@
         <Child type="Widget" skin="DialogBG" offset = "4 4 248 46" align = "ALIGN_STRETCH" name = "Client"/>
 
         <!-- Outer borders -->
-        <Child type="Widget" skin="TB_T" offset="4 0 248 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Border">
+        <Child type="Widget" skin="DB_T" offset="4 0 248 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Border">
             <Property key="Scale" value = "0 1 0 -1"/>
         </Child>
-        <Child type="Widget" skin="TB_L" offset="0 4 4 46" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Border">
+        <Child type="Widget" skin="DB_L" offset="0 4 4 46" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Border">
             <Property key="Scale" value = "1 0 -1 0"/>
         </Child>
-        <Child type="Widget" skin="TB_B" offset="4 50 248 4" align="ALIGN_BOTTOM ALIGN_HSTRETCH" name="Border">
+        <Child type="Widget" skin="DB_B" offset="4 50 248 4" align="ALIGN_BOTTOM ALIGN_HSTRETCH" name="Border">
             <Property key="Scale" value = "0 0 0 1"/>
         </Child>
-        <Child type="Widget" skin="TB_R" offset="252 4 4 46" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="Border">
+        <Child type="Widget" skin="DB_R" offset="252 4 4 46" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="Border">
             <Property key="Scale" value = "0 0 1 0"/>
         </Child>
 
-        <Child type="Widget" skin="TB_BR" offset="252 50 4 4" align="ALIGN_RIGHT ALIGN_BOTTOM" name="Border">
+        <Child type="Widget" skin="DB_BR" offset="252 50 4 4" align="ALIGN_RIGHT ALIGN_BOTTOM" name="Border">
             <Property key="Scale" value = "0 0 1 1"/>
         </Child>
-        <Child type="Widget" skin="TB_BL" offset="0 50 4 4" align="ALIGN_LEFT ALIGN_BOTTOM" name="Border">
+        <Child type="Widget" skin="DB_BL" offset="0 50 4 4" align="ALIGN_LEFT ALIGN_BOTTOM" name="Border">
             <Property key="Scale" value = "1 0 -1 1"/>
         </Child>
-        <Child type="Widget" skin="TB_TR" offset="252 0 4 4" align="ALIGN_RIGHT ALIGN_TOP" name="Border">
+        <Child type="Widget" skin="DB_TR" offset="252 0 4 4" align="ALIGN_RIGHT ALIGN_TOP" name="Border">
             <Property key="Scale" value = "0 1 1 -1"/>
         </Child>
-        <Child type="Widget" skin="TB_TL" offset="0 0 4 4" align="ALIGN_LEFT ALIGN_TOP" name="Border">
+        <Child type="Widget" skin="DB_TL" offset="0 0 4 4" align="ALIGN_LEFT ALIGN_TOP" name="Border">
             <Property key="Scale" value = "1 1 -1 -1"/>
         </Child>
     </Skin>
