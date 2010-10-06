@@ -60,6 +60,7 @@ namespace OMW
             bool mVerboseScripts;
             bool mNewGame;
             bool mUseSound;
+            bool mCompileAll;
 
             MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
@@ -127,6 +128,9 @@ namespace OMW
 
             /// Activate the focussed object.
             void activate();
+
+            /// Compile all scripts (excludign dialogue scripts) at startup?
+            void setCompileAll (bool all);
     };
 }
 

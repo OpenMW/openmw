@@ -107,6 +107,7 @@ OMW::Engine::Engine()
   , mVerboseScripts (false)
   , mNewGame (false)
   , mUseSound (true)
+  , mCompileAll (false)
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
@@ -301,6 +302,29 @@ void OMW::Engine::go()
         std::cout << "  Music Error: " << e.what() << "\n";
       }
 
+    // scripts
+    if (mCompileAll)
+    {
+        typedef ESMS::ScriptListT<ESM::Script>::MapType Container;
+
+        Container scripts = mEnvironment.mWorld->getStore().scripts.list;
+
+        int count = 0;
+        int success = 0;
+
+        for (Container::const_iterator iter (scripts.begin()); iter!=scripts.end(); ++iter, ++count)
+            if (mScriptManager->compile (iter->first))
+                ++success;
+
+        if (count)
+            std::cout
+                << "compiled " << success << " of " << count << " scripts ("
+                << 100*static_cast<double> (success)/count
+                << "%)"
+                << std::endl;
+
+    }
+
     // Start the main rendering loop
     mOgre.start();
 
@@ -340,4 +364,9 @@ void OMW::Engine::activate()
     {
         interpreterContext.executeActivation();
     }
+}
+
+void OMW::Engine::setCompileAll (bool all)
+{
+    mCompileAll = all;
 }

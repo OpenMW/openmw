@@ -34,6 +34,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ( "nosound", "disable all sound" )
         ( "script-verbose", "verbose script output" )
         ( "new-game", "activate char gen/new game mechanics" )
+        ( "script-all", "compile all scripts (excluding dialogue scripts) at startup")
         ;
 
     bpo::variables_map variables;
@@ -74,6 +75,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
     if (variables.count ("new-game"))
         engine.setNewGame();
+
+    if (variables.count ("script-all"))
+        engine.setCompileAll (true);
 
     return true;
 }
