@@ -46,6 +46,7 @@ namespace MWGui
   class InfoBoxDialog;
   class RaceDialog;
   class ClassChoiceDialog;
+  class GenerateClassResultDialog;
   class PickClassDialog;
   class BirthDialog;
 
@@ -66,6 +67,7 @@ namespace MWGui
     RaceDialog *raceDialog;
     ClassChoiceDialog *classChoiceDialog;
     InfoBoxDialog *generateClassQuestionDialog;
+    GenerateClassResultDialog *generateClassResultDialog;
     PickClassDialog *pickClassDialog;
     BirthDialog *birthSignDialog;
 
@@ -79,6 +81,7 @@ namespace MWGui
 
     // Keeps track of current step in Generate Class dialogs
     unsigned generateClassStep;
+    std::string generateClass;
 
     MyGUI::Gui *gui;
 
@@ -203,6 +206,8 @@ namespace MWGui
     // Character generation: Generate Class
     void showClassQuestionDialog();
     void onClassQuestionChosen(MyGUI::Widget* _sender, int _index);
+    void onGenerateClassBack();
+    void onGenerateClassDone();
 
     // Character generation: Pick Class dialog
     void onPickClassDialogDone();

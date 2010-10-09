@@ -75,6 +75,40 @@ namespace MWGui
         ClassChoiceDialog(MWWorld::Environment& environment);
     };
 
+    class GenerateClassResultDialog : public OEngine::GUI::Layout
+    {
+    public:
+        GenerateClassResultDialog(MWWorld::Environment& environment);
+
+        std::string getClassId() const;
+        void setClassId(const std::string &classId);
+
+        // Events
+        typedef delegates::CDelegate0 EventHandle_Void;
+
+        /** Event : Back button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventBack;
+
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_Void eventDone;
+
+    protected:
+        void onOkClicked(MyGUI::Widget* _sender);
+        void onBackClicked(MyGUI::Widget* _sender);
+
+    private:
+        MWWorld::Environment& environment;
+
+        MyGUI::StaticImagePtr classImage;
+        MyGUI::StaticTextPtr  className;
+
+        std::string currentClassId;
+    };
+
     class PickClassDialog : public OEngine::GUI::Layout
     {
     public:

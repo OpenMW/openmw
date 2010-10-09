@@ -12,6 +12,60 @@
 
 using namespace MWGui;
 
+/* GenerateClassResultDialog */
+
+GenerateClassResultDialog::GenerateClassResultDialog(MWWorld::Environment& environment)
+  : Layout("openmw_chargen_generate_class_result_layout.xml")
+  , environment(environment)
+{
+    // Centre dialog
+    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
+    MyGUI::IntCoord coord = mMainWidget->getCoord();
+    coord.left = (gameWindowSize.width - coord.width)/2;
+    coord.top = (gameWindowSize.height - coord.height)/2;
+    mMainWidget->setCoord(coord);
+
+    WindowManager *wm = environment.mWindowManager;
+    setText("ReflectT", wm->getGameSettingString("sMessageQuestionAnswer1", ""));
+
+    getWidget(classImage, "ClassImage");
+    getWidget(className, "ClassName");
+
+    // TODO: These buttons should be managed by a Dialog class
+    MyGUI::ButtonPtr backButton;
+    getWidget(backButton, "BackButton");
+    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
+
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
+}
+
+std::string GenerateClassResultDialog::getClassId() const
+{
+    return className->getCaption();
+}
+
+void GenerateClassResultDialog::setClassId(const std::string &classId)
+{
+    currentClassId = classId;
+    classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
+    ESMS::ESMStore &store = environment.mWorld->getStore();
+    className->setCaption(store.classes.find(currentClassId)->name);
+}
+
+// widget controls
+
+void GenerateClassResultDialog::onOkClicked(MyGUI::Widget* _sender)
+{
+    eventDone();
+}
+
+void GenerateClassResultDialog::onBackClicked(MyGUI::Widget* _sender)
+{
+    eventBack();
+}
+
 /* PickClassDialog */
 
 PickClassDialog::PickClassDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)

@@ -23,6 +23,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , raceDialog(nullptr)
   , classChoiceDialog(nullptr)
   , generateClassQuestionDialog(nullptr)
+  , generateClassResultDialog(nullptr)
   , pickClassDialog(nullptr)
   , birthSignDialog(nullptr)
   , nameChosen(false)
@@ -71,6 +72,7 @@ WindowManager::~WindowManager()
   delete raceDialog;
   delete classChoiceDialog;
   delete generateClassQuestionDialog;
+  delete generateClassResultDialog;
   delete pickClassDialog;
   delete birthSignDialog;
 }
@@ -369,9 +371,6 @@ void WindowManager::onClassChoice(MyGUI::WidgetPtr, int _index)
 
 void WindowManager::showClassQuestionDialog()
 {
-    if (!generateClassQuestionDialog)
-        generateClassQuestionDialog = new InfoBoxDialog(environment);
-
     struct Step
     {
         const char* text;
@@ -390,17 +389,29 @@ void WindowManager::showClassQuestionDialog()
         },
     } };
 
+    if (generateClassStep == steps.size())
+    {
+        // TODO: Calculate this in mechanics manager
+        generateClass = "acrobat";
+
+        if (generateClassResultDialog)
+            delete generateClassResultDialog;
+        generateClassResultDialog = new GenerateClassResultDialog(environment);
+        generateClassResultDialog->setClassId(generateClass);
+        generateClassResultDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onGenerateClassBack);
+        generateClassResultDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onGenerateClassDone);
+        generateClassResultDialog->setVisible(true);
+        return;
+    }
+
     if (generateClassStep > steps.size())
     {
         environment.mInputManager->setGuiMode(GM_Class);
         return;
     }
-    if (generateClassStep == steps.size())
-    {
-        // TODO: Show selected class
-        environment.mInputManager->setGuiMode(GM_Review);
-        return;
-    }
+
+    if (!generateClassQuestionDialog)
+        generateClassQuestionDialog = new InfoBoxDialog(environment);
 
     InfoBoxDialog::ButtonList buttons;
     generateClassQuestionDialog->setText(steps[generateClassStep].text);
@@ -425,6 +436,33 @@ void WindowManager::onClassQuestionChosen(MyGUI::Widget* _sender, int _index)
     ++generateClassStep;
     showClassQuestionDialog();
 }
+
+void WindowManager::onGenerateClassBack()
+{
+    if (generateClassResultDialog)
+    {
+        generateClassResultDialog->setVisible(false);
+    }
+    environment.mMechanicsManager->setPlayerClass(generateClass);
+
+    updateCharacterGeneration();
+
+    environment.mInputManager->setGuiMode(GM_Class);
+}
+
+void WindowManager::onGenerateClassDone()
+{
+    if (generateClassResultDialog)
+    {
+        generateClassResultDialog->setVisible(false);
+    }
+    environment.mMechanicsManager->setPlayerClass(generateClass);
+
+    updateCharacterGeneration();
+
+    environment.mInputManager->setGuiMode(GM_Review);
+}
+
 
 void WindowManager::onPickClassDialogDone()
 {

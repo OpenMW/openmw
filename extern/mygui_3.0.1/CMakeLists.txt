@@ -45,6 +45,7 @@ configure_file("${SDIR}/openmw_text_input_layout.xml" "${DDIR}/openmw_text_input
 configure_file("${SDIR}/openmw_infobox_layout.xml" "${DDIR}/openmw_infobox_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_race_layout.xml" "${DDIR}/openmw_chargen_race_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_class_layout.xml" "${DDIR}/openmw_chargen_class_layout.xml" COPYONLY)
+configure_file("${SDIR}/openmw_chargen_generate_class_result_layout.xml" "${DDIR}/openmw_chargen_generate_class_result_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_create_class_layout.xml" "${DDIR}/openmw_chargen_create_class_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_select_specialization_layout.xml" "${DDIR}/openmw_chargen_select_specialization_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_select_attribute_layout.xml" "${DDIR}/openmw_chargen_select_attribute_layout.xml" COPYONLY)
