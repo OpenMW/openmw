@@ -23,6 +23,58 @@ namespace MWGui
 {
     using namespace MyGUI;
 
+    class InfoBoxDialog : public OEngine::GUI::Layout
+    {
+    public:
+        InfoBoxDialog(MWWorld::Environment& environment);
+
+        typedef std::vector<std::string> ButtonList;
+
+        void setText(const std::string &str);
+        std::string getText() const;
+        void setButtons(ButtonList &buttons);
+
+        void update();
+        int getChosenButton() const;
+
+        // Events
+        typedef delegates::CDelegate2<MyGUI::WidgetPtr, int> EventHandle_WidgetInt;
+
+        /** Event : Button was clicked.\n
+            signature : void method(MyGUI::WidgetPtr widget, int index)\n
+        */
+        EventHandle_WidgetInt eventButtonSelected;
+
+    protected:
+        void onButtonClicked(MyGUI::WidgetPtr _sender);
+
+    private:
+        void center();
+
+        MWWorld::Environment& environment;
+
+        int currentButton;
+        MyGUI::WidgetPtr textBox;
+        MyGUI::StaticTextPtr text;
+        MyGUI::WidgetPtr buttonBar;
+        std::vector<MyGUI::ButtonPtr> buttons;
+    };
+
+    // Lets the player choose between 3 ways of creating a class
+    class ClassChoiceDialog : public InfoBoxDialog
+    {
+    public:
+        // Corresponds to the buttons that can be clicked
+        enum ClassChoice
+        {
+            Class_Generate = 0,
+            Class_Pick = 1,
+            Class_Create = 2,
+            Class_Back = 3
+        };
+        ClassChoiceDialog(MWWorld::Environment& environment);
+    };
+
     class PickClassDialog : public OEngine::GUI::Layout
     {
     public:

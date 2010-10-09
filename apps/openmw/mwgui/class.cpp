@@ -224,6 +224,146 @@ void PickClassDialog::updateStats()
     classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
 }
 
+/* InfoBoxDialog */
+
+void fitToText(MyGUI::StaticTextPtr widget)
+{
+    MyGUI::IntCoord inner = widget->getTextRegion();
+    MyGUI::IntCoord outer = widget->getCoord();
+    MyGUI::IntSize size = widget->getTextSize();
+    size.width += outer.width - inner.width;
+    size.height += outer.height - inner.height;
+    widget->setSize(size);
+}
+
+void layoutVertically(MyGUI::WidgetPtr widget, int margin)
+{
+    size_t count = widget->getChildCount();
+    int pos = 0;
+    pos += margin;
+    int width = 0;
+    for (unsigned i = 0; i < count; ++i)
+    {
+        MyGUI::WidgetPtr child = widget->getChildAt(i);
+        if (!child->isVisible())
+            continue;
+
+        child->setPosition(child->getLeft(), pos);
+        width = std::max(width, child->getWidth());
+        pos += child->getHeight() + margin;
+    }
+    width += margin*2;
+    widget->setSize(width, pos);
+}
+
+InfoBoxDialog::InfoBoxDialog(MWWorld::Environment& environment)
+    : Layout("openmw_infobox_layout.xml")
+    , environment(environment)
+    , currentButton(-1)
+{
+    getWidget(textBox, "TextBox");
+    getWidget(text, "Text");
+    text->getSubWidgetText()->setWordWrap(true);
+    getWidget(buttonBar, "ButtonBar");
+
+    center();
+}
+
+void InfoBoxDialog::setText(const std::string &str)
+{
+    text->setCaption(str);
+    textBox->setVisible(!str.empty());
+    fitToText(text);
+}
+
+std::string InfoBoxDialog::getText() const
+{
+    return text->getCaption();
+}
+
+void InfoBoxDialog::setButtons(ButtonList &buttons)
+{
+    for (std::vector<MyGUI::ButtonPtr>::iterator it = this->buttons.begin(); it != this->buttons.end(); ++it)
+    {
+        MyGUI::Gui::getInstance().destroyWidget(*it);
+    }
+    this->buttons.clear();
+    currentButton = -1;
+
+    // TODO: The buttons should be generated from a template in the layout file, ie. cloning an existing widget
+    MyGUI::ButtonPtr button;
+    MyGUI::IntCoord coord = MyGUI::IntCoord(0, 0, buttonBar->getWidth(), 10);
+    ButtonList::const_iterator end = buttons.end();
+    for (ButtonList::const_iterator it = buttons.begin(); it != end; ++it)
+    {
+        const std::string &text = *it;
+        button = buttonBar->createWidget<MyGUI::Button>("MW_Button", coord, MyGUI::Align::Top | MyGUI::Align::HCenter, "");
+        button->getSubWidgetText()->setWordWrap(true);
+        button->setCaption(text);
+        fitToText(button);
+        button->eventMouseButtonClick = MyGUI::newDelegate(this, &InfoBoxDialog::onButtonClicked);
+        coord.top += button->getHeight();
+        this->buttons.push_back(button);
+    }
+}
+
+void InfoBoxDialog::update()
+{
+    // Fix layout
+    layoutVertically(textBox, 4);
+    layoutVertically(buttonBar, 6);
+    layoutVertically(mMainWidget, 4 + 6);
+
+    center();
+}
+
+int InfoBoxDialog::getChosenButton() const
+{
+    return currentButton;
+}
+
+void InfoBoxDialog::onButtonClicked(MyGUI::WidgetPtr _sender)
+{
+    std::vector<MyGUI::ButtonPtr>::const_iterator end = buttons.end();
+    int i = 0;
+    for (std::vector<MyGUI::ButtonPtr>::const_iterator it = buttons.begin(); it != end; ++it)
+    {
+        if (*it == _sender)
+        {
+            currentButton = i;
+            eventButtonSelected(_sender, i);
+            return;
+        }
+        ++i;
+    }
+}
+
+void InfoBoxDialog::center()
+{
+    // Centre dialog
+    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
+    MyGUI::IntCoord coord = mMainWidget->getCoord();
+    coord.left = (gameWindowSize.width - coord.width)/2;
+    coord.top = (gameWindowSize.height - coord.height)/2;
+    mMainWidget->setCoord(coord);
+}
+
+/* ClassChoiceDialog */
+
+ClassChoiceDialog::ClassChoiceDialog(MWWorld::Environment& environment)
+    : InfoBoxDialog(environment)
+{
+    WindowManager *mw = environment.mWindowManager;
+    setText("");
+    ButtonList buttons;
+    buttons.push_back(mw->getGameSettingString("sClassChoiceMenu1", ""));
+    buttons.push_back(mw->getGameSettingString("sClassChoiceMenu2", ""));
+    buttons.push_back(mw->getGameSettingString("sClassChoiceMenu3", ""));
+    buttons.push_back(mw->getGameSettingString("sBack", ""));
+    setButtons(buttons);
+
+    update();
+}
 
 /* CreateClassDialog */
 
