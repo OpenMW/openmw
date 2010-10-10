@@ -525,6 +525,51 @@ CreateClassDialog::~CreateClassDialog()
     delete descDialog;
 }
 
+std::string CreateClassDialog::getName() const
+{
+    return editName->getOnlyText();
+}
+
+std::string CreateClassDialog::getDescription() const
+{
+    return description;
+}
+
+ESM::Class::Specialization CreateClassDialog::getSpecializationId() const
+{
+    return specializationId;
+}
+
+std::vector<int> CreateClassDialog::getFavoriteAttributes() const
+{
+    std::vector<int> v;
+    v.push_back(favoriteAttribute0->getAttributeId());
+    v.push_back(favoriteAttribute1->getAttributeId());
+    return v;
+}
+
+std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
+{
+    std::vector<ESM::Skill::SkillEnum> v;
+    v.push_back(majorSkill0->getSkillId());
+    v.push_back(majorSkill1->getSkillId());
+    v.push_back(majorSkill2->getSkillId());
+    v.push_back(majorSkill3->getSkillId());
+    v.push_back(majorSkill4->getSkillId());
+    return v;
+}
+
+std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
+{
+    std::vector<ESM::Skill::SkillEnum> v;
+    v.push_back(majorSkill0->getSkillId());
+    v.push_back(majorSkill1->getSkillId());
+    v.push_back(majorSkill2->getSkillId());
+    v.push_back(majorSkill3->getSkillId());
+    v.push_back(majorSkill4->getSkillId());
+    return v;
+}
+
 void CreateClassDialog::setNextButtonShow(bool shown)
 {
     MyGUI::ButtonPtr descriptionButton;

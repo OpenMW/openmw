@@ -48,6 +48,7 @@ namespace MWGui
   class ClassChoiceDialog;
   class GenerateClassResultDialog;
   class PickClassDialog;
+  class CreateClassDialog;
   class BirthDialog;
 
   class WindowManager
@@ -69,6 +70,7 @@ namespace MWGui
     InfoBoxDialog *generateClassQuestionDialog;
     GenerateClassResultDialog *generateClassResultDialog;
     PickClassDialog *pickClassDialog;
+    CreateClassDialog *createClassDialog;
     BirthDialog *birthSignDialog;
 
     // Which dialogs have been shown, controls back/next/ok buttons
@@ -212,6 +214,10 @@ namespace MWGui
     // Character generation: Pick Class dialog
     void onPickClassDialogDone();
     void onPickClassDialogBack();
+
+    // Character generation: Create Class dialog
+    void onCreateClassDialogDone();
+    void onCreateClassDialogBack();
 
     // Character generation: Birth sign dialog
     void onBirthSignDialogDone();

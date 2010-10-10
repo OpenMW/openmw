@@ -288,8 +288,12 @@ namespace MWGui
         CreateClassDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
         virtual ~CreateClassDialog();
 
-//        const std::string &getClassId() const { return currentClassId; }
-//        void setClassId(const std::string &classId);
+        std::string getName() const;
+        std::string getDescription() const;
+        ESM::Class::Specialization getSpecializationId() const;
+        std::vector<int> getFavoriteAttributes() const;
+        std::vector<ESM::Skill::SkillEnum> getMajorSkills() const;
+        std::vector<ESM::Skill::SkillEnum> getMinorSkills() const;
 
         void setNextButtonShow(bool shown);
         void open();

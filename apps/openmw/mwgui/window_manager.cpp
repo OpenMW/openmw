@@ -25,6 +25,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , generateClassQuestionDialog(nullptr)
   , generateClassResultDialog(nullptr)
   , pickClassDialog(nullptr)
+  , createClassDialog(nullptr)
   , birthSignDialog(nullptr)
   , nameChosen(false)
   , raceChosen(false)
@@ -74,6 +75,7 @@ WindowManager::~WindowManager()
   delete generateClassQuestionDialog;
   delete generateClassResultDialog;
   delete pickClassDialog;
+  delete createClassDialog;
   delete birthSignDialog;
 }
 
@@ -163,8 +165,12 @@ void WindowManager::updateVisible()
 
   if (mode == GM_ClassCreate)
   {
-      CreateClassDialog *ccd = new CreateClassDialog(environment, gui->getViewSize());
-      ccd->open();
+      if (createClassDialog)
+          delete createClassDialog;
+      createClassDialog = new CreateClassDialog(environment, gui->getViewSize());
+      createClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogDone);
+      createClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogBack);
+      createClassDialog->open();
       return;
   }
 
@@ -439,6 +445,9 @@ void WindowManager::onClassQuestionChosen(MyGUI::Widget* _sender, int _index)
 
 void WindowManager::onGenerateClassBack()
 {
+    bool goNext = classChosen; // Go to next dialog if class was previously chosen
+    classChosen = true;
+
     if (generateClassResultDialog)
     {
         generateClassResultDialog->setVisible(false);
@@ -452,6 +461,9 @@ void WindowManager::onGenerateClassBack()
 
 void WindowManager::onGenerateClassDone()
 {
+    bool goNext = classChosen; // Go to next dialog if class was previously chosen
+    classChosen = true;
+
     if (generateClassResultDialog)
     {
         generateClassResultDialog->setVisible(false);
@@ -460,7 +472,12 @@ void WindowManager::onGenerateClassDone()
 
     updateCharacterGeneration();
 
-    environment.mInputManager->setGuiMode(GM_Review);
+    if (reviewNext)
+        environment.mInputManager->setGuiMode(GM_Review);
+    else if (goNext)
+        environment.mInputManager->setGuiMode(GM_Birth);
+    else
+        environment.mInputManager->setGuiMode(GM_Game);
 }
 
 
@@ -487,6 +504,63 @@ void WindowManager::onPickClassDialogDone()
 }
 
 void WindowManager::onPickClassDialogBack()
+{
+    if (pickClassDialog)
+    {
+        pickClassDialog->setVisible(false);
+        environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
+    }
+
+    updateCharacterGeneration();
+
+    environment.mInputManager->setGuiMode(GM_Class);
+}
+
+void WindowManager::onCreateClassDialogDone()
+{
+    createClassDialog->eventDone = MWGui::CreateClassDialog::EventHandle_Void();
+
+    bool goNext = classChosen; // Go to next dialog if class was previously chosen
+    classChosen = true;
+    if (createClassDialog)
+    {
+        createClassDialog->setVisible(false);
+
+        // TODO: The ESM::Class should have methods to set these values to ensure correct data is assigned
+        ESM::Class klass;
+        klass.name = createClassDialog->getName();
+        klass.description = createClassDialog->getDescription();
+        klass.data.specialization = createClassDialog->getSpecializationId();
+        klass.data.isPlayable = 0x1;
+
+        std::vector<int> attributes = createClassDialog->getFavoriteAttributes();
+        assert(attributes.size() == 2);
+        klass.data.attribute[0] = attributes[0];
+        klass.data.attribute[1] = attributes[1];
+
+        std::vector<ESM::Skill::SkillEnum> majorSkills = createClassDialog->getMajorSkills();
+        std::vector<ESM::Skill::SkillEnum> minorSkills = createClassDialog->getMinorSkills();
+        assert(majorSkills.size() >= sizeof(klass.data.skills)/sizeof(klass.data.skills[0]));
+        assert(minorSkills.size() >= sizeof(klass.data.skills)/sizeof(klass.data.skills[0]));
+        for (size_t i = 0; i < sizeof(klass.data.skills)/sizeof(klass.data.skills[0]); ++i)
+        {
+            klass.data.skills[i][1] = majorSkills[i];
+            klass.data.skills[i][0] = minorSkills[i];
+        }
+        environment.mMechanicsManager->setPlayerClass(klass);
+    }
+
+    updateCharacterGeneration();
+
+    if (reviewNext)
+        environment.mInputManager->setGuiMode(GM_Review);
+    else if (goNext)
+        environment.mInputManager->setGuiMode(GM_Birth);
+    else
+        environment.mInputManager->setGuiMode(GM_Game);
+}
+
+void WindowManager::onCreateClassDialogBack()
 {
     if (pickClassDialog)
     {
