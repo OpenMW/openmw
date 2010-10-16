@@ -22,6 +22,7 @@
  */
 
 #include "bsa_file.hpp"
+#include <components/file_finder/file_finder.hpp>
 
 #include <libs/mangle/stream/servers/file_stream.hpp>
 #include <libs/mangle/stream/filters/slice_stream.hpp>
@@ -29,6 +30,7 @@
 #include <stdexcept>
 #include <stdlib.h>
 #include <assert.h>
+#include <iostream>
 
 using namespace std;
 using namespace Mangle::Stream;
@@ -127,6 +129,19 @@ void BSAFile::readHeader()
   // (skipped)
   size_t fileDataOffset = 12 + dirsize + 8*filenum;
 
+  // Setup FileFinder
+  char *data_dir = new char[filename.length()];
+  // Ugly code, get data_dir from engine somehow?
+  for(int index = filename.length(); index != 0; index--) {
+      if(filename[index] == '/') {
+          filename.copy(data_dir, index, 0);
+          index = 0;
+      }
+  }
+  std::cout << data_dir << std::endl;
+
+  FileFinder::FileFinder data_files(data_dir);
+
   // Set up the the FileStruct table
   files.resize(filenum);
   for(size_t i=0;i<filenum;i++)
@@ -139,9 +154,17 @@ void BSAFile::readHeader()
       if(fs.offset + fs.fileSize > fsize)
         fail("Archive contains offsets outside itself");
 
+
+
+      if(!data_files.has(fs.name))
       // Add the file name to the lookup
-      lookup[fs.name] = i;
+        lookup[fs.name] = i;
+      else
+          // Dunno how to use an outside file(yet), so just gonna print an annoying message
+          std::cout << "The file " << fs.name << " has a Data Files companion.\n";
+          lookup[fs.name] = i;
     }
+  delete[] data_dir;
 
   isLoaded = true;
 }
