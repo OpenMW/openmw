@@ -35,12 +35,13 @@ using namespace Mangle::Stream;
 /// An OGRE Archive wrapping a BSAFile archive
 class BSAArchive : public Archive
 {
+private:
   BSAFile arc;
 
 public:
-  BSAArchive(const String& name)
+  BSAArchive(const String& name, const String& data_dir)
              : Archive(name, "BSA")
-  { arc.open(name); }
+  { arc.open(name, data_dir); }
 
   bool isCaseSensitive() const { return false; }
 
@@ -130,7 +131,10 @@ public:
 // An archive factory for BSA archives
 class BSAArchiveFactory : public ArchiveFactory
 {
+private:
+    String data;
 public:
+  BSAArchiveFactory(const String& idata) {data = idata;}
   const String& getType() const
   {
     static String name = "BSA";
@@ -139,27 +143,27 @@ public:
 
   Archive *createInstance( const String& name )
   {
-    return new BSAArchive(name);
+    return new BSAArchive(name, data);
   }
 
   void destroyInstance( Archive* arch) { delete arch; }
 };
 
 static bool init = false;
-static void insertBSAFactory()
+static void insertBSAFactory(const String& data_dir)
 {
   if(!init)
     {
-      ArchiveManager::getSingleton().addArchiveFactory( new BSAArchiveFactory );
+      ArchiveManager::getSingleton().addArchiveFactory( new BSAArchiveFactory(data_dir) );
       init = true;
     }
 }
 
 // The function below is the only publicly exposed part of this file
 
-void addBSA(const std::string& name, const std::string& group)
+void addBSA(const std::string& name, const std::string& group, const std::string& data)
 {
-  insertBSAFactory();
+  insertBSAFactory(data);
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "BSA", group);
 }

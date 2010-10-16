@@ -68,6 +68,7 @@ class BSAFile
 
   /// Used for error messages
   std::string filename;
+  std::string data_dir; // Where might 'filename' have newer files to load than what is in the BSA?
 
   /// Case insensitive string comparison
   struct iltstr
@@ -103,7 +104,7 @@ class BSAFile
     : input(), isLoaded(false) {}
 
   /// Open an archive file.
-  void open(const std::string &file);
+  void open(const std::string &file, const std::string &data);
 
   /** Open an archive from a generic stream. The 'name' parameter is
       used for error messages.

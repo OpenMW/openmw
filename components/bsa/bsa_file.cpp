@@ -130,14 +130,6 @@ void BSAFile::readHeader()
   size_t fileDataOffset = 12 + dirsize + 8*filenum;
 
   // Setup FileFinder
-  char *data_dir = new char[filename.length()];
-  // Ugly code, get data_dir from engine somehow?
-  for(int index = filename.length(); index != 0; index--) {
-      if(filename[index] == '/') {
-          filename.copy(data_dir, index, 0);
-          index = 0;
-      }
-  }
   std::cout << data_dir << std::endl;
 
   FileFinder::FileFinder data_files(data_dir);
@@ -164,7 +156,6 @@ void BSAFile::readHeader()
           std::cout << "The file " << fs.name << " has a Data Files companion.\n";
           lookup[fs.name] = i;
     }
-  delete[] data_dir;
 
   isLoaded = true;
 }
@@ -185,9 +176,10 @@ int BSAFile::getIndex(const char *str)
 }
 
 /// Open an archive file.
-void BSAFile::open(const string &file)
+void BSAFile::open(const string &file, const string &data)
 {
   filename = file;
+  data_dir = data;
   input = StreamPtr(new FileStream(file));
   readHeader();
 }
