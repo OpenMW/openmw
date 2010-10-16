@@ -37,6 +37,12 @@
 class BSAFile
 {
  public:
+   /// Represents one file entry outside the archive
+   struct ExternFileStruct
+   {
+    char* name;
+    // Some useful stuff for using an external file
+   };
 
   /// Represents one file entry in the archive
   struct FileStruct
@@ -47,10 +53,15 @@ class BSAFile
     uint32_t fileSize, offset;
 
     // Zero-terminated file name
-    char* name;
+    char* name; // Just a guess here but this must be set to a std::string.c_str()
+    bool external; // Does this file have an external equivalent?
+    struct ExternFileStruct *exstruct; // Set to NULL if external == false?
   };
 
+        
+
   typedef std::vector<FileStruct> FileList;
+  typedef std::vector<ExternFileStruct> ExternFileList;
 
  private:
 
@@ -59,6 +70,7 @@ class BSAFile
 
   /// Table of files in this archive
   FileList files;
+  ExternFileList extern_files;
 
   /// Filename string buffer
   std::vector<char> stringBuf;
