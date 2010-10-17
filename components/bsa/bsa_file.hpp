@@ -57,6 +57,7 @@ class BSAFile
 
   /// The archive source
   Mangle::Stream::StreamPtr input;
+  std::vector<Mangle::Stream::StreamPtr> externals; // External data files
 
   /// Table of files in this archive
   FileList files;

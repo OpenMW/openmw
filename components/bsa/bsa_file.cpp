@@ -154,6 +154,17 @@ void BSAFile::readHeader()
           }
           else {
               fs.external= true;
+              externals.push_back(StreamPtr(new FileStream(data_files.lookup(fs.name))));
+
+              int externals_i = (externals.size() - 1);
+
+              assert(externals[externals_i]);
+              assert(externals[externals_i]->hasPosition);
+              assert(externals[externals_i]->isSeekable);
+
+              fs.offset = externals_i;
+              fs.fileSize = externals[fs.offset]->size();
+
               lookup[fs.name] = i;
          }
     }
@@ -204,5 +215,8 @@ StreamPtr BSAFile::getFile(const char *file)
 
   FileStruct &fs = files[i];
 
-  return StreamPtr(new SliceStream(input, fs.offset, fs.fileSize));
+  if(!fs.external)
+    return StreamPtr(new SliceStream(input, fs.offset, fs.fileSize));
+  else
+    return StreamPtr(new SliceStream(externals[fs.offset], 0, fs.fileSize));
 }
