@@ -48,6 +48,7 @@ class BSAFile
 
     // Zero-terminated file name
     char* name;
+    bool external; // Offset is set to index into 'externals', if this is true
   };
 
   typedef std::vector<FileStruct> FileList;
@@ -109,7 +110,7 @@ class BSAFile
   /** Open an archive from a generic stream. The 'name' parameter is
       used for error messages.
   */
-  void open(Mangle::Stream::StreamPtr inp, const std::string &name);
+  void open(Mangle::Stream::StreamPtr inp, const std::string &name, const std::string &data);
 
   /* -----------------------------------
    * Archive file routines

@@ -130,7 +130,6 @@ void BSAFile::readHeader()
   size_t fileDataOffset = 12 + dirsize + 8*filenum;
 
   // Setup FileFinder
-  std::cout << data_dir << std::endl;
 
   FileFinder::FileFinder data_files(data_dir);
 
@@ -148,13 +147,15 @@ void BSAFile::readHeader()
 
 
 
-      if(!data_files.has(fs.name))
-      // Add the file name to the lookup
-        lookup[fs.name] = i;
-      else
-          // Dunno how to use an outside file(yet), so just gonna print an annoying message
-          std::cout << "The file " << fs.name << " has a Data Files companion.\n";
-          lookup[fs.name] = i;
+          if(!data_files.has(fs.name)) {
+          // Add the file name to the lookup
+            lookup[fs.name] = i;
+            fs.external = false;
+          }
+          else {
+              fs.external= true;
+              lookup[fs.name] = i;
+         }
     }
 
   isLoaded = true;
@@ -187,7 +188,7 @@ void BSAFile::open(const string &file, const string &data)
 /** Open an archive from a generic stream. The 'name' parameter is
     used for error messages.
 */
-void BSAFile::open(StreamPtr inp, const string &name)
+void BSAFile::open(StreamPtr inp, const string &name, const string &data)
 {
   filename = name;
   input = inp;
