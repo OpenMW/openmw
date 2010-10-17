@@ -48,7 +48,7 @@ class BSAFile
 
     // Zero-terminated file name
     char* name;
-    bool external; // Offset is set to index into 'externals', if this is true
+    bool external; // Offset is set to 0 if this is true
   };
 
   typedef std::vector<FileStruct> FileList;
@@ -57,7 +57,7 @@ class BSAFile
 
   /// The archive source
   Mangle::Stream::StreamPtr input;
-  std::vector<Mangle::Stream::StreamPtr> externals; // External data files
+  Mangle::Stream::StreamPtr external; // Used for opening an external file temporarily
 
   /// Table of files in this archive
   FileList files;

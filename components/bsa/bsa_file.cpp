@@ -121,8 +121,7 @@ void BSAFile::readHeader()
   stringBuf.resize(dirsize-12*filenum);
   input->read(&stringBuf[0], stringBuf.size());
 
-  // Check our position
-  assert(input->tell() == 12+dirsize);
+  // Check our position assert(input->tell() == 12+dirsize);
 
   // Calculate the offset of the data buffer. All file offsets are
   // relative to this. 12 header bytes + directory + hash table
@@ -151,23 +150,34 @@ void BSAFile::readHeader()
           // Add the file name to the lookup
             lookup[fs.name] = i;
             fs.external = false;
+
           }
           else {
-              fs.external= true;
-              externals.push_back(StreamPtr(new FileStream(data_files.lookup(fs.name))));
+              fs.external = true;
+              //std::cout << "fs->name: " << fs.name << std::endl;
+              //std::cout << "data_files.lookup: " << data_files.lookup(fs.name) << std::endl;
+              //std::cout << std::endl;
+              try {
+              external = StreamPtr(new FileStream(data_files.lookup(fs.name)));
+              } catch (std::runtime_error) {
+                  lookup[fs.name] = i;
+                  fs.external = false;
+              }
+              if(fs.external) {
 
-              int externals_i = (externals.size() - 1);
+                  assert(external);
+                  assert(external->hasPosition);
+                  assert(external->isSeekable);
 
-              assert(externals[externals_i]);
-              assert(externals[externals_i]->hasPosition);
-              assert(externals[externals_i]->isSeekable);
+                  fs.offset = 0;
+                  fs.fileSize = external->size();
 
-              fs.offset = externals_i;
-              fs.fileSize = externals[fs.offset]->size();
-
-              lookup[fs.name] = i;
-         }
+                  lookup[fs.name] = i;
+              }
+          }
     }
+         
+    
 
   isLoaded = true;
 }
@@ -217,6 +227,9 @@ StreamPtr BSAFile::getFile(const char *file)
 
   if(!fs.external)
     return StreamPtr(new SliceStream(input, fs.offset, fs.fileSize));
-  else
-    return StreamPtr(new SliceStream(externals[fs.offset], 0, fs.fileSize));
+  else {
+    // return a FileStreamPtr here
+    FileFinder::FileFinder data_files(data_dir);
+    return StreamPtr(new SliceStream(StreamPtr(new FileStream(data_files.lookup(fs.name))),fs.offset, fs.fileSize));
+  }
 }
