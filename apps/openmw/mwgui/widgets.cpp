@@ -462,3 +462,89 @@ void MWSpellEffect::shutdownWidgetSkin()
 {
 }
 
+/* MWDynamicStat */
+
+MWDynamicStat::MWDynamicStat()
+: value(0)
+, max(1)
+, textWidget(nullptr)
+, barWidget(nullptr)
+, barTextWidget(nullptr)
+{
+}
+
+void MWDynamicStat::setValue(int cur, int max_)
+{
+    value = cur;
+    max = max_;
+
+    if (barWidget)
+    {
+        barWidget->setProgressRange(max);
+        barWidget->setProgressPosition(value);
+    }
+
+
+    if (barTextWidget)
+    {
+        if (value >= 0 && max > 0)
+        {
+            std::stringstream out;
+            out << value << "/" << max;
+            barTextWidget->setCaption(out.str().c_str());
+        }
+        else
+            barTextWidget->setCaption("");
+    }
+}
+void MWDynamicStat::setTitle(const std::string text)
+{
+    if (textWidget)
+        textWidget->setCaption(text);
+}
+
+void MWDynamicStat::_initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name)
+{
+    Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
+
+    initialiseWidgetSkin(_info);
+}
+
+MWDynamicStat::~MWDynamicStat()
+{
+    shutdownWidgetSkin();
+}
+
+void MWDynamicStat::baseChangeWidgetSkin(ResourceSkin* _info)
+{
+    shutdownWidgetSkin();
+    Base::baseChangeWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
+}
+
+void MWDynamicStat::initialiseWidgetSkin(ResourceSkin* _info)
+{
+    for (VectorWidgetPtr::iterator iter=mWidgetChildSkin.begin(); iter!=mWidgetChildSkin.end(); ++iter)
+    {
+        const std::string &name = *(*iter)->_getInternalData<std::string>();
+        if (name == "Text")
+        {
+            MYGUI_DEBUG_ASSERT( ! textWidget, "widget already assigned");
+            textWidget = (*iter)->castType<StaticText>();
+        }
+        else if (name == "Bar")
+        {
+            MYGUI_DEBUG_ASSERT( ! barWidget, "widget already assigned");
+            barWidget = (*iter)->castType<Progress>();
+        }
+        else if (name == "BarText")
+        {
+            MYGUI_DEBUG_ASSERT( ! barTextWidget, "widget already assigned");
+            barTextWidget = (*iter)->castType<StaticText>();
+        }
+    }
+}
+
+void MWDynamicStat::shutdownWidgetSkin()
+{
+}

@@ -190,6 +190,38 @@ namespace MWGui
             MyGUI::StaticTextPtr textWidget;
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
+
+        class MYGUI_EXPORT MWDynamicStat : public Widget
+        {
+            MYGUI_RTTI_DERIVED( MWDynamicStat );
+        public:
+            MWDynamicStat();
+
+            void setValue(int value, int max);
+            void setTitle(const std::string text);
+
+            int getValue() const { return value; }
+            int getMax() const { return max; }
+
+            /*internal:*/
+            virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
+
+        protected:
+            virtual ~MWDynamicStat();
+
+            void baseChangeWidgetSkin(ResourceSkin* _info);
+
+        private:
+            void initialiseWidgetSkin(ResourceSkin* _info);
+            void shutdownWidgetSkin();
+
+            int value, max;
+            MyGUI::StaticTextPtr textWidget;
+            MyGUI::ProgressPtr barWidget;
+            MyGUI::StaticTextPtr barTextWidget;
+        };
+        typedef MWDynamicStat* MWDynamicStatPtr;
+
     }
 }
 
