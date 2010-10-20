@@ -40,6 +40,7 @@ set(GAMEGUI_HEADER
     mwgui/race.hpp
     mwgui/class.hpp
     mwgui/birth.hpp
+    mwgui/review.hpp
     mwgui/window_manager.hpp
     mwgui/console.hpp
 )
@@ -52,6 +53,7 @@ set(GAMEGUI
     mwgui/race.cpp
     mwgui/birth.cpp
     mwgui/class.cpp
+    mwgui/review.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 520 409" name="_Main">
+
+        <!-- Player name, race, class and birth sign-->
+        <Widget type="Widget" skin="MW_Box" position="8 12 244 126">
+            <Widget type="Button" skin="MW_Button" position="8 8 64 23" name="NameButton"/>
+            <Widget type="Button" skin="MW_Button" position="8 37 56 23" name="RaceButton"/>
+            <Widget type="Button" skin="MW_Button" position="8 66 56 23" name="ClassButton"/>
+            <Widget type="Button" skin="MW_Button" position="8 95 54 23" name="SignButton"/>
+            <Widget type="StaticText" skin="SandTextRight" position="100 10 140 18" name="NameText"/>
+            <Widget type="StaticText" skin="SandTextRight" position="100 39 140 18" name="RaceText"/>
+            <Widget type="StaticText" skin="SandTextRight" position="100 68 140 18" name="ClassText"/>
+            <Widget type="StaticText" skin="SandTextRight" position="100 97 140 18" name="SignText"/>
+        </Widget>
+
+        <!-- Player health, magicka and fatigue -->
+        <Widget type="Widget" skin="MW_Box" position="8 144 244 64">
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Red" position="4 4 236 18" name="Health"/>
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Blue" position="4 22 236 18" name="Magicka"/>
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Green" position="4 40 236 18" name="Fatigue"/>
+        </Widget>
+
+        <!-- Player attributes -->
+        <Widget type="Widget" skin="MW_Box" position="8 214 244 154">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 4 236 18" name="Attribute0" />
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 22 236 18" name="Attribute1" />
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 40 236 18" name="Attribute2" />
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 58 236 18" name="Attribute3" />
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 76 236 18" name="Attribute4" />
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 94 236 18" name="Attribute5" />
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 112 236 18" name="Attribute6" />
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 130 236 18" name="Attribute7" />
+        </Widget>
+
+        <!-- Player skills, factions, birthsign and reputation -->
+        <Widget type="Widget" skin="MW_Box" position="258 12 244 356" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Skills">
+            <Widget type="Widget" skin="" position="4 4 218 346" align="ALIGN_STRETCH" name="SkillClient" />
+            <Widget type="VScroll" skin="MW_VScroll" position="226 4 14 346" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="SkillScroller" />
+        </Widget>
+
+        <!-- Dialog buttons -->
+        <Widget type="Button" skin="MW_Button" position="400 372 53 23" name="BackButton">
+            <Property key="Widget_Caption" value="Back"/>
+        </Widget>
+        <Widget type="Button" skin="MW_Button" position="460 372 42 23" name="OKButton">
+            <Property key="Widget_Caption" value="OK"/>
+        </Widget>
+    </Widget>
+</MyGUI>

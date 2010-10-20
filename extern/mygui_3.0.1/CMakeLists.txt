@@ -52,6 +52,7 @@ configure_file("${SDIR}/openmw_chargen_select_attribute_layout.xml" "${DDIR}/ope
 configure_file("${SDIR}/openmw_chargen_select_skill_layout.xml" "${DDIR}/openmw_chargen_select_skill_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_class_description_layout.xml" "${DDIR}/openmw_chargen_class_description_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_chargen_birth_layout.xml" "${DDIR}/openmw_chargen_birth_layout.xml" COPYONLY)
+configure_file("${SDIR}/openmw_chargen_review_layout.xml" "${DDIR}/openmw_chargen_review_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_inventory_window_layout.xml" "${DDIR}/openmw_inventory_window_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_layers.xml" "${DDIR}/openmw_layers.xml" COPYONLY)
 configure_file("${SDIR}/openmw_mainmenu_layout.xml" "${DDIR}/openmw_mainmenu_layout.xml" COPYONLY)

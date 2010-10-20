@@ -50,6 +50,7 @@ namespace MWGui
   class PickClassDialog;
   class CreateClassDialog;
   class BirthDialog;
+  class ReviewDialog;
 
   class WindowManager
   {
@@ -72,6 +73,7 @@ namespace MWGui
     PickClassDialog *pickClassDialog;
     CreateClassDialog *createClassDialog;
     BirthDialog *birthSignDialog;
+    ReviewDialog *reviewDialog;
 
     // Which dialogs have been shown, controls back/next/ok buttons
     bool nameChosen;
@@ -222,6 +224,10 @@ namespace MWGui
     // Character generation: Birth sign dialog
     void onBirthSignDialogDone();
     void onBirthSignDialogBack();
+
+    // Character generation: Review dialog
+    void onReviewDialogDone();
+    void onReviewDialogBack();
   };
 }
 #endif

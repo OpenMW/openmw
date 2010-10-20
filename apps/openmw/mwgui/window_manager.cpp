@@ -4,6 +4,7 @@
 #include "race.hpp"
 #include "class.hpp"
 #include "birth.hpp"
+#include "review.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -27,6 +28,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , pickClassDialog(nullptr)
   , createClassDialog(nullptr)
   , birthSignDialog(nullptr)
+  , reviewDialog(nullptr)
   , nameChosen(false)
   , raceChosen(false)
   , classChosen(false)
@@ -77,6 +79,7 @@ WindowManager::~WindowManager()
   delete pickClassDialog;
   delete createClassDialog;
   delete birthSignDialog;
+  delete reviewDialog;
 }
 
 void WindowManager::updateVisible()
@@ -182,6 +185,17 @@ void WindowManager::updateVisible()
       birthSignDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogDone);
       birthSignDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogBack);
       birthSignDialog->open();
+      return;
+  }
+
+  if (mode == GM_Review)
+  {
+      reviewNext = false;
+      if (!reviewDialog)
+          reviewDialog = new ReviewDialog(environment, gui->getViewSize());
+      reviewDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onReviewDialogDone);
+      reviewDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onReviewDialogBack);
+      reviewDialog->setVisible(true);
       return;
   }
 
@@ -604,4 +618,32 @@ void WindowManager::onBirthSignDialogBack()
     updateCharacterGeneration();
 
     environment.mInputManager->setGuiMode(GM_Class);
+}
+
+void WindowManager::onReviewDialogDone()
+{
+    reviewDialog->eventDone = MWGui::BirthDialog::EventHandle_Void();
+
+    if (reviewDialog)
+    {
+        reviewDialog->setVisible(false);
+        //environment.mMechanicsManager->setPlayerBirthsign(reviewDialog->getBirthId());
+    }
+
+    updateCharacterGeneration();
+
+    environment.mInputManager->setGuiMode(GM_Game);
+}
+
+void WindowManager::onReviewDialogBack()
+{
+    if (reviewDialog)
+    {
+        reviewDialog->setVisible(false);
+        //environment.mMechanicsManager->setPlayerBirthsign(reviewDialog->getBirthId());
+    }
+
+    updateCharacterGeneration();
+
+    environment.mInputManager->setGuiMode(GM_Birth);
 }
