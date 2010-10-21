@@ -56,6 +56,17 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   // The HUD is always on
   hud->setVisible(true);
 
+  // Setup player stats
+  for (int i = 0; i < ESM::Attribute::Length; ++i)
+  {
+      playerAttributes.insert(std::make_pair(ESM::Attribute::attributeIds[i], MWMechanics::Stat<int>()));
+  }
+
+  for (int i = 0; i < ESM::Skill::Length; ++i)
+  {
+      playerSkillValues.insert(std::make_pair(ESM::Skill::skillIds[i], MWMechanics::Stat<float>()));
+  }
+
   // Set up visibility
   updateVisible();
 }
@@ -193,6 +204,33 @@ void WindowManager::updateVisible()
       reviewNext = false;
       if (!reviewDialog)
           reviewDialog = new ReviewDialog(environment, gui->getViewSize());
+
+      reviewDialog->setPlayerName(playerName);
+      reviewDialog->setRace(playerRaceId);
+      reviewDialog->setClass(playerClass);
+      reviewDialog->setBirthSign(playerBirthSignId);
+
+      reviewDialog->setHealth(playerHealth);
+      reviewDialog->setMagicka(playerMagicka);
+      reviewDialog->setFatigue(playerFatigue);
+
+      {
+          std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator end = playerAttributes.end();
+          for (std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator it = playerAttributes.begin(); it != end; ++it)
+          {
+              reviewDialog->setAttribute(it->first, it->second);
+          }
+      }
+
+      {
+          std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator end = playerSkillValues.end();
+          for (std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator it = playerSkillValues.begin(); it != end; ++it)
+          {
+              reviewDialog->setSkillValue(it->first, it->second);
+          }
+          reviewDialog->configureSkills(playerMajorSkills, playerMinorSkills);
+      }
+
       reviewDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onReviewDialogDone);
       reviewDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onReviewDialogBack);
       reviewDialog->setVisible(true);
@@ -225,22 +263,96 @@ void WindowManager::updateVisible()
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
 {
     stats->setValue (id, value);
+
+    static const char *ids[] =
+    {
+        "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
+        "AttribVal6", "AttribVal7", "AttribVal8"
+    };
+    static ESM::Attribute::AttributeID attributes[] =
+    {
+        ESM::Attribute::Strength,
+        ESM::Attribute::Intelligence,
+        ESM::Attribute::Willpower,
+        ESM::Attribute::Agility,
+        ESM::Attribute::Speed,
+        ESM::Attribute::Endurance,
+        ESM::Attribute::Personality,
+        ESM::Attribute::Luck
+    };
+    for (int i = 0; i < sizeof(ids)/sizeof(ids[0]); ++i)
+    {
+        if (id != ids[i])
+            continue;
+        playerAttributes[attributes[i]] = value;
+        break;
+    }
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<float>& value)
 {
     stats->setValue (id, value);
+
+    static struct {const char *id; ESM::Skill::SkillEnum skillId; } skillMap[] =
+    {
+        {"SkillBlock", ESM::Skill::Block},
+        {"SkillArmorer", ESM::Skill::Armorer},
+        {"SkillMediumArmor", ESM::Skill::MediumArmor},
+        {"SkillHeavyArmor", ESM::Skill::HeavyArmor},
+        {"SkillBluntWeapon", ESM::Skill::BluntWeapon},
+        {"SkillLongBlade", ESM::Skill::LongBlade},
+        {"SkillAxe", ESM::Skill::Axe},
+        {"SkillSpear", ESM::Skill::Spear},
+        {"SkillAthletics", ESM::Skill::Athletics},
+        {"SkillEnchant", ESM::Skill::Armorer},
+        {"SkillDestruction", ESM::Skill::Destruction},
+        {"SkillAlteration", ESM::Skill::Alteration},
+        {"SkillIllusion", ESM::Skill::Illusion},
+        {"SkillConjuration", ESM::Skill::Conjuration},
+        {"SkillMysticism", ESM::Skill::Mysticism},
+        {"SkillRestoration", ESM::Skill::Restoration},
+        {"SkillAlchemy", ESM::Skill::Alchemy},
+        {"SkillUnarmored", ESM::Skill::Unarmored},
+        {"SkillSecurity", ESM::Skill::Security},
+        {"SkillSneak", ESM::Skill::Sneak},
+        {"SkillAcrobatics", ESM::Skill::Acrobatics},
+        {"SkillLightArmor", ESM::Skill::LightArmor},
+        {"SkillShortBlade", ESM::Skill::ShortBlade},
+        {"SkillMarksman", ESM::Skill::Marksman},
+        {"SkillMercantile", ESM::Skill::Mercantile},
+        {"SkillSpeechcraft", ESM::Skill::Speechcraft},
+        {"SkillHandToHand", ESM::Skill::HandToHand},
+    };
+    for (int i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
+    {
+        if (skillMap[i].id == id)
+        {
+            ESM::Skill::SkillEnum skillId = skillMap[i].skillId;
+            playerSkillValues[skillId] = value;
+            break;
+        }
+    }
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
 {
     stats->setValue (id, value);
     hud->setValue (id, value);
+    if (id == "HBar")
+        playerHealth = value;
+    else if (id == "MBar")
+        playerMagicka = value;
+    else if (id == "FBar")
+        playerFatigue = value;
 }
 
 void WindowManager::setValue (const std::string& id, const std::string& value)
 {
     stats->setValue (id, value);
+    if (id=="name")
+        playerName = value;
+    else if (id=="race")
+        playerRaceId = value;
 }
 
 void WindowManager::setValue (const std::string& id, int value)
@@ -248,9 +360,17 @@ void WindowManager::setValue (const std::string& id, int value)
     stats->setValue (id, value);
 }
 
+void WindowManager::setPlayerClass (const ESM::Class &class_)
+{
+    playerClass = class_;
+    stats->setValue("class", playerClass.name);
+}
+
 void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
 {
     stats->configureSkills (major, minor);
+    playerMajorSkills = major;
+    playerMinorSkills = minor;
 }
 
 void WindowManager::setFactions (const FactionList& factions)

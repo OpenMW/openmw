@@ -14,6 +14,7 @@
 #include <vector>
 #include <set>
 
+#include <components/esm_store/store.hpp>
 #include "../mwmechanics/stat.hpp"
 #include "mode.hpp"
 
@@ -54,6 +55,12 @@ namespace MWGui
 
   class WindowManager
   {
+  public:
+    typedef std::pair<std::string, int> Faction;
+    typedef std::vector<Faction> FactionList;
+    typedef std::vector<int> SkillList;
+
+  private:
     MWWorld::Environment& environment;
     HUD *hud;
     MapWindow *map;
@@ -87,6 +94,16 @@ namespace MWGui
     unsigned generateClassStep;
     std::string generateClass;
 
+    // Various stats about player as needed by window manager
+    std::string playerName;
+    ESM::Class playerClass;
+    std::string playerRaceId, playerBirthSignId;
+    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
+    SkillList playerMajorSkills, playerMinorSkills;
+    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;
+    MWMechanics::DynamicStat<int> playerHealth, playerMagicka, playerFatigue;
+
+    // Gui
     MyGUI::Gui *gui;
 
     // Current gui mode
@@ -145,10 +162,6 @@ namespace MWGui
 
     MyGUI::Gui* getGui() const { return gui; }
 
-    typedef std::pair<std::string, int> Faction;
-    typedef std::vector<Faction> FactionList;
-    typedef std::vector<int> SkillList;
-
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
     ///< Set value for the given ID.
 
@@ -163,6 +176,9 @@ namespace MWGui
 
     void setValue (const std::string& id, int value);
     ///< set value for the given ID.
+
+    void setPlayerClass (const ESM::Class &class_);
+    ///< set current class of player
 
     void configureSkills (const SkillList& major, const SkillList& minor);
     ///< configure skill groups, each set contains the skill ID for that group.
