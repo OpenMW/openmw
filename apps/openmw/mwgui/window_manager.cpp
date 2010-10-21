@@ -231,6 +231,8 @@ void WindowManager::updateVisible()
           reviewDialog->configureSkills(playerMajorSkills, playerMinorSkills);
       }
 
+      reviewDialog->updateSkillArea();
+
       reviewDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onReviewDialogDone);
       reviewDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onReviewDialogBack);
       reviewDialog->setVisible(true);
@@ -381,6 +383,7 @@ void WindowManager::setFactions (const FactionList& factions)
 void WindowManager::setBirthSign (const std::string &signId)
 {
     stats->setBirthSign (signId);
+    playerBirthSignId = signId;
 }
 
 void WindowManager::setReputation (int reputation)
