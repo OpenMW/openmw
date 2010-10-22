@@ -787,24 +787,36 @@ void WindowManager::onReviewDialogBack()
 
 void WindowManager::onNameDialogActivate()
 {
+    if (reviewDialog)
+        removeDialog(reviewDialog);
+
     reviewNext = true;
     setGuiMode(GM_Name);
 }
 
 void WindowManager::onRaceDialogActivate()
 {
+    if (reviewDialog)
+        removeDialog(reviewDialog);
+
     reviewNext = true;
     setGuiMode(GM_Race);
 }
 
 void WindowManager::onClassDialogActivate()
 {
+    if (reviewDialog)
+        removeDialog(reviewDialog);
+
     reviewNext = true;
     setGuiMode(GM_Class);
 }
 
 void WindowManager::onBirthSignDialogActivate()
 {
+    if (reviewDialog)
+        removeDialog(reviewDialog);
+
     reviewNext = true;
     setGuiMode(GM_Birth);
 }
