@@ -289,7 +289,7 @@ namespace MWGui
   {
       OEngine::GUI::Layout *d = static_cast<OEngine::GUI::Layout*>(dialog);
       removeDialog(d);
-      dialog = nullptr;
+      dialog = 0;
   }
 }
 

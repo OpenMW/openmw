@@ -168,10 +168,7 @@ void WindowManager::updateVisible()
   if (mode == GM_Name)
   {
       if (nameDialog)
-      {
-          nameDialog->setVisible(false);
-          garbageDialogs.push_back(nameDialog);
-      }
+          removeDialog(nameDialog);
       nameDialog = new TextInputDialog(environment, gui->getViewSize());
       std::string sName = getGameSettingString("sName", "Name");
       nameDialog->setTextLabel(sName);
@@ -184,10 +181,7 @@ void WindowManager::updateVisible()
   if (mode == GM_Race)
   {
       if (raceDialog)
-      {
-          raceDialog->setVisible(false);
-          garbageDialogs.push_back(raceDialog);
-      }
+          removeDialog(raceDialog);
       raceDialog = new RaceDialog(environment, gui->getViewSize());
       raceDialog->setNextButtonShow(raceChosen);
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
@@ -199,10 +193,7 @@ void WindowManager::updateVisible()
   if (mode == GM_Class)
   {
       if (classChoiceDialog)
-      {
-          classChoiceDialog->setVisible(false);
-          garbageDialogs.push_back(classChoiceDialog);
-      }
+          removeDialog(classChoiceDialog);
       classChoiceDialog = new ClassChoiceDialog(environment);
       classChoiceDialog->eventButtonSelected = MyGUI::newDelegate(this, &WindowManager::onClassChoice);
       return;
@@ -218,10 +209,7 @@ void WindowManager::updateVisible()
   if (mode == GM_ClassPick)
   {
       if (pickClassDialog)
-      {
-          pickClassDialog->setVisible(false);
-          garbageDialogs.push_back(pickClassDialog);
-      }
+          removeDialog(pickClassDialog);
       pickClassDialog = new PickClassDialog(environment, gui->getViewSize());
       pickClassDialog->setNextButtonShow(classChosen);
       pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
@@ -233,10 +221,7 @@ void WindowManager::updateVisible()
   if (mode == GM_ClassCreate)
   {
       if (createClassDialog)
-      {
-          createClassDialog->setVisible(false);
-          garbageDialogs.push_back(createClassDialog);
-      }
+          removeDialog(createClassDialog);
       createClassDialog = new CreateClassDialog(environment, gui->getViewSize());
       createClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogDone);
       createClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogBack);
@@ -247,10 +232,7 @@ void WindowManager::updateVisible()
   if (mode == GM_Birth)
   {
       if (birthSignDialog)
-      {
-          birthSignDialog->setVisible(false);
-          garbageDialogs.push_back(birthSignDialog);
-      }
+          removeDialog(birthSignDialog);
       birthSignDialog = new BirthDialog(environment, gui->getViewSize());
       birthSignDialog->setNextButtonShow(birthSignChosen);
       birthSignDialog->setBirthId(playerBirthSignId);
@@ -264,10 +246,7 @@ void WindowManager::updateVisible()
   {
       reviewNext = false;
       if (reviewDialog)
-      {
-          reviewDialog->setVisible(false);
-          garbageDialogs.push_back(reviewDialog);
-      }
+          removeDialog(reviewDialog);
       reviewDialog = new ReviewDialog(environment, gui->getViewSize());
       reviewDialog->setPlayerName(playerName);
       reviewDialog->setRace(playerRaceId);
@@ -511,9 +490,7 @@ void WindowManager::onNameDialogDone()
     {
         environment.mMechanicsManager->setPlayerName(nameDialog->getTextInput());
         nameDialog->eventDone = MWGui::TextInputDialog::EventHandle_Void();
-        nameDialog->setVisible(false);
-        garbageDialogs.push_back(nameDialog);
-        nameDialog = nullptr;
+        removeDialog(nameDialog);
     }
 
     bool goNext = nameChosen; // Go to next dialog if name was previously chosen
@@ -537,9 +514,7 @@ void WindowManager::onRaceDialogDone()
         if (!raceId.empty())
             environment.mMechanicsManager->setPlayerRace(raceId, raceDialog->getGender() == RaceDialog::GM_Male);
         raceDialog->eventDone = MWGui::RaceDialog::EventHandle_Void();
-        raceDialog->setVisible(false);
-        garbageDialogs.push_back(raceDialog);
-        raceDialog = nullptr;
+        removeDialog(raceDialog);
     }
 
     bool goNext = raceChosen; // Go to next dialog if race was previously chosen
@@ -562,9 +537,7 @@ void WindowManager::onRaceDialogBack()
         const std::string &raceId = raceDialog->getRaceId();
         if (!raceId.empty())
             environment.mMechanicsManager->setPlayerRace(raceId, raceDialog->getGender() == RaceDialog::GM_Male);
-        raceDialog->setVisible(false);
-        garbageDialogs.push_back(raceDialog);
-        raceDialog = nullptr;
+        removeDialog(raceDialog);
     }
 
     updateCharacterGeneration();
@@ -576,9 +549,7 @@ void WindowManager::onClassChoice(MyGUI::WidgetPtr, int _index)
 {
     if (classChoiceDialog)
     {
-        classChoiceDialog->setVisible(false);
-        garbageDialogs.push_back(classChoiceDialog);
-        classChoiceDialog = nullptr;
+        removeDialog(classChoiceDialog);
     }
 
     if (_index == ClassChoiceDialog::Class_Generate)
@@ -625,10 +596,7 @@ void WindowManager::showClassQuestionDialog()
         generateClass = "acrobat";
 
         if (generateClassResultDialog)
-        {
-            generateClassResultDialog->setVisible(false);
-            garbageDialogs.push_back(generateClassResultDialog);
-        }
+            removeDialog(generateClassResultDialog);
         generateClassResultDialog = new GenerateClassResultDialog(environment);
         generateClassResultDialog->setClassId(generateClass);
         generateClassResultDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onGenerateClassBack);
@@ -644,10 +612,7 @@ void WindowManager::showClassQuestionDialog()
     }
 
     if (generateClassQuestionDialog)
-    {
-        generateClassQuestionDialog->setVisible(false);
-        garbageDialogs.push_back(generateClassQuestionDialog);
-    }
+        removeDialog(generateClassQuestionDialog);
     generateClassQuestionDialog = new InfoBoxDialog(environment);
 
     InfoBoxDialog::ButtonList buttons;
@@ -664,11 +629,7 @@ void WindowManager::showClassQuestionDialog()
 void WindowManager::onClassQuestionChosen(MyGUI::Widget* _sender, int _index)
 {
     if (generateClassQuestionDialog)
-    {
-        generateClassQuestionDialog->setVisible(false);
-        garbageDialogs.push_back(generateClassQuestionDialog);
-        generateClassQuestionDialog = nullptr;
-    }
+        removeDialog(generateClassQuestionDialog);
     if (_index < 0 || _index >= 3)
     {
         setGuiMode(GM_Class);
@@ -685,11 +646,7 @@ void WindowManager::onGenerateClassBack()
     classChosen = true;
 
     if (generateClassResultDialog)
-    {
-        generateClassResultDialog->setVisible(false);
-        garbageDialogs.push_back(generateClassResultDialog);
-        generateClassResultDialog = nullptr;
-    }
+        removeDialog(generateClassResultDialog);
     environment.mMechanicsManager->setPlayerClass(generateClass);
 
     updateCharacterGeneration();
@@ -703,11 +660,7 @@ void WindowManager::onGenerateClassDone()
     classChosen = true;
 
     if (generateClassResultDialog)
-    {
-        generateClassResultDialog->setVisible(false);
-        garbageDialogs.push_back(generateClassResultDialog);
-        generateClassResultDialog = nullptr;
-    }
+        removeDialog(generateClassResultDialog);
     environment.mMechanicsManager->setPlayerClass(generateClass);
 
     updateCharacterGeneration();
@@ -729,9 +682,7 @@ void WindowManager::onPickClassDialogDone()
         if (!classId.empty())
             environment.mMechanicsManager->setPlayerClass(classId);
         pickClassDialog->eventDone = MWGui::PickClassDialog::EventHandle_Void();
-        pickClassDialog->setVisible(false);
-        garbageDialogs.push_back(pickClassDialog);
-        pickClassDialog = nullptr;
+        removeDialog(pickClassDialog);
     }
 
     bool goNext = classChosen; // Go to next dialog if class was previously chosen
@@ -754,9 +705,7 @@ void WindowManager::onPickClassDialogBack()
         const std::string classId = pickClassDialog->getClassId();
         if (!classId.empty())
             environment.mMechanicsManager->setPlayerClass(classId);
-        pickClassDialog->setVisible(false);
-        garbageDialogs.push_back(pickClassDialog);
-        pickClassDialog = nullptr;
+        removeDialog(pickClassDialog);
     }
 
     updateCharacterGeneration();
@@ -792,9 +741,7 @@ void WindowManager::onCreateClassDialogDone()
         environment.mMechanicsManager->setPlayerClass(klass);
 
         createClassDialog->eventDone = MWGui::CreateClassDialog::EventHandle_Void();
-        createClassDialog->setVisible(false);
-        garbageDialogs.push_back(createClassDialog);
-        createClassDialog = nullptr;
+        removeDialog(createClassDialog);
     }
 
     bool goNext = classChosen; // Go to next dialog if class was previously chosen
@@ -813,11 +760,7 @@ void WindowManager::onCreateClassDialogDone()
 void WindowManager::onCreateClassDialogBack()
 {
     if (createClassDialog)
-    {
-        createClassDialog->setVisible(false);
-        garbageDialogs.push_back(createClassDialog);
-        createClassDialog = nullptr;
-    }
+        removeDialog(createClassDialog);
 
     updateCharacterGeneration();
 
@@ -830,9 +773,7 @@ void WindowManager::onBirthSignDialogDone()
     {
         environment.mMechanicsManager->setPlayerBirthsign(birthSignDialog->getBirthId());
         birthSignDialog->eventDone = MWGui::BirthDialog::EventHandle_Void();
-        birthSignDialog->setVisible(false);
-        garbageDialogs.push_back(birthSignDialog);
-        birthSignDialog = nullptr;
+        removeDialog(birthSignDialog);
     }
 
     bool goNext = birthSignChosen; // Go to next dialog if birth sign was previously chosen
@@ -851,9 +792,7 @@ void WindowManager::onBirthSignDialogBack()
     if (birthSignDialog)
     {
         environment.mMechanicsManager->setPlayerBirthsign(birthSignDialog->getBirthId());
-        birthSignDialog->setVisible(false);
-        garbageDialogs.push_back(birthSignDialog);
-        birthSignDialog = nullptr;
+        removeDialog(birthSignDialog);
     }
 
     updateCharacterGeneration();
@@ -866,9 +805,7 @@ void WindowManager::onReviewDialogDone()
     if (reviewDialog)
     {
         reviewDialog->eventDone = MWGui::BirthDialog::EventHandle_Void();
-        reviewDialog->setVisible(false);
-        garbageDialogs.push_back(reviewDialog);
-        reviewDialog = nullptr;
+        removeDialog(reviewDialog);
     }
 
     updateCharacterGeneration();
@@ -879,11 +816,7 @@ void WindowManager::onReviewDialogDone()
 void WindowManager::onReviewDialogBack()
 {
     if (reviewDialog)
-    {
-        reviewDialog->setVisible(false);
-        garbageDialogs.push_back(reviewDialog);
-        reviewDialog = nullptr;
-    }
+        removeDialog(reviewDialog);
 
     updateCharacterGeneration();
 
