@@ -93,11 +93,13 @@ WindowManager::~WindowManager()
   delete createClassDialog;
   delete birthSignDialog;
   delete reviewDialog;
+
+  cleanupGarbage();
 }
 
-void WindowManager::update()
+void WindowManager::cleanupGarbage()
 {
-    // Delete any dialogs which no longer in use
+    // Delete any dialogs which are no longer in use
     if (!garbageDialogs.empty())
     {
         for (std::vector<OEngine::GUI::Layout*>::iterator it = garbageDialogs.begin(); it != garbageDialogs.end(); ++it)
@@ -106,7 +108,11 @@ void WindowManager::update()
         }
         garbageDialogs.clear();
     }
+}
 
+void WindowManager::update()
+{
+    cleanupGarbage();
     if (needModeChange)
     {
         needModeChange = false;

@@ -128,6 +128,7 @@ namespace MWGui
     bool needModeChange;
 
     std::vector<OEngine::GUI::Layout*> garbageDialogs;
+    void cleanupGarbage();
 
     // Currently shown windows in inventory mode
     GuiWindow shown;
