@@ -240,7 +240,9 @@ void PickClassDialog::updateStats()
         return;
     WindowManager *wm = environment.mWindowManager;
     ESMS::ESMStore &store = environment.mWorld->getStore();
-    const ESM::Class *klass = store.classes.find(currentClassId);
+    const ESM::Class *klass = store.classes.search(currentClassId);
+    if (!klass)
+        return;
 
     ESM::Class::Specialization specialization = static_cast<ESM::Class::Specialization>(klass->data.specialization);
 
