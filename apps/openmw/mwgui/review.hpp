@@ -56,9 +56,34 @@ namespace MWGui
         */
         EventHandle_Void eventDone;
 
+        /** Event : Activate name dialog.\n
+        signature : void method()\n
+        */
+        EventHandle_Void eventNameActivated;
+
+        /** Event : Activate race dialog.\n
+        signature : void method()\n
+        */
+        EventHandle_Void eventRaceActivated;
+
+        /** Event : Activate class dialog.\n
+        signature : void method()\n
+        */
+        EventHandle_Void eventClassActivated;
+
+        /** Event : Activate birth sign dialog.\n
+        signature : void method()\n
+        */
+        EventHandle_Void eventBirthSignActivated;
+
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
+
+        void onNameClicked(MyGUI::Widget* _sender);
+        void onRaceClicked(MyGUI::Widget* _sender);
+        void onClassClicked(MyGUI::Widget* _sender);
+        void onBirthSignClicked(MyGUI::Widget* _sender);
 
     private:
         enum ColorStyle

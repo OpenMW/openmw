@@ -173,7 +173,7 @@ void WindowManager::updateVisible()
       std::string sName = getGameSettingString("sName", "Name");
       nameDialog->setTextLabel(sName);
       nameDialog->setTextInput(playerName);
-      nameDialog->setNextButtonShow(nameChosen);
+      nameDialog->setNextButtonShow(nameChosen || reviewNext);
       nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
       nameDialog->open();
       return;
@@ -184,7 +184,7 @@ void WindowManager::updateVisible()
       if (raceDialog)
           removeDialog(raceDialog);
       raceDialog = new RaceDialog(environment);
-      raceDialog->setNextButtonShow(raceChosen);
+      raceDialog->setNextButtonShow(raceChosen || reviewNext);
       raceDialog->setRaceId(playerRaceId);
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
       raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
@@ -214,7 +214,7 @@ void WindowManager::updateVisible()
       if (pickClassDialog)
           removeDialog(pickClassDialog);
       pickClassDialog = new PickClassDialog(environment);
-      pickClassDialog->setNextButtonShow(classChosen);
+      pickClassDialog->setNextButtonShow(classChosen || reviewNext);
       pickClassDialog->setClassId(playerClass.name);
       pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
       pickClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogBack);
@@ -238,7 +238,7 @@ void WindowManager::updateVisible()
       if (birthSignDialog)
           removeDialog(birthSignDialog);
       birthSignDialog = new BirthDialog(environment);
-      birthSignDialog->setNextButtonShow(birthSignChosen);
+      birthSignDialog->setNextButtonShow(birthSignChosen || reviewNext);
       birthSignDialog->setBirthId(playerBirthSignId);
       birthSignDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogDone);
       birthSignDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogBack);
@@ -280,6 +280,12 @@ void WindowManager::updateVisible()
 
       reviewDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onReviewDialogDone);
       reviewDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onReviewDialogBack);
+
+      reviewDialog->eventNameActivated = MyGUI::newDelegate(this, &WindowManager::onNameDialogActivate);
+      reviewDialog->eventRaceActivated = MyGUI::newDelegate(this, &WindowManager::onRaceDialogActivate);
+      reviewDialog->eventClassActivated = MyGUI::newDelegate(this, &WindowManager::onClassDialogActivate);
+      reviewDialog->eventBirthSignActivated = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogActivate);
+
       reviewDialog->open();
       return;
   }
@@ -776,5 +782,29 @@ void WindowManager::onReviewDialogBack()
     if (reviewDialog)
         removeDialog(reviewDialog);
 
+    setGuiMode(GM_Birth);
+}
+
+void WindowManager::onNameDialogActivate()
+{
+    reviewNext = true;
+    setGuiMode(GM_Name);
+}
+
+void WindowManager::onRaceDialogActivate()
+{
+    reviewNext = true;
+    setGuiMode(GM_Race);
+}
+
+void WindowManager::onClassDialogActivate()
+{
+    reviewNext = true;
+    setGuiMode(GM_Class);
+}
+
+void WindowManager::onBirthSignDialogActivate()
+{
+    reviewNext = true;
     setGuiMode(GM_Birth);
 }

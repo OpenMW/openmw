@@ -32,18 +32,22 @@ ReviewDialog::ReviewDialog(MWWorld::Environment& environment)
     getWidget(nameWidget, "NameText");
     getWidget(button, "NameButton");
     button->setCaption(wm->getGameSettingString("sName", ""));
+    button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);;
 
     getWidget(raceWidget, "RaceText");
     getWidget(button, "RaceButton");
     button->setCaption(wm->getGameSettingString("sRace", ""));
+    button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);;
 
     getWidget(classWidget, "ClassText");
     getWidget(button, "ClassButton");
     button->setCaption(wm->getGameSettingString("sClass", ""));
+    button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);;
 
     getWidget(birthSignWidget, "SignText");
     getWidget(button, "SignButton");
     button->setCaption(wm->getGameSettingString("sBirthSign", ""));
+    button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);;
 
     // Setup dynamic stats
     getWidget(health, "Health");
@@ -352,4 +356,24 @@ void ReviewDialog::onOkClicked(MyGUI::Widget* _sender)
 void ReviewDialog::onBackClicked(MyGUI::Widget* _sender)
 {
     eventBack();
+}
+
+void ReviewDialog::onNameClicked(MyGUI::Widget* _sender)
+{
+    eventNameActivated();
+}
+
+void ReviewDialog::onRaceClicked(MyGUI::Widget* _sender)
+{
+    eventRaceActivated();
+}
+
+void ReviewDialog::onClassClicked(MyGUI::Widget* _sender)
+{
+    eventClassActivated();
+}
+
+void ReviewDialog::onBirthSignClicked(MyGUI::Widget* _sender)
+{
+    eventBirthSignActivated();
 }
