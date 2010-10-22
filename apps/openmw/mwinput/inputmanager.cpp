@@ -225,6 +225,14 @@ namespace MWInput
       // Tell OIS to handle all input events
       input.capture();
 
+      // Update windows/gui as a result of input events
+      // For instance this could mean opening a new window/dialog,
+      // by doing this after the input events are handled we
+      // ensure that window/gui changes appear quickly while
+      // avoiding that window/gui changes does not happen in
+      // event callbacks (which may crash)
+      windows.update();
+
       // Disable movement in Gui mode
       if(windows.isGuiMode()) return true;
 

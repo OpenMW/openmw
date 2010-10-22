@@ -34,6 +34,14 @@ namespace MWWorld
     class Environment;
 }
 
+namespace OEngine
+{
+    namespace GUI
+    {
+        class Layout;
+    }
+}
+
 namespace MWGui
 {
   class HUD;
@@ -109,6 +117,18 @@ namespace MWGui
     // Current gui mode
     GuiMode mode;
 
+    /**
+     * Next mode to activate in update().
+     */
+    GuiMode nextMode;
+    /**
+     * Whether a mode change is needed in update().
+     * Will use @a nextMode as the new mode.
+     */
+    bool needModeChange;
+
+    std::vector<OEngine::GUI::Layout*> garbageDialogs;
+
     // Currently shown windows in inventory mode
     GuiWindow shown;
 
@@ -126,11 +146,20 @@ namespace MWGui
     // allowed settings.
     void updateVisible();
 
+    void setGuiMode(GuiMode newMode);
+
   public:
     /// The constructor needs the main Gui object
     WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
         const Compiler::Extensions& extensions, bool newGame);
     virtual ~WindowManager();
+
+    /**
+     * Should be called each frame to update windows/gui elements.
+     * This could mean updating sizes of gui elements or opening
+     * new dialogs.
+     */
+    void update();
 
     void setMode(GuiMode newMode)
     {
@@ -140,6 +169,7 @@ namespace MWGui
       mode = newMode;
       updateVisible();
     }
+    void setNextMode(GuiMode newMode);
 
     GuiMode getMode() const { return mode; }
 
