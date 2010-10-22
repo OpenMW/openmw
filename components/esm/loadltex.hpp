@@ -23,12 +23,11 @@ namespace ESM {
 
 struct LandTexture
 {
-  std::string name, texture;
+  std::string id, texture;
   int index;
 
   void load(ESMReader &esm)
   {
-    name = esm.getHNString("NAME");
     esm.getHNT(index, "INTV");
     texture = esm.getHNString("DATA");
   }
