@@ -489,7 +489,6 @@ void WindowManager::onNameDialogDone()
     if (nameDialog)
     {
         environment.mMechanicsManager->setPlayerName(nameDialog->getTextInput());
-        nameDialog->eventDone = MWGui::TextInputDialog::EventHandle_Void();
         removeDialog(nameDialog);
     }
 
@@ -513,7 +512,6 @@ void WindowManager::onRaceDialogDone()
         const std::string &raceId = raceDialog->getRaceId();
         if (!raceId.empty())
             environment.mMechanicsManager->setPlayerRace(raceId, raceDialog->getGender() == RaceDialog::GM_Male);
-        raceDialog->eventDone = MWGui::RaceDialog::EventHandle_Void();
         removeDialog(raceDialog);
     }
 
@@ -681,7 +679,6 @@ void WindowManager::onPickClassDialogDone()
         const std::string &classId = pickClassDialog->getClassId();
         if (!classId.empty())
             environment.mMechanicsManager->setPlayerClass(classId);
-        pickClassDialog->eventDone = MWGui::PickClassDialog::EventHandle_Void();
         removeDialog(pickClassDialog);
     }
 
@@ -740,7 +737,6 @@ void WindowManager::onCreateClassDialogDone()
         }
         environment.mMechanicsManager->setPlayerClass(klass);
 
-        createClassDialog->eventDone = MWGui::CreateClassDialog::EventHandle_Void();
         removeDialog(createClassDialog);
     }
 
@@ -772,7 +768,6 @@ void WindowManager::onBirthSignDialogDone()
     if (birthSignDialog)
     {
         environment.mMechanicsManager->setPlayerBirthsign(birthSignDialog->getBirthId());
-        birthSignDialog->eventDone = MWGui::BirthDialog::EventHandle_Void();
         removeDialog(birthSignDialog);
     }
 
@@ -803,10 +798,7 @@ void WindowManager::onBirthSignDialogBack()
 void WindowManager::onReviewDialogDone()
 {
     if (reviewDialog)
-    {
-        reviewDialog->eventDone = MWGui::BirthDialog::EventHandle_Void();
         removeDialog(reviewDialog);
-    }
 
     updateCharacterGeneration();
 
