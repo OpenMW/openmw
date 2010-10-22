@@ -370,6 +370,7 @@ namespace MWMechanics
     {
         mEnvironment.mWorld->getPlayerPos().setBirthsign (id);
         buildPlayer();
+        mUpdatePlayer = true;
     }
 
     void MechanicsManager::setPlayerClass (const std::string& id)
