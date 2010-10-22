@@ -476,17 +476,6 @@ const std::string &WindowManager::getGameSettingString(const std::string &id, co
     return default_;
 }
 
-void WindowManager::updateCharacterGeneration()
-{
-    if (raceDialog)
-    {
-        // TOOD: Uncomment when methods in mechanics manager is implemented
-        //raceDialog->setRace(environment.mMechanicsManager->getPlayerRace());
-        //raceDialog->setGender(environment.mMechanicsManager->getPlayerMale() ? RaceDialog::GM_Male : RaceDialog::GM_Female);
-        // TODO: Face/Hair
-    }
-}
-
 void WindowManager::onNameDialogDone()
 {
     if (nameDialog)
@@ -497,8 +486,6 @@ void WindowManager::onNameDialogDone()
 
     bool goNext = nameChosen; // Go to next dialog if name was previously chosen
     nameChosen = true;
-
-    updateCharacterGeneration();
 
     if (reviewNext)
         setGuiMode(GM_Review);
@@ -521,8 +508,6 @@ void WindowManager::onRaceDialogDone()
     bool goNext = raceChosen; // Go to next dialog if race was previously chosen
     raceChosen = true;
 
-    updateCharacterGeneration();
-
     if (reviewNext)
         setGuiMode(GM_Review);
     else if (goNext)
@@ -540,8 +525,6 @@ void WindowManager::onRaceDialogBack()
             environment.mMechanicsManager->setPlayerRace(raceId, raceDialog->getGender() == RaceDialog::GM_Male);
         removeDialog(raceDialog);
     }
-
-    updateCharacterGeneration();
 
     setGuiMode(GM_Name);
 }
@@ -650,8 +633,6 @@ void WindowManager::onGenerateClassBack()
         removeDialog(generateClassResultDialog);
     environment.mMechanicsManager->setPlayerClass(generateClass);
 
-    updateCharacterGeneration();
-
     setGuiMode(GM_Class);
 }
 
@@ -663,8 +644,6 @@ void WindowManager::onGenerateClassDone()
     if (generateClassResultDialog)
         removeDialog(generateClassResultDialog);
     environment.mMechanicsManager->setPlayerClass(generateClass);
-
-    updateCharacterGeneration();
 
     if (reviewNext)
         setGuiMode(GM_Review);
@@ -688,8 +667,6 @@ void WindowManager::onPickClassDialogDone()
     bool goNext = classChosen; // Go to next dialog if class was previously chosen
     classChosen = true;
 
-    updateCharacterGeneration();
-
     if (reviewNext)
         setGuiMode(GM_Review);
     else if (goNext)
@@ -707,8 +684,6 @@ void WindowManager::onPickClassDialogBack()
             environment.mMechanicsManager->setPlayerClass(classId);
         removeDialog(pickClassDialog);
     }
-
-    updateCharacterGeneration();
 
     setGuiMode(GM_Class);
 }
@@ -746,8 +721,6 @@ void WindowManager::onCreateClassDialogDone()
     bool goNext = classChosen; // Go to next dialog if class was previously chosen
     classChosen = true;
 
-    updateCharacterGeneration();
-
     if (reviewNext)
         setGuiMode(GM_Review);
     else if (goNext)
@@ -760,8 +733,6 @@ void WindowManager::onCreateClassDialogBack()
 {
     if (createClassDialog)
         removeDialog(createClassDialog);
-
-    updateCharacterGeneration();
 
     setGuiMode(GM_Class);
 }
@@ -777,8 +748,6 @@ void WindowManager::onBirthSignDialogDone()
     bool goNext = birthSignChosen; // Go to next dialog if birth sign was previously chosen
     birthSignChosen = true;
 
-    updateCharacterGeneration();
-
     if (reviewNext || goNext)
         setGuiMode(GM_Review);
     else
@@ -793,8 +762,6 @@ void WindowManager::onBirthSignDialogBack()
         removeDialog(birthSignDialog);
     }
 
-    updateCharacterGeneration();
-
     setGuiMode(GM_Class);
 }
 
@@ -803,8 +770,6 @@ void WindowManager::onReviewDialogDone()
     if (reviewDialog)
         removeDialog(reviewDialog);
 
-    updateCharacterGeneration();
-
     setGuiMode(GM_Game);
 }
 
@@ -812,8 +777,6 @@ void WindowManager::onReviewDialogBack()
 {
     if (reviewDialog)
         removeDialog(reviewDialog);
-
-    updateCharacterGeneration();
 
     setGuiMode(GM_Birth);
 }

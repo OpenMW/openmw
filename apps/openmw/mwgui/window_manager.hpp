@@ -248,9 +248,6 @@ namespace MWGui
     const std::string &getGameSettingString(const std::string &id, const std::string &default_);
 
   private:
-    void updateCharacterGeneration();
-    void checkCharacterGeneration(GuiMode mode);
-
     // Character generation: Name dialog
     void onNameDialogDone();
 
