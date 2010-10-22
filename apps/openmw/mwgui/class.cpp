@@ -701,8 +701,6 @@ void CreateClassDialog::onSkillSelected()
 
 void CreateClassDialog::onDescriptionClicked(MyGUI::Widget* _sender)
 {
-    if (descDialog)
-        delete descDialog;
     descDialog = new DescriptionDialog(environment, environment.mWindowManager->getGui()->getViewSize());
     descDialog->setTextInput(description);
     descDialog->eventDone = MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionEntered);
@@ -712,7 +710,7 @@ void CreateClassDialog::onDescriptionClicked(MyGUI::Widget* _sender)
 void CreateClassDialog::onDescriptionEntered()
 {
     description = descDialog->getTextInput();
-    descDialog->setVisible(false);
+    environment.mWindowManager->removeDialog(descDialog);
 }
 
 void CreateClassDialog::onOkClicked(MyGUI::Widget* _sender)
