@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-    <!-- correct size is 474 192, adjust when skin is changed to a dialog -->
-    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 482 220" name="_Main">
-    <!-- content, used to adjust offsets while the window skin is used -->
-    <Widget type="Widget" skin="" position="0 0 474 192" align="ALIGN_STRETCH">
-
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 474 192" name="_Main">
         <!-- Class name -->
         <Widget type="StaticText" skin="ProgressText" position="12 12 48 30" name="LabelT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_Caption" value="Name"/>
@@ -65,6 +61,5 @@
         <Widget type="Button" skin="MW_Button" position="417 158 42 23" name="OKButton">
             <Property key="Widget_Caption" value="OK"/>
         </Widget>
-    </Widget>
     </Widget>
 </MyGUI>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-    <!-- correct size is 485 375, adjust when skin is changed to a dialog -->
-    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 493 403" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 485 375" name="_Main">
         <!-- Birthsign list -->
         <Widget type="List" skin="MW_List" position="8 13 196 137" name="BirthsignList" />
 

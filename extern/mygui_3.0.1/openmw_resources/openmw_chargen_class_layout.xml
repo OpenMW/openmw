@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <!-- correct size is 491 302, adjust when skin is changed to a dialog -->
-    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 499 330" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 491 302" name="_Main">
         <!-- Class list -->
         <Widget type="List" skin="MW_List" position="14 13 181 131" name="ClassList" />
 

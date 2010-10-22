@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <!-- correct size is 588 433, adjust when skin is changed to a dialog -->
-    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 596 461" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 588 433" name="_Main">
 
         <!-- Appearance -->
         <Widget type="StaticText" skin="HeaderText" position="8 16 241 18" name="AppearanceT" align="ALIGN_LEFT ALIGN_TOP">
