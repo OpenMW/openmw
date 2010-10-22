@@ -184,6 +184,7 @@ void WindowManager::updateVisible()
           removeDialog(raceDialog);
       raceDialog = new RaceDialog(environment, gui->getViewSize());
       raceDialog->setNextButtonShow(raceChosen);
+      raceDialog->setRaceId(playerRaceId);
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
       raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
       raceDialog->open();
@@ -212,6 +213,7 @@ void WindowManager::updateVisible()
           removeDialog(pickClassDialog);
       pickClassDialog = new PickClassDialog(environment, gui->getViewSize());
       pickClassDialog->setNextButtonShow(classChosen);
+      pickClassDialog->setClassId(playerClass.name);
       pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
       pickClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogBack);
       pickClassDialog->open();
