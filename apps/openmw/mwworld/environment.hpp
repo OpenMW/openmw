@@ -26,6 +26,11 @@ namespace MWDialogue
     class DialogueManager;
 }
 
+namespace MWInput
+{
+    struct MWInputManager;
+}
+
 namespace MWWorld
 {
     class World;
@@ -36,7 +41,8 @@ namespace MWWorld
     public:
         Environment()
         : mWorld (0), mSoundManager (0), mGlobalScripts (0), mWindowManager (0),
-          mMechanicsManager (0), mDialogueManager (0), mFrameDuration (0)
+          mMechanicsManager (0), mDialogueManager (0), mFrameDuration (0),
+          mInputManager (0)
         {}
 
         World *mWorld;
@@ -46,6 +52,9 @@ namespace MWWorld
         MWMechanics::MechanicsManager *mMechanicsManager;
         MWDialogue::DialogueManager *mDialogueManager;
         float mFrameDuration;
+
+        // For setting GUI mode
+        MWInput::MWInputManager *mInputManager;
     };
 }
 

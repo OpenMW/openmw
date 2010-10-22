@@ -43,6 +43,9 @@
 #include "loadstat.hpp"
 #include "loadweap.hpp"
 
+// Special records which are not loaded from ESM
+#include "attr.hpp"
+
 namespace ESM {
 
 // Integer versions of all the record names, used for faster lookup

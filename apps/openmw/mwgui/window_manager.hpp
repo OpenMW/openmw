@@ -12,12 +12,15 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include "../mwmechanics/stat.hpp"
+#include "mode.hpp"
 
 namespace MyGUI
 {
   class Gui;
+  class Widget;
 }
 
 namespace Compiler
@@ -36,51 +39,51 @@ namespace MWGui
   class MapWindow;
   class MainMenu;
   class StatsWindow;
+  class InventoryWindow;
   class Console;
 
-  enum GuiMode
-    {
-      GM_Game,          // Game mode, only HUD
-      GM_Inventory,     // Inventory mode
-      GM_MainMenu,      // Main menu mode
-
-      GM_Console,       // Console mode
-
-      // None of the following are implemented yet
-
-      GM_Dialogue,      // NPC interaction
-      GM_Barter,
-      GM_Rest,
-      // .. more here ..
-
-      // Startup character creation dialogs
-      GM_Name,
-      GM_Race,
-      GM_Birth,
-      GM_Class,
-      GM_Review
-    };
-
-  // Windows shown in inventory mode
-  enum GuiWindow
-    {
-      GW_None           = 0,
-
-      GW_Map            = 0x01,
-      GW_Inventory      = 0x02,
-      GW_Magic          = 0x04,
-      GW_Stats          = 0x08,
-
-      GW_ALL            = 0xFF
-    };
+  class TextInputDialog;
+  class InfoBoxDialog;
+  class RaceDialog;
+  class ClassChoiceDialog;
+  class GenerateClassResultDialog;
+  class PickClassDialog;
+  class CreateClassDialog;
+  class BirthDialog;
 
   class WindowManager
   {
+    MWWorld::Environment& environment;
     HUD *hud;
     MapWindow *map;
     MainMenu *menu;
     StatsWindow *stats;
+#if 0
+    InventoryWindow *inventory;
+#endif
     Console *console;
+
+    // Character creation
+    TextInputDialog *nameDialog;
+    RaceDialog *raceDialog;
+    ClassChoiceDialog *classChoiceDialog;
+    InfoBoxDialog *generateClassQuestionDialog;
+    GenerateClassResultDialog *generateClassResultDialog;
+    PickClassDialog *pickClassDialog;
+    CreateClassDialog *createClassDialog;
+    BirthDialog *birthSignDialog;
+
+    // Which dialogs have been shown, controls back/next/ok buttons
+    bool nameChosen;
+    bool raceChosen;
+    bool classChosen;
+    bool birthSignChosen;
+    bool reviewNext;
+    ///< If true then any click on Next will cause the summary to be shown
+
+    // Keeps track of current step in Generate Class dialogs
+    unsigned generateClassStep;
+    std::string generateClass;
 
     MyGUI::Gui *gui;
 
@@ -140,13 +143,85 @@ namespace MWGui
 
     MyGUI::Gui* getGui() const { return gui; }
 
+    typedef std::pair<std::string, int> Faction;
+    typedef std::vector<Faction> FactionList;
+    typedef std::vector<int> SkillList;
+
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
+    ///< Set value for the given ID.
+
+    void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
     ///< Set value for the given ID.
 
     void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
     ///< Set value for the given ID.
 
+    void setValue (const std::string& id, const std::string& value);
+    ///< set value for the given ID.
+
+    void setValue (const std::string& id, int value);
+    ///< set value for the given ID.
+
+    void configureSkills (const SkillList& major, const SkillList& minor);
+    ///< configure skill groups, each set contains the skill ID for that group.
+
+    void setFactions (const FactionList& factions);
+    ///< set faction and rank to display on stat window, use an empty vector to disable
+
+    void setBirthSign (const std::string &signId);
+    ///< set birth sign to display on stat window, use an empty string to disable.
+
+    void setReputation (int reputation);
+    ///< set the current reputation value
+
+    void setBounty (int bounty);
+    ///< set the current bounty value
+
+    void updateSkillArea();
+    ///< update display of skills, factions, birth sign, reputation and bounty
+
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
+
+    /**
+     * Fetches a GMST string from the store, if there is no setting with the given
+     * ID or it is not a string the default string is returned.
+     *
+     * @param id Identifier for the GMST setting, e.g. "aName"
+     * @param default Default value if the GMST setting cannot be used.
+     */
+    const std::string &getGameSettingString(const std::string &id, const std::string &default_);
+
+  private:
+    void updateCharacterGeneration();
+    void checkCharacterGeneration(GuiMode mode);
+
+    // Character generation: Name dialog
+    void onNameDialogDone();
+
+    // Character generation: Race dialog
+    void onRaceDialogDone();
+    void onRaceDialogBack();
+
+    // Character generation: Choose class process
+    void onClassChoice(MyGUI::Widget* _sender, int _index);
+
+    // Character generation: Generate Class
+    void showClassQuestionDialog();
+    void onClassQuestionChosen(MyGUI::Widget* _sender, int _index);
+    void onGenerateClassBack();
+    void onGenerateClassDone();
+
+    // Character generation: Pick Class dialog
+    void onPickClassDialogDone();
+    void onPickClassDialogBack();
+
+    // Character generation: Create Class dialog
+    void onCreateClassDialogDone();
+    void onCreateClassDialogBack();
+
+    // Character generation: Birth sign dialog
+    void onBirthSignDialogDone();
+    void onBirthSignDialogBack();
   };
 }
 #endif

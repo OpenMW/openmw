@@ -34,13 +34,24 @@ set(GAMEINPUT_HEADER
 source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})
 
 set(GAMEGUI_HEADER
-    mwgui/mw_layouts.hpp
+    mwgui/layouts.hpp
+    mwgui/text_input.hpp
+    mwgui/widgets.hpp
+    mwgui/race.hpp
+    mwgui/class.hpp
+    mwgui/birth.hpp
     mwgui/window_manager.hpp
     mwgui/console.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
+    mwgui/layouts.cpp
     mwgui/console.cpp
+    mwgui/text_input.cpp
+    mwgui/widgets.cpp
+    mwgui/race.cpp
+    mwgui/birth.cpp
+    mwgui/class.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
@@ -171,11 +182,14 @@ set(GAMECLASS_HEADER
 source_group(apps\\openmw\\mwclass FILES ${GAMECLASS} ${GAMECLASS_HEADER})
 
 set(GAMEMECHANICS
-    mwmechanics/mechanicsmanager.cpp)
+    mwmechanics/mechanicsmanager.cpp
+    mwmechanics/magiceffects.cpp
+    )
 set(GAMEMECHANICS_HEADER
     mwmechanics/mechanicsmanager.hpp
     mwmechanics/stat.hpp
     mwmechanics/creaturestats.hpp
+    mwmechanics/magiceffects.hpp
     )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
