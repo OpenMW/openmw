@@ -527,7 +527,9 @@ void WindowManager::onRaceDialogDone()
 {
     if (raceDialog)
     {
-        environment.mMechanicsManager->setPlayerRace(raceDialog->getRaceId(), raceDialog->getGender() == RaceDialog::GM_Male);
+        const std::string &raceId = raceDialog->getRaceId();
+        if (!raceId.empty())
+            environment.mMechanicsManager->setPlayerRace(raceId, raceDialog->getGender() == RaceDialog::GM_Male);
         raceDialog->eventDone = MWGui::RaceDialog::EventHandle_Void();
         raceDialog->setVisible(false);
         garbageDialogs.push_back(raceDialog);
@@ -551,7 +553,9 @@ void WindowManager::onRaceDialogBack()
 {
     if (raceDialog)
     {
-        environment.mMechanicsManager->setPlayerRace(raceDialog->getRaceId(), raceDialog->getGender() == RaceDialog::GM_Male);
+        const std::string &raceId = raceDialog->getRaceId();
+        if (!raceId.empty())
+            environment.mMechanicsManager->setPlayerRace(raceId, raceDialog->getGender() == RaceDialog::GM_Male);
         raceDialog->setVisible(false);
         garbageDialogs.push_back(raceDialog);
         raceDialog = nullptr;
@@ -715,7 +719,9 @@ void WindowManager::onPickClassDialogDone()
 {
     if (pickClassDialog)
     {
-        environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
+        const std::string &classId = pickClassDialog->getClassId();
+        if (!classId.empty())
+            environment.mMechanicsManager->setPlayerClass(classId);
         pickClassDialog->eventDone = MWGui::PickClassDialog::EventHandle_Void();
         pickClassDialog->setVisible(false);
         garbageDialogs.push_back(pickClassDialog);
@@ -739,7 +745,9 @@ void WindowManager::onPickClassDialogBack()
 {
     if (pickClassDialog)
     {
-        environment.mMechanicsManager->setPlayerClass(pickClassDialog->getClassId());
+        const std::string classId = pickClassDialog->getClassId();
+        if (!classId.empty())
+            environment.mMechanicsManager->setPlayerClass(classId);
         pickClassDialog->setVisible(false);
         garbageDialogs.push_back(pickClassDialog);
         pickClassDialog = nullptr;
