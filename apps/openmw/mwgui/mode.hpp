@@ -23,6 +23,9 @@ namespace MWGui
       GM_Race,
       GM_Birth,
       GM_Class,
+      GM_ClassGenerate,
+      GM_ClassPick,
+      GM_ClassCreate,
       GM_Review
     };
 

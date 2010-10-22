@@ -10,6 +10,16 @@
 
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
     </Skin>
+
+    <Skin name = "MW_TextBoxEditClient" size = "10 10">
+        <Property key="FontName" value = "MyGUI_CoreFont.18"/>
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_LEFT ALIGN_TOP" />
+        <Property key="Colour" value = "0.6 0.6 0.6" />
+
+        <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
+    </Skin>
+
     <Skin name = "MW_TextEdit" size = "512 20"  texture="mwgui.png">
         <BasisSkin type="SubSkin" offset = "0 0 512 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
             <State name="normal" offset = "2 2 512 2"/>
@@ -25,5 +35,23 @@
         </BasisSkin>
 
         <Child type="Widget" skin="MW_TextEditClient" offset = "2 2 508 18" align = "Stretch" name = "Client"/>
+    </Skin>
+
+    <Skin name = "MW_TextBoxEdit" size = "512 20"  texture="mwgui.png">
+        <BasisSkin type="SubSkin" offset = "0 0 512 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
+            <State name="normal" offset = "2 2 512 2"/>
+        </BasisSkin>
+        <BasisSkin type="SubSkin" offset = "0 2 2 16" align = "ALIGN_LEFT ALIGN_VSTRETCH">
+            <State name="normal" offset = "2 4 2 16"/>
+        </BasisSkin>
+        <BasisSkin type="SubSkin" offset = "510 2 2 16" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
+            <State name="normal" offset = "512 4 2 16"/>
+        </BasisSkin>
+        <BasisSkin type="SubSkin" offset = "0 18 512 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
+            <State name="normal" offset = "2 20 512 2"/>
+        </BasisSkin>
+
+        <Child type="Widget" skin="MW_TextBoxEditClient" offset = "2 2 490 18" align = "Stretch" name = "Client"/>
+        <Child type="VScroll" skin="MW_VScroll" offset = "494 3 14 14" align = "Right VStretch" name = "VScroll"/>
     </Skin>
 </MyGUI>

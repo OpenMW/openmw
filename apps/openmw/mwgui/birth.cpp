@@ -187,7 +187,7 @@ void BirthDialog::updateSpells()
     }
 
     int i = 0;
-    static struct{ const std::vector<std::string> &spells; const char *label; } categories[3] = {
+    struct{ const std::vector<std::string> &spells; const char *label; } categories[3] = {
         {abilities, "sBirthsignmenu1"},
         {powers,    "sPowers"},
         {spells,    "sBirthsignmenu2"}

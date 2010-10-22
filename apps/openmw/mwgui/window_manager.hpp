@@ -20,6 +20,7 @@
 namespace MyGUI
 {
   class Gui;
+  class Widget;
 }
 
 namespace Compiler
@@ -42,8 +43,12 @@ namespace MWGui
   class Console;
 
   class TextInputDialog;
+  class InfoBoxDialog;
   class RaceDialog;
+  class ClassChoiceDialog;
+  class GenerateClassResultDialog;
   class PickClassDialog;
+  class CreateClassDialog;
   class BirthDialog;
 
   class WindowManager
@@ -61,7 +66,11 @@ namespace MWGui
     // Character creation
     TextInputDialog *nameDialog;
     RaceDialog *raceDialog;
+    ClassChoiceDialog *classChoiceDialog;
+    InfoBoxDialog *generateClassQuestionDialog;
+    GenerateClassResultDialog *generateClassResultDialog;
     PickClassDialog *pickClassDialog;
+    CreateClassDialog *createClassDialog;
     BirthDialog *birthSignDialog;
 
     // Which dialogs have been shown, controls back/next/ok buttons
@@ -71,6 +80,10 @@ namespace MWGui
     bool birthSignChosen;
     bool reviewNext;
     ///< If true then any click on Next will cause the summary to be shown
+
+    // Keeps track of current step in Generate Class dialogs
+    unsigned generateClassStep;
+    std::string generateClass;
 
     MyGUI::Gui *gui;
 
@@ -189,9 +202,22 @@ namespace MWGui
     void onRaceDialogDone();
     void onRaceDialogBack();
 
+    // Character generation: Choose class process
+    void onClassChoice(MyGUI::Widget* _sender, int _index);
+
+    // Character generation: Generate Class
+    void showClassQuestionDialog();
+    void onClassQuestionChosen(MyGUI::Widget* _sender, int _index);
+    void onGenerateClassBack();
+    void onGenerateClassDone();
+
     // Character generation: Pick Class dialog
     void onPickClassDialogDone();
     void onPickClassDialogBack();
+
+    // Character generation: Create Class dialog
+    void onCreateClassDialogDone();
+    void onCreateClassDialogBack();
 
     // Character generation: Birth sign dialog
     void onBirthSignDialogDone();
