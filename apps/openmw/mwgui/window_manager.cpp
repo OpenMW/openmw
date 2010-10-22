@@ -485,7 +485,8 @@ void WindowManager::onNameDialogDone()
 {
     if (nameDialog)
     {
-        environment.mMechanicsManager->setPlayerName(nameDialog->getTextInput());
+        playerName = nameDialog->getTextInput();
+        environment.mMechanicsManager->setPlayerName(playerName);
         removeDialog(nameDialog);
     }
 
@@ -504,9 +505,9 @@ void WindowManager::onRaceDialogDone()
 {
     if (raceDialog)
     {
-        const std::string &raceId = raceDialog->getRaceId();
-        if (!raceId.empty())
-            environment.mMechanicsManager->setPlayerRace(raceId, raceDialog->getGender() == RaceDialog::GM_Male);
+        playerRaceId = raceDialog->getRaceId();
+        if (!playerRaceId.empty())
+            environment.mMechanicsManager->setPlayerRace(playerRaceId, raceDialog->getGender() == RaceDialog::GM_Male);
         removeDialog(raceDialog);
     }
 
@@ -525,9 +526,9 @@ void WindowManager::onRaceDialogBack()
 {
     if (raceDialog)
     {
-        const std::string &raceId = raceDialog->getRaceId();
-        if (!raceId.empty())
-            environment.mMechanicsManager->setPlayerRace(raceId, raceDialog->getGender() == RaceDialog::GM_Male);
+        playerRaceId = raceDialog->getRaceId();
+        if (!playerRaceId.empty())
+            environment.mMechanicsManager->setPlayerRace(playerRaceId, raceDialog->getGender() == RaceDialog::GM_Male);
         removeDialog(raceDialog);
     }
 
@@ -665,6 +666,9 @@ void WindowManager::onPickClassDialogDone()
         const std::string &classId = pickClassDialog->getClassId();
         if (!classId.empty())
             environment.mMechanicsManager->setPlayerClass(classId);
+        const ESM::Class *klass = environment.mWorld->getStore().classes.find(classId);
+        if (klass)
+            playerClass = *klass;
         removeDialog(pickClassDialog);
     }
 
@@ -718,6 +722,7 @@ void WindowManager::onCreateClassDialogDone()
             klass.data.skills[i][0] = minorSkills[i];
         }
         environment.mMechanicsManager->setPlayerClass(klass);
+        playerClass = klass;
 
         removeDialog(createClassDialog);
     }
@@ -745,9 +750,9 @@ void WindowManager::onBirthSignDialogDone()
 {
     if (birthSignDialog)
     {
-        const std::string birthSignId = birthSignDialog->getBirthId();
-        if (!birthSignId.empty())
-            environment.mMechanicsManager->setPlayerBirthsign(birthSignId);
+        playerBirthSignId = birthSignDialog->getBirthId();
+        if (!playerBirthSignId.empty())
+            environment.mMechanicsManager->setPlayerBirthsign(playerBirthSignId);
         removeDialog(birthSignDialog);
     }
 
