@@ -172,6 +172,7 @@ void WindowManager::updateVisible()
       nameDialog = new TextInputDialog(environment, gui->getViewSize());
       std::string sName = getGameSettingString("sName", "Name");
       nameDialog->setTextLabel(sName);
+      nameDialog->setTextInput(playerName);
       nameDialog->setNextButtonShow(nameChosen);
       nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
       nameDialog->open();

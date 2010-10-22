@@ -51,7 +51,6 @@ void TextInputDialog::open()
 {
     // Make sure the edit box has focus
     MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
-    textEdit->setOnlyText("");
     setVisible(true);
 }
 
