@@ -459,6 +459,15 @@ void WindowManager::updateSkillArea()
     stats->updateSkillArea();
 }
 
+void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
+{
+    assert(dialog);
+    if (!dialog)
+        return;
+    dialog->setVisible(false);
+    garbageDialogs.push_back(dialog);
+}
+
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
     std::cout << "message box: " << message << std::endl;

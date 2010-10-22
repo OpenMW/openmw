@@ -228,6 +228,13 @@ namespace MWGui
     void updateSkillArea();
     ///< update display of skills, factions, birth sign, reputation and bounty
 
+    template<typename T>
+    void removeDialog(T*& dialog);
+    ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
+
+    void removeDialog(OEngine::GUI::Layout* dialog);
+    ///< Hides dialog and schedules dialog to be deleted.
+
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
 
     /**
@@ -275,5 +282,14 @@ namespace MWGui
     void onReviewDialogDone();
     void onReviewDialogBack();
   };
+
+  template<typename T>
+  void WindowManager::removeDialog(T*& dialog)
+  {
+      OEngine::GUI::Layout *d = static_cast<OEngine::GUI::Layout*>(dialog);
+      removeDialog(d);
+      dialog = nullptr;
+  }
 }
+
 #endif
