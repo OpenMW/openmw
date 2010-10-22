@@ -117,6 +117,7 @@ OMW::Engine::Engine()
   , mVerboseScripts (false)
   , mNewGame (false)
   , mUseSound (true)
+  , mCompileAll (false)
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
@@ -278,9 +279,20 @@ void OMW::Engine::go()
 
     // load cell
     ESM::Position pos;
-    pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-    mEnvironment.mWorld->changeCell (mCellName, pos);
+    pos.pos[2] = 0;
+
+    if (const ESM::Cell *exterior = mEnvironment.mWorld->getExterior (mCellName))
+    {
+        mEnvironment.mWorld->indexToPosition (exterior->data.gridX, exterior->data.gridY,
+            pos.pos[0], pos.pos[1], true);
+        mEnvironment.mWorld->changeToExteriorCell (pos);
+    }
+    else
+    {
+        pos.pos[0] = pos.pos[1] = 0;
+        mEnvironment.mWorld->changeCell (mCellName, pos);
+    }
 
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
@@ -304,6 +316,29 @@ void OMW::Engine::go()
       {
         std::cout << "  Music Error: " << e.what() << "\n";
       }
+
+    // scripts
+    if (mCompileAll)
+    {
+        typedef ESMS::ScriptListT<ESM::Script>::MapType Container;
+
+        Container scripts = mEnvironment.mWorld->getStore().scripts.list;
+
+        int count = 0;
+        int success = 0;
+
+        for (Container::const_iterator iter (scripts.begin()); iter!=scripts.end(); ++iter, ++count)
+            if (mScriptManager->compile (iter->first))
+                ++success;
+
+        if (count)
+            std::cout
+                << "compiled " << success << " of " << count << " scripts ("
+                << 100*static_cast<double> (success)/count
+                << "%)"
+                << std::endl;
+
+    }
 
     // Start the main rendering loop
     mOgre.start();
@@ -344,4 +379,9 @@ void OMW::Engine::activate()
     {
         interpreterContext.executeActivation();
     }
+}
+
+void OMW::Engine::setCompileAll (bool all)
+{
+    mCompileAll = all;
 }

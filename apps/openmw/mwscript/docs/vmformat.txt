@@ -95,4 +95,10 @@ op 0x2000085-0x200008b: Disable Controls
 op 0x200008c: Unlock
 op 0x200008d: Unlock, explicit reference
 op 0x200008e: COE
-opcodes 0x200008f-0x3ffffff unused
+op 0x200008e-0x20000a8: GetSkill
+op 0x20000a9-0x20000c3: GetSkill, explicit reference
+op 0x20000c4-0x20000de: SetSkill
+op 0x20000df-0x20000f9: SetSkill, explicit reference
+op 0x20000fa-0x2000114: ModSkill
+op 0x2000115-0x200012f: ModSKill, explicit reference
+opcodes 0x2000130-0x3ffffff unused

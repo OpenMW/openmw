@@ -22,63 +22,123 @@ namespace MWMechanics
 
         // reset
         creatureStats.mLevel = player->npdt52.level;
+        creatureStats.mAbilities.clear();
+        creatureStats.mMagicEffects = MagicEffects();
 
         for (int i=0; i<27; ++i)
             npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
 
         // race
-        const ESM::Race *race =
-            mEnvironment.mWorld->getStore().races.find (mEnvironment.mWorld->getPlayerPos().getRace());
-
-        bool male = mEnvironment.mWorld->getPlayerPos().isMale();
-
-        for (int i=0; i<8; ++i)
+        if (mRaceSelected)
         {
-            const ESM::Race::MaleFemale *attribute = 0;
-            switch (i)
+            const ESM::Race *race =
+                mEnvironment.mWorld->getStore().races.find (
+                mEnvironment.mWorld->getPlayerPos().getRace());
+
+            bool male = mEnvironment.mWorld->getPlayerPos().isMale();
+
+            for (int i=0; i<8; ++i)
             {
-                case 0: attribute = &race->data.strength; break;
-                case 1: attribute = &race->data.intelligence; break;
-                case 2: attribute = &race->data.willpower; break;
-                case 3: attribute = &race->data.agility; break;
-                case 4: attribute = &race->data.speed; break;
-                case 5: attribute = &race->data.endurance; break;
-                case 6: attribute = &race->data.personality; break;
-                case 7: attribute = &race->data.luck; break;
+                const ESM::Race::MaleFemale *attribute = 0;
+                switch (i)
+                {
+                    case 0: attribute = &race->data.strength; break;
+                    case 1: attribute = &race->data.intelligence; break;
+                    case 2: attribute = &race->data.willpower; break;
+                    case 3: attribute = &race->data.agility; break;
+                    case 4: attribute = &race->data.speed; break;
+                    case 5: attribute = &race->data.endurance; break;
+                    case 6: attribute = &race->data.personality; break;
+                    case 7: attribute = &race->data.luck; break;
+                }
+
+                creatureStats.mAttributes[i].setBase (
+                    static_cast<int> (male ? attribute->male : attribute->female));
             }
 
-            creatureStats.mAttributes[i].setBase (
-                static_cast<int> (male ? attribute->male : attribute->female));
-        }
-
-        for (int i=0; i<7; ++i)
-        {
-            int index = race->data.bonus[i].skill;
-
-            if (index>=0 && index<27)
+            for (int i=0; i<7; ++i)
             {
-                npcStats.mSkill[i].setBase (
-                    npcStats.mSkill[i].getBase() + race->data.bonus[i].bonus);
+                int index = race->data.bonus[i].skill;
+
+                if (index>=0 && index<27)
+                {
+                    npcStats.mSkill[index].setBase (
+                        npcStats.mSkill[index].getBase() + race->data.bonus[i].bonus);
+                }
+            }
+
+            for (std::vector<std::string>::const_iterator iter (race->powers.list.begin());
+                iter!=race->powers.list.end(); ++iter)
+            {
+                insertSpell (*iter, ptr);
             }
         }
-
 
         // birthsign
-
-        // class
-        const ESM::Class& class_ = mEnvironment.mWorld->getPlayerPos().getClass();
-
-        for (int i=0; i<2; ++i)
+        if (!mEnvironment.mWorld->getPlayerPos().getBirthsign().empty())
         {
-            int attribute = class_.data.attribute[i];
-            if (attribute>=0 && attribute<8)
+            const ESM::BirthSign *sign =
+                mEnvironment.mWorld->getStore().birthSigns.find (
+                mEnvironment.mWorld->getPlayerPos().getBirthsign());
+
+            for (std::vector<std::string>::const_iterator iter (sign->powers.list.begin());
+                iter!=sign->powers.list.end(); ++iter)
             {
-                creatureStats.mAttributes[attribute].setBase (
-                    creatureStats.mAttributes[attribute].getBase() + 10);
+                insertSpell (*iter, ptr);
             }
         }
 
+        // class
+        if (mClassSelected)
+        {
+            const ESM::Class& class_ = mEnvironment.mWorld->getPlayerPos().getClass();
 
+            for (int i=0; i<2; ++i)
+            {
+                int attribute = class_.data.attribute[i];
+                if (attribute>=0 && attribute<8)
+                {
+                    creatureStats.mAttributes[attribute].setBase (
+                        creatureStats.mAttributes[attribute].getBase() + 10);
+                }
+            }
+
+            for (int i=0; i<2; ++i)
+            {
+                int bonus = i==0 ? 10 : 25;
+
+                for (int i2=0; i2<5; ++i2)
+                {
+                    int index = class_.data.skills[i2][i];
+
+                    if (index>=0 && index<27)
+                    {
+                        npcStats.mSkill[index].setBase (
+                            npcStats.mSkill[index].getBase() + bonus);
+                    }
+                }
+            }
+
+            typedef ESMS::IndexListT<ESM::Skill>::MapType ContainerType;
+            const ContainerType& skills = mEnvironment.mWorld->getStore().skills.list;
+
+            for (ContainerType::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
+            {
+                if (iter->second.data.specialization==class_.data.specialization)
+                {
+                    int index = iter->first;
+
+                    if (index>=0 && index<27)
+                    {
+                        npcStats.mSkill[index].setBase (
+                            npcStats.mSkill[index].getBase() + 5);
+                    }
+                }
+            }
+        }
+
+        // magic effects
+        adjustMagicEffects (ptr);
 
         // calculate dynamic stats
         int strength = creatureStats.mAttributes[0].getBase();
@@ -87,17 +147,81 @@ namespace MWMechanics
         int agility = creatureStats.mAttributes[3].getBase();
         int endurance = creatureStats.mAttributes[5].getBase();
 
+        double magickaFactor = creatureStats.mMagicEffects.get (EffectKey (84)).mMagnitude*0.1 + 0.5;
+
         creatureStats.mDynamic[0].setBase (static_cast<int> (0.5 * (strength + endurance)));
-        // TODO: calculate factor
-        creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence + 1 * intelligence));
+        creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence +
+            magickaFactor * intelligence));
         creatureStats.mDynamic[2].setBase (strength+willpower+agility+endurance);
 
         for (int i=0; i<3; ++i)
             creatureStats.mDynamic[i].setCurrent (creatureStats.mDynamic[i].getModified());
     }
 
+    void MechanicsManager::insertSpell (const std::string& id, MWWorld::Ptr& creature)
+    {
+        MWMechanics::CreatureStats& creatureStats =
+            MWWorld::Class::get (creature).getCreatureStats (creature);
+
+        const ESM::Spell *spell = mEnvironment.mWorld->getStore().spells.find (id);
+
+        switch (spell->data.type)
+        {
+            case ESM::Spell::ST_Ability:
+
+                if (creatureStats.mAbilities.find (id)==creatureStats.mAbilities.end())
+                {
+                    creatureStats.mAbilities.insert (id);
+                }
+
+                break;
+
+            // TODO ST_SPELL, ST_Blight, ST_Disease, ST_Curse, ST_Power
+
+            default:
+
+                std::cout
+                    << "adding unsupported spell type (" << spell->data.type
+                    << ") to creature: " << id << std::endl;
+        }
+    }
+
+    void MechanicsManager::adjustMagicEffects (MWWorld::Ptr& creature)
+    {
+        MWMechanics::CreatureStats& creatureStats =
+            MWWorld::Class::get (creature).getCreatureStats (creature);
+
+        MagicEffects now;
+
+        for (std::set<std::string>::const_iterator iter (creatureStats.mAbilities.begin());
+            iter!=creatureStats.mAbilities.end(); ++iter)
+        {
+            const ESM::Spell *spell = mEnvironment.mWorld->getStore().spells.find (*iter);
+
+            for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->effects.list.begin();
+                iter!=spell->effects.list.end(); ++iter)
+            {
+                if (iter->range==0) // self
+                {
+                    EffectParam param;
+                    param.mMagnitude = iter->magnMax; // TODO calculate magnitude
+                    now.add (EffectKey (*iter), param);
+                }
+            }
+        }
+
+        // TODO add effects from other spell types, active spells and equipment
+
+        MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
+
+        creatureStats.mMagicEffects = now;
+
+        // TODO apply diff to other stats
+    }
+
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
-    : mEnvironment (environment), mUpdatePlayer (true)
+    : mEnvironment (environment), mUpdatePlayer (true), mClassSelected (false),
+      mRaceSelected (false)
     {
         buildPlayer();
     }
@@ -237,6 +361,7 @@ namespace MWMechanics
     {
         mEnvironment.mWorld->getPlayerPos().setGender (male);
         mEnvironment.mWorld->getPlayerPos().setRace (race);
+        mRaceSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
     }
@@ -250,6 +375,7 @@ namespace MWMechanics
     void MechanicsManager::setPlayerClass (const std::string& id)
     {
         mEnvironment.mWorld->getPlayerPos().setClass (*mEnvironment.mWorld->getStore().classes.find (id));
+        mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
     }
@@ -257,6 +383,7 @@ namespace MWMechanics
     void MechanicsManager::setPlayerClass (const ESM::Class& class_)
     {
         mEnvironment.mWorld->getPlayerPos().setClass (class_);
+        mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
     }
