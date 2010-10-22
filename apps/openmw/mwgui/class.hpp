@@ -114,7 +114,7 @@ namespace MWGui
     class PickClassDialog : public OEngine::GUI::Layout
     {
     public:
-        PickClassDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        PickClassDialog(MWWorld::Environment& environment);
 
         const std::string &getClassId() const { return currentClassId; }
         void setClassId(const std::string &classId);
@@ -287,7 +287,7 @@ namespace MWGui
     class CreateClassDialog : public OEngine::GUI::Layout
     {
     public:
-        CreateClassDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        CreateClassDialog(MWWorld::Environment& environment);
         virtual ~CreateClassDialog();
 
         std::string getName() const;

@@ -24,7 +24,7 @@ namespace MWGui
     class RaceDialog : public OEngine::GUI::Layout
     {
     public:
-        RaceDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        RaceDialog(MWWorld::Environment& environment);
 
         enum Gender
         {

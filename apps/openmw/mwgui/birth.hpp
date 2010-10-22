@@ -20,7 +20,7 @@ namespace MWGui
     class BirthDialog : public OEngine::GUI::Layout
     {
     public:
-        BirthDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        BirthDialog(MWWorld::Environment& environment);
 
         enum Gender
         {

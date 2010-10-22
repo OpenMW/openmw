@@ -73,11 +73,12 @@ void GenerateClassResultDialog::onBackClicked(MyGUI::Widget* _sender)
 
 /* PickClassDialog */
 
-PickClassDialog::PickClassDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
+PickClassDialog::PickClassDialog(MWWorld::Environment& environment)
   : Layout("openmw_chargen_class_layout.xml")
   , environment(environment)
 {
     // Centre dialog
+    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
     MyGUI::IntCoord coord = mMainWidget->getCoord();
     coord.left = (gameWindowSize.width - coord.width)/2;
     coord.top = (gameWindowSize.height - coord.height)/2;
@@ -427,7 +428,7 @@ ClassChoiceDialog::ClassChoiceDialog(MWWorld::Environment& environment)
 
 /* CreateClassDialog */
 
-CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
+CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment)
   : Layout("openmw_chargen_create_class_layout.xml")
   , environment(environment)
   , specDialog(nullptr)
@@ -436,6 +437,7 @@ CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment, MyGUI::I
   , descDialog(nullptr)
 {
     // Centre dialog
+    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
     MyGUI::IntCoord coord = mMainWidget->getCoord();
     coord.left = (gameWindowSize.width - coord.width)/2;
     coord.top = (gameWindowSize.height - coord.height)/2;

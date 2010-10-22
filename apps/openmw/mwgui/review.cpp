@@ -13,12 +13,13 @@ using namespace Widgets;
 
 const int ReviewDialog::lineHeight = 18;
 
-ReviewDialog::ReviewDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
+ReviewDialog::ReviewDialog(MWWorld::Environment& environment)
     : Layout("openmw_chargen_review_layout.xml")
     , environment(environment)
     , lastPos(0)
 {
     // Centre dialog
+    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
     MyGUI::IntCoord coord = mMainWidget->getCoord();
     coord.left = (gameWindowSize.width - coord.width)/2;
     coord.top = (gameWindowSize.height - coord.height)/2;

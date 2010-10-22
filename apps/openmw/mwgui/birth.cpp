@@ -11,11 +11,12 @@
 using namespace MWGui;
 using namespace Widgets;
 
-BirthDialog::BirthDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
+BirthDialog::BirthDialog(MWWorld::Environment& environment)
   : Layout("openmw_chargen_birth_layout.xml")
   , environment(environment)
 {
     // Centre dialog
+    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
     MyGUI::IntCoord coord = mMainWidget->getCoord();
     coord.left = (gameWindowSize.width - coord.width)/2;
     coord.top = (gameWindowSize.height - coord.height)/2;

@@ -25,7 +25,7 @@ namespace MWGui
     public:
         typedef std::vector<int> SkillList;
 
-        ReviewDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        ReviewDialog(MWWorld::Environment& environment);
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);

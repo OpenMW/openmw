@@ -169,7 +169,7 @@ void WindowManager::updateVisible()
   {
       if (nameDialog)
           removeDialog(nameDialog);
-      nameDialog = new TextInputDialog(environment, gui->getViewSize());
+      nameDialog = new TextInputDialog(environment);
       std::string sName = getGameSettingString("sName", "Name");
       nameDialog->setTextLabel(sName);
       nameDialog->setTextInput(playerName);
@@ -183,7 +183,7 @@ void WindowManager::updateVisible()
   {
       if (raceDialog)
           removeDialog(raceDialog);
-      raceDialog = new RaceDialog(environment, gui->getViewSize());
+      raceDialog = new RaceDialog(environment);
       raceDialog->setNextButtonShow(raceChosen);
       raceDialog->setRaceId(playerRaceId);
       raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
@@ -213,7 +213,7 @@ void WindowManager::updateVisible()
   {
       if (pickClassDialog)
           removeDialog(pickClassDialog);
-      pickClassDialog = new PickClassDialog(environment, gui->getViewSize());
+      pickClassDialog = new PickClassDialog(environment);
       pickClassDialog->setNextButtonShow(classChosen);
       pickClassDialog->setClassId(playerClass.name);
       pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
@@ -226,7 +226,7 @@ void WindowManager::updateVisible()
   {
       if (createClassDialog)
           removeDialog(createClassDialog);
-      createClassDialog = new CreateClassDialog(environment, gui->getViewSize());
+      createClassDialog = new CreateClassDialog(environment);
       createClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogDone);
       createClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogBack);
       createClassDialog->open();
@@ -237,7 +237,7 @@ void WindowManager::updateVisible()
   {
       if (birthSignDialog)
           removeDialog(birthSignDialog);
-      birthSignDialog = new BirthDialog(environment, gui->getViewSize());
+      birthSignDialog = new BirthDialog(environment);
       birthSignDialog->setNextButtonShow(birthSignChosen);
       birthSignDialog->setBirthId(playerBirthSignId);
       birthSignDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogDone);
@@ -251,7 +251,7 @@ void WindowManager::updateVisible()
       reviewNext = false;
       if (reviewDialog)
           removeDialog(reviewDialog);
-      reviewDialog = new ReviewDialog(environment, gui->getViewSize());
+      reviewDialog = new ReviewDialog(environment);
       reviewDialog->setPlayerName(playerName);
       reviewDialog->setRace(playerRaceId);
       reviewDialog->setClass(playerClass);

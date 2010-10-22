@@ -1,14 +1,16 @@
 #include "text_input.hpp"
+#include "window_manager.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
 using namespace MWGui;
 
-TextInputDialog::TextInputDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
+TextInputDialog::TextInputDialog(MWWorld::Environment& environment)
   : Layout("openmw_text_input_layout.xml")
   , environment(environment)
 {
     // Centre dialog
+    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
     MyGUI::IntCoord coord = mMainWidget->getCoord();
     coord.left = (gameWindowSize.width - coord.width)/2;
     coord.top = (gameWindowSize.height - coord.height)/2;
