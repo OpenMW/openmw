@@ -16,6 +16,8 @@ StatsWindow::StatsWindow (MWWorld::Environment& environment)
   : Layout("openmw_stats_window_layout.xml")
   , environment(environment)
   , lastPos(0)
+  , reputation(0)
+  , bounty(0)
 {
     setCoord(0,0,498, 342);
 
