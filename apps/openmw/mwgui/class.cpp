@@ -41,6 +41,11 @@ GenerateClassResultDialog::GenerateClassResultDialog(MWWorld::Environment& envir
     okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
 }
 
+void GenerateClassResultDialog::open()
+{
+    setVisible(true);
+}
+
 std::string GenerateClassResultDialog::getClassId() const
 {
     return className->getCaption();
@@ -363,7 +368,7 @@ void InfoBoxDialog::setButtons(ButtonList &buttons)
     }
 }
 
-void InfoBoxDialog::update()
+void InfoBoxDialog::open()
 {
     // Fix layout
     layoutVertically(textBox, 4);
@@ -371,6 +376,7 @@ void InfoBoxDialog::update()
     layoutVertically(mMainWidget, 4 + 6);
 
     center();
+    setVisible(true);
 }
 
 int InfoBoxDialog::getChosenButton() const
@@ -417,8 +423,6 @@ ClassChoiceDialog::ClassChoiceDialog(MWWorld::Environment& environment)
     buttons.push_back(mw->getGameSettingString("sClassChoiceMenu3", ""));
     buttons.push_back(mw->getGameSettingString("sBack", ""));
     setButtons(buttons);
-
-    update();
 }
 
 /* CreateClassDialog */

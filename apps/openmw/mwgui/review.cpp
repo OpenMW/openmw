@@ -95,6 +95,12 @@ ReviewDialog::ReviewDialog(MWWorld::Environment& environment, MyGUI::IntSize gam
     okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
 }
 
+void ReviewDialog::open()
+{
+    updateSkillArea();
+    setVisible(true);
+}
+
 void ReviewDialog::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos)
 {
     int diff = lastPos - pos;

@@ -198,6 +198,7 @@ void WindowManager::updateVisible()
           removeDialog(classChoiceDialog);
       classChoiceDialog = new ClassChoiceDialog(environment);
       classChoiceDialog->eventButtonSelected = MyGUI::newDelegate(this, &WindowManager::onClassChoice);
+      classChoiceDialog->open();
       return;
   }
 
@@ -277,11 +278,9 @@ void WindowManager::updateVisible()
           reviewDialog->configureSkills(playerMajorSkills, playerMinorSkills);
       }
 
-      reviewDialog->updateSkillArea();
-
       reviewDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onReviewDialogDone);
       reviewDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onReviewDialogBack);
-      reviewDialog->setVisible(true);
+      reviewDialog->open();
       return;
   }
 
@@ -585,7 +584,7 @@ void WindowManager::showClassQuestionDialog()
         generateClassResultDialog->setClassId(generateClass);
         generateClassResultDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onGenerateClassBack);
         generateClassResultDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onGenerateClassDone);
-        generateClassResultDialog->setVisible(true);
+        generateClassResultDialog->open();
         return;
     }
 
@@ -605,9 +604,8 @@ void WindowManager::showClassQuestionDialog()
     buttons.push_back(steps[generateClassStep].buttons[1]);
     buttons.push_back(steps[generateClassStep].buttons[2]);
     generateClassQuestionDialog->setButtons(buttons);
-    generateClassQuestionDialog->update();
     generateClassQuestionDialog->eventButtonSelected = MyGUI::newDelegate(this, &WindowManager::onClassQuestionChosen);
-    generateClassQuestionDialog->setVisible(true);
+    generateClassQuestionDialog->open();
 }
 
 void WindowManager::onClassQuestionChosen(MyGUI::Widget* _sender, int _index)

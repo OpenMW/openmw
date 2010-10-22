@@ -41,7 +41,7 @@ namespace MWGui
         void configureSkills(const SkillList& major, const SkillList& minor);
         void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::Stat<float>& value);
 
-        void updateSkillArea();
+        void open();
 
         // Events
         typedef delegates::CDelegate0 EventHandle_Void;
@@ -74,6 +74,7 @@ namespace MWGui
         MyGUI::WidgetPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void updateScroller();
+        void updateSkillArea();
 
         void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
         void onWindowResize(MyGUI::WidgetPtr window);

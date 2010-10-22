@@ -34,7 +34,7 @@ namespace MWGui
         std::string getText() const;
         void setButtons(ButtonList &buttons);
 
-        void update();
+        void open();
         int getChosenButton() const;
 
         // Events
@@ -82,6 +82,8 @@ namespace MWGui
 
         std::string getClassId() const;
         void setClassId(const std::string &classId);
+
+        void open();
 
         // Events
         typedef delegates::CDelegate0 EventHandle_Void;
