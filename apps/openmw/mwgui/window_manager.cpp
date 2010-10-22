@@ -375,13 +375,19 @@ void WindowManager::onClassChoice(MyGUI::WidgetPtr, int _index)
     }
 }
 
-void WindowManager::showClassQuestionDialog()
+namespace MWGui
 {
+
     struct Step
     {
         const char* text;
         const char* buttons[3];
     };
+
+}
+
+void WindowManager::showClassQuestionDialog()
+{
     static boost::array<Step, 2> steps = { {
         {"On a clear day you chance upon a strange animal, its legs trapped in a hunter's clawsnare. Judging from the bleeding, it will not survive long.",
          {"Use herbs from your pack to put it to sleep?",
