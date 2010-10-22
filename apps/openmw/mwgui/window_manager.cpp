@@ -745,7 +745,9 @@ void WindowManager::onBirthSignDialogDone()
 {
     if (birthSignDialog)
     {
-        environment.mMechanicsManager->setPlayerBirthsign(birthSignDialog->getBirthId());
+        const std::string birthSignId = birthSignDialog->getBirthId();
+        if (!birthSignId.empty())
+            environment.mMechanicsManager->setPlayerBirthsign(birthSignId);
         removeDialog(birthSignDialog);
     }
 
