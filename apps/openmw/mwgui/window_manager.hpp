@@ -100,6 +100,8 @@ namespace MWGui
 
     // Keeps track of current step in Generate Class dialogs
     unsigned generateClassStep;
+    // A counter for each specialization which is increased when an answer is chosen, in order: Stealth, Combat, Magic
+    unsigned generateClassSpecializations[3];
     std::string generateClass;
 
     // Various stats about player as needed by window manager
