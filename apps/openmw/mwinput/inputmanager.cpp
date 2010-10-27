@@ -79,34 +79,6 @@ namespace MWInput
       ogre.screenshot(buf);
     }
 
-    // Switch between gui modes. Besides controlling the Gui windows
-    // this also makes sure input is directed to the right place
-    void setGuiMode(MWGui::GuiMode mode)
-    {
-      // Tell the GUI what to show (this also takes care of the mouse
-      // pointer)
-      windows.setMode(mode);
-
-      // Are we in GUI mode now?
-      if(windows.isGuiMode())
-        {
-          // Disable mouse look
-          mouse->setCamera(NULL);
-
-          // Enable GUI events
-          guiEvents->enabled = true;
-        }
-      else
-        {
-          // Start mouse-looking again. TODO: This should also allow
-          // for other ways to disable mouselook, like paralyzation.
-          mouse->setCamera(player.getCamera());
-
-          // Disable GUI events
-          guiEvents->enabled = false;
-        }
-    }
-
     // Called when the user presses the button to toggle the inventory
     // screen.
     void toggleInventory()
@@ -275,6 +247,34 @@ namespace MWInput
 
       return true;
     }
+
+    // Switch between gui modes. Besides controlling the Gui windows
+    // this also makes sure input is directed to the right place
+    void setGuiMode(MWGui::GuiMode mode)
+    {
+      // Tell the GUI what to show (this also takes care of the mouse
+      // pointer)
+      windows.setMode(mode);
+
+      // Are we in GUI mode now?
+      if(windows.isGuiMode())
+        {
+          // Disable mouse look
+          mouse->setCamera(NULL);
+
+          // Enable GUI events
+          guiEvents->enabled = true;
+        }
+      else
+        {
+          // Start mouse-looking again. TODO: This should also allow
+          // for other ways to disable mouselook, like paralyzation.
+          mouse->setCamera(player.getCamera());
+
+          // Disable GUI events
+          guiEvents->enabled = false;
+        }
+    }
   };
 
   MWInputManager::MWInputManager(OEngine::Render::OgreRenderer &ogre,
@@ -289,5 +289,10 @@ namespace MWInput
   MWInputManager::~MWInputManager()
   {
     delete impl;
+  }
+
+  void MWInputManager::setGuiMode(MWGui::GuiMode mode)
+  { 
+      impl->setGuiMode(mode);
   }
 }

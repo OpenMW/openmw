@@ -27,6 +27,13 @@ enum Specialization
     SPC_Stealth = 2
   };
 
+enum RangeType
+  {
+    RT_Self = 0,
+    RT_Touch = 1,
+    RT_Target = 2
+  };
+
 /** A list of references to spells and spell effects. This is shared
     between the records BSGN, NPC and RACE.
 */
@@ -61,10 +68,10 @@ struct ENAMstruct
 
   // Which skills/attributes are affected (for restore/drain spells
   // etc.)
-  char skill, attribute; // -1 if N/A
+  signed char skill, attribute; // -1 if N/A
 
   // Other spell parameters
-  int range; // 0 - self, 1 - touch, 2 - target
+  int range; // 0 - self, 1 - touch, 2 - target (RangeType enum)
   int area, duration, magnMin, magnMax;
 
   // Struct size should be 24 bytes
@@ -77,7 +84,7 @@ struct EffectList
 
   void load(ESMReader &esm)
   {
-    ENAMstruct s;    
+    ENAMstruct s;
     while(esm.isNextSub("ENAM"))
       {
         esm.getHT(s, 24);

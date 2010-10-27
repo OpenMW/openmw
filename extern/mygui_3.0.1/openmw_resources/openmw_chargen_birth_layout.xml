@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout">
+    <!-- correct size is 485 375, adjust when skin is changed to a dialog -->
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 493 403" name="_Main">
+        <!-- Birthsign list -->
+        <Widget type="List" skin="MW_List" position="8 13 196 137" name="BirthsignList" />
+
+        <!-- Birthsign image -->
+        <Widget type="Widget" skin="MW_Box" position="206 13 263 137" align="ALIGN_LEFT ALIGN_TOP">
+            <Widget type="StaticImage" skin="StaticImage" position="2 2 259 133" name="BirthsignImage" align="ALIGN_LEFT ALIGN_TOP" />
+        </Widget>
+
+        <!-- Spell list -->
+        <Widget type="Widget" skin="" position="8 160 465 178" align="ALIGN_LEFT ALIGN_TOP" name="SpellArea">
+        </Widget>
+
+        <!-- Dialog buttons -->
+        <Widget type="Button" skin="MW_Button" position="375 340 53 23" name="BackButton">
+            <Property key="Widget_Caption" value="Back"/>
+        </Widget>
+        <Widget type="Button" skin="MW_Button" position="431 340 42 23" name="OKButton">
+            <Property key="Widget_Caption" value="OK"/>
+        </Widget>
+    </Widget>
+</MyGUI>

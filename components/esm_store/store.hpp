@@ -69,12 +69,15 @@ namespace ESMS
     // Lists that need special rules
     CellList                    cells;
     RecIDListT<GameSetting>     gameSettings;
-    LandList                    lands;
-    LTexList                    landTexts;
-    ScriptListT<Script>         scripts;
-    //RecListT<MagicEffect> magicEffects;
-    //RecListT<Skill>       skills;
+    //RecListT<Land>        lands;
+    //RecListT<LandTexture> landTexts;
+    IndexListT<MagicEffect>     magicEffects;
+    ScriptListT<Script>      scripts;
+    IndexListT<Skill>           skills;
     //RecListT<PathGrid>    pathgrids;
+
+    // Special entry which is hardcoded and not loaded from an ESM
+    IndexListT<Attribute>       attributes;
 
     // Lookup of all IDs. Makes looking up references faster. Just
     // maps the id name to the record type.
@@ -112,13 +115,12 @@ namespace ESMS
       recLists[REC_GLOB] = &globals;
       recLists[REC_GMST] = &gameSettings;
       recLists[REC_INGR] = &ingreds;
-      recLists[REC_LAND] = &lands;
+      //recLists[REC_LAND] = &lands;
       recLists[REC_LEVC] = &creatureLists;
       recLists[REC_LEVI] = &itemLists;
       recLists[REC_LIGH] = &lights;
       recLists[REC_LOCK] = &lockpicks;
-      recLists[REC_LTEX] = &landTexts;
-      //recLists[REC_MGEF] = &magicEffects;
+      //recLists[REC_LTEX] = &landTexts;
       recLists[REC_MISC] = &miscItems;
       recLists[REC_NPC_] = &npcs;
       recLists[REC_NPCC] = &npcChange;
@@ -128,7 +130,6 @@ namespace ESMS
       recLists[REC_REGN] = &regions;
       recLists[REC_REPA] = &repairs;
       recLists[REC_SCPT] = &scripts;
-      //recLists[REC_SKIL] = &skills;
       recLists[REC_SNDG] = &soundGens;
       recLists[REC_SOUN] = &sounds;
       recLists[REC_SPEL] = &spells;

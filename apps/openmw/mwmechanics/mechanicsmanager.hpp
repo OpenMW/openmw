@@ -6,50 +6,71 @@
 #include "../mwworld/ptr.hpp"
 
 #include "creaturestats.hpp"
+#include "npcstats.hpp"
 
-namespace ESMS
+namespace MWWorld
 {
-    struct ESMStore;
-}
-
-namespace MWGui
-{
-    class WindowManager;
+    class Environment;
 }
 
 namespace MWMechanics
 {
     class MechanicsManager
     {
-            const ESMS::ESMStore& mStore;
-            MWGui::WindowManager& mWindowManager;
+            MWWorld::Environment& mEnvironment;
             std::set<MWWorld::Ptr> mActors;
             MWWorld::Ptr mWatched;
             CreatureStats mWatchedCreature;
-    
+            NpcStats mWatchedNpc;
+            bool mUpdatePlayer;
+            bool mClassSelected;
+            bool mRaceSelected;
+
+            void buildPlayer();
+            ///< build player according to stored class/race/birthsign information. Will
+            /// default to the values of the ESM::NPC object, if no explicit information is given.
+
+            void insertSpell (const std::string& id, MWWorld::Ptr& creature);
+
+            void adjustMagicEffects (MWWorld::Ptr& creature);
+
         public:
-        
-            MechanicsManager (const ESMS::ESMStore& store, MWGui::WindowManager& windowManager);
-            
+
+            MechanicsManager (MWWorld::Environment& environment);
+
             void configureGUI();
-            
+
             void addActor (const MWWorld::Ptr& ptr);
             ///< Register an actor for stats management
 
             void removeActor (const MWWorld::Ptr& ptr);
             ///< Deregister an actor for stats management
-                        
+
             void dropActors (const MWWorld::Ptr::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
-            
+
             void watchActor (const MWWorld::Ptr& ptr);
             ///< On each update look for changes in a previously registered actor and update the
             /// GUI accordingly.
-            
+
             void update();
             ///< Update actor stats
+
+            void setPlayerName (const std::string& name);
+            ///< Set player name.
+
+            void setPlayerRace (const std::string& id, bool male);
+            ///< Set player race.
+
+            void setPlayerBirthsign (const std::string& id);
+            ///< Set player birthsign.
+
+            void setPlayerClass (const std::string& id);
+            ///< Set player class to stock class.
+
+            void setPlayerClass (const ESM::Class& class_);
+            ///< Set player class to custom class.
     };
 }
 
 #endif
-
