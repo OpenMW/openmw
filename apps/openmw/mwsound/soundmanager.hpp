@@ -5,6 +5,7 @@
 #include <map>
 
 #include "../mwworld/ptr.hpp"
+#include <openengine/sound/sndmanager.hpp>
 
 namespace Ogre
 {
@@ -19,17 +20,24 @@ namespace ESMS
 
 namespace MWSound
 {
+	//SoundPtr *music;
     class SoundManager
     {
             // Hide implementation details - engine.cpp is compiling
             // enough as it is.
             struct SoundImpl;
+			
             SoundImpl *mData;
+			
 
         public:
       SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
                    const std::string &soundDir, bool useSound);
             ~SoundManager();
+			//struct SoundImpl;
+			bool isMusicPlaying();
+
+			SoundImpl getMData();
 
             void say (MWWorld::Ptr reference, const std::string& filename);
             ///< Make an actor say some text.

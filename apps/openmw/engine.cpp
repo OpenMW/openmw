@@ -57,8 +57,42 @@ void OMW::Engine::executeLocalScripts()
     mIgnoreLocalPtr = MWWorld::Ptr();
 }
 
+void OMW::Engine::startRandomTitle()
+{
+	  char number[100];
+	  /* initialize random seed: */
+  srand ( time(NULL) );
+
+  /* generate secret number: */
+  int r = rand() % 7 + 1;
+
+	sprintf(number, "Music/Explore/mx_explore_%d.mp3", r);
+   //std::string music = (mDataDir / "Music/Explore/mx_explore_5.mp3").file_string();
+	std::string music = (mDataDir / number).file_string();
+    try
+      {
+        std::cout << "Playing " << music << "\n";
+			mEnvironment.mSoundManager->streamMusic(music);
+      }
+    catch(std::exception &e)
+      {
+        std::cout << "  Music Error: " << e.what() << "\n";
+      }
+}
+
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
+	//
+	MWWorld::Environment test = mEnvironment;
+	if(! (test.mSoundManager->isMusicPlaying()))
+	{
+		// Play some good 'ol tunes
+			startRandomTitle();
+	}
+		
+	//tesprintf("HERE");t.mSoundManager.    
+
+
     try
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
@@ -216,6 +250,8 @@ void OMW::Engine::go()
     assert (!mCellName.empty());
     assert (!mMaster.empty());
 
+	
+
     std::cout << "Data directory: " << mDataDir << "\n";
 
     const char* plugCfg = "plugins.cfg";
@@ -293,16 +329,7 @@ void OMW::Engine::go()
     mOgre.getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
-    std::string music = (mDataDir / "Music/Explore/mx_explore_5.mp3").file_string();
-    try
-      {
-        std::cout << "Playing " << music << "\n";
-        mEnvironment.mSoundManager->streamMusic(music);
-      }
-    catch(std::exception &e)
-      {
-        std::cout << "  Music Error: " << e.what() << "\n";
-      }
+     startRandomTitle();
 
     // Start the main rendering loop
     mOgre.start();

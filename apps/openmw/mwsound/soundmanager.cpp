@@ -62,6 +62,7 @@ namespace MWSound
        sounds based on the sound factory it is given.
     */
     OEManagerPtr mgr;
+	SoundPtr music;
 
     /* This class calls update() on the sound manager each frame
        using and Ogre::FrameListener
@@ -319,6 +320,20 @@ namespace MWSound
       delete mData;
   }
 
+    bool SoundManager::isMusicPlaying()
+   {
+	    bool test =  mData->music->isPlaying();
+		return test;
+   }
+
+   SoundManager::SoundImpl SoundManager::getMData()
+  {
+	 // bool test = mData->music->isPlaying();
+	  return *mData;
+  }
+
+ 
+  
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
     // The range values are not tested
@@ -342,10 +357,13 @@ namespace MWSound
     // Play the sound and tell it to stream, if possible. TODO:
     // Store the reference, the jukebox will need to check status,
     // control volume etc.
-    SoundPtr music = mData->mgr->load(filename);
-    music->setStreaming(true);
-    music->setVolume(0.4);
-    music->play();
+	if (mData->music)
+		mData->music->stop();
+    mData->music = mData->mgr->load(filename);
+    mData->music->setStreaming(true);
+    mData->music->setVolume(0.4);
+    mData->music->play();
+
   }
 
   void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
