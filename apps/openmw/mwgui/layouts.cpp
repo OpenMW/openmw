@@ -205,7 +205,7 @@ void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<float
         {"SkillSpeechcraft", ESM::Skill::Speechcraft},
         {"SkillHandToHand", ESM::Skill::HandToHand},
     };
-    for (int i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
+    for (size_t i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
     {
         if (skillMap[i].id == id)
         {

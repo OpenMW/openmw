@@ -333,7 +333,7 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
         ESM::Attribute::Personality,
         ESM::Attribute::Luck
     };
-    for (int i = 0; i < sizeof(ids)/sizeof(ids[0]); ++i)
+    for (size_t i = 0; i < sizeof(ids)/sizeof(ids[0]); ++i)
     {
         if (id != ids[i])
             continue;
@@ -376,7 +376,7 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<flo
         {"SkillSpeechcraft", ESM::Skill::Speechcraft},
         {"SkillHandToHand", ESM::Skill::HandToHand},
     };
-    for (int i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
+    for (size_t i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
     {
         if (skillMap[i].id == id)
         {
@@ -637,7 +637,6 @@ void WindowManager::onClassQuestionChosen(MyGUI::Widget* _sender, int _index)
 
 void WindowManager::onGenerateClassBack()
 {
-    bool goNext = classChosen; // Go to next dialog if class was previously chosen
     classChosen = true;
 
     if (generateClassResultDialog)
