@@ -56,19 +56,43 @@ void OMW::Engine::executeLocalScripts()
 
     mIgnoreLocalPtr = MWWorld::Ptr();
 }
+void OMW::Engine::MP3Lookup()
+{
+	boost::filesystem::directory_iterator dir_iter(mDataDir / "Music/Explore/"), dir_end;
+	//std::list<boost::filesystem::path> files;
+	
+	nFiles = 0;
+	std::string mp3extension = ".mp3";
+	for(;dir_iter != dir_end; dir_iter++)
+	{
+		if(boost::filesystem::extension(*dir_iter) == mp3extension)
+		{
+			files.push_front((*dir_iter));
+			nFiles++;
+		}
+	}//*/
+}
 
 void OMW::Engine::startRandomTitle()
 {
-	  char number[100];
-	  /* initialize random seed: */
-  srand ( time(NULL) );
 
-  /* generate secret number: */
-  int r = rand() % 7 + 1;
+	std::list<boost::filesystem::path>::iterator fileIter;
+	if(nFiles > 0)
+	{
+		fileIter = files.begin();
+	srand ( time(NULL) );
 
-	sprintf(number, "Music/Explore/mx_explore_%d.mp3", r);
-   //std::string music = (mDataDir / "Music/Explore/mx_explore_5.mp3").file_string();
-	std::string music = (mDataDir / number).file_string();
+
+	int r = rand() % nFiles + 1;        //old random code
+
+	//int lowest=1, highest=nFiles;
+	//int range=(highest-lowest)+1; 
+	//int r = lowest+int(range*rand()/(highest + 1.0));
+	for(int i = 1; i < r; i++)
+	{
+		fileIter++;
+	}
+	std::string music = fileIter->file_string();
     try
       {
         std::cout << "Playing " << music << "\n";
@@ -78,13 +102,12 @@ void OMW::Engine::startRandomTitle()
       {
         std::cout << "  Music Error: " << e.what() << "\n";
       }
+	}
 }
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
-	//
-	MWWorld::Environment test = mEnvironment;
-	if(! (test.mSoundManager->isMusicPlaying()))
+	if(! (mEnvironment.mSoundManager->isMusicPlaying()))
 	{
 		// Play some good 'ol tunes
 			startRandomTitle();
@@ -249,6 +272,8 @@ void OMW::Engine::go()
     assert (!mDataDir.empty());
     assert (!mCellName.empty());
     assert (!mMaster.empty());
+
+	MP3Lookup();
 
 	
 
