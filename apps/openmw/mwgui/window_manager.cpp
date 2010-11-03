@@ -5,6 +5,8 @@
 #include "class.hpp"
 #include "birth.hpp"
 #include "review.hpp"
+#include "dialogue.hpp"
+#include "dialogue_history.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -22,6 +24,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   : environment(environment)
   , nameDialog(nullptr)
   , raceDialog(nullptr)
+  , dialogueWindow(nullptr)
   , classChoiceDialog(nullptr)
   , generateClassQuestionDialog(nullptr)
   , generateClassResultDialog(nullptr)
@@ -41,6 +44,10 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , shown(GW_ALL)
   , allowed(newGame ? GW_None : GW_ALL)
 {
+
+    //Register own widgets with MyGUI
+    MyGUI::FactoryManager::getInstance().registerFactory<DialogeHistory>("Widget");
+
   // Get size info from the Gui object
   assert(gui);
   int w = gui->getViewSize().width;
@@ -86,6 +93,7 @@ WindowManager::~WindowManager()
 
   delete nameDialog;
   delete raceDialog;
+  delete dialogueWindow;
   delete classChoiceDialog;
   delete generateClassQuestionDialog;
   delete generateClassResultDialog;
@@ -307,6 +315,17 @@ void WindowManager::updateVisible()
       return;
     }
 
+  if (mode == GM_Dialogue)
+  {
+      if (dialogueWindow)
+          removeDialog(dialogueWindow);
+      dialogueWindow = new DialogueWindow(environment);
+      dialogueWindow->eventBye = MyGUI::newDelegate(this, &WindowManager::onDialogueWindowBye);
+      dialogueWindow->open();
+      return;
+  }
+
+
   // Unsupported mode, switch back to game
   // Note: The call will eventually end up this method again but
   // will stop at the check if(mode == GM_Game) above.
@@ -520,6 +539,16 @@ void WindowManager::onRaceDialogDone()
         setGuiMode(GM_Class);
     else
         setGuiMode(GM_Game);
+}
+
+void WindowManager::onDialogueWindowBye()
+{
+    if (dialogueWindow)
+    {
+        //FIXME set some state and stuff?
+        removeDialog(dialogueWindow);
+    }
+    setGuiMode(GM_Game);
 }
 
 void WindowManager::onRaceDialogBack()
