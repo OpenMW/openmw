@@ -22,8 +22,6 @@ BirthDialog::BirthDialog(MWWorld::Environment& environment)
     coord.top = (gameWindowSize.height - coord.height)/2;
     mMainWidget->setCoord(coord);
 
-    WindowManager *wm = environment.mWindowManager;
-
     getWidget(spellArea, "SpellArea");
 
     getWidget(birthImage, "BirthsignImage");
