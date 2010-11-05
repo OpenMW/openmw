@@ -800,31 +800,15 @@ SelectAttributeDialog::SelectAttributeDialog(MWWorld::Environment& environment, 
 
     setText("LabelT", wm->getGameSettingString("sAttributesMenu1", ""));
 
-    getWidget(attribute0, "Attribute0");
-    getWidget(attribute1, "Attribute1");
-    getWidget(attribute2, "Attribute2");
-    getWidget(attribute3, "Attribute3");
-    getWidget(attribute4, "Attribute4");
-    getWidget(attribute5, "Attribute5");
-    getWidget(attribute6, "Attribute6");
-    getWidget(attribute7, "Attribute7");
-
-    Widgets::MWAttributePtr attributes[8] = {
-        attribute0,
-        attribute1,
-        attribute2,
-        attribute3,
-        attribute4,
-        attribute5,
-        attribute6,
-        attribute7
-    };
-
     for (int i = 0; i < 8; ++i)
     {
-        attributes[i]->setWindowManager(wm);
-        attributes[i]->setAttributeId(ESM::Attribute::attributeIds[i]);
-        attributes[i]->eventClicked = MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
+        Widgets::MWAttributePtr attribute;
+        char theIndex = '0'+i;
+
+        getWidget(attribute,  std::string("Attribute").append(1, theIndex));
+        attribute->setWindowManager(wm);
+        attribute->setAttributeId(ESM::Attribute::attributeIds[i]);
+        attribute->eventClicked = MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
     }
 
     // TODO: These buttons should be managed by a Dialog class

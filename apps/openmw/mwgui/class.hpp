@@ -214,8 +214,6 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        Widgets::MWAttributePtr attribute0, attribute1, attribute2, attribute3,
-                                attribute4, attribute5, attribute6, attribute7;
         Widgets::MWAttributePtr affectedWidget;
 
         ESM::Attribute::AttributeID attributeId;
