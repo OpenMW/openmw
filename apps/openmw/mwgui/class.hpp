@@ -150,9 +150,9 @@ namespace MWGui
         MyGUI::StaticImagePtr classImage;
         MyGUI::ListPtr        classList;
         MyGUI::StaticTextPtr  specializationName;
-        Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
-        Widgets::MWSkillPtr   majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
-        Widgets::MWSkillPtr   minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
+        Widgets::MWAttributePtr favoriteAttribute[2];
+        Widgets::MWSkillPtr   majorSkill[5];
+        Widgets::MWSkillPtr   minorSkill[5];
 
         std::string currentClassId;
     };

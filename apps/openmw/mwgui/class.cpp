@@ -89,34 +89,21 @@ PickClassDialog::PickClassDialog(MWWorld::Environment& environment)
     getWidget(specializationName, "SpecializationName");
 
     setText("FavoriteAttributesT", wm->getGameSettingString("sChooseClassMenu2", "Favorite Attributes:"));
-    getWidget(favoriteAttribute0, "FavoriteAttribute0");
-    getWidget(favoriteAttribute1, "FavoriteAttribute1");
-    favoriteAttribute0->setWindowManager(wm);
-    favoriteAttribute1->setWindowManager(wm);
+    getWidget(favoriteAttribute[0], "FavoriteAttribute0");
+    getWidget(favoriteAttribute[1], "FavoriteAttribute1");
+    favoriteAttribute[0]->setWindowManager(wm);
+    favoriteAttribute[1]->setWindowManager(wm);
 
     setText("MajorSkillT", wm->getGameSettingString("sChooseClassMenu3", "Major Skills:"));
-    getWidget(majorSkill0, "MajorSkill0");
-    getWidget(majorSkill1, "MajorSkill1");
-    getWidget(majorSkill2, "MajorSkill2");
-    getWidget(majorSkill3, "MajorSkill3");
-    getWidget(majorSkill4, "MajorSkill4");
-    majorSkill0->setWindowManager(wm);
-    majorSkill1->setWindowManager(wm);
-    majorSkill2->setWindowManager(wm);
-    majorSkill3->setWindowManager(wm);
-    majorSkill4->setWindowManager(wm);
-
     setText("MinorSkillT", wm->getGameSettingString("sChooseClassMenu4", "Minor Skills:"));
-    getWidget(minorSkill0, "MinorSkill0");
-    getWidget(minorSkill1, "MinorSkill1");
-    getWidget(minorSkill2, "MinorSkill2");
-    getWidget(minorSkill3, "MinorSkill3");
-    getWidget(minorSkill4, "MinorSkill4");
-    minorSkill0->setWindowManager(wm);
-    minorSkill1->setWindowManager(wm);
-    minorSkill2->setWindowManager(wm);
-    minorSkill3->setWindowManager(wm);
-    minorSkill4->setWindowManager(wm);
+    for(int i = 0; i < 5; i++)
+    {
+        char theIndex = '0'+i;
+        getWidget(majorSkill[i], std::string("MajorSkill").append(1, theIndex));
+        getWidget(minorSkill[i], std::string("MinorSkill").append(1, theIndex));
+        majorSkill[i]->setWindowManager(wm);
+        minorSkill[i]->setWindowManager(wm);
+    }
 
     getWidget(classList, "ClassList");
     classList->setScrollVisible(true);
@@ -259,28 +246,13 @@ void PickClassDialog::updateStats()
     };
     specializationName->setCaption(wm->getGameSettingString(specIds[specialization], specIds[specialization]));
 
-    favoriteAttribute0->setAttributeId(klass->data.attribute[0]);
-    favoriteAttribute1->setAttributeId(klass->data.attribute[1]);
-
-    Widgets::MWSkillPtr majorSkills[5] = {
-        majorSkill0,
-        majorSkill1,
-        majorSkill2,
-        majorSkill3,
-        majorSkill4
-    };
-    Widgets::MWSkillPtr minorSkills[5] = {
-        minorSkill0,
-        minorSkill1,
-        minorSkill2,
-        minorSkill3,
-        minorSkill4
-    };
+    favoriteAttribute[0]->setAttributeId(klass->data.attribute[0]);
+    favoriteAttribute[1]->setAttributeId(klass->data.attribute[1]);
 
     for (int i = 0; i < 5; ++i)
     {
-        majorSkills[i]->setSkillNumber(klass->data.skills[i][0]);
-        minorSkills[i]->setSkillNumber(klass->data.skills[i][1]);
+        majorSkill[i]->setSkillNumber(klass->data.skills[i][0]);
+        minorSkill[i]->setSkillNumber(klass->data.skills[i][1]);
     }
 
     classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
