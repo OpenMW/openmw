@@ -53,6 +53,8 @@ namespace MWGui
 
         MWWorld::Environment& environment;
 
+        void fitToText(MyGUI::StaticTextPtr widget);
+        void layoutVertically(MyGUI::WidgetPtr widget, int margin);
         int currentButton;
         MyGUI::WidgetPtr textBox;
         MyGUI::StaticTextPtr text;

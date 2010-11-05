@@ -260,7 +260,7 @@ void PickClassDialog::updateStats()
 
 /* InfoBoxDialog */
 
-void fitToText(MyGUI::StaticTextPtr widget)
+void InfoBoxDialog::fitToText(MyGUI::StaticTextPtr widget)
 {
     MyGUI::IntCoord inner = widget->getTextRegion();
     MyGUI::IntCoord outer = widget->getCoord();
@@ -270,7 +270,7 @@ void fitToText(MyGUI::StaticTextPtr widget)
     widget->setSize(size);
 }
 
-void layoutVertically(MyGUI::WidgetPtr widget, int margin)
+void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
 {
     size_t count = widget->getChildCount();
     int pos = 0;
