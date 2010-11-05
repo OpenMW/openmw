@@ -279,8 +279,6 @@ void ReviewDialog::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGU
 void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     WindowManager *wm = environment.mWindowManager;
-    MWMechanics::MechanicsManager *mm = environment.mMechanicsManager;
-    ESMS::ESMStore &store = environment.mWorld->getStore();
 
     // Add a line separator if there are items above
     if (!skillWidgets.empty())
@@ -332,9 +330,6 @@ void ReviewDialog::updateSkillArea()
 
     if (!miscSkills.empty())
         addSkills(miscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
-
-    WindowManager *wm = environment.mWindowManager;
-    ESMS::ESMStore &store = environment.mWorld->getStore();
 
     clientHeight = coord1.top;
     updateScroller();
