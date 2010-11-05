@@ -246,12 +246,9 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        Widgets::MWSkillPtr combatSkill0, combatSkill1, combatSkill2, combatSkill3, combatSkill4,
-                            combatSkill5, combatSkill6, combatSkill7, combatSkill8;
-        Widgets::MWSkillPtr magicSkill0, magicSkill1, magicSkill2, magicSkill3, magicSkill4,
-                            magicSkill5, magicSkill6, magicSkill7, magicSkill8;
-        Widgets::MWSkillPtr stealthSkill0, stealthSkill1, stealthSkill2, stealthSkill3, stealthSkill4,
-                            stealthSkill5, stealthSkill6, stealthSkill7, stealthSkill8;
+        Widgets::MWSkillPtr combatSkill[9];
+        Widgets::MWSkillPtr magicSkill[9];
+        Widgets::MWSkillPtr stealthSkill[9];
         Widgets::MWSkillPtr affectedWidget;
 
         ESM::Skill::SkillEnum skillId;

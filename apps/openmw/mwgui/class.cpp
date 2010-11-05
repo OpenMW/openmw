@@ -851,69 +851,47 @@ SelectSkillDialog::SelectSkillDialog(MWWorld::Environment& environment, MyGUI::I
     setText("MagicLabelT", wm->getGameSettingString("sSpecializationMagic", ""));
     setText("StealthLabelT", wm->getGameSettingString("sSpecializationStealth", ""));
 
-    getWidget(combatSkill0, "CombatSkill0");
-    getWidget(combatSkill1, "CombatSkill1");
-    getWidget(combatSkill2, "CombatSkill2");
-    getWidget(combatSkill3, "CombatSkill3");
-    getWidget(combatSkill4, "CombatSkill4");
-    getWidget(combatSkill5, "CombatSkill5");
-    getWidget(combatSkill6, "CombatSkill6");
-    getWidget(combatSkill7, "CombatSkill7");
-    getWidget(combatSkill8, "CombatSkill8");
-
-    getWidget(magicSkill0, "MagicSkill0");
-    getWidget(magicSkill1, "MagicSkill1");
-    getWidget(magicSkill2, "MagicSkill2");
-    getWidget(magicSkill3, "MagicSkill3");
-    getWidget(magicSkill4, "MagicSkill4");
-    getWidget(magicSkill5, "MagicSkill5");
-    getWidget(magicSkill6, "MagicSkill6");
-    getWidget(magicSkill7, "MagicSkill7");
-    getWidget(magicSkill8, "MagicSkill8");
-
-    getWidget(stealthSkill0, "StealthSkill0");
-    getWidget(stealthSkill1, "StealthSkill1");
-    getWidget(stealthSkill2, "StealthSkill2");
-    getWidget(stealthSkill3, "StealthSkill3");
-    getWidget(stealthSkill4, "StealthSkill4");
-    getWidget(stealthSkill5, "StealthSkill5");
-    getWidget(stealthSkill6, "StealthSkill6");
-    getWidget(stealthSkill7, "StealthSkill7");
-    getWidget(stealthSkill8, "StealthSkill8");
+    for(int i = 0; i < 9; i++)
+    {
+        char theIndex = '0'+i;
+        getWidget(combatSkill[i],  std::string("CombatSkill").append(1, theIndex));
+        getWidget(magicSkill[i],   std::string("MagicSkill").append(1, theIndex)); 
+        getWidget(stealthSkill[i], std::string("StealthSkill").append(1, theIndex));
+    }
 
     struct {Widgets::MWSkillPtr widget; ESM::Skill::SkillEnum skillId;} skills[3][9] = {
         {
-            {combatSkill0, ESM::Skill::Block},
-            {combatSkill1, ESM::Skill::Armorer},
-            {combatSkill2, ESM::Skill::MediumArmor},
-            {combatSkill3, ESM::Skill::HeavyArmor},
-            {combatSkill4, ESM::Skill::BluntWeapon},
-            {combatSkill5, ESM::Skill::LongBlade},
-            {combatSkill6, ESM::Skill::Axe},
-            {combatSkill7, ESM::Skill::Spear},
-            {combatSkill8, ESM::Skill::Athletics}
+            {combatSkill[0], ESM::Skill::Block},
+            {combatSkill[1], ESM::Skill::Armorer},
+            {combatSkill[2], ESM::Skill::MediumArmor},
+            {combatSkill[3], ESM::Skill::HeavyArmor},
+            {combatSkill[4], ESM::Skill::BluntWeapon},
+            {combatSkill[5], ESM::Skill::LongBlade},
+            {combatSkill[6], ESM::Skill::Axe},
+            {combatSkill[7], ESM::Skill::Spear},
+            {combatSkill[8], ESM::Skill::Athletics}
         },   
         {    
-            {magicSkill0, ESM::Skill::Enchant},
-            {magicSkill1, ESM::Skill::Destruction},
-            {magicSkill2, ESM::Skill::Alteration},
-            {magicSkill3, ESM::Skill::Illusion},
-            {magicSkill4, ESM::Skill::Conjuration},
-            {magicSkill5, ESM::Skill::Mysticism},
-            {magicSkill6, ESM::Skill::Restoration},
-            {magicSkill7, ESM::Skill::Alchemy},
-            {magicSkill8, ESM::Skill::Unarmored}
+            {magicSkill[0], ESM::Skill::Enchant},
+            {magicSkill[1], ESM::Skill::Destruction},
+            {magicSkill[2], ESM::Skill::Alteration},
+            {magicSkill[3], ESM::Skill::Illusion},
+            {magicSkill[4], ESM::Skill::Conjuration},
+            {magicSkill[5], ESM::Skill::Mysticism},
+            {magicSkill[6], ESM::Skill::Restoration},
+            {magicSkill[7], ESM::Skill::Alchemy},
+            {magicSkill[8], ESM::Skill::Unarmored}
         },   
         {    
-            {stealthSkill0, ESM::Skill::Security},
-            {stealthSkill1, ESM::Skill::Sneak},
-            {stealthSkill2, ESM::Skill::Acrobatics},
-            {stealthSkill3, ESM::Skill::LightArmor},
-            {stealthSkill4, ESM::Skill::ShortBlade},
-            {stealthSkill5 ,ESM::Skill::Marksman},
-            {stealthSkill6 ,ESM::Skill::Mercantile},
-            {stealthSkill7 ,ESM::Skill::Speechcraft},
-            {stealthSkill8 ,ESM::Skill::HandToHand}
+            {stealthSkill[0], ESM::Skill::Security},
+            {stealthSkill[1], ESM::Skill::Sneak},
+            {stealthSkill[2], ESM::Skill::Acrobatics},
+            {stealthSkill[3], ESM::Skill::LightArmor},
+            {stealthSkill[4], ESM::Skill::ShortBlade},
+            {stealthSkill[5] ,ESM::Skill::Marksman},
+            {stealthSkill[6] ,ESM::Skill::Mercantile},
+            {stealthSkill[7] ,ESM::Skill::Speechcraft},
+            {stealthSkill[8] ,ESM::Skill::HandToHand}
         }
     };
 
