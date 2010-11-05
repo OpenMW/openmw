@@ -430,28 +430,15 @@ CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment)
     favoriteAttribute1->eventClicked = MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
 
     setText("MajorSkillT", wm->getGameSettingString("sSkillClassMajor", ""));
-    getWidget(majorSkill0, "MajorSkill0");
-    getWidget(majorSkill1, "MajorSkill1");
-    getWidget(majorSkill2, "MajorSkill2");
-    getWidget(majorSkill3, "MajorSkill3");
-    getWidget(majorSkill4, "MajorSkill4");
-    skills.push_back(majorSkill0);
-    skills.push_back(majorSkill1);
-    skills.push_back(majorSkill2);
-    skills.push_back(majorSkill3);
-    skills.push_back(majorSkill4);
-
     setText("MinorSkillT", wm->getGameSettingString("sSkillClassMinor", ""));
-    getWidget(minorSkill0, "MinorSkill0");
-    getWidget(minorSkill1, "MinorSkill1");
-    getWidget(minorSkill2, "MinorSkill2");
-    getWidget(minorSkill3, "MinorSkill3");
-    getWidget(minorSkill4, "MinorSkill4");
-    skills.push_back(minorSkill0);
-    skills.push_back(minorSkill1);
-    skills.push_back(minorSkill2);
-    skills.push_back(minorSkill3);
-    skills.push_back(minorSkill4);
+    for(int i = 0; i < 5; i++)
+    {
+        char theIndex = '0'+i;
+        getWidget(majorSkill[i], std::string("MajorSkill").append(1, theIndex));
+        getWidget(minorSkill[i], std::string("MinorSkill").append(1, theIndex));
+        skills.push_back(majorSkill[i]);
+        skills.push_back(minorSkill[i]);
+    }
 
     std::vector<Widgets::MWSkillPtr>::const_iterator end = skills.end();
     for (std::vector<Widgets::MWSkillPtr>::const_iterator it = skills.begin(); it != end; ++it)
@@ -484,17 +471,17 @@ CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment)
     favoriteAttribute0->setAttributeId(ESM::Attribute::Strength);
     favoriteAttribute1->setAttributeId(ESM::Attribute::Agility);
 
-    majorSkill0->setSkillId(ESM::Skill::Block);
-    majorSkill1->setSkillId(ESM::Skill::Armorer);
-    majorSkill2->setSkillId(ESM::Skill::MediumArmor);
-    majorSkill3->setSkillId(ESM::Skill::HeavyArmor);
-    majorSkill4->setSkillId(ESM::Skill::BluntWeapon);
+    majorSkill[0]->setSkillId(ESM::Skill::Block);
+    majorSkill[1]->setSkillId(ESM::Skill::Armorer);
+    majorSkill[2]->setSkillId(ESM::Skill::MediumArmor);
+    majorSkill[3]->setSkillId(ESM::Skill::HeavyArmor);
+    majorSkill[4]->setSkillId(ESM::Skill::BluntWeapon);
 
-    minorSkill0->setSkillId(ESM::Skill::LongBlade);
-    minorSkill1->setSkillId(ESM::Skill::Axe);
-    minorSkill2->setSkillId(ESM::Skill::Spear);
-    minorSkill3->setSkillId(ESM::Skill::Athletics);
-    minorSkill4->setSkillId(ESM::Skill::Enchant);
+    minorSkill[0]->setSkillId(ESM::Skill::LongBlade);
+    minorSkill[1]->setSkillId(ESM::Skill::Axe);
+    minorSkill[2]->setSkillId(ESM::Skill::Spear);
+    minorSkill[3]->setSkillId(ESM::Skill::Athletics);
+    minorSkill[4]->setSkillId(ESM::Skill::Enchant);
 }
 
 CreateClassDialog::~CreateClassDialog()
@@ -531,22 +518,20 @@ std::vector<int> CreateClassDialog::getFavoriteAttributes() const
 std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
 {
     std::vector<ESM::Skill::SkillEnum> v;
-    v.push_back(majorSkill0->getSkillId());
-    v.push_back(majorSkill1->getSkillId());
-    v.push_back(majorSkill2->getSkillId());
-    v.push_back(majorSkill3->getSkillId());
-    v.push_back(majorSkill4->getSkillId());
+    for(int i = 0; i < 5; i++)
+    {
+        v.push_back(majorSkill[i]->getSkillId());
+    }
     return v;
 }
 
 std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
 {
     std::vector<ESM::Skill::SkillEnum> v;
-    v.push_back(majorSkill0->getSkillId());
-    v.push_back(majorSkill1->getSkillId());
-    v.push_back(majorSkill2->getSkillId());
-    v.push_back(majorSkill3->getSkillId());
-    v.push_back(majorSkill4->getSkillId());
+    for(int i=0; i < 5; i++)
+    {
+        v.push_back(majorSkill[i]->getSkillId());
+    }
     return v;
 }
 

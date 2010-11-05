@@ -328,8 +328,8 @@ namespace MWGui
         MyGUI::EditPtr          editName;
         MyGUI::WidgetPtr        specializationName;
         Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
-        Widgets::MWSkillPtr     majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
-        Widgets::MWSkillPtr     minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
+        Widgets::MWSkillPtr     majorSkill[5];
+        Widgets::MWSkillPtr     minorSkill[5];
         std::vector<Widgets::MWSkillPtr> skills;
         std::string             description;
 
