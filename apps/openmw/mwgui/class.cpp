@@ -15,15 +15,10 @@ using namespace MWGui;
 /* GenerateClassResultDialog */
 
 GenerateClassResultDialog::GenerateClassResultDialog(MWWorld::Environment& environment)
-  : Layout("openmw_chargen_generate_class_result_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_chargen_generate_class_result_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
     setText("ReflectT", wm->getGameSettingString("sMessageQuestionAnswer1", ""));

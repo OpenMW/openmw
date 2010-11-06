@@ -75,7 +75,7 @@ namespace MWGui
         ClassChoiceDialog(MWWorld::Environment& environment);
     };
 
-    class GenerateClassResultDialog : public OEngine::GUI::Layout
+    class GenerateClassResultDialog : public WindowBase
     {
     public:
         GenerateClassResultDialog(MWWorld::Environment& environment);
@@ -103,8 +103,6 @@ namespace MWGui
         void onBackClicked(MyGUI::Widget* _sender);
 
     private:
-        MWWorld::Environment& environment;
-
         MyGUI::StaticImagePtr classImage;
         MyGUI::StaticTextPtr  className;
 
