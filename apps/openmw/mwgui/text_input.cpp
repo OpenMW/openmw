@@ -6,15 +6,10 @@
 using namespace MWGui;
 
 TextInputDialog::TextInputDialog(MWWorld::Environment& environment)
-  : Layout("openmw_text_input_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_text_input_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     getWidget(textEdit, "TextEdit");
     textEdit->eventEditSelectAccept = newDelegate(this, &TextInputDialog::onTextAccepted);

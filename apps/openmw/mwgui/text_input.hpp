@@ -1,7 +1,7 @@
 #ifndef MWGUI_TEXT_INPUT_H
 #define MWGUI_TEXT_INPUT_H
 
-#include <openengine/gui/layout.hpp>
+#include "window_base.hpp"
 
 namespace MWWorld
 {
@@ -15,7 +15,7 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    class TextInputDialog : public OEngine::GUI::Layout
+    class TextInputDialog : public WindowBase
     {
     public:
         TextInputDialog(MWWorld::Environment& environment);
@@ -40,8 +40,6 @@ namespace MWGui
         void onTextAccepted(MyGUI::Edit* _sender);
 
     private:
-        MWWorld::Environment& environment;
-
         MyGUI::EditPtr textEdit;
     };
 }
