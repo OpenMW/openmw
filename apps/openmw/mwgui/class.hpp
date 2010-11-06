@@ -1,12 +1,7 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
-#include <components/esm_store/store.hpp>
-
-#include <openengine/gui/layout.hpp>
-
 #include <MyGUI.h>
-
 #include "widgets.hpp"
 #include "window_base.hpp"
 
