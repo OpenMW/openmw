@@ -109,7 +109,7 @@ namespace MWGui
         std::string currentClassId;
     };
 
-    class PickClassDialog : public OEngine::GUI::Layout
+    class PickClassDialog : public WindowBase
     {
     public:
         PickClassDialog(MWWorld::Environment& environment);
@@ -142,8 +142,6 @@ namespace MWGui
     private:
         void updateClasses();
         void updateStats();
-
-        MWWorld::Environment& environment;
 
         MyGUI::StaticImagePtr classImage;
         MyGUI::ListPtr        classList;
