@@ -15,6 +15,7 @@
 #include "../mwmechanics/stat.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
+#include "window_base.hpp"
 
 /*
   This file contains classes corresponding to all the window layouts
@@ -177,7 +178,7 @@ namespace MWGui
     }
   };
 
-    class StatsWindow : public OEngine::GUI::Layout
+    class StatsWindow : public WindowBase
     {
     public:
         typedef std::pair<std::string, int> Faction;
@@ -225,7 +226,6 @@ namespace MWGui
 
         static const int lineHeight;
 
-        MWWorld::Environment& environment;
         MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
         MyGUI::VScrollPtr skillScrollerWidget;
         int lastPos, clientHeight;

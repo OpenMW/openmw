@@ -13,8 +13,7 @@ using namespace MWGui;
 const int StatsWindow::lineHeight = 18;
 
 StatsWindow::StatsWindow (MWWorld::Environment& environment)
-  : Layout("openmw_stats_window_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_stats_window_layout.xml", environment)
   , lastPos(0)
   , reputation(0)
   , bounty(0)
@@ -59,7 +58,8 @@ StatsWindow::StatsWindow (MWWorld::Environment& environment)
         skillWidgetMap.insert(std::pair<int, MyGUI::StaticTextPtr>(i, nullptr));
     }
 
-    static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord = MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
+    MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
+    t->eventWindowChangeCoord = MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
 }
 
 void StatsWindow::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos)
