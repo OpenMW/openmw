@@ -273,7 +273,7 @@ namespace MWGui
         MyGUI::EditPtr textEdit;
     };
 
-    class CreateClassDialog : public OEngine::GUI::Layout
+    class CreateClassDialog : public WindowBase
     {
     public:
         CreateClassDialog(MWWorld::Environment& environment);
@@ -317,8 +317,6 @@ namespace MWGui
         void onDialogCancel();
 
     private:
-        MWWorld::Environment& environment;
-
         MyGUI::EditPtr          editName;
         MyGUI::WidgetPtr        specializationName;
         Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
