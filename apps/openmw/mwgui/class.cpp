@@ -721,13 +721,10 @@ void SelectSpecializationDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* SelectAttributeDialog */
 
 SelectAttributeDialog::SelectAttributeDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
-  : Layout("openmw_chargen_select_attribute_layout.xml")
+  : WindowBase("openmw_chargen_select_attribute_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
 

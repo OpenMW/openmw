@@ -183,7 +183,7 @@ namespace MWGui
         ESM::Class::Specialization specializationId;
     };
 
-    class SelectAttributeDialog : public OEngine::GUI::Layout
+    class SelectAttributeDialog : public WindowBase
     {
     public:
         SelectAttributeDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
