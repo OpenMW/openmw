@@ -766,13 +766,10 @@ void SelectAttributeDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* SelectSkillDialog */
 
 SelectSkillDialog::SelectSkillDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
-  : Layout("openmw_chargen_select_skill_layout.xml")
+  : WindowBase("openmw_chargen_select_skill_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
 

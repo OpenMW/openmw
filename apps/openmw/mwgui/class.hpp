@@ -215,7 +215,7 @@ namespace MWGui
         ESM::Attribute::AttributeID attributeId;
     };
 
-    class SelectSkillDialog : public OEngine::GUI::Layout
+    class SelectSkillDialog : public WindowBase
     {
     public:
         SelectSkillDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
