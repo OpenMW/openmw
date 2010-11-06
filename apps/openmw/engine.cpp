@@ -7,7 +7,8 @@
 
 #include <components/misc/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
-
+#include <components/esm/loadregn.hpp>
+#include <components/esm/esm_reader.hpp>
 #include <openengine/gui/manager.hpp>
 #include "mwgui/window_manager.hpp"
 
@@ -59,49 +60,41 @@ void OMW::Engine::executeLocalScripts()
 void OMW::Engine::MP3Lookup()
 {
 	boost::filesystem::directory_iterator dir_iter(mDataDir / "Music/Explore/"), dir_end;
-	//std::list<boost::filesystem::path> files;
-	
-	nFiles = 0;
+
 	std::string mp3extension = ".mp3";
 	for(;dir_iter != dir_end; dir_iter++)
 	{
 		if(boost::filesystem::extension(*dir_iter) == mp3extension)
 		{
-			files.push_front((*dir_iter));
-			nFiles++;
+			files.push_back(*dir_iter);
 		}
-	}//*/
+	}
 }
 
 void OMW::Engine::startRandomTitle()
 {
+	std::vector<boost::filesystem::path>::iterator fileIter;
 
-	std::list<boost::filesystem::path>::iterator fileIter;
-	if(nFiles > 0)
+	if(files.size() > 0)
 	{
 		fileIter = files.begin();
-	srand ( time(NULL) );
+		srand ( time(NULL) );
+		int r = rand() % files.size() + 1;        //old random code
 
-
-	int r = rand() % nFiles + 1;        //old random code
-
-	//int lowest=1, highest=nFiles;
-	//int range=(highest-lowest)+1; 
-	//int r = lowest+int(range*rand()/(highest + 1.0));
-	for(int i = 1; i < r; i++)
-	{
-		fileIter++;
-	}
-	std::string music = fileIter->file_string();
-    try
-      {
-        std::cout << "Playing " << music << "\n";
+		for(int i = 1; i < r; i++)
+		{
+			fileIter++;
+		}
+		std::string music = fileIter->file_string();
+		try
+		{
+			std::cout << "Playing " << music << "\n";
 			mEnvironment.mSoundManager->streamMusic(music);
-      }
-    catch(std::exception &e)
-      {
-        std::cout << "  Music Error: " << e.what() << "\n";
-      }
+		}
+		catch(std::exception &e)
+		{
+			std::cout << "  Music Error: " << e.what() << "\n";
+		}
 	}
 }
 
@@ -112,9 +105,31 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 		// Play some good 'ol tunes
 			startRandomTitle();
 	}
-		
-	//tesprintf("HERE");t.mSoundManager.    
+		    
+	                                            //If the region has changed
+	if(mEnvironment.mWorld->getIsExterior() && test.name != mEnvironment.mWorld->getCurrentRegion().name){
+			test = mEnvironment.mWorld->getCurrentRegion();
+			if(test.soundList.size() > 0)
+			{
+				std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
+				while (!(soundIter == test.soundList.end()))
+				{
+					ESM::NAME32 go = soundIter->sound;
+					char chance = soundIter->chance;
+					std::cout << "Sound: " << go.name <<" Chance:" << (int) chance << "\n";
+					soundIter++;
+				}
+			    
+			}
+			
 
+			//printf("REGION: %s\n", test.name);
+
+		}
+	else if(!mEnvironment.mWorld->getIsExterior())
+	{
+		test.name = "";
+	}
 
     try
     {
@@ -165,6 +180,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     {
         std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
+	//std::cout << "TESTING2";
 
     return true;
 }
@@ -274,6 +290,7 @@ void OMW::Engine::go()
     assert (!mMaster.empty());
 
 	MP3Lookup();
+	test.name = "";
 
 	
 

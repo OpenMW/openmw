@@ -39,9 +39,15 @@ namespace MWWorld
 
     class World
     {
+	    
         public:
-
             typedef std::list<std::pair<std::string, Ptr> > ScriptList;
+
+			ESM::ESMReader getEsmReader(); 
+			Ptr::CellStore getMCurrentCell();
+			ESM::Region getCurrentRegion();
+			bool  getIsExterior();
+			void setIsExterior(bool set);
 
         private:
 
@@ -61,7 +67,9 @@ namespace MWWorld
             MWWorld::Globals *mGlobalVariables;
             bool mSky;
             bool mCellChanged;
+			bool isExterior;
             Environment& mEnvironment;
+			ESM::Region *currentRegion;
 
             // not implemented
             World (const World&);
@@ -146,6 +154,7 @@ namespace MWWorld
             void changeToExteriorCell (const ESM::Position& position);
 
             const ESM::Cell *getExterior (const std::string& cellName) const;
+			const ESM::Cell *getExteriorRegion (const std::string& cellName) const;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
             void markCellAsUnchanged();

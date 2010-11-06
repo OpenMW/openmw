@@ -18,6 +18,10 @@
 #include "environment.hpp"
 #include "class.hpp"
 
+
+#include "refdata.hpp"
+#include "globals.hpp"
+
 namespace
 {
     template<typename T>
@@ -62,6 +66,30 @@ namespace
 
 namespace MWWorld
 {
+	ESM::ESMReader World::getEsmReader(){
+		return mEsm;
+	}
+
+	Ptr::CellStore World::getMCurrentCell()
+	{
+		return *mCurrentCell;
+	}
+
+	
+	ESM::Region World::getCurrentRegion()
+	{
+		return *currentRegion;
+	}
+
+
+	bool World::getIsExterior()
+	{
+		return isExterior;
+	}
+	void World::setIsExterior(bool set)
+	{
+		isExterior = set;
+	}
     void World::insertInteriorScripts (ESMS::CellStore<RefData>& cell)
     {
         listCellScripts (mStore, cell.activators, mLocalScripts, &cell);
@@ -315,6 +343,7 @@ namespace MWWorld
     : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false), mEnvironment (environment)
     {
+		isExterior = false;
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
 
@@ -605,6 +634,8 @@ namespace MWWorld
         adjustSky();
 
         mCellChanged = true;
+		isExterior = false;
+		//currentRegion->name = "";
     }
 
     void World::changeCell (int X, int Y, const ESM::Position& position)
@@ -685,6 +716,7 @@ namespace MWWorld
     {
         int x = 0;
         int y = 0;
+		isExterior = true;
 
         positionToIndex (position.pos[0], position.pos[1], x, y);
 
@@ -695,9 +727,21 @@ namespace MWWorld
     {
         // first try named cells
         if (const ESM::Cell *cell = mStore.cells.searchExtByName (cellName))
+		{
+			//mCellChanged = true;
+			
+			getExteriorRegion(cell->region);
             return cell;
 
-        // didn't work -> now check for regions
+		}
+
+
+        return getExteriorRegion(cellName);
+    }
+
+	const ESM::Cell *World::getExteriorRegion(const std::string& cellName) const
+	{
+		// didn't work -> now check for regions
         std::string cellName2 = ESMS::RecListT<ESM::Region>::toLower (cellName);
 
         for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
@@ -705,6 +749,7 @@ namespace MWWorld
         {
             if (ESMS::RecListT<ESM::Region>::toLower (iter->second.name)==cellName2)
             {
+				*currentRegion = iter->second;
                 if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
                     return cell;
 
@@ -712,8 +757,8 @@ namespace MWWorld
             }
         }
 
-        return 0;
-    }
+		return 0;
+	}
 
     void World::markCellAsUnchanged()
     {
@@ -793,6 +838,8 @@ namespace MWWorld
             y += cellSize/2;
         }
     }
+
+	
 
     void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
     {
