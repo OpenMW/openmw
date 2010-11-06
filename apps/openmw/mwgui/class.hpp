@@ -250,7 +250,7 @@ namespace MWGui
         ESM::Skill::SkillEnum skillId;
     };
 
-    class DescriptionDialog : public OEngine::GUI::Layout
+    class DescriptionDialog : public WindowBase
     {
     public:
         DescriptionDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
@@ -270,8 +270,6 @@ namespace MWGui
         void onOkClicked(MyGUI::Widget* _sender);
 
     private:
-        MWWorld::Environment& environment;
-
         MyGUI::EditPtr textEdit;
     };
 

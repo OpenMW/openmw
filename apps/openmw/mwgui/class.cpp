@@ -855,14 +855,10 @@ void SelectSkillDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* DescriptionDialog */
 
 DescriptionDialog::DescriptionDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
-  : Layout("openmw_chargen_class_description_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_chargen_class_description_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     getWidget(textEdit, "TextEdit");
 
