@@ -8,6 +8,7 @@
 #include <MyGUI.h>
 
 #include "widgets.hpp"
+#include "window_base.hpp"
 
 namespace MWWorld
 {
@@ -23,7 +24,7 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    class InfoBoxDialog : public OEngine::GUI::Layout
+    class InfoBoxDialog : public WindowBase
     {
     public:
         InfoBoxDialog(MWWorld::Environment& environment);
@@ -49,9 +50,6 @@ namespace MWGui
         void onButtonClicked(MyGUI::WidgetPtr _sender);
 
     private:
-        void center();
-
-        MWWorld::Environment& environment;
 
         void fitToText(MyGUI::StaticTextPtr widget);
         void layoutVertically(MyGUI::WidgetPtr widget, int margin);

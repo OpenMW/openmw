@@ -291,8 +291,7 @@ void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
 }
 
 InfoBoxDialog::InfoBoxDialog(MWWorld::Environment& environment)
-    : Layout("openmw_infobox_layout.xml")
-    , environment(environment)
+    : WindowBase("openmw_infobox_layout.xml", environment)
     , currentButton(-1)
 {
     getWidget(textBox, "TextBox");
@@ -371,16 +370,6 @@ void InfoBoxDialog::onButtonClicked(MyGUI::WidgetPtr _sender)
         }
         ++i;
     }
-}
-
-void InfoBoxDialog::center()
-{
-    // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
 }
 
 /* ClassChoiceDialog */
