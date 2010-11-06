@@ -1,8 +1,7 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
-#include <components/esm_store/store.hpp>
-#include <openengine/gui/layout.hpp>
+#include "window_base.hpp"
 #include "../mwmechanics/stat.hpp"
 #include "widgets.hpp"
 
@@ -20,7 +19,7 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    class ReviewDialog : public OEngine::GUI::Layout
+    class ReviewDialog : public WindowBase
     {
     public:
         typedef std::vector<int> SkillList;
@@ -106,7 +105,6 @@ namespace MWGui
 
         static const int lineHeight;
 
-        MWWorld::Environment& environment;
         MyGUI::StaticTextPtr nameWidget, raceWidget, classWidget, birthSignWidget;
         MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
         MyGUI::VScrollPtr skillScrollerWidget;
