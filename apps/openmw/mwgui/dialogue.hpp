@@ -1,10 +1,7 @@
 #ifndef MWGUI_DIALOGE_H
 #define MWGUI_DIALOGE_H
 
-#include <components/esm_store/store.hpp>
-
-#include <openengine/gui/layout.hpp>
-
+#include "window_base.hpp"
 #include <boost/array.hpp>
 
 namespace MWWorld
@@ -23,7 +20,7 @@ namespace MWGui
 
     using namespace MyGUI;
 
-    class DialogueWindow: public OEngine::GUI::Layout
+    class DialogueWindow: public WindowBase
     {
     public:
         DialogueWindow(MWWorld::Environment& environment);
@@ -45,8 +42,6 @@ namespace MWGui
 
     private:
         void updateOptions();
-
-        MWWorld::Environment& environment;
 
         DialogeHistory*     history;
         MyGUI::ListPtr      topicsList;

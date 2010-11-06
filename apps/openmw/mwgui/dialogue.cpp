@@ -17,15 +17,10 @@ using namespace MWGui;
 using namespace Widgets;
 
 DialogueWindow::DialogueWindow(MWWorld::Environment& environment)
-  : Layout("openmw_dialogue_window_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_dialogue_window_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     //WindowManager *wm = environment.mWindowManager;
     setText("NpcName", "Name of character");
