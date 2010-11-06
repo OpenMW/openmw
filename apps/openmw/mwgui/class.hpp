@@ -153,7 +153,7 @@ namespace MWGui
         std::string currentClassId;
     };
 
-    class SelectSpecializationDialog : public OEngine::GUI::Layout
+    class SelectSpecializationDialog : public WindowBase
     {
     public:
         SelectSpecializationDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
