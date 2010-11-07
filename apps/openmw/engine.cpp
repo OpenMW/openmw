@@ -1,10 +1,12 @@
 #include "engine.hpp"
+#include "components/esm/loadcell.hpp"
 
 #include <cassert>
 
 #include <iostream>
 #include <utility>
 
+#include <components/esm_store/cell_store.hpp>
 #include <components/misc/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/loadregn.hpp>
@@ -107,11 +109,14 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 	}
 		    
 	                                            //If the region has changed
-	if(mEnvironment.mWorld->getIsExterior() && test.name != mEnvironment.mWorld->getCurrentRegion().name){
-			test = mEnvironment.mWorld->getCurrentRegion();
+	MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
+	if(!(current->cell->data.flags & current->cell->Interior) && (test.name != current->cell->region)){
+			test = *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
 			if(test.soundList.size() > 0)
 			{
 				std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
+				mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
+				//mEnvironment.mSoundManager
 				while (!(soundIter == test.soundList.end()))
 				{
 					ESM::NAME32 go = soundIter->sound;
@@ -126,7 +131,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 			//printf("REGION: %s\n", test.name);
 
 		}
-	else if(!mEnvironment.mWorld->getIsExterior())
+	else if(current->cell->data.flags & current->cell->Interior)
 	{
 		test.name = "";
 	}
