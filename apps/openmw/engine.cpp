@@ -40,6 +40,7 @@
 #include <MyGUI_WidgetManager.h>
 #include "mwgui/class.hpp"
 
+
 void OMW::Engine::executeLocalScripts()
 {
     for (MWWorld::World::ScriptList::const_iterator iter (
@@ -107,27 +108,61 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 		// Play some good 'ol tunes
 			startRandomTitle();
 	}
+
+	std::string effect;
+
 		    
-	                                            //If the region has changed
+	                                            
 	MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
-	if(!(current->cell->data.flags & current->cell->Interior) && (test.name != current->cell->region)){
-			test = *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
+	//If the region has changed
+	if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
+			timer.restart();
+			if (test.name != current->cell->region)
+			{
+				total = 0;
+				test = *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
+			}
+			
 			if(test.soundList.size() > 0)
 			{
 				std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
-				mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
 				//mEnvironment.mSoundManager
+				if(total == 0){
+					while (!(soundIter == test.soundList.end()))
+					{
+						ESM::NAME32 go = soundIter->sound;
+						int chance = (int) soundIter->chance;
+						//std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+						soundIter++;
+						total += chance;
+					}
+				}
+
+			    srand ( time(NULL) );
+					int r = rand() % total;        //old random code
+					int pos = 0;
+					soundIter = test.soundList.begin();
 				while (!(soundIter == test.soundList.end()))
 				{
-					ESM::NAME32 go = soundIter->sound;
-					char chance = soundIter->chance;
-					std::cout << "Sound: " << go.name <<" Chance:" << (int) chance << "\n";
+					 const ESM::NAME32 go = soundIter->sound;
+					int chance = (int) soundIter->chance;
+					//std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
 					soundIter++;
+					if( r - pos < chance)
+					{
+						effect = go.name;
+						//play sound
+						std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+						mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
+						
+						break;
+
+					}
+					pos += chance;
 				}
-			    
 			}
 			
-
+			//mEnvironment.mSoundManager->playSound(effect, 1.0, 1.0);
 			//printf("REGION: %s\n", test.name);
 
 		}
@@ -296,6 +331,7 @@ void OMW::Engine::go()
 
 	MP3Lookup();
 	test.name = "";
+	total = 0;
 
 	
 

@@ -12,6 +12,8 @@
 
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
+#include <boost/timer.hpp>
+
 
 namespace Compiler
 {
@@ -62,6 +64,7 @@ namespace OMW
             bool mVerboseScripts;
             bool mNewGame;
             bool mUseSound;
+			int total;
 
             MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
@@ -69,6 +72,7 @@ namespace OMW
             Compiler::Context *mScriptContext;
             OEngine::GUI::MyGUIManager *mGuiManager;
 			ESM::Region test;
+			boost::timer timer;
 
             int focusFrameCounter;
             static const int focusUpdateFrame = 10;
