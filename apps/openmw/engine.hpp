@@ -54,7 +54,7 @@ namespace OMW
 
     class Engine : private Ogre::FrameListener
     {
-			std::vector<boost::filesystem::path> files;
+			
 			//int nFiles;
             boost::filesystem::path mDataDir;
             OEngine::Render::OgreRenderer mOgre;
@@ -85,8 +85,7 @@ namespace OMW
 
             /// add resources directory
             /// \note This function works recursively.
-			void OMW::Engine::MP3Lookup();
-			void startRandomTitle();
+			
             void addResourcesDirectory (const boost::filesystem::path& path);
 
             /// Load all BSA files in data directory.

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <utility>
 
+#include "components/esm/records.hpp"
 #include <components/esm_store/cell_store.hpp>
 #include <components/misc/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
@@ -41,6 +42,8 @@
 #include "mwgui/class.hpp"
 
 
+//using namespace ESM;
+
 void OMW::Engine::executeLocalScripts()
 {
     for (MWWorld::World::ScriptList::const_iterator iter (
@@ -60,53 +63,14 @@ void OMW::Engine::executeLocalScripts()
 
     mIgnoreLocalPtr = MWWorld::Ptr();
 }
-void OMW::Engine::MP3Lookup()
-{
-	boost::filesystem::directory_iterator dir_iter(mDataDir / "Music/Explore/"), dir_end;
 
-	std::string mp3extension = ".mp3";
-	for(;dir_iter != dir_end; dir_iter++)
-	{
-		if(boost::filesystem::extension(*dir_iter) == mp3extension)
-		{
-			files.push_back(*dir_iter);
-		}
-	}
-}
-
-void OMW::Engine::startRandomTitle()
-{
-	std::vector<boost::filesystem::path>::iterator fileIter;
-
-	if(files.size() > 0)
-	{
-		fileIter = files.begin();
-		srand ( time(NULL) );
-		int r = rand() % files.size() + 1;        //old random code
-
-		for(int i = 1; i < r; i++)
-		{
-			fileIter++;
-		}
-		std::string music = fileIter->file_string();
-		try
-		{
-			std::cout << "Playing " << music << "\n";
-			mEnvironment.mSoundManager->streamMusic(music);
-		}
-		catch(std::exception &e)
-		{
-			std::cout << "  Music Error: " << e.what() << "\n";
-		}
-	}
-}
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
 	if(! (mEnvironment.mSoundManager->isMusicPlaying()))
 	{
 		// Play some good 'ol tunes
-			startRandomTitle();
+			mEnvironment.mSoundManager->startRandomTitle();
 	}
 
 	std::string effect;
@@ -120,7 +84,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 			if (test.name != current->cell->region)
 			{
 				total = 0;
-				test = *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
+				test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
 			}
 			
 			if(test.soundList.size() > 0)
@@ -329,7 +293,6 @@ void OMW::Engine::go()
     assert (!mCellName.empty());
     assert (!mMaster.empty());
 
-	MP3Lookup();
 	test.name = "";
 	total = 0;
 
@@ -374,7 +337,7 @@ void OMW::Engine::go()
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
-                                                           (mDataDir / "Sound").file_string(),
+                                                           (mDataDir),
                                                            mUseSound);
 
     // Create script system
@@ -412,7 +375,7 @@ void OMW::Engine::go()
     mOgre.getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
-     startRandomTitle();
+      mEnvironment.mSoundManager->startRandomTitle();
 
     // Start the main rendering loop
     mOgre.start();

@@ -306,12 +306,13 @@ namespace MWSound
 
   SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
                              const ESMS::ESMStore &store,
-                             const std::string &soundDir,
+                             boost::filesystem::path dataDir,
                              bool useSound)
     : mData(NULL)
   {
+	MP3Lookup(dataDir / "Music/Explore/");
     if(useSound)
-      mData = new SoundImpl(root, camera, store, soundDir);
+      mData = new SoundImpl(root, camera, store, (dataDir / "Sound").file_string());
   }
 
   SoundManager::~SoundManager()
@@ -319,6 +320,48 @@ namespace MWSound
     if(mData)
       delete mData;
   }
+
+  void SoundManager::MP3Lookup(boost::filesystem::path dir)
+{
+	boost::filesystem::directory_iterator dir_iter(dir), dir_end;
+
+	std::string mp3extension = ".mp3";
+	for(;dir_iter != dir_end; dir_iter++)
+	{
+		if(boost::filesystem::extension(*dir_iter) == mp3extension)
+		{
+			files.push_back(*dir_iter);
+		}
+	}
+}
+
+  void SoundManager::startRandomTitle()
+{
+	std::vector<boost::filesystem::path>::iterator fileIter;
+
+	if(files.size() > 0)
+	{
+		fileIter = files.begin();
+		srand ( time(NULL) );
+		int r = rand() % files.size() + 1;        //old random code
+
+		for(int i = 1; i < r; i++)
+		{
+			fileIter++;
+		}
+		std::string music = fileIter->file_string();
+		try
+		{
+			std::cout << "Playing " << music << "\n";
+			streamMusic(music);
+		}
+		catch(std::exception &e)
+		{
+			std::cout << "  Music Error: " << e.what() << "\n";
+		}
+	}
+}
+
 
     bool SoundManager::isMusicPlaying()
    {
@@ -369,7 +412,6 @@ namespace MWSound
   void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
   {
     if(!mData) return;
-
     // Play and forget
     float min, max;
     const std::string &file = mData->lookup(soundId, volume, min, max);
