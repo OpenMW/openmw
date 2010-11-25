@@ -68,6 +68,7 @@ namespace MWRender
 	virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements);
     virtual void insertMesh(const std::string &mesh);
 	 virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements);
+	 virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
 
     /// insert a light related to the most recent insertBegin call.
     virtual void insertLight(float r, float g, float b, float radius);

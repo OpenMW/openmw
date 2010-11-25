@@ -91,6 +91,21 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
   //npcPart->
   
 }
+
+// insert a mesh related to the most recent insertBegin call.
+
+void ExteriorCellRender::scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements)
+{
+	assert(insert);
+	Ogre::SceneNode *parent = insert;
+	 //std::cout << "ELEMENTS:" << elements;
+	for (int i = 0; i < elements; i++){
+	   if(sceneNodeName[i] != "" && parent->getChild(sceneNodeName[i]))
+		   parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneNodeName[i]));
+	}
+	   parent->scale(axis);
+}
+
 // insert a mesh related to the most recent insertBegin call.
 
 
