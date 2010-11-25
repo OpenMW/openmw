@@ -57,7 +57,42 @@ void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
   insert->setOrientation(xr*yr*zr);
 }
 
+
+void ExteriorCellRender::rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements)
+{
+	assert(insert);
+	Ogre::SceneNode *parent = insert;
+	 //std::cout << "ELEMENTS:" << elements;
+	for (int i = 0; i < elements; i++){
+	   if(sceneNodeName[i] != "" && parent->getChild(sceneNodeName[i]))
+		   parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneNodeName[i]));
+	}
+	   parent->rotate(axis, angle);
+}
+
+void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements){
+	assert (insert);
+	 //insert->
+	   Ogre::SceneNode *parent = insert;
+	   for (int i = 0; i < elements; i++){
+	   if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
+		   parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
+		}
+	 
+	 npcPart = parent->createChildSceneNode(sceneNodeName);
+  NIFLoader::load(mesh);
+  MovableObject *ent = scene.getMgr()->createEntity(mesh);
+  
+  npcPart->translate(vec);
+  npcPart->rotate(axis, angle);
+ // npcPart->translate(vec);
+  //npcPart->rotate(axis, angle);
+  npcPart->attachObject(ent);
+  //npcPart->
+  
+}
 // insert a mesh related to the most recent insertBegin call.
+
 
 void ExteriorCellRender::insertMesh(const std::string &mesh)
 {
