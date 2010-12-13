@@ -897,7 +897,7 @@ void NIFLoader::loadResource(Resource *resource)
 		name.compare(test10) == 0 || name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 ||
 		name.compare(test14) == 0 || name.compare(test15) == 0 || name.compare(test16) == 0 || name.compare(test17) == 0 ||
 		name.compare(test18) == 0 || name.compare(test19) == 0 || name.compare(test20) == 0 || name.compare(test21) == 0 ||
-		name.compare(test22) == 0 || name.compare(test23) == 0 || name.compare(test24)
+		name.compare(test22) == 0 || name.compare(test23) == 0 || name.compare(test24) == 0
 		
 		){
 		//std::cout << "Welcome Chest\n";
