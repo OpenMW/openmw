@@ -39,6 +39,7 @@ namespace MWRender
 
 	virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements) = 0;
     /// insert a mesh related to the most recent insertBegin call.
+	virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst) = 0;
 	virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements) = 0;
     virtual void insertMesh(const std::string &mesh) = 0;
 

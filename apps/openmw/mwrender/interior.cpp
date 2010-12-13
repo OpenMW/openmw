@@ -83,7 +83,11 @@ void InteriorCellRender::scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeNam
 	}
 	   parent->scale(axis);
 }
-void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName, std::string sceneParent[], int elements){
+void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName, std::string sceneParent[], int elements)
+{
+	insertMesh(mesh, vec, axis, angle, sceneNodeName,  sceneParent, elements, true);
+}
+void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst){
 
 	   assert (insert);
 	 //insert->
@@ -94,11 +98,26 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
 		}
 	 
 	 npcPart = parent->createChildSceneNode(sceneNodeName);
-  NIFLoader::load(mesh);
-  MovableObject *ent = scene.getMgr()->createEntity(mesh);
-  
+	//npcPart->showBoundingBox(true);
+  MeshPtr good = NIFLoader::load(mesh, 0, 0);
+  MovableObject *ent = scene.getMgr()->createEntity(good->getName());
+  //ent->extr
+	
+	//  MovableObject *ent2 = scene.getMgr()->createEntity(bounds
+		//		);
+ //ent->
+    //std::cout << mesh << bounds << "\n";
+
+  if(translateFirst){
   npcPart->translate(vec);
   npcPart->rotate(axis, angle);
+  }
+  else{
+	  
+  npcPart->rotate(axis, angle);
+  npcPart->translate(vec);
+  }
+
   npcPart->attachObject(ent);
 }
 

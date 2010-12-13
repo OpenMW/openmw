@@ -21,11 +21,14 @@
 
  */
 
+//loadResource->handleNode->handleNiTriShape->createSubMesh
+
 #include "ogre_nif_loader.hpp"
 #include <Ogre.h>
 #include <stdio.h>
 
 #include <libs/mangle/vfs/servers/ogre_vfs.hpp>
+#include "../../apps/openmw/mwclass/npc.hpp"
 #include "../nif/nif_file.hpp"
 #include "../nif/node.hpp"
 #include "../nif/data.hpp"
@@ -325,10 +328,15 @@ void NIFLoader::findRealTexture(String &texName)
     texName[len-1] = 's';
 }
 
+//Handle node at top
+
 // Convert Nif::NiTriShape to Ogre::SubMesh, attached to the given
 // mesh.
 void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std::list<VertexBoneAssignment> &vertexBoneAssignments)
 {
+	
+
+	//	cout << "s:" << shape << "\n";
     NiTriShapeData *data = shape->data.getPtr();
     SubMesh *sub = mesh->createSubMesh(shape->name.toString());
 
@@ -468,8 +476,11 @@ static void vectorMul(const Matrix &A, float *C)
         C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
 }
 
+
 void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bounds)
 {
+	//if( MWClass::Npc.isChest)
+		//cout << "t:" << shape << "\n";
     assert(shape != NULL);
 
     // Interpret flags
@@ -719,6 +730,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 void NIFLoader::handleNode(Nif::Node *node, int flags,
                            const Transformation *trafo, BoundsFinder &bounds, Bone *parentBone)
 {
+	stack++;
+	//if( MWClass::isChest)
+	//	cout << "u:" << node << "\n";
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
@@ -810,20 +824,156 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     {
         NodeList &list = ((NiNode*)node)->children;
         int n = list.length();
-        for (int i=0; i<n; i++)
+		int i = 0;
+		if(isHands){
+			//cout << "NumberOfNs: " << n << "Stack:" << stack << "\n";
+			//if(stack == 3)
+				//n=0;
+		}
+        for (; i<n; i++)
         {
+			
             if (list.has(i))
                 handleNode(&list[i], flags, node->trafo, bounds, bone);
         }
     }
     else if (node->recType == RC_NiTriShape)
+	{
     // For shapes
-        handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+		if((isChest && stack < 10) || (isHands && counter < 3) || !(isChest || isHands)){                       //less than 10
+			handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+			
+		}
+		if(isHands){
+			//cout << "Handling Shape, Stack " << stack <<"\n";
+			counter++;
+		}
+		
+	}
+
+	stack--;
 }
 
 void NIFLoader::loadResource(Resource *resource)
 {
+	stack = 0;
+	counter = 0;
+	std::string name = resource->getName();
+	//std::cout <<"NAME:" << name;
+	//if(name.length() >= 20)
+	//	{std::string split = name.substr(name.length() - 20, 20);
+	//if(name == 
+	//std::cout <<"NAME:" << name << "LEN: " << name.length() << "\n";
+	const std::string test ="meshes\\b\\B_N_Dark Elf_M_Skins.NIF";
+	const std::string test2 ="meshes\\b\\B_N_Dark Elf_M_Skins.nif";
+	const std::string test3 ="meshes\\b\\B_N_Redguard_F_Skins.NIF";
+	const std::string test4 ="meshes\\b\\B_N_Redguard_F_Skins.nif";
+	const std::string test5 ="meshes\\b\\B_N_Dark Elf_F_Skins.nif";
+	const std::string test6 ="meshes\\b\\B_N_Redguard_M_Skins.nif";
+	const std::string test7 ="meshes\\b\\B_N_Wood Elf_F_Skins.nif";
+	const std::string test8 ="meshes\\b\\B_N_Wood Elf_M_Skins.nif";
+	const std::string test9 ="meshes\\b\\B_N_Imperial_F_Skins.nif";
+	const std::string test10 ="meshes\\b\\B_N_Imperial_M_Skins.nif";
+	const std::string test11 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
+	const std::string test12 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
+	const std::string test13 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
+	const std::string test14 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
+	const std::string test15 ="meshes\\b\\B_N_Nord_F_Skins.nif";
+	const std::string test16 ="meshes\\b\\B_N_Nord_M_Skins.nif";
+	const std::string test17 ="meshes\\b\\B_N_Imperial_F_Skins.nif";
+	const std::string test18 ="meshes\\b\\B_N_Imperial_M_Skins.nif";
+	const std::string test19 ="meshes\\b\\B_N_Orc_F_Skins.nif";
+	const std::string test20 ="meshes\\b\\B_N_Orc_M_Skins.nif";
+	const std::string test21 ="meshes\\b\\B_N_Breton_F_Skins.nif";
+	const std::string test22 ="meshes\\b\\B_N_Breton_M_Skins.nif";
+	const std::string test23 ="meshes\\b\\B_N_High Elf_F_Skins.nif";
+	const std::string test24 ="meshes\\b\\B_N_High Elf_M_Skins.nif";
+
+	//std::cout <<"LEN1:" << test.length() << "TEST: " << test << "\n";
+	
+	
+	if(name.compare(test) == 0 || name.compare(test2) == 0 || name.compare(test3) == 0 || name.compare(test4) == 0 ||
+		name.compare(test5) == 0 || name.compare(test6) == 0 || name.compare(test7) == 0 || name.compare(test8) == 0 || name.compare(test9) == 0 ||
+		name.compare(test10) == 0 || name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 ||
+		name.compare(test14) == 0 || name.compare(test15) == 0 || name.compare(test16) == 0 || name.compare(test17) == 0 ||
+		name.compare(test18) == 0 || name.compare(test19) == 0 || name.compare(test20) == 0 || name.compare(test21) == 0 ||
+		name.compare(test22) == 0 || name.compare(test23) == 0 || name.compare(test24)
+		
+		){
+		//std::cout << "Welcome Chest\n";
+		isChest = true;
+		if(name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 || name.compare(test14) == 0)
+		{
+			isBeast = true;
+			std::cout << "Welcome Beast\n";
+		}
+		else
+			isBeast = false;
+	}
+	else
+		isChest = false;
+	const std::string hands ="meshes\\b\\B_N_Dark Elf_M_Hands.1st.NIF";
+	const std::string hands2 ="meshes\\b\\B_N_Dark Elf_F_Hands.1st.NIF";
+	const std::string hands3 ="meshes\\b\\B_N_Redguard_M_Hands.1st.nif";
+	const std::string hands4 ="meshes\\b\\B_N_Redguard_F_Hands.1st.nif";
+	const std::string hands5 ="meshes\\b\\b_n_argonian_m_hands.1st.nif";
+	const std::string hands6 ="meshes\\b\\b_n_argonian_f_hands.1st.nif";
+	const std::string hands7 ="meshes\\b\\B_N_Breton_M_Hand.1st.NIF";
+	const std::string hands8 ="meshes\\b\\B_N_Breton_F_Hands.1st.nif";
+	const std::string hands9 ="meshes\\b\\B_N_High Elf_M_Hands.1st.nif";
+	const std::string hands10 ="meshes\\b\\B_N_High Elf_F_Hands.1st.nif";
+	const std::string hands11 ="meshes\\b\\B_N_Nord_M_Hands.1st.nif";
+	const std::string hands12 ="meshes\\b\\B_N_Nord_F_Hands.1st.nif";
+	const std::string hands13 ="meshes\\b\\b_n_khajiit_m_hands.1st.nif";
+	const std::string hands14 ="meshes\\b\\b_n_khajiit_f_hands.1st.nif";
+	const std::string hands15 ="meshes\\b\\B_N_Orc_M_Hands.1st.nif";
+	const std::string hands16 ="meshes\\b\\B_N_Orc_F_Hands.1st.nif";
+	const std::string hands17 ="meshes\\b\\B_N_Wood Elf_M_Hands.1st.nif";
+	const std::string hands18 ="meshes\\b\\B_N_Wood Elf_F_Hands.1st.nif";
+	const std::string hands19 ="meshes\\b\\B_N_Imperial_M_Hands.1st.nif";
+	const std::string hands20 ="meshes\\b\\B_N_Imperial_F_Hands.1st.nif";
+	if(name.compare(hands) == 0 || name.compare(hands2) == 0 || name.compare(hands3) == 0 || name.compare(hands4) == 0 ||
+		name.compare(hands5) == 0 || name.compare(hands6) == 0 || name.compare(hands7) == 0 || name.compare(hands8) == 0 ||
+		name.compare(hands9) == 0 || name.compare(hands10) == 0 || name.compare(hands11) == 0 || name.compare(hands12) == 0 ||
+		name.compare(hands13) == 0 || name.compare(hands14) == 0 || name.compare(hands15) == 0 || name.compare(hands16) == 0 ||
+		name.compare(hands17) == 0 || name.compare(hands18) == 0 || name.compare(hands19) == 0 || name.compare(hands20) == 0)
+	{
+		std::cout << "Welcome Hands1st\n";
+		isHands = true;
+		isChest = false;
+	}
+	else
+		isHands = false;
+	/*
+	else if(name.compare(test3) == 0 || name.compare(test4) == 0)
+	{
+		std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
+		isChest = true;
+	}
+	else if(name.compare(test5) == 0 || name.compare(test6) == 0)
+	{
+		std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
+		isChest = true;
+	}
+	else if(name.compare(test7) == 0 || name.compare(test8) == 0)
+	{
+		std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
+		isChest = true;
+	}
+	else if(name.compare(test9) == 0 || name.compare(test10) == 0)
+	{
+		std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
+		isChest = true;
+	}*/
+	
+	//if(split== "Skins.NIF")
+	//	std::cout << "\nSPECIAL PROPS\n";
     resourceName = "";
+	MeshManager *m = MeshManager::getSingletonPtr();
+    // Check if the resource already exists
+    //MeshPtr ptr = m->load(name, "custom");
+	//cout << "THISNAME: " << ptr->getName() << "\n";
+	//cout << "RESOURCE:"<< resource->getName();
     mesh = 0;
     skel.setNull();
 
@@ -836,6 +986,7 @@ void NIFLoader::loadResource(Resource *resource)
 
     // Look it up
     resourceName = mesh->getName();
+	//std::cout << resourceName << "\n";
 
     if (!vfs->isFile(resourceName))
     {
@@ -887,18 +1038,48 @@ void NIFLoader::loadResource(Resource *resource)
 //         mesh->setSkeletonName(getSkeletonName());
 }
 
-MeshPtr NIFLoader::load(const std::string &name,
-                        const std::string &group)
+MeshPtr NIFLoader::load(const std::string &name, 
+                         int pieces, int pieceIndex,const std::string &group)
 {
     MeshManager *m = MeshManager::getSingletonPtr();
-
     // Check if the resource already exists
     ResourcePtr ptr = m->getByName(name, group);
-    if (!ptr.isNull())
-        return MeshPtr(ptr);
+	MeshPtr resize;
+	
+    if (!ptr.isNull()){
+		//if(pieces > 1)
+			//cout << "It exists\n";
+		resize = MeshPtr(ptr);
+		//resize->load();
+		//resize->reload();
+	}
+	else // Nope, create a new one.
+	{
+		//if(pieces > 1)
+			//cout << "Creating it\n";
+		resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
+		//resize->load();
+		//resize->reload();
+		//return 0;
+		 ResourcePtr ptr = m->getByName(name, group);
+		 resize = MeshPtr(ptr);
+		
+		//NIFLoader::getSingletonPtr()->
+		/*ResourcePtr ptr = m->getByName(name, group);
+    if (!ptr.isNull()){
+		if(pieces > 1)
+			cout << "It exists\n";
+		resize = MeshPtr(ptr);*/
+		//return resize;
+	}
+	return resize;
+}
+	
 
-    // Nope, create a new one.
-    return MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
+MeshPtr NIFLoader::load(const std::string &name, 
+                         const std::string &group)
+{
+	return load(name, 1, 0, group);
 }
 
 /* More code currently not in use, from the old D source. This was

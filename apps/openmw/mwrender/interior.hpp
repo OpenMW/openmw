@@ -29,7 +29,7 @@ namespace MWRender
 
   class InteriorCellRender : public CellRender, private CellRenderImp
   {
-
+	  //static bool isChest;
     static bool lightConst;
     static float lightConstValue;
 
@@ -68,6 +68,7 @@ namespace MWRender
     /// insert a mesh related to the most recent insertBegin call.
     virtual void insertMesh(const std::string &mesh);
 	virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements);
+	virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst);
     /// insert a light related to the most recent insertBegin call.
     virtual void insertLight(float r, float g, float b, float radius);
 

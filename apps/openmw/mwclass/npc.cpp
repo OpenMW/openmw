@@ -41,7 +41,7 @@ namespace MWClass
 		std::string hairID = ref->base->hair;
         std::string headID = ref->base->head;
 		std::string npcName = ref->base->name;
-		//std::cout << "NPC: " << npcName << "\n";
+		std::cout << "NPC: " << npcName << "\n";
 
         //get the part of the bodypart id which describes the race and the gender
         std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
@@ -64,18 +64,19 @@ namespace MWClass
 		Ogre::Vector3 axis = Ogre::Vector3( 0, 0, 1);
 		Ogre::Radian angle = Ogre::Radian(0);
 		
-		std::string addresses[6] = {"", "", "", "",""};
-		std::string addresses2[6] = {"", "", "", "", ""};
+		std::string addresses[6] = {"", "", "", "","", ""};
+		std::string addresses2[6] = {"", "", "", "", "", ""};
 		std::string upperleft[5] = {"", "", "", "", ""};
 		std::string upperright[5] = {"", "", "", "", ""};
 		std::string neckandup[5] = {"", "", "","",""};
+		std::string empty[6] = {"", "", "", "","", ""};
 		int numbers = 0;
 		int uppernumbers = 0;
 		int neckNumbers = 0;
 		
         if (bodyPart){
-			
-           cellRender.insertMesh("meshes\\" + bodyPart->model, pos, axis, angle, npcName + "chest", addresses, numbers);
+		
+           cellRender.insertMesh("meshes\\" + bodyPart->model, pos, axis, angle, npcName + "chest", addresses, numbers, true);   //2 0
 		   addresses2[numbers] = npcName + "chest";
 		   addresses[numbers++] = npcName + "chest";
 		   upperleft[uppernumbers] = npcName + "chest";
@@ -92,11 +93,11 @@ namespace MWClass
 		const ESM::BodyPart *knee = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "knee");
 		const ESM::BodyPart *ankle = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "ankle");
 		const ESM::BodyPart *foot = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
-		const ESM::BodyPart *foot2 = foot + 1;
 		const ESM::BodyPart *wrist = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "wrist");
 		const ESM::BodyPart *forearm = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "forearm");
-		const ESM::BodyPart *hand = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands.1st");
-
+		const ESM::BodyPart *hand = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand.1st");
+		const ESM::BodyPart *hands = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands.1st");
+		std::cout << "RACE" << bodyRaceID << "\n";
 
 		Ogre::Vector3 pos2 = Ogre::Vector3( 0, .5, 75);
 		std::string upperarmpath[2] = {npcName + "chest", npcName + "upper arm"};
@@ -109,10 +110,11 @@ namespace MWClass
 		
 		//addresses[1] = npcName + "groin";
 		if(upperleg){
-		cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( 6, 0, -14), axis, Ogre::Radian(.7), npcName + "upper leg", addresses, numbers); //-18
+		cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( 6, 0, -14), axis, Ogre::Radian(3.14), npcName + "upper leg", addresses, numbers); //-18
 		cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( -6, 0, -14), axis, Ogre::Radian(0), npcName + "upper leg2", addresses2, numbers);
 		addresses2[numbers] = npcName + "upper leg2";
 		addresses[numbers++] = npcName + "upper leg";
+		cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), addresses, numbers);
 		}
 		if(knee)
 		{
@@ -124,28 +126,42 @@ namespace MWClass
 			addresses[numbers++] = npcName + "knee";
 		}
 		if(ankle){
-			cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0, 0, -18), axis, Ogre::Radian(0), npcName + "ankle", addresses, numbers);
-			cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0, 0, -18), axis, Ogre::Radian(0), npcName + "ankle2", addresses2, numbers);
+			
+			cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0, -1, -18), axis, Ogre::Radian(0), npcName + "ankle", addresses, numbers);   //-1
+			cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0, -1, -18), axis, Ogre::Radian(0), npcName + "ankle2", addresses2, numbers); //-1
 			
 			addresses2[numbers] = npcName + "ankle2";
 			addresses[numbers++] = npcName + "ankle";
 		}
 		if(foot){
-			cellRender.insertMesh ("meshes\\" + foot->model, Ogre::Vector3( 0, -2, -16), axis, Ogre::Radian(3.14), npcName + "foot", addresses, numbers);
+			//std::cout << "RACE" << bodyRaceID << "\n";
+			if(bodyRaceID.compare("b_n_khajiit_m_") == 0 || bodyRaceID.compare("b_n_khajiit_f_") == 0)
+			{
+				std::cout << "BEASTRACE\n";
+				cellRender.insertMesh ("meshes\\" + foot->model, Ogre::Vector3( 0, -24, -15), axis, Ogre::Radian(0), npcName + "foot", addresses, numbers);
 
-			cellRender.insertMesh ("meshes\\" + foot->model, Ogre::Vector3( 0, -2, -16), axis, Ogre::Radian(0), npcName + "foot2", addresses2, numbers);
+				cellRender.insertMesh ("meshes\\" + foot->model, Ogre::Vector3( 0, -24, -15), axis, Ogre::Radian(0), npcName + "foot2", addresses2, numbers);
+			}
+			else{
+			cellRender.insertMesh ("meshes\\" + foot->model, Ogre::Vector3( 0, -4, -15), axis, Ogre::Radian(0), npcName + "foot", addresses, numbers);
+
+			cellRender.insertMesh ("meshes\\" + foot->model, Ogre::Vector3( 0, -4, -15), axis, Ogre::Radian(0), npcName + "foot2", addresses2, numbers);
+			}
 			addresses2[numbers] = npcName + "foot2";
 			addresses[numbers++] = npcName + "foot";
-			cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), addresses, numbers);
+			//cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), addresses, numbers);
 		}
 		
 		 
 		if (arm){
-			cellRender.insertMesh("meshes\\" + arm->model, Ogre::Vector3(-12.5, 0, 104), Ogre::Vector3(1, 0, .75), Ogre::Radian(3.14), npcName + "upper arm", upperleft, uppernumbers);   //1, 0,.75
-			 //cellRender.rotateMesh(Ogre::Vector3(1, 0, 0), Ogre::Radian (.45), upperarmpath, 2);                                                                                          //1, 0, 1
+			//010
+			cellRender.insertMesh("meshes\\" + arm->model, Ogre::Vector3(-12.5, 0, 104), Ogre::Vector3(0, 1, 0), Ogre::Radian(-3.14 / 2), npcName + "upper arm", upperleft, uppernumbers);   //1, 0,.75
+			 //cellRender.rotateMesh(Ogre::Vector3(1, 0, 0), Ogre::Radian (.45), upperarmpath, 2);                                                                                          //-.5, 0, -.75
 			cellRender.insertMesh("meshes\\" + arm->model, Ogre::Vector3(12.5, 0, 105), Ogre::Vector3(-.5, 0, -.75), Ogre::Radian(3.14), npcName + "upper arm2", upperright, uppernumbers);
 			upperleft[uppernumbers] = npcName + "upper arm";
 			upperright[uppernumbers++] = npcName + "upper arm2";
+		    cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperleft, uppernumbers);        //1 -1 1
+			cellRender.rotateMesh(Ogre::Vector3(0, .1, 0),  Ogre::Radian(3.14/2), upperleft, uppernumbers);
 		}
 
 		if (forearm)
@@ -168,8 +184,29 @@ namespace MWClass
 		
 
 		if(hand)
-			cellRender.insertMesh("meshes\\" + hand->model, Ogre::Vector3(-50, 0, -120), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "hands", addresses, 4);   //0, 100, -100    0,0,120
-		
+		{
+			//std::cout << "WE FOUND A HAND\n";
+															//-50, 0, -120
+			cellRender.insertMesh("meshes\\" + hand->model, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "hand", upperleft, uppernumbers,false);   //0, 100, -100    0,0,120
+			cellRender.insertMesh("meshes\\" + hand->model, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0,0), Ogre::Radian(3.14), npcName + "hand2", upperright, uppernumbers, false);   //0, 100, -100    0,0,120
+			upperleft[uppernumbers] = npcName + "hand";
+			upperright[uppernumbers++] = npcName + "hand2";
+			//cellRender.rotateMesh(Ogre::Vector3(0, 0,0),  Ogre::Radian(3.14), upperleft, uppernumbers);
+			cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperleft, uppernumbers);
+			cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperright, uppernumbers);
+		}
+		if(hands)
+		{
+			//std::cout << "WE FOUND HANDS\n";
+															//-50, 0, -120
+			cellRender.insertMesh("meshes\\" + hands->model, Ogre::Vector3(42, 1,-110), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "hand", upperleft, uppernumbers, false);   //0, 100, -100    42, 0, -110
+			//cellRender.insertMesh("meshes\\" + hands->model, Ogre::Vector3(42, 0,110), Ogre::Vector3(1, 0, 0), Ogre::Radian(3.14), npcName + "hand", upperleft, uppernumbers, false);   //0, 100, -100    42, 0, -110
+			cellRender.insertMesh("meshes\\" + hands->model, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "hand2", upperright, uppernumbers, false);   //0, 100, -100    0,0,120
+			upperleft[uppernumbers] = npcName + "hand";
+			upperright[uppernumbers++] = npcName + "hand2";
+			cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperleft, uppernumbers);
+			cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperright, uppernumbers);
+		}
 
 		if(neck)
 		{
