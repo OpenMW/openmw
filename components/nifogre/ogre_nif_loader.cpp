@@ -55,7 +55,6 @@ using namespace Mangle::VFS;
 NIFLoader& NIFLoader::getSingleton()
 {
     static NIFLoader instance;
-
     return instance;
 }
 
@@ -334,8 +333,6 @@ void NIFLoader::findRealTexture(String &texName)
 // mesh.
 void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std::list<VertexBoneAssignment> &vertexBoneAssignments)
 {
-	
-
 	//	cout << "s:" << shape << "\n";
     NiTriShapeData *data = shape->data.getPtr();
     SubMesh *sub = mesh->createSubMesh(shape->name.toString());
@@ -429,7 +426,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     for (std::list<VertexBoneAssignment>::iterator it = vertexBoneAssignments.begin();
         it != vertexBoneAssignments.end(); it++)
     {
-        sub->addBoneAssignment(*it);
+			sub->addBoneAssignment(*it);
     }
 }
 
@@ -782,6 +779,8 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         if (!skel.isNull())     //if there is a skeleton
         {
             std::string name = node->name.toString();
+			//if (isBeast && isChest)
+			//	std::cout << "NAME: " << name << "\n";
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
             if(!skel->hasBone(name))
@@ -840,14 +839,48 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     else if (node->recType == RC_NiTriShape)
 	{
     // For shapes
-		if((isChest && stack < 10) || (isHands && counter < 3) || !(isChest || isHands)){                       //less than 10
-			handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+		/*For Beast Skins, Shape Bone Names
+		Tri Left Foot
+		Tri Right Foot
+		Tri Tail
+		Tri Chest
+		*/
+		if((isChest && stack < 10 )  || (isHands && counter < 3) || !(isChest || isHands)){                       //(isBeast && isChest && stack < 10 && counter == skincounter )
 			
+			std::string name = node->name.toString();
+			//if (isChest)
+				//std::cout << "NAME: " << name << "\n";
+
+			if(isChest && isBeast && skincounter == 0 && name.compare("Tri Chest") == 0){
+				//std::cout <<"BEASTCHEST1\n";
+				handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+				skincounter++;
+			}
+			else if(isChest && isBeast && skincounter == 1 && name.compare("Tri Tail") == 0){
+				//std::cout <<"BEASTCHEST2\n";
+				handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+				skincounter++;
+			}
+			else if(isChest && isBeast && skincounter == 2 && name.compare("Tri Left Foot") == 0){
+				//std::cout <<"BEASTCHEST3\n";
+				handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+				skincounter=1000;
+			}
+			else if (!isChest || !isBeast)
+			{
+				handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+			}
+			//if(isBeast && isChest)
+				//cout << "Handling Shape, Stack " << stack <<"\n";
+
+			
+			
+				counter++;
 		}
-		if(isHands){
+		/*if(isHands){
 			//cout << "Handling Shape, Stack " << stack <<"\n";
 			counter++;
-		}
+		}*/
 		
 	}
 
@@ -856,9 +889,16 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
 void NIFLoader::loadResource(Resource *resource)
 {
+	if(skincounter == 1000)
+		skincounter = 0;
 	stack = 0;
 	counter = 0;
 	std::string name = resource->getName();
+	if(resourceName.compare(name) != 0)
+	{
+		skincounter = 0;
+		resourceName = name;
+	}
 	//std::cout <<"NAME:" << name;
 	//if(name.length() >= 20)
 	//	{std::string split = name.substr(name.length() - 20, 20);
@@ -905,7 +945,7 @@ void NIFLoader::loadResource(Resource *resource)
 		if(name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 || name.compare(test14) == 0)
 		{
 			isBeast = true;
-			std::cout << "Welcome Beast\n";
+			//std::cout << "Welcome Beast\n";
 		}
 		else
 			isBeast = false;
@@ -938,12 +978,14 @@ void NIFLoader::loadResource(Resource *resource)
 		name.compare(hands13) == 0 || name.compare(hands14) == 0 || name.compare(hands15) == 0 || name.compare(hands16) == 0 ||
 		name.compare(hands17) == 0 || name.compare(hands18) == 0 || name.compare(hands19) == 0 || name.compare(hands20) == 0)
 	{
-		std::cout << "Welcome Hands1st\n";
+		//std::cout << "Welcome Hands1st\n";
 		isHands = true;
 		isChest = false;
 	}
 	else
 		isHands = false;
+
+
 	/*
 	else if(name.compare(test3) == 0 || name.compare(test4) == 0)
 	{
@@ -1039,25 +1081,40 @@ void NIFLoader::loadResource(Resource *resource)
 }
 
 MeshPtr NIFLoader::load(const std::string &name, 
-                         int pieces, int pieceIndex,const std::string &group)
+                         const std::string &group)
 {
     MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     ResourcePtr ptr = m->getByName(name, group);
 	MeshPtr resize;
 	
-    if (!ptr.isNull()){
+	const std::string beast1 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
+	const std::string beast2 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
+	const std::string beast3 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
+	const std::string beast4 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
+
+	const std::string beasttail1 ="tail\\b\\B_N_Khajiit_F_Skins.nif";
+	const std::string beasttail2 ="tail\\b\\B_N_Khajiit_M_Skins.nif";
+	const std::string beasttail3 ="tail\\b\\B_N_Argonian_F_Skins.nif";
+	const std::string beasttail4 ="tail\\b\\B_N_Argonian_M_Skins.nif";
+
+    if (!ptr.isNull()){ 
+		
 		//if(pieces > 1)
 			//cout << "It exists\n";
-		resize = MeshPtr(ptr);
+			resize = MeshPtr(ptr);
 		//resize->load();
 		//resize->reload();
 	}
 	else // Nope, create a new one.
 	{
+		resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
+		//cout <<"EXISTING" << name << "\n";
+		
 		//if(pieces > 1)
 			//cout << "Creating it\n";
-		resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
+		
+		
 		//resize->load();
 		//resize->reload();
 		//return 0;
@@ -1075,12 +1132,6 @@ MeshPtr NIFLoader::load(const std::string &name,
 	return resize;
 }
 	
-
-MeshPtr NIFLoader::load(const std::string &name, 
-                         const std::string &group)
-{
-	return load(name, 1, 0, group);
-}
 
 /* More code currently not in use, from the old D source. This was
    used in the first attempt at loading NIF meshes, where each submesh
