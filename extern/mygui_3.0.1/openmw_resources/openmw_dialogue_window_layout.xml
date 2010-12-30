@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 588 433" name="_Main">
+        <!-- HEADER -->
+        <Widget type="StaticText" skin="HeaderText" position="0 0 588 18" name="NpcName" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Widget_Caption" value="Name"/>
+            <Property key="Widget_AlignText" value="ALIGN_CENTER"/>
+        </Widget>
+
+        <!-- The Dialogue history -->
+        <Widget type="DialogeHistory" skin="MW_TextBoxEdit" position="8 39 400 375" name="History"  align="ALIGN_LEFT ALIGN_TOP STRETCH">
+            <Property key="Edit_Static" value="true"/>
+            <Property key="Edit_WordWrap" value="true"/>
+            <Property key="Text_FontHeight" value="18"/>
+            <Property key="Edit_MultiLine" value="1" />
+            <Property key="Edit_VisibleVScroll" value="1" />
+        </Widget>
+
+        <!-- The list of topics -->
+        <Widget type="List" skin="MW_List" position="432 39 132 341" name="TopicsList">
+        </Widget>
+
+        <!-- The Goodbye button -->
+        <Widget type="Button" skin="MW_Button" position="432 387 132 23" name="ByeButton">
+            <Property key="Widget_Caption" value="Goodbye"/>
+        </Widget>
+    </Widget>
+</MyGUI>

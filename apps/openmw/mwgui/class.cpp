@@ -15,15 +15,10 @@ using namespace MWGui;
 /* GenerateClassResultDialog */
 
 GenerateClassResultDialog::GenerateClassResultDialog(MWWorld::Environment& environment)
-  : Layout("openmw_chargen_generate_class_result_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_chargen_generate_class_result_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
     setText("ReflectT", wm->getGameSettingString("sMessageQuestionAnswer1", ""));
@@ -74,49 +69,31 @@ void GenerateClassResultDialog::onBackClicked(MyGUI::Widget* _sender)
 /* PickClassDialog */
 
 PickClassDialog::PickClassDialog(MWWorld::Environment& environment)
-  : Layout("openmw_chargen_class_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_chargen_class_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
     setText("SpecializationT", wm->getGameSettingString("sChooseClassMenu1", "Specialization"));
     getWidget(specializationName, "SpecializationName");
 
     setText("FavoriteAttributesT", wm->getGameSettingString("sChooseClassMenu2", "Favorite Attributes:"));
-    getWidget(favoriteAttribute0, "FavoriteAttribute0");
-    getWidget(favoriteAttribute1, "FavoriteAttribute1");
-    favoriteAttribute0->setWindowManager(wm);
-    favoriteAttribute1->setWindowManager(wm);
+    getWidget(favoriteAttribute[0], "FavoriteAttribute0");
+    getWidget(favoriteAttribute[1], "FavoriteAttribute1");
+    favoriteAttribute[0]->setWindowManager(wm);
+    favoriteAttribute[1]->setWindowManager(wm);
 
     setText("MajorSkillT", wm->getGameSettingString("sChooseClassMenu3", "Major Skills:"));
-    getWidget(majorSkill0, "MajorSkill0");
-    getWidget(majorSkill1, "MajorSkill1");
-    getWidget(majorSkill2, "MajorSkill2");
-    getWidget(majorSkill3, "MajorSkill3");
-    getWidget(majorSkill4, "MajorSkill4");
-    majorSkill0->setWindowManager(wm);
-    majorSkill1->setWindowManager(wm);
-    majorSkill2->setWindowManager(wm);
-    majorSkill3->setWindowManager(wm);
-    majorSkill4->setWindowManager(wm);
-
     setText("MinorSkillT", wm->getGameSettingString("sChooseClassMenu4", "Minor Skills:"));
-    getWidget(minorSkill0, "MinorSkill0");
-    getWidget(minorSkill1, "MinorSkill1");
-    getWidget(minorSkill2, "MinorSkill2");
-    getWidget(minorSkill3, "MinorSkill3");
-    getWidget(minorSkill4, "MinorSkill4");
-    minorSkill0->setWindowManager(wm);
-    minorSkill1->setWindowManager(wm);
-    minorSkill2->setWindowManager(wm);
-    minorSkill3->setWindowManager(wm);
-    minorSkill4->setWindowManager(wm);
+    for(int i = 0; i < 5; i++)
+    {
+        char theIndex = '0'+i;
+        getWidget(majorSkill[i], std::string("MajorSkill").append(1, theIndex));
+        getWidget(minorSkill[i], std::string("MinorSkill").append(1, theIndex));
+        majorSkill[i]->setWindowManager(wm);
+        minorSkill[i]->setWindowManager(wm);
+    }
 
     getWidget(classList, "ClassList");
     classList->setScrollVisible(true);
@@ -259,28 +236,13 @@ void PickClassDialog::updateStats()
     };
     specializationName->setCaption(wm->getGameSettingString(specIds[specialization], specIds[specialization]));
 
-    favoriteAttribute0->setAttributeId(klass->data.attribute[0]);
-    favoriteAttribute1->setAttributeId(klass->data.attribute[1]);
-
-    Widgets::MWSkillPtr majorSkills[5] = {
-        majorSkill0,
-        majorSkill1,
-        majorSkill2,
-        majorSkill3,
-        majorSkill4
-    };
-    Widgets::MWSkillPtr minorSkills[5] = {
-        minorSkill0,
-        minorSkill1,
-        minorSkill2,
-        minorSkill3,
-        minorSkill4
-    };
+    favoriteAttribute[0]->setAttributeId(klass->data.attribute[0]);
+    favoriteAttribute[1]->setAttributeId(klass->data.attribute[1]);
 
     for (int i = 0; i < 5; ++i)
     {
-        majorSkills[i]->setSkillNumber(klass->data.skills[i][0]);
-        minorSkills[i]->setSkillNumber(klass->data.skills[i][1]);
+        majorSkill[i]->setSkillNumber(klass->data.skills[i][0]);
+        minorSkill[i]->setSkillNumber(klass->data.skills[i][1]);
     }
 
     classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
@@ -288,7 +250,7 @@ void PickClassDialog::updateStats()
 
 /* InfoBoxDialog */
 
-void fitToText(MyGUI::StaticTextPtr widget)
+void InfoBoxDialog::fitToText(MyGUI::StaticTextPtr widget)
 {
     MyGUI::IntCoord inner = widget->getTextRegion();
     MyGUI::IntCoord outer = widget->getCoord();
@@ -298,7 +260,7 @@ void fitToText(MyGUI::StaticTextPtr widget)
     widget->setSize(size);
 }
 
-void layoutVertically(MyGUI::WidgetPtr widget, int margin)
+void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
 {
     size_t count = widget->getChildCount();
     int pos = 0;
@@ -319,8 +281,7 @@ void layoutVertically(MyGUI::WidgetPtr widget, int margin)
 }
 
 InfoBoxDialog::InfoBoxDialog(MWWorld::Environment& environment)
-    : Layout("openmw_infobox_layout.xml")
-    , environment(environment)
+    : WindowBase("openmw_infobox_layout.xml", environment)
     , currentButton(-1)
 {
     getWidget(textBox, "TextBox");
@@ -401,16 +362,6 @@ void InfoBoxDialog::onButtonClicked(MyGUI::WidgetPtr _sender)
     }
 }
 
-void InfoBoxDialog::center()
-{
-    // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
-}
-
 /* ClassChoiceDialog */
 
 ClassChoiceDialog::ClassChoiceDialog(MWWorld::Environment& environment)
@@ -429,19 +380,14 @@ ClassChoiceDialog::ClassChoiceDialog(MWWorld::Environment& environment)
 /* CreateClassDialog */
 
 CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment)
-  : Layout("openmw_chargen_create_class_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_chargen_create_class_layout.xml", environment)
   , specDialog(nullptr)
   , attribDialog(nullptr)
   , skillDialog(nullptr)
   , descDialog(nullptr)
 {
     // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
     setText("SpecializationT", wm->getGameSettingString("sChooseClassMenu1", "Specialization"));
@@ -458,28 +404,15 @@ CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment)
     favoriteAttribute1->eventClicked = MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
 
     setText("MajorSkillT", wm->getGameSettingString("sSkillClassMajor", ""));
-    getWidget(majorSkill0, "MajorSkill0");
-    getWidget(majorSkill1, "MajorSkill1");
-    getWidget(majorSkill2, "MajorSkill2");
-    getWidget(majorSkill3, "MajorSkill3");
-    getWidget(majorSkill4, "MajorSkill4");
-    skills.push_back(majorSkill0);
-    skills.push_back(majorSkill1);
-    skills.push_back(majorSkill2);
-    skills.push_back(majorSkill3);
-    skills.push_back(majorSkill4);
-
     setText("MinorSkillT", wm->getGameSettingString("sSkillClassMinor", ""));
-    getWidget(minorSkill0, "MinorSkill0");
-    getWidget(minorSkill1, "MinorSkill1");
-    getWidget(minorSkill2, "MinorSkill2");
-    getWidget(minorSkill3, "MinorSkill3");
-    getWidget(minorSkill4, "MinorSkill4");
-    skills.push_back(minorSkill0);
-    skills.push_back(minorSkill1);
-    skills.push_back(minorSkill2);
-    skills.push_back(minorSkill3);
-    skills.push_back(minorSkill4);
+    for(int i = 0; i < 5; i++)
+    {
+        char theIndex = '0'+i;
+        getWidget(majorSkill[i], std::string("MajorSkill").append(1, theIndex));
+        getWidget(minorSkill[i], std::string("MinorSkill").append(1, theIndex));
+        skills.push_back(majorSkill[i]);
+        skills.push_back(minorSkill[i]);
+    }
 
     std::vector<Widgets::MWSkillPtr>::const_iterator end = skills.end();
     for (std::vector<Widgets::MWSkillPtr>::const_iterator it = skills.begin(); it != end; ++it)
@@ -512,17 +445,17 @@ CreateClassDialog::CreateClassDialog(MWWorld::Environment& environment)
     favoriteAttribute0->setAttributeId(ESM::Attribute::Strength);
     favoriteAttribute1->setAttributeId(ESM::Attribute::Agility);
 
-    majorSkill0->setSkillId(ESM::Skill::Block);
-    majorSkill1->setSkillId(ESM::Skill::Armorer);
-    majorSkill2->setSkillId(ESM::Skill::MediumArmor);
-    majorSkill3->setSkillId(ESM::Skill::HeavyArmor);
-    majorSkill4->setSkillId(ESM::Skill::BluntWeapon);
+    majorSkill[0]->setSkillId(ESM::Skill::Block);
+    majorSkill[1]->setSkillId(ESM::Skill::Armorer);
+    majorSkill[2]->setSkillId(ESM::Skill::MediumArmor);
+    majorSkill[3]->setSkillId(ESM::Skill::HeavyArmor);
+    majorSkill[4]->setSkillId(ESM::Skill::BluntWeapon);
 
-    minorSkill0->setSkillId(ESM::Skill::LongBlade);
-    minorSkill1->setSkillId(ESM::Skill::Axe);
-    minorSkill2->setSkillId(ESM::Skill::Spear);
-    minorSkill3->setSkillId(ESM::Skill::Athletics);
-    minorSkill4->setSkillId(ESM::Skill::Enchant);
+    minorSkill[0]->setSkillId(ESM::Skill::LongBlade);
+    minorSkill[1]->setSkillId(ESM::Skill::Axe);
+    minorSkill[2]->setSkillId(ESM::Skill::Spear);
+    minorSkill[3]->setSkillId(ESM::Skill::Athletics);
+    minorSkill[4]->setSkillId(ESM::Skill::Enchant);
 }
 
 CreateClassDialog::~CreateClassDialog()
@@ -559,22 +492,20 @@ std::vector<int> CreateClassDialog::getFavoriteAttributes() const
 std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
 {
     std::vector<ESM::Skill::SkillEnum> v;
-    v.push_back(majorSkill0->getSkillId());
-    v.push_back(majorSkill1->getSkillId());
-    v.push_back(majorSkill2->getSkillId());
-    v.push_back(majorSkill3->getSkillId());
-    v.push_back(majorSkill4->getSkillId());
+    for(int i = 0; i < 5; i++)
+    {
+        v.push_back(majorSkill[i]->getSkillId());
+    }
     return v;
 }
 
 std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
 {
     std::vector<ESM::Skill::SkillEnum> v;
-    v.push_back(majorSkill0->getSkillId());
-    v.push_back(majorSkill1->getSkillId());
-    v.push_back(majorSkill2->getSkillId());
-    v.push_back(majorSkill3->getSkillId());
-    v.push_back(majorSkill4->getSkillId());
+    for(int i=0; i < 5; i++)
+    {
+        v.push_back(majorSkill[i]->getSkillId());
+    }
     return v;
 }
 
@@ -734,13 +665,10 @@ void CreateClassDialog::onBackClicked(MyGUI::Widget* _sender)
 /* SelectSpecializationDialog */
 
 SelectSpecializationDialog::SelectSpecializationDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
-  : Layout("openmw_chargen_select_specialization_layout.xml")
+  : WindowBase("openmw_chargen_select_specialization_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
 
@@ -788,43 +716,24 @@ void SelectSpecializationDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* SelectAttributeDialog */
 
 SelectAttributeDialog::SelectAttributeDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
-  : Layout("openmw_chargen_select_attribute_layout.xml")
+  : WindowBase("openmw_chargen_select_attribute_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
 
     setText("LabelT", wm->getGameSettingString("sAttributesMenu1", ""));
 
-    getWidget(attribute0, "Attribute0");
-    getWidget(attribute1, "Attribute1");
-    getWidget(attribute2, "Attribute2");
-    getWidget(attribute3, "Attribute3");
-    getWidget(attribute4, "Attribute4");
-    getWidget(attribute5, "Attribute5");
-    getWidget(attribute6, "Attribute6");
-    getWidget(attribute7, "Attribute7");
-
-    Widgets::MWAttributePtr attributes[8] = {
-        attribute0,
-        attribute1,
-        attribute2,
-        attribute3,
-        attribute4,
-        attribute5,
-        attribute6,
-        attribute7
-    };
-
     for (int i = 0; i < 8; ++i)
     {
-        attributes[i]->setWindowManager(wm);
-        attributes[i]->setAttributeId(ESM::Attribute::attributeIds[i]);
-        attributes[i]->eventClicked = MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
+        Widgets::MWAttributePtr attribute;
+        char theIndex = '0'+i;
+
+        getWidget(attribute,  std::string("Attribute").append(1, theIndex));
+        attribute->setWindowManager(wm);
+        attribute->setAttributeId(ESM::Attribute::attributeIds[i]);
+        attribute->eventClicked = MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
     }
 
     // TODO: These buttons should be managed by a Dialog class
@@ -852,13 +761,10 @@ void SelectAttributeDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* SelectSkillDialog */
 
 SelectSkillDialog::SelectSkillDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
-  : Layout("openmw_chargen_select_skill_layout.xml")
+  : WindowBase("openmw_chargen_select_skill_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
 
@@ -867,69 +773,47 @@ SelectSkillDialog::SelectSkillDialog(MWWorld::Environment& environment, MyGUI::I
     setText("MagicLabelT", wm->getGameSettingString("sSpecializationMagic", ""));
     setText("StealthLabelT", wm->getGameSettingString("sSpecializationStealth", ""));
 
-    getWidget(combatSkill0, "CombatSkill0");
-    getWidget(combatSkill1, "CombatSkill1");
-    getWidget(combatSkill2, "CombatSkill2");
-    getWidget(combatSkill3, "CombatSkill3");
-    getWidget(combatSkill4, "CombatSkill4");
-    getWidget(combatSkill5, "CombatSkill5");
-    getWidget(combatSkill6, "CombatSkill6");
-    getWidget(combatSkill7, "CombatSkill7");
-    getWidget(combatSkill8, "CombatSkill8");
-
-    getWidget(magicSkill0, "MagicSkill0");
-    getWidget(magicSkill1, "MagicSkill1");
-    getWidget(magicSkill2, "MagicSkill2");
-    getWidget(magicSkill3, "MagicSkill3");
-    getWidget(magicSkill4, "MagicSkill4");
-    getWidget(magicSkill5, "MagicSkill5");
-    getWidget(magicSkill6, "MagicSkill6");
-    getWidget(magicSkill7, "MagicSkill7");
-    getWidget(magicSkill8, "MagicSkill8");
-
-    getWidget(stealthSkill0, "StealthSkill0");
-    getWidget(stealthSkill1, "StealthSkill1");
-    getWidget(stealthSkill2, "StealthSkill2");
-    getWidget(stealthSkill3, "StealthSkill3");
-    getWidget(stealthSkill4, "StealthSkill4");
-    getWidget(stealthSkill5, "StealthSkill5");
-    getWidget(stealthSkill6, "StealthSkill6");
-    getWidget(stealthSkill7, "StealthSkill7");
-    getWidget(stealthSkill8, "StealthSkill8");
+    for(int i = 0; i < 9; i++)
+    {
+        char theIndex = '0'+i;
+        getWidget(combatSkill[i],  std::string("CombatSkill").append(1, theIndex));
+        getWidget(magicSkill[i],   std::string("MagicSkill").append(1, theIndex)); 
+        getWidget(stealthSkill[i], std::string("StealthSkill").append(1, theIndex));
+    }
 
     struct {Widgets::MWSkillPtr widget; ESM::Skill::SkillEnum skillId;} skills[3][9] = {
         {
-            {combatSkill0, ESM::Skill::Block},
-            {combatSkill1, ESM::Skill::Armorer},
-            {combatSkill2, ESM::Skill::MediumArmor},
-            {combatSkill3, ESM::Skill::HeavyArmor},
-            {combatSkill4, ESM::Skill::BluntWeapon},
-            {combatSkill5, ESM::Skill::LongBlade},
-            {combatSkill6, ESM::Skill::Axe},
-            {combatSkill7, ESM::Skill::Spear},
-            {combatSkill8, ESM::Skill::Athletics}
+            {combatSkill[0], ESM::Skill::Block},
+            {combatSkill[1], ESM::Skill::Armorer},
+            {combatSkill[2], ESM::Skill::MediumArmor},
+            {combatSkill[3], ESM::Skill::HeavyArmor},
+            {combatSkill[4], ESM::Skill::BluntWeapon},
+            {combatSkill[5], ESM::Skill::LongBlade},
+            {combatSkill[6], ESM::Skill::Axe},
+            {combatSkill[7], ESM::Skill::Spear},
+            {combatSkill[8], ESM::Skill::Athletics}
         },   
         {    
-            {magicSkill0, ESM::Skill::Enchant},
-            {magicSkill1, ESM::Skill::Destruction},
-            {magicSkill2, ESM::Skill::Alteration},
-            {magicSkill3, ESM::Skill::Illusion},
-            {magicSkill4, ESM::Skill::Conjuration},
-            {magicSkill5, ESM::Skill::Mysticism},
-            {magicSkill6, ESM::Skill::Restoration},
-            {magicSkill7, ESM::Skill::Alchemy},
-            {magicSkill8, ESM::Skill::Unarmored}
+            {magicSkill[0], ESM::Skill::Enchant},
+            {magicSkill[1], ESM::Skill::Destruction},
+            {magicSkill[2], ESM::Skill::Alteration},
+            {magicSkill[3], ESM::Skill::Illusion},
+            {magicSkill[4], ESM::Skill::Conjuration},
+            {magicSkill[5], ESM::Skill::Mysticism},
+            {magicSkill[6], ESM::Skill::Restoration},
+            {magicSkill[7], ESM::Skill::Alchemy},
+            {magicSkill[8], ESM::Skill::Unarmored}
         },   
         {    
-            {stealthSkill0, ESM::Skill::Security},
-            {stealthSkill1, ESM::Skill::Sneak},
-            {stealthSkill2, ESM::Skill::Acrobatics},
-            {stealthSkill3, ESM::Skill::LightArmor},
-            {stealthSkill4, ESM::Skill::ShortBlade},
-            {stealthSkill5 ,ESM::Skill::Marksman},
-            {stealthSkill6 ,ESM::Skill::Mercantile},
-            {stealthSkill7 ,ESM::Skill::Speechcraft},
-            {stealthSkill8 ,ESM::Skill::HandToHand}
+            {stealthSkill[0], ESM::Skill::Security},
+            {stealthSkill[1], ESM::Skill::Sneak},
+            {stealthSkill[2], ESM::Skill::Acrobatics},
+            {stealthSkill[3], ESM::Skill::LightArmor},
+            {stealthSkill[4], ESM::Skill::ShortBlade},
+            {stealthSkill[5] ,ESM::Skill::Marksman},
+            {stealthSkill[6] ,ESM::Skill::Mercantile},
+            {stealthSkill[7] ,ESM::Skill::Speechcraft},
+            {stealthSkill[8] ,ESM::Skill::HandToHand}
         }
     };
 
@@ -966,14 +850,10 @@ void SelectSkillDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* DescriptionDialog */
 
 DescriptionDialog::DescriptionDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize)
-  : Layout("openmw_chargen_class_description_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_chargen_class_description_layout.xml", environment)
 {
     // Centre dialog
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     getWidget(textEdit, "TextEdit");
 

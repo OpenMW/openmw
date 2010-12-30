@@ -1,13 +1,9 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
-#include <components/esm_store/store.hpp>
-
-#include <openengine/gui/layout.hpp>
-
 #include <MyGUI.h>
-
 #include "widgets.hpp"
+#include "window_base.hpp"
 
 namespace MWWorld
 {
@@ -23,7 +19,7 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    class InfoBoxDialog : public OEngine::GUI::Layout
+    class InfoBoxDialog : public WindowBase
     {
     public:
         InfoBoxDialog(MWWorld::Environment& environment);
@@ -49,10 +45,9 @@ namespace MWGui
         void onButtonClicked(MyGUI::WidgetPtr _sender);
 
     private:
-        void center();
 
-        MWWorld::Environment& environment;
-
+        void fitToText(MyGUI::StaticTextPtr widget);
+        void layoutVertically(MyGUI::WidgetPtr widget, int margin);
         int currentButton;
         MyGUI::WidgetPtr textBox;
         MyGUI::StaticTextPtr text;
@@ -75,7 +70,7 @@ namespace MWGui
         ClassChoiceDialog(MWWorld::Environment& environment);
     };
 
-    class GenerateClassResultDialog : public OEngine::GUI::Layout
+    class GenerateClassResultDialog : public WindowBase
     {
     public:
         GenerateClassResultDialog(MWWorld::Environment& environment);
@@ -103,15 +98,13 @@ namespace MWGui
         void onBackClicked(MyGUI::Widget* _sender);
 
     private:
-        MWWorld::Environment& environment;
-
         MyGUI::StaticImagePtr classImage;
         MyGUI::StaticTextPtr  className;
 
         std::string currentClassId;
     };
 
-    class PickClassDialog : public OEngine::GUI::Layout
+    class PickClassDialog : public WindowBase
     {
     public:
         PickClassDialog(MWWorld::Environment& environment);
@@ -145,19 +138,17 @@ namespace MWGui
         void updateClasses();
         void updateStats();
 
-        MWWorld::Environment& environment;
-
         MyGUI::StaticImagePtr classImage;
         MyGUI::ListPtr        classList;
         MyGUI::StaticTextPtr  specializationName;
-        Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
-        Widgets::MWSkillPtr   majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
-        Widgets::MWSkillPtr   minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
+        Widgets::MWAttributePtr favoriteAttribute[2];
+        Widgets::MWSkillPtr   majorSkill[5];
+        Widgets::MWSkillPtr   minorSkill[5];
 
         std::string currentClassId;
     };
 
-    class SelectSpecializationDialog : public OEngine::GUI::Layout
+    class SelectSpecializationDialog : public WindowBase
     {
     public:
         SelectSpecializationDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
@@ -187,7 +178,7 @@ namespace MWGui
         ESM::Class::Specialization specializationId;
     };
 
-    class SelectAttributeDialog : public OEngine::GUI::Layout
+    class SelectAttributeDialog : public WindowBase
     {
     public:
         SelectAttributeDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
@@ -214,14 +205,12 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        Widgets::MWAttributePtr attribute0, attribute1, attribute2, attribute3,
-                                attribute4, attribute5, attribute6, attribute7;
         Widgets::MWAttributePtr affectedWidget;
 
         ESM::Attribute::AttributeID attributeId;
     };
 
-    class SelectSkillDialog : public OEngine::GUI::Layout
+    class SelectSkillDialog : public WindowBase
     {
     public:
         SelectSkillDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
@@ -248,18 +237,15 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        Widgets::MWSkillPtr combatSkill0, combatSkill1, combatSkill2, combatSkill3, combatSkill4,
-                            combatSkill5, combatSkill6, combatSkill7, combatSkill8;
-        Widgets::MWSkillPtr magicSkill0, magicSkill1, magicSkill2, magicSkill3, magicSkill4,
-                            magicSkill5, magicSkill6, magicSkill7, magicSkill8;
-        Widgets::MWSkillPtr stealthSkill0, stealthSkill1, stealthSkill2, stealthSkill3, stealthSkill4,
-                            stealthSkill5, stealthSkill6, stealthSkill7, stealthSkill8;
+        Widgets::MWSkillPtr combatSkill[9];
+        Widgets::MWSkillPtr magicSkill[9];
+        Widgets::MWSkillPtr stealthSkill[9];
         Widgets::MWSkillPtr affectedWidget;
 
         ESM::Skill::SkillEnum skillId;
     };
 
-    class DescriptionDialog : public OEngine::GUI::Layout
+    class DescriptionDialog : public WindowBase
     {
     public:
         DescriptionDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
@@ -279,12 +265,10 @@ namespace MWGui
         void onOkClicked(MyGUI::Widget* _sender);
 
     private:
-        MWWorld::Environment& environment;
-
         MyGUI::EditPtr textEdit;
     };
 
-    class CreateClassDialog : public OEngine::GUI::Layout
+    class CreateClassDialog : public WindowBase
     {
     public:
         CreateClassDialog(MWWorld::Environment& environment);
@@ -328,13 +312,11 @@ namespace MWGui
         void onDialogCancel();
 
     private:
-        MWWorld::Environment& environment;
-
         MyGUI::EditPtr          editName;
         MyGUI::WidgetPtr        specializationName;
         Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
-        Widgets::MWSkillPtr     majorSkill0, majorSkill1, majorSkill2, majorSkill3, majorSkill4;
-        Widgets::MWSkillPtr     minorSkill0, minorSkill1, minorSkill2, minorSkill3, minorSkill4;
+        Widgets::MWSkillPtr     majorSkill[5];
+        Widgets::MWSkillPtr     minorSkill[5];
         std::vector<Widgets::MWSkillPtr> skills;
         std::string             description;
 

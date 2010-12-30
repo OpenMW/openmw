@@ -14,16 +14,11 @@ using namespace Widgets;
 const int ReviewDialog::lineHeight = 18;
 
 ReviewDialog::ReviewDialog(MWWorld::Environment& environment)
-    : Layout("openmw_chargen_review_layout.xml")
-    , environment(environment)
+    : WindowBase("openmw_chargen_review_layout.xml", environment)
     , lastPos(0)
 {
     // Centre dialog
-    MyGUI::IntSize gameWindowSize = environment.mWindowManager->getGui()->getViewSize();
-    MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
-    mMainWidget->setCoord(coord);
+    center();
 
     WindowManager *wm = environment.mWindowManager;
 
@@ -85,7 +80,7 @@ ReviewDialog::ReviewDialog(MWWorld::Environment& environment)
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
         skillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
-        skillWidgetMap.insert(std::pair<int, MyGUI::WidgetPtr>(i, nullptr));
+        skillWidgetMap.insert(std::pair<int, MyGUI::StaticTextPtr>(i, nullptr));
     }
 
     static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord = MyGUI::newDelegate(this, &ReviewDialog::onWindowResize);
@@ -180,7 +175,7 @@ void ReviewDialog::setAttribute(ESM::Attribute::AttributeID attributeId, const M
 void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::Stat<float>& value)
 {
     skillValues[skillId] = value;
-    MyGUI::WidgetPtr widget = skillWidgetMap[skillId];
+    MyGUI::StaticTextPtr widget = skillWidgetMap[skillId];
     if (widget)
     {
         float modified = value.getModified(), base = value.getBase();
@@ -214,7 +209,7 @@ void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vec
     }
 }
 
-void ReviewDialog::setStyledText(MyGUI::WidgetPtr widget, ColorStyle style, const std::string &value)
+void ReviewDialog::setStyledText(MyGUI::StaticTextPtr widget, ColorStyle style, const std::string &value)
 {
     widget->setCaption(value);
     if (style == CS_Super)
@@ -244,7 +239,7 @@ void ReviewDialog::addGroup(const std::string &label, MyGUI::IntCoord &coord1, M
     coord2.top += lineHeight;
 }
 
-MyGUI::WidgetPtr ReviewDialog::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::StaticTextPtr ReviewDialog::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::StaticTextPtr skillNameWidget, skillValueWidget;
 
@@ -279,8 +274,6 @@ void ReviewDialog::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGU
 void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     WindowManager *wm = environment.mWindowManager;
-    MWMechanics::MechanicsManager *mm = environment.mMechanicsManager;
-    ESMS::ESMStore &store = environment.mWorld->getStore();
 
     // Add a line separator if there are items above
     if (!skillWidgets.empty())
@@ -307,7 +300,7 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
             style = CS_Super;
         else if (modified < base)
             style = CS_Sub;
-        MyGUI::WidgetPtr widget = addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+        MyGUI::StaticTextPtr widget = addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
         skillWidgetMap[skillId] = widget;
     }
 }
@@ -332,9 +325,6 @@ void ReviewDialog::updateSkillArea()
 
     if (!miscSkills.empty())
         addSkills(miscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
-
-    WindowManager *wm = environment.mWindowManager;
-    ESMS::ESMStore &store = environment.mWorld->getStore();
 
     clientHeight = coord1.top;
     updateScroller();

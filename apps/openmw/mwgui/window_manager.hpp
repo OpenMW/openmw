@@ -54,6 +54,7 @@ namespace MWGui
   class TextInputDialog;
   class InfoBoxDialog;
   class RaceDialog;
+  class DialogueWindow;
   class ClassChoiceDialog;
   class GenerateClassResultDialog;
   class PickClassDialog;
@@ -82,6 +83,7 @@ namespace MWGui
     // Character creation
     TextInputDialog *nameDialog;
     RaceDialog *raceDialog;
+    DialogueWindow *dialogueWindow;
     ClassChoiceDialog *classChoiceDialog;
     InfoBoxDialog *generateClassQuestionDialog;
     GenerateClassResultDialog *generateClassResultDialog;
@@ -250,6 +252,9 @@ namespace MWGui
     const std::string &getGameSettingString(const std::string &id, const std::string &default_);
 
   private:
+
+    void onDialogueWindowBye();
+
     // Character generation: Name dialog
     void onNameDialogDone();
 

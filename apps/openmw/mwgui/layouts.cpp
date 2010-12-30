@@ -13,8 +13,7 @@ using namespace MWGui;
 const int StatsWindow::lineHeight = 18;
 
 StatsWindow::StatsWindow (MWWorld::Environment& environment)
-  : Layout("openmw_stats_window_layout.xml")
-  , environment(environment)
+  : WindowBase("openmw_stats_window_layout.xml", environment)
   , lastPos(0)
   , reputation(0)
   , bounty(0)
@@ -56,10 +55,11 @@ StatsWindow::StatsWindow (MWWorld::Environment& environment)
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
         skillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
-        skillWidgetMap.insert(std::pair<int, MyGUI::WidgetPtr>(i, nullptr));
+        skillWidgetMap.insert(std::pair<int, MyGUI::StaticTextPtr>(i, nullptr));
     }
 
-    static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord = MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
+    MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
+    t->eventWindowChangeCoord = MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
 }
 
 void StatsWindow::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos)
@@ -99,7 +99,7 @@ void StatsWindow::setPlayerName(const std::string& playerName)
     mMainWidget->setCaption(playerName);
 }
 
-void StatsWindow::setStyledText(MyGUI::WidgetPtr widget, ColorStyle style, const std::string &value)
+void StatsWindow::setStyledText(MyGUI::StaticTextPtr widget, ColorStyle style, const std::string &value)
 {
     widget->setCaption(value);
     if (style == CS_Super)
@@ -205,13 +205,13 @@ void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<float
         {"SkillSpeechcraft", ESM::Skill::Speechcraft},
         {"SkillHandToHand", ESM::Skill::HandToHand},
     };
-    for (int i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
+    for (size_t i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
     {
         if (skillMap[i].id == id)
         {
             int skillId = skillMap[i].skillId;
             skillValues[skillId] = value;
-            MyGUI::WidgetPtr widget = skillWidgetMap[skillId];
+            MyGUI::StaticTextPtr widget = skillWidgetMap[skillId];
             if (widget)
             {
                 float modified = value.getModified(), base = value.getBase();
@@ -277,7 +277,7 @@ void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, My
     coord2.top += lineHeight;
 }
 
-MyGUI::WidgetPtr StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::StaticTextPtr StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::StaticTextPtr skillNameWidget, skillValueWidget;
 
@@ -312,8 +312,6 @@ void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI
 void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     WindowManager *wm = environment.mWindowManager;
-    MWMechanics::MechanicsManager *mm = environment.mMechanicsManager;
-    ESMS::ESMStore &store = environment.mWorld->getStore();
 
     // Add a line separator if there are items above
     if (!skillWidgets.empty())
@@ -340,7 +338,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
             style = CS_Super;
         else if (modified < base)
             style = CS_Sub;
-        MyGUI::WidgetPtr widget = addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+        MyGUI::StaticTextPtr widget = addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
         skillWidgetMap[skillId] = widget;
     }
 }

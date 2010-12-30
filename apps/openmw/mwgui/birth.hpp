@@ -1,7 +1,7 @@
 #ifndef MWGUI_BIRTH_H
 #define MWGUI_BIRTH_H
 
-#include <openengine/gui/layout.hpp>
+#include "window_base.hpp"
 
 namespace MWWorld
 {
@@ -17,7 +17,7 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    class BirthDialog : public OEngine::GUI::Layout
+    class BirthDialog : public WindowBase
     {
     public:
         BirthDialog(MWWorld::Environment& environment);
@@ -56,8 +56,6 @@ namespace MWGui
     private:
         void updateBirths();
         void updateSpells();
-
-        MWWorld::Environment& environment;
 
         MyGUI::ListPtr    birthList;
         MyGUI::WidgetPtr  spellArea;

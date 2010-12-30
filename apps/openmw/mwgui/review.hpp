@@ -1,8 +1,7 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
-#include <components/esm_store/store.hpp>
-#include <openengine/gui/layout.hpp>
+#include "window_base.hpp"
 #include "../mwmechanics/stat.hpp"
 #include "widgets.hpp"
 
@@ -20,7 +19,7 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    class ReviewDialog : public OEngine::GUI::Layout
+    class ReviewDialog : public WindowBase
     {
     public:
         typedef std::vector<int> SkillList;
@@ -92,11 +91,11 @@ namespace MWGui
             CS_Normal,
             CS_Super
         };
-        void setStyledText(MyGUI::WidgetPtr widget, ColorStyle style, const std::string &value);
+        void setStyledText(MyGUI::StaticTextPtr widget, ColorStyle style, const std::string &value);
         void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        MyGUI::WidgetPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+        MyGUI::StaticTextPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void updateScroller();
         void updateSkillArea();
@@ -106,7 +105,6 @@ namespace MWGui
 
         static const int lineHeight;
 
-        MWWorld::Environment& environment;
         MyGUI::StaticTextPtr nameWidget, raceWidget, classWidget, birthSignWidget;
         MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
         MyGUI::VScrollPtr skillScrollerWidget;
@@ -118,7 +116,7 @@ namespace MWGui
 
         SkillList majorSkills, minorSkills, miscSkills;
         std::map<int, MWMechanics::Stat<float> > skillValues;
-        std::map<int, MyGUI::WidgetPtr> skillWidgetMap;
+        std::map<int, MyGUI::StaticTextPtr> skillWidgetMap;
         std::string name, raceId, birthSignId;
         ESM::Class klass;
         std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information

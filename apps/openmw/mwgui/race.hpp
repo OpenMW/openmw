@@ -3,7 +3,7 @@
 
 #include <components/esm_store/store.hpp>
 
-#include <openengine/gui/layout.hpp>
+#include "window_base.hpp"
 
 #include <boost/array.hpp>
 
@@ -21,7 +21,7 @@ namespace MWGui
 {
     using namespace MyGUI;
 
-    class RaceDialog : public OEngine::GUI::Layout
+    class RaceDialog : public WindowBase
     {
     public:
         RaceDialog(MWWorld::Environment& environment);
@@ -79,8 +79,6 @@ namespace MWGui
         void updateRaces();
         void updateSkills();
         void updateSpellPowers();
-
-        MWWorld::Environment& environment;
 
         MyGUI::CanvasPtr  appearanceBox;
         MyGUI::ListPtr    raceList;

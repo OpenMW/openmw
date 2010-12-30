@@ -43,6 +43,9 @@ set(GAMEGUI_HEADER
     mwgui/review.hpp
     mwgui/window_manager.hpp
     mwgui/console.hpp
+    mwgui/dialogue.hpp
+    mwgui/dialogue_history.hpp
+    mwgui/window_base.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
@@ -54,6 +57,9 @@ set(GAMEGUI
     mwgui/birth.cpp
     mwgui/class.cpp
     mwgui/review.cpp
+    mwgui/dialogue.cpp
+    mwgui/dialogue_history.cpp
+    mwgui/window_base.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
