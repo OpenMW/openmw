@@ -649,17 +649,22 @@ namespace MWGui
     } };
 }
 
+namespace MWGui
+{
+
+    struct ClassPoint
+    {
+        const char *id;
+        // Specialization points to match, in order: Stealth, Combat, Magic
+        // Note: Order is taken from http://www.uesp.net/wiki/Morrowind:Class_Quiz
+        int points[3];
+    };
+}
+
 void WindowManager::showClassQuestionDialog()
 {
     if (generateClassStep == generateClassSteps.size())
     {
-        struct ClassPoint
-        {
-            const char *id;
-            // Specialization points to match, in order: Stealth, Combat, Magic
-            // Note: Order is taken from http://www.uesp.net/wiki/Morrowind:Class_Quiz
-            int points[3];
-        };
 
         static boost::array<ClassPoint, 23> classes = { {
             {"Acrobat",     {6, 2, 2}},
@@ -709,7 +714,12 @@ void WindowManager::showClassQuestionDialog()
             else if (generateClassSpecializations[2] >= 7)
                 generateClass = "Mage";
             else
-                throw new std::exception("Failed to deduce class from chosen answers in generate class dialog");
+            {
+                std::cerr
+                    << "Failed to deduce class from chosen answers in generate class dialog"
+                    << std::endl;
+                generateClass = "Thief";
+            }
         }
 
         if (generateClassResultDialog)
@@ -834,7 +844,6 @@ void WindowManager::onCreateClassDialogDone()
 {
     if (createClassDialog)
     {
-        // TODO: The ESM::Class should have methods to set these values to ensure correct data is assigned
         ESM::Class klass;
         klass.name = createClassDialog->getName();
         klass.description = createClassDialog->getDescription();
