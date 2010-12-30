@@ -115,13 +115,12 @@ namespace ESMS
       recLists[REC_GLOB] = &globals;
       recLists[REC_GMST] = &gameSettings;
       recLists[REC_INGR] = &ingreds;
-      recLists[REC_LAND] = &lands;
+      //recLists[REC_LAND] = &lands;
       recLists[REC_LEVC] = &creatureLists;
       recLists[REC_LEVI] = &itemLists;
       recLists[REC_LIGH] = &lights;
       recLists[REC_LOCK] = &lockpicks;
       recLists[REC_LTEX] = &landTexts;
-      //recLists[REC_MGEF] = &magicEffects;
       recLists[REC_MISC] = &miscItems;
       recLists[REC_NPC_] = &npcs;
       recLists[REC_NPCC] = &npcChange;

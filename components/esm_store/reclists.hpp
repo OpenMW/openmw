@@ -9,7 +9,12 @@
 #include <assert.h>
 #include <stdexcept>
 #include <iterator>
+#include    <boost/algorithm/string.hpp>
 
+
+
+using namespace boost::algorithm;
+	
 namespace ESMS
 {
   using namespace ESM;
@@ -233,6 +238,15 @@ namespace ESMS
     }
   };
 
+    struct ciLessBoost : std::binary_function<std::string, std::string, bool>
+{
+    bool operator() (const std::string & s1, const std::string & s2) const {
+		                                       //case insensitive version of is_less
+        return lexicographical_compare(s1, s2, is_iless());
+    }
+};
+
+	
   // Cells aren't simply indexed by name. Exterior cells are treated
   // separately.
   // TODO: case handling (cell names are case-insensitive, but they are also showen to the
@@ -245,7 +259,7 @@ namespace ESMS
     int getSize() { return count; }
 
     // List of interior cells. Indexed by cell name.
-    typedef std::map<std::string,Cell*> IntCells;
+    typedef std::map<std::string,Cell*, ciLessBoost> IntCells;
     IntCells intCells;
 
     // List of exterior cells. Indexed as extCells[gridX][gridY].
@@ -267,6 +281,7 @@ namespace ESMS
         }
       }
     }
+
 
     const Cell* findInt(const std::string &id) const
     {
@@ -300,7 +315,7 @@ namespace ESMS
             const ExtCellsCol& column = iter->second;
             for (ExtCellsCol::const_iterator iter = column.begin(); iter!=column.end(); ++iter)
             {
-                if (iter->second->name==id)
+                if ( toLower(iter->second->name) == toLower(id))
                     return iter->second;
             }
         }

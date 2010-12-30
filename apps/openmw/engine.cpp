@@ -1,13 +1,17 @@
 #include "engine.hpp"
+#include "components/esm/loadcell.hpp"
 
 #include <cassert>
 
 #include <iostream>
 #include <utility>
 
+#include "components/esm/records.hpp"
+#include <components/esm_store/cell_store.hpp>
 #include <components/misc/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
-
+#include <components/esm/loadregn.hpp>
+#include <components/esm/esm_reader.hpp>
 #include <openengine/gui/manager.hpp>
 #include "mwgui/window_manager.hpp"
 
@@ -37,6 +41,9 @@
 #include <MyGUI_WidgetManager.h>
 #include "mwgui/class.hpp"
 
+
+//using namespace ESM;
+
 void OMW::Engine::executeLocalScripts()
 {
     for (MWWorld::World::ScriptList::const_iterator iter (
@@ -57,8 +64,77 @@ void OMW::Engine::executeLocalScripts()
     mIgnoreLocalPtr = MWWorld::Ptr();
 }
 
+
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
+	if(! (mEnvironment.mSoundManager->isMusicPlaying()))
+	{
+		// Play some good 'ol tunes
+			mEnvironment.mSoundManager->startRandomTitle();
+	}
+
+	std::string effect;
+
+		    
+	                                            
+	MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
+	//If the region has changed
+	if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
+			timer.restart();
+			if (test.name != current->cell->region)
+			{
+				total = 0;
+				test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
+			}
+			
+			if(test.soundList.size() > 0)
+			{
+				std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
+				//mEnvironment.mSoundManager
+				if(total == 0){
+					while (!(soundIter == test.soundList.end()))
+					{
+						ESM::NAME32 go = soundIter->sound;
+						int chance = (int) soundIter->chance;
+						//std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+						soundIter++;
+						total += chance;
+					}
+				}
+
+			    srand ( time(NULL) );
+					int r = rand() % total;        //old random code
+					int pos = 0;
+					soundIter = test.soundList.begin();
+				while (!(soundIter == test.soundList.end()))
+				{
+					 const ESM::NAME32 go = soundIter->sound;
+					int chance = (int) soundIter->chance;
+					//std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+					soundIter++;
+					if( r - pos < chance)
+					{
+						effect = go.name;
+						//play sound
+						std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+						mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
+						
+						break;
+
+					}
+					pos += chance;
+				}
+			}
+			
+			//mEnvironment.mSoundManager->playSound(effect, 1.0, 1.0);
+			//printf("REGION: %s\n", test.name);
+
+		}
+	else if(current->cell->data.flags & current->cell->Interior)
+	{
+		test.name = "";
+	}
+
     try
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
@@ -108,6 +184,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     {
         std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
+	//std::cout << "TESTING2";
 
     return true;
 }
@@ -217,6 +294,11 @@ void OMW::Engine::go()
     assert (!mCellName.empty());
     assert (!mMaster.empty());
 
+	test.name = "";
+	total = 0;
+
+	
+
     std::cout << "Data directory: " << mDataDir << "\n";
 
     const char* plugCfg = "plugins.cfg";
@@ -257,7 +339,7 @@ void OMW::Engine::go()
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
-                                                           (mDataDir / "Sound").file_string(),
+                                                           (mDataDir),
                                                            mUseSound);
 
     // Create script system
@@ -306,16 +388,7 @@ void OMW::Engine::go()
     mOgre.getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
-    std::string music = (mDataDir / "Music/Explore/mx_explore_5.mp3").file_string();
-    try
-      {
-        std::cout << "Playing " << music << "\n";
-        mEnvironment.mSoundManager->streamMusic(music);
-      }
-    catch(std::exception &e)
-      {
-        std::cout << "  Music Error: " << e.what() << "\n";
-      }
+      mEnvironment.mSoundManager->startRandomTitle();
 
     // scripts
     if (mCompileAll)

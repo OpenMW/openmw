@@ -12,6 +12,8 @@
 
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
+#include <boost/timer.hpp>
+
 
 namespace Compiler
 {
@@ -52,6 +54,8 @@ namespace OMW
 
     class Engine : private Ogre::FrameListener
     {
+
+			//int nFiles;
             boost::filesystem::path mDataDir;
             OEngine::Render::OgreRenderer mOgre;
             std::string mCellName;
@@ -61,12 +65,15 @@ namespace OMW
             bool mNewGame;
             bool mUseSound;
             bool mCompileAll;
+            int total;
 
             MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
             OEngine::GUI::MyGUIManager *mGuiManager;
+			ESM::Region test;
+			boost::timer timer;
 
             int focusFrameCounter;
             static const int focusUpdateFrame = 10;
@@ -79,6 +86,7 @@ namespace OMW
 
             /// add resources directory
             /// \note This function works recursively.
+
             void addResourcesDirectory (const boost::filesystem::path& path);
 
             /// Load all BSA files in data directory.
