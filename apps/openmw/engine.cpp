@@ -67,7 +67,7 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
-	if(! (mEnvironment.mSoundManager->isMusicPlaying()))
+	if(mUseSound && !(mEnvironment.mSoundManager->isMusicPlaying()))
 	{
 		// Play some good 'ol tunes
 			mEnvironment.mSoundManager->startRandomTitle();
