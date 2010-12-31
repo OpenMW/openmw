@@ -103,6 +103,7 @@ set(GAMESCRIPT_HEADER
     mwscript/controlextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
+    mwscript/ref.hpp
     )
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})
 

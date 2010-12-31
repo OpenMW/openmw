@@ -8,6 +8,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "interpretercontext.hpp"
+#include "ref.hpp"
 
 #include <iostream>
 
@@ -15,16 +16,14 @@ namespace MWScript
 {
     namespace Ai
     {
+        template<class R>
         class OpAiTravel : public Interpreter::Opcode1
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Float x = runtime[0].mInteger;
                     runtime.pop();
@@ -42,49 +41,14 @@ namespace MWScript
                 }
         };
 
-        class OpAiTravelExplicit : public Interpreter::Opcode1
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    Interpreter::Type_Float x = runtime[0].mInteger;
-                    runtime.pop();
-
-                    Interpreter::Type_Float y = runtime[0].mInteger;
-                    runtime.pop();
-
-                    Interpreter::Type_Float z = runtime[0].mInteger;
-                    runtime.pop();
-
-                    // discard additional arguments (reset), because we have no idea what they mean.
-                    for (unsigned int i=0; i<arg0; ++i) runtime.pop();
-
-                    std::cout << "AiTravel: " << x << ", " << y << ", " << z << std::endl;
-                }
-        };
-
+        template<class R>
         class OpAiEscort : public Interpreter::Opcode1
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     std::string actor = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -109,53 +73,14 @@ namespace MWScript
                 }
         };
 
-        class OpAiEscortExplicit : public Interpreter::Opcode1
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    std::string actor = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Float duration = runtime[0].mInteger;
-                    runtime.pop();
-
-                    Interpreter::Type_Float x = runtime[0].mInteger;
-                    runtime.pop();
-
-                    Interpreter::Type_Float y = runtime[0].mInteger;
-                    runtime.pop();
-
-                    Interpreter::Type_Float z = runtime[0].mInteger;
-                    runtime.pop();
-
-                    // discard additional arguments (reset), because we have no idea what they mean.
-                    for (unsigned int i=0; i<arg0; ++i) runtime.pop();
-
-                    std::cout << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration
-                        << std::endl;
-                }
-        };
-
+        template<class R>
         class OpGetAiPackageDone : public Interpreter::Opcode0
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value = 0;
 
@@ -163,25 +88,6 @@ namespace MWScript
                 }
         };
 
-        class OpGetAiPackageDoneExplicit : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    Interpreter::Type_Integer value = 0;
-
-                    runtime.push (value);
-                }
-        };
 
 
         const int opcodeAiTravel = 0x20000;
@@ -204,12 +110,13 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment3 (opcodeAiTravel, new OpAiTravel);
-            interpreter.installSegment3 (opcodeAiTravelExplicit, new OpAiTravelExplicit);
-            interpreter.installSegment3 (opcodeAiEscort, new OpAiEscort);
-            interpreter.installSegment3 (opcodeAiEscortExplicit, new OpAiEscortExplicit);
-            interpreter.installSegment5 (opcodeGetAiPackageDone, new OpGetAiPackageDone);
-            interpreter.installSegment5 (opcodeGetAiPackageDoneExplicit, new OpGetAiPackageDoneExplicit);
+            interpreter.installSegment3 (opcodeAiTravel, new OpAiTravel<ImplicitRef>);
+            interpreter.installSegment3 (opcodeAiTravelExplicit, new OpAiTravel<ExplicitRef>);
+            interpreter.installSegment3 (opcodeAiEscort, new OpAiEscort<ImplicitRef>);
+            interpreter.installSegment3 (opcodeAiEscortExplicit, new OpAiEscort<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetAiPackageDone, new OpGetAiPackageDone<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetAiPackageDoneExplicit,
+                new OpGetAiPackageDone<ExplicitRef>);
         }
     }
 }
