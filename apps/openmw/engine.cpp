@@ -75,8 +75,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
 	std::string effect;
 
-		    
-	                                            
+
+
 	MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
 	//If the region has changed
 	if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
@@ -86,7 +86,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 				total = 0;
 				test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
 			}
-			
+
 			if(test.soundList.size() > 0)
 			{
 				std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
@@ -118,14 +118,14 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 						//play sound
 						std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
 						mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
-						
+
 						break;
 
 					}
 					pos += chance;
 				}
 			}
-			
+
 			//mEnvironment.mSoundManager->playSound(effect, 1.0, 1.0);
 			//printf("REGION: %s\n", test.name);
 
@@ -297,7 +297,7 @@ void OMW::Engine::go()
 	test.name = "";
 	total = 0;
 
-	
+
 
     std::cout << "Data directory: " << mDataDir << "\n";
 
@@ -421,36 +421,45 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
-    std::string handle = mEnvironment.mWorld->getFacedHandle();
-
-    if (handle.empty())
-        return;
-
-    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
-
-    if (ptr.isEmpty())
-        return;
-
-    MWScript::InterpreterContext interpreterContext (mEnvironment,
-        &ptr.getRefData().getLocals(), ptr);
-
-    boost::shared_ptr<MWWorld::Action> action =
-        MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
-        mEnvironment);
-
-    interpreterContext.activate (ptr, action);
-
-    std::string script = MWWorld::Class::get (ptr).getScript (ptr);
-
-    if (!script.empty())
+    // TODO: This is only a workaround. The input dispatcher should catch any exceptions thrown inside
+    // the input handling functions. Looks like this will require an OpenEngine modification.
+    try
     {
-        mIgnoreLocalPtr = ptr;
-        mScriptManager->run (script, interpreterContext);
+        std::string handle = mEnvironment.mWorld->getFacedHandle();
+
+        if (handle.empty())
+            return;
+
+        MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+        if (ptr.isEmpty())
+            return;
+
+        MWScript::InterpreterContext interpreterContext (mEnvironment,
+            &ptr.getRefData().getLocals(), ptr);
+
+        boost::shared_ptr<MWWorld::Action> action =
+            MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
+            mEnvironment);
+
+        interpreterContext.activate (ptr, action);
+
+        std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+        if (!script.empty())
+        {
+            mIgnoreLocalPtr = ptr;
+            mScriptManager->run (script, interpreterContext);
+        }
+
+        if (!interpreterContext.hasActivationBeenHandled())
+        {
+            interpreterContext.executeActivation();
+        }
     }
-
-    if (!interpreterContext.hasActivationBeenHandled())
+    catch (const std::exception& e)
     {
-        interpreterContext.executeActivation();
+        std::cerr << "Activation failed: " << e.what() << std::endl;
     }
 }
 
