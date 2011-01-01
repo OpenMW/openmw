@@ -101,7 +101,7 @@ namespace MWClass
 		const ESM::BodyPart *hands = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands.1st");
 
 
-		std::cout << "RACE" << bodyRaceID << "\n";
+		//std::cout << "RACE" << bodyRaceID << "\n";
 
 		Ogre::Vector3 pos2 = Ogre::Vector3( 0, .5, 75);
 		std::string upperarmpath[2] = {npcName + "chest", npcName + "upper arm"};
