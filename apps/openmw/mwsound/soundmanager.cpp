@@ -364,10 +364,14 @@ namespace MWSound
 
 
     bool SoundManager::isMusicPlaying()
-   {
-	    bool test =  mData->music->isPlaying();
-		return test;
-   }
+    {
+	    bool test = false;
+        if(mData && mData->music)
+        {
+            test = mData->music->isPlaying();
+        }
+        return test;
+    }
 
    SoundManager::SoundImpl SoundManager::getMData()
   {
