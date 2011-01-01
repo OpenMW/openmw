@@ -118,25 +118,25 @@ namespace MWClass
 		
 		//addresses[1] = npcName + "groin";
 		if(upperleg){
-		cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( 6, 0, -14), axis, Ogre::Radian(3.14), npcName + "upper leg", addresses, numbers); //-18
-		cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( -6, 0, -14), axis, Ogre::Radian(0), npcName + "upper leg2", addresses2, numbers);
+		cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( 6, 0, -16), axis, Ogre::Radian(3.14), npcName + "upper leg", addresses, numbers); //-18
+		cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( -6, 0, -16), axis, Ogre::Radian(0), npcName + "upper leg2", addresses2, numbers);
 		addresses2[numbers] = npcName + "upper leg2";
 		addresses[numbers++] = npcName + "upper leg";
 		cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), addresses, numbers);
 		}
 		if(knee)
 		{
-			cellRender.insertMesh ("meshes\\" + knee->model, Ogre::Vector3( 0, -2, -18), axis, Ogre::Radian(0), npcName + "knee", addresses, numbers);
+			cellRender.insertMesh ("meshes\\" + knee->model, Ogre::Vector3( 0, -1, -23), axis, Ogre::Radian(0), npcName + "knee", addresses, numbers);
 		//cellRender.rotateMesh(Ogre::Vector3(0, 1, 0), Ogre::Radian (1), npcName + "upper arm");
-		cellRender.insertMesh ("meshes\\" + knee->model, Ogre::Vector3( 0, -2, -18), axis, Ogre::Radian(0), npcName + "knee2", addresses2, numbers);
+		cellRender.insertMesh ("meshes\\" + knee->model, Ogre::Vector3( 0, -1, -23), axis, Ogre::Radian(0), npcName + "knee2", addresses2, numbers);
 		
 			addresses2[numbers] = npcName + "knee2";
 			addresses[numbers++] = npcName + "knee";
 		}
 		if(ankle){
 			
-			cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0, -1, -18), axis, Ogre::Radian(0), npcName + "ankle", addresses, numbers);   //-1
-			cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0, -1, -18), axis, Ogre::Radian(0), npcName + "ankle2", addresses2, numbers); //-1
+			cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0, 0, -20), axis, Ogre::Radian(0), npcName + "ankle", addresses, numbers);   //-1
+			cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0,0, -20), axis, Ogre::Radian(0), npcName + "ankle2", addresses2, numbers); //-1
 			
 			addresses2[numbers] = npcName + "ankle2";
 			addresses[numbers++] = npcName + "ankle";
