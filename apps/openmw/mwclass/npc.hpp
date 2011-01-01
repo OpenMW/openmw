@@ -5,8 +5,6 @@
 
 namespace MWClass
 {
-	static bool isChest;
-	//static ;bool isChest = false;
     class Npc : public MWWorld::Class
     {
         public:

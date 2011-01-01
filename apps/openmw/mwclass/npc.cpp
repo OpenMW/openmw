@@ -41,7 +41,7 @@ namespace MWClass
 		std::string hairID = ref->base->hair;
         std::string headID = ref->base->head;
 		std::string npcName = ref->base->name;
-		std::cout << "NPC: " << npcName << "\n";
+		//std::cout << "NPC: " << npcName << "\n";
 
         //get the part of the bodypart id which describes the race and the gender
         std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
