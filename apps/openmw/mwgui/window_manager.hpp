@@ -100,14 +100,6 @@ namespace MWGui
     BirthDialog *birthSignDialog;
     ReviewDialog *reviewDialog;
 
-    // Which dialogs have been shown, controls back/next/ok buttons
-    bool nameChosen;
-    bool raceChosen;
-    bool classChosen;
-    bool birthSignChosen;
-    bool reviewNext;
-    ///< If true then any click on Next will cause the summary to be shown
-
     // Keeps track of current step in Generate Class dialogs
     unsigned generateClassStep;
     // A counter for each specialization which is increased when an answer is chosen, in order: Stealth, Combat, Magic
@@ -300,6 +292,19 @@ namespace MWGui
     void onReviewDialogDone();
     void onReviewDialogBack();
     void onReviewActivateDialog(int parDialog);
+
+    enum CreationStageEnum
+    {
+        NotStarted,
+        NameChosen,
+        RaceChosen,
+        ClassChosen,
+        BirthSignChosen,
+        ReviewNext
+    };
+
+    // Which state the character creating is in, controls back/next/ok buttons
+    CreationStageEnum creationStage;
   };
 
   template<typename T>
