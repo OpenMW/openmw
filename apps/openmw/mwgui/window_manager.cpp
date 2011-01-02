@@ -641,18 +641,6 @@ namespace MWGui
     } };
 }
 
-namespace MWGui
-{
-
-    struct ClassPoint
-    {
-        const char *id;
-        // Specialization points to match, in order: Stealth, Combat, Magic
-        // Note: Order is taken from http://www.uesp.net/wiki/Morrowind:Class_Quiz
-        unsigned int points[3];
-    };
-}
-
 void WindowManager::showClassQuestionDialog()
 {
     if (generateClassStep == generateClassSteps.size())
