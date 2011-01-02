@@ -297,12 +297,7 @@ void WindowManager::updateVisible()
 
         reviewDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onReviewDialogDone);
         reviewDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onReviewDialogBack);
-
-        reviewDialog->eventNameActivated = MyGUI::newDelegate(this, &WindowManager::onNameDialogActivate);
-        reviewDialog->eventRaceActivated = MyGUI::newDelegate(this, &WindowManager::onRaceDialogActivate);
-        reviewDialog->eventClassActivated = MyGUI::newDelegate(this, &WindowManager::onClassDialogActivate);
-        reviewDialog->eventBirthSignActivated = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogActivate);
-
+        reviewDialog->eventActivateDialog = MyGUI::newDelegate(this, &WindowManager::onReviewActivateDialog);
         reviewDialog->open();
         return;
     }
@@ -968,39 +963,24 @@ void WindowManager::onReviewDialogBack()
     setGuiMode(GM_Birth);
 }
 
-void WindowManager::onNameDialogActivate()
+void WindowManager::onReviewActivateDialog(int parDialog)
 {
     if (reviewDialog)
         removeDialog(reviewDialog);
-
     reviewNext = true;
-    setGuiMode(GM_Name);
+
+    switch(parDialog)
+    {
+        case ReviewDialog::NAME_DIALOG:
+            setGuiMode(GM_Name);
+            break;
+        case ReviewDialog::RACE_DIALOG:
+            setGuiMode(GM_Race);
+            break;
+        case ReviewDialog::CLASS_DIALOG:
+            setGuiMode(GM_Class);
+            break;
+        case ReviewDialog::BIRTHSIGN_DIALOG:
+            setGuiMode(GM_Birth);
+    };
 }
-
-void WindowManager::onRaceDialogActivate()
-{
-    if (reviewDialog)
-        removeDialog(reviewDialog);
-
-    reviewNext = true;
-    setGuiMode(GM_Race);
-}
-
-void WindowManager::onClassDialogActivate()
-{
-    if (reviewDialog)
-        removeDialog(reviewDialog);
-
-    reviewNext = true;
-    setGuiMode(GM_Class);
-}
-
-void WindowManager::onBirthSignDialogActivate()
-{
-    if (reviewDialog)
-        removeDialog(reviewDialog);
-
-    reviewNext = true;
-    setGuiMode(GM_Birth);
-}
-

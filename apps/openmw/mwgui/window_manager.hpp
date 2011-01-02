@@ -291,10 +291,7 @@ namespace MWGui
     // Character generation: Review dialog
     void onReviewDialogDone();
     void onReviewDialogBack();
-    void onNameDialogActivate();
-    void onRaceDialogActivate();
-    void onClassDialogActivate();
-    void onBirthSignDialogActivate();
+    void onReviewActivateDialog(int parDialog);
   };
 
   template<typename T>

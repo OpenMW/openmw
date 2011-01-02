@@ -352,20 +352,20 @@ void ReviewDialog::onBackClicked(MyGUI::Widget* _sender)
 
 void ReviewDialog::onNameClicked(MyGUI::Widget* _sender)
 {
-    eventNameActivated();
+    eventActivateDialog(NAME_DIALOG);
 }
 
 void ReviewDialog::onRaceClicked(MyGUI::Widget* _sender)
 {
-    eventRaceActivated();
+    eventActivateDialog(RACE_DIALOG);
 }
 
 void ReviewDialog::onClassClicked(MyGUI::Widget* _sender)
 {
-    eventClassActivated();
+    eventActivateDialog(CLASS_DIALOG);
 }
 
 void ReviewDialog::onBirthSignClicked(MyGUI::Widget* _sender)
 {
-    eventBirthSignActivated();
+    eventActivateDialog(BIRTHSIGN_DIALOG);
 }
