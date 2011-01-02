@@ -573,29 +573,29 @@ void WindowManager::onRaceDialogBack()
     setGuiMode(GM_Name);
 }
 
-void WindowManager::onClassChoice(MyGUI::WidgetPtr, int _index)
+void WindowManager::onClassChoice(int _index)
 {
     if (classChoiceDialog)
     {
         removeDialog(classChoiceDialog);
     }
 
-    if (_index == ClassChoiceDialog::Class_Generate)
+    switch(_index)
     {
-        setGuiMode(GM_ClassGenerate);
-    }
-    else if (_index == ClassChoiceDialog::Class_Pick)
-    {
-        setGuiMode(GM_ClassPick);
-    }
-    else if (_index == ClassChoiceDialog::Class_Create)
-    {
-        setGuiMode(GM_ClassCreate);
-    }
-    else if (_index == ClassChoiceDialog::Class_Back)
-    {
-        setGuiMode(GM_Race);
-    }
+        case ClassChoiceDialog::Class_Generate:
+            setGuiMode(GM_ClassGenerate);
+            break;
+        case ClassChoiceDialog::Class_Pick:
+            setGuiMode(GM_ClassPick);
+            break;
+        case ClassChoiceDialog::Class_Create:
+            setGuiMode(GM_ClassCreate);
+            break;
+        case ClassChoiceDialog::Class_Back:
+            setGuiMode(GM_Race);
+            break;
+
+    };
 }
 
 namespace MWGui
@@ -786,7 +786,7 @@ void WindowManager::showClassQuestionDialog()
     generateClassQuestionDialog->open();
 }
 
-void WindowManager::onClassQuestionChosen(MyGUI::Widget* _sender, int _index)
+void WindowManager::onClassQuestionChosen(int _index)
 {
     if (generateClassQuestionDialog)
         removeDialog(generateClassQuestionDialog);

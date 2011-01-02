@@ -355,7 +355,7 @@ void InfoBoxDialog::onButtonClicked(MyGUI::WidgetPtr _sender)
         if (*it == _sender)
         {
             currentButton = i;
-            eventButtonSelected(_sender, i);
+            eventButtonSelected(i);
             return;
         }
         ++i;

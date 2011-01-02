@@ -34,12 +34,12 @@ namespace MWGui
         int getChosenButton() const;
 
         // Events
-        typedef delegates::CDelegate2<MyGUI::WidgetPtr, int> EventHandle_WidgetInt;
+        typedef delegates::CDelegate1<int> EventHandle_Int;
 
         /** Event : Button was clicked.\n
             signature : void method(MyGUI::WidgetPtr widget, int index)\n
         */
-        EventHandle_WidgetInt eventButtonSelected;
+        EventHandle_Int eventButtonSelected;
 
     protected:
         void onButtonClicked(MyGUI::WidgetPtr _sender);

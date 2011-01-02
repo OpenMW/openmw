@@ -268,11 +268,11 @@ namespace MWGui
     void onRaceDialogBack();
 
     // Character generation: Choose class process
-    void onClassChoice(MyGUI::Widget* _sender, int _index);
+    void onClassChoice(int _index);
 
     // Character generation: Generate Class
     void showClassQuestionDialog();
-    void onClassQuestionChosen(MyGUI::Widget* _sender, int _index);
+    void onClassQuestionChosen(int _index);
     void onGenerateClassBack();
     void onGenerateClassDone();
 
