@@ -366,49 +366,11 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
     }
 }
 
-void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<float>& value)
-{
-    stats->setValue (id, value);
 
-    static struct {const char *id; ESM::Skill::SkillEnum skillId; } skillMap[] =
-    {
-        {"SkillBlock", ESM::Skill::Block},
-        {"SkillArmorer", ESM::Skill::Armorer},
-        {"SkillMediumArmor", ESM::Skill::MediumArmor},
-        {"SkillHeavyArmor", ESM::Skill::HeavyArmor},
-        {"SkillBluntWeapon", ESM::Skill::BluntWeapon},
-        {"SkillLongBlade", ESM::Skill::LongBlade},
-        {"SkillAxe", ESM::Skill::Axe},
-        {"SkillSpear", ESM::Skill::Spear},
-        {"SkillAthletics", ESM::Skill::Athletics},
-        {"SkillEnchant", ESM::Skill::Armorer},
-        {"SkillDestruction", ESM::Skill::Destruction},
-        {"SkillAlteration", ESM::Skill::Alteration},
-        {"SkillIllusion", ESM::Skill::Illusion},
-        {"SkillConjuration", ESM::Skill::Conjuration},
-        {"SkillMysticism", ESM::Skill::Mysticism},
-        {"SkillRestoration", ESM::Skill::Restoration},
-        {"SkillAlchemy", ESM::Skill::Alchemy},
-        {"SkillUnarmored", ESM::Skill::Unarmored},
-        {"SkillSecurity", ESM::Skill::Security},
-        {"SkillSneak", ESM::Skill::Sneak},
-        {"SkillAcrobatics", ESM::Skill::Acrobatics},
-        {"SkillLightArmor", ESM::Skill::LightArmor},
-        {"SkillShortBlade", ESM::Skill::ShortBlade},
-        {"SkillMarksman", ESM::Skill::Marksman},
-        {"SkillMercantile", ESM::Skill::Mercantile},
-        {"SkillSpeechcraft", ESM::Skill::Speechcraft},
-        {"SkillHandToHand", ESM::Skill::HandToHand},
-    };
-    for (size_t i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
-    {
-        if (skillMap[i].id == id)
-        {
-            ESM::Skill::SkillEnum skillId = skillMap[i].skillId;
-            playerSkillValues[skillId] = value;
-            break;
-        }
-    }
+void WindowManager::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+{
+    stats->setValue(parSkill, value);
+    playerSkillValues[parSkill] = value;
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)

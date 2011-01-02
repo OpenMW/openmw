@@ -205,7 +205,7 @@ namespace MWGui
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
     ///< Set value for the given ID.
 
-    void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
+    void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
     ///< Set value for the given ID.
 
     void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);

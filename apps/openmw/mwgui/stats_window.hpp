@@ -37,7 +37,7 @@ namespace MWGui
             void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
             void setValue (const std::string& id, const std::string& value);
             void setValue (const std::string& id, int value);
-            void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
+            void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
 
             void configureSkills (const SkillList& major, const SkillList& minor);
             void setFactions (const std::vector<Faction>& factions);
