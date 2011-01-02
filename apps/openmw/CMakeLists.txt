@@ -49,6 +49,7 @@ set(GAMEGUI_HEADER
     mwgui/dialogue.hpp
     mwgui/dialogue_history.hpp
     mwgui/window_base.hpp
+    mwgui/stats_window.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
@@ -63,6 +64,7 @@ set(GAMEGUI
     mwgui/dialogue.cpp
     mwgui/dialogue_history.cpp
     mwgui/window_base.cpp
+    mwgui/stats_window.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 

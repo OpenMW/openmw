@@ -7,6 +7,7 @@
 #include "review.hpp"
 #include "dialogue.hpp"
 #include "dialogue_history.hpp"
+#include "stats_window.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
