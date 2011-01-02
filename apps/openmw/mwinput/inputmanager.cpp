@@ -45,6 +45,24 @@ namespace MWInput
 
       A_Activate,
 
+      A_Use,		//Use weapon, spell, etc.
+      A_Jump,
+      A_AutoMove, 	//Toggle Auto-move forward
+      A_Rest, 		//Rest
+      A_Journal,	//Journal
+      A_Weapon,		//Draw/Sheath weapon
+      A_Spell,		//Ready/Unready Casting
+      A_AlwaysRun,	//Toggle Always Run
+      A_CycleSpellLeft, //cycling through spells
+      A_CycleSPellRight,
+      A_CycleWeaponLeft,//Cycling through weapons
+      A_CycleWeaponRight,
+
+      A_QuickSave,
+      A_QuickLoad,
+      A_QuickMenu,
+      A_GameMenu,
+
       A_LAST            // Marker for the last item
     };
 
