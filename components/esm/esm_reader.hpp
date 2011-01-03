@@ -1,6 +1,8 @@
 #ifndef _ESM_READER_H
 #define _ESM_READER_H
 
+#include <string.h>
+
 #include <string>
 #include <libs/platform/stdint.h>
 #include <libs/platform/string.h>
