@@ -307,13 +307,14 @@ void OMW::Engine::go()
 
     std::cout << "Data directory: " << mDataDir << "\n";
 
-    std::string cfgDir = OMW::Path::getPath(OMW::Path::USER_CFG_PATH, "openmw", "");
+    std::string cfgDir = OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH, "openmw", "");
+    std::string cfgUserDir = OMW::Path::getPath(OMW::Path::USER_CFG_PATH, "openmw", "");
     std::string plugCfg = "plugins.cfg";
     std::string ogreCfg = "ogre.cfg";
-    ogreCfg.insert(0, cfgDir);
+    ogreCfg.insert(0, cfgUserDir);
     plugCfg.insert(0, cfgDir);
 
-    mOgre.configure(!isFile(ogreCfg.c_str()), cfgDir, plugCfg, false);
+    mOgre.configure(!isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");
