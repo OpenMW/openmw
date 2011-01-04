@@ -15,9 +15,10 @@
 #include <mangle/input/filters/eventlist.hpp>
 
 #include <libs/platform/strings.h>
-#include "../mwrender/playerpos.hpp"
 
 #include "../engine.hpp"
+
+#include "../mwworld/player.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
@@ -58,7 +59,7 @@ namespace MWInput
     OEngine::Input::Poller poller;
     OEngine::Render::MouseLookEventPtr mouse;
     OEngine::GUI::EventInjectorPtr guiEvents;
-    MWRender::PlayerPos &player;
+    MWWorld::Player &player;
     MWGui::WindowManager &windows;
     OMW::Engine& mEngine;
 
@@ -124,7 +125,7 @@ namespace MWInput
 
   public:
     InputImpl(OEngine::Render::OgreRenderer &_ogre,
-                   MWRender::PlayerPos &_player,
+                   MWWorld::Player &_player,
                    MWGui::WindowManager &_windows,
                    bool debug,
                    OMW::Engine& engine)
@@ -286,7 +287,7 @@ namespace MWInput
   };
 
   MWInputManager::MWInputManager(OEngine::Render::OgreRenderer &ogre,
-                                 MWRender::PlayerPos &player,
+                                 MWWorld::Player &player,
                                  MWGui::WindowManager &windows,
                                  bool debug,
                                  OMW::Engine& engine)
@@ -300,7 +301,7 @@ namespace MWInput
   }
 
   void MWInputManager::setGuiMode(MWGui::GuiMode mode)
-  { 
+  {
       impl->setGuiMode(mode);
   }
 }

@@ -1,11 +1,11 @@
 
-#include "playerpos.hpp"
+#include "player.hpp"
 
-#include "../mwworld/world.hpp"
+#include "world.hpp"
 
-namespace MWRender
+namespace MWWorld
 {
-    PlayerPos::PlayerPos (Ogre::Camera *cam, const ESM::NPC *player, MWWorld::World& world) :
+    Player::Player (Ogre::Camera *cam, const ESM::NPC *player, MWWorld::World& world) :
       mCellStore (0), camera(cam), mWorld (world), mClass (0)
     {
         mPlayer.base = player;
@@ -16,12 +16,12 @@ namespace MWRender
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
     }
 
-    PlayerPos::~PlayerPos()
+    Player::~Player()
     {
         delete mClass;
     }
 
-    void PlayerPos::setPos(float x, float y, float z, bool updateCamera)
+    void Player::setPos(float x, float y, float z, bool updateCamera)
     {
         mWorld.moveObject (getPlayer(), x, y, z);
 
@@ -32,7 +32,7 @@ namespace MWRender
                 -mPlayer.ref.pos.pos[1]));
     }
 
-    void PlayerPos::setClass (const ESM::Class& class_)
+    void Player::setClass (const ESM::Class& class_)
     {
         ESM::Class *new_class = new ESM::Class (class_);
         delete mClass;
