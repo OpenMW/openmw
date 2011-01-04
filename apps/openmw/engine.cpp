@@ -41,6 +41,7 @@
 
 #include <MyGUI_WidgetManager.h>
 #include "mwgui/class.hpp"
+#include "path.hpp"
 
 
 //using namespace ESM;
@@ -245,6 +246,12 @@ void OMW::Engine::setDataDir (const boost::filesystem::path& dataDir)
     mDataDir = boost::filesystem::system_complete (dataDir);
 }
 
+// Set resource dir
+void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
+{
+    mResDir = boost::filesystem::system_complete(parResDir);
+}
+
 // Set start cell name (only interiors for now)
 
 void OMW::Engine::setCell (const std::string& cellName)
@@ -300,16 +307,20 @@ void OMW::Engine::go()
 
     std::cout << "Data directory: " << mDataDir << "\n";
 
-    const char* plugCfg = "plugins.cfg";
+    std::string cfgDir = OMW::Path::getPath(OMW::Path::USER_CFG_PATH, "openmw", "");
+    std::string plugCfg = "plugins.cfg";
+    std::string ogreCfg = "ogre.cfg";
+    ogreCfg.insert(0, cfgDir);
+    plugCfg.insert(0, cfgDir);
 
-    mOgre.configure(!isFile("ogre.cfg"), plugCfg, false);
+    mOgre.configure(!isFile(ogreCfg.c_str()), cfgDir, plugCfg, false);
 
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
-    addResourcesDirectory("resources/mygui/");
+    addResourcesDirectory(mResDir / "mygui");
 
     // Create the window
     mOgre.createWindow("OpenMW");
@@ -317,11 +328,10 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mNewGame, mEnvironment);
+    mEnvironment.mWorld = new MWWorld::World (mOgre, mDataDir, mMaster, mResDir, mNewGame, mEnvironment);
 
     // Set up the GUI system
-    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(),
-                                                 mOgre.getScene());
+    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false, cfgDir);
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");

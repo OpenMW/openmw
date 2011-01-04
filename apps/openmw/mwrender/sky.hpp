@@ -1,6 +1,8 @@
 #ifndef _GAME_RENDER_SKY_H
 #define _GAME_RENDER_SKY_H
 
+#include <boost/filesystem.hpp>
+
 namespace Ogre
 {
     class RenderWindow;
@@ -16,7 +18,8 @@ namespace MWRender
     {
     public:
         static SkyManager* create (Ogre::RenderWindow* pRenderWindow, 
-                                   Ogre::Camera* pCamera);
+                                   Ogre::Camera* pCamera,
+                                   const boost::filesystem::path& resDir);
         virtual ~SkyManager() {}
         
         virtual void enable() = 0;

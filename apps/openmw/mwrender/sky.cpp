@@ -19,7 +19,8 @@ namespace MWRender
 
     public:
                  CaelumManager (Ogre::RenderWindow* pRenderWindow, 
-                                   Ogre::Camera* pCamera);
+                                   Ogre::Camera* pCamera,
+                                   const boost::filesystem::path& resDir);
         virtual ~CaelumManager ();
         
         virtual void enable() {}
@@ -44,7 +45,8 @@ namespace MWRender
     };
 
     CaelumManager::CaelumManager (Ogre::RenderWindow* pRenderWindow, 
-                                  Ogre::Camera* pCamera) 
+                                  Ogre::Camera* pCamera,
+                                  const boost::filesystem::path& resDir)
         : mpCaelumSystem        (NULL)
     {
         using namespace Ogre;
@@ -55,7 +57,7 @@ namespace MWRender
 
         // Load the Caelum resources
         //
-        ResourceGroupManager::getSingleton().addResourceLocation("resources/caelum", "FileSystem", "Caelum");
+        ResourceGroupManager::getSingleton().addResourceLocation((resDir / "caelum").string(), "FileSystem", "Caelum");
         ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
         // Load the Caelum resources
@@ -89,13 +91,14 @@ namespace MWRender
     /// \return NULL on failure.
     /// 
     SkyManager* SkyManager::create (Ogre::RenderWindow* pRenderWindow, 
-                                    Ogre::Camera*       pCamera)
+                                    Ogre::Camera*       pCamera,
+                                    const boost::filesystem::path& resDir)
     {
         SkyManager* pSkyManager = NULL;
 
         try
         {
-            pSkyManager = new CaelumManager(pRenderWindow, pCamera);
+            pSkyManager = new CaelumManager(pRenderWindow, pCamera, resDir);
         }
         catch (Ogre::Exception& e)
         {

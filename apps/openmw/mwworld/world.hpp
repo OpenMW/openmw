@@ -89,8 +89,8 @@ namespace MWWorld
 
         public:
 
-           World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& master,
-                const std::string& dataDir, bool newGame, Environment& environment);
+           World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
+                const std::string& master, const boost::filesystem::path& resDir, bool newGame, Environment& environment);
 
             ~World();
 
