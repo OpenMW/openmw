@@ -257,7 +257,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
     "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
 else (WIN32)
 configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
-    "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
+    "${OpenMW_BINARY_DIR}/plugins.cfg")
 endif (WIN32)
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg

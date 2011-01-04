@@ -1,7 +1,7 @@
 # Defines plugins to load
 
 # Define plugin folder
-PluginFolder=/usr/local/lib/OGRE/
+PluginFolder=${OGRE_LIB_DIR}
 
 # Define plugins
 Plugin=RenderSystem_GL
