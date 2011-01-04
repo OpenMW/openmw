@@ -36,6 +36,19 @@ namespace Render
     /** Configure the renderer. This will load configuration files and
         set up the Root and logging classes. */
     bool configure(bool showConfig,     // Show config dialog box?
+                   const std::string &cfgPath, // Path to directory where to store config files
+                   const std::string &logPath, // Path to directory where to store log files
+                   const std::string &pluginCfg, // plugin.cfg file
+                   bool _logging);      // Enable or disable logging
+
+    bool configure(bool showConfig,     // Show config dialog box?
+                   const std::string &cfgPath, // Path to directory where to store config files
+                   const std::string &pluginCfg, // plugin.cfg file
+                   bool _logging);      // Enable or disable logging
+
+    /** Configure the renderer. This will load configuration files and
+        set up the Root and logging classes. */
+    bool configure(bool showConfig,     // Show config dialog box?
                    const std::string &pluginCfg, // plugin.cfg file
                    bool _logging);      // Enable or disable logging
 

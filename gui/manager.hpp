@@ -23,11 +23,11 @@ namespace GUI
 
   public:
     MyGUIManager() : mPlatform(NULL), mGui(NULL) {}
-    MyGUIManager(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false)
-    { setup(wnd,mgr,logging); }
+    MyGUIManager(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false, const std::string& logDir = std::string(""))
+    { setup(wnd,mgr,logging, logDir); }
     ~MyGUIManager() { shutdown(); }
 
-    void setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false);
+    void setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false, const std::string& logDir = std::string(""));
     void shutdown();
 
     MyGUI::Gui *getGui() { return mGui; }

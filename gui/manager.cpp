@@ -6,7 +6,7 @@
 
 using namespace OEngine::GUI;
 
-void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging)
+void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging, const std::string& logDir)
 {
   assert(wnd);
   assert(mgr);
@@ -21,13 +21,17 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
   LogManager::initialise();
   LogManager::setSTDOutputEnabled(logging);
 
+  std::string theLogFile = std::string(MYGUI_PLATFORM_LOG_FILENAME);
+  if(!logDir.empty())
+      theLogFile.insert(0, logDir);
+
   // Set up OGRE platform. We might make this more generic later.
   mPlatform = new OgrePlatform();
-  mPlatform->initialise(wnd, mgr);
+  mPlatform->initialise(wnd, mgr, "General", theLogFile);
 
   // Create GUI
   mGui = new Gui();
-  mGui->initialise();
+  mGui->initialise("core.xml", theLogFile);
 }
 
 void MyGUIManager::shutdown()
