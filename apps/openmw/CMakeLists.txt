@@ -242,3 +242,7 @@ if (APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
     target_link_libraries(openmw ${CARBON_FRAMEWORK})
 endif (APPLE)
+
+if(DPKG_PROGRAM)
+    INSTALL(TARGETS openmw RUNTIME DESTINATION games COMPONENT openmw)
+endif()

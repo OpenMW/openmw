@@ -5,9 +5,16 @@ option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
+find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+
 # Location of morrowind data files
-set(MORROWIND_DATA_FILES "data"
-    CACHE PATH "location of Morrowind data files")
+if(DPKG_PROGRAM)
+    set(MORROWIND_DATA_FILES "/usr/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
+    set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of Morrowind data files")
+else()
+    set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
+    set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of Morrowind data files")
+endif()
 
 if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
@@ -302,6 +309,57 @@ set(CMAKE_EXE_LINKER_FLAGS "-arch i386")
 set(CMAKE_CXX_FLAGS "-arch i386")
 
 endif (APPLE)
+
+
+if(DPKG_PROGRAM)
+    SET(CMAKE_INSTALL_PREFIX "/usr")
+
+    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+        exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe" OUTPUT_VARIABLE GIT_VERSION )
+        STRING(REGEX REPLACE "openmw-" "" VERSION_STRING "${GIT_VERSION}")
+        exec_program("git" ARGS "config --get user.name" OUTPUT_VARIABLE GIT_NAME )
+        exec_program("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
+        set(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
+    else()
+        #FIXME this should probably be read from some file like ${CMAKE_CURRENT_SOURCE_DIR}/VERSION or something that gets updated when changing version
+        set(VERSION_STRING "0.9.0")
+        set(PACKAGE_MAINTAINER "unknown")
+    endif()
+
+    #Install global configuration files
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+
+    #Install resources
+    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "share/games/openmw/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
+    INSTALL(DIRECTORY DESTINATION "share/games/openmw/data/" COMPONENT "Resources")
+
+    SET(CPACK_GENERATOR "DEB")
+    SET(CPACK_PACKAGE_NAME "openmw")
+    SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://openmw.com")
+    SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
+    SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "A reimplementation of The Elder Scrolls III: Morrowind
+ OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
+ Data files from the original game is required to run it.")
+    SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
+    SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogremain-1.7.1 (>= 1.7.1-1),  libboost-filesystem1.42.0 (>= 1.42.0), libboost-program-options1.42.0 (>= 1.42.0), libboost-system1.42.0 (>= 1.42.0), libboost-thread1.42.0 (>= 1.42.0), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.2.0 (>= 1.2.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2)")
+
+    SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
+
+    string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
+    execute_process(
+        COMMAND ${DPKG_PROGRAM} --print-architecture
+        OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
+
+    include(CPack)
+endif(DPKG_PROGRAM)
 
 # Apps and tools
 add_subdirectory( apps/openmw )
