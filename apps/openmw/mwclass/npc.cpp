@@ -53,9 +53,6 @@ namespace MWClass
 
         MWRender::Rendering rendering (cellRender, ref->ref);
         
-
-        //TODO: define consts for each bodypart e.g. chest, foot, wrist... and put the parts in the
-        // right place
         const ESM::BodyPart *bodyPart =
             environment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
 
@@ -241,7 +238,6 @@ namespace MWClass
 			cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperright, uppernumbers);
 		}
 
-		//neck will reset chest counter
 		if(neck)
 		{
 			cellRender.insertMesh ("meshes\\" + neck->model, Ogre::Vector3( 0, 0, 120), axis, Ogre::Radian(3.14), npcName + "neck", neckandup, neckNumbers);
@@ -250,8 +246,9 @@ namespace MWClass
 		cellRender.insertMesh (headModel, Ogre::Vector3( 0, 0, 5), axis, Ogre::Radian(0), npcName + "head", neckandup, neckNumbers);
 		neckandup[neckNumbers++] = npcName + "head";
 		cellRender.insertMesh (hairModel, Ogre::Vector3( 0, -1, 0), axis, Ogre::Radian(0), npcName + "hair", neckandup, neckNumbers);
+		cellRender.insertMesh("meshes\\base_anim.nif");
 		ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
-		
+		//
 	}
 
     void Npc::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
