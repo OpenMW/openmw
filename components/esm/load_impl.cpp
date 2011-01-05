@@ -43,8 +43,8 @@ namespace ESM
 
     if(esm.isNextSub("AIDT"))
       {
-	esm.getHExact(&AI, sizeof(AI));
-	hasAI = true;
+    esm.getHExact(&AI, sizeof(AI));
+    hasAI = true;
       }
     else hasAI = false;
 
@@ -73,45 +73,45 @@ namespace ESM
     if(subName.val == REC_ONAM)
       {
         actor = esm.getHString();
-	if(esm.isEmptyOrGetName()) return;
+    if(esm.isEmptyOrGetName()) return;
       }
     if(subName.val == REC_RNAM)
       {
         race = esm.getHString();
-	if(esm.isEmptyOrGetName()) return;
+    if(esm.isEmptyOrGetName()) return;
       }
     if(subName.val == REC_CNAM)
       {
         clas = esm.getHString();
-	if(esm.isEmptyOrGetName()) return;
+    if(esm.isEmptyOrGetName()) return;
       }
 
     factionLess = false;
     if(subName.val == REC_FNAM)
       {
         npcFaction = esm.getHString();
-	if(npcFaction == "FFFF") factionLess = true;
-	if(esm.isEmptyOrGetName()) return;
+    if(npcFaction == "FFFF") factionLess = true;
+    if(esm.isEmptyOrGetName()) return;
       }
     if(subName.val == REC_ANAM)
       {
-	cell = esm.getHString();
-	if(esm.isEmptyOrGetName()) return;
+    cell = esm.getHString();
+    if(esm.isEmptyOrGetName()) return;
       }
     if(subName.val == REC_DNAM)
       {
         pcFaction = esm.getHString();
-	if(esm.isEmptyOrGetName()) return;
+    if(esm.isEmptyOrGetName()) return;
       }
     if(subName.val == REC_SNAM)
       {
         sound = esm.getHString();
-	if(esm.isEmptyOrGetName()) return;
+    if(esm.isEmptyOrGetName()) return;
       }
     if(subName.val == REC_NAME)
       {
-	response = esm.getHString();
-	if(esm.isEmptyOrGetName()) return;
+    response = esm.getHString();
+    if(esm.isEmptyOrGetName()) return;
       }
 
     while(subName.val == REC_SCVR)
@@ -133,17 +133,17 @@ namespace ESM
           }
         else
           esm.fail("INFO.SCVR must precede INTV or FLTV, not "
-		   + subName.toString());
+           + subName.toString());
 
         selects.push_back(ss);
 
-	if(esm.isEmptyOrGetName()) return;
+    if(esm.isEmptyOrGetName()) return;
       }
 
     if(subName.val == REC_BNAM)
       {
-	resultScript = esm.getHString();
-	if(esm.isEmptyOrGetName()) return;
+    resultScript = esm.getHString();
+    if(esm.isEmptyOrGetName()) return;
       }
 
     questStatus = QS_None;

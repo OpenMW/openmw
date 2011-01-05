@@ -29,8 +29,8 @@ struct Race
 
   enum Flags
     {
-      Playable	= 0x01,
-      Beast	= 0x02
+      Playable  = 0x01,
+      Beast = 0x02
     };
 
   struct RADTstruct

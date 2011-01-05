@@ -610,7 +610,7 @@ namespace MWWorld
         adjustSky();
 
         mCellChanged = true;
-		//currentRegion->name = "";
+        //currentRegion->name = "";
     }
 
     void World::changeCell (int X, int Y, const ESM::Position& position)
@@ -800,7 +800,7 @@ namespace MWWorld
         }
     }
 
-	
+    
 
     void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
     {

@@ -43,11 +43,11 @@ struct gengetopt_args_info
   const char *quiet_help; /**< @brief Supress all record information. Useful for speed tests. help description.  */
   const char *loadcells_help; /**< @brief Browse through contents of all cells. help description.  */
   
-  unsigned int help_given ;	/**< @brief Whether help was given.  */
-  unsigned int version_given ;	/**< @brief Whether version was given.  */
-  unsigned int raw_given ;	/**< @brief Whether raw was given.  */
-  unsigned int quiet_given ;	/**< @brief Whether quiet was given.  */
-  unsigned int loadcells_given ;	/**< @brief Whether loadcells was given.  */
+  unsigned int help_given ; /**< @brief Whether help was given.  */
+  unsigned int version_given ;  /**< @brief Whether version was given.  */
+  unsigned int raw_given ;  /**< @brief Whether raw was given.  */
+  unsigned int quiet_given ;    /**< @brief Whether quiet was given.  */
+  unsigned int loadcells_given ;    /**< @brief Whether loadcells was given.  */
 
   char **inputs ; /**< @brief unamed options (options without names) */
   unsigned inputs_num ; /**< @brief unamed options number */

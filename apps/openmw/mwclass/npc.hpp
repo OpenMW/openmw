@@ -8,7 +8,7 @@ namespace MWClass
     class Npc : public MWWorld::Class
     {
         public:
-			
+            
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
             ///< Return ID of \a ptr
 
