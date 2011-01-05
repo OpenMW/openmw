@@ -82,7 +82,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
 
     private:
-        NIFLoader() : resourceGroup("General") { skincounter = 0; resourceName = "";}
+        NIFLoader() : resourceGroup("General") { skincounter = 0; resourceName = ""; anim = false;}
         NIFLoader(NIFLoader& n) {}
 
         void warn(std::string msg);
@@ -128,6 +128,7 @@ class NIFLoader : Ogre::ManualResourceLoader
 		bool isBeast;
 		bool isHands;
 		bool isFeet;
+		bool anim;
 		int counter;
 		int numbers;
 		int stack;

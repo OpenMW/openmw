@@ -728,8 +728,6 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
                            const Transformation *trafo, BoundsFinder &bounds, Bone *parentBone)
 {
 	stack++;
-	//if( MWClass::isChest)
-	//	cout << "u:" << node << "\n";
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
@@ -740,6 +738,10 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     {
         // Get the next extra data in the list
         e = e->extra.getPtr();
+		if(anim){
+			cout << "RECNAME:" << e->recName.toString() << "RECTYPE:" << e->recType << "\n";
+			cout << "THE:" << e;
+		}
         assert(e != NULL);
 
         if (e->recType == RC_NiStringExtraData)
@@ -761,9 +763,21 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
     Bone *bone = 0;
 
+	//Contains the actual rotation, scale, and translation coordinate data
+	if(node->recType == RC_NiKeyframeData && anim)
+	{
+
+	}
+	//Indicates the node that the data applies to
+	if(node->recType == RC_NiKeyframeController && anim)
+	{
+
+	}
+
     // create skeleton or add bones
     if (node->recType == RC_NiNode)
     {
+		//TODO:  Store this variable, then read the KeyFrames
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
@@ -779,6 +793,8 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         if (!skel.isNull())     //if there is a skeleton
         {
             std::string name = node->name.toString();
+			if (anim)
+				std::cout << "BONE:" << name << "\n";
 			//if (isBeast && isChest)
 			//	std::cout << "NAME: " << name << "\n";
             // Quick-n-dirty workaround for the fact that several
@@ -928,6 +944,13 @@ void NIFLoader::loadResource(Resource *resource)
 	const std::string test22 ="meshes\\b\\B_N_Breton_M_Skins.nif";
 	const std::string test23 ="meshes\\b\\B_N_High Elf_F_Skins.nif";
 	const std::string test24 ="meshes\\b\\B_N_High Elf_M_Skins.nif";
+	const std::string animfile = "meshes\\base_anim.nif";
+	if (name == animfile){
+		std::cout << "We have animation\n";
+		anim = true;
+	}
+	else
+		anim = false;
 
 	//std::cout <<"LEN1:" << test.length() << "TEST: " << test << "\n";
 	
@@ -1087,47 +1110,16 @@ MeshPtr NIFLoader::load(const std::string &name,
     // Check if the resource already exists
     ResourcePtr ptr = m->getByName(name, group);
 	MeshPtr resize;
-	
-	const std::string beast1 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
-	const std::string beast2 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
-	const std::string beast3 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
-	const std::string beast4 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
-
-	const std::string beasttail1 ="tail\\b\\B_N_Khajiit_F_Skins.nif";
-	const std::string beasttail2 ="tail\\b\\B_N_Khajiit_M_Skins.nif";
-	const std::string beasttail3 ="tail\\b\\B_N_Argonian_F_Skins.nif";
-	const std::string beasttail4 ="tail\\b\\B_N_Argonian_M_Skins.nif";
 
     if (!ptr.isNull()){ 
 		
-		//if(pieces > 1)
-			//cout << "It exists\n";
 			resize = MeshPtr(ptr);
-		//resize->load();
-		//resize->reload();
 	}
 	else // Nope, create a new one.
 	{
 		resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
-		//cout <<"EXISTING" << name << "\n";
-		
-		//if(pieces > 1)
-			//cout << "Creating it\n";
-		
-		
-		//resize->load();
-		//resize->reload();
-		//return 0;
 		 ResourcePtr ptr = m->getByName(name, group);
 		 resize = MeshPtr(ptr);
-		
-		//NIFLoader::getSingletonPtr()->
-		/*ResourcePtr ptr = m->getByName(name, group);
-    if (!ptr.isNull()){
-		if(pieces > 1)
-			cout << "It exists\n";
-		resize = MeshPtr(ptr);*/
-		//return resize;
 	}
 	return resize;
 }

@@ -42,6 +42,8 @@
 #include "mwgui/class.hpp"
 
 
+
+
 //using namespace ESM;
 
 void OMW::Engine::executeLocalScripts()
@@ -75,8 +77,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
 	std::string effect;
 
-
-
+		    
+	                                            
 	MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
 	//If the region has changed
 	if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
@@ -86,7 +88,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 				total = 0;
 				test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
 			}
-
+			
 			if(test.soundList.size() > 0)
 			{
 				std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
@@ -118,14 +120,14 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 						//play sound
 						std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
 						mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
-
+						
 						break;
 
 					}
 					pos += chance;
 				}
 			}
-
+			
 			//mEnvironment.mSoundManager->playSound(effect, 1.0, 1.0);
 			//printf("REGION: %s\n", test.name);
 
@@ -194,7 +196,6 @@ OMW::Engine::Engine()
   , mVerboseScripts (false)
   , mNewGame (false)
   , mUseSound (true)
-  , mCompileAll (false)
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
@@ -297,7 +298,7 @@ void OMW::Engine::go()
 	test.name = "";
 	total = 0;
 
-
+	
 
     std::cout << "Data directory: " << mDataDir << "\n";
 
@@ -307,6 +308,16 @@ void OMW::Engine::go()
 
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");
+	//boost::filesystem::copy_file("meshes\\b\\B_N_Argonian_F_Skins.nif",mDataDir / "b2\\B_N_Argonian_F_Skins.nif",boost::filesystem::copy_option::overwrite_if_exists);
+	/*CFileOperation fo;      // create object
+
+	fo.SetOverwriteMode(false); // reset OverwriteMode flag (optional)
+
+	if (!fo.Copy("c:\\source", "c:\\dest")) // do Copy
+	{
+		fo.ShowError(); // if copy fails show error message
+	}*/
+
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -327,7 +338,6 @@ void OMW::Engine::go()
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
@@ -361,20 +371,9 @@ void OMW::Engine::go()
 
     // load cell
     ESM::Position pos;
+    pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-    pos.pos[2] = 0;
-
-    if (const ESM::Cell *exterior = mEnvironment.mWorld->getExterior (mCellName))
-    {
-        mEnvironment.mWorld->indexToPosition (exterior->data.gridX, exterior->data.gridY,
-            pos.pos[0], pos.pos[1], true);
-        mEnvironment.mWorld->changeToExteriorCell (pos);
-    }
-    else
-    {
-        pos.pos[0] = pos.pos[1] = 0;
-        mEnvironment.mWorld->changeCell (mCellName, pos);
-    }
+    mEnvironment.mWorld->changeCell (mCellName, pos);
 
     // Sets up the input system
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
@@ -390,29 +389,6 @@ void OMW::Engine::go()
     // Play some good 'ol tunes
       mEnvironment.mSoundManager->startRandomTitle();
 
-    // scripts
-    if (mCompileAll)
-    {
-        typedef ESMS::ScriptListT<ESM::Script>::MapType Container;
-
-        Container scripts = mEnvironment.mWorld->getStore().scripts.list;
-
-        int count = 0;
-        int success = 0;
-
-        for (Container::const_iterator iter (scripts.begin()); iter!=scripts.end(); ++iter, ++count)
-            if (mScriptManager->compile (iter->first))
-                ++success;
-
-        if (count)
-            std::cout
-                << "compiled " << success << " of " << count << " scripts ("
-                << 100*static_cast<double> (success)/count
-                << "%)"
-                << std::endl;
-
-    }
-
     // Start the main rendering loop
     mOgre.start();
 
@@ -421,49 +397,35 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
-    // TODO: This is only a workaround. The input dispatcher should catch any exceptions thrown inside
-    // the input handling functions. Looks like this will require an OpenEngine modification.
-    try
+    std::string handle = mEnvironment.mWorld->getFacedHandle();
+
+    if (handle.empty())
+        return;
+
+    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+    if (ptr.isEmpty())
+        return;
+
+    MWScript::InterpreterContext interpreterContext (mEnvironment,
+        &ptr.getRefData().getLocals(), ptr);
+
+    boost::shared_ptr<MWWorld::Action> action =
+        MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
+        mEnvironment);
+
+    interpreterContext.activate (ptr, action);
+
+    std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+    if (!script.empty())
     {
-        std::string handle = mEnvironment.mWorld->getFacedHandle();
-
-        if (handle.empty())
-            return;
-
-        MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
-
-        if (ptr.isEmpty())
-            return;
-
-        MWScript::InterpreterContext interpreterContext (mEnvironment,
-            &ptr.getRefData().getLocals(), ptr);
-
-        boost::shared_ptr<MWWorld::Action> action =
-            MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
-            mEnvironment);
-
-        interpreterContext.activate (ptr, action);
-
-        std::string script = MWWorld::Class::get (ptr).getScript (ptr);
-
-        if (!script.empty())
-        {
-            mIgnoreLocalPtr = ptr;
-            mScriptManager->run (script, interpreterContext);
-        }
-
-        if (!interpreterContext.hasActivationBeenHandled())
-        {
-            interpreterContext.executeActivation();
-        }
+        mIgnoreLocalPtr = ptr;
+        mScriptManager->run (script, interpreterContext);
     }
-    catch (const std::exception& e)
+
+    if (!interpreterContext.hasActivationBeenHandled())
     {
-        std::cerr << "Activation failed: " << e.what() << std::endl;
+        interpreterContext.executeActivation();
     }
-}
-
-void OMW::Engine::setCompileAll (bool all)
-{
-    mCompileAll = all;
 }
