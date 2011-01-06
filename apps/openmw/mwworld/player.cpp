@@ -32,6 +32,27 @@ namespace MWWorld
                 -mPlayer.ref.pos.pos[1]));
     }
 
+    void Player::moveRel (float &relX, float &relY, float &relZ)
+    {
+        // Move camera relative to its own direction
+        camera->moveRelative (Ogre::Vector3(relX,0,relZ));
+
+        // Up/down movement is always done relative the world axis.
+        camera->move (Ogre::Vector3(0,relY,0));
+
+        // Get new camera position, converting back to MW coords.
+        Ogre::Vector3 pos = camera->getPosition();
+        relX = pos[0];
+        relY = -pos[2];
+        relZ = pos[1];
+
+        // TODO: Collision detection must be used to find the REAL new
+        // position.
+
+        // Set the position
+        setPos(relX, relY, relZ);
+    }
+
     void Player::setClass (const ESM::Class& class_)
     {
         ESM::Class *new_class = new ESM::Class (class_);
