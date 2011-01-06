@@ -14,7 +14,7 @@
 
 
 using namespace boost::algorithm;
-	
+    
 namespace ESMS
 {
   using namespace ESM;
@@ -241,12 +241,12 @@ namespace ESMS
     struct ciLessBoost : std::binary_function<std::string, std::string, bool>
 {
     bool operator() (const std::string & s1, const std::string & s2) const {
-		                                       //case insensitive version of is_less
+                                               //case insensitive version of is_less
         return lexicographical_compare(s1, s2, is_iless());
     }
 };
 
-	
+    
   // Cells aren't simply indexed by name. Exterior cells are treated
   // separately.
   // TODO: case handling (cell names are case-insensitive, but they are also showen to the

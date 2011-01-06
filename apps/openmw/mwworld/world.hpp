@@ -39,7 +39,7 @@ namespace MWWorld
 
     class World
     {
-	    
+        
         public:
             typedef std::list<std::pair<std::string, Ptr> > ScriptList;
 
@@ -50,7 +50,7 @@ namespace MWWorld
             MWRender::SkyManager* mSkyManager;
             MWRender::MWScene mScene;
             MWRender::PlayerPos *mPlayerPos;
-			Ptr::CellStore *mCurrentCell; // the cell, the player is in
+            Ptr::CellStore *mCurrentCell; // the cell, the player is in
             CellRenderCollection mActiveCells;
             CellRenderCollection mBufferedCells; // loaded, but not active (buffering not implementd yet)
             ESM::ESMReader mEsm;
@@ -96,7 +96,7 @@ namespace MWWorld
 
             MWRender::PlayerPos& getPlayerPos();
 
-			ESMS::ESMStore& getStore();
+            ESMS::ESMStore& getStore();
 
             const ScriptList& getLocalScripts() const;
             ///< Names and local variable state of all local scripts in active cells.

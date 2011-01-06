@@ -14,12 +14,12 @@ struct RankData
 {
   int attribute1, attribute2; // Attribute level
 
-  int skill1, skill2;	  // Skill level (faction skills given in
-		          // skillID below.) You need one skill at
-		          // level 'skill1' and two skills at level
-		          // 'skill2' to advance to this rank.
+  int skill1, skill2;     // Skill level (faction skills given in
+                  // skillID below.) You need one skill at
+                  // level 'skill1' and two skills at level
+                  // 'skill2' to advance to this rank.
 
-  int factReaction;	  // Reaction from faction members
+  int factReaction;   // Reaction from faction members
 };
 
 struct Faction
@@ -29,7 +29,7 @@ struct Faction
   struct FADTstruct
   {
     // Which attributes we like
-    int	attribute1, attribute2;
+    int attribute1, attribute2;
 
     RankData rankData[10];
 
