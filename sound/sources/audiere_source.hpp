@@ -3,6 +3,10 @@
 
 #include "sample_reader.hpp"
 
+// audiere.h from 1.9.4 (latest) release uses
+// cstring routines like strchr() and strlen() without
+// including cstring itself.
+#include <cstring>
 #include <audiere.h>
 
 namespace Mangle {
