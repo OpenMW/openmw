@@ -329,7 +329,7 @@ namespace MWWorld
         mEsm.open (masterPath.file_string());
         mStore.load (mEsm);
 
-        mPlayer = new MWWorld::Player (mScene.getCamera(), mStore.npcs.find ("player"), *this);
+        mPlayer = new MWWorld::Player (mScene.getPlayer(), mStore.npcs.find ("player"), *this);
 
         // global variables
         mGlobalVariables = new Globals (mStore);

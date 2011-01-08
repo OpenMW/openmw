@@ -20,6 +20,8 @@
 
 #include "../mwworld/player.hpp"
 
+#include "../mwrender/player.hpp"
+
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
 #include <OgreRoot.h>
@@ -165,7 +167,7 @@ namespace MWInput
       ogre.getRoot()->addFrameListener(this);
 
       // Set up the mouse handler and tell it about the player camera
-      mouse = MouseLookEventPtr(new MouseLookEvent(player.getCamera()));
+      mouse = MouseLookEventPtr(new MouseLookEvent(player.getRenderer()->getCamera()));
 
       // This event handler pumps events into MyGUI
       guiEvents = EventInjectorPtr(new EventInjector(windows.getGui()));
@@ -278,7 +280,7 @@ namespace MWInput
         {
           // Start mouse-looking again. TODO: This should also allow
           // for other ways to disable mouselook, like paralyzation.
-          mouse->setCamera(player.getCamera());
+          mouse->setCamera(player.getRenderer()->getCamera());
 
           // Disable GUI events
           guiEvents->enabled = false;

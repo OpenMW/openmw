@@ -8,18 +8,21 @@
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
-namespace MWWorld
+namespace MWRender
 {
-    class World;
+    class Player;
 }
 
 namespace MWWorld
 {
+    class World;
+
+    /// \brief NPC object representing the player and additional player data
     class Player
     {
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
         MWWorld::Ptr::CellStore *mCellStore;
-        Ogre::Camera *camera;
+        MWRender::Player *mRenderer;
         MWWorld::World& mWorld;
         std::string mName;
         bool mMale;
@@ -29,7 +32,7 @@ namespace MWWorld
 
     public:
 
-        Player(Ogre::Camera *cam, const ESM::NPC *player, MWWorld::World& world);
+        Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
 
         ~Player();
 
@@ -41,8 +44,6 @@ namespace MWWorld
             mCellStore = cellStore;
         }
 
-        Ogre::Camera *getCamera() { return camera; }
-
         /// Move the player relative to her own position and
         /// orientation. After the call, the new position is returned.
         void moveRel (float &relX, float &relY, float &relZ);
@@ -52,6 +53,8 @@ namespace MWWorld
             MWWorld::Ptr ptr (&mPlayer, mCellStore);
             return ptr;
         }
+
+        MWRender::Player *getRenderer() { return mRenderer; }
 
         void setName (const std::string& name)
         {

@@ -1,12 +1,14 @@
 
 #include "player.hpp"
 
+#include "../mwrender/player.hpp"
+
 #include "world.hpp"
 
 namespace MWWorld
 {
-    Player::Player (Ogre::Camera *cam, const ESM::NPC *player, MWWorld::World& world) :
-      mCellStore (0), camera(cam), mWorld (world), mClass (0)
+    Player::Player (MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world) :
+      mCellStore (0), mRenderer (renderer), mWorld (world), mClass (0)
     {
         mPlayer.base = player;
         mName = player->name;
@@ -26,7 +28,7 @@ namespace MWWorld
         mWorld.moveObject (getPlayer(), x, y, z);
 
         if (updateCamera)
-            camera->setPosition (Ogre::Vector3 (
+            mRenderer->getCamera()->setPosition (Ogre::Vector3 (
                 mPlayer.ref.pos.pos[0],
                 mPlayer.ref.pos.pos[2],
                 -mPlayer.ref.pos.pos[1]));
@@ -35,13 +37,13 @@ namespace MWWorld
     void Player::moveRel (float &relX, float &relY, float &relZ)
     {
         // Move camera relative to its own direction
-        camera->moveRelative (Ogre::Vector3(relX,0,relZ));
+        mRenderer->getCamera()->moveRelative (Ogre::Vector3(relX,0,relZ));
 
         // Up/down movement is always done relative the world axis.
-        camera->move (Ogre::Vector3(0,relY,0));
+        mRenderer->getCamera()->move (Ogre::Vector3(0,relY,0));
 
         // Get new camera position, converting back to MW coords.
-        Ogre::Vector3 pos = camera->getPosition();
+        Ogre::Vector3 pos = mRenderer->getCamera()->getPosition();
         relX = pos[0];
         relY = -pos[2];
         relZ = pos[1];

@@ -14,14 +14,18 @@ set(GAMEREND
     mwrender/cellimp.cpp
     mwrender/interior.cpp
     mwrender/exterior.cpp
-    mwrender/sky.cpp)
+    mwrender/sky.cpp
+    mwrender/player.cpp
+    )
 set(GAMEREND_HEADER
     mwrender/cell.hpp
     mwrender/cellimp.hpp
     mwrender/mwscene.hpp
     mwrender/interior.hpp
     mwrender/exterior.hpp
-    mwrender/sky.hpp)
+    mwrender/sky.hpp
+    mwrender/player.hpp
+    )
 source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})
 
 set(GAMEINPUT
