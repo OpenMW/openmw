@@ -20,8 +20,8 @@ struct Skill
     int attribute;     // see defs.hpp
     int specialization;// 0 - Combat, 1 - Magic, 2 - Stealth
     float useValue[4]; // How much skill improves through use. Meaning
-		       // of each field depends on what skill this
-		       // is. We should document this better later.
+               // of each field depends on what skill this
+               // is. We should document this better later.
   }; // Total size: 24 bytes
   SKDTstruct data;
 

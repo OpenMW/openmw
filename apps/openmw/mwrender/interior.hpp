@@ -29,7 +29,7 @@ namespace MWRender
 
   class InteriorCellRender : public CellRender, private CellRenderImp
   {
-	  //static bool isChest;
+      //static bool isChest;
     static bool lightConst;
     static float lightConstValue;
 
@@ -54,7 +54,7 @@ namespace MWRender
     Ogre::SceneNode *base;
 
     Ogre::SceneNode *insert;
-	Ogre::SceneNode *npcPart;
+    Ogre::SceneNode *npcPart;
 
     // 0 normal, 1 more bright, 2 max
     int ambientMode;
@@ -63,12 +63,12 @@ namespace MWRender
 
     /// start inserting a new reference.
     virtual void insertBegin (ESM::CellRef &ref);
-	 virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements);
-	 virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
+     virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements);
+     virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
     /// insert a mesh related to the most recent insertBegin call.
     virtual void insertMesh(const std::string &mesh);
-	virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements);
-	virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst);
+    virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements);
+    virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst);
     /// insert a light related to the most recent insertBegin call.
     virtual void insertLight(float r, float g, float b, float radius);
 
@@ -93,7 +93,7 @@ namespace MWRender
     virtual ~InteriorCellRender() { destroy(); }
 
     /// Make the cell visible. Load the cell if necessary.
-	//virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
+    //virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
     virtual void show();
 
     /// Remove the cell from rendering, but don't remove it from

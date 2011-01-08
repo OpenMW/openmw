@@ -96,7 +96,7 @@ namespace Compiler
 
             Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
                 const Extensions *extensions = 0);
-		    ///< constructor
+            ///< constructor
 
             void scan (Parser& parser);
             ///< Scan a token and deliver it to the parser.

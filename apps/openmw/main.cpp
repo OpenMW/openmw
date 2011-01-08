@@ -56,10 +56,10 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     bpo::variables_map variables;
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-	std::string configFilePath(macBundlePath() + "/Contents/MacOS/openmw.cfg");
-	std::ifstream configFile (configFilePath.c_str());
+    std::string configFilePath(macBundlePath() + "/Contents/MacOS/openmw.cfg");
+    std::ifstream configFile (configFilePath.c_str());
 #else
-	std::ifstream configFile ("openmw.cfg");
+    std::ifstream configFile ("openmw.cfg");
 #endif
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(desc).allow_unregistered().run();

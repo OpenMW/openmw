@@ -55,7 +55,7 @@ namespace OMW
     class Engine : private Ogre::FrameListener
     {
 
-			//int nFiles;
+            //int nFiles;
             boost::filesystem::path mDataDir;
             OEngine::Render::OgreRenderer mOgre;
             std::string mCellName;
@@ -72,8 +72,8 @@ namespace OMW
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
             OEngine::GUI::MyGUIManager *mGuiManager;
-			ESM::Region test;
-			boost::timer timer;
+            ESM::Region test;
+            boost::timer timer;
 
             int focusFrameCounter;
             static const int focusUpdateFrame = 10;
