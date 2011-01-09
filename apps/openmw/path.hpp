@@ -42,9 +42,16 @@ namespace OMW
                     theBasePath = macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
 #elif OGRE_PLATFORM_LINUX
                     const char* homedir;
-                    if ((homedir = getenv("HOME")) == NULL)
-                        return NULL;
-                    theBasePath = std::string(homedir)+"/."+parApp+"/";
+                    if ((homedir = getenv("OPENMW_HOME")) != NULL)
+                    {
+                        theBasePath = std::string(homedir)+"/";
+                    }
+                    else
+                    {
+                        if ((homedir = getenv("HOME")) == NULL)
+                            return NULL;
+                        theBasePath = std::string(homedir)+"/."+parApp+"/";
+                    }
                     mkdir(theBasePath.c_str(), 0777);
 #else
                     theBasePath = "";
