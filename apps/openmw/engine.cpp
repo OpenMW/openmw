@@ -312,7 +312,12 @@ void OMW::Engine::go()
     std::string plugCfg = "plugins.cfg";
     std::string ogreCfg = "ogre.cfg";
     ogreCfg.insert(0, cfgUserDir);
-    plugCfg.insert(0, cfgDir);
+
+    //A local plugins.cfg will be used if it exist, otherwise look in the default path
+    if(!isFile(plugCfg.c_str()))
+    {
+        plugCfg.insert(0, cfgDir);
+    }
 
     mOgre.configure(!isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
