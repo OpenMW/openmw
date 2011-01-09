@@ -101,6 +101,5 @@ op 0x20000c4-0x20000de: SetSkill
 op 0x20000df-0x20000f9: SetSkill, explicit reference
 op 0x20000fa-0x2000114: ModSkill
 op 0x2000115-0x200012f: ModSKill, explicit reference
-op 0x2000130: EnableCollision
-op 0x2000131: DisableCollision
-opcodes 0x2000130-0x3ffffff unused
+op 0x2000130: ToggleCollision
+opcodes 0x2000131-0x3ffffff unused

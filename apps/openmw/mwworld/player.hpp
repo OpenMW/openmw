@@ -104,9 +104,9 @@ namespace MWWorld
             return *mClass;
         }
 
-        void setCollisionMode (bool enable)
+        void toggleCollisionMode()
         {
-            mCollisionMode = enable;
+            mCollisionMode = !mCollisionMode;
         }
   };
 }

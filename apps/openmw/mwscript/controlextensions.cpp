@@ -37,32 +37,24 @@ namespace MWScript
                 }
         };
 
-        class OpSetCollision : public Interpreter::Opcode0
+        class OpToggleCollision : public Interpreter::Opcode0
         {
-                bool mEnable;
-
             public:
-
-                OpSetCollision (bool enable)
-                : mEnable (enable)
-                {}
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
 
-                    context.getWorld().getPlayer().setCollisionMode (mEnable);
+                    context.getWorld().getPlayer().toggleCollisionMode();
                 }
-
         };
 
         const int numberOfControls = 7;
 
         const int opcodeEnable = 0x200007e;
         const int opcodeDisable = 0x2000085;
-        const int opcodeEnableCollision = 0x2000130;
-        const int opcodeDisableCollision = 0x2000131;
+        const int opcodeToggleCollision = 0x2000130;
 
         const char *controls[numberOfControls] =
         {
@@ -81,8 +73,7 @@ namespace MWScript
                 extensions.registerInstruction (disable + controls[i], "", opcodeDisable+i);
             }
 
-            extensions.registerInstruction ("enablecollision", "", opcodeEnableCollision);
-            extensions.registerInstruction ("disablecollision", "", opcodeDisableCollision);
+            extensions.registerInstruction ("togglecollision", "", opcodeToggleCollision);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -93,8 +84,7 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeDisable+i, new OpSetControl (controls[i], false));
             }
 
-            interpreter.installSegment5 (opcodeEnableCollision, new OpSetCollision (true));
-            interpreter.installSegment5 (opcodeDisableCollision, new OpSetCollision (false));
+            interpreter.installSegment5 (opcodeToggleCollision, new OpToggleCollision);
         }
     }
 }
