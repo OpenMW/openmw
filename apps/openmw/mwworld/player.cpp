@@ -8,7 +8,7 @@
 namespace MWWorld
 {
     Player::Player (MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world) :
-      mCellStore (0), mRenderer (renderer), mWorld (world), mClass (0)
+      mCellStore (0), mRenderer (renderer), mWorld (world), mClass (0), mCollisionMode (true)
     {
         mPlayer.base = player;
         mName = player->name;
@@ -49,7 +49,7 @@ namespace MWWorld
         relZ = pos[1];
 
         // TODO: Collision detection must be used to find the REAL new
-        // position.
+        // position, if mCollisionMode==true
 
         // Set the position
         setPos(relX, relY, relZ);

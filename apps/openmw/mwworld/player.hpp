@@ -29,6 +29,7 @@ namespace MWWorld
         std::string mRace;
         std::string mBirthsign;
         ESM::Class *mClass;
+        bool mCollisionMode;
 
     public:
 
@@ -101,6 +102,11 @@ namespace MWWorld
         const ESM::Class& getClass() const
         {
             return *mClass;
+        }
+
+        void setCollisionMode (bool enable)
+        {
+            mCollisionMode = enable;
         }
   };
 }

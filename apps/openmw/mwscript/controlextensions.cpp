@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwworld/player.hpp"
+
 #include "interpretercontext.hpp"
 
 #include <iostream>
@@ -35,10 +37,32 @@ namespace MWScript
                 }
         };
 
+        class OpSetCollision : public Interpreter::Opcode0
+        {
+                bool mEnable;
+
+            public:
+
+                OpSetCollision (bool enable)
+                : mEnable (enable)
+                {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context
+                        = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    context.getWorld().getPlayer().setCollisionMode (mEnable);
+                }
+
+        };
+
         const int numberOfControls = 7;
 
         const int opcodeEnable = 0x200007e;
         const int opcodeDisable = 0x2000085;
+        const int opcodeEnableCollision = 0x2000130;
+        const int opcodeDisableCollision = 0x2000131;
 
         const char *controls[numberOfControls] =
         {
@@ -56,6 +80,9 @@ namespace MWScript
                 extensions.registerInstruction (enable + controls[i], "", opcodeEnable+i);
                 extensions.registerInstruction (disable + controls[i], "", opcodeDisable+i);
             }
+
+            extensions.registerInstruction ("enablecollision", "", opcodeEnableCollision);
+            extensions.registerInstruction ("disablecollision", "", opcodeDisableCollision);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -65,6 +92,9 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeEnable+i, new OpSetControl (controls[i], true));
                 interpreter.installSegment5 (opcodeDisable+i, new OpSetControl (controls[i], false));
             }
+
+            interpreter.installSegment5 (opcodeEnableCollision, new OpSetCollision (true));
+            interpreter.installSegment5 (opcodeDisableCollision, new OpSetCollision (false));
         }
     }
 }
