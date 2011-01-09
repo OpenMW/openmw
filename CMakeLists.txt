@@ -205,6 +205,8 @@ if (WIN32)
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
 set(PLATFORM_INCLUDE_DIR "")
+find_path (UUID_INCLUDE_DIR uuid/uuid.h)
+include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
 set(PLATFORM_INCLUDE_DIR "")
@@ -217,13 +219,14 @@ find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
 include_directories("."
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
     ${OPENAL_INCLUDE_DIR}
+    ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
