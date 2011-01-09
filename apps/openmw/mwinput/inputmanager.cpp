@@ -54,7 +54,7 @@ namespace MWInput
       A_Spell,		//Ready/Unready Casting
       A_AlwaysRun,	//Toggle Always Run
       A_CycleSpellLeft, //cycling through spells
-      A_CycleSPellRight,
+      A_CycleSpellRight,
       A_CycleWeaponLeft,//Cycling through weapons
       A_CycleWeaponRight,
 
@@ -86,8 +86,8 @@ namespace MWInput
     // Write screenshot to file.
     void screenshot()
     {
-      // Find the first unused filename.
-      //
+      
+      // Find the first unused filename with a do-while
       char buf[50];
       do
       {
