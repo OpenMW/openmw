@@ -14,16 +14,18 @@ set(GAMEREND
     mwrender/cellimp.cpp
     mwrender/interior.cpp
     mwrender/exterior.cpp
-    mwrender/playerpos.cpp
-    mwrender/sky.cpp)
+    mwrender/sky.cpp
+    mwrender/player.cpp
+    )
 set(GAMEREND_HEADER
     mwrender/cell.hpp
     mwrender/cellimp.hpp
     mwrender/mwscene.hpp
     mwrender/interior.hpp
     mwrender/exterior.hpp
-    mwrender/playerpos.hpp
-    mwrender/sky.hpp)
+    mwrender/sky.hpp
+    mwrender/player.hpp
+    )
 source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})
 
 set(GAMEINPUT
@@ -103,6 +105,7 @@ set(GAMESCRIPT_HEADER
     mwscript/controlextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
+    mwscript/ref.hpp
     )
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})
 
@@ -120,6 +123,7 @@ set(GAMEWORLD
     mwworld/actiontalk.cpp
     mwworld/actiontake.cpp
     mwworld/containerutil.cpp
+    mwworld/player.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -137,6 +141,7 @@ set(GAMEWORLD_HEADER
     mwworld/containerstore.hpp
     mwworld/manualref.hpp
     mwworld/containerutil.hpp
+    mwworld/player.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 

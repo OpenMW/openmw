@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwworld/player.hpp"
+
 #include "interpretercontext.hpp"
 
 #include <iostream>
@@ -35,10 +37,24 @@ namespace MWScript
                 }
         };
 
+        class OpToggleCollision : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context
+                        = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    context.getWorld().getPlayer().toggleCollisionMode();
+                }
+        };
+
         const int numberOfControls = 7;
 
         const int opcodeEnable = 0x200007e;
         const int opcodeDisable = 0x2000085;
+        const int opcodeToggleCollision = 0x2000130;
 
         const char *controls[numberOfControls] =
         {
@@ -56,6 +72,8 @@ namespace MWScript
                 extensions.registerInstruction (enable + controls[i], "", opcodeEnable+i);
                 extensions.registerInstruction (disable + controls[i], "", opcodeDisable+i);
             }
+
+            extensions.registerInstruction ("togglecollision", "", opcodeToggleCollision);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -65,6 +83,8 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeEnable+i, new OpSetControl (controls[i], true));
                 interpreter.installSegment5 (opcodeDisable+i, new OpSetControl (controls[i], false));
             }
+
+            interpreter.installSegment5 (opcodeToggleCollision, new OpToggleCollision);
         }
     }
 }

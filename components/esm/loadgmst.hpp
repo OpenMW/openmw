@@ -110,12 +110,12 @@ struct GameSetting
        "Return to Companion Share display.");   // same
     cS("sCompanionWarningMessage",
        "Your mercenary is poorer now than when he contracted with you.  Your mercenary will quit if you do not give him gold or goods to bring his Profit Value to a positive value.");
-	// 'Your mercenary is poorer now than when he contracted with
-	// you.  Your mercenary will quit if you do not give him gold
-	// or goods to bring his Profit to a positive value.'
-	// [The difference here is "Profit Value" -> "Profit"]
+    // 'Your mercenary is poorer now than when he contracted with
+    // you.  Your mercenary will quit if you do not give him gold
+    // or goods to bring his Profit to a positive value.'
+    // [The difference here is "Profit Value" -> "Profit"]
 
-      	// Strings that matches the id
+        // Strings that matches the id
     cS("sEffectSummonFabricant", id);// 'Summon Fabricant'
     return false;
   }
@@ -145,13 +145,13 @@ struct GameSetting
     cS("sEffectSummonCreature04", id);          // same
     cS("sEffectSummonCreature05", id);          // same
 
-	// Integers
+    // Integers
     cI("iWereWolfBounty", 10000);               // 1000
     cI("iWereWolfFightMod", 100);               // same
     cI("iWereWolfFleeMod", 100);                // same
     cI("iWereWolfLevelToAttack", 20);           // same
 
-	// Floats
+    // Floats
     cF("fFleeDistance", 3000);                  // same
     cF("fCombatDistanceWerewolfMod", 0.3);      // same
     cF("fWereWolfFatigue", 400);                // same
@@ -210,8 +210,8 @@ struct GameSetting
     // We are apparently allowed to be empty
     if(!esm.hasMoreSubs())
       {
-	type = VT_None;
-	return;
+    type = VT_None;
+    return;
       }
 
     // Load some data
@@ -219,18 +219,18 @@ struct GameSetting
     NAME n = esm.retSubName();
     if(n == "STRV")
       {
-	str = esm.getHString();
-	type = VT_String;
+    str = esm.getHString();
+    type = VT_String;
       }
     else if(n == "INTV")
       {
         esm.getHT(i);
-	type = VT_Int;
+    type = VT_Int;
       }
     else if(n == "FLTV")
       {
         esm.getHT(f);
-	type = VT_Float;
+    type = VT_Float;
       }
     else
       esm.fail("Unwanted subrecord type");
@@ -242,7 +242,7 @@ struct GameSetting
     // the 'id' string correctly before calling load().
 
     if( ( spf != SF_Tribunal && isDirtyTribunal() ) ||
-	( spf != SF_Bloodmoon && isDirtyBloodmoon() ) )
+    ( spf != SF_Bloodmoon && isDirtyBloodmoon() ) )
       dirty = true;
   }
 };

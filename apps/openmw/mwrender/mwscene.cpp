@@ -13,6 +13,8 @@
 #include "../mwworld/ptr.hpp"
 #include <components/esm/loadstat.hpp>
 
+#include "player.hpp"
+
 using namespace MWRender;
 using namespace Ogre;
 
@@ -38,6 +40,13 @@ MWScene::MWScene(OEngine::Render::OgreRenderer &_rend)
 
   //used to obtain ingame information of ogre objects (which are faced or selected)
   mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
+
+  mPlayer = new MWRender::Player (getCamera());
+}
+
+MWScene::~MWScene()
+{
+    delete mPlayer;
 }
 
 std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)

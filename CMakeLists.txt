@@ -205,6 +205,8 @@ if (WIN32)
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
 set(PLATFORM_INCLUDE_DIR "")
+find_path (UUID_INCLUDE_DIR uuid/uuid.h)
+include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
 set(PLATFORM_INCLUDE_DIR "")
@@ -217,13 +219,14 @@ find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
 include_directories("."
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
     ${OPENAL_INCLUDE_DIR}
+    ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
@@ -308,22 +311,40 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (WIN32)
+  if (MSVC)
     if (USE_DEBUG_CONSOLE)
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
     else()
-        # Turn off debug console, debug output will be written to visual studio output instead
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
+      # Turn off debug console, debug output will be written to visual studio output instead
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
     endif()
-
+    
     # Release builds use the debug console
     set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
     set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
     set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+  endif(MSVC)
 
-    # TODO: At some point release builds should not use the console but rather write to a log file
-    #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-    #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
+  # Same for MinGW
+  if (MINGW)
+    if (USE_DEBUG_CONSOLE)
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,console")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "-Wl,-subsystem,console")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+    else(USE_DEBUG_CONSOLE)
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,windows")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "-Wl,-subsystem,windows")
+    endif(USE_DEBUG_CONSOLE)
+
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "-Wl,-subsystem,console")
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "-Wl,-subsystem,console")
+    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
+  endif(MINGW)
+  
+  # TODO: At some point release builds should not use the console but rather write to a log file
+  #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+  #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()

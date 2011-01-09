@@ -8,7 +8,6 @@
 
 #include <components/esm_store/cell_store.hpp>
 
-#include "../mwrender/playerpos.hpp"
 #include "../mwrender/mwscene.hpp"
 
 #include "refdata.hpp"
@@ -34,12 +33,13 @@ namespace MWRender
 namespace MWWorld
 {
     class Environment;
+    class Player;
 
     /// \brief The game world and its visual representation
 
     class World
     {
-	    
+
         public:
             typedef std::list<std::pair<std::string, Ptr> > ScriptList;
 
@@ -49,8 +49,8 @@ namespace MWWorld
 
             MWRender::SkyManager* mSkyManager;
             MWRender::MWScene mScene;
-            MWRender::PlayerPos *mPlayerPos;
-			Ptr::CellStore *mCurrentCell; // the cell, the player is in
+            MWWorld::Player *mPlayer;
+            Ptr::CellStore *mCurrentCell; // the cell, the player is in
             CellRenderCollection mActiveCells;
             CellRenderCollection mBufferedCells; // loaded, but not active (buffering not implementd yet)
             ESM::ESMReader mEsm;
@@ -94,9 +94,9 @@ namespace MWWorld
 
             ~World();
 
-            MWRender::PlayerPos& getPlayerPos();
+            MWWorld::Player& getPlayer();
 
-			ESMS::ESMStore& getStore();
+            ESMS::ESMStore& getStore();
 
             const ScriptList& getLocalScripts() const;
             ///< Names and local variable state of all local scripts in active cells.

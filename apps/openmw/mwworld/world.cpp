@@ -17,7 +17,7 @@
 #include "ptr.hpp"
 #include "environment.hpp"
 #include "class.hpp"
-
+#include "player.hpp"
 
 #include "refdata.hpp"
 #include "globals.hpp"
@@ -296,12 +296,12 @@ namespace MWWorld
 
     void World::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position)
     {
-        mPlayerPos->setPos (position.pos[0], position.pos[1], position.pos[2], true);
-        mPlayerPos->setCell (cell);
+        mPlayer->setPos (position.pos[0], position.pos[1], position.pos[2], true);
+        mPlayer->setCell (cell);
         // TODO orientation
 
-        mEnvironment.mMechanicsManager->addActor (mPlayerPos->getPlayer());
-        mEnvironment.mMechanicsManager->watchActor (mPlayerPos->getPlayer());
+        mEnvironment.mMechanicsManager->addActor (mPlayer->getPlayer());
+        mEnvironment.mMechanicsManager->watchActor (mPlayer->getPlayer());
     }
 
 
@@ -317,7 +317,7 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
         const std::string& master, bool newGame, Environment& environment)
-    : mSkyManager (0), mScene (renderer), mPlayerPos (0), mCurrentCell (0), mGlobalVariables (0),
+    : mSkyManager (0), mScene (renderer), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false), mEnvironment (environment)
     {
         boost::filesystem::path masterPath (dataDir);
@@ -329,7 +329,7 @@ namespace MWWorld
         mEsm.open (masterPath.file_string());
         mStore.load (mEsm);
 
-        mPlayerPos = new MWRender::PlayerPos (mScene.getCamera(), mStore.npcs.find ("player"), *this);
+        mPlayer = new MWWorld::Player (mScene.getPlayer(), mStore.npcs.find ("player"), *this);
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -354,14 +354,14 @@ namespace MWWorld
             iter!=mBufferedCells.end(); ++iter)
             delete iter->second;
 
-        delete mPlayerPos;
+        delete mPlayer;
         delete mSkyManager;
         delete mGlobalVariables;
     }
 
-    MWRender::PlayerPos& World::getPlayerPos()
+    MWWorld::Player& World::getPlayer()
     {
-        return *mPlayerPos;
+        return *mPlayer;
     }
 
     ESMS::ESMStore& World::getStore()
@@ -394,7 +394,7 @@ namespace MWWorld
         // the player is always in an active cell.
         if (name=="player")
         {
-            return mPlayerPos->getPlayer();
+            return mPlayer->getPlayer();
         }
 
         // active cells
@@ -610,7 +610,7 @@ namespace MWWorld
         adjustSky();
 
         mCellChanged = true;
-		//currentRegion->name = "";
+        //currentRegion->name = "";
     }
 
     void World::changeCell (int X, int Y, const ESM::Position& position)
@@ -763,7 +763,7 @@ namespace MWWorld
         ptr.getCellRef().pos.pos[1] = y;
         ptr.getCellRef().pos.pos[2] = z;
 
-        if (ptr==mPlayerPos->getPlayer())
+        if (ptr==mPlayer->getPlayer())
         {
             if (mCurrentCell)
             {
@@ -777,7 +777,7 @@ namespace MWWorld
 
                     if (mCurrentCell->cell->data.gridX!=cellX || mCurrentCell->cell->data.gridY!=cellY)
                     {
-                        changeCell (cellX, cellY, mPlayerPos->getPlayer().getCellRef().pos);
+                        changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos);
                     }
                 }
             }
@@ -799,8 +799,6 @@ namespace MWWorld
             y += cellSize/2;
         }
     }
-
-	
 
     void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
     {

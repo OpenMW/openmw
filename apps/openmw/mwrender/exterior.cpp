@@ -63,26 +63,26 @@ void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
 
 void ExteriorCellRender::rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements)
 {
-	assert(insert);
-	Ogre::SceneNode *parent = insert;
-	 //std::cout << "ELEMENTS:" << elements;
-	for (int i = 0; i < elements; i++){
-	   if(sceneNodeName[i] != "" && parent->getChild(sceneNodeName[i]))
-		   parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneNodeName[i]));
-	}
-	   parent->rotate(axis, angle);
+    assert(insert);
+    Ogre::SceneNode *parent = insert;
+     //std::cout << "ELEMENTS:" << elements;
+    for (int i = 0; i < elements; i++){
+       if(sceneNodeName[i] != "" && parent->getChild(sceneNodeName[i]))
+           parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneNodeName[i]));
+    }
+       parent->rotate(axis, angle);
 }
 /*
 void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements){
-	assert (insert);
-	 //insert->
-	   Ogre::SceneNode *parent = insert;
-	   for (int i = 0; i < elements; i++){
-	   if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
-		   parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
-		}
-	 
-	 npcPart = parent->createChildSceneNode(sceneNodeName);
+    assert (insert);
+     //insert->
+       Ogre::SceneNode *parent = insert;
+       for (int i = 0; i < elements; i++){
+       if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
+           parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
+        }
+     
+     npcPart = parent->createChildSceneNode(sceneNodeName);
   NIFLoader::load(mesh);
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   
@@ -97,92 +97,99 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
 */
 void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName, std::string sceneParent[], int elements)
 {
-	insertMesh(mesh, vec, axis, angle, sceneNodeName,  sceneParent, elements, true);
+    insertMesh(mesh, vec, axis, angle, sceneNodeName,  sceneParent, elements, true);
 }
 void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst){
 
-	   assert (insert);
-	 //insert->
-	   Ogre::SceneNode *parent = insert;
-	   for (int i = 0; i < elements; i++){
-	   if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
-		   parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
-		}
-	 
-	 npcPart = parent->createChildSceneNode(sceneNodeName);
+       assert (insert);
+     //insert->
+       Ogre::SceneNode *parent = insert;
+       for (int i = 0; i < elements; i++){
+       if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
+           parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
+        }
+     
+     npcPart = parent->createChildSceneNode(sceneNodeName);
    MeshPtr good2 = NIFLoader::load(mesh);
 
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
 
 
+  if(translateFirst){
   npcPart->translate(vec);
   npcPart->rotate(axis, angle);
+  }
+  else{
+      
+  npcPart->rotate(axis, angle);
+  npcPart->translate(vec);
+  }
   npcPart->attachObject(ent);
 
    Ogre::MeshManager *m = MeshManager::getSingletonPtr();
   const std::string beast1 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
-	const std::string beast2 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
-	const std::string beast3 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
-	const std::string beast4 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
+    const std::string beast2 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
+    const std::string beast3 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
+    const std::string beast4 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
 
-	const std::string beasttail1 ="tail\\b\\B_N_Khajiit_F_Skins.nif";
-	const std::string beasttail2 ="tail\\b\\B_N_Khajiit_M_Skins.nif";
-	const std::string beasttail3 ="tail\\b\\B_N_Argonian_F_Skins.nif";
-	const std::string beasttail4 ="tail\\b\\B_N_Argonian_M_Skins.nif";
+    const std::string beasttail1 ="tail\\b\\B_N_Khajiit_F_Skins.nif";
+    const std::string beasttail2 ="tail\\b\\B_N_Khajiit_M_Skins.nif";
+    const std::string beasttail3 ="tail\\b\\B_N_Argonian_F_Skins.nif";
+    const std::string beasttail4 ="tail\\b\\B_N_Argonian_M_Skins.nif";
 
-	const std::string beastfoot1 ="foot\\b\\B_N_Khajiit_F_Skins.nif";
-	const std::string beastfoot2 ="foot\\b\\B_N_Khajiit_M_Skins.nif";
-	const std::string beastfoot3 ="foot\\b\\B_N_Argonian_F_Skins.nif";
-	const std::string beastfoot4 ="foot\\b\\B_N_Argonian_M_Skins.nif";
-	if(mesh.compare(beast1) == 0 && m->getByName(beasttail1).isNull())
-		{
-			//std::cout << "CLONINGKHAJIITF\n";
-			good2->reload();
-			MeshPtr tail = good2->clone(beasttail1);
-			good2->reload();
-			MeshPtr foot = good2->clone(beastfoot1);
-			good2->reload();
-		}
-		else if(mesh.compare(beast2) == 0 && m->getByName(beasttail2).isNull())
-		{
-			//std::cout << "CLONINGKHAJIITM\n";
-			good2->reload();
-			MeshPtr tail = good2->clone(beasttail2);
-			good2->reload();
-			MeshPtr foot = good2->clone(beastfoot2);
-			good2->reload();
-		}
-		else if(mesh.compare(beast3) == 0 && m->getByName(beasttail3).isNull())
-		{
-			//std::cout << "CLONINGARGONIANF\n";
-			good2->reload();
-			MeshPtr tail = good2->clone(beasttail3);
-			good2->reload();
-			MeshPtr foot = good2->clone(beastfoot3);
-			good2->reload();
-		}
-		else if(mesh.compare(beast4) == 0 && m->getByName(beasttail4).isNull())
-		{
-			//std::cout << "CLONINGARGONIANM\n";
-			good2->reload();
-			MeshPtr tail = good2->clone(beasttail4);
-			good2->reload();
-			MeshPtr foot = good2->clone(beastfoot4);
-			good2->reload();
-		}
+    const std::string beastfoot1 ="foot\\b\\B_N_Khajiit_F_Skins.nif";
+    const std::string beastfoot2 ="foot\\b\\B_N_Khajiit_M_Skins.nif";
+    const std::string beastfoot3 ="foot\\b\\B_N_Argonian_F_Skins.nif";
+    const std::string beastfoot4 ="foot\\b\\B_N_Argonian_M_Skins.nif";
+    if(mesh.compare(beast1) == 0 && m->getByName(beasttail1).isNull())
+        {
+            //std::cout << "CLONINGKHAJIITF\n";
+            good2->reload();
+            MeshPtr tail = good2->clone(beasttail1);
+            good2->reload();
+            MeshPtr foot = good2->clone(beastfoot1);
+            good2->reload();
+        }
+        else if(mesh.compare(beast2) == 0 && m->getByName(beasttail2).isNull())
+        {
+            //std::cout << "CLONINGKHAJIITM\n";
+            good2->reload();
+            MeshPtr tail = good2->clone(beasttail2);
+            good2->reload();
+            MeshPtr foot = good2->clone(beastfoot2);
+            good2->reload();
+        }
+        else if(mesh.compare(beast3) == 0 && m->getByName(beasttail3).isNull())
+        {
+            //std::cout << "CLONINGARGONIANF\n";
+            good2->reload();
+            MeshPtr tail = good2->clone(beasttail3);
+            good2->reload();
+            MeshPtr foot = good2->clone(beastfoot3);
+            good2->reload();
+        }
+        else if(mesh.compare(beast4) == 0 && m->getByName(beasttail4).isNull())
+        {
+            //std::cout << "CLONINGARGONIANM\n";
+            good2->reload();
+            MeshPtr tail = good2->clone(beasttail4);
+            good2->reload();
+            MeshPtr foot = good2->clone(beastfoot4);
+            good2->reload();
+        }
 }
 // insert a mesh related to the most recent insertBegin call.
 
 void ExteriorCellRender::scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements)
 {
-	assert(insert);
-	Ogre::SceneNode *parent = insert;
-	 //std::cout << "ELEMENTS:" << elements;
-	for (int i = 0; i < elements; i++){
-	   if(sceneNodeName[i] != "" && parent->getChild(sceneNodeName[i]))
-		   parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneNodeName[i]));
-	}
-	   parent->scale(axis);
+    assert(insert);
+    Ogre::SceneNode *parent = insert;
+     //std::cout << "ELEMENTS:" << elements;
+    for (int i = 0; i < elements; i++){
+       if(sceneNodeName[i] != "" && parent->getChild(sceneNodeName[i]))
+           parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneNodeName[i]));
+    }
+       parent->scale(axis);
 }
 
 // insert a mesh related to the most recent insertBegin call.

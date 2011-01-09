@@ -29,6 +29,7 @@
 #include "mwworld/ptr.hpp"
 #include "mwworld/environment.hpp"
 #include "mwworld/class.hpp"
+#include "mwworld/player.hpp"
 
 #include "mwclass/classes.hpp"
 
@@ -67,73 +68,71 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
-	if(! (mEnvironment.mSoundManager->isMusicPlaying()))
-	{
-		// Play some good 'ol tunes
-			mEnvironment.mSoundManager->startRandomTitle();
-	}
+    if(mUseSound && !(mEnvironment.mSoundManager->isMusicPlaying()))
+    {
+        // Play some good 'ol tunes
+        mEnvironment.mSoundManager->startRandomTitle();
+    }
 
-	std::string effect;
+    std::string effect;
 
+    MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+    //If the region has changed
+    if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
+        timer.restart();
+        if (test.name != current->cell->region)
+        {
+            total = 0;
+            test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
+        }
 
+        if(test.soundList.size() > 0)
+        {
+            std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
+            //mEnvironment.mSoundManager
+            if(total == 0){
+                while (!(soundIter == test.soundList.end()))
+                {
+                    ESM::NAME32 go = soundIter->sound;
+                    int chance = (int) soundIter->chance;
+                    //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+                    soundIter++;
+                    total += chance;
+                }
+            }
 
-	MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
-	//If the region has changed
-	if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
-			timer.restart();
-			if (test.name != current->cell->region)
-			{
-				total = 0;
-				test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
-			}
+            srand ( time(NULL) );
+            int r = rand() % total;        //old random code
+            int pos = 0;
+            soundIter = test.soundList.begin();
+            while (!(soundIter == test.soundList.end()))
+            {
+                const ESM::NAME32 go = soundIter->sound;
+                int chance = (int) soundIter->chance;
+                //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+                soundIter++;
+                if( r - pos < chance)
+                {
+                    effect = go.name;
+                    //play sound
+                    std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+                    mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
 
-			if(test.soundList.size() > 0)
-			{
-				std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
-				//mEnvironment.mSoundManager
-				if(total == 0){
-					while (!(soundIter == test.soundList.end()))
-					{
-						ESM::NAME32 go = soundIter->sound;
-						int chance = (int) soundIter->chance;
-						//std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-						soundIter++;
-						total += chance;
-					}
-				}
+                    break;
 
-			    srand ( time(NULL) );
-					int r = rand() % total;        //old random code
-					int pos = 0;
-					soundIter = test.soundList.begin();
-				while (!(soundIter == test.soundList.end()))
-				{
-					 const ESM::NAME32 go = soundIter->sound;
-					int chance = (int) soundIter->chance;
-					//std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-					soundIter++;
-					if( r - pos < chance)
-					{
-						effect = go.name;
-						//play sound
-						std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-						mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
+                }
+                pos += chance;
+            }
+        }
 
-						break;
+        //mEnvironment.mSoundManager->playSound(effect, 1.0, 1.0);
+        //printf("REGION: %s\n", test.name);
 
-					}
-					pos += chance;
-				}
-			}
-
-			//mEnvironment.mSoundManager->playSound(effect, 1.0, 1.0);
-			//printf("REGION: %s\n", test.name);
-
-		}
-	else if(current->cell->data.flags & current->cell->Interior)
-	{
-		test.name = "";
-	}
+    }
+    else if(current->cell->data.flags & current->cell->Interior)
+    {
+        test.name = "";
+    }
 
     try
     {
@@ -184,7 +183,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     {
         std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
-	//std::cout << "TESTING2";
+    //std::cout << "TESTING2";
 
     return true;
 }
@@ -294,8 +293,8 @@ void OMW::Engine::go()
     assert (!mCellName.empty());
     assert (!mMaster.empty());
 
-	test.name = "";
-	total = 0;
+    test.name = "";
+    total = 0;
 
 
 
@@ -377,7 +376,7 @@ void OMW::Engine::go()
     }
 
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
+    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayer(),
                                   *mEnvironment.mWindowManager, mDebug, *this);
     mEnvironment.mInputManager = &input;
 
@@ -439,7 +438,7 @@ void OMW::Engine::activate()
             &ptr.getRefData().getLocals(), ptr);
 
         boost::shared_ptr<MWWorld::Action> action =
-            MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
+            MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayer().getPlayer(),
             mEnvironment);
 
         interpreterContext.activate (ptr, action);

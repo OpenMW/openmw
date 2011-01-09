@@ -12,11 +12,13 @@
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "interpretercontext.hpp"
+#include "ref.hpp"
 
 namespace MWScript
 {
     namespace Stats
     {
+        template<class R>
         class OpGetAttribute : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -27,10 +29,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value =
                         MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
@@ -40,32 +39,7 @@ namespace MWScript
                 }
         };
 
-        class OpGetAttributeExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpGetAttributeExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        getModified();
-
-                    runtime.push (value);
-                }
-        };
-
+        template<class R>
         class OpSetAttribute : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -76,45 +50,17 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
                         setModified (value, 0);
                 }
         };
 
-        class OpSetAttributeExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpSetAttributeExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        setModified (value, 0);
-                }
-        };
-
+        template<class R>
         class OpModAttribute : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -125,13 +71,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     value += MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
                         getModified();
@@ -141,36 +84,7 @@ namespace MWScript
                 }
         };
 
-        class OpModAttributeExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpModAttributeExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    value +=
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        getModified();
-
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        setModified (value, 0, 100);
-                }
-        };
-
+        template<class R>
         class OpGetDynamic : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -181,10 +95,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     if (mIndex==0 && MWWorld::Class::get (ptr).hasItemHealth (ptr))
                     {
@@ -204,42 +115,7 @@ namespace MWScript
                 }
         };
 
-        class OpGetDynamicExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpGetDynamicExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    if (mIndex==0 && MWWorld::Class::get (ptr).hasItemHealth (ptr))
-                    {
-                        // health is a special case
-                        Interpreter::Type_Integer value =
-                            MWWorld::Class::get (ptr).getItemMaxHealth (ptr);
-                        runtime.push (value);
-
-                        return;
-                    }
-
-                    Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
-                        getCurrent();
-
-                    runtime.push (value);
-                }
-        };
-
+        template<class R>
         class OpSetDynamic : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -250,45 +126,17 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
                         setModified (value, 0);
                 }
         };
 
-        class OpSetDynamicExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpSetDynamicExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
-                        setModified (value, 0);
-                }
-        };
-
+        template<class R>
         class OpModDynamic : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -299,13 +147,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer diff = runtime[0].mInteger;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
@@ -318,40 +163,7 @@ namespace MWScript
                 }
         };
 
-        class OpModDynamicExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpModDynamicExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWMechanics::CreatureStats& stats =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr);
-
-                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
-
-                    stats.mDynamic[mIndex].setModified (
-                        diff + stats.mDynamic[mIndex].getModified(), 0);
-
-                    stats.mDynamic[mIndex].setCurrent (diff + current);
-                }
-        };
-
-
+        template<class R>
         class OpModCurrentDynamic : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -362,13 +174,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer diff = runtime[0].mInteger;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
@@ -378,36 +187,7 @@ namespace MWScript
                 }
         };
 
-        class OpModCurrentDynamicExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpModCurrentDynamicExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWMechanics::CreatureStats& stats =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr);
-
-                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
-
-                    stats.mDynamic[mIndex].setCurrent (diff + current);
-                }
-        };
-
+        template<class R>
         class OpGetDynamicGetRatio : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -418,10 +198,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
@@ -436,38 +213,7 @@ namespace MWScript
                 }
         };
 
-        class OpGetDynamicGetRatioExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpGetDynamicGetRatioExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWMechanics::CreatureStats& stats =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr);
-
-                    Interpreter::Type_Float value = 0;
-
-                    Interpreter::Type_Float max = stats.mDynamic[mIndex].getModified();
-
-                    if (max>0)
-                        value = stats.mDynamic[mIndex].getCurrent() / max;
-
-                    runtime.push (value);
-                }
-        };
-
+        template<class R>
         class OpGetSkill : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -478,10 +224,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value =
                         MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
@@ -491,32 +234,7 @@ namespace MWScript
                 }
         };
 
-        class OpGetSkillExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpGetSkillExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
-                        getModified();
-
-                    runtime.push (value);
-                }
-        };
-
+        template<class R>
         class OpSetSkill : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -527,45 +245,17 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
                         setModified (value, 0);
                 }
         };
 
-        class OpSetSkillExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpSetSkillExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
-                        setModified (value, 0);
-                }
-        };
-
+        template<class R>
         class OpModSkill : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -576,45 +266,12 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     value += MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
-                        getModified();
-
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
-                        setModified (value, 0, 100);
-                }
-        };
-
-        class OpModSkillExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpModSkillExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    value +=
-                        MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
                         getModified();
 
                     MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
@@ -729,53 +386,54 @@ namespace MWScript
         {
             for (int i=0; i<numberOfAttributes; ++i)
             {
-                interpreter.installSegment5 (opcodeGetAttribute+i, new OpGetAttribute (i));
+                interpreter.installSegment5 (opcodeGetAttribute+i, new OpGetAttribute<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeGetAttributeExplicit+i,
-                    new OpGetAttributeExplicit (i));
+                    new OpGetAttribute<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeSetAttribute+i, new OpSetAttribute (i));
+                interpreter.installSegment5 (opcodeSetAttribute+i, new OpSetAttribute<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeSetAttributeExplicit+i,
-                    new OpSetAttributeExplicit (i));
+                    new OpSetAttribute<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModAttribute+i, new OpModAttribute (i));
+                interpreter.installSegment5 (opcodeModAttribute+i, new OpModAttribute<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeModAttributeExplicit+i,
-                    new OpModAttributeExplicit (i));
+                    new OpModAttribute<ExplicitRef> (i));
             }
 
             for (int i=0; i<numberOfDynamics; ++i)
             {
-                interpreter.installSegment5 (opcodeGetDynamic+i, new OpGetDynamic (i));
+                interpreter.installSegment5 (opcodeGetDynamic+i, new OpGetDynamic<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeGetDynamicExplicit+i,
-                    new OpGetDynamicExplicit (i));
+                    new OpGetDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeSetDynamic+i, new OpSetDynamic (i));
+                interpreter.installSegment5 (opcodeSetDynamic+i, new OpSetDynamic<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeSetDynamicExplicit+i,
-                    new OpSetDynamicExplicit (i));
+                    new OpSetDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModDynamic+i, new OpModDynamic (i));
+                interpreter.installSegment5 (opcodeModDynamic+i, new OpModDynamic<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeModDynamicExplicit+i,
-                    new OpModDynamicExplicit (i));
+                    new OpModDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModCurrentDynamic+i, new OpModCurrentDynamic (i));
+                interpreter.installSegment5 (opcodeModCurrentDynamic+i,
+                    new OpModCurrentDynamic<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeModCurrentDynamicExplicit+i,
-                    new OpModCurrentDynamicExplicit (i));
+                    new OpModCurrentDynamic<ExplicitRef> (i));
 
                 interpreter.installSegment5 (opcodeGetDynamicGetRatio+i,
-                    new OpGetDynamicGetRatio (i));
+                    new OpGetDynamicGetRatio<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeGetDynamicGetRatioExplicit+i,
-                    new OpGetDynamicGetRatioExplicit (i));
+                    new OpGetDynamicGetRatio<ExplicitRef> (i));
             }
 
             for (int i=0; i<numberOfSkills; ++i)
             {
-                interpreter.installSegment5 (opcodeGetSkill+i, new OpGetSkill (i));
-                interpreter.installSegment5 (opcodeGetSkillExplicit+i, new OpGetSkillExplicit (i));
+                interpreter.installSegment5 (opcodeGetSkill+i, new OpGetSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (opcodeGetSkillExplicit+i, new OpGetSkill<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeSetSkill+i, new OpSetSkill (i));
-                interpreter.installSegment5 (opcodeSetSkillExplicit+i, new OpSetSkillExplicit (i));
+                interpreter.installSegment5 (opcodeSetSkill+i, new OpSetSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (opcodeSetSkillExplicit+i, new OpSetSkill<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModSkill+i, new OpModSkill (i));
-                interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkillExplicit (i));
+                interpreter.installSegment5 (opcodeModSkill+i, new OpModSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
             }
         }
     }

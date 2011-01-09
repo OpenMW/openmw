@@ -21,28 +21,28 @@ namespace ESMS
 
 namespace MWSound
 {
-	//SoundPtr *music;
+    //SoundPtr *music;
     class SoundManager
     {
             // Hide implementation details - engine.cpp is compiling
             // enough as it is.
             struct SoundImpl;
-			
+            
             SoundImpl *mData;
-			std::vector<boost::filesystem::path> files;
-			
+            std::vector<boost::filesystem::path> files;
+            
 
         public:
       SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
                    boost::filesystem::path dataDir, bool useSound);
             ~SoundManager();
 
-			void startRandomTitle();
-			void MP3Lookup(boost::filesystem::path dir);
-			//struct SoundImpl;
-			bool isMusicPlaying();
+            void startRandomTitle();
+            void MP3Lookup(boost::filesystem::path dir);
+            //struct SoundImpl;
+            bool isMusicPlaying();
 
-			SoundImpl getMData();
+            SoundImpl getMData();
 
             void say (MWWorld::Ptr reference, const std::string& filename);
             ///< Make an actor say some text.

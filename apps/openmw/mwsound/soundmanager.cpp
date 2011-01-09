@@ -62,7 +62,7 @@ namespace MWSound
        sounds based on the sound factory it is given.
     */
     OEManagerPtr mgr;
-	SoundPtr music;
+    SoundPtr music;
 
     /* This class calls update() on the sound manager each frame
        using and Ogre::FrameListener
@@ -310,7 +310,7 @@ namespace MWSound
                              bool useSound)
     : mData(NULL)
   {
-	MP3Lookup(dataDir / "Music/Explore/");
+    MP3Lookup(dataDir / "Music/Explore/");
     if(useSound)
       mData = new SoundImpl(root, camera, store, (dataDir / "Sound").file_string());
   }
@@ -323,60 +323,64 @@ namespace MWSound
 
   void SoundManager::MP3Lookup(boost::filesystem::path dir)
 {
-	boost::filesystem::directory_iterator dir_iter(dir), dir_end;
+    boost::filesystem::directory_iterator dir_iter(dir), dir_end;
 
-	std::string mp3extension = ".mp3";
-	for(;dir_iter != dir_end; dir_iter++)
-	{
-		if(boost::filesystem::extension(*dir_iter) == mp3extension)
-		{
-			files.push_back(*dir_iter);
-		}
-	}
+    std::string mp3extension = ".mp3";
+    for(;dir_iter != dir_end; dir_iter++)
+    {
+        if(boost::filesystem::extension(*dir_iter) == mp3extension)
+        {
+            files.push_back(*dir_iter);
+        }
+    }
 }
 
   void SoundManager::startRandomTitle()
 {
-	std::vector<boost::filesystem::path>::iterator fileIter;
+    std::vector<boost::filesystem::path>::iterator fileIter;
 
-	if(files.size() > 0)
-	{
-		fileIter = files.begin();
-		srand ( time(NULL) );
-		int r = rand() % files.size() + 1;        //old random code
+    if(files.size() > 0)
+    {
+        fileIter = files.begin();
+        srand ( time(NULL) );
+        int r = rand() % files.size() + 1;        //old random code
 
-		for(int i = 1; i < r; i++)
-		{
-			fileIter++;
-		}
-		std::string music = fileIter->file_string();
-		try
-		{
-			std::cout << "Playing " << music << "\n";
-			streamMusic(music);
-		}
-		catch(std::exception &e)
-		{
-			std::cout << "  Music Error: " << e.what() << "\n";
-		}
-	}
+        for(int i = 1; i < r; i++)
+        {
+            fileIter++;
+        }
+        std::string music = fileIter->file_string();
+        try
+        {
+            std::cout << "Playing " << music << "\n";
+            streamMusic(music);
+        }
+        catch(std::exception &e)
+        {
+            std::cout << "  Music Error: " << e.what() << "\n";
+        }
+    }
 }
 
 
     bool SoundManager::isMusicPlaying()
-   {
-	    bool test =  mData->music->isPlaying();
-		return test;
-   }
+    {
+        bool test = false;
+        if(mData && mData->music)
+        {
+            test = mData->music->isPlaying();
+        }
+        return test;
+    }
 
    SoundManager::SoundImpl SoundManager::getMData()
   {
-	 // bool test = mData->music->isPlaying();
-	  return *mData;
+     // bool test = mData->music->isPlaying();
+      return *mData;
   }
 
- 
-  
+
+
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
     // The range values are not tested
@@ -400,8 +404,8 @@ namespace MWSound
     // Play the sound and tell it to stream, if possible. TODO:
     // Store the reference, the jukebox will need to check status,
     // control volume etc.
-	if (mData->music)
-		mData->music->stop();
+    if (mData->music)
+        mData->music->stop();
     mData->music = mData->mgr->load(filename);
     mData->music->setStreaming(true);
     mData->music->setVolume(0.4);

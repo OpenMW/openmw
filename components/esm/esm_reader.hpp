@@ -1,6 +1,8 @@
 #ifndef _ESM_READER_H
 #define _ESM_READER_H
 
+#include <string.h>
+
 #include <string>
 #include <libs/platform/stdint.h>
 #include <libs/platform/string.h>
@@ -451,11 +453,11 @@ public:
   bool isEmptyOrGetName()
     {
       if(c.leftRec)
-	{
-	  esm->read(c.subName.name, 4);
-	  c.leftRec -= 4;
-	  return false;
-	}
+    {
+      esm->read(c.subName.name, 4);
+      c.leftRec -= 4;
+      return false;
+    }
       return true;
     }
 
@@ -472,7 +474,7 @@ public:
     {
       skipHSub();
       if(static_cast<int> (c.leftSub) != size)
-	fail("skipHSubSize() mismatch");
+    fail("skipHSubSize() mismatch");
     }
 
   /* Sub-record header. This updates leftRec beyond the current
@@ -481,7 +483,7 @@ public:
   void getSubHeader()
     {
       if(c.leftRec < 4)
-	fail("End of record while reading sub-record header");
+    fail("End of record while reading sub-record header");
 
       // Get subrecord size
       getT(c.leftSub);
@@ -491,7 +493,7 @@ public:
 
       // Check that sizes added up
       if(c.leftRec < 0)
-	fail("Not enough bytes left in record for this subrecord.");
+    fail("Not enough bytes left in record for this subrecord.");
     }
 
   /** Get sub header and check the size
@@ -550,9 +552,9 @@ public:
     {
       // General error checking
       if(c.leftFile < 12)
-	fail("End of file while reading record header");
+    fail("End of file while reading record header");
       if(c.leftRec)
-	fail("Previous record contains unread bytes");
+    fail("Previous record contains unread bytes");
 
       getUint(c.leftRec);
       getUint(flags);// This header entry is always zero
@@ -561,7 +563,7 @@ public:
 
       // Check that sizes add up
       if(c.leftFile < c.leftRec)
-	fail("Record size is larger than rest of file");
+    fail("Record size is larger than rest of file");
 
       // Adjust number of bytes c.left in file
       c.leftFile -= c.leftRec;

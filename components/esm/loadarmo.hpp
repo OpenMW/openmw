@@ -33,7 +33,7 @@ enum PartReferenceType
     PRT_RPauldron       = 23,
     PRT_LPauldron       = 24,
     PRT_Weapon          = 25,
-    PRT_Tail            = 26	
+    PRT_Tail            = 26    
   };
 
 // Reference to body parts
@@ -64,17 +64,17 @@ struct Armor
 {
   enum Type
   {
-    Helmet		= 0,
-    Cuirass		= 1,
-    LPauldron		= 2,
-    RPauldron		= 3,
-    Greaves		= 4,
-    Boots		= 5,
-    LGauntlet		= 6,
-    RGauntlet		= 7,
-    Shield		= 8,
-    LBracer		= 9,
-    RBracer		= 10
+    Helmet      = 0,
+    Cuirass     = 1,
+    LPauldron       = 2,
+    RPauldron       = 3,
+    Greaves     = 4,
+    Boots       = 5,
+    LGauntlet       = 6,
+    RGauntlet       = 7,
+    Shield      = 8,
+    LBracer     = 9,
+    RBracer     = 10
   };
 
   struct AODTstruct

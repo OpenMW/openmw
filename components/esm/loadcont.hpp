@@ -27,16 +27,16 @@ struct InventoryList
         esm.getHT(ci, 36);
         list.push_back(ci);
       }
-  }	
+  } 
 };
 
 struct Container
 {
   enum Flags
     {
-      Organic	= 1, // Objects cannot be placed in this container
-      Respawn	= 2, // Respawns after 4 months
-      Unknown	= 8
+      Organic   = 1, // Objects cannot be placed in this container
+      Respawn   = 2, // Respawns after 4 months
+      Unknown   = 8
     };
 
   std::string name, model, script;
