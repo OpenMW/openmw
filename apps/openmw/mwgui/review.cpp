@@ -8,6 +8,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <cmath>
+
 using namespace MWGui;
 using namespace Widgets;
 

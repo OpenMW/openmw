@@ -4,6 +4,7 @@
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwgui/window_manager.hpp"
 
+#include <cmath>
 #include <algorithm>
 #include <iterator>
 #include <boost/lexical_cast.hpp>

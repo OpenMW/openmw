@@ -29,6 +29,7 @@
 #include "mwworld/ptr.hpp"
 #include "mwworld/environment.hpp"
 #include "mwworld/class.hpp"
+#include "mwworld/player.hpp"
 
 #include "mwclass/classes.hpp"
 
@@ -77,7 +78,7 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
 
 
-	MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayerPos().getPlayer().getCell();
+	MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
 	//If the region has changed
 	if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
 			timer.restart();
@@ -377,7 +378,7 @@ void OMW::Engine::go()
     }
 
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayerPos(),
+    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayer(),
                                   *mEnvironment.mWindowManager, mDebug, *this);
     mEnvironment.mInputManager = &input;
 
@@ -439,7 +440,7 @@ void OMW::Engine::activate()
             &ptr.getRefData().getLocals(), ptr);
 
         boost::shared_ptr<MWWorld::Action> action =
-            MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayerPos().getPlayer(),
+            MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayer().getPlayer(),
             mEnvironment);
 
         interpreterContext.activate (ptr, action);

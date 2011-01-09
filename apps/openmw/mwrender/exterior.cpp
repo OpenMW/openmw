@@ -115,8 +115,15 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
 
 
+  if(translateFirst){
   npcPart->translate(vec);
   npcPart->rotate(axis, angle);
+  }
+  else{
+	  
+  npcPart->rotate(axis, angle);
+  npcPart->translate(vec);
+  }
   npcPart->attachObject(ent);
 
    Ogre::MeshManager *m = MeshManager::getSingletonPtr();
