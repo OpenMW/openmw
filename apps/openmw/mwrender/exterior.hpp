@@ -45,21 +45,21 @@ namespace MWRender
 
     static bool lightOutQuadInLin;
 
-    ESMS::CellStore<MWWorld::RefData> &cell;
+    ESMS::CellStore<MWWorld::RefData> &mCell;
     MWWorld::Environment &mEnvironment;
-    MWScene &scene;
+    MWScene &mScene;
 
     /// The scene node that contains all objects belonging to this
     /// cell.
-    Ogre::SceneNode *base;
+    Ogre::SceneNode *mBase;
 
-    Ogre::SceneNode *insert;
-    Ogre::SceneNode *npcPart;
+    Ogre::SceneNode *mInsert;
+    Ogre::SceneNode *mNpcPart;
 
     // 0 normal, 1 more bright, 2 max
-    int ambientMode;
+    int mAmbientMode;
 
-    Ogre::ColourValue ambientColor;
+    Ogre::ColourValue mAmbientColor;
 
     /// start inserting a new reference.
     virtual void insertBegin (ESM::CellRef &ref);
@@ -91,7 +91,7 @@ namespace MWRender
 
     ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
         MWScene &_scene)
-    : cell(_cell), mEnvironment (environment), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
+    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0) {}
 
     virtual ~ExteriorCellRender() { destroy(); }
 
