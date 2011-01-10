@@ -16,6 +16,12 @@
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include <OgreSceneNode.h>
 
+namespace 
+{
+    const Ogre::Radian kOgrePi (Ogre::Math::PI);
+    const Ogre::Radian kOgrePiOverTwo (Ogre::Math::PI / Ogre::Real(2.0));
+}
+
 namespace MWClass
 {
     std::string Npc::getId (const MWWorld::Ptr& ptr) const
@@ -107,18 +113,18 @@ namespace MWClass
         std::string upperarmpath[2] = {npcName + "chest", npcName + "upper arm"};
         
         if (groin){
-            cellRender.insertMesh("meshes\\" + groin->model, pos2, axis, Ogre::Radian(3.14), npcName + "groin", addresses, numbers);
+            cellRender.insertMesh("meshes\\" + groin->model, pos2, axis, kOgrePi, npcName + "groin", addresses, numbers);
             addresses2[numbers] = npcName + "groin";
             addresses[numbers++] = npcName + "groin";
         }
         if (tail) {
-            cellRender.insertMesh("tail\\" + tail->model, Ogre::Vector3(0 , 0, -76), axis, Ogre::Radian(3.14), npcName + "tail", addresses, numbers, "tail");
+            cellRender.insertMesh("tail\\" + tail->model, Ogre::Vector3(0 , 0, -76), axis, kOgrePi, npcName + "tail", addresses, numbers, "tail");
             //std::cout << "TAIL\n";
         }
         
         //addresses[1] = npcName + "groin";
         if(upperleg){
-        cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( 6, 0, -16), axis, Ogre::Radian(3.14), npcName + "upper leg", addresses, numbers); //-18
+        cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( 6, 0, -16), axis, kOgrePi, npcName + "upper leg", addresses, numbers); //-18
         cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( -6, 0, -16), axis, Ogre::Radian(0), npcName + "upper leg2", addresses2, numbers);
         addresses2[numbers] = npcName + "upper leg2";
         addresses[numbers++] = npcName + "upper leg";
@@ -158,9 +164,9 @@ namespace MWClass
         }
         if(feet){
             
-            cellRender.insertMesh ("foot\\" + feet->model, Ogre::Vector3( 7, 4, -16), axis, Ogre::Radian(3.14), npcName + "foot", addresses, numbers);        //9, 0, -14
+            cellRender.insertMesh ("foot\\" + feet->model, Ogre::Vector3( 7, 4, -16), axis, kOgrePi, npcName + "foot", addresses, numbers);        //9, 0, -14
 
-            cellRender.insertMesh ("foot\\" + feet->model, Ogre::Vector3( 7, 4, -16), axis, Ogre::Radian(3.14), npcName + "foot2", addresses2, numbers);
+            cellRender.insertMesh ("foot\\" + feet->model, Ogre::Vector3( 7, 4, -16), axis, kOgrePi, npcName + "foot2", addresses2, numbers);
             addresses2[numbers] = npcName + "foot2";
             addresses[numbers++] = npcName + "foot";
             //cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), addresses, numbers);
@@ -169,20 +175,20 @@ namespace MWClass
          
         if (arm){
             //010
-            cellRender.insertMesh("meshes\\" + arm->model, Ogre::Vector3(-12.5, 0, 104), Ogre::Vector3(0, 1, 0), Ogre::Radian(-3.14 / 2), npcName + "upper arm", upperleft, uppernumbers);   //1, 0,.75
+            cellRender.insertMesh("meshes\\" + arm->model, Ogre::Vector3(-12.5, 0, 104), Ogre::Vector3(0, 1, 0), -kOgrePiOverTwo, npcName + "upper arm", upperleft, uppernumbers);   //1, 0,.75
              //cellRender.rotateMesh(Ogre::Vector3(1, 0, 0), Ogre::Radian (.45), upperarmpath, 2);                                                                                          //-.5, 0, -.75
-            cellRender.insertMesh("meshes\\" + arm->model, Ogre::Vector3(12.5, 0, 105), Ogre::Vector3(-.5, 0, -.75), Ogre::Radian(3.14), npcName + "upper arm2", upperright, uppernumbers);
+            cellRender.insertMesh("meshes\\" + arm->model, Ogre::Vector3(12.5, 0, 105), Ogre::Vector3(-.5, 0, -.75), kOgrePi, npcName + "upper arm2", upperright, uppernumbers);
             upperleft[uppernumbers] = npcName + "upper arm";
             upperright[uppernumbers++] = npcName + "upper arm2";
             cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperleft, uppernumbers);        //1 -1 1
-            cellRender.rotateMesh(Ogre::Vector3(0, .1, 0),  Ogre::Radian(3.14/2), upperleft, uppernumbers);
+            cellRender.rotateMesh(Ogre::Vector3(0, 1, 0),  kOgrePiOverTwo, upperleft, uppernumbers);
         }
 
         if (forearm)
         {
         //addresses[1] = npcName + "upper arm";
-            cellRender.insertMesh("meshes\\" + forearm->model, Ogre::Vector3(-12.5, 0, 0), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "forearm", upperleft, uppernumbers);
-            cellRender.insertMesh("meshes\\" + forearm->model, Ogre::Vector3(-12.5, 0, 0), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "forearm2", upperright, uppernumbers);
+            cellRender.insertMesh("meshes\\" + forearm->model, Ogre::Vector3(-12.5, 0, 0), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "forearm", upperleft, uppernumbers);
+            cellRender.insertMesh("meshes\\" + forearm->model, Ogre::Vector3(-12.5, 0, 0), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "forearm2", upperright, uppernumbers);
             upperleft[uppernumbers] = npcName + "forearm";
             upperright[uppernumbers++] = npcName + "forearm2";
         }
@@ -192,14 +198,14 @@ namespace MWClass
         {
             if(upperleft[uppernumbers - 1].compare(npcName + "upper arm") == 0)
             {
-                cellRender.insertMesh("meshes\\b\\B_N_Argonian_M_Forearm.nif", Ogre::Vector3(-12.5, 0, 0), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "forearm", upperleft, uppernumbers);
-                cellRender.insertMesh("meshes\\b\\B_N_Argonian_M_Forearm.nif", Ogre::Vector3(-12.5, 0, 0), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "forearm2", upperright, uppernumbers);
+                cellRender.insertMesh("meshes\\b\\B_N_Argonian_M_Forearm.nif", Ogre::Vector3(-12.5, 0, 0), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "forearm", upperleft, uppernumbers);
+                cellRender.insertMesh("meshes\\b\\B_N_Argonian_M_Forearm.nif", Ogre::Vector3(-12.5, 0, 0), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "forearm2", upperright, uppernumbers);
                 upperleft[uppernumbers] = npcName + "forearm";
                 upperright[uppernumbers++] = npcName + "forearm2";
 
             }
-            cellRender.insertMesh("meshes\\" + wrist->model, Ogre::Vector3(-9.5, 0, 0), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "wrist", upperleft, uppernumbers);
-            cellRender.insertMesh("meshes\\" + wrist->model, Ogre::Vector3(-9.5, 0, 0), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "wrist2", upperright, uppernumbers);
+            cellRender.insertMesh("meshes\\" + wrist->model, Ogre::Vector3(-9.5, 0, 0), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "wrist", upperleft, uppernumbers);
+            cellRender.insertMesh("meshes\\" + wrist->model, Ogre::Vector3(-9.5, 0, 0), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "wrist2", upperright, uppernumbers);
             upperleft[uppernumbers] = npcName + "wrist";
             upperright[uppernumbers++] = npcName + "wrist2";
         }
@@ -215,11 +221,11 @@ namespace MWClass
                 pass = "b\\B_N_Dark Elf_M_Hands.1st.NIF";   
             else
                 pass = hand->model;
-            cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "hand", upperleft, uppernumbers,false);   //0, 100, -100    0,0,120
-            cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0,0), Ogre::Radian(3.14), npcName + "hand2", upperright, uppernumbers, false);   //0, 100, -100    0,0,120
+            cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "hand", upperleft, uppernumbers,false);   //0, 100, -100    0,0,120
+            cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0,0), kOgrePi, npcName + "hand2", upperright, uppernumbers, false);   //0, 100, -100    0,0,120
             upperleft[uppernumbers] = npcName + "hand";
             upperright[uppernumbers++] = npcName + "hand2";
-            //cellRender.rotateMesh(Ogre::Vector3(0, 0,0),  Ogre::Radian(3.14), upperleft, uppernumbers);
+            //cellRender.rotateMesh(Ogre::Vector3(0, 0,0),  kOgrePi, upperleft, uppernumbers);
             cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperleft, uppernumbers);
             cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperright, uppernumbers);
         }
@@ -232,9 +238,9 @@ namespace MWClass
                 pass = "b\\B_N_Nord_M_Hands.1st.nif";
             else
                 pass =hands->model;                             //-50, 0, -120
-            cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1,-110), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "hand", upperleft, uppernumbers, false);   //0, 100, -100    42, 0, -110
-            //cellRender.insertMesh("meshes\\" + hands->model, Ogre::Vector3(42, 0,110), Ogre::Vector3(1, 0, 0), Ogre::Radian(3.14), npcName + "hand", upperleft, uppernumbers, false);   //0, 100, -100    42, 0, -110
-            cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0, 0), Ogre::Radian(3.14), npcName + "hand2", upperright, uppernumbers, false);   //0, 100, -100    0,0,120
+            cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1,-110), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "hand", upperleft, uppernumbers, false);   //0, 100, -100    42, 0, -110
+            //cellRender.insertMesh("meshes\\" + hands->model, Ogre::Vector3(42, 0,110), Ogre::Vector3(1, 0, 0), kOgrePi, npcName + "hand", upperleft, uppernumbers, false);   //0, 100, -100    42, 0, -110
+            cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "hand2", upperright, uppernumbers, false);   //0, 100, -100    0,0,120
             upperleft[uppernumbers] = npcName + "hand";
             upperright[uppernumbers++] = npcName + "hand2";
             cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperleft, uppernumbers);
@@ -244,7 +250,7 @@ namespace MWClass
         //neck will reset chest counter
         if(neck)
         {
-            cellRender.insertMesh ("meshes\\" + neck->model, Ogre::Vector3( 0, 0, 120), axis, Ogre::Radian(3.14), npcName + "neck", neckandup, neckNumbers);
+            cellRender.insertMesh ("meshes\\" + neck->model, Ogre::Vector3( 0, 0, 120), axis, kOgrePi, npcName + "neck", neckandup, neckNumbers);
             neckandup[neckNumbers++] = npcName + "neck";
         }
         cellRender.insertMesh (headModel, Ogre::Vector3( 0, 0, 5), axis, Ogre::Radian(0), npcName + "head", neckandup, neckNumbers);
