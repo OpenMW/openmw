@@ -6,7 +6,7 @@
 // For GCC, just use strings.h (this applies to mingw too)
 #if defined(__GNUC__)
 #    include <strings.h>
-#elif defined(MSVC)
+#elif defined(MSVC) || defined(_MSC_VER)
 #    pragma warning(disable: 4996)
 #    define strcasecmp stricmp
 #    define snprintf _snprintf

@@ -209,7 +209,8 @@ find_path (UUID_INCLUDE_DIR uuid/uuid.h)
 include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
-set(PLATFORM_INCLUDE_DIR "")
+    set(PLATFORM_INCLUDE_DIR "")
+    add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
 endif()
 
 # Dependencies
