@@ -643,6 +643,11 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         for (std::vector<NiSkinData::BoneInfo>::iterator it = boneList.begin();
                 it != boneList.end(); it++)
         {
+            if(mSkel.isNull())
+            {
+                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex].name.toString() << std::endl;
+                break;
+            }
             //get the bone from bones array of skindata
             bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name.toString());
 
