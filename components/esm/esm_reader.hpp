@@ -152,15 +152,15 @@ public:
    *
    *************************************************************************/
 
-  int getVer() { return c.header.version; }
-  float getFVer() { return *((float*)&c.header.version); }
-  int getSpecial() { return spf; }
-  const std::string getAuthor() { return c.header.author.toString(); }
-  const std::string getDesc() { return c.header.desc.toString(); }
-  const SaveData &getSaveData() { return saveData; }
-  const MasterList &getMasters() { return masters; }
-  const NAME &retSubName() { return c.subName; }
-  uint32_t getSubSize() { return c.leftSub; }
+  int getVer() { return mCtx.header.version; }
+  float getFVer() { return *((float*)&mCtx.header.version); }
+  int getSpecial() { return mSpf; }
+  const std::string getAuthor() { return mCtx.header.author.toString(); }
+  const std::string getDesc() { return mCtx.header.desc.toString(); }
+  const SaveData &getSaveData() { return mSaveData; }
+  const MasterList &getMasters() { return mMasters; }
+  const NAME &retSubName() { return mCtx.subName; }
+  uint32_t getSubSize() { return mCtx.leftSub; }
 
   /*************************************************************************
    *
@@ -174,22 +174,22 @@ public:
   ESM_Context getContext()
   {
     // Update the file position before returning
-    c.filePos = esm->tell();
-    return c;
+    mCtx.filePos = mEsm->tell();
+    return mCtx;
   }
 
   /** Restore a previously saved context */
   void restoreContext(const ESM_Context &rc)
   {
     // Reopen the file if necessary
-    if(c.filename != rc.filename)
+    if(mCtx.filename != rc.filename)
       openRaw(rc.filename);
 
     // Copy the data
-    c = rc;
+    mCtx = rc;
 
     // Make sure we seek to the right place
-    esm->seek(c.filePos);
+    mEsm->seek(mCtx.filePos);
   }
 
   /** Close the file, resets all information. After calling close()
@@ -197,14 +197,14 @@ public:
   */
   void close()
   {
-    esm.reset();
-    c.filename.clear();
-    c.leftFile = 0;
-    c.leftRec = 0;
-    c.leftSub = 0;
-    c.subCached = false;
-    c.recName.val = 0;
-    c.subName.val = 0;
+    mEsm.reset();
+    mCtx.filename.clear();
+    mCtx.leftFile = 0;
+    mCtx.leftRec = 0;
+    mCtx.leftSub = 0;
+    mCtx.subCached = false;
+    mCtx.recName.val = 0;
+    mCtx.subName.val = 0;
   }
 
   /// Raw opening. Opens the file and sets everything up but doesn't
@@ -212,17 +212,17 @@ public:
   void openRaw(Mangle::Stream::StreamPtr _esm, const std::string &name)
   {  
     close();
-    esm = _esm;
-    c.filename = name;
-    c.leftFile = esm->size();
+    mEsm = _esm;
+    mCtx.filename = name;
+    mCtx.leftFile = mEsm->size();
 
     // Flag certain files for special treatment, based on the file
     // name.
-    const char *cstr = c.filename.c_str();
-    if(iends(cstr, "Morrowind.esm")) spf = SF_Morrowind;
-    else if(iends(cstr, "Tribunal.esm")) spf = SF_Tribunal;
-    else if(iends(cstr, "Bloodmoon.esm")) spf = SF_Bloodmoon;
-    else spf = SF_Other;
+    const char *cstr = mCtx.filename.c_str();
+    if(iends(cstr, "Morrowind.esm")) mSpf = SF_Morrowind;
+    else if(iends(cstr, "Tribunal.esm")) mSpf = SF_Tribunal;
+    else if(iends(cstr, "Bloodmoon.esm")) mSpf = SF_Bloodmoon;
+    else mSpf = SF_Other;
   }
 
   /// Load ES file from a new stream, parses the header. Closes the
@@ -237,10 +237,10 @@ public:
     getRecHeader();
 
     // Get the header
-    getHNT(c.header, "HEDR", 300);
+    getHNT(mCtx.header, "HEDR", 300);
 
-    if(c.header.version != VER_12 &&
-       c.header.version != VER_13)
+    if(mCtx.header.version != VER_12 &&
+       mCtx.header.version != VER_13)
       fail("Unsupported file format version");
 
     while(isNextSub("MAST"))
@@ -248,15 +248,15 @@ public:
         MasterData m;
         m.name = getHString();
         m.size = getHNLong("DATA");
-        masters.push_back(m);
+        mMasters.push_back(m);
       }
 
-    if(c.header.type == FT_ESS)
+    if(mCtx.header.type == FT_ESS)
       {
         // Savegame-related data
 
         // Player position etc
-        getHNT(saveData, "GMDT", 124);
+        getHNT(mSaveData, "GMDT", 124);
 
         /* Image properties, five ints. Is always:
            Red-mask:   0xff0000
@@ -332,7 +332,7 @@ public:
   void getHT(X &x)
   {
     getSubHeader();
-    if(c.leftSub != sizeof(X))
+    if(mCtx.leftSub != sizeof(X))
       fail("getHT(): subrecord size mismatch");
     getT(x);
   }
@@ -371,23 +371,23 @@ public:
     // them. For some reason, they break the rules, and contain a byte
     // (value 0) even if the header says there is no data. If
     // Morrowind accepts it, so should we.
-    if(c.leftSub == 0)
+    if(mCtx.leftSub == 0)
       {
         // Skip the following zero byte
-        c.leftRec--;
+        mCtx.leftRec--;
         char c;
-        esm->read(&c,1);
+        mEsm->read(&c,1);
         return "";
       }
 
-    return getString(c.leftSub);
+    return getString(mCtx.leftSub);
   }
 
   // Read the given number of bytes from a subrecord
   void getHExact(void*p, int size)
   {
     getSubHeader();
-    if(size !=static_cast<int> (c.leftSub))
+    if(size !=static_cast<int> (mCtx.leftSub))
       fail("getHExact() size mismatch");
     getExact(p,size);
   }
@@ -409,8 +409,8 @@ public:
   void getSubNameIs(const char* name)
   {
     getSubName();
-    if(c.subName != name)
-      fail("Expected subrecord " + std::string(name) + " but got " + c.subName.toString());
+    if(mCtx.subName != name)
+      fail("Expected subrecord " + std::string(name) + " but got " + mCtx.subName.toString());
   }
 
   /** Checks if the next sub record name matches the parameter. If it
@@ -420,16 +420,16 @@ public:
    */
   bool isNextSub(const char* name)
   {
-    if(!c.leftRec) return false;
+    if(!mCtx.leftRec) return false;
 
     getSubName();
 
     // If the name didn't match, then mark the it as 'cached' so it's
     // available for the next call to getSubName.
-    c.subCached = (c.subName != name);
+    mCtx.subCached = (mCtx.subName != name);
 
     // If subCached is false, then subName == name.
-    return !c.subCached;
+    return !mCtx.subCached;
   }
 
   // Read subrecord name. This gets called a LOT, so I've optimized it
@@ -437,25 +437,25 @@ public:
   void getSubName()
     {
       // If the name has already been read, do nothing
-      if(c.subCached)
+      if(mCtx.subCached)
         {
-          c.subCached = false;
+          mCtx.subCached = false;
           return;
         }
 
       // Don't bother with error checking, we will catch an EOF upon
       // reading the subrecord data anyway.
-      esm->read(c.subName.name, 4);
-      c.leftRec -= 4;
+      mEsm->read(mCtx.subName.name, 4);
+      mCtx.leftRec -= 4;
     }
 
   // This is specially optimized for LoadINFO.
   bool isEmptyOrGetName()
     {
-      if(c.leftRec)
+      if(mCtx.leftRec)
     {
-      esm->read(c.subName.name, 4);
-      c.leftRec -= 4;
+      mEsm->read(mCtx.subName.name, 4);
+      mCtx.leftRec -= 4;
       return false;
     }
       return true;
@@ -466,14 +466,14 @@ public:
   void skipHSub()
     {
       getSubHeader();
-      skip(c.leftSub);
+      skip(mCtx.leftSub);
     }
 
   // Skip sub record and check its size
   void skipHSubSize(int size)
     {
       skipHSub();
-      if(static_cast<int> (c.leftSub) != size)
+      if(static_cast<int> (mCtx.leftSub) != size)
     fail("skipHSubSize() mismatch");
     }
 
@@ -482,17 +482,17 @@ public:
   */
   void getSubHeader()
     {
-      if(c.leftRec < 4)
+      if(mCtx.leftRec < 4)
     fail("End of record while reading sub-record header");
 
       // Get subrecord size
-      getT(c.leftSub);
+      getT(mCtx.leftSub);
 
       // Adjust number of record bytes left
-      c.leftRec -= c.leftSub + 4;
+      mCtx.leftRec -= mCtx.leftSub + 4;
 
       // Check that sizes added up
-      if(c.leftRec < 0)
+      if(mCtx.leftRec < 0)
     fail("Not enough bytes left in record for this subrecord.");
     }
 
@@ -501,7 +501,7 @@ public:
   void getSubHeaderIs(int size)
   {
     getSubHeader();
-    if(size != static_cast<int> (c.leftSub))
+    if(size != static_cast<int> (mCtx.leftSub))
       fail("getSubHeaderIs(): Sub header mismatch");
   }
 
@@ -516,29 +516,29 @@ public:
   {
     if(!hasMoreRecs())
       fail("No more records, getRecName() failed");
-    getName(c.recName);
-    c.leftFile -= 4;
+    getName(mCtx.recName);
+    mCtx.leftFile -= 4;
 
     // Make sure we don't carry over any old cached subrecord
     // names. This can happen in some cases when we skip parts of a
     // record.
-    c.subCached = false;
+    mCtx.subCached = false;
 
-    return c.recName;
+    return mCtx.recName;
   }
 
   // Skip the rest of this record. Assumes the name and header have
   // already been read
   void skipRecord()
     {
-      skip(c.leftRec);
-      c.leftRec = 0;
+      skip(mCtx.leftRec);
+      mCtx.leftRec = 0;
     }
 
   // Skip an entire record, including the header (but not the name)
   void skipHRecord()
   {
-    if(!c.leftFile) return;
+    if(!mCtx.leftFile) return;
     getRecHeader();
     skipRecord();
   }
@@ -551,26 +551,26 @@ public:
   void getRecHeader(uint32_t &flags)
     {
       // General error checking
-      if(c.leftFile < 12)
+      if(mCtx.leftFile < 12)
     fail("End of file while reading record header");
-      if(c.leftRec)
+      if(mCtx.leftRec)
     fail("Previous record contains unread bytes");
 
-      getUint(c.leftRec);
+      getUint(mCtx.leftRec);
       getUint(flags);// This header entry is always zero
       getUint(flags);
-      c.leftFile -= 12;
+      mCtx.leftFile -= 12;
 
       // Check that sizes add up
-      if(c.leftFile < c.leftRec)
+      if(mCtx.leftFile < mCtx.leftRec)
     fail("Record size is larger than rest of file");
 
-      // Adjust number of bytes c.left in file
-      c.leftFile -= c.leftRec;
+      // Adjust number of bytes mCtx.left in file
+      mCtx.leftFile -= mCtx.leftRec;
     }
 
-  bool hasMoreRecs() { return c.leftFile > 0; }
-  bool hasMoreSubs() { return c.leftRec > 0; }
+  bool hasMoreRecs() { return mCtx.leftFile > 0; }
+  bool hasMoreSubs() { return mCtx.leftRec > 0; }
 
 
   /*************************************************************************
@@ -584,7 +584,7 @@ public:
 
   void getExact(void*x, int size)
   {
-    int t = esm->read(x, size);
+    int t = mEsm->read(x, size);
     if(t != size)
       fail("Read error");
   }
@@ -596,14 +596,14 @@ public:
   std::string getString(int size)
   {
     char *ptr = ToUTF8::getBuffer(size);
-    esm->read(ptr,size);
+    mEsm->read(ptr,size);
 
     // Convert to UTF8 and return
     return ToUTF8::getUtf8(ToUTF8::WINDOWS_1252);
   }
 
-  void skip(int bytes) { esm->seek(esm->tell()+bytes); }
-  uint64_t getOffset() { return esm->tell(); }
+  void skip(int bytes) { mEsm->seek(mEsm->tell()+bytes); }
+  uint64_t getOffset() { return mEsm->tell(); }
 
   /// Used for error handling
   void fail(const std::string &msg)
@@ -613,24 +613,24 @@ public:
       stringstream ss;
 
       ss << "ESM Error: " << msg;
-      ss << "\n  File: " << c.filename;
-      ss << "\n  Record: " << c.recName.toString();
-      ss << "\n  Subrecord: " << c.subName.toString();
-      if(esm != NULL)
-        ss << "\n  Offset: 0x" << hex << esm->tell();
+      ss << "\n  File: " << mCtx.filename;
+      ss << "\n  Record: " << mCtx.recName.toString();
+      ss << "\n  Subrecord: " << mCtx.subName.toString();
+      if(mEsm != NULL)
+        ss << "\n  Offset: 0x" << hex << mEsm->tell();
       throw std::runtime_error(ss.str());
     }
 
 private:
-  Mangle::Stream::StreamPtr esm;
+  Mangle::Stream::StreamPtr mEsm;
 
-  ESM_Context c;
+  ESM_Context mCtx;
 
   // Special file signifier (see SpecialFile enum above)
-  int spf;
+  int mSpf;
 
-  SaveData saveData;
-  MasterList masters;
+  SaveData mSaveData;
+  MasterList mMasters;
 };
 }
 #endif

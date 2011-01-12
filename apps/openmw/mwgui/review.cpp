@@ -81,8 +81,8 @@ ReviewDialog::ReviewDialog(MWWorld::Environment& environment)
 
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
-        skillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
-        skillWidgetMap.insert(std::pair<int, MyGUI::StaticTextPtr>(i, nullptr));
+        skillValues.insert(std::make_pair(i, MWMechanics::Stat<float>()));
+        skillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::StaticText*> (0)));
     }
 
     static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord = MyGUI::newDelegate(this, &ReviewDialog::onWindowResize);

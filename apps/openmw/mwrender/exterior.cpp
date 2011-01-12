@@ -35,14 +35,14 @@ bool ExteriorCellRender::lightOutQuadInLin = false;
 
 void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
 {
-  assert (!insert);
+  assert (!mInsert);
 
   // Create and place scene node for this object
-  insert = base->createChildSceneNode();
+  mInsert = mBase->createChildSceneNode();
 
   const float *f = ref.pos.pos;
-  insert->setPosition(f[0], f[1], f[2]);
-  insert->setScale(ref.scale, ref.scale, ref.scale);
+  mInsert->setPosition(f[0], f[1], f[2]);
+  mInsert->setScale(ref.scale, ref.scale, ref.scale);
 
   // Convert MW rotation to a quaternion:
   f = ref.pos.rot;
@@ -57,14 +57,14 @@ void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
   Quaternion zr(Radian(-f[2]), Vector3::UNIT_Z);
 
   // Rotates first around z, then y, then x
-  insert->setOrientation(xr*yr*zr);
+  mInsert->setOrientation(xr*yr*zr);
 }
 
 
 void ExteriorCellRender::rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements)
 {
-    assert(insert);
-    Ogre::SceneNode *parent = insert;
+    assert(mInsert);
+    Ogre::SceneNode *parent = mInsert;
      //std::cout << "ELEMENTS:" << elements;
     for (int i = 0; i < elements; i++){
        if(sceneNodeName[i] != "" && parent->getChild(sceneNodeName[i]))
@@ -74,24 +74,24 @@ void ExteriorCellRender::rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std
 }
 /*
 void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements){
-    assert (insert);
-     //insert->
-       Ogre::SceneNode *parent = insert;
+    assert (mInsert);
+     //mInsert->
+       Ogre::SceneNode *parent = mInsert;
        for (int i = 0; i < elements; i++){
        if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
            parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
         }
      
-     npcPart = parent->createChildSceneNode(sceneNodeName);
+     mNpcPart = parent->createChildSceneNode(sceneNodeName);
   NIFLoader::load(mesh);
-  MovableObject *ent = scene.getMgr()->createEntity(mesh);
+  MovableObject *ent = mScene.getMgr()->createEntity(mesh);
   
-  npcPart->translate(vec);
-  npcPart->rotate(axis, angle);
- // npcPart->translate(vec);
-  //npcPart->rotate(axis, angle);
-  npcPart->attachObject(ent);
-  //npcPart->
+  mNpcPart->translate(vec);
+  mNpcPart->rotate(axis, angle);
+ // mNpcPart->translate(vec);
+  //mNpcPart->rotate(axis, angle);
+  mNpcPart->attachObject(ent);
+  //mNpcPart->
   
 }
 */
@@ -101,30 +101,30 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
 }
 void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst){
 
-       assert (insert);
-     //insert->
-       Ogre::SceneNode *parent = insert;
+       assert (mInsert);
+     //mInsert->
+       Ogre::SceneNode *parent = mInsert;
        for (int i = 0; i < elements; i++){
        if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
            parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
         }
      
-     npcPart = parent->createChildSceneNode(sceneNodeName);
+     mNpcPart = parent->createChildSceneNode(sceneNodeName);
    MeshPtr good2 = NIFLoader::load(mesh);
 
-  MovableObject *ent = scene.getMgr()->createEntity(mesh);
+  MovableObject *ent = mScene.getMgr()->createEntity(mesh);
 
 
   if(translateFirst){
-  npcPart->translate(vec);
-  npcPart->rotate(axis, angle);
+  mNpcPart->translate(vec);
+  mNpcPart->rotate(axis, angle);
   }
   else{
       
-  npcPart->rotate(axis, angle);
-  npcPart->translate(vec);
+  mNpcPart->rotate(axis, angle);
+  mNpcPart->translate(vec);
   }
-  npcPart->attachObject(ent);
+  mNpcPart->attachObject(ent);
 
    Ogre::MeshManager *m = MeshManager::getSingletonPtr();
   const std::string beast1 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
@@ -182,8 +182,8 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
 
 void ExteriorCellRender::scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements)
 {
-    assert(insert);
-    Ogre::SceneNode *parent = insert;
+    assert(mInsert);
+    Ogre::SceneNode *parent = mInsert;
      //std::cout << "ELEMENTS:" << elements;
     for (int i = 0; i < elements; i++){
        if(sceneNodeName[i] != "" && parent->getChild(sceneNodeName[i]))
@@ -197,19 +197,19 @@ void ExteriorCellRender::scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeNam
 
 void ExteriorCellRender::insertMesh(const std::string &mesh)
 {
-  assert (insert);
+  assert (mInsert);
 
   NIFLoader::load(mesh);
-  MovableObject *ent = scene.getMgr()->createEntity(mesh);
-  insert->attachObject(ent);
+  MovableObject *ent = mScene.getMgr()->createEntity(mesh);
+  mInsert->attachObject(ent);
 }
 
 // insert a light related to the most recent insertBegin call.
 void ExteriorCellRender::insertLight(float r, float g, float b, float radius)
 {
-  assert (insert);
+  assert (mInsert);
 
-  Ogre::Light *light = scene.getMgr()->createLight();
+  Ogre::Light *light = mScene.getMgr()->createLight();
   light->setDiffuseColour (r, g, b);
 
   float cval=0.0f, lval=0.0f, qval=0.0f;
@@ -237,21 +237,21 @@ void ExteriorCellRender::insertLight(float r, float g, float b, float radius)
 
   light->setAttenuation(10*radius, cval, lval, qval);
 
-  insert->attachObject(light);
+  mInsert->attachObject(light);
 }
 
 // finish inserting a new reference and return a handle to it.
 
 std::string ExteriorCellRender::insertEnd (bool enable)
 {
-  assert (insert);
+  assert (mInsert);
 
-  std::string handle = insert->getName();
+  std::string handle = mInsert->getName();
 
   if (!enable)
-    insert->setVisible (false);
+    mInsert->setVisible (false);
 
-  insert = 0;
+  mInsert = 0;
 
   return handle;
 }
@@ -260,14 +260,14 @@ std::string ExteriorCellRender::insertEnd (bool enable)
 
 void ExteriorCellRender::configureAmbient()
 {
-  ambientColor.setAsABGR (cell.cell->ambi.ambient);
+  mAmbientColor.setAsABGR (mCell.cell->ambi.ambient);
   setAmbientMode();
 
   // Create a "sun" that shines light downwards. It doesn't look
   // completely right, but leave it for now.
-  Ogre::Light *light = scene.getMgr()->createLight();
+  Ogre::Light *light = mScene.getMgr()->createLight();
   Ogre::ColourValue colour;
-  colour.setAsABGR (cell.cell->ambi.sunlight);
+  colour.setAsABGR (mCell.cell->ambi.sunlight);
   light->setDiffuseColour (colour);
   light->setType(Ogre::Light::LT_DIRECTIONAL);
   light->setDirection(0,-1,0);
@@ -277,74 +277,74 @@ void ExteriorCellRender::configureAmbient()
 void ExteriorCellRender::configureFog()
 {
   Ogre::ColourValue color;
-  color.setAsABGR (cell.cell->ambi.fog);
+  color.setAsABGR (mCell.cell->ambi.fog);
 
-  float high = 4500 + 9000 * (1-cell.cell->ambi.fogDensity);
+  float high = 4500 + 9000 * (1-mCell.cell->ambi.fogDensity);
   float low = 200;
 
-  scene.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
-  scene.getCamera()->setFarClipDistance (high + 10);
-  scene.getViewport()->setBackgroundColour (color);
+  mScene.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
+  mScene.getCamera()->setFarClipDistance (high + 10);
+  mScene.getViewport()->setBackgroundColour (color);
 }
 
 void ExteriorCellRender::setAmbientMode()
 {
-  switch (ambientMode)
+  switch (mAmbientMode)
   {
     case 0:
 
-      scene.getMgr()->setAmbientLight(ambientColor);
+      mScene.getMgr()->setAmbientLight(mAmbientColor);
       break;
 
     case 1:
 
-      scene.getMgr()->setAmbientLight(0.7f*ambientColor + 0.3f*ColourValue(1,1,1));
+      mScene.getMgr()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
       break;
 
     case 2:
 
-      scene.getMgr()->setAmbientLight(ColourValue(1,1,1));
+      mScene.getMgr()->setAmbientLight(ColourValue(1,1,1));
       break;
   }
 }
 
 void ExteriorCellRender::show()
 {
-  base = scene.getRoot()->createChildSceneNode();
+  mBase = mScene.getRoot()->createChildSceneNode();
 
   configureAmbient();
   configureFog();
 
-  insertCell(cell, mEnvironment);
+  insertCell(mCell, mEnvironment);
 }
 
 void ExteriorCellRender::hide()
 {
-  if(base)
-    base->setVisible(false);
+  if(mBase)
+    mBase->setVisible(false);
 }
 
 void ExteriorCellRender::destroy()
 {
-  if(base)
+  if(mBase)
     {
-      base->removeAndDestroyAllChildren();
-      scene.getMgr()->destroySceneNode(base);
+      mBase->removeAndDestroyAllChildren();
+      mScene.getMgr()->destroySceneNode(mBase);
     }
 
-  base = NULL;
+  mBase = NULL;
 }
 
 // Switch through lighting modes.
 
 void ExteriorCellRender::toggleLight()
 {
-  if (ambientMode==2)
-    ambientMode = 0;
+  if (mAmbientMode==2)
+    mAmbientMode = 0;
   else
-    ++ambientMode;
+    ++mAmbientMode;
 
-  switch (ambientMode)
+  switch (mAmbientMode)
   {
     case 0: std::cout << "Setting lights to normal\n"; break;
     case 1: std::cout << "Turning the lights up\n"; break;
@@ -357,21 +357,21 @@ void ExteriorCellRender::toggleLight()
 void ExteriorCellRender::enable (const std::string& handle)
 {
     if (!handle.empty())
-        scene.getMgr()->getSceneNode (handle)->setVisible (true);
+        mScene.getMgr()->getSceneNode (handle)->setVisible (true);
 }
 
 void ExteriorCellRender::disable (const std::string& handle)
 {
     if (!handle.empty())
-        scene.getMgr()->getSceneNode (handle)->setVisible (false);
+        mScene.getMgr()->getSceneNode (handle)->setVisible (false);
 }
 
 void ExteriorCellRender::deleteObject (const std::string& handle)
 {
     if (!handle.empty())
     {
-        Ogre::SceneNode *node = scene.getMgr()->getSceneNode (handle);
+        Ogre::SceneNode *node = mScene.getMgr()->getSceneNode (handle);
         node->removeAndDestroyAllChildren();
-        scene.getMgr()->destroySceneNode (node);
+        mScene.getMgr()->destroySceneNode (node);
     }
 }
