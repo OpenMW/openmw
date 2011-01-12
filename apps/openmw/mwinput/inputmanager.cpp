@@ -60,6 +60,7 @@ namespace MWInput
       A_CycleSpellRight,
       A_CycleWeaponLeft,//Cycling through weapons
       A_CycleWeaponRight,
+      A_ToggleSneak, 	//Toggles Sneak, add Push-Sneak later
 
       A_QuickSave,
       A_QuickLoad,
@@ -213,6 +214,7 @@ namespace MWInput
        **********************************/
 
       // Key bindings for keypress events
+      // NOTE: These keys do not require constant polling - use in conjuction with variables in loops.
 
       disp->bind(A_Quit, KC_Q);
       disp->bind(A_Quit, KC_ESCAPE);
@@ -220,8 +222,11 @@ namespace MWInput
       disp->bind(A_Inventory, KC_I);
       disp->bind(A_Console, KC_F1);
       disp->bind(A_Activate, KC_SPACE);
+      disp->bind(A_AutoMove, KC_Z);
+      disp->bind(A_ToggleSneak, KC_X);
 
       // Key bindings for polled keys
+      // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.
 
       // Arrow keys
       poller.bind(A_MoveLeft, KC_LEFT);
@@ -259,6 +264,14 @@ namespace MWInput
 
       float speed = 300 * evt.timeSinceLastFrame;
       float moveX = 0, moveY = 0, moveZ = 0;
+     
+
+      //TODO: Where should I put bool isAutoMoving; ? 
+      //AUTO-MOVE condition
+	//Check Automove Toggle.
+	//If true...apply current MoveType speed to current direction
+
+      //If any other movement key is pressed, Toggle automove.
 
       if(poller.isDown(A_MoveLeft)) moveX -= speed;
       if(poller.isDown(A_MoveRight)) moveX += speed;
