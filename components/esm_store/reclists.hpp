@@ -4,6 +4,7 @@
 #include "components/esm/records.hpp"
 #include <map>
 #include <string>
+#include <vector>
 #include <algorithm>
 #include <cctype>
 #include <assert.h>
@@ -14,7 +15,7 @@
 
 
 using namespace boost::algorithm;
-    
+
 namespace ESMS
 {
   using namespace ESM;
@@ -23,6 +24,7 @@ namespace ESMS
   {
     virtual void load(ESMReader &esm, const std::string &id) = 0;
     virtual int getSize() = 0;
+    virtual void listIdentifier (std::vector<std::string>& identifier) const = 0;
 
     static std::string toLower (const std::string& name)
     {
@@ -76,6 +78,12 @@ namespace ESMS
     }
 
     int getSize() { return list.size(); }
+
+    virtual void listIdentifier (std::vector<std::string>& identifier) const
+    {
+        for (typename MapType::const_iterator iter (list.begin()); iter!=list.end(); ++iter)
+            identifier.push_back (iter->first);
+    }
   };
 
     /// Modified version of RecListT for records, that need to store their own ID
@@ -117,6 +125,12 @@ namespace ESMS
     }
 
     int getSize() { return list.size(); }
+
+    virtual void listIdentifier (std::vector<std::string>& identifier) const
+    {
+        for (typename MapType::const_iterator iter (list.begin()); iter!=list.end(); ++iter)
+            identifier.push_back (iter->first);
+    }
   };
 
   // The only difference to the above is a slight change to the load()
@@ -163,6 +177,12 @@ namespace ESMS
     }
 
     int getSize() { return list.size(); }
+
+    virtual void listIdentifier (std::vector<std::string>& identifier) const
+    {
+        for (typename MapType::const_iterator iter (list.begin()); iter!=list.end(); ++iter)
+            identifier.push_back (iter->first);
+    }
   };
 
   /* Land textures are indexed by an integer number
@@ -180,6 +200,8 @@ namespace ESMS
     }
 
     int getSize() { return count; }
+
+    virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
     void load(ESMReader &esm, const std::string &id)
     {
@@ -209,6 +231,8 @@ namespace ESMS
     int count;
     LandList() : count(0) {}
     int getSize() { return count; }
+
+    virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
     // Find land for the given coordinates. Return null if no data.
     const Land *search(int x, int y) const
@@ -246,7 +270,7 @@ namespace ESMS
     }
 };
 
-    
+
   // Cells aren't simply indexed by name. Exterior cells are treated
   // separately.
   // TODO: case handling (cell names are case-insensitive, but they are also showen to the
@@ -266,6 +290,12 @@ namespace ESMS
     typedef std::map<int, Cell*> ExtCellsCol;
     typedef std::map<int, ExtCellsCol> ExtCells;
     ExtCells extCells;
+
+    virtual void listIdentifier (std::vector<std::string>& identifier) const
+    {
+        for (IntCells::const_iterator iter (intCells.begin()); iter!=intCells.end(); ++iter)
+            identifier.push_back (iter->first);
+    }
 
     ~CellList()
     {
@@ -407,6 +437,12 @@ namespace ESMS
     }
 
     int getSize() { return list.size(); }
+
+    virtual void listIdentifier (std::vector<std::string>& identifier) const
+    {
+        for (typename MapType::const_iterator iter (list.begin()); iter!=list.end(); ++iter)
+            identifier.push_back (iter->first);
+    }
   };
 
   template <typename X>
@@ -428,6 +464,8 @@ namespace ESMS
         {
             return list.size();
         }
+
+        virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
         // Find the given object ID, or return NULL if not found.
         const X* search (int id) const
@@ -458,9 +496,7 @@ namespace ESMS
 
   /* We need special lists for:
 
-     Land
      Path grids
-     Land textures
   */
 }
 #endif

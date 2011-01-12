@@ -79,12 +79,23 @@ namespace MWGui
     {
         if (mNames.empty())
         {
+            // keywords
             std::istringstream input ("");
 
             Compiler::Scanner scanner (*this, input, mCompilerContext.getExtensions());
 
             scanner.listKeywords (mNames);
 
+            // identifier
+            const ESMS::ESMStore& store = mEnvironment.mWorld->getStore();
+
+            for (ESMS::RecListList::const_iterator iter (store.recLists.begin());
+                iter!=store.recLists.end(); ++iter)
+            {
+                iter->second->listIdentifier (mNames);
+            }
+
+            // sort
             std::sort (mNames.begin(), mNames.end());
         }
     }
