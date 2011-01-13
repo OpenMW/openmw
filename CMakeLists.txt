@@ -81,6 +81,12 @@ set(NIFOGRE_HEADER
     ${COMP_DIR}/nifogre/ogre_nif_loader.hpp)
 source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})
 
+set(NIFBULLET
+    ${COMP_DIR}/nifbullet/ogre_bullet_loader.cpp)
+set(NIFBULLET_HEADER
+    ${COMP_DIR}/nifbullet/bullet_nif_loader.hpp)
+source_group(components\\nifbullet FILES ${NIFBULLET} ${NIFBULLET_HEADER})
+
 set(TO_UTF8
     ${COMP_DIR}/to_utf8/to_utf8.cpp)
 set(TO_UTF8_HEADER
