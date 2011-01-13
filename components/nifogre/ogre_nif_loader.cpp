@@ -1016,7 +1016,6 @@ void NIFLoader::loadResource(Resource *resource)
     //if(split== "Skins.NIF")
     //  std::cout << "\nSPECIAL PROPS\n";
     resourceName = "";
-    MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     //MeshPtr ptr = m->load(name, "custom");
     //cout << "THISNAME: " << ptr->getName() << "\n";

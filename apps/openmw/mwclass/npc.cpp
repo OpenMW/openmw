@@ -75,7 +75,6 @@ namespace MWClass
         std::string upperleft[5] = {"", "", "", "", ""};
         std::string upperright[5] = {"", "", "", "", ""};
         std::string neckandup[5] = {"", "", "","",""};
-        std::string empty[6] = {"", "", "", "","", ""};
         int numbers = 0;
         int uppernumbers = 0;
         int neckNumbers = 0;
@@ -110,7 +109,6 @@ namespace MWClass
         //std::cout << "RACE" << bodyRaceID << "\n";
 
         Ogre::Vector3 pos2 = Ogre::Vector3( 0, .5, 75);
-        std::string upperarmpath[2] = {npcName + "chest", npcName + "upper arm"};
         
         if (groin){
             cellRender.insertMesh("meshes\\" + groin->model, pos2, axis, kOgrePi, npcName + "groin", addresses, numbers);
