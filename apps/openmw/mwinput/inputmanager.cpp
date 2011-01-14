@@ -186,7 +186,7 @@ namespace MWInput
                        "Toggle console");
       disp->funcs.bind(A_Activate, boost::bind(&InputImpl::activate, this),
                        "Activate");
-      disp->funcs.bind(A_AutoMove, boost::bind(&InputImpl::toggleAUtoMove, this),
+      disp->funcs.bind(A_AutoMove, boost::bind(&InputImpl::toggleAutoMove, this),
                       "Auto Move");
 
       // Add the exit listener
