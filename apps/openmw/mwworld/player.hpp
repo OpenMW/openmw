@@ -31,6 +31,8 @@ namespace MWWorld
         ESM::Class *mClass;
         bool mCollisionMode;
 
+	bool mAutoMove;
+
     public:
 
         Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
@@ -108,6 +110,29 @@ namespace MWWorld
         {
             mCollisionMode = !mCollisionMode;
         }
+
+	bool getmAutoMove() 
+        { 
+		return mAutoMove;
+	}
+
+	void setmAutoMove(bool setMe) 
+	{
+		mAutoMove = setMe;
+	}
+
+	/// <param name="duration">float value representing time since last call</param>
+	void executeAutoMove(float duration) 
+        {
+             if (this.mAutoMove == true) 
+	     {
+		//No code insight! ARGH!
+		//Z...? Forward is Z? /boggle
+		//player.setspeedZ() = speed * duration * -1;
+	     }
+	}
+
+
   };
 }
 #endif
