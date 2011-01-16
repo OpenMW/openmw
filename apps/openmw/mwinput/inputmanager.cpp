@@ -274,12 +274,10 @@ namespace MWInput
       float speed = 300 * evt.timeSinceLastFrame;
       float moveX = 0, moveY = 0, moveZ = 0;
      
-
-      /*AUTO-MOVE*/
-      //TODO: double Check this.
-      //player.executeAutoMove((float)evt.timeSinceLastEvent); 
+      //execute Automove - condition checked in function
+      player.executeAutoMove((float)evt.timeSinceLastEvent); 
  
-
+      //Poll and execute movement keys - will disable automove if pressed.
       if(poller.isDown(A_MoveLeft)) 
       { 
         player.setmAutoMove(false);

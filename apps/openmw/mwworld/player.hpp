@@ -32,6 +32,8 @@ namespace MWWorld
         bool mCollisionMode;
 
 	bool mAutoMove;
+	bool misSneaking;
+	bool misHidden;
 
     public:
 
