@@ -32,8 +32,9 @@ namespace MWWorld
         bool mCollisionMode;
 
 	bool mAutoMove;
-	bool misSneaking;
-	bool misHidden;
+	//bool misSneaking;
+	//bool misHidden;
+	bool misWalking;	//Testing...
 
     public:
 
@@ -133,6 +134,17 @@ namespace MWWorld
 		//player.setspeedZ() = speed * duration * -1;
 	     }
 	}
+
+	bool getmisWalking() 
+	{ 
+		return this.misWalking; 
+	}
+
+	void setmisWalking(bool setMe) 
+	{
+		this.misWalking = setMe;
+	}
+
 
 
   };

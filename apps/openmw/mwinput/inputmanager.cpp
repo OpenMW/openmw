@@ -61,6 +61,7 @@ namespace MWInput
       A_CycleWeaponLeft,//Cycling through weapons
       A_CycleWeaponRight,
       A_ToggleSneak, 	//Toggles Sneak, add Push-Sneak later
+      A_ToggleWalk,	//Toggle Walking/Running
 
       A_QuickSave,
       A_QuickLoad,
@@ -145,6 +146,11 @@ namespace MWInput
 	player.setmAutoMove(true);
     }
 
+    void toggleWalking() 
+    {
+	player.setmisWalking(true);
+    }
+
     // Exit program now button (which is disabled in GUI mode)
     void exitNow()
     {
@@ -188,6 +194,8 @@ namespace MWInput
                        "Activate");
       disp->funcs.bind(A_AutoMove, boost::bind(&InputImpl::toggleAutoMove, this),
                       "Auto Move");
+      disp->funcs.bind(A_ToggleWalk, boost::bind(&InputImpl::toggleWalking, this),
+                      "Toggle Walk/Run");
 
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
@@ -233,6 +241,7 @@ namespace MWInput
       disp->bind(A_Activate, KC_SPACE);
       disp->bind(A_AutoMove, KC_Z);
       disp->bind(A_ToggleSneak, KC_X);
+      disp->bind(A_ToggleWalk, KC_C);
 
       // Key bindings for polled keys
       // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.
@@ -271,7 +280,10 @@ namespace MWInput
       // Disable movement in Gui mode
       if(windows.isGuiMode()) return true;
 
-      float speed = 300 * evt.timeSinceLastFrame;
+      float speed = 300 * evt.timeSinceLastFrame;		//is this a placeholder player speed? 
+      float TESTwalkSpeed = 100 * evt.timeSinceLastFrame;	//Try this, then.
+      float TESTsneakSpeed = 100 * evt.timeSinceLastFrame;	//and this.
+
       float moveX = 0, moveY = 0, moveZ = 0;
      
       //execute Automove - condition checked in function
@@ -280,26 +292,50 @@ namespace MWInput
       //Poll and execute movement keys - will disable automove if pressed.
       if(poller.isDown(A_MoveLeft)) 
       { 
-        player.setmAutoMove(false);
-      	moveX -= speed;
+        if (player.getmisWalking() == false) 
+	  {
+      	     player.setmAutoMove(false);
+             moveX -= speed;
+	  } else {
+	     player.setmAutoMove(false);
+             moveX -= TESTwalkSpeed;
+	  }
       }
 
       if(poller.isDown(A_MoveRight)) 
       { 
-      player.setmAutoMove(false);
-      moveX += speed;
+	  if (player.getmisWalking() == false) 
+	  {
+      	     player.setmAutoMove(false);
+             moveX += speed;
+	  } else {
+	     player.setmAutoMove(false);
+             moveX += TESTwalkSpeed;
+	  }
       }
 
       if(poller.isDown(A_MoveForward))
       { 
-          player.setmAutoMove(false); 
-          moveZ -= speed;
+          if (player.getmisWalking() == false) 
+	  {
+      	     player.setmAutoMove(false);
+             moveZ -= speed;
+	  } else {
+	     player.setmAutoMove(false);
+             moveZ -= TESTwalkSpeed;
+	  }
       }
 
       if(poller.isDown(A_MoveBackward))
       { 
-	  player.setmAutoMove(false); 
-	  moveZ += speed;
+	  if (player.getmisWalking() == false) 
+	  {
+      	     player.setmAutoMove(false);
+             moveZ += speed;
+	  } else {
+	     player.setmAutoMove(false);
+             moveZ += TESTwalkSpeed;
+	  }
       }
 
 
