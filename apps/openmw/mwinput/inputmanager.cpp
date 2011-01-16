@@ -282,7 +282,7 @@ namespace MWInput
 
       float speed = 300 * evt.timeSinceLastFrame;		//is this a placeholder player speed? 
       float TESTwalkSpeed = 100 * evt.timeSinceLastFrame;	//Try this, then.
-      float TESTsneakSpeed = 100 * evt.timeSinceLastFrame;	//and this.
+      //float TESTsneakSpeed = 100 * evt.timeSinceLastFrame;	//and this.
 
       float moveX = 0, moveY = 0, moveZ = 0;
      

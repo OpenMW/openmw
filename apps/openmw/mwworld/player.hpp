@@ -127,7 +127,7 @@ namespace MWWorld
 	/// <param name="duration">float value representing time since last call</param>
 	void executeAutoMove(float duration) //call by value for MoveZ makes this harder.
         {
-             if (this.mAutoMove == true) 
+             if (mAutoMove == true) 
 	     {
 		//TODO: Make player go. 
 		/*Access moveZ, access walking/running speed, -1 is for correct direction, 
@@ -145,12 +145,12 @@ namespace MWWorld
 
 	bool getmisWalking() 
 	{ 
-		return this.misWalking; 
+		return misWalking; 
 	}
 
 	void setmisWalking(bool setMe) 
 	{
-		this.misWalking = setMe;
+		misWalking = setMe;
 	}
 
 
