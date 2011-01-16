@@ -287,7 +287,7 @@ namespace MWInput
       float moveX = 0, moveY = 0, moveZ = 0;
      
       //execute Automove - condition checked in function
-      player.executeAutoMove((float)evt.timeSinceLastEvent); 
+      player.executeAutoMove((float)evt.timeSinceLastEvent);  	//or since last frame?
  
       //Poll and execute movement keys - will disable automove if pressed.
       if(poller.isDown(A_MoveLeft)) 

@@ -125,13 +125,21 @@ namespace MWWorld
 	}
 
 	/// <param name="duration">float value representing time since last call</param>
-	void executeAutoMove(float duration) 
+	void executeAutoMove(float duration) //call by value for MoveZ makes this harder.
         {
              if (this.mAutoMove == true) 
 	     {
-		//No code insight! ARGH!
-		//Z...? Forward is Z? /boggle
-		//player.setspeedZ() = speed * duration * -1;
+		//TODO: Make player go. 
+		/*Access moveZ, access walking/running speed, -1 is for correct direction, 
+		otherwise you end up running backwards - not a bad idea for a future feature, actually...*/
+		/*
+		if (this.misWalking == false) 
+		{
+		//inputmanager.moveZ = 300 * duration * -1;  
+		} else {
+		//inputmanager.moveZ = 100 * duration * -1; 
+		}
+		*/
 	     }
 	}
 
