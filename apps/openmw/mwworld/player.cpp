@@ -16,6 +16,8 @@ namespace MWWorld
         mRace = player->race;
         mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2] = 0;
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
+	mAutoMove = false;
+	misWalking = false;
     }
 
     Player::~Player()
