@@ -280,38 +280,37 @@ namespace MWInput
       // Disable movement in Gui mode
       if(windows.isGuiMode()) return true;
 
-      float speed = 300 * evt.timeSinceLastFrame;		//is this a placeholder player speed? 
-      float TESTwalkSpeed = 100 * evt.timeSinceLastFrame;	//Try this, then.
-      //float TESTsneakSpeed = 100 * evt.timeSinceLastFrame;	//and this.
+      float speed = 300 * evt.timeSinceLastFrame;		//placeholder player speed? 
+      float TESTwalkSpeed = 100 * evt.timeSinceLastFrame;	//How about another?
 
       float moveX = 0, moveY = 0, moveZ = 0;
      
       //execute Automove - condition checked in function
-      player.executeAutoMove((float)evt.timeSinceLastEvent);  	//or since last frame?
- 
+      player.executeAutoMove((float)evt.timeSinceLastFrame);  	//or since last frame?
+  
       //Poll and execute movement keys - will disable automove if pressed.
       if(poller.isDown(A_MoveLeft)) 
       { 
         if (player.getmisWalking() == false) 
-	  {
+	    {
       	     player.setmAutoMove(false);
              moveX -= speed;
-	  } else {
-	     player.setmAutoMove(false);
+	    } else {
+			 player.setmAutoMove(false);
              moveX -= TESTwalkSpeed;
-	  }
+	    }
       }
 
       if(poller.isDown(A_MoveRight)) 
       { 
-	  if (player.getmisWalking() == false) 
-	  {
+		if (player.getmisWalking() == false) 
+		{
       	     player.setmAutoMove(false);
              moveX += speed;
-	  } else {
-	     player.setmAutoMove(false);
+		} else {
+			 player.setmAutoMove(false);
              moveX += TESTwalkSpeed;
-	  }
+		}
       }
 
       if(poller.isDown(A_MoveForward))
@@ -328,14 +327,14 @@ namespace MWInput
 
       if(poller.isDown(A_MoveBackward))
       { 
-	  if (player.getmisWalking() == false) 
-	  {
+		if (player.getmisWalking() == false) 
+		{
       	     player.setmAutoMove(false);
              moveZ += speed;
-	  } else {
-	     player.setmAutoMove(false);
+		} else {
+			 player.setmAutoMove(false);
              moveZ += TESTwalkSpeed;
-	  }
+		}
       }
 
 

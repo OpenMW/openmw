@@ -32,8 +32,6 @@ namespace MWWorld
         bool mCollisionMode;
 
 	bool mAutoMove;
-	//bool misSneaking;
-	//bool misHidden;
 	bool misWalking;	//Testing...
 
     public:
@@ -114,33 +112,27 @@ namespace MWWorld
             mCollisionMode = !mCollisionMode;
         }
 
-	bool getmAutoMove() 
+	    bool getmAutoMove() 
         { 
 		return mAutoMove;
-	}
+	    }
 
-	void setmAutoMove(bool setMe) 
-	{
-		mAutoMove = setMe;
-	}
-
-	/// <param name="duration">float value representing time since last call</param>
-	void executeAutoMove(float duration) //call by value for MoveZ makes this harder.
-        {
-             if (mAutoMove == true) 
-	     {
-		//TODO: Make player go. 
-		/*Access moveZ, access walking/running speed, -1 is for correct direction, 
-		otherwise you end up running backwards - not a bad idea for a future feature, actually...*/
-		/*
-		if (this.misWalking == false) 
+		void setmAutoMove(bool setMe) 
 		{
-		//inputmanager.moveZ = 300 * duration * -1;  
-		} else {
-		//inputmanager.moveZ = 100 * duration * -1; 
+			mAutoMove = setMe;
 		}
-		*/
-	     }
+	
+	//NOTE: we don't have speed being calculated yet, so for now this function only requires a frame duration.
+	/// <param name="duration">float value representing time since last call</param>
+	void executeAutoMove(float duration) 
+        {
+        if (mAutoMove == true) 
+		{
+		//if player is running
+			//Make player go at full speed
+			//player.moveRel(0, 0, (300*duration*-1)); 
+		//else go forward at walk speed.
+	    }
 	}
 
 	bool getmisWalking() 

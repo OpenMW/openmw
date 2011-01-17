@@ -63,4 +63,5 @@ namespace MWWorld
         delete mClass;
         mClass = new_class;
     }
+
 }
