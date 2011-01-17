@@ -126,11 +126,14 @@ namespace MWWorld
 	/// <param name="duration">float value representing time since last call</param>
 	void executeAutoMove(float duration) 
         {
+		float X_Val =  0.0f;
+		float Y_Val = 0.0f; 
+		float Z_Val = 300.0f * duration * -1.0f; 
         if (mAutoMove == true) 
 		{
 		//if player is running
 			//Make player go at full speed
-			//player.moveRel(0, 0, (300*duration*-1)); 
+			moveRel(X_Val, Y_Val, Z_Val); 
 		//else go forward at walk speed.
 	    }
 	}

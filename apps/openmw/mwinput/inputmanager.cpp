@@ -281,7 +281,7 @@ namespace MWInput
       if(windows.isGuiMode()) return true;
 
       float speed = 300 * evt.timeSinceLastFrame;		//placeholder player speed? 
-      float TESTwalkSpeed = 100 * evt.timeSinceLastFrame;	//How about another?
+      //float TESTwalkSpeed = 100 * evt.timeSinceLastFrame;	//How about another?
 
       float moveX = 0, moveY = 0, moveZ = 0;
      
@@ -291,51 +291,28 @@ namespace MWInput
       //Poll and execute movement keys - will disable automove if pressed.
       if(poller.isDown(A_MoveLeft)) 
       { 
-        if (player.getmisWalking() == false) 
-	    {
-      	     player.setmAutoMove(false);
-             moveX -= speed;
-	    } else {
-			 player.setmAutoMove(false);
-             moveX -= TESTwalkSpeed;
-	    }
+  	     player.setmAutoMove(false);
+         moveX -= speed;
+	  
       }
 
       if(poller.isDown(A_MoveRight)) 
       { 
-		if (player.getmisWalking() == false) 
-		{
-      	     player.setmAutoMove(false);
-             moveX += speed;
-		} else {
-			 player.setmAutoMove(false);
-             moveX += TESTwalkSpeed;
-		}
+		  player.setmAutoMove(false);
+          moveX += speed;
       }
 
       if(poller.isDown(A_MoveForward))
       { 
-          if (player.getmisWalking() == false) 
-	  {
-      	     player.setmAutoMove(false);
-             moveZ -= speed;
-	  } else {
-	     player.setmAutoMove(false);
-             moveZ -= TESTwalkSpeed;
+          player.setmAutoMove(false);
+          moveZ -= speed;
 	  }
-      }
 
       if(poller.isDown(A_MoveBackward))
       { 
-		if (player.getmisWalking() == false) 
-		{
-      	     player.setmAutoMove(false);
-             moveZ += speed;
-		} else {
-			 player.setmAutoMove(false);
-             moveZ += TESTwalkSpeed;
-		}
-      }
+      	  player.setmAutoMove(false);
+		  moveZ += speed;
+	  }
 
 
       // TODO: These should be enabled for floating modes (like
