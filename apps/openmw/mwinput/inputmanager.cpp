@@ -94,7 +94,7 @@ namespace MWInput
     // Write screenshot to file.
     void screenshot()
     {
-      
+
       // Find the first unused filename with a do-while
       char buf[50];
       do
@@ -105,7 +105,7 @@ namespace MWInput
       ogre.screenshot(buf);
     }
 
-   
+
     /* toggleInventory() is called when the user presses the button to toggle the inventory screen. */
     void toggleInventory()
     {
@@ -141,19 +141,19 @@ namespace MWInput
         mEngine.activate();
     }
 
-    void toggleAutoMove() 
+    void toggleAutoMove()
     {
-		if (player.getAutoMove() == false) 
-		{
-			player.setAutoMove(true);
-		} else { 
-			player.setAutoMove(false);
-		}
-	}
+        if (player.getAutoMove() == false)
+        {
+            player.setAutoMove(true);
+        } else {
+            player.setAutoMove(false);
+        }
+    }
 
-    void toggleWalking() 
+    void toggleWalking()
     {
-	player.setisWalking(true);
+        player.setisWalking(true);
     }
 
     // Exit program now button (which is disabled in GUI mode)
@@ -285,39 +285,38 @@ namespace MWInput
       // Disable movement in Gui mode
       if(windows.isGuiMode()) return true;
 
-      float speed = 300 * evt.timeSinceLastFrame;		//placeholder player speed? 
+      float speed = 300 * evt.timeSinceLastFrame;		//placeholder player speed?
       //float TESTwalkSpeed = 100 * evt.timeSinceLastFrame;	//How about another?
 
       float moveX = 0, moveY = 0, moveZ = 0;
-     
+
       //execute Automove - condition checked in function
       player.executeAutoMove((float)evt.timeSinceLastFrame);  	//or since last frame?
-  
+
       //Poll and execute movement keys - will disable automove if pressed.
-      if(poller.isDown(A_MoveLeft)) 
-      { 
-  	     player.setAutoMove(false);
+      if(poller.isDown(A_MoveLeft))
+      {
+         player.setAutoMove(false);
          moveX -= speed;
-	  
       }
 
-      if(poller.isDown(A_MoveRight)) 
-      { 
-		  player.setAutoMove(false);
+      if(poller.isDown(A_MoveRight))
+      {
+          player.setAutoMove(false);
           moveX += speed;
       }
 
       if(poller.isDown(A_MoveForward))
-      { 
+      {
           player.setAutoMove(false);
           moveZ -= speed;
-	  }
+      }
 
       if(poller.isDown(A_MoveBackward))
-      { 
-      	  player.setAutoMove(false);
-		  moveZ += speed;
-	  }
+      {
+          player.setAutoMove(false);
+          moveZ += speed;
+      }
 
 
       // TODO: These should be enabled for floating modes (like
