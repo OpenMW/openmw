@@ -48,6 +48,26 @@ namespace MWInput
 
       A_Activate,
 
+      A_Use,		//Use weapon, spell, etc.
+      A_Jump,
+      A_AutoMove, 	//Toggle Auto-move forward
+      A_Rest, 		//Rest
+      A_Journal,	//Journal
+      A_Weapon,		//Draw/Sheath weapon
+      A_Spell,		//Ready/Unready Casting
+      A_AlwaysRun,	//Toggle Always Run
+      A_CycleSpellLeft, //cycling through spells
+      A_CycleSpellRight,
+      A_CycleWeaponLeft,//Cycling through weapons
+      A_CycleWeaponRight,
+      A_ToggleSneak, 	//Toggles Sneak, add Push-Sneak later
+      A_ToggleWalk,	//Toggle Walking/Running
+
+      A_QuickSave,
+      A_QuickLoad,
+      A_QuickMenu,
+      A_GameMenu,
+
       A_LAST            // Marker for the last item
     };
 
@@ -68,11 +88,14 @@ namespace MWInput
     // Count screenshots.
     int shotCount;
 
+
+   /* InputImpl Methods */
+
     // Write screenshot to file.
     void screenshot()
     {
-      // Find the first unused filename.
-      //
+      
+      // Find the first unused filename with a do-while
       char buf[50];
       do
       {
@@ -82,8 +105,8 @@ namespace MWInput
       ogre.screenshot(buf);
     }
 
-    // Called when the user presses the button to toggle the inventory
-    // screen.
+   
+    /* toggleInventory() is called when the user presses the button to toggle the inventory screen. */
     void toggleInventory()
     {
       using namespace MWGui;
@@ -116,6 +139,21 @@ namespace MWInput
     void activate()
     {
         mEngine.activate();
+    }
+
+    void toggleAutoMove() 
+    {
+		if (player.getAutoMove() == false) 
+		{
+			player.setAutoMove(true);
+		} else { 
+			player.setAutoMove(false);
+		}
+	}
+
+    void toggleWalking() 
+    {
+	player.setisWalking(true);
     }
 
     // Exit program now button (which is disabled in GUI mode)
@@ -159,7 +197,10 @@ namespace MWInput
                        "Toggle console");
       disp->funcs.bind(A_Activate, boost::bind(&InputImpl::activate, this),
                        "Activate");
-
+      disp->funcs.bind(A_AutoMove, boost::bind(&InputImpl::toggleAutoMove, this),
+                      "Auto Move");
+      disp->funcs.bind(A_ToggleWalk, boost::bind(&InputImpl::toggleWalking, this),
+                      "Toggle Walk/Run");
 
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
@@ -195,6 +236,7 @@ namespace MWInput
        **********************************/
 
       // Key bindings for keypress events
+      // NOTE: These keys do not require constant polling - use in conjuction with variables in loops.
 
       disp->bind(A_Quit, KC_Q);
       disp->bind(A_Quit, KC_ESCAPE);
@@ -202,8 +244,12 @@ namespace MWInput
       disp->bind(A_Inventory, KC_I);
       disp->bind(A_Console, KC_F1);
       disp->bind(A_Activate, KC_SPACE);
+      disp->bind(A_AutoMove, KC_Z);
+      disp->bind(A_ToggleSneak, KC_X);
+      disp->bind(A_ToggleWalk, KC_C);
 
       // Key bindings for polled keys
+      // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.
 
       // Arrow keys
       poller.bind(A_MoveLeft, KC_LEFT);
@@ -222,7 +268,7 @@ namespace MWInput
       poller.bind(A_MoveDown, KC_LCONTROL);
     }
 
-    // Used to check for movement keys
+    //NOTE: Used to check for movement keys
     bool frameStarted(const Ogre::FrameEvent &evt)
     {
       // Tell OIS to handle all input events
@@ -239,13 +285,40 @@ namespace MWInput
       // Disable movement in Gui mode
       if(windows.isGuiMode()) return true;
 
-      float speed = 300 * evt.timeSinceLastFrame;
-      float moveX = 0, moveY = 0, moveZ = 0;
+      float speed = 300 * evt.timeSinceLastFrame;		//placeholder player speed? 
+      //float TESTwalkSpeed = 100 * evt.timeSinceLastFrame;	//How about another?
 
-      if(poller.isDown(A_MoveLeft)) moveX -= speed;
-      if(poller.isDown(A_MoveRight)) moveX += speed;
-      if(poller.isDown(A_MoveForward)) moveZ -= speed;
-      if(poller.isDown(A_MoveBackward)) moveZ += speed;
+      float moveX = 0, moveY = 0, moveZ = 0;
+     
+      //execute Automove - condition checked in function
+      player.executeAutoMove((float)evt.timeSinceLastFrame);  	//or since last frame?
+  
+      //Poll and execute movement keys - will disable automove if pressed.
+      if(poller.isDown(A_MoveLeft)) 
+      { 
+  	     player.setAutoMove(false);
+         moveX -= speed;
+	  
+      }
+
+      if(poller.isDown(A_MoveRight)) 
+      { 
+		  player.setAutoMove(false);
+          moveX += speed;
+      }
+
+      if(poller.isDown(A_MoveForward))
+      { 
+          player.setAutoMove(false);
+          moveZ -= speed;
+	  }
+
+      if(poller.isDown(A_MoveBackward))
+      { 
+      	  player.setAutoMove(false);
+		  moveZ += speed;
+	  }
+
 
       // TODO: These should be enabled for floating modes (like
       // swimming and levitation) and disabled for everything else.
@@ -288,6 +361,7 @@ namespace MWInput
     }
   };
 
+  /***CONSTRUCTOR***/
   MWInputManager::MWInputManager(OEngine::Render::OgreRenderer &ogre,
                                  MWWorld::Player &player,
                                  MWGui::WindowManager &windows,
@@ -297,6 +371,7 @@ namespace MWInput
     impl = new InputImpl(ogre,player,windows,debug, engine);
   }
 
+  /***DESTRUCTOR***/
   MWInputManager::~MWInputManager()
   {
     delete impl;
