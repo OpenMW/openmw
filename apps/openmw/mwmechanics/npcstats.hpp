@@ -18,6 +18,13 @@ namespace MWMechanics
         std::map<std::string, int> mFactionRank;
 
         Stat<float> mSkill[27];
+
+        bool mForceRun;
+        bool mForceSneak;
+        bool mSneak;
+        bool mCombat;
+
+        NpcStats() : mForceRun (false), mForceSneak (false), mSneak (false), mCombat (false) {}
     };
 }
 
