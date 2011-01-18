@@ -112,12 +112,12 @@ namespace MWWorld
             mCollisionMode = !mCollisionMode;
         }
 
-	    bool getmAutoMove() 
+	    bool getAutoMove() 
         { 
 		return mAutoMove;
 	    }
 
-		void setmAutoMove(bool setMe) 
+		void setAutoMove(bool setMe) 
 		{
 			mAutoMove = setMe;
 		}
@@ -138,12 +138,12 @@ namespace MWWorld
 	    }
 	}
 
-	bool getmisWalking() 
+	bool getisWalking() 
 	{ 
 		return misWalking; 
 	}
 
-	void setmisWalking(bool setMe) 
+	void setisWalking(bool setMe) 
 	{
 		misWalking = setMe;
 	}

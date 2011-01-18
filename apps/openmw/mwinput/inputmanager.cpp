@@ -143,8 +143,13 @@ namespace MWInput
 
     void toggleAutoMove() 
     {
-	player.setmAutoMove(true);
-    }
+		if (player.getmAutoMove() == false) 
+		{
+			player.setmAutoMove(true);
+		} else { 
+			player.setmAutoMove(false);
+		}
+	}
 
     void toggleWalking() 
     {
@@ -291,26 +296,26 @@ namespace MWInput
       //Poll and execute movement keys - will disable automove if pressed.
       if(poller.isDown(A_MoveLeft)) 
       { 
-  	     player.setmAutoMove(false);
+  	     player.setAutoMove(false);
          moveX -= speed;
 	  
       }
 
       if(poller.isDown(A_MoveRight)) 
       { 
-		  player.setmAutoMove(false);
+		  player.setAutoMove(false);
           moveX += speed;
       }
 
       if(poller.isDown(A_MoveForward))
       { 
-          player.setmAutoMove(false);
+          player.setAutoMove(false);
           moveZ -= speed;
 	  }
 
       if(poller.isDown(A_MoveBackward))
       { 
-      	  player.setmAutoMove(false);
+      	  player.setAutoMove(false);
 		  moveZ += speed;
 	  }
 
