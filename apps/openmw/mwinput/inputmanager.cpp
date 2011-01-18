@@ -143,17 +143,17 @@ namespace MWInput
 
     void toggleAutoMove() 
     {
-		if (player.getmAutoMove() == false) 
+		if (player.getAutoMove() == false) 
 		{
-			player.setmAutoMove(true);
+			player.setAutoMove(true);
 		} else { 
-			player.setmAutoMove(false);
+			player.setAutoMove(false);
 		}
 	}
 
     void toggleWalking() 
     {
-	player.setmisWalking(true);
+	player.setisWalking(true);
     }
 
     // Exit program now button (which is disabled in GUI mode)
