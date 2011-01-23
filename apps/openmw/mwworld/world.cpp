@@ -316,7 +316,7 @@ namespace MWWorld
     }
 
     World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
-        const std::string& master, bool newGame, Environment& environment)
+        const std::string& master, const boost::filesystem::path& resDir, bool newGame, Environment& environment)
     : mSkyManager (0), mScene (renderer), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false), mEnvironment (environment)
     {
@@ -341,7 +341,7 @@ namespace MWWorld
         }
 
         mSkyManager =
-            MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera());
+            MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir);
     }
 
     World::~World()

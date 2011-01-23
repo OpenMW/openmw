@@ -54,6 +54,13 @@ namespace MWRender
         /// name is empty and distance = -1 if there is no object which
         /// can be faced
         std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
+
+        /// Run physics simulation and modify \a world accordingly.
+        void doPhysics (float duration, MWWorld::World& world);
+
+        /// Inform phyiscs system about desired velocity vectors for actors
+        /// (in Morrowind coordinates).
+        void setMovement (const std::vector<std::string, Ogre::Vector3>& actors);
     };
 }
 

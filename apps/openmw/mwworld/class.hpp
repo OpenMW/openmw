@@ -41,6 +41,12 @@ namespace MWWorld
 
         public:
 
+            /// NPC-stances.
+            enum Stance
+            {
+                Run, Sneak, Combat
+            };
+
             virtual ~Class();
 
             virtual std::string getId (const Ptr& ptr) const;
@@ -107,6 +113,18 @@ namespace MWWorld
             virtual std::string getScript (const Ptr& ptr) const;
             ///< Return name of the script attached to ptr (default implementation: return an empty
             /// string).
+
+            virtual void setForceStance (const Ptr& ptr, Stance stance, bool force) const;
+            ///< Force or unforce a stance.
+
+            virtual void setStance (const Ptr& ptr, Stance stance, bool set) const;
+            ///< Set or unset a stance.
+
+            virtual bool getStance (const Ptr& ptr, Stance stance, bool ignoreForce = false) const;
+            ////< Check if a stance is active or not.
+
+            virtual float getSpeed (const Ptr& ptr) const;
+            ///< Return movement speed.
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

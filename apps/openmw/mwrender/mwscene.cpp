@@ -97,3 +97,13 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
 
     return std::pair<std::string, float>(handle, distance);
 }
+
+void MWScene::doPhysics (float duration, MWWorld::World& world)
+{
+
+}
+
+void MWScene::setMovement (const std::vector<std::string, Ogre::Vector3>& actors)
+{
+
+}

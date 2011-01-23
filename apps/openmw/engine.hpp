@@ -57,6 +57,7 @@ namespace OMW
 
             //int nFiles;
             boost::filesystem::path mDataDir;
+            boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;
@@ -106,6 +107,9 @@ namespace OMW
 
             /// Set data dir
             void setDataDir (const boost::filesystem::path& dataDir);
+
+            /// Set resource dir
+            void setResourceDir (const boost::filesystem::path& parResDir);
 
             /// Set start cell name (only interiors for now)
             void setCell (const std::string& cellName);

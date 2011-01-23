@@ -31,6 +31,9 @@ namespace MWWorld
         ESM::Class *mClass;
         bool mCollisionMode;
 
+        bool mAutoMove;
+        bool misWalking;//Testing...
+
     public:
 
         Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
@@ -108,6 +111,39 @@ namespace MWWorld
         {
             mCollisionMode = !mCollisionMode;
         }
-  };
+
+        bool getAutoMove()
+        {
+            return mAutoMove;
+        }
+
+        void setAutoMove(bool setMe)
+        {
+            mAutoMove = setMe;
+        }
+
+//NOTE: we don't have speed being calculated yet, so for now this function only requires a frame duration.
+/// <param name="duration">float value representing time since last call</param>
+        void executeAutoMove(float duration)
+        {
+            float X_Val =  0.0f;
+            float Y_Val = 0.0f;
+            float Z_Val = 300.0f * duration * -1.0f;
+            if (mAutoMove == true)
+            {
+                moveRel(X_Val, Y_Val, Z_Val);
+            }
+        }
+
+        bool getisWalking()
+        {
+            return misWalking;
+        }
+
+        void setisWalking(bool setMe)
+        {
+            misWalking = setMe;
+        }
+    };
 }
 #endif

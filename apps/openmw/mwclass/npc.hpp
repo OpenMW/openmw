@@ -8,7 +8,7 @@ namespace MWClass
     class Npc : public MWWorld::Class
     {
         public:
-            
+
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
             ///< Return ID of \a ptr
 
@@ -42,6 +42,19 @@ namespace MWClass
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
+
+           virtual void setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const;
+            ///< Force or unforce a stance.
+
+            virtual void setStance (const MWWorld::Ptr& ptr, Stance stance, bool set) const;
+            ///< Set or unset a stance.
+
+            virtual bool getStance (const MWWorld::Ptr& ptr, Stance stance, bool ignoreForce = false)
+                const;
+            ////< Check if a stance is active or not.
+
+            virtual float getSpeed (const MWWorld::Ptr& ptr) const;
+            ///< Return movement speed.
 
             static void registerSelf();
     };
