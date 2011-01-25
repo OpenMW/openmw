@@ -4,6 +4,8 @@
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
 
+#include <vector>
+
 namespace Ogre
 {
     class Camera;
@@ -11,6 +13,8 @@ namespace Ogre
     class SceneManager;
     class SceneNode;
     class RaySceneQuery;
+    class Quaternion;
+    class Vector3;
 }
 
 namespace MWWorld
@@ -61,6 +65,30 @@ namespace MWRender
         /// Inform phyiscs system about desired velocity vectors for actors
         /// (in Morrowind coordinates).
         void setMovement (const std::vector<std::string, Ogre::Vector3>& actors);
+
+        /// Add object to physics system.
+        void addObject (const std::string& handle, const std::string& mesh,
+            const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position);
+
+        /// Add actor to physics system.
+        void addActor (const std::string& handle, const std::string& mesh,
+            const Ogre::Vector3& position);
+
+        /// Remove object from physic systems.
+        void removeObject (const std::string& handle);
+
+        /// Move object.
+        void moveObject (const std::string& handle, const Ogre::Vector3& position);
+
+        /// Change object's orientation.
+        void rotateObject (const std::string& handle, const Ogre::Quaternion& rotation);
+
+        /// Change object's scale.
+        void scaleObject (const std::string& handle, float scale);
+
+        /// Set collision mode for player. If disabled player object should ignore
+        /// collisions and gravity.
+        void setCollsionMode (bool enabled);
     };
 }
 

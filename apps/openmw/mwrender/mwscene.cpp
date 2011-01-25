@@ -107,3 +107,40 @@ void MWScene::setMovement (const std::vector<std::string, Ogre::Vector3>& actors
 {
 
 }
+
+void MWScene::addObject (const std::string& handle, const std::string& mesh,
+    const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
+{
+
+}
+
+void MWScene::addActor (const std::string& handle, const std::string& mesh,
+    const Ogre::Vector3& position)
+{
+
+}
+
+void MWScene::removeObject (const std::string& handle)
+{
+
+}
+
+void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& position)
+{
+
+}
+
+void MWScene::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)
+{
+
+}
+
+void MWScene::scaleObject (const std::string& handle, float scale)
+{
+
+}
+
+void MWScene::setCollsionMode (bool enabled)
+{
+
+}
