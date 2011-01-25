@@ -89,7 +89,7 @@ set(NIFOGRE_HEADER
 source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})
 
 set(NIFBULLET
-    ${COMP_DIR}/nifbullet/ogre_bullet_loader.cpp)
+    ${COMP_DIR}/nifbullet/bullet_nif_loader.cpp)
 set(NIFBULLET_HEADER
     ${COMP_DIR}/nifbullet/bullet_nif_loader.hpp)
 source_group(components\\nifbullet FILES ${NIFBULLET} ${NIFBULLET_HEADER})
