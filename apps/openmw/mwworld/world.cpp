@@ -21,6 +21,7 @@
 
 #include "refdata.hpp"
 #include "globals.hpp"
+#include "doingphysics.hpp"
 
 namespace
 {
@@ -745,14 +746,17 @@ namespace MWWorld
 
             if (MWRender::CellRender *render = searchRender (ptr.getCell()))
             {
-                render->deleteObject (ptr.getRefData().getHandle());
-                ptr.getRefData().setHandle ("");
-
                 if (mActiveCells.find (ptr.getCell())!=mActiveCells.end())
                 {
                     Class::get (ptr).disable (ptr, mEnvironment);
                     mEnvironment.mSoundManager->stopSound3D (ptr);
+
+                    if (!DoingPhysics::isDoingPhysics())
+                        mScene.removeObject (ptr.getRefData().getHandle());
                 }
+
+                render->deleteObject (ptr.getRefData().getHandle());
+                ptr.getRefData().setHandle ("");
             }
         }
     }
@@ -778,6 +782,9 @@ namespace MWWorld
                     if (mCurrentCell->cell->data.gridX!=cellX || mCurrentCell->cell->data.gridY!=cellY)
                     {
                         changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos);
+
+                        if (!DoingPhysics::isDoingPhysics())
+                            mScene.moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
                     }
                 }
             }

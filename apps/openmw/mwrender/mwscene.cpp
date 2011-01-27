@@ -11,6 +11,7 @@
 
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/doingphysics.hpp"
 #include <components/esm/loadstat.hpp>
 
 #include "player.hpp"
@@ -100,6 +101,8 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
 
 void MWScene::doPhysics (float duration, MWWorld::World& world)
 {
+    // stop changes to world from being reported back to the physics system
+    MWWorld::DoingPhysics scopeGuard;
 
 }
 
