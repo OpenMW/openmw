@@ -258,6 +258,9 @@ namespace MWClass
         cellRender.insertMesh (hairModel, Ogre::Vector3( 0, -1, 0), axis, Ogre::Radian(0), npcName + "hair", neckandup, neckNumbers);
         ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
 
+
+        cellRender.insertActorPhysics();
+        ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
     }
 
     void Npc::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
