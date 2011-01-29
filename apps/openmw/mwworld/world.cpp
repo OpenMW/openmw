@@ -833,4 +833,9 @@ namespace MWWorld
         if (y<0)
             --cellY;
     }
+
+    void World::doPhysics (float duration)
+    {
+        mScene.doPhysics (duration, *this);
+    }
 }

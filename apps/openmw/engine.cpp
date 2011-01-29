@@ -179,6 +179,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
             focusFrameCounter = 0;
         }
+
+        mEnvironment.mWorld->doPhysics (mEnvironment.mFrameDuration);
     }
     catch (const std::exception& e)
     {
