@@ -145,6 +145,7 @@ set(GAMEWORLD_HEADER
     mwworld/containerutil.hpp
     mwworld/player.hpp
     mwworld/doingphysics.hpp
+    mwworld/cellfunctors.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 

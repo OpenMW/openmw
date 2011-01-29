@@ -22,6 +22,7 @@
 #include "refdata.hpp"
 #include "globals.hpp"
 #include "doingphysics.hpp"
+#include "cellfunctors.hpp"
 
 namespace
 {
@@ -271,6 +272,15 @@ namespace MWWorld
 
     void World::unloadCell (CellRenderCollection::iterator iter)
     {
+        ListHandles functor;
+        iter->first->forEach (functor);
+
+        { // silence annoying g++ warning
+            for (std::vector<std::string>::const_iterator iter (functor.mHandles.begin());
+                iter!=functor.mHandles.end(); ++iter)
+                mScene.removeObject (*iter);
+        }
+
         removeScripts (iter->first);
         mEnvironment.mMechanicsManager->dropActors (iter->first);
         iter->second->destroy();
@@ -616,6 +626,8 @@ namespace MWWorld
 
     void World::changeCell (int X, int Y, const ESM::Position& position)
     {
+        SuppressDoingPhysics scopeGuard;
+
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
 
@@ -782,10 +794,10 @@ namespace MWWorld
                     if (mCurrentCell->cell->data.gridX!=cellX || mCurrentCell->cell->data.gridY!=cellY)
                     {
                         changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos);
-
-                        if (!DoingPhysics::isDoingPhysics())
-                            mScene.moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
                     }
+
+                    if (!DoingPhysics::isDoingPhysics())
+                        mScene.moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
                 }
             }
         }
