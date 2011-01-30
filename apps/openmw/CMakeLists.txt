@@ -225,8 +225,10 @@ add_executable(openmw
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
-include_directories(${SOUND_INPUT_INCLUDES})
+include_directories(${SOUND_INPUT_INCLUDES} ${BULLET_INCLUDE_DIRS})
 add_definitions(${SOUND_DEFINE})
+
+message (INFO ${BULLET_INCLUDE_DIR})
 
 target_link_libraries(openmw
   ${OGRE_LIBRARIES}
@@ -234,6 +236,7 @@ target_link_libraries(openmw
   ${Boost_LIBRARIES}
   ${OPENAL_LIBRARY}
   ${SOUND_INPUT_LIBRARY}
+  ${BULLET_LIBRARIES}
   caelum
   MyGUIEngine
   MyGUIOgrePlatform
