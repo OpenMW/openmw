@@ -228,8 +228,6 @@ add_executable(openmw
 include_directories(${SOUND_INPUT_INCLUDES} ${BULLET_INCLUDE_DIRS})
 add_definitions(${SOUND_DEFINE})
 
-message (INFO ${BULLET_INCLUDE_DIR})
-
 target_link_libraries(openmw
   ${OGRE_LIBRARIES}
   ${OIS_LIBRARIES}
