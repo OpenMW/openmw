@@ -64,7 +64,7 @@ namespace MWRender
 
         /// Inform phyiscs system about desired velocity vectors for actors
         /// (in Morrowind coordinates).
-        void setMovement (const std::vector<std::string, Ogre::Vector3>& actors);
+        void setMovement (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
 
         /// Add object to physics system.
         void addObject (const std::string& handle, const std::string& mesh,

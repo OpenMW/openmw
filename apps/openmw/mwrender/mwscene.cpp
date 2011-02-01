@@ -106,7 +106,7 @@ void MWScene::doPhysics (float duration, MWWorld::World& world)
 
 }
 
-void MWScene::setMovement (const std::vector<std::string, Ogre::Vector3>& actors)
+void MWScene::setMovement (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
 {
 
 }

@@ -14,6 +14,11 @@
 #include "ptr.hpp"
 #include "globals.hpp"
 
+namespace Ogre
+{
+    class Vector3;
+}
+
 namespace ESM
 {
     struct Position;
@@ -163,7 +168,8 @@ namespace MWWorld
             void positionToIndex (float x, float y, int &cellX, int &cellY) const;
             ///< Convert position to cell numbers
 
-            void doPhysics (float duration);
+            void doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
+                float duration);
             ///< Run physics simulation and modify \a world accordingly.
     };
 }

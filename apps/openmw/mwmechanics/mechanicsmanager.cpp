@@ -255,7 +255,7 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
-    void MechanicsManager::update()
+    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement)
     {
         if (!mWatched.isEmpty())
         {
