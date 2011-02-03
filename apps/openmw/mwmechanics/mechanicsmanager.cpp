@@ -350,6 +350,15 @@ namespace MWMechanics
 
             mEnvironment.mWindowManager->configureSkills (majorSkills, minorSkills);
         }
+
+        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end();
+            ++iter)
+        {
+            Ogre::Vector3 vector = MWWorld::Class::get (*iter).getMovementVector (*iter);
+
+            if (vector!=Ogre::Vector3::ZERO)
+                movement.push_back (std::make_pair (iter->getRefData().getHandle(), vector));
+        }
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)
