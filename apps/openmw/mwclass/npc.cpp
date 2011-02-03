@@ -439,6 +439,33 @@ namespace MWClass
         return getStance (ptr, Run) ? 600 : 300; // TODO calculate these values from stats
     }
 
+    MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getMovement().get())
+        {
+            boost::shared_ptr<MWMechanics::Movement> movement (
+                new MWMechanics::Movement);
+        }
+
+        return *ptr.getRefData().getMovement();
+    }
+
+    Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
+    {
+        Ogre::Vector3 vector (0, 0, 0);
+
+        if (ptr.getRefData().getMovement().get())
+        {
+            vector.x = - ptr.getRefData().getMovement()->mLeftRight * 200;
+            vector.z = - ptr.getRefData().getMovement()->mForwardBackward * 200;
+
+            if (getStance (ptr, Run, false))
+                vector *= 2;
+        }
+
+        return vector;
+    }
+
     void Npc::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Npc);

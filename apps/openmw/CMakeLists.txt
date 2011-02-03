@@ -207,6 +207,7 @@ set(GAMEMECHANICS_HEADER
     mwmechanics/stat.hpp
     mwmechanics/creaturestats.hpp
     mwmechanics/magiceffects.hpp
+    mwmechanics/movement.hpp
     )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 

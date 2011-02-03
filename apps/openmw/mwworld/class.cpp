@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+#include <OgreVector3.h>
+
 #include "ptr.hpp"
 #include "nullaction.hpp"
 
@@ -110,6 +112,16 @@ namespace MWWorld
     float Class::getSpeed (const Ptr& ptr) const
     {
         return 0;
+    }
+
+    MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("movement settings not supported by class");
+    }
+
+    Ogre::Vector3 Class::getMovementVector (const Ptr& ptr) const
+    {
+        return Ogre::Vector3 (0, 0, 0);
     }
 
     const Class& Class::get (const std::string& key)
