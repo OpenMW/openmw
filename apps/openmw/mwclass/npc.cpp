@@ -443,6 +443,8 @@ namespace MWClass
         {
             boost::shared_ptr<MWMechanics::Movement> movement (
                 new MWMechanics::Movement);
+
+            ptr.getRefData().getMovement() = movement;
         }
 
         return *ptr.getRefData().getMovement();
