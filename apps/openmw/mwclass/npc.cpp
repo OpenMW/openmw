@@ -256,8 +256,6 @@ namespace MWClass
         cellRender.insertMesh (headModel, Ogre::Vector3( 0, 0, 5), axis, Ogre::Radian(0), npcName + "head", neckandup, neckNumbers);
         neckandup[neckNumbers++] = npcName + "head";
         cellRender.insertMesh (hairModel, Ogre::Vector3( 0, -1, 0), axis, Ogre::Radian(0), npcName + "hair", neckandup, neckNumbers);
-        ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
-
 
         cellRender.insertActorPhysics();
         ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
