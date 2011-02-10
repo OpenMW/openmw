@@ -393,7 +393,8 @@ namespace MWClass
         {
             case Run:
 
-                throw std::runtime_error ("run stance not manually setable for NPCs");
+                stats.mRun = set;
+                break;
 
             case Sneak:
 
@@ -415,7 +416,10 @@ namespace MWClass
         {
             case Run:
 
-                return ignoreForce ? false : stats.mForceRun;
+                if (!ignoreForce && stats.mForceRun)
+                    return true;
+
+                return stats.mRun;
 
             case Sneak:
 
