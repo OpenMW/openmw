@@ -510,7 +510,8 @@ namespace MWWorld
 
     Ptr World::getPtrViaHandle (const std::string& handle)
     {
-        // TODO player
+        if (mPlayer->getPlayer().getRefData().getHandle()==handle)
+            return mPlayer->getPlayer();
 
         for (CellRenderCollection::iterator iter (mActiveCells.begin());
             iter!=mActiveCells.end(); ++iter)
@@ -804,11 +805,12 @@ namespace MWWorld
                         changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos, false);
                     }
 
-                    if (!DoingPhysics::isDoingPhysics())
-                        mScene.moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
                 }
             }
         }
+
+        mScene.moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z),
+            !DoingPhysics::isDoingPhysics());
 
         // TODO cell change for non-player ref
     }

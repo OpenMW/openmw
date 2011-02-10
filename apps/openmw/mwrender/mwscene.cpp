@@ -107,11 +107,23 @@ void MWScene::doPhysics (float duration, MWWorld::World& world)
     // stop changes to world from being reported back to the physics system
     MWWorld::DoingPhysics scopeGuard;
 
+    // move object directly for now -> TODO replace with physics
+    for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (mMovement.begin());
+        iter!=mMovement.end(); ++iter)
+    {
+        MWWorld::Ptr ptr = world.getPtrViaHandle (iter->first);
+
+        Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
+
+        Ogre::Vector3 newPos = sceneNode->getPosition() + sceneNode->getOrientation() * iter->second;
+
+        world.moveObject (ptr, newPos.x, newPos.y, newPos.z);
+    }
 }
 
 void MWScene::setMovement (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
 {
-
+    mMovement = actors;
 }
 
 void MWScene::addObject (const std::string& handle, const std::string& mesh,
@@ -131,8 +143,9 @@ void MWScene::removeObject (const std::string& handle)
 
 }
 
-void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& position)
+void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics)
 {
+    rend.getScene()->getSceneNode (handle)->setPosition (position);
 
 }
 

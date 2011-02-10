@@ -5,6 +5,7 @@
 #include <openengine/ogre/renderer.hpp>
 
 #include <vector>
+#include <string>
 
 namespace Ogre
 {
@@ -39,6 +40,8 @@ namespace MWRender
         Ogre::RaySceneQuery *mRaySceneQuery;
 
         MWRender::Player *mPlayer;
+
+        std::vector<std::pair<std::string, Ogre::Vector3> > mMovement;
 
     public:
 
@@ -78,7 +81,7 @@ namespace MWRender
         void removeObject (const std::string& handle);
 
         /// Move object.
-        void moveObject (const std::string& handle, const Ogre::Vector3& position);
+        void moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics);
 
         /// Change object's orientation.
         void rotateObject (const std::string& handle, const Ogre::Quaternion& rotation);
