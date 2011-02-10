@@ -88,14 +88,19 @@ namespace MWWorld
 
             void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
 
-            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position);
+            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
+                bool adjustPlayerPos = true);
 
             void adjustSky();
 
+            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
+            ///< Move from exterior to interior or from interior cell to a different
+            /// interior cell.
         public:
 
            World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
-                const std::string& master, const boost::filesystem::path& resDir, bool newGame, Environment& environment);
+                const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+                Environment& environment);
 
             ~World();
 
@@ -143,12 +148,11 @@ namespace MWWorld
 
             float getTimeScaleFactor() const;
 
-            void changeCell (const std::string& cellName, const ESM::Position& position);
-            ///< works only for interior cells currently.
-
-            void changeCell (int X, int Y, const ESM::Position& position);
+            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position);
+            ///< Move to interior cell.
 
             void changeToExteriorCell (const ESM::Position& position);
+            ///< Move to exterior cell.
 
             const ESM::Cell *getExterior (const std::string& cellName) const;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.

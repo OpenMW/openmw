@@ -393,7 +393,7 @@ void OMW::Engine::go()
     else
     {
         pos.pos[0] = pos.pos[1] = 0;
-        mEnvironment.mWorld->changeCell (mCellName, pos);
+        mEnvironment.mWorld->changeToInteriorCell (mCellName, pos);
     }
 
     // Sets up the input system

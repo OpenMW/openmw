@@ -234,11 +234,17 @@ namespace MWMechanics
 
     void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
     {
+        if (ptr==mWatched)
+            mWatched = MWWorld::Ptr();
+
         mActors.erase (ptr);
     }
 
     void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
     {
+        if (!mWatched.isEmpty() && mWatched.getCell()==cellStore)
+            mWatched = MWWorld::Ptr();
+
         std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
 
         while (iter!=mActors.end())

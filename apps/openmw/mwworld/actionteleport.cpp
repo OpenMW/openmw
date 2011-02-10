@@ -16,6 +16,6 @@ namespace MWWorld
         if (mCellName.empty())
             environment.mWorld->changeToExteriorCell (mPosition);
         else
-            environment.mWorld->changeCell (mCellName, mPosition);
+            environment.mWorld->changeToInteriorCell (mCellName, mPosition);
     }
 }
