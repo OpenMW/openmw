@@ -102,14 +102,15 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
     return std::pair<std::string, float>(handle, distance);
 }
 
-void MWScene::doPhysics (float duration, MWWorld::World& world)
+void MWScene::doPhysics (float duration, MWWorld::World& world,
+    const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
 {
     // stop changes to world from being reported back to the physics system
     MWWorld::DoingPhysics scopeGuard;
 
     // move object directly for now -> TODO replace with physics
-    for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (mMovement.begin());
-        iter!=mMovement.end(); ++iter)
+    for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
+        iter!=actors.end(); ++iter)
     {
         MWWorld::Ptr ptr = world.getPtrViaHandle (iter->first);
 
@@ -119,11 +120,6 @@ void MWScene::doPhysics (float duration, MWWorld::World& world)
 
         world.moveObject (ptr, newPos.x, newPos.y, newPos.z);
     }
-}
-
-void MWScene::setMovement (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
-{
-    mMovement = actors;
 }
 
 void MWScene::addObject (const std::string& handle, const std::string& mesh,

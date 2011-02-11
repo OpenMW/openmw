@@ -41,8 +41,6 @@ namespace MWRender
 
         MWRender::Player *mPlayer;
 
-        std::vector<std::pair<std::string, Ogre::Vector3> > mMovement;
-
     public:
 
         MWScene (OEngine::Render::OgreRenderer &_rend);
@@ -63,11 +61,8 @@ namespace MWRender
         std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
 
         /// Run physics simulation and modify \a world accordingly.
-        void doPhysics (float duration, MWWorld::World& world);
-
-        /// Inform phyiscs system about desired velocity vectors for actors
-        /// (in Morrowind coordinates).
-        void setMovement (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
+        void doPhysics (float duration, MWWorld::World& world,
+            const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
 
         /// Add object to physics system.
         void addObject (const std::string& handle, const std::string& mesh,

@@ -847,7 +847,6 @@ namespace MWWorld
     void World::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
         float duration)
     {
-        mScene.setMovement (actors);
-        mScene.doPhysics (duration, *this);
+        mScene.doPhysics (duration, *this, actors);
     }
 }
