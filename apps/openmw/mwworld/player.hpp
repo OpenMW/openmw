@@ -30,9 +30,8 @@ namespace MWWorld
         std::string mBirthsign;
         ESM::Class *mClass;
         bool mCollisionMode;
-
         bool mAutoMove;
-        bool misWalking;//Testing...
+        int mForwardBackward;
 
     public:
 
@@ -117,33 +116,13 @@ namespace MWWorld
             return mAutoMove;
         }
 
-        void setAutoMove(bool setMe)
-        {
-            mAutoMove = setMe;
-        }
+        void setAutoMove (bool enable);
 
-//NOTE: we don't have speed being calculated yet, so for now this function only requires a frame duration.
-/// <param name="duration">float value representing time since last call</param>
-        void executeAutoMove(float duration)
-        {
-            float X_Val =  0.0f;
-            float Y_Val = 0.0f;
-            float Z_Val = 300.0f * duration * -1.0f;
-            if (mAutoMove == true)
-            {
-                moveRel(X_Val, Y_Val, Z_Val);
-            }
-        }
+        void setLeftRight (int value);
 
-        bool getisWalking()
-        {
-            return misWalking;
-        }
+        void setForwardBackward (int value);
 
-        void setisWalking(bool setMe)
-        {
-            misWalking = setMe;
-        }
+        void toggleRunning();
     };
 }
 #endif

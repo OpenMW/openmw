@@ -2,11 +2,18 @@
 #define GAME_MWMECHANICS_MECHANICSMANAGER_H
 
 #include <set>
+#include <vector>
+#include <string>
 
 #include "../mwworld/ptr.hpp"
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
+
+namespace Ogre
+{
+    class Vector3;
+}
 
 namespace MWWorld
 {
@@ -53,8 +60,8 @@ namespace MWMechanics
             ///< On each update look for changes in a previously registered actor and update the
             /// GUI accordingly.
 
-            void update();
-            ///< Update actor stats
+            void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement);
+            ///< Update actor stats and store desired velocity vectors in \a movement
 
             void setPlayerName (const std::string& name);
             ///< Set player name.

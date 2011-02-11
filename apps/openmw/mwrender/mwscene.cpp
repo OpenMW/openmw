@@ -42,7 +42,10 @@ MWScene::MWScene(OEngine::Render::OgreRenderer &_rend)
   //used to obtain ingame information of ogre objects (which are faced or selected)
   mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
 
-  mPlayer = new MWRender::Player (getCamera());
+    Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode();
+    playerNode->attachObject (getCamera());
+
+    mPlayer = new MWRender::Player (getCamera(), playerNode->getName());
 }
 
 MWScene::~MWScene()
@@ -99,16 +102,24 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
     return std::pair<std::string, float>(handle, distance);
 }
 
-void MWScene::doPhysics (float duration, MWWorld::World& world)
+void MWScene::doPhysics (float duration, MWWorld::World& world,
+    const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
 {
     // stop changes to world from being reported back to the physics system
     MWWorld::DoingPhysics scopeGuard;
 
-}
+    // move object directly for now -> TODO replace with physics
+    for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
+        iter!=actors.end(); ++iter)
+    {
+        MWWorld::Ptr ptr = world.getPtrViaHandle (iter->first);
 
-void MWScene::setMovement (const std::vector<std::string, Ogre::Vector3>& actors)
-{
+        Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
 
+        Ogre::Vector3 newPos = sceneNode->getPosition() + sceneNode->getOrientation() * iter->second;
+
+        world.moveObject (ptr, newPos.x, newPos.y, newPos.z);
+    }
 }
 
 void MWScene::addObject (const std::string& handle, const std::string& mesh,
@@ -128,8 +139,9 @@ void MWScene::removeObject (const std::string& handle)
 
 }
 
-void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& position)
+void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics)
 {
+    rend.getScene()->getSceneNode (handle)->setPosition (position);
 
 }
 

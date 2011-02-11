@@ -6,6 +6,8 @@
 #include <iostream>
 #include <utility>
 
+#include <OgreVector3.h>
+
 #include "components/esm/records.hpp"
 #include <components/esm_store/cell_store.hpp>
 #include <components/misc/fileops.hpp>
@@ -158,7 +160,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
             mEnvironment.mWorld->markCellAsUnchanged();
 
         // update actors
-        mEnvironment.mMechanicsManager->update();
+        std::vector<std::pair<std::string, Ogre::Vector3> > movement;
+        mEnvironment.mMechanicsManager->update (movement);
 
         if (focusFrameCounter++ == focusUpdateFrame)
         {
@@ -179,6 +182,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 
             focusFrameCounter = 0;
         }
+
+        mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
     }
     catch (const std::exception& e)
     {
@@ -388,7 +393,7 @@ void OMW::Engine::go()
     else
     {
         pos.pos[0] = pos.pos[1] = 0;
-        mEnvironment.mWorld->changeCell (mCellName, pos);
+        mEnvironment.mWorld->changeToInteriorCell (mCellName, pos);
     }
 
     // Sets up the input system

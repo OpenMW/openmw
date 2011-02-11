@@ -4,6 +4,7 @@
 namespace MWWorld
 {
     int DoingPhysics::sCounter = 0;
+    int DoingPhysics::sSuppress = 0;
 
     DoingPhysics::DoingPhysics()
     {
@@ -17,6 +18,16 @@ namespace MWWorld
 
     bool DoingPhysics::isDoingPhysics()
     {
-        return sCounter>0;
+        return sCounter>0 || sSuppress>0;
+    }
+
+    SuppressDoingPhysics::SuppressDoingPhysics()
+    {
+        ++DoingPhysics::sSuppress;
+    }
+
+    SuppressDoingPhysics::~SuppressDoingPhysics()
+    {
+        --DoingPhysics::sSuppress;
     }
 }

@@ -21,10 +21,12 @@ namespace MWMechanics
 
         bool mForceRun;
         bool mForceSneak;
+        bool mRun;
         bool mSneak;
         bool mCombat;
 
-        NpcStats() : mForceRun (false), mForceSneak (false), mSneak (false), mCombat (false) {}
+        NpcStats() : mForceRun (false), mForceSneak (false), mRun (false), mSneak (false),
+            mCombat (false) {}
     };
 }
 

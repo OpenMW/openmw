@@ -10,6 +10,11 @@
 #include "containerstore.hpp"
 #include "refdata.hpp"
 
+namespace Ogre
+{
+    class Vector3;
+}
+
 namespace MWRender
 {
     class CellRenderImp;
@@ -19,6 +24,7 @@ namespace MWMechanics
 {
     struct CreatureStats;
     struct NpcStats;
+    struct Movement;
 }
 
 namespace MWWorld
@@ -125,6 +131,13 @@ namespace MWWorld
 
             virtual float getSpeed (const Ptr& ptr) const;
             ///< Return movement speed.
+
+            virtual MWMechanics::Movement& getMovementSettings (const Ptr& ptr) const;
+            ///< Return desired movement.
+
+            virtual Ogre::Vector3 getMovementVector (const Ptr& ptr) const;
+            ///< Return desired movement vector (determined based on movement settings,
+            /// stance and stats).
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

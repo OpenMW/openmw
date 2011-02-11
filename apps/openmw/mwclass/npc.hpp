@@ -56,6 +56,13 @@ namespace MWClass
             virtual float getSpeed (const MWWorld::Ptr& ptr) const;
             ///< Return movement speed.
 
+            virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
+            ///< Return desired movement.
+
+            virtual Ogre::Vector3 getMovementVector (const MWWorld::Ptr& ptr) const;
+            ///< Return desired movement vector (determined based on movement settings,
+            /// stance and stats).
+
             static void registerSelf();
     };
 }

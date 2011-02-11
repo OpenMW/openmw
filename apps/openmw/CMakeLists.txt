@@ -145,6 +145,7 @@ set(GAMEWORLD_HEADER
     mwworld/containerutil.hpp
     mwworld/player.hpp
     mwworld/doingphysics.hpp
+    mwworld/cellfunctors.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
@@ -206,6 +207,7 @@ set(GAMEMECHANICS_HEADER
     mwmechanics/stat.hpp
     mwmechanics/creaturestats.hpp
     mwmechanics/magiceffects.hpp
+    mwmechanics/movement.hpp
     )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
