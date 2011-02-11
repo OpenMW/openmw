@@ -423,6 +423,7 @@ namespace MWWorld
         mStore.load (mEsm);
 
         mPlayer = new MWWorld::Player (mScene.getPlayer(), mStore.npcs.find ("player"), *this);
+        mScene.addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
         // global variables
         mGlobalVariables = new Globals (mStore);
