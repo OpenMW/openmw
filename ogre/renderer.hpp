@@ -70,6 +70,8 @@ namespace Render
     /// Write a screenshot to file
     void screenshot(const std::string &file);
 
+    float getFPS();
+
     /// Get the Root
     Ogre::Root *getRoot() { return mRoot; }
 

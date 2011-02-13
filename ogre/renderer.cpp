@@ -27,6 +27,11 @@ void OgreRenderer::screenshot(const std::string &file)
   mWindow->writeContentsToFile(file);
 }
 
+float OgreRenderer::getFPS()
+{
+  return mWindow->getLastFPS();
+}
+
 bool OgreRenderer::configure(bool showConfig,
                              const std::string &cfgPath,
                              const std::string &logPath,
