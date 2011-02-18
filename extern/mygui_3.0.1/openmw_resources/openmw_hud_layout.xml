@@ -48,5 +48,11 @@
 
         <Widget type="StaticImage" skin="StaticImage" position="0 0 32
             32" align="Center Center" name="Crosshair"/>
+
+        <!-- FPSCounter -->
+
+        <Widget type="StaticText" skin="SandText" position="278 123 65 80" align="Right Bottom"
+            name="FPSCounter"/>
+
     </Widget>
 </MyGUI>

@@ -153,10 +153,13 @@ namespace MWGui
 
     void setGuiMode(GuiMode newMode);
 
+    bool showFPSCounter;
+    float mFPS;
+
   public:
     /// The constructor needs the main Gui object
     WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-        const Compiler::Extensions& extensions, bool newGame);
+        const Compiler::Extensions& extensions, bool fpsSwitch, bool newGame);
     virtual ~WindowManager();
 
     /**
@@ -196,6 +199,8 @@ namespace MWGui
     }
 
     MyGUI::Gui* getGui() const { return gui; }
+
+    void wmSetFPS(float fps) { mFPS = fps; }
 
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
     ///< Set value for the given ID.

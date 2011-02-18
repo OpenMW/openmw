@@ -61,6 +61,7 @@ namespace OMW
             OEngine::Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;
+            bool mShowFPS;
             bool mDebug;
             bool mVerboseScripts;
             bool mNewGame;
@@ -118,6 +119,9 @@ namespace OMW
             /// - If the given name does not have an extension, ".esm" is added automatically
             /// - Currently OpenMW only supports one master at the same time.
             void addMaster (const std::string& master);
+
+            /// Enable fps counter
+            void showFPS() { mShowFPS = true; }
 
             /// Enable debug mode:
             /// - non-exclusive input

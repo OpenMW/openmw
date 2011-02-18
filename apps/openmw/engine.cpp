@@ -69,6 +69,11 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 {
+    if(mShowFPS)
+    {
+        mEnvironment.mWindowManager->wmSetFPS(mOgre.getFPS());
+    }
+
     if(mUseSound && !(mEnvironment.mSoundManager->isMusicPlaying()))
     {
         // Play some good 'ol tunes
@@ -190,7 +195,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 }
 
 OMW::Engine::Engine()
-  : mDebug (false)
+  : mShowFPS (false)
+  , mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
   , mUseSound (true)
@@ -348,7 +354,7 @@ void OMW::Engine::go()
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui(), mEnvironment,
-        mExtensions, mNewGame);
+        mExtensions, mShowFPS, mNewGame);
 
     // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),

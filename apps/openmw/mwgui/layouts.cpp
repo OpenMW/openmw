@@ -7,7 +7,6 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <boost/lexical_cast.hpp>
 
 using namespace MWGui;
 

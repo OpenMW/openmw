@@ -20,7 +20,7 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-    const Compiler::Extensions& extensions, bool newGame)
+    const Compiler::Extensions& extensions, bool fpsSwitch, bool newGame)
   : environment(environment)
   , nameDialog(nullptr)
   , raceDialog(nullptr)
@@ -44,6 +44,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , shown(GW_ALL)
   , allowed(newGame ? GW_None : GW_ALL)
 {
+    showFPSCounter = fpsSwitch;
 
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogeHistory>("Widget");
@@ -126,6 +127,10 @@ void WindowManager::update()
         needModeChange = false;
         environment.mInputManager->setGuiMode(nextMode);
         nextMode = GM_Game;
+    }
+    if (showFPSCounter)
+    {
+        hud->setFPS(mFPS);
     }
 }
 

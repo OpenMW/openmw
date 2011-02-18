@@ -6,6 +6,7 @@
 #include <openengine/gui/layout.hpp>
 
 #include <boost/array.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <sstream>
 #include <set>
@@ -58,6 +59,7 @@ namespace MWGui
       getWidget(compass, "Compass");
 
       getWidget(crosshair, "Crosshair");
+      getWidget(fpscounter, "FPSCounter");
 
       compass->setImageTexture("textures\\compass.dds");
       crosshair->setImageTexture("textures\\target.dds");
@@ -69,6 +71,11 @@ namespace MWGui
       setSpellIcon("icons\\s\\b_tx_s_rstor_health.dds");
       setSpellStatus(65, 100);
       setEffect("icons\\s\\tx_s_chameleon.dds");
+    }
+
+    void setFPS(float fps)
+    {
+         fpscounter->setCaption(boost::lexical_cast<std::string>((int)fps));
     }
 
     void setStats(int h, int hmax, int m, int mmax, int s, int smax)
@@ -146,6 +153,7 @@ namespace MWGui
     MyGUI::StaticImagePtr compass;
 
     MyGUI::StaticImagePtr crosshair;
+    MyGUI::StaticTextPtr fpscounter;
   };
 
   class MapWindow : public OEngine::GUI::Layout
