@@ -10,6 +10,9 @@
 
 #include <cmath>
 
+#undef min
+#undef max
+
 using namespace MWGui;
 using namespace Widgets;
 
