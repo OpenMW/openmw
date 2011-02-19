@@ -51,8 +51,10 @@
 
         <!-- FPSCounter -->
 
-        <Widget type="StaticText" skin="SandText" position="278 123 65 80" align="Right Bottom"
-            name="FPSCounter"/>
+        <Widget type="StaticText" skin="SandText" position="269 173 30 30" align="Right Bottom"
+            name="FPSCounter">
+		<Property key="Widget_AlignText" value="ALIGN_RIGHT ALIGN_BOTTOM"/>
+	</Widget>
 
     </Widget>
 </MyGUI>
