@@ -46,7 +46,7 @@ namespace MWRender
 
     public:
 
-        MWScene (OEngine::Render::OgreRenderer &_rend);
+        MWScene (OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng);
 
         ~MWScene();
 

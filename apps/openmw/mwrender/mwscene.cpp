@@ -19,9 +19,10 @@
 using namespace MWRender;
 using namespace Ogre;
 
-MWScene::MWScene(OEngine::Render::OgreRenderer &_rend)
+MWScene::MWScene(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng)
   : rend(_rend)
 {
+  eng = physEng;
   rend.createScene("PlayerCam", 55, 5);
 
   // Set default mipmap level (NB some APIs ignore this)
