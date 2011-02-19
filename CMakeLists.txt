@@ -30,24 +30,24 @@ cmake_minimum_required(VERSION 2.6)
 IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd/ogre_1_7_1")
     set(PREBUILT_DIR "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd")
     message (STATUS "OpenMW pre-built binaries found at ${PREBUILT_DIR}.")
-    
+
     SET(ENV{OGRE_HOME} "${PREBUILT_DIR}/ogre_1_7_1")
-    
+
     SET(ENV{BOOST_ROOT} "${PREBUILT_DIR}/boost_1_42_0")
     set(Boost_USE_STATIC_LIBS   ON)
     set(Boost_USE_MULTITHREADED ON)
     set(ENV{BOOST_INCLUDEDIR} "${BOOST_ROOT}/include")
     set(ENV{BOOST_LIBRARYDIR} "${BOOST_ROOT}/lib")
-    
+
     set(ENV{FREETYPE_DIR} "${PREBUILT_DIR}/freetype-2.3.5-1")
-    
+
     set(USE_MPG123 OFF)
-    set(USE_AUDIERE ON)    
+    set(USE_AUDIERE ON)
     set(AUDIERE_INCLUDE_DIR "${PREBUILT_DIR}/audiere-1.9.4/include")
     set(AUDIERE_LIBRARY "${PREBUILT_DIR}/audiere-1.9.4/lib/audiere.lib")
-    
+
     set(ENV{OPENALDIR} "${PREBUILT_DIR}/OpenAL 1.1 SDK")
-    
+
 ELSE()
     message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
 ENDIF()
@@ -232,6 +232,7 @@ find_package(OGRE REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
+find_package(Bullet REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
@@ -386,7 +387,7 @@ if (WIN32)
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
     endif()
-    
+
     # Release builds use the debug console
     set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
     set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
@@ -408,7 +409,7 @@ if (WIN32)
     set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "-Wl,-subsystem,console")
     set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
   endif(MINGW)
-  
+
   # TODO: At some point release builds should not use the console but rather write to a log file
   #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
   #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
