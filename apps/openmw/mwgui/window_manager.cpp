@@ -54,7 +54,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   int w = gui->getViewSize().width;
   int h = gui->getViewSize().height;
 
-  hud = new HUD(w,h);
+  hud = new HUD(w,h, showFPSCounter);
   menu = new MainMenu(w,h);
   map = new MapWindow();
   stats = new StatsWindow (environment);

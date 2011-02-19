@@ -9,6 +9,14 @@
         <BasisSkin type="SimpleText" offset = "0 0 16 16" align = "ALIGN_STRETCH"/>
     </Skin>
 
+    <Skin name = "NumFPS" size = "16 16">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontHeight" value = "18" />
+        <Property key="AlignText" value = "ALIGN_RIGHT ALIGN_BOTTOM" />
+        <Property key="Colour" value = "1 1 1" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16" align = "ALIGN_STRETCH"/>
+    </Skin>
+
     <Skin name = "SandText" size = "16 16">
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />

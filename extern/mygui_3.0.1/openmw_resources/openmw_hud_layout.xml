@@ -49,12 +49,12 @@
         <Widget type="StaticImage" skin="StaticImage" position="0 0 32
             32" align="Center Center" name="Crosshair"/>
 
-        <!-- FPSCounter -->
+        <!-- FPSCounter box -->
 
-        <Widget type="StaticText" skin="SandText" position="269 173 30 30" align="Right Bottom"
-            name="FPSCounter">
-		<Property key="Widget_AlignText" value="ALIGN_RIGHT ALIGN_BOTTOM"/>
-	</Widget>
+        <Widget type="Widget" skin="HUD_Box" position="12 12 28 21" align="Left Top"
+            name="FPSBox">
+            <Widget type="StaticText" skin="NumFPS" position="3 3 21 17" name="FPSCounter"/>
+        </Widget>
 
     </Widget>
 </MyGUI>

@@ -36,7 +36,7 @@ namespace MWGui
   class HUD : public OEngine::GUI::Layout
   {
   public:
-    HUD(int width, int height)
+    HUD(int width, int height, bool fpsSwitch)
       : Layout("openmw_hud_layout.xml")
     {
       setCoord(0,0, width, height);
@@ -59,7 +59,11 @@ namespace MWGui
       getWidget(compass, "Compass");
 
       getWidget(crosshair, "Crosshair");
+
+      getWidget(fpsbox, "FPSBox");
       getWidget(fpscounter, "FPSCounter");
+
+      fpsbox->setVisible(fpsSwitch);
 
       compass->setImageTexture("textures\\compass.dds");
       crosshair->setImageTexture("textures\\target.dds");
@@ -153,6 +157,8 @@ namespace MWGui
     MyGUI::StaticImagePtr compass;
 
     MyGUI::StaticImagePtr crosshair;
+
+    MyGUI::WidgetPtr fpsbox;
     MyGUI::StaticTextPtr fpscounter;
   };
 
