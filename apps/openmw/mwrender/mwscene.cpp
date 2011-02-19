@@ -112,37 +112,66 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
     for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
         iter!=actors.end(); ++iter)
     {
+		OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
+
+		//first adjust the rotation of the object, which is not handled by the physic engine i believe.
+		Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
+		Ogre::Quaternion quat = sceneNode->getOrientation();
+		act->setRotation(btQuaternion(quat.x,quat.y,quat.z,quat.w));
+
+		//the add the movement:
+		act->setWalkDirection(btVector3(iter->second.x,iter->second.y,iter->second.z));
+    }
+
+	eng->stepSimulation(0.30);
+
+    for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
+        iter!=actors.end(); ++iter)
+    {
         MWWorld::Ptr ptr = world.getPtrViaHandle (iter->first);
-
-        Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
-
-        Ogre::Vector3 newPos = sceneNode->getPosition() + sceneNode->getOrientation() * iter->second;
-
-        world.moveObject (ptr, newPos.x, newPos.y, newPos.z);
+		OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
+		btVector3 newPos = act->externalGhostObject->getWorldTransform().getOrigin();
+		world.moveObject (ptr, newPos.x(), newPos.y(), newPos.z());
     }
 }
 
 void MWScene::addObject (const std::string& handle, const std::string& mesh,
     const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
 {
-
+	OEngine::Physic::RigidBody* body = eng->createRigidBody(mesh,handle);
+	eng->addRigidBody(body);
+	btTransform tr;
+	tr.setOrigin(btVector3(position.x,position.y,position.z));
+	tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
+	body->setWorldTransform(tr);
 }
 
 void MWScene::addActor (const std::string& handle, const std::string& mesh,
     const Ogre::Vector3& position)
 {
-
+	//TODO:optimize this. Searching the std::map isn't very efficient i think.
+	eng->addCharacter(handle);
+	OEngine::Physic::PhysicActor* act = eng->getCharacter(handle);
+	act->setPosition(btVector3(position.x,position.y,position.z));
 }
 
 void MWScene::removeObject (const std::string& handle)
 {
-
+	//TODO:check if actor???
+	eng->removeRigidBody(handle);
+	eng->deleteRigidBody(handle);
 }
 
 void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics)
 {
     rend.getScene()->getSceneNode (handle)->setPosition (position);
-
+	if(updatePhysics)//TODO: is it an actor?
+	{
+		OEngine::Physic::RigidBody* body = eng->getRigidBody(handle);
+		btTransform tr = body->getWorldTransform();
+		tr.setOrigin(btVector3(position.x,position.y,position.z));
+		body->setWorldTransform(tr);
+	}
 }
 
 void MWScene::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)

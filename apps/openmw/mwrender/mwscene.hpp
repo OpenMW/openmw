@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
+#include <openengine\bullet\physic.hpp>
 
 #include <vector>
 #include <string>
@@ -38,6 +39,8 @@ namespace MWRender
         /// Morrowind.
         Ogre::SceneNode *mwRoot;
         Ogre::RaySceneQuery *mRaySceneQuery;
+
+		OEngine::Physic::PhysicEngine* eng;
 
         MWRender::Player *mPlayer;
 
