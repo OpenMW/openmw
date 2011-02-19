@@ -273,7 +273,7 @@ namespace MWWorld
     void World::unloadCell (CellRenderCollection::iterator iter)
     {
         ListHandles functor;
-        iter->first->forEach (functor);
+        iter->first->forEach<ListHandles>(functor);
 
         { // silence annoying g++ warning
             for (std::vector<std::string>::const_iterator iter (functor.mHandles.begin());
@@ -407,12 +407,13 @@ namespace MWWorld
         mCellChanged = true;
     }
 
-    World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
+    World::World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng, const boost::filesystem::path& dataDir,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment)
-    : mSkyManager (0), mScene (renderer), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
+    : mSkyManager (0), mScene (renderer,physEng), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false), mEnvironment (environment)
     {
+		mPhysEngine = physEng;
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
 
@@ -436,6 +437,8 @@ namespace MWWorld
 
         mSkyManager =
             MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir);
+
+		mPhysEngine = new OEngine::Physic::PhysicEngine();
     }
 
     World::~World()
@@ -451,6 +454,8 @@ namespace MWWorld
         delete mPlayer;
         delete mSkyManager;
         delete mGlobalVariables;
+
+		delete mPhysEngine;
     }
 
     MWWorld::Player& World::getPlayer()

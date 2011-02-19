@@ -14,6 +14,8 @@
 #include "ptr.hpp"
 #include "globals.hpp"
 
+#include "openengine\bullet\physic.hpp"
+
 namespace Ogre
 {
     class Vector3;
@@ -68,6 +70,8 @@ namespace MWWorld
             bool mCellChanged;
             Environment& mEnvironment;
 
+			OEngine::Physic::PhysicEngine* mPhysEngine;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
@@ -98,7 +102,7 @@ namespace MWWorld
             /// interior cell.
         public:
 
-           World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
+           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng, const boost::filesystem::path& dataDir,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
                 Environment& environment);
 
