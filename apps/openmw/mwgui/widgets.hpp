@@ -7,11 +7,6 @@
 
 #include "../mwmechanics/stat.hpp"
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 /*
   This file contains various custom widgets used in OpenMW.
  */
@@ -129,11 +124,10 @@ namespace MWGui
 
             typedef MWMechanics::Stat<int> SpellValue;
 
-            void setEnvironment(MWWorld::Environment *env_) { env = env_; }
+            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellId(const std::string &id);
             void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord);
 
-            MWWorld::Environment *getEnvironment() const { return env; }
             const std::string &getSpellId() const { return id; }
 
         /*internal:*/
@@ -150,7 +144,7 @@ namespace MWGui
 
             void updateWidgets();
 
-            MWWorld::Environment *env;
+            WindowManager* mWindowManager;
             std::string id;
             MyGUI::StaticTextPtr spellNameWidget;
         };
@@ -164,10 +158,9 @@ namespace MWGui
 
             typedef ESM::ENAMstruct SpellEffectValue;
 
-            void setEnvironment(MWWorld::Environment *env_) { env = env_; }
+            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(SpellEffectValue value);
 
-            MWWorld::Environment *getEnvironment() const { return env; }
             const SpellEffectValue &getSpellEffect() const { return effect; }
 
         /*internal:*/
@@ -184,7 +177,7 @@ namespace MWGui
 
             void updateWidgets();
 
-            MWWorld::Environment *env;
+            WindowManager* mWindowManager;
             SpellEffectValue effect;
             MyGUI::StaticImagePtr imageWidget;
             MyGUI::StaticTextPtr textWidget;

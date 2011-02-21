@@ -3,21 +3,17 @@
 
 #include <components/esm_store/store.hpp>
 
-#include <openengine/gui/layout.hpp>
-
-#include <boost/array.hpp>
-
 #include <sstream>
 #include <set>
 #include <string>
 #include <utility>
 
 #include "../mwmechanics/stat.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "window_base.hpp"
+
 namespace MWGui
 {
+    class WindowManager;
 
     class StatsWindow : public WindowBase
     {
@@ -27,7 +23,7 @@ namespace MWGui
 
             typedef std::vector<int> SkillList;
 
-            StatsWindow (MWWorld::Environment& environment);
+            StatsWindow(WindowManager& parWindowManager);
 
             void setBar(const std::string& name, const std::string& tname, int val, int max);
             void setPlayerName(const std::string& playerName);

@@ -1,7 +1,5 @@
 #include "dialogue.hpp"
 #include "dialogue_history.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"
@@ -16,8 +14,8 @@
 using namespace MWGui;
 using namespace Widgets;
 
-DialogueWindow::DialogueWindow(MWWorld::Environment& environment)
-  : WindowBase("openmw_dialogue_window_layout.xml", environment)
+DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
+  : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
 {
     // Centre dialog
     center();

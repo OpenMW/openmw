@@ -55,7 +55,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     hud = new HUD(w,h, showFPSCounter);
     menu = new MainMenu(w,h);
     map = new MapWindow();
-    stats = new StatsWindow (environment);
+    stats = new StatsWindow(*this);
 #if 0
     inventory = new InventoryWindow ();
 #endif
@@ -180,7 +180,7 @@ void WindowManager::updateVisible()
     {
         if (nameDialog)
             removeDialog(nameDialog);
-        nameDialog = new TextInputDialog(environment);
+        nameDialog = new TextInputDialog(*this);
         std::string sName = getGameSettingString("sName", "Name");
         nameDialog->setTextLabel(sName);
         nameDialog->setTextInput(playerName);
@@ -194,7 +194,7 @@ void WindowManager::updateVisible()
     {
         if (raceDialog)
             removeDialog(raceDialog);
-        raceDialog = new RaceDialog(environment);
+        raceDialog = new RaceDialog(*this);
         raceDialog->setNextButtonShow(creationStage >= RaceChosen);
         raceDialog->setRaceId(playerRaceId);
         raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
@@ -207,7 +207,7 @@ void WindowManager::updateVisible()
     {
         if (classChoiceDialog)
             removeDialog(classChoiceDialog);
-        classChoiceDialog = new ClassChoiceDialog(environment);
+        classChoiceDialog = new ClassChoiceDialog(*this);
         classChoiceDialog->eventButtonSelected = MyGUI::newDelegate(this, &WindowManager::onClassChoice);
         classChoiceDialog->open();
         return;
@@ -228,7 +228,7 @@ void WindowManager::updateVisible()
     {
         if (pickClassDialog)
             removeDialog(pickClassDialog);
-        pickClassDialog = new PickClassDialog(environment);
+        pickClassDialog = new PickClassDialog(*this);
         pickClassDialog->setNextButtonShow(creationStage >= ClassChosen);
         pickClassDialog->setClassId(playerClass.name);
         pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
@@ -241,7 +241,7 @@ void WindowManager::updateVisible()
     {
         if (createClassDialog)
             removeDialog(createClassDialog);
-        createClassDialog = new CreateClassDialog(environment);
+        createClassDialog = new CreateClassDialog(*this);
         createClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogDone);
         createClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogBack);
         createClassDialog->open();
@@ -252,7 +252,7 @@ void WindowManager::updateVisible()
     {
         if (birthSignDialog)
             removeDialog(birthSignDialog);
-        birthSignDialog = new BirthDialog(environment);
+        birthSignDialog = new BirthDialog(*this);
         birthSignDialog->setNextButtonShow(creationStage >= BirthSignChosen);
         birthSignDialog->setBirthId(playerBirthSignId);
         birthSignDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogDone);
@@ -265,7 +265,7 @@ void WindowManager::updateVisible()
     {
         if (reviewDialog)
             removeDialog(reviewDialog);
-        reviewDialog = new ReviewDialog(environment);
+        reviewDialog = new ReviewDialog(*this);
         reviewDialog->setPlayerName(playerName);
         reviewDialog->setRace(playerRaceId);
         reviewDialog->setClass(playerClass);
@@ -316,15 +316,16 @@ void WindowManager::updateVisible()
         return;
     }
 
-  if (mode == GM_Dialogue)
-  {
-      if (dialogueWindow)
-          removeDialog(dialogueWindow);
-      dialogueWindow = new DialogueWindow(environment);
-      dialogueWindow->eventBye = MyGUI::newDelegate(this, &WindowManager::onDialogueWindowBye);
-      dialogueWindow->open();
-      return;
-  }
+    if (mode == GM_Dialogue)
+    {
+        if (!dialogueWindow)
+        {
+            dialogueWindow = new DialogueWindow(*this);
+            dialogueWindow->eventBye = MyGUI::newDelegate(this, &WindowManager::onDialogueWindowBye);
+        }
+        dialogueWindow->open();
+        return;
+    }
 
 
     // Unsupported mode, switch back to game
@@ -702,7 +703,7 @@ void WindowManager::showClassQuestionDialog()
 
         if (generateClassResultDialog)
             removeDialog(generateClassResultDialog);
-        generateClassResultDialog = new GenerateClassResultDialog(environment);
+        generateClassResultDialog = new GenerateClassResultDialog(*this);
         generateClassResultDialog->setClassId(generateClass);
         generateClassResultDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onGenerateClassBack);
         generateClassResultDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onGenerateClassDone);
@@ -718,7 +719,7 @@ void WindowManager::showClassQuestionDialog()
 
     if (generateClassQuestionDialog)
         removeDialog(generateClassQuestionDialog);
-    generateClassQuestionDialog = new InfoBoxDialog(environment);
+    generateClassQuestionDialog = new InfoBoxDialog(*this);
 
     InfoBoxDialog::ButtonList buttons;
     generateClassQuestionDialog->setText(generateClassSteps[generateClassStep].text);
@@ -937,4 +938,9 @@ void WindowManager::onReviewActivateDialog(int parDialog)
         case ReviewDialog::BIRTHSIGN_DIALOG:
             setGuiMode(GM_Birth);
     };
+}
+
+ESMS::ESMStore& WindowManager::getStore()
+{
+    return environment.mWorld->getStore();
 }

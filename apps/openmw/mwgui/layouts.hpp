@@ -3,8 +3,6 @@
 
 #include <components/esm_store/store.hpp>
 
-#include <openengine/gui/layout.hpp>
-
 #include <boost/array.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -14,8 +12,6 @@
 #include <utility>
 
 #include "../mwmechanics/stat.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "window_base.hpp"
 
 /*

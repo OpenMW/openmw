@@ -256,6 +256,8 @@ namespace MWGui
      */
     const std::string &getGameSettingString(const std::string &id, const std::string &default_);
 
+    ESMS::ESMStore& getStore();
+
   private:
 
     void onDialogueWindowBye();

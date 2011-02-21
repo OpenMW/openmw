@@ -3,23 +3,20 @@
 
 #include <openengine/gui/layout.hpp>
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 namespace MWGui
 {
+    class WindowManager;
+
     class WindowBase: public OEngine::GUI::Layout
     {
         public:
-        WindowBase(const std::string& parLayout, MWWorld::Environment& parEnvironment);
+        WindowBase(const std::string& parLayout, WindowManager& parWindowManager);
 
         virtual void open();
         void center();
 
         protected:
-        MWWorld::Environment& environment;
+        WindowManager& mWindowManager;
     };
 }
 

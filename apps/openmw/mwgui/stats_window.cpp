@@ -1,8 +1,7 @@
 #include "stats_window.hpp"
 
-#include "../mwworld/class.hpp"
 #include "../mwmechanics/mechanicsmanager.hpp"
-#include "../mwgui/window_manager.hpp"
+#include "window_manager.hpp"
 
 #include <cmath>
 #include <algorithm>
@@ -12,8 +11,8 @@
 using namespace MWGui;
 const int StatsWindow::lineHeight = 18;
 
-StatsWindow::StatsWindow (MWWorld::Environment& environment)
-  : WindowBase("openmw_stats_window_layout.xml", environment)
+StatsWindow::StatsWindow (WindowManager& parWindowManager)
+  : WindowBase("openmw_stats_window_layout.xml", parWindowManager)
   , lastPos(0)
   , reputation(0)
   , bounty(0)
@@ -39,7 +38,7 @@ StatsWindow::StatsWindow (MWWorld::Environment& environment)
         { 0, 0 }
     };
 
-    const ESMS::ESMStore &store = environment.mWorld->getStore();
+    const ESMS::ESMStore &store = mWindowManager.getStore();
     for (int i=0; names[i][0]; ++i)
     {
         setText (names[i][0], store.gameSettings.find (names[i][1])->str);
@@ -273,15 +272,13 @@ void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI
 
 void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    WindowManager *wm = environment.mWindowManager;
-
     // Add a line separator if there are items above
     if (!skillWidgets.empty())
     {
         addSeparator(coord1, coord2);
     }
 
-    addGroup(wm->getGameSettingString(titleId, titleDefault), coord1, coord2);
+    addGroup(mWindowManager.getGameSettingString(titleId, titleDefault), coord1, coord2);
 
     SkillList::const_iterator end = skills.end();
     for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
@@ -300,7 +297,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
             style = CS_Super;
         else if (modified < base)
             style = CS_Sub;
-        MyGUI::StaticTextPtr widget = addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+        MyGUI::StaticTextPtr widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
         skillWidgetMap[skillId] = widget;
     }
 }
@@ -326,8 +323,7 @@ void StatsWindow::updateSkillArea()
     if (!miscSkills.empty())
         addSkills(miscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
-    WindowManager *wm = environment.mWindowManager;
-    ESMS::ESMStore &store = environment.mWorld->getStore();
+    ESMS::ESMStore &store = mWindowManager.getStore();
 
     if (!factions.empty())
     {
@@ -335,7 +331,7 @@ void StatsWindow::updateSkillArea()
         if (!skillWidgets.empty())
             addSeparator(coord1, coord2);
 
-        addGroup(wm->getGameSettingString("sFaction", "Faction"), coord1, coord2);
+        addGroup(mWindowManager.getGameSettingString("sFaction", "Faction"), coord1, coord2);
         FactionList::const_iterator end = factions.end();
         for (FactionList::const_iterator it = factions.begin(); it != end; ++it)
         {
@@ -351,7 +347,7 @@ void StatsWindow::updateSkillArea()
         if (!skillWidgets.empty())
             addSeparator(coord1, coord2);
 
-        addGroup(wm->getGameSettingString("sSign", "Sign"), coord1, coord2);
+        addGroup(mWindowManager.getGameSettingString("sSign", "Sign"), coord1, coord2);
         const ESM::BirthSign *sign = store.birthSigns.find(birthSignId);
         addItem(sign->name, coord1, coord2);
     }
@@ -360,8 +356,8 @@ void StatsWindow::updateSkillArea()
     if (!skillWidgets.empty())
         addSeparator(coord1, coord2);
 
-    addValueItem(wm->getGameSettingString("sReputation", "Reputation"), boost::lexical_cast<std::string>(static_cast<int>(reputation)), CS_Normal, coord1, coord2);
-    addValueItem(wm->getGameSettingString("sBounty", "Bounty"), boost::lexical_cast<std::string>(static_cast<int>(bounty)), CS_Normal, coord1, coord2);
+    addValueItem(mWindowManager.getGameSettingString("sReputation", "Reputation"), boost::lexical_cast<std::string>(static_cast<int>(reputation)), CS_Normal, coord1, coord2);
+    addValueItem(mWindowManager.getGameSettingString("sBounty", "Bounty"), boost::lexical_cast<std::string>(static_cast<int>(bounty)), CS_Normal, coord1, coord2);
 
     clientHeight = coord1.top;
     updateScroller();

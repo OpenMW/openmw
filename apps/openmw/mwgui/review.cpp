@@ -1,6 +1,4 @@
 #include "review.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"
@@ -15,48 +13,46 @@ using namespace Widgets;
 
 const int ReviewDialog::lineHeight = 18;
 
-ReviewDialog::ReviewDialog(MWWorld::Environment& environment)
-    : WindowBase("openmw_chargen_review_layout.xml", environment)
+ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
+    : WindowBase("openmw_chargen_review_layout.xml", parWindowManager)
     , lastPos(0)
 {
     // Centre dialog
     center();
 
-    WindowManager *wm = environment.mWindowManager;
-
     // Setup static stats
     ButtonPtr button;
     getWidget(nameWidget, "NameText");
     getWidget(button, "NameButton");
-    button->setCaption(wm->getGameSettingString("sName", ""));
+    button->setCaption(mWindowManager.getGameSettingString("sName", ""));
     button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);;
 
     getWidget(raceWidget, "RaceText");
     getWidget(button, "RaceButton");
-    button->setCaption(wm->getGameSettingString("sRace", ""));
+    button->setCaption(mWindowManager.getGameSettingString("sRace", ""));
     button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);;
 
     getWidget(classWidget, "ClassText");
     getWidget(button, "ClassButton");
-    button->setCaption(wm->getGameSettingString("sClass", ""));
+    button->setCaption(mWindowManager.getGameSettingString("sClass", ""));
     button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);;
 
     getWidget(birthSignWidget, "SignText");
     getWidget(button, "SignButton");
-    button->setCaption(wm->getGameSettingString("sBirthSign", ""));
+    button->setCaption(mWindowManager.getGameSettingString("sBirthSign", ""));
     button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);;
 
     // Setup dynamic stats
     getWidget(health, "Health");
-    health->setTitle(wm->getGameSettingString("sHealth", ""));
+    health->setTitle(mWindowManager.getGameSettingString("sHealth", ""));
     health->setValue(45, 45);
 
     getWidget(magicka, "Magicka");
-    magicka->setTitle(wm->getGameSettingString("sMagic", ""));
+    magicka->setTitle(mWindowManager.getGameSettingString("sMagic", ""));
     magicka->setValue(50, 50);
 
     getWidget(fatigue, "Fatigue");
-    fatigue->setTitle(wm->getGameSettingString("sFatigue", ""));
+    fatigue->setTitle(mWindowManager.getGameSettingString("sFatigue", ""));
     fatigue->setValue(160, 160);
 
     // Setup attributes
@@ -66,7 +62,7 @@ ReviewDialog::ReviewDialog(MWWorld::Environment& environment)
     {
         getWidget(attribute, std::string("Attribute") + boost::lexical_cast<std::string>(idx));
         attributeWidgets.insert(std::make_pair(static_cast<int>(ESM::Attribute::attributeIds[idx]), attribute));
-        attribute->setWindowManager(wm);
+        attribute->setWindowManager(&mWindowManager);
         attribute->setAttributeId(ESM::Attribute::attributeIds[idx]);
         attribute->setAttributeValue(MWAttribute::AttributeValue(0, 0));
     }
@@ -131,7 +127,7 @@ void ReviewDialog::setPlayerName(const std::string &name)
 void ReviewDialog::setRace(const std::string &raceId_)
 {
     raceId = raceId_;
-    const ESM::Race *race = environment.mWorld->getStore().races.search(raceId);
+    const ESM::Race *race = mWindowManager.getStore().races.search(raceId);
     if (race)
         raceWidget->setCaption(race->name);
 }
@@ -145,7 +141,7 @@ void ReviewDialog::setClass(const ESM::Class& class_)
 void ReviewDialog::setBirthSign(const std::string& signId)
 {
     birthSignId = signId;
-    const ESM::BirthSign *sign = environment.mWorld->getStore().birthSigns.search(birthSignId);
+    const ESM::BirthSign *sign = mWindowManager.getStore().birthSigns.search(birthSignId);
     if (sign)
         birthSignWidget->setCaption(sign->name);
 }
@@ -275,15 +271,13 @@ void ReviewDialog::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGU
 
 void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    WindowManager *wm = environment.mWindowManager;
-
     // Add a line separator if there are items above
     if (!skillWidgets.empty())
     {
         addSeparator(coord1, coord2);
     }
 
-    addGroup(wm->getGameSettingString(titleId, titleDefault), coord1, coord2);
+    addGroup(mWindowManager.getGameSettingString(titleId, titleDefault), coord1, coord2);
 
     SkillList::const_iterator end = skills.end();
     for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
@@ -302,7 +296,7 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
             style = CS_Super;
         else if (modified < base)
             style = CS_Sub;
-        MyGUI::StaticTextPtr widget = addValueItem(wm->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+        MyGUI::StaticTextPtr widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
         skillWidgetMap[skillId] = widget;
     }
 }

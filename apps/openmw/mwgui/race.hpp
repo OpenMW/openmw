@@ -7,9 +7,9 @@
 
 #include <boost/array.hpp>
 
-namespace MWWorld
+namespace MWGui
 {
-    class Environment;
+    class WindowManager;
 }
 
 /*
@@ -24,7 +24,7 @@ namespace MWGui
     class RaceDialog : public WindowBase
     {
     public:
-        RaceDialog(MWWorld::Environment& environment);
+        RaceDialog(WindowManager& parWindowManager);
 
         enum Gender
         {

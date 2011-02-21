@@ -5,9 +5,9 @@
 #include "../mwmechanics/stat.hpp"
 #include "widgets.hpp"
 
-namespace MWWorld
+namespace MWGui
 {
-    class Environment;
+    class WindowManager;
 }
 
 /*
@@ -30,7 +30,7 @@ namespace MWGui
         };
         typedef std::vector<int> SkillList;
 
-        ReviewDialog(MWWorld::Environment& environment);
+        ReviewDialog(WindowManager& parWindowManager);
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
