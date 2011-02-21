@@ -53,11 +53,6 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
-
     protected:
         void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
 

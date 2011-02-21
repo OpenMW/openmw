@@ -85,11 +85,6 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
-
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -119,11 +114,6 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventBack;
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
 
     protected:
         void onSelectClass(MyGUI::List* _sender, size_t _index);
@@ -250,14 +240,6 @@ namespace MWGui
         std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
         void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
 
-        // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
-
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
 
@@ -289,11 +271,6 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
-
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -305,7 +282,7 @@ namespace MWGui
         void onSkillClicked(Widgets::MWSkillPtr _sender);
         void onSkillSelected();
         void onDescriptionClicked(MyGUI::Widget* _sender);
-        void onDescriptionEntered();
+        void onDescriptionEntered(WindowBase* parWindow);
         void onDialogCancel();
 
     private:

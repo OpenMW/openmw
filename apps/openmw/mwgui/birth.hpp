@@ -39,11 +39,6 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
-
     protected:
         void onSelectBirth(MyGUI::List* _sender, size_t _index);
 

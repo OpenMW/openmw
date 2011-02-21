@@ -92,7 +92,7 @@ void BirthDialog::setBirthId(const std::string &birthId)
 
 void BirthDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void BirthDialog::onBackClicked(MyGUI::Widget* _sender)

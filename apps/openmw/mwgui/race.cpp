@@ -149,7 +149,7 @@ int wrap(int index, int max)
 
 void RaceDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void RaceDialog::onBackClicked(MyGUI::Widget* _sender)

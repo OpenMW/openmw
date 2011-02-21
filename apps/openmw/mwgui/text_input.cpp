@@ -53,10 +53,10 @@ void TextInputDialog::open()
 
 void TextInputDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void TextInputDialog::onTextAccepted(MyGUI::Edit* _sender)
 {
-    eventDone();
+    eventDone(this);
 }

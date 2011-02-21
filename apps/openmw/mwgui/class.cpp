@@ -55,7 +55,7 @@ void GenerateClassResultDialog::setClassId(const std::string &classId)
 
 void GenerateClassResultDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void GenerateClassResultDialog::onBackClicked(MyGUI::Widget* _sender)
@@ -166,7 +166,7 @@ void PickClassDialog::setClassId(const std::string &classId)
 
 void PickClassDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void PickClassDialog::onBackClicked(MyGUI::Widget* _sender)
@@ -639,7 +639,7 @@ void CreateClassDialog::onDescriptionClicked(MyGUI::Widget* _sender)
     descDialog->setVisible(true);
 }
 
-void CreateClassDialog::onDescriptionEntered()
+void CreateClassDialog::onDescriptionEntered(WindowBase* parWindow)
 {
     description = descDialog->getTextInput();
     mWindowManager.removeDialog(descDialog);
@@ -647,7 +647,7 @@ void CreateClassDialog::onDescriptionEntered()
 
 void CreateClassDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void CreateClassDialog::onBackClicked(MyGUI::Widget* _sender)
@@ -858,5 +858,5 @@ DescriptionDialog::DescriptionDialog(WindowManager& parWindowManager)
 
 void DescriptionDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }

@@ -464,7 +464,7 @@ const std::string &WindowManager::getGameSettingString(const std::string &id, co
     return default_;
 }
 
-void WindowManager::onNameDialogDone()
+void WindowManager::onNameDialogDone(WindowBase* parWindow)
 {
     if (nameDialog)
     {
@@ -485,7 +485,7 @@ void WindowManager::onNameDialogDone()
     }
 }
 
-void WindowManager::onRaceDialogDone()
+void WindowManager::onRaceDialogDone(WindowBase* parWindow)
 {
     if (raceDialog)
     {
@@ -764,7 +764,7 @@ void WindowManager::onGenerateClassBack()
     setGuiMode(GM_Class);
 }
 
-void WindowManager::onGenerateClassDone()
+void WindowManager::onGenerateClassDone(WindowBase* parWindow)
 {
     if (generateClassResultDialog)
         removeDialog(generateClassResultDialog);
@@ -783,7 +783,7 @@ void WindowManager::onGenerateClassDone()
 }
 
 
-void WindowManager::onPickClassDialogDone()
+void WindowManager::onPickClassDialogDone(WindowBase* parWindow)
 {
     if (pickClassDialog)
     {
@@ -821,7 +821,7 @@ void WindowManager::onPickClassDialogBack()
     setGuiMode(GM_Class);
 }
 
-void WindowManager::onCreateClassDialogDone()
+void WindowManager::onCreateClassDialogDone(WindowBase* parWindow)
 {
     if (createClassDialog)
     {
@@ -871,7 +871,7 @@ void WindowManager::onCreateClassDialogBack()
     setGuiMode(GM_Class);
 }
 
-void WindowManager::onBirthSignDialogDone()
+void WindowManager::onBirthSignDialogDone(WindowBase* parWindow)
 {
     if (birthSignDialog)
     {
@@ -902,7 +902,7 @@ void WindowManager::onBirthSignDialogBack()
     setGuiMode(GM_Class);
 }
 
-void WindowManager::onReviewDialogDone()
+void WindowManager::onReviewDialogDone(WindowBase* parWindow)
 {
     if (reviewDialog)
         removeDialog(reviewDialog);

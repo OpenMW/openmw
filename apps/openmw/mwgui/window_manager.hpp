@@ -44,6 +44,7 @@ namespace OEngine
 
 namespace MWGui
 {
+  class WindowBase;
   class HUD;
   class MapWindow;
   class MainMenu;
@@ -263,10 +264,10 @@ namespace MWGui
     void onDialogueWindowBye();
 
     // Character generation: Name dialog
-    void onNameDialogDone();
+    void onNameDialogDone(WindowBase* parWindow);
 
     // Character generation: Race dialog
-    void onRaceDialogDone();
+    void onRaceDialogDone(WindowBase* parWindow);
     void onRaceDialogBack();
 
     // Character generation: Choose class process
@@ -276,22 +277,22 @@ namespace MWGui
     void showClassQuestionDialog();
     void onClassQuestionChosen(int _index);
     void onGenerateClassBack();
-    void onGenerateClassDone();
+    void onGenerateClassDone(WindowBase* parWindow);
 
     // Character generation: Pick Class dialog
-    void onPickClassDialogDone();
+    void onPickClassDialogDone(WindowBase* parWindow);
     void onPickClassDialogBack();
 
     // Character generation: Create Class dialog
-    void onCreateClassDialogDone();
+    void onCreateClassDialogDone(WindowBase* parWindow);
     void onCreateClassDialogBack();
 
     // Character generation: Birth sign dialog
-    void onBirthSignDialogDone();
+    void onBirthSignDialogDone(WindowBase* parWindow);
     void onBirthSignDialogBack();
 
     // Character generation: Review dialog
-    void onReviewDialogDone();
+    void onReviewDialogDone(WindowBase* parWindow);
     void onReviewDialogBack();
     void onReviewActivateDialog(int parDialog);
 

@@ -336,7 +336,7 @@ void ReviewDialog::updateScroller()
 
 void ReviewDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void ReviewDialog::onBackClicked(MyGUI::Widget* _sender)
