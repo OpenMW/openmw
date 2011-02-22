@@ -64,6 +64,7 @@ Ogre::Resource(creator, name, handle, group, isManual, loader)
 	we have none as such. Full details can be set through scripts.
 	*/ 
 	Shape = NULL;
+    collide = true;
 	createParamDictionary("BulletShape");
 }
 
@@ -197,6 +198,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 {
 	cShape = static_cast<BulletShape *>(resource);
 	resourceName = cShape->getName();
+    cShape->collide = false;
 
 	currentShape = new btCompoundShape();
 	cShape->Shape = currentShape;
@@ -235,11 +237,18 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 		return;
 	}
 
-	handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,false);
+    //do a first pass
+	handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,false,false);
+
+    //if collide = false, then it does a second pass which create a shape for raycasting.
+    if(cShape->collide == false)
+    {
+	    handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,false,true);                               
+    }
 }
 
 void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
-	Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool isCollisionNode)
+	Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool isCollisionNode,bool raycastingOnly)
 {
 	// Accumulate the flags from all the child nodes. This works for all
 	// the flags we currently use, at least.
@@ -259,14 +268,14 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
 			// affecting the entire subtree of this node
 			Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e;
 
-			if (sd->string == "NCO")
+			if (sd->string == "NCO" && !raycastingOnly)
 			{
 				// No collision. Use an internal flag setting to mark this.
 				// We ignor this node!
 				flags |= 0x800;
 				return;
 			}
-			else if (sd->string == "MRK")
+			else if (sd->string == "MRK" && !raycastingOnly)
 				// Marker objects. These are only visible in the
 				// editor. Until and unless we add an editor component to
 				// the engine, just skip this entire node.
@@ -297,11 +306,15 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
 		{
 			if (list.has(i))
 			{
-				handleNode(&list[i], flags,finalRot,finalPos,finalScale,isCollisionNode);
+				handleNode(&list[i], flags,finalRot,finalPos,finalScale,isCollisionNode,raycastingOnly);
 			}
 		}
-	}
-	else if (node->recType == Nif::RC_NiTriShape && isCollisionNode) handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,finalScale);
+    }
+    else if (node->recType == Nif::RC_NiTriShape && isCollisionNode) 
+    {
+        cShape->collide = true;
+        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,finalScale,raycastingOnly);
+    }
 	else if(node->recType == Nif::RC_RootCollisionNode)
 	{
 		Nif::NodeList &list = ((Nif::NiNode*)node)->children;
@@ -309,12 +322,13 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
 		for (int i=0; i<n; i++)
 		{
 			if (list.has(i))
-				handleNode(&list[i], flags,finalRot,finalPos,finalScale,true);
+				handleNode(&list[i], flags,finalRot,finalPos,finalScale,true,raycastingOnly);
 		}
 	}
 }
 
-void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale)
+void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,
+    bool raycastingOnly)
 {
 	assert(shape != NULL);
 	btCollisionShape* NodeShape;
@@ -326,14 +340,14 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 
 	// If the object was marked "NCO" earlier, it shouldn't collide with
 	// anything. So don't do anything.
-	if (flags & 0x800)
+	if (flags & 0x800 && !raycastingOnly)
 	{
 		collide = false;
 		bbcollide = false;
 		return;
 	}
 
-	if (!collide && !bbcollide && hidden)
+	if (!collide && !bbcollide && hidden && !raycastingOnly)
 		// This mesh apparently isn't being used for anything, so don't
 		// bother setting it up.
 		return;

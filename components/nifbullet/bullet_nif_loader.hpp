@@ -84,6 +84,8 @@ public:
 	virtual ~BulletShape();
 
 	btCollisionShape* Shape;
+    //this flag indicate if the shape is used for collision or if it's for raycasting only.
+    bool collide;
 };
 
 /**
@@ -217,12 +219,12 @@ private:
 	*Parse a node.
 	*/
 	void handleNode(Nif::Node *node, int flags,
-		Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool isCollisionNode);
+		Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool isCollisionNode,bool raycastingOnly);
 
 	/**
 	*convert a NiTriShape to a bullet trishape.
 	*/
-	void handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales);
+	void handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
 
 	Mangle::VFS::OgreVFS *vfs;
 
