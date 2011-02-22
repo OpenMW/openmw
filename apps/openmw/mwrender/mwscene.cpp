@@ -67,9 +67,11 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
     Ray centerRay = getCamera()->getCameraToViewportRay(
         getViewport()->getWidth()/2,
         getViewport()->getHeight()/2);
+    btVector3 from(centerRay.getOrigin().x,centerRay.getOrigin().y,centerRay.getOrigin().z);
+    btVector3 to(centerRay.getPoint(1000).x,centerRay.getPoint(1000).x,centerRay.getPoint(1000).x);
 
     // get all objects touched by the ray
-    getRaySceneQuery()->setRay (centerRay );
+    /*getRaySceneQuery()->setRay (centerRay );
     RaySceneQueryResult &result = getRaySceneQuery()->execute();
 
     RaySceneQueryResult::iterator nearest = result.end();
@@ -102,9 +104,9 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
     {
         handle = nearest->movable->getParentSceneNode()->getName();
         distance = nearest->distance;
-    }
+    }*/
 
-    return std::pair<std::string, float>(handle, distance);
+    return eng->rayTest(from,to);
 }
 
 void MWScene::doPhysics (float duration, MWWorld::World& world,
