@@ -296,11 +296,13 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
 		for (int i=0; i<n; i++)
 		{
 			if (list.has(i))
+			{
 				handleNode(&list[i], flags,finalRot,finalPos,finalScale,isCollisionNode);
+			}
 		}
 	}
 	else if (node->recType == Nif::RC_NiTriShape && isCollisionNode) handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,finalScale);
-	else if(node->recType = Nif::RC_RootCollisionNode)
+	else if(node->recType == Nif::RC_RootCollisionNode)
 	{
 		Nif::NodeList &list = ((Nif::NiNode*)node)->children;
 		int n = list.length();

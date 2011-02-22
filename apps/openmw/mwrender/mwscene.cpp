@@ -20,33 +20,37 @@ using namespace MWRender;
 using namespace Ogre;
 
 MWScene::MWScene(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng)
-  : rend(_rend)
+	: rend(_rend)
 {
-  eng = physEng;
-  rend.createScene("PlayerCam", 55, 5);
+	eng = physEng;
+	rend.createScene("PlayerCam", 55, 5);
 
-  // Set default mipmap level (NB some APIs ignore this)
-  TextureManager::getSingleton().setDefaultNumMipmaps(5);
+	// Set default mipmap level (NB some APIs ignore this)
+	TextureManager::getSingleton().setDefaultNumMipmaps(5);
 
-  // Load resources
-  ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+	// Load resources
+	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-  // Turn the entire scene (represented by the 'root' node) -90
-  // degrees around the x axis. This makes Z go upwards, and Y go into
-  // the screen (when x is to the right.) This is the orientation that
-  // Morrowind uses, and it automagically makes everything work as it
-  // should.
-  SceneNode *rt = rend.getScene()->getRootSceneNode();
-  mwRoot = rt->createChildSceneNode();
-  mwRoot->pitch(Degree(-90));
+	// Turn the entire scene (represented by the 'root' node) -90
+	// degrees around the x axis. This makes Z go upwards, and Y go into
+	// the screen (when x is to the right.) This is the orientation that
+	// Morrowind uses, and it automagically makes everything work as it
+	// should.
+	SceneNode *rt = rend.getScene()->getRootSceneNode();
+	mwRoot = rt->createChildSceneNode();
+	mwRoot->pitch(Degree(-90));
 
-  //used to obtain ingame information of ogre objects (which are faced or selected)
-  mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
+	//used to obtain ingame information of ogre objects (which are faced or selected)
+	mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
 
-    Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode();
-    playerNode->attachObject (getCamera());
+	Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode();
+	playerNode->pitch(Degree(90));
+	Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
+	Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
+	cameraPitchNode->attachObject(getCamera());
 
-    mPlayer = new MWRender::Player (getCamera(), playerNode->getName());
+
+	mPlayer = new MWRender::Player (getCamera(), playerNode->getName());
 }
 
 MWScene::~MWScene()
@@ -109,29 +113,39 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
     // stop changes to world from being reported back to the physics system
     MWWorld::DoingPhysics scopeGuard;
 
-    // move object directly for now -> TODO replace with physics
+	//set the DebugRenderingMode. To disable it,set it to 0
+	eng->setDebugRenderingMode(1);
+
+    // move object directly for now -> TODO replace with physics done?
     for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
         iter!=actors.end(); ++iter)
     {
 		OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
 
 		//first adjust the rotation of the object, which is not handled by the physic engine i believe.
-		Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
-		Ogre::Quaternion quat = sceneNode->getOrientation();
-		act->setRotation(btQuaternion(quat.x,quat.y,quat.z,quat.w));
+
+		/*Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
+		Ogre::Quaternion quat = sceneNode->getChildIterator().getNext()->getOrientation();
+		Ogre::Quaternion quat2;
+		Ogre::Matrix3 mat;
+		quat.ToRotationMatrix(mat);
+		Ogre::Radian x,y,z;
+		mat.ToEulerAnglesXYZ(x,y,z);
+		mat.FromEulerAnglesXYZ(x,z,y);
+		Ogre::Vector3 dir = mat*iter->second;*/
 
 		//the add the movement:
-		act->setWalkDirection(btVector3(iter->second.x,iter->second.y,iter->second.z));
+		act->setWalkDirection(btVector3(iter->second.x,iter->second.y,iter->second.z)*duration);
     }
-
-	eng->stepSimulation(0.30);
+	//std::cout << "duration " << duration << std::endl;
+	eng->stepSimulation(duration);
 
     for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
         iter!=actors.end(); ++iter)
     {
         MWWorld::Ptr ptr = world.getPtrViaHandle (iter->first);
 		OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
-		btVector3 newPos = act->externalGhostObject->getWorldTransform().getOrigin();
+		btVector3 newPos = act->getPosition();
 		world.moveObject (ptr, newPos.x(), newPos.y(), newPos.z());
     }
 }
@@ -165,7 +179,8 @@ void MWScene::removeObject (const std::string& handle)
 
 void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics)
 {
-    rend.getScene()->getSceneNode (handle)->setPosition (position);
+    rend.getScene()->getSceneNode(handle)->setPosition(position);
+
 	if(updatePhysics)//TODO: is it an actor?
 	{
 		OEngine::Physic::RigidBody* body = eng->getRigidBody(handle);
@@ -177,7 +192,6 @@ void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& positi
 
 void MWScene::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)
 {
-
 }
 
 void MWScene::scaleObject (const std::string& handle, float scale)
