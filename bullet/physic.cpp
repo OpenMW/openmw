@@ -31,7 +31,7 @@ namespace Physic
 		transform.setIdentity();
 
 		// External capsule
-		externalGhostObject = new btPairCachingGhostObject();
+		externalGhostObject = new PairCachingGhostObject(name);
 		externalGhostObject->setWorldTransform( transform );
 
 		btScalar externalCapsuleHeight = 50;
@@ -44,7 +44,7 @@ namespace Physic
 		externalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
 
 		// Internal capsule
-		internalGhostObject = new btPairCachingGhostObject();
+		internalGhostObject = new PairCachingGhostObject(name);
 		internalGhostObject->setWorldTransform( transform );
 		//internalGhostObject->getBroadphaseHandle()->s
 		btScalar internalCapsuleHeight =  20;
@@ -196,13 +196,20 @@ namespace Physic
 		//create the real body
 		btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,shape->Shape);
 		RigidBody* body = new RigidBody(CI,name);
-
+        body->collide = shape->collide;
 		return body;
 	}
 
 	void PhysicEngine::addRigidBody(RigidBody* body)
 	{
-		dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+        if(body->collide)
+        {
+		    dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+        }
+        else
+        {
+            dynamicsWorld->addRigidBody(body,COL_WORLD,COL_NOTHING);
+        }
 		body->setActivationState(DISABLE_DEACTIVATION);
 		RigidBodyMap[body->mName] = body;
 	}
@@ -272,4 +279,26 @@ namespace Physic
 	void PhysicEngine::emptyEventLists(void)
 	{
 	}
+
+    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to)
+    {
+        std::string name = "";
+        float d = -1.;
+        btCollisionWorld::ClosestRayResultCallback resultCallback(from, to);
+        dynamicsWorld->rayTest(from, to, resultCallback);
+
+        if (resultCallback.hasHit())
+        {
+            if(resultCallback.m_collisionFilterGroup == COL_WORLD)
+            {
+                name = static_cast<RigidBody*>(resultCallback.m_collisionObject)->mName;
+            }
+            if(resultCallback.m_collisionFilterGroup == COL_ACTOR_EXTERNAL || resultCallback.m_collisionFilterGroup == COL_ACTOR_INTERNAL)
+            {
+                name = static_cast<PairCachingGhostObject*>(resultCallback.m_collisionObject)->mName;
+            }
+            d = resultCallback.m_closestHitFraction;
+        }
+        return std::pair<std::string,float>(name,d);
+    }
 }};

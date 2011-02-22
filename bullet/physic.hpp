@@ -34,6 +34,19 @@ namespace Physic
 	class CMotionState;
 	struct PhysicEvent;
 
+    /**
+    *This is just used to be able to name objects. 
+    */
+    class PairCachingGhostObject : public btPairCachingGhostObject
+    {
+    public:
+        PairCachingGhostObject(std::string name)
+            :btPairCachingGhostObject(),mName(name)
+        {
+        }
+        std::string mName;
+    };
+
 	/**
 	*A physic Actor use a modifed KinematicCharacterController taken in the bullet forum.
 	*/
@@ -63,10 +76,10 @@ namespace Physic
 
 		btKinematicCharacterController* mCharacter;
 
-		btPairCachingGhostObject* internalGhostObject;
+		PairCachingGhostObject* internalGhostObject;
 		btCollisionShape* internalCollisionShape;
 
-		btPairCachingGhostObject* externalGhostObject;
+		PairCachingGhostObject* externalGhostObject;
 		btCollisionShape* externalCollisionShape;
 
 		std::string mName;
@@ -82,6 +95,9 @@ namespace Physic
 	public:
 		RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
 		std::string mName;
+
+        //is this body used for raycasting only?
+        bool collide;
 	};
 
 	/**
@@ -160,6 +176,11 @@ namespace Physic
 		*Important Note: this will crash if the Render is not yet initialise!
 		*/
 		void setDebugRenderingMode(int mode);
+
+        /**
+        *Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
+        */
+        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to);
 
 		//event list of non player object
 		std::list<PhysicEvent> NPEventList;
