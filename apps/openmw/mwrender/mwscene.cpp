@@ -126,18 +126,20 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
 
 		//first adjust the rotation of the object, which is not handled by the physic engine i believe.
 
-		/*Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
+		Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
 		Ogre::Quaternion quat = sceneNode->getChildIterator().getNext()->getOrientation();
-		Ogre::Quaternion quat2;
-		Ogre::Matrix3 mat;
-		quat.ToRotationMatrix(mat);
-		Ogre::Radian x,y,z;
-		mat.ToEulerAnglesXYZ(x,y,z);
-		mat.FromEulerAnglesXYZ(x,z,y);
-		Ogre::Vector3 dir = mat*iter->second;*/
+		//Ogre::Quaternion quat2;
+        //Ogre::Matrix3::
+		//Ogre::Matrix3 mat;
+		//quat.ToRotationMatrix(mat);
+		//Ogre::Radian x,y,z;
+		//mat.ToEulerAnglesXYZ(x,y,z);
+        //mat.FromEulerAnglesXYZ(Ogre::Radian(0),z,Ogre::Radian(0));
+        Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
+		Ogre::Vector3 dir = quat*dir1;
 
 		//the add the movement:
-		act->setWalkDirection(btVector3(iter->second.x,iter->second.y,iter->second.z)*duration);
+		act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y)*duration);
     }
 	//std::cout << "duration " << duration << std::endl;
 	eng->stepSimulation(duration);
