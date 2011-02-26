@@ -85,7 +85,6 @@ void BulletShape::deleteShape(btCollisionShape* mShape)
 		if(mShape->isCompound())
 		{
 			btCompoundShape* ms = static_cast<btCompoundShape*>(Shape);
-			btCompoundShapeChild* child = ms->getChildList();
 			int a = ms->getNumChildShapes();
 			for(int i=0; i <a;i++)
 			{
@@ -376,12 +375,11 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 	btTriangleMesh *mTriMesh = new btTriangleMesh();
 
 	Nif::NiTriShapeData *data = shape->data.getPtr();
-	int numVerts = data->vertices.length / 3;
 
 	float* vertices = (float*)data->vertices.ptr;
 	unsigned short* triangles = (unsigned short*)data->triangles.ptr;
 
-	for(int i=0; i < data->triangles.length; i = i+3)
+	for(unsigned int i=0; i < data->triangles.length; i = i+3)
 	{
 		btVector3 b1(vertices[triangles[i+0]*3]*parentScale,vertices[triangles[i+0]*3+1]*parentScale,vertices[triangles[i+0]*3+2]*parentScale);
 		btVector3 b2(vertices[triangles[i+1]*3]*parentScale,vertices[triangles[i+1]*3+1]*parentScale,vertices[triangles[i+1]*3+2]*parentScale);
