@@ -1,7 +1,7 @@
 #include "physic.hpp"
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
-#include <components\nifbullet\bullet_nif_loader.hpp>
+#include <components/nifbullet/bullet_nif_loader.hpp>
 //#include <apps\openmw\mwworld\world.hpp>
 #include "CMotionState.h"
 #include "OgreRoot.h"
@@ -18,7 +18,7 @@ namespace Physic
 	enum collisiontypes {
 		COL_NOTHING = 0, //<Collide with nothing
 		COL_WORLD = BIT(0), //<Collide with world objects
-		COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule 
+		COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
 		COL_ACTOR_EXTERNAL = BIT(2) //<collide with external capsule
 	};
 
@@ -69,18 +69,18 @@ namespace Physic
 		delete externalCollisionShape;
 	}
 
-	void PhysicActor::setWalkDirection(btVector3& mvt)
+	void PhysicActor::setWalkDirection(const btVector3& mvt)
 	{
 		mCharacter->setWalkDirection( mvt );
 	}
 
-	void PhysicActor::Rotate(btQuaternion& quat)
+	void PhysicActor::Rotate(const btQuaternion& quat)
 	{
 		externalGhostObject->getWorldTransform().setRotation( externalGhostObject->getWorldTransform().getRotation() * quat );
 		internalGhostObject->getWorldTransform().setRotation( internalGhostObject->getWorldTransform().getRotation() * quat );
 	}
 
-	void PhysicActor::setRotation(btQuaternion& quat)
+	void PhysicActor::setRotation(const btQuaternion& quat)
 	{
 		externalGhostObject->getWorldTransform().setRotation( quat );
 		internalGhostObject->getWorldTransform().setRotation( quat );
@@ -96,7 +96,7 @@ namespace Physic
 		return internalGhostObject->getWorldTransform().getRotation();
 	}
 
-	void PhysicActor::setPosition(btVector3& pos)
+	void PhysicActor::setPosition(const btVector3& pos)
 	{
 		internalGhostObject->getWorldTransform().setOrigin(pos);
 		externalGhostObject->getWorldTransform().setOrigin(pos);
@@ -179,7 +179,7 @@ namespace Physic
 		delete solver;
 		delete collisionConfiguration;
 		delete dispatcher;
-		delete broadphase;	
+		delete broadphase;
 		delete ShapeLoader;
 	}
 
@@ -232,7 +232,7 @@ namespace Physic
 			RigidBodyMap[name] = NULL;
 		}
 	}
-	
+
 	RigidBody* PhysicEngine::getRigidBody(std::string name)
 	{
 		RigidBody* body = RigidBodyMap[name];
