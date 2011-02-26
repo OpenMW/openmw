@@ -203,9 +203,9 @@ OMW::Engine::Engine()
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
+  , mPhysicEngine (0)
 {
     MWClass::registerClasses();
-	mPhysicEngine = new OEngine::Physic::PhysicEngine();
 }
 
 OMW::Engine::~Engine()
@@ -339,8 +339,12 @@ void OMW::Engine::go()
 
     loadBSA();
 
+    // Create physics
+    mPhysicEngine = new OEngine::Physic::PhysicEngine();
+
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mDataDir, mMaster, mResDir, mNewGame, mEnvironment);
+
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false, cfgDir);
