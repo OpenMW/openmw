@@ -57,7 +57,7 @@ namespace Physic
 		internalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
 
 		mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 0.4 ),1,0 );
-		mCharacter->setUpAxis(btKinematicCharacterController::UpAxis::Z_AXIS);
+		mCharacter->setUpAxis(btKinematicCharacterController::Z_AXIS);
 	}
 
 	PhysicActor::~PhysicActor()
