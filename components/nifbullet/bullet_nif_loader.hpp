@@ -29,8 +29,8 @@
 #include <OgreMesh.h>
 #include <assert.h>
 #include <string>
-#include <BulletCollision\CollisionShapes\btBvhTriangleMeshShape.h>
-#include <BulletCollision\CollisionShapes\btConvexTriangleMeshShape.h>
+#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
+#include <BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h>
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 
@@ -77,8 +77,8 @@ protected:
 
 public:
 
-	BulletShape(Ogre::ResourceManager *creator, const Ogre::String &name, 
-		Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual = false, 
+	BulletShape(Ogre::ResourceManager *creator, const Ogre::String &name,
+		Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual = false,
 		Ogre::ManualResourceLoader *loader = 0);
 
 	virtual ~BulletShape();
@@ -91,12 +91,12 @@ public:
 /**
 *
 */
-class BulletShapePtr : public Ogre::SharedPtr<BulletShape> 
+class BulletShapePtr : public Ogre::SharedPtr<BulletShape>
 {
 public:
 	BulletShapePtr() : Ogre::SharedPtr<BulletShape>() {}
 	explicit BulletShapePtr(BulletShape *rep) : Ogre::SharedPtr<BulletShape>(rep) {}
-	BulletShapePtr(const BulletShapePtr &r) : Ogre::SharedPtr<BulletShape>(r) {} 
+	BulletShapePtr(const BulletShapePtr &r) : Ogre::SharedPtr<BulletShape>(r) {}
 	BulletShapePtr(const Ogre::ResourcePtr &r) : Ogre::SharedPtr<BulletShape>()
 	{
 		if( r.isNull() )
@@ -136,7 +136,7 @@ public:
 };
 
 /**
-*Hold any BulletShape that was created by the ManualBulletShapeLoader. 
+*Hold any BulletShape that was created by the ManualBulletShapeLoader.
 *
 *To get a bulletShape, you must load it first.
 *First, create a manualBulletShapeLoader. Then call ManualBulletShapeManager->load(). This create an "empty" resource.
@@ -145,7 +145,7 @@ public:
 *When you use the resource no more, just use BulletShapeManager->unload(). It won't completly delete the resource, but it will
 *"empty" it.This allow a better management of memory: when you are leaving a cell, just unload every useless shape.
 *
-*Alternatively, you can call BulletShape->load() in order to actually load the resource. 
+*Alternatively, you can call BulletShape->load() in order to actually load the resource.
 *When you are finished with it, just call BulletShape->unload().
 *
 *IMO: prefere the first methode, i am not completly sure about the 2nd.
@@ -156,10 +156,10 @@ public:
 class BulletShapeManager : public Ogre::ResourceManager, public Ogre::Singleton<BulletShapeManager>
 {
 protected:
-	
+
 	// must implement this from ResourceManager's interface
-	Ogre::Resource *createImpl(const Ogre::String &name, Ogre::ResourceHandle handle, 
-		const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader, 
+	Ogre::Resource *createImpl(const Ogre::String &name, Ogre::ResourceHandle handle,
+		const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader,
 		const Ogre::NameValuePairList *createParams);
 
 public:
@@ -200,7 +200,7 @@ public:
 	void loadResource(Ogre::Resource *resource);
 
 	/**
-	*This function load a new bulletShape from a NIF file into the BulletShapeManager. 
+	*This function load a new bulletShape from a NIF file into the BulletShapeManager.
 	*When the file is loaded, you can then use BulletShapeManager::getByName() to retrive the bulletShape.
 	*Warning: this function will just crash if the resourceGroup doesn't exist!
 	*/

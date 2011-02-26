@@ -14,7 +14,7 @@
 #include "ptr.hpp"
 #include "globals.hpp"
 
-#include "openengine\bullet\physic.hpp"
+#include <openengine/bullet/physic.hpp>
 
 namespace Ogre
 {

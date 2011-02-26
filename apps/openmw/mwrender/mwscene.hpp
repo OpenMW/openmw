@@ -3,7 +3,7 @@
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
-#include <openengine\bullet\physic.hpp>
+#include <openengine/bullet/physic.hpp>
 
 #include <vector>
 #include <string>

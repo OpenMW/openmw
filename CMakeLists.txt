@@ -166,6 +166,19 @@ set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp
 )
 
+set(OENGINE_BULLET
+    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.cpp
+    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.h
+    ${LIBDIR}/openengine/bullet/BtOgre.cpp
+    ${LIBDIR}/openengine/bullet/BtOgreExtras.h
+    ${LIBDIR}/openengine/bullet/BtOgreGP.h
+    ${LIBDIR}/openengine/bullet/BtOgrePG.h
+    ${LIBDIR}/openengine/bullet/CMotionState.cpp
+    ${LIBDIR}/openengine/bullet/CMotionState.h
+    ${LIBDIR}/openengine/bullet/physic.cpp
+    ${LIBDIR}/openengine/bullet/physic.hpp
+)
+
 # Sound setup
 if (USE_AUDIERE)
     set(MANGLE_SOUND_OUTPUT
@@ -206,7 +219,7 @@ set(OENGINE_SOUND
   ${LIBDIR}/mangle/sound/outputs/openal_out.cpp
   ${MANGLE_SOUND_OUTPUT}
 )
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_SOUND})
+set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_SOUND} ${OENGINE_BULLET})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
 
 set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
