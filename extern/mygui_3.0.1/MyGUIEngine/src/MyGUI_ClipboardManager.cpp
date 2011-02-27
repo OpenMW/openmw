@@ -62,7 +62,11 @@ namespace MyGUI
 		if (dwProcessID != ::GetCurrentProcessId())
 			return TRUE;
 
+#ifdef _M_X64
+		if (::GetWindowLongPtr(hWnd, GWLP_HINSTANCE) == lParam)
+#else
 		if (::GetWindowLong(hWnd, GWL_HINSTANCE) == lParam)
+#endif
 		{
 			// Нашли. hWnd - то что надо
 			g_hWnd = hWnd;
