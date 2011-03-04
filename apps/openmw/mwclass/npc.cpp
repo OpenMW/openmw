@@ -179,7 +179,7 @@ namespace MWClass
             upperleft[uppernumbers] = npcName + "upper arm";
             upperright[uppernumbers++] = npcName + "upper arm2";
             cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperleft, uppernumbers);        //1 -1 1
-            cellRender.rotateMesh(Ogre::Vector3(0, 1, 0),  kOgrePiOverTwo, upperleft, uppernumbers);
+            cellRender.rotateMesh(Ogre::Vector3(0, .1, 0),  kOgrePiOverTwo, upperleft, uppernumbers);
         }
 
         if (forearm)
