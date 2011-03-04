@@ -28,7 +28,6 @@
 #include <stdio.h>
 
 #include <libs/mangle/vfs/servers/ogre_vfs.hpp>
-#include "../../apps/openmw/mwclass/npc.hpp"
 #include "../nif/nif_file.hpp"
 #include "../nif/node.hpp"
 #include "../nif/data.hpp"
@@ -476,8 +475,6 @@ static void vectorMul(const Matrix &A, float *C)
 
 void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bounds)
 {
-    //if( MWClass::Npc.isChest)
-        //cout << "t:" << shape << "\n";
     assert(shape != NULL);
 
     // Interpret flags
