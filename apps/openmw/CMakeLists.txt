@@ -242,6 +242,10 @@ target_link_libraries(openmw
 if (APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
     target_link_libraries(openmw ${CARBON_FRAMEWORK})
+    install(TARGETS openmw
+		BUNDLE DESTINATION .
+		RUNTIME DESTINATION ../MacOS
+		COMPONENT Runtime)
 endif (APPLE)
 
 if(DPKG_PROGRAM)

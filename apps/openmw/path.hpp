@@ -4,6 +4,10 @@
 #include <OgrePlatform.h>
 #include <string>
 
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <OSX/macUtils.h>
+#endif
+
 namespace OMW
 {
     class Path

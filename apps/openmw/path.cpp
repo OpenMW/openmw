@@ -13,7 +13,7 @@ std::string OMW::Path::getPath(PathTypeEnum parType, const std::string parApp, c
     if(parType == GLOBAL_CFG_PATH)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        theBasePath = macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
+        theBasePath = Ogre::macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
 #elif OGRE_PLATFORM == OGRE_PLATFORM_LINUX
         theBasePath = "/etc/"+parApp+"/";
 #else
@@ -24,7 +24,7 @@ std::string OMW::Path::getPath(PathTypeEnum parType, const std::string parApp, c
     else
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        theBasePath = macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
+        theBasePath = Ogre::macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
 #elif OGRE_PLATFORM == OGRE_PLATFORM_LINUX
         const char* theDir;
         if ((theDir = getenv("OPENMW_HOME")) != NULL)

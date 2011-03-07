@@ -8,7 +8,7 @@ bool isFile(const char *name)
   return boost::filesystem::exists(cfg_file_path);
 }
 
-#ifdef __MACOSX__
+#ifdef OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <CoreFoundation/CoreFoundation.h>
 
 std::string macBundlePath()

@@ -273,7 +273,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 if (APPLE)
   set(APPLE_BUNDLE_RESOURCES
     ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-    ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
+    ${CMAKE_SOURCE_DIR}/files/plugins.cfg.mac
   )
 endif (APPLE)
 
@@ -287,12 +287,7 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 if (APPLE)
   set(MISC_FILES
 		  ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-		  ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
-		  ${CMAKE_SOURCE_DIR}/files/mac/ogre.cfg)
-install(TARGETS openmw
-		BUNDLE DESTINATION .
-		RUNTIME DESTINATION ../MacOS
-		COMPONENT Runtime)
+		  ${CMAKE_SOURCE_DIR}/files/plugins.cfg.mac)
 install(FILES ${MISC_FILES} DESTINATION ../MacOS)
 set(CPACK_GENERATOR "Bundle")
 set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
