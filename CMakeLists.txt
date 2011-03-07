@@ -23,7 +23,6 @@ endif()
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
-
 #
 # Pre-built binaries being used?
 #
@@ -220,6 +219,10 @@ if (MSVC10)
     add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
 endif()
 
+if (APPLE)
+	set(Boost_USE_STATIC_LIBS   ON)
+endif (APPLE)
+
 # Dependencies
 
 find_package(OGRE REQUIRED)
@@ -262,20 +265,25 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
 if (WIN32)
 configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
     "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
-else (WIN32)
+endif (WIN32)
+if (LINUX)
 configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
     "${OpenMW_BINARY_DIR}/plugins.cfg")
-endif (WIN32)
+endif (LINUX)
+if (APPLE)
+configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
+	"${OpenMW_BINARY_DIR}/plugins.cfg")
+endif (APPLE)
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg")
 
-if (APPLE)
-  set(APPLE_BUNDLE_RESOURCES
-    ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-    ${CMAKE_SOURCE_DIR}/files/plugins.cfg.mac
-  )
-endif (APPLE)
+#if (APPLE)
+#  set(APPLE_BUNDLE_RESOURCES
+#    ${OpenMW_BINARY_DIR}/openmw.cfg
+#    ${OpenMW_BINARY_DIR}/plugins.cfg
+#  )
+#endif (APPLE)
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -286,16 +294,16 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 # Apple bundling
 if (APPLE)
   set(MISC_FILES
-		  ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-		  ${CMAKE_SOURCE_DIR}/files/plugins.cfg.mac)
+		${OpenMW_BINARY_DIR}/openmw.cfg
+	    ${OpenMW_BINARY_DIR}/plugins.cfg)
 install(FILES ${MISC_FILES} DESTINATION ../MacOS)
 set(CPACK_GENERATOR "Bundle")
 set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
 set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
 set(CPACK_BUNDLE_NAME "OpenMW")
-set(CPACK_PACKAGE_VERSION "0.07")
+set(CPACK_PACKAGE_VERSION "0.10")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "07")
+set(CPACK_PACKAGE_VERSION_MINOR "09")
 set(CPACK_PACKAGE_VERSION_PATCH "")
 
 include(CPack)
