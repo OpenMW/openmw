@@ -219,6 +219,13 @@ namespace Physic
 		RigidBody* body = RigidBodyMap[name];
 		if(body != NULL)
 		{
+            broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+            std::map<std::string,PhysicActor*>::iterator it = PhysicActorMap.begin();
+            for(;it!=PhysicActorMap.end();it++)
+            {
+                it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+            }
 			dynamicsWorld->removeRigidBody(RigidBodyMap[name]);
 		}
 	}
@@ -291,11 +298,11 @@ namespace Physic
         {
             if(resultCallback.m_collisionFilterGroup == COL_WORLD)
             {
-                name = static_cast<RigidBody*>(resultCallback.m_collisionObject)->mName;
+                name = dynamic_cast<RigidBody&>(*resultCallback.m_collisionObject).mName;
             }
             if(resultCallback.m_collisionFilterGroup == COL_ACTOR_EXTERNAL || resultCallback.m_collisionFilterGroup == COL_ACTOR_INTERNAL)
             {
-                name = static_cast<PairCachingGhostObject*>(resultCallback.m_collisionObject)->mName;
+                name = dynamic_cast<PairCachingGhostObject&>(*resultCallback.m_collisionObject).mName;
             }
             d = resultCallback.m_closestHitFraction;
         }
