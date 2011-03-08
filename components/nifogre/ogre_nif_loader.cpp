@@ -643,8 +643,13 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         for (std::vector<NiSkinData::BoneInfo>::iterator it = boneList.begin();
                 it != boneList.end(); it++)
         {
+            if(mSkel.isNull())
+            {
+                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex].name.toString() << std::endl;
+                break;
+            }
             //get the bone from bones array of skindata
-            bonePtr = skel->getBone(shape->skin->bones[boneIndex].name.toString());
+            bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name.toString());
 
             // final_vector = old_vector + old_rotation*new_vector*old_scale
             vecPos = bonePtr->_getDerivedPosition() +
@@ -767,7 +772,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
-            skel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
+            mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
 
             /*if (node->extra->recType == RC_NiTextKeyExtraData )
             {
@@ -776,16 +781,16 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
             }*/
         }
 
-        if (!skel.isNull())     //if there is a skeleton
+        if (!mSkel.isNull())     //if there is a skeleton
         {
             std::string name = node->name.toString();
             //if (isBeast && isChest)
             //  std::cout << "NAME: " << name << "\n";
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
-            if(!skel->hasBone(name))
+            if(!mSkel->hasBone(name))
             {
-                bone = skel->createBone(name);
+                bone = mSkel->createBone(name);
 
                 if (parentBone)
                   parentBone->addChild(bone);
@@ -1011,13 +1016,12 @@ void NIFLoader::loadResource(Resource *resource)
     //if(split== "Skins.NIF")
     //  std::cout << "\nSPECIAL PROPS\n";
     resourceName = "";
-    MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     //MeshPtr ptr = m->load(name, "custom");
     //cout << "THISNAME: " << ptr->getName() << "\n";
     //cout << "RESOURCE:"<< resource->getName();
     mesh = 0;
-    skel.setNull();
+    mSkel.setNull();
 
     // Set up the VFS if it hasn't been done already
     if (!vfs) vfs = new OgreVFS(resourceGroup);
