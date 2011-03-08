@@ -278,13 +278,6 @@ endif (APPLE)
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg")
 
-#if (APPLE)
-#  set(APPLE_BUNDLE_RESOURCES
-#    ${OpenMW_BINARY_DIR}/openmw.cfg
-#    ${OpenMW_BINARY_DIR}/plugins.cfg
-#  )
-#endif (APPLE)
-
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
     #add_definitions (-Wall -Werror)
@@ -297,13 +290,14 @@ if (APPLE)
 		${OpenMW_BINARY_DIR}/openmw.cfg
 	    ${OpenMW_BINARY_DIR}/plugins.cfg)
 install(FILES ${MISC_FILES} DESTINATION ../MacOS)
+install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ../Resources)
 set(CPACK_GENERATOR "Bundle")
 set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
 set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
 set(CPACK_BUNDLE_NAME "OpenMW")
 set(CPACK_PACKAGE_VERSION "0.10")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "09")
+set(CPACK_PACKAGE_VERSION_MINOR "10")
 set(CPACK_PACKAGE_VERSION_PATCH "")
 
 include(CPack)
