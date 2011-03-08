@@ -111,11 +111,16 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
 int main(int argc, char**argv)
 {
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+	// set current dir to bundle path
+	boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath());
+	boost::filesystem::current_path(bundlePath);
+#endif
 
     try
     {
         OMW::Engine engine;
-
+		
         if (parseOptions (argc, argv, engine))
         {
             engine.go();

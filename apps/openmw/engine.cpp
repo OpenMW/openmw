@@ -253,30 +253,13 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 
 void OMW::Engine::setDataDir (const boost::filesystem::path& dataDir)
 {
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-	// FIXME possibly hack, should use Carbon methods to get resource path
-	mDataDir = boost::filesystem::path(Ogre::macBundlePath() + "/Contents/Resources");
-	mDataDir = mDataDir / dataDir;
-#else
     mDataDir = boost::filesystem::system_complete (dataDir);
-#endif
-    std::cout << "mDataDir: " << mDataDir << std::endl;
-    std::cout << "dataDir: " << dataDir << std::endl;
-	std::cout << "initial path: " << boost::filesystem::initial_path() << std::endl;
-	std::cout << "mac bundle path: " << Ogre::macBundlePath() << std::endl;
 }
 
 // Set resource dir
 void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
 {
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-	// FIXME possibly hack, should use Carbon methods to get resource path
-	mResDir = boost::filesystem::path(Ogre::macBundlePath() + "/Contents/Resources");
-	mResDir = mResDir / parResDir;
-#else
 	mResDir = boost::filesystem::system_complete(parResDir);
-#endif
-    
 }
 
 // Set start cell name (only interiors for now)
