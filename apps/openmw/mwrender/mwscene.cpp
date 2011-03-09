@@ -118,38 +118,35 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
 	//set the DebugRenderingMode. To disable it,set it to 0
 	eng->setDebugRenderingMode(1);
 
-    // move object directly for now -> TODO replace with physics done?
+    //set the walkdirection to 0 (no movement) for every actor)
+    for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = eng->PhysicActorMap.begin(); it != eng->PhysicActorMap.end();it++)
+    {
+        OEngine::Physic::PhysicActor* act = it->second;
+        act->setWalkDirection(btVector3(0,0,0));
+    }
+
     for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
         iter!=actors.end(); ++iter)
     {
 		OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
 
-		//first adjust the rotation of the object, which is not handled by the physic engine i believe.
-
+        //dirty stuff to get the camera orientation. Must be changed!
 		Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
 		Ogre::Quaternion quat = sceneNode->getChildIterator().getNext()->getOrientation();
-		//Ogre::Quaternion quat2;
-        //Ogre::Matrix3::
-		//Ogre::Matrix3 mat;
-		//quat.ToRotationMatrix(mat);
-		//Ogre::Radian x,y,z;
-		//mat.ToEulerAnglesXYZ(x,y,z);
-        //mat.FromEulerAnglesXYZ(Ogre::Radian(0),z,Ogre::Radian(0));
+
         Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
 		Ogre::Vector3 dir = 0.01*(quat*dir1);
 
-		//the add the movement:
+		//set the walk direction
 		act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
     }
-	//std::cout << "duration " << duration << std::endl;
 	eng->stepSimulation(duration);
 
-    for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
-        iter!=actors.end(); ++iter)
+    for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = eng->PhysicActorMap.begin(); it != eng->PhysicActorMap.end();it++)
     {
-        MWWorld::Ptr ptr = world.getPtrViaHandle (iter->first);
-		OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
+        OEngine::Physic::PhysicActor* act = it->second;
 		btVector3 newPos = act->getPosition();
+        MWWorld::Ptr ptr = world.getPtrViaHandle (it->first);
 		world.moveObject (ptr, newPos.x(), newPos.y(), newPos.z());
     }
 }
