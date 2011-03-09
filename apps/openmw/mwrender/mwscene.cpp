@@ -136,10 +136,10 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
 		//mat.ToEulerAnglesXYZ(x,y,z);
         //mat.FromEulerAnglesXYZ(Ogre::Radian(0),z,Ogre::Radian(0));
         Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-		Ogre::Vector3 dir = quat*dir1;
+		Ogre::Vector3 dir = 0.01*(quat*dir1);
 
 		//the add the movement:
-		act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y)*duration);
+		act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
     }
 	//std::cout << "duration " << duration << std::endl;
 	eng->stepSimulation(duration);
