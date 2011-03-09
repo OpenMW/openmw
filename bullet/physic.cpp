@@ -34,11 +34,11 @@ namespace Physic
 		externalGhostObject = new PairCachingGhostObject(name);
 		externalGhostObject->setWorldTransform( transform );
 
-		btScalar externalCapsuleHeight = 50;
-		btScalar externalCapsuleWidth = 20;
+		btScalar externalCapsuleHeight = 90;
+		btScalar externalCapsuleWidth = 16;
 
 		externalCollisionShape = new btCapsuleShapeZ( externalCapsuleWidth,  externalCapsuleHeight );
-		externalCollisionShape->setMargin( 1 );
+		externalCollisionShape->setMargin( 0.05 );
 
 		externalGhostObject->setCollisionShape( externalCollisionShape );
 		externalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
@@ -47,16 +47,16 @@ namespace Physic
 		internalGhostObject = new PairCachingGhostObject(name);
 		internalGhostObject->setWorldTransform( transform );
 		//internalGhostObject->getBroadphaseHandle()->s
-		btScalar internalCapsuleHeight =  20;
-		btScalar internalCapsuleWidth =  5;
+		btScalar internalCapsuleHeight =  88;
+		btScalar internalCapsuleWidth =  15;
 
 		internalCollisionShape = new btCapsuleShapeZ( internalCapsuleWidth, internalCapsuleHeight );
-		internalCollisionShape->setMargin( 1 );
+		internalCollisionShape->setMargin( 0.05 );
 
 		internalGhostObject->setCollisionShape( internalCollisionShape );
 		internalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
 
-		mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 0.4 ),1,0 );
+		mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 10 ),1,20,20,9.8,0.2 );
 		mCharacter->setUpAxis(btKinematicCharacterController::Z_AXIS);
 	}
 
