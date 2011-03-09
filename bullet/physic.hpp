@@ -1,7 +1,7 @@
 #ifndef OENGINE_BULLET_PHYSIC_H
 #define OENGINE_BULLET_PHYSIC_H
 
-#include <BulletDynamics\Dynamics\btRigidBody.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 #include <string>
 #include <list>
@@ -35,7 +35,7 @@ namespace Physic
 	struct PhysicEvent;
 
     /**
-    *This is just used to be able to name objects. 
+    *This is just used to be able to name objects.
     */
     class PairCachingGhostObject : public btPairCachingGhostObject
     {
@@ -62,17 +62,17 @@ namespace Physic
 		*I think it's also needed to take time into account. A typical call should look like this:
 		*setWalkDirection( mvt * orientation * dt)
 		*/
-		void setWalkDirection(btVector3& mvt);
+		void setWalkDirection(const btVector3& mvt);
 
-		void Rotate(btQuaternion& quat);
+		void Rotate(const btQuaternion& quat);
 
-		void setRotation(btQuaternion& quat);
+		void setRotation(const btQuaternion& quat);
 
 		btVector3 getPosition(void);
 
 		btQuaternion getRotation(void);
 
-		void setPosition(btVector3& pos);
+		void setPosition(const btVector3& pos);
 
 		btKinematicCharacterController* mCharacter;
 
