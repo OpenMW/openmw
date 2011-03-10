@@ -72,7 +72,7 @@ Getting OpenMW Working
         $ cd /path/to/libsndfile/source
         $ ./configure --prefix=$OMW_LIB_PREFIX \
         --disable-dependency-tracking
-        $make install 
+        $ make install 
 
 7. Generate the Makefile for OpenMW as follows and build OpenMW:
         $ mkdir /path/to/openmw/build/dir
