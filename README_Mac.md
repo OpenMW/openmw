@@ -31,7 +31,7 @@ Getting OpenMW Working
 1. Clone this repository.
 2. Note about libs: I prefer not to install them globally (i. e. in /usr/local/), so I installing them in directory in my home directory. If OpenMW sources is in $HOME/path/openmw, I'm using $HOME/path/libs/root as prefix for boost and other libs.
   It's useful to create env var for lib install prefix:
-        $ export OMW_LIB_PREFIX=$HOME/path/libs
+        $ export OMW_LIB_PREFIX=$HOME/path/libs/root
 
 3. First of all, set for current terminal some env vars:
         $ export CFLAGS="-arch i386"
@@ -97,7 +97,8 @@ Getting OpenMW Working
         Create symlink to resources subdirectory:
         $ ln -s resources Contents/Resources/resources
         Create symlinks for *.cfg files:
-        $ ln -s plugins.cfg 
+        $ ln -s plugins.cfg Contents/MacOS/plugins.cfg
+        $ ln -s openmw.cfg Contents/MacOS/openmw.cfg
 
 9. Move your Morrowind `Data Files` directory into the `Contents/Resources`
    with the name `data` or create symlink:
@@ -106,6 +107,11 @@ Getting OpenMW Working
 10. From your build directory run:
         $ ./openmw
   Enjoy!
+
+11. Optionally you can create .app bundle:
+        $ make package
+  But for now you shold manually copy Contents directory from build directory to bundle
+  (because there is no plugins and resources in generated .app).
    
 
 [boost]: http://www.boost.org
