@@ -104,6 +104,8 @@ Getting OpenMW Working
         $ ln -s /path/to/morrowind/data/files Contents/Resources/data
 
 10. From your build directory run:
+        $ ./openmw
+  Enjoy!
    
 
 [boost]: http://www.boost.org
