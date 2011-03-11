@@ -461,7 +461,7 @@ namespace MWClass
         if (ptr.getRefData().getMovement().get())
         {
             vector.x = - ptr.getRefData().getMovement()->mLeftRight * 200;
-            vector.z = - ptr.getRefData().getMovement()->mForwardBackward * 200;
+            vector.y = ptr.getRefData().getMovement()->mForwardBackward * 200;
 
             if (getStance (ptr, Run, false))
                 vector *= 2;
