@@ -114,7 +114,7 @@ void ReviewDialog::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos
     }
 }
 
-void ReviewDialog::onWindowResize(MyGUI::WidgetPtr window)
+void ReviewDialog::onWindowResize(MyGUI::Window* window)
 {
     updateScroller();
 }

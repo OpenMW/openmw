@@ -76,7 +76,7 @@ void StatsWindow::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos)
     }
 }
 
-void StatsWindow::onWindowResize(MyGUI::WidgetPtr window)
+void StatsWindow::onWindowResize(MyGUI::Window* window)
 {
     updateScroller();
 }

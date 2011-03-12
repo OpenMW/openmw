@@ -58,7 +58,7 @@ namespace MWGui
             void updateScroller();
 
             void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
-            void onWindowResize(MyGUI::WidgetPtr window);
+            void onWindowResize(MyGUI::Window* window);
 
             static const int lineHeight;
 
