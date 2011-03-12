@@ -12,13 +12,13 @@ if(DPKG_PROGRAM)
     set(MORROWIND_DATA_FILES "/usr/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
     set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of Morrowind data files")
 else()
-	if (APPLE)
-		# set path inside bundle
-		set(MORROWIND_DATA_FILES "Contents/Resources/data" CACHE PATH "location of Morrowind data files")
-    	set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of Morrowind data files")
+    if (APPLE)
+        # set path inside bundle
+        set(MORROWIND_DATA_FILES "Contents/Resources/data" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of Morrowind data files")
     else()
-    	set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
-    	set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of Morrowind data files")
     endif(APPLE)
 endif(DPKG_PROGRAM)
 
@@ -226,7 +226,7 @@ if (MSVC10)
 endif()
 
 if (APPLE)
-	set(Boost_USE_STATIC_LIBS   ON)
+    set(Boost_USE_STATIC_LIBS   ON)
 endif (APPLE)
 
 # Dependencies
@@ -278,7 +278,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
 endif (LINUX)
 if (APPLE)
 configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
-	"${OpenMW_BINARY_DIR}/plugins.cfg")
+    "${OpenMW_BINARY_DIR}/plugins.cfg")
 endif (APPLE)
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
@@ -293,8 +293,8 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 # Apple bundling
 if (APPLE)
   set(MISC_FILES
-		${OpenMW_BINARY_DIR}/openmw.cfg
-	    ${OpenMW_BINARY_DIR}/plugins.cfg)
+        ${OpenMW_BINARY_DIR}/openmw.cfg
+        ${OpenMW_BINARY_DIR}/plugins.cfg)
 install(FILES ${MISC_FILES} DESTINATION ../MacOS)
 install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ../Resources)
 set(CPACK_GENERATOR "Bundle")

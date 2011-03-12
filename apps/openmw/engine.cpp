@@ -259,7 +259,7 @@ void OMW::Engine::setDataDir (const boost::filesystem::path& dataDir)
 // Set resource dir
 void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
 {
-	mResDir = boost::filesystem::system_complete(parResDir);
+    mResDir = boost::filesystem::system_complete(parResDir);
 }
 
 // Set start cell name (only interiors for now)
