@@ -183,7 +183,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
             focusFrameCounter = 0;
         }
 
-        mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
+        if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
+            mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
     }
     catch (const std::exception& e)
     {
