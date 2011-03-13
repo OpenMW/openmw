@@ -87,9 +87,9 @@ namespace MWRender
         /// Change object's scale.
         void scaleObject (const std::string& handle, float scale);
 
-        /// Set collision mode for player. If disabled player object should ignore
+        /// Toggle collision mode for player. If disabled player object should ignore
         /// collisions and gravity.
-        void setCollsionMode (bool enabled);
+        void toggleCollisionMode();
     };
 }
 

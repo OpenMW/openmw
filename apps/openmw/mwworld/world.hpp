@@ -179,6 +179,10 @@ namespace MWWorld
             void doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
                 float duration);
             ///< Run physics simulation and modify \a world accordingly.
+
+            void toggleCollisionMode();
+            ///< Toggle collision mode for player. If disabled player object should ignore
+            /// collisions and gravity.
     };
 }
 

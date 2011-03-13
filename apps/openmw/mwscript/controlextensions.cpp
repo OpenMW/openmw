@@ -46,7 +46,7 @@ namespace MWScript
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
 
-                    context.getWorld().getPlayer().toggleCollisionMode();
+                    context.getWorld().toggleCollisionMode();
                 }
         };
 
