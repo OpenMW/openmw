@@ -29,7 +29,6 @@ namespace MWWorld
         std::string mRace;
         std::string mBirthsign;
         ESM::Class *mClass;
-        bool mCollisionMode;
         bool mAutoMove;
         int mForwardBackward;
 
@@ -46,10 +45,6 @@ namespace MWWorld
         {
             mCellStore = cellStore;
         }
-
-        /// Move the player relative to her own position and
-        /// orientation. After the call, the new position is returned.
-        void moveRel (float &relX, float &relY, float &relZ);
 
         MWWorld::Ptr getPlayer()
         {
@@ -104,11 +99,6 @@ namespace MWWorld
         const ESM::Class& getClass() const
         {
             return *mClass;
-        }
-
-        void toggleCollisionMode()
-        {
-            mCollisionMode = !mCollisionMode;
         }
 
         bool getAutoMove()
