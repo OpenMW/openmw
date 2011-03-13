@@ -218,6 +218,7 @@ OMW::Engine::~Engine()
     delete mEnvironment.mDialogueManager;
     delete mScriptManager;
     delete mScriptContext;
+    delete mPhysicEngine;
 }
 
 // Load all BSA files in data directory.
