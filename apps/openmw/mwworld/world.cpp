@@ -855,4 +855,9 @@ namespace MWWorld
     {
         mScene.doPhysics (duration, *this, actors);
     }
+
+    void World::toggleCollisionMode()
+    {
+        mScene.toggleCollisionMode();
+    }
 }

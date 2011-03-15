@@ -200,7 +200,7 @@ void MWScene::scaleObject (const std::string& handle, float scale)
 
 }
 
-void MWScene::setCollsionMode (bool enabled)
+void MWScene::toggleCollisionMode()
 {
 
 }
