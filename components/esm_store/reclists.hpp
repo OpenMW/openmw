@@ -259,11 +259,11 @@ namespace ESMS
     int getSize() { return count; }
 
     // List of interior cells. Indexed by cell name.
-    typedef std::map<std::string,Cell*, ciLessBoost> IntCells;
+    typedef std::map<std::string,ESM::Cell*, ciLessBoost> IntCells;
     IntCells intCells;
 
     // List of exterior cells. Indexed as extCells[gridX][gridY].
-    typedef std::map<int, Cell*> ExtCellsCol;
+    typedef std::map<int, ESM::Cell*> ExtCellsCol;
     typedef std::map<int, ExtCellsCol> ExtCells;
     ExtCells extCells;
 
@@ -283,7 +283,7 @@ namespace ESMS
     }
 
 
-    const Cell* findInt(const std::string &id) const
+    const ESM::Cell* findInt(const std::string &id) const
     {
       IntCells::const_iterator it = intCells.find(id);
 
@@ -293,7 +293,7 @@ namespace ESMS
       return it->second;
     }
 
-    const Cell *searchExt (int x, int y) const
+    const ESM::Cell *searchExt (int x, int y) const
     {
         ExtCells::const_iterator it = extCells.find (x);
 
@@ -308,7 +308,7 @@ namespace ESMS
         return it2->second;
     }
 
-    const Cell *searchExtByName (const std::string& id) const
+    const ESM::Cell *searchExtByName (const std::string& id) const
     {
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
         {
@@ -323,7 +323,7 @@ namespace ESMS
         return 0;
     }
 
-    const Cell *searchExtByRegion (const std::string& id) const
+    const ESM::Cell *searchExtByRegion (const std::string& id) const
     {
         std::string id2 = toLower (id);
 
@@ -345,13 +345,13 @@ namespace ESMS
       count++;
 
       // All cells have a name record, even nameless exterior cells.
-      Cell *cell = new Cell;
+      ESM::Cell *cell = new ESM::Cell;
       cell->name = id;
 
       // The cell itself takes care of all the hairy details
       cell->load(esm);
 
-      if(cell->data.flags & Cell::Interior)
+      if(cell->data.flags & ESM::Cell::Interior)
         {
           // Store interior cell by name
           intCells[id] = cell;

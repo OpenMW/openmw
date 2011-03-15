@@ -135,7 +135,7 @@ class NIFLoader : Ogre::ManualResourceLoader
 
         // pointer to the ogre mesh which is currently build
         Ogre::Mesh *mesh;
-        Ogre::SkeletonPtr skel;
+        Ogre::SkeletonPtr mSkel;
 };
 
 #endif

@@ -1,7 +1,5 @@
 #include "widgets.hpp"
 #include "window_manager.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "components/esm_store/store.hpp"
 
 #include <boost/lexical_cast.hpp>
@@ -267,7 +265,7 @@ void MWAttribute::shutdownWidgetSkin()
 /* MWSpell */
 
 MWSpell::MWSpell()
-    : env(nullptr)
+    : mWindowManager(nullptr)
     , spellNameWidget(nullptr)
 {
 }
@@ -280,7 +278,7 @@ void MWSpell::setSpellId(const std::string &spellId)
 
 void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord)
 {
-    ESMS::ESMStore &store = env->mWorld->getStore();
+    ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::Spell *spell = store.spells.search(id);
     MYGUI_ASSERT(spell, "spell with id '" << id << "' not found");
 
@@ -289,7 +287,7 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
     for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->effects.list.begin(); it != end; ++it)
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
-        effect->setEnvironment(env);
+        effect->setWindowManager(mWindowManager);
         effect->setSpellEffect(*it);
         effects.push_back(effect);
         coord.top += effect->getHeight();
@@ -298,9 +296,9 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
 
 void MWSpell::updateWidgets()
 {
-    if (spellNameWidget && env)
+    if (spellNameWidget && mWindowManager)
     {
-        ESMS::ESMStore &store = env->mWorld->getStore();
+        ESMS::ESMStore &store = mWindowManager->getStore();
         const ESM::Spell *spell = store.spells.search(id);
         if (spell)
             spellNameWidget->setCaption(spell->name);
@@ -348,7 +346,7 @@ void MWSpell::shutdownWidgetSkin()
 /* MWSpellEffect */
 
 MWSpellEffect::MWSpellEffect()
-    : env(nullptr)
+    : mWindowManager(nullptr)
     , imageWidget(nullptr)
     , textWidget(nullptr)
 {
@@ -362,11 +360,10 @@ void MWSpellEffect::setSpellEffect(SpellEffectValue value)
 
 void MWSpellEffect::updateWidgets()
 {
-    if (!env)
+    if (!mWindowManager)
         return;
 
-    ESMS::ESMStore &store = env->mWorld->getStore();
-    WindowManager *wm = env->mWindowManager;
+    ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::MagicEffect *magicEffect = store.magicEffects.search(effect.effectID);
     if (textWidget)
     {
@@ -376,7 +373,7 @@ void MWSpellEffect::updateWidgets()
             std::string spellLine = "";
             if (effect.skill >= 0 && effect.skill < ESM::Skill::Length)
             {
-                spellLine += " " + wm->getGameSettingString(ESM::Skill::sSkillNameIds[effect.skill], "");
+                spellLine += " " + mWindowManager->getGameSettingString(ESM::Skill::sSkillNameIds[effect.skill], "");
             }
             if (effect.attribute >= 0 && effect.attribute < 8)
             {
@@ -390,7 +387,7 @@ void MWSpellEffect::updateWidgets()
                     "sAttributePersonality",
                     "sAttributeLuck"
                 };
-                spellLine += " " + wm->getGameSettingString(attributes[effect.attribute], "");
+                spellLine += " " + mWindowManager->getGameSettingString(attributes[effect.attribute], "");
             }
             if (effect.magnMin >= 0 || effect.magnMax >= 0)
             {

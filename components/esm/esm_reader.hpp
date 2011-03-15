@@ -490,10 +490,6 @@ public:
 
       // Adjust number of record bytes left
       mCtx.leftRec -= mCtx.leftSub + 4;
-
-      // Check that sizes added up
-      if(mCtx.leftRec < 0)
-    fail("Not enough bytes left in record for this subrecord.");
     }
 
   /** Get sub header and check the size

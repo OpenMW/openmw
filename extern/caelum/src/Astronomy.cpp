@@ -321,7 +321,7 @@ namespace Caelum
         getGregorianDateTimeFromJulianDay(julianDay, year, month, day, hour, minute, second);
     }
 
-#if (OGRE_PLATFORM == OGRE_PLATFORM_WIN32) && (OGRE_COMPILER == OGRE_COMPILER_MSVC)
+#if (OGRE_PLATFORM == OGRE_PLATFORM_WIN32) && (OGRE_COMPILER == OGRE_COMPILER_MSVC) && (OGRE_ARCH_TYPE != OGRE_ARCHITECTURE_64)
     int Astronomy::enterHighPrecissionFloatingPointMode ()
     {
         int oldMode = ::_controlfp (0, 0);

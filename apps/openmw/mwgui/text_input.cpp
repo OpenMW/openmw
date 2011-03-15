@@ -1,12 +1,10 @@
 #include "text_input.hpp"
 #include "window_manager.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 
 using namespace MWGui;
 
-TextInputDialog::TextInputDialog(MWWorld::Environment& environment)
-  : WindowBase("openmw_text_input_layout.xml", environment)
+TextInputDialog::TextInputDialog(WindowManager& parWindowManager)
+  : WindowBase("openmw_text_input_layout.xml", parWindowManager)
 {
     // Centre dialog
     center();
@@ -55,10 +53,10 @@ void TextInputDialog::open()
 
 void TextInputDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void TextInputDialog::onTextAccepted(MyGUI::Edit* _sender)
 {
-    eventDone();
+    eventDone(this);
 }

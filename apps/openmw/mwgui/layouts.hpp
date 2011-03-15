@@ -3,9 +3,8 @@
 
 #include <components/esm_store/store.hpp>
 
-#include <openengine/gui/layout.hpp>
-
 #include <boost/array.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <sstream>
 #include <set>
@@ -13,12 +12,10 @@
 #include <utility>
 
 #include "../mwmechanics/stat.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "window_base.hpp"
 
 /*
-  This file contains classes corresponding to all the window layouts
+  This file contains classes corresponding to window layouts
   defined in resources/mygui/ *.xml.
 
   Each class inherites GUI::Layout and loads the XML file, and
@@ -35,117 +32,27 @@ namespace MWGui
   class HUD : public OEngine::GUI::Layout
   {
   public:
-    HUD(int width, int height)
-      : Layout("openmw_hud_layout.xml")
-    {
-      setCoord(0,0, width, height);
-
-      // Energy bars
-      getWidget(health, "Health");
-      getWidget(magicka, "Magicka");
-      getWidget(stamina, "Stamina");
-
-      // Item and spell images and status bars
-      getWidget(weapImage, "WeapImage");
-      getWidget(weapStatus, "WeapStatus");
-      getWidget(spellImage, "SpellImage");
-      getWidget(spellStatus, "SpellStatus");
-
-      getWidget(effectBox, "EffectBox");
-      getWidget(effect1, "Effect1");
-
-      getWidget(minimap, "MiniMap");
-      getWidget(compass, "Compass");
-
-      getWidget(crosshair, "Crosshair");
-
-      compass->setImageTexture("textures\\compass.dds");
-      crosshair->setImageTexture("textures\\target.dds");
-
-      // These are just demo values, you should replace these with
-      // real calls from outside the class later.
-      setWeapIcon("icons\\w\\tx_knife_iron.dds");
-      setWeapStatus(90, 100);
-      setSpellIcon("icons\\s\\b_tx_s_rstor_health.dds");
-      setSpellStatus(65, 100);
-      setEffect("icons\\s\\tx_s_chameleon.dds");
-    }
-
-    void setStats(int h, int hmax, int m, int mmax, int s, int smax)
-    {
-      health->setProgressRange(hmax);
-      health->setProgressPosition(h);
-      magicka->setProgressRange(mmax);
-      magicka->setProgressPosition(m);
-      stamina->setProgressRange(smax);
-      stamina->setProgressPosition(s);
-    }
-
-    void setWeapIcon(const char *str)
-    { weapImage->setImageTexture(str); }
-    void setSpellIcon(const char *str)
-    { spellImage->setImageTexture(str); }
-
-    void setWeapStatus(int s, int smax)
-    {
-      weapStatus->setProgressRange(smax);
-      weapStatus->setProgressPosition(s);
-    }
-    void setSpellStatus(int s, int smax)
-    {
-      spellStatus->setProgressRange(smax);
-      spellStatus->setProgressPosition(s);
-    }
-
-    void setEffect(const char *img)
-    { effect1->setImageTexture(img); }
-
-    void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
-    {
-        static const char *ids[] =
-        {
-            "HBar", "MBar", "FBar",
-            0
-        };
-
-        for (int i=0; ids[i]; ++i)
-            if (ids[i]==id)
-            {
-                switch (i)
-                {
-                    case 0:
-
-                      health->setProgressRange (value.getModified());
-                      health->setProgressPosition (value.getCurrent());
-                      break;
-
-                    case 1:
-
-                      magicka->setProgressRange (value.getModified());
-                      magicka->setProgressPosition (value.getCurrent());
-                      break;
-
-                    case 2:
-
-                      stamina->setProgressRange (value.getModified());
-                      stamina->setProgressPosition (value.getCurrent());
-                      break;
-                }
-            }
-    }
+    HUD(int width, int height, bool fpsSwitch);
+    void setStats(int h, int hmax, int m, int mmax, int s, int smax);
+    void setWeapIcon(const char *str);
+    void setSpellIcon(const char *str);
+    void setWeapStatus(int s, int smax);
+    void setSpellStatus(int s, int smax);
+    void setEffect(const char *img);
+    void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
+    void setFPS(float fps);
 
     MyGUI::ProgressPtr health, magicka, stamina;
-
     MyGUI::StaticImagePtr weapImage, spellImage;
     MyGUI::ProgressPtr weapStatus, spellStatus;
-
     MyGUI::WidgetPtr effectBox;
     MyGUI::StaticImagePtr effect1;
-
     MyGUI::StaticImagePtr minimap;
     MyGUI::StaticImagePtr compass;
-
     MyGUI::StaticImagePtr crosshair;
+
+    MyGUI::WidgetPtr fpsbox;
+    MyGUI::StaticTextPtr fpscounter;
   };
 
   class MapWindow : public OEngine::GUI::Layout
@@ -177,68 +84,6 @@ namespace MWGui
       setCoord(0,0,w,h);
     }
   };
-
-    class StatsWindow : public WindowBase
-    {
-    public:
-        typedef std::pair<std::string, int> Faction;
-        typedef std::vector<Faction> FactionList;
-
-        typedef std::vector<int> SkillList;
-
-        StatsWindow (MWWorld::Environment& environment);
-
-        void setBar(const std::string& name, const std::string& tname, int val, int max);
-        void setPlayerName(const std::string& playerName);
-
-        /// Set value for the given ID.
-        void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
-        void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
-        void setValue (const std::string& id, const std::string& value);
-        void setValue (const std::string& id, int value);
-
-        void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
-
-        void configureSkills (const SkillList& major, const SkillList& minor);
-        void setFactions (const std::vector<Faction>& factions);
-        void setBirthSign (const std::string &signId);
-        void setReputation (int reputation) { this->reputation = reputation; }
-        void setBounty (int bounty) { this->bounty = bounty; }
-        void updateSkillArea();
-
-    private:
-        enum ColorStyle
-        {
-          CS_Sub,
-          CS_Normal,
-          CS_Super
-        };
-        void setStyledText(MyGUI::StaticTextPtr widget, ColorStyle style, const std::string &value);
-        void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        MyGUI::StaticTextPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void updateScroller();
-
-        void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
-        void onWindowResize(MyGUI::WidgetPtr window);
-
-        static const int lineHeight;
-
-        MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
-        MyGUI::VScrollPtr skillScrollerWidget;
-        int lastPos, clientHeight;
-
-        SkillList majorSkills, minorSkills, miscSkills;
-        std::map<int, MWMechanics::Stat<float> > skillValues;
-        std::map<int, MyGUI::StaticTextPtr> skillWidgetMap;
-        std::map<std::string, MyGUI::WidgetPtr> factionWidgetMap;
-        FactionList factions; ///< Stores a list of factions and the current rank
-        std::string birthSignId;
-        int reputation, bounty;
-        std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
-    };
 
 #if 0
   class InventoryWindow : public OEngine::GUI::Layout

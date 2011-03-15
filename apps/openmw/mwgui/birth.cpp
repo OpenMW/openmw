@@ -1,6 +1,4 @@
 #include "birth.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"
@@ -11,8 +9,8 @@
 using namespace MWGui;
 using namespace Widgets;
 
-BirthDialog::BirthDialog(MWWorld::Environment& environment)
-  : WindowBase("openmw_chargen_birth_layout.xml", environment)
+BirthDialog::BirthDialog(WindowManager& parWindowManager)
+  : WindowBase("openmw_chargen_birth_layout.xml", parWindowManager)
 {
     // Centre dialog
     center();
@@ -94,7 +92,7 @@ void BirthDialog::setBirthId(const std::string &birthId)
 
 void BirthDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void BirthDialog::onBackClicked(MyGUI::Widget* _sender)
@@ -121,7 +119,7 @@ void BirthDialog::updateBirths()
 {
     birthList->removeAllItems();
 
-    ESMS::ESMStore &store = environment.mWorld->getStore();
+    ESMS::ESMStore &store = mWindowManager.getStore();
     
     ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator it = store.birthSigns.list.begin();
     ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator end = store.birthSigns.list.end();
@@ -151,7 +149,7 @@ void BirthDialog::updateSpells()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, spellArea->getWidth(), 18);
 
-    ESMS::ESMStore &store = environment.mWorld->getStore();
+    ESMS::ESMStore &store = mWindowManager.getStore();
     const ESM::BirthSign *birth = store.birthSigns.find(currentBirthId);
 
     std::string texturePath = std::string("textures\\") + birth->texture;
@@ -191,7 +189,7 @@ void BirthDialog::updateSpells()
         if (!categories[category].spells.empty())
         {
             MyGUI::StaticTextPtr label = spellArea->createWidget<MyGUI::StaticText>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
-            label->setCaption(environment.mWindowManager->getGameSettingString(categories[category].label, ""));
+            label->setCaption(mWindowManager.getGameSettingString(categories[category].label, ""));
             spellItems.push_back(label);
             coord.top += lineHeight;
 
@@ -200,7 +198,7 @@ void BirthDialog::updateSpells()
             {
                 const std::string &spellId = *it;
                 spellWidget = spellArea->createWidget<MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("Spell") + boost::lexical_cast<std::string>(i));
-                spellWidget->setEnvironment(&environment);
+                spellWidget->setWindowManager(&mWindowManager);
                 spellWidget->setSpellId(spellId);
 
                 spellItems.push_back(spellWidget);

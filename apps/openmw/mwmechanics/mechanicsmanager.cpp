@@ -282,17 +282,6 @@ namespace MWMechanics
                 "HBar", "MBar", "FBar"
             };
 
-            static const char *skillNames[27] =
-            {
-                "SkillBlock", "SkillArmorer", "SkillMediumArmor", "SkillHeavyArmor",
-                "SkillBluntWeapon", "SkillLongBlade", "SkillAxe", "SkillSpear",
-                "SkillAthletics", "SkillEnchant", "SkillDestruction", "SkillAlteration",
-                "SkillIllusion", "SkillConjuration", "SkillMysticism", "SkillRestoration",
-                "SkillAlchemy", "SkillUnarmored", "SkillSecurity", "SkillSneak",
-                "SkillAcrobatics", "SkillLightArmor", "SkillShortBlade", "SkillMarksman",
-                "SkillMercantile", "SkillSpeechcraft", "SkillHandToHand",
-            };
-
             for (int i=0; i<8; ++i)
             {
                 if (stats.mAttributes[i]!=mWatchedCreature.mAttributes[i])
@@ -315,16 +304,14 @@ namespace MWMechanics
 
             bool update = false;
 
-            for (int i=0; i<27; ++i)
+            //Loop over ESM::Skill::SkillEnum
+            for(int i = 0; i < 27; ++i)
             {
-                if (npcStats.mSkill[i]!=mWatchedNpc.mSkill[i])
+                if(npcStats.mSkill[i] != mWatchedNpc.mSkill[i])
                 {
                     update = true;
-
                     mWatchedNpc.mSkill[i] = npcStats.mSkill[i];
-
-                    mEnvironment.mWindowManager->setValue (skillNames[i], npcStats.mSkill[i]);
-
+                    mEnvironment.mWindowManager->setValue((ESM::Skill::SkillEnum)i, npcStats.mSkill[i]);
                 }
             }
 

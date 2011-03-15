@@ -5,11 +5,6 @@
 #include "widgets.hpp"
 #include "window_base.hpp"
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 /*
   This file contains the dialogs for choosing a class.
   Layout is defined by resources/mygui/openmw_chargen_class_layout.xml.
@@ -19,10 +14,12 @@ namespace MWGui
 {
     using namespace MyGUI;
 
+    class WindowManager;
+
     class InfoBoxDialog : public WindowBase
     {
     public:
-        InfoBoxDialog(MWWorld::Environment& environment);
+        InfoBoxDialog(WindowManager& parWindowManager);
 
         typedef std::vector<std::string> ButtonList;
 
@@ -34,12 +31,12 @@ namespace MWGui
         int getChosenButton() const;
 
         // Events
-        typedef delegates::CDelegate2<MyGUI::WidgetPtr, int> EventHandle_WidgetInt;
+        typedef delegates::CDelegate1<int> EventHandle_Int;
 
         /** Event : Button was clicked.\n
             signature : void method(MyGUI::WidgetPtr widget, int index)\n
         */
-        EventHandle_WidgetInt eventButtonSelected;
+        EventHandle_Int eventButtonSelected;
 
     protected:
         void onButtonClicked(MyGUI::WidgetPtr _sender);
@@ -67,13 +64,13 @@ namespace MWGui
             Class_Create = 2,
             Class_Back = 3
         };
-        ClassChoiceDialog(MWWorld::Environment& environment);
+        ClassChoiceDialog(WindowManager& parWindowManager);
     };
 
     class GenerateClassResultDialog : public WindowBase
     {
     public:
-        GenerateClassResultDialog(MWWorld::Environment& environment);
+        GenerateClassResultDialog(WindowManager& parWindowManager);
 
         std::string getClassId() const;
         void setClassId(const std::string &classId);
@@ -87,11 +84,6 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventBack;
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
@@ -107,7 +99,7 @@ namespace MWGui
     class PickClassDialog : public WindowBase
     {
     public:
-        PickClassDialog(MWWorld::Environment& environment);
+        PickClassDialog(WindowManager& parWindowManager);
 
         const std::string &getClassId() const { return currentClassId; }
         void setClassId(const std::string &classId);
@@ -122,11 +114,6 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventBack;
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
 
     protected:
         void onSelectClass(MyGUI::List* _sender, size_t _index);
@@ -151,7 +138,7 @@ namespace MWGui
     class SelectSpecializationDialog : public WindowBase
     {
     public:
-        SelectSpecializationDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        SelectSpecializationDialog(WindowManager& parWindowManager);
 
         ESM::Class::Specialization getSpecializationId() const { return specializationId; }
 
@@ -181,7 +168,7 @@ namespace MWGui
     class SelectAttributeDialog : public WindowBase
     {
     public:
-        SelectAttributeDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        SelectAttributeDialog(WindowManager& parWindowManager);
 
         ESM::Attribute::AttributeID getAttributeId() const { return attributeId; }
         Widgets::MWAttributePtr getAffectedWidget() const { return affectedWidget; }
@@ -213,7 +200,7 @@ namespace MWGui
     class SelectSkillDialog : public WindowBase
     {
     public:
-        SelectSkillDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        SelectSkillDialog(WindowManager& parWindowManager);
 
         ESM::Skill::SkillEnum getSkillId() const { return skillId; }
         Widgets::MWSkillPtr getAffectedWidget() const { return affectedWidget; }
@@ -248,18 +235,10 @@ namespace MWGui
     class DescriptionDialog : public WindowBase
     {
     public:
-        DescriptionDialog(MWWorld::Environment& environment, MyGUI::IntSize gameWindowSize);
+        DescriptionDialog(WindowManager& parWindowManager);
 
         std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
         void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
-
-        // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
@@ -271,7 +250,7 @@ namespace MWGui
     class CreateClassDialog : public WindowBase
     {
     public:
-        CreateClassDialog(MWWorld::Environment& environment);
+        CreateClassDialog(WindowManager& parWindowManager);
         virtual ~CreateClassDialog();
 
         std::string getName() const;
@@ -292,11 +271,6 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
-
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -308,7 +282,7 @@ namespace MWGui
         void onSkillClicked(Widgets::MWSkillPtr _sender);
         void onSkillSelected();
         void onDescriptionClicked(MyGUI::Widget* _sender);
-        void onDescriptionEntered();
+        void onDescriptionEntered(WindowBase* parWindow);
         void onDialogCancel();
 
     private:

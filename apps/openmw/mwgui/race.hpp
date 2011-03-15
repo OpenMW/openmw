@@ -7,9 +7,9 @@
 
 #include <boost/array.hpp>
 
-namespace MWWorld
+namespace MWGui
 {
-    class Environment;
+    class WindowManager;
 }
 
 /*
@@ -24,7 +24,7 @@ namespace MWGui
     class RaceDialog : public WindowBase
     {
     public:
-        RaceDialog(MWWorld::Environment& environment);
+        RaceDialog(WindowManager& parWindowManager);
 
         enum Gender
         {
@@ -52,11 +52,6 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventBack;
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
 
     protected:
         void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
