@@ -116,7 +116,7 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
     MWWorld::DoingPhysics scopeGuard;
 
 	//set the DebugRenderingMode. To disable it,set it to 0
-	eng->setDebugRenderingMode(1);
+//	eng->setDebugRenderingMode(1);
 
     //set the walkdirection to 0 (no movement) for every actor)
     for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = eng->PhysicActorMap.begin(); it != eng->PhysicActorMap.end();it++)
@@ -203,4 +203,17 @@ void MWScene::scaleObject (const std::string& handle, float scale)
 void MWScene::toggleCollisionMode()
 {
 
+}
+
+void MWScene::toggleRenderMode (int mode)
+{
+    switch (mode)
+    {
+        case MWWorld::World::Render_CollisionDebug:
+
+            // TODO use a proper function instead of accessing the member variable
+            // directly.
+            eng->setDebugRenderingMode (!eng->isDebugCreated);
+            break;
+    }
 }

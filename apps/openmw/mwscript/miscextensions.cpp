@@ -90,6 +90,18 @@ namespace MWScript
                 }
         };
 
+        class OpToggleCollisionDebug : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    context.getWorld().toggleRenderMode (MWWorld::World::Render_CollisionDebug);
+                }
+        };
 
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
@@ -98,6 +110,7 @@ namespace MWScript
         const int opcodeLockExplicit = 0x20005;
         const int opcodeUnlock = 0x200008c;
         const int opcodeUnlockExplicit = 0x200008d;
+        const int opcodeToggleCollisionDebug = 0x2000132;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -106,6 +119,10 @@ namespace MWScript
             extensions.registerInstruction ("activate", "", opcodeActivate);
             extensions.registerInstruction ("lock", "/l", opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction ("unlock", "", opcodeUnlock, opcodeUnlockExplicit);
+            extensions.registerInstruction ("togglecollisionboxes", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("togglecollisiongrid", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("tcb", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("tcg", "", opcodeToggleCollisionDebug);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -117,6 +134,7 @@ namespace MWScript
             interpreter.installSegment3 (opcodeLockExplicit, new OpLock<ExplicitRef>);
             interpreter.installSegment5 (opcodeUnlock, new OpUnlock<ImplicitRef>);
             interpreter.installSegment5 (opcodeUnlockExplicit, new OpUnlock<ExplicitRef>);
+            interpreter.installSegment5 (opcodeToggleCollisionDebug, new OpToggleCollisionDebug);
         }
     }
 }

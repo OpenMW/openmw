@@ -50,6 +50,11 @@ namespace MWWorld
         public:
             typedef std::list<std::pair<std::string, Ptr> > ScriptList;
 
+            enum RenderMode
+            {
+                Render_CollisionDebug
+            };
+
         private:
 
             typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
@@ -183,6 +188,9 @@ namespace MWWorld
             void toggleCollisionMode();
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
+
+            void toggleRenderMode (RenderMode mode);
+            ///< Toggle a render mode.
     };
 }
 
