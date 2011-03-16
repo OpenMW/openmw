@@ -16,7 +16,7 @@
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include <OgreSceneNode.h>
 
-namespace 
+namespace
 {
     const Ogre::Radian kOgrePi (Ogre::Math::PI);
     const Ogre::Radian kOgrePiOverTwo (Ogre::Math::PI / Ogre::Real(2.0));
@@ -38,7 +38,7 @@ namespace MWClass
         //Ogre::SceneNode *chest;
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
-        
+
         //Store scenenodes by npc's name + bodypart [0]  ,  npc's name + bodypart    [1]
         //Ex.                 Fargothchest               ,  Fargothneck
 
@@ -58,7 +58,7 @@ namespace MWClass
             environment.mWorld->getStore().bodyParts.find(hairID)->model;
 
         MWRender::Rendering rendering (cellRender, ref->ref);
-        
+
 
         //TODO: define consts for each bodypart e.g. chest, foot, wrist... and put the parts in the
         // right place
@@ -69,7 +69,7 @@ namespace MWClass
         Ogre::Vector3 pos = Ogre::Vector3( 20, 20, 20);
         Ogre::Vector3 axis = Ogre::Vector3( 0, 0, 1);
         Ogre::Radian angle = Ogre::Radian(0);
-        
+
         std::string addresses[6] = {"", "", "", "","", ""};
         std::string addresses2[6] = {"", "", "", "", "", ""};
         std::string upperleft[5] = {"", "", "", "", ""};
@@ -79,9 +79,9 @@ namespace MWClass
         int numbers = 0;
         int uppernumbers = 0;
         int neckNumbers = 0;
-        
+
         if (bodyPart){
-        
+
            cellRender.insertMesh("meshes\\" + bodyPart->model, pos, axis, angle, npcName + "chest", addresses, numbers, true);   //2 0
            addresses2[numbers] = npcName + "chest";
            addresses[numbers++] = npcName + "chest";
@@ -111,7 +111,7 @@ namespace MWClass
 
         Ogre::Vector3 pos2 = Ogre::Vector3( 0, .5, 75);
         std::string upperarmpath[2] = {npcName + "chest", npcName + "upper arm"};
-        
+
         if (groin){
             cellRender.insertMesh("meshes\\" + groin->model, pos2, axis, kOgrePi, npcName + "groin", addresses, numbers);
             addresses2[numbers] = npcName + "groin";
@@ -121,7 +121,7 @@ namespace MWClass
             cellRender.insertMesh("tail\\" + tail->model, Ogre::Vector3(0 , 0, -76), axis, kOgrePi, npcName + "tail", addresses, numbers, "tail");
             //std::cout << "TAIL\n";
         }
-        
+
         //addresses[1] = npcName + "groin";
         if(upperleg){
         cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( 6, 0, -16), axis, kOgrePi, npcName + "upper leg", addresses, numbers); //-18
@@ -135,15 +135,15 @@ namespace MWClass
             cellRender.insertMesh ("meshes\\" + knee->model, Ogre::Vector3( 0, -1, -23), axis, Ogre::Radian(0), npcName + "knee", addresses, numbers);
         //cellRender.rotateMesh(Ogre::Vector3(0, 1, 0), Ogre::Radian (1), npcName + "upper arm");
         cellRender.insertMesh ("meshes\\" + knee->model, Ogre::Vector3( 0, -1, -23), axis, Ogre::Radian(0), npcName + "knee2", addresses2, numbers);
-        
+
             addresses2[numbers] = npcName + "knee2";
             addresses[numbers++] = npcName + "knee";
         }
         if(ankle){
-            
+
             cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0, 0, -20), axis, Ogre::Radian(0), npcName + "ankle", addresses, numbers);   //-1
             cellRender.insertMesh ("meshes\\" + ankle->model, Ogre::Vector3( 0,0, -20), axis, Ogre::Radian(0), npcName + "ankle2", addresses2, numbers); //-1
-            
+
             addresses2[numbers] = npcName + "ankle2";
             addresses[numbers++] = npcName + "ankle";
         }
@@ -163,7 +163,7 @@ namespace MWClass
             //cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), addresses, numbers);
         }
         if(feet){
-            
+
             cellRender.insertMesh ("foot\\" + feet->model, Ogre::Vector3( 7, 4, -16), axis, kOgrePi, npcName + "foot", addresses, numbers);        //9, 0, -14
 
             cellRender.insertMesh ("foot\\" + feet->model, Ogre::Vector3( 7, 4, -16), axis, kOgrePi, npcName + "foot2", addresses2, numbers);
@@ -171,8 +171,8 @@ namespace MWClass
             addresses[numbers++] = npcName + "foot";
             //cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), addresses, numbers);
         }
-        
-         
+
+
         if (arm){
             //010
             cellRender.insertMesh("meshes\\" + arm->model, Ogre::Vector3(-12.5, 0, 104), Ogre::Vector3(0, 1, 0), -kOgrePiOverTwo, npcName + "upper arm", upperleft, uppernumbers);   //1, 0,.75
@@ -209,7 +209,7 @@ namespace MWClass
             upperleft[uppernumbers] = npcName + "wrist";
             upperright[uppernumbers++] = npcName + "wrist2";
         }
-        
+
 
         if(hand)
         {
@@ -218,7 +218,7 @@ namespace MWClass
             //std::cout << "WE FOUND HANDS\n";
             std::string pass;
             if(hand->model.compare("b\\B_N_Dark Elf_F_Hands.1st.NIF")==0 && bodyRaceID.compare("b_n_dark elf_m_") == 0)
-                pass = "b\\B_N_Dark Elf_M_Hands.1st.NIF";   
+                pass = "b\\B_N_Dark Elf_M_Hands.1st.NIF";
             else
                 pass = hand->model;
             cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "hand", upperleft, uppernumbers,false);   //0, 100, -100    0,0,120
@@ -256,8 +256,9 @@ namespace MWClass
         cellRender.insertMesh (headModel, Ogre::Vector3( 0, 0, 5), axis, Ogre::Radian(0), npcName + "head", neckandup, neckNumbers);
         neckandup[neckNumbers++] = npcName + "head";
         cellRender.insertMesh (hairModel, Ogre::Vector3( 0, -1, 0), axis, Ogre::Radian(0), npcName + "hair", neckandup, neckNumbers);
+
+        cellRender.insertActorPhysics();
         ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
-        
     }
 
     void Npc::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
@@ -311,7 +312,6 @@ namespace MWClass
     {
         if (!ptr.getRefData().getNpcStats().get())
         {
-            // xxx
             boost::shared_ptr<MWMechanics::NpcStats> stats (
                 new MWMechanics::NpcStats);
 
@@ -361,6 +361,113 @@ namespace MWClass
             ptr.get<ESM::NPC>();
 
         return ref->base->script;
+    }
+
+    void Npc::setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        switch (stance)
+        {
+            case Run:
+
+                stats.mForceRun = force;
+                break;
+
+            case Sneak:
+
+                stats.mForceSneak = force;
+                break;
+
+            case Combat:
+
+                throw std::runtime_error ("combat stance not enforcable for NPCs");
+        }
+    }
+
+    void Npc::setStance (const MWWorld::Ptr& ptr, Stance stance, bool set) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        switch (stance)
+        {
+            case Run:
+
+                stats.mRun = set;
+                break;
+
+            case Sneak:
+
+                stats.mSneak = set;
+                break;
+
+            case Combat:
+
+                stats.mCombat = set;
+                break;
+        }
+    }
+
+    bool Npc::getStance (const MWWorld::Ptr& ptr, Stance stance, bool ignoreForce) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        switch (stance)
+        {
+            case Run:
+
+                if (!ignoreForce && stats.mForceRun)
+                    return true;
+
+                return stats.mRun;
+
+            case Sneak:
+
+                if (!ignoreForce && stats.mForceSneak)
+                    return true;
+
+                return stats.mSneak;
+
+            case Combat:
+
+                return stats.mCombat;
+        }
+
+        return false;
+    }
+
+    float Npc::getSpeed (const MWWorld::Ptr& ptr) const
+    {
+        return getStance (ptr, Run) ? 600 : 300; // TODO calculate these values from stats
+    }
+
+    MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getMovement().get())
+        {
+            boost::shared_ptr<MWMechanics::Movement> movement (
+                new MWMechanics::Movement);
+
+            ptr.getRefData().getMovement() = movement;
+        }
+
+        return *ptr.getRefData().getMovement();
+    }
+
+    Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
+    {
+        Ogre::Vector3 vector (0, 0, 0);
+
+        if (ptr.getRefData().getMovement().get())
+        {
+            vector.x = - ptr.getRefData().getMovement()->mLeftRight * 200;
+            vector.y = ptr.getRefData().getMovement()->mForwardBackward * 200;
+
+            if (getStance (ptr, Run, false))
+                vector *= 2;
+        }
+
+        return vector;
     }
 
     void Npc::registerSelf()

@@ -10,6 +10,11 @@
 #include "containerstore.hpp"
 #include "refdata.hpp"
 
+namespace Ogre
+{
+    class Vector3;
+}
+
 namespace MWRender
 {
     class CellRenderImp;
@@ -19,6 +24,7 @@ namespace MWMechanics
 {
     struct CreatureStats;
     struct NpcStats;
+    struct Movement;
 }
 
 namespace MWWorld
@@ -40,6 +46,12 @@ namespace MWWorld
             Class();
 
         public:
+
+            /// NPC-stances.
+            enum Stance
+            {
+                Run, Sneak, Combat
+            };
 
             virtual ~Class();
 
@@ -107,6 +119,25 @@ namespace MWWorld
             virtual std::string getScript (const Ptr& ptr) const;
             ///< Return name of the script attached to ptr (default implementation: return an empty
             /// string).
+
+            virtual void setForceStance (const Ptr& ptr, Stance stance, bool force) const;
+            ///< Force or unforce a stance.
+
+            virtual void setStance (const Ptr& ptr, Stance stance, bool set) const;
+            ///< Set or unset a stance.
+
+            virtual bool getStance (const Ptr& ptr, Stance stance, bool ignoreForce = false) const;
+            ////< Check if a stance is active or not.
+
+            virtual float getSpeed (const Ptr& ptr) const;
+            ///< Return movement speed.
+
+            virtual MWMechanics::Movement& getMovementSettings (const Ptr& ptr) const;
+            ///< Return desired movement.
+
+            virtual Ogre::Vector3 getMovementVector (const Ptr& ptr) const;
+            ///< Return desired movement vector (determined based on movement settings,
+            /// stance and stats).
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

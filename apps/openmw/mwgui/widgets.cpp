@@ -6,6 +6,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#undef min
+#undef max
+
 using namespace MWGui;
 using namespace MWGui::Widgets;
 

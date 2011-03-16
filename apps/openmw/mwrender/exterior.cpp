@@ -58,6 +58,8 @@ void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
 
   // Rotates first around z, then y, then x
   mInsert->setOrientation(xr*yr*zr);
+
+    mInsertMesh.clear();
 }
 
 
@@ -81,18 +83,18 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
        if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
            parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
         }
-     
+
      mNpcPart = parent->createChildSceneNode(sceneNodeName);
   NIFLoader::load(mesh);
   MovableObject *ent = mScene.getMgr()->createEntity(mesh);
-  
+
   mNpcPart->translate(vec);
   mNpcPart->rotate(axis, angle);
  // mNpcPart->translate(vec);
   //mNpcPart->rotate(axis, angle);
   mNpcPart->attachObject(ent);
   //mNpcPart->
-  
+
 }
 */
 void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName, std::string sceneParent[], int elements)
@@ -108,7 +110,7 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
        if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
            parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
         }
-     
+
      mNpcPart = parent->createChildSceneNode(sceneNodeName);
    MeshPtr good2 = NIFLoader::load(mesh);
 
@@ -120,7 +122,7 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
   mNpcPart->rotate(axis, angle);
   }
   else{
-      
+
   mNpcPart->rotate(axis, angle);
   mNpcPart->translate(vec);
   }
@@ -202,6 +204,22 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
   NIFLoader::load(mesh);
   MovableObject *ent = mScene.getMgr()->createEntity(mesh);
   mInsert->attachObject(ent);
+
+    if (mInsertMesh.empty())
+        mInsertMesh = mesh;
+}
+
+void ExteriorCellRender::insertObjectPhysics()
+{
+    if (!mInsertMesh.empty())
+        mScene.addObject (mInsert->getName(), mInsertMesh, mInsert->getOrientation(),
+            mInsert->getScale().x, mInsert->getPosition());
+}
+
+void ExteriorCellRender::insertActorPhysics()
+{
+    if (!mInsertMesh.empty())
+        mScene.addActor (mInsert->getName(), mInsertMesh, mInsert->getPosition());
 }
 
 // insert a light related to the most recent insertBegin call.

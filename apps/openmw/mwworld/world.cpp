@@ -21,6 +21,8 @@
 
 #include "refdata.hpp"
 #include "globals.hpp"
+#include "doingphysics.hpp"
+#include "cellfunctors.hpp"
 
 namespace
 {
@@ -270,6 +272,15 @@ namespace MWWorld
 
     void World::unloadCell (CellRenderCollection::iterator iter)
     {
+        ListHandles functor;
+        iter->first->forEach<ListHandles>(functor);
+
+        { // silence annoying g++ warning
+            for (std::vector<std::string>::const_iterator iter (functor.mHandles.begin());
+                iter!=functor.mHandles.end(); ++iter)
+                mScene.removeObject (*iter);
+        }
+
         removeScripts (iter->first);
         mEnvironment.mMechanicsManager->dropActors (iter->first);
         iter->second->destroy();
@@ -294,9 +305,12 @@ namespace MWWorld
         }
     }
 
-    void World::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position)
+    void World::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
+        bool adjustPlayerPos)
     {
-        mPlayer->setPos (position.pos[0], position.pos[1], position.pos[2], true);
+        if (adjustPlayerPos)
+            mPlayer->setPos (position.pos[0], position.pos[1], position.pos[2], true);
+
         mPlayer->setCell (cell);
         // TODO orientation
 
@@ -315,11 +329,91 @@ namespace MWWorld
         }
     }
 
-    World::World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
-        const std::string& master, const boost::filesystem::path& resDir, bool newGame, Environment& environment)
-    : mSkyManager (0), mScene (renderer), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
+    void World::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
+    {
+        SuppressDoingPhysics scopeGuard;
+
+        // remove active
+        mEnvironment.mMechanicsManager->removeActor (mPlayer->getPlayer());
+
+        CellRenderCollection::iterator active = mActiveCells.begin();
+
+        while (active!=mActiveCells.end())
+        {
+            if (!(active->first->cell->data.flags & ESM::Cell::Interior))
+            {
+                if (std::abs (X-active->first->cell->data.gridX)<=1 &&
+                    std::abs (Y-active->first->cell->data.gridY)<=1)
+                {
+                    // keep cells within the new 3x3 grid
+                    ++active;
+                    continue;
+                }
+            }
+
+            unloadCell (active++);
+        }
+
+        // Load cells
+        for (int x=X-1; x<=X+1; ++x)
+            for (int y=Y-1; y<=Y+1; ++y)
+            {
+                CellRenderCollection::iterator iter = mActiveCells.begin();
+
+                while (iter!=mActiveCells.end())
+                {
+                    assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
+
+                    if (x==iter->first->cell->data.gridX &&
+                        y==iter->first->cell->data.gridY)
+                        break;
+
+                    ++iter;
+                }
+
+                if (iter==mActiveCells.end())
+                {
+                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mStore, mEsm);
+                    Ptr::CellStore *cell = &mExteriors[std::make_pair (x, y)];
+
+                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
+                }
+            }
+
+        // find current cell
+        CellRenderCollection::iterator iter = mActiveCells.begin();
+
+        while (iter!=mActiveCells.end())
+        {
+            assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
+
+            if (X==iter->first->cell->data.gridX &&
+                Y==iter->first->cell->data.gridY)
+                break;
+
+            ++iter;
+        }
+
+        assert (iter!=mActiveCells.end());
+
+        mCurrentCell = iter->first;
+
+        // adjust player
+        playerCellChange (&mExteriors[std::make_pair (X, Y)], position, adjustPlayerPos);
+
+        // Sky system
+        adjustSky();
+
+        mCellChanged = true;
+    }
+
+    World::World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng, const boost::filesystem::path& dataDir,
+        const std::string& master, const boost::filesystem::path& resDir,
+        bool newGame, Environment& environment)
+    : mSkyManager (0), mScene (renderer,physEng), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false), mEnvironment (environment)
     {
+		mPhysEngine = physEng;
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
 
@@ -330,6 +424,7 @@ namespace MWWorld
         mStore.load (mEsm);
 
         mPlayer = new MWWorld::Player (mScene.getPlayer(), mStore.npcs.find ("player"), *this);
+        mScene.addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -342,6 +437,8 @@ namespace MWWorld
 
         mSkyManager =
             MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir);
+
+		mPhysEngine = new OEngine::Physic::PhysicEngine();
     }
 
     World::~World()
@@ -357,6 +454,8 @@ namespace MWWorld
         delete mPlayer;
         delete mSkyManager;
         delete mGlobalVariables;
+
+		delete mPhysEngine;
     }
 
     MWWorld::Player& World::getPlayer()
@@ -417,7 +516,8 @@ namespace MWWorld
 
     Ptr World::getPtrViaHandle (const std::string& handle)
     {
-        // TODO player
+        if (mPlayer->getPlayer().getRefData().getHandle()==handle)
+            return mPlayer->getPlayer();
 
         for (CellRenderCollection::iterator iter (mActiveCells.begin());
             iter!=mActiveCells.end(); ++iter)
@@ -586,8 +686,10 @@ namespace MWWorld
         return mGlobalVariables->getInt ("timescale");
     }
 
-    void World::changeCell (const std::string& cellName, const ESM::Position& position)
+    void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        SuppressDoingPhysics scopeGuard;
+
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
 
@@ -613,89 +715,14 @@ namespace MWWorld
         //currentRegion->name = "";
     }
 
-    void World::changeCell (int X, int Y, const ESM::Position& position)
-    {
-        // remove active
-        CellRenderCollection::iterator active = mActiveCells.begin();
-
-        while (active!=mActiveCells.end())
-        {
-            if (!(active->first->cell->data.flags & ESM::Cell::Interior))
-            {
-                if (std::abs (X-active->first->cell->data.gridX)<=1 &&
-                    std::abs (Y-active->first->cell->data.gridY)<=1)
-                {
-                    // keep cells within the new 3x3 grid
-                    ++active;
-                    continue;
-                }
-            }
-
-            unloadCell (active++);
-        }
-
-        // Load cells
-        for (int x=X-1; x<=X+1; ++x)
-            for (int y=Y-1; y<=Y+1; ++y)
-            {
-                CellRenderCollection::iterator iter = mActiveCells.begin();
-
-                while (iter!=mActiveCells.end())
-                {
-                    assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
-
-                    if (x==iter->first->cell->data.gridX &&
-                        y==iter->first->cell->data.gridY)
-                        break;
-
-                    ++iter;
-                }
-
-                if (iter==mActiveCells.end())
-                {
-                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mStore, mEsm);
-                    Ptr::CellStore *cell = &mExteriors[std::make_pair (x, y)];
-
-                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
-                }
-            }
-
-        // find current cell
-        CellRenderCollection::iterator iter = mActiveCells.begin();
-
-        while (iter!=mActiveCells.end())
-        {
-            assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
-
-            if (X==iter->first->cell->data.gridX &&
-                Y==iter->first->cell->data.gridY)
-                break;
-
-            ++iter;
-        }
-
-        assert (iter!=mActiveCells.end());
-
-        mCurrentCell = iter->first;
-
-        // adjust player
-        playerCellChange (&mExteriors[std::make_pair (X, Y)], position);
-
-        // Sky system
-        adjustSky();
-
-        mCellChanged = true;
-    }
-
-
- void World::changeToExteriorCell (const ESM::Position& position)
+    void World::changeToExteriorCell (const ESM::Position& position)
     {
         int x = 0;
         int y = 0;
 
         positionToIndex (position.pos[0], position.pos[1], x, y);
 
-        changeCell (x, y, position);
+        changeCell (x, y, position, true);
     }
 
     const ESM::Cell *World::getExterior (const std::string& cellName) const
@@ -721,6 +748,7 @@ namespace MWWorld
 
         return 0;
     }
+
     void World::markCellAsUnchanged()
     {
         mCellChanged = false;
@@ -745,14 +773,17 @@ namespace MWWorld
 
             if (MWRender::CellRender *render = searchRender (ptr.getCell()))
             {
-                render->deleteObject (ptr.getRefData().getHandle());
-                ptr.getRefData().setHandle ("");
-
                 if (mActiveCells.find (ptr.getCell())!=mActiveCells.end())
                 {
                     Class::get (ptr).disable (ptr, mEnvironment);
                     mEnvironment.mSoundManager->stopSound3D (ptr);
+
+                    if (!DoingPhysics::isDoingPhysics())
+                        mScene.removeObject (ptr.getRefData().getHandle());
                 }
+
+                render->deleteObject (ptr.getRefData().getHandle());
+                ptr.getRefData().setHandle ("");
             }
         }
     }
@@ -777,11 +808,15 @@ namespace MWWorld
 
                     if (mCurrentCell->cell->data.gridX!=cellX || mCurrentCell->cell->data.gridY!=cellY)
                     {
-                        changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos);
+                        changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos, false);
                     }
+
                 }
             }
         }
+
+        mScene.moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z),
+            !DoingPhysics::isDoingPhysics());
 
         // TODO cell change for non-player ref
     }
@@ -813,5 +848,16 @@ namespace MWWorld
 
         if (y<0)
             --cellY;
+    }
+
+    void World::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
+        float duration)
+    {
+        mScene.doPhysics (duration, *this, actors);
+    }
+
+    void World::toggleCollisionMode()
+    {
+        mScene.toggleCollisionMode();
     }
 }

@@ -125,6 +125,7 @@ set(GAMEWORLD
     mwworld/actiontake.cpp
     mwworld/containerutil.cpp
     mwworld/player.cpp
+    mwworld/doingphysics.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -143,6 +144,8 @@ set(GAMEWORLD_HEADER
     mwworld/manualref.hpp
     mwworld/containerutil.hpp
     mwworld/player.hpp
+    mwworld/doingphysics.hpp
+    mwworld/cellfunctors.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
@@ -204,6 +207,7 @@ set(GAMEMECHANICS_HEADER
     mwmechanics/stat.hpp
     mwmechanics/creaturestats.hpp
     mwmechanics/magiceffects.hpp
+    mwmechanics/movement.hpp
     )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
@@ -225,7 +229,7 @@ add_executable(openmw
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
-include_directories(${SOUND_INPUT_INCLUDES})
+include_directories(${SOUND_INPUT_INCLUDES} ${BULLET_INCLUDE_DIRS})
 add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
@@ -234,6 +238,7 @@ target_link_libraries(openmw
   ${Boost_LIBRARIES}
   ${OPENAL_LIBRARY}
   ${SOUND_INPUT_LIBRARY}
+  ${BULLET_LIBRARIES}
   caelum
   MyGUIEngine
   MyGUIOgrePlatform

@@ -60,6 +60,8 @@ void InteriorCellRender::insertBegin (ESM::CellRef &ref)
 
   // Rotates first around z, then y, then x
   insert->setOrientation(xr*yr*zr);
+
+    mInsertMesh.clear();
 }
 
 // insert a mesh related to the most recent insertBegin call.
@@ -100,7 +102,7 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
        if(sceneParent[i] != "" && parent->getChild(sceneParent[i]))
            parent = dynamic_cast<Ogre::SceneNode*> (parent->getChild(sceneParent[i]));
         }
-     
+
      npcPart = parent->createChildSceneNode(sceneNodeName);
     //npcPart->showBoundingBox(true);
 
@@ -108,7 +110,7 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
 
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   //ent->extr
-    
+
     //  MovableObject *ent2 = scene.getMgr()->createEntity(bounds
         //      );
  //ent->
@@ -119,7 +121,7 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
   npcPart->rotate(axis, angle);
   }
   else{
-      
+
   npcPart->rotate(axis, angle);
   npcPart->translate(vec);
   }
@@ -185,6 +187,22 @@ void InteriorCellRender::insertMesh(const std::string &mesh)
   NIFLoader::load(mesh);
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   insert->attachObject(ent);
+
+    if (mInsertMesh.empty())
+        mInsertMesh = mesh;
+}
+
+void InteriorCellRender::insertObjectPhysics()
+{
+    if (!mInsertMesh.empty())
+        scene.addObject (insert->getName(), mInsertMesh, insert->getOrientation(),
+            insert->getScale().x, insert->getPosition());
+}
+
+void InteriorCellRender::insertActorPhysics()
+{
+    if (!mInsertMesh.empty())
+        scene.addActor (insert->getName(), mInsertMesh, insert->getPosition());
 }
 
 // insert a light related to the most recent insertBegin call.

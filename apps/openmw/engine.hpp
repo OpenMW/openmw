@@ -8,6 +8,7 @@
 #include <OgreFrameListener.h>
 
 #include <openengine/ogre/renderer.hpp>
+#include <openengine/bullet/physic.hpp>
 #include <components/compiler/extensions.hpp>
 
 #include "mwworld/environment.hpp"
@@ -59,6 +60,7 @@ namespace OMW
             boost::filesystem::path mDataDir;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer mOgre;
+			OEngine::Physic::PhysicEngine* mPhysicEngine;
             std::string mCellName;
             std::string mMaster;
             bool mDebug;

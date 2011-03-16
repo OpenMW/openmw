@@ -45,6 +45,9 @@ namespace MWRender
 
     virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements) = 0;
 
+    virtual void insertObjectPhysics() = 0;
+
+    virtual void insertActorPhysics() = 0;
 
     /// insert a light related to the most recent insertBegin call.
     virtual void insertLight(float r, float g, float b, float radius) = 0;

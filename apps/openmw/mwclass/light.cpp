@@ -31,6 +31,7 @@ namespace MWClass
             MWRender::Rendering rendering (cellRender, ref->ref);
 
             cellRender.insertMesh ("meshes\\" + model);
+            cellRender.insertObjectPhysics();
 
             // Extract the color and convert to floating point
             const int color = ref->base->data.color;

@@ -3,6 +3,7 @@
 
 namespace MWRender
 {
-    Player::Player (Ogre::Camera *camera) : mCamera (camera)
+    Player::Player (Ogre::Camera *camera, const std::string& handle)
+    : mCamera (camera), mHandle (handle)
     {}
 }

@@ -9,6 +9,9 @@
 #include <iterator>
 #include <boost/lexical_cast.hpp>
 
+#undef min
+#undef max
+
 using namespace MWGui;
 
 const int StatsWindow::lineHeight = 18;
