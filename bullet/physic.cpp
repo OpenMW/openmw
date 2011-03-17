@@ -34,7 +34,7 @@ namespace Physic
 		externalGhostObject = new PairCachingGhostObject(name);
 		externalGhostObject->setWorldTransform( transform );
 
-		btScalar externalCapsuleHeight = 90;
+		btScalar externalCapsuleHeight = 130;
 		btScalar externalCapsuleWidth = 16;
 
 		externalCollisionShape = new btCapsuleShapeZ( externalCapsuleWidth,  externalCapsuleHeight );
@@ -47,7 +47,7 @@ namespace Physic
 		internalGhostObject = new PairCachingGhostObject(name);
 		internalGhostObject->setWorldTransform( transform );
 		//internalGhostObject->getBroadphaseHandle()->s
-		btScalar internalCapsuleHeight =  88;
+		btScalar internalCapsuleHeight =  120;
 		btScalar internalCapsuleWidth =  15;
 
 		internalCollisionShape = new btCapsuleShapeZ( internalCapsuleWidth, internalCapsuleHeight );
@@ -56,8 +56,12 @@ namespace Physic
 		internalGhostObject->setCollisionShape( internalCollisionShape );
 		internalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
 
-		mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 10 ),1,20,20,9.8,0.2 );
+		mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 10 ),1,9.8,20,9.8,0.2 );
 		mCharacter->setUpAxis(btKinematicCharacterController::Z_AXIS);
+        mCharacter->setUseGhostSweepTest(false);
+
+        mCharacter->mCollision = false;
+        setGravity(0);
 	}
 
 	PhysicActor::~PhysicActor()
@@ -68,6 +72,16 @@ namespace Physic
 		delete externalGhostObject;
 		delete externalCollisionShape;
 	}
+
+    void PhysicActor::setGravity(float gravity)
+    {
+        mCharacter->setGravity(gravity);
+    }
+
+    void PhysicActor::enableCollisions(bool collision)
+    {
+        mCharacter->mCollision = collision;
+    }
 
 	void PhysicActor::setWalkDirection(const btVector3& mvt)
 	{

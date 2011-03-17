@@ -22,7 +22,6 @@ subject to the following restrictions:
 #include "LinearMath/btDefaultMotionState.h"
 #include "btKinematicCharacterController.h"
 
-#include <iostream>
 ///@todo Interact with dynamic objects,
 ///Ride kinematicly animated platforms properly
 ///Support ducking
@@ -132,6 +131,8 @@ btKinematicCharacterController::btKinematicCharacterController( btPairCachingGho
 	m_wasJumping = false;
 
 	setMaxSlope( btRadians( 45.0 ) );
+
+    mCollision = true;
 }
 
 
@@ -142,8 +143,9 @@ btKinematicCharacterController::~btKinematicCharacterController ()
 
 bool btKinematicCharacterController::recoverFromPenetration( btCollisionWorld* collisionWorld )
 {
-	//std::cout << "recover!!!!";
 	bool penetration = false;
+
+    if(!mCollision) return penetration;
 
 	collisionWorld->getDispatcher()->dispatchAllCollisionPairs( internalGhostObject->getOverlappingPairCache(),
 		collisionWorld->getDispatchInfo(),
@@ -172,10 +174,6 @@ bool btKinematicCharacterController::recoverFromPenetration( btCollisionWorld* c
 			for( int p = 0; p < manifold->getNumContacts(); p++ )
 			{
 				const btManifoldPoint&pt = manifold->getContactPoint( p );
-				if(manifold->getBody1() == externalGhostObject) std::cout << "external!!";
-				if(manifold->getBody0() == externalGhostObject) std::cout << "external!!";
-				if(manifold->getBody1() == internalGhostObject) std::cout << "internal!!";
-				if(manifold->getBody0() == internalGhostObject) std::cout << "internal!!";
 				if( (manifold->getBody1() == externalGhostObject && manifold->getBody0() == internalGhostObject)
 					||(manifold->getBody0() == externalGhostObject && manifold->getBody1() == internalGhostObject) )
 				{
@@ -194,7 +192,6 @@ bool btKinematicCharacterController::recoverFromPenetration( btCollisionWorld* c
 						currentPosition += pt.m_normalWorldOnB * directionSign * dist * m_recoveringFactor;          
 
 						penetration = true;
-						std::cout << "recover!!!!";
 					}
 				}
 			}
@@ -218,6 +215,13 @@ bool btKinematicCharacterController::recoverFromPenetration( btCollisionWorld* c
 btVector3 btKinematicCharacterController::stepUp( btCollisionWorld* world, const btVector3& currentPosition, btScalar& currentStepOffset )
 {
 	btVector3 targetPosition = currentPosition + getUpAxisDirections()[ m_upAxis ] * ( m_stepHeight + ( m_verticalOffset > btScalar( 0.0 ) ? m_verticalOffset : 0.0 ) );
+
+    //if the no collisions mode is on, no need to go any further
+    if(!mCollision)
+    {
+        currentStepOffset = m_stepHeight;
+        return targetPosition;
+    }
 
 	// Retrieve the collision shape
 	//
@@ -319,6 +323,9 @@ btVector3 btKinematicCharacterController::stepForwardAndStrafe( btCollisionWorld
 	//
 	btVector3 targetPosition = currentPosition + walkMove;
 
+    //if the no collisions mode is on, no need to go any further
+    if(!mCollision) return targetPosition;
+
 	// Retrieve the collision shape
 	//
 	btCollisionShape* collisionShape = externalGhostObject->getCollisionShape();
@@ -399,6 +406,9 @@ btVector3 btKinematicCharacterController::stepDown( btCollisionWorld* collisionW
 	// It prevents some flickering
 	//
 	btVector3 targetPosition = currentPosition - stepDrop;
+
+    //if the no collisions mode is on, no need to go any further
+    if(!mCollision) return targetPosition;
 
 	btTransform start;
 	start.setIdentity();

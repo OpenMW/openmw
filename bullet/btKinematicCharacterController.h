@@ -159,6 +159,9 @@ public:
 	}
 
 	bool onGround() const;
+
+    //if set to false, there will be no collision.
+    bool mCollision;
 };
 
 #endif // KINEMATIC_CHARACTER_CONTROLLER_H

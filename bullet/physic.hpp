@@ -68,6 +68,10 @@ namespace Physic
 
 		void setRotation(const btQuaternion& quat);
 
+        void setGravity(float gravity);
+
+        void enableCollisions(bool collision);
+
 		btVector3 getPosition(void);
 
 		btQuaternion getRotation(void);
