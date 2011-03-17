@@ -67,6 +67,8 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
     Ray centerRay = getCamera()->getCameraToViewportRay(
         getViewport()->getWidth()/2,
         getViewport()->getHeight()/2);
+    //let's avoid the capsule shape of the player.
+    centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
     btVector3 from(centerRay.getOrigin().x,centerRay.getOrigin().y,centerRay.getOrigin().z);
     btVector3 to(centerRay.getPoint(1000).x,centerRay.getPoint(1000).x,centerRay.getPoint(1000).x);
 
