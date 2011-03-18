@@ -207,6 +207,16 @@ void MWScene::toggleCollisionMode()
     for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = eng->PhysicActorMap.begin(); it != eng->PhysicActorMap.end();it++)
     {
         OEngine::Physic::PhysicActor* act = it->second;
-        act->enableCollisions(!act->getCollisionMode());
+        bool cmode = act->getCollisionMode();
+        if(cmode)
+        {
+            act->enableCollisions(false);
+            act->setGravity(0);
+        }
+        else
+        {
+            act->enableCollisions(true);
+            act->setGravity(10);
+        }
     }
 }
