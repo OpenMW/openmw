@@ -6,6 +6,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include "BulletShapeLoader.h"
 
 class btRigidBody;
 class btBroadphaseInterface;
@@ -19,9 +20,6 @@ namespace BtOgre
 {
 	class DebugDrawer;
 }
-
-class BulletShapeManager;
-class ManualBulletShapeLoader;
 
 namespace MWWorld
 {
@@ -72,6 +70,8 @@ namespace Physic
 
         void enableCollisions(bool collision);
 
+        bool getCollisionMode();
+
 		btVector3 getPosition(void);
 
 		btQuaternion getRotation(void);
@@ -113,7 +113,14 @@ namespace Physic
 	class PhysicEngine
 	{
 	public:
-		PhysicEngine();
+        /**
+        *Note that the shapeLoader IS destroyed by the phyic Engine!!
+        */
+		PhysicEngine(BulletShapeLoader* shapeLoader);
+
+        /**
+        *It DOES destroy the shape loader!
+        */
 		~PhysicEngine();
 
 		/**
@@ -200,7 +207,7 @@ namespace Physic
 		btDiscreteDynamicsWorld* dynamicsWorld;
 
 		//the NIF file loader.
-		ManualBulletShapeLoader* ShapeLoader;
+		BulletShapeLoader* mShapeLoader;
 
 		std::map<std::string,RigidBody*> RigidBodyMap;
 		std::map<std::string,PhysicActor*> PhysicActorMap;

@@ -83,6 +83,11 @@ namespace Physic
         mCharacter->mCollision = collision;
     }
 
+    bool PhysicActor::getCollisionMode()
+    {
+        return mCharacter->mCollision;
+    }
+
 	void PhysicActor::setWalkDirection(const btVector3& mvt)
 	{
 		mCharacter->setWalkDirection( mvt );
@@ -133,7 +138,7 @@ namespace Physic
 
 
 
-	PhysicEngine::PhysicEngine()
+	PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader)
 	{
 		// Set up the collision configuration and dispatcher
 		collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -157,7 +162,7 @@ namespace Physic
 			new BulletShapeManager();
 		}
 		//TODO:singleton?
-		ShapeLoader = new ManualBulletShapeLoader();
+		mShapeLoader = shapeLoader;
 
 		isDebugCreated = false;
 	}
@@ -178,14 +183,14 @@ namespace Physic
 		}
 	}
 
-	void PhysicEngine::setDebugRenderingMode(int mode)
-	{
-		if(!isDebugCreated)
-		{
-			createDebugRendering();
-		}
-			mDebugDrawer->setDebugMode(mode);
-	}
+    void PhysicEngine::setDebugRenderingMode(int mode)
+    {
+        if(!isDebugCreated)
+        {
+            createDebugRendering();
+        }
+        mDebugDrawer->setDebugMode(mode);
+    }
 
 	PhysicEngine::~PhysicEngine()
 	{
@@ -194,13 +199,13 @@ namespace Physic
 		delete collisionConfiguration;
 		delete dispatcher;
 		delete broadphase;
-		delete ShapeLoader;
+		delete mShapeLoader;
 	}
 
 	RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name)
 	{
 		//get the shape from the .nif
-		ShapeLoader->load(mesh,"General");
+		mShapeLoader->load(mesh,"General");
 		BulletShapeManager::getSingletonPtr()->load(mesh,"General");
 		BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(mesh,"General");
 
