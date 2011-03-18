@@ -204,5 +204,9 @@ void MWScene::scaleObject (const std::string& handle, float scale)
 
 void MWScene::toggleCollisionMode()
 {
-
+    for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = eng->PhysicActorMap.begin(); it != eng->PhysicActorMap.end();it++)
+    {
+        OEngine::Physic::PhysicActor* act = it->second;
+        act->enableCollisions(!act->getCollisionMode());
+    }
 }
