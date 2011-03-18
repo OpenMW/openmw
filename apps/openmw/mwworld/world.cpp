@@ -438,7 +438,7 @@ namespace MWWorld
         mSkyManager =
             MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir);
 
-		mPhysEngine = new OEngine::Physic::PhysicEngine();
+		mPhysEngine = physEng;
     }
 
     World::~World()
@@ -455,7 +455,7 @@ namespace MWWorld
         delete mSkyManager;
         delete mGlobalVariables;
 
-		delete mPhysEngine;
+		//delete mPhysEngine;
     }
 
     MWWorld::Player& World::getPlayer()

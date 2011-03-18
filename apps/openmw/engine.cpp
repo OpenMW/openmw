@@ -49,6 +49,7 @@
 #include "mwgui/class.hpp"
 #include "path.hpp"
 
+#include "components/nifbullet/bullet_nif_loader.hpp"
 
 //using namespace ESM;
 
@@ -351,8 +352,9 @@ void OMW::Engine::go()
 
     loadBSA();
 
-    // Create physics
-    mPhysicEngine = new OEngine::Physic::PhysicEngine();
+    // Create physics. shapeLoader is deleted by the physic engine
+    ManualBulletShapeLoader* shapeLoader = new ManualBulletShapeLoader();
+    mPhysicEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mDataDir, mMaster, mResDir, mNewGame, mEnvironment);
