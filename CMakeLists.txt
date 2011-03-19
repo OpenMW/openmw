@@ -182,6 +182,8 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/CMotionState.h
     ${LIBDIR}/openengine/bullet/physic.cpp
     ${LIBDIR}/openengine/bullet/physic.hpp
+    ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
+    ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
 )
 
 # Sound setup

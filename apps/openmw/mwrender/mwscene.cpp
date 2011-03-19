@@ -69,44 +69,8 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
         getViewport()->getHeight()/2);
     //let's avoid the capsule shape of the player.
     centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
-    btVector3 from(centerRay.getOrigin().x,centerRay.getOrigin().y,centerRay.getOrigin().z);
-    btVector3 to(centerRay.getPoint(1000).x,centerRay.getPoint(1000).x,centerRay.getPoint(1000).x);
-
-    // get all objects touched by the ray
-    /*getRaySceneQuery()->setRay (centerRay );
-    RaySceneQueryResult &result = getRaySceneQuery()->execute();
-
-    RaySceneQueryResult::iterator nearest = result.end();
-
-    for (RaySceneQueryResult::iterator itr = result.begin();
-        itr != result.end(); itr++ )
-    {
-        // there seem to be omnipresent objects like the caelum sky dom,
-        // the distance of these objects is always 0 so this if excludes these
-        if ( itr->movable && itr->distance >= 0.1)
-        {
-            // horrible hack to exclude statics. this must be removed as soon as a replacement for the
-            // AABB raycasting is implemented (we should not ignore statics)
-            MWWorld::Ptr ptr = world.getPtrViaHandle (itr->movable->getParentSceneNode()->getName());
-            if (ptr.getType()==typeid (ESM::Static))
-                break;
-
-            if ( nearest == result.end() )  //if no object is set
-            {
-                nearest = itr;
-            }
-            else if ( itr->distance < nearest->distance )
-            {
-                nearest = itr;
-            }
-        }
-    }
-
-    if ( nearest != result.end() )
-    {
-        handle = nearest->movable->getParentSceneNode()->getName();
-        distance = nearest->distance;
-    }*/
+    btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
+    btVector3 to(centerRay.getPoint(1000).x,-centerRay.getPoint(1000).z,centerRay.getPoint(1000).y);
 
     return eng->rayTest(from,to);
 }
