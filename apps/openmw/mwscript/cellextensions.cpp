@@ -53,7 +53,7 @@ namespace MWScript
                     else
                     {
                         pos.pos[0] = pos.pos[1] = 0;
-                        context.getWorld().changeCell (cell, pos);
+                        context.getWorld().changeToInteriorCell (cell, pos);
                     }
                 }
         };

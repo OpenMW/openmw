@@ -14,6 +14,13 @@
 #include "ptr.hpp"
 #include "globals.hpp"
 
+#include <openengine/bullet/physic.hpp>
+
+namespace Ogre
+{
+    class Vector3;
+}
+
 namespace ESM
 {
     struct Position;
@@ -63,6 +70,8 @@ namespace MWWorld
             bool mCellChanged;
             Environment& mEnvironment;
 
+			OEngine::Physic::PhysicEngine* mPhysEngine;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
@@ -83,14 +92,19 @@ namespace MWWorld
 
             void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
 
-            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position);
+            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
+                bool adjustPlayerPos = true);
 
             void adjustSky();
 
+            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
+            ///< Move from exterior to interior or from interior cell to a different
+            /// interior cell.
         public:
 
-           World (OEngine::Render::OgreRenderer& renderer, const boost::filesystem::path& dataDir,
-                const std::string& master, const boost::filesystem::path& resDir, bool newGame, Environment& environment);
+           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng, const boost::filesystem::path& dataDir,
+                const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+                Environment& environment);
 
             ~World();
 
@@ -138,12 +152,11 @@ namespace MWWorld
 
             float getTimeScaleFactor() const;
 
-            void changeCell (const std::string& cellName, const ESM::Position& position);
-            ///< works only for interior cells currently.
-
-            void changeCell (int X, int Y, const ESM::Position& position);
+            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position);
+            ///< Move to interior cell.
 
             void changeToExteriorCell (const ESM::Position& position);
+            ///< Move to exterior cell.
 
             const ESM::Cell *getExterior (const std::string& cellName) const;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
@@ -162,6 +175,14 @@ namespace MWWorld
 
             void positionToIndex (float x, float y, int &cellX, int &cellY) const;
             ///< Convert position to cell numbers
+
+            void doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
+                float duration);
+            ///< Run physics simulation and modify \a world accordingly.
+
+            void toggleCollisionMode();
+            ///< Toggle collision mode for player. If disabled player object should ignore
+            /// collisions and gravity.
     };
 }
 

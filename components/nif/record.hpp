@@ -79,7 +79,8 @@ enum RecordType
   RC_NiAutoNormalParticlesData,
   RC_NiSequenceStreamHelper,
   RC_NiSourceTexture,
-  RC_NiSkinInstance
+  RC_NiSkinInstance,
+  RC_RootCollisionNode
 };
 
 /// Base class for all records

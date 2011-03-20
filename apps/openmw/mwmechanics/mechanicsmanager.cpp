@@ -234,11 +234,17 @@ namespace MWMechanics
 
     void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
     {
+        if (ptr==mWatched)
+            mWatched = MWWorld::Ptr();
+
         mActors.erase (ptr);
     }
 
     void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
     {
+        if (!mWatched.isEmpty() && mWatched.getCell()==cellStore)
+            mWatched = MWWorld::Ptr();
+
         std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
 
         while (iter!=mActors.end())
@@ -255,7 +261,7 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
-    void MechanicsManager::update()
+    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement)
     {
         if (!mWatched.isEmpty())
         {
@@ -336,6 +342,15 @@ namespace MWMechanics
             }
 
             mEnvironment.mWindowManager->configureSkills (majorSkills, minorSkills);
+        }
+
+        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end();
+            ++iter)
+        {
+            Ogre::Vector3 vector = MWWorld::Class::get (*iter).getMovementVector (*iter);
+
+            if (vector!=Ogre::Vector3::ZERO)
+                movement.push_back (std::make_pair (iter->getRefData().getHandle(), vector));
         }
     }
 

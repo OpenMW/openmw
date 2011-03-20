@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <iterator>
 
+#undef min
+#undef max
+
 using namespace MWGui;
 
 

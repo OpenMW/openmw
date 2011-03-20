@@ -261,8 +261,9 @@ namespace MWClass
         cellRender.insertMesh (headModel, Ogre::Vector3( 0, 0, 5), axis, Ogre::Radian(0), npcName + "head", neckandup, neckNumbers);
         neckandup[neckNumbers++] = npcName + "head";
         cellRender.insertMesh (hairModel, Ogre::Vector3( 0, -1, 0), axis, Ogre::Radian(0), npcName + "hair", neckandup, neckNumbers);
-        ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
 
+        cellRender.insertActorPhysics();
+        ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
     }
 
     void Npc::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
@@ -316,7 +317,6 @@ namespace MWClass
     {
         if (!ptr.getRefData().getNpcStats().get())
         {
-            // xxx
             boost::shared_ptr<MWMechanics::NpcStats> stats (
                 new MWMechanics::NpcStats);
 
@@ -366,6 +366,113 @@ namespace MWClass
             ptr.get<ESM::NPC>();
 
         return ref->base->script;
+    }
+
+    void Npc::setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        switch (stance)
+        {
+            case Run:
+
+                stats.mForceRun = force;
+                break;
+
+            case Sneak:
+
+                stats.mForceSneak = force;
+                break;
+
+            case Combat:
+
+                throw std::runtime_error ("combat stance not enforcable for NPCs");
+        }
+    }
+
+    void Npc::setStance (const MWWorld::Ptr& ptr, Stance stance, bool set) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        switch (stance)
+        {
+            case Run:
+
+                stats.mRun = set;
+                break;
+
+            case Sneak:
+
+                stats.mSneak = set;
+                break;
+
+            case Combat:
+
+                stats.mCombat = set;
+                break;
+        }
+    }
+
+    bool Npc::getStance (const MWWorld::Ptr& ptr, Stance stance, bool ignoreForce) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        switch (stance)
+        {
+            case Run:
+
+                if (!ignoreForce && stats.mForceRun)
+                    return true;
+
+                return stats.mRun;
+
+            case Sneak:
+
+                if (!ignoreForce && stats.mForceSneak)
+                    return true;
+
+                return stats.mSneak;
+
+            case Combat:
+
+                return stats.mCombat;
+        }
+
+        return false;
+    }
+
+    float Npc::getSpeed (const MWWorld::Ptr& ptr) const
+    {
+        return getStance (ptr, Run) ? 600 : 300; // TODO calculate these values from stats
+    }
+
+    MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getMovement().get())
+        {
+            boost::shared_ptr<MWMechanics::Movement> movement (
+                new MWMechanics::Movement);
+
+            ptr.getRefData().getMovement() = movement;
+        }
+
+        return *ptr.getRefData().getMovement();
+    }
+
+    Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
+    {
+        Ogre::Vector3 vector (0, 0, 0);
+
+        if (ptr.getRefData().getMovement().get())
+        {
+            vector.x = - ptr.getRefData().getMovement()->mLeftRight * 200;
+            vector.y = ptr.getRefData().getMovement()->mForwardBackward * 200;
+
+            if (getStance (ptr, Run, false))
+                vector *= 2;
+        }
+
+        return vector;
     }
 
     void Npc::registerSelf()

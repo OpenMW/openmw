@@ -9,6 +9,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "containerstore.hpp"
 
@@ -36,6 +37,7 @@ namespace MWWorld
             // are never copied outside of container operations.
             boost::shared_ptr<MWMechanics::CreatureStats> mCreatureStats;
             boost::shared_ptr<MWMechanics::NpcStats> mNpcStats;
+            boost::shared_ptr<MWMechanics::Movement> mMovement;
 
             boost::shared_ptr<ContainerStore<RefData> > mContainerStore;
 
@@ -100,6 +102,11 @@ namespace MWWorld
             boost::shared_ptr<MWMechanics::NpcStats>& getNpcStats()
             {
                 return mNpcStats;
+            }
+
+            boost::shared_ptr<MWMechanics::Movement>& getMovement()
+            {
+                return mMovement;
             }
 
             boost::shared_ptr<ContainerStore<RefData> >& getContainerStore()
