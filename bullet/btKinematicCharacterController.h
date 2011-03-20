@@ -101,6 +101,7 @@ public:
 
 	~btKinematicCharacterController ();
 
+    void setVerticalVelocity(float z);
 
 	///btActionInterface interface
 	virtual void updateAction( btCollisionWorld* collisionWorld, btScalar deltaTime )

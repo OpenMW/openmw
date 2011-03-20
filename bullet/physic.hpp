@@ -67,6 +67,8 @@ namespace Physic
 		void setRotation(const btQuaternion& quat);
 
         void setGravity(float gravity);
+        
+        void setVerticalVelocity(float z);
 
         void enableCollisions(bool collision);
 

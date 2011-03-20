@@ -76,11 +76,17 @@ namespace Physic
     void PhysicActor::setGravity(float gravity)
     {
         mCharacter->setGravity(gravity);
+        //mCharacter->
     }
 
     void PhysicActor::enableCollisions(bool collision)
     {
         mCharacter->mCollision = collision;
+    }
+
+    void PhysicActor::setVerticalVelocity(float z)
+    {
+        mCharacter->setVerticalVelocity(z);
     }
 
     bool PhysicActor::getCollisionMode()

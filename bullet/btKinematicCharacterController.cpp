@@ -140,6 +140,10 @@ btKinematicCharacterController::~btKinematicCharacterController ()
 {
 }
 
+void btKinematicCharacterController::setVerticalVelocity(float z)
+{
+    m_verticalVelocity = z;
+}
 
 bool btKinematicCharacterController::recoverFromPenetration( btCollisionWorld* collisionWorld )
 {
