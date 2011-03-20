@@ -175,12 +175,14 @@ void MWScene::toggleCollisionMode()
         if(cmode)
         {
             act->enableCollisions(false);
-            act->setGravity(0);
+            act->setGravity(0.);
+            act->setVerticalVelocity(0);
         }
         else
         {
             act->enableCollisions(true);
-            act->setGravity(10);
+            act->setGravity(10.);
+            act->setVerticalVelocity(0);
         }
     }
 }
