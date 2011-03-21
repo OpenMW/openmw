@@ -51,6 +51,8 @@ MWScene::MWScene(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicE
 
 
 	mPlayer = new MWRender::Player (getCamera(), playerNode->getName());
+
+    mFreeFly = true;
 }
 
 MWScene::~MWScene()
@@ -97,11 +99,24 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
 		OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
 
         //dirty stuff to get the camera orientation. Must be changed!
-		Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
-		Ogre::Quaternion quat = sceneNode->getChildIterator().getNext()->getOrientation();
 
-        Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-		Ogre::Vector3 dir = 0.01*(quat*dir1);
+        Ogre::SceneNode *sceneNode = rend.getScene()->getSceneNode (iter->first);
+        Ogre::Vector3 dir;
+        Ogre::Node* yawNode = sceneNode->getChildIterator().getNext();
+        Ogre::Node* pitchNode = yawNode->getChildIterator().getNext();
+        if(mFreeFly)
+        {
+            Ogre::Quaternion yawQuat = yawNode->getOrientation();
+            Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
+            Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
+            dir = 0.01*(yawQuat*pitchQuat*dir1);
+        }
+        else
+        {
+            Ogre::Quaternion quat = yawNode->getOrientation();
+            Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
+            dir = 0.01*(quat*dir1);
+        }
 
 		//set the walk direction
 		act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
@@ -177,9 +192,11 @@ void MWScene::toggleCollisionMode()
             act->enableCollisions(false);
             act->setGravity(0.);
             act->setVerticalVelocity(0);
+            mFreeFly = true;
         }
         else
         {
+            mFreeFly = false;
             act->enableCollisions(true);
             act->setGravity(10.);
             act->setVerticalVelocity(0);

@@ -44,6 +44,8 @@ namespace MWRender
 
         MWRender::Player *mPlayer;
 
+        bool mFreeFly;
+
     public:
 
         MWScene (OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng);
