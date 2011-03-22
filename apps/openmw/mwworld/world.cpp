@@ -313,7 +313,6 @@ namespace MWWorld
 
         mPlayer->setCell (cell);
         // TODO orientation
-
         mEnvironment.mMechanicsManager->addActor (mPlayer->getPlayer());
         mEnvironment.mMechanicsManager->watchActor (mPlayer->getPlayer());
     }

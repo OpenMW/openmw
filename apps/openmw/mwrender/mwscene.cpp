@@ -127,7 +127,6 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
     {
         OEngine::Physic::PhysicActor* act = it->second;
 		btVector3 newPos = act->getPosition();
-        std::cout << newPos.x()<<newPos.y(),newPos.z();
         MWWorld::Ptr ptr = world.getPtrViaHandle (it->first);
 		world.moveObject (ptr, newPos.x(), newPos.y(), newPos.z());
     }
@@ -164,7 +163,7 @@ void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& positi
 {
     rend.getScene()->getSceneNode(handle)->setPosition(position);
 
-    if(updatePhysics)//TODO: is it an actor?
+    if(updatePhysics)//TODO: is it an actor? Done?
     {
         if (OEngine::Physic::RigidBody* body = eng->getRigidBody(handle))
         {
@@ -173,6 +172,12 @@ void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& positi
             btTransform tr = body->getWorldTransform();
             tr.setOrigin(btVector3(position.x,position.y,position.z));
             body->setWorldTransform(tr);
+        }
+        if (OEngine::Physic::PhysicActor* act = eng->getCharacter(handle))
+        {
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // start positions others than 0, 0, 0
+            act->setPosition(btVector3(position.x,position.y,position.z));
         }
     }
 }
