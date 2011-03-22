@@ -109,13 +109,13 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
             Ogre::Quaternion yawQuat = yawNode->getOrientation();
             Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
             Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-            dir = 0.01*(yawQuat*pitchQuat*dir1);
+            dir = 0.07*(yawQuat*pitchQuat*dir1);
         }
         else
         {
             Ogre::Quaternion quat = yawNode->getOrientation();
             Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-            dir = 0.01*(quat*dir1);
+            dir = 0.07*(quat*dir1);
         }
 
 		//set the walk direction
@@ -163,7 +163,7 @@ void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& positi
 {
     rend.getScene()->getSceneNode(handle)->setPosition(position);
 
-    if(updatePhysics)//TODO: is it an actor?
+    if(updatePhysics)//TODO: is it an actor? Done?
     {
         if (OEngine::Physic::RigidBody* body = eng->getRigidBody(handle))
         {
@@ -172,6 +172,12 @@ void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& positi
             btTransform tr = body->getWorldTransform();
             tr.setOrigin(btVector3(position.x,position.y,position.z));
             body->setWorldTransform(tr);
+        }
+        if (OEngine::Physic::PhysicActor* act = eng->getCharacter(handle))
+        {
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // start positions others than 0, 0, 0
+            act->setPosition(btVector3(position.x,position.y,position.z));
         }
     }
 }
