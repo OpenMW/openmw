@@ -38,7 +38,7 @@ namespace Physic
 		btScalar externalCapsuleWidth = 16;
 
 		externalCollisionShape = new btCapsuleShapeZ( externalCapsuleWidth,  externalCapsuleHeight );
-		externalCollisionShape->setMargin( 0.05 );
+		externalCollisionShape->setMargin( 0.1 );
 
 		externalGhostObject->setCollisionShape( externalCollisionShape );
 		externalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
@@ -51,12 +51,12 @@ namespace Physic
 		btScalar internalCapsuleWidth =  15;
 
 		internalCollisionShape = new btCapsuleShapeZ( internalCapsuleWidth, internalCapsuleHeight );
-		internalCollisionShape->setMargin( 0.05 );
+		internalCollisionShape->setMargin( 0.1 );
 
 		internalGhostObject->setCollisionShape( internalCollisionShape );
 		internalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
 
-		mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 10 ),1,9.8,20,9.8,0.2 );
+		mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 40 ),1,4,20,9.8,0.2 );
 		mCharacter->setUpAxis(btKinematicCharacterController::Z_AXIS);
         mCharacter->setUseGhostSweepTest(false);
 
@@ -273,7 +273,7 @@ namespace Physic
 
 	void PhysicEngine::stepSimulation(double deltaT)
 	{
-		dynamicsWorld->stepSimulation(deltaT,1,1/30.);
+		dynamicsWorld->stepSimulation(deltaT,1,1/50.);
 		if(isDebugCreated)
 		{
 			mDebugDrawer->step();
@@ -315,22 +315,33 @@ namespace Physic
     std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to)
     {
         std::string name = "";
-        float d = -1.;
-        btCollisionWorld::ClosestRayResultCallback resultCallback(from, to);
-        dynamicsWorld->rayTest(from, to, resultCallback);
+        float d = -1;
 
-        if (resultCallback.hasHit())
+        float d1 = 10000.;
+        btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
+        resultCallback1.m_collisionFilterMask = COL_WORLD;
+        dynamicsWorld->rayTest(from, to, resultCallback1);
+        if (resultCallback1.hasHit())
         {
-            if(resultCallback.m_collisionFilterGroup == COL_WORLD)
-            {
-                name = dynamic_cast<RigidBody&>(*resultCallback.m_collisionObject).mName;
-            }
-            if(resultCallback.m_collisionFilterGroup == COL_ACTOR_EXTERNAL || resultCallback.m_collisionFilterGroup == COL_ACTOR_INTERNAL)
-            {
-                name = dynamic_cast<PairCachingGhostObject&>(*resultCallback.m_collisionObject).mName;
-            }
-            d = resultCallback.m_closestHitFraction;
+            name = static_cast<RigidBody&>(*resultCallback1.m_collisionObject).mName;
+            d1 = resultCallback1.m_closestHitFraction;
+            d = d1;
         }
+
+        btCollisionWorld::ClosestRayResultCallback resultCallback2(from, to);
+        resultCallback2.m_collisionFilterMask = COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL;
+        dynamicsWorld->rayTest(from, to, resultCallback2);
+        float d2 = 10000.;
+        if (resultCallback2.hasHit())
+        {
+            d2 = resultCallback1.m_closestHitFraction;
+            if(d2<=d1)
+            {
+                name = static_cast<PairCachingGhostObject&>(*resultCallback2.m_collisionObject).mName;
+                d = d2;
+            }
+        }
+
         return std::pair<std::string,float>(name,d);
     }
 }};
