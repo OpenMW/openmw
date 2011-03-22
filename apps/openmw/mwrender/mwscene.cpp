@@ -72,7 +72,7 @@ std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
     //let's avoid the capsule shape of the player.
     centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
     btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
-    btVector3 to(centerRay.getPoint(1000).x,-centerRay.getPoint(1000).z,centerRay.getPoint(1000).y);
+    btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
 
     return eng->rayTest(from,to);
 }
@@ -115,7 +115,7 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
         {
             Ogre::Quaternion quat = yawNode->getOrientation();
             Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-            dir = 0.07*(quat*dir1);
+            dir = 0.025*(quat*dir1);
         }
 
 		//set the walk direction
@@ -208,7 +208,7 @@ void MWScene::toggleCollisionMode()
         {
             mFreeFly = false;
             act->enableCollisions(true);
-            act->setGravity(10.);
+            act->setGravity(4.);
             act->setVerticalVelocity(0);
         }
     }
