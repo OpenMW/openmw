@@ -14,7 +14,8 @@ using namespace Mangle::Sound;
 
 // --- SampleSource ---
 
-void AudiereSource::getInfo(int32_t *rate, int32_t *channels, int32_t *bits)
+void AudiereSource::getInfo(Mangle::Sound::int32_t *rate,
+    Mangle::Sound::int32_t *channels, Mangle::Sound::int32_t *bits)
 {
   SampleFormat fmt;
   int channels_, rate_;
