@@ -309,7 +309,7 @@ namespace MWWorld
         bool adjustPlayerPos)
     {
         if (adjustPlayerPos)
-            mPlayer->setPos (position.pos[0], position.pos[1], position.pos[2], true);
+            mPlayer->setPos (position.pos[0], position.pos[1], position.pos[2], false);
 
         mPlayer->setCell (cell);
         // TODO orientation

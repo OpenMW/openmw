@@ -109,13 +109,13 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
             Ogre::Quaternion yawQuat = yawNode->getOrientation();
             Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
             Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-            dir = 0.01*(yawQuat*pitchQuat*dir1);
+            dir = 0.07*(yawQuat*pitchQuat*dir1);
         }
         else
         {
             Ogre::Quaternion quat = yawNode->getOrientation();
             Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-            dir = 0.01*(quat*dir1);
+            dir = 0.07*(quat*dir1);
         }
 
 		//set the walk direction
@@ -127,6 +127,7 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
     {
         OEngine::Physic::PhysicActor* act = it->second;
 		btVector3 newPos = act->getPosition();
+        std::cout << newPos.x()<<newPos.y(),newPos.z();
         MWWorld::Ptr ptr = world.getPtrViaHandle (it->first);
 		world.moveObject (ptr, newPos.x(), newPos.y(), newPos.z());
     }
