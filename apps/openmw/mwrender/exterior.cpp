@@ -218,8 +218,7 @@ void ExteriorCellRender::insertObjectPhysics()
 
 void ExteriorCellRender::insertActorPhysics()
 {
-    if (!mInsertMesh.empty())
-        mScene.addActor (mInsert->getName(), mInsertMesh, mInsert->getPosition());
+    mScene.addActor (mInsert->getName(), mInsertMesh, mInsert->getPosition());
 }
 
 // insert a light related to the most recent insertBegin call.

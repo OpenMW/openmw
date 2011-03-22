@@ -201,8 +201,7 @@ void InteriorCellRender::insertObjectPhysics()
 
 void InteriorCellRender::insertActorPhysics()
 {
-    if (!mInsertMesh.empty())
-        scene.addActor (insert->getName(), mInsertMesh, insert->getPosition());
+    scene.addActor (insert->getName(), mInsertMesh, insert->getPosition());
 }
 
 // insert a light related to the most recent insertBegin call.
