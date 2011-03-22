@@ -18,7 +18,7 @@ namespace MWWorld
 
     bool DoingPhysics::isDoingPhysics()
     {
-        return sCounter>0 || sSuppress>0;
+        return sCounter>0 && sSuppress==0;
     }
 
     SuppressDoingPhysics::SuppressDoingPhysics()

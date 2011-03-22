@@ -164,13 +164,17 @@ void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& positi
 {
     rend.getScene()->getSceneNode(handle)->setPosition(position);
 
-	if(updatePhysics)//TODO: is it an actor?
-	{
-		OEngine::Physic::RigidBody* body = eng->getRigidBody(handle);
-		btTransform tr = body->getWorldTransform();
-		tr.setOrigin(btVector3(position.x,position.y,position.z));
-		body->setWorldTransform(tr);
-	}
+    if(updatePhysics)//TODO: is it an actor?
+    {
+        if (OEngine::Physic::RigidBody* body = eng->getRigidBody(handle))
+        {
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // start positions others than 0, 0, 0
+            btTransform tr = body->getWorldTransform();
+            tr.setOrigin(btVector3(position.x,position.y,position.z));
+            body->setWorldTransform(tr);
+        }
+    }
 }
 
 void MWScene::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)
