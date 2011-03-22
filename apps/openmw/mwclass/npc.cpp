@@ -46,7 +46,14 @@ namespace MWClass
 
         std::string hairID = ref->base->hair;
         std::string headID = ref->base->head;
-        std::string npcName = ref->base->name;
+
+        // very ugly workaround to stop OGRE from chocking on non-unique scene node handles
+        static int uniqueId = 0;
+
+        std::ostringstream stream;
+        stream << "npc$" << uniqueId++;
+
+        std::string npcName = stream.str(); // ref->base->name;
         //std::cout << "NPC: " << npcName << "\n";
 
         //get the part of the bodypart id which describes the race and the gender
