@@ -308,6 +308,7 @@ namespace MWWorld
     void World::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
         bool adjustPlayerPos)
     {
+        std::cout << "PlayerCellChange";
         if (adjustPlayerPos)
             mPlayer->setPos (position.pos[0], position.pos[1], position.pos[2], false);
 
@@ -330,6 +331,7 @@ namespace MWWorld
 
     void World::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
+        std::cout << "change CEll "  << X << Y;
         SuppressDoingPhysics scopeGuard;
 
         // remove active
@@ -716,6 +718,7 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
+        std::cout << "to exterior cell";
         int x = 0;
         int y = 0;
 
