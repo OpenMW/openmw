@@ -308,7 +308,6 @@ namespace MWWorld
     void World::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
         bool adjustPlayerPos)
     {
-        std::cout << "PlayerCellChange";
         if (adjustPlayerPos)
             mPlayer->setPos (position.pos[0], position.pos[1], position.pos[2], false);
 
@@ -454,8 +453,6 @@ namespace MWWorld
         delete mPlayer;
         delete mSkyManager;
         delete mGlobalVariables;
-
-		//delete mPhysEngine;
     }
 
     MWWorld::Player& World::getPlayer()
@@ -717,7 +714,6 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
-        std::cout << "to exterior cell";
         int x = 0;
         int y = 0;
 
