@@ -133,7 +133,6 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     //if collide = false, then it does a second pass which create a shape for raycasting.
     if(cShape->collide == false)
     {
-        std::cout << "collide = false "<<resourceName << std::endl;
 	    handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,true);                               
     }
 }
@@ -306,7 +305,6 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 	}
 	NodeShape = new btBvhTriangleMeshShape(mTriMesh,true);
 	currentShape->addChildShape(tr,NodeShape);
-    std::cout << "tri";
 }
 
 void ManualBulletShapeLoader::load(const std::string &name,const std::string &group)
