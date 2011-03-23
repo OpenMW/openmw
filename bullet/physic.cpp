@@ -241,28 +241,37 @@ namespace Physic
 
 	void PhysicEngine::removeRigidBody(std::string name)
 	{
-		RigidBody* body = RigidBodyMap[name];
-		if(body != NULL)
-		{
-            broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
-            std::map<std::string,PhysicActor*>::iterator it = PhysicActorMap.begin();
-            for(;it!=PhysicActorMap.end();it++)
+        std::map<std::string,RigidBody*>::iterator it = RigidBodyMap.find(name);
+        if (it != RigidBodyMap.end() )
+        {
+            RigidBody* body = it->second;
+            if(body != NULL)
             {
-                it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
-                it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                std::map<std::string,PhysicActor*>::iterator it = PhysicActorMap.begin();
+                for(;it!=PhysicActorMap.end();it++)
+                {
+                    it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                    it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                }
+                dynamicsWorld->removeRigidBody(RigidBodyMap[name]);
             }
-			dynamicsWorld->removeRigidBody(RigidBodyMap[name]);
-		}
+        }
 	}
 
 	void PhysicEngine::deleteRigidBody(std::string name)
 	{
-		RigidBody* body = RigidBodyMap[name];
-		if(body != NULL)
-		{
-			delete body;
-			RigidBodyMap[name] = NULL;
-		}
+        std::map<std::string,RigidBody*>::iterator it = RigidBodyMap.find(name);
+        if (it != RigidBodyMap.end() )
+        {
+            RigidBody* body = it->second;
+            if(body != NULL)
+            {
+                delete body;
+                RigidBodyMap[name] = NULL;
+                RigidBodyMap.erase(it);
+            }
+        }
 	}
 
 	RigidBody* PhysicEngine::getRigidBody(std::string name)
@@ -291,15 +300,33 @@ namespace Physic
 
 	void PhysicEngine::removeCharacter(std::string name)
 	{
-		PhysicActor* act = PhysicActorMap[name];
-		if(act != NULL)
-		{
-			dynamicsWorld->removeCollisionObject(act->externalGhostObject);
-			dynamicsWorld->removeCollisionObject(act->internalGhostObject);
-			dynamicsWorld->removeAction(act->mCharacter);
-			delete act;
-			PhysicActorMap[name] = NULL;
-		}
+        //std::cout << "remove";
+        std::map<std::string,PhysicActor*>::iterator it = PhysicActorMap.find(name);
+        if (it != PhysicActorMap.end() )
+        {
+            PhysicActor* act = it->second;
+            if(act != NULL)
+            {
+                /*broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
+                broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
+                std::map<std::string,PhysicActor*>::iterator it2 = PhysicActorMap.begin();
+                for(;it2!=PhysicActorMap.end();it++)
+                {
+                    it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
+                    it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
+                    it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
+                    it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
+                }*/
+                //act->externalGhostObject->
+                dynamicsWorld->removeCollisionObject(act->externalGhostObject);
+                dynamicsWorld->removeCollisionObject(act->internalGhostObject);
+                dynamicsWorld->removeAction(act->mCharacter);
+                delete act;
+                PhysicActorMap[name] = NULL;
+                PhysicActorMap.erase(it);
+            }
+        }
+        //std::cout << "ok";
 	}
 
 	PhysicActor* PhysicEngine::getCharacter(std::string name)
