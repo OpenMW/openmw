@@ -78,6 +78,9 @@ namespace Compiler
             void generateInstructionCode (int keyword, std::vector<Interpreter::Type_Code>& code,
                 Literals& literals, const std::string& id, int optionalArguments) const;
             ///< Append code for function to \a code.
+
+            void listKeywords (std::vector<std::string>& keywords) const;
+            ///< Append all known keywords to \æ kaywords.
     };
 }
 

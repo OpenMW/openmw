@@ -1,6 +1,8 @@
 
 #include "console.hpp"
 
+#include <algorithm>
+
 #include <components/compiler/exception.hpp>
 
 #include "../mwscript/extensions.hpp"
@@ -26,6 +28,12 @@ namespace MWGui
 
     bool Console::compile (const std::string& cmd, Compiler::Output& output)
     {
+
+  listNames();
+  for (std::vector<std::string>::iterator iter (mNames.begin()); iter!=mNames.end(); ++iter)
+    std::cout << *iter << ", ";
+  std::cout << std::endl;
+
         try
         {
             ErrorHandler::reset();
@@ -65,6 +73,31 @@ namespace MWGui
     void Console::report (const std::string& message, Type type)
     {
         printError ((type==ErrorMessage ? "error: " : "warning: ") + message);
+    }
+
+    void Console::listNames()
+    {
+        if (mNames.empty())
+        {
+            // keywords
+            std::istringstream input ("");
+
+            Compiler::Scanner scanner (*this, input, mCompilerContext.getExtensions());
+
+            scanner.listKeywords (mNames);
+
+            // identifier
+            const ESMS::ESMStore& store = mEnvironment.mWorld->getStore();
+
+            for (ESMS::RecListList::const_iterator iter (store.recLists.begin());
+                iter!=store.recLists.end(); ++iter)
+            {
+                iter->second->listIdentifier (mNames);
+            }
+
+            // sort
+            std::sort (mNames.begin(), mNames.end());
+        }
     }
 
     Console::Console(int w, int h, MWWorld::Environment& environment,

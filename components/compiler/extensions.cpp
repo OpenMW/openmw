@@ -207,4 +207,11 @@ namespace Compiler
                 throw std::logic_error ("unsupported code segment");
         }
     }
+
+    void Extensions::listKeywords (std::vector<std::string>& keywords) const
+    {
+        for (std::map<std::string, int>::const_iterator iter (mKeywords.begin());
+            iter!=mKeywords.end(); ++iter)
+            keywords.push_back (iter->first);
+    }
 }

@@ -21,10 +21,11 @@ namespace MWGui
   class Console : private OEngine::GUI::Layout, private Compiler::ErrorHandler
   {
     private:
-    
+
         MWScript::CompilerContext mCompilerContext;
         MWWorld::Environment& mEnvironment;
-        
+        std::vector<std::string> mNames;
+
         bool compile (const std::string& cmd, Compiler::Output& output);
 
         /// Report error to the user.
@@ -32,7 +33,13 @@ namespace MWGui
 
         /// Report a file related error
         virtual void report (const std::string& message, Type type);
-                    
+
+        void listNames();
+        ///< Write all valid identifiers and keywords into mNames and sort them.
+        /// \note If mNames is not empty, this function is a no-op.
+        /// \note The list may contain duplicates (if a name is a keyword and an identifier at the same
+        /// time).
+
   public:
     MyGUI::EditPtr command;
     MyGUI::EditPtr history;
