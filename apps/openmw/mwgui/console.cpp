@@ -28,12 +28,6 @@ namespace MWGui
 
     bool Console::compile (const std::string& cmd, Compiler::Output& output)
     {
-
-  listNames();
-  for (std::vector<std::string>::iterator iter (mNames.begin()); iter!=mNames.end(); ++iter)
-    std::cout << *iter << ", ";
-  std::cout << std::endl;
-
         try
         {
             ErrorHandler::reset();
