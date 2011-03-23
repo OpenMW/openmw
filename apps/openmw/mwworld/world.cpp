@@ -859,4 +859,9 @@ namespace MWWorld
     {
         mScene.toggleCollisionMode();
     }
+
+    void World::toggleRenderMode (RenderMode mode)
+    {
+        mScene.toggleRenderMode (mode);
+    }
 }
