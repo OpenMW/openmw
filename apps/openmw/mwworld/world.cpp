@@ -331,7 +331,6 @@ namespace MWWorld
 
     void World::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
-        std::cout << "change CEll "  << X << Y;
         SuppressDoingPhysics scopeGuard;
 
         // remove active
