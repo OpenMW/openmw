@@ -247,13 +247,13 @@ namespace Physic
             RigidBody* body = it->second;
             if(body != NULL)
             {
-                broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
-                std::map<std::string,PhysicActor*>::iterator it = PhysicActorMap.begin();
-                for(;it!=PhysicActorMap.end();it++)
+               // broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                /*std::map<std::string,PhysicActor*>::iterator it2 = PhysicActorMap.begin();
+                for(;it2!=PhysicActorMap.end();it++)
                 {
-                    it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
-                    it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
-                }
+                    it2->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                    it2->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                }*/
                 dynamicsWorld->removeRigidBody(RigidBodyMap[name]);
             }
         }
@@ -268,9 +268,8 @@ namespace Physic
             if(body != NULL)
             {
                 delete body;
-                RigidBodyMap[name] = NULL;
-                RigidBodyMap.erase(it);
             }
+            RigidBodyMap.erase(it);
         }
 	}
 
@@ -322,9 +321,8 @@ namespace Physic
                 dynamicsWorld->removeCollisionObject(act->internalGhostObject);
                 dynamicsWorld->removeAction(act->mCharacter);
                 delete act;
-                PhysicActorMap[name] = NULL;
-                PhysicActorMap.erase(it);
             }
+            PhysicActorMap.erase(it);
         }
         //std::cout << "ok";
 	}
