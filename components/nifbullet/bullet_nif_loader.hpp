@@ -105,7 +105,12 @@ private:
 	*Parse a node.
 	*/
 	void handleNode(Nif::Node *node, int flags,
-		Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool isCollisionNode,bool raycastingOnly);
+		Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
+
+    /**
+    *Helpler function
+    */
+    bool hasRootCollisionNode(Nif::Node* node);
 
 	/**
 	*convert a NiTriShape to a bullet trishape.

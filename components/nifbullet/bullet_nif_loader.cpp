@@ -125,18 +125,47 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 		return;
 	}
 
+    bool hasCollisionNode = hasRootCollisionNode(node);
+
     //do a first pass
-	handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,false,false);
+	handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,false);
 
     //if collide = false, then it does a second pass which create a shape for raycasting.
     if(cShape->collide == false)
     {
-	    handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,false,true);                               
+        std::cout << "collide = false "<<resourceName << std::endl;
+	    handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,true);                               
     }
 }
 
+bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
+{
+	if (node->recType == Nif::RC_NiNode)
+	{
+		Nif::NodeList &list = ((Nif::NiNode*)node)->children;
+		int n = list.length();
+		for (int i=0; i<n; i++)
+		{
+			if (list.has(i))
+			{
+				if(hasRootCollisionNode(&list[i])) return true;;
+			}
+		}
+    }
+    else if (node->recType == Nif::RC_NiTriShape) 
+    {
+        return false;
+    }
+	else if(node->recType == Nif::RC_RootCollisionNode)
+	{
+        return true;
+	}
+    
+    return false;
+}
+
 void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
-	Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool isCollisionNode,bool raycastingOnly)
+	Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
 	// Accumulate the flags from all the child nodes. This works for all
 	// the flags we currently use, at least.
@@ -194,11 +223,11 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
 		{
 			if (list.has(i))
 			{
-				handleNode(&list[i], flags,finalRot,finalPos,finalScale,isCollisionNode,raycastingOnly);
+				handleNode(&list[i], flags,finalRot,finalPos,finalScale,hasCollisionNode,isCollisionNode,raycastingOnly);
 			}
 		}
     }
-    else if (node->recType == Nif::RC_NiTriShape && isCollisionNode) 
+    else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode)) 
     {
         cShape->collide = true;
         handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,finalScale,raycastingOnly);
@@ -210,7 +239,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
 		for (int i=0; i<n; i++)
 		{
 			if (list.has(i))
-				handleNode(&list[i], flags,finalRot,finalPos,finalScale,true,raycastingOnly);
+				handleNode(&list[i], flags,finalRot,finalPos,finalScale,hasCollisionNode,true,raycastingOnly);
 		}
 	}
 }
@@ -277,6 +306,7 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 	}
 	NodeShape = new btBvhTriangleMeshShape(mTriMesh,true);
 	currentShape->addChildShape(tr,NodeShape);
+    std::cout << "tri";
 }
 
 void ManualBulletShapeLoader::load(const std::string &name,const std::string &group)
