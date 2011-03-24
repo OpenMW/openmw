@@ -155,6 +155,7 @@ void MWScene::addActor (const std::string& handle, const std::string& mesh,
 void MWScene::removeObject (const std::string& handle)
 {
 	//TODO:check if actor???
+    eng->removeCharacter(handle);
 	eng->removeRigidBody(handle);
 	eng->deleteRigidBody(handle);
 }

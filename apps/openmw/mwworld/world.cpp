@@ -453,8 +453,6 @@ namespace MWWorld
         delete mPlayer;
         delete mSkyManager;
         delete mGlobalVariables;
-
-		//delete mPhysEngine;
     }
 
     MWWorld::Player& World::getPlayer()
