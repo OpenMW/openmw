@@ -49,8 +49,8 @@ Getting OpenMW Working
         --link-shared,static --prefix=$OMW_LIB_PREFIX install
 
 
-5. Download [Ogre][] SDK (tested with 1.7.2) and move `lib/Release/Ogre.framework` into
-  `Library/Frameworks`.
+5. Download [Ogre][] SDK (tested with 1.7.2), unpack it and move
+`lib/Release/Ogre.framework` into `Library/Frameworks`.
 
 6. Download [OIS][] and use the XCode project provided in
    `ois/Mac/XCode-2.2`. Be sure to set your build architecture to
@@ -92,6 +92,7 @@ Getting OpenMW Working
         $ cd /path/to/open/build/dir
         $ cmake \
         -D CMAKE_OSX_ARCHITECTURES=i386 \
+        -D OGRESDK=/path/to/ogre/sdk \
         -D BOOST_INCLUDEDIR=$OMW_LIB_PREFIX/include/boost-1_45 \
         -D BOOST_LIBRARYDIR=$OMW_LIB_PREFIX/lib \
         -D SNDFILE_INCLUDE_DIR=$OMW_LIB_PREFIX/include \
@@ -108,32 +109,17 @@ Getting OpenMW Working
     You can use -G"Xcode" if you prefer Xcode, or -G"Eclipse CDT4 - Unix Makefiles"
     if you prefer Eclipse. You also can specify -D CMAKE_BUILD_TYPE=Debug for debug
     build.
-        
-11. In build directory create directory for game resources:
-        $ cd /path/to/openmw/build/dir
-        $ mkdir Contents
-        $ mkdir Contents/Resources
-        $ mkdir Contents/Plugins
-    Copy Ogre plugins from Ogre SDK to Plugins subdir:
-        $ cp /path/to/ogre/sdk/lib/*.dylib Contents/Plugins
-    Create symlink to resources subdirectory:
-        $ ln -s resources Contents/Resources/resources
-    Create symlinks for *.cfg files:
-        $ ln -s plugins.cfg Contents/MacOS/plugins.cfg
-        $ ln -s openmw.cfg Contents/MacOS/openmw.cfg
 
-12. Move your Morrowind `Data Files` directory into the `Contents/Resources`
+11. Copy your Morrowind `Data Files` directory into the OpenMW build dir
    with the name `data` or create symlink:
-        $ ln -s /path/to/morrowind/data/files Contents/Resources/data
+        $ ln -s /path/to/morrowind/data/files /path/to/openmw/build/dir/data
 
-13. From your build directory run:
-        $ ./openmw
+12. From your build directory run:
+        $ OpenMW.app/Contents/MacOS/openmw
+    or:
+        $ open OpenMW.app    
   Enjoy!
 
-14. Optionally you can create .app bundle:
-        $ make package
-  But for now you shold manually copy Contents directory from build directory to bundle
-  (because there is no plugins and resources in generated .app).
    
 
 [boost]: http://www.boost.org
