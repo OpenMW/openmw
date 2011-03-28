@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>resources/clear.png</file>
+    <file>resources/openmw_header.png</file>
+    <file>resources/openmw_icon.png</file>
+</qresource>
+</RCC>
