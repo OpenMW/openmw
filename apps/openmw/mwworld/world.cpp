@@ -419,7 +419,7 @@ namespace MWWorld
         std::cout << "Loading ESM " << masterPath.string() << "\n";
 
         // This parses the ESM file and loads a sample cell
-        mEsm.open (masterPath.file_string());
+        mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
         mPlayer = new MWWorld::Player (mScene.getPlayer(), mStore.npcs.find ("player"), *this);

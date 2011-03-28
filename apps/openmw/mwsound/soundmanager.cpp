@@ -312,7 +312,7 @@ namespace MWSound
   {
     MP3Lookup(dataDir / "Music/Explore/");
     if(useSound)
-      mData = new SoundImpl(root, camera, store, (dataDir / "Sound").file_string());
+      mData = new SoundImpl(root, camera, store, (dataDir / "Sound").string());
   }
 
   SoundManager::~SoundManager()
@@ -349,7 +349,7 @@ namespace MWSound
         {
             fileIter++;
         }
-        std::string music = fileIter->file_string();
+        std::string music = fileIter->string();
         try
         {
             std::cout << "Playing " << music << "\n";

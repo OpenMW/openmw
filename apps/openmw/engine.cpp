@@ -244,7 +244,7 @@ void OMW::Engine::loadBSA()
         if (boost::filesystem::extension (iter->path())==".bsa")
         {
             std::cout << "Adding " << iter->path().string() << std::endl;
-            addBSA(iter->path().file_string());
+            addBSA(iter->path().string());
         }
     }
 }
@@ -254,7 +254,7 @@ void OMW::Engine::loadBSA()
 
 void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 {
-    mOgre.getRoot()->addResourceLocation (path.file_string(), "FileSystem",
+    mOgre.getRoot()->addResourceLocation (path.string(), "FileSystem",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 }
 

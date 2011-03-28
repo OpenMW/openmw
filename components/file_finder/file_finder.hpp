@@ -20,7 +20,7 @@ class FileFinderT
 
     void add(const boost::filesystem::path &pth)
     {
-      std::string file = pth.file_string();
+      std::string file = pth.string();
       std::string key = file.substr(cut);
       owner->table[key] = file;
     }
@@ -35,7 +35,7 @@ public:
 
     // Remember the original path length, so we can cut it away from
     // the relative paths used as keys
-    std::string pstring = path.file_string();
+    std::string pstring = path.string();
     inserter.cut = pstring.size();
 
     // If the path does not end in a slash, then boost will add one
