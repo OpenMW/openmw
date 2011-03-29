@@ -47,8 +47,14 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             "set resources directory")
         ("start", bpo::value<std::string>()->default_value ("Beshara"),
             "set initial cell")
-        ("master", bpo::value<std::string>()->default_value ("Morrowind"),
-            "master file")
+        ("master", bpo::value<std::vector<std::string> >()
+            ->default_value (std::vector<std::string>(), "")
+            ->multitoken(),
+            "master file(s)")
+        ("plugin", bpo::value<std::vector<std::string> >()
+            ->default_value (std::vector<std::string>(), "")
+            ->multitoken(),
+            "plugin file(s)")
         ( "showfps", "show fps counter")
         ( "debug", "debug mode" )
         ( "nosound", "disable all sound" )
@@ -83,25 +89,50 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         return false;
     }
 
+    // directory settings
     engine.setDataDir (variables["data"].as<std::string>());
     engine.setResourceDir (variables["resources"].as<std::string>());
-    engine.setCell (variables["start"].as<std::string>());
-    engine.addMaster (variables["master"].as<std::string>());
 
-    if (variables.count ("showfps"))
+    // master and plugin
+    std::vector<std::string> master = variables["master"].as<std::vector<std::string> >();
+    if (master.empty())
+    {
+        std::cout << "No master file given. Assuming Morrowind.esm" << std::endl;
+        master.push_back ("Morrowind");
+    }
+
+    if (master.size()>1)
+    {
+        std::cout
+            << "Ignoring all but the first master file (multiple master files not yet supported)."
+            << std::endl;
+    }
+
+    engine.addMaster (master[0]);
+
+    std::vector<std::string> plugin = variables["plugin"].as<std::vector<std::string> >();
+
+    if (!plugin.empty())
+        std::cout << "Ignoring plugin files (plugins not yet supported)." << std::endl;
+
+    // startup-settings
+    engine.setCell (variables["start"].as<std::string>());
+
+    if (variables.count ("new-game"))
+        engine.setNewGame();
+
+    // other settings
+    if (variables.count ("fps"))
         engine.showFPS();
 
     if (variables.count ("debug"))
         engine.enableDebugMode();
 
-    if (variables.count ("nosound"))
+    if (variables.count ("no-sound"))
         engine.disableSound();
 
     if (variables.count ("script-verbose"))
         engine.enableVerboseScripts();
-
-    if (variables.count ("new-game"))
-        engine.setNewGame();
 
     if (variables.count ("script-all"))
         engine.setCompileAll (true);
