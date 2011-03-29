@@ -317,9 +317,9 @@ void DataFilesDialog::restoreDefaults()
     dataFilesModel->checkedItems.clear();
 
     QModelIndexList indexlist; // Make a list of default master files
-    indexlist.append(dataFilesModel->index("Morrowind.esm", 0));
-    indexlist.append(dataFilesModel->index("Tribunal.esm", 0));
-    indexlist.append(dataFilesModel->index("Bloodmoon.esm", 0));
+    indexlist.append(dataFilesModel->index("data/Morrowind.esm", 0));
+    indexlist.append(dataFilesModel->index("data/Tribunal.esm", 0));
+    indexlist.append(dataFilesModel->index("data/Bloodmoon.esm", 0));
 
     foreach (const QModelIndex &index, indexlist) {
         if (index.isValid()) {
