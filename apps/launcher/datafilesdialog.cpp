@@ -15,7 +15,7 @@ DataFilesDialog::DataFilesDialog()
 
     dataFilesModel = new DataFilesModel();
     dataFilesModel->setReadOnly(true); // Prevent changes to files
-    dataFilesModel->setRootPath("/opt/openmw/data");
+    dataFilesModel->setRootPath("data");
 
 //    sortModel = new QSortFilterProxyModel();
 //    sortModel->setSourceModel(dataFilesModel);
@@ -181,7 +181,7 @@ void DataFilesDialog::setupView()
 //    dataFilesView->setModel(sortModel);
 
     // Set the view to the data directory
-    dataFilesView->setRootIndex(QModelIndex(dataFilesModel->index("/opt/openmw/data")));
+    dataFilesView->setRootIndex(QModelIndex(dataFilesModel->index("data")));
 //    dataFilesView->setRootIndex(sortModel->mapFromSource(QModelIndex(dataFilesModel->index("/opt/openmw/data"))));
 
     dataFilesView->verticalHeader()->hide();
@@ -245,19 +245,24 @@ void DataFilesDialog::readConfig()
 
 void DataFilesDialog::writeConfig()
 {
-/*    // Custom write method: We cannot use QSettings because it does not accept spaces
+    // Custom write method: We cannot use QSettings because it does not accept spaces
 
-//    QList<QPersistentModelIndex> checkedItems = dataFilesModel->getCheckedItems().toList();
-    QList<QPersistentModelIndex> checkedItems = dataFilesModel->getCheckedItems();
-
-    qSort(checkedItems); // Sort the indexes so that master files end up on top
-
-    QString keyName;
-    QString fileName;
-
-    QFile file("Morrowind.ini"); // Specify filepath later
+//    QList<QPersistentModelIndex> checkeditems = dataFilesModel->getCheckedItems().toList();
+    QStringList checkeditems = dataFilesModel->getCheckedItems();
+    //QString sectionname = "[Game Files]";
+    QString filename;
+    QFileInfo datafile;
+    
+    // Sort the items so that master files end up on top
+    foreach (QString str, checkeditems) {
+        if(str.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
+            checkeditems.move(checkeditems.indexOf(str), 0);
+        }
+    }
+    
+    QFile file("openmw.cfg"); // Specify filepath later
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        close(); // File cannot be opened or created
+        close(); // File cannot be opened or created TODO: throw error
 
     //QTextStream in(&file);
     QTextStream in(&file);
@@ -265,34 +270,44 @@ void DataFilesDialog::writeConfig()
     //QString buffer;
     QByteArray buffer;
 
+    // Remove all previous master/plugin entries from config
     while (!in.atEnd()) {
         QString line = in.readLine();
-        if (!line.contains("GameFile") && line != "[Game Files]") {
-            buffer += line + "\n";
+        //if (!line.contains("GameFile") && line != "[Game Files]") {
+        if (!line.contains("master") && !line.contains("plugin")) {
+            buffer += line += "\n"; 
         }
     }
 
     file.close();
 
+    // Now we write back the other config entries
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-        close();
+        close(); // File cannot be opened or created TODO: throw error
 
-    QTextStream out(&file);
     file.write(buffer);
-
-    out << "[Game Files]\n";
-
+    QTextStream out(&file);
+    
+    // Write the section name to the config file before we write out the data files
+    //out << sectionname << endl;
+    
     // Write the list of game files to the config
-    for (int i = 0; i < checkedItems.size(); ++i) {
-        fileName = dataFilesModel->fileName(checkedItems.at(i));
-
-        keyName.setNum(i);
-        keyName.prepend("GameFile");
-
-        out << keyName << "=" << fileName << "\n";
+    for (int i = 0; i < checkeditems.size(); ++i) {
+        //filename = dataFilesModel->fileName(checkeditems.at(i));
+        filename = checkeditems.at(i);
+        datafile = QFileInfo(filename);
+        
+        if (datafile.exists()) {
+            if (filename.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
+                out << "master=" << datafile.fileName() << endl;
+            } else if (filename.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
+                out << "plugin=" << datafile.fileName() << endl;
+            }
+        }
     }
 
-    file.close();*/
+
+    file.close();
     close(); // Exit dialog
 }
 
@@ -302,9 +317,9 @@ void DataFilesDialog::restoreDefaults()
     dataFilesModel->checkedItems.clear();
 
     QModelIndexList indexlist; // Make a list of default master files
-    indexlist.append(dataFilesModel->index("/opt/openmw/data/Morrowind.esm", 0));
-    indexlist.append(dataFilesModel->index("/opt/openmw/data/Tribunal.esm", 0));
-    indexlist.append(dataFilesModel->index("/opt/openmw/data/Bloodmoon.esm", 0));
+    indexlist.append(dataFilesModel->index("Morrowind.esm", 0));
+    indexlist.append(dataFilesModel->index("Tribunal.esm", 0));
+    indexlist.append(dataFilesModel->index("Bloodmoon.esm", 0));
 
     foreach (const QModelIndex &index, indexlist) {
         if (index.isValid()) {
