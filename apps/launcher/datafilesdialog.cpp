@@ -208,39 +208,49 @@ void DataFilesDialog::setupView()
 }
 
 void DataFilesDialog::readConfig()
-{
-    // Morrowind.ini settings
-    QSettings settings("Morrowind.ini",
-                        QSettings::IniFormat);
-    settings.beginGroup("Game Files");
+{    
+    QString filename;
+    QString path = "data/"; // TODO: Should be global
+    
+    QFile file("openmw.cfg"); // Specify filepath later
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "error open";
+        close(); // File cannot be opened or created TODO: throw error
+    }
+    
+    QTextStream in(&file);
 
-    const QStringList childKeys = settings.childKeys();
+    QStringList datafiles;
 
-    // See if the files from the config file actually exist
-    foreach (const QString &childKey, childKeys) {
-        // Create full path to current file found in config
-        QString path = "/opt/openmw/data/"; // Note: get path from config
-        path.append(settings.value(childKey).toString());
+    // Add each data file read from the config file to a QStringList
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+                
+        if (line.contains("master")) {
+            filename = line.remove("master=");
+            filename.prepend(path);
+            
+            datafiles << filename << "\n";
+            
+        } else if (line.contains("plugin")) {
+            filename = line.remove("plugin=");
+            filename.prepend(path);
+            
+            datafiles << filename << "\n";
+        }
+    }
 
-        QModelIndex index = dataFilesModel->index(path, 0);
-//        QModelIndex index = sortModel->mapFromSource(dataFilesModel->index(path, 0));
-//        QModelIndex index = sortModel->mapFromSource(dataFilesModel->index(path));
-
+    file.close();
+    
+    // Check if the files are in the model, set to checked if found
+    foreach(const QString &currentfile, datafiles) {
+        QModelIndex index = dataFilesModel->index(currentfile, 0);
+        
         if (index.isValid()) {
             // File is found in model, set it to checked
-            qDebug() << "File is found in model, set it to checked";
-      //      dataFilesModel->setData(sortModel->mapToSource(index), Qt::Checked, Qt::CheckStateRole);
-              dataFilesModel->setData(index, Qt::Checked, Qt::CheckStateRole);
-//            dataFilesModel->checkedItems.insert(QPersistentModelIndex(sortModel->mapToSource(index)));
-        //    dataFilesModel->checkedItems.insert(index);
-
-            //qDebug() << index;
-        } else {
-           // File is not found in the model
-           qDebug() << "file not found!";
-       }
+            dataFilesModel->setData(index, Qt::Checked, Qt::CheckStateRole);
+        }
     }
-    settings.endGroup();
 }
 
 void DataFilesDialog::writeConfig()
@@ -254,9 +264,9 @@ void DataFilesDialog::writeConfig()
     QFileInfo datafile;
     
     // Sort the items so that master files end up on top
-    foreach (QString str, checkeditems) {
-        if(str.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
-            checkeditems.move(checkeditems.indexOf(str), 0);
+    foreach (const QString &currentitem, checkeditems) {
+        if(currentitem.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
+            checkeditems.move(checkeditems.indexOf(currentitem), 0);
         }
     }
     
