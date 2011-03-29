@@ -3,27 +3,34 @@
 
 #include "datafilesdialog.h"
 #include "datafilesmodel.h"
+#include "datafilesitem.h"
 
 using namespace ESM;
 
-//DataFilesDialog::DataFilesDialog(QWidget *parent)
-//    : QDialog(parent)
-
 DataFilesDialog::DataFilesDialog()
 {
-    //QWidget *centralWidget = new QWidget;
-
+    //dataFilesModel = new DataFilesModel(this);
     dataFilesModel = new DataFilesModel();
-    dataFilesModel->setReadOnly(true); // Prevent changes to files
-    dataFilesModel->setRootPath("data");
+    
+    for (int row = 0; row < 4; ++row) {
+        for (int column = 0; column < 4; ++column) {
+             QList<QVariant> test;
+            test << QString("%0").arg(i);
+            DataFilesItem *item = new DataFilesItem(test);
+            dataFilesModel->setItem(row, column, item);
+        }
+    }
+  
+    //dataFilesModel->setReadOnly(true); // Prevent changes to files
+    //dataFilesModel->setRootPath("data");
 
 //    sortModel = new QSortFilterProxyModel();
 //    sortModel->setSourceModel(dataFilesModel);
 
-    selectionModel = new QItemSelectionModel(dataFilesModel);
+    //selectionModel = new QItemSelectionModel(dataFilesModel);
 //    selectionModel = new QItemSelectionModel(sortModel);
 
-    // First, show only plugin files and sort them
+    /* First, show only plugin files and sort them
     QStringList acceptedfiles = (QStringList() << "*.esp");
     dataFilesModel->setNameFilters(acceptedfiles);
     dataFilesModel->setNameFilterDisables(false); // Hide all other files
@@ -35,58 +42,33 @@ DataFilesDialog::DataFilesDialog()
     acceptedfiles = (QStringList() << "*.esm" << "*.esp");
     dataFilesModel->setNameFilters(acceptedfiles);
     dataFilesModel->setFilter(QDir::Files);
-
+*/
     // Column 1
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
-    QHBoxLayout *groupsLayout = new QHBoxLayout();
 
     QGroupBox *groupFiles = new QGroupBox(tr("Morrowind Files"), this);
     groupFiles->setMinimumWidth(450);
     QVBoxLayout *groupFilesLayout = new QVBoxLayout(groupFiles);
 
-    QSpacerItem *vSpacer1 = new QSpacerItem(20, 2, QSizePolicy::Minimum, QSizePolicy::Fixed);
+    //QSpacerItem *vSpacer1 = new QSpacerItem(20, 2, QSizePolicy::Minimum, QSizePolicy::Fixed);
 
-    QHBoxLayout *filterLayout = new QHBoxLayout();
+    /*QHBoxLayout *filterLayout = new QHBoxLayout();
     QLabel *labelFilter = new QLabel(tr("Filter:"), groupFiles);
     lineFilter = new LineEdit(groupFiles);
 
     filterLayout->addWidget(labelFilter);
     filterLayout->addWidget(lineFilter);
-
+    */
+    
     // View for the game files
-    dataFilesView = new QTableView(groupFiles);
-
+    //dataFilesView = new QTreeView(groupFiles);
+    dataFilesView = new QTreeView(groupFiles);
+    dataFilesView->setModel(dataFilesModel);
+    
     // Put everything in the correct layouts
-    groupFilesLayout->addLayout(filterLayout);
-    groupFilesLayout->addItem(vSpacer1);
+    //groupFilesLayout->addLayout(filterLayout);
+    //groupFilesLayout->addItem(vSpacer1);
     groupFilesLayout->addWidget(dataFilesView);
-    groupsLayout->addWidget(groupFiles);
-
-    // Column 2
-    QGroupBox *groupInfo = new QGroupBox(tr("File Information"), this);
-    groupInfo->setFixedWidth(250);
-    QVBoxLayout *groupInfoLayout = new QVBoxLayout(groupInfo);
-
-    QSpacerItem *vSpacer2 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Fixed);
-
-    QLabel *labelAuthor = new QLabel(tr("Author:"), groupInfo);
-    lineAuthor = new QLineEdit(groupInfo);
-    lineAuthor->setReadOnly(true);
-
-    QSpacerItem *vSpacer3 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Fixed);
-
-    QLabel *labelDesc = new QLabel(tr("Description:"), groupInfo);
-    textDesc = new QPlainTextEdit(groupInfo);
-    textDesc->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    textDesc->setMinimumHeight(180);
-    textDesc->setReadOnly(true);
-
-    QSpacerItem *vSpacer4 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Fixed);
-
-    QLabel *labelDepends = new QLabel(tr("Dependencies:"), groupInfo);
-    textDepends = new QPlainTextEdit(groupInfo);
-    textDepends->setFixedHeight(80);
-    textDepends->setReadOnly(true);
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
     QSpacerItem *horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -97,28 +79,14 @@ DataFilesDialog::DataFilesDialog()
 
     buttonsLayout->addItem(horizontalSpacer);
     buttonsLayout->addWidget(buttonBox);
-
-    // Put everything in the correct layouts
-    groupInfoLayout->addItem(vSpacer2);
-    groupInfoLayout->addWidget(labelAuthor);
-    groupInfoLayout->addWidget(lineAuthor);
-    groupInfoLayout->addItem(vSpacer3);
-    groupInfoLayout->addWidget(labelDesc);
-    groupInfoLayout->addWidget(textDesc);
-    groupInfoLayout->addItem(vSpacer4);
-    groupInfoLayout->addWidget(labelDepends);
-    groupInfoLayout->addWidget(textDepends);
-
-    groupsLayout->addWidget(groupInfo);
-
-    dialogLayout->addLayout(groupsLayout);
+    
+    dialogLayout->addWidget(groupFiles);
     dialogLayout->addLayout(buttonsLayout);
 
     setWindowTitle(tr("Data Files"));
 
-
     // Signals and slots
-    //connect(dataFilesModel, SIGNAL(directoryLoaded(const QString &)), this, SLOT(setupView()));
+    /*connect(dataFilesModel, SIGNAL(directoryLoaded(const QString &)), this, SLOT(setupView()));
 
     connect(dataFilesView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
     connect(selectionModel, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(changeData(QModelIndex, QModelIndex)));
@@ -128,14 +96,14 @@ DataFilesDialog::DataFilesDialog()
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), SIGNAL(clicked()), this, SLOT(restoreDefaults()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(writeConfig()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
-
-    readConfig();
-    setupView();
+*/
+    //readConfig();
+    //setupView();
 }
 
 void DataFilesDialog::changeData(QModelIndex index, QModelIndex bottom)
 {
-    if (!index.isValid()) {
+    /*if (!index.isValid()) {
         return;
     }
 
@@ -176,7 +144,7 @@ void DataFilesDialog::changeData(QModelIndex index, QModelIndex bottom)
 
 void DataFilesDialog::setupView()
 {
-    // The signal directoryLoaded is emitted after all files are in the model
+    /* The signal directoryLoaded is emitted after all files are in the model
     dataFilesView->setModel(dataFilesModel);
 //    dataFilesView->setModel(sortModel);
 
@@ -203,13 +171,13 @@ void DataFilesDialog::setupView()
     dataFilesView->horizontalHeader()->setStretchLastSection(true);
 
 
-    //sortModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+    //sortModel->setSortCaseSensitivity(Qt::CaseInsensitive);*/
 
 }
 
 void DataFilesDialog::readConfig()
 {    
-    QString filename;
+/*    QString filename;
     QString path = "data/"; // TODO: Should be global
     
     QFile file("openmw.cfg"); // Specify filepath later
@@ -250,12 +218,12 @@ void DataFilesDialog::readConfig()
             // File is found in model, set it to checked
             dataFilesModel->setData(index, Qt::Checked, Qt::CheckStateRole);
         }
-    }
+    }*/
 }
 
 void DataFilesDialog::writeConfig()
 {
-    // Custom write method: We cannot use QSettings because it does not accept spaces
+    /* Custom write method: We cannot use QSettings because it does not accept spaces
 
 //    QList<QPersistentModelIndex> checkeditems = dataFilesModel->getCheckedItems().toList();
     QStringList checkeditems = dataFilesModel->getCheckedItems();
@@ -318,12 +286,12 @@ void DataFilesDialog::writeConfig()
 
 
     file.close();
-    close(); // Exit dialog
+    close(); // Exit dialog*/
 }
 
 void DataFilesDialog::restoreDefaults()
 {
-    // Uncheck all checked items
+/*    // Uncheck all checked items
     dataFilesModel->checkedItems.clear();
 
     QModelIndexList indexlist; // Make a list of default master files
@@ -337,12 +305,12 @@ void DataFilesDialog::restoreDefaults()
             dataFilesModel->setData(index, Qt::Checked, Qt::CheckStateRole);
         }
     }
-    dataFilesModel->submit(); // Force refresh of view
+    dataFilesModel->submit(); // Force refresh of view*/
 }
 
 void DataFilesDialog::setCheckstate(QModelIndex index)
 {
-    // No check if index is valid: doubleclicked() always returns
+    /* No check if index is valid: doubleclicked() always returns
     // a valid index when emitted
 
     //index = QModelIndex(sortModel->mapToSource(index)); // Get a valid index
@@ -357,11 +325,12 @@ void DataFilesDialog::setCheckstate(QModelIndex index)
         dataFilesModel->setData(index, Qt::Unchecked, Qt::CheckStateRole);
     } else {
        dataFilesModel->setData(index, Qt::Checked, Qt::CheckStateRole);
-    }
+    }*/
 }
 
 void DataFilesDialog::setFilter()
 {
+    /*
     QStringList filefilter = (QStringList() << "*.esm" << "*.esp");
     QStringList currentfilefilter;
 
@@ -390,5 +359,5 @@ void DataFilesDialog::setFilter()
 //    readConfig();
 //    dataFilesModel->submit();
 //    dataFilesModel->setData();
-
+*/
 }

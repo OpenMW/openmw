@@ -1,38 +1,35 @@
 #ifndef DATAFILESMODEL_H
 #define DATAFILESMODEL_H
 
-#include <QFileSystemModel>
-#include <QFileIconProvider>
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QVariant>
 
-#include <QDebug>
+class DataFilesItem;
 
-class DataFilesModel : public QFileSystemModel
+class DataFilesModel : public QAbstractItemModel
 {
+    Q_OBJECT
+
 public:
+    //DataFilesModel(const QString &data, QObject *parent = 0);
     DataFilesModel(QObject *parent = 0);
-    ~DataFilesModel() {};
+    ~DataFilesModel();
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-
+    QVariant data(const QModelIndex &index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const;
+    QModelIndex parent(const QModelIndex &index) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+private:
+    //void setupModelData(const QStringList &lines, TreeItem *parent);
 
-//    void sort(int column, Qt::SortOrder order);
-    //test
-//    void setCheckedItems(const QStringList& files);
-//    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
-//    void unCheckAll();
-
-//    const QSet<QPersistentModelIndex> getCheckedItems();
-//    const QList<QPersistentModelIndex> getCheckedItems();
-    const QStringList getCheckedItems();
-
-//    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-
-//    QSet<QPersistentModelIndex> checkedItems;
-//    QList<QPersistentModelIndex> checkedItems;
-    QStringList checkedItems;
+    DataFilesItem *rootItem;
 };
 
 #endif

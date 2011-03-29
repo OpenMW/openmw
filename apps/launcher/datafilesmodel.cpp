@@ -1,145 +1,155 @@
+#include <QtGui>
+
+#include "datafilesitem.h"
 #include "datafilesmodel.h"
 
+//DataFilesModel::DataFilesModel(const QString &data, QObject *parent)
 DataFilesModel::DataFilesModel(QObject *parent)
-    : QFileSystemModel(parent)
+    : QAbstractItemModel(parent)
 {
+    QList<QVariant> rootData;
+    rootData << " ";
+    //rootItem = new DataFilesItem(rootData);
+    rootItem = new DataFilesItem(rootData);
+    //setupModelData(data.split(QString("\n")), rootItem);
+}
+
+DataFilesModel::~DataFilesModel()
+{
+    delete rootItem;
+}
+
+int DataFilesModel::columnCount(const QModelIndex &parent) const
+{
+    if (parent.isValid())
+        return static_cast<DataFilesItem*>(parent.internalPointer())->columnCount();
+    else
+        return rootItem->columnCount();
 }
 
 QVariant DataFilesModel::data(const QModelIndex &index, int role) const
 {
-    if (index.isValid() && role == Qt::DecorationRole) {
-        if (index.column() == 2) {
-            QFileIconProvider fip;
-            QIcon fileIcon = fip.icon(fileInfo(index));
-            return fileIcon;
-        }
-        else {
-            return QIcon();
-        }
+    if (!index.isValid())
+        return QVariant();
 
-    }
+    if (role != Qt::DisplayRole)
+        return QVariant();
 
-    if (index.isValid() && role == Qt::DisplayRole) {
-        if (index.column() == 2) {
-           //qDebug() << index.data(Qt::DisplayRole);
-           if (fileInfo(index).suffix().toLower() == "esp") {
-               return QString("Plugin File");
-           }
-           else if (fileInfo(index).suffix().toLower() == "esm") {
-               return QString("Master File");
+    DataFilesItem *item = static_cast<DataFilesItem*>(index.internalPointer());
 
-           }
-        }
-    }
-
-    if (index.isValid() && role == Qt::CheckStateRole && index.column() == 0) {
-        // Put a checkbox in the first column
-        if (index.isValid())
-
-        if (checkedItems.contains(filePath(index))) {
-//        if (checkedItems.contains(index)) {
-            return Qt::Checked;
-        }
-        else {
-            return Qt::Unchecked;
-        }
-    }
-    return QFileSystemModel::data(index, role);
+    return item->data(index.column());
 }
-
-bool DataFilesModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-
-    if (index.isValid() && role == Qt::CheckStateRole && index.column() == 0) {
-//        QPersistentModelIndex pindex(index);
-
-  //      qDebug() << pindex;
-
-        if (value == Qt::Checked) {
-            //checkedItems.insert(pindex);
-            checkedItems.append(filePath(index));
-        } else {
-//            checkedItems.remove(pindex);
-            checkedItems.removeAll(filePath(index));
-        }
-
-        emit dataChanged(index, index);
-        return true;
-    }
-
-    return QFileSystemModel::setData(index, value, role);
-}
-
-
 
 Qt::ItemFlags DataFilesModel::flags(const QModelIndex &index) const
 {
-    return QFileSystemModel::flags(index) | Qt::ItemIsUserCheckable;
+    if (!index.isValid())
+        return 0;
+
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-
-
-/*QVariant DataFilesModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant DataFilesModel::headerData(int section, Qt::Orientation orientation,
+                                int role) const
 {
-    switch (role) {
-    case Qt::DecorationRole:
-        if (section == 0) {
-            // ### TODO oh man this is ugly and doesn't even work all the way!
-            // it is still 2 pixels off
-            QImage pixmap(16, 1, QImage::Format_Mono);
-            pixmap.fill(0);
-            pixmap.setAlphaChannel(pixmap.createAlphaMask());
-            return pixmap;
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+        return rootItem->data(section);
+
+    return QVariant();
+}
+
+QModelIndex DataFilesModel::index(int row, int column, const QModelIndex &parent)
+            const
+{
+    if (!hasIndex(row, column, parent))
+        return QModelIndex();
+
+    DataFilesItem *parentItem;
+
+    if (!parent.isValid())
+        parentItem = rootItem;
+    else
+        parentItem = static_cast<DataFilesItem*>(parent.internalPointer());
+
+    DataFilesItem *childItem = parentItem->child(row);
+    if (childItem)
+        return createIndex(row, column, childItem);
+    else
+        return QModelIndex();
+}
+
+QModelIndex DataFilesModel::parent(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return QModelIndex();
+
+    DataFilesItem *childItem = static_cast<DataFilesItem*>(index.internalPointer());
+    DataFilesItem *parentItem = childItem->parent();
+
+    if (parentItem == rootItem)
+        return QModelIndex();
+
+    return createIndex(parentItem->row(), 0, parentItem);
+}
+
+int DataFilesModel::rowCount(const QModelIndex &parent) const
+{
+    DataFilesItem *parentItem;
+    if (parent.column() > 0)
+        return 0;
+
+    if (!parent.isValid())
+        parentItem = rootItem;
+    else
+        parentItem = static_cast<DataFilesItem*>(parent.internalPointer());
+
+    return parentItem->childCount();
+}
+
+/*void DataFilesModel::setupModelData(const QStringList &lines, DataFilesItem *parent)
+{
+    QList<DataFilesItem*> parents;
+    QList<int> indentations;
+    parents << parent;
+    indentations << 0;
+
+    int number = 0;
+
+    while (number < lines.count()) {
+        int position = 0;
+        while (position < lines[number].length()) {
+            if (lines[number].mid(position, 1) != " ")
+                break;
+            position++;
         }
-        break;
-    case Qt::TextAlignmentRole:
-        return Qt::AlignLeft;
+
+        QString lineData = lines[number].mid(position).trimmed();
+
+        if (!lineData.isEmpty()) {
+            // Read the column data from the rest of the line.
+            QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
+            QList<QVariant> columnData;
+            for (int column = 0; column < columnStrings.count(); ++column)
+                columnData << columnStrings[column];
+
+            if (position > indentations.last()) {
+                // The last child of the current parent is now the new parent
+                // unless the current parent has no children.
+
+                if (parents.last()->childCount() > 0) {
+                    parents << parents.last()->child(parents.last()->childCount()-1);
+                    indentations << position;
+                }
+            } else {
+                while (position < indentations.last() && parents.count() > 0) {
+                    parents.pop_back();
+                    indentations.pop_back();
+                }
+            }
+
+            // Append a new item to the current parent's list of children.
+            parents.last()->appendChild(new DataFilesItem(columnData, parents.last()));
+        }
+
+        number++;
     }
-
-    if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
-        return QAbstractItemModel::headerData(section, orientation, role);
-
-    QString returnValue;
-    switch (section) {
-    case 0: returnValue = tr("TES3 File");
-            break;
-    case 1: returnValue = tr("Size");
-            break;
-    case 2: returnValue = tr("Status");
-           break;
-    case 3: returnValue = tr("Date Modified");
-            break;
-    default: return QVariant();
-    }
-    return returnValue;
-}
-*/
-
-/*test
-void DataFilesModel::setCheckedItems(const QStringList &gameFiles)
-{
-    qDebug() << "test";
-    qDebug() << gameFiles.join("lol");
-
-
-}*/
-
-/*void DataFilesModel::unCheckAll()
-{
-    checkedItems.clear();
-//    data();
-    emit dataChanged(QModelIndex(), QModelIndex());
-    submit();
-}*/
-
-const QStringList DataFilesModel::getCheckedItems()
-//const QList<QPersistentModelIndex> DataFilesModel::getCheckedItems()
-//const QSet<QPersistentModelIndex> DataFilesModel::getCheckedItems()
-{
-    return checkedItems;
-}
-
-/*void DataFilesModel::sort(int column, Qt::SortOrder order)
-{
-    qDebug() << "Sort!";
 }*/

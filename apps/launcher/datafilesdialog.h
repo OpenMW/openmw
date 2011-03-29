@@ -1,20 +1,21 @@
 #ifndef DATAFILESDIALOG_H
 #define DATAFILESDIALOG_H
 
-#include <QDialog>
-#include <QModelIndex>
-#include <QLineEdit>
-#include <QPlainTextEdit>
-
 #include "lineedit.h"
 
 class DataFilesModel;
-class QStringList;
-class QTableView;
+
+/*class QStringList;
+class QTreeView;
 class QLineEdit;
 class QPlainTextEdit;
 class QItemSelectionModel;
 class QSortFilterProxyModel;
+*/
+#include <QDialog>
+#include <QModelIndex>
+
+class QTreeView;
 
 class DataFilesDialog : public QDialog
 {
@@ -27,14 +28,14 @@ public:
 private:
     DataFilesModel *dataFilesModel;
 
-    QTableView *dataFilesView;
-    QItemSelectionModel *selectionModel;
-    QSortFilterProxyModel *sortModel;
+    QTreeView *dataFilesView;
+    //QItemSelectionModel *selectionModel;
+    //QSortFilterProxyModel *sortModel;
 
-    QLineEdit *lineAuthor;
-    LineEdit *lineFilter;
-    QPlainTextEdit *textDesc;
-    QPlainTextEdit *textDepends;
+    //QLineEdit *lineAuthor;
+    //LineEdit *lineFilter;
+    //QPlainTextEdit *textDesc;
+    //QPlainTextEdit *textDepends;
 
 
 public slots:
