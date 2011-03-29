@@ -118,19 +118,19 @@ DataFilesDialog::DataFilesDialog()
 
 
     // Signals and slots
-    connect(dataFilesModel, SIGNAL(directoryLoaded(const QString &)), this, SLOT(setupView()));
-//    connect(dataFilesModel, SIGNAL(dataChanged(const QModelIndex, const QModelIndex)), this, SLOT(readConfig()));
+    //connect(dataFilesModel, SIGNAL(directoryLoaded(const QString &)), this, SLOT(setupView()));
 
     connect(dataFilesView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
     connect(selectionModel, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(changeData(QModelIndex, QModelIndex)));
 
-    connect(lineFilter, SIGNAL(textChanged(const QString &)), this, SLOT(setFilter()));
+    connect(lineFilter, SIGNAL(textChanged(const QString&)), this, SLOT(setFilter()));
 
     connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), SIGNAL(clicked()), this, SLOT(restoreDefaults()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(writeConfig()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
 
     readConfig();
+    setupView();
 }
 
 void DataFilesDialog::changeData(QModelIndex index, QModelIndex bottom)
@@ -209,8 +209,6 @@ void DataFilesDialog::setupView()
 
 void DataFilesDialog::readConfig()
 {
-    qDebug() << "datachanged";
-
     // Morrowind.ini settings
     QSettings settings("Morrowind.ini",
                         QSettings::IniFormat);
