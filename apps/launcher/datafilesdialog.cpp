@@ -2,25 +2,17 @@
 #include <components/esm/esm_reader.hpp>
 
 #include "datafilesdialog.h"
-#include "datafilesmodel.h"
-#include "datafilesitem.h"
+//#include "datafilesmodel.h"
+//#include "datafilesitem.h"
 
 using namespace ESM;
 
 DataFilesDialog::DataFilesDialog()
 {
     //dataFilesModel = new DataFilesModel(this);
-    dataFilesModel = new DataFilesModel();
+    dataFilesModel = new QStandardItemModel();
     
-    for (int row = 0; row < 4; ++row) {
-        for (int column = 0; column < 4; ++column) {
-             QList<QVariant> test;
-            test << QString("%0").arg(i);
-            DataFilesItem *item = new DataFilesItem(test);
-            dataFilesModel->setItem(row, column, item);
-        }
-    }
-  
+   
     //dataFilesModel->setReadOnly(true); // Prevent changes to files
     //dataFilesModel->setRootPath("data");
 
@@ -64,6 +56,10 @@ DataFilesDialog::DataFilesDialog()
     //dataFilesView = new QTreeView(groupFiles);
     dataFilesView = new QTreeView(groupFiles);
     dataFilesView->setModel(dataFilesModel);
+    dataFilesView->setDragEnabled(true);
+    dataFilesView->setDropIndicatorShown(true);
+    dataFilesView->setAlternatingRowColors(true);
+    
     
     // Put everything in the correct layouts
     //groupFilesLayout->addLayout(filterLayout);
@@ -99,6 +95,7 @@ DataFilesDialog::DataFilesDialog()
 */
     //readConfig();
     //setupView();
+    setupView();
 }
 
 void DataFilesDialog::changeData(QModelIndex index, QModelIndex bottom)
@@ -144,6 +141,30 @@ void DataFilesDialog::changeData(QModelIndex index, QModelIndex bottom)
 
 void DataFilesDialog::setupView()
 {
+    QDir datadir(QString("data/"));
+    QStringList acceptedfiles = (QStringList() << "*.esp");
+    QStringList datafiles;
+    
+    datadir.setNameFilters(acceptedfiles);
+    
+    datafiles = datadir.entryList();
+    
+    QStandardItem *parentItem = dataFilesModel->invisibleRootItem();
+    QStandardItem *masterFile = new QStandardItem(QString("Morrowind.esm"));
+    parentItem->appendRow(masterFile);
+    parentItem = masterFile;
+    
+    QFileIconProvider fip;
+    QIcon fileIcon = fip.icon(QFileInfo("data/Morrowind.esm"));
+    
+    foreach (const QString &currentfile, datafiles) {
+        QStandardItem *item = new QStandardItem(currentfile);
+        item->setIcon(fileIcon);
+        parentItem->appendRow(item);
+    }
+    
+    
+    
     /* The signal directoryLoaded is emitted after all files are in the model
     dataFilesView->setModel(dataFilesModel);
 //    dataFilesView->setModel(sortModel);

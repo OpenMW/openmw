@@ -3,7 +3,8 @@
 
 #include "lineedit.h"
 
-class DataFilesModel;
+//class DataFilesModel;
+
 
 /*class QStringList;
 class QTreeView;
@@ -16,6 +17,7 @@ class QSortFilterProxyModel;
 #include <QModelIndex>
 
 class QTreeView;
+class QStandardItemModel;
 
 class DataFilesDialog : public QDialog
 {
@@ -26,7 +28,7 @@ public:
 //    ~DataFilesDialog() { };
 
 private:
-    DataFilesModel *dataFilesModel;
+    QStandardItemModel *dataFilesModel;
 
     QTreeView *dataFilesView;
     //QItemSelectionModel *selectionModel;
