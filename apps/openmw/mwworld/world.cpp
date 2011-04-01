@@ -412,7 +412,7 @@ namespace MWWorld
     : mSkyManager (0), mScene (renderer,physEng), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false), mEnvironment (environment)
     {
-		mPhysEngine = physEng;
+        mPhysEngine = physEng;
         boost::filesystem::path masterPath (dataDir);
         masterPath /= master;
 
@@ -437,7 +437,7 @@ namespace MWWorld
         mSkyManager =
             MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir);
 
-		mPhysEngine = physEng;
+        mPhysEngine = physEng;
     }
 
     World::~World()

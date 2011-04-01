@@ -92,8 +92,8 @@ void NIFFile::parse()
       else if(rec == "NiRotatingParticles") { r = new NiRotatingParticles; r->recType = RC_NiRotatingParticles; }
       else if(rec == "NiAutoNormalParticles") { r = new NiAutoNormalParticles; r->recType = RC_NiAutoNormalParticles; }
       else if(rec == "NiCamera") { r = new NiCamera; r->recType = RC_NiCamera; }
-	  else if(rec == "RootCollisionNode"){ r = new NiNode; r->recType = RC_RootCollisionNode; }// a root collision node is exactly like a node
-																							   //that's why there is no need to create a new type
+        else if(rec == "RootCollisionNode"){ r = new NiNode; r->recType = RC_RootCollisionNode; }// a root collision node is exactly like a node
+                                                                                                 //that's why there is no need to create a new type
 
       // Properties
       else if(rec == "NiTexturingProperty") { r = new NiTexturingProperty; r->recType = RC_NiTexturingProperty; }

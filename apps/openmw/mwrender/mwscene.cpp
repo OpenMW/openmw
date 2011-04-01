@@ -20,37 +20,37 @@ using namespace MWRender;
 using namespace Ogre;
 
 MWScene::MWScene(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng)
-	: rend(_rend)
+    : rend(_rend)
 {
-	eng = physEng;
-	rend.createScene("PlayerCam", 55, 5);
+    eng = physEng;
+    rend.createScene("PlayerCam", 55, 5);
 
-	// Set default mipmap level (NB some APIs ignore this)
-	TextureManager::getSingleton().setDefaultNumMipmaps(5);
+    // Set default mipmap level (NB some APIs ignore this)
+    TextureManager::getSingleton().setDefaultNumMipmaps(5);
 
-	// Load resources
-	ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+    // Load resources
+    ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-	// Turn the entire scene (represented by the 'root' node) -90
-	// degrees around the x axis. This makes Z go upwards, and Y go into
-	// the screen (when x is to the right.) This is the orientation that
-	// Morrowind uses, and it automagically makes everything work as it
-	// should.
-	SceneNode *rt = rend.getScene()->getRootSceneNode();
-	mwRoot = rt->createChildSceneNode();
-	mwRoot->pitch(Degree(-90));
+    // Turn the entire scene (represented by the 'root' node) -90
+    // degrees around the x axis. This makes Z go upwards, and Y go into
+    // the screen (when x is to the right.) This is the orientation that
+    // Morrowind uses, and it automagically makes everything work as it
+    // should.
+    SceneNode *rt = rend.getScene()->getRootSceneNode();
+    mwRoot = rt->createChildSceneNode();
+    mwRoot->pitch(Degree(-90));
 
-	//used to obtain ingame information of ogre objects (which are faced or selected)
-	mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
+    //used to obtain ingame information of ogre objects (which are faced or selected)
+    mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
 
-	Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode();
-	playerNode->pitch(Degree(90));
-	Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
-	Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
-	cameraPitchNode->attachObject(getCamera());
+    Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode();
+    playerNode->pitch(Degree(90));
+    Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
+    Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
+    cameraPitchNode->attachObject(getCamera());
 
 
-	mPlayer = new MWRender::Player (getCamera(), playerNode->getName());
+    mPlayer = new MWRender::Player (getCamera(), playerNode->getName());
 
     mFreeFly = true;
 }
@@ -82,8 +82,8 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
     // stop changes to world from being reported back to the physics system
     MWWorld::DoingPhysics scopeGuard;
 
-	//set the DebugRenderingMode. To disable it,set it to 0
-//	eng->setDebugRenderingMode(1);
+    //set the DebugRenderingMode. To disable it,set it to 0
+    //eng->setDebugRenderingMode(1);
 
     //set the walkdirection to 0 (no movement) for every actor)
     for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = eng->PhysicActorMap.begin(); it != eng->PhysicActorMap.end();it++)
@@ -95,7 +95,7 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
     for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
         iter!=actors.end(); ++iter)
     {
-		OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
+        OEngine::Physic::PhysicActor* act = eng->getCharacter(iter->first);
 
         //dirty stuff to get the camera orientation. Must be changed!
 
@@ -117,46 +117,46 @@ void MWScene::doPhysics (float duration, MWWorld::World& world,
             dir = 0.025*(quat*dir1);
         }
 
-		//set the walk direction
-		act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
+        //set the walk direction
+        act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
     }
-	eng->stepSimulation(duration);
+    eng->stepSimulation(duration);
 
     for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = eng->PhysicActorMap.begin(); it != eng->PhysicActorMap.end();it++)
     {
         OEngine::Physic::PhysicActor* act = it->second;
-		btVector3 newPos = act->getPosition();
+        btVector3 newPos = act->getPosition();
         MWWorld::Ptr ptr = world.getPtrViaHandle (it->first);
-		world.moveObject (ptr, newPos.x(), newPos.y(), newPos.z());
+        world.moveObject (ptr, newPos.x(), newPos.y(), newPos.z());
     }
 }
 
 void MWScene::addObject (const std::string& handle, const std::string& mesh,
     const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
 {
-	OEngine::Physic::RigidBody* body = eng->createRigidBody(mesh,handle);
-	eng->addRigidBody(body);
-	btTransform tr;
-	tr.setOrigin(btVector3(position.x,position.y,position.z));
-	tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
-	body->setWorldTransform(tr);
+    OEngine::Physic::RigidBody* body = eng->createRigidBody(mesh,handle);
+    eng->addRigidBody(body);
+    btTransform tr;
+    tr.setOrigin(btVector3(position.x,position.y,position.z));
+    tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
+    body->setWorldTransform(tr);
 }
 
 void MWScene::addActor (const std::string& handle, const std::string& mesh,
     const Ogre::Vector3& position)
 {
-	//TODO:optimize this. Searching the std::map isn't very efficient i think.
-	eng->addCharacter(handle);
-	OEngine::Physic::PhysicActor* act = eng->getCharacter(handle);
-	act->setPosition(btVector3(position.x,position.y,position.z));
+    //TODO:optimize this. Searching the std::map isn't very efficient i think.
+    eng->addCharacter(handle);
+    OEngine::Physic::PhysicActor* act = eng->getCharacter(handle);
+    act->setPosition(btVector3(position.x,position.y,position.z));
 }
 
 void MWScene::removeObject (const std::string& handle)
 {
-	//TODO:check if actor???
+    //TODO:check if actor???
     eng->removeCharacter(handle);
-	eng->removeRigidBody(handle);
-	eng->deleteRigidBody(handle);
+    eng->removeRigidBody(handle);
+    eng->deleteRigidBody(handle);
 }
 
 void MWScene::moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics)
