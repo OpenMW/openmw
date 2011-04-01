@@ -63,7 +63,6 @@ MWScene::~MWScene()
 std::pair<std::string, float> MWScene::getFacedHandle (MWWorld::World& world)
 {
     std::string handle = "";
-    float distance = -1;
 
     //get a ray pointing to the center of the viewport
     Ray centerRay = getCamera()->getCameraToViewportRay(
