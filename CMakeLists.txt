@@ -347,7 +347,7 @@ if(DPKG_PROGRAM)
         set(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
     else()
         #FIXME this should probably be read from some file like ${CMAKE_CURRENT_SOURCE_DIR}/VERSION or something that gets updated when changing version
-        set(VERSION_STRING "0.9.0")
+        set(VERSION_STRING "0.10.0")
         set(PACKAGE_MAINTAINER "unknown")
     endif()
 
@@ -370,7 +370,7 @@ if(DPKG_PROGRAM)
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogremain-1.7.1 (>= 1.7.1-1),  libboost-filesystem1.42.0 (>= 1.42.0), libboost-program-options1.42.0 (>= 1.42.0), libboost-system1.42.0 (>= 1.42.0), libboost-thread1.42.0 (>= 1.42.0), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.2.0 (>= 1.2.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2)")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogremain-1.7.1 (>= 1.7.1-1), libbullet2.77 (>= 2.77),  libboost-filesystem1.42.0 (>= 1.42.0), libboost-program-options1.42.0 (>= 1.42.0), libboost-system1.42.0 (>= 1.42.0), libboost-thread1.42.0 (>= 1.42.0), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.2.0 (>= 1.2.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
