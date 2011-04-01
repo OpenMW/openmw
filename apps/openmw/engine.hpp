@@ -60,7 +60,7 @@ namespace OMW
             boost::filesystem::path mDataDir;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer mOgre;
-			OEngine::Physic::PhysicEngine* mPhysicEngine;
+            OEngine::Physic::PhysicEngine* mPhysicEngine;
             std::string mCellName;
             std::string mMaster;
             bool mShowFPS;

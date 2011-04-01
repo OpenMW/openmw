@@ -52,10 +52,10 @@ namespace Nif
 
 namespace Mangle
 {
-	namespace VFS
-	{
-		class OgreVFS;
-	}
+    namespace VFS
+    {
+        class OgreVFS;
+    }
 }
 
 
@@ -66,64 +66,64 @@ class ManualBulletShapeLoader : public BulletShapeLoader
 {
 public:
 
-	ManualBulletShapeLoader():resourceGroup("General"){vfs = 0;}
-	virtual ~ManualBulletShapeLoader() {}
+    ManualBulletShapeLoader():resourceGroup("General"){vfs = 0;}
+    virtual ~ManualBulletShapeLoader() {}
 
-	void warn(std::string msg)
-	{
-		std::cerr << "NIFLoader: Warn:" << msg << "\n";
-	}
+    void warn(std::string msg)
+    {
+        std::cerr << "NIFLoader: Warn:" << msg << "\n";
+    }
 
-	void fail(std::string msg)
-	{
-		std::cerr << "NIFLoader: Fail: "<< msg << std::endl;
-		assert(1);
-	}
+    void fail(std::string msg)
+    {
+        std::cerr << "NIFLoader: Fail: "<< msg << std::endl;
+        assert(1);
+    }
 
-	/**
-	*This function should not be called manualy. Use load instead. (this is called by the BulletShapeManager when you use load).
-	*/
-	void loadResource(Ogre::Resource *resource);
+    /**
+    *This function should not be called manualy. Use load instead. (this is called by the BulletShapeManager when you use load).
+    */
+    void loadResource(Ogre::Resource *resource);
 
-	/**
-	*This function load a new bulletShape from a NIF file into the BulletShapeManager.
-	*When the file is loaded, you can then use BulletShapeManager::getByName() to retrive the bulletShape.
-	*Warning: this function will just crash if the resourceGroup doesn't exist!
-	*/
-	void load(const std::string &name,const std::string &group);
+    /**
+    *This function load a new bulletShape from a NIF file into the BulletShapeManager.
+    *When the file is loaded, you can then use BulletShapeManager::getByName() to retrive the bulletShape.
+    *Warning: this function will just crash if the resourceGroup doesn't exist!
+    */
+    void load(const std::string &name,const std::string &group);
 
 private:
-	Ogre::Matrix3 getMatrix(Nif::Transformation* tr);
+    Ogre::Matrix3 getMatrix(Nif::Transformation* tr);
 
-	Ogre::Vector3 getVector(Nif::Transformation* tr);
+    Ogre::Vector3 getVector(Nif::Transformation* tr);
 
-	btQuaternion getbtQuat(Ogre::Matrix3 m);
+    btQuaternion getbtQuat(Ogre::Matrix3 m);
 
-	btVector3 getbtVector(Nif::Vector v);
+    btVector3 getbtVector(Nif::Vector v);
 
-	/**
-	*Parse a node.
-	*/
-	void handleNode(Nif::Node *node, int flags,
-		Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
+    /**
+    *Parse a node.
+    */
+    void handleNode(Nif::Node *node, int flags,
+        Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
 
     /**
     *Helpler function
     */
     bool hasRootCollisionNode(Nif::Node* node);
 
-	/**
-	*convert a NiTriShape to a bullet trishape.
-	*/
-	void handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
+    /**
+    *convert a NiTriShape to a bullet trishape.
+    */
+    void handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
 
-	Mangle::VFS::OgreVFS *vfs;
+    Mangle::VFS::OgreVFS *vfs;
 
-	std::string resourceName;
-	std::string resourceGroup;
+    std::string resourceName;
+    std::string resourceGroup;
 
-	BulletShape* cShape;//current shape
-	btCompoundShape* currentShape;//the shape curently under construction
+    BulletShape* cShape;//current shape
+    btCompoundShape* currentShape;//the shape curently under construction
 };
 
 #endif

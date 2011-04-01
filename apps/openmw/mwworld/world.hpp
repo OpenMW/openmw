@@ -75,7 +75,7 @@ namespace MWWorld
             bool mCellChanged;
             Environment& mEnvironment;
 
-			OEngine::Physic::PhysicEngine* mPhysEngine;
+            OEngine::Physic::PhysicEngine* mPhysEngine;
 
             // not implemented
             World (const World&);

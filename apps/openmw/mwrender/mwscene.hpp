@@ -40,7 +40,7 @@ namespace MWRender
         Ogre::SceneNode *mwRoot;
         Ogre::RaySceneQuery *mRaySceneQuery;
 
-		OEngine::Physic::PhysicEngine* eng;
+        OEngine::Physic::PhysicEngine* eng;
 
         MWRender::Player *mPlayer;
 
