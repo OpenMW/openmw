@@ -206,7 +206,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
 }
 
 OMW::Engine::Engine()
-  : mShowFPS (false)
+  : mPhysicEngine (0)
+  , mShowFPS (false)
   , mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
@@ -215,7 +216,6 @@ OMW::Engine::Engine()
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
-  , mPhysicEngine (0)
 {
     MWClass::registerClasses();
 }
