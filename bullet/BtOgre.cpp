@@ -379,10 +379,10 @@ namespace BtOgre {
 		mIndexBuffer (0),
 		mVertexCount (0),
 		mIndexCount (0),
-		mBounds (Vector3(-1,-1,-1)),
-		mBoundRadius (-1),
-		mBoneIndex (0),
 		mTransform (transform),
+		mBoundRadius (-1),
+		mBounds (Vector3(-1,-1,-1)),
+		mBoneIndex (0),
 		mScale(1)
 	{	
 	}
