@@ -59,7 +59,13 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
     bpo::variables_map variables;
 
-    std::string cfgFile = OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH, "openmw", "openmw.cfg");
+    //If there is an openmw.cfg in the current path use that as global config
+    //Otherwise try getPath
+    std::string cfgFile = "openmw.cfg";
+    if(!isFile(cfgFile.c_str()))
+    {
+        cfgFile = OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH, "openmw", "openmw.cfg");
+    }
     std::cout << "Using global config file: " << cfgFile << std::endl;
     std::ifstream globalConfigFile(cfgFile.c_str());
 
