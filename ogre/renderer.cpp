@@ -104,7 +104,7 @@ void OgreRenderer::createScene(const std::string camName, float fov, float nearC
   mCamera = mScene->createCamera(camName);
   mCamera->setNearClipDistance(nearClip);
   mCamera->setFOVy(Degree(fov));
-  
+
   // Create one viewport, entire window
   mView = mWindow->addViewport(mCamera);
 

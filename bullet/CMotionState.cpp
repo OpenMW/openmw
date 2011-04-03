@@ -10,36 +10,36 @@ namespace OEngine {
 namespace Physic
 {
 
-	CMotionState::CMotionState(PhysicEngine* eng,std::string name)
-	{
-		pEng = eng;
-		tr.setIdentity();
-		pName = name;
-	};
+    CMotionState::CMotionState(PhysicEngine* eng,std::string name)
+    {
+        pEng = eng;
+        tr.setIdentity();
+        pName = name;
+    };
 
-	void CMotionState::getWorldTransform(btTransform &worldTrans) const
-	{
-		worldTrans = tr;
-	}
+    void CMotionState::getWorldTransform(btTransform &worldTrans) const
+    {
+        worldTrans = tr;
+    }
 
-	void CMotionState::setWorldTransform(const btTransform &worldTrans)
-	{
-		tr = worldTrans;
+    void CMotionState::setWorldTransform(const btTransform &worldTrans)
+    {
+        tr = worldTrans;
 
-		PhysicEvent evt;
-		evt.isNPC = isNPC;
-		evt.isPC = isPC;
-		evt.newTransform = tr;
-		evt.RigidBodyName = pName;
+        PhysicEvent evt;
+        evt.isNPC = isNPC;
+        evt.isPC = isPC;
+        evt.newTransform = tr;
+        evt.RigidBodyName = pName;
 
-		if(isPC)
-		{
-			pEng->PEventList.push_back(evt);
-		}
-		else
-		{
-			pEng->NPEventList.push_back(evt);
-		}
-	}
+        if(isPC)
+        {
+            pEng->PEventList.push_back(evt);
+        }
+        else
+        {
+            pEng->NPEventList.push_back(evt);
+        }
+    }
 
 }}

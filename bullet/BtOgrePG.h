@@ -3,7 +3,7 @@
  *
  *       Filename:  BtOgrePG.h
  *
- *    Description:  The part of BtOgre that handles information transfer from Bullet to 
+ *    Description:  The part of BtOgre that handles information transfer from Bullet to
  *                  Ogre (like updating graphics object positions).
  *
  *        Version:  1.0
@@ -25,7 +25,7 @@ namespace BtOgre {
 
 //A MotionState is Bullet's way of informing you about updates to an object.
 //Pass this MotionState to a btRigidBody to have your SceneNode updated automaticaly.
-class RigidBodyState : public btMotionState 
+class RigidBodyState : public btMotionState
 {
     protected:
         btTransform mTransform;
@@ -42,19 +42,19 @@ class RigidBodyState : public btMotionState
         }
 
         RigidBodyState(Ogre::SceneNode *node)
-            : mTransform(((node != NULL) ? BtOgre::Convert::toBullet(node->getOrientation()) : btQuaternion(0,0,0,1)), 
+            : mTransform(((node != NULL) ? BtOgre::Convert::toBullet(node->getOrientation()) : btQuaternion(0,0,0,1)),
                          ((node != NULL) ? BtOgre::Convert::toBullet(node->getPosition())    : btVector3(0,0,0))),
               mCenterOfMassOffset(btTransform::getIdentity()),
               mNode(node)
         {
         }
 
-        virtual void getWorldTransform(btTransform &ret) const 
+        virtual void getWorldTransform(btTransform &ret) const
         {
             ret = mCenterOfMassOffset.inverse() * mTransform;
         }
 
-        virtual void setWorldTransform(const btTransform &in) 
+        virtual void setWorldTransform(const btTransform &in)
         {
             if (mNode == NULL)
                 return;
@@ -68,7 +68,7 @@ class RigidBodyState : public btMotionState
             mNode->setPosition(pos.x(), pos.y(), pos.z());
         }
 
-        void setNode(Ogre::SceneNode *node) 
+        void setNode(Ogre::SceneNode *node)
         {
             mNode = node;
         }

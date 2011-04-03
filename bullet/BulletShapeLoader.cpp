@@ -2,8 +2,8 @@
 
 
 
-BulletShape::BulletShape(Ogre::ResourceManager* creator, const Ogre::String &name, 
-    Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual, 
+BulletShape::BulletShape(Ogre::ResourceManager* creator, const Ogre::String &name,
+    Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual,
     Ogre::ManualResourceLoader *loader) :
 Ogre::Resource(creator, name, handle, group, isManual, loader)
 {
@@ -12,9 +12,9 @@ Ogre::Resource(creator, name, handle, group, isManual, loader)
 
     /* For consistency with StringInterface, but we don't add any parameters here
     That's because the Resource implementation of StringInterface is to
-    list all the options that need to be set before loading, of which 
+    list all the options that need to be set before loading, of which
     we have none as such. Full details can be set through scripts.
-    */ 
+    */
     Shape = NULL;
     collide = true;
     createParamDictionary("BulletShape");
@@ -70,8 +70,8 @@ BulletShapeManager *BulletShapeManager::getSingletonPtr()
 }
 
 BulletShapeManager &BulletShapeManager::getSingleton()
-{  
-    assert(ms_Singleton);  
+{
+    assert(ms_Singleton);
     return(*ms_Singleton);
 }
 
@@ -103,8 +103,8 @@ BulletShapePtr BulletShapeManager::load(const Ogre::String &name, const Ogre::St
     return textf;
 }
 
-Ogre::Resource *BulletShapeManager::createImpl(const Ogre::String &name, Ogre::ResourceHandle handle, 
-    const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader, 
+Ogre::Resource *BulletShapeManager::createImpl(const Ogre::String &name, Ogre::ResourceHandle handle,
+    const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader,
     const Ogre::NameValuePairList *createParams)
 {
     BulletShape* res = new BulletShape(this, name, handle, group, isManual, loader);

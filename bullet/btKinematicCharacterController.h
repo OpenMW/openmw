@@ -44,41 +44,41 @@ public:
   };
 
 private:
-	btPairCachingGhostObject* externalGhostObject;  // use this for querying collisions for sliding and move
-  btPairCachingGhostObject* internalGhostObject;  // and this for recoreving from penetrations
+    btPairCachingGhostObject* externalGhostObject;  // use this for querying collisions for sliding and move
+    btPairCachingGhostObject* internalGhostObject;  // and this for recoreving from penetrations
 
-	btScalar m_verticalVelocity;
-	btScalar m_verticalOffset;
-	btScalar m_fallSpeed;
-	btScalar m_jumpSpeed;
-	btScalar m_maxJumpHeight;
-	btScalar m_maxSlopeRadians; // Slope angle that is set (used for returning the exact value)
-	btScalar m_maxSlopeCosine;  // Cosine equivalent of m_maxSlopeRadians (calculated once when set, for optimization)
-	btScalar m_gravity;
-	btScalar m_recoveringFactor;
+    btScalar m_verticalVelocity;
+    btScalar m_verticalOffset;
+    btScalar m_fallSpeed;
+    btScalar m_jumpSpeed;
+    btScalar m_maxJumpHeight;
+    btScalar m_maxSlopeRadians; // Slope angle that is set (used for returning the exact value)
+    btScalar m_maxSlopeCosine;  // Cosine equivalent of m_maxSlopeRadians (calculated once when set, for optimization)
+    btScalar m_gravity;
+    btScalar m_recoveringFactor;
 
-	btScalar m_stepHeight;
+    btScalar m_stepHeight;
 
-	///this is the desired walk direction, set by the user
-	btVector3	m_walkDirection;
+    ///this is the desired walk direction, set by the user
+    btVector3   m_walkDirection;
 
-	///keep track of the contact manifolds
-	btManifoldArray	m_manifoldArray;
+    ///keep track of the contact manifolds
+    btManifoldArray m_manifoldArray;
 
   ///Gravity attributes
-	bool  m_wasJumping;
+    bool  m_wasJumping;
 
-	bool	m_useGhostObjectSweepTest;
-	bool	m_useWalkDirection;
-	btScalar	m_velocityTimeInterval;
+    bool    m_useGhostObjectSweepTest;
+    bool    m_useWalkDirection;
+    btScalar    m_velocityTimeInterval;
 
-	UpAxis m_upAxis;
+    UpAxis m_upAxis;
 
-	static btVector3* getUpAxisDirections();
+    static btVector3* getUpAxisDirections();
 
-	bool recoverFromPenetration ( btCollisionWorld* collisionWorld );
+    bool recoverFromPenetration ( btCollisionWorld* collisionWorld );
 
-	btVector3 stepUp( btCollisionWorld* collisionWorld, const btVector3& currentPosition, btScalar& currentStepOffset );
+    btVector3 stepUp( btCollisionWorld* collisionWorld, const btVector3& currentPosition, btScalar& currentStepOffset );
   btVector3 stepForwardAndStrafe( btCollisionWorld* collisionWorld, const btVector3& currentPosition, const btVector3& walkMove );
   btScalar addFallOffset( bool wasJumping, btScalar currentStepOffset, btScalar dt );
   btVector3 stepDown( btCollisionWorld* collisionWorld, const btVector3& currentPosition, btScalar currentStepOffset );
@@ -90,7 +90,7 @@ public:
   /// Using a smaller internalGhostObject can help for removing some flickering but create some
   /// stopping artefacts when sliding along stairs or small walls.
   /// Don't forget to scale gravity and fallSpeed if you scale the world.
-	btKinematicCharacterController( btPairCachingGhostObject* externalGhostObject,
+    btKinematicCharacterController( btPairCachingGhostObject* externalGhostObject,
                                   btPairCachingGhostObject* internalGhostObject,
                                   btScalar stepHeight,
                                   btScalar constantScale = btScalar( 1.0 ),
@@ -99,67 +99,67 @@ public:
                                   btScalar jumpVelocity = btScalar( 9.8 ),
                                   btScalar recoveringFactor = btScalar( 0.2 ) );
 
-	~btKinematicCharacterController ();
+    ~btKinematicCharacterController ();
 
     void setVerticalVelocity(float z);
 
-	///btActionInterface interface
-	virtual void updateAction( btCollisionWorld* collisionWorld, btScalar deltaTime )
-	{
+    ///btActionInterface interface
+    virtual void updateAction( btCollisionWorld* collisionWorld, btScalar deltaTime )
+    {
     preStep( collisionWorld );
-		playerStep( collisionWorld, deltaTime );
-	}
+        playerStep( collisionWorld, deltaTime );
+    }
 
-	///btActionInterface interface
-	void debugDraw( btIDebugDraw* debugDrawer );
+    ///btActionInterface interface
+    void debugDraw( btIDebugDraw* debugDrawer );
 
   void setUpAxis( UpAxis axis )
-	{
-		m_upAxis = axis;
-	}
+    {
+        m_upAxis = axis;
+    }
 
-	/// This should probably be called setPositionIncrementPerSimulatorStep.
-	/// This is neither a direction nor a velocity, but the amount to
-	///	increment the position each simulation iteration, regardless
-	///	of dt.
-	/// This call will reset any velocity set by setVelocityForTimeInterval().
-	virtual void	setWalkDirection(const btVector3& walkDirection);
+    /// This should probably be called setPositionIncrementPerSimulatorStep.
+    /// This is neither a direction nor a velocity, but the amount to
+    /// increment the position each simulation iteration, regardless
+    /// of dt.
+    /// This call will reset any velocity set by setVelocityForTimeInterval().
+    virtual void    setWalkDirection(const btVector3& walkDirection);
 
-	/// Caller provides a velocity with which the character should move for
-	///	the given time period.  After the time period, velocity is reset
-	///	to zero.
-	/// This call will reset any walk direction set by setWalkDirection().
-	/// Negative time intervals will result in no motion.
-	virtual void setVelocityForTimeInterval(const btVector3& velocity,
-				btScalar timeInterval);
+    /// Caller provides a velocity with which the character should move for
+    /// the given time period.  After the time period, velocity is reset
+    /// to zero.
+    /// This call will reset any walk direction set by setWalkDirection().
+    /// Negative time intervals will result in no motion.
+    virtual void setVelocityForTimeInterval(const btVector3& velocity,
+                btScalar timeInterval);
 
-	void reset();
-	void warp( const btVector3& origin );
+    void reset();
+    void warp( const btVector3& origin );
 
-	void preStep( btCollisionWorld* collisionWorld );
-	void playerStep( btCollisionWorld* collisionWorld, btScalar dt );
+    void preStep( btCollisionWorld* collisionWorld );
+    void playerStep( btCollisionWorld* collisionWorld, btScalar dt );
 
-	void setFallSpeed( btScalar fallSpeed );
-	void setJumpSpeed( btScalar jumpSpeed );
-	void setMaxJumpHeight( btScalar maxJumpHeight );
-	bool canJump() const;
+    void setFallSpeed( btScalar fallSpeed );
+    void setJumpSpeed( btScalar jumpSpeed );
+    void setMaxJumpHeight( btScalar maxJumpHeight );
+    bool canJump() const;
 
-	void jump();
+    void jump();
 
-	void setGravity( btScalar gravity );
-	btScalar getGravity() const;
+    void setGravity( btScalar gravity );
+    btScalar getGravity() const;
 
-	/// The max slope determines the maximum angle that the controller can walk up.
-	/// The slope angle is measured in radians.
-	void setMaxSlope( btScalar slopeRadians );
-	btScalar getMaxSlope() const;
+    /// The max slope determines the maximum angle that the controller can walk up.
+    /// The slope angle is measured in radians.
+    void setMaxSlope( btScalar slopeRadians );
+    btScalar getMaxSlope() const;
 
-	void setUseGhostSweepTest( bool useGhostObjectSweepTest )
-	{
-		m_useGhostObjectSweepTest = useGhostObjectSweepTest;
-	}
+    void setUseGhostSweepTest( bool useGhostObjectSweepTest )
+    {
+        m_useGhostObjectSweepTest = useGhostObjectSweepTest;
+    }
 
-	bool onGround() const;
+    bool onGround() const;
 
     //if set to false, there will be no collision.
     bool mCollision;

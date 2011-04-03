@@ -35,26 +35,26 @@ typedef std::vector<Ogre::Vector3> Vector3Array;
 class Convert
 {
 public:
-	Convert() {};
-	~Convert() {};
+    Convert() {};
+    ~Convert() {};
 
-	static btQuaternion toBullet(const Ogre::Quaternion &q)
-	{
-		return btQuaternion(q.x, q.y, q.z, q.w);
-	}
-	static btVector3 toBullet(const Ogre::Vector3 &v)
-	{
-		return btVector3(v.x, v.y, v.z);
-	}
+    static btQuaternion toBullet(const Ogre::Quaternion &q)
+    {
+        return btQuaternion(q.x, q.y, q.z, q.w);
+    }
+    static btVector3 toBullet(const Ogre::Vector3 &v)
+    {
+        return btVector3(v.x, v.y, v.z);
+    }
 
-	static Ogre::Quaternion toOgre(const btQuaternion &q)
-	{
-		return Ogre::Quaternion(q.w(), q.x(), q.y(), q.z());
-	}
-	static Ogre::Vector3 toOgre(const btVector3 &v)
-	{
-		return Ogre::Vector3(v.x(), v.y(), v.z());
-	}
+    static Ogre::Quaternion toOgre(const btQuaternion &q)
+    {
+        return Ogre::Quaternion(q.w(), q.x(), q.y(), q.z());
+    }
+    static Ogre::Vector3 toOgre(const btVector3 &v)
+    {
+        return Ogre::Vector3(v.x(), v.y(), v.z());
+    }
 };
 
 //From here on its debug-drawing stuff. ------------------------------------------------------------------
@@ -151,11 +151,11 @@ public:
   /// Remove all points from the point list
   void clear();
 
-  /// Call this to update the hardware buffer after making changes.  
+  /// Call this to update the hardware buffer after making changes.
   void update();
 
   /** Set the type of operation to draw with.
-   * @param opType Can be one of 
+   * @param opType Can be one of
    *    - RenderOperation::OT_LINE_STRIP
    *    - RenderOperation::OT_LINE_LIST
    *    - RenderOperation::OT_POINT_LIST
@@ -181,20 +181,20 @@ private:
 class DebugDrawer : public btIDebugDraw
 {
 protected:
-	Ogre::SceneNode *mNode;
-	btDynamicsWorld *mWorld;
-	DynamicLines *mLineDrawer;
-	bool mDebugOn;
+    Ogre::SceneNode *mNode;
+    btDynamicsWorld *mWorld;
+    DynamicLines *mLineDrawer;
+    bool mDebugOn;
 
 public:
 
-	DebugDrawer(Ogre::SceneNode *node, btDynamicsWorld *world) 
-		: mNode(node),
-		  mWorld(world),
-		  mDebugOn(true)
-	{
-		mLineDrawer = new DynamicLines(Ogre::RenderOperation::OT_LINE_LIST);
-		mNode->attachObject(mLineDrawer);
+    DebugDrawer(Ogre::SceneNode *node, btDynamicsWorld *world)
+        : mNode(node),
+          mWorld(world),
+          mDebugOn(true)
+    {
+        mLineDrawer = new DynamicLines(Ogre::RenderOperation::OT_LINE_LIST);
+        mNode->attachObject(mLineDrawer);
 
                 if (!Ogre::ResourceGroupManager::getSingleton().resourceGroupExists("BtOgre"))
                     Ogre::ResourceGroupManager::getSingleton().createResourceGroup("BtOgre");
@@ -205,68 +205,68 @@ public:
                     mat->setSelfIllumination(1,1,1);
                 }
 
-		mLineDrawer->setMaterial("BtOgre/DebugLines");
-	}
+        mLineDrawer->setMaterial("BtOgre/DebugLines");
+    }
 
-	~DebugDrawer() 
-	{
+    ~DebugDrawer()
+    {
                 Ogre::MaterialManager::getSingleton().remove("BtOgre/DebugLines");
                 Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup("BtOgre");
-		delete mLineDrawer;
-	}
+        delete mLineDrawer;
+    }
 
-	void step()
-	{
-		if (mDebugOn)
-		{
-			mWorld->debugDrawWorld();
-			mLineDrawer->update();
-			mNode->needUpdate();
-			mLineDrawer->clear();
-		}
-		else
-		{
-			mLineDrawer->clear();
-			mLineDrawer->update();
-			mNode->needUpdate();
-		}
-	}
+    void step()
+    {
+        if (mDebugOn)
+        {
+            mWorld->debugDrawWorld();
+            mLineDrawer->update();
+            mNode->needUpdate();
+            mLineDrawer->clear();
+        }
+        else
+        {
+            mLineDrawer->clear();
+            mLineDrawer->update();
+            mNode->needUpdate();
+        }
+    }
 
-	void drawLine(const btVector3& from,const btVector3& to,const btVector3& color)
-	{
-		mLineDrawer->addPoint(Convert::toOgre(from));
-		mLineDrawer->addPoint(Convert::toOgre(to));
-	}
+    void drawLine(const btVector3& from,const btVector3& to,const btVector3& color)
+    {
+        mLineDrawer->addPoint(Convert::toOgre(from));
+        mLineDrawer->addPoint(Convert::toOgre(to));
+    }
 
-	void drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color)
-	{
-		mLineDrawer->addPoint(Convert::toOgre(PointOnB));
-		mLineDrawer->addPoint(Convert::toOgre(PointOnB) + (Convert::toOgre(normalOnB) * distance * 20));
-	}
+    void drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color)
+    {
+        mLineDrawer->addPoint(Convert::toOgre(PointOnB));
+        mLineDrawer->addPoint(Convert::toOgre(PointOnB) + (Convert::toOgre(normalOnB) * distance * 20));
+    }
 
-	void reportErrorWarning(const char* warningString)
-	{
-		Ogre::LogManager::getSingleton().logMessage(warningString);
-	}
+    void reportErrorWarning(const char* warningString)
+    {
+        Ogre::LogManager::getSingleton().logMessage(warningString);
+    }
 
-	void draw3dText(const btVector3& location,const char* textString)
-	{
-	}
-	
-	//0 for off, anything else for on.
-	void setDebugMode(int isOn) 
-	{
-		mDebugOn = (isOn == 0) ? false : true;
+    void draw3dText(const btVector3& location,const char* textString)
+    {
+    }
 
-		if (!mDebugOn)
-			mLineDrawer->clear();
-	}
-	
-	//0 for off, anything else for on.
-	int	getDebugMode() const 
-	{
-		return mDebugOn;
-	}
+    //0 for off, anything else for on.
+    void setDebugMode(int isOn)
+    {
+        mDebugOn = (isOn == 0) ? false : true;
+
+        if (!mDebugOn)
+            mLineDrawer->clear();
+    }
+
+    //0 for off, anything else for on.
+    int getDebugMode() const
+    {
+        return mDebugOn;
+    }
 
 };
 

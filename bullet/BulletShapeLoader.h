@@ -128,11 +128,11 @@ class BulletShapeLoader : public Ogre::ManualResourceLoader
 public:
 
     BulletShapeLoader(){};
-	virtual ~BulletShapeLoader() {}
+    virtual ~BulletShapeLoader() {}
 
-	virtual void loadResource(Ogre::Resource *resource);
+    virtual void loadResource(Ogre::Resource *resource);
 
-	virtual void load(const std::string &name,const std::string &group);
+    virtual void load(const std::string &name,const std::string &group);
 };
 
 #endif

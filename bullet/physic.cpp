@@ -15,63 +15,63 @@
 namespace OEngine {
 namespace Physic
 {
-	enum collisiontypes {
-		COL_NOTHING = 0, //<Collide with nothing
-		COL_WORLD = BIT(0), //<Collide with world objects
-		COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
-		COL_ACTOR_EXTERNAL = BIT(2) //<collide with external capsule
-	};
+    enum collisiontypes {
+        COL_NOTHING = 0, //<Collide with nothing
+        COL_WORLD = BIT(0), //<Collide with world objects
+        COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
+        COL_ACTOR_EXTERNAL = BIT(2) //<collide with external capsule
+    };
 
-	PhysicActor::PhysicActor(std::string name)
-	{
-		mName = name;
+    PhysicActor::PhysicActor(std::string name)
+    {
+        mName = name;
 
-		// The capsule is at the origin
-		btTransform transform;
-		transform.setIdentity();
+        // The capsule is at the origin
+        btTransform transform;
+        transform.setIdentity();
 
-		// External capsule
-		externalGhostObject = new PairCachingGhostObject(name);
-		externalGhostObject->setWorldTransform( transform );
+        // External capsule
+        externalGhostObject = new PairCachingGhostObject(name);
+        externalGhostObject->setWorldTransform( transform );
 
-		btScalar externalCapsuleHeight = 130;
-		btScalar externalCapsuleWidth = 16;
+        btScalar externalCapsuleHeight = 130;
+        btScalar externalCapsuleWidth = 16;
 
-		externalCollisionShape = new btCapsuleShapeZ( externalCapsuleWidth,  externalCapsuleHeight );
-		externalCollisionShape->setMargin( 0.1 );
+        externalCollisionShape = new btCapsuleShapeZ( externalCapsuleWidth,  externalCapsuleHeight );
+        externalCollisionShape->setMargin( 0.1 );
 
-		externalGhostObject->setCollisionShape( externalCollisionShape );
-		externalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
+        externalGhostObject->setCollisionShape( externalCollisionShape );
+        externalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
 
-		// Internal capsule
-		internalGhostObject = new PairCachingGhostObject(name);
-		internalGhostObject->setWorldTransform( transform );
-		//internalGhostObject->getBroadphaseHandle()->s
-		btScalar internalCapsuleHeight =  120;
-		btScalar internalCapsuleWidth =  15;
+        // Internal capsule
+        internalGhostObject = new PairCachingGhostObject(name);
+        internalGhostObject->setWorldTransform( transform );
+        //internalGhostObject->getBroadphaseHandle()->s
+        btScalar internalCapsuleHeight =  120;
+        btScalar internalCapsuleWidth =  15;
 
-		internalCollisionShape = new btCapsuleShapeZ( internalCapsuleWidth, internalCapsuleHeight );
-		internalCollisionShape->setMargin( 0.1 );
+        internalCollisionShape = new btCapsuleShapeZ( internalCapsuleWidth, internalCapsuleHeight );
+        internalCollisionShape->setMargin( 0.1 );
 
-		internalGhostObject->setCollisionShape( internalCollisionShape );
-		internalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
+        internalGhostObject->setCollisionShape( internalCollisionShape );
+        internalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
 
-		mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 40 ),1,4,20,9.8,0.2 );
-		mCharacter->setUpAxis(btKinematicCharacterController::Z_AXIS);
+        mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 40 ),1,4,20,9.8,0.2 );
+        mCharacter->setUpAxis(btKinematicCharacterController::Z_AXIS);
         mCharacter->setUseGhostSweepTest(false);
 
         mCharacter->mCollision = false;
         setGravity(0);
-	}
+    }
 
-	PhysicActor::~PhysicActor()
-	{
-		delete mCharacter;
-		delete internalGhostObject;
-		delete internalCollisionShape;
-		delete externalGhostObject;
-		delete externalCollisionShape;
-	}
+    PhysicActor::~PhysicActor()
+    {
+        delete mCharacter;
+        delete internalGhostObject;
+        delete internalCollisionShape;
+        delete externalGhostObject;
+        delete externalCollisionShape;
+    }
 
     void PhysicActor::setGravity(float gravity)
     {
@@ -94,100 +94,100 @@ namespace Physic
         return mCharacter->mCollision;
     }
 
-	void PhysicActor::setWalkDirection(const btVector3& mvt)
-	{
-		mCharacter->setWalkDirection( mvt );
-	}
+    void PhysicActor::setWalkDirection(const btVector3& mvt)
+    {
+        mCharacter->setWalkDirection( mvt );
+    }
 
-	void PhysicActor::Rotate(const btQuaternion& quat)
-	{
-		externalGhostObject->getWorldTransform().setRotation( externalGhostObject->getWorldTransform().getRotation() * quat );
-		internalGhostObject->getWorldTransform().setRotation( internalGhostObject->getWorldTransform().getRotation() * quat );
-	}
+    void PhysicActor::Rotate(const btQuaternion& quat)
+    {
+        externalGhostObject->getWorldTransform().setRotation( externalGhostObject->getWorldTransform().getRotation() * quat );
+        internalGhostObject->getWorldTransform().setRotation( internalGhostObject->getWorldTransform().getRotation() * quat );
+    }
 
-	void PhysicActor::setRotation(const btQuaternion& quat)
-	{
-		externalGhostObject->getWorldTransform().setRotation( quat );
-		internalGhostObject->getWorldTransform().setRotation( quat );
-	}
+    void PhysicActor::setRotation(const btQuaternion& quat)
+    {
+        externalGhostObject->getWorldTransform().setRotation( quat );
+        internalGhostObject->getWorldTransform().setRotation( quat );
+    }
 
-	btVector3 PhysicActor::getPosition(void)
-	{
-		return internalGhostObject->getWorldTransform().getOrigin();
-	}
+    btVector3 PhysicActor::getPosition(void)
+    {
+        return internalGhostObject->getWorldTransform().getOrigin();
+    }
 
-	btQuaternion PhysicActor::getRotation(void)
-	{
-		return internalGhostObject->getWorldTransform().getRotation();
-	}
+    btQuaternion PhysicActor::getRotation(void)
+    {
+        return internalGhostObject->getWorldTransform().getRotation();
+    }
 
-	void PhysicActor::setPosition(const btVector3& pos)
-	{
-		internalGhostObject->getWorldTransform().setOrigin(pos);
-		externalGhostObject->getWorldTransform().setOrigin(pos);
-	}
+    void PhysicActor::setPosition(const btVector3& pos)
+    {
+        internalGhostObject->getWorldTransform().setOrigin(pos);
+        externalGhostObject->getWorldTransform().setOrigin(pos);
+    }
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	RigidBody::RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name)
-		:btRigidBody(CI),mName(name)
-	{
-
-	};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+    RigidBody::RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name)
+        :btRigidBody(CI),mName(name)
+    {
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////////////////////////////
+    };
 
 
 
-	PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader)
-	{
-		// Set up the collision configuration and dispatcher
-		collisionConfiguration = new btDefaultCollisionConfiguration();
-		dispatcher = new btCollisionDispatcher(collisionConfiguration);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// The actual physics solver
-		solver = new btSequentialImpulseConstraintSolver;
 
-		//TODO: memory leak?
-		btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
-		pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
 
-	    broadphase = new btDbvtBroadphase(pairCache);
+    PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader)
+    {
+        // Set up the collision configuration and dispatcher
+        collisionConfiguration = new btDefaultCollisionConfiguration();
+        dispatcher = new btCollisionDispatcher(collisionConfiguration);
 
-		// The world.
-		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
-		dynamicsWorld->setGravity(btVector3(0,0,-10));
+        // The actual physics solver
+        solver = new btSequentialImpulseConstraintSolver;
 
-		if(BulletShapeManager::getSingletonPtr() == NULL)
-		{
-			new BulletShapeManager();
-		}
-		//TODO:singleton?
-		mShapeLoader = shapeLoader;
+        //TODO: memory leak?
+        btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
+        pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
 
-		isDebugCreated = false;
-	}
+        broadphase = new btDbvtBroadphase(pairCache);
 
-	void PhysicEngine::createDebugRendering()
-	{
-		if(!isDebugCreated)
-		{
-			Ogre::SceneManagerEnumerator::SceneManagerIterator iter = Ogre::Root::getSingleton().getSceneManagerIterator();
-			iter.begin();
-			Ogre::SceneManager* scn = iter.getNext();
-			Ogre::SceneNode* node = scn->getRootSceneNode()->createChildSceneNode();
-			node->pitch(Ogre::Degree(-90));
-			mDebugDrawer = new BtOgre::DebugDrawer(node, dynamicsWorld);
-			dynamicsWorld->setDebugDrawer(mDebugDrawer);
-			isDebugCreated = true;
-			dynamicsWorld->debugDrawWorld();
-		}
-	}
+        // The world.
+        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+        dynamicsWorld->setGravity(btVector3(0,0,-10));
+
+        if(BulletShapeManager::getSingletonPtr() == NULL)
+        {
+            new BulletShapeManager();
+        }
+        //TODO:singleton?
+        mShapeLoader = shapeLoader;
+
+        isDebugCreated = false;
+    }
+
+    void PhysicEngine::createDebugRendering()
+    {
+        if(!isDebugCreated)
+        {
+            Ogre::SceneManagerEnumerator::SceneManagerIterator iter = Ogre::Root::getSingleton().getSceneManagerIterator();
+            iter.begin();
+            Ogre::SceneManager* scn = iter.getNext();
+            Ogre::SceneNode* node = scn->getRootSceneNode()->createChildSceneNode();
+            node->pitch(Ogre::Degree(-90));
+            mDebugDrawer = new BtOgre::DebugDrawer(node, dynamicsWorld);
+            dynamicsWorld->setDebugDrawer(mDebugDrawer);
+            isDebugCreated = true;
+            dynamicsWorld->debugDrawWorld();
+        }
+    }
 
     void PhysicEngine::setDebugRenderingMode(int mode)
     {
@@ -198,69 +198,69 @@ namespace Physic
         mDebugDrawer->setDebugMode(mode);
     }
 
-	PhysicEngine::~PhysicEngine()
-	{
-		delete dynamicsWorld;
-		delete solver;
-		delete collisionConfiguration;
-		delete dispatcher;
-		delete broadphase;
-		delete mShapeLoader;
-	}
+    PhysicEngine::~PhysicEngine()
+    {
+        delete dynamicsWorld;
+        delete solver;
+        delete collisionConfiguration;
+        delete dispatcher;
+        delete broadphase;
+        delete mShapeLoader;
+    }
 
-	RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name)
-	{
-		//get the shape from the .nif
-		mShapeLoader->load(mesh,"General");
-		BulletShapeManager::getSingletonPtr()->load(mesh,"General");
-		BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(mesh,"General");
+    RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name)
+    {
+        //get the shape from the .nif
+        mShapeLoader->load(mesh,"General");
+        BulletShapeManager::getSingletonPtr()->load(mesh,"General");
+        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(mesh,"General");
 
-		//create the motionState
-		CMotionState* newMotionState = new CMotionState(this,name);
+        //create the motionState
+        CMotionState* newMotionState = new CMotionState(this,name);
 
-		//create the real body
-		btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,shape->Shape);
-		RigidBody* body = new RigidBody(CI,name);
+        //create the real body
+        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,shape->Shape);
+        RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
-		return body;
-	}
+        return body;
+    }
 
-	void PhysicEngine::addRigidBody(RigidBody* body)
-	{
+    void PhysicEngine::addRigidBody(RigidBody* body)
+    {
         if(body->collide)
         {
-		    dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+            dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
         }
         else
         {
             dynamicsWorld->addRigidBody(body,COL_WORLD,COL_NOTHING);
         }
-		body->setActivationState(DISABLE_DEACTIVATION);
-		RigidBodyMap[body->mName] = body;
-	}
+        body->setActivationState(DISABLE_DEACTIVATION);
+        RigidBodyMap[body->mName] = body;
+    }
 
-	void PhysicEngine::removeRigidBody(std::string name)
-	{
+    void PhysicEngine::removeRigidBody(std::string name)
+    {
         std::map<std::string,RigidBody*>::iterator it = RigidBodyMap.find(name);
         if (it != RigidBodyMap.end() )
         {
             RigidBody* body = it->second;
             if(body != NULL)
             {
-               // broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                // broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
                 /*std::map<std::string,PhysicActor*>::iterator it2 = PhysicActorMap.begin();
-                for(;it2!=PhysicActorMap.end();it++)
-                {
-                    it2->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
-                    it2->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
-                }*/
+                  for(;it2!=PhysicActorMap.end();it++)
+                  {
+                  it2->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                  it2->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
+                  }*/
                 dynamicsWorld->removeRigidBody(RigidBodyMap[name]);
             }
         }
-	}
+    }
 
-	void PhysicEngine::deleteRigidBody(std::string name)
-	{
+    void PhysicEngine::deleteRigidBody(std::string name)
+    {
         std::map<std::string,RigidBody*>::iterator it = RigidBodyMap.find(name);
         if (it != RigidBodyMap.end() )
         {
@@ -271,34 +271,34 @@ namespace Physic
             }
             RigidBodyMap.erase(it);
         }
-	}
+    }
 
-	RigidBody* PhysicEngine::getRigidBody(std::string name)
-	{
-		RigidBody* body = RigidBodyMap[name];
-		return body;
-	}
+    RigidBody* PhysicEngine::getRigidBody(std::string name)
+    {
+        RigidBody* body = RigidBodyMap[name];
+        return body;
+    }
 
-	void PhysicEngine::stepSimulation(double deltaT)
-	{
-		dynamicsWorld->stepSimulation(deltaT,1,1/50.);
-		if(isDebugCreated)
-		{
-			mDebugDrawer->step();
-		}
-	}
+    void PhysicEngine::stepSimulation(double deltaT)
+    {
+        dynamicsWorld->stepSimulation(deltaT,1,1/50.);
+        if(isDebugCreated)
+        {
+            mDebugDrawer->step();
+        }
+    }
 
-	void PhysicEngine::addCharacter(std::string name)
-	{
-		PhysicActor* newActor = new PhysicActor(name);
-		dynamicsWorld->addCollisionObject( newActor->externalGhostObject, COL_ACTOR_EXTERNAL, COL_WORLD |COL_ACTOR_EXTERNAL );
-		dynamicsWorld->addCollisionObject( newActor->internalGhostObject, COL_ACTOR_INTERNAL, COL_WORLD |COL_ACTOR_INTERNAL );
-		dynamicsWorld->addAction( newActor->mCharacter );
-		PhysicActorMap[name] = newActor;
-	}
+    void PhysicEngine::addCharacter(std::string name)
+    {
+        PhysicActor* newActor = new PhysicActor(name);
+        dynamicsWorld->addCollisionObject( newActor->externalGhostObject, COL_ACTOR_EXTERNAL, COL_WORLD |COL_ACTOR_EXTERNAL );
+        dynamicsWorld->addCollisionObject( newActor->internalGhostObject, COL_ACTOR_INTERNAL, COL_WORLD |COL_ACTOR_INTERNAL );
+        dynamicsWorld->addAction( newActor->mCharacter );
+        PhysicActorMap[name] = newActor;
+    }
 
-	void PhysicEngine::removeCharacter(std::string name)
-	{
+    void PhysicEngine::removeCharacter(std::string name)
+    {
         //std::cout << "remove";
         std::map<std::string,PhysicActor*>::iterator it = PhysicActorMap.find(name);
         if (it != PhysicActorMap.end() )
@@ -307,15 +307,15 @@ namespace Physic
             if(act != NULL)
             {
                 /*broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
-                broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
-                std::map<std::string,PhysicActor*>::iterator it2 = PhysicActorMap.begin();
-                for(;it2!=PhysicActorMap.end();it++)
-                {
-                    it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
-                    it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
-                    it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
-                    it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
-                }*/
+                  broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
+                  std::map<std::string,PhysicActor*>::iterator it2 = PhysicActorMap.begin();
+                  for(;it2!=PhysicActorMap.end();it++)
+                  {
+                  it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
+                  it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
+                  it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
+                  it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
+                  }*/
                 //act->externalGhostObject->
                 dynamicsWorld->removeCollisionObject(act->externalGhostObject);
                 dynamicsWorld->removeCollisionObject(act->internalGhostObject);
@@ -325,17 +325,17 @@ namespace Physic
             PhysicActorMap.erase(it);
         }
         //std::cout << "ok";
-	}
+    }
 
-	PhysicActor* PhysicEngine::getCharacter(std::string name)
-	{
-		PhysicActor* act = PhysicActorMap[name];
-		return act;
-	}
+    PhysicActor* PhysicEngine::getCharacter(std::string name)
+    {
+        PhysicActor* act = PhysicActorMap[name];
+        return act;
+    }
 
-	void PhysicEngine::emptyEventLists(void)
-	{
-	}
+    void PhysicEngine::emptyEventLists(void)
+    {
+    }
 
     std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to)
     {
