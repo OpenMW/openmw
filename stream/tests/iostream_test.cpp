@@ -76,7 +76,7 @@ void test2()
 
 struct Dummy2 : Stream
 {
-  Dummy2() 
+  Dummy2()
   {
     isWritable = true;
     isReadable = false;

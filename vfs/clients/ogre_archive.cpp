@@ -71,7 +71,7 @@ Ogre::StringVectorPtr MangleArchive::find(const Ogre::String& pattern,
   return Ogre::StringVectorPtr(res);
 }
 
-Ogre::FileInfoListPtr MangleArchive::findFileInfo(const Ogre::String& pattern, 
+Ogre::FileInfoListPtr MangleArchive::findFileInfo(const Ogre::String& pattern,
                                         bool recursive,
                                         bool dirs)
 {

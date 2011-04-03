@@ -36,6 +36,6 @@ int main()
   cout << "Result: " << data << endl;
   cout << "Eof: " << inp->eof() << endl;
   cout << "Pos: " << inp->tell() << endl;
-  
+
   return 0;
 }

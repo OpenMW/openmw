@@ -169,10 +169,10 @@ void SDLGLDriver::setVideoMode(int width, int height, int bpp, bool fullscreen)
 
   // Have OpenGL generate a texture object handle for us
   glGenTextures( 1, &texture );
- 
+
   // Bind the texture object
   glBindTexture( GL_TEXTURE_2D, texture );
- 
+
   // Set the texture's stretching properties
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -213,24 +213,24 @@ void SDLGLDriver::updateNoSwap()
   // Bottom-left vertex (corner)
   glTexCoord2i( 0, 1 );
   glVertex3f(0,diff,0);
-	
+
   // Bottom-right vertex (corner)
   glTexCoord2i( 1, 1 );
   glVertex3f( realDisp->w, diff, 0.f );
-	
+
   // Top-right vertex (corner)
   glTexCoord2i( 1, 0 );
   glVertex3f( realDisp->w, screen->h, 0.f );
-	
+
   // Top-left vertex (corner)
   glTexCoord2i( 0, 0 );
   glVertex3f( 0, screen->h, 0.f );
   glEnd();
 
   glMatrixMode(GL_PROJECTION);
-  glPopMatrix();   
+  glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();	
+  glPopMatrix();
 }
 
 void SDLGLDriver::swap()

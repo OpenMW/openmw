@@ -50,7 +50,7 @@ class MangleArchive : public Ogre::Archive
   // Find functions will only work if vfs->hasFind is set.
   Ogre::StringVectorPtr find(const Ogre::String& pattern, bool recursive = true,
                              bool dirs = false);
-  Ogre::FileInfoListPtr findFileInfo(const Ogre::String& pattern, 
+  Ogre::FileInfoListPtr findFileInfo(const Ogre::String& pattern,
                                      bool recursive = true,
                                      bool dirs = false);
 };

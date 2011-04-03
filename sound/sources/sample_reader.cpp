@@ -72,7 +72,7 @@ size_t SampleReader::read(void *_data, size_t length)
       // Determine how much we read
       return data-(char*)_data;
     }
-  
+
   // Determine the overshoot
   pullSize = length - num;
   assert(pullSize < frameSize && pullSize >= 0);

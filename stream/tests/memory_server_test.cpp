@@ -37,6 +37,6 @@ int main()
   cout << "Pos: " << inp->tell() << endl;
 
   cout << "Entire stream from pointer: " << (char*)inp->getPtr() << endl;
-  
+
   return 0;
 }

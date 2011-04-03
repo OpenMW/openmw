@@ -34,7 +34,7 @@ FFMpegSource::FFMpegSource(const std::string &file)
 
   if(av_open_input_file(&FmtCtx, file.c_str(), NULL, 0, NULL) != 0)
     fail("Error loading audio file " + file);
-  
+
   if(av_find_stream_info(FmtCtx) < 0)
     {
       msg = "Error in file stream " + file;

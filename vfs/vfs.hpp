@@ -13,7 +13,7 @@ struct FileInfo
 {
   /// Full name, including path
   std::string name;
-  
+
   /// Base name, not including path
   std::string basename;
 
@@ -22,7 +22,7 @@ struct FileInfo
 
   /// File size
   size_t size;
-  
+
   /// Last modification date
   time_t time;
 };
