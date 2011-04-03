@@ -9,191 +9,233 @@ using namespace ESM;
 
 DataFilesDialog::DataFilesDialog()
 {
-    //dataFilesModel = new DataFilesModel(this);
-    dataFilesModel = new QStandardItemModel();
+    QSplitter *splitter = new QSplitter(this);
+    tree = new QTreeView(this);
+    mastertable = new QTableView(this);
+    plugintable = new QTableView(this);
+
+    splitter->setOrientation(Qt::Vertical);
+    splitter->addWidget(tree);
+    splitter->addWidget(mastertable);
+    splitter->addWidget(plugintable);
+
+    // Adjust the widget heights inside the splitter
+    QList<int> sizelist;
+    sizelist << 100 << 200 << 400;
+    splitter->setSizes(sizelist);
     
-   
-    //dataFilesModel->setReadOnly(true); // Prevent changes to files
-    //dataFilesModel->setRootPath("data");
-
-//    sortModel = new QSortFilterProxyModel();
-//    sortModel->setSourceModel(dataFilesModel);
-
-    //selectionModel = new QItemSelectionModel(dataFilesModel);
-//    selectionModel = new QItemSelectionModel(sortModel);
-
-    /* First, show only plugin files and sort them
-    QStringList acceptedfiles = (QStringList() << "*.esp");
-    dataFilesModel->setNameFilters(acceptedfiles);
-    dataFilesModel->setNameFilterDisables(false); // Hide all other files
-
-    dataFilesModel->sort(3, Qt::AscendingOrder); // Sort the plugins by date
-    dataFilesModel->submit(); // Force refresh of the data
-
-    // Now show master files too, to make them appear at the top of the list
-    acceptedfiles = (QStringList() << "*.esm" << "*.esp");
-    dataFilesModel->setNameFilters(acceptedfiles);
-    dataFilesModel->setFilter(QDir::Files);
-*/
-    // Column 1
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
+    dialogLayout->addWidget(splitter);
+    //dialogLayout->addWidget(plugintable);
 
-    QGroupBox *groupFiles = new QGroupBox(tr("Morrowind Files"), this);
-    groupFiles->setMinimumWidth(450);
-    QVBoxLayout *groupFilesLayout = new QVBoxLayout(groupFiles);
+    datafilesmodel = new QStandardItemModel();
+    mastersmodel = new QStandardItemModel();
 
-    //QSpacerItem *vSpacer1 = new QSpacerItem(20, 2, QSizePolicy::Minimum, QSizePolicy::Fixed);
+    QDir datafilesdir("data/");
+    if (!datafilesdir.exists())
+        qWarning("Cannot find the plugin directory");
 
-    /*QHBoxLayout *filterLayout = new QHBoxLayout();
-    QLabel *labelFilter = new QLabel(tr("Filter:"), groupFiles);
-    lineFilter = new LineEdit(groupFiles);
-
-    filterLayout->addWidget(labelFilter);
-    filterLayout->addWidget(lineFilter);
-    */
-    
-    // View for the game files
-    //dataFilesView = new QTreeView(groupFiles);
-    dataFilesView = new QTreeView(groupFiles);
-    dataFilesView->setModel(dataFilesModel);
-    dataFilesView->setDragEnabled(true);
-    dataFilesView->setDropIndicatorShown(true);
-    dataFilesView->setAlternatingRowColors(true);
-    
-    
-    // Put everything in the correct layouts
-    //groupFilesLayout->addLayout(filterLayout);
-    //groupFilesLayout->addItem(vSpacer1);
-    groupFilesLayout->addWidget(dataFilesView);
-
-    QHBoxLayout *buttonsLayout = new QHBoxLayout();
-    QSpacerItem *horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    QDialogButtonBox *buttonBox = new QDialogButtonBox();
-    buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults);
-    buttonBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    buttonsLayout->addItem(horizontalSpacer);
-    buttonsLayout->addWidget(buttonBox);
-    
-    dialogLayout->addWidget(groupFiles);
-    dialogLayout->addLayout(buttonsLayout);
-
-    setWindowTitle(tr("Data Files"));
-
-    // Signals and slots
-    /*connect(dataFilesModel, SIGNAL(directoryLoaded(const QString &)), this, SLOT(setupView()));
-
-    connect(dataFilesView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
-    connect(selectionModel, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(changeData(QModelIndex, QModelIndex)));
-
-    connect(lineFilter, SIGNAL(textChanged(const QString&)), this, SLOT(setFilter()));
-
-    connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), SIGNAL(clicked()), this, SLOT(restoreDefaults()));
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(writeConfig()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
-*/
-    //readConfig();
-    //setupView();
-    setupView();
-}
-
-void DataFilesDialog::changeData(QModelIndex index, QModelIndex bottom)
-{
-    /*if (!index.isValid()) {
-        return;
-    }
-
-    // Added for testing
-
-    textDepends->clear(); // Clear the dependencies of previous file
-
-    ESMReader datafile;
-    QString path(dataFilesModel->filePath(index));
-//    QString path(dataFilesModel->filePath(sortModel->mapToSource(index)));
-
-    datafile.open(path.toStdString()); // Open the selected file
-
-    // Get the author of the selected file and display it
-    QString author(QString::fromStdString(datafile.getAuthor()));
-    lineAuthor->setText(author);
-
-    // Get the file desciption
-    QString desc(QString::fromStdString(datafile.getDesc()));
-    textDesc->setPlainText(desc);
-
-    // Get a list of master files on which the file depends
-    ESMReader::MasterList mlist = datafile.getMasters();
-
-    for (unsigned int i = 0; i < mlist.size(); ++i) // Add each master file
-        textDepends->appendPlainText(QString::fromStdString(mlist[i].name));
-
-    /* Get the date of creation
-    QDateTime dateCreated = dataFilesModel->fileInfo(index).created();
-    QString created = dateCreated.toString(QString("dd.MM.yyyy"));
-    labelDateCreated->setText(created);
-
-    // Get the date last modified
-    QDateTime dateModified = dataFilesModel->fileInfo(index).lastModified();
-    QString modified = dateModified.toString(QString("dd.MM.yyyy"));
-    labelDateModified->setText(modified);*/
-}
-
-void DataFilesDialog::setupView()
-{
-    QDir datadir(QString("data/"));
     QStringList acceptedfiles = (QStringList() << "*.esp");
-    QStringList datafiles;
+    QStringList files;
+        
+    datafilesdir.setNameFilters(acceptedfiles);
+    files = datafilesdir.entryList();
+
     
-    datadir.setNameFilters(acceptedfiles);
+    //foreach (const QString &currentfile, datafiles) {
+    for (int i=0; i<files.count(); ++i)
+    {
+        ESMReader datafile;
+        QString currentfile = files.at(i);
+        
+        QStringList masters;
+        QString path = QString("data/").append(currentfile);
+        datafile.open(path.toStdString());
+        
+        ESMReader::MasterList mlist = datafile.getMasters();
+        
+        for (unsigned int i = 0; i < mlist.size(); ++i) {// Add each master file
+            masters.append(QString::fromStdString(mlist[i].name));
+        }
+        
+        masters.sort(); // Sort the masters alphabetically
+        
+        // Add the masters to mastersmodel
+        foreach (const QString &currentmaster, masters) {
+            QStandardItem *item = new QStandardItem(currentmaster);
+            
+            QList<QStandardItem*> foundmasters = mastersmodel->findItems(currentmaster);
+                        
+            if (foundmasters.isEmpty()) {
+                 // Current master is not found in the master, add it
+                mastersmodel->appendRow(item);
+            }
+        }
+        
+        // Add the masters to datafilesmodel
+        QStandardItem *item = new QStandardItem(masters.join(","));
+        QStandardItem *child = new QStandardItem(currentfile);
+        
+        QList<QStandardItem*> masteritems = datafilesmodel->findItems(masters.join(","));
+        
+        
+        if (masteritems.isEmpty()) {
+            item->appendRow(child);
+            datafilesmodel->appendRow(item);
+        } else {   
+            foreach (QStandardItem *currentitem, masteritems) {
+                currentitem->appendRow(child);
+            }
+        }
+        //if (foundmasters.isEmpty()) {
+            //datafilesmodel->appendRow(item);
+        //}
+    }
+
+    /*for( int r=0; r<5; ++r ) {
+        QStandardItem *item = new QStandardItem( QString("Morrowind.esm").arg(r));
+
+        / *for( int i=0; i<3; i++ ) {
+            QStandardItem *child = new QStandardItem( QString("Master %0 Item %1").arg(r).arg(i));
+            //child->setEditable( false );
+            item->appendRow( child );
+        }* /
+
+        mastersmodel->setItem(r, 0, item);
+    }*/
+
+
+    pluginsmodel = new QStandardItemModel(0, 1);
+    masterselectmodel = new QItemSelectionModel(mastersmodel);
     
-    datafiles = datadir.entryList();
+    tree->setModel(datafilesmodel);
+    tree->header()->hide();
+        
+    mastertable->setModel(mastersmodel);
+    mastertable->setSelectionModel(masterselectmodel);
     
-    QStandardItem *parentItem = dataFilesModel->invisibleRootItem();
-    QStandardItem *masterFile = new QStandardItem(QString("Morrowind.esm"));
-    parentItem->appendRow(masterFile);
-    parentItem = masterFile;
+    mastertable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    mastertable->setSelectionMode(QAbstractItemView::MultiSelection);
+    mastertable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    mastertable->horizontalHeader()->setStretchLastSection(true);
+    mastertable->horizontalHeader()->hide();
+
+    plugintable->setModel(pluginsmodel);
+    plugintable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    plugintable->setSelectionMode(QAbstractItemView::MultiSelection);
+    plugintable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    plugintable->horizontalHeader()->setStretchLastSection(true);
+    plugintable->horizontalHeader()->hide();
+
+    connect(masterselectmodel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(masterSelectionChanged(const QItemSelection&, const QItemSelection&)));
+
+    // Adjust the dialog width
+    setMinimumWidth(500);
+}
+
+void DataFilesDialog::appendPlugins(const QModelIndex &masterindex)
+{
+    // Find the plugins in the datafilesmodel and append them to the pluginsmodel
+    if (!masterindex.isValid())
+        return;
     
-    QFileIconProvider fip;
-    QIcon fileIcon = fip.icon(QFileInfo("data/Morrowind.esm"));
+    for (int r=0; r<datafilesmodel->rowCount(masterindex); ++r ) {
+        QModelIndex childindex = masterindex.child(r, 0);
+        
+        if (childindex.isValid()) {
+            // Now we see if the pluginsmodel already contains this plugin
+            QList<QStandardItem *> itemlist = pluginsmodel->findItems(QVariant(datafilesmodel->data(childindex)).toString());
+            
+            if (itemlist.isEmpty())
+            {
+                // Plugin not yet in the pluginsmodel, add it
+                QStandardItem *item = new QStandardItem(QVariant(datafilesmodel->data(childindex)).toString());
+                pluginsmodel->appendRow(item);
+            }
+        }
     
-    foreach (const QString &currentfile, datafiles) {
-        QStandardItem *item = new QStandardItem(currentfile);
-        item->setIcon(fileIcon);
-        parentItem->appendRow(item);
     }
     
+}
+
+void DataFilesDialog::removePlugins(const QModelIndex &masterindex)
+{
     
+    if (!masterindex.isValid())
+        return;
+   
+    for (int r=0; r<datafilesmodel->rowCount(masterindex); ++r) {
+        QModelIndex childindex = masterindex.child(r, 0);
+
+        QList<QStandardItem *> itemlist = pluginsmodel->findItems(QVariant(childindex.data()).toString());
+        
+        if (!itemlist.isEmpty()) {
+            foreach (const QStandardItem *currentitem, itemlist) {
+                qDebug() << "Remove plugin:" << currentitem->data(Qt::DisplayRole).toString();
+                pluginsmodel->removeRow(currentitem->row());
+            }
+        }
+    }
     
-    /* The signal directoryLoaded is emitted after all files are in the model
-    dataFilesView->setModel(dataFilesModel);
-//    dataFilesView->setModel(sortModel);
+}
 
-    // Set the view to the data directory
-    dataFilesView->setRootIndex(QModelIndex(dataFilesModel->index("data")));
-//    dataFilesView->setRootIndex(sortModel->mapFromSource(QModelIndex(dataFilesModel->index("/opt/openmw/data"))));
+void DataFilesDialog::masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{     
+    if (masterselectmodel->hasSelection()) { // Not exactly necessary to check
+        const QModelIndexList selectedindexes = masterselectmodel->selectedIndexes();
+    
+        QStringList masters;
+        QString masterstr;
+        
+        // Create a QStringList containing all the masters
+        foreach (const QModelIndex &currentindex, selectedindexes) {
+            masters.append(currentindex.data().toString());
+        }
+        
+        masters.sort();
+        masterstr = masters.join(","); // Make a comma-separated QString
+        
+        qDebug() << "Masters" << masterstr;
+        
+        // Iterate over all masters in the datafilesmodel to see if they are selected
+        for (int r=0; r<datafilesmodel->rowCount(); ++r) {
+            QModelIndex currentindex = datafilesmodel->index(r, 0);
+            QString master = currentindex.data().toString();
+                      
+            if (currentindex.isValid()) {
+                // See if the current master is in the string with selected masters
+                if (masterstr.contains(master))
+                {
+                    // Append the plugins from the current master to pluginsmodel
+                    appendPlugins(currentindex);
+                }
+            }
+        }
+    }
+    
+   // See what plugins to remove
+   QModelIndexList deselectedindexes = deselected.indexes();
+  
+   if (!deselectedindexes.isEmpty()) {
+        foreach (const QModelIndex &currentindex, deselectedindexes) {
 
-    dataFilesView->verticalHeader()->hide();
-
-    //dataFilesView->hideColumn(1);
-    dataFilesView->hideColumn(3); // Hide Date Modified column
-    dataFilesView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    dataFilesView->verticalHeader()->setDefaultSectionSize(25); //setHeight
-
-    dataFilesView->setSortingEnabled(true);
-
-    dataFilesView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    dataFilesView->setSelectionModel(selectionModel);
-
-
-    dataFilesView->setAlternatingRowColors(true); // Fancy colors!
-
-    dataFilesView->resizeColumnsToContents();
-    dataFilesView->horizontalHeader()->setStretchLastSection(true);
-
-
-    //sortModel->setSortCaseSensitivity(Qt::CaseInsensitive);*/
-
+            QString master = currentindex.data().toString();
+            master.prepend("*");
+            master.append("*");
+            QList<QStandardItem *> itemlist = datafilesmodel->findItems(master, Qt::MatchWildcard);
+            
+            if (itemlist.isEmpty())
+                qDebug() << "Empty as shit";
+            
+            foreach (const QStandardItem *currentitem, itemlist) {
+                
+                QModelIndex index = currentitem->index();
+                qDebug() << "Master to remove plugins of:" << index.data().toString();
+                
+                removePlugins(index);
+            }
+        }
+   }
 }
 
 void DataFilesDialog::readConfig()
@@ -329,29 +371,11 @@ void DataFilesDialog::restoreDefaults()
     dataFilesModel->submit(); // Force refresh of view*/
 }
 
-void DataFilesDialog::setCheckstate(QModelIndex index)
+
+
+/*void DataFilesDialog::setFilter()
 {
-    /* No check if index is valid: doubleclicked() always returns
-    // a valid index when emitted
-
-    //index = QModelIndex(sortModel->mapToSource(index)); // Get a valid index
-    index = index.sibling(index.row(), 0); // reset index to first column
-    // because that's where te checkbox is; makes it possible to doubleclick whole row
-
-    if (!index.isValid())
-        return;
-
-    if (dataFilesModel->data(index, Qt::CheckStateRole) == Qt::Checked) {
-        // Selected row is checked, uncheck it
-        dataFilesModel->setData(index, Qt::Unchecked, Qt::CheckStateRole);
-    } else {
-       dataFilesModel->setData(index, Qt::Checked, Qt::CheckStateRole);
-    }*/
-}
-
-void DataFilesDialog::setFilter()
-{
-    /*
+    / *
     QStringList filefilter = (QStringList() << "*.esm" << "*.esp");
     QStringList currentfilefilter;
 
@@ -380,5 +404,6 @@ void DataFilesDialog::setFilter()
 //    readConfig();
 //    dataFilesModel->submit();
 //    dataFilesModel->setData();
-*/
+* /
 }
+*/

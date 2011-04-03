@@ -17,7 +17,10 @@ class QSortFilterProxyModel;
 #include <QModelIndex>
 
 class QTreeView;
+class QTableView;
 class QStandardItemModel;
+class QItemSelectionModel;
+class QItemSelection;
 
 class DataFilesDialog : public QDialog
 {
@@ -28,9 +31,9 @@ public:
 //    ~DataFilesDialog() { };
 
 private:
-    QStandardItemModel *dataFilesModel;
+    //QStandardItemModel *dataFilesModel;
 
-    QTreeView *dataFilesView;
+    //QTreeView *dataFilesView;
     //QItemSelectionModel *selectionModel;
     //QSortFilterProxyModel *sortModel;
 
@@ -38,18 +41,33 @@ private:
     //LineEdit *lineFilter;
     //QPlainTextEdit *textDesc;
     //QPlainTextEdit *textDepends;
+    QModelIndexList *masterindexes;
 
+    QStandardItemModel *datafilesmodel;
+    QStandardItemModel *mastersmodel;
+    QStandardItemModel *pluginsmodel;
+    
+    QItemSelectionModel *masterselectmodel;
+    
+    QTreeView *tree;
+
+    QTableView *mastertable;
+    QTableView *plugintable;
+
+    void appendPlugins(const QModelIndex &masterindex);
+    void removePlugins(const QModelIndex &masterindex);
 
 public slots:
 
-    void changeData(QModelIndex top, QModelIndex bottom); // edit
+    //void changeData(QModelIndex top, QModelIndex bottom); // edit
     void restoreDefaults();
     void readConfig();
     void writeConfig();
-    void setupView();
+    //void setupView();
 
-    void setFilter();
-    void setCheckstate(QModelIndex index);
+    void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    //void setFilter();
+    //void setCheckstate(QModelIndex index);
 //    void doubleClicked(QModelIndex index);
 
 };
