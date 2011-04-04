@@ -107,4 +107,5 @@ op 0x2000132: ToggleCollsionDebug
 op 0x2000133: Journal
 op 0x2000134: SetJournalIndex
 op 0x2000135: GetJournalIndex
-opcodes 0x2000136-0x3ffffff unused
+op 0x2000136: GetPCCell
+opcodes 0x2000137-0x3ffffff unused

@@ -102,10 +102,42 @@ namespace MWScript
                 }
         };
 
+        class OpGetPCCell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context
+                        = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    const ESM::Cell *cell = context.getWorld().getPlayer().getPlayer().getCell()->cell;
+
+                    std::string current = cell->name;
+
+                    if (!(cell->data.flags & ESM::Cell::Interior) && current.empty())
+                    {
+                        const ESM::Region *region =
+                            context.getWorld().getStore().regions.find (cell->region);
+
+                        current = region->name;
+                    }
+
+                    bool match = current.length()>=name.length() &&
+                        current.substr (0, name.length())==name;
+
+                    runtime.push (match ? 1 : 0);
+                }
+        };
+
         const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
         const int opcodeCOE = 0x200008e;
         const int opcodeGetInterior = 0x2000131;
+        const int opcodeGetPCCell = 0x2000136;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -115,6 +147,7 @@ namespace MWScript
             extensions.registerInstruction ("coe", "ll", opcodeCOE);
             extensions.registerInstruction ("centeronexterior", "ll", opcodeCOE);
             extensions.registerFunction ("getinterior", 'l', "", opcodeGetInterior);
+            extensions.registerFunction ("getpccell", 'l', "c", opcodeGetPCCell);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -123,6 +156,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeCOC, new OpCOC);
             interpreter.installSegment5 (opcodeCOE, new OpCOE);
             interpreter.installSegment5 (opcodeGetInterior, new OpGetInterior);
+            interpreter.installSegment5 (opcodeGetPCCell, new OpGetPCCell);
         }
     }
 }
