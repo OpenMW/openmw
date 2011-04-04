@@ -93,6 +93,7 @@ set(GAMESCRIPT
     mwscript/controlextensions.cpp
     mwscript/extensions.cpp
     mwscript/globalscripts.cpp
+    mwscript/dialogueextensions.cpp
     )
 set(GAMESCRIPT_HEADER
     mwscript/locals.hpp
@@ -111,6 +112,7 @@ set(GAMESCRIPT_HEADER
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
     mwscript/ref.hpp
+    mwscript/dialogueextensions.hpp
     )
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})
 
