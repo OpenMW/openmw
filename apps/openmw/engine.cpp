@@ -36,6 +36,7 @@
 #include "mwclass/classes.hpp"
 
 #include "mwdialogue/dialoguemanager.hpp"
+#include "mwdialogue/journal.hpp"
 
 #include "mwmechanics/mechanicsmanager.hpp"
 
@@ -228,6 +229,7 @@ OMW::Engine::~Engine()
     delete mEnvironment.mGlobalScripts;
     delete mEnvironment.mMechanicsManager;
     delete mEnvironment.mDialogueManager;
+    delete mEnvironment.mJournal;
     delete mScriptManager;
     delete mScriptContext;
     delete mPhysicEngine;
@@ -396,6 +398,7 @@ void OMW::Engine::go()
     mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (mEnvironment);
 
     // Create dialog system
+    mEnvironment.mJournal = new MWDialogue::Journal (mEnvironment);
     mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment);
 
     // load cell
