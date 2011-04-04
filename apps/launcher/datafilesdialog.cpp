@@ -2,6 +2,7 @@
 #include <components/esm/esm_reader.hpp>
 
 #include "datafilesdialog.h"
+//#include "pluginitemmodel.h"
 //#include "datafilesmodel.h"
 //#include "datafilesitem.h"
 
@@ -14,6 +15,28 @@ DataFilesDialog::DataFilesDialog()
     mastertable = new QTableView(this);
     plugintable = new QTableView(this);
 
+    /* listtest
+    QTableWidget *pluginlist = new QTableWidget(this);
+    
+    pluginlist->horizontalHeader()->setStretchLastSection(true);
+    pluginlist->insertColumn(0);
+    
+    for (unsigned int i=0; i<6; ++i) {
+        pluginlist->insertRow(i);
+        QTableWidgetItem *item = new QTableWidgetItem(QString("Plugin %0").arg(i));
+        item->setFlags(item->flags() & ~(Qt::ItemIsDropEnabled));
+        pluginlist->setItem(i, 0, item);
+    }
+    
+    pluginlist->insertRow(6);
+    pluginlist->setSelectionMode(QAbstractItemView::SingleSelection); // single item can be draged or droped
+    pluginlist->setDragEnabled(true);
+    pluginlist->setDragDropMode(QAbstractItemView::InternalMove);
+    pluginlist->viewport()->setAcceptDrops(true);
+ 
+    pluginlist->setDropIndicatorShown(true);
+    */
+    
     splitter->setOrientation(Qt::Vertical);
     splitter->addWidget(tree);
     splitter->addWidget(mastertable);
@@ -63,6 +86,7 @@ DataFilesDialog::DataFilesDialog()
         // Add the masters to mastersmodel
         foreach (const QString &currentmaster, masters) {
             QStandardItem *item = new QStandardItem(currentmaster);
+            item->setFlags(item->flags() & ~(Qt::ItemIsDropEnabled));
             
             QList<QStandardItem*> foundmasters = mastersmodel->findItems(currentmaster);
                         
@@ -74,7 +98,9 @@ DataFilesDialog::DataFilesDialog()
         
         // Add the masters to datafilesmodel
         QStandardItem *item = new QStandardItem(masters.join(","));
+        item->setFlags(item->flags() & ~(Qt::ItemIsDropEnabled));
         QStandardItem *child = new QStandardItem(currentfile);
+        child->setFlags(child->flags() & ~(Qt::ItemIsDropEnabled));
         
         QList<QStandardItem*> masteritems = datafilesmodel->findItems(masters.join(","));
         
@@ -84,6 +110,7 @@ DataFilesDialog::DataFilesDialog()
             datafilesmodel->appendRow(item);
         } else {   
             foreach (QStandardItem *currentitem, masteritems) {
+                currentitem->setFlags(currentitem->flags() & ~(Qt::ItemIsDropEnabled));
                 currentitem->appendRow(child);
             }
         }
@@ -106,7 +133,12 @@ DataFilesDialog::DataFilesDialog()
 
 
     pluginsmodel = new QStandardItemModel(0, 1);
+    pluginsmodel->setSupportedDragActions(Qt::MoveAction);
+    pluginsmodel->invisibleRootItem()->setFlags(Qt::ItemIsDropEnabled);
+    
+    
     masterselectmodel = new QItemSelectionModel(mastersmodel);
+    pluginselectmodel = new QItemSelectionModel(pluginsmodel);
     
     tree->setModel(datafilesmodel);
     tree->header()->hide();
@@ -121,14 +153,26 @@ DataFilesDialog::DataFilesDialog()
     mastertable->horizontalHeader()->hide();
 
     plugintable->setModel(pluginsmodel);
+    plugintable->setSelectionModel(pluginselectmodel);
     plugintable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    plugintable->setSelectionMode(QAbstractItemView::MultiSelection);
+    plugintable->setSelectionMode(QAbstractItemView::SingleSelection);
     plugintable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     plugintable->horizontalHeader()->setStretchLastSection(true);
     plugintable->horizontalHeader()->hide();
+    
+    plugintable->setDragEnabled(true);
+    plugintable->setDragDropMode(QAbstractItemView::InternalMove);
+    plugintable->setDropIndicatorShown(true);
+    plugintable->setDragDropOverwriteMode(false);
+    plugintable->viewport()->setAcceptDrops(true);
+    
+    plugintable->setContextMenuPolicy(Qt::CustomContextMenu);
+
 
     connect(masterselectmodel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(masterSelectionChanged(const QItemSelection&, const QItemSelection&)));
-
+    connect(plugintable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+    connect(plugintable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
+    
     // Adjust the dialog width
     setMinimumWidth(500);
 }
@@ -150,6 +194,8 @@ void DataFilesDialog::appendPlugins(const QModelIndex &masterindex)
             {
                 // Plugin not yet in the pluginsmodel, add it
                 QStandardItem *item = new QStandardItem(QVariant(datafilesmodel->data(childindex)).toString());
+                item->setFlags(item->flags() & ~(Qt::ItemIsDropEnabled));
+                item->setCheckable(true);
                 pluginsmodel->appendRow(item);
             }
         }
@@ -236,6 +282,78 @@ void DataFilesDialog::masterSelectionChanged(const QItemSelection &selected, con
             }
         }
    }
+}
+
+void DataFilesDialog::showContextMenu(const QPoint &point)
+{
+    qDebug() << "Show me the money!";
+    
+
+   
+    QAction *action1 = new QAction(QIcon::fromTheme("arrow-up-double"), tr("Move to Top"), this);
+    QAction *action2 = new QAction(QIcon::fromTheme("arrow-down-double"), tr("Move to Bottom"), this);
+    QAction *action3 = new QAction(QIcon::fromTheme("arrow-up"), tr("Move Up"), this);
+    QAction *action4 = new QAction(QIcon::fromTheme("arrow-down"), tr("Move Down"), this);
+    QAction *action5 = new QAction(this);
+    
+    QModelIndex index = plugintable->indexAt(point);
+    
+    if (index.isValid()) { // Should be valid!
+        const QStandardItem *item = pluginsmodel->itemFromIndex(index);
+    
+        if (item->checkState() == Qt::Checked) {
+            action5->setText("Uncheck Item");
+        } else if (item->checkState() == Qt::Unchecked) {
+            action5->setText("Check Item");
+        }
+    }
+    
+    connect(action5, SIGNAL(triggered()), this, SLOT(actionCheckstate()));
+    
+    QMenu menu(this);
+    menu.addAction(action1);
+    menu.addAction(action2);
+    menu.addSeparator();
+    menu.addAction(action3);
+    menu.addAction(action4);
+    menu.addSeparator();
+    menu.addAction(action5);
+    
+    menu.exec(plugintable->viewport()->mapToGlobal(point));
+
+}
+
+void DataFilesDialog::actionCheckstate()
+{
+    qDebug() << "actionCheckstate";
+    
+    const QModelIndexList selectedindexes = pluginselectmodel->selectedIndexes();
+
+    // Should only be one index selected
+    foreach (const QModelIndex &currentindex, selectedindexes) {
+        setCheckstate(currentindex);
+    }
+        
+}
+
+void DataFilesDialog::setCheckstate(QModelIndex index)
+{
+    // No check if index is valid: doubleclicked() always returns
+    // a valid index when emitted
+
+    //index = QModelIndex(sortModel->mapToSource(index)); // Get a valid index
+    index = index.sibling(index.row(), 0); // reset index to first column
+    // because that's where te checkbox is; makes it possible to doubleclick whole row
+
+    if (!index.isValid())
+        return;
+
+    if (pluginsmodel->data(index, Qt::CheckStateRole) == Qt::Checked) {
+        // Selected row is checked, uncheck it
+        pluginsmodel->setData(index, Qt::Unchecked, Qt::CheckStateRole);
+    } else {
+        pluginsmodel->setData(index, Qt::Checked, Qt::CheckStateRole);
+    }
 }
 
 void DataFilesDialog::readConfig()
@@ -407,3 +525,4 @@ void DataFilesDialog::restoreDefaults()
 * /
 }
 */
+

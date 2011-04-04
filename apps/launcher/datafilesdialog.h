@@ -16,6 +16,7 @@ class QSortFilterProxyModel;
 #include <QDialog>
 #include <QModelIndex>
 
+class PluginItemModel;
 class QTreeView;
 class QTableView;
 class QStandardItemModel;
@@ -48,6 +49,7 @@ private:
     QStandardItemModel *pluginsmodel;
     
     QItemSelectionModel *masterselectmodel;
+    QItemSelectionModel *pluginselectmodel;
     
     QTreeView *tree;
 
@@ -63,11 +65,14 @@ public slots:
     void restoreDefaults();
     void readConfig();
     void writeConfig();
+    void showContextMenu(const QPoint &point);
+    
+    void actionCheckstate();
     //void setupView();
 
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     //void setFilter();
-    //void setCheckstate(QModelIndex index);
+    void setCheckstate(QModelIndex index);
 //    void doubleClicked(QModelIndex index);
 
 };

@@ -1,14 +1,10 @@
 set(LAUNCHER
   datafilesdialog.cpp
-  datafilesmodel.cpp
-  datafilesitem.cpp
   lineedit.cpp
   main.cpp
   maindialog.cpp
   settingsdialog.cpp
   datafilesdialog.h
-  datafilesmodel.h
-  datafilesitem.h
   lineedit.h
   maindialog.h
   settingsdialog.h
@@ -16,8 +12,6 @@ set(LAUNCHER
 
 SET(MOC_HDRS
   datafilesdialog.h
-  datafilesmodel.h
-  datafilesitem.h
   lineedit.h
   maindialog.h
   settingsdialog.h
