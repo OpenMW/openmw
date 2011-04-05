@@ -25,4 +25,11 @@ if (MYGUI_USE_FREETYPE)
 	)
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS} uuid)
+# We don't need this lib in OS X. uuid functions is in libc here.
+if (NOT APPLE)
+	target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS} uuid)
+endif(NOT APPLE)
+
+if (MINGW)
+  target_link_libraries(${PROJECT_NAME} libwinmm.a)
+endif (MINGW)

@@ -67,22 +67,22 @@ namespace Mangle
 class NIFLoader : Ogre::ManualResourceLoader
 {
     public:
-		static int numberOfMeshes;
+        static int numberOfMeshes;
         static NIFLoader& getSingleton();
         static NIFLoader* getSingletonPtr();
 
         virtual void loadResource(Ogre::Resource *resource);
 
-		static Ogre::MeshPtr load(const std::string &name, 
+        static Ogre::MeshPtr load(const std::string &name, 
                                     const std::string &group="General");
 
 
-		
+        
         Ogre::Vector3 convertVector3(const Nif::Vector& vec);
         Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
 
     private:
-        NIFLoader() : resourceGroup("General") { skincounter = 0; resourceName = ""; anim = false;}
+        NIFLoader() : resourceGroup("General") { skincounter = 0; resourceName = "";}
         NIFLoader(NIFLoader& n) {}
 
         void warn(std::string msg);
@@ -123,20 +123,19 @@ class NIFLoader : Ogre::ManualResourceLoader
 
         std::string resourceName;
         std::string resourceGroup;
-		int skincounter;
-		bool isChest;
-		bool isBeast;
-		bool isHands;
-		bool isFeet;
-		bool anim;
-		int counter;
-		int numbers;
-		int stack;
-		
+        int skincounter;
+        bool isChest;
+        bool isBeast;
+        bool isHands;
+        bool isFeet;
+        int counter;
+        int numbers;
+        int stack;
+        
 
         // pointer to the ogre mesh which is currently build
         Ogre::Mesh *mesh;
-        Ogre::SkeletonPtr skel;
+        Ogre::SkeletonPtr mSkel;
 };
 
 #endif

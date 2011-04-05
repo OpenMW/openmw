@@ -7,9 +7,10 @@
 
 #include <components/misc/fileops.hpp>
 #include "engine.hpp"
+#include "path.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
-#include <boost/iostreams/concepts.hpp> 
+#include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 
 #  if !defined(_DEBUG)
@@ -42,10 +43,13 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ("help", "print help message")
         ("data", bpo::value<std::string>()->default_value ("data"),
             "set data directory")
+        ("resources", bpo::value<std::string>()->default_value ("resources"),
+            "set resources directory")
         ("start", bpo::value<std::string>()->default_value ("Beshara"),
             "set initial cell")
         ("master", bpo::value<std::string>()->default_value ("Morrowind"),
             "master file")
+        ( "showfps", "show fps counter")
         ( "debug", "debug mode" )
         ( "nosound", "disable all sound" )
         ( "script-verbose", "verbose script output" )
@@ -55,20 +59,23 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
     bpo::variables_map variables;
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-	std::string configFilePath(macBundlePath() + "/Contents/MacOS/openmw.cfg");
-	std::ifstream configFile (configFilePath.c_str());
-#else
-	std::ifstream configFile ("openmw.cfg");
-#endif
+    std::string cfgFile = OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH, "openmw", "openmw.cfg");
+    std::cout << "Using global config file: " << cfgFile << std::endl;
+    std::ifstream globalConfigFile(cfgFile.c_str());
+
+    cfgFile = OMW::Path::getPath(OMW::Path::USER_CFG_PATH, "openmw", "openmw.cfg");
+    std::cout << "Using user config file: " << cfgFile << std::endl;
+    std::ifstream userConfigFile(cfgFile.c_str());
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
 
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-    if (configFile.is_open())
-        bpo::store ( bpo::parse_config_file (configFile, desc), variables);
+    if (userConfigFile.is_open())
+        bpo::store ( bpo::parse_config_file (userConfigFile, desc), variables);
+    if (globalConfigFile.is_open())
+        bpo::store ( bpo::parse_config_file (globalConfigFile, desc), variables);
 
     if (variables.count ("help"))
     {
@@ -77,8 +84,12 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     }
 
     engine.setDataDir (variables["data"].as<std::string>());
+    engine.setResourceDir (variables["resources"].as<std::string>());
     engine.setCell (variables["start"].as<std::string>());
     engine.addMaster (variables["master"].as<std::string>());
+
+    if (variables.count ("showfps"))
+        engine.showFPS();
 
     if (variables.count ("debug"))
         engine.enableDebugMode();
@@ -100,6 +111,11 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
 int main(int argc, char**argv)
 {
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    // set current dir to bundle path
+    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath());
+    boost::filesystem::current_path(bundlePath);
+#endif
 
     try
     {

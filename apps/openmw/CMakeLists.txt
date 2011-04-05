@@ -4,7 +4,8 @@ project(OpenMW)
 
 set(GAME
     main.cpp
-    engine.cpp)
+    engine.cpp
+    path.cpp)
 set(GAME_HEADER
     engine.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
@@ -14,16 +15,18 @@ set(GAMEREND
     mwrender/cellimp.cpp
     mwrender/interior.cpp
     mwrender/exterior.cpp
-    mwrender/playerpos.cpp
-    mwrender/sky.cpp)
+    mwrender/sky.cpp
+    mwrender/player.cpp
+    )
 set(GAMEREND_HEADER
     mwrender/cell.hpp
     mwrender/cellimp.hpp
     mwrender/mwscene.hpp
     mwrender/interior.hpp
     mwrender/exterior.hpp
-    mwrender/playerpos.hpp
-    mwrender/sky.hpp)
+    mwrender/sky.hpp
+    mwrender/player.hpp
+    )
 source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})
 
 set(GAMEINPUT
@@ -46,6 +49,7 @@ set(GAMEGUI_HEADER
     mwgui/dialogue.hpp
     mwgui/dialogue_history.hpp
     mwgui/window_base.hpp
+    mwgui/stats_window.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
@@ -60,6 +64,7 @@ set(GAMEGUI
     mwgui/dialogue.cpp
     mwgui/dialogue_history.cpp
     mwgui/window_base.cpp
+    mwgui/stats_window.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
@@ -103,6 +108,7 @@ set(GAMESCRIPT_HEADER
     mwscript/controlextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
+    mwscript/ref.hpp
     )
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})
 
@@ -120,6 +126,8 @@ set(GAMEWORLD
     mwworld/actiontalk.cpp
     mwworld/actiontake.cpp
     mwworld/containerutil.cpp
+    mwworld/player.cpp
+    mwworld/doingphysics.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -137,6 +145,9 @@ set(GAMEWORLD_HEADER
     mwworld/containerstore.hpp
     mwworld/manualref.hpp
     mwworld/containerutil.hpp
+    mwworld/player.hpp
+    mwworld/doingphysics.hpp
+    mwworld/cellfunctors.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
@@ -198,6 +209,7 @@ set(GAMEMECHANICS_HEADER
     mwmechanics/stat.hpp
     mwmechanics/creaturestats.hpp
     mwmechanics/magiceffects.hpp
+    mwmechanics/movement.hpp
     )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
@@ -219,7 +231,7 @@ add_executable(openmw
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
-include_directories(${SOUND_INPUT_INCLUDES})
+include_directories(${SOUND_INPUT_INCLUDES} ${BULLET_INCLUDE_DIRS})
 add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
@@ -228,6 +240,7 @@ target_link_libraries(openmw
   ${Boost_LIBRARIES}
   ${OPENAL_LIBRARY}
   ${SOUND_INPUT_LIBRARY}
+  ${BULLET_LIBRARIES}
   caelum
   MyGUIEngine
   MyGUIOgrePlatform
@@ -236,4 +249,12 @@ target_link_libraries(openmw
 if (APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
     target_link_libraries(openmw ${CARBON_FRAMEWORK})
+    install(TARGETS openmw
+        BUNDLE DESTINATION .
+        RUNTIME DESTINATION ../MacOS
+        COMPONENT Runtime)
 endif (APPLE)
+
+if(DPKG_PROGRAM)
+    INSTALL(TARGETS openmw RUNTIME DESTINATION games COMPONENT openmw)
+endif()

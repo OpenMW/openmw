@@ -7,6 +7,7 @@
 #include "review.hpp"
 #include "dialogue.hpp"
 #include "dialogue_history.hpp"
+#include "stats_window.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -20,7 +21,7 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-    const Compiler::Extensions& extensions, bool newGame)
+    const Compiler::Extensions& extensions, bool fpsSwitch, bool newGame)
   : environment(environment)
   , nameDialog(nullptr)
   , raceDialog(nullptr)
@@ -32,11 +33,6 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , createClassDialog(nullptr)
   , birthSignDialog(nullptr)
   , reviewDialog(nullptr)
-  , nameChosen(false)
-  , raceChosen(false)
-  , classChosen(false)
-  , birthSignChosen(false)
-  , reviewNext(false)
   , gui(_gui)
   , mode(GM_Game)
   , nextMode(GM_Game)
@@ -44,65 +40,68 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , shown(GW_ALL)
   , allowed(newGame ? GW_None : GW_ALL)
 {
+    showFPSCounter = fpsSwitch;
+
+    creationStage = NotStarted;
 
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogeHistory>("Widget");
 
-  // Get size info from the Gui object
-  assert(gui);
-  int w = gui->getViewSize().width;
-  int h = gui->getViewSize().height;
+    // Get size info from the Gui object
+    assert(gui);
+    int w = gui->getViewSize().width;
+    int h = gui->getViewSize().height;
 
-  hud = new HUD(w,h);
-  menu = new MainMenu(w,h);
-  map = new MapWindow();
-  stats = new StatsWindow (environment);
+    hud = new HUD(w,h, showFPSCounter);
+    menu = new MainMenu(w,h);
+    map = new MapWindow();
+    stats = new StatsWindow(*this);
 #if 0
-  inventory = new InventoryWindow ();
+    inventory = new InventoryWindow ();
 #endif
-  console = new Console(w,h, environment, extensions);
+    console = new Console(w,h, environment, extensions);
 
-  // The HUD is always on
-  hud->setVisible(true);
+    // The HUD is always on
+    hud->setVisible(true);
 
-  // Setup player stats
-  for (int i = 0; i < ESM::Attribute::Length; ++i)
-  {
-      playerAttributes.insert(std::make_pair(ESM::Attribute::attributeIds[i], MWMechanics::Stat<int>()));
-  }
+    // Setup player stats
+    for (int i = 0; i < ESM::Attribute::Length; ++i)
+    {
+        playerAttributes.insert(std::make_pair(ESM::Attribute::attributeIds[i], MWMechanics::Stat<int>()));
+    }
 
-  for (int i = 0; i < ESM::Skill::Length; ++i)
-  {
-      playerSkillValues.insert(std::make_pair(ESM::Skill::skillIds[i], MWMechanics::Stat<float>()));
-  }
+    for (int i = 0; i < ESM::Skill::Length; ++i)
+    {
+        playerSkillValues.insert(std::make_pair(ESM::Skill::skillIds[i], MWMechanics::Stat<float>()));
+    }
 
-  // Set up visibility
-  updateVisible();
+    // Set up visibility
+    updateVisible();
 }
 
 WindowManager::~WindowManager()
 {
-  delete console;
-  delete hud;
-  delete map;
-  delete menu;
-  delete stats;
+    delete console;
+    delete hud;
+    delete map;
+    delete menu;
+    delete stats;
 #if 0
-  delete inventory;
+    delete inventory;
 #endif
 
-  delete nameDialog;
-  delete raceDialog;
-  delete dialogueWindow;
-  delete classChoiceDialog;
-  delete generateClassQuestionDialog;
-  delete generateClassResultDialog;
-  delete pickClassDialog;
-  delete createClassDialog;
-  delete birthSignDialog;
-  delete reviewDialog;
+    delete nameDialog;
+    delete raceDialog;
+    delete dialogueWindow;
+    delete classChoiceDialog;
+    delete generateClassQuestionDialog;
+    delete generateClassResultDialog;
+    delete pickClassDialog;
+    delete createClassDialog;
+    delete birthSignDialog;
+    delete reviewDialog;
 
-  cleanupGarbage();
+    cleanupGarbage();
 }
 
 void WindowManager::cleanupGarbage()
@@ -127,6 +126,10 @@ void WindowManager::update()
         environment.mInputManager->setGuiMode(nextMode);
         nextMode = GM_Game;
     }
+    if (showFPSCounter)
+    {
+        hud->setFPS(mFPS);
+    }
 }
 
 void WindowManager::setNextMode(GuiMode newMode)
@@ -142,198 +145,193 @@ void WindowManager::setGuiMode(GuiMode newMode)
 
 void WindowManager::updateVisible()
 {
-  // Start out by hiding everything except the HUD
-  map->setVisible(false);
-  menu->setVisible(false);
-  stats->setVisible(false);
+    // Start out by hiding everything except the HUD
+    map->setVisible(false);
+    menu->setVisible(false);
+    stats->setVisible(false);
 #if 0
-  inventory->setVisible(false);
+    inventory->setVisible(false);
 #endif
-  console->disable();
+    console->disable();
 
-  // Mouse is visible whenever we're not in game mode
-  gui->setVisiblePointer(isGuiMode());
+    // Mouse is visible whenever we're not in game mode
+    gui->setVisiblePointer(isGuiMode());
 
-  // If in game mode, don't show anything.
-  if(mode == GM_Game)
+    // If in game mode, don't show anything.
+    if(mode == GM_Game)
     {
-      return;
+        return;
     }
 
-  if(mode == GM_MainMenu)
+    if(mode == GM_MainMenu)
     {
-      // Enable the main menu
-      menu->setVisible(true);
-      return;
+        // Enable the main menu
+        menu->setVisible(true);
+        return;
     }
 
-  if(mode == GM_Console)
+    if(mode == GM_Console)
     {
-      console->enable();
-      return;
+        console->enable();
+        return;
     }
 
-  if (mode == GM_Name)
-  {
-      if (nameDialog)
-          removeDialog(nameDialog);
-      nameDialog = new TextInputDialog(environment);
-      std::string sName = getGameSettingString("sName", "Name");
-      nameDialog->setTextLabel(sName);
-      nameDialog->setTextInput(playerName);
-      nameDialog->setNextButtonShow(nameChosen || reviewNext);
-      nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
-      nameDialog->open();
-      return;
-  }
-
-  if (mode == GM_Race)
-  {
-      if (raceDialog)
-          removeDialog(raceDialog);
-      raceDialog = new RaceDialog(environment);
-      raceDialog->setNextButtonShow(raceChosen || reviewNext);
-      raceDialog->setRaceId(playerRaceId);
-      raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
-      raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
-      raceDialog->open();
-      return;
-  }
-
-  if (mode == GM_Class)
-  {
-      if (classChoiceDialog)
-          removeDialog(classChoiceDialog);
-      classChoiceDialog = new ClassChoiceDialog(environment);
-      classChoiceDialog->eventButtonSelected = MyGUI::newDelegate(this, &WindowManager::onClassChoice);
-      classChoiceDialog->open();
-      return;
-  }
-
-  if (mode == GM_ClassGenerate)
-  {
-      generateClassStep = 0;
-      generateClass = "";
-      generateClassSpecializations[0] = 0;
-      generateClassSpecializations[1] = 0;
-      generateClassSpecializations[2] = 0;
-      showClassQuestionDialog();
-      return;
-  }
-
-  if (mode == GM_ClassPick)
-  {
-      if (pickClassDialog)
-          removeDialog(pickClassDialog);
-      pickClassDialog = new PickClassDialog(environment);
-      pickClassDialog->setNextButtonShow(classChosen || reviewNext);
-      pickClassDialog->setClassId(playerClass.name);
-      pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
-      pickClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogBack);
-      pickClassDialog->open();
-      return;
-  }
-
-  if (mode == GM_ClassCreate)
-  {
-      if (createClassDialog)
-          removeDialog(createClassDialog);
-      createClassDialog = new CreateClassDialog(environment);
-      createClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogDone);
-      createClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogBack);
-      createClassDialog->open();
-      return;
-  }
-
-  if (mode == GM_Birth)
-  {
-      if (birthSignDialog)
-          removeDialog(birthSignDialog);
-      birthSignDialog = new BirthDialog(environment);
-      birthSignDialog->setNextButtonShow(birthSignChosen || reviewNext);
-      birthSignDialog->setBirthId(playerBirthSignId);
-      birthSignDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogDone);
-      birthSignDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogBack);
-      birthSignDialog->open();
-      return;
-  }
-
-  if (mode == GM_Review)
-  {
-      reviewNext = false;
-      if (reviewDialog)
-          removeDialog(reviewDialog);
-      reviewDialog = new ReviewDialog(environment);
-      reviewDialog->setPlayerName(playerName);
-      reviewDialog->setRace(playerRaceId);
-      reviewDialog->setClass(playerClass);
-      reviewDialog->setBirthSign(playerBirthSignId);
-
-      reviewDialog->setHealth(playerHealth);
-      reviewDialog->setMagicka(playerMagicka);
-      reviewDialog->setFatigue(playerFatigue);
-
-      {
-          std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator end = playerAttributes.end();
-          for (std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator it = playerAttributes.begin(); it != end; ++it)
-          {
-              reviewDialog->setAttribute(it->first, it->second);
-          }
-      }
-
-      {
-          std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator end = playerSkillValues.end();
-          for (std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator it = playerSkillValues.begin(); it != end; ++it)
-          {
-              reviewDialog->setSkillValue(it->first, it->second);
-          }
-          reviewDialog->configureSkills(playerMajorSkills, playerMinorSkills);
-      }
-
-      reviewDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onReviewDialogDone);
-      reviewDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onReviewDialogBack);
-
-      reviewDialog->eventNameActivated = MyGUI::newDelegate(this, &WindowManager::onNameDialogActivate);
-      reviewDialog->eventRaceActivated = MyGUI::newDelegate(this, &WindowManager::onRaceDialogActivate);
-      reviewDialog->eventClassActivated = MyGUI::newDelegate(this, &WindowManager::onClassDialogActivate);
-      reviewDialog->eventBirthSignActivated = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogActivate);
-
-      reviewDialog->open();
-      return;
-  }
-
-  if(mode == GM_Inventory)
+    if (mode == GM_Name)
     {
-      // Ah, inventory mode. First, compute the effective set of
-      // windows to show. This is controlled both by what windows the
-      // user has opened/closed (the 'shown' variable) and by what
-      // windows we are allowed to show (the 'allowed' var.)
-      int eff = shown & allowed;
+        if (nameDialog)
+            removeDialog(nameDialog);
+        nameDialog = new TextInputDialog(*this);
+        std::string sName = getGameSettingString("sName", "Name");
+        nameDialog->setTextLabel(sName);
+        nameDialog->setTextInput(playerName);
+        nameDialog->setNextButtonShow(creationStage >= NameChosen);
+        nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
+        nameDialog->open();
+        return;
+    }
 
-      // Show the windows we want
-      map   -> setVisible( (eff & GW_Map) != 0 );
-      stats -> setVisible( (eff & GW_Stats) != 0 );
+    if (mode == GM_Race)
+    {
+        if (raceDialog)
+            removeDialog(raceDialog);
+        raceDialog = new RaceDialog(*this);
+        raceDialog->setNextButtonShow(creationStage >= RaceChosen);
+        raceDialog->setRaceId(playerRaceId);
+        raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
+        raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
+        raceDialog->open();
+        return;
+    }
+
+    if (mode == GM_Class)
+    {
+        if (classChoiceDialog)
+            removeDialog(classChoiceDialog);
+        classChoiceDialog = new ClassChoiceDialog(*this);
+        classChoiceDialog->eventButtonSelected = MyGUI::newDelegate(this, &WindowManager::onClassChoice);
+        classChoiceDialog->open();
+        return;
+    }
+
+    if (mode == GM_ClassGenerate)
+    {
+        generateClassStep = 0;
+        generateClass = "";
+        generateClassSpecializations[0] = 0;
+        generateClassSpecializations[1] = 0;
+        generateClassSpecializations[2] = 0;
+        showClassQuestionDialog();
+        return;
+    }
+
+    if (mode == GM_ClassPick)
+    {
+        if (pickClassDialog)
+            removeDialog(pickClassDialog);
+        pickClassDialog = new PickClassDialog(*this);
+        pickClassDialog->setNextButtonShow(creationStage >= ClassChosen);
+        pickClassDialog->setClassId(playerClass.name);
+        pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
+        pickClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogBack);
+        pickClassDialog->open();
+        return;
+    }
+
+    if (mode == GM_ClassCreate)
+    {
+        if (createClassDialog)
+            removeDialog(createClassDialog);
+        createClassDialog = new CreateClassDialog(*this);
+        createClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogDone);
+        createClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onCreateClassDialogBack);
+        createClassDialog->open();
+        return;
+    }
+
+    if (mode == GM_Birth)
+    {
+        if (birthSignDialog)
+            removeDialog(birthSignDialog);
+        birthSignDialog = new BirthDialog(*this);
+        birthSignDialog->setNextButtonShow(creationStage >= BirthSignChosen);
+        birthSignDialog->setBirthId(playerBirthSignId);
+        birthSignDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogDone);
+        birthSignDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onBirthSignDialogBack);
+        birthSignDialog->open();
+        return;
+    }
+
+    if (mode == GM_Review)
+    {
+        if (reviewDialog)
+            removeDialog(reviewDialog);
+        reviewDialog = new ReviewDialog(*this);
+        reviewDialog->setPlayerName(playerName);
+        reviewDialog->setRace(playerRaceId);
+        reviewDialog->setClass(playerClass);
+        reviewDialog->setBirthSign(playerBirthSignId);
+
+        reviewDialog->setHealth(playerHealth);
+        reviewDialog->setMagicka(playerMagicka);
+        reviewDialog->setFatigue(playerFatigue);
+
+        {
+            std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator end = playerAttributes.end();
+            for (std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator it = playerAttributes.begin(); it != end; ++it)
+            {
+                reviewDialog->setAttribute(it->first, it->second);
+            }
+        }
+
+        {
+            std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator end = playerSkillValues.end();
+            for (std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator it = playerSkillValues.begin(); it != end; ++it)
+            {
+                reviewDialog->setSkillValue(it->first, it->second);
+            }
+            reviewDialog->configureSkills(playerMajorSkills, playerMinorSkills);
+        }
+
+        reviewDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onReviewDialogDone);
+        reviewDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onReviewDialogBack);
+        reviewDialog->eventActivateDialog = MyGUI::newDelegate(this, &WindowManager::onReviewActivateDialog);
+        reviewDialog->open();
+        return;
+    }
+
+    if(mode == GM_Inventory)
+    {
+        // Ah, inventory mode. First, compute the effective set of
+        // windows to show. This is controlled both by what windows the
+        // user has opened/closed (the 'shown' variable) and by what
+        // windows we are allowed to show (the 'allowed' var.)
+        int eff = shown & allowed;
+
+        // Show the windows we want
+        map   -> setVisible( (eff & GW_Map) != 0 );
+        stats -> setVisible( (eff & GW_Stats) != 0 );
 #if 0
-//      inventory -> setVisible( eff & GW_Inventory );
+        //      inventory -> setVisible( eff & GW_Inventory );
 #endif
-      return;
+        return;
     }
 
-  if (mode == GM_Dialogue)
-  {
-      if (dialogueWindow)
-          removeDialog(dialogueWindow);
-      dialogueWindow = new DialogueWindow(environment);
-      dialogueWindow->eventBye = MyGUI::newDelegate(this, &WindowManager::onDialogueWindowBye);
-      dialogueWindow->open();
-      return;
-  }
+    if (mode == GM_Dialogue)
+    {
+        if (!dialogueWindow)
+        {
+            dialogueWindow = new DialogueWindow(*this);
+            dialogueWindow->eventBye = MyGUI::newDelegate(this, &WindowManager::onDialogueWindowBye);
+        }
+        dialogueWindow->open();
+        return;
+    }
 
 
-  // Unsupported mode, switch back to game
-  // Note: The call will eventually end up this method again but
-  // will stop at the check if(mode == GM_Game) above.
-  setGuiMode(GM_Game);
+    // Unsupported mode, switch back to game
+    // Note: The call will eventually end up this method again but
+    // will stop at the check if(mode == GM_Game) above.
+    setGuiMode(GM_Game);
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
@@ -365,49 +363,11 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
     }
 }
 
-void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<float>& value)
-{
-    stats->setValue (id, value);
 
-    static struct {const char *id; ESM::Skill::SkillEnum skillId; } skillMap[] =
-    {
-        {"SkillBlock", ESM::Skill::Block},
-        {"SkillArmorer", ESM::Skill::Armorer},
-        {"SkillMediumArmor", ESM::Skill::MediumArmor},
-        {"SkillHeavyArmor", ESM::Skill::HeavyArmor},
-        {"SkillBluntWeapon", ESM::Skill::BluntWeapon},
-        {"SkillLongBlade", ESM::Skill::LongBlade},
-        {"SkillAxe", ESM::Skill::Axe},
-        {"SkillSpear", ESM::Skill::Spear},
-        {"SkillAthletics", ESM::Skill::Athletics},
-        {"SkillEnchant", ESM::Skill::Armorer},
-        {"SkillDestruction", ESM::Skill::Destruction},
-        {"SkillAlteration", ESM::Skill::Alteration},
-        {"SkillIllusion", ESM::Skill::Illusion},
-        {"SkillConjuration", ESM::Skill::Conjuration},
-        {"SkillMysticism", ESM::Skill::Mysticism},
-        {"SkillRestoration", ESM::Skill::Restoration},
-        {"SkillAlchemy", ESM::Skill::Alchemy},
-        {"SkillUnarmored", ESM::Skill::Unarmored},
-        {"SkillSecurity", ESM::Skill::Security},
-        {"SkillSneak", ESM::Skill::Sneak},
-        {"SkillAcrobatics", ESM::Skill::Acrobatics},
-        {"SkillLightArmor", ESM::Skill::LightArmor},
-        {"SkillShortBlade", ESM::Skill::ShortBlade},
-        {"SkillMarksman", ESM::Skill::Marksman},
-        {"SkillMercantile", ESM::Skill::Mercantile},
-        {"SkillSpeechcraft", ESM::Skill::Speechcraft},
-        {"SkillHandToHand", ESM::Skill::HandToHand},
-    };
-    for (size_t i = 0; i < sizeof(skillMap)/sizeof(skillMap[0]); ++i)
-    {
-        if (skillMap[i].id == id)
-        {
-            ESM::Skill::SkillEnum skillId = skillMap[i].skillId;
-            playerSkillValues[skillId] = value;
-            break;
-        }
-    }
+void WindowManager::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+{
+    stats->setValue(parSkill, value);
+    playerSkillValues[parSkill] = value;
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
@@ -504,7 +464,7 @@ const std::string &WindowManager::getGameSettingString(const std::string &id, co
     return default_;
 }
 
-void WindowManager::onNameDialogDone()
+void WindowManager::onNameDialogDone(WindowBase* parWindow)
 {
     if (nameDialog)
     {
@@ -513,18 +473,19 @@ void WindowManager::onNameDialogDone()
         removeDialog(nameDialog);
     }
 
-    bool goNext = nameChosen; // Go to next dialog if name was previously chosen
-    nameChosen = true;
-
-    if (reviewNext)
+    // Go to next dialog if name was previously chosen
+    if (creationStage == ReviewNext)
         setGuiMode(GM_Review);
-    else if (goNext)
+    else if (creationStage >= NameChosen)
         setGuiMode(GM_Race);
     else
+    {
+        creationStage = NameChosen;
         setGuiMode(GM_Game);
+    }
 }
 
-void WindowManager::onRaceDialogDone()
+void WindowManager::onRaceDialogDone(WindowBase* parWindow)
 {
     if (raceDialog)
     {
@@ -534,15 +495,16 @@ void WindowManager::onRaceDialogDone()
         removeDialog(raceDialog);
     }
 
-    bool goNext = raceChosen; // Go to next dialog if race was previously chosen
-    raceChosen = true;
-
-    if (reviewNext)
+    // Go to next dialog if race was previously chosen
+    if (creationStage == ReviewNext)
         setGuiMode(GM_Review);
-    else if (goNext)
+    else if(creationStage >= RaceChosen)
         setGuiMode(GM_Class);
     else
+    {
+        creationStage = RaceChosen;
         setGuiMode(GM_Game);
+    }
 }
 
 void WindowManager::onDialogueWindowBye()
@@ -568,29 +530,29 @@ void WindowManager::onRaceDialogBack()
     setGuiMode(GM_Name);
 }
 
-void WindowManager::onClassChoice(MyGUI::WidgetPtr, int _index)
+void WindowManager::onClassChoice(int _index)
 {
     if (classChoiceDialog)
     {
         removeDialog(classChoiceDialog);
     }
 
-    if (_index == ClassChoiceDialog::Class_Generate)
+    switch(_index)
     {
-        setGuiMode(GM_ClassGenerate);
-    }
-    else if (_index == ClassChoiceDialog::Class_Pick)
-    {
-        setGuiMode(GM_ClassPick);
-    }
-    else if (_index == ClassChoiceDialog::Class_Create)
-    {
-        setGuiMode(GM_ClassCreate);
-    }
-    else if (_index == ClassChoiceDialog::Class_Back)
-    {
-        setGuiMode(GM_Race);
-    }
+        case ClassChoiceDialog::Class_Generate:
+            setGuiMode(GM_ClassGenerate);
+            break;
+        case ClassChoiceDialog::Class_Pick:
+            setGuiMode(GM_ClassPick);
+            break;
+        case ClassChoiceDialog::Class_Create:
+            setGuiMode(GM_ClassCreate);
+            break;
+        case ClassChoiceDialog::Class_Back:
+            setGuiMode(GM_Race);
+            break;
+
+    };
 }
 
 namespace MWGui
@@ -678,18 +640,6 @@ namespace MWGui
     } };
 }
 
-namespace MWGui
-{
-
-    struct ClassPoint
-    {
-        const char *id;
-        // Specialization points to match, in order: Stealth, Combat, Magic
-        // Note: Order is taken from http://www.uesp.net/wiki/Morrowind:Class_Quiz
-        int points[3];
-    };
-}
-
 void WindowManager::showClassQuestionDialog()
 {
     if (generateClassStep == generateClassSteps.size())
@@ -753,7 +703,7 @@ void WindowManager::showClassQuestionDialog()
 
         if (generateClassResultDialog)
             removeDialog(generateClassResultDialog);
-        generateClassResultDialog = new GenerateClassResultDialog(environment);
+        generateClassResultDialog = new GenerateClassResultDialog(*this);
         generateClassResultDialog->setClassId(generateClass);
         generateClassResultDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onGenerateClassBack);
         generateClassResultDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onGenerateClassDone);
@@ -769,7 +719,7 @@ void WindowManager::showClassQuestionDialog()
 
     if (generateClassQuestionDialog)
         removeDialog(generateClassQuestionDialog);
-    generateClassQuestionDialog = new InfoBoxDialog(environment);
+    generateClassQuestionDialog = new InfoBoxDialog(*this);
 
     InfoBoxDialog::ButtonList buttons;
     generateClassQuestionDialog->setText(generateClassSteps[generateClassStep].text);
@@ -781,7 +731,7 @@ void WindowManager::showClassQuestionDialog()
     generateClassQuestionDialog->open();
 }
 
-void WindowManager::onClassQuestionChosen(MyGUI::Widget* _sender, int _index)
+void WindowManager::onClassQuestionChosen(int _index)
 {
     if (generateClassQuestionDialog)
         removeDialog(generateClassQuestionDialog);
@@ -804,7 +754,8 @@ void WindowManager::onClassQuestionChosen(MyGUI::Widget* _sender, int _index)
 
 void WindowManager::onGenerateClassBack()
 {
-    classChosen = true;
+    if(creationStage < ClassChosen)
+        creationStage = ClassChosen;
 
     if (generateClassResultDialog)
         removeDialog(generateClassResultDialog);
@@ -813,25 +764,26 @@ void WindowManager::onGenerateClassBack()
     setGuiMode(GM_Class);
 }
 
-void WindowManager::onGenerateClassDone()
+void WindowManager::onGenerateClassDone(WindowBase* parWindow)
 {
-    bool goNext = classChosen; // Go to next dialog if class was previously chosen
-    classChosen = true;
-
     if (generateClassResultDialog)
         removeDialog(generateClassResultDialog);
     environment.mMechanicsManager->setPlayerClass(generateClass);
 
-    if (reviewNext)
+     // Go to next dialog if class was previously chosen
+    if (creationStage == ReviewNext)
         setGuiMode(GM_Review);
-    else if (goNext)
+    else if (creationStage >= ClassChosen)
         setGuiMode(GM_Birth);
     else
+    {
+        creationStage = ClassChosen;
         setGuiMode(GM_Game);
+    }
 }
 
 
-void WindowManager::onPickClassDialogDone()
+void WindowManager::onPickClassDialogDone(WindowBase* parWindow)
 {
     if (pickClassDialog)
     {
@@ -844,15 +796,16 @@ void WindowManager::onPickClassDialogDone()
         removeDialog(pickClassDialog);
     }
 
-    bool goNext = classChosen; // Go to next dialog if class was previously chosen
-    classChosen = true;
-
-    if (reviewNext)
+    // Go to next dialog if class was previously chosen
+    if (creationStage == ReviewNext)
         setGuiMode(GM_Review);
-    else if (goNext)
+    else if (creationStage >= ClassChosen)
         setGuiMode(GM_Birth);
     else
+    {
+        creationStage = ClassChosen;
         setGuiMode(GM_Game);
+    }
 }
 
 void WindowManager::onPickClassDialogBack()
@@ -868,7 +821,7 @@ void WindowManager::onPickClassDialogBack()
     setGuiMode(GM_Class);
 }
 
-void WindowManager::onCreateClassDialogDone()
+void WindowManager::onCreateClassDialogDone(WindowBase* parWindow)
 {
     if (createClassDialog)
     {
@@ -898,15 +851,16 @@ void WindowManager::onCreateClassDialogDone()
         removeDialog(createClassDialog);
     }
 
-    bool goNext = classChosen; // Go to next dialog if class was previously chosen
-    classChosen = true;
-
-    if (reviewNext)
+    // Go to next dialog if class was previously chosen
+    if (creationStage == ReviewNext)
         setGuiMode(GM_Review);
-    else if (goNext)
+    else if (creationStage >= ClassChosen)
         setGuiMode(GM_Birth);
     else
+    {
+        creationStage = ClassChosen;
         setGuiMode(GM_Game);
+    }
 }
 
 void WindowManager::onCreateClassDialogBack()
@@ -917,7 +871,7 @@ void WindowManager::onCreateClassDialogBack()
     setGuiMode(GM_Class);
 }
 
-void WindowManager::onBirthSignDialogDone()
+void WindowManager::onBirthSignDialogDone(WindowBase* parWindow)
 {
     if (birthSignDialog)
     {
@@ -927,13 +881,14 @@ void WindowManager::onBirthSignDialogDone()
         removeDialog(birthSignDialog);
     }
 
-    bool goNext = birthSignChosen; // Go to next dialog if birth sign was previously chosen
-    birthSignChosen = true;
-
-    if (reviewNext || goNext)
+    // Go to next dialog if birth sign was previously chosen
+    if (creationStage >= BirthSignChosen)
         setGuiMode(GM_Review);
     else
+    {
+        creationStage = BirthSignChosen;
         setGuiMode(GM_Game);
+    }
 }
 
 void WindowManager::onBirthSignDialogBack()
@@ -947,7 +902,7 @@ void WindowManager::onBirthSignDialogBack()
     setGuiMode(GM_Class);
 }
 
-void WindowManager::onReviewDialogDone()
+void WindowManager::onReviewDialogDone(WindowBase* parWindow)
 {
     if (reviewDialog)
         removeDialog(reviewDialog);
@@ -963,38 +918,29 @@ void WindowManager::onReviewDialogBack()
     setGuiMode(GM_Birth);
 }
 
-void WindowManager::onNameDialogActivate()
+void WindowManager::onReviewActivateDialog(int parDialog)
 {
     if (reviewDialog)
         removeDialog(reviewDialog);
+    creationStage = ReviewNext;
 
-    reviewNext = true;
-    setGuiMode(GM_Name);
+    switch(parDialog)
+    {
+        case ReviewDialog::NAME_DIALOG:
+            setGuiMode(GM_Name);
+            break;
+        case ReviewDialog::RACE_DIALOG:
+            setGuiMode(GM_Race);
+            break;
+        case ReviewDialog::CLASS_DIALOG:
+            setGuiMode(GM_Class);
+            break;
+        case ReviewDialog::BIRTHSIGN_DIALOG:
+            setGuiMode(GM_Birth);
+    };
 }
 
-void WindowManager::onRaceDialogActivate()
+ESMS::ESMStore& WindowManager::getStore()
 {
-    if (reviewDialog)
-        removeDialog(reviewDialog);
-
-    reviewNext = true;
-    setGuiMode(GM_Race);
-}
-
-void WindowManager::onClassDialogActivate()
-{
-    if (reviewDialog)
-        removeDialog(reviewDialog);
-
-    reviewNext = true;
-    setGuiMode(GM_Class);
-}
-
-void WindowManager::onBirthSignDialogActivate()
-{
-    if (reviewDialog)
-        removeDialog(reviewDialog);
-
-    reviewNext = true;
-    setGuiMode(GM_Birth);
+    return environment.mWorld->getStore();
 }

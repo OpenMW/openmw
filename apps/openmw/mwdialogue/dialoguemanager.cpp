@@ -13,6 +13,7 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/refdata.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwinput/inputmanager.hpp"
 
@@ -225,7 +226,7 @@ namespace MWDialogue
 
         // check cell
         if (!info.cell.empty())
-            if (mEnvironment.mWorld->getPlayerPos().getPlayer().getCell()->cell->name != info.cell)
+            if (mEnvironment.mWorld->getPlayer().getPlayer().getCell()->cell->name != info.cell)
                 return false;
 
         // TODO check DATAstruct

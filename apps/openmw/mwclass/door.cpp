@@ -5,8 +5,7 @@
 
 #include <components/esm_store/cell_store.hpp>
 
-#include "../mwrender/playerpos.hpp"
-
+#include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/actionteleport.hpp"
@@ -31,6 +30,7 @@ namespace MWClass
         {
             MWRender::Rendering rendering (cellRender, ref->ref);
             cellRender.insertMesh ("meshes\\" + model);
+            cellRender.insertObjectPhysics();
             ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
         }
     }
@@ -65,7 +65,7 @@ namespace MWClass
         if (ref->ref.teleport)
         {
             // teleport door
-            if (environment.mWorld->getPlayerPos().getPlayer()==actor)
+            if (environment.mWorld->getPlayer().getPlayer()==actor)
             {
                 // the player is using the door
                 return boost::shared_ptr<MWWorld::Action> (

@@ -8,12 +8,13 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
+#include "../mwworld/player.hpp"
 
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
     {
-        MWWorld::Ptr ptr = mEnvironment.mWorld->getPlayerPos().getPlayer();
+        MWWorld::Ptr ptr = mEnvironment.mWorld->getPlayer().getPlayer();
 
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
@@ -33,9 +34,9 @@ namespace MWMechanics
         {
             const ESM::Race *race =
                 mEnvironment.mWorld->getStore().races.find (
-                mEnvironment.mWorld->getPlayerPos().getRace());
+                mEnvironment.mWorld->getPlayer().getRace());
 
-            bool male = mEnvironment.mWorld->getPlayerPos().isMale();
+            bool male = mEnvironment.mWorld->getPlayer().isMale();
 
             for (int i=0; i<8; ++i)
             {
@@ -75,11 +76,11 @@ namespace MWMechanics
         }
 
         // birthsign
-        if (!mEnvironment.mWorld->getPlayerPos().getBirthsign().empty())
+        if (!mEnvironment.mWorld->getPlayer().getBirthsign().empty())
         {
             const ESM::BirthSign *sign =
                 mEnvironment.mWorld->getStore().birthSigns.find (
-                mEnvironment.mWorld->getPlayerPos().getBirthsign());
+                mEnvironment.mWorld->getPlayer().getBirthsign());
 
             for (std::vector<std::string>::const_iterator iter (sign->powers.list.begin());
                 iter!=sign->powers.list.end(); ++iter)
@@ -91,7 +92,7 @@ namespace MWMechanics
         // class
         if (mClassSelected)
         {
-            const ESM::Class& class_ = mEnvironment.mWorld->getPlayerPos().getClass();
+            const ESM::Class& class_ = mEnvironment.mWorld->getPlayer().getClass();
 
             for (int i=0; i<2; ++i)
             {
@@ -233,11 +234,17 @@ namespace MWMechanics
 
     void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
     {
+        if (ptr==mWatched)
+            mWatched = MWWorld::Ptr();
+
         mActors.erase (ptr);
     }
 
     void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
     {
+        if (!mWatched.isEmpty() && mWatched.getCell()==cellStore)
+            mWatched = MWWorld::Ptr();
+
         std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
 
         while (iter!=mActors.end())
@@ -254,7 +261,7 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
-    void MechanicsManager::update()
+    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement)
     {
         if (!mWatched.isEmpty())
         {
@@ -273,17 +280,6 @@ namespace MWMechanics
             static const char *dynamicNames[3] =
             {
                 "HBar", "MBar", "FBar"
-            };
-
-            static const char *skillNames[27] =
-            {
-                "SkillBlock", "SkillArmorer", "SkillMediumArmor", "SkillHeavyArmor",
-                "SkillBluntWeapon", "SkillLongBlade", "SkillAxe", "SkillSpear",
-                "SkillAthletics", "SkillEnchant", "SkillDestruction", "SkillAlteration",
-                "SkillIllusion", "SkillConjuration", "SkillMysticism", "SkillRestoration",
-                "SkillAlchemy", "SkillUnarmored", "SkillSecurity", "SkillSneak",
-                "SkillAcrobatics", "SkillLightArmor", "SkillShortBlade", "SkillMarksman",
-                "SkillMercantile", "SkillSpeechcraft", "SkillHandToHand",
             };
 
             for (int i=0; i<8; ++i)
@@ -308,16 +304,14 @@ namespace MWMechanics
 
             bool update = false;
 
-            for (int i=0; i<27; ++i)
+            //Loop over ESM::Skill::SkillEnum
+            for(int i = 0; i < 27; ++i)
             {
-                if (npcStats.mSkill[i]!=mWatchedNpc.mSkill[i])
+                if(npcStats.mSkill[i] != mWatchedNpc.mSkill[i])
                 {
                     update = true;
-
                     mWatchedNpc.mSkill[i] = npcStats.mSkill[i];
-
-                    mEnvironment.mWindowManager->setValue (skillNames[i], npcStats.mSkill[i]);
-
+                    mEnvironment.mWindowManager->setValue((ESM::Skill::SkillEnum)i, npcStats.mSkill[i]);
                 }
             }
 
@@ -330,12 +324,12 @@ namespace MWMechanics
         if (mUpdatePlayer)
         {
             // basic player profile; should not change anymore after the creation phase is finished.
-            mEnvironment.mWindowManager->setValue ("name", mEnvironment.mWorld->getPlayerPos().getName());
+            mEnvironment.mWindowManager->setValue ("name", mEnvironment.mWorld->getPlayer().getName());
             mEnvironment.mWindowManager->setValue ("race",
-                mEnvironment.mWorld->getStore().races.find (mEnvironment.mWorld->getPlayerPos().
+                mEnvironment.mWorld->getStore().races.find (mEnvironment.mWorld->getPlayer().
                 getRace())->name);
             mEnvironment.mWindowManager->setValue ("class",
-                mEnvironment.mWorld->getPlayerPos().getClass().name);
+                mEnvironment.mWorld->getPlayer().getClass().name);
             mUpdatePlayer = false;
 
             MWGui::WindowManager::SkillList majorSkills (5);
@@ -343,24 +337,33 @@ namespace MWMechanics
 
             for (int i=0; i<5; ++i)
             {
-                minorSkills[i] = mEnvironment.mWorld->getPlayerPos().getClass().data.skills[i][0];
-                majorSkills[i] = mEnvironment.mWorld->getPlayerPos().getClass().data.skills[i][1];
+                minorSkills[i] = mEnvironment.mWorld->getPlayer().getClass().data.skills[i][0];
+                majorSkills[i] = mEnvironment.mWorld->getPlayer().getClass().data.skills[i][1];
             }
 
             mEnvironment.mWindowManager->configureSkills (majorSkills, minorSkills);
+        }
+
+        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end();
+            ++iter)
+        {
+            Ogre::Vector3 vector = MWWorld::Class::get (*iter).getMovementVector (*iter);
+
+            if (vector!=Ogre::Vector3::ZERO)
+                movement.push_back (std::make_pair (iter->getRefData().getHandle(), vector));
         }
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)
     {
-        mEnvironment.mWorld->getPlayerPos().setName (name);
+        mEnvironment.mWorld->getPlayer().setName (name);
         mUpdatePlayer = true;
     }
 
     void MechanicsManager::setPlayerRace (const std::string& race, bool male)
     {
-        mEnvironment.mWorld->getPlayerPos().setGender (male);
-        mEnvironment.mWorld->getPlayerPos().setRace (race);
+        mEnvironment.mWorld->getPlayer().setGender (male);
+        mEnvironment.mWorld->getPlayer().setRace (race);
         mRaceSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
@@ -368,14 +371,14 @@ namespace MWMechanics
 
     void MechanicsManager::setPlayerBirthsign (const std::string& id)
     {
-        mEnvironment.mWorld->getPlayerPos().setBirthsign (id);
+        mEnvironment.mWorld->getPlayer().setBirthsign (id);
         buildPlayer();
         mUpdatePlayer = true;
     }
 
     void MechanicsManager::setPlayerClass (const std::string& id)
     {
-        mEnvironment.mWorld->getPlayerPos().setClass (*mEnvironment.mWorld->getStore().classes.find (id));
+        mEnvironment.mWorld->getPlayer().setClass (*mEnvironment.mWorld->getStore().classes.find (id));
         mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
@@ -383,7 +386,7 @@ namespace MWMechanics
 
     void MechanicsManager::setPlayerClass (const ESM::Class& class_)
     {
-        mEnvironment.mWorld->getPlayerPos().setClass (class_);
+        mEnvironment.mWorld->getPlayer().setClass (class_);
         mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;

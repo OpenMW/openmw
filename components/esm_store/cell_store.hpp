@@ -133,7 +133,48 @@ namespace ESMS
         loadRefs(store, esm);
     }
 
+    /// Call functor (ref) for each reference. functor must return a bool. Returning
+    /// false will abort the iteration.
+    /// \return Iteration completed?
+    template<class Functor>
+    bool forEach (Functor& functor)
+    {
+        return
+            forEachImp (functor, activators) &&
+            forEachImp (functor, potions) &&
+            forEachImp (functor, appas) &&
+            forEachImp (functor, armors) &&
+            forEachImp (functor, books) &&
+            forEachImp (functor, clothes) &&
+            forEachImp (functor, containers) &&
+            forEachImp (functor, creatures) &&
+            forEachImp (functor, doors) &&
+            forEachImp (functor, ingreds) &&
+            forEachImp (functor, creatureLists) &&
+            forEachImp (functor, itemLists) &&
+            forEachImp (functor, lights) &&
+            forEachImp (functor, lockpicks) &&
+            forEachImp (functor, miscItems) &&
+            forEachImp (functor, npcs) &&
+            forEachImp (functor, probes) &&
+            forEachImp (functor, repairs) &&
+            forEachImp (functor, statics) &&
+            forEachImp (functor, weapons);
+    }
+
   private:
+
+    template<class Functor, class List>
+    bool forEachImp (Functor& functor, List& list)
+    {
+        for (typename List::List::iterator iter (list.list.begin()); iter!=list.list.end();
+            ++iter)
+            if (!functor (iter->ref, iter->mData))
+                return false;
+
+        return true;
+    }
+
     void loadRefs(const ESMStore &store, ESMReader &esm)
     {
       assert (cell);

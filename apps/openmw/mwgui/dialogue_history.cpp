@@ -1,6 +1,4 @@
 #include "dialogue_history.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"

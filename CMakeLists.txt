@@ -5,9 +5,22 @@ option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
+find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+
 # Location of morrowind data files
-set(MORROWIND_DATA_FILES "data"
-    CACHE PATH "location of Morrowind data files")
+if(DPKG_PROGRAM)
+    set(MORROWIND_DATA_FILES "/usr/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
+    set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of Morrowind data files")
+else()
+    if (APPLE)
+        # set path inside bundle
+        set(MORROWIND_DATA_FILES "Contents/Resources/data" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of Morrowind data files")
+    else()
+        set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of Morrowind data files")
+    endif(APPLE)
+endif(DPKG_PROGRAM)
 
 if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
@@ -16,31 +29,30 @@ endif()
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
-
 #
 # Pre-built binaries being used?
 #
 IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd/ogre_1_7_1")
     set(PREBUILT_DIR "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd")
     message (STATUS "OpenMW pre-built binaries found at ${PREBUILT_DIR}.")
-    
+
     SET(ENV{OGRE_HOME} "${PREBUILT_DIR}/ogre_1_7_1")
-    
+
     SET(ENV{BOOST_ROOT} "${PREBUILT_DIR}/boost_1_42_0")
     set(Boost_USE_STATIC_LIBS   ON)
     set(Boost_USE_MULTITHREADED ON)
     set(ENV{BOOST_INCLUDEDIR} "${BOOST_ROOT}/include")
     set(ENV{BOOST_LIBRARYDIR} "${BOOST_ROOT}/lib")
-    
+
     set(ENV{FREETYPE_DIR} "${PREBUILT_DIR}/freetype-2.3.5-1")
-    
+
     set(USE_MPG123 OFF)
-    set(USE_AUDIERE ON)    
+    set(USE_AUDIERE ON)
     set(AUDIERE_INCLUDE_DIR "${PREBUILT_DIR}/audiere-1.9.4/include")
     set(AUDIERE_LIBRARY "${PREBUILT_DIR}/audiere-1.9.4/lib/audiere.lib")
-    
+
     set(ENV{OPENALDIR} "${PREBUILT_DIR}/OpenAL 1.1 SDK")
-    
+
 ELSE()
     message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
 ENDIF()
@@ -80,6 +92,12 @@ set(NIFOGRE
 set(NIFOGRE_HEADER
     ${COMP_DIR}/nifogre/ogre_nif_loader.hpp)
 source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})
+
+set(NIFBULLET
+    ${COMP_DIR}/nifbullet/bullet_nif_loader.cpp)
+set(NIFBULLET_HEADER
+    ${COMP_DIR}/nifbullet/bullet_nif_loader.hpp)
+source_group(components\\nifbullet FILES ${NIFBULLET} ${NIFBULLET_HEADER})
 
 set(TO_UTF8
     ${COMP_DIR}/to_utf8/to_utf8.cpp)
@@ -130,10 +148,10 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC} ${TO_UTF8}
-    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER})
+    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER} ${TO_UTF8_HEADER}
-    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER})
+    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER})
 
 # source directory: libs
 
@@ -151,6 +169,21 @@ set(OENGINE_OGRE
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/events.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
+)
+
+set(OENGINE_BULLET
+    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.cpp
+    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.h
+    ${LIBDIR}/openengine/bullet/BtOgre.cpp
+    ${LIBDIR}/openengine/bullet/BtOgreExtras.h
+    ${LIBDIR}/openengine/bullet/BtOgreGP.h
+    ${LIBDIR}/openengine/bullet/BtOgrePG.h
+    ${LIBDIR}/openengine/bullet/CMotionState.cpp
+    ${LIBDIR}/openengine/bullet/CMotionState.h
+    ${LIBDIR}/openengine/bullet/physic.cpp
+    ${LIBDIR}/openengine/bullet/physic.hpp
+    ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
+    ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
 )
 
 # Sound setup
@@ -193,7 +226,7 @@ set(OENGINE_SOUND
   ${LIBDIR}/mangle/sound/outputs/openal_out.cpp
   ${MANGLE_SOUND_OUTPUT}
 )
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_SOUND})
+set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_SOUND} ${OENGINE_BULLET})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
 
 set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
@@ -205,10 +238,17 @@ if (WIN32)
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
 set(PLATFORM_INCLUDE_DIR "")
+find_path (UUID_INCLUDE_DIR uuid/uuid.h)
+include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
-set(PLATFORM_INCLUDE_DIR "")
+    set(PLATFORM_INCLUDE_DIR "")
+    add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
 endif()
+
+if (APPLE)
+    set(Boost_USE_STATIC_LIBS   ON)
+endif (APPLE)
 
 # Dependencies
 
@@ -216,14 +256,16 @@ find_package(OGRE REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
+find_package(Bullet REQUIRED)
 include_directories("."
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
     ${OPENAL_INCLUDE_DIR}
+    ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
@@ -251,20 +293,18 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
 if (WIN32)
 configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
     "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
-else (WIN32)
-configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
-    "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
 endif (WIN32)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
+    "${OpenMW_BINARY_DIR}/plugins.cfg")
+endif()
+if (APPLE)
+configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
+    "${OpenMW_BINARY_DIR}/plugins.cfg")
+endif (APPLE)
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg")
-
-if (APPLE)
-  set(APPLE_BUNDLE_RESOURCES
-    ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-    ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
-  )
-endif (APPLE)
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -275,21 +315,17 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 # Apple bundling
 if (APPLE)
   set(MISC_FILES
-		  ${CMAKE_SOURCE_DIR}/files/openmw.cfg
-		  ${CMAKE_SOURCE_DIR}/files/mac/plugins.cfg
-		  ${CMAKE_SOURCE_DIR}/files/mac/ogre.cfg)
-install(TARGETS openmw
-		BUNDLE DESTINATION .
-		RUNTIME DESTINATION ../MacOS
-		COMPONENT Runtime)
+        ${OpenMW_BINARY_DIR}/openmw.cfg
+        ${OpenMW_BINARY_DIR}/plugins.cfg)
 install(FILES ${MISC_FILES} DESTINATION ../MacOS)
+install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ../Resources)
 set(CPACK_GENERATOR "Bundle")
 set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
 set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
 set(CPACK_BUNDLE_NAME "OpenMW")
-set(CPACK_PACKAGE_VERSION "0.07")
+set(CPACK_PACKAGE_VERSION "0.10")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "07")
+set(CPACK_PACKAGE_VERSION_MINOR "10")
 set(CPACK_PACKAGE_VERSION_PATCH "")
 
 include(CPack)
@@ -298,6 +334,57 @@ set(CMAKE_EXE_LINKER_FLAGS "-arch i386")
 set(CMAKE_CXX_FLAGS "-arch i386")
 
 endif (APPLE)
+
+
+if(DPKG_PROGRAM)
+    SET(CMAKE_INSTALL_PREFIX "/usr")
+
+    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+        exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe" OUTPUT_VARIABLE GIT_VERSION )
+        STRING(REGEX REPLACE "openmw-" "" VERSION_STRING "${GIT_VERSION}")
+        exec_program("git" ARGS "config --get user.name" OUTPUT_VARIABLE GIT_NAME )
+        exec_program("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
+        set(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
+    else()
+        #FIXME this should probably be read from some file like ${CMAKE_CURRENT_SOURCE_DIR}/VERSION or something that gets updated when changing version
+        set(VERSION_STRING "0.10.0")
+        set(PACKAGE_MAINTAINER "unknown")
+    endif()
+
+    #Install global configuration files
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+
+    #Install resources
+    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "share/games/openmw/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
+    INSTALL(DIRECTORY DESTINATION "share/games/openmw/data/" COMPONENT "Resources")
+
+    SET(CPACK_GENERATOR "DEB")
+    SET(CPACK_PACKAGE_NAME "openmw")
+    SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://openmw.com")
+    SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
+    SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "A reimplementation of The Elder Scrolls III: Morrowind
+ OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
+ Data files from the original game is required to run it.")
+    SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
+    SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogremain-1.7.1 (>= 1.7.1-1), libbullet2.77 (>= 2.77),  libboost-filesystem1.42.0 (>= 1.42.0), libboost-program-options1.42.0 (>= 1.42.0), libboost-system1.42.0 (>= 1.42.0), libboost-thread1.42.0 (>= 1.42.0), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.2.0 (>= 1.2.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2)")
+
+    SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
+
+    string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
+    execute_process(
+        COMMAND ${DPKG_PROGRAM} --print-architecture
+        OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
+
+    include(CPack)
+endif(DPKG_PROGRAM)
 
 # Apps and tools
 add_subdirectory( apps/openmw )
@@ -308,22 +395,40 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (WIN32)
+  if (MSVC)
     if (USE_DEBUG_CONSOLE)
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
     else()
-        # Turn off debug console, debug output will be written to visual studio output instead
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
+      # Turn off debug console, debug output will be written to visual studio output instead
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
     endif()
 
     # Release builds use the debug console
     set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
     set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
     set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+  endif(MSVC)
 
-    # TODO: At some point release builds should not use the console but rather write to a log file
-    #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-    #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
+  # Same for MinGW
+  if (MINGW)
+    if (USE_DEBUG_CONSOLE)
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,console")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "-Wl,-subsystem,console")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+    else(USE_DEBUG_CONSOLE)
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,windows")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "-Wl,-subsystem,windows")
+    endif(USE_DEBUG_CONSOLE)
+
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "-Wl,-subsystem,console")
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "-Wl,-subsystem,console")
+    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
+  endif(MINGW)
+
+  # TODO: At some point release builds should not use the console but rather write to a log file
+  #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+  #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()

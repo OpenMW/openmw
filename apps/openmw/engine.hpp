@@ -8,6 +8,7 @@
 #include <OgreFrameListener.h>
 
 #include <openengine/ogre/renderer.hpp>
+#include <openengine/bullet/physic.hpp>
 #include <components/compiler/extensions.hpp>
 
 #include "mwworld/environment.hpp"
@@ -55,11 +56,14 @@ namespace OMW
     class Engine : private Ogre::FrameListener
     {
 
-			//int nFiles;
+            //int nFiles;
             boost::filesystem::path mDataDir;
+            boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer mOgre;
+            OEngine::Physic::PhysicEngine* mPhysicEngine;
             std::string mCellName;
             std::string mMaster;
+            bool mShowFPS;
             bool mDebug;
             bool mVerboseScripts;
             bool mNewGame;
@@ -72,8 +76,8 @@ namespace OMW
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
             OEngine::GUI::MyGUIManager *mGuiManager;
-			ESM::Region test;
-			boost::timer timer;
+            ESM::Region test;
+            boost::timer timer;
 
             int focusFrameCounter;
             static const int focusUpdateFrame = 10;
@@ -107,6 +111,9 @@ namespace OMW
             /// Set data dir
             void setDataDir (const boost::filesystem::path& dataDir);
 
+            /// Set resource dir
+            void setResourceDir (const boost::filesystem::path& parResDir);
+
             /// Set start cell name (only interiors for now)
             void setCell (const std::string& cellName);
 
@@ -114,6 +121,9 @@ namespace OMW
             /// - If the given name does not have an extension, ".esm" is added automatically
             /// - Currently OpenMW only supports one master at the same time.
             void addMaster (const std::string& master);
+
+            /// Enable fps counter
+            void showFPS() { mShowFPS = true; }
 
             /// Enable debug mode:
             /// - non-exclusive input

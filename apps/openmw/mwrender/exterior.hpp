@@ -45,32 +45,37 @@ namespace MWRender
 
     static bool lightOutQuadInLin;
 
-    ESMS::CellStore<MWWorld::RefData> &cell;
+    ESMS::CellStore<MWWorld::RefData> &mCell;
     MWWorld::Environment &mEnvironment;
-    MWScene &scene;
+    MWScene &mScene;
 
     /// The scene node that contains all objects belonging to this
     /// cell.
-    Ogre::SceneNode *base;
+    Ogre::SceneNode *mBase;
 
-    Ogre::SceneNode *insert;
-	Ogre::SceneNode *npcPart;
+    Ogre::SceneNode *mInsert;
+    std::string mInsertMesh;
+    Ogre::SceneNode *mNpcPart;
 
     // 0 normal, 1 more bright, 2 max
-    int ambientMode;
+    int mAmbientMode;
 
-    Ogre::ColourValue ambientColor;
+    Ogre::ColourValue mAmbientColor;
 
     /// start inserting a new reference.
     virtual void insertBegin (ESM::CellRef &ref);
 
     /// insert a mesh related to the most recent insertBegin call.
-	virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements);
+    virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements);
     virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst);
-	
-	virtual void insertMesh(const std::string &mesh);
-	 virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements);
-	 virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
+
+    virtual void insertMesh(const std::string &mesh);
+     virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements);
+     virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
+
+    virtual void insertObjectPhysics();
+
+    virtual void insertActorPhysics();
 
     /// insert a light related to the most recent insertBegin call.
     virtual void insertLight(float r, float g, float b, float radius);
@@ -85,13 +90,13 @@ namespace MWRender
     void configureFog();
 
     void setAmbientMode();
-	 
+
 
   public:
 
     ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
         MWScene &_scene)
-    : cell(_cell), mEnvironment (environment), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
+    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0) {}
 
     virtual ~ExteriorCellRender() { destroy(); }
 

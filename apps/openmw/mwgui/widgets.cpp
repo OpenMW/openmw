@@ -1,10 +1,11 @@
 #include "widgets.hpp"
 #include "window_manager.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "components/esm_store/store.hpp"
 
 #include <boost/lexical_cast.hpp>
+
+#undef min
+#undef max
 
 using namespace MWGui;
 using namespace MWGui::Widgets;
@@ -89,53 +90,53 @@ void MWSkill::onClicked(MyGUI::Widget* _sender)
 
 void MWSkill::_initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name)
 {
-	Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
+    Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
 
-	initialiseWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
 }
 
 MWSkill::~MWSkill()
 {
-	shutdownWidgetSkin();
+    shutdownWidgetSkin();
 }
 
 void MWSkill::baseChangeWidgetSkin(ResourceSkin* _info)
 {
-	shutdownWidgetSkin();
-	Base::baseChangeWidgetSkin(_info);
-	initialiseWidgetSkin(_info);
+    shutdownWidgetSkin();
+    Base::baseChangeWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
 }
 
 void MWSkill::initialiseWidgetSkin(ResourceSkin* _info)
 {
     for (VectorWidgetPtr::iterator iter=mWidgetChildSkin.begin(); iter!=mWidgetChildSkin.end(); ++iter)
-	{
+    {
         const std::string &name = *(*iter)->_getInternalData<std::string>();
-		if (name == "StatName")
-		{
-			MYGUI_DEBUG_ASSERT( ! skillNameWidget, "widget already assigned");
-			skillNameWidget = (*iter)->castType<StaticText>();
-		}
-		else if (name == "StatValue")
-		{
-			MYGUI_DEBUG_ASSERT( ! skillValueWidget, "widget already assigned");
-			skillValueWidget = (*iter)->castType<StaticText>();
-		}
-		else if (name == "StatNameButton")
-		{
-			MYGUI_DEBUG_ASSERT( ! skillNameWidget, "widget already assigned");
+        if (name == "StatName")
+        {
+            MYGUI_DEBUG_ASSERT( ! skillNameWidget, "widget already assigned");
+            skillNameWidget = (*iter)->castType<StaticText>();
+        }
+        else if (name == "StatValue")
+        {
+            MYGUI_DEBUG_ASSERT( ! skillValueWidget, "widget already assigned");
+            skillValueWidget = (*iter)->castType<StaticText>();
+        }
+        else if (name == "StatNameButton")
+        {
+            MYGUI_DEBUG_ASSERT( ! skillNameWidget, "widget already assigned");
             MyGUI::ButtonPtr button = (*iter)->castType<Button>();
             skillNameWidget = button;
             button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWSkill::onClicked);
-		}
-		else if (name == "StatValueButton")
-		{
-			MYGUI_DEBUG_ASSERT( ! skillValueWidget, "widget already assigned");
+        }
+        else if (name == "StatValueButton")
+        {
+            MYGUI_DEBUG_ASSERT( ! skillValueWidget, "widget already assigned");
             MyGUI::ButtonPtr button = (*iter)->castType<Button>();
             skillNameWidget = button;
             button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWSkill::onClicked);
-		}
-	}
+        }
+    }
 }
 
 void MWSkill::shutdownWidgetSkin()
@@ -208,53 +209,53 @@ void MWAttribute::updateWidgets()
 
 void MWAttribute::_initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name)
 {
-	Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
+    Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
 
-	initialiseWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
 }
 
 MWAttribute::~MWAttribute()
 {
-	shutdownWidgetSkin();
+    shutdownWidgetSkin();
 }
 
 void MWAttribute::baseChangeWidgetSkin(ResourceSkin* _info)
 {
-	shutdownWidgetSkin();
-	Base::baseChangeWidgetSkin(_info);
-	initialiseWidgetSkin(_info);
+    shutdownWidgetSkin();
+    Base::baseChangeWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
 }
 
 void MWAttribute::initialiseWidgetSkin(ResourceSkin* _info)
 {
     for (VectorWidgetPtr::iterator iter=mWidgetChildSkin.begin(); iter!=mWidgetChildSkin.end(); ++iter)
-	{
+    {
         const std::string &name = *(*iter)->_getInternalData<std::string>();
-		if (name == "StatName")
-		{
-			MYGUI_DEBUG_ASSERT( ! attributeNameWidget, "widget already assigned");
-			attributeNameWidget = (*iter)->castType<StaticText>();
-		}
-		else if (name == "StatValue")
-		{
-			MYGUI_DEBUG_ASSERT( ! attributeValueWidget, "widget already assigned");
-			attributeValueWidget = (*iter)->castType<StaticText>();
-		}
-		else if (name == "StatNameButton")
-		{
-			MYGUI_DEBUG_ASSERT( ! attributeNameWidget, "widget already assigned");
+        if (name == "StatName")
+        {
+            MYGUI_DEBUG_ASSERT( ! attributeNameWidget, "widget already assigned");
+            attributeNameWidget = (*iter)->castType<StaticText>();
+        }
+        else if (name == "StatValue")
+        {
+            MYGUI_DEBUG_ASSERT( ! attributeValueWidget, "widget already assigned");
+            attributeValueWidget = (*iter)->castType<StaticText>();
+        }
+        else if (name == "StatNameButton")
+        {
+            MYGUI_DEBUG_ASSERT( ! attributeNameWidget, "widget already assigned");
             MyGUI::ButtonPtr button = (*iter)->castType<Button>();
             attributeNameWidget = button;
             button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWAttribute::onClicked);
-		}
-		else if (name == "StatValue")
-		{
-			MYGUI_DEBUG_ASSERT( ! attributeValueWidget, "widget already assigned");
+        }
+        else if (name == "StatValue")
+        {
+            MYGUI_DEBUG_ASSERT( ! attributeValueWidget, "widget already assigned");
             MyGUI::ButtonPtr button = (*iter)->castType<Button>();
             attributeNameWidget = button;
             button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWAttribute::onClicked);
-		}
-	}
+        }
+    }
 }
 
 void MWAttribute::shutdownWidgetSkin()
@@ -264,7 +265,7 @@ void MWAttribute::shutdownWidgetSkin()
 /* MWSpell */
 
 MWSpell::MWSpell()
-    : env(nullptr)
+    : mWindowManager(nullptr)
     , spellNameWidget(nullptr)
 {
 }
@@ -277,7 +278,7 @@ void MWSpell::setSpellId(const std::string &spellId)
 
 void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord)
 {
-    ESMS::ESMStore &store = env->mWorld->getStore();
+    ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::Spell *spell = store.spells.search(id);
     MYGUI_ASSERT(spell, "spell with id '" << id << "' not found");
 
@@ -286,7 +287,7 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
     for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->effects.list.begin(); it != end; ++it)
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
-        effect->setEnvironment(env);
+        effect->setWindowManager(mWindowManager);
         effect->setSpellEffect(*it);
         effects.push_back(effect);
         coord.top += effect->getHeight();
@@ -295,9 +296,9 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
 
 void MWSpell::updateWidgets()
 {
-    if (spellNameWidget && env)
+    if (spellNameWidget && mWindowManager)
     {
-        ESMS::ESMStore &store = env->mWorld->getStore();
+        ESMS::ESMStore &store = mWindowManager->getStore();
         const ESM::Spell *spell = store.spells.search(id);
         if (spell)
             spellNameWidget->setCaption(spell->name);
@@ -308,34 +309,34 @@ void MWSpell::updateWidgets()
 
 void MWSpell::_initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name)
 {
-	Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
+    Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
 
-	initialiseWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
 }
 
 MWSpell::~MWSpell()
 {
-	shutdownWidgetSkin();
+    shutdownWidgetSkin();
 }
 
 void MWSpell::baseChangeWidgetSkin(ResourceSkin* _info)
 {
-	shutdownWidgetSkin();
-	Base::baseChangeWidgetSkin(_info);
-	initialiseWidgetSkin(_info);
+    shutdownWidgetSkin();
+    Base::baseChangeWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
 }
 
 void MWSpell::initialiseWidgetSkin(ResourceSkin* _info)
 {
     for (VectorWidgetPtr::iterator iter=mWidgetChildSkin.begin(); iter!=mWidgetChildSkin.end(); ++iter)
-	{
+    {
         const std::string &name = *(*iter)->_getInternalData<std::string>();
-		if (name == "StatName")
-		{
-			MYGUI_DEBUG_ASSERT( ! spellNameWidget, "widget already assigned");
-			spellNameWidget = (*iter)->castType<StaticText>();
-		}
-	}
+        if (name == "StatName")
+        {
+            MYGUI_DEBUG_ASSERT( ! spellNameWidget, "widget already assigned");
+            spellNameWidget = (*iter)->castType<StaticText>();
+        }
+    }
 }
 
 void MWSpell::shutdownWidgetSkin()
@@ -345,7 +346,7 @@ void MWSpell::shutdownWidgetSkin()
 /* MWSpellEffect */
 
 MWSpellEffect::MWSpellEffect()
-    : env(nullptr)
+    : mWindowManager(nullptr)
     , imageWidget(nullptr)
     , textWidget(nullptr)
 {
@@ -359,11 +360,10 @@ void MWSpellEffect::setSpellEffect(SpellEffectValue value)
 
 void MWSpellEffect::updateWidgets()
 {
-    if (!env)
+    if (!mWindowManager)
         return;
 
-    ESMS::ESMStore &store = env->mWorld->getStore();
-    WindowManager *wm = env->mWindowManager;
+    ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::MagicEffect *magicEffect = store.magicEffects.search(effect.effectID);
     if (textWidget)
     {
@@ -373,7 +373,7 @@ void MWSpellEffect::updateWidgets()
             std::string spellLine = "";
             if (effect.skill >= 0 && effect.skill < ESM::Skill::Length)
             {
-                spellLine += " " + wm->getGameSettingString(ESM::Skill::sSkillNameIds[effect.skill], "");
+                spellLine += " " + mWindowManager->getGameSettingString(ESM::Skill::sSkillNameIds[effect.skill], "");
             }
             if (effect.attribute >= 0 && effect.attribute < 8)
             {
@@ -387,7 +387,7 @@ void MWSpellEffect::updateWidgets()
                     "sAttributePersonality",
                     "sAttributeLuck"
                 };
-                spellLine += " " + wm->getGameSettingString(attributes[effect.attribute], "");
+                spellLine += " " + mWindowManager->getGameSettingString(attributes[effect.attribute], "");
             }
             if (effect.magnMin >= 0 || effect.magnMax >= 0)
             {
@@ -423,39 +423,39 @@ void MWSpellEffect::updateWidgets()
 
 void MWSpellEffect::_initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name)
 {
-	Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
+    Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
 
-	initialiseWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
 }
 
 MWSpellEffect::~MWSpellEffect()
 {
-	shutdownWidgetSkin();
+    shutdownWidgetSkin();
 }
 
 void MWSpellEffect::baseChangeWidgetSkin(ResourceSkin* _info)
 {
-	shutdownWidgetSkin();
-	Base::baseChangeWidgetSkin(_info);
-	initialiseWidgetSkin(_info);
+    shutdownWidgetSkin();
+    Base::baseChangeWidgetSkin(_info);
+    initialiseWidgetSkin(_info);
 }
 
 void MWSpellEffect::initialiseWidgetSkin(ResourceSkin* _info)
 {
     for (VectorWidgetPtr::iterator iter=mWidgetChildSkin.begin(); iter!=mWidgetChildSkin.end(); ++iter)
-	{
+    {
         const std::string &name = *(*iter)->_getInternalData<std::string>();
-		if (name == "Text")
-		{
-			MYGUI_DEBUG_ASSERT( ! textWidget, "widget already assigned");
-			textWidget = (*iter)->castType<StaticText>();
-		}
-		else if (name == "Image")
-		{
-			MYGUI_DEBUG_ASSERT( ! imageWidget, "widget already assigned");
-			imageWidget = (*iter)->castType<StaticImage>();
-		}
-	}
+        if (name == "Text")
+        {
+            MYGUI_DEBUG_ASSERT( ! textWidget, "widget already assigned");
+            textWidget = (*iter)->castType<StaticText>();
+        }
+        else if (name == "Image")
+        {
+            MYGUI_DEBUG_ASSERT( ! imageWidget, "widget already assigned");
+            imageWidget = (*iter)->castType<StaticImage>();
+        }
+    }
 }
 
 void MWSpellEffect::shutdownWidgetSkin()

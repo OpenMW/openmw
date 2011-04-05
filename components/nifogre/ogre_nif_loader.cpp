@@ -28,7 +28,6 @@
 #include <stdio.h>
 
 #include <libs/mangle/vfs/servers/ogre_vfs.hpp>
-#include "../../apps/openmw/mwclass/npc.hpp"
 #include "../nif/nif_file.hpp"
 #include "../nif/node.hpp"
 #include "../nif/data.hpp"
@@ -333,7 +332,7 @@ void NIFLoader::findRealTexture(String &texName)
 // mesh.
 void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std::list<VertexBoneAssignment> &vertexBoneAssignments)
 {
-	//	cout << "s:" << shape << "\n";
+    //  cout << "s:" << shape << "\n";
     NiTriShapeData *data = shape->data.getPtr();
     SubMesh *sub = mesh->createSubMesh(shape->name.toString());
 
@@ -426,7 +425,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     for (std::list<VertexBoneAssignment>::iterator it = vertexBoneAssignments.begin();
         it != vertexBoneAssignments.end(); it++)
     {
-			sub->addBoneAssignment(*it);
+            sub->addBoneAssignment(*it);
     }
 }
 
@@ -476,8 +475,6 @@ static void vectorMul(const Matrix &A, float *C)
 
 void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bounds)
 {
-	//if( MWClass::Npc.isChest)
-		//cout << "t:" << shape << "\n";
     assert(shape != NULL);
 
     // Interpret flags
@@ -643,8 +640,13 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         for (std::vector<NiSkinData::BoneInfo>::iterator it = boneList.begin();
                 it != boneList.end(); it++)
         {
+            if(mSkel.isNull())
+            {
+                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex].name.toString() << std::endl;
+                break;
+            }
             //get the bone from bones array of skindata
-            bonePtr = skel->getBone(shape->skin->bones[boneIndex].name.toString());
+            bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name.toString());
 
             // final_vector = old_vector + old_rotation*new_vector*old_scale
             vecPos = bonePtr->_getDerivedPosition() +
@@ -727,7 +729,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 void NIFLoader::handleNode(Nif::Node *node, int flags,
                            const Transformation *trafo, BoundsFinder &bounds, Bone *parentBone)
 {
-	stack++;
+    stack++;
+    //if( MWClass::isChest)
+    //  cout << "u:" << node << "\n";
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
@@ -738,10 +742,6 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     {
         // Get the next extra data in the list
         e = e->extra.getPtr();
-		if(anim){
-			cout << "RECNAME:" << e->recName.toString() << "RECTYPE:" << e->recType << "\n";
-			cout << "THE:" << e;
-		}
         assert(e != NULL);
 
         if (e->recType == RC_NiStringExtraData)
@@ -763,25 +763,13 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
     Bone *bone = 0;
 
-	//Contains the actual rotation, scale, and translation coordinate data
-	if(node->recType == RC_NiKeyframeData && anim)
-	{
-
-	}
-	//Indicates the node that the data applies to
-	if(node->recType == RC_NiKeyframeController && anim)
-	{
-
-	}
-
     // create skeleton or add bones
     if (node->recType == RC_NiNode)
     {
-		//TODO:  Store this variable, then read the KeyFrames
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
-            skel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
+            mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
 
             /*if (node->extra->recType == RC_NiTextKeyExtraData )
             {
@@ -790,18 +778,16 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
             }*/
         }
 
-        if (!skel.isNull())     //if there is a skeleton
+        if (!mSkel.isNull())     //if there is a skeleton
         {
             std::string name = node->name.toString();
-			if (anim)
-				std::cout << "BONE:" << name << "\n";
-			//if (isBeast && isChest)
-			//	std::cout << "NAME: " << name << "\n";
+            //if (isBeast && isChest)
+            //  std::cout << "NAME: " << name << "\n";
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
-            if(!skel->hasBone(name))
+            if(!mSkel->hasBone(name))
             {
-                bone = skel->createBone(name);
+                bone = mSkel->createBone(name);
 
                 if (parentBone)
                   parentBone->addChild(bone);
@@ -839,208 +825,200 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     {
         NodeList &list = ((NiNode*)node)->children;
         int n = list.length();
-		int i = 0;
-		if(isHands){
-			//cout << "NumberOfNs: " << n << "Stack:" << stack << "\n";
-			//if(stack == 3)
-				//n=0;
-		}
+        int i = 0;
+        if(isHands){
+            //cout << "NumberOfNs: " << n << "Stack:" << stack << "\n";
+            //if(stack == 3)
+                //n=0;
+        }
         for (; i<n; i++)
         {
-			
+            
             if (list.has(i))
                 handleNode(&list[i], flags, node->trafo, bounds, bone);
         }
     }
     else if (node->recType == RC_NiTriShape)
-	{
+    {
     // For shapes
-		/*For Beast Skins, Shape Bone Names
-		Tri Left Foot
-		Tri Right Foot
-		Tri Tail
-		Tri Chest
-		*/
-		if((isChest && stack < 10 )  || (isHands && counter < 3) || !(isChest || isHands)){                       //(isBeast && isChest && stack < 10 && counter == skincounter )
-			
-			std::string name = node->name.toString();
-			//if (isChest)
-				//std::cout << "NAME: " << name << "\n";
+        /*For Beast Skins, Shape Bone Names
+        Tri Left Foot
+        Tri Right Foot
+        Tri Tail
+        Tri Chest
+        */
+        if((isChest && stack < 10 )  || (isHands && counter < 3) || !(isChest || isHands)){                       //(isBeast && isChest && stack < 10 && counter == skincounter )
+            
+            std::string name = node->name.toString();
+            //if (isChest)
+                //std::cout << "NAME: " << name << "\n";
 
-			if(isChest && isBeast && skincounter == 0 && name.compare("Tri Chest") == 0){
-				//std::cout <<"BEASTCHEST1\n";
-				handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
-				skincounter++;
-			}
-			else if(isChest && isBeast && skincounter == 1 && name.compare("Tri Tail") == 0){
-				//std::cout <<"BEASTCHEST2\n";
-				handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
-				skincounter++;
-			}
-			else if(isChest && isBeast && skincounter == 2 && name.compare("Tri Left Foot") == 0){
-				//std::cout <<"BEASTCHEST3\n";
-				handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
-				skincounter=1000;
-			}
-			else if (!isChest || !isBeast)
-			{
-				handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
-			}
-			//if(isBeast && isChest)
-				//cout << "Handling Shape, Stack " << stack <<"\n";
+            if(isChest && isBeast && skincounter == 0 && name.compare("Tri Chest") == 0){
+                //std::cout <<"BEASTCHEST1\n";
+                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+                skincounter++;
+            }
+            else if(isChest && isBeast && skincounter == 1 && name.compare("Tri Tail") == 0){
+                //std::cout <<"BEASTCHEST2\n";
+                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+                skincounter++;
+            }
+            else if(isChest && isBeast && skincounter == 2 && name.compare("Tri Left Foot") == 0){
+                //std::cout <<"BEASTCHEST3\n";
+                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+                skincounter=1000;
+            }
+            else if (!isChest || !isBeast)
+            {
+                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+            }
+            //if(isBeast && isChest)
+                //cout << "Handling Shape, Stack " << stack <<"\n";
 
-			
-			
-				counter++;
-		}
-		/*if(isHands){
-			//cout << "Handling Shape, Stack " << stack <<"\n";
-			counter++;
-		}*/
-		
-	}
+            
+            
+                counter++;
+        }
+        /*if(isHands){
+            //cout << "Handling Shape, Stack " << stack <<"\n";
+            counter++;
+        }*/
+        
+    }
 
-	stack--;
+    stack--;
 }
 
 void NIFLoader::loadResource(Resource *resource)
 {
-	if(skincounter == 1000)
-		skincounter = 0;
-	stack = 0;
-	counter = 0;
-	std::string name = resource->getName();
-	if(resourceName.compare(name) != 0)
-	{
-		skincounter = 0;
-		resourceName = name;
-	}
-	//std::cout <<"NAME:" << name;
-	//if(name.length() >= 20)
-	//	{std::string split = name.substr(name.length() - 20, 20);
-	//if(name == 
-	//std::cout <<"NAME:" << name << "LEN: " << name.length() << "\n";
-	const std::string test ="meshes\\b\\B_N_Dark Elf_M_Skins.NIF";
-	const std::string test2 ="meshes\\b\\B_N_Dark Elf_M_Skins.nif";
-	const std::string test3 ="meshes\\b\\B_N_Redguard_F_Skins.NIF";
-	const std::string test4 ="meshes\\b\\B_N_Redguard_F_Skins.nif";
-	const std::string test5 ="meshes\\b\\B_N_Dark Elf_F_Skins.nif";
-	const std::string test6 ="meshes\\b\\B_N_Redguard_M_Skins.nif";
-	const std::string test7 ="meshes\\b\\B_N_Wood Elf_F_Skins.nif";
-	const std::string test8 ="meshes\\b\\B_N_Wood Elf_M_Skins.nif";
-	const std::string test9 ="meshes\\b\\B_N_Imperial_F_Skins.nif";
-	const std::string test10 ="meshes\\b\\B_N_Imperial_M_Skins.nif";
-	const std::string test11 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
-	const std::string test12 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
-	const std::string test13 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
-	const std::string test14 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
-	const std::string test15 ="meshes\\b\\B_N_Nord_F_Skins.nif";
-	const std::string test16 ="meshes\\b\\B_N_Nord_M_Skins.nif";
-	const std::string test17 ="meshes\\b\\B_N_Imperial_F_Skins.nif";
-	const std::string test18 ="meshes\\b\\B_N_Imperial_M_Skins.nif";
-	const std::string test19 ="meshes\\b\\B_N_Orc_F_Skins.nif";
-	const std::string test20 ="meshes\\b\\B_N_Orc_M_Skins.nif";
-	const std::string test21 ="meshes\\b\\B_N_Breton_F_Skins.nif";
-	const std::string test22 ="meshes\\b\\B_N_Breton_M_Skins.nif";
-	const std::string test23 ="meshes\\b\\B_N_High Elf_F_Skins.nif";
-	const std::string test24 ="meshes\\b\\B_N_High Elf_M_Skins.nif";
-	const std::string animfile = "meshes\\base_anim.nif";
-	if (name == animfile){
-		std::cout << "We have animation\n";
-		anim = true;
-	}
-	else
-		anim = false;
+    if(skincounter == 1000)
+        skincounter = 0;
+    stack = 0;
+    counter = 0;
+    std::string name = resource->getName();
+    if(resourceName.compare(name) != 0)
+    {
+        skincounter = 0;
+        resourceName = name;
+    }
+    //std::cout <<"NAME:" << name;
+    //if(name.length() >= 20)
+    //  {std::string split = name.substr(name.length() - 20, 20);
+    //if(name == 
+    //std::cout <<"NAME:" << name << "LEN: " << name.length() << "\n";
+    const std::string test ="meshes\\b\\B_N_Dark Elf_M_Skins.NIF";
+    const std::string test2 ="meshes\\b\\B_N_Dark Elf_M_Skins.nif";
+    const std::string test3 ="meshes\\b\\B_N_Redguard_F_Skins.NIF";
+    const std::string test4 ="meshes\\b\\B_N_Redguard_F_Skins.nif";
+    const std::string test5 ="meshes\\b\\B_N_Dark Elf_F_Skins.nif";
+    const std::string test6 ="meshes\\b\\B_N_Redguard_M_Skins.nif";
+    const std::string test7 ="meshes\\b\\B_N_Wood Elf_F_Skins.nif";
+    const std::string test8 ="meshes\\b\\B_N_Wood Elf_M_Skins.nif";
+    const std::string test9 ="meshes\\b\\B_N_Imperial_F_Skins.nif";
+    const std::string test10 ="meshes\\b\\B_N_Imperial_M_Skins.nif";
+    const std::string test11 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
+    const std::string test12 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
+    const std::string test13 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
+    const std::string test14 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
+    const std::string test15 ="meshes\\b\\B_N_Nord_F_Skins.nif";
+    const std::string test16 ="meshes\\b\\B_N_Nord_M_Skins.nif";
+    const std::string test17 ="meshes\\b\\B_N_Imperial_F_Skins.nif";
+    const std::string test18 ="meshes\\b\\B_N_Imperial_M_Skins.nif";
+    const std::string test19 ="meshes\\b\\B_N_Orc_F_Skins.nif";
+    const std::string test20 ="meshes\\b\\B_N_Orc_M_Skins.nif";
+    const std::string test21 ="meshes\\b\\B_N_Breton_F_Skins.nif";
+    const std::string test22 ="meshes\\b\\B_N_Breton_M_Skins.nif";
+    const std::string test23 ="meshes\\b\\B_N_High Elf_F_Skins.nif";
+    const std::string test24 ="meshes\\b\\B_N_High Elf_M_Skins.nif";
 
-	//std::cout <<"LEN1:" << test.length() << "TEST: " << test << "\n";
-	
-	
-	if(name.compare(test) == 0 || name.compare(test2) == 0 || name.compare(test3) == 0 || name.compare(test4) == 0 ||
-		name.compare(test5) == 0 || name.compare(test6) == 0 || name.compare(test7) == 0 || name.compare(test8) == 0 || name.compare(test9) == 0 ||
-		name.compare(test10) == 0 || name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 ||
-		name.compare(test14) == 0 || name.compare(test15) == 0 || name.compare(test16) == 0 || name.compare(test17) == 0 ||
-		name.compare(test18) == 0 || name.compare(test19) == 0 || name.compare(test20) == 0 || name.compare(test21) == 0 ||
-		name.compare(test22) == 0 || name.compare(test23) == 0 || name.compare(test24) == 0
-		
-		){
-		//std::cout << "Welcome Chest\n";
-		isChest = true;
-		if(name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 || name.compare(test14) == 0)
-		{
-			isBeast = true;
-			//std::cout << "Welcome Beast\n";
-		}
-		else
-			isBeast = false;
-	}
-	else
-		isChest = false;
-	const std::string hands ="meshes\\b\\B_N_Dark Elf_M_Hands.1st.NIF";
-	const std::string hands2 ="meshes\\b\\B_N_Dark Elf_F_Hands.1st.NIF";
-	const std::string hands3 ="meshes\\b\\B_N_Redguard_M_Hands.1st.nif";
-	const std::string hands4 ="meshes\\b\\B_N_Redguard_F_Hands.1st.nif";
-	const std::string hands5 ="meshes\\b\\b_n_argonian_m_hands.1st.nif";
-	const std::string hands6 ="meshes\\b\\b_n_argonian_f_hands.1st.nif";
-	const std::string hands7 ="meshes\\b\\B_N_Breton_M_Hand.1st.NIF";
-	const std::string hands8 ="meshes\\b\\B_N_Breton_F_Hands.1st.nif";
-	const std::string hands9 ="meshes\\b\\B_N_High Elf_M_Hands.1st.nif";
-	const std::string hands10 ="meshes\\b\\B_N_High Elf_F_Hands.1st.nif";
-	const std::string hands11 ="meshes\\b\\B_N_Nord_M_Hands.1st.nif";
-	const std::string hands12 ="meshes\\b\\B_N_Nord_F_Hands.1st.nif";
-	const std::string hands13 ="meshes\\b\\b_n_khajiit_m_hands.1st.nif";
-	const std::string hands14 ="meshes\\b\\b_n_khajiit_f_hands.1st.nif";
-	const std::string hands15 ="meshes\\b\\B_N_Orc_M_Hands.1st.nif";
-	const std::string hands16 ="meshes\\b\\B_N_Orc_F_Hands.1st.nif";
-	const std::string hands17 ="meshes\\b\\B_N_Wood Elf_M_Hands.1st.nif";
-	const std::string hands18 ="meshes\\b\\B_N_Wood Elf_F_Hands.1st.nif";
-	const std::string hands19 ="meshes\\b\\B_N_Imperial_M_Hands.1st.nif";
-	const std::string hands20 ="meshes\\b\\B_N_Imperial_F_Hands.1st.nif";
-	if(name.compare(hands) == 0 || name.compare(hands2) == 0 || name.compare(hands3) == 0 || name.compare(hands4) == 0 ||
-		name.compare(hands5) == 0 || name.compare(hands6) == 0 || name.compare(hands7) == 0 || name.compare(hands8) == 0 ||
-		name.compare(hands9) == 0 || name.compare(hands10) == 0 || name.compare(hands11) == 0 || name.compare(hands12) == 0 ||
-		name.compare(hands13) == 0 || name.compare(hands14) == 0 || name.compare(hands15) == 0 || name.compare(hands16) == 0 ||
-		name.compare(hands17) == 0 || name.compare(hands18) == 0 || name.compare(hands19) == 0 || name.compare(hands20) == 0)
-	{
-		//std::cout << "Welcome Hands1st\n";
-		isHands = true;
-		isChest = false;
-	}
-	else
-		isHands = false;
+    //std::cout <<"LEN1:" << test.length() << "TEST: " << test << "\n";
+    
+    
+    if(name.compare(test) == 0 || name.compare(test2) == 0 || name.compare(test3) == 0 || name.compare(test4) == 0 ||
+        name.compare(test5) == 0 || name.compare(test6) == 0 || name.compare(test7) == 0 || name.compare(test8) == 0 || name.compare(test9) == 0 ||
+        name.compare(test10) == 0 || name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 ||
+        name.compare(test14) == 0 || name.compare(test15) == 0 || name.compare(test16) == 0 || name.compare(test17) == 0 ||
+        name.compare(test18) == 0 || name.compare(test19) == 0 || name.compare(test20) == 0 || name.compare(test21) == 0 ||
+        name.compare(test22) == 0 || name.compare(test23) == 0 || name.compare(test24) == 0
+        
+        ){
+        //std::cout << "Welcome Chest\n";
+        isChest = true;
+        if(name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 || name.compare(test14) == 0)
+        {
+            isBeast = true;
+            //std::cout << "Welcome Beast\n";
+        }
+        else
+            isBeast = false;
+    }
+    else
+        isChest = false;
+    const std::string hands ="meshes\\b\\B_N_Dark Elf_M_Hands.1st.NIF";
+    const std::string hands2 ="meshes\\b\\B_N_Dark Elf_F_Hands.1st.NIF";
+    const std::string hands3 ="meshes\\b\\B_N_Redguard_M_Hands.1st.nif";
+    const std::string hands4 ="meshes\\b\\B_N_Redguard_F_Hands.1st.nif";
+    const std::string hands5 ="meshes\\b\\b_n_argonian_m_hands.1st.nif";
+    const std::string hands6 ="meshes\\b\\b_n_argonian_f_hands.1st.nif";
+    const std::string hands7 ="meshes\\b\\B_N_Breton_M_Hand.1st.NIF";
+    const std::string hands8 ="meshes\\b\\B_N_Breton_F_Hands.1st.nif";
+    const std::string hands9 ="meshes\\b\\B_N_High Elf_M_Hands.1st.nif";
+    const std::string hands10 ="meshes\\b\\B_N_High Elf_F_Hands.1st.nif";
+    const std::string hands11 ="meshes\\b\\B_N_Nord_M_Hands.1st.nif";
+    const std::string hands12 ="meshes\\b\\B_N_Nord_F_Hands.1st.nif";
+    const std::string hands13 ="meshes\\b\\b_n_khajiit_m_hands.1st.nif";
+    const std::string hands14 ="meshes\\b\\b_n_khajiit_f_hands.1st.nif";
+    const std::string hands15 ="meshes\\b\\B_N_Orc_M_Hands.1st.nif";
+    const std::string hands16 ="meshes\\b\\B_N_Orc_F_Hands.1st.nif";
+    const std::string hands17 ="meshes\\b\\B_N_Wood Elf_M_Hands.1st.nif";
+    const std::string hands18 ="meshes\\b\\B_N_Wood Elf_F_Hands.1st.nif";
+    const std::string hands19 ="meshes\\b\\B_N_Imperial_M_Hands.1st.nif";
+    const std::string hands20 ="meshes\\b\\B_N_Imperial_F_Hands.1st.nif";
+    if(name.compare(hands) == 0 || name.compare(hands2) == 0 || name.compare(hands3) == 0 || name.compare(hands4) == 0 ||
+        name.compare(hands5) == 0 || name.compare(hands6) == 0 || name.compare(hands7) == 0 || name.compare(hands8) == 0 ||
+        name.compare(hands9) == 0 || name.compare(hands10) == 0 || name.compare(hands11) == 0 || name.compare(hands12) == 0 ||
+        name.compare(hands13) == 0 || name.compare(hands14) == 0 || name.compare(hands15) == 0 || name.compare(hands16) == 0 ||
+        name.compare(hands17) == 0 || name.compare(hands18) == 0 || name.compare(hands19) == 0 || name.compare(hands20) == 0)
+    {
+        //std::cout << "Welcome Hands1st\n";
+        isHands = true;
+        isChest = false;
+    }
+    else
+        isHands = false;
 
 
-	/*
-	else if(name.compare(test3) == 0 || name.compare(test4) == 0)
-	{
-		std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
-		isChest = true;
-	}
-	else if(name.compare(test5) == 0 || name.compare(test6) == 0)
-	{
-		std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
-		isChest = true;
-	}
-	else if(name.compare(test7) == 0 || name.compare(test8) == 0)
-	{
-		std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
-		isChest = true;
-	}
-	else if(name.compare(test9) == 0 || name.compare(test10) == 0)
-	{
-		std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
-		isChest = true;
-	}*/
-	
-	//if(split== "Skins.NIF")
-	//	std::cout << "\nSPECIAL PROPS\n";
+    /*
+    else if(name.compare(test3) == 0 || name.compare(test4) == 0)
+    {
+        std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
+        isChest = true;
+    }
+    else if(name.compare(test5) == 0 || name.compare(test6) == 0)
+    {
+        std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
+        isChest = true;
+    }
+    else if(name.compare(test7) == 0 || name.compare(test8) == 0)
+    {
+        std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
+        isChest = true;
+    }
+    else if(name.compare(test9) == 0 || name.compare(test10) == 0)
+    {
+        std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
+        isChest = true;
+    }*/
+    
+    //if(split== "Skins.NIF")
+    //  std::cout << "\nSPECIAL PROPS\n";
     resourceName = "";
-	MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     //MeshPtr ptr = m->load(name, "custom");
-	//cout << "THISNAME: " << ptr->getName() << "\n";
-	//cout << "RESOURCE:"<< resource->getName();
+    //cout << "THISNAME: " << ptr->getName() << "\n";
+    //cout << "RESOURCE:"<< resource->getName();
     mesh = 0;
-    skel.setNull();
+    mSkel.setNull();
 
     // Set up the VFS if it hasn't been done already
     if (!vfs) vfs = new OgreVFS(resourceGroup);
@@ -1051,7 +1029,7 @@ void NIFLoader::loadResource(Resource *resource)
 
     // Look it up
     resourceName = mesh->getName();
-	//std::cout << resourceName << "\n";
+    //std::cout << resourceName << "\n";
 
     if (!vfs->isFile(resourceName))
     {
@@ -1109,21 +1087,52 @@ MeshPtr NIFLoader::load(const std::string &name,
     MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     ResourcePtr ptr = m->getByName(name, group);
-	MeshPtr resize;
+    MeshPtr resize;
+    
+    const std::string beast1 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
+    const std::string beast2 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
+    const std::string beast3 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
+    const std::string beast4 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
+
+    const std::string beasttail1 ="tail\\b\\B_N_Khajiit_F_Skins.nif";
+    const std::string beasttail2 ="tail\\b\\B_N_Khajiit_M_Skins.nif";
+    const std::string beasttail3 ="tail\\b\\B_N_Argonian_F_Skins.nif";
+    const std::string beasttail4 ="tail\\b\\B_N_Argonian_M_Skins.nif";
 
     if (!ptr.isNull()){ 
-		
-			resize = MeshPtr(ptr);
-	}
-	else // Nope, create a new one.
-	{
-		resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
-		 ResourcePtr ptr = m->getByName(name, group);
-		 resize = MeshPtr(ptr);
-	}
-	return resize;
+        
+        //if(pieces > 1)
+            //cout << "It exists\n";
+            resize = MeshPtr(ptr);
+        //resize->load();
+        //resize->reload();
+    }
+    else // Nope, create a new one.
+    {
+        resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
+        //cout <<"EXISTING" << name << "\n";
+        
+        //if(pieces > 1)
+            //cout << "Creating it\n";
+        
+        
+        //resize->load();
+        //resize->reload();
+        //return 0;
+         ResourcePtr ptr = m->getByName(name, group);
+         resize = MeshPtr(ptr);
+        
+        //NIFLoader::getSingletonPtr()->
+        /*ResourcePtr ptr = m->getByName(name, group);
+    if (!ptr.isNull()){
+        if(pieces > 1)
+            cout << "It exists\n";
+        resize = MeshPtr(ptr);*/
+        //return resize;
+    }
+    return resize;
 }
-	
+    
 
 /* More code currently not in use, from the old D source. This was
    used in the first attempt at loading NIF meshes, where each submesh
@@ -1138,9 +1147,9 @@ MeshPtr NIFLoader::load(const std::string &name,
 extern "C" void ogre_insertTexture(char* name, uint32_t width, uint32_t height, void *data)
 {
   TexturePtr texture = TextureManager::getSingleton().createManual(
-      name, 		// name
-      "General",	// group
-      TEX_TYPE_2D,     	// type
+      name,         // name
+      "General",    // group
+      TEX_TYPE_2D,      // type
       width, height,    // width & height
       0,                // number of mipmaps
       PF_BYTE_RGBA,     // pixel format

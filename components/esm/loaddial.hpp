@@ -17,12 +17,12 @@ struct Dialogue
 {
   enum Type
     {
-      Topic		= 0,
-      Voice		= 1,
-      Greeting		= 2,
-      Persuasion	= 3,
-      Journal		= 4,
-      Deleted		= -1
+      Topic     = 0,
+      Voice     = 1,
+      Greeting      = 2,
+      Persuasion    = 3,
+      Journal       = 4,
+      Deleted       = -1
     };
 
   char type;
@@ -37,11 +37,11 @@ struct Dialogue
       esm.getT(type);
     else if(si == 4)
       {
-	// These are just markers, their values are not used.
-	int i;
-	esm.getT(i);
-	esm.getHNT(i,"DELE");
-	type = Deleted;
+    // These are just markers, their values are not used.
+    int i;
+    esm.getT(i);
+    esm.getHNT(i,"DELE");
+    type = Deleted;
       }
     else esm.fail("Unknown sub record size");
   }

@@ -7,9 +7,10 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include "interpretercontext.hpp"
-
 #include "../mwworld/class.hpp"
+
+#include "interpretercontext.hpp"
+#include "ref.hpp"
 
 namespace MWScript
 {
@@ -55,16 +56,14 @@ namespace MWScript
                 }
         };
 
+        template<class R>
         class OpLock : public Interpreter::Opcode1
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer lockLevel = 100;
 
@@ -78,48 +77,20 @@ namespace MWScript
                 }
         };
 
-        class OpLockExplicit : public Interpreter::Opcode1
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
-                {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    Interpreter::Type_Integer lockLevel = 100;
-
-                    if (arg0==1)
-                    {
-                        lockLevel = runtime[0].mInteger;
-                        runtime.pop();
-                    }
-
-                    MWWorld::Class::get (ptr).lock (ptr, lockLevel);
-                }
-        };
-
+        template<class R>
         class OpUnlock : public Interpreter::Opcode0
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     MWWorld::Class::get (ptr).unlock (ptr);
                 }
         };
 
-        class OpUnlockExplicit : public Interpreter::Opcode0
+        class OpToggleCollisionDebug : public Interpreter::Opcode0
         {
             public:
 
@@ -128,15 +99,9 @@ namespace MWScript
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
 
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWWorld::Class::get (ptr).unlock (ptr);
+                    context.getWorld().toggleRenderMode (MWWorld::World::Render_CollisionDebug);
                 }
         };
-
 
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
@@ -145,6 +110,7 @@ namespace MWScript
         const int opcodeLockExplicit = 0x20005;
         const int opcodeUnlock = 0x200008c;
         const int opcodeUnlockExplicit = 0x200008d;
+        const int opcodeToggleCollisionDebug = 0x2000132;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -153,6 +119,10 @@ namespace MWScript
             extensions.registerInstruction ("activate", "", opcodeActivate);
             extensions.registerInstruction ("lock", "/l", opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction ("unlock", "", opcodeUnlock, opcodeUnlockExplicit);
+            extensions.registerInstruction ("togglecollisionboxes", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("togglecollisiongrid", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("tcb", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("tcg", "", opcodeToggleCollisionDebug);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -160,10 +130,11 @@ namespace MWScript
             interpreter.installSegment5 (opcodeXBox, new OpXBox);
             interpreter.installSegment5 (opcodeOnActivate, new OpOnActivate);
             interpreter.installSegment5 (opcodeActivate, new OpActivate);
-            interpreter.installSegment3 (opcodeLock, new OpLock);
-            interpreter.installSegment3 (opcodeLockExplicit, new OpLockExplicit);
-            interpreter.installSegment5 (opcodeUnlock, new OpUnlock);
-            interpreter.installSegment5 (opcodeUnlockExplicit, new OpUnlockExplicit);
+            interpreter.installSegment3 (opcodeLock, new OpLock<ImplicitRef>);
+            interpreter.installSegment3 (opcodeLockExplicit, new OpLock<ExplicitRef>);
+            interpreter.installSegment5 (opcodeUnlock, new OpUnlock<ImplicitRef>);
+            interpreter.installSegment5 (opcodeUnlockExplicit, new OpUnlock<ExplicitRef>);
+            interpreter.installSegment5 (opcodeToggleCollisionDebug, new OpToggleCollisionDebug);
         }
     }
 }

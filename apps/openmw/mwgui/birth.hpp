@@ -3,11 +3,6 @@
 
 #include "window_base.hpp"
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 /*
   This file contains the dialog for choosing a birth sign.
   Layout is defined by resources/mygui/openmw_chargen_race_layout.xml.
@@ -17,10 +12,12 @@ namespace MWGui
 {
     using namespace MyGUI;
 
+    class WindowManager;
+
     class BirthDialog : public WindowBase
     {
     public:
-        BirthDialog(MWWorld::Environment& environment);
+        BirthDialog(WindowManager& parWindowManager);
 
         enum Gender
         {
@@ -41,11 +38,6 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventBack;
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventDone;
 
     protected:
         void onSelectBirth(MyGUI::List* _sender, size_t _index);

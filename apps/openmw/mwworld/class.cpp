@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+#include <OgreVector3.h>
+
 #include "ptr.hpp"
 #include "nullaction.hpp"
 
@@ -90,6 +92,36 @@ namespace MWWorld
     std::string Class::getScript (const Ptr& ptr) const
     {
         return "";
+    }
+
+    void Class::setForceStance (const Ptr& ptr, Stance stance, bool force) const
+    {
+        throw std::runtime_error ("stance not supported by class");
+    }
+
+    void Class::setStance (const Ptr& ptr, Stance stance, bool set) const
+    {
+        throw std::runtime_error ("stance not supported by class");
+    }
+
+    bool Class::getStance (const Ptr& ptr, Stance stance, bool ignoreForce) const
+    {
+        return false;
+    }
+
+    float Class::getSpeed (const Ptr& ptr) const
+    {
+        return 0;
+    }
+
+    MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("movement settings not supported by class");
+    }
+
+    Ogre::Vector3 Class::getMovementVector (const Ptr& ptr) const
+    {
+        return Ogre::Vector3 (0, 0, 0);
     }
 
     const Class& Class::get (const std::string& key)

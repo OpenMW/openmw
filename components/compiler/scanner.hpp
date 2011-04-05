@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iosfwd>
+#include <vector>
 
 #include "tokenloc.hpp"
 
@@ -24,7 +25,7 @@ namespace Compiler
                 Putback_None, Putback_Special, Putback_Integer, Putback_Float,
                 Putback_Name, Putback_Keyword
             };
-    
+
             ErrorHandler& mErrorHandler;
             TokenLoc mLoc;
             TokenLoc mPrevLoc;
@@ -96,26 +97,28 @@ namespace Compiler
 
             Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
                 const Extensions *extensions = 0);
-		    ///< constructor
+            ///< constructor
 
             void scan (Parser& parser);
             ///< Scan a token and deliver it to the parser.
 
-            void putbackSpecial (int code, const TokenLoc& loc); 
+            void putbackSpecial (int code, const TokenLoc& loc);
             ///< put back a special token
 
-            void putbackInt (int value, const TokenLoc& loc); 
-            ///< put back an integer token            
+            void putbackInt (int value, const TokenLoc& loc);
+            ///< put back an integer token
 
-            void putbackFloat (float value, const TokenLoc& loc); 
-            ///< put back a float token            
+            void putbackFloat (float value, const TokenLoc& loc);
+            ///< put back a float token
 
-            void putbackName (const std::string& name, const TokenLoc& loc); 
+            void putbackName (const std::string& name, const TokenLoc& loc);
             ///< put back a name toekn
 
-            void putbackKeyword (int keyword, const TokenLoc& loc); 
+            void putbackKeyword (int keyword, const TokenLoc& loc);
             ///< put back a keyword token
-            
+
+            void listKeywords (std::vector<std::string>& keywords);
+            ///< Append all known keywords to \æ kaywords.
     };
 }
 

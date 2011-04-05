@@ -29,7 +29,7 @@ struct MyMeshLoader : ManualResourceLoader
 
     HardwareVertexBufferSharedPtr vbuf = 
       HardwareBufferManager::getSingleton().createVertexBuffer(
-	VertexElement::getTypeSize(VET_FLOAT3),
+    VertexElement::getTypeSize(VET_FLOAT3),
         numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
     // Upload the vertex data to the card

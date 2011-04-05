@@ -44,6 +44,7 @@ namespace OEngine
 
 namespace MWGui
 {
+  class WindowBase;
   class HUD;
   class MapWindow;
   class MainMenu;
@@ -61,6 +62,14 @@ namespace MWGui
   class CreateClassDialog;
   class BirthDialog;
   class ReviewDialog;
+
+  struct ClassPoint
+  {
+      const char *id;
+      // Specialization points to match, in order: Stealth, Combat, Magic
+      // Note: Order is taken from http://www.uesp.net/wiki/Morrowind:Class_Quiz
+      unsigned int points[3];
+  };
 
   class WindowManager
   {
@@ -91,14 +100,6 @@ namespace MWGui
     CreateClassDialog *createClassDialog;
     BirthDialog *birthSignDialog;
     ReviewDialog *reviewDialog;
-
-    // Which dialogs have been shown, controls back/next/ok buttons
-    bool nameChosen;
-    bool raceChosen;
-    bool classChosen;
-    bool birthSignChosen;
-    bool reviewNext;
-    ///< If true then any click on Next will cause the summary to be shown
 
     // Keeps track of current step in Generate Class dialogs
     unsigned generateClassStep;
@@ -153,10 +154,13 @@ namespace MWGui
 
     void setGuiMode(GuiMode newMode);
 
+    bool showFPSCounter;
+    float mFPS;
+
   public:
     /// The constructor needs the main Gui object
     WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-        const Compiler::Extensions& extensions, bool newGame);
+        const Compiler::Extensions& extensions, bool fpsSwitch, bool newGame);
     virtual ~WindowManager();
 
     /**
@@ -197,10 +201,12 @@ namespace MWGui
 
     MyGUI::Gui* getGui() const { return gui; }
 
+    void wmSetFPS(float fps) { mFPS = fps; }
+
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
     ///< Set value for the given ID.
 
-    void setValue (const std::string& id, const MWMechanics::Stat<float>& value);
+    void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
     ///< Set value for the given ID.
 
     void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
@@ -251,45 +257,57 @@ namespace MWGui
      */
     const std::string &getGameSettingString(const std::string &id, const std::string &default_);
 
+    ESMS::ESMStore& getStore();
+
   private:
 
     void onDialogueWindowBye();
 
     // Character generation: Name dialog
-    void onNameDialogDone();
+    void onNameDialogDone(WindowBase* parWindow);
 
     // Character generation: Race dialog
-    void onRaceDialogDone();
+    void onRaceDialogDone(WindowBase* parWindow);
     void onRaceDialogBack();
 
     // Character generation: Choose class process
-    void onClassChoice(MyGUI::Widget* _sender, int _index);
+    void onClassChoice(int _index);
 
     // Character generation: Generate Class
     void showClassQuestionDialog();
-    void onClassQuestionChosen(MyGUI::Widget* _sender, int _index);
+    void onClassQuestionChosen(int _index);
     void onGenerateClassBack();
-    void onGenerateClassDone();
+    void onGenerateClassDone(WindowBase* parWindow);
 
     // Character generation: Pick Class dialog
-    void onPickClassDialogDone();
+    void onPickClassDialogDone(WindowBase* parWindow);
     void onPickClassDialogBack();
 
     // Character generation: Create Class dialog
-    void onCreateClassDialogDone();
+    void onCreateClassDialogDone(WindowBase* parWindow);
     void onCreateClassDialogBack();
 
     // Character generation: Birth sign dialog
-    void onBirthSignDialogDone();
+    void onBirthSignDialogDone(WindowBase* parWindow);
     void onBirthSignDialogBack();
 
     // Character generation: Review dialog
-    void onReviewDialogDone();
+    void onReviewDialogDone(WindowBase* parWindow);
     void onReviewDialogBack();
-    void onNameDialogActivate();
-    void onRaceDialogActivate();
-    void onClassDialogActivate();
-    void onBirthSignDialogActivate();
+    void onReviewActivateDialog(int parDialog);
+
+    enum CreationStageEnum
+    {
+        NotStarted,
+        NameChosen,
+        RaceChosen,
+        ClassChosen,
+        BirthSignChosen,
+        ReviewNext
+    };
+
+    // Which state the character creating is in, controls back/next/ok buttons
+    CreationStageEnum creationStage;
   };
 
   template<typename T>

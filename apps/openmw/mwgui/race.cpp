@@ -1,6 +1,4 @@
 #include "race.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"
@@ -15,8 +13,8 @@
 using namespace MWGui;
 using namespace Widgets;
 
-RaceDialog::RaceDialog(MWWorld::Environment& environment)
-  : WindowBase("openmw_chargen_race_layout.xml", environment)
+RaceDialog::RaceDialog(WindowManager& parWindowManager)
+  : WindowBase("openmw_chargen_race_layout.xml", parWindowManager)
   , genderIndex(0)
   , faceIndex(0)
   , hairIndex(0)
@@ -29,8 +27,7 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment)
     // These are just demo values, you should replace these with
     // real calls from outside the class later.
 
-    WindowManager *wm = environment.mWindowManager;
-    setText("AppearanceT", wm->getGameSettingString("sRaceMenu1", "Appearance"));
+    setText("AppearanceT", mWindowManager.getGameSettingString("sRaceMenu1", "Appearance"));
     getWidget(appearanceBox, "AppearanceBox");
 
     getWidget(headRotate, "HeadRotate");
@@ -42,34 +39,34 @@ RaceDialog::RaceDialog(MWWorld::Environment& environment)
     // Set up next/previous buttons
     MyGUI::ButtonPtr prevButton, nextButton;
 
-    setText("GenderChoiceT", wm->getGameSettingString("sRaceMenu2", "Change Sex"));
+    setText("GenderChoiceT", mWindowManager.getGameSettingString("sRaceMenu2", "Change Sex"));
     getWidget(prevButton, "PrevGenderButton");
     getWidget(nextButton, "NextGenderButton");
     prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousGender);
     nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextGender);
 
-    setText("FaceChoiceT", wm->getGameSettingString("sRaceMenu3", "Change Face"));
+    setText("FaceChoiceT", mWindowManager.getGameSettingString("sRaceMenu3", "Change Face"));
     getWidget(prevButton, "PrevFaceButton");
     getWidget(nextButton, "NextFaceButton");
     prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousFace);
     nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextFace);
 
-    setText("HairChoiceT", wm->getGameSettingString("sRaceMenu3", "Change Hair"));
+    setText("HairChoiceT", mWindowManager.getGameSettingString("sRaceMenu3", "Change Hair"));
     getWidget(prevButton, "PrevHairButton");
     getWidget(nextButton, "NextHairButton");
     prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
     nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextHair);
 
-    setText("RaceT", wm->getGameSettingString("sRaceMenu4", "Race"));
+    setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu4", "Race"));
     getWidget(raceList, "RaceList");
     raceList->setScrollVisible(true);
     raceList->eventListSelectAccept = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
     raceList->eventListMouseItemActivate = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
     raceList->eventListChangePosition = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
-    setText("SkillsT", wm->getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
+    setText("SkillsT", mWindowManager.getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
     getWidget(skillList, "SkillList");
-    setText("SpellPowerT", wm->getGameSettingString("sRaceMenu7", "Specials"));
+    setText("SpellPowerT", mWindowManager.getGameSettingString("sRaceMenu7", "Specials"));
     getWidget(spellPowerList, "SpellPowerList");
 
     // TODO: These buttons should be managed by a Dialog class
@@ -152,7 +149,7 @@ int wrap(int index, int max)
 
 void RaceDialog::onOkClicked(MyGUI::Widget* _sender)
 {
-    eventDone();
+    eventDone(this);
 }
 
 void RaceDialog::onBackClicked(MyGUI::Widget* _sender)
@@ -215,7 +212,7 @@ void RaceDialog::updateRaces()
 {
     raceList->removeAllItems();
 
-    ESMS::ESMStore &store = environment.mWorld->getStore();
+    ESMS::ESMStore &store = mWindowManager.getStore();
     
     ESMS::RecListT<ESM::Race>::MapType::const_iterator it = store.races.list.begin();
     ESMS::RecListT<ESM::Race>::MapType::const_iterator end = store.races.list.end();
@@ -249,8 +246,7 @@ void RaceDialog::updateSkills()
     const int lineHeight = 18;
     MyGUI::IntCoord coord1(0, 0, skillList->getWidth(), 18);
 
-    WindowManager *wm = environment.mWindowManager;
-    ESMS::ESMStore &store = environment.mWorld->getStore();
+    ESMS::ESMStore &store = mWindowManager.getStore();
     const ESM::Race *race = store.races.find(currentRaceId);
     int count = sizeof(race->data.bonus)/sizeof(race->data.bonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
     for (int i = 0; i < count; ++i)
@@ -261,7 +257,7 @@ void RaceDialog::updateSkills()
 
         skillWidget = skillList->createWidget<MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default,
                                                        std::string("Skill") + boost::lexical_cast<std::string>(i));
-        skillWidget->setWindowManager(wm);
+        skillWidget->setWindowManager(&mWindowManager);
         skillWidget->setSkillNumber(skillId);
         skillWidget->setSkillValue(MWSkill::SkillValue(race->data.bonus[i].bonus));
 
@@ -286,7 +282,7 @@ void RaceDialog::updateSpellPowers()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, spellPowerList->getWidth(), 18);
 
-    ESMS::ESMStore &store = environment.mWorld->getStore();
+    ESMS::ESMStore &store = mWindowManager.getStore();
     const ESM::Race *race = store.races.find(currentRaceId);
 
     std::vector<std::string>::const_iterator it = race->powers.list.begin();
@@ -295,7 +291,7 @@ void RaceDialog::updateSpellPowers()
     {
         const std::string &spellpower = *it;
         spellPowerWidget = spellPowerList->createWidget<MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
-        spellPowerWidget->setEnvironment(&environment);
+        spellPowerWidget->setWindowManager(&mWindowManager);
         spellPowerWidget->setSpellId(spellpower);
 
         spellPowerItems.push_back(spellPowerWidget);

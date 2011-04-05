@@ -4,9 +4,9 @@
 #include "window_base.hpp"
 #include <boost/array.hpp>
 
-namespace MWWorld
+namespace MWGui
 {
-    class Environment;
+    class WindowManager;
 }
 
 /*
@@ -23,7 +23,7 @@ namespace MWGui
     class DialogueWindow: public WindowBase
     {
     public:
-        DialogueWindow(MWWorld::Environment& environment);
+        DialogueWindow(WindowManager& parWindowManager);
 
         void open();
 

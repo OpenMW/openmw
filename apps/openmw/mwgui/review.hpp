@@ -5,9 +5,9 @@
 #include "../mwmechanics/stat.hpp"
 #include "widgets.hpp"
 
-namespace MWWorld
+namespace MWGui
 {
-    class Environment;
+    class WindowManager;
 }
 
 /*
@@ -22,9 +22,15 @@ namespace MWGui
     class ReviewDialog : public WindowBase
     {
     public:
+        enum Dialogs {
+            NAME_DIALOG,
+            RACE_DIALOG,
+            CLASS_DIALOG,
+            BIRTHSIGN_DIALOG
+        };
         typedef std::vector<int> SkillList;
 
-        ReviewDialog(MWWorld::Environment& environment);
+        ReviewDialog(WindowManager& parWindowManager);
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
@@ -44,36 +50,14 @@ namespace MWGui
 
         // Events
         typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CDelegate1<int> EventHandle_Int;
 
         /** Event : Back button clicked.\n
         signature : void method()\n
         */
         EventHandle_Void eventBack;
 
-        /** Event : Dialog finished, OK button clicked.\n
-        signature : void method()\n
-        */
-        EventHandle_Void eventDone;
-
-        /** Event : Activate name dialog.\n
-        signature : void method()\n
-        */
-        EventHandle_Void eventNameActivated;
-
-        /** Event : Activate race dialog.\n
-        signature : void method()\n
-        */
-        EventHandle_Void eventRaceActivated;
-
-        /** Event : Activate class dialog.\n
-        signature : void method()\n
-        */
-        EventHandle_Void eventClassActivated;
-
-        /** Event : Activate birth sign dialog.\n
-        signature : void method()\n
-        */
-        EventHandle_Void eventBirthSignActivated;
+        EventHandle_Int eventActivateDialog;
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
@@ -101,7 +85,7 @@ namespace MWGui
         void updateSkillArea();
 
         void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
-        void onWindowResize(MyGUI::WidgetPtr window);
+        void onWindowResize(MyGUI::Window* window);
 
         static const int lineHeight;
 
