@@ -131,6 +131,19 @@ set(ESM
     ${COMP_DIR}/esm/skill.cpp
     ${COMP_DIR}/esm/attr.cpp
     ${COMP_DIR}/esm/class.cpp
+    ${COMP_DIR}/esm/esm_reader.cpp
+    ${COMP_DIR}/esm/loadland.cpp
+    ${COMP_DIR}/esm/loadacti.cpp
+    ${COMP_DIR}/esm/loadalch.cpp
+    ${COMP_DIR}/esm/loadappa.cpp
+    ${COMP_DIR}/esm/loadarmo.cpp
+    ${COMP_DIR}/esm/loadbody.cpp
+    ${COMP_DIR}/esm/loadbook.cpp
+    ${COMP_DIR}/esm/loadbsgn.cpp
+    ${COMP_DIR}/esm/loadcell.cpp
+    ${COMP_DIR}/esm/loadclas.cpp
+    ${COMP_DIR}/esm/loadclot.cpp
+    
 )
 source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 

@@ -3,18 +3,14 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 struct Activator
 {
-  std::string name, script, model;
+    std::string name, script, model;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNString("FNAM");
-    script = esm.getHNOString("SCRI");
-  }
+    void load(ESMReader &esm);
 };
 }
 #endif
