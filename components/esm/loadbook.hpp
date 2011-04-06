@@ -3,7 +3,8 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 /*
  * Books, magic scrolls, notes and so on
@@ -11,25 +12,16 @@ namespace ESM {
 
 struct Book
 {
-  struct BKDTstruct
-  {
-    float weight;
-    int value, isScroll, skillID, enchant;
-  };
+    struct BKDTstruct
+    {
+        float weight;
+        int value, isScroll, skillID, enchant;
+    };
 
-  BKDTstruct data;
-  std::string name, model, icon, script, enchant, text;
+    BKDTstruct data;
+    std::string name, model, icon, script, enchant, text;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNOString("FNAM");
-    esm.getHNT(data, "BKDT", 20);
-    script = esm.getHNOString("SCRI");
-    icon = esm.getHNOString("ITEX");
-    text = esm.getHNOString("TEXT");
-    enchant = esm.getHNOString("ENAM");
-  }
+    void load(ESMReader &esm);
 };
 }
 #endif
