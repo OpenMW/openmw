@@ -74,6 +74,7 @@ namespace MWScript
             }
 
             extensions.registerInstruction ("togglecollision", "", opcodeToggleCollision);
+            extensions.registerInstruction ("tcl", "", opcodeToggleCollision);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
