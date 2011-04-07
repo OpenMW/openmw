@@ -1,20 +1,21 @@
 set(LAUNCHER
-  datafilesdialog.cpp
+  datafilespage.cpp
   lineedit.cpp
   main.cpp
   maindialog.cpp
-  settingsdialog.cpp
-  datafilesdialog.h
-  lineedit.h
-  maindialog.h
-  settingsdialog.h
+  playpage.cpp
+
+  datafilespage.hpp
+  lineedit.hpp
+  maindialog.hpp
+  playpage.hpp
 )
 
 SET(MOC_HDRS
-  datafilesdialog.h
-  lineedit.h
-  maindialog.h
-  settingsdialog.h
+  datafilespage.hpp
+  lineedit.hpp
+  maindialog.hpp
+  playpage.hpp
 )
 
 source_group(apps\\launcher FILES ${ESMTOOL})

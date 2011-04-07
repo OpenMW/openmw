@@ -2,9 +2,6 @@
 #include <components/esm/esm_reader.hpp>
 
 #include "datafilesdialog.h"
-//#include "pluginitemmodel.h"
-//#include "datafilesmodel.h"
-//#include "datafilesitem.h"
 
 using namespace ESM;
 
@@ -172,9 +169,31 @@ DataFilesDialog::DataFilesDialog()
     connect(masterselectmodel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(masterSelectionChanged(const QItemSelection&, const QItemSelection&)));
     connect(plugintable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
     connect(plugintable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
+    connect(pluginsmodel, SIGNAL(rowsAboutToBeMoved(const QModelIndex&, int, int, const QModelIndex&, int)), this, SLOT(test()));
     
     // Adjust the dialog width
     setMinimumWidth(500);
+}
+
+void DataFilesDialog::test()
+{
+    qDebug() << "Breaky Breaky!";
+    /*QModelIndexList deselectedindexes = deselected.indexes();
+  
+    if (!deselectedindexes.isEmpty()) {
+        foreach (const QModelIndex &currentindex, deselectedindexes) {
+            qDebug() << "Data is: " << currentindex.data();
+            qDebug() << "Row is: "<< currentindex.row();
+            QList<QStandardItem *> itemlist = pluginsmodel->findItems(QVariant(currentindex.data()).toString());
+            
+            if (!itemlist.isEmpty())
+            {
+                foreach (const QStandardItem *currentitem, itemlist) {
+                    pluginselectmodel->select(currentitem->index(), QItemSelectionModel::Toggle);
+                }
+            }
+        }
+    }*/
 }
 
 void DataFilesDialog::appendPlugins(const QModelIndex &masterindex)

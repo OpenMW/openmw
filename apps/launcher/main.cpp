@@ -1,6 +1,6 @@
 #include <QApplication>
 
-#include "maindialog.h"
+#include "maindialog.hpp"
 
 int main(int argc, char *argv[])
 {

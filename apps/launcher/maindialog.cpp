@@ -1,121 +1,141 @@
 #include <QtGui>
+#include <QDebug>
 
-#include "maindialog.h"
-#include "datafilesdialog.h"
-#include "settingsdialog.h"
+#include "maindialog.hpp"
+#include "playpage.hpp"
+#include "datafilespage.hpp"
 
 MainDialog::MainDialog()
-{
-      
-    QLabel *header = new QLabel(this);  
-    header->setMinimumSize(QSize(400, 150));
-    header->setPixmap(QPixmap(":resources/openmw_header.png"));
-
-    // Buttons
-    QPushButton *buttonStart = new QPushButton(this);
-    buttonStart->setMinimumSize(QSize(200, 40));
-    buttonStart->setText(tr("Start OpenMW"));
+{  
+    mIconWidget = new QListWidget;
+    mIconWidget->setViewMode(QListView::IconMode);
+    mIconWidget->setWrapping(false);
     
-    QPushButton *buttonDataFiles = new QPushButton(this);
-    buttonDataFiles->setMinimumSize(QSize(200, 40));
-    buttonDataFiles->setText(tr("Data Files"));
+    mIconWidget->setStyleSheet("QListWidget { background-image: url(background.png); background-color: white; background-repeat: no-repeat; background-attachment: scroll; background-position: right; } QListWidgetItem { alignment: center; }");
+    mIconWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Just to be sure
+    
+    //mIconWidget->setItemDelegate(new ListViewDelegate());
+    mIconWidget->setAttribute(Qt::WA_MacShowFocusRect); // Show a focus frame around the icons on Mac
+    //mIconWidget->setLayoutMode(QListView::SinglePass);
+    mIconWidget->setUniformItemSizes(true);
+    
+    mIconWidget->setIconSize(QSize(48, 48));
+    mIconWidget->setMovement(QListView::Static);
+    
+    mIconWidget->setMinimumWidth(400);
+    mIconWidget->setFixedHeight(80);
+    mIconWidget->setSpacing(4);
+    mIconWidget->setCurrentRow(0);
+    //QSize itemSize(80, 80);
+    
+    //mIconWidget->setGridSize ( itemSize );
+    
+    mIconWidget->setFlow(QListView::LeftToRight);
 
-    QPushButton *buttonSettings = new QPushButton(this);
-    buttonSettings->setText(tr("Settings"));
-    buttonSettings->setIcon(QIcon::fromTheme("preferences-other"));
+    QGroupBox *groupBox = new QGroupBox(this);
+    QVBoxLayout *groupLayout = new QVBoxLayout(groupBox);
+    
+    // TODO: TESTING
+    
+    /*mProfileModel = new QStringListModel();
+    QStringList profileList;
+    profileList << "Default" << "Warrior" << "Redemption" << "Cool stuff bro!";
+    mProfileModel->setStringList(profileList);
+    */
+    
+    // Various pages
+    mPlayPage = new PlayPage(this);
+    //mPlayPage->mProfileModel->setStringList(profileList);
+    
+    mDataFilesPage = new DataFilesPage(this);
+    //mDataFilesPage->mProfileComboBox->setModel(mProfileModel);
+    
+    mPagesWidget = new QStackedWidget(groupBox);
+    mPagesWidget->addWidget(mPlayPage);
+    mPagesWidget->addWidget(new PlayPage);
+    mPagesWidget->addWidget(mDataFilesPage);
+    //mPagesWidget->addWidget(new QueryPage);
+    
+    groupLayout->addWidget(mPagesWidget);
+
+    QPushButton *playButton = new QPushButton(tr("Play"));
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
     buttonBox->setStandardButtons(QDialogButtonBox::Close);
-    buttonBox->addButton(buttonSettings, QDialogButtonBox::ActionRole);
-        
+    buttonBox->addButton(playButton, QDialogButtonBox::ActionRole);
+    
+    //QSpacerItem *vSpacer1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
-    QVBoxLayout *buttonsLayout = new QVBoxLayout();
-    QHBoxLayout *bodyLayout = new QHBoxLayout();
-    QHBoxLayout *dialogButtonsLayout = new QHBoxLayout();
+    dialogLayout->addWidget(mIconWidget);
+    //dialogLayout->addItem(vSpacer1);
+    dialogLayout->addWidget(groupBox);
     
-    QSpacerItem *hSpacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *hSpacer2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *hSpacer3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    
-    QSpacerItem *vSpacer1 = new QSpacerItem(40, 150, QSizePolicy::Minimum, QSizePolicy::Fixed);
-    QSpacerItem *vSpacer2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    
-    buttonsLayout->addItem(vSpacer1);
-    buttonsLayout->addWidget(buttonStart);
-    buttonsLayout->addWidget(buttonDataFiles);
-    buttonsLayout->addItem(vSpacer2);
-    
-    bodyLayout->addItem(hSpacer1);
-    bodyLayout->addLayout(buttonsLayout);
-    bodyLayout->addItem(hSpacer2);
-    
-    dialogButtonsLayout->addItem(hSpacer3);
-    dialogButtonsLayout->addWidget(buttonBox);
-    
-    dialogLayout->addLayout(bodyLayout);
-    dialogLayout->addLayout(dialogButtonsLayout);
-    
-    setMinimumSize(QSize(400, 310));
-    setMaximumSize(QSize(400, 310));
+    dialogLayout->addWidget(buttonBox);
+    //mainLayout->addStretch(1);
+    //mainLayout->addSpacing(12);
 
     setWindowTitle(tr("OpenMW Launcher"));
-    QPixmap pixmap(":resources/openmw_icon.png");
-    setWindowIcon(QIcon(pixmap));
+    setMinimumSize(QSize(550, 450));
     
-    // Signals and slots
-    connect(buttonStart, SIGNAL(clicked()), this, SLOT(start()));
-    connect(buttonDataFiles, SIGNAL(clicked()), this, SLOT(showDataFiles()));
-    connect(buttonSettings, SIGNAL(clicked()), this, SLOT(showSettings()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
-    
-    openmw = new QProcess(NULL);
-
+    createIcons();
 }
 
-void MainDialog::start()
+void MainDialog::createIcons()
 {
-    // Start the game!
-    openmw->start("./openmw");
-    connect(openmw, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));  
+    //QSize itemSize(80, 66);
+    
+    QListWidgetItem *configButton = new QListWidgetItem(mIconWidget);
+    configButton->setIcon(QIcon(":resources/openmw-icon.png"));
+    configButton->setText(tr("Play"));
+    configButton->setTextAlignment(Qt::AlignCenter);
+    configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    //configButton->setSizeHint(itemSize);
+    
+    QListWidgetItem *updateButton = new QListWidgetItem(mIconWidget);
+    updateButton->setIcon(QIcon::fromTheme("video-display"));
+    updateButton->setText(tr("Graphics"));
+    updateButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
+    updateButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    //updateButton->setSizeHint(itemSize);
+    
+    QListWidgetItem *queryButton = new QListWidgetItem(mIconWidget);
+    queryButton->setIcon(QIcon(":resources/openmw-plugin-icon.png"));
+    queryButton->setText(tr("Data Files"));
+    queryButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+    queryButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    //queryButton->setSizeHint(itemSize);
+    
+    connect(mIconWidget,
+            SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 }
 
-void MainDialog::finished(int exitCode, QProcess::ExitStatus exitStatus)
+void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
-    QString debuginfo = openmw->readAllStandardOutput();
-       
-    if (exitCode == 0 && exitStatus == QProcess::NormalExit) {
-        // Close the launcher if the game is quitted
-        close();
-    } 
-    
-    if (exitCode != 0) {
-        // An error occured whilst starting OpenMW
+    if (!current)
+        current = previous;
 
-        // First check if readAllStandardOutput is empty
-        // Finished gets signaled twice sometimes
+    mPagesWidget->setCurrentIndex(mIconWidget->row(current));
+    
+    if (previous) {
+        QString previousPage = previous->data(Qt::DisplayRole).toString();
+        QString currentPage = current->data(Qt::DisplayRole).toString();
         
-        if (!debuginfo.isEmpty())
-        {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle("Error");
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("\nAn error occured while starting OpenMW."));
-            msgBox.setDetailedText(debuginfo);
-            msgBox.exec();   
+        // The user switched from Data Files to Play
+        if (previousPage == QString("Data Files") && currentPage == QString("Play")) {
+            mPlayPage->mProfileModel->setStringList(mDataFilesPage->mProfileModel->stringList());
+            mPlayPage->mProfileComboBox->setCurrentIndex(mDataFilesPage->mProfileComboBox->currentIndex());
         }
-       
+        
+        // The user switched from Play to Data Files
+        if (previousPage == QString("Play") && currentPage == QString("Data Files")) {
+            mDataFilesPage->mProfileComboBox->setCurrentIndex(mPlayPage->mProfileComboBox->currentIndex());
+        }
     }
+
 }
 
-void MainDialog::showDataFiles()
-{
-    DataFilesDialog dialog;
-    dialog.exec();
-}
-
-void MainDialog::showSettings()
-{
-    SettingsDialog dialog;
-    dialog.exec();
-}

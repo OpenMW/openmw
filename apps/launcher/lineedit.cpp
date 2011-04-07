@@ -7,7 +7,7 @@
 **
 ****************************************************************************/
 
-#include "lineedit.h"
+#include "lineedit.hpp"
 #include <QToolButton>
 #include <QStyle>
 

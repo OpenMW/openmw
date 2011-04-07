@@ -8,18 +8,15 @@ DEPENDPATH += .
 INCLUDEPATH += .
 
 # Input
-HEADERS += datafilesdialog.h \
-           datafilesitem.h \
-           datafilesmodel.h \
-           lineedit.h \
-           maindialog.h \
-           settingsdialog.h
-SOURCES += datafilesdialog.cpp \
-           datafilesitem.cpp \
-           datafilesmodel.cpp \
+HEADERS += datafilespage.hpp \
+           lineedit.hpp \
+           maindialog.hpp \
+           playpage.hpp
+
+SOURCES += datafilespage.cpp \
            lineedit.cpp \
-           main.cpp \
            maindialog.cpp \
-           qrc_resources.cxx \
-           settingsdialog.cpp
+           playpage.cpp
+           qrc_resources.cxx
+
 RESOURCES += resources.qrc
