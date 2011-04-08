@@ -28,13 +28,7 @@ struct SoundGenerator
 
   std::string creature, sound;
 
-  void load(ESMReader &esm)
-  {
-    esm.getHNT(type, "DATA", 4);
-
-    creature = esm.getHNOString("CNAM");
-    sound = esm.getHNOString("SNAM");
-  }
+  void load(ESMReader &esm);
 };
 }
 #endif

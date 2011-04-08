@@ -3,20 +3,14 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 struct Door
 {
-  std::string name, model, script, openSound, closeSound;
+    std::string name, model, script, openSound, closeSound;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNOString("FNAM");
-    script = esm.getHNOString("SCRI");
-    openSound = esm.getHNOString("SNAM");
-    closeSound = esm.getHNOString("ANAM");
-  }
+    void load(ESMReader &esm);
 };
 }
 #endif

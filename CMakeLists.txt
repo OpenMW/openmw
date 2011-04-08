@@ -1,5 +1,9 @@
 project(OpenMW)
 
+IF (APPLE)
+    set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/OpenMW.app")
+ENDIF (APPLE)
+
 # Sound source selection
 option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
@@ -14,7 +18,7 @@ if(DPKG_PROGRAM)
 else()
     if (APPLE)
         # set path inside bundle
-        set(MORROWIND_DATA_FILES "Contents/Resources/data" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_DATA_FILES "../data" CACHE PATH "location of Morrowind data files")
         set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of Morrowind data files")
     else()
         set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
@@ -123,10 +127,48 @@ source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 set(ESM
-    ${COMP_DIR}/esm/load_impl.cpp
-    ${COMP_DIR}/esm/skill.cpp
     ${COMP_DIR}/esm/attr.cpp
-    ${COMP_DIR}/esm/class.cpp
+    ${COMP_DIR}/esm/esm_reader.cpp
+    ${COMP_DIR}/esm/loadland.cpp
+    ${COMP_DIR}/esm/loadacti.cpp
+    ${COMP_DIR}/esm/loadalch.cpp
+    ${COMP_DIR}/esm/loadappa.cpp
+    ${COMP_DIR}/esm/loadarmo.cpp
+    ${COMP_DIR}/esm/loadbody.cpp
+    ${COMP_DIR}/esm/loadbook.cpp
+    ${COMP_DIR}/esm/loadbsgn.cpp
+    ${COMP_DIR}/esm/loadcell.cpp
+    ${COMP_DIR}/esm/loadclas.cpp
+    ${COMP_DIR}/esm/loadclot.cpp
+    ${COMP_DIR}/esm/loadcont.cpp
+    ${COMP_DIR}/esm/loadcrea.cpp
+    ${COMP_DIR}/esm/loaddial.cpp
+    ${COMP_DIR}/esm/loaddoor.cpp
+    ${COMP_DIR}/esm/loadench.cpp
+    ${COMP_DIR}/esm/loadfact.cpp
+    ${COMP_DIR}/esm/loadglob.cpp
+    ${COMP_DIR}/esm/loadgmst.cpp
+    ${COMP_DIR}/esm/loadinfo.cpp
+    ${COMP_DIR}/esm/loadingr.cpp
+    ${COMP_DIR}/esm/loadlevlist.cpp
+    ${COMP_DIR}/esm/loadligh.cpp
+    ${COMP_DIR}/esm/loadlocks.cpp
+    ${COMP_DIR}/esm/loadltex.cpp
+    ${COMP_DIR}/esm/loadmgef.cpp
+    ${COMP_DIR}/esm/loadmisc.cpp
+    ${COMP_DIR}/esm/loadnpc.cpp
+    ${COMP_DIR}/esm/loadpgrd.cpp
+    ${COMP_DIR}/esm/loadrace.cpp
+    ${COMP_DIR}/esm/loadregn.cpp
+    ${COMP_DIR}/esm/loadscpt.cpp
+    ${COMP_DIR}/esm/loadskil.cpp
+    ${COMP_DIR}/esm/loadsndg.cpp
+    ${COMP_DIR}/esm/loadsoun.cpp
+    ${COMP_DIR}/esm/loadspel.cpp
+    ${COMP_DIR}/esm/loadsscr.cpp
+    ${COMP_DIR}/esm/loadstat.cpp
+    ${COMP_DIR}/esm/loadweap.cpp
+
 )
 source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 
@@ -286,25 +328,50 @@ add_definitions(-DCAELUM_STATIC)
 
 # Specify build paths
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
+if (APPLE)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
+else (APPLE)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
+endif (APPLE)
 
 # Other files
 
 if (WIN32)
-configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
-    "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
+    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
+        "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
 endif (WIN32)
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
-    "${OpenMW_BINARY_DIR}/plugins.cfg")
+    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
+        "${OpenMW_BINARY_DIR}/plugins.cfg")
 endif()
+
 if (APPLE)
-configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
-    "${OpenMW_BINARY_DIR}/plugins.cfg")
+    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
+        "${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg")
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
+        "${APP_BUNDLE_DIR}/Contents/Info.plist" COPYONLY)
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
+        "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
+
+
+    # prepare plugins
+    configure_file(${OGRE_PLUGIN_DIR}/RenderSystem_GL.dylib
+        "${APP_BUNDLE_DIR}/Contents/Plugins/RenderSystem_GL.dylib" COPYONLY)
+
+    configure_file(${OGRE_PLUGIN_DIR}/Plugin_OctreeSceneManager.dylib
+        "${APP_BUNDLE_DIR}/Contents/Plugins/Plugin_OctreeSceneManager.dylib" COPYONLY)
+
+    configure_file(${OGRE_PLUGIN_DIR}/Plugin_ParticleFX.dylib
+        "${APP_BUNDLE_DIR}/Contents/Plugins/Plugin_ParticleFX.dylib" COPYONLY)
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg")
+
 endif (APPLE)
 
-configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-    "${OpenMW_BINARY_DIR}/openmw.cfg")
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -315,10 +382,15 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 # Apple bundling
 if (APPLE)
   set(MISC_FILES
-        ${OpenMW_BINARY_DIR}/openmw.cfg
-        ${OpenMW_BINARY_DIR}/plugins.cfg)
+        ${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg
+        ${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg)
+
+    set(OGRE_PLUGINS
+        ${APP_BUNDLE_DIR}/Contents/Plugins/*)
+
 install(FILES ${MISC_FILES} DESTINATION ../MacOS)
-install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ../Resources)
+install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Plugins" DESTINATION ..)
+install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Resources/resources" DESTINATION ../Resources)
 set(CPACK_GENERATOR "Bundle")
 set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
 set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
