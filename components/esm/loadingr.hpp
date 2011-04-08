@@ -3,7 +3,8 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 /*
  * Alchemy ingredient
@@ -11,26 +12,19 @@ namespace ESM {
 
 struct Ingredient
 {
-  struct IRDTstruct
-  {
-    float weight;
-    int value;
-    int effectID[4];    // Effect, 0 or -1 means none
-    int skills[4];      // SkillEnum related to effect
-    int attributes[4];  // Attribute related to effect
-  };
+    struct IRDTstruct
+    {
+        float weight;
+        int value;
+        int effectID[4]; // Effect, 0 or -1 means none
+        int skills[4]; // SkillEnum related to effect
+        int attributes[4]; // Attribute related to effect
+    };
 
-  IRDTstruct data;
-  std::string name, model, icon, script;
+    IRDTstruct data;
+    std::string name, model, icon, script;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNString("FNAM");
-    esm.getHNT(data, "IRDT", 56);
-    script = esm.getHNOString("SCRI");
-    icon = esm.getHNOString("ITEX");
-  }
+    void load(ESMReader &esm);
 };
 }
 #endif

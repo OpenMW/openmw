@@ -127,10 +127,7 @@ source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 set(ESM
-    ${COMP_DIR}/esm/load_impl.cpp
-    ${COMP_DIR}/esm/skill.cpp
     ${COMP_DIR}/esm/attr.cpp
-    ${COMP_DIR}/esm/class.cpp
     ${COMP_DIR}/esm/esm_reader.cpp
     ${COMP_DIR}/esm/loadland.cpp
     ${COMP_DIR}/esm/loadacti.cpp
@@ -143,6 +140,34 @@ set(ESM
     ${COMP_DIR}/esm/loadcell.cpp
     ${COMP_DIR}/esm/loadclas.cpp
     ${COMP_DIR}/esm/loadclot.cpp
+    ${COMP_DIR}/esm/loadcont.cpp
+    ${COMP_DIR}/esm/loadcrea.cpp
+    ${COMP_DIR}/esm/loaddial.cpp
+    ${COMP_DIR}/esm/loaddoor.cpp
+    ${COMP_DIR}/esm/loadench.cpp
+    ${COMP_DIR}/esm/loadfact.cpp
+    ${COMP_DIR}/esm/loadglob.cpp
+    ${COMP_DIR}/esm/loadgmst.cpp
+    ${COMP_DIR}/esm/loadinfo.cpp
+    ${COMP_DIR}/esm/loadingr.cpp
+    ${COMP_DIR}/esm/loadlevlist.cpp
+    ${COMP_DIR}/esm/loadligh.cpp
+    ${COMP_DIR}/esm/loadlocks.cpp
+    ${COMP_DIR}/esm/loadltex.cpp
+    ${COMP_DIR}/esm/loadmgef.cpp
+    ${COMP_DIR}/esm/loadmisc.cpp
+    ${COMP_DIR}/esm/loadnpc.cpp
+    ${COMP_DIR}/esm/loadpgrd.cpp
+    ${COMP_DIR}/esm/loadrace.cpp
+    ${COMP_DIR}/esm/loadregn.cpp
+    ${COMP_DIR}/esm/loadscpt.cpp
+    ${COMP_DIR}/esm/loadskil.cpp
+    ${COMP_DIR}/esm/loadsndg.cpp
+    ${COMP_DIR}/esm/loadsoun.cpp
+    ${COMP_DIR}/esm/loadspel.cpp
+    ${COMP_DIR}/esm/loadsscr.cpp
+    ${COMP_DIR}/esm/loadstat.cpp
+    ${COMP_DIR}/esm/loadweap.cpp
     
 )
 source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
