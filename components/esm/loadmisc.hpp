@@ -3,7 +3,8 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 /*
  * Misc inventory items, basically things that have no use but can be
@@ -12,26 +13,19 @@ namespace ESM {
 
 struct Misc
 {
-  struct MCDTstruct
-  {
-    float weight;
-    int value;
-    int isKey; // There are many keys in Morrowind.esm that has this
-           // set to 0. TODO: Check what this field corresponds to
-           // in the editor.
-  };
-  MCDTstruct data;
+    struct MCDTstruct
+    {
+        float weight;
+        int value;
+        int isKey; // There are many keys in Morrowind.esm that has this
+                   // set to 0. TODO: Check what this field corresponds to
+                   // in the editor.
+    };
+    MCDTstruct data;
 
-  std::string name, model, icon, script;
+    std::string name, model, icon, script;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNOString("FNAM");
-    esm.getHNT(data, "MCDT", 12);
-    script = esm.getHNOString("SCRI");
-    icon = esm.getHNOString("ITEX");
-  }
+    void load(ESMReader &esm);
 };
 }
 #endif

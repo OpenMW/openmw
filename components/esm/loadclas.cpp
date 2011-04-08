@@ -3,6 +3,18 @@
 namespace ESM
 {
 
+const Class::Specialization Class::specializationIds[3] = {
+  Class::Combat,
+  Class::Magic,
+  Class::Stealth
+};
+
+const char *Class::gmstSpecializationIds[3] = {
+  "sSpecializationCombat",
+  "sSpecializationMagic",
+  "sSpecializationStealth"
+};
+
 void Class::load(ESMReader &esm)
 {
     name = esm.getHNString("FNAM");

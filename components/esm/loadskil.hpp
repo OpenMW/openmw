@@ -66,12 +66,7 @@ struct Skill
   static const std::string sSkillNameIds[Length];
   static const boost::array<SkillEnum, Length> skillIds;
 
-  void load(ESMReader &esm)
-    {
-      esm.getHNT(index, "INDX");
-      esm.getHNT(data, "SKDT", 24);
-      description = esm.getHNOString("DESC");
-    }
+  void load(ESMReader &esm);
 };
 }
 #endif
