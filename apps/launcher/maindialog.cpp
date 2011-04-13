@@ -26,10 +26,7 @@ MainDialog::MainDialog()
     mIconWidget->setFixedHeight(80);
     mIconWidget->setSpacing(4);
     mIconWidget->setCurrentRow(0);
-    //QSize itemSize(80, 80);
-    
-    //mIconWidget->setGridSize ( itemSize );
-    
+
     mIconWidget->setFlow(QListView::LeftToRight);
 
     QGroupBox *groupBox = new QGroupBox(this);

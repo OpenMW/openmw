@@ -32,15 +32,14 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     
     // Add both tables to a splitter
     QSplitter *splitter = new QSplitter(this);
-    splitter->setOrientation(Qt::Vertical);
+    splitter->setOrientation(Qt::Horizontal);
 
-    splitter->addWidget(mPluginsTable);
     splitter->addWidget(mMastersWidget);
+    splitter->addWidget(mPluginsTable);  
     
-    
-    // Adjust the default widget heights inside the splitter
+    // Adjust the default widget widths inside the splitter
     QList<int> sizeList;
-    sizeList << 200 << 400;
+    sizeList << 100 << 300;
     splitter->setSizes(sizeList);
     
     // Bottom part with profile options
