@@ -1225,20 +1225,15 @@ void NIFLoader::loadResource(Resource *resource)
 
 	
 	}
-	/*
-	else if (n != NULL)
-	{
-		std::cout << "handle" << handle << "\n";
-		//handle++;
-	}*/
+	
+	//std::cout <"BE\n";
 	}
 	
-
-
     // set skeleton
-  if (!mSkel.isNull())
+  if (!mSkel.isNull() && mesh->isLoaded())
   {
         mesh->_notifySkeleton(mSkel);
+		std::cout << "Skeleton notified\n";
   }
 
     // set skeleton
