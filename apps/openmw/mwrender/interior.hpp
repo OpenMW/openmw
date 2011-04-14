@@ -6,6 +6,7 @@
 
 #include "OgreColourValue.h"
 #include <OgreSceneNode.h>
+#include <Ogre.h>
 
 namespace Ogre
 {
@@ -67,6 +68,7 @@ namespace MWRender
      virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements);
      virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
     /// insert a mesh related to the most recent insertBegin call.
+	//virtual Ogre::Entity* insertAndDeliverMesh(const std::string &mesh);
     virtual void insertMesh(const std::string &mesh);
     virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements);
     virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst);

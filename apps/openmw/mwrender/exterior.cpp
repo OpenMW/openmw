@@ -273,6 +273,21 @@ std::string ExteriorCellRender::insertEnd (bool enable)
   return handle;
 }
 
+/*
+Ogre::Entity* ExteriorCellRender::insertAndDeliverMesh(const std::string &mesh)
+{
+	 assert (insert);
+
+  NIFLoader::load(mesh);
+  Entity *ent = mScene.getMgr()->createEntity(mesh);
+  ent->setDisplaySkeleton(true);
+
+
+      mInsert->attachObject(ent);
+  return  ent;
+
+}*/
+
 // configure lighting according to cell
 
 void ExteriorCellRender::configureAmbient()

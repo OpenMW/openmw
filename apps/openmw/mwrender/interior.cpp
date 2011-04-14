@@ -180,6 +180,23 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
         }
 }
 
+/*
+Ogre::Entity* InteriorCellRender::insertAndDeliverMesh(const std::string &mesh)
+{
+	
+	assert (insert);
+
+  NIFLoader::load(mesh);
+  Entity *ent = scene.getMgr()->createEntity(mesh);
+  ent->setDisplaySkeleton(true);
+
+
+      insert->attachObject(ent);
+  return  ent;
+
+}*/
+
+
 void InteriorCellRender::insertMesh(const std::string &mesh)
 {
   assert (insert);
