@@ -71,10 +71,12 @@ source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 set(GAMEDIALOGUE_HEADER
     mwdialogue/dialoguemanager.hpp
     mwdialogue/journal.hpp
+    mwdialogue/journalentry.hpp
 )
 set(GAMEDIALOGUE
     mwdialogue/dialoguemanager.cpp
     mwdialogue/journal.cpp
+    mwdialogue/journalentry.cpp
 )
 source_group(apps\\openmw\\mwdialogue FILES ${GAMEDIALOGUE_HEADER} ${GAMEDIALOGUE})
 
