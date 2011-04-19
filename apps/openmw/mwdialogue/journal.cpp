@@ -23,4 +23,14 @@ namespace MWDialogue
     {
         return 0;
     }
+
+    Journal::TEntryIter Journal::begin() const
+    {
+        return mJournal.begin();
+    }
+
+    Journal::TEntryIter Journal::end() const
+    {
+        return mJournal.end();
+    }
 }
