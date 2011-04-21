@@ -460,7 +460,7 @@ namespace MWWorld
         return *mPlayer;
     }
 
-    ESMS::ESMStore& World::getStore()
+    const ESMS::ESMStore& World::getStore() const
     {
         return mStore;
     }

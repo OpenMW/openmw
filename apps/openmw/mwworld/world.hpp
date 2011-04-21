@@ -115,7 +115,7 @@ namespace MWWorld
 
             MWWorld::Player& getPlayer();
 
-            ESMS::ESMStore& getStore();
+            const ESMS::ESMStore& getStore() const;
 
             const ScriptList& getLocalScripts() const;
             ///< Names and local variable state of all local scripts in active cells.
