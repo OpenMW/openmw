@@ -55,12 +55,20 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             ->default_value (std::vector<std::string>(), "")
             ->multitoken(),
             "plugin file(s)")
-        ( "fps", "show fps counter")
-        ( "debug", "debug mode" )
-        ( "nosound", "disable all sound" )
-        ( "script-verbose", "verbose script output" )
-        ( "new-game", "activate char gen/new game mechanics" )
-        ( "script-all", "compile all scripts (excluding dialogue scripts) at startup")
+        ( "fps", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false), "show fps counter")
+        ( "debug", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false), "debug mode" )
+        ( "nosound", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false), "disable all sound" )
+        ( "script-verbose", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false), "verbose script output" )
+        ( "new-game", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false),
+            "activate char gen/new game mechanics" )
+        ( "script-all", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false),
+            "compile all scripts (excluding dialogue scripts) at startup")
         ;
 
     bpo::variables_map variables;
@@ -118,23 +126,23 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     // startup-settings
     engine.setCell (variables["start"].as<std::string>());
 
-    if (variables.count ("new-game"))
+    if (variables["new-game"].as<bool>()==true)
         engine.setNewGame();
 
     // other settings
-    if (variables.count ("fps"))
+    if (variables["fps"].as<bool>()==true)
         engine.showFPS();
 
-    if (variables.count ("debug"))
+    if (variables["debug"].as<bool>()==true)
         engine.enableDebugMode();
 
-    if (variables.count ("no-sound"))
+    if (variables["nosound"].as<bool>()==true)
         engine.disableSound();
 
-    if (variables.count ("script-verbose"))
+    if (variables["script-verbose"].as<bool>()==true)
         engine.enableVerboseScripts();
 
-    if (variables.count ("script-all"))
+    if (variables["script-all"].as<bool>()==true)
         engine.setCompileAll (true);
 
     return true;
