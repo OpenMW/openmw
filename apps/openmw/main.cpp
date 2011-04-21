@@ -55,7 +55,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             ->default_value (std::vector<std::string>(), "")
             ->multitoken(),
             "plugin file(s)")
-        ( "showfps", "show fps counter")
+        ( "fps", "show fps counter")
         ( "debug", "debug mode" )
         ( "nosound", "disable all sound" )
         ( "script-verbose", "verbose script output" )
