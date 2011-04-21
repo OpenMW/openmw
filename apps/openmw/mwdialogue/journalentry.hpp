@@ -8,6 +8,11 @@ namespace ESMS
     struct ESMStore;
 }
 
+namespace MWWorld
+{
+    class World;
+}
+
 namespace MWDialogue
 {
     /// \brief a quest or dialogue entry with a timestamp
@@ -22,6 +27,9 @@ namespace MWDialogue
         JournalEntry (int day, const std::string& topic, const std::string& infoId);
 
         std::string getText (const ESMS::ESMStore& store) const;
+
+        static JournalEntry makeFromQuest (const std::string& topic, int index,
+            const MWWorld::World& world);
     };
 
 }
