@@ -480,6 +480,11 @@ namespace MWWorld
         return (*mGlobalVariables)[name];
     }
 
+    Globals::Data World::getGlobalVariable (const std::string& name) const
+    {
+        return (*mGlobalVariables)[name];
+    }
+
     char World::getGlobalVariableType (const std::string& name) const
     {
         return mGlobalVariables->getType (name);

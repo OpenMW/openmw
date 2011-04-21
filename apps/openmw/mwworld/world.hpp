@@ -125,6 +125,8 @@ namespace MWWorld
 
             Globals::Data& getGlobalVariable (const std::string& name);
 
+            Globals::Data getGlobalVariable (const std::string& name) const;
+
             char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.
 
