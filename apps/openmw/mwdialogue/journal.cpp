@@ -12,7 +12,7 @@ namespace MWDialogue
 
     void Journal::addEntry (const std::string& id, int index)
     {
-        mJournal.push_back (JournalEntry::makeFromQuest (id, index, *mEnvironment.mWorld));
+        mJournal.push_back (StampedJournalEntry::makeFromQuest (id, index, *mEnvironment.mWorld));
         std::cout << "journal: " << id << " at " << index << std::endl;
     }
 

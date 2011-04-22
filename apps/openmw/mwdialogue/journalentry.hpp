@@ -15,23 +15,40 @@ namespace MWWorld
 
 namespace MWDialogue
 {
-    /// \brief a quest or dialogue entry with a timestamp
+    /// \brief A quest or dialogue entry
     struct JournalEntry
     {
-        int mDay;
         std::string mTopic;
         std::string mInfoId;
 
         JournalEntry();
 
-        JournalEntry (int day, const std::string& topic, const std::string& infoId);
+        JournalEntry (const std::string& topic, const std::string& infoId);
 
         std::string getText (const ESMS::ESMStore& store) const;
 
         static JournalEntry makeFromQuest (const std::string& topic, int index,
             const MWWorld::World& world);
+
+        static std::string idFromIndex (const std::string& topic, int index,
+            const MWWorld::World& world);
     };
 
+    /// \biref A quest entry with a timestamp.
+    struct StampedJournalEntry : public JournalEntry
+    {
+        int mDay;
+        int mMonth;
+        int mDayOfMonth;
+
+        StampedJournalEntry();
+
+        StampedJournalEntry (const std::string& topic, const std::string& infoId,
+            int day, int month, int dayOfMonth);
+
+        static StampedJournalEntry makeFromQuest (const std::string& topic, int index,
+            const MWWorld::World& world);
+    };
 }
 
 #endif

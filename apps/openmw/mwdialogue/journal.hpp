@@ -17,13 +17,13 @@ namespace MWDialogue
     {
         public:
 
-            typedef std::deque<JournalEntry> TEntryContainer;
+            typedef std::deque<StampedJournalEntry> TEntryContainer;
             typedef TEntryContainer::const_iterator TEntryIter;
 
         private:
 
             MWWorld::Environment& mEnvironment;
-            std::deque<JournalEntry> mJournal;
+            TEntryContainer mJournal;
 
         public:
 
