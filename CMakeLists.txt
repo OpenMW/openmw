@@ -340,10 +340,12 @@ if (WIN32)
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
         "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
 endif (WIN32)
-if (LINUX)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
         "${OpenMW_BINARY_DIR}/plugins.cfg")
-endif (LINUX)
+endif()
+
 if (APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
         "${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg")
