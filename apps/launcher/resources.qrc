@@ -1,8 +1,10 @@
 <!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>resources/clear.png</file>
-    <file>resources/openmw-icon.png</file>
-    <file>resources/openmw-plugin-icon.png</file>
-    <file>resources/openmw-header.png</file>
+<qresource prefix="/images">
+    <file alias="clear.png">resources/images/clear.png</file>
+    <file alias="down.png">resources/images/down.png</file>
+    <file alias="openmw-icon.png">resources/images/openmw-icon.png</file>
+    <file alias="openmw-plugin-icon.png">resources/images/openmw-plugin-icon.png</file>
+    <file alias="openmw-header.png">resources/images/openmw-header.png</file>
+    <file alias="playpage-background.png">resources/images/playpage-background.png</file>
 </qresource>
 </RCC>
