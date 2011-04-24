@@ -342,15 +342,17 @@ void DataFilesPage::writeConfig()
     settings.beginGroup(mProfileComboBox->currentText());
 
     // First write all the masters to the config
-    for (int i = 0; i < mMastersWidget->rowCount(); ++i) {
-        const QTableWidgetItem *item = mMastersWidget->item(i, 0);
-        settings.setValue(QString("Master"), item->data(Qt::DisplayRole).toString());
+    for (int r = 0; r < mMastersWidget->rowCount(); ++r) {
+        const QTableWidgetItem *item = mMastersWidget->item(r, 0);
+        settings.setValue(QString("Master%1").arg(r), item->data(Qt::DisplayRole).toString());
     }
 
     // Now write all checked plugins
-    foreach (const QString &currentPlugin, checkedItems())
+    const QStringList checkedPlugins = checkedItems();
+
+    for (int i = 0; i < checkedPlugins.size(); ++i)
     {
-        settings.setValue(QString("Plugin"), currentPlugin);
+        settings.setValue(QString("Plugin%1").arg(i), checkedPlugins.at(i));
     }
 
     settings.endGroup();
