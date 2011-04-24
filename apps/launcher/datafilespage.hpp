@@ -30,16 +30,16 @@ public slots:
 private:
     QTableWidget *mMastersWidget;
     QTableView *mPluginsTable;
- 
+
     QStandardItemModel *mDataFilesModel;
     QStandardItemModel *mPluginsModel;
-    
+
     QItemSelectionModel *mPluginsSelectModel;
 
     void setupDataFiles();
     void addPlugins(const QModelIndex &index);
     void removePlugins(const QModelIndex &index);
 
-}; 
+};
 
-#endif 
+#endif

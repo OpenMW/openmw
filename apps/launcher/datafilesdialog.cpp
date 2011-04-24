@@ -14,26 +14,26 @@ DataFilesDialog::DataFilesDialog()
 
     /* listtest
     QTableWidget *pluginlist = new QTableWidget(this);
-    
+
     pluginlist->horizontalHeader()->setStretchLastSection(true);
     pluginlist->insertColumn(0);
-    
+
     for (unsigned int i=0; i<6; ++i) {
         pluginlist->insertRow(i);
         QTableWidgetItem *item = new QTableWidgetItem(QString("Plugin %0").arg(i));
         item->setFlags(item->flags() & ~(Qt::ItemIsDropEnabled));
         pluginlist->setItem(i, 0, item);
     }
-    
+
     pluginlist->insertRow(6);
     pluginlist->setSelectionMode(QAbstractItemView::SingleSelection); // single item can be draged or droped
     pluginlist->setDragEnabled(true);
     pluginlist->setDragDropMode(QAbstractItemView::InternalMove);
     pluginlist->viewport()->setAcceptDrops(true);
- 
+
     pluginlist->setDropIndicatorShown(true);
     */
-    
+
     splitter->setOrientation(Qt::Vertical);
     splitter->addWidget(tree);
     splitter->addWidget(mastertable);
@@ -43,7 +43,7 @@ DataFilesDialog::DataFilesDialog()
     QList<int> sizelist;
     sizelist << 100 << 200 << 400;
     splitter->setSizes(sizelist);
-    
+
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
     dialogLayout->addWidget(splitter);
     //dialogLayout->addWidget(plugintable);
@@ -57,55 +57,55 @@ DataFilesDialog::DataFilesDialog()
 
     QStringList acceptedfiles = (QStringList() << "*.esp");
     QStringList files;
-        
+
     datafilesdir.setNameFilters(acceptedfiles);
     files = datafilesdir.entryList();
 
-    
+
     //foreach (const QString &currentfile, datafiles) {
     for (int i=0; i<files.count(); ++i)
     {
         ESMReader datafile;
         QString currentfile = files.at(i);
-        
+
         QStringList masters;
         QString path = QString("data/").append(currentfile);
         datafile.open(path.toStdString());
-        
+
         ESMReader::MasterList mlist = datafile.getMasters();
-        
+
         for (unsigned int i = 0; i < mlist.size(); ++i) {// Add each master file
             masters.append(QString::fromStdString(mlist[i].name));
         }
-        
+
         masters.sort(); // Sort the masters alphabetically
-        
+
         // Add the masters to mastersmodel
         foreach (const QString &currentmaster, masters) {
             QStandardItem *item = new QStandardItem(currentmaster);
             item->setFlags(item->flags() & ~(Qt::ItemIsDropEnabled));
-            
+
             QList<QStandardItem*> foundmasters = mastersmodel->findItems(currentmaster);
-                        
+
             if (foundmasters.isEmpty()) {
                  // Current master is not found in the master, add it
                 mastersmodel->appendRow(item);
             }
         }
-        
+
         // Add the masters to datafilesmodel
         QStandardItem *item = new QStandardItem(masters.join(","));
         item->setFlags(item->flags() & ~(Qt::ItemIsDropEnabled));
         QStandardItem *child = new QStandardItem(currentfile);
         child->setFlags(child->flags() & ~(Qt::ItemIsDropEnabled));
-        
+
         QList<QStandardItem*> masteritems = datafilesmodel->findItems(masters.join(","));
-        
-        
+
+
         if (masteritems.isEmpty()) {
             item->appendRow(child);
             datafilesmodel->appendRow(item);
-        } else {   
+        } else {
             foreach (QStandardItem *currentitem, masteritems) {
                 currentitem->setFlags(currentitem->flags() & ~(Qt::ItemIsDropEnabled));
                 currentitem->appendRow(child);
@@ -132,17 +132,17 @@ DataFilesDialog::DataFilesDialog()
     pluginsmodel = new QStandardItemModel(0, 1);
     pluginsmodel->setSupportedDragActions(Qt::MoveAction);
     pluginsmodel->invisibleRootItem()->setFlags(Qt::ItemIsDropEnabled);
-    
-    
+
+
     masterselectmodel = new QItemSelectionModel(mastersmodel);
     pluginselectmodel = new QItemSelectionModel(pluginsmodel);
-    
+
     tree->setModel(datafilesmodel);
     tree->header()->hide();
-        
+
     mastertable->setModel(mastersmodel);
     mastertable->setSelectionModel(masterselectmodel);
-    
+
     mastertable->setSelectionBehavior(QAbstractItemView::SelectRows);
     mastertable->setSelectionMode(QAbstractItemView::MultiSelection);
     mastertable->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -156,13 +156,13 @@ DataFilesDialog::DataFilesDialog()
     plugintable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     plugintable->horizontalHeader()->setStretchLastSection(true);
     plugintable->horizontalHeader()->hide();
-    
+
     plugintable->setDragEnabled(true);
     plugintable->setDragDropMode(QAbstractItemView::InternalMove);
     plugintable->setDropIndicatorShown(true);
     plugintable->setDragDropOverwriteMode(false);
     plugintable->viewport()->setAcceptDrops(true);
-    
+
     plugintable->setContextMenuPolicy(Qt::CustomContextMenu);
 
 
@@ -170,7 +170,7 @@ DataFilesDialog::DataFilesDialog()
     connect(plugintable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
     connect(plugintable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
     connect(pluginsmodel, SIGNAL(rowsAboutToBeMoved(const QModelIndex&, int, int, const QModelIndex&, int)), this, SLOT(test()));
-    
+
     // Adjust the dialog width
     setMinimumWidth(500);
 }
@@ -179,13 +179,13 @@ void DataFilesDialog::test()
 {
     qDebug() << "Breaky Breaky!";
     /*QModelIndexList deselectedindexes = deselected.indexes();
-  
+
     if (!deselectedindexes.isEmpty()) {
         foreach (const QModelIndex &currentindex, deselectedindexes) {
             qDebug() << "Data is: " << currentindex.data();
             qDebug() << "Row is: "<< currentindex.row();
             QList<QStandardItem *> itemlist = pluginsmodel->findItems(QVariant(currentindex.data()).toString());
-            
+
             if (!itemlist.isEmpty())
             {
                 foreach (const QStandardItem *currentitem, itemlist) {
@@ -201,14 +201,14 @@ void DataFilesDialog::appendPlugins(const QModelIndex &masterindex)
     // Find the plugins in the datafilesmodel and append them to the pluginsmodel
     if (!masterindex.isValid())
         return;
-    
+
     for (int r=0; r<datafilesmodel->rowCount(masterindex); ++r ) {
         QModelIndex childindex = masterindex.child(r, 0);
-        
+
         if (childindex.isValid()) {
             // Now we see if the pluginsmodel already contains this plugin
             QList<QStandardItem *> itemlist = pluginsmodel->findItems(QVariant(datafilesmodel->data(childindex)).toString());
-            
+
             if (itemlist.isEmpty())
             {
                 // Plugin not yet in the pluginsmodel, add it
@@ -218,22 +218,22 @@ void DataFilesDialog::appendPlugins(const QModelIndex &masterindex)
                 pluginsmodel->appendRow(item);
             }
         }
-    
+
     }
-    
+
 }
 
 void DataFilesDialog::removePlugins(const QModelIndex &masterindex)
 {
-    
+
     if (!masterindex.isValid())
         return;
-   
+
     for (int r=0; r<datafilesmodel->rowCount(masterindex); ++r) {
         QModelIndex childindex = masterindex.child(r, 0);
 
         QList<QStandardItem *> itemlist = pluginsmodel->findItems(QVariant(childindex.data()).toString());
-        
+
         if (!itemlist.isEmpty()) {
             foreach (const QStandardItem *currentitem, itemlist) {
                 qDebug() << "Remove plugin:" << currentitem->data(Qt::DisplayRole).toString();
@@ -241,32 +241,32 @@ void DataFilesDialog::removePlugins(const QModelIndex &masterindex)
             }
         }
     }
-    
+
 }
 
 void DataFilesDialog::masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
-{     
+{
     if (masterselectmodel->hasSelection()) { // Not exactly necessary to check
         const QModelIndexList selectedindexes = masterselectmodel->selectedIndexes();
-    
+
         QStringList masters;
         QString masterstr;
-        
+
         // Create a QStringList containing all the masters
         foreach (const QModelIndex &currentindex, selectedindexes) {
             masters.append(currentindex.data().toString());
         }
-        
+
         masters.sort();
         masterstr = masters.join(","); // Make a comma-separated QString
-        
+
         qDebug() << "Masters" << masterstr;
-        
+
         // Iterate over all masters in the datafilesmodel to see if they are selected
         for (int r=0; r<datafilesmodel->rowCount(); ++r) {
             QModelIndex currentindex = datafilesmodel->index(r, 0);
             QString master = currentindex.data().toString();
-                      
+
             if (currentindex.isValid()) {
                 // See if the current master is in the string with selected masters
                 if (masterstr.contains(master))
@@ -277,10 +277,10 @@ void DataFilesDialog::masterSelectionChanged(const QItemSelection &selected, con
             }
         }
     }
-    
+
    // See what plugins to remove
    QModelIndexList deselectedindexes = deselected.indexes();
-  
+
    if (!deselectedindexes.isEmpty()) {
         foreach (const QModelIndex &currentindex, deselectedindexes) {
 
@@ -288,15 +288,15 @@ void DataFilesDialog::masterSelectionChanged(const QItemSelection &selected, con
             master.prepend("*");
             master.append("*");
             QList<QStandardItem *> itemlist = datafilesmodel->findItems(master, Qt::MatchWildcard);
-            
+
             if (itemlist.isEmpty())
                 qDebug() << "Empty as shit";
-            
+
             foreach (const QStandardItem *currentitem, itemlist) {
-                
+
                 QModelIndex index = currentitem->index();
                 qDebug() << "Master to remove plugins of:" << index.data().toString();
-                
+
                 removePlugins(index);
             }
         }
@@ -306,29 +306,29 @@ void DataFilesDialog::masterSelectionChanged(const QItemSelection &selected, con
 void DataFilesDialog::showContextMenu(const QPoint &point)
 {
     qDebug() << "Show me the money!";
-    
 
-   
+
+
     QAction *action1 = new QAction(QIcon::fromTheme("arrow-up-double"), tr("Move to Top"), this);
     QAction *action2 = new QAction(QIcon::fromTheme("arrow-down-double"), tr("Move to Bottom"), this);
     QAction *action3 = new QAction(QIcon::fromTheme("arrow-up"), tr("Move Up"), this);
     QAction *action4 = new QAction(QIcon::fromTheme("arrow-down"), tr("Move Down"), this);
     QAction *action5 = new QAction(this);
-    
+
     QModelIndex index = plugintable->indexAt(point);
-    
+
     if (index.isValid()) { // Should be valid!
         const QStandardItem *item = pluginsmodel->itemFromIndex(index);
-    
+
         if (item->checkState() == Qt::Checked) {
             action5->setText("Uncheck Item");
         } else if (item->checkState() == Qt::Unchecked) {
             action5->setText("Check Item");
         }
     }
-    
+
     connect(action5, SIGNAL(triggered()), this, SLOT(actionCheckstate()));
-    
+
     QMenu menu(this);
     menu.addAction(action1);
     menu.addAction(action2);
@@ -337,7 +337,7 @@ void DataFilesDialog::showContextMenu(const QPoint &point)
     menu.addAction(action4);
     menu.addSeparator();
     menu.addAction(action5);
-    
+
     menu.exec(plugintable->viewport()->mapToGlobal(point));
 
 }
@@ -345,14 +345,14 @@ void DataFilesDialog::showContextMenu(const QPoint &point)
 void DataFilesDialog::actionCheckstate()
 {
     qDebug() << "actionCheckstate";
-    
+
     const QModelIndexList selectedindexes = pluginselectmodel->selectedIndexes();
 
     // Should only be one index selected
     foreach (const QModelIndex &currentindex, selectedindexes) {
         setCheckstate(currentindex);
     }
-        
+
 }
 
 void DataFilesDialog::setCheckstate(QModelIndex index)
@@ -376,16 +376,16 @@ void DataFilesDialog::setCheckstate(QModelIndex index)
 }
 
 void DataFilesDialog::readConfig()
-{    
+{
 /*    QString filename;
     QString path = "data/"; // TODO: Should be global
-    
+
     QFile file("openmw.cfg"); // Specify filepath later
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "error open";
         close(); // File cannot be opened or created TODO: throw error
     }
-    
+
     QTextStream in(&file);
 
     QStringList datafiles;
@@ -393,27 +393,27 @@ void DataFilesDialog::readConfig()
     // Add each data file read from the config file to a QStringList
     while (!in.atEnd()) {
         QString line = in.readLine();
-                
+
         if (line.contains("master")) {
             filename = line.remove("master=");
             filename.prepend(path);
-            
+
             datafiles << filename << "\n";
-            
+
         } else if (line.contains("plugin")) {
             filename = line.remove("plugin=");
             filename.prepend(path);
-            
+
             datafiles << filename << "\n";
         }
     }
 
     file.close();
-    
+
     // Check if the files are in the model, set to checked if found
     foreach(const QString &currentfile, datafiles) {
         QModelIndex index = dataFilesModel->index(currentfile, 0);
-        
+
         if (index.isValid()) {
             // File is found in model, set it to checked
             dataFilesModel->setData(index, Qt::Checked, Qt::CheckStateRole);
@@ -430,14 +430,14 @@ void DataFilesDialog::writeConfig()
     //QString sectionname = "[Game Files]";
     QString filename;
     QFileInfo datafile;
-    
+
     // Sort the items so that master files end up on top
     foreach (const QString &currentitem, checkeditems) {
         if(currentitem.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
             checkeditems.move(checkeditems.indexOf(currentitem), 0);
         }
     }
-    
+
     QFile file("openmw.cfg"); // Specify filepath later
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         close(); // File cannot be opened or created TODO: throw error
@@ -453,7 +453,7 @@ void DataFilesDialog::writeConfig()
         QString line = in.readLine();
         //if (!line.contains("GameFile") && line != "[Game Files]") {
         if (!line.contains("master") && !line.contains("plugin")) {
-            buffer += line += "\n"; 
+            buffer += line += "\n";
         }
     }
 
@@ -465,16 +465,16 @@ void DataFilesDialog::writeConfig()
 
     file.write(buffer);
     QTextStream out(&file);
-    
+
     // Write the section name to the config file before we write out the data files
     //out << sectionname << endl;
-    
+
     // Write the list of game files to the config
     for (int i = 0; i < checkeditems.size(); ++i) {
         //filename = dataFilesModel->fileName(checkeditems.at(i));
         filename = checkeditems.at(i);
         datafile = QFileInfo(filename);
-        
+
         if (datafile.exists()) {
             if (filename.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
                 out << "master=" << datafile.fileName() << endl;

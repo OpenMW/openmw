@@ -19,7 +19,7 @@ public:
     MainDialog();
 
     //QStringListModel *mProfileModel;
-    
+
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
 
@@ -28,7 +28,7 @@ private:
 
     QListWidget *mIconWidget;
     QStackedWidget *mPagesWidget;
-    
+
     PlayPage *mPlayPage;
     DataFilesPage *mDataFilesPage;
 };
