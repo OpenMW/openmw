@@ -22,7 +22,7 @@ public:
     QComboBox *mProfileComboBox;
     QStringListModel *mProfileModel;
 
-    const QStringList checkedItems();
+    const QStringList checkedPlugins();
     void writeConfig();
 
 public slots:
@@ -42,6 +42,7 @@ private:
     void setupDataFiles();
     void addPlugins(const QModelIndex &index);
     void removePlugins(const QModelIndex &index);
+    void uncheckPlugins();
 };
 
 #endif

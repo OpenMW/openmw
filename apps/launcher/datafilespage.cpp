@@ -309,7 +309,7 @@ void DataFilesPage::setCheckstate(QModelIndex index)
     }
 }
 
-const QStringList DataFilesPage::checkedItems()
+const QStringList DataFilesPage::checkedPlugins()
 {
     QStringList checkedItems;
 
@@ -325,6 +325,21 @@ const QStringList DataFilesPage::checkedItems()
     }
     return checkedItems;
 }
+
+void DataFilesPage::uncheckPlugins()
+{
+    for (int r=0; r<mPluginsModel->rowCount(); ++r ) {
+        QModelIndex index = mPluginsModel->index(r, 0);
+
+        if (index.isValid()) {
+            // See if the current item is checked
+            if (mPluginsModel->data(index, Qt::CheckStateRole) == Qt::Checked) {
+                mPluginsModel->setData(index, Qt::Unchecked, Qt::CheckStateRole);
+            }
+        }
+    }
+}
+
 
 void DataFilesPage::resizeRows()
 {
@@ -348,11 +363,11 @@ void DataFilesPage::writeConfig()
     }
 
     // Now write all checked plugins
-    const QStringList checkedPlugins = checkedItems();
+    const QStringList plugins = checkedPlugins();
 
-    for (int i = 0; i < checkedPlugins.size(); ++i)
+    for (int i = 0; i < plugins.size(); ++i)
     {
-        settings.setValue(QString("Plugin%1").arg(i), checkedPlugins.at(i));
+        settings.setValue(QString("Plugin%1").arg(i), plugins.at(i));
     }
 
     settings.endGroup();
