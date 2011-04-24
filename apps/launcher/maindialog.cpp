@@ -7,13 +7,13 @@
 
 MainDialog::MainDialog()
 {
-    // TODO: Should be an install path
+    /* TODO: Should be an install path
     QFile file("apps/launcher/resources/launcher.qss");
 
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());
     qDebug() << styleSheet;
-    setStyleSheet(styleSheet);
+    setStyleSheet(styleSheet);*/
 
     mIconWidget = new QListWidget;
     mIconWidget->setViewMode(QListView::IconMode);

@@ -1,4 +1,4 @@
-QGroupBox#PlayBox {
+QGroupBox {
     background-image: url(":/images/playpage-background.png");
     background-repeat: no-repeat;
     background-position: top;
@@ -8,13 +8,12 @@ QGroupBox#PlayBox {
     padding-bottom: 100px;
 }
 
-QPushButton#PlayButton {
+QPushButton {
 
     width: 200px;
     max-width: 200px;
     height: 50px;
 
-    margin-left: 90%;
     margin-bottom: 30px;
 
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
@@ -36,7 +35,7 @@ QPushButton#PlayButton {
     border-radius: 5px;
 }
 
-QPushButton#PlayButton:hover {
+QPushButton:hover {
     border-bottom: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
     border-top: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
     border-right: qlineargradient(spread:pad, x1:1, y1:0, x2:0, y2:0, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
@@ -45,24 +44,23 @@ QPushButton#PlayButton:hover {
     border-style: solid;
 }
 
-QPushButton#PlayButton:pressed {
+QPushButton:pressed {
 
 }
 
-QLabel#ProfileLabel
+QLabel
 {
     margin-left: 90%;
     font: 14pt "Gauntlet Classic";
 }
 
 
-QComboBox#ProfileComboBox
+QComboBox
 {
     width: 180px;
     max-width: 200px;
     height: 20px;
 
-    margin-left: 90%;
     padding: 1px 18px 1px 3px;
 
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 gray, stop:0.2 white, stop:1 rgba(255, 255, 255, 55));
@@ -80,12 +78,12 @@ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
 }*/
 
 
-QComboBox#ProfileComboBox:on { /* shift the text when the popup opens */
+QComboBox { /* shift the text when the popup opens */
     padding-top: 3px;
     padding-left: 4px;
 }
 
-QComboBox#ProfileComboBox::drop-down {
+QComboBox::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
 
@@ -97,16 +95,16 @@ QComboBox#ProfileComboBox::drop-down {
     border-bottom-right-radius: 3px;
 }
 
-QComboBox#ProfileComboBox::down-arrow {
+QComboBox::down-arrow {
     image: url(":/images/down.png");
 }
 
-QComboBox#ProfileComboBox::down-arrow:on { /* shift the arrow when popup is open */
+QComboBox::down-arrow:on { /* shift the arrow when popup is open */
     top: 1px;
     left: 1px;
 }
 
-QListWidget#IconWidget {
+QListWidget {
     background-image: url(":/images/openmw-header.png");
     background-color: white;
     background-repeat: no-repeat;

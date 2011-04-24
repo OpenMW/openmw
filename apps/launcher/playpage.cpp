@@ -4,6 +4,13 @@
 
 PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
+    // TODO: Should be an install path
+    QFile file("apps/launcher/resources/launcher.qss");
+
+    file.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(file.readAll());
+    qDebug() << styleSheet;
+    setStyleSheet(styleSheet);
 
     QGroupBox *playBox = new QGroupBox(this);
     playBox->setObjectName("PlayBox");
