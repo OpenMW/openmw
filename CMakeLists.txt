@@ -336,6 +336,10 @@ endif (APPLE)
 
 # Other files
 
+configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+    "${OpenMW_BINARY_DIR}/openmw.cfg" COPYONLY)
+
+
 if (WIN32)
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
         "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
@@ -424,7 +428,7 @@ if(DPKG_PROGRAM)
     endif()
 
     #Install global configuration files
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/openmw.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install resources
