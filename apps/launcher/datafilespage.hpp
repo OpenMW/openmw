@@ -22,12 +22,13 @@ public:
     QComboBox *mProfileComboBox;
     QStringListModel *mProfileModel;
 
+    const QStringList checkedItems();
+    void writeConfig();
+
 public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckstate(QModelIndex index);
     void resizeRows();
-
-    const QStringList checkedItems();
 
 private:
     QTableWidget *mMastersWidget;
@@ -41,7 +42,6 @@ private:
     void setupDataFiles();
     void addPlugins(const QModelIndex &index);
     void removePlugins(const QModelIndex &index);
-
 };
 
 #endif

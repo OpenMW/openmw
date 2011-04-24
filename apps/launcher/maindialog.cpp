@@ -68,7 +68,7 @@ MainDialog::MainDialog()
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
     buttonBox->setStandardButtons(QDialogButtonBox::Close);
-    buttonBox->addButton(playButton, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
     //QSpacerItem *vSpacer1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -85,6 +85,9 @@ MainDialog::MainDialog()
     setMinimumSize(QSize(550, 450));
 
     createIcons();
+
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
 }
 
 void MainDialog::createIcons()
@@ -118,6 +121,7 @@ void MainDialog::createIcons()
     connect(mIconWidget,
             SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
+
 }
 
 void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
@@ -145,3 +149,15 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
 }
 
+void MainDialog::closeEvent(QCloseEvent *event)
+{
+    qDebug() << "Close event";
+    mDataFilesPage->writeConfig();
+    event->accept();
+
+}
+
+void MainDialog::play()
+{
+
+}

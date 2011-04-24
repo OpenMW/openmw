@@ -332,3 +332,28 @@ void DataFilesPage::resizeRows()
     mPluginsTable->resizeRowsToContents();
 }
 
+
+void DataFilesPage::writeConfig()
+{
+    // TODO: Testing the config here
+    QSettings settings("launcher.cfg", QSettings::IniFormat);
+
+    settings.beginGroup("Profiles");
+    settings.beginGroup(mProfileComboBox->currentText());
+
+    // First write all the masters to the config
+    for (int i = 0; i < mMastersWidget->rowCount(); ++i) {
+        const QTableWidgetItem *item = mMastersWidget->item(i, 0);
+        settings.setValue(QString("Master"), item->data(Qt::DisplayRole).toString());
+    }
+
+    // Now write all checked plugins
+    foreach (const QString &currentPlugin, checkedItems())
+    {
+        settings.setValue(QString("Plugin"), currentPlugin);
+    }
+
+    settings.endGroup();
+    settings.endGroup();
+
+}

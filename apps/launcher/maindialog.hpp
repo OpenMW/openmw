@@ -22,9 +22,12 @@ public:
 
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
+    void play();
+
 
 private:
     void createIcons();
+    void closeEvent(QCloseEvent *event);
 
     QListWidget *mIconWidget;
     QStackedWidget *mPagesWidget;
