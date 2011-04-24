@@ -30,7 +30,11 @@ public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckstate(QModelIndex index);
     void resizeRows();
+<<<<<<< HEAD
     void profileChanged(const QString &current, const QString &previous);
+=======
+    void profileChanged(const QString &profile);
+>>>>>>> 766e3f6... Added combobox slot for changing the profile
 
 private:
     QTableWidget *mMastersWidget;
