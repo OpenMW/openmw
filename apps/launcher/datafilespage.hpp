@@ -29,6 +29,7 @@ public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckstate(QModelIndex index);
     void resizeRows();
+    void profileChanged(const QString &profile);
 
 private:
     QTableWidget *mMastersWidget;

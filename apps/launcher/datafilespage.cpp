@@ -90,9 +90,14 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     setupDataFiles();
 
-    connect(mMastersWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(masterSelectionChanged(const QItemSelection&, const QItemSelection&)));
+    connect(mMastersWidget->selectionModel(),
+            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+            this, SLOT(masterSelectionChanged(const QItemSelection&, const QItemSelection&)));
+
     connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
     connect(mPluginsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(resizeRows()));
+
+    connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
 
 }
 
@@ -347,6 +352,12 @@ void DataFilesPage::resizeRows()
     mPluginsTable->resizeRowsToContents();
 }
 
+void DataFilesPage::profileChanged(const QString &profile)
+{
+    qDebug() << "Profile changed";
+    uncheckPlugins();
+
+}
 
 void DataFilesPage::writeConfig()
 {
