@@ -32,8 +32,6 @@ public slots:
     void resizeRows();
     void profileChanged(const QString &current, const QString &previous);
 
-    const QStringList checkedItems();
-
 private:
     QTableWidget *mMastersWidget;
     QTableView *mPluginsTable;
