@@ -27,6 +27,8 @@ public slots:
     void setCheckstate(QModelIndex index);
     void resizeRows();
 
+    const QStringList checkedItems();
+
 private:
     QTableWidget *mMastersWidget;
     QTableView *mPluginsTable;

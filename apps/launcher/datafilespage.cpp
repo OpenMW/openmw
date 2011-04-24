@@ -241,6 +241,7 @@ void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const
             }
         }
    }
+
 }
 
 void DataFilesPage::addPlugins(const QModelIndex &index)
@@ -251,10 +252,11 @@ void DataFilesPage::addPlugins(const QModelIndex &index)
 
     for (int r=0; r<mDataFilesModel->rowCount(index); ++r ) {
         QModelIndex childIndex = index.child(r, 0);
-        const QString childIndexData = QVariant(mDataFilesModel->data(childIndex)).toString();
 
         if (childIndex.isValid()) {
             // Now we see if the pluginsmodel already contains this plugin
+            const QString childIndexData = QVariant(mDataFilesModel->data(childIndex)).toString();
+
             QList<QStandardItem *> itemList = mPluginsModel->findItems(childIndexData);
 
             if (itemList.isEmpty())
@@ -307,8 +309,26 @@ void DataFilesPage::setCheckstate(QModelIndex index)
     }
 }
 
+const QStringList DataFilesPage::checkedItems()
+{
+    QStringList checkedItems;
+
+    for (int r=0; r<mPluginsModel->rowCount(); ++r ) {
+        QModelIndex index = mPluginsModel->index(r, 0);
+
+        if (index.isValid()) {
+            // See if the current item is checked
+            if (mPluginsModel->data(index, Qt::CheckStateRole) == Qt::Checked) {
+                checkedItems.append(index.data().toString());
+            }
+        }
+    }
+    return checkedItems;
+}
+
 void DataFilesPage::resizeRows()
 {
     // Contents changed
     mPluginsTable->resizeRowsToContents();
 }
+
