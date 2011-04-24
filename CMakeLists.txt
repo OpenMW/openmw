@@ -14,15 +14,15 @@ find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
 # Location of morrowind data files
 if(DPKG_PROGRAM)
     set(MORROWIND_DATA_FILES "/usr/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
-    set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of Morrowind data files")
+    set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
 else()
     if (APPLE)
         # set path inside bundle
         set(MORROWIND_DATA_FILES "../data" CACHE PATH "location of Morrowind data files")
-        set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of OpenMW resources files")
     else()
         set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
-        set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
     endif(APPLE)
 endif(DPKG_PROGRAM)
 
