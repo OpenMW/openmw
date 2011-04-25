@@ -135,13 +135,13 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
         // The user switched from Data Files to Play
         if (previousPage == QString("Data Files") && currentPage == QString("Play")) {
-            mPlayPage->mProfileModel->setStringList(mDataFilesPage->mProfileModel->stringList());
-            mPlayPage->mProfileComboBox->setCurrentIndex(mDataFilesPage->mProfileComboBox->currentIndex());
+            mPlayPage->mProfilesModel->setStringList(mDataFilesPage->mProfilesModel->stringList());
+            mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
         }
 
         // The user switched from Play to Data Files
         if (previousPage == QString("Play") && currentPage == QString("Data Files")) {
-            mDataFilesPage->mProfileComboBox->setCurrentIndex(mPlayPage->mProfileComboBox->currentIndex());
+            mDataFilesPage->mProfilesComboBox->setCurrentIndex(mPlayPage->mProfilesComboBox->currentIndex());
         }
     }
 

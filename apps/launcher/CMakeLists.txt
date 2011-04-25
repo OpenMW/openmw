@@ -11,6 +11,7 @@ set(LAUNCHER
   playpage.hpp
   combobox.hpp
 
+  ../openmw/path.cpp
 )
 
 set(MOC_HDRS

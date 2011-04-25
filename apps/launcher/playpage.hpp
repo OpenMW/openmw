@@ -13,8 +13,8 @@ class PlayPage : public QWidget
 public:
     PlayPage(QWidget *parent = 0);
 
-    QComboBox *mProfileComboBox;
-    QStringListModel *mProfileModel;
+    QComboBox *mProfilesComboBox;
+    QStringListModel *mProfilesModel;
 };
 
 #endif

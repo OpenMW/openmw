@@ -51,27 +51,29 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     if (config.exists())
     {
+        qDebug() << "Using config file from current directory";
         mLauncherConfig = new QSettings("launcher.cfg", QSettings::IniFormat);
     } else {
         QString path = QString::fromStdString(OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH,
-                                                                 "launcher",
+                                                                 "openmw",
                                                                  "launcher.cfg"));
+        qDebug() << "Using global config file from " << path;
         mLauncherConfig = new QSettings(path, QSettings::IniFormat);
     }
 
+    config.close();
 
-    QSettings settings("launcher.cfg", QSettings::IniFormat);
-    settings.beginGroup("Profiles");
+    mLauncherConfig->beginGroup("Profiles");
 
-    mProfileModel = new QStringListModel();
-    mProfileModel->setStringList(settings.childGroups());
+    mProfilesModel = new QStringListModel();
+    mProfilesModel->setStringList(mLauncherConfig->childGroups());
 
 
-    mProfileComboBox = new ComboBox(this);
-    mProfileComboBox->setModel(mProfileModel);
+    mProfilesComboBox = new ComboBox(this);
+    mProfilesComboBox->setModel(mProfilesModel);
 
-    mProfileComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
-    mProfileComboBox->setInsertPolicy(QComboBox::InsertAtBottom);
+    mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
+    mProfilesComboBox->setInsertPolicy(QComboBox::InsertAtBottom);
     //mProfileComboBox->addItem(QString("New Profile"));
 
     QToolButton *NewProfileToolButton = new QToolButton(this);
@@ -86,7 +88,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     QHBoxLayout *bottomLayout = new QHBoxLayout();
 
     bottomLayout->addWidget(profileLabel);
-    bottomLayout->addWidget(mProfileComboBox);
+    bottomLayout->addWidget(mProfilesComboBox);
     bottomLayout->addWidget(NewProfileToolButton);
     bottomLayout->addWidget(CopyProfileToolButton);
     bottomLayout->addWidget(DeleteProfileToolButton);
@@ -114,7 +116,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     connect(mPluginsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(resizeRows()));
 
     //connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
-    connect(mProfileComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
+    connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 
 
     readConfig();
@@ -391,7 +393,7 @@ void DataFilesPage::writeConfig()
     QSettings settings("launcher.cfg", QSettings::IniFormat);
 
     settings.beginGroup("Profiles");
-    settings.beginGroup(mProfileComboBox->currentText());
+    settings.beginGroup(mProfilesComboBox->currentText());
 
     // First write all the masters to the config
     for (int r = 0; r < mMastersWidget->rowCount(); ++r) {

@@ -21,8 +21,8 @@ class DataFilesPage : public QWidget
 public:
     DataFilesPage(QWidget *parent = 0);
 
-    ComboBox *mProfileComboBox;
-    QStringListModel *mProfileModel;
+    ComboBox *mProfilesComboBox;
+    QStringListModel *mProfilesModel;
     QSettings *mLauncherConfig;
 
     const QStringList checkedPlugins();
