@@ -85,9 +85,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     pageLayout->addLayout(bottomLayout);
     pageLayout->addItem(vSpacer3);
 
-    setupDataFiles();
-    setupConfig();
-
     connect(mMastersWidget->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(masterSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -98,6 +95,9 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     //connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
     connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 
+
+    setupDataFiles();
+    setupConfig();
 }
 
 void DataFilesPage::setupDataFiles()
@@ -174,7 +174,6 @@ void DataFilesPage::setupDataFiles()
 
         QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
 
-
         if (masterList.isEmpty()) { // Masters node not yet in the mDataFilesModel
             parent->appendRow(child);
             mDataFilesModel->appendRow(parent);
@@ -187,8 +186,48 @@ void DataFilesPage::setupDataFiles()
     }
 }
 
+void DataFilesPage::setupConfig()
+{
+    QFile config("launcher.cfg");
+
+    if (config.exists())
+    {
+        qDebug() << "Using config file from current directory";
+        mLauncherConfig = new QSettings("launcher.cfg", QSettings::IniFormat);
+    } else {
+        QString path = QString::fromStdString(OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH,
+                                                                 "openmw",
+                                                                 "launcher.cfg"));
+        qDebug() << "Using global config file from " << path;
+        mLauncherConfig = new QSettings(path, QSettings::IniFormat);
+    }
+
+    config.close();
+
+    mLauncherConfig->beginGroup("Profiles");
+    QStringList profiles = mLauncherConfig->childGroups();
+
+    if (profiles.isEmpty()) {
+        // Add a default profile
+        profiles.append("Default");
+    }
+
+    mProfilesModel->setStringList(profiles);
+
+    QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
+    if (currentProfile.isEmpty()) {
+        currentProfile = "Default";
+    }
+    mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
+
+    mLauncherConfig->endGroup();
+
+    readConfig();
+}
+
 void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
+    // TODO: Use mMasterWidget->selectedItems
     if (mMastersWidget->selectionModel()->hasSelection()) {
         const QModelIndexList selectedIndexes = mMastersWidget->selectionModel()->selectedIndexes();
 
@@ -245,8 +284,6 @@ void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const
             }
         }
    }
-
-   readConfig();
 
 }
 
@@ -347,11 +384,9 @@ void DataFilesPage::uncheckPlugins()
     }
 }
 
-
 void DataFilesPage::resizeRows()
 {
     // Contents changed
-    qDebug() << "test";
     mPluginsTable->resizeRowsToContents();
 }
 
@@ -371,50 +406,15 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
 
 }
 
-void DataFilesPage::setupConfig()
-{
-    QFile config("launcher.cfg");
-
-    if (config.exists())
-    {
-        qDebug() << "Using config file from current directory";
-        mLauncherConfig = new QSettings("launcher.cfg", QSettings::IniFormat);
-    } else {
-        QString path = QString::fromStdString(OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH,
-                                                                 "openmw",
-                                                                 "launcher.cfg"));
-        qDebug() << "Using global config file from " << path;
-        mLauncherConfig = new QSettings(path, QSettings::IniFormat);
-    }
-
-    config.close();
-
-
-    mLauncherConfig->beginGroup("Profiles");
-    QStringList profiles = mLauncherConfig->childGroups();
-
-    if (profiles.isEmpty()) {
-        // Add a default profile
-        profiles.append("Default");
-    }
-
-    mProfilesModel->setStringList(profiles);
-
-    QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
-    if (currentProfile.isEmpty()) {
-        currentProfile = "Default";
-    }
-    mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
-
-    mLauncherConfig->endGroup();
-
-}
-
-
 void DataFilesPage::readConfig()
 {
     QString profile = mProfilesComboBox->currentText();
     qDebug() << "read from: " << profile;
+
+    // Make sure we have no groups open
+    while (!mLauncherConfig->group().isEmpty()) {
+        mLauncherConfig->endGroup();
+    }
 
     mLauncherConfig->beginGroup("Profiles");
     mLauncherConfig->beginGroup(profile);
@@ -423,20 +423,28 @@ void DataFilesPage::readConfig()
     qDebug() << childKeys << "SJILDKIEJS";
 
     foreach (const QString &key, childKeys) {
-        qDebug() << "Key is " << key << mLauncherConfig->value(key).toString();
-        if (key.startsWith("Plugin")) {
-            QList<QStandardItem *> itemList = mPluginsModel->findItems(mLauncherConfig->value(key).toString());
+        const QString keyValue = mLauncherConfig->value(key).toString();
 
-            if (!itemList.isEmpty())
+        if (key.startsWith("Plugin")) {
+            QList<QStandardItem *> pluginList = mPluginsModel->findItems(keyValue);
+
+            if (!pluginList.isEmpty())
             {
-                foreach (const QStandardItem *currentItem, itemList) {
-                    mPluginsModel->setData(currentItem->index(), Qt::Checked, Qt::CheckStateRole);
+                foreach (const QStandardItem *currentPlugin, pluginList) {
+                    mPluginsModel->setData(currentPlugin->index(), Qt::Checked, Qt::CheckStateRole);
                 }
             }
         }
 
         if (key.startsWith("Master")) {
-            qDebug() << mLauncherConfig->value(key).toString();
+            qDebug() << "Read master: " << keyValue;
+            QList<QTableWidgetItem*> masterList = mMastersWidget->findItems(keyValue, Qt::MatchExactly);
+
+            if (!masterList.isEmpty()) {
+                foreach (QTableWidgetItem *currentMaster, masterList) {
+                    mMastersWidget->selectionModel()->select(mMastersWidget->model()->index(currentMaster->row(), 0), QItemSelectionModel::Select);
+                }
+            }
         }
     }
 }
@@ -465,14 +473,6 @@ void DataFilesPage::writeConfig(QString profile)
     // First write the masters to the config
     QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
 
-    /*mLauncherConfig->beginWriteArray("Masters");
-    for (int i = 0; i < selectedMasters.size(); ++i) {
-        mLauncherConfig->setArrayIndex(i);
-        const QTableWidgetItem *item = selectedMasters.at(i);
-        mLauncherConfig->setValue("Master", item->data(Qt::DisplayRole).toString());
-    }
-    mLauncherConfig->endArray();
-    */
     for (int i = 0; i < selectedMasters.size(); ++i) {
         const QTableWidgetItem *item = selectedMasters.at(i);
         mLauncherConfig->setValue(QString("Master%0").arg(i), item->data(Qt::DisplayRole).toString());
