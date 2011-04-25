@@ -10,9 +10,10 @@ set(LAUNCHER
   maindialog.hpp
   playpage.hpp
   combobox.hpp
+
 )
 
-SET(MOC_HDRS
+set(MOC_HDRS
   datafilespage.hpp
   lineedit.hpp
   maindialog.hpp

@@ -12,6 +12,7 @@ class QStandardItemModel;
 class QItemSelection;
 class QItemSelectionModel;
 class QStringListModel;
+class QSettings;
 
 class DataFilesPage : public QWidget
 {
@@ -22,8 +23,10 @@ public:
 
     ComboBox *mProfileComboBox;
     QStringListModel *mProfileModel;
+    QSettings *mLauncherConfig;
 
     const QStringList checkedPlugins();
+    void readConfig();
     void writeConfig();
 
 public slots:

@@ -3,6 +3,7 @@
 #include <QDebug> // TODO: Remove
 
 #include <components/esm/esm_reader.hpp>
+#include "../openmw/path.hpp"
 
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
@@ -46,10 +47,24 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     QLabel *profileLabel = new QLabel(tr("Current Profile:"), this);
 
     // TEST
+    QFile config("launcher.cfg");
+
+    if (config.exists())
+    {
+        mLauncherConfig = new QSettings("launcher.cfg", QSettings::IniFormat);
+    } else {
+        QString path = QString::fromStdString(OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH,
+                                                                 "launcher",
+                                                                 "launcher.cfg"));
+        mLauncherConfig = new QSettings(path, QSettings::IniFormat);
+    }
+
+
+    QSettings settings("launcher.cfg", QSettings::IniFormat);
+    settings.beginGroup("Profiles");
+
     mProfileModel = new QStringListModel();
-    QStringList profileList;
-    profileList << "Default" << "New" << "Yeah" << "Cool story bro!";
-    mProfileModel->setStringList(profileList);
+    mProfileModel->setStringList(settings.childGroups());
 
 
     mProfileComboBox = new ComboBox(this);
@@ -100,6 +115,9 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     //connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
     connect(mProfileComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
+
+
+    readConfig();
 }
 
 void DataFilesPage::setupDataFiles()
@@ -358,6 +376,12 @@ void DataFilesPage::profileChanged(const QString &current, const QString &previo
 {
     qDebug() << "Profile changed " << current << previous;
     uncheckPlugins();
+
+}
+
+void DataFilesPage::readConfig()
+{
+    // TODO: global etc
 
 }
 
