@@ -151,6 +151,7 @@ void MainDialog::closeEvent(QCloseEvent *event)
 {
     qDebug() << "Close event";
     mDataFilesPage->writeConfig();
+    mDataFilesPage->mLauncherConfig->sync();
     event->accept();
 
 }

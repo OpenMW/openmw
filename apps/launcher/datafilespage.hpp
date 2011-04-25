@@ -26,14 +26,15 @@ public:
     QSettings *mLauncherConfig;
 
     const QStringList checkedPlugins();
+    void setupConfig();
     void readConfig();
-    void writeConfig();
+    void writeConfig(QString profile = QString());
 
 public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckstate(QModelIndex index);
     void resizeRows();
-    void profileChanged(const QString &current, const QString &previous);
+    void profileChanged(const QString &previous, const QString &current);
 
 private:
     QTableWidget *mMastersWidget;

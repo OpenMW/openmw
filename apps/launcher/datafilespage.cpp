@@ -46,28 +46,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     // Bottom part with profile options
     QLabel *profileLabel = new QLabel(tr("Current Profile:"), this);
 
-    // TEST
-    QFile config("launcher.cfg");
-
-    if (config.exists())
-    {
-        qDebug() << "Using config file from current directory";
-        mLauncherConfig = new QSettings("launcher.cfg", QSettings::IniFormat);
-    } else {
-        QString path = QString::fromStdString(OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH,
-                                                                 "openmw",
-                                                                 "launcher.cfg"));
-        qDebug() << "Using global config file from " << path;
-        mLauncherConfig = new QSettings(path, QSettings::IniFormat);
-    }
-
-    config.close();
-
-    mLauncherConfig->beginGroup("Profiles");
-
     mProfilesModel = new QStringListModel();
-    mProfilesModel->setStringList(mLauncherConfig->childGroups());
-
 
     mProfilesComboBox = new ComboBox(this);
     mProfilesComboBox->setModel(mProfilesModel);
@@ -107,6 +86,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     pageLayout->addItem(vSpacer3);
 
     setupDataFiles();
+    setupConfig();
 
     connect(mMastersWidget->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
@@ -118,8 +98,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     //connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
     connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 
-
-    readConfig();
 }
 
 void DataFilesPage::setupDataFiles()
@@ -268,6 +246,8 @@ void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const
         }
    }
 
+   readConfig();
+
 }
 
 void DataFilesPage::addPlugins(const QModelIndex &index)
@@ -360,6 +340,7 @@ void DataFilesPage::uncheckPlugins()
         if (index.isValid()) {
             // See if the current item is checked
             if (mPluginsModel->data(index, Qt::CheckStateRole) == Qt::Checked) {
+                qDebug() << "Uncheck!";
                 mPluginsModel->setData(index, Qt::Unchecked, Qt::CheckStateRole);
             }
         }
@@ -374,31 +355,127 @@ void DataFilesPage::resizeRows()
     mPluginsTable->resizeRowsToContents();
 }
 
-void DataFilesPage::profileChanged(const QString &current, const QString &previous)
+void DataFilesPage::profileChanged(const QString &previous, const QString &current)
 {
     qDebug() << "Profile changed " << current << previous;
+
+    // Just to be sure
+    if (!previous.isEmpty()) {
+        writeConfig(previous);
+        mLauncherConfig->sync();
+    }
+
     uncheckPlugins();
 
+    readConfig();
+
 }
+
+void DataFilesPage::setupConfig()
+{
+    QFile config("launcher.cfg");
+
+    if (config.exists())
+    {
+        qDebug() << "Using config file from current directory";
+        mLauncherConfig = new QSettings("launcher.cfg", QSettings::IniFormat);
+    } else {
+        QString path = QString::fromStdString(OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH,
+                                                                 "openmw",
+                                                                 "launcher.cfg"));
+        qDebug() << "Using global config file from " << path;
+        mLauncherConfig = new QSettings(path, QSettings::IniFormat);
+    }
+
+    config.close();
+
+
+    mLauncherConfig->beginGroup("Profiles");
+    QStringList profiles = mLauncherConfig->childGroups();
+
+    if (profiles.isEmpty()) {
+        // Add a default profile
+        profiles.append("Default");
+    }
+
+    mProfilesModel->setStringList(profiles);
+
+    QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
+    if (currentProfile.isEmpty()) {
+        currentProfile = "Default";
+    }
+    mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
+
+    mLauncherConfig->endGroup();
+
+}
+
 
 void DataFilesPage::readConfig()
 {
-    // TODO: global etc
+    QString profile = mProfilesComboBox->currentText();
+    qDebug() << "read from: " << profile;
 
+    mLauncherConfig->beginGroup("Profiles");
+    mLauncherConfig->beginGroup(profile);
+
+    QStringList childKeys = mLauncherConfig->childKeys();
+    qDebug() << childKeys << "SJILDKIEJS";
+
+    foreach (const QString &key, childKeys) {
+        qDebug() << "Key is " << key << mLauncherConfig->value(key).toString();
+        if (key.startsWith("Plugin")) {
+            QList<QStandardItem *> itemList = mPluginsModel->findItems(mLauncherConfig->value(key).toString());
+
+            if (!itemList.isEmpty())
+            {
+                foreach (const QStandardItem *currentItem, itemList) {
+                    mPluginsModel->setData(currentItem->index(), Qt::Checked, Qt::CheckStateRole);
+                }
+            }
+        }
+
+        if (key.startsWith("Master")) {
+            qDebug() << mLauncherConfig->value(key).toString();
+        }
+    }
 }
 
-void DataFilesPage::writeConfig()
+void DataFilesPage::writeConfig(QString profile)
 {
     // TODO: Testing the config here
-    QSettings settings("launcher.cfg", QSettings::IniFormat);
+    if (profile.isEmpty()) {
+        profile = mProfilesComboBox->currentText();
+    }
 
-    settings.beginGroup("Profiles");
-    settings.beginGroup(mProfilesComboBox->currentText());
+    qDebug() << "Writing: " << profile;
 
-    // First write all the masters to the config
-    for (int r = 0; r < mMastersWidget->rowCount(); ++r) {
-        const QTableWidgetItem *item = mMastersWidget->item(r, 0);
-        settings.setValue(QString("Master%1").arg(r), item->data(Qt::DisplayRole).toString());
+    // Make sure we have no groups open
+    while (!mLauncherConfig->group().isEmpty()) {
+        mLauncherConfig->endGroup();
+    }
+
+    mLauncherConfig->beginGroup("Profiles");
+    mLauncherConfig->setValue("CurrentProfile", profile);
+
+    // Open the profile-name subgroup
+    mLauncherConfig->beginGroup(profile);
+    mLauncherConfig->remove("");
+
+    // First write the masters to the config
+    QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
+
+    /*mLauncherConfig->beginWriteArray("Masters");
+    for (int i = 0; i < selectedMasters.size(); ++i) {
+        mLauncherConfig->setArrayIndex(i);
+        const QTableWidgetItem *item = selectedMasters.at(i);
+        mLauncherConfig->setValue("Master", item->data(Qt::DisplayRole).toString());
+    }
+    mLauncherConfig->endArray();
+    */
+    for (int i = 0; i < selectedMasters.size(); ++i) {
+        const QTableWidgetItem *item = selectedMasters.at(i);
+        mLauncherConfig->setValue(QString("Master%0").arg(i), item->data(Qt::DisplayRole).toString());
     }
 
     // Now write all checked plugins
@@ -406,10 +483,12 @@ void DataFilesPage::writeConfig()
 
     for (int i = 0; i < plugins.size(); ++i)
     {
-        settings.setValue(QString("Plugin%1").arg(i), plugins.at(i));
+        mLauncherConfig->setValue(QString("Plugin%1").arg(i), plugins.at(i));
     }
 
-    settings.endGroup();
-    settings.endGroup();
+    qDebug() <<  mLauncherConfig->childKeys();
+    mLauncherConfig->endGroup();
+    qDebug() <<  mLauncherConfig->childKeys();
+    mLauncherConfig->endGroup();
 
 }
