@@ -9,7 +9,6 @@ PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());
-    qDebug() << styleSheet;
     setStyleSheet(styleSheet);
 
     QGroupBox *playBox = new QGroupBox(this);

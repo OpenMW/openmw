@@ -51,7 +51,8 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     profileList << "Default" << "New" << "Yeah" << "Cool story bro!";
     mProfileModel->setStringList(profileList);
 
-    mProfileComboBox = new QComboBox(this);
+
+    mProfileComboBox = new ComboBox(this);
     mProfileComboBox->setModel(mProfileModel);
 
     mProfileComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
@@ -77,7 +78,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
     // Add some space above and below the page items
-    QSpacerItem *vSpacer1 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
+    //QSpacerItem *vSpacer1 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
     QSpacerItem *vSpacer2 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
     QSpacerItem *vSpacer3 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
 
@@ -97,8 +98,8 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
     connect(mPluginsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(resizeRows()));
 
-    connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
-
+    //connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
+    connect(mProfileComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 }
 
 void DataFilesPage::setupDataFiles()
@@ -349,12 +350,13 @@ void DataFilesPage::uncheckPlugins()
 void DataFilesPage::resizeRows()
 {
     // Contents changed
+    qDebug() << "test";
     mPluginsTable->resizeRowsToContents();
 }
 
-void DataFilesPage::profileChanged(const QString &profile)
+void DataFilesPage::profileChanged(const QString &current, const QString &previous)
 {
-    qDebug() << "Profile changed";
+    qDebug() << "Profile changed " << current << previous;
     uncheckPlugins();
 
 }

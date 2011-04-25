@@ -9,6 +9,7 @@ set(LAUNCHER
   lineedit.hpp
   maindialog.hpp
   playpage.hpp
+  combobox.hpp
 )
 
 SET(MOC_HDRS
@@ -16,6 +17,7 @@ SET(MOC_HDRS
   lineedit.hpp
   maindialog.hpp
   playpage.hpp
+  combobox.hpp
 )
 
 source_group(apps\\launcher FILES ${ESMTOOL})

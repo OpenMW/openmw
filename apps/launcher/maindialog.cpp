@@ -18,8 +18,6 @@ MainDialog::MainDialog()
     mIconWidget = new QListWidget;
     mIconWidget->setViewMode(QListView::IconMode);
     mIconWidget->setWrapping(false);
-    mIconWidget->setObjectName("IconWidget");
-    qDebug() << mIconWidget->objectName();
 
     mIconWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Just to be sure
 

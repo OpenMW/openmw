@@ -3,10 +3,11 @@
 
 #include <QWidget>
 #include <QModelIndex>
+#include "combobox.hpp"
 
 class QTableWidget;
 class QTableView;
-class QComboBox;
+class ComboBox;
 class QStandardItemModel;
 class QItemSelection;
 class QItemSelectionModel;
@@ -19,7 +20,7 @@ class DataFilesPage : public QWidget
 public:
     DataFilesPage(QWidget *parent = 0);
 
-    QComboBox *mProfileComboBox;
+    ComboBox *mProfileComboBox;
     QStringListModel *mProfileModel;
 
     const QStringList checkedPlugins();
@@ -29,7 +30,7 @@ public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckstate(QModelIndex index);
     void resizeRows();
-    void profileChanged(const QString &profile);
+    void profileChanged(const QString &current, const QString &previous);
 
 private:
     QTableWidget *mMastersWidget;
