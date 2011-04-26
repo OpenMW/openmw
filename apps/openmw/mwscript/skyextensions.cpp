@@ -24,7 +24,7 @@ namespace MWScript
 
                     bool enabled = context.getWorld().toggleSky();
 
-                    context.messageBox (enabled ? "Sky -> On" : "Sky -> Off");
+                    context.report (enabled ? "Sky -> On" : "Sky -> Off");
                 }
         };
 

@@ -102,7 +102,7 @@ namespace MWScript
                     bool enabled =
                         context.getWorld().toggleRenderMode (MWWorld::World::Render_CollisionDebug);
 
-                    context.messageBox (enabled ?
+                    context.report (enabled ?
                         "Collsion Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
                 }
         };

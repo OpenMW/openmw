@@ -110,6 +110,11 @@ namespace MWScript
         mEnvironment.mWindowManager->messageBox (message, buttons);
     }
 
+    void InterpreterContext::report (const std::string& message)
+    {
+        messageBox (message);
+    }
+
     bool InterpreterContext::menuMode()
     {
         return mEnvironment.mWindowManager->isGuiMode();
