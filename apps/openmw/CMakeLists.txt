@@ -73,12 +73,14 @@ set(GAMEDIALOGUE_HEADER
     mwdialogue/journal.hpp
     mwdialogue/journalentry.hpp
     mwdialogue/quest.hpp
+    mwdialogue/topic.hpp
 )
 set(GAMEDIALOGUE
     mwdialogue/dialoguemanager.cpp
     mwdialogue/journal.cpp
     mwdialogue/journalentry.cpp
     mwdialogue/quest.cpp
+    mwdialogue/topic.cpp
 )
 source_group(apps\\openmw\\mwdialogue FILES ${GAMEDIALOGUE_HEADER} ${GAMEDIALOGUE})
 

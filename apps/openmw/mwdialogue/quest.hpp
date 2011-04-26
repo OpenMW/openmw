@@ -1,31 +1,14 @@
 #ifndef GAME_MMDIALOG_QUEST_H
 #define GAME_MWDIALOG_QUEST_H
 
-#include <string>
-#include <vector>
-
-#include "journalentry.hpp"
-
-namespace MWWorld
-{
-    class World;
-}
+#include "topic.hpp"
 
 namespace MWDialogue
 {
     /// \brief A quest in progress or a compelted quest
-    class Quest
+    class Quest : public Topic
     {
-        public:
-
-            typedef std::vector<std::string> TEntryContainer;
-            typedef TEntryContainer::const_iterator TEntryIter;
-
-        private:
-
-            std::string mTopic;
             int mIndex;
-            TEntryContainer mEntries; // info-IDs
             bool mFinished;
 
         public:
@@ -44,18 +27,10 @@ namespace MWDialogue
 
             bool isFinished() const;
 
-            void addEntry (const JournalEntry& entry, const MWWorld::World& world);
+            virtual void addEntry (const JournalEntry& entry, const MWWorld::World& world);
             ///< Add entry and adjust index accordingly.
             ///
             /// \note Redundant entries are ignored, but the index is still adjusted.
-
-            TEntryIter begin();
-            ///< Iterator pointing to the begin of the journal for this quest.
-
-            TEntryIter end();
-            ///< Iterator pointing past the end of the journal for this quest.
-
-            JournalEntry getEntry (const std::string& infoId);
     };
 }
 

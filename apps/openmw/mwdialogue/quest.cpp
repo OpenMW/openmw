@@ -8,11 +8,11 @@
 namespace MWDialogue
 {
     Quest::Quest()
-    : mIndex (0), mFinished (false)
+    : Topic(), mIndex (0), mFinished (false)
     {}
 
     Quest::Quest (const std::string& topic)
-    : mTopic (topic), mIndex (0), mFinished (false)
+    : Topic (topic), mIndex (0), mFinished (false)
     {}
 
     const std::string Quest::getName (const MWWorld::World& world) const
@@ -82,20 +82,5 @@ namespace MWDialogue
                 return;
 
         mEntries.push_back (entry.mInfoId);
-    }
-
-    Quest::TEntryIter Quest::begin()
-    {
-        return mEntries.begin();
-    }
-
-    Quest::TEntryIter Quest::end()
-    {
-        return mEntries.end();
-    }
-
-    JournalEntry Quest::getEntry (const std::string& infoId)
-    {
-        return JournalEntry (mTopic, infoId);
     }
 }
