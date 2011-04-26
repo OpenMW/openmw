@@ -3,8 +3,10 @@
 
 #include <string>
 #include <deque>
+#include <map>
 
 #include "journalentry.hpp"
+#include "quest.hpp"
 
 namespace MWWorld
 {
@@ -13,17 +15,23 @@ namespace MWWorld
 
 namespace MWDialogue
 {
+    /// \brief The player's journal
     class Journal
     {
         public:
 
             typedef std::deque<StampedJournalEntry> TEntryContainer;
             typedef TEntryContainer::const_iterator TEntryIter;
+            typedef std::map<std::string, Quest> TQuestContainer; // topc, quest
+            typedef TQuestContainer::const_iterator TQuestIter;
 
         private:
 
             MWWorld::Environment& mEnvironment;
             TEntryContainer mJournal;
+            TQuestContainer mQuests;
+
+            Quest& getQuest (const std::string& id);
 
         public:
 
@@ -45,6 +53,12 @@ namespace MWDialogue
 
             TEntryIter end() const;
             ///< Iterator pointing past the end of the main journal.
+
+            TQuestIter questBegin() const;
+            ///< Iterator pointing to the first quest (sorted by topic ID)
+
+            TQuestIter questEnd() const;
+            ///< Iterator pointing past the last quest.
     };
 }
 
