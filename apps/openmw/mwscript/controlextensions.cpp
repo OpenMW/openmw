@@ -46,7 +46,9 @@ namespace MWScript
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
 
-                    context.getWorld().toggleCollisionMode();
+                    bool enabled = context.getWorld().toggleCollisionMode();
+
+                    context.messageBox (enabled ? "Collsion -> On" : "Collision -> Off");
                 }
         };
 
