@@ -78,10 +78,10 @@ namespace MWDialogue
         setIndex (index, world);
 
         for (TEntryIter iter (mEntries.begin()); iter!=mEntries.end(); ++iter)
-            if (iter->mInfoId==entry.mInfoId)
+            if (*iter==entry.mInfoId)
                 return;
 
-        mEntries.push_back (entry);
+        mEntries.push_back (entry.mInfoId);
     }
 
     Quest::TEntryIter Quest::begin()
@@ -92,5 +92,10 @@ namespace MWDialogue
     Quest::TEntryIter Quest::end()
     {
         return mEntries.end();
+    }
+
+    JournalEntry Quest::getEntry (const std::string& infoId)
+    {
+        return JournalEntry (mTopic, infoId);
     }
 }

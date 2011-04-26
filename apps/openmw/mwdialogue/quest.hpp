@@ -18,14 +18,14 @@ namespace MWDialogue
     {
         public:
 
-            typedef std::vector<JournalEntry> TEntryContainer;
+            typedef std::vector<std::string> TEntryContainer;
             typedef TEntryContainer::const_iterator TEntryIter;
 
         private:
 
             std::string mTopic;
             int mIndex;
-            std::vector<JournalEntry> mEntries;
+            TEntryContainer mEntries; // info-IDs
             bool mFinished;
 
         public:
@@ -54,6 +54,8 @@ namespace MWDialogue
 
             TEntryIter end();
             ///< Iterator pointing past the end of the journal for this quest.
+
+            JournalEntry getEntry (const std::string& infoId);
     };
 }
 
