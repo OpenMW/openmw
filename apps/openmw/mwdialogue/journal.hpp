@@ -24,12 +24,15 @@ namespace MWDialogue
             typedef TEntryContainer::const_iterator TEntryIter;
             typedef std::map<std::string, Quest> TQuestContainer; // topc, quest
             typedef TQuestContainer::const_iterator TQuestIter;
+            typedef std::map<std::string, Topic> TTopicContainer; // topic-id, topic-content
+            typedef TTopicContainer::const_iterator TTopicIter;
 
         private:
 
             MWWorld::Environment& mEnvironment;
             TEntryContainer mJournal;
             TQuestContainer mQuests;
+            TTopicContainer mTopics;
 
             Quest& getQuest (const std::string& id);
 
@@ -46,6 +49,8 @@ namespace MWDialogue
             int getJournalIndex (const std::string& id) const;
             ///< Get the journal index.
 
+            void addTopic (const std::string& topicId, const std::string& infoId);
+
             TEntryIter begin() const;
             ///< Iterator pointing to the begin of the main journal.
             ///
@@ -59,6 +64,14 @@ namespace MWDialogue
 
             TQuestIter questEnd() const;
             ///< Iterator pointing past the last quest.
+
+            TTopicIter topicBegin() const;
+            ///< Iterator pointing to the first topic (sorted by topic ID)
+            ///
+            /// \note The topic ID is identical with the user-visible topic string.
+
+            TTopicIter topicEnd() const;
+            ///< Iterator pointing past the last topic.
     };
 }
 

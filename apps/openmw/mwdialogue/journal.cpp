@@ -43,6 +43,21 @@ namespace MWDialogue
         quest.setIndex (index, *mEnvironment.mWorld);
     }
 
+    void Journal::addTopic (const std::string& topicId, const std::string& infoId)
+    {
+        TTopicContainer::iterator iter = mTopics.find (topicId);
+
+        if (iter==mTopics.end())
+        {
+            std::pair<TTopicContainer::iterator, bool> result
+                = mTopics.insert (std::make_pair (topicId, Topic (topicId)));
+
+            iter = result.first;
+        }
+
+        iter->second.addEntry (JournalEntry (topicId, infoId), *mEnvironment.mWorld);
+    }
+
     int Journal::getJournalIndex (const std::string& id) const
     {
         return 0;
@@ -66,5 +81,15 @@ namespace MWDialogue
     Journal::TQuestIter Journal::questEnd() const
     {
         return mQuests.end();
+    }
+
+    Journal::TTopicIter Journal::topicBegin() const
+    {
+        return mTopics.begin();
+    }
+
+    Journal::TTopicIter Journal::topicEnd() const
+    {
+        return mTopics.end();
     }
 }
