@@ -21,10 +21,6 @@ MainDialog::MainDialog()
 
     mIconWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Just to be sure
 
-    //mIconWidget->setItemDelegate(new ListViewDelegate());
-    mIconWidget->setAttribute(Qt::WA_MacShowFocusRect); // Show a focus frame around the icons on Mac
-    //mIconWidget->setLayoutMode(QListView::SinglePass);
-    mIconWidget->setUniformItemSizes(true);
 
     mIconWidget->setIconSize(QSize(48, 48));
     mIconWidget->setMovement(QListView::Static);
@@ -33,12 +29,10 @@ MainDialog::MainDialog()
     mIconWidget->setFixedHeight(80);
     mIconWidget->setSpacing(4);
     mIconWidget->setCurrentRow(0);
-
     mIconWidget->setFlow(QListView::LeftToRight);
 
     QGroupBox *groupBox = new QGroupBox(this);
     QVBoxLayout *groupLayout = new QVBoxLayout(groupBox);
-
     // TODO: TESTING
 
     /*mProfileModel = new QStringListModel();
@@ -99,7 +93,6 @@ void MainDialog::createIcons()
     configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     //configButton->setSizeHint(itemSize);
-
     QListWidgetItem *updateButton = new QListWidgetItem(mIconWidget);
     updateButton->setIcon(QIcon::fromTheme("video-display"));
     updateButton->setText(tr("Graphics"));
@@ -110,6 +103,8 @@ void MainDialog::createIcons()
 
     QListWidgetItem *queryButton = new QListWidgetItem(mIconWidget);
     queryButton->setIcon(QIcon(":/images/openmw-plugin-icon.png"));
+    QListWidgetItem *queryButton = new QListWidgetItem(mIconWidget);
+    queryButton->setIcon(QIcon(":resources/openmw-plugin-icon.png"));
     queryButton->setText(tr("Data Files"));
     queryButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     queryButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
@@ -120,6 +115,9 @@ void MainDialog::createIcons()
             SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 
+    connect(mIconWidget,
+            SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 }
 
 void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
