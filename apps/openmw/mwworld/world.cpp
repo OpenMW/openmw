@@ -460,7 +460,7 @@ namespace MWWorld
         return *mPlayer;
     }
 
-    ESMS::ESMStore& World::getStore()
+    const ESMS::ESMStore& World::getStore() const
     {
         return mStore;
     }
@@ -476,6 +476,11 @@ namespace MWWorld
     }
 
     Globals::Data& World::getGlobalVariable (const std::string& name)
+    {
+        return (*mGlobalVariables)[name];
+    }
+
+    Globals::Data World::getGlobalVariable (const std::string& name) const
     {
         return (*mGlobalVariables)[name];
     }

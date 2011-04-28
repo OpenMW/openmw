@@ -115,7 +115,7 @@ namespace MWWorld
 
             MWWorld::Player& getPlayer();
 
-            ESMS::ESMStore& getStore();
+            const ESMS::ESMStore& getStore() const;
 
             const ScriptList& getLocalScripts() const;
             ///< Names and local variable state of all local scripts in active cells.
@@ -124,6 +124,8 @@ namespace MWWorld
             ///< Has the player moved to a different cell, since the last frame?
 
             Globals::Data& getGlobalVariable (const std::string& name);
+
+            Globals::Data getGlobalVariable (const std::string& name) const;
 
             char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.

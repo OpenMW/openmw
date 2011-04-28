@@ -212,8 +212,8 @@ void RaceDialog::updateRaces()
 {
     raceList->removeAllItems();
 
-    ESMS::ESMStore &store = mWindowManager.getStore();
-    
+    const ESMS::ESMStore &store = mWindowManager.getStore();
+
     ESMS::RecListT<ESM::Race>::MapType::const_iterator it = store.races.list.begin();
     ESMS::RecListT<ESM::Race>::MapType::const_iterator end = store.races.list.end();
     int index = 0;
@@ -246,7 +246,7 @@ void RaceDialog::updateSkills()
     const int lineHeight = 18;
     MyGUI::IntCoord coord1(0, 0, skillList->getWidth(), 18);
 
-    ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = mWindowManager.getStore();
     const ESM::Race *race = store.races.find(currentRaceId);
     int count = sizeof(race->data.bonus)/sizeof(race->data.bonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
     for (int i = 0; i < count; ++i)
@@ -282,7 +282,7 @@ void RaceDialog::updateSpellPowers()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, spellPowerList->getWidth(), 18);
 
-    ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = mWindowManager.getStore();
     const ESM::Race *race = store.races.find(currentRaceId);
 
     std::vector<std::string>::const_iterator it = race->powers.list.begin();

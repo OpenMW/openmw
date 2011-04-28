@@ -260,6 +260,11 @@ namespace MWScript
         mEnvironment.mWorld->disable (ref);
     }
 
+    MWWorld::Environment& InterpreterContext::getEnvironment()
+    {
+        return mEnvironment;
+    }
+
     MWGui::WindowManager& InterpreterContext::getWindowManager()
     {
         return *mEnvironment.mWindowManager;

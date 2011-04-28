@@ -106,6 +106,10 @@ namespace MWScript
 
             virtual void disable (const std::string& id = "");
 
+            MWWorld::Environment& getEnvironment();
+
+            /// \todo remove the following functions (extentions should use getEnvironment instead)
+
             MWWorld::World& getWorld();
 
             MWSound::SoundManager& getSoundManager();

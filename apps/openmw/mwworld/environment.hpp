@@ -24,6 +24,7 @@ namespace MWMechanics
 namespace MWDialogue
 {
     class DialogueManager;
+    class Journal;
 }
 
 namespace MWInput
@@ -41,7 +42,7 @@ namespace MWWorld
     public:
         Environment()
         : mWorld (0), mSoundManager (0), mGlobalScripts (0), mWindowManager (0),
-          mMechanicsManager (0), mDialogueManager (0), mFrameDuration (0),
+          mMechanicsManager (0), mDialogueManager (0), mJournal (0), mFrameDuration (0),
           mInputManager (0)
         {}
 
@@ -51,6 +52,7 @@ namespace MWWorld
         MWGui::WindowManager *mWindowManager;
         MWMechanics::MechanicsManager *mMechanicsManager;
         MWDialogue::DialogueManager *mDialogueManager;
+        MWDialogue::Journal *mJournal;
         float mFrameDuration;
 
         // For setting GUI mode
