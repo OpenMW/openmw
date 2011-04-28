@@ -1,25 +1,17 @@
-#ifndef PATH__HPP
-#define PATH__HPP
+#ifndef COMPONENTS_FILES_PATH_HPP
+#define COMPONENTS_FILES_PATH_HPP
 
-#include <OgrePlatform.h>
 #include <string>
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OSX/macUtils.h>
-#endif
-
-namespace OMW
+namespace Files
 {
-    class Path
+    enum PathTypeEnum
     {
-        public:
-            enum PathTypeEnum
-            {
-                USER_CFG_PATH,
-                GLOBAL_CFG_PATH
-            };
-
-            static std::string getPath(PathTypeEnum parType, const std::string parApp, const std::string parFile);
+        Path_ConfigUser,
+        Path_ConfigGlobal
     };
+
+    std::string getPath (PathTypeEnum parType, const std::string parApp, const std::string parFile);
 }
+
 #endif

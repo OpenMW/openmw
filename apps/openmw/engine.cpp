@@ -323,12 +323,10 @@ void OMW::Engine::go()
     test.name = "";
     total = 0;
 
-
-
     std::cout << "Data directory: " << mDataDir << "\n";
 
-    std::string cfgDir = OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH, "openmw", "");
-    std::string cfgUserDir = OMW::Path::getPath(OMW::Path::USER_CFG_PATH, "openmw", "");
+    std::string cfgDir = Files::getPath (Files::Path_ConfigUser, "openmw", "");
+    std::string cfgUserDir = Files::getPath (Files::Path_ConfigGlobal, "openmw", "");
     std::string plugCfg = "plugins.cfg";
     std::string ogreCfg = "ogre.cfg";
     ogreCfg.insert(0, cfgUserDir);
