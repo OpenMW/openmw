@@ -181,6 +181,14 @@ set(MISC_HEADER
     ${COMP_DIR}/misc/stringops.hpp)
 source_group(components\\misc FILES ${MISC} ${MISC_HEADER})
 
+set(FILES
+    ${COMP_DIR}/files/path.cpp
+    )
+set(FILES_HEADER
+    ${COMP_DIR}/files/path.hpp
+    )
+source_group(components\\files FILES ${FILES} ${FILES_HEADER})
+
 file(GLOB COMPILER ${COMP_DIR}/compiler/*.cpp)
 file(GLOB COMPILER_HEADER ${COMP_DIR}/compiler/*.hpp)
 source_group(components\\compiler FILES ${COMPILER} ${COMPILER_HEADER})
@@ -190,10 +198,10 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC} ${TO_UTF8}
-    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET})
+    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET} ${FILES})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER} ${TO_UTF8_HEADER}
-    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER})
+    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER} ${FILES_HEADER})
 
 # source directory: libs
 

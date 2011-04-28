@@ -6,8 +6,9 @@
 #include <boost/program_options.hpp>
 
 #include <components/misc/fileops.hpp>
+#include <components/files/path.hpp>
+
 #include "engine.hpp"
-#include "path.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
 #include <boost/iostreams/concepts.hpp>

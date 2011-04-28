@@ -14,6 +14,8 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/loadregn.hpp>
 #include <components/esm/esm_reader.hpp>
+#include <components/files/path.hpp>
+
 #include <openengine/gui/manager.hpp>
 #include "mwgui/window_manager.hpp"
 
@@ -47,7 +49,6 @@
 
 #include <MyGUI_WidgetManager.h>
 #include "mwgui/class.hpp"
-#include "path.hpp"
 
 #include "components/nifbullet/bullet_nif_loader.hpp"
 

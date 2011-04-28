@@ -5,7 +5,7 @@ project(OpenMW)
 set(GAME
     main.cpp
     engine.cpp
-    path.cpp)
+    )
 set(GAME_HEADER
     engine.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
