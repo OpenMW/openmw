@@ -3,7 +3,7 @@
 #include <QDebug> // TODO: Remove
 
 #include <components/esm/esm_reader.hpp>
-#include "../openmw/path.hpp"
+#include <components/files/path.hpp>
 
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
@@ -195,7 +195,7 @@ void DataFilesPage::setupConfig()
         qDebug() << "Using config file from current directory";
         mLauncherConfig = new QSettings("launcher.cfg", QSettings::IniFormat);
     } else {
-        QString path = QString::fromStdString(OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH,
+        QString path = QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
                                                                  "openmw",
                                                                  "launcher.cfg"));
         qDebug() << "Using global config file from " << path;

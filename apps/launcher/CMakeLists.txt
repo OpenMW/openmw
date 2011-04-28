@@ -10,8 +10,6 @@ set(LAUNCHER
   maindialog.hpp
   playpage.hpp
   combobox.hpp
-
-  ../openmw/path.cpp
 )
 
 set(MOC_HDRS
@@ -21,8 +19,6 @@ set(MOC_HDRS
   playpage.hpp
   combobox.hpp
 )
-
-source_group(apps\\launcher FILES ${ESMTOOL})
 
 find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
@@ -36,6 +32,7 @@ include(${QT_USE_FILE})
 add_executable(launcher
   ${LAUNCHER}
   ${MISC} ${MISC_HEADER}
+  ${FILES} ${FILES_HEADER}
   ${TO_UTF8}
   ${ESM}
   ${RCC_SRCS}

@@ -103,8 +103,6 @@ void MainDialog::createIcons()
 
     QListWidgetItem *queryButton = new QListWidgetItem(mIconWidget);
     queryButton->setIcon(QIcon(":/images/openmw-plugin-icon.png"));
-    QListWidgetItem *queryButton = new QListWidgetItem(mIconWidget);
-    queryButton->setIcon(QIcon(":resources/openmw-plugin-icon.png"));
     queryButton->setText(tr("Data Files"));
     queryButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     queryButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
