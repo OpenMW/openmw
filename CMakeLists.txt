@@ -14,15 +14,15 @@ find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
 # Location of morrowind data files
 if(DPKG_PROGRAM)
     set(MORROWIND_DATA_FILES "/usr/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
-    set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of Morrowind data files")
+    set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
 else()
     if (APPLE)
         # set path inside bundle
         set(MORROWIND_DATA_FILES "../data" CACHE PATH "location of Morrowind data files")
-        set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of OpenMW resources files")
     else()
         set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
-        set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
     endif(APPLE)
 endif(DPKG_PROGRAM)
 
@@ -181,6 +181,14 @@ set(MISC_HEADER
     ${COMP_DIR}/misc/stringops.hpp)
 source_group(components\\misc FILES ${MISC} ${MISC_HEADER})
 
+set(FILES
+    ${COMP_DIR}/files/path.cpp
+    )
+set(FILES_HEADER
+    ${COMP_DIR}/files/path.hpp
+    )
+source_group(components\\files FILES ${FILES} ${FILES_HEADER})
+
 file(GLOB COMPILER ${COMP_DIR}/compiler/*.cpp)
 file(GLOB COMPILER_HEADER ${COMP_DIR}/compiler/*.hpp)
 source_group(components\\compiler FILES ${COMPILER} ${COMPILER_HEADER})
@@ -190,10 +198,10 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC} ${TO_UTF8}
-    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET})
+    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET} ${FILES})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER} ${TO_UTF8_HEADER}
-    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER})
+    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER} ${FILES_HEADER})
 
 # source directory: libs
 
@@ -336,6 +344,11 @@ endif (APPLE)
 
 # Other files
 
+configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+    "${OpenMW_BINARY_DIR}/openmw.cfg")
+configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+    "${OpenMW_BINARY_DIR}/openmw.cfg.install")
+
 if (WIN32)
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
         "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
@@ -424,7 +437,7 @@ if(DPKG_PROGRAM)
     endif()
 
     #Install global configuration files
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install resources
