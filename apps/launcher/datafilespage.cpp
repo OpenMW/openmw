@@ -188,21 +188,20 @@ void DataFilesPage::setupDataFiles()
 
 void DataFilesPage::setupConfig()
 {
-    QFile config("launcher.cfg");
+    QString config = "launcher.cfg";
+    QFile file(config);
 
-    if (config.exists())
-    {
-        qDebug() << "Using config file from current directory";
-        mLauncherConfig = new QSettings("launcher.cfg", QSettings::IniFormat);
-    } else {
-        QString path = QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
-                                                                 "openmw",
-                                                                 "launcher.cfg"));
-        qDebug() << "Using global config file from " << path;
-        mLauncherConfig = new QSettings(path, QSettings::IniFormat);
+    if (!file.exists()) {
+        config = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
+                                                       "openmw", "launcher.cfg"));
     }
 
-    config.close();
+    file.setFileName(config); // Just for displaying information
+    qDebug() << "Using config file from " << file.fileName();
+    file.close();
+
+    // Open our config file
+    mLauncherConfig = new QSettings(config, QSettings::IniFormat);
 
     mLauncherConfig->beginGroup("Profiles");
     QStringList profiles = mLauncherConfig->childGroups();
