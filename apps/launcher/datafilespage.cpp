@@ -129,21 +129,40 @@ void DataFilesPage::setupDataFiles()
 
     mPluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    // Some testing TODO TODO TODO
+    // TODO: Add a warning when a master is missing
 
     QDir dataFilesDir("data/");
 
     if (!dataFilesDir.exists())
         qWarning("Cannot find the plugin directory");
 
+    // First we add all the master files from the plugin dir
+    dataFilesDir.setNameFilters((QStringList() << "*.esm")); // Only load masters
+
+    QStringList masterFiles = dataFilesDir.entryList();
+
+    for (int i=0; i<masterFiles.count(); ++i)
+    {
+        QString currentMaster = masterFiles.at(i);
+        QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
+
+        if (itemList.isEmpty()) // Master is not yet in the widget
+            {
+                mMastersWidget->insertRow(i);
+                QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
+                mMastersWidget->setItem(i, 0, item);
+            }
+    }
+
+    // Now on to the plugins
     dataFilesDir.setNameFilters((QStringList() << "*.esp")); // Only load plugins
 
-    QStringList dataFiles = dataFilesDir.entryList();
+    QStringList pluginFiles = dataFilesDir.entryList();
 
-    for (int i=0; i<dataFiles.count(); ++i)
+    for (int i=0; i<pluginFiles.count(); ++i)
     {
         ESMReader fileReader;
-        QString currentFile = dataFiles.at(i);
+        QString currentFile = pluginFiles.at(i);
         QStringList availableMasters; // Will contain all found masters
 
         QString path = QString("data/").append(currentFile);
