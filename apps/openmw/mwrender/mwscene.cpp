@@ -191,7 +191,7 @@ void MWScene::scaleObject (const std::string& handle, float scale)
 
 }
 
-void MWScene::toggleCollisionMode()
+bool MWScene::toggleCollisionMode()
 {
     for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = eng->PhysicActorMap.begin(); it != eng->PhysicActorMap.end();it++)
     {
@@ -203,6 +203,7 @@ void MWScene::toggleCollisionMode()
             act->setGravity(0.);
             act->setVerticalVelocity(0);
             mFreeFly = true;
+            return false;
         }
         else
         {
@@ -210,11 +211,15 @@ void MWScene::toggleCollisionMode()
             act->enableCollisions(true);
             act->setGravity(4.);
             act->setVerticalVelocity(0);
+            return true;
         }
     }
+
+    return false; // This should never happen, but it shall not bother us now, since
+                    // this part of the code needs a rewrite anyway.
 }
 
-void MWScene::toggleRenderMode (int mode)
+bool MWScene::toggleRenderMode (int mode)
 {
     switch (mode)
     {
@@ -223,6 +228,8 @@ void MWScene::toggleRenderMode (int mode)
             // TODO use a proper function instead of accessing the member variable
             // directly.
             eng->setDebugRenderingMode (!eng->isDebugCreated);
-            break;
+            return eng->isDebugCreated;
     }
+
+    return false;
 }

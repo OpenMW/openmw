@@ -99,7 +99,11 @@ namespace MWScript
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
 
-                    context.getWorld().toggleRenderMode (MWWorld::World::Render_CollisionDebug);
+                    bool enabled =
+                        context.getWorld().toggleRenderMode (MWWorld::World::Render_CollisionDebug);
+
+                    context.report (enabled ?
+                        "Collsion Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
                 }
         };
 

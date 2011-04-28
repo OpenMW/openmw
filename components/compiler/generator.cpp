@@ -125,6 +125,11 @@ namespace
         code.push_back (Compiler::Generator::segment3 (0, buttons));
     }
 
+    void opReport (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (58));
+    }
+
     void opFetchLocalShort (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (21));
@@ -514,6 +519,14 @@ namespace Compiler
 
             opPushInt (code, index);
             opMessageBox (code, buttons);
+        }
+
+        void report (CodeContainer& code, Literals& literals, const std::string& message)
+        {
+            int index = literals.addString (message);
+
+            opPushInt (code, index);
+            opReport (code);
         }
 
         void fetchLocal (CodeContainer& code, char localType, int localIndex)

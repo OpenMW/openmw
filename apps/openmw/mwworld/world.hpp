@@ -149,7 +149,8 @@ namespace MWWorld
 
             void setDay (int day);
 
-            void toggleSky();
+            bool toggleSky();
+            ///< \return Resulting mode
 
             int getMasserPhase() const;
 
@@ -187,12 +188,14 @@ namespace MWWorld
                 float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
-            void toggleCollisionMode();
+            bool toggleCollisionMode();
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
+            ///< \return Resulting mode
 
-            void toggleRenderMode (RenderMode mode);
+            bool toggleRenderMode (RenderMode mode);
             ///< Toggle a render mode.
+            ///< \return Resulting mode
     };
 }
 
