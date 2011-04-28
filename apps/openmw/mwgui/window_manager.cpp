@@ -940,7 +940,7 @@ void WindowManager::onReviewActivateDialog(int parDialog)
     };
 }
 
-ESMS::ESMStore& WindowManager::getStore()
+const ESMS::ESMStore& WindowManager::getStore() const
 {
     return environment.mWorld->getStore();
 }

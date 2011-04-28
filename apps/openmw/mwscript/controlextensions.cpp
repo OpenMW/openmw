@@ -46,7 +46,9 @@ namespace MWScript
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
 
-                    context.getWorld().toggleCollisionMode();
+                    bool enabled = context.getWorld().toggleCollisionMode();
+
+                    context.report (enabled ? "Collsion -> On" : "Collision -> Off");
                 }
         };
 
@@ -74,6 +76,7 @@ namespace MWScript
             }
 
             extensions.registerInstruction ("togglecollision", "", opcodeToggleCollision);
+            extensions.registerInstruction ("tcl", "", opcodeToggleCollision);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)

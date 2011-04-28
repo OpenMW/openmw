@@ -57,8 +57,12 @@ namespace MWScript
             virtual void setLocalFloat (int index, float value);
 
             using Interpreter::Context::messageBox;
+
             virtual void messageBox (const std::string& message,
                 const std::vector<std::string>& buttons);
+
+            virtual void report (const std::string& message);
+            ///< By default echo via messageBox.
 
             virtual bool menuMode();
 
@@ -105,6 +109,10 @@ namespace MWScript
             virtual void enable (const std::string& id = "");
 
             virtual void disable (const std::string& id = "");
+
+            MWWorld::Environment& getEnvironment();
+
+            /// \todo remove the following functions (extentions should use getEnvironment instead)
 
             MWWorld::World& getWorld();
 

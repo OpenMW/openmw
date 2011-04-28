@@ -3,7 +3,8 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 /*
  * Sound generator. This describes the sounds a creature make.
@@ -11,24 +12,24 @@ namespace ESM {
 
 struct SoundGenerator
 {
-  enum Type
+    enum Type
     {
-      LeftFoot  = 0,
-      RightFoot = 1,
-      SwimLeft  = 2,
-      SwimRight = 3,
-      Moan  = 4,
-      Roar  = 5,
-      Scream    = 6,
-      Land  = 7
+        LeftFoot = 0,
+        RightFoot = 1,
+        SwimLeft = 2,
+        SwimRight = 3,
+        Moan = 4,
+        Roar = 5,
+        Scream = 6,
+        Land = 7
     };
 
-  // Type 
-  int type;
+    // Type
+    int type;
 
-  std::string creature, sound;
+    std::string creature, sound;
 
-  void load(ESMReader &esm);
+    void load(ESMReader &esm);
 };
 }
 #endif

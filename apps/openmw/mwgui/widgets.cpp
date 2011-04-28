@@ -278,7 +278,7 @@ void MWSpell::setSpellId(const std::string &spellId)
 
 void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord)
 {
-    ESMS::ESMStore &store = mWindowManager->getStore();
+    const ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::Spell *spell = store.spells.search(id);
     MYGUI_ASSERT(spell, "spell with id '" << id << "' not found");
 
@@ -298,7 +298,7 @@ void MWSpell::updateWidgets()
 {
     if (spellNameWidget && mWindowManager)
     {
-        ESMS::ESMStore &store = mWindowManager->getStore();
+        const ESMS::ESMStore &store = mWindowManager->getStore();
         const ESM::Spell *spell = store.spells.search(id);
         if (spell)
             spellNameWidget->setCaption(spell->name);
@@ -363,7 +363,7 @@ void MWSpellEffect::updateWidgets()
     if (!mWindowManager)
         return;
 
-    ESMS::ESMStore &store = mWindowManager->getStore();
+    const ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::MagicEffect *magicEffect = store.magicEffects.search(effect.effectID);
     if (textWidget)
     {

@@ -460,7 +460,7 @@ namespace MWWorld
         return *mPlayer;
     }
 
-    ESMS::ESMStore& World::getStore()
+    const ESMS::ESMStore& World::getStore() const
     {
         return mStore;
     }
@@ -476,6 +476,11 @@ namespace MWWorld
     }
 
     Globals::Data& World::getGlobalVariable (const std::string& name)
+    {
+        return (*mGlobalVariables)[name];
+    }
+
+    Globals::Data World::getGlobalVariable (const std::string& name) const
     {
         return (*mGlobalVariables)[name];
     }
@@ -645,12 +650,13 @@ namespace MWWorld
         mSkyManager->setDate (mGlobalVariables->getInt ("day"), month);
     }
 
-    void World::toggleSky()
+    bool World::toggleSky()
     {
         if (mSky)
         {
             mSky = false;
             mSkyManager->disable();
+            return false;
         }
         else
         {
@@ -660,6 +666,7 @@ namespace MWWorld
             mSkyManager->setDate (mGlobalVariables->getInt ("day"),
                 mGlobalVariables->getInt ("month"));
             mSkyManager->enable();
+            return true;
         }
     }
 
@@ -853,13 +860,13 @@ namespace MWWorld
         mScene.doPhysics (duration, *this, actors);
     }
 
-    void World::toggleCollisionMode()
+    bool World::toggleCollisionMode()
     {
-        mScene.toggleCollisionMode();
+        return mScene.toggleCollisionMode();
     }
 
-    void World::toggleRenderMode (RenderMode mode)
+    bool World::toggleRenderMode (RenderMode mode)
     {
-        mScene.toggleRenderMode (mode);
+        return mScene.toggleRenderMode (mode);
     }
 }

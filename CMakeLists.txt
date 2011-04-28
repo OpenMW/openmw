@@ -168,7 +168,7 @@ set(ESM
     ${COMP_DIR}/esm/loadsscr.cpp
     ${COMP_DIR}/esm/loadstat.cpp
     ${COMP_DIR}/esm/loadweap.cpp
-    
+
 )
 source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 
@@ -181,6 +181,14 @@ set(MISC_HEADER
     ${COMP_DIR}/misc/stringops.hpp)
 source_group(components\\misc FILES ${MISC} ${MISC_HEADER})
 
+set(FILES
+    ${COMP_DIR}/files/path.cpp
+    )
+set(FILES_HEADER
+    ${COMP_DIR}/files/path.hpp
+    )
+source_group(components\\files FILES ${FILES} ${FILES_HEADER})
+
 file(GLOB COMPILER ${COMP_DIR}/compiler/*.cpp)
 file(GLOB COMPILER_HEADER ${COMP_DIR}/compiler/*.hpp)
 source_group(components\\compiler FILES ${COMPILER} ${COMPILER_HEADER})
@@ -190,10 +198,10 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC} ${TO_UTF8}
-    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET})
+    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET} ${FILES})
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER} ${TO_UTF8_HEADER}
-    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER})
+    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER} ${FILES_HEADER})
 
 # source directory: libs
 
@@ -337,8 +345,9 @@ endif (APPLE)
 # Other files
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-    "${OpenMW_BINARY_DIR}/openmw.cfg" COPYONLY)
-
+    "${OpenMW_BINARY_DIR}/openmw.cfg")
+configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+    "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
 if (WIN32)
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
@@ -353,28 +362,29 @@ endif()
 if (APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
         "${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg")
-        
+
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
         "${APP_BUNDLE_DIR}/Contents/Info.plist" COPYONLY)
-    
+
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 
-    
+
     # prepare plugins
     configure_file(${OGRE_PLUGIN_DIR}/RenderSystem_GL.dylib
         "${APP_BUNDLE_DIR}/Contents/Plugins/RenderSystem_GL.dylib" COPYONLY)
-    
+
     configure_file(${OGRE_PLUGIN_DIR}/Plugin_OctreeSceneManager.dylib
         "${APP_BUNDLE_DIR}/Contents/Plugins/Plugin_OctreeSceneManager.dylib" COPYONLY)
-        
+
     configure_file(${OGRE_PLUGIN_DIR}/Plugin_ParticleFX.dylib
         "${APP_BUNDLE_DIR}/Contents/Plugins/Plugin_ParticleFX.dylib" COPYONLY)
-        
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg")
+
 endif (APPLE)
 
-configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-    "${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg")
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -384,13 +394,13 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 
 # Apple bundling
 if (APPLE)
-  set(MISC_FILES
+    set(MISC_FILES
         ${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg
         ${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg)
-        
-	set(OGRE_PLUGINS
-		${APP_BUNDLE_DIR}/Contents/Plugins/*)
-          
+
+    set(OGRE_PLUGINS
+        ${APP_BUNDLE_DIR}/Contents/Plugins/*)
+
 install(FILES ${MISC_FILES} DESTINATION ../MacOS)
 install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Plugins" DESTINATION ..)
 install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Resources/resources" DESTINATION ../Resources)
@@ -427,7 +437,7 @@ if(DPKG_PROGRAM)
     endif()
 
     #Install global configuration files
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/openmw.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install resources

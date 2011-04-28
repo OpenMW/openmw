@@ -91,12 +91,14 @@ namespace MWRender
 
         /// Toggle collision mode for player. If disabled player object should ignore
         /// collisions and gravity.
-        void toggleCollisionMode();
+        /// \return Resulting mode
+        bool toggleCollisionMode();
 
         /// Toggle render mode
         /// \todo Using an int instead of a enum here to avoid cyclic includes. Will be fixed
         /// when the mw*-refactoring is done.
-        void toggleRenderMode (int mode);
+        /// \return Resulting mode
+        bool toggleRenderMode (int mode);
     };
 }
 

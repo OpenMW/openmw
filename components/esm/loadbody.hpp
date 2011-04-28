@@ -29,12 +29,15 @@ struct BodyPart
 
     enum Flags
     {
-        BPF_Female = 1, BPF_Playable = 2
+        BPF_Female = 1,
+        BPF_Playable = 2
     };
 
     enum MeshType
     {
-        MT_Skin = 0, MT_Clothing = 1, MT_Armor = 2
+        MT_Skin = 0,
+        MT_Clothing = 1,
+        MT_Armor = 2
     };
 
     struct BYDTstruct

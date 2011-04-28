@@ -104,4 +104,8 @@ op 0x2000115-0x200012f: ModSKill, explicit reference
 op 0x2000130: ToggleCollision
 op 0x2000131: GetInterior
 op 0x2000132: ToggleCollsionDebug
-opcodes 0x2000133-0x3ffffff unused
+op 0x2000133: Journal
+op 0x2000134: SetJournalIndex
+op 0x2000135: GetJournalIndex
+op 0x2000136: GetPCCell
+opcodes 0x2000137-0x3ffffff unused

@@ -6,8 +6,9 @@
 #include <boost/program_options.hpp>
 
 #include <components/misc/fileops.hpp>
+#include <components/files/path.hpp>
+
 #include "engine.hpp"
-#include "path.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
 #include <boost/iostreams/concepts.hpp>
@@ -78,12 +79,12 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     std::string cfgFile = "openmw.cfg";
     if(!isFile(cfgFile.c_str()))
     {
-        cfgFile = OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH, "openmw", "openmw.cfg");
+        cfgFile = Files::getPath (Files::Path_ConfigGlobal, "openmw", "openmw.cfg");
     }
     std::cout << "Using global config file: " << cfgFile << std::endl;
     std::ifstream globalConfigFile(cfgFile.c_str());
 
-    cfgFile = OMW::Path::getPath(OMW::Path::USER_CFG_PATH, "openmw", "openmw.cfg");
+    cfgFile = Files::getPath (Files::Path_ConfigUser, "openmw", "openmw.cfg");
     std::cout << "Using user config file: " << cfgFile << std::endl;
     std::ifstream userConfigFile(cfgFile.c_str());
 
