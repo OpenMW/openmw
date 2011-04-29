@@ -30,7 +30,10 @@ struct Creature
 
     enum Type
     {
-        Creatures = 0, Deadra = 1, Undead = 2, Humanoid = 3
+        Creatures = 0,
+        Deadra = 1,
+        Undead = 2,
+        Humanoid = 3
     };
 
     struct NPDTstruct

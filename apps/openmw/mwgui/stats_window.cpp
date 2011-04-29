@@ -323,7 +323,7 @@ void StatsWindow::updateSkillArea()
     if (!miscSkills.empty())
         addSkills(miscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
-    ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = mWindowManager.getStore();
 
     if (!factions.empty())
     {

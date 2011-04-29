@@ -2,15 +2,21 @@
 
 #include <boost/filesystem.hpp>
 
+#include <OgrePlatform.h>
+#include <string>
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <OSX/macUtils.h>
+#endif
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 #include <stdlib.h> //getenv
 #endif
 
-
-std::string OMW::Path::getPath(PathTypeEnum parType, const std::string parApp, const std::string parFile)
+std::string Files::getPath (PathTypeEnum parType, const std::string parApp, const std::string parFile)
 {
     std::string theBasePath;
-    if(parType == GLOBAL_CFG_PATH)
+    if (parType==Path_ConfigGlobal)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         theBasePath = Ogre::macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
@@ -21,7 +27,7 @@ std::string OMW::Path::getPath(PathTypeEnum parType, const std::string parApp, c
 #endif
 
     }
-    else
+    else if (parType==Path_ConfigUser)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         theBasePath = Ogre::macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
@@ -53,4 +59,3 @@ std::string OMW::Path::getPath(PathTypeEnum parType, const std::string parApp, c
     theBasePath.append(parFile);
     return theBasePath;
 }
-

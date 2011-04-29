@@ -38,7 +38,9 @@ struct Class
 
     enum Specialization
     {
-        Combat = 0, Magic = 1, Stealth = 2
+        Combat = 0,
+        Magic = 1,
+        Stealth = 2
     };
 
     static const Specialization specializationIds[3];

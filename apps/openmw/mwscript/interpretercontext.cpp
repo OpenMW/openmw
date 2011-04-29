@@ -110,6 +110,11 @@ namespace MWScript
         mEnvironment.mWindowManager->messageBox (message, buttons);
     }
 
+    void InterpreterContext::report (const std::string& message)
+    {
+        messageBox (message);
+    }
+
     bool InterpreterContext::menuMode()
     {
         return mEnvironment.mWindowManager->isGuiMode();
@@ -258,6 +263,11 @@ namespace MWScript
     {
         MWWorld::Ptr ref = getReference (id, false);
         mEnvironment.mWorld->disable (ref);
+    }
+
+    MWWorld::Environment& InterpreterContext::getEnvironment()
+    {
+        return mEnvironment;
     }
 
     MWGui::WindowManager& InterpreterContext::getWindowManager()

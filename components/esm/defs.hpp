@@ -23,12 +23,16 @@ enum VarType
 
 enum Specialization
 {
-    SPC_Combat = 0, SPC_Magic = 1, SPC_Stealth = 2
+    SPC_Combat = 0,
+    SPC_Magic = 1,
+    SPC_Stealth = 2
 };
 
 enum RangeType
 {
-    RT_Self = 0, RT_Touch = 1, RT_Target = 2
+    RT_Self = 0,
+    RT_Touch = 1,
+    RT_Target = 2
 };
 
 /** A list of references to spells and spell effects. This is shared

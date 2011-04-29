@@ -16,68 +16,70 @@ namespace MWScript
         class OpToggleSky : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-                    
-                    context.getWorld().toggleSky();
-                } 
-        };      
-        
+
+                    bool enabled = context.getWorld().toggleSky();
+
+                    context.report (enabled ? "Sky -> On" : "Sky -> Off");
+                }
+        };
+
         class OpTurnMoonWhite : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-                    
+
                     context.getWorld().setMoonColour (false);
-                } 
-        };          
+                }
+        };
 
         class OpTurnMoonRed : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-                    
+
                     context.getWorld().setMoonColour (true);
-                } 
-        };     
-        
+                }
+        };
+
         class OpGetMasserPhase : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-         
+
                     runtime.push (context.getWorld().getMasserPhase());
-                } 
-        };               
+                }
+        };
 
         class OpGetSecundaPhase : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-         
+
                     runtime.push (context.getWorld().getSecundaPhase());
-                } 
-        };               
-    
+                }
+        };
+
         const int opcodeToggleSky = 0x2000021;
         const int opcodeTurnMoonWhite = 0x2000022;
         const int opcodeTurnMoonRed = 0x2000023;
@@ -93,7 +95,7 @@ namespace MWScript
             extensions.registerFunction ("getmasserphase", 'l', "", opcodeGetMasserPhase);
             extensions.registerFunction ("getsecundaphase", 'l', "", opcodeGetSecundaPhase);
         }
-            
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (opcodeToggleSky, new OpToggleSky);
@@ -101,7 +103,6 @@ namespace MWScript
             interpreter.installSegment5 (opcodeTurnMoonRed, new OpTurnMoonRed);
             interpreter.installSegment5 (opcodeGetMasserPhase, new OpGetMasserPhase);
             interpreter.installSegment5 (opcodeGetSecundaPhase, new OpGetSecundaPhase);
-        }    
+        }
     }
 }
-

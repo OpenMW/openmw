@@ -81,6 +81,8 @@ namespace Compiler
         void message (CodeContainer& code, Literals& literals, const std::string& message,
             int buttons);
 
+        void report (CodeContainer& code, Literals& literals, const std::string& message);
+
         void fetchLocal (CodeContainer& code, char localType, int localIndex);
 
         void jump (CodeContainer& code, int offset);

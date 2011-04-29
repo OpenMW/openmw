@@ -6,8 +6,9 @@
 #include <boost/program_options.hpp>
 
 #include <components/misc/fileops.hpp>
+#include <components/files/path.hpp>
+
 #include "engine.hpp"
-#include "path.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
 #include <boost/iostreams/concepts.hpp>
@@ -47,23 +48,43 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             "set resources directory")
         ("start", bpo::value<std::string>()->default_value ("Beshara"),
             "set initial cell")
-        ("master", bpo::value<std::string>()->default_value ("Morrowind"),
-            "master file")
-        ( "showfps", "show fps counter")
-        ( "debug", "debug mode" )
-        ( "nosound", "disable all sound" )
-        ( "script-verbose", "verbose script output" )
-        ( "new-game", "activate char gen/new game mechanics" )
-        ( "script-all", "compile all scripts (excluding dialogue scripts) at startup")
+        ("master", bpo::value<std::vector<std::string> >()
+            ->default_value (std::vector<std::string>(), "")
+            ->multitoken(),
+            "master file(s)")
+        ("plugin", bpo::value<std::vector<std::string> >()
+            ->default_value (std::vector<std::string>(), "")
+            ->multitoken(),
+            "plugin file(s)")
+        ( "fps", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false), "show fps counter")
+        ( "debug", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false), "debug mode" )
+        ( "nosound", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false), "disable all sound" )
+        ( "script-verbose", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false), "verbose script output" )
+        ( "new-game", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false),
+            "activate char gen/new game mechanics" )
+        ( "script-all", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false),
+            "compile all scripts (excluding dialogue scripts) at startup")
         ;
 
     bpo::variables_map variables;
 
-    std::string cfgFile = OMW::Path::getPath(OMW::Path::GLOBAL_CFG_PATH, "openmw", "openmw.cfg");
+    //If there is an openmw.cfg in the current path use that as global config
+    //Otherwise try getPath
+    std::string cfgFile = "openmw.cfg";
+    if(!isFile(cfgFile.c_str()))
+    {
+        cfgFile = Files::getPath (Files::Path_ConfigGlobal, "openmw", "openmw.cfg");
+    }
     std::cout << "Using global config file: " << cfgFile << std::endl;
     std::ifstream globalConfigFile(cfgFile.c_str());
 
-    cfgFile = OMW::Path::getPath(OMW::Path::USER_CFG_PATH, "openmw", "openmw.cfg");
+    cfgFile = Files::getPath (Files::Path_ConfigUser, "openmw", "openmw.cfg");
     std::cout << "Using user config file: " << cfgFile << std::endl;
     std::ifstream userConfigFile(cfgFile.c_str());
 
@@ -83,27 +104,52 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         return false;
     }
 
+    // directory settings
     engine.setDataDir (variables["data"].as<std::string>());
     engine.setResourceDir (variables["resources"].as<std::string>());
+
+    // master and plugin
+    std::vector<std::string> master = variables["master"].as<std::vector<std::string> >();
+    if (master.empty())
+    {
+        std::cout << "No master file given. Assuming Morrowind.esm" << std::endl;
+        master.push_back ("Morrowind");
+    }
+
+    if (master.size()>1)
+    {
+        std::cout
+            << "Ignoring all but the first master file (multiple master files not yet supported)."
+            << std::endl;
+    }
+
+    engine.addMaster (master[0]);
+
+    std::vector<std::string> plugin = variables["plugin"].as<std::vector<std::string> >();
+
+    if (!plugin.empty())
+        std::cout << "Ignoring plugin files (plugins not yet supported)." << std::endl;
+
+    // startup-settings
     engine.setCell (variables["start"].as<std::string>());
-    engine.addMaster (variables["master"].as<std::string>());
 
-    if (variables.count ("showfps"))
-        engine.showFPS();
-
-    if (variables.count ("debug"))
-        engine.enableDebugMode();
-
-    if (variables.count ("nosound"))
-        engine.disableSound();
-
-    if (variables.count ("script-verbose"))
-        engine.enableVerboseScripts();
-
-    if (variables.count ("new-game"))
+    if (variables["new-game"].as<bool>()==true)
         engine.setNewGame();
 
-    if (variables.count ("script-all"))
+    // other settings
+    if (variables["fps"].as<bool>()==true)
+        engine.showFPS();
+
+    if (variables["debug"].as<bool>()==true)
+        engine.enableDebugMode();
+
+    if (variables["nosound"].as<bool>()==true)
+        engine.disableSound();
+
+    if (variables["script-verbose"].as<bool>()==true)
+        engine.enableVerboseScripts();
+
+    if (variables["script-all"].as<bool>()==true)
         engine.setCompileAll (true);
 
     return true;

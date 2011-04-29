@@ -117,5 +117,9 @@ op  55: explicit reference = stack[0]; pop; disable explicit reference
 op  56: explicit reference = stack[0]; pop; push 1, if explicit reference is disabled, 0 else
 op  57: explicit reference = stack[0]; pop;
         replace stack[0] with distance between explicit reference and a reference of ID stack[0]
-opcodes 58-33554431 unused
+op  58: report string literal index in stack[0];
+         additional arguments (if any) in stack[n]..stack[1];
+         n is determined according to the message string
+         all arguments are removed from stack
+opcodes 59-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
