@@ -45,9 +45,5 @@ target_link_libraries(launcher
   ${QT_LIBRARIES}
 )
 
-
-
-#if (APPLE)
-#    find_library(CARBON_FRAMEWORK Carbon)
-#    target_link_libraries(openmw ${CARBON_FRAMEWORK})
-#endif (APPLE)
+configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
+    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
