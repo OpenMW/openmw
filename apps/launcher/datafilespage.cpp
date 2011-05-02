@@ -83,12 +83,14 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     mNewProfileButton = new QPushButton(this);
     mNewProfileButton->setIcon(QIcon::fromTheme("document-new"));
+    mNewProfileButton->setShortcut(QKeySequence(tr("Ctrl+N")));
 
     mCopyProfileButton = new QPushButton(this);
     mCopyProfileButton->setIcon(QIcon::fromTheme("edit-copy"));
 
     mDeleteProfileButton = new QPushButton(this);
     mDeleteProfileButton->setIcon(QIcon::fromTheme("document-close"));
+    mDeleteProfileButton->setShortcut(QKeySequence(tr("Delete")));
 
     QHBoxLayout *bottomLayout = new QHBoxLayout();
 
@@ -122,6 +124,8 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
 
     connect(mNewProfileButton, SIGNAL(pressed()), this, SLOT(newProfile()));
+    connect(mCopyProfileButton, SIGNAL(pressed()), this, SLOT(copyProfile()));
+    connect(mDeleteProfileButton, SIGNAL(pressed()), this, SLOT(deleteProfile()));
 
     setupConfig();
 }
@@ -149,15 +153,73 @@ void DataFilesPage::newProfile()
 
 }
 
+void DataFilesPage::copyProfile()
+{
+    QString profile = mProfilesComboBox->currentText();
+    bool ok;
+
+    QString text = QInputDialog::getText(this, tr("Copy Profile"),
+                                         tr("Profile Name:"), QLineEdit::Normal,
+                                         tr("%0 Copy").arg(profile), &ok);
+    if (ok && !text.isEmpty()) {
+        if (mProfilesComboBox->findText(text) != -1)
+        {
+            QMessageBox::warning(this, tr("Profile already exists"),
+                                 tr("the profile <b>%0</b> already exists.").arg(text),
+                                 QMessageBox::Ok);
+        } else {
+            // Add the new profile to the combobox
+            mProfilesComboBox->addItem(text);
+
+            // First write the current profile as the new profile
+            writeConfig(text);
+            mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(text));
+
+        }
+
+    }
+
+}
+
 void DataFilesPage::deleteProfile()
 {
     QString profile = mProfilesComboBox->currentText();
 
 
-    if (!profile.isEmpty()) {
-        QMessageBox::warning(this, tr("Delete profile"),
-                             tr("Are you sure you want to remove <b>%0.</b>").arg(profile),
-                             QMessageBox::Ok);
+    if (profile.isEmpty()) {
+        return;
+    }
+
+    QMessageBox deleteMessageBox(this);
+    deleteMessageBox.setWindowTitle(tr("Delete Profile"));
+    deleteMessageBox.setText(tr("Are you sure you want to delete <b>%0</b>?").arg(profile));
+    deleteMessageBox.setIcon(QMessageBox::Warning);
+    QAbstractButton *deleteButton =
+        deleteMessageBox.addButton(tr("Delete"), QMessageBox::ActionRole);
+
+    deleteMessageBox.addButton(QMessageBox::Cancel);
+
+    deleteMessageBox.exec();
+
+    if (deleteMessageBox.clickedButton() == deleteButton) {
+
+        qDebug() << "Delete profile " << profile;
+
+        // Make sure we have no groups open
+        while (!mLauncherConfig->group().isEmpty()) {
+            mLauncherConfig->endGroup();
+        }
+
+        mLauncherConfig->beginGroup("Profiles");
+
+        // Open the profile-name subgroup
+        mLauncherConfig->beginGroup(profile);
+        mLauncherConfig->remove(""); // Clear the subgroup
+        mLauncherConfig->endGroup();
+        mLauncherConfig->endGroup();
+
+        // Remove the profile from the combobox
+        mProfilesComboBox->removeItem(mProfilesComboBox->findText(profile));
     }
 }
 

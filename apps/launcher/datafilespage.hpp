@@ -39,6 +39,7 @@ public slots:
     void resizeRows();
     void profileChanged(const QString &previous, const QString &current);
     void newProfile();
+    void copyProfile();
     void deleteProfile();
 
 private:
