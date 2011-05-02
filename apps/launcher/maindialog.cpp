@@ -99,6 +99,10 @@ void MainDialog::createPages()
     QString dataDir = mGameConfig->value("data").toString();
     mDataFilesPage->setupDataFiles(dataDir);
 
+    // Set the combobox of the play page to imitate the comobox on the datafilespage
+    mPlayPage->mProfilesComboBox->setModel(mDataFilesPage->mProfilesComboBox->model());
+    mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
+
     // Add the pages to the stacked widget
     mPagesWidget->addWidget(mPlayPage);
     mPagesWidget->addWidget(mGraphicsPage);
@@ -119,13 +123,13 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
         // The user switched from Data Files to Play
         if (previousPage == QString("Data Files") && currentPage == QString("Play")) {
-            //mPlayPage->mProfilesModel->setStringList(mDataFilesPage->mProfilesModel->stringList());
-            //mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
+            mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
+
         }
 
         // The user switched from Play to Data Files
         if (previousPage == QString("Play") && currentPage == QString("Data Files")) {
-            //mDataFilesPage->mProfilesComboBox->setCurrentIndex(mPlayPage->mProfilesComboBox->currentIndex());
+            mDataFilesPage->mProfilesComboBox->setCurrentIndex(mPlayPage->mProfilesComboBox->currentIndex());
         }
     }
 
