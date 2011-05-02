@@ -179,7 +179,7 @@ void DataFilesPage::setupDataFiles(const QString &path)
     for (int i=0; i<masterFiles.count(); ++i)
     {
         QString currentMaster = masterFiles.at(i);
-        QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
+        const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
         if (itemList.isEmpty()) // Master is not yet in the widget
             {
@@ -212,7 +212,7 @@ void DataFilesPage::setupDataFiles(const QString &path)
             const QString currentMaster = QString::fromStdString(mlist[i].name);
             availableMasters.append(currentMaster);
 
-            QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
+            const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
             if (itemList.isEmpty()) // Master is not yet in the widget
             {
@@ -228,7 +228,7 @@ void DataFilesPage::setupDataFiles(const QString &path)
         QStandardItem *parent = new QStandardItem(availableMasters.join(","));
         QStandardItem *child = new QStandardItem(currentFile);
 
-        QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
+        const QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
 
         if (masterList.isEmpty()) { // Masters node not yet in the mDataFilesModel
             parent->appendRow(child);
@@ -279,7 +279,6 @@ void DataFilesPage::setupConfig()
         profiles.append("Default");
     }
 
-    //mProfilesModel->setStringList(profiles);
     mProfilesComboBox->addItems(profiles);
 
     QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
@@ -375,7 +374,7 @@ void DataFilesPage::addPlugins(const QModelIndex &index)
             // Now we see if the pluginsmodel already contains this plugin
             const QString childIndexData = QVariant(mDataFilesModel->data(childIndex)).toString();
 
-            QList<QStandardItem *> itemList = mPluginsModel->findItems(childIndexData);
+            const QList<QStandardItem *> itemList = mPluginsModel->findItems(childIndexData);
 
             if (itemList.isEmpty())
             {
@@ -401,7 +400,7 @@ void DataFilesPage::removePlugins(const QModelIndex &index)
     for (int r=0; r<mDataFilesModel->rowCount(index); ++r) {
         QModelIndex childIndex = index.child(r, 0);
 
-        QList<QStandardItem *> itemList = mPluginsModel->findItems(QVariant(childIndex.data()).toString());
+        const QList<QStandardItem *> itemList = mPluginsModel->findItems(QVariant(childIndex.data()).toString());
 
         if (!itemList.isEmpty()) {
             foreach (const QStandardItem *currentItem, itemList) {
@@ -500,7 +499,7 @@ void DataFilesPage::readConfig()
         const QString keyValue = mLauncherConfig->value(key).toString();
 
         if (key.startsWith("Plugin")) {
-            QList<QStandardItem *> pluginList = mPluginsModel->findItems(keyValue);
+            const QList<QStandardItem *> pluginList = mPluginsModel->findItems(keyValue);
 
             if (!pluginList.isEmpty())
             {
@@ -512,7 +511,7 @@ void DataFilesPage::readConfig()
 
         if (key.startsWith("Master")) {
             qDebug() << "Read master: " << keyValue;
-            QList<QTableWidgetItem*> masterList = mMastersWidget->findItems(keyValue, Qt::MatchFixedString);
+            const QList<QTableWidgetItem*> masterList = mMastersWidget->findItems(keyValue, Qt::MatchFixedString);
 
             if (!masterList.isEmpty()) {
                 foreach (QTableWidgetItem *currentMaster, masterList) {
@@ -550,7 +549,7 @@ void DataFilesPage::writeConfig(QString profile)
     mLauncherConfig->remove(""); // Clear the subgroup
 
     // First write the masters to the config
-    QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
+    const QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
 
     // We don't use foreach because we need i
     for (int i = 0; i < selectedMasters.size(); ++i) {
