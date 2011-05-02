@@ -4,12 +4,14 @@ set(LAUNCHER
   main.cpp
   maindialog.cpp
   playpage.cpp
+  graphicspage.cpp
 
   datafilespage.hpp
   lineedit.hpp
   maindialog.hpp
   playpage.hpp
   combobox.hpp
+  graphicspage.hpp
 )
 
 set(MOC_HDRS
@@ -18,6 +20,7 @@ set(MOC_HDRS
   maindialog.hpp
   playpage.hpp
   combobox.hpp
+  graphicspage.hpp
 )
 
 find_package(Qt4 REQUIRED)

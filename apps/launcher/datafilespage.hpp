@@ -13,6 +13,7 @@ class QItemSelection;
 class QItemSelectionModel;
 class QStringListModel;
 class QSettings;
+class QPushButton;
 
 class DataFilesPage : public QWidget
 {
@@ -22,7 +23,7 @@ public:
     DataFilesPage(QWidget *parent = 0);
 
     ComboBox *mProfilesComboBox;
-    QStringListModel *mProfilesModel;
+    //QStringListModel *mProfilesModel;
     QSettings *mLauncherConfig;
 
     const QStringList checkedPlugins();
@@ -30,11 +31,14 @@ public:
     void readConfig();
     void writeConfig(QString profile = QString());
 
+    void setupDataFiles(const QString &path);
+
 public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckstate(QModelIndex index);
     void resizeRows();
     void profileChanged(const QString &previous, const QString &current);
+    void newProfile();
 
 private:
     QTableWidget *mMastersWidget;
@@ -45,7 +49,10 @@ private:
 
     QItemSelectionModel *mPluginsSelectModel;
 
-    void setupDataFiles();
+    QPushButton *mNewProfileButton;
+    QPushButton *mCopyProfileButton;
+    QPushButton *mDeleteProfileButton;
+
     void addPlugins(const QModelIndex &index);
     void removePlugins(const QModelIndex &index);
     void uncheckPlugins();

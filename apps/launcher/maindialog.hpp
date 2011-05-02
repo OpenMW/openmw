@@ -7,8 +7,10 @@ class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
 class QStringListModel;
+class QSettings;
 
 class PlayPage;
+class GraphicsPage;
 class DataFilesPage;
 
 class MainDialog : public QDialog
@@ -27,13 +29,18 @@ public slots:
 
 private:
     void createIcons();
+    void createPages();
+    void setupConfig();
     void closeEvent(QCloseEvent *event);
 
     QListWidget *mIconWidget;
     QStackedWidget *mPagesWidget;
 
     PlayPage *mPlayPage;
+    GraphicsPage *mGraphicsPage;
     DataFilesPage *mDataFilesPage;
+
+    QSettings *mGameConfig;
 };
 
 #endif

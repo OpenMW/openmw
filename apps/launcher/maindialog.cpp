@@ -1,29 +1,27 @@
 #include <QtGui>
 #include <QDebug>
 
+#include <components/files/path.hpp>
+
 #include "maindialog.hpp"
 #include "playpage.hpp"
+#include "graphicspage.hpp"
 #include "datafilespage.hpp"
 
 MainDialog::MainDialog()
 {
-    /* TODO: Should be an install path
-    QFile file("apps/launcher/resources/launcher.qss");
-
-    file.open(QFile::ReadOnly);
-    QString styleSheet = QLatin1String(file.readAll());
-    qDebug() << styleSheet;
-    setStyleSheet(styleSheet);*/
-
     mIconWidget = new QListWidget;
     mIconWidget->setViewMode(QListView::IconMode);
     mIconWidget->setWrapping(false);
-
     mIconWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Just to be sure
-
-
     mIconWidget->setIconSize(QSize(48, 48));
     mIconWidget->setMovement(QListView::Static);
+
+    mIconWidget->setStyleSheet("background-image: url(:/images/openmw-header.png); \
+                                background-color: white; \
+                                background-repeat: no-repeat; \
+                                background-attachment: scroll; \
+                                background-position: right;");
 
     mIconWidget->setMinimumWidth(400);
     mIconWidget->setFixedHeight(80);
@@ -33,27 +31,8 @@ MainDialog::MainDialog()
 
     QGroupBox *groupBox = new QGroupBox(this);
     QVBoxLayout *groupLayout = new QVBoxLayout(groupBox);
-    // TODO: TESTING
-
-    /*mProfileModel = new QStringListModel();
-    QStringList profileList;
-    profileList << "Default" << "Warrior" << "Redemption" << "Cool stuff bro!";
-    mProfileModel->setStringList(profileList);
-    */
-
-    // Various pages
-    mPlayPage = new PlayPage(this);
-    //mPlayPage->mProfileModel->setStringList(profileList);
-
-    mDataFilesPage = new DataFilesPage(this);
-    //mDataFilesPage->mProfileComboBox->setModel(mProfileModel);
 
     mPagesWidget = new QStackedWidget(groupBox);
-    mPagesWidget->addWidget(mPlayPage);
-    mPagesWidget->addWidget(new PlayPage);
-    mPagesWidget->addWidget(mDataFilesPage);
-    //mPagesWidget->addWidget(new QueryPage);
-
     groupLayout->addWidget(mPagesWidget);
 
     QPushButton *playButton = new QPushButton(tr("Play"));
@@ -76,30 +55,27 @@ MainDialog::MainDialog()
     setWindowTitle(tr("OpenMW Launcher"));
     setMinimumSize(QSize(550, 450));
 
-    createIcons();
-
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
+
+    setupConfig();
+    createIcons();
+    createPages();
 }
 
 void MainDialog::createIcons()
 {
-    //QSize itemSize(80, 66);
-
     QListWidgetItem *configButton = new QListWidgetItem(mIconWidget);
     configButton->setIcon(QIcon(":/images/openmw-icon.png"));
     configButton->setText(tr("Play"));
     configButton->setTextAlignment(Qt::AlignCenter);
     configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    //configButton->setSizeHint(itemSize);
     QListWidgetItem *updateButton = new QListWidgetItem(mIconWidget);
     updateButton->setIcon(QIcon::fromTheme("video-display"));
     updateButton->setText(tr("Graphics"));
     updateButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
     updateButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-    //updateButton->setSizeHint(itemSize);
 
     QListWidgetItem *queryButton = new QListWidgetItem(mIconWidget);
     queryButton->setIcon(QIcon(":/images/openmw-plugin-icon.png"));
@@ -107,15 +83,27 @@ void MainDialog::createIcons()
     queryButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     queryButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    //queryButton->setSizeHint(itemSize);
-
     connect(mIconWidget,
             SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 
-    connect(mIconWidget,
-            SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
-            this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
+}
+
+void MainDialog::createPages()
+{
+    // Various pages
+    mPlayPage = new PlayPage(this);
+    mGraphicsPage = new GraphicsPage(this);
+    mDataFilesPage = new DataFilesPage(this);
+
+    QString dataDir = mGameConfig->value("data").toString();
+    mDataFilesPage->setupDataFiles(dataDir);
+
+    // Add the pages to the stacked widget
+    mPagesWidget->addWidget(mPlayPage);
+    mPagesWidget->addWidget(mGraphicsPage);
+    mPagesWidget->addWidget(mDataFilesPage);
+
 }
 
 void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
@@ -131,13 +119,13 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
         // The user switched from Data Files to Play
         if (previousPage == QString("Data Files") && currentPage == QString("Play")) {
-            mPlayPage->mProfilesModel->setStringList(mDataFilesPage->mProfilesModel->stringList());
-            mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
+            //mPlayPage->mProfilesModel->setStringList(mDataFilesPage->mProfilesModel->stringList());
+            //mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
         }
 
         // The user switched from Play to Data Files
         if (previousPage == QString("Play") && currentPage == QString("Data Files")) {
-            mDataFilesPage->mProfilesComboBox->setCurrentIndex(mPlayPage->mProfilesComboBox->currentIndex());
+            //mDataFilesPage->mProfilesComboBox->setCurrentIndex(mPlayPage->mProfilesComboBox->currentIndex());
         }
     }
 
@@ -154,5 +142,26 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
 void MainDialog::play()
 {
+
+}
+
+void MainDialog::setupConfig()
+{
+    // First we read the OpenMW config
+    QString config = "openmw.cfg";
+    QFile file(config);
+
+    if (!file.exists()) {
+        config = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
+                                                       "openmw", "launcher.cfg"));
+    }
+
+    file.setFileName(config); // Just for displaying information
+    qDebug() << "Using config file from " << file.fileName();
+    file.close();
+
+    // Open our config file
+    mGameConfig = new QSettings(config, QSettings::IniFormat);
+
 
 }

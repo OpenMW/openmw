@@ -31,6 +31,32 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mMastersWidget = new QTableWidget(this); // Contains the available masters
     mPluginsTable = new QTableView(this);
 
+    mMastersWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    mMastersWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    mMastersWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    mMastersWidget->setAlternatingRowColors(true);
+    mMastersWidget->horizontalHeader()->setStretchLastSection(true);
+    mMastersWidget->horizontalHeader()->hide();
+    mMastersWidget->verticalHeader()->hide();
+    mMastersWidget->insertColumn(0);
+
+    mPluginsTable->setModel(mPluginsModel);
+    mPluginsTable->setSelectionModel(mPluginsSelectModel);
+    mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    mPluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    mPluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    mPluginsTable->setAlternatingRowColors(true);
+    mPluginsTable->horizontalHeader()->setStretchLastSection(true);
+    mPluginsTable->horizontalHeader()->hide();
+
+    mPluginsTable->setDragEnabled(true);
+    mPluginsTable->setDragDropMode(QAbstractItemView::InternalMove);
+    mPluginsTable->setDropIndicatorShown(true);
+    mPluginsTable->setDragDropOverwriteMode(false);
+    mPluginsTable->viewport()->setAcceptDrops(true);
+
+    mPluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
+
     // Add both tables to a splitter
     QSplitter *splitter = new QSplitter(this);
     splitter->setOrientation(Qt::Horizontal);
@@ -46,31 +72,31 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     // Bottom part with profile options
     QLabel *profileLabel = new QLabel(tr("Current Profile:"), this);
 
-    mProfilesModel = new QStringListModel();
+    //mProfilesModel = new QStringListModel();
 
     mProfilesComboBox = new ComboBox(this);
-    mProfilesComboBox->setModel(mProfilesModel);
+    //mProfilesComboBox->setModel(mProfilesModel);
 
     mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
     mProfilesComboBox->setInsertPolicy(QComboBox::InsertAtBottom);
     //mProfileComboBox->addItem(QString("New Profile"));
 
-    QToolButton *NewProfileToolButton = new QToolButton(this);
-    NewProfileToolButton->setIcon(QIcon::fromTheme("document-new"));
+    mNewProfileButton = new QPushButton(this);
+    mNewProfileButton->setIcon(QIcon::fromTheme("document-new"));
 
-    QToolButton *CopyProfileToolButton = new QToolButton(this);
-    CopyProfileToolButton->setIcon(QIcon::fromTheme("edit-copy"));
+    mCopyProfileButton = new QPushButton(this);
+    mCopyProfileButton->setIcon(QIcon::fromTheme("edit-copy"));
 
-    QToolButton *DeleteProfileToolButton = new QToolButton(this);
-    DeleteProfileToolButton->setIcon(QIcon::fromTheme("document-close"));
+    mDeleteProfileButton = new QPushButton(this);
+    mDeleteProfileButton->setIcon(QIcon::fromTheme("document-close"));
 
     QHBoxLayout *bottomLayout = new QHBoxLayout();
 
     bottomLayout->addWidget(profileLabel);
     bottomLayout->addWidget(mProfilesComboBox);
-    bottomLayout->addWidget(NewProfileToolButton);
-    bottomLayout->addWidget(CopyProfileToolButton);
-    bottomLayout->addWidget(DeleteProfileToolButton);
+    bottomLayout->addWidget(mNewProfileButton);
+    bottomLayout->addWidget(mCopyProfileButton);
+    bottomLayout->addWidget(mDeleteProfileButton);
 
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
     // Add some space above and below the page items
@@ -95,43 +121,42 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     //connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
     connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 
+    connect(mNewProfileButton, SIGNAL(pressed()), this, SLOT(newProfile()));
 
-    setupDataFiles();
     setupConfig();
 }
 
-void DataFilesPage::setupDataFiles()
+void DataFilesPage::newProfile()
 {
-    mMastersWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mMastersWidget->setSelectionMode(QAbstractItemView::MultiSelection);
-    mMastersWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mMastersWidget->setAlternatingRowColors(true);
-    mMastersWidget->horizontalHeader()->setStretchLastSection(true);
-    mMastersWidget->horizontalHeader()->hide();
-    mMastersWidget->verticalHeader()->hide();
-    mMastersWidget->insertColumn(0);
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("New Profile"),
+                                                  tr("Profile Name:"), QLineEdit::Normal,
+                                         tr("New Profile"), &ok);
+    if (ok && !text.isEmpty()) {
+        if (mProfilesComboBox->findText(text) != -1)
+        {
+            QMessageBox::warning(this, tr("Profile already exists"),
+                                 tr("the profile %0 already exists.").arg(text),
+                                 QMessageBox::Ok);
+        } else {
+            // Add the new profile to the combobox
+            mProfilesComboBox->addItem(text);
+            mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(text));
 
-    mPluginsTable->setModel(mPluginsModel);
-    mPluginsTable->setSelectionModel(mPluginsSelectModel);
-    mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mPluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mPluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mPluginsTable->setAlternatingRowColors(true);
-    mPluginsTable->horizontalHeader()->setStretchLastSection(true);
-    mPluginsTable->horizontalHeader()->hide();
+        }
 
+    }
 
-    mPluginsTable->setDragEnabled(true);
-    mPluginsTable->setDragDropMode(QAbstractItemView::InternalMove);
-    mPluginsTable->setDropIndicatorShown(true);
-    mPluginsTable->setDragDropOverwriteMode(false);
-    mPluginsTable->viewport()->setAcceptDrops(true);
+        //textLabel->setText(text);
 
-    mPluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
+}
 
+void DataFilesPage::setupDataFiles(const QString &path)
+{
+    qDebug() << "setupDataFiles called!";
     // TODO: Add a warning when a master is missing
 
-    QDir dataFilesDir("data/");
+    QDir dataFilesDir(path);
 
     if (!dataFilesDir.exists())
         qWarning("Cannot find the plugin directory");
@@ -165,8 +190,10 @@ void DataFilesPage::setupDataFiles()
         QString currentFile = pluginFiles.at(i);
         QStringList availableMasters; // Will contain all found masters
 
-        QString path = QString("data/").append(currentFile);
-        fileReader.open(path.toStdString());
+        QString filePath = dataFilesDir.absolutePath();
+        filePath.append("/");
+        filePath.append(currentFile);
+        fileReader.open(filePath.toStdString());
 
         // First we fill the availableMasters and the mMastersWidget
         ESMReader::MasterList mlist = fileReader.getMasters();
@@ -203,6 +230,8 @@ void DataFilesPage::setupDataFiles()
             }
         }
     }
+
+    readConfig();
 }
 
 void DataFilesPage::setupConfig()
@@ -230,7 +259,8 @@ void DataFilesPage::setupConfig()
         profiles.append("Default");
     }
 
-    mProfilesModel->setStringList(profiles);
+    //mProfilesModel->setStringList(profiles);
+    mProfilesComboBox->addItems(profiles);
 
     QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
     if (currentProfile.isEmpty()) {
@@ -239,8 +269,6 @@ void DataFilesPage::setupConfig()
     mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
 
     mLauncherConfig->endGroup();
-
-    readConfig();
 }
 
 void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -419,7 +447,8 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
     }
 
     uncheckPlugins();
-
+    // Deselect the masters
+    mMastersWidget->selectionModel()->clearSelection();
     readConfig();
 
 }
@@ -438,7 +467,6 @@ void DataFilesPage::readConfig()
     mLauncherConfig->beginGroup(profile);
 
     QStringList childKeys = mLauncherConfig->childKeys();
-    qDebug() << childKeys << "SJILDKIEJS";
 
     foreach (const QString &key, childKeys) {
         const QString keyValue = mLauncherConfig->value(key).toString();
@@ -456,7 +484,7 @@ void DataFilesPage::readConfig()
 
         if (key.startsWith("Master")) {
             qDebug() << "Read master: " << keyValue;
-            QList<QTableWidgetItem*> masterList = mMastersWidget->findItems(keyValue, Qt::MatchExactly);
+            QList<QTableWidgetItem*> masterList = mMastersWidget->findItems(keyValue, Qt::MatchFixedString);
 
             if (!masterList.isEmpty()) {
                 foreach (QTableWidgetItem *currentMaster, masterList) {
@@ -486,11 +514,12 @@ void DataFilesPage::writeConfig(QString profile)
 
     // Open the profile-name subgroup
     mLauncherConfig->beginGroup(profile);
-    mLauncherConfig->remove("");
+    mLauncherConfig->remove(""); // Clear the subgroup
 
     // First write the masters to the config
     QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
 
+    // We don't use foreach because we need i
     for (int i = 0; i < selectedMasters.size(); ++i) {
         const QTableWidgetItem *item = selectedMasters.at(i);
         mLauncherConfig->setValue(QString("Master%0").arg(i), item->data(Qt::DisplayRole).toString());
@@ -504,9 +533,7 @@ void DataFilesPage::writeConfig(QString profile)
         mLauncherConfig->setValue(QString("Plugin%1").arg(i), plugins.at(i));
     }
 
-    qDebug() <<  mLauncherConfig->childKeys();
     mLauncherConfig->endGroup();
-    qDebug() <<  mLauncherConfig->childKeys();
     mLauncherConfig->endGroup();
 
 }
