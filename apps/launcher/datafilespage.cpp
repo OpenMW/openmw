@@ -119,7 +119,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     connect(mPluginsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(resizeRows()));
 
     //connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
-    connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
+
 
     connect(mNewProfileButton, SIGNAL(pressed()), this, SLOT(newProfile()));
 
@@ -274,10 +274,10 @@ void DataFilesPage::setupConfig()
     mLauncherConfig->beginGroup("Profiles");
     QStringList profiles = mLauncherConfig->childGroups();
 
-    /*if (profiles.isEmpty()) {
+    if (profiles.isEmpty()) {
         // Add a default profile
         profiles.append("Default");
-    }*/
+    }
 
     //mProfilesModel->setStringList(profiles);
     mProfilesComboBox->addItems(profiles);
@@ -294,6 +294,10 @@ void DataFilesPage::setupConfig()
     mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
 
     mLauncherConfig->endGroup();
+
+    // Now we connect the combobox to do something if the profile changes
+    // This prevents strange behaviour while reading and appending the profiles
+    connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 }
 
 void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -341,7 +345,7 @@ void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const
             QString master = currentIndex.data().toString();
             master.prepend("*");
             master.append("*");
-            QList<QStandardItem *> itemList = mDataFilesModel->findItems(master, Qt::MatchWildcard);
+            const QList<QStandardItem *> itemList = mDataFilesModel->findItems(master, Qt::MatchWildcard);
 
             if (itemList.isEmpty())
                 qDebug() << "Empty as shit";
