@@ -136,7 +136,7 @@ void DataFilesPage::newProfile()
         if (mProfilesComboBox->findText(text) != -1)
         {
             QMessageBox::warning(this, tr("Profile already exists"),
-                                 tr("the profile %0 already exists.").arg(text),
+                                 tr("the profile <b>%0</b> already exists.").arg(text),
                                  QMessageBox::Ok);
         } else {
             // Add the new profile to the combobox
@@ -147,8 +147,18 @@ void DataFilesPage::newProfile()
 
     }
 
-        //textLabel->setText(text);
+}
 
+void DataFilesPage::deleteProfile()
+{
+    QString profile = mProfilesComboBox->currentText();
+
+
+    if (!profile.isEmpty()) {
+        QMessageBox::warning(this, tr("Delete profile"),
+                             tr("Are you sure you want to remove <b>%0.</b>").arg(profile),
+                             QMessageBox::Ok);
+    }
 }
 
 void DataFilesPage::setupDataFiles(const QString &path)
@@ -236,6 +246,7 @@ void DataFilesPage::setupDataFiles(const QString &path)
 
 void DataFilesPage::setupConfig()
 {
+    qDebug() << "setupConfig called";
     QString config = "launcher.cfg";
     QFile file(config);
 
@@ -246,24 +257,38 @@ void DataFilesPage::setupConfig()
 
     file.setFileName(config); // Just for displaying information
     qDebug() << "Using config file from " << file.fileName();
+    file.open(QIODevice::ReadOnly);
+    qDebug() << "File contents:" << file.readAll();
     file.close();
 
     // Open our config file
     mLauncherConfig = new QSettings(config, QSettings::IniFormat);
+    mLauncherConfig->sync();
+
+
+    // Make sure we have no groups open
+    while (!mLauncherConfig->group().isEmpty()) {
+        mLauncherConfig->endGroup();
+    }
 
     mLauncherConfig->beginGroup("Profiles");
     QStringList profiles = mLauncherConfig->childGroups();
 
-    if (profiles.isEmpty()) {
+    /*if (profiles.isEmpty()) {
         // Add a default profile
         profiles.append("Default");
-    }
+    }*/
 
     //mProfilesModel->setStringList(profiles);
     mProfilesComboBox->addItems(profiles);
 
     QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
+
+    qDebug() << mLauncherConfig->value("CurrentProfile").toString();
+    qDebug() << mLauncherConfig->childGroups();
+
     if (currentProfile.isEmpty()) {
+        qDebug() << "No current profile selected";
         currentProfile = "Default";
     }
     mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
@@ -440,6 +465,9 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
 {
     qDebug() << "Profile changed " << current << previous;
 
+    //if (previous.isEmpty()) {
+    //    return;
+    //}
     // Just to be sure
     if (!previous.isEmpty()) {
         writeConfig(previous);
@@ -502,6 +530,10 @@ void DataFilesPage::writeConfig(QString profile)
         profile = mProfilesComboBox->currentText();
     }
 
+    if (profile.isEmpty()) {
+        return;
+    }
+
     qDebug() << "Writing: " << profile;
 
     // Make sure we have no groups open
@@ -513,6 +545,7 @@ void DataFilesPage::writeConfig(QString profile)
     mLauncherConfig->setValue("CurrentProfile", profile);
 
     // Open the profile-name subgroup
+    qDebug() << "beginning group: " << profile;
     mLauncherConfig->beginGroup(profile);
     mLauncherConfig->remove(""); // Clear the subgroup
 
