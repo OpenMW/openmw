@@ -298,16 +298,16 @@ void DataFilesPage::setupConfig()
 
 void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    // TODO: Use mMasterWidget->selectedItems
     if (mMastersWidget->selectionModel()->hasSelection()) {
-        const QModelIndexList selectedIndexes = mMastersWidget->selectionModel()->selectedIndexes();
 
         QStringList masters;
         QString masterstr;
 
         // Create a QStringList containing all the masters
-        foreach (const QModelIndex &index, selectedIndexes) {
-            masters.append(index.data().toString());
+        const QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
+
+        foreach (const QTableWidgetItem *item, selectedMasters) {
+            masters.append(item->data(Qt::DisplayRole).toString());
         }
 
         masters.sort();
@@ -465,10 +465,6 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
 {
     qDebug() << "Profile changed " << current << previous;
 
-    //if (previous.isEmpty()) {
-    //    return;
-    //}
-    // Just to be sure
     if (!previous.isEmpty()) {
         writeConfig(previous);
         mLauncherConfig->sync();
