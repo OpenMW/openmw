@@ -2,16 +2,12 @@ QGroupBox {
     background-image: url(":/images/playpage-background.png");
     background-repeat: no-repeat;
     background-position: top;
-    padding-top: 100px;
     padding-left: 30px;
     padding-right: 30px;
-    padding-bottom: 100px;
 }
 
 QPushButton {
 
-    width: 200px;
-    max-width: 200px;
     height: 50px;
 
     margin-bottom: 30px;
@@ -50,17 +46,12 @@ QPushButton:pressed {
 
 QLabel
 {
-    margin-left: 90%;
     font: 14pt "Gauntlet Classic";
 }
 
 
 QComboBox
 {
-    width: 180px;
-    max-width: 200px;
-    height: 20px;
-
     padding: 1px 18px 1px 3px;
 
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 gray, stop:0.2 white, stop:1 rgba(255, 255, 255, 55));
