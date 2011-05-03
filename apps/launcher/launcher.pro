@@ -20,3 +20,4 @@ SOURCES += datafilespage.cpp \
            qrc_resources.cxx
 
 RESOURCES += resources.qrc
+RC_FILE = launcher.rc

@@ -53,7 +53,8 @@ MainDialog::MainDialog()
     //mainLayout->addSpacing(12);
 
     setWindowTitle(tr("OpenMW Launcher"));
-    setMinimumSize(QSize(550, 450));
+    setWindowIcon(QIcon(":/images/openmw-icon.png"));
+    setMinimumSize(QSize(575, 575));
 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
@@ -201,6 +202,7 @@ void MainDialog::play()
         return;
     }
 
+    // Start the game
     if (!process.startDetached(game)) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error starting OpenMW");
