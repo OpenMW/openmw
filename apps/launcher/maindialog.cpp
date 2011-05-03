@@ -111,6 +111,8 @@ void MainDialog::createPages()
     // Select the first page
     mIconWidget->setCurrentItem(mIconWidget->item(0), QItemSelectionModel::Select);
 
+    connect(mPlayPage->mPlayButton, SIGNAL(clicked()), this, SLOT(play()));
+
     connect(mPlayPage->mProfilesComboBox,
             SIGNAL(currentIndexChanged(int)),
             this, SLOT(profileChanged(int)));
@@ -161,6 +163,30 @@ void MainDialog::closeEvent(QCloseEvent *event)
 void MainDialog::play()
 {
 
+#if Q_WS_WIN
+    // Windows TODO: proper install path handling
+    QString game = "./openmw.exe";
+    QFile file(game);
+# else
+    QString game = "./openmw";
+    QFile file(game);
+#endif
+
+    QProcess process;
+
+    if (!file.exists()) {
+        // TODO: Throw error!
+        qDebug() << "Could not start process";
+        return;
+    }
+
+    if(!process.startDetached(game)) {
+        // TODO: Throw error!;
+        qDebug() << "Could not start process";
+        qDebug() << "reason was:" << process.errorString();
+    } else {
+        close();
+    }
 }
 
 void MainDialog::setupConfig()

@@ -4,7 +4,7 @@
 #include <QWidget>
 
 class QComboBox;
-class QStringListModel;
+class QPushButton;
 
 class PlayPage : public QWidget
 {
@@ -14,7 +14,8 @@ public:
     PlayPage(QWidget *parent = 0);
 
     QComboBox *mProfilesComboBox;
-    QStringListModel *mProfilesModel;
+    QPushButton *mPlayButton;
+
 };
 
 #endif
