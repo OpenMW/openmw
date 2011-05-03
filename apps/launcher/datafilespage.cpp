@@ -369,10 +369,10 @@ void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const
         QString masterstr;
 
         // Create a QStringList containing all the masters
-        const QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
+        const QStringList masterList = selectedMasters();
 
-        foreach (const QTableWidgetItem *item, selectedMasters) {
-            masters.append(item->data(Qt::DisplayRole).toString());
+        foreach (const QString &currentMaster, masterList) {
+            masters.append(currentMaster);
         }
 
         masters.sort();
@@ -486,6 +486,18 @@ void DataFilesPage::setCheckstate(QModelIndex index)
     } else {
         mPluginsModel->setData(index, Qt::Checked, Qt::CheckStateRole);
     }
+}
+
+const QStringList DataFilesPage::selectedMasters()
+{
+    QStringList masters;
+    const QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
+
+    foreach (const QTableWidgetItem *item, selectedMasters) {
+        masters.append(item->data(Qt::DisplayRole).toString());
+    }
+
+    return masters;
 }
 
 const QStringList DataFilesPage::checkedPlugins()
@@ -611,12 +623,12 @@ void DataFilesPage::writeConfig(QString profile)
     mLauncherConfig->remove(""); // Clear the subgroup
 
     // First write the masters to the config
-    const QList<QTableWidgetItem *> selectedMasters = mMastersWidget->selectedItems();
+    const QStringList masterList = selectedMasters();
 
     // We don't use foreach because we need i
-    for (int i = 0; i < selectedMasters.size(); ++i) {
-        const QTableWidgetItem *item = selectedMasters.at(i);
-        mLauncherConfig->setValue(QString("Master%0").arg(i), item->data(Qt::DisplayRole).toString());
+    for (int i = 0; i < masterList.size(); ++i) {
+        const QString master = masterList.at(i);
+        mLauncherConfig->setValue(QString("Master%0").arg(i), master);
     }
 
     // Now write all checked plugins

@@ -140,6 +140,58 @@ void MainDialog::closeEvent(QCloseEvent *event)
     qDebug() << "Close event";
     mDataFilesPage->writeConfig();
     mDataFilesPage->mLauncherConfig->sync();
+
+    // Write to the openmw.cfg
+    QString dataPath = mGameConfig->value("data").toString();
+    dataPath.append("/");
+
+    QStringList dataFiles = mDataFilesPage->selectedMasters();
+    dataFiles.append(mDataFilesPage->checkedPlugins());
+
+    qDebug() << "Writing to openmw.cfg";
+
+    // Open the config as a QFile
+    QFile file(mGameConfig->fileName());
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // File cannot be opened or created TODO: throw error
+    }
+
+    QTextStream in(&file);
+    QByteArray buffer;
+
+    // Remove all previous master/plugin entries from config
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (!line.contains("master") && !line.contains("plugin")) {
+            buffer += line += "\n";
+        }
+    }
+
+    file.close();
+
+    // Now we write back the other config entries
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+       // File cannot be opened or created TODO: throw error
+    }
+
+    file.write(buffer);
+    QTextStream out(&file);
+
+    // Write the list of game files to the config
+    foreach (const QString &currentFile, dataFiles) {
+        QFileInfo dataFile = QFileInfo(QString(currentFile).prepend(dataPath));
+
+        if (dataFile.exists()) {
+            if (currentFile.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
+                out << "master=" << currentFile << endl;
+            } else if (currentFile.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
+                out << "plugin=" << currentFile << endl;
+            }
+        }
+    }
+
+
+    file.close();
     event->accept();
 
 }

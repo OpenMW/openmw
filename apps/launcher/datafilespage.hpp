@@ -27,6 +27,7 @@ public:
     QSettings *mLauncherConfig;
 
     const QStringList checkedPlugins();
+    const QStringList selectedMasters();
     void setupConfig();
     void readConfig();
     void writeConfig(QString profile = QString());
