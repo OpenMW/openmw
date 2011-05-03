@@ -25,12 +25,14 @@ public:
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
     void play();
+    void profileChanged(int index);
 
 
 private:
     void createIcons();
     void createPages();
     void setupConfig();
+    void writeConfig();
     void closeEvent(QCloseEvent *event);
 
     QListWidget *mIconWidget;

@@ -20,7 +20,7 @@ QPushButton {
         stop:0.9 rgba(0, 0, 0, 55),
         stop:1 rgba(0, 0, 0, 100));
 
-    font: 24pt "Gauntlet Thin";
+    font: 24pt "FreeMono";
     color: black;
 
     border-right: 1px solid rgba(0, 0, 0, 155);
@@ -46,7 +46,7 @@ QPushButton:pressed {
 
 QLabel
 {
-    font: 14pt "Gauntlet Classic";
+    font: 14pt "FreeMono";
 }
 
 
@@ -54,19 +54,17 @@ QComboBox
 {
     padding: 1px 18px 1px 3px;
 
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 gray, stop:0.2 white, stop:1 rgba(255, 255, 255, 55));
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 white, stop:0.2 rgba(0, 0, 0, 25), stop:1 rgba(255, 255, 255, 200));
     border-width: 1px;
     border-color: rgba(0, 0, 0, 125);
     border-style: solid;
     border-radius: 2px;
 }
 
-/* QComboBox gets the "on" state when the popup is open * /
+/*QComboBox gets the "on" state when the popup is open */
 QComboBox:!editable:on, QComboBox::drop-down:editable:on {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                stop: 0 #D3D3D3, stop: 0.4 #D8D8D8,
-                                stop: 0.5 #DDDDDD, stop: 1.0 #E1E1E1);
-}*/
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 gray, stop:0.2 white);
+}
 
 
 QComboBox { /* shift the text when the popup opens */
@@ -101,8 +99,4 @@ QListWidget {
     background-repeat: no-repeat;
     background-attachment: scroll;
     background-position: right;
-}
-
-QListWidgetItem {
-    alignment: center;
 }

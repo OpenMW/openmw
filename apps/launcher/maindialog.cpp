@@ -108,6 +108,34 @@ void MainDialog::createPages()
     mPagesWidget->addWidget(mGraphicsPage);
     mPagesWidget->addWidget(mDataFilesPage);
 
+    // Select the first page
+    mIconWidget->setCurrentItem(mIconWidget->item(0), QItemSelectionModel::Select);
+
+    connect(mPlayPage->mProfilesComboBox,
+            SIGNAL(currentIndexChanged(int)),
+            this, SLOT(profileChanged(int)));
+
+    connect(mDataFilesPage->mProfilesComboBox,
+            SIGNAL(currentIndexChanged(int)),
+            this, SLOT(profileChanged(int)));
+
+}
+
+void MainDialog::profileChanged(int index)
+{
+    // Just to be sure, should always have a selection
+    if (!mIconWidget->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QString currentPage = mIconWidget->currentItem()->data(Qt::DisplayRole).toString();
+    if (currentPage == QString("Play")) {
+        mDataFilesPage->mProfilesComboBox->setCurrentIndex(index);
+    }
+
+    if (currentPage == QString("Data Files")) {
+        mPlayPage->mProfilesComboBox->setCurrentIndex(index);
+    }
 }
 
 void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
@@ -116,23 +144,6 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
         current = previous;
 
     mPagesWidget->setCurrentIndex(mIconWidget->row(current));
-
-    if (previous) {
-        QString previousPage = previous->data(Qt::DisplayRole).toString();
-        QString currentPage = current->data(Qt::DisplayRole).toString();
-
-        // The user switched from Data Files to Play
-        if (previousPage == QString("Data Files") && currentPage == QString("Play")) {
-            mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
-
-        }
-
-        // The user switched from Play to Data Files
-        if (previousPage == QString("Play") && currentPage == QString("Data Files")) {
-            mDataFilesPage->mProfilesComboBox->setCurrentIndex(mPlayPage->mProfilesComboBox->currentIndex());
-        }
-    }
-
 }
 
 void MainDialog::closeEvent(QCloseEvent *event)
@@ -141,6 +152,38 @@ void MainDialog::closeEvent(QCloseEvent *event)
     mDataFilesPage->writeConfig();
     mDataFilesPage->mLauncherConfig->sync();
 
+    // Now write to the game config
+    writeConfig();
+    event->accept();
+
+}
+
+void MainDialog::play()
+{
+
+}
+
+void MainDialog::setupConfig()
+{
+    // First we read the OpenMW config
+    QString config = "openmw.cfg";
+    QFile file(config);
+
+    if (!file.exists()) {
+        config = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
+                                                       "openmw", "launcher.cfg"));
+    }
+
+    file.setFileName(config); // Just for displaying information
+    qDebug() << "Using config file from " << file.fileName();
+    file.close();
+
+    // Open our config file
+    mGameConfig = new QSettings(config, QSettings::IniFormat);
+}
+
+void MainDialog::writeConfig()
+{
     // Write to the openmw.cfg
     QString dataPath = mGameConfig->value("data").toString();
     dataPath.append("/");
@@ -171,7 +214,7 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
     // Now we write back the other config entries
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-       // File cannot be opened or created TODO: throw error
+        // File cannot be opened or created TODO: throw error
     }
 
     file.write(buffer);
@@ -190,34 +233,5 @@ void MainDialog::closeEvent(QCloseEvent *event)
         }
     }
 
-
     file.close();
-    event->accept();
-
-}
-
-void MainDialog::play()
-{
-
-}
-
-void MainDialog::setupConfig()
-{
-    // First we read the OpenMW config
-    QString config = "openmw.cfg";
-    QFile file(config);
-
-    if (!file.exists()) {
-        config = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                       "openmw", "launcher.cfg"));
-    }
-
-    file.setFileName(config); // Just for displaying information
-    qDebug() << "Using config file from " << file.fileName();
-    file.close();
-
-    // Open our config file
-    mGameConfig = new QSettings(config, QSettings::IniFormat);
-
-
 }
