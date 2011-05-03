@@ -151,10 +151,8 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 void MainDialog::closeEvent(QCloseEvent *event)
 {
     qDebug() << "Close event";
-    mDataFilesPage->writeConfig();
-    mDataFilesPage->mLauncherConfig->sync();
 
-    // Now write to the game config
+    // Now write all config files
     writeConfig();
     event->accept();
 
@@ -162,6 +160,8 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
 void MainDialog::play()
 {
+    // First do a write of all the configs, just to be sure
+    writeConfig();
 
 #if Q_WS_WIN
     // Windows TODO: proper install path handling
@@ -192,7 +192,7 @@ void MainDialog::play()
 void MainDialog::setupConfig()
 {
     // First we read the OpenMW config
-    QString config = "openmw.cfg";
+    QString config = "./openmw.cfg";
     QFile file(config);
 
     if (!file.exists()) {
@@ -210,9 +210,13 @@ void MainDialog::setupConfig()
 
 void MainDialog::writeConfig()
 {
+    // Write the profiles
+    mDataFilesPage->writeConfig();
+    mDataFilesPage->mLauncherConfig->sync();
+
     // Write to the openmw.cfg
-    QString dataPath = mGameConfig->value("data").toString();
-    dataPath.append("/");
+    //QString dataPath = mGameConfig->value("data").toString();
+    //dataPath.append("/");
 
     QStringList dataFiles = mDataFilesPage->selectedMasters();
     dataFiles.append(mDataFilesPage->checkedPlugins());
@@ -220,7 +224,10 @@ void MainDialog::writeConfig()
     qDebug() << "Writing to openmw.cfg";
 
     // Open the config as a QFile
-    QFile file(mGameConfig->fileName());
+
+    QString cfgfile = "./openmw.cfg";
+
+    QFile file(cfgfile);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         // File cannot be opened or created TODO: throw error
     }
@@ -248,16 +255,17 @@ void MainDialog::writeConfig()
 
     // Write the list of game files to the config
     foreach (const QString &currentFile, dataFiles) {
-        QFileInfo dataFile = QFileInfo(QString(currentFile).prepend(dataPath));
+        //QFileInfo dataFile = QFileInfo(QString(currentFile).prepend(dataPath));
 
-        if (dataFile.exists()) {
-            if (currentFile.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
-                out << "master=" << currentFile << endl;
-            } else if (currentFile.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
-                out << "plugin=" << currentFile << endl;
-            }
+        //if (dataFile.exists()) {
+        if (currentFile.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
+            out << "master=" << currentFile << endl;
+        } else if (currentFile.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
+            out << "plugin=" << currentFile << endl;
         }
+        //}
     }
 
     file.close();
+    qDebug() << "Writing done!";
 }

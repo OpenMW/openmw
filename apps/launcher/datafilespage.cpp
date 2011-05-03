@@ -309,7 +309,7 @@ void DataFilesPage::setupDataFiles(const QString &path)
 void DataFilesPage::setupConfig()
 {
     qDebug() << "setupConfig called";
-    QString config = "launcher.cfg";
+    QString config = "./launcher.cfg";
     QFile file(config);
 
     if (!file.exists()) {

@@ -5,7 +5,7 @@
 PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
     // Load the stylesheet
-    QFile file("launcher.qss");
+    QFile file("./launcher.qss");
 
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());
