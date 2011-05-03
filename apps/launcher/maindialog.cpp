@@ -173,17 +173,46 @@ void MainDialog::play()
 #endif
 
     QProcess process;
+    QFileInfo info(file);
 
     if (!file.exists()) {
-        // TODO: Throw error!
-        qDebug() << "Could not start process";
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error starting OpenMW");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not find OpenMW</b><br><br> \
+                        The OpenMW application is not found.<br> \
+                        Please make sure OpenMW is installed and try again.<br>"));
+        msgBox.exec();
+
         return;
     }
 
-    if(!process.startDetached(game)) {
-        // TODO: Throw error!;
-        qDebug() << "Could not start process";
-        qDebug() << "reason was:" << process.errorString();
+    if (!info.isExecutable()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error starting OpenMW");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not start OpenMW</b><br><br> \
+                        The OpenMW application is not executable.<br> \
+                        Please make sure you have the right permissions and try again.<br>"));
+        msgBox.exec();
+
+        return;
+    }
+
+    if (!process.startDetached(game)) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error starting OpenMW");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not start OpenMW</b><br><br> \
+                        An error occurred while starting OpenMW.<br><br> \
+                        Press \"Show Details...\" for more information.<br>"));
+        msgBox.setDetailedText(process.errorString());
+        msgBox.exec();
+
+        return;
     } else {
         close();
     }
