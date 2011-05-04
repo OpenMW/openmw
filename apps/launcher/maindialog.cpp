@@ -164,11 +164,11 @@ void MainDialog::play()
     // First do a write of all the configs, just to be sure
     writeConfig();
 
-#if Q_WS_WIN
+#ifdef Q_WS_WIN
     // Windows TODO: proper install path handling
     QString game = "./openmw.exe";
     QFile file(game);
-# else
+#else
     QString game = "./openmw";
     QFile file(game);
 #endif
