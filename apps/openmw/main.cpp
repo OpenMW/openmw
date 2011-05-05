@@ -42,8 +42,10 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
     desc.add_options()
         ("help", "print help message")
-        ("data", bpo::value<std::string>()->default_value ("data"),
-            "set data directory")
+        ("data", bpo::value<std::vector<std::string> >()
+            ->default_value (std::vector<std::string>(), "data")
+            ->multitoken(),
+            "set data directories (later directories have higher priority)")
         ("resources", bpo::value<std::string>()->default_value ("resources"),
             "set resources directory")
         ("start", bpo::value<std::string>()->default_value ("Beshara"),
@@ -105,9 +107,10 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     }
 
     // directory settings
-    std::vector<boost::filesystem::path> dataDirs;
-    dataDirs.push_back (variables["data"].as<std::string>());
-    engine.setDataDirs (dataDirs);
+    std::vector<std::string> dataDirs = variables["data"].as<std::vector<std::string> >();
+    std::vector<boost::filesystem::path> dataDirs2 (dataDirs.begin(), dataDirs.end());
+    engine.setDataDirs (dataDirs2);
+
     engine.setResourceDir (variables["resources"].as<std::string>());
 
     // master and plugin
