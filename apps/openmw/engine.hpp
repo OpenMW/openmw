@@ -84,6 +84,7 @@ namespace OMW
             MWWorld::Ptr mIgnoreLocalPtr;
 
             Files::Collections mFileCollections;
+            bool mFSStrict;
 
             // not implemented
             Engine (const Engine&);
@@ -108,6 +109,12 @@ namespace OMW
             Engine();
 
             ~Engine();
+
+            /// Enable strict filesystem mode (do not fold case)
+            ///
+            /// \attention The strict mode must be specified before any path-related settings
+            /// are given to the engine.
+            void enableFSStrict();
 
             /// Set data dirs
             void setDataDirs (const std::vector<boost::filesystem::path>& dataDirs);

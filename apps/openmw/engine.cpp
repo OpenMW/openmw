@@ -218,6 +218,7 @@ OMW::Engine::Engine()
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
+  , mFSStrict (false)
 {
     MWClass::registerClasses();
 }
@@ -258,6 +259,11 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 }
 
+void OMW::Engine::enableFSStrict()
+{
+    mFSStrict = true;
+}
+
 // Set data dir
 
 void OMW::Engine::setDataDirs (const std::vector<boost::filesystem::path>& dataDirs)
@@ -266,7 +272,7 @@ void OMW::Engine::setDataDirs (const std::vector<boost::filesystem::path>& dataD
     assert (!dataDirs.empty());
     mDataDir = dataDirs[0];
 
-    mFileCollections = Files::Collections (dataDirs, true);
+    mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
 
 // Set resource dir

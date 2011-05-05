@@ -74,6 +74,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ( "script-all", boost::program_options::value<bool>()->
             implicit_value (true)->default_value (false),
             "compile all scripts (excluding dialogue scripts) at startup")
+        ( "fs-strict", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false),
+            "strict file system handling (no case folding)")
         ;
 
     bpo::variables_map variables;
@@ -109,6 +112,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     }
 
     // directory settings
+    if (variables["fs-strict"].as<bool>()==true)
+        engine.enableFSStrict();
+
     std::vector<std::string> dataDirs = variables["data"].as<std::vector<std::string> >();
     std::vector<boost::filesystem::path> dataDirs2 (dataDirs.begin(), dataDirs.end());
 
