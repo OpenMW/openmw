@@ -46,6 +46,8 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             ->default_value (std::vector<std::string>(), "data")
             ->multitoken(),
             "set data directories (later directories have higher priority)")
+        ("data-local", bpo::value<std::string>()->default_value (""),
+            "set local data directory (highest priority)")
         ("resources", bpo::value<std::string>()->default_value ("resources"),
             "set resources directory")
         ("start", bpo::value<std::string>()->default_value ("Beshara"),
@@ -109,6 +111,11 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     // directory settings
     std::vector<std::string> dataDirs = variables["data"].as<std::vector<std::string> >();
     std::vector<boost::filesystem::path> dataDirs2 (dataDirs.begin(), dataDirs.end());
+
+    std::string local = variables["data-local"].as<std::string>();
+    if (!local.empty())
+        dataDirs.push_back (local);
+
     engine.setDataDirs (dataDirs2);
 
     engine.setResourceDir (variables["resources"].as<std::string>());
