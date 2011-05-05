@@ -10,6 +10,7 @@
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
 #include <components/compiler/extensions.hpp>
+#include <components/files/collections.hpp>
 
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
@@ -55,8 +56,6 @@ namespace OMW
 
     class Engine : private Ogre::FrameListener
     {
-
-            //int nFiles;
             boost::filesystem::path mDataDir;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer mOgre;
@@ -84,6 +83,8 @@ namespace OMW
 
             MWWorld::Ptr mIgnoreLocalPtr;
 
+            Files::Collections mFileCollections;
+
             // not implemented
             Engine (const Engine&);
             Engine& operator= (const Engine&);
@@ -108,8 +109,8 @@ namespace OMW
 
             ~Engine();
 
-            /// Set data dir
-            void setDataDir (const boost::filesystem::path& dataDir);
+            /// Set data dirs
+            void setDataDirs (const std::vector<boost::filesystem::path>& dataDirs);
 
             /// Set resource dir
             void setResourceDir (const boost::filesystem::path& parResDir);

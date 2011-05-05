@@ -105,7 +105,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     }
 
     // directory settings
-    engine.setDataDir (variables["data"].as<std::string>());
+    std::vector<boost::filesystem::path> dataDirs;
+    dataDirs.push_back (variables["data"].as<std::string>());
+    engine.setDataDirs (dataDirs);
     engine.setResourceDir (variables["resources"].as<std::string>());
 
     // master and plugin

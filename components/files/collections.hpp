@@ -13,6 +13,8 @@ namespace Files
 
         public:
 
+            Collections();
+
             Collections (const std::vector<boost::filesystem::path>& directories, bool foldCase);
             ///< Directories are listed with increasing priority.
 

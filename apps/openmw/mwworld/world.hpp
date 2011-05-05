@@ -26,6 +26,11 @@ namespace ESM
     struct Position;
 }
 
+namespace Files
+{
+    class Collections;
+}
+
 namespace Render
 {
     class OgreRenderer;
@@ -107,7 +112,8 @@ namespace MWWorld
             /// interior cell.
         public:
 
-           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng, const boost::filesystem::path& dataDir,
+           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+                const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
                 Environment& environment);
 
