@@ -41,9 +41,9 @@ namespace Files
 
     MultiDirCollection::MultiDirCollection (const std::vector<boost::filesystem::path>& directories,
         const std::string& extension, bool foldCase)
-    : mFiles (NameLess (foldCase))
+    : mFiles (NameLess (!foldCase))
     {
-        NameEqual equal (foldCase);
+        NameEqual equal (!foldCase);
 
         for (std::vector<boost::filesystem::path>::const_iterator iter = directories.begin();
             iter!=directories.end(); ++iter)

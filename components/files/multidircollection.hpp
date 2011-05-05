@@ -27,7 +27,9 @@ namespace Files
                 char l = std::tolower (left[i]);
                 char r = std::tolower (right[i]);
 
-                if (l>=r)
+                if (l<r)
+                    return true;
+                if (l>r)
                     return false;
             }
 
