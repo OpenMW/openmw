@@ -42,8 +42,12 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
     desc.add_options()
         ("help", "print help message")
-        ("data", bpo::value<std::string>()->default_value ("data"),
-            "set data directory")
+        ("data", bpo::value<std::vector<std::string> >()
+            ->default_value (std::vector<std::string>(), "data")
+            ->multitoken(),
+            "set data directories (later directories have higher priority)")
+        ("data-local", bpo::value<std::string>()->default_value (""),
+            "set local data directory (highest priority)")
         ("resources", bpo::value<std::string>()->default_value ("resources"),
             "set resources directory")
         ("start", bpo::value<std::string>()->default_value ("Beshara"),
@@ -70,6 +74,9 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ( "script-all", boost::program_options::value<bool>()->
             implicit_value (true)->default_value (false),
             "compile all scripts (excluding dialogue scripts) at startup")
+        ( "fs-strict", boost::program_options::value<bool>()->
+            implicit_value (true)->default_value (false),
+            "strict file system handling (no case folding)")
         ;
 
     bpo::variables_map variables;
@@ -105,7 +112,18 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     }
 
     // directory settings
-    engine.setDataDir (variables["data"].as<std::string>());
+    if (variables["fs-strict"].as<bool>()==true)
+        engine.enableFSStrict();
+
+    std::vector<std::string> dataDirs = variables["data"].as<std::vector<std::string> >();
+    std::vector<boost::filesystem::path> dataDirs2 (dataDirs.begin(), dataDirs.end());
+
+    std::string local = variables["data-local"].as<std::string>();
+    if (!local.empty())
+        dataDirs.push_back (local);
+
+    engine.setDataDirs (dataDirs2);
+
     engine.setResourceDir (variables["resources"].as<std::string>());
 
     // master and plugin

@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <components/bsa/bsa_archive.hpp>
+#include <components/files/collections.hpp>
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/interior.hpp"
@@ -406,15 +407,16 @@ namespace MWWorld
         mCellChanged = true;
     }
 
-    World::World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng, const boost::filesystem::path& dataDir,
+    World::World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+        const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment)
     : mSkyManager (0), mScene (renderer,physEng), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false), mEnvironment (environment)
     {
         mPhysEngine = physEng;
-        boost::filesystem::path masterPath (dataDir);
-        masterPath /= master;
+
+        boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
         std::cout << "Loading ESM " << masterPath.string() << "\n";
 
