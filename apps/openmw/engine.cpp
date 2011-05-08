@@ -218,6 +218,7 @@ OMW::Engine::Engine()
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
+  , mFSStrict (false)
 {
     MWClass::registerClasses();
 }
@@ -240,15 +241,12 @@ OMW::Engine::~Engine()
 
 void OMW::Engine::loadBSA()
 {
-    boost::filesystem::directory_iterator end;
+    const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
 
-    for (boost::filesystem::directory_iterator iter (mDataDir); iter!=end; ++iter)
+    for (Files::MultiDirCollection::TIter iter (bsa.begin()); iter!=bsa.end(); ++iter)
     {
-        if (boost::filesystem::extension (iter->path())==".bsa")
-        {
-            std::cout << "Adding " << iter->path().string() << std::endl;
-            addBSA(iter->path().string());
-        }
+         std::cout << "Adding " << iter->second.string() << std::endl;
+         addBSA (iter->second.string());
     }
 }
 
@@ -261,11 +259,20 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 }
 
+void OMW::Engine::enableFSStrict()
+{
+    mFSStrict = true;
+}
+
 // Set data dir
 
-void OMW::Engine::setDataDir (const boost::filesystem::path& dataDir)
+void OMW::Engine::setDataDirs (const std::vector<boost::filesystem::path>& dataDirs)
 {
-    mDataDir = boost::filesystem::system_complete (dataDir);
+    /// \todo remove mDataDir, once resources system can handle multiple directories
+    assert (!dataDirs.empty());
+    mDataDir = dataDirs[0];
+
+    mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
 
 // Set resource dir
@@ -318,14 +325,11 @@ void OMW::Engine::setNewGame()
 void OMW::Engine::go()
 {
     assert (!mEnvironment.mWorld);
-    assert (!mDataDir.empty());
     assert (!mCellName.empty());
     assert (!mMaster.empty());
 
     test.name = "";
     total = 0;
-
-    std::cout << "Data directory: " << mDataDir << "\n";
 
     std::string cfgDir = Files::getPath (Files::Path_ConfigGlobal, "openmw", "");
     std::string cfgUserDir = Files::getPath (Files::Path_ConfigUser, "openmw", "");
@@ -358,8 +362,8 @@ void OMW::Engine::go()
     mPhysicEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mDataDir, mMaster, mResDir, mNewGame, mEnvironment);
-
+    mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mFileCollections, mMaster,
+        mResDir, mNewGame, mEnvironment);
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false, cfgDir);

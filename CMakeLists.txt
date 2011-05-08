@@ -183,9 +183,13 @@ source_group(components\\misc FILES ${MISC} ${MISC_HEADER})
 
 set(FILES
     ${COMP_DIR}/files/path.cpp
+    ${COMP_DIR}/files/multidircollection.cpp
+    ${COMP_DIR}/files/collections.cpp
     )
 set(FILES_HEADER
     ${COMP_DIR}/files/path.hpp
+    ${COMP_DIR}/files/multidircollection.hpp
+    ${COMP_DIR}/files/collections.hpp
     )
 source_group(components\\files FILES ${FILES} ${FILES_HEADER})
 
