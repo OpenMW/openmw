@@ -89,7 +89,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mCopyProfileButton->setIcon(QIcon::fromTheme("edit-copy"));
 
     mDeleteProfileButton = new QPushButton(this);
-    mDeleteProfileButton->setIcon(QIcon::fromTheme("document-close"));
+    mDeleteProfileButton->setIcon(QIcon::fromTheme("edit-delete"));
     mDeleteProfileButton->setShortcut(QKeySequence(tr("Delete")));
 
     QHBoxLayout *bottomLayout = new QHBoxLayout();

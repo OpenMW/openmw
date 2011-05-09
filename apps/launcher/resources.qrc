@@ -7,4 +7,11 @@
     <file alias="openmw-header.png">resources/images/openmw-header.png</file>
     <file alias="playpage-background.png">resources/images/playpage-background.png</file>
 </qresource>
+<qresource prefix="/icons">
+
+    <file alias="48x48/video-display.png">resources/icons/video-display.png</file>
+    <file alias="16x16/document-new.png">resources/icons/document-new.png</file>
+    <file alias="16x16/edit-copy.png">resources/icons/edit-copy.png</file>
+    <file alias="16x16/edit-delete.png">resources/icons/edit-delete.png</file>
+</qresource>
 </RCC>
