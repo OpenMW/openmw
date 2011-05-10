@@ -11,17 +11,12 @@
 MainDialog::MainDialog()
 {
     mIconWidget = new QListWidget;
+    mIconWidget->setObjectName("IconWidget");
     mIconWidget->setViewMode(QListView::IconMode);
     mIconWidget->setWrapping(false);
     mIconWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Just to be sure
     mIconWidget->setIconSize(QSize(48, 48));
     mIconWidget->setMovement(QListView::Static);
-
-    mIconWidget->setStyleSheet("background-image: url(:/images/openmw-header.png); \
-                                background-color: white; \
-                                background-repeat: no-repeat; \
-                                background-attachment: scroll; \
-                                background-position: right;");
 
     mIconWidget->setMinimumWidth(400);
     mIconWidget->setFixedHeight(80);
@@ -246,6 +241,10 @@ void MainDialog::writeConfig()
     // Write the profiles
     mDataFilesPage->writeConfig();
     mDataFilesPage->mLauncherConfig->sync();
+
+    // Write the graphics settings
+    mGraphicsPage->writeConfig();
+    mGraphicsPage->mOgreConfig->sync();
 
     // Write to the openmw.cfg
     //QString dataPath = mGameConfig->value("data").toString();
