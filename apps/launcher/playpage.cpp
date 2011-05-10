@@ -4,25 +4,21 @@
 
 PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
-    // Load the stylesheet
-    QFile file("./launcher.qss");
+    QWidget *playWidget = new QWidget(this);
+    playWidget->setObjectName("PlayGroup");
+    playWidget->setFixedSize(QSize(425, 375));
 
-    file.open(QFile::ReadOnly);
-    QString styleSheet = QLatin1String(file.readAll());
-    setStyleSheet(styleSheet);
-
-    QGroupBox *playBox = new QGroupBox(this);
-    playBox->setFixedSize(QSize(425, 375));
-    playBox->setFlat(true);
-
-    mPlayButton = new QPushButton(tr("Play"), playBox);
+    mPlayButton = new QPushButton(tr("Play"), playWidget);
+    mPlayButton->setObjectName("PlayButton");
     mPlayButton->setMinimumSize(QSize(200, 50));
 
-    QLabel *profileLabel = new QLabel(tr("Current Profile:"), playBox);
+    QLabel *profileLabel = new QLabel(tr("Current Profile:"), playWidget);
+    profileLabel->setObjectName("ProfileLabel");
 
-    mProfilesComboBox = new QComboBox(playBox);
+    mProfilesComboBox = new QComboBox(playWidget);
+    mProfilesComboBox->setObjectName("ProfilesComboBox");
 
-    QGridLayout *playLayout = new QGridLayout(playBox);
+    QGridLayout *playLayout = new QGridLayout(playWidget);
 
     QSpacerItem *hSpacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
     QSpacerItem *hSpacer2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -40,6 +36,6 @@ PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 
     QHBoxLayout *pageLayout = new QHBoxLayout(this);
 
-    pageLayout->addWidget(playBox);
+    pageLayout->addWidget(playWidget);
 
 }

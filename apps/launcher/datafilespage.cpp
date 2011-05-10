@@ -17,7 +17,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     mPluginsSelectModel = new QItemSelectionModel(mPluginsModel);
 
-    //QPushButton *deselectButton = new QPushButton(tr("Deselect All"));
     QLabel *filterLabel = new QLabel(tr("Filter:"), this);
     LineEdit *filterLineEdit = new LineEdit(this);
 
@@ -31,6 +30,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mMastersWidget = new QTableWidget(this); // Contains the available masters
     mPluginsTable = new QTableView(this);
 
+    mMastersWidget->setObjectName("MastersWidget");
     mMastersWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     mMastersWidget->setSelectionMode(QAbstractItemView::MultiSelection);
     mMastersWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -72,24 +72,22 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     // Bottom part with profile options
     QLabel *profileLabel = new QLabel(tr("Current Profile:"), this);
 
-    //mProfilesModel = new QStringListModel();
-
     mProfilesComboBox = new ComboBox(this);
-    //mProfilesComboBox->setModel(mProfilesModel);
-
     mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
     mProfilesComboBox->setInsertPolicy(QComboBox::InsertAtBottom);
-    //mProfileComboBox->addItem(QString("New Profile"));
 
     mNewProfileButton = new QPushButton(this);
     mNewProfileButton->setIcon(QIcon::fromTheme("document-new"));
+    mNewProfileButton->setToolTip(tr("New Profile"));
     mNewProfileButton->setShortcut(QKeySequence(tr("Ctrl+N")));
 
     mCopyProfileButton = new QPushButton(this);
     mCopyProfileButton->setIcon(QIcon::fromTheme("edit-copy"));
+    mCopyProfileButton->setToolTip(tr("Copy Profile"));
 
     mDeleteProfileButton = new QPushButton(this);
     mDeleteProfileButton->setIcon(QIcon::fromTheme("edit-delete"));
+    mDeleteProfileButton->setToolTip(tr("Delete Profile"));
     mDeleteProfileButton->setShortcut(QKeySequence(tr("Delete")));
 
     QHBoxLayout *bottomLayout = new QHBoxLayout();
@@ -102,11 +100,9 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
     // Add some space above and below the page items
-    //QSpacerItem *vSpacer1 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
     QSpacerItem *vSpacer2 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
     QSpacerItem *vSpacer3 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-    //pageLayout->addItem(vSpacer1);
     pageLayout->addLayout(topLayout);
     pageLayout->addItem(vSpacer2);
     pageLayout->addWidget(splitter);
@@ -119,9 +115,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
     connect(mPluginsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(resizeRows()));
-
-    //connect(mProfileComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(profileChanged(const QString&)));
-
 
     connect(mNewProfileButton, SIGNAL(pressed()), this, SLOT(newProfile()));
     connect(mCopyProfileButton, SIGNAL(pressed()), this, SLOT(copyProfile()));

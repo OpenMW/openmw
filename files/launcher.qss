@@ -1,4 +1,4 @@
-QGroupBox {
+#PlayGroup {
     background-image: url(":/images/playpage-background.png");
     background-repeat: no-repeat;
     background-position: top;
@@ -6,7 +6,11 @@ QGroupBox {
     padding-right: 30px;
 }
 
-QPushButton {
+#MastersWidget {
+    selection-background-color: palette(highlight);
+}
+
+#PlayButton {
 
     height: 50px;
 
@@ -20,7 +24,7 @@ QPushButton {
         stop:0.9 rgba(0, 0, 0, 55),
         stop:1 rgba(0, 0, 0, 100));
 
-    font: 24pt "FreeMono";
+    font: 24pt "Trebuchet MS";
     color: black;
 
     border-right: 1px solid rgba(0, 0, 0, 155);
@@ -31,7 +35,7 @@ QPushButton {
     border-radius: 5px;
 }
 
-QPushButton:hover {
+#PlayButton:hover {
     border-bottom: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
     border-top: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
     border-right: qlineargradient(spread:pad, x1:1, y1:0, x2:0, y2:0, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
@@ -40,18 +44,16 @@ QPushButton:hover {
     border-style: solid;
 }
 
-QPushButton:pressed {
+#PlayButton:pressed {
 
 }
 
-QLabel
-{
-    font: 14pt "FreeMono";
+#ProfileLabel {
+    font: 14pt "Trebuchet MS";
 }
 
 
-QComboBox
-{
+#ProfilesComboBox {
     padding: 1px 18px 1px 3px;
 
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 white, stop:0.2 rgba(0, 0, 0, 25), stop:1 rgba(255, 255, 255, 200));
@@ -62,17 +64,19 @@ QComboBox
 }
 
 /*QComboBox gets the "on" state when the popup is open */
-QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+#ProfilesComboBox:!editable:on, #ProfilesComboBox::drop-down:editable:on {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 gray, stop:0.2 white);
 }
 
 
-QComboBox { /* shift the text when the popup opens */
+#ProfilesComboBox { /* shift the text when the popup opens */
     padding-top: 3px;
     padding-left: 4px;
+
+    font: 11pt "Trebuchet MS";
 }
 
-QComboBox::drop-down {
+#ProfilesComboBox::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
 
@@ -84,16 +88,16 @@ QComboBox::drop-down {
     border-bottom-right-radius: 3px;
 }
 
-QComboBox::down-arrow {
+#ProfilesComboBox::down-arrow {
     image: url(":/images/down.png");
 }
 
-QComboBox::down-arrow:on { /* shift the arrow when popup is open */
+#ProfilesComboBox::down-arrow:on { /* shift the arrow when popup is open */
     top: 1px;
     left: 1px;
 }
 
-QListWidget {
+#IconWidget {
     background-image: url(":/images/openmw-header.png");
     background-color: white;
     background-repeat: no-repeat;
