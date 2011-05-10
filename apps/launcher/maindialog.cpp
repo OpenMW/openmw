@@ -41,16 +41,11 @@ MainDialog::MainDialog()
     buttonBox->setStandardButtons(QDialogButtonBox::Close);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
-    //QSpacerItem *vSpacer1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
     dialogLayout->addWidget(mIconWidget);
-    //dialogLayout->addItem(vSpacer1);
     dialogLayout->addWidget(groupBox);
-
     dialogLayout->addWidget(buttonBox);
-    //mainLayout->addStretch(1);
-    //mainLayout->addSpacing(12);
+
 
     setWindowTitle(tr("OpenMW Launcher"));
     setWindowIcon(QIcon(":/images/openmw-icon.png"));
@@ -66,23 +61,30 @@ MainDialog::MainDialog()
 
 void MainDialog::createIcons()
 {
-    QListWidgetItem *configButton = new QListWidgetItem(mIconWidget);
-    configButton->setIcon(QIcon(":/images/openmw-icon.png"));
-    configButton->setText(tr("Play"));
-    configButton->setTextAlignment(Qt::AlignCenter);
-    configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    if (!QIcon::hasThemeIcon("document-new")) {
+        QIcon::setThemeName("tango");
+    }
 
-    QListWidgetItem *updateButton = new QListWidgetItem(mIconWidget);
-    updateButton->setIcon(QIcon::fromTheme("video-display"));
-    updateButton->setText(tr("Graphics"));
-    updateButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
-    updateButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    // We create a fallback icon because the default fallback doesn't work
+    QIcon graphicsIcon = QIcon(":/icons/tango/video-display.png");
 
-    QListWidgetItem *queryButton = new QListWidgetItem(mIconWidget);
-    queryButton->setIcon(QIcon(":/images/openmw-plugin-icon.png"));
-    queryButton->setText(tr("Data Files"));
-    queryButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-    queryButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    QListWidgetItem *playButton = new QListWidgetItem(mIconWidget);
+    playButton->setIcon(QIcon(":/images/openmw-icon.png"));
+    playButton->setText(tr("Play"));
+    playButton->setTextAlignment(Qt::AlignCenter);
+    playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    QListWidgetItem *graphicsButton = new QListWidgetItem(mIconWidget);
+    graphicsButton->setIcon(QIcon::fromTheme("video-display", graphicsIcon));
+    graphicsButton->setText(tr("Graphics"));
+    graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
+    graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    QListWidgetItem *dataFilesButton = new QListWidgetItem(mIconWidget);
+    dataFilesButton->setIcon(QIcon(":/images/openmw-plugin-icon.png"));
+    dataFilesButton->setText(tr("Data Files"));
+    dataFilesButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+    dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     connect(mIconWidget,
             SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
