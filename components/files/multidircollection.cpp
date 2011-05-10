@@ -55,10 +55,10 @@ namespace Files
             {
                 boost::filesystem::path path = *iter;
 
-                if (!equal (extension, path.extension()))
+                if (!equal (extension, boost::filesystem::path (path.extension()).string()))
                     continue;
 
-                std::string filename = path.filename();
+                std::string filename = boost::filesystem::path (path.filename()).string();
 
                 TIter result = mFiles.find (filename);
 
