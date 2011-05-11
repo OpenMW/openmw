@@ -44,6 +44,8 @@ MainDialog::MainDialog()
 
     setWindowTitle(tr("OpenMW Launcher"));
     setWindowIcon(QIcon(":/images/openmw-icon.png"));
+    // Remove what's this? button
+    setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setMinimumSize(QSize(575, 575));
 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
