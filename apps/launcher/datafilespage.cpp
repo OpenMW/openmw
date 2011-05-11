@@ -15,6 +15,11 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mDataFilesModel = new QStandardItemModel(); // Contains all plugins with masters
     mPluginsModel = new QStandardItemModel(); // Contains selectable plugins
 
+    mPluginsProxyModel = new QSortFilterProxyModel();
+    mPluginsProxyModel->setDynamicSortFilter(true);
+    mPluginsProxyModel->setSourceModel(mPluginsModel);
+
+    // TODO: decide what to do with the selection model
     mPluginsSelectModel = new QItemSelectionModel(mPluginsModel);
 
     QLabel *filterLabel = new QLabel(tr("Filter:"), this);
@@ -40,7 +45,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mMastersWidget->verticalHeader()->hide();
     mMastersWidget->insertColumn(0);
 
-    mPluginsTable->setModel(mPluginsModel);
+    mPluginsTable->setModel(mPluginsProxyModel);
     mPluginsTable->setSelectionModel(mPluginsSelectModel);
     mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     mPluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -112,6 +117,8 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     connect(mMastersWidget->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(masterSelectionChanged(const QItemSelection&, const QItemSelection&)));
+
+    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(const QString)));
 
     connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
     connect(mPluginsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(resizeRows()));
@@ -531,6 +538,13 @@ void DataFilesPage::resizeRows()
     mPluginsTable->resizeRowsToContents();
 }
 
+void DataFilesPage::filterChanged(const QString filter)
+{
+    QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
+    mPluginsProxyModel->setFilterRegExp(regExp);
+
+}
+
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
 {
     qDebug() << "Profile changed " << current << previous;
@@ -544,7 +558,6 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
     // Deselect the masters
     mMastersWidget->selectionModel()->clearSelection();
     readConfig();
-
 }
 
 void DataFilesPage::readConfig()

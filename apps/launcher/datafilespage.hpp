@@ -11,6 +11,7 @@ class ComboBox;
 class QStandardItemModel;
 class QItemSelection;
 class QItemSelectionModel;
+class QSortFilterProxyModel;
 class QStringListModel;
 class QSettings;
 class QPushButton;
@@ -23,7 +24,6 @@ public:
     DataFilesPage(QWidget *parent = 0);
 
     ComboBox *mProfilesComboBox;
-    //QStringListModel *mProfilesModel;
     QSettings *mLauncherConfig;
 
     const QStringList checkedPlugins();
@@ -38,6 +38,7 @@ public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckstate(QModelIndex index);
     void resizeRows();
+    void filterChanged(const QString filter);
     void profileChanged(const QString &previous, const QString &current);
     void newProfile();
     void copyProfile();
@@ -50,6 +51,7 @@ private:
     QStandardItemModel *mDataFilesModel;
     QStandardItemModel *mPluginsModel;
 
+    QSortFilterProxyModel *mPluginsProxyModel;
     QItemSelectionModel *mPluginsSelectModel;
 
     QPushButton *mNewProfileButton;
