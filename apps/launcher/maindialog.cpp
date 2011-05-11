@@ -94,8 +94,36 @@ void MainDialog::createPages()
     mGraphicsPage = new GraphicsPage(this);
     mDataFilesPage = new DataFilesPage(this);
 
-    QString dataDir = mGameConfig->value("data").toString();
-    mDataFilesPage->setupDataFiles(dataDir);
+    // First we retrieve all data= keys from the config
+    // We can't use QSettings directly because it
+    // does not support multiple keys with the same name
+    QFile file(mGameConfig->fileName());
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return; // File cannot be opened or created TODO: throw error
+    }
+
+    QTextStream in(&file);
+
+    QStringList dataDirs;
+
+    // Add each data= value
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+
+        if (line.startsWith("data=")) {
+            dataDirs.append(line.remove("data="));
+        }
+    }
+
+    // Add the data-local= key
+    QString dataLocal = mGameConfig->value("data-local").toString();
+    if (!dataLocal.isEmpty()) {
+        dataDirs.append(dataLocal);
+    }
+
+    // Now pass the datadirs on to the DataFilesPage
+    mDataFilesPage->setupDataFiles(dataDirs, mGameConfig->value("fs-strict").toBool());
 
     // Set the combobox of the play page to imitate the comobox on the datafilespage
     mPlayPage->mProfilesComboBox->setModel(mDataFilesPage->mProfilesComboBox->model());

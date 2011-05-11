@@ -4,11 +4,14 @@
 
 #include <components/esm/esm_reader.hpp>
 #include <components/files/path.hpp>
+#include <components/files/collections.hpp>
+#include <components/files/multidircollection.hpp>
 
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
 
 using namespace ESM;
+using namespace std;
 
 DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 {
@@ -130,49 +133,51 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     setupConfig();
 }
 
-void DataFilesPage::setupDataFiles(const QString &path)
+void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 {
     qDebug() << "setupDataFiles called!";
-    // TODO: Add a warning when a master is missing
 
-    QDir dataFilesDir(path);
+    // Put the paths in a boost::filesystem vector to use with Files::Collections
+    std::vector<boost::filesystem::path> dataDirs;
 
-    if (!dataFilesDir.exists())
-        qWarning("Cannot find the plugin directory");
+    foreach (const QString &currentPath, paths) {
+        dataDirs.push_back(boost::filesystem::path(currentPath.toStdString()));
+    }
 
-    // First we add all the master files from the plugin dir
-    dataFilesDir.setNameFilters((QStringList() << "*.esm")); // Only load masters
+    // Create a file collection for the dataDirs
+    Files::Collections mFileCollections(dataDirs, strict);
 
-    QStringList masterFiles = dataFilesDir.entryList();
+     // First we add all the master files
+    const Files::MultiDirCollection &esm = mFileCollections.getCollection(".esm");
+    unsigned int i = 0; // Row number
 
-    for (int i=0; i<masterFiles.count(); ++i)
+    for (Files::MultiDirCollection::TIter iter(esm.begin()); iter!=esm.end(); ++iter)
     {
-        QString currentMaster = masterFiles.at(i);
+        qDebug() << "Master: " << QString::fromStdString(iter->second.filename().string());
+
+        QString currentMaster = QString::fromStdString(iter->second.filename().string());
         const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
         if (itemList.isEmpty()) // Master is not yet in the widget
-            {
-                mMastersWidget->insertRow(i);
-                QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
-                mMastersWidget->setItem(i, 0, item);
-            }
+        {
+            qDebug() << "Master not yet in the widget, rowcount is " << i;
+
+            mMastersWidget->insertRow(i);
+            QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
+            mMastersWidget->setItem(i, 0, item);
+            ++i;
+        }
     }
 
     // Now on to the plugins
-    dataFilesDir.setNameFilters((QStringList() << "*.esp")); // Only load plugins
+    const Files::MultiDirCollection &esp = mFileCollections.getCollection(".esp");
 
-    QStringList pluginFiles = dataFilesDir.entryList();
-
-    for (int i=0; i<pluginFiles.count(); ++i)
+    for (Files::MultiDirCollection::TIter iter(esp.begin()); iter!=esp.end(); ++iter)
     {
         ESMReader fileReader;
-        QString currentFile = pluginFiles.at(i);
         QStringList availableMasters; // Will contain all found masters
 
-        QString filePath = dataFilesDir.absolutePath();
-        filePath.append("/");
-        filePath.append(currentFile);
-        fileReader.open(filePath.toStdString());
+        fileReader.open(iter->second.string());
 
         // First we fill the availableMasters and the mMastersWidget
         ESMReader::MasterList mlist = fileReader.getMasters();
@@ -185,6 +190,7 @@ void DataFilesPage::setupDataFiles(const QString &path)
 
             if (itemList.isEmpty()) // Master is not yet in the widget
             {
+                // TODO: Show warning, missing master
                 mMastersWidget->insertRow(i);
                 QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
                 mMastersWidget->setItem(i, 0, item);
@@ -193,9 +199,9 @@ void DataFilesPage::setupDataFiles(const QString &path)
 
         availableMasters.sort(); // Sort the masters alphabetically
 
-        // Now we put the currentFile in the mDataFilesModel under its masters
+        // Now we put the current plugin in the mDataFilesModel under its masters
         QStandardItem *parent = new QStandardItem(availableMasters.join(","));
-        QStandardItem *child = new QStandardItem(currentFile);
+        QStandardItem *child = new QStandardItem(QString::fromStdString(iter->second.filename().string()));
 
         const QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
 
@@ -210,6 +216,8 @@ void DataFilesPage::setupDataFiles(const QString &path)
         }
     }
 
+    // TODO: Better dynamic resizing of rows
+    resizeRows();
     readConfig();
 }
 
@@ -480,11 +488,13 @@ void DataFilesPage::setCheckstate(QModelIndex index)
     if (!index.isValid())
         return;
 
-    if (mPluginsModel->data(index, Qt::CheckStateRole) == Qt::Checked) {
+    QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(index);
+
+    if (mPluginsModel->data(sourceModelIndex, Qt::CheckStateRole) == Qt::Checked) {
         // Selected row is checked, uncheck it
-        mPluginsModel->setData(index, Qt::Unchecked, Qt::CheckStateRole);
+        mPluginsModel->setData(sourceModelIndex, Qt::Unchecked, Qt::CheckStateRole);
     } else {
-        mPluginsModel->setData(index, Qt::Checked, Qt::CheckStateRole);
+        mPluginsModel->setData(sourceModelIndex, Qt::Checked, Qt::CheckStateRole);
     }
 }
 
@@ -542,7 +552,7 @@ void DataFilesPage::filterChanged(const QString filter)
 {
     QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
     mPluginsProxyModel->setFilterRegExp(regExp);
-
+    resizeRows();
 }
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)

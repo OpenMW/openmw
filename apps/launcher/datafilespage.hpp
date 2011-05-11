@@ -32,7 +32,7 @@ public:
     void readConfig();
     void writeConfig(QString profile = QString());
 
-    void setupDataFiles(const QString &path);
+    void setupDataFiles(const QStringList &paths, bool strict);
 
 public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
