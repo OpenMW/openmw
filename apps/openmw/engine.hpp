@@ -100,7 +100,7 @@ namespace OMW
 
             void executeLocalScripts();
 
-            virtual bool frameStarted(const Ogre::FrameEvent& evt);
+            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
             /// Process pending commands
 

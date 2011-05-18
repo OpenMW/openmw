@@ -76,7 +76,7 @@ void OMW::Engine::executeLocalScripts()
 }
 
 
-bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
+bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     if(mShowFPS)
     {
