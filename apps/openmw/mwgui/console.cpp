@@ -223,11 +223,11 @@ namespace MWGui
             try
             {
                 ConsoleInterpreterContext interpreterContext (*this, mEnvironment, MWWorld::Ptr());
-                Interpreter::Interpreter interpreter (interpreterContext);
+                Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 std::vector<Interpreter::Type_Code> code;
                 output.getCode (code);
-                interpreter.run (&code[0], code.size());
+                interpreter.run (&code[0], code.size(), interpreterContext);
             }
             catch (const std::exception& error)
             {
