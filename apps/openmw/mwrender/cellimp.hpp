@@ -35,7 +35,7 @@ namespace MWRender
     virtual ~CellRenderImp() {}
 
     /// start inserting a new reference.
-    virtual void insertBegin (ESM::CellRef &ref) = 0;
+    virtual void insertBegin (ESM::CellRef &ref, bool static_ = false) = 0;
 
     virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements) = 0;
     /// insert a mesh related to the most recent insertBegin call.
@@ -71,10 +71,10 @@ namespace MWRender
 
         public:
 
-            Rendering (CellRenderImp& cellRender, ESM::CellRef &ref)
+            Rendering (CellRenderImp& cellRender, ESM::CellRef &ref, bool static_ = false)
             : mCellRender (cellRender), mEnd (false)
             {
-                mCellRender.insertBegin (ref);
+                mCellRender.insertBegin (ref, static_);
             }
 
             ~Rendering()

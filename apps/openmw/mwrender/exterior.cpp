@@ -45,8 +45,8 @@ ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell,
 }
 
 
-// start inserting a new reference.
-void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
+
+void ExteriorCellRender::insertBegin (ESM::CellRef &ref, bool static_)
 {
   assert (!mInsert);
 
