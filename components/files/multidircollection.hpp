@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <locale>
 
 #include <boost/filesystem/path.hpp>
 
@@ -21,11 +22,12 @@ namespace Files
                 return left<right;
 
             std::size_t min = std::min (left.length(), right.length());
+			std::locale loc;
 
             for (std::size_t i=0; i<min; ++i)
             {
-                char l = std::tolower (left[i]);
-                char r = std::tolower (right[i]);
+                char l = std::tolower (left[i], loc);
+                char r = std::tolower (right[i], loc);
 
                 if (l<r)
                     return true;

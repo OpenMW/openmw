@@ -145,6 +145,7 @@ public:
   void destroyInstance( Archive* arch) { delete arch; }
 };
 
+
 static bool init = false;
 static void insertBSAFactory()
 {
@@ -162,4 +163,9 @@ void addBSA(const std::string& name, const std::string& group)
   insertBSAFactory();
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "BSA", group);
+}
+void addDir(const std::string& name, const std::string& group)
+{
+  ResourceGroupManager::getSingleton().
+    addResourceLocation(name, "FileSystem", group);
 }

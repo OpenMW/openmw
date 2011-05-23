@@ -296,6 +296,7 @@ void OMW::Engine::loadBSA()
          std::cout << "Adding " << iter->second.string() << std::endl;
          addBSA (iter->second.string());
     }
+
 }
 
 // add resources directory

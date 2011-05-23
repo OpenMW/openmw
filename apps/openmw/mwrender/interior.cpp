@@ -200,8 +200,10 @@ Ogre::Entity* InteriorCellRender::insertAndDeliverMesh(const std::string &mesh)
 void InteriorCellRender::insertMesh(const std::string &mesh)
 {
   assert (insert);
-
-  NIFLoader::load(mesh);
+  //if(mesh == "\\Meshes\\bald_MJ_hat.NIF")
+	//  NIFLoader::load(mesh, "");
+  //else
+	 NIFLoader::load(mesh);
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   insert->attachObject(ent);
 
