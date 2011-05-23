@@ -125,6 +125,8 @@ namespace MWRender
     /// Remove the reference with the given handle permanently from the scene.
     virtual void deleteObject (const std::string& handle);
 
+    void destroyAllAttachedMovableObjects(Ogre::SceneNode* i_pSceneNode);
+
     static int uniqueID;
   };
 }

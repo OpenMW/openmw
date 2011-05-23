@@ -224,6 +224,7 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
   {
       sg->addEntity(ent,mInsert->_getDerivedPosition(),mInsert->_getDerivedOrientation(),mInsert->_getDerivedScale());
       sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
+      mScene.getMgr()->destroyEntity(ent);
   }
   if (mInsertMesh.empty())
       mInsertMesh = mesh;
@@ -363,10 +364,38 @@ void ExteriorCellRender::hide()
     mBase->setVisible(false);
 }
 
+void ExteriorCellRender::destroyAllAttachedMovableObjects(Ogre::SceneNode* i_pSceneNode)
+{
+   if ( !i_pSceneNode )
+   {
+      assert( false );
+      return;
+   }
+
+   // Destroy all the attached objects
+   SceneNode::ObjectIterator itObject = i_pSceneNode->getAttachedObjectIterator();
+
+   while ( itObject.hasMoreElements() )
+   {
+      MovableObject* pObject = static_cast<MovableObject*>(itObject.getNext());
+      i_pSceneNode->getCreator()->destroyMovableObject( pObject );
+   }
+
+   // Recurse to child SceneNodes
+   SceneNode::ChildNodeIterator itChild = i_pSceneNode->getChildIterator();
+
+   while ( itChild.hasMoreElements() )
+   {
+      SceneNode* pChildNode = static_cast<SceneNode*>(itChild.getNext());
+      destroyAllAttachedMovableObjects( pChildNode );
+   }
+}
+
 void ExteriorCellRender::destroy()
 {
   if(mBase)
     {
+      destroyAllAttachedMovableObjects(mBase);
       mBase->removeAndDestroyAllChildren();
       mScene.getMgr()->destroySceneNode(mBase);
     }
