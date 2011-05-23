@@ -31,17 +31,14 @@ float ExteriorCellRender::lightQuadraticRadiusMult = 1;
 
 bool ExteriorCellRender::lightOutQuadInLin = false;
 
+int ExteriorCellRender::uniqueID = 0;
+
 ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
     MWScene &_scene)
     : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0) 
 {
-    //char a = mCell.cell->name;
-    //char *rand1;
-    srand (150);
-    //itoa(rand(),rand1,10);
-    int a;
-    Ogre::StringConverter::toString(rand());
-    sg = Ogre::Root::getSingleton().getSceneManagerIterator().getNext()->createStaticGeometry( Ogre::StringConverter::toString(a));
+    uniqueID = uniqueID +1;
+    sg = Ogre::Root::getSingleton().getSceneManagerIterator().getNext()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
 }
 
 
