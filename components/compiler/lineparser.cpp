@@ -30,12 +30,12 @@ namespace Compiler
         {
             case 'l':
 
-                Generator::message (mCode, mLiterals, "%g", 0);
+                Generator::report (mCode, mLiterals, "%g");
                 break;
 
             case 'f':
 
-                Generator::message (mCode, mLiterals, "%f", 0);
+                Generator::report (mCode, mLiterals, "%f");
                 break;
 
             default:

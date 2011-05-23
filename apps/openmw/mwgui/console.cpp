@@ -17,6 +17,8 @@ namespace MWGui
 
             ConsoleInterpreterContext (Console& console, MWWorld::Environment& environment,
                 MWWorld::Ptr reference);
+
+            virtual void report (const std::string& message);
     };
 
     ConsoleInterpreterContext::ConsoleInterpreterContext (Console& console,
@@ -25,6 +27,11 @@ namespace MWGui
         reference.isEmpty() ? 0 : &reference.getRefData().getLocals(), reference),
       mConsole (console)
     {}
+
+    void ConsoleInterpreterContext::report (const std::string& message)
+    {
+        mConsole.printOK (message);
+    }
 
     bool Console::compile (const std::string& cmd, Compiler::Output& output)
     {
@@ -216,11 +223,11 @@ namespace MWGui
             try
             {
                 ConsoleInterpreterContext interpreterContext (*this, mEnvironment, MWWorld::Ptr());
-                Interpreter::Interpreter interpreter (interpreterContext);
+                Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 std::vector<Interpreter::Type_Code> code;
                 output.getCode (code);
-                interpreter.run (&code[0], code.size());
+                interpreter.run (&code[0], code.size(), interpreterContext);
             }
             catch (const std::exception& error)
             {

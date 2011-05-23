@@ -5,7 +5,7 @@ project(OpenMW)
 set(GAME
     main.cpp
     engine.cpp
-    path.cpp)
+    )
 set(GAME_HEADER
     engine.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
@@ -70,9 +70,17 @@ source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
 set(GAMEDIALOGUE_HEADER
     mwdialogue/dialoguemanager.hpp
+    mwdialogue/journal.hpp
+    mwdialogue/journalentry.hpp
+    mwdialogue/quest.hpp
+    mwdialogue/topic.hpp
 )
 set(GAMEDIALOGUE
     mwdialogue/dialoguemanager.cpp
+    mwdialogue/journal.cpp
+    mwdialogue/journalentry.cpp
+    mwdialogue/quest.cpp
+    mwdialogue/topic.cpp
 )
 source_group(apps\\openmw\\mwdialogue FILES ${GAMEDIALOGUE_HEADER} ${GAMEDIALOGUE})
 
@@ -91,6 +99,7 @@ set(GAMESCRIPT
     mwscript/controlextensions.cpp
     mwscript/extensions.cpp
     mwscript/globalscripts.cpp
+    mwscript/dialogueextensions.cpp
     )
 set(GAMESCRIPT_HEADER
     mwscript/locals.hpp
@@ -109,6 +118,7 @@ set(GAMESCRIPT_HEADER
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
     mwscript/ref.hpp
+    mwscript/dialogueextensions.hpp
     )
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})
 

@@ -3,7 +3,8 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 /*
  * Alchemist apparatus
@@ -11,33 +12,26 @@ namespace ESM {
 
 struct Apparatus
 {
-  enum AppaType
+    enum AppaType
     {
-      MortarPestle  = 0,
-      Albemic       = 1,
-      Calcinator    = 2,
-      Retort        = 3
+        MortarPestle = 0,
+        Albemic = 1,
+        Calcinator = 2,
+        Retort = 3
     };
 
-  struct AADTstruct
-  {
-    int type;
-    float quality;
-    float weight;
-    int value;
-  };
+    struct AADTstruct
+    {
+        int type;
+        float quality;
+        float weight;
+        int value;
+    };
 
-  AADTstruct data;
-  std::string model, icon, script, name;
+    AADTstruct data;
+    std::string model, icon, script, name;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNString("FNAM");
-    esm.getHNT(data, "AADT", 16);
-    script = esm.getHNOString("SCRI");
-    icon = esm.getHNString("ITEX");
-  }
+    void load(ESMReader &esm);
 };
 }
 #endif

@@ -3,7 +3,8 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 /*
  * Faction definitions
@@ -12,67 +13,46 @@ namespace ESM {
 // Requirements for each rank
 struct RankData
 {
-  int attribute1, attribute2; // Attribute level
+    int attribute1, attribute2; // Attribute level
 
-  int skill1, skill2;     // Skill level (faction skills given in
-                  // skillID below.) You need one skill at
-                  // level 'skill1' and two skills at level
-                  // 'skill2' to advance to this rank.
+    int skill1, skill2; // Skill level (faction skills given in
+    // skillID below.) You need one skill at
+    // level 'skill1' and two skills at level
+    // 'skill2' to advance to this rank.
 
-  int factReaction;   // Reaction from faction members
+    int factReaction; // Reaction from faction members
 };
 
 struct Faction
 {
-  std::string id, name;
+    std::string id, name;
 
-  struct FADTstruct
-  {
-    // Which attributes we like
-    int attribute1, attribute2;
+    struct FADTstruct
+    {
+        // Which attributes we like
+        int attribute1, attribute2;
 
-    RankData rankData[10];
+        RankData rankData[10];
 
-    int skillID[6]; // IDs of skills this faction require
-    int unknown;    // Always -1?
-    int isHidden;   // 1 - hidden from player
-  }; // 240 bytes
+        int skillID[6]; // IDs of skills this faction require
+        int unknown; // Always -1?
+        int isHidden; // 1 - hidden from player
+    }; // 240 bytes
 
-  FADTstruct data;
+    FADTstruct data;
 
-  struct Reaction
-  {
-    std::string faction;
-    int reaction;
-  };
+    struct Reaction
+    {
+        std::string faction;
+        int reaction;
+    };
 
-  std::vector<Reaction> reactions;
+    std::vector<Reaction> reactions;
 
-  // Name of faction ranks (may be empty for NPC factions)
-  std::string ranks[10];
+    // Name of faction ranks (may be empty for NPC factions)
+    std::string ranks[10];
 
-  void load(ESMReader &esm)
-  {
-    name = esm.getHNString("FNAM");
-
-    // Read rank names. These are optional.
-    int i = 0;
-    while(esm.isNextSub("RNAM") && i<10) ranks[i++] = esm.getHString();
-
-    // Main data struct
-    esm.getHNT(data, "FADT", 240);
-
-    if(data.isHidden > 1) esm.fail("Unknown flag!");
-
-    // Read faction response values
-    while(esm.hasMoreSubs())
-      {
-        Reaction r;
-        r.faction = esm.getHNString("ANAM");
-        esm.getHNT(r.reaction, "INTV");
-        reactions.push_back(r);
-      }
-  }
+    void load(ESMReader &esm);
 };
 }
 #endif

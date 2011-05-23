@@ -26,6 +26,11 @@ namespace ESM
     struct Position;
 }
 
+namespace Files
+{
+    class Collections;
+}
+
 namespace Render
 {
     class OgreRenderer;
@@ -107,7 +112,8 @@ namespace MWWorld
             /// interior cell.
         public:
 
-           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng, const boost::filesystem::path& dataDir,
+           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+                const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
                 Environment& environment);
 
@@ -115,7 +121,7 @@ namespace MWWorld
 
             MWWorld::Player& getPlayer();
 
-            ESMS::ESMStore& getStore();
+            const ESMS::ESMStore& getStore() const;
 
             const ScriptList& getLocalScripts() const;
             ///< Names and local variable state of all local scripts in active cells.
@@ -124,6 +130,8 @@ namespace MWWorld
             ///< Has the player moved to a different cell, since the last frame?
 
             Globals::Data& getGlobalVariable (const std::string& name);
+
+            Globals::Data getGlobalVariable (const std::string& name) const;
 
             char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.
@@ -147,7 +155,8 @@ namespace MWWorld
 
             void setDay (int day);
 
-            void toggleSky();
+            bool toggleSky();
+            ///< \return Resulting mode
 
             int getMasserPhase() const;
 
@@ -185,12 +194,14 @@ namespace MWWorld
                 float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
-            void toggleCollisionMode();
+            bool toggleCollisionMode();
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
+            ///< \return Resulting mode
 
-            void toggleRenderMode (RenderMode mode);
+            bool toggleRenderMode (RenderMode mode);
             ///< Toggle a render mode.
+            ///< \return Resulting mode
     };
 }
 

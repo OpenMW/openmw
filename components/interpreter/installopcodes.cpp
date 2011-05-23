@@ -95,6 +95,7 @@ namespace Interpreter
         interpreter.installSegment5 (54, new OpEnableExplicit);
         interpreter.installSegment5 (55, new OpDisableExplicit);
         interpreter.installSegment5 (56, new OpGetDisabledExplicit);
+        interpreter.installSegment5 (58, new OpReport);
 
         // script control
         interpreter.installSegment5 (46, new OpScriptRunning);
@@ -106,4 +107,3 @@ namespace Interpreter
         interpreter.installSegment5 (57, new OpGetDistanceExplicit);
     }
 }
-

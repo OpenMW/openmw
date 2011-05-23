@@ -50,7 +50,7 @@ void GenerateClassResultDialog::setClassId(const std::string &classId)
 {
     currentClassId = classId;
     classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
-    ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = mWindowManager.getStore();
     className->setCaption(store.classes.find(currentClassId)->name);
 }
 
@@ -196,8 +196,8 @@ void PickClassDialog::updateClasses()
 {
     classList->removeAllItems();
 
-    ESMS::ESMStore &store = mWindowManager.getStore();
-    
+    const ESMS::ESMStore &store = mWindowManager.getStore();
+
     ESMS::RecListT<ESM::Class>::MapType::const_iterator it = store.classes.list.begin();
     ESMS::RecListT<ESM::Class>::MapType::const_iterator end = store.classes.list.end();
     int index = 0;
@@ -220,7 +220,7 @@ void PickClassDialog::updateStats()
 {
     if (currentClassId.empty())
         return;
-    ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = mWindowManager.getStore();
     const ESM::Class *klass = store.classes.search(currentClassId);
     if (!klass)
         return;
@@ -767,7 +767,7 @@ SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
     {
         char theIndex = '0'+i;
         getWidget(combatSkill[i],  std::string("CombatSkill").append(1, theIndex));
-        getWidget(magicSkill[i],   std::string("MagicSkill").append(1, theIndex)); 
+        getWidget(magicSkill[i],   std::string("MagicSkill").append(1, theIndex));
         getWidget(stealthSkill[i], std::string("StealthSkill").append(1, theIndex));
     }
 
@@ -782,8 +782,8 @@ SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
             {combatSkill[6], ESM::Skill::Axe},
             {combatSkill[7], ESM::Skill::Spear},
             {combatSkill[8], ESM::Skill::Athletics}
-        },   
-        {    
+        },
+        {
             {magicSkill[0], ESM::Skill::Enchant},
             {magicSkill[1], ESM::Skill::Destruction},
             {magicSkill[2], ESM::Skill::Alteration},
@@ -793,8 +793,8 @@ SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
             {magicSkill[6], ESM::Skill::Restoration},
             {magicSkill[7], ESM::Skill::Alchemy},
             {magicSkill[8], ESM::Skill::Unarmored}
-        },   
-        {    
+        },
+        {
             {stealthSkill[0], ESM::Skill::Security},
             {stealthSkill[1], ESM::Skill::Sneak},
             {stealthSkill[2], ESM::Skill::Acrobatics},

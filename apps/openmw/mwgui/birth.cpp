@@ -119,8 +119,8 @@ void BirthDialog::updateBirths()
 {
     birthList->removeAllItems();
 
-    ESMS::ESMStore &store = mWindowManager.getStore();
-    
+    const ESMS::ESMStore &store = mWindowManager.getStore();
+
     ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator it = store.birthSigns.list.begin();
     ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator end = store.birthSigns.list.end();
     int index = 0;
@@ -149,7 +149,7 @@ void BirthDialog::updateSpells()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, spellArea->getWidth(), 18);
 
-    ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = mWindowManager.getStore();
     const ESM::BirthSign *birth = store.birthSigns.find(currentBirthId);
 
     std::string texturePath = std::string("textures\\") + birth->texture;

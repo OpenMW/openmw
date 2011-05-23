@@ -117,51 +117,14 @@ struct Cell
   int water; // Water level
   int mapColor;
 
-  void load(ESMReader &esm)
-  {
-    // Ignore this for now, it might mean we should delete the entire
-    // cell?
-    if(esm.isNextSub("DELE")) esm.skipHSub();
-
-    esm.getHNT(data, "DATA", 12);
-
-    // Water level
-    water = 0;
-
-    if(data.flags & Interior)
-      {
-        // Interior cells
-
-        if(esm.isNextSub("INTV") || esm.isNextSub("WHGT"))
-          esm.getHT(water);
-
-        // Quasi-exterior cells have a region (which determines the
-        // weather), pure interior cells have ambient lighting
-        // instead.
-        if(data.flags & QuasiEx)
-          region = esm.getHNOString("RGNN");
-        else
-          esm.getHNT(ambi, "AMBI", 16);
-      }
-    else
-      {
-        // Exterior cells
-        region = esm.getHNOString("RGNN");
-        esm.getHNOT(mapColor, "NAM5");
-      }
-
-    // Save position of the cell references and move on
-    context = esm.getContext();
-    esm.skipRecord();
-  }
+  void load(ESMReader &esm);
 
   // Restore the given reader to the stored position. Will try to open
   // the file matching the stored file name. If you want to read from
   // somewhere other than the file system, you need to pre-open the
   // ESMReader, and the filename must match the stored filename
   // exactly.
-  void restore(ESMReader &esm) const
-  { esm.restoreContext(context); }
+  void restore(ESMReader &esm) const;
 
   /* Get the next reference in this cell, if any. Returns false when
      there are no more references in the cell.
@@ -169,66 +132,7 @@ struct Cell
      All fields of the CellRef struct are overwritten. You can safely
      reuse one memory location without blanking it between calls.
   */
-  static bool getNextRef(ESMReader &esm, CellRef &ref)
-  {
-    if(!esm.hasMoreSubs()) return false;
-
-    // Number of references in the cell? Maximum once in each cell,
-    // but not always at the beginning, and not always right. In other
-    // words, completely useless.
-    {
-      int i;
-      esm.getHNOT(i, "NAM0");
-    }
-
-    esm.getHNT(ref.refnum, "FRMR");
-    ref.refID = esm.getHNString("NAME");
-
-    // getHNOT will not change the existing value if the subrecord is
-    // missing
-    ref.scale = 1.0;
-    esm.getHNOT(ref.scale, "XSCL");
-
-    ref.owner = esm.getHNOString("ANAM");
-    ref.glob = esm.getHNOString("BNAM");
-    ref.soul = esm.getHNOString("XSOL");
-
-    ref.faction = esm.getHNOString("CNAM");
-    ref.factIndex = -1;
-    esm.getHNOT(ref.factIndex, "INDX");
-
-    ref.charge = -1.0;
-    esm.getHNOT(ref.charge, "XCHG");
-
-    ref.intv = 0;
-    ref.nam9 = 0;
-    esm.getHNOT(ref.intv, "INTV");
-    esm.getHNOT(ref.nam9, "NAM9");
-
-    // Present for doors that teleport you to another cell.
-    if(esm.isNextSub("DODT"))
-      {
-        ref.teleport = true;
-        esm.getHT(ref.doorDest);
-        ref.destCell = esm.getHNOString("DNAM");
-      }
-    else ref.teleport = false;
-
-    // Integer, despite the name suggesting otherwise
-    ref.lockLevel = 0;
-    esm.getHNOT(ref.lockLevel, "FLTV");
-    ref.key = esm.getHNOString("KNAM");
-    ref.trap = esm.getHNOString("TNAM");
-
-    ref.unam = 0;
-    ref.fltv = 0;
-    esm.getHNOT(ref.unam, "UNAM");
-    esm.getHNOT(ref.fltv, "FLTV");
-
-    esm.getHNT(ref.pos, "DATA", 24);
-
-    return true;
-  }
+  static bool getNextRef(ESMReader &esm, CellRef &ref);
 };
 }
 #endif

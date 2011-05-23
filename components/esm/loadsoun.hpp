@@ -3,20 +3,20 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 struct SOUNstruct
 {
-  unsigned char volume, minRange, maxRange;
+    unsigned char volume, minRange, maxRange;
 };
 
 struct Sound
 {
-  SOUNstruct data;
-  std::string sound;
+    SOUNstruct data;
+    std::string sound;
 
-  // Body moved to load_impl.cpp
-  void load(ESMReader &esm);
+    void load(ESMReader &esm);
 };
 }
 #endif
