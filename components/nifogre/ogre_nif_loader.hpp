@@ -132,6 +132,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         int numbers;
         int stack;
         
+         std::multimap<std::string,std::string> MaterialMap;
 
         // pointer to the ogre mesh which is currently build
         Ogre::Mesh *mesh;

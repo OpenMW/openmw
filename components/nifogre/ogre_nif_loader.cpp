@@ -581,8 +581,27 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             {
                 // Use NiMaterialProperty data to create the data
                 const S_MaterialProperty *d = m->data;
-                createMaterial(material, d->ambient, d->diffuse, d->specular, d->emissive,
-                               d->glossiness, d->alpha, alphaFlags, alphaTest, texName);
+
+                std::multimap<std::string,std::string>::iterator itr = MaterialMap.find(texName);
+                std::multimap<std::string,std::string>::iterator lastElement;
+                lastElement = MaterialMap.upper_bound(texName);
+                if (itr != MaterialMap.end())
+                {
+                    for ( ; itr != lastElement; ++itr)
+                    {
+                        //std::cout << "OK!";
+                        //MaterialPtr mat = MaterialManager::getSingleton().getByName(itr->second,recourceGroup);
+                        material = itr->second;
+                        //if( mat->getA
+                    }
+                }
+                else
+                {
+                    //std::cout << "new";
+                    createMaterial(material, d->ambient, d->diffuse, d->specular, d->emissive,
+                                    d->glossiness, d->alpha, alphaFlags, alphaTest, texName);
+                    MaterialMap.insert(std::make_pair(texName,material));
+                }
             }
             else
             {
