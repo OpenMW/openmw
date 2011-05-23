@@ -57,6 +57,9 @@ namespace MWRender
     std::string mInsertMesh;
     Ogre::SceneNode *mNpcPart;
 
+    //the static geometry
+    Ogre::StaticGeometry *sg;
+
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;
 
@@ -95,8 +98,7 @@ namespace MWRender
   public:
 
     ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
-        MWScene &_scene)
-    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0) {}
+        MWScene &_scene);
 
     virtual ~ExteriorCellRender() { destroy(); }
 

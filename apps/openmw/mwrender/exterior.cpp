@@ -31,8 +31,21 @@ float ExteriorCellRender::lightQuadraticRadiusMult = 1;
 
 bool ExteriorCellRender::lightOutQuadInLin = false;
 
-// start inserting a new reference.
+ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
+    MWScene &_scene)
+    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0) 
+{
+    //char a = mCell.cell->name;
+    //char *rand1;
+    srand (150);
+    //itoa(rand(),rand1,10);
+    int a;
+    Ogre::StringConverter::toString(rand());
+    sg = Ogre::Root::getSingleton().getSceneManagerIterator().getNext()->createStaticGeometry( Ogre::StringConverter::toString(a));
+}
 
+
+// start inserting a new reference.
 void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
 {
   assert (!mInsert);
@@ -202,8 +215,11 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
   assert (mInsert);
 
   NIFLoader::load(mesh);
-  MovableObject *ent = mScene.getMgr()->createEntity(mesh);
+  Entity *ent = mScene.getMgr()->createEntity(mesh);
   mInsert->attachObject(ent);
+
+  /*sg->addEntity(ent,mInsert->_getDerivedPosition(),mInsert->_getDerivedOrientation(),mInsert->_getDerivedScale());
+  sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));*/
 
     if (mInsertMesh.empty())
         mInsertMesh = mesh;
@@ -333,6 +349,8 @@ void ExteriorCellRender::show()
   configureFog();
 
   insertCell(mCell, mEnvironment);
+
+  sg->build();
 }
 
 void ExteriorCellRender::hide()
@@ -350,6 +368,8 @@ void ExteriorCellRender::destroy()
     }
 
   mBase = NULL;
+  std::cout << "destroy";
+  Ogre::Root::getSingleton().getSceneManagerIterator().getNext()->destroyStaticGeometry(sg);
 }
 
 // Switch through lighting modes.
