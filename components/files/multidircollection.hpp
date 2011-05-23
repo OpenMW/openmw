@@ -24,8 +24,8 @@ namespace Files
 
             for (std::size_t i=0; i<min; ++i)
             {
-                char l = std::tolower (left[i]);
-                char r = std::tolower (right[i]);
+                char l = std::tolower (left[i],std::locale());
+                char r = std::tolower (right[i],std::locale());
 
                 if (l<r)
                     return true;
