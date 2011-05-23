@@ -50,6 +50,8 @@ void ExteriorCellRender::insertBegin (ESM::CellRef &ref, bool static_)
 {
   assert (!mInsert);
 
+  isStatic = static_;
+
   // Create and place scene node for this object
   mInsert = mBase->createChildSceneNode();
 
@@ -72,7 +74,7 @@ void ExteriorCellRender::insertBegin (ESM::CellRef &ref, bool static_)
   // Rotates first around z, then y, then x
   mInsert->setOrientation(xr*yr*zr);
 
-    mInsertMesh.clear();
+  mInsertMesh.clear();
 }
 
 
@@ -216,13 +218,18 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
 
   NIFLoader::load(mesh);
   Entity *ent = mScene.getMgr()->createEntity(mesh);
-  mInsert->attachObject(ent);
 
-  /*sg->addEntity(ent,mInsert->_getDerivedPosition(),mInsert->_getDerivedOrientation(),mInsert->_getDerivedScale());
-  sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));*/
-
-    if (mInsertMesh.empty())
-        mInsertMesh = mesh;
+  if(!isStatic)
+  {
+      mInsert->attachObject(ent);
+  }
+  else
+  {
+      sg->addEntity(ent,mInsert->_getDerivedPosition(),mInsert->_getDerivedOrientation(),mInsert->_getDerivedScale());
+      sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
+  }
+  if (mInsertMesh.empty())
+      mInsertMesh = mesh;
 }
 
 void ExteriorCellRender::insertObjectPhysics()

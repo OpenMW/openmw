@@ -59,6 +59,7 @@ namespace MWRender
 
     //the static geometry
     Ogre::StaticGeometry *sg;
+    bool isStatic;
 
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;
