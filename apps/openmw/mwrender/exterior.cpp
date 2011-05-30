@@ -35,7 +35,7 @@ int ExteriorCellRender::uniqueID = 0;
 
 ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
     MWScene &_scene)
-    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0) 
+    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0)
 {
     uniqueID = uniqueID +1;
     sg = Ogre::Root::getSingleton().getSceneManagerIterator().getNext()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
@@ -402,7 +402,11 @@ void ExteriorCellRender::destroy()
 
   mBase = NULL;
   std::cout << "destroy";
+  if (sg)
+  {
   Ogre::Root::getSingleton().getSceneManagerIterator().getNext()->destroyStaticGeometry(sg);
+  sg = 0;
+  }
 }
 
 // Switch through lighting modes.
