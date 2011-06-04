@@ -111,16 +111,16 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 			mAnimationState->setLoop(true);
 			//npcmodel->getSkeleton()->
 
-			mAnimationState->setEnabled(true);           
-			 
+			mAnimationState->setEnabled(true);
 
-			 
-			
+
+
+
 			 Ogre::AnimationState *mAnimationState2 = creaturemodel->getAnimationState("WholeThing2");
 			mAnimationState2->setLoop(true);
 			mAnimationState2->setWeight(.5);
-			mAnimationState2->setEnabled(true); 
-			 
+			mAnimationState2->setEnabled(true);
+
 			  mAnimationState2->createBlendMask(creaturemodel->getSkeleton()->getNumBones(),1);
 			 mAnimationState->createBlendMask(creaturemodel->getSkeleton()->getNumBones(),1);
 			 for(int j = 2; j < creaturemodel->getSkeleton()->getNumBones(); j++)
@@ -130,11 +130,11 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 			 }
 			  // set skeleton
 		std::cout << "TimePosition:" << mAnimationState->getTimePosition() << "\n";
-		
+
 		mAnimationState->addTime(evt.timeSinceLastFrame);
 		mAnimationState2->addTime(evt.timeSinceLastFrame);
 		//npcmodel->_updateAnimation();
-		//mAnimationState2->setEnabled(true); 
+		//mAnimationState2->setEnabled(true);
 		creaturedataiter++;
 	}*/
 
@@ -297,6 +297,10 @@ void OMW::Engine::loadBSA()
          addBSA (iter->second.string());
     }
 
+         std::string m = mDataDir.string();
+          std::cout << "Data dir" << m << "\n";
+          addDir(m);
+
 }
 
 // add resources directory
@@ -394,8 +398,8 @@ void OMW::Engine::go()
 
     mOgre.configure(!isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
-    addResourcesDirectory (mDataDir / "Meshes");
-    addResourcesDirectory (mDataDir / "Textures");
+    //addResourcesDirectory (mDataDir / "Meshes");
+    //addResourcesDirectory (mDataDir / "Textures");
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.

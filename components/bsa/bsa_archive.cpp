@@ -23,6 +23,7 @@
 
 #include "bsa_archive.hpp"
 
+#include <OgreFileSystem.h>
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
@@ -33,6 +34,29 @@ using namespace Ogre;
 using namespace Mangle::Stream;
 
 /// An OGRE Archive wrapping a BSAFile archive
+class DirArchive: public Ogre::FileSystemArchive
+{
+   //FileSystemArchive* arc;
+    public:
+
+    DirArchive(const String& name)
+             : FileSystemArchive(name, "Dir")
+  { mType = "Dir";}
+
+    bool isCaseSensitive() const { return false; }
+
+  // The archive is loaded in the constructor, and never unloaded.
+    void load() {}
+    void unload() {}
+
+    DataStreamPtr open(const String& filename, bool readonly = true) const
+  {
+      std::string copy = filename;
+      return FileSystemArchive::open(copy, readonly);
+  }
+
+};
+
 class BSAArchive : public Archive
 {
   BSAFile arc;
@@ -145,13 +169,40 @@ public:
   void destroyInstance( Archive* arch) { delete arch; }
 };
 
+class DirArchiveFactory : public FileSystemArchiveFactory
+{
+public:
+  const String& getType() const
+  {
+    static String name = "Dir";
+    return name;
+  }
+
+  Archive *createInstance( const String& name )
+  {
+    return new DirArchive(name);
+  }
+
+  void destroyInstance( Archive* arch) { delete arch; }
+};
+
 
 static bool init = false;
+static bool init2 = false;
 static void insertBSAFactory()
 {
   if(!init)
     {
       ArchiveManager::getSingleton().addArchiveFactory( new BSAArchiveFactory );
+      init = true;
+    }
+}
+
+static void insertDirFactory()
+{
+  if(!init2)
+    {
+      ArchiveManager::getSingleton().addArchiveFactory( new DirArchiveFactory );
       init = true;
     }
 }
@@ -166,6 +217,7 @@ void addBSA(const std::string& name, const std::string& group)
 }
 void addDir(const std::string& name, const std::string& group)
 {
+    insertDirFactory();
   ResourceGroupManager::getSingleton().
-    addResourceLocation(name, "FileSystem", group);
+    addResourceLocation(name, "Dir", group);
 }
