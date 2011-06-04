@@ -300,6 +300,8 @@ void OMW::Engine::loadBSA()
          std::string m = mDataDir.string();
           std::cout << "Data dir" << m << "\n";
           addDir(m);
+          //std::string s = "f\n";
+          //std::cout <<"S: " << s.size() << "\n";
 
 }
 

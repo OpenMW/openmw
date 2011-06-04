@@ -49,9 +49,33 @@ class DirArchive: public Ogre::FileSystemArchive
     void load() {}
     void unload() {}
 
+     bool exists(const String& filename) {
+        std::string copy = filename;
+      if(OGRE_PLATFORM != OGRE_PLATFORM_WIN32)
+      {
+
+      for (int i = 0; i < filename.size(); i++)
+      {
+          if(copy.at(i) == '\\' ){
+                copy.replace(i, 1, "/");
+          }
+      }
+      }
+      return FileSystemArchive::exists(copy);
+     }
+
     DataStreamPtr open(const String& filename, bool readonly = true) const
   {
       std::string copy = filename;
+      if(OGRE_PLATFORM != OGRE_PLATFORM_WIN32){
+      //std::cout << "In Open\n";
+      for (int i = 0; i < filename.size(); i++)
+      {
+          if(copy.at(i) == '\\' ){
+                copy.replace(i, 1, "/");
+          }
+      }
+      }
       return FileSystemArchive::open(copy, readonly);
   }
 
