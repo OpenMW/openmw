@@ -180,11 +180,30 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
         }
 }
 
+/*
+Ogre::Entity* InteriorCellRender::insertAndDeliverMesh(const std::string &mesh)
+{
+	
+	assert (insert);
+
+  NIFLoader::load(mesh);
+  Entity *ent = scene.getMgr()->createEntity(mesh);
+  ent->setDisplaySkeleton(true);
+
+
+      insert->attachObject(ent);
+  return  ent;
+
+}*/
+
+
 void InteriorCellRender::insertMesh(const std::string &mesh)
 {
   assert (insert);
-
-  NIFLoader::load(mesh);
+  //if(mesh == "\\Meshes\\bald_MJ_hat.NIF")
+	//  NIFLoader::load(mesh, "");
+  //else
+	 NIFLoader::load(mesh);
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   insert->attachObject(ent);
 
