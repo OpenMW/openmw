@@ -118,7 +118,7 @@ namespace MWClass
         Ogre::Vector3 pos2 = Ogre::Vector3( 0, .5, 75);
 
         if (groin){
-			cellRender.insertMesh("Meshes\\bald_MJ_hat.NIF");        //w/W_6th_Hammer.NIF
+			cellRender.insertMesh("Meshes\\joker\\bald_MJ_hat.nif");        //w/W_6th_Hammer.NIF
 			//bald_MJ_hat.NIF
             cellRender.insertMesh("meshes\\" + groin->model, pos2, axis, kOgrePi, npcName + "groin", addresses, numbers);
             addresses2[numbers] = npcName + "groin";

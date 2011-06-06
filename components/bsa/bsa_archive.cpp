@@ -36,12 +36,42 @@ using namespace Mangle::Stream;
 /// An OGRE Archive wrapping a BSAFile archive
 class DirArchive: public Ogre::FileSystemArchive
 {
-   //FileSystemArchive* arc;
+
+    boost::filesystem::path currentdir;
+    std::map<std::string, std::vector<std::string> > m;
+
     public:
 
     DirArchive(const String& name)
              : FileSystemArchive(name, "Dir")
-  { mType = "Dir";}
+  { mType = "Dir";
+  currentdir = name;
+
+  populateMap(currentdir);
+
+  }
+  void populateMap(boost::filesystem::path d){
+     //need to cut off first
+      boost::filesystem::directory_iterator dir_iter(d), dir_end;
+      std::vector<std::string> filesind;
+      boost::filesystem::path f;
+      for(;dir_iter != dir_end; dir_iter++)
+    {
+        if(boost::filesystem::is_directory(*dir_iter))
+            populateMap(*dir_iter);
+        else
+        {
+
+            f = *dir_iter;
+            std::string s = f.string();
+            filesind.push_back(s);
+            //std::cout << "File: " << s << "\n";
+        }
+    }
+    m[d.string()] = filesind;
+    std::cout << "Directory: " << d.string() << filesind.size() << "\n";
+
+  }
 
     bool isCaseSensitive() const { return false; }
 
@@ -50,6 +80,11 @@ class DirArchive: public Ogre::FileSystemArchive
     void unload() {}
 
      bool exists(const String& filename) {
+          //String s = filename;
+         //FileSystemArchive::findFiles(s, true, false, filenames.getPointer(), f.getPointer());
+        // std::cout << "Filenames" << filenames.useCount() << "\n";
+
+
         std::string copy = filename;
       if(OGRE_PLATFORM != OGRE_PLATFORM_WIN32)
       {
@@ -61,6 +96,23 @@ class DirArchive: public Ogre::FileSystemArchive
           }
       }
       }
+      boost::filesystem::path p = copy;
+
+      int last = copy.size() - 1;
+      int i = last;
+
+      for (;last >= 0; i--)
+      {
+          if(copy.at(i) == '/' || copy.at(i) == '\\')
+                break;
+      }
+      std::string folder;
+
+      folder = copy.substr(0, i);
+
+      boost::filesystem::path folderpath = folder;
+     std::cout << "\nFull:" << p.string() << "\n"<< "Part:" << folderpath.string();
+
       return FileSystemArchive::exists(copy);
      }
 
@@ -227,7 +279,7 @@ static void insertDirFactory()
   if(!init2)
     {
       ArchiveManager::getSingleton().addArchiveFactory( new DirArchiveFactory );
-      init = true;
+      init2 = true;
     }
 }
 

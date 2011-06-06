@@ -22,6 +22,7 @@
  */
 
 #include <string>
+#include <boost/filesystem.hpp>
 
 #ifndef _BSA_ARCHIVE_H_
 #define _BSA_ARCHIVE_H_
