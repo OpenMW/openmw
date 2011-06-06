@@ -12,8 +12,6 @@
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>
 
-#include <components/interpreter/interpreter.hpp>
-
 #include "extensions.hpp"
 
 namespace MWScript
@@ -21,7 +19,8 @@ namespace MWScript
     ScriptManager::ScriptManager (const ESMS::ESMStore& store, bool verbose,
         Compiler::Context& compilerContext)
     : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
-      mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext)
+      mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
+      mOpcodesInstalled (false)
     {}
 
     bool ScriptManager::compile (const std::string& name)
@@ -99,9 +98,13 @@ namespace MWScript
         if (!iter->second.empty())
             try
             {
-                Interpreter::Interpreter interpreter (interpreterContext);
-                installOpcodes (interpreter);
-                interpreter.run (&iter->second[0], iter->second.size());
+                if (!mOpcodesInstalled)
+                {
+                    installOpcodes (mInterpreter);
+                    mOpcodesInstalled = true;
+                }
+
+                mInterpreter.run (&iter->second[0], iter->second.size(), interpreterContext);
             }
             catch (const std::exception& e)
             {
