@@ -100,7 +100,6 @@ void MainDialog::createPages()
     // We can't use QSettings directly because it
     // does not support multiple keys with the same name
     QFile file(mGameConfig->fileName());
-    qDebug() << "createPages gamefilename: " << mGameConfig->fileName();
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox msgBox;
@@ -230,7 +229,7 @@ void MainDialog::play()
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not find OpenMW</b><br><br> \
                         The OpenMW application is not found.<br> \
-                        Please make sure OpenMW is installed and try again.<br>"));
+                        Please make sure OpenMW is installed correctly and try again.<br>"));
         msgBox.exec();
 
         return;

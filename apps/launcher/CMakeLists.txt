@@ -5,6 +5,7 @@ set(LAUNCHER
   maindialog.cpp
   playpage.cpp
   graphicspage.cpp
+  naturalsort.cpp
 
   datafilespage.hpp
   lineedit.hpp
@@ -12,6 +13,7 @@ set(LAUNCHER
   playpage.hpp
   combobox.hpp
   graphicspage.hpp
+  naturalsort.hpp
 )
 
 set(MOC_HDRS
@@ -21,6 +23,7 @@ set(MOC_HDRS
   playpage.hpp
   combobox.hpp
   graphicspage.hpp
+
 )
 
 find_package(Qt4 REQUIRED)

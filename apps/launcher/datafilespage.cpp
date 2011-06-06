@@ -9,6 +9,7 @@
 
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
+#include "naturalsort.hpp"
 
 using namespace ESM;
 using namespace std;
@@ -574,19 +575,18 @@ void DataFilesPage::readConfig()
     mLauncherConfig->beginGroup(profile);
 
     QStringList childKeys = mLauncherConfig->childKeys();
+    QStringList plugins;
+
+    // Sort the child keys numerical instead of alphabetically
+    // i.e. Plugin1, Plugin2 instead of Plugin1, Plugin10
+    qSort(childKeys.begin(), childKeys.end(), naturalSortLessThanCI);
 
     foreach (const QString &key, childKeys) {
         const QString keyValue = mLauncherConfig->value(key).toString();
 
         if (key.startsWith("Plugin")) {
-            const QList<QStandardItem *> pluginList = mPluginsModel->findItems(keyValue);
-
-            if (!pluginList.isEmpty())
-            {
-                foreach (const QStandardItem *currentPlugin, pluginList) {
-                    mPluginsModel->setData(currentPlugin->index(), Qt::Checked, Qt::CheckStateRole);
-                }
-            }
+            plugins.append(keyValue);
+            continue;
         }
 
         if (key.startsWith("Master")) {
@@ -600,6 +600,24 @@ void DataFilesPage::readConfig()
             }
         }
     }
+
+    // Iterate over the plugins to set their checkstate and position
+    for (int i = 0; i < plugins.size(); ++i) {
+        const QString plugin = plugins.at(i);
+
+        const QList<QStandardItem *> pluginList = mPluginsModel->findItems(plugin);
+
+        if (!pluginList.isEmpty())
+        {
+            foreach (const QStandardItem *currentPlugin, pluginList) {
+                mPluginsModel->setData(currentPlugin->index(), Qt::Checked, Qt::CheckStateRole);
+
+                // Move the plugin to the position specified in the config file
+                mPluginsModel->insertRow(i, mPluginsModel->takeRow(currentPlugin->row()));
+            }
+        }
+    }
+
 }
 
 void DataFilesPage::writeConfig(QString profile)
