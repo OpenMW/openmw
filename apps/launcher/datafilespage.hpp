@@ -37,7 +37,6 @@ public:
 public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckstate(QModelIndex index);
-    void resizeRows();
     void filterChanged(const QString filter);
     void profileChanged(const QString &previous, const QString &current);
     void newProfile();

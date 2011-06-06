@@ -57,6 +57,12 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mPluginsTable->horizontalHeader()->setStretchLastSection(true);
     mPluginsTable->horizontalHeader()->hide();
 
+    // Set the row height to the size of the checkboxes
+    QCheckBox checkBox;
+    unsigned int height = checkBox.sizeHint().height() + 2;
+
+    mPluginsTable->verticalHeader()->setDefaultSectionSize(height);
+
     mPluginsTable->setDragEnabled(true);
     mPluginsTable->setDragDropMode(QAbstractItemView::InternalMove);
     mPluginsTable->setDropIndicatorShown(true);
@@ -124,7 +130,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(const QString)));
 
     connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
-    connect(mPluginsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(resizeRows()));
 
     connect(mNewProfileButton, SIGNAL(pressed()), this, SLOT(newProfile()));
     connect(mCopyProfileButton, SIGNAL(pressed()), this, SLOT(copyProfile()));
@@ -216,8 +221,6 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
         }
     }
 
-    // TODO: Better dynamic resizing of rows
-    resizeRows();
     readConfig();
 }
 
@@ -399,7 +402,6 @@ void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const
                 {
                     // Append the plugins from the current master to pluginsmodel
                     addPlugins(currentIndex);
-                    mPluginsTable->resizeRowsToContents();
                 }
             }
         }
@@ -535,24 +537,16 @@ void DataFilesPage::uncheckPlugins()
         if (index.isValid()) {
             // See if the current item is checked
             if (mPluginsModel->data(index, Qt::CheckStateRole) == Qt::Checked) {
-                qDebug() << "Uncheck!";
                 mPluginsModel->setData(index, Qt::Unchecked, Qt::CheckStateRole);
             }
         }
     }
 }
 
-void DataFilesPage::resizeRows()
-{
-    // Contents changed
-    mPluginsTable->resizeRowsToContents();
-}
-
 void DataFilesPage::filterChanged(const QString filter)
 {
     QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
     mPluginsProxyModel->setFilterRegExp(regExp);
-    resizeRows();
 }
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
