@@ -22,9 +22,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mPluginsProxyModel->setDynamicSortFilter(true);
     mPluginsProxyModel->setSourceModel(mPluginsModel);
 
-    // TODO: decide what to do with the selection model
-    mPluginsSelectModel = new QItemSelectionModel(mPluginsModel);
-
     QLabel *filterLabel = new QLabel(tr("Filter:"), this);
     LineEdit *filterLineEdit = new LineEdit(this);
 
@@ -49,7 +46,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mMastersWidget->insertColumn(0);
 
     mPluginsTable->setModel(mPluginsProxyModel);
-    mPluginsTable->setSelectionModel(mPluginsSelectModel);
     mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     mPluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
     mPluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
