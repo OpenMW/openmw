@@ -284,7 +284,6 @@ namespace MWWorld
 
         removeScripts (iter->first);
         mEnvironment.mMechanicsManager->dropActors (iter->first);
-        iter->second->destroy();
         mEnvironment.mSoundManager->stopSound (iter->first);
         delete iter->second;
         mActiveCells.erase (iter);

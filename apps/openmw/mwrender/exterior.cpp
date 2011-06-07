@@ -31,11 +31,23 @@ float ExteriorCellRender::lightQuadraticRadiusMult = 1;
 
 bool ExteriorCellRender::lightOutQuadInLin = false;
 
-// start inserting a new reference.
+int ExteriorCellRender::uniqueID = 0;
 
-void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
+ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
+    MWScene &_scene)
+    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0)
+{
+    uniqueID = uniqueID +1;
+    sg = mScene.getMgr()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+}
+
+
+
+void ExteriorCellRender::insertBegin (ESM::CellRef &ref, bool static_)
 {
   assert (!mInsert);
+
+  isStatic = static_;
 
   // Create and place scene node for this object
   mInsert = mBase->createChildSceneNode();
@@ -59,7 +71,7 @@ void ExteriorCellRender::insertBegin (ESM::CellRef &ref)
   // Rotates first around z, then y, then x
   mInsert->setOrientation(xr*yr*zr);
 
-    mInsertMesh.clear();
+  mInsertMesh.clear();
 }
 
 
@@ -202,11 +214,20 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
   assert (mInsert);
 
   NIFLoader::load(mesh);
-  MovableObject *ent = mScene.getMgr()->createEntity(mesh);
-  mInsert->attachObject(ent);
+  Entity *ent = mScene.getMgr()->createEntity(mesh);
 
-    if (mInsertMesh.empty())
-        mInsertMesh = mesh;
+  if(!isStatic)
+  {
+      mInsert->attachObject(ent);
+  }
+  else
+  {
+      sg->addEntity(ent,mInsert->_getDerivedPosition(),mInsert->_getDerivedOrientation(),mInsert->_getDerivedScale());
+      sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
+      mScene.getMgr()->destroyEntity(ent);
+  }
+  if (mInsertMesh.empty())
+      mInsertMesh = mesh;
 }
 
 void ExteriorCellRender::insertObjectPhysics()
@@ -333,6 +354,8 @@ void ExteriorCellRender::show()
   configureFog();
 
   insertCell(mCell, mEnvironment);
+
+  sg->build();
 }
 
 void ExteriorCellRender::hide()
@@ -341,15 +364,49 @@ void ExteriorCellRender::hide()
     mBase->setVisible(false);
 }
 
+void ExteriorCellRender::destroyAllAttachedMovableObjects(Ogre::SceneNode* i_pSceneNode)
+{
+   if ( !i_pSceneNode )
+   {
+      assert( false );
+      return;
+   }
+
+   // Destroy all the attached objects
+   SceneNode::ObjectIterator itObject = i_pSceneNode->getAttachedObjectIterator();
+
+   while ( itObject.hasMoreElements() )
+   {
+      MovableObject* pObject = static_cast<MovableObject*>(itObject.getNext());
+      i_pSceneNode->getCreator()->destroyMovableObject( pObject );
+   }
+
+   // Recurse to child SceneNodes
+   SceneNode::ChildNodeIterator itChild = i_pSceneNode->getChildIterator();
+
+   while ( itChild.hasMoreElements() )
+   {
+      SceneNode* pChildNode = static_cast<SceneNode*>(itChild.getNext());
+      destroyAllAttachedMovableObjects( pChildNode );
+   }
+}
+
 void ExteriorCellRender::destroy()
 {
   if(mBase)
     {
+      destroyAllAttachedMovableObjects(mBase);
       mBase->removeAndDestroyAllChildren();
       mScene.getMgr()->destroySceneNode(mBase);
     }
 
-  mBase = NULL;
+    mBase = 0;
+
+    if (sg)
+    {
+        mScene.getMgr()->destroyStaticGeometry (sg);
+        sg = 0;
+    }
 }
 
 // Switch through lighting modes.
