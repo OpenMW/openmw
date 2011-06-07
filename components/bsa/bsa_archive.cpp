@@ -162,7 +162,7 @@ class DirArchive: public Ogre::FileSystemArchive
 
     //std::transform(file.begin(), file.end(), file.begin(), tolower);
       //boost::filesystem::path folderpath = folder;
-      std::vector<std::string> current = m[folder];
+      std::vector<std::string>& current = m[folder];
 
        for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
        {
