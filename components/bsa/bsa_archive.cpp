@@ -33,15 +33,71 @@
 using namespace Ogre;
 using namespace Mangle::Stream;
 
+struct ciLessBoost : std::binary_function<std::string, std::string, bool>
+{
+    bool operator() (const std::string & s1, const std::string & s2) const {
+                                               //case insensitive version of is_less
+        return lexicographical_compare(s1, s2, boost::algorithm::is_iless());
+    }
+};
+
 /// An OGRE Archive wrapping a BSAFile archive
 class DirArchive: public Ogre::FileSystemArchive
 {
-   //FileSystemArchive* arc;
+
+    boost::filesystem::path currentdir;
+    std::map<std::string, std::vector<std::string>, ciLessBoost> m;
+    int cutoff;
+
     public:
 
     DirArchive(const String& name)
              : FileSystemArchive(name, "Dir")
-  { mType = "Dir";}
+  { mType = "Dir";
+  currentdir = name;
+  std::string s = name;
+  cutoff = s.size() + 1;
+  //std::cout << "Cut off:" << cutoff;
+
+  populateMap(currentdir);
+
+  }
+  void populateMap(boost::filesystem::path d){
+     //need to cut off first
+      boost::filesystem::directory_iterator dir_iter(d), dir_end;
+      std::vector<std::string> filesind;
+      boost::filesystem::path f;
+      for(;dir_iter != dir_end; dir_iter++)
+    {
+        if(boost::filesystem::is_directory(*dir_iter))
+            populateMap(*dir_iter);
+        else
+        {
+
+            f = *dir_iter;
+            std::string s = f.string();
+
+            std::string small;
+            if(cutoff < s.size())
+                small = s.substr(cutoff, s.size() - cutoff);
+            else
+                small = s.substr(cutoff - 1, s.size() - cutoff);
+
+            filesind.push_back(small);
+            //std::cout << "File: " << small << "f\n";
+        }
+    }
+    std::string small;
+    std::string original = d.string();
+    if(cutoff < original.size())
+        small = original.substr(cutoff, original.size() - cutoff);
+    else
+        small = original.substr(cutoff - 1, original.size() - cutoff);
+    boost::filesystem::path smallp = small;
+    m[smallp.string()] = filesind;
+    //std::cout << "Directory: " << smallp.string() << " " << filesind.size() << "\n";
+
+  }
 
     bool isCaseSensitive() const { return false; }
 
@@ -50,6 +106,12 @@ class DirArchive: public Ogre::FileSystemArchive
     void unload() {}
 
      bool exists(const String& filename) {
+         //std::cout << "exists\n";
+          //String s = filename;
+         //FileSystemArchive::findFiles(s, true, false, filenames.getPointer(), f.getPointer());
+        // std::cout << "Filenames" << filenames.useCount() << "\n";
+
+
         std::string copy = filename;
       if(OGRE_PLATFORM != OGRE_PLATFORM_WIN32)
       {
@@ -61,14 +123,50 @@ class DirArchive: public Ogre::FileSystemArchive
           }
       }
       }
+      boost::filesystem::path p = copy;
+
+      int last = copy.size() - 1;
+      int i = last;
+
+      for (;last >= 0; i--)
+      {
+          if(copy.at(i) == '/' || copy.at(i) == '\\')
+                break;
+      }
+
+      std::string file = copy.substr(i + 1, copy.size() - i);  //filename with no slash
+      std::string folder = copy.substr(0, i);                              //folder with no slash
+
+    std::transform(file.begin(), file.end(), file.begin(), tolower);
+      boost::filesystem::path folderpath = folder;
+      std::vector<std::string> current = m[folderpath.string()];
+
+       for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
+       {
+            std::string loopfile = iter->substr(i + 1, copy.size() - i);  //filename with no slash
+            std::transform(loopfile.begin(), loopfile.end(), loopfile.begin(), tolower);
+            if(file.compare(loopfile) == 0){
+            std::cout << "Loopfile:" << loopfile << "\n";
+            return FileSystemArchive::exists(*iter);
+            }
+       }
+
+      //std::cout << "Filename:" << file << "\n";
+      //std::cout << "Full:" << p.string() << "\n";
+      //std::cout << "Current:" << folder << "size: " << current.size() << "\n";
+     //std::cout << "\nFull:" << p.string() << "\n"<< "Part:" << folderpath.string();
+
       return FileSystemArchive::exists(copy);
      }
 
     DataStreamPtr open(const String& filename, bool readonly = true) const
   {
-      std::string copy = filename;
-      if(OGRE_PLATFORM != OGRE_PLATFORM_WIN32){
-      //std::cout << "In Open\n";
+     std::map<std::string, std::vector<std::string>, ciLessBoost> mlocal = m;
+       //std::cout << "Open\n";
+        std::string copy = filename;
+      if(OGRE_PLATFORM != OGRE_PLATFORM_WIN32)
+      {
+
       for (int i = 0; i < filename.size(); i++)
       {
           if(copy.at(i) == '\\' ){
@@ -76,6 +174,39 @@ class DirArchive: public Ogre::FileSystemArchive
           }
       }
       }
+      boost::filesystem::path p = copy;
+
+      int last = copy.size() - 1;
+      int i = last;
+
+      for (;last >= 0; i--)
+      {
+          if(copy.at(i) == '/' || copy.at(i) == '\\')
+                break;
+      }
+
+      std::string file = copy.substr(i + 1, copy.size() - i);  //filename with no slash
+      std::string folder = copy.substr(0, i);                              //folder with no slash
+
+    std::transform(file.begin(), file.end(), file.begin(), tolower);
+      boost::filesystem::path folderpath = folder;
+      std::vector<std::string> current = mlocal[folderpath.string()];
+
+       for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
+       {
+            std::string loopfile = iter->substr(i + 1, copy.size() - i);  //filename with no slash
+            std::transform(loopfile.begin(), loopfile.end(), loopfile.begin(), tolower);
+            if(file.compare(loopfile) == 0){
+            std::cout << "Loopfile:" << loopfile << "\n";
+            return FileSystemArchive::open(*iter, readonly);
+            }
+       }
+
+      //std::cout << "Filename:" << file << "\n";
+      //std::cout << "Full:" << p.string() << "\n";
+      //std::cout << "Current:" << folder << "size: " << current.size() << "\n";
+     //std::cout << "\nFull:" << p.string() << "\n"<< "Part:" << folderpath.string();
+
       return FileSystemArchive::open(copy, readonly);
   }
 
@@ -227,7 +358,7 @@ static void insertDirFactory()
   if(!init2)
     {
       ArchiveManager::getSingleton().addArchiveFactory( new DirArchiveFactory );
-      init = true;
+      init2 = true;
     }
 }
 
