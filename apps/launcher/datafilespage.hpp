@@ -54,6 +54,7 @@ public slots:
     void moveBottom();
     void check();
     void uncheck();
+    void refresh();
 
 private:
     QTableWidget *mMastersWidget;

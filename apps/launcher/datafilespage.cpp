@@ -87,23 +87,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
     mProfilesComboBox->setInsertPolicy(QComboBox::InsertAtBottom);
 
-    /*mNewProfileButton = new QPushButton(this);
-    mNewProfileButton->setIcon(QIcon::fromTheme("document-new"));
-    //mNewProfileButton->setToolTip(tr("New Profile"));
-    //mNewProfileButton->setShortcut(QKeySequence(tr("Ctrl+N")));
-
-    mCopyProfileButton = new QPushButton(this);
-    mCopyProfileButton->setIcon(QIcon::fromTheme("edit-copy"));
-    //mCopyProfileButton->setToolTip(tr("Copy Profile"));
-
-    mDeleteProfileButton = new QPushButton(this);
-    mDeleteProfileButton->setIcon(QIcon::fromTheme("edit-delete"));
-    //mDeleteProfileButton->setToolTip(tr("Delete Profile"));*/
-    //mDeleteProfileButton->setShortcut(QKeySequence(tr("Delete")));
-
-    //QHBoxLayout *bottomLayout = new QHBoxLayout();
-    //bottomLayout = new QHBoxLayout();
-
     mProfileToolBar = new QToolBar(this);
     mProfileToolBar->setMovable(false);
     mProfileToolBar->setIconSize(QSize(16, 16));
@@ -111,17 +94,9 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mProfileToolBar->addWidget(profileLabel);
     mProfileToolBar->addWidget(mProfilesComboBox);
 
-    //splitter->addWidget(profileToolBar);
-    //bottomLayout->addWidget(profileLabel);
-    //bottomLayout->addWidget(mProfilesComboBox);
-    /*bottomLayout->addWidget(mNewProfileButton);
-    bottomLayout->addWidget(mCopyProfileButton);
-    bottomLayout->addWidget(mDeleteProfileButton);*/
-
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
     // Add some space above and below the page items
     QSpacerItem *vSpacer2 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
-
 
     pageLayout->addLayout(topLayout);
     pageLayout->addItem(vSpacer2);
@@ -286,6 +261,10 @@ void DataFilesPage::setupConfig()
 
 void DataFilesPage::createActions()
 {
+    // Refresh the plugins
+    QAction *refreshAction = new QAction(tr("Refresh"), this);
+    refreshAction->setShortcut(QKeySequence(tr("F5")));
+    connect(refreshAction, SIGNAL(triggered()), this, SLOT(refresh()));
 
     // Profile actions
     mNewProfileAction = new QAction(QIcon::fromTheme("document-new"), tr("&New Profile"), this);
@@ -334,6 +313,7 @@ void DataFilesPage::createActions()
     connect(mUncheckAction, SIGNAL(triggered()), this, SLOT(uncheck()));
 
     // Makes shortcuts work even if the context menu is hidden
+    this->addAction(refreshAction);
     this->addAction(mMoveUpAction);
     this->addAction(mMoveDownAction);
     this->addAction(mMoveTopAction);
@@ -591,6 +571,14 @@ void DataFilesPage::uncheck()
     }
 }
 
+void DataFilesPage::refresh()
+{
+    // Refresh the plugins table
+
+    writeConfig();
+    readConfig();
+}
+
 
 void DataFilesPage::showContextMenu(const QPoint &point)
 {
@@ -614,6 +602,12 @@ void DataFilesPage::showContextMenu(const QPoint &point)
         }
 
     }
+
+    // Make sure these are enabled because they might still be disabled
+    mMoveUpAction->setEnabled(true);
+    mMoveTopAction->setEnabled(true);
+    mMoveDownAction->setEnabled(true);
+    mMoveBottomAction->setEnabled(true);
 
     QModelIndex firstIndex = mPluginsProxyModel->mapToSource(selectedIndexes.first());
     QModelIndex lastIndex = mPluginsProxyModel->mapToSource(selectedIndexes.last());
