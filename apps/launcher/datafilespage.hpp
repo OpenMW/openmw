@@ -14,7 +14,9 @@ class QItemSelectionModel;
 class QSortFilterProxyModel;
 class QStringListModel;
 class QSettings;
-class QPushButton;
+class QAction;
+class QToolBar;
+class QMenu;
 
 class DataFilesPage : public QWidget
 {
@@ -36,12 +38,22 @@ public:
 
 public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void setCheckstate(QModelIndex index);
+    void setCheckState(QModelIndex index);
+
     void filterChanged(const QString filter);
+    void showContextMenu(const QPoint &point);
     void profileChanged(const QString &previous, const QString &current);
+
+    // Action slots
     void newProfile();
     void copyProfile();
     void deleteProfile();
+    void moveUp();
+    void moveDown();
+    void moveTop();
+    void moveBottom();
+    void check();
+    void uncheck();
 
 private:
     QTableWidget *mMastersWidget;
@@ -53,13 +65,26 @@ private:
     QSortFilterProxyModel *mPluginsProxyModel;
     QItemSelectionModel *mPluginsSelectModel;
 
-    QPushButton *mNewProfileButton;
-    QPushButton *mCopyProfileButton;
-    QPushButton *mDeleteProfileButton;
+    QToolBar *mProfileToolBar;
+    QMenu *mContextMenu;
+
+    QAction *mNewProfileAction;
+    QAction *mCopyProfileAction;
+    QAction *mDeleteProfileAction;
+
+    QAction *mMoveUpAction;
+    QAction *mMoveDownAction;
+    QAction *mMoveTopAction;
+    QAction *mMoveBottomAction;
+    QAction *mCheckAction;
+    QAction *mUncheckAction;
 
     void addPlugins(const QModelIndex &index);
     void removePlugins(const QModelIndex &index);
     void uncheckPlugins();
+    void createActions();
+
+    bool isChecked(const QModelIndex &index);
 };
 
 #endif

@@ -87,38 +87,46 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
     mProfilesComboBox->setInsertPolicy(QComboBox::InsertAtBottom);
 
-    mNewProfileButton = new QPushButton(this);
+    /*mNewProfileButton = new QPushButton(this);
     mNewProfileButton->setIcon(QIcon::fromTheme("document-new"));
-    mNewProfileButton->setToolTip(tr("New Profile"));
-    mNewProfileButton->setShortcut(QKeySequence(tr("Ctrl+N")));
+    //mNewProfileButton->setToolTip(tr("New Profile"));
+    //mNewProfileButton->setShortcut(QKeySequence(tr("Ctrl+N")));
 
     mCopyProfileButton = new QPushButton(this);
     mCopyProfileButton->setIcon(QIcon::fromTheme("edit-copy"));
-    mCopyProfileButton->setToolTip(tr("Copy Profile"));
+    //mCopyProfileButton->setToolTip(tr("Copy Profile"));
 
     mDeleteProfileButton = new QPushButton(this);
     mDeleteProfileButton->setIcon(QIcon::fromTheme("edit-delete"));
-    mDeleteProfileButton->setToolTip(tr("Delete Profile"));
-    mDeleteProfileButton->setShortcut(QKeySequence(tr("Delete")));
+    //mDeleteProfileButton->setToolTip(tr("Delete Profile"));*/
+    //mDeleteProfileButton->setShortcut(QKeySequence(tr("Delete")));
 
-    QHBoxLayout *bottomLayout = new QHBoxLayout();
+    //QHBoxLayout *bottomLayout = new QHBoxLayout();
+    //bottomLayout = new QHBoxLayout();
 
-    bottomLayout->addWidget(profileLabel);
-    bottomLayout->addWidget(mProfilesComboBox);
-    bottomLayout->addWidget(mNewProfileButton);
+    mProfileToolBar = new QToolBar(this);
+    mProfileToolBar->setMovable(false);
+    mProfileToolBar->setIconSize(QSize(16, 16));
+
+    mProfileToolBar->addWidget(profileLabel);
+    mProfileToolBar->addWidget(mProfilesComboBox);
+
+    //splitter->addWidget(profileToolBar);
+    //bottomLayout->addWidget(profileLabel);
+    //bottomLayout->addWidget(mProfilesComboBox);
+    /*bottomLayout->addWidget(mNewProfileButton);
     bottomLayout->addWidget(mCopyProfileButton);
-    bottomLayout->addWidget(mDeleteProfileButton);
+    bottomLayout->addWidget(mDeleteProfileButton);*/
 
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
     // Add some space above and below the page items
     QSpacerItem *vSpacer2 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
-    QSpacerItem *vSpacer3 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
+
 
     pageLayout->addLayout(topLayout);
     pageLayout->addItem(vSpacer2);
     pageLayout->addWidget(splitter);
-    pageLayout->addLayout(bottomLayout);
-    pageLayout->addItem(vSpacer3);
+    pageLayout->addWidget(mProfileToolBar);
 
     connect(mMastersWidget->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
@@ -126,13 +134,13 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(const QString)));
 
-    connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckstate(QModelIndex)));
+    connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
+    connect(mPluginsTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
-    connect(mNewProfileButton, SIGNAL(pressed()), this, SLOT(newProfile()));
-    connect(mCopyProfileButton, SIGNAL(pressed()), this, SLOT(copyProfile()));
-    connect(mDeleteProfileButton, SIGNAL(pressed()), this, SLOT(deleteProfile()));
+
 
     setupConfig();
+    createActions();
 }
 
 void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
@@ -276,15 +284,83 @@ void DataFilesPage::setupConfig()
     connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 }
 
+void DataFilesPage::createActions()
+{
+
+    // Profile actions
+    mNewProfileAction = new QAction(QIcon::fromTheme("document-new"), tr("&New Profile"), this);
+    mNewProfileAction->setToolTip(tr("New Profile"));
+    mNewProfileAction->setShortcut(QKeySequence(tr("Ctrl+N")));
+    connect(mNewProfileAction, SIGNAL(triggered()), this, SLOT(newProfile()));
+
+
+    mCopyProfileAction = new QAction(QIcon::fromTheme("edit-copy"), tr("&Copy Profile"), this);
+    mCopyProfileAction->setToolTip(tr("Copy Profile"));
+    mCopyProfileAction->setShortcut(QKeySequence(tr("Ctrl+C")));
+    connect(mCopyProfileAction, SIGNAL(triggered()), this, SLOT(copyProfile()));
+
+    mDeleteProfileAction = new QAction(QIcon::fromTheme("edit-delete"), tr("Delete Profile"), this);
+    mDeleteProfileAction->setToolTip(tr("Delete Profile"));
+    mDeleteProfileAction->setShortcut(QKeySequence(tr("Delete")));
+    connect(mDeleteProfileAction, SIGNAL(triggered()), this, SLOT(deleteProfile()));
+
+    // Add the newly created actions to the toolbar
+    mProfileToolBar->addSeparator();
+    mProfileToolBar->addAction(mNewProfileAction);
+    mProfileToolBar->addAction(mCopyProfileAction);
+    mProfileToolBar->addAction(mDeleteProfileAction);
+
+    // Context menu actions
+    mMoveUpAction = new QAction(QIcon::fromTheme("go-up"), tr("Move &Up"), this);
+    mMoveUpAction->setShortcut(QKeySequence(tr("Ctrl+U")));
+    connect(mMoveUpAction, SIGNAL(triggered()), this, SLOT(moveUp()));
+
+    mMoveDownAction = new QAction(QIcon::fromTheme("go-down"), tr("&Move Down"), this);
+    mMoveDownAction->setShortcut(QKeySequence(tr("Ctrl+M")));
+    connect(mMoveDownAction, SIGNAL(triggered()), this, SLOT(moveDown()));
+
+    mMoveTopAction = new QAction(QIcon::fromTheme("go-top"), tr("Move to Top"), this);
+    mMoveTopAction->setShortcut(QKeySequence(tr("Ctrl+Shift+U")));
+    connect(mMoveTopAction, SIGNAL(triggered()), this, SLOT(moveTop()));
+
+    mMoveBottomAction = new QAction(QIcon::fromTheme("go-bottom"), tr("Move to Bottom"), this);
+    mMoveBottomAction->setShortcut(QKeySequence(tr("Ctrl+Shift+M")));
+    connect(mMoveBottomAction, SIGNAL(triggered()), this, SLOT(moveBottom()));
+
+    mCheckAction = new QAction(tr("Check selected"), this);
+    connect(mCheckAction, SIGNAL(triggered()), this, SLOT(check()));
+
+    mUncheckAction = new QAction(tr("Uncheck selected"), this);
+    connect(mUncheckAction, SIGNAL(triggered()), this, SLOT(uncheck()));
+
+    // Makes shortcuts work even if the context menu is hidden
+    this->addAction(mMoveUpAction);
+    this->addAction(mMoveDownAction);
+    this->addAction(mMoveTopAction);
+    this->addAction(mMoveBottomAction);
+
+    // Context menu for the plugins table
+    mContextMenu = new QMenu(this);
+
+    mContextMenu->addAction(mMoveUpAction);
+    mContextMenu->addAction(mMoveDownAction);
+    mContextMenu->addSeparator();
+    mContextMenu->addAction(mMoveTopAction);
+    mContextMenu->addAction(mMoveBottomAction);
+    mContextMenu->addSeparator();
+    mContextMenu->addAction(mCheckAction);
+    mContextMenu->addAction(mUncheckAction);
+
+}
+
 void DataFilesPage::newProfile()
 {
     bool ok;
     QString text = QInputDialog::getText(this, tr("New Profile"),
                                          tr("Profile Name:"), QLineEdit::Normal,
-                                            tr("New Profile"), &ok);
+                                         tr("New Profile"), &ok);
     if (ok && !text.isEmpty()) {
-        if (mProfilesComboBox->findText(text) != -1)
-        {
+        if (mProfilesComboBox->findText(text) != -1) {
             QMessageBox::warning(this, tr("Profile already exists"),
                                  tr("the profile <b>%0</b> already exists.").arg(text),
                                  QMessageBox::Ok);
@@ -308,8 +384,7 @@ void DataFilesPage::copyProfile()
                                          tr("Profile Name:"), QLineEdit::Normal,
                                          tr("%0 Copy").arg(profile), &ok);
     if (ok && !text.isEmpty()) {
-        if (mProfilesComboBox->findText(text) != -1)
-        {
+        if (mProfilesComboBox->findText(text) != -1) {
             QMessageBox::warning(this, tr("Profile already exists"),
                                  tr("the profile <b>%0</b> already exists.").arg(text),
                                  QMessageBox::Ok);
@@ -367,6 +442,196 @@ void DataFilesPage::deleteProfile()
         // Remove the profile from the combobox
         mProfilesComboBox->removeItem(mProfilesComboBox->findText(profile));
     }
+}
+
+void DataFilesPage::moveUp()
+{
+    // Shift the selected plugins up one row
+
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+    QModelIndex firstIndex = mPluginsProxyModel->mapToSource(selectedIndexes.first());
+
+    // Check if the first selected plugin is the top one
+    if (firstIndex.row() == 0) {
+        return;
+    }
+
+    foreach (const QModelIndex &currentIndex, selectedIndexes) {
+        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
+        int currentRow = sourceModelIndex.row();
+
+        if (sourceModelIndex.isValid() && currentRow > 0) {
+            mPluginsModel->insertRow((currentRow - 1), mPluginsModel->takeRow(currentRow));
+        }
+    }
+}
+
+void DataFilesPage::moveDown()
+{
+    // Shift the selected plugins down one row
+
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+    QModelIndex lastIndex = mPluginsProxyModel->mapToSource(selectedIndexes.last());
+
+    // Check if last selected plugin is bottom one
+    if ((lastIndex.row() + 1) == mPluginsModel->rowCount()) {
+        return;
+    }
+
+    foreach (const QModelIndex &currentIndex, selectedIndexes) {
+        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
+        int currentRow = sourceModelIndex.row();
+
+        if (sourceModelIndex.isValid() && (currentRow + 1) < mPluginsModel->rowCount()) {
+            mPluginsModel->insertRow((currentRow + 1), mPluginsModel->takeRow(currentRow));
+        }
+    }
+}
+
+void DataFilesPage::moveTop()
+{
+    // Move the selection to the top of the table
+
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+    QModelIndex firstIndex = mPluginsProxyModel->mapToSource(selectedIndexes.first());
+
+    // Check if the first selected plugin is the top one
+    if (firstIndex.row() == 0) {
+        return;
+    }
+
+    for (int i=0; i < selectedIndexes.count(); ++i) {
+
+        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(selectedIndexes.at(i));
+
+        int currentRow = sourceModelIndex.row();
+
+        if (sourceModelIndex.isValid() && currentRow > 0) {
+            mPluginsModel->insertRow(i, mPluginsModel->takeRow(currentRow));
+        }
+    }
+}
+
+void DataFilesPage::moveBottom()
+{
+    // Move the selection to the bottom of the table
+
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+    QModelIndex lastIndex = mPluginsProxyModel->mapToSource(selectedIndexes.last());
+
+    // Check if last selected plugin is bottom one
+    if ((lastIndex.row() + 1) == mPluginsModel->rowCount()) {
+        return;
+    }
+
+    for (int i=0; i < selectedIndexes.count(); ++i) {
+
+        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(selectedIndexes.at(i));
+
+        // Subtract iterations because takeRow shifts the rows below the taken row up
+        int currentRow = sourceModelIndex.row() - i;
+
+        if (sourceModelIndex.isValid() && (currentRow + 1) < mPluginsModel->rowCount()) {
+            mPluginsModel->appendRow(mPluginsModel->takeRow(currentRow));
+        }
+    }
+}
+
+void DataFilesPage::check()
+{
+    // Check the current selection
+
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+
+    foreach (const QModelIndex &currentIndex, selectedIndexes) {
+        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
+
+        if (sourceModelIndex.isValid()) {
+            mPluginsModel->setData(sourceModelIndex, Qt::Checked, Qt::CheckStateRole);
+        }
+    }
+}
+
+void DataFilesPage::uncheck()
+{
+    // Uncheck the current selection
+
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+
+    foreach (const QModelIndex &currentIndex, selectedIndexes) {
+        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
+
+        if (sourceModelIndex.isValid()) {
+            mPluginsModel->setData(sourceModelIndex, Qt::Unchecked, Qt::CheckStateRole);
+        }
+    }
+}
+
+
+void DataFilesPage::showContextMenu(const QPoint &point)
+{
+
+    QPoint globalPos = mPluginsTable->mapToGlobal(point);
+
+    QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+
+    // Show the check/uncheck actions depending on the state of the selected items
+    mUncheckAction->setEnabled(false);
+    mCheckAction->setEnabled(false);
+
+    foreach (const QModelIndex &currentIndex, selectedIndexes) {
+        if (currentIndex.isValid()) {
+
+            if (isChecked(currentIndex)) {
+                mUncheckAction->setEnabled(true);
+            } else {
+                mCheckAction->setEnabled(true);
+            }
+        }
+
+    }
+
+    QModelIndex firstIndex = mPluginsProxyModel->mapToSource(selectedIndexes.first());
+    QModelIndex lastIndex = mPluginsProxyModel->mapToSource(selectedIndexes.last());
+
+    // Check if selected first item is top row in model
+    if (firstIndex.row() == 0) {
+        mMoveUpAction->setEnabled(false);
+        mMoveTopAction->setEnabled(false);
+    }
+
+    // Check if last row is bottom row in model
+    if ((lastIndex.row() + 1) == mPluginsModel->rowCount()) {
+        mMoveDownAction->setEnabled(false);
+        mMoveBottomAction->setEnabled(false);
+    }
+
+    // Show menu
+    mContextMenu->exec(globalPos);
 }
 
 void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -482,7 +747,7 @@ void DataFilesPage::removePlugins(const QModelIndex &index)
 
 }
 
-void DataFilesPage::setCheckstate(QModelIndex index)
+void DataFilesPage::setCheckState(QModelIndex index)
 {
     if (!index.isValid())
         return;
@@ -495,6 +760,19 @@ void DataFilesPage::setCheckstate(QModelIndex index)
     } else {
         mPluginsModel->setData(sourceModelIndex, Qt::Checked, Qt::CheckStateRole);
     }
+}
+
+bool DataFilesPage::isChecked(const QModelIndex &index)
+{
+
+    QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(index);
+
+    if (mPluginsModel->data(sourceModelIndex, Qt::CheckStateRole) == Qt::Checked) {
+        return true;
+    } else {
+        return false;
+    }
+
 }
 
 const QStringList DataFilesPage::selectedMasters()
