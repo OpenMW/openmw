@@ -23,6 +23,8 @@
 
 #include <string>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <algorithm>
 
 #ifndef _BSA_ARCHIVE_H_
 #define _BSA_ARCHIVE_H_
