@@ -13,5 +13,9 @@
     <file alias="16x16/document-new.png">resources/icons/tango/document-new.png</file>
     <file alias="16x16/edit-copy.png">resources/icons/tango/edit-copy.png</file>
     <file alias="16x16/edit-delete.png">resources/icons/tango/edit-delete.png</file>
+    <file alias="16x16/go-bottom.png">resources/icons/tango/go-bottom.png</file>
+    <file alias="16x16/go-down.png">resources/icons/tango/go-down.png</file>
+    <file alias="16x16/go-top.png">resources/icons/tango/go-top.png</file>
+    <file alias="16x16/go-up.png">resources/icons/tango/go-up.png</file>
 </qresource>
 </RCC>
