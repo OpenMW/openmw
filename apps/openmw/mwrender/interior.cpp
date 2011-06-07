@@ -35,7 +35,7 @@ bool InteriorCellRender::lightOutQuadInLin = false;
 
 // start inserting a new reference.
 
-void InteriorCellRender::insertBegin (ESM::CellRef &ref)
+void InteriorCellRender::insertBegin (ESM::CellRef &ref, bool static_)
 {
   assert (!insert);
 
