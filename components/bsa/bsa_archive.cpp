@@ -107,7 +107,7 @@ class DirArchive: public Ogre::FileSystemArchive
         small = original.substr(cutoff - 1, original.size() - cutoff);
     //boost::filesystem::path smallp = small;
     m[small] = filesind;
-    //std::cout << "Directory: " << smallp.string() << " " << filesind.size() << "\n";
+    //std::cout << "Directory: " << small << " " << filesind.size() << "\n";
 
   }
 
@@ -126,8 +126,7 @@ class DirArchive: public Ogre::FileSystemArchive
 
         std::string copy = filename;
 
-      if(OGRE_PLATFORM != OGRE_PLATFORM_WIN32)
-      {
+  
 
       for (int i = 0; i < filename.size(); i++)
       {
@@ -135,7 +134,7 @@ class DirArchive: public Ogre::FileSystemArchive
                 copy.replace(i, 1, "/");
           }
       }
-      }
+
 
       if(copy.at(0) == '\\' || copy.at(0) == '/')
         {
@@ -189,8 +188,7 @@ class DirArchive: public Ogre::FileSystemArchive
        //std::cout << "Open\n";
         std::string copy = filename;
 
-      if(OGRE_PLATFORM != OGRE_PLATFORM_WIN32)
-      {
+    
 
       for (int i = 0; i < filename.size(); i++)
       {
@@ -198,7 +196,7 @@ class DirArchive: public Ogre::FileSystemArchive
                 copy.replace(i, 1, "/");
           }
       }
-      }
+
 
       if(copy.at(0) == '\\' || copy.at(0) == '/')
         {
