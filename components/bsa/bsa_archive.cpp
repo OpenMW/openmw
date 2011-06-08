@@ -49,7 +49,7 @@ class DirArchive: public Ogre::FileSystemArchive
 
     boost::filesystem::path currentdir;
     std::map<std::string, std::vector<std::string>, ciLessBoost> m;
-    int cutoff;
+    unsigned int cutoff;
 
     bool comparePortion(std::string file1, std::string file2, int start, int size) const
     {
@@ -128,21 +128,15 @@ class DirArchive: public Ogre::FileSystemArchive
 
         std::string copy = filename;
 
-  
 
-      for (int i = 0; i < filename.size(); i++)
+
+      for (unsigned int i = 0; i < filename.size(); i++)
       {
           if(copy.at(i) == '\\' ){
                 copy.replace(i, 1, "/");
           }
       }
-	  if(fsstrict == true)
-	  {
-		  std::cout << "fsstrict " << copy << "\n";
-			return FileSystemArchive::exists(copy);
 
-	  }
-	    std::cout << "afterstrict\n";
 
       if(copy.at(0) == '\\' || copy.at(0) == '/')
         {
@@ -151,8 +145,13 @@ class DirArchive: public Ogre::FileSystemArchive
             //std::cout << "The copy" << copy << "\n";
             //std::cout << "After:" << copy.size();
         }
+        if(fsstrict == true)
+	  {
+		  //std::cout << "fsstrict " << copy << "\n";
+			return FileSystemArchive::exists(copy);
 
-	  
+	  }
+
 
       int last = copy.size() - 1;
       int i = last;
@@ -195,19 +194,15 @@ class DirArchive: public Ogre::FileSystemArchive
        //std::cout << "Open\n";
         std::string copy = filename;
 
-    
 
-      for (int i = 0; i < filename.size(); i++)
+
+      for (unsigned int i = 0; i < filename.size(); i++)
       {
           if(copy.at(i) == '\\' ){
                 copy.replace(i, 1, "/");
           }
       }
-	   if(fsstrict == true){
-		   std::cout << "fsstrict " << copy << "\n";
-			return FileSystemArchive::open(copy, readonly);
-	   }
-	   std::cout << "afterstrict\n";
+
 
       if(copy.at(0) == '\\' || copy.at(0) == '/')
         {
@@ -217,7 +212,9 @@ class DirArchive: public Ogre::FileSystemArchive
             //std::cout << "After:" << copy.size();
         }
 
-	  	 
+          if(fsstrict == true){
+			return FileSystemArchive::open(copy, readonly);
+	   }
 
       //boost::filesystem::path p = copy;
 
@@ -419,7 +416,7 @@ void addDir(const std::string& name, const bool& fs, const std::string& group)
 {
 	fsstrict = fs;
     insertDirFactory();
-	
+
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "Dir", group);
 }
