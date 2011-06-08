@@ -7,6 +7,9 @@ set(LAUNCHER
   graphicspage.cpp
   naturalsort.cpp
 
+  pluginsmodel.cpp
+  pluginsview.cpp
+
   datafilespage.hpp
   lineedit.hpp
   maindialog.hpp
@@ -14,6 +17,9 @@ set(LAUNCHER
   combobox.hpp
   graphicspage.hpp
   naturalsort.hpp
+
+  pluginsmodel.hpp
+  pluginsview.hpp
 )
 
 set(MOC_HDRS
@@ -24,6 +30,8 @@ set(MOC_HDRS
   combobox.hpp
   graphicspage.hpp
 
+  pluginsmodel.hpp
+  pluginsview.hpp
 )
 
 find_package(Qt4 REQUIRED)

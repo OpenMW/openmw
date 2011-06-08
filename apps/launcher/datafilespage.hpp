@@ -6,8 +6,6 @@
 #include "combobox.hpp"
 
 class QTableWidget;
-class QTableView;
-class ComboBox;
 class QStandardItemModel;
 class QItemSelection;
 class QItemSelectionModel;
@@ -17,6 +15,9 @@ class QSettings;
 class QAction;
 class QToolBar;
 class QMenu;
+class PluginsModel;
+class PluginsView;
+class ComboBox;
 
 class DataFilesPage : public QWidget
 {
@@ -58,10 +59,10 @@ public slots:
 
 private:
     QTableWidget *mMastersWidget;
-    QTableView *mPluginsTable;
+    PluginsView *mPluginsTable;
 
     QStandardItemModel *mDataFilesModel;
-    QStandardItemModel *mPluginsModel;
+    PluginsModel *mPluginsModel;
 
     QSortFilterProxyModel *mPluginsProxyModel;
     QItemSelectionModel *mPluginsSelectModel;

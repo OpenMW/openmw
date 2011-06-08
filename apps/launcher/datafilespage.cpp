@@ -10,6 +10,8 @@
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
 #include "naturalsort.hpp"
+#include "pluginsmodel.hpp"
+#include "pluginsview.hpp"
 
 using namespace ESM;
 using namespace std;
@@ -17,7 +19,7 @@ using namespace std;
 DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 {
     mDataFilesModel = new QStandardItemModel(); // Contains all plugins with masters
-    mPluginsModel = new QStandardItemModel(); // Contains selectable plugins
+    mPluginsModel = new PluginsModel(); // Contains selectable plugins
 
     mPluginsProxyModel = new QSortFilterProxyModel();
     mPluginsProxyModel->setDynamicSortFilter(true);
@@ -34,8 +36,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     topLayout->addWidget(filterLineEdit);
 
     mMastersWidget = new QTableWidget(this); // Contains the available masters
-    mPluginsTable = new QTableView(this);
-
     mMastersWidget->setObjectName("MastersWidget");
     mMastersWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     mMastersWidget->setSelectionMode(QAbstractItemView::MultiSelection);
@@ -46,11 +46,9 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mMastersWidget->verticalHeader()->hide();
     mMastersWidget->insertColumn(0);
 
+    mPluginsTable = new PluginsView(this);
     mPluginsTable->setModel(mPluginsProxyModel);
-    mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mPluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mPluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mPluginsTable->setAlternatingRowColors(true);
+
     mPluginsTable->horizontalHeader()->setStretchLastSection(true);
     mPluginsTable->horizontalHeader()->hide();
 
@@ -59,14 +57,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     unsigned int height = checkBox.sizeHint().height() + 2;
 
     mPluginsTable->verticalHeader()->setDefaultSectionSize(height);
-
-    mPluginsTable->setDragEnabled(true);
-    mPluginsTable->setDragDropMode(QAbstractItemView::InternalMove);
-    mPluginsTable->setDropIndicatorShown(true);
-    mPluginsTable->setDragDropOverwriteMode(false);
-    mPluginsTable->viewport()->setAcceptDrops(true);
-
-    mPluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Add both tables to a splitter
     QSplitter *splitter = new QSplitter(this);
