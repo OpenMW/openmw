@@ -81,11 +81,11 @@ Vector3 NIFLoader::convertVector3(const Nif::Vector& vec)
 Quaternion NIFLoader::convertRotation(const Nif::Matrix& rot)
 {
     Real matrix[3][3];
-    
+
     for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
             matrix[i][j] = rot.v[i].array[j];
-        
+
         return Quaternion(Matrix3(matrix));
 }
 
@@ -265,7 +265,7 @@ void NIFLoader::createMaterial(const String &name,
         }
         else
             pass->setDepthWriteEnabled(true); */
-        
+
 
         // Add transparency if NiAlphaProperty was present
         if (alphaFlags != -1)
@@ -346,16 +346,16 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     sub->vertexData = new VertexData();
     sub->vertexData->vertexCount = numVerts;
     sub->useSharedVertices = false;
-    
+
     VertexDeclaration *decl = sub->vertexData->vertexDeclaration;
     decl->addElement(nextBuf, 0, VET_FLOAT3, VES_POSITION);
-    
+
     HardwareVertexBufferSharedPtr vbuf =
         HardwareBufferManager::getSingleton().createVertexBuffer(
             VertexElement::getTypeSize(VET_FLOAT3),
             numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
     vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, true);
-    
+
     VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
     bind->setBinding(nextBuf++, vbuf);
 
@@ -673,7 +673,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                     if (verIndex < data->normals.length)
                     {
                         Vector3 absNormalsPos = vecRot * Vector3(ptrNormals + verIndex *3);
-                        
+
                         for (int j=0; j<3; j++)
                             (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
                     }
@@ -833,7 +833,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         }
         for (; i<n; i++)
         {
-            
+
             if (list.has(i))
                 handleNode(&list[i], flags, node->trafo, bounds, bone);
         }
@@ -848,7 +848,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         Tri Chest
         */
         if((isChest && stack < 10 )  || (isHands && counter < 3) || !(isChest || isHands)){                       //(isBeast && isChest && stack < 10 && counter == skincounter )
-            
+
             std::string name = node->name.toString();
             //if (isChest)
                 //std::cout << "NAME: " << name << "\n";
@@ -875,15 +875,15 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
             //if(isBeast && isChest)
                 //cout << "Handling Shape, Stack " << stack <<"\n";
 
-            
-            
+
+
                 counter++;
         }
         /*if(isHands){
             //cout << "Handling Shape, Stack " << stack <<"\n";
             counter++;
         }*/
-        
+
     }
 
     stack--;
@@ -904,7 +904,7 @@ void NIFLoader::loadResource(Resource *resource)
     //std::cout <<"NAME:" << name;
     //if(name.length() >= 20)
     //  {std::string split = name.substr(name.length() - 20, 20);
-    //if(name == 
+    //if(name ==
     //std::cout <<"NAME:" << name << "LEN: " << name.length() << "\n";
     const std::string test ="meshes\\b\\B_N_Dark Elf_M_Skins.NIF";
     const std::string test2 ="meshes\\b\\B_N_Dark Elf_M_Skins.nif";
@@ -932,15 +932,15 @@ void NIFLoader::loadResource(Resource *resource)
     const std::string test24 ="meshes\\b\\B_N_High Elf_M_Skins.nif";
 
     //std::cout <<"LEN1:" << test.length() << "TEST: " << test << "\n";
-    
-    
+
+
     if(name.compare(test) == 0 || name.compare(test2) == 0 || name.compare(test3) == 0 || name.compare(test4) == 0 ||
         name.compare(test5) == 0 || name.compare(test6) == 0 || name.compare(test7) == 0 || name.compare(test8) == 0 || name.compare(test9) == 0 ||
         name.compare(test10) == 0 || name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 ||
         name.compare(test14) == 0 || name.compare(test15) == 0 || name.compare(test16) == 0 || name.compare(test17) == 0 ||
         name.compare(test18) == 0 || name.compare(test19) == 0 || name.compare(test20) == 0 || name.compare(test21) == 0 ||
         name.compare(test22) == 0 || name.compare(test23) == 0 || name.compare(test24) == 0
-        
+
         ){
         //std::cout << "Welcome Chest\n";
         isChest = true;
@@ -1009,7 +1009,7 @@ void NIFLoader::loadResource(Resource *resource)
         std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
         isChest = true;
     }*/
-    
+
     //if(split== "Skins.NIF")
     //  std::cout << "\nSPECIAL PROPS\n";
     resourceName = "";
@@ -1072,7 +1072,7 @@ void NIFLoader::loadResource(Resource *resource)
 	short handle = 0;
 	//skel->setBlendMode(Ogre::SkeletonAnimationBlendMode::ANIMBLEND_CUMULATIVE);
 	bool first = true;
-	
+
     // set the bounding value.
     if (bounds.isValid())
     {
@@ -1080,155 +1080,10 @@ void NIFLoader::loadResource(Resource *resource)
                                         bounds.maxX(), bounds.maxY(), bounds.maxZ()));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
-	for(int i = 0; i < nif.numRecords(); i++)
-	{
-		
-	Nif::NiKeyframeController *f = dynamic_cast<Nif::NiKeyframeController*>(nif.getRecord(i));
-	Nif::Node *n = dynamic_cast<Nif::Node*>(nif.getRecord(i));
-	
 
-	if(f != NULL)
-	{
-		Nif::NiKeyframeDataPtr data = f->data;
-		std::cout << "Controller's Rtype:" <<  data->getRtype() << "Stype: " << data->getStype() << "Ttype:" << data->getTtype() << "\n";
-		
-		if(first){
 
-			float end = f->timeStop;
-			//std::cout <<"Creating WholeThing" << end << "\n";
-			
-			//TRANSLATION
-			if(!mSkel.isNull()){
-			std::cout <<"Creating WholeThing" << end << "\n";
-			animcore = mSkel->createAnimation("WholeThing", end);
-			//animcore->setInterpolationMode(Ogre::Animation::IM_SPLINE);
-			//animcore->setRotationInterpolationMode(Ogre::Animation::RIM_SPHERICAL);
-			//animcore2->setRotationInterpolationMode(Ogre::Animation::RIM_LINEAR);
 
-			//ROTATION
-			animcore2 = mSkel->createAnimation("WholeThing2", end);
-			//animcore2->setInterpolationMode(Ogre::Animation::IM_SPLINE);
-			//animcore2->setRotationInterpolationMode(Ogre::Animation::RIM_SPHERICAL);
-			}
-			std::cout <<"AFTER";
-			first = false;
-		}
-		 if(animcore && animcore2){
-		Nif::Named *node = dynamic_cast<Nif::Named*> ( f->target.getPtr());
-			std::cout << "The target rec: " << node->name.toString() << "\n";
-			Ogre::NodeAnimationTrack* mTrack = animcore->createNodeTrack(handle, mSkel->getBone(node->name.toString()));
-		Ogre::NodeAnimationTrack* mTrack2 = animcore2->createNodeTrack(handle++, mSkel->getBone(node->name.toString()));
-			/* if (node->recType == RC_NiNode)
-		{
-        NodeList &list = ((NiNode*)node)->children;
-        int n = list.length();
-		
-        for (int i = n; i<=n; i++)
-        {
-			if(skel->hasBone((list[i]).name.toString()))
-				mTrack3 = animcore2->createNodeTrack(handle++, skel->getBone((list[i]).name.toString()));
-            
-        }
-    }*/
-		
-		std::vector<Ogre::Quaternion> quats = data->getQuat();
-		std::vector<Ogre::Quaternion>::iterator quatIter = quats.begin();
-		std::vector<float> rtime = data->getrTime();
-		std::vector<float>::iterator rtimeiter = rtime.begin();
 
-		std::vector<float> ttime = data->gettTime();
-		std::vector<float>::iterator ttimeiter = ttime.begin();
-		std::vector<Ogre::Vector3> translist1  = data->getTranslist1();
-		std::vector<Ogre::Vector3>::iterator transiter = translist1.begin();
-		std::vector<Ogre::Vector3> translist2  = data->getTranslist2();
-		std::vector<Ogre::Vector3>::iterator transiter2 = translist2.begin();
-		std::vector<Ogre::Vector3> translist3  = data->getTranslist3();
-		std::vector<Ogre::Vector3>::iterator transiter3 = translist3.begin();
-		
-
-		float tleft = 0;
-		float rleft = 0.0;
-		float ttotal = 0.0;
-		float rtotal = 0;
-		Ogre::TransformKeyFrame* mKey;
-		Ogre::TransformKeyFrame* mKey2;
-		float tused = 0.0;
-		float rused = 0.0;
-		Ogre::Quaternion lastquat;
-		Ogre::Vector3 lasttrans;
-		bool rend = false;
-		bool tend = false;
-		Ogre::Quaternion test;// = (skel->getBone(node->name.toString()))->getOrientation();
-		for (int j = 0 ; j < ttime.size(); j++)
-		{
-			if(data->getTtype() >= 1 && data->getTtype() <= 5)
-			{
-				
-			    Ogre::TransformKeyFrame* mKey = mTrack->createNodeKeyFrame(*ttimeiter);
-				Ogre::Vector3 standard = *transiter;
-				if(data->getTtype() == 2)
-					standard = *transiter *  *transiter2  *  *transiter3;
-
-				mKey->setTranslate(standard);/*
-				if(mTrack3)
-				{
-					 Ogre::TransformKeyFrame* mKey3 = mTrack->createNodeKeyFrame(*ttimeiter);
-					mKey3->setTranslate(standard);
-				}*/
-				//mKey->setRotation(Quaternion::ZERO);
-				//mKey->setScale(Ogre::Vector3(1,1,1));
-				transiter++;               //START
-				transiter2++;
-				transiter3++;
-			    ttimeiter++;
-			}
-		}
-		for (int j = 0 ; j < rtime.size(); j++)
-		{
-			if(data->getRtype() >= 1 && data->getRtype() <= 5)
-			{
-			    Ogre::TransformKeyFrame* mKey2 = mTrack2->createNodeKeyFrame(*rtimeiter);
-				test = *quatIter;
-
-				mKey2->setRotation(test);
-				//mKey2->setTranslate(Ogre::Vector3(0,0,0));
-				//mKey2->setScale(Ogre::Vector3(1,1,1));
-				quatIter++;
-			    rtimeiter++;
-			}
-		}
-		 }
-	
-			
-
-		
-		/*
-		//mTrack = animcore->createNodeTrack(handle++, skel->getBone(node->name.toString()));
-
-		std::vector<float> stime = data->getsTime();
-		std::vector<float>::iterator stimeiter = stime.begin();
-
-		std::vector<float> sfactor = data->getScalefactor();
-		std::vector<float>::iterator sfactoriter = sfactor.begin();
-		for (int i = 0 ; i < stime.size(); i++)
-		{
-			if(data->getStype() >= 1 && data->getStype() <= 5)
-			{
-			    Ogre::TransformKeyFrame* mKey = mTrack->createNodeKeyFrame(*stimeiter);
-			    mKey->setScale(Ogre::Vector3(*sfactoriter, *sfactoriter, *sfactoriter));
-
-			    sfactoriter++;
-			    stimeiter++;
-			}
-		}
-		*/
-
-	
-	}
-	
-	//std::cout <"BE\n";
-	}
-	
     // set skeleton
   if (!mSkel.isNull() && mesh->isLoaded())
   {
@@ -1241,14 +1096,14 @@ void NIFLoader::loadResource(Resource *resource)
 //         mesh->setSkeletonName(getSkeletonName());
 }
 
-MeshPtr NIFLoader::load(const std::string &name, 
+MeshPtr NIFLoader::load(const std::string &name,
                          const std::string &group)
 {
     MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     ResourcePtr ptr = m->getByName(name, group);
     MeshPtr resize;
-    
+
     const std::string beast1 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
     const std::string beast2 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
     const std::string beast3 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
@@ -1259,8 +1114,8 @@ MeshPtr NIFLoader::load(const std::string &name,
     const std::string beasttail3 ="tail\\b\\B_N_Argonian_F_Skins.nif";
     const std::string beasttail4 ="tail\\b\\B_N_Argonian_M_Skins.nif";
 
-    if (!ptr.isNull()){ 
-        
+    if (!ptr.isNull()){
+
         //if(pieces > 1)
             //cout << "It exists\n";
             resize = MeshPtr(ptr);
@@ -1271,17 +1126,17 @@ MeshPtr NIFLoader::load(const std::string &name,
     {
         resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
         //cout <<"EXISTING" << name << "\n";
-        
+
         //if(pieces > 1)
             //cout << "Creating it\n";
-        
-        
+
+
         //resize->load();
         //resize->reload();
         //return 0;
          ResourcePtr ptr = m->getByName(name, group);
          resize = MeshPtr(ptr);
-        
+
         //NIFLoader::getSingletonPtr()->
         /*ResourcePtr ptr = m->getByName(name, group);
     if (!ptr.isNull()){
@@ -1292,7 +1147,7 @@ MeshPtr NIFLoader::load(const std::string &name,
     }
     return resize;
 }
-    
+
 
 /* More code currently not in use, from the old D source. This was
    used in the first attempt at loading NIF meshes, where each submesh
