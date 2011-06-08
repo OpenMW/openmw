@@ -584,7 +584,15 @@ void DataFilesPage::showContextMenu(const QPoint &point)
     foreach (const QModelIndex &currentIndex, selectedIndexes) {
         if (currentIndex.isValid()) {
 
-            if (isChecked(currentIndex)) {
+            const QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(currentIndex);
+
+            if (!sourceIndex.isValid()) {
+                return;
+            }
+
+            const QStandardItem *currentItem = mPluginsModel->itemFromIndex(sourceIndex);
+
+            if (currentItem->checkState() == Qt::Checked) {
                 mUncheckAction->setEnabled(true);
             } else {
                 mCheckAction->setEnabled(true);
@@ -744,19 +752,6 @@ void DataFilesPage::setCheckState(QModelIndex index)
     } else {
         mPluginsModel->setData(sourceModelIndex, Qt::Checked, Qt::CheckStateRole);
     }
-}
-
-bool DataFilesPage::isChecked(const QModelIndex &index)
-{
-
-    QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(index);
-
-    if (mPluginsModel->data(sourceModelIndex, Qt::CheckStateRole) == Qt::Checked) {
-        return true;
-    } else {
-        return false;
-    }
-
 }
 
 const QStringList DataFilesPage::selectedMasters()

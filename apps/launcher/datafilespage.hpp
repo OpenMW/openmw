@@ -86,7 +86,6 @@ private:
     void uncheckPlugins();
     void createActions();
 
-    bool isChecked(const QModelIndex &index);
 };
 
 #endif
