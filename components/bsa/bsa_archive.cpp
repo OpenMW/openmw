@@ -41,6 +41,8 @@ struct ciLessBoost : std::binary_function<std::string, std::string, bool>
     }
 };
 
+static bool fsstrict = false;
+
 /// An OGRE Archive wrapping a BSAFile archive
 class DirArchive: public Ogre::FileSystemArchive
 {
@@ -70,8 +72,8 @@ class DirArchive: public Ogre::FileSystemArchive
   std::string s = name;
   cutoff = s.size() + 1;
   //std::cout << "Cut off:" << cutoff;
-
-  populateMap(currentdir);
+  if(fsstrict == false)
+		 populateMap(currentdir);
 
   }
   void populateMap(boost::filesystem::path d){
@@ -111,7 +113,7 @@ class DirArchive: public Ogre::FileSystemArchive
 
   }
 
-    bool isCaseSensitive() const { return false; }
+    bool isCaseSensitive() const { return fsstrict; }
 
   // The archive is loaded in the constructor, and never unloaded.
     void load() {}
@@ -134,7 +136,13 @@ class DirArchive: public Ogre::FileSystemArchive
                 copy.replace(i, 1, "/");
           }
       }
+	  if(fsstrict == true)
+	  {
+		  std::cout << "fsstrict " << copy << "\n";
+			return FileSystemArchive::exists(copy);
 
+	  }
+	    std::cout << "afterstrict\n";
 
       if(copy.at(0) == '\\' || copy.at(0) == '/')
         {
@@ -144,8 +152,7 @@ class DirArchive: public Ogre::FileSystemArchive
             //std::cout << "After:" << copy.size();
         }
 
-
-      //boost::filesystem::path p = copy;
+	  
 
       int last = copy.size() - 1;
       int i = last;
@@ -196,7 +203,11 @@ class DirArchive: public Ogre::FileSystemArchive
                 copy.replace(i, 1, "/");
           }
       }
-
+	   if(fsstrict == true){
+		   std::cout << "fsstrict " << copy << "\n";
+			return FileSystemArchive::open(copy, readonly);
+	   }
+	   std::cout << "afterstrict\n";
 
       if(copy.at(0) == '\\' || copy.at(0) == '/')
         {
@@ -205,6 +216,9 @@ class DirArchive: public Ogre::FileSystemArchive
             //std::cout << "The copy" << copy << "\n";
             //std::cout << "After:" << copy.size();
         }
+
+	  	 
+
       //boost::filesystem::path p = copy;
 
       int last = copy.size() - 1;
@@ -374,6 +388,7 @@ public:
 
 static bool init = false;
 static bool init2 = false;
+
 static void insertBSAFactory()
 {
   if(!init)
@@ -400,9 +415,11 @@ void addBSA(const std::string& name, const std::string& group)
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "BSA", group);
 }
-void addDir(const std::string& name, const std::string& group)
+void addDir(const std::string& name, const bool& fs, const std::string& group)
 {
+	fsstrict = fs;
     insertDirFactory();
+	
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "Dir", group);
 }

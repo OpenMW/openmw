@@ -93,51 +93,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     std::string effect;
 
     MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
-	/*
-	ESMS::CellRefList<ESM::Creature,MWWorld::RefData>::List creatureData = (current->creatures).list;
-	ESMS::CellRefList<ESM::Creature,MWWorld::RefData>::List::iterator creaturedataiter = creatureData.begin();
-
-	for(int i = 0; i < creatureData.size(); i++)
-	{
-		//std::cout << "Testing" << i < "\n";
-		ESMS::LiveCellRef<ESM::Creature,MWWorld::RefData> item = *creaturedataiter;
-		Ogre::Entity* creaturemodel = item.model;
-
-		if(evt.timeSinceLastFrame == 0)
-			creaturemodel->getSkeleton()->setBindingPose();
-		creaturemodel->getSkeleton()->setBlendMode(Ogre::SkeletonAnimationBlendMode::ANIMBLEND_AVERAGE);    //ANIMBLEND_AVERAGE
-		Ogre::AnimationState *mAnimationState = creaturemodel->getAnimationState("WholeThing");
-		mAnimationState->setWeight(.5);
-			mAnimationState->setLoop(true);
-			//npcmodel->getSkeleton()->
-
-			mAnimationState->setEnabled(true);
-
-
-
-
-			 Ogre::AnimationState *mAnimationState2 = creaturemodel->getAnimationState("WholeThing2");
-			mAnimationState2->setLoop(true);
-			mAnimationState2->setWeight(.5);
-			mAnimationState2->setEnabled(true);
-
-			  mAnimationState2->createBlendMask(creaturemodel->getSkeleton()->getNumBones(),1);
-			 mAnimationState->createBlendMask(creaturemodel->getSkeleton()->getNumBones(),1);
-			 for(int j = 2; j < creaturemodel->getSkeleton()->getNumBones(); j++)
-			 {
-				mAnimationState->setBlendMaskEntry(j,1);
-				mAnimationState2->setBlendMaskEntry(j,1);
-			 }
-			  // set skeleton
-		std::cout << "TimePosition:" << mAnimationState->getTimePosition() << "\n";
-
-		mAnimationState->addTime(evt.timeSinceLastFrame);
-		mAnimationState2->addTime(evt.timeSinceLastFrame);
-		//npcmodel->_updateAnimation();
-		//mAnimationState2->setEnabled(true);
-		creaturedataiter++;
-	}*/
-
 
 
     //If the region has changed
@@ -299,9 +254,7 @@ void OMW::Engine::loadBSA()
 
          std::string m = mDataDir.string();
           std::cout << "Data dir" << m << "\n";
-          addDir(m);
-          //std::string s = "f\n";
-          //std::cout <<"S: " << s.size() << "\n";
+          addDir(m, mFSStrict);
 
 }
 
