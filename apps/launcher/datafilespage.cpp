@@ -16,6 +16,18 @@
 using namespace ESM;
 using namespace std;
 
+//sort QModelIndexList ascending
+bool rowGreaterThan(const QModelIndex &index1, const QModelIndex &index2)
+{
+    return index1.row() >= index2.row();
+}
+
+//sort QModelIndexList descending
+bool rowSmallerThan(const QModelIndex &index1, const QModelIndex &index2)
+{
+    return index1.row() <= index2.row();
+}
+
 DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 {
     mDataFilesModel = new QStandardItemModel(); // Contains all plugins with masters
@@ -48,6 +60,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     mPluginsTable = new PluginsView(this);
     mPluginsTable->setModel(mPluginsProxyModel);
+    mPluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
 
     mPluginsTable->horizontalHeader()->setStretchLastSection(true);
     mPluginsTable->horizontalHeader()->hide();
@@ -207,9 +220,6 @@ void DataFilesPage::setupConfig()
 
     file.setFileName(config); // Just for displaying information
     qDebug() << "Using config file from " << file.fileName();
-    file.open(QIODevice::ReadOnly);
-    qDebug() << "File contents:" << file.readAll();
-    file.close();
 
     // Open our config file
     mLauncherConfig = new QSettings(config, QSettings::IniFormat);
@@ -423,6 +433,10 @@ void DataFilesPage::moveUp()
     }
 
     QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+
+    //sort selection ascending because selectedIndexes returns an unsorted list
+    qSort(selectedIndexes.begin(), selectedIndexes.end(), rowSmallerThan);
+
     QModelIndex firstIndex = mPluginsProxyModel->mapToSource(selectedIndexes.first());
 
     // Check if the first selected plugin is the top one
@@ -431,11 +445,16 @@ void DataFilesPage::moveUp()
     }
 
     foreach (const QModelIndex &currentIndex, selectedIndexes) {
-        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
+        const QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
         int currentRow = sourceModelIndex.row();
 
         if (sourceModelIndex.isValid() && currentRow > 0) {
             mPluginsModel->insertRow((currentRow - 1), mPluginsModel->takeRow(currentRow));
+
+            const QModelIndex targetIndex = mPluginsModel->index((currentRow - 1), 0, QModelIndex());
+
+            mPluginsTable->selectionModel()->select(targetIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+            scrollToSelection();
         }
     }
 }
@@ -449,7 +468,11 @@ void DataFilesPage::moveDown()
     }
 
     QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
-    QModelIndex lastIndex = mPluginsProxyModel->mapToSource(selectedIndexes.last());
+
+    //sort selection descending because selectedIndexes returns an unsorted list
+    qSort(selectedIndexes.begin(), selectedIndexes.end(), rowGreaterThan);
+
+    const QModelIndex lastIndex = mPluginsProxyModel->mapToSource(selectedIndexes.first());
 
     // Check if last selected plugin is bottom one
     if ((lastIndex.row() + 1) == mPluginsModel->rowCount()) {
@@ -457,11 +480,16 @@ void DataFilesPage::moveDown()
     }
 
     foreach (const QModelIndex &currentIndex, selectedIndexes) {
-        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
+        const QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
         int currentRow = sourceModelIndex.row();
 
         if (sourceModelIndex.isValid() && (currentRow + 1) < mPluginsModel->rowCount()) {
             mPluginsModel->insertRow((currentRow + 1), mPluginsModel->takeRow(currentRow));
+
+            const QModelIndex targetIndex = mPluginsModel->index((currentRow + 1), 0, QModelIndex());
+
+            mPluginsTable->selectionModel()->select(targetIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+            scrollToSelection();
         }
     }
 }
@@ -475,6 +503,10 @@ void DataFilesPage::moveTop()
     }
 
     QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+
+    //sort selection ascending because selectedIndexes returns an unsorted list
+    qSort(selectedIndexes.begin(), selectedIndexes.end(), rowSmallerThan);
+
     QModelIndex firstIndex = mPluginsProxyModel->mapToSource(selectedIndexes.first());
 
     // Check if the first selected plugin is the top one
@@ -484,12 +516,15 @@ void DataFilesPage::moveTop()
 
     for (int i=0; i < selectedIndexes.count(); ++i) {
 
-        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(selectedIndexes.at(i));
+        const QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(selectedIndexes.at(i));
 
         int currentRow = sourceModelIndex.row();
 
         if (sourceModelIndex.isValid() && currentRow > 0) {
+
             mPluginsModel->insertRow(i, mPluginsModel->takeRow(currentRow));
+            mPluginsTable->selectionModel()->select(mPluginsModel->index(i, 0, QModelIndex()), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+            mPluginsTable->scrollToTop();
         }
     }
 }
@@ -503,7 +538,11 @@ void DataFilesPage::moveBottom()
     }
 
     QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
-    QModelIndex lastIndex = mPluginsProxyModel->mapToSource(selectedIndexes.last());
+
+    //sort selection descending because selectedIndexes returns an unsorted list
+    qSort(selectedIndexes.begin(), selectedIndexes.end(), rowSmallerThan);
+
+    const QModelIndex lastIndex = mPluginsProxyModel->mapToSource(selectedIndexes.last());
 
     // Check if last selected plugin is bottom one
     if ((lastIndex.row() + 1) == mPluginsModel->rowCount()) {
@@ -512,13 +551,19 @@ void DataFilesPage::moveBottom()
 
     for (int i=0; i < selectedIndexes.count(); ++i) {
 
-        QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(selectedIndexes.at(i));
+        const QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(selectedIndexes.at(i));
 
         // Subtract iterations because takeRow shifts the rows below the taken row up
         int currentRow = sourceModelIndex.row() - i;
 
         if (sourceModelIndex.isValid() && (currentRow + 1) < mPluginsModel->rowCount()) {
             mPluginsModel->appendRow(mPluginsModel->takeRow(currentRow));
+
+            // Rowcount starts with 1, row numbers start with 0
+            const QModelIndex lastRow = mPluginsModel->index((mPluginsModel->rowCount() -1), 0, QModelIndex());
+
+            mPluginsTable->selectionModel()->select(lastRow, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+            mPluginsTable->scrollToBottom();
         }
     }
 }
@@ -532,6 +577,9 @@ void DataFilesPage::check()
     }
 
     QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+
+    //sort selection ascending because selectedIndexes returns an unsorted list
+    qSort(selectedIndexes.begin(), selectedIndexes.end(), rowSmallerThan);
 
     foreach (const QModelIndex &currentIndex, selectedIndexes) {
         QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
@@ -552,6 +600,9 @@ void DataFilesPage::uncheck()
 
     QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
 
+    //sort selection ascending because selectedIndexes returns an unsorted list
+    qSort(selectedIndexes.begin(), selectedIndexes.end(), rowSmallerThan);
+
     foreach (const QModelIndex &currentIndex, selectedIndexes) {
         QModelIndex sourceModelIndex = mPluginsProxyModel->mapToSource(currentIndex);
 
@@ -569,6 +620,32 @@ void DataFilesPage::refresh()
     readConfig();
 }
 
+void DataFilesPage::scrollToSelection()
+{
+    // Scroll to the selected plugins
+
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    // Get the selected indexes visible by determining the middle index
+    QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
+    qSort(selectedIndexes.begin(), selectedIndexes.end(), rowSmallerThan);
+
+    // The selected rows including non-selected inside selection
+    unsigned int selectedRows = selectedIndexes.last().row() - selectedIndexes.first().row();
+
+    // Determine the row which is roughly in the middle of the selection
+    unsigned int middleRow = selectedIndexes.first().row() + (int)(selectedRows / 2) + 1;
+
+
+    const QModelIndex middleIndex = mPluginsProxyModel->mapFromSource(mPluginsModel->index(middleRow, 0, QModelIndex()));
+
+    // Make sure the whole selection is visible
+    mPluginsTable->scrollTo(selectedIndexes.first());
+    mPluginsTable->scrollTo(selectedIndexes.last());
+    mPluginsTable->scrollTo(middleIndex);
+}
 
 void DataFilesPage::showContextMenu(const QPoint &point)
 {

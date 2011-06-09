@@ -86,6 +86,8 @@ private:
     void uncheckPlugins();
     void createActions();
 
+    void scrollToSelection();
+
 };
 
 #endif
