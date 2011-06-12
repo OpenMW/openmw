@@ -87,15 +87,18 @@ namespace MWSound
 	bool FSstrict;
     FileFinder::FileFinder files;
 	FileFinder::FileFinderStrict strict;
+	FileFinder::FileFinder musicpath;
+	FileFinder::FileFinderStrict musicpathStrict;
 
     SoundImpl(Ogre::Root *root, Ogre::Camera *camera,
               const ESMS::ESMStore &str,
-              const std::string &soundDir, bool fsstrict)
+              const std::string &soundDir, const std::string &musicDir, bool fsstrict)
       : mgr(new OEManager(SoundFactoryPtr(new SOUND_FACTORY)))
       , updater(mgr)
       , cameraTracker(mgr)
       , store(str)
       , files(soundDir), strict(soundDir)
+	  ,musicpath(musicDir), musicpathStrict(musicDir)
     {
 	 FSstrict = fsstrict;	
       cout << "Sound output:  " << SOUND_OUT << endl;
@@ -113,6 +116,8 @@ namespace MWSound
         cameraTracker.unfollowCamera();
     }
 
+
+
     static std::string toMp3(std::string str)
     {
       std::string::size_type i = str.rfind('.');
@@ -124,44 +129,70 @@ namespace MWSound
       return str;
     }
 
-    bool hasFile(const std::string &str)
+    bool hasFile(const std::string &str, bool music = false)
     {
 		if(FSstrict == false){
-      if(files.has(str)) return true;
-      // Not found? Try with .mp3
-      return files.has(toMp3(str));
+			if(music){
+				if(musicpath.has(str)) return true;
+			 // Not found? Try with .mp3
+			 return musicpath.has(toMp3(str));
+			}
+			else
+			{
+				if(files.has(str)) return true;
+				 return files.has(toMp3(str));
+			}
 		}
-		else{
-			 if(strict.has(str)) return true;
-      // Not found? Try with .mp3
-      return files.has(toMp3(str));
-    }
+		else
+		{
+			if(music){
+				if(musicpathStrict.has(str)) return true;
+			 // Not found? Try with .mp3
+			 return musicpathStrict.has(toMp3(str));
+			}
+			else
+			{
+				if(strict.has(str)) return true;
+				 return strict.has(toMp3(str));
+			}
+
+		}
 	}
 
     // Convert a Morrowind sound path (eg. Fx\funny.wav) to full path
     // with proper slash conversion (eg. datadir/Sound/Fx/funny.wav)
-    std::string convertPath(const std::string &str)
+    std::string convertPath(const std::string &str, bool music = false)
     {
 		if(FSstrict == false){
       // Search and return
-      if(files.has(str))
-        return files.lookup(str);
+        if(music && musicpath.has(str))
+			return musicpath.lookup(str);
+      else if(files.has(str))
+			return files.lookup(str);
+
 
       // Try mp3 if the wav wasn't found
       std::string mp3 = toMp3(str);
-      if(files.has(mp3))
-        return files.lookup(mp3);
+      if(music && musicpath.has(mp3))
+        return musicpath.lookup(mp3);
+	  else if(files.has(mp3))
+		  return files.lookup(mp3);
 		}
 
 		else
 		{
-			 if(files.has(str))
-				return files.lookup(str);
+			  if(music && musicpathStrict.has(str))
+			return musicpathStrict.lookup(str);
+      else if(strict.has(str))
+			return strict.lookup(str);
 
-			// Try mp3 if the wav wasn't found
-			std::string mp3 = toMp3(str);
-			if(files.has(mp3))
-				return files.lookup(mp3);
+
+      // Try mp3 if the wav wasn't found
+      std::string mp3 = toMp3(str);
+      if(music && musicpathStrict.has(mp3))
+        return musicpathStrict.lookup(mp3);
+	  else if(strict.has(str))
+		  return strict.lookup(mp3);
 		}
 
       // Give up
@@ -326,6 +357,22 @@ namespace MWSound
     }
   };
 
+  void SoundManager::streamMusicFull (const std::string& filename)
+  {
+    if(!mData) return;
+
+    // Play the sound and tell it to stream, if possible. TODO:
+    // Store the reference, the jukebox will need to check status,
+    // control volume etc.
+    if (mData->music)
+        mData->music->stop();
+    mData->music = mData->mgr->load(filename);
+    mData->music->setStreaming(true);
+    mData->music->setVolume(0.4);
+    mData->music->play();
+
+  }
+
   SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
                              const ESMS::ESMStore &store,
                              boost::filesystem::path dataDir,
@@ -335,7 +382,7 @@ namespace MWSound
 	  fsStrict = fsstrict;
     MP3Lookup(dataDir / "Music/Explore/");
     if(useSound)
-      mData = new SoundImpl(root, camera, store, (dataDir / "Sound").string(), fsstrict);
+      mData = new SoundImpl(root, camera, store, (dataDir / "Sound").string(), (dataDir / "Music").string(), fsstrict);
   }
 
   SoundManager::~SoundManager()
@@ -343,6 +390,15 @@ namespace MWSound
     if(mData)
       delete mData;
   }
+
+  void SoundManager::streamMusic(const std::string& filename){
+	 if(mData->hasFile(filename, true))
+	 {
+		 std::string fullpath = mData->convertPath(filename, true);
+		 streamMusicFull(fullpath);
+	 }
+  }
+
 
   void SoundManager::MP3Lookup(boost::filesystem::path dir)
 {
@@ -376,7 +432,7 @@ namespace MWSound
         try
         {
             std::cout << "Playing " << music << "\n";
-            streamMusic(music);
+            streamMusicFull(music);
         }
         catch(std::exception &e)
         {
@@ -420,22 +476,7 @@ namespace MWSound
     return !mData->isPlaying(ptr, "_say_sound");
   }
 
-  void SoundManager::streamMusic (const std::string& filename)
-  {
-    if(!mData) return;
-
-    // Play the sound and tell it to stream, if possible. TODO:
-    // Store the reference, the jukebox will need to check status,
-    // control volume etc.
-    if (mData->music)
-        mData->music->stop();
-    mData->music = mData->mgr->load(filename);
-    mData->music->setStreaming(true);
-    mData->music->setVolume(0.4);
-    mData->music->play();
-
-  }
-
+  
   void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
   {
     if(!mData) return;
