@@ -392,7 +392,7 @@ void OMW::Engine::go()
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
                                                            (mDataDir),
-                                                           mUseSound);
+                                                           mUseSound, mFSStrict);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,

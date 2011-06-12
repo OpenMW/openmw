@@ -63,7 +63,7 @@ namespace MWSound
     */
     OEManagerPtr mgr;
     SoundPtr music;
-
+	
     /* This class calls update() on the sound manager each frame
        using and Ogre::FrameListener
     */
@@ -84,20 +84,22 @@ namespace MWSound
     // finding. It takes DOS paths (any case, \\ slashes or / slashes)
     // relative to the sound dir, and translates them into full paths
     // of existing files in the filesystem, if they exist.
+	bool FSstrict;
     FileFinder::FileFinder files;
+	FileFinder::FileFinderStrict strict;
 
     SoundImpl(Ogre::Root *root, Ogre::Camera *camera,
               const ESMS::ESMStore &str,
-              const std::string &soundDir)
+              const std::string &soundDir, bool fsstrict)
       : mgr(new OEManager(SoundFactoryPtr(new SOUND_FACTORY)))
       , updater(mgr)
       , cameraTracker(mgr)
       , store(str)
-      , files(soundDir)
+      , files(soundDir), strict(soundDir)
     {
+	 FSstrict = fsstrict;	
       cout << "Sound output:  " << SOUND_OUT << endl;
       cout << "Sound decoder: " << SOUND_IN << endl;
-
       // Attach the camera to the camera tracker
       cameraTracker.followCamera(camera);
 
@@ -124,15 +126,23 @@ namespace MWSound
 
     bool hasFile(const std::string &str)
     {
+		if(FSstrict == false){
       if(files.has(str)) return true;
       // Not found? Try with .mp3
       return files.has(toMp3(str));
+		}
+		else{
+			 if(strict.has(str)) return true;
+      // Not found? Try with .mp3
+      return files.has(toMp3(str));
     }
+	}
 
     // Convert a Morrowind sound path (eg. Fx\funny.wav) to full path
     // with proper slash conversion (eg. datadir/Sound/Fx/funny.wav)
     std::string convertPath(const std::string &str)
     {
+		if(FSstrict == false){
       // Search and return
       if(files.has(str))
         return files.lookup(str);
@@ -141,6 +151,18 @@ namespace MWSound
       std::string mp3 = toMp3(str);
       if(files.has(mp3))
         return files.lookup(mp3);
+		}
+
+		else
+		{
+			 if(files.has(str))
+				return files.lookup(str);
+
+			// Try mp3 if the wav wasn't found
+			std::string mp3 = toMp3(str);
+			if(files.has(mp3))
+				return files.lookup(mp3);
+		}
 
       // Give up
       return "";
@@ -307,12 +329,13 @@ namespace MWSound
   SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
                              const ESMS::ESMStore &store,
                              boost::filesystem::path dataDir,
-                             bool useSound)
+                             bool useSound, bool fsstrict)
     : mData(NULL)
   {
+	  fsStrict = fsstrict;
     MP3Lookup(dataDir / "Music/Explore/");
     if(useSound)
-      mData = new SoundImpl(root, camera, store, (dataDir / "Sound").string());
+      mData = new SoundImpl(root, camera, store, (dataDir / "Sound").string(), fsstrict);
   }
 
   SoundManager::~SoundManager()

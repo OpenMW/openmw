@@ -30,12 +30,15 @@ namespace MWSound
             
             SoundImpl *mData;
             std::vector<boost::filesystem::path> files;
+			bool fsStrict;
             
-
         public:
+
+			
       SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
-                   boost::filesystem::path dataDir, bool useSound);
+                   boost::filesystem::path dataDir, bool useSound, bool fsstrict);
             ~SoundManager();
+
 
             void startRandomTitle();
             void MP3Lookup(boost::filesystem::path dir);
