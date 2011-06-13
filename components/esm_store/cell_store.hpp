@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 namespace ESMS
 {
@@ -187,7 +188,14 @@ namespace ESMS
       // Get each reference in turn
       while(cell->getNextRef(esm, ref))
         {
-          int rec = store.find(ref.refID);
+            std::string lowerCase;
+
+            std::transform (ref.refID.begin(), ref.refID.end(), std::back_inserter (lowerCase),
+                (int(*)(int)) std::tolower);
+
+            int rec = store.find(ref.refID);
+
+            ref.refID = lowerCase;
 
           /* We can optimize this further by storing the pointer to the
              record itself in store.all, so that we don't need to look it
