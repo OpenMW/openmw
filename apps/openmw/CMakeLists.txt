@@ -65,6 +65,7 @@ set(GAMEGUI
     mwgui/dialogue_history.cpp
     mwgui/window_base.cpp
     mwgui/stats_window.cpp
+    mwgui/messagebox.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
