@@ -68,6 +68,7 @@ configure_file("${SDIR}/openmw_progress.skin.xml" "${DDIR}/openmw_progress.skin.
 configure_file("${SDIR}/openmw_stats_window_layout.xml" "${DDIR}/openmw_stats_window_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_text.skin.xml" "${DDIR}/openmw_text.skin.xml" COPYONLY)
 configure_file("${SDIR}/openmw_windows.skin.xml" "${DDIR}/openmw_windows.skin.xml" COPYONLY)
+configure_file("${SDIR}/openmw_messagebox_layout.xml" "${DDIR}/openmw_messagebox_layout.xml" COPYONLY)
 configure_file("${SDIR}/smallbars.png" "${DDIR}/smallbars.png" COPYONLY)
 configure_file("${SDIR}/transparent.png" "${DDIR}/transparent.png" COPYONLY)
 configure_file("${SDIR}/VeraMono.ttf" "${DDIR}/VeraMono.ttf" COPYONLY)
