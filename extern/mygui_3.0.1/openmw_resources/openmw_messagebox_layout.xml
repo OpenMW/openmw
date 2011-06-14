@@ -2,9 +2,6 @@
 
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 491 302" name="_Main">
-        <Widget type="StaticText" skin="HeaderText" position="0 0 162 18" name="message" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_Caption" value="Test:"/>
-            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
-        </Widget>
+        <Widget type="StaticText" skin="NormalText" position="4 4 70 18" name="message"/>
     </Widget>
 </MyGUI>

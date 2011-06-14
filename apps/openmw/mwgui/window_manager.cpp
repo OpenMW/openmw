@@ -61,7 +61,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     inventory = new InventoryWindow ();
 #endif
     console = new Console(w,h, environment, extensions);
-    mMessageBoxManager = new MessageBoxManager();
+    mMessageBoxManager = new MessageBoxManager(this);
 
     // The HUD is always on
     hud->setVisible(true);
