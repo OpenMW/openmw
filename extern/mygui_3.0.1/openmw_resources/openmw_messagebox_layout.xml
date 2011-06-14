@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 491 302" name="_Main">
+        <Widget type="StaticText" skin="HeaderText" position="0 0 162 18" name="message" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Widget_Caption" value="Test:"/>
+            <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
+        </Widget>
+    </Widget>
+</MyGUI>
