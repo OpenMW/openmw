@@ -22,7 +22,7 @@ class FileFinderT
     {
       std::string file = pth.string();
       std::string key = file.substr(cut);
-      owner->table[key] = file;
+		owner->table[key] = file;
     }
   };
 
@@ -50,17 +50,18 @@ public:
 
   bool has(const std::string& file) const
   {
-    return table.find(file) != table.end();
+	 return table.find(file) != table.end();
   }
 
   // Find the full path from a relative path.
   const std::string &lookup(const std::string& file) const
   {
-    return table.find(file)->second;
+	 return table.find(file)->second;
   }
 };
 
 // The default is to use path_less for equality checks
 typedef FileFinderT<path_less> FileFinder;
+typedef FileFinderT<path_slash> FileFinderStrict;
 }
 #endif
