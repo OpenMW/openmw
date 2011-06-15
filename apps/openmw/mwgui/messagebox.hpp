@@ -33,7 +33,6 @@ namespace MWGui
             void setMessage (const std::string& message);
             int getHeight ();
             void update (int height);
-            void del ();
             
         protected:
             MessageBoxManager& mMessageBoxManager;
@@ -42,6 +41,7 @@ namespace MWGui
             MyGUI::EditPtr mMessageWidget;
             int mFixedWidth;
             int mBottomPadding;
+            int mNextBoxPadding;
     };
 
 }

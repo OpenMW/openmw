@@ -12,6 +12,8 @@ void MessageBoxManager::createMessageBox (const std::string& message)
     std::cout << "create non-interactive message box" << std::endl;
     MessageBox *box = new MessageBox(*this, message);
     
+    // create a timer and delete when ready.
+    
     mMessageBoxes.insert(mMessageBoxes.begin(), box);
     int height = box->getHeight();
     std::vector<MessageBox*>::const_iterator it;
@@ -19,7 +21,7 @@ void MessageBoxManager::createMessageBox (const std::string& message)
     int i = 0;
     for(it = mMessageBoxes.begin()+1; it != mMessageBoxes.end(); ++it) {
         if(i == 2) {
-            (*it)->del();
+            delete (*it);
             break;
         }
         else {
@@ -34,6 +36,13 @@ void MessageBoxManager::createInteractiveMessageBox (const std::string& message,
 {
     std::cout << "create interactive message box" << std::endl;
     std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
+    
+    // delete all MessageBox'es
+    std::vector<MessageBox*>::const_iterator it;
+    for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); it++) {
+        delete (*it);
+    }
+    mMessageBoxes.clear();
 }
 
 MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
@@ -43,6 +52,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
 {
     mFixedWidth = 300;
     mBottomPadding = 20;
+    mNextBoxPadding = 20;
     
     getWidget(mMessageWidget, "message");
     
@@ -50,7 +60,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     mMessageWidget->addText(cMessage);
     
     MyGUI::IntSize size;
-    size.width = mFixedWidth; // fiexd width
+    size.width = mFixedWidth;
     size.height = 100; // dummy
     
     MyGUI::IntCoord coord;
@@ -85,15 +95,7 @@ void MessageBox::update (int height)
     mMainWidget->setVisible(true);
 }
 
-void MessageBox::del ()
-{
-    // i dont know how to destroy, but therefor i will just set height and width to zero
-    MyGUI::IntSize size;
-    size.width = size.height = 0;
-    mMainWidget->setSize(size);
-}
-
 int MessageBox::getHeight ()
 {
-    return mHeight+20; // 20 is the padding between this and the next MessageBox
+    return mHeight+mNextBoxPadding; // 20 is the padding between this and the next MessageBox
 }
