@@ -249,6 +249,8 @@ namespace MWGui
     ///< Hides dialog and schedules dialog to be deleted.
     
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
+    
+    void onFrame (float frameDuration);
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given

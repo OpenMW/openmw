@@ -566,6 +566,11 @@ void WindowManager::onClassChoice(int _index)
     };
 }
 
+void WindowManager::onFrame (float frameDuration)
+{
+    mMessageBoxManager->onFrame(frameDuration);
+}
+
 namespace MWGui
 {
 

@@ -5,6 +5,22 @@ using namespace MWGui;
 MessageBoxManager::MessageBoxManager (WindowManager *windowManager)
 {
     mWindowManager = windowManager;
+    // defines
+    mMessageBoxSpeed = 0.1;
+}
+
+void MessageBoxManager::onFrame (float frameDuration)
+{
+    std::vector<MessageBoxManagerTimer*>::const_iterator it;
+    for(it = mTimers.begin(); it != mTimers.end(); it++)
+    {
+        (*it)->current += frameDuration;
+        if((*it)->current >= (*it)->max)
+        {
+            // FIXME: delete the messagebox and erase it from the vector
+            std::cout << "delete MessageBox" << std::endl;
+        }
+    }
 }
 
 void MessageBoxManager::createMessageBox (const std::string& message)
@@ -12,16 +28,18 @@ void MessageBoxManager::createMessageBox (const std::string& message)
     std::cout << "create non-interactive message box" << std::endl;
     MessageBox *box = new MessageBox(*this, message);
     
-    // create a timer and delete when ready.
+    removeMessageBox(message.length()*mMessageBoxSpeed, box);
     
     mMessageBoxes.insert(mMessageBoxes.begin(), box);
     int height = box->getHeight();
     std::vector<MessageBox*>::const_iterator it;
     
     int i = 0;
-    for(it = mMessageBoxes.begin()+1; it != mMessageBoxes.end(); ++it) {
+    for(it = mMessageBoxes.begin()+1; it != mMessageBoxes.end(); ++it)
+    {
         if(i == 2) {
             delete (*it);
+            // FIXME: erase it from the vector without segfault :/
             break;
         }
         else {
@@ -30,6 +48,7 @@ void MessageBoxManager::createMessageBox (const std::string& message)
             i++;
         }
     }
+    std::cout << "mMessageBoxes.size() is " << mMessageBoxes.size() << std::endl;
 }
 
 void MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
@@ -37,19 +56,39 @@ void MessageBoxManager::createInteractiveMessageBox (const std::string& message,
     std::cout << "create interactive message box" << std::endl;
     std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
     
-    // delete all MessageBox'es
+    // FIXME: erase it from the vector without segfault :/
     std::vector<MessageBox*>::const_iterator it;
-    for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); it++) {
+    for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); it++)
+    {
         delete (*it);
     }
     mMessageBoxes.clear();
 }
+
+void MessageBoxManager::removeMessageBox (float time, MessageBox *msgbox)
+{
+    MessageBoxManagerTimer *timer;
+    timer->current = 0;
+    timer->max = time;
+    timer->messageBox = msgbox;
+    
+    mTimers.insert(mTimers.end(), timer);
+}
+
+void MessageBoxManager::setMessageBoxSpeed (int speed)
+{
+    mMessageBoxSpeed = speed;
+}
+
+
+
 
 MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
   : Layout("openmw_messagebox_layout.xml")
   , mMessageBoxManager(parMessageBoxManager)
   , cMessage(message)
 {
+    // defines
     mFixedWidth = 300;
     mBottomPadding = 20;
     mNextBoxPadding = 20;

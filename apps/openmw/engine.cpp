@@ -152,6 +152,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     try
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
+        
+        //
+        mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
         // global scripts
         mEnvironment.mGlobalScripts->run (mEnvironment);
