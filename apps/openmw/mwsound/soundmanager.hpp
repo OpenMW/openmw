@@ -33,7 +33,7 @@ namespace MWSound
 			bool fsStrict;
 			void streamMusicFull (const std::string& filename);
             ///< Play a soundifle
-            /// \param filename name of a sound file in "Music/" in the data directory.
+            /// \param absolute filename
             
         public:
 
@@ -43,6 +43,8 @@ namespace MWSound
             ~SoundManager();
 
 			void streamMusic(const std::string& filename);
+			 ///< Play a soundifle
+            /// \param filename name of a sound file in "Music/" in the data directory.
             void startRandomTitle();
             void MP3Lookup(boost::filesystem::path dir);
             //struct SoundImpl;
