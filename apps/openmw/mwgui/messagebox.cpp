@@ -17,8 +17,8 @@ void MessageBoxManager::createMessageBox (const std::string& message)
     std::vector<MessageBox*>::const_iterator it;
     
     int i = 0;
-    for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it) {
-        if(i == 3) {
+    for(it = mMessageBoxes.begin()+1; it != mMessageBoxes.end(); ++it) {
+        if(i == 2) {
             (*it)->del();
             break;
         }
@@ -39,35 +39,50 @@ void MessageBoxManager::createInteractiveMessageBox (const std::string& message,
 MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
   : Layout("openmw_messagebox_layout.xml")
   , mMessageBoxManager(parMessageBoxManager)
+  , cMessage(message)
 {
-    setText("message", message);
+    mFixedWidth = 300;
+    mBottomPadding = 20;
+    
+    getWidget(mMessageWidget, "message");
+    
+    mMessageWidget->setOverflowToTheLeft(true);
+    mMessageWidget->addText(cMessage);
+    
+    MyGUI::IntSize size;
+    size.width = mFixedWidth; // fiexd width
+    size.height = 100; // dummy
+    
+    MyGUI::IntCoord coord;
+    coord.left = 10; // dummy
+    coord.top = 10; // dummy
+
+    mMessageWidget->setSize(size);
+    
+    MyGUI::IntSize textSize = mMessageWidget->_getTextSize();
+    size.height = mHeight = textSize.height + 20; // this is the padding between the text and the box
+    
+    mMainWidget->setSize(size);
+    size.width -= 5; // this is to center the text (see messagebox_layout.xml, Widget type="Edit" position="-2 -3 0 0")
+    mMessageWidget->setSize(size);
+    
     update(0);
 }
 
 void MessageBox::update (int height)
 {
-    MyGUI::WidgetPtr messageWidget;
-    getWidget(messageWidget, "message");
-    
-    MyGUI::IntSize size = messageWidget->_getTextSize();
-    messageWidget->setSize(size);
-    size.width += 20; // padding between text and border of the box
-    size.height += 20; // same here
-    
     MyGUI::IntSize gameWindowSize = mMessageBoxManager.mWindowManager->getGui()->getViewSize();
     MyGUI::IntCoord coord;
-    coord.left = (gameWindowSize.width - size.width)/2;
-    coord.top = (gameWindowSize.height - size.height - height);
+    coord.left = (gameWindowSize.width - mFixedWidth)/2;
+    coord.top = (gameWindowSize.height - mHeight - height - mBottomPadding);
     
-    
-    std::cout << "Setting MainWidget to position (" << coord.left << "|" << coord.top
-        << ") and size to (" << size.width << "|" << size.height << ")"
-        << " while height is " << height << std::endl;
+    MyGUI::IntSize size;
+    size.width = mFixedWidth;
+    size.height = mHeight;
     
     mMainWidget->setCoord(coord);
     mMainWidget->setSize(size);
-    
-    mHeight = size.height;
+    mMainWidget->setVisible(true);
 }
 
 void MessageBox::del ()
