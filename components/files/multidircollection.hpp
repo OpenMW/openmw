@@ -23,11 +23,12 @@ namespace Files
                 return left<right;
 
             std::size_t min = std::min (left.length(), right.length());
+            std::locale loc;
 
             for (std::size_t i=0; i<min; ++i)
             {
-                char l = std::tolower (left[i],std::locale());
-                char r = std::tolower (right[i],std::locale());
+                char l = std::tolower (left[i], loc);
+                char r = std::tolower (right[i], loc);
 
                 if (l<r)
                     return true;

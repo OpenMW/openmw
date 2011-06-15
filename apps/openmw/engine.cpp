@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <OgreVector3.h>
+#include <Ogre.h>
 
 #include "components/esm/records.hpp"
 #include <components/esm_store/cell_store.hpp>
@@ -92,6 +93,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     std::string effect;
 
     MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+
+
     //If the region has changed
     if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
         timer.restart();
@@ -248,6 +251,11 @@ void OMW::Engine::loadBSA()
          std::cout << "Adding " << iter->second.string() << std::endl;
          addBSA (iter->second.string());
     }
+
+         std::string m = mDataDir.string();
+          std::cout << "Data dir" << m << "\n";
+          addDir(m, mFSStrict);
+
 }
 
 // add resources directory
@@ -345,9 +353,6 @@ void OMW::Engine::go()
 
     mOgre.configure(!isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
-    addResourcesDirectory (mDataDir / "Meshes");
-    addResourcesDirectory (mDataDir / "Textures");
-
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
     addResourcesDirectory(mResDir / "mygui");
@@ -384,7 +389,7 @@ void OMW::Engine::go()
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
                                                            (mDataDir),
-                                                           mUseSound);
+                                                           mUseSound, mFSStrict);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,

@@ -22,6 +22,9 @@
  */
 
 #include <string>
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <algorithm>
 
 #ifndef _BSA_ARCHIVE_H_
 #define _BSA_ARCHIVE_H_
@@ -29,5 +32,6 @@
 /// Add the given BSA file as an input archive in the Ogre resource
 /// system.
 void addBSA(const std::string& file, const std::string& group="General");
+void addDir(const std::string& file, const bool& fs, const std::string& group="General");
 
 #endif

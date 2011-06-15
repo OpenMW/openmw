@@ -27,19 +27,28 @@ namespace MWSound
             // Hide implementation details - engine.cpp is compiling
             // enough as it is.
             struct SoundImpl;
-            
+
             SoundImpl *mData;
             std::vector<boost::filesystem::path> files;
-            
+            bool fsStrict;
+
+            void streamMusicFull (const std::string& filename);
+            ///< Play a soundifle
+            /// \param absolute filename
 
         public:
+
       SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
-                   boost::filesystem::path dataDir, bool useSound);
+                   boost::filesystem::path dataDir, bool useSound, bool fsstrict);
             ~SoundManager();
+
+            void streamMusic(const std::string& filename);
+            ///< Play a soundifle
+            /// \param filename name of a sound file in "Music/" in the data directory.
 
             void startRandomTitle();
             void MP3Lookup(boost::filesystem::path dir);
-            //struct SoundImpl;
+
             bool isMusicPlaying();
 
             SoundImpl getMData();
@@ -51,9 +60,7 @@ namespace MWSound
             bool sayDone (MWWorld::Ptr reference) const;
             ///< Is actor not speaking?
 
-            void streamMusic (const std::string& filename);
-            ///< Play a soundifle
-            /// \param filename name of a sound file in "Music/" in the data directory.
+
 
             void playSound (const std::string& soundId, float volume, float pitch);
             ///< Play a sound, independently of 3D-position

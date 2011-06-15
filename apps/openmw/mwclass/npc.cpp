@@ -95,8 +95,7 @@ namespace MWClass
            upperright[uppernumbers++] = npcName + "chest";
            neckandup[neckNumbers++] = npcName + "chest";
         }
-           //std::cout << "GETTING NPC PART";
-        //Orgre::SceneNode test = cellRender.getNpcPart();
+
 
         const ESM::BodyPart *upperleg = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper leg");
         const ESM::BodyPart *groin = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "groin");
@@ -113,8 +112,6 @@ namespace MWClass
         const ESM::BodyPart *hands = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands.1st");
 
 
-        //std::cout << "RACE" << bodyRaceID << "\n";
-
         Ogre::Vector3 pos2 = Ogre::Vector3( 0, .5, 75);
 
         if (groin){
@@ -124,10 +121,9 @@ namespace MWClass
         }
         if (tail) {
             cellRender.insertMesh("tail\\" + tail->model, Ogre::Vector3(0 , 0, -76), axis, kOgrePi, npcName + "tail", addresses, numbers, "tail");
-            //std::cout << "TAIL\n";
         }
 
-        //addresses[1] = npcName + "groin";
+  
         if(upperleg){
         cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( 6, 0, -16), axis, kOgrePi, npcName + "upper leg", addresses, numbers); //-18
         cellRender.insertMesh ("meshes\\" + upperleg->model, Ogre::Vector3( -6, 0, -16), axis, Ogre::Radian(0), npcName + "upper leg2", addresses2, numbers);
@@ -218,9 +214,6 @@ namespace MWClass
 
         if(hand)
         {
-            //std::cout << "WE FOUND A HAND\n";
-                                                            //-50, 0, -120
-            //std::cout << "WE FOUND HANDS\n";
             std::string pass;
             if(hand->model.compare("b\\B_N_Dark Elf_F_Hands.1st.NIF")==0 && bodyRaceID.compare("b_n_dark elf_m_") == 0)
                 pass = "b\\B_N_Dark Elf_M_Hands.1st.NIF";
@@ -230,7 +223,6 @@ namespace MWClass
             cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0,0), kOgrePi, npcName + "hand2", upperright, uppernumbers, false);   //0, 100, -100    0,0,120
             upperleft[uppernumbers] = npcName + "hand";
             upperright[uppernumbers++] = npcName + "hand2";
-            //cellRender.rotateMesh(Ogre::Vector3(0, 0,0),  kOgrePi, upperleft, uppernumbers);
             cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperleft, uppernumbers);
             cellRender.scaleMesh(Ogre::Vector3(1, -1, 1), upperright, uppernumbers);
         }
@@ -244,7 +236,6 @@ namespace MWClass
             else
                 pass =hands->model;                             //-50, 0, -120
             cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1,-110), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "hand", upperleft, uppernumbers, false);   //0, 100, -100    42, 0, -110
-            //cellRender.insertMesh("meshes\\" + hands->model, Ogre::Vector3(42, 0,110), Ogre::Vector3(1, 0, 0), kOgrePi, npcName + "hand", upperleft, uppernumbers, false);   //0, 100, -100    42, 0, -110
             cellRender.insertMesh("meshes\\" + pass, Ogre::Vector3(42, 1, -110), Ogre::Vector3(0, 0, 0), kOgrePi, npcName + "hand2", upperright, uppernumbers, false);   //0, 100, -100    0,0,120
             upperleft[uppernumbers] = npcName + "hand";
             upperright[uppernumbers++] = npcName + "hand2";

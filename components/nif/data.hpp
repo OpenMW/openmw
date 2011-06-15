@@ -25,6 +25,7 @@
 #define _NIF_DATA_H_
 
 #include "controlled.hpp"
+#include <iostream>
 
 namespace Nif
 {
@@ -433,67 +434,70 @@ public:
 
 class NiKeyframeData : public Record
 {
-public:
-  void read(NIFFile *nif)
-  {
-    // Rotations first
-    int count = nif->getInt();
-    if(count)
-      {
-        int type = nif->getInt();
+    public:
 
-        if(type == 1)
-          nif->skip(count*4*5); // time + quaternion
-        else if(type == 3)
-          nif->skip(count*4*8); // rot1 + tension+bias+continuity
-        else if(type == 4)
-          {
-            for(int j=0;j<count;j++)
-              {
-                nif->getFloat(); // time
-                for(int i=0; i<3; i++)
-                  {
-                    int cnt = nif->getInt();
-                    int type = nif->getInt();
-                    if(type == 1)
-                      nif->skip(cnt*4*2); // time + unknown
-                    else if(type == 2)
-                      nif->skip(cnt*4*4); // time + unknown vector
-                    else nif->fail("Unknown sub-rotation type");
-                  }
-              }
-          }
-        else nif->fail("Unknown rotation type in NiKeyframeData");
-      }
+        void read(NIFFile *nif)
+        {
+            // Rotations first
+            int count = nif->getInt();
+            if(count)
+            {
+                int type = nif->getInt();
 
-    // Then translation
-    count = nif->getInt();
-    if(count)
-      {
-        int type = nif->getInt();
+                if(type == 1)
+                    nif->skip(count*4*5); // time + quaternion
+                else if(type == 3)
+                    nif->skip(count*4*8); // rot1 + tension+bias+continuity
+                else if(type == 4)
+                {
+                    for(int j=0;j<count;j++)
+                    {
+                        nif->getFloat(); // time
+                        for(int i=0; i<3; i++)
+                        {
+                            int cnt = nif->getInt();
+                            int type = nif->getInt();
+                            if(type == 1)
+                                nif->skip(cnt*4*2); // time + unknown
+                            else if(type == 2)
+                                nif->skip(cnt*4*4); // time + unknown vector
+                            else nif->fail("Unknown sub-rotation type");
+                        }
+                    }
+                }
+                else nif->fail("Unknown rotation type in NiKeyframeData");
+            }
 
-        if(type == 1) nif->getFloatLen(count*4); // time + translation
-        else if(type == 2)
-          nif->getFloatLen(count*10); // trans1 + forward + backward
-        else if(type == 3)
-          nif->getFloatLen(count*7); // trans1 + tension,bias,continuity
-        else nif->fail("Unknown translation type");
-      }
+            // Then translation
+            count = nif->getInt();
 
-    // Finally, scalings
-    count = nif->getInt();
-    if(count)
-      {
-        int type = nif->getInt();
+            if(count)
+            {
+                int type = nif->getInt();
 
-        int size = 0;
-        if(type == 1) size = 2; // time+scale
-        else if(type == 2) size = 4; // 1 + forward + backward (floats)
-        else if(type == 3) size = 5; // 1 + tbc
-        else nif->fail("Unknown scaling type");
-        nif->getFloatLen(count*size);
-      }
-  }
+                if(type == 1)
+                    nif->getFloatLen(count*4); // time + translation
+                else if(type == 2)
+                    nif->getFloatLen(count*10); // trans1 + forward + backward
+                else if(type == 3)
+                    nif->getFloatLen(count*7); // trans1 + tension,bias,continuity
+                else nif->fail("Unknown translation type");
+            }
+
+            // Finally, scalings
+            count = nif->getInt();
+            if(count)
+            {
+                int type = nif->getInt();
+
+                int size = 0;
+                if(type == 1) size = 2; // time+scale
+                else if(type == 2) size = 4; // 1 + forward + backward (floats)
+                else if(type == 3) size = 5; // 1 + tbc
+                else nif->fail("Unknown scaling type");
+                nif->getFloatLen(count*size);
+            }
+        }
 };
 
 } // Namespace
