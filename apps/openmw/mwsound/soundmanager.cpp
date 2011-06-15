@@ -63,7 +63,7 @@ namespace MWSound
     */
     OEManagerPtr mgr;
     SoundPtr music;
-	
+
     /* This class calls update() on the sound manager each frame
        using and Ogre::FrameListener
     */
@@ -84,11 +84,11 @@ namespace MWSound
     // finding. It takes DOS paths (any case, \\ slashes or / slashes)
     // relative to the sound dir, and translates them into full paths
     // of existing files in the filesystem, if they exist.
-	bool FSstrict;
+    bool FSstrict;
     FileFinder::FileFinder files;
-	FileFinder::FileFinderStrict strict;
-	FileFinder::FileFinder musicpath;
-	FileFinder::FileFinderStrict musicpathStrict;
+    FileFinder::FileFinderStrict strict;
+    FileFinder::FileFinder musicpath;
+    FileFinder::FileFinderStrict musicpathStrict;
 
     SoundImpl(Ogre::Root *root, Ogre::Camera *camera,
               const ESMS::ESMStore &str,
@@ -98,9 +98,9 @@ namespace MWSound
       , cameraTracker(mgr)
       , store(str)
       , files(soundDir), strict(soundDir)
-	  ,musicpath(musicDir), musicpathStrict(musicDir)
+      ,musicpath(musicDir), musicpathStrict(musicDir)
     {
-	 FSstrict = fsstrict;	
+      FSstrict = fsstrict;
       cout << "Sound output:  " << SOUND_OUT << endl;
       cout << "Sound decoder: " << SOUND_IN << endl;
       // Attach the camera to the camera tracker
@@ -131,72 +131,74 @@ namespace MWSound
 
     bool hasFile(const std::string &str, bool music = false)
     {
-		if(FSstrict == false){
-			if(music){
-				if(musicpath.has(str)) return true;
-			 // Not found? Try with .mp3
-			 return musicpath.has(toMp3(str));
-			}
-			else
-			{
-				if(files.has(str)) return true;
-				 return files.has(toMp3(str));
-			}
-		}
-		else
-		{
-			if(music){
-				if(musicpathStrict.has(str)) return true;
-			 // Not found? Try with .mp3
-			 return musicpathStrict.has(toMp3(str));
-			}
-			else
-			{
-				if(strict.has(str)) return true;
-				 return strict.has(toMp3(str));
-			}
+        if(FSstrict == false)
+        {
+            if(music)
+            {
+                if(musicpath.has(str)) return true;
 
-		}
-	}
+                // Not found? Try with .mp3
+                return musicpath.has(toMp3(str));
+            }
+            else
+            {
+                if(files.has(str)) return true;
+                return files.has(toMp3(str));
+            }
+        }
+        else
+        {
+            if(music)
+            {
+                if(musicpathStrict.has(str)) return true;
+
+                // Not found? Try with .mp3
+                return musicpathStrict.has(toMp3(str));
+            }
+            else
+            {
+                if(strict.has(str)) return true;
+                    return strict.has(toMp3(str));
+            }
+        }
+    }
 
     // Convert a Morrowind sound path (eg. Fx\funny.wav) to full path
     // with proper slash conversion (eg. datadir/Sound/Fx/funny.wav)
     std::string convertPath(const std::string &str, bool music = false)
     {
-		if(FSstrict == false){
-      // Search and return
-        if(music && musicpath.has(str))
-			return musicpath.lookup(str);
-      else if(files.has(str))
-			return files.lookup(str);
+        if(FSstrict == false)
+        {
+            // Search and return
+            if(music && musicpath.has(str))
+                return musicpath.lookup(str);
+            else if(files.has(str))
+                return files.lookup(str);
 
+            // Try mp3 if the wav wasn't found
+            std::string mp3 = toMp3(str);
+            if(music && musicpath.has(mp3))
+                return musicpath.lookup(mp3);
+            else if(files.has(mp3))
+                return files.lookup(mp3);
+        }
+        else
+        {
+            if(music && musicpathStrict.has(str))
+                return musicpathStrict.lookup(str);
+            else if(strict.has(str))
+                return strict.lookup(str);
 
-      // Try mp3 if the wav wasn't found
-      std::string mp3 = toMp3(str);
-      if(music && musicpath.has(mp3))
-        return musicpath.lookup(mp3);
-	  else if(files.has(mp3))
-		  return files.lookup(mp3);
-		}
+            // Try mp3 if the wav wasn't found
+            std::string mp3 = toMp3(str);
+            if(music && musicpathStrict.has(mp3))
+                return musicpathStrict.lookup(mp3);
+            else if(strict.has(str))
+                return strict.lookup(mp3);
+        }
 
-		else
-		{
-			  if(music && musicpathStrict.has(str))
-			return musicpathStrict.lookup(str);
-      else if(strict.has(str))
-			return strict.lookup(str);
-
-
-      // Try mp3 if the wav wasn't found
-      std::string mp3 = toMp3(str);
-      if(music && musicpathStrict.has(mp3))
-        return musicpathStrict.lookup(mp3);
-	  else if(strict.has(str))
-		  return strict.lookup(mp3);
-		}
-
-      // Give up
-      return "";
+        // Give up
+        return "";
     }
 
     // Convert a soundId to file name, and modify the volume
@@ -377,9 +379,8 @@ namespace MWSound
                              const ESMS::ESMStore &store,
                              boost::filesystem::path dataDir,
                              bool useSound, bool fsstrict)
-    : mData(NULL)
+    : mData(NULL), fsStrict (fsstrict)
   {
-	  fsStrict = fsstrict;
     MP3Lookup(dataDir / "Music/Explore/");
     if(useSound)
       mData = new SoundImpl(root, camera, store, (dataDir / "Sound").string(), (dataDir / "Music").string(), fsstrict);
@@ -391,13 +392,14 @@ namespace MWSound
       delete mData;
   }
 
-  void SoundManager::streamMusic(const std::string& filename){
-	 if(mData->hasFile(filename, true))
-	 {
-		 std::string fullpath = mData->convertPath(filename, true);
-		 streamMusicFull(fullpath);
-	 }
-  }
+    void SoundManager::streamMusic(const std::string& filename)
+    {
+        if(mData->hasFile(filename, true))
+        {
+            std::string fullpath = mData->convertPath(filename, true);
+            streamMusicFull(fullpath);
+        }
+    }
 
 
   void SoundManager::MP3Lookup(boost::filesystem::path dir)
@@ -476,7 +478,7 @@ namespace MWSound
     return !mData->isPlaying(ptr, "_say_sound");
   }
 
-  
+
   void SoundManager::playSound (const std::string& soundId, float volume, float pitch)
   {
     if(!mData) return;

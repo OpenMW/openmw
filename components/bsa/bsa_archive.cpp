@@ -66,14 +66,13 @@ class DirArchive: public Ogre::FileSystemArchive
     public:
 
     DirArchive(const String& name)
-             : FileSystemArchive(name, "Dir")
-  { 
-	  mType = "Dir";
-  currentdir = name;
-  std::string s = name;
-  cutoff = s.size() + 1;
-  if(fsstrict == false)
-		 populateMap(currentdir);
+    : FileSystemArchive(name, "Dir"), currentdir (name)
+    {
+        mType = "Dir";
+        std::string s = name;
+        cutoff = s.size() + 1;
+        if(fsstrict == false)
+            populateMap(currentdir);
 
   }
   void populateMap(boost::filesystem::path d){
@@ -134,11 +133,10 @@ class DirArchive: public Ogre::FileSystemArchive
             copy.erase(0, 1);
         }
         if(fsstrict == true)
-	  {
-		  //std::cout << "fsstrict " << copy << "\n";
-			return FileSystemArchive::exists(copy);
-
-	  }
+        {
+            //std::cout << "fsstrict " << copy << "\n";
+            return FileSystemArchive::exists(copy);
+        }
 
 
       int last = copy.size() - 1;
@@ -185,9 +183,10 @@ class DirArchive: public Ogre::FileSystemArchive
             copy.erase(0, 1);
         }
 
-          if(fsstrict == true){
-			return FileSystemArchive::open(copy, readonly);
-	   }
+        if(fsstrict == true)
+        {
+            return FileSystemArchive::open(copy, readonly);
+        }
 
 
       int last = copy.size() - 1;
@@ -199,7 +198,7 @@ class DirArchive: public Ogre::FileSystemArchive
                 break;
       }
 
-      std::string folder = copy.substr(0, i);                              //folder with no slash              
+      std::string folder = copy.substr(0, i);                              //folder with no slash
       std::vector<std::string> current = mlocal[folder];
 
        for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)

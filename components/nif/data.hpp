@@ -26,7 +26,6 @@
 
 #include "controlled.hpp"
 #include <iostream>
-#include <Ogre.h>
 
 namespace Nif
 {
@@ -435,266 +434,71 @@ public:
 
 class NiKeyframeData : public Record
 {
-	
-	//Rotations
-	std::vector<Ogre::Quaternion> quats;
-	std::vector<Ogre::Vector3> tbc;
-	std::vector<float> rottime;
-	int rtype;
+    public:
 
-	//Translations
-	std::vector<Ogre::Vector3> translist1;
-	std::vector<Ogre::Vector3> translist2;
-	std::vector<Ogre::Vector3> translist3;
-	std::vector<Ogre::Vector3> transtbc;
-	std::vector<float> transtime;
-	int ttype;
+        void read(NIFFile *nif)
+        {
+            // Rotations first
+            int count = nif->getInt();
+            if(count)
+            {
+                int type = nif->getInt();
 
-	//Scalings
+                if(type == 1)
+                    nif->skip(count*4*5); // time + quaternion
+                else if(type == 3)
+                    nif->skip(count*4*8); // rot1 + tension+bias+continuity
+                else if(type == 4)
+                {
+                    for(int j=0;j<count;j++)
+                    {
+                        nif->getFloat(); // time
+                        for(int i=0; i<3; i++)
+                        {
+                            int cnt = nif->getInt();
+                            int type = nif->getInt();
+                            if(type == 1)
+                                nif->skip(cnt*4*2); // time + unknown
+                            else if(type == 2)
+                                nif->skip(cnt*4*4); // time + unknown vector
+                            else nif->fail("Unknown sub-rotation type");
+                        }
+                    }
+                }
+                else nif->fail("Unknown rotation type in NiKeyframeData");
+            }
 
-	std::vector<float> scalefactor;
-	std::vector<float> scaletime;
-	std::vector<float> forwards;
-	std::vector<float> backwards;
-	std::vector<Ogre::Vector3> tbcscale;
-	int stype;
+            // Then translation
+            count = nif->getInt();
 
-public:
+            if(count)
+            {
+                int type = nif->getInt();
 
-  void read(NIFFile *nif)
-  {
-    // Rotations first
-    int count = nif->getInt();
-	//std::vector<Ogre::Quaternion> quat(count);
-	//std::vector<float> rottime(count);
-	std::cout << "r";
-    if(count)
-      {
+                if(type == 1)
+                    nif->getFloatLen(count*4); // time + translation
+                else if(type == 2)
+                    nif->getFloatLen(count*10); // trans1 + forward + backward
+                else if(type == 3)
+                    nif->getFloatLen(count*7); // trans1 + tension,bias,continuity
+                else nif->fail("Unknown translation type");
+            }
 
-		//TYPE1  LINEAR_KEY
-		//TYPE2  QUADRATIC_KEY
-		//TYPE3  TBC_KEY
-		//TYPE4  XYZ_ROTATION_KEY
-		//TYPE5  UNKNOWN_KEY
-        rtype = nif->getInt();
-		    //std::cout << "Count: " << count << "Type: " << type << "\n";
+            // Finally, scalings
+            count = nif->getInt();
+            if(count)
+            {
+                int type = nif->getInt();
 
-        if(rtype == 1)
-		{
-			//We need to actually read in these values instead of skipping them
-			//nif->skip(count*4*5); // time + quaternion
-			for (int i = 0; i < count; i++) {
-			    float time = nif->getFloat();
-			    float w = nif->getFloat();
-			    float x = nif->getFloat();
-			    float y = nif->getFloat();
-			    float z = nif->getFloat();
-				Ogre::Quaternion quat = Ogre::Quaternion(Ogre::Real(w), Ogre::Real(x), Ogre::Real(y), Ogre::Real(z));
-				quats.push_back(quat);
-				rottime.push_back(time);
-				//if(time == 0.0 || time > 355.5) 
-					// std::cout <<"Time:" << time << "W:" << w <<"X:" << x << "Y:" << y << "Z:" << z << "\n";
-			}
-		}
-        else if(rtype == 3)
-		{                  //Example - node 116 in base_anim.nif
-			for (int i = 0; i < count; i++) {
-			    float time = nif->getFloat();
-			    float w = nif->getFloat();
-			    float x = nif->getFloat();
-			    float y = nif->getFloat();
-			    float z = nif->getFloat();
-
-				float tbcx = nif->getFloat();
-				float tbcy = nif->getFloat();
-				float tbcz = nif->getFloat();
-				Ogre::Quaternion quat = Ogre::Quaternion(Ogre::Real(w), Ogre::Real(x), Ogre::Real(y), Ogre::Real(z));
-				Ogre::Vector3 vec = Ogre::Vector3(tbcx, tbcy, tbcz);
-				quats.push_back(quat);
-				rottime.push_back(time);
-				tbc.push_back(vec);
-				//if(time == 0.0 || time > 355.5) 
-					// std::cout <<"Time:" << time << "W:" << w <<"X:" << x << "Y:" << y << "Z:" << z << "\n";
-			}
-
-          //nif->skip(count*4*8); // rot1 + tension+bias+continuity
-		}
-        else if(rtype == 4)
-          {
-            for(int j=0;j<count;j++)
-              {
-                nif->getFloat(); // time
-                for(int i=0; i<3; i++)
-                  {
-                    int cnt = nif->getInt();
-                    int type = nif->getInt();
-                    if(type == 1)
-                      nif->skip(cnt*4*2); // time + unknown
-                    else if(type == 2)
-                      nif->skip(cnt*4*4); // time + unknown vector
-                    else nif->fail("Unknown sub-rotation type");
-                  }
-              }
-          }
-        else nif->fail("Unknown rotation type in NiKeyframeData");
-      }
-	//first = false;
-
-    // Then translation
-    count = nif->getInt();
-	
-    if(count)
-      {
-       ttype = nif->getInt();
-
-		//std::cout << "TransCount:" << count << " Type: " << type << "\n";
-        if(ttype == 1) {
-			for (int i = 0; i < count; i++) {
-				float time = nif->getFloat();
-				float x = nif->getFloat();
-				float y = nif->getFloat();
-				float z = nif->getFloat();
-				Ogre::Vector3 trans = Ogre::Vector3(x, y, z);
-				translist1.push_back(trans);
-				transtime.push_back(time);
-			}
-			//nif->getFloatLen(count*4); // time + translation
-		}
-        else if(ttype == 2)
-		{                                        //Example - node 116 in base_anim.nif
-			for (int i = 0; i < count; i++) {
-				float time = nif->getFloat();
-				float x = nif->getFloat();
-				float y = nif->getFloat();
-				float z = nif->getFloat();
-				float x2 = nif->getFloat();
-				float y2 = nif->getFloat();
-				float z2 = nif->getFloat();
-				float x3 = nif->getFloat();
-				float y3 = nif->getFloat();
-				float z3 = nif->getFloat();
-				Ogre::Vector3 trans = Ogre::Vector3(x, y, z);
-				Ogre::Vector3 trans2 = Ogre::Vector3(x2, y2, z2);
-				Ogre::Vector3 trans3 = Ogre::Vector3(x3, y3, z3);
-				transtime.push_back(time);
-				translist1.push_back(trans);
-				translist2.push_back(trans2);
-				translist3.push_back(trans3);
-			}
-			
-			//nif->getFloatLen(count*10); // trans1 + forward + backward
-		}
-        else if(ttype == 3){
-			for (int i = 0; i < count; i++) {
-				float time = nif->getFloat();
-				float x = nif->getFloat();
-				float y = nif->getFloat();
-				float z = nif->getFloat();
-				float t = nif->getFloat();
-				float b = nif->getFloat();
-				float c = nif->getFloat();
-				Ogre::Vector3 trans = Ogre::Vector3(x, y, z);
-				Ogre::Vector3 tbc = Ogre::Vector3(t, b, c);
-				translist1.push_back(trans);
-				transtbc.push_back(tbc);
-				transtime.push_back(time);
-			}
-          //nif->getFloatLen(count*7); // trans1 + tension,bias,continuity
-		}
-        else nif->fail("Unknown translation type");
-      }
-
-    // Finally, scalings
-    count = nif->getInt();
-    if(count)
-      {
-        stype = nif->getInt();
-
-		
-		for(int i = 0; i < count; i++){
-					
-				
-        //int size = 0;
-        if(stype >= 1 && stype < 4) 
-			{
-				float time = nif->getFloat();
-				float scale = nif->getFloat();
-				scaletime.push_back(time);
-				scalefactor.push_back(scale);
-				//size = 2; // time+scale
-			}
-		else nif->fail("Unknown scaling type");
-         if(stype == 2){
-			//size = 4; // 1 + forward + backward (floats)
-			float forward = nif->getFloat();
-			float backward = nif->getFloat();
-			forwards.push_back(forward);
-			backwards.push_back(backward);
-		}
-		else if(stype == 3){
-			float tbcx = nif->getFloat();
-			float tbcy = nif->getFloat();
-			float tbcz = nif->getFloat();
-			Ogre::Vector3 vec = Ogre::Vector3(tbcx, tbcy, tbcz);
-			tbcscale.push_back(vec);
-
-			//size = 5; // 1 + tbc
-		}
-        
-		}
-      }
-	  else 
-		  stype = 0;
-  }
-  	int getRtype(){
-		return rtype;
-	}
-	int getStype(){
-		return stype;
-	}
-	int getTtype(){
-		return ttype;
-	}
-	std::vector<Ogre::Quaternion> getQuat(){
-		return quats;
-	}
-	std::vector<Ogre::Vector3> getrTbc(){
-		return tbc;
-	}
-	std::vector<float> getrTime(){
-		return rottime;
-	}
-
-	std::vector<Ogre::Vector3> getTranslist1(){
-		return translist1;
-	}
-	std::vector<Ogre::Vector3> getTranslist2(){
-		return translist2;
-	}
-	std::vector<Ogre::Vector3> getTranslist3(){
-		return translist3;
-	}
-	std::vector<float> gettTime(){
-		return transtime;
-	}
-	std::vector<float> getScalefactor(){
-		return scalefactor;
-	}
-	std::vector<float> getForwards(){
-		return forwards;
-	}
-	std::vector<float> getBackwards(){
-		return backwards;
-	}
-	std::vector<Ogre::Vector3> getScaleTbc(){
-		return tbcscale;
-	}
-
-	std::vector<float> getsTime(){
-		return scaletime;
-	}
+                int size = 0;
+                if(type == 1) size = 2; // time+scale
+                else if(type == 2) size = 4; // 1 + forward + backward (floats)
+                else if(type == 3) size = 5; // 1 + tbc
+                else nif->fail("Unknown scaling type");
+                nif->getFloatLen(count*size);
+            }
+        }
 };
-
 
 } // Namespace
 #endif

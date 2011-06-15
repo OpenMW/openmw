@@ -23,7 +23,7 @@ namespace Files
                 return left<right;
 
             std::size_t min = std::min (left.length(), right.length());
-			std::locale loc;
+            std::locale loc;
 
             for (std::size_t i=0; i<min; ++i)
             {

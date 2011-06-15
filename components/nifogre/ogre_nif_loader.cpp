@@ -1068,11 +1068,6 @@ void NIFLoader::loadResource(Resource *resource)
     // Handle the node
     handleNode(node, 0, NULL, bounds, 0);
 
-
-	short handle = 0;
-	//skel->setBlendMode(Ogre::SkeletonAnimationBlendMode::ANIMBLEND_CUMULATIVE);
-	bool first = true;
-
     // set the bounding value.
     if (bounds.isValid())
     {
@@ -1080,16 +1075,6 @@ void NIFLoader::loadResource(Resource *resource)
                                         bounds.maxX(), bounds.maxY(), bounds.maxZ()));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
-
-
-
-
-    // set skeleton
-  if (!mSkel.isNull() && mesh->isLoaded())
-  {
-        mesh->_notifySkeleton(mSkel);
-		std::cout << "Skeleton notified\n";
-  }
 
     // set skeleton
 //     if (!skel.isNull())

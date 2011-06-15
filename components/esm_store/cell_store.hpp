@@ -14,7 +14,6 @@
 #include "components/esm/records.hpp"
 #include "components/esm/loadcell.hpp"
 #include <list>
-#include <Ogre.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -29,8 +28,6 @@ namespace ESMS
   {
     // The object that this instance is based on.
     const X* base;
-
-	Ogre::Entity *model;
 
     /* Information about this instance, such as 3D location and
        rotation and individual type-dependent data.

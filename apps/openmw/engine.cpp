@@ -353,9 +353,6 @@ void OMW::Engine::go()
 
     mOgre.configure(!isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
-    //addResourcesDirectory (mDataDir / "Meshes");
-    //addResourcesDirectory (mDataDir / "Textures");
-
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
     addResourcesDirectory(mResDir / "mygui");
