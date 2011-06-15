@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <locale>
+#include <cctype>
 
 #include <boost/filesystem/path.hpp>
 
