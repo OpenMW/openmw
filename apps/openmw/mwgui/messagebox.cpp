@@ -11,14 +11,13 @@ MessageBoxManager::MessageBoxManager (WindowManager *windowManager)
 
 void MessageBoxManager::onFrame (float frameDuration)
 {
-    std::vector<MessageBoxManagerTimer*>::const_iterator it;
+    std::vector<MessageBoxManagerTimer>::iterator it;
     for(it = mTimers.begin(); it != mTimers.end(); it++)
     {
-        (*it)->current += frameDuration;
-        if((*it)->current >= (*it)->max)
+        it->current += frameDuration;
+        if(it->current >= it->max)
         {
             // FIXME: delete the messagebox and erase it from the vector
-            std::cout << "delete MessageBox" << std::endl;
         }
     }
 }
@@ -67,10 +66,10 @@ void MessageBoxManager::createInteractiveMessageBox (const std::string& message,
 
 void MessageBoxManager::removeMessageBox (float time, MessageBox *msgbox)
 {
-    MessageBoxManagerTimer *timer;
-    timer->current = 0;
-    timer->max = time;
-    timer->messageBox = msgbox;
+    MessageBoxManagerTimer timer;
+    timer.current = 0;
+    timer.max = time;
+    timer.messageBox = msgbox;
     
     mTimers.insert(mTimers.end(), timer);
 }

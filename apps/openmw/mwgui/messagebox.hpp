@@ -3,7 +3,6 @@
 
 #include <openengine/gui/layout.hpp>
 #include <MyGUI.h>
-#include <OgreTimer.h>
 
 #include "window_base.hpp"
 #include "window_manager.hpp"
@@ -36,7 +35,7 @@ namespace MWGui
             
         private:
             std::vector<MessageBox*> mMessageBoxes;
-            std::vector<MessageBoxManagerTimer*> mTimers;
+            std::vector<MessageBoxManagerTimer> mTimers;
             float mMessageBoxSpeed;
     };
     
