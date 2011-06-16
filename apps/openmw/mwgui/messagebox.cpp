@@ -12,33 +12,39 @@ MessageBoxManager::MessageBoxManager (WindowManager *windowManager)
 void MessageBoxManager::onFrame (float frameDuration)
 {
     std::vector<MessageBoxManagerTimer>::iterator it;
-    for(it = mTimers.begin(); it != mTimers.end(); it++)
+    for(it = mTimers.begin(); it != mTimers.end();)
     {
         it->current += frameDuration;
         if(it->current >= it->max)
         {
-            // FIXME: delete the messagebox and erase it from the vector
+            removeMessageBox(it->messageBox);
+            it = mTimers.erase(it);
+        }
+        else
+        {
+            it++;
         }
     }
 }
 
 void MessageBoxManager::createMessageBox (const std::string& message)
 {
-    std::cout << "create non-interactive message box" << std::endl;
+    std::cout << "MessageBox: " << message << std::endl;
+    
     MessageBox *box = new MessageBox(*this, message);
     
     removeMessageBox(message.length()*mMessageBoxSpeed, box);
     
     mMessageBoxes.insert(mMessageBoxes.begin(), box);
     int height = box->getHeight();
-    std::vector<MessageBox*>::const_iterator it;
+    std::vector<MessageBox*>::iterator it;
     
     int i = 0;
     for(it = mMessageBoxes.begin()+1; it != mMessageBoxes.end(); ++it)
     {
         if(i == 2) {
             delete (*it);
-            // FIXME: erase it from the vector without segfault :/
+            mMessageBoxes.erase(it);
             break;
         }
         else {
@@ -47,19 +53,19 @@ void MessageBoxManager::createMessageBox (const std::string& message)
             i++;
         }
     }
-    std::cout << "mMessageBoxes.size() is " << mMessageBoxes.size() << std::endl;
 }
 
 void MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
-    std::cout << "create interactive message box" << std::endl;
+    std::cout << "interactive MessageBox: " << message << " - ";
     std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
+    std::cout << std::endl;
     
-    // FIXME: erase it from the vector without segfault :/
-    std::vector<MessageBox*>::const_iterator it;
-    for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); it++)
+    std::vector<MessageBox*>::iterator it = mMessageBoxes.begin();
+    while(it != mMessageBoxes.end())
     {
         delete (*it);
+        it = mMessageBoxes.erase(it);
     }
     mMessageBoxes.clear();
 }
@@ -72,6 +78,21 @@ void MessageBoxManager::removeMessageBox (float time, MessageBox *msgbox)
     timer.messageBox = msgbox;
     
     mTimers.insert(mTimers.end(), timer);
+}
+
+bool MessageBoxManager::removeMessageBox (MessageBox *msgbox)
+{
+    std::vector<MessageBox*>::iterator it;
+    for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
+    {
+        if((*it) == msgbox)
+        {
+            delete (*it);
+            mMessageBoxes.erase(it);
+            return true;
+        }
+    }
+    return false;
 }
 
 void MessageBoxManager::setMessageBoxSpeed (int speed)

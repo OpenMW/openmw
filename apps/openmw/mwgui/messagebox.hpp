@@ -29,6 +29,7 @@ namespace MWGui
             void createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
             
             void removeMessageBox (float time, MessageBox *msgbox);
+            bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
             
             WindowManager *mWindowManager;
