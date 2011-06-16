@@ -50,6 +50,7 @@ set(GAMEGUI_HEADER
     mwgui/dialogue_history.hpp
     mwgui/window_base.hpp
     mwgui/stats_window.hpp
+    mwgui/messagebox.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
