@@ -5,7 +5,7 @@
         <Widget type="StaticText" skin="StaticText" position="4 4 4 4" name="message" />
     </Widget-->
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 0 0" name="_Main">
-        <Widget type="Edit" skin="MW_TextEditClient" position="-2 -3 0 0" name="message"  align="ALIGN_LEFT ALIGN_TOP STRETCH">
+        <Widget type="Edit" skin="MW_TextEditClient" position="5 -5 0 0" name="message"  align="ALIGN_LEFT ALIGN_TOP STRETCH">
             <Property key="Edit_Static" value="true"/>
             <Property key="Edit_WordWrap" value="true"/>
             <Property key="Text_FontHeight" value="18"/>

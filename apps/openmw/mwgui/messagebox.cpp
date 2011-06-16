@@ -67,14 +67,8 @@ void MessageBoxManager::createMessageBox (const std::string& message)
     int height = 0;
     for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
     {
-        if((*it) == box)
-        {
-            std::cout << "update(" << height << ")" << std::endl;
-            box->update(height);
-        }
-        else {
-            height += (*it)->getHeight();
-        }
+        (*it)->update(height);
+        height += (*it)->getHeight();
     }
 }
 
@@ -156,7 +150,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     size.height = mHeight = textSize.height + 20; // this is the padding between the text and the box
     
     mMainWidget->setSize(size);
-    size.width -= 5; // this is to center the text (see messagebox_layout.xml, Widget type="Edit" position="-2 -3 0 0")
+    size.width -= 15; // this is to center the text (see messagebox_layout.xml, Widget type="Edit" position="-2 -3 0 0")
     mMessageWidget->setSize(size);
 }
 
