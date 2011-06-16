@@ -48,6 +48,8 @@ namespace MWGui
             int getHeight ();
             void update (int height);
             
+            bool mMarkedToDelete;
+            
         protected:
             MessageBoxManager& mMessageBoxManager;
             int mHeight;

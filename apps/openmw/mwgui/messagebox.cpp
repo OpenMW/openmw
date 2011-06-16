@@ -17,7 +17,28 @@ void MessageBoxManager::onFrame (float frameDuration)
         it->current += frameDuration;
         if(it->current >= it->max)
         {
-            removeMessageBox(it->messageBox);
+            it->messageBox->mMarkedToDelete = true;
+            
+            if(*mMessageBoxes.begin() == it->messageBox) // if this box is the last one
+            {
+                // collect all with mMarkedToDelete and delete them.
+                // and place the other messageboxes on the right position
+                int height = 0;
+                std::vector<MessageBox*>::iterator it2 = mMessageBoxes.begin();
+                while(it2 != mMessageBoxes.end())
+                {
+                    if((*it2)->mMarkedToDelete)
+                    {
+                        delete (*it2);
+                        it2 = mMessageBoxes.erase(it2);
+                    }
+                    else {
+                        (*it2)->update(height);
+                        height += (*it2)->getHeight();
+                        it2++;
+                    }
+                }
+            }
             it = mTimers.erase(it);
         }
         else
@@ -35,22 +56,24 @@ void MessageBoxManager::createMessageBox (const std::string& message)
     
     removeMessageBox(message.length()*mMessageBoxSpeed, box);
     
-    mMessageBoxes.insert(mMessageBoxes.begin(), box);
-    int height = box->getHeight();
+    mMessageBoxes.push_back(box);
     std::vector<MessageBox*>::iterator it;
     
-    int i = 0;
-    for(it = mMessageBoxes.begin()+1; it != mMessageBoxes.end(); ++it)
+    if(mMessageBoxes.size() > 3) {
+        delete *mMessageBoxes.begin();
+        mMessageBoxes.erase(mMessageBoxes.begin());
+    }
+    
+    int height = 0;
+    for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
     {
-        if(i == 2) {
-            delete (*it);
-            mMessageBoxes.erase(it);
-            break;
+        if((*it) == box)
+        {
+            std::cout << "update(" << height << ")" << std::endl;
+            box->update(height);
         }
         else {
-            (*it)->update(height);
             height += (*it)->getHeight();
-            i++;
         }
     }
 }
@@ -112,6 +135,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     mFixedWidth = 300;
     mBottomPadding = 20;
     mNextBoxPadding = 20;
+    mMarkedToDelete = false;
     
     getWidget(mMessageWidget, "message");
     
@@ -134,8 +158,6 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     mMainWidget->setSize(size);
     size.width -= 5; // this is to center the text (see messagebox_layout.xml, Widget type="Edit" position="-2 -3 0 0")
     mMessageWidget->setSize(size);
-    
-    update(0);
 }
 
 void MessageBox::update (int height)
