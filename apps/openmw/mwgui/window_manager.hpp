@@ -62,6 +62,7 @@ namespace MWGui
   class CreateClassDialog;
   class BirthDialog;
   class ReviewDialog;
+  class MessageBoxManager;
 
   struct ClassPoint
   {
@@ -84,6 +85,7 @@ namespace MWGui
     MapWindow *map;
     MainMenu *menu;
     StatsWindow *stats;
+    MessageBoxManager *mMessageBoxManager;
 #if 0
     InventoryWindow *inventory;
 #endif
@@ -245,8 +247,10 @@ namespace MWGui
 
     void removeDialog(OEngine::GUI::Layout* dialog);
     ///< Hides dialog and schedules dialog to be deleted.
-
+    
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
+    
+    void onFrame (float frameDuration);
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given
