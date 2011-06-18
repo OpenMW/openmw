@@ -11,6 +11,7 @@
 namespace MWGui
 {
     
+    class InteractiveMessageBox;
     class MessageBoxManager;
     class MessageBox;
 
@@ -36,6 +37,7 @@ namespace MWGui
             
         private:
             std::vector<MessageBox*> mMessageBoxes;
+            std::vector<InteractiveMessageBox*> mInterMessageBoxes;
             std::vector<MessageBoxManagerTimer> mTimers;
             float mMessageBoxSpeed;
     };
@@ -58,6 +60,17 @@ namespace MWGui
             int mFixedWidth;
             int mBottomPadding;
             int mNextBoxPadding;
+    };
+    
+    class InteractiveMessageBox : public OEngine::GUI::Layout
+    {
+        public:
+            InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
+            
+        protected:
+            MessageBoxManager& mMessageBoxManager;
+            MyGUI::EditPtr mMessageWidget;
+            MyGUI::WidgetPtr mButtonsWidget;
     };
 
 }

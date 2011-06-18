@@ -78,6 +78,10 @@ void MessageBoxManager::createInteractiveMessageBox (const std::string& message,
     std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
     std::cout << std::endl;
     
+    InteractiveMessageBox *box = new InteractiveMessageBox(*this, message, buttons);
+    mInterMessageBoxes.push_back(box);
+    
+    // delete all non-interactive MessageBox'es
     std::vector<MessageBox*>::iterator it = mMessageBoxes.begin();
     while(it != mMessageBoxes.end())
     {
@@ -174,3 +178,18 @@ int MessageBox::getHeight ()
 {
     return mHeight+mNextBoxPadding; // 20 is the padding between this and the next MessageBox
 }
+
+
+
+InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
+  : Layout("openmw_interactive_messagebox_layout.xml")
+  , mMessageBoxManager(parMessageBoxManager)
+{
+    getWidget(mMessageWidget, "message");
+    getWidget(mButtonsWidget, "buttons");
+    
+    mMessageWidget->setOverflowToTheLeft(true);
+    mMessageWidget->addText(message);
+}
+
+
