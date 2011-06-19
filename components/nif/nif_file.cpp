@@ -36,6 +36,7 @@
 #include <iostream>
 using namespace std;
 using namespace Nif;
+using namespace Misc;
 
 /* This file implements functions from the NIFFile class. It is also
    where we stash all the functions we couldn't add as inline

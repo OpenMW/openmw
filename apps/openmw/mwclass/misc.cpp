@@ -14,11 +14,11 @@
 
 namespace MWClass
 {
-    void Misc::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
+    void Miscellaneous::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
         MWWorld::Environment& environment) const
     {
-        ESMS::LiveCellRef<ESM::Misc, MWWorld::RefData> *ref =
-            ptr.get<ESM::Misc>();
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
@@ -31,39 +31,39 @@ namespace MWClass
         }
     }
 
-    std::string Misc::getName (const MWWorld::Ptr& ptr) const
+    std::string Miscellaneous::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Misc, MWWorld::RefData> *ref =
-            ptr.get<ESM::Misc>();
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
 
         return ref->base->name;
     }
 
-    boost::shared_ptr<MWWorld::Action> Misc::activate (const MWWorld::Ptr& ptr,
+    boost::shared_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
     }
 
-    void Misc::insertIntoContainer (const MWWorld::Ptr& ptr,
+    void Miscellaneous::insertIntoContainer (const MWWorld::Ptr& ptr,
         MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
     {
         insertIntoContainerStore (ptr, containerStore.miscItems);
     }
 
-    std::string Misc::getScript (const MWWorld::Ptr& ptr) const
+    std::string Miscellaneous::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Misc, MWWorld::RefData> *ref =
-            ptr.get<ESM::Misc>();
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
 
         return ref->base->script;
     }
 
-    void Misc::registerSelf()
+    void Miscellaneous::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Misc);
+        boost::shared_ptr<Class> instance (new Miscellaneous);
 
-        registerClass (typeid (ESM::Misc).name(), instance);
+        registerClass (typeid (ESM::Miscellaneous).name(), instance);
     }
 }

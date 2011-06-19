@@ -11,7 +11,7 @@ namespace ESM
  * carried, bought and sold. It also includes keys.
  */
 
-struct Misc
+struct Miscellaneous
 {
     struct MCDTstruct
     {

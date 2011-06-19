@@ -84,7 +84,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     //If there is an openmw.cfg in the current path use that as global config
     //Otherwise try getPath
     std::string cfgFile = "openmw.cfg";
-    if(!isFile(cfgFile.c_str()))
+    if(!Misc::isFile(cfgFile.c_str()))
     {
         cfgFile = Files::getPath (Files::Path_ConfigGlobal, "openmw", "openmw.cfg");
     }

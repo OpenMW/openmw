@@ -16,7 +16,7 @@ namespace MWWorld
             ESMS::CellRefList<ESM::Ingredient, D>        ingreds;
             ESMS::CellRefList<ESM::Light, D>             lights;
             ESMS::CellRefList<ESM::Tool, D>              lockpicks;
-            ESMS::CellRefList<ESM::Misc, D>              miscItems;
+            ESMS::CellRefList<ESM::Miscellaneous, D>     miscItems;
             ESMS::CellRefList<ESM::Probe, D>             probes;
             ESMS::CellRefList<ESM::Repair, D>            repairs;
             ESMS::CellRefList<ESM::Weapon, D>            weapons;

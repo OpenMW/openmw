@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _BSA_FILE_H_
-#define _BSA_FILE_H_
+#ifndef BSA_BSA_FILE_H
+#define BSA_BSA_FILE_H
 
 #include <libs/mangle/stream/stream.hpp>
 #include <libs/platform/stdint.h>
@@ -30,6 +30,9 @@
 #include <string>
 #include <vector>
 #include <map>
+
+namespace Bsa
+{
 
 /**
    This class is used to read "Bethesda Archive Files", or BSAs.
@@ -130,5 +133,7 @@ class BSAFile
   const FileList &getList() const
     { return files; }
 };
+
+}
 
 #endif

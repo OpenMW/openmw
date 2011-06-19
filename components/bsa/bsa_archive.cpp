@@ -30,8 +30,12 @@
 #include "bsa_file.hpp"
 #include <libs/mangle/stream/clients/ogre_datastream.hpp>
 
+namespace
+{
+
 using namespace Ogre;
 using namespace Mangle::Stream;
+using namespace Bsa;
 
 struct ciLessBoost : std::binary_function<std::string, std::string, bool>
 {
@@ -364,6 +368,11 @@ static void insertDirFactory()
     }
 }
 
+}
+
+namespace Bsa
+{
+
 // The function below is the only publicly exposed part of this file
 
 void addBSA(const std::string& name, const std::string& group)
@@ -372,11 +381,14 @@ void addBSA(const std::string& name, const std::string& group)
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "BSA", group);
 }
+
 void addDir(const std::string& name, const bool& fs, const std::string& group)
 {
-	fsstrict = fs;
+    fsstrict = fs;
     insertDirFactory();
 
-  ResourceGroupManager::getSingleton().
+    ResourceGroupManager::getSingleton().
     addResourceLocation(name, "Dir", group);
+}
+
 }

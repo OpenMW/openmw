@@ -19,7 +19,7 @@ int main()
   Root *root = new Root("","","");
 
   // Add the BSA
-  addBSA("../../data/Morrowind.bsa");
+  Bsa::addBSA("../../data/Morrowind.bsa");
 
   // Pick a sample file
   String tex = "textures\\tx_natural_cavern_wall13.dds";
