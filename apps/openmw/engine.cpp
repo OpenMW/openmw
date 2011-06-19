@@ -338,12 +338,12 @@ void OMW::Engine::go()
     ogreCfg.insert(0, cfgUserDir);
 
     //A local plugins.cfg will be used if it exist, otherwise look in the default path
-    if(!isFile(plugCfg.c_str()))
+    if(!Misc::isFile(plugCfg.c_str()))
     {
         plugCfg.insert(0, cfgDir);
     }
 
-    mOgre.configure(!isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
+    mOgre.configure(!Misc::isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");

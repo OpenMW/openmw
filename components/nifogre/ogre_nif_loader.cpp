@@ -50,6 +50,7 @@ using namespace std;
 using namespace Ogre;
 using namespace Nif;
 using namespace Mangle::VFS;
+using namespace Misc;
 
 NIFLoader& NIFLoader::getSingleton()
 {

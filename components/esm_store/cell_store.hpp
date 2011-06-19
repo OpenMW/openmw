@@ -100,7 +100,7 @@ namespace ESMS
     CellRefList<ItemLevList, D>       itemLists;
     CellRefList<ESM::Light, D>        lights;
     CellRefList<Tool, D>              lockpicks;
-    CellRefList<Misc, D>              miscItems;
+    CellRefList<Miscellaneous, D>              miscItems;
     CellRefList<NPC, D>               npcs;
     CellRefList<Probe, D>             probes;
     CellRefList<Repair, D>            repairs;

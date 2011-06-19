@@ -21,13 +21,16 @@
 
  */
 
-#ifndef _SLICE_ARRAY_H_
-#define _SLICE_ARRAY_H_
+#ifndef MISC_SLICE_ARRAY_H
+#define MISC_SLICE_ARRAY_H
 
 // A simple array implementation containing a pointer and a
 // length. Used for holding slices into a data buffer.
 #include <string.h>
 #include <string>
+
+namespace Misc
+{
 
 template <class T>
 struct SliceArray
@@ -73,5 +76,7 @@ struct SliceArray
 typedef SliceArray<char> SString;
 typedef SliceArray<int> IntArray;
 typedef SliceArray<float> FloatArray;
+
+}
 
 #endif

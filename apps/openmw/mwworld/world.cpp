@@ -135,7 +135,7 @@ namespace MWWorld
         if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = cell.lockpicks.find (name))
             return Ptr (ref, &cell);
 
-        if (ESMS::LiveCellRef<ESM::Misc, RefData> *ref = cell.miscItems.find (name))
+        if (ESMS::LiveCellRef<ESM::Miscellaneous, RefData> *ref = cell.miscItems.find (name))
             return Ptr (ref, &cell);
 
         if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = cell.npcs.find (name))
@@ -198,7 +198,7 @@ namespace MWWorld
         if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = searchViaHandle (handle, cell.lockpicks))
             return Ptr (ref, &cell);
 
-        if (ESMS::LiveCellRef<ESM::Misc, RefData> *ref = searchViaHandle (handle, cell.miscItems))
+        if (ESMS::LiveCellRef<ESM::Miscellaneous, RefData> *ref = searchViaHandle (handle, cell.miscItems))
             return Ptr (ref, &cell);
 
         if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = searchViaHandle (handle, cell.npcs))
