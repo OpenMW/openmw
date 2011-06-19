@@ -49,7 +49,7 @@ using namespace Ogre;
 using namespace Nif;
 using namespace Mangle::VFS;
 
-
+using namespace NifBullet;
 
 //====================================================================================================
 Ogre::Matrix3 ManualBulletShapeLoader::getMatrix(Nif::Transformation* tr)

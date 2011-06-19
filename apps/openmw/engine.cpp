@@ -358,7 +358,7 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create physics. shapeLoader is deleted by the physic engine
-    ManualBulletShapeLoader* shapeLoader = new ManualBulletShapeLoader();
+    NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
     mPhysicEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
 
     // Create the world
