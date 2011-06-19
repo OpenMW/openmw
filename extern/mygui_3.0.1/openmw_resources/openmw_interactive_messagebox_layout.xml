@@ -13,7 +13,7 @@
             <Property key="TextColour" value = "0.7 0.7 0.7" />
         </Widget>
         <Widget type="Widget" skin="" position="0 0 500 400" align="ALIGN_STRETCH" name="buttons">
-            <Widget type="Button" skin="MW_Button" position="0 0 30 18" name="somefunnybutton"/>
+            <!-- Widget type="Button" skin="MW_Button" position="0 0 30 18" name="somefunnybutton"/ -->
         </Widget>
     </Widget>
 </MyGUI>

@@ -2,10 +2,9 @@
 
 using namespace MWGui;
 
-MessageBoxManager::MessageBoxManager (WindowManager *windowManager, MyGUI::Gui *_gui)
+MessageBoxManager::MessageBoxManager (WindowManager *windowManager)
 {
     mWindowManager = windowManager;
-    gui = _gui;
     // defines
     mMessageBoxSpeed = 0.1;
     mInterMessageBoxe = NULL;
@@ -84,7 +83,7 @@ bool MessageBoxManager::createInteractiveMessageBox (const std::string& message,
     std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
     std::cout << std::endl;
     
-    mInterMessageBoxe = new InteractiveMessageBox(*this, gui, message, buttons);
+    mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
     
     return true;
 }
@@ -184,11 +183,12 @@ int MessageBox::getHeight ()
 
 
 
-InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, MyGUI::Gui *_gui, const std::string& message, const std::vector<std::string>& buttons)
+InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
   : Layout("openmw_interactive_messagebox_layout.xml")
   , mMessageBoxManager(parMessageBoxManager)
-  , mGUI(_gui)
 {
+    mTextButtonPadding = 10;
+    
     getWidget(mMessageWidget, "message");
     getWidget(mButtonsWidget, "buttons");
     
@@ -207,13 +207,19 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     size.height = textSize.height;
     mMessageWidget->setSize(size);
     
+    MyGUI::IntCoord coord(10, textSize.height+mTextButtonPadding, 100, 50);
+    
     std::vector<std::string>::const_iterator it;
     for(it = buttons.begin(); it != buttons.end(); ++it)
     {
         std::cout << "add button " << *it << std::endl;
-        MyGUI::ButtonPtr button = mGUI->createWidget<MyGUI::Button>("button1", 10, textSize.height, 480, 100, MyGUI::Align::Default, "buttons");
+        MyGUI::ButtonPtr button = mButtonsWidget->createWidget<MyGUI::Button>(
+            MyGUI::WidgetStyle::Child,
+            std::string("MW_Button"),
+            coord,
+            MyGUI::Align::Default);
         button->setCaption(*it);
-        //mButtons.push_back(button);
+        mButtons.push_back(button);
     }
     
 }
