@@ -187,7 +187,13 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
   : Layout("openmw_interactive_messagebox_layout.xml")
   , mMessageBoxManager(parMessageBoxManager)
 {
-    mTextButtonPadding = 10;
+    int fixedWidth = 500;
+    int textPadding = 10; // padding between text-widget and main-widget
+    int textButtonPadding = 20; // padding between the text-widget und the button-widget
+    int buttonLeftPadding = 10; // padding between the buttons if horizontal
+    int buttonTopPadding = 5; // ^-- if vertical
+    int buttonPadding = 5; // padding between button label and button itself
+    
     
     getWidget(mMessageWidget, "message");
     getWidget(mButtonsWidget, "buttons");
@@ -196,32 +202,98 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     mMessageWidget->addText(message);
     
     MyGUI::IntSize textSize = mMessageWidget->_getTextSize();
-    std::cout << "textSize.width " << textSize.width << " textSize.height " << textSize.height << std::endl;
-
-    MyGUI::IntSize size;
-    size.width = 500; // 500 is fixed width
-    size.height = textSize.height + 100; // 100 is mButtonWidget high
     
-    mMainWidget->setSize(size);
-    size.width = 480; // fixed width (500) - 2*padding (10)
-    size.height = textSize.height;
-    mMessageWidget->setSize(size);
     
-    MyGUI::IntCoord coord(10, textSize.height+mTextButtonPadding, 100, 50);
+    int buttonsWidth = 0;
+    int buttonHeight = 0;
+    MyGUI::IntCoord dummyCoord(0, 0, 0, 0);
     
     std::vector<std::string>::const_iterator it;
     for(it = buttons.begin(); it != buttons.end(); ++it)
     {
-        std::cout << "add button " << *it << std::endl;
         MyGUI::ButtonPtr button = mButtonsWidget->createWidget<MyGUI::Button>(
             MyGUI::WidgetStyle::Child,
             std::string("MW_Button"),
-            coord,
+            dummyCoord,
             MyGUI::Align::Default);
         button->setCaption(*it);
+        
         mButtons.push_back(button);
+        
+        buttonsWidth += button->_getTextSize().width + 2*buttonPadding + 2*buttonLeftPadding;
+        buttonHeight = button->_getTextSize().height + 2*buttonPadding + 2*buttonTopPadding;
     }
     
+    MyGUI::IntSize mainWidgetSize;
+    if(buttonsWidth < fixedWidth)
+    {
+        // on one line
+    
+        int left;
+        if(textSize.width + 2*textPadding < buttonsWidth)
+        {
+            mainWidgetSize.width = buttonsWidth;
+            left = buttonLeftPadding;
+        }
+        else
+        {
+            mainWidgetSize.width = textSize.width + 2*textPadding;
+            left = (textSize.width - buttonsWidth)/2;
+        }
+        mainWidgetSize.height = textSize.height + textButtonPadding + buttonHeight;
+        mMainWidget->setSize(mainWidgetSize);
+    
+        mMessageWidget->setSize(textSize);
+        
+        MyGUI::IntCoord buttonCord;
+        MyGUI::IntSize buttonSize(0, buttonHeight);
+        
+        std::vector<MyGUI::ButtonPtr>::const_iterator button;
+        for(button = mButtons.begin(); button != mButtons.end(); ++button)
+        {
+            buttonCord.left = left;
+            buttonCord.top = textSize.height + textButtonPadding;
+            
+            buttonSize.width = (*button)->_getTextSize().width + buttonPadding*2;
+            buttonSize.height = (*button)->_getTextSize().height + buttonPadding*2;
+            
+            (*button)->setCoord(buttonCord);
+            (*button)->setSize(buttonSize);
+            
+            left += buttonSize.width + 2*buttonLeftPadding;
+        }
+    }
+    else
+    {
+        // among each other
+        
+        mainWidgetSize.width = textSize.width + 2*textPadding;
+        mainWidgetSize.height = textSize.height + 2*textPadding + textButtonPadding + buttonHeight * buttons.size();
+        mMainWidget->setSize(mainWidgetSize);
+        
+        mMessageWidget->setSize(textSize);
+        
+        MyGUI::IntCoord buttonCord;
+        MyGUI::IntSize buttonSize(0, buttonHeight);
+        
+        int top = textButtonPadding + buttonTopPadding + textSize.height;
+        
+        std::vector<MyGUI::ButtonPtr>::const_iterator button;
+        for(button = mButtons.begin(); button != mButtons.end(); ++button)
+        {
+            buttonCord.top = top;
+            buttonCord.left =  (textSize.width - (*button)->_getTextSize().width)/2;
+            
+            buttonSize.width = (*button)->_getTextSize().width + buttonPadding*2;
+            buttonSize.height = (*button)->_getTextSize().height + buttonPadding*2;
+            
+            (*button)->setCoord(buttonCord);
+            (*button)->setSize(buttonSize);
+            
+            top += buttonSize.height + 2*buttonTopPadding;
+        }
+        
+    }
 }
 
 
