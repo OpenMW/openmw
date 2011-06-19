@@ -61,7 +61,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     inventory = new InventoryWindow ();
 #endif
     console = new Console(w,h, environment, extensions);
-    mMessageBoxManager = new MessageBoxManager(this);
+    mMessageBoxManager = new MessageBoxManager(this, (MyGUI::Gui*)gui);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -329,6 +329,14 @@ void WindowManager::updateVisible()
         dialogueWindow->open();
         return;
     }
+    
+    if(mode == GM_InterMessageBox)
+    {
+        if(!mMessageBoxManager->isInteractiveMessageBox()) {
+            setGuiMode(GM_Game);
+        }
+        return;
+    }
 
 
     // Unsupported mode, switch back to game
@@ -449,14 +457,6 @@ void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
-    /*std::cout << "message box: " << message << std::endl;
-
-    if (!buttons.empty())
-    {
-        std::cout << "buttons: ";
-        std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
-        std::cout << std::endl;
-    }*/
     if (buttons.empty())
     {
         mMessageBoxManager->createMessageBox(message);
@@ -464,6 +464,7 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
     else
     {
         mMessageBoxManager->createInteractiveMessageBox(message, buttons);
+        setGuiMode(GM_InterMessageBox);
     }
 }
 

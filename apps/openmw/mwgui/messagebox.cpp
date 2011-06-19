@@ -2,11 +2,13 @@
 
 using namespace MWGui;
 
-MessageBoxManager::MessageBoxManager (WindowManager *windowManager)
+MessageBoxManager::MessageBoxManager (WindowManager *windowManager, MyGUI::Gui *_gui)
 {
     mWindowManager = windowManager;
+    gui = _gui;
     // defines
     mMessageBoxSpeed = 0.1;
+    mInterMessageBoxe = NULL;
 }
 
 void MessageBoxManager::onFrame (float frameDuration)
@@ -72,23 +74,24 @@ void MessageBoxManager::createMessageBox (const std::string& message)
     }
 }
 
-void MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
+bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
+    if(mInterMessageBoxe != NULL) {
+        std::cout << "there is a MessageBox already" << std::endl;
+        return false;
+    }
     std::cout << "interactive MessageBox: " << message << " - ";
     std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
     std::cout << std::endl;
     
-    InteractiveMessageBox *box = new InteractiveMessageBox(*this, message, buttons);
-    mInterMessageBoxes.push_back(box);
+    mInterMessageBoxe = new InteractiveMessageBox(*this, gui, message, buttons);
     
-    // delete all non-interactive MessageBox'es
-    std::vector<MessageBox*>::iterator it = mMessageBoxes.begin();
-    while(it != mMessageBoxes.end())
-    {
-        delete (*it);
-        it = mMessageBoxes.erase(it);
-    }
-    mMessageBoxes.clear();
+    return true;
+}
+
+bool MessageBoxManager::isInteractiveMessageBox ()
+{
+    return mInterMessageBoxe != NULL;
 }
 
 void MessageBoxManager::removeMessageBox (float time, MessageBox *msgbox)
@@ -181,15 +184,41 @@ int MessageBox::getHeight ()
 
 
 
-InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
+InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, MyGUI::Gui *_gui, const std::string& message, const std::vector<std::string>& buttons)
   : Layout("openmw_interactive_messagebox_layout.xml")
   , mMessageBoxManager(parMessageBoxManager)
+  , mGUI(_gui)
 {
     getWidget(mMessageWidget, "message");
     getWidget(mButtonsWidget, "buttons");
     
     mMessageWidget->setOverflowToTheLeft(true);
     mMessageWidget->addText(message);
+    
+    MyGUI::IntSize textSize = mMessageWidget->_getTextSize();
+    std::cout << "textSize.width " << textSize.width << " textSize.height " << textSize.height << std::endl;
+
+    MyGUI::IntSize size;
+    size.width = 500; // 500 is fixed width
+    size.height = textSize.height + 100; // 100 is mButtonWidget high
+    
+    mMainWidget->setSize(size);
+    size.width = 480; // fixed width (500) - 2*padding (10)
+    size.height = textSize.height;
+    mMessageWidget->setSize(size);
+    
+    std::vector<std::string>::const_iterator it;
+    for(it = buttons.begin(); it != buttons.end(); ++it)
+    {
+        std::cout << "add button " << *it << std::endl;
+        MyGUI::ButtonPtr button = mGUI->createWidget<MyGUI::Button>("button1", 10, textSize.height, 480, 100, MyGUI::Align::Default, "buttons");
+        button->setCaption(*it);
+        //mButtons.push_back(button);
+    }
+    
 }
+
+
+
 
 

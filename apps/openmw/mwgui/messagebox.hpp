@@ -24,10 +24,11 @@ namespace MWGui
     class MessageBoxManager
     {
         public:
-            MessageBoxManager (WindowManager* windowManager);
+            MessageBoxManager (WindowManager* windowManager, MyGUI::Gui *_gui);
             void onFrame (float frameDuration);
             void createMessageBox (const std::string& message);
-            void createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
+            bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
+            bool isInteractiveMessageBox ();
             
             void removeMessageBox (float time, MessageBox *msgbox);
             bool removeMessageBox (MessageBox *msgbox);
@@ -37,8 +38,9 @@ namespace MWGui
             
         private:
             std::vector<MessageBox*> mMessageBoxes;
-            std::vector<InteractiveMessageBox*> mInterMessageBoxes;
+            InteractiveMessageBox* mInterMessageBoxe;
             std::vector<MessageBoxManagerTimer> mTimers;
+            MyGUI::Gui *gui;
             float mMessageBoxSpeed;
     };
     
@@ -65,12 +67,14 @@ namespace MWGui
     class InteractiveMessageBox : public OEngine::GUI::Layout
     {
         public:
-            InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
+            InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, MyGUI::Gui *_gui, const std::string& message, const std::vector<std::string>& buttons);
             
         protected:
             MessageBoxManager& mMessageBoxManager;
             MyGUI::EditPtr mMessageWidget;
             MyGUI::WidgetPtr mButtonsWidget;
+            MyGUI::Gui *mGUI;
+            //std::vector<MyGUI::Button> mButtons;
     };
 
 }
