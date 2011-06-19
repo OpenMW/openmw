@@ -106,7 +106,7 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
      npcPart = parent->createChildSceneNode(sceneNodeName);
     //npcPart->showBoundingBox(true);
 
-  MeshPtr good2 = NIFLoader::load(mesh);
+  MeshPtr good2 = NifOgre::NIFLoader::load(mesh);
 
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   //ent->extr
@@ -184,7 +184,7 @@ void InteriorCellRender::insertMesh(const std::string &mesh)
 {
   assert (insert);
 
-  NIFLoader::load(mesh);
+  NifOgre::NIFLoader::load(mesh);
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   insert->attachObject(ent);
 

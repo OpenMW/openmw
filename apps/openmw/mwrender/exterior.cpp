@@ -124,7 +124,7 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
         }
 
      mNpcPart = parent->createChildSceneNode(sceneNodeName);
-   MeshPtr good2 = NIFLoader::load(mesh);
+   MeshPtr good2 = NifOgre::NIFLoader::load(mesh);
 
   MovableObject *ent = mScene.getMgr()->createEntity(mesh);
 
@@ -213,7 +213,7 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
 {
   assert (mInsert);
 
-  NIFLoader::load(mesh);
+  NifOgre::NIFLoader::load(mesh);
   Entity *ent = mScene.getMgr()->createEntity(mesh);
 
   if(!isStatic)
