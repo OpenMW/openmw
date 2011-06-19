@@ -246,7 +246,7 @@ void OMW::Engine::loadBSA()
     for (Files::MultiDirCollection::TIter iter (bsa.begin()); iter!=bsa.end(); ++iter)
     {
          std::cout << "Adding " << iter->second.string() << std::endl;
-         addBSA (iter->second.string());
+         Bsa::addBSA (iter->second.string());
     }
 }
 

@@ -23,11 +23,16 @@
 
 #include <string>
 
-#ifndef _BSA_ARCHIVE_H_
-#define _BSA_ARCHIVE_H_
+#ifndef BSA_BSA_ARCHIVE_H
+#define BSA_BSA_ARCHIVE_H
+
+namespace Bsa
+{
 
 /// Add the given BSA file as an input archive in the Ogre resource
 /// system.
 void addBSA(const std::string& file, const std::string& group="General");
+
+}
 
 #endif

@@ -29,8 +29,12 @@
 #include "bsa_file.hpp"
 #include <libs/mangle/stream/clients/ogre_datastream.hpp>
 
+namespace
+{
+
 using namespace Ogre;
 using namespace Mangle::Stream;
+using namespace Bsa;
 
 /// An OGRE Archive wrapping a BSAFile archive
 class BSAArchive : public Archive
@@ -155,6 +159,11 @@ static void insertBSAFactory()
     }
 }
 
+}
+
+namespace Bsa
+{
+
 // The function below is the only publicly exposed part of this file
 
 void addBSA(const std::string& name, const std::string& group)
@@ -162,4 +171,6 @@ void addBSA(const std::string& name, const std::string& group)
   insertBSAFactory();
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "BSA", group);
+}
+
 }
