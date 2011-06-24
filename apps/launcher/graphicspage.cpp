@@ -34,7 +34,7 @@ GraphicsPage::GraphicsPage(QWidget *parent) : QWidget(parent)
     displayGroupLayout->addWidget(mDisplayStackedWidget);
     displayGroupLayout->addItem(vSpacer3);
 
-    // Page
+    // Layout for the whole page
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
 
     pageLayout->addWidget(rendererGroup);
@@ -180,7 +180,6 @@ void GraphicsPage::setupOgre()
     }
     catch(Ogre::Exception &ex)
     {
-        // TODO: Better warning text
         QString ogreError = QString::fromStdString(ex.getFullDescription().c_str());
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error creating Ogre::Root");
@@ -212,7 +211,7 @@ void GraphicsPage::setupOgre()
         mRendererComboBox->setCurrentIndex(index);
     }
 
-    // Create separate rendersystems TODO: Warn on non-existant
+    // Create separate rendersystems
     QString openGLName = mRendererComboBox->itemText(mRendererComboBox->findText(QString("OpenGL"), Qt::MatchStartsWith));
     QString direct3DName = mRendererComboBox->itemText(mRendererComboBox->findText(QString("Direct3D"), Qt::MatchStartsWith));
 
@@ -231,7 +230,7 @@ void GraphicsPage::setupOgre()
         std::exit(1);
     }
 
-    // Now fill the GUI elements TODO: CLEANUP!
+    // Now fill the GUI elements
     // OpenGL
     if (mOpenGLRenderSystem) {
         mOGLRTTComboBox->addItems(getAvailableOptions(QString("RTT Preferred Mode"), mOpenGLRenderSystem));
@@ -338,7 +337,14 @@ void GraphicsPage::writeConfig()
     QFile file(mOgreConfig->fileName());
 
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        // File could not be opened, TODO: throw error
+        // File could not be opened,
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error opening Ogre configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not open %0</b><br><br> \
+        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
         return;
     }
 
@@ -453,8 +459,5 @@ void GraphicsPage::rendererChanged(const QString &renderer)
         mRendererStackedWidget->setCurrentIndex(0);
         mDisplayStackedWidget->setCurrentIndex(0);
     }
-    // Set the render system to the selected one
-    //mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString().c_str());
-    //qDebug() << getConfigValue("Preferred RTT Mode");
 
 }
