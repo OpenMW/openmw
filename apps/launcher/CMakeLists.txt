@@ -45,7 +45,7 @@ QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
 include(${QT_USE_FILE})
 
 # Main executable
-add_executable(launcher
+add_executable(omwlauncher
     ${LAUNCHER}
     ${MISC} ${MISC_HEADER}
     ${FILES} ${FILES_HEADER}
@@ -55,7 +55,7 @@ add_executable(launcher
     ${MOC_SRCS}
 )
 
-target_link_libraries(launcher
+target_link_libraries(omwlauncher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${QT_LIBRARIES}
@@ -63,3 +63,6 @@ target_link_libraries(launcher
 
 configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
     "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
+
+configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
+    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.cfg")

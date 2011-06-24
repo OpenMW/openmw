@@ -42,7 +42,7 @@ MainDialog::MainDialog()
 
 
     setWindowTitle(tr("OpenMW Launcher"));
-    setWindowIcon(QIcon(":/images/openmw-icon.png"));
+    setWindowIcon(QIcon(":/images/openmw.png"));
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setMinimumSize(QSize(575, 575));
@@ -65,7 +65,7 @@ void MainDialog::createIcons()
     QIcon graphicsIcon = QIcon(":/icons/tango/video-display.png");
 
     QListWidgetItem *playButton = new QListWidgetItem(mIconWidget);
-    playButton->setIcon(QIcon(":/images/openmw-icon.png"));
+    playButton->setIcon(QIcon(":/images/openmw.png"));
     playButton->setText(tr("Play"));
     playButton->setTextAlignment(Qt::AlignCenter);
     playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
@@ -77,7 +77,7 @@ void MainDialog::createIcons()
     graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     QListWidgetItem *dataFilesButton = new QListWidgetItem(mIconWidget);
-    dataFilesButton->setIcon(QIcon(":/images/openmw-plugin-icon.png"));
+    dataFilesButton->setIcon(QIcon(":/images/openmw-plugin.png"));
     dataFilesButton->setText(tr("Data Files"));
     dataFilesButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);

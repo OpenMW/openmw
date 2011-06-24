@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=0.11
+Type=Application
+Name=OpenMW Launcher
+GenericName=Role Playing Game
+Comment=An engine replacement for The Elder Scrolls III: Morrowind
+TryExec=omwlauncher
+Exec=omwlauncher
+Icon=openmw
+Categories=Game;RolePlaying;

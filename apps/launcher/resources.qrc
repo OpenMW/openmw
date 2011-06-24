@@ -2,8 +2,8 @@
 <qresource prefix="/images">
     <file alias="clear.png">resources/images/clear.png</file>
     <file alias="down.png">resources/images/down.png</file>
-    <file alias="openmw-icon.png">resources/images/openmw-icon.png</file>
-    <file alias="openmw-plugin-icon.png">resources/images/openmw-plugin-icon.png</file>
+    <file alias="openmw.png">resources/images/openmw.png</file>
+    <file alias="openmw-plugin.png">resources/images/openmw-plugin.png</file>
     <file alias="openmw-header.png">resources/images/openmw-header.png</file>
     <file alias="playpage-background.png">resources/images/playpage-background.png</file>
 </qresource>
