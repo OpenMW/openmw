@@ -58,6 +58,8 @@ namespace Mangle
     }
 }
 
+namespace NifBullet
+{
 
 /**
 *Load bulletShape from NIF files.
@@ -125,5 +127,7 @@ private:
     BulletShape* cShape;//current shape
     btCompoundShape* currentShape;//the shape curently under construction
 };
+
+}
 
 #endif

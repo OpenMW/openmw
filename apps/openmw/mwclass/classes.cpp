@@ -42,7 +42,7 @@ namespace MWClass
         ItemLevList::registerSelf();
         Light::registerSelf();
         Lockpick::registerSelf();
-        Misc::registerSelf();
+        Miscellaneous::registerSelf();
         Probe::registerSelf();
         Repair::registerSelf();
         Static::registerSelf();

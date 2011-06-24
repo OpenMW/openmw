@@ -46,7 +46,7 @@ public:
 class Named : public Controlled
 {
 public:
-  SString name;
+  Misc::SString name;
 
   void read(NIFFile *nif)
   {

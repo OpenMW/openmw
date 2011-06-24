@@ -246,7 +246,7 @@ void OMW::Engine::loadBSA()
     for (Files::MultiDirCollection::TIter iter (bsa.begin()); iter!=bsa.end(); ++iter)
     {
          std::cout << "Adding " << iter->second.string() << std::endl;
-         addBSA (iter->second.string());
+         Bsa::addBSA (iter->second.string());
     }
 }
 
@@ -338,12 +338,12 @@ void OMW::Engine::go()
     ogreCfg.insert(0, cfgUserDir);
 
     //A local plugins.cfg will be used if it exist, otherwise look in the default path
-    if(!isFile(plugCfg.c_str()))
+    if(!Misc::isFile(plugCfg.c_str()))
     {
         plugCfg.insert(0, cfgDir);
     }
 
-    mOgre.configure(!isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
+    mOgre.configure(!Misc::isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
     addResourcesDirectory (mDataDir / "Meshes");
     addResourcesDirectory (mDataDir / "Textures");
@@ -358,7 +358,7 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create physics. shapeLoader is deleted by the physic engine
-    ManualBulletShapeLoader* shapeLoader = new ManualBulletShapeLoader();
+    NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
     mPhysicEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
 
     // Create the world
