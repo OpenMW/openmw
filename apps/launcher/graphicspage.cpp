@@ -449,7 +449,6 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
 
 void GraphicsPage::rendererChanged(const QString &renderer)
 {
-    qDebug() << "renderer is " << renderer;
     if (renderer.contains("Direct3D")) {
         mRendererStackedWidget->setCurrentIndex(1);
         mDisplayStackedWidget->setCurrentIndex(1);

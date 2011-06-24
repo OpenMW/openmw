@@ -17,7 +17,6 @@ public:
         { return qobject_cast<PluginsModel*>(QAbstractItemView::model()); }
 
     void startDrag(Qt::DropActions supportedActions);
-    void setModel(PluginsModel *model);
     void setModel(QSortFilterProxyModel *model);
 
 public slots:

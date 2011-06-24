@@ -1,8 +1,7 @@
-#include "pluginsview.hpp"
-
 #include <QDebug>
-
 #include <QSortFilterProxyModel>
+
+#include "pluginsview.hpp"
 
 PluginsView::PluginsView(QWidget *parent) : QTableView(parent)
 {
@@ -14,10 +13,7 @@ PluginsView::PluginsView(QWidget *parent) : QTableView(parent)
     setDragDropMode(QAbstractItemView::InternalMove);
     setDropIndicatorShown(true);
     setDragDropOverwriteMode(false);
-    //viewport()->setAcceptDrops(true);
-
     setContextMenuPolicy(Qt::CustomContextMenu);
-
 
 }
 
@@ -26,16 +22,6 @@ void PluginsView::startDrag(Qt::DropActions supportedActions)
     selectionModel()->select( selectionModel()->selection(),
                               QItemSelectionModel::Select | QItemSelectionModel::Rows );
     QAbstractItemView::startDrag( supportedActions );
-}
-
-void PluginsView::setModel(PluginsModel *model)
-{
-    /*QTableView::setModel(model);
-
-    qRegisterMetaType< QVector<QPersistentModelIndex> >();
-
-    connect(model, SIGNAL(indexesDropped(QVector<QPersistentModelIndex>)),
-            this, SLOT(selectIndexes(QVector<QPersistentModelIndex>)), Qt::QueuedConnection);*/
 }
 
 void PluginsView::setModel(QSortFilterProxyModel *model)

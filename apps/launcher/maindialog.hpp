@@ -20,8 +20,6 @@ class MainDialog : public QDialog
 public:
     MainDialog();
 
-    //QStringListModel *mProfileModel;
-
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
     void play();

@@ -1,5 +1,4 @@
 #include <QtGui>
-#include <QDebug>
 
 #include <components/files/path.hpp>
 
@@ -198,12 +197,9 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
 void MainDialog::closeEvent(QCloseEvent *event)
 {
-    qDebug() << "Close event";
-
     // Now write all config files
     writeConfig();
     event->accept();
-
 }
 
 void MainDialog::play()
@@ -295,14 +291,10 @@ void MainDialog::writeConfig()
     mGraphicsPage->writeConfig();
     mGraphicsPage->mOgreConfig->sync();
 
-    // Write to the openmw.cfg
-    //QString dataPath = mGameConfig->value("data").toString();
-    //dataPath.append("/");
-
     QStringList dataFiles = mDataFilesPage->selectedMasters();
     dataFiles.append(mDataFilesPage->checkedPlugins());
 
-    qDebug() << "Writing to openmw.cfg";
+    qDebug("Writing to openmw.cfg");
 
     // Open the config as a QFile
     QFile file(mGameConfig->fileName());
@@ -360,5 +352,4 @@ void MainDialog::writeConfig()
     }
 
     file.close();
-    qDebug() << "Writing done!";
 }

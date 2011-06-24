@@ -1,5 +1,4 @@
 #include <QtGui>
-#include <QDebug>
 
 #include <components/esm/esm_reader.hpp>
 #include <components/files/path.hpp>
@@ -74,7 +73,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
     // Set the row height to the size of the checkboxes
     QCheckBox checkBox;
-    unsigned int height = checkBox.sizeHint().height() + 2;
+    unsigned int height = checkBox.sizeHint().height() + 4;
 
     mPluginsTable->verticalHeader()->setDefaultSectionSize(height);
 
@@ -127,8 +126,6 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 
 void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 {
-    qDebug() << "setupDataFiles called!";
-
     // Put the paths in a boost::filesystem vector to use with Files::Collections
     std::vector<boost::filesystem::path> dataDirs;
 
@@ -145,15 +142,11 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
     for (Files::MultiDirCollection::TIter iter(esm.begin()); iter!=esm.end(); ++iter)
     {
-        qDebug() << "Master: " << QString::fromStdString(iter->second.filename().string());
-
         QString currentMaster = QString::fromStdString(iter->second.filename().string());
         const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
         if (itemList.isEmpty()) // Master is not yet in the widget
         {
-            qDebug() << "Master not yet in the widget, rowcount is " << i;
-
             mMastersWidget->insertRow(i);
             QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
             mMastersWidget->setItem(i, 0, item);
@@ -213,7 +206,6 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
 void DataFilesPage::setupConfig()
 {
-    qDebug() << "setupConfig called";
     QString config = "./launcher.cfg";
     QFile file(config);
 
@@ -247,11 +239,8 @@ void DataFilesPage::setupConfig()
 
     QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
 
-    qDebug() << mLauncherConfig->value("CurrentProfile").toString();
-    qDebug() << mLauncherConfig->childGroups();
-
     if (currentProfile.isEmpty()) {
-        qDebug() << "No current profile selected";
+        // No current profile selected
         currentProfile = "Default";
     }
     mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
@@ -407,10 +396,7 @@ void DataFilesPage::deleteProfile()
     deleteMessageBox.exec();
 
     if (deleteMessageBox.clickedButton() == deleteButton) {
-
-        qDebug() << "Delete profile " << profile;
-
-        // Make sure we have no groups open
+       // Make sure we have no groups open
         while (!mLauncherConfig->group().isEmpty()) {
             mLauncherConfig->endGroup();
         }
@@ -724,8 +710,6 @@ void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const
         masters.sort();
         masterstr = masters.join(","); // Make a comma-separated QString
 
-        qDebug() << "Masters" << masterstr;
-
         // Iterate over all masters in the datafilesmodel to see if they are selected
         for (int r=0; r<mDataFilesModel->rowCount(); ++r) {
             QModelIndex currentIndex = mDataFilesModel->index(r, 0);
@@ -753,14 +737,8 @@ void DataFilesPage::masterSelectionChanged(const QItemSelection &selected, const
             master.append("*");
             const QList<QStandardItem *> itemList = mDataFilesModel->findItems(master, Qt::MatchWildcard);
 
-            if (itemList.isEmpty())
-                qDebug() << "Empty as shit";
-
             foreach (const QStandardItem *currentItem, itemList) {
-
                 QModelIndex index = currentItem->index();
-                qDebug() << "Master to remove plugins of:" << index.data().toString();
-
                 removePlugins(index);
             }
         }
@@ -811,8 +789,6 @@ void DataFilesPage::removePlugins(const QModelIndex &index)
 
         if (!itemList.isEmpty()) {
             foreach (const QStandardItem *currentItem, itemList) {
-                qDebug() << "Remove plugin:" << currentItem->data(Qt::DisplayRole).toString();
-
                 mPluginsModel->removeRow(currentItem->row());
             }
         }
@@ -886,8 +862,6 @@ void DataFilesPage::filterChanged(const QString filter)
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
 {
-    qDebug() << "Profile changed " << current << previous;
-
     if (!previous.isEmpty()) {
         writeConfig(previous);
         mLauncherConfig->sync();
@@ -902,7 +876,6 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
 void DataFilesPage::readConfig()
 {
     QString profile = mProfilesComboBox->currentText();
-    qDebug() << "read from: " << profile;
 
     // Make sure we have no groups open
     while (!mLauncherConfig->group().isEmpty()) {
@@ -928,7 +901,6 @@ void DataFilesPage::readConfig()
         }
 
         if (key.startsWith("Master")) {
-            qDebug() << "Read master: " << keyValue;
             const QList<QTableWidgetItem*> masterList = mMastersWidget->findItems(keyValue, Qt::MatchFixedString);
 
             if (!masterList.isEmpty()) {
@@ -968,8 +940,6 @@ void DataFilesPage::writeConfig(QString profile)
         return;
     }
 
-    qDebug() << "Writing: " << profile;
-
     // Make sure we have no groups open
     while (!mLauncherConfig->group().isEmpty()) {
         mLauncherConfig->endGroup();
@@ -979,7 +949,6 @@ void DataFilesPage::writeConfig(QString profile)
     mLauncherConfig->setValue("CurrentProfile", profile);
 
     // Open the profile-name subgroup
-    qDebug() << "beginning group: " << profile;
     mLauncherConfig->beginGroup(profile);
     mLauncherConfig->remove(""); // Clear the subgroup
 
