@@ -1,6 +1,5 @@
 #include <QtGui>
-
-#include <QDebug> // TODO: Remove
+#include <QDebug>
 
 #include <components/esm/esm_reader.hpp>
 #include <components/files/path.hpp>
@@ -37,15 +36,23 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mPluginsProxyModel->setDynamicSortFilter(true);
     mPluginsProxyModel->setSourceModel(mPluginsModel);
 
-    QLabel *filterLabel = new QLabel(tr("Filter:"), this);
+    QLabel *filterLabel = new QLabel(tr("&Filter:"), this);
     LineEdit *filterLineEdit = new LineEdit(this);
+    filterLabel->setBuddy(filterLineEdit);
 
-    QHBoxLayout *topLayout = new QHBoxLayout();
+    QToolBar *filterToolBar = new QToolBar(this);
+    filterToolBar->setMovable(false);
+
+    // Create a container widget and a layout to get the spacer to work
+    QWidget *filterWidget = new QWidget(this);
+    QHBoxLayout *filterLayout = new QHBoxLayout(filterWidget);
     QSpacerItem *hSpacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    topLayout->addItem(hSpacer1);
-    topLayout->addWidget(filterLabel);
-    topLayout->addWidget(filterLineEdit);
+    filterLayout->addItem(hSpacer1);
+    filterLayout->addWidget(filterLabel);
+    filterLayout->addWidget(filterLineEdit);
+
+    filterToolBar->addWidget(filterWidget);
 
     mMastersWidget = new QTableWidget(this); // Contains the available masters
     mMastersWidget->setObjectName("MastersWidget");
@@ -98,11 +105,8 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     mProfileToolBar->addWidget(mProfilesComboBox);
 
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
-    // Add some space above and below the page items
-    QSpacerItem *vSpacer2 = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-    pageLayout->addLayout(topLayout);
-    pageLayout->addItem(vSpacer2);
+    pageLayout->addWidget(filterToolBar);
     pageLayout->addWidget(splitter);
     pageLayout->addWidget(mProfileToolBar);
 
@@ -956,7 +960,6 @@ void DataFilesPage::readConfig()
 
 void DataFilesPage::writeConfig(QString profile)
 {
-    // TODO: Testing the config here
     if (profile.isEmpty()) {
         profile = mProfilesComboBox->currentText();
     }
