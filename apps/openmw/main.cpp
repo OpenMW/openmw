@@ -26,6 +26,11 @@
 
 #endif
 
+// for Ogre::macBundlePath
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <OSX/macUtils.h>
+#endif
+
 using namespace std;
 
 /// Parse command line options and openmw.cfg file (if one exists). Results are directly
