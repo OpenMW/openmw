@@ -210,6 +210,10 @@ void MainDialog::play()
 #ifdef Q_WS_WIN
     QString game = "./openmw.exe";
     QFile file(game);
+#elif defined(Q_WS_MAC)
+    QDir dir(QCoreApplication::applicationDirPath());
+    QString game = dir.absoluteFilePath("openmw");
+    QFile file(game);
 #else
     QString game = "./openmw";
     QFile file(game);
