@@ -65,8 +65,15 @@ target_link_libraries(omwlauncher
     ${PNG_LIBRARY}
 )
 
-configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
-
-configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
-    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.cfg")
+if (APPLE)
+    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
+        "${APP_BUNDLE_DIR}/../launcher.qss")
+    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
+        "${APP_BUNDLE_DIR}/../launcher.cfg")
+else()
+    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
+        
+    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.cfg")
+endif()
