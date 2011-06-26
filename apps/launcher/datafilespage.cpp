@@ -90,7 +90,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     splitter->setSizes(sizeList);
 
     // Bottom part with profile options
-    QLabel *profileLabel = new QLabel(tr("Current Profile:"), this);
+    QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
 
     mProfilesComboBox = new ComboBox(this);
     mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
