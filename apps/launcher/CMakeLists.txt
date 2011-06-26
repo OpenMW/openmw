@@ -39,6 +39,9 @@ source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC
 find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
 
+find_package(PNG REQUIRED)
+include_directories(${PNG_INCLUDE_DIR})
+
 QT4_ADD_RESOURCES(RCC_SRCS resources.qrc)
 QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
 
@@ -59,6 +62,7 @@ target_link_libraries(omwlauncher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${QT_LIBRARIES}
+    ${PNG_LIBRARY}
 )
 
 configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
