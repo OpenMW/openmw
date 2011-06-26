@@ -11,9 +11,7 @@
 }
 
 #PlayButton {
-
     height: 50px;
-
     margin-bottom: 30px;
 
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
@@ -45,18 +43,24 @@
 }
 
 #PlayButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(0, 0, 0, 75),
+        stop:0.1 rgba(0, 0, 0, 15),
+        stop:0.2 rgba(255, 255, 255, 55)
+        stop:0.95 rgba(255, 255, 255, 55),
+        stop:1 rgba(255, 255, 255, 155));
 
+    border: 1px solid rgba(0, 0, 0, 55);
 }
 
 #ProfileLabel {
     font: 14pt "Trebuchet MS";
 }
 
-
 #ProfilesComboBox {
     padding: 1px 18px 1px 3px;
 
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 white, stop:0.2 rgba(0, 0, 0, 25), stop:1 rgba(255, 255, 255, 200));
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 white, stop:0.2 rgba(0, 0, 0, 25), stop:1 white);
     border-width: 1px;
     border-color: rgba(0, 0, 0, 125);
     border-style: solid;
@@ -65,7 +69,12 @@
 
 /*QComboBox gets the "on" state when the popup is open */
 #ProfilesComboBox:!editable:on, #ProfilesComboBox::drop-down:editable:on {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 gray, stop:0.2 white);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(0, 0, 0, 75),
+        stop:0.1 rgba(0, 0, 0, 15),
+        stop:0.2 rgba(255, 255, 255, 55));
+
+    border: 1px solid rgba(0, 0, 0, 55);
 }
 
 
@@ -95,6 +104,11 @@
 #ProfilesComboBox::down-arrow:on { /* shift the arrow when popup is open */
     top: 1px;
     left: 1px;
+}
+
+#ProfilesComboBox QAbstractItemView {
+    border: 2px solid lightgray;
+    border-radius: 5px;
 }
 
 #IconWidget {
