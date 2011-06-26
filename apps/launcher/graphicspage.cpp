@@ -270,7 +270,7 @@ void GraphicsPage::readConfig()
         }
 
         index = mOGLAntiAliasingComboBox->findText(getConfigValue("FSAA", mOpenGLRenderSystem));
-        if ( index != -1) {
+        if ( index != -1){
             mOGLAntiAliasingComboBox->setCurrentIndex(index);
         }
 
@@ -285,17 +285,18 @@ void GraphicsPage::readConfig()
         }
 
         // Now we do the same for the checkboxes
-        if (QString::compare(getConfigValue("VSync", mOpenGLRenderSystem), QString("Yes")) == 0) {
+        if (getConfigValue("VSync", mOpenGLRenderSystem) == QLatin1String("Yes")) {
             mOGLVSyncCheckBox->setCheckState(Qt::Checked);
         }
 
-        if (QString::compare(getConfigValue("Full Screen", mOpenGLRenderSystem), QString("Yes")) == 0) {
+        if (getConfigValue("Full Screen", mOpenGLRenderSystem) == QLatin1String("Yes")) {
             mOGLFullScreenCheckBox->setCheckState(Qt::Checked);
         }
     }
 
     if (mDirect3DRenderSystem) {
-            int index = mD3DRenderDeviceComboBox->findText(getConfigValue("Rendering Device", mDirect3DRenderSystem));
+
+        int index = mD3DRenderDeviceComboBox->findText(getConfigValue("Rendering Device", mDirect3DRenderSystem));
         if ( index != -1) {
             mD3DRenderDeviceComboBox->setCurrentIndex(index);
         }
@@ -315,15 +316,15 @@ void GraphicsPage::readConfig()
             mD3DResolutionComboBox->setCurrentIndex(index);
         }
 
-        if (QString::compare(getConfigValue("Allow NVPerfHUD", mDirect3DRenderSystem), QString("Yes")) == 0) {
+        if (getConfigValue("Allow NVPerfHUD", mDirect3DRenderSystem) == QLatin1String("Yes")) {
                 mD3DNvPerfCheckBox->setCheckState(Qt::Checked);
         }
 
-        if (QString::compare(getConfigValue("VSync", mDirect3DRenderSystem), QString("Yes")) == 0) {
+        if (getConfigValue("VSync", mDirect3DRenderSystem) == QLatin1String("Yes")) {
                 mD3DVSyncCheckBox->setCheckState(Qt::Checked);
         }
 
-        if (QString::compare(getConfigValue("Full Screen", mDirect3DRenderSystem), QString("Yes")) == 0) {
+        if (getConfigValue("Full Screen", mDirect3DRenderSystem) == QLatin1String("Yes")) {
                 mD3DFullScreenCheckBox->setCheckState(Qt::Checked);
         }
     }

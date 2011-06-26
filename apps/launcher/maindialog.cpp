@@ -178,11 +178,11 @@ void MainDialog::profileChanged(int index)
     }
 
     QString currentPage = mIconWidget->currentItem()->data(Qt::DisplayRole).toString();
-    if (currentPage == QString("Play")) {
+    if (currentPage == QLatin1String("Play")) {
         mDataFilesPage->mProfilesComboBox->setCurrentIndex(index);
     }
 
-    if (currentPage == QString("Data Files")) {
+    if (currentPage == QLatin1String("Data Files")) {
         mPlayPage->mProfilesComboBox->setCurrentIndex(index);
     }
 }
