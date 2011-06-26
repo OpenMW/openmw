@@ -19,11 +19,7 @@ add_library(caelum STATIC ${SOURCES})
 #
 # Resources
 #
-if (APPLE)
-	SET(CAELUM_RES_DEST "${APP_BUNDLE_DIR}/Contents/Resources")
-else (APPLE)
-	SET(CAELUM_RES_DEST "${OpenMW_BINARY_DIR}")
-endif (APPLE)
+SET(CAELUM_RES_DEST "${OpenMW_BINARY_DIR}")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/AtmosphereDepth.png "${CAELUM_RES_DEST}/resources/caelum/AtmosphereDepth.png" COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/CaelumGroundFog.cg "${CAELUM_RES_DEST}/resources/caelum/CaelumGroundFog.cg" COPYONLY)
