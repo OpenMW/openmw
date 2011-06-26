@@ -9,7 +9,7 @@
 #include <OSX/macUtils.h>
 #endif
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <stdlib.h> //getenv
 #endif
 
@@ -19,7 +19,9 @@ std::string Files::getPath (PathTypeEnum parType, const std::string parApp, cons
     if (parType==Path_ConfigGlobal)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        theBasePath = Ogre::macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
+    	boost::filesystem::path path(Ogre::macBundlePath());
+    	path = path.parent_path();
+        theBasePath = path.string() + "/";
 #elif OGRE_PLATFORM == OGRE_PLATFORM_LINUX
         theBasePath = "/etc/"+parApp+"/";
 #else
@@ -29,9 +31,7 @@ std::string Files::getPath (PathTypeEnum parType, const std::string parApp, cons
     }
     else if (parType==Path_ConfigUser)
     {
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        theBasePath = Ogre::macBundlePath() + "/Contents/MacOS/"; //FIXME do we have global/local with OSX?
-#elif OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         const char* theDir;
         if ((theDir = getenv("OPENMW_HOME")) != NULL)
         {
@@ -57,5 +57,6 @@ std::string Files::getPath (PathTypeEnum parType, const std::string parApp, cons
     }
 
     theBasePath.append(parFile);
+    std::cout << "theBasePath is " << theBasePath << std::endl;
     return theBasePath;
 }

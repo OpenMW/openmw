@@ -182,7 +182,7 @@ int main(int argc, char**argv)
 {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     // set current dir to bundle path
-    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath());
+    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
     boost::filesystem::current_path(bundlePath);
 #endif
 
