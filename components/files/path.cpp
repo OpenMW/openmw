@@ -57,6 +57,5 @@ std::string Files::getPath (PathTypeEnum parType, const std::string parApp, cons
     }
 
     theBasePath.append(parFile);
-    std::cout << "theBasePath is " << theBasePath << std::endl;
     return theBasePath;
 }
