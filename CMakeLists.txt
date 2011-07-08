@@ -12,6 +12,10 @@ set (OPENMW_VERSION_PATCH 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_PATCH}")
 
+# doxygen main page
+
+configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
+
 # Sound source selection
 option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)

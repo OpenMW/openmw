@@ -3,3 +3,4 @@ build
 Doxygen
 prebuilt
 apps/openmw/config.hpp
+Docs/mainpage.hpp
