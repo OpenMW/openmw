@@ -2,3 +2,4 @@ build
 *~
 Doxygen
 prebuilt
+apps/openmw/config.hpp

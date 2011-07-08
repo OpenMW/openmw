@@ -1,5 +1,9 @@
 project(OpenMW)
 
+# config file
+
+configure_file ("${OpenMW_SOURCE_DIR}/config.hpp.cmake" "${OpenMW_SOURCE_DIR}/config.hpp")
+
 # local files
 
 set(GAME
@@ -7,7 +11,8 @@ set(GAME
     engine.cpp
     )
 set(GAME_HEADER
-    engine.hpp)
+    engine.hpp
+    config.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND
