@@ -85,7 +85,13 @@ void ESMStore::load(ESMReader &esm)
                 dialogue = 0;
 
             // Insert the reference into the global lookup
-            if(!id.empty())
+            if(!id.empty() &&
+                (n.val==REC_ACTI || n.val==REC_ALCH || n.val==REC_APPA || n.val==REC_ARMO ||
+                n.val==REC_BOOK || n.val==REC_CLOT || n.val==REC_CONT || n.val==REC_CREA ||
+                n.val==REC_DOOR || n.val==REC_INGR || n.val==REC_LEVC || n.val==REC_LEVI ||
+                n.val==REC_LIGH || n.val==REC_LOCK || n.val==REC_MISC || n.val==REC_NPC_ ||
+                n.val==REC_PROB || n.val==REC_REPA || n.val==REC_STAT || n.val==REC_WEAP)
+                )
                 all[id] = n.val;
         }
     }
