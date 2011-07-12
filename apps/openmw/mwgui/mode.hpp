@@ -26,7 +26,10 @@ namespace MWGui
       GM_ClassGenerate,
       GM_ClassPick,
       GM_ClassCreate,
-      GM_Review
+      GM_Review,
+      
+      // interactive MessageBox
+      GM_InterMessageBox
     };
 
   // Windows shown in inventory mode

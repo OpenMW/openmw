@@ -250,6 +250,9 @@ namespace MWGui
     
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
     
+    int readPressedButton ();
+    ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
+    
     void onFrame (float frameDuration);
 
     /**
