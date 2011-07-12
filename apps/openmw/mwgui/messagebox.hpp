@@ -73,6 +73,8 @@ namespace MWGui
             MyGUI::EditPtr mMessageWidget;
             MyGUI::WidgetPtr mButtonsWidget;
             std::vector<MyGUI::ButtonPtr> mButtons;
+
+            int mTextButtonPadding;
     };
 
 }

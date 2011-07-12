@@ -193,6 +193,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     int buttonLeftPadding = 10; // padding between the buttons if horizontal
     int buttonTopPadding = 5; // ^-- if vertical
     int buttonPadding = 5; // padding between button label and button itself
+    int buttonMainPadding = 10; // padding between buttons and bottom of the main widget
     
     
     getWidget(mMessageWidget, "message");
@@ -203,6 +204,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     
     MyGUI::IntSize textSize = mMessageWidget->_getTextSize();
     
+    MyGUI::IntSize gameWindowSize = mMessageBoxManager.mWindowManager->getGui()->getViewSize();
     
     int buttonsWidth = 0;
     int buttonHeight = 0;
@@ -220,33 +222,43 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         
         mButtons.push_back(button);
         
-        buttonsWidth += button->_getTextSize().width + 2*buttonPadding + 2*buttonLeftPadding;
-        buttonHeight = button->_getTextSize().height + 2*buttonPadding + 2*buttonTopPadding;
+        buttonsWidth += button->_getTextSize().width + 2*buttonPadding + buttonLeftPadding;
+        buttonHeight = button->_getTextSize().height + 2*buttonPadding + buttonTopPadding;
     }
+    buttonsWidth += buttonLeftPadding;
     
     MyGUI::IntSize mainWidgetSize;
     if(buttonsWidth < fixedWidth)
     {
         // on one line
-    
-        int left;
+        std::cout << "on one line" << std::endl;
+        
         if(textSize.width + 2*textPadding < buttonsWidth)
         {
+            std::cout << "width = buttonsWidth" << std::endl;
             mainWidgetSize.width = buttonsWidth;
-            left = buttonLeftPadding;
         }
         else
         {
-            mainWidgetSize.width = textSize.width + 2*textPadding;
-            left = (textSize.width - buttonsWidth)/2;
+            mainWidgetSize.width = textSize.width + 3*textPadding;
         }
-        mainWidgetSize.height = textSize.height + textButtonPadding + buttonHeight;
+        mainWidgetSize.height = textSize.height + textButtonPadding + buttonHeight + buttonMainPadding;
+        
+        MyGUI::IntCoord absCoord;
+        absCoord.left = (gameWindowSize.width - mainWidgetSize.width)/2;
+        absCoord.top = (gameWindowSize.height - mainWidgetSize.height)/2;
+        
+        std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
+        std::cout << "left " << absCoord.left << " top " << absCoord.top << std::endl;
+        
+        mMainWidget->setCoord(absCoord);
         mMainWidget->setSize(mainWidgetSize);
-    
+        
         mMessageWidget->setSize(textSize);
         
         MyGUI::IntCoord buttonCord;
         MyGUI::IntSize buttonSize(0, buttonHeight);
+        int left = (mainWidgetSize.width - buttonsWidth)/2 + buttonPadding;
         
         std::vector<MyGUI::ButtonPtr>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
@@ -254,13 +266,13 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
             buttonCord.left = left;
             buttonCord.top = textSize.height + textButtonPadding;
             
-            buttonSize.width = (*button)->_getTextSize().width + buttonPadding*2;
-            buttonSize.height = (*button)->_getTextSize().height + buttonPadding*2;
+            buttonSize.width = (*button)->_getTextSize().width + 2*buttonPadding;
+            buttonSize.height = (*button)->_getTextSize().height + 2*buttonPadding;
             
             (*button)->setCoord(buttonCord);
             (*button)->setSize(buttonSize);
             
-            left += buttonSize.width + 2*buttonLeftPadding;
+            left += buttonSize.width + buttonLeftPadding;
         }
     }
     else
