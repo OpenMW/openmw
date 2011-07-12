@@ -254,6 +254,12 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         mMainWidget->setCoord(absCoord);
         mMainWidget->setSize(mainWidgetSize);
         
+        
+        MyGUI::IntCoord messageWidgetCoord;
+        messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
+        messageWidgetCoord.top = textPadding;
+        mMessageWidget->setCoord(messageWidgetCoord);
+        
         mMessageWidget->setSize(textSize);
         
         MyGUI::IntCoord buttonCord;
