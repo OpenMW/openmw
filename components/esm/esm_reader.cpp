@@ -3,6 +3,8 @@
 namespace ESM
 {
 
+using namespace Misc;
+
 ESM_Context ESMReader::getContext()
 {
     // Update the file position before returning

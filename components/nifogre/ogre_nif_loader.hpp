@@ -49,6 +49,9 @@ namespace Mangle
     }
 }
 
+namespace NifOgre
+{
+
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
     something Ogre can use. Later it will also handle the insertion of
@@ -137,5 +140,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         Ogre::Mesh *mesh;
         Ogre::SkeletonPtr mSkel;
 };
+
+}
 
 #endif

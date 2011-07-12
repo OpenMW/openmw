@@ -38,7 +38,7 @@ public:
   // internal (data is inside the nif itself) texture?
   bool external;
 
-  SString filename;    // In case of external textures
+  Misc::SString filename;    // In case of external textures
   NiPixelDataPtr data; // In case of internal textures
 
   /* Pixel layout
@@ -89,7 +89,7 @@ public:
 class ShapeData : public Record
 {
 public:
-  FloatArray vertices, normals, colors, uvlist;
+  Misc::FloatArray vertices, normals, colors, uvlist;
   const Vector *center;
   float radius;
 
@@ -124,7 +124,7 @@ class NiTriShapeData : public ShapeData
 {
 public:
   // Triangles, three vertex indices per triangle
-  SliceArray<short> triangles;
+  Misc::SliceArray<short> triangles;
 
   void read(NIFFile *nif)
   {
@@ -378,7 +378,7 @@ public:
   {
     const BoneTrafo *trafo;
     const Vector4 *unknown;
-    SliceArray<VertWeight> weights;
+    Misc::SliceArray<VertWeight> weights;
   };
 
   const BoneTrafo *trafo;

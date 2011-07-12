@@ -131,7 +131,7 @@ std::string ToUTF8::getUtf8(ToUTF8::FromType from)
   // Pick translation array
   const char *arr;
   if(from == ToUTF8::WINDOWS_1252)
-    arr = windows_1252;
+    arr = ToUTF8::windows_1252;
   else
     assert(0);
 

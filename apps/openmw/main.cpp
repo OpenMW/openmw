@@ -26,6 +26,8 @@
 
 #endif
 
+#include "config.hpp"
+
 using namespace std;
 
 /// Parse command line options and openmw.cfg file (if one exists). Results are directly
@@ -41,7 +43,8 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         "Syntax: openmw <options>\nAllowed options");
 
     desc.add_options()
-        ("help", "print help message")
+        ("help", "print help message and quit")
+        ("version", "print version information and quit")
         ("data", bpo::value<std::vector<std::string> >()
             ->default_value (std::vector<std::string>(), "data")
             ->multitoken(),
@@ -84,7 +87,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     //If there is an openmw.cfg in the current path use that as global config
     //Otherwise try getPath
     std::string cfgFile = "openmw.cfg";
-    if(!isFile(cfgFile.c_str()))
+    if(!Misc::isFile(cfgFile.c_str()))
     {
         cfgFile = Files::getPath (Files::Path_ConfigGlobal, "openmw", "openmw.cfg");
     }
@@ -105,11 +108,22 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     if (globalConfigFile.is_open())
         bpo::store ( bpo::parse_config_file (globalConfigFile, desc), variables);
 
+    bool run = true;
+
     if (variables.count ("help"))
     {
         std::cout << desc << std::endl;
-        return false;
+        run = false;
     }
+
+    if (variables.count ("version"))
+    {
+        std::cout << "OpenMW version " << OPENMW_VERSION << std::endl;
+        run = false;
+    }
+
+    if (!run)
+        return false;
 
     // directory settings
     if (variables["fs-strict"].as<bool>()==true)

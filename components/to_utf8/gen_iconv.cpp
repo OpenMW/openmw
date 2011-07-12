@@ -74,13 +74,28 @@ int write_table(const std::string &charset, const std::string &tableName)
 
   // Finish table
   cout << "};\n";
+
+  return 0;
 }
 
 int main()
 {
   cout << hex;
 
+  // Write header guard
+  cout << "#ifndef COMPONENTS_TOUTF8_TABLE_GEN_H\n#define COMPONENTS_TOUTF8_TABLE_GEN_H\n\n";
+
+  // Write namespace
+  cout << "namespace ToUTF8\n{\n\n";
+
   // English
   write_table("WINDOWS-1252", "windows_1252");
+
+  // Close namespace
+  cout << "\n}\n\n";
+
+  // Close header guard
+  cout << "#endif\n\n";
+
   return 0;
 }

@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace Mangle::Stream;
+using namespace Bsa;
 
 /// Error handling
 void BSAFile::fail(const string &msg)
