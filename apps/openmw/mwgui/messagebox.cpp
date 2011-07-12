@@ -47,6 +47,12 @@ void MessageBoxManager::onFrame (float frameDuration)
             it++;
         }
     }
+    
+    if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
+        delete mInterMessageBoxe;
+        mInterMessageBoxe = NULL;
+        mWindowManager->setNextMode(GM_Game);
+    }
 }
 
 void MessageBoxManager::createMessageBox (const std::string& message)
@@ -124,6 +130,16 @@ void MessageBoxManager::setMessageBoxSpeed (int speed)
 }
 
 
+int MessageBoxManager::readPressedButton ()
+{
+    if(mInterMessageBoxe != NULL)
+    {
+        return mInterMessageBoxe->readPressedButton();
+    }
+    return -1;
+}
+
+
 
 
 MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
@@ -186,6 +202,7 @@ int MessageBox::getHeight ()
 InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
   : Layout("openmw_interactive_messagebox_layout.xml")
   , mMessageBoxManager(parMessageBoxManager)
+  , mButtonPressed(-1)
 {
     int fixedWidth = 500;
     int textPadding = 10; // padding between text-widget and main-widget
@@ -194,6 +211,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     int buttonTopPadding = 5; // ^-- if vertical
     int buttonPadding = 5; // padding between button label and button itself
     int buttonMainPadding = 10; // padding between buttons and bottom of the main widget
+    
+    mMarkedToDelete = false;
     
     
     getWidget(mMessageWidget, "message");
@@ -221,6 +240,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
             dummyCoord,
             MyGUI::Align::Default);
         button->setCaption(*it);
+        
+        button->eventMouseButtonClick = MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed); 
         
         mButtons.push_back(button);
         
@@ -341,6 +362,30 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         }
         
     }
+}
+
+void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)
+{
+    mMarkedToDelete = true;
+    int index = 0;
+    std::vector<MyGUI::ButtonPtr>::const_iterator button;
+    for(button = mButtons.begin(); button != mButtons.end(); ++button)
+    {
+        if(*button == pressed)
+        {
+            mButtonPressed = index;
+            return;
+        }
+        index++;
+    }
+    std::cout << "Cant be possible :/" << std::endl;
+}
+
+int InteractiveMessageBox::readPressedButton ()
+{
+    int pressed = mButtonPressed;
+    mButtonPressed = -1;
+    return pressed;
 }
 
 

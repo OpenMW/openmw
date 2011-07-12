@@ -34,6 +34,8 @@ namespace MWGui
             bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
             
+            int readPressedButton ();
+            
             WindowManager *mWindowManager;
             
         private:
@@ -67,6 +69,10 @@ namespace MWGui
     {
         public:
             InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
+            void mousePressed (MyGUI::Widget* _widget);
+            int readPressedButton ();
+            
+            bool mMarkedToDelete;
             
         private:
             MessageBoxManager& mMessageBoxManager;
@@ -75,6 +81,7 @@ namespace MWGui
             std::vector<MyGUI::ButtonPtr> mButtons;
 
             int mTextButtonPadding;
+            int mButtonPressed;
     };
 
 }

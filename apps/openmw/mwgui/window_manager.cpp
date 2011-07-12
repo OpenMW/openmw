@@ -468,6 +468,11 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
     }
 }
 
+int WindowManager::readPressedButton ()
+{
+    return mMessageBoxManager->readPressedButton();
+}
+
 const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
     const ESM::GameSetting *setting = environment.mWorld->getStore().gameSettings.search(id);
