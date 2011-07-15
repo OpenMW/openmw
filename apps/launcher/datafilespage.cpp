@@ -1,4 +1,5 @@
 #include <QtGui>
+#include <QPlastiqueStyle>
 
 #include <components/esm/esm_reader.hpp>
 #include <components/files/path.hpp>
@@ -92,9 +93,11 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
     // Bottom part with profile options
     QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
 
+    QPlastiqueStyle *style = new QPlastiqueStyle;
     mProfilesComboBox = new ComboBox(this);
     mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
     mProfilesComboBox->setInsertPolicy(QComboBox::InsertAtBottom);
+    mProfilesComboBox->setStyle(style);
 
     mProfileToolBar = new QToolBar(this);
     mProfileToolBar->setMovable(false);
