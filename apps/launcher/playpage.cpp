@@ -15,8 +15,10 @@ PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
     QLabel *profileLabel = new QLabel(tr("Current Profile:"), playWidget);
     profileLabel->setObjectName("ProfileLabel");
 
+    QPlastiqueStyle *style = new QPlastiqueStyle;
     mProfilesComboBox = new QComboBox(playWidget);
     mProfilesComboBox->setObjectName("ProfilesComboBox");
+    mProfilesComboBox->setStyle(style);
 
     QGridLayout *playLayout = new QGridLayout(playWidget);
 
