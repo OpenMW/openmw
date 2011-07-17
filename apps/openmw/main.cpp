@@ -83,7 +83,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
         ( "encoding", boost::program_options::value<std::string>()->
             default_value("win1252"),
-            "Font encoding used in OpenMW game messages:\n"
+            "Character encoding used in OpenMW game messages:\n"
             "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default")
