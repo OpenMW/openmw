@@ -370,7 +370,7 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mFileCollections, mMaster,
-        mResDir, mNewGame, mEnvironment);
+        mResDir, mNewGame, mEnvironment, mEncoding);
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false, cfgDir);
@@ -518,4 +518,9 @@ void OMW::Engine::activate()
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
+}
+
+void OMW::Engine::setEncoding(const std::string& encoding)
+{
+    mEncoding = encoding;
 }

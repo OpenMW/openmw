@@ -115,7 +115,7 @@ namespace MWWorld
            World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
-                Environment& environment);
+                Environment& environment, const std::string& encoding);
 
             ~World();
 

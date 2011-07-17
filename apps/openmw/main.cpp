@@ -80,6 +80,13 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ( "fs-strict", boost::program_options::value<bool>()->
             implicit_value (true)->default_value (false),
             "strict file system handling (no case folding)")
+
+        ( "encoding", boost::program_options::value<std::string>()->
+            default_value("win1252"),
+            "Font encoding used in OpenMW game messages:\n"
+            "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+            "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+            "\n\twin1252 - Western European (Latin) alphabet, used by default")
         ;
 
     bpo::variables_map variables;
@@ -124,6 +131,24 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
 
     if (!run)
         return false;
+
+    // Font encoding settings
+    std::string encoding(variables["encoding"].as<std::string>());
+    if (encoding == "win1250")
+    {
+      std::cout << "Using Central and Eastern European font encoding." << std::endl;
+      engine.setEncoding(encoding);
+    }
+    else if (encoding == "win1251")
+    {
+      std::cout << "Using Cyrillic font encoding." << std::endl;
+      engine.setEncoding(encoding);
+    }
+    else
+    {
+      std::cout << "Using default (English) font encoding." << std::endl;
+      engine.setEncoding("win1252");
+    }
 
     // directory settings
     if (variables["fs-strict"].as<bool>()==true)
