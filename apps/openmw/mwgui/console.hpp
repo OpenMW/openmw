@@ -80,6 +80,8 @@ namespace MWGui
                   MyGUI::Char _char);
 
     void acceptCommand(MyGUI::EditPtr _sender);
+
+    std::string complete( std::string input, std::vector<std::string> &matches );
   };
 }
 #endif
