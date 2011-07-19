@@ -259,17 +259,43 @@ namespace MWGui
         using namespace std;
         string output=input;
         string tmp=input;
+        bool has_front_quote = false;
 
         /* Does the input string contain things that don't have to be completed? If yes erase them. */
-        for(string::reverse_iterator rit=tmp.rbegin(); rit < tmp.rend(); rit++) {
-            if( *rit == ' ' ) {
-                if( rit == tmp.rbegin() )
-                {
-                    tmp.clear();
-                    break;
+        /* Are there quotation marks? */
+        if( tmp.find('"') != string::npos ) {
+            int numquotes=0;
+            for(string::iterator it=tmp.begin(); it < tmp.end(); it++) {
+                if( *it == '"' )
+                    numquotes++;
+            }
+
+            /* Is it terminated?*/
+            if( numquotes % 2 ) {
+                tmp.erase( 0, tmp.rfind('"')+1 );
+                has_front_quote = true;
+            }
+            else {
+                size_t pos;
+                if( ( ((pos = tmp.rfind(' ')) != string::npos ) ) && ( pos > tmp.rfind('"') ) ) {
+                    tmp.erase( 0, tmp.rfind(' ')+1);
                 }
-                tmp.erase(tmp.begin(), (rit).base());
-                break;
+                else {
+                    tmp.clear();
+                }
+                has_front_quote = false;
+            }
+        }
+        /* No quotation marks. Are there spaces?*/
+        else {
+            size_t rpos;
+            if( (rpos=tmp.rfind(' ')) != string::npos ) {
+                if( rpos == 0 ) {
+                    tmp.clear();
+                }
+                else {
+                    tmp.erase(0, rpos+1);
+                }
             }
         }
         /* Erase the input from the output string so we can easily append the completed form later. */
@@ -291,7 +317,7 @@ namespace MWGui
 
             /* Is the beginning of the string different from the input string? If yes skip it. */
             for( string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();iter++, iter2++) {
-                if( *iter != *iter2 ) {
+                if( tolower(*iter) != tolower(*iter2) ) {
                     string_different=true;
                     break;
                 }
@@ -312,7 +338,18 @@ namespace MWGui
 
         /* Only one match. We're done. */
         if( matches.size() == 1 ) {
-            return output.append(matches.front() + string(" "));
+            /* Adding quotation marks when the input string started with a quotation mark or has spaces in it*/
+            if( ( matches.front().find(' ') != string::npos )  ) {
+                if( !has_front_quote )
+                    output.append(string("\""));
+                return output.append(matches.front() + string("\" ")); 
+            }
+            else if( has_front_quote ) {
+                return  output.append(matches.front() + string("\" "));
+            }
+            else {
+                return output.append(matches.front() + string(" "));
+            }
         }
 
         /* Check if all matching strings match further than input. If yes complete to this match. */
@@ -320,12 +357,14 @@ namespace MWGui
 
         for(string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); iter++, i++) {
             for(vector<string>::iterator it=matches.begin(); it < matches.end();it++) {
-                if( (*it)[i] != *iter ) {
+                if( tolower((*it)[i]) != tolower(*iter) ) {
                     /* Append the longest match to the end of the output string*/
-                    return output.append(matches.front().substr( 0, i));
+                    output.append(matches.front().substr( 0, i));
+                    return output;
                 }  
             }
         }
+
         /* All keywords match with the shortest. Append it to the output string and return it. */
         return output.append(matches.front());
     }
