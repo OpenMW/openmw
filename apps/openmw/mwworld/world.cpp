@@ -411,7 +411,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mSkyManager (0), mScene (renderer,physEng), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
-      mSky (false), mCellChanged (false), mEnvironment (environment)
+      mSky (false), mCellChanged (false), mEnvironment (environment), mNextDynamicRecord (0)
     {
         mPhysEngine = physEng;
 
@@ -870,5 +870,37 @@ namespace MWWorld
     bool World::toggleRenderMode (RenderMode mode)
     {
         return mScene.toggleRenderMode (mode);
+    }
+
+    std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)
+    {
+        /// \todo Rewrite the ESMStore so that a dynamic 2nd ESMStore can be attached to it.
+        /// This function should then insert the record into the 2nd store (the code for this
+        /// should also be moved to the ESMStore class). It might be a good idea to review
+        /// the STL-container usage of the ESMStore before the rewrite.
+
+        std::ostringstream stream;
+        stream << "$dyamic" << mNextDynamicRecord++;
+
+        const ESM::Potion *created =
+            &mStore.potions.list.insert (std::make_pair (stream.str(), record)).first->second;
+
+        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_ALCH));
+
+        return std::make_pair (stream.str(), created);
+    }
+
+    std::pair<std::string, const ESM::Class *> World::createRecord (const ESM::Class& record)
+    {
+        /// \todo See function above.
+        std::ostringstream stream;
+        stream << "$dyamic" << mNextDynamicRecord++;
+
+        const ESM::Class *created =
+            &mStore.classes.list.insert (std::make_pair (stream.str(), record)).first->second;
+
+        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_CLAS));
+
+        return std::make_pair (stream.str(), created);
     }
 }
