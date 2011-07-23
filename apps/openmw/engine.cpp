@@ -44,10 +44,6 @@
 
 #include <OgreRoot.h>
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OSX/macUtils.h>
-#endif
-
 #include <MyGUI_WidgetManager.h>
 #include "mwgui/class.hpp"
 

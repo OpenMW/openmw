@@ -22,11 +22,7 @@ add_subdirectory(OgrePlatform)
 
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR}/openmw_resources)
-if (APPLE)
-	set(DDIR ${APP_BUNDLE_DIR}/Contents/Resources/resources/mygui)
-else (APPLE)
-	set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
-endif (APPLE)
+set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 configure_file("${SDIR}/bigbars.png" "${DDIR}/bigbars.png" COPYONLY)
 configure_file("${SDIR}/black.png" "${DDIR}/black.png" COPYONLY)

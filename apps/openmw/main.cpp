@@ -26,6 +26,11 @@
 
 #endif
 
+// for Ogre::macBundlePath
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <OSX/macUtils.h>
+#endif
+
 using namespace std;
 
 /// Parse command line options and openmw.cfg file (if one exists). Results are directly
@@ -177,7 +182,7 @@ int main(int argc, char**argv)
 {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     // set current dir to bundle path
-    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath());
+    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
     boost::filesystem::current_path(bundlePath);
 #endif
 
