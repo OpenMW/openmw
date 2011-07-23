@@ -880,7 +880,7 @@ namespace MWWorld
         /// the STL-container usage of the ESMStore before the rewrite.
 
         std::ostringstream stream;
-        stream << "$dyamic" << mNextDynamicRecord++;
+        stream << "$dynamic" << mNextDynamicRecord++;
 
         const ESM::Potion *created =
             &mStore.potions.list.insert (std::make_pair (stream.str(), record)).first->second;
@@ -894,7 +894,7 @@ namespace MWWorld
     {
         /// \todo See function above.
         std::ostringstream stream;
-        stream << "$dyamic" << mNextDynamicRecord++;
+        stream << "$dynamic" << mNextDynamicRecord++;
 
         const ESM::Class *created =
             &mStore.classes.list.insert (std::make_pair (stream.str(), record)).first->second;
