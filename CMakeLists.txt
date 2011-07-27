@@ -2,6 +2,9 @@ project(OpenMW)
 
 IF (APPLE)
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/OpenMW.app")
+    
+    # using 10.6 sdk
+    set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
 ENDIF (APPLE)
 
 # Sound source selection
