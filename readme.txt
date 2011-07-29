@@ -8,20 +8,35 @@ License: GPL (see GPL3.txt for more information)
 Website: www.openmw.com
 
 
+THIS IS A WORK IN PROGRESS
+
 INSTALLATION
 
 Windows:
-Text goes here
+TODO add description for Windows
 
 Linux:
 Ubuntu
+TODO add description for Ubuntu
 
 Arch Linux
 There's an OpenMW package available in the AUR Repository:
 http://aur.archlinux.org/packages.php?ID=21419
 
+OS X:
+TODO add description for OS X
+
+BUILD FROM SOURCE
+
+TODO add description here
+
+COMMAND LINE OPTIONS
+TODO add description of command line options
 
 CREDITS
+
+Developers:
+TODO add list of developers
 
 OpenMW:
 Thanks to DokterDume for kindly providing us with the Moon and Star logo
@@ -32,3 +47,5 @@ Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Fil
 
 
 CHANGELOG
+
+TODO add changelog (take pre 0.11.0 changelog from wiki when it is up again; take 0.11.0 and later changelog from tracker)
