@@ -142,7 +142,9 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
     for (Files::MultiDirCollection::TIter iter(esm.begin()); iter!=esm.end(); ++iter)
     {
-        QString currentMaster = QString::fromStdString(std::string (iter->second.filename()));
+        std::string filename = boost::filesystem::path (iter->second.filename()).string();
+        QString currentMaster = QString::fromStdString(filename);
+        
         const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
         if (itemList.isEmpty()) // Master is not yet in the widget
@@ -186,7 +188,9 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
         // Now we put the current plugin in the mDataFilesModel under its masters
         QStandardItem *parent = new QStandardItem(availableMasters.join(","));
-        QStandardItem *child = new QStandardItem(QString::fromStdString(std::string (iter->second.filename())));
+        
+        std::string filename = boost::filesystem::path (iter->second.filename()).string();
+        QStandardItem *child = new QStandardItem(QString::fromStdString(std::string(filename)));
 
         const QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
 
