@@ -277,8 +277,6 @@ void MainDialog::setupConfig()
                                                        "openmw", "openmw.cfg"));
     }
 
-    file.setFileName(config); // Just for displaying information
-    qDebug() << "Using config file from " << file.fileName();
     file.close();
 
     // Open our config file
