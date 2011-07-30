@@ -1,6 +1,5 @@
 #include <QMimeData>
 #include <QBitArray>
-#include <QDebug>
 
 #include "pluginsmodel.hpp"
 

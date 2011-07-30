@@ -176,7 +176,6 @@ void GraphicsPage::setupOgre()
     try
     {
         mOgre = new Ogre::Root(pluginCfg.toStdString());
-        qDebug("Ogre::Root created successfully.");
     }
     catch(Ogre::Exception &ex)
     {

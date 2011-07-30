@@ -298,8 +298,6 @@ void MainDialog::writeConfig()
     QStringList dataFiles = mDataFilesPage->selectedMasters();
     dataFiles.append(mDataFilesPage->checkedPlugins());
 
-    qDebug("Writing to openmw.cfg");
-
     // Open the config as a QFile
     QFile file(mGameConfig->fileName());
 

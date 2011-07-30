@@ -219,7 +219,6 @@ void DataFilesPage::setupConfig()
     }
 
     file.setFileName(config); // Just for displaying information
-    qDebug() << "Using config file from " << file.fileName();
 
     // Open our config file
     mLauncherConfig = new QSettings(config, QSettings::IniFormat);
