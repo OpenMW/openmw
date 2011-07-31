@@ -190,8 +190,7 @@ void GraphicsPage::setupOgre()
         msgBox.setDetailedText(ogreError);
         msgBox.exec();
 
-        QString error = QString("Error creating Ogre::Root, the error reported was: %0").arg(ogreError);
-        qCritical(error.toAscii());
+        qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
 
         std::exit(1);
     }
