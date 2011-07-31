@@ -165,7 +165,6 @@ void GraphicsPage::setupConfig()
 void GraphicsPage::setupOgre()
 {
     QString pluginCfg = "./plugins.cfg";
-
     QFile file(pluginCfg);
 
     if (!file.exists()) {
@@ -173,9 +172,18 @@ void GraphicsPage::setupOgre()
                                                           "openmw", "plugins.cfg"));
     }
     
+    // Reopen the file from user directory
+    file.setFileName(pluginCfg);
+    
+    if (!file.exists()) {
+        // There's no plugins.cfg in the user directory, use global directory
+        pluginCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
+                                                          "openmw", "plugins.cfg"));   
+    }
+    
     // Create a log manager so we can surpress debug text to stdout/stderr
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
-    logMgr->createLog("Ogre.log", true, false, false);
+    logMgr->createLog("launcherOgre.log", true, false, false);
 
     try
     {
