@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <QDir>
 #include <QFile>
-#include <QDebug>
 
 #include "maindialog.hpp"
 
@@ -24,10 +23,6 @@ int main(int argc, char *argv[])
 
     // Load the stylesheet
     QFile file("./launcher.qss");
-    
-    QFileInfo fi(file);
-    
-    qDebug() << "Stylesheet path is: " << fi.absoluteFilePath();
 
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());

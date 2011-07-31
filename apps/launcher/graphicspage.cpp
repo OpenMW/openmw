@@ -165,13 +165,25 @@ void GraphicsPage::setupConfig()
 void GraphicsPage::setupOgre()
 {
     QString pluginCfg = "./plugins.cfg";
-
     QFile file(pluginCfg);
 
     if (!file.exists()) {
         pluginCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
                                                           "openmw", "plugins.cfg"));
     }
+    
+    // Reopen the file from user directory
+    file.setFileName(pluginCfg);
+    
+    if (!file.exists()) {
+        // There's no plugins.cfg in the user directory, use global directory
+        pluginCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
+                                                          "openmw", "plugins.cfg"));   
+    }
+    
+    // Create a log manager so we can surpress debug text to stdout/stderr
+    Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
+    logMgr->createLog("launcherOgre.log", true, false, false);
 
     try
     {
@@ -190,8 +202,7 @@ void GraphicsPage::setupOgre()
         msgBox.setDetailedText(ogreError);
         msgBox.exec();
 
-        QString error = QString("Error creating Ogre::Root, the error reported was: %0").arg(ogreError);
-        qCritical(error.toAscii());
+        qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
 
         std::exit(1);
     }
