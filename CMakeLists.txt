@@ -399,7 +399,7 @@ endif (CMAKE_COMPILER_IS_GNUCC)
 # Apple bundling
 # TODO REWRITE!
 if (APPLE)
-  set(MISC_FILES
+    set(MISC_FILES
         ${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg
         ${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg)
 
@@ -483,6 +483,8 @@ option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
+
+add_subdirectory( apps/launcher )
 
 if (WIN32)
   if (MSVC)
