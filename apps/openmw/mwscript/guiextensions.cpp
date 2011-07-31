@@ -15,42 +15,57 @@
 namespace MWScript
 {
     namespace Gui
-    {    
+    {
         class OpEnableWindow : public Interpreter::Opcode0
         {
                 MWGui::GuiWindow mWindow;
-                
+
             public:
-            
+
                 OpEnableWindow (MWGui::GuiWindow window) : mWindow (window) {}
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-                    
+
                     context.getWindowManager().allow (mWindow);
-                } 
-        };    
-    
+                }
+        };
+
         class OpShowDialogue : public Interpreter::Opcode0
         {
                 MWGui::GuiMode mDialogue;
-                
+
             public:
-            
+
                 OpShowDialogue (MWGui::GuiMode dialogue)
                 : mDialogue (dialogue)
                 {}
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-                    
+
                     context.getInputManager().setGuiMode(mDialogue);
-                } 
-        };  
+                }
+        };
+
+        class OpGetButtonPressed : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    MWWorld::Ptr ptr = context.getReference();
+
+                    runtime.push (context.getWindowManager().readPressedButton());
+                }
+        };
 
         const int opcodeEnableBirthMenu = 0x200000e;
         const int opcodeEnableClassMenu = 0x200000f;
@@ -63,7 +78,8 @@ namespace MWScript
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
         const int opcodeShowRestMenu = 0x2000018;
-    
+        const int opcodeGetButtonPressed = 0x2000137;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             extensions.registerInstruction ("enablebirthmenu", "", opcodeEnableBirthMenu);
@@ -80,10 +96,12 @@ namespace MWScript
 
             extensions.registerInstruction ("enablerestmenu", "", opcodeEnableRest);
             extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
-            
+
             extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);
+
+            extensions.registerFunction ("getbuttonpressed", 'l', "", opcodeGetButtonPressed);
         }
-        
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (opcodeEnableBirthMenu,
@@ -115,6 +133,8 @@ namespace MWScript
 
             interpreter.installSegment5 (opcodeShowRestMenu,
                 new OpShowDialogue (MWGui::GM_Rest));
+
+            interpreter.installSegment5 (opcodeGetButtonPressed, new OpGetButtonPressed);
         }
     }
 }

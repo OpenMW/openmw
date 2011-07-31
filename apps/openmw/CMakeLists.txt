@@ -1,5 +1,9 @@
 project(OpenMW)
 
+# config file
+
+configure_file ("${OpenMW_SOURCE_DIR}/config.hpp.cmake" "${OpenMW_SOURCE_DIR}/config.hpp")
+
 # local files
 
 set(GAME
@@ -7,7 +11,8 @@ set(GAME
     engine.cpp
     )
 set(GAME_HEADER
-    engine.hpp)
+    engine.hpp
+    config.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND
@@ -50,6 +55,7 @@ set(GAMEGUI_HEADER
     mwgui/dialogue_history.hpp
     mwgui/window_base.hpp
     mwgui/stats_window.hpp
+    mwgui/messagebox.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
@@ -65,6 +71,7 @@ set(GAMEGUI
     mwgui/dialogue_history.cpp
     mwgui/window_base.cpp
     mwgui/stats_window.cpp
+    mwgui/messagebox.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 

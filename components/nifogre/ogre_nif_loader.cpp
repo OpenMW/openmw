@@ -83,11 +83,11 @@ Vector3 NIFLoader::convertVector3(const Nif::Vector& vec)
 Quaternion NIFLoader::convertRotation(const Nif::Matrix& rot)
 {
     Real matrix[3][3];
-    
+
     for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
             matrix[i][j] = rot.v[i].array[j];
-        
+
         return Quaternion(Matrix3(matrix));
 }
 
@@ -267,7 +267,7 @@ void NIFLoader::createMaterial(const String &name,
         }
         else
             pass->setDepthWriteEnabled(true); */
-        
+
 
         // Add transparency if NiAlphaProperty was present
         if (alphaFlags != -1)
@@ -348,16 +348,16 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     sub->vertexData = new VertexData();
     sub->vertexData->vertexCount = numVerts;
     sub->useSharedVertices = false;
-    
+
     VertexDeclaration *decl = sub->vertexData->vertexDeclaration;
     decl->addElement(nextBuf, 0, VET_FLOAT3, VES_POSITION);
-    
+
     HardwareVertexBufferSharedPtr vbuf =
         HardwareBufferManager::getSingleton().createVertexBuffer(
             VertexElement::getTypeSize(VET_FLOAT3),
             numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
     vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, true);
-    
+
     VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
     bind->setBinding(nextBuf++, vbuf);
 
@@ -694,7 +694,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                     if (verIndex < data->normals.length)
                     {
                         Vector3 absNormalsPos = vecRot * Vector3(ptrNormals + verIndex *3);
-                        
+
                         for (int j=0; j<3; j++)
                             (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
                     }
@@ -854,7 +854,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         }
         for (; i<n; i++)
         {
-            
+
             if (list.has(i))
                 handleNode(&list[i], flags, node->trafo, bounds, bone);
         }
@@ -869,7 +869,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         Tri Chest
         */
         if((isChest && stack < 10 )  || (isHands && counter < 3) || !(isChest || isHands)){                       //(isBeast && isChest && stack < 10 && counter == skincounter )
-            
+
             std::string name = node->name.toString();
             //if (isChest)
                 //std::cout << "NAME: " << name << "\n";
@@ -896,15 +896,15 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
             //if(isBeast && isChest)
                 //cout << "Handling Shape, Stack " << stack <<"\n";
 
-            
-            
+
+
                 counter++;
         }
         /*if(isHands){
             //cout << "Handling Shape, Stack " << stack <<"\n";
             counter++;
         }*/
-        
+
     }
 
     stack--;
@@ -925,7 +925,7 @@ void NIFLoader::loadResource(Resource *resource)
     //std::cout <<"NAME:" << name;
     //if(name.length() >= 20)
     //  {std::string split = name.substr(name.length() - 20, 20);
-    //if(name == 
+    //if(name ==
     //std::cout <<"NAME:" << name << "LEN: " << name.length() << "\n";
     const std::string test ="meshes\\b\\B_N_Dark Elf_M_Skins.NIF";
     const std::string test2 ="meshes\\b\\B_N_Dark Elf_M_Skins.nif";
@@ -953,15 +953,15 @@ void NIFLoader::loadResource(Resource *resource)
     const std::string test24 ="meshes\\b\\B_N_High Elf_M_Skins.nif";
 
     //std::cout <<"LEN1:" << test.length() << "TEST: " << test << "\n";
-    
-    
+
+
     if(name.compare(test) == 0 || name.compare(test2) == 0 || name.compare(test3) == 0 || name.compare(test4) == 0 ||
         name.compare(test5) == 0 || name.compare(test6) == 0 || name.compare(test7) == 0 || name.compare(test8) == 0 || name.compare(test9) == 0 ||
         name.compare(test10) == 0 || name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 ||
         name.compare(test14) == 0 || name.compare(test15) == 0 || name.compare(test16) == 0 || name.compare(test17) == 0 ||
         name.compare(test18) == 0 || name.compare(test19) == 0 || name.compare(test20) == 0 || name.compare(test21) == 0 ||
         name.compare(test22) == 0 || name.compare(test23) == 0 || name.compare(test24) == 0
-        
+
         ){
         //std::cout << "Welcome Chest\n";
         isChest = true;
@@ -1030,7 +1030,7 @@ void NIFLoader::loadResource(Resource *resource)
         std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
         isChest = true;
     }*/
-    
+
     //if(split== "Skins.NIF")
     //  std::cout << "\nSPECIAL PROPS\n";
     resourceName = "";
@@ -1102,14 +1102,14 @@ void NIFLoader::loadResource(Resource *resource)
 //         mesh->setSkeletonName(getSkeletonName());
 }
 
-MeshPtr NIFLoader::load(const std::string &name, 
+MeshPtr NIFLoader::load(const std::string &name,
                          const std::string &group)
 {
     MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     ResourcePtr ptr = m->getByName(name, group);
     MeshPtr resize;
-    
+
     const std::string beast1 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
     const std::string beast2 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
     const std::string beast3 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
@@ -1120,8 +1120,8 @@ MeshPtr NIFLoader::load(const std::string &name,
     const std::string beasttail3 ="tail\\b\\B_N_Argonian_F_Skins.nif";
     const std::string beasttail4 ="tail\\b\\B_N_Argonian_M_Skins.nif";
 
-    if (!ptr.isNull()){ 
-        
+    if (!ptr.isNull()){
+
         //if(pieces > 1)
             //cout << "It exists\n";
             resize = MeshPtr(ptr);
@@ -1132,17 +1132,17 @@ MeshPtr NIFLoader::load(const std::string &name,
     {
         resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
         //cout <<"EXISTING" << name << "\n";
-        
+
         //if(pieces > 1)
             //cout << "Creating it\n";
-        
-        
+
+
         //resize->load();
         //resize->reload();
         //return 0;
          ResourcePtr ptr = m->getByName(name, group);
          resize = MeshPtr(ptr);
-        
+
         //NIFLoader::getSingletonPtr()->
         /*ResourcePtr ptr = m->getByName(name, group);
     if (!ptr.isNull()){
@@ -1153,7 +1153,7 @@ MeshPtr NIFLoader::load(const std::string &name,
     }
     return resize;
 }
-    
+
 
 /* More code currently not in use, from the old D source. This was
    used in the first attempt at loading NIF meshes, where each submesh

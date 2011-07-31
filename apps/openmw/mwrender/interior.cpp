@@ -182,11 +182,11 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
 
 void InteriorCellRender::insertMesh(const std::string &mesh)
 {
-  assert (insert);
+    assert (insert);
 
-  NifOgre::NIFLoader::load(mesh);
-  MovableObject *ent = scene.getMgr()->createEntity(mesh);
-  insert->attachObject(ent);
+    NifOgre::NIFLoader::load(mesh);
+    MovableObject *ent = scene.getMgr()->createEntity(mesh);
+    insert->attachObject(ent);
 
     if (mInsertMesh.empty())
         mInsertMesh = mesh;

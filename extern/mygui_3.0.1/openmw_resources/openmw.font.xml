@@ -2,8 +2,9 @@
 
 <MyGUI type="Font">
 
-	<Font name="MyGUI_CoreFont.18" source="Comic.TTF" size="18" resolution="72" antialias_colour="false" space_width="4" tab_count="4" spacer="5">
+	<Font name="MyGUI_CoreFont.18" source="Comic.TTF" size="18" resolution="72" antialias_colour="false" space_width="4" tab_count="4" spacer="5" distance="10">
 		<Code range="33 126"/>
+		<Code range="192 382"/><!-- Central and Eastern European languages glyphs -->
 		<Code range="1025 1105"/>
 		<Code range="8470 8470" help="№"/>
 		<Code hide="128"/>
@@ -11,15 +12,16 @@
 		<Code hide="1104"/>
 	</Font>
 
-
-    <Font name="MonoFont" default_height="17" source="VeraMono.ttf" size="18" resolution="50" antialias_colour="false" space_width="4" tab_width="8" cursor_width="2" distance="5" offset_height="0">
+    <Font name="MonoFont" default_height="17" source="VeraMono.ttf" size="18" resolution="50" antialias_colour="false" space_width="4" tab_width="8" cursor_width="2" distance="10" offset_height="0">
         <Code range="33 126"/>
+        <Code range="192 382"/><!-- Central and Eastern European glyphs -->
         <Code range="1025 1105"/>
     </Font>
 
     <!-- Useful for youtube videos :) -->
-    <Font name="youtube" default_height="34" source="VeraMono.ttf" size="36" resolution="50" antialias_colour="false" space_width="8" tab_width="16" cursor_width="4" distance="10" offset_height="0">
+    <Font name="youtube" default_height="34" source="VeraMono.ttf" size="36" resolution="50" antialias_colour="false" space_width="8" tab_width="16" cursor_width="4" distance="15" offset_height="0">
         <Code range="33 126"/>
+        <Code range="192 382"/><!-- Central and Eastern European languages glyphs -->
         <Code range="1025 1105"/>
     </Font>
 
