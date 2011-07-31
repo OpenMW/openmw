@@ -1,6 +1,8 @@
 #include <QMimeData>
 #include <QBitArray>
 
+#include <limits>
+
 #include "pluginsmodel.hpp"
 
 PluginsModel::PluginsModel(QObject *parent) : QStandardItemModel(parent)
@@ -53,8 +55,8 @@ bool PluginsModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
 
     //code based on QAbstractItemModel::decodeData
     // adapted to work with QStandardItem
-    int top = INT_MAX;
-    int left = INT_MAX;
+    int top = std::numeric_limits<int>::max();
+    int left = std::numeric_limits<int>::max();
     int bottom = 0;
     int right = 0;
     QVector<int> rows, columns;
