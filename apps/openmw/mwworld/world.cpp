@@ -1,4 +1,3 @@
-
 #include "world.hpp"
 
 #include <cmath>
@@ -466,6 +465,11 @@ namespace MWWorld
     {
         return mStore;
     }
+    
+    ESM::ESMReader& World::getEsmReader()
+    {
+        return mEsm;
+    }
 
     const World::ScriptList& World::getLocalScripts() const
     {
@@ -694,6 +698,7 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        return mWorldScene->changeToInteriorCell(cellName, position);
         SuppressDoingPhysics scopeGuard;
 
         // remove active
@@ -904,3 +909,4 @@ namespace MWWorld
         return std::make_pair (stream.str(), created);
     }
 }
+
