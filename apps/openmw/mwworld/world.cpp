@@ -18,6 +18,7 @@
 #include "environment.hpp"
 #include "class.hpp"
 #include "player.hpp"
+#include "scene.hpp"
 
 #include "refdata.hpp"
 #include "globals.hpp"
@@ -220,6 +221,7 @@ namespace MWWorld
 
     MWRender::CellRender *World::searchRender (Ptr::CellStore *store)
     {
+        return mWorldScene->searchRender(store);
         CellRenderCollection::iterator iter = mActiveCells.find (store);
 
         if (iter!=mActiveCells.end())
@@ -272,6 +274,7 @@ namespace MWWorld
 
     void World::unloadCell (CellRenderCollection::iterator iter)
     {
+        return mWorldScene->unloadCell(iter);
         ListHandles functor;
         iter->first->forEach<ListHandles>(functor);
 
@@ -290,6 +293,7 @@ namespace MWWorld
 
     void World::loadCell (Ptr::CellStore *cell, MWRender::CellRender *render)
     {
+        return mWorldScene->loadCell(cell, render); 
         // register local scripts
         insertInteriorScripts (*cell);
 
@@ -329,6 +333,7 @@ namespace MWWorld
 
     void World::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
+        return mWorldScene->changeCell(X, Y, position, adjustPlayerPos);
         SuppressDoingPhysics scopeGuard;
 
         // remove active
@@ -412,6 +417,7 @@ namespace MWWorld
     : mSkyManager (0), mScene (renderer,physEng), mPlayer (0), mCurrentCell (0), mGlobalVariables (0),
       mSky (false), mCellChanged (false), mEnvironment (environment), mNextDynamicRecord (0)
     {
+        mWorldScene = new Scene(environment, this, mScene);
         mPhysEngine = physEng;
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
@@ -498,6 +504,7 @@ namespace MWWorld
 
     Ptr World::getPtr (const std::string& name, bool activeOnly)
     {
+        return mWorldScene->getPtr(name, activeOnly);
         // the player is always in an active cell.
         if (name=="player")
         {
@@ -524,6 +531,7 @@ namespace MWWorld
 
     Ptr World::getPtrViaHandle (const std::string& handle)
     {
+        return mWorldScene->getPtrViaHandle(handle);
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
 
@@ -541,6 +549,7 @@ namespace MWWorld
 
     void World::enable (Ptr reference)
     {
+        return mWorldScene->enable(reference);
         if (!reference.getRefData().isEnabled())
         {
             reference.getRefData().enable();
@@ -557,6 +566,7 @@ namespace MWWorld
 
     void World::disable (Ptr reference)
     {
+        return mWorldScene->disable(reference);
         if (reference.getRefData().isEnabled())
         {
             reference.getRefData().disable();
@@ -728,6 +738,7 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
+        return mWorldScene->changeToExteriorCell(position);
         int x = 0;
         int y = 0;
 
@@ -738,6 +749,7 @@ namespace MWWorld
 
     const ESM::Cell *World::getExterior (const std::string& cellName) const
     {
+        return mWorldScene->getExterior(cellName);
         // first try named cells
         if (const ESM::Cell *cell = mStore.cells.searchExtByName (cellName))
             return cell;
@@ -778,6 +790,7 @@ namespace MWWorld
 
     void World::deleteObject (Ptr ptr)
     {
+        return mWorldScene->deleteObject(ptr);
         if (ptr.getRefData().getCount()>0)
         {
             ptr.getRefData().setCount (0);
@@ -801,6 +814,7 @@ namespace MWWorld
 
     void World::moveObject (Ptr ptr, float x, float y, float z)
     {
+        return mWorldScene->moveObject(ptr, x, y, z);
         ptr.getCellRef().pos.pos[0] = x;
         ptr.getCellRef().pos.pos[1] = y;
         ptr.getCellRef().pos.pos[2] = z;
