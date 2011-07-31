@@ -172,6 +172,10 @@ void GraphicsPage::setupOgre()
         pluginCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
                                                           "openmw", "plugins.cfg"));
     }
+    
+    // Create a log manager so we can surpress debug text to stdout/stderr
+    Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
+    logMgr->createLog("Ogre.log", true, false, false);
 
     try
     {
