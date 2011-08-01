@@ -264,28 +264,6 @@ namespace MWWorld
         }
     }
 
-    void World::unloadCell (CellRenderCollection::iterator iter)
-    {
-        return mWorldScene->unloadCell(iter);
-    }
-
-    void World::loadCell (Ptr::CellStore *cell, MWRender::CellRender *render)
-    {
-        return mWorldScene->loadCell(cell, render);
-    }
-
-    void World::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
-        bool adjustPlayerPos)
-    {
-        if (adjustPlayerPos)
-            mPlayer->setPos (position.pos[0], position.pos[1], position.pos[2], false);
-
-        mPlayer->setCell (cell);
-        // TODO orientation
-        mEnvironment.mMechanicsManager->addActor (mPlayer->getPlayer());
-        mEnvironment.mMechanicsManager->watchActor (mPlayer->getPlayer());
-    }
-
 
     void World::adjustSky()
     {
@@ -295,11 +273,6 @@ namespace MWWorld
             // TODO set weather
             toggleSky();
         }
-    }
-
-    void World::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
-    {
-        mWorldScene->changeCell(X, Y, position, adjustPlayerPos);
     }
 
     World::World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
@@ -662,7 +635,7 @@ namespace MWWorld
 
                     if (currentCell->cell->data.gridX!=cellX || currentCell->cell->data.gridY!=cellY)
                     {
-                        changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos, false);
+                        mWorldScene->changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos, false);
                     }
 
                 }

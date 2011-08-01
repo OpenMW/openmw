@@ -71,8 +71,6 @@ namespace MWWorld
             MWWorld::Player *mPlayer;
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
-            std::map<std::string, Ptr::CellStore> mInteriors;
-            std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
             ScriptList mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
             bool mSky;
@@ -94,17 +92,7 @@ namespace MWWorld
             int getDaysPerMonth (int month) const;
 
             void removeScripts (Ptr::CellStore *cell);
-
-            void unloadCell (CellRenderCollection::iterator iter);
-
-            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
-
-            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
-                bool adjustPlayerPos = true);
-
-            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
-            ///< Move from exterior to interior or from interior cell to a different
-            /// interior cell.
+            
         public:
 
            World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
