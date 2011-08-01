@@ -520,6 +520,11 @@ namespace MWWorld
             }
         }
     }
+    
+    std::map<Ptr::CellStore *, MWRender::CellRender *> Scene::getActiveCells ()
+    {
+        return mActiveCells;
+    }
 
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
@@ -583,6 +588,11 @@ namespace MWWorld
         }
 
         return 0;
+    }
+    
+    Ptr::CellStore* Scene::getCurrentCell ()
+    {
+        return mCurrentCell;
     }
 
     void Scene::markCellAsUnchanged()

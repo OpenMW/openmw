@@ -69,9 +69,6 @@ namespace MWWorld
             MWRender::MWScene mScene;
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
-            Ptr::CellStore *mCurrentCell; // the cell, the player is in
-            CellRenderCollection mActiveCells;
-            CellRenderCollection mBufferedCells; // loaded, but not active (buffering not implementd yet)
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
             std::map<std::string, Ptr::CellStore> mInteriors;
@@ -79,7 +76,6 @@ namespace MWWorld
             ScriptList mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
             bool mSky;
-            bool mCellChanged;
             Environment& mEnvironment;
             int mNextDynamicRecord;
 

@@ -97,16 +97,8 @@ namespace MWWorld
 
             void removeScripts (Ptr::CellStore *cell);
 
-            void unloadCell (CellRenderCollection::iterator iter);
-
-            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
-
             void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
-
-            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
-            ///< Move from exterior to interior or from interior cell to a different
-            /// interior cell.
         public:
 
            Scene (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
@@ -115,6 +107,18 @@ namespace MWWorld
                 Environment& environment, const std::string& encoding, World* world, MWRender::MWScene& scene);
 
             ~Scene();
+
+            void unloadCell (CellRenderCollection::iterator iter);
+
+            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
+
+            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
+            ///< Move from exterior to interior or from interior cell to a different
+            /// interior cell.
+            
+            Ptr::CellStore* getCurrentCell ();
+            
+            CellRenderCollection getActiveCells ();
 
             void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
 
