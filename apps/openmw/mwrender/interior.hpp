@@ -3,6 +3,7 @@
 
 #include "cell.hpp"
 #include "cellimp.hpp"
+#include "../mwworld/physicssystem.hpp"
 
 #include "OgreColourValue.h"
 #include <OgreSceneNode.h>
@@ -48,6 +49,7 @@ namespace MWRender
     ESMS::CellStore<MWWorld::RefData> &cell;
     MWWorld::Environment &mEnvironment;
     MWScene &scene;
+    MWWorld::PhysicsSystem *mPhysics;
 
     /// The scene node that contains all objects belonging to this
     /// cell.
@@ -93,8 +95,11 @@ namespace MWRender
   public:
 
     InteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
-        MWScene &_scene)
-    : cell(_cell), mEnvironment (environment), scene(_scene), base(NULL), insert(NULL), ambientMode (0) {}
+        MWScene &_scene, MWWorld::PhysicsSystem *physics)
+    : cell(_cell), mEnvironment (environment), scene(_scene), base(NULL), insert(NULL), ambientMode (0)
+    {
+        mPhysics = physics;
+    }
 
     virtual ~InteriorCellRender() { destroy(); }
 

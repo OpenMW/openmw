@@ -283,6 +283,8 @@ namespace MWWorld
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0)
     {
         mPhysEngine = physEng;
+        
+        mPhysics = new PhysicsSystem(renderer, physEng);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
@@ -294,7 +296,7 @@ namespace MWWorld
         mStore.load (mEsm);
 
         mPlayer = new MWWorld::Player (mScene.getPlayer(), mStore.npcs.find ("player"), *this);
-        mScene.addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
+        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -310,7 +312,7 @@ namespace MWWorld
 
         mPhysEngine = physEng;
         
-        mWorldScene = new Scene(environment, this, mScene);
+        mWorldScene = new Scene(environment, this, mScene, mPhysics);
     }
 
     World::~World()
@@ -319,6 +321,7 @@ namespace MWWorld
         delete mSkyManager;
         delete mGlobalVariables;
         delete mWorldScene;
+        delete mPhysics;
     }
 
     const ESM::Cell *World::getExterior (const std::string& cellName) const
@@ -635,7 +638,7 @@ namespace MWWorld
                     mEnvironment.mSoundManager->stopSound3D (ptr);
 
                     if (!DoingPhysics::isDoingPhysics())
-                        mScene.removeObject (ptr.getRefData().getHandle());
+                        mPhysics->removeObject (ptr.getRefData().getHandle());
                 }
 
                 render->deleteObject (ptr.getRefData().getHandle());
@@ -672,7 +675,7 @@ namespace MWWorld
             }
         }
 
-        mScene.moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z),
+        mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z),
             !DoingPhysics::isDoingPhysics());
 
         // TODO cell change for non-player ref
@@ -710,7 +713,7 @@ namespace MWWorld
     void World::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
         float duration)
     {
-        mScene.doPhysics (duration, *this, actors);
+        mPhysics->doPhysics (duration, *this, actors);
     }
 
     bool World::toggleCollisionMode()

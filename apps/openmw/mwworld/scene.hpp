@@ -9,6 +9,7 @@
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwrender/mwscene.hpp"
+#include "physicssystem.hpp"
 
 #include "refdata.hpp"
 #include "ptr.hpp"
@@ -62,13 +63,14 @@ namespace MWWorld
             bool mCellChanged;
             Environment& mEnvironment;
             World *mWorld;
+            PhysicsSystem *mPhysics;
 
 
             void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
         public:
 
-           Scene (Environment& environment, World *world, MWRender::MWScene& scene);
+           Scene (Environment& environment, World *world, MWRender::MWScene& scene, PhysicsSystem *physics);
 
             ~Scene();
 

@@ -34,8 +34,8 @@ bool ExteriorCellRender::lightOutQuadInLin = false;
 int ExteriorCellRender::uniqueID = 0;
 
 ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
-    MWScene &_scene)
-    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0)
+    MWScene &_scene, MWWorld::PhysicsSystem *physics)
+    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0), mPhysics(physics)
 {
     uniqueID = uniqueID +1;
     sg = mScene.getMgr()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
@@ -233,13 +233,15 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
 void ExteriorCellRender::insertObjectPhysics()
 {
     if (!mInsertMesh.empty())
-        mScene.addObject (mInsert->getName(), mInsertMesh, mInsert->getOrientation(),
+    {
+        mPhysics->addObject (mInsert->getName(), mInsertMesh, mInsert->getOrientation(),
             mInsert->getScale().x, mInsert->getPosition());
+    }
 }
 
 void ExteriorCellRender::insertActorPhysics()
 {
-    mScene.addActor (mInsert->getName(), mInsertMesh, mInsert->getPosition());
+    mPhysics->addActor (mInsert->getName(), mInsertMesh, mInsert->getPosition());
 }
 
 // insert a light related to the most recent insertBegin call.

@@ -27,7 +27,7 @@ namespace MWWorld
         { // silence annoying g++ warning
             for (std::vector<std::string>::const_iterator iter (functor.mHandles.begin());
                 iter!=functor.mHandles.end(); ++iter)
-                mScene.removeObject (*iter);
+                mPhysics->removeObject (*iter);
         }
 
         mWorld->removeScripts (iter->first);
@@ -113,7 +113,7 @@ namespace MWWorld
                     mWorld->getExterior(x, y)->loadExt (x, y, mWorld->getStore(), mWorld->getEsmReader());
                     Ptr::CellStore *cell = mWorld->getExterior(x, y);
 
-                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
+                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene, mPhysics));
                 }
             }
 
@@ -144,9 +144,9 @@ namespace MWWorld
         mCellChanged = true;
     }
 
-    Scene::Scene (Environment& environment, World *world, MWRender::MWScene& scene)
+    Scene::Scene (Environment& environment, World *world, MWRender::MWScene& scene, PhysicsSystem *physics)
     : mScene (scene), mCurrentCell (0),
-      mCellChanged (false), mEnvironment (environment), mWorld(world)
+      mCellChanged (false), mEnvironment (environment), mWorld(world), mPhysics(physics)
     {
     }
 
@@ -184,7 +184,7 @@ namespace MWWorld
         mWorld->getInterior(cellName)->loadInt (cellName, mWorld->getStore(), mWorld->getEsmReader());
         Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
-        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene));
+        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene, mPhysics));
 
         // adjust player
         mCurrentCell = cell;

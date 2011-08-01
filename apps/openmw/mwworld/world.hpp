@@ -14,6 +14,7 @@
 #include "ptr.hpp"
 #include "globals.hpp"
 #include "scene.hpp"
+#include "physicssystem.hpp"
 
 #include <openengine/bullet/physic.hpp>
 
@@ -73,6 +74,7 @@ namespace MWWorld
             ESMS::ESMStore mStore;
             ScriptList mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
+            MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
             Environment& mEnvironment;
             int mNextDynamicRecord;

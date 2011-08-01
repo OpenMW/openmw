@@ -140,6 +140,7 @@ source_group(apps\\openmw\\mwsound FILES ${GAMESOUND} ${GAMESOUND_HEADER})
 set(GAMEWORLD
     mwworld/world.cpp
     mwworld/scene.cpp
+    mwworld/physicssystem.cpp
     mwworld/globals.cpp
     mwworld/class.cpp
     mwworld/actionteleport.cpp
@@ -152,6 +153,7 @@ set(GAMEWORLD
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
     mwworld/world.hpp
+    mwworld/physicssystem.hpp
     mwworld/scene.hpp
     mwworld/environment.hpp
     mwworld/globals.hpp
