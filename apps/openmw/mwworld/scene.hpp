@@ -1,10 +1,35 @@
 #ifndef GAME_MWWORLD_SCENE_H
 #define GAME_MWWORLD_SCENE_H
 
+#include <vector>
+#include <map>
+
+#include <boost/filesystem.hpp>
+
 #include <components/esm_store/cell_store.hpp>
-#include "ptr.hpp"
-#include "environment.hpp"
+
 #include "../mwrender/mwscene.hpp"
+
+#include "refdata.hpp"
+#include "ptr.hpp"
+#include "globals.hpp"
+
+#include <openengine/bullet/physic.hpp>
+
+namespace Ogre
+{
+    class Vector3;
+}
+
+namespace ESM
+{
+    struct Position;
+}
+
+namespace Files
+{
+    class Collections;
+}
 
 namespace Render
 {
@@ -19,47 +44,145 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class Environment;
+    class Player;
+
+    /// \brief The game world and its visual representation
 
     class Scene
     {
+
         public:
-            Scene(Environment& environment, World *world, MWRender::MWScene scene);
-            
+            typedef std::list<std::pair<std::string, Ptr> > ScriptList;
+
+            enum RenderMode
+            {
+                Render_CollisionDebug
+            };
+
         private:
-        
+
             typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
-            
-            CellRenderCollection mActiveCells;
+
+            MWRender::SkyManager* mSkyManager;
+            MWRender::MWScene mScene;
             Ptr::CellStore *mCurrentCell; // the cell, the player is in
+            CellRenderCollection mActiveCells;
+            CellRenderCollection mBufferedCells; // loaded, but not active (buffering not implementd yet)
+            ESM::ESMReader mEsm;
+            ESMS::ESMStore mStore;
             std::map<std::string, Ptr::CellStore> mInteriors;
             std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
-            Environment& mEnvironment;
-            World *mWorld;
-            MWRender::MWScene mScene;
+            ScriptList mLocalScripts;
+            MWWorld::Globals *mGlobalVariables;
+            bool mSky;
             bool mCellChanged;
-            
-            Ptr getPtr (const std::string& name, Ptr::CellStore& cell);
-            Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell);
-            
-        public:
-            
-            MWRender::CellRender *searchRender (Ptr::CellStore *store);
-            
-            void unloadCell (CellRenderCollection::iterator iter);
-            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
-            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
-            Ptr getPtr (const std::string& name, bool activeOnly);
-            Ptr getPtrViaHandle (const std::string& handle);
-            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position, bool adjustPlayerPos);
-            void enable (Ptr reference);
-            void disable (Ptr reference);
-            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position);
-            void changeToExteriorCell (const ESM::Position& position);
-            const ESM::Cell *getExterior (const std::string& cellName) const;
-            void deleteObject (Ptr ptr);
-            void moveObject (Ptr ptr, float x, float y, float z);
-    };
+            Environment& mEnvironment;
+            int mNextDynamicRecord;
+            World *mWorld;
 
+            OEngine::Physic::PhysicEngine* mPhysEngine;
+
+            // not implemented
+            Scene (const Scene&);
+            Scene& operator= (const Scene&);
+
+            Ptr getPtr (const std::string& name, Ptr::CellStore& cellStore);
+
+            Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
+
+            MWRender::CellRender *searchRender (Ptr::CellStore *store);
+
+            int getDaysPerMonth (int month) const;
+
+            void removeScripts (Ptr::CellStore *cell);
+
+            void unloadCell (CellRenderCollection::iterator iter);
+
+            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
+
+            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
+                bool adjustPlayerPos = true);
+
+            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
+            ///< Move from exterior to interior or from interior cell to a different
+            /// interior cell.
+        public:
+
+           Scene (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+                const Files::Collections& fileCollections,
+                const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+                Environment& environment, const std::string& encoding, World* world, MWRender::MWScene& scene);
+
+            ~Scene();
+
+            void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
+
+            MWWorld::Player& getPlayer();
+
+            const ESMS::ESMStore& getStore() const;
+
+            const ScriptList& getLocalScripts() const;
+            ///< Names and local variable state of all local scripts in active cells.
+
+            bool hasCellChanged() const;
+            ///< Has the player moved to a different cell, since the last frame?
+
+            Globals::Data& getGlobalVariable (const std::string& name);
+
+            Globals::Data getGlobalVariable (const std::string& name) const;
+
+            char getGlobalVariableType (const std::string& name) const;
+            ///< Return ' ', if there is no global variable with this name.
+
+            Ptr getPtr (const std::string& name, bool activeOnly);
+            ///< Return a pointer to a liveCellRef with the given name.
+            /// \param activeOnly do non search inactive cells.
+
+            Ptr getPtrViaHandle (const std::string& handle);
+            ///< Return a pointer to a liveCellRef with the given Ogre handle.
+
+            void enable (Ptr reference);
+
+            void disable (Ptr reference);
+
+            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position); // FIXME: YEAH!
+            ///< Move to interior cell.
+
+            void changeToExteriorCell (const ESM::Position& position); // FIXME: YEAH!
+            ///< Move to exterior cell.
+
+            const ESM::Cell *getExterior (const std::string& cellName) const; // FIXME: YEAH!
+            ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
+
+            void markCellAsUnchanged(); // FIXME: YEAH!
+
+            std::string getFacedHandle();
+            ///< Return handle of the object the player is looking at
+
+            void deleteObject (Ptr ptr); // FIXME: DONT KNOW
+
+            void moveObject (Ptr ptr, float x, float y, float z); // FIXME: DONT KNOW
+
+            void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false) const;
+            ///< Convert cell numbers to position.
+
+            void positionToIndex (float x, float y, int &cellX, int &cellY) const;
+            ///< Convert position to cell numbers
+
+            void doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
+                float duration);
+            ///< Run physics simulation and modify \a world accordingly.
+
+            bool toggleCollisionMode();
+            ///< Toggle collision mode for player. If disabled player object should ignore
+            /// collisions and gravity.
+            ///< \return Resulting mode
+
+            bool toggleRenderMode (RenderMode mode);
+            ///< Toggle a render mode.
+            ///< \return Resulting mode
+    };
 }
 
 #endif

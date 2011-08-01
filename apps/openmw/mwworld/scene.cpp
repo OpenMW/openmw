@@ -1,16 +1,5 @@
 #include "scene.hpp"
-
 #include "world.hpp"
-#include "ptr.hpp"
-#include "environment.hpp"
-#include "class.hpp"
-#include "player.hpp"
-
-#include "refdata.hpp"
-#include "globals.hpp"
-#include "doingphysics.hpp"
-#include "cellfunctors.hpp"
-#include "environment.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -36,7 +25,29 @@
 #include "doingphysics.hpp"
 #include "cellfunctors.hpp"
 
-namespace {
+namespace
+{
+    template<typename T>
+    void listCellScripts (const ESMS::ESMStore& store,
+        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::Scene::ScriptList& scriptList,
+        MWWorld::Ptr::CellStore *cell)
+    {
+        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
+            cellRefList.list.begin());
+            iter!=cellRefList.list.end(); ++iter)
+        {
+            if (!iter->base->script.empty() && iter->mData.getCount())
+            {
+                if (const ESM::Script *script = store.scripts.find (iter->base->script))
+                {
+                    iter->mData.setLocals (*script);
+
+                    scriptList.push_back (
+                        std::make_pair (iter->base->script, MWWorld::Ptr (&*iter, cell)));
+                }
+            }
+        }
+    }
 
     template<typename T>
     ESMS::LiveCellRef<T, MWWorld::RefData> *searchViaHandle (const std::string& handle,
@@ -56,15 +67,30 @@ namespace {
     }
 }
 
-
 namespace MWWorld
 {
 
-    Scene::Scene(Environment& environment, World *world, MWRender::MWScene scene) :
-        mEnvironment(environment), mWorld(world), mScene(scene)
+    void Scene::insertInteriorScripts (ESMS::CellStore<RefData>& cell)
     {
+        listCellScripts (mWorld->getStore(), cell.activators, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.potions, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.appas, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.armors, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.books, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.clothes, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.containers, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.creatures, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.doors, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.ingreds, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.lights, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.lockpicks, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.miscItems, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.npcs, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.probes, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.repairs, mLocalScripts, &cell);
+        listCellScripts (mWorld->getStore(), cell.weapons, mLocalScripts, &cell);
     }
-    
+
     Ptr Scene::getPtr (const std::string& name, Ptr::CellStore& cell)
     {
         if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref = cell.activators.find (name))
@@ -129,8 +155,6 @@ namespace MWWorld
 
         return Ptr();
     }
-    
-    
 
     Ptr Scene::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
@@ -203,10 +227,50 @@ namespace MWWorld
         {
             return iter->second;
         }
+        else
+        {
+            iter = mBufferedCells.find (store);
+            if (iter!=mBufferedCells.end())
+                return iter->second;
+        }
 
         return 0;
     }
-    
+
+    int Scene::getDaysPerMonth (int month) const
+    {
+        switch (month)
+        {
+            case 0: return 31;
+            case 1: return 28;
+            case 2: return 31;
+            case 3: return 30;
+            case 4: return 31;
+            case 5: return 30;
+            case 6: return 31;
+            case 7: return 31;
+            case 8: return 30;
+            case 9: return 31;
+            case 10: return 30;
+            case 11: return 31;
+        }
+
+        throw std::runtime_error ("month out of range");
+    }
+
+    void Scene::removeScripts (Ptr::CellStore *cell)
+    {
+        ScriptList::iterator iter = mLocalScripts.begin();
+
+        while (iter!=mLocalScripts.end())
+        {
+            if (iter->second.getCell()==cell)
+                mLocalScripts.erase (iter++);
+            else
+                ++iter;
+        }
+    }
+
     void Scene::unloadCell (CellRenderCollection::iterator iter)
     {
         ListHandles functor;
@@ -215,21 +279,20 @@ namespace MWWorld
         { // silence annoying g++ warning
             for (std::vector<std::string>::const_iterator iter (functor.mHandles.begin());
                 iter!=functor.mHandles.end(); ++iter)
-            {
-                mScene.removeObject (*iter); // FIXME
-            }
+                mScene.removeObject (*iter);
         }
 
+        removeScripts (iter->first);
         mEnvironment.mMechanicsManager->dropActors (iter->first);
         mEnvironment.mSoundManager->stopSound (iter->first);
         delete iter->second;
         mActiveCells.erase (iter);
     }
-    
+
     void Scene::loadCell (Ptr::CellStore *cell, MWRender::CellRender *render)
     {
         // register local scripts
-        mWorld->insertInteriorScripts (*cell); // FIXME
+        insertInteriorScripts (*cell);
 
         // This connects the cell data with the rendering scene.
         std::pair<CellRenderCollection::iterator, bool> result =
@@ -240,9 +303,20 @@ namespace MWWorld
             // Load the cell and insert it into the renderer
             result.first->second->show();
         }
-        
     }
-    
+
+    void Scene::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
+        bool adjustPlayerPos)
+    {
+        if (adjustPlayerPos)
+            mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2], false);
+
+        mWorld->getPlayer().setCell (cell);
+        // TODO orientation
+        mEnvironment.mMechanicsManager->addActor (mWorld->getPlayer().getPlayer());
+        mEnvironment.mMechanicsManager->watchActor (mWorld->getPlayer().getPlayer());
+    }
+
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
         SuppressDoingPhysics scopeGuard;
@@ -287,7 +361,7 @@ namespace MWWorld
 
                 if (iter==mActiveCells.end())
                 {
-                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mWorld->getStore(), mWorld->getEsmReader());
+                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mWorld->getStore(), mEsm);
                     Ptr::CellStore *cell = &mExteriors[std::make_pair (x, y)];
 
                     loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
@@ -316,12 +390,59 @@ namespace MWWorld
         playerCellChange (&mExteriors[std::make_pair (X, Y)], position, adjustPlayerPos);
 
         // Sky system
-        mWorld->adjustSky(); // FIXME
+        mWorld->adjustSky();
 
         mCellChanged = true;
-        
     }
-    
+
+    Scene::Scene (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+        const Files::Collections& fileCollections,
+        const std::string& master, const boost::filesystem::path& resDir,
+        bool newGame, Environment& environment, const std::string& encoding, World *world, MWRender::MWScene& scene)
+    : mSkyManager (0), mScene (scene), mCurrentCell (0), mGlobalVariables (0),
+      mSky (false), mCellChanged (false), mEnvironment (environment), mNextDynamicRecord (0), mWorld(world)
+    {
+    }
+
+    Scene::~Scene()
+    {
+        for (CellRenderCollection::iterator iter (mActiveCells.begin());
+            iter!=mActiveCells.end(); ++iter)
+            delete iter->second;
+
+        for (CellRenderCollection::iterator iter (mBufferedCells.begin());
+            iter!=mBufferedCells.end(); ++iter)
+            delete iter->second;
+
+        delete mSkyManager;
+        delete mGlobalVariables;
+    }
+
+    const Scene::ScriptList& Scene::getLocalScripts() const
+    {
+        return mLocalScripts;
+    }
+
+    bool Scene::hasCellChanged() const
+    {
+        return mCellChanged;
+    }
+
+    Globals::Data& Scene::getGlobalVariable (const std::string& name)
+    {
+        return (*mGlobalVariables)[name];
+    }
+
+    Globals::Data Scene::getGlobalVariable (const std::string& name) const
+    {
+        return (*mGlobalVariables)[name];
+    }
+
+    char Scene::getGlobalVariableType (const std::string& name) const
+    {
+        return mGlobalVariables->getType (name);
+    }
+
     Ptr Scene::getPtr (const std::string& name, bool activeOnly)
     {
         // the player is always in an active cell.
@@ -346,9 +467,8 @@ namespace MWWorld
         }
 
         throw std::runtime_error ("unknown ID: " + name);
-        
     }
-    
+
     Ptr Scene::getPtrViaHandle (const std::string& handle)
     {
         if (mWorld->getPlayer().getPlayer().getRefData().getHandle()==handle)
@@ -364,22 +484,8 @@ namespace MWWorld
         }
 
         throw std::runtime_error ("unknown Ogre handle: " + handle);
-        
     }
-    
-    void Scene::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
-        bool adjustPlayerPos)
-    {
-        if (adjustPlayerPos)
-            mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2], false);
 
-        mWorld->getPlayer().setCell (cell);
-        // TODO orientation
-        mEnvironment.mMechanicsManager->addActor (mWorld->getPlayer().getPlayer());
-        mEnvironment.mMechanicsManager->watchActor (mWorld->getPlayer().getPlayer());
-    
-    }
-    
     void Scene::enable (Ptr reference)
     {
         if (!reference.getRefData().isEnabled())
@@ -391,13 +497,11 @@ namespace MWWorld
                 render->enable (reference.getRefData().getHandle());
 
                 if (mActiveCells.find (reference.getCell())!=mActiveCells.end())
-                {
-                    Class::get (reference).enable (reference, mEnvironment); //FIXME
-                }
+                    Class::get (reference).enable (reference, mEnvironment);
             }
         }
     }
-    
+
     void Scene::disable (Ptr reference)
     {
         if (reference.getRefData().isEnabled())
@@ -416,7 +520,8 @@ namespace MWWorld
             }
         }
     }
-    
+
+
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
         SuppressDoingPhysics scopeGuard;
@@ -430,32 +535,32 @@ namespace MWWorld
         }
 
         // Load cell.
-        mInteriors[cellName].loadInt (cellName, mWorld->getStore(), mWorld->getEsmReader());
+        mInteriors[cellName].loadInt (cellName, mWorld->getStore(), mEsm);
         Ptr::CellStore *cell = &mInteriors[cellName];
 
         loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene));
 
         // adjust player
         mCurrentCell = cell;
-        playerCellChange (cell, position, true); // FIXME
+        playerCellChange (cell, position);
 
         // Sky system
-        mWorld->adjustSky(); // FIXME
+        mWorld->adjustSky();
 
         mCellChanged = true;
         //currentRegion->name = "";
     }
-    
+
     void Scene::changeToExteriorCell (const ESM::Position& position)
     {
         int x = 0;
         int y = 0;
 
-        mWorld->positionToIndex (position.pos[0], position.pos[1], x, y);
+        positionToIndex (position.pos[0], position.pos[1], x, y);
 
         changeCell (x, y, position, true);
     }
-    
+
     const ESM::Cell *Scene::getExterior (const std::string& cellName) const
     {
         // first try named cells
@@ -479,7 +584,25 @@ namespace MWWorld
 
         return 0;
     }
-    
+
+    void Scene::markCellAsUnchanged()
+    {
+        mCellChanged = false;
+    }
+
+    std::string Scene::getFacedHandle()
+    {
+        // FIXME
+        /*std::pair<std::string, float> result = mScene.getFacedHandle (*this);
+
+        if (result.first.empty() ||
+            result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
+            return "";
+
+        return result.first;*/
+        return std::string("");
+    }
+
     void Scene::deleteObject (Ptr ptr)
     {
         if (ptr.getRefData().getCount()>0)
@@ -502,7 +625,7 @@ namespace MWWorld
             }
         }
     }
-    
+
     void Scene::moveObject (Ptr ptr, float x, float y, float z)
     {
         ptr.getCellRef().pos.pos[0] = x;
@@ -519,7 +642,7 @@ namespace MWWorld
                     int cellX = 0;
                     int cellY = 0;
 
-                    mWorld->positionToIndex (x, y, cellX, cellY);
+                    positionToIndex (x, y, cellX, cellY);
 
                     if (mCurrentCell->cell->data.gridX!=cellX || mCurrentCell->cell->data.gridY!=cellY)
                     {
@@ -536,4 +659,50 @@ namespace MWWorld
         // TODO cell change for non-player ref
     }
 
+    void Scene::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
+    {
+        const int cellSize = 8192;
+
+        x = cellSize * cellX;
+        y = cellSize * cellY;
+
+        if (centre)
+        {
+            x += cellSize/2;
+            y += cellSize/2;
+        }
+    }
+
+    void Scene::positionToIndex (float x, float y, int &cellX, int &cellY) const
+    {
+        const int cellSize = 8192;
+
+        cellX = static_cast<int> (x/cellSize);
+
+        if (x<0)
+            --cellX;
+
+        cellY = static_cast<int> (y/cellSize);
+
+        if (y<0)
+            --cellY;
+    }
+
+    void Scene::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
+        float duration)
+    {
+        // FIXME
+        // mScene.doPhysics (duration, *this, actors);
+    }
+
+    bool Scene::toggleCollisionMode()
+    {
+        return mScene.toggleCollisionMode();
+    }
+
+    bool Scene::toggleRenderMode (RenderMode mode)
+    {
+        return mScene.toggleRenderMode (mode);
+    }
 }
+
