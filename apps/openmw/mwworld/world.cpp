@@ -310,7 +310,7 @@ namespace MWWorld
 
         mPhysEngine = physEng;
         
-        mWorldScene = new Scene(renderer, physEng, fileCollections, master, resDir, newGame, environment, encoding, this, mScene);
+        mWorldScene = new Scene(environment, this, mScene);
     }
 
     World::~World()
@@ -318,6 +318,7 @@ namespace MWWorld
         delete mPlayer;
         delete mSkyManager;
         delete mGlobalVariables;
+        delete mWorldScene;
     }
 
     MWWorld::Player& World::getPlayer()

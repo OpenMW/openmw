@@ -71,10 +71,7 @@ namespace MWWorld
                 bool adjustPlayerPos = true);
         public:
 
-           Scene (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
-                const Files::Collections& fileCollections,
-                const std::string& master, const boost::filesystem::path& resDir, bool newGame,
-                Environment& environment, const std::string& encoding, World* world, MWRender::MWScene& scene);
+           Scene (Environment& environment, World *world, MWRender::MWScene& scene);
 
             ~Scene();
 

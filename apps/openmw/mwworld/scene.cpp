@@ -144,10 +144,7 @@ namespace MWWorld
         mCellChanged = true;
     }
 
-    Scene::Scene (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
-        const Files::Collections& fileCollections,
-        const std::string& master, const boost::filesystem::path& resDir,
-        bool newGame, Environment& environment, const std::string& encoding, World *world, MWRender::MWScene& scene)
+    Scene::Scene (Environment& environment, World *world, MWRender::MWScene& scene)
     : mScene (scene), mCurrentCell (0),
       mCellChanged (false), mEnvironment (environment), mWorld(world)
     {
