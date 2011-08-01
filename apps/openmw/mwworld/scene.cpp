@@ -1,13 +1,6 @@
 #include "scene.hpp"
 #include "world.hpp"
 
-#include <cmath>
-#include <iostream>
-
-#include <components/bsa/bsa_archive.hpp>
-#include <components/files/collections.hpp>
-
-#include "../mwrender/sky.hpp"
 #include "../mwrender/interior.hpp"
 #include "../mwrender/exterior.hpp"
 
@@ -17,11 +10,8 @@
 
 #include "ptr.hpp"
 #include "environment.hpp"
-#include "class.hpp"
 #include "player.hpp"
 
-#include "refdata.hpp"
-#include "globals.hpp"
 #include "doingphysics.hpp"
 #include "cellfunctors.hpp"
 
@@ -42,8 +32,8 @@ namespace MWWorld
 
         mWorld->removeScripts (iter->first);
         
-        mEnvironment.mMechanicsManager->dropActors (iter->first);
-        mEnvironment.mSoundManager->stopSound (iter->first);
+        mEnvironment.mMechanicsManager->dropActors (iter->first); // FIXME: gehört in world?
+        mEnvironment.mSoundManager->stopSound (iter->first); // FIXME: same
         delete iter->second;
         mActiveCells.erase (iter);
     }
@@ -158,8 +148,8 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding, World *world, MWRender::MWScene& scene)
-    : mSkyManager (0), mScene (scene), mCurrentCell (0), mGlobalVariables (0),
-      mSky (false), mCellChanged (false), mEnvironment (environment), mNextDynamicRecord (0), mWorld(world)
+    : mScene (scene), mCurrentCell (0),
+      mCellChanged (false), mEnvironment (environment), mWorld(world)
     {
     }
 
@@ -168,13 +158,6 @@ namespace MWWorld
         for (CellRenderCollection::iterator iter (mActiveCells.begin());
             iter!=mActiveCells.end(); ++iter)
             delete iter->second;
-
-        for (CellRenderCollection::iterator iter (mBufferedCells.begin());
-            iter!=mBufferedCells.end(); ++iter)
-            delete iter->second;
-
-        delete mSkyManager;
-        delete mGlobalVariables;
     }
 
     bool Scene::hasCellChanged() const
