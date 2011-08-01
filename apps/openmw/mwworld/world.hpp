@@ -90,8 +90,6 @@ namespace MWWorld
             MWRender::CellRender *searchRender (Ptr::CellStore *store);
 
             int getDaysPerMonth (int month) const;
-
-            void removeScripts (Ptr::CellStore *cell);
             
         public:
 
@@ -101,6 +99,8 @@ namespace MWWorld
                 Environment& environment, const std::string& encoding);
 
             ~World();
+
+            void removeScripts (Ptr::CellStore *cell);
 
             void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
 
