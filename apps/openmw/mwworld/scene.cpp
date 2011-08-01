@@ -110,7 +110,7 @@ namespace MWWorld
 
                 if (iter==mActiveCells.end())
                 {
-                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mWorld->getStore(), mEsm);
+                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mWorld->getStore(), mWorld->getEsmReader());
                     Ptr::CellStore *cell = &mExteriors[std::make_pair (x, y)];
 
                     loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
@@ -180,7 +180,8 @@ namespace MWWorld
         }
 
         // Load cell.
-        mInteriors[cellName].loadInt (cellName, mWorld->getStore(), mEsm);
+        std::cout << "cellName:" << cellName << std::endl;
+        mInteriors[cellName].loadInt (cellName, mWorld->getStore(), mWorld->getEsmReader());
         Ptr::CellStore *cell = &mInteriors[cellName];
 
         loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene));

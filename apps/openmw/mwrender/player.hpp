@@ -22,7 +22,7 @@ namespace MWRender
 
                 Ogre::Camera *getCamera() { return mCamera; }
 
-                std::string getHandle() const { std::cout << "mHandle " << mHandle << std::endl; return mHandle; }
+                std::string getHandle() const { return mHandle; }
     };
 }
 
