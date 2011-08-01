@@ -320,6 +320,30 @@ namespace MWWorld
         delete mGlobalVariables;
         delete mWorldScene;
     }
+
+    const ESM::Cell *World::getExterior (const std::string& cellName) const
+    {
+        // first try named cells
+        if (const ESM::Cell *cell = mStore.cells.searchExtByName (cellName))
+            return cell;
+
+        // didn't work -> now check for regions
+        std::string cellName2 = ESMS::RecListT<ESM::Region>::toLower (cellName);
+
+        for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
+            iter!=mStore.regions.list.end(); ++iter)
+        {
+            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.name)==cellName2)
+            {
+                if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
+                    return cell;
+
+                break;
+            }
+        }
+
+        return 0;
+    }
     
     Ptr::CellStore *World::getExterior (int x, int y)
     {
@@ -579,11 +603,6 @@ namespace MWWorld
     void World::changeToExteriorCell (const ESM::Position& position)
     {
         return mWorldScene->changeToExteriorCell(position);
-    }
-
-    const ESM::Cell *World::getExterior (const std::string& cellName) const
-    {
-        return mWorldScene->getExterior(cellName);
     }
 
     void World::markCellAsUnchanged()

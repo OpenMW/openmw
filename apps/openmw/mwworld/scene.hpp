@@ -93,9 +93,6 @@ namespace MWWorld
             void changeToExteriorCell (const ESM::Position& position); 
             ///< Move to exterior cell.
 
-            const ESM::Cell *getExterior (const std::string& cellName) const;
-            ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
-
             void markCellAsUnchanged(); 
 
             std::string getFacedHandle();

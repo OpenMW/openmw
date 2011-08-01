@@ -206,30 +206,6 @@ namespace MWWorld
 
         changeCell (x, y, position, true);
     }
-
-    const ESM::Cell *Scene::getExterior (const std::string& cellName) const
-    {
-        // first try named cells
-        if (const ESM::Cell *cell = mWorld->getStore().cells.searchExtByName (cellName))
-            return cell;
-
-        // didn't work -> now check for regions
-        std::string cellName2 = ESMS::RecListT<ESM::Region>::toLower (cellName);
-
-        for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mWorld->getStore().regions.list.begin());
-            iter!=mWorld->getStore().regions.list.end(); ++iter)
-        {
-            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.name)==cellName2)
-            {
-                if (const ESM::Cell *cell = mWorld->getStore().cells.searchExtByRegion (iter->first))
-                    return cell;
-
-                break;
-            }
-        }
-
-        return 0;
-    }
     
     Ptr::CellStore* Scene::getCurrentCell ()
     {
