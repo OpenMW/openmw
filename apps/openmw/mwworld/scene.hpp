@@ -59,8 +59,6 @@ namespace MWWorld
             MWRender::MWScene mScene;
             Ptr::CellStore *mCurrentCell; // the cell, the player is in
             CellRenderCollection mActiveCells;
-            std::map<std::string, Ptr::CellStore> mInteriors;
-            std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
             bool mCellChanged;
             Environment& mEnvironment;
             World *mWorld;

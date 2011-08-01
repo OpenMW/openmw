@@ -76,6 +76,9 @@ namespace MWWorld
             bool mSky;
             Environment& mEnvironment;
             int mNextDynamicRecord;
+            
+            std::map<std::string, Ptr::CellStore> mInteriors;
+            std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
 
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
@@ -99,6 +102,10 @@ namespace MWWorld
                 Environment& environment, const std::string& encoding);
 
             ~World();
+            
+            Ptr::CellStore *getExterior (int x, int y);
+            
+            Ptr::CellStore *getInterior (std::string name);
 
             void removeScripts (Ptr::CellStore *cell);
 

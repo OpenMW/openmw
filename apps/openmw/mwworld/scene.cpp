@@ -110,8 +110,8 @@ namespace MWWorld
 
                 if (iter==mActiveCells.end())
                 {
-                    mExteriors[std::make_pair (x, y)].loadExt (x, y, mWorld->getStore(), mWorld->getEsmReader());
-                    Ptr::CellStore *cell = &mExteriors[std::make_pair (x, y)];
+                    mWorld->getExterior(x, y)->loadExt (x, y, mWorld->getStore(), mWorld->getEsmReader());
+                    Ptr::CellStore *cell = mWorld->getExterior(x, y);
 
                     loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene));
                 }
@@ -136,7 +136,7 @@ namespace MWWorld
         mCurrentCell = iter->first;
 
         // adjust player
-        playerCellChange (&mExteriors[std::make_pair (X, Y)], position, adjustPlayerPos);
+        playerCellChange (mWorld->getExterior(X, Y), position, adjustPlayerPos);
 
         // Sky system
         mWorld->adjustSky();
@@ -181,8 +181,8 @@ namespace MWWorld
 
         // Load cell.
         std::cout << "cellName:" << cellName << std::endl;
-        mInteriors[cellName].loadInt (cellName, mWorld->getStore(), mWorld->getEsmReader());
-        Ptr::CellStore *cell = &mInteriors[cellName];
+        mWorld->getInterior(cellName)->loadInt (cellName, mWorld->getStore(), mWorld->getEsmReader());
+        Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
         loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene));
 

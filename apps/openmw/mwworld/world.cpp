@@ -320,6 +320,16 @@ namespace MWWorld
         delete mGlobalVariables;
         delete mWorldScene;
     }
+    
+    Ptr::CellStore *World::getExterior (int x, int y)
+    {
+        return &mExteriors[std::make_pair (x, y)];
+    }
+    
+    Ptr::CellStore *World::getInterior (std::string name)
+    {
+        return &mInteriors[name];
+    }
 
     MWWorld::Player& World::getPlayer()
     {
