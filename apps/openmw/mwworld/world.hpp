@@ -96,6 +96,8 @@ namespace MWWorld
 
             int getDaysPerMonth (int month) const;
             
+            void moveObjectImp (Ptr ptr, float x, float y, float z);
+            
         public:
 
            World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
@@ -179,8 +181,6 @@ namespace MWWorld
             ///< Return handle of the object the player is looking at
 
             void deleteObject (Ptr ptr);
-            
-            void moveObjectImp (Ptr ptr, float x, float y, float z);
 
             void moveObject (Ptr ptr, float x, float y, float z);
 
