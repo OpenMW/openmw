@@ -25,7 +25,7 @@ namespace MWWorld
     
     }
     
-    void PhysicsSystem::doPhysics (float duration, MWWorld::World& world,
+    std::vector< std::pair<const std::string*, Ogre::Vector3> > PhysicsSystem::doPhysics (float duration,
         const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
     {
         // stop changes to world from being reported back to the physics system
@@ -71,13 +71,15 @@ namespace MWWorld
         }
         mEngine->stepSimulation(duration);
 
+        std::vector< std::pair<const std::string*, Ogre::Vector3> > response;
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
-            OEngine::Physic::PhysicActor* act = it->second;
-            btVector3 newPos = act->getPosition();
-            MWWorld::Ptr ptr = world.getPtrViaHandle (it->first);
-            world.moveObject (ptr, newPos.x(), newPos.y(), newPos.z());
+            btVector3 newPos = it->second->getPosition();
+            Ogre::Vector3 coord(newPos.x(), newPos.y(), newPos.z());
+            
+            response.push_back(std::pair<const std::string*, Ogre::Vector3>(&it->first, coord));
         }
+        return response;
     }
 
     void PhysicsSystem::addObject (const std::string& handle, const std::string& mesh,

@@ -14,7 +14,7 @@ namespace MWWorld
             PhysicsSystem (OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng);
             ~PhysicsSystem ();
             
-            void doPhysics (float duration, MWWorld::World& world,
+            std::vector< std::pair<const std::string*, Ogre::Vector3> > doPhysics (float duration,
                 const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
             
             void addObject (const std::string& handle, const std::string& mesh,

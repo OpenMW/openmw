@@ -713,7 +713,12 @@ namespace MWWorld
     void World::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
         float duration)
     {
-        mPhysics->doPhysics (duration, *this, actors);
+        std::vector< std::pair<const std::string*, Ogre::Vector3> > vectors = mPhysics->doPhysics (duration, actors);
+        std::vector< std::pair<const std::string*, Ogre::Vector3> >::iterator it;
+        for(it = vectors.begin(); it != vectors.end(); it++) {
+            MWWorld::Ptr ptr = getPtrViaHandle (*it->first);
+            moveObject (ptr, it->second.x, it->second.y, it->second.z);
+        }
     }
 
     bool World::toggleCollisionMode()
