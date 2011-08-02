@@ -647,7 +647,7 @@ namespace MWWorld
         }
     }
 
-    void World::moveObject (Ptr ptr, float x, float y, float z)
+    void World::moveObjectImp (Ptr ptr, float x, float y, float z)
     {
         ptr.getCellRef().pos.pos[0] = x;
         ptr.getCellRef().pos.pos[1] = y;
@@ -674,6 +674,11 @@ namespace MWWorld
                 }
             }
         }
+    }
+
+    void World::moveObject (Ptr ptr, float x, float y, float z)
+    {
+        moveObjectImp(ptr, x, y, z);
 
         mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z),
             !DoingPhysics::isDoingPhysics());

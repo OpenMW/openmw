@@ -179,6 +179,8 @@ namespace MWWorld
             ///< Return handle of the object the player is looking at
 
             void deleteObject (Ptr ptr);
+            
+            void moveObjectImp (Ptr ptr, float x, float y, float z);
 
             void moveObject (Ptr ptr, float x, float y, float z);
 
