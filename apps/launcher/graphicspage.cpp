@@ -363,41 +363,11 @@ void GraphicsPage::writeConfig()
 
     out << "Render System=" << mSelectedRenderSystem->getName().c_str() << endl << endl;
 
-    if (mOpenGLRenderSystem) {
-        QString openGLName = mOpenGLRenderSystem->getName().c_str();
-        openGLName.prepend("[");
-        openGLName.append("]");
-        out << openGLName << endl;
-
-        out << "RTT Preferred Mode=" << mOGLRTTComboBox->currentText() << endl;
-        out << "FSAA=" << mOGLAntiAliasingComboBox->currentText() << endl;
-        out << "Video Mode=" << mOGLResolutionComboBox->currentText() << endl;
-        out << "Display Frequency=" << mOGLFrequencyComboBox->currentText() << endl;
-
-        if (mOGLVSyncCheckBox->checkState() == Qt::Checked) {
-            out << "VSync=Yes" << endl;
-        } else {
-            out << "VSync=No" << endl;
-        }
-
-        if (mOGLFullScreenCheckBox->checkState() == Qt::Checked) {
-            out << "Full Screen=Yes" << endl;
-        } else {
-            out << "Full Screen=No" << endl;
-        }
-
-    }
-
     if (mDirect3DRenderSystem) {
         QString direct3DName = mDirect3DRenderSystem->getName().c_str();
         direct3DName.prepend("[");
         direct3DName.append("]");
         out << direct3DName << endl;
-
-        out << "Rendering Device=" << mD3DRenderDeviceComboBox->currentText() << endl;
-        out << "FSAA=" << mD3DAntiAliasingComboBox->currentText() << endl;
-        out << "Floating-point mode=" << mD3DFloatingPointComboBox->currentText() << endl;
-        out << "Video Mode=" << mD3DResolutionComboBox->currentText() << endl;
 
         if (mD3DNvPerfCheckBox->checkState() == Qt::Checked) {
             out << "Allow NVPerfHUD=Yes" << endl;
@@ -405,11 +375,8 @@ void GraphicsPage::writeConfig()
             out << "Allow NVPerfHUD=No" << endl;
         }
 
-        if (mD3DVSyncCheckBox->checkState() == Qt::Checked) {
-            out << "VSync=Yes" << endl;
-        } else {
-            out << "VSync=No" << endl;
-        }
+        out << "FSAA=" << mD3DAntiAliasingComboBox->currentText() << endl;
+        out << "Floating-point mode=" << mD3DFloatingPointComboBox->currentText() << endl;
 
         if (mD3DFullScreenCheckBox->checkState() == Qt::Checked) {
             out << "Full Screen=Yes" << endl;
@@ -417,6 +384,49 @@ void GraphicsPage::writeConfig()
             out << "Full Screen=No" << endl;
         }
 
+        out << "Rendering Device=" << mD3DRenderDeviceComboBox->currentText() << endl;
+        out << "Resource Creation Policy=Create on all devices" << endl;
+
+        if (mD3DVSyncCheckBox->checkState() == Qt::Checked) {
+            out << "VSync=Yes" << endl;
+        } else {
+            out << "VSync=No" << endl;
+        }
+
+        out << "VSync Interval=1" << endl;
+        out << "Video Mode=" << mD3DResolutionComboBox->currentText() << endl;
+        out << "sRGB Gamma Conversion=No" << endl;
+    }
+
+    out << endl;
+
+    if (mOpenGLRenderSystem) {
+        QString openGLName = mOpenGLRenderSystem->getName().c_str();
+        openGLName.prepend("[");
+        openGLName.append("]");
+        out << openGLName << endl;
+
+        out << "Colour Depth=32" << endl;
+        out << "Display Frequency=" << mOGLFrequencyComboBox->currentText() << endl;
+        out << "FSAA=" << mOGLAntiAliasingComboBox->currentText() << endl;
+
+        if (mOGLFullScreenCheckBox->checkState() == Qt::Checked) {
+            out << "Full Screen=Yes" << endl;
+        } else {
+            out << "Full Screen=No" << endl;
+        }
+
+        out << "RTT Preferred Mode=" << mOGLRTTComboBox->currentText() << endl;
+
+        if (mOGLVSyncCheckBox->checkState() == Qt::Checked) {
+            out << "VSync=Yes" << endl;
+        } else {
+            out << "VSync=No" << endl;
+        }
+
+        out << "VSync Interval=1" << endl;
+        out << "Video Mode=" << mOGLResolutionComboBox->currentText() << endl;
+        out << "sRGB Gamma Conversion=No" << endl;
     }
 
     file.close();
@@ -470,5 +480,5 @@ void GraphicsPage::rendererChanged(const QString &renderer)
         mDisplayStackedWidget->setCurrentIndex(0);
     }
 
-	mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
+    mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
 }
