@@ -350,6 +350,9 @@ public:
   /// Used for error handling
   void fail(const std::string &msg);
 
+  /// Sets font encoding for ESM strings
+  void setEncoding(const std::string& encoding);
+
 private:
   Mangle::Stream::StreamPtr mEsm;
 
@@ -360,6 +363,7 @@ private:
 
   SaveData mSaveData;
   MasterList mMasters;
+  ToUTF8::FromType mEncoding;
 };
 }
 #endif

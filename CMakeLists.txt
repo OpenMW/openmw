@@ -2,7 +2,22 @@ project(OpenMW)
 
 IF (APPLE)
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/OpenMW.app")
+
+    # using 10.6 sdk
+    set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
 ENDIF (APPLE)
+
+# Version
+
+set (OPENMW_VERSION_MAJOR 0)
+set (OPENMW_VERSION_MINOR 11)
+set (OPENMW_VERSION_RELEASE 0)
+
+set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+
+# doxygen main page
+
+configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
 
 # Sound source selection
 option(USE_AUDIERE "use Audiere for sound" OFF)
@@ -55,7 +70,7 @@ IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd/ogre_1_7_1")
     set(AUDIERE_LIBRARY "${PREBUILT_DIR}/audiere-1.9.4/lib/audiere.lib")
 
     set(ENV{OPENALDIR} "${PREBUILT_DIR}/OpenAL 1.1 SDK")
-    
+
     set(BULLET_ROOT "${PREBUILT_DIR}/bullet")
 ELSE()
     message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
@@ -433,8 +448,7 @@ if(DPKG_PROGRAM)
         exec_program("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
         set(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
     else()
-        #FIXME this should probably be read from some file like ${CMAKE_CURRENT_SOURCE_DIR}/VERSION or something that gets updated when changing version
-        set(VERSION_STRING "0.10.0")
+        set(VERSION_STRING "${OPENMW_VERSION}")
         set(PACKAGE_MAINTAINER "unknown")
     endif()
 

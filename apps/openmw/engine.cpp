@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <OgreVector3.h>
+#include <Ogre.h>
 
 #include "components/esm/records.hpp"
 #include <components/esm_store/cell_store.hpp>
@@ -88,6 +89,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     std::string effect;
 
     MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+
+
     //If the region has changed
     if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
         timer.restart();
@@ -148,6 +151,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     try
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
+
+        //
+        mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
         // global scripts
         mEnvironment.mGlobalScripts->run (mEnvironment);
@@ -244,6 +250,10 @@ void OMW::Engine::loadBSA()
          std::cout << "Adding " << iter->second.string() << std::endl;
          Bsa::addBSA (iter->second.string());
     }
+
+    std::string m = mDataDir.string();
+    std::cout << "Data dir" << m << "\n";
+    Bsa::addDir(m, mFSStrict);
 }
 
 // add resources directory
@@ -341,9 +351,6 @@ void OMW::Engine::go()
 
     mOgre.configure(!Misc::isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
-    addResourcesDirectory (mDataDir / "Meshes");
-    addResourcesDirectory (mDataDir / "Textures");
-
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
     addResourcesDirectory(mResDir / "mygui");
@@ -359,7 +366,7 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mFileCollections, mMaster,
-        mResDir, mNewGame, mEnvironment);
+        mResDir, mNewGame, mEnvironment, mEncoding);
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false, cfgDir);
@@ -380,7 +387,7 @@ void OMW::Engine::go()
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
                                                            (mDataDir),
-                                                           mUseSound);
+                                                           mUseSound, mFSStrict);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
@@ -507,4 +514,9 @@ void OMW::Engine::activate()
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
+}
+
+void OMW::Engine::setEncoding(const std::string& encoding)
+{
+    mEncoding = encoding;
 }

@@ -23,6 +23,7 @@
 
 #include "bsa_archive.hpp"
 
+#include <OgreFileSystem.h>
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
@@ -36,7 +37,186 @@ using namespace Ogre;
 using namespace Mangle::Stream;
 using namespace Bsa;
 
+struct ciLessBoost : std::binary_function<std::string, std::string, bool>
+{
+    bool operator() (const std::string & s1, const std::string & s2) const {
+                                               //case insensitive version of is_less
+        return lexicographical_compare(s1, s2, boost::algorithm::is_iless());
+    }
+};
+
+static bool fsstrict = false;
+
 /// An OGRE Archive wrapping a BSAFile archive
+class DirArchive: public Ogre::FileSystemArchive
+{
+
+    boost::filesystem::path currentdir;
+    std::map<std::string, std::vector<std::string>, ciLessBoost> m;
+    unsigned int cutoff;
+
+    bool comparePortion(std::string file1, std::string file2, int start, int size) const
+    {
+        for(int i = start; i < start+size; i++)
+        {
+            char one = file1.at(i);
+            char two = file2.at(i);
+            if(tolower(one) != tolower(two) )
+                return false;
+        }
+        return true;
+    }
+
+    public:
+
+    DirArchive(const String& name)
+    : FileSystemArchive(name, "Dir"), currentdir (name)
+    {
+        mType = "Dir";
+        std::string s = name;
+        cutoff = s.size() + 1;
+        if(fsstrict == false)
+            populateMap(currentdir);
+
+  }
+  void populateMap(boost::filesystem::path d){
+     //need to cut off first
+      boost::filesystem::directory_iterator dir_iter(d), dir_end;
+      std::vector<std::string> filesind;
+      boost::filesystem::path f;
+      for(;dir_iter != dir_end; dir_iter++)
+    {
+        if(boost::filesystem::is_directory(*dir_iter))
+            populateMap(*dir_iter);
+        else
+        {
+
+            f = *dir_iter;
+            std::string s = f.string();
+
+            std::string small;
+            if(cutoff < s.size())
+                small = s.substr(cutoff, s.size() - cutoff);
+            else
+                small = s.substr(cutoff - 1, s.size() - cutoff);
+
+            filesind.push_back(small);
+        }
+    }
+    std::string small;
+    std::string original = d.string();
+    if(cutoff < original.size())
+        small = original.substr(cutoff, original.size() - cutoff);
+    else
+        small = original.substr(cutoff - 1, original.size() - cutoff);
+    m[small] = filesind;
+
+  }
+
+    bool isCaseSensitive() const { return fsstrict; }
+
+  // The archive is loaded in the constructor, and never unloaded.
+    void load() {}
+    void unload() {}
+
+     bool exists(const String& filename) {
+        std::string copy = filename;
+
+
+
+      for (unsigned int i = 0; i < filename.size(); i++)
+      {
+          if(copy.at(i) == '\\' ){
+                copy.replace(i, 1, "/");
+          }
+      }
+
+
+      if(copy.at(0) == '\\' || copy.at(0) == '/')
+        {
+            copy.erase(0, 1);
+        }
+        if(fsstrict == true)
+        {
+            //std::cout << "fsstrict " << copy << "\n";
+            return FileSystemArchive::exists(copy);
+        }
+
+
+      int last = copy.size() - 1;
+      int i = last;
+
+      for (;last >= 0; i--)
+      {
+          if(copy.at(i) == '/' || copy.at(i) == '\\')
+                break;
+      }
+
+      std::string folder = copy.substr(0, i);                              //folder with no slash
+
+      std::vector<std::string>& current = m[folder];
+
+       for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
+       {
+            if(comparePortion(*iter, copy, i + 1, copy.size() - i -1) == true){
+            return FileSystemArchive::exists(*iter);
+            }
+       }
+
+
+      return false;
+     }
+
+    DataStreamPtr open(const String& filename, bool readonly = true) const
+  {
+     std::map<std::string, std::vector<std::string>, ciLessBoost> mlocal = m;
+        std::string copy = filename;
+
+
+
+      for (unsigned int i = 0; i < filename.size(); i++)
+      {
+          if(copy.at(i) == '\\' ){
+                copy.replace(i, 1, "/");
+          }
+      }
+
+
+      if(copy.at(0) == '\\' || copy.at(0) == '/')
+        {
+            copy.erase(0, 1);
+        }
+
+        if(fsstrict == true)
+        {
+            return FileSystemArchive::open(copy, readonly);
+        }
+
+
+      int last = copy.size() - 1;
+      int i = last;
+
+      for (;last >= 0; i--)
+      {
+          if(copy.at(i) == '/' || copy.at(i) == '\\')
+                break;
+      }
+
+      std::string folder = copy.substr(0, i);                              //folder with no slash
+      std::vector<std::string> current = mlocal[folder];
+
+       for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
+       {
+            if(comparePortion(*iter, copy, i + 1, copy.size() - i -1) == true){
+            return FileSystemArchive::open(*iter, readonly);
+            }
+       }
+        DataStreamPtr p;
+      return p;
+  }
+
+};
+
 class BSAArchive : public Archive
 {
   BSAFile arc;
@@ -149,13 +329,42 @@ public:
   void destroyInstance( Archive* arch) { delete arch; }
 };
 
+class DirArchiveFactory : public FileSystemArchiveFactory
+{
+public:
+  const String& getType() const
+  {
+    static String name = "Dir";
+    return name;
+  }
+
+  Archive *createInstance( const String& name )
+  {
+    return new DirArchive(name);
+  }
+
+  void destroyInstance( Archive* arch) { delete arch; }
+};
+
+
 static bool init = false;
+static bool init2 = false;
+
 static void insertBSAFactory()
 {
   if(!init)
     {
       ArchiveManager::getSingleton().addArchiveFactory( new BSAArchiveFactory );
       init = true;
+    }
+}
+
+static void insertDirFactory()
+{
+  if(!init2)
+    {
+      ArchiveManager::getSingleton().addArchiveFactory( new DirArchiveFactory );
+      init2 = true;
     }
 }
 
@@ -171,6 +380,15 @@ void addBSA(const std::string& name, const std::string& group)
   insertBSAFactory();
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "BSA", group);
+}
+
+void addDir(const std::string& name, const bool& fs, const std::string& group)
+{
+    fsstrict = fs;
+    insertDirFactory();
+
+    ResourceGroupManager::getSingleton().
+    addResourceLocation(name, "Dir", group);
 }
 
 }
