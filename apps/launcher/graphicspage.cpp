@@ -258,7 +258,7 @@ void GraphicsPage::setupOgre()
     // Direct3D
     if (mDirect3DRenderSystem) {
         mD3DRenderDeviceComboBox->addItems(getAvailableOptions(QString("Rendering Device"), mDirect3DRenderSystem));
-        mD3DAntiAliasingComboBox->addItems(getAvailableOptions(QString("Anti aliasing"), mDirect3DRenderSystem));
+        mD3DAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mDirect3DRenderSystem));
         mD3DFloatingPointComboBox->addItems(getAvailableOptions(QString("Floating-point mode"), mDirect3DRenderSystem));
 
         QStringList videoModes = getAvailableOptions(QString("Video Mode"), mDirect3DRenderSystem);
@@ -311,7 +311,7 @@ void GraphicsPage::readConfig()
             mD3DRenderDeviceComboBox->setCurrentIndex(index);
         }
 
-        index = mD3DAntiAliasingComboBox->findText(getConfigValue("Anti aliasing", mDirect3DRenderSystem));
+        index = mD3DAntiAliasingComboBox->findText(getConfigValue("FSAA", mDirect3DRenderSystem));
         if ( index != -1) {
             mD3DAntiAliasingComboBox->setCurrentIndex(index);
         }
@@ -395,7 +395,7 @@ void GraphicsPage::writeConfig()
         out << direct3DName << endl;
 
         out << "Rendering Device=" << mD3DRenderDeviceComboBox->currentText() << endl;
-        out << "Anti aliasing=" << mD3DAntiAliasingComboBox->currentText() << endl;
+        out << "FSAA=" << mD3DAntiAliasingComboBox->currentText() << endl;
         out << "Floating-point mode=" << mD3DFloatingPointComboBox->currentText() << endl;
         out << "Video Mode=" << mD3DResolutionComboBox->currentText() << endl;
 
@@ -470,4 +470,5 @@ void GraphicsPage::rendererChanged(const QString &renderer)
         mDisplayStackedWidget->setCurrentIndex(0);
     }
 
+	mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
 }

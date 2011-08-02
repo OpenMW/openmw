@@ -164,6 +164,7 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
         ESMReader fileReader;
         QStringList availableMasters; // Will contain all found masters
 
+        fileReader.setEncoding("win1252");
         fileReader.open(iter->second.string());
 
         // First we fill the availableMasters and the mMastersWidget
