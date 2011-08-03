@@ -125,7 +125,8 @@ private:
     std::string resourceGroup;
 
     BulletShape* cShape;//current shape
-    btCompoundShape* currentShape;//the shape curently under construction
+    btTriangleMesh *mTriMesh;
+    btBvhTriangleMeshShape* currentShape;//the shape curently under construction
 };
 
 }

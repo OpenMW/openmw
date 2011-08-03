@@ -88,8 +88,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     resourceName = cShape->getName();
     cShape->collide = false;
 
-    currentShape = new btCompoundShape();
-    cShape->Shape = currentShape;
+    mTriMesh = new btTriangleMesh();
 
     if (!vfs) vfs = new OgreVFS(resourceGroup);
 
@@ -135,6 +134,9 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     {
         handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,true);
     }
+
+    currentShape = new btBvhTriangleMeshShape(mTriMesh,true);
+    cShape->Shape = currentShape;
 }
 
 bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
@@ -247,7 +249,6 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
     bool raycastingOnly)
 {
     assert(shape != NULL);
-    btCollisionShape* NodeShape;
 
     // Interpret flags
     bool hidden    = (flags & 0x01) != 0; // Not displayed
@@ -289,7 +290,6 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 
     /* Do in-place transformation.the only needed transfo is the scale. (maybe not in fact)
      */
-    btTriangleMesh *mTriMesh = new btTriangleMesh();
 
     Nif::NiTriShapeData *data = shape->data.getPtr();
 
@@ -303,8 +303,6 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
         btVector3 b3(vertices[triangles[i+2]*3]*parentScale,vertices[triangles[i+2]*3+1]*parentScale,vertices[triangles[i+2]*3+2]*parentScale);
         mTriMesh->addTriangle(b1,b2,b3);
     }
-    NodeShape = new btBvhTriangleMeshShape(mTriMesh,true);
-    currentShape->addChildShape(tr,NodeShape);
 }
 
 void ManualBulletShapeLoader::load(const std::string &name,const std::string &group)
