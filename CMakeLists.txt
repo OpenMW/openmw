@@ -2,7 +2,22 @@ project(OpenMW)
 
 IF (APPLE)
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/OpenMW.app")
+
+    # using 10.6 sdk
+    set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
 ENDIF (APPLE)
+
+# Version
+
+set (OPENMW_VERSION_MAJOR 0)
+set (OPENMW_VERSION_MINOR 11)
+set (OPENMW_VERSION_RELEASE 0)
+
+set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+
+# doxygen main page
+
+configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
 
 # Sound source selection
 option(USE_AUDIERE "use Audiere for sound" OFF)
@@ -17,9 +32,8 @@ if(DPKG_PROGRAM)
     set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
 else()
     if (APPLE)
-        # set path inside bundle
-        set(MORROWIND_DATA_FILES "../data" CACHE PATH "location of Morrowind data files")
-        set(MORROWIND_RESOURCE_FILES "Contents/Resources/resources" CACHE PATH "location of OpenMW resources files")
+        set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
+        set(MORROWIND_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
     else()
         set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
         set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
@@ -57,6 +71,7 @@ IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd/ogre_1_7_1")
 
     set(ENV{OPENALDIR} "${PREBUILT_DIR}/OpenAL 1.1 SDK")
 
+    set(BULLET_ROOT "${PREBUILT_DIR}/bullet")
 ELSE()
     message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
 ENDIF()
@@ -365,7 +380,7 @@ endif()
 
 if (APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
-        "${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg")
+        "${OpenMW_BINARY_DIR}/plugins.cfg")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
         "${APP_BUNDLE_DIR}/Contents/Info.plist" COPYONLY)
@@ -384,9 +399,6 @@ if (APPLE)
     configure_file(${OGRE_PLUGIN_DIR}/Plugin_ParticleFX.dylib
         "${APP_BUNDLE_DIR}/Contents/Plugins/Plugin_ParticleFX.dylib" COPYONLY)
 
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg")
-
 endif (APPLE)
 
 
@@ -397,8 +409,9 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 # Apple bundling
+# TODO REWRITE!
 if (APPLE)
-  set(MISC_FILES
+    set(MISC_FILES
         ${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg
         ${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg)
 
@@ -435,8 +448,7 @@ if(DPKG_PROGRAM)
         exec_program("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
         set(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
     else()
-        #FIXME this should probably be read from some file like ${CMAKE_CURRENT_SOURCE_DIR}/VERSION or something that gets updated when changing version
-        set(VERSION_STRING "0.10.0")
+        set(VERSION_STRING "${OPENMW_VERSION}")
         set(PACKAGE_MAINTAINER "unknown")
     endif()
 
@@ -482,6 +494,8 @@ option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
+
+add_subdirectory( apps/launcher )
 
 if (WIN32)
   if (MSVC)

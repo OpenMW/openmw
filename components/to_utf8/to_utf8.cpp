@@ -130,10 +130,28 @@ std::string ToUTF8::getUtf8(ToUTF8::FromType from)
 {
   // Pick translation array
   const char *arr;
-  if(from == ToUTF8::WINDOWS_1252)
-    arr = windows_1252;
-  else
-    assert(0);
+  switch (from)
+  {
+    case ToUTF8::WINDOWS_1252:
+    {
+      arr = ToUTF8::windows_1252;
+      break;
+    }
+    case ToUTF8::WINDOWS_1250:
+    {
+      arr = ToUTF8::windows_1250;
+      break;
+    }
+    case ToUTF8::WINDOWS_1251:
+    {
+      arr = ToUTF8::windows_1251;
+      break;
+    }
+    default:
+    {
+      assert(0);
+    }
+  }
 
   // Double check that the input string stops at some point (it might
   // contain zero terminators before this, inside its own data, which

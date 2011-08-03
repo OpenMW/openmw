@@ -3,6 +3,8 @@
 namespace ESM
 {
 
+using namespace Misc;
+
 ESM_Context ESMReader::getContext()
 {
     // Update the file position before returning
@@ -324,7 +326,7 @@ std::string ESMReader::getString(int size)
     mEsm->read(ptr, size);
 
     // Convert to UTF8 and return
-    return ToUTF8::getUtf8(ToUTF8::WINDOWS_1252);
+    return ToUTF8::getUtf8(mEncoding);
 }
 
 void ESMReader::fail(const std::string &msg)
@@ -340,6 +342,23 @@ void ESMReader::fail(const std::string &msg)
     if (mEsm != NULL)
         ss << "\n  Offset: 0x" << hex << mEsm->tell();
     throw std::runtime_error(ss.str());
+}
+
+void ESMReader::setEncoding(const std::string& encoding)
+{
+  if (encoding == "win1250")
+  {
+    mEncoding = ToUTF8::WINDOWS_1250;
+  }
+  else if (encoding == "win1251")
+  {
+    mEncoding = ToUTF8::WINDOWS_1251;
+  }
+  else
+  {
+    // Default Latin encoding
+    mEncoding = ToUTF8::WINDOWS_1252;
+  }
 }
 
 }

@@ -49,6 +49,9 @@ namespace Mangle
     }
 }
 
+namespace NifOgre
+{
+
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
     something Ogre can use. Later it will also handle the insertion of
@@ -73,11 +76,11 @@ class NIFLoader : Ogre::ManualResourceLoader
 
         virtual void loadResource(Ogre::Resource *resource);
 
-        static Ogre::MeshPtr load(const std::string &name, 
+        static Ogre::MeshPtr load(const std::string &name,
                                     const std::string &group="General");
 
 
-        
+
         Ogre::Vector3 convertVector3(const Nif::Vector& vec);
         Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
 
@@ -113,7 +116,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         {
             return resourceName + ".skel";
         }
-        
+
         // This is the interface to the Ogre resource system. It allows us to
         // load NIFs from BSAs, in the file system and in any other place we
         // tell Ogre to look (eg. in zip or rar files.) It's also used to
@@ -131,11 +134,13 @@ class NIFLoader : Ogre::ManualResourceLoader
         int counter;
         int numbers;
         int stack;
-        
+        std::multimap<std::string,std::string> MaterialMap;
 
         // pointer to the ogre mesh which is currently build
         Ogre::Mesh *mesh;
         Ogre::SkeletonPtr mSkel;
 };
+
+}
 
 #endif

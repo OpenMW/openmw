@@ -171,6 +171,22 @@ namespace MWGui
                   MyGUI::KeyCode key,
                   MyGUI::Char _char)
     {
+        if( key == MyGUI::KeyCode::Tab)
+        {
+            std::vector<std::string> matches;
+            listNames();
+            command->setCaption(complete( command->getCaption(), matches ));
+#if 0
+            int i = 0;
+            for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); it++,i++ )
+            {
+                printOK( *it );
+                if( i == 50 )
+                    break;
+            }
+#endif
+        }
+
         if(command_history.empty()) return;
 
         // Traverse history with up and down arrows
@@ -223,11 +239,11 @@ namespace MWGui
             try
             {
                 ConsoleInterpreterContext interpreterContext (*this, mEnvironment, MWWorld::Ptr());
-                Interpreter::Interpreter interpreter (interpreterContext);
+                Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 std::vector<Interpreter::Type_Code> code;
                 output.getCode (code);
-                interpreter.run (&code[0], code.size());
+                interpreter.run (&code[0], code.size(), interpreterContext);
             }
             catch (const std::exception& error)
             {
@@ -236,5 +252,120 @@ namespace MWGui
         }
 
         command->setCaption("");
+    }
+
+    std::string Console::complete( std::string input, std::vector<std::string> &matches )
+    {
+        using namespace std;
+        string output=input;
+        string tmp=input;
+        bool has_front_quote = false;
+
+        /* Does the input string contain things that don't have to be completed? If yes erase them. */
+        /* Are there quotation marks? */
+        if( tmp.find('"') != string::npos ) {
+            int numquotes=0;
+            for(string::iterator it=tmp.begin(); it < tmp.end(); it++) {
+                if( *it == '"' )
+                    numquotes++;
+            }
+
+            /* Is it terminated?*/
+            if( numquotes % 2 ) {
+                tmp.erase( 0, tmp.rfind('"')+1 );
+                has_front_quote = true;
+            }
+            else {
+                size_t pos;
+                if( ( ((pos = tmp.rfind(' ')) != string::npos ) ) && ( pos > tmp.rfind('"') ) ) {
+                    tmp.erase( 0, tmp.rfind(' ')+1);
+                }
+                else {
+                    tmp.clear();
+                }
+                has_front_quote = false;
+            }
+        }
+        /* No quotation marks. Are there spaces?*/
+        else {
+            size_t rpos;
+            if( (rpos=tmp.rfind(' ')) != string::npos ) {
+                if( rpos == 0 ) {
+                    tmp.clear();
+                }
+                else {
+                    tmp.erase(0, rpos+1);
+                }
+            }
+        }
+        /* Erase the input from the output string so we can easily append the completed form later. */
+        output.erase(output.end()-tmp.length(), output.end());
+
+        /* Is there still something in the input string? If not just display all commands and return the unchanged input. */
+        if( tmp.length() == 0 ) {
+                matches=mNames;
+            return input;
+        }
+
+        /* Iterate through the vector. */
+        for(vector<string>::iterator it=mNames.begin(); it < mNames.end();it++) {
+            bool string_different=false;
+
+            /* Is the string shorter than the input string? If yes skip it. */
+            if( (*it).length() < tmp.length() )
+                continue;
+
+            /* Is the beginning of the string different from the input string? If yes skip it. */
+            for( string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();iter++, iter2++) {
+                if( tolower(*iter) != tolower(*iter2) ) {
+                    string_different=true;
+                    break;
+                }
+            }
+
+            if( string_different )
+                continue;
+
+            /* The beginning of the string matches the input string, save it for the next test. */
+            matches.push_back(*it);
+        }
+
+        /* There are no matches. Return the unchanged input. */
+        if( matches.empty() )
+        {
+            return input;
+        }
+
+        /* Only one match. We're done. */
+        if( matches.size() == 1 ) {
+            /* Adding quotation marks when the input string started with a quotation mark or has spaces in it*/
+            if( ( matches.front().find(' ') != string::npos )  ) {
+                if( !has_front_quote )
+                    output.append(string("\""));
+                return output.append(matches.front() + string("\" ")); 
+            }
+            else if( has_front_quote ) {
+                return  output.append(matches.front() + string("\" "));
+            }
+            else {
+                return output.append(matches.front() + string(" "));
+            }
+        }
+
+        /* Check if all matching strings match further than input. If yes complete to this match. */
+        int i = tmp.length();
+
+        for(string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); iter++, i++) {
+            for(vector<string>::iterator it=matches.begin(); it < matches.end();it++) {
+                if( tolower((*it)[i]) != tolower(*iter) ) {
+                    /* Append the longest match to the end of the output string*/
+                    output.append(matches.front().substr( 0, i));
+                    return output;
+                }  
+            }
+        }
+
+        /* All keywords match with the shortest. Append it to the output string and return it. */
+        return output.append(matches.front());
     }
 }

@@ -8,6 +8,7 @@
 #include "dialogue.hpp"
 #include "dialogue_history.hpp"
 #include "stats_window.hpp"
+#include "messagebox.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -60,6 +61,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     inventory = new InventoryWindow ();
 #endif
     console = new Console(w,h, environment, extensions);
+    mMessageBoxManager = new MessageBoxManager(this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -82,6 +84,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
 WindowManager::~WindowManager()
 {
     delete console;
+    delete mMessageBoxManager;
     delete hud;
     delete map;
     delete menu;
@@ -326,6 +329,14 @@ void WindowManager::updateVisible()
         dialogueWindow->open();
         return;
     }
+    
+    if(mode == GM_InterMessageBox)
+    {
+        if(!mMessageBoxManager->isInteractiveMessageBox()) {
+            setGuiMode(GM_Game);
+        }
+        return;
+    }
 
 
     // Unsupported mode, switch back to game
@@ -446,14 +457,20 @@ void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
-    std::cout << "message box: " << message << std::endl;
-
-    if (!buttons.empty())
+    if (buttons.empty())
     {
-        std::cout << "buttons: ";
-        std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
-        std::cout << std::endl;
+        mMessageBoxManager->createMessageBox(message);
     }
+    else
+    {
+        mMessageBoxManager->createInteractiveMessageBox(message, buttons);
+        setGuiMode(GM_InterMessageBox);
+    }
+}
+
+int WindowManager::readPressedButton ()
+{
+    return mMessageBoxManager->readPressedButton();
 }
 
 const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
@@ -553,6 +570,11 @@ void WindowManager::onClassChoice(int _index)
             break;
 
     };
+}
+
+void WindowManager::onFrame (float frameDuration)
+{
+    mMessageBoxManager->onFrame(frameDuration);
 }
 
 namespace MWGui

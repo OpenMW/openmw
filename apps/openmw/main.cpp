@@ -26,6 +26,13 @@
 
 #endif
 
+// for Ogre::macBundlePath
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <OSX/macUtils.h>
+#endif
+
+#include "config.hpp"
+
 using namespace std;
 
 /// Parse command line options and openmw.cfg file (if one exists). Results are directly
@@ -41,7 +48,8 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         "Syntax: openmw <options>\nAllowed options");
 
     desc.add_options()
-        ("help", "print help message")
+        ("help", "print help message and quit")
+        ("version", "print version information and quit")
         ("data", bpo::value<std::vector<std::string> >()
             ->default_value (std::vector<std::string>(), "data")
             ->multitoken(),
@@ -77,6 +85,13 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
         ( "fs-strict", boost::program_options::value<bool>()->
             implicit_value (true)->default_value (false),
             "strict file system handling (no case folding)")
+
+        ( "encoding", boost::program_options::value<std::string>()->
+            default_value("win1252"),
+            "Character encoding used in OpenMW game messages:\n"
+            "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+            "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+            "\n\twin1252 - Western European (Latin) alphabet, used by default")
         ;
 
     bpo::variables_map variables;
@@ -84,7 +99,7 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     //If there is an openmw.cfg in the current path use that as global config
     //Otherwise try getPath
     std::string cfgFile = "openmw.cfg";
-    if(!isFile(cfgFile.c_str()))
+    if(!Misc::isFile(cfgFile.c_str()))
     {
         cfgFile = Files::getPath (Files::Path_ConfigGlobal, "openmw", "openmw.cfg");
     }
@@ -105,10 +120,39 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     if (globalConfigFile.is_open())
         bpo::store ( bpo::parse_config_file (globalConfigFile, desc), variables);
 
+    bool run = true;
+
     if (variables.count ("help"))
     {
         std::cout << desc << std::endl;
+        run = false;
+    }
+
+    if (variables.count ("version"))
+    {
+        std::cout << "OpenMW version " << OPENMW_VERSION << std::endl;
+        run = false;
+    }
+
+    if (!run)
         return false;
+
+    // Font encoding settings
+    std::string encoding(variables["encoding"].as<std::string>());
+    if (encoding == "win1250")
+    {
+      std::cout << "Using Central and Eastern European font encoding." << std::endl;
+      engine.setEncoding(encoding);
+    }
+    else if (encoding == "win1251")
+    {
+      std::cout << "Using Cyrillic font encoding." << std::endl;
+      engine.setEncoding(encoding);
+    }
+    else
+    {
+      std::cout << "Using default (English) font encoding." << std::endl;
+      engine.setEncoding("win1252");
     }
 
     // directory settings
@@ -177,7 +221,7 @@ int main(int argc, char**argv)
 {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     // set current dir to bundle path
-    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath());
+    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
     boost::filesystem::current_path(bundlePath);
 #endif
 

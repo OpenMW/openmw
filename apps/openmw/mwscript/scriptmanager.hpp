@@ -8,6 +8,7 @@
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/compiler/fileparser.hpp>
 
+#include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/types.hpp>
 
 namespace ESMS
@@ -35,6 +36,8 @@ namespace MWScript
             bool mVerbose;
             Compiler::Context& mCompilerContext;
             Compiler::FileParser mParser;
+            Interpreter::Interpreter mInterpreter;
+            bool mOpcodesInstalled;
 
             std::map<std::string, std::vector<Interpreter::Type_Code> > mScripts;
 

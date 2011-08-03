@@ -3,7 +3,7 @@
 namespace ESM
 {
 
-void Misc::load(ESMReader &esm)
+void Miscellaneous::load(ESMReader &esm)
 {
     model = esm.getHNString("MODL");
     name = esm.getHNOString("FNAM");

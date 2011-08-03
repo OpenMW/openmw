@@ -6,6 +6,7 @@
 
 #include "OgreColourValue.h"
 #include <OgreMath.h>
+#include <Ogre.h>
 
 namespace Ogre
 {
@@ -57,19 +58,24 @@ namespace MWRender
     std::string mInsertMesh;
     Ogre::SceneNode *mNpcPart;
 
+    //the static geometry
+    Ogre::StaticGeometry *sg;
+    bool isStatic;
+
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;
 
     Ogre::ColourValue mAmbientColor;
 
     /// start inserting a new reference.
-    virtual void insertBegin (ESM::CellRef &ref);
+    virtual void insertBegin (ESM::CellRef &ref, bool static_ = false);
 
     /// insert a mesh related to the most recent insertBegin call.
     virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec,  Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements);
     virtual void insertMesh(const std::string &mesh, Ogre::Vector3 vec, Ogre::Vector3 axis, Ogre::Radian angle, std::string sceneNodeName, std::string sceneParent[], int elements, bool translateFirst);
 
     virtual void insertMesh(const std::string &mesh);
+
      virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements);
      virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
 
@@ -95,8 +101,7 @@ namespace MWRender
   public:
 
     ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
-        MWScene &_scene)
-    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0) {}
+        MWScene &_scene);
 
     virtual ~ExteriorCellRender() { destroy(); }
 
@@ -121,6 +126,10 @@ namespace MWRender
 
     /// Remove the reference with the given handle permanently from the scene.
     virtual void deleteObject (const std::string& handle);
+
+    void destroyAllAttachedMovableObjects(Ogre::SceneNode* i_pSceneNode);
+
+    static int uniqueID;
   };
 }
 

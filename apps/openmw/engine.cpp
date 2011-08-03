@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <OgreVector3.h>
+#include <Ogre.h>
 
 #include "components/esm/records.hpp"
 #include <components/esm_store/cell_store.hpp>
@@ -44,10 +45,6 @@
 
 #include <OgreRoot.h>
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OSX/macUtils.h>
-#endif
-
 #include <MyGUI_WidgetManager.h>
 #include "mwgui/class.hpp"
 
@@ -76,7 +73,7 @@ void OMW::Engine::executeLocalScripts()
 }
 
 
-bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
+bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     if(mShowFPS)
     {
@@ -92,6 +89,8 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     std::string effect;
 
     MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+
+
     //If the region has changed
     if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
         timer.restart();
@@ -152,6 +151,9 @@ bool OMW::Engine::frameStarted(const Ogre::FrameEvent& evt)
     try
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
+
+        //
+        mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
         // global scripts
         mEnvironment.mGlobalScripts->run (mEnvironment);
@@ -246,8 +248,12 @@ void OMW::Engine::loadBSA()
     for (Files::MultiDirCollection::TIter iter (bsa.begin()); iter!=bsa.end(); ++iter)
     {
          std::cout << "Adding " << iter->second.string() << std::endl;
-         addBSA (iter->second.string());
+         Bsa::addBSA (iter->second.string());
     }
+
+    std::string m = mDataDir.string();
+    std::cout << "Data dir" << m << "\n";
+    Bsa::addDir(m, mFSStrict);
 }
 
 // add resources directory
@@ -338,15 +344,12 @@ void OMW::Engine::go()
     ogreCfg.insert(0, cfgUserDir);
 
     //A local plugins.cfg will be used if it exist, otherwise look in the default path
-    if(!isFile(plugCfg.c_str()))
+    if(!Misc::isFile(plugCfg.c_str()))
     {
         plugCfg.insert(0, cfgDir);
     }
 
-    mOgre.configure(!isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
-
-    addResourcesDirectory (mDataDir / "Meshes");
-    addResourcesDirectory (mDataDir / "Textures");
+    mOgre.configure(!Misc::isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -358,12 +361,12 @@ void OMW::Engine::go()
     loadBSA();
 
     // Create physics. shapeLoader is deleted by the physic engine
-    ManualBulletShapeLoader* shapeLoader = new ManualBulletShapeLoader();
+    NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
     mPhysicEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mFileCollections, mMaster,
-        mResDir, mNewGame, mEnvironment);
+        mResDir, mNewGame, mEnvironment, mEncoding);
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false, cfgDir);
@@ -384,7 +387,7 @@ void OMW::Engine::go()
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
                                                            (mDataDir),
-                                                           mUseSound);
+                                                           mUseSound, mFSStrict);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
@@ -511,4 +514,9 @@ void OMW::Engine::activate()
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
+}
+
+void OMW::Engine::setEncoding(const std::string& encoding)
+{
+    mEncoding = encoding;
 }

@@ -5,7 +5,7 @@
 
 namespace MWClass
 {
-    class Misc : public MWWorld::Class
+    class Miscellaneous : public MWWorld::Class
     {
         public:
 

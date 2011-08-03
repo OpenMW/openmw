@@ -108,4 +108,5 @@ op 0x2000133: Journal
 op 0x2000134: SetJournalIndex
 op 0x2000135: GetJournalIndex
 op 0x2000136: GetPCCell
-opcodes 0x2000137-0x3ffffff unused
+op 0x2000137: GetButtonPressed
+opcodes 0x2000138-0x3ffffff unused

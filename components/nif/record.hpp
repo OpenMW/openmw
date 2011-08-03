@@ -24,6 +24,8 @@
 #ifndef _NIF_RECORD_H_
 #define _NIF_RECORD_H_
 
+#include <components/misc/slice_array.hpp>
+
 namespace Nif
 {
 
@@ -88,7 +90,7 @@ struct Record
 {
   // Record type and type name
   int recType;
-  SString recName;
+  Misc::SString recName;
 
   Record() : recType(RC_MISSING) {}
 

@@ -258,7 +258,7 @@ namespace MWInput
     }
 
     //NOTE: Used to check for movement keys
-    bool frameStarted(const Ogre::FrameEvent &evt)
+    bool frameRenderingQueued (const Ogre::FrameEvent &evt)
     {
         // Tell OIS to handle all input events
         input.capture();

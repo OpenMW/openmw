@@ -11,6 +11,7 @@
 
 using namespace std;
 using namespace Mangle::Stream;
+using namespace Bsa;
 
 int main(int argc, char** argv)
 {

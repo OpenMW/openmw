@@ -56,6 +56,7 @@ namespace OMW
 
     class Engine : private Ogre::FrameListener
     {
+            std::string mEncoding;
             boost::filesystem::path mDataDir;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer mOgre;
@@ -100,7 +101,7 @@ namespace OMW
 
             void executeLocalScripts();
 
-            virtual bool frameStarted(const Ogre::FrameEvent& evt);
+            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
             /// Process pending commands
 
@@ -157,6 +158,9 @@ namespace OMW
 
             /// Compile all scripts (excludign dialogue scripts) at startup?
             void setCompileAll (bool all);
+
+            /// Font encoding
+            void setEncoding(const std::string& encoding);
     };
 }
 

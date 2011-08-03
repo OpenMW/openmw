@@ -90,11 +90,11 @@ int main()
 
 
         //Ressources stuff
-        addBSA("Morrowind.bsa");
+        Bsa::addBSA("Morrowind.bsa");
         //Ogre::ResourceGroupManager::getSingleton().createResourceGroup("general");
 
         Ogre::ResourcePtr ptr = BulletShapeManager::getSingleton().getByName(mesh,"General");
-        ManualBulletShapeLoader* ShapeLoader = new ManualBulletShapeLoader();
+        NifBullet::ManualBulletShapeLoader* ShapeLoader = new NifBullet::ManualBulletShapeLoader();
 
         ShapeLoader->load(mesh,"General");
         //BulletShapeManager::getSingleton().unload(mesh);

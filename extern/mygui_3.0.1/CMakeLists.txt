@@ -22,11 +22,7 @@ add_subdirectory(OgrePlatform)
 
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR}/openmw_resources)
-if (APPLE)
-	set(DDIR ${APP_BUNDLE_DIR}/Contents/Resources/resources/mygui)
-else (APPLE)
-	set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
-endif (APPLE)
+set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 configure_file("${SDIR}/bigbars.png" "${DDIR}/bigbars.png" COPYONLY)
 configure_file("${SDIR}/black.png" "${DDIR}/black.png" COPYONLY)
@@ -68,6 +64,8 @@ configure_file("${SDIR}/openmw_progress.skin.xml" "${DDIR}/openmw_progress.skin.
 configure_file("${SDIR}/openmw_stats_window_layout.xml" "${DDIR}/openmw_stats_window_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_text.skin.xml" "${DDIR}/openmw_text.skin.xml" COPYONLY)
 configure_file("${SDIR}/openmw_windows.skin.xml" "${DDIR}/openmw_windows.skin.xml" COPYONLY)
+configure_file("${SDIR}/openmw_messagebox_layout.xml" "${DDIR}/openmw_messagebox_layout.xml" COPYONLY)
+configure_file("${SDIR}/openmw_interactive_messagebox_layout.xml" "${DDIR}/openmw_interactive_messagebox_layout.xml" COPYONLY)
 configure_file("${SDIR}/smallbars.png" "${DDIR}/smallbars.png" COPYONLY)
 configure_file("${SDIR}/transparent.png" "${DDIR}/transparent.png" COPYONLY)
 configure_file("${SDIR}/VeraMono.ttf" "${DDIR}/VeraMono.ttf" COPYONLY)

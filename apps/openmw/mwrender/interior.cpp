@@ -35,7 +35,7 @@ bool InteriorCellRender::lightOutQuadInLin = false;
 
 // start inserting a new reference.
 
-void InteriorCellRender::insertBegin (ESM::CellRef &ref)
+void InteriorCellRender::insertBegin (ESM::CellRef &ref, bool static_)
 {
   assert (!insert);
 
@@ -106,7 +106,7 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
      npcPart = parent->createChildSceneNode(sceneNodeName);
     //npcPart->showBoundingBox(true);
 
-  MeshPtr good2 = NIFLoader::load(mesh);
+  MeshPtr good2 = NifOgre::NIFLoader::load(mesh);
 
   MovableObject *ent = scene.getMgr()->createEntity(mesh);
   //ent->extr
@@ -182,11 +182,11 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
 
 void InteriorCellRender::insertMesh(const std::string &mesh)
 {
-  assert (insert);
+    assert (insert);
 
-  NIFLoader::load(mesh);
-  MovableObject *ent = scene.getMgr()->createEntity(mesh);
-  insert->attachObject(ent);
+    NifOgre::NIFLoader::load(mesh);
+    MovableObject *ent = scene.getMgr()->createEntity(mesh);
+    insert->attachObject(ent);
 
     if (mInsertMesh.empty())
         mInsertMesh = mesh;

@@ -52,7 +52,7 @@ namespace ESMS
     RecListT<ItemLevList>       itemLists;
     RecListT<Light>             lights;
     RecListT<Tool>              lockpicks;
-    RecListT<Misc>              miscItems;
+    RecListT<Miscellaneous>     miscItems;
     RecListWithIDT<NPC>               npcs;
     RecListT<LoadNPCC>          npcChange;
     RecListT<Probe>             probes;

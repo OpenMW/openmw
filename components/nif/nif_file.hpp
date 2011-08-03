@@ -128,24 +128,24 @@ class NIFFile
   char getByte() { return getType<char>(); }
 
   template<class X>
-  SliceArray<X> getArrayLen(int num)
-    { return SliceArray<X>((const X*)inp->getPtr(num*sizeof(X)),num); }
+  Misc::SliceArray<X> getArrayLen(int num)
+    { return Misc::SliceArray<X>((const X*)inp->getPtr(num*sizeof(X)),num); }
 
   template<class X>
-  SliceArray<X> getArray()
+  Misc::SliceArray<X> getArray()
     {
       int len = getInt();
       return getArrayLen<X>(len);
     }
 
-  SString getString() { return getArray<char>(); }
+  Misc::SString getString() { return getArray<char>(); }
 
   const Vector *getVector() { return getPtr<Vector>(); }
   const Matrix *getMatrix() { return getPtr<Matrix>(); }
   const Transformation *getTrafo() { return getPtr<Transformation>(); }
   const Vector4 *getVector4() { return getPtr<Vector4>(); }
 
-  FloatArray getFloatLen(int num)
+  Misc::FloatArray getFloatLen(int num)
     { return getArrayLen<float>(num); }
 
   // For fixed-size strings where you already know the size

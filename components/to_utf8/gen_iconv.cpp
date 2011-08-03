@@ -74,13 +74,44 @@ int write_table(const std::string &charset, const std::string &tableName)
 
   // Finish table
   cout << "};\n";
+
+  return 0;
 }
 
 int main()
 {
   cout << hex;
 
+  // Write header guard
+  cout << "#ifndef COMPONENTS_TOUTF8_TABLE_GEN_H\n#define COMPONENTS_TOUTF8_TABLE_GEN_H\n\n";
+
+  // Write namespace
+  cout << "namespace ToUTF8\n{\n\n";
+
+  // Central European and Eastern European languages that use Latin script, such as
+  // Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian.
+  cout << "\n/// Central European and Eastern European languages that use Latin script,"
+          "\n/// such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian,"
+          "\n/// Serbian (Latin script), Romanian and Albanian."
+          "\n";
+  write_table("WINDOWS-1250", "windows_1250");
+
+  // Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages
+  cout << "\n/// Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic"
+          "\n/// and other languages"
+          "\n";
+  write_table("WINDOWS-1251", "windows_1251");
+
   // English
+  cout << "\n/// Latin alphabet used by English and some other Western languages"
+          "\n";
   write_table("WINDOWS-1252", "windows_1252");
+
+  // Close namespace
+  cout << "\n}\n\n";
+
+  // Close header guard
+  cout << "#endif\n\n";
+
   return 0;
 }
