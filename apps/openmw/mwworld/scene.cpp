@@ -152,9 +152,9 @@ namespace MWWorld
 
     Scene::~Scene()
     {
-        for (CellRenderCollection::iterator iter (mActiveCells.begin());
+        /*for (CellRenderCollection::iterator iter (mActiveCells.begin());
             iter!=mActiveCells.end(); ++iter)
-            delete iter->second;
+            delete iter->second;*/
     }
 
     bool Scene::hasCellChanged() const

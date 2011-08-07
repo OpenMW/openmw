@@ -320,7 +320,7 @@ namespace MWWorld
         delete mPlayer;
         delete mSkyManager;
         delete mGlobalVariables;
-        delete mWorldScene;
+        //delete mWorldScene;
         delete mPhysics;
     }
 

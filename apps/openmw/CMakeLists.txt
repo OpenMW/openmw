@@ -16,7 +16,7 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND
-    mwrender/render_manager.cpp
+    mwrender/rendering_manager.cpp
     mwrender/mwscene.cpp
     mwrender/cellimp.cpp
     mwrender/interior.cpp
@@ -25,7 +25,7 @@ set(GAMEREND
     mwrender/player.cpp
     )
 set(GAMEREND_HEADER
-    mwrender/render_manager.hpp
+    mwrender/rendering_manager.hpp
     mwrender/cell.hpp
     mwrender/cellimp.hpp
     mwrender/mwscene.hpp
