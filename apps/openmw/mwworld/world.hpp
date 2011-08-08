@@ -13,6 +13,8 @@
 #include "refdata.hpp"
 #include "ptr.hpp"
 #include "globals.hpp"
+#include "scene.hpp"
+#include "physicssystem.hpp"
 
 #include <openengine/bullet/physic.hpp>
 
@@ -66,28 +68,25 @@ namespace MWWorld
 
             MWRender::SkyManager* mSkyManager;
             MWRender::MWScene mScene;
+            MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
-            Ptr::CellStore *mCurrentCell; // the cell, the player is in
-            CellRenderCollection mActiveCells;
-            CellRenderCollection mBufferedCells; // loaded, but not active (buffering not implementd yet)
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
-            std::map<std::string, Ptr::CellStore> mInteriors;
-            std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
             ScriptList mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
+            MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
-            bool mCellChanged;
             Environment& mEnvironment;
             int mNextDynamicRecord;
+            
+            std::map<std::string, Ptr::CellStore> mInteriors;
+            std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
 
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
             // not implemented
             World (const World&);
             World& operator= (const World&);
-
-            void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
 
             Ptr getPtr (const std::string& name, Ptr::CellStore& cellStore);
 
@@ -96,21 +95,9 @@ namespace MWWorld
             MWRender::CellRender *searchRender (Ptr::CellStore *store);
 
             int getDaysPerMonth (int month) const;
-
-            void removeScripts (Ptr::CellStore *cell);
-
-            void unloadCell (CellRenderCollection::iterator iter);
-
-            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
-
-            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
-                bool adjustPlayerPos = true);
-
-            void adjustSky();
-
-            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
-            ///< Move from exterior to interior or from interior cell to a different
-            /// interior cell.
+            
+            void moveObjectImp (Ptr ptr, float x, float y, float z);
+            
         public:
 
            World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
@@ -119,10 +106,22 @@ namespace MWWorld
                 Environment& environment, const std::string& encoding);
 
             ~World();
+            
+            Ptr::CellStore *getExterior (int x, int y);
+            
+            Ptr::CellStore *getInterior (std::string name);
+
+            void removeScripts (Ptr::CellStore *cell);
+
+            void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
+
+            void adjustSky();
 
             MWWorld::Player& getPlayer();
 
             const ESMS::ESMStore& getStore() const;
+            
+            ESM::ESMReader& getEsmReader();
 
             const ScriptList& getLocalScripts() const;
             ///< Names and local variable state of all local scripts in active cells.

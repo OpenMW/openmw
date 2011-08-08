@@ -17,6 +17,7 @@ namespace MWWorld
         mMale = !(player->flags & ESM::NPC::Female);
         mRace = player->race;
         mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2] = 0;
+        std::cout << renderer->getHandle();
         mPlayer.mData.setHandle (renderer->getHandle());
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
     }
