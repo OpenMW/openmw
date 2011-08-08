@@ -9,6 +9,7 @@
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwrender/mwscene.hpp"
+#include "../mwrender/rendering_manager.hpp"
 
 #include "refdata.hpp"
 #include "ptr.hpp"
@@ -66,7 +67,6 @@ namespace MWWorld
 
             typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
 
-            MWRender::SkyManager* mSkyManager;
             MWRender::MWScene mScene;
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
@@ -77,6 +77,7 @@ namespace MWWorld
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
             Environment& mEnvironment;
+            MWRender::RenderingManager *mRenderingManager;
             int mNextDynamicRecord;
             
             std::map<std::string, Ptr::CellStore> mInteriors;
