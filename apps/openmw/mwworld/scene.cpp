@@ -31,7 +31,7 @@ namespace MWWorld
         }
 
         mWorld->removeScripts (iter->first);
-        
+
         mEnvironment.mMechanicsManager->dropActors (iter->first); // FIXME: gehört in world?
         mEnvironment.mSoundManager->stopSound (iter->first); // FIXME: same
         delete iter->second;
@@ -152,21 +152,21 @@ namespace MWWorld
 
     Scene::~Scene()
     {
-        /*for (CellRenderCollection::iterator iter (mActiveCells.begin());
+        for (CellRenderCollection::iterator iter (mActiveCells.begin());
             iter!=mActiveCells.end(); ++iter)
-            delete iter->second;*/
+            delete iter->second;
     }
 
     bool Scene::hasCellChanged() const
     {
         return mCellChanged;
     }
-    
+
     std::map<Ptr::CellStore *, MWRender::CellRender *> Scene::getActiveCells ()
     {
         return mActiveCells;
     }
-    
+
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
         SuppressDoingPhysics scopeGuard;
@@ -206,7 +206,7 @@ namespace MWWorld
 
         changeCell (x, y, position, true);
     }
-    
+
     Ptr::CellStore* Scene::getCurrentCell ()
     {
         return mCurrentCell;
@@ -217,4 +217,3 @@ namespace MWWorld
         mCellChanged = false;
     }
 }
-

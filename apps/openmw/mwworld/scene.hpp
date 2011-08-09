@@ -57,7 +57,7 @@ namespace MWWorld
 
             typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
 
-            MWRender::MWScene mScene;
+            MWRender::MWScene& mScene;
             Ptr::CellStore *mCurrentCell; // the cell, the player is in
             CellRenderCollection mActiveCells;
             bool mCellChanged;
@@ -81,9 +81,9 @@ namespace MWWorld
             void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
             ///< Move from exterior to interior or from interior cell to a different
             /// interior cell.
-            
+
             Ptr::CellStore* getCurrentCell ();
-            
+
             CellRenderCollection getActiveCells ();
 
             bool hasCellChanged() const;
@@ -92,10 +92,10 @@ namespace MWWorld
             void changeToInteriorCell (const std::string& cellName, const ESM::Position& position);
             ///< Move to interior cell.
 
-            void changeToExteriorCell (const ESM::Position& position); 
+            void changeToExteriorCell (const ESM::Position& position);
             ///< Move to exterior cell.
 
-            void markCellAsUnchanged(); 
+            void markCellAsUnchanged();
 
             std::string getFacedHandle();
     };

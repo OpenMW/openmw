@@ -283,7 +283,7 @@ namespace MWWorld
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0)
     {
         mPhysEngine = physEng;
-        
+
         mPhysics = new PhysicsSystem(renderer, physEng);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
@@ -311,16 +311,16 @@ namespace MWWorld
             MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir);
 
         mPhysEngine = physEng;
-        
+
         mWorldScene = new Scene(environment, this, mScene, mPhysics);
     }
 
     World::~World()
     {
-        delete mPlayer;
+        delete mWorldScene;
         delete mSkyManager;
         delete mGlobalVariables;
-        //delete mWorldScene;
+        delete mPlayer;
         delete mPhysics;
     }
 
@@ -347,12 +347,12 @@ namespace MWWorld
 
         return 0;
     }
-    
+
     Ptr::CellStore *World::getExterior (int x, int y)
     {
         return &mExteriors[std::make_pair (x, y)];
     }
-    
+
     Ptr::CellStore *World::getInterior (std::string name)
     {
         return &mInteriors[name];
@@ -367,7 +367,7 @@ namespace MWWorld
     {
         return mStore;
     }
-    
+
     ESM::ESMReader& World::getEsmReader()
     {
         return mEsm;
@@ -768,4 +768,3 @@ namespace MWWorld
         return std::make_pair (stream.str(), created);
     }
 }
-
