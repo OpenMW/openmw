@@ -273,14 +273,31 @@ void MainDialog::setupConfig()
     QFile file(config);
 
     if (!file.exists()) {
-        config = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                       "openmw", "openmw.cfg"));
+        file.setFileName(QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
+                                                       "openmw", "openmw.cfg")));
+    }
+    
+    if (!file.exists()) {
+        file.setFileName(QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
+                                                               "openmw", "openmw.cfg")));
+    }
+    
+    if (!file.exists()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error opening OpenMW configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not open %0</b><br><br> \
+        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
+        
+        file.close();
+        QApplication::exit(); // No config file available
     }
 
+    // Open our config file   
+    mGameConfig = new QSettings(file.fileName(), QSettings::IniFormat);
     file.close();
-
-    // Open our config file
-    mGameConfig = new QSettings(config, QSettings::IniFormat);
 }
 
 void MainDialog::writeConfig()
