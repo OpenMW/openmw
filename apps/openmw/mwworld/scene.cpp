@@ -25,8 +25,7 @@ void insertCellRefList (T& cellRefList, ESMS::CellStore<MWWorld::RefData> &cell)
 {
     if (!cellRefList.list.empty())
     {
-        const MWWorld::Class& class_ =
-            MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.list.begin(), &cell));
+        //const MWWorld::Class& class_ = MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.list.begin(), &cell));
 
         for (typename T::List::iterator it = cellRefList.list.begin();
             it != cellRefList.list.end(); it++)
@@ -100,7 +99,6 @@ namespace MWWorld
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
         SuppressDoingPhysics scopeGuard;
-
         // remove active
         mEnvironment.mMechanicsManager->removeActor (mWorld->getPlayer().getPlayer());
 

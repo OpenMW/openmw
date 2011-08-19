@@ -524,3 +524,4 @@ void OMW::Engine::setEncoding(const std::string& encoding)
 {
     mEncoding = encoding;
 }
+

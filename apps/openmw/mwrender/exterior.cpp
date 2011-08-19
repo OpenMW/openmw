@@ -35,7 +35,7 @@ int ExteriorCellRender::uniqueID = 0;
 
 ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
     MWScene &_scene, MWWorld::PhysicsSystem *physics)
-    : mCell(_cell), mEnvironment (environment), mScene(_scene), mBase(NULL), mInsert(NULL), mAmbientMode (0), mPhysics(physics)
+    : mCell(_cell), mEnvironment (environment), mScene(_scene), mPhysics(physics), mBase(NULL), mInsert(NULL), mAmbientMode (0) 
 {
     uniqueID = uniqueID +1;
     sg = mScene.getMgr()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
@@ -350,13 +350,14 @@ void ExteriorCellRender::setAmbientMode()
 
 void ExteriorCellRender::show()
 {
+    // FIXME: this one may be the bug
   mBase = mScene.getRoot()->createChildSceneNode();
-
+  
   configureAmbient();
   configureFog();
-
+  
   insertCell(mCell, mEnvironment);
-
+  
   sg->build();
 }
 
