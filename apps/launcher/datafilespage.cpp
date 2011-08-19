@@ -1,9 +1,9 @@
 #include <QtGui>
 
 #include <components/esm/esm_reader.hpp>
-#include <components/files/path.hpp>
 #include <components/files/collections.hpp>
 #include <components/files/multidircollection.hpp>
+#include <components/cfg/configurationmanager.hpp>
 
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
@@ -211,12 +211,13 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
 void DataFilesPage::setupConfig()
 {
-    QString config = "./launcher.cfg";
+    Cfg::ConfigurationManager cfg;
+
+    QString config = (cfg.getRuntimeConfigPath() / "launcher.cfg").string().c_str();
     QFile file(config);
 
     if (!file.exists()) {
-        config = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                       "openmw", "launcher.cfg"));
+        config = QString::fromStdString((cfg.getLocalConfigPath() / "launcher.cfg").string());
     }
 
     file.setFileName(config); // Just for displaying information

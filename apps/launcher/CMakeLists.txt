@@ -52,6 +52,7 @@ add_executable(omwlauncher
     ${LAUNCHER}
     ${MISC} ${MISC_HEADER}
     ${FILES} ${FILES_HEADER}
+    ${CFG} ${CFG_HEADER}
     ${TO_UTF8}
     ${ESM}
     ${RCC_SRCS}
