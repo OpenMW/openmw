@@ -7,6 +7,7 @@
 #include <OgreRenderSystem.h>
 #include <OgreConfigFile.h>
 #include <OgreConfigDialog.h>
+#include <components/cfg/configurationmanager.hpp>
 
 class QComboBox;
 class QCheckBox;
@@ -28,6 +29,7 @@ public slots:
     void rendererChanged(const QString &renderer);
 
 private:
+    Cfg::ConfigurationManager mCfg;
     Ogre::Root *mOgre;
     Ogre::RenderSystem *mSelectedRenderSystem;
     Ogre::RenderSystem *mOpenGLRenderSystem;

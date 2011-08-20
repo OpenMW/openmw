@@ -1,7 +1,5 @@
 #include <QtGui>
 
-#include <components/files/path.hpp>
-
 #include "graphicspage.hpp"
 
 GraphicsPage::GraphicsPage(QWidget *parent) : QWidget(parent)
@@ -149,13 +147,11 @@ void GraphicsPage::createPages()
 
 void GraphicsPage::setupConfig()
 {
-    QString ogreCfg = "./ogre.cfg";
-
+    QString ogreCfg = (mCfg.getRuntimeConfigPath() / "ogre.cfg").string().c_str();
     QFile file(ogreCfg);
 
     if (!file.exists()) {
-        ogreCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                        "openmw", "ogre.cfg"));
+        ogreCfg = QString::fromStdString((mCfg.getLocalConfigPath() / "ogre.cfg").string());
     }
 
     mOgreConfig = new QSettings(ogreCfg, QSettings::IniFormat);
@@ -164,12 +160,11 @@ void GraphicsPage::setupConfig()
 
 void GraphicsPage::setupOgre()
 {
-    QString pluginCfg = "./plugins.cfg";
+    QString pluginCfg = (mCfg.getRuntimeConfigPath() / "plugins.cfg").string().c_str();
     QFile file(pluginCfg);
 
     if (!file.exists()) {
-        pluginCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                          "openmw", "plugins.cfg"));
+        pluginCfg = QString::fromStdString((mCfg.getLocalConfigPath() / "plugins.cfg").string());
     }
     
     // Reopen the file from user directory
@@ -177,8 +172,7 @@ void GraphicsPage::setupOgre()
     
     if (!file.exists()) {
         // There's no plugins.cfg in the user directory, use global directory
-        pluginCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
-                                                          "openmw", "plugins.cfg"));   
+        pluginCfg = QString::fromStdString((mCfg.getGlobalConfigPath() / "plugins.cfg").string());
     }
     
     // Create a log manager so we can surpress debug text to stdout/stderr

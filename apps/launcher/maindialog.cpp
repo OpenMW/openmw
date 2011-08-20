@@ -1,7 +1,5 @@
 #include <QtGui>
 
-#include <components/files/path.hpp>
-
 #include "maindialog.hpp"
 #include "playpage.hpp"
 #include "graphicspage.hpp"
@@ -268,13 +266,14 @@ void MainDialog::play()
 
 void MainDialog::setupConfig()
 {
+    Cfg::ConfigurationManager cfg;
+
     // First we read the OpenMW config
-    QString config = "./openmw.cfg";
+    QString config = (cfg.getRuntimeConfigPath() / "openmw.cfg").string().c_str();
     QFile file(config);
 
     if (!file.exists()) {
-        config = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                       "openmw", "openmw.cfg"));
+        config = QString::fromStdString((cfg.getLocalConfigPath() / "openmw.cfg").string());
     }
 
     file.close();

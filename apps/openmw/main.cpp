@@ -5,8 +5,10 @@
 
 #include <boost/program_options.hpp>
 
-#include <components/misc/fileops.hpp>
+#include <components/files/fileops.hpp>
 #include <components/files/path.hpp>
+#include <components/files/collections.hpp>
+#include <components/cfg/configurationmanager.hpp>
 
 #include "engine.hpp"
 
@@ -35,56 +37,64 @@
 
 using namespace std;
 
-/// Parse command line options and openmw.cfg file (if one exists). Results are directly
-/// written to \a engine.
-/// \return Run OpenMW?
-
-bool parseOptions (int argc, char**argv, OMW::Engine& engine)
+/**
+ * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
+ * to parse configuration files.
+ *
+ * Results are directly written to \ref Engine class.
+ *
+ * \retval true - Everything goes OK
+ * \retval false - Error
+ */
+bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::ConfigurationManager& cfgMgr)
 {
     // Create a local alias for brevity
     namespace bpo = boost::program_options;
+    typedef std::vector<std::string> StringsVector;
 
-    bpo::options_description desc (
-        "Syntax: openmw <options>\nAllowed options");
+    bpo::options_description desc("Syntax: openmw <options>\nAllowed options");
 
     desc.add_options()
-        ("help", "print help message and quit")
+        ("help", "print help message")
         ("version", "print version information and quit")
-        ("data", bpo::value<std::vector<std::string> >()
-            ->default_value (std::vector<std::string>(), "data")
-            ->multitoken(),
-            "set data directories (later directories have higher priority)")
-        ("data-local", bpo::value<std::string>()->default_value (""),
+        ("data", bpo::value<Files::Collections::PathContainer>()->default_value(Files::Collections::PathContainer(), "data")
+            ->multitoken(), "set data directories (later directories have higher priority)")
+
+        ("data-local", bpo::value<std::string>()->default_value(""),
             "set local data directory (highest priority)")
-        ("resources", bpo::value<std::string>()->default_value ("resources"),
+
+        ("resources", bpo::value<std::string>()->default_value("resources"),
             "set resources directory")
-        ("start", bpo::value<std::string>()->default_value ("Beshara"),
+
+        ("start", bpo::value<std::string>()->default_value("Beshara"),
             "set initial cell")
-        ("master", bpo::value<std::vector<std::string> >()
-            ->default_value (std::vector<std::string>(), "")
-            ->multitoken(),
-            "master file(s)")
-        ("plugin", bpo::value<std::vector<std::string> >()
-            ->default_value (std::vector<std::string>(), "")
-            ->multitoken(),
-            "plugin file(s)")
-        ( "fps", boost::program_options::value<bool>()->
-            implicit_value (true)->default_value (false), "show fps counter")
-        ( "debug", boost::program_options::value<bool>()->
-            implicit_value (true)->default_value (false), "debug mode" )
-        ( "nosound", boost::program_options::value<bool>()->
-            implicit_value (true)->default_value (false), "disable all sound" )
-        ( "script-verbose", boost::program_options::value<bool>()->
-            implicit_value (true)->default_value (false), "verbose script output" )
-        ( "new-game", boost::program_options::value<bool>()->
-            implicit_value (true)->default_value (false),
-            "activate char gen/new game mechanics" )
-        ( "script-all", boost::program_options::value<bool>()->
-            implicit_value (true)->default_value (false),
-            "compile all scripts (excluding dialogue scripts) at startup")
-        ( "fs-strict", boost::program_options::value<bool>()->
-            implicit_value (true)->default_value (false),
-            "strict file system handling (no case folding)")
+
+        ("master", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+            ->multitoken(), "master file(s)")
+
+        ("plugin", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+            ->multitoken(), "plugin file(s)")
+
+        ("fps", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "show fps counter")
+
+        ("debug", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "debug mode")
+
+        ("nosound", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "disable all sounds")
+
+        ("script-verbose", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "verbose script output")
+
+        ("new-game", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "activate char gen/new game mechanics")
+
+        ("script-all", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "compile all scripts (excluding dialogue scripts) at startup")
+
+        ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "strict file system handling (no case folding)")
 
         ( "encoding", boost::program_options::value<std::string>()->
             default_value("win1252"),
@@ -94,31 +104,16 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
             "\n\twin1252 - Western European (Latin) alphabet, used by default")
         ;
 
+    bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
+        .options(desc).allow_unregistered().run();
+
     bpo::variables_map variables;
 
-    //If there is an openmw.cfg in the current path use that as global config
-    //Otherwise try getPath
-    std::string cfgFile = "openmw.cfg";
-    if(!Misc::isFile(cfgFile.c_str()))
-    {
-        cfgFile = Files::getPath (Files::Path_ConfigGlobal, "openmw", "openmw.cfg");
-    }
-    std::cout << "Using global config file: " << cfgFile << std::endl;
-    std::ifstream globalConfigFile(cfgFile.c_str());
+    cfgMgr.readConfiguration(variables, desc);
 
-    cfgFile = Files::getPath (Files::Path_ConfigUser, "openmw", "openmw.cfg");
-    std::cout << "Using user config file: " << cfgFile << std::endl;
-    std::ifstream userConfigFile(cfgFile.c_str());
-
-    bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
-
+    // Runtime options override settings from all configs
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
-
-    if (userConfigFile.is_open())
-        bpo::store ( bpo::parse_config_file (userConfigFile, desc), variables);
-    if (globalConfigFile.is_open())
-        bpo::store ( bpo::parse_config_file (globalConfigFile, desc), variables);
 
     bool run = true;
 
@@ -156,63 +151,57 @@ bool parseOptions (int argc, char**argv, OMW::Engine& engine)
     }
 
     // directory settings
-    if (variables["fs-strict"].as<bool>()==true)
-        engine.enableFSStrict();
+    engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
-    std::vector<std::string> dataDirs = variables["data"].as<std::vector<std::string> >();
-    std::vector<boost::filesystem::path> dataDirs2 (dataDirs.begin(), dataDirs.end());
+    Files::Collections::PathContainer dataDirs = variables["data"].as<Files::Collections::PathContainer>();
 
-    std::string local = variables["data-local"].as<std::string>();
+    std::string local(variables["data-local"].as<std::string>());
     if (!local.empty())
-        dataDirs.push_back (local);
+    {
+        dataDirs.push_back(local);
+    }
 
-    engine.setDataDirs (dataDirs2);
+    if (dataDirs.empty())
+    {
+        dataDirs.push_back(cfgMgr.getLocalDataPath().string());
+    }
 
-    engine.setResourceDir (variables["resources"].as<std::string>());
+    engine.setDataDirs(dataDirs);
+
+    engine.setResourceDir(variables["resources"].as<std::string>());
 
     // master and plugin
-    std::vector<std::string> master = variables["master"].as<std::vector<std::string> >();
+    StringsVector master = variables["master"].as<StringsVector>();
     if (master.empty())
     {
         std::cout << "No master file given. Assuming Morrowind.esm" << std::endl;
-        master.push_back ("Morrowind");
+        master.push_back("Morrowind");
     }
 
-    if (master.size()>1)
+    if (master.size() > 1)
     {
         std::cout
             << "Ignoring all but the first master file (multiple master files not yet supported)."
             << std::endl;
     }
+    engine.addMaster(master[0]);
 
-    engine.addMaster (master[0]);
-
-    std::vector<std::string> plugin = variables["plugin"].as<std::vector<std::string> >();
-
+    StringsVector plugin = variables["plugin"].as<StringsVector>();
     if (!plugin.empty())
+    {
         std::cout << "Ignoring plugin files (plugins not yet supported)." << std::endl;
+    }
 
     // startup-settings
-    engine.setCell (variables["start"].as<std::string>());
-
-    if (variables["new-game"].as<bool>()==true)
-        engine.setNewGame();
+    engine.setCell(variables["start"].as<std::string>());
+    engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
-    if (variables["fps"].as<bool>()==true)
-        engine.showFPS();
-
-    if (variables["debug"].as<bool>()==true)
-        engine.enableDebugMode();
-
-    if (variables["nosound"].as<bool>()==true)
-        engine.disableSound();
-
-    if (variables["script-verbose"].as<bool>()==true)
-        engine.enableVerboseScripts();
-
-    if (variables["script-all"].as<bool>()==true)
-        engine.setCompileAll (true);
+    engine.showFPS(variables["fps"].as<bool>());
+    engine.setDebugMode(variables["debug"].as<bool>());
+    engine.setSoundUsage(!variables["nosound"].as<bool>());
+    engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
+    engine.setCompileAll(variables["script-all"].as<bool>());
 
     return true;
 }
@@ -227,16 +216,17 @@ int main(int argc, char**argv)
 
     try
     {
-        OMW::Engine engine;
+        Cfg::ConfigurationManager cfgMgr;
+        OMW::Engine engine(cfgMgr);
 
-        if (parseOptions (argc, argv, engine))
+        if (parseOptions(argc, argv, engine, cfgMgr))
         {
             engine.go();
         }
     }
-    catch(exception &e)
+    catch (std::exception &e)
     {
-        cout << "\nERROR: " << e.what() << endl;
+        std::cout << "\nERROR: " << e.what() << std::endl;
         return 1;
     }
 
