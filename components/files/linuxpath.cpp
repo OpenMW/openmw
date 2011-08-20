@@ -25,6 +25,7 @@
 #if defined(__linux__)
 
 #include <cstdlib>
+#include <cstring>
 #include <pwd.h>
 #include <unistd.h>
 
