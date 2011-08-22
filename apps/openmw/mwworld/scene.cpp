@@ -11,9 +11,39 @@
 #include "ptr.hpp"
 #include "environment.hpp"
 #include "player.hpp"
+#include "class.hpp"
 
 #include "doingphysics.hpp"
 #include "cellfunctors.hpp"
+
+
+
+namespace {
+
+template<typename T>
+void insertCellRefList (T& cellRefList, ESMS::CellStore<MWWorld::RefData> &cell)
+{
+    if (!cellRefList.list.empty())
+    {
+        //const MWWorld::Class& class_ = MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.list.begin(), &cell));
+
+        for (typename T::List::iterator it = cellRefList.list.begin();
+            it != cellRefList.list.end(); it++)
+        {
+            if (it->mData.getCount() || it->mData.isEnabled())
+            {
+                MWWorld::Ptr ptr (&*it, &cell);
+                /* TODO: call
+                    * RenderingManager.insertObject
+                    * class_.insertObjectPhysic
+                    * class_.insertObjectMechanics
+                */
+            }
+        }
+    }
+}
+
+}
 
 
 namespace MWWorld
@@ -69,7 +99,6 @@ namespace MWWorld
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
         SuppressDoingPhysics scopeGuard;
-
         // remove active
         mEnvironment.mMechanicsManager->removeActor (mWorld->getPlayer().getPlayer());
 
@@ -216,4 +245,37 @@ namespace MWWorld
     {
         mCellChanged = false;
     }
+    
+/*#include <cassert>
+#include <iostream>
+#include <exception>
+
+#include "../mwworld/class.hpp"
+#include "../mwworld/ptr.hpp"*/
+
+void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell)
+{
+  // Loop through all references in the cell
+  insertCellRefList (cell.activators, cell);
+  insertCellRefList (cell.potions, cell);
+  insertCellRefList (cell.appas, cell);
+  insertCellRefList (cell.armors, cell);
+  insertCellRefList (cell.books, cell);
+  insertCellRefList (cell.clothes, cell);
+  insertCellRefList (cell.containers, cell);
+  insertCellRefList (cell.creatures, cell);
+  insertCellRefList (cell.doors, cell);
+  insertCellRefList (cell.ingreds, cell);
+  insertCellRefList (cell.creatureLists, cell);
+  insertCellRefList (cell.itemLists, cell);
+  insertCellRefList (cell.lights, cell);
+  insertCellRefList (cell.lockpicks, cell);
+  insertCellRefList (cell.miscItems, cell);
+  insertCellRefList (cell.npcs, cell);
+  insertCellRefList (cell.probes, cell);
+  insertCellRefList (cell.repairs, cell);
+  insertCellRefList (cell.statics, cell);
+  insertCellRefList (cell.weapons, cell);
+}
+
 }

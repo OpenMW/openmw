@@ -279,7 +279,7 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
-    : mSkyManager (0), mScene (renderer,physEng), mPlayer (0), mGlobalVariables (0),
+    : mScene (renderer,physEng), mPlayer (0), mGlobalVariables (0),
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0)
     {
         mPhysEngine = physEng;
@@ -307,18 +307,17 @@ namespace MWWorld
             mGlobalVariables->setInt ("chargenstate", 1);
         }
 
-        mSkyManager =
-            MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir);
-
         mPhysEngine = physEng;
 
         mWorldScene = new Scene(environment, this, mScene, mPhysics);
+        mRenderingManager = new MWRender::RenderingManager(
+            MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir)
+        );
     }
 
     World::~World()
     {
         delete mWorldScene;
-        delete mSkyManager;
         delete mGlobalVariables;
         delete mPlayer;
         delete mPhysics;
@@ -499,7 +498,7 @@ namespace MWWorld
 
         mGlobalVariables->setFloat ("gamehour", hour);
 
-        mSkyManager->setHour (hour);
+        mRenderingManager->skySetHour (hour);
 
         if (days>0)
             setDay (days + mGlobalVariables->getInt ("day"));
@@ -534,7 +533,7 @@ namespace MWWorld
         mGlobalVariables->setInt ("day", day);
         mGlobalVariables->setInt ("month", month);
 
-        mSkyManager->setDate (day, month);
+        mRenderingManager->skySetDate (day, month);
     }
 
     void World::setMonth (int month)
@@ -555,7 +554,7 @@ namespace MWWorld
         if (years>0)
             mGlobalVariables->setInt ("year", years+mGlobalVariables->getInt ("year"));
 
-        mSkyManager->setDate (mGlobalVariables->getInt ("day"), month);
+        mRenderingManager->skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
     bool World::toggleSky()
@@ -563,34 +562,34 @@ namespace MWWorld
         if (mSky)
         {
             mSky = false;
-            mSkyManager->disable();
+            mRenderingManager->skyDisable();
             return false;
         }
         else
         {
             mSky = true;
             // TODO check for extorior or interior with sky.
-            mSkyManager->setHour (mGlobalVariables->getFloat ("gamehour"));
-            mSkyManager->setDate (mGlobalVariables->getInt ("day"),
+            mRenderingManager->skySetHour (mGlobalVariables->getFloat ("gamehour"));
+            mRenderingManager->skySetDate (mGlobalVariables->getInt ("day"),
                 mGlobalVariables->getInt ("month"));
-            mSkyManager->enable();
+            mRenderingManager->skyEnable();
             return true;
         }
     }
 
     int World::getMasserPhase() const
     {
-        return mSkyManager->getMasserPhase();
+        return mRenderingManager->skyGetMasserPhase();
     }
 
     int World::getSecundaPhase() const
     {
-        return mSkyManager->getSecundaPhase();
+        return mRenderingManager->skyGetSecundaPhase();
     }
 
     void World::setMoonColour (bool red)
     {
-        mSkyManager->setMoonColour (red);
+        mRenderingManager->skySetMoonColour (red);
     }
 
     float World::getTimeScaleFactor() const

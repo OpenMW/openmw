@@ -98,6 +98,8 @@ namespace MWWorld
             void markCellAsUnchanged();
 
             std::string getFacedHandle();
+            
+            void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
     };
 }
 
