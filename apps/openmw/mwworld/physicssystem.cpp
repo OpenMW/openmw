@@ -15,16 +15,16 @@ namespace MWWorld
 {
 
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng) :
-        mRender(_rend), mEngine(physEng)
+        mRender(_rend), mEngine(physEng), mFreeFly (true)
     {
-        
+
     }
-    
+
     PhysicsSystem::~PhysicsSystem()
     {
-    
+
     }
-    
+
     std::vector< std::pair<std::string, Ogre::Vector3> > PhysicsSystem::doPhysics (float duration,
         const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
     {
@@ -76,7 +76,7 @@ namespace MWWorld
         {
             btVector3 newPos = it->second->getPosition();
             Ogre::Vector3 coord(newPos.x(), newPos.y(), newPos.z());
-            
+
             response.push_back(std::pair<std::string, Ogre::Vector3>(it->first, coord));
         }
         return response;
