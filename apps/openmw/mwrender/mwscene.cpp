@@ -43,7 +43,7 @@ MWScene::MWScene(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicE
     //used to obtain ingame information of ogre objects (which are faced or selected)
     mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
 
-    Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode();
+    Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode ("player");
     playerNode->pitch(Degree(90));
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();

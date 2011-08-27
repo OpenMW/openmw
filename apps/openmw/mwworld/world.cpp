@@ -673,6 +673,12 @@ namespace MWWorld
                 }
             }
         }
+
+        // \todo cell change for non-player ref
+
+        // \todo this should go into the new scene class and eventually into the objects/actors classes.
+        mScene.getMgr()->getSceneNode (ptr.getRefData().getHandle())->
+            setPosition (Ogre::Vector3 (x, y, z));
     }
 
     void World::moveObject (Ptr ptr, float x, float y, float z)
@@ -680,9 +686,7 @@ namespace MWWorld
         moveObjectImp(ptr, x, y, z);
 
         mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z),
-            !DoingPhysics::isDoingPhysics());
-
-        // TODO cell change for non-player ref
+            true);
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
@@ -718,11 +722,27 @@ namespace MWWorld
         float duration)
     {
         std::vector< std::pair<std::string, Ogre::Vector3> > vectors = mPhysics->doPhysics (duration, actors);
-        std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it;
-        for(it = vectors.begin(); it != vectors.end(); it++) {
-            MWWorld::Ptr ptr = getPtrViaHandle (it->first);
-            moveObject (ptr, it->second.x, it->second.y, it->second.z);
+        std::vector< std::pair<std::string, Ogre::Vector3> >::iterator player = vectors.end();
+
+        for (std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it = vectors.begin();
+            it!= vectors.end(); ++it)
+        {
+            if (it->first=="player")
+            {
+                player = it;
+            }
+            else
+            {
+                MWWorld::Ptr ptr = getPtrViaHandle (it->first);
+                moveObjectImp (ptr, it->second.x, it->second.y, it->second.z);
+            }
         }
+
+        // Make sure player is moved last (otherwise the cell might change in the middle of an update
+        // loop)
+        if (player!=vectors.end())
+            moveObjectImp (getPtrViaHandle (player->first),
+                player->second.x, player->second.y, player->second.z);
     }
 
     bool World::toggleCollisionMode()

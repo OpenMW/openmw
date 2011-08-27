@@ -112,8 +112,6 @@ namespace MWWorld
 
     void PhysicsSystem::moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics)
     {
-        mRender.getScene()->getSceneNode(handle)->setPosition(position);
-
         if(updatePhysics)//TODO: is it an actor? Done?
         {
             if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))

@@ -13,12 +13,14 @@ namespace MWWorld
       mAutoMove (false), mForwardBackward (0)
     {
         mPlayer.base = player;
+        mPlayer.ref.refID = "player";
         mName = player->name;
         mMale = !(player->flags & ESM::NPC::Female);
         mRace = player->race;
         mPlayer.ref.pos.pos[0] = mPlayer.ref.pos.pos[1] = mPlayer.ref.pos.pos[2] = 0;
         std::cout << renderer->getHandle();
         mPlayer.mData.setHandle (renderer->getHandle());
+        /// \todo Do not make a copy of classes defined in esm/p records.
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
     }
 
@@ -29,6 +31,7 @@ namespace MWWorld
 
     void Player::setPos(float x, float y, float z, bool updateCamera)
     {
+        /// \todo This fcuntion should be removed during the mwrender-refactoring.
         mWorld.moveObject (getPlayer(), x, y, z);
 
         if (updateCamera)

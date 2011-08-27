@@ -245,7 +245,7 @@ namespace MWWorld
     {
         mCellChanged = false;
     }
-    
+
 /*#include <cassert>
 #include <iostream>
 #include <exception>
