@@ -1,5 +1,4 @@
 #include "physicssystem.hpp"
-#include "../mwworld/doingphysics.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/world.hpp" // FIXME
 
@@ -28,9 +27,6 @@ namespace MWWorld
     std::vector< std::pair<std::string, Ogre::Vector3> > PhysicsSystem::doPhysics (float duration,
         const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
     {
-        // stop changes to world from being reported back to the physics system
-        MWWorld::DoingPhysics scopeGuard;
-
         //set the DebugRenderingMode. To disable it,set it to 0
         //eng->setDebugRenderingMode(1);
 

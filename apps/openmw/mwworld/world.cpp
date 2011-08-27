@@ -21,7 +21,6 @@
 
 #include "refdata.hpp"
 #include "globals.hpp"
-#include "doingphysics.hpp"
 #include "cellfunctors.hpp"
 
 namespace
@@ -636,8 +635,7 @@ namespace MWWorld
                     Class::get (ptr).disable (ptr, mEnvironment);
                     mEnvironment.mSoundManager->stopSound3D (ptr);
 
-                    if (!DoingPhysics::isDoingPhysics())
-                        mPhysics->removeObject (ptr.getRefData().getHandle());
+                    mPhysics->removeObject (ptr.getRefData().getHandle());
                 }
 
                 render->deleteObject (ptr.getRefData().getHandle());

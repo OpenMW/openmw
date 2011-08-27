@@ -13,10 +13,7 @@
 #include "player.hpp"
 #include "class.hpp"
 
-#include "doingphysics.hpp"
 #include "cellfunctors.hpp"
-
-
 
 namespace {
 
@@ -98,7 +95,6 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
-        SuppressDoingPhysics scopeGuard;
         // remove active
         mEnvironment.mMechanicsManager->removeActor (mWorld->getPlayer().getPlayer());
 
@@ -198,8 +194,6 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        SuppressDoingPhysics scopeGuard;
-
         // remove active
         CellRenderCollection::iterator active = mActiveCells.begin();
 

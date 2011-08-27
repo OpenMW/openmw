@@ -11,7 +11,6 @@
 
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/doingphysics.hpp"
 #include <components/esm/loadstat.hpp>
 
 #include "player.hpp"
