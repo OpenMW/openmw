@@ -38,37 +38,25 @@ bool OgreRenderer::configure(bool showConfig,
                              const std::string &pluginCfg,
                              bool _logging)
 {
-  std::string theLogFile("Ogre.log");
-  std::string theCfgFile("ogre.cfg");
+    // Set up logging first
+    new LogManager;
+    Log *log = LogManager::getSingleton().createLog(logPath + std::string("Ogre.log"));
+    logging = _logging;
 
-  theLogFile.insert(0, logPath);
-  theCfgFile.insert(0, cfgPath);
-
-  // Set up logging first
-  new LogManager;
-  Log *log = LogManager::getSingleton().createLog(theLogFile);
-  logging = _logging;
-
-  if(logging)
+    if(logging)
     // Full log detail
     log->setLogDetail(LL_BOREME);
-  else
+    else
     // Disable logging
     log->setDebugOutputEnabled(false);
 
-  mRoot = new Root(pluginCfg, theCfgFile, "");
+    mRoot = new Root(pluginCfg, cfgPath, "");
 
-  // Show the configuration dialog and initialise the system, if the
-  // showConfig parameter is specified. The settings are stored in
-  // ogre.cfg. If showConfig is false, the settings are assumed to
-  // already exist in ogre.cfg.
-  int result;
-  if(showConfig)
-    result = mRoot->showConfigDialog();
-  else
-    result = mRoot->restoreConfig();
-
-  return !result;
+    // Show the configuration dialog and initialise the system, if the
+    // showConfig parameter is specified. The settings are stored in
+    // ogre.cfg. If showConfig is false, the settings are assumed to
+    // already exist in ogre.cfg.
+    return (showConfig) ? mRoot->showConfigDialog() : mRoot->restoreConfig();
 }
 
 bool OgreRenderer::configure(bool showConfig,
