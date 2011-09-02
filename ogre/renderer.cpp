@@ -56,7 +56,7 @@ bool OgreRenderer::configure(bool showConfig,
     // showConfig parameter is specified. The settings are stored in
     // ogre.cfg. If showConfig is false, the settings are assumed to
     // already exist in ogre.cfg.
-    return (showConfig) ? mRoot->showConfigDialog() : mRoot->restoreConfig();
+    return (showConfig) ? !mRoot->showConfigDialog() : !mRoot->restoreConfig();
 }
 
 bool OgreRenderer::configure(bool showConfig,
