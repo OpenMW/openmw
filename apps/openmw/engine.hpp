@@ -157,8 +157,6 @@ namespace OMW
             void setEncoding(const std::string& encoding);
 
         private:
-            std::string getOgreFilesDir(const std::string& ogreFile);
-
             Cfg::ConfigurationManager& mCfgMgr;
     };
 }

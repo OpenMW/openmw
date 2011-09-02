@@ -109,11 +109,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
 
     bpo::variables_map variables;
 
-    cfgMgr.readConfiguration(variables, desc);
-
     // Runtime options override settings from all configs
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
+
+    cfgMgr.readConfiguration(variables, desc);
 
     bool run = true;
 
