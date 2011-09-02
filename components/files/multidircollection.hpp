@@ -11,6 +11,8 @@
 
 namespace Files
 {
+    typedef std::vector<boost::filesystem::path> PathContainer;
+
     struct NameLess
     {
         bool mStrict;
@@ -58,7 +60,7 @@ namespace Files
 
         public:
 
-            MultiDirCollection (const std::vector<boost::filesystem::path>& directories,
+            MultiDirCollection (const Files::PathContainer& directories,
                 const std::string& extension, bool foldCase);
             ///< Directories are listed with increasing priority.
             /// \param extension The extension that should be listed in this collection. Must

@@ -10,7 +10,7 @@ namespace Files
     {
     }
 
-    Collections::Collections(const std::vector<boost::filesystem::path>& directories, bool foldCase)
+    Collections::Collections(const Files::PathContainer& directories, bool foldCase)
         : mDirectories(directories)
         , mFoldCase(foldCase)
         , mCollections()

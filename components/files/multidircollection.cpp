@@ -39,21 +39,25 @@ namespace Files
         }
     };
 
-    MultiDirCollection::MultiDirCollection (const std::vector<boost::filesystem::path>& directories,
+    MultiDirCollection::MultiDirCollection(const Files::PathContainer& directories,
         const std::string& extension, bool foldCase)
     : mFiles (NameLess (!foldCase))
     {
         NameEqual equal (!foldCase);
 
-        for (std::vector<boost::filesystem::path>::const_iterator iter = directories.begin();
+        for (PathContainer::const_iterator iter = directories.begin();
             iter!=directories.end(); ++iter)
         {
-            boost::filesystem::path dataDirectory = *iter;
-
-            for (boost::filesystem::directory_iterator iter (dataDirectory);
-                iter!=boost::filesystem::directory_iterator(); ++iter)
+            if (!boost::filesystem::is_directory(*iter))
             {
-                boost::filesystem::path path = *iter;
+                std::cout << "Skipping invalid directory: " << (*iter).string() << std::endl;
+                continue;
+            }
+
+            for (boost::filesystem::directory_iterator dirIter(*iter);
+                    dirIter != boost::filesystem::directory_iterator(); ++dirIter)
+            {
+                boost::filesystem::path path = *dirIter;
 
                 if (!equal (extension, boost::filesystem::path (path.extension()).string()))
                     continue;

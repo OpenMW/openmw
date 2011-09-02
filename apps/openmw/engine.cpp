@@ -252,9 +252,8 @@ void OMW::Engine::loadBSA()
          Bsa::addBSA (iter->second.string());
     }
 
-    std::string m = mDataDir.string();
-    std::cout << "Data dir" << m << "\n";
-    Bsa::addDir(m, mFSStrict);
+    std::cout << "Data dir " << mDataDir.string() << std::endl;
+    Bsa::addDir(mDataDir.string(), mFSStrict);
 }
 
 // add resources directory
@@ -273,12 +272,11 @@ void OMW::Engine::enableFSStrict(bool fsStrict)
 
 // Set data dir
 
-void OMW::Engine::setDataDirs (const std::vector<boost::filesystem::path>& dataDirs)
+void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     /// \todo remove mDataDir, once resources system can handle multiple directories
     assert (!dataDirs.empty());
-    mDataDir = dataDirs[0];
-
+    mDataDir = dataDirs.back();
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
 
