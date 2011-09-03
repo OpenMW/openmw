@@ -84,7 +84,7 @@ namespace MWWorld
 
             Ptr::CellStore* getCurrentCell ();
 
-            CellRenderCollection getActiveCells ();
+            const CellRenderCollection& getActiveCells ();
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
@@ -98,7 +98,7 @@ namespace MWWorld
             void markCellAsUnchanged();
 
             std::string getFacedHandle();
-            
+
             void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
     };
 }

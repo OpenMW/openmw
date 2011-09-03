@@ -219,7 +219,7 @@ namespace MWWorld
 
     MWRender::CellRender *World::searchRender (Ptr::CellStore *store)
     {
-        CellRenderCollection::iterator iter = mWorldScene->getActiveCells().find (store);
+        CellRenderCollection::const_iterator iter = mWorldScene->getActiveCells().find (store);
 
         if (iter!=mWorldScene->getActiveCells().end())
         {
@@ -405,7 +405,7 @@ namespace MWWorld
         }
 
         // active cells
-        for (CellRenderCollection::iterator iter (mWorldScene->getActiveCells().begin());
+        for (CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr ptr = getPtr (name, *iter->first);
@@ -427,7 +427,7 @@ namespace MWWorld
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
 
-        for (CellRenderCollection::iterator iter (mWorldScene->getActiveCells().begin());
+        for (CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr ptr = getPtrViaHandle (handle, *iter->first);
@@ -720,6 +720,7 @@ namespace MWWorld
         float duration)
     {
         std::vector< std::pair<std::string, Ogre::Vector3> > vectors = mPhysics->doPhysics (duration, actors);
+
         std::vector< std::pair<std::string, Ogre::Vector3> >::iterator player = vectors.end();
 
         for (std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it = vectors.begin();

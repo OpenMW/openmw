@@ -59,8 +59,8 @@ namespace MWWorld
 
         mWorld->removeScripts (iter->first);
 
-        mEnvironment.mMechanicsManager->dropActors (iter->first); // FIXME: gehört in world?
-        mEnvironment.mSoundManager->stopSound (iter->first); // FIXME: same
+        mEnvironment.mMechanicsManager->dropActors (iter->first);
+        mEnvironment.mSoundManager->stopSound (iter->first);
         delete iter->second;
         mActiveCells.erase (iter);
     }
@@ -187,7 +187,7 @@ namespace MWWorld
         return mCellChanged;
     }
 
-    std::map<Ptr::CellStore *, MWRender::CellRender *> Scene::getActiveCells ()
+    const std::map<Ptr::CellStore *, MWRender::CellRender *>& Scene::getActiveCells ()
     {
         return mActiveCells;
     }
