@@ -85,7 +85,7 @@ namespace MWWorld
         bool adjustPlayerPos)
     {
         if (adjustPlayerPos)
-            mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2], false);
+            mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
 
         mWorld->getPlayer().setCell (cell);
         // TODO orientation
@@ -187,7 +187,7 @@ namespace MWWorld
         return mCellChanged;
     }
 
-    const std::map<Ptr::CellStore *, MWRender::CellRender *>& Scene::getActiveCells ()
+    const Scene::CellRenderCollection& Scene::getActiveCells() const
     {
         return mActiveCells;
     }

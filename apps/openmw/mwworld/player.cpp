@@ -29,16 +29,10 @@ namespace MWWorld
         delete mClass;
     }
 
-    void Player::setPos(float x, float y, float z, bool updateCamera)
+    void Player::setPos(float x, float y, float z)
     {
         /// \todo This fcuntion should be removed during the mwrender-refactoring.
         mWorld.moveObject (getPlayer(), x, y, z);
-
-        if (updateCamera)
-            mRenderer->getCamera()->setPosition (Ogre::Vector3 (
-                mPlayer.ref.pos.pos[0],
-                mPlayer.ref.pos.pos[2],
-                -mPlayer.ref.pos.pos[1]));
     }
 
     void Player::setClass (const ESM::Class& class_)

@@ -25,7 +25,7 @@ namespace MWWorld
 
             void removeObject (const std::string& handle);
 
-            void moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics);
+            void moveObject (const std::string& handle, const Ogre::Vector3& position);
 
             void rotateObject (const std::string& handle, const Ogre::Quaternion& rotation);
 

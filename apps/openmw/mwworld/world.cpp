@@ -219,7 +219,7 @@ namespace MWWorld
 
     MWRender::CellRender *World::searchRender (Ptr::CellStore *store)
     {
-        CellRenderCollection::const_iterator iter = mWorldScene->getActiveCells().find (store);
+        Scene::CellRenderCollection::const_iterator iter = mWorldScene->getActiveCells().find (store);
 
         if (iter!=mWorldScene->getActiveCells().end())
         {
@@ -405,7 +405,7 @@ namespace MWWorld
         }
 
         // active cells
-        for (CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+        for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr ptr = getPtr (name, *iter->first);
@@ -427,7 +427,7 @@ namespace MWWorld
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
 
-        for (CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+        for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr ptr = getPtrViaHandle (handle, *iter->first);
@@ -683,8 +683,7 @@ namespace MWWorld
     {
         moveObjectImp(ptr, x, y, z);
 
-        mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z),
-            true);
+        mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
@@ -746,7 +745,7 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return mScene.toggleCollisionMode();
+        return mPhysics->toggleCollisionMode();
     }
 
     bool World::toggleRenderMode (RenderMode mode)

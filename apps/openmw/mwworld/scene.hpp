@@ -53,9 +53,9 @@ namespace MWWorld
 
         public:
 
-        private:
-
             typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
+
+        private:
 
             MWRender::MWScene& mScene;
             Ptr::CellStore *mCurrentCell; // the cell, the player is in
@@ -65,12 +65,11 @@ namespace MWWorld
             World *mWorld;
             PhysicsSystem *mPhysics;
 
-
             void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
         public:
 
-           Scene (Environment& environment, World *world, MWRender::MWScene& scene, PhysicsSystem *physics);
+            Scene (Environment& environment, World *world, MWRender::MWScene& scene, PhysicsSystem *physics);
 
             ~Scene();
 
@@ -84,7 +83,7 @@ namespace MWWorld
 
             Ptr::CellStore* getCurrentCell ();
 
-            const CellRenderCollection& getActiveCells ();
+            const CellRenderCollection& getActiveCells () const;
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
@@ -97,7 +96,7 @@ namespace MWWorld
 
             void markCellAsUnchanged();
 
-            std::string getFacedHandle();
+//            std::string getFacedHandle();
 
             void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
     };

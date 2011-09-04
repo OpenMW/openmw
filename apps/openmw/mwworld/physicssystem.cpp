@@ -106,24 +106,21 @@ namespace MWWorld
         mEngine->deleteRigidBody(handle);
     }
 
-    void PhysicsSystem::moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics)
+    void PhysicsSystem::moveObject (const std::string& handle, const Ogre::Vector3& position)
     {
-        if(updatePhysics)//TODO: is it an actor? Done?
+        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {
-            if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
-            {
-                // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
-                // start positions others than 0, 0, 0
-                btTransform tr = body->getWorldTransform();
-                tr.setOrigin(btVector3(position.x,position.y,position.z));
-                body->setWorldTransform(tr);
-            }
-            if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
-            {
-                // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
-                // start positions others than 0, 0, 0
-                act->setPosition(btVector3(position.x,position.y,position.z));
-            }
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // start positions others than 0, 0, 0
+            btTransform tr = body->getWorldTransform();
+            tr.setOrigin(btVector3(position.x,position.y,position.z));
+            body->setWorldTransform(tr);
+        }
+        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+        {
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // start positions others than 0, 0, 0
+            act->setPosition(btVector3(position.x,position.y,position.z));
         }
     }
 

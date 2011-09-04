@@ -65,8 +65,6 @@ namespace MWWorld
 
         private:
 
-            typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
-
             MWRender::MWScene mScene;
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
@@ -79,7 +77,7 @@ namespace MWWorld
             Environment& mEnvironment;
             MWRender::RenderingManager *mRenderingManager;
             int mNextDynamicRecord;
-            
+
             std::map<std::string, Ptr::CellStore> mInteriors;
             std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
 
@@ -96,9 +94,9 @@ namespace MWWorld
             MWRender::CellRender *searchRender (Ptr::CellStore *store);
 
             int getDaysPerMonth (int month) const;
-            
+
             void moveObjectImp (Ptr ptr, float x, float y, float z);
-            
+
         public:
 
            World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
@@ -107,9 +105,9 @@ namespace MWWorld
                 Environment& environment, const std::string& encoding);
 
             ~World();
-            
+
             Ptr::CellStore *getExterior (int x, int y);
-            
+
             Ptr::CellStore *getInterior (std::string name);
 
             void removeScripts (Ptr::CellStore *cell);
@@ -121,7 +119,7 @@ namespace MWWorld
             MWWorld::Player& getPlayer();
 
             const ESMS::ESMStore& getStore() const;
-            
+
             ESM::ESMReader& getEsmReader();
 
             const ScriptList& getLocalScripts() const;

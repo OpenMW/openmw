@@ -44,8 +44,6 @@ namespace MWRender
 
         MWRender::Player *mPlayer;
 
-        bool mFreeFly;
-
     public:
 
         MWScene (OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng);
@@ -64,11 +62,6 @@ namespace MWRender
         /// name is empty and distance = -1 if there is no object which
         /// can be faced
         std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
-
-        /// Toggle collision mode for player. If disabled player object should ignore
-        /// collisions and gravity.
-        /// \return Resulting mode
-        bool toggleCollisionMode();
 
         /// Toggle render mode
         /// \todo Using an int instead of a enum here to avoid cyclic includes. Will be fixed
