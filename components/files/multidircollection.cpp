@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 
