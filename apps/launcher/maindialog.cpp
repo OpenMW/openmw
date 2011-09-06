@@ -313,8 +313,9 @@ void MainDialog::writeConfig()
     QStringList dataFiles = mDataFilesPage->selectedMasters();
     dataFiles.append(mDataFilesPage->checkedPlugins());
 
-    // Open the config as a QFile
-    QFile file(mGameConfig->fileName());
+    // Open the config as a QFile 
+    QFile file(QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
+                                                     "openmw", "openmw.cfg")));
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         // File cannot be opened or created
