@@ -50,7 +50,7 @@ MainDialog::MainDialog()
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
 
-    setupConfig();
+    //setupConfig();
     createIcons();
     createPages();
 }
@@ -88,52 +88,105 @@ void MainDialog::createIcons()
 
 }
 
-void MainDialog::createPages()
+QStringList MainDialog::readConfig(const QString &fileName)
 {
-    // Various pages
-    mPlayPage = new PlayPage(this);
-    mGraphicsPage = new GraphicsPage(this);
-    mDataFilesPage = new DataFilesPage(this);
-
-    // First we retrieve all data= keys from the config
     // We can't use QSettings directly because it
     // does not support multiple keys with the same name
-    QFile file(mGameConfig->fileName());
-
+    QFile file(fileName);
+    
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error opening OpenMW configuration file");
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not open %0</b><br><br> \
-                        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
-
+        
         QApplication::exit(); // File cannot be opened or created
     }
-
+    
     QTextStream in(&file);
-
     QStringList dataDirs;
-
-    // Add each data= value
+    QString dataLocal;
+    
+    // Read the config line by line
     while (!in.atEnd()) {
         QString line = in.readLine();
-
+        
         if (line.startsWith("data=")) {
             dataDirs.append(line.remove("data="));
         }
+        
+        // Read the data-local key, if more than one are found only the last is used
+        if (line.startsWith("data-local=")) {
+            dataLocal = line.remove("data-local=");
+        }
+        
+        // Read fs-strict key
+        if (line.startsWith("fs-strict=")) {
+            QString value = line.remove("fs-strict=");
+            
+            (value.toLower() == QLatin1String("true"))
+            ? mStrict = true
+            : mStrict = false;
+              
+        }
+            
     }
-
-    // Add the data-local= key
-    QString dataLocal = mGameConfig->value("data-local").toString();
+    
+    // Add the data-local= key to the end of the dataDirs for priority reasons   
     if (!dataLocal.isEmpty()) {
         dataDirs.append(dataLocal);
     }
+    
+    if (!dataDirs.isEmpty())
+    {
+        // Reset the global datadirs to the newly read entries
+        // Else return the previous dataDirs because nothing was found in this file;
+        mDataDirs = dataDirs;
+    }
+
+    file.close();
+    
+    return mDataDirs;
+}
+
+void MainDialog::createPages()
+{
+    mPlayPage = new PlayPage(this);
+    mGraphicsPage = new GraphicsPage(this);
+    mDataFilesPage = new DataFilesPage(this);
+    
+    // Retrieve all data entries from the configs
+    QStringList dataDirs;
+ 
+    // Global location
+    QFile file(QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
+                                                     "openmw", "openmw.cfg")));
+    if (file.exists()) {
+        dataDirs = readConfig(file.fileName());
+    }
+    
+    // User location
+    file.setFileName(QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
+                                                           "openmw", "openmw.cfg")));
+    if (file.exists()) {
+        dataDirs = readConfig(file.fileName());
+    }
+
+    // Local location
+    file.setFileName("./openmw.cfg");
+    
+    if (file.exists()) {
+        dataDirs = readConfig(file.fileName());
+    } 
+    
+    file.close();
 
     if (!dataDirs.isEmpty()) {
         // Now pass the datadirs on to the DataFilesPage
-        mDataFilesPage->setupDataFiles(dataDirs, mGameConfig->value("fs-strict").toBool());
+        mDataFilesPage->setupDataFiles(dataDirs, mStrict);
     } else {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error reading OpenMW configuration file");
@@ -264,40 +317,6 @@ void MainDialog::play()
     } else {
         close();
     }
-}
-
-void MainDialog::setupConfig()
-{
-    // First we read the OpenMW config
-    QString config = "./openmw.cfg";
-    QFile file(config);
-
-    if (!file.exists()) {
-        file.setFileName(QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                       "openmw", "openmw.cfg")));
-    }
-    
-    if (!file.exists()) {
-        file.setFileName(QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
-                                                               "openmw", "openmw.cfg")));
-    }
-    
-    if (!file.exists()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error opening OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open %0</b><br><br> \
-        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
-        
-        file.close();
-        QApplication::exit(); // No config file available
-    }
-
-    // Open our config file   
-    mGameConfig = new QSettings(file.fileName(), QSettings::IniFormat);
-    file.close();
 }
 
 void MainDialog::writeConfig()
