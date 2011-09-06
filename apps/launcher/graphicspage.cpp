@@ -189,24 +189,6 @@ void GraphicsPage::setupOgre()
                                       "openmw", "ogre.cfg"));
     file.setFileName(ogreCfg);
 
-    /* Not yet supported by OpenMW as it only seems to look in the user directory for ogre.cfg
-    QString ogreCfg = "./ogre.cfg";
-    file.setFileName(ogreCfg);
-
-    if (!file.exists()) {
-        file.setFileName(QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                               "openmw", "ogre.cfg")));
-    }
-    
-    if (!file.exists()) {
-        file.setFileName(QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
-                                                               "openmw", "ogre.cfg")));
-    }
-    
-    if (!file.exists()) {
-        file.setFileName(ogreCfg);
-    }*/
-
     try
     {
         mOgre = new Ogre::Root(pluginCfg.toStdString(), file.fileName().toStdString(), "./launcherOgre.log");
@@ -428,7 +410,27 @@ void GraphicsPage::writeConfig()
         mOpenGLRenderSystem->setConfigOption("Video Mode", mOGLResolutionComboBox->currentText().toStdString());
     }
     
-    //mOpenGLRenderSystem->validateConfigOptions();
+    // Now we validate the options
+    QString ogreError = QString::fromStdString(mSelectedRenderSystem->validateConfigOptions());
+    
+    if (!ogreError.isEmpty()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error validating configuration");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>A problem occured while validating the graphics options</b><br><br> \
+        The graphics options could not be saved.<br><br> \
+        Press \"Show Details...\" for more information.<br>"));
+        msgBox.setDetailedText(ogreError);
+        msgBox.exec();
+        
+        Ogre::LogManager::getSingletonPtr()->logMessage( "Caught exception in validateConfigOptions");
+        
+        qCritical("Error validating configuration");
+        
+        std::exit(1);
+    }
+
     // Write the settings to the config file
     mOgre->saveConfig();
     
