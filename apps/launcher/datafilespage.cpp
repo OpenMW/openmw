@@ -643,7 +643,11 @@ void DataFilesPage::scrollToSelection()
 
 void DataFilesPage::showContextMenu(const QPoint &point)
 {
-
+    // Make sure there are plugins in the view
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+    
     QPoint globalPos = mPluginsTable->mapToGlobal(point);
 
     QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
