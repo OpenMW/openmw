@@ -335,17 +335,17 @@ void MainDialog::writeConfig()
     QFile file(QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
                                                      "openmw", "openmw.cfg")));
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Error opening OpenMW configuration file");
+        msgBox.setWindowTitle("Error writing OpenMW configuration file");
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open %0</b><br><br> \
+        msgBox.setText(tr("<br><b>Could not open or create %0</b><br><br> \
                         Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
-        return;
+        std::exit(1);
     }
 
     QTextStream in(&file);
@@ -371,10 +371,11 @@ void MainDialog::writeConfig()
                         Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
-        return;
+        std::exit(1);;
     }
 
     file.write(buffer);
+  
     QTextStream out(&file);
 
     // Write the list of game files to the config
