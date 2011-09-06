@@ -50,7 +50,6 @@ MainDialog::MainDialog()
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
 
-    //setupConfig();
     createIcons();
     createPages();
 }
