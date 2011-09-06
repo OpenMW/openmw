@@ -15,35 +15,31 @@ static const char* const pluginsCfgFile = "plugins.cfg";
 ConfigurationManager::ConfigurationManager()
     : mPath("openmw")
 {
-	/**
-	 * According to task #168 plugins.cfg file shall be located in global
-	 * configuration path or in runtime configuration path.
-	 */
-	mPluginsCfgPath = mPath.getGlobalConfigPath() / pluginsCfgFile;
-	if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
-	{
-		mPluginsCfgPath = mPath.getRuntimeConfigPath() / pluginsCfgFile;
-		if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
-		{
-			std::cerr << "Failed to find " << pluginsCfgFile << " file!" << std::endl;
-			mPluginsCfgPath.clear();
-		}
-	}
+    /**
+     * According to task #168 plugins.cfg file shall be located in global
+     * configuration path or in runtime configuration path.
+     */
+    mPluginsCfgPath = mPath.getGlobalConfigPath() / pluginsCfgFile;
+    if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
+    {
+        mPluginsCfgPath = mPath.getRuntimeConfigPath() / pluginsCfgFile;
+        if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
+        {
+            std::cerr << "Failed to find " << pluginsCfgFile << " file!" << std::endl;
+            mPluginsCfgPath.clear();
+        }
+    }
 
-	/**
-	 * According to task #168 ogre.cfg file shall be located only
-	 * in user configuration path.
-	 */
-	mOgreCfgPath = mPath.getLocalConfigPath() / ogreCfgFile;
+    /**
+     * According to task #168 ogre.cfg file shall be located only
+     * in user configuration path.
+     */
+    mOgreCfgPath = mPath.getLocalConfigPath() / ogreCfgFile;
 
-	mLogPath = mPath.getLocalConfigPath();
+    mLogPath = mPath.getLocalConfigPath();
 }
 
 ConfigurationManager::~ConfigurationManager()
-{
-}
-
-void setupPath(const char* const cfgFile, boost::filesystem::path& path)
 {
 }
 
@@ -145,17 +141,17 @@ void ConfigurationManager::setRuntimeDataPath(const boost::filesystem::path& new
 
 const boost::filesystem::path& ConfigurationManager::getOgreConfigPath() const
 {
-	return mOgreCfgPath;
+    return mOgreCfgPath;
 }
 
 const boost::filesystem::path& ConfigurationManager::getPluginsConfigPath() const
 {
-	return mPluginsCfgPath;
+    return mPluginsCfgPath;
 }
 
 const boost::filesystem::path& ConfigurationManager::getLogPath() const
 {
-	return mLogPath;
+    return mLogPath;
 }
 
 } /* namespace Cfg */
