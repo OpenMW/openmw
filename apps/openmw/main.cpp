@@ -57,7 +57,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
     desc.add_options()
         ("help", "print help message")
         ("version", "print version information and quit")
-        ("data", bpo::value<Files::Collections::PathContainer>()->default_value(Files::Collections::PathContainer(), "data")
+        ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
             ->multitoken(), "set data directories (later directories have higher priority)")
 
         ("data-local", bpo::value<std::string>()->default_value(""),
@@ -109,11 +109,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
 
     bpo::variables_map variables;
 
-    cfgMgr.readConfiguration(variables, desc);
-
     // Runtime options override settings from all configs
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
+
+    cfgMgr.readConfiguration(variables, desc);
 
     bool run = true;
 
@@ -153,17 +153,17 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
-    Files::Collections::PathContainer dataDirs = variables["data"].as<Files::Collections::PathContainer>();
+    Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
 
     std::string local(variables["data-local"].as<std::string>());
     if (!local.empty())
     {
-        dataDirs.push_back(local);
+        dataDirs.push_back(Files::PathContainer::value_type(local));
     }
 
     if (dataDirs.empty())
     {
-        dataDirs.push_back(cfgMgr.getLocalDataPath().string());
+        dataDirs.push_back(cfgMgr.getLocalDataPath());
     }
 
     engine.setDataDirs(dataDirs);

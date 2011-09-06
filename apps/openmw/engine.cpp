@@ -252,9 +252,8 @@ void OMW::Engine::loadBSA()
          Bsa::addBSA (iter->second.string());
     }
 
-    std::string m = mDataDir.string();
-    std::cout << "Data dir" << m << "\n";
-    Bsa::addDir(m, mFSStrict);
+    std::cout << "Data dir " << mDataDir.string() << std::endl;
+    Bsa::addDir(mDataDir.string(), mFSStrict);
 }
 
 // add resources directory
@@ -273,12 +272,11 @@ void OMW::Engine::enableFSStrict(bool fsStrict)
 
 // Set data dir
 
-void OMW::Engine::setDataDirs (const std::vector<boost::filesystem::path>& dataDirs)
+void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     /// \todo remove mDataDir, once resources system can handle multiple directories
     assert (!dataDirs.empty());
-    mDataDir = dataDirs[0];
-
+    mDataDir = dataDirs.back();
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
 
@@ -327,25 +325,6 @@ void OMW::Engine::setNewGame(bool newGame)
     mNewGame = newGame;
 }
 
-std::string OMW::Engine::getOgreFilesDir(const std::string& ogreFile)
-{
-    boost::filesystem::path cfgPath(mCfgMgr.getRuntimeConfigPath());
-    if (!boost::filesystem::exists(cfgPath / ogreFile))
-    {
-        cfgPath = mCfgMgr.getLocalConfigPath();
-        if (!boost::filesystem::exists(cfgPath / ogreFile ))
-        {
-            cfgPath = mCfgMgr.getGlobalConfigPath();
-            if (!boost::filesystem::exists(cfgPath / ogreFile))
-            {
-                cfgPath.clear();
-            }
-        }
-    }
-
-   return (!cfgPath.empty()) ? cfgPath.string() + std::string("/") : std::string();
- }
-
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -357,11 +336,10 @@ void OMW::Engine::go()
     test.name = "";
     total = 0;
 
-
-    std::string cfgDir(getOgreFilesDir("ogre.cfg"));
-    std::string pluginsFile(getOgreFilesDir("plugins.cfg") + std::string("plugins.cfg"));
-
-    mOgre.configure(cfgDir.empty(), cfgDir, pluginsFile, false);
+    mOgre.configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
+        mCfgMgr.getOgreConfigPath().string(),
+        mCfgMgr.getLogPath().string() + std::string("/"),
+        mCfgMgr.getPluginsConfigPath().string(), false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -381,7 +359,9 @@ void OMW::Engine::go()
         mResDir, mNewGame, mEnvironment, mEncoding);
 
     // Set up the GUI system
-    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false, cfgDir);
+    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false,
+        mCfgMgr.getLogPath().string() + std::string("/"));
+
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");

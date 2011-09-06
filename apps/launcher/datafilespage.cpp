@@ -127,7 +127,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 {
     // Put the paths in a boost::filesystem vector to use with Files::Collections
-    std::vector<boost::filesystem::path> dataDirs;
+    Files::PathContainer dataDirs;
 
     foreach (const QString &currentPath, paths) {
         dataDirs.push_back(boost::filesystem::path(currentPath.toStdString()));
@@ -142,8 +142,8 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
     for (Files::MultiDirCollection::TIter iter(esm.begin()); iter!=esm.end(); ++iter)
     {
-        std::string filename = boost::filesystem::path (iter->second.filename()).string();
-        QString currentMaster = QString::fromStdString(filename);
+        QString currentMaster = QString::fromStdString(
+                boost::filesystem::path (iter->second.filename()).string());
         
         const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
@@ -164,7 +164,7 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
         ESMReader fileReader;
         QStringList availableMasters; // Will contain all found masters
 
-        fileReader.setEncoding("win1252");
+        fileReader.setEncoding("win1252"); // FIXME: This should be configurable!
         fileReader.open(iter->second.string());
 
         // First we fill the availableMasters and the mMastersWidget
@@ -190,8 +190,8 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
         // Now we put the current plugin in the mDataFilesModel under its masters
         QStandardItem *parent = new QStandardItem(availableMasters.join(","));
         
-        std::string filename = boost::filesystem::path (iter->second.filename()).string();
-        QStandardItem *child = new QStandardItem(QString::fromStdString(std::string(filename)));
+        QStandardItem *child = new QStandardItem(QString::fromStdString(
+                boost::filesystem::path (iter->second.filename()).string()));
 
         const QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
 

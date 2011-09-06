@@ -1,7 +1,6 @@
 #ifndef COMPONENTS_FILES_COLLECTION_HPP
 #define COMPONENTS_FILES_COLLECTION_HPP
 
-#include <vector>
 #include <string>
 #include <map>
 #include <boost/filesystem.hpp>
@@ -13,12 +12,10 @@ namespace Files
     class Collections
     {
         public:
-            typedef std::vector<boost::filesystem::path> PathContainer;
-
             Collections();
 
             ///< Directories are listed with increasing priority.
-            Collections(const PathContainer& directories, bool foldCase);
+            Collections(const Files::PathContainer& directories, bool foldCase);
 
             ///< Return a file collection for the given extension. Extension must contain the
             /// leading dot and must be all lower-case.
@@ -26,7 +23,7 @@ namespace Files
 
         private:
             typedef std::map<std::string, MultiDirCollection> MultiDirCollectionContainer;
-            PathContainer mDirectories;
+            Files::PathContainer mDirectories;
 
             bool mFoldCase;
             mutable MultiDirCollectionContainer mCollections;

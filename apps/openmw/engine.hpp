@@ -115,7 +115,7 @@ namespace OMW
             void enableFSStrict(bool fsStrict);
 
             /// Set data dirs
-            void setDataDirs(const Files::Collections::PathContainer& dataDirs);
+            void setDataDirs(const Files::PathContainer& dataDirs);
 
             /// Set resource dir
             void setResourceDir(const boost::filesystem::path& parResDir);
@@ -157,8 +157,6 @@ namespace OMW
             void setEncoding(const std::string& encoding);
 
         private:
-            std::string getOgreFilesDir(const std::string& ogreFile);
-
             Cfg::ConfigurationManager& mCfgMgr;
     };
 }

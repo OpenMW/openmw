@@ -41,12 +41,20 @@ struct ConfigurationManager
     const boost::filesystem::path& getRuntimeDataPath() const;
     void setRuntimeDataPath(const boost::filesystem::path& newPath);
 
+    const boost::filesystem::path& getOgreConfigPath() const;
+    const boost::filesystem::path& getPluginsConfigPath() const;
+    const boost::filesystem::path& getLogPath() const;
+
     private:
         void loadConfig(const boost::filesystem::path& path,
             boost::program_options::variables_map& variables,
             boost::program_options::options_description& description);
 
         Files::Path<> mPath;
+
+        boost::filesystem::path mOgreCfgPath;
+        boost::filesystem::path mPluginsCfgPath;
+        boost::filesystem::path mLogPath;
 };
 
 } /* namespace Cfg */

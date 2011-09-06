@@ -147,37 +147,19 @@ void GraphicsPage::createPages()
 
 void GraphicsPage::setupConfig()
 {
-    QString ogreCfg = (mCfg.getRuntimeConfigPath() / "ogre.cfg").string().c_str();
+    QString ogreCfg = mCfg.getOgreConfigPath().string().c_str();
     QFile file(ogreCfg);
-
-    if (!file.exists()) {
-        ogreCfg = QString::fromStdString((mCfg.getLocalConfigPath() / "ogre.cfg").string());
-    }
-
     mOgreConfig = new QSettings(ogreCfg, QSettings::IniFormat);
-
 }
 
 void GraphicsPage::setupOgre()
 {
-    QString pluginCfg = (mCfg.getRuntimeConfigPath() / "plugins.cfg").string().c_str();
+    QString pluginCfg = mCfg.getPluginsConfigPath().string().c_str();
     QFile file(pluginCfg);
-
-    if (!file.exists()) {
-        pluginCfg = QString::fromStdString((mCfg.getLocalConfigPath() / "plugins.cfg").string());
-    }
-    
-    // Reopen the file from user directory
-    file.setFileName(pluginCfg);
-    
-    if (!file.exists()) {
-        // There's no plugins.cfg in the user directory, use global directory
-        pluginCfg = QString::fromStdString((mCfg.getGlobalConfigPath() / "plugins.cfg").string());
-    }
     
     // Create a log manager so we can surpress debug text to stdout/stderr
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
-    logMgr->createLog("launcherOgre.log", true, false, false);
+    logMgr->createLog((mCfg.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
     try
     {
