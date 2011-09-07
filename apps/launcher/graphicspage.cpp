@@ -346,9 +346,9 @@ void GraphicsPage::readConfig()
 
 void GraphicsPage::writeConfig()
 {
+    mOgre->setRenderSystem(mSelectedRenderSystem);
+
     if (mDirect3DRenderSystem) {
-        mOgre->setRenderSystem(mDirect3DRenderSystem);
-        
         // Nvidia Performance HUD
         if (mD3DNvPerfCheckBox->checkState() == Qt::Checked) {
             mDirect3DRenderSystem->setConfigOption("Allow NVPerfHUD", "Yes");
@@ -381,8 +381,6 @@ void GraphicsPage::writeConfig()
     }
     
     if (mOpenGLRenderSystem) {
-        mOgre->setRenderSystem(mOpenGLRenderSystem);
-        
         // Display Frequency
         mOpenGLRenderSystem->setConfigOption("Display Frequency", mOGLFrequencyComboBox->currentText().toStdString());
         
