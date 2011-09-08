@@ -135,7 +135,6 @@ namespace MWWorld
 
                 if (iter==mActiveCells.end())
                 {
-                    mWorld->getExterior(x, y)->loadExt (x, y, mWorld->getStore(), mWorld->getEsmReader());
                     Ptr::CellStore *cell = mWorld->getExterior(x, y);
 
                     loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene, mPhysics));
@@ -204,7 +203,6 @@ namespace MWWorld
 
         // Load cell.
         std::cout << "cellName:" << cellName << std::endl;
-        mWorld->getInterior(cellName)->loadInt (cellName, mWorld->getStore(), mWorld->getEsmReader());
         Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
         loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene, mPhysics));

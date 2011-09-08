@@ -279,7 +279,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mScene (renderer,physEng), mPlayer (0), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0)
+      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm)
     {
         mPhysEngine = physEng;
 
@@ -348,12 +348,12 @@ namespace MWWorld
 
     Ptr::CellStore *World::getExterior (int x, int y)
     {
-        return &mExteriors[std::make_pair (x, y)];
+        return mCells.getExterior (x, y);
     }
 
-    Ptr::CellStore *World::getInterior (std::string name)
+    Ptr::CellStore *World::getInterior (const std::string& name)
     {
-        return &mInteriors[name];
+        return mCells.getInterior (name);
     }
 
     MWWorld::Player& World::getPlayer()

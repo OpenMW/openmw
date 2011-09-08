@@ -16,6 +16,7 @@
 #include "globals.hpp"
 #include "scene.hpp"
 #include "physicssystem.hpp"
+#include "cells.hpp"
 
 #include <openengine/bullet/physic.hpp>
 
@@ -78,8 +79,7 @@ namespace MWWorld
             MWRender::RenderingManager *mRenderingManager;
             int mNextDynamicRecord;
 
-            std::map<std::string, Ptr::CellStore> mInteriors;
-            std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
+            Cells mCells;
 
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
@@ -108,7 +108,7 @@ namespace MWWorld
 
             Ptr::CellStore *getExterior (int x, int y);
 
-            Ptr::CellStore *getInterior (std::string name);
+            Ptr::CellStore *getInterior (const std::string& name);
 
             void removeScripts (Ptr::CellStore *cell);
 

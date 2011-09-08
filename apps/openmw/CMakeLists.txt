@@ -148,6 +148,7 @@ set(GAMEWORLD
     mwworld/actiontake.cpp
     mwworld/containerutil.cpp
     mwworld/player.cpp
+    mwworld/cells.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -168,6 +169,7 @@ set(GAMEWORLD_HEADER
     mwworld/containerutil.hpp
     mwworld/player.hpp
     mwworld/cellfunctors.hpp
+    mwworld/cells.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
