@@ -318,7 +318,7 @@ namespace ESMS
       IntCells::const_iterator it = intCells.find(id);
 
       if(it == intCells.end())
-        return NULL;
+         throw std::runtime_error ("Interior cell not found - " + id);
 
       return it->second;
     }
@@ -338,6 +338,15 @@ namespace ESMS
         return it2->second;
     }
 
+    const ESM::Cell *findExt (int x, int y) const
+    {
+        const ESM::Cell *cell = searchExt (x, y);
+
+        if (!cell)
+            throw std::runtime_error ("Exterior cell not found");
+
+        return cell;
+    }
     const ESM::Cell *searchExtByName (const std::string& id) const
     {
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)

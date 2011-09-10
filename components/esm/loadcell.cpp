@@ -1,5 +1,8 @@
 #include "loadcell.hpp"
 
+#include <string>
+#include <sstream>
+
 namespace ESM
 {
 
@@ -45,6 +48,20 @@ void Cell::load(ESMReader &esm)
 void Cell::restore(ESMReader &esm) const
 {
     esm.restoreContext(context);
+}
+
+std::string Cell::getDescription() const
+{
+    if (data.flags & Interior)
+    {
+        return name;
+    }
+    else
+    {
+        std::ostringstream stream;
+        stream << data.gridX << ", " << data.gridY;
+        return stream.str();
+    }
 }
 
 bool Cell::getNextRef(ESMReader &esm, CellRef &ref)

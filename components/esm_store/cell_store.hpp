@@ -81,7 +81,8 @@ namespace ESMS
   class CellStore
   {
   public:
-    CellStore() : cell (0) {}
+
+    CellStore (const ESM::Cell *cell_) : cell (cell_) {}
 
     const ESM::Cell *cell;
 
@@ -107,31 +108,11 @@ namespace ESMS
     CellRefList<Static, D>            statics;
     CellRefList<Weapon, D>            weapons;
 
-    /** Look up and load an interior cell from the given ESM data
-        storage. */
-    void loadInt(const std::string &name, const ESMStore &store, ESMReader &esm)
+    void load (const ESMStore &store, ESMReader &esm)
     {
-        std::cout << "loading cell '" << name << "'\n";
+        std::cout << "loading cell " << cell->getDescription() << std::endl;
 
-        cell = store.cells.findInt(name);
-
-        if(cell == NULL)
-            throw std::runtime_error("Cell not found - " + name);
-
-        loadRefs(store, esm);
-    }
-
-    /** Ditto for exterior cell. */
-    void loadExt(int X, int Y, const ESMStore &store, ESMReader &esm)
-    {
-        std::cout << "loading exterior cell '" << X << ", " << Y << "'\n";
-
-        cell = store.cells.searchExt (X, Y);
-
-        if(cell == NULL)
-            throw std::runtime_error("Exterior cell not found");
-
-        loadRefs(store, esm);
+        loadRefs (store, esm);
     }
 
     /// Call functor (ref) for each reference. functor must return a bool. Returning
