@@ -29,6 +29,8 @@ namespace MWWorld
             Cells (const Cells&);
             Cells& operator= (const Cells&);
 
+            Ptr::CellStore *getCellStore (const ESM::Cell *cell);
+
         public:
 
             Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader);
@@ -38,6 +40,8 @@ namespace MWWorld
             Ptr::CellStore *getInterior (const std::string& name);
 
             Ptr getPtr (const std::string& name, Ptr::CellStore& cellStore);
+
+            Ptr getPtr (const std::string& name);
     };
 }
 

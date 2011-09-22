@@ -1,5 +1,34 @@
 #include "cells.hpp"
 
+MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
+{
+    if (cell->data.flags & ESM::Cell::Interior)
+    {
+        std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (cell->name);
+
+        if (result==mInteriors.end())
+        {
+            result = mInteriors.insert (std::make_pair (cell->name, Ptr::CellStore (cell))).first;
+        }
+
+        return &result->second;
+    }
+    else
+    {
+        std::map<std::pair<int, int>, Ptr::CellStore>::iterator result =
+            mExteriors.find (std::make_pair (cell->data.gridX, cell->data.gridY));
+
+        if (result==mExteriors.end())
+        {
+            result = mExteriors.insert (std::make_pair (
+                std::make_pair (cell->data.gridX, cell->data.gridY), Ptr::CellStore (cell))).first;
+
+        }
+
+        return &result->second;
+    }
+}
+
 MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader)
 : mStore (store), mReader (reader) {}
 
@@ -101,5 +130,51 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
     if (ESMS::LiveCellRef<ESM::Weapon, RefData> *ref = cell.weapons.find (name))
         return Ptr (ref, &cell);
 
+    return Ptr();
+}
+
+MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
+{
+    // First check cells that are already listed
+    for (std::map<std::string, Ptr::CellStore>::iterator iter = mInteriors.begin();
+        iter!=mInteriors.end(); ++iter)
+    {
+        Ptr ptr = getPtr (name, iter->second);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    for (std::map<std::pair<int, int>, Ptr::CellStore>::iterator iter = mExteriors.begin();
+        iter!=mExteriors.end(); ++iter)
+    {
+        Ptr ptr = getPtr (name, iter->second);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    // Now try the other cells
+    for (ESMS::CellList::IntCells::const_iterator iter = mStore.cells.intCells.begin();
+        iter!=mStore.cells.intCells.end(); ++iter)
+    {
+        Ptr::CellStore *cellStore = getCellStore (iter->second);
+
+        Ptr ptr = getPtr (name, *cellStore);
+
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    for (ESMS::CellList::ExtCells::const_iterator iter = mStore.cells.extCells.begin();
+        iter!=mStore.cells.extCells.end(); ++iter)
+    {
+        Ptr::CellStore *cellStore = getCellStore (iter->second);
+
+        Ptr ptr = getPtr (name, *cellStore);
+
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    // giving up
     return Ptr();
 }

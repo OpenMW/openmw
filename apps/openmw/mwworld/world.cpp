@@ -351,7 +351,10 @@ namespace MWWorld
 
         if (!activeOnly)
         {
-            // TODO: inactive cells
+            Ptr ptr = mCells.getPtr (name);
+
+            if (!ptr.isEmpty())
+                return ptr;
         }
 
         throw std::runtime_error ("unknown ID: " + name);
