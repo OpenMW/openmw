@@ -37,6 +37,7 @@ namespace MWWorld
 
             Ptr::CellStore *getInterior (const std::string& name);
 
+            Ptr getPtr (const std::string& name, Ptr::CellStore& cellStore);
     };
 }
 

@@ -87,8 +87,6 @@ namespace MWWorld
             World (const World&);
             World& operator= (const World&);
 
-            Ptr getPtr (const std::string& name, Ptr::CellStore& cellStore);
-
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
             MWRender::CellRender *searchRender (Ptr::CellStore *store);

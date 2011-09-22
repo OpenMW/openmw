@@ -89,71 +89,6 @@ namespace MWWorld
         listCellScripts (mStore, cell.weapons, mLocalScripts, &cell);
     }
 
-    Ptr World::getPtr (const std::string& name, Ptr::CellStore& cell)
-    {
-        if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref = cell.activators.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Potion, RefData> *ref = cell.potions.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Apparatus, RefData> *ref = cell.appas.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Armor, RefData> *ref = cell.armors.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Book, RefData> *ref = cell.books.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Clothing, RefData> *ref = cell.clothes.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Container, RefData> *ref = cell.containers.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Creature, RefData> *ref = cell.creatures.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Door, RefData> *ref = cell.doors.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Ingredient, RefData> *ref = cell.ingreds.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::CreatureLevList, RefData> *ref = cell.creatureLists.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::ItemLevList, RefData> *ref = cell.itemLists.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Light, RefData> *ref = cell.lights.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = cell.lockpicks.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Miscellaneous, RefData> *ref = cell.miscItems.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = cell.npcs.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Probe, RefData> *ref = cell.probes.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Repair, RefData> *ref = cell.repairs.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Static, RefData> *ref = cell.statics.find (name))
-            return Ptr (ref, &cell);
-
-        if (ESMS::LiveCellRef<ESM::Weapon, RefData> *ref = cell.weapons.find (name))
-            return Ptr (ref, &cell);
-
-        return Ptr();
-    }
-
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
         if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref =
@@ -408,7 +343,7 @@ namespace MWWorld
         for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
-            Ptr ptr = getPtr (name, *iter->first);
+            Ptr ptr = mCells.getPtr (name, *iter->first);
 
             if (!ptr.isEmpty())
                 return ptr;
