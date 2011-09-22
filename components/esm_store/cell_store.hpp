@@ -13,8 +13,10 @@
 #include "store.hpp"
 #include "components/esm/records.hpp"
 #include "components/esm/loadcell.hpp"
-#include <list>
 
+#include <list>
+#include <string>
+#include <vector>
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
@@ -82,9 +84,16 @@ namespace ESMS
   {
   public:
 
-    CellStore (const ESM::Cell *cell_) : cell (cell_) {}
+    enum State
+    {
+        State_Unloaded, State_Preloaded, State_Loaded
+    };
+
+    CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded) {}
 
     const ESM::Cell *cell;
+    State mState;
+    std::vector<std::string> mIds;
 
     // Lists for each individual object type
     CellRefList<Activator, D>         activators;
@@ -110,9 +119,27 @@ namespace ESMS
 
     void load (const ESMStore &store, ESMReader &esm)
     {
-        std::cout << "loading cell " << cell->getDescription() << std::endl;
+        if (mState!=State_Loaded)
+        {
+            if (mState==State_Preloaded)
+                mIds.clear();
 
-        loadRefs (store, esm);
+            std::cout << "loading cell " << cell->getDescription() << std::endl;
+
+            loadRefs (store, esm);
+
+            mState = State_Loaded;
+        }
+    }
+
+    void preload (const ESMStore &store, ESMReader &esm)
+    {
+        if (mState==State_Unloaded)
+        {
+            listRefs (store, esm);
+
+            mState = State_Preloaded;
+        }
     }
 
     /// Call functor (ref) for each reference. functor must return a bool. Returning
@@ -155,6 +182,30 @@ namespace ESMS
                 return false;
 
         return true;
+    }
+
+    /// Run through references and store IDs
+    void listRefs(const ESMStore &store, ESMReader &esm)
+    {
+        assert (cell);
+
+        // Reopen the ESM reader and seek to the right position.
+        cell->restore (esm);
+
+        CellRef ref;
+
+        // Get each reference in turn
+        while (cell->getNextRef (esm, ref))
+        {
+            std::string lowerCase;
+
+            std::transform (ref.refID.begin(), ref.refID.end(), std::back_inserter (lowerCase),
+                (int(*)(int)) std::tolower);
+
+            mIds.push_back (ref.refID);
+        }
+
+        std::sort (mIds.begin(), mIds.end());
     }
 
     void loadRefs(const ESMStore &store, ESMReader &esm)
