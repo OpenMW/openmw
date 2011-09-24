@@ -16,6 +16,7 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 set(GAMEREND
+    mwrender/rendering_manager.cpp
     mwrender/mwscene.cpp
     mwrender/cellimp.cpp
     mwrender/interior.cpp
@@ -24,6 +25,7 @@ set(GAMEREND
     mwrender/player.cpp
     )
 set(GAMEREND_HEADER
+    mwrender/rendering_manager.hpp
     mwrender/cell.hpp
     mwrender/cellimp.hpp
     mwrender/mwscene.hpp
@@ -137,6 +139,8 @@ source_group(apps\\openmw\\mwsound FILES ${GAMESOUND} ${GAMESOUND_HEADER})
 
 set(GAMEWORLD
     mwworld/world.cpp
+    mwworld/scene.cpp
+    mwworld/physicssystem.cpp
     mwworld/globals.cpp
     mwworld/class.cpp
     mwworld/actionteleport.cpp
@@ -144,12 +148,13 @@ set(GAMEWORLD
     mwworld/actiontake.cpp
     mwworld/containerutil.cpp
     mwworld/player.cpp
-    mwworld/doingphysics.cpp
+    mwworld/cells.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
     mwworld/world.hpp
-    mwworld/ptr.hpp
+    mwworld/physicssystem.hpp
+    mwworld/scene.hpp
     mwworld/environment.hpp
     mwworld/globals.hpp
     mwworld/class.hpp
@@ -163,8 +168,8 @@ set(GAMEWORLD_HEADER
     mwworld/manualref.hpp
     mwworld/containerutil.hpp
     mwworld/player.hpp
-    mwworld/doingphysics.hpp
     mwworld/cellfunctors.hpp
+    mwworld/cells.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 

@@ -13,8 +13,10 @@
 #include "store.hpp"
 #include "components/esm/records.hpp"
 #include "components/esm/loadcell.hpp"
-#include <list>
 
+#include <list>
+#include <string>
+#include <vector>
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
@@ -81,9 +83,17 @@ namespace ESMS
   class CellStore
   {
   public:
-    CellStore() : cell (0) {}
+
+    enum State
+    {
+        State_Unloaded, State_Preloaded, State_Loaded
+    };
+
+    CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded) {}
 
     const ESM::Cell *cell;
+    State mState;
+    std::vector<std::string> mIds;
 
     // Lists for each individual object type
     CellRefList<Activator, D>         activators;
@@ -107,31 +117,29 @@ namespace ESMS
     CellRefList<Static, D>            statics;
     CellRefList<Weapon, D>            weapons;
 
-    /** Look up and load an interior cell from the given ESM data
-        storage. */
-    void loadInt(const std::string &name, const ESMStore &store, ESMReader &esm)
+    void load (const ESMStore &store, ESMReader &esm)
     {
-        std::cout << "loading cell '" << name << "'\n";
+        if (mState!=State_Loaded)
+        {
+            if (mState==State_Preloaded)
+                mIds.clear();
 
-        cell = store.cells.findInt(name);
+            std::cout << "loading cell " << cell->getDescription() << std::endl;
 
-        if(cell == NULL)
-            throw std::runtime_error("Cell not found - " + name);
+            loadRefs (store, esm);
 
-        loadRefs(store, esm);
+            mState = State_Loaded;
+        }
     }
 
-    /** Ditto for exterior cell. */
-    void loadExt(int X, int Y, const ESMStore &store, ESMReader &esm)
+    void preload (const ESMStore &store, ESMReader &esm)
     {
-        std::cout << "loading exterior cell '" << X << ", " << Y << "'\n";
+        if (mState==State_Unloaded)
+        {
+            listRefs (store, esm);
 
-        cell = store.cells.searchExt (X, Y);
-
-        if(cell == NULL)
-            throw std::runtime_error("Exterior cell not found");
-
-        loadRefs(store, esm);
+            mState = State_Preloaded;
+        }
     }
 
     /// Call functor (ref) for each reference. functor must return a bool. Returning
@@ -174,6 +182,30 @@ namespace ESMS
                 return false;
 
         return true;
+    }
+
+    /// Run through references and store IDs
+    void listRefs(const ESMStore &store, ESMReader &esm)
+    {
+        assert (cell);
+
+        // Reopen the ESM reader and seek to the right position.
+        cell->restore (esm);
+
+        CellRef ref;
+
+        // Get each reference in turn
+        while (cell->getNextRef (esm, ref))
+        {
+            std::string lowerCase;
+
+            std::transform (ref.refID.begin(), ref.refID.end(), std::back_inserter (lowerCase),
+                (int(*)(int)) std::tolower);
+
+            mIds.push_back (lowerCase);
+        }
+
+        std::sort (mIds.begin(), mIds.end());
     }
 
     void loadRefs(const ESMStore &store, ESMReader &esm)

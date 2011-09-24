@@ -44,8 +44,6 @@ namespace MWRender
 
         MWRender::Player *mPlayer;
 
-        bool mFreeFly;
-
     public:
 
         MWScene (OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng);
@@ -64,35 +62,6 @@ namespace MWRender
         /// name is empty and distance = -1 if there is no object which
         /// can be faced
         std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
-
-        /// Run physics simulation and modify \a world accordingly.
-        void doPhysics (float duration, MWWorld::World& world,
-            const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
-
-        /// Add object to physics system.
-        void addObject (const std::string& handle, const std::string& mesh,
-            const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position);
-
-        /// Add actor to physics system.
-        void addActor (const std::string& handle, const std::string& mesh,
-            const Ogre::Vector3& position);
-
-        /// Remove object from physic systems.
-        void removeObject (const std::string& handle);
-
-        /// Move object.
-        void moveObject (const std::string& handle, const Ogre::Vector3& position, bool updatePhysics);
-
-        /// Change object's orientation.
-        void rotateObject (const std::string& handle, const Ogre::Quaternion& rotation);
-
-        /// Change object's scale.
-        void scaleObject (const std::string& handle, float scale);
-
-        /// Toggle collision mode for player. If disabled player object should ignore
-        /// collisions and gravity.
-        /// \return Resulting mode
-        bool toggleCollisionMode();
 
         /// Toggle render mode
         /// \todo Using an int instead of a enum here to avoid cyclic includes. Will be fixed

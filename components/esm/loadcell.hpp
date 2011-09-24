@@ -126,6 +126,9 @@ struct Cell
   // exactly.
   void restore(ESMReader &esm) const;
 
+  std::string getDescription() const;
+  ///< Return a short string describing the cell (mostly used for debugging/logging purpose)
+
   /* Get the next reference in this cell, if any. Returns false when
      there are no more references in the cell.
 
