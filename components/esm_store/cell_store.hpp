@@ -202,7 +202,7 @@ namespace ESMS
             std::transform (ref.refID.begin(), ref.refID.end(), std::back_inserter (lowerCase),
                 (int(*)(int)) std::tolower);
 
-            mIds.push_back (ref.refID);
+            mIds.push_back (lowerCase);
         }
 
         std::sort (mIds.begin(), mIds.end());

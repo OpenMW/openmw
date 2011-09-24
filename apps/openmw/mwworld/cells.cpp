@@ -1,5 +1,9 @@
 #include "cells.hpp"
 
+#include <cctype>
+
+#include <algorithm>
+
 MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
     if (cell->data.flags & ESM::Cell::Interior)
@@ -68,7 +72,21 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 
 MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& cell)
 {
-    cell.load (mStore, mReader);
+    if (cell.mState==Ptr::CellStore::State_Unloaded)
+        cell.preload (mStore, mReader);
+
+    if (cell.mState==Ptr::CellStore::State_Preloaded)
+    {
+        std::string lowerCase;
+
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), lowerCase))
+            cell.load (mStore, mReader);
+        else
+            return Ptr();
+    }
 
     if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref = cell.activators.find (name))
         return Ptr (ref, &cell);
