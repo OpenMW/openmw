@@ -189,6 +189,9 @@ namespace ESMS
     {
         assert (cell);
 
+        if (cell->context.filename.empty())
+            return; // this is a dynamically generated cell -> skipping.
+
         // Reopen the ESM reader and seek to the right position.
         cell->restore (esm);
 
@@ -211,6 +214,9 @@ namespace ESMS
     void loadRefs(const ESMStore &store, ESMReader &esm)
     {
       assert (cell);
+
+        if (cell->context.filename.empty())
+            return; // this is a dynamically generated cell -> skipping.
 
       // Reopen the ESM reader and seek to the right position.
       cell->restore(esm);
