@@ -214,7 +214,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mScene (renderer,physEng), mPlayer (0), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm)
+      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysEngine = physEng;
 
