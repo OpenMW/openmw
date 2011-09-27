@@ -1,9 +1,9 @@
 #include <QtGui>
 
 #include <components/esm/esm_reader.hpp>
-#include <components/files/path.hpp>
 #include <components/files/collections.hpp>
 #include <components/files/multidircollection.hpp>
+#include <components/cfg/configurationmanager.hpp>
 
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
@@ -127,7 +127,7 @@ DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
 void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 {
     // Put the paths in a boost::filesystem vector to use with Files::Collections
-    std::vector<boost::filesystem::path> dataDirs;
+    Files::PathContainer dataDirs;
 
     foreach (const QString &currentPath, paths) {
         dataDirs.push_back(boost::filesystem::path(currentPath.toStdString()));
@@ -142,9 +142,9 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
     for (Files::MultiDirCollection::TIter iter(esm.begin()); iter!=esm.end(); ++iter)
     {
-        std::string filename = boost::filesystem::path (iter->second.filename()).string();
-        QString currentMaster = QString::fromStdString(filename);
-        
+        QString currentMaster = QString::fromStdString(
+                boost::filesystem::path (iter->second.filename()).string());
+
         const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
         if (itemList.isEmpty()) // Master is not yet in the widget
@@ -163,8 +163,8 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
     {
         ESMReader fileReader;
         QStringList availableMasters; // Will contain all found masters
-        
-        fileReader.setEncoding("win1252");
+
+        fileReader.setEncoding("win1252"); // FIXME: This should be configurable!
         fileReader.open(iter->second.string());
 
         // First we fill the availableMasters and the mMastersWidget
@@ -179,12 +179,12 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
             if (itemList.isEmpty()) // Master is not yet in the widget
             {
                 mMastersWidget->insertRow(i);
-                
+
                 QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
                 item->setForeground(Qt::red);
                 item->setFlags(item->flags() & ~(Qt::ItemIsSelectable));
-                
-                mMastersWidget->setItem(i, 0, item); 
+
+                mMastersWidget->setItem(i, 0, item);
             }
         }
 
@@ -192,18 +192,18 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
         // Now we put the current plugin in the mDataFilesModel under its masters
         QStandardItem *parent = new QStandardItem(availableMasters.join(","));
-        
+
         QString fileName = QString::fromStdString(boost::filesystem::path (iter->second.filename()).string());
         QStandardItem *child = new QStandardItem(fileName);
-        
+
         // Tooltip information
         QString author = QString::fromStdString(fileReader.getAuthor());
         float version = fileReader.getFVer();
         QString description = QString::fromStdString(fileReader.getDesc());
-        
+
         // For the date created/modified
         QFileInfo fi(QString::fromStdString(iter->second.string()));
-        
+
         QString toolTip= QString("<b>Author:</b> %1<br/> \
                                 <b>Version:</b> %2<br/><br/> \
                                 <b>Description:</b><br/> \
@@ -215,9 +215,9 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
                             .arg(description)
                             .arg(fi.created().toString(Qt::TextDate))
                             .arg(fi.lastModified().toString(Qt::TextDate));
-        
+
         child->setToolTip(toolTip);
-        
+
         const QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
 
         if (masterList.isEmpty()) { // Masters node not yet in the mDataFilesModel
@@ -236,12 +236,13 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
 void DataFilesPage::setupConfig()
 {
-    QString config = "./launcher.cfg";
+    Cfg::ConfigurationManager cfg;
+
+    QString config = (cfg.getRuntimeConfigPath() / "launcher.cfg").string().c_str();
     QFile file(config);
 
     if (!file.exists()) {
-        config = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                       "openmw", "launcher.cfg"));
+        config = QString::fromStdString((cfg.getLocalConfigPath() / "launcher.cfg").string());
     }
 
     file.setFileName(config); // Just for displaying information
@@ -672,7 +673,7 @@ void DataFilesPage::showContextMenu(const QPoint &point)
     if (!mPluginsTable->selectionModel()->hasSelection()) {
         return;
     }
-    
+
     QPoint globalPos = mPluginsTable->mapToGlobal(point);
 
     QModelIndexList selectedIndexes = mPluginsTable->selectionModel()->selectedIndexes();
@@ -971,7 +972,7 @@ void DataFilesPage::writeConfig(QString profile)
     if (mPluginsModel->rowCount() < 1) {
         return;
     }
-    
+
     if (profile.isEmpty()) {
         profile = mProfilesComboBox->currentText();
     }

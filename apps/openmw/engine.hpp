@@ -15,7 +15,7 @@
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
 #include <boost/timer.hpp>
-
+#include <components/cfg/configurationmanager.hpp>
 
 namespace Compiler
 {
@@ -53,7 +53,6 @@ namespace OEngine
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
-
     class Engine : private Ogre::FrameListener
     {
             std::string mEncoding;
@@ -106,49 +105,44 @@ namespace OMW
             /// Process pending commands
 
         public:
-
-            Engine();
-
-            ~Engine();
+            Engine(Cfg::ConfigurationManager& configurationManager);
+            virtual ~Engine();
 
             /// Enable strict filesystem mode (do not fold case)
             ///
             /// \attention The strict mode must be specified before any path-related settings
             /// are given to the engine.
-            void enableFSStrict();
+            void enableFSStrict(bool fsStrict);
 
             /// Set data dirs
-            void setDataDirs (const std::vector<boost::filesystem::path>& dataDirs);
+            void setDataDirs(const Files::PathContainer& dataDirs);
 
             /// Set resource dir
-            void setResourceDir (const boost::filesystem::path& parResDir);
+            void setResourceDir(const boost::filesystem::path& parResDir);
 
             /// Set start cell name (only interiors for now)
-            void setCell (const std::string& cellName);
+            void setCell(const std::string& cellName);
 
             /// Set master file (esm)
             /// - If the given name does not have an extension, ".esm" is added automatically
             /// - Currently OpenMW only supports one master at the same time.
-            void addMaster (const std::string& master);
+            void addMaster(const std::string& master);
 
             /// Enable fps counter
-            void showFPS() { mShowFPS = true; }
+            void showFPS(bool showFps);
 
             /// Enable debug mode:
             /// - non-exclusive input
-            void enableDebugMode();
+            void setDebugMode(bool debugMode);
 
-            /// Enable the command server so external apps can send commands to the console.
-            /// Must be set before go().
+            /// Enable or disable verbose script output
+            void setScriptsVerbosity(bool scriptsVerbosity);
 
-            /// Enable verbose script output
-            void enableVerboseScripts();
-
-            /// Disable all sound
-            void disableSound() { mUseSound = false; }
+            /// Disable or enable all sounds
+            void setSoundUsage(bool soundUsage);
 
             /// Start as a new game.
-            void setNewGame();
+            void setNewGame(bool newGame);
 
             /// Initialise and enter main loop.
             void go();
@@ -161,7 +155,10 @@ namespace OMW
 
             /// Font encoding
             void setEncoding(const std::string& encoding);
+
+        private:
+            Cfg::ConfigurationManager& mCfgMgr;
     };
 }
 
-#endif
+#endif /* ENGINE_H */

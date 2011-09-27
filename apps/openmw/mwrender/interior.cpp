@@ -195,13 +195,15 @@ void InteriorCellRender::insertMesh(const std::string &mesh)
 void InteriorCellRender::insertObjectPhysics()
 {
     if (!mInsertMesh.empty())
-        scene.addObject (insert->getName(), mInsertMesh, insert->getOrientation(),
+    {
+        mPhysics->addObject (insert->getName(), mInsertMesh, insert->getOrientation(),
             insert->getScale().x, insert->getPosition());
+    }
 }
 
 void InteriorCellRender::insertActorPhysics()
 {
-    scene.addActor (insert->getName(), mInsertMesh, insert->getPosition());
+    mPhysics->addActor (insert->getName(), mInsertMesh, insert->getPosition());
 }
 
 // insert a light related to the most recent insertBegin call.

@@ -1,7 +1,5 @@
 #include <QtGui>
 
-#include <components/files/path.hpp>
-
 #include "graphicspage.hpp"
 
 GraphicsPage::GraphicsPage(QWidget *parent) : QWidget(parent)
@@ -149,44 +147,21 @@ void GraphicsPage::createPages()
 
 void GraphicsPage::setupConfig()
 {
-    QString ogreCfg = "./ogre.cfg";
-
+    QString ogreCfg = mCfg.getOgreConfigPath().string().c_str();
     QFile file(ogreCfg);
-
-    if (!file.exists()) {
-        ogreCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                        "openmw", "ogre.cfg"));
-    }
-
     mOgreConfig = new QSettings(ogreCfg, QSettings::IniFormat);
-
 }
 
 void GraphicsPage::setupOgre()
 {
-    QString pluginCfg = "./plugins.cfg";
+    QString pluginCfg = mCfg.getPluginsConfigPath().string().c_str();
     QFile file(pluginCfg);
 
-    if (!file.exists()) {
-        pluginCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                          "openmw", "plugins.cfg"));
-    }
-    
-    // Reopen the file from user directory
-    file.setFileName(pluginCfg);
-    
-    if (!file.exists()) {
-        // There's no plugins.cfg in the user directory, use global directory
-        pluginCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
-                                                          "openmw", "plugins.cfg"));   
-    }
-    
     // Create a log manager so we can surpress debug text to stdout/stderr
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
-    logMgr->createLog("launcherOgre.log", true, false, false);
+    logMgr->createLog((mCfg.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
-    QString ogreCfg = QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                      "openmw", "ogre.cfg"));
+    QString ogreCfg = QString::fromStdString(mCfg.getOgreConfigPath().string());
     file.setFileName(ogreCfg);
 
     try
@@ -355,62 +330,62 @@ void GraphicsPage::writeConfig()
         } else {
             mDirect3DRenderSystem->setConfigOption("Allow NVPerfHUD", "No");
         }
-        
+
         // Antialiasing
         mDirect3DRenderSystem->setConfigOption("FSAA", mD3DAntiAliasingComboBox->currentText().toStdString());
-        
+
         // Full screen
         if (mD3DFullScreenCheckBox->checkState() == Qt::Checked) {
             mDirect3DRenderSystem->setConfigOption("Full Screen", "Yes");
         } else {
             mDirect3DRenderSystem->setConfigOption("Full Screen", "No");
         }
-        
+
         // Rendering device
         mDirect3DRenderSystem->setConfigOption("Rendering Device", mD3DRenderDeviceComboBox->currentText().toStdString());
-        
+
         // VSync
         if (mD3DVSyncCheckBox->checkState() == Qt::Checked) {
             mDirect3DRenderSystem->setConfigOption("VSync", "Yes");
         } else {
             mDirect3DRenderSystem->setConfigOption("VSync", "No");
         }
-       
+
         // Resolution
         mDirect3DRenderSystem->setConfigOption("Video Mode", mD3DResolutionComboBox->currentText().toStdString());
     }
-    
+
     if (mOpenGLRenderSystem) {
         // Display Frequency
         mOpenGLRenderSystem->setConfigOption("Display Frequency", mOGLFrequencyComboBox->currentText().toStdString());
-        
+
         // Antialiasing
         mOpenGLRenderSystem->setConfigOption("FSAA", mOGLAntiAliasingComboBox->currentText().toStdString());
-        
+
         // Full screen
         if (mOGLFullScreenCheckBox->checkState() == Qt::Checked) {
             mOpenGLRenderSystem->setConfigOption("Full Screen", "Yes");
         } else {
             mOpenGLRenderSystem->setConfigOption("Full Screen", "No");
         }
-        
+
         // RTT mode
         mOpenGLRenderSystem->setConfigOption("RTT Preferred Mode", mOGLRTTComboBox->currentText().toStdString());
-        
+
         // VSync
         if (mOGLVSyncCheckBox->checkState() == Qt::Checked) {
             mOpenGLRenderSystem->setConfigOption("VSync", "Yes");
         } else {
             mOpenGLRenderSystem->setConfigOption("VSync", "No");
         }
-        
+
         // Resolution
         mOpenGLRenderSystem->setConfigOption("Video Mode", mOGLResolutionComboBox->currentText().toStdString());
     }
-    
+
     // Now we validate the options
     QString ogreError = QString::fromStdString(mSelectedRenderSystem->validateConfigOptions());
-    
+
     if (!ogreError.isEmpty()) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error validating configuration");
@@ -421,17 +396,17 @@ void GraphicsPage::writeConfig()
         Press \"Show Details...\" for more information.<br>"));
         msgBox.setDetailedText(ogreError);
         msgBox.exec();
-        
+
         Ogre::LogManager::getSingletonPtr()->logMessage( "Caught exception in validateConfigOptions");
-        
+
         qCritical("Error validating configuration");
-        
+
         std::exit(1);
     }
 
     // Write the settings to the config file
     mOgre->saveConfig();
-    
+
 }
 
 QString GraphicsPage::getConfigValue(const QString &key, Ogre::RenderSystem *renderer)

@@ -39,7 +39,7 @@ namespace MWWorld
         ~Player();
 
         /// Set the player position. Uses Morrowind coordinates.
-        void setPos(float _x, float _y, float _z, bool updateCamera = false);
+        void setPos(float x, float y, float z);
 
         void setCell (MWWorld::Ptr::CellStore *cellStore)
         {

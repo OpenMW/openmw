@@ -90,6 +90,14 @@ set(BSA_HEADER
     ${COMP_DIR}/bsa/bsa_file.hpp)
 source_group(components\\bsa FILES ${BSA} ${BSA_HEADER})
 
+set(CFG
+    ${COMP_DIR}/cfg/configurationmanager.cpp
+    )
+set(CFG_HEADER
+    ${COMP_DIR}/cfg/configurationmanager.hpp
+    )
+source_group(components\\cfg FILES ${CFG} ${CFG_HEADER})
+
 set(NIF
     ${COMP_DIR}/nif/nif_file.cpp)
 set(NIF_HEADER
@@ -189,22 +197,29 @@ source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 
 set(MISC
     ${COMP_DIR}/misc/stringops.cpp
-    ${COMP_DIR}/misc/fileops.cpp)
+    )
 set(MISC_HEADER
-    ${COMP_DIR}/misc/fileops.hpp
     ${COMP_DIR}/misc/slice_array.hpp
-    ${COMP_DIR}/misc/stringops.hpp)
+    ${COMP_DIR}/misc/stringops.hpp
+    )
 source_group(components\\misc FILES ${MISC} ${MISC_HEADER})
 
 set(FILES
-    ${COMP_DIR}/files/path.cpp
+    ${COMP_DIR}/files/linuxpath.cpp
+    ${COMP_DIR}/files/windowspath.cpp
+    ${COMP_DIR}/files/macospath.cpp
     ${COMP_DIR}/files/multidircollection.cpp
     ${COMP_DIR}/files/collections.cpp
+    ${COMP_DIR}/files/fileops.cpp
     )
 set(FILES_HEADER
+    ${COMP_DIR}/files/linuxpath.hpp
+    ${COMP_DIR}/files/windowspath.hpp
+    ${COMP_DIR}/files/macospath.hpp
     ${COMP_DIR}/files/path.hpp
     ${COMP_DIR}/files/multidircollection.hpp
     ${COMP_DIR}/files/collections.hpp
+    ${COMP_DIR}/files/fileops.hpp
     )
 source_group(components\\files FILES ${FILES} ${FILES_HEADER})
 
@@ -217,10 +232,14 @@ file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
 source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
 
 set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC} ${TO_UTF8}
-    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET} ${FILES})
+    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET} ${FILES}
+    ${CFG}
+    )
 set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
     ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER} ${TO_UTF8_HEADER}
-    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER} ${FILES_HEADER})
+    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER} ${FILES_HEADER}
+    ${CFG_HEADER}
+    )
 
 # source directory: libs
 

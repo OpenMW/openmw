@@ -1,7 +1,5 @@
 #include <QtGui>
 
-#include <components/files/path.hpp>
-
 #include "maindialog.hpp"
 #include "playpage.hpp"
 #include "graphicspage.hpp"
@@ -92,7 +90,7 @@ QStringList MainDialog::readConfig(const QString &fileName)
     // We can't use QSettings directly because it
     // does not support multiple keys with the same name
     QFile file(fileName);
-    
+
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error opening OpenMW configuration file");
@@ -101,44 +99,44 @@ QStringList MainDialog::readConfig(const QString &fileName)
         msgBox.setText(tr("<br><b>Could not open %0</b><br><br> \
         Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
-        
+
         QApplication::exit(); // File cannot be opened or created
     }
-    
+
     QTextStream in(&file);
     QStringList dataDirs;
     QString dataLocal;
-    
+
     // Read the config line by line
     while (!in.atEnd()) {
         QString line = in.readLine();
-        
+
         if (line.startsWith("data=")) {
             dataDirs.append(line.remove("data="));
         }
-        
+
         // Read the data-local key, if more than one are found only the last is used
         if (line.startsWith("data-local=")) {
             dataLocal = line.remove("data-local=");
         }
-        
+
         // Read fs-strict key
         if (line.startsWith("fs-strict=")) {
             QString value = line.remove("fs-strict=");
-            
+
             (value.toLower() == QLatin1String("true"))
             ? mStrict = true
             : mStrict = false;
-              
+
         }
-            
+
     }
-    
-    // Add the data-local= key to the end of the dataDirs for priority reasons   
+
+    // Add the data-local= key to the end of the dataDirs for priority reasons
     if (!dataLocal.isEmpty()) {
         dataDirs.append(dataLocal);
     }
-    
+
     if (!dataDirs.isEmpty())
     {
         // Reset the global datadirs to the newly read entries
@@ -147,7 +145,7 @@ QStringList MainDialog::readConfig(const QString &fileName)
     }
 
     file.close();
-    
+
     return mDataDirs;
 }
 
@@ -156,31 +154,29 @@ void MainDialog::createPages()
     mPlayPage = new PlayPage(this);
     mGraphicsPage = new GraphicsPage(this);
     mDataFilesPage = new DataFilesPage(this);
-    
+
     // Retrieve all data entries from the configs
     QStringList dataDirs;
- 
+
     // Global location
-    QFile file(QString::fromStdString(Files::getPath(Files::Path_ConfigGlobal,
-                                                     "openmw", "openmw.cfg")));
+    QFile file(QString::fromStdString((mCfg.getGlobalConfigPath()/"openmw.cfg").string()));
     if (file.exists()) {
         dataDirs = readConfig(file.fileName());
     }
-    
+
     // User location
-    file.setFileName(QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                           "openmw", "openmw.cfg")));
+    file.setFileName(QString::fromStdString((mCfg.getLocalConfigPath()/"openmw.cfg").string()));
     if (file.exists()) {
         dataDirs = readConfig(file.fileName());
     }
 
     // Local location
     file.setFileName("./openmw.cfg");
-    
+
     if (file.exists()) {
         dataDirs = readConfig(file.fileName());
-    } 
-    
+    }
+
     file.close();
 
     if (!dataDirs.isEmpty()) {
@@ -331,9 +327,8 @@ void MainDialog::writeConfig()
     QStringList dataFiles = mDataFilesPage->selectedMasters();
     dataFiles.append(mDataFilesPage->checkedPlugins());
 
-    // Open the config as a QFile 
-    QFile file(QString::fromStdString(Files::getPath(Files::Path_ConfigUser,
-                                                     "openmw", "openmw.cfg")));
+    // Open the config as a QFile
+    QFile file(QString::fromStdString((mCfg.getLocalConfigPath()/"openmw.cfg").string()));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
@@ -375,7 +370,7 @@ void MainDialog::writeConfig()
     }
 
     file.write(buffer);
-  
+
     QTextStream out(&file);
 
     // Write the list of game files to the config

@@ -287,8 +287,7 @@ namespace ESMS
     IntCells intCells;
 
     // List of exterior cells. Indexed as extCells[gridX][gridY].
-    typedef std::map<int, ESM::Cell*> ExtCellsCol;
-    typedef std::map<int, ExtCellsCol> ExtCells;
+    typedef std::map<std::pair<int, int>, ESM::Cell*> ExtCells;
     ExtCells extCells;
 
     virtual void listIdentifier (std::vector<std::string>& identifier) const
@@ -303,13 +302,7 @@ namespace ESMS
         delete it->second;
 
       for (ExtCells::iterator it = extCells.begin(); it!=extCells.end(); ++it)
-      {
-        ExtCellsCol& col = it->second;
-        for (ExtCellsCol::iterator it = col.begin(); it!=col.end(); ++it)
-        {
           delete it->second;
-        }
-      }
     }
 
 
@@ -318,36 +311,36 @@ namespace ESMS
       IntCells::const_iterator it = intCells.find(id);
 
       if(it == intCells.end())
-        return NULL;
+         throw std::runtime_error ("Interior cell not found - " + id);
 
       return it->second;
     }
 
     const ESM::Cell *searchExt (int x, int y) const
     {
-        ExtCells::const_iterator it = extCells.find (x);
+        ExtCells::const_iterator it = extCells.find (std::make_pair (x, y));
 
         if (it==extCells.end())
             return 0;
 
-        ExtCellsCol::const_iterator it2 = it->second.find (y);
-
-        if (it2 == it->second.end())
-            return 0;
-
-        return it2->second;
+        return it->second;
     }
 
+    const ESM::Cell *findExt (int x, int y) const
+    {
+        const ESM::Cell *cell = searchExt (x, y);
+
+        if (!cell)
+            throw std::runtime_error ("Exterior cell not found");
+
+        return cell;
+    }
     const ESM::Cell *searchExtByName (const std::string& id) const
     {
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
         {
-            const ExtCellsCol& column = iter->second;
-            for (ExtCellsCol::const_iterator iter = column.begin(); iter!=column.end(); ++iter)
-            {
-                if ( toLower(iter->second->name) == toLower(id))
-                    return iter->second;
-            }
+            if (toLower (iter->second->name) == toLower (id))
+                return iter->second;
         }
 
         return 0;
@@ -358,14 +351,8 @@ namespace ESMS
         std::string id2 = toLower (id);
 
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
-        {
-            const ExtCellsCol& column = iter->second;
-            for (ExtCellsCol::const_iterator iter = column.begin(); iter!=column.end(); ++iter)
-            {
-                if (toLower (iter->second->region)==id)
-                    return iter->second;
-            }
-        }
+            if (toLower (iter->second->region)==id)
+                return iter->second;
 
         return 0;
     }
@@ -389,7 +376,7 @@ namespace ESMS
       else
         {
           // Store exterior cells by grid position
-          extCells[cell->data.gridX][cell->data.gridY] = cell;
+          extCells[std::make_pair (cell->data.gridX, cell->data.gridY)] = cell;
         }
     }
   };

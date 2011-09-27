@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include <components/cfg/configurationmanager.hpp>
+
 class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
@@ -30,12 +32,11 @@ public slots:
 private:
     void createIcons();
     void createPages();
-    void setupConfig();
     void writeConfig();
     void closeEvent(QCloseEvent *event);
-    
+
     QStringList readConfig(const QString &fileName);
-    
+
     QListWidget *mIconWidget;
     QStackedWidget *mPagesWidget;
 
@@ -45,6 +46,8 @@ private:
 
     QStringList mDataDirs;
     bool mStrict;
+
+    Cfg::ConfigurationManager mCfg;
 };
 
 #endif

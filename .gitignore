@@ -4,3 +4,6 @@ Doxygen
 prebuilt
 apps/openmw/config.hpp
 Docs/mainpage.hpp
+CMakeFiles
+*/CMakeFiles
+CMakeCache.txt

@@ -11,7 +11,7 @@
 
 #include "components/esm/records.hpp"
 #include <components/esm_store/cell_store.hpp>
-#include <components/misc/fileops.hpp>
+#include <components/files/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/loadregn.hpp>
 #include <components/esm/esm_reader.hpp>
@@ -209,7 +209,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     return true;
 }
 
-OMW::Engine::Engine()
+OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
   : mPhysicEngine (0)
   , mShowFPS (false)
   , mDebug (false)
@@ -221,6 +221,7 @@ OMW::Engine::Engine()
   , mScriptContext (0)
   , mGuiManager (0)
   , mFSStrict (false)
+  , mCfgMgr(configurationManager)
 {
     MWClass::registerClasses();
 }
@@ -251,9 +252,8 @@ void OMW::Engine::loadBSA()
          Bsa::addBSA (iter->second.string());
     }
 
-    std::string m = mDataDir.string();
-    std::cout << "Data dir" << m << "\n";
-    Bsa::addDir(m, mFSStrict);
+    std::cout << "Data dir " << mDataDir.string() << std::endl;
+    Bsa::addDir(mDataDir.string(), mFSStrict);
 }
 
 // add resources directory
@@ -265,19 +265,18 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 }
 
-void OMW::Engine::enableFSStrict()
+void OMW::Engine::enableFSStrict(bool fsStrict)
 {
-    mFSStrict = true;
+    mFSStrict = fsStrict;
 }
 
 // Set data dir
 
-void OMW::Engine::setDataDirs (const std::vector<boost::filesystem::path>& dataDirs)
+void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     /// \todo remove mDataDir, once resources system can handle multiple directories
     assert (!dataDirs.empty());
-    mDataDir = dataDirs[0];
-
+    mDataDir = dataDirs.back();
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
 
@@ -311,19 +310,19 @@ void OMW::Engine::addMaster (const std::string& master)
     }
 }
 
-void OMW::Engine::enableDebugMode()
+void OMW::Engine::setDebugMode(bool debugMode)
 {
-    mDebug = true;
+    mDebug = debugMode;
 }
 
-void OMW::Engine::enableVerboseScripts()
+void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
 {
-    mVerboseScripts = true;
+    mVerboseScripts = scriptsVerbosity;
 }
 
-void OMW::Engine::setNewGame()
+void OMW::Engine::setNewGame(bool newGame)
 {
-    mNewGame = true;
+    mNewGame = newGame;
 }
 
 // Initialise and enter main loop.
@@ -337,19 +336,10 @@ void OMW::Engine::go()
     test.name = "";
     total = 0;
 
-    std::string cfgDir = Files::getPath (Files::Path_ConfigGlobal, "openmw", "");
-    std::string cfgUserDir = Files::getPath (Files::Path_ConfigUser, "openmw", "");
-    std::string plugCfg = "plugins.cfg";
-    std::string ogreCfg = "ogre.cfg";
-    ogreCfg.insert(0, cfgUserDir);
-
-    //A local plugins.cfg will be used if it exist, otherwise look in the default path
-    if(!Misc::isFile(plugCfg.c_str()))
-    {
-        plugCfg.insert(0, cfgDir);
-    }
-
-    mOgre.configure(!Misc::isFile(ogreCfg.c_str()), cfgUserDir, plugCfg, false);
+    mOgre.configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
+        mCfgMgr.getOgreConfigPath().string(),
+        mCfgMgr.getLogPath().string() + std::string("/"),
+        mCfgMgr.getPluginsConfigPath().string(), false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -369,7 +359,9 @@ void OMW::Engine::go()
         mResDir, mNewGame, mEnvironment, mEncoding);
 
     // Set up the GUI system
-    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false, cfgDir);
+    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false,
+        mCfgMgr.getLogPath().string() + std::string("/"));
+
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
@@ -514,6 +506,16 @@ void OMW::Engine::activate()
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
+}
+
+void OMW::Engine::setSoundUsage(bool soundUsage)
+{
+    mUseSound = soundUsage;
+}
+
+void OMW::Engine::showFPS(bool showFps)
+{
+    mShowFPS = showFps;
 }
 
 void OMW::Engine::setEncoding(const std::string& encoding)
