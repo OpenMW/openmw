@@ -8,6 +8,8 @@ set(LAUNCHER
     playpage.cpp
     pluginsmodel.cpp
     pluginsview.cpp
+
+    launcher.rc
 )
 
 set(LAUNCHER_HEADER
