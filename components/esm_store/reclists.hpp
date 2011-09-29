@@ -305,15 +305,24 @@ namespace ESMS
           delete it->second;
     }
 
+    const ESM::Cell* searchInt(const std::string &id) const
+    {
+      IntCells::const_iterator iter = intCells.find(id);
+
+      if (iter!=intCells.end())
+        return iter->second;
+
+      return 0;
+    }
 
     const ESM::Cell* findInt(const std::string &id) const
     {
-      IntCells::const_iterator it = intCells.find(id);
+      const ESM::Cell *cell = searchInt (id);
 
-      if(it == intCells.end())
+      if (!cell)
          throw std::runtime_error ("Interior cell not found - " + id);
 
-      return it->second;
+      return cell;
     }
 
     const ESM::Cell *searchExt (int x, int y) const

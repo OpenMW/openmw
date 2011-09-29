@@ -207,6 +207,10 @@ namespace MWWorld
             std::pair<std::string, const ESM::Class *> createRecord (const ESM::Class& record);
             ///< Create a new recrod (of type class) in the ESM store.
             /// \return ID, pointer to created record
+
+            const ESM::Cell *createRecord (const ESM::Cell& record);
+            ///< Create a new recrod (of type cell) in the ESM store.
+            /// \return ID, pointer to created record
     };
 }
 
