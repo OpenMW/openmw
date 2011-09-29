@@ -574,6 +574,14 @@ namespace MWWorld
                     mEnvironment.mSoundManager->stopSound3D (ptr);
 
                     mPhysics->removeObject (ptr.getRefData().getHandle());
+
+                    for (ScriptList::iterator iter = mLocalScripts.begin(); iter!=mLocalScripts.end();
+                        ++iter)
+                        if (ptr==iter->second)
+                        {
+                            mLocalScripts.erase (iter);
+                            break;
+                        }
                 }
 
                 render->deleteObject (ptr.getRefData().getHandle());
