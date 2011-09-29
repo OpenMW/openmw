@@ -514,7 +514,10 @@ if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
 
-add_subdirectory( apps/launcher )
+option(BUILD_LAUNCHER "build Launcher inspector" ON)
+if (BUILD_LAUNCHER)
+   add_subdirectory( apps/launcher )
+endif()
 
 if (WIN32)
   if (MSVC)
