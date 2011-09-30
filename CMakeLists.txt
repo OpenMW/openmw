@@ -452,6 +452,10 @@ if(DPKG_PROGRAM)
         set(PACKAGE_MAINTAINER "unknown")
     endif()
 
+    #Install icon and desktop file
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+
     #Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
@@ -470,8 +474,8 @@ if(DPKG_PROGRAM)
  Data files from the original game is required to run it.")
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogremain-1.7.1 (>= 1.7.1-1), libbullet2.77 (>= 2.77),  libboost-filesystem1.42.0 (>= 1.42.0), libboost-program-options1.42.0 (>= 1.42.0), libboost-system1.42.0 (>= 1.42.0), libboost-thread1.42.0 (>= 1.42.0), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.2.0 (>= 1.2.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2)")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogremain-1.7.3 (>= 1.7.3), libbullet0 (>= 2.77),  libboost-filesystem1.42.0 (>= 1.42.0), libboost-program-options1.42.0 (>= 1.42.0), libboost-system1.42.0 (>= 1.42.0), libboost-thread1.42.0 (>= 1.42.0), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.2.0 (>= 1.2.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 

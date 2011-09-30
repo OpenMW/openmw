@@ -65,6 +65,10 @@ target_link_libraries(omwlauncher
     ${PNG_LIBRARY}
 )
 
+if(DPKG_PROGRAM)
+    INSTALL(TARGETS omwlauncher RUNTIME DESTINATION games COMPONENT omwlauncher)
+endif()
+
 if (APPLE)
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${APP_BUNDLE_DIR}/../launcher.qss")
