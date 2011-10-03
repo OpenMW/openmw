@@ -214,7 +214,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mScene (renderer,physEng), mPlayer (0), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm)
+      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysEngine = physEng;
 
@@ -574,6 +574,14 @@ namespace MWWorld
                     mEnvironment.mSoundManager->stopSound3D (ptr);
 
                     mPhysics->removeObject (ptr.getRefData().getHandle());
+
+                    for (ScriptList::iterator iter = mLocalScripts.begin(); iter!=mLocalScripts.end();
+                        ++iter)
+                        if (ptr==iter->second)
+                        {
+                            mLocalScripts.erase (iter);
+                            break;
+                        }
                 }
 
                 render->deleteObject (ptr.getRefData().getHandle());
@@ -721,5 +729,28 @@ namespace MWWorld
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_CLAS));
 
         return std::make_pair (stream.str(), created);
+    }
+
+    const ESM::Cell *World::createRecord (const ESM::Cell& record)
+    {
+        if (record.data.flags & ESM::Cell::Interior)
+        {
+            if (mStore.cells.searchInt (record.name))
+                throw std::runtime_error ("failed creating interior cell");
+
+            ESM::Cell *cell = new ESM::Cell (record);
+            mStore.cells.intCells.insert (std::make_pair (record.name, cell));
+            return cell;
+        }
+        else
+        {
+            if (mStore.cells.searchExt (record.data.gridX, record.data.gridY))
+                throw std::runtime_error ("failed creating exterior cell");
+
+            ESM::Cell *cell = new ESM::Cell (record);
+            mStore.cells.extCells.insert (
+                std::make_pair (std::make_pair (record.data.gridX, record.data.gridY), cell));
+            return cell;
+        }
     }
 }

@@ -4,6 +4,8 @@
 
 #include <algorithm>
 
+#include "world.hpp"
+
 MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
     if (cell->data.flags & ESM::Cell::Interior)
@@ -33,8 +35,8 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
     }
 }
 
-MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader)
-: mStore (store), mReader (reader) {}
+MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader, MWWorld::World& world)
+: mStore (store), mReader (reader), mWorld (world) {}
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 {
@@ -43,7 +45,21 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
     if (result==mExteriors.end())
     {
-        const ESM::Cell *cell = mStore.cells.findExt (x, y);
+        const ESM::Cell *cell = mStore.cells.searchExt (x, y);
+
+        if (!cell)
+        {
+            // Cell isn't predefined. Make one on the fly.
+            ESM::Cell record;
+
+            record.data.flags = 0;
+            record.data.gridX = x;
+            record.data.gridY = y;
+            record.water = 0;
+            record.mapColor = 0;
+
+            cell = mWorld.createRecord (record);
+        }
 
         result = mExteriors.insert (std::make_pair (
             std::make_pair (x, y), Ptr::CellStore (cell))).first;
