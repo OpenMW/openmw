@@ -116,7 +116,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
                     }
                 }
 
-                srand ( time(NULL) );
                 int r = rand() % total;        //old random code
                 int pos = 0;
                 soundIter = test.soundList.begin();
@@ -221,6 +220,7 @@ OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
   , mFSStrict (false)
   , mCfgMgr(configurationManager)
 {
+    std::srand ( std::time(NULL) );
     MWClass::registerClasses();
 }
 
