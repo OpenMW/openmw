@@ -17,6 +17,7 @@
 #include "scene.hpp"
 #include "physicssystem.hpp"
 #include "cells.hpp"
+#include "localscripts.hpp"
 
 #include <openengine/bullet/physic.hpp>
 
@@ -55,9 +56,7 @@ namespace MWWorld
 
     class World
     {
-
         public:
-            typedef std::list<std::pair<std::string, Ptr> > ScriptList;
 
             enum RenderMode
             {
@@ -71,7 +70,7 @@ namespace MWWorld
             MWWorld::Player *mPlayer;
             ESM::ESMReader mEsm;
             ESMS::ESMStore mStore;
-            ScriptList mLocalScripts;
+            LocalScripts mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
@@ -108,8 +107,6 @@ namespace MWWorld
 
             Ptr::CellStore *getInterior (const std::string& name);
 
-            void removeScripts (Ptr::CellStore *cell);
-
             void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
 
             void adjustSky();
@@ -120,8 +117,7 @@ namespace MWWorld
 
             ESM::ESMReader& getEsmReader();
 
-            const ScriptList& getLocalScripts() const;
-            ///< Names and local variable state of all local scripts in active cells.
+            LocalScripts& getLocalScripts();
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?

@@ -81,8 +81,6 @@ namespace OMW
             int focusFrameCounter;
             static const int focusUpdateFrame = 10;
 
-            MWWorld::Ptr mIgnoreLocalPtr;
-
             Files::Collections mFileCollections;
             bool mFSStrict;
 

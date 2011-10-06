@@ -54,22 +54,23 @@
 
 void OMW::Engine::executeLocalScripts()
 {
-    for (MWWorld::World::ScriptList::const_iterator iter (
-        mEnvironment.mWorld->getLocalScripts().begin());
-        iter!=mEnvironment.mWorld->getLocalScripts().end(); ++iter)
-    {
-        if (mIgnoreLocalPtr.isEmpty() || mIgnoreLocalPtr!=iter->second)
-        {
-            MWScript::InterpreterContext interpreterContext (mEnvironment,
-                &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
-            mScriptManager->run (iter->first, interpreterContext);
+    MWWorld::LocalScripts& localScripts = mEnvironment.mWorld->getLocalScripts();
 
-            if (mEnvironment.mWorld->hasCellChanged())
-                break;
-        }
+    localScripts.startIteration();
+
+    while (!localScripts.isFinished())
+    {
+        std::pair<std::string, MWWorld::Ptr> script = localScripts.getNext();
+
+        MWScript::InterpreterContext interpreterContext (mEnvironment,
+            &script.second.getRefData().getLocals(), script.second);
+        mScriptManager->run (script.first, interpreterContext);
+
+        if (mEnvironment.mWorld->hasCellChanged())
+            break;
     }
 
-    mIgnoreLocalPtr = MWWorld::Ptr();
+    mEnvironment.mWorld->getLocalScripts().setIgnore (MWWorld::Ptr());
 }
 
 
@@ -488,7 +489,7 @@ void OMW::Engine::activate()
 
         if (!script.empty())
         {
-            mIgnoreLocalPtr = ptr;
+            mEnvironment.mWorld->getLocalScripts().setIgnore (ptr);
             mScriptManager->run (script, interpreterContext);
         }
 

@@ -27,7 +27,7 @@ namespace
 {
     template<typename T>
     void listCellScripts (const ESMS::ESMStore& store,
-        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::World::ScriptList& scriptList,
+        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::LocalScripts& localScripts,
         MWWorld::Ptr::CellStore *cell)
     {
         for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
@@ -40,8 +40,7 @@ namespace
                 {
                     iter->mData.setLocals (*script);
 
-                    scriptList.push_back (
-                        std::make_pair (iter->base->script, MWWorld::Ptr (&*iter, cell)));
+                    localScripts.add (iter->base->script, MWWorld::Ptr (&*iter, cell));
                 }
             }
         }
@@ -185,20 +184,6 @@ namespace MWWorld
         throw std::runtime_error ("month out of range");
     }
 
-    void World::removeScripts (Ptr::CellStore *cell)
-    {
-        ScriptList::iterator iter = mLocalScripts.begin();
-
-        while (iter!=mLocalScripts.end())
-        {
-            if (iter->second.getCell()==cell)
-                mLocalScripts.erase (iter++);
-            else
-                ++iter;
-        }
-    }
-
-
     void World::adjustSky()
     {
         if (mSky)
@@ -306,7 +291,7 @@ namespace MWWorld
         return mEsm;
     }
 
-    const World::ScriptList& World::getLocalScripts() const
+    LocalScripts& World::getLocalScripts()
     {
         return mLocalScripts;
     }
@@ -575,13 +560,7 @@ namespace MWWorld
 
                     mPhysics->removeObject (ptr.getRefData().getHandle());
 
-                    for (ScriptList::iterator iter = mLocalScripts.begin(); iter!=mLocalScripts.end();
-                        ++iter)
-                        if (ptr==iter->second)
-                        {
-                            mLocalScripts.erase (iter);
-                            break;
-                        }
+                    mLocalScripts.remove (ptr);
                 }
 
                 render->deleteObject (ptr.getRefData().getHandle());

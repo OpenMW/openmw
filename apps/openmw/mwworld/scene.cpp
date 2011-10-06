@@ -57,7 +57,7 @@ namespace MWWorld
                 mPhysics->removeObject (*iter);
         }
 
-        mWorld->removeScripts (iter->first);
+        mWorld->getLocalScripts().clearCell (iter->first);
 
         mEnvironment.mMechanicsManager->dropActors (iter->first);
         mEnvironment.mSoundManager->stopSound (iter->first);
