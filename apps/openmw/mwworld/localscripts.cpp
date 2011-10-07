@@ -1,6 +1,26 @@
 
 #include "localscripts.hpp"
 
+namespace
+{
+    template<typename T>
+    void listCellScripts (MWWorld::LocalScripts& localScripts,
+        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList,  MWWorld::Ptr::CellStore *cell)
+    {
+        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
+            cellRefList.list.begin());
+            iter!=cellRefList.list.end(); ++iter)
+        {
+            if (!iter->base->script.empty() && iter->mData.getCount())
+            {
+                localScripts.add (iter->base->script, MWWorld::Ptr (&*iter, cell));
+            }
+        }
+    }
+}
+
+MWWorld::LocalScripts::LocalScripts (const ESMS::ESMStore& store) : mStore (store) {}
+
 void MWWorld::LocalScripts::setIgnore (const Ptr& ptr)
 {
     mIgnore = ptr;
@@ -39,7 +59,33 @@ std::pair<std::string, MWWorld::Ptr> MWWorld::LocalScripts::getNext()
 
 void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 {
-    mScripts.push_back (std::make_pair (scriptName, ptr));
+    if (const ESM::Script *script = mStore.scripts.find (scriptName))
+    {
+        ptr.getRefData().setLocals (*script);
+
+        mScripts.push_back (std::make_pair (scriptName, ptr));
+    }
+}
+
+void MWWorld::LocalScripts::addCell (Ptr::CellStore *cell)
+{
+    listCellScripts (*this, cell->activators, cell);
+    listCellScripts (*this, cell->potions, cell);
+    listCellScripts (*this, cell->appas, cell);
+    listCellScripts (*this, cell->armors, cell);
+    listCellScripts (*this, cell->books, cell);
+    listCellScripts (*this, cell->clothes, cell);
+    listCellScripts (*this, cell->containers, cell);
+    listCellScripts (*this, cell->creatures, cell);
+    listCellScripts (*this, cell->doors, cell);
+    listCellScripts (*this, cell->ingreds, cell);
+    listCellScripts (*this, cell->lights, cell);
+    listCellScripts (*this, cell->lockpicks, cell);
+    listCellScripts (*this, cell->miscItems, cell);
+    listCellScripts (*this, cell->npcs, cell);
+    listCellScripts (*this, cell->probes, cell);
+    listCellScripts (*this, cell->repairs, cell);
+    listCellScripts (*this, cell->weapons, cell);
 }
 
 void MWWorld::LocalScripts::clear()

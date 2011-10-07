@@ -70,7 +70,7 @@ void OMW::Engine::executeLocalScripts()
             break;
     }
 
-    mEnvironment.mWorld->getLocalScripts().setIgnore (MWWorld::Ptr());
+    localScripts.setIgnore (MWWorld::Ptr());
 }
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)

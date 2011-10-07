@@ -68,7 +68,7 @@ namespace MWWorld
     void Scene::loadCell (Ptr::CellStore *cell, MWRender::CellRender *render)
     {
         // register local scripts
-        mWorld->insertInteriorScripts (*cell);
+        mWorld->getLocalScripts().addCell (cell);
 
         // This connects the cell data with the rendering scene.
         std::pair<CellRenderCollection::iterator, bool> result =

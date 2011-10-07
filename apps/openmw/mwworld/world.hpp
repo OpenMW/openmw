@@ -107,8 +107,6 @@ namespace MWWorld
 
             Ptr::CellStore *getInterior (const std::string& name);
 
-            void insertInteriorScripts (ESMS::CellStore<RefData>& cell);
-
             void adjustSky();
 
             MWWorld::Player& getPlayer();

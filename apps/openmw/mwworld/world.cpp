@@ -66,28 +66,6 @@ namespace
 
 namespace MWWorld
 {
-
-    void World::insertInteriorScripts (ESMS::CellStore<RefData>& cell)
-    {
-        listCellScripts (mStore, cell.activators, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.potions, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.appas, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.armors, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.books, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.clothes, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.containers, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.creatures, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.doors, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.ingreds, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.lights, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.lockpicks, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.miscItems, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.npcs, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.probes, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.repairs, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.weapons, mLocalScripts, &cell);
-    }
-
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
         if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref =
@@ -198,7 +176,7 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
-    : mScene (renderer,physEng), mPlayer (0), mGlobalVariables (0),
+    : mScene (renderer,physEng), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysEngine = physEng;
