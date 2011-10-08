@@ -102,6 +102,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
             "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default")
+
+        ("report-focus", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "write name of focussed object to cout")
         ;
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -202,6 +205,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
     engine.setSoundUsage(!variables["nosound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
+    engine.setReportFocus(variables["report-focus"].as<bool>());
 
     return true;
 }

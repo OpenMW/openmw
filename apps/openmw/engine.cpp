@@ -73,6 +73,36 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
+void OMW::Engine::updateFocusReport (float duration)
+{
+    if ((mFocusTDiff += duration)>0.25)
+    {
+        mFocusTDiff = 0;
+
+        std::string name;
+
+        std::string handle = mEnvironment.mWorld->getFacedHandle();
+
+        if (!handle.empty())
+        {
+            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+            if (!ptr.isEmpty())
+                name = MWWorld::Class::get (ptr).getName (ptr);
+        }
+
+        if (name!=mFocusName)
+        {
+            mFocusName = name;
+
+            if (mFocusName.empty())
+                std::cout << "Unfocus" << std::endl;
+            else
+                std::cout << "Focus: " << name << std::endl;
+        }
+    }
+}
+
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
@@ -176,24 +206,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
             mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
 
-        if (focusFrameCounter++ == focusUpdateFrame)
-        {
-            std::string handle = mEnvironment.mWorld->getFacedHandle();
-
-            if (!handle.empty())
-            {
-                MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
-
-                if (!ptr.isEmpty())
-                {
-                    std::string name = MWWorld::Class::get (ptr).getName (ptr);
-                    if (!name.empty())
-                        std::cout << "Object: " << name << std::endl;
-                }
-            }
-
-            focusFrameCounter = 0;
-        }
+        // report focus object (for debugging)
+        if (mReportFocus)
+            updateFocusReport (mEnvironment.mFrameDuration);
     }
     catch (const std::exception& e)
     {
@@ -211,6 +226,8 @@ OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
   , mNewGame (false)
   , mUseSound (true)
   , mCompileAll (false)
+  , mReportFocus (false)
+  , mFocusTDiff (0)
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
@@ -320,6 +337,11 @@ void OMW::Engine::setNewGame(bool newGame)
     mNewGame = newGame;
 }
 
+void OMW::Engine::setReportFocus (bool report)
+{
+    mReportFocus = report;
+}
+
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -415,8 +437,6 @@ void OMW::Engine::go()
     MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayer(),
                                   *mEnvironment.mWindowManager, mDebug, *this);
     mEnvironment.mInputManager = &input;
-
-    focusFrameCounter = 0;
 
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 

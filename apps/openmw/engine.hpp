@@ -68,6 +68,10 @@ namespace OMW
             bool mNewGame;
             bool mUseSound;
             bool mCompileAll;
+            bool mReportFocus;
+            float mFocusTDiff;
+            std::string mFocusName;
+
             int total;
 
             MWWorld::Environment mEnvironment;
@@ -77,9 +81,6 @@ namespace OMW
             OEngine::GUI::MyGUIManager *mGuiManager;
             ESM::Region test;
             boost::timer timer;
-
-            int focusFrameCounter;
-            static const int focusUpdateFrame = 10;
 
             Files::Collections mFileCollections;
             bool mFSStrict;
@@ -98,9 +99,9 @@ namespace OMW
 
             void executeLocalScripts();
 
-            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
+            void updateFocusReport (float duration);
 
-            /// Process pending commands
+            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
         public:
             Engine(Cfg::ConfigurationManager& configurationManager);
@@ -141,6 +142,9 @@ namespace OMW
 
             /// Start as a new game.
             void setNewGame(bool newGame);
+
+            /// Write name of focussed object to cout
+            void setReportFocus (bool report);
 
             /// Initialise and enter main loop.
             void go();
