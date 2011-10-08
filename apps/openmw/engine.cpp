@@ -77,6 +77,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
     {
+        mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
+
         if(mShowFPS)
         {
             mEnvironment.mWindowManager->wmSetFPS(mOgre.getFPS());
@@ -138,19 +140,15 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
                     pos += chance;
                 }
             }
-
-            //mEnvironment.mSoundManager->playSound(effect, 1.0, 1.0);
-            //printf("REGION: %s\n", test.name);
-
         }
         else if(current->cell->data.flags & current->cell->Interior)
         {
             test.name = "";
         }
 
-        mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
 
-        //
+
+        // update GUI
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
         // global scripts
@@ -175,28 +173,27 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
         mEnvironment.mMechanicsManager->update (movement);
 
+        if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
+            mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
+
         if (focusFrameCounter++ == focusUpdateFrame)
         {
             std::string handle = mEnvironment.mWorld->getFacedHandle();
-
-            std::string name;
 
             if (!handle.empty())
             {
                 MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
                 if (!ptr.isEmpty())
-                    name = MWWorld::Class::get (ptr).getName (ptr);
+                {
+                    std::string name = MWWorld::Class::get (ptr).getName (ptr);
+                    if (!name.empty())
+                        std::cout << "Object: " << name << std::endl;
+                }
             }
-
-            if (!name.empty())
-                std::cout << "Object: " << name << std::endl;
 
             focusFrameCounter = 0;
         }
-
-        if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
-            mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
     }
     catch (const std::exception& e)
     {
