@@ -109,76 +109,19 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
 
-        if(mShowFPS)
+        // sound
+        if (mUseSound)
         {
-            mEnvironment.mWindowManager->wmSetFPS(mOgre.getFPS());
+            if (!mEnvironment.mSoundManager->isMusicPlaying())
+                mEnvironment.mSoundManager->startRandomTitle();
+
+            mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
         }
-
-        if(mUseSound && !(mEnvironment.mSoundManager->isMusicPlaying()))
-        {
-            // Play some good 'ol tunes
-            mEnvironment.mSoundManager->startRandomTitle();
-        }
-
-        std::string effect;
-
-        MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
-
-        //If the region has changed
-        if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
-            timer.restart();
-            if (test.name != current->cell->region)
-            {
-                total = 0;
-                test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
-            }
-
-            if(test.soundList.size() > 0)
-            {
-                std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
-                //mEnvironment.mSoundManager
-                if(total == 0){
-                    while (!(soundIter == test.soundList.end()))
-                    {
-                        ESM::NAME32 go = soundIter->sound;
-                        int chance = (int) soundIter->chance;
-                        //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-                        soundIter++;
-                        total += chance;
-                    }
-                }
-
-                int r = rand() % total;        //old random code
-                int pos = 0;
-                soundIter = test.soundList.begin();
-                while (!(soundIter == test.soundList.end()))
-                {
-                    const ESM::NAME32 go = soundIter->sound;
-                    int chance = (int) soundIter->chance;
-                    //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-                    soundIter++;
-                    if( r - pos < chance)
-                    {
-                        effect = go.name;
-                        //play sound
-                        std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-                        mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
-
-                        break;
-
-                    }
-                    pos += chance;
-                }
-            }
-        }
-        else if(current->cell->data.flags & current->cell->Interior)
-        {
-            test.name = "";
-        }
-
-
 
         // update GUI
+        if(mShowFPS)
+            mEnvironment.mWindowManager->wmSetFPS(mOgre.getFPS());
+
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
         // global scripts
@@ -350,9 +293,6 @@ void OMW::Engine::go()
     assert (!mCellName.empty());
     assert (!mMaster.empty());
 
-    test.name = "";
-    total = 0;
-
     mOgre.configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string() + std::string("/"),
@@ -396,7 +336,7 @@ void OMW::Engine::go()
                                                            mOgre.getCamera(),
                                                            mEnvironment.mWorld->getStore(),
                                                            (mDataDir),
-                                                           mUseSound, mFSStrict);
+                                                           mUseSound, mFSStrict, mEnvironment);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,

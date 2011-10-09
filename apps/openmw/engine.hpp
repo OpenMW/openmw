@@ -14,7 +14,6 @@
 
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
-#include <boost/timer.hpp>
 #include <components/cfg/configurationmanager.hpp>
 
 namespace Compiler
@@ -72,15 +71,11 @@ namespace OMW
             float mFocusTDiff;
             std::string mFocusName;
 
-            int total;
-
             MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
             OEngine::GUI::MyGUIManager *mGuiManager;
-            ESM::Region test;
-            boost::timer timer;
 
             Files::Collections mFileCollections;
             bool mFSStrict;
