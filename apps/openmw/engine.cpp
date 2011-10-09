@@ -6,21 +6,23 @@
 #include <iostream>
 #include <utility>
 
-#include <OgreVector3.h>
-#include <Ogre.h>
+#include <OgreRoot.h>
 
-#include "components/esm/records.hpp"
+#include <MyGUI_WidgetManager.h>
+
+#include <openengine/ogre/renderer.hpp>
+#include <openengine/gui/manager.hpp>
+
+#include <components/esm/records.hpp>
 #include <components/esm_store/cell_store.hpp>
-#include <components/files/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
-#include <components/esm/loadregn.hpp>
 #include <components/esm/esm_reader.hpp>
 #include <components/files/path.hpp>
-
-#include <openengine/gui/manager.hpp>
-#include "mwgui/window_manager.hpp"
+#include <components/nifbullet/bullet_nif_loader.hpp>
 
 #include "mwinput/inputmanager.hpp"
+
+#include "mwgui/window_manager.hpp"
 
 #include "mwscript/scriptmanager.hpp"
 #include "mwscript/compilercontext.hpp"
@@ -42,15 +44,6 @@
 #include "mwdialogue/journal.hpp"
 
 #include "mwmechanics/mechanicsmanager.hpp"
-
-#include <OgreRoot.h>
-
-#include <MyGUI_WidgetManager.h>
-#include "mwgui/class.hpp"
-
-#include "components/nifbullet/bullet_nif_loader.hpp"
-
-//using namespace ESM;
 
 void OMW::Engine::executeLocalScripts()
 {

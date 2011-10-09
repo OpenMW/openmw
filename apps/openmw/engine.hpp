@@ -7,14 +7,14 @@
 
 #include <OgreFrameListener.h>
 
-#include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
+
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
+#include <components/cfg/configurationmanager.hpp>
 
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
-#include <components/cfg/configurationmanager.hpp>
 
 namespace Compiler
 {
@@ -46,6 +46,11 @@ namespace OEngine
   namespace GUI
   {
     class MyGUIManager;
+  }
+
+  namespace Render
+  {
+    class OgreRenderer;
   }
 }
 
