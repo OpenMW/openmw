@@ -319,12 +319,6 @@ void OMW::Engine::go()
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false,
         mCfgMgr.getLogPath().string() + std::string("/"));
 
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
-
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
@@ -383,29 +377,19 @@ void OMW::Engine::go()
     mOgre.getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
-      mEnvironment.mSoundManager->startRandomTitle();
+    mEnvironment.mSoundManager->startRandomTitle();
 
     // scripts
     if (mCompileAll)
     {
-        typedef ESMS::ScriptListT<ESM::Script>::MapType Container;
+        std::pair<int, int> result = mScriptManager->compileAll();
 
-        Container scripts = mEnvironment.mWorld->getStore().scripts.list;
-
-        int count = 0;
-        int success = 0;
-
-        for (Container::const_iterator iter (scripts.begin()); iter!=scripts.end(); ++iter, ++count)
-            if (mScriptManager->compile (iter->first))
-                ++success;
-
-        if (count)
+        if (result.first)
             std::cout
-                << "compiled " << success << " of " << count << " scripts ("
-                << 100*static_cast<double> (success)/count
+                << "compiled " << result.second << " of " << result.first << " scripts ("
+                << 100*static_cast<double> (result.second)/result.first
                 << "%)"
                 << std::endl;
-
     }
 
     // Start the main rendering loop
