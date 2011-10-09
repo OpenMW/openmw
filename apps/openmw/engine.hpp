@@ -57,7 +57,7 @@ namespace OMW
             std::string mEncoding;
             boost::filesystem::path mDataDir;
             boost::filesystem::path mResDir;
-            OEngine::Render::OgreRenderer mOgre;
+            OEngine::Render::OgreRenderer *mOgre;
             OEngine::Physic::PhysicEngine* mPhysicEngine;
             std::string mCellName;
             std::string mMaster;

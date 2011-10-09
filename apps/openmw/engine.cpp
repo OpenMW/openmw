@@ -120,7 +120,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // update GUI
         if(mShowFPS)
-            mEnvironment.mWindowManager->wmSetFPS(mOgre.getFPS());
+            mEnvironment.mWindowManager->wmSetFPS(mOgre->getFPS());
 
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
@@ -162,7 +162,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 }
 
 OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
-  : mPhysicEngine (0)
+  : mOgre (0)
+  , mPhysicEngine (0)
   , mShowFPS (false)
   , mDebug (false)
   , mVerboseScripts (false)
@@ -193,6 +194,7 @@ OMW::Engine::~Engine()
     delete mScriptManager;
     delete mScriptContext;
     delete mPhysicEngine;
+    delete mOgre;
 }
 
 // Load all BSA files in data directory.
@@ -216,7 +218,7 @@ void OMW::Engine::loadBSA()
 
 void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 {
-    mOgre.getRoot()->addResourceLocation (path.string(), "FileSystem",
+    mOgre->getRoot()->addResourceLocation (path.string(), "FileSystem",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 }
 
@@ -292,8 +294,11 @@ void OMW::Engine::go()
     assert (!mEnvironment.mWorld);
     assert (!mCellName.empty());
     assert (!mMaster.empty());
+    assert (!mOgre);
 
-    mOgre.configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
+    mOgre = new OEngine::Render::OgreRenderer;
+
+    mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string() + std::string("/"),
         mCfgMgr.getPluginsConfigPath().string(), false);
@@ -303,20 +308,22 @@ void OMW::Engine::go()
     addResourcesDirectory(mResDir / "mygui");
 
     // Create the window
-    mOgre.createWindow("OpenMW");
+    mOgre->createWindow("OpenMW");
 
     loadBSA();
 
+    /// \todo move this into the physics manager
     // Create physics. shapeLoader is deleted by the physic engine
     NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
     mPhysicEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mFileCollections, mMaster,
+    mEnvironment.mWorld = new MWWorld::World (*mOgre, mPhysicEngine, mFileCollections, mMaster,
         mResDir, mNewGame, mEnvironment, mEncoding);
 
+    /// \todo move this into the GUI manager (a.k.a WindowManager)
     // Set up the GUI system
-    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false,
+    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false,
         mCfgMgr.getLogPath().string() + std::string("/"));
 
     // Create window manager - this manages all the MW-specific GUI windows
@@ -326,8 +333,8 @@ void OMW::Engine::go()
         mExtensions, mShowFPS, mNewGame);
 
     // Create sound system
-    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),
-                                                           mOgre.getCamera(),
+    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
+                                                           mOgre->getCamera(),
                                                            mEnvironment.mWorld->getStore(),
                                                            (mDataDir),
                                                            mUseSound, mFSStrict, mEnvironment);
@@ -368,13 +375,13 @@ void OMW::Engine::go()
     }
 
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayer(),
+    MWInput::MWInputManager input(*mOgre, mEnvironment.mWorld->getPlayer(),
                                   *mEnvironment.mWindowManager, mDebug, *this);
     mEnvironment.mInputManager = &input;
 
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 
-    mOgre.getRoot()->addFrameListener (this);
+    mOgre->getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
     mEnvironment.mSoundManager->startRandomTitle();
@@ -393,7 +400,7 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
-    mOgre.start();
+    mOgre->start();
 
     std::cout << "Quitting peacefully.\n";
 }
