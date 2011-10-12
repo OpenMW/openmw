@@ -340,7 +340,7 @@ void MainDialog::writeConfig()
                         Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
-        std::exit(1);
+        QApplication::exit(1);
     }
 
     QTextStream in(&file);
@@ -366,7 +366,7 @@ void MainDialog::writeConfig()
                         Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
-        std::exit(1);;
+        QApplication::exit(1);
     }
 
     file.write(buffer);
