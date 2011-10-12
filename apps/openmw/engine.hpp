@@ -7,15 +7,14 @@
 
 #include <OgreFrameListener.h>
 
-#include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
+
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
+#include <components/cfg/configurationmanager.hpp>
 
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
-#include <boost/timer.hpp>
-#include <components/cfg/configurationmanager.hpp>
 
 namespace Compiler
 {
@@ -48,6 +47,11 @@ namespace OEngine
   {
     class MyGUIManager;
   }
+
+  namespace Render
+  {
+    class OgreRenderer;
+  }
 }
 
 namespace OMW
@@ -58,7 +62,7 @@ namespace OMW
             std::string mEncoding;
             boost::filesystem::path mDataDir;
             boost::filesystem::path mResDir;
-            OEngine::Render::OgreRenderer mOgre;
+            OEngine::Render::OgreRenderer *mOgre;
             OEngine::Physic::PhysicEngine* mPhysicEngine;
             std::string mCellName;
             std::string mMaster;
@@ -68,20 +72,15 @@ namespace OMW
             bool mNewGame;
             bool mUseSound;
             bool mCompileAll;
-            int total;
+            bool mReportFocus;
+            float mFocusTDiff;
+            std::string mFocusName;
 
             MWWorld::Environment mEnvironment;
             MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
             OEngine::GUI::MyGUIManager *mGuiManager;
-            ESM::Region test;
-            boost::timer timer;
-
-            int focusFrameCounter;
-            static const int focusUpdateFrame = 10;
-
-            MWWorld::Ptr mIgnoreLocalPtr;
 
             Files::Collections mFileCollections;
             bool mFSStrict;
@@ -100,9 +99,9 @@ namespace OMW
 
             void executeLocalScripts();
 
-            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
+            void updateFocusReport (float duration);
 
-            /// Process pending commands
+            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
         public:
             Engine(Cfg::ConfigurationManager& configurationManager);
@@ -143,6 +142,9 @@ namespace OMW
 
             /// Start as a new game.
             void setNewGame(bool newGame);
+
+            /// Write name of focussed object to cout
+            void setReportFocus (bool report);
 
             /// Initialise and enter main loop.
             void go();

@@ -1,7 +1,12 @@
 #include "soundmanager.hpp"
 
 #include <iostream>
+#include <algorithm>
+#include <map>
+
 using namespace std;
+
+#include <OgreRoot.h>
 
 #include <openengine/sound/sndmanager.hpp>
 #include <mangle/sound/clients/ogre_listener_mover.hpp>
@@ -9,10 +14,10 @@ using namespace std;
 
 #include <components/file_finder/file_finder.hpp>
 #include <components/esm_store/store.hpp>
-#include <algorithm>
-#include <map>
 
-#include <OgreRoot.h>
+#include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
+#include "../mwworld/player.hpp"
 
 /* Set up the sound manager to use Audiere, FFMPEG or
    MPG123/libsndfile for input. The OPENMW_USE_x macros are set in
@@ -378,12 +383,18 @@ namespace MWSound
   SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
                              const ESMS::ESMStore &store,
                              boost::filesystem::path dataDir,
-                             bool useSound, bool fsstrict)
-    : mData(NULL), fsStrict (fsstrict)
+                             bool useSound, bool fsstrict, MWWorld::Environment& environment)
+    : mData(NULL), fsStrict (fsstrict), mEnvironment (environment)
   {
     MP3Lookup(dataDir / "Music/Explore/");
     if(useSound)
       mData = new SoundImpl(root, camera, store, (dataDir / "Sound").string(), (dataDir / "Music").string(), fsstrict);
+
+
+    test.name = "";
+    total = 0;
+
+
   }
 
   SoundManager::~SoundManager()
@@ -532,5 +543,65 @@ namespace MWSound
   {
     if(!mData) return;
     mData->updatePositions(ptr);
+  }
+
+  void SoundManager::update (float duration)
+  {
+        std::string effect;
+
+        MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+
+        //If the region has changed
+        if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
+            timer.restart();
+            if (test.name != current->cell->region)
+            {
+                total = 0;
+                test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
+            }
+
+            if(test.soundList.size() > 0)
+            {
+                std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
+                //mEnvironment.mSoundManager
+                if(total == 0){
+                    while (!(soundIter == test.soundList.end()))
+                    {
+                        ESM::NAME32 go = soundIter->sound;
+                        int chance = (int) soundIter->chance;
+                        //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+                        soundIter++;
+                        total += chance;
+                    }
+                }
+
+                int r = rand() % total;        //old random code
+                int pos = 0;
+                soundIter = test.soundList.begin();
+                while (!(soundIter == test.soundList.end()))
+                {
+                    const ESM::NAME32 go = soundIter->sound;
+                    int chance = (int) soundIter->chance;
+                    //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+                    soundIter++;
+                    if( r - pos < chance)
+                    {
+                        effect = go.name;
+                        //play sound
+                        std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+                        mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
+
+                        break;
+
+                    }
+                    pos += chance;
+                }
+            }
+        }
+        else if(current->cell->data.flags & current->cell->Interior)
+        {
+            test.name = "";
+        }
+
   }
 }

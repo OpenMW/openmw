@@ -116,4 +116,20 @@ namespace MWScript
                 iter->second.clear(); // don't execute again.
             }
     }
+
+    std::pair<int, int> ScriptManager::compileAll()
+    {
+        typedef ESMS::ScriptListT<ESM::Script>::MapType Container;
+
+        const Container& scripts = mStore.scripts.list;
+
+        int count = 0;
+        int success = 0;
+
+        for (Container::const_iterator iter (scripts.begin()); iter!=scripts.end(); ++iter, ++count)
+            if (compile (iter->first))
+                ++success;
+
+        return std::make_pair (count, success);
+    }
 }
