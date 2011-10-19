@@ -45,6 +45,7 @@ bool RenderingManager::getPhysicsDebugRendering() const{
 void RenderingManager::update (float duration){
 
 
+}
 
 void RenderingManager::skyEnable ()
 {
