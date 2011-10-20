@@ -1,12 +1,64 @@
 #include "renderingmanager.hpp"
 
+#include <assert.h>
+
+#include "OgreRoot.h"
+#include "OgreRenderWindow.h"
+#include "OgreSceneManager.h"
+#include "OgreViewport.h"
+#include "OgreCamera.h"
+#include "OgreTextureManager.h"
+
+#include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
+#include "../mwworld/ptr.hpp"
+#include <components/esm/loadstat.hpp>
+
+#include "player.hpp"
+
+using namespace MWRender;
+using namespace Ogre;
+
 namespace MWRender {
 
 
 
-RenderingManager::RenderingManager (Ogre::RenderWindow* window, Ogre::Camera* cam, const boost::filesystem2::path& resDir) 
+RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem2::path& resDir) :rend(_rend)
 {
-	mSkyManager = MWRender::SkyManager::create(window, cam, resDir);
+	camera = rend.getCamera();
+	mSkyManager = MWRender::SkyManager::create(rend.getWindow(), camera, resDir);
+
+	
+	 rend.createScene("PlayerCam", 55, 5);
+
+    // Set default mipmap level (NB some APIs ignore this)
+    TextureManager::getSingleton().setDefaultNumMipmaps(5);
+
+    // Load resources
+    ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+
+    // Turn the entire scene (represented by the 'root' node) -90
+    // degrees around the x axis. This makes Z go upwards, and Y go into
+    // the screen (when x is to the right.) This is the orientation that
+    // Morrowind uses, and it automagically makes everything work as it
+    // should.
+	
+    SceneNode *rt = rend.getScene()->getRootSceneNode();
+    mwRoot = rt->createChildSceneNode();
+    mwRoot->pitch(Degree(-90));
+
+    //used to obtain ingame information of ogre objects (which are faced or selected)
+    mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
+
+    Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode ("player");
+    playerNode->pitch(Degree(90));
+    Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
+    Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
+    cameraPitchNode->attachObject(camera);
+
+
+    mPlayer = new MWRender::Player (camera, playerNode->getName());
+
+	
 }
 
 RenderingManager::~RenderingManager ()

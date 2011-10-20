@@ -32,6 +32,7 @@ namespace MWWorld
             void scaleObject (const std::string& handle, float scale);
 
             bool toggleCollisionMode();
+			 std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
 
         private:
             OEngine::Render::OgreRenderer &mRender;

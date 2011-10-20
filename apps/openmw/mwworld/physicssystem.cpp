@@ -10,6 +10,7 @@
 #include "OgreTextureManager.h"
 
 
+using namespace Ogre;
 namespace MWWorld
 {
 
@@ -23,6 +24,22 @@ namespace MWWorld
     {
 
     }
+	std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
+	{
+		std::string handle = "";
+
+        //get a ray pointing to the center of the viewport
+        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
+        mRender.getViewport()->getWidth()/2,
+        mRender.getViewport()->getHeight()/2);
+        //let's avoid the capsule shape of the player.
+        centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
+        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
+        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+
+        return mEngine->rayTest(from,to);
+    }
+
 
     std::vector< std::pair<std::string, Ogre::Vector3> > PhysicsSystem::doPhysics (float duration,
         const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
