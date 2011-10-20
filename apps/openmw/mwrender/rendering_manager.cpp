@@ -4,10 +4,9 @@ namespace MWRender {
 
 
 
-RenderingManager::RenderingManager (SkyManager *skyManager) :
-    mSkyManager(skyManager)
+RenderingManager::RenderingManager (Ogre::RenderWindow* window, Ogre::Camera* cam, const boost::filesystem2::path& resDir) 
 {
-
+	mSkyManager = MWRender::SkyManager::create(window, cam, resDir);
 }
 
 RenderingManager::~RenderingManager ()

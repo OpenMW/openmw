@@ -207,9 +207,7 @@ namespace MWWorld
         mPhysEngine = physEng;
 
         mWorldScene = new Scene(environment, this, mScene, mPhysics);
-        mRenderingManager = new MWRender::RenderingManager(
-            MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir)
-        );
+        mRenderingManager = new MWRender::RenderingManager(renderer.getWindow(), mScene.getCamera(), resDir);
     }
 
     World::~World()

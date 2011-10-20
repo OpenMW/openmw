@@ -7,13 +7,14 @@
 #include "../mwworld/ptr.hpp"
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
+#include <boost/filesystem.hpp>
 
 namespace MWRender
 {
 
 class RenderingManager {
   public:
-    RenderingManager(SkyManager *skyManager);
+    RenderingManager(Ogre::RenderWindow* window, Ogre::Camera* cam, const boost::filesystem2::path& resDir);
     ~RenderingManager();
 
     void removeCell (MWWorld::Ptr::CellStore *store); // TODO do we want this?
