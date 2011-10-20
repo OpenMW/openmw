@@ -9,7 +9,7 @@
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwrender/mwscene.hpp"
-#include "../mwrender/rendering_manager.hpp"
+#include "../mwrender/renderingmanager.hpp"
 
 #include "refdata.hpp"
 #include "ptr.hpp"
