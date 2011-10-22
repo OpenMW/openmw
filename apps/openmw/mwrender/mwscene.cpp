@@ -18,6 +18,24 @@
 using namespace MWRender;
 using namespace Ogre;
 
+Debugging::Debugging(OEngine::Physic::PhysicEngine* engine){
+	eng = engine;
+}
+
+bool Debugging::toggleRenderMode (int mode){
+	 switch (mode)
+    {
+        case MWWorld::World::Render_CollisionDebug:
+
+            // TODO use a proper function instead of accessing the member variable
+            // directly.
+            eng->setDebugRenderingMode (!eng->isDebugCreated);
+            return eng->isDebugCreated;
+    }
+
+    return false;
+}
+
 MWScene::MWScene(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng)
     : rend(_rend)
 {

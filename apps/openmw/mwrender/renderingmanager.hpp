@@ -34,6 +34,8 @@ namespace MWWorld
 namespace MWRender
 {
 	class Player;
+	
+
 class RenderingManager {
 
 	 OEngine::Render::OgreRenderer &rend;

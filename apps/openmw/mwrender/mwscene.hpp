@@ -28,6 +28,15 @@ namespace MWRender
 {
     class Player;
 
+	class Debugging{
+	OEngine::Physic::PhysicEngine* eng;
+
+
+	public:
+		Debugging(OEngine::Physic::PhysicEngine* engine);
+		bool toggleRenderMode (int mode);
+	};
+
     /// \brief 3D-scene (rendering and physics)
 
     class MWScene
