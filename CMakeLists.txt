@@ -7,6 +7,12 @@ IF (APPLE)
     set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
 ENDIF (APPLE)
 
+# Macros
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
+
+include (OpenMWMacros)
+
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
@@ -75,9 +81,6 @@ IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd/ogre_1_7_1")
 ELSE()
     message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
 ENDIF()
-
-# Add path for CMake scripts
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
 # source directory: components
 set(COMP_DIR ${CMAKE_SOURCE_DIR}/components)

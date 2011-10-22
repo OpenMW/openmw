@@ -15,26 +15,9 @@ set(GAME_HEADER
     config.hpp)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
-set(GAMEREND
-    mwrender/rendering_manager.cpp
-    mwrender/mwscene.cpp
-    mwrender/cellimp.cpp
-    mwrender/interior.cpp
-    mwrender/exterior.cpp
-    mwrender/sky.cpp
-    mwrender/player.cpp
+add_openmw_dir (mwrender
+    rendering_manager mwscene cellimp interior exterior sky player
     )
-set(GAMEREND_HEADER
-    mwrender/rendering_manager.hpp
-    mwrender/cell.hpp
-    mwrender/cellimp.hpp
-    mwrender/mwscene.hpp
-    mwrender/interior.hpp
-    mwrender/exterior.hpp
-    mwrender/sky.hpp
-    mwrender/player.hpp
-    )
-source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})
 
 set(GAMEINPUT
     mwinput/inputmanager.cpp
@@ -237,10 +220,10 @@ set(GAMEMECHANICS_HEADER
     )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 
-set(OPENMW_CPP ${GAME} ${GAMEREND} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD}
+set(OPENMW_CPP ${GAME} ${GAMEINPUT} ${GAMESCRIPT} ${GAMESOUND} ${GAMEGUI} ${GAMEWORLD}
     ${GAMECLASS} ${GAMEMECHANICS} ${GAMEDIALOGUE}
     )
-set(OPENMW_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
+set(OPENMW_HEADER ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESCRIPT_HEADER}
     ${GAMESOUND_HEADER} ${GAMEGUI_HEADER} ${GAMEWORLD_HEADER}  ${GAMECLASS_HEADER}
     ${GAMEMECHANICS_HEADER} ${GAMEDIALOG_HEADERUE}
     )
@@ -249,6 +232,7 @@ set(OPENMW_HEADER ${GAME_HEADER} ${GAMEREND_HEADER} ${GAMEINPUT_HEADER} ${GAMESC
 add_executable(openmw
     ${COMPONENTS} ${COMPONENTS_HEADER}
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
+    ${OPENMW_FILES}
     ${OPENMW_CPP} ${OPENMW_HEADER}
     ${APPLE_BUNDLE_RESOURCES}
     )
