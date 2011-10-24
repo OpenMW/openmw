@@ -20,7 +20,7 @@ namespace MWWorld
 
 namespace MWRender
 {
-  class MWScene;
+  class RenderingManager;
 
   /**
      This class is responsible for inserting meshes and other
@@ -48,7 +48,7 @@ namespace MWRender
 
     ESMS::CellStore<MWWorld::RefData> &cell;
     MWWorld::Environment &mEnvironment;
-    MWScene &scene;
+    MWRender::RenderingManager &mRendering;
     MWWorld::PhysicsSystem *mPhysics;
 
     /// The scene node that contains all objects belonging to this
@@ -95,8 +95,8 @@ namespace MWRender
   public:
 
     InteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
-        MWScene &_scene, MWWorld::PhysicsSystem *physics)
-    : cell(_cell), mEnvironment (environment), scene(_scene), base(NULL), insert(NULL), ambientMode (0)
+        RenderingManager &_rendering, MWWorld::PhysicsSystem *physics)
+    : cell(_cell), mEnvironment (environment), mRendering(_rendering), base(NULL), insert(NULL), ambientMode (0)
     {
         mPhysics = physics;
     }

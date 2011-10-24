@@ -65,7 +65,8 @@ namespace MWWorld
 
         private:
 
-            MWRender::MWScene mScene;
+            MWRender::RenderingManager mRendering;
+			MWRender::Debugging mDebugging;
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
             ESM::ESMReader mEsm;
@@ -75,7 +76,6 @@ namespace MWWorld
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
             Environment& mEnvironment;
-            MWRender::RenderingManager *mRenderingManager;
             int mNextDynamicRecord;
 
             Cells mCells;

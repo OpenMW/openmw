@@ -22,13 +22,14 @@ namespace MWRender {
 
 
 
-RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem2::path& resDir) :rend(_rend)
+RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir) :rend(_rend)
 {
-	camera = rend.getCamera();
-	mSkyManager = MWRender::SkyManager::create(rend.getWindow(), camera, resDir);
-
 	
+	
+
+	//std::cout << "ONE";
 	 rend.createScene("PlayerCam", 55, 5);
+	 mSkyManager = MWRender::SkyManager::create(rend.getWindow(), getCamera(), resDir);
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -41,7 +42,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // the screen (when x is to the right.) This is the orientation that
     // Morrowind uses, and it automagically makes everything work as it
     // should.
-	
+	//std::cout << "TWO";
     SceneNode *rt = rend.getScene()->getRootSceneNode();
     mwRoot = rt->createChildSceneNode();
     mwRoot->pitch(Degree(-90));
@@ -53,16 +54,17 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     playerNode->pitch(Degree(90));
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
-    cameraPitchNode->attachObject(camera);
+    cameraPitchNode->attachObject(getCamera());
+	std::cout <<"TWOF\n";
 
-
-    mPlayer = new MWRender::Player (camera, playerNode->getName());
-
+    mPlayer = new MWRender::Player (getCamera(), playerNode->getName());
+	//std::cout << "Three";
 	
 }
 
 RenderingManager::~RenderingManager ()
 {
+	delete mPlayer;
     delete mSkyManager;
 }
 

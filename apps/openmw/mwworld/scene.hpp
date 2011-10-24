@@ -14,7 +14,7 @@
 #include "refdata.hpp"
 #include "ptr.hpp"
 #include "globals.hpp"
-
+#include "../mwrender/renderingmanager.hpp"
 #include <openengine/bullet/physic.hpp>
 
 namespace Ogre
@@ -57,7 +57,7 @@ namespace MWWorld
 
         private:
 
-            MWRender::MWScene& mScene;
+            MWRender::RenderingManager mRendering;
             Ptr::CellStore *mCurrentCell; // the cell, the player is in
             CellRenderCollection mActiveCells;
             bool mCellChanged;
@@ -69,7 +69,7 @@ namespace MWWorld
                 bool adjustPlayerPos = true);
         public:
 
-            Scene (Environment& environment, World *world, MWRender::MWScene& scene, PhysicsSystem *physics);
+            Scene (Environment& environment, World *world, MWRender::RenderingManager& rm, PhysicsSystem *physics);
 
             ~Scene();
 

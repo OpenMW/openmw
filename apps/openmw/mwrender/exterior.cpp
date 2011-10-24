@@ -1,4 +1,5 @@
 #include "exterior.hpp"
+#include "renderingmanager.hpp"
 
 #include <OgreEntity.h>
 #include <OgreLight.h>
@@ -34,11 +35,11 @@ bool ExteriorCellRender::lightOutQuadInLin = false;
 int ExteriorCellRender::uniqueID = 0;
 
 ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
-    MWScene &_scene, MWWorld::PhysicsSystem *physics)
-    : mCell(_cell), mEnvironment (environment), mScene(_scene), mPhysics(physics), mBase(NULL), mInsert(NULL), mAmbientMode (0) 
+    RenderingManager &_rendering, MWWorld::PhysicsSystem *physics)
+    : mCell(_cell), mEnvironment (environment), mRendering(_rendering), mPhysics(physics), mBase(NULL), mInsert(NULL), mAmbientMode (0) 
 {
     uniqueID = uniqueID +1;
-    sg = mScene.getMgr()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+    sg = mRendering.getMgr()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
 }
 
 
@@ -126,7 +127,7 @@ void ExteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
      mNpcPart = parent->createChildSceneNode(sceneNodeName);
    MeshPtr good2 = NifOgre::NIFLoader::load(mesh);
 
-  MovableObject *ent = mScene.getMgr()->createEntity(mesh);
+  MovableObject *ent = mRendering.getMgr()->createEntity(mesh);
 
 
   if(translateFirst){
@@ -214,7 +215,7 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
   assert (mInsert);
 
   NifOgre::NIFLoader::load(mesh);
-  Entity *ent = mScene.getMgr()->createEntity(mesh);
+  Entity *ent = mRendering.getMgr()->createEntity(mesh);
 
   if(!isStatic)
   {
@@ -224,7 +225,7 @@ void ExteriorCellRender::insertMesh(const std::string &mesh)
   {
       sg->addEntity(ent,mInsert->_getDerivedPosition(),mInsert->_getDerivedOrientation(),mInsert->_getDerivedScale());
       sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
-      mScene.getMgr()->destroyEntity(ent);
+      mRendering.getMgr()->destroyEntity(ent);
   }
   if (mInsertMesh.empty())
       mInsertMesh = mesh;
@@ -249,7 +250,7 @@ void ExteriorCellRender::insertLight(float r, float g, float b, float radius)
 {
   assert (mInsert);
 
-  Ogre::Light *light = mScene.getMgr()->createLight();
+  Ogre::Light *light = mRendering.getMgr()->createLight();
   light->setDiffuseColour (r, g, b);
 
   float cval=0.0f, lval=0.0f, qval=0.0f;
@@ -305,7 +306,7 @@ void ExteriorCellRender::configureAmbient()
 
   // Create a "sun" that shines light downwards. It doesn't look
   // completely right, but leave it for now.
-  Ogre::Light *light = mScene.getMgr()->createLight();
+  Ogre::Light *light = mRendering.getMgr()->createLight();
   Ogre::ColourValue colour;
   colour.setAsABGR (mCell.cell->ambi.sunlight);
   light->setDiffuseColour (colour);
@@ -322,9 +323,9 @@ void ExteriorCellRender::configureFog()
   float high = 4500 + 9000 * (1-mCell.cell->ambi.fogDensity);
   float low = 200;
 
-  mScene.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
-  mScene.getCamera()->setFarClipDistance (high + 10);
-  mScene.getViewport()->setBackgroundColour (color);
+  mRendering.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
+  mRendering.getCamera()->setFarClipDistance (high + 10);
+  mRendering.getViewport()->setBackgroundColour (color);
 }
 
 void ExteriorCellRender::setAmbientMode()
@@ -333,17 +334,17 @@ void ExteriorCellRender::setAmbientMode()
   {
     case 0:
 
-      mScene.getMgr()->setAmbientLight(mAmbientColor);
+      mRendering.getMgr()->setAmbientLight(mAmbientColor);
       break;
 
     case 1:
 
-      mScene.getMgr()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
+      mRendering.getMgr()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
       break;
 
     case 2:
 
-      mScene.getMgr()->setAmbientLight(ColourValue(1,1,1));
+      mRendering.getMgr()->setAmbientLight(ColourValue(1,1,1));
       break;
   }
 }
@@ -351,7 +352,7 @@ void ExteriorCellRender::setAmbientMode()
 void ExteriorCellRender::show()
 {
     // FIXME: this one may be the bug
-  mBase = mScene.getRoot()->createChildSceneNode();
+  mBase = mRendering.getRoot()->createChildSceneNode();
   
   configureAmbient();
   configureFog();
@@ -400,14 +401,14 @@ void ExteriorCellRender::destroy()
     {
       destroyAllAttachedMovableObjects(mBase);
       mBase->removeAndDestroyAllChildren();
-      mScene.getMgr()->destroySceneNode(mBase);
+      mRendering.getMgr()->destroySceneNode(mBase);
     }
 
     mBase = 0;
 
     if (sg)
     {
-        mScene.getMgr()->destroyStaticGeometry (sg);
+        mRendering.getMgr()->destroyStaticGeometry (sg);
         sg = 0;
     }
 }
@@ -434,21 +435,21 @@ void ExteriorCellRender::toggleLight()
 void ExteriorCellRender::enable (const std::string& handle)
 {
     if (!handle.empty())
-        mScene.getMgr()->getSceneNode (handle)->setVisible (true);
+        mRendering.getMgr()->getSceneNode (handle)->setVisible (true);
 }
 
 void ExteriorCellRender::disable (const std::string& handle)
 {
     if (!handle.empty())
-        mScene.getMgr()->getSceneNode (handle)->setVisible (false);
+        mRendering.getMgr()->getSceneNode (handle)->setVisible (false);
 }
 
 void ExteriorCellRender::deleteObject (const std::string& handle)
 {
     if (!handle.empty())
     {
-        Ogre::SceneNode *node = mScene.getMgr()->getSceneNode (handle);
+        Ogre::SceneNode *node = mRendering.getMgr()->getSceneNode (handle);
         node->removeAndDestroyAllChildren();
-        mScene.getMgr()->destroySceneNode (node);
+        mRendering.getMgr()->destroySceneNode (node);
     }
 }

@@ -68,20 +68,25 @@ void OMW::Engine::executeLocalScripts()
 
 void OMW::Engine::updateFocusReport (float duration)
 {
+
     if ((mFocusTDiff += duration)>0.25)
     {
         mFocusTDiff = 0;
 
         std::string name;
-
+		
         std::string handle = mEnvironment.mWorld->getFacedHandle();
 
         if (!handle.empty())
         {
             MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
-            if (!ptr.isEmpty())
+            if (!ptr.isEmpty()){
                 name = MWWorld::Class::get (ptr).getName (ptr);
+				if (!name.empty())
+	                  std::cout << "Object: " << name << std::endl;
+
+			}
         }
 
         if (name!=mFocusName)
@@ -284,6 +289,8 @@ void OMW::Engine::setReportFocus (bool report)
 
 void OMW::Engine::go()
 {
+	mFocusTDiff = 0;
+	mReportFocus = true;
     assert (!mEnvironment.mWorld);
     assert (!mCellName.empty());
     assert (!mMaster.empty());

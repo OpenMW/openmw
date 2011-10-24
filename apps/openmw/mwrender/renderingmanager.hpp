@@ -52,7 +52,7 @@ class RenderingManager {
         MWRender::Player *mPlayer;
 
   public:
-    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem2::path& resDir);
+    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir);
     ~RenderingManager();
 
     void removeCell (MWWorld::Ptr::CellStore *store); // TODO do we want this?
@@ -77,7 +77,11 @@ class RenderingManager {
     int skyGetMasserPhase() const;
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
-    
+	Ogre::SceneManager *getMgr() { return rend.getScene(); }
+	Ogre::Camera *getCamera() { return rend.getCamera(); }
+	Ogre::Viewport *getViewport() { return rend.getViewport(); }
+	Ogre::SceneNode *getRoot() { return mwRoot; }
+    MWRender::Player *getPlayer() { return mPlayer; }
   private:
     
     SkyManager* mSkyManager;

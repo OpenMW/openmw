@@ -176,8 +176,8 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
-    : mScene (renderer,physEng), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
+    : mRendering (renderer,resDir), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
+      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this), mDebugging(physEng)
     {
         mPhysEngine = physEng;
 
@@ -192,7 +192,7 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-        mPlayer = new MWWorld::Player (mScene.getPlayer(), mStore.npcs.find ("player"), *this);
+        mPlayer = new MWWorld::Player (mRendering.getPlayer(), mStore.npcs.find ("player"), *this);
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
         // global variables
@@ -206,9 +206,8 @@ namespace MWWorld
 
         mPhysEngine = physEng;
 
-        mWorldScene = new Scene(environment, this, mScene, mPhysics);
-        mRenderingManager = new MWRender::RenderingManager(renderer,
-			resDir);
+        mWorldScene = new Scene(environment, this, mRendering, mPhysics);
+       
     }
 
     World::~World()
@@ -397,7 +396,7 @@ namespace MWWorld
 
         mGlobalVariables->setFloat ("gamehour", hour);
 
-        mRenderingManager->skySetHour (hour);
+        mRendering.skySetHour (hour);
 
         if (days>0)
             setDay (days + mGlobalVariables->getInt ("day"));
@@ -432,7 +431,7 @@ namespace MWWorld
         mGlobalVariables->setInt ("day", day);
         mGlobalVariables->setInt ("month", month);
 
-        mRenderingManager->skySetDate (day, month);
+        mRendering.skySetDate (day, month);
     }
 
     void World::setMonth (int month)
@@ -453,7 +452,7 @@ namespace MWWorld
         if (years>0)
             mGlobalVariables->setInt ("year", years+mGlobalVariables->getInt ("year"));
 
-        mRenderingManager->skySetDate (mGlobalVariables->getInt ("day"), month);
+        mRendering.skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
     bool World::toggleSky()
@@ -461,34 +460,34 @@ namespace MWWorld
         if (mSky)
         {
             mSky = false;
-            mRenderingManager->skyDisable();
+            mRendering.skyDisable();
             return false;
         }
         else
         {
             mSky = true;
             // TODO check for extorior or interior with sky.
-            mRenderingManager->skySetHour (mGlobalVariables->getFloat ("gamehour"));
-            mRenderingManager->skySetDate (mGlobalVariables->getInt ("day"),
+            mRendering.skySetHour (mGlobalVariables->getFloat ("gamehour"));
+            mRendering.skySetDate (mGlobalVariables->getInt ("day"),
                 mGlobalVariables->getInt ("month"));
-            mRenderingManager->skyEnable();
+            mRendering.skyEnable();
             return true;
         }
     }
 
     int World::getMasserPhase() const
     {
-        return mRenderingManager->skyGetMasserPhase();
+        return mRendering.skyGetMasserPhase();
     }
 
     int World::getSecundaPhase() const
     {
-        return mRenderingManager->skyGetSecundaPhase();
+        return mRendering.skyGetSecundaPhase();
     }
 
     void World::setMoonColour (bool red)
     {
-        mRenderingManager->skySetMoonColour (red);
+        mRendering.skySetMoonColour (red);
     }
 
     float World::getTimeScaleFactor() const
@@ -513,7 +512,7 @@ namespace MWWorld
 
     std::string World::getFacedHandle()
     {
-        std::pair<std::string, float> result = mScene.getFacedHandle (*this);
+        std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
         if (result.first.empty() ||
             result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
@@ -577,7 +576,7 @@ namespace MWWorld
         // \todo cell change for non-player ref
 
         // \todo this should go into the new scene class and eventually into the objects/actors classes.
-        mScene.getMgr()->getSceneNode (ptr.getRefData().getHandle())->
+        mRendering.getMgr()->getSceneNode (ptr.getRefData().getHandle())->
             setPosition (Ogre::Vector3 (x, y, z));
     }
 
@@ -652,7 +651,7 @@ namespace MWWorld
 
     bool World::toggleRenderMode (RenderMode mode)
     {
-        return mScene.toggleRenderMode (mode);
+        return mDebugging.toggleRenderMode (mode);
     }
 
     std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)

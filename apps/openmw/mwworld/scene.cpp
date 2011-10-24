@@ -137,7 +137,7 @@ namespace MWWorld
                 {
                     Ptr::CellStore *cell = mWorld->getExterior(x, y);
 
-                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mScene, mPhysics));
+                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mRendering, mPhysics));
                 }
             }
 
@@ -168,8 +168,8 @@ namespace MWWorld
         mCellChanged = true;
     }
 
-    Scene::Scene (Environment& environment, World *world, MWRender::MWScene& scene, PhysicsSystem *physics)
-    : mScene (scene), mCurrentCell (0),
+    Scene::Scene (Environment& environment, World *world, MWRender::RenderingManager& rm, PhysicsSystem *physics)
+    : mRendering(rm), mCurrentCell (0),
       mCellChanged (false), mEnvironment (environment), mWorld(world), mPhysics(physics)
     {
     }
@@ -205,7 +205,7 @@ namespace MWWorld
         std::cout << "cellName:" << cellName << std::endl;
         Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
-        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mScene, mPhysics));
+        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mRendering, mPhysics));
 
         // adjust player
         mCurrentCell = cell;
