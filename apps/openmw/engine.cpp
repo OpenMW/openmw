@@ -83,8 +83,6 @@ void OMW::Engine::updateFocusReport (float duration)
 
             if (!ptr.isEmpty()){
                 name = MWWorld::Class::get (ptr).getName (ptr);
-				if (!name.empty())
-	                  std::cout << "Object: " << name << std::endl;
 
 			}
         }
