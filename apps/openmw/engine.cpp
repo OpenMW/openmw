@@ -288,7 +288,6 @@ void OMW::Engine::setReportFocus (bool report)
 void OMW::Engine::go()
 {
 	mFocusTDiff = 0;
-	mReportFocus = true;
     assert (!mEnvironment.mWorld);
     assert (!mCellName.empty());
     assert (!mMaster.empty());
