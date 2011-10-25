@@ -48,7 +48,8 @@ namespace MWRender
 
     ESMS::CellStore<MWWorld::RefData> &cell;
     MWWorld::Environment &mEnvironment;
-    MWRender::RenderingManager &mRendering;
+    OEngine::Render::OgreRenderer& mRenderer;
+	Ogre::SceneNode *mMwRoot;
     MWWorld::PhysicsSystem *mPhysics;
 
     /// The scene node that contains all objects belonging to this
@@ -95,9 +96,10 @@ namespace MWRender
   public:
 
     InteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
-        RenderingManager &_rendering, MWWorld::PhysicsSystem *physics)
-    : cell(_cell), mEnvironment (environment), mRendering(_rendering), base(NULL), insert(NULL), ambientMode (0)
+        OEngine::Render::OgreRenderer& renderer, Ogre::SceneNode *mwRoot, MWWorld::PhysicsSystem *physics)
+    : cell(_cell), mEnvironment (environment), mRenderer(renderer), base(NULL), insert(NULL), ambientMode (0)
     {
+		mMwRoot = mwRoot;
         mPhysics = physics;
     }
 

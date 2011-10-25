@@ -57,7 +57,8 @@ namespace MWWorld
 
         private:
 
-            MWRender::RenderingManager mRendering;
+            OEngine::Render::OgreRenderer& mRenderer;
+			Ogre::SceneNode *mMwRoot;
             Ptr::CellStore *mCurrentCell; // the cell, the player is in
             CellRenderCollection mActiveCells;
             bool mCellChanged;
@@ -69,7 +70,7 @@ namespace MWWorld
                 bool adjustPlayerPos = true);
         public:
 
-            Scene (Environment& environment, World *world, MWRender::RenderingManager& rm, PhysicsSystem *physics);
+            Scene (Environment& environment, World *world, OEngine::Render::OgreRenderer& renderer, Ogre::SceneNode *mwRoot,  PhysicsSystem *physics);
 
             ~Scene();
 

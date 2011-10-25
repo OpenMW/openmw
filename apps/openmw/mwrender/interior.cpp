@@ -109,7 +109,7 @@ void InteriorCellRender::insertMesh(const std::string &mesh, Ogre::Vector3 vec, 
 
   MeshPtr good2 = NifOgre::NIFLoader::load(mesh);
 
-  MovableObject *ent = mRendering.getMgr()->createEntity(mesh);
+  MovableObject *ent = mRenderer.getScene()->createEntity(mesh);
   //ent->extr
 
     //  MovableObject *ent2 = scene.getMgr()->createEntity(bounds
@@ -186,7 +186,7 @@ void InteriorCellRender::insertMesh(const std::string &mesh)
     assert (insert);
 
     NifOgre::NIFLoader::load(mesh);
-    MovableObject *ent = mRendering.getMgr()->createEntity(mesh);
+    MovableObject *ent = mRenderer.getScene()->createEntity(mesh);
     insert->attachObject(ent);
 
     if (mInsertMesh.empty())
@@ -212,7 +212,7 @@ void InteriorCellRender::insertLight(float r, float g, float b, float radius)
 {
   assert (insert);
 
-  Ogre::Light *light = mRendering.getMgr()->createLight();
+  Ogre::Light *light = mRenderer.getScene()->createLight();
   light->setDiffuseColour (r, g, b);
 
   float cval=0.0f, lval=0.0f, qval=0.0f;
@@ -268,7 +268,7 @@ void InteriorCellRender::configureAmbient()
 
   // Create a "sun" that shines light downwards. It doesn't look
   // completely right, but leave it for now.
-  Ogre::Light *light = mRendering.getMgr()->createLight();
+  Ogre::Light *light = mRenderer.getScene()->createLight();
   Ogre::ColourValue colour;
   colour.setAsABGR (cell.cell->ambi.sunlight);
   light->setDiffuseColour (colour);
@@ -285,9 +285,9 @@ void InteriorCellRender::configureFog()
   float high = 4500 + 9000 * (1-cell.cell->ambi.fogDensity);
   float low = 200;
 
-  mRendering.getMgr()->setFog (FOG_LINEAR, color, 0, low, high);
-  mRendering.getCamera()->setFarClipDistance (high + 10);
-  mRendering.getViewport()->setBackgroundColour (color);
+  mRenderer.getScene()->setFog (FOG_LINEAR, color, 0, low, high);
+  mRenderer.getCamera()->setFarClipDistance (high + 10);
+  mRenderer.getViewport()->setBackgroundColour (color);
 }
 
 void InteriorCellRender::setAmbientMode()
@@ -296,24 +296,24 @@ void InteriorCellRender::setAmbientMode()
   {
     case 0:
 
-      mRendering.getMgr()->setAmbientLight(ambientColor);
+      mRenderer.getScene()->setAmbientLight(ambientColor);
       break;
 
     case 1:
 
-      mRendering.getMgr()->setAmbientLight(0.7f*ambientColor + 0.3f*ColourValue(1,1,1));
+      mRenderer.getScene()->setAmbientLight(0.7f*ambientColor + 0.3f*ColourValue(1,1,1));
       break;
 
     case 2:
 
-      mRendering.getMgr()->setAmbientLight(ColourValue(1,1,1));
+      mRenderer.getScene()->setAmbientLight(ColourValue(1,1,1));
       break;
   }
 }
 
 void InteriorCellRender::show()
 {
-  base = mRendering.getRoot()->createChildSceneNode();
+  base = mMwRoot->createChildSceneNode();
 
   configureAmbient();
   configureFog();
@@ -332,7 +332,7 @@ void InteriorCellRender::destroy()
   if(base)
     {
       base->removeAndDestroyAllChildren();
-      mRendering.getMgr()->destroySceneNode(base);
+      mRenderer.getScene()->destroySceneNode(base);
     }
 
   base = NULL;
@@ -360,22 +360,22 @@ void InteriorCellRender::toggleLight()
 void InteriorCellRender::enable (const std::string& handle)
 {
     if (!handle.empty())
-       mRendering.getMgr()->getSceneNode (handle)->setVisible (true);
+       mRenderer.getScene()->getSceneNode (handle)->setVisible (true);
 }
 
 void InteriorCellRender::disable (const std::string& handle)
 {
     if (!handle.empty())
-        mRendering.getMgr()->getSceneNode (handle)->setVisible (false);
+        mRenderer.getScene()->getSceneNode (handle)->setVisible (false);
 }
 
 void InteriorCellRender::deleteObject (const std::string& handle)
 {
     if (!handle.empty())
     {
-        Ogre::SceneNode *node = mRendering.getMgr()->getSceneNode (handle);
+        Ogre::SceneNode *node = mRenderer.getScene()->getSceneNode (handle);
         node->removeAndDestroyAllChildren();
-        mRendering.getMgr()->destroySceneNode (node);
+        mRenderer.getScene()->destroySceneNode (node);
     }
 }
 

@@ -137,7 +137,7 @@ namespace MWWorld
                 {
                     Ptr::CellStore *cell = mWorld->getExterior(x, y);
 
-                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mRendering, mPhysics));
+                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mRenderer, mMwRoot, mPhysics));
                 }
             }
 
@@ -168,10 +168,12 @@ namespace MWWorld
         mCellChanged = true;
     }
 
-    Scene::Scene (Environment& environment, World *world, MWRender::RenderingManager& rm, PhysicsSystem *physics)
-    : mRendering(rm), mCurrentCell (0),
+	//We need the ogre renderer and a scene node.
+    Scene::Scene (Environment& environment, World *world, OEngine::Render::OgreRenderer& renderer, Ogre::SceneNode *mwRoot, PhysicsSystem *physics)
+    : mRenderer(renderer), mCurrentCell (0),
       mCellChanged (false), mEnvironment (environment), mWorld(world), mPhysics(physics)
     {
+		mMwRoot = mwRoot;
     }
 
     Scene::~Scene()
@@ -205,7 +207,7 @@ namespace MWWorld
         std::cout << "cellName:" << cellName << std::endl;
         Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
-        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mRendering, mPhysics));
+        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mRenderer, mMwRoot, mPhysics));
 
         // adjust player
         mCurrentCell = cell;

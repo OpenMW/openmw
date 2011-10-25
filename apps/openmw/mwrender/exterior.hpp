@@ -49,7 +49,8 @@ namespace MWRender
 
     ESMS::CellStore<MWWorld::RefData> &mCell;
     MWWorld::Environment &mEnvironment;
-    RenderingManager &mRendering;
+   OEngine::Render::OgreRenderer& mRenderer;
+   Ogre::SceneNode *mMwRoot;
     MWWorld::PhysicsSystem *mPhysics;
 
     /// The scene node that contains all objects belonging to this
@@ -103,7 +104,7 @@ namespace MWRender
   public:
 
     ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell, MWWorld::Environment& environment,
-        RenderingManager &_rendering, MWWorld::PhysicsSystem *physics);
+       OEngine::Render::OgreRenderer& renderer, Ogre::SceneNode *mwRoot, MWWorld::PhysicsSystem *physics);
 
     virtual ~ExteriorCellRender() { destroy(); }
 

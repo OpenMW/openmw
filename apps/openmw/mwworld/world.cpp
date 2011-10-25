@@ -179,6 +179,7 @@ namespace MWWorld
     : mRendering (renderer,resDir), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this), mDebugging(physEng)
     {
+		std::cout << "Creating myworld\n";
         mPhysEngine = physEng;
 
         mPhysics = new PhysicsSystem(renderer, physEng);
@@ -206,7 +207,8 @@ namespace MWWorld
 
         mPhysEngine = physEng;
 
-        mWorldScene = new Scene(environment, this, mRendering, mPhysics);
+        mWorldScene = new Scene(environment, this, mRendering.getOgreRenderer(), mRendering.getRoot(), mPhysics);
+		std::cout << "After mworldscene\n";
        
     }
 
@@ -214,8 +216,10 @@ namespace MWWorld
     {
         delete mWorldScene;
         delete mGlobalVariables;
-        delete mPlayer;
+        
         delete mPhysics;
+		
+		delete mPlayer;
     }
 
     const ESM::Cell *World::getExterior (const std::string& cellName) const

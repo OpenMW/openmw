@@ -29,7 +29,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
 	//std::cout << "ONE";
 	 rend.createScene("PlayerCam", 55, 5);
-	 mSkyManager = MWRender::SkyManager::create(rend.getWindow(), getCamera(), resDir);
+	 mSkyManager = MWRender::SkyManager::create(rend.getWindow(), rend.getCamera(), resDir);
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -54,10 +54,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     playerNode->pitch(Degree(90));
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
-    cameraPitchNode->attachObject(getCamera());
-	std::cout <<"TWOF\n";
+    cameraPitchNode->attachObject(rend.getCamera());
 
-    mPlayer = new MWRender::Player (getCamera(), playerNode->getName());
+    mPlayer = new MWRender::Player (rend.getCamera(), playerNode->getName());
 	//std::cout << "Three";
 	
 }

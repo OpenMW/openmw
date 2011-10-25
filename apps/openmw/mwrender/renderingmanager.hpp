@@ -77,9 +77,8 @@ class RenderingManager {
     int skyGetMasserPhase() const;
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
+	OEngine::Render::OgreRenderer& getOgreRenderer(){return rend;}
 	Ogre::SceneManager *getMgr() { return rend.getScene(); }
-	Ogre::Camera *getCamera() { return rend.getCamera(); }
-	Ogre::Viewport *getViewport() { return rend.getViewport(); }
 	Ogre::SceneNode *getRoot() { return mwRoot; }
     MWRender::Player *getPlayer() { return mPlayer; }
   private:
