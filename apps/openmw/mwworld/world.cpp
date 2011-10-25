@@ -208,7 +208,6 @@ namespace MWWorld
         mPhysEngine = physEng;
 
         mWorldScene = new Scene(environment, this, mRendering.getOgreRenderer(), mRendering.getRoot(), mPhysics);
-		std::cout << "After mworldscene\n";
        
     }
 

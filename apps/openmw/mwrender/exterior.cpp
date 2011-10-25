@@ -8,9 +8,7 @@
 #include <OgreSceneManager.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
-#include "mwscene.hpp"
 #include <libs/mangle/vfs/servers/ogre_vfs.hpp>
-#include "mwscene.hpp"
 #include <Ogre.h>
 
 using namespace MWRender;

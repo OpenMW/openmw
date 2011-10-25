@@ -1,4 +1,4 @@
-#include "mwscene.hpp"
+#include "debugging.hpp"
 
 #include <assert.h>
 

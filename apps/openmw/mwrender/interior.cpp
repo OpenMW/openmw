@@ -9,7 +9,6 @@
 #include <OgreMath.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
-#include "mwscene.hpp"
 #include <Ogre.h>
 #include <stdio.h>
 

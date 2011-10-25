@@ -8,7 +8,6 @@
 
 #include <components/esm_store/cell_store.hpp>
 
-#include "../mwrender/mwscene.hpp"
 #include "physicssystem.hpp"
 
 #include "refdata.hpp"
