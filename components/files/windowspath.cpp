@@ -6,8 +6,8 @@
 
 #include <windows.h>
 #include <shlobj.h>
-
 #include <Shlwapi.h>
+
 #pragma comment(lib, "Shlwapi.lib")
 
 namespace Files
