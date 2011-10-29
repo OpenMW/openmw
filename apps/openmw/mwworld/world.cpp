@@ -176,10 +176,10 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
-    : mRendering (renderer,resDir), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this), mDebugging(physEng)
+    : mRendering (renderer,resDir), mDebugging(physEng), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
+      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
-		std::cout << "Creating myworld\n";
+        std::cout << "Creating myworld\n";
         mPhysEngine = physEng;
 
         mPhysics = new PhysicsSystem(renderer, physEng);
@@ -208,17 +208,17 @@ namespace MWWorld
         mPhysEngine = physEng;
 
         mWorldScene = new Scene(environment, this, mRendering.getOgreRenderer(), mRendering.getRoot(), mPhysics);
-       
+
     }
 
     World::~World()
     {
         delete mWorldScene;
         delete mGlobalVariables;
-        
+
         delete mPhysics;
-		
-		delete mPlayer;
+
+        delete mPlayer;
     }
 
     const ESM::Cell *World::getExterior (const std::string& cellName) const

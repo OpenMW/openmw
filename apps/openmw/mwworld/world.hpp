@@ -66,7 +66,7 @@ namespace MWWorld
         private:
 
             MWRender::RenderingManager mRendering;
-			MWRender::Debugging mDebugging;
+            MWRender::Debugging mDebugging;
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
             ESM::ESMReader mEsm;
