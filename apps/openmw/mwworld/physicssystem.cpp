@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "physicssystem.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/world.hpp" // FIXME
@@ -154,28 +156,31 @@ namespace MWWorld
     {
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
-            OEngine::Physic::PhysicActor* act = it->second;
-            bool cmode = act->getCollisionMode();
-            if(cmode)
+            if (it->first=="player")
             {
-                act->enableCollisions(false);
-                act->setGravity(0.);
-                act->setVerticalVelocity(0);
-                mFreeFly = true;
-                return false;
-            }
-            else
-            {
-                mFreeFly = false;
-                act->enableCollisions(true);
-                act->setGravity(4.);
-                act->setVerticalVelocity(0);
-                return true;
+                OEngine::Physic::PhysicActor* act = it->second;
+
+                bool cmode = act->getCollisionMode();
+                if(cmode)
+                {
+                    act->enableCollisions(false);
+                    act->setGravity(0.);
+                    act->setVerticalVelocity(0);
+                    mFreeFly = true;
+                    return false;
+                }
+                else
+                {
+                    mFreeFly = false;
+                    act->enableCollisions(true);
+                    act->setGravity(4.);
+                    act->setVerticalVelocity(0);
+                    return true;
+                }
             }
         }
 
-        return false; // This should never happen, but it shall not bother us now, since
-                        // this part of the code needs a rewrite anyway.
+        throw std::logic_error ("can't find player");
     }
 
 }
