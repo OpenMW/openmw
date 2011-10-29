@@ -231,7 +231,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode)) 
     {
         cShape->collide = true;
-        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,finalScale,raycastingOnly);
+        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,parentScale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)
     {
@@ -269,27 +269,6 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
         // bother setting it up.
         return;
 
-    btTransform tr;
-    tr.setRotation(getbtQuat(parentRot));
-    tr.setOrigin(btVector3(parentPos.x,parentPos.y,parentPos.z));
-
-    // Bounding box collision isn't implemented, always use mesh for now.
-    /*if (bbcollide)
-      {
-      return;
-      std::cout << "bbcolide?";
-    //TODO: check whether it's half box or not (is there a /2?)
-    NodeShape = new btBoxShape(btVector3(shape->boundXYZ->array[0]/2.,shape->boundXYZ->array[1]/2.,shape->boundXYZ->array[2]/2.));
-    std::cout << "bbcolide12121212121";
-    currentShape->addChildShape(tr,NodeShape);
-    std::cout << "aaaaaaaaaaaaa";
-    return;
-    collide = true;
-    bbcollide = false;
-    }*/
-
-    /* Do in-place transformation.the only needed transfo is the scale. (maybe not in fact)
-     */
 
     Nif::NiTriShapeData *data = shape->data.getPtr();
 
@@ -298,10 +277,13 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 
     for(unsigned int i=0; i < data->triangles.length; i = i+3)
     {
-        btVector3 b1(vertices[triangles[i+0]*3]*parentScale,vertices[triangles[i+0]*3+1]*parentScale,vertices[triangles[i+0]*3+2]*parentScale);
-        btVector3 b2(vertices[triangles[i+1]*3]*parentScale,vertices[triangles[i+1]*3+1]*parentScale,vertices[triangles[i+1]*3+2]*parentScale);
-        btVector3 b3(vertices[triangles[i+2]*3]*parentScale,vertices[triangles[i+2]*3+1]*parentScale,vertices[triangles[i+2]*3+2]*parentScale);
-        mTriMesh->addTriangle(b1,b2,b3);
+        Ogre::Vector3 b1(vertices[triangles[i+0]*3]*parentScale,vertices[triangles[i+0]*3+1]*parentScale,vertices[triangles[i+0]*3+2]*parentScale);
+        Ogre::Vector3 b2(vertices[triangles[i+1]*3]*parentScale,vertices[triangles[i+1]*3+1]*parentScale,vertices[triangles[i+1]*3+2]*parentScale);
+        Ogre::Vector3 b3(vertices[triangles[i+2]*3]*parentScale,vertices[triangles[i+2]*3+1]*parentScale,vertices[triangles[i+2]*3+2]*parentScale);
+        b1 = parentRot * b1 + parentPos;
+        b2 = parentRot * b2 + parentPos;
+        b3 = parentRot * b3 + parentPos;
+        mTriMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
     }
 }
 
