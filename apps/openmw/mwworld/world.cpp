@@ -176,7 +176,7 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
-    : mRendering (renderer,resDir), mDebugging(physEng), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
+    : mRendering (renderer,resDir, physEng),mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         std::cout << "Creating myworld\n";
@@ -654,7 +654,7 @@ namespace MWWorld
 
     bool World::toggleRenderMode (RenderMode mode)
     {
-        return mDebugging.toggleRenderMode (mode);
+        return mRendering.toggleRenderMode (mode);
     }
 
     std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)

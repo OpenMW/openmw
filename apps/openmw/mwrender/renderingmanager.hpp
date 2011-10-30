@@ -3,6 +3,7 @@
 
 
 #include "sky.hpp"
+#include "debugging.hpp"
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
@@ -50,10 +51,12 @@ class RenderingManager {
         OEngine::Physic::PhysicEngine* eng;
 
         MWRender::Player *mPlayer;
+		MWRender::Debugging mDebugging;
 
   public:
-    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir);
+    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
     ~RenderingManager();
+	bool toggleRenderMode(int mode);
 
     void removeCell (MWWorld::Ptr::CellStore *store); // TODO do we want this?
     

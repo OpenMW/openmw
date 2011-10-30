@@ -22,7 +22,7 @@ namespace MWRender {
 
 
 
-RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir) :rend(_rend)
+RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine) :rend(_rend), mDebugging(engine)
 {
 	
 	
@@ -133,6 +133,9 @@ int RenderingManager::skyGetSecundaPhase() const
 void RenderingManager::skySetMoonColour (bool red)
 {
     mSkyManager->setMoonColour(red);
+}
+bool RenderingManager::toggleRenderMode(int mode){
+	return mDebugging.toggleRenderMode(mode);
 }
 
 }
