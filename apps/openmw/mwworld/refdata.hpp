@@ -22,7 +22,9 @@ namespace MWWorld
 {
     class RefData
     {
-            std::string mHandle;
+            Ogre::SceneNode* mHandle;
+
+			std::string baseNode;
 
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
@@ -43,12 +45,18 @@ namespace MWWorld
 
         public:
 
-            RefData() : mHasLocals (false), mEnabled (true), mCount (1) {}
+            RefData() : mHasLocals (false), mEnabled (true), mCount (1){ mHandle = 0;}
 
-            std::string getHandle()
+            Ogre::SceneNode* getHandle()
             {
                 return mHandle;
             }
+			std::string getBaseNode(){
+				return baseNode;
+			}
+			void setBaseNode(const std::string& node){
+				baseNode = node;
+			}
 
             int getCount() const
             {
@@ -64,10 +72,6 @@ namespace MWWorld
                 }
             }
 
-            void setHandle (const std::string& handle)
-            {
-                mHandle = handle;
-            }
 
             void setCount (int count)
             {
