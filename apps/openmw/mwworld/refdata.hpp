@@ -12,6 +12,7 @@
 #include "../mwmechanics/movement.hpp"
 
 #include "containerstore.hpp"
+#include <Ogre.h>
 
 namespace ESM
 {
@@ -22,9 +23,8 @@ namespace MWWorld
 {
     class RefData
     {
-            Ogre::SceneNode* mHandle;
+            Ogre::SceneNode* mBaseNode;
 
-			std::string baseNode;
 
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
@@ -45,18 +45,15 @@ namespace MWWorld
 
         public:
 
-            RefData() : mHasLocals (false), mEnabled (true), mCount (1){ mHandle = 0;}
+            RefData() : mHasLocals (false), mEnabled (true), mCount (1) {mBaseNode = 0;}
 
-            Ogre::SceneNode* getHandle()
+            std::string getHandle()
             {
-                return mHandle;
+                return mBaseNode->getName();
             }
-			std::string getBaseNode(){
-				return baseNode;
-			}
-			void setBaseNode(const std::string& node){
-				baseNode = node;
-			}
+            void setSceneNode(Ogre::SceneNode* base){
+                 mBaseNode = base;
+            }
 
             int getCount() const
             {
