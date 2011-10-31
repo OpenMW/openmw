@@ -28,6 +28,15 @@ namespace MWRender
   /// Base class for cell render, that implements inserting references into a cell in a
   /// cell type- and render-engine-independent way.
 
+	class NPC{
+
+	};
+	class Creature{
+
+	};
+	class Obj{
+
+	};
   class CellRenderImp
   {
   public:
