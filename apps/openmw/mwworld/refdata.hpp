@@ -45,13 +45,13 @@ namespace MWWorld
 
         public:
 
-            RefData() : mHasLocals (false), mEnabled (true), mCount (1) {mBaseNode = 0;}
+            RefData() : mHasLocals (false), mEnabled (true), mCount (1),mBaseNode(0) {}
 
             std::string getHandle()
             {
                 return mBaseNode->getName();
             }
-            void setSceneNode(Ogre::SceneNode* base){
+            void setBaseNode(Ogre::SceneNode* base){
                  mBaseNode = base;
             }
 
