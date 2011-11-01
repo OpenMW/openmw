@@ -15,6 +15,7 @@
 
 #include "player.hpp"
 
+
 using namespace MWRender;
 using namespace Ogre;
 
@@ -66,6 +67,20 @@ RenderingManager::~RenderingManager ()
 	delete mPlayer;
     delete mSkyManager;
 }
+
+MWRender::Npcs& RenderingManager::getNPCs(){
+	return npcs;
+}
+MWRender::Objects& RenderingManager::getObjects(){
+	return objects;
+}
+MWRender::Creatures& RenderingManager::getCreatures(){
+	return creatures;
+}
+MWRender::Player* RenderingManager::getPlayer(){
+    return mPlayer;
+}
+
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
 

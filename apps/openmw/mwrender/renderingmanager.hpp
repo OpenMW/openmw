@@ -15,6 +15,9 @@
 #include "../mwworld/ptr.hpp"
 
 #include <boost/filesystem.hpp>
+#include "objects.hpp"
+#include "npcs.hpp"
+#include "creatures.hpp"
 
 namespace Ogre
 {
@@ -34,13 +37,22 @@ namespace MWWorld
 
 namespace MWRender
 {
-	class Player;
-	
+    class Player;
+    class RenderingInterface{
+    public:
+        virtual MWRender::Npcs& getNPCs();
+        virtual MWRender::Creatures& getCreatures();
+        virtual MWRender::Objects& getObjects();
+	    virtual MWRender::Player* getPlayer();
+    };
 
-class RenderingManager {
+class RenderingManager: private RenderingInterface {
 
 	 OEngine::Render::OgreRenderer &rend;
 	 Ogre::Camera* camera;
+	 MWRender::Npcs npcs;
+	 MWRender::Creatures creatures;
+	 MWRender::Objects objects;
 
         /// Root node for all objects added to the scene. This is rotated so
         /// that the OGRE coordinate system matches that used internally in
@@ -56,6 +68,10 @@ class RenderingManager {
   public:
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
     ~RenderingManager();
+	virtual MWRender::Npcs& getNPCs();
+    virtual MWRender::Creatures& getCreatures();
+    virtual MWRender::Objects& getObjects();
+    virtual MWRender::Player* getPlayer();
 	bool toggleRenderMode(int mode);
 
     void removeCell (MWWorld::Ptr::CellStore *store); // TODO do we want this?
@@ -83,7 +99,7 @@ class RenderingManager {
 	OEngine::Render::OgreRenderer& getOgreRenderer(){return rend;}
 	Ogre::SceneManager *getMgr() { return rend.getScene(); }
 	Ogre::SceneNode *getRoot() { return mwRoot; }
-    MWRender::Player *getPlayer() { return mPlayer; }
+    
   private:
     
     SkyManager* mSkyManager;

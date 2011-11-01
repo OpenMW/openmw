@@ -1,0 +1,5 @@
+namespace MWRender{
+class Npcs{
+
+};
+}

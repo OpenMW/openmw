@@ -16,7 +16,7 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging cellimp interior exterior sky player
+    renderingmanager debugging cellimp interior exterior sky player npcs creatures objects
     )
 
 add_openmw_dir (mwinput
