@@ -43,7 +43,7 @@ namespace MWRender
         virtual MWRender::Npcs& getNPCs();
         virtual MWRender::Creatures& getCreatures();
         virtual MWRender::Objects& getObjects();
-	    virtual MWRender::Player* getPlayer();
+	    virtual MWRender::Player& getPlayer();
     };
 
 class RenderingManager: private RenderingInterface {
@@ -71,7 +71,7 @@ class RenderingManager: private RenderingInterface {
 	virtual MWRender::Npcs& getNPCs();
     virtual MWRender::Creatures& getCreatures();
     virtual MWRender::Objects& getObjects();
-    virtual MWRender::Player* getPlayer();
+    virtual MWRender::Player& getPlayer();
 	bool toggleRenderMode(int mode);
 
     void removeCell (MWWorld::Ptr::CellStore *store); // TODO do we want this?

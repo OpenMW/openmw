@@ -77,8 +77,8 @@ MWRender::Objects& RenderingManager::getObjects(){
 MWRender::Creatures& RenderingManager::getCreatures(){
 	return creatures;
 }
-MWRender::Player* RenderingManager::getPlayer(){
-    return mPlayer;
+MWRender::Player& RenderingManager::getPlayer(){
+    return (*mPlayer);
 }
 
 
