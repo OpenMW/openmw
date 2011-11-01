@@ -9,6 +9,7 @@
 #include "../mwrender/sky.hpp"
 #include "../mwrender/interior.hpp"
 #include "../mwrender/exterior.hpp"
+#include "../mwrender/player.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
@@ -193,7 +194,8 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-        mPlayer = new MWWorld::Player (mRendering.getPlayer(), mStore.npcs.find ("player"), *this);
+		MWRender::Player* play = &(mRendering.getPlayer());
+        mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
         // global variables
