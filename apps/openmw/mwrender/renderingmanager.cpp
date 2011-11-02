@@ -1,4 +1,5 @@
 #include "renderingmanager.hpp"
+#include "objects.hpp"
 
 #include <assert.h>
 
@@ -23,7 +24,7 @@ namespace MWRender {
 
 
 
-RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine) :rend(_rend), mDebugging(engine)
+RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine) :rend(_rend), mDebugging(engine), objects(rend)
 {
 	
 	
@@ -58,8 +59,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(rend.getCamera());
 
     mPlayer = new MWRender::Player (rend.getCamera(), playerNode->getName());
+
 	//std::cout << "Three";
-	
 }
 
 RenderingManager::~RenderingManager ()

@@ -48,22 +48,7 @@ namespace MWRender
 
 class RenderingManager: private RenderingInterface {
 
-	 OEngine::Render::OgreRenderer &rend;
-	 Ogre::Camera* camera;
-	 MWRender::Npcs npcs;
-	 MWRender::Creatures creatures;
-	 MWRender::Objects objects;
-
-        /// Root node for all objects added to the scene. This is rotated so
-        /// that the OGRE coordinate system matches that used internally in
-        /// Morrowind.
-        Ogre::SceneNode *mwRoot;
-        Ogre::RaySceneQuery *mRaySceneQuery;
-
-        OEngine::Physic::PhysicEngine* eng;
-
-        MWRender::Player *mPlayer;
-		MWRender::Debugging mDebugging;
+	
 
   public:
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
@@ -103,6 +88,22 @@ class RenderingManager: private RenderingInterface {
   private:
     
     SkyManager* mSkyManager;
+	 OEngine::Render::OgreRenderer &rend;
+	 Ogre::Camera* camera;
+	 MWRender::Npcs npcs;
+	 MWRender::Creatures creatures;
+	 MWRender::Objects objects;
+
+        /// Root node for all objects added to the scene. This is rotated so
+        /// that the OGRE coordinate system matches that used internally in
+        /// Morrowind.
+        Ogre::SceneNode *mwRoot;
+        Ogre::RaySceneQuery *mRaySceneQuery;
+
+        OEngine::Physic::PhysicEngine* eng;
+
+        MWRender::Player *mPlayer;
+		MWRender::Debugging mDebugging;
     
     
 };

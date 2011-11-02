@@ -2,13 +2,17 @@
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
+#include <openengine/ogre/renderer.hpp>
 
 namespace MWRender{
 class Objects{
 private:
 	OEngine::Render::OgreRenderer &rend;
+	 Ogre::SceneNode *mBase;
+    Ogre::SceneNode *mInsert;
+	bool isStatic;
 public:
-    Objects(OEngine::Render::OgreRenderer& _rend): rend(_rend){}
+    Objects(OEngine::Render::OgreRenderer& _rend): rend(_rend){mBase = rend.getScene()->getRootSceneNode();  }
     ~Objects(){}
    void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
