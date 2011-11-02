@@ -164,6 +164,22 @@ void GraphicsPage::setupOgre()
     QString ogreCfg = QString::fromStdString(mCfg.getOgreConfigPath().string());
     file.setFileName(ogreCfg);
 
+    //we need to check that the path to the configuration file exists before we
+    //try and create an instance of Ogre::Root otherwise Ogre raises an exception
+    QDir configDir = QFileInfo(file).dir();
+    if ( !configDir.exists() && !configDir.mkpath(configDir.path()) )
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error creating config file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(QString(tr("<br><b>Failed to create the configuration file</b><br><br> \
+        Make sure you have write access to<br>%1<br><br>")).arg(configDir.path()));
+        msgBox.exec();
+
+        QApplication::exit(1);
+    }
+
     try
     {
         mOgre = new Ogre::Root(pluginCfg.toStdString(), file.fileName().toStdString(), "./launcherOgre.log");
