@@ -4,12 +4,25 @@
 using namespace MWRender;
 
 void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
-    ptr.getRefData().setBaseNode(mBase);
-	assert (!mInsert);
+	Ogre::SceneNode* root = rend.getScene()->getRootSceneNode();
+	Ogre::SceneNode* cellnode;
+	if(cellSceneNodes.find(ptr.getCell()) == cellSceneNodes.end())
+	{
+		//Create the scenenode and put it in the map
+		cellnode = root->createChildSceneNode();
+		cellSceneNodes[ptr.getCell()] = cellnode;
+		assert(!cellnode->getChildIterator()->begin());  //Is this right?
+	}
+	else
+	{
+		cellnode = (cellSceneNodes.find(ptr.getCell()))->second;
+	}
+	Ogre::SceneNode* insert = cellnode->createChildSceneNode();
+	
+    ptr.getRefData().setBaseNode(insert);
 	isStatic = static_;
 
-      // Create and place scene node for this object
-     mInsert = mBase->createChildSceneNode();
+    
 }
 void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh){
 

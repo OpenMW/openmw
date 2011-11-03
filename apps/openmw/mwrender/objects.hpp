@@ -8,11 +8,10 @@ namespace MWRender{
 class Objects{
 private:
 	OEngine::Render::OgreRenderer &rend;
-	 Ogre::SceneNode *mBase;
-    Ogre::SceneNode *mInsert;
+	std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> cellSceneNodes;
 	bool isStatic;
 public:
-    Objects(OEngine::Render::OgreRenderer& _rend): rend(_rend){mBase = rend.getScene()->getRootSceneNode();  }
+    Objects(OEngine::Render::OgreRenderer& _rend): rend(_rend){}
     ~Objects(){}
    void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
