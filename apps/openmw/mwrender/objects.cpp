@@ -11,7 +11,7 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 		//Create the scenenode and put it in the map
 		cellnode = root->createChildSceneNode();
 		cellSceneNodes[ptr.getCell()] = cellnode;
-		assert(!cellnode->getChildIterator()->begin());  //Is this right?
+		//assert(!cellnode->getChildIterator()->begin());  //Is this right?
 	}
 	else
 	{
