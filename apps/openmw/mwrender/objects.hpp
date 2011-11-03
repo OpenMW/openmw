@@ -7,11 +7,30 @@
 namespace MWRender{
 class Objects{
 private:
-	OEngine::Render::OgreRenderer &rend;
-	std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> cellSceneNodes;
+	OEngine::Render::OgreRenderer &mRend;
+	std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
 	bool isStatic;
+	Ogre::StaticGeometry *sg;
+	static int uniqueID;
+	 static bool lightConst;
+    static float lightConstValue;
+
+    static bool lightLinear;
+    static int lightLinearMethod;
+    static float lightLinearValue;
+    static float lightLinearRadiusMult;
+
+    static bool lightQuadratic;
+    static int lightQuadraticMethod;
+    static float lightQuadraticValue;
+    static float lightQuadraticRadiusMult;
+
+    static bool lightOutQuadInLin;
 public:
-    Objects(OEngine::Render::OgreRenderer& _rend): rend(_rend){}
+    Objects(OEngine::Render::OgreRenderer& _rend): mRend(_rend){
+		uniqueID = uniqueID +1;
+    sg = mRend.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+	}
     ~Objects(){}
    void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
