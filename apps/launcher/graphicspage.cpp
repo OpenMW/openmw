@@ -178,6 +178,7 @@ void GraphicsPage::setupOgre()
         msgBox.exec();
 
         QApplication::exit(1);
+        return;
     }
 
     try
@@ -200,6 +201,7 @@ void GraphicsPage::setupOgre()
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
 
         QApplication::exit(1);
+        return;
     }
 
     // Get the available renderers and put them in the combobox
@@ -233,6 +235,7 @@ void GraphicsPage::setupOgre()
         msgBox.exec();
 
         QApplication::exit(1);
+        return;
     }
 
     // Now fill the GUI elements
@@ -418,6 +421,7 @@ void GraphicsPage::writeConfig()
         qCritical("Error validating configuration");
 
         QApplication::exit(1);
+        return;
     }
 
     // Write the settings to the config file
