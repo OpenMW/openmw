@@ -57,6 +57,8 @@ class RenderingManager: private RenderingInterface {
     virtual MWRender::Creatures& getCreatures();
     virtual MWRender::Objects& getObjects();
     virtual MWRender::Player& getPlayer();
+
+	void toggleLight();
 	bool toggleRenderMode(int mode);
 
     void removeCell (MWWorld::Ptr::CellStore *store); // TODO do we want this?
@@ -86,13 +88,21 @@ class RenderingManager: private RenderingInterface {
 	Ogre::SceneNode *getRoot() { return mwRoot; }
     
   private:
-    
+    void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
+		 /// configure fog according to cell
+    void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
+    void setAmbientMode();
     SkyManager* mSkyManager;
 	 OEngine::Render::OgreRenderer &rend;
 	 Ogre::Camera* camera;
 	 MWRender::Npcs npcs;
 	 MWRender::Creatures creatures;
 	 MWRender::Objects objects;
+
+	// 0 normal, 1 more bright, 2 max
+    int mAmbientMode;
+
+    Ogre::ColourValue mAmbientColor;
 
         /// Root node for all objects added to the scene. This is rotated so
         /// that the OGRE coordinate system matches that used internally in

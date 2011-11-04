@@ -154,4 +154,71 @@ bool RenderingManager::toggleRenderMode(int mode){
 	return mDebugging.toggleRenderMode(mode);
 }
 
+void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
+{
+  Ogre::ColourValue color;
+  color.setAsABGR (mCell.cell->ambi.fog);
+
+  float high = 4500 + 9000 * (1-mCell.cell->ambi.fogDensity);
+  float low = 200;
+
+  rend.getScene()->setFog (FOG_LINEAR, color, 0, low, high);
+  rend.getCamera()->setFarClipDistance (high + 10);
+  rend.getViewport()->setBackgroundColour (color);
+}
+
+void RenderingManager::setAmbientMode()
+{
+  switch (mAmbientMode)
+  {
+    case 0:
+
+      rend.getScene()->setAmbientLight(mAmbientColor);
+      break;
+
+    case 1:
+
+      rend.getScene()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
+      break;
+
+    case 2:
+
+      rend.getScene()->setAmbientLight(ColourValue(1,1,1));
+      break;
+  }
+}
+
+void RenderingManager::configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell)
+{
+  mAmbientColor.setAsABGR (mCell.cell->ambi.ambient);
+  setAmbientMode();
+
+  // Create a "sun" that shines light downwards. It doesn't look
+  // completely right, but leave it for now.
+  Ogre::Light *light = rend.getScene()->createLight();
+  Ogre::ColourValue colour;
+  colour.setAsABGR (mCell.cell->ambi.sunlight);
+  light->setDiffuseColour (colour);
+  light->setType(Ogre::Light::LT_DIRECTIONAL);
+  light->setDirection(0,-1,0);
+}
+// Switch through lighting modes.
+
+void RenderingManager::toggleLight()
+{
+  if (mAmbientMode==2)
+    mAmbientMode = 0;
+  else
+    ++mAmbientMode;
+
+  switch (mAmbientMode)
+  {
+    case 0: std::cout << "Setting lights to normal\n"; break;
+    case 1: std::cout << "Turning the lights up\n"; break;
+    case 2: std::cout << "Turning the lights to full\n"; break;
+  }
+
+  setAmbientMode();
+}
+
 }
