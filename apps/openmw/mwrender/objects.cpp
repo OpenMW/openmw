@@ -23,91 +23,91 @@ bool Objects::lightOutQuadInLin = false;
 int Objects::uniqueID = 0;
 
 void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
-	Ogre::SceneNode* root = mRend.getScene()->getRootSceneNode();
-	Ogre::SceneNode* cellnode;
-	if(mCellSceneNodes.find(ptr.getCell()) == mCellSceneNodes.end())
-	{
+    Ogre::SceneNode* root = mRend.getScene()->getRootSceneNode();
+    Ogre::SceneNode* cellnode;
+    if(mCellSceneNodes.find(ptr.getCell()) == mCellSceneNodes.end())
+    {
 		//Create the scenenode and put it in the map
 		cellnode = root->createChildSceneNode();
-		mCellSceneNodes[ptr.getCell()] = cellnode;
+        mCellSceneNodes[ptr.getCell()] = cellnode;
 	}
 	else
-	{
-		cellnode = mCellSceneNodes[ptr.getCell()];
-	}
+    {
+        cellnode = mCellSceneNodes[ptr.getCell()];
+    }
 
 	
 
-	Ogre::SceneNode* insert = cellnode->createChildSceneNode();
-	const float *f = ptr.getCellRef().pos.pos;
-  insert->setPosition(f[0], f[1], f[2]);
-  insert->setScale(ptr.getCellRef().scale, ptr.getCellRef().scale, ptr.getCellRef().scale);
+    Ogre::SceneNode* insert = cellnode->createChildSceneNode();
+    const float *f = ptr.getCellRef().pos.pos;
+    insert->setPosition(f[0], f[1], f[2]);
+    insert->setScale(ptr.getCellRef().scale, ptr.getCellRef().scale, ptr.getCellRef().scale);
 
-  // Convert MW rotation to a quaternion:
-  f = ptr.getCellRef().pos.rot;
+    // Convert MW rotation to a quaternion:
+    f = ptr.getCellRef().pos.rot;
 
-  // Rotate around X axis
-  Quaternion xr(Radian(-f[0]), Vector3::UNIT_X);
+    // Rotate around X axis
+    Quaternion xr(Radian(-f[0]), Vector3::UNIT_X);
 
-  // Rotate around Y axis
-  Quaternion yr(Radian(-f[1]), Vector3::UNIT_Y);
+    // Rotate around Y axis
+    Quaternion yr(Radian(-f[1]), Vector3::UNIT_Y);
 
-  // Rotate around Z axis
-  Quaternion zr(Radian(-f[2]), Vector3::UNIT_Z);
+    // Rotate around Z axis
+    Quaternion zr(Radian(-f[2]), Vector3::UNIT_Z);
 
-  // Rotates first around z, then y, then x
- insert->setOrientation(xr*yr*zr);
-	 if (!enabled)
-           insert->setVisible (false);
+   // Rotates first around z, then y, then x
+    insert->setOrientation(xr*yr*zr);
+    if (!enabled)
+         insert->setVisible (false);
     ptr.getRefData().setBaseNode(insert);
-	isStatic = static_;
+    isStatic = static_;
 
     
 }
 void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh){
-	Ogre::SceneNode* insert = mRend.getScene()->getSceneNode(ptr.getRefData().getHandle());
-	assert(insert);
+    Ogre::SceneNode* insert = mRend.getScene()->getSceneNode(ptr.getRefData().getHandle());
+    assert(insert);
 
-	NifOgre::NIFLoader::load(mesh);
-  Entity *ent = mRend.getScene()->createEntity(mesh);
+    NifOgre::NIFLoader::load(mesh);
+    Entity *ent = mRend.getScene()->createEntity(mesh);
 
-  if(!isStatic)
-  {
-     insert->attachObject(ent);
-  }
-  else
-  {
-	  Ogre::StaticGeometry* sg;
-	  if(mSG.find(ptr.getCell()) == mSG.end())
-	  {
-		  uniqueID = uniqueID +1;
-          sg = mRend.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
-		  //Create the scenenode and put it in the map
-		  mSG[ptr.getCell()] = sg;
-	  }
-	  else
-	  {
-		  sg = mSG[ptr.getCell()];
-	  }
+    if(!isStatic)
+    {
+        insert->attachObject(ent);
+    }
+    else
+    {
+	    Ogre::StaticGeometry* sg;
+	    if(mSG.find(ptr.getCell()) == mSG.end())
+        {
+            uniqueID = uniqueID +1;
+            sg = mRend.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+            //Create the scenenode and put it in the map
+            mSG[ptr.getCell()] = sg;
+        }
+        else
+        {
+            sg = mSG[ptr.getCell()];
+        }
 
-      sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
-      sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
+        sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
+        sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
 
-	  sg->build();  //Is this the right place for building?
-      mRend.getScene()->destroyEntity(ent);
-  }
+        sg->build();  //Is this the right place for building?
+        mRend.getScene()->destroyEntity(ent);
+    }
 
 }
 void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius){
-	Ogre::SceneNode* insert = mRend.getScene()->getSceneNode(ptr.getRefData().getHandle());
-	assert(insert);
-	 Ogre::Light *light = mRend.getScene()->createLight();
-  light->setDiffuseColour (r, g, b);
+    Ogre::SceneNode* insert = mRend.getScene()->getSceneNode(ptr.getRefData().getHandle());
+    assert(insert);
+    Ogre::Light *light = mRend.getScene()->createLight();
+    light->setDiffuseColour (r, g, b);
 
-  float cval=0.0f, lval=0.0f, qval=0.0f;
+    float cval=0.0f, lval=0.0f, qval=0.0f;
 
-  if(lightConst)
-    cval = lightConstValue;
+    if(lightConst)
+         cval = lightConstValue;
   if(!lightOutQuadInLin)
   {
     if(lightLinear)
@@ -145,10 +145,10 @@ void Objects::deleteObject (const std::string& handle)
 void Objects::removeCell(const MWWorld::Ptr& ptr){
 	 if(mCellSceneNodes.find(ptr.getCell()) != mCellSceneNodes.end())
     {
-      Ogre::SceneNode* base = mCellSceneNodes[ptr.getCell()];
-      base->removeAndDestroyAllChildren();
-      mRend.getScene()->destroySceneNode(base);
-	  base = 0;
+        Ogre::SceneNode* base = mCellSceneNodes[ptr.getCell()];
+        base->removeAndDestroyAllChildren();
+        mRend.getScene()->destroySceneNode(base);
+	    base = 0;
     }
 
 
