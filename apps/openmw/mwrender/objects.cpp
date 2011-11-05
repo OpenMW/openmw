@@ -33,8 +33,11 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 	}
 	else
 	{
-		cellnode = (mCellSceneNodes.find(ptr.getCell()))->second;
+		cellnode = mCellSceneNodes[ptr.getCell()];
 	}
+
+	
+
 	Ogre::SceneNode* insert = cellnode->createChildSceneNode();
 	const float *f = ptr.getCellRef().pos.pos;
   insert->setPosition(f[0], f[1], f[2]);
@@ -74,8 +77,23 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh){
   }
   else
   {
+	  Ogre::StaticGeometry* sg;
+	  if(mSG.find(ptr.getCell()) == mSG.end())
+	  {
+		  uniqueID = uniqueID +1;
+          sg = mRend.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+		  //Create the scenenode and put it in the map
+		  mSG[ptr.getCell()] = sg;
+	  }
+	  else
+	  {
+		  sg = mSG[ptr.getCell()];
+	  }
+
       sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
       sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
+
+	  sg->build();  //Is this the right place for building?
       mRend.getScene()->destroyEntity(ent);
   }
 
@@ -112,5 +130,33 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
   light->setAttenuation(10*radius, cval, lval, qval);
 
   insert->attachObject(light);
+}
+
+void Objects::deleteObject (const std::string& handle)
+{
+    if (!handle.empty())
+    {
+        Ogre::SceneNode *node = mRend.getScene()->getSceneNode (handle);
+        node->removeAndDestroyAllChildren();
+        mRend.getScene()->destroySceneNode (node);
+    }
+}
+
+void Objects::removeCell(const MWWorld::Ptr& ptr){
+	 if(mCellSceneNodes.find(ptr.getCell()) != mCellSceneNodes.end())
+    {
+      Ogre::SceneNode* base = mCellSceneNodes[ptr.getCell()];
+      base->removeAndDestroyAllChildren();
+      mRend.getScene()->destroySceneNode(base);
+	  base = 0;
+    }
+
+
+    if(mSG.find(ptr.getCell()) != mSG.end())
+    {
+		Ogre::StaticGeometry* sg = mSG[ptr.getCell()];
+        mRend.getScene()->destroyStaticGeometry (sg);
+        sg = 0;
+    }
 }
 

@@ -9,8 +9,8 @@ class Objects{
 private:
 	OEngine::Render::OgreRenderer &mRend;
 	std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
+	std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
 	bool isStatic;
-	Ogre::StaticGeometry *sg;
 	static int uniqueID;
 	 static bool lightConst;
     static float lightConstValue;
@@ -28,13 +28,13 @@ private:
     static bool lightOutQuadInLin;
 public:
     Objects(OEngine::Render::OgreRenderer& _rend): mRend(_rend){
-		uniqueID = uniqueID +1;
-    sg = mRend.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
 	}
     ~Objects(){}
    void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
 	void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
+	void deleteObject (const std::string& handle);
+	void removeCell(const MWWorld::Ptr& ptr);
 	
     /// insert a light related to the most recent insertBegin call.
    
