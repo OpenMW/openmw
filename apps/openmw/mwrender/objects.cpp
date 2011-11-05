@@ -93,7 +93,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh){
         sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
         sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
 
-        sg->build();  //Is this the right place for building?
+        
         mRend.getScene()->destroyEntity(ent);
     }
 
@@ -157,6 +157,13 @@ void Objects::removeCell(const MWWorld::Ptr& ptr){
 		Ogre::StaticGeometry* sg = mSG[ptr.getCell()];
         mRend.getScene()->destroyStaticGeometry (sg);
         sg = 0;
+    }
+}
+void Objects::buildStaticGeometry(const MWWorld::Ptr& ptr){
+    if(mSG.find(ptr.getCell()) != mSG.end())
+    {
+		Ogre::StaticGeometry* sg = mSG[ptr.getCell()];
+        sg->build();  
     }
 }
 

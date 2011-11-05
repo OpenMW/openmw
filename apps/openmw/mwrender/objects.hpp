@@ -34,6 +34,8 @@ public:
     void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
     void deleteObject (const std::string& handle);
     void removeCell(const MWWorld::Ptr& ptr);
+    void buildStaticGeometry(const MWWorld::Ptr& ptr);
+
 	
     /// insert a light related to the most recent insertBegin call.
    
