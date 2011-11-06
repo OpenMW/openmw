@@ -52,11 +52,6 @@ include(${QT_USE_FILE})
 # Main executable
 add_executable(omwlauncher
     ${LAUNCHER}
-    ${MISC} ${MISC_HEADER}
-    ${FILES} ${FILES_HEADER}
-    ${CFG} ${CFG_HEADER}
-    ${TO_UTF8}
-    ${ESM}
     ${RCC_SRCS}
     ${MOC_SRCS}
 )
@@ -66,6 +61,7 @@ target_link_libraries(omwlauncher
     ${OGRE_LIBRARIES}
     ${QT_LIBRARIES}
     ${PNG_LIBRARY}
+    components
 )
 
 if(DPKG_PROGRAM)
@@ -80,7 +76,7 @@ if (APPLE)
 else()
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
-        
+
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.cfg")
 endif()
