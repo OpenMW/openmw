@@ -1,5 +1,4 @@
 #include "renderingmanager.hpp"
-#include "objects.hpp"
 
 #include <assert.h>
 

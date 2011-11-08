@@ -5,8 +5,8 @@
 #include <openengine/ogre/renderer.hpp>
 
 namespace MWRender{
+
 class Objects{
-private:
 	OEngine::Render::OgreRenderer &mRend;
 	std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
 	std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
@@ -34,7 +34,7 @@ public:
     void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
     void deleteObject (const std::string& handle);
     void removeCell(const MWWorld::Ptr& ptr);
-    void buildStaticGeometry(const MWWorld::Ptr& ptr);
+    void buildStaticGeometry(ESMS::CellStore<MWWorld::RefData> &cell);
 
 	
     /// insert a light related to the most recent insertBegin call.

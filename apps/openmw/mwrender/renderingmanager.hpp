@@ -4,6 +4,7 @@
 
 #include "sky.hpp"
 #include "debugging.hpp"
+#include "renderinginterface.hpp"
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
@@ -15,9 +16,8 @@
 #include "../mwworld/ptr.hpp"
 
 #include <boost/filesystem.hpp>
-#include "objects.hpp"
-#include "npcs.hpp"
-#include "creatures.hpp"
+
+
 
 namespace Ogre
 {
@@ -38,13 +38,7 @@ namespace MWWorld
 namespace MWRender
 {
     class Player;
-    class RenderingInterface{
-    public:
-        virtual MWRender::Npcs& getNPCs();
-        virtual MWRender::Creatures& getCreatures();
-        virtual MWRender::Objects& getObjects();
-	    virtual MWRender::Player& getPlayer();
-    };
+    
 
 class RenderingManager: private RenderingInterface {
 

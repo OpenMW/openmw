@@ -2,8 +2,9 @@
 #include <OgreSceneNode.h>
 #include <components/nifogre/ogre_nif_loader.hpp>
 
-using namespace MWRender;
 using namespace Ogre;
+using namespace MWRender;
+
 
 bool Objects::lightConst = false;
 float Objects::lightConstValue = 0.0f;
@@ -159,10 +160,10 @@ void Objects::removeCell(const MWWorld::Ptr& ptr){
         sg = 0;
     }
 }
-void Objects::buildStaticGeometry(const MWWorld::Ptr& ptr){
-    if(mSG.find(ptr.getCell()) != mSG.end())
+void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell){
+    if(mSG.find(&cell) != mSG.end())
     {
-		Ogre::StaticGeometry* sg = mSG[ptr.getCell()];
+		Ogre::StaticGeometry* sg = mSG[&cell];
         sg->build();  
     }
 }
