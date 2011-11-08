@@ -64,7 +64,7 @@ namespace MWClass
         std::string hairModel = "meshes\\" +
             environment.mWorld->getStore().bodyParts.find(hairID)->model;
 
-        MWRender::Rendering rendering (cellRender, ref->ref);
+        MWRender::Rendering rendering (cellRender, ref->ref, ref->mData);
 
 
         //TODO: define consts for each bodypart e.g. chest, foot, wrist... and put the parts in the

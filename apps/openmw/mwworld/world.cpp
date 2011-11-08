@@ -549,9 +549,9 @@ namespace MWWorld
 
     void World::moveObjectImp (Ptr ptr, float x, float y, float z)
     {
-        ptr.getCellRef().pos.pos[0] = x;
-        ptr.getCellRef().pos.pos[1] = y;
-        ptr.getCellRef().pos.pos[2] = z;
+        ptr.getRefData().getPosition().pos[0] = x;
+        ptr.getRefData().getPosition().pos[1] = y;
+        ptr.getRefData().getPosition().pos[2] = z;
 
         if (ptr==mPlayer->getPlayer())
         {
@@ -568,7 +568,7 @@ namespace MWWorld
 
                     if (currentCell->cell->data.gridX!=cellX || currentCell->cell->data.gridY!=cellY)
                     {
-                        mWorldScene->changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos, false);
+                        mWorldScene->changeCell (cellX, cellY, mPlayer->getPlayer().getRefData().getPosition(), false);
                     }
 
                 }

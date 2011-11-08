@@ -196,8 +196,10 @@ namespace MWScript
 
         double diff[3];
 
+        const float* const pos1 = ref.getRefData().getPosition().pos;
+        const float* const pos2 = ref2.getRefData().getPosition().pos;
         for (int i=0; i<3; ++i)
-            diff[i] = ref.getCellRef().pos.pos[i] - ref2.getCellRef().pos.pos[i];
+            diff[i] = pos1[i] - pos2[i];
 
         return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
     }

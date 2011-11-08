@@ -26,9 +26,20 @@ namespace ESMS
   using namespace ESM;
 
   /// A reference to one object (of any type) in a cell.
+  ///
+  /// Constructing this with a CellRef instance in the constructor means that
+  /// in practice (where D is RefData) the possibly mutable data is copied
+  /// across to mData. If later adding data (such as position) to CellRef
+  /// this would have to be manually copied across.
   template <typename X, typename D>
   struct LiveCellRef
   {
+    LiveCellRef(const CellRef& cref, const X* b = NULL) : base(b), ref(cref),
+                                                          mData(ref) {}
+                                                          
+
+    LiveCellRef(const X* b = NULL) : base(b), mData(ref) {}
+
     // The object that this instance is based on.
     const X* base;
 
@@ -59,11 +70,7 @@ namespace ESMS
       if(obj == NULL)
         throw std::runtime_error("Error resolving cell reference " + ref.refID);
 
-      LiveRef lr;
-      lr.ref = ref;
-      lr.base = obj;
-
-      list.push_back(lr);
+      list.push_back(LiveRef(ref, obj));
     }
 
     LiveRef *find (const std::string& name)

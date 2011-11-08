@@ -41,9 +41,11 @@ namespace MWWorld
 
             boost::shared_ptr<ContainerStore<RefData> > mContainerStore;
 
-        public:
+            ESM::Position mPosition;
 
-            RefData() : mHasLocals (false), mEnabled (true), mCount (1) {}
+        public:
+            RefData(const ESMS::CellRef& cr) : mHasLocals (false), mEnabled (true),
+                                         mCount (1), mPosition(cr.pos) {}
 
             std::string getHandle()
             {
@@ -112,6 +114,11 @@ namespace MWWorld
             boost::shared_ptr<ContainerStore<RefData> >& getContainerStore()
             {
                 return mContainerStore;
+            }
+
+            ESM::Position& getPosition()
+            {
+                return mPosition;
             }
     };
 }
