@@ -40,7 +40,7 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 	
 
     Ogre::SceneNode* insert = cellnode->createChildSceneNode();
-    const float *f = ptr.getCellRef().pos.pos;
+    const float *f = ptr.getRefData().getPosition().pos;
     insert->setPosition(f[0], f[1], f[2]);
     insert->setScale(ptr.getCellRef().scale, ptr.getCellRef().scale, ptr.getCellRef().scale);
 
