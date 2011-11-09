@@ -16,10 +16,7 @@ namespace MWClass
         {
             // TODO check stacking
 
-            ESMS::LiveCellRef<T, MWWorld::RefData> cellRef;
-
-            cellRef.base = ptr.get<T>()->base;
-            cellRef.ref = ptr.getCellRef();
+            ESMS::LiveCellRef<T, MWWorld::RefData> cellRef(ptr.getCellRef(), ptr.get<T>()->base);
             cellRef.mData = ptr.getRefData();
 
             containerStore.list.push_back (cellRef);

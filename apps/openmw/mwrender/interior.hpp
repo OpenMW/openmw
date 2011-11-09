@@ -66,7 +66,7 @@ namespace MWRender
     Ogre::ColourValue ambientColor;
 
     /// start inserting a new reference.
-    virtual void insertBegin (ESM::CellRef &ref, bool static_ = false);
+    virtual void insertBegin (ESM::CellRef &ref, MWWorld::RefData& refData, bool static_ = false);
      virtual void rotateMesh(Ogre::Vector3 axis, Ogre::Radian angle,  std::string sceneNodeName[], int elements);
      virtual void scaleMesh(Ogre::Vector3 axis,  std::string sceneNodeName[], int elements);
     /// insert a mesh related to the most recent insertBegin call.

@@ -164,6 +164,23 @@ void GraphicsPage::setupOgre()
     QString ogreCfg = QString::fromStdString(mCfg.getOgreConfigPath().string());
     file.setFileName(ogreCfg);
 
+    //we need to check that the path to the configuration file exists before we
+    //try and create an instance of Ogre::Root otherwise Ogre raises an exception
+    QDir configDir = QFileInfo(file).dir();
+    if ( !configDir.exists() && !configDir.mkpath(configDir.path()) )
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error creating config file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(QString(tr("<br><b>Failed to create the configuration file</b><br><br> \
+        Make sure you have write access to<br>%1<br><br>")).arg(configDir.path()));
+        msgBox.exec();
+
+        QApplication::exit(1);
+        return;
+    }
+
     try
     {
         mOgre = new Ogre::Root(pluginCfg.toStdString(), file.fileName().toStdString(), "./launcherOgre.log");
@@ -183,7 +200,8 @@ void GraphicsPage::setupOgre()
 
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
 
-        std::exit(1);
+        QApplication::exit(1);
+        return;
     }
 
     // Get the available renderers and put them in the combobox
@@ -216,7 +234,8 @@ void GraphicsPage::setupOgre()
         Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
         msgBox.exec();
 
-        std::exit(1);
+        QApplication::exit(1);
+        return;
     }
 
     // Now fill the GUI elements
@@ -388,7 +407,7 @@ void GraphicsPage::writeConfig()
 
     if (!ogreError.isEmpty()) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Error validating configuration");
+        msgBox.setWindowTitle("Error validating Ogre configuration");
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>A problem occured while validating the graphics options</b><br><br> \
@@ -401,11 +420,34 @@ void GraphicsPage::writeConfig()
 
         qCritical("Error validating configuration");
 
-        std::exit(1);
+        QApplication::exit(1);
+        return;
     }
 
     // Write the settings to the config file
-    mOgre->saveConfig();
+
+
+    try
+    {
+        mOgre->saveConfig();
+    }
+    catch(Ogre::Exception &ex)
+    {
+        QString ogreError = QString::fromStdString(ex.getFullDescription().c_str());
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error writing Ogre configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not write the graphics configuration</b><br><br> \
+        Please make sure you have the right permissions and try again.<br><br> \
+        Press \"Show Details...\" for more information.<br>"));
+        msgBox.setDetailedText(ogreError);
+        msgBox.exec();
+
+        qCritical("Error saving Ogre configuration, the error reported was:\n %s", qPrintable(ogreError));
+
+        QApplication::exit(1);
+    }
 
 }
 

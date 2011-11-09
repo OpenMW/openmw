@@ -35,14 +35,14 @@ bool InteriorCellRender::lightOutQuadInLin = false;
 
 // start inserting a new reference.
 
-void InteriorCellRender::insertBegin (ESM::CellRef &ref, bool static_)
+void InteriorCellRender::insertBegin (ESM::CellRef &ref, MWWorld::RefData& refData, bool static_)
 {
   assert (!insert);
 
   // Create and place scene node for this object
   insert = base->createChildSceneNode();
 
-  const float *f = ref.pos.pos;
+  const float *f = refData.getPosition().pos;
   insert->setPosition(f[0], f[1], f[2]);
   insert->setScale(ref.scale, ref.scale, ref.scale);
 

@@ -295,6 +295,14 @@ void OMW::Engine::go()
 
     mOgre = new OEngine::Render::OgreRenderer;
 
+    //we need to ensure the path to the configuration exists before creating an
+    //instance of ogre root so that Ogre doesn't raise an exception when trying to
+    //access it
+    const boost::filesystem::path configPath = mCfgMgr.getOgreConfigPath().parent_path();
+    if ( !boost::filesystem::exists(configPath) )
+    {
+        boost::filesystem::create_directories(configPath);
+    }
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string() + std::string("/"),

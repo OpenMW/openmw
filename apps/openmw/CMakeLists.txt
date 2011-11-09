@@ -59,12 +59,14 @@ add_openmw_dir (mwmechanics
 
 # Main executable
 add_executable(openmw
-    ${COMPONENTS} ${COMPONENTS_HEADER}
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
+    ${CONPONENT_FILES}
     ${OPENMW_FILES}
     ${GAME} ${GAME_HEADER}
     ${APPLE_BUNDLE_RESOURCES}
     )
+
+target_link_libraries (openmw components)
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.

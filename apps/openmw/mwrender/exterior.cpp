@@ -44,7 +44,7 @@ ExteriorCellRender::ExteriorCellRender(ESMS::CellStore<MWWorld::RefData> &_cell,
 
 
 
-void ExteriorCellRender::insertBegin (ESM::CellRef &ref, bool static_)
+void ExteriorCellRender::insertBegin (ESM::CellRef &ref, MWWorld::RefData& refData, bool static_)
 {
   assert (!mInsert);
 
