@@ -34,6 +34,10 @@ namespace MWWorld
             bool toggleCollisionMode();
 			 std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
 
+            void insertObjectPhysics(const std::string& handle);
+
+              void insertActorPhysics(const std::string& handle);
+
         private:
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;

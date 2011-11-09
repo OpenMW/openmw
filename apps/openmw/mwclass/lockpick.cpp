@@ -21,12 +21,28 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        MWRender::Objects objects = renderingInterface.getObjects();
+        
         if (!model.empty())
         {
+            MWRender::Objects objects = renderingInterface.getObjects();
+            objects.insertBegin(ptr, true, false);
             objects.insertMesh(ptr, "meshes\\" + model);
         }
     }
+
+    void Lockpick::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    {
+        ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData> *ref =
+            ptr.get<ESM::Tool>();
+
+        assert (ref->base != NULL);
+        std::string handle = ptr.getRefData().getHandle();
+        if(!handle.empty()){
+            physics.insertObjectPhysics(handle);
+        }
+
+    }
+
 
     std::string Lockpick::getName (const MWWorld::Ptr& ptr) const
     {

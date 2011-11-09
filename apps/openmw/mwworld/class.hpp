@@ -10,6 +10,7 @@
 #include "containerstore.hpp"
 #include "refdata.hpp"
 #include "../mwrender/renderinginterface.hpp"
+#include "physicssystem.hpp"
 
 namespace Ogre
 {
@@ -63,6 +64,7 @@ namespace MWWorld
 
 
             virtual void insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual void enable (const Ptr& ptr, MWWorld::Environment& environment) const;

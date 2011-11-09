@@ -25,6 +25,9 @@ namespace MWWorld
     {
 
     }
+    void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const{
+
+    }
 
     void Class::enable (const Ptr& ptr, MWWorld::Environment& environment) const
     {
