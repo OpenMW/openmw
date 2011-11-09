@@ -408,45 +408,36 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
-    // TODO: This is only a workaround. The input dispatcher should catch any exceptions thrown inside
-    // the input handling functions. Looks like this will require an OpenEngine modification.
-    try
+    std::string handle = mEnvironment.mWorld->getFacedHandle();
+
+    if (handle.empty())
+        return;
+
+    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+    if (ptr.isEmpty())
+        return;
+
+    MWScript::InterpreterContext interpreterContext (mEnvironment,
+        &ptr.getRefData().getLocals(), ptr);
+
+    boost::shared_ptr<MWWorld::Action> action =
+        MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayer().getPlayer(),
+        mEnvironment);
+
+    interpreterContext.activate (ptr, action);
+
+    std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+    if (!script.empty())
     {
-        std::string handle = mEnvironment.mWorld->getFacedHandle();
-
-        if (handle.empty())
-            return;
-
-        MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
-
-        if (ptr.isEmpty())
-            return;
-
-        MWScript::InterpreterContext interpreterContext (mEnvironment,
-            &ptr.getRefData().getLocals(), ptr);
-
-        boost::shared_ptr<MWWorld::Action> action =
-            MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayer().getPlayer(),
-            mEnvironment);
-
-        interpreterContext.activate (ptr, action);
-
-        std::string script = MWWorld::Class::get (ptr).getScript (ptr);
-
-        if (!script.empty())
-        {
-            mEnvironment.mWorld->getLocalScripts().setIgnore (ptr);
-            mScriptManager->run (script, interpreterContext);
-        }
-
-        if (!interpreterContext.hasActivationBeenHandled())
-        {
-            interpreterContext.executeActivation();
-        }
+        mEnvironment.mWorld->getLocalScripts().setIgnore (ptr);
+        mScriptManager->run (script, interpreterContext);
     }
-    catch (const std::exception& e)
+
+    if (!interpreterContext.hasActivationBeenHandled())
     {
-        std::cerr << "Activation failed: " << e.what() << std::endl;
+        interpreterContext.executeActivation();
     }
 }
 
