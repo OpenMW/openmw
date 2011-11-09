@@ -180,7 +180,6 @@ namespace MWWorld
     : mRendering (renderer,resDir, physEng),mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
-        std::cout << "Creating myworld\n";
         mPhysEngine = physEng;
 
         mPhysics = new PhysicsSystem(renderer, physEng);
