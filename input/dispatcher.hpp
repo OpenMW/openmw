@@ -1,10 +1,13 @@
 #ifndef OENGINE_INPUT_DISPATCHER_H
 #define OENGINE_INPUT_DISPATCHER_H
 
+#include <cassert>
+#include <iostream>
+
+#include <mangle/input/event.hpp>
+
 #include "dispatch_map.hpp"
 #include "func_binder.hpp"
-#include <mangle/input/event.hpp>
-#include <assert.h>
 
 namespace OEngine {
 namespace Input {
