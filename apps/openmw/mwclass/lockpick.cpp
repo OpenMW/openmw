@@ -30,15 +30,14 @@ namespace MWClass
         }
     }
 
-    void Lockpick::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Lockpick::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
     {
         ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData> *ref =
             ptr.get<ESM::Tool>();
 
         assert (ref->base != NULL);
-        std::string handle = ptr.getRefData().getHandle();
-        if(!handle.empty()){
-            physics.insertObjectPhysics(handle);
+        if(ptr.getRefData().getBaseNode()){
+            physics.insertObjectPhysics(ptr);
         }
 
     }

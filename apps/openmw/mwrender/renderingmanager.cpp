@@ -85,10 +85,10 @@ MWRender::Player& RenderingManager::getPlayer(){
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
 
 }
-void RenderingManager::addObject (const MWWorld::Ptr& ptr, MWWorld::Ptr::CellStore *store){
+void RenderingManager::addObject (const MWWorld::Ptr& ptr){
 
 }
-void RenderingManager::removeObject (const MWWorld::Ptr& ptr, MWWorld::Ptr::CellStore *store){
+void RenderingManager::removeObject (const MWWorld::Ptr& ptr){
 
 }
 void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position){

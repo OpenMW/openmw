@@ -64,7 +64,7 @@ namespace MWWorld
 
 
             virtual void insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
-            virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual void enable (const Ptr& ptr, MWWorld::Environment& environment) const;

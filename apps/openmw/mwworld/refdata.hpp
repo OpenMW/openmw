@@ -55,6 +55,9 @@ namespace MWWorld
             {
                 return mBaseNode->getName();
             }
+            Ogre::SceneNode* getBaseNode(){
+                return mBaseNode;
+            }
             void setBaseNode(Ogre::SceneNode* base){
                  mBaseNode = base;
             }

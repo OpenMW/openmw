@@ -57,12 +57,14 @@ class RenderingManager: private RenderingInterface {
 
     void removeCell (MWWorld::Ptr::CellStore *store); // TODO do we want this?
     
-    void addObject (const MWWorld::Ptr& ptr, MWWorld::Ptr::CellStore *store);
-    void removeObject (const MWWorld::Ptr& ptr, MWWorld::Ptr::CellStore *store);
+    void addObject (const MWWorld::Ptr& ptr);
+    void removeObject (const MWWorld::Ptr& ptr);
     
     void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
     void rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation);
+
+    /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);
     
     void setPhysicsDebugRendering (bool);
