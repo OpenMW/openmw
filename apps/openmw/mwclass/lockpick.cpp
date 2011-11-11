@@ -25,7 +25,7 @@ namespace MWClass
         if (!model.empty())
         {
             MWRender::Objects objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, true, false);
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
             objects.insertMesh(ptr, "meshes\\" + model);
         }
     }
@@ -35,8 +35,10 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData> *ref =
             ptr.get<ESM::Tool>();
 
+
+        const std::string &model = ref->base->model;
         assert (ref->base != NULL);
-        if(ptr.getRefData().getBaseNode()){
+        if(!model.empty()){
             physics.insertObjectPhysics(ptr);
         }
 

@@ -4,6 +4,7 @@
 #include <vector>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
+#include "ptr.hpp"
 
 namespace MWWorld
 {

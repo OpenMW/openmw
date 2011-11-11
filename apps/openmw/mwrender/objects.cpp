@@ -66,7 +66,7 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
     
 }
 void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh){
-    Ogre::SceneNode* insert = mRend.getScene()->getSceneNode(ptr.getRefData().getHandle());
+    Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
     assert(insert);
 
     NifOgre::NIFLoader::load(mesh);
