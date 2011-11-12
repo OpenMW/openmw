@@ -4,7 +4,9 @@
 
 #include "sky.hpp"
 #include "debugging.hpp"
-#include "renderinginterface.hpp"
+//Commented out for now, possibly do an ifdef if necessary, cla
+
+
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
@@ -17,6 +19,9 @@
 
 #include <boost/filesystem.hpp>
 
+#ifndef RENDERING_INTERFACE
+#include "renderinginterface.hpp"
+#endif
 
 
 namespace Ogre

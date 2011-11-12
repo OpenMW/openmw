@@ -13,7 +13,6 @@
 #include "../mwworld/ptr.hpp"
 #include <components/esm/loadstat.hpp>
 
-#include "player.hpp"
 
 
 using namespace MWRender;

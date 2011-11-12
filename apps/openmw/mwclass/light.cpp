@@ -36,7 +36,7 @@ namespace MWClass
             const float g = ((color >> 8) & 0xFF) / 255.0f;
             const float b = ((color >> 16) & 0xFF) / 255.0f;
             const float radius = float (ref->base->data.radius);
-            objects.insertLight (r, g, b, radius);
+            objects.insertLight (ptr, r, g, b, radius);
         }
     }
 

@@ -9,8 +9,11 @@
 #include "action.hpp"
 #include "containerstore.hpp"
 #include "refdata.hpp"
-#include "../mwrender/renderinginterface.hpp"
+
 #include "physicssystem.hpp"
+#ifndef RENDERING_INTERFACE
+#include "../mwrender/renderinginterface.hpp"
+#endif
 
 namespace Ogre
 {

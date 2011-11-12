@@ -1,6 +1,8 @@
 #include "objects.hpp"
 #include "npcs.hpp"
 #include "creatures.hpp"
+#include "player.hpp"
+#define RENDERING_INTERFACE 1
 namespace MWRender{
 class RenderingInterface{
     public:
