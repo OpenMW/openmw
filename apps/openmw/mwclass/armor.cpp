@@ -14,21 +14,33 @@
 
 namespace MWClass
 {
-    void Armor::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+    void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
             ptr.get<ESM::Armor>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
+        
         if (!model.empty())
         {
-            MWRender::Rendering rendering (cellRender, ref->ref, ref->mData);
-            cellRender.insertMesh ("meshes\\" + model);
-            cellRender.insertObjectPhysics();
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+            MWRender::Objects objects = renderingInterface.getObjects();
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            objects.insertMesh(ptr, "meshes\\" + model);
         }
+    }
+
+    void Armor::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        const std::string &model = ref->base->model;
+        assert (ref->base != NULL);
+        if(!model.empty()){
+            physics.insertObjectPhysics(ptr);
+        }
+
     }
 
     std::string Armor::getName (const MWWorld::Ptr& ptr) const

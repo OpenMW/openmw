@@ -14,21 +14,34 @@
 
 namespace MWClass
 {
-    void Miscellaneous::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+    void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
+        
         if (!model.empty())
         {
-            MWRender::Rendering rendering (cellRender, ref->ref, ref->mData);
-            cellRender.insertMesh ("meshes\\" + model);
-            cellRender.insertObjectPhysics();
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+            MWRender::Objects objects = renderingInterface.getObjects();
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            objects.insertMesh(ptr, "meshes\\" + model);
         }
+    }
+
+    void Miscellaneous::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
+
+
+        const std::string &model = ref->base->model;
+        assert (ref->base != NULL);
+        if(!model.empty()){
+            physics.insertObjectPhysics(ptr);
+        }
+
     }
 
     std::string Miscellaneous::getName (const MWWorld::Ptr& ptr) const

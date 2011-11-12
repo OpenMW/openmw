@@ -18,31 +18,40 @@
 
 namespace MWClass
 {
-    void Light::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+    void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
             ptr.get<ESM::Light>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
+        
         if (!model.empty())
         {
-            MWRender::Rendering rendering (cellRender, ref->ref, ref->mData);
-
-            cellRender.insertMesh ("meshes\\" + model);
-            cellRender.insertObjectPhysics();
-
-            // Extract the color and convert to floating point
+            MWRender::Objects objects = renderingInterface.getObjects();
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            objects.insertMesh(ptr, "meshes\\" + model);
             const int color = ref->base->data.color;
-            const float r = ((color >>  0) & 0xFF) / 255.0f;
-            const float g = ((color >>  8) & 0xFF) / 255.0f;
+            const float r = ((color >> 0) & 0xFF) / 255.0f;
+            const float g = ((color >> 8) & 0xFF) / 255.0f;
             const float b = ((color >> 16) & 0xFF) / 255.0f;
             const float radius = float (ref->base->data.radius);
-            cellRender.insertLight (r, g, b, radius);
-
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+            objects.insertLight (r, g, b, radius);
         }
+    }
+
+    void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+
+        const std::string &model = ref->base->model;
+        assert (ref->base != NULL);
+        if(!model.empty()){
+            physics.insertObjectPhysics(ptr);
+        }
+
     }
 
     void Light::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
