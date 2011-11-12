@@ -13,6 +13,7 @@
 #include "../mwworld/world.hpp"
 
 #include "../mwrender/cellimp.hpp"
+#include "../mwrender/objects.hpp"
 
 #include <iostream>
 

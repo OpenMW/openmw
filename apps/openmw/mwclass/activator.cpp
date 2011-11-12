@@ -1,5 +1,6 @@
 
 #include "activator.hpp"
+#include "../mwrender/objects.hpp"
 
 #include <components/esm/loadacti.hpp>
 

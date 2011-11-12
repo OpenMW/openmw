@@ -2,6 +2,7 @@
 #define GAME_MWCLASS_INGREDIENT_H
 
 #include "../mwworld/class.hpp"
+#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {

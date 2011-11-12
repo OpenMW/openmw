@@ -12,7 +12,7 @@
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwworld/ptr.hpp"
 #include <components/esm/loadstat.hpp>
-
+#include "renderinginterface.hpp"
 
 
 using namespace MWRender;

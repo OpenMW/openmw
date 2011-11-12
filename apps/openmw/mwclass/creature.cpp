@@ -33,9 +33,9 @@ namespace MWClass
         
         if (!model.empty())
         {
-            MWRender::Objects objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            MWRender::Creatures creatures = renderingInterface.getCreatures();
+            //creatures.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            //creatures.insertMesh(ptr, "meshes\\" + model);
         }
     }
 

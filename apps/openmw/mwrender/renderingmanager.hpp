@@ -19,10 +19,11 @@
 
 #include <boost/filesystem.hpp>
 
-#ifndef RENDERING_INTERFACE
 #include "renderinginterface.hpp"
-#endif
-
+#include "npcs.hpp"
+#include "creatures.hpp"
+#include "objects.hpp"
+#include "player.hpp"
 
 namespace Ogre
 {
@@ -42,7 +43,7 @@ namespace MWWorld
 
 namespace MWRender
 {
-    class Player;
+
     
 
 class RenderingManager: private RenderingInterface {
@@ -51,7 +52,7 @@ class RenderingManager: private RenderingInterface {
 
   public:
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
-    ~RenderingManager();
+    virtual ~RenderingManager();
 	virtual MWRender::Npcs& getNPCs();
     virtual MWRender::Creatures& getCreatures();
     virtual MWRender::Objects& getObjects();
@@ -96,7 +97,7 @@ class RenderingManager: private RenderingInterface {
     SkyManager* mSkyManager;
 	 OEngine::Render::OgreRenderer &rend;
 	 Ogre::Camera* camera;
-	 MWRender::Npcs npcs;
+	MWRender::Npcs npcs;
 	 MWRender::Creatures creatures;
 	 MWRender::Objects objects;
 

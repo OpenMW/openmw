@@ -2,6 +2,7 @@
 #define GAME_MWCLASS_NPC_H
 
 #include "../mwworld/class.hpp"
+#include "../mwrender/npcs.hpp"
 
 namespace MWClass
 {

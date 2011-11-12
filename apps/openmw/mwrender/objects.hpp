@@ -1,3 +1,6 @@
+#ifndef _GAME_RENDER_OBJECTS_H
+#define _GAME_RENDER_OBJECTS_H
+
 #include "components/esm_store/cell_store.hpp"
 
 #include "../mwworld/refdata.hpp"
@@ -41,3 +44,4 @@ public:
    
 };
 }
+#endif
