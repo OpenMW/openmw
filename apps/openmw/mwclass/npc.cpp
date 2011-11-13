@@ -15,7 +15,6 @@
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include <OgreSceneNode.h>
-#include "../mwrender/objects.hpp"
 
 namespace
 {
