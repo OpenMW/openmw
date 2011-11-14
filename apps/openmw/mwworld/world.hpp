@@ -88,7 +88,7 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
-            MWRender::CellRender *searchRender (Ptr::CellStore *store);
+            //MWRender::CellRender *searchRender (Ptr::CellStore *store);
 
             int getDaysPerMonth (int month) const;
 

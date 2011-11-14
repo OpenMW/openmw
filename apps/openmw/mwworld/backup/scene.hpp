@@ -52,13 +52,13 @@ namespace MWWorld
 
         public:
 
-            typedef std::list<Ptr::CellStore *> CellRenderCollection;
+            typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
 
         private:
 
             //OEngine::Render::OgreRenderer& mRenderer;
 			Ogre::SceneNode *mMwRoot;
-            Ptr::CellStore* mCurrentCell; // the cell, the player is in
+            Ptr::CellStore *mCurrentCell; // the cell, the player is in
             CellRenderCollection mActiveCells;
             bool mCellChanged;
             Environment& mEnvironment;
@@ -76,7 +76,7 @@ namespace MWWorld
 
             void unloadCell (CellRenderCollection::iterator iter);
 
-            void loadCell (Ptr::CellStore *cell);
+            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
 
             void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
             ///< Move from exterior to interior or from interior cell to a different

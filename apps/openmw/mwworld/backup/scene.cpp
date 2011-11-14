@@ -49,9 +49,7 @@ namespace MWWorld
     void Scene::unloadCell (CellRenderCollection::iterator iter)
     {
         ListHandles functor;
-        Ptr::CellStore* cellstore = *iter;
-        
-        cellstore->forEach<ListHandles>(functor);
+        iter->first->forEach<ListHandles>(functor);
 
         { // silence annoying g++ warning
             for (std::vector<std::string>::const_iterator iter (functor.mHandles.begin());
@@ -59,24 +57,28 @@ namespace MWWorld
                 mPhysics->removeObject (*iter);
         }
 
-        mWorld->getLocalScripts().clearCell (cellstore);
+        mWorld->getLocalScripts().clearCell (iter->first);
 
-        mEnvironment.mMechanicsManager->dropActors (cellstore);
-        mEnvironment.mSoundManager->stopSound (cellstore);
-        //delete iter->second;
+        mEnvironment.mMechanicsManager->dropActors (iter->first);
+        mEnvironment.mSoundManager->stopSound (iter->first);
+        delete iter->second;
         mActiveCells.erase (iter);
     }
 
-    void Scene::loadCell (Ptr::CellStore *cell)
+    void Scene::loadCell (Ptr::CellStore *cell, MWRender::CellRender *render)
     {
         // register local scripts
         mWorld->getLocalScripts().addCell (cell);
 
         // This connects the cell data with the rendering scene.
-            mActiveCells.push_back(cell);
-        
-       mRendering.getObjects().buildStaticGeometry(*cell);
-         
+        std::pair<CellRenderCollection::iterator, bool> result =
+            mActiveCells.insert (std::make_pair (cell, render));
+
+        if (result.second)
+        {
+            // Load the cell and insert it into the renderer
+            result.first->second->show();
+        }
     }
 
     void Scene::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
@@ -97,18 +99,16 @@ namespace MWWorld
         mEnvironment.mMechanicsManager->removeActor (mWorld->getPlayer().getPlayer());
 
         CellRenderCollection::iterator active = mActiveCells.begin();
-         Ptr::CellStore* cellstore = *active;
-        
+
         while (active!=mActiveCells.end())
         {
-            if (!(cellstore->cell->data.flags & ESM::Cell::Interior))
+            if (!(active->first->cell->data.flags & ESM::Cell::Interior))
             {
-                if (std::abs (X-cellstore->cell->data.gridX)<=1 &&
-                    std::abs (Y-cellstore->cell->data.gridY)<=1)
+                if (std::abs (X-active->first->cell->data.gridX)<=1 &&
+                    std::abs (Y-active->first->cell->data.gridY)<=1)
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
-                    cellstore = *active;
                     continue;
                 }
             }
@@ -121,14 +121,13 @@ namespace MWWorld
             for (int y=Y-1; y<=Y+1; ++y)
             {
                 CellRenderCollection::iterator iter = mActiveCells.begin();
-                Ptr::CellStore* cellstore = *iter;
 
                 while (iter!=mActiveCells.end())
                 {
                     assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
 
-                    if (x==cellstore->cell->data.gridX &&
-                        y==cellstore->cell->data.gridY)
+                    if (x==iter->first->cell->data.gridX &&
+                        y==iter->first->cell->data.gridY)
                         break;
 
                     ++iter;
@@ -138,20 +137,19 @@ namespace MWWorld
                 {
                     Ptr::CellStore *cell = mWorld->getExterior(x, y);
 
-                    loadCell (cell);
+                    loadCell (cell, new MWRender::ExteriorCellRender (*cell, mEnvironment, mRendering.getOgreRenderer(), mMwRoot, mPhysics));
                 }
             }
 
         // find current cell
         CellRenderCollection::iterator iter = mActiveCells.begin();
-      cellstore = *active;
 
         while (iter!=mActiveCells.end())
         {
             assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
 
-            if (X==cellstore->cell->data.gridX &&
-                Y==cellstore->cell->data.gridY)
+            if (X==iter->first->cell->data.gridX &&
+                Y==iter->first->cell->data.gridY)
                 break;
 
             ++iter;
@@ -159,7 +157,7 @@ namespace MWWorld
 
         assert (iter!=mActiveCells.end());
 
-        mCurrentCell = cellstore;
+        mCurrentCell = iter->first;
 
         // adjust player
         playerCellChange (mWorld->getExterior(X, Y), position, adjustPlayerPos);
@@ -180,9 +178,9 @@ namespace MWWorld
 
     Scene::~Scene()
     {
-        /*for (CellRenderCollection::iterator iter (mActiveCells.begin());
+        for (CellRenderCollection::iterator iter (mActiveCells.begin());
             iter!=mActiveCells.end(); ++iter)
-            delete iter->second;*/
+            delete iter->second;
     }
 
     bool Scene::hasCellChanged() const
@@ -209,7 +207,7 @@ namespace MWWorld
         std::cout << "cellName:" << cellName << std::endl;
         Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
-        loadCell (cell);
+        loadCell (cell, new MWRender::InteriorCellRender (*cell, mEnvironment, mRendering.getOgreRenderer(), mMwRoot, mPhysics));
 
         // adjust player
         mCurrentCell = cell;
