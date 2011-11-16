@@ -60,7 +60,7 @@ void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environme
                 try
                 {
                  
-                    class_.insertObjectRendering(ptr, rendering);
+                    rendering.addObject(ptr);
                     class_.insertObject(ptr, physics, environment);
                     class_.enable (ptr, environment);
                 }

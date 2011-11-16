@@ -6,7 +6,7 @@
 #include "debugging.hpp"
 //Commented out for now, possibly do an ifdef if necessary, cla
 
-
+#include "../mwworld/class.hpp"
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
