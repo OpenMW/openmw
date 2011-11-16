@@ -14,6 +14,7 @@
 #include "ptr.hpp"
 #include "globals.hpp"
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/renderinginterface.hpp"
 #include <openengine/bullet/physic.hpp>
 
 namespace Ogre
@@ -52,14 +53,14 @@ namespace MWWorld
 
         public:
 
-            typedef std::list<Ptr::CellStore *> CellRenderCollection;
+            typedef std::set<Ptr::CellStore *> CellStoreCollection;
 
         private:
 
             //OEngine::Render::OgreRenderer& mRenderer;
 			Ogre::SceneNode *mMwRoot;
             Ptr::CellStore* mCurrentCell; // the cell, the player is in
-            CellRenderCollection mActiveCells;
+            CellStoreCollection mActiveCells;
             bool mCellChanged;
             Environment& mEnvironment;
             World *mWorld;
@@ -68,13 +69,15 @@ namespace MWWorld
 
             void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
+            
+            
         public:
 
-            Scene (Environment& environment, World *world, MWRender::RenderingManager& rendering, Ogre::SceneNode *mwRoot,  PhysicsSystem *physics);
+            Scene (Environment& environment, World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics);
 
             ~Scene();
 
-            void unloadCell (CellRenderCollection::iterator iter);
+            void unloadCell (CellStoreCollection::iterator iter);
 
             void loadCell (Ptr::CellStore *cell);
 
@@ -84,7 +87,7 @@ namespace MWWorld
 
             Ptr::CellStore* getCurrentCell ();
 
-            const CellRenderCollection& getActiveCells () const;
+            const CellStoreCollection& getActiveCells () const;
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
@@ -100,6 +103,7 @@ namespace MWWorld
 //            std::string getFacedHandle();
 
             void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
+            void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::Environment& environment);
     };
 }
 

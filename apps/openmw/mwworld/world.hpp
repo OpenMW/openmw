@@ -88,7 +88,6 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
-            //MWRender::CellRender *searchRender (Ptr::CellStore *store);
 
             int getDaysPerMonth (int month) const;
 
@@ -133,9 +132,11 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
-
+            
+            /// \todo enable reference in the OGRE scene
             void enable (Ptr reference);
-
+            
+            /// \todo 5disable reference in the OGRE scene
             void disable (Ptr reference);
 
             void advanceTime (double hours);

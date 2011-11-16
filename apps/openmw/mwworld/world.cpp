@@ -130,20 +130,6 @@ namespace MWWorld
         return Ptr();
     }
 
-    /*
-    MWRender::CellRender *World::searchRender (Ptr::CellStore *store)
-    {
-        for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-                 iter!=mWorldScene->getActiveCells().end(); ++iter)
-                {
-                     Ptr::CellStore* cellstore = *iter;
-                     if(store == cellstore){
-                           //return iter->second;
-                     }
-                }
-
-        return 0;
-    }*/
 
     int World::getDaysPerMonth (int month) const
     {
@@ -211,7 +197,7 @@ namespace MWWorld
 
         mPhysEngine = physEng;
 
-        mWorldScene = new Scene(environment, this, mRendering, mRendering.getRoot(), mPhysics);
+        mWorldScene = new Scene(environment, this, mRendering, mPhysics);
 
     }
 
@@ -308,7 +294,7 @@ namespace MWWorld
         }
 
         // active cells
-        for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr::CellStore* cellstore = *iter;
@@ -334,7 +320,7 @@ namespace MWWorld
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
 
-        for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr::CellStore* cellstore = *iter;
@@ -355,17 +341,9 @@ namespace MWWorld
 
            
                 //render->enable (reference.getRefData().getHandle());
-                for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-                 iter!=mWorldScene->getActiveCells().end(); ++iter)
-                {
-                     Ptr::CellStore* cellstore = *iter;
-                     if(reference.getCell() == cellstore){
-                          Class::get (reference).enable (reference, mEnvironment);
-                          break;
-                     }
-                }
-
-                    
+            if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end())
+                 Class::get (reference).enable (reference, mEnvironment);
+                     
            
         }
     }
@@ -378,16 +356,10 @@ namespace MWWorld
 
          
                 //render->disable (reference.getRefData().getHandle());
-                for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-                 iter!=mWorldScene->getActiveCells().end(); ++iter)
-                {
-                     Ptr::CellStore* cellstore = *iter;
-                     if(reference.getCell() == cellstore){
-                         Class::get (reference).disable (reference, mEnvironment);
-                         mEnvironment.mSoundManager->stopSound3D (reference);
-                          break;
-                     }
-                }
+            if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end()){
+                  Class::get (reference).disable (reference, mEnvironment);
+                  mEnvironment.mSoundManager->stopSound3D (reference);
+            }
             
             
         }
@@ -548,19 +520,14 @@ namespace MWWorld
             ptr.getRefData().setCount (0);
 
            
-                for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-                 iter!=mWorldScene->getActiveCells().end(); ++iter)
-                {
-                     Ptr::CellStore* cellstore = *iter;
-                     if(ptr.getCell() == cellstore){
+                if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end()){
                            Class::get (ptr).disable (ptr, mEnvironment);
                             mEnvironment.mSoundManager->stopSound3D (ptr);
 
                             mPhysics->removeObject (ptr.getRefData().getHandle());
+                            mRendering.removeObject(ptr);
 
                             mLocalScripts.remove (ptr);
-                          break;
-                     }
                 }
             
 
