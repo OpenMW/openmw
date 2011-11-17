@@ -22,7 +22,8 @@ namespace MWWorld
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
         std::cout << renderer->getHandle();
-        mPlayer.mData.setHandle (renderer->getHandle());
+       
+        mPlayer.mData.setBaseNode(renderer->getNode());
         /// \todo Do not make a copy of classes defined in esm/p records.
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
     }

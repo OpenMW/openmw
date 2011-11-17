@@ -5,7 +5,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "../mwrender/cellimp.hpp"
 
 namespace MWClass
 {

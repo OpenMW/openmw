@@ -1,8 +1,6 @@
 #include "scene.hpp"
 #include "world.hpp"
 
-#include "../mwrender/interior.hpp"
-#include "../mwrender/exterior.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 

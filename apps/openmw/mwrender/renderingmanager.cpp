@@ -55,7 +55,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
     cameraPitchNode->attachObject(rend.getCamera());
 
-    mPlayer = new MWRender::Player (rend.getCamera(), playerNode->getName());
+    mPlayer = new MWRender::Player (rend.getCamera(), playerNode);
 
 	//std::cout << "Three";
 }

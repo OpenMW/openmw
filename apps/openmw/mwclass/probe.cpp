@@ -8,9 +8,8 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 
-#include "../mwrender/cellimp.hpp"
-
 #include "containerutil.hpp"
+#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {
@@ -44,6 +43,14 @@ namespace MWClass
 
     }
 
+
+    std::string Probe::getName (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+            ptr.get<ESM::Probe>();
+
+        return ref->base->name;
+    }
     boost::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {

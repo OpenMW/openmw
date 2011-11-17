@@ -7,8 +7,6 @@
 #include <components/files/collections.hpp>
 
 #include "../mwrender/sky.hpp"
-#include "../mwrender/interior.hpp"
-#include "../mwrender/exterior.hpp"
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
