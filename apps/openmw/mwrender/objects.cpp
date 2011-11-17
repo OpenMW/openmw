@@ -23,8 +23,11 @@ bool Objects::lightOutQuadInLin = false;
 
 int Objects::uniqueID = 0;
 
+void Objects::setMwRoot(Ogre::SceneNode* root){
+    mwRoot = root;
+}
 void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
-    Ogre::SceneNode* root = mRend.getScene()->getRootSceneNode();
+    Ogre::SceneNode* root = mwRoot;
     Ogre::SceneNode* cellnode;
     if(mCellSceneNodes.find(ptr.getCell()) == mCellSceneNodes.end())
     {

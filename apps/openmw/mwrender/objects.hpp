@@ -13,6 +13,7 @@ class Objects{
 	OEngine::Render::OgreRenderer &mRend;
 	std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
 	std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
+    Ogre::SceneNode* mwRoot;
     bool isStatic;
     static int uniqueID;
     static bool lightConst;
@@ -38,6 +39,7 @@ public:
     void deleteObject (const std::string& handle);
     void removeCell(const MWWorld::Ptr& ptr);
     void buildStaticGeometry(ESMS::CellStore<MWWorld::RefData> &cell);
+    void setMwRoot(Ogre::SceneNode* root);
 
 	
     /// insert a light related to the most recent insertBegin call.

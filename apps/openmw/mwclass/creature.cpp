@@ -9,7 +9,6 @@
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
 
-#include "../mwrender/cellimp.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
@@ -25,6 +24,7 @@ namespace MWClass
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
+        /*
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
@@ -36,11 +36,12 @@ namespace MWClass
             MWRender::Creatures creatures = renderingInterface.getCreatures();
             //creatures.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
             //creatures.insertMesh(ptr, "meshes\\" + model);
-        }
+        }*/
     }
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
     {
+        /*
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
@@ -49,7 +50,7 @@ namespace MWClass
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertActorPhysics(ptr);
-        }
+        }*/
 
     }
 

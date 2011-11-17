@@ -10,8 +10,6 @@
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/environment.hpp"
 
-#include "../mwrender/cellimp.hpp"
-
 #include "../mwsound/soundmanager.hpp"
 
 #include "containerutil.hpp"

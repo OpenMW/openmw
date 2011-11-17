@@ -45,6 +45,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     SceneNode *rt = rend.getScene()->getRootSceneNode();
     mwRoot = rt->createChildSceneNode();
     mwRoot->pitch(Degree(-90));
+    objects.setMwRoot(mwRoot);
 
     //used to obtain ingame information of ogre objects (which are faced or selected)
     mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
@@ -219,5 +220,7 @@ void RenderingManager::toggleLight()
 
   setAmbientMode();
 }
+
+
 
 }

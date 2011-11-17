@@ -7,8 +7,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "../mwrender/cellimp.hpp"
-
 namespace MWClass
 {
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const

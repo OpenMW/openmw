@@ -8,8 +8,6 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 
-#include "../mwrender/cellimp.hpp"
-
 #include "containerutil.hpp"
 
 namespace MWClass

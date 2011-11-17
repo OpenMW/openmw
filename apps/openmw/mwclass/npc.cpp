@@ -11,8 +11,6 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
-#include "../mwrender/cellimp.hpp"
-
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include <OgreSceneNode.h>
 
@@ -34,6 +32,7 @@ namespace MWClass
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
+        /*
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 
@@ -45,11 +44,13 @@ namespace MWClass
             MWRender::Npcs npcs = renderingInterface.getNPCs();
             //npcs.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
             //npcs.insertMesh(ptr, "meshes\\" + model);
-        }
+        }*/
     }
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
     {
+
+        /*
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 
@@ -58,7 +59,7 @@ namespace MWClass
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertActorPhysics(ptr);
-        }
+        }*/
 
     }
 
