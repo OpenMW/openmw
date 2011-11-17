@@ -134,6 +134,7 @@ namespace MWWorld
         
         while (active!=mActiveCells.end())
         {
+            cellstore = *active;
             if (!(cellstore->cell->data.flags & ESM::Cell::Interior))
             {
                 if (std::abs (X-cellstore->cell->data.gridX)<=1 &&
@@ -141,7 +142,6 @@ namespace MWWorld
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
-                    cellstore = *active;
                     continue;
                 }
             }
@@ -154,10 +154,11 @@ namespace MWWorld
             for (int y=Y-1; y<=Y+1; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
-                Ptr::CellStore* cellstore = *iter;
+               
 
                 while (iter!=mActiveCells.end())
                 {
+                    cellstore = *iter;
                     assert (!(cellstore->cell->data.flags & ESM::Cell::Interior));
 
                     if (x==cellstore->cell->data.gridX &&
@@ -177,10 +178,11 @@ namespace MWWorld
 
         // find current cell
         CellStoreCollection::iterator iter = mActiveCells.begin();
-      cellstore = *active;
+      
 
         while (iter!=mActiveCells.end())
         {
+            cellstore = *iter;
             assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
 
             if (X==cellstore->cell->data.gridX &&
