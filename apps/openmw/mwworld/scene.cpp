@@ -57,7 +57,6 @@ void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environme
 
                 try
                 {
-                 
                     rendering.addObject(ptr);
                     class_.insertObject(ptr, physics, environment);
                     class_.enable (ptr, environment);
@@ -101,14 +100,17 @@ namespace MWWorld
 
     void Scene::loadCell (Ptr::CellStore *cell)
     {
+        std::cout << "Start load\n";
         // register local scripts
         mWorld->getLocalScripts().addCell (cell);
 
         // This connects the cell data with the rendering scene.
             mActiveCells.insert(cell);
-        
-       mRendering.getObjects().buildStaticGeometry(*cell);
+        std::cout << "Before static\n";
+       
        insertCell(*cell, mEnvironment);
+       mRendering.getObjects().buildStaticGeometry(*cell);
+       std::cout << "Done loading cell\n";
          
     }
 
@@ -228,6 +230,7 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        std::cout << "Changing to interior\n";
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -309,7 +312,9 @@ void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell,
     MWWorld::Environment& environment)
 {
   // Loop through all references in the cell
+  std::cout << "Reflist1\n";
   insertCellRefList(mRendering, environment, cell.activators, cell, *mPhysics);
+  std::cout << "Reflist2\n";
   insertCellRefList(mRendering, environment, cell.potions, cell, *mPhysics);
   insertCellRefList(mRendering, environment, cell.appas, cell, *mPhysics);
   insertCellRefList(mRendering, environment, cell.armors, cell, *mPhysics);

@@ -183,15 +183,15 @@ namespace MWWorld
         throw std::logic_error ("can't find player");
     }
 
-     void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr){
+     void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
            Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-         addObject (node->getName(), node->getName(), node->getOrientation(),
+         addObject (node->getName(), model, node->getOrientation(),
             node->getScale().x, node->getPosition());
      }
 
-     void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr){
+     void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
            Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-         addActor (node->getName(), node->getName(), node->getPosition());
+         addActor (node->getName(), model, node->getPosition());
      }
 
 }
