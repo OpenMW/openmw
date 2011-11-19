@@ -187,7 +187,7 @@ namespace ESMS
             ++iter)
             if (!functor (iter->ref, iter->mData))
                 return false;
-
+        
         return true;
     }
 

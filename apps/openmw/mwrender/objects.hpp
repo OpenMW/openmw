@@ -37,7 +37,7 @@ public:
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
     void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
     void deleteObject (const std::string& handle);
-    void removeCell(const MWWorld::Ptr& ptr);
+    void removeCell(MWWorld::Ptr::CellStore* store);
     void buildStaticGeometry(ESMS::CellStore<MWWorld::RefData> &cell);
     void setMwRoot(Ogre::SceneNode* root);
 

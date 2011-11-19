@@ -82,7 +82,7 @@ MWRender::Player& RenderingManager::getPlayer(){
 
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
-
+    objects.removeCell(store);
 }
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
     const MWWorld::Class& class_ =

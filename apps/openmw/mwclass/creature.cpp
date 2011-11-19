@@ -33,7 +33,7 @@ namespace MWClass
         
         if (!model.empty())
         {
-            MWRender::Creatures creatures = renderingInterface.getCreatures();
+            MWRender::Creatures& creatures = renderingInterface.getCreatures();
             //creatures.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
             //creatures.insertMesh(ptr, "meshes\\" + model);
         }*/

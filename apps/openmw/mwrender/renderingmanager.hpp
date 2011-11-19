@@ -88,11 +88,12 @@ class RenderingManager: private RenderingInterface {
 	OEngine::Render::OgreRenderer& getOgreRenderer(){return rend;}
 	Ogre::SceneManager *getMgr() { return rend.getScene(); }
 	Ogre::SceneNode *getRoot() { return mwRoot; }
-    
-  private:
-    void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
+     void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
 		 /// configure fog according to cell
     void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
+    
+  private:
+   
     void setAmbientMode();
     SkyManager* mSkyManager;
 	 OEngine::Render::OgreRenderer &rend;

@@ -22,7 +22,7 @@ namespace MWClass
         
         if (!model.empty())
         {
-            MWRender::Objects objects = renderingInterface.getObjects();
+            MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
             objects.insertMesh(ptr, "meshes\\" + model);
         }

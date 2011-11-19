@@ -41,7 +41,7 @@ namespace MWClass
         
         if (!model.empty())
         {
-            MWRender::Npcs npcs = renderingInterface.getNPCs();
+            MWRender::Npcs& npcs = renderingInterface.getNPCs();
             //npcs.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
             //npcs.insertMesh(ptr, "meshes\\" + model);
         }*/

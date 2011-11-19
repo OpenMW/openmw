@@ -79,38 +79,46 @@ namespace MWWorld
 
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
+        
         ListHandles functor;
-        Ptr::CellStore* cellstore = *iter;
-       
-        cellstore->forEach<ListHandles>(functor);
+        
+        MWWorld::Ptr::CellStore* active = *iter;
+        mRendering.removeCell(active);
+        
+        active->forEach<ListHandles>(functor);
 
-        { // silence annoying g++ warning
-            for (std::vector<std::string>::const_iterator iter (functor.mHandles.begin());
-                iter!=functor.mHandles.end(); ++iter)
-                mPhysics->removeObject (*iter);
+        { 
+
+           
+            // silence annoying g++ warning
+            for (std::vector<Ogre::SceneNode*>::const_iterator iter (functor.mHandles.begin());
+                iter!=functor.mHandles.end(); ++iter){
+                 Ogre::SceneNode* node = *iter;
+                mPhysics->removeObject (node->getName());
+            }
         }
-
-        mWorld->getLocalScripts().clearCell (cellstore);
-
-        mEnvironment.mMechanicsManager->dropActors (cellstore);
-        mEnvironment.mSoundManager->stopSound (cellstore);
-        //delete iter->second;
+        mWorld->getLocalScripts().clearCell (active);
+        mEnvironment.mMechanicsManager->dropActors (active);
+        mEnvironment.mSoundManager->stopSound (active);
         mActiveCells.erase (iter);
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)
     {
-        std::cout << "Start load\n";
         // register local scripts
         mWorld->getLocalScripts().addCell (cell);
 
-        // This connects the cell data with the rendering scene.
-            mActiveCells.insert(cell);
-        std::cout << "Before static\n";
        
-       insertCell(*cell, mEnvironment);
-       mRendering.getObjects().buildStaticGeometry(*cell);
-       std::cout << "Done loading cell\n";
+
+        std::pair<CellStoreCollection::iterator, bool> result =
+            mActiveCells.insert(cell);
+       if(result.second){
+              insertCell(*cell, mEnvironment);
+               mRendering.getObjects().buildStaticGeometry(*cell);
+               mRendering.configureAmbient(*cell);
+              
+        }
+       
          
     }
 
@@ -233,7 +241,7 @@ namespace MWWorld
         std::cout << "Changing to interior\n";
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
-
+        std::cout << "Size: " << mActiveCells.size() << "\n";
         while (active!=mActiveCells.end())
         {
             unloadCell (active++);
@@ -312,9 +320,7 @@ void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell,
     MWWorld::Environment& environment)
 {
   // Loop through all references in the cell
-  std::cout << "Reflist1\n";
   insertCellRefList(mRendering, environment, cell.activators, cell, *mPhysics);
-  std::cout << "Reflist2\n";
   insertCellRefList(mRendering, environment, cell.potions, cell, *mPhysics);
   insertCellRefList(mRendering, environment, cell.appas, cell, *mPhysics);
   insertCellRefList(mRendering, environment, cell.armors, cell, *mPhysics);

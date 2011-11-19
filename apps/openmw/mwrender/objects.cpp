@@ -40,8 +40,6 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
         cellnode = mCellSceneNodes[ptr.getCell()];
     }
 
-	
-
     Ogre::SceneNode* insert = cellnode->createChildSceneNode();
     const float *f = ptr.getRefData().getPosition().pos;
     insert->setPosition(f[0], f[1], f[2]);
@@ -100,6 +98,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh){
         
         mRend.getScene()->destroyEntity(ent);
     }
+    
 
 }
 void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius){
@@ -146,19 +145,19 @@ void Objects::deleteObject (const std::string& handle)
     }
 }
 
-void Objects::removeCell(const MWWorld::Ptr& ptr){
-	 if(mCellSceneNodes.find(ptr.getCell()) != mCellSceneNodes.end())
+void Objects::removeCell(MWWorld::Ptr::CellStore* store){
+	 if(mCellSceneNodes.find(store) != mCellSceneNodes.end())
     {
-        Ogre::SceneNode* base = mCellSceneNodes[ptr.getCell()];
+        Ogre::SceneNode* base = mCellSceneNodes[store];
         base->removeAndDestroyAllChildren();
         mRend.getScene()->destroySceneNode(base);
 	    base = 0;
     }
 
 
-    if(mSG.find(ptr.getCell()) != mSG.end())
+    if(mSG.find(store) != mSG.end())
     {
-		Ogre::StaticGeometry* sg = mSG[ptr.getCell()];
+		Ogre::StaticGeometry* sg = mSG[store];
         mRend.getScene()->destroyStaticGeometry (sg);
         sg = 0;
     }
@@ -170,4 +169,5 @@ void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell){
         sg->build();  
     }
 }
+
 
