@@ -53,12 +53,13 @@ namespace
 
         for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
         {
+            if(iter->mData.getBaseNode()){
             if (iter->mData.getHandle()==handle)
             {
                 return &*iter;
             }
+            }
         }
-
         return 0;
     }
 }
@@ -70,61 +71,43 @@ namespace MWWorld
         if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref =
             searchViaHandle (handle, cell.activators))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Potion, RefData> *ref = searchViaHandle (handle, cell.potions))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Apparatus, RefData> *ref = searchViaHandle (handle, cell.appas))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Armor, RefData> *ref = searchViaHandle (handle, cell.armors))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Book, RefData> *ref = searchViaHandle (handle, cell.books))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Clothing, RefData> *ref = searchViaHandle (handle, cell.clothes))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Container, RefData> *ref =
             searchViaHandle (handle, cell.containers))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Creature, RefData> *ref =
             searchViaHandle (handle, cell.creatures))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Door, RefData> *ref = searchViaHandle (handle, cell.doors))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Ingredient, RefData> *ref =
             searchViaHandle (handle, cell.ingreds))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Light, RefData> *ref = searchViaHandle (handle, cell.lights))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = searchViaHandle (handle, cell.lockpicks))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Miscellaneous, RefData> *ref = searchViaHandle (handle, cell.miscItems))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = searchViaHandle (handle, cell.npcs))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Probe, RefData> *ref = searchViaHandle (handle, cell.probes))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Repair, RefData> *ref = searchViaHandle (handle, cell.repairs))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Static, RefData> *ref = searchViaHandle (handle, cell.statics))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Weapon, RefData> *ref = searchViaHandle (handle, cell.weapons))
             return Ptr (ref, &cell);
-
         return Ptr();
     }
 
@@ -317,7 +300,6 @@ namespace MWWorld
     {
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
-
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {

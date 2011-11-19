@@ -417,15 +417,11 @@ void OMW::Engine::activate()
     try
     {
         std::string handle = mEnvironment.mWorld->getFacedHandle();
-
         if (handle.empty())
             return;
-
         MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
-
         if (ptr.isEmpty())
             return;
-
         MWScript::InterpreterContext interpreterContext (mEnvironment,
             &ptr.getRefData().getLocals(), ptr);
 
