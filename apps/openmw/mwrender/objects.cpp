@@ -150,6 +150,7 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store){
     {
         Ogre::SceneNode* base = mCellSceneNodes[store];
         base->removeAndDestroyAllChildren();
+        mCellSceneNodes.erase(store);
         mRend.getScene()->destroySceneNode(base);
 	    base = 0;
     }
@@ -158,6 +159,7 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store){
     if(mSG.find(store) != mSG.end())
     {
 		Ogre::StaticGeometry* sg = mSG[store];
+        mSG.erase(store);
         mRend.getScene()->destroyStaticGeometry (sg);
         sg = 0;
     }
