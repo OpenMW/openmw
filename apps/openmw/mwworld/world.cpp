@@ -673,4 +673,15 @@ namespace MWWorld
             return cell;
         }
     }
+
+    void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
+        int number)
+    {
+        mRendering.playAnimationGroup (ptr, groupName, mode, number);
+    }
+
+    void World::skipAnimation (const MWWorld::Ptr& ptr)
+    {
+        mRendering.skipAnimation (ptr);
+    }
 }

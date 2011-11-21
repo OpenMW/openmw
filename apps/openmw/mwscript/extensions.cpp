@@ -14,6 +14,7 @@
 #include "aiextensions.hpp"
 #include "controlextensions.hpp"
 #include "dialogueextensions.hpp"
+#include "animationextensions.hpp"
 
 namespace MWScript
 {
@@ -29,6 +30,7 @@ namespace MWScript
         Ai::registerExtensions (extensions);
         Control::registerExtensions (extensions);
         Dialogue::registerExtensions (extensions);
+        Animation::registerExtensions (extensions);
     }
 
     void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -44,5 +46,6 @@ namespace MWScript
         Ai::installOpcodes (interpreter);
         Control::installOpcodes (interpreter);
         Dialogue::installOpcodes (interpreter);
+        Animation::installOpcodes (interpreter);
     }
 }

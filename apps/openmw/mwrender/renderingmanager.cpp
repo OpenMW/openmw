@@ -225,6 +225,15 @@ void RenderingManager::toggleLight()
   setAmbientMode();
 }
 
+void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
+     int mode, int number)
+{
+std::cout<<"play animation " << groupName << ", " << mode << ", " << number << std::endl;
+}
 
+void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
+{
+std::cout<<"skip animation"<<std::endl;
+}
 
 }

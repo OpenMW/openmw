@@ -36,6 +36,7 @@ add_openmw_dir (mwscript
     locals scriptmanager compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
+    animationextensions
     )
 
 add_openmw_dir (mwsound
