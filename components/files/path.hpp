@@ -30,7 +30,7 @@
     #include <components/files/linuxpath.hpp>
     namespace Files { typedef LinuxPath TargetPathType; }
 
-#elif defined(__WIN32) || defined(__WINDOWS__)
+#elif defined(__WIN32) || defined(__WINDOWS__) || defined (_WINDOWS)
     #include <components/files/windowspath.hpp>
     namespace Files { typedef WindowsPath TargetPathType; }
 

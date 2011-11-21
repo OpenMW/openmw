@@ -1,5 +1,6 @@
 
 #include "activator.hpp"
+#include "../mwrender/objects.hpp"
 
 #include <components/esm/loadacti.hpp>
 
@@ -7,25 +8,37 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "../mwrender/cellimp.hpp"
 
 namespace MWClass
 {
-    void Activator::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+   void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
             ptr.get<ESM::Activator>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
+        
         if (!model.empty())
         {
-            MWRender::Rendering rendering (cellRender, ref->ref, ref->mData);
-            cellRender.insertMesh ("meshes\\" + model);
-            cellRender.insertObjectPhysics();
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+            MWRender::Objects& objects = renderingInterface.getObjects();
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            objects.insertMesh(ptr, "meshes\\" + model);
         }
+    }
+
+    void Activator::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+            ptr.get<ESM::Activator>();
+
+
+        const std::string &model = ref->base->model;
+        assert (ref->base != NULL);
+        if(!model.empty()){
+            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        }
+
     }
 
     std::string Activator::getName (const MWWorld::Ptr& ptr) const

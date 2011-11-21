@@ -2,6 +2,7 @@
 #define GAME_MWCLASS_NPC_H
 
 #include "../mwworld/class.hpp"
+#include "../mwrender/npcs.hpp"
 
 namespace MWClass
 {
@@ -12,9 +13,10 @@ namespace MWClass
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
             ///< Return ID of \a ptr
 
-            virtual void insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-                MWWorld::Environment& environment) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
+
+            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const;
 
             virtual void enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
             ///< Enable reference; only does the non-rendering part

@@ -7,8 +7,7 @@
 #include <components/files/collections.hpp>
 
 #include "../mwrender/sky.hpp"
-#include "../mwrender/interior.hpp"
-#include "../mwrender/exterior.hpp"
+#include "../mwrender/player.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
@@ -54,12 +53,13 @@ namespace
 
         for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
         {
+            if(iter->mData.getBaseNode()){
             if (iter->mData.getHandle()==handle)
             {
                 return &*iter;
             }
+            }
         }
-
         return 0;
     }
 }
@@ -71,75 +71,46 @@ namespace MWWorld
         if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref =
             searchViaHandle (handle, cell.activators))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Potion, RefData> *ref = searchViaHandle (handle, cell.potions))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Apparatus, RefData> *ref = searchViaHandle (handle, cell.appas))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Armor, RefData> *ref = searchViaHandle (handle, cell.armors))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Book, RefData> *ref = searchViaHandle (handle, cell.books))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Clothing, RefData> *ref = searchViaHandle (handle, cell.clothes))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Container, RefData> *ref =
             searchViaHandle (handle, cell.containers))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Creature, RefData> *ref =
             searchViaHandle (handle, cell.creatures))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Door, RefData> *ref = searchViaHandle (handle, cell.doors))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Ingredient, RefData> *ref =
             searchViaHandle (handle, cell.ingreds))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Light, RefData> *ref = searchViaHandle (handle, cell.lights))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = searchViaHandle (handle, cell.lockpicks))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Miscellaneous, RefData> *ref = searchViaHandle (handle, cell.miscItems))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = searchViaHandle (handle, cell.npcs))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Probe, RefData> *ref = searchViaHandle (handle, cell.probes))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Repair, RefData> *ref = searchViaHandle (handle, cell.repairs))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Static, RefData> *ref = searchViaHandle (handle, cell.statics))
             return Ptr (ref, &cell);
-
         if (ESMS::LiveCellRef<ESM::Weapon, RefData> *ref = searchViaHandle (handle, cell.weapons))
             return Ptr (ref, &cell);
-
         return Ptr();
     }
 
-    MWRender::CellRender *World::searchRender (Ptr::CellStore *store)
-    {
-        Scene::CellRenderCollection::const_iterator iter = mWorldScene->getActiveCells().find (store);
-
-        if (iter!=mWorldScene->getActiveCells().end())
-        {
-            return iter->second;
-        }
-
-        return 0;
-    }
 
     int World::getDaysPerMonth (int month) const
     {
@@ -176,7 +147,7 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
-    : mScene (renderer,physEng), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
+    : mRendering (renderer,resDir, physEng),mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysEngine = physEng;
@@ -192,7 +163,8 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-        mPlayer = new MWWorld::Player (mScene.getPlayer(), mStore.npcs.find ("player"), *this);
+        MWRender::Player* play = &(mRendering.getPlayer());
+        mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
         // global variables
@@ -206,18 +178,18 @@ namespace MWWorld
 
         mPhysEngine = physEng;
 
-        mWorldScene = new Scene(environment, this, mScene, mPhysics);
-        mRenderingManager = new MWRender::RenderingManager(
-            MWRender::SkyManager::create(renderer.getWindow(), mScene.getCamera(), resDir)
-        );
+        mWorldScene = new Scene(environment, this, mRendering, mPhysics);
+
     }
 
     World::~World()
     {
         delete mWorldScene;
         delete mGlobalVariables;
-        delete mPlayer;
+
         delete mPhysics;
+
+        delete mPlayer;
     }
 
     const ESM::Cell *World::getExterior (const std::string& cellName) const
@@ -303,10 +275,11 @@ namespace MWWorld
         }
 
         // active cells
-        for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
-            Ptr ptr = mCells.getPtr (name, *iter->first);
+            Ptr::CellStore* cellstore = *iter;
+            Ptr ptr = mCells.getPtr (name, *cellstore);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -327,11 +300,11 @@ namespace MWWorld
     {
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
-
-        for (Scene::CellRenderCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
-            Ptr ptr = getPtrViaHandle (handle, *iter->first);
+            Ptr::CellStore* cellstore = *iter;
+            Ptr ptr = getPtrViaHandle (handle, *cellstore);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -346,13 +319,12 @@ namespace MWWorld
         {
             reference.getRefData().enable();
 
-            if (MWRender::CellRender *render = searchRender (reference.getCell()))
-            {
-                render->enable (reference.getRefData().getHandle());
 
-                if (mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end())
-                    Class::get (reference).enable (reference, mEnvironment);
-            }
+                //render->enable (reference.getRefData().getHandle());
+            if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end())
+                 Class::get (reference).enable (reference, mEnvironment);
+
+
         }
     }
 
@@ -362,16 +334,14 @@ namespace MWWorld
         {
             reference.getRefData().disable();
 
-            if (MWRender::CellRender *render = searchRender (reference.getCell()))
-            {
-                render->disable (reference.getRefData().getHandle());
 
-                if (mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end())
-                {
-                    Class::get (reference).disable (reference, mEnvironment);
-                    mEnvironment.mSoundManager->stopSound3D (reference);
-                }
+                //render->disable (reference.getRefData().getHandle());
+            if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end()){
+                  Class::get (reference).disable (reference, mEnvironment);
+                  mEnvironment.mSoundManager->stopSound3D (reference);
             }
+
+
         }
     }
 
@@ -398,7 +368,7 @@ namespace MWWorld
 
         mGlobalVariables->setFloat ("gamehour", hour);
 
-        mRenderingManager->skySetHour (hour);
+        mRendering.skySetHour (hour);
 
         if (days>0)
             setDay (days + mGlobalVariables->getInt ("day"));
@@ -433,7 +403,7 @@ namespace MWWorld
         mGlobalVariables->setInt ("day", day);
         mGlobalVariables->setInt ("month", month);
 
-        mRenderingManager->skySetDate (day, month);
+        mRendering.skySetDate (day, month);
     }
 
     void World::setMonth (int month)
@@ -454,7 +424,7 @@ namespace MWWorld
         if (years>0)
             mGlobalVariables->setInt ("year", years+mGlobalVariables->getInt ("year"));
 
-        mRenderingManager->skySetDate (mGlobalVariables->getInt ("day"), month);
+        mRendering.skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
     bool World::toggleSky()
@@ -462,34 +432,34 @@ namespace MWWorld
         if (mSky)
         {
             mSky = false;
-            mRenderingManager->skyDisable();
+            mRendering.skyDisable();
             return false;
         }
         else
         {
             mSky = true;
             // TODO check for extorior or interior with sky.
-            mRenderingManager->skySetHour (mGlobalVariables->getFloat ("gamehour"));
-            mRenderingManager->skySetDate (mGlobalVariables->getInt ("day"),
+            mRendering.skySetHour (mGlobalVariables->getFloat ("gamehour"));
+            mRendering.skySetDate (mGlobalVariables->getInt ("day"),
                 mGlobalVariables->getInt ("month"));
-            mRenderingManager->skyEnable();
+            mRendering.skyEnable();
             return true;
         }
     }
 
     int World::getMasserPhase() const
     {
-        return mRenderingManager->skyGetMasserPhase();
+        return mRendering.skyGetMasserPhase();
     }
 
     int World::getSecundaPhase() const
     {
-        return mRenderingManager->skyGetSecundaPhase();
+        return mRendering.skyGetSecundaPhase();
     }
 
     void World::setMoonColour (bool red)
     {
-        mRenderingManager->skySetMoonColour (red);
+        mRendering.skySetMoonColour (red);
     }
 
     float World::getTimeScaleFactor() const
@@ -514,7 +484,7 @@ namespace MWWorld
 
     std::string World::getFacedHandle()
     {
-        std::pair<std::string, float> result = mScene.getFacedHandle (*this);
+        std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
         if (result.first.empty() ||
             result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
@@ -529,21 +499,16 @@ namespace MWWorld
         {
             ptr.getRefData().setCount (0);
 
-            if (MWRender::CellRender *render = searchRender (ptr.getCell()))
-            {
-                if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end())
-                {
-                    Class::get (ptr).disable (ptr, mEnvironment);
-                    mEnvironment.mSoundManager->stopSound3D (ptr);
 
-                    mPhysics->removeObject (ptr.getRefData().getHandle());
+                if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end()){
+//                           Class::get (ptr).disable (ptr, mEnvironment); /// \todo this line needs to be removed
+                            mEnvironment.mSoundManager->stopSound3D (ptr);
 
-                    mLocalScripts.remove (ptr);
+                            mPhysics->removeObject (ptr.getRefData().getHandle());
+                            mRendering.removeObject(ptr);
+
+                            mLocalScripts.remove (ptr);
                 }
-
-                render->deleteObject (ptr.getRefData().getHandle());
-                ptr.getRefData().setHandle ("");
-            }
         }
     }
 
@@ -575,11 +540,9 @@ namespace MWWorld
             }
         }
 
-        // \todo cell change for non-player ref
+        /// \todo cell change for non-player ref
 
-        // \todo this should go into the new scene class and eventually into the objects/actors classes.
-        mScene.getMgr()->getSceneNode (ptr.getRefData().getHandle())->
-            setPosition (Ogre::Vector3 (x, y, z));
+        mRendering.moveObject (ptr, Ogre::Vector3 (x, y, z));
     }
 
     void World::moveObject (Ptr ptr, float x, float y, float z)
@@ -653,7 +616,7 @@ namespace MWWorld
 
     bool World::toggleRenderMode (RenderMode mode)
     {
-        return mScene.toggleRenderMode (mode);
+        return mRendering.toggleRenderMode (mode);
     }
 
     std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)

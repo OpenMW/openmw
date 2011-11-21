@@ -4,6 +4,7 @@
 #include <vector>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
+#include "ptr.hpp"
 
 namespace MWWorld
 {
@@ -32,6 +33,11 @@ namespace MWWorld
             void scaleObject (const std::string& handle, float scale);
 
             bool toggleCollisionMode();
+			 std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
+
+            void insertObjectPhysics(const MWWorld::Ptr& ptr, std::string model);
+
+              void insertActorPhysics(const MWWorld::Ptr&, std::string model);
 
         private:
             OEngine::Render::OgreRenderer &mRender;

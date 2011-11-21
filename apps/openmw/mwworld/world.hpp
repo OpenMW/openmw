@@ -8,8 +8,8 @@
 
 #include <components/esm_store/cell_store.hpp>
 
-#include "../mwrender/mwscene.hpp"
-#include "../mwrender/rendering_manager.hpp"
+#include "../mwrender/debugging.hpp"
+#include "../mwrender/renderingmanager.hpp"
 
 #include "refdata.hpp"
 #include "ptr.hpp"
@@ -65,7 +65,8 @@ namespace MWWorld
 
         private:
 
-            MWRender::MWScene mScene;
+            MWRender::RenderingManager mRendering;
+            
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
             ESM::ESMReader mEsm;
@@ -75,7 +76,6 @@ namespace MWWorld
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
             Environment& mEnvironment;
-            MWRender::RenderingManager *mRenderingManager;
             int mNextDynamicRecord;
 
             Cells mCells;
@@ -88,7 +88,6 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
-            MWRender::CellRender *searchRender (Ptr::CellStore *store);
 
             int getDaysPerMonth (int month) const;
 
@@ -133,9 +132,11 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
-
+            
+            /// \todo enable reference in the OGRE scene
             void enable (Ptr reference);
-
+            
+            /// \todo 5disable reference in the OGRE scene
             void disable (Ptr reference);
 
             void advanceTime (double hours);

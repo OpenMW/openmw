@@ -6,16 +6,17 @@
 
 #include <boost/filesystem.hpp>
 
+#include <openengine/bullet/physic.hpp>
+
 #include <components/esm_store/cell_store.hpp>
 
-#include "../mwrender/mwscene.hpp"
-#include "physicssystem.hpp"
+#include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
+#include "physicssystem.hpp"
 #include "refdata.hpp"
 #include "ptr.hpp"
 #include "globals.hpp"
-
-#include <openengine/bullet/physic.hpp>
 
 namespace Ogre
 {
@@ -53,29 +54,32 @@ namespace MWWorld
 
         public:
 
-            typedef std::map<Ptr::CellStore *, MWRender::CellRender *> CellRenderCollection;
+            typedef std::set<Ptr::CellStore *> CellStoreCollection;
 
         private:
 
-            MWRender::MWScene& mScene;
-            Ptr::CellStore *mCurrentCell; // the cell, the player is in
-            CellRenderCollection mActiveCells;
+            //OEngine::Render::OgreRenderer& mRenderer;
+            Ptr::CellStore* mCurrentCell; // the cell, the player is in
+            CellStoreCollection mActiveCells;
             bool mCellChanged;
             Environment& mEnvironment;
             World *mWorld;
             PhysicsSystem *mPhysics;
+            MWRender::RenderingManager& mRendering;
 
             void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
+
+
         public:
 
-            Scene (Environment& environment, World *world, MWRender::MWScene& scene, PhysicsSystem *physics);
+            Scene (Environment& environment, World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics);
 
             ~Scene();
 
-            void unloadCell (CellRenderCollection::iterator iter);
+            void unloadCell (CellStoreCollection::iterator iter);
 
-            void loadCell (Ptr::CellStore *cell, MWRender::CellRender *render);
+            void loadCell (Ptr::CellStore *cell);
 
             void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
             ///< Move from exterior to interior or from interior cell to a different
@@ -83,7 +87,7 @@ namespace MWWorld
 
             Ptr::CellStore* getCurrentCell ();
 
-            const CellRenderCollection& getActiveCells () const;
+            const CellStoreCollection& getActiveCells () const;
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
@@ -96,9 +100,7 @@ namespace MWWorld
 
             void markCellAsUnchanged();
 
-//            std::string getFacedHandle();
-
-            void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
+            void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::Environment& environment);
     };
 }
 

@@ -2,6 +2,7 @@
 #define GAME_MWRENDER_PLAYER_H
 
 #include <iostream>
+#include <Ogre.h>
 
 namespace Ogre
 {
@@ -14,15 +15,16 @@ namespace MWRender
     class Player
     {
         Ogre::Camera *mCamera;
-        std::string mHandle;
+        Ogre::SceneNode* mNode;
 
             public:
 
-                Player (Ogre::Camera *camera, const std::string& handle);
+                Player (Ogre::Camera *camera, Ogre::SceneNode* mNode);
 
                 Ogre::Camera *getCamera() { return mCamera; }
 
-                std::string getHandle() const { return mHandle; }
+                std::string getHandle() const { return mNode->getName(); }
+                Ogre::SceneNode* getNode() {return mNode;}
     };
 }
 

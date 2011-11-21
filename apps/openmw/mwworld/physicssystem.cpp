@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "physicssystem.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/world.hpp" // FIXME
@@ -10,6 +12,7 @@
 #include "OgreTextureManager.h"
 
 
+using namespace Ogre;
 namespace MWWorld
 {
 
@@ -23,6 +26,22 @@ namespace MWWorld
     {
 
     }
+	std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
+	{
+		std::string handle = "";
+
+        //get a ray pointing to the center of the viewport
+        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
+        mRender.getViewport()->getWidth()/2,
+        mRender.getViewport()->getHeight()/2);
+        //let's avoid the capsule shape of the player.
+        centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
+        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
+        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+
+        return mEngine->rayTest(from,to);
+    }
+
 
     std::vector< std::pair<std::string, Ogre::Vector3> > PhysicsSystem::doPhysics (float duration,
         const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
@@ -137,28 +156,42 @@ namespace MWWorld
     {
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
-            OEngine::Physic::PhysicActor* act = it->second;
-            bool cmode = act->getCollisionMode();
-            if(cmode)
+            if (it->first=="player")
             {
-                act->enableCollisions(false);
-                act->setGravity(0.);
-                act->setVerticalVelocity(0);
-                mFreeFly = true;
-                return false;
-            }
-            else
-            {
-                mFreeFly = false;
-                act->enableCollisions(true);
-                act->setGravity(4.);
-                act->setVerticalVelocity(0);
-                return true;
+                OEngine::Physic::PhysicActor* act = it->second;
+
+                bool cmode = act->getCollisionMode();
+                if(cmode)
+                {
+                    act->enableCollisions(false);
+                    act->setGravity(0.);
+                    act->setVerticalVelocity(0);
+                    mFreeFly = true;
+                    return false;
+                }
+                else
+                {
+                    mFreeFly = false;
+                    act->enableCollisions(true);
+                    act->setGravity(4.);
+                    act->setVerticalVelocity(0);
+                    return true;
+                }
             }
         }
 
-        return false; // This should never happen, but it shall not bother us now, since
-                        // this part of the code needs a rewrite anyway.
+        throw std::logic_error ("can't find player");
     }
+
+     void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
+           Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+         addObject (node->getName(), model, node->getOrientation(),
+            node->getScale().x, node->getPosition());
+     }
+
+     void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
+           Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+         addActor (node->getName(), model, node->getPosition());
+     }
 
 }

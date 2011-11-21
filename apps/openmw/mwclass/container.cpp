@@ -7,25 +7,36 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "../mwrender/cellimp.hpp"
-
 namespace MWClass
 {
-    void Container::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+    void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
             ptr.get<ESM::Container>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
+        
         if (!model.empty())
         {
-            MWRender::Rendering rendering (cellRender, ref->ref, ref->mData);
-            cellRender.insertMesh ("meshes\\" + model);
-            cellRender.insertObjectPhysics();
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+            MWRender::Objects& objects = renderingInterface.getObjects();
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            objects.insertMesh(ptr, "meshes\\" + model);
         }
+    }
+
+    void Container::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+            ptr.get<ESM::Container>();
+
+
+        const std::string &model = ref->base->model;
+        assert (ref->base != NULL);
+        if(!model.empty()){
+            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        }
+
     }
 
     std::string Container::getName (const MWWorld::Ptr& ptr) const

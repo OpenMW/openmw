@@ -16,12 +16,12 @@ namespace MWWorld
     /// List all (Ogre-)handles.
     struct ListHandles
     {
-        std::vector<std::string> mHandles;
+        std::vector<Ogre::SceneNode*> mHandles;
 
         bool operator() (ESM::CellRef& ref, RefData& data)
         {
-            std::string handle = data.getHandle();
-            if (!handle.empty())
+            Ogre::SceneNode* handle = data.getBaseNode();
+            if (handle)
                 mHandles.push_back (handle);
             return true;
         }
