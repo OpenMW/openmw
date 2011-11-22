@@ -22,10 +22,10 @@ namespace MWRender {
 
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
-:rend(_rend), objects(rend), mDebugging(engine)
+:mRendering(_rend), mObjects(mRendering), mDebugging(engine)
 {
-    rend.createScene("PlayerCam", 55, 5);
-    mSkyManager = MWRender::SkyManager::create(rend.getWindow(), rend.getCamera(), resDir);
+    mRendering.createScene("PlayerCam", 55, 5);
+    mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), resDir);
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -38,21 +38,21 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // the screen (when x is to the right.) This is the orientation that
     // Morrowind uses, and it automagically makes everything work as it
     // should.
-    SceneNode *rt = rend.getScene()->getRootSceneNode();
-    mwRoot = rt->createChildSceneNode();
-    mwRoot->pitch(Degree(-90));
-    objects.setMwRoot(mwRoot);
+    SceneNode *rt = mRendering.getScene()->getRootSceneNode();
+    mMwRoot = rt->createChildSceneNode();
+    mMwRoot->pitch(Degree(-90));
+    mObjects.setMwRoot(mMwRoot);
 
     //used to obtain ingame information of ogre objects (which are faced or selected)
-    mRaySceneQuery = rend.getScene()->createRayQuery(Ray());
+    mRaySceneQuery = mRendering.getScene()->createRayQuery(Ray());
 
-    Ogre::SceneNode *playerNode = mwRoot->createChildSceneNode ("player");
+    Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
     playerNode->pitch(Degree(90));
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
-    cameraPitchNode->attachObject(rend.getCamera());
+    cameraPitchNode->attachObject(mRendering.getCamera());
 
-    mPlayer = new MWRender::Player (rend.getCamera(), playerNode);
+    mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
 }
 
 RenderingManager::~RenderingManager ()
@@ -62,25 +62,25 @@ RenderingManager::~RenderingManager ()
 }
 
 MWRender::Npcs& RenderingManager::getNPCs(){
-    return npcs;
+    return mNpcs;
 }
 MWRender::Objects& RenderingManager::getObjects(){
-    return objects;
+    return mObjects;
 }
 MWRender::Creatures& RenderingManager::getCreatures(){
-    return creatures;
+    return mCreatures;
 }
 MWRender::Player& RenderingManager::getPlayer(){
     return (*mPlayer);
 }
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
-    objects.removeCell(store);
+    mObjects.removeCell(store);
 }
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
-    objects.buildStaticGeometry (*store);
+    mObjects.buildStaticGeometry (*store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
@@ -91,7 +91,7 @@ void RenderingManager::addObject (const MWWorld::Ptr& ptr){
 }
 void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
 {
-    if (!objects.deleteObject (ptr))
+    if (!mObjects.deleteObject (ptr))
     {
         /// \todo delete non-object MW-references
     }
@@ -100,7 +100,7 @@ void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
 void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position)
 {
     /// \todo move this to the rendering-subsystems
-    rend.getScene()->getSceneNode (ptr.getRefData().getHandle())->
+    mRendering.getScene()->getSceneNode (ptr.getRefData().getHandle())->
             setPosition (position);
 }
 
@@ -166,9 +166,9 @@ void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
   float high = 4500 + 9000 * (1-mCell.cell->ambi.fogDensity);
   float low = 200;
 
-  rend.getScene()->setFog (FOG_LINEAR, color, 0, low, high);
-  rend.getCamera()->setFarClipDistance (high + 10);
-  rend.getViewport()->setBackgroundColour (color);
+  mRendering.getScene()->setFog (FOG_LINEAR, color, 0, low, high);
+  mRendering.getCamera()->setFarClipDistance (high + 10);
+  mRendering.getViewport()->setBackgroundColour (color);
 }
 
 void RenderingManager::setAmbientMode()
@@ -177,17 +177,17 @@ void RenderingManager::setAmbientMode()
   {
     case 0:
 
-      rend.getScene()->setAmbientLight(mAmbientColor);
+      mRendering.getScene()->setAmbientLight(mAmbientColor);
       break;
 
     case 1:
 
-      rend.getScene()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
+      mRendering.getScene()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
       break;
 
     case 2:
 
-      rend.getScene()->setAmbientLight(ColourValue(1,1,1));
+      mRendering.getScene()->setAmbientLight(ColourValue(1,1,1));
       break;
   }
 }
@@ -199,7 +199,7 @@ void RenderingManager::configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell
 
   // Create a "sun" that shines light downwards. It doesn't look
   // completely right, but leave it for now.
-  Ogre::Light *light = rend.getScene()->createLight();
+  Ogre::Light *light = mRendering.getScene()->createLight();
   Ogre::ColourValue colour;
   colour.setAsABGR (mCell.cell->ambi.sunlight);
   light->setDiffuseColour (colour);

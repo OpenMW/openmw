@@ -109,11 +109,10 @@ class RenderingManager: private RenderingInterface {
 
     void setAmbientMode();
     SkyManager* mSkyManager;
-    OEngine::Render::OgreRenderer &rend;
-    Ogre::Camera* camera;
-    MWRender::Npcs npcs;
-    MWRender::Creatures creatures;
-    MWRender::Objects objects;
+    OEngine::Render::OgreRenderer &mRendering;
+    MWRender::Npcs mNpcs;
+    MWRender::Creatures mCreatures;
+    MWRender::Objects mObjects;
 
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;
@@ -123,10 +122,10 @@ class RenderingManager: private RenderingInterface {
     /// Root node for all objects added to the scene. This is rotated so
     /// that the OGRE coordinate system matches that used internally in
     /// Morrowind.
-    Ogre::SceneNode *mwRoot;
+    Ogre::SceneNode *mMwRoot;
     Ogre::RaySceneQuery *mRaySceneQuery;
 
-    OEngine::Physic::PhysicEngine* eng;
+    OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
     MWRender::Player *mPlayer;
     MWRender::Debugging mDebugging;

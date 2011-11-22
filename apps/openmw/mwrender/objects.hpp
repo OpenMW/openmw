@@ -13,7 +13,7 @@ class Objects{
     OEngine::Render::OgreRenderer &mRend;
     std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
     std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
-    Ogre::SceneNode* mwRoot;
+    Ogre::SceneNode* mMwRoot;
     bool isStatic;
     static int uniqueID;
     static bool lightConst;
