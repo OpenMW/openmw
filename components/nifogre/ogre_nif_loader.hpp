@@ -85,8 +85,10 @@ class NIFLoader : Ogre::ManualResourceLoader
         Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
 
     private:
-        NIFLoader() : resourceGroup("General") { skincounter = 0; resourceName = "";}
+        NIFLoader() : resourceGroup("General") {resourceName = "";}
         NIFLoader(NIFLoader& n) {}
+
+        void calculateTransform();
 
         void warn(std::string msg);
         void fail(std::string msg);
@@ -126,19 +128,17 @@ class NIFLoader : Ogre::ManualResourceLoader
 
         std::string resourceName;
         std::string resourceGroup;
-        int skincounter;
-        bool isChest;
-        bool isBeast;
-        bool isHands;
-        bool isFeet;
-        int counter;
-        int numbers;
-        int stack;
+       Ogre::Matrix4 mTransform;
+        Ogre::AxisAlignedBox mBoundingBox;
+        bool flip;
+        bool mNormaliseNormals;
+        bool mFlipVertexWinding;
         std::multimap<std::string,std::string> MaterialMap;
 
         // pointer to the ogre mesh which is currently build
         Ogre::Mesh *mesh;
         Ogre::SkeletonPtr mSkel;
+        Ogre::Vector3 vector;
 };
 
 }
