@@ -22,7 +22,7 @@ namespace MWRender {
 
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
-:mRendering(_rend), mObjects(mRendering), mDebugging(engine)
+:mRendering(_rend), mObjects(mRendering), mDebugging(engine), mActors(mRendering)
 {
     mRendering.createScene("PlayerCam", 55, 5);
     mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), resDir);
@@ -61,15 +61,14 @@ RenderingManager::~RenderingManager ()
     delete mSkyManager;
 }
 
-MWRender::Npcs& RenderingManager::getNPCs(){
-    return mNpcs;
-}
+
 MWRender::Objects& RenderingManager::getObjects(){
     return mObjects;
 }
-MWRender::Creatures& RenderingManager::getCreatures(){
-    return mCreatures;
+MWRender::Actors& RenderingManager::getActors(){
+    return mActors;
 }
+
 MWRender::Player& RenderingManager::getPlayer(){
     return (*mPlayer);
 }

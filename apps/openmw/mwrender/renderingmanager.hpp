@@ -19,9 +19,9 @@
 #include <boost/filesystem.hpp>
 
 #include "renderinginterface.hpp"
-#include "npcs.hpp"
-#include "creatures.hpp"
+
 #include "objects.hpp"
+#include "actors.hpp"
 #include "player.hpp"
 
 namespace Ogre
@@ -49,9 +49,9 @@ class RenderingManager: private RenderingInterface {
 
   private:
 
-    virtual MWRender::Npcs& getNPCs();
-    virtual MWRender::Creatures& getCreatures();
+
     virtual MWRender::Objects& getObjects();
+    virtual MWRender::Actors& getActors();
 
   public:
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
@@ -110,9 +110,9 @@ class RenderingManager: private RenderingInterface {
     void setAmbientMode();
     SkyManager* mSkyManager;
     OEngine::Render::OgreRenderer &mRendering;
-    MWRender::Npcs mNpcs;
-    MWRender::Creatures mCreatures;
+   
     MWRender::Objects mObjects;
+    MWRender::Actors mActors;
 
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;
