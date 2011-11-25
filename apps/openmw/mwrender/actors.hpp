@@ -2,6 +2,7 @@
 #define _GAME_RENDER_ACTORS_H
 
 #include "components/esm_store/cell_store.hpp"
+#include <map>
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
@@ -10,14 +11,21 @@ namespace MWRender{
     class Actors{
         OEngine::Render::OgreRenderer &mRend;
         std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
-        std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
         Ogre::SceneNode* mMwRoot;
-        bool isStatic;
-        static int uniqueID;
+
+        
 
         public:
-              Actors(OEngine::Render::OgreRenderer& _rend): mRend(_rend){}
-              ~Actors(){}
+        Actors(OEngine::Render::OgreRenderer& _rend): mRend(_rend){}
+        ~Actors(){}
+        void setMwRoot(Ogre::SceneNode* root);
+        void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
+        void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
+         bool deleteObject (const MWWorld::Ptr& ptr);
+        ///< \return found?
+
+        void removeCell(MWWorld::Ptr::CellStore* store);
+        
     };
 }
 #endif

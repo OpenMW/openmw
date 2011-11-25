@@ -581,7 +581,6 @@ public:
     int count = nif->getInt();
 	//std::vector<Ogre::Quaternion> quat(count);
 	//std::vector<float> rottime(count);
-	std::cout << "r";
     if(count)
       {
 

@@ -1038,6 +1038,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
+   
             mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
 
             /*if (node->extra->recType == RC_NiTextKeyExtraData )
@@ -1239,6 +1240,11 @@ void NIFLoader::loadResource(Resource *resource)
         mesh->_setBounds(AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
                                         bounds.maxX(), bounds.maxY(), bounds.maxZ()));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
+    }
+
+     if (!mSkel.isNull())
+    {
+       mesh->_notifySkeleton(mSkel);
     }
 }
 

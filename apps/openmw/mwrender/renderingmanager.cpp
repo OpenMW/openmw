@@ -42,6 +42,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mMwRoot = rt->createChildSceneNode();
     mMwRoot->pitch(Degree(-90));
     mObjects.setMwRoot(mMwRoot);
+    mActors.setMwRoot(mMwRoot);
 
     //used to obtain ingame information of ogre objects (which are faced or selected)
     mRaySceneQuery = mRendering.getScene()->createRayQuery(Ray());
@@ -75,6 +76,7 @@ MWRender::Player& RenderingManager::getPlayer(){
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
     mObjects.removeCell(store);
+    mActors.removeCell(store);
 }
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
@@ -91,6 +93,10 @@ void RenderingManager::addObject (const MWWorld::Ptr& ptr){
 void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
 {
     if (!mObjects.deleteObject (ptr))
+    {
+        /// \todo delete non-object MW-references
+    }
+     if (!mActors.deleteObject (ptr))
     {
         /// \todo delete non-object MW-references
     }
