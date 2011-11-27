@@ -1103,7 +1103,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
                 handleNode(&list[i], flags, node->trafo, bounds, bone, boneSequence);
         }
     }
-    else if (node->recType == RC_NiTriShape)
+    else if (node->recType == RC_NiTriShape && bNiTri)
     {
          std::string nodename = node->name.toString();
 		
@@ -1128,6 +1128,10 @@ void NIFLoader::loadResource(Resource *resource)
     flip = false;
     name = resource->getName();
     char suffix = name.at(name.length() - 2);
+    bool addAnim = true;
+    bool hasAnim = false;
+    bool baddin = false;
+    bNiTri = true;
 
         if(suffix == '*')
 		{
@@ -1144,12 +1148,12 @@ void NIFLoader::loadResource(Resource *resource)
 		}
 		else if(suffix == '>')
 		{
-
-			//bNiTri = false;
-			//baddin = true;
+            baddin = true;
+			bNiTri = false;
 			std::string sub = name.substr(name.length() - 6, 4);
-			//if(sub.compare("0000") != 0)
-			//	addAnim = false;
+            
+			if(sub.compare("0000") != 0)
+			addAnim = false;
 				
 		}
        
@@ -1233,7 +1237,31 @@ void NIFLoader::loadResource(Resource *resource)
 	
 
     handleNode(node, 0, NULL, bounds, 0, boneSequence);
+    if(addAnim)
+    {
+        for(int i = 0; i < nif.numRecords(); i++)
+	    {
+	        Nif::NiKeyframeController *f = dynamic_cast<Nif::NiKeyframeController*>(nif.getRecord(i));
 
+            Nif::Node *n = dynamic_cast<Nif::Node*>(nif.getRecord(i));
+	        if(f != NULL)
+	        {
+		        hasAnim = true;
+		        Nif::Node *o = dynamic_cast<Nif::Node*>(f->target.getPtr());
+		        Nif::NiKeyframeDataPtr data = f->data;
+		
+		        if (f->timeStart == FLT_MAX)
+			        continue;
+		        data->setBonename(o->name.toString());
+		        data->setStartTime(f->timeStart);
+		        data->setStopTime(f->timeStop);
+
+		        allanim.push_back(data.get());
+		
+		
+	        }
+        }
+    }
     // set the bounding value.
     if (bounds.isValid())
     {
@@ -1241,12 +1269,44 @@ void NIFLoader::loadResource(Resource *resource)
                                         bounds.maxX(), bounds.maxY(), bounds.maxZ()));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
+    if(hasAnim && addAnim){
+		//std::cout << "Lower" << lowername << "\n";
+		//std::cout << "Adding the animations\n";
+		allanimmap[name] = allanim;
+		alltextmappings[name] = textmappings;
+	}
+	if(!mSkel.isNull() && shapes.size() > 0 && addAnim)
+	{
+		allshapesmap[name] = shapes;
+	}
+    if(baddin){
+		/*if(addAnim){
+			if(isBeast)
+				npcknaSkel = mSkel;
+			else
+				npcSkel = mSkel;
+		}*/
+		for(int i = 0; i < addin.size(); i++){
+		insertMeshInsideBase(addin[i]);
+		}
+		addin.clear();
+	}
+    if(flip){
+	    mesh->_setBounds(mBoundingBox, false);
+	}
 
      if (!mSkel.isNull())
     {
        mesh->_notifySkeleton(mSkel);
     }
+    flip = false;
 }
+
+void NIFLoader::addInMesh(Ogre::Mesh* input){
+	addin.push_back(input);
+}
+
+
 
 MeshPtr NIFLoader::load(const std::string &name,
                          const std::string &group)
@@ -1264,6 +1324,276 @@ MeshPtr NIFLoader::load(const std::string &name,
         themesh = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
     }
     return themesh;
+}
+
+/*
+This function shares much of the same code handleShapes() in MWRender::Animation
+This function also creates new position and normal buffers for submeshes. 
+This function points to existing texture and IndexData buffers
+*/
+
+std::vector<Nif::NiKeyframeData>& NIFLoader::getAnim(std::string lowername){
+		
+		std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost>::iterator iter = allanimmap.find(lowername);
+		if(iter != allanimmap.end())
+			mAnim = iter->second;
+		return mAnim;
+			
+}
+std::vector<Nif::NiTriShapeCopy>& NIFLoader::getShapes(std::string lowername){
+		
+		std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost>::iterator iter = allshapesmap.find(lowername);
+		if(iter != allshapesmap.end())
+			mS = iter->second;
+		return mS;
+}
+
+float NIFLoader::getTime(std::string filename, std::string text){
+	std::map<std::string,std::map<std::string,float>,ciLessBoost>::iterator iter = alltextmappings.find(filename);
+	if(iter != alltextmappings.end()){
+		std::map<std::string,float>::iterator insideiter = (iter->second).find(text);
+		if(insideiter != (iter->second).end())
+			return insideiter->second;
+		else
+			return -20000000.0;
+	}
+
+	return -10000000.0;
+}
+
+void NIFLoader::insertMeshInsideBase(Ogre::Mesh* input)
+{
+	/*if(addin)
+	{
+		std::cout << "InsideBase:" << addin->getName() << "\n";
+	}*/
+	if(input)
+	{
+		std::vector<Nif::NiTriShapeCopy> shapes = NIFLoader::getSingletonPtr()->getShapes(input->getName());
+		for(int i = 0; i < shapes.size(); i++){
+		
+		//std::cout << "Shapes" << shapes[i].sname;
+	
+		Ogre::SubMesh* sub = input->getSubMesh(shapes[i].sname);
+		Ogre::SubMesh* subNew = mesh->createSubMesh(shapes[i].sname);
+		
+	
+		int nextBuf = 0;
+
+
+		 //----------------------------------------VERTICES----------------------------------------
+		int numVerts = shapes[i].vertices.size();
+		subNew->vertexData = new VertexData();
+		subNew->vertexData->vertexCount = numVerts;
+		subNew->useSharedVertices = false;
+
+		//-----------------------------------------POSITIONS---------------------------------------
+
+	
+		VertexDeclaration *decl = subNew->vertexData->vertexDeclaration;
+		const VertexElement* position =
+            sub->vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_POSITION);
+		Ogre::HardwareVertexBufferSharedPtr vbuf;
+		HardwareVertexBufferSharedPtr newvbuf;
+		float* pRealNormal = new float[numVerts * 3];
+		VertexBufferBinding* bind;
+		
+		
+
+
+
+		
+		 //std::cout << "X " << pReal[0] << "Y " << pReal[1] << "Z" << pReal[2] << "\n";
+		float* pReal = new float[numVerts * 3];
+
+		std::map<unsigned int, bool> vertices;
+			std::map<unsigned int, bool> normals;
+			std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfovector =  shapes[i].boneinfo;
+	
+			//std::cout << "Name " << copy.sname << "\n";
+
+			    if(boneinfovector.size() > 0){
+
+				
+				for (int j = 0; j < boneinfovector.size(); j++)
+				{
+					Nif::NiSkinData::BoneInfoCopy boneinfo = boneinfovector[j];
+					Ogre::Bone *bonePtr = mSkel->getBone(boneinfo.bonename);
+					Ogre::Vector3 vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfo.trafo.trans;
+					Ogre::Quaternion vecRot = bonePtr->_getDerivedOrientation() * boneinfo.trafo.rotation;
+					//std::cout << "Bone" << bonePtr->getName() << "\n";
+					 for (unsigned int k=0; k< boneinfo.weights.size(); k++)
+					 {
+						  unsigned int verIndex = boneinfo.weights[k].vertex;
+						  if(vertices.find(verIndex) == vertices.end())
+						  {
+							  Ogre::Vector3 absVertPos = vecPos + vecRot * shapes[i].vertices[verIndex];
+							  vertices[verIndex] = true;
+							  absVertPos = absVertPos * boneinfo.weights[k].weight;
+							   Ogre::Real* addr = (pReal + 3 * verIndex);
+							  *addr = absVertPos.x;
+							  *(addr+1) = absVertPos.y;
+				              *(addr+2) = absVertPos.z;
+
+								//std::cout << "Vertex" << vertices[verIndex] << "\n";
+						  }
+						  else 
+						  {
+							 Ogre::Vector3 absVertPos = vecPos + vecRot * shapes[i].vertices[verIndex];
+							   absVertPos = absVertPos * boneinfo.weights[k].weight;
+							   Ogre::Vector3 old = Ogre::Vector3(pReal + 3 * verIndex);
+							   absVertPos = absVertPos + old;
+							   Ogre::Real* addr = (pReal + 3 * verIndex);
+							  *addr = absVertPos.x;
+							  *(addr+1) = absVertPos.y;
+				              *(addr+2) = absVertPos.z;
+
+						  }
+						  
+						  if(normals.find(verIndex) == normals.end())
+						  {
+							  Ogre::Vector3 absNormalsPos = vecRot * shapes[i].normals[verIndex];
+							  absNormalsPos = absNormalsPos * boneinfo.weights[k].weight;
+							  normals[verIndex] = true;
+							  Ogre::Real* addr = (pRealNormal + 3 * verIndex);
+							  *addr = absNormalsPos.x;
+				              *(addr+1) = absNormalsPos.y;
+				              *(addr+2) = absNormalsPos.z;
+						  }
+						  else{
+							     Ogre::Vector3 absNormalsPos = vecRot * shapes[i].normals[verIndex];
+							  absNormalsPos = absNormalsPos * boneinfo.weights[k].weight;
+							 Ogre::Vector3 old = Ogre::Vector3(pRealNormal + 3 * verIndex);
+							 absNormalsPos = absNormalsPos + old;
+
+							  Ogre::Real* addr = (pRealNormal + 3 * verIndex);
+							  *addr = absNormalsPos.x;
+				              *(addr+1) = absNormalsPos.y;
+				              *(addr+2) = absNormalsPos.z;
+						  }
+
+					 }
+				
+					/*
+					std::cout << "TransformRot:" << boneinfo.trafo.rotation << "TransformTrans:" << boneinfo.trafo.trans << "\n";
+					std::vector<Nif::NiSkinData::VertWeight> weights = boneinfo.weights;
+					for (int j = 0; j < weights.size(); j++){
+						std::cout << "Vertex: " << weights[j].vertex << " Weight: " << weights[j].weight << "\n";
+					}*/
+				}
+			}
+
+				if(position){
+				decl->addElement(nextBuf, 0, VET_FLOAT3, VES_POSITION);
+		
+		 
+    
+		newvbuf =
+        HardwareBufferManager::getSingleton().createVertexBuffer(
+            VertexElement::getTypeSize(VET_FLOAT3),
+            numVerts, HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY);
+
+		  newvbuf->writeData(0, newvbuf->getSizeInBytes(), pReal, false);
+		  
+
+		   bind = subNew->vertexData->vertexBufferBinding;
+			bind->setBinding(nextBuf++, newvbuf);
+		
+
+		}
+		//----------------------------------------NORMALS-------------------------------------------
+
+			const VertexElement* normal =
+            sub->vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_NORMAL);
+			if(normal)
+			{
+			decl->addElement(nextBuf, 0, VET_FLOAT3, VES_NORMAL);
+        newvbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
+                   VertexElement::getTypeSize(VET_FLOAT3),
+                   numVerts, HardwareBuffer::HBU_DYNAMIC);
+		
+
+		 newvbuf->writeData(0, newvbuf->getSizeInBytes(), pRealNormal, false);
+
+		   bind->setBinding(nextBuf++, newvbuf);
+			}
+
+			
+		//--------------------------------------COLORS--------------------------------------------
+		    const VertexElement* color =
+            sub->vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_DIFFUSE);
+			if(color)
+			{
+
+		   decl->addElement(nextBuf, 0, VET_COLOUR, VES_DIFFUSE);
+		  
+		    vbuf = sub->vertexData->vertexBufferBinding->getBuffer(color->getSource());
+        newvbuf = vbuf;
+		//RGBA* pReal2 = static_cast<RGBA*>(vbuf->lock(Ogre::HardwareBuffer::HBL_NORMAL));
+        //newvbuf->writeData(0, vbuf->getSizeInBytes(), pReal2, false);
+
+		   //vbuf->unlock();
+
+		   bind->setBinding(nextBuf++, newvbuf);
+			}
+
+		//-------------------------------------TEXTURES-------------------------------------------
+
+		    const VertexElement* text =
+            sub->vertexData->vertexDeclaration->findElementBySemantic(Ogre::VES_TEXTURE_COORDINATES);
+			if(text){
+		   vbuf = sub->vertexData->vertexBufferBinding->getBuffer(text->getSource());
+		  
+		   decl->addElement(nextBuf, 0, VET_FLOAT2, VES_TEXTURE_COORDINATES);
+        newvbuf = vbuf;
+		//float* pRealf = static_cast<float*>(vbuf->lock(Ogre::HardwareBuffer::HBL_NORMAL));
+
+		//std::cout << "SIze" << vbuf->getSizeInBytes();
+		
+		// newvbuf->writeData(0, vbuf->getSizeInBytes(), pRealf, false);
+		 //vbuf->unlock();
+		 bind->setBinding(nextBuf++, newvbuf);
+			}
+
+		 //----------------------------------INDEX DATA--------------------------------------
+		 int numFaces = sub->indexData->indexCount;
+		subNew->indexData->indexCount = numFaces;
+        subNew->indexData->indexStart = 0;
+		 
+		 HardwareIndexBufferSharedPtr ibuf = sub->indexData->indexBuffer;
+		 HardwareIndexBufferSharedPtr ibufNew = ibuf;
+
+		 //uint16* tri = static_cast<uint16*>(ibuf->lock(Ogre::HardwareBuffer::HBL_NORMAL));
+		 //ibufNew->writeData(0, ibuf->getSizeInBytes(), tri, false);
+		 subNew->indexData->indexBuffer = ibufNew;
+		 //ibuf->unlock();
+
+		 if (!sub->getMaterialName().empty()){ 
+			 subNew->setMaterialName(sub->getMaterialName());
+		 }
+
+		  //Ogre::SubMesh::VertexBoneAssignmentList bonelist = sub->getBoneAssignments();
+		
+		 /*
+		 Ogre::VertexBoneAssignment assign;
+		 assign.boneIndex = 0;
+		 assign.vertexIndex = 0;
+		 assign.weight = 1.0;
+		 subNew->addBoneAssignment(assign);*/
+		 
+		 Ogre::SubMesh::BoneAssignmentIterator boneiter = sub->getBoneAssignmentIterator();
+		 while(boneiter.hasMoreElements())
+		 {
+			 subNew->addBoneAssignment(boneiter.current()->second);
+			 boneiter.getNext();
+		 }
+		 subNew->addBoneAssignment(boneiter.current()->second);
+
+
+
+	}
+	}
+
 }
 
 

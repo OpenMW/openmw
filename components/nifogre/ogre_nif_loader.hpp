@@ -108,7 +108,11 @@ class NIFLoader : Ogre::ManualResourceLoader
 
         static Ogre::MeshPtr load(const std::string &name,
                                     const std::string &group="General");
-
+        void insertMeshInsideBase(Ogre::Mesh* mesh);
+        std::vector<Nif::NiKeyframeData>& getAnim(std::string name);
+		std::vector<Nif::NiTriShapeCopy>& getShapes(std::string name);
+		float getTime(std::string filename, std::string text);
+        void addInMesh(Ogre::Mesh* input);
 
 
         Ogre::Vector3 convertVector3(const Nif::Vector& vec);
@@ -163,6 +167,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         bool flip;
         bool mNormaliseNormals;
         bool mFlipVertexWinding;
+        bool bNiTri;
         std::multimap<std::string,std::string> MaterialMap;
 
         // pointer to the ogre mesh which is currently build
@@ -177,6 +182,9 @@ class NIFLoader : Ogre::ManualResourceLoader
 		std::map<std::string,std::map<std::string,float>,ciLessBoost> alltextmappings;
 		std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost> allanimmap;
 		std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost> allshapesmap;
+        std::vector<Ogre::Mesh*> addin;
+        std::vector<Nif::NiKeyframeData> mAnim;
+		std::vector<Nif::NiTriShapeCopy> mS;
 };
 
 }
