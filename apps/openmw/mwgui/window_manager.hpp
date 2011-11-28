@@ -51,6 +51,7 @@ namespace MWGui
   class StatsWindow;
   class InventoryWindow;
   class Console;
+  class JournalWindow;
 
   class TextInputDialog;
   class InfoBoxDialog;
@@ -90,6 +91,7 @@ namespace MWGui
     InventoryWindow *inventory;
 #endif
     Console *console;
+    JournalWindow* mJournal;
 
     // Character creation
     TextInputDialog *nameDialog;

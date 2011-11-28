@@ -14,6 +14,7 @@
 #include "../mwinput/inputmanager.hpp"
 
 #include "console.hpp"
+#include "journal_window.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -61,6 +62,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     inventory = new InventoryWindow ();
 #endif
     console = new Console(w,h, environment, extensions);
+    mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
 
     // The HUD is always on
@@ -89,6 +91,7 @@ WindowManager::~WindowManager()
     delete map;
     delete menu;
     delete stats;
+    delete mJournal;
 #if 0
     delete inventory;
 #endif
@@ -156,6 +159,7 @@ void WindowManager::updateVisible()
     inventory->setVisible(false);
 #endif
     console->disable();
+    mJournal->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     gui->setVisiblePointer(isGuiMode());
@@ -335,6 +339,12 @@ void WindowManager::updateVisible()
         if(!mMessageBoxManager->isInteractiveMessageBox()) {
             setGuiMode(GM_Game);
         }
+        return;
+    }
+
+    if(mode == GM_Journal)
+    {
+        mJournal->setVisible(true);
         return;
     }
 
