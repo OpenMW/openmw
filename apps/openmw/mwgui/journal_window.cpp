@@ -42,11 +42,12 @@ void MWGui::JournalWindow::onWindowResize(MyGUI::Window* window)
 
 void MWGui::JournalWindow::displayLeftText(std::string text)
 {
-    mLeftTextWidget->removeAllRenderItems();
+    mLeftTextWidget->eraseText(0,mLeftTextWidget->getTextLength());
     mLeftTextWidget->addText(text);
 }
 
 void MWGui::JournalWindow::displayRightText(std::string text)
 {
+    mRightTextWidget->eraseText(0,mRightTextWidget->getTextLength());
     mRightTextWidget->addText(text);
 }
