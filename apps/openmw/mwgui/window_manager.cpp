@@ -14,7 +14,7 @@
 #include "../mwinput/inputmanager.hpp"
 
 #include "console.hpp"
-#include "journal_window.hpp"
+#include "journalwindow.hpp"
 
 #include <assert.h>
 #include <iostream>
