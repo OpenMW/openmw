@@ -250,7 +250,7 @@ namespace MWMechanics
         while (iter!=mActors.end())
             if (iter->getCell()==cellStore)
             {
-                std::cout << "Erasing an actor";
+                //std::cout << "Erasing an actor";
                 mActors.erase (iter++);
             }
             else

@@ -54,7 +54,7 @@ class RenderingManager: private RenderingInterface {
     virtual MWRender::Actors& getActors();
 
   public:
-    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
+    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment);
     virtual ~RenderingManager();
 
     virtual MWRender::Player& getPlayer(); /// \todo move this to private again as soon as
