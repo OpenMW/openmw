@@ -109,6 +109,60 @@ void Actors::insertNPC(const MWWorld::Ptr& ptr){
 				insertBoundedPart("meshes\\" + foot->model + "*|", "Left Foot", base);
 			}
 		}
+        if(groin){
+			insertBoundedPart("meshes\\" + groin->model, "Groin", base);
+		}
+        if(knee)
+		{
+			insertBoundedPart("meshes\\" + knee->model + "*|", "Left Knee", base);  //e
+			insertBoundedPart("meshes\\" + knee->model, "Right Knee", base);   //e
+			
+		}
+		if(ankle){
+			
+			insertBoundedPart("meshes\\" + ankle->model + "*|", "Left Ankle", base); //Ogre::Quaternion(Ogre::Radian(3.14 / 4), Ogre::Vector3(1, 0, 0)),blank); //1,0,0, blank);
+			insertBoundedPart("meshes\\" + ankle->model, "Right Ankle", base);
+		}
+        if (armr){
+			insertBoundedPart("meshes\\" + armr->model, "Right Upper Arm", base);
+		}
+		if(arml){
+			insertBoundedPart("meshes\\" + arml->model + "*|", "Left Upper Arm", base);
+		}
+
+		if (forearmr)
+		{
+				insertBoundedPart("meshes\\" + forearmr->model, "Right Forearm", base);
+		}
+		if(forearml)
+			insertBoundedPart("meshes\\" + forearml->model + "*|", "Left Forearm", base);
+
+		if (wristr)
+		{
+			insertBoundedPart("meshes\\" + wristr->model, "Right Wrist", base);
+		}
+
+		if(wristl)
+				insertBoundedPart("meshes\\" + wristl->model + "*|", "Left Wrist", base);
+		
+
+	
+		
+
+		/*if(claviclel)
+			insertBoundedPart("meshes\\" + claviclel->model + "*|", "Left Clavicle", base);
+		if(clavicler)
+			insertBoundedPart("meshes\\" + clavicler->model , "Right Clavicle", base);*/
+	
+	
+		if(neck)
+		{
+			insertBoundedPart("meshes\\" + neck->model, "Neck", base);
+		}
+		if(head)
+			insertBoundedPart("meshes\\" + head->model, "Head", base);
+		if(hair)
+			insertBoundedPart("meshes\\" + hair->model, "Head", base);
 }
 void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
     Ogre::SceneNode* cellnode;

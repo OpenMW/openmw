@@ -343,7 +343,6 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 	{
 		float *datamod = new float[data->vertices.length];
 		//std::cout << "Shape" << shape->name.toString() << "\n";
-		//std::cout << "MTransform" << mTransform << "\n";
 		for(int i = 0; i < numVerts; i++)
 		{
 			int index = i * 3;
@@ -368,7 +367,6 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 		vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, false);
 	}
     
-    vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, true);
 
     VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
     bind->setBinding(nextBuf++, vbuf);
@@ -476,7 +474,6 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
                                                               HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
 
 		if(flip && mFlipVertexWinding && sub->indexData->indexCount % 3 == 0){
-            std::cout << "INTHEWINDING\n";
 			sub->indexData->indexBuffer = ibuf;
 
 			uint16 *datamod = new uint16[numFaces];
@@ -939,6 +936,7 @@ void NIFLoader::calculateTransform()
         // Calculate transform
         Matrix4 transform = Matrix4::IDENTITY;
         transform = Matrix4::getScale(vector) * transform;
+        
         // Check whether we have to flip vertex winding.
         // We do have to, if we changed our right hand base.
         // We can test it by using the cross product from X and Y and see, if it is a non-negative
@@ -953,7 +951,6 @@ void NIFLoader::calculateTransform()
         }
 
         mTransform = transform;
-
 }
 void NIFLoader::handleNode(Nif::Node *node, int flags,
                            const Transformation *trafo, BoundsFinder &bounds, Ogre::Bone *parentBone, std::vector<std::string> boneSequence)
@@ -1184,7 +1181,6 @@ void NIFLoader::loadResource(Resource *resource)
 	}
     if(flip)
 	{
-		std::cout << "Flipping";
 		calculateTransform();
 	}
     // Set up the VFS if it hasn't been done already
