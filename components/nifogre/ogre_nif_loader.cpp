@@ -476,6 +476,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
                                                               HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
 
 		if(flip && mFlipVertexWinding && sub->indexData->indexCount % 3 == 0){
+            std::cout << "INTHEWINDING\n";
 			sub->indexData->indexBuffer = ibuf;
 
 			uint16 *datamod = new uint16[numFaces];
@@ -1183,7 +1184,7 @@ void NIFLoader::loadResource(Resource *resource)
 	}
     if(flip)
 	{
-		//std::cout << "Flipping";
+		std::cout << "Flipping";
 		calculateTransform();
 	}
     // Set up the VFS if it hasn't been done already

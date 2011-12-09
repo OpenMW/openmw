@@ -33,19 +33,6 @@ namespace MWClass
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         renderingInterface.getActors().insertNPC(ptr);
-        /*
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
-            ptr.get<ESM::NPC>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-        
-        if (!model.empty())
-        {
-            MWRender::Npcs& npcs = renderingInterface.getNPCs();
-            //npcs.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            //npcs.insertMesh(ptr, "meshes\\" + model);
-        }*/
     }
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const

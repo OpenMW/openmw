@@ -119,7 +119,8 @@ class NIFLoader : Ogre::ManualResourceLoader
         Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
 
     private:
-        NIFLoader() : resourceGroup("General") {resourceName = "";}
+        NIFLoader() : resourceGroup("General"),mNormaliseNormals(false),
+          mFlipVertexWinding(false), flip(false) {resourceName = "";}
         NIFLoader(NIFLoader& n) {}
 
         void calculateTransform();

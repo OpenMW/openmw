@@ -1,6 +1,7 @@
 #include "actors.hpp"
 #include <OgreSceneNode.h>
 #include <components/nifogre/ogre_nif_loader.hpp>
+#include "../mwworld/world.hpp"
 
 using namespace Ogre;
 using namespace MWRender;
@@ -9,8 +10,15 @@ using namespace NifOgre;
 void Actors::setMwRoot(Ogre::SceneNode* root){
     mMwRoot = root;
 }
+Ogre::Entity* Actors::insertBoundedPart(const std::string &mesh, std::string bonename, Ogre::Entity* base){
+    NIFLoader::load(mesh);
+    Entity* ent = mRend.getScene()->createEntity(mesh);
+	 
+    base->attachObjectToBone(bonename, ent); 
+    return ent;
+				
+}
 void Actors::insertNPC(const MWWorld::Ptr& ptr){
-/*
     ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
         assert (ref->base != NULL);
@@ -45,6 +53,18 @@ void Actors::insertNPC(const MWWorld::Ptr& ptr){
 		bool female = tolower(secondtolast) == 'f';
 		bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
 
+
+        std::string smodel = "meshes\\base_anim.nif";
+		if(beast)
+			smodel = "meshes\\base_animkna.nif";
+
+         Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
+         assert(insert);
+
+         NifOgre::NIFLoader::load(smodel);
+    Entity *base = mRend.getScene()->createEntity(smodel);
+    insert->attachObject(base);
+        
         std::string headModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(headID)->model;
 
@@ -72,7 +92,23 @@ void Actors::insertNPC(const MWWorld::Ptr& ptr){
 		const ESM::BodyPart* handr = handl;
 		const ESM::BodyPart* forearmr = forearml;
 		const ESM::BodyPart* wristr = wristl;
-		const ESM::BodyPart* armr = arml;*/
+		const ESM::BodyPart* armr = arml;
+        if(upperleg){
+			insertBoundedPart("meshes\\" + upperleg->model + "*|", "Left Upper Leg", base);
+			insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg", base);
+			
+		}
+        if(foot){
+			if(bodyRaceID.compare("b_n_khajiit_m_") == 0)
+			{
+				feet = foot;
+			}
+			else
+			{
+				insertBoundedPart("meshes\\" + foot->model, "Right Foot", base);
+				insertBoundedPart("meshes\\" + foot->model + "*|", "Left Foot", base);
+			}
+		}
 }
 void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
     Ogre::SceneNode* cellnode;

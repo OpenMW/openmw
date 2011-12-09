@@ -4,11 +4,17 @@
 #include "components/esm_store/cell_store.hpp"
 #include <map>
 
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
+
+
 #include <openengine/ogre/renderer.hpp>
 #include "components/nifogre/ogre_nif_loader.hpp"
+
+#include "../mwworld/refdata.hpp"
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
+
+
 namespace MWRender{
     class Actors{
         OEngine::Render::OgreRenderer &mRend;
@@ -21,6 +27,7 @@ namespace MWRender{
         public:
         Actors(OEngine::Render::OgreRenderer& _rend, MWWorld::Environment& _env): mRend(_rend), mEnvironment(_env){}
         ~Actors(){}
+        Ogre::Entity* Actors::insertBoundedPart(const std::string &mesh, std::string bonename, Ogre::Entity* base);
         void setMwRoot(Ogre::SceneNode* root);
         void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
         void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
