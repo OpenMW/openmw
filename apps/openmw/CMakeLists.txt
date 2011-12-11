@@ -25,7 +25,7 @@ add_openmw_dir (mwinput
 
 add_openmw_dir (mwgui
     layouts text_input widgets race class birth review window_manager console dialogue
-    dialogue_history window_base stats_window messagebox
+    dialogue_history window_base stats_window messagebox journalwindow
     )
 
 add_openmw_dir (mwdialogue
