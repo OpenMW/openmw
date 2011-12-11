@@ -58,7 +58,6 @@ set(GAMEGUI_HEADER
     mwgui/window_base.hpp
     mwgui/stats_window.hpp
     mwgui/messagebox.hpp
-    mwgui/journalwindow.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
@@ -75,7 +74,6 @@ set(GAMEGUI
     mwgui/window_base.cpp
     mwgui/stats_window.cpp
     mwgui/messagebox.cpp
-    mwgui/journalwindow.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
