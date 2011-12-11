@@ -156,14 +156,34 @@ void GraphicsPage::setupOgre()
 {
     QString pluginCfg = mCfg.getPluginsConfigPath().string().c_str();
     QFile file(pluginCfg);
-    
+
     // Create a log manager so we can surpress debug text to stdout/stderr
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
     logMgr->createLog((mCfg.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
+    QString ogreCfg = QString::fromStdString(mCfg.getOgreConfigPath().string());
+    file.setFileName(ogreCfg);
+
+    //we need to check that the path to the configuration file exists before we
+    //try and create an instance of Ogre::Root otherwise Ogre raises an exception
+    QDir configDir = QFileInfo(file).dir();
+    if ( !configDir.exists() && !configDir.mkpath(configDir.path()) )
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error creating config file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(QString(tr("<br><b>Failed to create the configuration file</b><br><br> \
+        Make sure you have write access to<br>%1<br><br>")).arg(configDir.path()));
+        msgBox.exec();
+
+        QApplication::exit(1);
+        return;
+    }
+
     try
     {
-        mOgre = new Ogre::Root(pluginCfg.toStdString());
+        mOgre = new Ogre::Root(pluginCfg.toStdString(), file.fileName().toStdString(), "./launcherOgre.log");
     }
     catch(Ogre::Exception &ex)
     {
@@ -180,7 +200,8 @@ void GraphicsPage::setupOgre()
 
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
 
-        std::exit(1);
+        QApplication::exit(1);
+        return;
     }
 
     // Get the available renderers and put them in the combobox
@@ -213,7 +234,8 @@ void GraphicsPage::setupOgre()
         Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
         msgBox.exec();
 
-        std::exit(1);
+        QApplication::exit(1);
+        return;
     }
 
     // Now fill the GUI elements
@@ -318,94 +340,114 @@ void GraphicsPage::readConfig()
 
 void GraphicsPage::writeConfig()
 {
-    // Write the config file settings
+    mOgre->setRenderSystem(mSelectedRenderSystem);
 
-    // Custom write method: We cannot use QSettings because it does not accept spaces
-    QFile file(mOgreConfig->fileName());
+    if (mDirect3DRenderSystem) {
+        // Nvidia Performance HUD
+        if (mD3DNvPerfCheckBox->checkState() == Qt::Checked) {
+            mDirect3DRenderSystem->setConfigOption("Allow NVPerfHUD", "Yes");
+        } else {
+            mDirect3DRenderSystem->setConfigOption("Allow NVPerfHUD", "No");
+        }
 
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        // File could not be opened,
+        // Antialiasing
+        mDirect3DRenderSystem->setConfigOption("FSAA", mD3DAntiAliasingComboBox->currentText().toStdString());
+
+        // Full screen
+        if (mD3DFullScreenCheckBox->checkState() == Qt::Checked) {
+            mDirect3DRenderSystem->setConfigOption("Full Screen", "Yes");
+        } else {
+            mDirect3DRenderSystem->setConfigOption("Full Screen", "No");
+        }
+
+        // Rendering device
+        mDirect3DRenderSystem->setConfigOption("Rendering Device", mD3DRenderDeviceComboBox->currentText().toStdString());
+
+        // VSync
+        if (mD3DVSyncCheckBox->checkState() == Qt::Checked) {
+            mDirect3DRenderSystem->setConfigOption("VSync", "Yes");
+        } else {
+            mDirect3DRenderSystem->setConfigOption("VSync", "No");
+        }
+
+        // Resolution
+        mDirect3DRenderSystem->setConfigOption("Video Mode", mD3DResolutionComboBox->currentText().toStdString());
+    }
+
+    if (mOpenGLRenderSystem) {
+        // Display Frequency
+        mOpenGLRenderSystem->setConfigOption("Display Frequency", mOGLFrequencyComboBox->currentText().toStdString());
+
+        // Antialiasing
+        mOpenGLRenderSystem->setConfigOption("FSAA", mOGLAntiAliasingComboBox->currentText().toStdString());
+
+        // Full screen
+        if (mOGLFullScreenCheckBox->checkState() == Qt::Checked) {
+            mOpenGLRenderSystem->setConfigOption("Full Screen", "Yes");
+        } else {
+            mOpenGLRenderSystem->setConfigOption("Full Screen", "No");
+        }
+
+        // RTT mode
+        mOpenGLRenderSystem->setConfigOption("RTT Preferred Mode", mOGLRTTComboBox->currentText().toStdString());
+
+        // VSync
+        if (mOGLVSyncCheckBox->checkState() == Qt::Checked) {
+            mOpenGLRenderSystem->setConfigOption("VSync", "Yes");
+        } else {
+            mOpenGLRenderSystem->setConfigOption("VSync", "No");
+        }
+
+        // Resolution
+        mOpenGLRenderSystem->setConfigOption("Video Mode", mOGLResolutionComboBox->currentText().toStdString());
+    }
+
+    // Now we validate the options
+    QString ogreError = QString::fromStdString(mSelectedRenderSystem->validateConfigOptions());
+
+    if (!ogreError.isEmpty()) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Error opening Ogre configuration file");
+        msgBox.setWindowTitle("Error validating Ogre configuration");
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open %0</b><br><br> \
-        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+        msgBox.setText(tr("<br><b>A problem occured while validating the graphics options</b><br><br> \
+        The graphics options could not be saved.<br><br> \
+        Press \"Show Details...\" for more information.<br>"));
+        msgBox.setDetailedText(ogreError);
         msgBox.exec();
+
+        Ogre::LogManager::getSingletonPtr()->logMessage( "Caught exception in validateConfigOptions");
+
+        qCritical("Error validating configuration");
+
+        QApplication::exit(1);
         return;
     }
 
-    QTextStream out(&file);
+    // Write the settings to the config file
 
-    out << "Render System=" << mSelectedRenderSystem->getName().c_str() << endl << endl;
 
-    if (mDirect3DRenderSystem) {
-        QString direct3DName = mDirect3DRenderSystem->getName().c_str();
-        direct3DName.prepend("[");
-        direct3DName.append("]");
-        out << direct3DName << endl;
-
-        if (mD3DNvPerfCheckBox->checkState() == Qt::Checked) {
-            out << "Allow NVPerfHUD=Yes" << endl;
-        } else {
-            out << "Allow NVPerfHUD=No" << endl;
-        }
-
-        out << "FSAA=" << mD3DAntiAliasingComboBox->currentText() << endl;
-        out << "Floating-point mode=" << mD3DFloatingPointComboBox->currentText() << endl;
-
-        if (mD3DFullScreenCheckBox->checkState() == Qt::Checked) {
-            out << "Full Screen=Yes" << endl;
-        } else {
-            out << "Full Screen=No" << endl;
-        }
-
-        out << "Rendering Device=" << mD3DRenderDeviceComboBox->currentText() << endl;
-        out << "Resource Creation Policy=Create on all devices" << endl;
-
-        if (mD3DVSyncCheckBox->checkState() == Qt::Checked) {
-            out << "VSync=Yes" << endl;
-        } else {
-            out << "VSync=No" << endl;
-        }
-
-        out << "VSync Interval=1" << endl;
-        out << "Video Mode=" << mD3DResolutionComboBox->currentText() << endl;
-        out << "sRGB Gamma Conversion=No" << endl;
+    try
+    {
+        mOgre->saveConfig();
     }
+    catch(Ogre::Exception &ex)
+    {
+        QString ogreError = QString::fromStdString(ex.getFullDescription().c_str());
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error writing Ogre configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not write the graphics configuration</b><br><br> \
+        Please make sure you have the right permissions and try again.<br><br> \
+        Press \"Show Details...\" for more information.<br>"));
+        msgBox.setDetailedText(ogreError);
+        msgBox.exec();
 
-    out << endl;
+        qCritical("Error saving Ogre configuration, the error reported was:\n %s", qPrintable(ogreError));
 
-    if (mOpenGLRenderSystem) {
-        QString openGLName = mOpenGLRenderSystem->getName().c_str();
-        openGLName.prepend("[");
-        openGLName.append("]");
-        out << openGLName << endl;
-
-        out << "Colour Depth=32" << endl;
-        out << "Display Frequency=" << mOGLFrequencyComboBox->currentText() << endl;
-        out << "FSAA=" << mOGLAntiAliasingComboBox->currentText() << endl;
-
-        if (mOGLFullScreenCheckBox->checkState() == Qt::Checked) {
-            out << "Full Screen=Yes" << endl;
-        } else {
-            out << "Full Screen=No" << endl;
-        }
-
-        out << "RTT Preferred Mode=" << mOGLRTTComboBox->currentText() << endl;
-
-        if (mOGLVSyncCheckBox->checkState() == Qt::Checked) {
-            out << "VSync=Yes" << endl;
-        } else {
-            out << "VSync=No" << endl;
-        }
-
-        out << "VSync Interval=1" << endl;
-        out << "Video Mode=" << mOGLResolutionComboBox->currentText() << endl;
-        out << "sRGB Gamma Conversion=No" << endl;
+        QApplication::exit(1);
     }
-
-    file.close();
 
 }
 

@@ -18,6 +18,8 @@ namespace ESM
 
 namespace MWWorld
 {
+    class World;
+
     /// \brief Cell container
     class Cells
     {
@@ -25,6 +27,7 @@ namespace MWWorld
             ESM::ESMReader& mReader;
             std::map<std::string, Ptr::CellStore> mInteriors;
             std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
+            MWWorld::World& mWorld;
 
             Cells (const Cells&);
             Cells& operator= (const Cells&);
@@ -33,7 +36,9 @@ namespace MWWorld
 
         public:
 
-            Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader);
+            Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader, MWWorld::World& world);
+            ///< \todo pass the dynamic part of the ESMStore isntead (once it is written) of the whole
+            /// world
 
             Ptr::CellStore *getExterior (int x, int y);
 

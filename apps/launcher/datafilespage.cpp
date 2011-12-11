@@ -144,7 +144,7 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
     {
         QString currentMaster = QString::fromStdString(
                 boost::filesystem::path (iter->second.filename()).string());
-        
+
         const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
         if (itemList.isEmpty()) // Master is not yet in the widget
@@ -178,9 +178,12 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
             if (itemList.isEmpty()) // Master is not yet in the widget
             {
-                // TODO: Show warning, missing master
                 mMastersWidget->insertRow(i);
+
                 QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
+                item->setForeground(Qt::red);
+                item->setFlags(item->flags() & ~(Qt::ItemIsSelectable));
+
                 mMastersWidget->setItem(i, 0, item);
             }
         }
@@ -189,9 +192,31 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
         // Now we put the current plugin in the mDataFilesModel under its masters
         QStandardItem *parent = new QStandardItem(availableMasters.join(","));
-        
-        QStandardItem *child = new QStandardItem(QString::fromStdString(
-                boost::filesystem::path (iter->second.filename()).string()));
+
+        QString fileName = QString::fromStdString(boost::filesystem::path (iter->second.filename()).string());
+        QStandardItem *child = new QStandardItem(fileName);
+
+        // Tooltip information
+        QString author = QString::fromStdString(fileReader.getAuthor());
+        float version = fileReader.getFVer();
+        QString description = QString::fromStdString(fileReader.getDesc());
+
+        // For the date created/modified
+        QFileInfo fi(QString::fromStdString(iter->second.string()));
+
+        QString toolTip= QString("<b>Author:</b> %1<br/> \
+                                <b>Version:</b> %2<br/><br/> \
+                                <b>Description:</b><br/> \
+                                %3<br/><br/> \
+                                <b>Created on:</b> %4<br/> \
+                                <b>Last modified:</b> %5")
+                            .arg(author)
+                            .arg(version)
+                            .arg(description)
+                            .arg(fi.created().toString(Qt::TextDate))
+                            .arg(fi.lastModified().toString(Qt::TextDate));
+
+        child->setToolTip(toolTip);
 
         const QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
 
@@ -644,6 +669,10 @@ void DataFilesPage::scrollToSelection()
 
 void DataFilesPage::showContextMenu(const QPoint &point)
 {
+    // Make sure there are plugins in the view
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
 
     QPoint globalPos = mPluginsTable->mapToGlobal(point);
 
@@ -763,6 +792,7 @@ void DataFilesPage::addPlugins(const QModelIndex &index)
         if (childIndex.isValid()) {
             // Now we see if the pluginsmodel already contains this plugin
             const QString childIndexData = QVariant(mDataFilesModel->data(childIndex)).toString();
+            const QString childIndexToolTip = QVariant(mDataFilesModel->data(childIndex, Qt::ToolTipRole)).toString();
 
             const QList<QStandardItem *> itemList = mPluginsModel->findItems(childIndexData);
 
@@ -772,6 +802,7 @@ void DataFilesPage::addPlugins(const QModelIndex &index)
                 QStandardItem *item = new QStandardItem(childIndexData);
                 item->setFlags(item->flags() & ~(Qt::ItemIsDropEnabled));
                 item->setCheckable(true);
+                item->setToolTip(childIndexToolTip);
 
                 mPluginsModel->appendRow(item);
             }
@@ -937,6 +968,11 @@ void DataFilesPage::readConfig()
 
 void DataFilesPage::writeConfig(QString profile)
 {
+    // Don't overwrite the config if no plugins are found
+    if (mPluginsModel->rowCount() < 1) {
+        return;
+    }
+
     if (profile.isEmpty()) {
         profile = mProfilesComboBox->currentText();
     }

@@ -6,21 +6,23 @@
 #include <iostream>
 #include <utility>
 
-#include <OgreVector3.h>
-#include <Ogre.h>
+#include <OgreRoot.h>
 
-#include "components/esm/records.hpp"
+#include <MyGUI_WidgetManager.h>
+
+#include <openengine/ogre/renderer.hpp>
+#include <openengine/gui/manager.hpp>
+
+#include <components/esm/records.hpp>
 #include <components/esm_store/cell_store.hpp>
-#include <components/files/fileops.hpp>
 #include <components/bsa/bsa_archive.hpp>
-#include <components/esm/loadregn.hpp>
 #include <components/esm/esm_reader.hpp>
 #include <components/files/path.hpp>
-
-#include <openengine/gui/manager.hpp>
-#include "mwgui/window_manager.hpp"
+#include <components/nifbullet/bullet_nif_loader.hpp>
 
 #include "mwinput/inputmanager.hpp"
+
+#include "mwgui/window_manager.hpp"
 
 #include "mwscript/scriptmanager.hpp"
 #include "mwscript/compilercontext.hpp"
@@ -43,116 +45,76 @@
 
 #include "mwmechanics/mechanicsmanager.hpp"
 
-#include <OgreRoot.h>
-
-#include <MyGUI_WidgetManager.h>
-#include "mwgui/class.hpp"
-
-#include "components/nifbullet/bullet_nif_loader.hpp"
-
-//using namespace ESM;
-
 void OMW::Engine::executeLocalScripts()
 {
-    for (MWWorld::World::ScriptList::const_iterator iter (
-        mEnvironment.mWorld->getLocalScripts().begin());
-        iter!=mEnvironment.mWorld->getLocalScripts().end(); ++iter)
-    {
-        if (mIgnoreLocalPtr.isEmpty() || mIgnoreLocalPtr!=iter->second)
-        {
-            MWScript::InterpreterContext interpreterContext (mEnvironment,
-                &iter->second.getRefData().getLocals(), MWWorld::Ptr (iter->second));
-            mScriptManager->run (iter->first, interpreterContext);
+    MWWorld::LocalScripts& localScripts = mEnvironment.mWorld->getLocalScripts();
 
-            if (mEnvironment.mWorld->hasCellChanged())
-                break;
-        }
+    localScripts.startIteration();
+
+    while (!localScripts.isFinished())
+    {
+        std::pair<std::string, MWWorld::Ptr> script = localScripts.getNext();
+
+        MWScript::InterpreterContext interpreterContext (mEnvironment,
+            &script.second.getRefData().getLocals(), script.second);
+        mScriptManager->run (script.first, interpreterContext);
+
+        if (mEnvironment.mWorld->hasCellChanged())
+            break;
     }
 
-    mIgnoreLocalPtr = MWWorld::Ptr();
+    localScripts.setIgnore (MWWorld::Ptr());
 }
 
+void OMW::Engine::updateFocusReport (float duration)
+{
+    if ((mFocusTDiff += duration)>0.25)
+    {
+        mFocusTDiff = 0;
+
+        std::string name;
+
+        std::string handle = mEnvironment.mWorld->getFacedHandle();
+
+        if (!handle.empty())
+        {
+            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+            if (!ptr.isEmpty())
+                name = MWWorld::Class::get (ptr).getName (ptr);
+        }
+
+        if (name!=mFocusName)
+        {
+            mFocusName = name;
+
+            if (mFocusName.empty())
+                std::cout << "Unfocus" << std::endl;
+            else
+                std::cout << "Focus: " << name << std::endl;
+        }
+    }
+}
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
-    if(mShowFPS)
-    {
-        mEnvironment.mWindowManager->wmSetFPS(mOgre.getFPS());
-    }
-
-    if(mUseSound && !(mEnvironment.mSoundManager->isMusicPlaying()))
-    {
-        // Play some good 'ol tunes
-        mEnvironment.mSoundManager->startRandomTitle();
-    }
-
-    std::string effect;
-
-    MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
-
-
-    //If the region has changed
-    if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10){
-        timer.restart();
-        if (test.name != current->cell->region)
-        {
-            total = 0;
-            test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
-        }
-
-        if(test.soundList.size() > 0)
-        {
-            std::vector<ESM::Region::SoundRef>::iterator soundIter = test.soundList.begin();
-            //mEnvironment.mSoundManager
-            if(total == 0){
-                while (!(soundIter == test.soundList.end()))
-                {
-                    ESM::NAME32 go = soundIter->sound;
-                    int chance = (int) soundIter->chance;
-                    //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-                    soundIter++;
-                    total += chance;
-                }
-            }
-
-            srand ( time(NULL) );
-            int r = rand() % total;        //old random code
-            int pos = 0;
-            soundIter = test.soundList.begin();
-            while (!(soundIter == test.soundList.end()))
-            {
-                const ESM::NAME32 go = soundIter->sound;
-                int chance = (int) soundIter->chance;
-                //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-                soundIter++;
-                if( r - pos < chance)
-                {
-                    effect = go.name;
-                    //play sound
-                    std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-                    mEnvironment.mSoundManager->playSound(effect, 20.0, 1.0);
-
-                    break;
-
-                }
-                pos += chance;
-            }
-        }
-
-        //mEnvironment.mSoundManager->playSound(effect, 1.0, 1.0);
-        //printf("REGION: %s\n", test.name);
-
-    }
-    else if(current->cell->data.flags & current->cell->Interior)
-    {
-        test.name = "";
-    }
-
     try
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
 
-        //
+        // sound
+        if (mUseSound)
+        {
+            if (!mEnvironment.mSoundManager->isMusicPlaying())
+                mEnvironment.mSoundManager->startRandomTitle();
+
+            mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
+        }
+
+        // update GUI
+        if(mShowFPS)
+            mEnvironment.mWindowManager->wmSetFPS(mOgre->getFPS());
+
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
         // global scripts
@@ -177,52 +139,39 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
         mEnvironment.mMechanicsManager->update (movement);
 
-        if (focusFrameCounter++ == focusUpdateFrame)
-        {
-            std::string handle = mEnvironment.mWorld->getFacedHandle();
-
-            std::string name;
-
-            if (!handle.empty())
-            {
-                MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
-
-                if (!ptr.isEmpty())
-                    name = MWWorld::Class::get (ptr).getName (ptr);
-            }
-
-            if (!name.empty())
-                std::cout << "Object: " << name << std::endl;
-
-            focusFrameCounter = 0;
-        }
-
         if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
             mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
+
+        // report focus object (for debugging)
+        if (mReportFocus)
+            updateFocusReport (mEnvironment.mFrameDuration);
     }
     catch (const std::exception& e)
     {
         std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
-    //std::cout << "TESTING2";
 
     return true;
 }
 
 OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
-  : mPhysicEngine (0)
+  : mOgre (0)
+  , mPhysicEngine (0)
   , mShowFPS (false)
   , mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
   , mUseSound (true)
   , mCompileAll (false)
+  , mReportFocus (false)
+  , mFocusTDiff (0)
   , mScriptManager (0)
   , mScriptContext (0)
   , mGuiManager (0)
   , mFSStrict (false)
   , mCfgMgr(configurationManager)
 {
+    std::srand ( std::time(NULL) );
     MWClass::registerClasses();
 }
 
@@ -238,6 +187,7 @@ OMW::Engine::~Engine()
     delete mScriptManager;
     delete mScriptContext;
     delete mPhysicEngine;
+    delete mOgre;
 }
 
 // Load all BSA files in data directory.
@@ -261,7 +211,7 @@ void OMW::Engine::loadBSA()
 
 void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 {
-    mOgre.getRoot()->addResourceLocation (path.string(), "FileSystem",
+    mOgre->getRoot()->addResourceLocation (path.string(), "FileSystem",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 }
 
@@ -325,6 +275,11 @@ void OMW::Engine::setNewGame(bool newGame)
     mNewGame = newGame;
 }
 
+void OMW::Engine::setReportFocus (bool report)
+{
+    mReportFocus = report;
+}
+
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -332,11 +287,19 @@ void OMW::Engine::go()
     assert (!mEnvironment.mWorld);
     assert (!mCellName.empty());
     assert (!mMaster.empty());
+    assert (!mOgre);
 
-    test.name = "";
-    total = 0;
+    mOgre = new OEngine::Render::OgreRenderer;
 
-    mOgre.configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
+    //we need to ensure the path to the configuration exists before creating an
+    //instance of ogre root so that Ogre doesn't raise an exception when trying to
+    //access it
+    const boost::filesystem::path configPath = mCfgMgr.getOgreConfigPath().parent_path();
+    if ( !boost::filesystem::exists(configPath) )
+    {
+        boost::filesystem::create_directories(configPath);
+    }
+    mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string() + std::string("/"),
         mCfgMgr.getPluginsConfigPath().string(), false);
@@ -346,27 +309,23 @@ void OMW::Engine::go()
     addResourcesDirectory(mResDir / "mygui");
 
     // Create the window
-    mOgre.createWindow("OpenMW");
+    mOgre->createWindow("OpenMW");
 
     loadBSA();
 
+    /// \todo move this into the physics manager
     // Create physics. shapeLoader is deleted by the physic engine
     NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
     mPhysicEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (mOgre, mPhysicEngine, mFileCollections, mMaster,
+    mEnvironment.mWorld = new MWWorld::World (*mOgre, mPhysicEngine, mFileCollections, mMaster,
         mResDir, mNewGame, mEnvironment, mEncoding);
 
+    /// \todo move this into the GUI manager (a.k.a WindowManager)
     // Set up the GUI system
-    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre.getWindow(), mOgre.getScene(), false,
+    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false,
         mCfgMgr.getLogPath().string() + std::string("/"));
-
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
@@ -375,11 +334,11 @@ void OMW::Engine::go()
         mExtensions, mShowFPS, mNewGame);
 
     // Create sound system
-    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre.getRoot(),
-                                                           mOgre.getCamera(),
+    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
+                                                           mOgre->getCamera(),
                                                            mEnvironment.mWorld->getStore(),
                                                            (mDataDir),
-                                                           mUseSound, mFSStrict);
+                                                           mUseSound, mFSStrict, mEnvironment);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
@@ -417,89 +376,68 @@ void OMW::Engine::go()
     }
 
     // Sets up the input system
-    MWInput::MWInputManager input(mOgre, mEnvironment.mWorld->getPlayer(),
+    MWInput::MWInputManager input(*mOgre, mEnvironment.mWorld->getPlayer(),
                                   *mEnvironment.mWindowManager, mDebug, *this);
     mEnvironment.mInputManager = &input;
 
-    focusFrameCounter = 0;
-
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 
-    mOgre.getRoot()->addFrameListener (this);
+    mOgre->getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
-      mEnvironment.mSoundManager->startRandomTitle();
+    mEnvironment.mSoundManager->startRandomTitle();
 
     // scripts
     if (mCompileAll)
     {
-        typedef ESMS::ScriptListT<ESM::Script>::MapType Container;
+        std::pair<int, int> result = mScriptManager->compileAll();
 
-        Container scripts = mEnvironment.mWorld->getStore().scripts.list;
-
-        int count = 0;
-        int success = 0;
-
-        for (Container::const_iterator iter (scripts.begin()); iter!=scripts.end(); ++iter, ++count)
-            if (mScriptManager->compile (iter->first))
-                ++success;
-
-        if (count)
+        if (result.first)
             std::cout
-                << "compiled " << success << " of " << count << " scripts ("
-                << 100*static_cast<double> (success)/count
+                << "compiled " << result.second << " of " << result.first << " scripts ("
+                << 100*static_cast<double> (result.second)/result.first
                 << "%)"
                 << std::endl;
-
     }
 
     // Start the main rendering loop
-    mOgre.start();
+    mOgre->start();
 
     std::cout << "Quitting peacefully.\n";
 }
 
 void OMW::Engine::activate()
 {
-    // TODO: This is only a workaround. The input dispatcher should catch any exceptions thrown inside
-    // the input handling functions. Looks like this will require an OpenEngine modification.
-    try
+    std::string handle = mEnvironment.mWorld->getFacedHandle();
+
+    if (handle.empty())
+        return;
+
+    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+
+    if (ptr.isEmpty())
+        return;
+
+    MWScript::InterpreterContext interpreterContext (mEnvironment,
+        &ptr.getRefData().getLocals(), ptr);
+
+    boost::shared_ptr<MWWorld::Action> action =
+        MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayer().getPlayer(),
+        mEnvironment);
+
+    interpreterContext.activate (ptr, action);
+
+    std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+    if (!script.empty())
     {
-        std::string handle = mEnvironment.mWorld->getFacedHandle();
-
-        if (handle.empty())
-            return;
-
-        MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
-
-        if (ptr.isEmpty())
-            return;
-
-        MWScript::InterpreterContext interpreterContext (mEnvironment,
-            &ptr.getRefData().getLocals(), ptr);
-
-        boost::shared_ptr<MWWorld::Action> action =
-            MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayer().getPlayer(),
-            mEnvironment);
-
-        interpreterContext.activate (ptr, action);
-
-        std::string script = MWWorld::Class::get (ptr).getScript (ptr);
-
-        if (!script.empty())
-        {
-            mIgnoreLocalPtr = ptr;
-            mScriptManager->run (script, interpreterContext);
-        }
-
-        if (!interpreterContext.hasActivationBeenHandled())
-        {
-            interpreterContext.executeActivation();
-        }
+        mEnvironment.mWorld->getLocalScripts().setIgnore (ptr);
+        mScriptManager->run (script, interpreterContext);
     }
-    catch (const std::exception& e)
+
+    if (!interpreterContext.hasActivationBeenHandled())
     {
-        std::cerr << "Activation failed: " << e.what() << std::endl;
+        interpreterContext.executeActivation();
     }
 }
 

@@ -7,11 +7,17 @@ IF (APPLE)
     set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
 ENDIF (APPLE)
 
+# Macros
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
+
+include (OpenMWMacros)
+
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
 set (OPENMW_VERSION_MINOR 11)
-set (OPENMW_VERSION_RELEASE 0)
+set (OPENMW_VERSION_RELEASE 1)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
@@ -75,171 +81,6 @@ IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd/ogre_1_7_1")
 ELSE()
     message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
 ENDIF()
-
-# Add path for CMake scripts
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
-
-# source directory: components
-set(COMP_DIR ${CMAKE_SOURCE_DIR}/components)
-
-set(BSA
-    ${COMP_DIR}/bsa/bsa_archive.cpp
-    ${COMP_DIR}/bsa/bsa_file.cpp)
-set(BSA_HEADER
-    ${COMP_DIR}/bsa/bsa_archive.hpp
-    ${COMP_DIR}/bsa/bsa_file.hpp)
-source_group(components\\bsa FILES ${BSA} ${BSA_HEADER})
-
-set(CFG
-    ${COMP_DIR}/cfg/configurationmanager.cpp
-    )
-set(CFG_HEADER
-    ${COMP_DIR}/cfg/configurationmanager.hpp
-    )
-source_group(components\\cfg FILES ${CFG} ${CFG_HEADER})
-
-set(NIF
-    ${COMP_DIR}/nif/nif_file.cpp)
-set(NIF_HEADER
-    ${COMP_DIR}/nif/controlled.hpp
-    ${COMP_DIR}/nif/effect.hpp
-    ${COMP_DIR}/nif/nif_types.hpp
-    ${COMP_DIR}/nif/record.hpp
-    ${COMP_DIR}/nif/controller.hpp
-    ${COMP_DIR}/nif/extra.hpp
-    ${COMP_DIR}/nif/node.hpp
-    ${COMP_DIR}/nif/record_ptr.hpp
-    ${COMP_DIR}/nif/data.hpp
-    ${COMP_DIR}/nif/nif_file.hpp
-    ${COMP_DIR}/nif/property.hpp)
-source_group(components\\nif FILES ${NIF} ${NIF_HEADER})
-
-set(NIFOGRE
-    ${COMP_DIR}/nifogre/ogre_nif_loader.cpp)
-set(NIFOGRE_HEADER
-    ${COMP_DIR}/nifogre/ogre_nif_loader.hpp)
-source_group(components\\nifogre FILES ${NIFOGRE} ${NIFOGRE_HEADER})
-
-set(NIFBULLET
-    ${COMP_DIR}/nifbullet/bullet_nif_loader.cpp)
-set(NIFBULLET_HEADER
-    ${COMP_DIR}/nifbullet/bullet_nif_loader.hpp)
-source_group(components\\nifbullet FILES ${NIFBULLET} ${NIFBULLET_HEADER})
-
-set(TO_UTF8
-    ${COMP_DIR}/to_utf8/to_utf8.cpp)
-set(TO_UTF8_HEADER
-    ${COMP_DIR}/to_utf8/to_utf8.hpp)
-source_group(components\\to_utf8 FILES ${TO_UTF8} ${TO_UTF8_HEADER})
-
-set(FILE_FINDER
-    ${COMP_DIR}/file_finder/search.cpp)
-set(FILE_FINDER_HEADER
-    ${COMP_DIR}/file_finder/file_finder.hpp
-    ${COMP_DIR}/file_finder/filename_less.hpp
-    ${COMP_DIR}/file_finder/search.hpp)
-source_group(components\\file_finder FILES ${FILE_FINDER} ${FILE_FINDER_HEADER})
-
-set(ESM_STORE
-    ${COMP_DIR}/esm_store/store.cpp)
-set(ESM_STORE_HEADER
-    ${COMP_DIR}/esm_store/cell_store.hpp
-    ${COMP_DIR}/esm_store/reclists.hpp
-    ${COMP_DIR}/esm_store/store.hpp)
-source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
-
-file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
-set(ESM
-    ${COMP_DIR}/esm/attr.cpp
-    ${COMP_DIR}/esm/esm_reader.cpp
-    ${COMP_DIR}/esm/loadland.cpp
-    ${COMP_DIR}/esm/loadacti.cpp
-    ${COMP_DIR}/esm/loadalch.cpp
-    ${COMP_DIR}/esm/loadappa.cpp
-    ${COMP_DIR}/esm/loadarmo.cpp
-    ${COMP_DIR}/esm/loadbody.cpp
-    ${COMP_DIR}/esm/loadbook.cpp
-    ${COMP_DIR}/esm/loadbsgn.cpp
-    ${COMP_DIR}/esm/loadcell.cpp
-    ${COMP_DIR}/esm/loadclas.cpp
-    ${COMP_DIR}/esm/loadclot.cpp
-    ${COMP_DIR}/esm/loadcont.cpp
-    ${COMP_DIR}/esm/loadcrea.cpp
-    ${COMP_DIR}/esm/loaddial.cpp
-    ${COMP_DIR}/esm/loaddoor.cpp
-    ${COMP_DIR}/esm/loadench.cpp
-    ${COMP_DIR}/esm/loadfact.cpp
-    ${COMP_DIR}/esm/loadglob.cpp
-    ${COMP_DIR}/esm/loadgmst.cpp
-    ${COMP_DIR}/esm/loadinfo.cpp
-    ${COMP_DIR}/esm/loadingr.cpp
-    ${COMP_DIR}/esm/loadlevlist.cpp
-    ${COMP_DIR}/esm/loadligh.cpp
-    ${COMP_DIR}/esm/loadlocks.cpp
-    ${COMP_DIR}/esm/loadltex.cpp
-    ${COMP_DIR}/esm/loadmgef.cpp
-    ${COMP_DIR}/esm/loadmisc.cpp
-    ${COMP_DIR}/esm/loadnpc.cpp
-    ${COMP_DIR}/esm/loadpgrd.cpp
-    ${COMP_DIR}/esm/loadrace.cpp
-    ${COMP_DIR}/esm/loadregn.cpp
-    ${COMP_DIR}/esm/loadscpt.cpp
-    ${COMP_DIR}/esm/loadskil.cpp
-    ${COMP_DIR}/esm/loadsndg.cpp
-    ${COMP_DIR}/esm/loadsoun.cpp
-    ${COMP_DIR}/esm/loadspel.cpp
-    ${COMP_DIR}/esm/loadsscr.cpp
-    ${COMP_DIR}/esm/loadstat.cpp
-    ${COMP_DIR}/esm/loadweap.cpp
-
-)
-source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
-
-set(MISC
-    ${COMP_DIR}/misc/stringops.cpp
-    )
-set(MISC_HEADER
-    ${COMP_DIR}/misc/slice_array.hpp
-    ${COMP_DIR}/misc/stringops.hpp
-    )
-source_group(components\\misc FILES ${MISC} ${MISC_HEADER})
-
-set(FILES
-    ${COMP_DIR}/files/linuxpath.cpp
-    ${COMP_DIR}/files/windowspath.cpp
-    ${COMP_DIR}/files/macospath.cpp
-    ${COMP_DIR}/files/multidircollection.cpp
-    ${COMP_DIR}/files/collections.cpp
-    ${COMP_DIR}/files/fileops.cpp
-    )
-set(FILES_HEADER
-    ${COMP_DIR}/files/linuxpath.hpp
-    ${COMP_DIR}/files/windowspath.hpp
-    ${COMP_DIR}/files/macospath.hpp
-    ${COMP_DIR}/files/path.hpp
-    ${COMP_DIR}/files/multidircollection.hpp
-    ${COMP_DIR}/files/collections.hpp
-    ${COMP_DIR}/files/fileops.hpp
-    )
-source_group(components\\files FILES ${FILES} ${FILES_HEADER})
-
-file(GLOB COMPILER ${COMP_DIR}/compiler/*.cpp)
-file(GLOB COMPILER_HEADER ${COMP_DIR}/compiler/*.hpp)
-source_group(components\\compiler FILES ${COMPILER} ${COMPILER_HEADER})
-
-file(GLOB INTERPRETER ${COMP_DIR}/interpreter/*.cpp)
-file(GLOB INTERPRETER_HEADER ${COMP_DIR}/interpreter/*.hpp)
-source_group(components\\interpreter FILES ${INTERPRETER} ${INTERPRETER_HEADER})
-
-set(COMPONENTS ${BSA} ${NIF} ${NIFOGRE} ${ESM_STORE} ${MISC} ${TO_UTF8}
-    ${COMPILER} ${INTERPRETER} ${ESM} ${FILE_FINDER} ${NIFBULLET} ${FILES}
-    ${CFG}
-    )
-set(COMPONENTS_HEADER ${BSA_HEADER} ${NIF_HEADER} ${NIFOGRE_HEADER} ${ESM_STORE_HEADER}
-    ${ESM_HEADER} ${MISC_HEADER} ${COMPILER_HEADER} ${TO_UTF8_HEADER}
-    ${INTERPRETER_HEADER} ${FILE_FINDER_HEADER} ${NIFBULLET_HEADER} ${FILES_HEADER}
-    ${CFG_HEADER}
-    )
 
 # source directory: libs
 
@@ -444,10 +285,10 @@ set(CPACK_GENERATOR "Bundle")
 set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
 set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
 set(CPACK_BUNDLE_NAME "OpenMW")
-set(CPACK_PACKAGE_VERSION "0.10")
-set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "10")
-set(CPACK_PACKAGE_VERSION_PATCH "")
+set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
+set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
+set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
 include(CPack)
 
@@ -471,6 +312,10 @@ if(DPKG_PROGRAM)
         set(PACKAGE_MAINTAINER "unknown")
     endif()
 
+    #Install icon and desktop file
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+
     #Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
@@ -489,8 +334,8 @@ if(DPKG_PROGRAM)
  Data files from the original game is required to run it.")
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogremain-1.7.1 (>= 1.7.1-1), libbullet2.77 (>= 2.77),  libboost-filesystem1.42.0 (>= 1.42.0), libboost-program-options1.42.0 (>= 1.42.0), libboost-system1.42.0 (>= 1.42.0), libboost-thread1.42.0 (>= 1.42.0), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.2.0 (>= 1.2.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2)")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogre-1.7.3 (>= 1.7.3), libbullet0 (>= 2.77),  libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
@@ -505,6 +350,9 @@ if(DPKG_PROGRAM)
 
     include(CPack)
 endif(DPKG_PROGRAM)
+
+# Components
+add_subdirectory (components)
 
 # Apps and tools
 add_subdirectory( apps/openmw )

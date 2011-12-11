@@ -79,6 +79,12 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
         playerSkillValues.insert(std::make_pair(ESM::Skill::skillIds[i], MWMechanics::Stat<float>()));
     }
 
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
+
     // Set up visibility
     updateVisible();
 }
@@ -333,7 +339,7 @@ void WindowManager::updateVisible()
         dialogueWindow->open();
         return;
     }
-    
+
     if(mode == GM_InterMessageBox)
     {
         if(!mMessageBoxManager->isInteractiveMessageBox()) {

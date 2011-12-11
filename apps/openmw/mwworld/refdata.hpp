@@ -41,9 +41,14 @@ namespace MWWorld
 
             boost::shared_ptr<ContainerStore<RefData> > mContainerStore;
 
-        public:
+            ESM::Position mPosition;
 
-            RefData() : mHasLocals (false), mEnabled (true), mCount (1) {}
+        public:
+            /// @param cr Used to copy constant data such as position into this class where it can
+            ///           be altered without effecting the original data. This makes it possible
+            ///           to reset the position as the orignal data is still held in the CellRef
+            RefData(const ESMS::CellRef& cr) : mHasLocals (false), mEnabled (true),
+                                         mCount (1), mPosition(cr.pos) {}
 
             std::string getHandle()
             {
@@ -112,6 +117,11 @@ namespace MWWorld
             boost::shared_ptr<ContainerStore<RefData> >& getContainerStore()
             {
                 return mContainerStore;
+            }
+
+            ESM::Position& getPosition()
+            {
+                return mPosition;
             }
     };
 }

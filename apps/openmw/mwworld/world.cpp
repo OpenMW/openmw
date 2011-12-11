@@ -27,7 +27,7 @@ namespace
 {
     template<typename T>
     void listCellScripts (const ESMS::ESMStore& store,
-        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::World::ScriptList& scriptList,
+        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::LocalScripts& localScripts,
         MWWorld::Ptr::CellStore *cell)
     {
         for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
@@ -40,8 +40,7 @@ namespace
                 {
                     iter->mData.setLocals (*script);
 
-                    scriptList.push_back (
-                        std::make_pair (iter->base->script, MWWorld::Ptr (&*iter, cell)));
+                    localScripts.add (iter->base->script, MWWorld::Ptr (&*iter, cell));
                 }
             }
         }
@@ -67,28 +66,6 @@ namespace
 
 namespace MWWorld
 {
-
-    void World::insertInteriorScripts (ESMS::CellStore<RefData>& cell)
-    {
-        listCellScripts (mStore, cell.activators, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.potions, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.appas, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.armors, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.books, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.clothes, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.containers, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.creatures, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.doors, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.ingreds, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.lights, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.lockpicks, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.miscItems, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.npcs, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.probes, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.repairs, mLocalScripts, &cell);
-        listCellScripts (mStore, cell.weapons, mLocalScripts, &cell);
-    }
-
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
         if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref =
@@ -185,20 +162,6 @@ namespace MWWorld
         throw std::runtime_error ("month out of range");
     }
 
-    void World::removeScripts (Ptr::CellStore *cell)
-    {
-        ScriptList::iterator iter = mLocalScripts.begin();
-
-        while (iter!=mLocalScripts.end())
-        {
-            if (iter->second.getCell()==cell)
-                mLocalScripts.erase (iter++);
-            else
-                ++iter;
-        }
-    }
-
-
     void World::adjustSky()
     {
         if (mSky)
@@ -213,8 +176,8 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
-    : mScene (renderer,physEng), mPlayer (0), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm)
+    : mScene (renderer,physEng), mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
+      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysEngine = physEng;
 
@@ -306,7 +269,7 @@ namespace MWWorld
         return mEsm;
     }
 
-    const World::ScriptList& World::getLocalScripts() const
+    LocalScripts& World::getLocalScripts()
     {
         return mLocalScripts;
     }
@@ -574,6 +537,8 @@ namespace MWWorld
                     mEnvironment.mSoundManager->stopSound3D (ptr);
 
                     mPhysics->removeObject (ptr.getRefData().getHandle());
+
+                    mLocalScripts.remove (ptr);
                 }
 
                 render->deleteObject (ptr.getRefData().getHandle());
@@ -584,9 +549,9 @@ namespace MWWorld
 
     void World::moveObjectImp (Ptr ptr, float x, float y, float z)
     {
-        ptr.getCellRef().pos.pos[0] = x;
-        ptr.getCellRef().pos.pos[1] = y;
-        ptr.getCellRef().pos.pos[2] = z;
+        ptr.getRefData().getPosition().pos[0] = x;
+        ptr.getRefData().getPosition().pos[1] = y;
+        ptr.getRefData().getPosition().pos[2] = z;
 
         if (ptr==mPlayer->getPlayer())
         {
@@ -603,7 +568,7 @@ namespace MWWorld
 
                     if (currentCell->cell->data.gridX!=cellX || currentCell->cell->data.gridY!=cellY)
                     {
-                        mWorldScene->changeCell (cellX, cellY, mPlayer->getPlayer().getCellRef().pos, false);
+                        mWorldScene->changeCell (cellX, cellY, mPlayer->getPlayer().getRefData().getPosition(), false);
                     }
 
                 }
@@ -721,5 +686,28 @@ namespace MWWorld
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_CLAS));
 
         return std::make_pair (stream.str(), created);
+    }
+
+    const ESM::Cell *World::createRecord (const ESM::Cell& record)
+    {
+        if (record.data.flags & ESM::Cell::Interior)
+        {
+            if (mStore.cells.searchInt (record.name))
+                throw std::runtime_error ("failed creating interior cell");
+
+            ESM::Cell *cell = new ESM::Cell (record);
+            mStore.cells.intCells.insert (std::make_pair (record.name, cell));
+            return cell;
+        }
+        else
+        {
+            if (mStore.cells.searchExt (record.data.gridX, record.data.gridY))
+                throw std::runtime_error ("failed creating exterior cell");
+
+            ESM::Cell *cell = new ESM::Cell (record);
+            mStore.cells.extCells.insert (
+                std::make_pair (std::make_pair (record.data.gridX, record.data.gridY), cell));
+            return cell;
+        }
     }
 }

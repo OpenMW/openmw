@@ -52,6 +52,10 @@ namespace MWScript
             bool compile (const std::string& name);
             ///< Compile script with the given namen
             /// \return Success?
+
+            std::pair<int, int> compileAll();
+            ///< Compile all scripts
+            /// \return count, success
     };
 };
 

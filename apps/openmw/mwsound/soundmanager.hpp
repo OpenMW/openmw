@@ -8,6 +8,9 @@
 #include "../mwworld/ptr.hpp"
 #include <openengine/sound/sndmanager.hpp>
 
+
+#include <boost/timer.hpp>
+
 namespace Ogre
 {
     class Root;
@@ -17,6 +20,11 @@ namespace Ogre
 namespace ESMS
 {
     struct ESMStore;
+}
+
+namespace MWWorld
+{
+    struct Environment;
 }
 
 namespace MWSound
@@ -31,6 +39,11 @@ namespace MWSound
             SoundImpl *mData;
             std::vector<boost::filesystem::path> files;
             bool fsStrict;
+            MWWorld::Environment& mEnvironment;
+
+            int total;
+            ESM::Region test;
+            boost::timer timer;
 
             void streamMusicFull (const std::string& filename);
             ///< Play a soundifle
@@ -38,8 +51,9 @@ namespace MWSound
 
         public:
 
-      SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
-                   boost::filesystem::path dataDir, bool useSound, bool fsstrict);
+            SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
+                   boost::filesystem::path dataDir, bool useSound, bool fsstrict,
+                   MWWorld::Environment& environment);
             ~SoundManager();
 
             void streamMusic(const std::string& filename);
@@ -60,8 +74,6 @@ namespace MWSound
             bool sayDone (MWWorld::Ptr reference) const;
             ///< Is actor not speaking?
 
-
-
             void playSound (const std::string& soundId, float volume, float pitch);
             ///< Play a sound, independently of 3D-position
 
@@ -81,6 +93,8 @@ namespace MWSound
 
             void updateObject(MWWorld::Ptr reference);
             ///< Update the position of all sounds connected to the given object.
+
+            void update (float duration);
     };
 }
 
