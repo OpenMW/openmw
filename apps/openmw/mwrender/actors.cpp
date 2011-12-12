@@ -13,7 +13,8 @@ void Actors::setMwRoot(Ogre::SceneNode* root){
 }
 void Actors::insertNPC(const MWWorld::Ptr& ptr){
         insertBegin(ptr, true, true);
-        MWRender::NpcAnimation(ptr, mEnvironment, mRend);
+        MWRender::Animation anim = MWRender::NpcAnimation(ptr, mEnvironment, mRend);
+        mAllActors.push_back(anim);
 		
 		
 }
@@ -57,8 +58,8 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 }
 void Actors::insertCreature (const MWWorld::Ptr& ptr){
     insertBegin(ptr, true, true);
-
-   MWRender::CreatureAnimation(ptr, mEnvironment, mRend);
+    MWRender::Animation anim = MWRender::CreatureAnimation(ptr, mEnvironment, mRend);
+   mAllActors.push_back(anim);
 }
 
 bool Actors::deleteObject (const MWWorld::Ptr& ptr)
@@ -92,4 +93,5 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
         mRend.getScene()->destroySceneNode(base);
         base = 0;
     }
+    
 }

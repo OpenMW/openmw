@@ -5,6 +5,10 @@
 using namespace Ogre;
 using namespace NifOgre;
 namespace MWRender{
+
+CreatureAnimation::~CreatureAnimation(){
+
+}
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend): Animation(_env,_rend){
     Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
     assert(insert);

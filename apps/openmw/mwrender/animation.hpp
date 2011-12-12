@@ -20,6 +20,7 @@ class Animation{
     Ogre::Entity* base;
     public:
      Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env){};
+     ~Animation();
  
 };
 }

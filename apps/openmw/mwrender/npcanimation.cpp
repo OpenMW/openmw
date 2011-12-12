@@ -4,6 +4,9 @@
 using namespace Ogre;
 using namespace NifOgre;
 namespace MWRender{
+NpcAnimation::~NpcAnimation(){
+
+}
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend): Animation(_env,_rend){
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
@@ -52,7 +55,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          
     base = mRend.getScene()->createEntity(smodel);
     insert->attachObject(base);
-        std::cout << "Nifloader\n";
         
         std::string headModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(headID)->model;
@@ -82,7 +84,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		const ESM::BodyPart* forearmr = forearml;
 		const ESM::BodyPart* wristr = wristl;
 		const ESM::BodyPart* armr = arml;
-        std::cout << "upperleg";
         if(upperleg){
 			insertBoundedPart("meshes\\" + upperleg->model + "*|", "Left Upper Leg");
 			insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg");

@@ -3,6 +3,7 @@
 
 #include "components/esm_store/cell_store.hpp"
 #include <map>
+#include <list>
 
 
 
@@ -22,6 +23,7 @@ namespace MWRender{
         std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
         Ogre::SceneNode* mMwRoot;
         MWWorld::Environment& mEnvironment;
+        std::list<Animation> mAllActors;
 
         
 
