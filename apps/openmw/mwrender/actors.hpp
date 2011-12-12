@@ -13,7 +13,8 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
-
+#include "npcanimation.hpp"
+#include "creatureanimation.hpp"
 
 namespace MWRender{
     class Actors{
@@ -27,11 +28,9 @@ namespace MWRender{
         public:
         Actors(OEngine::Render::OgreRenderer& _rend, MWWorld::Environment& _env): mRend(_rend), mEnvironment(_env){}
         ~Actors(){}
-        Ogre::Entity* Actors::insertBoundedPart(const std::string &mesh, std::string bonename, Ogre::Entity* base);
         void setMwRoot(Ogre::SceneNode* root);
         void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
-        void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
-        void insertFreePart(const MWWorld::Ptr& ptr, const std::string& mesh);
+        void insertCreature (const MWWorld::Ptr& ptr);
         void insertNPC(const MWWorld::Ptr& ptr);
          bool deleteObject (const MWWorld::Ptr& ptr);
         ///< \return found?

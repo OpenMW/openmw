@@ -474,6 +474,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
                                                               HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
 
 		if(flip && mFlipVertexWinding && sub->indexData->indexCount % 3 == 0){
+
 			sub->indexData->indexBuffer = ibuf;
 
 			uint16 *datamod = new uint16[numFaces];
@@ -1109,10 +1110,10 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
             {
                 handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds, original, boneSequence);
             }
-			else if(name.length() >= triname.length())
+			else if(nodename.length() >= triname.length())
 			{
 				std::transform(nodename.begin(), nodename.end(), nodename.begin(), std::tolower);
-				if(triname == name.substr(0, triname.length()))
+				if(triname == nodename.substr(0, triname.length()))
 					handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds, original, boneSequence);
 			}
     }
