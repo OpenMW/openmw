@@ -1,7 +1,7 @@
 #include "actors.hpp"
 #include <OgreSceneNode.h>
 #include <components/nifogre/ogre_nif_loader.hpp>
-#include "../mwworld/world.hpp"
+
 
 
 using namespace Ogre;
@@ -13,8 +13,8 @@ void Actors::setMwRoot(Ogre::SceneNode* root){
 }
 void Actors::insertNPC(const MWWorld::Ptr& ptr){
         insertBegin(ptr, true, true);
-        MWRender::Animation anim = MWRender::NpcAnimation(ptr, mEnvironment, mRend);
-        mAllActors.push_back(anim);
+          NpcAnimation* anim = new MWRender::NpcAnimation(ptr, mEnvironment, mRend);
+    mAllActors.push_back(anim);
 		
 		
 }
@@ -58,8 +58,9 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 }
 void Actors::insertCreature (const MWWorld::Ptr& ptr){
     insertBegin(ptr, true, true);
-    MWRender::Animation anim = MWRender::CreatureAnimation(ptr, mEnvironment, mRend);
-   mAllActors.push_back(anim);
+   CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr, mEnvironment, mRend);
+    mAllActors.push_back(anim);
+   //mAllActors.push_back(&anim);
 }
 
 bool Actors::deleteObject (const MWWorld::Ptr& ptr)

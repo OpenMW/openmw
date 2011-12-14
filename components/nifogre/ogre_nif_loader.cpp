@@ -1277,18 +1277,7 @@ void NIFLoader::loadResource(Resource *resource)
 	{
 		allshapesmap[name] = shapes;
 	}
-    if(baddin){
-		/*if(addAnim){
-			if(isBeast)
-				npcknaSkel = mSkel;
-			else
-				npcSkel = mSkel;
-		}*/
-		for(int i = 0; i < addin.size(); i++){
-		insertMeshInsideBase(addin[i]);
-		}
-		addin.clear();
-	}
+   
     if(flip){
 	    mesh->_setBounds(mBoundingBox, false);
 	}
@@ -1330,20 +1319,22 @@ This function also creates new position and normal buffers for submeshes.
 This function points to existing texture and IndexData buffers
 */
 
-std::vector<Nif::NiKeyframeData>& NIFLoader::getAnim(std::string lowername){
+std::vector<Nif::NiKeyframeData>* NIFLoader::getAnim(std::string lowername){
 		
 		std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost>::iterator iter = allanimmap.find(lowername);
+       std::vector<Nif::NiKeyframeData>* pass = 0;
 		if(iter != allanimmap.end())
-			mAnim = iter->second;
-		return mAnim;
+			pass = &(iter->second);
+		return pass;
 			
 }
-std::vector<Nif::NiTriShapeCopy>& NIFLoader::getShapes(std::string lowername){
+std::vector<Nif::NiTriShapeCopy>* NIFLoader::getShapes(std::string lowername){
 		
 		std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost>::iterator iter = allshapesmap.find(lowername);
+        std::vector<Nif::NiTriShapeCopy>* pass = 0;
 		if(iter != allshapesmap.end())
-			mS = iter->second;
-		return mS;
+			pass = &(iter->second);
+		return pass;
 }
 
 float NIFLoader::getTime(std::string filename, std::string text){
@@ -1359,12 +1350,14 @@ float NIFLoader::getTime(std::string filename, std::string text){
 	return -10000000.0;
 }
 
+/*
 void NIFLoader::insertMeshInsideBase(Ogre::Mesh* input)
 {
 	/*if(addin)
 	{
 		std::cout << "InsideBase:" << addin->getName() << "\n";
 	}*/
+/*
 	if(input)
 	{
 		std::vector<Nif::NiTriShapeCopy> shapes = NIFLoader::getSingletonPtr()->getShapes(input->getName());
@@ -1478,7 +1471,7 @@ void NIFLoader::insertMeshInsideBase(Ogre::Mesh* input)
 					for (int j = 0; j < weights.size(); j++){
 						std::cout << "Vertex: " << weights[j].vertex << " Weight: " << weights[j].weight << "\n";
 					}*/
-				}
+				/*}
 			}
 
 				if(position){
@@ -1578,7 +1571,7 @@ void NIFLoader::insertMeshInsideBase(Ogre::Mesh* input)
 		 assign.vertexIndex = 0;
 		 assign.weight = 1.0;
 		 subNew->addBoneAssignment(assign);*/
-		 
+		 /*
 		 Ogre::SubMesh::BoneAssignmentIterator boneiter = sub->getBoneAssignmentIterator();
 		 while(boneiter.hasMoreElements())
 		 {
@@ -1592,7 +1585,7 @@ void NIFLoader::insertMeshInsideBase(Ogre::Mesh* input)
 	}
 	}
 
-}
+}*/
 
 
 /* More code currently not in use, from the old D source. This was

@@ -3,6 +3,9 @@
 #include "animation.hpp"
 #include <components/nif/data.hpp>
 #include <components/nif/node.hpp>
+#include <components/nif/property.hpp>
+#include <components/nif/controller.hpp>
+#include <components/nif/extra.hpp>
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
@@ -12,11 +15,14 @@
 namespace MWRender{
 
 class NpcAnimation: public Animation{
-    std::vector<std::vector<Nif::NiTriShapeCopy>> shapeparts;   //All the NiTriShape data that we need for animating this particular npc
+    std::vector<Ogre::Entity*> entityparts;
+
+    std::vector<std::vector<Nif::NiTriShapeCopy>*> shapeparts;   //All the NiTriShape data that we need for animating this particular npc
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);
      ~NpcAnimation();
     Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
+    void insertFreePart(const std::string &mesh, Ogre::SceneNode* insert);
 };
 }
 #endif

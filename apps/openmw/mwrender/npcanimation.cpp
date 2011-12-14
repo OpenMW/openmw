@@ -1,6 +1,7 @@
 #include "npcanimation.hpp"
 #include "../mwworld/world.hpp"
 
+
 using namespace Ogre;
 using namespace NifOgre;
 namespace MWRender{
@@ -54,6 +55,15 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          NifOgre::NIFLoader::load(smodel);
          
     base = mRend.getScene()->createEntity(smodel);
+
+    /*
+    transformations = &(NIFLoader::getSingletonPtr())->getAnim(smodel);
+        for(int init = 0; init < transformations->size(); init++){
+				rindexI.push_back(0);
+				//a.rindexJ.push_back(0);
+				tindexI.push_back(0);
+				//a.tindexJ.push_back(0);
+			}*/
     insert->attachObject(base);
         
         std::string headModel = "meshes\\" +
@@ -61,7 +71,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 
 		std::string hairModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
-
+        const ESM::BodyPart *chest = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
         const ESM::BodyPart *upperleg = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper leg");
 		const ESM::BodyPart *groin = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "groin");
 		const ESM::BodyPart *arml = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper arm");  //We need two
@@ -136,7 +146,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		if(wristl)
 				insertBoundedPart("meshes\\" + wristl->model + "*|", "Left Wrist");
 		
-
+        
 	
 		
 
@@ -154,6 +164,15 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 			insertBoundedPart("meshes\\" + head->model, "Head");
 		if(hair)
 			insertBoundedPart("meshes\\" + hair->model, "Head");
+
+        if (chest){
+				insertFreePart("meshes\\" + chest->model + "|\"", insert);
+			
+		}
+        if (handr){
+				insertFreePart("meshes\\" + handr->model + "|?", insert);
+			
+		}
 }
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
@@ -162,5 +181,16 @@ Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::stri
 	 
     base->attachObjectToBone(bonename, ent); 
     return ent;
+}
+void NpcAnimation::insertFreePart(const std::string &mesh, Ogre::SceneNode* insert){
+    NIFLoader::load(mesh);
+    Entity* ent = mRend.getScene()->createEntity(mesh);
+    insert->attachObject(ent);
+    entityparts.push_back(ent);
+    //std::vector<Nif::NiTriShapeCopy> shapes = (NIFLoader::getSingletonPtr())->getShapes(mesh);
+    std::vector<Nif::NiTriShapeCopy>* shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh));
+    shapeparts.push_back(shapes);
+
+    
 }
 }

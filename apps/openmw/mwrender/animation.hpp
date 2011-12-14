@@ -13,9 +13,25 @@ class Animation{
    protected:
     OEngine::Render::OgreRenderer &mRend;
     MWWorld::Environment& mEnvironment;    
+
+    float time;
+	float startTime;
+	float stopTime;
+	bool loop;
+	//Represents a rotation index for each bone
+	std::vector<int>rindexI;
+    //Represents a translation index for each bone
+	std::vector<int>tindexI;
+	
+	//Only shapes with morphing data will need a shape number
+	int shapeNumber;
+	std::vector<std::vector<int>> shapeIndexI;
+
+	Ogre::SkeletonInstance* skel;
+    
    
 
-    std::vector<Nif::NiKeyframeData> transformations;
+    std::vector<Nif::NiKeyframeData>* transformations;
     std::map<std::string,float> textmappings;
     Ogre::Entity* base;
     public:
