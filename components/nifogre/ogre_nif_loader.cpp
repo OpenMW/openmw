@@ -1121,6 +1121,8 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
 void NIFLoader::loadResource(Resource *resource)
 {
+    	allanim.clear();
+	shapes.clear();
    mBoundingBox.setNull();
     mesh = 0;
     mSkel.setNull();
@@ -1276,6 +1278,7 @@ void NIFLoader::loadResource(Resource *resource)
 	if(!mSkel.isNull() && shapes.size() > 0 && addAnim)
 	{
 		allshapesmap[name] = shapes;
+        
 	}
    
     if(flip){

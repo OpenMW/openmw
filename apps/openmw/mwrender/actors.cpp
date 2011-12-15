@@ -59,6 +59,7 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 void Actors::insertCreature (const MWWorld::Ptr& ptr){
     insertBegin(ptr, true, true);
    CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr, mEnvironment, mRend);
+    //mAllActors.insert(std::pair<MWWorld::Ptr, Animation*>(ptr,anim));
     mAllActors.push_back(anim);
    //mAllActors.push_back(&anim);
 }

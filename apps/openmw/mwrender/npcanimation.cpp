@@ -56,14 +56,21 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          
     base = mRend.getScene()->createEntity(smodel);
 
-    /*
-    transformations = &(NIFLoader::getSingletonPtr())->getAnim(smodel);
+    
+    if(transformations = (NIFLoader::getSingletonPtr())->getAnim(smodel)){
+
         for(int init = 0; init < transformations->size(); init++){
 				rindexI.push_back(0);
 				//a.rindexJ.push_back(0);
 				tindexI.push_back(0);
 				//a.tindexJ.push_back(0);
-			}*/
+			}
+        loop = false;
+        skel = base->getSkeleton();
+        stopTime = transformations->begin()->getStopTime();
+			//a.startTime = NIFLoader::getSingletonPtr()->getTime(item.smodel, "IdleSneak: Start");
+				startTime = transformations->end()->getStartTime();
+    }
     insert->attachObject(base);
         
         std::string headModel = "meshes\\" +
@@ -173,6 +180,17 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 				insertFreePart("meshes\\" + handr->model + "|?", insert);
 			
 		}
+        if (handl){
+				insertFreePart("meshes\\" + handl->model + "|>", insert);
+			
+		}
+        if(tail){
+                insertFreePart("meshes\\" + tail->model + "|*", insert);
+        }
+        if(feet){
+                insertFreePart("meshes\\" + feet->model + "|<", insert);
+                insertFreePart("meshes\\" + feet->model + "|:", insert);
+        }
 }
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
@@ -187,9 +205,11 @@ void NpcAnimation::insertFreePart(const std::string &mesh, Ogre::SceneNode* inse
     Entity* ent = mRend.getScene()->createEntity(mesh);
     insert->attachObject(ent);
     entityparts.push_back(ent);
-    //std::vector<Nif::NiTriShapeCopy> shapes = (NIFLoader::getSingletonPtr())->getShapes(mesh);
     std::vector<Nif::NiTriShapeCopy>* shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh));
-    shapeparts.push_back(shapes);
+    if(shapes){
+        shapeparts.push_back(shapes);
+        handleShapes(shapes, ent, skel);
+    }
 
     
 }

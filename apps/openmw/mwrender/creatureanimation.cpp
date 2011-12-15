@@ -21,6 +21,21 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
 
         NifOgre::NIFLoader::load(mesh);
         base = mRend.getScene()->createEntity(mesh);
+
+        if(transformations = (NIFLoader::getSingletonPtr())->getAnim(mesh)){
+
+        for(int init = 0; init < transformations->size(); init++){
+				rindexI.push_back(0);
+				//a.rindexJ.push_back(0);
+				tindexI.push_back(0);
+				//a.tindexJ.push_back(0);
+			}
+        loop = false;
+        skel = base->getSkeleton();
+        stopTime = transformations->begin()->getStopTime();
+			//a.startTime = NIFLoader::getSingletonPtr()->getTime(item.smodel, "IdleSneak: Start");
+				startTime = transformations->end()->getStartTime();
+    }
         insert->attachObject(base);
     }
 }
