@@ -16,8 +16,8 @@ namespace MWRender{
 
 
 
-			std::map<unsigned int, bool> vertices;
-			std::map<unsigned int, bool> normals;
+			std::set<unsigned int> vertices;
+			std::set<unsigned int> normals;
 			std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfovector =  copy.boneinfo;
 	
 			//std::cout << "Name " << copy.sname << "\n";
@@ -103,7 +103,7 @@ namespace MWRender{
 						  {
 							  Ogre::Vector3 absVertPos = vecPos + vecRot * allvertices[verIndex];
 							  absVertPos = absVertPos * boneinfo.weights[j].weight;
-							  vertices[verIndex] = true;
+							  vertices.insert(verIndex);
 							   Ogre::Real* addr = (pReal + 3 * verIndex);
 							  *addr = absVertPos.x;
 							  *(addr+1) = absVertPos.y;
@@ -130,7 +130,7 @@ namespace MWRender{
 						  {
 							  Ogre::Vector3 absNormalsPos = vecRot * allnormals[verIndex];
 							  absNormalsPos = absNormalsPos * boneinfo.weights[j].weight;
-							  normals[verIndex] = true;
+							  normals.insert(verIndex);
 							  Ogre::Real* addr = (pRealNormal + 3 * verIndex);
 							  *addr = absNormalsPos.x;
 				              *(addr+1) = absNormalsPos.y;
