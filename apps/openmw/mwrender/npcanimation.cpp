@@ -173,23 +173,25 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 			insertBoundedPart("meshes\\" + hair->model, "Head");
 
         if (chest){
-				insertFreePart("meshes\\" + chest->model + "|\"", insert);
+				insertFreePart("meshes\\" + chest->model, ">\"", insert);
+               
 			
 		}
         if (handr){
-				insertFreePart("meshes\\" + handr->model + "|?", insert);
+				insertFreePart("meshes\\" + handr->model , ">?", insert);
 			
 		}
         if (handl){
-				insertFreePart("meshes\\" + handl->model + "|>", insert);
+				insertFreePart("meshes\\" + handl->model, ">>", insert);
 			
 		}
         if(tail){
-                insertFreePart("meshes\\" + tail->model + "|*", insert);
+                insertFreePart("meshes\\" + tail->model, ">*", insert);
         }
         if(feet){
-                insertFreePart("meshes\\" + feet->model + "|<", insert);
-                insertFreePart("meshes\\" + feet->model + "|:", insert);
+                std::string num = getUniqueID(feet->model);
+                insertFreePart("meshes\\" + feet->model,"><", insert);
+                insertFreePart("meshes\\" + feet->model,">:", insert);
         }
 }
 
@@ -200,12 +202,14 @@ Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::stri
     base->attachObjectToBone(bonename, ent); 
     return ent;
 }
-void NpcAnimation::insertFreePart(const std::string &mesh, Ogre::SceneNode* insert){
-    NIFLoader::load(mesh);
-    Entity* ent = mRend.getScene()->createEntity(mesh);
+void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suffix, Ogre::SceneNode* insert){
+    std::string meshNumbered = mesh + getUniqueID(mesh + suffix) + suffix; 
+    NIFLoader::load(meshNumbered);
+    
+    Entity* ent = mRend.getScene()->createEntity(meshNumbered);
     insert->attachObject(ent);
     entityparts.push_back(ent);
-    std::vector<Nif::NiTriShapeCopy>* shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh));
+    std::vector<Nif::NiTriShapeCopy>* shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh + "0000" + suffix));
     if(shapes){
         shapeparts.push_back(shapes);
         handleShapes(shapes, ent, skel);

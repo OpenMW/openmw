@@ -1,6 +1,6 @@
 #include "actors.hpp"
 #include <OgreSceneNode.h>
-#include <components/nifogre/ogre_nif_loader.hpp>
+
 
 
 

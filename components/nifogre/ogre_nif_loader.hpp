@@ -44,8 +44,7 @@
 #include <vector>
 #include <list>
 // For warning messages
-#include <iostream>
-
+#include <iostream>5
 // float infinity
 #include <limits>
 using namespace boost::algorithm;

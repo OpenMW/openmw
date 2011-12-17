@@ -1,9 +1,30 @@
 #include "animation.hpp"
 
+
 namespace MWRender{
+    std::map<std::string, int> Animation::mUniqueIDs;
     Animation::~Animation(){
         base = 0;
     }
+    std::string Animation::getUniqueID(std::string mesh){
+    int counter;
+    if(mUniqueIDs.find(mesh) == mUniqueIDs.end()){
+        counter = mUniqueIDs[mesh] = 0;
+    }
+    else
+        counter = mUniqueIDs[mesh]++;
+    
+    std::stringstream out;
+			if(counter > 99 && counter < 1000)
+				out << "0";
+			else if(counter > 9)
+				out << "00";
+			else
+				out << "000";
+            out << counter;
+    return out.str();
+}
+
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
         shapeNumber = 0;
         std::vector<Nif::NiTriShapeCopy>::iterator allshapesiter;

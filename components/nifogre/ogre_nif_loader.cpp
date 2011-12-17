@@ -1150,7 +1150,7 @@ void NIFLoader::loadResource(Resource *resource)
 		else if(suffix == '>')
 		{
             baddin = true;
-			bNiTri = false;
+			bNiTri = true;
 			std::string sub = name.substr(name.length() - 6, 4);
             
 			if(sub.compare("0000") != 0)

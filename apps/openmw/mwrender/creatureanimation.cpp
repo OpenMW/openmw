@@ -18,11 +18,12 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
    assert (ref->base != NULL);
     if(!ref->base->model.empty()){
         const std::string &mesh = "meshes\\" + ref->base->model;
+        std::string meshNumbered = mesh + getUniqueID(mesh) + ">|";
+        NifOgre::NIFLoader::load(meshNumbered);
+        base = mRend.getScene()->createEntity(meshNumbered);
+        std::string meshZero = mesh + "0000>|";
 
-        NifOgre::NIFLoader::load(mesh);
-        base = mRend.getScene()->createEntity(mesh);
-
-        if(transformations = (NIFLoader::getSingletonPtr())->getAnim(mesh)){
+        if(transformations = (NIFLoader::getSingletonPtr())->getAnim(meshZero)){
 
         for(int init = 0; init < transformations->size(); init++){
 				rindexI.push_back(0);
