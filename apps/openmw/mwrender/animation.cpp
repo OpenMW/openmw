@@ -4,7 +4,6 @@
 namespace MWRender{
     std::map<std::string, int> Animation::mUniqueIDs;
     Animation::~Animation(){
-        base = 0;
     }
     std::string Animation::getUniqueID(std::string mesh){
     int counter;
@@ -320,5 +319,73 @@ namespace MWRender{
 	else
 		return false;
 
+}
+
+ void Animation::handleAnimationTransforms(){
+    Ogre::Bone* b = skel->getRootBone();
+	b->setOrientation(.3,.3,.3,.3);   //This is a trick
+	skel->getManualBonesDirty();
+    skel->_updateTransforms();
+	skel->_notifyManualBonesDirty();
+
+    std::vector<Nif::NiKeyframeData>::iterator iter;
+    int slot = 0;
+    if(transformations){
+    for(iter = transformations->begin(); iter != transformations->end(); iter++){
+        if(time < iter->getStartTime() || time < startTime || time > iter->getStopTime())
+	    {
+		    continue;
+	    }
+
+    if(skel->hasBone(iter->getBonename())){
+        Ogre::Bone* bone = skel->getBone(iter->getBonename());
+	
+        float x;
+		float x2;
+	
+	    std::vector<Ogre::Quaternion> quats = iter->getQuat();
+
+        std::vector<float> ttime = iter->gettTime();
+        std::vector<float>::iterator ttimeiter = ttime.begin();
+       
+        std::vector<float> rtime = iter->getrTime();
+        int rindexJ = 0;
+	    timeIndex(time, rtime, rindexI[slot], rindexJ, x2);
+	    int tindexJ = 0;
+
+
+        std::vector<Ogre::Vector3> translist1 = iter->getTranslist1();
+
+        timeIndex(time, ttime, tindexI[slot], tindexJ, x);
+
+		//std::cout << "X: " << x << " X2: " << x2 << "\n";
+
+	
+	    if(translist1.size() > 0){
+            Ogre::Vector3 v1 = translist1[tindexI[slot]];
+            Ogre::Vector3 v2 = translist1[tindexJ];
+            Ogre::Vector3 t = v1 + (v2 - v1) * x;
+	        bone->setPosition(t); 
+	    }
+	
+	    if(quats.size() > 0){
+		    Ogre::Quaternion r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
+		    bone->setOrientation(r);
+	    }
+
+
+        skel->getManualBonesDirty();
+        skel->_updateTransforms();
+	    skel->_notifyManualBonesDirty();
+	
+	    Ogre::Entity* ent = base;
+
+        ent->getAllAnimationStates()->_notifyDirty();
+        ent->_updateAnimation();
+	    ent->_notifyMoved();
+	}  
+    slot++;
+    }
+}
 }
 }
