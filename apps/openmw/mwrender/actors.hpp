@@ -23,7 +23,7 @@ namespace MWRender{
         std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
         Ogre::SceneNode* mMwRoot;
         MWWorld::Environment& mEnvironment;
-        std::list<Animation*> mAllActors;
+		std::map<MWWorld::Ptr, Animation*> mAllActors;
 
         
 

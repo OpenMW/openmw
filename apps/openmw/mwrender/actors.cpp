@@ -12,9 +12,13 @@ void Actors::setMwRoot(Ogre::SceneNode* root){
     mMwRoot = root;
 }
 void Actors::insertNPC(const MWWorld::Ptr& ptr){
+		
         insertBegin(ptr, true, true);
-          NpcAnimation* anim = new MWRender::NpcAnimation(ptr, mEnvironment, mRend);
-    mAllActors.push_back(anim);
+         NpcAnimation* anim = new MWRender::NpcAnimation(ptr, mEnvironment, mRend);
+   
+	//	
+		 
+		  mAllActors[ptr] = anim;
 		
 		
 }
@@ -57,17 +61,20 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 
 }
 void Actors::insertCreature (const MWWorld::Ptr& ptr){
+	
     insertBegin(ptr, true, true);
    CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr, mEnvironment, mRend);
     //mAllActors.insert(std::pair<MWWorld::Ptr, Animation*>(ptr,anim));
-    mAllActors.push_back(anim);
-   //mAllActors.push_back(&anim);
+    mAllActors[ptr] = anim;
+   //mAllActors.push_back(&anim);*/
 }
 
 bool Actors::deleteObject (const MWWorld::Ptr& ptr)
 {
+	mAllActors.erase(ptr);
     if (Ogre::SceneNode *base = ptr.getRefData().getBaseNode())
     {
+		
         Ogre::SceneNode *parent = base->getParentSceneNode();
 
         for (std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *>::const_iterator iter (
@@ -91,6 +98,15 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
     {
         Ogre::SceneNode* base = mCellSceneNodes[store];
         base->removeAndDestroyAllChildren();
+
+
+
+
+
+
+
+
+
         mCellSceneNodes.erase(store);
         mRend.getScene()->destroySceneNode(base);
         base = 0;

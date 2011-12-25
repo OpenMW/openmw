@@ -47,7 +47,7 @@ namespace MWClass
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
-        //    physics.insertActorPhysics(ptr, "meshes\\" + model);
+            physics.insertActorPhysics(ptr, "meshes\\" + model);
         }
 
     }

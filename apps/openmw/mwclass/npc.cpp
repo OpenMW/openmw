@@ -38,7 +38,7 @@ namespace MWClass
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
     {
 
-        /*
+        
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 
@@ -47,7 +47,7 @@ namespace MWClass
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertActorPhysics(ptr, "meshes\\" + model);
-        }*/
+        }
 
     }
 

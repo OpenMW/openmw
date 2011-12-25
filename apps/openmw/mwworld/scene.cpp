@@ -59,7 +59,9 @@ namespace MWWorld
         ListHandles functor;
 
         MWWorld::Ptr::CellStore* active = *iter;
-        mRendering.removeCell(active);
+        
+		
+		
 
         active->forEach<ListHandles>(functor);
 
@@ -73,11 +75,13 @@ namespace MWWorld
                 mPhysics->removeObject (node->getName());
             }
         }
-        //mPhysics->removeObject("Unnamed_43");
+		mRendering.removeCell(active);
+		//mPhysics->removeObject("Unnamed_43");
         mWorld->getLocalScripts().clearCell (active);
         mEnvironment.mMechanicsManager->dropActors (active);
         mEnvironment.mSoundManager->stopSound (active);
-        mActiveCells.erase (iter);
+		mActiveCells.erase(active);
+        
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)
