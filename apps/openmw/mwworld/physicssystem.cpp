@@ -191,7 +191,7 @@ namespace MWWorld
 
      void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
            Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-             std::cout << "Adding node with name" << node->getName();
+            // std::cout << "Adding node with name" << node->getName();
          addActor (node->getName(), model, node->getPosition());
      }
 

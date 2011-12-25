@@ -98,18 +98,15 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
     {
         Ogre::SceneNode* base = mCellSceneNodes[store];
         base->removeAndDestroyAllChildren();
-
-
-
-
-
-
-
-
-
         mCellSceneNodes.erase(store);
         mRend.getScene()->destroySceneNode(base);
         base = 0;
     }
+	for(std::map<MWWorld::Ptr, Animation*>::iterator iter = mAllActors.begin(); iter != mAllActors.end(); iter++)
+	{
+		if(iter->first.getCell() == store){
+			mAllActors.erase(iter);
+		}
+	}
     
 }
