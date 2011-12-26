@@ -9,6 +9,7 @@ NpcAnimation::~NpcAnimation(){
 
 }
 
+
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend): Animation(_env,_rend){
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
@@ -69,7 +70,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
         skel = base->getSkeleton();
         stopTime = transformations->begin()->getStopTime();
 			//a.startTime = NIFLoader::getSingletonPtr()->getTime(item.smodel, "IdleSneak: Start");
-				startTime = transformations->end()->getStartTime();
+				startTime = transformations->begin()->getStartTime();
     }
     insert->attachObject(base);
         
@@ -216,5 +217,15 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
     }
 
     
+}
+
+void NpcAnimation::runAnimation(float timepassed){
+	if(animate){
+		//Add the amount of time passed to time
+
+		//Handle the animation transforms dependent on time
+
+		//Handle the shapes dependent on animation transforms
+	}
 }
 }

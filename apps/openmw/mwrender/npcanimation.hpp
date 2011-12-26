@@ -23,6 +23,8 @@ class NpcAnimation: public Animation{
      ~NpcAnimation();
     Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
     void insertFreePart(const std::string &mesh, const std::string suffix, Ogre::SceneNode* insert);
+	virtual void runAnimation(float timepassed);
+	
 };
 }
 #endif

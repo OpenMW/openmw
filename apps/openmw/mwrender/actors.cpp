@@ -71,6 +71,7 @@ void Actors::insertCreature (const MWWorld::Ptr& ptr){
 
 bool Actors::deleteObject (const MWWorld::Ptr& ptr)
 {
+	delete mAllActors[ptr];
 	mAllActors.erase(ptr);
     if (Ogre::SceneNode *base = ptr.getRefData().getBaseNode())
     {
@@ -105,6 +106,7 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
 	for(std::map<MWWorld::Ptr, Animation*>::iterator iter = mAllActors.begin(); iter != mAllActors.end(); iter++)
 	{
 		if(iter->first.getCell() == store){
+			delete iter->second;
 			mAllActors.erase(iter);
 		}
 	}

@@ -105,6 +105,8 @@ class RenderingManager: private RenderingInterface {
     ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
     /// references that are currently not in the rendered scene should be ignored.
 
+	void addTime(float timepassed);
+
   private:
 
     void setAmbientMode();

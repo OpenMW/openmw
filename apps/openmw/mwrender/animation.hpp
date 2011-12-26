@@ -23,6 +23,7 @@ class Animation{
 	float startTime;
 	float stopTime;
 	bool loop;
+	bool animate;
 	//Represents a rotation index for each bone
 	std::vector<int>rindexI;
     //Represents a translation index for each bone
@@ -43,8 +44,11 @@ class Animation{
     void handleAnimationTransforms();
     bool timeIndex( float time, std::vector<float> times, int & i, int & j, float & x );
     std::string getUniqueID(std::string mesh);
+	
     public:
-     Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env){};
+     Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env), loop(false), animate(false){};
+	 virtual void runAnimation(float timepassed) = 0;
+	 void startScript(std::string groupname, int mode, int loops);
     
     
      ~Animation();

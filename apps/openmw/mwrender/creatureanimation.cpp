@@ -35,9 +35,21 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
         skel = base->getSkeleton();
         stopTime = transformations->begin()->getStopTime();
 			//a.startTime = NIFLoader::getSingletonPtr()->getTime(item.smodel, "IdleSneak: Start");
-				startTime = transformations->end()->getStartTime();
+				startTime = transformations->begin()->getStartTime();
+		shapes = (NIFLoader::getSingletonPtr())->getShapes(meshZero);
     }
         insert->attachObject(base);
     }
+}
+
+void CreatureAnimation::runAnimation(float timepassed){
+	if(animate){
+		//Add the amount of time passed to time
+
+		//Handle the animation transforms dependent on time
+
+		//Handle the shapes dependent on animation transforms
+
+	}
 }
 }

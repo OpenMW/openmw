@@ -23,6 +23,11 @@ namespace MWRender{
             out << counter;
     return out.str();
 }
+	void Animation::startScript(std::string groupname, int mode, int loops){
+		//If groupname is recognized set animate to true
+		//Set the start time and stop time
+		//How many times to loop
+	}
 
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
         shapeNumber = 0;

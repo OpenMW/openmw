@@ -240,5 +240,8 @@ void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 {
 std::cout<<"skip animation"<<std::endl;
 }
+void RenderingManager::addTime(float timepassed){
+	//Notify each animation that time has passed
+}
 
 }
