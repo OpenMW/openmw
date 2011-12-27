@@ -354,8 +354,10 @@ namespace MWRender{
     for(iter = transformations->begin(); iter != transformations->end(); iter++){
         if(time < iter->getStartTime() || time < startTime || time > iter->getStopTime())
 	    {
-		    continue;
             slot++;
+            iter++;
+		    continue;
+            
 	    }
 
     if(skel->hasBone(iter->getBonename())){

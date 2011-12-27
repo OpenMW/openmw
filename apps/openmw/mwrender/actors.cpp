@@ -114,7 +114,8 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
 }
 
 void Actors::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number){
-    mAllActors.find(ptr)->second->startScript(groupName, mode, number);
+    if(mAllActors.find(ptr) != mAllActors.end())
+        mAllActors[ptr]->startScript(groupName, mode, number);
 }
 void Actors::skipAnimation (const MWWorld::Ptr& ptr){
 
