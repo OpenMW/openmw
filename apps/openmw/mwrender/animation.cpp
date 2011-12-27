@@ -155,7 +155,7 @@ namespace MWRender{
 							  *addr = absVertPos.x;
 							  *(addr+1) = absVertPos.y;
 				              *(addr+2) = absVertPos.z;
-                              std::cout << "We are actually 2\n";
+                              
 							  //std::cout << "Vertex" << verIndex << "Weight: " << boneinfo.weights[i].weight << "was seen twice\n";
 
 						  }
@@ -335,8 +335,18 @@ namespace MWRender{
 
 }
 
- void Animation::handleAnimationTransforms(){
-    
+ void Animation::handleAnimationTransforms(Ogre::Entity* entity){
+    Ogre::SkeletonInstance* skel = entity->getSkeleton();
+
+    Ogre::Bone* b = skel->getRootBone();
+	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
+	    skel->getManualBonesDirty();
+        skel->_updateTransforms();
+	    skel->_notifyManualBonesDirty();
+
+         entity->getAllAnimationStates()->_notifyDirty();
+     entity->_updateAnimation();
+    entity->_notifyMoved();
 
     std::vector<Nif::NiKeyframeData>::iterator iter;
     int slot = 0;
@@ -345,6 +355,7 @@ namespace MWRender{
         if(time < iter->getStartTime() || time < startTime || time > iter->getStopTime())
 	    {
 		    continue;
+            slot++;
 	    }
 
     if(skel->hasBone(iter->getBonename())){
@@ -387,12 +398,13 @@ namespace MWRender{
         skel->getManualBonesDirty();
         skel->_updateTransforms();
 	    skel->_notifyManualBonesDirty();
+        
 	
-	    Ogre::Entity* ent = base;
+	    
 
-        ent->getAllAnimationStates()->_notifyDirty();
-        ent->_updateAnimation();
-	    ent->_notifyMoved();
+        entity->getAllAnimationStates()->_notifyDirty();
+        entity->_updateAnimation();
+	    entity->_notifyMoved();
 	}  
     slot++;
     }

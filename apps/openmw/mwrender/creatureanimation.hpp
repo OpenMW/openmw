@@ -14,7 +14,7 @@
 namespace MWRender{
 
 class CreatureAnimation: public Animation{
-    std::vector<Nif::NiTriShapeCopy>* shapes;          //All the NiTriShapeData for this creature
+   
     public:
     ~CreatureAnimation();
     CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);

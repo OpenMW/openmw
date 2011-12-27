@@ -49,11 +49,11 @@ namespace MWClass
 		 std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
 		 bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
 
-
+         /*
         std::string smodel = "meshes\\base_anim.nif";
 		if(beast)
 			smodel = "meshes\\base_animkna.nif";
-		physics.insertActorPhysics(ptr, smodel);
+		physics.insertActorPhysics(ptr, smodel);*/
 
 
     }

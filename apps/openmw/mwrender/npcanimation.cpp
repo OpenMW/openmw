@@ -50,7 +50,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		if(beast)
 			smodel = "meshes\\base_animkna.nif";
 
-         Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
+         insert = ptr.getRefData().getBaseNode();
          assert(insert);
 
          NifOgre::NIFLoader::load(smodel);
@@ -67,7 +67,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 				//a.tindexJ.push_back(0);
 			}
         loop = false;
-        skel = base->getSkeleton();
+        
         stopTime = transformations->begin()->getStopTime();
 			//a.startTime = NIFLoader::getSingletonPtr()->getTime(item.smodel, "IdleSneak: Start");
 				startTime = transformations->begin()->getStartTime();
@@ -207,13 +207,13 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
     std::string meshNumbered = mesh + getUniqueID(mesh + suffix) + suffix; 
     NIFLoader::load(meshNumbered);
     
-    hand = mRend.getScene()->createEntity(meshNumbered);
-    insert->attachObject(hand);
-    //entityparts.push_back(ent);
-    std::vector<Nif::NiTriShapeCopy>* shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh + "0000" + suffix));
+    Ogre::Entity* ent = mRend.getScene()->createEntity(meshNumbered);
+    insert->attachObject(ent);
+    entityparts.push_back(ent);
+    shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh + "0000" + suffix));
     if(shapes){
         shapeparts.push_back(shapes);
-        handleShapes(shapes, hand, skel);
+        handleShapes(shapes, ent, base->getSkeleton());
     }
 
     
@@ -228,25 +228,25 @@ void NpcAnimation::runAnimation(float timepassed){
 	//Handle the shapes dependent on animation transforms
 	if(animate){
         time += timepassed;
-        Ogre::Bone* b = skel->getRootBone();
-	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
-	    skel->getManualBonesDirty();
-        skel->_updateTransforms();
-	    skel->_notifyManualBonesDirty();
-
-         base->getAllAnimationStates()->_notifyDirty();
-     base->_updateAnimation();
-    base->_notifyMoved();
+        
 
 
-        handleAnimationTransforms();
+        handleAnimationTransforms(base);
+       // handleAnimationTransforms(base);
+        //handleAnimationTransforms(hand);
+       // 
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
-        int i = 0;
-        while(shapepartsiter != shapeparts.end() && entitypartsiter != entityparts.end())
+        //int i = 0;
+        while(shapepartsiter != shapeparts.end())
         {
             std::vector<Nif::NiTriShapeCopy>* shapes = *shapepartsiter;
-            handleShapes(shapes, *entitypartsiter, skel);
+            //insert->
+            //insert->detachObject(hand->getName());
+            Ogre::Entity* theentity = *entitypartsiter;
+            handleAnimationTransforms(theentity);
+            handleShapes(shapes, theentity, theentity->getSkeleton());
+            //insert->attachObject(hand);
             //std::cout << "Shape part size" << shapes->size() << "\n";
             shapepartsiter++;
             entitypartsiter++;

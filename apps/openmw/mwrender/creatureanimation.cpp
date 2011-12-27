@@ -32,7 +32,6 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
 				//a.tindexJ.push_back(0);
 			}
         loop = false;
-        skel = base->getSkeleton();
         stopTime = transformations->begin()->getStopTime();
 			//a.startTime = NIFLoader::getSingletonPtr()->getTime(item.smodel, "IdleSneak: Start");
 				startTime = transformations->begin()->getStartTime();
@@ -50,18 +49,9 @@ void CreatureAnimation::runAnimation(float timepassed){
 
 		//Handle the shapes dependent on animation transforms
         time += timepassed;
-        Ogre::Bone* b = skel->getRootBone();
-	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
-	    skel->getManualBonesDirty();
-        skel->_updateTransforms();
-	    skel->_notifyManualBonesDirty();
-
-         base->getAllAnimationStates()->_notifyDirty();
-        base->_updateAnimation();
-        base->_notifyMoved();
-
-        handleAnimationTransforms();
-        handleShapes(shapes, base, skel);
+       
+        handleAnimationTransforms(base);
+        handleShapes(shapes, base, base->getSkeleton());
 
 	}
 }
