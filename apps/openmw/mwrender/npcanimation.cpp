@@ -173,7 +173,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		if(hair)
 			insertBoundedPart("meshes\\" + hair->model, "Head");
 
-        if (chest){
+        /*if (chest){
 				insertFreePart("meshes\\" + chest->model, ">\"", insert);
                
 			
@@ -181,7 +181,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
         if (handr){
 				insertFreePart("meshes\\" + handr->model , ">?", insert);
 			
-		}
+		}*/
         if (handl){
 				insertFreePart("meshes\\" + handl->model, ">>", insert);
 			
@@ -207,25 +207,50 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
     std::string meshNumbered = mesh + getUniqueID(mesh + suffix) + suffix; 
     NIFLoader::load(meshNumbered);
     
-    Entity* ent = mRend.getScene()->createEntity(meshNumbered);
-    insert->attachObject(ent);
-    entityparts.push_back(ent);
+    hand = mRend.getScene()->createEntity(meshNumbered);
+    insert->attachObject(hand);
+    //entityparts.push_back(ent);
     std::vector<Nif::NiTriShapeCopy>* shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh + "0000" + suffix));
     if(shapes){
         shapeparts.push_back(shapes);
-        handleShapes(shapes, ent, skel);
+        handleShapes(shapes, hand, skel);
     }
 
     
 }
 
+
 void NpcAnimation::runAnimation(float timepassed){
+    //Add the amount of time passed to time
+
+	//Handle the animation transforms dependent on time
+
+	//Handle the shapes dependent on animation transforms
 	if(animate){
-		//Add the amount of time passed to time
+        time += timepassed;
+        Ogre::Bone* b = skel->getRootBone();
+	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
+	    skel->getManualBonesDirty();
+        skel->_updateTransforms();
+	    skel->_notifyManualBonesDirty();
 
-		//Handle the animation transforms dependent on time
+         base->getAllAnimationStates()->_notifyDirty();
+     base->_updateAnimation();
+    base->_notifyMoved();
 
-		//Handle the shapes dependent on animation transforms
-	}
+
+        handleAnimationTransforms();
+        std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
+        std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
+        int i = 0;
+        while(shapepartsiter != shapeparts.end() && entitypartsiter != entityparts.end())
+        {
+            std::vector<Nif::NiTriShapeCopy>* shapes = *shapepartsiter;
+            handleShapes(shapes, *entitypartsiter, skel);
+            //std::cout << "Shape part size" << shapes->size() << "\n";
+            shapepartsiter++;
+            entitypartsiter++;
+	    }
+    }
 }
 }

@@ -3,8 +3,10 @@
 
 namespace MWRender{
     std::map<std::string, int> Animation::mUniqueIDs;
+
     Animation::~Animation(){
     }
+
     std::string Animation::getUniqueID(std::string mesh){
     int counter;
     if(mUniqueIDs.find(mesh) == mUniqueIDs.end()){
@@ -27,6 +29,11 @@ namespace MWRender{
 		//If groupname is recognized set animate to true
 		//Set the start time and stop time
 		//How many times to loop
+        if(groupname == "all"){
+            animate = true;
+            time = startTime;
+        }
+            
 	}
 
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
@@ -35,7 +42,7 @@ namespace MWRender{
 	    for(allshapesiter = allshapes->begin(); allshapesiter != allshapes->end(); allshapesiter++)
 		{
         
-			Nif::NiTriShapeCopy copy = *allshapesiter;
+			Nif::NiTriShapeCopy& copy = *allshapesiter;
 			std::vector<Ogre::Vector3> allvertices = copy.vertices;
 			std::vector<Ogre::Vector3> allnormals = copy.normals;
 
@@ -133,6 +140,7 @@ namespace MWRender{
 							  *addr = absVertPos.x;
 							  *(addr+1) = absVertPos.y;
 				              *(addr+2) = absVertPos.z;
+                             
 
 								//std::cout << "Vertex" << vertices[verIndex] << "\n";
 						  }
@@ -147,6 +155,7 @@ namespace MWRender{
 							  *addr = absVertPos.x;
 							  *(addr+1) = absVertPos.y;
 				              *(addr+2) = absVertPos.z;
+                              std::cout << "We are actually 2\n";
 							  //std::cout << "Vertex" << verIndex << "Weight: " << boneinfo.weights[i].weight << "was seen twice\n";
 
 						  }
@@ -194,8 +203,8 @@ namespace MWRender{
 					Ogre::Vector3 transmult;
 						Ogre::Quaternion rotmult;
 						float scale;
-					if(creaturemodel->getSkeleton()->hasBone(*boneSequenceIter)){
-					Ogre::Bone *bonePtr = creaturemodel->getSkeleton()->getBone(*boneSequenceIter);
+					if(skel->hasBone(*boneSequenceIter)){
+					Ogre::Bone *bonePtr = skel->getBone(*boneSequenceIter);
 					
 						
 					
@@ -327,11 +336,7 @@ namespace MWRender{
 }
 
  void Animation::handleAnimationTransforms(){
-    Ogre::Bone* b = skel->getRootBone();
-	b->setOrientation(.3,.3,.3,.3);   //This is a trick
-	skel->getManualBonesDirty();
-    skel->_updateTransforms();
-	skel->_notifyManualBonesDirty();
+    
 
     std::vector<Nif::NiKeyframeData>::iterator iter;
     int slot = 0;

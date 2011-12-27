@@ -234,13 +234,15 @@ void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::s
      int mode, int number)
 {
 std::cout<<"play animation " << groupName << ", " << mode << ", " << number << std::endl;
+    mActors.playAnimationGroup(ptr, groupName, mode, number);
 }
 
 void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 {
 std::cout<<"skip animation"<<std::endl;
 }
-void RenderingManager::addTime(float timepassed){
+void RenderingManager::addTime(){
+    mActors.addTime();
 	//Notify each animation that time has passed
 }
 

@@ -101,6 +101,7 @@ namespace MWWorld
             void markCellAsUnchanged();
 
             void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::Environment& environment);
+            void advanceTime();
     };
 }
 

@@ -49,6 +49,19 @@ void CreatureAnimation::runAnimation(float timepassed){
 		//Handle the animation transforms dependent on time
 
 		//Handle the shapes dependent on animation transforms
+        time += timepassed;
+        Ogre::Bone* b = skel->getRootBone();
+	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
+	    skel->getManualBonesDirty();
+        skel->_updateTransforms();
+	    skel->_notifyManualBonesDirty();
+
+         base->getAllAnimationStates()->_notifyDirty();
+        base->_updateAnimation();
+        base->_notifyMoved();
+
+        handleAnimationTransforms();
+        handleShapes(shapes, base, skel);
 
 	}
 }

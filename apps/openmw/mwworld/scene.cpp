@@ -52,7 +52,9 @@ void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environme
 
 namespace MWWorld
 {
-
+    void Scene::advanceTime(){
+        mRendering.addTime();
+    }
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         std::cout << "Unloading cell\n";

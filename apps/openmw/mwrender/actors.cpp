@@ -112,3 +112,17 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
 	}
     
 }
+
+void Actors::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number){
+    mAllActors.find(ptr)->second->startScript(groupName, mode, number);
+}
+void Actors::skipAnimation (const MWWorld::Ptr& ptr){
+
+}
+void Actors::addTime(){
+    //std::cout << "Adding time in actors\n";
+    for(std::map<MWWorld::Ptr, Animation*>::iterator iter = mAllActors.begin(); iter != mAllActors.end(); iter++)
+	{
+		(iter->second)->runAnimation(mEnvironment.mFrameDuration);
+	}
+}

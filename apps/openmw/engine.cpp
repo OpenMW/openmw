@@ -135,6 +135,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             mEnvironment.mWorld->advanceTime (
                 mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
 
+        
         if (changed) // keep change flag for another frame, if cell changed happend in local script
             mEnvironment.mWorld->markCellAsUnchanged();
 
