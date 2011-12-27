@@ -173,7 +173,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		if(hair)
 			insertBoundedPart("meshes\\" + hair->model, "Head");
 
-        /*if (chest){
+        if (chest){
 				insertFreePart("meshes\\" + chest->model, ">\"", insert);
                
 			
@@ -181,7 +181,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
         if (handr){
 				insertFreePart("meshes\\" + handr->model , ">?", insert);
 			
-		}*/
+		}
         if (handl){
 				insertFreePart("meshes\\" + handl->model, ">>", insert);
 			
