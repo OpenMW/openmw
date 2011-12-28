@@ -49,7 +49,12 @@ void CreatureAnimation::runAnimation(float timepassed){
 
 		//Handle the shapes dependent on animation transforms
         time += timepassed;
-       
+        if(time > transformations->begin()->getStopTime()){
+            animate = false;
+            std::cout << "Stopping the animation\n";
+            return;
+        }
+            
         handleAnimationTransforms();
         handleShapes(shapes, base, base->getSkeleton());
 

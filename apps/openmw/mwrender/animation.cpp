@@ -40,7 +40,8 @@ namespace MWRender{
         shapeNumber = 0;
         std::vector<Nif::NiTriShapeCopy>::iterator allshapesiter;
 	    for(allshapesiter = allshapes->begin(); allshapesiter != allshapes->end(); allshapesiter++)
-		{
+		
+                {
         
 			Nif::NiTriShapeCopy& copy = *allshapesiter;
 			std::vector<Ogre::Vector3> allvertices = copy.vertices;
@@ -261,21 +262,9 @@ namespace MWRender{
 					}
 
 				}
-				
-		}
-		
-
-		for(allshapesiter = allshapes->begin(); allshapesiter != allshapes->end(); allshapesiter++)
-		{
-			Nif::NiTriShapeCopy copy = *allshapesiter;
-			Ogre::HardwareVertexBufferSharedPtr vbuf = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(0);
-
-			        Ogre::HardwareVertexBufferSharedPtr vbufNormal = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(1);
-					vbuf->unlock();
+				vbuf->unlock();
 					vbufNormal->unlock();
-		}        
-
-
+		}
 
     }
     bool Animation::timeIndex( float time, std::vector<float> times, int & i, int & j, float & x ){
