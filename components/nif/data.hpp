@@ -429,9 +429,9 @@ class NiMorphData : public Record
 	float startTime;
 	float stopTime;
 	std::vector<Ogre::Vector3> initialVertices;
-	std::vector<std::vector<float>> relevantTimes;
-	std::vector<std::vector<Ogre::Vector3>> relevantData;
-	std::vector<std::vector<Ogre::Vector3>> additionalVertices;
+	std::vector<std::vector<float> > relevantTimes;
+	std::vector<std::vector<Ogre::Vector3> > relevantData;
+	std::vector<std::vector<Ogre::Vector3> > additionalVertices;
 
 
 public:
@@ -457,7 +457,7 @@ public:
 	  std::vector<std::vector<float>> getRelevantTimes(){
 			return relevantTimes;
 	  }
-	   std::vector<std::vector<Ogre::Vector3>> getAdditionalVertices(){
+	   std::vector<std::vector<Ogre::Vector3> > getAdditionalVertices(){
 			return additionalVertices;
 	  }
 	  

@@ -31,6 +31,7 @@
 #include    <boost/algorithm/string.hpp>
 #include <Ogre.h>
 #include <stdio.h>
+#include <iostream>
 
 #include <libs/mangle/vfs/servers/ogre_vfs.hpp>
 #include "../nif/nif_file.hpp"

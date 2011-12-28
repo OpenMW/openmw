@@ -18,7 +18,7 @@ class NpcAnimation: public Animation{
     std::vector<Ogre::Entity*> entityparts;
     Ogre::Entity* hand;
     Ogre::SceneNode* insert;
-    std::vector<std::vector<Nif::NiTriShapeCopy>*> shapeparts;   //All the NiTriShape data that we need for animating this particular npc
+    std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating this particular npc
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);
      ~NpcAnimation();

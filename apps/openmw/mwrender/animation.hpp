@@ -31,7 +31,7 @@ class Animation{
 	
 	//Only shapes with morphing data will need a shape number
 	int shapeNumber;
-	std::vector<std::vector<int>> shapeIndexI;
+	std::vector<std::vector<int> > shapeIndexI;
 
 	//Ogre::SkeletonInstance* skel;
      std::vector<Nif::NiTriShapeCopy>* shapes;          //All the NiTriShapeData for this creature
