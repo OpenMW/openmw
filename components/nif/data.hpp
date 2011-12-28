@@ -451,10 +451,10 @@ public:
 	  std::vector<Ogre::Vector3> getInitialVertices(){
 			return initialVertices;
 	  }
-	  std::vector<std::vector<Ogre::Vector3>> getRelevantData(){
+	  std::vector<std::vector<Ogre::Vector3> > getRelevantData(){
 			return relevantData;
 	  }
-	  std::vector<std::vector<float>> getRelevantTimes(){
+	  std::vector<std::vector<float> > getRelevantTimes(){
 			return relevantTimes;
 	  }
 	   std::vector<std::vector<Ogre::Vector3> > getAdditionalVertices(){

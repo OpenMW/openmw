@@ -1006,7 +1006,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 			
 			std::cout << "Outputting " << cut << "\n";
 
-			std::ofstream File("Indices" + cut + ".txt");
+			std::ofstream file(("Indices" + cut + ".txt").c_str());
 	
 			/*if(File.is_open())
 				std::cout << "We could open\n";
@@ -1021,11 +1021,11 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 				replace(text.begin(), text.end(), '\n', '/');
 
 				text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
-				File << "Time: " << textiter->time << "|" << text << "\n";
+				file << "Time: " << textiter->time << "|" << text << "\n";
 				
 				textmappings[text] = textiter->time;
 			}
-			File.close();
+			file.close();
 		}
     }
 
@@ -1112,7 +1112,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
             }
 			else if(nodename.length() >= triname.length())
 			{
-				std::transform(nodename.begin(), nodename.end(), nodename.begin(), std::tolower);
+				std::transform(nodename.begin(), nodename.end(), nodename.begin(), ::tolower);
 				if(triname == nodename.substr(0, triname.length()))
 					handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds, original, boneSequence);
 			}
