@@ -50,7 +50,7 @@ void CreatureAnimation::runAnimation(float timepassed){
 		//Handle the shapes dependent on animation transforms
         time += timepassed;
        
-        handleAnimationTransforms(base);
+        handleAnimationTransforms();
         handleShapes(shapes, base, base->getSkeleton());
 
 	}

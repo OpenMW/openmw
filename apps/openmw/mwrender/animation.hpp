@@ -35,6 +35,7 @@ class Animation{
 
 	//Ogre::SkeletonInstance* skel;
      std::vector<Nif::NiTriShapeCopy>* shapes;          //All the NiTriShapeData for this creature
+     std::vector<Ogre::Entity*> entityparts;
 
     
    
@@ -43,7 +44,7 @@ class Animation{
     std::map<std::string,float> textmappings;
     Ogre::Entity* base;
     void handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel);
-    void handleAnimationTransforms(Ogre::Entity* model);
+    void handleAnimationTransforms();
     bool timeIndex( float time, std::vector<float> times, int & i, int & j, float & x );
     std::string getUniqueID(std::string mesh);
 	

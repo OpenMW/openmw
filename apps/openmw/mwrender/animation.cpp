@@ -335,8 +335,9 @@ namespace MWRender{
 
 }
 
- void Animation::handleAnimationTransforms(Ogre::Entity* entity){
-    Ogre::SkeletonInstance* skel = entity->getSkeleton();
+ void Animation::handleAnimationTransforms(){
+    Ogre::SkeletonInstance* skel = base->getSkeleton();
+    
 
     Ogre::Bone* b = skel->getRootBone();
 	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
@@ -344,9 +345,23 @@ namespace MWRender{
         skel->_updateTransforms();
 	    skel->_notifyManualBonesDirty();
 
-         entity->getAllAnimationStates()->_notifyDirty();
-     entity->_updateAnimation();
-    entity->_notifyMoved();
+         base->getAllAnimationStates()->_notifyDirty();
+     base->_updateAnimation();
+    base->_notifyMoved();
+
+    for(int i = 0; i < entityparts.size(); i++){
+         Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
+
+        Ogre::Bone* b = skel->getRootBone();
+	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
+	    skel->getManualBonesDirty();
+        skel->_updateTransforms();
+	    skel->_notifyManualBonesDirty();
+
+         entityparts[i]->getAllAnimationStates()->_notifyDirty();
+        entityparts[i]->_updateAnimation();
+         entityparts[i]->_notifyMoved();
+    }
 
     std::vector<Nif::NiKeyframeData>::iterator iter;
     int slot = 0;
@@ -360,10 +375,7 @@ namespace MWRender{
             
 	    }
 
-    if(skel->hasBone(iter->getBonename())){
-        Ogre::Bone* bone = skel->getBone(iter->getBonename());
-	
-        float x;
+         float x;
 		float x2;
 	
 	    std::vector<Ogre::Quaternion> quats = iter->getQuat();
@@ -382,32 +394,53 @@ namespace MWRender{
         timeIndex(time, ttime, tindexI[slot], tindexJ, x);
 
 		//std::cout << "X: " << x << " X2: " << x2 << "\n";
-
-	
-	    if(translist1.size() > 0){
+        Ogre::Vector3 t;
+        Ogre::Quaternion r;
+	    
+        bool bTrans = translist1.size() > 0;
+	    if(bTrans){
             Ogre::Vector3 v1 = translist1[tindexI[slot]];
             Ogre::Vector3 v2 = translist1[tindexJ];
-            Ogre::Vector3 t = v1 + (v2 - v1) * x;
-	        bone->setPosition(t); 
+           t = (v1 + (v2 - v1) * x);
+	        
 	    }
 	
-	    if(quats.size() > 0){
-		    Ogre::Quaternion r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
-		    bone->setOrientation(r);
+        bool bQuats = quats.size() > 0;
+	    if(bQuats){
+		    r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
+		    //bone->setOrientation(r);
 	    }
+        skel = base->getSkeleton();
 
-
+    if(skel->hasBone(iter->getBonename())){
+        Ogre::Bone* bone = skel->getBone(iter->getBonename());
+        if(bTrans)
+            bone->setPosition(t);
+        if(bQuats)
+            bone->setOrientation(r);
         skel->getManualBonesDirty();
         skel->_updateTransforms();
 	    skel->_notifyManualBonesDirty();
-        
-	
-	    
-
-        entity->getAllAnimationStates()->_notifyDirty();
-        entity->_updateAnimation();
-	    entity->_notifyMoved();
+        base->getAllAnimationStates()->_notifyDirty();
+        base->_updateAnimation();
+	    base->_notifyMoved();
 	}  
+    for(int i = 0; i < entityparts.size(); i++){
+        skel = entityparts[i]->getSkeleton();
+         if(skel->hasBone(iter->getBonename())){
+            Ogre::Bone* bone = skel->getBone(iter->getBonename());
+            if(bTrans)
+                bone->setPosition(t);
+            if(bQuats)
+                bone->setOrientation(r);
+            skel->getManualBonesDirty();
+            skel->_updateTransforms();
+	        skel->_notifyManualBonesDirty();
+            entityparts[i]->getAllAnimationStates()->_notifyDirty();
+            entityparts[i]->_updateAnimation();
+	        entityparts[i]->_notifyMoved();
+	    }  
+    }
     slot++;
     }
 }

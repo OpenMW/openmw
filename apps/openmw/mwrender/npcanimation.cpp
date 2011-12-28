@@ -231,7 +231,7 @@ void NpcAnimation::runAnimation(float timepassed){
         
 
 
-        handleAnimationTransforms(base);
+        handleAnimationTransforms();
        // handleAnimationTransforms(base);
         //handleAnimationTransforms(hand);
        // 
@@ -244,7 +244,7 @@ void NpcAnimation::runAnimation(float timepassed){
             //insert->
             //insert->detachObject(hand->getName());
             Ogre::Entity* theentity = *entitypartsiter;
-            handleAnimationTransforms(theentity);
+           // handleAnimationTransforms(theentity);
             handleShapes(shapes, theentity, theentity->getSkeleton());
             //insert->attachObject(hand);
             //std::cout << "Shape part size" << shapes->size() << "\n";
