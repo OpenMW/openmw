@@ -56,6 +56,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          NifOgre::NIFLoader::load(smodel);
          
     base = mRend.getScene()->createEntity(smodel);
+    base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones 
+                                               //stay in the same place when we skipanim, or open a gui window
 
     
     if(transformations = (NIFLoader::getSingletonPtr())->getAnim(smodel)){
@@ -226,10 +228,17 @@ void NpcAnimation::runAnimation(float timepassed){
 	//Handle the animation transforms dependent on time
 
 	//Handle the shapes dependent on animation transforms
-	if(animate){
+	if(animate > 0){
         time += timepassed;
         
-
+        if(time > stopTime){
+            animate--;
+            //std::cout << "Stopping the animation\n";
+            if(animate == 0)
+                time = stopTime;
+            else
+                time = startTime + (time - stopTime);
+        }
 
         handleAnimationTransforms();
        // handleAnimationTransforms(base);
@@ -252,5 +261,6 @@ void NpcAnimation::runAnimation(float timepassed){
             entitypartsiter++;
 	    }
     }
+
 }
 }

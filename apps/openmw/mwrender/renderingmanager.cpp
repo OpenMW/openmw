@@ -240,6 +240,7 @@ std::cout<<"play animation " << groupName << ", " << mode << ", " << number << s
 void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 {
 std::cout<<"skip animation"<<std::endl;
+    mActors.skipAnimation(ptr);
 }
 void RenderingManager::addTime(){
     mActors.addTime();

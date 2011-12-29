@@ -42,17 +42,20 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
 }
 
 void CreatureAnimation::runAnimation(float timepassed){
-	if(animate){
+	if(animate > 0){
 		//Add the amount of time passed to time
 
 		//Handle the animation transforms dependent on time
 
 		//Handle the shapes dependent on animation transforms
         time += timepassed;
-        if(time > transformations->begin()->getStopTime()){
-            animate = false;
-            std::cout << "Stopping the animation\n";
-            return;
+        if(time > stopTime){
+            animate--;
+            //std::cout << "Stopping the animation\n";
+            if(animate == 0)
+                time = stopTime;
+            else
+                time = startTime + (time - stopTime);
         }
             
         handleAnimationTransforms();

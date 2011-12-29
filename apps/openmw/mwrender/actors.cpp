@@ -118,7 +118,8 @@ void Actors::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& gro
         mAllActors[ptr]->startScript(groupName, mode, number);
 }
 void Actors::skipAnimation (const MWWorld::Ptr& ptr){
-
+    if(mAllActors.find(ptr) != mAllActors.end())
+        mAllActors[ptr]->stopScript();
 }
 void Actors::addTime(){
     //std::cout << "Adding time in actors\n";

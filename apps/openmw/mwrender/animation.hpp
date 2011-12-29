@@ -18,12 +18,13 @@ class Animation{
     OEngine::Render::OgreRenderer &mRend;
     MWWorld::Environment& mEnvironment;
     static std::map<std::string, int> mUniqueIDs;
+    std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating an npc
 
     float time;
 	float startTime;
 	float stopTime;
 	bool loop;
-	bool animate;
+	int animate;
 	//Represents a rotation index for each bone
 	std::vector<int>rindexI;
     //Represents a translation index for each bone
@@ -49,9 +50,10 @@ class Animation{
     std::string getUniqueID(std::string mesh);
 	
     public:
-     Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env), loop(false), animate(false){};
+     Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env), loop(false), animate(0){};
 	 virtual void runAnimation(float timepassed) = 0;
 	 void startScript(std::string groupname, int mode, int loops);
+     void stopScript();
     
     
      ~Animation();

@@ -17,7 +17,7 @@ namespace MWRender{
 class NpcAnimation: public Animation{
     
     Ogre::SceneNode* insert;
-    std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating this particular npc
+    
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);
      ~NpcAnimation();

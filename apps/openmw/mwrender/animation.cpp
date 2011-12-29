@@ -30,11 +30,14 @@ namespace MWRender{
 		//Set the start time and stop time
 		//How many times to loop
         if(groupname == "all"){
-            animate = true;
+            animate = loops;
             time = startTime;
         }
             
 	}
+    void Animation::stopScript(){
+        animate = 0;
+    }
 
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
         shapeNumber = 0;
