@@ -64,3 +64,5 @@ add_component_dir (interpreter
 include_directories(${BULLET_INCLUDE_DIRS})
 
 add_library (components STATIC ${COMPONENT_FILES})
+
+target_link_libraries (components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
