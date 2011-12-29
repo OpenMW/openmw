@@ -174,6 +174,8 @@ namespace MWGui
      */
     void update();
 
+    MWWorld::Environment& getEnvironment();
+
     void setMode(GuiMode newMode)
     {
       if (newMode==GM_Inventory && allowed==GW_None)

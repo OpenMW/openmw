@@ -1,5 +1,8 @@
 #include "journalwindow.hpp"
 #include "window_manager.hpp"
+#include "../mwdialogue/journal.hpp"
+#include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
 
 
 std::list<std::string> formatText(std::string text)
@@ -84,11 +87,26 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
     mLeftTextWidget->setEditStatic(true);
     mRightTextWidget->addText("Right texxt  ");
 
-    std::list<std::string> list = formatText("OpenMW rgh dsfg sqef srg ZT  uzql n ZLIEHRF LQSJH GLOIjf qjfmj hslkdgn jlkdjhg qlr isgli shli uhs fiuh qksf cg ksjnf lkqsnbf ksbf sbfkl zbf kuyzflkj sbgdfkj zlfh ozhjfmo hzmfh lizuf rty qzt ezy tkyEZT RYYJ DG fgh  is an open-source implementation of the game engine found in the game Morrowind. This is a dumb test text msodjbg smojg smoig  fiiinnn");
-    displayLeftText(list.front());
+    //std::list<std::string> list = formatText("OpenMW rgh dsfg sqef srg ZT  uzql n ZLIEHRF LQSJH GLOIjf qjfmj hslkdgn jlkdjhg qlr isgli shli uhs fiuh qksf cg ksjnf lkqsnbf ksbf sbfkl zbf kuyzflkj sbgdfkj zlfh ozhjfmo hzmfh lizuf rty qzt ezy tkyEZT RYYJ DG fgh  is an open-source implementation of the game engine found in the game Morrowind. This is a dumb test text msodjbg smojg smoig  fiiinnn");
+    //std::list<std::string> list = formatText();
+    //displayLeftText(list.front());
 
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
     t->eventWindowChangeCoord = MyGUI::newDelegate(this, &JournalWindow::onWindowResize);
+}
+
+void MWGui::JournalWindow::open()
+{
+    if(mWindowManager.getEnvironment().mJournal->begin()!=mWindowManager.getEnvironment().mJournal->end())
+    {
+        std::string a = mWindowManager.getEnvironment().mJournal->begin()->getText(mWindowManager.getEnvironment().mWorld->getStore());
+        std::cout << a;
+    }
+    else
+    {
+        std::cout << "empty";
+        //std::cout << mWindowManager.getEnvironment().mJournal->begin()->getText(mWindowManager.getEnvironment().mWorld->getStore());
+    }
 }
 
 void MWGui::JournalWindow::onWindowResize(MyGUI::Window* window)

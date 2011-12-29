@@ -144,6 +144,11 @@ void WindowManager::update()
     }
 }
 
+MWWorld::Environment& WindowManager::getEnvironment()
+{
+    return environment;
+}
+
 void WindowManager::setNextMode(GuiMode newMode)
 {
     nextMode = newMode;
@@ -351,6 +356,7 @@ void WindowManager::updateVisible()
     if(mode == GM_Journal)
     {
         mJournal->setVisible(true);
+        mJournal->open();
         return;
     }
 

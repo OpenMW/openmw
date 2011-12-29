@@ -5,7 +5,6 @@
 #include <set>
 #include <string>
 #include <utility>
-#include "../mwdialogue/journal.hpp"
 
 #include "window_base.hpp"
 
@@ -17,6 +16,7 @@ namespace MWGui
     {
         public:
             JournalWindow(WindowManager& parWindowManager);
+            void open();
 
         private:
             enum ColorStyle
