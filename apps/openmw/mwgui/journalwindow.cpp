@@ -4,18 +4,30 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
-
-std::list<std::string> formatText(std::string text)
+struct book
 {
-    std::cout << "\n \n \n";
-    std::list<std::string> stringList;
+    int endLine;
+    std::list<std::string> pages;
+};
+
+book formatText(std::string text,book mBook,int maxLine, int lineSize)
+{
     //stringList.push_back("");
-    int maxLine = 10;
-    int lineSize = 20;
 
     int cLineSize = 0;
-    int cLine = 0;
+    int cLine = mBook.endLine +1;
     std::string cString;
+
+    if(mBook.pages.empty())
+    {
+        cString = "";
+        cLine = 0;
+    }
+    else
+    {
+        cString = mBook.pages.back() + std::string("\n");
+        mBook.pages.pop_back();
+    }
 
     std::string::iterator wordBegin = text.begin();
     std::string::iterator wordEnd;
@@ -24,17 +36,14 @@ std::list<std::string> formatText(std::string text)
 
     while(cText.length() != 0)
     {
-        std::cout << "a";
         size_t firstSpace = cText.find_first_of(' ');
         if(firstSpace == std::string::npos)
         {
             cString = cString + cText;
-            stringList.push_back(cString);
+            mBook.pages.push_back(cString);
             //TODO:finnish this
-            std::cout << "brerak?";
             break;
         }
-        std::cout << "notbreak";
         if(firstSpace + cLineSize <= lineSize)
         {
             cLineSize = firstSpace + cLineSize;
@@ -51,16 +60,16 @@ std::list<std::string> formatText(std::string text)
             else
             {
                 cLine = 0;
-                stringList.push_back(cString);
+                mBook.pages.push_back(cString);
                 cString = cText.substr(0,firstSpace +1);
             }
         }
         //std::cout << cText << "\n";
-        std::cout << cText.length();
-        if(firstSpace == cText.length()) std::cout << "maxi error en veu";
+        //std::cout << cText.length();
         cText = cText.substr(firstSpace +1,cText.length() - firstSpace -1);
     }
-    return stringList;
+    mBook.endLine = cLine;
+    return mBook;
     //std::string 
 }
 
@@ -99,8 +108,40 @@ void MWGui::JournalWindow::open()
 {
     if(mWindowManager.getEnvironment().mJournal->begin()!=mWindowManager.getEnvironment().mJournal->end())
     {
-        std::string a = mWindowManager.getEnvironment().mJournal->begin()->getText(mWindowManager.getEnvironment().mWorld->getStore());
-        std::cout << a;
+        std::vector<std::string> leftPages;
+        std::vector<std::string> rightPages;
+
+        book journal;
+        journal.endLine = 0;
+
+        for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = mWindowManager.getEnvironment().mJournal->begin();it!=mWindowManager.getEnvironment().mJournal->end();it++)
+        {
+            std::string a = it->getText(mWindowManager.getEnvironment().mWorld->getStore());
+            std::cout << a;
+            journal = formatText(a,journal,10,20);
+            journal.endLine = journal.endLine +1;
+            journal.pages.back() = journal.pages.back() + std::string("\n");
+        }
+        //std::string a = mWindowManager.getEnvironment().mJournal->begin()->getText(mWindowManager.getEnvironment().mWorld->getStore());
+        //std::list<std::string> journal = formatText(a,10,20,1);
+        bool left = true;
+        for(std::list<std::string>::iterator it = journal.pages.begin(); it != journal.pages.end();it++)
+        {
+            if(left)
+            {
+                leftPages.push_back(*it);
+            }
+            else
+            {
+                rightPages.push_back(*it);
+            }
+            left = !left;
+        }
+        if(!left) rightPages.push_back("");
+
+        displayLeftText(leftPages.back());
+        displayRightText(rightPages.back());
+
     }
     else
     {
