@@ -96,6 +96,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		const ESM::BodyPart *handl = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand");   //We need two
 		const ESM::BodyPart *hair = mEnvironment.mWorld->getStore().bodyParts.search(hairID);
 		const ESM::BodyPart *head = mEnvironment.mWorld->getStore().bodyParts.search(headID);
+        if(bodyRaceID == "b_n_argonian_f_")
+            forearml = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");  //We need two
 		if(!handl)
 			handl = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
 		//const ESM::BodyPart* claviclel = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "clavicle");
