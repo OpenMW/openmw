@@ -35,16 +35,26 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		//	vector = Ogre::Vector3(1,1,-1);
 
 
-
 		std::string hairID = ref->base->hair;
         std::string headID = ref->base->head;
 		std::string npcName = ref->base->name;
-
+        //ESMStore::Races r = 
+        const ESM::Race* race = mEnvironment.mWorld->getStore().races.find(ref->base->race);
+        
+        
          std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
 		char secondtolast = bodyRaceID.at(bodyRaceID.length() - 2);
 		bool female = tolower(secondtolast) == 'f';
 		bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
+        std::cout << "Race: " << ref->base->race ;
+        if(female){
+           std::cout << " Sex: Female" << " Height: " << race->data.height.female << "\n";
+        }
+        else{
+             std::cout << " Sex: Male" << " Height: " << race->data.height.male << "\n";
+        }
 
+        
 
         std::string smodel = "meshes\\base_anim.nif";
 		if(beast)
@@ -76,8 +86,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
     }
     insert->attachObject(base);
     
-        if(bodyRaceID == "b_n_wood elf_f_" || bodyRaceID == "b_n_wood elf_m_")
-            insert->scale(.9,.9,.9);
+        if(female)
+            insert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
+        else
+            insert->scale(race->data.height.male, race->data.height.male, race->data.height.male);
         std::string headModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(headID)->model;
 
@@ -108,6 +120,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		const ESM::BodyPart* forearmr = forearml;
 		const ESM::BodyPart* wristr = wristl;
 		const ESM::BodyPart* armr = arml;
+
+        
         if(upperleg){
 			insertBoundedPart("meshes\\" + upperleg->model + "*|", "Left Upper Leg");
 			insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg");
@@ -168,8 +182,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 			insertBoundedPart("meshes\\" + claviclel->model + "*|", "Left Clavicle", base);
 		if(clavicler)
 			insertBoundedPart("meshes\\" + clavicler->model , "Right Clavicle", base);*/
-	
-	
+	    
+	    
 		if(neck)
 		{
 			insertBoundedPart("meshes\\" + neck->model, "Neck");
@@ -178,7 +192,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 			insertBoundedPart("meshes\\" + head->model, "Head");
 		if(hair)
 			insertBoundedPart("meshes\\" + hair->model, "Head");
-
+        
         if (chest){
 				insertFreePart("meshes\\" + chest->model, ">\"", insert);
                
@@ -248,7 +262,7 @@ void NpcAnimation::runAnimation(float timepassed){
        // handleAnimationTransforms(base);
         //handleAnimationTransforms(hand);
        // 
-        std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
+        /*std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
         //int i = 0;
         while(shapepartsiter != shapeparts.end())
@@ -263,7 +277,7 @@ void NpcAnimation::runAnimation(float timepassed){
             //std::cout << "Shape part size" << shapes->size() << "\n";
             shapepartsiter++;
             entitypartsiter++;
-	    }
+	    }*/
     }
 
 }
