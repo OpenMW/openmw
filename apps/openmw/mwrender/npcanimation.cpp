@@ -75,7 +75,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 				startTime = transformations->begin()->getStartTime();
     }
     insert->attachObject(base);
-        
+    
+        if(bodyRaceID == "b_n_wood elf_f_" || bodyRaceID == "b_n_wood elf_m_")
+            insert->scale(.9,.9,.9);
         std::string headModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(headID)->model;
 
