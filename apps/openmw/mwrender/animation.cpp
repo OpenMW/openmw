@@ -53,14 +53,14 @@ namespace MWRender{
 
 
 			std::set<unsigned int> vertices;
-			std::set<unsigned int> normals;
+			//std::set<unsigned int> normals;
 			std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfovector =  copy.boneinfo;
 	
 			//std::cout << "Name " << copy.sname << "\n";
 			Ogre::HardwareVertexBufferSharedPtr vbuf = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(0);
 		            Ogre::Real* pReal = static_cast<Ogre::Real*>(vbuf->lock(Ogre::HardwareBuffer::HBL_NORMAL));
-			       Ogre::HardwareVertexBufferSharedPtr vbufNormal = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(1);
-		            Ogre::Real* pRealNormal = static_cast<Ogre::Real*>(vbufNormal->lock(Ogre::HardwareBuffer::HBL_NORMAL));
+			       //Ogre::HardwareVertexBufferSharedPtr vbufNormal = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(1);
+		           // Ogre::Real* pRealNormal = static_cast<Ogre::Real*>(vbufNormal->lock(Ogre::HardwareBuffer::HBL_NORMAL));
 
 				std::vector<Ogre::Vector3> initialVertices = copy.morph.getInitialVertices();
 				//Each shape has multiple indices
@@ -164,7 +164,7 @@ namespace MWRender{
 
 						  }
 						  
-						  if(normals.find(verIndex) == normals.end())
+						  /*if(normals.find(verIndex) == normals.end())
 						  {
 							  Ogre::Vector3 absNormalsPos = vecRot * allnormals[verIndex];
 							  absNormalsPos = absNormalsPos * boneinfo.weights[j].weight;
@@ -186,7 +186,7 @@ namespace MWRender{
 				              *(addr+1) = absNormalsPos.y;
 				              *(addr+2) = absNormalsPos.z;
 
-						  }
+						  }*/
 
 					 }
 				}
@@ -254,7 +254,7 @@ namespace MWRender{
 						*(addr+1) = current.y;
 						*(addr + 2) = current.z;
 
-					}
+					}/*
 					for(int i = 0; i < allnormals.size(); i++){
 						Ogre::Vector3 current =rotmult * allnormals[i];
 						Ogre::Real* addr = pRealNormal + i * 3;
@@ -262,11 +262,11 @@ namespace MWRender{
 						*(addr+1) = current.y;
 						*(addr + 2) = current.z;
 
-					}
+					}*/
 
 				}
 				vbuf->unlock();
-					vbufNormal->unlock();
+					//vbufNormal->unlock();
 		}
 
     }

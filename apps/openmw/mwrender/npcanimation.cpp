@@ -262,7 +262,7 @@ void NpcAnimation::runAnimation(float timepassed){
        // handleAnimationTransforms(base);
         //handleAnimationTransforms(hand);
        // 
-        /*std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
+        std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
         //int i = 0;
         while(shapepartsiter != shapeparts.end())
@@ -277,7 +277,7 @@ void NpcAnimation::runAnimation(float timepassed){
             //std::cout << "Shape part size" << shapes->size() << "\n";
             shapepartsiter++;
             entitypartsiter++;
-	    }*/
+	    }
     }
 
 }
