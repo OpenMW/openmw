@@ -217,6 +217,14 @@ void NIFLoader::createMaterial(const String &name,
     // will automatically be loaded when needed. If not (such as for
     // internal NIF textures that we might support later), we should
     // already have inserted a manual loader for the texture.
+    if(!mSkel.isNull()){
+    material->removeAllTechniques();
+  
+        Ogre::Technique* tech = material->createTechnique();
+        //tech->setSchemeName("blahblah");
+        Pass* pass = tech->createPass();
+        pass->setVertexProgram("Ogre/HardwareSkinningFourWeights");
+    }
     if (!texName.empty())
     {
         Pass *pass = material->getTechnique(0)->getPass(0);
@@ -276,6 +284,8 @@ void NIFLoader::createMaterial(const String &name,
     material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
     material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
     material->setShininess(glossiness);
+    
+   
 }
 
 // Takes a name and adds a unique part to it. This is just used to

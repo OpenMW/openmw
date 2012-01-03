@@ -271,6 +271,18 @@ void NpcAnimation::runAnimation(float timepassed){
             //insert->
             //insert->detachObject(hand->getName());
             Ogre::Entity* theentity = *entitypartsiter;
+            /*
+            Pass* pass = theentity->getSubEntity(0)->getMaterial()->getBestTechnique()->getPass(0); 
+            if (pass->hasVertexProgram() && pass->getVertexProgram()->isSkeletalAnimationIncluded())
+                std::cout << "It's hardware\n";
+                else
+                std::cout << "It's software\n";*/
+            //std::cout << "Techniques:" << theentity->getSubEntity(0)->getMaterial()->getNumTechniques() << "\n";
+		    /*if (pass->hasVertexProgram())// && pass->getVertexProgram()->isSkeletalAnimationIncluded()) value = "Hardware"
+                std::cout << "Its hardware\n";
+            else
+                std::cout << "Its software\n";*/
+
            // handleAnimationTransforms(theentity);
             handleShapes(shapes, theentity, theentity->getSkeleton());
             //insert->attachObject(hand);
