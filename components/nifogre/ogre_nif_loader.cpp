@@ -217,6 +217,7 @@ void NIFLoader::createMaterial(const String &name,
     // will automatically be loaded when needed. If not (such as for
     // internal NIF textures that we might support later), we should
     // already have inserted a manual loader for the texture.
+    /*
     if(!mSkel.isNull()){
     material->removeAllTechniques();
   
@@ -224,7 +225,7 @@ void NIFLoader::createMaterial(const String &name,
         //tech->setSchemeName("blahblah");
         Pass* pass = tech->createPass();
         pass->setVertexProgram("Ogre/HardwareSkinningFourWeights");
-    }
+    }*/
     if (!texName.empty())
     {
         Pass *pass = material->getTechnique(0)->getPass(0);
