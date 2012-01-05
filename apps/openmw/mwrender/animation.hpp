@@ -8,6 +8,7 @@
 #include "../mwworld/environment.hpp"
 #include <components/nif/node.hpp>
 #include <map>
+#include <openengine/bullet/physic.hpp>
 
 namespace MWRender{
 
@@ -15,9 +16,12 @@ class Animation{
     
    protected:
     
+    OEngine::Physic::PhysicEngine* engine;
     OEngine::Render::OgreRenderer &mRend;
     MWWorld::Environment& mEnvironment;
     static std::map<std::string, int> mUniqueIDs;
+    Ogre::Quaternion rotate;
+    Ogre::Vector3 trans;
     std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating an npc
 
     float time;
@@ -38,8 +42,6 @@ class Animation{
      std::vector<Nif::NiTriShapeCopy>* shapes;          //All the NiTriShapeData for this creature
      std::vector<Ogre::Entity*> entityparts;
 
-    
-   
 
     std::vector<Nif::NiKeyframeData>* transformations;
     std::map<std::string,float> textmappings;

@@ -145,6 +145,12 @@ namespace MWWorld
 
     void PhysicsSystem::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)
     {
+         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+        {
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // start positions others than 0, 0, 0
+            act->setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+        }
     }
 
     void PhysicsSystem::scaleObject (const std::string& handle, float scale)

@@ -259,6 +259,16 @@ void NpcAnimation::runAnimation(float timepassed){
         }
 
         handleAnimationTransforms();
+        //mEnvironment.mWorld->
+        /*if(base->hasSkeleton())
+        {
+            
+            Ogre::Quaternion boneQuat = rotate;
+            Ogre::Vector3 boneTrans = trans;
+            mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), boneTrans + insert->getPosition());
+            mEnvironment.mWorld->setObjectPhysicsRotation(insert->getName(), boneQuat * insert->getOrientation());
+            
+        }*/
        // handleAnimationTransforms(base);
         //handleAnimationTransforms(hand);
        // 

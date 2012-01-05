@@ -16,6 +16,7 @@
 #include "../mwworld/environment.hpp"
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
+#include <openengine/bullet/physic.hpp>
 
 namespace MWRender{
     class Actors{
