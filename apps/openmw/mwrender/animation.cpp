@@ -411,10 +411,7 @@ namespace MWRender{
         if(bQuats)
             bone->setOrientation(r);
 
-        if(iter == transformations->begin()){
-            trans = bone->getPosition();
-            rotate = bone->getOrientation();
-        }
+       
         skel->getManualBonesDirty();
         skel->_updateTransforms();
 	    skel->_notifyManualBonesDirty();

@@ -214,6 +214,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
                 insertFreePart("meshes\\" + feet->model,"><", insert);
                 insertFreePart("meshes\\" + feet->model,">:", insert);
         }
+        originalpos = insert->_getWorldAABB().getCenter();
+        originalscenenode = insert->getPosition();
 }
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
@@ -259,7 +261,13 @@ void NpcAnimation::runAnimation(float timepassed){
         }
 
         handleAnimationTransforms();
-        //mEnvironment.mWorld->
+        Ogre::Vector3 current = insert->_getWorldAABB().getCenter();
+
+        //This is the attempt at npc physics
+        //mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), current); 
+
+
+        
         /*if(base->hasSkeleton())
         {
             

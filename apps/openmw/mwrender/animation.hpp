@@ -20,8 +20,9 @@ class Animation{
     OEngine::Render::OgreRenderer &mRend;
     MWWorld::Environment& mEnvironment;
     static std::map<std::string, int> mUniqueIDs;
-    Ogre::Quaternion rotate;
-    Ogre::Vector3 trans;
+    
+    Ogre::Vector3 originalpos;
+    Ogre::Vector3 originalscenenode;
     std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating an npc
 
     float time;
