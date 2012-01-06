@@ -77,6 +77,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
         stopTime = transformations->begin()->getStopTime();
 		startTime = transformations->begin()->getStartTime();
     }
+    textmappings = NIFLoader::getSingletonPtr()->getTextIndices(smodel);
     insert->attachObject(base);
     
         if(female)

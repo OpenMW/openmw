@@ -42,7 +42,7 @@ class Animation{
 
 
     std::vector<Nif::NiKeyframeData>* transformations;
-    std::map<std::string,float> textmappings;
+    std::map<std::string,float>* textmappings;
     Ogre::Entity* base;
     void handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel);
     void handleAnimationTransforms();

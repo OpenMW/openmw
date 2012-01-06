@@ -1315,17 +1315,12 @@ std::vector<Nif::NiTriShapeCopy>* NIFLoader::getShapes(std::string lowername){
 		return pass;
 }
 
-float NIFLoader::getTime(std::string filename, std::string text){
-	std::map<std::string,std::map<std::string,float>,ciLessBoost>::iterator iter = alltextmappings.find(filename);
-	if(iter != alltextmappings.end()){
-		std::map<std::string,float>::iterator insideiter = (iter->second).find(text);
-		if(insideiter != (iter->second).end())
-			return insideiter->second;
-		else
-			return -20000000.0;
-	}
-
-	return -10000000.0;
+std::map<std::string, float>* NIFLoader::getTextIndices(std::string lowername){
+	std::map<std::string,std::map<std::string, float>, ciLessBoost>::iterator iter = alltextmappings.find(lowername);
+    std::map<std::string, float>* pass = 0;
+		if(iter != alltextmappings.end())
+			pass = &(iter->second);
+		return pass;
 }
 
 

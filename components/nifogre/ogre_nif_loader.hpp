@@ -110,7 +110,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         //void insertMeshInsideBase(Ogre::Mesh* mesh);
         std::vector<Nif::NiKeyframeData>* getAnim(std::string name);
 		std::vector<Nif::NiTriShapeCopy>* getShapes(std::string name);
-		float getTime(std::string filename, std::string text);
+        std::map<std::string, float>* getTextIndices(std::string name);
         void addInMesh(Ogre::Mesh* input);
 
 

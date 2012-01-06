@@ -31,7 +31,8 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
         stopTime = transformations->begin()->getStopTime();
 		startTime = transformations->begin()->getStartTime();
 		shapes = (NIFLoader::getSingletonPtr())->getShapes(meshZero);
-    }
+        }
+        textmappings = NIFLoader::getSingletonPtr()->getTextIndices(meshZero);
         insert->attachObject(base);
     }
 }
