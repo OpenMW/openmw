@@ -10,6 +10,11 @@
 #include <map>
 #include <openengine/bullet/physic.hpp>
 
+using namespace boost::algorithm;
+
+
+
+
 namespace MWRender{
 
 class Animation{

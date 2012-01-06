@@ -1006,6 +1006,8 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 				replace(text.begin(), text.end(), '\n', '/');
 
 				text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
+                if(text.at(0) == '/')
+                    text.erase(0, 1);
 				file << "Time: " << textiter->time << "|" << text << "\n";
 				
 				textmappings[text] = textiter->time;
