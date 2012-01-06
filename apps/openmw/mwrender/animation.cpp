@@ -34,8 +34,14 @@ namespace MWRender{
             time = startTime;
         }
         else if(textmappings){
+            
             std::string startName = groupname + ": start";
             std::string stopName = groupname + ": stop";
+
+            if(loops > 1){
+                startName = groupname + ": loop start";
+                std::string stopName = groupname + ": loop stop";
+            }
             std::cout << "StartName:" << startName << "\n";
             bool first = false;
             for(std::map<std::string, float>::iterator iter = textmappings->begin(); iter != textmappings->end(); iter++){

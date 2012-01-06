@@ -1006,11 +1006,26 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 				replace(text.begin(), text.end(), '\n', '/');
 
 				text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
-                if(text.at(0) == '/')
-                    text.erase(0, 1);
-				file << "Time: " << textiter->time << "|" << text << "\n";
+                int i = 0;
+                while(i < text.length()){
+                    while(i < text.length() && text.at(i) == '/' ){
+                        i++;
+                    }
+                    int first = i;
+                    int length = 0;
+                    while(i < text.length() && text.at(i) != '/' ){
+                        i++;
+                        length++;
+                    }
+                    if(first < text.length()){
+                            //length = text.length() - first;
+                        std::string sub = text.substr(first, length);
+
+				       file << "Time: " << textiter->time << "|" << sub << "\n";
 				
-				textmappings[text] = textiter->time;
+				        textmappings[sub] = textiter->time;
+                    }
+                }
 			}
 			file.close();
 		}
