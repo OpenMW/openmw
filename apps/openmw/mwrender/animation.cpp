@@ -77,7 +77,7 @@ namespace MWRender{
 						}
                         if(time >= copy.morph.getStartTime() && time <= copy.morph.getStopTime()){
 						float x;
-						for (int i = 0; i < copy.morph.getAdditionalVertices().size(); i++){
+						for (unsigned int i = 0; i < copy.morph.getAdditionalVertices().size(); i++){
 							int j = 0;
 							if(shapeIndexI[shapeNumber].size() <= i)
 								shapeIndexI[shapeNumber].push_back(0);
@@ -93,7 +93,7 @@ namespace MWRender{
 							if ( t > 1 ) t = 1;
 						    if( t != 0 && initialVertices.size() == copy.morph.getAdditionalVertices()[i].size())
 							{
-								for (int v = 0; v < initialVertices.size(); v++){
+								for (unsigned int v = 0; v < initialVertices.size(); v++){
 									initialVertices[v] += ((copy.morph.getAdditionalVertices()[i])[v]) * t;
 								}
 							}
@@ -103,17 +103,7 @@ namespace MWRender{
 							
 
 						}
-						//After everything, write everything out
 						
-						/*
-						for(int i = 0; i < initialVertices.size(); i++){
-						Ogre::Vector3 current = initialVertices[i];
-						Ogre::Real* addr = pReal + i * 3;
-					    *addr = current.x;
-						*(addr+1) = current.y;
-						*(addr + 2) = current.z;
-
-					}*/
 						allvertices = initialVertices;
                         }
 						shapeNumber++;
@@ -124,14 +114,14 @@ namespace MWRender{
 			    if(boneinfovector.size() > 0){
 
 				
-				for (int i = 0; i < boneinfovector.size(); i++)
+				for (unsigned int i = 0; i < boneinfovector.size(); i++)
 				{
 					Nif::NiSkinData::BoneInfoCopy boneinfo = boneinfovector[i];
 					if(skel->hasBone(boneinfo.bonename)){
 					Ogre::Bone *bonePtr = skel->getBone(boneinfo.bonename);
 					Ogre::Vector3 vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfo.trafo.trans;
 					Ogre::Quaternion vecRot = bonePtr->_getDerivedOrientation() * boneinfo.trafo.rotation;
-					//std::cout << "Bone" << bonePtr->getName() << "\n";
+					
 					 for (unsigned int j=0; j < boneinfo.weights.size(); j++)
 					 {
 						  unsigned int verIndex = boneinfo.weights[j].vertex;
@@ -146,7 +136,6 @@ namespace MWRender{
 				              *(addr+2) = absVertPos.z;
                              
 
-								//std::cout << "Vertex" << vertices[verIndex] << "\n";
 						  }
 						  else 
 						  {
@@ -247,7 +236,7 @@ namespace MWRender{
 					// Computes C = B + AxC*scale
 					 // final_vector = old_vector + old_rotation*new_vector*old_scale/
 					
-					for(int i = 0; i < allvertices.size(); i++){
+					for(unsigned int i = 0; i < allvertices.size(); i++){
 						Ogre::Vector3 current = transmult + rotmult * allvertices[i];
 						Ogre::Real* addr = pReal + i * 3;
 					    *addr = current.x;
@@ -332,7 +321,7 @@ namespace MWRender{
     
 
     Ogre::Bone* b = skel->getRootBone();
-	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
+	    b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));   //This is a trick
 	    skel->getManualBonesDirty();
         skel->_updateTransforms();
 	    skel->_notifyManualBonesDirty();
@@ -341,11 +330,11 @@ namespace MWRender{
      base->_updateAnimation();
     base->_notifyMoved();
 
-    for(int i = 0; i < entityparts.size(); i++){
+    for(unsigned int i = 0; i < entityparts.size(); i++){
          Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
 
         Ogre::Bone* b = skel->getRootBone();
-	    b->setOrientation(.3,.3,.3,.3);   //This is a trick
+	   b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
 	    skel->getManualBonesDirty();
         skel->_updateTransforms();
 	    skel->_notifyManualBonesDirty();

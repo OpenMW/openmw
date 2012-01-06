@@ -16,7 +16,7 @@ namespace MWRender{
 
 class NpcAnimation: public Animation{
     
-    Ogre::SceneNode* insert;
+    
     
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);

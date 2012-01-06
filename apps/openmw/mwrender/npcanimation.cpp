@@ -13,9 +13,6 @@ NpcAnimation::~NpcAnimation(){
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend): Animation(_env,_rend){
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
-        //assert (ref->base != NULL);
-		
-        //insertBegin(ptr, true, true);
 		
 		//Part selection on last character of the file string
 		//  " Tri Chest
@@ -46,13 +43,13 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		char secondtolast = bodyRaceID.at(bodyRaceID.length() - 2);
 		bool female = tolower(secondtolast) == 'f';
 		bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
-        std::cout << "Race: " << ref->base->race ;
+        /*std::cout << "Race: " << ref->base->race ;
         if(female){
            std::cout << " Sex: Female" << " Height: " << race->data.height.female << "\n";
         }
         else{
              std::cout << " Sex: Male" << " Height: " << race->data.height.male << "\n";
-        }
+        }*/
 
         
 
@@ -72,17 +69,13 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
     
     if(transformations = (NIFLoader::getSingletonPtr())->getAnim(smodel)){
 
-        for(int init = 0; init < transformations->size(); init++){
+        for(unsigned int init = 0; init < transformations->size(); init++){
 				rindexI.push_back(0);
-				//a.rindexJ.push_back(0);
 				tindexI.push_back(0);
-				//a.tindexJ.push_back(0);
 			}
-        loop = false;
         
         stopTime = transformations->begin()->getStopTime();
-			//a.startTime = NIFLoader::getSingletonPtr()->getTime(item.smodel, "IdleSneak: Start");
-				startTime = transformations->begin()->getStartTime();
+		startTime = transformations->begin()->getStartTime();
     }
     insert->attachObject(base);
     
@@ -114,7 +107,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
             forearml = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");  //We need two
 		if(!handl)
 			handl = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
-		//const ESM::BodyPart* claviclel = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "clavicle");
+		//const ESM::BodyPart* claviclel = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "clavicle");  
 		//const ESM::BodyPart* clavicler = claviclel;
 		const ESM::BodyPart* handr = handl;
 		const ESM::BodyPart* forearmr = forearml;
@@ -214,8 +207,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
                 insertFreePart("meshes\\" + feet->model,"><", insert);
                 insertFreePart("meshes\\" + feet->model,">:", insert);
         }
-        originalpos = insert->_getWorldAABB().getCenter();
-        originalscenenode = insert->getPosition();
+        //originalpos = insert->_getWorldAABB().getCenter();
+        //originalscenenode = insert->getPosition();
 }
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
@@ -243,17 +236,17 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
 
 
 void NpcAnimation::runAnimation(float timepassed){
-    //Add the amount of time passed to time
+    //1. Add the amount of time passed to time
 
-	//Handle the animation transforms dependent on time
+	//2. Handle the animation transforms dependent on time
 
-	//Handle the shapes dependent on animation transforms
+	//3. Handle the shapes dependent on animation transforms
 	if(animate > 0){
         time += timepassed;
         
         if(time > stopTime){
             animate--;
-            //std::cout << "Stopping the animation\n";
+            
             if(animate == 0)
                 time = stopTime;
             else
@@ -277,17 +270,12 @@ void NpcAnimation::runAnimation(float timepassed){
             //mEnvironment.mWorld->setObjectPhysicsRotation(insert->getName(), boneQuat * insert->getOrientation());
             
         }*/
-       // handleAnimationTransforms(base);
-        //handleAnimationTransforms(hand);
-       // 
+       
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
-        //int i = 0;
         while(shapepartsiter != shapeparts.end())
         {
             std::vector<Nif::NiTriShapeCopy>* shapes = *shapepartsiter;
-            //insert->
-            //insert->detachObject(hand->getName());
             Ogre::Entity* theentity = *entitypartsiter;
             /*
             Pass* pass = theentity->getSubEntity(0)->getMaterial()->getBestTechnique()->getPass(0); 
@@ -295,16 +283,8 @@ void NpcAnimation::runAnimation(float timepassed){
                 std::cout << "It's hardware\n";
                 else
                 std::cout << "It's software\n";*/
-            //std::cout << "Techniques:" << theentity->getSubEntity(0)->getMaterial()->getNumTechniques() << "\n";
-		    /*if (pass->hasVertexProgram())// && pass->getVertexProgram()->isSkeletalAnimationIncluded()) value = "Hardware"
-                std::cout << "Its hardware\n";
-            else
-                std::cout << "Its software\n";*/
-
-           // handleAnimationTransforms(theentity);
+       
             handleShapes(shapes, theentity, theentity->getSkeleton());
-            //insert->attachObject(hand);
-            //std::cout << "Shape part size" << shapes->size() << "\n";
             shapepartsiter++;
             entitypartsiter++;
 	    }

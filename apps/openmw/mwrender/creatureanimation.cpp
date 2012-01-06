@@ -10,8 +10,7 @@ CreatureAnimation::~CreatureAnimation(){
 
 }
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend): Animation(_env,_rend){
-    Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
-    assert(insert);
+    insert = ptr.getRefData().getBaseNode();
     ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
@@ -27,14 +26,10 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
 
         for(int init = 0; init < transformations->size(); init++){
 				rindexI.push_back(0);
-				//a.rindexJ.push_back(0);
 				tindexI.push_back(0);
-				//a.tindexJ.push_back(0);
 			}
-        loop = false;
         stopTime = transformations->begin()->getStopTime();
-			//a.startTime = NIFLoader::getSingletonPtr()->getTime(item.smodel, "IdleSneak: Start");
-				startTime = transformations->begin()->getStartTime();
+		startTime = transformations->begin()->getStartTime();
 		shapes = (NIFLoader::getSingletonPtr())->getShapes(meshZero);
     }
         insert->attachObject(base);
