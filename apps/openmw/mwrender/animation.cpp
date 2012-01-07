@@ -35,15 +35,39 @@ namespace MWRender{
         }
         else if(textmappings){
             
-            std::string startName = groupname + ": start";
-            std::string stopName = groupname + ": stop";
+            std::string startName = groupname + ": loop start";
+            std::string stopName = groupname + ": loop stop";
+
+            bool first = false;
 
             if(loops > 1){
                 startName = groupname + ": loop start";
-                std::string stopName = groupname + ": loop stop";
+                stopName = groupname + ": loop stop";
+
+                for(std::map<std::string, float>::iterator iter = textmappings->begin(); iter != textmappings->end(); iter++){
+                
+                std::string current = iter->first.substr(0, startName.size());
+                std::transform(current.begin(), current.end(), current.begin(), ::tolower);
+                std::string current2 = iter->first.substr(0, stopName.size());
+                std::transform(current2.begin(), current2.end(), current2.begin(), ::tolower);
+
+                if(current == startName){
+                    startTime = iter->second;
+                     animate = loops;
+                     time = startTime;
+                     first = true;
+                }
+                if(current2 == stopName){
+                    stopTime = iter->second;
+                    if(first)
+                        break;
+                }
+                }
             }
-            std::cout << "StartName:" << startName << "\n";
-            bool first = false;
+            if(!first){
+                startName = groupname + ": start";
+                stopName = groupname + ": stop";
+            
             for(std::map<std::string, float>::iterator iter = textmappings->begin(); iter != textmappings->end(); iter++){
                 
                 std::string current = iter->first.substr(0, startName.size());
@@ -62,6 +86,7 @@ namespace MWRender{
                     if(first)
                         break;
                 }
+            }
             }
            
         }
