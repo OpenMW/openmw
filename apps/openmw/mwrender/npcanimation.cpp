@@ -224,6 +224,18 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
     NIFLoader::load(meshNumbered);
     
     Ogre::Entity* ent = mRend.getScene()->createEntity(meshNumbered);
+    
+        /*MaterialPtr material = ent->getSubEntity(0)->getMaterial();
+        material->removeAllTechniques();
+
+        Ogre::Technique* tech = material->createTechnique();
+
+         Pass* pass2 = tech->createPass();
+        pass2->setVertexProgram("Ogre/HardwareSkinningTwoWeights");
+        pass2->setColourWriteEnabled(false);
+        //tech->setSchemeName("blahblah");*/
+        
+
     insert->attachObject(ent);
     entityparts.push_back(ent);
     shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh + "0000" + suffix));
