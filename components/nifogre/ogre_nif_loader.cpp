@@ -201,6 +201,9 @@ static CompareFunction getTestMode(int mode)
 }
 */
 
+void NIFLoader::setOutputAnimFiles(bool output){
+    mOutputAnimFiles = output;
+}
 void NIFLoader::createMaterial(const String &name,
                            const Vector &ambient,
                            const Vector &diffuse,
@@ -984,19 +987,22 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         if (e->recType == RC_NiTextKeyExtraData){
 			Nif::NiTextKeyExtraData* extra =  dynamic_cast<Nif::NiTextKeyExtraData*> (e);
 			
-			
-			std::string cut = "";
-			for(unsigned int i = 0; i < name.length();  i++)
-			{
-				if(!(name.at(i) == '\\' || name.at(i) == '/' || name.at(i) == '>' || name.at(i) == '<' || name.at(i) == '?' || name.at(i) == '*' || name.at(i) == '|' || name.at(i) == ':' || name.at(i) == '"'))
-				{
-					cut += name.at(i);
-				}
-			}
-			
-			std::cout << "Outputting " << cut << "\n";
+			std::ofstream file;
 
-			std::ofstream file(("Indices" + cut + ".txt").c_str());
+            if(mOutputAnimFiles){
+			    std::string cut = "";
+			    for(unsigned int i = 0; i < name.length();  i++)
+			    {
+				    if(!(name.at(i) == '\\' || name.at(i) == '/' || name.at(i) == '>' || name.at(i) == '<' || name.at(i) == '?' || name.at(i) == '*' || name.at(i) == '|' || name.at(i) == ':' || name.at(i) == '"'))
+				    {
+					    cut += name.at(i);
+				    }
+			    }
+			
+			    std::cout << "Outputting " << cut << "\n";
+
+			    file.open(("Indices" + cut + ".txt").c_str());
+            }
 	
 			for(std::vector<Nif::NiTextKeyExtraData::TextKey>::iterator textiter = extra->list.begin(); textiter != extra->list.end(); textiter++)
 			{
@@ -1021,7 +1027,8 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
                             //length = text.length() - first;
                         std::string sub = text.substr(first, length);
 
-				       file << "Time: " << textiter->time << "|" << sub << "\n";
+				       if(mOutputAnimFiles)
+                            file << "Time: " << textiter->time << "|" << sub << "\n";
 				
 				        textmappings[sub] = textiter->time;
                     }

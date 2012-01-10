@@ -117,12 +117,15 @@ class NIFLoader : Ogre::ManualResourceLoader
         Ogre::Vector3 convertVector3(const Nif::Vector& vec);
         Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
 
+        void setOutputAnimFiles(bool output);
+
     private:
-        NIFLoader() : resourceGroup("General"),mNormaliseNormals(false),
-          mFlipVertexWinding(false), flip(false) {resourceName = "";}
+        NIFLoader() : mNormaliseNormals(false),  resourceGroup("General"), resourceName(""), flip(false),
+          mFlipVertexWinding(false), mOutputAnimFiles(false)  {}
         NIFLoader(NIFLoader& n) {}
 
         void calculateTransform();
+        
 
         void warn(std::string msg);
         void fail(std::string msg);
@@ -168,6 +171,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         bool mNormaliseNormals;
         bool mFlipVertexWinding;
         bool bNiTri;
+        bool mOutputAnimFiles;
         std::multimap<std::string,std::string> MaterialMap;
 
         // pointer to the ogre mesh which is currently build
@@ -185,6 +189,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         std::vector<Ogre::Mesh*> addin;
         std::vector<Nif::NiKeyframeData> mAnim;
 		std::vector<Nif::NiTriShapeCopy> mS;
+        
 };
 
 }

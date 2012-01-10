@@ -19,6 +19,7 @@
 #include <components/esm/esm_reader.hpp>
 #include <components/files/path.hpp>
 #include <components/nifbullet/bullet_nif_loader.hpp>
+#include <components/nifogre/ogre_nif_loader.hpp>
 
 #include "mwinput/inputmanager.hpp"
 
@@ -44,6 +45,7 @@
 #include "mwdialogue/journal.hpp"
 
 #include "mwmechanics/mechanicsmanager.hpp"
+
 
 void OMW::Engine::executeLocalScripts()
 {
@@ -97,6 +99,11 @@ void OMW::Engine::updateFocusReport (float duration)
                 std::cout << "Focus: " << name << std::endl;
         }
     }
+}
+
+void OMW::Engine::setAnimationVerbose(bool animverbose){
+    if(animverbose)
+        NifOgre::NIFLoader::getSingletonPtr()->setOutputAnimFiles(true);
 }
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
