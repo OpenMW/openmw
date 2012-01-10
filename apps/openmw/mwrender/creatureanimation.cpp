@@ -45,7 +45,7 @@ void CreatureAnimation::runAnimation(float timepassed){
 
 		//Handle the shapes dependent on animation transforms
         time += timepassed;
-        if(time > stopTime){
+        if(time >= stopTime){
             animate--;
             //std::cout << "Stopping the animation\n";
             if(animate == 0)

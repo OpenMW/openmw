@@ -408,7 +408,7 @@ namespace MWRender{
         if(time < iter->getStartTime() || time < startTime || time > iter->getStopTime())
 	    {
             slot++;
-            iter++;
+            //iter++;
 		    continue;
             
 	    }
@@ -442,14 +442,13 @@ namespace MWRender{
            t = (v1 + (v2 - v1) * x);
 	        
 	    }
-	
+	    
         bool bQuats = quats.size() > 0;
 	    if(bQuats){
 		    r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
 		    //bone->setOrientation(r);
 	    }
         skel = base->getSkeleton();
-
     if(skel->hasBone(iter->getBonename())){
         Ogre::Bone* bone = skel->getBone(iter->getBonename());
         if(bTrans)
@@ -485,4 +484,5 @@ namespace MWRender{
     }
 }
 }
+
 }
