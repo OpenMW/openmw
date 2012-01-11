@@ -78,7 +78,8 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
     : WindowBase("openmw_journal_layout.xml", parWindowManager)
     , lastPos(0)
 {
-    setCoord(0,0,498, 342);
+    //setCoord(0,0,498, 342);
+    center();
 
     getWidget(mLeftTextWidget, "LeftText");
     getWidget(mRightTextWidget, "RightText");

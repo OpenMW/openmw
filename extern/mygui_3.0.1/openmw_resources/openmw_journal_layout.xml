@@ -1,13 +1,18 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
+
+
 <MyGUI type="Layout">
 
-<Widget type="Window" skin="StaticImage" layer="Windows"position="0 0 485 375" name="_Main">
+<Widget type="Window" skin="" layer="Windows" align="Left|Top" position="00 200 512 256" name="_Main">
 
-<Widget type="StaticImage" skin="StaticImage" layer="Windows" position_real="0 0 1 1" name="JImage">     
+<Widget type="StaticImage" skin="StaticImage" position_real="0 0 1 1" align="Top|Right" name="JImage">     
 <Property key="Image_Texture" value="textures\tx_menubook.dds"/>
+<!--Property key="Image_Texture" value="mwgui.png"/-->
 
     <Widget type="Edit" skin="MW_ConsoleLog" position_real="0.22 0.186667 0.31 0.613333" name = "LeftText"/>
     <Widget type="Edit" skin="MW_ConsoleLog" position_real="0.58 0.2 0.3 0.6" name = "RightText"/>
 </Widget>
 </Widget>
+
+
 </MyGUI>
