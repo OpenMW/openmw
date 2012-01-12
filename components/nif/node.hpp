@@ -103,6 +103,7 @@ struct NiTriShapeCopy
  std::vector<Ogre::Vector3> vertices;
  std::vector<Ogre::Vector3> normals;
  std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfo;
+ std::map<int, std::vector<Nif::NiSkinData::IndividualWeight>> vertsToWeights;
  Nif::NiMorphData morph;
 };
 

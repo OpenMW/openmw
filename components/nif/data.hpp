@@ -390,9 +390,15 @@ public:
   struct BoneInfoCopy
   {
 	   std::string bonename;
+       unsigned short bonehandle;
 	   BoneTrafoCopy trafo;
 	   Vector4 unknown;
-       std::vector<VertWeight> weights;
+       //std::vector<VertWeight> weights;
+  };
+  struct IndividualWeight
+  {
+      float weight;
+        unsigned int boneinfocopyindex;
   };
 
   const BoneTrafo *trafo;

@@ -15,6 +15,11 @@
 
 namespace MWRender{
 
+struct PosAndRot{
+    Ogre::Quaternion vecRot;
+    Ogre::Vector3 vecPos;
+};
+
 class Animation{
     
    protected:

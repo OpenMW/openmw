@@ -97,21 +97,25 @@ namespace MWRender{
     }
 
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
+       bool useHandles = skel == creaturemodel->getSkeleton();
         shapeNumber = 0;
+        
         std::vector<Nif::NiTriShapeCopy>::iterator allshapesiter;
 	    for(allshapesiter = allshapes->begin(); allshapesiter != allshapes->end(); allshapesiter++)
 		
                 {
+                    //std::map<unsigned short, PosAndRot> vecPosRot;
         
 			Nif::NiTriShapeCopy& copy = *allshapesiter;
-			std::vector<Ogre::Vector3> allvertices = copy.vertices;
-			std::vector<Ogre::Vector3> allnormals = copy.normals;
+			std::vector<Ogre::Vector3>* allvertices = &copy.vertices;
+			std::vector<Ogre::Vector3>* allnormals = &copy.normals;
 
 
 
-			std::set<unsigned int> vertices;
+			//std::set<unsigned int> vertices;
 			//std::set<unsigned int> normals;
-			std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfovector =  copy.boneinfo;
+			//std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfovector =  copy.boneinfo;
+            std::map<int, std::vector<Nif::NiSkinData::IndividualWeight>>* verticesToChange = &copy.vertsToWeights;
 	
 			//std::cout << "Name " << copy.sname << "\n";
 			Ogre::HardwareVertexBufferSharedPtr vbuf = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(0);
@@ -161,17 +165,91 @@ namespace MWRender{
 
 						}
 						
-						allvertices = initialVertices;
+						allvertices = &initialVertices;
                         }
 						shapeNumber++;
 					}
 				}
 
 
-			    if(boneinfovector.size() > 0){
+			    if(verticesToChange->size() > 0){
+                    
+                for(std::map<int, std::vector<Nif::NiSkinData::IndividualWeight>>::iterator iter = verticesToChange->begin();
+                    iter != verticesToChange->end(); iter++)
+                {
+                    std::vector<Nif::NiSkinData::IndividualWeight> inds = iter->second;
+                    int verIndex = iter->first;
+                    Ogre::Vector3 currentVertex = (*allvertices)[verIndex];
+                    Nif::NiSkinData::BoneInfoCopy* boneinfocopy = &(allshapesiter->boneinfo[inds[0].boneinfocopyindex]);
+                    Ogre::Bone *bonePtr = 0;
+                    if(useHandles)
+                    {
+                        bonePtr = skel->getBone(boneinfocopy->bonehandle);
+                    }
+                    else
+                        bonePtr = skel->getBone(boneinfocopy->bonename);
+                    
+                    Ogre::Vector3 vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
+                    Ogre::Quaternion vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
+					
+                    
+                    /*if(vecPosRot.find(boneinfocopy->bonehandle) == vecPosRot.end()){
+                        vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
+                        vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
+                       
+                        if(useHandles){
+                             PosAndRot both;
+                            both.vecPos = vecPos;
+                            both.vecRot = vecRot;
+                            vecPosRot[boneinfocopy->bonehandle] = both;
+                        }
+                    }
+                    else{
+                        PosAndRot both = vecPosRot[boneinfocopy->bonehandle];
+                        vecPos = both.vecPos;
+                        vecRot = both.vecRot;
+                    }*/
 
+                    Ogre::Vector3 absVertPos = (vecPos + vecRot * currentVertex) * inds[0].weight;
+                    
+
+                    for(int i = 1; i < inds.size(); i++){
+                        boneinfocopy = &(allshapesiter->boneinfo[inds[i].boneinfocopyindex]);
+                        if(useHandles)
+                            bonePtr = skel->getBone(boneinfocopy->bonehandle);
+                        else
+                            bonePtr = skel->getBone(boneinfocopy->bonename);
+                        vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
+                            vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
+
+                        /*if(vecPosRot.find(boneinfocopy->bonehandle) == vecPosRot.end()){
+                            vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
+                            vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
+                            
+                            if(useHandles){
+                                PosAndRot both;
+                                both.vecPos = vecPos;
+                                both.vecRot = vecRot;
+                                vecPosRot[boneinfocopy->bonehandle] = both;
+                            }
+                        }
+                         else{
+                                PosAndRot both = vecPosRot[boneinfocopy->bonehandle];
+                                vecPos = both.vecPos;
+                                vecRot = both.vecRot;
+                        }*/
+
+                    
+                        absVertPos += (vecPos + vecRot * currentVertex) * inds[i].weight;
+                    
+                    }
+                     Ogre::Real* addr = (pReal + 3 * verIndex);
+							  *addr = absVertPos.x;
+							  *(addr+1) = absVertPos.y;
+				              *(addr+2) = absVertPos.z;
+                }
 				
-				for (unsigned int i = 0; i < boneinfovector.size(); i++)
+				/*for (unsigned int i = 0; i < boneinfovector.size(); i++)
 				{
 					Nif::NiSkinData::BoneInfoCopy boneinfo = boneinfovector[i];
 					if(skel->hasBone(boneinfo.bonename)){
@@ -234,14 +312,14 @@ namespace MWRender{
 
 						  }*/
 
-					 }
-				}
+					 //}
+				//}
 				
 					
-				}
+				//}   //Comment out
 				   
-				   
-				}
+				   ;
+				}  
 				else
 				{
 					//Ogre::Bone *bonePtr = creaturemodel->getSkeleton()->getBone(copy.bonename);
@@ -293,8 +371,8 @@ namespace MWRender{
 					// Computes C = B + AxC*scale
 					 // final_vector = old_vector + old_rotation*new_vector*old_scale/
 					
-					for(unsigned int i = 0; i < allvertices.size(); i++){
-						Ogre::Vector3 current = transmult + rotmult * allvertices[i];
+					for(unsigned int i = 0; i < allvertices->size(); i++){
+						Ogre::Vector3 current = transmult + rotmult * (*allvertices)[i];
 						Ogre::Real* addr = pReal + i * 3;
 					    *addr = current.x;
 						*(addr+1) = current.y;

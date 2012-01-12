@@ -355,7 +355,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     HardwareVertexBufferSharedPtr vbuf =
         HardwareBufferManager::getSingleton().createVertexBuffer(
             VertexElement::getTypeSize(VET_FLOAT3),
-            numVerts, HardwareBuffer::HBU_DYNAMIC);
+            numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
     
     if(flip)
 	{
@@ -388,7 +388,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
         decl->addElement(nextBuf, 0, VET_FLOAT3, VES_NORMAL);
         vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
                    VertexElement::getTypeSize(VET_FLOAT3),
-                   numVerts, HardwareBuffer::HBU_DYNAMIC,true);
+                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
 		
 		if(flip)
 		{
@@ -751,7 +751,6 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     if (!shape->skin.empty())
     {
 		
-		//Bone assignments are stored in submeshes, so we don't need to copy them
 		
 		
         // vector that stores if the position of a vertex is absolute
@@ -791,10 +790,12 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             // final_vector = old_vector + old_rotation*new_vector*old_scale
            
 
-			Nif::NiSkinData::BoneInfoCopy boneinfo;
-			boneinfo.trafo.rotation = convertRotation(it->trafo->rotation);
-			boneinfo.trafo.trans = convertVector3(it->trafo->trans);
-			boneinfo.bonename = shape->skin->bones[boneIndex].name.toString();
+			Nif::NiSkinData::BoneInfoCopy boneinfocopy;
+			boneinfocopy.trafo.rotation = convertRotation(it->trafo->rotation);
+			boneinfocopy.trafo.trans = convertVector3(it->trafo->trans);
+			boneinfocopy.bonename = shape->skin->bones[boneIndex].name.toString();
+            boneinfocopy.bonehandle = bonePtr->getHandle();
+            copy.boneinfo.push_back(boneinfocopy);
             for (unsigned int i=0; i<it->weights.length; i++)
             {
 				 vecPos = bonePtr->_getDerivedPosition() +
@@ -802,7 +803,21 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
             vecRot = bonePtr->_getDerivedOrientation() * convertRotation(it->trafo->rotation);
                 unsigned int verIndex = (it->weights.ptr + i)->vertex;
-				boneinfo.weights.push_back(*(it->weights.ptr + i));
+				//boneinfo.weights.push_back(*(it->weights.ptr + i));
+                Nif::NiSkinData::IndividualWeight ind;
+                ind.weight = (it->weights.ptr + i)->weight;
+                ind.boneinfocopyindex = copy.boneinfo.size() - 1;
+                if(copy.vertsToWeights.find(verIndex) == copy.vertsToWeights.end())
+                {
+                    std::vector<Nif::NiSkinData::IndividualWeight> blank;
+                    blank.push_back(ind);
+                    copy.vertsToWeights[verIndex] = blank;
+                }
+                else
+                {
+                    copy.vertsToWeights[verIndex].push_back(ind);
+                }
+
                 //Check if the vertex is relativ, FIXME: Is there a better solution?
                 if (vertexPosAbsolut[verIndex] == false)
                 {
@@ -865,7 +880,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
                 vertexBoneAssignments.push_back(vba);
             }
-			copy.boneinfo.push_back(boneinfo);
+			
 
             boneIndex++;
         }
