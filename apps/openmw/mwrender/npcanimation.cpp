@@ -284,6 +284,7 @@ void NpcAnimation::runAnimation(float timepassed){
             
         }*/
        
+        
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
         while(shapepartsiter != shapeparts.end())

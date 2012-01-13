@@ -102,8 +102,10 @@ void OMW::Engine::updateFocusReport (float duration)
 }
 
 void OMW::Engine::setAnimationVerbose(bool animverbose){
-    if(animverbose)
+    if(animverbose){
         NifOgre::NIFLoader::getSingletonPtr()->setOutputAnimFiles(true);
+        NifOgre::NIFLoader::getSingletonPtr()->setVerbosePath(mCfgMgr.getLogPath().string());
+    }
 }
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
@@ -338,6 +340,7 @@ void OMW::Engine::go()
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false,
         mCfgMgr.getLogPath().string() + std::string("/"));
+   
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);

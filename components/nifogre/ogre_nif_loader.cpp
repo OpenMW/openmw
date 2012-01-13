@@ -204,6 +204,9 @@ static CompareFunction getTestMode(int mode)
 void NIFLoader::setOutputAnimFiles(bool output){
     mOutputAnimFiles = output;
 }
+void NIFLoader::setVerbosePath(std::string path){
+    verbosePath = path;
+}
 void NIFLoader::createMaterial(const String &name,
                            const Vector &ambient,
                            const Vector &diffuse,
@@ -1016,7 +1019,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 			
 			    std::cout << "Outputting " << cut << "\n";
 
-			    file.open(("Indices" + cut + ".txt").c_str());
+			    file.open((verbosePath + "/Indices" + cut + ".txt").c_str());
             }
 	
 			for(std::vector<Nif::NiTextKeyExtraData::TextKey>::iterator textiter = extra->list.begin(); textiter != extra->list.end(); textiter++)

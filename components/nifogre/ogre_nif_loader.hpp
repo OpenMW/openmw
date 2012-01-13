@@ -118,6 +118,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
 
         void setOutputAnimFiles(bool output);
+        void setVerbosePath(std::string path);
 
     private:
         NIFLoader() : mNormaliseNormals(false),  resourceGroup("General"), resourceName(""), flip(false),
@@ -163,6 +164,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         // extension from .tga to .dds if the texture is missing.
         Mangle::VFS::OgreVFS *vfs;
 
+        std::string verbosePath;
         std::string resourceName;
         std::string resourceGroup;
        Ogre::Matrix4 mTransform;
