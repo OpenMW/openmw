@@ -233,13 +233,11 @@ void RenderingManager::toggleLight()
 void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
      int mode, int number)
 {
-std::cout<<"play animation " << groupName << ", " << mode << ", " << number << std::endl;
     mActors.playAnimationGroup(ptr, groupName, mode, number);
 }
 
 void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 {
-std::cout<<"skip animation"<<std::endl;
     mActors.skipAnimation(ptr);
 }
 void RenderingManager::addTime(){

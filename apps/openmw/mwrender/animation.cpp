@@ -9,11 +9,15 @@ namespace MWRender{
 
     std::string Animation::getUniqueID(std::string mesh){
     int counter;
-    if(mUniqueIDs.find(mesh) == mUniqueIDs.end()){
-        counter = mUniqueIDs[mesh] = 0;
+    std::string copy = mesh;
+    std::transform(copy.begin(), copy.end(), copy.begin(), ::tolower);
+    if(mUniqueIDs.find(copy) == mUniqueIDs.end()){
+        counter = mUniqueIDs[copy] = 0;
     }
-    else
-        counter = mUniqueIDs[mesh]++;
+    else{
+        mUniqueIDs[copy] = mUniqueIDs[copy] + 1;
+        counter = mUniqueIDs[copy];
+    }
     
     std::stringstream out;
 			if(counter > 99 && counter < 1000)
@@ -463,7 +467,7 @@ namespace MWRender{
 
          base->getAllAnimationStates()->_notifyDirty();
      //base->_updateAnimation();
-    base->_notifyMoved();
+   base->_notifyMoved();
 
     for(unsigned int i = 0; i < entityparts.size(); i++){
          Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
