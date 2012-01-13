@@ -221,6 +221,12 @@ class BSAArchive : public Archive
 {
   BSAFile arc;
 
+  FileInfoListPtr findFileInfo(const String&, bool, bool) const
+  {
+    static FileInfoListPtr filp(new FileInfoList());
+    return filp;
+  }
+
 public:
   BSAArchive(const String& name)
              : Archive(name, "BSA")
