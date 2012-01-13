@@ -457,12 +457,12 @@ namespace MWRender{
 
     Ogre::Bone* b = skel->getRootBone();
 	    b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));   //This is a trick
-	    skel->getManualBonesDirty();
+	    
         skel->_updateTransforms();
-	    skel->_notifyManualBonesDirty();
+	    //skel->_notifyManualBonesDirty();
 
          base->getAllAnimationStates()->_notifyDirty();
-     base->_updateAnimation();
+     //base->_updateAnimation();
     base->_notifyMoved();
 
     for(unsigned int i = 0; i < entityparts.size(); i++){
@@ -470,12 +470,12 @@ namespace MWRender{
 
         Ogre::Bone* b = skel->getRootBone();
 	   b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
-	    skel->getManualBonesDirty();
+	  
         skel->_updateTransforms();
-	    skel->_notifyManualBonesDirty();
+	   // skel->_notifyManualBonesDirty();
 
          entityparts[i]->getAllAnimationStates()->_notifyDirty();
-        entityparts[i]->_updateAnimation();
+        //entityparts[i]->_updateAnimation();
          entityparts[i]->_notifyMoved();
     }
 
@@ -535,11 +535,11 @@ namespace MWRender{
             bone->setOrientation(r);
 
        
-        skel->getManualBonesDirty();
+        
         skel->_updateTransforms();
-	    skel->_notifyManualBonesDirty();
+	    //skel->_notifyManualBonesDirty();
         base->getAllAnimationStates()->_notifyDirty();
-        base->_updateAnimation();
+        //base->_updateAnimation();
 	    base->_notifyMoved();
 	}  
     for(int i = 0; i < entityparts.size(); i++){
@@ -550,11 +550,11 @@ namespace MWRender{
                 bone->setPosition(t);
             if(bQuats)
                 bone->setOrientation(r);
-            skel->getManualBonesDirty();
+            
             skel->_updateTransforms();
-	        skel->_notifyManualBonesDirty();
+	        //skel->_notifyManualBonesDirty();
             entityparts[i]->getAllAnimationStates()->_notifyDirty();
-            entityparts[i]->_updateAnimation();
+           // entityparts[i]->_updateAnimation();
 	        entityparts[i]->_notifyMoved();
 	    }  
     }
