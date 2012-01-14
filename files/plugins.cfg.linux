@@ -7,6 +7,6 @@ PluginFolder=${OGRE_PLUGIN_DIR}
 Plugin=RenderSystem_GL
 Plugin=Plugin_ParticleFX
 Plugin=Plugin_OctreeSceneManager
-# Plugin=Plugin_CgProgramManager
+Plugin=Plugin_CgProgramManager
 
 

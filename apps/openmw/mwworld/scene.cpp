@@ -15,30 +15,6 @@
 
 namespace {
 
-
-
-template<typename T>
-void insertCellRefList (T& cellRefList, ESMS::CellStore<MWWorld::RefData> &cell)
-{
-    if (!cellRefList.list.empty())
-    {
-        //const MWWorld::Class& class_ = MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.list.begin(), &cell));
-
-        for (typename T::List::iterator it = cellRefList.list.begin();
-            it != cellRefList.list.end(); it++)
-        {
-            if (it->mData.getCount() || it->mData.isEnabled())
-            {
-                MWWorld::Ptr ptr (&*it, &cell);
-                /* TODO: call
-                    * RenderingManager.insertObject
-                    * class_.insertObjectPhysic
-                    * class_.insertObjectMechanics
-                */
-            }
-        }
-   }
-}
 template<typename T>
 void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environment& environment,
     T& cellRefList, ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::PhysicsSystem& physics)
@@ -76,20 +52,22 @@ void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environme
 
 namespace MWWorld
 {
-
+    
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
-        
+        std::cout << "Unloading cell\n";
         ListHandles functor;
-        
+
         MWWorld::Ptr::CellStore* active = *iter;
-        mRendering.removeCell(active);
         
+		
+		
+
         active->forEach<ListHandles>(functor);
 
-        { 
+        {
 
-           
+
             // silence annoying g++ warning
             for (std::vector<Ogre::SceneNode*>::const_iterator iter (functor.mHandles.begin());
                 iter!=functor.mHandles.end(); ++iter){
@@ -97,10 +75,13 @@ namespace MWWorld
                 mPhysics->removeObject (node->getName());
             }
         }
+		mRendering.removeCell(active);
+		//mPhysics->removeObject("Unnamed_43");
         mWorld->getLocalScripts().clearCell (active);
         mEnvironment.mMechanicsManager->dropActors (active);
         mEnvironment.mSoundManager->stopSound (active);
-        mActiveCells.erase (iter);
+		mActiveCells.erase(active);
+        
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)
@@ -108,18 +89,18 @@ namespace MWWorld
         // register local scripts
         mWorld->getLocalScripts().addCell (cell);
 
-       
+
 
         std::pair<CellStoreCollection::iterator, bool> result =
             mActiveCells.insert(cell);
        if(result.second){
               insertCell(*cell, mEnvironment);
-               mRendering.getObjects().buildStaticGeometry(*cell);
+               //mRendering.cellAdded (cell);
                mRendering.configureAmbient(*cell);
-              
+
         }
-       
-         
+
+
     }
 
     void Scene::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
@@ -140,15 +121,13 @@ namespace MWWorld
         mEnvironment.mMechanicsManager->removeActor (mWorld->getPlayer().getPlayer());
 
         CellStoreCollection::iterator active = mActiveCells.begin();
-         Ptr::CellStore* cellstore = *active;
-        
+
         while (active!=mActiveCells.end())
         {
-            cellstore = *active;
-            if (!(cellstore->cell->data.flags & ESM::Cell::Interior))
+            if (!((*active)->cell->data.flags & ESM::Cell::Interior))
             {
-                if (std::abs (X-cellstore->cell->data.gridX)<=1 &&
-                    std::abs (Y-cellstore->cell->data.gridY)<=1)
+                if (std::abs (X-(*active)->cell->data.gridX)<=1 &&
+                    std::abs (Y-(*active)->cell->data.gridY)<=1)
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
@@ -164,15 +143,13 @@ namespace MWWorld
             for (int y=Y-1; y<=Y+1; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
-               
 
                 while (iter!=mActiveCells.end())
                 {
-                    cellstore = *iter;
-                    assert (!(cellstore->cell->data.flags & ESM::Cell::Interior));
+                    assert (!((*iter)->cell->data.flags & ESM::Cell::Interior));
 
-                    if (x==cellstore->cell->data.gridX &&
-                        y==cellstore->cell->data.gridY)
+                    if (x==(*iter)->cell->data.gridX &&
+                        y==(*iter)->cell->data.gridY)
                         break;
 
                     ++iter;
@@ -188,15 +165,13 @@ namespace MWWorld
 
         // find current cell
         CellStoreCollection::iterator iter = mActiveCells.begin();
-      
 
         while (iter!=mActiveCells.end())
         {
-            cellstore = *iter;
-            assert (!(iter->first->cell->data.flags & ESM::Cell::Interior));
+            assert (!((*iter)->cell->data.flags & ESM::Cell::Interior));
 
-            if (X==cellstore->cell->data.gridX &&
-                Y==cellstore->cell->data.gridY)
+            if (X==(*iter)->cell->data.gridX &&
+                Y==(*iter)->cell->data.gridY)
                 break;
 
             ++iter;
@@ -204,7 +179,7 @@ namespace MWWorld
 
         assert (iter!=mActiveCells.end());
 
-        mCurrentCell = cellstore;
+        mCurrentCell = *iter;
 
         // adjust player
         playerCellChange (mWorld->getExterior(X, Y), position, adjustPlayerPos);
@@ -215,10 +190,10 @@ namespace MWWorld
         mCellChanged = true;
     }
 
-	//We need the ogre renderer and a scene node.
+    //We need the ogre renderer and a scene node.
     Scene::Scene (Environment& environment, World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics)
-    : mRendering(rendering), mCurrentCell (0),
-      mCellChanged (false), mEnvironment (environment), mWorld(world), mPhysics(physics)
+    : mCurrentCell (0), mCellChanged (false), mEnvironment (environment), mWorld(world),
+      mPhysics(physics), mRendering(rendering)
     {
     }
 
@@ -241,7 +216,7 @@ namespace MWWorld
         std::cout << "Changing to interior\n";
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
-        std::cout << "Size: " << mActiveCells.size() << "\n";
+
         while (active!=mActiveCells.end())
         {
             unloadCell (active++);
@@ -261,7 +236,6 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
-        //currentRegion->name = "";
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)
@@ -283,38 +257,6 @@ namespace MWWorld
     {
         mCellChanged = false;
     }
-
-/*#include <cassert>
-#include <iostream>
-#include <exception>
-
-#include "../mwworld/class.hpp"
-#include "../mwworld/ptr.hpp"*/
-
-void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell)
-{
-  // Loop through all references in the cell
-  insertCellRefList (cell.activators, cell);
-  insertCellRefList (cell.potions, cell);
-  insertCellRefList (cell.appas, cell);
-  insertCellRefList (cell.armors, cell);
-  insertCellRefList (cell.books, cell);
-  insertCellRefList (cell.clothes, cell);
-  insertCellRefList (cell.containers, cell);
-  insertCellRefList (cell.creatures, cell);
-  insertCellRefList (cell.doors, cell);
-  insertCellRefList (cell.ingreds, cell);
-  insertCellRefList (cell.creatureLists, cell);
-  insertCellRefList (cell.itemLists, cell);
-  insertCellRefList (cell.lights, cell);
-  insertCellRefList (cell.lockpicks, cell);
-  insertCellRefList (cell.miscItems, cell);
-  insertCellRefList (cell.npcs, cell);
-  insertCellRefList (cell.probes, cell);
-  insertCellRefList (cell.repairs, cell);
-  insertCellRefList (cell.statics, cell);
-  insertCellRefList(cell.weapons, cell);
-}
 
 void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell,
     MWWorld::Environment& environment)
