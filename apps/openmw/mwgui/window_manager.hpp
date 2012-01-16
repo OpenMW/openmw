@@ -205,8 +205,7 @@ namespace MWGui
 
     MyGUI::Gui* getGui() const { return gui; }
 
-    void wmSetFPS(float fps) { mFPS = fps; }
-    void wmSetDetailedFPS(float fps, size_t triangleCount, size_t batchCount)
+    void wmUpdateFps(float fps, size_t triangleCount, size_t batchCount)
     {
         mFPS = fps;
         mTriangleCount = triangleCount;

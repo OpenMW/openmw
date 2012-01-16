@@ -113,17 +113,10 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         }
 
         // update GUI
-        if(mFpsLevel == 1)
-        {
-            mEnvironment.mWindowManager->wmSetFPS(mOgre->getFPS());
-        }
-        else if(mFpsLevel == 2) //detailed
-        {
-            Ogre::RenderWindow* window = mOgre->getWindow();
-            mEnvironment.mWindowManager->wmSetDetailedFPS(window->getLastFPS(),
-                                                          window->getTriangleCount(),
-                                                          window->getBatchCount());
-        }
+        Ogre::RenderWindow* window = mOgre->getWindow();
+        mEnvironment.mWindowManager->wmUpdateFps(window->getLastFPS(),
+                                                 window->getTriangleCount(),
+                                                 window->getBatchCount());
 
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
