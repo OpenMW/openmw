@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Skin">
+<Skin name="Next_btn" size="64 32" texture="textures\tx_menubook_next_idle.dds">
+<BasisSkin type="MainSkin" offset="0 0 64 32" align="ALIGN_VSTRETCH">
+<State name="normal" offset="0 0 64 32"/>
+</BasisSkin>
+</Skin>
+
+<Skin name="Prev_btn" size="128 32" texture="textures\tx_menubook_prev_idle.dds">
+<BasisSkin type="MainSkin" offset="0 0 128 32" align="ALIGN_VSTRETCH">
+<State name="normal" offset="0 0 128 32"/>
+</BasisSkin>
+</Skin>
+
+    <Skin name = "MW_BookClient" size = "10 10">
+        <Property key="FontName" value = "MonoFont" />
+        <Property key="AlignText" value = "Left Top" />
+        <Property key="Colour" value = "0000FF" />
+        <!--Property key="Pointer" value = "beam" /-->
+        <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
+    </Skin>
+	
+    <Skin name="MW_BookPage" size="0 0 50 50">
+        <Property key="WordWrap" value = "true" />
+        <Child type="Widget" skin="MW_BookClient" offset="0 0 35 10" align = "ALIGN_STRETCH" name = "Client"/>
+        <!--Child type="VScroll" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
+    </Skin>
+</MyGUI>

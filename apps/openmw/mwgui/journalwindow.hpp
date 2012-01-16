@@ -31,6 +31,13 @@ namespace MWGui
             void displayLeftText(std::string text);
             void displayRightText(std::string text);
 
+
+            /**
+            *Called when next/prev button is used.
+            */
+            void notifyNextPage(MyGUI::WidgetPtr _sender);
+            void notifyPrevPage(MyGUI::WidgetPtr _sender);
+
             static const int lineHeight;
 
             MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
@@ -38,6 +45,11 @@ namespace MWGui
             int lastPos, clientHeight;
             MyGUI::EditPtr mLeftTextWidget;
             MyGUI::EditPtr mRightTextWidget;
+            MyGUI::ButtonPtr mPrevBtn;
+            MyGUI::ButtonPtr mNextBtn;
+            std::vector<std::string> leftPages;
+            std::vector<std::string> rightPages;
+            int mPageNumber; //store the number of the current left page
     };
 
 }

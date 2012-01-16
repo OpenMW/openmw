@@ -83,6 +83,10 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
 
     getWidget(mLeftTextWidget, "LeftText");
     getWidget(mRightTextWidget, "RightText");
+    getWidget(mPrevBtn, "PrevPageBTN");
+    mPrevBtn->eventMouseButtonClick = MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyPrevPage);
+    getWidget(mNextBtn, "NextPageBTN");
+    mNextBtn->eventMouseButtonClick = MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyNextPage);
     //MyGUI::ItemBox* list = new MyGUI::ItemBox();
     //list->addItem("qaq","aqzazaz");
     //mScrollerWidget->addChildItem(list);
@@ -107,11 +111,9 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
 
 void MWGui::JournalWindow::open()
 {
+    mPageNumber = 0;
     if(mWindowManager.getEnvironment().mJournal->begin()!=mWindowManager.getEnvironment().mJournal->end())
     {
-        std::vector<std::string> leftPages;
-        std::vector<std::string> rightPages;
-
         book journal;
         journal.endLine = 0;
 
@@ -119,7 +121,7 @@ void MWGui::JournalWindow::open()
         {
             std::string a = it->getText(mWindowManager.getEnvironment().mWorld->getStore());
             std::cout << a;
-            journal = formatText(a,journal,10,20);
+            journal = formatText(a,journal,10,17);
             journal.endLine = journal.endLine +1;
             journal.pages.back() = journal.pages.back() + std::string("\n");
         }
@@ -140,8 +142,9 @@ void MWGui::JournalWindow::open()
         }
         if(!left) rightPages.push_back("");
 
-        displayLeftText(leftPages.back());
-        displayRightText(rightPages.back());
+        mPageNumber = leftPages.size()-1;
+        displayLeftText(leftPages[mPageNumber]);
+        displayRightText(rightPages[mPageNumber]);
 
     }
     else
@@ -165,4 +168,27 @@ void MWGui::JournalWindow::displayRightText(std::string text)
 {
     mRightTextWidget->eraseText(0,mRightTextWidget->getTextLength());
     mRightTextWidget->addText(text);
+}
+
+
+void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
+{
+    std::cout << mPageNumber;
+    if(mPageNumber < int(leftPages.size())-1)
+    {
+        mPageNumber = mPageNumber + 1;
+        displayLeftText(leftPages[mPageNumber]);
+        displayRightText(rightPages[mPageNumber]);
+    }
+}
+
+void MWGui::JournalWindow::notifyPrevPage(MyGUI::WidgetPtr _sender)
+{
+    std::cout << mPageNumber;
+    if(mPageNumber > 0)
+    {
+        mPageNumber = mPageNumber - 1;
+        displayLeftText(leftPages[mPageNumber]);
+        displayRightText(rightPages[mPageNumber]);
+    }
 }
