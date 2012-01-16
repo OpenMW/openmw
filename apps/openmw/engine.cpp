@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <OgreRoot.h>
+#include <OgreRenderWindow.h>
 
 #include <MyGUI_WidgetManager.h>
 
@@ -112,8 +113,17 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         }
 
         // update GUI
-        if(mShowFPS)
+        if(mFpsLevel == 1)
+        {
             mEnvironment.mWindowManager->wmSetFPS(mOgre->getFPS());
+        }
+        else if(mFpsLevel == 2) //detailed
+        {
+            Ogre::RenderWindow* window = mOgre->getWindow();
+            mEnvironment.mWindowManager->wmSetDetailedFPS(window->getLastFPS(),
+                                                          window->getTriangleCount(),
+                                                          window->getBatchCount());
+        }
 
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
@@ -157,7 +167,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mPhysicEngine (0)
-  , mShowFPS (false)
+  , mFpsLevel(0)
   , mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
@@ -331,7 +341,7 @@ void OMW::Engine::go()
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui(), mEnvironment,
-        mExtensions, mShowFPS, mNewGame);
+        mExtensions, mFpsLevel, mNewGame);
 
     // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
@@ -451,9 +461,9 @@ void OMW::Engine::setSoundUsage(bool soundUsage)
     mUseSound = soundUsage;
 }
 
-void OMW::Engine::showFPS(bool showFps)
+void OMW::Engine::showFPS(int level)
 {
-    mShowFPS = showFps;
+    mFpsLevel = level;
 }
 
 void OMW::Engine::setEncoding(const std::string& encoding)

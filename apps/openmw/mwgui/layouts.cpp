@@ -13,7 +13,7 @@
 using namespace MWGui;
 
 
-HUD::HUD(int width, int height, bool fpsSwitch)
+HUD::HUD(int width, int height, int fpsLevel)
     : Layout("openmw_hud_layout.xml")
 {
     setCoord(0,0, width, height);
@@ -37,10 +37,28 @@ HUD::HUD(int width, int height, bool fpsSwitch)
 
     getWidget(crosshair, "Crosshair");
 
-    getWidget(fpsbox, "FPSBox");
-    getWidget(fpscounter, "FPSCounter");
 
-    fpsbox->setVisible(fpsSwitch);
+    MyGUI::WidgetPtr fpsBoxAdvanced;
+    MyGUI::WidgetPtr fpsBoxDefault;
+
+    getWidget(fpsBoxDefault, "FPSBox");
+    getWidget(fpsBoxAdvanced, "FPSBoxAdv");
+    if ( fpsLevel == 2 ){
+        fpsBoxDefault->setVisible(false);
+        fpsbox = fpsBoxAdvanced;
+        getWidget(fpscounter, "FPSCounterAdv");
+    }else if ( fpsLevel == 1 ){
+        fpsBoxAdvanced->setVisible(false);
+        fpsbox = fpsBoxDefault;
+        getWidget(fpscounter, "FPSCounter");
+    }else{
+        fpsBoxDefault->setVisible(false);
+        fpsBoxAdvanced->setVisible(false);
+
+        getWidget(fpscounter, "FPSCounter");
+    }
+    getWidget(trianglecounter, "TriangleCounter");
+    getWidget(batchcounter, "BatchCounter");
 
     compass->setImageTexture("textures\\compass.dds");
     crosshair->setImageTexture("textures\\target.dds");
@@ -59,6 +77,15 @@ void HUD::setFPS(float fps)
     fpscounter->setCaption(boost::lexical_cast<std::string>((int)fps));
 }
 
+void HUD::setTriangleCount(size_t count)
+{
+    trianglecounter->setCaption(boost::lexical_cast<std::string>(count));
+}
+
+void HUD::setBatchCount(size_t count)
+{
+    batchcounter->setCaption(boost::lexical_cast<std::string>(count));
+}
 
 void HUD::setStats(int h, int hmax, int m, int mmax, int s, int smax)
 {

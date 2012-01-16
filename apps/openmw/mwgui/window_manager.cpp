@@ -22,7 +22,7 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-    const Compiler::Extensions& extensions, bool fpsSwitch, bool newGame)
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame)
   : environment(environment)
   , nameDialog(nullptr)
   , raceDialog(nullptr)
@@ -41,7 +41,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , shown(GW_ALL)
   , allowed(newGame ? GW_None : GW_ALL)
 {
-    showFPSCounter = fpsSwitch;
+    showFPSLevel = fpsLevel;
 
     creationStage = NotStarted;
 
@@ -53,7 +53,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     int w = gui->getViewSize().width;
     int h = gui->getViewSize().height;
 
-    hud = new HUD(w,h, showFPSCounter);
+    hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
     map = new MapWindow();
     stats = new StatsWindow(*this);
@@ -135,9 +135,11 @@ void WindowManager::update()
         environment.mInputManager->setGuiMode(nextMode);
         nextMode = GM_Game;
     }
-    if (showFPSCounter)
+    if (showFPSLevel > 0)
     {
         hud->setFPS(mFPS);
+        hud->setTriangleCount(mTriangleCount);
+        hud->setBatchCount(mBatchCount);
     }
 }
 
