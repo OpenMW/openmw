@@ -97,6 +97,8 @@ boost::filesystem::path WindowsPath::getInstallPath() const
         {
             installPath = data;
         }
+
+        delete[] data;
     }
 
     return installPath;
