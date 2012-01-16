@@ -120,7 +120,6 @@ void MWGui::JournalWindow::open()
         for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = mWindowManager.getEnvironment().mJournal->begin();it!=mWindowManager.getEnvironment().mJournal->end();it++)
         {
             std::string a = it->getText(mWindowManager.getEnvironment().mWorld->getStore());
-            std::cout << a;
             journal = formatText(a,journal,10,17);
             journal.endLine = journal.endLine +1;
             journal.pages.back() = journal.pages.back() + std::string("\n");
@@ -149,7 +148,6 @@ void MWGui::JournalWindow::open()
     }
     else
     {
-        std::cout << "empty";
         //std::cout << mWindowManager.getEnvironment().mJournal->begin()->getText(mWindowManager.getEnvironment().mWorld->getStore());
     }
 }
@@ -173,7 +171,6 @@ void MWGui::JournalWindow::displayRightText(std::string text)
 
 void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
 {
-    std::cout << mPageNumber;
     if(mPageNumber < int(leftPages.size())-1)
     {
         mPageNumber = mPageNumber + 1;
@@ -184,7 +181,6 @@ void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
 
 void MWGui::JournalWindow::notifyPrevPage(MyGUI::WidgetPtr _sender)
 {
-    std::cout << mPageNumber;
     if(mPageNumber > 0)
     {
         mPageNumber = mPageNumber - 1;
