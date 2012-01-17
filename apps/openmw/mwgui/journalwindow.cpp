@@ -4,11 +4,14 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
-struct book
+namespace
 {
-    int endLine;
-    std::list<std::string> pages;
-};
+    struct book
+    {
+        int endLine;
+        std::list<std::string> pages;
+    };
+}
 
 book formatText(std::string text,book mBook,int maxLine, int lineSize)
 {
@@ -44,7 +47,7 @@ book formatText(std::string text,book mBook,int maxLine, int lineSize)
             //TODO:finnish this
             break;
         }
-        if(firstSpace + cLineSize <= lineSize)
+        if(static_cast<int> (firstSpace) + cLineSize <= lineSize)
         {
             cLineSize = firstSpace + cLineSize;
             cString = cString + cText.substr(0,firstSpace +1);
@@ -70,7 +73,7 @@ book formatText(std::string text,book mBook,int maxLine, int lineSize)
     }
     mBook.endLine = cLine;
     return mBook;
-    //std::string 
+    //std::string
 }
 
 
