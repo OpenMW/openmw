@@ -37,24 +37,15 @@ HUD::HUD(int width, int height, int fpsLevel)
 
     getWidget(crosshair, "Crosshair");
 
-
-    MyGUI::WidgetPtr fpsBoxAdvanced;
-    MyGUI::WidgetPtr fpsBoxDefault;
-
-    getWidget(fpsBoxDefault, "FPSBox");
-    getWidget(fpsBoxAdvanced, "FPSBoxAdv");
     if ( fpsLevel == 2 ){
-        fpsBoxDefault->setVisible(false);
-        fpsbox = fpsBoxAdvanced;
+        getWidget(fpsbox, "FPSBoxAdv");
+        fpsbox->setVisible(true);
         getWidget(fpscounter, "FPSCounterAdv");
     }else if ( fpsLevel == 1 ){
-        fpsBoxAdvanced->setVisible(false);
-        fpsbox = fpsBoxDefault;
+        getWidget(fpsbox, "FPSBox");
+        fpsbox->setVisible(true);
         getWidget(fpscounter, "FPSCounter");
     }else{
-        fpsBoxDefault->setVisible(false);
-        fpsBoxAdvanced->setVisible(false);
-
         getWidget(fpscounter, "FPSCounter");
     }
     getWidget(trianglecounter, "TriangleCounter");
