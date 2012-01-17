@@ -90,15 +90,13 @@ boost::filesystem::path WindowsPath::getInstallPath() const
     if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT(regkey), 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS)
     {
         //Key existed, let's try to read the install dir
-        char* data = new char[4096];
-        int len = 4096;
+        std::vector<char> buf(512);
+        int len = 512;
 
-        if (RegQueryValueEx(hKey, TEXT("Installed Path"), NULL, NULL, (LPBYTE)data, (LPDWORD)&len) == ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, TEXT("Installed Path"), NULL, NULL, (LPBYTE)&buf[0], (LPDWORD)&len) == ERROR_SUCCESS)
         {
-            installPath = data;
+            installPath = &buf[0];
         }
-
-        delete[] data;
     }
 
     return installPath;
