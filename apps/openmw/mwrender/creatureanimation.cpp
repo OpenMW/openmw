@@ -14,7 +14,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
     ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
-   assert (ref->base != NULL);
+    assert (ref->base != NULL);
     if(!ref->base->model.empty()){
         const std::string &mesh = "meshes\\" + ref->base->model;
         std::string meshNumbered = mesh + getUniqueID(mesh) + ">|";
@@ -22,9 +22,9 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
         base = mRend.getScene()->createEntity(meshNumbered);
         std::string meshZero = mesh + "0000>|";
 
-        if(transformations = (NIFLoader::getSingletonPtr())->getAnim(meshZero)){
+        if((transformations = (NIFLoader::getSingletonPtr())->getAnim(meshZero))){
 
-        for(int init = 0; init < transformations->size(); init++){
+        for(std::size_t init = 0; init < transformations->size(); init++){
 				rindexI.push_back(0);
 				tindexI.push_back(0);
 			}
@@ -53,7 +53,7 @@ void CreatureAnimation::runAnimation(float timepassed){
             else
                 time = startTime + (time - stopTime);
         }
-            
+
         handleAnimationTransforms();
         handleShapes(shapes, base, base->getSkeleton());
 

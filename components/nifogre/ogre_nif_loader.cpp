@@ -222,7 +222,7 @@ void NIFLoader::createMaterial(const String &name,
     //Hardware Skinning code, textures may be the wrong color if enabled
      /*if(!mSkel.isNull()){
     material->removeAllTechniques();
-  
+
         Ogre::Technique* tech = material->createTechnique();
         //tech->setSchemeName("blahblah");
         Pass* pass = tech->createPass();
@@ -234,8 +234,8 @@ void NIFLoader::createMaterial(const String &name,
     // will automatically be loaded when needed. If not (such as for
     // internal NIF textures that we might support later), we should
     // already have inserted a manual loader for the texture.
-    
-   
+
+
     if (!texName.empty())
     {
         Pass *pass = material->getTechnique(0)->getPass(0);
@@ -295,8 +295,8 @@ void NIFLoader::createMaterial(const String &name,
     material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
     material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
     material->setShininess(glossiness);
-    
-   
+
+
 }
 
 // Takes a name and adds a unique part to it. This is just used to
@@ -359,7 +359,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
         HardwareBufferManager::getSingleton().createVertexBuffer(
             VertexElement::getTypeSize(VET_FLOAT3),
             numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
-    
+
     if(flip)
 	{
 		float *datamod = new float[data->vertices.length];
@@ -381,7 +381,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 	{
 		vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, false);
 	}
-    
+
 
     VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
     bind->setBinding(nextBuf++, vbuf);
@@ -392,7 +392,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
         vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
                    VertexElement::getTypeSize(VET_FLOAT3),
                    numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
-		
+
 		if(flip)
 		{
 			Quaternion rotation = mTransform.extractQuaternion();
@@ -456,10 +456,10 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 		if(flip)
 		{
 		    float *datamod = new float[data->uvlist.length];
-		
+
 		    for(unsigned int i = 0; i < data->uvlist.length; i+=2){
 			    float x = *(data->uvlist.ptr + i);
-			    
+
 			    float y = *(data->uvlist.ptr + i + 1);
 
 			    datamod[i] =x;
@@ -474,10 +474,10 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 
    // Triangle faces - The total number of triangle points
     int numFaces = data->triangles.length;
-	
+
     if (numFaces)
     {
-		
+
 		sub->indexData->indexCount = numFaces;
         sub->indexData->indexStart = 0;
         HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
@@ -508,14 +508,14 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 
 				index += 3;
 			}
-			
+
 			 ibuf->writeData(0, ibuf->getSizeInBytes(), datamod, false);
 
 		}
 		else
 		     ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, false);
         sub->indexData->indexBuffer = ibuf;
-        
+
 
 
     }
@@ -753,9 +753,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     //use niskindata for the position of vertices.
     if (!shape->skin.empty())
     {
-		
-		
-		
+
+
+
         // vector that stores if the position of a vertex is absolute
         std::vector<bool> vertexPosAbsolut(numVerts,false);
 		std::vector<Ogre::Vector3> vertexPosOriginal(numVerts, Ogre::Vector3::ZERO);
@@ -791,7 +791,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name.toString());
 
             // final_vector = old_vector + old_rotation*new_vector*old_scale
-           
+
 
 			Nif::NiSkinData::BoneInfoCopy boneinfocopy;
 			boneinfocopy.trafo.rotation = convertRotation(it->trafo->rotation);
@@ -841,7 +841,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                         Vector3 absNormalsPos = vecRot * Vector3(ptrNormals + verIndex *3);
 						absNormalsPos = absNormalsPos * (it->weights.ptr + i)->weight;
 						vertexNormalOriginal[verIndex] = Vector3(ptrNormals + verIndex *3);
-                        
+
                         for (int j=0; j<3; j++)
                             (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
                     }
@@ -868,7 +868,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 						absNormalsPos = absNormalsPos * (it->weights.ptr + i)->weight;
 						Vector3 oldNormal = Vector3(ptrNormals + verIndex *3);
 						absNormalsPos = absNormalsPos + oldNormal;
-                        
+
                         for (int j=0; j<3; j++)
                             (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
                     }
@@ -879,19 +879,19 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 vba.boneIndex = bonePtr->getHandle();
                 vba.vertexIndex = verIndex;
                 vba.weight = (it->weights.ptr + i)->weight;
-	
+
 
                 vertexBoneAssignments.push_back(vba);
             }
-			
+
 
             boneIndex++;
         }
-		
+
     }
     else
     {
-		
+
 			copy.boneSequence = boneSequence;
         // Rotate, scale and translate all the vertices,
         const Matrix &rot = shape->trafo->rotation;
@@ -902,7 +902,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 		copy.trafo.rotation = convertRotation(original.rotation);
 		copy.trafo.scale = original.scale;
 		//We don't use velocity for anything yet, so it does not need to be saved
-	
+
 		// Computes C = B + AxC*scale
         for (int i=0; i<numVerts; i++)
         {
@@ -911,7 +911,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 			mBoundingBox.merge(absVertPos);
             ptr += 3;
         }
-		
+
         // Remember to rotate all the vertex normals as well
         if (data->normals.length)
         {
@@ -955,7 +955,7 @@ void NIFLoader::calculateTransform()
         // Calculate transform
         Matrix4 transform = Matrix4::IDENTITY;
         transform = Matrix4::getScale(vector) * transform;
-        
+
         // Check whether we have to flip vertex winding.
         // We do have to, if we changed our right hand base.
         // We can test it by using the cross product from X and Y and see, if it is a non-negative
@@ -963,7 +963,7 @@ void NIFLoader::calculateTransform()
         // but the test is cheap either way.
         Matrix3 m3;
         transform.extract3x3Matrix(m3);
-		
+
         if (m3.GetColumn(0).crossProduct(m3.GetColumn(1)).dotProduct(m3.GetColumn(2)) < 0)
         {
         	mFlipVertexWinding = true;
@@ -1003,39 +1003,38 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         }
 
         if (e->recType == RC_NiTextKeyExtraData){
-			Nif::NiTextKeyExtraData* extra =  dynamic_cast<Nif::NiTextKeyExtraData*> (e);
-			
-			std::ofstream file;
+            Nif::NiTextKeyExtraData* extra =  dynamic_cast<Nif::NiTextKeyExtraData*> (e);
+
+            std::ofstream file;
 
             if(mOutputAnimFiles){
-			    std::string cut = "";
-			    for(unsigned int i = 0; i < name.length();  i++)
-			    {
-				    if(!(name.at(i) == '\\' || name.at(i) == '/' || name.at(i) == '>' || name.at(i) == '<' || name.at(i) == '?' || name.at(i) == '*' || name.at(i) == '|' || name.at(i) == ':' || name.at(i) == '"'))
-				    {
-					    cut += name.at(i);
-				    }
-			    }
-			
-			    std::cout << "Outputting " << cut << "\n";
+                std::string cut = "";
+                for(unsigned int i = 0; i < name.length();  i++)
+                {
+                    if(!(name.at(i) == '\\' || name.at(i) == '/' || name.at(i) == '>' || name.at(i) == '<' || name.at(i) == '?' || name.at(i) == '*' || name.at(i) == '|' || name.at(i) == ':' || name.at(i) == '"'))
+                    {
+                        cut += name.at(i);
+                    }
+                }
 
-			    file.open((verbosePath + "/Indices" + cut + ".txt").c_str());
+                std::cout << "Outputting " << cut << "\n";
+
+                file.open((verbosePath + "/Indices" + cut + ".txt").c_str());
             }
-	
-			for(std::vector<Nif::NiTextKeyExtraData::TextKey>::iterator textiter = extra->list.begin(); textiter != extra->list.end(); textiter++)
-			{
-				
-				std::string text = textiter->text.toString();
-				
-				replace(text.begin(), text.end(), '\n', '/');
 
-				text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
-                int i = 0;
+            for(std::vector<Nif::NiTextKeyExtraData::TextKey>::iterator textiter = extra->list.begin(); textiter != extra->list.end(); textiter++)
+            {
+                std::string text = textiter->text.toString();
+
+                replace(text.begin(), text.end(), '\n', '/');
+
+                text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
+                std::size_t i = 0;
                 while(i < text.length()){
                     while(i < text.length() && text.at(i) == '/' ){
                         i++;
                     }
-                    int first = i;
+                    std::size_t first = i;
                     int length = 0;
                     while(i < text.length() && text.at(i) != '/' ){
                         i++;
@@ -1045,15 +1044,15 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
                             //length = text.length() - first;
                         std::string sub = text.substr(first, length);
 
-				       if(mOutputAnimFiles)
+                       if(mOutputAnimFiles)
                             file << "Time: " << textiter->time << "|" << sub << "\n";
-				
-				        textmappings[sub] = textiter->time;
+
+                        textmappings[sub] = textiter->time;
                     }
                 }
-			}
-			file.close();
-		}
+            }
+            file.close();
+        }
     }
 
     Bone *bone = 0;
@@ -1064,7 +1063,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
-   
+
             mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
         }
 
@@ -1072,7 +1071,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         {
             std::string name = node->name.toString();
             boneSequence.push_back(name);
-            
+
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
             if(!mSkel->hasBone(name))
@@ -1125,7 +1124,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     else if (node->recType == RC_NiTriShape && bNiTri)
     {
          std::string nodename = node->name.toString();
-		
+
 			if (triname == "")
             {
                 handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds, original, boneSequence);
@@ -1172,12 +1171,12 @@ void NIFLoader::loadResource(Resource *resource)
             baddin = true;
 			bNiTri = true;
 			std::string sub = name.substr(name.length() - 6, 4);
-            
+
 			if(sub.compare("0000") != 0)
 			addAnim = false;
-				
+
 		}
-       
+
        switch(name.at(name.length() - 1))
 	{
 	    case '"':
@@ -1253,33 +1252,30 @@ void NIFLoader::loadResource(Resource *resource)
 
     // Handle the node
 	std::vector<std::string> boneSequence;
-	
-	
+
+
 
     handleNode(node, 0, NULL, bounds, 0, boneSequence);
     if(addAnim)
     {
         for(int i = 0; i < nif.numRecords(); i++)
-	    {
-	        Nif::NiKeyframeController *f = dynamic_cast<Nif::NiKeyframeController*>(nif.getRecord(i));
+        {
+            Nif::NiKeyframeController *f = dynamic_cast<Nif::NiKeyframeController*>(nif.getRecord(i));
 
-            Nif::Node *n = dynamic_cast<Nif::Node*>(nif.getRecord(i));
-	        if(f != NULL)
-	        {
-		        hasAnim = true;
-		        Nif::Node *o = dynamic_cast<Nif::Node*>(f->target.getPtr());
-		        Nif::NiKeyframeDataPtr data = f->data;
-		
-		        if (f->timeStart == 10000000000000000)
-			        continue;
-		        data->setBonename(o->name.toString());
-		        data->setStartTime(f->timeStart);
-		        data->setStopTime(f->timeStop);
+            if(f != NULL)
+            {
+                hasAnim = true;
+                Nif::Node *o = dynamic_cast<Nif::Node*>(f->target.getPtr());
+                Nif::NiKeyframeDataPtr data = f->data;
 
-		        allanim.push_back(data.get());
-		
-		
-	        }
+                if (f->timeStart == 10000000000000000)
+                    continue;
+                data->setBonename(o->name.toString());
+                data->setStartTime(f->timeStart);
+                data->setStopTime(f->timeStop);
+
+                allanim.push_back(data.get());
+            }
         }
     }
     // set the bounding value.
@@ -1290,18 +1286,18 @@ void NIFLoader::loadResource(Resource *resource)
         mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
     if(hasAnim && addAnim){
-		allanimmap[name] = allanim;
-		alltextmappings[name] = textmappings;
-	}
-	if(!mSkel.isNull() && shapes.size() > 0 && addAnim)
-	{
-		allshapesmap[name] = shapes;
-        
-	}
-   
+        allanimmap[name] = allanim;
+        alltextmappings[name] = textmappings;
+    }
+    if(!mSkel.isNull() && shapes.size() > 0 && addAnim)
+    {
+        allshapesmap[name] = shapes;
+
+    }
+
     if(flip){
-	    mesh->_setBounds(mBoundingBox, false);
-	}
+        mesh->_setBounds(mBoundingBox, false);
+    }
 
      if (!mSkel.isNull())
     {
@@ -1310,7 +1306,7 @@ void NIFLoader::loadResource(Resource *resource)
 }
 
 void NIFLoader::addInMesh(Ogre::Mesh* input){
-	addin.push_back(input);
+    addin.push_back(input);
 }
 
 
@@ -1318,7 +1314,7 @@ void NIFLoader::addInMesh(Ogre::Mesh* input){
 MeshPtr NIFLoader::load(const std::string &name,
                          const std::string &group)
 {
-    
+
     MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     ResourcePtr ptr = m->getByName(name, group);
@@ -1335,26 +1331,26 @@ MeshPtr NIFLoader::load(const std::string &name,
 
 /*
 This function shares much of the same code handleShapes() in MWRender::Animation
-This function also creates new position and normal buffers for submeshes. 
+This function also creates new position and normal buffers for submeshes.
 This function points to existing texture and IndexData buffers
 */
 
 std::vector<Nif::NiKeyframeData>* NIFLoader::getAnim(std::string lowername){
-		
-		std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost>::iterator iter = allanimmap.find(lowername);
+
+        std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost>::iterator iter = allanimmap.find(lowername);
        std::vector<Nif::NiKeyframeData>* pass = 0;
-		if(iter != allanimmap.end())
-			pass = &(iter->second);
-		return pass;
-			
+        if(iter != allanimmap.end())
+            pass = &(iter->second);
+        return pass;
+
 }
 std::vector<Nif::NiTriShapeCopy>* NIFLoader::getShapes(std::string lowername){
-		
-		std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost>::iterator iter = allshapesmap.find(lowername);
+
+        std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost>::iterator iter = allshapesmap.find(lowername);
         std::vector<Nif::NiTriShapeCopy>* pass = 0;
-		if(iter != allshapesmap.end())
-			pass = &(iter->second);
-		return pass;
+        if(iter != allshapesmap.end())
+            pass = &(iter->second);
+        return pass;
 }
 
 std::map<std::string, float>* NIFLoader::getTextIndices(std::string lowername){

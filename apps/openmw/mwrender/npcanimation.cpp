@@ -13,7 +13,7 @@ NpcAnimation::~NpcAnimation(){
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend): Animation(_env,_rend){
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
-		
+
 		//Part selection on last character of the file string
 		//  " Tri Chest
 		//  * Tri Tail
@@ -35,10 +35,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		std::string hairID = ref->base->hair;
         std::string headID = ref->base->head;
 		std::string npcName = ref->base->name;
-        //ESMStore::Races r = 
+        //ESMStore::Races r =
         const ESM::Race* race = mEnvironment.mWorld->getStore().races.find(ref->base->race);
-        
-        
+
+
          std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
 		char secondtolast = bodyRaceID.at(bodyRaceID.length() - 2);
 		bool female = tolower(secondtolast) == 'f';
@@ -51,7 +51,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
              std::cout << " Sex: Male" << " Height: " << race->data.height.male << "\n";
         }*/
 
-        
+
 
         std::string smodel = "meshes\\base_anim.nif";
 		if(beast)
@@ -61,25 +61,25 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          assert(insert);
 
          NifOgre::NIFLoader::load(smodel);
-         
+
     base = mRend.getScene()->createEntity(smodel);
-    base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones 
+    base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones
                                                //stay in the same place when we skipanim, or open a gui window
 
-    
-    if(transformations = (NIFLoader::getSingletonPtr())->getAnim(smodel)){
+
+    if((transformations = (NIFLoader::getSingletonPtr())->getAnim(smodel))){
 
         for(unsigned int init = 0; init < transformations->size(); init++){
 				rindexI.push_back(0);
 				tindexI.push_back(0);
 			}
-        
+
         stopTime = transformations->begin()->getStopTime();
 		startTime = transformations->begin()->getStartTime();
     }
     textmappings = NIFLoader::getSingletonPtr()->getTextIndices(smodel);
     insert->attachObject(base);
-    
+
         if(female)
             insert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
         else
@@ -108,18 +108,18 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
             forearml = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");  //We need two
 		if(!handl)
 			handl = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
-		//const ESM::BodyPart* claviclel = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "clavicle");  
+		//const ESM::BodyPart* claviclel = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "clavicle");
 		//const ESM::BodyPart* clavicler = claviclel;
 		const ESM::BodyPart* handr = handl;
 		const ESM::BodyPart* forearmr = forearml;
 		const ESM::BodyPart* wristr = wristl;
 		const ESM::BodyPart* armr = arml;
 
-        
+
         if(upperleg){
 			insertBoundedPart("meshes\\" + upperleg->model + "*|", "Left Upper Leg");
 			insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg");
-			
+
 		}
         if(foot){
 			if(bodyRaceID.compare("b_n_khajiit_m_") == 0)
@@ -139,10 +139,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		{
 			insertBoundedPart("meshes\\" + knee->model + "*|", "Left Knee");  //e
 			insertBoundedPart("meshes\\" + knee->model, "Right Knee");   //e
-			
+
 		}
 		if(ankle){
-			
+
 			insertBoundedPart("meshes\\" + ankle->model + "*|", "Left Ankle"); //Ogre::Quaternion(Ogre::Radian(3.14 / 4), Ogre::Vector3(1, 0, 0)),blank); //1,0,0, blank);
 			insertBoundedPart("meshes\\" + ankle->model, "Right Ankle");
 		}
@@ -167,17 +167,17 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 
 		if(wristl)
 				insertBoundedPart("meshes\\" + wristl->model + "*|", "Left Wrist");
-		
-        
-	
-		
+
+
+
+
 
 		/*if(claviclel)
 			insertBoundedPart("meshes\\" + claviclel->model + "*|", "Left Clavicle", base);
 		if(clavicler)
 			insertBoundedPart("meshes\\" + clavicler->model , "Right Clavicle", base);*/
-	    
-	    
+
+
 		if(neck)
 		{
 			insertBoundedPart("meshes\\" + neck->model, "Neck");
@@ -186,19 +186,19 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 			insertBoundedPart("meshes\\" + head->model, "Head");
 		if(hair)
 			insertBoundedPart("meshes\\" + hair->model, "Head");
-        
+
         if (chest){
 				insertFreePart("meshes\\" + chest->model, ">\"", insert);
-               
-			
+
+
 		}
         if (handr){
 				insertFreePart("meshes\\" + handr->model , ">?", insert);
-			
+
 		}
         if (handl){
 				insertFreePart("meshes\\" + handl->model, ">>", insert);
-			
+
 		}
         if(tail){
                 insertFreePart("meshes\\" + tail->model, ">*", insert);
@@ -215,16 +215,16 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
     NIFLoader::load(mesh);
     Entity* ent = mRend.getScene()->createEntity(mesh);
-	 
-    base->attachObjectToBone(bonename, ent); 
+
+    base->attachObjectToBone(bonename, ent);
     return ent;
 }
 void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suffix, Ogre::SceneNode* insert){
-    std::string meshNumbered = mesh + getUniqueID(mesh + suffix) + suffix; 
+    std::string meshNumbered = mesh + getUniqueID(mesh + suffix) + suffix;
     NIFLoader::load(meshNumbered);
-    
+
     Ogre::Entity* ent = mRend.getScene()->createEntity(meshNumbered);
-    
+
         /*MaterialPtr material = ent->getSubEntity(0)->getMaterial();
         material->removeAllTechniques();
 
@@ -234,7 +234,7 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
         pass2->setVertexProgram("Ogre/HardwareSkinningTwoWeights");
         pass2->setColourWriteEnabled(false);
         //tech->setSchemeName("blahblah");*/
-        
+
 
     insert->attachObject(ent);
     entityparts.push_back(ent);
@@ -244,7 +244,7 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
         handleShapes(shapes, ent, base->getSkeleton());
     }
 
-    
+
 }
 
 
@@ -256,10 +256,10 @@ void NpcAnimation::runAnimation(float timepassed){
 	//3. Handle the shapes dependent on animation transforms
 	if(animate > 0){
         time += timepassed;
-        
+
         if(time > stopTime){
             animate--;
-            
+
             if(animate == 0)
                 time = stopTime;
             else
@@ -270,21 +270,21 @@ void NpcAnimation::runAnimation(float timepassed){
         Ogre::Vector3 current = insert->_getWorldAABB().getCenter();
 
         //This is the attempt at npc physics
-        //mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), current); 
+        //mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), current);
 
 
-        
+
         /*if(base->hasSkeleton())
         {
-            
+
             Ogre::Quaternion boneQuat = rotate;
             Ogre::Vector3 boneTrans = trans;
             mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), boneTrans + insert->getPosition());
             //mEnvironment.mWorld->setObjectPhysicsRotation(insert->getName(), boneQuat * insert->getOrientation());
-            
+
         }*/
-       
-        
+
+
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
         while(shapepartsiter != shapeparts.end())
@@ -292,12 +292,12 @@ void NpcAnimation::runAnimation(float timepassed){
             std::vector<Nif::NiTriShapeCopy>* shapes = *shapepartsiter;
             Ogre::Entity* theentity = *entitypartsiter;
             /*
-            Pass* pass = theentity->getSubEntity(0)->getMaterial()->getBestTechnique()->getPass(0); 
+            Pass* pass = theentity->getSubEntity(0)->getMaterial()->getBestTechnique()->getPass(0);
             if (pass->hasVertexProgram() && pass->getVertexProgram()->isSkeletalAnimationIncluded())
                 std::cout << "It's hardware\n";
                 else
                 std::cout << "It's software\n";*/
-       
+
             handleShapes(shapes, theentity, theentity->getSkeleton());
             shapepartsiter++;
             entitypartsiter++;

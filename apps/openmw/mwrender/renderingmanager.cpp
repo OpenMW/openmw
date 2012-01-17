@@ -22,7 +22,7 @@ namespace MWRender {
 
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
-:mRendering(_rend), mObjects(mRendering), mDebugging(engine), mActors(mRendering, environment)
+:mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
     mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), resDir);
