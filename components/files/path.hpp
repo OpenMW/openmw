@@ -76,6 +76,7 @@ struct Path
         , mLocalDataPath(mPath.getLocalDataPath())
         , mGlobalDataPath(mPath.getGlobalDataPath())
         , mRuntimeDataPath(mPath.getRuntimeDataPath())
+        , mInstalledPath(mPath.getInstallPath())
     {
         if (!application_name.empty())
         {
@@ -209,6 +210,26 @@ struct Path
         mRuntimeDataPath = path;
     }
 
+    /**
+     * \brief Return path pointing to the directory where application was started.
+     *
+     * \return boost::filesystem::path
+     */
+    const boost::filesystem::path& getInstalledPath() const
+    {
+        return mInstalledPath;
+    }
+
+    /**
+     * \brief Sets new runtime data directory.
+     *
+     * \param [in] path - New path
+     */
+    void setInstalledPath(const boost::filesystem::path& path)
+    {
+        mInstalledPath = path;
+    }
+
     private:
         PathType mPath;
 
@@ -223,6 +244,7 @@ struct Path
         boost::filesystem::path mRuntimeDataPath;        /**< Runtime path to the configuration files.
                                                               By default it is a 'data' directory in same
                                                               directory where application was run */
+        boost::filesystem::path mInstalledPath;          /**< Runtime path to the configuration files. */
 
 };
 

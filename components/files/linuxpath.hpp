@@ -26,6 +26,7 @@
 #if defined(__linux__)
 
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 /**
  * \namespace Files
@@ -81,6 +82,13 @@ struct LinuxPath
      * \return boost::filesystem::path
      */
     boost::filesystem::path getRuntimeDataPath() const;
+
+    /**
+     * \brief Gets the path of the installed Morrowind version if there is one.
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getInstallPath() const;
 };
 
 } /* namespace Files */
