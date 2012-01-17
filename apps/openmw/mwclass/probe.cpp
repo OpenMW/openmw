@@ -8,28 +8,41 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 
-#include "../mwrender/cellimp.hpp"
-
 #include "containerutil.hpp"
+#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {
-    void Probe::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+    void Probe::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
             ptr.get<ESM::Probe>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
+        
         if (!model.empty())
         {
-            MWRender::Rendering rendering (cellRender, ref->ref, ref->mData);
-            cellRender.insertMesh ("meshes\\" + model);
-            cellRender.insertObjectPhysics();
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+            MWRender::Objects& objects = renderingInterface.getObjects();
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            objects.insertMesh(ptr, "meshes\\" + model);
         }
     }
+
+    void Probe::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+            ptr.get<ESM::Probe>();
+
+
+        const std::string &model = ref->base->model;
+        assert (ref->base != NULL);
+        if(!model.empty()){
+            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        }
+
+    }
+
 
     std::string Probe::getName (const MWWorld::Ptr& ptr) const
     {
@@ -38,7 +51,6 @@ namespace MWClass
 
         return ref->base->name;
     }
-
     boost::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {

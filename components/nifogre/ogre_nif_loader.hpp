@@ -28,9 +28,37 @@
 #include <OgreMesh.h>
 #include <assert.h>
 #include <string>
+#include    <boost/algorithm/string.hpp>
+#include <Ogre.h>
+#include <stdio.h>
+#include <iostream>
+
+#include <libs/mangle/vfs/servers/ogre_vfs.hpp>
+#include "../nif/nif_file.hpp"
+#include "../nif/node.hpp"
+#include "../nif/data.hpp"
+#include "../nif/property.hpp"
+#include "../nif/controller.hpp"
+#include "../nif/extra.hpp"
+#include <libs/platform/strings.h>
+
+#include <vector>
+#include <list>
+// For warning messages
+#include <iostream>
+#include <limits>
+using namespace boost::algorithm;
 
 
 class BoundsFinder;
+
+struct ciLessBoost : std::binary_function<std::string, std::string, bool>
+{
+    bool operator() (const std::string & s1, const std::string & s2) const {
+                                               //case insensitive version of is_less
+        return lexicographical_compare(s1, s2, is_iless());
+    }
+};
 
 namespace Nif
 {
@@ -51,6 +79,7 @@ namespace Mangle
 
 namespace NifOgre
 {
+
 
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
@@ -78,23 +107,34 @@ class NIFLoader : Ogre::ManualResourceLoader
 
         static Ogre::MeshPtr load(const std::string &name,
                                     const std::string &group="General");
-
+        //void insertMeshInsideBase(Ogre::Mesh* mesh);
+        std::vector<Nif::NiKeyframeData>* getAnim(std::string name);
+        std::vector<Nif::NiTriShapeCopy>* getShapes(std::string name);
+        std::map<std::string, float>* getTextIndices(std::string name);
+        void addInMesh(Ogre::Mesh* input);
 
 
         Ogre::Vector3 convertVector3(const Nif::Vector& vec);
         Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
 
+        void setOutputAnimFiles(bool output);
+        void setVerbosePath(std::string path);
+
     private:
-        NIFLoader() : resourceGroup("General") { skincounter = 0; resourceName = "";}
+        NIFLoader() : resourceName(""), resourceGroup("General"),  flip(false), mNormaliseNormals(false),
+          mFlipVertexWinding(false), mOutputAnimFiles(false)  {}
         NIFLoader(NIFLoader& n) {}
+
+        void calculateTransform();
+
 
         void warn(std::string msg);
         void fail(std::string msg);
 
         void handleNode( Nif::Node *node, int flags,
-                        const Nif::Transformation *trafo, BoundsFinder &bounds, Ogre::Bone *parentBone);
+                        const Nif::Transformation *trafo, BoundsFinder &bounds, Ogre::Bone *parentBone, std::vector<std::string> boneSequence);
 
-        void handleNiTriShape(Nif::NiTriShape *shape, int flags, BoundsFinder &bounds);
+        void handleNiTriShape(Nif::NiTriShape *shape, int flags, BoundsFinder &bounds, Nif::Transformation original, std::vector<std::string> boneSequence);
 
         void createOgreSubMesh(Nif::NiTriShape *shape, const Ogre::String &material, std::list<Ogre::VertexBoneAssignment> &vertexBoneAssignments);
 
@@ -124,21 +164,34 @@ class NIFLoader : Ogre::ManualResourceLoader
         // extension from .tga to .dds if the texture is missing.
         Mangle::VFS::OgreVFS *vfs;
 
+        std::string verbosePath;
         std::string resourceName;
         std::string resourceGroup;
-        int skincounter;
-        bool isChest;
-        bool isBeast;
-        bool isHands;
-        bool isFeet;
-        int counter;
-        int numbers;
-        int stack;
+        Ogre::Matrix4 mTransform;
+        Ogre::AxisAlignedBox mBoundingBox;
+        bool flip;
+        bool mNormaliseNormals;
+        bool mFlipVertexWinding;
+        bool bNiTri;
+        bool mOutputAnimFiles;
         std::multimap<std::string,std::string> MaterialMap;
 
         // pointer to the ogre mesh which is currently build
         Ogre::Mesh *mesh;
         Ogre::SkeletonPtr mSkel;
+        Ogre::Vector3 vector;
+        std::vector<Nif::NiTriShapeCopy> shapes;
+        std::string name;
+        std::string triname;
+        std::vector<Nif::NiKeyframeData> allanim;
+        std::map<std::string,float> textmappings;
+        std::map<std::string,std::map<std::string,float>,ciLessBoost> alltextmappings;
+        std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost> allanimmap;
+        std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost> allshapesmap;
+        std::vector<Ogre::Mesh*> addin;
+        std::vector<Nif::NiKeyframeData> mAnim;
+        std::vector<Nif::NiTriShapeCopy> mS;
+
 };
 
 }

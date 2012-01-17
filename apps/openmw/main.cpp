@@ -78,6 +78,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
         ("fps", boost::program_options::value<int>()->implicit_value(1)
             ->default_value(0), "fps counter detail (0 = off, 1 = fps counter, 2 = full detail)")
 
+        ("anim-verbose", boost::program_options::value<bool>()->implicit_value(true)
+            ->default_value(false), "output animation indices files")
+
         ("debug", boost::program_options::value<bool>()->implicit_value(true)
             ->default_value(false), "debug mode")
 
@@ -206,6 +209,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setReportFocus(variables["report-focus"].as<bool>());
+    engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
 
     return true;
 }

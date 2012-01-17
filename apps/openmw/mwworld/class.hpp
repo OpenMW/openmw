@@ -9,6 +9,8 @@
 #include "action.hpp"
 #include "containerstore.hpp"
 #include "refdata.hpp"
+#include "../mwrender/renderinginterface.hpp"
+#include "physicssystem.hpp"
 
 namespace Ogre
 {
@@ -59,8 +61,10 @@ namespace MWWorld
             ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
-            virtual void insertObj (const Ptr& ptr, MWRender::CellRenderImp& cellRender,
-                MWWorld::Environment& environment) const;
+
+
+            virtual void insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual void enable (const Ptr& ptr, MWWorld::Environment& environment) const;

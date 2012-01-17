@@ -158,6 +158,8 @@ namespace OMW
             /// Font encoding
             void setEncoding(const std::string& encoding);
 
+            void setAnimationVerbose(bool animverbose);
+
         private:
             Cfg::ConfigurationManager& mCfgMgr;
     };

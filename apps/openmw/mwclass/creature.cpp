@@ -9,7 +9,6 @@
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
 
-#include "../mwrender/cellimp.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
@@ -23,21 +22,34 @@ namespace MWClass
         return ref->base->mId;
     }
 
-    void Creature::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+    void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        
+        /*ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
+        
         if (!model.empty())
-        {
-            MWRender::Rendering rendering (cellRender, ref->ref, ref->mData);
-            cellRender.insertMesh("meshes\\" + model);
-            cellRender.insertActorPhysics();
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+        {*/
+            MWRender::Actors& actors = renderingInterface.getActors();
+            actors.insertCreature(ptr);
+        
+    }
+
+    void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+            ptr.get<ESM::Creature>();
+
+
+        const std::string &model = ref->base->model;
+        assert (ref->base != NULL);
+        if(!model.empty()){
+            physics.insertActorPhysics(ptr, "meshes\\" + model);
         }
+
     }
 
     void Creature::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const

@@ -24,25 +24,7 @@
 //loadResource->handleNode->handleNiTriShape->createSubMesh
 
 #include "ogre_nif_loader.hpp"
-#include <Ogre.h>
-#include <stdio.h>
 
-#include <libs/mangle/vfs/servers/ogre_vfs.hpp>
-#include "../nif/nif_file.hpp"
-#include "../nif/node.hpp"
-#include "../nif/data.hpp"
-#include "../nif/property.hpp"
-#include "../nif/controller.hpp"
-#include "../nif/extra.hpp"
-#include <libs/platform/strings.h>
-
-#include <vector>
-#include <list>
-// For warning messages
-#include <iostream>
-
-// float infinity
-#include <limits>
 
 typedef unsigned char ubyte;
 
@@ -219,6 +201,12 @@ static CompareFunction getTestMode(int mode)
 }
 */
 
+void NIFLoader::setOutputAnimFiles(bool output){
+    mOutputAnimFiles = output;
+}
+void NIFLoader::setVerbosePath(std::string path){
+    verbosePath = path;
+}
 void NIFLoader::createMaterial(const String &name,
                            const Vector &ambient,
                            const Vector &diffuse,
@@ -230,11 +218,24 @@ void NIFLoader::createMaterial(const String &name,
 {
     MaterialPtr material = MaterialManager::getSingleton().create(name, resourceGroup);
 
+
+    //Hardware Skinning code, textures may be the wrong color if enabled
+     /*if(!mSkel.isNull()){
+    material->removeAllTechniques();
+
+        Ogre::Technique* tech = material->createTechnique();
+        //tech->setSchemeName("blahblah");
+        Pass* pass = tech->createPass();
+        pass->setVertexProgram("Ogre/HardwareSkinningFourWeights");
+    }*/
+
     // This assigns the texture to this material. If the texture name is
     // a file name, and this file exists (in a resource directory), it
     // will automatically be loaded when needed. If not (such as for
     // internal NIF textures that we might support later), we should
     // already have inserted a manual loader for the texture.
+
+
     if (!texName.empty())
     {
         Pass *pass = material->getTechnique(0)->getPass(0);
@@ -294,6 +295,8 @@ void NIFLoader::createMaterial(const String &name,
     material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
     material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
     material->setShininess(glossiness);
+
+
 }
 
 // Takes a name and adds a unique part to it. This is just used to
@@ -355,20 +358,69 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     HardwareVertexBufferSharedPtr vbuf =
         HardwareBufferManager::getSingleton().createVertexBuffer(
             VertexElement::getTypeSize(VET_FLOAT3),
-            numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-    vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, true);
+            numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+
+    if(flip)
+	{
+		float *datamod = new float[data->vertices.length];
+		//std::cout << "Shape" << shape->name.toString() << "\n";
+		for(int i = 0; i < numVerts; i++)
+		{
+			int index = i * 3;
+			const float *pos = data->vertices.ptr + index;
+		    Ogre::Vector3 original = Ogre::Vector3(*pos  ,*(pos+1), *(pos+2));
+			original = mTransform * original;
+			mBoundingBox.merge(original);
+			datamod[index] = original.x;
+			datamod[index+1] = original.y;
+			datamod[index+2] = original.z;
+		}
+		 vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
+	}
+	else
+	{
+		vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, false);
+	}
+
 
     VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
     bind->setBinding(nextBuf++, vbuf);
 
-    // Vertex normals
     if (data->normals.length)
     {
         decl->addElement(nextBuf, 0, VET_FLOAT3, VES_NORMAL);
         vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
                    VertexElement::getTypeSize(VET_FLOAT3),
-                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-        vbuf->writeData(0, vbuf->getSizeInBytes(), data->normals.ptr, true);
+                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+
+		if(flip)
+		{
+			Quaternion rotation = mTransform.extractQuaternion();
+			rotation.normalise();
+
+			float *datamod = new float[data->normals.length];
+			for(int i = 0; i < numVerts; i++)
+		    {
+			    int index = i * 3;
+			    const float *pos = data->normals.ptr + index;
+		        Ogre::Vector3 original = Ogre::Vector3(*pos  ,*(pos+1), *(pos+2));
+				original = rotation * original;
+				if (mNormaliseNormals)
+			    {
+                    original.normalise();
+				}
+
+
+			    datamod[index] = original.x;
+			    datamod[index+1] = original.y;
+			    datamod[index+2] = original.z;
+		    }
+			vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
+		}
+		else
+		{
+            vbuf->writeData(0, vbuf->getSizeInBytes(), data->normals.ptr, false);
+		}
         bind->setBinding(nextBuf++, vbuf);
     }
 
@@ -393,30 +445,79 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
         bind->setBinding(nextBuf++, vbuf);
     }
 
-    // Texture UV coordinates
-    if (data->uvlist.length)
+     if (data->uvlist.length)
     {
+
         decl->addElement(nextBuf, 0, VET_FLOAT2, VES_TEXTURE_COORDINATES);
         vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
                    VertexElement::getTypeSize(VET_FLOAT2),
-                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY,false);
 
-        vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, true);
+		if(flip)
+		{
+		    float *datamod = new float[data->uvlist.length];
+
+		    for(unsigned int i = 0; i < data->uvlist.length; i+=2){
+			    float x = *(data->uvlist.ptr + i);
+
+			    float y = *(data->uvlist.ptr + i + 1);
+
+			    datamod[i] =x;
+				datamod[i + 1] =y;
+		    }
+			vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
+		}
+		else
+			vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, false);
         bind->setBinding(nextBuf++, vbuf);
     }
 
-    // Triangle faces
+   // Triangle faces - The total number of triangle points
     int numFaces = data->triangles.length;
+
     if (numFaces)
     {
+
+		sub->indexData->indexCount = numFaces;
+        sub->indexData->indexStart = 0;
         HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
                                             createIndexBuffer(HardwareIndexBuffer::IT_16BIT,
                                                               numFaces,
-                                                              HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-        ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, true);
+                                                              HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
+
+		if(flip && mFlipVertexWinding && sub->indexData->indexCount % 3 == 0){
+
+			sub->indexData->indexBuffer = ibuf;
+
+			uint16 *datamod = new uint16[numFaces];
+			int index = 0;
+			for (size_t i = 0; i < sub->indexData->indexCount; i+=3)
+			{
+
+			     const short *pos = data->triangles.ptr + index;
+				uint16 i0 = (uint16) *(pos+0);
+				uint16 i1 = (uint16) *(pos+1);
+				uint16 i2 = (uint16) *(pos+2);
+
+				//std::cout << "i0: " << i0 << "i1: " << i1 << "i2: " << i2 << "\n";
+
+
+				datamod[index] = i2;
+				datamod[index+1] = i1;
+				datamod[index+2] = i0;
+
+				index += 3;
+			}
+
+			 ibuf->writeData(0, ibuf->getSizeInBytes(), datamod, false);
+
+		}
+		else
+		     ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, false);
         sub->indexData->indexBuffer = ibuf;
-        sub->indexData->indexCount = numFaces;
-        sub->indexData->indexStart = 0;
+
+
+
     }
 
     // Set material if one was given
@@ -475,7 +576,7 @@ static void vectorMul(const Matrix &A, float *C)
 }
 
 
-void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bounds)
+void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bounds, Transformation original, std::vector<std::string> boneSequence)
 {
     assert(shape != NULL);
 
@@ -636,11 +737,29 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
     std::list<VertexBoneAssignment> vertexBoneAssignments;
 
+    Nif::NiTriShapeCopy copy = shape->clone();
+	if(!shape->controller.empty())
+	{
+		Nif::Controller* cont = shape->controller.getPtr();
+		if(cont->recType == RC_NiGeomMorpherController)
+		{
+			Nif::NiGeomMorpherController* morph = dynamic_cast<Nif::NiGeomMorpherController*> (cont);
+			copy.morph = morph->data.get();
+			copy.morph.setStartTime(morph->timeStart);
+			copy.morph.setStopTime(morph->timeStop);
+		}
+
+	}
     //use niskindata for the position of vertices.
     if (!shape->skin.empty())
     {
-        // vector that stores if the position if a vertex is absolute
+
+
+
+        // vector that stores if the position of a vertex is absolute
         std::vector<bool> vertexPosAbsolut(numVerts,false);
+		std::vector<Ogre::Vector3> vertexPosOriginal(numVerts, Ogre::Vector3::ZERO);
+		std::vector<Ogre::Vector3> vertexNormalOriginal(numVerts, Ogre::Vector3::ZERO);
 
         float *ptrNormals = (float*)data->normals.ptr;
         //the bone from skin->bones[boneIndex] is linked to skin->data->bones[boneIndex]
@@ -667,24 +786,50 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 break;
             }
             //get the bone from bones array of skindata
+			if(!mSkel->hasBone(shape->skin->bones[boneIndex].name.toString()))
+				std::cout << "We don't have this bone";
             bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name.toString());
 
             // final_vector = old_vector + old_rotation*new_vector*old_scale
-            vecPos = bonePtr->_getDerivedPosition() +
+
+
+			Nif::NiSkinData::BoneInfoCopy boneinfocopy;
+			boneinfocopy.trafo.rotation = convertRotation(it->trafo->rotation);
+			boneinfocopy.trafo.trans = convertVector3(it->trafo->trans);
+			boneinfocopy.bonename = shape->skin->bones[boneIndex].name.toString();
+            boneinfocopy.bonehandle = bonePtr->getHandle();
+            copy.boneinfo.push_back(boneinfocopy);
+            for (unsigned int i=0; i<it->weights.length; i++)
+            {
+				 vecPos = bonePtr->_getDerivedPosition() +
                 bonePtr->_getDerivedOrientation() * convertVector3(it->trafo->trans);
 
             vecRot = bonePtr->_getDerivedOrientation() * convertRotation(it->trafo->rotation);
-
-            for (unsigned int i=0; i<it->weights.length; i++)
-            {
                 unsigned int verIndex = (it->weights.ptr + i)->vertex;
+				//boneinfo.weights.push_back(*(it->weights.ptr + i));
+                Nif::NiSkinData::IndividualWeight ind;
+                ind.weight = (it->weights.ptr + i)->weight;
+                ind.boneinfocopyindex = copy.boneinfo.size() - 1;
+                if(copy.vertsToWeights.find(verIndex) == copy.vertsToWeights.end())
+                {
+                    std::vector<Nif::NiSkinData::IndividualWeight> blank;
+                    blank.push_back(ind);
+                    copy.vertsToWeights[verIndex] = blank;
+                }
+                else
+                {
+                    copy.vertsToWeights[verIndex].push_back(ind);
+                }
 
                 //Check if the vertex is relativ, FIXME: Is there a better solution?
                 if (vertexPosAbsolut[verIndex] == false)
                 {
                     //apply transformation to the vertices
                     Vector3 absVertPos = vecPos + vecRot * Vector3(ptr + verIndex *3);
+					absVertPos = absVertPos * (it->weights.ptr + i)->weight;
+					vertexPosOriginal[verIndex] = Vector3(ptr + verIndex *3);
 
+					mBoundingBox.merge(absVertPos);
                     //convert it back to float *
                     for (int j=0; j<3; j++)
                         (ptr + verIndex*3)[j] = absVertPos[j];
@@ -694,6 +839,8 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                     if (verIndex < data->normals.length)
                     {
                         Vector3 absNormalsPos = vecRot * Vector3(ptrNormals + verIndex *3);
+						absNormalsPos = absNormalsPos * (it->weights.ptr + i)->weight;
+						vertexNormalOriginal[verIndex] = Vector3(ptrNormals + verIndex *3);
 
                         for (int j=0; j<3; j++)
                             (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
@@ -701,27 +848,67 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
                     vertexPosAbsolut[verIndex] = true;
                 }
+				else
+				{
+					Vector3 absVertPos = vecPos + vecRot * vertexPosOriginal[verIndex];
+					absVertPos = absVertPos * (it->weights.ptr + i)->weight;
+					Vector3 old = Vector3(ptr + verIndex *3);
+					absVertPos = absVertPos + old;
+
+					mBoundingBox.merge(absVertPos);
+                    //convert it back to float *
+                    for (int j=0; j<3; j++)
+                        (ptr + verIndex*3)[j] = absVertPos[j];
+
+                    //apply rotation to the normals (not every vertex has a normal)
+                    //FIXME: I guessed that vertex[i] = normal[i], is that true?
+                    if (verIndex < data->normals.length)
+                    {
+                        Vector3 absNormalsPos = vecRot * vertexNormalOriginal[verIndex];
+						absNormalsPos = absNormalsPos * (it->weights.ptr + i)->weight;
+						Vector3 oldNormal = Vector3(ptrNormals + verIndex *3);
+						absNormalsPos = absNormalsPos + oldNormal;
+
+                        for (int j=0; j<3; j++)
+                            (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
+                    }
+				}
+
 
                 VertexBoneAssignment vba;
                 vba.boneIndex = bonePtr->getHandle();
                 vba.vertexIndex = verIndex;
                 vba.weight = (it->weights.ptr + i)->weight;
 
+
                 vertexBoneAssignments.push_back(vba);
             }
 
+
             boneIndex++;
         }
+
     }
     else
     {
+
+			copy.boneSequence = boneSequence;
         // Rotate, scale and translate all the vertices,
         const Matrix &rot = shape->trafo->rotation;
         const Vector &pos = shape->trafo->pos;
         float scale = shape->trafo->scale;
+
+		copy.trafo.trans = convertVector3(original.pos);
+		copy.trafo.rotation = convertRotation(original.rotation);
+		copy.trafo.scale = original.scale;
+		//We don't use velocity for anything yet, so it does not need to be saved
+
+		// Computes C = B + AxC*scale
         for (int i=0; i<numVerts; i++)
         {
             vectorMulAdd(rot, pos, ptr, scale);
+			Ogre::Vector3 absVertPos = Ogre::Vector3(*(ptr + 3 * i), *(ptr + 3 * i + 1), *(ptr + 3 * i + 2));
+			mBoundingBox.merge(absVertPos);
             ptr += 3;
         }
 
@@ -735,24 +922,58 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 ptr += 3;
             }
         }
+		if(!mSkel.isNull() ){
+			int boneIndex;
+			Ogre::Bone *parentBone = mSkel->getBone(boneSequence[boneSequence.size() - 1]);
+			if(parentBone)
+				boneIndex = parentBone->getHandle();
+			else
+				boneIndex = mSkel->getNumBones() - 1;
+			for(int i = 0; i < numVerts; i++){
+		 VertexBoneAssignment vba;
+                vba.boneIndex = boneIndex;
+                vba.vertexIndex = i;
+                vba.weight = 1;
+				 vertexBoneAssignments.push_back(vba);
+			}
+		}
     }
 
     if (!hidden)
     {
         // Add this vertex set to the bounding box
         bounds.add(optr, numVerts);
+        shapes.push_back(copy);
 
         // Create the submesh
         createOgreSubMesh(shape, material, vertexBoneAssignments);
     }
 }
 
-void NIFLoader::handleNode(Nif::Node *node, int flags,
-                           const Transformation *trafo, BoundsFinder &bounds, Bone *parentBone)
+void NIFLoader::calculateTransform()
 {
-    stack++;
-    //if( MWClass::isChest)
-    //  cout << "u:" << node << "\n";
+        // Calculate transform
+        Matrix4 transform = Matrix4::IDENTITY;
+        transform = Matrix4::getScale(vector) * transform;
+
+        // Check whether we have to flip vertex winding.
+        // We do have to, if we changed our right hand base.
+        // We can test it by using the cross product from X and Y and see, if it is a non-negative
+        // projection on Z. Actually it should be exactly Z, as we don't do non-uniform scaling yet,
+        // but the test is cheap either way.
+        Matrix3 m3;
+        transform.extract3x3Matrix(m3);
+
+        if (m3.GetColumn(0).crossProduct(m3.GetColumn(1)).dotProduct(m3.GetColumn(2)) < 0)
+        {
+        	mFlipVertexWinding = true;
+        }
+
+        mTransform = transform;
+}
+void NIFLoader::handleNode(Nif::Node *node, int flags,
+                           const Transformation *trafo, BoundsFinder &bounds, Ogre::Bone *parentBone, std::vector<std::string> boneSequence)
+{
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
@@ -780,6 +1001,58 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
                 // the engine, just skip this entire node.
                 return;
         }
+
+        if (e->recType == RC_NiTextKeyExtraData){
+            Nif::NiTextKeyExtraData* extra =  dynamic_cast<Nif::NiTextKeyExtraData*> (e);
+
+            std::ofstream file;
+
+            if(mOutputAnimFiles){
+                std::string cut = "";
+                for(unsigned int i = 0; i < name.length();  i++)
+                {
+                    if(!(name.at(i) == '\\' || name.at(i) == '/' || name.at(i) == '>' || name.at(i) == '<' || name.at(i) == '?' || name.at(i) == '*' || name.at(i) == '|' || name.at(i) == ':' || name.at(i) == '"'))
+                    {
+                        cut += name.at(i);
+                    }
+                }
+
+                std::cout << "Outputting " << cut << "\n";
+
+                file.open((verbosePath + "/Indices" + cut + ".txt").c_str());
+            }
+
+            for(std::vector<Nif::NiTextKeyExtraData::TextKey>::iterator textiter = extra->list.begin(); textiter != extra->list.end(); textiter++)
+            {
+                std::string text = textiter->text.toString();
+
+                replace(text.begin(), text.end(), '\n', '/');
+
+                text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
+                std::size_t i = 0;
+                while(i < text.length()){
+                    while(i < text.length() && text.at(i) == '/' ){
+                        i++;
+                    }
+                    std::size_t first = i;
+                    int length = 0;
+                    while(i < text.length() && text.at(i) != '/' ){
+                        i++;
+                        length++;
+                    }
+                    if(first < text.length()){
+                            //length = text.length() - first;
+                        std::string sub = text.substr(first, length);
+
+                       if(mOutputAnimFiles)
+                            file << "Time: " << textiter->time << "|" << sub << "\n";
+
+                        textmappings[sub] = textiter->time;
+                    }
+                }
+            }
+            file.close();
+        }
     }
 
     Bone *bone = 0;
@@ -790,20 +1063,15 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
-            mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
 
-            /*if (node->extra->recType == RC_NiTextKeyExtraData )
-            {
-                //TODO: Get animation names
-                std::cout << node->name.toString() << " is root bone and has textkeyextradata!\n";
-            }*/
+            mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
         }
 
         if (!mSkel.isNull())     //if there is a skeleton
         {
             std::string name = node->name.toString();
-            //if (isBeast && isChest)
-            //  std::cout << "NAME: " << name << "\n";
+            boneSequence.push_back(name);
+
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
             if(!mSkel->hasBone(name))
@@ -819,7 +1087,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
             }
         }
     }
-
+    Transformation original = *(node->trafo);
     // Apply the parent transformation to this node. We overwrite the
     // existing data with the final transformation.
     if (trafo)
@@ -846,201 +1114,97 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     {
         NodeList &list = ((NiNode*)node)->children;
         int n = list.length();
-        int i = 0;
-        if(isHands){
-            //cout << "NumberOfNs: " << n << "Stack:" << stack << "\n";
-            //if(stack == 3)
-                //n=0;
-        }
-        for (; i<n; i++)
+        for (int i = 0; i<n; i++)
         {
 
             if (list.has(i))
-                handleNode(&list[i], flags, node->trafo, bounds, bone);
+                handleNode(&list[i], flags, node->trafo, bounds, bone, boneSequence);
         }
     }
-    else if (node->recType == RC_NiTriShape)
+    else if (node->recType == RC_NiTriShape && bNiTri)
     {
-    // For shapes
-        /*For Beast Skins, Shape Bone Names
-        Tri Left Foot
-        Tri Right Foot
-        Tri Tail
-        Tri Chest
-        */
-        if((isChest && stack < 10 )  || (isHands && counter < 3) || !(isChest || isHands)){                       //(isBeast && isChest && stack < 10 && counter == skincounter )
+         std::string nodename = node->name.toString();
 
-            std::string name = node->name.toString();
-            //if (isChest)
-                //std::cout << "NAME: " << name << "\n";
-
-            if(isChest && isBeast && skincounter == 0 && name.compare("Tri Chest") == 0){
-                //std::cout <<"BEASTCHEST1\n";
-                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
-                skincounter++;
-            }
-            else if(isChest && isBeast && skincounter == 1 && name.compare("Tri Tail") == 0){
-                //std::cout <<"BEASTCHEST2\n";
-                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
-                skincounter++;
-            }
-            else if(isChest && isBeast && skincounter == 2 && name.compare("Tri Left Foot") == 0){
-                //std::cout <<"BEASTCHEST3\n";
-                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
-                skincounter=1000;
-            }
-            else if (!isChest || !isBeast)
+			if (triname == "")
             {
-                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds);
+                handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds, original, boneSequence);
             }
-            //if(isBeast && isChest)
-                //cout << "Handling Shape, Stack " << stack <<"\n";
-
-
-
-                counter++;
-        }
-        /*if(isHands){
-            //cout << "Handling Shape, Stack " << stack <<"\n";
-            counter++;
-        }*/
-
+			else if(nodename.length() >= triname.length())
+			{
+				std::transform(nodename.begin(), nodename.end(), nodename.begin(), ::tolower);
+				if(triname == nodename.substr(0, triname.length()))
+					handleNiTriShape(dynamic_cast<NiTriShape*>(node), flags, bounds, original, boneSequence);
+			}
     }
-
-    stack--;
 }
 
 void NIFLoader::loadResource(Resource *resource)
 {
-    if(skincounter == 1000)
-        skincounter = 0;
-    stack = 0;
-    counter = 0;
-    std::string name = resource->getName();
-    if(resourceName.compare(name) != 0)
-    {
-        skincounter = 0;
-        resourceName = name;
-    }
-    //std::cout <<"NAME:" << name;
-    //if(name.length() >= 20)
-    //  {std::string split = name.substr(name.length() - 20, 20);
-    //if(name ==
-    //std::cout <<"NAME:" << name << "LEN: " << name.length() << "\n";
-    const std::string test ="meshes\\b\\B_N_Dark Elf_M_Skins.NIF";
-    const std::string test2 ="meshes\\b\\B_N_Dark Elf_M_Skins.nif";
-    const std::string test3 ="meshes\\b\\B_N_Redguard_F_Skins.NIF";
-    const std::string test4 ="meshes\\b\\B_N_Redguard_F_Skins.nif";
-    const std::string test5 ="meshes\\b\\B_N_Dark Elf_F_Skins.nif";
-    const std::string test6 ="meshes\\b\\B_N_Redguard_M_Skins.nif";
-    const std::string test7 ="meshes\\b\\B_N_Wood Elf_F_Skins.nif";
-    const std::string test8 ="meshes\\b\\B_N_Wood Elf_M_Skins.nif";
-    const std::string test9 ="meshes\\b\\B_N_Imperial_F_Skins.nif";
-    const std::string test10 ="meshes\\b\\B_N_Imperial_M_Skins.nif";
-    const std::string test11 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
-    const std::string test12 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
-    const std::string test13 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
-    const std::string test14 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
-    const std::string test15 ="meshes\\b\\B_N_Nord_F_Skins.nif";
-    const std::string test16 ="meshes\\b\\B_N_Nord_M_Skins.nif";
-    const std::string test17 ="meshes\\b\\B_N_Imperial_F_Skins.nif";
-    const std::string test18 ="meshes\\b\\B_N_Imperial_M_Skins.nif";
-    const std::string test19 ="meshes\\b\\B_N_Orc_F_Skins.nif";
-    const std::string test20 ="meshes\\b\\B_N_Orc_M_Skins.nif";
-    const std::string test21 ="meshes\\b\\B_N_Breton_F_Skins.nif";
-    const std::string test22 ="meshes\\b\\B_N_Breton_M_Skins.nif";
-    const std::string test23 ="meshes\\b\\B_N_High Elf_F_Skins.nif";
-    const std::string test24 ="meshes\\b\\B_N_High Elf_M_Skins.nif";
-
-    //std::cout <<"LEN1:" << test.length() << "TEST: " << test << "\n";
-
-
-    if(name.compare(test) == 0 || name.compare(test2) == 0 || name.compare(test3) == 0 || name.compare(test4) == 0 ||
-        name.compare(test5) == 0 || name.compare(test6) == 0 || name.compare(test7) == 0 || name.compare(test8) == 0 || name.compare(test9) == 0 ||
-        name.compare(test10) == 0 || name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 ||
-        name.compare(test14) == 0 || name.compare(test15) == 0 || name.compare(test16) == 0 || name.compare(test17) == 0 ||
-        name.compare(test18) == 0 || name.compare(test19) == 0 || name.compare(test20) == 0 || name.compare(test21) == 0 ||
-        name.compare(test22) == 0 || name.compare(test23) == 0 || name.compare(test24) == 0
-
-        ){
-        //std::cout << "Welcome Chest\n";
-        isChest = true;
-        if(name.compare(test11) == 0 || name.compare(test12) == 0 || name.compare(test13) == 0 || name.compare(test14) == 0)
-        {
-            isBeast = true;
-            //std::cout << "Welcome Beast\n";
-        }
-        else
-            isBeast = false;
-    }
-    else
-        isChest = false;
-    const std::string hands ="meshes\\b\\B_N_Dark Elf_M_Hands.1st.NIF";
-    const std::string hands2 ="meshes\\b\\B_N_Dark Elf_F_Hands.1st.NIF";
-    const std::string hands3 ="meshes\\b\\B_N_Redguard_M_Hands.1st.nif";
-    const std::string hands4 ="meshes\\b\\B_N_Redguard_F_Hands.1st.nif";
-    const std::string hands5 ="meshes\\b\\b_n_argonian_m_hands.1st.nif";
-    const std::string hands6 ="meshes\\b\\b_n_argonian_f_hands.1st.nif";
-    const std::string hands7 ="meshes\\b\\B_N_Breton_M_Hand.1st.NIF";
-    const std::string hands8 ="meshes\\b\\B_N_Breton_F_Hands.1st.nif";
-    const std::string hands9 ="meshes\\b\\B_N_High Elf_M_Hands.1st.nif";
-    const std::string hands10 ="meshes\\b\\B_N_High Elf_F_Hands.1st.nif";
-    const std::string hands11 ="meshes\\b\\B_N_Nord_M_Hands.1st.nif";
-    const std::string hands12 ="meshes\\b\\B_N_Nord_F_Hands.1st.nif";
-    const std::string hands13 ="meshes\\b\\b_n_khajiit_m_hands.1st.nif";
-    const std::string hands14 ="meshes\\b\\b_n_khajiit_f_hands.1st.nif";
-    const std::string hands15 ="meshes\\b\\B_N_Orc_M_Hands.1st.nif";
-    const std::string hands16 ="meshes\\b\\B_N_Orc_F_Hands.1st.nif";
-    const std::string hands17 ="meshes\\b\\B_N_Wood Elf_M_Hands.1st.nif";
-    const std::string hands18 ="meshes\\b\\B_N_Wood Elf_F_Hands.1st.nif";
-    const std::string hands19 ="meshes\\b\\B_N_Imperial_M_Hands.1st.nif";
-    const std::string hands20 ="meshes\\b\\B_N_Imperial_F_Hands.1st.nif";
-    if(name.compare(hands) == 0 || name.compare(hands2) == 0 || name.compare(hands3) == 0 || name.compare(hands4) == 0 ||
-        name.compare(hands5) == 0 || name.compare(hands6) == 0 || name.compare(hands7) == 0 || name.compare(hands8) == 0 ||
-        name.compare(hands9) == 0 || name.compare(hands10) == 0 || name.compare(hands11) == 0 || name.compare(hands12) == 0 ||
-        name.compare(hands13) == 0 || name.compare(hands14) == 0 || name.compare(hands15) == 0 || name.compare(hands16) == 0 ||
-        name.compare(hands17) == 0 || name.compare(hands18) == 0 || name.compare(hands19) == 0 || name.compare(hands20) == 0)
-    {
-        //std::cout << "Welcome Hands1st\n";
-        isHands = true;
-        isChest = false;
-    }
-    else
-        isHands = false;
-
-
-    /*
-    else if(name.compare(test3) == 0 || name.compare(test4) == 0)
-    {
-        std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
-        isChest = true;
-    }
-    else if(name.compare(test5) == 0 || name.compare(test6) == 0)
-    {
-        std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
-        isChest = true;
-    }
-    else if(name.compare(test7) == 0 || name.compare(test8) == 0)
-    {
-        std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
-        isChest = true;
-    }
-    else if(name.compare(test9) == 0 || name.compare(test10) == 0)
-    {
-        std::cout << "\n\n\nWelcome FRedguard Chest\n\n\n";
-        isChest = true;
-    }*/
-
-    //if(split== "Skins.NIF")
-    //  std::cout << "\nSPECIAL PROPS\n";
-    resourceName = "";
-    // Check if the resource already exists
-    //MeshPtr ptr = m->load(name, "custom");
-    //cout << "THISNAME: " << ptr->getName() << "\n";
-    //cout << "RESOURCE:"<< resource->getName();
+    	allanim.clear();
+	shapes.clear();
+   mBoundingBox.setNull();
     mesh = 0;
     mSkel.setNull();
+    flip = false;
+    name = resource->getName();
+    char suffix = name.at(name.length() - 2);
+    bool addAnim = true;
+    bool hasAnim = false;
+    bool baddin = false;
+    bNiTri = true;
 
+        if(suffix == '*')
+		{
+			vector = Ogre::Vector3(-1,1,1);
+			flip = true;
+		}
+		else if(suffix == '?'){
+			vector = Ogre::Vector3(1,-1,1);
+			flip = true;
+		}
+		else if(suffix == '<'){
+			vector = Ogre::Vector3(1,1,-1);
+			flip = true;
+		}
+		else if(suffix == '>')
+		{
+            baddin = true;
+			bNiTri = true;
+			std::string sub = name.substr(name.length() - 6, 4);
+
+			if(sub.compare("0000") != 0)
+			addAnim = false;
+
+		}
+
+       switch(name.at(name.length() - 1))
+	{
+	    case '"':
+			triname = "tri chest";
+			break;
+		case '*':
+			triname = "tri tail";
+			break;
+		case ':':
+			triname = "tri left foot";
+			break;
+		case '<':
+			triname = "tri right foot";
+			break;
+		case '>':
+			triname = "tri left hand";
+			break;
+		case '?':
+			triname = "tri right hand";
+			break;
+		default:
+			triname = "";
+			break;
+	}
+    if(flip)
+	{
+		calculateTransform();
+	}
     // Set up the VFS if it hasn't been done already
     if (!vfs) vfs = new OgreVFS(resourceGroup);
 
@@ -1087,8 +1251,33 @@ void NIFLoader::loadResource(Resource *resource)
     }
 
     // Handle the node
-    handleNode(node, 0, NULL, bounds, 0);
+	std::vector<std::string> boneSequence;
 
+
+
+    handleNode(node, 0, NULL, bounds, 0, boneSequence);
+    if(addAnim)
+    {
+        for(int i = 0; i < nif.numRecords(); i++)
+        {
+            Nif::NiKeyframeController *f = dynamic_cast<Nif::NiKeyframeController*>(nif.getRecord(i));
+
+            if(f != NULL)
+            {
+                hasAnim = true;
+                Nif::Node *o = dynamic_cast<Nif::Node*>(f->target.getPtr());
+                Nif::NiKeyframeDataPtr data = f->data;
+
+                if (f->timeStart == 10000000000000000)
+                    continue;
+                data->setBonename(o->name.toString());
+                data->setStartTime(f->timeStart);
+                data->setStopTime(f->timeStop);
+
+                allanim.push_back(data.get());
+            }
+        }
+    }
     // set the bounding value.
     if (bounds.isValid())
     {
@@ -1096,63 +1285,83 @@ void NIFLoader::loadResource(Resource *resource)
                                         bounds.maxX(), bounds.maxY(), bounds.maxZ()));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
+    if(hasAnim && addAnim){
+        allanimmap[name] = allanim;
+        alltextmappings[name] = textmappings;
+    }
+    if(!mSkel.isNull() && shapes.size() > 0 && addAnim)
+    {
+        allshapesmap[name] = shapes;
 
-    // set skeleton
-//     if (!skel.isNull())
-//         mesh->setSkeletonName(getSkeletonName());
+    }
+
+    if(flip){
+        mesh->_setBounds(mBoundingBox, false);
+    }
+
+     if (!mSkel.isNull())
+    {
+       mesh->_notifySkeleton(mSkel);
+    }
 }
+
+void NIFLoader::addInMesh(Ogre::Mesh* input){
+    addin.push_back(input);
+}
+
+
 
 MeshPtr NIFLoader::load(const std::string &name,
                          const std::string &group)
 {
+
     MeshManager *m = MeshManager::getSingletonPtr();
     // Check if the resource already exists
     ResourcePtr ptr = m->getByName(name, group);
-    MeshPtr resize;
-
-    const std::string beast1 ="meshes\\b\\B_N_Khajiit_F_Skins.nif";
-    const std::string beast2 ="meshes\\b\\B_N_Khajiit_M_Skins.nif";
-    const std::string beast3 ="meshes\\b\\B_N_Argonian_F_Skins.nif";
-    const std::string beast4 ="meshes\\b\\B_N_Argonian_M_Skins.nif";
-
-    const std::string beasttail1 ="tail\\b\\B_N_Khajiit_F_Skins.nif";
-    const std::string beasttail2 ="tail\\b\\B_N_Khajiit_M_Skins.nif";
-    const std::string beasttail3 ="tail\\b\\B_N_Argonian_F_Skins.nif";
-    const std::string beasttail4 ="tail\\b\\B_N_Argonian_M_Skins.nif";
-
+    MeshPtr themesh;
     if (!ptr.isNull()){
-
-        //if(pieces > 1)
-            //cout << "It exists\n";
-            resize = MeshPtr(ptr);
-        //resize->load();
-        //resize->reload();
+            themesh = MeshPtr(ptr);
     }
     else // Nope, create a new one.
     {
-        resize = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
-        //cout <<"EXISTING" << name << "\n";
-
-        //if(pieces > 1)
-            //cout << "Creating it\n";
-
-
-        //resize->load();
-        //resize->reload();
-        //return 0;
-         ResourcePtr ptr = m->getByName(name, group);
-         resize = MeshPtr(ptr);
-
-        //NIFLoader::getSingletonPtr()->
-        /*ResourcePtr ptr = m->getByName(name, group);
-    if (!ptr.isNull()){
-        if(pieces > 1)
-            cout << "It exists\n";
-        resize = MeshPtr(ptr);*/
-        //return resize;
+        themesh = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
     }
-    return resize;
+    return themesh;
 }
+
+/*
+This function shares much of the same code handleShapes() in MWRender::Animation
+This function also creates new position and normal buffers for submeshes.
+This function points to existing texture and IndexData buffers
+*/
+
+std::vector<Nif::NiKeyframeData>* NIFLoader::getAnim(std::string lowername){
+
+        std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost>::iterator iter = allanimmap.find(lowername);
+       std::vector<Nif::NiKeyframeData>* pass = 0;
+        if(iter != allanimmap.end())
+            pass = &(iter->second);
+        return pass;
+
+}
+std::vector<Nif::NiTriShapeCopy>* NIFLoader::getShapes(std::string lowername){
+
+        std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost>::iterator iter = allshapesmap.find(lowername);
+        std::vector<Nif::NiTriShapeCopy>* pass = 0;
+        if(iter != allshapesmap.end())
+            pass = &(iter->second);
+        return pass;
+}
+
+std::map<std::string, float>* NIFLoader::getTextIndices(std::string lowername){
+	std::map<std::string,std::map<std::string, float>, ciLessBoost>::iterator iter = alltextmappings.find(lowername);
+    std::map<std::string, float>* pass = 0;
+		if(iter != alltextmappings.end())
+			pass = &(iter->second);
+		return pass;
+}
+
+
 
 
 /* More code currently not in use, from the old D source. This was

@@ -19,7 +19,11 @@ op 0x20002: AiEscort
 op 0x20003: AiEscort, explicit reference
 op 0x20004: Lock
 op 0x20005: Lock, explicit reference
-opcodes 0x20006-0x3ffff unused
+op 0x20006: PlayAnim
+op 0x20007: PlayAnim, explicit reference
+op 0x20008: LoopAnim
+op 0x20009: LoopAnim, explicit reference
+opcodes 0x2000a-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -109,4 +113,6 @@ op 0x2000134: SetJournalIndex
 op 0x2000135: GetJournalIndex
 op 0x2000136: GetPCCell
 op 0x2000137: GetButtonPressed
-opcodes 0x2000138-0x3ffffff unused
+op 0x2000138: SkipAnim
+op 0x2000139: SkipAnim, expplicit reference
+opcodes 0x200013a-0x3ffffff unused

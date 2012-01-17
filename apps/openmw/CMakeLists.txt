@@ -16,7 +16,7 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    rendering_manager mwscene cellimp interior exterior sky player
+    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects renderinginterface 
     )
 
 add_openmw_dir (mwinput
@@ -36,6 +36,7 @@ add_openmw_dir (mwscript
     locals scriptmanager compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
+    animationextensions
     )
 
 add_openmw_dir (mwsound

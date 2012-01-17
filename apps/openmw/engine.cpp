@@ -20,6 +20,7 @@
 #include <components/esm/esm_reader.hpp>
 #include <components/files/path.hpp>
 #include <components/nifbullet/bullet_nif_loader.hpp>
+#include <components/nifogre/ogre_nif_loader.hpp>
 
 #include "mwinput/inputmanager.hpp"
 
@@ -46,6 +47,7 @@
 
 #include "mwmechanics/mechanicsmanager.hpp"
 
+
 void OMW::Engine::executeLocalScripts()
 {
     MWWorld::LocalScripts& localScripts = mEnvironment.mWorld->getLocalScripts();
@@ -69,6 +71,7 @@ void OMW::Engine::executeLocalScripts()
 
 void OMW::Engine::updateFocusReport (float duration)
 {
+
     if ((mFocusTDiff += duration)>0.25)
     {
         mFocusTDiff = 0;
@@ -81,8 +84,10 @@ void OMW::Engine::updateFocusReport (float duration)
         {
             MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
-            if (!ptr.isEmpty())
+            if (!ptr.isEmpty()){
                 name = MWWorld::Class::get (ptr).getName (ptr);
+
+            }
         }
 
         if (name!=mFocusName)
@@ -94,6 +99,13 @@ void OMW::Engine::updateFocusReport (float duration)
             else
                 std::cout << "Focus: " << name << std::endl;
         }
+    }
+}
+
+void OMW::Engine::setAnimationVerbose(bool animverbose){
+    if(animverbose){
+        NifOgre::NIFLoader::getSingletonPtr()->setOutputAnimFiles(true);
+        NifOgre::NIFLoader::getSingletonPtr()->setVerbosePath(mCfgMgr.getLogPath().string());
     }
 }
 
@@ -135,6 +147,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             mEnvironment.mWorld->advanceTime (
                 mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
 
+        
         if (changed) // keep change flag for another frame, if cell changed happend in local script
             mEnvironment.mWorld->markCellAsUnchanged();
 
@@ -287,6 +300,7 @@ void OMW::Engine::setReportFocus (bool report)
 
 void OMW::Engine::go()
 {
+    mFocusTDiff = 0;
     assert (!mEnvironment.mWorld);
     assert (!mCellName.empty());
     assert (!mMaster.empty());
@@ -329,6 +343,7 @@ void OMW::Engine::go()
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false,
         mCfgMgr.getLogPath().string() + std::string("/"));
+   
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
