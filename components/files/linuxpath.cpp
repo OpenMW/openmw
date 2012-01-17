@@ -28,6 +28,7 @@
 #include <cstring>
 #include <pwd.h>
 #include <unistd.h>
+#include <boost/filesystem/fstream.hpp>
 
 /**
  * \namespace Files
@@ -179,11 +180,10 @@ boost::filesystem::path LinuxPath::getInstallPath() const
     boost::filesystem::ifstream file(wineDefaultRegistry);
     bool isRegEntry = false;
     std::string line;
-    int startPos, pos;
     
     while (std::getline(file, line))
     {
-        if(line.length() > 0 && line[0] == '[') // we found an entry
+        if(!line.empty() && line[0] == '[') // we found an entry
         {
             std::string regkey = line.substr(1, line.find(']')-1);
             if( regkey.compare("SOFTWARE\\\\Wow6432Node\\\\Bethesda Softworks\\\\Morrowind") == 0
@@ -194,12 +194,14 @@ boost::filesystem::path LinuxPath::getInstallPath() const
         }
         else if(isRegEntry)
         {
-            if(line.length() == 0 || line[0] != '"') // empty line means new registry key
+            if(line.empty() || line[0] != '"') // empty line means new registry key
             {
                 break;
             }
             std::string key = line.substr(1, line.find('"', 1)-1);
             if(key.compare("Installed Path") == 0) {
+                std::string::size_type pos, startPos;
+                
                 startPos = line.find('=')+2;
                 std::string installPath = line.substr(startPos, line.find('"', startPos+1)-startPos);
                 installPath.replace(0, 2, wineDriveC.string());
@@ -207,8 +209,8 @@ boost::filesystem::path LinuxPath::getInstallPath() const
                 pos = -1;
                 do
                 {
-                    pos = static_cast<int>(installPath.find("\\\\", pos+1));
-                    if(static_cast<size_t>(pos) == std::string::npos)
+                    pos = installPath.find("\\\\", pos+1);
+                    if(pos == std::string::npos)
                     {
                         break;
                     }

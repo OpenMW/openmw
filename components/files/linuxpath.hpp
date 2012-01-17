@@ -26,7 +26,6 @@
 #if defined(__linux__)
 
 #include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 /**
  * \namespace Files
