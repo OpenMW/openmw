@@ -75,8 +75,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
         ("plugin", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "plugin file(s)")
 
-        ("fps", boost::program_options::value<bool>()->implicit_value(true)
-            ->default_value(false), "show fps counter")
+        ("fps", boost::program_options::value<int>()->implicit_value(1)
+            ->default_value(0), "fps counter detail (0 = off, 1 = fps counter, 2 = full detail)")
 
         ("debug", boost::program_options::value<bool>()->implicit_value(true)
             ->default_value(false), "debug mode")
@@ -200,7 +200,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
     engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
-    engine.showFPS(variables["fps"].as<bool>());
+    engine.showFPS(variables["fps"].as<int>());
     engine.setDebugMode(variables["debug"].as<bool>());
     engine.setSoundUsage(!variables["nosound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());

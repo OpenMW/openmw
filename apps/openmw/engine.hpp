@@ -66,7 +66,7 @@ namespace OMW
             OEngine::Physic::PhysicEngine* mPhysicEngine;
             std::string mCellName;
             std::string mMaster;
-            bool mShowFPS;
+            int mFpsLevel;
             bool mDebug;
             bool mVerboseScripts;
             bool mNewGame;
@@ -128,7 +128,7 @@ namespace OMW
             void addMaster(const std::string& master);
 
             /// Enable fps counter
-            void showFPS(bool showFps);
+            void showFPS(int level);
 
             /// Enable debug mode:
             /// - non-exclusive input
