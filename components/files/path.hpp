@@ -26,7 +26,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__FreeBSD__)
     #include <components/files/linuxpath.hpp>
     namespace Files { typedef LinuxPath TargetPathType; }
 

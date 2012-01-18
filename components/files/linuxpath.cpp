@@ -22,7 +22,7 @@
 
 #include "linuxpath.hpp"
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__FreeBSD__)
 
 #include <cstdlib>
 #include <cstring>
@@ -157,4 +157,4 @@ boost::filesystem::path LinuxPath::getRuntimeDataPath() const
 
 } /* namespace Files */
 
-#endif /* defined(__linux__) */
+#endif /* defined(__linux__) || defined(__FreeBSD__) */

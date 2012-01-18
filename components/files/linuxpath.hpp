@@ -23,7 +23,7 @@
 #ifndef COMPONENTS_FILES_LINUXPATH_H
 #define COMPONENTS_FILES_LINUXPATH_H
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__FreeBSD__)
 
 #include <boost/filesystem.hpp>
 
@@ -85,6 +85,6 @@ struct LinuxPath
 
 } /* namespace Files */
 
-#endif /* defined(__linux__) */
+#endif /* defined(__linux__) || defined(__FreeBSD__) */
 
 #endif /* COMPONENTS_FILES_LINUXPATH_H */
