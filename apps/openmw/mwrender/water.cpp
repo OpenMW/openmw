@@ -2,7 +2,7 @@
 
 namespace MWRender {
   Water::Water (Ogre::Camera *camera) : mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()) {
-
+      std::cout << "1\n";
     try {
       Ogre::CompositorManager::getSingleton().addCompositor(mViewport, "Water", -1);
       Ogre::CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
@@ -11,26 +11,14 @@ namespace MWRender {
     mIsUnderwater = false;
 
     mCamera->addListener(this);
-
-    
-    for (unsigned int i = 0; i < 2; i++) {
-      Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().createManual(i == 0 ? "refraction" : "reflection", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET);
-      
-      Ogre::RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
-      rtt->addViewport(mCamera)->setOverlaysEnabled(false);
-      rtt->addListener(this);
-      
-      if (i == 0) mRefractionTarget = rtt;
-      else mReflectionTarget = rtt;
-    }
         
 
     mWaterPlane = Ogre::Plane(Ogre::Vector3::UNIT_Y, 0);
-    Ogre::MeshManager::getSingleton().createPlane("water", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, 7000, 7000, 10, 10, true, 1, 3, 5, Ogre::Vector3::UNIT_Z);
-
+    Ogre::MeshManager::getSingleton().createPlane("water", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, 7000, 7000, 1, 1, true, 1, 3,5, Ogre::Vector3::UNIT_Z);
 
     mWater = mSceneManager->createEntity("Water", "water");
-    mWater->setMaterialName("Water/ReflectionRefraction");
+    mWater->setMaterialName("Examples/Water0");
+    
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
     mWaterNode->attachObject(mWater);
    
@@ -39,8 +27,8 @@ namespace MWRender {
 
   Water::~Water() {
     Ogre::MeshManager::getSingleton().remove("water");
-    Ogre::TextureManager::getSingleton().remove("refraction");
-    Ogre::TextureManager::getSingleton().remove("reflection");
+    //Ogre::TextureManager::getSingleton().remove("refraction");
+    //Ogre::TextureManager::getSingleton().remove("reflection");
     Ogre::CompositorManager::getSingleton().removeCompositorChain(mViewport);
   }
 

@@ -57,6 +57,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(rend.getCamera());
 
     mPlayer = new MWRender::Player (rend.getCamera(), playerNode);
+    mWater = new MWRender::Water(rend.getCamera());
 
 	//std::cout << "Three";
 }
@@ -219,6 +220,9 @@ void RenderingManager::toggleLight()
   }
 
   setAmbientMode();
+}
+void RenderingManager::checkUnderwater(){
+    mWater->checkUnderwater();
 }
 
 

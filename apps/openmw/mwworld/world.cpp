@@ -525,6 +525,7 @@ namespace MWWorld
 
         if (ptr==mPlayer->getPlayer())
         {
+            mRendering.checkUnderwater();
             Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
             if (currentCell)
             {
