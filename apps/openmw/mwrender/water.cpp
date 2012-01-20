@@ -1,7 +1,7 @@
 #include "water.hpp"
 
 namespace MWRender {
-  Water::Water (Ogre::Camera *camera, int top) : mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()) {
+  Water::Water (Ogre::Camera *camera, int top) : mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()), mTop(top) {
     try {
       Ogre::CompositorManager::getSingleton().addCompositor(mViewport, "Water", -1);
       Ogre::CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
@@ -10,11 +10,13 @@ namespace MWRender {
     mIsUnderwater = false;
     mCamera->addListener(this);
         
-    mWaterPlane = Ogre::Plane(Ogre::Vector3::UNIT_Y, top);
-    Ogre::MeshManager::getSingleton().createPlane("water", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, 14000, 14000, 1, 1, true, 1, 3,5, Ogre::Vector3::UNIT_Z);
+    mWaterPlane = Ogre::Plane(Ogre::Vector3::UNIT_Y, mTop);
+    
+    Ogre::MeshManager::getSingleton().createPlane("water", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, 14000, 14000, 10, 10, true, 1, 3,5, Ogre::Vector3::UNIT_Z);
     
     
     mWater = mSceneManager->createEntity("water");
+    
       mWater->setMaterialName("Examples/Water0");
     
         
@@ -58,24 +60,22 @@ namespace MWRender {
     }
   }
 
-  void Water::checkUnderwater() {
-    Ogre::Vector3 pos = mCamera->getPosition();
-    if (mIsUnderwater && pos.y > 0) {
+  void Water::checkUnderwater(float  y) {
+
+    if (mIsUnderwater && y > mTop) {
       try {
 	Ogre::CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
       } catch(...) {
       }
-      std::cout << "Removing water compositor" << "\n";
       mIsUnderwater = false;
     } 
 
-    if (!mIsUnderwater && pos.y < 0) {
+    if (!mIsUnderwater && y < mTop) {
       try {
 	Ogre::CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", true);
       } catch(...) {
       }
       mIsUnderwater = true;
-      std::cout << "Adding water compositor" << "\n";
     }
   }
 

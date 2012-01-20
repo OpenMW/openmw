@@ -310,9 +310,7 @@ void OMW::Engine::go()
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
-    std::cout << "Before the water\n";
-    
-    std::cout << "After the water" << mResDir << "\n";
+
     //addResourcesDirectory(mResDir);
    
     addResourcesDirectory(mResDir / "mygui");

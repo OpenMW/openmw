@@ -21,6 +21,7 @@ namespace MWRender {
 
     Ogre::Vector3 mOldCameraPos;
     bool mIsUnderwater;
+    int mTop;
 
 
 
@@ -36,7 +37,7 @@ namespace MWRender {
     Water (Ogre::Camera *camera, int top);
     ~Water();
 
-    void checkUnderwater();
+    void checkUnderwater(float y);
 
 
   };

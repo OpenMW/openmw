@@ -522,10 +522,11 @@ namespace MWWorld
         ptr.getRefData().getPosition().pos[0] = x;
         ptr.getRefData().getPosition().pos[1] = y;
         ptr.getRefData().getPosition().pos[2] = z;
-
         if (ptr==mPlayer->getPlayer())
         {
-            mRendering.checkUnderwater();
+            //std::cout << "Current pos" <<   ptr.getRefData().getPosition().pos[1];
+            
+            mRendering.checkUnderwater( ptr.getRefData().getPosition().pos[2]);
             Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
             if (currentCell)
             {

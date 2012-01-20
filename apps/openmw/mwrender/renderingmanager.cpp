@@ -230,9 +230,9 @@ void RenderingManager::toggleLight()
 
   setAmbientMode();
 }
-void RenderingManager::checkUnderwater(){
+void RenderingManager::checkUnderwater(float y){
     if(mWater){
-         mWater->checkUnderwater();
+         mWater->checkUnderwater(y);
     }
 }
 
