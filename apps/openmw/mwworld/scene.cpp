@@ -95,7 +95,7 @@ namespace MWWorld
             mActiveCells.insert(cell);
        if(result.second){
               insertCell(*cell, mEnvironment);
-               //mRendering.cellAdded (cell);
+               mRendering.cellAdded (cell);
                mRendering.configureAmbient(*cell);
 
         }

@@ -33,7 +33,7 @@ namespace MWRender {
     
   public:
     
-    Water (Ogre::Camera *camera);
+    Water (Ogre::Camera *camera, int top);
     ~Water();
 
     void checkUnderwater();

@@ -58,6 +58,7 @@ class RenderingManager: private RenderingInterface {
     virtual MWRender::Creatures& getCreatures();
     virtual MWRender::Objects& getObjects();
     virtual MWRender::Player& getPlayer();
+     void cellAdded (MWWorld::Ptr::CellStore *store);
 
 	void toggleLight();
 	bool toggleRenderMode(int mode);

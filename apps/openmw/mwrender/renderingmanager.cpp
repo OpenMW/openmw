@@ -57,7 +57,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(rend.getCamera());
 
     mPlayer = new MWRender::Player (rend.getCamera(), playerNode);
-    mWater = new MWRender::Water(rend.getCamera());
+    mWater = 0;
 
 	//std::cout << "Three";
 }
@@ -84,6 +84,10 @@ MWRender::Player& RenderingManager::getPlayer(){
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
     objects.removeCell(store);
+    if(mWater){
+        delete mWater;
+        mWater = 0;
+    }
 }
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
     const MWWorld::Class& class_ =
@@ -114,6 +118,11 @@ bool RenderingManager::getPhysicsDebugRendering() const{
 void RenderingManager::update (float duration){
 
 
+}
+void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store){
+    if(store->cell->data.flags & store->cell->HasWater)
+        mWater = new MWRender::Water(rend.getCamera(), store->cell->water);
+   
 }
 
 void RenderingManager::skyEnable ()
@@ -222,7 +231,9 @@ void RenderingManager::toggleLight()
   setAmbientMode();
 }
 void RenderingManager::checkUnderwater(){
-    mWater->checkUnderwater();
+    if(mWater){
+         mWater->checkUnderwater();
+    }
 }
 
 
