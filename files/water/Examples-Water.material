@@ -32,7 +32,6 @@ material Water/Compositor
 		pass
 		{
 			depth_check off
-
 			vertex_program_ref Water/GlassVP
 			{
 				param_named_auto timeVal time 0.25
@@ -105,7 +104,7 @@ material Examples/Water0
 		{
 			//
        			
-			
+			depth_write off
 			vertex_program_ref Water/RefractReflectVP
 			{
 				param_named_auto worldViewProjMatrix worldviewproj_matrix
@@ -133,15 +132,13 @@ material Examples/Water0
 				texture Water02.jpg
 				// min / mag filtering, no mip
 				filtering linear linear none
-				colour_op_ex source1 src_manual src_current 0 1 0
-				alpha_op_ex source1 src_manual src_current 0.1
+				alpha_op_ex source1 src_manual src_current 0.9
 				
 			}
 			// Noise
 			texture_unit
 			{
-				colour_op_ex source1 src_manual src_current 0 1 0
-				alpha_op_ex source1 src_manual src_current 0.1
+				alpha_op_ex source1 src_manual src_current 0.9
 				// Perlin noise volume
 				texture waves2.dds
 				// min / mag filtering, no mip
