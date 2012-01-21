@@ -16,7 +16,7 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player npcs creatures objects renderinginterface
+    renderingmanager debugging sky terrain player npcs creatures objects renderinginterface
     )
 
 add_openmw_dir (mwinput
@@ -75,6 +75,7 @@ add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
   ${OGRE_LIBRARIES}
+  ${OGRE_Terrain_LIBRARY}
   ${OIS_LIBRARIES}
   ${Boost_LIBRARIES}
   ${OPENAL_LIBRARY}

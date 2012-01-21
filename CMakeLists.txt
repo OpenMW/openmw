@@ -188,6 +188,7 @@ find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
+    ${OGRE_Terrain_INCLUDE_DIR}
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
@@ -258,6 +259,16 @@ if (APPLE)
 
     configure_file(${OGRE_PLUGIN_DIR}/Plugin_ParticleFX.dylib
         "${APP_BUNDLE_DIR}/Contents/Plugins/Plugin_ParticleFX.dylib" COPYONLY)
+
+    # prepare components
+    configure_file(${OGRE_LIB_DIR}/libOgrePaging.dylib
+        "${APP_BUNDLE_DIR}/Contents/Components/libOgrePaging.dylib" COPYONLY)
+
+    configure_file(${OGRE_LIB_DIR}/libOgreTerrain.dylib
+        "${APP_BUNDLE_DIR}/Contents/Components/libOgreTerrain.dylib" COPYONLY)
+        
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg")
 
 endif (APPLE)
 

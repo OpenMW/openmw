@@ -235,7 +235,7 @@ namespace ESMS
     virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
     // Find land for the given coordinates. Return null if no data.
-    const Land *search(int x, int y) const
+    Land *search(int x, int y) const
     {
       Lands::const_iterator it = lands.find(x);
       if(it==lands.end())

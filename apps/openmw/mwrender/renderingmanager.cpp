@@ -26,6 +26,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 {
     rend.createScene("PlayerCam", 55, 5);
     mSkyManager = MWRender::SkyManager::create(rend.getWindow(), rend.getCamera(), resDir);
+    mTerrainManager = new TerrainManager(rend.getScene());
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -59,6 +60,7 @@ RenderingManager::~RenderingManager ()
 {
     delete mPlayer;
     delete mSkyManager;
+    delete mTerrainManager;
 }
 
 MWRender::Npcs& RenderingManager::getNPCs(){
@@ -76,11 +78,13 @@ MWRender::Player& RenderingManager::getPlayer(){
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
     objects.removeCell(store);
+    mTerrainManager->cellRemoved(store);
 }
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
     objects.buildStaticGeometry (*store);
+    mTerrainManager->cellAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){

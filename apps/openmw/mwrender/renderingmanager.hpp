@@ -3,6 +3,7 @@
 
 
 #include "sky.hpp"
+#include "terrain.hpp"
 #include "debugging.hpp"
 
 #include "../mwworld/class.hpp"
@@ -97,6 +98,7 @@ class RenderingManager: private RenderingInterface {
 
     void setAmbientMode();
     SkyManager* mSkyManager;
+    TerrainManager* mTerrainManager;
     OEngine::Render::OgreRenderer &rend;
     Ogre::Camera* camera;
     MWRender::Npcs npcs;

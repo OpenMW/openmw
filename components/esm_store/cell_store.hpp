@@ -96,7 +96,8 @@ namespace ESMS
         State_Unloaded, State_Preloaded, State_Loaded
     };
 
-    CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded) {}
+    CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded),
+                                         land(NULL) {}
 
     const ESM::Cell *cell;
     State mState;
@@ -124,6 +125,8 @@ namespace ESMS
     CellRefList<Static, D>            statics;
     CellRefList<Weapon, D>            weapons;
 
+    const Land* land;
+
     void load (const ESMStore &store, ESMReader &esm)
     {
         if (mState!=State_Loaded)
@@ -134,6 +137,11 @@ namespace ESMS
             std::cout << "loading cell " << cell->getDescription() << std::endl;
 
             loadRefs (store, esm);
+
+            if ( ! (cell->data.flags & ESM::Cell::Interior) )
+            {
+                loadTerrain(cell->data.gridX, cell->data.gridY, store, esm);
+            }
 
             mState = State_Loaded;
         }
@@ -179,6 +187,29 @@ namespace ESMS
     }
 
   private:
+
+    void loadTerrain(int X, int Y, const ESMStore &store, ESMReader &esm)
+    {
+        // load terrain
+        Land *land = store.lands.search(X, Y);
+        if (land != NULL)
+        {
+            land->loadData(esm);
+        }
+
+        this->land = land;
+    }
+
+    void unloadTerrain(int X, int Y, const ESMStore &store) {
+        Land *land = store.lands.search(X,Y);
+        // unload terrain
+        if (land != NULL)
+        {
+            land->unloadData();
+        }
+
+        this->land = NULL;
+    }
 
     template<class Functor, class List>
     bool forEachImp (Functor& functor, List& list)

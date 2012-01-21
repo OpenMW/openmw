@@ -21,7 +21,51 @@ struct Land
 
     bool hasData;
 
+    bool dataLoaded;
+
+    // number of vertices per side
+    static const int LAND_SIZE = 65;
+
+    // cell terrain size in world coords
+    static const int REAL_SIZE = 8192;
+
+    // total number of vertices
+    static const int LAND_NUM_VERTS = LAND_SIZE * LAND_SIZE;
+
+    static const int HEIGHT_SCALE = 8;
+
+#pragma pack(push,1)
+    struct VHGT
+    {
+        float heightOffset;
+        int8_t heightData[LAND_NUM_VERTS];
+        short unknown1;
+        char unknown2;
+    };
+#pragma pack(pop)
+
+    typedef uint8_t VNML[LAND_NUM_VERTS * 3];
+
+    struct LandData
+    {
+        float heightOffset;
+        float heights[LAND_NUM_VERTS];
+        //float normals[LAND_NUM_VERTS * 3];
+    };
+
+    LandData *landData;
+
     void load(ESMReader &esm);
+
+    /**
+     * Actually loads data
+     */
+    void loadData(ESMReader &esm);
+
+    /**
+     * Frees memory allocated for land data
+     */
+    void unloadData();
 };
 }
 #endif
