@@ -69,6 +69,54 @@ boost::filesystem::path MacOsPath::getLocalPath() const
     return boost::filesystem::path("./");
 }
 
+boost::filesystem::path MacOsPath::getUserDataPath() const
+{
+    boost::filesystem::path localDataPath(".");
+    boost::filesystem::path suffix("/");
+
+    const char* theDir = getenv("OPENMW_DATA");
+    if (theDir == NULL)
+    {
+        theDir = getenv("HOME");
+        if (theDir == NULL)
+        {
+            struct passwd* pwd = getpwuid(getuid());
+            if (pwd != NULL)
+            {
+                theDir = pwd->pw_dir;
+            }
+        }
+        if (theDir != NULL)
+        {
+            suffix = boost::filesystem::path("/Library/Application Support/");
+        }
+    }
+
+    if (theDir != NULL)
+    {
+        localDataPath = boost::filesystem::path(theDir);
+    }
+
+    localDataPath /= suffix;
+    return localDataPath;
+}
+
+boost::filesystem::path MacOsPath::getGlobalDataPath() const
+{
+    boost::filesystem::path globalDataPath("/Library/Application Support/");
+    return globalDataPath;
+}
+
+boost::filesystem::path MacOsPath::getLocalDataPath() const
+{
+    return boost::filesystem::path("./data/");
+}
+
+boost::filesystem::path MacOsPath::getInstallPath() const;
+{
+    return boost::filesystem::path("./");
+}
+
 } /* namespace Files */
 
 #endif /* defined(macintosh) || defined(Macintosh) || defined(__APPLE__) || defined(__MACH__) */

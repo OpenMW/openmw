@@ -59,6 +59,30 @@ struct WindowsPath
      * \return boost::filesystem::path
      */
     boost::filesystem::path getLocalPath() const;
+
+    /**
+     * \brief Return same path like getUserConfigPath
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getUserDataPath() const;
+
+    /**
+     * \brief Return same path like getGlobalConfigPath
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getGlobalDataPath() const;
+
+    /**
+     * \brief Return runtime data path which is a location where
+     * an application was started with 'data' suffix.
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getLocalDataPath() const;
+
+    boost::filesystem::path getInstallPath() const;
 };
 
 } /* namespace Files */

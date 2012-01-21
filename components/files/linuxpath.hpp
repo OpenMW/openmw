@@ -59,6 +59,29 @@ struct LinuxPath
      * \return boost::filesystem::path
      */
     boost::filesystem::path getLocalPath() const;
+
+    /**
+     * \brief
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getUserDataPath() const;
+
+    /**
+     * \brief
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getGlobalDataPath() const;
+
+    /**
+     * \brief
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getLocalDataPath() const;
+
+    boost::filesystem::path getInstallPath() const;
 };
 
 } /* namespace Files */

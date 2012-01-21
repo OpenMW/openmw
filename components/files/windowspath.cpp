@@ -52,6 +52,35 @@ boost::filesystem::path WindowsPath::getLocalPath() const
     return boost::filesystem::path("./");
 }
 
+/**
+ * FIXME: Someone with Windows system should check this and correct if necessary
+ */
+boost::filesystem::path WindowsPath::getUserDataPath() const
+{
+    return getUserConfigPath();
+}
+
+/**
+ * FIXME: Someone with Windows system should check this and correct if necessary
+ */
+boost::filesystem::path WindowsPath::getGlobalDataPath() const
+{
+    return getGlobalConfigPath();
+}
+
+/**
+ * FIXME: Someone with Windows system should check this and correct if necessary
+ */
+boost::filesystem::path WindowsPath::getLocalDataPath() const
+{
+    return boost::filesystem::path("./data/");
+}
+
+boost::filesystem::path WindowsPath::getInstallPath() const;
+{
+    return boost::filesystem::path("./");
+}
+
 } /* namespace Files */
 
 #endif /* defined(_WIN32) || defined(__WINDOWS__) */

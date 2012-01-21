@@ -14,6 +14,12 @@
 namespace Files
 {
 
+extern const char* const mwDataToken;
+extern const char* const localDataToken;
+extern const char* const userDataToken;
+extern const char* const globalDataToken;
+
+
 /**
  * \struct ConfigurationManager
  */
@@ -37,7 +43,9 @@ struct ConfigurationManager
     const boost::filesystem::path& getLogPath() const;
 
     private:
-        typedef const boost::filesystem::path& (ConfigurationManager::*path_type_f)() const;
+        typedef Files::FixedPath<> FixedPathType;
+
+        typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
         typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
 
         void loadConfig(const boost::filesystem::path& path,
@@ -46,12 +54,7 @@ struct ConfigurationManager
 
         void setupTokensMapping();
 
-        const boost::filesystem::path& getInstallPath() const;
-        const boost::filesystem::path& getGlobalDataPath() const;
-        const boost::filesystem::path& getUserDataPath() const;
-        const boost::filesystem::path& getLocalDataPath() const;
-
-        Files::FixedPath<> mFixedPath;
+        FixedPathType mFixedPath;
 
         boost::filesystem::path mOgreCfgPath;
         boost::filesystem::path mPluginsCfgPath;

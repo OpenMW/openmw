@@ -59,6 +59,8 @@ struct MacOsPath
      * \return boost::filesystem::path
      */
     boost::filesystem::path getLocalPath() const;
+
+    boost::filesystem::path getInstallPath() const;
 };
 
 } /* namespace Files */

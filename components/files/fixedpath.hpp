@@ -73,9 +73,10 @@ struct FixedPath
         , mUserPath(mPath.getUserPath())
         , mGlobalPath(mPath.getGlobalPath())
         , mLocalPath(mPath.getLocalPath())
-        , mLocalDataPath()
-        , mGlobalDataPath()
-        , mRuntimeDataPath()
+        , mUserDataPath(mPath.getUserDataPath())
+        , mGlobalDataPath(mPath.getGlobalDataPath())
+        , mLocalDataPath(mPath.getLocalDataPath())
+        , mInstallPath(mPath.getInstallPath())
     {
         if (!application_name.empty())
         {
@@ -119,64 +120,28 @@ struct FixedPath
         return mLocalPath;
     }
 
-    /**
-     * \brief Return path pointing to the user local data directory.
-     *
-     * \return boost::filesystem::path
-     */
-    const boost::filesystem::path& getLocalDataPath() const
+    const boost::filesystem::path& getInstallPath() const
     {
-        return mLocalDataPath;
+    // TODO: It will be corrected later.
+        static boost::filesystem::path p("./");
+        return p;
+
+        //return mFixedPath.getInstallPath();
     }
 
-    /**
-     * \brief Sets new local data path.
-     *
-     * \param [in] path - New path
-     */
-    void setLocalDataPath(const boost::filesystem::path& path)
-    {
-        mLocalDataPath = path;
-    }
-
-    /**
-     * \brief Return path pointing to the global (system) data directory.
-     *
-     * \return boost::filesystem::path
-     */
     const boost::filesystem::path& getGlobalDataPath() const
     {
         return mGlobalDataPath;
     }
 
-    /**
-     * \brief Sets new global (system) data directory.
-     *
-     * \param [in] path - New path
-     */
-    void setGlobalDataPath(const boost::filesystem::path& path)
+    const boost::filesystem::path& getUserDataPath() const
     {
-        mGlobalDataPath = path;
+        return mUserDataPath;
     }
 
-    /**
-     * \brief Return path pointing to the directory where application was started.
-     *
-     * \return boost::filesystem::path
-     */
-    const boost::filesystem::path& getRuntimeDataPath() const
+    const boost::filesystem::path& getLocalDataPath() const
     {
-        return mRuntimeDataPath;
-    }
-
-    /**
-     * \brief Sets new runtime data directory.
-     *
-     * \param [in] path - New path
-     */
-    void setRuntimeDataPath(const boost::filesystem::path& path)
-    {
-        mRuntimeDataPath = path;
+        return mLocalDataPath;
     }
 
     private:
@@ -186,11 +151,12 @@ struct FixedPath
         boost::filesystem::path mGlobalPath;     /**< Global path */
         boost::filesystem::path mLocalPath;      /**< It is the same directory where application was run */
 
-        boost::filesystem::path mLocalDataPath;          /**< User local application data path (user plugins / mods / etc.) */
-        boost::filesystem::path mGlobalDataPath;         /**< Global application data path */
-        boost::filesystem::path mRuntimeDataPath;        /**< Runtime path to the configuration files.
+        boost::filesystem::path mUserDataPath;          /**< User data path */
+        boost::filesystem::path mGlobalDataPath;        /**< Global application data path */
+        boost::filesystem::path mLocalDataPath;         /**< Local path to the configuration files.
                                                               By default it is a 'data' directory in same
                                                               directory where application was run */
+        boost::filesystem::path mInstallPath;
 
 };
 

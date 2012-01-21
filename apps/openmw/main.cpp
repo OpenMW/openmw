@@ -166,7 +166,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (dataDirs.empty())
     {
-        dataDirs.push_back(cfgMgr.getDataPath("local:data?"));
+        dataDirs.push_back(cfgMgr.getDataPath(Files::localDataToken));
     }
 
     engine.setDataDirs(dataDirs);

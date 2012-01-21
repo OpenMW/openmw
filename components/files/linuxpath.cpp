@@ -95,6 +95,71 @@ boost::filesystem::path LinuxPath::getLocalPath() const
     return boost::filesystem::path("./");
 }
 
+boost::filesystem::path LinuxPath::getUserDataPath() const
+{
+    boost::filesystem::path localDataPath(".");
+    boost::filesystem::path suffix("/");
+
+    const char* theDir = getenv("OPENMW_DATA");
+    if (theDir == NULL)
+    {
+        theDir = getenv("XDG_DATA_HOME");
+        if (theDir == NULL)
+        {
+            theDir = getenv("HOME");
+            if (theDir == NULL)
+            {
+                struct passwd* pwd = getpwuid(getuid());
+                if (pwd != NULL)
+                {
+                    theDir = pwd->pw_dir;
+                }
+            }
+            if (theDir != NULL)
+            {
+                suffix = boost::filesystem::path("/.local/share/");
+            }
+        }
+    }
+
+    if (theDir != NULL) {
+        localDataPath = boost::filesystem::path(theDir);
+    }
+
+    localDataPath /= suffix;
+    return localDataPath;
+}
+
+boost::filesystem::path LinuxPath::getGlobalDataPath() const
+{
+    boost::filesystem::path globalDataPath("/usr/local/share/");
+
+    char* theDir = getenv("XDG_DATA_DIRS");
+    if (theDir != NULL)
+    {
+        // We take only first path from list
+        char* ptr = strtok(theDir, ":");
+        if (ptr != NULL)
+        {
+            globalDataPath = boost::filesystem::path(ptr);
+            globalDataPath /= boost::filesystem::path("/");
+        }
+    }
+
+    return globalDataPath;
+}
+
+boost::filesystem::path LinuxPath::getLocalDataPath() const
+{
+    return boost::filesystem::path("./data/");
+}
+
+
+boost::filesystem::path LinuxPath::getInstallPath() const
+{
+    return boost::filesystem::path("./");
+}
+
 } /* namespace Files */
 
 #endif /* defined(__linux__) || defined(__FreeBSD__) */
