@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include <components/cfg/configurationmanager.hpp>
+#include <components/files/configurationmanager.hpp>
 
 class QListWidget;
 class QListWidgetItem;
@@ -47,7 +47,7 @@ private:
     QStringList mDataDirs;
     bool mStrict;
 
-    Cfg::ConfigurationManager mCfg;
+    Files::ConfigurationManager mCfgMgr;
 };
 
 #endif

@@ -6,10 +6,6 @@ add_component_dir (bsa
     bsa_archive bsa_file
     )
 
-add_component_dir (cfg
-    configurationmanager
-    )
-
 add_component_dir (nif
     controlled effect nif_types record controller extra node record_ptr data nif_file property
     )
@@ -47,7 +43,7 @@ add_component_dir (misc
     )
 
 add_component_dir (files
-    linuxpath windowspath macospath path multidircollection collections fileops
+    linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
     )
 
 add_component_dir (compiler

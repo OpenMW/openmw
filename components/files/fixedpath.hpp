@@ -18,10 +18,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \file components/files/path.hpp */
+/** \file components/files/fixedpath.hpp */
 
-#ifndef COMPONENTS_FILES_PATH_HPP
-#define COMPONENTS_FILES_PATH_HPP
+#ifndef COMPONENTS_FILES_FIXEDPATH_HPP
+#define COMPONENTS_FILES_FIXEDPATH_HPP
 
 #include <string>
 #include <boost/filesystem.hpp>
@@ -59,7 +59,7 @@ template
 <
     class P = TargetPathType
 >
-struct Path
+struct FixedPath
 {
     typedef P PathType;
 
@@ -68,21 +68,21 @@ struct Path
      *
      * \param [in] application_name - Name of the application
      */
-    Path(const std::string& application_name)
+    FixedPath(const std::string& application_name)
         : mPath()
-        , mLocalConfigPath(mPath.getLocalConfigPath())
-        , mGlobalConfigPath(mPath.getGlobalConfigPath())
-        , mRuntimeConfigPath(mPath.getRuntimeConfigPath())
-        , mLocalDataPath(mPath.getLocalDataPath())
-        , mGlobalDataPath(mPath.getGlobalDataPath())
-        , mRuntimeDataPath(mPath.getRuntimeDataPath())
+        , mUserPath(mPath.getUserPath())
+        , mGlobalPath(mPath.getGlobalPath())
+        , mLocalPath(mPath.getLocalPath())
+        , mLocalDataPath()
+        , mGlobalDataPath()
+        , mRuntimeDataPath()
     {
         if (!application_name.empty())
         {
             boost::filesystem::path suffix(application_name + std::string("/"));
 
-            mLocalConfigPath /= suffix;
-            mGlobalConfigPath /= suffix;
+            mUserPath /= suffix;
+            mGlobalPath /= suffix;
 
             mLocalDataPath /= suffix;
             mGlobalDataPath /= suffix;
@@ -94,19 +94,9 @@ struct Path
      *
      * \return boost::filesystem::path
      */
-    const boost::filesystem::path& getLocalConfigPath() const
+    const boost::filesystem::path& getUserPath() const
     {
-        return mLocalConfigPath;
-    }
-
-    /**
-     * \brief Sets new local configuration path.
-     *
-     * \param [in] path - New path
-     */
-    void setLocalConfigPath(const boost::filesystem::path& path)
-    {
-        mLocalConfigPath = path;
+        return mUserPath;
     }
 
     /**
@@ -114,19 +104,9 @@ struct Path
      *
      * \return boost::filesystem::path
      */
-    const boost::filesystem::path& getGlobalConfigPath() const
+    const boost::filesystem::path& getGlobalPath() const
     {
-        return mGlobalConfigPath;
-    }
-
-    /**
-     * \brief Sets new global configuration path.
-     *
-     * \param [in] path - New path
-     */
-    void setGlobalConfigPath(const boost::filesystem::path& path)
-    {
-        mGlobalConfigPath = path;
+        return mGlobalPath;
     }
 
     /**
@@ -134,19 +114,9 @@ struct Path
      *
      * \return boost::filesystem::path
      */
-    const boost::filesystem::path& getRuntimeConfigPath() const
+    const boost::filesystem::path& getLocalPath() const
     {
-        return mRuntimeConfigPath;
-    }
-
-    /**
-     * \brief Sets new runtime configuration path.
-     *
-     * \param [in] path - New path
-     */
-    void setRuntimeConfigPath(const boost::filesystem::path& path)
-    {
-        mRuntimeConfigPath = path;
+        return mLocalPath;
     }
 
     /**
@@ -212,11 +182,9 @@ struct Path
     private:
         PathType mPath;
 
-        boost::filesystem::path mLocalConfigPath;        /**< User local path to the configuration files */
-        boost::filesystem::path mGlobalConfigPath;       /**< Global path to the configuration files */
-        boost::filesystem::path mRuntimeConfigPath;      /**< Runtime path to the configuration files.
-                                                              By default it is the same directory where
-                                                              application was run */
+        boost::filesystem::path mUserPath;       /**< User path  */
+        boost::filesystem::path mGlobalPath;     /**< Global path */
+        boost::filesystem::path mLocalPath;      /**< It is the same directory where application was run */
 
         boost::filesystem::path mLocalDataPath;          /**< User local application data path (user plugins / mods / etc.) */
         boost::filesystem::path mGlobalDataPath;         /**< Global application data path */
@@ -229,4 +197,4 @@ struct Path
 
 } /* namespace Files */
 
-#endif /* COMPONENTS_FILES_PATH_HPP */
+#endif /* COMPONENTS_FILES_FIXEDPATH_HPP */

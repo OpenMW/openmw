@@ -3,7 +3,7 @@
 #include <components/esm/esm_reader.hpp>
 #include <components/files/collections.hpp>
 #include <components/files/multidircollection.hpp>
-#include <components/cfg/configurationmanager.hpp>
+#include <components/files/configurationmanager.hpp>
 
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
@@ -26,7 +26,9 @@ bool rowSmallerThan(const QModelIndex &index1, const QModelIndex &index2)
     return index1.row() <= index2.row();
 }
 
-DataFilesPage::DataFilesPage(QWidget *parent) : QWidget(parent)
+DataFilesPage::DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent)
+    : QWidget(parent)
+    , mCfgMgr(cfg)
 {
     mDataFilesModel = new QStandardItemModel(); // Contains all plugins with masters
     mPluginsModel = new PluginsModel(); // Contains selectable plugins
@@ -236,13 +238,11 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
 
 void DataFilesPage::setupConfig()
 {
-    Cfg::ConfigurationManager cfg;
-
-    QString config = (cfg.getRuntimeConfigPath() / "launcher.cfg").string().c_str();
+    QString config = (mCfgMgr.getLocalPath() / "launcher.cfg").string().c_str();
     QFile file(config);
 
     if (!file.exists()) {
-        config = QString::fromStdString((cfg.getLocalConfigPath() / "launcher.cfg").string());
+        config = QString::fromStdString((mCfgMgr.getUserPath() / "launcher.cfg").string());
     }
 
     file.setFileName(config); // Just for displaying information

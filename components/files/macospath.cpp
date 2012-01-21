@@ -34,9 +34,9 @@
 namespace Files
 {
 
-boost::filesystem::path MacOsPath::getLocalConfigPath() const
+boost::filesystem::path MacOsPath::getUserPath() const
 {
-    boost::filesystem::path localConfigPath(".");
+    boost::filesystem::path userPath(".");
     boost::filesystem::path suffix("/");
 
     const char* theDir = getenv("HOME");
@@ -50,68 +50,24 @@ boost::filesystem::path MacOsPath::getLocalConfigPath() const
     }
     if (theDir != NULL)
     {
-        localConfigPath = boost::filesystem::path(theDir) / "Library/Preferences/";
+        userPath = boost::filesystem::path(theDir) / "Library/Preferences/";
     }
 
-    localConfigPath /= suffix;
+    userPath /= suffix;
 
-    return localConfigPath;
+    return userPath;
 }
 
-boost::filesystem::path MacOsPath::getGlobalConfigPath() const
+boost::filesystem::path MacOsPath::getGlobalPath() const
 {
-    boost::filesystem::path globalConfigPath("/Library/Preferences/");
-    return globalConfigPath;
+    boost::filesystem::path globalPath("/Library/Preferences/");
+    return globalPath;
 }
 
-boost::filesystem::path MacOsPath::getRuntimeConfigPath() const
+boost::filesystem::path MacOsPath::getLocalPath() const
 {
     return boost::filesystem::path("./");
 }
-
-boost::filesystem::path MacOsPath::getLocalDataPath() const
-{
-    boost::filesystem::path localDataPath(".");
-    boost::filesystem::path suffix("/");
-
-    const char* theDir = getenv("OPENMW_DATA");
-    if (theDir == NULL)
-    {
-        theDir = getenv("HOME");
-        if (theDir == NULL)
-        {
-            struct passwd* pwd = getpwuid(getuid());
-            if (pwd != NULL)
-            {
-                theDir = pwd->pw_dir;
-            }
-        }
-        if (theDir != NULL)
-        {
-            suffix = boost::filesystem::path("/Library/Application Support/");
-        }
-    }
-
-    if (theDir != NULL)
-    {
-        localDataPath = boost::filesystem::path(theDir);
-    }
-
-    localDataPath /= suffix;
-    return localDataPath;
-}
-
-boost::filesystem::path MacOsPath::getGlobalDataPath() const
-{
-    boost::filesystem::path globalDataPath("/Library/Application Support/");
-    return globalDataPath;
-}
-
-boost::filesystem::path MacOsPath::getRuntimeDataPath() const
-{
-    return boost::filesystem::path("./data/");
-}
-
 
 } /* namespace Files */
 

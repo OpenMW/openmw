@@ -17,7 +17,9 @@
 #include <components/esm_store/cell_store.hpp>
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/esm_reader.hpp>
-#include <components/files/path.hpp>
+#include <components/files/fixedpath.hpp>
+#include <components/files/configurationmanager.hpp>
+
 #include <components/nifbullet/bullet_nif_loader.hpp>
 
 #include "mwinput/inputmanager.hpp"
@@ -154,7 +156,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     return true;
 }
 
-OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
+OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mPhysicEngine (0)
   , mShowFPS (false)

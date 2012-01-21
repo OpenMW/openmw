@@ -19,12 +19,14 @@ class PluginsModel;
 class PluginsView;
 class ComboBox;
 
+namespace Files { struct ConfigurationManager; }
+
 class DataFilesPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    DataFilesPage(QWidget *parent = 0);
+    DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent = 0);
 
     ComboBox *mProfilesComboBox;
     QSettings *mLauncherConfig;
@@ -80,6 +82,8 @@ private:
     QAction *mMoveBottomAction;
     QAction *mCheckAction;
     QAction *mUncheckAction;
+
+    Files::ConfigurationManager& mCfgMgr;
 
     void addPlugins(const QModelIndex &index);
     void removePlugins(const QModelIndex &index);

@@ -35,9 +35,9 @@
 namespace Files
 {
 
-boost::filesystem::path LinuxPath::getLocalConfigPath() const
+boost::filesystem::path LinuxPath::getUserPath() const
 {
-    boost::filesystem::path localConfigPath(".");
+    boost::filesystem::path userPath(".");
     boost::filesystem::path suffix("/");
 
     const char* theDir = getenv("OPENMW_CONFIG");
@@ -63,17 +63,17 @@ boost::filesystem::path LinuxPath::getLocalConfigPath() const
     }
 
     if (theDir != NULL) {
-        localConfigPath = boost::filesystem::path(theDir);
+        userPath = boost::filesystem::path(theDir);
     }
 
-    localConfigPath /= suffix;
+    userPath /= suffix;
 
-    return localConfigPath;
+    return userPath;
 }
 
-boost::filesystem::path LinuxPath::getGlobalConfigPath() const
+boost::filesystem::path LinuxPath::getGlobalPath() const
 {
-    boost::filesystem::path globalConfigPath("/etc/xdg/");
+    boost::filesystem::path globalPath("/etc/xdg/");
 
     char* theDir = getenv("XDG_CONFIG_DIRS");
     if (theDir != NULL)
@@ -82,78 +82,18 @@ boost::filesystem::path LinuxPath::getGlobalConfigPath() const
         char* ptr = strtok(theDir, ":");
         if (ptr != NULL)
         {
-            globalConfigPath = boost::filesystem::path(ptr);
-            globalConfigPath /= boost::filesystem::path("/");
+            globalPath = boost::filesystem::path(ptr);
+            globalPath /= boost::filesystem::path("/");
         }
     }
 
-    return globalConfigPath;
+    return globalPath;
 }
 
-boost::filesystem::path LinuxPath::getRuntimeConfigPath() const
+boost::filesystem::path LinuxPath::getLocalPath() const
 {
     return boost::filesystem::path("./");
 }
-
-boost::filesystem::path LinuxPath::getLocalDataPath() const
-{
-    boost::filesystem::path localDataPath(".");
-    boost::filesystem::path suffix("/");
-
-    const char* theDir = getenv("OPENMW_DATA");
-    if (theDir == NULL)
-    {
-        theDir = getenv("XDG_DATA_HOME");
-        if (theDir == NULL)
-        {
-            theDir = getenv("HOME");
-            if (theDir == NULL)
-            {
-                struct passwd* pwd = getpwuid(getuid());
-                if (pwd != NULL)
-                {
-                    theDir = pwd->pw_dir;
-                }
-            }
-            if (theDir != NULL)
-            {
-                suffix = boost::filesystem::path("/.local/share/");
-            }
-        }
-    }
-
-    if (theDir != NULL) {
-        localDataPath = boost::filesystem::path(theDir);
-    }
-
-    localDataPath /= suffix;
-    return localDataPath;
-}
-
-boost::filesystem::path LinuxPath::getGlobalDataPath() const
-{
-    boost::filesystem::path globalDataPath("/usr/local/share/");
-
-    char* theDir = getenv("XDG_DATA_DIRS");
-    if (theDir != NULL)
-    {
-        // We take only first path from list
-        char* ptr = strtok(theDir, ":");
-        if (ptr != NULL)
-        {
-            globalDataPath = boost::filesystem::path(ptr);
-            globalDataPath /= boost::filesystem::path("/");
-        }
-    }
-
-    return globalDataPath;
-}
-
-boost::filesystem::path LinuxPath::getRuntimeDataPath() const
-{
-    return boost::filesystem::path("./data/");
-}
-
 
 } /* namespace Files */
 

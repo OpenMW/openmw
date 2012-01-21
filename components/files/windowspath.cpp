@@ -10,9 +10,9 @@
 namespace Files
 {
 
-boost::filesystem::path WindowsPath::getLocalConfigPath() const
+boost::filesystem::path WindowsPath::getUserPath() const
 {
-    boost::filesystem::path localConfigPath(".");
+    boost::filesystem::path userPath(".");
     boost::filesystem::path suffix("/");
 
     TCHAR path[MAX_PATH];
@@ -21,17 +21,17 @@ boost::filesystem::path WindowsPath::getLocalConfigPath() const
     if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, 0, path)))
     {
         PathAppend(path, TEXT("My Games"));
-        localConfigPath = boost::filesystem::path(path);
+        userPath = boost::filesystem::path(path);
     }
 
-    localConfigPath /= suffix;
+    userPath /= suffix;
 
-    return localConfigPath;
+    return userPath;
 }
 
-boost::filesystem::path WindowsPath::getGlobalConfigPath() const
+boost::filesystem::path WindowsPath::getGlobalPath() const
 {
-    boost::filesystem::path globalConfigPath(".");
+    boost::filesystem::path globalPath(".");
     boost::filesystem::path suffix("/");
 
     TCHAR path[MAX_PATH];
@@ -39,32 +39,17 @@ boost::filesystem::path WindowsPath::getGlobalConfigPath() const
 
     if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, NULL, 0, path)))
     {
-        globalConfigPath = boost::filesystem::path(path);
+        globalPath = boost::filesystem::path(path);
     }
 
-    globalConfigPath /= suffix;
+    globalPath /= suffix;
 
-    return globalConfigPath;
+    return globalPath;
 }
 
-boost::filesystem::path WindowsPath::getRuntimeConfigPath() const
+boost::filesystem::path WindowsPath::getLocalPath() const
 {
     return boost::filesystem::path("./");
-}
-
-boost::filesystem::path WindowsPath::getLocalDataPath() const
-{
-    return getLocalConfigPath();
-}
-
-boost::filesystem::path WindowsPath::getGlobalDataPath() const
-{
-    return getGlobalConfigPath();
-}
-
-boost::filesystem::path WindowsPath::getRuntimeDataPath() const
-{
-    return boost::filesystem::path("./data/");
 }
 
 } /* namespace Files */

@@ -11,7 +11,6 @@
 
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
-#include <components/cfg/configurationmanager.hpp>
 
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
@@ -52,6 +51,11 @@ namespace OEngine
   {
     class OgreRenderer;
   }
+}
+
+namespace Files
+{
+    struct ConfigurationManager;
 }
 
 namespace OMW
@@ -104,7 +108,7 @@ namespace OMW
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
         public:
-            Engine(Cfg::ConfigurationManager& configurationManager);
+            Engine(Files::ConfigurationManager& configurationManager);
             virtual ~Engine();
 
             /// Enable strict filesystem mode (do not fold case)
@@ -159,7 +163,7 @@ namespace OMW
             void setEncoding(const std::string& encoding);
 
         private:
-            Cfg::ConfigurationManager& mCfgMgr;
+            Files::ConfigurationManager& mCfgMgr;
     };
 }
 

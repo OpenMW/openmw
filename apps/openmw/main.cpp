@@ -6,9 +6,9 @@
 #include <boost/program_options.hpp>
 
 #include <components/files/fileops.hpp>
-#include <components/files/path.hpp>
+#include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>
-#include <components/cfg/configurationmanager.hpp>
+#include <components/files/configurationmanager.hpp>
 
 #include "engine.hpp"
 
@@ -46,7 +46,7 @@ using namespace std;
  * \retval true - Everything goes OK
  * \retval false - Error
  */
-bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::ConfigurationManager& cfgMgr)
+bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::ConfigurationManager& cfgMgr)
 {
     // Create a local alias for brevity
     namespace bpo = boost::program_options;
@@ -166,7 +166,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
 
     if (dataDirs.empty())
     {
-        dataDirs.push_back(cfgMgr.getLocalDataPath());
+        dataDirs.push_back(cfgMgr.getDataPath("local:data?"));
     }
 
     engine.setDataDirs(dataDirs);
@@ -220,7 +220,7 @@ int main(int argc, char**argv)
 
     try
     {
-        Cfg::ConfigurationManager cfgMgr;
+        Files::ConfigurationManager cfgMgr;
         OMW::Engine engine(cfgMgr);
 
         if (parseOptions(argc, argv, engine, cfgMgr))
