@@ -34,6 +34,12 @@ struct Land
 
     static const int HEIGHT_SCALE = 8;
 
+    //number of textures per side of land
+    static const int LAND_TEXTURE_SIZE = 16;
+
+    //total number of textures per land
+    static const int LAND_NUM_TEXTURES = LAND_TEXTURE_SIZE * LAND_TEXTURE_SIZE;
+
 #pragma pack(push,1)
     struct VHGT
     {
@@ -51,6 +57,8 @@ struct Land
         float heightOffset;
         float heights[LAND_NUM_VERTS];
         //float normals[LAND_NUM_VERTS * 3];
+        uint16_t textures[LAND_NUM_TEXTURES];
+        char colours[3 * LAND_NUM_VERTS];
     };
 
     LandData *landData;

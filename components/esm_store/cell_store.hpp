@@ -126,6 +126,7 @@ namespace ESMS
     CellRefList<Weapon, D>            weapons;
 
     const Land* land;
+    const LTexList* landTextures;
 
     void load (const ESMStore &store, ESMReader &esm)
     {
@@ -141,6 +142,7 @@ namespace ESMS
             if ( ! (cell->data.flags & ESM::Cell::Interior) )
             {
                 loadTerrain(cell->data.gridX, cell->data.gridY, store, esm);
+                landTextures = &store.landTexts;
             }
 
             mState = State_Loaded;

@@ -86,6 +86,25 @@ void Land::loadData(ESMReader &esm)
                 landData->heights[x + y * LAND_SIZE] = tempOffset * HEIGHT_SCALE;
             }
         }
+
+        if (esm.isNextSub("WNAM"))
+        {
+            esm.skipHSubSize(81);
+        }
+        if (esm.isNextSub("VCLR"))
+        {
+            esm.skipHSubSize(12675);
+        }
+        //TODO fix magic numbers
+        uint16_t vtex[512];
+        esm.getHNExact(&vtex, 512, "VTEX");
+
+        int readPos = 0; //bit ugly, but it works
+        for ( int y1 = 0; y1 < 4; y1++ )
+            for ( int x1 = 0; x1 < 4; x1++ )
+                for ( int y2 = 0; y2 < 4; y2++)
+                    for ( int x2 = 0; x2 < 4; x2++ )
+                        landData->textures[(y1*4+y2)*16+(x1*4+x2)] = vtex[readPos++];
     }
     else
     {
