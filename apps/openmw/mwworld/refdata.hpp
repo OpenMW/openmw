@@ -34,6 +34,8 @@ namespace MWWorld
             bool mEnabled;
             int mCount; // 0: deleted
 
+            ESM::Position mPosition;
+
             // we are using shared pointer here to avoid having to create custom copy-constructor,
             // assignment operator and destructor. As a consequence though copying a RefData object
             // manually will probably give unexcepted results. This is not a problem since RefData
@@ -44,7 +46,9 @@ namespace MWWorld
 
             boost::shared_ptr<ContainerStore<RefData> > mContainerStore;
 
-            ESM::Position mPosition;
+            void copy (const RefData& refData);
+
+            void cleanup();
 
         public:
 
@@ -52,6 +56,12 @@ namespace MWWorld
             /// be altered without effecting the original data. This makes it possible
             /// to reset the position as the orignal data is still held in the CellRef
             RefData (const ESMS::CellRef& cellRef);
+
+            RefData (const RefData& refData);
+
+            ~RefData();
+
+            RefData& operator= (const RefData& refData);
 
             /// Return OGRE handle (may be empty).
             std::string getHandle();

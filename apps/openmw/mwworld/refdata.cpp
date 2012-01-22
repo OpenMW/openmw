@@ -3,9 +3,69 @@
 
 namespace MWWorld
 {
+    void RefData::copy (const RefData& refData)
+    {
+        mBaseNode = refData.mBaseNode;
+        mLocals = refData.mLocals;
+        mHasLocals = refData.mHasLocals;
+        mEnabled = refData.mEnabled;
+        mCount = refData.mCount;
+        mPosition = refData.mPosition;
+
+        mCreatureStats = refData.mCreatureStats;
+        mNpcStats = refData.mNpcStats;
+        mMovement = refData.mMovement;
+        mContainerStore = refData.mContainerStore;
+    }
+
+    void RefData::cleanup()
+    {
+        mBaseNode = 0;
+    }
+
     RefData::RefData (const ESMS::CellRef& cellRef)
     : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.pos)
     {}
+
+    RefData::RefData (const RefData& refData)
+    : mBaseNode(0)
+    {
+        try
+        {
+            copy (refData);
+        }
+        catch (...)
+        {
+            cleanup();
+            throw;
+        }
+    }
+
+    RefData::RefData& RefData::operator= (const RefData& refData)
+    {
+        try
+        {
+            cleanup();
+            copy (refData);
+        }
+        catch (...)
+        {
+            cleanup();
+            throw;
+        }
+
+        return *this;
+    }
+
+    RefData::~RefData()
+    {
+        try
+        {
+            cleanup();
+        }
+        catch (...)
+        {}
+    }
 
     std::string RefData::getHandle()
     {
