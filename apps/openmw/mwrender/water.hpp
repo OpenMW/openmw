@@ -40,7 +40,7 @@ namespace MWRender {
     ~Water();
 
     void checkUnderwater(float y);
-    void changeCell(float x, float y);
+    void changeCell(const ESM::Cell* cell);
 
 
   };

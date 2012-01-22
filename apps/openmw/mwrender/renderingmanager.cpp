@@ -133,9 +133,13 @@ void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater){
         if(mWater == 0)
             mWater = new MWRender::Water(rend.getCamera(), store->cell);
+        else
+            mWater->changeCell(store->cell);
         //else
 
     }
+    else
+        removeWater();
    
 }
 

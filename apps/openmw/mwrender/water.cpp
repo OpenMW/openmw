@@ -12,9 +12,9 @@ namespace MWRender {
     
    
     mIsUnderwater = false;
-    mCamera->addListener(this);
+    //mCamera->addListener(this);
         
-    mWaterPlane = Ogre::Plane(Ogre::Vector3::UNIT_Y, mTop);
+    mWaterPlane = Ogre::Plane(Ogre::Vector3::UNIT_Y, 0);
     
     Ogre::MeshManager::getSingleton().createPlane("water", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*3  + 10000, CELL_SIZE * 3 + 10000, 10, 10, true, 1, 3,5, Ogre::Vector3::UNIT_Z);
     
@@ -27,6 +27,7 @@ namespace MWRender {
       
     
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
+    mWaterNode->setPosition(0, mTop, 0);
     
     
    if(!(cell->data.flags & cell->Interior))
@@ -40,7 +41,7 @@ namespace MWRender {
 
   Water::~Water() {
       Ogre::MeshManager::getSingleton().remove("water");
-      mCamera->removeListener(this);
+      //mCamera->removeListener(this);
     
       mWaterNode->detachObject(mWater);
       mSceneManager->destroyEntity(mWater);
@@ -49,6 +50,17 @@ namespace MWRender {
     //Ogre::TextureManager::getSingleton().remove("refraction");
     //Ogre::TextureManager::getSingleton().remove("reflection");
     Ogre::CompositorManager::getSingleton().removeCompositorChain(mViewport);
+  }
+
+  void Water::changeCell(const ESM::Cell* cell){
+      mTop = cell->water;
+      
+      
+   
+        if(!(cell->data.flags & cell->Interior))
+            mWaterNode->setPosition(getSceneNodeCoordinates(cell->data.gridX, cell->data.gridY));
+        else
+            mWaterNode->setPosition(0, mTop, 0);
   }
 
 
@@ -106,7 +118,7 @@ namespace MWRender {
   void Water::cameraDestroyed(Ogre::Camera *cam) {
   }
   Ogre::Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY){
-      Ogre::Vector3 out = Ogre::Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), 0, -gridY * CELL_SIZE - (CELL_SIZE / 2));
+      Ogre::Vector3 out = Ogre::Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), mTop, -gridY * CELL_SIZE - (CELL_SIZE / 2));
       
       return out;
   }

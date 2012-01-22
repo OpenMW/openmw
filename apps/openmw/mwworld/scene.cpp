@@ -218,7 +218,6 @@ namespace MWWorld
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
         std::cout << "Changing to interior\n";
-        mRendering.removeWater();
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -250,7 +249,6 @@ namespace MWWorld
     {
         int x = 0;
         int y = 0;
-        mRendering.removeWater();
 
         mWorld->positionToIndex (position.pos[0], position.pos[1], x, y);
 
