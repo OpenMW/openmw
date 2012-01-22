@@ -78,13 +78,15 @@ MWRender::Player& RenderingManager::getPlayer(){
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
     objects.removeCell(store);
-    mTerrainManager->cellRemoved(store);
+    if (store->cell->isExterior())
+      mTerrainManager->cellRemoved(store);
 }
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
     objects.buildStaticGeometry (*store);
-    mTerrainManager->cellAdded(store);
+    if (store->cell->isExterior())
+      mTerrainManager->cellAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
