@@ -64,6 +64,7 @@ class RenderingManager: private RenderingInterface {
 	bool toggleRenderMode(int mode);
 
     void removeCell (MWWorld::Ptr::CellStore *store); // TODO do we want this?
+    void removeWater();
     
     void addObject (const MWWorld::Ptr& ptr);
     void removeObject (const MWWorld::Ptr& ptr);

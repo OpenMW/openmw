@@ -2,12 +2,13 @@
 #define GAME_MWRENDER_WATER_H
 
 #include <Ogre.h>
-
+#include <components/esm/loadcell.hpp>
 
 namespace MWRender {
 
     /// Water rendering 	
   class Water : Ogre::RenderTargetListener, Ogre::Camera::Listener {
+      static const int CELL_SIZE = 8192;
     Ogre::Camera *mCamera;
     Ogre::SceneManager *mSceneManager;
     Ogre::Viewport *mViewport;
@@ -31,13 +32,15 @@ namespace MWRender {
     void cameraPreRenderScene(Ogre::Camera *cam);
     void cameraPostRenderScene(Ogre::Camera *cam);
     void cameraDestroyed(Ogre::Camera *cam);
+    Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
     
   public:
     
-    Water (Ogre::Camera *camera, int top);
+    Water (Ogre::Camera *camera, const ESM::Cell* cell);
     ~Water();
 
     void checkUnderwater(float y);
+    void changeCell(float x, float y);
 
 
   };

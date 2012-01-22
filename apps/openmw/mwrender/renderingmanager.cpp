@@ -84,6 +84,9 @@ MWRender::Player& RenderingManager::getPlayer(){
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
     objects.removeCell(store);
+    
+}
+void RenderingManager::removeWater (){
     if(mWater){
         delete mWater;
         mWater = 0;
@@ -120,8 +123,12 @@ void RenderingManager::update (float duration){
 
 }
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store){
-    if(store->cell->data.flags & store->cell->HasWater)
-        mWater = new MWRender::Water(rend.getCamera(), store->cell->water);
+    if(store->cell->data.flags & store->cell->HasWater){
+        if(mWater == 0)
+            mWater = new MWRender::Water(rend.getCamera(), store->cell);
+        //else
+
+    }
    
 }
 

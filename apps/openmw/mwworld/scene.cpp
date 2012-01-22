@@ -75,7 +75,7 @@ namespace MWWorld
                 mPhysics->removeObject (node->getName());
             }
         }
-		mRendering.removeCell(active);
+		
 		//mPhysics->removeObject("Unnamed_43");
         mWorld->getLocalScripts().clearCell (active);
         mEnvironment.mMechanicsManager->dropActors (active);
@@ -95,7 +95,6 @@ namespace MWWorld
             mActiveCells.insert(cell);
        if(result.second){
               insertCell(*cell, mEnvironment);
-               mRendering.cellAdded (cell);
                mRendering.configureAmbient(*cell);
 
         }
@@ -180,6 +179,7 @@ namespace MWWorld
         assert (iter!=mActiveCells.end());
 
         mCurrentCell = *iter;
+        std::cout << "GridX: " << mCurrentCell->cell->data.gridX << "GridY: " << mCurrentCell->cell->data.gridY << "\n";
 
         // adjust player
         playerCellChange (mWorld->getExterior(X, Y), position, adjustPlayerPos);
@@ -188,6 +188,7 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
+        mRendering.cellAdded(mCurrentCell);
     }
 
     //We need the ogre renderer and a scene node.
@@ -214,6 +215,7 @@ namespace MWWorld
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
         std::cout << "Changing to interior\n";
+        mRendering.removeWater();
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -227,6 +229,7 @@ namespace MWWorld
         Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
         loadCell (cell);
+        
 
         // adjust player
         mCurrentCell = cell;
@@ -236,12 +239,14 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
+        mRendering.cellAdded(cell);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)
     {
         int x = 0;
         int y = 0;
+        mRendering.removeWater();
 
         mWorld->positionToIndex (position.pos[0], position.pos[1], x, y);
 
