@@ -82,6 +82,11 @@ struct WindowsPath
      */
     boost::filesystem::path getLocalDataPath() const;
 
+    /**
+     * \brief Gets the path of the installed Morrowind version if there is one.
+     *
+     * \return boost::filesystem::path
+     */
     boost::filesystem::path getInstallPath() const;
 };
 

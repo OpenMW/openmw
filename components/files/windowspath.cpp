@@ -5,7 +5,10 @@
 #include <cstring>
 
 #include <windows.h>
-#include <shobj.h>
+#include <shlobj.h>
+#include <Shlwapi.h>
+
+#pragma comment(lib, "Shlwapi.lib")
 
 namespace Files
 {
@@ -76,9 +79,36 @@ boost::filesystem::path WindowsPath::getLocalDataPath() const
     return boost::filesystem::path("./data/");
 }
 
-boost::filesystem::path WindowsPath::getInstallPath() const;
+boost::filesystem::path WindowsPath::getInstallPath() const
 {
-    return boost::filesystem::path("./");
+    boost::filesystem::path installPath("");
+
+    HKEY hKey;
+
+    BOOL f64 = FALSE;
+    LPCTSTR regkey;
+    if (IsWow64Process(GetCurrentProcess(), &f64) && f64)
+    {
+        regkey = "SOFTWARE\\Wow6432Node\\Bethesda Softworks\\Morrowind";
+    }
+    else
+    {
+        regkey = "SOFTWARE\\Bethesda Softworks\\Morrowind";
+    }
+
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT(regkey), 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS)
+    {
+        //Key existed, let's try to read the install dir
+        std::vector<char> buf(512);
+        int len = 512;
+
+        if (RegQueryValueEx(hKey, TEXT("Installed Path"), NULL, NULL, (LPBYTE)&buf[0], (LPDWORD)&len) == ERROR_SUCCESS)
+        {
+            installPath = &buf[0];
+        }
+    }
+
+    return installPath;
 }
 
 } /* namespace Files */
