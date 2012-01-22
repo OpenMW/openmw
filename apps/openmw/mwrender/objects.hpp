@@ -10,9 +10,9 @@
 namespace MWRender{
 
 class Objects{
-	OEngine::Render::OgreRenderer &mRend;
-	std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
-	std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
+    OEngine::Render::OgreRenderer &mRend;
+    std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
+    std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
     Ogre::SceneNode* mwRoot;
     bool isStatic;
     static int uniqueID;
@@ -36,14 +36,13 @@ public:
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
     void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
-    void deleteObject (const std::string& handle);
+
+    bool deleteObject (const MWWorld::Ptr& ptr);
+    ///< \return found?
+
     void removeCell(MWWorld::Ptr::CellStore* store);
     void buildStaticGeometry(ESMS::CellStore<MWWorld::RefData> &cell);
     void setMwRoot(Ogre::SceneNode* root);
-
-	
-    /// insert a light related to the most recent insertBegin call.
-   
 };
 }
 #endif

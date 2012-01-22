@@ -21,14 +21,11 @@ namespace MWRender {
 
 
 
-RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine) :rend(_rend), mDebugging(engine), objects(rend)
+RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
+:rend(_rend), objects(rend), mDebugging(engine)
 {
-	
-	
-
-	//std::cout << "ONE";
-	 rend.createScene("PlayerCam", 55, 5);
-	 mSkyManager = MWRender::SkyManager::create(rend.getWindow(), rend.getCamera(), resDir);
+    rend.createScene("PlayerCam", 55, 5);
+    mSkyManager = MWRender::SkyManager::create(rend.getWindow(), rend.getCamera(), resDir);
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -41,7 +38,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // the screen (when x is to the right.) This is the orientation that
     // Morrowind uses, and it automagically makes everything work as it
     // should.
-	//std::cout << "TWO";
     SceneNode *rt = rend.getScene()->getRootSceneNode();
     mwRoot = rt->createChildSceneNode();
     mwRoot->pitch(Degree(-90));
@@ -57,6 +53,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(rend.getCamera());
 
     mPlayer = new MWRender::Player (rend.getCamera(), playerNode);
+
     mWater = 0;
 
 	//std::cout << "Three";
@@ -64,23 +61,22 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
 RenderingManager::~RenderingManager ()
 {
-	delete mPlayer;
+    delete mPlayer;
     delete mSkyManager;
 }
 
 MWRender::Npcs& RenderingManager::getNPCs(){
-	return npcs;
+    return npcs;
 }
 MWRender::Objects& RenderingManager::getObjects(){
-	return objects;
+    return objects;
 }
 MWRender::Creatures& RenderingManager::getCreatures(){
-	return creatures;
+    return creatures;
 }
 MWRender::Player& RenderingManager::getPlayer(){
     return (*mPlayer);
 }
-
 
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
     objects.removeCell(store);
@@ -92,17 +88,33 @@ void RenderingManager::removeWater (){
         mWater = 0;
     }
 }
+
+void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
+{
+    objects.buildStaticGeometry (*store);
+}
+
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
     const MWWorld::Class& class_ =
             MWWorld::Class::get (ptr);
     class_.insertObjectRendering(ptr, *this);
-}
-void RenderingManager::removeObject (const MWWorld::Ptr& ptr){
 
 }
-void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position){
-
+void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
+{
+    if (!objects.deleteObject (ptr))
+    {
+        /// \todo delete non-object MW-references
+    }
 }
+
+void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position)
+{
+    /// \todo move this to the rendering-subsystems
+    rend.getScene()->getSceneNode (ptr.getRefData().getHandle())->
+            setPosition (position);
+}
+
 void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale){
 
 }
@@ -112,17 +124,12 @@ void RenderingManager::rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quate
 void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store){
 
 }
-void RenderingManager::setPhysicsDebugRendering (bool){
 
-}
-bool RenderingManager::getPhysicsDebugRendering() const{
-	return true;
-}
 void RenderingManager::update (float duration){
 
 
 }
-void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store){
+void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater){
         if(mWater == 0)
             mWater = new MWRender::Water(rend.getCamera(), store->cell);
@@ -168,7 +175,7 @@ void RenderingManager::skySetMoonColour (bool red)
     mSkyManager->setMoonColour(red);
 }
 bool RenderingManager::toggleRenderMode(int mode){
-	return mDebugging.toggleRenderMode(mode);
+    return mDebugging.toggleRenderMode(mode);
 }
 
 void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)

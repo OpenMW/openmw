@@ -22,7 +22,7 @@ namespace MWWorld
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
         std::cout << renderer->getHandle();
-       
+
         mPlayer.mData.setBaseNode(renderer->getNode());
         /// \todo Do not make a copy of classes defined in esm/p records.
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
@@ -35,7 +35,7 @@ namespace MWWorld
 
     void Player::setPos(float x, float y, float z)
     {
-        /// \todo This fcuntion should be removed during the mwrender-refactoring.
+      /// \todo This fcuntion should be removed during the mwrender-refactoring.
         mWorld.moveObject (getPlayer(), x, y, z);
     }
 

@@ -63,6 +63,8 @@ namespace MWWorld
 		
 		
 
+        mRendering.removeCell(active);
+
         active->forEach<ListHandles>(functor);
 
         {
@@ -95,6 +97,7 @@ namespace MWWorld
             mActiveCells.insert(cell);
        if(result.second){
               insertCell(*cell, mEnvironment);
+              mRendering.cellAdded(cell);
                mRendering.configureAmbient(*cell);
 
         }
@@ -179,7 +182,7 @@ namespace MWWorld
         assert (iter!=mActiveCells.end());
 
         mCurrentCell = *iter;
-        std::cout << "GridX: " << mCurrentCell->cell->data.gridX << "GridY: " << mCurrentCell->cell->data.gridY << "\n";
+
 
         // adjust player
         playerCellChange (mWorld->getExterior(X, Y), position, adjustPlayerPos);
@@ -188,7 +191,7 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
-        mRendering.cellAdded(mCurrentCell);
+        mRendering.waterAdded(mCurrentCell);
     }
 
     //We need the ogre renderer and a scene node.
@@ -239,7 +242,8 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
-        mRendering.cellAdded(cell);
+
+        mRendering.waterAdded(cell);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)

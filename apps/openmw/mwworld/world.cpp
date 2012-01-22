@@ -163,7 +163,7 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-		MWRender::Player* play = &(mRendering.getPlayer());
+        MWRender::Player* play = &(mRendering.getPlayer());
         mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
@@ -319,12 +319,12 @@ namespace MWWorld
         {
             reference.getRefData().enable();
 
-           
+
                 //render->enable (reference.getRefData().getHandle());
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end())
                  Class::get (reference).enable (reference, mEnvironment);
-                     
-           
+
+
         }
     }
 
@@ -334,14 +334,14 @@ namespace MWWorld
         {
             reference.getRefData().disable();
 
-         
+
                 //render->disable (reference.getRefData().getHandle());
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end()){
                   Class::get (reference).disable (reference, mEnvironment);
                   mEnvironment.mSoundManager->stopSound3D (reference);
             }
-            
-            
+
+
         }
     }
 
@@ -499,9 +499,9 @@ namespace MWWorld
         {
             ptr.getRefData().setCount (0);
 
-           
+
                 if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end()){
-                           Class::get (ptr).disable (ptr, mEnvironment);
+//                           Class::get (ptr).disable (ptr, mEnvironment); /// \todo this line needs to be removed
                             mEnvironment.mSoundManager->stopSound3D (ptr);
 
                             mPhysics->removeObject (ptr.getRefData().getHandle());
@@ -509,11 +509,6 @@ namespace MWWorld
 
                             mLocalScripts.remove (ptr);
                 }
-            
-
-                //Should this go here or inside the for loop?
-                mRendering.getObjects().deleteObject (ptr.getRefData().getHandle());
-                ptr.getRefData().setBaseNode(0);
         }
     }
 
@@ -547,11 +542,9 @@ namespace MWWorld
             }
         }
 
-        // \todo cell change for non-player ref
+        /// \todo cell change for non-player ref
 
-        // \todo this should go into the new scene class and eventually into the objects/actors classes.
-        mRendering.getMgr()->getSceneNode (ptr.getRefData().getHandle())->
-            setPosition (Ogre::Vector3 (x, y, z));
+        mRendering.moveObject (ptr, Ogre::Vector3 (x, y, z));
     }
 
     void World::moveObject (Ptr ptr, float x, float y, float z)

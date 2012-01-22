@@ -6,16 +6,17 @@
 
 #include <boost/filesystem.hpp>
 
+#include <openengine/bullet/physic.hpp>
+
 #include <components/esm_store/cell_store.hpp>
 
-#include "physicssystem.hpp"
+#include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
+#include "physicssystem.hpp"
 #include "refdata.hpp"
 #include "ptr.hpp"
 #include "globals.hpp"
-#include "../mwrender/renderingmanager.hpp"
-#include "../mwrender/renderinginterface.hpp"
-#include <openengine/bullet/physic.hpp>
 
 namespace Ogre
 {
@@ -58,7 +59,6 @@ namespace MWWorld
         private:
 
             //OEngine::Render::OgreRenderer& mRenderer;
-			Ogre::SceneNode *mMwRoot;
             Ptr::CellStore* mCurrentCell; // the cell, the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
@@ -69,8 +69,8 @@ namespace MWWorld
 
             void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
-            
-            
+
+
         public:
 
             Scene (Environment& environment, World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics);
@@ -100,9 +100,6 @@ namespace MWWorld
 
             void markCellAsUnchanged();
 
-//            std::string getFacedHandle();
-
-            void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
             void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::Environment& environment);
     };
 }

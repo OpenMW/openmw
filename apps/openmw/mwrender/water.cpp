@@ -7,9 +7,10 @@ namespace MWRender {
       Ogre::CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
     } catch(...) {
     }
+    std::cout << "Water Constructor\n";
     mTop = cell->water;
     
-    std::cout << "Making water\n";
+   
     mIsUnderwater = false;
     mCamera->addListener(this);
         
@@ -27,25 +28,24 @@ namespace MWRender {
     
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
     
-    //if(!(cell->data.flags & cell->Interior))
-    //{
-        mWaterNode->setPosition(getSceneNodeCoordinates(cell->data.gridX, cell->data.gridY));
-    //}
-    //else
-    //   mWaterNode->setPosition(10000, 0, 10000);   //Don't mess with y
+    
+   if(!(cell->data.flags & cell->Interior))
+   {
+       mWaterNode->setPosition(getSceneNodeCoordinates(cell->data.gridX, cell->data.gridY));
+   }
     mWaterNode->attachObject(mWater);
    
   }
 
 
   Water::~Water() {
+      Ogre::MeshManager::getSingleton().remove("water");
       mCamera->removeListener(this);
     
       mWaterNode->detachObject(mWater);
       mSceneManager->destroyEntity(mWater);
       mSceneManager->destroySceneNode(mWaterNode);
-      
-    Ogre::MeshManager::getSingleton().remove("water");
+     
     //Ogre::TextureManager::getSingleton().remove("refraction");
     //Ogre::TextureManager::getSingleton().remove("reflection");
     Ogre::CompositorManager::getSingleton().removeCompositorChain(mViewport);
