@@ -5,6 +5,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <Ogre.h>
+
 #include "../mwscript/locals.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -12,7 +14,6 @@
 #include "../mwmechanics/movement.hpp"
 
 #include "containerstore.hpp"
-#include <Ogre.h>
 
 namespace ESM
 {
@@ -45,90 +46,45 @@ namespace MWWorld
 
             ESM::Position mPosition;
 
-
         public:
-            /// @param cr Used to copy constant data such as position into this class where it can
-            ///           be altered without effecting the original data. This makes it possible
-            ///           to reset the position as the orignal data is still held in the CellRef
-            RefData(const ESMS::CellRef& cr) : mBaseNode(0), mHasLocals (false), mEnabled (true),
-                                         mCount (1), mPosition(cr.pos) {}
 
+            /// @param cellRef Used to copy constant data such as position into this class where it can
+            /// be altered without effecting the original data. This makes it possible
+            /// to reset the position as the orignal data is still held in the CellRef
+            RefData (const ESMS::CellRef& cellRef);
 
-            std::string getHandle()
-            {
-                return mBaseNode->getName();
-            }
-            Ogre::SceneNode* getBaseNode(){
-                return mBaseNode;
-            }
-            void setBaseNode(Ogre::SceneNode* base){
-                 mBaseNode = base;
-            }
+            /// Return OGRE handle (may be empty).
+            std::string getHandle();
 
-            int getCount() const
-            {
-                return mCount;
-            }
+            /// Return OGRE base node (can be a null pointer).
+            Ogre::SceneNode* getBaseNode();
 
-            void setLocals (const ESM::Script& script)
-            {
-                if (!mHasLocals)
-                {
-                    mLocals.configure (script);
-                    mHasLocals = true;
-                }
-            }
+            /// Set OGRE base node (can be a null pointer).
+            void setBaseNode (Ogre::SceneNode* base);
 
+            int getCount() const;
 
-            void setCount (int count)
-            {
-                mCount = count;
-            }
+            void setLocals (const ESM::Script& script);
 
-            MWScript::Locals& getLocals()
-            {
-                return mLocals;
-            }
+            void setCount (int count);
 
-            bool isEnabled() const
-            {
-                return mEnabled;
-            }
+            MWScript::Locals& getLocals();
 
-            void enable()
-            {
-                mEnabled = true;
-            }
+            bool isEnabled() const;
 
-            void disable()
-            {
-                mEnabled = true;
-            }
+            void enable();
 
-            boost::shared_ptr<MWMechanics::CreatureStats>& getCreatureStats()
-            {
-                return mCreatureStats;
-            }
+            void disable();
 
-            boost::shared_ptr<MWMechanics::NpcStats>& getNpcStats()
-            {
-                return mNpcStats;
-            }
+            boost::shared_ptr<MWMechanics::CreatureStats>& getCreatureStats();
 
-            boost::shared_ptr<MWMechanics::Movement>& getMovement()
-            {
-                return mMovement;
-            }
+            boost::shared_ptr<MWMechanics::NpcStats>& getNpcStats();
 
-            boost::shared_ptr<ContainerStore<RefData> >& getContainerStore()
-            {
-                return mContainerStore;
-            }
+            boost::shared_ptr<MWMechanics::Movement>& getMovement();
 
-            ESM::Position& getPosition()
-            {
-                return mPosition;
-            }
+            boost::shared_ptr<ContainerStore<RefData> >& getContainerStore();
+
+            ESM::Position& getPosition();
     };
 }
 
