@@ -89,6 +89,8 @@ namespace Physic
         btCollisionShape* externalCollisionShape;
 
         std::string mName;
+
+        btVector3 mTranslation;
     };
 
     /**
