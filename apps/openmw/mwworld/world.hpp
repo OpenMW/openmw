@@ -140,12 +140,16 @@ namespace MWWorld
             void disable (Ptr reference);
 
             void advanceTime (double hours);
+            ///< Advance in-game time.
 
             void setHour (double hour);
+            ///< Set in-game time hour.
 
             void setMonth (int month);
+            ///< Set in-game time month.
 
             void setDay (int day);
+            ///< Set in-game time day.
 
             bool toggleSky();
             ///< \return Resulting mode
