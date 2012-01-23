@@ -7,7 +7,6 @@ namespace MWRender {
       Ogre::CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
     } catch(...) {
     }
-    std::cout << "Water Constructor\n";
     mTop = cell->water;
     
    
@@ -16,7 +15,7 @@ namespace MWRender {
         
     mWaterPlane = Ogre::Plane(Ogre::Vector3::UNIT_Y, 0);
     
-    Ogre::MeshManager::getSingleton().createPlane("water", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*3  + 10000, CELL_SIZE * 3 + 10000, 10, 10, true, 1, 3,5, Ogre::Vector3::UNIT_Z);
+    Ogre::MeshManager::getSingleton().createPlane("water", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,5, Ogre::Vector3::UNIT_Z);
     
     
     mWater = mSceneManager->createEntity("water");
