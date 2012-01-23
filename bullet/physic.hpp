@@ -89,6 +89,12 @@ namespace Physic
         btCollisionShape* externalCollisionShape;
 
         std::string mName;
+
+        /**
+        *NPC scenenode is located on there feet, and you can't simply translate a btShape, so this vector is used
+        *each time get/setposition is called.
+        */
+        btVector3 mTranslation;
     };
 
     /**

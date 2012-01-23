@@ -34,8 +34,8 @@ namespace Physic
         externalGhostObject = new PairCachingGhostObject(name);
         externalGhostObject->setWorldTransform( transform );
 
-        btScalar externalCapsuleHeight = 130;
-        btScalar externalCapsuleWidth = 16;
+        btScalar externalCapsuleHeight = 120;
+        btScalar externalCapsuleWidth = 19;
 
         externalCollisionShape = new btCapsuleShapeZ( externalCapsuleWidth,  externalCapsuleHeight );
         externalCollisionShape->setMargin( 0.1 );
@@ -47,8 +47,8 @@ namespace Physic
         internalGhostObject = new PairCachingGhostObject(name);
         internalGhostObject->setWorldTransform( transform );
         //internalGhostObject->getBroadphaseHandle()->s
-        btScalar internalCapsuleHeight =  120;
-        btScalar internalCapsuleWidth =  15;
+        btScalar internalCapsuleHeight =  110;
+        btScalar internalCapsuleWidth =  17;
 
         internalCollisionShape = new btCapsuleShapeZ( internalCapsuleWidth, internalCapsuleHeight );
         internalCollisionShape->setMargin( 0.1 );
@@ -62,6 +62,8 @@ namespace Physic
 
         mCharacter->mCollision = false;
         setGravity(0);
+
+        mTranslation = btVector3(0,0,70);
     }
 
     PhysicActor::~PhysicActor()
@@ -113,7 +115,7 @@ namespace Physic
 
     btVector3 PhysicActor::getPosition(void)
     {
-        return internalGhostObject->getWorldTransform().getOrigin();
+        return internalGhostObject->getWorldTransform().getOrigin() -mTranslation;
     }
 
     btQuaternion PhysicActor::getRotation(void)
@@ -123,8 +125,8 @@ namespace Physic
 
     void PhysicActor::setPosition(const btVector3& pos)
     {
-        internalGhostObject->getWorldTransform().setOrigin(pos);
-        externalGhostObject->getWorldTransform().setOrigin(pos);
+        internalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
+        externalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
