@@ -46,15 +46,17 @@ namespace MWRender
         Ogre::Terrain::ImportData terrainData;
 
         terrainData.inputBias = 0;
-        terrainData.inputFloat = store->land->landData->heights;
+        terrainData.inputFloat = store->land[1][1]->landData->heights;
 
         std::map<uint16_t, int> indexes;
-        initTerrainTextures(&terrainData, store, indexes);
+        initTerrainTextures(&terrainData, store, 0, 0,
+                            ESM::Land::LAND_TEXTURE_SIZE, indexes);
         mTerrainGroup->defineTerrain(x, y, &terrainData);
 
         mTerrainGroup->loadTerrain(x, y, true);
         Ogre::Terrain* terrain = mTerrainGroup->getTerrain(x,y);
-        initTerrainBlendMaps(terrain, store, indexes);
+        initTerrainBlendMaps(terrain, store, 0, 0,
+                             ESM::Land::LAND_TEXTURE_SIZE, indexes);
     }
 
     void TerrainManager::cellRemoved(MWWorld::Ptr::CellStore *store)
@@ -65,20 +67,29 @@ namespace MWRender
 
     void TerrainManager::initTerrainTextures(Ogre::Terrain::ImportData* terrainData,
                                              MWWorld::Ptr::CellStore* store,
+                                             int fromX, int fromY, int size,
                                              std::map<uint16_t, int>& indexes)
     {
+        assert(store != NULL && "store must be a valid pointer");
+        assert(terrainData != NULL && "Must have valid terrain data");
+        assert(fromX >= 0 && fromY >= 0 &&
+               "Can't get a terrain texture on terrain outside the current cell");
+        assert(fromX+size <= ESM::Land::LAND_TEXTURE_SIZE &&
+               fromY+size <= ESM::Land::LAND_TEXTURE_SIZE &&
+               "Can't get a terrain texture on terrain outside the current cell");
+
         //have a base texture for now, but this is probably not needed on most cells
         terrainData->layerList.resize(1);
         terrainData->layerList[0].worldSize = 256;
         terrainData->layerList[0].textureNames.push_back("textures\\_land_default.dds");
         terrainData->layerList[0].textureNames.push_back("textures\\_land_default.dds");
 
-        const uint16_t* const textures = store->land->landData->textures;
-        for ( int y = 0; y < ESM::Land::LAND_TEXTURE_SIZE; y++ )
+        for ( int y = fromY - 1; y < fromY + size + 1; y++ )
         {
-            for ( int x = 0; x < ESM::Land::LAND_TEXTURE_SIZE; x++ )
+            for ( int x = fromX - 1; x < fromX + size + 1; x++ )
             {
-                const uint16_t ltexIndex = textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+                const uint16_t ltexIndex = getLtexIndexAt(store, x, y);
+                //this is the base texture, so we can ignore this at present
                 if ( ltexIndex == 0 )
                 {
                     continue;
@@ -89,7 +100,7 @@ namespace MWRender
                 if ( it == indexes.end() )
                 {
                     //NB: All vtex ids are +1 compared to the ltex ids
-                    assert((int)ltexIndex - 1 > 0 &&
+                    assert((int)ltexIndex >= 0 &&
                            store->landTextures->ltex.size() > (size_t)ltexIndex - 1 &&
                            "LAND.VTEX must be within the bounds of the LTEX array");
                     
@@ -116,11 +127,23 @@ namespace MWRender
 
     void TerrainManager::initTerrainBlendMaps(Ogre::Terrain* terrain,
                                               MWWorld::Ptr::CellStore* store,
+                                              int fromX, int fromY, int size,
                                               const std::map<uint16_t, int>& indexes)
     {
+        assert(store != NULL && "store must be a valid pointer");
+        assert(terrain != NULL && "Must have valid terrain");
+        assert(fromX >= 0 && fromY >= 0 &&
+               "Can't get a terrain texture on terrain outside the current cell");
+        assert(fromX+size <= ESM::Land::LAND_TEXTURE_SIZE &&
+               fromY+size <= ESM::Land::LAND_TEXTURE_SIZE &&
+               "Can't get a terrain texture on terrain outside the current cell");
+
+        //size must be a power of 2 as we do divisions with a power of 2 number
+        //that need to result in an integer for correct splatting
+        assert( (size & (size - 1)) == 0 && "Size must be a power of 2");
+
         const int blendSize = terrain->getLayerBlendMapSize();
-        const int blendDist = TERRAIN_SHADE_DISTANCE *
-                                  (blendSize / ESM::Land::LAND_TEXTURE_SIZE);
+        const int blendDist = TERRAIN_SHADE_DISTANCE * (blendSize / size);
 
         //zero out every map
         std::map<uint16_t, int>::const_iterator iter;
@@ -132,21 +155,24 @@ namespace MWRender
         }
 
         //covert the ltex data into a set of blend maps
-        const uint16_t* const textures = store->land->landData->textures;
-        for ( int texY = 0; texY < ESM::Land::LAND_TEXTURE_SIZE; texY++ )
+        for ( int texY = fromY - 1; texY < fromY + size + 1; texY++ )
         {
-            for ( int texX = 0; texX < ESM::Land::LAND_TEXTURE_SIZE; texX++ )
+            for ( int texX = fromY - 1; texX < fromY + size + 1; texX++ )
             {
-                const uint16_t ltexIndex = textures[texY * ESM::Land::LAND_TEXTURE_SIZE + texX];
+                const uint16_t ltexIndex = getLtexIndexAt(store, texX, texY);
+
+                //this is the ground texture, which is currently the base texture
+                //so don't alter the splatting map
                 if ( ltexIndex == 0 ){
                     continue;
                 }
+
                 const int layerIndex = indexes.find(ltexIndex)->second;
 
                 float* const pBlend = terrain->getLayerBlendMap(layerIndex)
                                              ->getBlendPointer();
 
-                const int splatSize = blendSize / ESM::Land::LAND_TEXTURE_SIZE;
+                const int splatSize = blendSize / size;
 
                 //setup the bounds for the shading of this texture splat
                 const int startX = std::max(0, texX*splatSize - blendDist);
@@ -207,6 +233,53 @@ namespace MWRender
              blend->update();
         }
 
+    }
+
+
+    int TerrainManager::getLtexIndexAt(MWWorld::Ptr::CellStore* store,
+                                       int x, int y)
+    {
+        //check texture index falls within the 9 cell bounds
+        //as this function can't cope with anything above that
+        assert(x >= -ESM::Land::LAND_TEXTURE_SIZE &&
+               y >= -ESM::Land::LAND_TEXTURE_SIZE &&
+               "Trying to get land textures that are out of bounds");
+
+        assert(x < 2*ESM::Land::LAND_TEXTURE_SIZE &&
+               y < 2*ESM::Land::LAND_TEXTURE_SIZE &&
+               "Trying to get land textures that are out of bounds");
+
+        assert(store != NULL && "Store pointer must be valid");
+
+        //default center cell is indexed at (1,1)
+        int cellX = 1;
+        int cellY = 1;
+
+        if ( x < 0 )
+        {
+            cellX--;
+            x += ESM::Land::LAND_TEXTURE_SIZE;
+        }
+        else if ( x >= ESM::Land::LAND_TEXTURE_SIZE )
+        {
+            cellX++;
+            x -= ESM::Land::LAND_TEXTURE_SIZE;
+        }
+
+        if ( y < 0 )
+        {
+            cellY--;
+            y += ESM::Land::LAND_TEXTURE_SIZE;
+        }
+        else if ( y >= ESM::Land::LAND_TEXTURE_SIZE )
+        {
+            cellY++;
+            y -= ESM::Land::LAND_TEXTURE_SIZE;
+        }
+
+        return store->land[cellX][cellY]
+                    ->landData
+                    ->textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
     }
 
 }

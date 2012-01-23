@@ -96,8 +96,8 @@ namespace ESMS
         State_Unloaded, State_Preloaded, State_Loaded
     };
 
-    CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded),
-                                         land(NULL) {}
+    CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded)
+                                         {}
 
     const ESM::Cell *cell;
     State mState;
@@ -125,7 +125,7 @@ namespace ESMS
     CellRefList<Static, D>            statics;
     CellRefList<Weapon, D>            weapons;
 
-    const Land* land;
+    const Land* land[3][3];
     const LTexList* landTextures;
 
     void load (const ESMStore &store, ESMReader &esm)
@@ -141,7 +141,16 @@ namespace ESMS
 
             if ( ! (cell->data.flags & ESM::Cell::Interior) )
             {
-                loadTerrain(cell->data.gridX, cell->data.gridY, store, esm);
+                for ( size_t x = 0; x < 3; x++ )
+                {
+                    for ( size_t y = 0; y < 3; y++ )
+                    {
+                        land[x][y] = loadTerrain(cell->data.gridX + x - 1,
+                                                 cell->data.gridY + y - 1,
+                                                 store,
+                                                 esm);
+                    }
+                }
                 landTextures = &store.landTexts;
             }
 
@@ -190,7 +199,7 @@ namespace ESMS
 
   private:
 
-    void loadTerrain(int X, int Y, const ESMStore &store, ESMReader &esm)
+    Land* loadTerrain(int X, int Y, const ESMStore &store, ESMReader &esm)
     {
         // load terrain
         Land *land = store.lands.search(X, Y);
@@ -199,18 +208,13 @@ namespace ESMS
             land->loadData(esm);
         }
 
-        this->land = land;
+        return land;
     }
 
     void unloadTerrain(int X, int Y, const ESMStore &store) {
-        Land *land = store.lands.search(X,Y);
-        // unload terrain
-        if (land != NULL)
-        {
-            land->unloadData();
-        }
-
-        this->land = NULL;
+        assert (false &&
+                "This function is not implemented due to the fact that we now store overlapping land blocks so" &&
+                "we cannot be sure that the land segment is not being used by another CellStore");
     }
 
     template<class Functor, class List>
