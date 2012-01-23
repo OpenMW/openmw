@@ -348,14 +348,13 @@ namespace MWWorld
     void World::advanceTime (double hours)
     {
         hours += mGlobalVariables->getFloat ("gamehour");
-        
+
         setHour (hours);
 
         int days = hours / 24;
 
         if (days>0)
             mGlobalVariables->setInt ("dayspassed", days + mGlobalVariables->getInt ("dayspassed"));
-        mWorldScene->advanceTime();
     }
 
     void World::setHour (double hour)
@@ -690,5 +689,10 @@ namespace MWWorld
     }
     void World::setObjectPhysicsPosition(const std::string& handle, Ogre::Vector3 vec){
         mPhysics->moveObject(handle, vec);
+    }
+
+    void World::update (float duration)
+    {
+        mWorldScene->update (duration);
     }
 }

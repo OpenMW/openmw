@@ -147,7 +147,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             mEnvironment.mWorld->advanceTime (
                 mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
 
-        
+
         if (changed) // keep change flag for another frame, if cell changed happend in local script
             mEnvironment.mWorld->markCellAsUnchanged();
 
@@ -157,6 +157,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
             mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
+
+        // update world
+        mEnvironment.mWorld->update (evt.timeSinceLastFrame);
 
         // report focus object (for debugging)
         if (mReportFocus)
@@ -343,7 +346,7 @@ void OMW::Engine::go()
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false,
         mCfgMgr.getLogPath().string() + std::string("/"));
-   
+
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
