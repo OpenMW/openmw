@@ -1,5 +1,6 @@
 #include <OgreTerrain.h>
 #include <OgreTerrainGroup.h>
+#include <OgreTerrainMaterialGeneratorA.h>
 
 #include "terrain.hpp"
 
@@ -7,30 +8,55 @@
 
 namespace MWRender
 {
+
+    //----------------------------------------------------------------------------------------------
+    
     TerrainManager::TerrainManager(Ogre::SceneManager* mgr)
     {
         mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
 
         mTerrainGlobals->setMaxPixelError(8);
+        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 1024 : 256);
+
+        Ogre::TerrainMaterialGenerator::Profile* const activeProfile =
+            mTerrainGlobals->getDefaultMaterialGenerator()
+                           ->getActiveProfile();
+        Ogre::TerrainMaterialGeneratorA::SM2Profile* matProfile =
+            static_cast<Ogre::TerrainMaterialGeneratorA::SM2Profile*>(activeProfile);
+
+        matProfile->setLightmapEnabled(false);
+        matProfile->setReceiveDynamicShadowsEnabled(false);
+
+        mLandSize = ESM::Land::LAND_SIZE;
+        mRealSize = ESM::Land::REAL_SIZE;
+        if ( SPLIT_TERRAIN )
+        {
+            mLandSize  = (mLandSize - 1)/2 + 1;
+            mRealSize /= 2;
+        }
 
         mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(mgr,
-                Ogre::Terrain::ALIGN_X_Z, ESM::Land::LAND_SIZE,
-                ESM::Land::REAL_SIZE);
+                                                    Ogre::Terrain::ALIGN_X_Z,
+                                                    mLandSize,
+                                                    mRealSize);
 
-        mTerrainGroup->setOrigin(Ogre::Vector3(ESM::Land::REAL_SIZE/2,
-                                 0,
-                                 -ESM::Land::REAL_SIZE/2));
+        mTerrainGroup->setOrigin(Ogre::Vector3(mRealSize/2,
+                                               0,
+                                               -mRealSize/2));
 
-        Ogre::Terrain::ImportData importSettings =
+        Ogre::Terrain::ImportData& importSettings =
                 mTerrainGroup->getDefaultImportSettings();
 
-        importSettings.terrainSize = ESM::Land::LAND_SIZE;
-        importSettings.worldSize = ESM::Land::REAL_SIZE;
+        importSettings.inputBias    = 0;
+        importSettings.terrainSize  = mLandSize;
+        importSettings.worldSize    = mRealSize;
         importSettings.minBatchSize = 9;
-        importSettings.maxBatchSize = 33;
+        importSettings.maxBatchSize = mLandSize;
 
-        importSettings.deleteInputData = false;
+        importSettings.deleteInputData = true;
     }
+
+    //----------------------------------------------------------------------------------------------
 
     TerrainManager::~TerrainManager()
     {
@@ -38,32 +64,110 @@ namespace MWRender
         OGRE_DELETE mTerrainGlobals;
     }
 
+    //----------------------------------------------------------------------------------------------
+
     void TerrainManager::cellAdded(MWWorld::Ptr::CellStore *store)
     {
-        int x = store->cell->getGridX();
-        int y = store->cell->getGridY();
+        const int cellX = store->cell->getGridX();
+        const int cellY = store->cell->getGridY();
 
-        Ogre::Terrain::ImportData terrainData;
+        Ogre::Terrain::ImportData terrainData =
+            mTerrainGroup->getDefaultImportSettings();
 
-        terrainData.inputBias = 0;
-        terrainData.inputFloat = store->land[1][1]->landData->heights;
+        if ( SPLIT_TERRAIN )
+        {
+            //split the cell terrain into four segments
+            const int numTextures = ESM::Land::LAND_TEXTURE_SIZE/2;
 
-        std::map<uint16_t, int> indexes;
-        initTerrainTextures(&terrainData, store, 0, 0,
-                            ESM::Land::LAND_TEXTURE_SIZE, indexes);
-        mTerrainGroup->defineTerrain(x, y, &terrainData);
+            for ( int x = 0; x < 2; x++ )
+            {
+                for ( int y = 0; y < 2; y++ )
+                {
+                    const int terrainX = cellX * 2 + x;
+                    const int terrainY = cellY * 2 + y;
 
-        mTerrainGroup->loadTerrain(x, y, true);
-        Ogre::Terrain* terrain = mTerrainGroup->getTerrain(x,y);
-        initTerrainBlendMaps(terrain, store, 0, 0,
-                             ESM::Land::LAND_TEXTURE_SIZE, indexes);
+                    terrainData.inputFloat = OGRE_ALLOC_T(float,
+                                                          mLandSize*mLandSize,
+                                                          Ogre::MEMCATEGORY_GEOMETRY);
+
+                    //copy the height data row by row
+                    for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
+                    {
+                                               //the offset of the current segment
+                        const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
+                                               //offset of the row
+                                               terrainCopyY * ESM::Land::LAND_SIZE;
+                        const size_t xOffset = x * (mLandSize-1);
+
+                        memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
+                               &store->land[1][1]->landData->heights[yOffset + xOffset],
+                               mLandSize*sizeof(float));
+                    }
+
+                    std::map<uint16_t, int> indexes;
+                    initTerrainTextures(&terrainData, store,
+                                        x * numTextures, y * numTextures,
+                                        numTextures, indexes);
+
+                    mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
+
+                    mTerrainGroup->loadTerrain(terrainX, terrainY, true);
+                    Ogre::Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
+                    initTerrainBlendMaps(terrain, store,
+                                         x * numTextures, y * numTextures,
+                                         numTextures, indexes);
+                    
+                }
+            }
+        }
+        else
+        {
+            //one cell is one terrain segment
+            terrainData.inputFloat = OGRE_ALLOC_T(float,
+                                                  mLandSize*mLandSize,
+                                                  Ogre::MEMCATEGORY_GEOMETRY);
+
+            memcpy(&terrainData.inputFloat[0],
+                   &store->land[1][1]->landData->heights[0],
+                   mLandSize*mLandSize*sizeof(float));
+
+            std::map<uint16_t, int> indexes;
+            initTerrainTextures(&terrainData, store, 0, 0,
+                                ESM::Land::LAND_TEXTURE_SIZE, indexes);
+
+            mTerrainGroup->defineTerrain(cellX, cellY, &terrainData);
+
+            mTerrainGroup->loadTerrain(cellX, cellY, true);
+            Ogre::Terrain* terrain = mTerrainGroup->getTerrain(cellX, cellY);
+            initTerrainBlendMaps(terrain, store, 0, 0,
+                                 ESM::Land::LAND_TEXTURE_SIZE, indexes);
+        }
+
     }
+
+    //----------------------------------------------------------------------------------------------
 
     void TerrainManager::cellRemoved(MWWorld::Ptr::CellStore *store)
     {
-        mTerrainGroup->removeTerrain(store->cell->getGridX(),
-                                     store->cell->getGridY());
+        if ( SPLIT_TERRAIN )
+        {
+            for ( int x = 0; x < 2; x++ )
+            {
+                for ( int y = 0; y < 2; y++ )
+                {
+                    mTerrainGroup->removeTerrain(store->cell->getGridX() * 2 + x,
+                                                 store->cell->getGridY() * 2 + y);
+                }
+            }
+        }
+        else
+        {
+            mTerrainGroup->removeTerrain(store->cell->getGridX(),
+                                         store->cell->getGridY());
+        }
     }
+
+    //----------------------------------------------------------------------------------------------
 
     void TerrainManager::initTerrainTextures(Ogre::Terrain::ImportData* terrainData,
                                              MWWorld::Ptr::CellStore* store,
@@ -122,8 +226,9 @@ namespace MWRender
                 }
             }
         }
-
     }
+
+    //----------------------------------------------------------------------------------------------
 
     void TerrainManager::initTerrainBlendMaps(Ogre::Terrain* terrain,
                                               MWWorld::Ptr::CellStore* store,
@@ -157,15 +262,23 @@ namespace MWRender
         //covert the ltex data into a set of blend maps
         for ( int texY = fromY - 1; texY < fromY + size + 1; texY++ )
         {
-            for ( int texX = fromY - 1; texX < fromY + size + 1; texX++ )
+            for ( int texX = fromX - 1; texX < fromX + size + 1; texX++ )
             {
                 const uint16_t ltexIndex = getLtexIndexAt(store, texX, texY);
+
+                //whilte texX is the splat index relative to the entire cell,
+                //relX is relative to the current segment we are splatting
+                const int relX = texX - fromX;
+                const int relY = texY - fromY;
 
                 //this is the ground texture, which is currently the base texture
                 //so don't alter the splatting map
                 if ( ltexIndex == 0 ){
                     continue;
                 }
+
+                assert (indexes.find(ltexIndex) != indexes.end() &&
+                        "Texture layer must exist");
 
                 const int layerIndex = indexes.find(ltexIndex)->second;
 
@@ -175,11 +288,11 @@ namespace MWRender
                 const int splatSize = blendSize / size;
 
                 //setup the bounds for the shading of this texture splat
-                const int startX = std::max(0, texX*splatSize - blendDist);
-                const int endX = std::min(blendSize, (texX+1)*splatSize + blendDist);
+                const int startX = std::max(0, relX*splatSize - blendDist);
+                const int endX = std::min(blendSize, (relX+1)*splatSize + blendDist);
 
-                const int startY = std::max(0, texY*splatSize - blendDist);
-                const int endY = std::min(blendSize, (texY+1)*splatSize + blendDist);
+                const int startY = std::max(0, relY*splatSize - blendDist);
+                const int endY = std::min(blendSize, (relY+1)*splatSize + blendDist);
 
                 for ( int blendX = startX; blendX < endX; blendX++ )
                 {
@@ -193,16 +306,16 @@ namespace MWRender
 
                         //calculate the distance from the edge of the square
                         // to the point we are shading
-                        int distX = texX*splatSize - blendX;
+                        int distX = relX*splatSize - blendX;
                         if ( distX < 0 )
                         {
-                            distX = std::max(0, blendX - (texX+1)*splatSize);
+                            distX = std::max(0, blendX - (relX+1)*splatSize);
                         }
 
-                        int distY = texY*splatSize - blendY;
+                        int distY = relY*splatSize - blendY;
                         if ( distY < 0 )
                         {
-                            distY = std::max(0, blendY - (texY+1)*splatSize);
+                            distY = std::max(0, blendY - (relY+1)*splatSize);
                         }
 
                         float blendAmount = blendDist - std::sqrt((float)distX*distX + distY*distY);
@@ -235,6 +348,7 @@ namespace MWRender
 
     }
 
+    //----------------------------------------------------------------------------------------------
 
     int TerrainManager::getLtexIndexAt(MWWorld::Ptr::CellStore* store,
                                        int x, int y)

@@ -16,6 +16,15 @@ namespace MWRender{
 
     /**
      * Implements the Morrowind terrain using the Ogre Terrain Component
+     *
+     * This currently has two options as to how the terrain is rendered, one
+     * is that one cell is rendered as one Ogre::Terrain and the other that
+     * it is rendered as 4 Ogre::Terrain segments
+     *
+     * Splitting it up into segments has the following advantages
+     * * Seems to be faster
+     * * Terrain can now be culled more aggressivly using view frustram culling
+     * * We don't hit splat limits as much
      */
     class TerrainManager{
     public:
@@ -27,6 +36,27 @@ namespace MWRender{
     private:
         Ogre::TerrainGlobalOptions* mTerrainGlobals;
         Ogre::TerrainGroup* mTerrainGroup;
+
+        /**
+         * Should each cell be split into a further four Ogre::Terrain objects
+         *
+         * This has the advantage that it is possible to cull more terrain and
+         * we are more likly to be able to be able to fit all the required splats
+         * in (Ogre's default material generator only works with about 6 textures)
+         */
+        static const bool SPLIT_TERRAIN = true;
+
+        /**
+         * The length in verticies of a single terrain block.
+         * This takes into account the SPLIT_TERRAIN option
+         */
+        int mLandSize;
+
+        /**
+         * The length in game units of a single terrain block.
+         * This takes into account the SPLIT_TERRAIN option
+         */
+        int mRealSize;
 
         /**
          * The distance that the current cell should be shaded into the neighbouring
