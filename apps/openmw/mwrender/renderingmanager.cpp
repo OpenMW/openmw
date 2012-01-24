@@ -121,7 +121,7 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 
 void RenderingManager::update (float duration){
 
-
+    mActors.update (duration);
 }
 
 void RenderingManager::skyEnable ()
@@ -239,10 +239,6 @@ void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::s
 void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 {
     mActors.skipAnimation(ptr);
-}
-void RenderingManager::addTime(){
-    mActors.addTime();
-	//Notify each animation that time has passed
 }
 
 }

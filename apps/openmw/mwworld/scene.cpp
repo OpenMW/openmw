@@ -52,8 +52,8 @@ void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environme
 
 namespace MWWorld
 {
-    void Scene::advanceTime(){
-        mRendering.addTime();
+    void Scene::update (float duration){
+        mRendering.update (duration);
     }
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
@@ -61,9 +61,9 @@ namespace MWWorld
         ListHandles functor;
 
         MWWorld::Ptr::CellStore* active = *iter;
-        
-		
-		
+
+
+
 
         active->forEach<ListHandles>(functor);
 
@@ -83,7 +83,7 @@ namespace MWWorld
         mEnvironment.mMechanicsManager->dropActors (active);
         mEnvironment.mSoundManager->stopSound (active);
 		mActiveCells.erase(active);
-        
+
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)
