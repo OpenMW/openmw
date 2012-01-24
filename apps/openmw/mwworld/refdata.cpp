@@ -1,6 +1,8 @@
 
 #include "refdata.hpp"
 
+#include "customdata.hpp"
+
 namespace MWWorld
 {
     void RefData::copy (const RefData& refData)
@@ -16,19 +18,25 @@ namespace MWWorld
         mNpcStats = refData.mNpcStats;
         mMovement = refData.mMovement;
         mContainerStore = refData.mContainerStore;
+
+        mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
     }
 
     void RefData::cleanup()
     {
         mBaseNode = 0;
+
+        delete mCustomData;
+        mCustomData = 0;
     }
 
     RefData::RefData (const ESMS::CellRef& cellRef)
-    : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.pos)
+    : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.pos),
+      mCustomData (0)
     {}
 
     RefData::RefData (const RefData& refData)
-    : mBaseNode(0)
+    : mBaseNode(0), mCustomData (0)
     {
         try
         {
@@ -144,5 +152,16 @@ namespace MWWorld
     ESM::Position& RefData::getPosition()
     {
         return mPosition;
+    }
+
+    void RefData::setCustomData (CustomData *data)
+    {
+        delete mCustomData;
+        mCustomData = data;
+    }
+
+    CustomData *RefData::getCustomData()
+    {
+        return mCustomData;
     }
 }

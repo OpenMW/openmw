@@ -46,7 +46,7 @@ add_openmw_dir (mwsound
 add_openmw_dir (mwworld
     refdata world physicssystem scene environment globals class action nullaction actionteleport
     containerstore actiontalk actiontake containerstore manualref containerutil player cellfunctors
-    cells localscripts
+    cells localscripts customdata
     )
 
 add_openmw_dir (mwclass

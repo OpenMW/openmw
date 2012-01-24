@@ -22,6 +22,8 @@ namespace ESM
 
 namespace MWWorld
 {
+    class CustomData;
+
     class RefData
     {
             Ogre::SceneNode* mBaseNode;
@@ -35,6 +37,8 @@ namespace MWWorld
             int mCount; // 0: deleted
 
             ESM::Position mPosition;
+
+            CustomData *mCustomData;
 
             // we are using shared pointer here to avoid having to create custom copy-constructor,
             // assignment operator and destructor. As a consequence though copying a RefData object
@@ -95,6 +99,13 @@ namespace MWWorld
             boost::shared_ptr<ContainerStore<RefData> >& getContainerStore();
 
             ESM::Position& getPosition();
+
+            void setCustomData (CustomData *data);
+            ///< Set custom data (potentially replacing old custom data). The ownership of \æ data is
+            /// transferred to this.
+
+            CustomData *getCustomData();
+            ///< May return a 0-pointer. The ownership of the return data object is not transferred.
     };
 }
 
