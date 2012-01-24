@@ -684,12 +684,6 @@ namespace MWWorld
     {
         mRendering.skipAnimation (ptr);
     }
-    void World::setObjectPhysicsRotation(const std::string& handle, Ogre::Quaternion quat){
-        mPhysics->rotateObject(handle, quat);
-    }
-    void World::setObjectPhysicsPosition(const std::string& handle, Ogre::Vector3 vec){
-        mPhysics->moveObject(handle, vec);
-    }
 
     void World::update (float duration)
     {

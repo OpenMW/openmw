@@ -222,8 +222,6 @@ namespace MWWorld
             void skipAnimation (const MWWorld::Ptr& ptr);
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
             /// references that are currently not in the rendered scene should be ignored.
-            void setObjectPhysicsRotation(const std::string& handle,Ogre::Quaternion quat);
-            void setObjectPhysicsPosition(const std::string& handle,Ogre::Vector3 vector);
 
             void update (float duration);
     };
