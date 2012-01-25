@@ -2,12 +2,14 @@
 #define GAME_MWCLASS_NPC_H
 
 #include "../mwworld/class.hpp"
-
+#include "../mwworld/customdata.hpp"
 
 namespace MWClass
 {
     class Npc : public MWWorld::Class
     {
+            void ensureCustomData (const MWWorld::Ptr& ptr) const;
+
         public:
 
             virtual std::string getId (const MWWorld::Ptr& ptr) const;

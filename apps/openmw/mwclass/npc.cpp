@@ -1,6 +1,8 @@
 
 #include "npc.hpp"
 
+#include <memory>
+
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -18,10 +20,44 @@ namespace
 {
     const Ogre::Radian kOgrePi (Ogre::Math::PI);
     const Ogre::Radian kOgrePiOverTwo (Ogre::Math::PI / Ogre::Real(2.0));
+
+    struct CustomData : public MWWorld::CustomData
+    {
+        MWMechanics::NpcStats mNpcStats;
+
+        virtual MWWorld::CustomData *clone() const;
+    };
+
+    MWWorld::CustomData *CustomData::clone() const
+    {
+        return new CustomData (*this);
+    }
 }
 
 namespace MWClass
 {
+    void Npc::ensureCustomData (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+        {
+            std::auto_ptr<CustomData> data (new CustomData);
+
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
+
+            if (!ref->base->faction.empty())
+            {
+                // TODO research how initial rank is stored. The information in loadnpc.hpp are at
+                // best very unclear.
+                data->mNpcStats.mFactionRank[ref->base->faction] = 0;
+            }
+
+            for (int i=0; i<27; ++i)
+                data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
+
+            ptr.getRefData().setCustomData (data.release());
+        }
+    }
+
     std::string Npc::getId (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
@@ -106,27 +142,9 @@ namespace MWClass
 
     MWMechanics::NpcStats& Npc::getNpcStats (const MWWorld::Ptr& ptr) const
     {
-        if (!ptr.getRefData().getNpcStats().get())
-        {
-            boost::shared_ptr<MWMechanics::NpcStats> stats (
-                new MWMechanics::NpcStats);
+        ensureCustomData (ptr);
 
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
-
-            if (!ref->base->faction.empty())
-            {
-                // TODO research how initial rank is stored. The information in loadnpc.hpp are at
-                // best very unclear.
-                stats->mFactionRank[ref->base->faction] = 0;
-            }
-
-            for (int i=0; i<27; ++i)
-                stats->mSkill[i].setBase (ref->base->npdt52.skills[i]);
-
-            ptr.getRefData().getNpcStats() = stats;
-        }
-
-        return *ptr.getRefData().getNpcStats();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
     }
 
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
