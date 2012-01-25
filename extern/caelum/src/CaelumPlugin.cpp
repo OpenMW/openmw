@@ -21,17 +21,17 @@ along with Caelum. If not, see <http://www.gnu.org/licenses/>.
 #include "CaelumPrecompiled.h"
 #include "CaelumPlugin.h"
 
-template<> Caelum::CaelumPlugin* Ogre::Singleton<Caelum::CaelumPlugin>::msSingleton = 0;
+template<> Caelum::CaelumPlugin* Ogre::Singleton<Caelum::CaelumPlugin>::ms_Singleton = 0;
 
 namespace Caelum
 {
 	CaelumPlugin* CaelumPlugin::getSingletonPtr () {
-        return msSingleton;
+        return ms_Singleton;
     }
 
     CaelumPlugin& CaelumPlugin::getSingleton () {  
-        assert (msSingleton);
-        return *msSingleton;  
+        assert (ms_Singleton);
+        return *ms_Singleton;  
     }
 
     extern "C" void CAELUM_EXPORT dllStartPlugin () {
