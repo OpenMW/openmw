@@ -101,7 +101,7 @@ namespace MWRender{
     }
 
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
-       bool useHandles = skel == creaturemodel->getSkeleton();
+       bool useHandles = false;
         shapeNumber = 0;
         
         std::vector<Nif::NiTriShapeCopy>::iterator allshapesiter;
@@ -186,62 +186,56 @@ namespace MWRender{
                     Ogre::Vector3 currentVertex = (*allvertices)[verIndex];
                     Nif::NiSkinData::BoneInfoCopy* boneinfocopy = &(allshapesiter->boneinfo[inds[0].boneinfocopyindex]);
                     Ogre::Bone *bonePtr = 0;
-                    if(useHandles)
-                    {
-                        bonePtr = skel->getBone(boneinfocopy->bonehandle);
-                    }
-                    else
+                   
+                        
+                    
+                    Ogre::Vector3 vecPos; //= bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
+                    Ogre::Quaternion vecRot; //= bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
+					std::map<Nif::NiSkinData::BoneInfoCopy*, PosAndRot>::iterator result = vecRotPos.find(boneinfocopy);
+                    
+                    if(result == vecRotPos.end()){
                         bonePtr = skel->getBone(boneinfocopy->bonename);
-                    
-                    Ogre::Vector3 vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
-                    Ogre::Quaternion vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
-					
-                    
-                    /*if(vecPosRot.find(boneinfocopy->bonehandle) == vecPosRot.end()){
+                        
                         vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
                         vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
                        
-                        if(useHandles){
+                        
                              PosAndRot both;
                             both.vecPos = vecPos;
                             both.vecRot = vecRot;
-                            vecPosRot[boneinfocopy->bonehandle] = both;
-                        }
+                            vecRotPos[boneinfocopy] = both;
+                       
                     }
                     else{
-                        PosAndRot both = vecPosRot[boneinfocopy->bonehandle];
+                        PosAndRot both = result->second;
                         vecPos = both.vecPos;
                         vecRot = both.vecRot;
-                    }*/
+                    }
 
                     Ogre::Vector3 absVertPos = (vecPos + vecRot * currentVertex) * inds[0].weight;
                     
 
                     for(int i = 1; i < inds.size(); i++){
                         boneinfocopy = &(allshapesiter->boneinfo[inds[i].boneinfocopyindex]);
-                        if(useHandles)
-                            bonePtr = skel->getBone(boneinfocopy->bonehandle);
-                        else
-                            bonePtr = skel->getBone(boneinfocopy->bonename);
-                        vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
-                            vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
+                        result = vecRotPos.find(boneinfocopy);
+                       
 
-                        /*if(vecPosRot.find(boneinfocopy->bonehandle) == vecPosRot.end()){
+                        if(result == vecRotPos.end()){
+                            bonePtr = skel->getBone(boneinfocopy->bonename);
                             vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
                             vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
                             
-                            if(useHandles){
                                 PosAndRot both;
                                 both.vecPos = vecPos;
                                 both.vecRot = vecRot;
-                                vecPosRot[boneinfocopy->bonehandle] = both;
-                            }
+                                vecRotPos[boneinfocopy] = both;
+                            
                         }
                          else{
-                                PosAndRot both = vecPosRot[boneinfocopy->bonehandle];
+                                PosAndRot both = result->second;
                                 vecPos = both.vecPos;
                                 vecRot = both.vecRot;
-                        }*/
+                        }
 
                     
                         absVertPos += (vecPos + vecRot * currentVertex) * inds[i].weight;
@@ -253,76 +247,9 @@ namespace MWRender{
 				              *(addr+2) = absVertPos.z;
                 }
 				
-				/*for (unsigned int i = 0; i < boneinfovector.size(); i++)
-				{
-					Nif::NiSkinData::BoneInfoCopy boneinfo = boneinfovector[i];
-					if(skel->hasBone(boneinfo.bonename)){
-					Ogre::Bone *bonePtr = skel->getBone(boneinfo.bonename);
-					Ogre::Vector3 vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfo.trafo.trans;
-					Ogre::Quaternion vecRot = bonePtr->_getDerivedOrientation() * boneinfo.trafo.rotation;
-					
-					 for (unsigned int j=0; j < boneinfo.weights.size(); j++)
-					 {
-						  unsigned int verIndex = boneinfo.weights[j].vertex;
-						  if(vertices.find(verIndex) == vertices.end())
-						  {
-							  Ogre::Vector3 absVertPos = vecPos + vecRot * allvertices[verIndex];
-							  absVertPos = absVertPos * boneinfo.weights[j].weight;
-							  vertices.insert(verIndex);
-							   Ogre::Real* addr = (pReal + 3 * verIndex);
-							  *addr = absVertPos.x;
-							  *(addr+1) = absVertPos.y;
-				              *(addr+2) = absVertPos.z;
-                             
-
-						  }
-						  else 
-						  {
-							
-							   Ogre::Vector3 absVertPos = vecPos + vecRot * allvertices[verIndex];
-							   absVertPos = absVertPos * boneinfo.weights[j].weight;
-							   Ogre::Vector3 old = Ogre::Vector3(pReal + 3 * verIndex);
-							   absVertPos = absVertPos + old;
-							   Ogre::Real* addr = (pReal + 3 * verIndex);
-							  *addr = absVertPos.x;
-							  *(addr+1) = absVertPos.y;
-				              *(addr+2) = absVertPos.z;
-                              
-							  //std::cout << "Vertex" << verIndex << "Weight: " << boneinfo.weights[i].weight << "was seen twice\n";
-
-						  }
-						  
-						  /*if(normals.find(verIndex) == normals.end())
-						  {
-							  Ogre::Vector3 absNormalsPos = vecRot * allnormals[verIndex];
-							  absNormalsPos = absNormalsPos * boneinfo.weights[j].weight;
-							  normals.insert(verIndex);
-							  Ogre::Real* addr = (pRealNormal + 3 * verIndex);
-							  *addr = absNormalsPos.x;
-				              *(addr+1) = absNormalsPos.y;
-				              *(addr+2) = absNormalsPos.z;
-						  }
-						  else
-						  {
-							   Ogre::Vector3 absNormalsPos = vecRot * allnormals[verIndex];
-							  absNormalsPos = absNormalsPos * boneinfo.weights[j].weight;
-							 Ogre::Vector3 old = Ogre::Vector3(pRealNormal + 3 * verIndex);
-							 absNormalsPos = absNormalsPos + old;
-
-							  Ogre::Real* addr = (pRealNormal + 3 * verIndex);
-							  *addr = absNormalsPos.x;
-				              *(addr+1) = absNormalsPos.y;
-				              *(addr+2) = absNormalsPos.z;
-
-						  }*/
-
-					 //}
-				//}
 				
-					
-				//}   //Comment out
 				   
-				   ;
+				
 				}  
 				else
 				{
@@ -469,19 +396,18 @@ namespace MWRender{
      //base->_updateAnimation();
    base->_notifyMoved();
 
-    for(unsigned int i = 0; i < entityparts.size(); i++){
+   for(unsigned int i = 0; i < entityparts.size(); i++){
          Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
 
         Ogre::Bone* b = skel->getRootBone();
 	   b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
 	  
         skel->_updateTransforms();
-	   // skel->_notifyManualBonesDirty();
 
          entityparts[i]->getAllAnimationStates()->_notifyDirty();
-        //entityparts[i]->_updateAnimation();
          entityparts[i]->_notifyMoved();
     }
+
 
     std::vector<Nif::NiKeyframeData>::iterator iter;
     int slot = 0;
@@ -490,7 +416,7 @@ namespace MWRender{
         if(time < iter->getStartTime() || time < startTime || time > iter->getStopTime())
 	    {
             slot++;
-            //iter++;
+            
 		    continue;
             
 	    }
@@ -546,22 +472,7 @@ namespace MWRender{
         //base->_updateAnimation();
 	    base->_notifyMoved();
 	}  
-    for(int i = 0; i < entityparts.size(); i++){
-        skel = entityparts[i]->getSkeleton();
-         if(skel->hasBone(iter->getBonename())){
-            Ogre::Bone* bone = skel->getBone(iter->getBonename());
-            if(bTrans)
-                bone->setPosition(t);
-            if(bQuats)
-                bone->setOrientation(r);
-            
-            skel->_updateTransforms();
-	        //skel->_notifyManualBonesDirty();
-            entityparts[i]->getAllAnimationStates()->_notifyDirty();
-           // entityparts[i]->_updateAnimation();
-	        entityparts[i]->_notifyMoved();
-	    }  
-    }
+   
     slot++;
     }
 }

@@ -424,6 +424,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
         bind->setBinding(nextBuf++, vbuf);
     }
 
+    
     // Vertex colors
     if (data->colors.length)
     {

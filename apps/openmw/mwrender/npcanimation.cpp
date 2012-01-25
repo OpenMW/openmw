@@ -250,6 +250,7 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
 
 
 void NpcAnimation::runAnimation(float timepassed){
+    
     //1. Add the amount of time passed to time
 
 	//2. Handle the animation transforms dependent on time
@@ -270,36 +271,19 @@ void NpcAnimation::runAnimation(float timepassed){
         handleAnimationTransforms();
         Ogre::Vector3 current = insert->_getWorldAABB().getCenter();
 
-        //This is the attempt at npc physics
-        //mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), current); 
-
-
-        
-        /*if(base->hasSkeleton())
-        {
-            
-            Ogre::Quaternion boneQuat = rotate;
-            Ogre::Vector3 boneTrans = trans;
-            mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), boneTrans + insert->getPosition());
-            //mEnvironment.mWorld->setObjectPhysicsRotation(insert->getName(), boneQuat * insert->getOrientation());
-            
-        }*/
+       
        
         
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
         while(shapepartsiter != shapeparts.end())
         {
+            vecRotPos.clear();
             std::vector<Nif::NiTriShapeCopy>* shapes = *shapepartsiter;
             Ogre::Entity* theentity = *entitypartsiter;
-            /*
-            Pass* pass = theentity->getSubEntity(0)->getMaterial()->getBestTechnique()->getPass(0); 
-            if (pass->hasVertexProgram() && pass->getVertexProgram()->isSkeletalAnimationIncluded())
-                std::cout << "It's hardware\n";
-                else
-                std::cout << "It's software\n";*/
+           
        
-            handleShapes(shapes, theentity, theentity->getSkeleton());
+            handleShapes(shapes, theentity, base->getSkeleton());
             shapepartsiter++;
             entitypartsiter++;
 	    }

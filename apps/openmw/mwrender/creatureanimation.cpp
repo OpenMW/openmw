@@ -38,6 +38,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
 }
 
 void CreatureAnimation::runAnimation(float timepassed){
+    vecRotPos.clear();
 	if(animate > 0){
 		//Add the amount of time passed to time
 

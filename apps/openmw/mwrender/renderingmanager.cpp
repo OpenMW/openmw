@@ -25,6 +25,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 :mRendering(_rend), mObjects(mRendering), mDebugging(engine), mActors(mRendering, environment)
 {
     mRendering.createScene("PlayerCam", 55, 5);
+    //mSkyManager = 0;
     mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), resDir);
 
     // Set default mipmap level (NB some APIs ignore this)
@@ -126,27 +127,32 @@ void RenderingManager::update (float duration){
 
 void RenderingManager::skyEnable ()
 {
+    if(mSkyManager)
     mSkyManager->enable();
 }
 
 void RenderingManager::skyDisable ()
 {
-    mSkyManager->disable();
+    if(mSkyManager)
+        mSkyManager->disable();
 }
 
 void RenderingManager::skySetHour (double hour)
 {
-    mSkyManager->setHour(hour);
+    if(mSkyManager)
+        mSkyManager->setHour(hour);
 }
 
 
 void RenderingManager::skySetDate (int day, int month)
 {
-    mSkyManager->setDate(day, month);
+    if(mSkyManager)
+        mSkyManager->setDate(day, month);
 }
 
 int RenderingManager::skyGetMasserPhase() const
 {
+   
     return mSkyManager->getMasserPhase();
 }
 
@@ -155,9 +161,9 @@ int RenderingManager::skyGetSecundaPhase() const
     return mSkyManager->getSecundaPhase();
 }
 
-void RenderingManager::skySetMoonColour (bool red)
-{
-    mSkyManager->setMoonColour(red);
+void RenderingManager::skySetMoonColour (bool red){
+    if(mSkyManager)
+        mSkyManager->setMoonColour(red);
 }
 bool RenderingManager::toggleRenderMode(int mode){
     return mDebugging.toggleRenderMode(mode);
