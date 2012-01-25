@@ -157,73 +157,75 @@ boost::filesystem::path LinuxPath::getLocalDataPath() const
 
 boost::filesystem::path LinuxPath::getInstallPath() const
 {
-    char *homePath = getenv("HOME");
-    if(!homePath)
-    {
-        return boost::filesystem::path("");
-    }
-    
-    boost::filesystem::path wineDefaultRegistry(homePath);
-    wineDefaultRegistry /= ".wine/system.reg";
-    
-    boost::filesystem::path wineDriveC(homePath);
-    wineDriveC /= ".wine/drive_c";
+    boost::filesystem::path installPath;
 
-    boost::filesystem::file_status fileStatus = boost::filesystem::status(wineDefaultRegistry);
-    boost::filesystem::file_status dirStatus = boost::filesystem::status(wineDriveC);
-    if(!boost::filesystem::is_regular_file(fileStatus) || !boost::filesystem::is_directory(dirStatus))
+    char *homePath = getenv("HOME");
+    if (homePath == NULL)
     {
-        return boost::filesystem::path("");
-    }
-    
-    
-    boost::filesystem::ifstream file(wineDefaultRegistry);
-    bool isRegEntry = false;
-    std::string line;
-    
-    while (std::getline(file, line))
-    {
-        if(!line.empty() && line[0] == '[') // we found an entry
+        struct passwd* pwd = getpwuid(getuid());
+        if (pwd != NULL)
         {
-            std::string regkey = line.substr(1, line.find(']')-1);
-            if( regkey.compare("SOFTWARE\\\\Wow6432Node\\\\Bethesda Softworks\\\\Morrowind") == 0
-             || regkey.compare("SOFTWARE\\\\Bethesda Softworks\\\\Morrowind") == 0 )
-            {
-                isRegEntry = true;
-            }
+            homePath = pwd->pw_dir;
         }
-        else if(isRegEntry)
+    }
+
+    if (homePath != NULL)
+    {
+        boost::filesystem::path wineDefaultRegistry(homePath);
+        wineDefaultRegistry /= ".wine/system.reg";
+
+        if (boost::filesystem::is_regular_file(wineDefaultRegistry))
         {
-            if(line.empty() || line[0] != '"') // empty line means new registry key
+            boost::filesystem::ifstream file(wineDefaultRegistry);
+            bool isRegEntry = false;
+            std::string line;
+            std::string mwpath;
+
+            while (std::getline(file, line) && !line.empty())
             {
-                break;
-            }
-            std::string key = line.substr(1, line.find('"', 1)-1);
-            if(key.compare("Installed Path") == 0) {
-                std::string::size_type pos, startPos;
-                
-                startPos = line.find('=')+2;
-                std::string installPath = line.substr(startPos, line.find('"', startPos+1)-startPos);
-                installPath.replace(0, 2, wineDriveC.string());
-                
-                pos = -1;
-                do
+                if (line[0] == '[') // we found an entry
                 {
-                    pos = installPath.find("\\\\", pos+1);
-                    if(pos == std::string::npos)
+                    isRegEntry = (line.find("Softworks\\Morrowind]") != std::string::npos);
+                }
+                else if (isRegEntry)
+                {
+                    if (line[0] == '"') // empty line means new registry key
                     {
-                        break;
+                        std::string key = line.substr(1, line.find('"', 1) - 1);
+                        if (strcasecmp(key.c_str(), "Installed Path") == 0)
+                        {
+                            std::string::size_type valuePos = line.find('=') + 2;
+                            mwpath = line.substr(valuePos, line.rfind('"') - valuePos);
+
+                            std::string::size_type pos = mwpath.find("\\");
+                            while (pos != std::string::npos)
+                            {
+                               mwpath.replace(pos, 2, "/");
+                               pos = mwpath.find("\\", pos + 1);
+                            }
+                            break;
+                        }
                     }
-                    
-                    installPath.replace(pos, 2, "/");
-                } while(true);
-                
-                return boost::filesystem::path(installPath);
+                }
+            }
+
+            if (!mwpath.empty())
+            {
+                // Change drive letter to lowercase, so we could use ~/.wine/dosdevice symlinks
+                mwpath[0] = tolower(mwpath[0]);
+                installPath /= homePath;
+                installPath /= ".wine/dosdevices/";
+                installPath /= mwpath;
+
+                if (!boost::filesystem::is_directory(installPath))
+                {
+                    installPath.clear();
+                }
             }
         }
     }
-    
-    return boost::filesystem::path("");
+
+    return installPath;
 }
 
 } /* namespace Files */

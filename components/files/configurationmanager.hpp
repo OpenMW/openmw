@@ -7,18 +7,13 @@
 #include <boost/filesystem.hpp>
 
 #include <components/files/fixedpath.hpp>
+#include <components/files/collections.hpp>
 
 /**
  * \namespace Files
  */
 namespace Files
 {
-
-extern const char* const mwDataToken;
-extern const char* const localDataToken;
-extern const char* const userDataToken;
-extern const char* const globalDataToken;
-
 
 /**
  * \struct ConfigurationManager
@@ -30,13 +25,17 @@ struct ConfigurationManager
 
     void readConfiguration(boost::program_options::variables_map& variables,
         boost::program_options::options_description& description);
+    void processPaths(Files::PathContainer& dataDirs);
 
     /**< Fixed paths */
     const boost::filesystem::path& getGlobalPath() const;
     const boost::filesystem::path& getUserPath() const;
-    const boost::filesystem::path& getLocalPath() const ;
+    const boost::filesystem::path& getLocalPath() const;
 
-    const boost::filesystem::path& getDataPath(const std::string& type) const;
+    const boost::filesystem::path& getGlobalDataPath() const;
+    const boost::filesystem::path& getUserDataPath() const;
+    const boost::filesystem::path& getLocalDataPath() const;
+    const boost::filesystem::path& getInstallPath() const;
 
     const boost::filesystem::path& getOgreConfigPath() const;
     const boost::filesystem::path& getPluginsConfigPath() const;
@@ -45,7 +44,7 @@ struct ConfigurationManager
     private:
         typedef Files::FixedPath<> FixedPathType;
 
-        typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
+        typedef void (FixedPathType::*path_type_f)(const boost::filesystem::path&);
         typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
 
         void loadConfig(const boost::filesystem::path& path,

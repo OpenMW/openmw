@@ -3,7 +3,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <functional>
+#include <algorithm>
 
 namespace Files
 {
@@ -24,7 +24,7 @@ ConfigurationManager::ConfigurationManager()
 
     /**
      * According to task #168 plugins.cfg file shall be located in global
-     * configuration path or in runtime configuration path.
+     * configuration path or in local configuration path.
      */
     mPluginsCfgPath = mFixedPath.getGlobalPath() / pluginsCfgFile;
     if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
@@ -55,10 +55,10 @@ ConfigurationManager::~ConfigurationManager()
 
 void ConfigurationManager::setupTokensMapping()
 {
-    mTokensMapping.insert(std::make_pair(mwDataToken, &FixedPath<>::getInstallPath));
-    mTokensMapping.insert(std::make_pair(localDataToken, &FixedPath<>::getLocalDataPath));
-    mTokensMapping.insert(std::make_pair(userDataToken, &FixedPath<>::getUserDataPath));
-    mTokensMapping.insert(std::make_pair(globalDataToken, &FixedPath<>::getGlobalDataPath));
+    mTokensMapping.insert(std::make_pair(mwDataToken, &FixedPath<>::setInstallPath));
+    mTokensMapping.insert(std::make_pair(localDataToken, &FixedPath<>::setLocalDataPath));
+    mTokensMapping.insert(std::make_pair(userDataToken, &FixedPath<>::setUserDataPath));
+    mTokensMapping.insert(std::make_pair(globalDataToken, &FixedPath<>::setGlobalDataPath));
 }
 
 void ConfigurationManager::readConfiguration(boost::program_options::variables_map& variables,
@@ -66,10 +66,54 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
 {
     loadConfig(mFixedPath.getUserPath(), variables, description);
     boost::program_options::notify(variables);
+
     loadConfig(mFixedPath.getLocalPath(), variables, description);
     boost::program_options::notify(variables);
     loadConfig(mFixedPath.getGlobalPath(), variables, description);
     boost::program_options::notify(variables);
+
+}
+
+struct EmptyPath : public std::unary_function<const boost::filesystem::path&, bool>
+{
+    bool operator()(const boost::filesystem::path& path) const
+    {
+        return path.empty();
+    }
+};
+
+void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
+{
+    for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
+    {
+        const std::string& path = it->string();
+        if (!path.empty() && path[0] == '?')
+        {
+            std::string::size_type pos = path.find('?', 1);
+            if (pos != std::string::npos)
+            {
+                ++pos;
+                TokensMappingContainer::iterator tokenIt = mTokensMapping.find(path.substr(0, pos));
+
+                if (tokenIt != mTokensMapping.end())
+                {
+                    boost::filesystem::path tempPath(path.substr(pos, path.length() - pos));
+
+                    if (boost::filesystem::is_directory(tempPath))
+                    {
+                        ((mFixedPath).*(tokenIt->second))(tempPath);
+                        (*it) = tempPath;
+                    }
+                    else
+                    {
+                        (*it).clear();
+                    }
+                }
+            }
+        }
+    }
+
+    dataDirs.erase(std::remove_if(dataDirs.begin(), dataDirs.end(), EmptyPath()), dataDirs.end());
 }
 
 void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
@@ -112,15 +156,24 @@ const boost::filesystem::path& ConfigurationManager::getLocalPath() const
     return mFixedPath.getLocalPath();
 }
 
-const boost::filesystem::path& ConfigurationManager::getDataPath(const std::string& type) const
+const boost::filesystem::path& ConfigurationManager::getGlobalDataPath() const
 {
-    TokensMappingContainer::const_iterator it = mTokensMapping.find(type);
-    if (it != mTokensMapping.end())
-    {
-        return ((mFixedPath).*(it->second))();
-    }
+    return mFixedPath.getGlobalDataPath();
+}
 
+const boost::filesystem::path& ConfigurationManager::getUserDataPath() const
+{
+    return mFixedPath.getUserDataPath();
+}
+
+const boost::filesystem::path& ConfigurationManager::getLocalDataPath() const
+{
     return mFixedPath.getLocalDataPath();
+}
+
+const boost::filesystem::path& ConfigurationManager::getInstallPath() const
+{
+    return mFixedPath.getInstallPath();
 }
 
 const boost::filesystem::path& ConfigurationManager::getOgreConfigPath() const

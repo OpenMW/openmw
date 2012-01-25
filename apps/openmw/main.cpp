@@ -157,6 +157,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
     Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
+    cfgMgr.processPaths(dataDirs);
 
     std::string local(variables["data-local"].as<std::string>());
     if (!local.empty())
@@ -166,7 +167,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (dataDirs.empty())
     {
-        dataDirs.push_back(cfgMgr.getDataPath(Files::localDataToken));
+        dataDirs.push_back(cfgMgr.getLocalDataPath());
     }
 
     engine.setDataDirs(dataDirs);
