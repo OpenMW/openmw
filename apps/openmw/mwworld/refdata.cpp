@@ -14,7 +14,6 @@ namespace MWWorld
         mCount = refData.mCount;
         mPosition = refData.mPosition;
 
-        mCreatureStats = refData.mCreatureStats;
         mMovement = refData.mMovement;
         mContainerStore = refData.mContainerStore;
 
@@ -126,11 +125,6 @@ namespace MWWorld
     void RefData::disable()
     {
         mEnabled = true;
-    }
-
-    boost::shared_ptr<MWMechanics::CreatureStats>& RefData::getCreatureStats()
-    {
-        return mCreatureStats;
     }
 
     boost::shared_ptr<MWMechanics::Movement>& RefData::getMovement()

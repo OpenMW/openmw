@@ -24,6 +24,7 @@ namespace
     struct CustomData : public MWWorld::CustomData
     {
         MWMechanics::NpcStats mNpcStats;
+        MWMechanics::CreatureStats mCreatureStats;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -44,6 +45,7 @@ namespace MWClass
 
             ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
 
+            // NPC stats
             if (!ref->base->faction.empty())
             {
                 // TODO research how initial rank is stored. The information in loadnpc.hpp are at
@@ -54,6 +56,22 @@ namespace MWClass
             for (int i=0; i<27; ++i)
                 data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
 
+            // creature stats
+            data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
+            data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
+            data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
+            data->mCreatureStats.mAttributes[3].set (ref->base->npdt52.agility);
+            data->mCreatureStats.mAttributes[4].set (ref->base->npdt52.speed);
+            data->mCreatureStats.mAttributes[5].set (ref->base->npdt52.endurance);
+            data->mCreatureStats.mAttributes[6].set (ref->base->npdt52.personality);
+            data->mCreatureStats.mAttributes[7].set (ref->base->npdt52.luck);
+            data->mCreatureStats.mDynamic[0].set (ref->base->npdt52.health);
+            data->mCreatureStats.mDynamic[1].set (ref->base->npdt52.mana);
+            data->mCreatureStats.mDynamic[2].set (ref->base->npdt52.fatigue);
+
+            data->mCreatureStats.mLevel = ref->base->npdt52.level;
+
+            // store
             ptr.getRefData().setCustomData (data.release());
         }
     }
@@ -113,31 +131,9 @@ namespace MWClass
 
     MWMechanics::CreatureStats& Npc::getCreatureStats (const MWWorld::Ptr& ptr) const
     {
-        if (!ptr.getRefData().getCreatureStats().get())
-        {
-            boost::shared_ptr<MWMechanics::CreatureStats> stats (
-                new MWMechanics::CreatureStats);
+        ensureCustomData (ptr);
 
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
-
-            stats->mAttributes[0].set (ref->base->npdt52.strength);
-            stats->mAttributes[1].set (ref->base->npdt52.intelligence);
-            stats->mAttributes[2].set (ref->base->npdt52.willpower);
-            stats->mAttributes[3].set (ref->base->npdt52.agility);
-            stats->mAttributes[4].set (ref->base->npdt52.speed);
-            stats->mAttributes[5].set (ref->base->npdt52.endurance);
-            stats->mAttributes[6].set (ref->base->npdt52.personality);
-            stats->mAttributes[7].set (ref->base->npdt52.luck);
-            stats->mDynamic[0].set (ref->base->npdt52.health);
-            stats->mDynamic[1].set (ref->base->npdt52.mana);
-            stats->mDynamic[2].set (ref->base->npdt52.fatigue);
-
-            stats->mLevel = ref->base->npdt52.level;
-
-            ptr.getRefData().getCreatureStats() = stats;
-        }
-
-        return *ptr.getRefData().getCreatureStats();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
     }
 
     MWMechanics::NpcStats& Npc::getNpcStats (const MWWorld::Ptr& ptr) const

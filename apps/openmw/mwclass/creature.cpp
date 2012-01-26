@@ -8,12 +8,55 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
-
+#include "../mwworld/customdata.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
+namespace
+{
+    struct CustomData : public MWWorld::CustomData
+    {
+        MWMechanics::CreatureStats mCreatureStats;
+
+        virtual MWWorld::CustomData *clone() const;
+    };
+
+    MWWorld::CustomData *CustomData::clone() const
+    {
+        return new CustomData (*this);
+    }
+}
+
 namespace MWClass
 {
+    void Creature::ensureCustomData (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+        {
+            std::auto_ptr<CustomData> data (new CustomData);
+
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref = ptr.get<ESM::Creature>();
+
+            // creature stats
+            data->mCreatureStats.mAttributes[0].set (ref->base->data.strength);
+            data->mCreatureStats.mAttributes[1].set (ref->base->data.intelligence);
+            data->mCreatureStats.mAttributes[2].set (ref->base->data.willpower);
+            data->mCreatureStats.mAttributes[3].set (ref->base->data.agility);
+            data->mCreatureStats.mAttributes[4].set (ref->base->data.speed);
+            data->mCreatureStats.mAttributes[5].set (ref->base->data.endurance);
+            data->mCreatureStats.mAttributes[6].set (ref->base->data.personality);
+            data->mCreatureStats.mAttributes[7].set (ref->base->data.luck);
+            data->mCreatureStats.mDynamic[0].set (ref->base->data.health);
+            data->mCreatureStats.mDynamic[1].set (ref->base->data.mana);
+            data->mCreatureStats.mDynamic[2].set (ref->base->data.fatigue);
+
+            data->mCreatureStats.mLevel = ref->base->data.level;
+
+            // store
+            ptr.getRefData().setCustomData (data.release());
+        }
+    }
+
     std::string Creature::getId (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
@@ -24,18 +67,18 @@ namespace MWClass
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        
+
         /*ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {*/
             MWRender::Actors& actors = renderingInterface.getActors();
             actors.insertCreature(ptr);
-        
+
     }
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
@@ -72,31 +115,9 @@ namespace MWClass
 
     MWMechanics::CreatureStats& Creature::getCreatureStats (const MWWorld::Ptr& ptr) const
     {
-        if (!ptr.getRefData().getCreatureStats().get())
-        {
-            boost::shared_ptr<MWMechanics::CreatureStats> stats (
-                new MWMechanics::CreatureStats);
+        ensureCustomData (ptr);
 
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref = ptr.get<ESM::Creature>();
-
-            stats->mAttributes[0].set (ref->base->data.strength);
-            stats->mAttributes[1].set (ref->base->data.intelligence);
-            stats->mAttributes[2].set (ref->base->data.willpower);
-            stats->mAttributes[3].set (ref->base->data.agility);
-            stats->mAttributes[4].set (ref->base->data.speed);
-            stats->mAttributes[5].set (ref->base->data.endurance);
-            stats->mAttributes[6].set (ref->base->data.personality);
-            stats->mAttributes[7].set (ref->base->data.luck);
-            stats->mDynamic[0].set (ref->base->data.health);
-            stats->mDynamic[1].set (ref->base->data.mana);
-            stats->mDynamic[2].set (ref->base->data.fatigue);
-
-            stats->mLevel = ref->base->data.level;
-
-            ptr.getRefData().getCreatureStats() = stats;
-        }
-
-        return *ptr.getRefData().getCreatureStats();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
     }
 
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
