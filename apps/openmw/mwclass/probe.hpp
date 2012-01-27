@@ -3,7 +3,6 @@
 
 #include "../mwworld/class.hpp"
 
-
 namespace MWClass
 {
     class Probe : public MWWorld::Class

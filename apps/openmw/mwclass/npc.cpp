@@ -17,6 +17,7 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/customdata.hpp"
 
 namespace
 {

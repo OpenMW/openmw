@@ -9,6 +9,8 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 
+#include "../mwrender/objects.hpp"
+
 namespace
 {
     struct CustomData : public MWWorld::CustomData
