@@ -1,6 +1,8 @@
 
 #include "refdata.hpp"
 
+#include <components/esm_store/cell_store.hpp>
+
 #include "customdata.hpp"
 
 namespace MWWorld
@@ -14,8 +16,6 @@ namespace MWWorld
         mCount = refData.mCount;
         mPosition = refData.mPosition;
 
-        mContainerStore = refData.mContainerStore;
-
         mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
     }
 
@@ -27,7 +27,7 @@ namespace MWWorld
         mCustomData = 0;
     }
 
-    RefData::RefData (const ESMS::CellRef& cellRef)
+    RefData::RefData (const ESM::CellRef& cellRef)
     : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.pos),
       mCustomData (0)
     {}
@@ -124,11 +124,6 @@ namespace MWWorld
     void RefData::disable()
     {
         mEnabled = true;
-    }
-
-    boost::shared_ptr<ContainerStore<RefData> >& RefData::getContainerStore()
-    {
-        return mContainerStore;
     }
 
     ESM::Position& RefData::getPosition()

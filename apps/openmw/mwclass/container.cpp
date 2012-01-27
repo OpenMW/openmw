@@ -6,9 +6,39 @@
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/customdata.hpp"
+
+namespace
+{
+    struct CustomData : public MWWorld::CustomData
+    {
+        MWWorld::ContainerStore<MWWorld::RefData> mContainerStore;
+
+        virtual MWWorld::CustomData *clone() const;
+    };
+
+    MWWorld::CustomData *CustomData::clone() const
+    {
+        return new CustomData (*this);
+    }
+}
 
 namespace MWClass
 {
+    void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+        {
+            std::auto_ptr<CustomData> data (new CustomData);
+
+            // \todo add initial container content
+
+            // store
+            ptr.getRefData().setCustomData (data.release());
+        }
+    }
+
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
@@ -16,7 +46,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -50,17 +80,9 @@ namespace MWClass
     MWWorld::ContainerStore<MWWorld::RefData>& Container::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
-        if (!ptr.getRefData().getContainerStore().get())
-        {
-            boost::shared_ptr<MWWorld::ContainerStore<MWWorld::RefData> > store (
-                new MWWorld::ContainerStore<MWWorld::RefData>);
+        ensureCustomData (ptr);
 
-            // TODO add initial content
-
-            ptr.getRefData().getContainerStore() = store;
-        }
-
-        return *ptr.getRefData().getContainerStore();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
     }
 
     std::string Container::getScript (const MWWorld::Ptr& ptr) const

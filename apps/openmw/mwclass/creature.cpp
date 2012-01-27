@@ -4,19 +4,20 @@
 #include <components/esm/loadcrea.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/customdata.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwworld/containerstore.hpp"
 
 namespace
 {
     struct CustomData : public MWWorld::CustomData
     {
         MWMechanics::CreatureStats mCreatureStats;
+        MWWorld::ContainerStore<MWWorld::RefData> mContainerStore;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -52,6 +53,8 @@ namespace MWClass
 
             data->mCreatureStats.mLevel = ref->base->data.level;
 
+            // \todo add initial container content
+
             // store
             ptr.getRefData().setCustomData (data.release());
         }
@@ -67,18 +70,8 @@ namespace MWClass
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-
-        /*ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
-            ptr.get<ESM::Creature>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {*/
-            MWRender::Actors& actors = renderingInterface.getActors();
-            actors.insertCreature(ptr);
-
+        MWRender::Actors& actors = renderingInterface.getActors();
+        actors.insertCreature(ptr);
     }
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
@@ -92,7 +85,6 @@ namespace MWClass
         if(!model.empty()){
             physics.insertActorPhysics(ptr, "meshes\\" + model);
         }
-
     }
 
     void Creature::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
@@ -129,17 +121,9 @@ namespace MWClass
     MWWorld::ContainerStore<MWWorld::RefData>& Creature::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
-        if (!ptr.getRefData().getContainerStore().get())
-        {
-            boost::shared_ptr<MWWorld::ContainerStore<MWWorld::RefData> > store (
-                new MWWorld::ContainerStore<MWWorld::RefData>);
+        ensureCustomData (ptr);
 
-            // TODO add initial content
-
-            ptr.getRefData().getContainerStore() = store;
-        }
-
-        return *ptr.getRefData().getContainerStore();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
     }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const

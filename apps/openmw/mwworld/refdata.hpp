@@ -3,17 +3,16 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
 #include <Ogre.h>
 
-#include "../mwscript/locals.hpp"
+#include <components/esm/defs.hpp>
 
-#include "containerstore.hpp"
+#include "../mwscript/locals.hpp"
 
 namespace ESM
 {
     class Script;
+    class CellRef;
 }
 
 namespace MWWorld
@@ -36,12 +35,6 @@ namespace MWWorld
 
             CustomData *mCustomData;
 
-            // we are using shared pointer here to avoid having to create custom copy-constructor,
-            // assignment operator and destructor. As a consequence though copying a RefData object
-            // manually will probably give unexcepted results. This is not a problem since RefData
-            // are never copied outside of container operations.
-            boost::shared_ptr<ContainerStore<RefData> > mContainerStore;
-
             void copy (const RefData& refData);
 
             void cleanup();
@@ -51,7 +44,7 @@ namespace MWWorld
             /// @param cellRef Used to copy constant data such as position into this class where it can
             /// be altered without effecting the original data. This makes it possible
             /// to reset the position as the orignal data is still held in the CellRef
-            RefData (const ESMS::CellRef& cellRef);
+            RefData (const ESM::CellRef& cellRef);
 
             RefData (const RefData& refData);
 
@@ -81,8 +74,6 @@ namespace MWWorld
             void enable();
 
             void disable();
-
-            boost::shared_ptr<ContainerStore<RefData> >& getContainerStore();
 
             ESM::Position& getPosition();
 

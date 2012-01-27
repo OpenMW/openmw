@@ -9,14 +9,14 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
-#include "../mwmechanics/movement.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwworld/containerstore.hpp"
 
 namespace
 {
@@ -28,6 +28,7 @@ namespace
         MWMechanics::NpcStats mNpcStats;
         MWMechanics::CreatureStats mCreatureStats;
         MWMechanics::Movement mMovement;
+        MWWorld::ContainerStore<MWWorld::RefData> mContainerStore;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -73,6 +74,8 @@ namespace MWClass
             data->mCreatureStats.mDynamic[2].set (ref->base->npdt52.fatigue);
 
             data->mCreatureStats.mLevel = ref->base->npdt52.level;
+
+            // \todo add initial container content
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -155,17 +158,9 @@ namespace MWClass
     MWWorld::ContainerStore<MWWorld::RefData>& Npc::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
-        if (!ptr.getRefData().getContainerStore().get())
-        {
-            boost::shared_ptr<MWWorld::ContainerStore<MWWorld::RefData> > store (
-                new MWWorld::ContainerStore<MWWorld::RefData>);
+        ensureCustomData (ptr);
 
-            // TODO add initial content
-
-            ptr.getRefData().getContainerStore() = store;
-        }
-
-        return *ptr.getRefData().getContainerStore();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
     }
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const

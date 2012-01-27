@@ -8,6 +8,8 @@ namespace MWClass
 {
     class Container : public MWWorld::Class
     {
+            void ensureCustomData (const MWWorld::Ptr& ptr) const;
+
         public:
 
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
