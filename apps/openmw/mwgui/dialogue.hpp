@@ -35,6 +35,13 @@ namespace MWGui
         */
         EventHandle_Void eventBye;
 
+        void startDialogue(std::string npcName);
+        void stopDialogue();
+        void addKeyword(std::string keyWord,std::string topicText);
+        void removeKeyword(std::string keyWord);
+        void addText(std::string text);
+        void askQuestion();
+
     protected:
         void onSelectTopic(MyGUI::List* _sender, size_t _index);
         void onByeClicked(MyGUI::Widget* _sender);
@@ -42,9 +49,15 @@ namespace MWGui
 
     private:
         void updateOptions();
+        /**
+        *Helper function that add topic keyword in blue in a text.
+        */
+        std::string parseText(std::string text);
+        void displayTopicText(std::string topic);
 
         DialogeHistory*     history;
         MyGUI::ListPtr      topicsList;
+        std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.
     };
 }
 #endif

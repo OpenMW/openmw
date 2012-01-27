@@ -15,31 +15,31 @@ using namespace MWGui;
 using namespace Widgets;
 
 DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
-  : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
+    : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
 {
     // Centre dialog
     center();
 
     //WindowManager *wm = environment.mWindowManager;
     setText("NpcName", "Name of character");
-  
+
     //History view
     getWidget(history, "History");
     history->setOverflowToTheLeft(true);
     history->getClient()->eventMouseButtonClick = MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
-   
+
     //Topics list 
     getWidget(topicsList, "TopicsList");
     topicsList->setScrollVisible(true);
-    topicsList->eventListSelectAccept      = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    //topicsList->eventListSelectAccept      = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
     topicsList->eventListMouseItemActivate = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
-    topicsList->eventListChangePosition    = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    //topicsList->eventListChangePosition    = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
     MyGUI::ButtonPtr byeButton;
     getWidget(byeButton, "ByeButton");
     byeButton->eventMouseButtonClick = MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
 
-    updateOptions();
+    //updateOptions();
 }
 
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
@@ -54,14 +54,18 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     if(history->getColorAtPos(cursorPosition) != "#FFFFFF")
     {
         UString key = history->getColorTextAt(cursorPosition);
-        std::cout << "Clicked on key: " << key << std::endl;
-        //eventTopicSelected(key);
+        //std::cout << "Clicked on key: " << key << std::endl;
+        displayTopicText(key);
     }
 }
 
 void DialogueWindow::open()
 {
-    updateOptions();
+    //updateOptions();
+    topicsList->removeAllItems();
+    pTopicsText.clear();
+    history->eraseText(0,history->getTextLength());
+    
     setVisible(true);
 }
 
@@ -74,27 +78,96 @@ void DialogueWindow::onSelectTopic(MyGUI::List* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;
+    std::string topic =  _sender->getItem(_index);
+    displayTopicText(topic);
 
     //const std::string* theTopic  = topicsList->getItemDataAt<std::string>(_index);
     //std::cout << "Selected: "<< theTopic << std::endl;
     //eventTopicSelected(key);
 }
 
+void DialogueWindow::startDialogue(std::string npcName)
+{
+    setText("NpcName", npcName);
+}
+
+void DialogueWindow::addKeyword(std::string keyWord,std::string topicText)
+{
+    if(topicsList->findItemIndexWith(keyWord) == MyGUI::ITEM_NONE)
+    {
+        topicsList->addItem(keyWord);
+        pTopicsText[keyWord] = topicText; 
+    }
+}
+
+void DialogueWindow::removeKeyword(std::string keyWord)
+{
+    if(topicsList->findItemIndexWith(keyWord) != MyGUI::ITEM_NONE)
+    {
+        std::cout << topicsList->findItem(keyWord);
+        topicsList->removeItemAt(topicsList->findItem(keyWord));
+        pTopicsText.erase(keyWord);
+    }
+}
+
+
+/**
+*Copied from the internet.
+*/
+void replaceInString(std::string& str, const std::string& oldStr, const std::string& newStr)
+{
+    size_t pos = 0;
+    while((pos = str.find(oldStr, pos)) != std::string::npos)
+    {
+        str.replace(pos, oldStr.length(), newStr);
+        pos += newStr.length();
+    }
+}
+
+std::string DialogueWindow::parseText(std::string text)
+{
+    //topicsList->geti
+    for(int i = 0;i<topicsList->getItemCount();i++)
+    {
+        std::string keyWord = topicsList->getItem(i);
+        std::string newKeyWord = "#FF0000"+keyWord+"#FFFFFF";
+        replaceInString(text,keyWord,newKeyWord);
+    }
+    return text;
+}
+
+void DialogueWindow::displayTopicText(std::string topic)
+{
+    if(topicsList->findItemIndexWith(topic) != MyGUI::ITEM_NONE)
+    {
+        history->addDialogHeading(topic);
+        history->addDialogText(parseText(pTopicsText[topic]));
+    }
+    else
+    {
+        std::cout << "topic not found!";
+    }
+}
 
 void DialogueWindow::updateOptions()
 {
     //FIXME Add this properly
-    history->addDialogText("Through the translucent surface of the orb, you see shifting images of distant locations...");
+    /*history->addDialogText("Through the translucent surface of the orb, you see shifting images of distant locations...");
     for(int z = 0; z < 10; z++)
     {
-        history->addDialogHeading("Fort Frostmoth");
-        history->addDialogText("The image in the orb flickers, and you see.... The cold courtyard of #FF0000Fort Frostmoth#FFFFFF, battered bu werewolf attack, but still standing, still projecting Imperial might even to this distant and cold corner of the world.");
-    }
+    history->addDialogHeading("Fort Frostmoth");
+    history->addDialogText("The image in the orb flickers, and you see.... The cold courtyard of #FF0000Fort Frostmoth#FFFFFF, battered bu werewolf attack, but still standing, still projecting Imperial might even to this distant and cold corner of the world.");
+    }*/
 
     //Clear the list of topics
     topicsList->removeAllItems();
-    int i = 0;
-    topicsList->addItem("Ald'ruhn", i++);
+    pTopicsText.clear();
+    history->eraseText(0,history->getTextLength());
+
+    addKeyword("gus","gus is working on the dialogue system");
+
+    displayTopicText("gus");
+    /*topicsList->addItem("Ald'ruhn", i++);
     topicsList->addItem("Balmora", i++);
     topicsList->addItem("Sadrith Mora", i++);
     topicsList->addItem("Vivec", i++);
@@ -115,6 +188,6 @@ void DialogueWindow::updateOptions()
     topicsList->addItem("Tel Fyr", i++);
     topicsList->addItem("Tel Mora", i++);
     topicsList->addItem("Tel Vos", i++);
-    topicsList->addItem("Vos", i++);
+    topicsList->addItem("Vos", i++);*/
 }
 
