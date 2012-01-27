@@ -9,8 +9,6 @@
 
 #include "../mwscript/locals.hpp"
 
-#include "../mwmechanics/movement.hpp"
-
 #include "containerstore.hpp"
 
 namespace ESM
@@ -42,8 +40,6 @@ namespace MWWorld
             // assignment operator and destructor. As a consequence though copying a RefData object
             // manually will probably give unexcepted results. This is not a problem since RefData
             // are never copied outside of container operations.
-            boost::shared_ptr<MWMechanics::Movement> mMovement;
-
             boost::shared_ptr<ContainerStore<RefData> > mContainerStore;
 
             void copy (const RefData& refData);
@@ -85,8 +81,6 @@ namespace MWWorld
             void enable();
 
             void disable();
-
-            boost::shared_ptr<MWMechanics::Movement>& getMovement();
 
             boost::shared_ptr<ContainerStore<RefData> >& getContainerStore();
 

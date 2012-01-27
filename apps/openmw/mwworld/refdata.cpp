@@ -14,7 +14,6 @@ namespace MWWorld
         mCount = refData.mCount;
         mPosition = refData.mPosition;
 
-        mMovement = refData.mMovement;
         mContainerStore = refData.mContainerStore;
 
         mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
@@ -125,11 +124,6 @@ namespace MWWorld
     void RefData::disable()
     {
         mEnabled = true;
-    }
-
-    boost::shared_ptr<MWMechanics::Movement>& RefData::getMovement()
-    {
-        return mMovement;
     }
 
     boost::shared_ptr<ContainerStore<RefData> >& RefData::getContainerStore()

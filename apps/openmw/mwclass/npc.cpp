@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <OgreSceneNode.h>
+
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -12,9 +14,9 @@
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
-#include <OgreSceneNode.h>
 
 namespace
 {
@@ -25,6 +27,7 @@ namespace
     {
         MWMechanics::NpcStats mNpcStats;
         MWMechanics::CreatureStats mCreatureStats;
+        MWMechanics::Movement mMovement;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -253,29 +256,20 @@ namespace MWClass
 
     MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
     {
-        if (!ptr.getRefData().getMovement().get())
-        {
-            boost::shared_ptr<MWMechanics::Movement> movement (
-                new MWMechanics::Movement);
+        ensureCustomData (ptr);
 
-            ptr.getRefData().getMovement() = movement;
-        }
-
-        return *ptr.getRefData().getMovement();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
     {
         Ogre::Vector3 vector (0, 0, 0);
 
-        if (ptr.getRefData().getMovement().get())
-        {
-            vector.x = - ptr.getRefData().getMovement()->mLeftRight * 200;
-            vector.y = ptr.getRefData().getMovement()->mForwardBackward * 200;
+        vector.x = - getMovementSettings (ptr).mLeftRight * 200;
+        vector.y = getMovementSettings (ptr).mForwardBackward * 200;
 
-            if (getStance (ptr, Run, false))
-                vector *= 2;
-        }
+        if (getStance (ptr, Run, false))
+            vector *= 2;
 
         return vector;
     }
