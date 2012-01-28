@@ -51,7 +51,7 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     const IntPoint& lastPressed = InputManager::getInstance().getLastLeftPressed();
 
     size_t cursorPosition = t->getCursorPosition(lastPressed);
-    if(history->getColorAtPos(cursorPosition) != "#FFFFFF")
+    if(history->getColorAtPos(cursorPosition) != "#B29154")
     {
         UString key = history->getColorTextAt(cursorPosition);
         //std::cout << "Clicked on key: " << key << std::endl;
@@ -65,7 +65,7 @@ void DialogueWindow::open()
     topicsList->removeAllItems();
     pTopicsText.clear();
     history->eraseText(0,history->getTextLength());
-    
+    updateOptions();
     setVisible(true);
 }
 
@@ -130,7 +130,7 @@ std::string DialogueWindow::parseText(std::string text)
     for(int i = 0;i<topicsList->getItemCount();i++)
     {
         std::string keyWord = topicsList->getItem(i);
-        std::string newKeyWord = "#FF0000"+keyWord+"#FFFFFF";
+        std::string newKeyWord = "#686EBA"+keyWord+"#B29154";
         replaceInString(text,keyWord,newKeyWord);
     }
     return text;
@@ -146,6 +146,15 @@ void DialogueWindow::displayTopicText(std::string topic)
     else
     {
         std::cout << "topic not found!";
+    }
+}
+
+void DialogueWindow::askQuestion(std::string question,std::list<std::string> answers)
+{
+    history->addDialogText(parseText(question));
+    for(std::list<std::string>::iterator it = answers.begin();it!=answers.end();it++)
+    {
+        history->addDialogText("#572D21"+(*it)+"#B29154");
     }
 }
 
@@ -165,8 +174,12 @@ void DialogueWindow::updateOptions()
     history->eraseText(0,history->getTextLength());
 
     addKeyword("gus","gus is working on the dialogue system");
-
     displayTopicText("gus");
+
+    std::list<std::string> test;
+    test.push_back("option 1");
+    test.push_back("option 2");
+    askQuestion("is gus cooking?",test);
     /*topicsList->addItem("Ald'ruhn", i++);
     topicsList->addItem("Balmora", i++);
     topicsList->addItem("Sadrith Mora", i++);

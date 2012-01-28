@@ -61,9 +61,9 @@ UString DialogeHistory::getColorTextAt(size_t _pos)
 
 void DialogeHistory::addDialogHeading(const UString& parText)
 {
-    UString head("\n#00FF00");
+    UString head("\n#D8C09A");
     head.append(parText);
-    head.append("#FFFFFF\n");
+    head.append("#B29154\n");
     addText(head);
 }
 
