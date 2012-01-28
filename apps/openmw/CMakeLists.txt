@@ -1,18 +1,16 @@
-project(OpenMW)
 
 # config file
-
-configure_file ("${OpenMW_SOURCE_DIR}/config.hpp.cmake" "${OpenMW_SOURCE_DIR}/config.hpp")
+configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp")
 
 # local files
-
 set(GAME
     main.cpp
     engine.cpp
-    )
+)
 set(GAME_HEADER
     engine.hpp
-    config.hpp)
+    config.hpp
+)
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
@@ -61,13 +59,11 @@ add_openmw_dir (mwmechanics
 # Main executable
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
-    ${CONPONENT_FILES}
+    ${COMPONENT_FILES}
     ${OPENMW_FILES}
     ${GAME} ${GAME_HEADER}
     ${APPLE_BUNDLE_RESOURCES}
-    )
-
-target_link_libraries (openmw components)
+)
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
@@ -75,26 +71,27 @@ include_directories(${SOUND_INPUT_INCLUDES} ${BULLET_INCLUDE_DIRS})
 add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
-  ${OGRE_LIBRARIES}
-  ${OIS_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${OPENAL_LIBRARY}
-  ${SOUND_INPUT_LIBRARY}
-  ${BULLET_LIBRARIES}
-  caelum
-  MyGUIEngine
-  MyGUIOgrePlatform
+    ${OGRE_LIBRARIES}
+    ${OIS_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OPENAL_LIBRARY}
+    ${SOUND_INPUT_LIBRARY}
+    ${BULLET_LIBRARIES}
+    caelum
+    components
+    MyGUIEngine
+    MyGUIOgrePlatform
 )
 
-if (APPLE)
+if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
     target_link_libraries(openmw ${CARBON_FRAMEWORK})
     install(TARGETS openmw
         BUNDLE DESTINATION .
         RUNTIME DESTINATION ../MacOS
         COMPONENT Runtime)
-endif (APPLE)
+endif(APPLE)
 
 if(DPKG_PROGRAM)
     INSTALL(TARGETS openmw RUNTIME DESTINATION games COMPONENT openmw)
-endif()
+endif(DPKG_PROGRAM)
