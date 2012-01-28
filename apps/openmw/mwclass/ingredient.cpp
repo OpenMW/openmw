@@ -8,6 +8,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 
+#include "../mwrender/objects.hpp"
 
 #include "containerutil.hpp"
 
@@ -20,7 +21,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -34,14 +35,11 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
             ptr.get<ESM::Ingredient>();
 
-
-
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-
     }
 
     std::string Ingredient::getName (const MWWorld::Ptr& ptr) const

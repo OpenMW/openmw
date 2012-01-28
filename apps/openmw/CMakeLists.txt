@@ -14,7 +14,7 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects renderinginterface 
+    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects renderinginterface
     )
 
 add_openmw_dir (mwinput
@@ -44,7 +44,7 @@ add_openmw_dir (mwsound
 add_openmw_dir (mwworld
     refdata world physicssystem scene environment globals class action nullaction actionteleport
     containerstore actiontalk actiontake containerstore manualref containerutil player cellfunctors
-    cells localscripts
+    cells localscripts customdata
     )
 
 add_openmw_dir (mwclass

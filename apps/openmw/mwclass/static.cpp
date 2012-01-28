@@ -5,6 +5,7 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {
@@ -15,7 +16,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
