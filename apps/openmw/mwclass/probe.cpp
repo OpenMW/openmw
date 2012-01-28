@@ -20,7 +20,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -59,7 +59,7 @@ namespace MWClass
     }
 
     void Probe::insertIntoContainer (const MWWorld::Ptr& ptr,
-        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+        MWWorld::ContainerStore& containerStore) const
     {
         insertIntoContainerStore (ptr, containerStore.probes);
     }

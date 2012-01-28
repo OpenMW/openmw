@@ -3,23 +3,24 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "refdata.hpp"
+
 namespace MWWorld
 {
-    template<typename D>
     struct ContainerStore
     {
-            ESMS::CellRefList<ESM::Potion, D>            potions;
-            ESMS::CellRefList<ESM::Apparatus, D>         appas;
-            ESMS::CellRefList<ESM::Armor, D>             armors;
-            ESMS::CellRefList<ESM::Book, D>              books;
-            ESMS::CellRefList<ESM::Clothing, D>          clothes;
-            ESMS::CellRefList<ESM::Ingredient, D>        ingreds;
-            ESMS::CellRefList<ESM::Light, D>             lights;
-            ESMS::CellRefList<ESM::Tool, D>              lockpicks;
-            ESMS::CellRefList<ESM::Miscellaneous, D>     miscItems;
-            ESMS::CellRefList<ESM::Probe, D>             probes;
-            ESMS::CellRefList<ESM::Repair, D>            repairs;
-            ESMS::CellRefList<ESM::Weapon, D>            weapons;
+            ESMS::CellRefList<ESM::Potion, RefData>            potions;
+            ESMS::CellRefList<ESM::Apparatus, RefData>         appas;
+            ESMS::CellRefList<ESM::Armor, RefData>             armors;
+            ESMS::CellRefList<ESM::Book, RefData>              books;
+            ESMS::CellRefList<ESM::Clothing, RefData>          clothes;
+            ESMS::CellRefList<ESM::Ingredient, RefData>        ingreds;
+            ESMS::CellRefList<ESM::Light, RefData>             lights;
+            ESMS::CellRefList<ESM::Tool, RefData>              lockpicks;
+            ESMS::CellRefList<ESM::Miscellaneous, RefData>     miscItems;
+            ESMS::CellRefList<ESM::Probe, RefData>             probes;
+            ESMS::CellRefList<ESM::Repair, RefData>            repairs;
+            ESMS::CellRefList<ESM::Weapon, RefData>            weapons;
     };
 }
 

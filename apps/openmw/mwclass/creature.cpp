@@ -17,7 +17,7 @@ namespace
     struct CustomData : public MWWorld::CustomData
     {
         MWMechanics::CreatureStats mCreatureStats;
-        MWWorld::ContainerStore<MWWorld::RefData> mContainerStore;
+        MWWorld::ContainerStore mContainerStore;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -118,7 +118,7 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
 
-    MWWorld::ContainerStore<MWWorld::RefData>& Creature::getContainerStore (const MWWorld::Ptr& ptr)
+    MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
         ensureCustomData (ptr);

@@ -24,7 +24,7 @@ namespace
 namespace MWWorld
 {
     void listItemsInContainer (const std::string& id,
-        ContainerStore<MWWorld::RefData>& containerStore,
+        ContainerStore& containerStore,
         const ESMS::ESMStore& store, std::vector<Ptr>& list)
     {
         listItemsInContainerImp (id, containerStore.potions, store.potions, list);

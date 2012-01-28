@@ -35,8 +35,7 @@ namespace MWClass
             virtual MWMechanics::NpcStats& getNpcStats (const MWWorld::Ptr& ptr) const;
             ///< Return NPC stats
 
-            virtual MWWorld::ContainerStore<MWWorld::RefData>& getContainerStore (
-                const MWWorld::Ptr& ptr) const;
+            virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,

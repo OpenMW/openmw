@@ -23,7 +23,7 @@ namespace MWClass
             ///< Generate action for activation
 
             virtual void insertIntoContainer (const MWWorld::Ptr& ptr,
-                MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const;
+                MWWorld::ContainerStore& containerStore) const;
             ///< Insert into a containe
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;

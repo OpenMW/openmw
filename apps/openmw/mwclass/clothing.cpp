@@ -60,7 +60,7 @@ namespace MWClass
     }
 
     void Clothing::insertIntoContainer (const MWWorld::Ptr& ptr,
-        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
+        MWWorld::ContainerStore& containerStore) const
     {
         insertIntoContainerStore (ptr, containerStore.clothes);
     }

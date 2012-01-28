@@ -29,7 +29,7 @@ namespace MWClass
             ///< Return item max health or throw an exception, if class does not have item health
 
             virtual void insertIntoContainer (const MWWorld::Ptr& ptr,
-                MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const;
+                MWWorld::ContainerStore& containerStore) const;
             ///< Insert into a containe
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
