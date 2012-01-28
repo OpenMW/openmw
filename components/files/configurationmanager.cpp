@@ -12,10 +12,10 @@ static const char* const openmwCfgFile = "openmw.cfg";
 static const char* const ogreCfgFile = "ogre.cfg";
 static const char* const pluginsCfgFile = "plugins.cfg";
 
-const char* const mwDataToken = "?mw:data?";
-const char* const localDataToken = "?local:data?";
-const char* const userDataToken = "?user:data?";
-const char* const globalDataToken = "?global:data?";
+const char* const mwToken = "?mw?";
+const char* const localToken = "?local?";
+const char* const userToken = "?user?";
+const char* const globalToken = "?global?";
 
 ConfigurationManager::ConfigurationManager()
     : mFixedPath("openmw")
@@ -55,10 +55,10 @@ ConfigurationManager::~ConfigurationManager()
 
 void ConfigurationManager::setupTokensMapping()
 {
-    mTokensMapping.insert(std::make_pair(mwDataToken, &FixedPath<>::getInstallPath));
-    mTokensMapping.insert(std::make_pair(localDataToken, &FixedPath<>::getLocalDataPath));
-    mTokensMapping.insert(std::make_pair(userDataToken, &FixedPath<>::getUserDataPath));
-    mTokensMapping.insert(std::make_pair(globalDataToken, &FixedPath<>::getGlobalDataPath));
+    mTokensMapping.insert(std::make_pair(mwToken, &FixedPath<>::getInstallPath));
+    mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalDataPath));
+    mTokensMapping.insert(std::make_pair(userToken, &FixedPath<>::getUserDataPath));
+    mTokensMapping.insert(std::make_pair(globalToken, &FixedPath<>::getGlobalDataPath));
 }
 
 void ConfigurationManager::readConfiguration(boost::program_options::variables_map& variables,
@@ -104,6 +104,11 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
                 {
                     (*it).clear();
                 }
+            }
+            else
+            {
+                // Clean invalid / unknown token, it will be removed outside the loop
+                (*it).clear();
             }
         }
     }
