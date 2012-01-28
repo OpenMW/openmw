@@ -51,11 +51,18 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     const IntPoint& lastPressed = InputManager::getInstance().getLastLeftPressed();
 
     size_t cursorPosition = t->getCursorPosition(lastPressed);
-    if(history->getColorAtPos(cursorPosition) != "#B29154")
+    MyGUI::UString color = history->getColorAtPos(cursorPosition);
+    if(color != "#B29154")
     {
         UString key = history->getColorTextAt(cursorPosition);
+
         //std::cout << "Clicked on key: " << key << std::endl;
-        displayTopicText(key);
+        if(color == "#686EBA") displayTopicText(key);
+        if(color == "#572D21") 
+        {
+            //TODO: send back the answere to the question!
+            std::cout << "and the ansere is..."<< key;
+        }
     }
 }
 
@@ -154,7 +161,7 @@ void DialogueWindow::askQuestion(std::string question,std::list<std::string> ans
     history->addDialogText(parseText(question));
     for(std::list<std::string>::iterator it = answers.begin();it!=answers.end();it++)
     {
-        history->addDialogText("#572D21"+(*it)+"#B29154");
+        history->addDialogText("#572D21"+(*it)+"#B29154"+" ");
     }
 }
 
