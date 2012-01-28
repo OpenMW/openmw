@@ -44,7 +44,7 @@ struct ConfigurationManager
     private:
         typedef Files::FixedPath<> FixedPathType;
 
-        typedef void (FixedPathType::*path_type_f)(const boost::filesystem::path&);
+        typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
         typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
 
         void loadConfig(const boost::filesystem::path& path,

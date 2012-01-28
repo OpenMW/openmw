@@ -125,19 +125,9 @@ struct FixedPath
         return mInstallPath;
     }
 
-    void setInstallPath(const boost::filesystem::path& path)
-    {
-        mInstallPath = path;
-    }
-
     const boost::filesystem::path& getGlobalDataPath() const
     {
         return mGlobalDataPath;
-    }
-
-    void setGlobalDataPath(const boost::filesystem::path& path)
-    {
-        mGlobalDataPath = path;
     }
 
     const boost::filesystem::path& getUserDataPath() const
@@ -145,19 +135,9 @@ struct FixedPath
         return mUserDataPath;
     }
 
-    void setUserDataPath(const boost::filesystem::path& path)
-    {
-        mUserDataPath = path;
-    }
-
     const boost::filesystem::path& getLocalDataPath() const
     {
         return mLocalDataPath;
-    }
-
-    void setLocalDataPath(const boost::filesystem::path& path)
-    {
-        mLocalDataPath = path;
     }
 
     private:

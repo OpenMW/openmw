@@ -55,10 +55,10 @@ ConfigurationManager::~ConfigurationManager()
 
 void ConfigurationManager::setupTokensMapping()
 {
-    mTokensMapping.insert(std::make_pair(mwDataToken, &FixedPath<>::setInstallPath));
-    mTokensMapping.insert(std::make_pair(localDataToken, &FixedPath<>::setLocalDataPath));
-    mTokensMapping.insert(std::make_pair(userDataToken, &FixedPath<>::setUserDataPath));
-    mTokensMapping.insert(std::make_pair(globalDataToken, &FixedPath<>::setGlobalDataPath));
+    mTokensMapping.insert(std::make_pair(mwDataToken, &FixedPath<>::getInstallPath));
+    mTokensMapping.insert(std::make_pair(localDataToken, &FixedPath<>::getLocalDataPath));
+    mTokensMapping.insert(std::make_pair(userDataToken, &FixedPath<>::getUserDataPath));
+    mTokensMapping.insert(std::make_pair(globalDataToken, &FixedPath<>::getGlobalDataPath));
 }
 
 void ConfigurationManager::readConfiguration(boost::program_options::variables_map& variables,
@@ -87,27 +87,22 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
     {
         const std::string& path = it->string();
-        if (!path.empty() && path[0] == '?')
+
+        // Check if path contains a token
+        if (!path.empty() && *path.begin() == '?' && *path.rbegin() == '?')
         {
-            std::string::size_type pos = path.find('?', 1);
-            if (pos != std::string::npos)
+            TokensMappingContainer::iterator tokenIt = mTokensMapping.find(path);
+            if (tokenIt != mTokensMapping.end())
             {
-                ++pos;
-                TokensMappingContainer::iterator tokenIt = mTokensMapping.find(path.substr(0, pos));
+                boost::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
 
-                if (tokenIt != mTokensMapping.end())
+                if (boost::filesystem::is_directory(tempPath))
                 {
-                    boost::filesystem::path tempPath(path.substr(pos, path.length() - pos));
-
-                    if (boost::filesystem::is_directory(tempPath))
-                    {
-                        ((mFixedPath).*(tokenIt->second))(tempPath);
-                        (*it) = tempPath;
-                    }
-                    else
-                    {
-                        (*it).clear();
-                    }
+                    (*it) = tempPath;
+                }
+                else
+                {
+                    (*it).clear();
                 }
             }
         }
