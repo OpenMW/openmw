@@ -65,7 +65,7 @@ namespace MWWorld
 
         private:
 
-            MWRender::RenderingManager mRendering;
+            MWRender::RenderingManager* mRendering;
 
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
@@ -95,7 +95,7 @@ namespace MWWorld
 
         public:
 
-           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+           World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
                 Environment& environment, const std::string& encoding);

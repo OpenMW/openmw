@@ -7,14 +7,11 @@
 
 #include <OgreFrameListener.h>
 
-#include <openengine/bullet/physic.hpp>
-
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
 #include <components/cfg/configurationmanager.hpp>
 
 #include "mwworld/environment.hpp"
-#include "mwworld/physicssystem.hpp"
 #include "mwworld/ptr.hpp"
 
 namespace Compiler
@@ -64,7 +61,6 @@ namespace OMW
             boost::filesystem::path mDataDir;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
-            OEngine::Physic::PhysicEngine* mPhysicEngine;
             std::string mCellName;
             std::string mMaster;
             int mFpsLevel;
@@ -78,7 +74,6 @@ namespace OMW
             std::string mFocusName;
 
             MWWorld::Environment mEnvironment;
-            MWWorld::PhysicsSystem *mPhysicsSystem;
             MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;

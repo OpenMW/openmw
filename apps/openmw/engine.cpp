@@ -326,13 +326,9 @@ void OMW::Engine::go()
     mOgre->createWindow("OpenMW");
 
     loadBSA();
-    
-    // Create the physics system
-    mPhysicsSystem = new MWWorld::PhysicsSystem(*mOgre);
-    mPhysicEngine = mPhysicsSystem->getEngine();
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (*mOgre, mPhysicEngine, mFileCollections, mMaster,
+    mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,
         mResDir, mNewGame, mEnvironment, mEncoding);
 
     // Create window manager - this manages all the MW-specific GUI windows
