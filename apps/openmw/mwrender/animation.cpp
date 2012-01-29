@@ -124,8 +124,7 @@ namespace MWRender{
 			//std::cout << "Name " << copy.sname << "\n";
 			Ogre::HardwareVertexBufferSharedPtr vbuf = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(0);
 		            Ogre::Real* pReal = static_cast<Ogre::Real*>(vbuf->lock(Ogre::HardwareBuffer::HBL_NORMAL));
-			       //Ogre::HardwareVertexBufferSharedPtr vbufNormal = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(1);
-		           // Ogre::Real* pRealNormal = static_cast<Ogre::Real*>(vbufNormal->lock(Ogre::HardwareBuffer::HBL_NORMAL));
+			      
 
 				std::vector<Ogre::Vector3> initialVertices = copy.morph.getInitialVertices();
 				//Each shape has multiple indices
@@ -184,13 +183,14 @@ namespace MWRender{
                     std::vector<Nif::NiSkinData::IndividualWeight> inds = iter->second;
                     int verIndex = iter->first;
                     Ogre::Vector3 currentVertex = (*allvertices)[verIndex];
+                    Ogre::Vector3 currentNormal = (*allnormals)[verIndex];
                     Nif::NiSkinData::BoneInfoCopy* boneinfocopy = &(allshapesiter->boneinfo[inds[0].boneinfocopyindex]);
                     Ogre::Bone *bonePtr = 0;
                    
                         
                     
-                    Ogre::Vector3 vecPos; //= bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
-                    Ogre::Quaternion vecRot; //= bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
+                    Ogre::Vector3 vecPos;
+                    Ogre::Quaternion vecRot; 
 					std::map<Nif::NiSkinData::BoneInfoCopy*, PosAndRot>::iterator result = vecRotPos.find(boneinfocopy);
                     
                     if(result == vecRotPos.end()){
@@ -213,6 +213,7 @@ namespace MWRender{
                     }
 
                     Ogre::Vector3 absVertPos = (vecPos + vecRot * currentVertex) * inds[0].weight;
+                   
                     
 
                     for(int i = 1; i < inds.size(); i++){
@@ -239,12 +240,14 @@ namespace MWRender{
 
                     
                         absVertPos += (vecPos + vecRot * currentVertex) * inds[i].weight;
+                        
                     
                     }
                      Ogre::Real* addr = (pReal + 3 * verIndex);
 							  *addr = absVertPos.x;
 							  *(addr+1) = absVertPos.y;
 				              *(addr+2) = absVertPos.z;
+                    
                 }
 				
 				
@@ -321,7 +324,7 @@ namespace MWRender{
 
 				}
 				vbuf->unlock();
-					//vbufNormal->unlock();
+					
 		}
 
     }
@@ -394,18 +397,15 @@ namespace MWRender{
 
          base->getAllAnimationStates()->_notifyDirty();
      //base->_updateAnimation();
-   base->_notifyMoved();
+   //base->_notifyMoved();
 
    for(unsigned int i = 0; i < entityparts.size(); i++){
-         Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
+         //Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
 
         Ogre::Bone* b = skel->getRootBone();
 	   b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
-	  
-        skel->_updateTransforms();
 
          entityparts[i]->getAllAnimationStates()->_notifyDirty();
-         entityparts[i]->_notifyMoved();
     }
 
 
@@ -416,9 +416,7 @@ namespace MWRender{
         if(time < iter->getStartTime() || time < startTime || time > iter->getStopTime())
 	    {
             slot++;
-            
-		    continue;
-            
+		    continue;   
 	    }
 
          float x;
@@ -439,7 +437,6 @@ namespace MWRender{
 
         timeIndex(time, ttime, tindexI[slot], tindexJ, x);
 
-		//std::cout << "X: " << x << " X2: " << x2 << "\n";
         Ogre::Vector3 t;
         Ogre::Quaternion r;
 	    
@@ -454,7 +451,6 @@ namespace MWRender{
         bool bQuats = quats.size() > 0;
 	    if(bQuats){
 		    r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
-		    //bone->setOrientation(r);
 	    }
         skel = base->getSkeleton();
     if(skel->hasBone(iter->getBonename())){
@@ -467,10 +463,8 @@ namespace MWRender{
        
         
         skel->_updateTransforms();
-	    //skel->_notifyManualBonesDirty();
         base->getAllAnimationStates()->_notifyDirty();
-        //base->_updateAnimation();
-	    base->_notifyMoved();
+        
 	}  
    
     slot++;

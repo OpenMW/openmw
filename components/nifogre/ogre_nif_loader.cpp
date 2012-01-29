@@ -220,14 +220,14 @@ void NIFLoader::createMaterial(const String &name,
 
 
     //Hardware Skinning code, textures may be the wrong color if enabled
-    /* if(!mSkel.isNull()){
-    material->removeAllTechniques();
+     
+    /*material->removeAllTechniques();
   
         Ogre::Technique* tech = material->createTechnique();
         //tech->setSchemeName("blahblah");
         Pass* pass = tech->createPass();
-        pass->setVertexProgram("Ogre/HardwareSkinningFourWeights");
-    }*/
+        pass->setVertexProgram("Ogre/BasicVertexPrograms/AmbientOneTexture");*/
+   
 
     // This assigns the texture to this material. If the texture name is
     // a file name, and this file exists (in a resource directory), it
@@ -888,6 +888,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
             boneIndex++;
         }
+
 		
     }
     else
@@ -1154,6 +1155,10 @@ void NIFLoader::loadResource(Resource *resource)
     bool hasAnim = false;
     bool baddin = false;
     bNiTri = true;
+    if(name == "meshes\\base_anim.nif" || name == "meshes\\base_animkna.nif")
+    {
+        bNiTri = false;
+    }
 
         if(suffix == '*')
 		{
@@ -1304,15 +1309,13 @@ void NIFLoader::loadResource(Resource *resource)
 	    mesh->_setBounds(mBoundingBox, false);
 	}
 
-     if (!mSkel.isNull())
+     if (!mSkel.isNull() )
     {
        mesh->_notifySkeleton(mSkel);
     }
 }
 
-void NIFLoader::addInMesh(Ogre::Mesh* input){
-	addin.push_back(input);
-}
+
 
 
 

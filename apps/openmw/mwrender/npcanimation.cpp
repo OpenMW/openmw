@@ -43,14 +43,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		char secondtolast = bodyRaceID.at(bodyRaceID.length() - 2);
 		bool female = tolower(secondtolast) == 'f';
 		bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
-        /*std::cout << "Race: " << ref->base->race ;
-        if(female){
-           std::cout << " Sex: Female" << " Height: " << race->data.height.female << "\n";
-        }
-        else{
-             std::cout << " Sex: Male" << " Height: " << race->data.height.male << "\n";
-        }*/
-
+        
         
 
         std::string smodel = "meshes\\base_anim.nif";
@@ -65,7 +58,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
     base = mRend.getScene()->createEntity(smodel);
     base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones 
                                                //stay in the same place when we skipanim, or open a gui window
-
     
     if(transformations = (NIFLoader::getSingletonPtr())->getAnim(smodel)){
 
@@ -116,7 +108,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		const ESM::BodyPart* wristr = wristl;
 		const ESM::BodyPart* armr = arml;
 
-        
+       
         if(upperleg){
 			insertBoundedPart("meshes\\" + upperleg->model + "*|", "Left Upper Leg");
 			insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg");
@@ -178,7 +170,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		if(clavicler)
 			insertBoundedPart("meshes\\" + clavicler->model , "Right Clavicle", base);*/
 	    
-	    
+       
 		if(neck)
 		{
 			insertBoundedPart("meshes\\" + neck->model, "Neck");
@@ -187,6 +179,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 			insertBoundedPart("meshes\\" + head->model, "Head");
 		if(hair)
 			insertBoundedPart("meshes\\" + hair->model, "Head");
+      
         
         if (chest){
 				insertFreePart("meshes\\" + chest->model, ">\"", insert);
@@ -214,6 +207,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 }
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
+   
     NIFLoader::load(mesh);
     Entity* ent = mRend.getScene()->createEntity(mesh);
 	 
