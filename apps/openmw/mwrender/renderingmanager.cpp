@@ -19,8 +19,6 @@ using namespace Ogre;
 
 namespace MWRender {
 
-
-
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
 :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mDebugging(engine)
 {

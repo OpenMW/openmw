@@ -15,6 +15,8 @@
 #include <set>
 
 #include <components/esm_store/store.hpp>
+#include <openengine/ogre/renderer.hpp>
+#include <openengine/gui/manager.hpp>
 #include "../mwmechanics/stat.hpp"
 #include "mode.hpp"
 
@@ -81,6 +83,7 @@ namespace MWGui
     typedef std::vector<int> SkillList;
 
   private:
+    OEngine::GUI::MyGUIManager *mGuiManager;
     MWWorld::Environment& environment;
     HUD *hud;
     MapWindow *map;
@@ -165,8 +168,8 @@ namespace MWGui
 
   public:
     /// The constructor needs the main Gui object
-    WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-        const Compiler::Extensions& extensions, int fpsLevel, bool newGame);
+    WindowManager(MWWorld::Environment& environment,
+        const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
     virtual ~WindowManager();
 
     /**
