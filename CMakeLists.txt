@@ -1,11 +1,38 @@
 project(OpenMW)
 
-IF (APPLE)
-    set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/OpenMW.app")
+if (APPLE)
+    set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
+
+    set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
 
     # using 10.6 sdk
     set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
-ENDIF (APPLE)
+
+    # This override needed to handle cases where some dependencies already fixed up,
+    # so BundleUtilities cannot find them
+
+    #function(gp_resolve_item_override context item exepath dirs resolved_item resolved)
+    #    message(STATUS "gp_resolve_item_override for ${item} with ${exepath} and ${dirs}")
+    #    if(item MATCHES "@executable_path" AND resolved)
+    #        if (item MATCHES "Frameworks") # if it is a framework
+    #            # get last segment of path
+    #            get_filename_component(fname "${item}" NAME_WE)
+    #            # now cycle through dirs
+    #            find_library(ri NAMES ${fname} PATHS ${exepath} ${dirs})
+    #            if (ri)
+    #                message(STATUS "found ${ri} for ${item}")
+    #                set(${resolved_item_var} ri)
+    #            endif()
+    #        endif()
+    #    endif()
+    #endfunction(gp_resolve_item_override)
+
+    #gp_resolve_item_override("" "@executable_path/../Frameworks/Ogre.framework" 
+    #                            /Users/corristo/Projects/OpenMW/build/OpenMW.app/Contents/MacOS
+    #                            ""
+    #                            ""
+    #                            "")
+endif (APPLE)
 
 # Macros
 
@@ -268,36 +295,6 @@ if (CMAKE_COMPILER_IS_GNUCC)
     add_definitions (-Wall)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
-# Apple bundling
-# TODO REWRITE!
-if (APPLE)
-    set(MISC_FILES
-        ${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg
-        ${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg)
-
-    set(OGRE_PLUGINS
-        ${APP_BUNDLE_DIR}/Contents/Plugins/*)
-
-install(FILES ${MISC_FILES} DESTINATION ../MacOS)
-install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Plugins" DESTINATION ..)
-install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Resources/resources" DESTINATION ../Resources)
-set(CPACK_GENERATOR "Bundle")
-set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
-set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
-set(CPACK_BUNDLE_NAME "OpenMW")
-set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
-set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
-set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
-
-include(CPack)
-
-set(CMAKE_EXE_LINKER_FLAGS "-arch i386")
-set(CMAKE_CXX_FLAGS "-arch i386")
-
-endif (APPLE)
-
-
 if(DPKG_PROGRAM)
     SET(CMAKE_INSTALL_PREFIX "/usr")
 
@@ -405,3 +402,69 @@ if (WIN32)
   #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
   #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()
+
+# Apple bundling
+# TODO REWRITE!
+if (APPLE)
+    set(MISC_FILES
+        ${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg
+        ${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg)
+
+    set(OGRE_PLUGINS
+        ${APP_BUNDLE_DIR}/Contents/Plugins/*)
+
+#install(FILES ${MISC_FILES} DESTINATION ../MacOS)
+#install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Plugins" DESTINATION ..)
+#install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Resources/resources" DESTINATION ../Resources)
+install(DIRECTORY "${APP_BUNDLE_DIR}" DESTINATION . COMPONENT Runtime)
+set(CPACK_GENERATOR "DragNDrop")
+# set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
+# set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
+# set(CPACK_BUNDLE_NAME "OpenMW")
+set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
+set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
+set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
+
+set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}")
+set(DIRS "")
+
+INSTALL(CODE "
+    set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    set(CMAKE_SYSTEM_FRAMEWORK_PATH ${CMAKE_SYSTEM_FRAMEWORK_PATH})
+
+    set(OPENMW_RESOLVED_ITEMS \"\")
+
+    function(gp_resolve_item_override context item exepath dirs resolved_item_var resolved_var)
+        if(item MATCHES \"@executable_path\" AND NOT \${\${resolved_var}})
+            if (item MATCHES \"Frameworks\") # if it is a framework
+                # get last segment of path
+                get_filename_component(fname \"\${item}\" NAME_WE)
+                find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /Library/Frameworks)
+                if (ri)
+                    message(STATUS \"found \${ri} for \${item}\")
+                    string(REGEX REPLACE \"^.*/Frameworks/.*\\\\.framework\" \"\" item_part \${item})
+                    set(ri \"\${ri}\${item_part}\")
+                    set(\${resolved_item_var} \${ri} PARENT_SCOPE)
+                    set(\${resolved_var} 1 PARENT_SCOPE)
+                    set(OPENMW_RESOLVED_ITEMS \${_OPENMW_RESOLVED_ITEMS} \${ri})
+                endif()
+            else()
+                # code path for standard (non-framework) libs (ogre & qt pugins)
+            endif()
+        endif()
+    endfunction(gp_resolve_item_override)
+
+    cmake_policy(SET CMP0009 OLD)
+    set(BU_CHMOD_BUNDLE_ITEMS ON)
+    include(BundleUtilities)
+    fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")
+    " COMPONENT Runtime)
+
+include(CPack)
+
+set(CMAKE_EXE_LINKER_FLAGS "-arch i386")
+set(CMAKE_CXX_FLAGS "-arch i386")
+
+endif (APPLE)
