@@ -22,12 +22,13 @@
 
 using namespace MWGui;
 
-WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame)
+WindowManager::WindowManager(MWWorld::Environment& environment,
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath)
   : environment(environment)
   , nameDialog(nullptr)
   , raceDialog(nullptr)
   , dialogueWindow(nullptr)
+  , mGuiManager (0)
   , classChoiceDialog(nullptr)
   , generateClassQuestionDialog(nullptr)
   , generateClassResultDialog(nullptr)
@@ -35,7 +36,6 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , createClassDialog(nullptr)
   , birthSignDialog(nullptr)
   , reviewDialog(nullptr)
-  , gui(_gui)
   , mode(GM_Game)
   , nextMode(GM_Game)
   , needModeChange(false)
@@ -45,6 +45,10 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     showFPSLevel = fpsLevel;
 
     creationStage = NotStarted;
+
+    // Set up the GUI system
+    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
+    gui = mGuiManager->getGui();
 
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogeHistory>("Widget");
@@ -91,6 +95,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
 
 WindowManager::~WindowManager()
 {
+    delete mGuiManager;
     delete console;
     delete mMessageBoxManager;
     delete hud;

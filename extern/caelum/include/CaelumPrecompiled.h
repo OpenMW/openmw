@@ -19,7 +19,7 @@ along with Caelum. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifdef __APPLE__
-#include "Ogre/Ogre.h"
+#include "OGRE/Ogre.h"
 #else
 #include "Ogre.h"
 #endif

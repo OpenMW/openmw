@@ -14,6 +14,7 @@
 #include <components/cfg/configurationmanager.hpp>
 
 #include "mwworld/environment.hpp"
+#include "mwworld/physicssystem.hpp"
 #include "mwworld/ptr.hpp"
 
 namespace Compiler
@@ -77,10 +78,11 @@ namespace OMW
             std::string mFocusName;
 
             MWWorld::Environment mEnvironment;
+            MWWorld::PhysicsSystem *mPhysicsSystem;
             MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
-            OEngine::GUI::MyGUIManager *mGuiManager;
+            
 
             Files::Collections mFileCollections;
             bool mFSStrict;

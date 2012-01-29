@@ -75,7 +75,7 @@ namespace Caelum
         stream.unsetf(std::ios::dec);
         stream.setf(std::ios::hex);
         stream.setf(std::ios::uppercase);
-        stream << reinterpret_cast<ptrdiff_t>(pointer);
+        stream << reinterpret_cast<std::ptrdiff_t>(pointer);
         return stream.str();
     }
 

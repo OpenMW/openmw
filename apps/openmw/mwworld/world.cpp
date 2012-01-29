@@ -152,7 +152,7 @@ namespace MWWorld
     {
         mPhysEngine = physEng;
 
-        mPhysics = new PhysicsSystem(renderer, physEng);
+        mPhysics = new PhysicsSystem(renderer);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
