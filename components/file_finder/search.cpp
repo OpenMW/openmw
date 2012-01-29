@@ -2,27 +2,27 @@
 
 #include <iostream>
 
-using namespace std;
-using namespace boost::filesystem;
-
-void FileFinder::find(const path & dir_path, ReturnPath &ret, bool recurse)
+void FileFinder::find(const boost::filesystem::path & dir_path, ReturnPath &ret, bool recurse)
 {
-  if ( !exists( dir_path ) )
+    if ( !boost::filesystem::exists( dir_path ) )
     {
-      cout << "Path " << dir_path << " not found\n";
+      std::cout << "Path " << dir_path << " not found" << std::endl;
       return;
     }
 
-  directory_iterator end_itr; // default construction yields past-the-end
-  for ( directory_iterator itr(dir_path);
-        itr != end_itr;
-        ++itr )
+    boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
+    for (boost::filesystem::directory_iterator itr(dir_path); itr != end_itr; ++itr)
     {
-      if ( is_directory( *itr ) )
+        if (boost::filesystem::is_directory( *itr ))
         {
-          if(recurse) find(*itr, ret);
+            if (recurse)
+            {
+                find(*itr, ret);
+            }
         }
-      else
-        ret.add(*itr);
+        else
+        {
+            ret.add(*itr);
+        }
     }
 }

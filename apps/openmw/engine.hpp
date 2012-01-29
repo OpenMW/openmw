@@ -64,7 +64,7 @@ namespace OMW
     class Engine : private Ogre::FrameListener
     {
             std::string mEncoding;
-            boost::filesystem::path mDataDir;
+            Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
             OEngine::Physic::PhysicEngine* mPhysicEngine;

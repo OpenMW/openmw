@@ -200,12 +200,12 @@ void OMW::Engine::loadBSA()
 
     for (Files::MultiDirCollection::TIter iter (bsa.begin()); iter!=bsa.end(); ++iter)
     {
-         std::cout << "Adding " << iter->second.string() << std::endl;
-         Bsa::addBSA (iter->second.string());
+        std::cout << "Adding " << iter->second.string() << std::endl;
+        Bsa::addBSA (iter->second.string());
     }
 
-    std::cout << "Data dir " << mDataDir.string() << std::endl;
-    Bsa::addDir(mDataDir.string(), mFSStrict);
+    //std::cout << "Data dir " << mDataDir.string() << std::endl;
+    //Bsa::addDir(mDataDir.string(), mFSStrict);
 }
 
 // add resources directory
@@ -228,7 +228,7 @@ void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     /// \todo remove mDataDir, once resources system can handle multiple directories
     assert (!dataDirs.empty());
-    mDataDir = dataDirs.back();
+    mDataDirs = dataDirs;
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
 
@@ -339,7 +339,7 @@ void OMW::Engine::go()
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
                                                            mOgre->getCamera(),
                                                            mEnvironment.mWorld->getStore(),
-                                                           (mDataDir),
+                                                           mDataDirs,
                                                            mUseSound, mFSStrict, mEnvironment);
 
     // Create script system
