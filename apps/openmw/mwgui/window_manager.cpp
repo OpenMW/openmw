@@ -24,11 +24,11 @@ using namespace MWGui;
 
 WindowManager::WindowManager(MWWorld::Environment& environment,
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath)
-  : environment(environment)
+  : mGuiManager (0)
+  , environment(environment)
   , nameDialog(nullptr)
   , raceDialog(nullptr)
   , dialogueWindow(nullptr)
-  , mGuiManager (0)
   , classChoiceDialog(nullptr)
   , generateClassQuestionDialog(nullptr)
   , generateClassResultDialog(nullptr)
