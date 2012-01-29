@@ -148,7 +148,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mRendering (renderer,resDir, physEng, environment),mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
+      mSky (false), bCollision(false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysEngine = physEng;
 
@@ -183,10 +183,15 @@ namespace MWWorld
     }
 
     void World::makeNewPlayer(){
+        bool initialCollision = bCollision;
+        if(bCollision)
+            toggleCollisionMode();
         MWRender::Player* play = &(mRendering.getPlayer());
         delete mPlayer;
         mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
+        if(initialCollision)
+            toggleCollisionMode();
     }
 
     World::~World()
@@ -619,7 +624,8 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return mPhysics->toggleCollisionMode();
+        bCollision = mPhysics->toggleCollisionMode();
+        return bCollision;
     }
 
     bool World::toggleRenderMode (RenderMode mode)

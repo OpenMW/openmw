@@ -77,6 +77,7 @@ namespace MWWorld
             bool mSky;
             Environment& mEnvironment;
             int mNextDynamicRecord;
+            bool bCollision;
 
             Cells mCells;
 
