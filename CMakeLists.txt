@@ -7,31 +7,6 @@ if (APPLE)
 
     # using 10.6 sdk
     set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
-
-    # This override needed to handle cases where some dependencies already fixed up,
-    # so BundleUtilities cannot find them
-
-    #function(gp_resolve_item_override context item exepath dirs resolved_item resolved)
-    #    message(STATUS "gp_resolve_item_override for ${item} with ${exepath} and ${dirs}")
-    #    if(item MATCHES "@executable_path" AND resolved)
-    #        if (item MATCHES "Frameworks") # if it is a framework
-    #            # get last segment of path
-    #            get_filename_component(fname "${item}" NAME_WE)
-    #            # now cycle through dirs
-    #            find_library(ri NAMES ${fname} PATHS ${exepath} ${dirs})
-    #            if (ri)
-    #                message(STATUS "found ${ri} for ${item}")
-    #                set(${resolved_item_var} ri)
-    #            endif()
-    #        endif()
-    #    endif()
-    #endfunction(gp_resolve_item_override)
-
-    #gp_resolve_item_override("" "@executable_path/../Frameworks/Ogre.framework" 
-    #                            /Users/corristo/Projects/OpenMW/build/OpenMW.app/Contents/MacOS
-    #                            ""
-    #                            ""
-    #                            "")
 endif (APPLE)
 
 # Macros
@@ -227,6 +202,13 @@ include_directories("."
 
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
+if(APPLE)
+    # List used Ogre plugins
+    SET(USED_OGRE_PLUGINS "RenderSystem_GL"
+                          "Plugin_OctreeSceneManager"
+                          "Plugin_ParticleFX")
+endif(APPLE)
+
 add_subdirectory( extern/caelum )
 add_subdirectory( extern/mygui_3.0.1 )
 
@@ -270,22 +252,17 @@ if (APPLE)
         "${OpenMW_BINARY_DIR}/plugins.cfg")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
-        "${APP_BUNDLE_DIR}/Contents/Info.plist" COPYONLY)
+        "${APP_BUNDLE_DIR}/Contents/Info.plist")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 
-
     # prepare plugins
-    configure_file(${OGRE_PLUGIN_DIR}/RenderSystem_GL.dylib
-        "${APP_BUNDLE_DIR}/Contents/Plugins/RenderSystem_GL.dylib" COPYONLY)
-
-    configure_file(${OGRE_PLUGIN_DIR}/Plugin_OctreeSceneManager.dylib
-        "${APP_BUNDLE_DIR}/Contents/Plugins/Plugin_OctreeSceneManager.dylib" COPYONLY)
-
-    configure_file(${OGRE_PLUGIN_DIR}/Plugin_ParticleFX.dylib
-        "${APP_BUNDLE_DIR}/Contents/Plugins/Plugin_ParticleFX.dylib" COPYONLY)
-
+    foreach(plugin ${USED_OGRE_PLUGINS})
+        configure_file("${OGRE_PLUGIN_DIR}/${plugin}.dylib"
+                        "${APP_BUNDLE_DIR}/Contents/Plugins/${plugin}.dylib"
+                        COPYONLY)
+    endforeach()
 endif (APPLE)
 
 
@@ -427,6 +404,12 @@ set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
 set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
 set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}")
+set(PLUGINS "")
+
+foreach(plugin ${USED_OGRE_PLUGINS})
+    set(PLUGINS ${PLUGINS} "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}/Contents/Plugins/${plugin}.dylib")
+endforeach()
+
 set(DIRS "")
 
 INSTALL(CODE "
@@ -459,7 +442,7 @@ INSTALL(CODE "
     cmake_policy(SET CMP0009 OLD)
     set(BU_CHMOD_BUNDLE_ITEMS ON)
     include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")
+    fixup_bundle(\"${APPS}\" \"${PLUGINS}\" \"${DIRS}\")
     " COMPONENT Runtime)
 
 include(CPack)
