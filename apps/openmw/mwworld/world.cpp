@@ -182,6 +182,13 @@ namespace MWWorld
 
     }
 
+    void World::makeNewPlayer(){
+        MWRender::Player* play = &(mRendering.getPlayer());
+        delete mPlayer;
+        mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
+        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
+    }
+
     World::~World()
     {
         delete mWorldScene;
