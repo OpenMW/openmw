@@ -46,7 +46,7 @@ namespace MWWorld
         }
     }
 
-    RefData::RefData& RefData::operator= (const RefData& refData)
+    RefData& RefData::operator= (const RefData& refData)
     {
         try
         {
