@@ -14,7 +14,7 @@
 
 #include "console.hpp"
 #include "journalwindow.hpp"
-#include "character_creation.hpp"
+#include "charactercreation.hpp"
 
 #include <assert.h>
 #include <iostream>
