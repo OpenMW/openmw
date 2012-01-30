@@ -32,6 +32,12 @@ namespace Compiler
 namespace MWWorld
 {
     class Environment;
+    class World;
+}
+
+namespace MWMechanics
+{
+    class MechanicsManager;
 }
 
 namespace OEngine
@@ -52,14 +58,13 @@ namespace MWGui
   class InventoryWindow;
   class Console;
   class JournalWindow;
+  class CharacterCreation;
 
   class TextInputDialog;
   class InfoBoxDialog;
-  class RaceDialog;
   class DialogueWindow;
   class ClassChoiceDialog;
   class GenerateClassResultDialog;
-  class PickClassDialog;
   class CreateClassDialog;
   class BirthDialog;
   class ReviewDialog;
@@ -94,13 +99,12 @@ namespace MWGui
     JournalWindow* mJournal;
 
     // Character creation
-    TextInputDialog *nameDialog;
-    RaceDialog *raceDialog;
+    CharacterCreation* mCharGen;
+    
     DialogueWindow *dialogueWindow;
     ClassChoiceDialog *classChoiceDialog;
     InfoBoxDialog *generateClassQuestionDialog;
     GenerateClassResultDialog *generateClassResultDialog;
-    PickClassDialog *pickClassDialog;
     CreateClassDialog *createClassDialog;
     BirthDialog *birthSignDialog;
     ReviewDialog *reviewDialog;
@@ -112,9 +116,9 @@ namespace MWGui
     std::string generateClass;
 
     // Various stats about player as needed by window manager
-    std::string playerName;
     ESM::Class playerClass;
-    std::string playerRaceId, playerBirthSignId;
+    std::string playerRaceId; ///REMOVE
+    std::string playerBirthSignId;
     std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
     SkillList playerMajorSkills, playerMinorSkills;
     std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;
@@ -156,8 +160,6 @@ namespace MWGui
     // allowed settings.
     void updateVisible();
 
-    void setGuiMode(GuiMode newMode);
-
     int showFPSLevel;
     float mFPS;
     size_t mTriangleCount;
@@ -168,6 +170,10 @@ namespace MWGui
     WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
         const Compiler::Extensions& extensions, int fpsLevel, bool newGame);
     virtual ~WindowManager();
+
+    void setGuiMode(GuiMode newMode);
+    MWMechanics::MechanicsManager* getMechanicsManager();
+    MWWorld::World* getWorld();
 
     /**
      * Should be called each frame to update windows/gui elements.
@@ -280,26 +286,12 @@ namespace MWGui
   private:
 
     void onDialogueWindowBye();
-
-    // Character generation: Name dialog
-    void onNameDialogDone(WindowBase* parWindow);
-
-    // Character generation: Race dialog
-    void onRaceDialogDone(WindowBase* parWindow);
-    void onRaceDialogBack();
-
-    // Character generation: Choose class process
-    void onClassChoice(int _index);
-
+    
     // Character generation: Generate Class
     void showClassQuestionDialog();
     void onClassQuestionChosen(int _index);
     void onGenerateClassBack();
     void onGenerateClassDone(WindowBase* parWindow);
-
-    // Character generation: Pick Class dialog
-    void onPickClassDialogDone(WindowBase* parWindow);
-    void onPickClassDialogBack();
 
     // Character generation: Create Class dialog
     void onCreateClassDialogDone(WindowBase* parWindow);
@@ -314,6 +306,7 @@ namespace MWGui
     void onReviewDialogBack();
     void onReviewActivateDialog(int parDialog);
 
+    /// REMOVE
     enum CreationStageEnum
     {
         NotStarted,
@@ -326,6 +319,7 @@ namespace MWGui
 
     // Which state the character creating is in, controls back/next/ok buttons
     CreationStageEnum creationStage;
+    /// /REMOVE
   };
 
   template<typename T>

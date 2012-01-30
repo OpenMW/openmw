@@ -1,7 +1,6 @@
 #include "window_manager.hpp"
 #include "layouts.hpp"
 #include "text_input.hpp"
-#include "race.hpp"
 #include "class.hpp"
 #include "birth.hpp"
 #include "review.hpp"
@@ -15,6 +14,7 @@
 
 #include "console.hpp"
 #include "journalwindow.hpp"
+#include "character_creation.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -25,13 +25,10 @@ using namespace MWGui;
 WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame)
   : environment(environment)
-  , nameDialog(nullptr)
-  , raceDialog(nullptr)
   , dialogueWindow(nullptr)
   , classChoiceDialog(nullptr)
   , generateClassQuestionDialog(nullptr)
   , generateClassResultDialog(nullptr)
-  , pickClassDialog(nullptr)
   , createClassDialog(nullptr)
   , birthSignDialog(nullptr)
   , reviewDialog(nullptr)
@@ -44,6 +41,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
 {
     showFPSLevel = fpsLevel;
 
+    /// REMOVE
     creationStage = NotStarted;
 
     //Register own widgets with MyGUI
@@ -67,6 +65,8 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
 
     // The HUD is always on
     hud->setVisible(true);
+
+    mCharGen = new CharacterCreation(this);
 
     // Setup player stats
     for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -102,13 +102,10 @@ WindowManager::~WindowManager()
     delete inventory;
 #endif
 
-    delete nameDialog;
-    delete raceDialog;
     delete dialogueWindow;
     delete classChoiceDialog;
     delete generateClassQuestionDialog;
     delete generateClassResultDialog;
-    delete pickClassDialog;
     delete createClassDialog;
     delete birthSignDialog;
     delete reviewDialog;
@@ -127,6 +124,11 @@ void WindowManager::cleanupGarbage()
         }
         garbageDialogs.clear();
     }
+}
+
+MWMechanics::MechanicsManager* WindowManager::getMechanicsManager()
+{
+    return environment.mMechanicsManager;
 }
 
 void WindowManager::update()
@@ -178,7 +180,7 @@ void WindowManager::updateVisible()
     gui->setVisiblePointer(isGuiMode());
 
     // If in game mode, don't show anything.
-    if(mode == GM_Game)
+    if(mode == GM_Game) //Use a switch/case structure
     {
         return;
     }
@@ -196,40 +198,21 @@ void WindowManager::updateVisible()
         return;
     }
 
-    if (mode == GM_Name)
+    if (mode == GM_Name) //Combine this with all char-gen related if statements
     {
-        if (nameDialog)
-            removeDialog(nameDialog);
-        nameDialog = new TextInputDialog(*this);
-        std::string sName = getGameSettingString("sName", "Name");
-        nameDialog->setTextLabel(sName);
-        nameDialog->setTextInput(playerName);
-        nameDialog->setNextButtonShow(creationStage >= NameChosen);
-        nameDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onNameDialogDone);
-        nameDialog->open();
+        mCharGen->spawnDialog(GM_Name);
         return;
     }
 
-    if (mode == GM_Race)
+    if (mode == GM_Race) //Combine this with all char-gen related if statements
     {
-        if (raceDialog)
-            removeDialog(raceDialog);
-        raceDialog = new RaceDialog(*this);
-        raceDialog->setNextButtonShow(creationStage >= RaceChosen);
-        raceDialog->setRaceId(playerRaceId);
-        raceDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onRaceDialogDone);
-        raceDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onRaceDialogBack);
-        raceDialog->open();
+        mCharGen->spawnDialog(GM_Race);
         return;
     }
 
     if (mode == GM_Class)
     {
-        if (classChoiceDialog)
-            removeDialog(classChoiceDialog);
-        classChoiceDialog = new ClassChoiceDialog(*this);
-        classChoiceDialog->eventButtonSelected = MyGUI::newDelegate(this, &WindowManager::onClassChoice);
-        classChoiceDialog->open();
+        mCharGen->spawnDialog(GM_Class);
         return;
     }
 
@@ -246,14 +229,7 @@ void WindowManager::updateVisible()
 
     if (mode == GM_ClassPick)
     {
-        if (pickClassDialog)
-            removeDialog(pickClassDialog);
-        pickClassDialog = new PickClassDialog(*this);
-        pickClassDialog->setNextButtonShow(creationStage >= ClassChosen);
-        pickClassDialog->setClassId(playerClass.name);
-        pickClassDialog->eventDone = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogDone);
-        pickClassDialog->eventBack = MyGUI::newDelegate(this, &WindowManager::onPickClassDialogBack);
-        pickClassDialog->open();
+        mCharGen->spawnDialog(GM_ClassPick);
         return;
     }
 
@@ -286,7 +262,7 @@ void WindowManager::updateVisible()
         if (reviewDialog)
             removeDialog(reviewDialog);
         reviewDialog = new ReviewDialog(*this);
-        reviewDialog->setPlayerName(playerName);
+        //reviewDialog->setPlayerName(playerName); //Move this to Chargen as part of refactoring
         reviewDialog->setRace(playerRaceId);
         reviewDialog->setClass(playerClass);
         reviewDialog->setBirthSign(playerBirthSignId);
@@ -420,10 +396,10 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicS
 void WindowManager::setValue (const std::string& id, const std::string& value)
 {
     stats->setValue (id, value);
-    if (id=="name")
+    /*if (id=="name")
         playerName = value;
     else if (id=="race")
-        playerRaceId = value;
+        playerRaceId = value;*/ //Move this to chargen
 }
 
 void WindowManager::setValue (const std::string& id, int value)
@@ -505,49 +481,6 @@ const std::string &WindowManager::getGameSettingString(const std::string &id, co
     return default_;
 }
 
-void WindowManager::onNameDialogDone(WindowBase* parWindow)
-{
-    if (nameDialog)
-    {
-        playerName = nameDialog->getTextInput();
-        environment.mMechanicsManager->setPlayerName(playerName);
-        removeDialog(nameDialog);
-    }
-
-    // Go to next dialog if name was previously chosen
-    if (creationStage == ReviewNext)
-        setGuiMode(GM_Review);
-    else if (creationStage >= NameChosen)
-        setGuiMode(GM_Race);
-    else
-    {
-        creationStage = NameChosen;
-        setGuiMode(GM_Game);
-    }
-}
-
-void WindowManager::onRaceDialogDone(WindowBase* parWindow)
-{
-    if (raceDialog)
-    {
-        playerRaceId = raceDialog->getRaceId();
-        if (!playerRaceId.empty())
-            environment.mMechanicsManager->setPlayerRace(playerRaceId, raceDialog->getGender() == RaceDialog::GM_Male);
-        removeDialog(raceDialog);
-    }
-
-    // Go to next dialog if race was previously chosen
-    if (creationStage == ReviewNext)
-        setGuiMode(GM_Review);
-    else if(creationStage >= RaceChosen)
-        setGuiMode(GM_Class);
-    else
-    {
-        creationStage = RaceChosen;
-        setGuiMode(GM_Game);
-    }
-}
-
 void WindowManager::onDialogueWindowBye()
 {
     if (dialogueWindow)
@@ -556,44 +489,6 @@ void WindowManager::onDialogueWindowBye()
         removeDialog(dialogueWindow);
     }
     setGuiMode(GM_Game);
-}
-
-void WindowManager::onRaceDialogBack()
-{
-    if (raceDialog)
-    {
-        playerRaceId = raceDialog->getRaceId();
-        if (!playerRaceId.empty())
-            environment.mMechanicsManager->setPlayerRace(playerRaceId, raceDialog->getGender() == RaceDialog::GM_Male);
-        removeDialog(raceDialog);
-    }
-
-    setGuiMode(GM_Name);
-}
-
-void WindowManager::onClassChoice(int _index)
-{
-    if (classChoiceDialog)
-    {
-        removeDialog(classChoiceDialog);
-    }
-
-    switch(_index)
-    {
-        case ClassChoiceDialog::Class_Generate:
-            setGuiMode(GM_ClassGenerate);
-            break;
-        case ClassChoiceDialog::Class_Pick:
-            setGuiMode(GM_ClassPick);
-            break;
-        case ClassChoiceDialog::Class_Create:
-            setGuiMode(GM_ClassCreate);
-            break;
-        case ClassChoiceDialog::Class_Back:
-            setGuiMode(GM_Race);
-            break;
-
-    };
 }
 
 void WindowManager::onFrame (float frameDuration)
@@ -828,43 +723,9 @@ void WindowManager::onGenerateClassDone(WindowBase* parWindow)
     }
 }
 
-
-void WindowManager::onPickClassDialogDone(WindowBase* parWindow)
+MWWorld::World* WindowManager::getWorld()
 {
-    if (pickClassDialog)
-    {
-        const std::string &classId = pickClassDialog->getClassId();
-        if (!classId.empty())
-            environment.mMechanicsManager->setPlayerClass(classId);
-        const ESM::Class *klass = environment.mWorld->getStore().classes.find(classId);
-        if (klass)
-            playerClass = *klass;
-        removeDialog(pickClassDialog);
-    }
-
-    // Go to next dialog if class was previously chosen
-    if (creationStage == ReviewNext)
-        setGuiMode(GM_Review);
-    else if (creationStage >= ClassChosen)
-        setGuiMode(GM_Birth);
-    else
-    {
-        creationStage = ClassChosen;
-        setGuiMode(GM_Game);
-    }
-}
-
-void WindowManager::onPickClassDialogBack()
-{
-    if (pickClassDialog)
-    {
-        const std::string classId = pickClassDialog->getClassId();
-        if (!classId.empty())
-            environment.mMechanicsManager->setPlayerClass(classId);
-        removeDialog(pickClassDialog);
-    }
-
-    setGuiMode(GM_Class);
+    return environment.mWorld;
 }
 
 void WindowManager::onCreateClassDialogDone(WindowBase* parWindow)

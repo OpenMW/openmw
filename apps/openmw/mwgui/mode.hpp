@@ -45,6 +45,15 @@ namespace MWGui
 
       GW_ALL            = 0xFF
     };
+    
+  // Character creation dialogs
+  enum CharGen
+    {
+      GEN_Name,
+      GEN_Race,
+      GEN_Class,
+      GEN_Sign
+    };
 }
 
 #endif
