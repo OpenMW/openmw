@@ -221,7 +221,7 @@ namespace MWWorld
             /// references that are currently not in the rendered scene should be ignored.
             void setObjectPhysicsRotation(const std::string& handle,Ogre::Quaternion quat);
             void setObjectPhysicsPosition(const std::string& handle,Ogre::Vector3 vector);
-            void makeNewPlayer();
+           
     };
 }
 

@@ -109,7 +109,6 @@ namespace MWWorld
     void Scene::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
         bool adjustPlayerPos)
     {
-        mWorld->makeNewPlayer();
         if (adjustPlayerPos)
             mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
 
