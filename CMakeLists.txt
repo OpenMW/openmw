@@ -381,69 +381,77 @@ if (WIN32)
 endif()
 
 # Apple bundling
-# TODO REWRITE!
 if (APPLE)
     set(MISC_FILES
         ${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg
         ${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg)
 
-    set(OGRE_PLUGINS
-        ${APP_BUNDLE_DIR}/Contents/Plugins/*)
+    #install(FILES ${MISC_FILES} DESTINATION ../MacOS)
+    #install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Plugins" DESTINATION ..)
+    #install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Resources/resources" DESTINATION ../Resources)
+    install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION . COMPONENT Runtime)
+    set(CPACK_GENERATOR "DragNDrop")
+    # set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
+    # set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
+    # set(CPACK_BUNDLE_NAME "OpenMW")
+    set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
+    set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
+    set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
+    set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
-#install(FILES ${MISC_FILES} DESTINATION ../MacOS)
-#install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Plugins" DESTINATION ..)
-#install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Resources/resources" DESTINATION ../Resources)
-install(DIRECTORY "${APP_BUNDLE_DIR}" DESTINATION . COMPONENT Runtime)
-set(CPACK_GENERATOR "DragNDrop")
-# set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
-# set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
-# set(CPACK_BUNDLE_NAME "OpenMW")
-set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
-set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
-set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}")
+    set(PLUGINS "")
 
-set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}")
-set(PLUGINS "")
+    # Scan Plugins dir for *.dylibs
+    file(GLOB ALL_PLUGINS "${APP_BUNDLE_DIR}/Contents/Plugins/*.dylib")
 
-foreach(plugin ${USED_OGRE_PLUGINS})
-    set(PLUGINS ${PLUGINS} "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}/Contents/Plugins/${plugin}.dylib")
-endforeach()
+    foreach(PLUGIN ${ALL_PLUGINS})
+        get_filename_component(PLUGIN_FILENAME ${PLUGIN} NAME)
+        set(PLUGINS ${PLUGINS} "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}/Contents/Plugins/${PLUGIN_FILENAME}")
+    endforeach()
 
-set(DIRS "")
+    #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
+    set(DIRS "")
 
-INSTALL(CODE "
-    set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    set(CMAKE_SYSTEM_FRAMEWORK_PATH ${CMAKE_SYSTEM_FRAMEWORK_PATH})
+    # Overriding item resolving during installation, it needed if
+    # some library already has be "fixed up", i.e. its id name contains @executable_path,
+    # but library is not embedded in bundle. For example, it's Ogre.framework from Ogre SDK.
+    # Current implementation of GetPrerequsities/BundleUtilities doesn't handle that case.
+    # 
+    # Current limitations:
+    #   1. Handles only frameworks, not simple libs
+    INSTALL(CODE "
+        set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+        set(CMAKE_SYSTEM_FRAMEWORK_PATH ${CMAKE_SYSTEM_FRAMEWORK_PATH})
 
-    set(OPENMW_RESOLVED_ITEMS \"\")
+        set(OPENMW_RESOLVED_ITEMS \"\")
 
-    function(gp_resolve_item_override context item exepath dirs resolved_item_var resolved_var)
-        if(item MATCHES \"@executable_path\" AND NOT \${\${resolved_var}})
-            if (item MATCHES \"Frameworks\") # if it is a framework
-                # get last segment of path
-                get_filename_component(fname \"\${item}\" NAME_WE)
-                find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /Library/Frameworks)
-                if (ri)
-                    message(STATUS \"found \${ri} for \${item}\")
-                    string(REGEX REPLACE \"^.*/Frameworks/.*\\\\.framework\" \"\" item_part \${item})
-                    set(ri \"\${ri}\${item_part}\")
-                    set(\${resolved_item_var} \${ri} PARENT_SCOPE)
-                    set(\${resolved_var} 1 PARENT_SCOPE)
-                    set(OPENMW_RESOLVED_ITEMS \${_OPENMW_RESOLVED_ITEMS} \${ri})
+        function(gp_resolve_item_override context item exepath dirs resolved_item_var resolved_var)
+            if(item MATCHES \"@executable_path\" AND NOT \${\${resolved_var}})
+                if (item MATCHES \"Frameworks\") # if it is a framework
+                    # get last segment of path
+                    get_filename_component(fname \"\${item}\" NAME_WE)
+                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /Library/Frameworks)
+                    if (ri)
+                        message(STATUS \"found \${ri} for \${item}\")
+                        string(REGEX REPLACE \"^.*/Frameworks/.*\\\\.framework\" \"\" item_part \${item})
+                        set(ri \"\${ri}\${item_part}\")
+                        set(\${resolved_item_var} \${ri} PARENT_SCOPE)
+                        set(\${resolved_var} 1 PARENT_SCOPE)
+                        set(OPENMW_RESOLVED_ITEMS \${_OPENMW_RESOLVED_ITEMS} \${ri})
+                    endif()
+                else()
+                    # code path for standard (non-framework) libs (ogre & qt pugins)
                 endif()
-            else()
-                # code path for standard (non-framework) libs (ogre & qt pugins)
             endif()
-        endif()
-    endfunction(gp_resolve_item_override)
+        endfunction(gp_resolve_item_override)
 
-    cmake_policy(SET CMP0009 OLD)
-    set(BU_CHMOD_BUNDLE_ITEMS ON)
-    include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"${PLUGINS}\" \"${DIRS}\")
-    " COMPONENT Runtime)
+        cmake_policy(SET CMP0009 OLD)
+        set(BU_CHMOD_BUNDLE_ITEMS ON)
+        include(BundleUtilities)
+        fixup_bundle(\"${APPS}\" \"${PLUGINS}\" \"${DIRS}\")
+        " COMPONENT Runtime)
 
 include(CPack)
 
