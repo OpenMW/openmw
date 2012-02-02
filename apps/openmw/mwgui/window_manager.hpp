@@ -80,58 +80,6 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
     typedef std::vector<int> SkillList;
 
-  private:
-    MWWorld::Environment& environment;
-    HUD *hud;
-    MapWindow *map;
-    MainMenu *menu;
-    StatsWindow *stats;
-    MessageBoxManager *mMessageBoxManager;
-    Console *console;
-    JournalWindow* mJournal;
-    DialogueWindow *dialogueWindow;
-    
-    CharacterCreation* mCharGen;
-    
-    // Various stats about player as needed by window manager
-    ESM::Class playerClass;
-    std::string playerName;
-    std::string playerRaceId;
-    std::string playerBirthSignId;
-    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
-    SkillList playerMajorSkills, playerMinorSkills;
-    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;
-    MWMechanics::DynamicStat<int> playerHealth, playerMagicka, playerFatigue;
-
-    
-    MyGUI::Gui *gui; // Gui
-    GuiMode mode; // Current gui mode
-    GuiMode nextMode; // Next mode to activate in update()
-    bool needModeChange; //Whether a mode change is needed in update() [will use nextMode]
-
-    std::vector<OEngine::GUI::Layout*> garbageDialogs;
-    void cleanupGarbage();
-
-    GuiWindow shown; // Currently shown windows in inventory mode
-
-    /* Currently ALLOWED windows in inventory mode. This is used at
-       the start of the game, when windows are enabled one by one
-       through script commands. You can manipulate this through using
-       allow() and disableAll().
-
-       The setting should also affect visibility of certain HUD
-       elements, but this is not done yet.
-     */
-    GuiWindow allowed;
-
-    void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
-
-    int showFPSLevel;
-    float mFPS;
-    size_t mTriangleCount;
-    size_t mBatchCount;
-
-  public:
     WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment, const Compiler::Extensions& extensions, int fpsLevel, bool newGame);
     virtual ~WindowManager();
 
@@ -222,6 +170,55 @@ namespace MWGui
     const ESMS::ESMStore& getStore() const;
 
   private:
+    MWWorld::Environment& environment;
+    HUD *hud;
+    MapWindow *map;
+    MainMenu *menu;
+    StatsWindow *stats;
+    MessageBoxManager *mMessageBoxManager;
+    Console *console;
+    JournalWindow* mJournal;
+    DialogueWindow *dialogueWindow;
+    
+    CharacterCreation* mCharGen;
+    
+    // Various stats about player as needed by window manager
+    ESM::Class playerClass;
+    std::string playerName;
+    std::string playerRaceId;
+    std::string playerBirthSignId;
+    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
+    SkillList playerMajorSkills, playerMinorSkills;
+    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;
+    MWMechanics::DynamicStat<int> playerHealth, playerMagicka, playerFatigue;
+
+    
+    MyGUI::Gui *gui; // Gui
+    GuiMode mode; // Current gui mode
+    GuiMode nextMode; // Next mode to activate in update()
+    bool needModeChange; //Whether a mode change is needed in update() [will use nextMode]
+
+    std::vector<OEngine::GUI::Layout*> garbageDialogs;
+    void cleanupGarbage();
+
+    GuiWindow shown; // Currently shown windows in inventory mode
+
+    /* Currently ALLOWED windows in inventory mode. This is used at
+       the start of the game, when windows are enabled one by one
+       through script commands. You can manipulate this through using
+       allow() and disableAll().
+
+       The setting should also affect visibility of certain HUD
+       elements, but this is not done yet.
+     */
+    GuiWindow allowed;
+
+    void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
+
+    int showFPSLevel;
+    float mFPS;
+    size_t mTriangleCount;
+    size_t mBatchCount;
 
     void onDialogueWindowBye();
   };

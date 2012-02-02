@@ -37,34 +37,34 @@ namespace MWGui
     void spawnDialog(const char id);
     
     private:
-    WindowManager* wm;
-    MWWorld::Environment* environment;
-    
     //Dialogs
-    TextInputDialog *nameDialog;
-    RaceDialog *raceDialog;
-    DialogueWindow *dialogueWindow;
-    ClassChoiceDialog *classChoiceDialog;
-    InfoBoxDialog *generateClassQuestionDialog;
-    GenerateClassResultDialog *generateClassResultDialog;
-    PickClassDialog *pickClassDialog;
-    CreateClassDialog *createClassDialog;
-    BirthDialog *birthSignDialog;
-    ReviewDialog *reviewDialog;
+    TextInputDialog* mNameDialog;
+    RaceDialog* mRaceDialog;
+    DialogueWindow* mDialogueWindow;
+    ClassChoiceDialog* mClassChoiceDialog;
+    InfoBoxDialog* mGenerateClassQuestionDialog;
+    GenerateClassResultDialog* mGenerateClassResultDialog;
+    PickClassDialog* mPickClassDialog;
+    CreateClassDialog* mCreateClassDialog;
+    BirthDialog* mBirthSignDialog;
+    ReviewDialog* mReviewDialog;
+    
+    WindowManager* mWM;
+    MWWorld::Environment* mEnvironment;
     
     //Player data
-    std::string playerName;
-    std::string playerRaceId;
-    std::string playerBirthSignId;
-    ESM::Class playerClass;
-    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
-    SkillList playerMajorSkills, playerMinorSkills;
-    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;
+    std::string mPlayerName;
+    std::string mPlayerRaceId;
+    std::string mPlayerBirthSignId;
+    ESM::Class mPlayerClass;
+    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > mPlayerAttributes;
+    SkillList mPlayerMajorSkills, mPlayerMinorSkills;
+    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > mPlayerSkillValues;
     
     //Class generation vars
-    unsigned generateClassStep;                 // Keeps track of current step in Generate Class dialog
-    unsigned generateClassSpecializations[3];   // A counter for each specialization which is increased when an answer is chosen
-    std::string generateClass;                  // In order: Stealth, Combat, Magic
+    unsigned mGenerateClassStep;                 // Keeps track of current step in Generate Class dialog
+    unsigned mGenerateClassSpecializations[3];   // A counter for each specialization which is increased when an answer is chosen
+    std::string mGenerateClass;                  // In order: Stealth, Combat, Magic
     
     ////Dialog events
     //Name dialog
@@ -94,27 +94,27 @@ namespace MWGui
     void onReviewDialogBack();
     void onReviewActivateDialog(int parDialog);
     
-    enum CreationStageEnum
+    enum CSE    //Creation Stage Enum
     {
-        NotStarted,
-        NameChosen,
-        RaceChosen,
-        ClassChosen,
-        BirthSignChosen,
-        ReviewNext
+        CSE_NotStarted,
+        CSE_NameChosen,
+        CSE_RaceChosen,
+        CSE_ClassChosen,
+        CSE_BirthSignChosen,
+        CSE_ReviewNext
     };
 
-    CreationStageEnum creationStage; // Which state the character creating is in, controls back/next/ok buttons
+    CSE mCreationStage; // Which state the character creating is in, controls back/next/ok buttons
     };
    
     struct Step
     {
-        const char* text;
-        const char* buttons[3];
-        ESM::Class::Specialization specializations[3]; // The specialization for each answer
+        const char* mText;
+        const char* mButtons[3];
+        ESM::Class::Specialization mSpecializations[3]; // The specialization for each answer
     };
 
-    static boost::array<Step, 10> generateClassSteps = { {
+    static boost::array<Step, 10> sGenerateClassSteps = { {
         // Question 1
         {"On a clear day you chance upon a strange animal, its legs trapped in a hunter's clawsnare. Judging from the bleeding, it will not survive long.",
         {"Draw your dagger, mercifully endings its life with a single thrust.",
