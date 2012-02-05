@@ -64,6 +64,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     console = new Console(w,h, environment, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
+    dialogueWindow = new DialogueWindow(*this,environment);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -173,6 +174,7 @@ void WindowManager::updateVisible()
 #endif
     console->disable();
     mJournal->setVisible(false);
+    dialogueWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     gui->setVisiblePointer(isGuiMode());
@@ -338,11 +340,6 @@ void WindowManager::updateVisible()
 
     if (mode == GM_Dialogue)
     {
-        if (!dialogueWindow)
-        {
-            dialogueWindow = new DialogueWindow(*this);
-            dialogueWindow->eventBye = MyGUI::newDelegate(this, &WindowManager::onDialogueWindowBye);
-        }
         dialogueWindow->open();
         return;
     }

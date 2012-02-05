@@ -307,4 +307,19 @@ namespace MWDialogue
         }
     }
 
+    void DialogueManager::keywordSelected(std::string keyword)
+    {
+        std::cout << "keyword" << keyword;
+    }
+
+    void DialogueManager::goodbyeSelected()
+    {
+        mEnvironment.mInputManager->setGuiMode(MWGui::GM_Game);
+    }
+
+    void DialogueManager::questionAnswered(std::string answere)
+    {
+         std::cout << "and the ansere is..."<< answere;
+    }
+
 }

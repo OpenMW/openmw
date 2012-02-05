@@ -3,6 +3,8 @@
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"
+#include "../mwworld/environment.hpp"
+#include "../mwdialogue/dialoguemanager.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -31,8 +33,9 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 }
 
 
-DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
-    : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
+DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environment& environment)
+    : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager),
+    mEnvironment(environment)
 {
     // Centre dialog
     center();
@@ -76,11 +79,16 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
         UString key = history->getColorTextAt(cursorPosition);
 
         //std::cout << "Clicked on key: " << key << std::endl;
-        if(color == "#686EBA") displayTopicText(lower_string(key));
+        if(color == "#686EBA")
+        {
+            mEnvironment.mDialogueManager->keywordSelected(lower_string(key));
+            displayTopicText(lower_string(key));
+        }
         if(color == "#572D21") 
         {
             //TODO: send back the answere to the question!
-            std::cout << "and the ansere is..."<< key;
+            mEnvironment.mDialogueManager->questionAnswered(key);
+            //std::cout << "and the ansere is..."<< key;
         }
     }
 }
@@ -97,7 +105,8 @@ void DialogueWindow::open()
 
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
 {
-    eventBye();
+    //eventBye();
+    mEnvironment.mDialogueManager->goodbyeSelected();
 }
 
 void DialogueWindow::onSelectTopic(MyGUI::List* _sender, size_t _index)
@@ -105,6 +114,7 @@ void DialogueWindow::onSelectTopic(MyGUI::List* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
     std::string topic =  _sender->getItem(_index);
+    mEnvironment.mDialogueManager->keywordSelected(lower_string(topic));
     displayTopicText(topic);
 
     //const std::string* theTopic  = topicsList->getItemDataAt<std::string>(_index);
