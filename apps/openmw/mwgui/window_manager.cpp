@@ -472,6 +472,7 @@ void WindowManager::updateSkillArea()
 
 void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 {
+    std::cout << "dialogue a la poubelle";
     assert(dialog);
     if (!dialog)
         return;
@@ -553,7 +554,8 @@ void WindowManager::onDialogueWindowBye()
     if (dialogueWindow)
     {
         //FIXME set some state and stuff?
-        removeDialog(dialogueWindow);
+        //removeDialog(dialogueWindow);
+        dialogueWindow->setVisible(false);
     }
     setGuiMode(GM_Game);
 }

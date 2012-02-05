@@ -57,6 +57,8 @@ namespace MWGui
 
         DialogeHistory*     history;
         MyGUI::ListPtr      topicsList;
+        MyGUI::ProgressPtr pDispositionBar;
+        MyGUI::EditPtr pDispositionText;
         std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.
     };
 }

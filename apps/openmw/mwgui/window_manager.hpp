@@ -207,6 +207,8 @@ namespace MWGui
       updateVisible();
     }
 
+    MWGui::DialogueWindow* getDialogueWindow() {return dialogueWindow;}
+
     MyGUI::Gui* getGui() const { return gui; }
 
     void wmUpdateFps(float fps, size_t triangleCount, size_t batchCount)

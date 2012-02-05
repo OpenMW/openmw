@@ -16,6 +16,8 @@
 #include "../mwworld/player.hpp"
 
 #include "../mwinput/inputmanager.hpp"
+#include "../mwgui/dialogue.hpp"
+#include "../mwgui/window_manager.hpp"
 
 #include <iostream>
 
@@ -236,13 +238,13 @@ namespace MWDialogue
             if (!isMatching (actor, *iter))
                 return false;
 
-        std::cout
+        /*std::cout
             << "unchecked entries:" << std::endl
             << "    player faction: " << info.pcFaction << std::endl
             << "    disposition: " << info.data.disposition << std::endl
             << "    NPC rank: " << static_cast<int> (info.data.rank) << std::endl
             << "    gender: " << static_cast<int> (info.data.gender) << std::endl
-            << "    PC rank: " << static_cast<int> (info.data.PCrank) << std::endl;
+            << "    PC rank: " << static_cast<int> (info.data.PCrank) << std::endl;*/
 
         return true;
     }
@@ -254,7 +256,7 @@ namespace MWDialogue
         std::cout << "talking with " << MWWorld::Class::get (actor).getName (actor) << std::endl;
 
         const ESM::Dialogue *dialogue = mEnvironment.mWorld->getStore().dialogs.find ("hello");
-
+        
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
         {
@@ -277,7 +279,30 @@ namespace MWDialogue
                 }
 
                 mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
+                MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                win->startDialogue(MWWorld::Class::get (actor).getName (actor));
+                win->addText(iter->response);
                 break;
+            }
+        }
+
+        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        {
+            ESM::Dialogue ndialogue = it->second;
+            if(ndialogue.type == ESM::Dialogue::Type::Topic)
+            {
+                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
+                    iter!=it->second.mInfo.end(); ++iter)
+                {
+                    if (isMatching (actor, *iter))
+                    {
+                        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                        win->addKeyword(it->first,iter->response);
+                        //std::cout << "match found!!";
+                        break;
+                    }
+                }
             }
         }
     }
