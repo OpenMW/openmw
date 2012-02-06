@@ -11,11 +11,11 @@
 namespace MWRender{
 
 class Objects{
-    OEngine::Render::OgreRenderer &mRend;
+    OEngine::Render::OgreRenderer &mRenderer;
     std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
-    std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
+    std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometry;
     Ogre::SceneNode* mMwRoot;
-    bool isStatic;
+    bool mIsStatic;
     static int uniqueID;
     static bool lightConst;
     static float lightConstValue;
@@ -36,7 +36,7 @@ class Objects{
     ///< Remove all movable objects from \a node.
 
 public:
-    Objects(OEngine::Render::OgreRenderer& _rend): mRend(_rend){}
+    Objects(OEngine::Render::OgreRenderer& renderer): mRenderer (renderer){}
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
