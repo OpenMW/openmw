@@ -48,7 +48,7 @@ namespace MWScript
 
                     bool enabled = context.getWorld().toggleCollisionMode();
 
-                    context.report (enabled ? "Collsion -> On" : "Collision -> Off");
+                    context.report (enabled ? "Collision -> On" : "Collision -> Off");
                 }
         };
 
