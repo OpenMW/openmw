@@ -23,6 +23,17 @@ bool Objects::lightOutQuadInLin = false;
 
 int Objects::uniqueID = 0;
 
+void Objects::clearSceneNode (Ogre::SceneNode *node)
+{
+    /// \todo This should probably be moved into OpenEngine at some point.
+    for (int i=node->numAttachedObjects()-1; i>=0; --i)
+    {
+        Ogre::MovableObject *object = node->getAttachedObject (i);
+        node->detachObject (object);
+        mRend.getScene()->destroyMovableObject (object);
+    }
+}
+
 void Objects::setMwRoot(Ogre::SceneNode* root){
     mMwRoot = root;
 }
@@ -59,6 +70,7 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 
    // Rotates first around z, then y, then x
     insert->setOrientation(xr*yr*zr);
+
     if (!enabled)
          insert->setVisible (false);
     ptr.getRefData().setBaseNode(insert);
@@ -145,6 +157,7 @@ bool Objects::deleteObject (const MWWorld::Ptr& ptr)
             mCellSceneNodes.begin()); iter!=mCellSceneNodes.end(); ++iter)
             if (iter->second==parent)
             {
+                clearSceneNode (base);
                 base->removeAndDestroyAllChildren();
                 mRend.getScene()->destroySceneNode (base);
                 ptr.getRefData().setBaseNode (0);
@@ -161,12 +174,15 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store){
     if(mCellSceneNodes.find(store) != mCellSceneNodes.end())
     {
         Ogre::SceneNode* base = mCellSceneNodes[store];
+
+        for (int i=0; i<base->numChildren(); ++i)
+            clearSceneNode (static_cast<Ogre::SceneNode *> (base->getChild (i)));
+
         base->removeAndDestroyAllChildren();
         mCellSceneNodes.erase(store);
         mRend.getScene()->destroySceneNode(base);
         base = 0;
     }
-
 
     if(mSG.find(store) != mSG.end())
     {
@@ -176,6 +192,7 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store){
         sg = 0;
     }
 }
+
 void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell){
     if(mSG.find(&cell) != mSG.end())
     {

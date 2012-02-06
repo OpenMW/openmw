@@ -1,11 +1,12 @@
 #ifndef _GAME_RENDER_OBJECTS_H
 #define _GAME_RENDER_OBJECTS_H
 
-#include "components/esm_store/cell_store.hpp"
+#include <openengine/ogre/renderer.hpp>
+
+#include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
-#include <openengine/ogre/renderer.hpp>
 
 namespace MWRender{
 
@@ -30,6 +31,10 @@ class Objects{
     static float lightQuadraticRadiusMult;
 
     static bool lightOutQuadInLin;
+
+    void clearSceneNode (Ogre::SceneNode *node);
+    ///< Remove all movable objects from \a node.
+
 public:
     Objects(OEngine::Render::OgreRenderer& _rend): mRend(_rend){}
     ~Objects(){}
