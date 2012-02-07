@@ -16,7 +16,20 @@ namespace MWRender
         mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
 
         mTerrainGlobals->setMaxPixelError(8);
-        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 1024 : 256);
+        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        mTerrainGlobals->setLightMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        mTerrainGlobals->setCompositeMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        mTerrainGlobals->setDefaultGlobalColourMapSize(256);
+
+        //10 (default) didn't seem to be quite enough
+        mTerrainGlobals->setSkirtSize(32);
+
+        /*
+         * Here we are pushing the composite map distance beyond the edge
+         * of the rendered terrain due to light issues (the lighting differs
+         * so much that it is very noticable
+         */
+        mTerrainGlobals->setCompositeMapDistance(ESM::Land::REAL_SIZE*4);
 
         Ogre::TerrainMaterialGenerator::Profile* const activeProfile =
             mTerrainGlobals->getDefaultMaterialGenerator()
@@ -27,6 +40,7 @@ namespace MWRender
         matProfile->setLightmapEnabled(false);
         matProfile->setReceiveDynamicShadowsEnabled(false);
 
+        //scale the land size if required
         mLandSize = ESM::Land::LAND_SIZE;
         mRealSize = ESM::Land::REAL_SIZE;
         if ( SPLIT_TERRAIN )
@@ -109,6 +123,8 @@ namespace MWRender
                                         x * numTextures, y * numTextures,
                                         numTextures, indexes);
 
+                    assert( mTerrainGroup->getTerrain(cellX, cellY) == NULL &&
+                            "The terrain for this cell already existed" );
                     mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
 
                     mTerrainGroup->loadTerrain(terrainX, terrainY, true);
@@ -143,6 +159,7 @@ namespace MWRender
                                  ESM::Land::LAND_TEXTURE_SIZE, indexes);
         }
 
+        mTerrainGroup->freeTemporaryResources();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -155,14 +172,14 @@ namespace MWRender
             {
                 for ( int y = 0; y < 2; y++ )
                 {
-                    mTerrainGroup->removeTerrain(store->cell->getGridX() * 2 + x,
+                    mTerrainGroup->unloadTerrain(store->cell->getGridX() * 2 + x,
                                                  store->cell->getGridY() * 2 + y);
                 }
             }
         }
         else
         {
-            mTerrainGroup->removeTerrain(store->cell->getGridX(),
+            mTerrainGroup->unloadTerrain(store->cell->getGridX(),
                                          store->cell->getGridY());
         }
     }
