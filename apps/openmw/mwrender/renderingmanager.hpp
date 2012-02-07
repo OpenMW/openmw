@@ -118,6 +118,7 @@ class RenderingManager: private RenderingInterface {
     int mAmbientMode;
 
     Ogre::ColourValue mAmbientColor;
+    Ogre::Light* mSun;
 
     /// Root node for all objects added to the scene. This is rotated so
     /// that the OGRE coordinate system matches that used internally in
