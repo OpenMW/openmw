@@ -4,6 +4,7 @@
 #include <components/esm/loadinfo.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include <map>
 
 namespace MWWorld
 {
@@ -19,6 +20,8 @@ namespace MWDialogue
             bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo::SelectStruct& select) const;
 
             bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const;
+
+            std::map<std::string,bool> knownTopics;// Those are the topics the player knows.
 
         public:
 
