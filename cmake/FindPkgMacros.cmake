@@ -50,6 +50,11 @@ endmacro(create_search_paths)
 # clear cache variables if a certain variable changed
 macro(clear_if_changed TESTVAR)
   # test against internal check variable
+  # HACK: Apparently, adding a variable to the cache cleans up the list
+  # a bit. We need to also remove any empty strings from the list, but
+  # at the same time ensure that we are actually dealing with a list.
+  list(APPEND ${TESTVAR} "")
+  list(REMOVE_ITEM ${TESTVAR} "")
   if (NOT "${${TESTVAR}}" STREQUAL "${${TESTVAR}_INT_CHECK}")
     message(STATUS "${TESTVAR} changed.")
     foreach(var ${ARGN})
@@ -129,9 +134,18 @@ MACRO(findpkg_framework fwk)
       /System/Library/Frameworks
       /Network/Library/Frameworks
       /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.0.sdk/System/Library/Frameworks/
-      ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Release
-      ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Debug
+      ${CMAKE_CURRENT_SOURCE_DIR}/lib/Release
+      ${CMAKE_CURRENT_SOURCE_DIR}/lib/Debug
     )
+    # These could be arrays of paths, add each individually to the search paths
+    foreach(i ${OGRE_PREFIX_PATH})
+      set(${fwk}_FRAMEWORK_PATH ${${fwk}_FRAMEWORK_PATH} ${i}/lib/Release ${i}/lib/Debug)
+    endforeach(i)
+
+    foreach(i ${OGRE_PREFIX_BUILD})
+      set(${fwk}_FRAMEWORK_PATH ${${fwk}_FRAMEWORK_PATH} ${i}/lib/Release ${i}/lib/Debug)
+    endforeach(i)
+
     FOREACH(dir ${${fwk}_FRAMEWORK_PATH})
       SET(fwkpath ${dir}/${fwk}.framework)
       IF(EXISTS ${fwkpath})
