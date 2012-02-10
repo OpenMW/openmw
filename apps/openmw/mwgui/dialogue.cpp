@@ -22,9 +22,12 @@ using namespace Widgets;
 
 std::string lower_string(const std::string& str)
 {
-    std::string lower;
-    std::transform(str.begin(), str.end(), std::back_inserter(lower), std::tolower);
-    return lower;
+        std::string lowerCase;
+
+        std::transform (str.begin(), str.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        return lowerCase;
 }
 
 std::string::size_type find_str_ci(const std::string& str, const std::string& substr,size_t pos)
