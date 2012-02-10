@@ -29,6 +29,8 @@ namespace MWDialogue
 
             void startDialogue (const MWWorld::Ptr& actor);
 
+            void addTopic(std::string topic);
+
             //calbacks for the GUI
             void keywordSelected(std::string keyword);
             void goodbyeSelected();
