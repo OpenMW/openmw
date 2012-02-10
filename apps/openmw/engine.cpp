@@ -462,6 +462,28 @@ void OMW::Engine::activate()
     }
 }
 
+void OMW::Engine::screenshot()
+{
+    // Count screenshots.
+    int shotCount = 0;
+
+    const std::string screenshotPath = mCfgMgr.getLocalConfigPath().string();
+
+    // Find the first unused filename with a do-while
+    std::ostringstream stream;
+    do
+    {
+        // Reset the stream
+        stream.str("");
+        stream.clear();
+
+        stream << screenshotPath << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << ".png";
+
+    } while (boost::filesystem::exists(stream.str()));
+
+    mOgre->screenshot(stream.str());
+}
+
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
