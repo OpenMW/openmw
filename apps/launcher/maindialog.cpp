@@ -164,15 +164,15 @@ void MainDialog::createPages()
         dataDirs = readConfig(file.fileName());
     }
 
-    // User location
-    file.setFileName(QString::fromStdString((mCfgMgr.getUserPath()/"openmw.cfg").string()));
+    // Local location
+    file.setFileName("./openmw.cfg");
+
     if (file.exists()) {
         dataDirs = readConfig(file.fileName());
     }
 
-    // Local location
-    file.setFileName("./openmw.cfg");
-
+    // User location
+    file.setFileName(QString::fromStdString((mCfgMgr.getUserPath()/"openmw.cfg").string()));
     if (file.exists()) {
         dataDirs = readConfig(file.fileName());
     }
