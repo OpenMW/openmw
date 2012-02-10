@@ -157,7 +157,7 @@ namespace Physic
 
         //TODO: memory leak?
         btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
-        pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
+        //pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
 
         broadphase = new btDbvtBroadphase(pairCache);
 
