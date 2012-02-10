@@ -36,6 +36,7 @@ namespace
         return lowerCase;
     }
 
+
     template<typename T1, typename T2>
     bool selectCompare (char comp, T1 value1, T2 value2)
     {
@@ -399,8 +400,39 @@ namespace MWDialogue
     {
         std::cout << "talking with " << MWWorld::Class::get (actor).getName (actor) << std::endl;
 
+        //initialise the GUI
+        mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
+        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+        win->startDialogue(MWWorld::Class::get (actor).getName (actor));
+
+        actorKnownTopics.clear();
+        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        {
+            ESM::Dialogue ndialogue = it->second;
+            if(ndialogue.type == ESM::Dialogue::Type::Topic)
+            {
+                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
+                    iter!=it->second.mInfo.end(); ++iter)
+                {
+                    if (isMatching (actor, *iter))
+                    {
+                        actorKnownTopics[it->first] = iter->response;
+                        if(knownTopics.find(toLower(it->first)) != knownTopics.end())
+                        {
+                            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                            win->addKeyword(it->first,iter->response);
+                            //std::cout << it->first;
+                            //std::cout << "match found!!";
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         const ESM::Dialogue *dialogue = mEnvironment.mWorld->getStore().dialogs.find ("hello");
-        
+  
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
         {
@@ -421,43 +453,31 @@ namespace MWDialogue
                     std::cout << "script: " << iter->resultScript << std::endl;
                     // TODO execute script
                 }
-
-                mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
-                MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-                win->startDialogue(MWWorld::Class::get (actor).getName (actor));
                 win->addText(iter->response);
                 break;
             }
         }
+    }
 
-        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
-        {
-            ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.type == ESM::Dialogue::Type::Topic)
-            {
-                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
-                    iter!=it->second.mInfo.end(); ++iter)
-                {
-                    if (isMatching (actor, *iter))
-                    {
-                        if(knownTopics.find(toLower(it->first)) != knownTopics.end())
-                        {
-                            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-                            win->addKeyword(it->first,iter->response);
-                            //std::cout << it->first;
-                            //std::cout << "match found!!";
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+    //helper function
+    std::string::size_type find_str_ci(const std::string& str, const std::string& substr,size_t pos)
+    {
+        return toLower(str).find(toLower(substr),pos);
     }
 
     void DialogueManager::keywordSelected(std::string keyword)
     {
-        std::cout << "keyword" << keyword;
+        std::string text = actorKnownTopics[keyword];
+        std::map<std::string,std::string>::iterator it;
+        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
+        {
+            if(find_str_ci(text,it->second,0) !=std::string::npos)
+            {
+                knownTopics[it->first] = true;
+                MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                win->addKeyword(it->first,it->second);
+            }
+        }
     }
 
     void DialogueManager::goodbyeSelected()
