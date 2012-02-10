@@ -121,6 +121,14 @@ namespace
 
 namespace MWDialogue
 {
+
+    //helper function
+    std::string::size_type find_str_ci(const std::string& str, const std::string& substr,size_t pos)
+    {
+        return toLower(str).find(toLower(substr),pos);
+    }
+
+
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor,
         const ESM::DialInfo::SelectStruct& select) const
     {
@@ -439,9 +447,9 @@ namespace MWDialogue
             if (isMatching (actor, *iter))
             {
                 // start dialogue
-                std::cout << "found matching info record" << std::endl;
+                //std::cout << "found matching info record" << std::endl;
 
-                std::cout << "response: " << iter->response << std::endl;
+                //std::cout << "response: " << iter->response << std::endl;
 
                 if (!iter->sound.empty())
                 {
@@ -450,19 +458,25 @@ namespace MWDialogue
 
                 if (!iter->resultScript.empty())
                 {
-                    std::cout << "script: " << iter->resultScript << std::endl;
+                    //std::cout << "script: " << iter->resultScript << std::endl;
                     // TODO execute script
                 }
+                std::string text = iter->response;
+                std::map<std::string,std::string>::iterator it;
+                for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
+                {
+                    if(find_str_ci(text,it->first,0) !=std::string::npos)
+                    {
+                        std::cout << "fouuuuuuuuuuund";
+                        knownTopics[it->first] = true;
+                        MWGui::DialogueWindow* win2 = mEnvironment.mWindowManager->getDialogueWindow();
+                        win2->addKeyword(it->first,it->second);
+                    }
+                }
                 win->addText(iter->response);
-                break;
+                //break;
             }
         }
-    }
-
-    //helper function
-    std::string::size_type find_str_ci(const std::string& str, const std::string& substr,size_t pos)
-    {
-        return toLower(str).find(toLower(substr),pos);
     }
 
     void DialogueManager::keywordSelected(std::string keyword)
@@ -471,7 +485,7 @@ namespace MWDialogue
         std::map<std::string,std::string>::iterator it;
         for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
         {
-            if(find_str_ci(text,it->second,0) !=std::string::npos)
+            if(find_str_ci(text,it->first,0) !=std::string::npos)
             {
                 knownTopics[it->first] = true;
                 MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
