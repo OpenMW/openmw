@@ -170,8 +170,7 @@ namespace MWInput
         poller(input),
         player(_player),
         windows(_windows),
-        mEngine (engine),
-        shotCount(0)
+        mEngine (engine)
     {
       using namespace OEngine::Input;
       using namespace OEngine::Render;
