@@ -50,7 +50,7 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
     getWidget(history, "History");
     history->setOverflowToTheLeft(true);
     history->getClient()->eventMouseButtonClick = MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
-
+    history->setMaxTextLength(1000000);
     //Topics list 
     getWidget(topicsList, "TopicsList");
     topicsList->setScrollVisible(true);
