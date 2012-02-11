@@ -438,43 +438,47 @@ namespace MWDialogue
                 }
             }
         }
+        //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
 
-        const ESM::Dialogue *dialogue = mEnvironment.mWorld->getStore().dialogs.find ("hello");
-  
-        for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
-            iter!=dialogue->mInfo.end(); ++iter)
+        bool greetingFound = false;
+        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
-            if (isMatching (actor, *iter))
+            ESM::Dialogue ndialogue = it->second;
+            if(ndialogue.type == ESM::Dialogue::Type::Greeting)
             {
-                // start dialogue
-                //std::cout << "found matching info record" << std::endl;
-
-                //std::cout << "response: " << iter->response << std::endl;
-
-                if (!iter->sound.empty())
+                if (greetingFound) break;
+                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
+                    iter!=it->second.mInfo.end(); ++iter)
                 {
-                    // TODO play sound
-                }
-
-                if (!iter->resultScript.empty())
-                {
-                    //std::cout << "script: " << iter->resultScript << std::endl;
-                    // TODO execute script
-                }
-                std::string text = iter->response;
-                std::map<std::string,std::string>::iterator it;
-                for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
-                {
-                    if(find_str_ci(text,it->first,0) !=std::string::npos)
+                    if (isMatching (actor, *iter))
                     {
-                        std::cout << "fouuuuuuuuuuund";
-                        knownTopics[it->first] = true;
-                        MWGui::DialogueWindow* win2 = mEnvironment.mWindowManager->getDialogueWindow();
-                        win2->addKeyword(it->first,it->second);
+                        if (!iter->sound.empty())
+                        {
+                            // TODO play sound
+                        }
+
+                        if (!iter->resultScript.empty())
+                        {
+                            //std::cout << "script: " << iter->resultScript << std::endl;
+                            // TODO execute script
+                        }
+                        std::string text = iter->response;
+                        std::map<std::string,std::string>::iterator it;
+                        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
+                        {
+                            if(find_str_ci(text,it->first,0) !=std::string::npos)
+                            {
+                                //std::cout << "fouuuuuuuuuuund";
+                                knownTopics[it->first] = true;
+                                MWGui::DialogueWindow* win2 = mEnvironment.mWindowManager->getDialogueWindow();
+                                win2->addKeyword(it->first,it->second);
+                            }
+                        }
+                        win->addText(iter->response);
+                        greetingFound = true;
+                        break;
                     }
                 }
-                win->addText(iter->response);
-                //break;
             }
         }
     }
