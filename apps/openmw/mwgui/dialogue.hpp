@@ -9,6 +9,11 @@ namespace MWGui
     class WindowManager;
 }
 
+namespace MWWorld
+{
+    class Environment;
+}
+
 /*
   This file contains the dialouge window
   Layout is defined by resources/mygui/openmw_dialogue_window_layout.xml.
@@ -23,7 +28,7 @@ namespace MWGui
     class DialogueWindow: public WindowBase
     {
     public:
-        DialogueWindow(WindowManager& parWindowManager);
+        DialogueWindow(WindowManager& parWindowManager,MWWorld::Environment& environment);
 
         void open();
 
@@ -35,6 +40,13 @@ namespace MWGui
         */
         EventHandle_Void eventBye;
 
+        void startDialogue(std::string npcName);
+        void stopDialogue();
+        void addKeyword(std::string keyWord,std::string topicText);
+        void removeKeyword(std::string keyWord);
+        void addText(std::string text);
+        void askQuestion(std::string question,std::list<std::string> answers);
+
     protected:
         void onSelectTopic(MyGUI::List* _sender, size_t _index);
         void onByeClicked(MyGUI::Widget* _sender);
@@ -42,9 +54,19 @@ namespace MWGui
 
     private:
         void updateOptions();
+        /**
+        *Helper function that add topic keyword in blue in a text.
+        */
+        std::string parseText(std::string text);
+        void displayTopicText(std::string topic);
 
         DialogeHistory*     history;
         MyGUI::ListPtr      topicsList;
+        MyGUI::ProgressPtr pDispositionBar;
+        MyGUI::EditPtr pDispositionText;
+        std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.
+
+        MWWorld::Environment& mEnvironment;
     };
 }
 #endif
