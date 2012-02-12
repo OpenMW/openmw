@@ -220,7 +220,7 @@ void NIFLoader::createMaterial(const String &name,
 
 
     //Hardware Skinning code, textures may be the wrong color if enabled
-     /*if(!mSkel.isNull()){
+    /* if(!mSkel.isNull()){
     material->removeAllTechniques();
 
         Ogre::Technique* tech = material->createTechnique();
@@ -358,7 +358,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     HardwareVertexBufferSharedPtr vbuf =
         HardwareBufferManager::getSingleton().createVertexBuffer(
             VertexElement::getTypeSize(VET_FLOAT3),
-            numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+            numVerts, HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
 
     if(flip)
 	{
