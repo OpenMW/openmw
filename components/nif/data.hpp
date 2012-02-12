@@ -473,7 +473,7 @@ void read(NIFFile *nif)
     int vertCount  = nif->getInt();
     nif->getByte();
 	int magic = nif->getInt();
-	int type = nif->getInt();
+	/*int type =*/ nif->getInt();
 	for(int i = 0; i < vertCount; i++){
 
 		float x = nif->getFloat();
@@ -485,7 +485,7 @@ void read(NIFFile *nif)
     for(int i=1; i<morphCount; i++)
     {
         magic = nif->getInt();
-        type = nif->getInt();
+        /*type =*/ nif->getInt();
 		std::vector<Ogre::Vector3> current;
 		std::vector<float> currentTime;
         for(int i = 0; i < magic; i++){
