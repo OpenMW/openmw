@@ -190,7 +190,7 @@ void DialogueWindow::displayTopicText(std::string topic)
 
 void DialogueWindow::addText(std::string text)
 {
-    history->addDialogText(parseText(text));
+    history->addDialogText("#B29154"+parseText(text)+"#B29154");
 }
 
 void DialogueWindow::askQuestion(std::string question,std::list<std::string> answers)
