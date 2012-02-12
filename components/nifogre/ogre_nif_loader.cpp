@@ -1268,7 +1268,7 @@ void NIFLoader::loadResource(Resource *resource)
                 Nif::Node *o = dynamic_cast<Nif::Node*>(f->target.getPtr());
                 Nif::NiKeyframeDataPtr data = f->data;
 
-                if (f->timeStart == 10000000000000000)
+                if (f->timeStart == 10000000000000000.0f)
                     continue;
                 data->setBonename(o->name.toString());
                 data->setStartTime(f->timeStart);
