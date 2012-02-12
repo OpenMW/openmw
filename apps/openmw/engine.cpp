@@ -197,15 +197,16 @@ OMW::Engine::~Engine()
 void OMW::Engine::loadBSA()
 {
     const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-
-    for (Files::MultiDirCollection::TIter iter (bsa.begin()); iter!=bsa.end(); ++iter)
+    std::string dataDirectory;
+    for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
     {
         std::cout << "Adding " << iter->second.string() << std::endl;
-        Bsa::addBSA (iter->second.string());
-    }
+        Bsa::addBSA(iter->second.string());
 
-    //std::cout << "Data dir " << mDataDir.string() << std::endl;
-    //Bsa::addDir(mDataDir.string(), mFSStrict);
+        dataDirectory = iter->second.parent_path().string();
+        std::cout << "Data dir " << dataDirectory << std::endl;
+        Bsa::addDir(dataDirectory, mFSStrict);
+    }
 }
 
 // add resources directory
