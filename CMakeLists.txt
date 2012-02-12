@@ -351,6 +351,37 @@ if(DPKG_PROGRAM)
     include(CPack)
 endif(DPKG_PROGRAM)
 
+if(WIN32)
+    FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
+    INSTALL(FILES ${files} DESTINATION ".")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.cfg" "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION ".")
+    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
+
+    SET(CPACK_GENERATOR "NSIS")
+    SET(CPACK_PACKAGE_NAME "OpenMW")
+    SET(CPACK_PACKAGE_VENDOR "OpenMW.org")
+    SET(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
+    SET(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
+    SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
+    SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;esmtool;Esmtool;omwlauncher;OpenMW Launcher")
+    SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
+    SET(CPACK_RESOURCE_FILE_LICENSE "${OpenMW_SOURCE_DIR}/GPL3.txt")
+    SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+    SET(CPACK_NSIS_DISPLAY_NAME "OpenMW")
+    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
+    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
+    SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
+
+    if(EXISTS "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/vcredist_x86.exe" DESTINATION "redist")
+        SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x86.exe\\\" /q'" )
+    endif(EXISTS "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
+
+    include(CPack)
+endif(WIN32)
+
 # Components
 add_subdirectory (components)
 
