@@ -197,7 +197,7 @@ namespace MWDialogue
                             for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = mEnvironment.mJournal->begin();it!=mEnvironment.mJournal->end();it++)
                             {
 
-                                if(it->mTopic == name) isInJournal = true; 
+                                if(it->mTopic == name) isInJournal = true;
                             }
                         }
                         else
@@ -227,7 +227,7 @@ namespace MWDialogue
                     {
                         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
                         int isFaction = int(toLower(npc->base->faction) == toLower(name));
-                        if(selectCompare<int,int>(comp,!isFaction,select.i)) 
+                        if(selectCompare<int,int>(comp,!isFaction,select.i))
                             return false;
                     }
                     else
@@ -241,7 +241,7 @@ namespace MWDialogue
                     {
                         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
                         int isClass = int(toLower(npc->base->cls) == toLower(name));
-                        if(selectCompare<int,int>(comp,!isClass,select.i)) 
+                        if(selectCompare<int,int>(comp,!isClass,select.i))
                             return false;
                     }
                     else
@@ -256,7 +256,7 @@ namespace MWDialogue
                         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
                         int isRace = int(toLower(npc->base->race) == toLower(name));
                         //std::cout << "isRace"<<isRace; mEnvironment.mWorld
-                        if(selectCompare<int,int>(comp,!isRace,select.i)) 
+                        if(selectCompare<int,int>(comp,!isRace,select.i))
                             return false;
                     }
                     else
@@ -418,7 +418,7 @@ namespace MWDialogue
         for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.type == ESM::Dialogue::Type::Topic)
+            if(ndialogue.type == ESM::Dialogue::Topic)
             {
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
                     iter!=it->second.mInfo.end(); ++iter)
@@ -444,7 +444,7 @@ namespace MWDialogue
         for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.type == ESM::Dialogue::Type::Greeting)
+            if(ndialogue.type == ESM::Dialogue::Greeting)
             {
                 if (greetingFound) break;
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
