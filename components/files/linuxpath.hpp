@@ -23,7 +23,7 @@
 #ifndef COMPONENTS_FILES_LINUXPATH_H
 #define COMPONENTS_FILES_LINUXPATH_H
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__FreeBSD__)
 
 #include <boost/filesystem.hpp>
 
@@ -39,18 +39,18 @@ namespace Files
 struct LinuxPath
 {
     /**
-     * \brief Return path to the local configuration directory.
+     * \brief Return path to the user directory.
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getLocalConfigPath() const;
+    boost::filesystem::path getUserPath() const;
 
     /**
      * \brief Return path to the global (system) configuration directory.
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getGlobalConfigPath() const;
+    boost::filesystem::path getGlobalPath() const;
 
     /**
      * \brief Return path to the runtime configuration directory which is the
@@ -58,33 +58,39 @@ struct LinuxPath
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getRuntimeConfigPath() const;
+    boost::filesystem::path getLocalPath() const;
 
     /**
-     * \brief Return path to the local data directory.
+     * \brief
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getLocalDataPath() const;
+    boost::filesystem::path getUserDataPath() const;
 
     /**
-     * \brief Return path to the global (system) data directory.
+     * \brief
      *
      * \return boost::filesystem::path
      */
     boost::filesystem::path getGlobalDataPath() const;
 
     /**
-     * \brief Return runtime data path which is a location where
-     * an application was started with 'data' suffix.
+     * \brief
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getRuntimeDataPath() const;
+    boost::filesystem::path getLocalDataPath() const;
+
+    /**
+     * \brief Gets the path of the installed Morrowind version if there is one.
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getInstallPath() const;
 };
 
 } /* namespace Files */
 
-#endif /* defined(__linux__) */
+#endif /* defined(__linux__) || defined(__FreeBSD__) */
 
 #endif /* COMPONENTS_FILES_LINUXPATH_H */

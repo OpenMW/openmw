@@ -22,12 +22,13 @@
 
 #include "linuxpath.hpp"
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__FreeBSD__)
 
 #include <cstdlib>
 #include <cstring>
 #include <pwd.h>
 #include <unistd.h>
+#include <boost/filesystem/fstream.hpp>
 
 /**
  * \namespace Files
@@ -35,9 +36,9 @@
 namespace Files
 {
 
-boost::filesystem::path LinuxPath::getLocalConfigPath() const
+boost::filesystem::path LinuxPath::getUserPath() const
 {
-    boost::filesystem::path localConfigPath(".");
+    boost::filesystem::path userPath(".");
     boost::filesystem::path suffix("/");
 
     const char* theDir = getenv("OPENMW_CONFIG");
@@ -63,17 +64,17 @@ boost::filesystem::path LinuxPath::getLocalConfigPath() const
     }
 
     if (theDir != NULL) {
-        localConfigPath = boost::filesystem::path(theDir);
+        userPath = boost::filesystem::path(theDir);
     }
 
-    localConfigPath /= suffix;
+    userPath /= suffix;
 
-    return localConfigPath;
+    return userPath;
 }
 
-boost::filesystem::path LinuxPath::getGlobalConfigPath() const
+boost::filesystem::path LinuxPath::getGlobalPath() const
 {
-    boost::filesystem::path globalConfigPath("/etc/xdg/");
+    boost::filesystem::path globalPath("/etc/xdg/");
 
     char* theDir = getenv("XDG_CONFIG_DIRS");
     if (theDir != NULL)
@@ -82,20 +83,20 @@ boost::filesystem::path LinuxPath::getGlobalConfigPath() const
         char* ptr = strtok(theDir, ":");
         if (ptr != NULL)
         {
-            globalConfigPath = boost::filesystem::path(ptr);
-            globalConfigPath /= boost::filesystem::path("/");
+            globalPath = boost::filesystem::path(ptr);
+            globalPath /= boost::filesystem::path("/");
         }
     }
 
-    return globalConfigPath;
+    return globalPath;
 }
 
-boost::filesystem::path LinuxPath::getRuntimeConfigPath() const
+boost::filesystem::path LinuxPath::getLocalPath() const
 {
     return boost::filesystem::path("./");
 }
 
-boost::filesystem::path LinuxPath::getLocalDataPath() const
+boost::filesystem::path LinuxPath::getUserDataPath() const
 {
     boost::filesystem::path localDataPath(".");
     boost::filesystem::path suffix("/");
@@ -149,12 +150,84 @@ boost::filesystem::path LinuxPath::getGlobalDataPath() const
     return globalDataPath;
 }
 
-boost::filesystem::path LinuxPath::getRuntimeDataPath() const
+boost::filesystem::path LinuxPath::getLocalDataPath() const
 {
     return boost::filesystem::path("./data/");
 }
 
+boost::filesystem::path LinuxPath::getInstallPath() const
+{
+    boost::filesystem::path installPath;
+
+    char *homePath = getenv("HOME");
+    if (homePath == NULL)
+    {
+        struct passwd* pwd = getpwuid(getuid());
+        if (pwd != NULL)
+        {
+            homePath = pwd->pw_dir;
+        }
+    }
+
+    if (homePath != NULL)
+    {
+        boost::filesystem::path wineDefaultRegistry(homePath);
+        wineDefaultRegistry /= ".wine/system.reg";
+
+        if (boost::filesystem::is_regular_file(wineDefaultRegistry))
+        {
+            boost::filesystem::ifstream file(wineDefaultRegistry);
+            bool isRegEntry = false;
+            std::string line;
+            std::string mwpath;
+
+            while (std::getline(file, line) && !line.empty())
+            {
+                if (line[0] == '[') // we found an entry
+                {
+                    isRegEntry = (line.find("Softworks\\Morrowind]") != std::string::npos);
+                }
+                else if (isRegEntry)
+                {
+                    if (line[0] == '"') // empty line means new registry key
+                    {
+                        std::string key = line.substr(1, line.find('"', 1) - 1);
+                        if (strcasecmp(key.c_str(), "Installed Path") == 0)
+                        {
+                            std::string::size_type valuePos = line.find('=') + 2;
+                            mwpath = line.substr(valuePos, line.rfind('"') - valuePos);
+
+                            std::string::size_type pos = mwpath.find("\\");
+                            while (pos != std::string::npos)
+                            {
+                               mwpath.replace(pos, 2, "/");
+                               pos = mwpath.find("\\", pos + 1);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!mwpath.empty())
+            {
+                // Change drive letter to lowercase, so we could use ~/.wine/dosdevice symlinks
+                mwpath[0] = tolower(mwpath[0]);
+                installPath /= homePath;
+                installPath /= ".wine/dosdevices/";
+                installPath /= mwpath;
+
+                if (!boost::filesystem::is_directory(installPath))
+                {
+                    installPath.clear();
+                }
+            }
+        }
+    }
+
+    return installPath;
+}
 
 } /* namespace Files */
 
-#endif /* defined(__linux__) */
+#endif /* defined(__linux__) || defined(__FreeBSD__) */

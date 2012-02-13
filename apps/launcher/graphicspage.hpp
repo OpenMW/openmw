@@ -7,19 +7,20 @@
 #include <OgreRenderSystem.h>
 #include <OgreConfigFile.h>
 #include <OgreConfigDialog.h>
-#include <components/cfg/configurationmanager.hpp>
 
 class QComboBox;
 class QCheckBox;
 class QStackedWidget;
 class QSettings;
 
+namespace Files { struct ConfigurationManager; }
+
 class GraphicsPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    GraphicsPage(QWidget *parent = 0);
+    GraphicsPage(Files::ConfigurationManager& cfg, QWidget *parent = 0);
 
     QSettings *mOgreConfig;
 
@@ -29,7 +30,7 @@ public slots:
     void rendererChanged(const QString &renderer);
 
 private:
-    Cfg::ConfigurationManager mCfg;
+    Files::ConfigurationManager& mCfgMgr;
     Ogre::Root *mOgre;
     Ogre::RenderSystem *mSelectedRenderSystem;
     Ogre::RenderSystem *mOpenGLRenderSystem;

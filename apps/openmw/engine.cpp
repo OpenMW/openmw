@@ -18,7 +18,9 @@
 #include <components/esm_store/cell_store.hpp>
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/esm_reader.hpp>
-#include <components/files/path.hpp>
+#include <components/files/fixedpath.hpp>
+#include <components/files/configurationmanager.hpp>
+
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
 
@@ -173,7 +175,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     return true;
 }
 
-OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
+OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mPhysicEngine (0)
   , mFpsLevel(0)
@@ -214,15 +216,16 @@ OMW::Engine::~Engine()
 void OMW::Engine::loadBSA()
 {
     const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-
-    for (Files::MultiDirCollection::TIter iter (bsa.begin()); iter!=bsa.end(); ++iter)
+    std::string dataDirectory;
+    for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
     {
-         std::cout << "Adding " << iter->second.string() << std::endl;
-         Bsa::addBSA (iter->second.string());
-    }
+        std::cout << "Adding " << iter->second.string() << std::endl;
+        Bsa::addBSA(iter->second.string());
 
-    std::cout << "Data dir " << mDataDir.string() << std::endl;
-    Bsa::addDir(mDataDir.string(), mFSStrict);
+        dataDirectory = iter->second.parent_path().string();
+        std::cout << "Data dir " << dataDirectory << std::endl;
+        Bsa::addDir(dataDirectory, mFSStrict);
+    }
 }
 
 // add resources directory
@@ -245,7 +248,7 @@ void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     /// \todo remove mDataDir, once resources system can handle multiple directories
     assert (!dataDirs.empty());
-    mDataDir = dataDirs.back();
+    mDataDirs = dataDirs;
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
 
@@ -358,7 +361,7 @@ void OMW::Engine::go()
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
                                                            mOgre->getCamera(),
                                                            mEnvironment.mWorld->getStore(),
-                                                           (mDataDir),
+                                                           mDataDirs,
                                                            mUseSound, mFSStrict, mEnvironment);
 
     // Create script system

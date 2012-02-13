@@ -1,15 +1,18 @@
-#ifndef COMPONENTS_CFG_CONFIGURATIONMANAGER_HPP
-#define COMPONENTS_CFG_CONFIGURATIONMANAGER_HPP
+#ifndef COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
+#define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
+
+#include <tr1/unordered_map>
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
-#include <components/files/path.hpp>
+#include <components/files/fixedpath.hpp>
+#include <components/files/collections.hpp>
 
 /**
- * \namespace Cfg
+ * \namespace Files
  */
-namespace Cfg
+namespace Files
 {
 
 /**
@@ -22,41 +25,43 @@ struct ConfigurationManager
 
     void readConfiguration(boost::program_options::variables_map& variables,
         boost::program_options::options_description& description);
+    void processPaths(Files::PathContainer& dataDirs);
 
-    const boost::filesystem::path& getGlobalConfigPath() const;
-    void setGlobalConfigPath(const boost::filesystem::path& newPath);
-
-    const boost::filesystem::path& getLocalConfigPath() const;
-    void setLocalConfigPath(const boost::filesystem::path& newPath);
-
-    const boost::filesystem::path& getRuntimeConfigPath() const;
-    void setRuntimeConfigPath(const boost::filesystem::path& newPath);
+    /**< Fixed paths */
+    const boost::filesystem::path& getGlobalPath() const;
+    const boost::filesystem::path& getUserPath() const;
+    const boost::filesystem::path& getLocalPath() const;
 
     const boost::filesystem::path& getGlobalDataPath() const;
-    void setGlobalDataPath(const boost::filesystem::path& newPath);
-
+    const boost::filesystem::path& getUserDataPath() const;
     const boost::filesystem::path& getLocalDataPath() const;
-    void setLocalDataPath(const boost::filesystem::path& newPath);
-
-    const boost::filesystem::path& getRuntimeDataPath() const;
-    void setRuntimeDataPath(const boost::filesystem::path& newPath);
+    const boost::filesystem::path& getInstallPath() const;
 
     const boost::filesystem::path& getOgreConfigPath() const;
     const boost::filesystem::path& getPluginsConfigPath() const;
     const boost::filesystem::path& getLogPath() const;
 
     private:
+        typedef Files::FixedPath<> FixedPathType;
+
+        typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
+        typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
+
         void loadConfig(const boost::filesystem::path& path,
             boost::program_options::variables_map& variables,
             boost::program_options::options_description& description);
 
-        Files::Path<> mPath;
+        void setupTokensMapping();
+
+        FixedPathType mFixedPath;
 
         boost::filesystem::path mOgreCfgPath;
         boost::filesystem::path mPluginsCfgPath;
         boost::filesystem::path mLogPath;
+
+        TokensMappingContainer mTokensMapping;
 };
 
 } /* namespace Cfg */
 
-#endif /* COMPONENTS_CFG_CONFIGURATIONMANAGER_HPP */
+#endif /* COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP */

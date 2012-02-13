@@ -43,29 +43,29 @@ struct WindowsPath
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getLocalConfigPath() const;
+    boost::filesystem::path getUserPath() const;
 
     /**
      * \brief Returns "X:\Program Files\"
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getGlobalConfigPath() const;
+    boost::filesystem::path getGlobalPath() const;
 
     /**
-     * \brief Return runtime configuration path which is a location where
+     * \brief Return local path which is a location where
      * an application was started
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getRuntimeConfigPath() const;
+    boost::filesystem::path getLocalPath() const;
 
     /**
-     * \brief Return same path like getLocalConfigPath
+     * \brief Return same path like getUserConfigPath
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getLocalDataPath() const;
+    boost::filesystem::path getUserDataPath() const;
 
     /**
      * \brief Return same path like getGlobalConfigPath
@@ -80,7 +80,14 @@ struct WindowsPath
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getRuntimeDataPath() const;
+    boost::filesystem::path getLocalDataPath() const;
+
+    /**
+     * \brief Gets the path of the installed Morrowind version if there is one.
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getInstallPath() const;
 };
 
 } /* namespace Files */
