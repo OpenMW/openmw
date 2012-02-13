@@ -1150,7 +1150,7 @@ void NIFLoader::loadResource(Resource *resource)
     char suffix = name.at(name.length() - 2);
     bool addAnim = true;
     bool hasAnim = false;
-    bool baddin = false;
+    //bool baddin = false;
     bNiTri = true;
 
         if(suffix == '*')
@@ -1168,7 +1168,7 @@ void NIFLoader::loadResource(Resource *resource)
 		}
 		else if(suffix == '>')
 		{
-            baddin = true;
+            //baddin = true;
 			bNiTri = true;
 			std::string sub = name.substr(name.length() - 6, 4);
 

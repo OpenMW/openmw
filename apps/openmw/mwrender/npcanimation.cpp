@@ -267,7 +267,7 @@ void NpcAnimation::runAnimation(float timepassed){
         }
 
         handleAnimationTransforms();
-        Ogre::Vector3 current = insert->_getWorldAABB().getCenter();
+        //Ogre::Vector3 current = insert->_getWorldAABB().getCenter();
 
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();

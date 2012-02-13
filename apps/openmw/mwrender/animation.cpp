@@ -499,7 +499,7 @@ namespace MWRender{
 	    std::vector<Ogre::Quaternion> quats = iter->getQuat();
 
         std::vector<float> ttime = iter->gettTime();
-        std::vector<float>::iterator ttimeiter = ttime.begin();
+        //std::vector<float>::iterator ttimeiter = ttime.begin();
 
         std::vector<float> rtime = iter->getrTime();
         int rindexJ = 0;
