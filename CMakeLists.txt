@@ -382,14 +382,17 @@ endif()
 
 # Apple bundling
 if (APPLE)
-    set(MISC_FILES
-        ${APP_BUNDLE_DIR}/Contents/MacOS/openmw.cfg
-        ${APP_BUNDLE_DIR}/Contents/MacOS/plugins.cfg)
+    set(INSTALL_SUBDIR OpenMW)
 
     #install(FILES ${MISC_FILES} DESTINATION ../MacOS)
     #install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Plugins" DESTINATION ..)
     #install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Resources/resources" DESTINATION ../Resources)
-    install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION . COMPONENT Runtime)
+    install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+
+    install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     set(CPACK_GENERATOR "DragNDrop")
     # set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
     # set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
@@ -399,7 +402,7 @@ if (APPLE)
     set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
     set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}")
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
     set(PLUGINS "")
 
     # Scan Plugins dir for *.dylibs
@@ -407,7 +410,7 @@ if (APPLE)
 
     foreach(PLUGIN ${ALL_PLUGINS})
         get_filename_component(PLUGIN_FILENAME ${PLUGIN} NAME)
-        set(PLUGINS ${PLUGINS} "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}/Contents/Plugins/${PLUGIN_FILENAME}")
+        set(PLUGINS ${PLUGINS} "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins/${PLUGIN_FILENAME}")
     endforeach()
 
     #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
