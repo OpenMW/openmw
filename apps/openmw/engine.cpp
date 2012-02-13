@@ -470,7 +470,7 @@ void OMW::Engine::screenshot()
     // Count screenshots.
     int shotCount = 0;
 
-    const std::string screenshotPath = mCfgMgr.getLocalPath().string();
+    const std::string screenshotPath = mCfgMgr.getUserPath().string();
 
     // Find the first unused filename with a do-while
     std::ostringstream stream;
