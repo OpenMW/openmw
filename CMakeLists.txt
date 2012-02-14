@@ -18,8 +18,8 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 11)
-set (OPENMW_VERSION_RELEASE 1)
+set (OPENMW_VERSION_MINOR 12)
+set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
@@ -451,7 +451,7 @@ if (APPLE)
     # some library already has be "fixed up", i.e. its id name contains @executable_path,
     # but library is not embedded in bundle. For example, it's Ogre.framework from Ogre SDK.
     # Current implementation of GetPrerequsities/BundleUtilities doesn't handle that case.
-    # 
+    #
     # Current limitations:
     #   1. Handles only frameworks, not simple libs
     INSTALL(CODE "
