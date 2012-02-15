@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFile>
+#include <QtDebug>
 
 #include "maindialog.hpp"
 
@@ -17,6 +18,14 @@ int main(int argc, char *argv[])
         dir.cdUp();
         dir.cdUp();
     }
+
+    QDir pluginsPath(QCoreApplication::applicationDirPath());
+    pluginsPath.cdUp();
+    pluginsPath.cd("Plugins");
+
+    QStringList libraryPaths;
+    libraryPaths << pluginsPath.path() << QCoreApplication::applicationDirPath();
+    app.setLibraryPaths(libraryPaths);
     #endif
 
     QDir::setCurrent(dir.absolutePath());
