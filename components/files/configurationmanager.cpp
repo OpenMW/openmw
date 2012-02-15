@@ -89,26 +89,36 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
         const std::string& path = it->string();
 
         // Check if path contains a token
-        if (!path.empty() && *path.begin() == '?' && *path.rbegin() == '?')
+        if (!path.empty() && *path.begin() == '?')
         {
-            TokensMappingContainer::iterator tokenIt = mTokensMapping.find(path);
-            if (tokenIt != mTokensMapping.end())
+            std::string::size_type pos = path.find('?', 1);
+            if (pos != std::string::npos && pos != 0)
             {
-                boost::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
-
-                if (boost::filesystem::is_directory(tempPath))
+                TokensMappingContainer::iterator tokenIt = mTokensMapping.find(path.substr(0, pos + 1));
+                if (tokenIt != mTokensMapping.end())
                 {
-                    (*it) = tempPath;
+                    boost::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
+                    if (pos < path.length() - 1)
+                    {
+                        // There is something after the token, so we should
+                        // append it to the path
+                        tempPath /= path.substr(pos + 1, path.length() - pos);
+                    }
+
+                    if (boost::filesystem::is_directory(tempPath))
+                    {
+                        (*it) = tempPath;
+                    }
+                    else
+                    {
+                        (*it).clear();
+                    }
                 }
                 else
                 {
+                    // Clean invalid / unknown token, it will be removed outside the loop
                     (*it).clear();
                 }
-            }
-            else
-            {
-                // Clean invalid / unknown token, it will be removed outside the loop
-                (*it).clear();
             }
         }
     }

@@ -86,6 +86,7 @@ struct FixedPath
             mGlobalPath /= suffix;
 
             mLocalDataPath /= suffix;
+            mUserDataPath /= suffix;
             mGlobalDataPath /= suffix;
         }
     }
