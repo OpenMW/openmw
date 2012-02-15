@@ -23,19 +23,19 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
+        MWRender::Objects& objects = renderingInterface.getObjects();
+        objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+
         if (!model.empty())
-        {
-            MWRender::Objects& objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
             objects.insertMesh(ptr, "meshes\\" + model);
-            const int color = ref->base->data.color;
-            const float r = ((color >> 0) & 0xFF) / 255.0f;
-            const float g = ((color >> 8) & 0xFF) / 255.0f;
-            const float b = ((color >> 16) & 0xFF) / 255.0f;
-            const float radius = float (ref->base->data.radius);
-            objects.insertLight (ptr, r, g, b, radius);
-        }
+
+        const int color = ref->base->data.color;
+        const float r = ((color >> 0) & 0xFF) / 255.0f;
+        const float g = ((color >> 8) & 0xFF) / 255.0f;
+        const float b = ((color >> 16) & 0xFF) / 255.0f;
+        const float radius = float (ref->base->data.radius);
+        objects.insertLight (ptr, r, g, b, radius);
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
@@ -43,13 +43,12 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
             ptr.get<ESM::Light>();
 
-
-        const std::string &model = ref->base->model;
         assert (ref->base != NULL);
+        const std::string &model = ref->base->model;
+
         if(!model.empty()){
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-
     }
 
     void Light::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const

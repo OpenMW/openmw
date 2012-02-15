@@ -1,20 +1,21 @@
 #ifndef _GAME_RENDER_OBJECTS_H
 #define _GAME_RENDER_OBJECTS_H
 
-#include "components/esm_store/cell_store.hpp"
+#include <openengine/ogre/renderer.hpp>
+
+#include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
-#include <openengine/ogre/renderer.hpp>
 
 namespace MWRender{
 
 class Objects{
-    OEngine::Render::OgreRenderer &mRend;
+    OEngine::Render::OgreRenderer &mRenderer;
     std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
-    std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mSG;
+    std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometry;
     Ogre::SceneNode* mMwRoot;
-    bool isStatic;
+    bool mIsStatic;
     static int uniqueID;
     static bool lightConst;
     static float lightConstValue;
@@ -30,8 +31,12 @@ class Objects{
     static float lightQuadraticRadiusMult;
 
     static bool lightOutQuadInLin;
+
+    void clearSceneNode (Ogre::SceneNode *node);
+    ///< Remove all movable objects from \a node.
+
 public:
-    Objects(OEngine::Render::OgreRenderer& _rend): mRend(_rend){}
+    Objects(OEngine::Render::OgreRenderer& renderer): mRenderer (renderer){}
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
