@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
         dir.cdUp();
     }
 
+    // force Qt to load only LOCAL plugins, don't touch system Qt installation
     QDir pluginsPath(QCoreApplication::applicationDirPath());
     pluginsPath.cdUp();
     pluginsPath.cd("Plugins");
