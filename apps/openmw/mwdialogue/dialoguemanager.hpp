@@ -21,6 +21,8 @@ namespace MWDialogue
 
             bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const;
 
+            void parseText(std::string text);
+
             std::map<std::string,bool> knownTopics;// Those are the topics the player knows.
             std::map<std::string,std::string> actorKnownTopics;
 

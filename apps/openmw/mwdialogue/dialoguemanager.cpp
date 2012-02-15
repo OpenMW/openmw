@@ -404,6 +404,32 @@ namespace MWDialogue
         knownTopics[toLower(topic)] = true;
     }
 
+    void DialogueManager::parseText(std::string text)
+    {
+        std::map<std::string,std::string>::iterator it;
+        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
+        {
+            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+            size_t pos = find_str_ci(text,it->first,0);
+            if(pos !=std::string::npos)
+            {
+                if(pos==0)
+                {
+                    //std::cout << "fouuuuuuuuuuund";
+                    knownTopics[it->first] = true;
+                    win->addKeyword(it->first,it->second);
+                }
+                else if(text.substr(pos -1,1) == " ")
+                {
+                    //std::cout << "fouuuuuuuuuuund";
+                    knownTopics[it->first] = true;
+                    win->addKeyword(it->first,it->second);
+                }
+            }
+
+        }
+    }
+
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
         std::cout << "talking with " << MWWorld::Class::get (actor).getName (actor) << std::endl;
@@ -463,18 +489,9 @@ namespace MWDialogue
                             // TODO execute script
                         }
                         std::string text = iter->response;
-                        std::map<std::string,std::string>::iterator it;
-                        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
-                        {
-                            if(find_str_ci(text,it->first,0) !=std::string::npos)
-                            {
-                                //std::cout << "fouuuuuuuuuuund";
-                                knownTopics[it->first] = true;
-                                MWGui::DialogueWindow* win2 = mEnvironment.mWindowManager->getDialogueWindow();
-                                win2->addKeyword(it->first,it->second);
-                            }
-                        }
+                        parseText(text);
                         win->addText(iter->response);
+                        
                         greetingFound = true;
                         break;
                     }
@@ -486,16 +503,7 @@ namespace MWDialogue
     void DialogueManager::keywordSelected(std::string keyword)
     {
         std::string text = actorKnownTopics[keyword];
-        std::map<std::string,std::string>::iterator it;
-        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
-        {
-            if(find_str_ci(text,it->first,0) !=std::string::npos)
-            {
-                knownTopics[it->first] = true;
-                MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-                win->addKeyword(it->first,it->second);
-            }
-        }
+        parseText(text);
     }
 
     void DialogueManager::goodbyeSelected()
