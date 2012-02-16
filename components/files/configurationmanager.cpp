@@ -56,9 +56,9 @@ ConfigurationManager::~ConfigurationManager()
 void ConfigurationManager::setupTokensMapping()
 {
     mTokensMapping.insert(std::make_pair(mwToken, &FixedPath<>::getInstallPath));
-    mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalDataPath));
-    mTokensMapping.insert(std::make_pair(userToken, &FixedPath<>::getUserDataPath));
-    mTokensMapping.insert(std::make_pair(globalToken, &FixedPath<>::getGlobalDataPath));
+    mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalPath));
+    mTokensMapping.insert(std::make_pair(userToken, &FixedPath<>::getUserPath));
+    mTokensMapping.insert(std::make_pair(globalToken, &FixedPath<>::getGlobalPath));
 }
 
 void ConfigurationManager::readConfiguration(boost::program_options::variables_map& variables,
