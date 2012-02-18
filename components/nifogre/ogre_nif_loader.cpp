@@ -531,6 +531,8 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     {
             sub->addBoneAssignment(*it);
     }
+    if(mSkel.isNull())
+       needBoneAssignments.push_back(sub);
 }
 
 // Helper math functions. Reinventing linear algebra for the win!
@@ -945,7 +947,8 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     {
         // Add this vertex set to the bounding box
         bounds.add(optr, numVerts);
-        shapes.push_back(copy);
+        if(addShapes)
+            shapes.push_back(copy);
 
         // Create the submesh
         createOgreSubMesh(shape, material, vertexBoneAssignments);
@@ -1066,9 +1069,11 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
-   
+            addShapes = true;
             mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
         }
+        else if (!mSkel.isNull() && !parentBone)
+            addShapes = false;
 
         if (!mSkel.isNull())     //if there is a skeleton
         {
@@ -1143,8 +1148,11 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
 void NIFLoader::loadResource(Resource *resource)
 {
+    addShapes = false;
     	allanim.clear();
 	shapes.clear();
+    needBoneAssignments.clear();
+   // needBoneAssignments.clear();
    mBoundingBox.setNull();
     mesh = 0;
     mSkel.setNull();
@@ -1311,6 +1319,17 @@ void NIFLoader::loadResource(Resource *resource)
 
      if (!mSkel.isNull() )
     {
+        for(std::vector<Ogre::SubMesh*>::iterator iter = needBoneAssignments.begin(); iter != needBoneAssignments.end(); iter++)
+        {
+            int boneIndex = mSkel->getNumBones() - 1;
+		        VertexBoneAssignment vba;
+                vba.boneIndex = boneIndex;
+                vba.vertexIndex = 0;
+                vba.weight = 1;
+				 
+
+            (*iter)->addBoneAssignment(vba);
+        }
        mesh->_notifySkeleton(mSkel);
     }
 }

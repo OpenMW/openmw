@@ -121,7 +121,7 @@ class NIFLoader : Ogre::ManualResourceLoader
 
     private:
         NIFLoader() : mNormaliseNormals(false),  resourceGroup("General"), resourceName(""), flip(false),
-          mFlipVertexWinding(false), mOutputAnimFiles(false)  {}
+          mFlipVertexWinding(false), mOutputAnimFiles(false), addShapes(false)  {}
         NIFLoader(NIFLoader& n) {}
 
         void calculateTransform();
@@ -189,6 +189,8 @@ class NIFLoader : Ogre::ManualResourceLoader
 		std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost> allshapesmap;
         std::vector<Nif::NiKeyframeData> mAnim;
 		std::vector<Nif::NiTriShapeCopy> mS;
+        std::vector<Ogre::SubMesh*> needBoneAssignments;
+        bool addShapes;
         
 };
 
