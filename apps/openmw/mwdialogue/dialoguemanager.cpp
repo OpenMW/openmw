@@ -27,7 +27,6 @@
 #include "../mwscript/extensions.hpp"
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>
-#include <components/compiler/lineparser.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/compiler/output.hpp>
@@ -35,7 +34,7 @@
 
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"
-#include <components/compiler/fileparser.hpp>
+#include <components/compiler/scriptparser.hpp>
 
 namespace
 {
@@ -411,7 +410,8 @@ namespace MWDialogue
     }
 
     DialogueManager::DialogueManager (MWWorld::Environment& environment) : 
-    mEnvironment (environment),mCompilerContext (MWScript::CompilerContext::Type_Dialgoue, environment)
+    mEnvironment (environment),mCompilerContext (MWScript::CompilerContext::Type_Dialgoue, environment),
+        mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
     {
     }
 
@@ -518,21 +518,26 @@ namespace MWDialogue
         }
     }
 
-    bool DialogueManager::compile (const std::string& cmd, Compiler::Output& output)
+    bool DialogueManager::compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code)
     {
         try
         {
-            ErrorHandler::reset();
+            mErrorHandler.reset();
 
-            std::istringstream input (cmd + '\n');
+            std::istringstream input (cmd);
 
-            Compiler::Scanner scanner (*this, input, mCompilerContext.getExtensions());
+            Compiler::Scanner scanner (mErrorHandler, input, mCompilerContext.getExtensions());
 
-            Compiler::FileParser parser(*this,mCompilerContext);
+            Compiler::ScriptParser parser(mErrorHandler,mCompilerContext,Compiler::Locals());//??????&mActor.getRefData().getLocals());
 
             scanner.scan (parser);
 
-            return isGood();
+            if(mErrorHandler.isGood())
+            {
+                parser.getCode(code);
+                return true;
+            }
+            return false;
         }
         catch (const Compiler::SourceException& error)
         {
@@ -548,18 +553,14 @@ namespace MWDialogue
 
     void DialogueManager::executeScript(std::string script)
     {
-        Compiler::Locals locals;
-        Compiler::Output output (locals);
-
-        if(compile(script,output))
+        std::vector<Interpreter::Type_Code> code;
+        if(compile(script,code))
         {
             try
             {
                 MWScript::InterpreterContext interpreterContext(mEnvironment,&mActor.getRefData().getLocals(),mActor);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
-                std::vector<Interpreter::Type_Code> code;
-                output.getCode (code);
                 interpreter.run (&code[0], code.size(), interpreterContext);
             }
             catch (const std::exception& error)

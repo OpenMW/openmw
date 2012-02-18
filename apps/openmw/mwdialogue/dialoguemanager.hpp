@@ -3,7 +3,7 @@
 
 #include <components/esm/loadinfo.hpp>
 
-#include <components/compiler/errorhandler.hpp>
+#include <components/compiler/streamerrorhandler.hpp>
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"
 #include <components/compiler/output.hpp>
@@ -18,7 +18,7 @@ namespace MWWorld
 
 namespace MWDialogue
 {
-    class DialogueManager: private Compiler::ErrorHandler
+    class DialogueManager
     {
             MWWorld::Environment& mEnvironment;
 
@@ -32,14 +32,11 @@ namespace MWDialogue
             std::map<std::string,ESM::DialInfo> actorKnownTopics;
 
             MWScript::CompilerContext mCompilerContext;
+            std::ostream mErrorStream;
+            Compiler::StreamErrorHandler mErrorHandler;
+            
 
-            /// Report error to the user.
-            virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type){};
-
-            /// Report a file related error
-            virtual void report (const std::string& message, Type type){};
-
-            bool compile (const std::string& cmd, Compiler::Output& output);
+            bool compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code);
             void executeScript(std::string script);
             MWWorld::Ptr mActor;
 
