@@ -3,6 +3,8 @@
 
 #include "../mwrender/player.hpp"
 
+#include "../mwmechanics/movement.hpp"
+
 #include "world.hpp"
 #include "class.hpp"
 

@@ -35,8 +35,6 @@
 #include "mwsound/soundmanager.hpp"
 
 #include "mwworld/world.hpp"
-#include "mwworld/ptr.hpp"
-#include "mwworld/environment.hpp"
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
 
@@ -147,7 +145,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             mEnvironment.mWorld->advanceTime (
                 mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
 
-        
+
         if (changed) // keep change flag for another frame, if cell changed happend in local script
             mEnvironment.mWorld->markCellAsUnchanged();
 
@@ -157,6 +155,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
             mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
+
+        // update world
+        mEnvironment.mWorld->update (evt.timeSinceLastFrame);
 
         // report focus object (for debugging)
         if (mReportFocus)
@@ -172,7 +173,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
 OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
   : mOgre (0)
-  , mPhysicEngine (0)
   , mFpsLevel(0)
   , mDebug (false)
   , mVerboseScripts (false)
@@ -183,7 +183,6 @@ OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
   , mFocusTDiff (0)
   , mScriptManager (0)
   , mScriptContext (0)
-  , mGuiManager (0)
   , mFSStrict (false)
   , mCfgMgr(configurationManager)
 {
@@ -193,7 +192,6 @@ OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    delete mGuiManager;
     delete mEnvironment.mWorld;
     delete mEnvironment.mSoundManager;
     delete mEnvironment.mGlobalScripts;
@@ -202,7 +200,6 @@ OMW::Engine::~Engine()
     delete mEnvironment.mJournal;
     delete mScriptManager;
     delete mScriptContext;
-    delete mPhysicEngine;
     delete mOgre;
 }
 
@@ -330,26 +327,15 @@ void OMW::Engine::go()
 
     loadBSA();
 
-    /// \todo move this into the physics manager
-    // Create physics. shapeLoader is deleted by the physic engine
-    NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
-    mPhysicEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
-
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (*mOgre, mPhysicEngine, mFileCollections, mMaster,
+    mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,
         mResDir, mNewGame, mEnvironment, mEncoding);
-
-    /// \todo move this into the GUI manager (a.k.a WindowManager)
-    // Set up the GUI system
-    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false,
-        mCfgMgr.getLogPath().string() + std::string("/"));
-   
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
-    mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui(), mEnvironment,
-        mExtensions, mFpsLevel, mNewGame);
+    mEnvironment.mWindowManager = new MWGui::WindowManager(mEnvironment,
+        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"));
 
     // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),

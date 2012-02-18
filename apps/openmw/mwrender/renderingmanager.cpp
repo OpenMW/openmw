@@ -19,8 +19,6 @@ using namespace Ogre;
 
 namespace MWRender {
 
-
-
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
 :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mDebugging(engine)
 {
@@ -123,7 +121,7 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 
 void RenderingManager::update (float duration){
 
-
+    mActors.update (duration);
 }
 
 void RenderingManager::skyEnable ()
@@ -244,10 +242,6 @@ void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::s
 void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 {
     mActors.skipAnimation(ptr);
-}
-void RenderingManager::addTime(){
-    mActors.addTime();
-	//Notify each animation that time has passed
 }
 
 }

@@ -8,6 +8,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 
+#include "../mwrender/objects.hpp"
 
 #include "containerutil.hpp"
 
@@ -20,7 +21,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();

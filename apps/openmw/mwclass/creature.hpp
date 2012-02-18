@@ -10,6 +10,8 @@ namespace MWClass
 {
     class Creature : public MWWorld::Class
     {
+            void ensureCustomData (const MWWorld::Ptr& ptr) const;
+
         public:
 
             virtual std::string getId (const MWWorld::Ptr& ptr) const;

@@ -269,22 +269,6 @@ void NpcAnimation::runAnimation(float timepassed){
         handleAnimationTransforms();
         Ogre::Vector3 current = insert->_getWorldAABB().getCenter();
 
-        //This is the attempt at npc physics
-        //mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), current);
-
-
-
-        /*if(base->hasSkeleton())
-        {
-
-            Ogre::Quaternion boneQuat = rotate;
-            Ogre::Vector3 boneTrans = trans;
-            mEnvironment.mWorld->setObjectPhysicsPosition(insert->getName(), boneTrans + insert->getPosition());
-            //mEnvironment.mWorld->setObjectPhysicsRotation(insert->getName(), boneQuat * insert->getOrientation());
-
-        }*/
-
-
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
         while(shapepartsiter != shapeparts.end())
@@ -301,7 +285,7 @@ void NpcAnimation::runAnimation(float timepassed){
             handleShapes(shapes, theentity, theentity->getSkeleton());
             shapepartsiter++;
             entitypartsiter++;
-	    }
+        }
     }
 
 }

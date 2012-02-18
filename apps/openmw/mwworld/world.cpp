@@ -143,16 +143,17 @@ namespace MWWorld
         }
     }
 
-    World::World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+    World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
-    : mRendering (renderer,resDir, physEng, environment),mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
+    : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
-        mPhysEngine = physEng;
-
-        mPhysics = new PhysicsSystem(renderer, physEng);
+        mPhysics = new PhysicsSystem(renderer);
+        mPhysEngine = mPhysics->getEngine();
+        
+        mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine, environment);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
@@ -163,7 +164,7 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-        MWRender::Player* play = &(mRendering.getPlayer());
+        MWRender::Player* play = &(mRendering->getPlayer());
         mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
@@ -176,9 +177,7 @@ namespace MWWorld
             mGlobalVariables->setInt ("chargenstate", 1);
         }
 
-        mPhysEngine = physEng;
-
-        mWorldScene = new Scene(environment, this, mRendering, mPhysics);
+        mWorldScene = new Scene(environment, this, *mRendering, mPhysics);
 
     }
 
@@ -186,7 +185,7 @@ namespace MWWorld
     {
         delete mWorldScene;
         delete mGlobalVariables;
-
+        delete mRendering;
         delete mPhysics;
 
         delete mPlayer;
@@ -348,14 +347,13 @@ namespace MWWorld
     void World::advanceTime (double hours)
     {
         hours += mGlobalVariables->getFloat ("gamehour");
-        
+
         setHour (hours);
 
         int days = hours / 24;
 
         if (days>0)
             mGlobalVariables->setInt ("dayspassed", days + mGlobalVariables->getInt ("dayspassed"));
-        mWorldScene->advanceTime();
     }
 
     void World::setHour (double hour)
@@ -369,7 +367,7 @@ namespace MWWorld
 
         mGlobalVariables->setFloat ("gamehour", hour);
 
-        mRendering.skySetHour (hour);
+        mRendering->skySetHour (hour);
 
         if (days>0)
             setDay (days + mGlobalVariables->getInt ("day"));
@@ -404,7 +402,7 @@ namespace MWWorld
         mGlobalVariables->setInt ("day", day);
         mGlobalVariables->setInt ("month", month);
 
-        mRendering.skySetDate (day, month);
+        mRendering->skySetDate (day, month);
     }
 
     void World::setMonth (int month)
@@ -425,7 +423,7 @@ namespace MWWorld
         if (years>0)
             mGlobalVariables->setInt ("year", years+mGlobalVariables->getInt ("year"));
 
-        mRendering.skySetDate (mGlobalVariables->getInt ("day"), month);
+        mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
     bool World::toggleSky()
@@ -433,34 +431,34 @@ namespace MWWorld
         if (mSky)
         {
             mSky = false;
-            mRendering.skyDisable();
+            mRendering->skyDisable();
             return false;
         }
         else
         {
             mSky = true;
             // TODO check for extorior or interior with sky.
-            mRendering.skySetHour (mGlobalVariables->getFloat ("gamehour"));
-            mRendering.skySetDate (mGlobalVariables->getInt ("day"),
+            mRendering->skySetHour (mGlobalVariables->getFloat ("gamehour"));
+            mRendering->skySetDate (mGlobalVariables->getInt ("day"),
                 mGlobalVariables->getInt ("month"));
-            mRendering.skyEnable();
+            mRendering->skyEnable();
             return true;
         }
     }
 
     int World::getMasserPhase() const
     {
-        return mRendering.skyGetMasserPhase();
+        return mRendering->skyGetMasserPhase();
     }
 
     int World::getSecundaPhase() const
     {
-        return mRendering.skyGetSecundaPhase();
+        return mRendering->skyGetSecundaPhase();
     }
 
     void World::setMoonColour (bool red)
     {
-        mRendering.skySetMoonColour (red);
+        mRendering->skySetMoonColour (red);
     }
 
     float World::getTimeScaleFactor() const
@@ -506,7 +504,7 @@ namespace MWWorld
                             mEnvironment.mSoundManager->stopSound3D (ptr);
 
                             mPhysics->removeObject (ptr.getRefData().getHandle());
-                            mRendering.removeObject(ptr);
+                            mRendering->removeObject(ptr);
 
                             mLocalScripts.remove (ptr);
                 }
@@ -543,7 +541,7 @@ namespace MWWorld
 
         /// \todo cell change for non-player ref
 
-        mRendering.moveObject (ptr, Ogre::Vector3 (x, y, z));
+        mRendering->moveObject (ptr, Ogre::Vector3 (x, y, z));
     }
 
     void World::moveObject (Ptr ptr, float x, float y, float z)
@@ -617,7 +615,7 @@ namespace MWWorld
 
     bool World::toggleRenderMode (RenderMode mode)
     {
-        return mRendering.toggleRenderMode (mode);
+        return mRendering->toggleRenderMode (mode);
     }
 
     std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)
@@ -678,17 +676,16 @@ namespace MWWorld
     void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
         int number)
     {
-        mRendering.playAnimationGroup (ptr, groupName, mode, number);
+        mRendering->playAnimationGroup (ptr, groupName, mode, number);
     }
 
     void World::skipAnimation (const MWWorld::Ptr& ptr)
     {
-        mRendering.skipAnimation (ptr);
+        mRendering->skipAnimation (ptr);
     }
-    void World::setObjectPhysicsRotation(const std::string& handle, Ogre::Quaternion quat){
-        mPhysics->rotateObject(handle, quat);
-    }
-    void World::setObjectPhysicsPosition(const std::string& handle, Ogre::Vector3 vec){
-        mPhysics->moveObject(handle, vec);
+
+    void World::update (float duration)
+    {
+        mWorldScene->update (duration);
     }
 }

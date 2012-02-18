@@ -14,8 +14,6 @@
 
 #include "../mwrender/objects.hpp"
 
-#include <iostream>
-
 namespace MWClass
 {
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -25,7 +23,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -39,13 +37,11 @@ namespace MWClass
          ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
             ptr.get<ESM::Door>();
 
-
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-
     }
 
     std::string Door::getName (const MWWorld::Ptr& ptr) const
@@ -86,7 +82,7 @@ namespace MWClass
             }
             else
             {
-                // another NPC or a create is using the door
+                // another NPC or a creature is using the door
                 // TODO return action for teleporting other NPC/creature
                 return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
             }
