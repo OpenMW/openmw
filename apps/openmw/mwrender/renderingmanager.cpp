@@ -72,6 +72,11 @@ MWRender::Player& RenderingManager::getPlayer(){
     return (*mPlayer);
 }
 
+OEngine::Render::Fader* RenderingManager::getFader()
+{
+    return mRendering.getFader();
+}
+
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
     mObjects.removeCell(store);
     mActors.removeCell(store);

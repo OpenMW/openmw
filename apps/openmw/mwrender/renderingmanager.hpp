@@ -9,6 +9,7 @@
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
+#include <openengine/ogre/fader.hpp>
 #include <openengine/bullet/physic.hpp>
 
 #include <vector>
@@ -63,6 +64,8 @@ class RenderingManager: private RenderingInterface {
 
     void toggleLight();
     bool toggleRenderMode(int mode);
+    
+    OEngine::Render::Fader* getFader();
 
     void removeCell (MWWorld::Ptr::CellStore *store);
 

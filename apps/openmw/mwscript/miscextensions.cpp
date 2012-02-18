@@ -123,6 +123,57 @@ namespace MWScript
                         "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
                 }
         };
+        
+        class OpFadeIn : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Float time = runtime[0].mFloat;
+                    runtime.pop();
+                    
+                    context.getWorld().getFader()->fadeIn(time);
+                }
+        };
+        
+        class OpFadeOut : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Float time = runtime[0].mFloat;
+                    runtime.pop();
+                    
+                    context.getWorld().getFader()->fadeOut(time);
+                }
+        };
+        
+        class OpFadeTo : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Float alpha = runtime[0].mFloat;
+                    runtime.pop();
+                    
+                    Interpreter::Type_Float time = runtime[0].mFloat;
+                    runtime.pop();
+                    
+                    context.getWorld().getFader()->fadeTo(alpha, time);
+                }
+        };
 
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
@@ -133,6 +184,9 @@ namespace MWScript
         const int opcodeUnlockExplicit = 0x200008d;
         const int opcodeToggleCollisionDebug = 0x2000132;
         const int opcodeToggleWireframe = 0x200013b;
+        const int opcodeFadeIn = 0x200013c;
+        const int opcodeFadeOut = 0x200013d;
+        const int opcodeFadeTo = 0x200013e;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -147,6 +201,9 @@ namespace MWScript
             extensions.registerInstruction ("tcg", "", opcodeToggleCollisionDebug);
             extensions.registerInstruction ("twf", "", opcodeToggleWireframe);
             extensions.registerInstruction ("togglewireframe", "", opcodeToggleWireframe);
+            extensions.registerInstruction ("fadein", "f", opcodeFadeIn);
+            extensions.registerInstruction ("fadeout", "f", opcodeFadeOut);
+            extensions.registerInstruction ("fadeto", "ff", opcodeFadeTo);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -160,6 +217,9 @@ namespace MWScript
             interpreter.installSegment5 (opcodeUnlockExplicit, new OpUnlock<ExplicitRef>);
             interpreter.installSegment5 (opcodeToggleCollisionDebug, new OpToggleCollisionDebug);
             interpreter.installSegment5 (opcodeToggleWireframe, new OpToggleWireframe);
+            interpreter.installSegment5 (opcodeFadeIn, new OpFadeIn);
+            interpreter.installSegment5 (opcodeFadeOut, new OpFadeOut);
+            interpreter.installSegment5 (opcodeFadeTo, new OpFadeTo);
         }
     }
 }

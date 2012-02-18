@@ -162,6 +162,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         // report focus object (for debugging)
         if (mReportFocus)
             updateFocusReport (mEnvironment.mFrameDuration);
+            
+        // update ogre renderer
+        mOgre->update(evt.timeSinceLastFrame);
     }
     catch (const std::exception& e)
     {

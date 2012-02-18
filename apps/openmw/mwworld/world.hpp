@@ -20,6 +20,7 @@
 #include "localscripts.hpp"
 
 #include <openengine/bullet/physic.hpp>
+#include <openengine/ogre/fader.hpp>
 
 namespace Ogre
 {
@@ -102,6 +103,8 @@ namespace MWWorld
                 Environment& environment, const std::string& encoding);
 
             ~World();
+            
+            OEngine::Render::Fader* getFader();
 
             Ptr::CellStore *getExterior (int x, int y);
 
