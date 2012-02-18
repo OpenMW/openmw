@@ -1,4 +1,5 @@
 #include "renderer.hpp"
+#include "fader.hpp"
 
 #include "OgreRoot.h"
 #include "OgreRenderWindow.h"
@@ -12,6 +13,8 @@ using namespace OEngine::Render;
 
 void OgreRenderer::cleanup()
 {
+  delete mFader;
+  
   if(mRoot)
     delete mRoot;
   mRoot = NULL;
@@ -20,6 +23,11 @@ void OgreRenderer::cleanup()
 void OgreRenderer::start()
 {
   mRoot->startRendering();
+}
+
+void OgreRenderer::update(float dt)
+{
+  mFader->update(dt);
 }
 
 void OgreRenderer::screenshot(const std::string &file)
@@ -98,4 +106,6 @@ void OgreRenderer::createScene(const std::string camName, float fov, float nearC
 
   // Alter the camera aspect ratio to match the viewport
   mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+  
+  mFader = new Fader();
 }
