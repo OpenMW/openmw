@@ -146,6 +146,7 @@ namespace MWScript
             extensions.registerInstruction ("tcb", "", opcodeToggleCollisionDebug);
             extensions.registerInstruction ("tcg", "", opcodeToggleCollisionDebug);
             extensions.registerInstruction ("twf", "", opcodeToggleWireframe);
+            extensions.registerInstruction ("togglewireframe", "", opcodeToggleWireframe);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
