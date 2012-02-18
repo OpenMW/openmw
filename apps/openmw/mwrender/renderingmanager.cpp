@@ -157,8 +157,24 @@ void RenderingManager::skySetMoonColour (bool red)
 {
     mSkyManager->setMoonColour(red);
 }
-bool RenderingManager::toggleRenderMode(int mode){
-    return mDebugging.toggleRenderMode(mode);
+
+bool RenderingManager::toggleRenderMode(int mode)
+{
+    if (mode == MWWorld::World::Render_CollisionDebug)
+        return mDebugging.toggleRenderMode(mode);
+    else // if (mode == MWWorld::World::Render_Wireframe)
+    {
+        if (mRendering.getCamera()->getPolygonMode() == PM_SOLID)
+        {
+            mRendering.getCamera()->setPolygonMode(PM_WIREFRAME);
+            return true;
+        }
+        else
+        {
+            mRendering.getCamera()->setPolygonMode(PM_SOLID);
+            return false;
+        }
+    }
 }
 
 void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)

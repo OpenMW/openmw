@@ -103,7 +103,24 @@ namespace MWScript
                         context.getWorld().toggleRenderMode (MWWorld::World::Render_CollisionDebug);
 
                     context.report (enabled ?
-                        "Collsion Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
+                        "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
+                }
+        };
+        
+        class OpToggleWireframe : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    bool enabled =
+                        context.getWorld().toggleRenderMode (MWWorld::World::Render_Wireframe);
+
+                    context.report (enabled ?
+                        "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
                 }
         };
 
@@ -115,6 +132,7 @@ namespace MWScript
         const int opcodeUnlock = 0x200008c;
         const int opcodeUnlockExplicit = 0x200008d;
         const int opcodeToggleCollisionDebug = 0x2000132;
+        const int opcodeToggleWireframe = 0x200013b;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -127,6 +145,7 @@ namespace MWScript
             extensions.registerInstruction ("togglecollisiongrid", "", opcodeToggleCollisionDebug);
             extensions.registerInstruction ("tcb", "", opcodeToggleCollisionDebug);
             extensions.registerInstruction ("tcg", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("twf", "", opcodeToggleWireframe);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -139,6 +158,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeUnlock, new OpUnlock<ImplicitRef>);
             interpreter.installSegment5 (opcodeUnlockExplicit, new OpUnlock<ExplicitRef>);
             interpreter.installSegment5 (opcodeToggleCollisionDebug, new OpToggleCollisionDebug);
+            interpreter.installSegment5 (opcodeToggleWireframe, new OpToggleWireframe);
         }
     }
 }

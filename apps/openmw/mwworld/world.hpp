@@ -60,7 +60,8 @@ namespace MWWorld
 
             enum RenderMode
             {
-                Render_CollisionDebug
+                Render_CollisionDebug,
+                Render_Wireframe
             };
 
         private:
