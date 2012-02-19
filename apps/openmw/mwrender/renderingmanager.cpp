@@ -125,6 +125,8 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 void RenderingManager::update (float duration){
 
     mActors.update (duration);
+    
+    mRendering.update(duration);
 }
 
 void RenderingManager::skyEnable ()
