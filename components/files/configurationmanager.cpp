@@ -5,6 +5,11 @@
 #include <iostream>
 #include <algorithm>
 
+#include <boost/bind.hpp>
+
+/**
+ * \namespace Files
+ */
 namespace Files
 {
 
@@ -22,10 +27,6 @@ ConfigurationManager::ConfigurationManager()
 {
     setupTokensMapping();
 
-    /**
-     * According to task #168 plugins.cfg file shall be located in global
-     * configuration path or in local configuration path.
-     */
     mPluginsCfgPath = mFixedPath.getGlobalPath() / pluginsCfgFile;
     if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
     {
@@ -37,15 +38,7 @@ ConfigurationManager::ConfigurationManager()
         }
     }
 
-    /**
-     * According to task #168 ogre.cfg file shall be located only
-     * in user configuration path.
-     */
     mOgreCfgPath = mFixedPath.getUserPath() / ogreCfgFile;
-
-    /**
-     * FIXME: Logs shoudn't be stored in the same dir where configuration is placed.
-     */
     mLogPath = mFixedPath.getUserPath();
 }
 
@@ -56,8 +49,8 @@ ConfigurationManager::~ConfigurationManager()
 void ConfigurationManager::setupTokensMapping()
 {
     mTokensMapping.insert(std::make_pair(mwToken, &FixedPath<>::getInstallPath));
-    mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalDataPath));
-    mTokensMapping.insert(std::make_pair(userToken, &FixedPath<>::getUserDataPath));
+    mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalPath));
+    mTokensMapping.insert(std::make_pair(userToken, &FixedPath<>::getUserPath));
     mTokensMapping.insert(std::make_pair(globalToken, &FixedPath<>::getGlobalDataPath));
 }
 
@@ -73,14 +66,6 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     boost::program_options::notify(variables);
 
 }
-
-struct EmptyPath : public std::unary_function<const boost::filesystem::path&, bool>
-{
-    bool operator()(const boost::filesystem::path& path) const
-    {
-        return path.empty();
-    }
-};
 
 void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
 {
@@ -105,14 +90,7 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
                         tempPath /= path.substr(pos + 1, path.length() - pos);
                     }
 
-                    if (boost::filesystem::is_directory(tempPath))
-                    {
-                        (*it) = tempPath;
-                    }
-                    else
-                    {
-                        (*it).clear();
-                    }
+                    *it = tempPath;
                 }
                 else
                 {
@@ -121,9 +99,15 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
                 }
             }
         }
+
+        if (!boost::filesystem::is_directory(*it))
+        {
+            (*it).clear();
+        }
     }
 
-    dataDirs.erase(std::remove_if(dataDirs.begin(), dataDirs.end(), EmptyPath()), dataDirs.end());
+    dataDirs.erase(std::remove_if(dataDirs.begin(), dataDirs.end(),
+        boost::bind(&boost::filesystem::path::empty, _1)), dataDirs.end());
 }
 
 void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
@@ -169,16 +153,6 @@ const boost::filesystem::path& ConfigurationManager::getLocalPath() const
 const boost::filesystem::path& ConfigurationManager::getGlobalDataPath() const
 {
     return mFixedPath.getGlobalDataPath();
-}
-
-const boost::filesystem::path& ConfigurationManager::getUserDataPath() const
-{
-    return mFixedPath.getUserDataPath();
-}
-
-const boost::filesystem::path& ConfigurationManager::getLocalDataPath() const
-{
-    return mFixedPath.getLocalDataPath();
 }
 
 const boost::filesystem::path& ConfigurationManager::getInstallPath() const

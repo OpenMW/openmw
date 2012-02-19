@@ -73,9 +73,7 @@ struct FixedPath
         , mUserPath(mPath.getUserPath())
         , mGlobalPath(mPath.getGlobalPath())
         , mLocalPath(mPath.getLocalPath())
-        , mUserDataPath(mPath.getUserDataPath())
         , mGlobalDataPath(mPath.getGlobalDataPath())
-        , mLocalDataPath(mPath.getLocalDataPath())
         , mInstallPath(mPath.getInstallPath())
     {
         if (!application_name.empty())
@@ -84,9 +82,6 @@ struct FixedPath
 
             mUserPath /= suffix;
             mGlobalPath /= suffix;
-
-            mLocalDataPath /= suffix;
-            mUserDataPath /= suffix;
             mGlobalDataPath /= suffix;
         }
     }
@@ -131,16 +126,6 @@ struct FixedPath
         return mGlobalDataPath;
     }
 
-    const boost::filesystem::path& getUserDataPath() const
-    {
-        return mUserDataPath;
-    }
-
-    const boost::filesystem::path& getLocalDataPath() const
-    {
-        return mLocalDataPath;
-    }
-
     private:
         PathType mPath;
 
@@ -148,11 +133,8 @@ struct FixedPath
         boost::filesystem::path mGlobalPath;     /**< Global path */
         boost::filesystem::path mLocalPath;      /**< It is the same directory where application was run */
 
-        boost::filesystem::path mUserDataPath;          /**< User data path */
         boost::filesystem::path mGlobalDataPath;        /**< Global application data path */
-        boost::filesystem::path mLocalDataPath;         /**< Local path to the configuration files.
-                                                              By default it is a 'data' directory in same
-                                                              directory where application was run */
+
         boost::filesystem::path mInstallPath;
 
 };

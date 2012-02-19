@@ -65,21 +65,7 @@ struct LinuxPath
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getUserDataPath() const;
-
-    /**
-     * \brief
-     *
-     * \return boost::filesystem::path
-     */
     boost::filesystem::path getGlobalDataPath() const;
-
-    /**
-     * \brief
-     *
-     * \return boost::filesystem::path
-     */
-    boost::filesystem::path getLocalDataPath() const;
 
     /**
      * \brief Gets the path of the installed Morrowind version if there is one.

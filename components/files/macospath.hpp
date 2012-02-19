@@ -60,6 +60,13 @@ struct MacOsPath
      */
     boost::filesystem::path getLocalPath() const;
 
+    /**
+     * \brief
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getGlobalDataPath() const;
+
     boost::filesystem::path getInstallPath() const;
 };
 

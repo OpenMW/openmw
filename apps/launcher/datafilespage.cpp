@@ -135,6 +135,8 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
         dataDirs.push_back(boost::filesystem::path(currentPath.toStdString()));
     }
 
+    mCfgMgr.processPaths(dataDirs);
+
     // Create a file collection for the dataDirs
     Files::Collections mFileCollections(dataDirs, strict);
 
