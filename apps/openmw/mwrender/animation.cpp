@@ -216,7 +216,7 @@ namespace MWRender{
                    
                     
 
-                    for(int i = 1; i < inds.size(); i++){
+                    for(std::size_t i = 1; i < inds.size(); i++){
                         boneinfocopy = &(allshapesiter->boneinfo[inds[i].boneinfocopyindex]);
                         result = vecRotPos.find(boneinfocopy);
                        
