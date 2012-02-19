@@ -7,6 +7,7 @@ namespace Ogre
 {
     class RenderWindow;
     class Camera;
+    class SceneNode;
 }
 
 namespace MWRender
@@ -19,8 +20,11 @@ namespace MWRender
     public:
         static SkyManager* create (Ogre::RenderWindow* pRenderWindow, 
                                    Ogre::Camera* pCamera,
+                                   Ogre::SceneNode* pMwRoot,
                                    const boost::filesystem::path& resDir);
         virtual ~SkyManager() {}
+        
+        virtual void update(float duration) = 0;
         
         virtual void enable() = 0;
         

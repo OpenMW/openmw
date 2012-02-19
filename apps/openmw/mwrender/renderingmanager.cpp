@@ -23,7 +23,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
-    mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), resDir);
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -41,7 +40,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mMwRoot->pitch(Degree(-90));
     mObjects.setMwRoot(mMwRoot);
     mActors.setMwRoot(mMwRoot);
-
+    
+    mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), mMwRoot, resDir);
+    
     //used to obtain ingame information of ogre objects (which are faced or selected)
     mRaySceneQuery = mRendering.getScene()->createRayQuery(Ray());
 
@@ -125,6 +126,8 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 void RenderingManager::update (float duration){
 
     mActors.update (duration);
+    
+    mSkyManager->update(duration);
 }
 
 void RenderingManager::skyEnable ()
