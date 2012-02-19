@@ -128,6 +128,8 @@ void RenderingManager::update (float duration){
     mActors.update (duration);
     
     mSkyManager->update(duration);
+    
+    mRendering.update(duration);
 }
 
 void RenderingManager::skyEnable ()
