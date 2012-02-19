@@ -583,6 +583,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 {
     assert(shape != NULL);
 
+    bool saveTheShape = inTheSkeletonTree;
     // Interpret flags
     bool hidden    = (flags & 0x01) != 0; // Not displayed
     bool collide   = (flags & 0x02) != 0; // Use mesh for collision
@@ -741,6 +742,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     std::list<VertexBoneAssignment> vertexBoneAssignments;
 
     Nif::NiTriShapeCopy copy = shape->clone();
+   
 	if(!shape->controller.empty())
 	{
 		Nif::Controller* cont = shape->controller.getPtr();
@@ -750,6 +752,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 			copy.morph = morph->data.get();
 			copy.morph.setStartTime(morph->timeStart);
 			copy.morph.setStopTime(morph->timeStop);
+            saveTheShape = true;
 		}
 
 	}
@@ -928,10 +931,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         }
 		if(!mSkel.isNull() ){
 			int boneIndex;
-			Ogre::Bone *parentBone = mSkel->getBone(boneSequence[boneSequence.size() - 1]);
-			if(parentBone)
-				boneIndex = parentBone->getHandle();
-			else
+			
 				boneIndex = mSkel->getNumBones() - 1;
 			for(int i = 0; i < numVerts; i++){
 		 VertexBoneAssignment vba;
@@ -947,7 +947,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     {
         // Add this vertex set to the bounding box
         bounds.add(optr, numVerts);
-        if(addShapes)
+        if(saveTheShape)
             shapes.push_back(copy);
 
         // Create the submesh
@@ -1069,21 +1069,22 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
-            addShapes = true;
+            inTheSkeletonTree = true;
             mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
         }
         else if (!mSkel.isNull() && !parentBone)
-            addShapes = false;
+            inTheSkeletonTree = false;
 
         if (!mSkel.isNull())     //if there is a skeleton
         {
             std::string name = node->name.toString();
-            boneSequence.push_back(name);
+            
             
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
             if(!mSkel->hasBone(name))
             {
+                boneSequence.push_back(name);
                 bone = mSkel->createBone(name);
 
                 if (parentBone)
@@ -1148,7 +1149,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
 void NIFLoader::loadResource(Resource *resource)
 {
-    addShapes = false;
+    inTheSkeletonTree = false;
     	allanim.clear();
 	shapes.clear();
     needBoneAssignments.clear();

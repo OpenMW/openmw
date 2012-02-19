@@ -261,11 +261,13 @@ namespace MWRender{
 					Ogre::Vector3 shapetrans = copy.trafo.trans;
 					float shapescale = copy.trafo.scale;
 					std::vector<std::string> boneSequence = copy.boneSequence;
-					std::vector<std::string>::iterator boneSequenceIter = boneSequence.begin();
+					
 					Ogre::Vector3 transmult;
 						Ogre::Quaternion rotmult;
 						float scale;
-					if(skel->hasBone(*boneSequenceIter)){
+					if(boneSequence.size() > 0){
+                        std::vector<std::string>::iterator boneSequenceIter = boneSequence.begin();
+                        if(skel->hasBone(*boneSequenceIter)){
 					Ogre::Bone *bonePtr = skel->getBone(*boneSequenceIter);
 					
 						
@@ -292,6 +294,7 @@ namespace MWRender{
 
 						//std::cout << "Position: " << transmult << "Rotation: " << rotmult << "\n";
 					}
+                    }
 					else
 					{
 						transmult = shapetrans;
