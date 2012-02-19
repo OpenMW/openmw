@@ -18,10 +18,12 @@ using namespace Ogre;
 using namespace OEngine::Render;
 
 Fader::Fader() : 
-    mMode(FadingMode_None),
+    mMode(FadingMode_In),
     mRemainingTime(0.f),
     mTargetTime(0.f),
-    mTargetAlpha(0.f)
+    mTargetAlpha(0.f),
+    mCurrentAlpha(0.f),
+    mStartAlpha(0.f)
 {
 
     // Create the fading material
@@ -50,35 +52,46 @@ Fader::Fader() :
 }
 
 void Fader::update(float dt)
-{
-    if (mMode == FadingMode_None) return;
-    
+{    
     if (mRemainingTime > 0)
     {
-        mOverlay->show();
-        float alpha;
         if (mMode == FadingMode_In)
-            alpha = (mRemainingTime/mTargetTime) * 1.f;
+        {
+            mCurrentAlpha -= dt/mTargetTime * (mStartAlpha-mTargetAlpha);
+            if (mCurrentAlpha < mTargetAlpha) mCurrentAlpha = mTargetAlpha;
+        }
         else if (mMode == FadingMode_Out)
-            alpha = (1-(mRemainingTime/mTargetTime)) * 1.f;
-        else if (mMode == FadingMode_To)
-            alpha = (1-(mRemainingTime/mTargetTime)) * mTargetAlpha;
-            
-        mFadeTextureUnit->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, alpha);
+        {
+            mCurrentAlpha += dt/mTargetTime * (mTargetAlpha-mStartAlpha);
+            if (mCurrentAlpha > mTargetAlpha) mCurrentAlpha = mTargetAlpha;
+        }
+        
+        applyAlpha();
         
         mRemainingTime -= dt;
     }
-    else
-    {
-        mMode = FadingMode_None;
-        mOverlay->hide();
-    }
+    
+   if (mCurrentAlpha == 0.f) mOverlay->hide();
+}
+
+void Fader::applyAlpha()
+{
+    mOverlay->show();
+    mFadeTextureUnit->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, mCurrentAlpha);
 }
 
 void Fader::fadeIn(float time)
 {
-    if (time<=0) return;
-    
+    if (time<0.f) return;
+    if (time==0.f)
+    {
+        mCurrentAlpha = 0.f;
+        applyAlpha();
+        return;
+    }
+        
+    mStartAlpha = mCurrentAlpha;
+    mTargetAlpha = 0.f;
     mMode = FadingMode_In;
     mTargetTime = time;
     mRemainingTime = time;
@@ -86,8 +99,16 @@ void Fader::fadeIn(float time)
 
 void Fader::fadeOut(const float time)
 {
-    if (time<=0) return;
-    
+    if (time<0.f) return;
+    if (time==0.f)
+    {
+        mCurrentAlpha = 1.f;
+        applyAlpha();
+        return;
+    }
+        
+    mStartAlpha = mCurrentAlpha;
+    mTargetAlpha = 1.f;
     mMode = FadingMode_Out;
     mTargetTime = time;
     mRemainingTime = time;
@@ -95,10 +116,21 @@ void Fader::fadeOut(const float time)
 
 void Fader::fadeTo(const int percent, const float time)
 {
-    if (time<=0) return;
+    if (time<0.f) return;
+    if (time==0.f)
+    {
+        mCurrentAlpha = percent/100.f;
+        applyAlpha();
+        return;
+    }
     
-    mMode = FadingMode_To;
+    mStartAlpha = mCurrentAlpha;
+    mTargetAlpha = percent/100.f;
+    
+    if (mTargetAlpha == mStartAlpha) return;
+    else if (mTargetAlpha > mStartAlpha) mMode = FadingMode_Out;
+    else mMode = FadingMode_In;
+    
     mTargetTime = time;
     mRemainingTime = time;
-    mTargetAlpha = percent/100.f;
 }

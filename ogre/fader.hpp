@@ -30,23 +30,26 @@ namespace Render
     void fadeIn(const float time);
     void fadeOut(const float time);
     void fadeTo(const int percent, const float time);
-    
+        
   private:
     enum FadingMode
     {
         FadingMode_In,
-        FadingMode_Out,
-        FadingMode_To,
-        FadingMode_None // no fading
+        FadingMode_Out
     };
+    
+    void applyAlpha();
   
     Ogre::TextureUnitState* mFadeTextureUnit;
     Ogre::Overlay* mOverlay;
     
     FadingMode mMode;
+    
     float mRemainingTime;
     float mTargetTime;
     float mTargetAlpha;
+    float mCurrentAlpha;
+    float mStartAlpha;
     
   protected:
   };
