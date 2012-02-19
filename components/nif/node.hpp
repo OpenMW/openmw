@@ -103,7 +103,7 @@ struct NiTriShapeCopy
  std::vector<Ogre::Vector3> vertices;
  std::vector<Ogre::Vector3> normals;
  std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfo;
- std::map<int, std::vector<Nif::NiSkinData::IndividualWeight>> vertsToWeights;
+ std::map<int, std::vector<Nif::NiSkinData::IndividualWeight> > vertsToWeights;
  Nif::NiMorphData morph;
 };
 
@@ -158,13 +158,13 @@ struct NiTriShape : Node
 	  {
 		   float *current = (float*) (ptr + i * 3);
 		   copy.vertices.push_back(Ogre::Vector3(*current, *(current + 1), *(current + 2)));
-		    
+
 		   if(ptrNormals){
 			float *currentNormals = (float*) (ptrNormals + i * 3);
-		   copy.normals.push_back(Ogre::Vector3(*currentNormals, *(currentNormals + 1), *(currentNormals + 2))); 
+		   copy.normals.push_back(Ogre::Vector3(*currentNormals, *(currentNormals + 1), *(currentNormals + 2)));
 	 		  }
       }
-	  
+
 
   return copy;
   }

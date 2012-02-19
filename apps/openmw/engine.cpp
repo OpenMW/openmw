@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <OgreRoot.h>
+#include <OgreRenderWindow.h>
 
 #include <MyGUI_WidgetManager.h>
 
@@ -124,8 +125,10 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         }
 
         // update GUI
-        if(mShowFPS)
-            mEnvironment.mWindowManager->wmSetFPS(mOgre->getFPS());
+        Ogre::RenderWindow* window = mOgre->getWindow();
+        mEnvironment.mWindowManager->wmUpdateFps(window->getLastFPS(),
+                                                 window->getTriangleCount(),
+                                                 window->getBatchCount());
 
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
@@ -144,7 +147,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             mEnvironment.mWorld->advanceTime (
                 mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
 
-        
+
         if (changed) // keep change flag for another frame, if cell changed happend in local script
             mEnvironment.mWorld->markCellAsUnchanged();
 
@@ -154,6 +157,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
             mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
+
+        // update world
+        mEnvironment.mWorld->update (evt.timeSinceLastFrame);
 
         // report focus object (for debugging)
         if (mReportFocus)
@@ -170,7 +176,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mPhysicEngine (0)
-  , mShowFPS (false)
+  , mFpsLevel(0)
   , mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
@@ -340,13 +346,13 @@ void OMW::Engine::go()
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false,
         mCfgMgr.getLogPath().string() + std::string("/"));
-   
+
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.mWindowManager = new MWGui::WindowManager(mGuiManager->getGui(), mEnvironment,
-        mExtensions, mShowFPS, mNewGame);
+        mExtensions, mFpsLevel, mNewGame);
 
     // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
@@ -456,6 +462,28 @@ void OMW::Engine::activate()
     }
 }
 
+void OMW::Engine::screenshot()
+{
+    // Count screenshots.
+    int shotCount = 0;
+
+    const std::string screenshotPath = mCfgMgr.getLocalConfigPath().string();
+
+    // Find the first unused filename with a do-while
+    std::ostringstream stream;
+    do
+    {
+        // Reset the stream
+        stream.str("");
+        stream.clear();
+
+        stream << screenshotPath << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << ".png";
+
+    } while (boost::filesystem::exists(stream.str()));
+
+    mOgre->screenshot(stream.str());
+}
+
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
@@ -466,9 +494,9 @@ void OMW::Engine::setSoundUsage(bool soundUsage)
     mUseSound = soundUsage;
 }
 
-void OMW::Engine::showFPS(bool showFps)
+void OMW::Engine::showFPS(int level)
 {
-    mShowFPS = showFps;
+    mFpsLevel = level;
 }
 
 void OMW::Engine::setEncoding(const std::string& encoding)

@@ -141,12 +141,16 @@ namespace MWWorld
             void disable (Ptr reference);
 
             void advanceTime (double hours);
+            ///< Advance in-game time.
 
             void setHour (double hour);
+            ///< Set in-game time hour.
 
             void setMonth (int month);
+            ///< Set in-game time month.
 
             void setDay (int day);
+            ///< Set in-game time day.
 
             bool toggleSky();
             ///< \return Resulting mode
@@ -219,9 +223,9 @@ namespace MWWorld
             void skipAnimation (const MWWorld::Ptr& ptr);
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
             /// references that are currently not in the rendered scene should be ignored.
-            void setObjectPhysicsRotation(const std::string& handle,Ogre::Quaternion quat);
-            void setObjectPhysicsPosition(const std::string& handle,Ogre::Vector3 vector);
-           
+
+            void update (float duration);
+
     };
 }
 

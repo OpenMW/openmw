@@ -25,13 +25,13 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Float x = runtime[0].mInteger;
+                    Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
 
-                    Interpreter::Type_Float y = runtime[0].mInteger;
+                    Interpreter::Type_Float y = runtime[0].mFloat;
                     runtime.pop();
 
-                    Interpreter::Type_Float z = runtime[0].mInteger;
+                    Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
                     // discard additional arguments (reset), because we have no idea what they mean.
@@ -53,16 +53,16 @@ namespace MWScript
                     std::string actor = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    Interpreter::Type_Float duration = runtime[0].mInteger;
+                    Interpreter::Type_Float duration = runtime[0].mFloat;
                     runtime.pop();
 
-                    Interpreter::Type_Float x = runtime[0].mInteger;
+                    Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
 
-                    Interpreter::Type_Float y = runtime[0].mInteger;
+                    Interpreter::Type_Float y = runtime[0].mFloat;
                     runtime.pop();
 
-                    Interpreter::Type_Float z = runtime[0].mInteger;
+                    Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
 
                     // discard additional arguments (reset), because we have no idea what they mean.
@@ -99,9 +99,9 @@ namespace MWScript
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
-            extensions.registerInstruction ("aitravel", "lll/l", opcodeAiTravel,
+            extensions.registerInstruction ("aitravel", "fff/l", opcodeAiTravel,
                 opcodeAiTravelExplicit);
-            extensions.registerInstruction ("aiescort", "cllll/l", opcodeAiEscort,
+            extensions.registerInstruction ("aiescort", "cffff/l", opcodeAiEscort,
                 opcodeAiEscortExplicit);
 
             extensions.registerFunction ("getaipackagedone", 'l', "", opcodeGetAiPackageDone,

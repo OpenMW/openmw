@@ -26,7 +26,7 @@ namespace MWRender{
         MWWorld::Environment& mEnvironment;
 		std::map<MWWorld::Ptr, Animation*> mAllActors;
 
-        
+
 
         public:
         Actors(OEngine::Render::OgreRenderer& _rend, MWWorld::Environment& _env): mRend(_rend), mEnvironment(_env){}
@@ -52,8 +52,8 @@ namespace MWRender{
         ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
         /// references that are currently not in the rendered scene should be ignored.
 
-	    void addTime();
-        
+        void update (float duration);
+
     };
 }
 #endif

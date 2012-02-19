@@ -15,11 +15,11 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), true);
             objects.insertMesh(ptr, "meshes\\" + model);
         }
     }
@@ -29,13 +29,12 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Static, MWWorld::RefData> *ref =
             ptr.get<ESM::Static>();
 
-
-        const std::string &model = ref->base->model;
         assert (ref->base != NULL);
+        const std::string &model = ref->base->model;
+
         if(!model.empty()){
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-
     }
 
     std::string Static::getName (const MWWorld::Ptr& ptr) const

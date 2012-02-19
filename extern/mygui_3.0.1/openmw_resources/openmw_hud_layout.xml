@@ -49,11 +49,32 @@
         <Widget type="StaticImage" skin="StaticImage" position="0 0 32
             32" align="Center Center" name="Crosshair"/>
 
-        <!-- FPSCounter box -->
-
+        <!-- Basic FPSCounter box -->
         <Widget type="Widget" skin="HUD_Box" position="12 12 28 21" align="Left Top"
             name="FPSBox">
+            <Property key="Widget_Visible" value="false"/>
             <Widget type="StaticText" skin="NumFPS" position="3 3 21 17" name="FPSCounter"/>
+        </Widget>
+
+        <!-- Advanced FPSCounter box -->
+        <Widget type="Widget" skin="HUD_Box" position="12 12 118 51" align="Left Top"
+            name="FPSBoxAdv">
+            <Property key="Widget_Visible" value="false"/>
+
+            <Widget type="StaticText" skin="NumFPS" position="3 3 71 17">
+                    <Property key="Widget_Caption" value="FPS: "/>
+            </Widget>
+            <Widget type="StaticText" skin="NumFPS" position="53 3 71 17" name="FPSCounterAdv"/>
+
+            <Widget type="StaticText" skin="NumFPS" position="3 3 71 32">
+                    <Property key="Widget_Caption" value="Tri Count: "/>
+            </Widget>
+            <Widget type="StaticText" skin="NumFPS" position="53 3 71 32" name="TriangleCounter"/>
+
+            <Widget type="StaticText" skin="NumFPS" position="3 3 71 47">
+                    <Property key="Widget_Caption" value="Batch Count: "/>
+            </Widget>
+            <Widget type="StaticText" skin="NumFPS" position="53 3 71 47" name="BatchCounter"/>
         </Widget>
 
     </Widget>

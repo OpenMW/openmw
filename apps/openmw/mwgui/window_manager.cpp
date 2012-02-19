@@ -14,6 +14,7 @@
 #include "../mwinput/inputmanager.hpp"
 
 #include "console.hpp"
+#include "journalwindow.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -22,7 +23,7 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment,
-    const Compiler::Extensions& extensions, bool fpsSwitch, bool newGame)
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame)
   : environment(environment)
   , nameDialog(nullptr)
   , raceDialog(nullptr)
@@ -41,7 +42,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
   , shown(GW_ALL)
   , allowed(newGame ? GW_None : GW_ALL)
 {
-    showFPSCounter = fpsSwitch;
+    showFPSLevel = fpsLevel;
 
     creationStage = NotStarted;
 
@@ -53,7 +54,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     int w = gui->getViewSize().width;
     int h = gui->getViewSize().height;
 
-    hud = new HUD(w,h, showFPSCounter);
+    hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
     map = new MapWindow();
     stats = new StatsWindow(*this);
@@ -61,6 +62,7 @@ WindowManager::WindowManager(MyGUI::Gui *_gui, MWWorld::Environment& environment
     inventory = new InventoryWindow ();
 #endif
     console = new Console(w,h, environment, extensions);
+    mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
 
     // The HUD is always on
@@ -95,6 +97,7 @@ WindowManager::~WindowManager()
     delete map;
     delete menu;
     delete stats;
+    delete mJournal;
 #if 0
     delete inventory;
 #endif
@@ -135,10 +138,17 @@ void WindowManager::update()
         environment.mInputManager->setGuiMode(nextMode);
         nextMode = GM_Game;
     }
-    if (showFPSCounter)
+    if (showFPSLevel > 0)
     {
         hud->setFPS(mFPS);
+        hud->setTriangleCount(mTriangleCount);
+        hud->setBatchCount(mBatchCount);
     }
+}
+
+MWWorld::Environment& WindowManager::getEnvironment()
+{
+    return environment;
 }
 
 void WindowManager::setNextMode(GuiMode newMode)
@@ -162,6 +172,7 @@ void WindowManager::updateVisible()
     inventory->setVisible(false);
 #endif
     console->disable();
+    mJournal->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     gui->setVisiblePointer(isGuiMode());
@@ -341,6 +352,13 @@ void WindowManager::updateVisible()
         if(!mMessageBoxManager->isInteractiveMessageBox()) {
             setGuiMode(GM_Game);
         }
+        return;
+    }
+
+    if(mode == GM_Journal)
+    {
+        mJournal->setVisible(true);
+        mJournal->open();
         return;
     }
 

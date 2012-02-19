@@ -79,7 +79,7 @@ namespace Mangle
 
 namespace NifOgre
 {
-    
+
 
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
@@ -109,7 +109,7 @@ class NIFLoader : Ogre::ManualResourceLoader
                                     const std::string &group="General");
         //void insertMeshInsideBase(Ogre::Mesh* mesh);
         std::vector<Nif::NiKeyframeData>* getAnim(std::string name);
-		std::vector<Nif::NiTriShapeCopy>* getShapes(std::string name);
+        std::vector<Nif::NiTriShapeCopy>* getShapes(std::string name);
         std::map<std::string, float>* getTextIndices(std::string name);
 
 
@@ -120,12 +120,13 @@ class NIFLoader : Ogre::ManualResourceLoader
         void setVerbosePath(std::string path);
 
     private:
-        NIFLoader() : mNormaliseNormals(false),  resourceGroup("General"), resourceName(""), flip(false),
+
+        NIFLoader() : resourceName(""), resourceGroup("General"),  flip(false), mNormaliseNormals(false),
           mFlipVertexWinding(false), mOutputAnimFiles(false), inTheSkeletonTree(false)  {}
         NIFLoader(NIFLoader& n) {}
 
         void calculateTransform();
-        
+
 
         void warn(std::string msg);
         void fail(std::string msg);
@@ -166,7 +167,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         std::string verbosePath;
         std::string resourceName;
         std::string resourceGroup;
-       Ogre::Matrix4 mTransform;
+        Ogre::Matrix4 mTransform;
         Ogre::AxisAlignedBox mBoundingBox;
         bool flip;
         bool mNormaliseNormals;
@@ -183,6 +184,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         std::string name;
         std::string triname;
         std::vector<Nif::NiKeyframeData> allanim;
+
 		std::map<std::string,float> textmappings;
 		std::map<std::string,std::map<std::string,float>,ciLessBoost> alltextmappings;
 		std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost> allanimmap;
@@ -192,6 +194,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         std::vector<Ogre::SubMesh*> needBoneAssignments;
         bool inTheSkeletonTree;
         
+
 };
 
 }

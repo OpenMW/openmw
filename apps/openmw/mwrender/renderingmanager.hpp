@@ -105,14 +105,12 @@ class RenderingManager: private RenderingInterface {
     ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
     /// references that are currently not in the rendered scene should be ignored.
 
-	void addTime();
-
   private:
 
     void setAmbientMode();
     SkyManager* mSkyManager;
     OEngine::Render::OgreRenderer &mRendering;
-   
+
     MWRender::Objects mObjects;
     MWRender::Actors mActors;
 
@@ -120,6 +118,7 @@ class RenderingManager: private RenderingInterface {
     int mAmbientMode;
 
     Ogre::ColourValue mAmbientColor;
+    Ogre::Light* mSun;
 
     /// Root node for all objects added to the scene. This is rotated so
     /// that the OGRE coordinate system matches that used internally in

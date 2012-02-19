@@ -22,7 +22,7 @@ namespace MWRender {
 
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
-:mRendering(_rend), mObjects(mRendering), mDebugging(engine), mActors(mRendering, environment)
+:mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
     //mSkyManager = 0;
@@ -55,10 +55,12 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(mRendering.getCamera());
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
+    mSun = 0;
 }
 
 RenderingManager::~RenderingManager ()
 {
+    //TODO: destroy mSun?
     delete mPlayer;
     delete mSkyManager;
 }
@@ -122,7 +124,7 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 
 void RenderingManager::update (float duration){
 
-
+    mActors.update (duration);
 }
 
 void RenderingManager::skyEnable ()
@@ -210,12 +212,15 @@ void RenderingManager::configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell
 
   // Create a "sun" that shines light downwards. It doesn't look
   // completely right, but leave it for now.
-  Ogre::Light *light = mRendering.getScene()->createLight();
+  if(!mSun)
+  {
+      mSun = mRendering.getScene()->createLight();
+  }
   Ogre::ColourValue colour;
   colour.setAsABGR (mCell.cell->ambi.sunlight);
-  light->setDiffuseColour (colour);
-  light->setType(Ogre::Light::LT_DIRECTIONAL);
-  light->setDirection(0,-1,0);
+  mSun->setDiffuseColour (colour);
+  mSun->setType(Ogre::Light::LT_DIRECTIONAL);
+  mSun->setDirection(0,-1,0);
 }
 // Switch through lighting modes.
 
@@ -245,10 +250,6 @@ void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::s
 void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 {
     mActors.skipAnimation(ptr);
-}
-void RenderingManager::addTime(){
-    mActors.addTime();
-	//Notify each animation that time has passed
 }
 
 }
