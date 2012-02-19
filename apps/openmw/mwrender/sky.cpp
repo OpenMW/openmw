@@ -70,6 +70,35 @@ namespace MWRender
         clouds_node->attachObject(clouds_ent);
         mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
         
+        // Sun
+        /// \todo calculate the sun position based on time of day
+        Vector3 sunPosition(0, 0, 1.f);
+        
+        // this distance has to be set accordingly so that the sun is
+        // behind the clouds, but still in front of the atmosphere
+        const float sunDistance = 1000.f; 
+        
+        const float sunScale = 700.f;
+        
+        Vector3 finalPosition = sunPosition.normalisedCopy() * sunDistance;
+        
+        // Create a camera-aligned billboard to render the sun
+        BillboardSet* bbSet = mSceneMgr->createBillboardSet("SkyBillboardSet", 1);
+        bbSet->setDefaultDimensions(sunScale, sunScale);
+        bbSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY);
+        SceneNode* bbNode = mRootNode->createChildSceneNode();
+        bbNode->translate(finalPosition);
+        bbNode->attachObject(bbSet);
+        bbSet->createBillboard(0,0,0);
+        
+        MaterialPtr sunMaterial = MaterialManager::getSingleton().create("SunMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        sunMaterial->removeAllTechniques();
+        Pass* p = sunMaterial->createTechnique()->createPass();
+        p->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+        p->setDepthWriteEnabled(false);
+        TextureUnitState* tus = p->createTextureUnitState("textures\\tx_sun_05.dds");
+        bbSet->setMaterialName("SunMaterial");
+
         // I'm not sure if the materials are being used by any other objects
         // Make a unique "modifiable" copy of the materials to be sure
         mCloudMaterial = mCloudMaterial->clone("Clouds");
