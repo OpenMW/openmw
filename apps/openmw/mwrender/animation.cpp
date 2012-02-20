@@ -18,7 +18,7 @@ namespace MWRender{
         mUniqueIDs[copy] = mUniqueIDs[copy] + 1;
         counter = mUniqueIDs[copy];
     }
-    
+
     std::stringstream out;
 			if(counter > 99 && counter < 1000)
 				out << "0";
@@ -38,7 +38,7 @@ namespace MWRender{
             time = startTime;
         }
         else if(textmappings){
-            
+
             std::string startName = groupname + ": loop start";
             std::string stopName = groupname + ": loop stop";
 
@@ -49,7 +49,7 @@ namespace MWRender{
                 stopName = groupname + ": loop stop";
 
                 for(std::map<std::string, float>::iterator iter = textmappings->begin(); iter != textmappings->end(); iter++){
-                
+
                 std::string current = iter->first.substr(0, startName.size());
                 std::transform(current.begin(), current.end(), current.begin(), ::tolower);
                 std::string current2 = iter->first.substr(0, stopName.size());
@@ -71,9 +71,9 @@ namespace MWRender{
             if(!first){
                 startName = groupname + ": start";
                 stopName = groupname + ": stop";
-            
+
             for(std::map<std::string, float>::iterator iter = textmappings->begin(); iter != textmappings->end(); iter++){
-                
+
                 std::string current = iter->first.substr(0, startName.size());
                 std::transform(current.begin(), current.end(), current.begin(), ::tolower);
                 std::string current2 = iter->first.substr(0, stopName.size());
@@ -92,24 +92,23 @@ namespace MWRender{
                 }
             }
             }
-           
+
         }
-            
+
 	}
     void Animation::stopScript(){
         animate = 0;
     }
 
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
-       bool useHandles = false;
         shapeNumber = 0;
-        
+
         std::vector<Nif::NiTriShapeCopy>::iterator allshapesiter;
 	    for(allshapesiter = allshapes->begin(); allshapesiter != allshapes->end(); allshapesiter++)
-		
+
                 {
                     //std::map<unsigned short, PosAndRot> vecPosRot;
-        
+
 			Nif::NiTriShapeCopy& copy = *allshapesiter;
 			std::vector<Ogre::Vector3>* allvertices = &copy.vertices;
 			std::vector<Ogre::Vector3>* allnormals = &copy.normals;
@@ -119,12 +118,12 @@ namespace MWRender{
 			//std::set<unsigned int> vertices;
 			//std::set<unsigned int> normals;
 			//std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfovector =  copy.boneinfo;
-            std::map<int, std::vector<Nif::NiSkinData::IndividualWeight>>* verticesToChange = &copy.vertsToWeights;
-	
+            std::map<int, std::vector<Nif::NiSkinData::IndividualWeight> >* verticesToChange = &copy.vertsToWeights;
+
 			//std::cout << "Name " << copy.sname << "\n";
 			Ogre::HardwareVertexBufferSharedPtr vbuf = creaturemodel->getMesh()->getSubMesh(copy.sname)->vertexData->vertexBufferBinding->getBuffer(0);
 		            Ogre::Real* pReal = static_cast<Ogre::Real*>(vbuf->lock(Ogre::HardwareBuffer::HBL_NORMAL));
-			      
+
 
 				std::vector<Ogre::Vector3> initialVertices = copy.morph.getInitialVertices();
 				//Each shape has multiple indices
@@ -134,7 +133,7 @@ namespace MWRender{
 					if(copy.vertices.size() == initialVertices.size())
 					{
 						//Create if it doesn't already exist
-						if(shapeIndexI.size() == shapeNumber)
+						if(shapeIndexI.size() == static_cast<std::size_t> (shapeNumber))
 						{
 							std::vector<int> vec;
 							shapeIndexI.push_back(vec);
@@ -164,10 +163,10 @@ namespace MWRender{
 
 							}
 
-							
+
 
 						}
-						
+
 						allvertices = &initialVertices;
                         }
 						shapeNumber++;
@@ -176,8 +175,8 @@ namespace MWRender{
 
 
 			    if(verticesToChange->size() > 0){
-                    
-                for(std::map<int, std::vector<Nif::NiSkinData::IndividualWeight>>::iterator iter = verticesToChange->begin();
+
+                for(std::map<int, std::vector<Nif::NiSkinData::IndividualWeight> >::iterator iter = verticesToChange->begin();
                     iter != verticesToChange->end(); iter++)
                 {
                     std::vector<Nif::NiSkinData::IndividualWeight> inds = iter->second;
@@ -186,25 +185,25 @@ namespace MWRender{
                     Ogre::Vector3 currentNormal = (*allnormals)[verIndex];
                     Nif::NiSkinData::BoneInfoCopy* boneinfocopy = &(allshapesiter->boneinfo[inds[0].boneinfocopyindex]);
                     Ogre::Bone *bonePtr = 0;
-                   
-                        
-                    
+
+
+
                     Ogre::Vector3 vecPos;
-                    Ogre::Quaternion vecRot; 
+                    Ogre::Quaternion vecRot;
 					std::map<Nif::NiSkinData::BoneInfoCopy*, PosAndRot>::iterator result = vecRotPos.find(boneinfocopy);
-                    
+
                     if(result == vecRotPos.end()){
                         bonePtr = skel->getBone(boneinfocopy->bonename);
-                        
+
                         vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
                         vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
-                       
-                        
+
+
                              PosAndRot both;
                             both.vecPos = vecPos;
                             both.vecRot = vecRot;
                             vecRotPos[boneinfocopy] = both;
-                       
+
                     }
                     else{
                         PosAndRot both = result->second;
@@ -213,24 +212,24 @@ namespace MWRender{
                     }
 
                     Ogre::Vector3 absVertPos = (vecPos + vecRot * currentVertex) * inds[0].weight;
-                   
-                    
+
+
 
                     for(std::size_t i = 1; i < inds.size(); i++){
                         boneinfocopy = &(allshapesiter->boneinfo[inds[i].boneinfocopyindex]);
                         result = vecRotPos.find(boneinfocopy);
-                       
+
 
                         if(result == vecRotPos.end()){
                             bonePtr = skel->getBone(boneinfocopy->bonename);
                             vecPos = bonePtr->_getDerivedPosition() + bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.trans;
                             vecRot = bonePtr->_getDerivedOrientation() * boneinfocopy->trafo.rotation;
-                            
+
                                 PosAndRot both;
                                 both.vecPos = vecPos;
                                 both.vecRot = vecRot;
                                 vecRotPos[boneinfocopy] = both;
-                            
+
                         }
                          else{
                                 PosAndRot both = result->second;
@@ -238,22 +237,22 @@ namespace MWRender{
                                 vecRot = both.vecRot;
                         }
 
-                    
+
                         absVertPos += (vecPos + vecRot * currentVertex) * inds[i].weight;
-                        
-                    
+
+
                     }
                      Ogre::Real* addr = (pReal + 3 * verIndex);
 							  *addr = absVertPos.x;
 							  *(addr+1) = absVertPos.y;
 				              *(addr+2) = absVertPos.z;
-                    
+
                 }
-				
-				
-				   
-				
-				}  
+
+
+
+
+				}
 				else
 				{
 					//Ogre::Bone *bonePtr = creaturemodel->getSkeleton()->getBone(copy.bonename);
@@ -261,7 +260,7 @@ namespace MWRender{
 					Ogre::Vector3 shapetrans = copy.trafo.trans;
 					float shapescale = copy.trafo.scale;
 					std::vector<std::string> boneSequence = copy.boneSequence;
-					
+
 					Ogre::Vector3 transmult;
 						Ogre::Quaternion rotmult;
 						float scale;
@@ -269,9 +268,9 @@ namespace MWRender{
                         std::vector<std::string>::iterator boneSequenceIter = boneSequence.begin();
                         if(skel->hasBone(*boneSequenceIter)){
 					Ogre::Bone *bonePtr = skel->getBone(*boneSequenceIter);
-					
-						
-					
+
+
+
 
 						transmult = bonePtr->getPosition();
 						rotmult = bonePtr->getOrientation();
@@ -301,13 +300,13 @@ namespace MWRender{
 						rotmult = shaperot;
 						scale = shapescale;
 					}
-		
-					
-					
+
+
+
 
 					// Computes C = B + AxC*scale
 					 // final_vector = old_vector + old_rotation*new_vector*old_scale/
-					
+
 					for(unsigned int i = 0; i < allvertices->size(); i++){
 						Ogre::Vector3 current = transmult + rotmult * (*allvertices)[i];
 						Ogre::Real* addr = pReal + i * 3;
@@ -327,7 +326,7 @@ namespace MWRender{
 
 				}
 				vbuf->unlock();
-					
+
 		}
 
     }
@@ -347,10 +346,10 @@ namespace MWRender{
 			x = 0.0;
 			return true;
 		}
-		
+
 		if ( i < 0 || i >= count )
 			i = 0;
-		
+
 		float tI = times[i];
 		if ( time > tI )
 		{
@@ -390,11 +389,11 @@ namespace MWRender{
 
  void Animation::handleAnimationTransforms(){
     Ogre::SkeletonInstance* skel = base->getSkeleton();
-    
+
 
     Ogre::Bone* b = skel->getRootBone();
 	    b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));   //This is a trick
-	    
+
         skel->_updateTransforms();
 	    //skel->_notifyManualBonesDirty();
 
@@ -419,17 +418,17 @@ namespace MWRender{
         if(time < iter->getStartTime() || time < startTime || time > iter->getStopTime())
 	    {
             slot++;
-		    continue;   
+		    continue;
 	    }
 
          float x;
 		float x2;
-	
+
 	    std::vector<Ogre::Quaternion> quats = iter->getQuat();
 
         std::vector<float> ttime = iter->gettTime();
         std::vector<float>::iterator ttimeiter = ttime.begin();
-       
+
         std::vector<float> rtime = iter->getrTime();
         int rindexJ = 0;
 	    timeIndex(time, rtime, rindexI[slot], rindexJ, x2);
@@ -442,15 +441,15 @@ namespace MWRender{
 
         Ogre::Vector3 t;
         Ogre::Quaternion r;
-	    
+
         bool bTrans = translist1.size() > 0;
 	    if(bTrans){
             Ogre::Vector3 v1 = translist1[tindexI[slot]];
             Ogre::Vector3 v2 = translist1[tindexJ];
            t = (v1 + (v2 - v1) * x);
-	        
+
 	    }
-	    
+
         bool bQuats = quats.size() > 0;
 	    if(bQuats){
 		    r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
@@ -463,13 +462,13 @@ namespace MWRender{
         if(bQuats)
             bone->setOrientation(r);
 
-       
-        
+
+
         skel->_updateTransforms();
         base->getAllAnimationStates()->_notifyDirty();
-        
-	}  
-   
+
+	}
+
     slot++;
     }
 }
