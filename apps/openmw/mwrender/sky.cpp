@@ -59,7 +59,6 @@ namespace MWRender
     void MWSkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
     {
         // Get the vertex colour buffer of this mesh
-        VertexDeclaration* dec = ent->getMesh()->getSubMesh(0)->vertexData->vertexDeclaration;
         const Ogre::VertexElement* ves_diffuse = ent->getMesh()->getSubMesh(0)->vertexData->vertexDeclaration->findElementBySemantic( Ogre::VES_DIFFUSE );
         HardwareVertexBufferSharedPtr colourBuffer = ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource());
         
@@ -69,7 +68,7 @@ namespace MWRender
         // Iterate over all vertices
         int vertex_size = colourBuffer->getVertexSize();
         float * currentVertex = NULL;
-        for (int i=0; i<colourBuffer->getNumVertices(); ++i)
+        for (unsigned int i=0; i<colourBuffer->getNumVertices(); ++i)
         {
             // Get a pointer to the vertex colour
             ves_diffuse->baseVertexPointerToElement( pData, &currentVertex );
@@ -250,7 +249,7 @@ namespace MWRender
         Pass* p = sunMaterial->createTechnique()->createPass();
         p->setSceneBlending(SBT_TRANSPARENT_ALPHA);
         p->setDepthWriteEnabled(false);
-        TextureUnitState* tus = p->createTextureUnitState("textures\\tx_sun_05.dds");
+        p->createTextureUnitState("textures\\tx_sun_05.dds");
         bbSet->setMaterialName("SunMaterial");
 
         // I'm not sure if the materials are being used by any other objects
