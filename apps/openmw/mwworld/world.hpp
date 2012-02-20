@@ -228,6 +228,7 @@ namespace MWWorld
             /// references that are currently not in the rendered scene should be ignored.
 
             void update (float duration);
+
     };
 }
 

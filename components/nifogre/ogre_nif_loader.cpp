@@ -220,14 +220,15 @@ void NIFLoader::createMaterial(const String &name,
 
 
     //Hardware Skinning code, textures may be the wrong color if enabled
-     /*if(!mSkel.isNull()){
+
+    /* if(!mSkel.isNull()){
     material->removeAllTechniques();
 
         Ogre::Technique* tech = material->createTechnique();
         //tech->setSchemeName("blahblah");
         Pass* pass = tech->createPass();
-        pass->setVertexProgram("Ogre/HardwareSkinningFourWeights");
-    }*/
+        pass->setVertexProgram("Ogre/BasicVertexPrograms/AmbientOneTexture");*/
+   
 
     // This assigns the texture to this material. If the texture name is
     // a file name, and this file exists (in a resource directory), it
@@ -358,7 +359,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     HardwareVertexBufferSharedPtr vbuf =
         HardwareBufferManager::getSingleton().createVertexBuffer(
             VertexElement::getTypeSize(VET_FLOAT3),
-            numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+            numVerts, HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
 
     if(flip)
 	{
@@ -424,6 +425,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
         bind->setBinding(nextBuf++, vbuf);
     }
 
+    
     // Vertex colors
     if (data->colors.length)
     {
@@ -530,6 +532,8 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     {
             sub->addBoneAssignment(*it);
     }
+    if(mSkel.isNull())
+       needBoneAssignments.push_back(sub);
 }
 
 // Helper math functions. Reinventing linear algebra for the win!
@@ -580,6 +584,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 {
     assert(shape != NULL);
 
+    bool saveTheShape = inTheSkeletonTree;
     // Interpret flags
     bool hidden    = (flags & 0x01) != 0; // Not displayed
     bool collide   = (flags & 0x02) != 0; // Use mesh for collision
@@ -738,6 +743,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     std::list<VertexBoneAssignment> vertexBoneAssignments;
 
     Nif::NiTriShapeCopy copy = shape->clone();
+   
 	if(!shape->controller.empty())
 	{
 		Nif::Controller* cont = shape->controller.getPtr();
@@ -747,6 +753,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 			copy.morph = morph->data.get();
 			copy.morph.setStartTime(morph->timeStart);
 			copy.morph.setStopTime(morph->timeStop);
+            saveTheShape = true;
 		}
 
 	}
@@ -888,6 +895,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             boneIndex++;
         }
 
+
     }
     else
     {
@@ -924,10 +932,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         }
 		if(!mSkel.isNull() ){
 			int boneIndex;
-			Ogre::Bone *parentBone = mSkel->getBone(boneSequence[boneSequence.size() - 1]);
-			if(parentBone)
-				boneIndex = parentBone->getHandle();
-			else
+			
 				boneIndex = mSkel->getNumBones() - 1;
 			for(int i = 0; i < numVerts; i++){
 		 VertexBoneAssignment vba;
@@ -943,7 +948,8 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     {
         // Add this vertex set to the bounding box
         bounds.add(optr, numVerts);
-        shapes.push_back(copy);
+        if(saveTheShape)
+            shapes.push_back(copy);
 
         // Create the submesh
         createOgreSubMesh(shape, material, vertexBoneAssignments);
@@ -1063,19 +1069,22 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         //FIXME: "Bip01" isn't every time the root bone
         if (node->name == "Bip01" || node->name == "Root Bone")  //root node, create a skeleton
         {
+            inTheSkeletonTree = true;
 
             mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
         }
+        else if (!mSkel.isNull() && !parentBone)
+            inTheSkeletonTree = false;
 
         if (!mSkel.isNull())     //if there is a skeleton
         {
             std::string name = node->name.toString();
-            boneSequence.push_back(name);
 
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
             if(!mSkel->hasBone(name))
             {
+                boneSequence.push_back(name);
                 bone = mSkel->createBone(name);
 
                 if (parentBone)
@@ -1140,8 +1149,11 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
 void NIFLoader::loadResource(Resource *resource)
 {
+    inTheSkeletonTree = false;
     	allanim.clear();
 	shapes.clear();
+    needBoneAssignments.clear();
+   // needBoneAssignments.clear();
    mBoundingBox.setNull();
     mesh = 0;
     mSkel.setNull();
@@ -1150,8 +1162,12 @@ void NIFLoader::loadResource(Resource *resource)
     char suffix = name.at(name.length() - 2);
     bool addAnim = true;
     bool hasAnim = false;
-    bool baddin = false;
+    //bool baddin = false;
     bNiTri = true;
+    if(name == "meshes\\base_anim.nif" || name == "meshes\\base_animkna.nif")
+    {
+        bNiTri = false;
+    }
 
         if(suffix == '*')
 		{
@@ -1168,7 +1184,7 @@ void NIFLoader::loadResource(Resource *resource)
 		}
 		else if(suffix == '>')
 		{
-            baddin = true;
+            //baddin = true;
 			bNiTri = true;
 			std::string sub = name.substr(name.length() - 6, 4);
 
@@ -1268,7 +1284,7 @@ void NIFLoader::loadResource(Resource *resource)
                 Nif::Node *o = dynamic_cast<Nif::Node*>(f->target.getPtr());
                 Nif::NiKeyframeDataPtr data = f->data;
 
-                if (f->timeStart == 10000000000000000)
+                if (f->timeStart >= 10000000000000000.0f)
                     continue;
                 data->setBonename(o->name.toString());
                 data->setStartTime(f->timeStart);
@@ -1299,15 +1315,24 @@ void NIFLoader::loadResource(Resource *resource)
         mesh->_setBounds(mBoundingBox, false);
     }
 
-     if (!mSkel.isNull())
+     if (!mSkel.isNull() )
     {
+        for(std::vector<Ogre::SubMesh*>::iterator iter = needBoneAssignments.begin(); iter != needBoneAssignments.end(); iter++)
+        {
+            int boneIndex = mSkel->getNumBones() - 1;
+		        VertexBoneAssignment vba;
+                vba.boneIndex = boneIndex;
+                vba.vertexIndex = 0;
+                vba.weight = 1;
+				 
+
+            (*iter)->addBoneAssignment(vba);
+        }
        mesh->_notifySkeleton(mSkel);
     }
 }
 
-void NIFLoader::addInMesh(Ogre::Mesh* input){
-    addin.push_back(input);
-}
+
 
 
 

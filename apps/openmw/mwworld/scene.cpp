@@ -60,12 +60,12 @@ namespace MWWorld
         std::cout << "Unloading cell\n";
         ListHandles functor;
 
-        MWWorld::Ptr::CellStore* active = *iter;
 
 
 
 
-        active->forEach<ListHandles>(functor);
+
+        (*iter)->forEach<ListHandles>(functor);
 
         {
 
@@ -77,13 +77,15 @@ namespace MWWorld
                 mPhysics->removeObject (node->getName());
             }
         }
-		mRendering.removeCell(active);
+		mRendering.removeCell(*iter);
 		//mPhysics->removeObject("Unnamed_43");
-        mWorld->getLocalScripts().clearCell (active);
-        mEnvironment.mMechanicsManager->dropActors (active);
-        mEnvironment.mSoundManager->stopSound (active);
-		mActiveCells.erase(active);
 
+        mWorld->getLocalScripts().clearCell (*iter);
+        mEnvironment.mMechanicsManager->dropActors (*iter);
+        mEnvironment.mSoundManager->stopSound (*iter);
+		mActiveCells.erase(*iter);
+        
+        
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)

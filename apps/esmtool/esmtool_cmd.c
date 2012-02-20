@@ -926,13 +926,13 @@ int update_arg(void *field, char **orig_field,
                const char *long_opt, char short_opt,
                const char *additional_error)
 {
-  char *stop_char = 0;
-  const char *val = value;
-  int found;
+  //char *stop_char = 0;
+  //const char *val = value;
+  //int found;
   FIX_UNUSED (field);
 
-  stop_char = 0;
-  found = 0;
+  //stop_char = 0;
+  //found = 0;
 
   if (!multiple_option && prev_given && (*prev_given || (check_ambiguity && *field_given)))
     {
@@ -955,8 +955,8 @@ int update_arg(void *field, char **orig_field,
     (*prev_given)++;
   if (field_given)
     (*field_given)++;
-  if (possible_values)
-    val = possible_values[found];
+  //if (possible_values)
+    //val = possible_values[found];
 
   switch(arg_type) {
   default:
@@ -996,7 +996,7 @@ cmdline_parser_internal (
   
   int override;
   int initialize;
-  int check_required;
+  //int check_required;
   int check_ambiguity;
 
   char *optarg;
@@ -1008,7 +1008,7 @@ cmdline_parser_internal (
   
   override = params->override;
   initialize = params->initialize;
-  check_required = params->check_required;
+  //check_required = params->check_required;
   check_ambiguity = params->check_ambiguity;
 
   if (initialize)
