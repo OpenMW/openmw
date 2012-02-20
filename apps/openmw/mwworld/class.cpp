@@ -7,6 +7,7 @@
 
 #include "ptr.hpp"
 #include "nullaction.hpp"
+#include "containerstore.hpp"
 
 namespace MWWorld
 {

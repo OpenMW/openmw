@@ -7,10 +7,10 @@
 #include <boost/shared_ptr.hpp>
 
 #include "action.hpp"
-#include "containerstore.hpp"
 #include "refdata.hpp"
-#include "../mwrender/renderinginterface.hpp"
 #include "physicssystem.hpp"
+
+#include "../mwrender/renderinginterface.hpp"
 
 namespace Ogre
 {
@@ -33,6 +33,7 @@ namespace MWWorld
 {
     class Ptr;
     class Environment;
+    class ContainerStore;
 
     /// \brief Base class for referenceable esm records
     class Class
