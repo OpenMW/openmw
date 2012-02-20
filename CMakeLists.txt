@@ -348,10 +348,18 @@ if(WIN32)
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
 
-    if(EXISTS "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/vcredist_x86.exe" DESTINATION "redist")
+    SET(VCREDIST "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
+    if(EXISTS ${VCREDIST})
+        INSTALL(FILES ${VCREDIST} DESTINATION "redist")
         SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x86.exe\\\" /q'" )
-    endif(EXISTS "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
+    endif(EXISTS ${VCREDIST})
+
+    SET(OALREDIST "${OpenMW_BINARY_DIR}/oalinst.exe")
+    if(EXISTS ${OALREDIST})
+        INSTALL(FILES ${OALREDIST} DESTINATION "redist")
+        SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
+            ExecWait '\\\"$INSTDIR\\\\redist\\\\oalinst.exe\\\" /s'" )
+    endif(EXISTS ${OALREDIST})
 
     include(CPack)
 endif(WIN32)
