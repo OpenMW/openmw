@@ -314,6 +314,7 @@ namespace MWRender
     }
     MWSkyManager::~MWSkyManager()
     {
+        delete mSun;
     }
     
     void MWSkyManager::update(float duration)
