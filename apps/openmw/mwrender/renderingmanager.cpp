@@ -23,6 +23,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
+    //mSkyManager = 0;
     mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), resDir);
 
     // Set default mipmap level (NB some APIs ignore this)
@@ -52,10 +53,12 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(mRendering.getCamera());
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
+    mSun = 0;
 }
 
 RenderingManager::~RenderingManager ()
 {
+    //TODO: destroy mSun?
     delete mPlayer;
     delete mSkyManager;
 }
@@ -124,27 +127,32 @@ void RenderingManager::update (float duration){
 
 void RenderingManager::skyEnable ()
 {
+    if(mSkyManager)
     mSkyManager->enable();
 }
 
 void RenderingManager::skyDisable ()
 {
-    mSkyManager->disable();
+    if(mSkyManager)
+        mSkyManager->disable();
 }
 
 void RenderingManager::skySetHour (double hour)
 {
-    mSkyManager->setHour(hour);
+    if(mSkyManager)
+        mSkyManager->setHour(hour);
 }
 
 
 void RenderingManager::skySetDate (int day, int month)
 {
-    mSkyManager->setDate(day, month);
+    if(mSkyManager)
+        mSkyManager->setDate(day, month);
 }
 
 int RenderingManager::skyGetMasserPhase() const
 {
+   
     return mSkyManager->getMasserPhase();
 }
 
@@ -153,9 +161,9 @@ int RenderingManager::skyGetSecundaPhase() const
     return mSkyManager->getSecundaPhase();
 }
 
-void RenderingManager::skySetMoonColour (bool red)
-{
-    mSkyManager->setMoonColour(red);
+void RenderingManager::skySetMoonColour (bool red){
+    if(mSkyManager)
+        mSkyManager->setMoonColour(red);
 }
 bool RenderingManager::toggleRenderMode(int mode){
     return mDebugging.toggleRenderMode(mode);
@@ -202,12 +210,15 @@ void RenderingManager::configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell
 
   // Create a "sun" that shines light downwards. It doesn't look
   // completely right, but leave it for now.
-  Ogre::Light *light = mRendering.getScene()->createLight();
+  if(!mSun)
+  {
+      mSun = mRendering.getScene()->createLight();
+  }
   Ogre::ColourValue colour;
   colour.setAsABGR (mCell.cell->ambi.sunlight);
-  light->setDiffuseColour (colour);
-  light->setType(Ogre::Light::LT_DIRECTIONAL);
-  light->setDirection(0,-1,0);
+  mSun->setDiffuseColour (colour);
+  mSun->setType(Ogre::Light::LT_DIRECTIONAL);
+  mSun->setDirection(0,-1,0);
 }
 // Switch through lighting modes.
 

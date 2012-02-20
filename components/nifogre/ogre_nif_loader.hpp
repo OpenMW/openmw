@@ -111,7 +111,6 @@ class NIFLoader : Ogre::ManualResourceLoader
         std::vector<Nif::NiKeyframeData>* getAnim(std::string name);
         std::vector<Nif::NiTriShapeCopy>* getShapes(std::string name);
         std::map<std::string, float>* getTextIndices(std::string name);
-        void addInMesh(Ogre::Mesh* input);
 
 
         Ogre::Vector3 convertVector3(const Nif::Vector& vec);
@@ -121,8 +120,9 @@ class NIFLoader : Ogre::ManualResourceLoader
         void setVerbosePath(std::string path);
 
     private:
+
         NIFLoader() : resourceName(""), resourceGroup("General"),  flip(false), mNormaliseNormals(false),
-          mFlipVertexWinding(false), mOutputAnimFiles(false)  {}
+          mFlipVertexWinding(false), mOutputAnimFiles(false), inTheSkeletonTree(false)  {}
         NIFLoader(NIFLoader& n) {}
 
         void calculateTransform();
@@ -184,13 +184,16 @@ class NIFLoader : Ogre::ManualResourceLoader
         std::string name;
         std::string triname;
         std::vector<Nif::NiKeyframeData> allanim;
-        std::map<std::string,float> textmappings;
-        std::map<std::string,std::map<std::string,float>,ciLessBoost> alltextmappings;
-        std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost> allanimmap;
-        std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost> allshapesmap;
-        std::vector<Ogre::Mesh*> addin;
+
+		std::map<std::string,float> textmappings;
+		std::map<std::string,std::map<std::string,float>,ciLessBoost> alltextmappings;
+		std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost> allanimmap;
+		std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost> allshapesmap;
         std::vector<Nif::NiKeyframeData> mAnim;
-        std::vector<Nif::NiTriShapeCopy> mS;
+		std::vector<Nif::NiTriShapeCopy> mS;
+        std::vector<Ogre::SubMesh*> needBoneAssignments;
+        bool inTheSkeletonTree;
+        
 
 };
 

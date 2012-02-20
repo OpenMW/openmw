@@ -32,8 +32,8 @@ book formatText(std::string text,book mBook,int maxLine, int lineSize)
         mBook.pages.pop_back();
     }
 
-    std::string::iterator wordBegin = text.begin();
-    std::string::iterator wordEnd;
+    //std::string::iterator wordBegin = text.begin();
+    //std::string::iterator wordEnd;
 
     std::string cText = text;
 
