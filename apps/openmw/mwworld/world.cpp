@@ -148,7 +148,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mRendering (renderer,resDir, physEng, environment),mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (false), bCollision(false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
+      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysEngine = physEng;
 
@@ -612,8 +612,7 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        bCollision = mPhysics->toggleCollisionMode();
-        return bCollision;
+        return mPhysics->toggleCollisionMode();;
     }
 
     bool World::toggleRenderMode (RenderMode mode)
