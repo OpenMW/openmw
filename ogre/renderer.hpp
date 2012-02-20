@@ -19,6 +19,7 @@ namespace Ogre
 namespace OEngine {
 namespace Render
 {
+  class Fader;
   class OgreRenderer
   {
     Ogre::Root *mRoot;
@@ -26,6 +27,7 @@ namespace Render
     Ogre::SceneManager *mScene;
     Ogre::Camera *mCamera;
     Ogre::Viewport *mView;
+    Fader* mFader;
     bool logging;
 
   public:
@@ -66,6 +68,8 @@ namespace Render
 
     /// Start the main rendering loop
     void start();
+    
+    void update(float dt);
 
     /// Write a screenshot to file
     void screenshot(const std::string &file);
@@ -80,6 +84,9 @@ namespace Render
 
     /// Get the scene manager
     Ogre::SceneManager *getScene() { return mScene; }
+    
+    /// Get the screen colour fader
+    Fader *getFader() { return mFader; }
 
     /// Camera
     Ogre::Camera *getCamera() { return mCamera; }
