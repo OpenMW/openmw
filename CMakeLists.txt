@@ -207,6 +207,7 @@ if(APPLE)
     # List used Ogre plugins
     SET(USED_OGRE_PLUGINS "RenderSystem_GL"
                           "Plugin_OctreeSceneManager"
+                          "Plugin_CgProgramManager"
                           "Plugin_ParticleFX")
 endif(APPLE)
 
