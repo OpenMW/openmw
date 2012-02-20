@@ -164,7 +164,7 @@ namespace MWRender
         // Clouds
         NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
         Entity* clouds_ent = mSceneMgr->createEntity("meshes\\sky_clouds_01.nif");
-        clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY);
+        clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_LATE);
         SceneNode* clouds_node = mRootNode->createChildSceneNode();
         clouds_node->attachObject(clouds_ent);
         mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
@@ -225,7 +225,7 @@ namespace MWRender
         
         // Sun
         /// \todo calculate the sun position based on time of day
-        Vector3 sunPosition(0, 0, 1.f);
+        Vector3 sunPosition(0.4, 0.4, 1.f);
         
         // this distance has to be set accordingly so that the sun is
         // behind the clouds, but still in front of the atmosphere
@@ -248,6 +248,7 @@ namespace MWRender
         sunMaterial->removeAllTechniques();
         Pass* p = sunMaterial->createTechnique()->createPass();
         p->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+        p->setDepthCheckEnabled(false);
         p->setDepthWriteEnabled(false);
         p->createTextureUnitState("textures\\tx_sun_05.dds");
         bbSet->setMaterialName("SunMaterial");
