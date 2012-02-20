@@ -26,11 +26,39 @@ namespace MWRender
                         const Vector3& pInitialPosition,
                         SceneNode* pRootNode
                     );
-                    
+        CelestialBody();
+                            
         void setPosition(const Vector3& pPosition);
+        void setVisible(const bool visible) { mNode->setVisible(visible); };
         
-    private:
+    protected:
+        virtual void init(const String& pTextureName,
+                        const unsigned int pInitialSize,
+                        const Vector3& pInitialPosition,
+                        SceneNode* pRootNode);
+    
         SceneNode* mNode;
+        MaterialPtr mMaterial;
+    };
+    
+    /*
+     * The moons need a seperate class because of their shader (which allows them to be partially transparent)
+     */
+    class Moon : public CelestialBody
+    {
+    public:
+        Moon(  const String& pTextureName,
+                        const unsigned int pInitialSize,
+                        const Vector3& pInitialPosition,
+                        SceneNode* pRootNode
+                    );
+    
+        void setVisibility(const float pVisibility);
+        ///< set the transparency factor for this moon
+        
+        void setColour(const ColourValue& pColour);
+        
+        /// \todo Moon phases
     };
     
     CelestialBody::CelestialBody( const String& textureName,
@@ -38,34 +66,11 @@ namespace MWRender
                         const Vector3& pInitialPosition,
                         SceneNode* pRootNode)
     {
-        SceneManager* sceneMgr = pRootNode->getCreator();
-        
-        const float scale = initialSize*700.f;
-        
-        Vector3 finalPosition = pInitialPosition.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
-        
-        static unsigned int bodyCount=0;
-        
-        // Create a camera-aligned billboard
-        BillboardSet* bbSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
-        bbSet->setDefaultDimensions(scale, scale);
-        bbSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY);
-        SceneNode* mNode = pRootNode->createChildSceneNode();
-        mNode->setPosition(finalPosition);
-        mNode->attachObject(bbSet);
-        bbSet->createBillboard(0,0,0);
-        
-        MaterialPtr material = MaterialManager::getSingleton().create("CelestialBody"+StringConverter::toString(bodyCount), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-        material->removeAllTechniques();
-        Pass* p = material->createTechnique()->createPass();
-        p->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-        p->setDepthCheckEnabled(false);
-        p->setDepthWriteEnabled(false);
-        p->createTextureUnitState(textureName /*"textures\\tx_sun_05.dds"*/);
-        bbSet->setMaterialName("CelestialBody"+StringConverter::toString(bodyCount));
-        
-        bodyCount++;
-
+        init(textureName, initialSize, pInitialPosition, pRootNode);
+    }
+    
+    CelestialBody::CelestialBody()
+    {
     }
     
     void CelestialBody::setPosition(const Vector3& pPosition)
@@ -73,6 +78,115 @@ namespace MWRender
         Vector3 finalPosition = pPosition.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
 
         mNode->setPosition(finalPosition);
+    }
+    
+    void CelestialBody::init(const String& textureName,
+                        const unsigned int initialSize,
+                        const Vector3& pInitialPosition,
+                        SceneNode* pRootNode)
+    {
+        SceneManager* sceneMgr = pRootNode->getCreator();
+        
+        const float scale = initialSize*550.f;
+        
+        Vector3 finalPosition = pInitialPosition.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
+        
+        static unsigned int bodyCount=0;
+        
+        /// \todo These billboards are not 100% correct, might want to revisit them later
+        BillboardSet* bbSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
+        bbSet->setDefaultDimensions(scale, scale);
+        bbSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+1);
+        bbSet->setBillboardType(BBT_PERPENDICULAR_COMMON);
+        bbSet->setCommonDirection( -pInitialPosition.normalisedCopy() );
+        mNode = pRootNode->createChildSceneNode();
+        mNode->setPosition(finalPosition);
+        mNode->attachObject(bbSet);
+        bbSet->createBillboard(0,0,0);
+        
+        mMaterial = MaterialManager::getSingleton().create("CelestialBody"+StringConverter::toString(bodyCount), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        mMaterial->removeAllTechniques();
+        Pass* p = mMaterial->createTechnique()->createPass();
+        p->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+        p->setDepthCheckEnabled(false);
+        p->setDepthWriteEnabled(false);
+        p->setSelfIllumination(1.0,1.0,1.0);
+        p->setDiffuse(0.0,0.0,0.0,1.0);
+        p->setAmbient(0.0,0.0,0.0);
+        p->createTextureUnitState(textureName);
+        bbSet->setMaterialName("CelestialBody"+StringConverter::toString(bodyCount));
+        
+        bodyCount++;
+    }
+    
+    Moon::Moon( const String& textureName,
+                        const unsigned int initialSize,
+                        const Vector3& pInitialPosition,
+                        SceneNode* pRootNode)
+    {
+        init(textureName, initialSize, pInitialPosition, pRootNode);
+
+        HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
+        HighLevelGpuProgramPtr vshader;
+        if (mgr.resourceExists("Moon_VP"))
+            vshader = mgr.getByName("Moon_VP");
+        else
+            vshader = mgr.createProgram("Moon_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "cg", GPT_VERTEX_PROGRAM);
+        vshader->setParameter("profiles", "vs_2_x arbvp1");
+		vshader->setParameter("entry_point", "main_vp");
+		StringUtil::StrStreamType outStream;
+		outStream <<
+		"void main_vp(	\n"
+		"	float4 position : POSITION,	\n"
+        "   in float2 uv : TEXCOORD0, \n"
+        "   out float2 oUV : TEXCOORD0, \n"
+		"	out float4 oPosition : POSITION,	\n"
+		"	uniform float4x4 worldViewProj	\n"
+        ")	\n"
+		"{	\n"
+        "   oUV = uv; \n"
+		"	oPosition = mul( worldViewProj, position );  \n"
+		"}";
+		vshader->setSource(outStream.str());
+		vshader->load();
+		vshader->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
+        mMaterial->getTechnique(0)->getPass(0)->setVertexProgram(vshader->getName());
+        
+        HighLevelGpuProgramPtr fshader;
+        if (mgr.resourceExists("Moon_FP"))
+            fshader = mgr.getByName("Moon_FP");
+        else
+            fshader = mgr.createProgram("Moon_FP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "cg", GPT_FRAGMENT_PROGRAM);
+
+        fshader->setParameter("profiles", "ps_2_x arbfp1");
+		fshader->setParameter("entry_point", "main_fp");
+		StringUtil::StrStreamType outStream2;
+		outStream2 <<
+		"void main_fp(	\n"
+        "   in float2 uv : TEXCOORD0, \n"
+		"	out float4 oColor    : COLOR, \n"
+        "   uniform sampler2D texture : TEXUNIT0, \n"
+        "   uniform float visibilityFactor, \n"
+        "   uniform float4 emissive \n"
+        ")	\n"
+		"{	\n"
+        "   float4 tex = tex2D(texture, uv); \n"
+        "   oColor = float4(emissive.xyz,1) * tex2D(texture, uv) * float4(1,1,1,visibilityFactor); \n"
+		"}";
+		fshader->setSource(outStream2.str());
+		fshader->load();
+        fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
+        mMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
+    }
+    
+    void Moon::setVisibility(const float pVisibility)
+    {
+        mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("visibilityFactor", Real(pVisibility));
+    }
+    
+    void Moon::setColour(const ColourValue& pColour)
+    {
+        mMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(pColour);
     }
     
     class MWSkyManager : public SkyManager
@@ -101,11 +215,13 @@ namespace MWRender
         ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
         /// 3 waxing or waning gibbous, 4 full moon
         
-        virtual void setMoonColour (bool red) {}
+        virtual void setMoonColour (bool red);
         ///< change Secunda colour to red
         
     private:
         CelestialBody* mSun;
+        Moon* mMasser;
+        Moon* mSecunda;
     
         Camera* mCamera;
         Viewport* mViewport;
@@ -185,6 +301,12 @@ namespace MWRender
         mViewport->setBackgroundColour(ColourValue(0.87, 0.87, 0.87));
         
         mSun = new CelestialBody("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 1.0), mRootNode);
+        mMasser = new Moon("textures\\tx_masser_full.dds", 1, Vector3(-0.4, -0.4, 0.5), mRootNode);
+        mSecunda = new Moon("textures\\tx_secunda_full.dds", 1, Vector3(0.4, -0.4, 0.5), mRootNode);
+        mMasser->setVisibility(0.2);
+        mSecunda->setVisibility(0.2);
+        mMasser->setVisible(false);
+        mSecunda->setVisible(false);
         
         HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
 
@@ -230,7 +352,7 @@ namespace MWRender
         // Clouds
         NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
         Entity* clouds_ent = mSceneMgr->createEntity("meshes\\sky_clouds_01.nif");
-        clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+1);
+        clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+2);
         SceneNode* clouds_node = mRootNode->createChildSceneNode();
         clouds_node->attachObject(clouds_ent);
         mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
@@ -279,7 +401,6 @@ namespace MWRender
 		"{	\n"
         "   uv += float2(1,1) * time * 0.01; \n" // Scroll in x,y direction
         "   float4 tex = tex2D(texture, uv); \n"
-        "   clip(tex.a<0.5); \n"
         "   oColor = color * float4(emissive.xyz,1) * tex2D(texture, uv); \n"
 		"}";
 		mCloudFragmentShader->setSource(outStream2.str());
@@ -305,7 +426,7 @@ namespace MWRender
         mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
         // Disable depth writing so that the sky does not cover any objects
         mCloudMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-        //mAtmosphereMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+        mAtmosphereMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
         mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
         mCloudMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
         
@@ -315,6 +436,8 @@ namespace MWRender
     MWSkyManager::~MWSkyManager()
     {
         delete mSun;
+        delete mMasser;
+        delete mSecunda;
     }
     
     void MWSkyManager::update(float duration)
@@ -337,89 +460,10 @@ namespace MWRender
         mRootNode->setVisible(false);
     }
     
-    
-    //
-    // Implements a Caelum sky with default settings.
-    //
-    // Note: this is intended as a temporary solution to provide some form of 
-    // sky rendering.  This code will obviously need significant tailoring to
-    // support fidelity with Morrowind's rendering.  Before doing major work
-    // on this class, more research should be done to determine whether
-    // Caelum or another plug-in such as SkyX would be best for the long-term.
-    //
-    class CaelumManager : public SkyManager
+    void MWSkyManager::setMoonColour (bool red)
     {
-    protected:
-        Caelum::CaelumSystem*   mpCaelumSystem;
-
-    public:
-                 CaelumManager (Ogre::RenderWindow* pRenderWindow, 
-                                   Ogre::Camera* pCamera,
-                                   const boost::filesystem::path& resDir);
-        virtual ~CaelumManager ();
-        
-        virtual void update(float duration) {}
-        
-        virtual void enable() {}
-        
-        virtual void disable() {}
-        
-        virtual void setHour (double hour) {}
-        ///< will be called even when sky is disabled.
-        
-        virtual void setDate (int day, int month) {}
-        ///< will be called even when sky is disabled.
-        
-        virtual int getMasserPhase() const { return 0; }
-        ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
-        /// 3 waxing or waning gibbous, 4 full moon
-        
-        virtual int getSecundaPhase() const { return 0; }
-        ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
-        /// 3 waxing or waning gibbous, 4 full moon
-        
-        virtual void setMoonColour (bool red) {}
-    };
-
-    CaelumManager::CaelumManager (Ogre::RenderWindow* pRenderWindow, 
-                                  Ogre::Camera* pCamera,
-                                  const boost::filesystem::path& resDir)
-        : mpCaelumSystem        (NULL)
-    {
-        using namespace Caelum;
-
-        assert(pCamera);
-        assert(pRenderWindow);
-
-        // Load the Caelum resources
-        //
-        ResourceGroupManager::getSingleton().addResourceLocation((resDir / "caelum").string(), "FileSystem", "Caelum");
-        ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-
-        // Load the Caelum resources
-        //
-        Ogre::SceneManager* pScene = pCamera->getSceneManager();
-        Caelum::CaelumSystem::CaelumComponent componentMask = CaelumSystem::CAELUM_COMPONENTS_DEFAULT;
-        mpCaelumSystem = new Caelum::CaelumSystem (Root::getSingletonPtr(), pScene, componentMask);
-        
-        // Set time acceleration.
-        mpCaelumSystem->getUniversalClock()->setTimeScale(128);       
-
-        // Disable fog since OpenMW is handling OGRE fog elsewhere
-        mpCaelumSystem->setManageSceneFog(false);
-
-        // Change the camera far distance to make sure the sky is not clipped
-        pCamera->setFarClipDistance(50000);
-
-        // Register Caelum as an OGRE listener
-        pRenderWindow->addListener(mpCaelumSystem);
-        Root::getSingletonPtr()->addFrameListener(mpCaelumSystem);
-    }
-
-    CaelumManager::~CaelumManager() 
-    {
-        if (mpCaelumSystem) 
-            mpCaelumSystem->shutdown (false);
+        mSecunda->setColour( red ? ColourValue(1.0, 0.0, 0.0)
+                                : ColourValue(1.0, 1.0, 1.0));
     }
 
     /// Creates and connects the sky rendering component to OGRE.
@@ -433,12 +477,12 @@ namespace MWRender
     {
         SkyManager* pSkyManager = NULL;
 
-        //try
-        //{
+        try
+        {
             //pSkyManager = new CaelumManager(pRenderWindow, pCamera, resDir);
             pSkyManager = new MWSkyManager(pMwRoot, pCamera);
-        //}
-        /*catch (Ogre::Exception& e)
+        }
+        catch (Ogre::Exception& e)
         {
             std::cout << "\nOGRE Exception when attempting to add sky: " 
                 << e.getFullDescription().c_str() << std::endl;
@@ -447,7 +491,7 @@ namespace MWRender
         {
             std::cout << "\nException when attempting to add sky: " 
                 << e.what() << std::endl;
-        }*/
+        }
 
         return pSkyManager;
     }
