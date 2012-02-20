@@ -10,10 +10,71 @@
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 
+// this distance has to be set accordingly so that the
+// celestial bodies are behind the clouds, but in front of the atmosphere
+#define CELESTIAL_BODY_DISTANCE 1000.f
+
 using namespace Ogre;
 
 namespace MWRender
 {
+    class CelestialBody
+    {
+    public:
+        CelestialBody(  const String& pTextureName,
+                        const unsigned int pInitialSize,
+                        const Vector3& pInitialPosition,
+                        SceneNode* pRootNode
+                    );
+                    
+        void setPosition(const Vector3& pPosition);
+        
+    private:
+        SceneNode* mNode;
+    };
+    
+    CelestialBody::CelestialBody( const String& textureName,
+                        const unsigned int initialSize,
+                        const Vector3& pInitialPosition,
+                        SceneNode* pRootNode)
+    {
+        SceneManager* sceneMgr = pRootNode->getCreator();
+        
+        const float scale = initialSize*700.f;
+        
+        Vector3 finalPosition = pInitialPosition.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
+        
+        static unsigned int bodyCount=0;
+        
+        // Create a camera-aligned billboard
+        BillboardSet* bbSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
+        bbSet->setDefaultDimensions(scale, scale);
+        bbSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY);
+        SceneNode* mNode = pRootNode->createChildSceneNode();
+        mNode->setPosition(finalPosition);
+        mNode->attachObject(bbSet);
+        bbSet->createBillboard(0,0,0);
+        
+        MaterialPtr material = MaterialManager::getSingleton().create("CelestialBody"+StringConverter::toString(bodyCount), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        material->removeAllTechniques();
+        Pass* p = material->createTechnique()->createPass();
+        p->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+        p->setDepthCheckEnabled(false);
+        p->setDepthWriteEnabled(false);
+        p->createTextureUnitState(textureName /*"textures\\tx_sun_05.dds"*/);
+        bbSet->setMaterialName("CelestialBody"+StringConverter::toString(bodyCount));
+        
+        bodyCount++;
+
+    }
+    
+    void CelestialBody::setPosition(const Vector3& pPosition)
+    {
+        Vector3 finalPosition = pPosition.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
+
+        mNode->setPosition(finalPosition);
+    }
+    
     class MWSkyManager : public SkyManager
     {
     public:
@@ -41,8 +102,11 @@ namespace MWRender
         /// 3 waxing or waning gibbous, 4 full moon
         
         virtual void setMoonColour (bool red) {}
+        ///< change Secunda colour to red
         
     private:
+        CelestialBody* mSun;
+    
         Camera* mCamera;
         Viewport* mViewport;
         SceneNode* mRootNode;
@@ -120,6 +184,8 @@ namespace MWRender
 
         mViewport->setBackgroundColour(ColourValue(0.87, 0.87, 0.87));
         
+        mSun = new CelestialBody("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 1.0), mRootNode);
+        
         HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
 
         // Atmosphere
@@ -164,7 +230,7 @@ namespace MWRender
         // Clouds
         NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
         Entity* clouds_ent = mSceneMgr->createEntity("meshes\\sky_clouds_01.nif");
-        clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_LATE);
+        clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+1);
         SceneNode* clouds_node = mRootNode->createChildSceneNode();
         clouds_node->attachObject(clouds_ent);
         mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
@@ -223,36 +289,6 @@ namespace MWRender
         
         ModVertexAlpha(clouds_ent, 1);
         
-        // Sun
-        /// \todo calculate the sun position based on time of day
-        Vector3 sunPosition(0.4, 0.4, 1.f);
-        
-        // this distance has to be set accordingly so that the sun is
-        // behind the clouds, but still in front of the atmosphere
-        const float sunDistance = 1000.f; 
-        
-        const float sunScale = 700.f;
-        
-        Vector3 finalPosition = sunPosition.normalisedCopy() * sunDistance;
-        
-        // Create a camera-aligned billboard to render the sun
-        BillboardSet* bbSet = mSceneMgr->createBillboardSet("SkyBillboardSet", 1);
-        bbSet->setDefaultDimensions(sunScale, sunScale);
-        bbSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY);
-        SceneNode* bbNode = mRootNode->createChildSceneNode();
-        bbNode->translate(finalPosition);
-        bbNode->attachObject(bbSet);
-        bbSet->createBillboard(0,0,0);
-        
-        MaterialPtr sunMaterial = MaterialManager::getSingleton().create("SunMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-        sunMaterial->removeAllTechniques();
-        Pass* p = sunMaterial->createTechnique()->createPass();
-        p->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-        p->setDepthCheckEnabled(false);
-        p->setDepthWriteEnabled(false);
-        p->createTextureUnitState("textures\\tx_sun_05.dds");
-        bbSet->setMaterialName("SunMaterial");
-
         // I'm not sure if the materials are being used by any other objects
         // Make a unique "modifiable" copy of the materials to be sure
         mCloudMaterial = mCloudMaterial->clone("Clouds");
