@@ -689,4 +689,9 @@ namespace MWWorld
     {
         mWorldScene->update (duration);
     }
+    
+    OEngine::Render::Fader* World::getFader()
+    {
+        return mRendering->getFader();
+    }
 }

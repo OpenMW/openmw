@@ -115,4 +115,8 @@ op 0x2000136: GetPCCell
 op 0x2000137: GetButtonPressed
 op 0x2000138: SkipAnim
 op 0x2000139: SkipAnim, expplicit reference
-opcodes 0x200013a-0x3ffffff unused
+op 0x200013b: twf
+op 0x200013c: FadeIn
+op 0x200013d: FadeOut
+op 0x200013e: FadeTo
+opcodes 0x200013f-0x3ffffff unused
