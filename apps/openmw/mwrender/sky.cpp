@@ -21,7 +21,6 @@ namespace MWRender
 
         try
         {
-            //pSkyManager = new CaelumManager(pRenderWindow, pCamera, resDir);
             pSkyManager = new MWSkyManager(pMwRoot, pCamera);
         }
         catch (Ogre::Exception& e)

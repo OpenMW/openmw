@@ -77,7 +77,6 @@ target_link_libraries(openmw
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
-    caelum
     components
     MyGUIEngine
     MyGUIOgrePlatform
