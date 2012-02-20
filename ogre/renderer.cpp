@@ -13,7 +13,8 @@ using namespace OEngine::Render;
 
 void OgreRenderer::cleanup()
 {
-  delete mFader;
+  if (mFader)
+    delete mFader;
   
   if(mRoot)
     delete mRoot;

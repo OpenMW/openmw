@@ -32,7 +32,7 @@ namespace Render
 
   public:
     OgreRenderer()
-      : mRoot(NULL), mWindow(NULL), mScene(NULL) {}
+      : mRoot(NULL), mWindow(NULL), mScene(NULL), mFader(NULL) {}
     ~OgreRenderer() { cleanup(); }
 
     /** Configure the renderer. This will load configuration files and
