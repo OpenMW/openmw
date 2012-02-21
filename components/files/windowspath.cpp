@@ -10,6 +10,13 @@
 
 #pragma comment(lib, "Shlwapi.lib")
 
+/**
+ * FIXME: Someone with Windows system should check this and correct if necessary
+ */
+
+/**
+ * \namespace Files
+ */
 namespace Files
 {
 
@@ -55,28 +62,9 @@ boost::filesystem::path WindowsPath::getLocalPath() const
     return boost::filesystem::path("./");
 }
 
-/**
- * FIXME: Someone with Windows system should check this and correct if necessary
- */
-boost::filesystem::path WindowsPath::getUserDataPath() const
-{
-    return getUserConfigPath();
-}
-
-/**
- * FIXME: Someone with Windows system should check this and correct if necessary
- */
 boost::filesystem::path WindowsPath::getGlobalDataPath() const
 {
     return getGlobalConfigPath();
-}
-
-/**
- * FIXME: Someone with Windows system should check this and correct if necessary
- */
-boost::filesystem::path WindowsPath::getLocalDataPath() const
-{
-    return boost::filesystem::path("./data/");
 }
 
 boost::filesystem::path WindowsPath::getInstallPath() const

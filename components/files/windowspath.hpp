@@ -39,7 +39,8 @@ namespace Files
 struct WindowsPath
 {
     /**
-     * \brief Returns "X:\Documents And Settings\<User name>\My Documents\My Games\"
+     * \brief Returns user path i.e.:
+     * "X:\Documents And Settings\<User name>\My Documents\My Games\"
      *
      * \return boost::filesystem::path
      */
@@ -61,26 +62,11 @@ struct WindowsPath
     boost::filesystem::path getLocalPath() const;
 
     /**
-     * \brief Return same path like getUserConfigPath
-     *
-     * \return boost::filesystem::path
-     */
-    boost::filesystem::path getUserDataPath() const;
-
-    /**
      * \brief Return same path like getGlobalConfigPath
      *
      * \return boost::filesystem::path
      */
     boost::filesystem::path getGlobalDataPath() const;
-
-    /**
-     * \brief Return runtime data path which is a location where
-     * an application was started with 'data' suffix.
-     *
-     * \return boost::filesystem::path
-     */
-    boost::filesystem::path getLocalDataPath() const;
 
     /**
      * \brief Gets the path of the installed Morrowind version if there is one.

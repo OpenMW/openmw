@@ -41,29 +41,19 @@ boost::filesystem::path LinuxPath::getUserPath() const
     boost::filesystem::path userPath(".");
     boost::filesystem::path suffix("/");
 
-    const char* theDir = getenv("OPENMW_CONFIG");
+    const char* theDir = getenv("HOME");
     if (theDir == NULL)
     {
-        theDir = getenv("XDG_CONFIG_HOME");
-        if (theDir == NULL)
+        struct passwd* pwd = getpwuid(getuid());
+        if (pwd != NULL)
         {
-            theDir = getenv("HOME");
-            if (theDir == NULL)
-            {
-                struct passwd* pwd = getpwuid(getuid());
-                if (pwd != NULL)
-                {
-                    theDir = pwd->pw_dir;
-                }
-            }
-            if (theDir != NULL)
-            {
-                suffix = boost::filesystem::path("/.config/");
-            }
+            theDir = pwd->pw_dir;
         }
     }
 
-    if (theDir != NULL) {
+    if (theDir != NULL)
+    {
+        suffix = boost::filesystem::path("/.config/");
         userPath = boost::filesystem::path(theDir);
     }
 
@@ -74,20 +64,7 @@ boost::filesystem::path LinuxPath::getUserPath() const
 
 boost::filesystem::path LinuxPath::getGlobalPath() const
 {
-    boost::filesystem::path globalPath("/etc/xdg/");
-
-    char* theDir = getenv("XDG_CONFIG_DIRS");
-    if (theDir != NULL)
-    {
-        // We take only first path from list
-        char* ptr = strtok(theDir, ":");
-        if (ptr != NULL)
-        {
-            globalPath = boost::filesystem::path(ptr);
-            globalPath /= boost::filesystem::path("/");
-        }
-    }
-
+    boost::filesystem::path globalPath("/etc/");
     return globalPath;
 }
 
@@ -96,63 +73,10 @@ boost::filesystem::path LinuxPath::getLocalPath() const
     return boost::filesystem::path("./");
 }
 
-boost::filesystem::path LinuxPath::getUserDataPath() const
-{
-    boost::filesystem::path localDataPath(".");
-    boost::filesystem::path suffix("/");
-
-    const char* theDir = getenv("OPENMW_DATA");
-    if (theDir == NULL)
-    {
-        theDir = getenv("XDG_DATA_HOME");
-        if (theDir == NULL)
-        {
-            theDir = getenv("HOME");
-            if (theDir == NULL)
-            {
-                struct passwd* pwd = getpwuid(getuid());
-                if (pwd != NULL)
-                {
-                    theDir = pwd->pw_dir;
-                }
-            }
-            if (theDir != NULL)
-            {
-                suffix = boost::filesystem::path("/.local/share/");
-            }
-        }
-    }
-
-    if (theDir != NULL) {
-        localDataPath = boost::filesystem::path(theDir);
-    }
-
-    localDataPath /= suffix;
-    return localDataPath;
-}
-
 boost::filesystem::path LinuxPath::getGlobalDataPath() const
 {
-    boost::filesystem::path globalDataPath("/usr/local/share/");
-
-    char* theDir = getenv("XDG_DATA_DIRS");
-    if (theDir != NULL)
-    {
-        // We take only first path from list
-        char* ptr = strtok(theDir, ":");
-        if (ptr != NULL)
-        {
-            globalDataPath = boost::filesystem::path(ptr);
-            globalDataPath /= boost::filesystem::path("/");
-        }
-    }
-
+    boost::filesystem::path globalDataPath("/usr/share/games/");
     return globalDataPath;
-}
-
-boost::filesystem::path LinuxPath::getLocalDataPath() const
-{
-    return boost::filesystem::path("./data/");
 }
 
 boost::filesystem::path LinuxPath::getInstallPath() const
@@ -211,7 +135,8 @@ boost::filesystem::path LinuxPath::getInstallPath() const
 
             if (!mwpath.empty())
             {
-                // Change drive letter to lowercase, so we could use ~/.wine/dosdevice symlinks
+                // Change drive letter to lowercase, so we could use
+                // ~/.wine/dosdevices symlinks
                 mwpath[0] = tolower(mwpath[0]);
                 installPath /= homePath;
                 installPath /= ".wine/dosdevices/";
