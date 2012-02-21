@@ -152,20 +152,14 @@ QStringList MainDialog::readConfig(const QString &fileName)
 void MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
-    mGraphicsPage = new GraphicsPage(this);
-    mDataFilesPage = new DataFilesPage(this);
+    mGraphicsPage = new GraphicsPage(mCfgMgr, this);
+    mDataFilesPage = new DataFilesPage(mCfgMgr, this);
 
     // Retrieve all data entries from the configs
     QStringList dataDirs;
 
     // Global location
-    QFile file(QString::fromStdString((mCfg.getGlobalConfigPath()/"openmw.cfg").string()));
-    if (file.exists()) {
-        dataDirs = readConfig(file.fileName());
-    }
-
-    // User location
-    file.setFileName(QString::fromStdString((mCfg.getLocalConfigPath()/"openmw.cfg").string()));
+    QFile file(QString::fromStdString((mCfgMgr.getGlobalPath()/"openmw.cfg").string()));
     if (file.exists()) {
         dataDirs = readConfig(file.fileName());
     }
@@ -173,6 +167,12 @@ void MainDialog::createPages()
     // Local location
     file.setFileName("./openmw.cfg");
 
+    if (file.exists()) {
+        dataDirs = readConfig(file.fileName());
+    }
+
+    // User location
+    file.setFileName(QString::fromStdString((mCfgMgr.getUserPath()/"openmw.cfg").string()));
     if (file.exists()) {
         dataDirs = readConfig(file.fileName());
     }
@@ -328,7 +328,7 @@ void MainDialog::writeConfig()
     dataFiles.append(mDataFilesPage->checkedPlugins());
 
     // Open the config as a QFile
-    QFile file(QString::fromStdString((mCfg.getLocalConfigPath()/"openmw.cfg").string()));
+    QFile file(QString::fromStdString((mCfgMgr.getUserPath()/"openmw.cfg").string()));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created

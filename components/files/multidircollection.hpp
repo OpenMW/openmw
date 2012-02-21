@@ -68,7 +68,7 @@ namespace Files
             /// \param foldCase Ignore filename case
 
             boost::filesystem::path getPath (const std::string& file) const;
-            ///< Return full path (including filename) of \æ file.
+            ///< Return full path (including filename) of \a file.
             ///
             /// If the file does not exist, an exception is thrown. \a file must include
             /// the extension.

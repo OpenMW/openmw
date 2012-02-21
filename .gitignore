@@ -7,3 +7,7 @@ Docs/mainpage.hpp
 CMakeFiles
 */CMakeFiles
 CMakeCache.txt
+moc_*.cxx
+cmake_install.cmake
+*.[ao]
+
