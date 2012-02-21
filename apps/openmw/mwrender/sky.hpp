@@ -120,6 +120,9 @@ namespace MWRender
         void setMoonColour (bool red);
         ///< change Secunda colour to red
         
+        void setCloudsOpacity(float opacity);
+        ///< change opacity of the clouds
+        
     private:
         CelestialBody* mSun;
         Moon* mMasser;

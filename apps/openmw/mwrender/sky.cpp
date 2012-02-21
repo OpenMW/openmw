@@ -368,17 +368,19 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     "   in float4 color : TEXCOORD1, \n"
     "   uniform sampler2D texture : TEXUNIT0, \n"
     "   uniform float time, \n"
+    "   uniform float opacity, \n"
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
     "   uv += float2(1,1) * time * "<<CLOUD_SPEED<<"; \n" // Scroll in x,y direction
     "   float4 tex = tex2D(texture, uv); \n"
-    "   oColor = color * float4(emissive.xyz,1) * tex2D(texture, uv); \n"
+    "   oColor = color * float4(emissive.xyz,1) * tex2D(texture, uv) * float4(1,1,1,opacity); \n"
     "}";
     mCloudFragmentShader->setSource(outStream2.str());
     mCloudFragmentShader->load();
     mCloudFragmentShader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mCloudMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(mCloudFragmentShader->getName());
+    setCloudsOpacity(0.75);
     
     ModVertexAlpha(clouds_ent, 1);
     
@@ -437,4 +439,9 @@ void SkyManager::setMoonColour (bool red)
 {
     mSecunda->setColour( red ? ColourValue(1.0, 0.0, 0.0)
                             : ColourValue(1.0, 1.0, 1.0));
+}
+
+void SkyManager::setCloudsOpacity(float opacity)
+{
+    mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("opacity", Real(opacity));
 }
