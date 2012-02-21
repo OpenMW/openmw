@@ -99,7 +99,6 @@ namespace MWRender
         Moon* mMasser;
         Moon* mSecunda;
     
-        Ogre::Camera* mCamera;
         Ogre::Viewport* mViewport;
         Ogre::SceneNode* mRootNode;
         Ogre::SceneManager* mSceneMgr;

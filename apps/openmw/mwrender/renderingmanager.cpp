@@ -40,10 +40,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mMwRoot->pitch(Degree(-90));
     mObjects.setMwRoot(mMwRoot);
     mActors.setMwRoot(mMwRoot);
-    
-    //mSkyManager = 0;
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
-    
+        
     //used to obtain ingame information of ogre objects (which are faced or selected)
     mRaySceneQuery = mRendering.getScene()->createRayQuery(Ray());
 
@@ -52,6 +49,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
     cameraPitchNode->attachObject(mRendering.getCamera());
+    
+    //mSkyManager = 0;
+    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
@@ -200,7 +200,7 @@ void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
   Ogre::ColourValue color;
   color.setAsABGR (mCell.cell->ambi.fog);
 
-  float high = 4500 + 9000 * (1-mCell.cell->ambi.fogDensity);
+  float high = /*4500 + 9000 * */(1-mCell.cell->ambi.fogDensity);
   float low = 200;
 
   mRendering.getScene()->setFog (FOG_LINEAR, color, 0, low, high);

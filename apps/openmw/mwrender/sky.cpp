@@ -211,8 +211,9 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 {
     mViewport = pCamera->getViewport();
     mSceneMgr = pMwRoot->getCreator();
-    mRootNode = pMwRoot->createChildSceneNode();
-    mRootNode->setScale(100.f, 100.f, 100.f);
+    mRootNode = pCamera->getParentSceneNode()->createChildSceneNode();
+    mRootNode->pitch(Degree(-90)); // convert MW to ogre coordinates
+    mRootNode->setInheritOrientation(false);
 
     mViewport->setBackgroundColour(ColourValue(0.87, 0.87, 0.87));
     
@@ -345,9 +346,6 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     mCloudMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-    
-    mCamera = pCamera;
-    mCamera->setFarClipDistance(500000.f);
 }
 
 SkyManager::~SkyManager()
@@ -358,11 +356,7 @@ SkyManager::~SkyManager()
 }
 
 void SkyManager::update(float duration)
-{
-    // Sync the position of the skydomes with the camera
-    /// \todo for some reason this is 1 frame delayed, which causes the skydome move funnily when the camera moves
-    mRootNode->_setDerivedPosition(mCamera->getParentSceneNode()->_getDerivedPosition());
-    
+{    
     // UV Scroll the clouds
     mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", 1);
 }
