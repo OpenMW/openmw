@@ -42,7 +42,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mActors.setMwRoot(mMwRoot);
     
     //mSkyManager = 0;
-    mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), mMwRoot, resDir);
+    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
     
     //used to obtain ingame information of ogre objects (which are faced or selected)
     mRaySceneQuery = mRendering.getScene()->createRayQuery(Ray());
