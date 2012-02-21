@@ -50,6 +50,7 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class WeatherManager;
     class Environment;
     class Player;
 
@@ -68,6 +69,8 @@ namespace MWWorld
         private:
 
             MWRender::RenderingManager* mRendering;
+            
+            MWWorld::WeatherManager* mWeatherManager;
 
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;

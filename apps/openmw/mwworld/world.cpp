@@ -13,10 +13,12 @@
 
 #include "../mwsound/soundmanager.hpp"
 
+
 #include "ptr.hpp"
 #include "environment.hpp"
 #include "class.hpp"
 #include "player.hpp"
+#include "weather.hpp"
 
 #include "refdata.hpp"
 #include "globals.hpp"
@@ -154,6 +156,8 @@ namespace MWWorld
         mPhysEngine = mPhysics->getEngine();
         
         mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine, environment);
+        
+        mWeatherManager = new MWWorld::WeatherManager();
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
@@ -184,6 +188,7 @@ namespace MWWorld
 
     World::~World()
     {
+        delete mWeatherManager;
         delete mWorldScene;
         delete mGlobalVariables;
         delete mRendering;
