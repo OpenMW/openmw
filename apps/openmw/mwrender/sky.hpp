@@ -61,37 +61,63 @@ namespace MWRender
         ///< set the transparency factor for this moon
         
         void setColour(const Ogre::ColourValue& pColour);
+                
+        enum Phase
+        {
+            Phase_New = 0,
+            Phase_WaxingCrescent,
+            Phase_WaxingHalf,
+            Phase_WaxingGibbous,
+            Phase_WaningCrescent,
+            Phase_WaningHalf,
+            Phase_WaningGibbous,
+            Phase_Full
+        };
         
-        /// \todo Moon phases
-    };
+        enum Type
+        {
+            Type_Masser = 0,
+            Type_Secunda
+        };
+        
+        void setPhase(const Phase& phase);
+        void setType(const Type& type);
+        
+        Phase getPhase() const;
+        unsigned int getPhaseInt() const;
     
+    private:
+        Type mType;
+        Phase mPhase;
+    };
+        
     class SkyManager
     {
     public:
         SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera);
-        virtual ~SkyManager();
+        ~SkyManager();
         
-        virtual void update(float duration);
+        void update(float duration);
         
-        virtual void enable();
+        void enable();
         
-        virtual void disable();
+        void disable();
         
-        virtual void setHour (double hour) {}
+        void setHour (double hour) {}
         ///< will be called even when sky is disabled.
         
-        virtual void setDate (int day, int month) {}
+        void setDate (int day, int month) {}
         ///< will be called even when sky is disabled.
         
-        virtual int getMasserPhase() const { return 0; }
+        int getMasserPhase() const;
         ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
         /// 3 waxing or waning gibbous, 4 full moon
         
-        virtual int getSecundaPhase() const { return 0; }
+        int getSecundaPhase() const;
         ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
         /// 3 waxing or waning gibbous, 4 full moon
         
-        virtual void setMoonColour (bool red);
+        void setMoonColour (bool red);
         ///< change Secunda colour to red
         
     private:

@@ -139,6 +139,57 @@ Moon::Moon( const String& textureName,
     fshader->load();
     fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
+    
+    setVisibility(1.0);
+    
+    mPhase = Moon::Phase_Full;
+}
+
+void Moon::setType(const Moon::Type& type)
+{
+    mType = type;
+}
+
+void Moon::setPhase(const Moon::Phase& phase)
+{
+    Ogre::String textureName = "textures\\tx_";
+    
+    if (mType == Moon::Type_Secunda) textureName += "secunda_";
+    else textureName += "masser_";
+    
+    if      (phase == Moon::Phase_New)              textureName += "new";
+    else if (phase == Moon::Phase_WaxingCrescent)   textureName += "one_wax";
+    else if (phase == Moon::Phase_WaxingHalf)       textureName += "half_wax";
+    else if (phase == Moon::Phase_WaxingGibbous)    textureName += "three_wax";
+    else if (phase == Moon::Phase_WaningCrescent)   textureName += "one_wan";
+    else if (phase == Moon::Phase_WaningHalf)       textureName += "half_wan";
+    else if (phase == Moon::Phase_WaningGibbous)    textureName += "three_wan";
+    else if (phase == Moon::Phase_Full)             textureName += "full";
+
+    textureName += ".dds";
+    
+    mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(textureName);
+    
+    mPhase = phase;
+}
+
+Moon::Phase Moon::getPhase() const
+{
+    return mPhase;
+}
+
+unsigned int Moon::getPhaseInt() const
+{
+    if      (mPhase == Moon::Phase_New)              return 0;
+    else if (mPhase == Moon::Phase_WaxingCrescent)   return 1;
+    else if (mPhase == Moon::Phase_WaningCrescent)   return 1;
+    else if (mPhase == Moon::Phase_WaxingHalf)       return 2;
+    else if (mPhase == Moon::Phase_WaningHalf)       return 2;
+    else if (mPhase == Moon::Phase_WaxingGibbous)    return 3;
+    else if (mPhase == Moon::Phase_WaningGibbous)    return 3;
+    else if (mPhase == Moon::Phase_Full)             return 4;
+    
+    return 0;
 }
 
 void Moon::setVisibility(const float pVisibility)
@@ -219,12 +270,14 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     
     mSun = new CelestialBody("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 1.0), mRootNode);
     mMasser = new Moon("textures\\tx_masser_full.dds", 1, Vector3(-0.4, -0.4, 0.5), mRootNode);
-    mSecunda = new Moon("textures\\tx_secunda_full.dds", 1, Vector3(0.4, -0.4, 0.5), mRootNode);
-    mMasser->setVisibility(0.2);
-    mSecunda->setVisibility(0.2);
+    mSecunda = new Moon("textures\\tx_secunda_full.dds", 0.5, Vector3(0.4, -0.4, 0.5), mRootNode);
+    mMasser->setType(Moon::Type_Masser);
+    mSecunda->setType(Moon::Type_Secunda);
+    //mMasser->setVisibility(0.2);
+    //mSecunda->setVisibility(0.2);
     mMasser->setVisible(false);
     mSecunda->setVisible(false);
-    
+        
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
 
     // Atmosphere
@@ -338,10 +391,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(0.235, 0.5, 0.73);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, 0.0);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setAmbient(0.0, 0.0, 0.0);
-    // Set up an UV scroll animation to move the clouds
-    mCloudMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setScrollAnimation(0.01f, 0.01f);
     mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
-    // Disable depth writing so that the sky does not cover any objects
     mCloudMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
@@ -353,6 +403,16 @@ SkyManager::~SkyManager()
     delete mSun;
     delete mMasser;
     delete mSecunda;
+}
+
+int SkyManager::getMasserPhase() const
+{
+    return mMasser->getPhaseInt();
+}
+
+int SkyManager::getSecundaPhase() const
+{
+    return mSecunda->getPhaseInt();
 }
 
 void SkyManager::update(float duration)
