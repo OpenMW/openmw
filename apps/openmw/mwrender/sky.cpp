@@ -13,6 +13,8 @@
 using namespace MWRender;
 using namespace Ogre;
 
+// the speed at which the clouds are animated
+#define CLOUD_SPEED 0.0025
 
 // this distance has to be set accordingly so that the
 // celestial bodies are behind the clouds, but in front of the atmosphere
@@ -369,7 +371,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
-    "   uv += float2(1,1) * time * 0.01; \n" // Scroll in x,y direction
+    "   uv += float2(1,1) * time * "<<CLOUD_SPEED<<"; \n" // Scroll in x,y direction
     "   float4 tex = tex2D(texture, uv); \n"
     "   oColor = color * float4(emissive.xyz,1) * tex2D(texture, uv); \n"
     "}";
