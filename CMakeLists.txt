@@ -329,7 +329,7 @@ if(WIN32)
     FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
     INSTALL(FILES ${files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.cfg" "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION ".")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")

@@ -124,7 +124,7 @@ void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         if (configFileStream.is_open())
         {
             boost::program_options::store(boost::program_options::parse_config_file(
-                configFileStream, description), variables);
+                configFileStream, description, true), variables);
 
             std::cout << "done." << std::endl;
         }

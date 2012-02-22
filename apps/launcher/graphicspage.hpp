@@ -20,9 +20,7 @@ class GraphicsPage : public QWidget
     Q_OBJECT
 
 public:
-    GraphicsPage(Files::ConfigurationManager& cfg, QWidget *parent = 0);
-
-    QSettings *mOgreConfig;
+    GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent = 0);
 
     void writeConfig();
 
@@ -30,7 +28,6 @@ public slots:
     void rendererChanged(const QString &renderer);
 
 private:
-    Files::ConfigurationManager& mCfgMgr;
     Ogre::Root *mOgre;
     Ogre::RenderSystem *mSelectedRenderSystem;
     Ogre::RenderSystem *mOpenGLRenderSystem;
@@ -59,6 +56,10 @@ private:
     QCheckBox *mD3DNvPerfCheckBox;
     QCheckBox *mD3DVSyncCheckBox;
     QCheckBox *mD3DFullScreenCheckBox;
+
+    QSettings *mOgreConfig;
+
+    Files::ConfigurationManager &mCfgMgr;
 
     QString getConfigValue(const QString &key, Ogre::RenderSystem *renderer);
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);

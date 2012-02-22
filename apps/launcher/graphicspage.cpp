@@ -3,7 +3,7 @@
 #include "graphicspage.hpp"
 #include <components/files/configurationmanager.hpp>
 
-GraphicsPage::GraphicsPage(Files::ConfigurationManager& cfg, QWidget *parent)
+GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
     , mCfgMgr(cfg)
 {

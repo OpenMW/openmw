@@ -26,7 +26,7 @@ bool rowSmallerThan(const QModelIndex &index1, const QModelIndex &index2)
     return index1.row() <= index2.row();
 }
 
-DataFilesPage::DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent)
+DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
     , mCfgMgr(cfg)
 {
@@ -123,25 +123,89 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent)
 
 
     setupConfig();
+    setupDataFiles();
     createActions();
 }
 
-void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
+void DataFilesPage::setupConfig()
 {
-    // Put the paths in a boost::filesystem vector to use with Files::Collections
-    Files::PathContainer dataDirs;
+    QString config = QString::fromStdString((mCfgMgr.getLocalPath() / "launcher.cfg").string());
+    QFile file(config);
 
-    foreach (const QString &currentPath, paths) {
-        dataDirs.push_back(boost::filesystem::path(currentPath.toStdString()));
+    if (!file.exists()) {
+        config = QString::fromStdString((mCfgMgr.getUserPath() / "launcher.cfg").string());
     }
 
+    // Open our config file
+    mLauncherConfig = new QSettings(config, QSettings::IniFormat);
+    mLauncherConfig->sync();
+
+
+    // Make sure we have no groups open
+    while (!mLauncherConfig->group().isEmpty()) {
+        mLauncherConfig->endGroup();
+    }
+
+    mLauncherConfig->beginGroup("Profiles");
+    QStringList profiles = mLauncherConfig->childGroups();
+
+    if (profiles.isEmpty()) {
+        // Add a default profile
+        profiles.append("Default");
+    }
+
+    mProfilesComboBox->addItems(profiles);
+
+    QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
+
+    if (currentProfile.isEmpty()) {
+        // No current profile selected
+        currentProfile = "Default";
+    }
+    mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
+
+    mLauncherConfig->endGroup();
+
+    // Now we connect the combobox to do something if the profile changes
+    // This prevents strange behaviour while reading and appending the profiles
+    connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
+}
+
+
+void DataFilesPage::setupDataFiles()
+{
+    // We use the Configuration Manager to retrieve the configuration values
+    boost::program_options::variables_map variables;
+    boost::program_options::options_description desc;
+
+    desc.add_options()
+        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
+        ("data-local", boost::program_options::value<std::string>()->default_value(""))
+        ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
+        ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+
+    mCfgMgr.readConfiguration(variables, desc);
+
+    // Put the paths in a boost::filesystem vector to use with Files::Collections
+    Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
     mCfgMgr.processPaths(dataDirs);
 
+    std::string local(variables["data-local"].as<std::string>());
+    if (!local.empty())
+    {
+        dataDirs.push_back(Files::PathContainer::value_type(local));
+    }
+
+    if (dataDirs.empty())
+    {
+        dataDirs.push_back(mCfgMgr.getLocalPath());
+    }
+
     // Create a file collection for the dataDirs
-    Files::Collections mFileCollections(dataDirs, strict);
+    Files::Collections fileCollections(dataDirs, !variables["fs-strict"].as<bool>());
 
      // First we add all the master files
-    const Files::MultiDirCollection &esm = mFileCollections.getCollection(".esm");
+    const Files::MultiDirCollection &esm = fileCollections.getCollection(".esm");
     unsigned int i = 0; // Row number
 
     for (Files::MultiDirCollection::TIter iter(esm.begin()); iter!=esm.end(); ++iter)
@@ -161,14 +225,14 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
     }
 
     // Now on to the plugins
-    const Files::MultiDirCollection &esp = mFileCollections.getCollection(".esp");
+    const Files::MultiDirCollection &esp = fileCollections.getCollection(".esp");
 
     for (Files::MultiDirCollection::TIter iter(esp.begin()); iter!=esp.end(); ++iter)
     {
         ESMReader fileReader;
         QStringList availableMasters; // Will contain all found masters
 
-        fileReader.setEncoding("win1252"); // FIXME: This should be configurable!
+        fileReader.setEncoding(variables["encoding"].as<std::string>());
         fileReader.open(iter->second.string());
 
         // First we fill the availableMasters and the mMastersWidget
@@ -236,52 +300,6 @@ void DataFilesPage::setupDataFiles(const QStringList &paths, bool strict)
     }
 
     readConfig();
-}
-
-void DataFilesPage::setupConfig()
-{
-    QString config = (mCfgMgr.getLocalPath() / "launcher.cfg").string().c_str();
-    QFile file(config);
-
-    if (!file.exists()) {
-        config = QString::fromStdString((mCfgMgr.getUserPath() / "launcher.cfg").string());
-    }
-
-    file.setFileName(config); // Just for displaying information
-
-    // Open our config file
-    mLauncherConfig = new QSettings(config, QSettings::IniFormat);
-    mLauncherConfig->sync();
-
-
-    // Make sure we have no groups open
-    while (!mLauncherConfig->group().isEmpty()) {
-        mLauncherConfig->endGroup();
-    }
-
-    mLauncherConfig->beginGroup("Profiles");
-    QStringList profiles = mLauncherConfig->childGroups();
-
-    if (profiles.isEmpty()) {
-        // Add a default profile
-        profiles.append("Default");
-    }
-
-    mProfilesComboBox->addItems(profiles);
-
-    QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
-
-    if (currentProfile.isEmpty()) {
-        // No current profile selected
-        currentProfile = "Default";
-    }
-    mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
-
-    mLauncherConfig->endGroup();
-
-    // Now we connect the combobox to do something if the profile changes
-    // This prevents strange behaviour while reading and appending the profiles
-    connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 }
 
 void DataFilesPage::createActions()
@@ -983,6 +1001,53 @@ void DataFilesPage::writeConfig(QString profile)
         return;
     }
 
+    // Prepare the OpenMW config
+
+    // Open the config as a QFile
+    QFile file(QString::fromStdString((mCfgMgr.getUserPath()/"openmw.cfg").string()));
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        // File cannot be opened or created
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error writing OpenMW configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not open or create %0</b><br><br> \
+        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
+
+        QApplication::exit(1);
+    }
+
+    QTextStream in(&file);
+    QByteArray buffer;
+
+    // Remove all previous master/plugin entries from config
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (!line.contains("master") && !line.contains("plugin")) {
+            buffer += line += "\n";
+        }
+    }
+
+    file.close();
+
+    // Now we write back the other config entries
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error writing OpenMW configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not write to %0</b><br><br> \
+        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
+
+        QApplication::exit(1);
+    }
+
+    file.write(buffer);
+    QTextStream gameConfig(&file);
+
     // Make sure we have no groups open
     while (!mLauncherConfig->group().isEmpty()) {
         mLauncherConfig->endGroup();
@@ -995,13 +1060,16 @@ void DataFilesPage::writeConfig(QString profile)
     mLauncherConfig->beginGroup(profile);
     mLauncherConfig->remove(""); // Clear the subgroup
 
-    // First write the masters to the config
-    const QStringList masterList = selectedMasters();
+    // First write the masters to the configs
+    const QStringList masters = selectedMasters();
 
     // We don't use foreach because we need i
-    for (int i = 0; i < masterList.size(); ++i) {
-        const QString master = masterList.at(i);
-        mLauncherConfig->setValue(QString("Master%0").arg(i), master);
+    for (int i = 0; i < masters.size(); ++i) {
+        const QString currentMaster = masters.at(i);
+
+        mLauncherConfig->setValue(QString("Master%0").arg(i), currentMaster);
+        gameConfig << "master=" << currentMaster << endl;
+
     }
 
     // Now write all checked plugins
@@ -1009,9 +1077,12 @@ void DataFilesPage::writeConfig(QString profile)
 
     for (int i = 0; i < plugins.size(); ++i)
     {
-        mLauncherConfig->setValue(QString("Plugin%1").arg(i), plugins.at(i));
+        const QString currentPlugin = plugins.at(i);
+        mLauncherConfig->setValue(QString("Plugin%1").arg(i), currentPlugin);
+        gameConfig << "plugin=" << currentPlugin << endl;
     }
 
+    file.close();
     mLauncherConfig->endGroup();
     mLauncherConfig->endGroup();
 

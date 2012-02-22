@@ -45,6 +45,20 @@ MainDialog::MainDialog()
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setMinimumSize(QSize(575, 575));
 
+    // Load the stylesheet
+    QString config = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "launcher.qss").string());
+    QFile file(config);
+
+    if (!file.exists()) {
+        file.setFileName(QString::fromStdString((mCfgMgr.getLocalPath() / "launcher.qss").string()));
+    }
+
+    file.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(file.readAll());
+    qApp->setStyleSheet(styleSheet);
+    file.close();
+
+
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
 
@@ -85,116 +99,13 @@ void MainDialog::createIcons()
 
 }
 
-QStringList MainDialog::readConfig(const QString &fileName)
-{
-    // We can't use QSettings directly because it
-    // does not support multiple keys with the same name
-    QFile file(fileName);
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error opening OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open %0</b><br><br> \
-        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
-
-        QApplication::exit(); // File cannot be opened or created
-    }
-
-    QTextStream in(&file);
-    QStringList dataDirs;
-    QString dataLocal;
-
-    // Read the config line by line
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-
-        if (line.startsWith("data=")) {
-            dataDirs.append(line.remove("data="));
-        }
-
-        // Read the data-local key, if more than one are found only the last is used
-        if (line.startsWith("data-local=")) {
-            dataLocal = line.remove("data-local=");
-        }
-
-        // Read fs-strict key
-        if (line.startsWith("fs-strict=")) {
-            QString value = line.remove("fs-strict=");
-
-            (value.toLower() == QLatin1String("true"))
-            ? mStrict = true
-            : mStrict = false;
-
-        }
-
-    }
-
-    // Add the data-local= key to the end of the dataDirs for priority reasons
-    if (!dataLocal.isEmpty()) {
-        dataDirs.append(dataLocal);
-    }
-
-    if (!dataDirs.isEmpty())
-    {
-        // Reset the global datadirs to the newly read entries
-        // Else return the previous dataDirs because nothing was found in this file;
-        mDataDirs = dataDirs;
-    }
-
-    file.close();
-
-    return mDataDirs;
-}
-
 void MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, this);
 
-    // Retrieve all data entries from the configs
-    QStringList dataDirs;
-
-    // Global location
-    QFile file(QString::fromStdString((mCfgMgr.getGlobalPath()/"openmw.cfg").string()));
-    if (file.exists()) {
-        dataDirs = readConfig(file.fileName());
-    }
-
-    // Local location
-    file.setFileName("./openmw.cfg");
-
-    if (file.exists()) {
-        dataDirs = readConfig(file.fileName());
-    }
-
-    // User location
-    file.setFileName(QString::fromStdString((mCfgMgr.getUserPath()/"openmw.cfg").string()));
-    if (file.exists()) {
-        dataDirs = readConfig(file.fileName());
-    }
-
-    file.close();
-
-    if (!dataDirs.isEmpty()) {
-        // Now pass the datadirs on to the DataFilesPage
-        mDataFilesPage->setupDataFiles(dataDirs, mStrict);
-    } else {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error reading OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not read the location of the data files</b><br><br> \
-                        Please make sure OpenMW is correctly configured and try again.<br>"));
-        msgBox.exec();
-
-        QApplication::exit(); // No data or data-local entries in openmw.cfg
-    }
-
-    // Set the combobox of the play page to imitate the comobox on the datafilespage
+    // Set the combobox of the play page to imitate the combobox on the datafilespage
     mPlayPage->mProfilesComboBox->setModel(mDataFilesPage->mProfilesComboBox->model());
     mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
 
@@ -246,14 +157,16 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 void MainDialog::closeEvent(QCloseEvent *event)
 {
     // Now write all config files
-    writeConfig();
+    mDataFilesPage->writeConfig();
+    mGraphicsPage->writeConfig();
     event->accept();
 }
 
 void MainDialog::play()
 {
     // First do a write of all the configs, just to be sure
-    writeConfig();
+    mDataFilesPage->writeConfig();
+    mGraphicsPage->writeConfig();
 
 #ifdef Q_WS_WIN
     QString game = "./openmw.exe";
@@ -312,76 +225,4 @@ void MainDialog::play()
     } else {
         close();
     }
-}
-
-void MainDialog::writeConfig()
-{
-    // Write the profiles
-    mDataFilesPage->writeConfig();
-    mDataFilesPage->mLauncherConfig->sync();
-
-    // Write the graphics settings
-    mGraphicsPage->writeConfig();
-    mGraphicsPage->mOgreConfig->sync();
-
-    QStringList dataFiles = mDataFilesPage->selectedMasters();
-    dataFiles.append(mDataFilesPage->checkedPlugins());
-
-    // Open the config as a QFile
-    QFile file(QString::fromStdString((mCfgMgr.getUserPath()/"openmw.cfg").string()));
-
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-        // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0</b><br><br> \
-                        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
-
-        QApplication::exit(1);
-    }
-
-    QTextStream in(&file);
-    QByteArray buffer;
-
-    // Remove all previous master/plugin entries from config
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        if (!line.contains("master") && !line.contains("plugin")) {
-            buffer += line += "\n";
-        }
-    }
-
-    file.close();
-
-    // Now we write back the other config entries
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not write to %0</b><br><br> \
-                        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
-
-        QApplication::exit(1);
-    }
-
-    file.write(buffer);
-
-    QTextStream out(&file);
-
-    // Write the list of game files to the config
-    foreach (const QString &currentFile, dataFiles) {
-
-        if (currentFile.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
-            out << "master=" << currentFile << endl;
-        } else if (currentFile.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
-            out << "plugin=" << currentFile << endl;
-        }
-    }
-
-    file.close();
 }

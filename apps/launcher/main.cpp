@@ -31,13 +31,6 @@ int main(int argc, char *argv[])
 
     QDir::setCurrent(dir.absolutePath());
 
-    // Load the stylesheet
-    QFile file("./launcher.qss");
-
-    file.open(QFile::ReadOnly);
-    QString styleSheet = QLatin1String(file.readAll());
-    app.setStyleSheet(styleSheet);
-
     MainDialog dialog;
     return dialog.exec();
 

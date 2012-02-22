@@ -28,14 +28,10 @@ public slots:
     void play();
     void profileChanged(int index);
 
-
 private:
     void createIcons();
     void createPages();
-    void writeConfig();
     void closeEvent(QCloseEvent *event);
-
-    QStringList readConfig(const QString &fileName);
 
     QListWidget *mIconWidget;
     QStackedWidget *mPagesWidget;
@@ -43,9 +39,6 @@ private:
     PlayPage *mPlayPage;
     GraphicsPage *mGraphicsPage;
     DataFilesPage *mDataFilesPage;
-
-    QStringList mDataDirs;
-    bool mStrict;
 
     Files::ConfigurationManager mCfgMgr;
 };
