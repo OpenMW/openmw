@@ -44,6 +44,11 @@ void CelestialBody::setPosition(const Vector3& pPosition)
     mNode->setPosition(finalPosition);
 }
 
+void CelestialBody::setColour(const ColourValue& pColour)
+{
+    mMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(pColour);
+}
+
 void CelestialBody::init(const String& textureName,
                     const unsigned int initialSize,
                     const Vector3& pInitialPosition,
@@ -68,7 +73,7 @@ void CelestialBody::init(const String& textureName,
     mNode->attachObject(bbSet);
     bbSet->createBillboard(0,0,0);
     
-    mMaterial = MaterialManager::getSingleton().create("CelestialBody"+StringConverter::toString(bodyCount), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    mMaterial = MaterialManager::getSingleton().create("BillboardMaterial"+StringConverter::toString(bodyCount), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     mMaterial->removeAllTechniques();
     Pass* p = mMaterial->createTechnique()->createPass();
     p->setSceneBlending(SBT_TRANSPARENT_ALPHA);
@@ -78,7 +83,7 @@ void CelestialBody::init(const String& textureName,
     p->setDiffuse(0.0,0.0,0.0,1.0);
     p->setAmbient(0.0,0.0,0.0);
     p->createTextureUnitState(textureName);
-    bbSet->setMaterialName("CelestialBody"+StringConverter::toString(bodyCount));
+    bbSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
     
     bodyCount++;
 }
@@ -152,6 +157,8 @@ void Moon::setType(const Moon::Type& type)
     mType = type;
 }
 
+
+/// \todo the moon phase rendering is not correct - the dark part of the moon does not occlude the stars
 void Moon::setPhase(const Moon::Phase& phase)
 {
     Ogre::String textureName = "textures\\tx_";
@@ -198,12 +205,6 @@ void Moon::setVisibility(const float pVisibility)
 {
     mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("visibilityFactor", Real(pVisibility));
 }
-
-void Moon::setColour(const ColourValue& pColour)
-{
-    mMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(pColour);
-}
-
 
 void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
 {
@@ -367,14 +368,16 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     "	out float4 oColor    : COLOR, \n"
     "   in float4 color : TEXCOORD1, \n"
     "   uniform sampler2D texture : TEXUNIT0, \n"
+    "   uniform sampler2D secondTexture : TEXUNIT1, \n"
+    "   uniform float transitionFactor, \n"
     "   uniform float time, \n"
     "   uniform float opacity, \n"
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
     "   uv += float2(1,1) * time * "<<CLOUD_SPEED<<"; \n" // Scroll in x,y direction
-    "   float4 tex = tex2D(texture, uv); \n"
-    "   oColor = color * float4(emissive.xyz,1) * tex2D(texture, uv) * float4(1,1,1,opacity); \n"
+    "   float4 tex = lerp(tex2D(texture, uv), tex2D(secondTexture, uv), transitionFactor); \n"
+    "   oColor = color * float4(emissive.xyz,1) * tex * float4(1,1,1,opacity); \n"
     "}";
     mCloudFragmentShader->setSource(outStream2.str());
     mCloudFragmentShader->load();
@@ -400,6 +403,8 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     mCloudMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+    
+    mCloudMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("");
 }
 
 SkyManager::~SkyManager()
@@ -437,6 +442,7 @@ void SkyManager::disable()
 
 void SkyManager::setMoonColour (bool red)
 {
+    /// \todo tweak these colors
     mSecunda->setColour( red ? ColourValue(1.0, 0.0, 0.0)
                             : ColourValue(1.0, 1.0, 1.0));
 }
@@ -444,4 +450,32 @@ void SkyManager::setMoonColour (bool red)
 void SkyManager::setCloudsOpacity(float opacity)
 {
     mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("opacity", Real(opacity));
+}
+
+void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
+{
+    if (mClouds != weather.mCloudTexture)
+    {
+        mCloudMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("textures\\"+weather.mCloudTexture);
+        mClouds = weather.mCloudTexture;
+    }
+    
+    if (mNextClouds != weather.mNextCloudTexture)
+    {
+        mCloudMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName("textures\\"+weather.mNextCloudTexture);
+        mNextClouds = weather.mNextCloudTexture;
+    }
+    
+    if (mCloudBlendFactor != weather.mCloudBlendFactor)
+    {
+        mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("transitionFactor", Real(weather.mCloudBlendFactor));
+        mCloudBlendFactor = weather.mCloudBlendFactor;
+    }
+    
+    if (mCloudOpacity != weather.mCloudOpacity)
+    {
+        mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("opacity", Real(weather.mCloudOpacity));
+        mCloudOpacity = weather.mCloudOpacity;
+    }
+
 }

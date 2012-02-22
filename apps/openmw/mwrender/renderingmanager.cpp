@@ -64,6 +64,10 @@ RenderingManager::~RenderingManager ()
     delete mSkyManager;
 }
 
+MWRender::SkyManager* RenderingManager::getSkyManager()
+{
+    return mSkyManager;
+}
 
 MWRender::Objects& RenderingManager::getObjects(){
     return mObjects;

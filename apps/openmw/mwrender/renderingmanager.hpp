@@ -62,6 +62,8 @@ class RenderingManager: private RenderingInterface {
                                             /// MWWorld::Player has been rewritten to not need access
                                             /// to internal details of the rendering system anymore
 
+    SkyManager* getSkyManager();
+
     void toggleLight();
     bool toggleRenderMode(int mode);
     
@@ -111,7 +113,9 @@ class RenderingManager: private RenderingInterface {
   private:
 
     void setAmbientMode();
+    
     SkyManager* mSkyManager;
+    
     OEngine::Render::OgreRenderer &mRendering;
 
     MWRender::Objects mObjects;

@@ -8,6 +8,7 @@
 #include <OgreHighLevelGpuProgram.h>
 
 #include "sky.hpp"
+#include "../mwworld/weather.hpp"
 
 namespace Ogre
 {
@@ -30,7 +31,8 @@ namespace MWRender
                         Ogre::SceneNode* pRootNode
                     );
         CelestialBody();
-                            
+        
+        void setColour(const Ogre::ColourValue& pColour);
         void setPosition(const Ogre::Vector3& pPosition);
         void setVisible(const bool visible);
         
@@ -59,9 +61,7 @@ namespace MWRender
     
         void setVisibility(const float pVisibility);
         ///< set the transparency factor for this moon
-        
-        void setColour(const Ogre::ColourValue& pColour);
-                
+                        
         enum Phase
         {
             Phase_New = 0,
@@ -123,6 +123,8 @@ namespace MWRender
         void setCloudsOpacity(float opacity);
         ///< change opacity of the clouds
         
+        void setWeather(const MWWorld::WeatherResult& weather);
+        
     private:
         CelestialBody* mSun;
         Moon* mMasser;
@@ -136,6 +138,14 @@ namespace MWRender
         Ogre::MaterialPtr mAtmosphereMaterial;
         
         Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
+        
+        // remember the cloud texture names used right now, so we don't have to set the texture names if they didnt change
+        Ogre::String mClouds;
+        Ogre::String mNextClouds;
+        float mCloudBlendFactor;
+        float mCloudOpacity;
+        
+        float mRemainingTransitionTime;
         
         void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
     };

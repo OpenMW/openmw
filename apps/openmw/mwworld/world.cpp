@@ -693,6 +693,8 @@ namespace MWWorld
     void World::update (float duration)
     {
         mWorldScene->update (duration);
+        
+        mWeatherManager->update (duration);
     }
     
     OEngine::Render::Fader* World::getFader()

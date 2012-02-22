@@ -11,6 +11,35 @@ namespace MWRender
 
 namespace MWWorld
 {
+    /// Defines the actual weather that results from weather setting (see below), time of day and weather transition
+    struct WeatherResult
+    {
+        Ogre::String mCloudTexture;
+        Ogre::String mNextCloudTexture;
+        float mCloudBlendFactor;
+                
+        Ogre::ColourValue mFogColor;
+        
+        Ogre::ColourValue mAmbientColor;
+        
+        Ogre::ColourValue mSunColor;
+        
+        Ogre::ColourValue mSunDiscColor;
+        
+        float mFogDepth;
+        
+        float mWindSpeed;
+        
+        float mCloudSpeed;
+        
+        float mCloudOpacity;
+        
+        float mGlareView;
+        
+        Ogre::String mAmbientLoopSoundID;
+    };
+    
+    
     /// Defines a single weather setting
     struct Weather
     {
@@ -83,7 +112,7 @@ namespace MWWorld
          * @param instant
          *      if true, the weather changes instantly. if false, it slowly starts transitioning.
          */
-        void setWeather(const Weather& weather, bool instant=false);
+        void setWeather(const Ogre::String& weather, bool instant=false);
         
         /**
          * Per-frame update
@@ -93,6 +122,16 @@ namespace MWWorld
         
     private:
         MWRender::RenderingManager* mRendering;
+        
+        std::map<Ogre::String, Weather> mWeatherSettings;
+        
+        Ogre::String mCurrentWeather;
+        Ogre::String mNextWeather;
+        
+        float mRemainingTransitionTime;
+        
+        WeatherResult transition(const Weather& other, const float factor);
+        WeatherResult getResult();
     };
 }
 
