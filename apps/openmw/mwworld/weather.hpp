@@ -120,7 +120,14 @@ namespace MWWorld
          */
         void update(float duration);
         
+        void setHour(const float hour);
+        
+        void setDate(const int day, const int month);
+        
     private:
+        float mHour;
+        int mDay, mMonth;
+    
         MWRender::RenderingManager* mRendering;
         
         std::map<Ogre::String, Weather> mWeatherSettings;
@@ -130,8 +137,8 @@ namespace MWWorld
         
         float mRemainingTransitionTime;
         
-        WeatherResult transition(const Weather& other, const float factor);
-        WeatherResult getResult();
+        WeatherResult transition(const float factor);
+        WeatherResult getResult(const Ogre::String& weather);
     };
 }
 

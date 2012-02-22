@@ -46,9 +46,9 @@ void WeatherManager::setWeather(const String& weather, bool instant)
     }
 }
 
-WeatherResult WeatherManager::getResult()
+WeatherResult WeatherManager::getResult(const String& weather)
 {
-    const Weather& current = mWeatherSettings[mCurrentWeather];
+    const Weather& current = mWeatherSettings[weather];
     WeatherResult result;
     
     result.mCloudTexture = current.mCloudTexture;
@@ -59,9 +59,10 @@ WeatherResult WeatherManager::getResult()
     return result;
 }
 
-WeatherResult WeatherManager::transition(const Weather& other, float factor)
+WeatherResult WeatherManager::transition(float factor)
 {
-    const Weather& current = mWeatherSettings[mCurrentWeather];
+    const WeatherResult& current = getResult(mCurrentWeather);
+    const WeatherResult& other = getResult(mNextWeather);
     WeatherResult result;
     
     result.mCloudTexture = current.mCloudTexture;
@@ -70,7 +71,7 @@ WeatherResult WeatherManager::transition(const Weather& other, float factor)
         
     #define lerp(x, y) (x * (1-factor) + y * factor)
     
-    result.mCloudOpacity = lerp(current.mCloudsMaximumPercent, other.mCloudsMaximumPercent);
+    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     
     /// \todo
     
@@ -92,9 +93,20 @@ void WeatherManager::update(float duration)
     }
     
     if (mNextWeather != "")
-        result = transition(mWeatherSettings[mNextWeather], 1-(mRemainingTransitionTime/TRANSITION_TIME));
+        result = transition(1-(mRemainingTransitionTime/TRANSITION_TIME));
     else
-        result = getResult();
+        result = getResult(mCurrentWeather);
     
     mRendering->getSkyManager()->setWeather(result);
+}
+
+void WeatherManager::setHour(const float hour)
+{
+    mHour = hour;
+}
+
+void WeatherManager::setDate(const int day, const int month)
+{
+    mDay = day;
+    mMonth = month;
 }

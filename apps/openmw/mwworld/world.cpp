@@ -374,6 +374,8 @@ namespace MWWorld
         mGlobalVariables->setFloat ("gamehour", hour);
 
         mRendering->skySetHour (hour);
+        
+        mWeatherManager->setHour (hour);
 
         if (days>0)
             setDay (days + mGlobalVariables->getInt ("day"));
@@ -409,6 +411,8 @@ namespace MWWorld
         mGlobalVariables->setInt ("month", month);
 
         mRendering->skySetDate (day, month);
+        
+        mWeatherManager->setDate (day, month);
     }
 
     void World::setMonth (int month)
