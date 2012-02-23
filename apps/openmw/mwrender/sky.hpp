@@ -18,45 +18,48 @@ namespace Ogre
     class Viewport;
     class SceneManager;
     class Entity;
+    class BillboardSet;
 }
 
 namespace MWRender
 {
-   class CelestialBody
+   class BillboardObject
     {
     public:
-        CelestialBody(  const Ogre::String& pTextureName,
-                        const unsigned int pInitialSize,
-                        const Ogre::Vector3& pInitialPosition,
-                        Ogre::SceneNode* pRootNode
+        BillboardObject(  const Ogre::String& textureName,
+                        const unsigned int size,
+                        const Ogre::Vector3& position,
+                        Ogre::SceneNode* rootNode
                     );
-        CelestialBody();
+        BillboardObject();
         
         void setColour(const Ogre::ColourValue& pColour);
         void setPosition(const Ogre::Vector3& pPosition);
         void setVisible(const bool visible);
+        void setRenderQueue(unsigned int id);
         
     protected:
-        virtual void init(const Ogre::String& pTextureName,
-                        const unsigned int pInitialSize,
-                        const Ogre::Vector3& pInitialPosition,
-                        Ogre::SceneNode* pRootNode);
+        virtual void init(const Ogre::String& textureName,
+                        const unsigned int size,
+                        const Ogre::Vector3& position,
+                        Ogre::SceneNode* rootNode);
     
         Ogre::SceneNode* mNode;
         Ogre::MaterialPtr mMaterial;
+        Ogre::BillboardSet* mBBSet;
     };
     
     
     /*
      * The moons need a seperate class because of their shader (which allows them to be partially transparent)
      */
-    class Moon : public CelestialBody
+    class Moon : public BillboardObject
     {
     public:
-        Moon(  const Ogre::String& pTextureName,
-                        const unsigned int pInitialSize,
-                        const Ogre::Vector3& pInitialPosition,
-                        Ogre::SceneNode* pRootNode
+        Moon(  const Ogre::String& textureName,
+                        const unsigned int size,
+                        const Ogre::Vector3& position,
+                        Ogre::SceneNode* rootNode
                     );
     
         void setVisibility(const float pVisibility);
@@ -126,7 +129,8 @@ namespace MWRender
         void setWeather(const MWWorld::WeatherResult& weather);
         
     private:
-        CelestialBody* mSun;
+        BillboardObject* mSun;
+        BillboardObject* mSunGlare;
         Moon* mMasser;
         Moon* mSecunda;
     

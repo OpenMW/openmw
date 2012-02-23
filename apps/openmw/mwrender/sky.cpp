@@ -20,58 +20,63 @@ using namespace Ogre;
 // celestial bodies are behind the clouds, but in front of the atmosphere
 #define CELESTIAL_BODY_DISTANCE 1000.f
 
-CelestialBody::CelestialBody( const String& textureName,
+BillboardObject::BillboardObject( const String& textureName,
                     const unsigned int initialSize,
-                    const Vector3& pInitialPosition,
-                    SceneNode* pRootNode)
+                    const Vector3& position,
+                    SceneNode* rootNode)
 {
-    init(textureName, initialSize, pInitialPosition, pRootNode);
+    init(textureName, initialSize, position, rootNode);
 }
 
-CelestialBody::CelestialBody()
+BillboardObject::BillboardObject()
 {
 }
 
-void CelestialBody::setVisible(const bool visible)
+void BillboardObject::setVisible(const bool visible)
 {
     mNode->setVisible(visible);
 }
 
-void CelestialBody::setPosition(const Vector3& pPosition)
+void BillboardObject::setPosition(const Vector3& pPosition)
 {
     Vector3 finalPosition = pPosition.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
 
     mNode->setPosition(finalPosition);
 }
 
-void CelestialBody::setColour(const ColourValue& pColour)
+void BillboardObject::setColour(const ColourValue& pColour)
 {
     mMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(pColour);
 }
 
-void CelestialBody::init(const String& textureName,
-                    const unsigned int initialSize,
-                    const Vector3& pInitialPosition,
-                    SceneNode* pRootNode)
+void BillboardObject::setRenderQueue(unsigned int id)
 {
-    SceneManager* sceneMgr = pRootNode->getCreator();
+    mBBSet->setRenderQueueGroup(id);
+}
+
+void BillboardObject::init(const String& textureName,
+                    const unsigned int initialSize,
+                    const Vector3& position,
+                    SceneNode* rootNode)
+{
+    SceneManager* sceneMgr = rootNode->getCreator();
     
     const float scale = initialSize*550.f;
     
-    Vector3 finalPosition = pInitialPosition.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
+    Vector3 finalPosition = position.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
     
     static unsigned int bodyCount=0;
     
     /// \todo These billboards are not 100% correct, might want to revisit them later
-    BillboardSet* bbSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
-    bbSet->setDefaultDimensions(scale, scale);
-    bbSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+1);
-    bbSet->setBillboardType(BBT_PERPENDICULAR_COMMON);
-    bbSet->setCommonDirection( -pInitialPosition.normalisedCopy() );
-    mNode = pRootNode->createChildSceneNode();
+    mBBSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
+    mBBSet->setDefaultDimensions(scale, scale);
+    mBBSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+1);
+    mBBSet->setBillboardType(BBT_PERPENDICULAR_COMMON);
+    mBBSet->setCommonDirection( -position.normalisedCopy() );
+    mNode = rootNode->createChildSceneNode();
     mNode->setPosition(finalPosition);
-    mNode->attachObject(bbSet);
-    bbSet->createBillboard(0,0,0);
+    mNode->attachObject(mBBSet);
+    mBBSet->createBillboard(0,0,0);
     
     mMaterial = MaterialManager::getSingleton().create("BillboardMaterial"+StringConverter::toString(bodyCount), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     mMaterial->removeAllTechniques();
@@ -83,17 +88,17 @@ void CelestialBody::init(const String& textureName,
     p->setDiffuse(0.0,0.0,0.0,1.0);
     p->setAmbient(0.0,0.0,0.0);
     p->createTextureUnitState(textureName);
-    bbSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
+    mBBSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
     
     bodyCount++;
 }
 
 Moon::Moon( const String& textureName,
                     const unsigned int initialSize,
-                    const Vector3& pInitialPosition,
-                    SceneNode* pRootNode)
+                    const Vector3& position,
+                    SceneNode* rootNode)
 {
-    init(textureName, initialSize, pInitialPosition, pRootNode);
+    init(textureName, initialSize, position, rootNode);
 
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
     HighLevelGpuProgramPtr vshader;
@@ -271,7 +276,9 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 
     mViewport->setBackgroundColour(ColourValue(0.87, 0.87, 0.87));
     
-    mSun = new CelestialBody("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 1.0), mRootNode);
+    mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 1.0), mRootNode);
+    mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 1.0), mRootNode);
+    mSunGlare->setRenderQueue(RENDER_QUEUE_SKIES_LATE);
     mMasser = new Moon("textures\\tx_masser_full.dds", 1, Vector3(-0.4, -0.4, 0.5), mRootNode);
     mSecunda = new Moon("textures\\tx_secunda_full.dds", 0.5, Vector3(0.4, -0.4, 0.5), mRootNode);
     mMasser->setType(Moon::Type_Masser);
@@ -411,6 +418,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 SkyManager::~SkyManager()
 {
     delete mSun;
+    delete mSunGlare;
     delete mMasser;
     delete mSecunda;
 }

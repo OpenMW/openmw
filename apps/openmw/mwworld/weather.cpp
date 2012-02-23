@@ -211,17 +211,20 @@ void WeatherManager::update(float duration)
     else
         result = getResult(mCurrentWeather);
     
-    mRendering->getSkyManager()->setWeather(result);
     
     if (mWorld->isCellExterior() || mWorld->isCellQuasiExterior())
     {
         mRendering->setAmbientColour(result.mAmbientColor);
         mRendering->sunEnable();
         mRendering->setSunColour(result.mSunColor);
+        
+        mRendering->skyEnable();
+        mRendering->getSkyManager()->setWeather(result);
     }
     else
     {
         mRendering->sunDisable();
+        mRendering->skyDisable();
     }
 }
 
