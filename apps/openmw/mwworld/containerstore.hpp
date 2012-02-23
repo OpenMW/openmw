@@ -31,7 +31,7 @@ namespace MWWorld
 
             static const int Type_All = 0xffff;
 
-//        private:
+        private:
 
             ESMS::CellRefList<ESM::Potion, RefData>            potions;
             ESMS::CellRefList<ESM::Apparatus, RefData>         appas;
