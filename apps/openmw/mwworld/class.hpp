@@ -108,11 +108,6 @@ namespace MWWorld
             ///< Return container store or throw an exception, if class does not have a
             /// container store (default implementation: throw an exceoption)
 
-            virtual void insertIntoContainer (const Ptr& ptr, ContainerStore& containerStore)
-                const;
-            ///< Insert into a container or throw an exception, if class does not support inserting into
-            /// a container.
-
             virtual void lock (const Ptr& ptr, int lockLevel) const;
             ///< Lock object (default implementation: throw an exception)
 

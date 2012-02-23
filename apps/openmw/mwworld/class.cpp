@@ -77,11 +77,6 @@ namespace MWWorld
         throw std::runtime_error ("class does not have a container store");
     }
 
-    void Class::insertIntoContainer (const Ptr& ptr, ContainerStore& containerStore) const
-    {
-        throw std::runtime_error ("class does not support inserting into a container");
-    }
-
     void Class::lock (const Ptr& ptr, int lockLevel) const
     {
         throw std::runtime_error ("class does not support locking");

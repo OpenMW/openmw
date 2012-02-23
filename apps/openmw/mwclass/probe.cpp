@@ -8,7 +8,6 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 
-#include "containerutil.hpp"
 #include "../mwrender/objects.hpp"
 
 namespace MWClass
@@ -56,12 +55,6 @@ namespace MWClass
     {
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
-    }
-
-    void Probe::insertIntoContainer (const MWWorld::Ptr& ptr,
-        MWWorld::ContainerStore& containerStore) const
-    {
-        insertIntoContainerStore (ptr, containerStore.probes);
     }
 
     std::string Probe::getScript (const MWWorld::Ptr& ptr) const
