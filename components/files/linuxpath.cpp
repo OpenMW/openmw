@@ -105,11 +105,16 @@ boost::filesystem::path LinuxPath::getInstallPath() const
             std::string line;
             std::string mwpath;
 
-            while (std::getline(file, line) && !line.empty())
+            while (std::getline(file, line))
             {
                 if (line[0] == '[') // we found an entry
                 {
-                    isRegEntry = (line.find("Softworks\\Morrowind]") != std::string::npos);
+                    if (isRegEntry)
+                    {
+                        break;
+                    }
+
+                    isRegEntry = (line.find("Softworks\\\\Morrowind]") != std::string::npos);
                 }
                 else if (isRegEntry)
                 {
