@@ -64,7 +64,7 @@ boost::filesystem::path WindowsPath::getLocalPath() const
 
 boost::filesystem::path WindowsPath::getGlobalDataPath() const
 {
-    return getGlobalConfigPath();
+    return getGlobalPath();
 }
 
 boost::filesystem::path WindowsPath::getInstallPath() const
