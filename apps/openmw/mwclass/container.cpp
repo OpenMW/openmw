@@ -15,7 +15,7 @@ namespace
 {
     struct CustomData : public MWWorld::CustomData
     {
-        MWWorld::ContainerStore<MWWorld::RefData> mContainerStore;
+        MWWorld::ContainerStore mContainerStore;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -79,7 +79,7 @@ namespace MWClass
         return ref->base->name;
     }
 
-    MWWorld::ContainerStore<MWWorld::RefData>& Container::getContainerStore (const MWWorld::Ptr& ptr)
+    MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
         ensureCustomData (ptr);

@@ -39,7 +39,7 @@ namespace MWClass
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation
 
-            virtual MWWorld::ContainerStore<MWWorld::RefData>& getContainerStore (
+            virtual MWWorld::ContainerStore& getContainerStore (
                 const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
