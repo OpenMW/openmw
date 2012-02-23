@@ -145,6 +145,9 @@ namespace MWRender
         float mCloudBlendFactor;
         float mCloudOpacity;
         
+        Ogre::ColourValue mCloudColour;
+        Ogre::ColourValue mSkyColour;
+        
         float mRemainingTransitionTime;
         
         void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);

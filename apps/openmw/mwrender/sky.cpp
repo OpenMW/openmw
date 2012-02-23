@@ -477,5 +477,18 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("opacity", Real(weather.mCloudOpacity));
         mCloudOpacity = weather.mCloudOpacity;
     }
+    
+    if (mCloudColour != weather.mSunColor)
+    { 
+        mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mAmbientColor);
+        mCloudColour = weather.mSunColor;
+    }
+    
+    if (mSkyColour != weather.mSkyColor)
+    { 
+        mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSkyColor);
+        mSkyColour = weather.mSkyColor;
+    }
 
+    mViewport->setBackgroundColour(weather.mFogColor);
 }

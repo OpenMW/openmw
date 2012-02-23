@@ -90,6 +90,8 @@ namespace MWWorld
         
         Ogre::ColourValue mAmbientColor;
         
+        Ogre::ColourValue mSkyColor;
+        
         Ogre::ColourValue mSunColor;
         
         Ogre::ColourValue mSunDiscColor;
@@ -203,6 +205,8 @@ namespace MWWorld
         MWRender::RenderingManager* mRendering;
         
         std::map<Ogre::String, Weather> mWeatherSettings;
+        
+        WeatherGlobals mGlobals;
         
         Ogre::String mCurrentWeather;
         Ogre::String mNextWeather;

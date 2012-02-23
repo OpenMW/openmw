@@ -8,7 +8,7 @@ using namespace MWWorld;
 #define TRANSITION_TIME 10
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) : 
-    mCurrentWeather("clear")
+     mHour(0), mCurrentWeather("clear")
 {
     mRendering = rendering;
     
@@ -81,7 +81,9 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) :
     */
     
     setWeather("clear", true);
-    setWeather("cloudy", false);
+    
+    // Test transition
+    //setWeather("cloudy", false);
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -106,7 +108,53 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mCloudTexture = current.mCloudTexture;
     result.mCloudBlendFactor = 0;
     result.mCloudOpacity = current.mCloudsMaximumPercent;
-    /// \todo
+    result.mWindSpeed = current.mWindSpeed;
+    result.mCloudSpeed = current.mCloudSpeed;
+    result.mGlareView = current.mGlareView;
+    result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+    
+    const float dayTime = 13.f;
+    const float nightTime = 1.f;
+    
+    float factor;
+    
+    /// \todo interpolation
+    
+    // night
+    if (mHour <= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration) || mHour >= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration))
+    {
+        result.mFogColor = current.mFogNightColor;
+        result.mAmbientColor = current.mAmbientNightColor;
+        result.mSunColor = current.mSunNightColor;
+        result.mSkyColor = current.mSkyNightColor;
+    }
+    
+    // sunrise
+    else if (mHour >= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration) && mHour <= (mGlobals.mSunriseTime+mGlobals.mSunriseDuration))
+    {
+        result.mFogColor = current.mFogSunriseColor;
+        result.mAmbientColor = current.mAmbientSunriseColor;
+        result.mSunColor = current.mSunSunriseColor;
+        result.mSkyColor = current.mSkySunriseColor;
+    }
+    
+    // day
+    else if (mHour >= (mGlobals.mSunriseTime+mGlobals.mSunriseDuration) && mHour <= (mGlobals.mSunsetTime-mGlobals.mSunsetDuration))
+    {
+        result.mFogColor = current.mFogDayColor;
+        result.mAmbientColor = current.mAmbientDayColor;
+        result.mSunColor = current.mSunDayColor;
+        result.mSkyColor = current.mSkyDayColor;
+    }
+    
+    // sunset
+    else if (mHour >= (mGlobals.mSunsetTime-mGlobals.mSunsetDuration) && mHour <= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration))
+    {
+        result.mFogColor = current.mFogSunsetColor;
+        result.mAmbientColor = current.mAmbientSunsetColor;
+        result.mSunColor = current.mSunSunsetColor;
+        result.mSkyColor = current.mSkySunsetColor;
+    }
     
     return result;
 }
@@ -124,9 +172,26 @@ WeatherResult WeatherManager::transition(float factor)
     #define lerp(x, y) (x * (1-factor) + y * factor)
     
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
+    result.mFogColor = lerp(current.mFogColor, other.mFogColor);
+    result.mSunColor = lerp(current.mSunColor, other.mSunColor);
+    result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor);
     
-    /// \todo
+    result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor);
+    result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor);
+    result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth);
+    result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed);
+    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
+    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
+    result.mGlareView = lerp(current.mGlareView, other.mGlareView);
     
+    // sound change behaviour:
+    // if 'other' has a new sound, switch to it after 1/2 of the transition length
+    if (other.mAmbientLoopSoundID != "")
+        result.mAmbientLoopSoundID = factor>0.5 ? other.mAmbientLoopSoundID : current.mAmbientLoopSoundID;
+    // if 'current' has a sound and 'other' does not have a sound, turn off the sound immediately
+    else if (current.mAmbientLoopSoundID != "")
+        result.mAmbientLoopSoundID = "";
+        
     return result;
 }
 
@@ -154,6 +219,16 @@ void WeatherManager::update(float duration)
 
 void WeatherManager::setHour(const float hour)
 {
+    // accelerate a bit for testing
+    /*
+    mHour += 0.001;
+    
+    if (mHour >= 24.f) mHour = 0.f;
+    
+    #include <iostream>
+    std::cout << "hour " << mHour << std::endl;
+    /**/
+    
     mHour = hour;
 }
 
