@@ -284,18 +284,25 @@ void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
     mSun->setDiffuseColour(colour);
 }
+
+void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
+{
+    mRendering.getScene()->setAmbientLight(colour);
+}
+
 void RenderingManager::sunEnable()
 {
-    /// \todo
+    if (mSun) mSun->setVisible(true);
 }
+
 void RenderingManager::sunDisable()
 {
-    /// \todo
+    if (mSun) mSun->setVisible(false);
 }
 
 void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 {
-    /// \todo
+    if (mSun) mSun->setPosition(direction);
 }
 
 } // namespace

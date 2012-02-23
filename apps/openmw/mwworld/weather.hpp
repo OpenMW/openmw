@@ -11,6 +11,8 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class World;
+    
     /// Global weather manager properties (according to INI)
     struct WeatherGlobals
     {
@@ -177,7 +179,7 @@ namespace MWWorld
     class WeatherManager
     {
     public:
-        WeatherManager(MWRender::RenderingManager*);
+        WeatherManager(MWRender::RenderingManager*, MWWorld::World*);
         
         /**
          * Change the weather setting
@@ -203,6 +205,7 @@ namespace MWWorld
         int mDay, mMonth;
     
         MWRender::RenderingManager* mRendering;
+        MWWorld::World* mWorld;
         
         std::map<Ogre::String, Weather> mWeatherSettings;
         

@@ -112,7 +112,7 @@ namespace MWWorld
             Ptr::CellStore *getExterior (int x, int y);
 
             Ptr::CellStore *getInterior (const std::string& name);
-
+            
             void adjustSky();
 
             MWWorld::Player& getPlayer();
@@ -125,6 +125,9 @@ namespace MWWorld
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
+            
+            bool isCellExterior() const;
+            bool isCellQuasiExterior() const;
 
             Globals::Data& getGlobalVariable (const std::string& name);
 

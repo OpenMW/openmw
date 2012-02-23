@@ -157,7 +157,7 @@ namespace MWWorld
         
         mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine, environment);
         
-        mWeatherManager = new MWWorld::WeatherManager(mRendering);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering, this);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
@@ -699,6 +699,32 @@ namespace MWWorld
         mWorldScene->update (duration);
         
         mWeatherManager->update (duration);
+    }
+    
+    bool World::isCellExterior() const
+    {
+        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        if (currentCell)
+        {
+            if (!(currentCell->cell->data.flags & ESM::Cell::Interior))
+                return true;
+            else
+                return false;
+        }
+        return false;
+    }
+    
+    bool World::isCellQuasiExterior() const
+    {
+        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        if (currentCell)
+        {
+            if (!(currentCell->cell->data.flags & ESM::Cell::QuasiEx))
+                return false;
+            else
+                return true;
+        }
+        return false;
     }
     
     OEngine::Render::Fader* World::getFader()

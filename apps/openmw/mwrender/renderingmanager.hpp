@@ -87,6 +87,7 @@ class RenderingManager: private RenderingInterface {
 
     void update (float duration);
     
+    void setAmbientColour(const Ogre::ColourValue& colour);
     void setSunColour(const Ogre::ColourValue& colour);
     void setSunDirection(const Ogre::Vector3& direction);
     void sunEnable();

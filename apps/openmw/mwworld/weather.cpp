@@ -1,4 +1,5 @@
 #include "weather.hpp"
+#include "world.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
 
@@ -7,10 +8,11 @@ using namespace MWWorld;
 
 #define TRANSITION_TIME 10
 
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) : 
+WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, World* world) : 
      mHour(0), mCurrentWeather("clear")
 {
     mRendering = rendering;
+    mWorld = world;
     
     #define clr(r,g,b) ColourValue(r/255.f, g/255.f, b/255.f)
     
@@ -211,7 +213,16 @@ void WeatherManager::update(float duration)
     
     mRendering->getSkyManager()->setWeather(result);
     
-    mRendering->setSunColour(result.mSunColor);
+    if (mWorld->isCellExterior() || mWorld->isCellQuasiExterior())
+    {
+        mRendering->setAmbientColour(result.mAmbientColor);
+        mRendering->sunEnable();
+        mRendering->setSunColour(result.mSunColor);
+    }
+    else
+    {
+        mRendering->sunDisable();
+    }
 }
 
 void WeatherManager::setHour(const float hour)

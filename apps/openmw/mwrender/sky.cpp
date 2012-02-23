@@ -480,8 +480,9 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     }
     
     if (mCloudColour != weather.mSunColor)
-    { 
-        mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mAmbientColor);
+    {
+        /// \todo the cloud color looks a bit out of place sometimes (especially in Sunset) - maybe there's a multiplier or setting that i've missed?
+        mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSunColor);
         mCloudColour = weather.mSunColor;
     }
     
@@ -498,9 +499,4 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     }
 
     mViewport->setBackgroundColour(weather.mFogColor);
-    
-    /// \todo
-    // only set ambient light if we're in an exterior cell
-    // (interior cell lights are not managed by SkyManager)
-    mSceneMgr->setAmbientLight(weather.mAmbientColor);
 }
