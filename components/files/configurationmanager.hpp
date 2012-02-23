@@ -1,7 +1,11 @@
 #ifndef COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
+#ifdef _WIN32
+#include <boost/tr1/tr1/unordered_map>
+#else
 #include <tr1/unordered_map>
+#endif
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
