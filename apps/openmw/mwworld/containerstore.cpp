@@ -2,6 +2,8 @@
 #include "containerstore.hpp"
 
 #include <cassert>
+#include <typeinfo>
+#include <stdexcept>
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::begin (int mask)
 {
@@ -10,12 +12,78 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::begin (int mask)
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 {
-    return ContainerStoreIterator();
+    return ContainerStoreIterator (this);
+}
+
+void MWWorld::ContainerStore::add (const Ptr& ptr)
+{
+    /// \todo implement item stocking
+
+    switch (getType (ptr))
+    {
+        case Type_Potion: potions.list.push_back (*ptr.get<ESM::Potion>());  break;
+        case Type_Apparatus: appas.list.push_back (*ptr.get<ESM::Apparatus>());  break;
+        case Type_Armor: armors.list.push_back (*ptr.get<ESM::Armor>());  break;
+        case Type_Book: books.list.push_back (*ptr.get<ESM::Book>());  break;
+        case Type_Clothing: clothes.list.push_back (*ptr.get<ESM::Clothing>());  break;
+        case Type_Ingredient: ingreds.list.push_back (*ptr.get<ESM::Ingredient>());  break;
+        case Type_Light: lights.list.push_back (*ptr.get<ESM::Light>());  break;
+        case Type_Lockpick: lockpicks.list.push_back (*ptr.get<ESM::Tool>());  break;
+        case Type_Miscellaneous: miscItems.list.push_back (*ptr.get<ESM::Miscellaneous>());  break;
+        case Type_Probe: probes.list.push_back (*ptr.get<ESM::Probe>());  break;
+        case Type_Repair: repairs.list.push_back (*ptr.get<ESM::Repair>());  break;
+        case Type_Weapon: weapons.list.push_back (*ptr.get<ESM::Weapon>());  break;
+    }
+}
+
+int MWWorld::ContainerStore::getType (const Ptr& ptr)
+{
+    if (ptr.isEmpty())
+        throw std::runtime_error ("can't put a non-existent object into a container");
+
+    if (ptr.getTypeName()==typeid (ESM::Potion).name())
+        return Type_Potion;
+
+    if (ptr.getTypeName()==typeid (ESM::Apparatus).name())
+        return Type_Apparatus;
+
+    if (ptr.getTypeName()==typeid (ESM::Armor).name())
+        return Type_Armor;
+
+    if (ptr.getTypeName()==typeid (ESM::Book).name())
+        return Type_Book;
+
+    if (ptr.getTypeName()==typeid (ESM::Clothing).name())
+        return Type_Clothing;
+
+    if (ptr.getTypeName()==typeid (ESM::Ingredient).name())
+        return Type_Ingredient;
+
+    if (ptr.getTypeName()==typeid (ESM::Light).name())
+        return Type_Light;
+
+    if (ptr.getTypeName()==typeid (ESM::Tool).name())
+        return Type_Lockpick;
+
+    if (ptr.getTypeName()==typeid (ESM::Miscellaneous).name())
+        return Type_Miscellaneous;
+
+    if (ptr.getTypeName()==typeid (ESM::Probe).name())
+        return Type_Probe;
+
+    if (ptr.getTypeName()==typeid (ESM::Repair).name())
+        return Type_Repair;
+
+    if (ptr.getTypeName()==typeid (ESM::Weapon).name())
+        return Type_Weapon;
+
+    throw std::runtime_error (
+        "Object of type " + ptr.getTypeName() + " can not be placed into a container");
 }
 
 
-
-MWWorld::ContainerStoreIterator::ContainerStoreIterator() : mType (-1), mMask (0), mContainer (0)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container)
+: mType (-1), mMask (0), mContainer (container)
 {}
 
 MWWorld::ContainerStoreIterator::ContainerStoreIterator (int mask, ContainerStore *container)
@@ -209,7 +277,7 @@ MWWorld::Ptr MWWorld::ContainerStoreIterator::operator*() const
         case ContainerStore::Type_Weapon: return MWWorld::Ptr (&*mWeapon, 0);
     }
 
-    return MWWorld::Ptr();
+    throw std::runtime_error ("invalid pointer");
 }
 
 MWWorld::ContainerStoreIterator& MWWorld::ContainerStoreIterator::operator++()
@@ -252,6 +320,7 @@ bool MWWorld::ContainerStoreIterator::isEqual (const ContainerStoreIterator& ite
         case ContainerStore::Type_Probe: return mProbe==iter.mProbe;
         case ContainerStore::Type_Repair: return mRepair==iter.mRepair;
         case ContainerStore::Type_Weapon: return mWeapon==iter.mWeapon;
+        case -1: return true;
     }
 
     return false;

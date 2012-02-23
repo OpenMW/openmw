@@ -31,6 +31,8 @@ namespace MWWorld
 
             static const int Type_All = 0xffff;
 
+//        private:
+
             ESMS::CellRefList<ESM::Potion, RefData>            potions;
             ESMS::CellRefList<ESM::Apparatus, RefData>         appas;
             ESMS::CellRefList<ESM::Armor, RefData>             armors;
@@ -44,9 +46,23 @@ namespace MWWorld
             ESMS::CellRefList<ESM::Repair, RefData>            repairs;
             ESMS::CellRefList<ESM::Weapon, RefData>            weapons;
 
+        public:
+
             ContainerStoreIterator begin (int mask = Type_All);
 
             ContainerStoreIterator end();
+
+            void add (const Ptr& ptr);
+            ///< Add the item pointed to by \a ptr to this container.
+            ///
+            /// \note The item pointed to is not required to exist beyond this function call.
+            ///
+            /// \attention Do not add items to an existing stack by increasing the count instead of
+            /// calling this function!
+
+            static int getType (const Ptr& ptr);
+            ///< This function throws an exception, if ptr does not point to an object, that can be
+            /// put into a container.
 
         friend class ContainerStoreIterator;
     };
@@ -76,7 +92,7 @@ namespace MWWorld
 
         private:
 
-            ContainerStoreIterator();
+            ContainerStoreIterator (ContainerStore *container);
             ///< End-iterator
 
             ContainerStoreIterator (int mask, ContainerStore *container);
