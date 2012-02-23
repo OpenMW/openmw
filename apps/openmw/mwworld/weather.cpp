@@ -113,11 +113,6 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     
-    const float dayTime = 13.f;
-    const float nightTime = 1.f;
-    
-    float factor;
-    
     /// \todo interpolation
     
     // night
@@ -215,6 +210,8 @@ void WeatherManager::update(float duration)
         result = getResult(mCurrentWeather);
     
     mRendering->getSkyManager()->setWeather(result);
+    
+    mRendering->setSunColour(result.mSunColor);
 }
 
 void WeatherManager::setHour(const float hour)
@@ -227,7 +224,7 @@ void WeatherManager::setHour(const float hour)
     
     #include <iostream>
     std::cout << "hour " << mHour << std::endl;
-    /**/
+    */
     
     mHour = hour;
 }

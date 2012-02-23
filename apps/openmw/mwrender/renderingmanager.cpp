@@ -20,7 +20,7 @@ using namespace Ogre;
 namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
-:mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mDebugging(engine)
+:mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
 
@@ -280,4 +280,22 @@ void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
     mActors.skipAnimation(ptr);
 }
 
+void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
+{
+    mSun->setDiffuseColour(colour);
 }
+void RenderingManager::sunEnable()
+{
+    /// \todo
+}
+void RenderingManager::sunDisable()
+{
+    /// \todo
+}
+
+void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
+{
+    /// \todo
+}
+
+} // namespace

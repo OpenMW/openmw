@@ -14,7 +14,7 @@ using namespace MWRender;
 using namespace Ogre;
 
 // the speed at which the clouds are animated
-#define CLOUD_SPEED 0.0025
+#define CLOUD_SPEED 0.001
 
 // this distance has to be set accordingly so that the
 // celestial bodies are behind the clouds, but in front of the atmosphere
@@ -371,11 +371,12 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     "   uniform sampler2D secondTexture : TEXUNIT1, \n"
     "   uniform float transitionFactor, \n"
     "   uniform float time, \n"
+    "   uniform float speed, \n"
     "   uniform float opacity, \n"
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
-    "   uv += float2(1,1) * time * "<<CLOUD_SPEED<<"; \n" // Scroll in x,y direction
+    "   uv += float2(1,1) * time * speed * "<<CLOUD_SPEED<<"; \n" // Scroll in x,y direction
     "   float4 tex = lerp(tex2D(texture, uv), tex2D(secondTexture, uv), transitionFactor); \n"
     "   oColor = color * float4(emissive.xyz,1) * tex * float4(1,1,1,opacity); \n"
     "}";
@@ -489,6 +490,17 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSkyColor);
         mSkyColour = weather.mSkyColor;
     }
+    
+    if (mCloudSpeed != weather.mCloudSpeed)
+    {
+        mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("speed", Real(weather.mCloudSpeed));
+        mCloudSpeed = weather.mCloudSpeed;
+    }
 
     mViewport->setBackgroundColour(weather.mFogColor);
+    
+    /// \todo
+    // only set ambient light if we're in an exterior cell
+    // (interior cell lights are not managed by SkyManager)
+    mSceneMgr->setAmbientLight(weather.mAmbientColor);
 }

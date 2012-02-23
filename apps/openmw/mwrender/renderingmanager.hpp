@@ -86,7 +86,12 @@ class RenderingManager: private RenderingInterface {
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);
 
     void update (float duration);
-
+    
+    void setSunColour(const Ogre::ColourValue& colour);
+    void setSunDirection(const Ogre::Vector3& direction);
+    void sunEnable();
+    void sunDisable();
+    
     void skyEnable ();
     void skyDisable ();
     void skySetHour (double hour);
