@@ -274,7 +274,8 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
     ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource())->unlock();
 }
 
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
+SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
+    mGlareEnabled(false)
 {
     mViewport = pCamera->getViewport();
     mSceneMgr = pMwRoot->getCreator();
@@ -445,12 +446,18 @@ void SkyManager::update(float duration)
 {    
     // UV Scroll the clouds
     mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", 1);
+    
+    mSunGlare->setVisible(mGlareEnabled && mSunEnabled && mEnabled);
+    mSun->setVisible(mSunEnabled && mEnabled);
 }
 
 void SkyManager::enable()
 {
     mRootNode->setVisible(true);
     mEnabled = true;
+    
+    mSunGlare->setVisible(mGlareEnabled && mSunEnabled && mEnabled);
+    mSun->setVisible(mSunEnabled && mEnabled);
 }
 
 void SkyManager::disable()
@@ -530,15 +537,11 @@ Vector3 SkyManager::getRealSunPos()
 
 void SkyManager::sunEnable()
 {
-    mSun->setVisible(true);
-    mSunGlare->setVisible(mGlareEnabled);
     mSunEnabled = true;
 }
 
 void SkyManager::sunDisable()
 {
-    mSun->setVisible(false);
-    mSunGlare->setVisible(false);
     mSunEnabled = false;
 }
 
