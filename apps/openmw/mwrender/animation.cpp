@@ -466,11 +466,12 @@ namespace MWRender{
         
 
 	}
-	skel->_updateTransforms();
-        base->getAllAnimationStates()->_notifyDirty();
+	
 
     slot++;
     }
+	skel->_updateTransforms();
+        base->getAllAnimationStates()->_notifyDirty();
 }
 }
 
