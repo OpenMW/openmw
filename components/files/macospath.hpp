@@ -39,21 +39,21 @@ namespace Files
 struct MacOsPath
 {
     /**
-     * \brief Return path to the local configuration directory.
+     * \brief Return path to the local directory.
      *
      * \return boost::filesystem::path
      */
     boost::filesystem::path getUserPath() const;
 
     /**
-     * \brief Return path to the global (system) configuration directory.
+     * \brief Return path to the global (system) directory.
      *
      * \return boost::filesystem::path
      */
     boost::filesystem::path getGlobalPath() const;
 
     /**
-     * \brief Return path to the runtime configuration directory which is the
+     * \brief Return path to the runtime directory which is the
      * place where an application was started.
      *
      * \return boost::filesystem::path

@@ -46,7 +46,7 @@ struct LinuxPath
     boost::filesystem::path getUserPath() const;
 
     /**
-     * \brief Return path to the global (system) configuration directory.
+     * \brief Return path to the global (system) directory where game files could be placed.
      *
      * \return boost::filesystem::path
      */

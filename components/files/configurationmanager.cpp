@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include <boost/bind.hpp>
+#include <boost/algorithm/string/erase.hpp>
 
 /**
  * \namespace Files
@@ -69,9 +70,11 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
 
 void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
 {
+    std::string path;
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
     {
-        const std::string& path = it->string();
+        path = it->string();
+        boost::erase_all(path, "\"");
 
         // Check if path contains a token
         if (!path.empty() && *path.begin() == '?')
