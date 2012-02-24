@@ -443,31 +443,31 @@ namespace MWRender{
         Ogre::Quaternion r;
 
         bool bTrans = translist1.size() > 0;
-	    if(bTrans){
-            Ogre::Vector3 v1 = translist1[tindexI[slot]];
-            Ogre::Vector3 v2 = translist1[tindexJ];
-           t = (v1 + (v2 - v1) * x);
-
-	    }
+	   
 
         bool bQuats = quats.size() > 0;
-	    if(bQuats){
-		    r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
-	    }
-        skel = base->getSkeleton();
+	   
     if(skel->hasBone(iter->getBonename())){
         Ogre::Bone* bone = skel->getBone(iter->getBonename());
-        if(bTrans)
+        if(bTrans){
+			 Ogre::Vector3 v1 = translist1[tindexI[slot]];
+            Ogre::Vector3 v2 = translist1[tindexJ];
+           t = (v1 + (v2 - v1) * x);
             bone->setPosition(t);
-        if(bQuats)
+
+		}
+        if(bQuats){
+			 r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
             bone->setOrientation(r);
+		}
 
 
 
-        skel->_updateTransforms();
-        base->getAllAnimationStates()->_notifyDirty();
+        
 
 	}
+	skel->_updateTransforms();
+        base->getAllAnimationStates()->_notifyDirty();
 
     slot++;
     }
