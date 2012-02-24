@@ -18,8 +18,8 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 11)
-set (OPENMW_VERSION_RELEASE 1)
+set (OPENMW_VERSION_MINOR 12)
+set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
@@ -329,7 +329,7 @@ if(WIN32)
     FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
     INSTALL(FILES ${files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.cfg" "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION ".")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
@@ -348,10 +348,18 @@ if(WIN32)
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
 
-    if(EXISTS "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/vcredist_x86.exe" DESTINATION "redist")
+    SET(VCREDIST "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
+    if(EXISTS ${VCREDIST})
+        INSTALL(FILES ${VCREDIST} DESTINATION "redist")
         SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x86.exe\\\" /q'" )
-    endif(EXISTS "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
+    endif(EXISTS ${VCREDIST})
+
+    SET(OALREDIST "${OpenMW_BINARY_DIR}/oalinst.exe")
+    if(EXISTS ${OALREDIST})
+        INSTALL(FILES ${OALREDIST} DESTINATION "redist")
+        SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
+            ExecWait '\\\"$INSTDIR\\\\redist\\\\oalinst.exe\\\" /s'" )
+    endif(EXISTS ${OALREDIST})
 
     include(CPack)
 endif(WIN32)
@@ -415,9 +423,6 @@ endif()
 if (APPLE)
     set(INSTALL_SUBDIR OpenMW)
 
-    #install(FILES ${MISC_FILES} DESTINATION ../MacOS)
-    #install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Plugins" DESTINATION ..)
-    #install(DIRECTORY "${APP_BUNDLE_DIR}/Contents/Resources/resources" DESTINATION ../Resources)
     install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
@@ -425,9 +430,6 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     set(CPACK_GENERATOR "DragNDrop")
-    # set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/files/mac/Info.plist")
-    # set(CPACK_BUNDLE_ICON  "${CMAKE_SOURCE_DIR}/files/mac/openmw.icns")
-    # set(CPACK_BUNDLE_NAME "OpenMW")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
     set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
     set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
@@ -437,11 +439,13 @@ if (APPLE)
     set(PLUGINS "")
 
     # Scan Plugins dir for *.dylibs
-    file(GLOB ALL_PLUGINS "${APP_BUNDLE_DIR}/Contents/Plugins/*.dylib")
+    set(PLUGIN_SEARCH_ROOT "${APP_BUNDLE_DIR}/Contents/Plugins")
+    file(GLOB_RECURSE ALL_PLUGINS "${PLUGIN_SEARCH_ROOT}/*.dylib")
 
+    set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins")
     foreach(PLUGIN ${ALL_PLUGINS})
-        get_filename_component(PLUGIN_FILENAME ${PLUGIN} NAME)
-        set(PLUGINS ${PLUGINS} "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins/${PLUGIN_FILENAME}")
+        string(REPLACE "${PLUGIN_SEARCH_ROOT}/" "" PLUGIN_RELATIVE "${PLUGIN}")
+        set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
     endforeach()
 
     #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
@@ -451,7 +455,7 @@ if (APPLE)
     # some library already has be "fixed up", i.e. its id name contains @executable_path,
     # but library is not embedded in bundle. For example, it's Ogre.framework from Ogre SDK.
     # Current implementation of GetPrerequsities/BundleUtilities doesn't handle that case.
-    # 
+    #
     # Current limitations:
     #   1. Handles only frameworks, not simple libs
     INSTALL(CODE "

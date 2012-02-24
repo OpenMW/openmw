@@ -43,6 +43,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		char secondtolast = bodyRaceID.at(bodyRaceID.length() - 2);
 		bool female = tolower(secondtolast) == 'f';
 		bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
+
         /*std::cout << "Race: " << ref->base->race ;
         if(female){
            std::cout << " Sex: Female" << " Height: " << race->data.height.female << "\n";
@@ -65,6 +66,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
     base = mRend.getScene()->createEntity(smodel);
     base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones
                                                //stay in the same place when we skipanim, or open a gui window
+
 
 
     if((transformations = (NIFLoader::getSingletonPtr())->getAnim(smodel))){
@@ -177,7 +179,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		if(clavicler)
 			insertBoundedPart("meshes\\" + clavicler->model , "Right Clavicle", base);*/
 
-
 		if(neck)
 		{
 			insertBoundedPart("meshes\\" + neck->model, "Neck");
@@ -213,6 +214,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 }
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
+   
     NIFLoader::load(mesh);
     Entity* ent = mRend.getScene()->createEntity(mesh);
 
@@ -225,15 +227,7 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
 
     Ogre::Entity* ent = mRend.getScene()->createEntity(meshNumbered);
 
-        /*MaterialPtr material = ent->getSubEntity(0)->getMaterial();
-        material->removeAllTechniques();
-
-        Ogre::Technique* tech = material->createTechnique();
-
-         Pass* pass2 = tech->createPass();
-        pass2->setVertexProgram("Ogre/HardwareSkinningTwoWeights");
-        pass2->setColourWriteEnabled(false);
-        //tech->setSchemeName("blahblah");*/
+     
 
 
     insert->attachObject(ent);
@@ -249,6 +243,7 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
 
 
 void NpcAnimation::runAnimation(float timepassed){
+    
     //1. Add the amount of time passed to time
 
 	//2. Handle the animation transforms dependent on time
@@ -267,22 +262,17 @@ void NpcAnimation::runAnimation(float timepassed){
         }
 
         handleAnimationTransforms();
-        //Ogre::Vector3 current = insert->_getWorldAABB().getCenter();
 
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
         while(shapepartsiter != shapeparts.end())
         {
+            vecRotPos.clear();
             std::vector<Nif::NiTriShapeCopy>* shapes = *shapepartsiter;
             Ogre::Entity* theentity = *entitypartsiter;
-            /*
-            Pass* pass = theentity->getSubEntity(0)->getMaterial()->getBestTechnique()->getPass(0);
-            if (pass->hasVertexProgram() && pass->getVertexProgram()->isSkeletalAnimationIncluded())
-                std::cout << "It's hardware\n";
-                else
-                std::cout << "It's software\n";*/
 
-            handleShapes(shapes, theentity, theentity->getSkeleton());
+
+            handleShapes(shapes, theentity, base->getSkeleton());
             shapepartsiter++;
             entitypartsiter++;
         }

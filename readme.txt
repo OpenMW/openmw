@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.11.1
+Version: 0.12.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -14,7 +14,7 @@ THIS IS A WORK IN PROGRESS
 INSTALLATION
 
 Windows:
-Just unpack to a location of your choice. Currently there is no installer.
+Run the installer.
 
 Linux:
 Ubuntu (and most others)
@@ -35,25 +35,87 @@ TODO add description here
 
 THE DATA PATH
 
-After the installation OpenMW needs to be told where to find the Morrowind data directory. Create a text file named openmw.cfg (location depends on platform) and enter the following line:
+The data path tells OpenMW where to find your Morrowind files. From 0.12.0 on OpenMW should be able to
+pick up the location of these files on its own, if both Morrowind and OpenMW are installed properly
+(installing Morrowind under WINE is considered a proper install).
+
+If that does not work for you, please check if you have any leftover openmw.cfg files from versions earlier than 0.12.0. These can interfere with the configuration process, so try to remove then.
+
+If you are running OpenMW without installing it, you still need to manually adjust the data path. Create a text file named openmw.cfg in the location of the binary and enter the following line:
 
 data=path to your data directory
 
 (where you replace "path to your data directory" with the actual location of your data directory)
 
-On Windows a suitable location for the cfg file is alongside the binary. Currently the binary release comes with such a file pre-generated, but you still need to adjust the data setting.
-
-On Linux and Mac the default location will be ~/.config/openmw/openmw.cfg.
-
 
 COMMAND LINE OPTIONS
-TODO add description of command line options
+
+Syntax: openmw <options>
+Allowed options:
+  --help                           print help message
+  --version                        print version information and quit
+  --data arg (=data)               set data directories (later directories have
+                                   higher priority)
+  --data-local arg                 set local data directory (highest priority)
+  --resources arg (=resources)     set resources directory
+  --start arg (=Beshara)           set initial cell
+  --master arg                     master file(s)
+  --plugin arg                     plugin file(s)
+  --fps [=arg(=1)] (=0)            fps counter detail (0 = off, 1 = fps counter
+                                   , 2 = full detail)
+  --anim-verbose [=arg(=1)] (=0)   output animation indices files
+  --debug [=arg(=1)] (=0)          debug mode
+  --nosound [=arg(=1)] (=0)        disable all sounds
+  --script-verbose [=arg(=1)] (=0) verbose script output
+  --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
+  --script-all [=arg(=1)] (=0)     compile all scripts (excluding dialogue scri
+                                   pts) at startup
+  --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding
+                                   )
+  --encoding arg (=win1252)        Character encoding used in OpenMW game messa
+                                   ges:
+
+                                   win1250 - Central and Eastern European such
+                                   as Polish, Czech, Slovak, Hungarian, Slovene
+                                   , Bosnian, Croatian, Serbian (Latin script),
+                                   Romanian and Albanian languages
+
+                                   win1251 - Cyrillic alphabet such as Russian,
+                                   Bulgarian, Serbian Cyrillic and other langua
+                                   ges
+
+                                   win1252 - Western European (Latin) alphabet,
+                                   used by default
+  --report-focus [=arg(=1)] (=0)   write name of focussed object to cout
 
 
 CREDITS
 
-Developers:
-TODO add list of developers
+Current Developers:
+Alexander “Ace” Olofsson
+athile
+Cris “Mirceam” Mihalache
+gugus / gus
+Jacob “Yacoby” Essex
+Jason “jhooks” Hooks
+Lukasz “lgro” Gromanowski
+Marc “Zini” Zinnschlag
+Nikolay “corristo” Kasyanov
+Pieter “pvdk” van der Kloet
+Sebastian “swick” Wick
+
+Retired Developers:
+Ardekantur
+Armin Preiml
+Diggory Hardy
+Jan Borsodi
+Jan-Peter “peppe” Nilsson
+Josua Grawitter
+Karl-Felix “k1ll” Glatzer
+Nicolay Korslund
+sergoz
+Star-Demon
+Yuri Krupenin
 
 OpenMW:
 Thanks to DokterDume for kindly providing us with the Moon and Star logo used as the application icon and project logo.
@@ -63,6 +125,33 @@ Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Fil
 
 
 CHANGELOG
+
+0.12.0
+
+Bug #154: FPS Drop
+Bug #169: Local scripts continue running if associated object is deleted
+Bug #174: OpenMW fails to start if the config directory doesn't exist
+Bug #187: Missing lighting
+Bug #188: Lights without a mesh are not rendered
+Bug #191: Taking screenshot causes crash when running installed
+Feature #28: Sort out the cell load problem
+Feature #31: Allow the player to move away from pre-defined cells
+Feature #35: Use alternate storage location for modified object position
+Feature #45: NPC animations
+Feature #46: Creature Animation
+Feature #89: Basic Journal Window
+Feature #110: Automatically pick up the path of existing MW-installations
+Feature #133: Handle resources across multiple data directories
+Feature #134: Generate a suitable default-value for --data-local
+Feature #183: More FPS display settings
+Task #19: Refactor engine class
+Task #109/Feature #162: Automate Packaging
+Task #112: Catch exceptions thrown in input handling functions
+Task #128/#168: Cleanup Configuration File Handling
+Task #131: NPC Activation doesn't work properly
+Task #144: MWRender cleanup
+Task #155: cmake cleanup
+
 
 0.11.1
 
@@ -90,4 +179,4 @@ Task #14: Replace tabs with 4 spaces
 Task #18: Move components from global namespace into their own namespace
 Task #123: refactor header files in components/esm
 
-TODO add old changelog (take pre 0.11.0 changelog from wiki)
+TODO add old changelog (take pre 0.11.1 changelog from wiki)

@@ -182,6 +182,7 @@ namespace MWWorld
 
     }
 
+
     World::~World()
     {
         delete mWorldScene;
@@ -611,7 +612,7 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return mPhysics->toggleCollisionMode();
+        return mPhysics->toggleCollisionMode();;
     }
 
     bool World::toggleRenderMode (RenderMode mode)
