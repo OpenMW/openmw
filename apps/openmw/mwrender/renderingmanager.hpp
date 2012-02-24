@@ -93,6 +93,7 @@ class RenderingManager: private RenderingInterface {
     void sunEnable();
     void sunDisable();
     
+    void setGlare(bool glare);
     void skyEnable ();
     void skyDisable ();
     void skySetHour (double hour);

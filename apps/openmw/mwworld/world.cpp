@@ -24,6 +24,9 @@
 #include "globals.hpp"
 #include "cellfunctors.hpp"
 
+#include <OgreVector3.h>
+using namespace Ogre;
+
 namespace
 {
     template<typename T>
@@ -413,6 +416,8 @@ namespace MWWorld
         mRendering->skySetDate (day, month);
         
         mWeatherManager->setDate (day, month);
+        
+        
     }
 
     void World::setMonth (int month)
@@ -699,6 +704,14 @@ namespace MWWorld
         mWorldScene->update (duration);
         
         mWeatherManager->update (duration);
+        
+        // cast a ray from player to sun to detect if the sun is visible
+        // this is temporary until we find a better place to put this code
+        // currently its here because we need to access the physics system
+        float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
+        Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
+        sun = Vector3(sun.x, -sun.z, sun.y);
+        mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
     }
     
     bool World::isCellExterior() const

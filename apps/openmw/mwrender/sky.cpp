@@ -54,6 +54,11 @@ void BillboardObject::setRenderQueue(unsigned int id)
     mBBSet->setRenderQueueGroup(id);
 }
 
+SceneNode* BillboardObject::getNode()
+{
+    return mNode;
+}
+
 void BillboardObject::init(const String& textureName,
                     const unsigned int initialSize,
                     const Vector3& position,
@@ -276,8 +281,8 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 
     mViewport->setBackgroundColour(ColourValue(0.87, 0.87, 0.87));
     
-    mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 1.0), mRootNode);
-    mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 1.0), mRootNode);
+    mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 0.4), mRootNode);
+    mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode);
     mSunGlare->setRenderQueue(RENDER_QUEUE_SKIES_LATE);
     mMasser = new Moon("textures\\tx_masser_full.dds", 1, Vector3(-0.4, -0.4, 0.5), mRootNode);
     mSecunda = new Moon("textures\\tx_secunda_full.dds", 0.5, Vector3(0.4, -0.4, 0.5), mRootNode);
@@ -442,11 +447,13 @@ void SkyManager::update(float duration)
 void SkyManager::enable()
 {
     mRootNode->setVisible(true);
+    mEnabled = true;
 }
 
 void SkyManager::disable()
 {
     mRootNode->setVisible(false);
+    mEnabled = false;
 }
 
 void SkyManager::setMoonColour (bool red)
@@ -507,4 +514,14 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     }
 
     mViewport->setBackgroundColour(weather.mFogColor);
+}
+
+void SkyManager::setGlare(bool glare)
+{
+    mSunGlare->setVisible(glare && mEnabled);
+}
+
+Vector3 SkyManager::getRealSunPos()
+{
+    return mSun->getNode()->_getDerivedPosition();
 }

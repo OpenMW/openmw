@@ -38,6 +38,8 @@ namespace MWRender
         void setVisible(const bool visible);
         void setRenderQueue(unsigned int id);
         
+        Ogre::SceneNode* getNode();
+        
     protected:
         virtual void init(const Ogre::String& textureName,
                         const unsigned int size,
@@ -128,6 +130,9 @@ namespace MWRender
         
         void setWeather(const MWWorld::WeatherResult& weather);
         
+        void setGlare(bool glare);
+        Ogre::Vector3 getRealSunPos();
+        
     private:
         BillboardObject* mSun;
         BillboardObject* mSunGlare;
@@ -156,6 +161,8 @@ namespace MWRender
         float mRemainingTransitionTime;
         
         void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
+        
+        bool mEnabled;
     };
 }
 
