@@ -496,8 +496,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     
     if (mCloudColour != weather.mSunColor)
     {
-        /// \todo the cloud color looks a bit out of place sometimes (especially in Sunset) - maybe there's a multiplier or setting that i've missed?
-        mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSunColor);
+        mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSunColor + weather.mAmbientColor);
         mCloudColour = weather.mSunColor;
     }
     

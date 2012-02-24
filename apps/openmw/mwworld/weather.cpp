@@ -8,8 +8,10 @@ using namespace MWWorld;
 
 #define TRANSITION_TIME 10
 
+#define lerp(x, y) (x * (1-factor) + y * factor)
+
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, World* world) : 
-     mHour(0), mCurrentWeather("clear")
+     mHour(14), mCurrentWeather("clear")
 {
     mRendering = rendering;
     mWorld = world;
@@ -114,8 +116,8 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mCloudSpeed = current.mCloudSpeed;
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-    
-    /// \todo interpolation
+        
+    const float fade_duration = current.mTransitionDelta;
     
     // night
     if (mHour <= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration) || mHour >= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration))
@@ -127,16 +129,39 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
     
     // sunrise
-    else if (mHour >= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration) && mHour <= (mGlobals.mSunriseTime+mGlobals.mSunriseDuration))
+    else if (mHour >= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration) && mHour <= mGlobals.mSunriseTime)
     {
-        result.mFogColor = current.mFogSunriseColor;
-        result.mAmbientColor = current.mAmbientSunriseColor;
-        result.mSunColor = current.mSunSunriseColor;
-        result.mSkyColor = current.mSkySunriseColor;
+        if (mHour <= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration+fade_duration))
+        {
+            // fade in
+            float advance = (mGlobals.mSunriseTime-mGlobals.mSunriseDuration+fade_duration)-mHour;
+            float factor = (advance / fade_duration);
+            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor);
+            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor);
+            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor);
+            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor);
+        }
+        else if (mHour >= (mGlobals.mSunriseTime-fade_duration))
+        {
+            // fade out
+            float advance = mHour-(mGlobals.mSunriseTime-fade_duration);
+            float factor = advance / fade_duration;
+            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor);
+            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor);
+            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor);
+            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor);
+        }
+        else 
+        {
+            result.mFogColor = current.mFogSunriseColor;
+            result.mAmbientColor = current.mAmbientSunriseColor;
+            result.mSunColor = current.mSunSunriseColor;
+            result.mSkyColor = current.mSkySunriseColor;
+        }
     }
     
     // day
-    else if (mHour >= (mGlobals.mSunriseTime+mGlobals.mSunriseDuration) && mHour <= (mGlobals.mSunsetTime-mGlobals.mSunsetDuration))
+    else if (mHour >= (mGlobals.mSunriseTime) && mHour <= (mGlobals.mSunsetTime))
     {
         result.mFogColor = current.mFogDayColor;
         result.mAmbientColor = current.mAmbientDayColor;
@@ -145,12 +170,35 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
     
     // sunset
-    else if (mHour >= (mGlobals.mSunsetTime-mGlobals.mSunsetDuration) && mHour <= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration))
+    else if (mHour >= (mGlobals.mSunsetTime) && mHour <= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration))
     {
-        result.mFogColor = current.mFogSunsetColor;
-        result.mAmbientColor = current.mAmbientSunsetColor;
-        result.mSunColor = current.mSunSunsetColor;
-        result.mSkyColor = current.mSkySunsetColor;
+        if (mHour <= (mGlobals.mSunsetTime+fade_duration))
+        {
+            // fade in
+            float advance = (mGlobals.mSunsetTime+fade_duration)-mHour;
+            float factor = (advance / fade_duration);
+            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor);
+            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor);
+            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor);
+            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor);
+        }
+        else if (mHour >= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration-fade_duration))
+        {
+            // fade out
+            float advance = mHour-(mGlobals.mSunsetTime+mGlobals.mSunsetDuration-fade_duration);
+            float factor = advance / fade_duration;
+            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor);
+            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor);
+            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor);
+            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor);
+        }
+        else 
+        {
+            result.mFogColor = current.mFogSunsetColor;
+            result.mAmbientColor = current.mAmbientSunsetColor;
+            result.mSunColor = current.mSunSunsetColor;
+            result.mSkyColor = current.mSkySunsetColor;
+        }
     }
     
     return result;
@@ -165,8 +213,6 @@ WeatherResult WeatherManager::transition(float factor)
     result.mCloudTexture = current.mCloudTexture;
     result.mNextCloudTexture = other.mCloudTexture;
     result.mCloudBlendFactor = factor;
-        
-    #define lerp(x, y) (x * (1-factor) + y * factor)
     
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     result.mFogColor = lerp(current.mFogColor, other.mFogColor);
@@ -232,7 +278,7 @@ void WeatherManager::setHour(const float hour)
 {
     // accelerate a bit for testing
     /*
-    mHour += 0.001;
+    mHour += 0.005;
     
     if (mHour >= 24.f) mHour = 0.f;
     
