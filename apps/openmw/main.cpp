@@ -35,6 +35,23 @@
 
 #include "config.hpp"
 
+#include <boost/version.hpp>
+/**
+ * Workaround for problems with whitespaces in paths in older versions of Boost library
+ */
+#if (BOOST_VERSION <= 104600)
+namespace boost
+{
+
+template<>
+inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string>(const std::string& arg)
+{
+    return boost::filesystem::path(arg);
+}
+
+} /* namespace boost */
+#endif /* (BOOST_VERSION <= 104600) */
+
 using namespace std;
 
 /**
