@@ -246,8 +246,6 @@ void OMW::Engine::enableFSStrict(bool fsStrict)
 
 void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
-    /// \todo remove mDataDir, once resources system can handle multiple directories
-    assert (!dataDirs.empty());
     mDataDirs = dataDirs;
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
