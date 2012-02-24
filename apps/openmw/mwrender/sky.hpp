@@ -149,18 +149,23 @@ namespace MWRender
         Ogre::SceneNode* mRootNode;
         Ogre::SceneManager* mSceneMgr;
         
+        Ogre::SceneNode* mAtmosphereDay;
+        Ogre::SceneNode* mAtmosphereNight;
+        
         Ogre::MaterialPtr mCloudMaterial;
         Ogre::MaterialPtr mAtmosphereMaterial;
         
+        Ogre::MaterialPtr mStarsMaterials[7];
+        
         Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
         
-        // remember the cloud texture names used right now, so we don't have to set the texture names if they didnt change
+        // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;
         Ogre::String mNextClouds;
         float mCloudBlendFactor;
         float mCloudOpacity;
         float mCloudSpeed;
-        
+        float mStarsOpacity;
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
                 

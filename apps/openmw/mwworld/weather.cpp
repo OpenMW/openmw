@@ -85,9 +85,6 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, World* wor
     */
     
     setWeather("clear", true);
-    
-    // Test transition
-    //setWeather("cloudy", false);
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -116,35 +113,40 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mCloudSpeed = current.mCloudSpeed;
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-        
+    
     const float fade_duration = 0.15 /*current.mTransitionDelta*/;
     
+    result.mNight = (mHour < 6.f+fade_duration || mHour > 20.f-fade_duration);
+    
     // night
-    if (mHour <= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration) || mHour >= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration))
+    if (mHour <= (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration)
+        || mHour >= (WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration))
     {
         result.mFogColor = current.mFogNightColor;
         result.mAmbientColor = current.mAmbientNightColor;
         result.mSunColor = current.mSunNightColor;
         result.mSkyColor = current.mSkyNightColor;
+        result.mNightFade = 1.f;
     }
     
     // sunrise
-    else if (mHour >= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration) && mHour <= mGlobals.mSunriseTime)
+    else if (mHour >= (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration) && mHour <= WeatherGlobals::mSunriseTime)
     {
-        if (mHour <= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration+fade_duration))
+        if (mHour <= (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration+fade_duration))
         {
             // fade in
-            float advance = (mGlobals.mSunriseTime-mGlobals.mSunriseDuration+fade_duration)-mHour;
+            float advance = (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration+fade_duration)-mHour;
             float factor = (advance / fade_duration);
             result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor);
             result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor);
             result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor);
             result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor);
+            result.mNightFade = factor;
         }
-        else if (mHour >= (mGlobals.mSunriseTime-fade_duration))
+        else if (mHour >= (WeatherGlobals::mSunriseTime-fade_duration))
         {
             // fade out
-            float advance = mHour-(mGlobals.mSunriseTime-fade_duration);
+            float advance = mHour-(WeatherGlobals::mSunriseTime-fade_duration);
             float factor = advance / fade_duration;
             result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor);
             result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor);
@@ -161,7 +163,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
     
     // day
-    else if (mHour >= (mGlobals.mSunriseTime) && mHour <= (mGlobals.mSunsetTime))
+    else if (mHour >= (WeatherGlobals::mSunriseTime) && mHour <= (WeatherGlobals::mSunsetTime))
     {
         result.mFogColor = current.mFogDayColor;
         result.mAmbientColor = current.mAmbientDayColor;
@@ -170,27 +172,28 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
     
     // sunset
-    else if (mHour >= (mGlobals.mSunsetTime) && mHour <= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration))
+    else if (mHour >= (WeatherGlobals::mSunsetTime) && mHour <= (WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration))
     {
-        if (mHour <= (mGlobals.mSunsetTime+fade_duration))
+        if (mHour <= (WeatherGlobals::mSunsetTime+fade_duration))
         {
             // fade in
-            float advance = (mGlobals.mSunsetTime+fade_duration)-mHour;
+            float advance = (WeatherGlobals::mSunsetTime+fade_duration)-mHour;
             float factor = (advance / fade_duration);
             result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor);
             result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor);
             result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor);
             result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor);
         }
-        else if (mHour >= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration-fade_duration))
+        else if (mHour >= (WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration-fade_duration))
         {
             // fade out
-            float advance = mHour-(mGlobals.mSunsetTime+mGlobals.mSunsetDuration-fade_duration);
+            float advance = mHour-(WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration-fade_duration);
             float factor = advance / fade_duration;
             result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor);
             result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor);
             result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor);
             result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor);
+            result.mNightFade = factor;
         }
         else 
         {
@@ -226,6 +229,8 @@ WeatherResult WeatherManager::transition(float factor)
     result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     result.mGlareView = lerp(current.mGlareView, other.mGlareView);
+    
+    result.mNight = current.mNight;
     
     // sound change behaviour:
     // if 'other' has a new sound, switch to it after 1/2 of the transition length
@@ -274,7 +279,8 @@ void WeatherManager::update(float duration)
     }
     
     // disable sun during night
-    if (mHour >= mGlobals.mSunsetTime+mGlobals.mSunsetDuration || mHour <= mGlobals.mSunriseTime-mGlobals.mSunriseDuration)
+    if (mHour >= WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration
+        || mHour <= WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration)
         mRendering->getSkyManager()->sunDisable();
     else
     {

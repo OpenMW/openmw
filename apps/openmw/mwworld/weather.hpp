@@ -68,17 +68,10 @@ namespace MWWorld
         Snow Low Kill=150
         */
         
-        float   mSunriseTime,
-                mSunsetTime,
-                mSunriseDuration,
-                mSunsetDuration;
-        
-        WeatherGlobals() :
-            mSunriseTime(8),
-            mSunsetTime(18),
-            mSunriseDuration(2),
-            mSunsetDuration(2)
-        {};
+        static const float mSunriseTime = 8;
+        static const float mSunsetTime = 18;
+        static const float mSunriseDuration = 2;
+        static const float mSunsetDuration = 2;
     };
     
     /// Defines the actual weather that results from weather setting (see below), time of day and weather transition
@@ -107,6 +100,9 @@ namespace MWWorld
         float mCloudOpacity;
         
         float mGlareView;
+        
+        bool mNight; // use night skybox
+        float mNightFade; // fading factor for night skybox
         
         Ogre::String mAmbientLoopSoundID;
     };
@@ -208,9 +204,7 @@ namespace MWWorld
         MWWorld::World* mWorld;
         
         std::map<Ogre::String, Weather> mWeatherSettings;
-        
-        WeatherGlobals mGlobals;
-        
+                
         Ogre::String mCurrentWeather;
         Ogre::String mNextWeather;
         
