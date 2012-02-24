@@ -62,7 +62,7 @@ struct WindowsPath
     boost::filesystem::path getLocalPath() const;
 
     /**
-     * \brief Return same path like getGlobalConfigPath
+     * \brief Return same path like getGlobalPath
      *
      * \return boost::filesystem::path
      */
