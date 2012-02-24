@@ -39,7 +39,10 @@ void BillboardObject::setVisible(const bool visible)
 
 void BillboardObject::setPosition(const Vector3& pPosition)
 {
-    Vector3 finalPosition = pPosition.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
+    Vector3 normalised = pPosition.normalisedCopy();
+    Vector3 finalPosition = normalised * CELESTIAL_BODY_DISTANCE;
+    
+    mBBSet->setCommonDirection( -normalised );
 
     mNode->setPosition(finalPosition);
 }
@@ -284,7 +287,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 0.4), mRootNode);
     mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode);
     mSunGlare->setRenderQueue(RENDER_QUEUE_SKIES_LATE);
-    mMasser = new Moon("textures\\tx_masser_full.dds", 1, Vector3(-0.4, -0.4, 0.5), mRootNode);
+    mMasser = new Moon("textures\\tx_masser_full.dds", 1, Vector3(-0.4, 0.4, 0.5), mRootNode);
     mSecunda = new Moon("textures\\tx_secunda_full.dds", 0.5, Vector3(0.4, -0.4, 0.5), mRootNode);
     mMasser->setType(Moon::Type_Masser);
     mSecunda->setType(Moon::Type_Secunda);
@@ -517,10 +520,30 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
 void SkyManager::setGlare(bool glare)
 {
-    mSunGlare->setVisible(glare && mEnabled);
+    mGlareEnabled = glare;
 }
 
 Vector3 SkyManager::getRealSunPos()
 {
     return mSun->getNode()->_getDerivedPosition();
+}
+
+void SkyManager::sunEnable()
+{
+    mSun->setVisible(true);
+    mSunGlare->setVisible(mGlareEnabled);
+    mSunEnabled = true;
+}
+
+void SkyManager::sunDisable()
+{
+    mSun->setVisible(false);
+    mSunGlare->setVisible(false);
+    mSunEnabled = false;
+}
+
+void SkyManager::setSunDirection(const Vector3& direction)
+{
+    mSun->setPosition(direction);
+    mSunGlare->setPosition(direction);
 }

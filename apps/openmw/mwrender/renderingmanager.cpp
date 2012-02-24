@@ -303,6 +303,7 @@ void RenderingManager::sunDisable()
 void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 {
     if (mSun) mSun->setPosition(direction);
+    mSkyManager->setSunDirection(direction);
 }
 
 void RenderingManager::setGlare(bool glare)

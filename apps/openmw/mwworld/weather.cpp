@@ -117,7 +117,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
         
-    const float fade_duration = current.mTransitionDelta;
+    const float fade_duration = 0.15 /*current.mTransitionDelta*/;
     
     // night
     if (mHour <= (mGlobals.mSunriseTime-mGlobals.mSunriseDuration) || mHour >= (mGlobals.mSunsetTime+mGlobals.mSunsetDuration))
@@ -271,6 +271,23 @@ void WeatherManager::update(float duration)
     {
         mRendering->sunDisable();
         mRendering->skyDisable();
+    }
+    
+    // disable sun during night
+    if (mHour >= mGlobals.mSunsetTime+mGlobals.mSunsetDuration || mHour <= mGlobals.mSunriseTime-mGlobals.mSunriseDuration)
+        mRendering->getSkyManager()->sunDisable();
+    else
+    {
+        // during day, calculate sun angle
+        float height = 1-std::abs(((mHour-13)/7.f));
+        int facing = mHour > 13.f ? 1 : -1;
+        Vector3 final(
+            (1-height)*facing, 
+            (1-height)*facing, 
+            height);
+        mRendering->setSunDirection(final);
+        
+        mRendering->getSkyManager()->sunEnable();
     }
 }
 

@@ -130,6 +130,12 @@ namespace MWRender
         
         void setWeather(const MWWorld::WeatherResult& weather);
         
+        void sunEnable();
+        
+        void sunDisable();
+        
+        void setSunDirection(const Ogre::Vector3& direction);
+        
         void setGlare(bool glare);
         Ogre::Vector3 getRealSunPos();
         
@@ -163,6 +169,8 @@ namespace MWRender
         void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
         
         bool mEnabled;
+        bool mGlareEnabled;
+        bool mSunEnabled;
     };
 }
 

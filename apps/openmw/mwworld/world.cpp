@@ -142,9 +142,9 @@ namespace MWWorld
     {
         if (mSky)
         {
-            toggleSky();
-            // TODO set weather
-            toggleSky();
+            mRendering->skySetHour (mGlobalVariables->getFloat ("gamehour"));
+            mRendering->skySetDate (mGlobalVariables->getInt ("day"),
+                mGlobalVariables->getInt ("month"));
         }
     }
 
@@ -452,10 +452,6 @@ namespace MWWorld
         else
         {
             mSky = true;
-            // TODO check for extorior or interior with sky.
-            mRendering->skySetHour (mGlobalVariables->getFloat ("gamehour"));
-            mRendering->skySetDate (mGlobalVariables->getInt ("day"),
-                mGlobalVariables->getInt ("month"));
             mRendering->skyEnable();
             return true;
         }
