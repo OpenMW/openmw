@@ -736,6 +736,11 @@ namespace MWWorld
         return false;
     }
     
+    int World::getCurrentWeather() const
+    {
+        return mWeatherManager->getWeatherID();
+    }
+    
     OEngine::Render::Fader* World::getFader()
     {
         return mRendering->getFader();

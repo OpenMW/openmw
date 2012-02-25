@@ -79,12 +79,26 @@ namespace MWScript
                     runtime.push (context.getWorld().getSecundaPhase());
                 }
         };
+        
+        class OpGetCurrentWeather : public Interpreter::Opcode0
+        {
+            public:
+                
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+                    
+                    runtime.push (context.getWorld().getCurrentWeather());
+                }
+        };
 
         const int opcodeToggleSky = 0x2000021;
         const int opcodeTurnMoonWhite = 0x2000022;
         const int opcodeTurnMoonRed = 0x2000023;
         const int opcodeGetMasserPhase = 0x2000024;
         const int opcodeGetSecundaPhase = 0x2000025;
+        const int opcodeGetCurrentWeather = 0x200013f;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -94,6 +108,7 @@ namespace MWScript
             extensions.registerInstruction ("turnmoonred", "", opcodeTurnMoonRed);
             extensions.registerFunction ("getmasserphase", 'l', "", opcodeGetMasserPhase);
             extensions.registerFunction ("getsecundaphase", 'l', "", opcodeGetSecundaPhase);
+            extensions.registerFunction ("getcurrentweather", 'l', "", opcodeGetCurrentWeather);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -103,6 +118,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeTurnMoonRed, new OpTurnMoonRed);
             interpreter.installSegment5 (opcodeGetMasserPhase, new OpGetMasserPhase);
             interpreter.installSegment5 (opcodeGetSecundaPhase, new OpGetSecundaPhase);
+            interpreter.installSegment5 (opcodeGetCurrentWeather, new OpGetCurrentWeather);
         }
     }
 }

@@ -233,6 +233,8 @@ namespace MWWorld
         
         void setDate(const int day, const int month);
         
+        unsigned int getWeatherID() const;
+        
     private:
         float mHour;
         int mDay, mMonth;

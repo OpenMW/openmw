@@ -119,4 +119,5 @@ op 0x200013b: twf
 op 0x200013c: FadeIn
 op 0x200013d: FadeOut
 op 0x200013e: FadeTo
-opcodes 0x200013f-0x3ffffff unused
+op 0x200013f: GetCurrentWeather
+opcodes 0x2000140-0x3ffffff unused

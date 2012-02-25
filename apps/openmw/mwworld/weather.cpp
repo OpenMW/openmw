@@ -316,6 +316,9 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     mWeatherSettings["blizzard"] = blizzard;
     
     setWeather("foggy", true);
+    
+    //                        const ESM::Region *region =
+     //                       context.getWorld().getStore().regions.find (cell->region);
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -660,4 +663,33 @@ void WeatherManager::setDate(const int day, const int month)
 {
     mDay = day;
     mMonth = month;
+}
+
+unsigned int WeatherManager::getWeatherID() const
+{
+    // Source: http://www.uesp.net/wiki/Tes3Mod:GetCurrentWeather
+    
+    if (mCurrentWeather == "clear")
+        return 0;
+    else if (mCurrentWeather == "cloudy")
+        return 1;
+    else if (mCurrentWeather == "foggy")
+        return 2;
+    else if (mCurrentWeather == "overcast")
+        return 3;
+    else if (mCurrentWeather == "rain")
+        return 4;
+    else if (mCurrentWeather == "thunder")
+        return 5;
+    else if (mCurrentWeather == "ashstorm")
+        return 6;
+    else if (mCurrentWeather == "blight")
+        return 7;
+    else if (mCurrentWeather == "snow")
+        return 8;
+    else if (mCurrentWeather == "blizzard")
+        return 9;
+    
+    else
+        return 0;
 }

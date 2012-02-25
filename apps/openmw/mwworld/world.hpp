@@ -163,6 +163,8 @@ namespace MWWorld
 
             bool toggleSky();
             ///< \return Resulting mode
+            
+            int getCurrentWeather() const;
 
             int getMasserPhase() const;
 
