@@ -1,17 +1,17 @@
 #include "weather.hpp"
 #include "world.hpp"
+#include "player.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwsound/soundmanager.hpp"
 
-#include <time.h>
-#include <stdlib.h>
+#include <ctime>
+#include <cstdlib>
+#include <iostream>
 
 using namespace Ogre;
 using namespace MWWorld;
 using namespace MWSound;
-
-#define TRANSITION_TIME 10
 
 #define lerp(x, y) (x * (1-factor) + y * factor)
 
@@ -21,8 +21,8 @@ const std::string WeatherGlobals::mThunderSoundID2 = "Thunder2";
 const std::string WeatherGlobals::mThunderSoundID3 = "Thunder3";
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environment* env) : 
-     mHour(14), mCurrentWeather("clear"), mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50),
-     mThunderSoundDelay(0)
+     mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
+     mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0)
 {
     mRendering = rendering;
     mEnvironment = env;
@@ -314,24 +314,24 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     blizzard.mGlareView = 0;
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
     mWeatherSettings["blizzard"] = blizzard;
-    
-    setWeather("foggy", true);
-    
-    //                        const ESM::Region *region =
-     //                       context.getWorld().getStore().regions.find (cell->region);
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
 {
-    if (instant)
+    if (instant || mFirstUpdate)
     {
         mNextWeather = "";
         mCurrentWeather = weather;
+        mFirstUpdate = false;
     }
-    else if (weather != mCurrentWeather)
+    else
     {
+        // if there's another transition that hasn't finished yet, just apply it immediately
+        if (mNextWeather != "")
+            mCurrentWeather = mNextWeather;
+            
         mNextWeather = weather;
-        mRemainingTransitionTime = TRANSITION_TIME;
+        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60;
     }
 }
 
@@ -479,8 +479,71 @@ WeatherResult WeatherManager::transition(float factor)
 
 void WeatherManager::update(float duration)
 {
+    mWeatherUpdateTime -= duration;
     if (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior())
     {
+        std::string regionstr = mEnvironment->mWorld->getPlayer().getPlayer().getCell()->cell->region;
+        
+        if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
+        {
+            mCurrentRegion = regionstr;
+            mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*60.f;
+            
+            // get weather probabilities for the current region
+            const ESM::Region *region = mEnvironment->mWorld->getStore().regions.find (regionstr);
+            
+            float clear = region->data.clear/255.f;
+            float cloudy = region->data.cloudy/255.f;
+            float foggy = region->data.foggy/255.f;
+            float overcast = region->data.overcast/255.f;
+            float rain = region->data.rain/255.f;
+            float thunder = region->data.thunder/255.f;
+            float ash = region->data.ash/255.f;
+            float blight = region->data.blight/255.f;
+            float snow = region->data.a/255.f;
+            float blizzard = region->data.b/255.f;
+            
+            // re-scale to 100 percent
+            const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
+                        
+            srand(time(NULL));
+            float random = ((rand()%100)/100.f) * total;
+            
+            std::string weather;
+            
+            if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                weather = "blizzard";
+            else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                weather = "snow";
+            else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
+                weather = "blight";
+            else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
+                weather = "ashstorm";
+            else if (random >= rain+overcast+foggy+cloudy+clear)
+                weather = "thunderstorm";
+            else if (random >= overcast+foggy+cloudy+clear)
+                weather = "rain";
+            else if (random >= foggy+cloudy+clear)
+                weather = "overcast";
+            else if (random >= cloudy+clear)
+                weather = "foggy";
+            else if (random >= clear)
+                weather = "cloudy";
+            else
+                weather = "clear";
+            
+            setWeather(weather, false);
+            /*
+            std::cout << "roll result: " << random << std::endl;
+            
+            std::cout << regionstr << " weather probabilities: " << clear << " " << cloudy << " " << foggy << " " 
+                << overcast << " " << rain << " " << thunder << " " << ash << " " << blight << " " << snow << " " 
+                << blizzard << std::endl;
+            
+            std::cout << "New weather : " << weather << std::endl;
+            */
+        }
+                
         WeatherResult result;
         
         if (mNextWeather != "")
@@ -494,7 +557,7 @@ void WeatherManager::update(float duration)
         }
         
         if (mNextWeather != "")
-            result = transition(1-(mRemainingTransitionTime/TRANSITION_TIME));
+            result = transition(1-(mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60)));
         else
             result = getResult(mCurrentWeather);
         
@@ -652,11 +715,11 @@ void WeatherManager::setHour(const float hour)
     
     if (mHour >= 24.f) mHour = 0.f;
     
-    #include <iostream>
     std::cout << "hour " << mHour << std::endl;
     */
     
     mHour = hour;
+    
 }
 
 void WeatherManager::setDate(const int day, const int month)

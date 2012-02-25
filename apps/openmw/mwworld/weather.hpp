@@ -100,6 +100,8 @@ namespace MWWorld
         static const float mSunriseDuration = 2;
         static const float mSunsetDuration = 2;
         
+        static const float mWeatherUpdateTime = 20.f;
+        
         // morrowind sets these per-weather, but since they are only used by 'thunderstorm'
         // weather setting anyway, we can just as well set them globally
         static const float mThunderFrequency = .4;
@@ -247,8 +249,14 @@ namespace MWWorld
         Ogre::String mCurrentWeather;
         Ogre::String mNextWeather;
         
-        float mRemainingTransitionTime;
+        std::string mCurrentRegion;
         
+        bool mFirstUpdate;
+        
+        float mWeatherUpdateTime;
+        
+        float mRemainingTransitionTime;
+                
         float mThunderFlash;
         float mThunderChance;
         float mThunderChanceNeeded;
