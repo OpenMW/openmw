@@ -29,7 +29,7 @@ namespace MWRender
     {
     public:
         BillboardObject(  const Ogre::String& textureName,
-                        const unsigned int size,
+                        const float size,
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode
                     );
@@ -44,7 +44,7 @@ namespace MWRender
         
     protected:
         virtual void init(const Ogre::String& textureName,
-                        const unsigned int size,
+                        const float size,
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode);
     
@@ -61,12 +61,12 @@ namespace MWRender
     {
     public:
         Moon(  const Ogre::String& textureName,
-                        const unsigned int size,
+                        const float size,
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode
                     );
     
-        void setVisibility(const float pVisibility);
+        void setVisibility(const float visibility);
         ///< set the transparency factor for this moon
                         
         enum Phase
@@ -94,6 +94,7 @@ namespace MWRender
         unsigned int getPhaseInt() const;
     
     private:
+        float mVisibility;
         Type mType;
         Phase mPhase;
     };
@@ -137,6 +138,20 @@ namespace MWRender
         void sunDisable();
         
         void setSunDirection(const Ogre::Vector3& direction);
+        
+        void setMasserDirection(const Ogre::Vector3& direction);
+        
+        void setSecundaDirection(const Ogre::Vector3& direction);
+        
+        void setMasserFade(const float fade);
+        
+        void setSecundaFade(const float fade);
+        
+        void masserEnable();
+        void masserDisable();
+
+        void secundaEnable();
+        void secundaDisable();
         
         void setThunder(const float factor);
         
@@ -183,6 +198,8 @@ namespace MWRender
         bool mEnabled;
         bool mGlareEnabled;
         bool mSunEnabled;
+        bool mMasserEnabled;
+        bool mSecundaEnabled;
     };
 }
 

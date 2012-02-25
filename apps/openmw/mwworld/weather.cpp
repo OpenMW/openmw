@@ -121,7 +121,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     mWeatherSettings["overcast"] = overcast;
     */
     
-    setWeather("thunderstorm", true);
+    setWeather("clear", true);
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -317,6 +317,74 @@ void WeatherManager::update(float duration)
             mRendering->setSunDirection(final);
             
             mRendering->getSkyManager()->sunEnable();
+        }
+        
+        // moon calculations
+        float night;
+        if (mHour >= 14)
+            night = mHour-14;
+        else if (mHour <= 10)
+            night = mHour+10;
+        else
+            night = 0;
+            
+        night /= 20.f;
+        
+        if (night != 0)
+        {
+            float moonHeight = 1-std::abs((night-0.5)*2);
+            int facing = (mHour > 0.f && mHour<12.f) ? 1 : -1;
+            Vector3 masser(
+                (1-moonHeight)*facing, 
+                (1-moonHeight)*facing, 
+                moonHeight);
+            
+            Vector3 secunda(
+                (1-moonHeight)*facing*0.8, 
+                (1-moonHeight)*facing*1.25, 
+                moonHeight);
+            
+            mRendering->getSkyManager()->setMasserDirection(masser);
+            mRendering->getSkyManager()->setSecundaDirection(secunda);
+            mRendering->getSkyManager()->masserEnable();
+            mRendering->getSkyManager()->secundaEnable();
+            
+            float hour_fade;
+            if (mHour >= 7.f && mHour <= 14.f)
+                hour_fade = 1-(mHour-7)/3.f;
+            else if (mHour >= 14 && mHour <= 15.f)
+                hour_fade = mHour-14;
+            else
+                hour_fade = 1;
+            
+            float secunda_angle_fade;
+            float masser_angle_fade;
+            float angle = moonHeight*90.f;
+            
+            if (angle >= 30 && angle <= 50)
+                secunda_angle_fade = (angle-30)/20.f;
+            else if (angle <30)
+                secunda_angle_fade = 0.f;
+            else
+                secunda_angle_fade = 1.f;
+            
+            if (angle >= 40 && angle <= 50)
+                masser_angle_fade = (angle-40)/10.f;
+            else if (angle <40)
+                masser_angle_fade = 0.f;
+            else
+                masser_angle_fade = 1.f;
+                
+            masser_angle_fade *= hour_fade;
+            secunda_angle_fade *= hour_fade;
+            
+            mRendering->getSkyManager()->setMasserFade(masser_angle_fade);
+            mRendering->getSkyManager()->setSecundaFade(secunda_angle_fade);
+        }
+        else
+        {
+            mRendering->getSkyManager()->masserDisable();
+            mRendering->getSkyManager()->secundaDisable();
         }
         
         if (mCurrentWeather == "thunderstorm" && mNextWeather == "")

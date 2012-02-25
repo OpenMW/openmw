@@ -21,7 +21,7 @@ using namespace Ogre;
 #define CELESTIAL_BODY_DISTANCE 1000.f
 
 BillboardObject::BillboardObject( const String& textureName,
-                    const unsigned int initialSize,
+                    const float initialSize,
                     const Vector3& position,
                     SceneNode* rootNode)
 {
@@ -63,21 +63,19 @@ SceneNode* BillboardObject::getNode()
 }
 
 void BillboardObject::init(const String& textureName,
-                    const unsigned int initialSize,
+                    const float initialSize,
                     const Vector3& position,
                     SceneNode* rootNode)
 {
     SceneManager* sceneMgr = rootNode->getCreator();
-    
-    const float scale = initialSize*550.f;
-    
+        
     Vector3 finalPosition = position.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
     
     static unsigned int bodyCount=0;
     
     /// \todo These billboards are not 100% correct, might want to revisit them later
     mBBSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
-    mBBSet->setDefaultDimensions(scale, scale);
+    mBBSet->setDefaultDimensions(550.f*initialSize, 550.f*initialSize);
     mBBSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+2);
     mBBSet->setBillboardType(BBT_PERPENDICULAR_COMMON);
     mBBSet->setCommonDirection( -position.normalisedCopy() );
@@ -102,7 +100,7 @@ void BillboardObject::init(const String& textureName,
 }
 
 Moon::Moon( const String& textureName,
-                    const unsigned int initialSize,
+                    const float initialSize,
                     const Vector3& position,
                     SceneNode* rootNode)
 {
@@ -214,9 +212,13 @@ unsigned int Moon::getPhaseInt() const
     return 0;
 }
 
-void Moon::setVisibility(const float pVisibility)
+void Moon::setVisibility(const float visibility)
 {
-    mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("visibilityFactor", Real(pVisibility));
+    if (mVisibility != visibility)
+    {
+        mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("visibilityFactor", Real(visibility));
+        mVisibility = visibility;
+    }
 }
 
 void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
@@ -302,14 +304,19 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     overlay_panel->show();
     mThunderOverlay->add2D(overlay_panel);
     mThunderOverlay->hide();
-        
+    
+    mSecunda = new Moon("textures\\tx_secunda_full.dds", 0.5, Vector3(-0.4, 0.4, 0.5), mRootNode);
+    mSecunda->setType(Moon::Type_Secunda);
+    mSecunda->setRenderQueue(RENDER_QUEUE_SKIES_EARLY+4);
+    
+    mMasser = new Moon("textures\\tx_masser_full.dds", 0.75, Vector3(-0.4, 0.4, 0.5), mRootNode);
+    mMasser->setRenderQueue(RENDER_QUEUE_SKIES_EARLY+3);
+    mMasser->setType(Moon::Type_Masser);
+    
     mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 0.4), mRootNode);
     mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode);
     mSunGlare->setRenderQueue(RENDER_QUEUE_SKIES_LATE);
-    mMasser = new Moon("textures\\tx_masser_full.dds", 1, Vector3(-0.4, 0.4, 0.5), mRootNode);
-    mSecunda = new Moon("textures\\tx_secunda_full.dds", 0.5, Vector3(0.4, -0.4, 0.5), mRootNode);
-    mMasser->setType(Moon::Type_Masser);
-    mSecunda->setType(Moon::Type_Secunda);
+
                 
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
 
@@ -427,7 +434,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     // Clouds
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
     Entity* clouds_ent = mSceneMgr->createEntity("meshes\\sky_clouds_01.nif");
-    clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+3);
+    clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+5);
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
     clouds_node->attachObject(clouds_ent);
     mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
@@ -538,12 +545,10 @@ void SkyManager::enable()
     mRootNode->setVisible(true);
     mEnabled = true;
     
-    mSunGlare->setVisible(mGlareEnabled && mSunEnabled && mEnabled);
-    mSun->setVisible(mSunEnabled && mEnabled);
-    
-    /// \todo
-    mMasser->setVisible(false);
-    mSecunda->setVisible(false);
+    mSunGlare->setVisible(mGlareEnabled && mSunEnabled);
+    mSun->setVisible(mSunEnabled);
+    mMasser->setVisible(mMasserEnabled);
+    mSecunda->setVisible(mSecundaEnabled);
 }
 
 void SkyManager::disable()
@@ -554,8 +559,7 @@ void SkyManager::disable()
 
 void SkyManager::setMoonColour (bool red)
 {
-    /// \todo tweak these colors
-    mSecunda->setColour( red ? ColourValue(1.0, 0.0, 0.0)
+    mSecunda->setColour( red ? ColourValue(1.0, 0.0784, 0.0784)
                             : ColourValue(1.0, 1.0, 1.0));
 }
 
@@ -646,6 +650,36 @@ void SkyManager::setSunDirection(const Vector3& direction)
     mSunGlare->setPosition(direction);
 }
 
+void SkyManager::setMasserDirection(const Vector3& direction)
+{
+    mMasser->setPosition(direction);
+}
+
+void SkyManager::setSecundaDirection(const Vector3& direction)
+{
+    mSecunda->setPosition(direction);
+}
+
+void SkyManager::masserEnable()
+{
+    mMasserEnabled = true;
+}
+
+void SkyManager::secundaEnable()
+{
+    mSecundaEnabled = true;
+}
+
+void SkyManager::masserDisable()
+{
+    mMasserEnabled = false;
+}
+
+void SkyManager::secundaDisable()
+{
+    mSecundaEnabled = false;
+}
+
 void SkyManager::setThunder(const float factor)
 {
     if (factor > 0.f)
@@ -655,4 +689,14 @@ void SkyManager::setThunder(const float factor)
     }
     else
         mThunderOverlay->hide();
+}
+
+void SkyManager::setMasserFade(const float fade)
+{
+    mMasser->setVisibility(fade);
+}
+
+void SkyManager::setSecundaFade(const float fade)
+{
+    mSecunda->setVisibility(fade);
 }

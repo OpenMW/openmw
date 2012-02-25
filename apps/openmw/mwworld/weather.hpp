@@ -17,6 +17,7 @@ namespace MWWorld
     struct WeatherGlobals
     {
         /*
+        [Weather]
         EnvReduceColor=255,255,255,255
         LerpCloseColor=037,046,048,255
         BumpFadeColor=230,239,255,255
@@ -66,6 +67,32 @@ namespace MWWorld
         Snow Gravity Scale=0.1
         Snow High Kill=700
         Snow Low Kill=150
+        
+        
+        [Moons]
+        Masser Size=94
+        Masser Fade In Start=14
+        Masser Fade In Finish=15
+        Masser Fade Out Start=7
+        Masser Fade Out Finish=10
+        Masser Axis Offset=35
+        Masser Speed=.5
+        Masser Daily Increment=1
+        Masser Fade Start Angle=50
+        Masser Fade End Angle=40
+        Masser Moon Shadow Early Fade Angle=0.5
+        Secunda Size=40
+        Secunda Fade In Start=14
+        Secunda Fade In Finish=15
+        Secunda Fade Out Start=7
+        Secunda Fade Out Finish=10
+        Secunda Axis Offset=50
+        Secunda Speed=.6
+        Secunda Daily Increment=1.2
+        Secunda Fade Start Angle=50
+        Secunda Fade End Angle=30
+        Secunda Moon Shadow Early Fade Angle=0.5
+        Script Color=255,20,20
         */
         
         static const float mSunriseTime = 8;
