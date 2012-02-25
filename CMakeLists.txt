@@ -190,7 +190,7 @@ find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
-    ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
+    ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
