@@ -188,8 +188,7 @@ void DataFilesPage::setupDataFiles()
 
     // Put the paths in a boost::filesystem vector to use with Files::Collections
     Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
-    mCfgMgr.processPaths(dataDirs);
-
+ 
     std::string local(variables["data-local"].as<std::string>());
     if (!local.empty())
     {
@@ -200,6 +199,8 @@ void DataFilesPage::setupDataFiles()
     {
         dataDirs.push_back(mCfgMgr.getLocalPath());
     }
+
+    mCfgMgr.processPaths(dataDirs);
 
     // Create a file collection for the dataDirs
     Files::Collections fileCollections(dataDirs, !variables["fs-strict"].as<bool>());
