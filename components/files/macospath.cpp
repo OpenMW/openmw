@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <pwd.h>
 #include <unistd.h>
+#include <boost/filesystem/fstream.hpp>
 
 /**
  * FIXME: Someone with MacOS system should check this and correct if necessary
