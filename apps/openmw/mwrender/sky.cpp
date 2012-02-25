@@ -538,6 +538,9 @@ void SkyManager::update(float duration)
 {    
     // UV Scroll the clouds
     mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", 1);
+    
+    mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
+    mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
 }
 
 void SkyManager::enable()
@@ -699,4 +702,15 @@ void SkyManager::setMasserFade(const float fade)
 void SkyManager::setSecundaFade(const float fade)
 {
     mSecunda->setVisibility(fade);
+}
+
+void SkyManager::setHour(double hour)
+{
+    mHour = hour;
+}
+
+void SkyManager::setDate(int day, int month)
+{
+    mDay = day;
+    mMonth = month;
 }

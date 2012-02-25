@@ -86,6 +86,34 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     cloudy.mGlareView = 1.0;
     mWeatherSettings["cloudy"] = cloudy;
     
+    Weather foggy;
+    foggy.mCloudTexture = "tx_sky_foggy.dds";
+    foggy.mCloudsMaximumPercent = 1.0;
+    foggy.mTransitionDelta = 0.015;
+    foggy.mSkySunriseColor = clr(197, 190, 180);
+    foggy.mSkyDayColor = clr(184, 211, 228);
+    foggy.mSkySunsetColor = clr(142, 159, 176);
+    foggy.mSkyNightColor = clr(18, 23, 28);
+    foggy.mFogSunriseColor = clr(173, 164, 148);
+    foggy.mFogDayColor = clr(150, 187, 209);
+    foggy.mFogSunsetColor = clr(113, 135, 157);
+    foggy.mFogNightColor = clr(19, 24, 29);
+    foggy.mAmbientSunriseColor = clr(48, 43, 37);
+    foggy.mAmbientDayColor = clr(92, 109, 120);
+    foggy.mAmbientSunsetColor = clr(28, 33, 39);
+    foggy.mAmbientNightColor = clr(28, 33, 39);
+    foggy.mSunSunriseColor = clr(177, 162, 137);
+    foggy.mSunDayColor = clr(111, 131, 151);
+    foggy.mSunSunsetColor = clr(125, 157, 189);
+    foggy.mSunNightColor = clr(81, 100, 119);
+    foggy.mSunDiscSunsetColor = clr(223, 223, 223);
+    foggy.mLandFogDayDepth = 1.0;
+    foggy.mLandFogNightDepth = 1.9;
+    foggy.mWindSpeed = 0;
+    foggy.mCloudSpeed = 1.25;
+    foggy.mGlareView = 0.25;
+    mWeatherSettings["foggy"] = foggy;
+    
     Weather thunderstorm;
     thunderstorm.mCloudTexture = "tx_sky_thunder.dds";
     thunderstorm.mCloudsMaximumPercent = 0.66;
@@ -112,16 +140,182 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     thunderstorm.mWindSpeed = 0.5;
     thunderstorm.mCloudSpeed = 3;
     thunderstorm.mGlareView = 0;
+    thunderstorm.mRainLoopSoundID = "rain heavy";
     mWeatherSettings["thunderstorm"] = thunderstorm;
     
-    /*
+    Weather rain;
+    rain.mCloudTexture = "tx_sky_rainy.dds";
+    rain.mCloudsMaximumPercent = 0.66;
+    rain.mTransitionDelta = 0.015;
+    rain.mSkySunriseColor = clr(71, 74, 75);
+    rain.mSkyDayColor = clr(116, 120, 122);
+    rain.mSkySunsetColor = clr(73, 73, 73);
+    rain.mSkyNightColor = clr(24, 25, 26);
+    rain.mFogSunriseColor = clr(71, 74, 75);
+    rain.mFogDayColor = clr(116, 120, 122);
+    rain.mFogSunsetColor = clr(73, 73, 73);
+    rain.mFogNightColor = clr(24, 25, 26);
+    rain.mAmbientSunriseColor = clr(97, 90, 88);
+    rain.mAmbientDayColor = clr(105, 110, 113);
+    rain.mAmbientSunsetColor = clr(88, 97, 97);
+    rain.mAmbientNightColor = clr(50, 55, 67);
+    rain.mSunSunriseColor = clr(131, 122, 120);
+    rain.mSunDayColor = clr(149, 157, 170);
+    rain.mSunSunsetColor = clr(120, 126, 131);
+    rain.mSunNightColor = clr(50, 62, 101);
+    rain.mSunDiscSunsetColor = clr(128, 128, 128);
+    rain.mLandFogDayDepth = 0.8;
+    rain.mLandFogNightDepth = 0.8;
+    rain.mWindSpeed = 0.3;
+    rain.mCloudSpeed = 2;
+    rain.mGlareView = 0;
+    rain.mRainLoopSoundID = "rain";
+    mWeatherSettings["rain"] = rain;
+    
     Weather overcast;
     overcast.mCloudTexture = "tx_sky_overcast.dds";
     overcast.mCloudsMaximumPercent = 1.0;
+    overcast.mTransitionDelta = 0.015;
+    overcast.mSkySunriseColor = clr(91, 99, 106);
+    overcast.mSkyDayColor = clr(143, 146, 149);
+    overcast.mSkySunsetColor = clr(108, 115, 121);
+    overcast.mSkyNightColor = clr(19, 22, 25);
+    overcast.mFogSunriseColor = clr(91, 99, 106);
+    overcast.mFogDayColor = clr(143, 146, 149);
+    overcast.mFogSunsetColor = clr(108, 115, 121);
+    overcast.mFogNightColor = clr(19, 22, 25);
+    overcast.mAmbientSunriseColor = clr(84, 88, 92);
+    overcast.mAmbientDayColor = clr(93, 96, 105);
+    overcast.mAmbientSunsetColor = clr(83, 77, 75);
+    overcast.mAmbientNightColor = clr(57, 60, 66);
+    overcast.mSunSunriseColor = clr(87, 125, 163);
+    overcast.mSunDayColor = clr(163, 169, 183);
+    overcast.mSunSunsetColor = clr(85, 103, 157);
+    overcast.mSunNightColor = clr(32, 54, 100);
+    overcast.mSunDiscSunsetColor = clr(128, 128, 128);
+    overcast.mLandFogDayDepth = 0.7;
+    overcast.mLandFogNightDepth = 0.7;
+    overcast.mWindSpeed = 0.2;
+    overcast.mCloudSpeed = 1.5;
+    overcast.mGlareView = 0;
     mWeatherSettings["overcast"] = overcast;
-    */
     
-    setWeather("clear", true);
+    Weather ashstorm;
+    ashstorm.mCloudTexture = "tx_sky_ashstorm.dds";
+    ashstorm.mCloudsMaximumPercent = 1.0;
+    ashstorm.mTransitionDelta = 0.035;
+    ashstorm.mSkySunriseColor = clr(91, 56, 51);
+    ashstorm.mSkyDayColor = clr(124, 73, 58);
+    ashstorm.mSkySunsetColor = clr(106, 55, 40);
+    ashstorm.mSkyNightColor = clr(20, 21, 22);
+    ashstorm.mFogSunriseColor = clr(91, 56, 51);
+    ashstorm.mFogDayColor = clr(124, 73, 58);
+    ashstorm.mFogSunsetColor = clr(106, 55, 40);
+    ashstorm.mFogNightColor = clr(20, 21, 22);
+    ashstorm.mAmbientSunriseColor = clr(52, 42, 37);
+    ashstorm.mAmbientDayColor = clr(75, 49, 41);
+    ashstorm.mAmbientSunsetColor = clr(48, 39, 35);
+    ashstorm.mAmbientNightColor = clr(36, 42, 49);
+    ashstorm.mSunSunriseColor = clr(184, 91, 71);
+    ashstorm.mSunDayColor = clr(228, 139, 114);
+    ashstorm.mSunSunsetColor = clr(185, 86, 57);
+    ashstorm.mSunNightColor = clr(54, 66, 74);
+    ashstorm.mSunDiscSunsetColor = clr(128, 128, 128);
+    ashstorm.mLandFogDayDepth = 1.1;
+    ashstorm.mLandFogNightDepth = 1.2;
+    ashstorm.mWindSpeed = 0.8;
+    ashstorm.mCloudSpeed = 7;
+    ashstorm.mGlareView = 0;
+    ashstorm.mAmbientLoopSoundID = "ashstorm";
+    mWeatherSettings["ashstorm"] = ashstorm;
+    
+    Weather blight;
+    blight.mCloudTexture = "tx_sky_blight.dds";
+    blight.mCloudsMaximumPercent = 1.0;
+    blight.mTransitionDelta = 0.04;
+    blight.mSkySunriseColor = clr(90, 35, 35);
+    blight.mSkyDayColor = clr(90, 35, 35);
+    blight.mSkySunsetColor = clr(92, 33, 33);
+    blight.mSkyNightColor = clr(44, 14, 14);
+    blight.mFogSunriseColor = clr(90, 35, 35);
+    blight.mFogDayColor = clr(128, 19, 19);
+    blight.mFogSunsetColor = clr(92, 33, 33);
+    blight.mFogNightColor = clr(44, 14, 14);
+    blight.mAmbientSunriseColor = clr(61, 40, 40);
+    blight.mAmbientDayColor = clr(79, 54, 54);
+    blight.mAmbientSunsetColor = clr(61, 40, 40);
+    blight.mAmbientNightColor = clr(56, 58, 62);
+    blight.mSunSunriseColor = clr(180, 78, 78);
+    blight.mSunDayColor = clr(224, 84, 84);
+    blight.mSunSunsetColor = clr(180, 78, 78);
+    blight.mSunNightColor = clr(61, 91, 143);
+    blight.mSunDiscSunsetColor = clr(128, 128, 128);
+    blight.mLandFogDayDepth = 1.1;
+    blight.mLandFogNightDepth = 1.2;
+    blight.mWindSpeed = 0.9;
+    blight.mCloudSpeed = 9;
+    blight.mGlareView = 0;
+    blight.mAmbientLoopSoundID = "blight";
+    mWeatherSettings["blight"] = blight;
+    
+    Weather snow;
+    snow.mCloudTexture = "tx_bm_sky_snow.dds";
+    snow.mCloudsMaximumPercent = 1.0;
+    snow.mTransitionDelta = 0.014;
+    snow.mSkySunriseColor = clr(196, 91, 91);
+    snow.mSkyDayColor = clr(153, 158, 166);
+    snow.mSkySunsetColor = clr(96, 115, 134);
+    snow.mSkyNightColor = clr(31, 35, 39);
+    snow.mFogSunriseColor = clr(106, 91, 91);
+    snow.mFogDayColor = clr(153, 158, 166);
+    snow.mFogSunsetColor = clr(96, 115, 134);
+    snow.mFogNightColor = clr(31, 35, 39);
+    snow.mAmbientSunriseColor = clr(92, 84, 84);
+    snow.mAmbientDayColor = clr(93, 96, 105);
+    snow.mAmbientSunsetColor = clr(70, 79, 87);
+    snow.mAmbientNightColor = clr(49, 58, 68);
+    snow.mSunSunriseColor = clr(141, 109, 109);
+    snow.mSunDayColor = clr(163, 169, 183);
+    snow.mSunSunsetColor = clr(101, 121, 141);
+    snow.mSunNightColor = clr(55, 66, 77);
+    snow.mSunDiscSunsetColor = clr(128, 128, 128);
+    snow.mLandFogDayDepth = 1.0;
+    snow.mLandFogNightDepth = 1.2;
+    snow.mWindSpeed = 0;
+    snow.mCloudSpeed = 1.5;
+    snow.mGlareView = 0;
+    mWeatherSettings["snow"] = snow;
+    
+    Weather blizzard;
+    blizzard.mCloudTexture = "tx_bm_sky_blizzard.dds";
+    blizzard.mCloudsMaximumPercent = 1.0;
+    blizzard.mTransitionDelta = 0.030;
+    blizzard.mSkySunriseColor = clr(91, 99, 106);
+    blizzard.mSkyDayColor = clr(121, 133, 145);
+    blizzard.mSkySunsetColor = clr(108, 115, 121);
+    blizzard.mSkyNightColor = clr(27, 29, 31);
+    blizzard.mFogSunriseColor = clr(91, 99, 106);
+    blizzard.mFogDayColor = clr(121, 133, 145);
+    blizzard.mFogSunsetColor = clr(108, 115, 121);
+    blizzard.mFogNightColor = clr(21, 24, 28);
+    blizzard.mAmbientSunriseColor = clr(84, 88, 92);
+    blizzard.mAmbientDayColor = clr(93, 96, 105);
+    blizzard.mAmbientSunsetColor = clr(83, 77, 75);
+    blizzard.mAmbientNightColor = clr(53, 62, 70);
+    blizzard.mSunSunriseColor = clr(114, 128, 146);
+    blizzard.mSunDayColor = clr(163, 169, 183);
+    blizzard.mSunSunsetColor = clr(106, 114, 136);
+    blizzard.mSunNightColor = clr(57, 66, 74);
+    blizzard.mSunDiscSunsetColor = clr(128, 128, 128);
+    blizzard.mLandFogDayDepth = 2.8;
+    blizzard.mLandFogNightDepth = 3.0;
+    blizzard.mWindSpeed = 0.9;
+    blizzard.mCloudSpeed = 7.5;
+    blizzard.mGlareView = 0;
+    blizzard.mAmbientLoopSoundID = "BM Blizzard";
+    mWeatherSettings["blizzard"] = blizzard;
+    
+    setWeather("foggy", true);
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -151,7 +345,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     
-    const float fade_duration = 0.15 /*current.mTransitionDelta*/;
+    const float fade_duration = current.mTransitionDelta * 24.f;
     
     result.mNight = (mHour < 6.f+fade_duration || mHour > 20.f-fade_duration);
     
@@ -402,8 +596,6 @@ void WeatherManager::update(float duration)
                     else if (sound == 1) soundname = WeatherGlobals::mThunderSoundID1;
                     else if (sound == 2) soundname = WeatherGlobals::mThunderSoundID2;
                     else if (sound == 3) soundname = WeatherGlobals::mThunderSoundID3;
-                    #include <iostream>
-                    std::cout << "play sound" << std::endl;
                     mEnvironment->mSoundManager->playSound(soundname, 1.0, 1.0);
                     mThunderSoundDelay = 1000;
                 }

@@ -181,8 +181,7 @@ namespace MWWorld
         // Color modulation for the sun itself during sunset (not completely sure)
         Ogre::ColourValue mSunDiscSunsetColor;
         
-        // Duration of weather transition
-        // the INI value is 0.015, so I suppose this is measured in Morrowind-days? (0.015 days = 36 minutes in Morrowind)
+        // Duration of weather transition (in days)
         float mTransitionDelta;
         
         // No idea what this one is used for?
@@ -191,7 +190,7 @@ namespace MWWorld
         // Cloud animation speed multiplier
         float mCloudSpeed;
         
-        // Multiplier for clouds transparency?
+        // Multiplier for clouds transparency
         float mCloudsMaximumPercent;
         
         // Value between 0 and 1, defines the strength of the sun glare effect

@@ -75,10 +75,10 @@ namespace MWRender
             Phase_WaxingCrescent,
             Phase_WaxingHalf,
             Phase_WaxingGibbous,
-            Phase_WaningCrescent,
-            Phase_WaningHalf,
+            Phase_Full,
             Phase_WaningGibbous,
-            Phase_Full
+            Phase_WaningHalf,
+            Phase_WaningCrescent
         };
         
         enum Type
@@ -111,10 +111,10 @@ namespace MWRender
         
         void disable();
         
-        void setHour (double hour) {}
+        void setHour (double hour);
         ///< will be called even when sky is disabled.
         
-        void setDate (int day, int month) {}
+        void setDate (int day, int month);
         ///< will be called even when sky is disabled.
         
         int getMasserPhase() const;
@@ -159,6 +159,10 @@ namespace MWRender
         Ogre::Vector3 getRealSunPos();
         
     private:
+        float mHour;
+        int mDay;
+        int mMonth;
+    
         BillboardObject* mSun;
         BillboardObject* mSunGlare;
         Moon* mMasser;
