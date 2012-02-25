@@ -284,9 +284,25 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     mRootNode->setInheritOrientation(false);
     
     /// \todo preload all the textures and meshes that are used for sky rendering
-
-    mViewport->setBackgroundColour(ColourValue(0.87, 0.87, 0.87));
     
+    // Create overlay used for thunderstorm
+    MaterialPtr material = MaterialManager::getSingleton().create( "ThunderMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+    Pass* pass = material->getTechnique(0)->getPass(0);
+    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+    mThunderTextureUnit = pass->createTextureUnitState();
+    mThunderTextureUnit->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(1.f, 1.f, 1.f)); // always black colour    
+    mThunderTextureUnit->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 0.5f);
+    OverlayManager& ovm = OverlayManager::getSingleton();
+    mThunderOverlay = ovm.create( "ThunderOverlay" );
+    OverlayContainer* overlay_panel;
+    overlay_panel = (OverlayContainer*)ovm.createOverlayElement("Panel", "ThunderPanel");
+    overlay_panel->_setPosition(0, 0);
+    overlay_panel->_setDimensions(1, 1);
+    overlay_panel->setMaterialName( "ThunderMaterial" );
+    overlay_panel->show();
+    mThunderOverlay->add2D(overlay_panel);
+    mThunderOverlay->hide();
+        
     mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 0.4), mRootNode);
     mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode);
     mSunGlare->setRenderQueue(RENDER_QUEUE_SKIES_LATE);
@@ -294,22 +310,15 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     mSecunda = new Moon("textures\\tx_secunda_full.dds", 0.5, Vector3(0.4, -0.4, 0.5), mRootNode);
     mMasser->setType(Moon::Type_Masser);
     mSecunda->setType(Moon::Type_Secunda);
-    //mMasser->setVisibility(0.2);
-    //mSecunda->setVisibility(0.2);
-    mMasser->setVisible(false);
-    mSecunda->setVisible(false);
-        
+                
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
 
     // Stars
     /// \todo sky_night_02.nif (available in Bloodmoon)
-    /// \todo how to make a transition between day and night sky?
     MeshPtr mesh = NifOgre::NIFLoader::load("meshes\\sky_night_01.nif");        
     Entity* night1_ent = mSceneMgr->createEntity("meshes\\sky_night_01.nif");
     night1_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+1);
-    
-    ModVertexAlpha(night1_ent, 2);
-    
+        
     mAtmosphereNight = mRootNode->createChildSceneNode();
     mAtmosphereNight->attachObject(night1_ent);
     
@@ -326,7 +335,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
         mStarsMaterials[i] = mp;
     }
     
-   // Stars vertex shader
+    // Stars vertex shader
     HighLevelGpuProgramPtr vshader3 = mgr.createProgram("Stars_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
         "cg", GPT_VERTEX_PROGRAM);
     vshader3->setParameter("profiles", "vs_2_x arbvp1");
@@ -635,4 +644,15 @@ void SkyManager::setSunDirection(const Vector3& direction)
 {
     mSun->setPosition(direction);
     mSunGlare->setPosition(direction);
+}
+
+void SkyManager::setThunder(const float factor)
+{
+    if (factor > 0.f)
+    {
+        mThunderOverlay->show();
+        mThunderTextureUnit->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, factor*0.6);
+    }
+    else
+        mThunderOverlay->hide();
 }

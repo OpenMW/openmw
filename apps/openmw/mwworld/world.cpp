@@ -160,7 +160,7 @@ namespace MWWorld
         
         mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine, environment);
         
-        mWeatherManager = new MWWorld::WeatherManager(mRendering, this);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering, &environment);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 

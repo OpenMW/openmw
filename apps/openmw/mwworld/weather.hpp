@@ -11,7 +11,7 @@ namespace MWRender
 
 namespace MWWorld
 {
-    class World;
+    class Environment;
     
     /// Global weather manager properties (according to INI)
     struct WeatherGlobals
@@ -72,8 +72,18 @@ namespace MWWorld
         static const float mSunsetTime = 18;
         static const float mSunriseDuration = 2;
         static const float mSunsetDuration = 2;
+        
+        // morrowind sets these per-weather, but since they are only used by 'thunderstorm'
+        // weather setting anyway, we can just as well set them globally
+        static const float mThunderFrequency = .4;
+        static const float mThunderThreshold = 0.6;
+        static const float mThunderSoundDelay = 0.25;
+        static const std::string mThunderSoundID0;
+        static const std::string mThunderSoundID1;
+        static const std::string mThunderSoundID2;
+        static const std::string mThunderSoundID3;
     };
-    
+        
     /// Defines the actual weather that results from weather setting (see below), time of day and weather transition
     struct WeatherResult
     {
@@ -142,7 +152,7 @@ namespace MWWorld
                 mLandFogNightDepth;
         
         // Color modulation for the sun itself during sunset (not completely sure)
-        Ogre::ColourValue mSunDiscSunsetColour;
+        Ogre::ColourValue mSunDiscSunsetColor;
         
         // Duration of weather transition
         // the INI value is 0.015, so I suppose this is measured in Morrowind-days? (0.015 days = 36 minutes in Morrowind)
@@ -164,7 +174,8 @@ namespace MWWorld
         // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
         Ogre::String mAmbientLoopSoundID;
         
-        /// \todo rain, thunder, ashstorm...
+        // Rain sound effect
+        Ogre::String mRainLoopSoundID;
         
         /// \todo disease chance
     };
@@ -175,7 +186,7 @@ namespace MWWorld
     class WeatherManager
     {
     public:
-        WeatherManager(MWRender::RenderingManager*, MWWorld::World*);
+        WeatherManager(MWRender::RenderingManager*, MWWorld::Environment*);
         
         /**
          * Change the weather setting
@@ -201,7 +212,7 @@ namespace MWWorld
         int mDay, mMonth;
     
         MWRender::RenderingManager* mRendering;
-        MWWorld::World* mWorld;
+        MWWorld::Environment* mEnvironment;
         
         std::map<Ogre::String, Weather> mWeatherSettings;
                 
@@ -209,6 +220,11 @@ namespace MWWorld
         Ogre::String mNextWeather;
         
         float mRemainingTransitionTime;
+        
+        float mThunderFlash;
+        float mThunderChance;
+        float mThunderChanceNeeded;
+        float mThunderSoundDelay;
         
         WeatherResult transition(const float factor);
         WeatherResult getResult(const Ogre::String& weather);

@@ -19,11 +19,13 @@ namespace Ogre
     class SceneManager;
     class Entity;
     class BillboardSet;
+    class TextureUnitState;
+    class Overlay;
 }
 
 namespace MWRender
 {
-   class BillboardObject
+    class BillboardObject
     {
     public:
         BillboardObject(  const Ogre::String& textureName,
@@ -136,6 +138,8 @@ namespace MWRender
         
         void setSunDirection(const Ogre::Vector3& direction);
         
+        void setThunder(const float factor);
+        
         void setGlare(bool glare);
         Ogre::Vector3 getRealSunPos();
         
@@ -168,6 +172,9 @@ namespace MWRender
         float mStarsOpacity;
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
+        
+        Ogre::Overlay* mThunderOverlay;
+        Ogre::TextureUnitState* mThunderTextureUnit;
                 
         float mRemainingTransitionTime;
         

@@ -2,19 +2,30 @@
 #include "world.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwsound/soundmanager.hpp"
+
+#include <time.h>
+#include <stdlib.h>
 
 using namespace Ogre;
 using namespace MWWorld;
+using namespace MWSound;
 
 #define TRANSITION_TIME 10
 
 #define lerp(x, y) (x * (1-factor) + y * factor)
 
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, World* world) : 
-     mHour(14), mCurrentWeather("clear")
+const std::string WeatherGlobals::mThunderSoundID0 = "Thunder0";
+const std::string WeatherGlobals::mThunderSoundID1 = "Thunder1";
+const std::string WeatherGlobals::mThunderSoundID2 = "Thunder2";
+const std::string WeatherGlobals::mThunderSoundID3 = "Thunder3";
+
+WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environment* env) : 
+     mHour(14), mCurrentWeather("clear"), mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50),
+     mThunderSoundDelay(0)
 {
     mRendering = rendering;
-    mWorld = world;
+    mEnvironment = env;
     
     #define clr(r,g,b) ColourValue(r/255.f, g/255.f, b/255.f)
     
@@ -22,7 +33,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, World* wor
     Weather clear;
     clear.mCloudTexture = "tx_sky_clear.dds";
     clear.mCloudsMaximumPercent = 1.0;
-    clear.mTransitionDelta = 0.15;
+    clear.mTransitionDelta = 0.015;
     clear.mSkySunriseColor = clr(118, 141, 164);
     clear.mSkyDayColor = clr(95, 135, 203);
     clear.mSkySunsetColor = clr(56, 89, 129);
@@ -39,19 +50,18 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, World* wor
     clear.mSunDayColor = clr(255, 252, 238);
     clear.mSunSunsetColor = clr(255, 115, 79);
     clear.mSunNightColor = clr(59, 97, 176);
-    clear.mSunDiscSunsetColour = clr(255, 189, 157);
+    clear.mSunDiscSunsetColor = clr(255, 189, 157);
     clear.mLandFogDayDepth = 0.69;
     clear.mLandFogNightDepth = 0.69;
     clear.mWindSpeed = 0.1;
     clear.mCloudSpeed = 1.25;
     clear.mGlareView = 1.0;
-    
     mWeatherSettings["clear"] = clear;
     
     Weather cloudy;
     cloudy.mCloudTexture = "tx_sky_cloudy.dds";
     cloudy.mCloudsMaximumPercent = 1.0;
-    cloudy.mTransitionDelta = 0.15;
+    cloudy.mTransitionDelta = 0.015;
     cloudy.mSkySunriseColor = clr(126, 158, 173);
     cloudy.mSkyDayColor = clr(117, 160, 215);
     cloudy.mSkySunsetColor = clr(111, 114, 159);
@@ -68,14 +78,41 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, World* wor
     cloudy.mSunDayColor = clr(255, 236, 221);
     cloudy.mSunSunsetColor = clr(255, 89, 00);
     cloudy.mSunNightColor = clr(77, 91, 124);
-    cloudy.mSunDiscSunsetColour = clr(255, 202, 179);
+    cloudy.mSunDiscSunsetColor = clr(255, 202, 179);
     cloudy.mLandFogDayDepth = 0.72;
     cloudy.mLandFogNightDepth = 0.72;
     cloudy.mWindSpeed = 0.2;
     cloudy.mCloudSpeed = 2;
     cloudy.mGlareView = 1.0;
-    
     mWeatherSettings["cloudy"] = cloudy;
+    
+    Weather thunderstorm;
+    thunderstorm.mCloudTexture = "tx_sky_thunder.dds";
+    thunderstorm.mCloudsMaximumPercent = 0.66;
+    thunderstorm.mTransitionDelta = 0.03;
+    thunderstorm.mSkySunriseColor = clr(35, 36, 39);
+    thunderstorm.mSkyDayColor = clr(97, 104, 115);
+    thunderstorm.mSkySunsetColor = clr(35, 36, 39);
+    thunderstorm.mSkyNightColor = clr(19, 20, 22);
+    thunderstorm.mFogSunriseColor = clr(70, 74, 85);
+    thunderstorm.mFogDayColor = clr(97, 104, 115);
+    thunderstorm.mFogSunsetColor = clr(70, 74, 85);
+    thunderstorm.mFogNightColor = clr(19, 20, 22);
+    thunderstorm.mAmbientSunriseColor = clr(54, 54, 54);
+    thunderstorm.mAmbientDayColor = clr(90, 90, 90);
+    thunderstorm.mAmbientSunsetColor = clr(54, 54, 54);
+    thunderstorm.mAmbientNightColor = clr(49, 51, 54);
+    thunderstorm.mSunSunriseColor = clr(91, 99, 122);
+    thunderstorm.mSunDayColor = clr(138, 144, 155);
+    thunderstorm.mSunSunsetColor = clr(96, 101, 117);
+    thunderstorm.mSunNightColor = clr(55, 76, 110);
+    thunderstorm.mSunDiscSunsetColor = clr(128, 128, 128);
+    thunderstorm.mLandFogDayDepth = 1;
+    thunderstorm.mLandFogNightDepth = 1.15;
+    thunderstorm.mWindSpeed = 0.5;
+    thunderstorm.mCloudSpeed = 3;
+    thunderstorm.mGlareView = 0;
+    mWeatherSettings["thunderstorm"] = thunderstorm;
     
     /*
     Weather overcast;
@@ -84,7 +121,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, World* wor
     mWeatherSettings["overcast"] = overcast;
     */
     
-    setWeather("clear", true);
+    setWeather("thunderstorm", true);
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -245,26 +282,90 @@ WeatherResult WeatherManager::transition(float factor)
 
 void WeatherManager::update(float duration)
 {
-    WeatherResult result;
-    
-    if (mNextWeather != "")
+    if (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior())
     {
-        mRemainingTransitionTime -= duration;
-        if (mRemainingTransitionTime < 0)
+        WeatherResult result;
+        
+        if (mNextWeather != "")
         {
-            mCurrentWeather = mNextWeather;
-            mNextWeather = "";
+            mRemainingTransitionTime -= duration;
+            if (mRemainingTransitionTime < 0)
+            {
+                mCurrentWeather = mNextWeather;
+                mNextWeather = "";
+            }
         }
-    }
-    
-    if (mNextWeather != "")
-        result = transition(1-(mRemainingTransitionTime/TRANSITION_TIME));
-    else
-        result = getResult(mCurrentWeather);
-    
-    
-    if (mWorld->isCellExterior() || mWorld->isCellQuasiExterior())
-    {
+        
+        if (mNextWeather != "")
+            result = transition(1-(mRemainingTransitionTime/TRANSITION_TIME));
+        else
+            result = getResult(mCurrentWeather);
+        
+        // disable sun during night
+        if (mHour >= WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration
+            || mHour <= WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration)
+            mRendering->getSkyManager()->sunDisable();
+        else
+        {
+            // during day, calculate sun angle
+            float height = 1-std::abs(((mHour-13)/7.f));
+            int facing = mHour > 13.f ? 1 : -1;
+            Vector3 final(
+                (1-height)*facing, 
+                (1-height)*facing, 
+                height);
+            mRendering->setSunDirection(final);
+            
+            mRendering->getSkyManager()->sunEnable();
+        }
+        
+        if (mCurrentWeather == "thunderstorm" && mNextWeather == "")
+        {
+            if (mThunderFlash > 0)
+            {
+                // play the sound after a delay
+                mThunderSoundDelay -= duration;
+                if (mThunderSoundDelay <= 0)
+                {
+                    // pick a random sound
+                    int sound = rand() % 4;
+                    std::string soundname;
+                    if (sound == 0) soundname = WeatherGlobals::mThunderSoundID0;
+                    else if (sound == 1) soundname = WeatherGlobals::mThunderSoundID1;
+                    else if (sound == 2) soundname = WeatherGlobals::mThunderSoundID2;
+                    else if (sound == 3) soundname = WeatherGlobals::mThunderSoundID3;
+                    #include <iostream>
+                    std::cout << "play sound" << std::endl;
+                    mEnvironment->mSoundManager->playSound(soundname, 1.0, 1.0);
+                    mThunderSoundDelay = 1000;
+                }
+                
+                mThunderFlash -= duration;
+                if (mThunderFlash > 0)
+                    mRendering->getSkyManager()->setThunder( mThunderFlash / WeatherGlobals::mThunderThreshold );
+                else
+                {
+                    srand(time(NULL));
+                    mThunderChanceNeeded = rand() % 100;
+                    mThunderChance = 0;
+                    mRendering->getSkyManager()->setThunder( 0.f );
+                }
+            }
+            else
+            {
+                // no thunder active
+                mThunderChance += duration*4; // chance increases by 4 percent every second
+                if (mThunderChance >= mThunderChanceNeeded)
+                {
+                    mThunderFlash = WeatherGlobals::mThunderThreshold;
+                    
+                    mRendering->getSkyManager()->setThunder( mThunderFlash / WeatherGlobals::mThunderThreshold );
+                    
+                    mThunderSoundDelay = WeatherGlobals::mThunderSoundDelay;
+                }
+            }
+        }
+        
         mRendering->setAmbientColour(result.mAmbientColor);
         mRendering->sunEnable();
         mRendering->setSunColour(result.mSunColor);
@@ -276,24 +377,7 @@ void WeatherManager::update(float duration)
     {
         mRendering->sunDisable();
         mRendering->skyDisable();
-    }
-    
-    // disable sun during night
-    if (mHour >= WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration
-        || mHour <= WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration)
-        mRendering->getSkyManager()->sunDisable();
-    else
-    {
-        // during day, calculate sun angle
-        float height = 1-std::abs(((mHour-13)/7.f));
-        int facing = mHour > 13.f ? 1 : -1;
-        Vector3 final(
-            (1-height)*facing, 
-            (1-height)*facing, 
-            height);
-        mRendering->setSunDirection(final);
-        
-        mRendering->getSkyManager()->sunEnable();
+        mRendering->getSkyManager()->setThunder(0.f);
     }
 }
 
