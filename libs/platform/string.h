@@ -3,7 +3,7 @@
 #define _STRING_WRAPPER_H
 
 #include <string.h>
-#if defined(__APPLE__) || defined(__MINGW32__)
+#if (defined(__APPLE__) && __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 1070) || defined(__MINGW32__)
 // need our own implementation of strnlen
 static size_t strnlen(const char *s, size_t n)
 {
