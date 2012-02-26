@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <boost/algorithm/string.hpp>   
+
 using namespace Ogre;
 using namespace MWWorld;
 using namespace MWSound;
@@ -483,54 +485,60 @@ void WeatherManager::update(float duration)
     if (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior())
     {
         std::string regionstr = mEnvironment->mWorld->getPlayer().getPlayer().getCell()->cell->region;
+        boost::algorithm::to_lower(regionstr);
         
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
             mCurrentRegion = regionstr;
             mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*60.f;
             
-            // get weather probabilities for the current region
-            const ESM::Region *region = mEnvironment->mWorld->getStore().regions.find (regionstr);
-            
-            float clear = region->data.clear/255.f;
-            float cloudy = region->data.cloudy/255.f;
-            float foggy = region->data.foggy/255.f;
-            float overcast = region->data.overcast/255.f;
-            float rain = region->data.rain/255.f;
-            float thunder = region->data.thunder/255.f;
-            float ash = region->data.ash/255.f;
-            float blight = region->data.blight/255.f;
-            float snow = region->data.a/255.f;
-            float blizzard = region->data.b/255.f;
-            
-            // re-scale to 100 percent
-            const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
-                        
-            srand(time(NULL));
-            float random = ((rand()%100)/100.f) * total;
-            
             std::string weather;
             
-            if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                weather = "blizzard";
-            else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                weather = "snow";
-            else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
-                weather = "blight";
-            else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
-                weather = "ashstorm";
-            else if (random >= rain+overcast+foggy+cloudy+clear)
-                weather = "thunderstorm";
-            else if (random >= overcast+foggy+cloudy+clear)
-                weather = "rain";
-            else if (random >= foggy+cloudy+clear)
-                weather = "overcast";
-            else if (random >= cloudy+clear)
-                weather = "foggy";
-            else if (random >= clear)
-                weather = "cloudy";
+            if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
+                weather = mRegionOverrides[regionstr];
             else
-                weather = "clear";
+            {
+                // get weather probabilities for the current region
+                const ESM::Region *region = mEnvironment->mWorld->getStore().regions.find (regionstr);
+                
+                float clear = region->data.clear/255.f;
+                float cloudy = region->data.cloudy/255.f;
+                float foggy = region->data.foggy/255.f;
+                float overcast = region->data.overcast/255.f;
+                float rain = region->data.rain/255.f;
+                float thunder = region->data.thunder/255.f;
+                float ash = region->data.ash/255.f;
+                float blight = region->data.blight/255.f;
+                float snow = region->data.a/255.f;
+                float blizzard = region->data.b/255.f;
+                
+                // re-scale to 100 percent
+                const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
+                            
+                srand(time(NULL));
+                float random = ((rand()%100)/100.f) * total;
+                                
+                if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                    weather = "blizzard";
+                else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                    weather = "snow";
+                else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
+                    weather = "blight";
+                else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
+                    weather = "ashstorm";
+                else if (random >= rain+overcast+foggy+cloudy+clear)
+                    weather = "thunderstorm";
+                else if (random >= overcast+foggy+cloudy+clear)
+                    weather = "rain";
+                else if (random >= foggy+cloudy+clear)
+                    weather = "overcast";
+                else if (random >= cloudy+clear)
+                    weather = "foggy";
+                else if (random >= clear)
+                    weather = "cloudy";
+                else
+                    weather = "clear";
+            }
             
             setWeather(weather, false);
             /*
@@ -755,4 +763,33 @@ unsigned int WeatherManager::getWeatherID() const
     
     else
         return 0;
+}
+
+void WeatherManager::changeWeather(const std::string& region, const unsigned int id)
+{
+    std::string weather;
+    if (id==0)
+        weather = "clear";
+    else if (id==1)
+        weather = "cloudy";
+    else if (id==2)
+        weather = "foggy";
+    else if (id==3)
+        weather = "overcast";
+    else if (id==4)
+        weather = "rain";
+    else if (id==5)
+        weather = "thunder";
+    else if (id==6)
+        weather = "ashstorm";
+    else if (id==7)
+        weather = "blight";
+    else if (id==8)
+        weather = "snow";
+    else if (id==9)
+        weather = "blizzard";
+    else
+        weather = "clear";
+
+    mRegionOverrides[region] = weather;
 }

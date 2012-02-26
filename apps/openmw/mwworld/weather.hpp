@@ -112,14 +112,14 @@ namespace MWWorld
         static const std::string mThunderSoundID2;
         static const std::string mThunderSoundID3;
     };
-        
+
     /// Defines the actual weather that results from weather setting (see below), time of day and weather transition
     struct WeatherResult
     {
         Ogre::String mCloudTexture;
         Ogre::String mNextCloudTexture;
         float mCloudBlendFactor;
-                
+        
         Ogre::ColourValue mFogColor;
         
         Ogre::ColourValue mAmbientColor;
@@ -217,13 +217,11 @@ namespace MWWorld
         WeatherManager(MWRender::RenderingManager*, MWWorld::Environment*);
         
         /**
-         * Change the weather setting
-         * @param weather
-         *      new weather setting to use
-         * @param instant
-         *      if true, the weather changes instantly. if false, it slowly starts transitioning.
+         * Change the weather in the specified region
+         * @param region that should be changed
+         * @param ID of the weather setting to shift to
          */
-        void setWeather(const Ogre::String& weather, bool instant=false);
+        void changeWeather(const std::string& region, const unsigned int id);
         
         /**
          * Per-frame update
@@ -240,12 +238,14 @@ namespace MWWorld
     private:
         float mHour;
         int mDay, mMonth;
-    
+        
         MWRender::RenderingManager* mRendering;
         MWWorld::Environment* mEnvironment;
         
         std::map<Ogre::String, Weather> mWeatherSettings;
-                
+        
+        std::map<std::string, std::string> mRegionOverrides;
+        
         Ogre::String mCurrentWeather;
         Ogre::String mNextWeather;
         
@@ -256,7 +256,7 @@ namespace MWWorld
         float mWeatherUpdateTime;
         
         float mRemainingTransitionTime;
-                
+        
         float mThunderFlash;
         float mThunderChance;
         float mThunderChanceNeeded;
@@ -264,6 +264,8 @@ namespace MWWorld
         
         WeatherResult transition(const float factor);
         WeatherResult getResult(const Ogre::String& weather);
+        
+        void setWeather(const Ogre::String& weather, bool instant=false);
     };
 }
 

@@ -164,6 +164,8 @@ namespace MWWorld
             bool toggleSky();
             ///< \return Resulting mode
             
+            void changeWeather(const std::string& region, const unsigned int id);
+            
             int getCurrentWeather() const;
 
             int getMasserPhase() const;
