@@ -733,7 +733,6 @@ void WeatherManager::setHour(const float hour)
     */
     
     mHour = hour;
-    
 }
 
 void WeatherManager::setDate(const int day, const int month)

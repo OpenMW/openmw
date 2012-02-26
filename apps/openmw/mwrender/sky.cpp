@@ -599,7 +599,11 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     
     if (mCloudColour != weather.mSunColor)
     {
-        mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSunColor + weather.mAmbientColor);
+        ColourValue clr( weather.mSunColor.r*0.7 + weather.mAmbientColor.r*0.7,
+                        weather.mSunColor.g*0.7 + weather.mAmbientColor.g*0.7,
+                        weather.mSunColor.b*0.7 + weather.mAmbientColor.b*0.7);
+        
+        mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(clr);
         mCloudColour = weather.mSunColor;
     }
     
