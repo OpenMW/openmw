@@ -39,6 +39,10 @@ namespace MWRender
         void setPosition(const Ogre::Vector3& pPosition);
         void setVisible(const bool visible);
         void setRenderQueue(unsigned int id);
+        void setSize(const float size);
+        Ogre::Vector3 getPosition() const;
+        
+        void setVisibility(const float visibility);
         
         Ogre::SceneNode* getNode();
         
@@ -65,9 +69,6 @@ namespace MWRender
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode
                     );
-    
-        void setVisibility(const float visibility);
-        ///< set the transparency factor for this moon
                         
         enum Phase
         {
@@ -94,7 +95,6 @@ namespace MWRender
         unsigned int getPhaseInt() const;
     
     private:
-        float mVisibility;
         Type mType;
         Phase mPhase;
     };
@@ -196,6 +196,8 @@ namespace MWRender
         Ogre::TextureUnitState* mThunderTextureUnit;
                 
         float mRemainingTransitionTime;
+        
+        float mGlareFade;
         
         void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
         

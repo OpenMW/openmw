@@ -37,6 +37,16 @@ void BillboardObject::setVisible(const bool visible)
     mNode->setVisible(visible);
 }
 
+void BillboardObject::setSize(const float size)
+{
+    mNode->setScale(size, size, size);
+}
+
+void BillboardObject::setVisibility(const float visibility)
+{
+    mMaterial->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, visibility);
+}
+
 void BillboardObject::setPosition(const Vector3& pPosition)
 {
     Vector3 normalised = pPosition.normalisedCopy();
@@ -45,6 +55,11 @@ void BillboardObject::setPosition(const Vector3& pPosition)
     mBBSet->setCommonDirection( -normalised );
 
     mNode->setPosition(finalPosition);
+}
+
+Vector3 BillboardObject::getPosition() const
+{
+    return mNode->getPosition();
 }
 
 void BillboardObject::setColour(const ColourValue& pColour)
@@ -146,15 +161,16 @@ Moon::Moon( const String& textureName,
     "   in float2 uv : TEXCOORD0, \n"
     "	out float4 oColor    : COLOR, \n"
     "   uniform sampler2D texture : TEXUNIT0, \n"
-    "   uniform float visibilityFactor, \n"
+    "   uniform float4 diffuse, \n"
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
     "   float4 tex = tex2D(texture, uv); \n"
-    "   oColor = float4(emissive.xyz,1) * tex2D(texture, uv) * float4(1,1,1,visibilityFactor); \n"
+    "   oColor = float4(emissive.xyz,1) * tex2D(texture, uv) * float4(1,1,1,diffuse.a); \n"
     "}";
     fshader->setSource(outStream2.str());
     fshader->load();
+    fshader->getDefaultParameters()->setNamedAutoConstant("diffuse", GpuProgramParameters::ACT_SURFACE_DIFFUSE_COLOUR);
     fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
     
@@ -210,15 +226,6 @@ unsigned int Moon::getPhaseInt() const
     else if (mPhase == Moon::Phase_Full)             return 4;
     
     return 0;
-}
-
-void Moon::setVisibility(const float visibility)
-{
-    if (mVisibility != visibility)
-    {
-        mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("visibilityFactor", Real(visibility));
-        mVisibility = visibility;
-    }
 }
 
 void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
@@ -277,7 +284,7 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
 }
 
 SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
-    mGlareEnabled(false)
+    mGlareFade(0), mGlareEnabled(false)
 {
     mViewport = pCamera->getViewport();
     mSceneMgr = pMwRoot->getCreator();
@@ -541,10 +548,36 @@ void SkyManager::update(float duration)
     // UV Scroll the clouds
     mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", 1);
     
+    /// \todo improve this
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
     mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
     
-    mSunGlare->setVisible(mGlareEnabled && mSunEnabled);
+    // increase the strength of the sun glare effect depending 
+    // on how directly the player is looking at the sun
+    if (mSunEnabled)
+    {
+        Vector3 sun = mSunGlare->getPosition();
+        sun = Vector3(sun.x, sun.z, -sun.y);
+        Vector3 cam = mViewport->getCamera()->getRealDirection();
+        const Degree angle = sun.angleBetween( cam );
+        float val = 1- (angle.valueDegrees() / 180.f);
+        val = (val*val*val*val)*2;
+        
+        if (mGlareEnabled)
+        {
+            mGlareFade += duration*3;
+            if (mGlareFade > 1) mGlareFade = 1;
+        }
+        else
+        {
+            mGlareFade -= duration*3;
+            if (mGlareFade < 0.3) mGlareFade = 0;
+        }
+        
+        mSunGlare->setSize(val * (mGlareFade));
+    }
+    
+    mSunGlare->setVisible(mGlareFade>0 && mSunEnabled);
     mSun->setVisible(mSunEnabled);
     mMasser->setVisible(mMasserEnabled);
     mSecunda->setVisible(mSecundaEnabled);
@@ -627,6 +660,15 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
             mStarsMaterials[i]->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, weather.mNightFade);
         mStarsOpacity = weather.mNightFade;
     }
+
+    float strength;
+    float timeofday_angle = std::abs(mSunGlare->getPosition().z/mSunGlare->getPosition().length());
+    if (timeofday_angle <= 0.44)
+        strength = timeofday_angle/0.44f;
+    else
+        strength = 1.f;
+    
+    mSunGlare->setVisibility(weather.mGlareView * strength);
     
     mAtmosphereNight->setVisible(weather.mNight && mEnabled);
 }

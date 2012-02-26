@@ -349,6 +349,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mCloudSpeed = current.mCloudSpeed;
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+    result.mSunColor = current.mSunDiscSunsetColor;
     
     const float fade_duration = current.mTransitionDelta * 24.f;
     
