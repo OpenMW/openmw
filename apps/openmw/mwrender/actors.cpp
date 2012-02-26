@@ -99,12 +99,14 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
         mRend.getScene()->destroySceneNode(base);
         base = 0;
     }
-	for(std::map<MWWorld::Ptr, Animation*>::iterator iter = mAllActors.begin(); iter != mAllActors.end(); iter++)
+	for(std::map<MWWorld::Ptr, Animation*>::iterator iter = mAllActors.begin(); iter != mAllActors.end(); )
 	{
 		if(iter->first.getCell() == store){
 			delete iter->second;
-			mAllActors.erase(iter);
+			iter = mAllActors.erase(iter);
 		}
+        else
+            ++iter;
 	}
 
 }
