@@ -535,23 +535,25 @@ int SkyManager::getSecundaPhase() const
 }
 
 void SkyManager::update(float duration)
-{    
+{
+    if (!mEnabled) return;
+    
     // UV Scroll the clouds
     mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", 1);
     
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
     mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
+    
+    mSunGlare->setVisible(mGlareEnabled && mSunEnabled);
+    mSun->setVisible(mSunEnabled);
+    mMasser->setVisible(mMasserEnabled);
+    mSecunda->setVisible(mSecundaEnabled);
 }
 
 void SkyManager::enable()
 {
     mRootNode->setVisible(true);
     mEnabled = true;
-    
-    mSunGlare->setVisible(mGlareEnabled && mSunEnabled);
-    mSun->setVisible(mSunEnabled);
-    mMasser->setVisible(mMasserEnabled);
-    mSecunda->setVisible(mSecundaEnabled);
 }
 
 void SkyManager::disable()

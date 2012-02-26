@@ -710,7 +710,6 @@ void WeatherManager::update(float duration)
         mRendering->sunEnable();
         mRendering->setSunColour(result.mSunColor);
         
-        mRendering->skyEnable();
         mRendering->getSkyManager()->setWeather(result);
     }
     else

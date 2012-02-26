@@ -140,12 +140,16 @@ namespace MWWorld
 
     void World::adjustSky()
     {
-        if (mSky)
+        if (mSky && (isCellExterior() || isCellQuasiExterior()))
         {
             mRendering->skySetHour (mGlobalVariables->getFloat ("gamehour"));
             mRendering->skySetDate (mGlobalVariables->getInt ("day"),
                 mGlobalVariables->getInt ("month"));
+
+            mRendering->getSkyManager()->enable();
         }
+        else
+            mRendering->getSkyManager()->disable();
     }
 
     World::World (OEngine::Render::OgreRenderer& renderer,
@@ -153,7 +157,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
+      mSky (true), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
