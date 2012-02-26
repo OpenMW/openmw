@@ -99,16 +99,15 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
         mRend.getScene()->destroySceneNode(base);
         base = 0;
     }
-	for(std::map<MWWorld::Ptr, Animation*>::iterator iter = mAllActors.begin(); iter != mAllActors.end(); )
-	{
-		if(iter->first.getCell() == store){
-			delete iter->second;
-			iter = mAllActors.erase(iter);
-		}
+    for(std::map<MWWorld::Ptr, Animation*>::iterator iter = mAllActors.begin(); iter != mAllActors.end(); )
+    {
+        if(iter->first.getCell() == store){
+            delete iter->second;
+            mAllActors.erase(iter++);
+        }
         else
             ++iter;
-	}
-
+    }
 }
 
 void Actors::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number){
