@@ -354,6 +354,8 @@ WeatherResult WeatherManager::getResult(const String& weather)
     
     result.mNight = (mHour < 6.f+fade_duration || mHour > 20.f-fade_duration);
     
+    result.mFogDepth = result.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
+    
     // night
     if (mHour <= (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration)
         || mHour >= (WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration))
@@ -569,6 +571,8 @@ void WeatherManager::update(float duration)
         else
             result = getResult(mCurrentWeather);
         
+        mRendering->configureFog(result.mFogDepth, result.mFogColor);
+        
         // disable sun during night
         if (mHour >= WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration
             || mHour <= WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration)
@@ -699,6 +703,8 @@ void WeatherManager::update(float duration)
                 }
             }
         }
+        else
+            mRendering->getSkyManager()->setThunder(0.f);
         
         mRendering->setAmbientColour(result.mAmbientColor);
         mRendering->sunEnable();

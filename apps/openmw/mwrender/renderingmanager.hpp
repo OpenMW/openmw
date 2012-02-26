@@ -102,9 +102,13 @@ class RenderingManager: private RenderingInterface {
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
     void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
+    
     /// configure fog according to cell
     void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
-
+    
+    /// configure fog manually
+    void configureFog(const float density, const Ogre::ColourValue& colour);
+    
     void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
         int number = 1);
     ///< Run animation for a MW-reference. Calls to this function for references that are currently not

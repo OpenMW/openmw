@@ -623,8 +623,6 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     }
     
     mAtmosphereNight->setVisible(weather.mNight && mEnabled);
-
-    mViewport->setBackgroundColour(weather.mFogColor);
 }
 
 void SkyManager::setGlare(bool glare)

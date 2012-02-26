@@ -204,13 +204,21 @@ void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
   Ogre::ColourValue color;
   color.setAsABGR (mCell.cell->ambi.fog);
 
-  float high = /*4500 + 9000 * */(1-mCell.cell->ambi.fogDensity);
-  float low = 200;
-
-  mRendering.getScene()->setFog (FOG_LINEAR, color, 0, low, high);
-  mRendering.getCamera()->setFarClipDistance (high + 10);
-  mRendering.getViewport()->setBackgroundColour (color);
+  configureFog(mCell.cell->ambi.fogDensity, color);
 }
+
+void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
+{  
+  /// \todo make the viewing distance and fog start/end configurable
+  float low = 3000 / density;
+  float high = 6200 / density;
+    
+  mRendering.getScene()->setFog (FOG_LINEAR, colour, 0, low, high);
+  
+  mRendering.getCamera()->setFarClipDistance ( high );
+  mRendering.getViewport()->setBackgroundColour (colour);
+}
+
 
 void RenderingManager::setAmbientMode()
 {
