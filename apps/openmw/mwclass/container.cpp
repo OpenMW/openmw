@@ -99,8 +99,9 @@ namespace MWClass
             else
             {
                 // Trap activation goes here
-                std::cout << "Trapped with: " << ptr.getCellRef().trap << std::endl;
+                std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
                 environment.mSoundManager->playSound(trapActivationSound, 1.0, 1.0);
+                ptr.getCellRef().trap = "";
                 return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
             }
         }

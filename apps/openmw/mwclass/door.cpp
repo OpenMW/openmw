@@ -66,6 +66,7 @@ namespace MWClass
         const std::string &openSound = ref->base->openSound;
         //const std::string &closeSound = ref->base->closeSound;
         const std::string lockedSound = "LockedDoor";
+        const std::string trapActivationSound = "Disarm Trap Fail";
 
         if (ptr.getCellRef().lockLevel>0)
         {
@@ -76,7 +77,14 @@ namespace MWClass
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
 
-        // TODO check trap
+        if(!ptr.getCellRef().trap.empty())
+        {
+            // Trap activation
+            std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
+            environment.mSoundManager->playSound(trapActivationSound, 1.0, 1.0);
+            ptr.getCellRef().trap = "";
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+        }
 
         if (ref->ref.teleport)
         {
@@ -99,6 +107,9 @@ namespace MWClass
         {
             // animated door
             // TODO return action for rotating the door
+
+            // This is a little pointless, but helps with testing
+            environment.mSoundManager->playSound(openSound, 1.0, 1.0);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
     }
