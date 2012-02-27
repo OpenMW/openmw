@@ -276,7 +276,7 @@ namespace MWRender{
 						rotmult = bonePtr->getOrientation();
 						scale = bonePtr->getScale().x;
 						boneSequenceIter++;
-						std::cout << "Entering\n";
+						
 					    for(; boneSequenceIter != boneSequence.end(); boneSequenceIter++)
 					    {
 							if(creaturemodel->getSkeleton()->hasBone(*boneSequenceIter)){
