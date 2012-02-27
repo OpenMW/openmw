@@ -14,6 +14,8 @@
 
 #include "../mwrender/objects.hpp"
 
+#include "../mwsound/soundmanager.hpp"
+
 namespace MWClass
 {
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -61,11 +63,16 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
             ptr.get<ESM::Door>();
 
+        const std::string &openSound = ref->base->openSound;
+        //const std::string &closeSound = ref->base->closeSound;
+        const std::string lockedSound = "LockedDoor";
+
         if (ptr.getCellRef().lockLevel>0)
         {
             // TODO check for key
             // TODO report failure to player (message, sound?). Look up behaviour of original MW.
             std::cout << "Locked!" << std::endl;
+            environment.mSoundManager->playSound(lockedSound, 1.0, 1.0);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
 
@@ -77,6 +84,7 @@ namespace MWClass
             if (environment.mWorld->getPlayer().getPlayer()==actor)
             {
                 // the player is using the door
+                environment.mSoundManager->playSound(openSound, 1.0, 1.0);
                 return boost::shared_ptr<MWWorld::Action> (
                     new MWWorld::ActionTeleportPlayer (ref->ref.destCell, ref->ref.doorDest));
             }
