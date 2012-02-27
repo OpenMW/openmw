@@ -20,6 +20,10 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
+            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+                const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
+            ///< Generate action for activation
+
             virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
