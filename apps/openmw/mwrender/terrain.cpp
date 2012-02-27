@@ -1,10 +1,12 @@
 #include <OgreTerrain.h>
 #include <OgreTerrainGroup.h>
-#include <OgreTerrainMaterialGeneratorA.h>
 
+#include "terrainmaterial.hpp"
 #include "terrain.hpp"
 
 #include "components/esm/loadland.hpp"
+
+using namespace Ogre;
 
 namespace MWRender
 {
@@ -18,15 +20,23 @@ namespace MWRender
         mTerrainGlobals->setMaxPixelError(8);
         mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 1024 : 256);
 
+        Ogre::TerrainMaterialGeneratorPtr matGen;
+        TerrainMaterialGeneratorB* matGenP = new TerrainMaterialGeneratorB();
+        matGen.bind(matGenP);
+        mTerrainGlobals->setDefaultMaterialGenerator(matGen);
+
         Ogre::TerrainMaterialGenerator::Profile* const activeProfile =
             mTerrainGlobals->getDefaultMaterialGenerator()
                            ->getActiveProfile();
-        Ogre::TerrainMaterialGeneratorA::SM2Profile* matProfile =
-            static_cast<Ogre::TerrainMaterialGeneratorA::SM2Profile*>(activeProfile);
+        TerrainMaterialGeneratorB::SM2Profile* matProfile =
+            static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         matProfile->setLightmapEnabled(false);
         matProfile->setReceiveDynamicShadowsEnabled(false);
-
+        matProfile->setLayerNormalMappingEnabled(false);
+        //matProfile->setLayerParallaxMappingEnabled(false);
+        matProfile->setLayerSpecularMappingEnabled(false);
+        
         mLandSize = ESM::Land::LAND_SIZE;
         mRealSize = ESM::Land::REAL_SIZE;
         if ( SPLIT_TERRAIN )
