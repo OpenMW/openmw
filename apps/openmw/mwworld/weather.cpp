@@ -328,9 +328,12 @@ void WeatherManager::setWeather(const String& weather, bool instant)
     }
     else
     {
-        // if there's another transition that hasn't finished yet, just apply it immediately
         if (mNextWeather != "")
-            mCurrentWeather = mNextWeather;
+        {
+            // transition more than 50% finished?
+            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60) <= 0.5)
+                mCurrentWeather = mNextWeather;
+        }
             
         mNextWeather = weather;
         mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60;
