@@ -31,10 +31,10 @@ namespace MWRender
         TerrainMaterialGeneratorB::SM2Profile* matProfile =
             static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
-        matProfile->setLightmapEnabled(false);
+        matProfile->setLightmapEnabled(false); // this doesn't disable the lightmap, although it should ??
         matProfile->setReceiveDynamicShadowsEnabled(false);
         matProfile->setLayerNormalMappingEnabled(false);
-        //matProfile->setLayerParallaxMappingEnabled(false);
+        matProfile->setLayerParallaxMappingEnabled(false);
         matProfile->setLayerSpecularMappingEnabled(false);
         
         mLandSize = ESM::Land::LAND_SIZE;
@@ -195,8 +195,8 @@ namespace MWRender
         //have a base texture for now, but this is probably not needed on most cells
         terrainData->layerList.resize(1);
         terrainData->layerList[0].worldSize = 256;
-        terrainData->layerList[0].textureNames.push_back("textures\\_land_default.dds");
-        terrainData->layerList[0].textureNames.push_back("textures\\_land_default.dds");
+        terrainData->layerList[0].textureNames.push_back("textures\\_land_default.dds"); // diffuseSpec
+        //terrainData->layerList[0].textureNames.push_back("textures\\_land_default.dds"); // normalHeight
 
         for ( int y = fromY - 1; y < fromY + size + 1; y++ )
         {
@@ -230,7 +230,7 @@ namespace MWRender
 
                     //Normal map. This should be removed but it would require alterations to
                     //the material generator. Another option would be to use a 1x1 blank texture
-                    terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
+                    //terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
 
                     indexes[ltexIndex] = position;
                 }

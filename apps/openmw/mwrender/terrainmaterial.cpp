@@ -46,16 +46,16 @@ namespace Ogre
 		// in the albedo texture to store specular reflection
 		// similarly we double-up the normal and height (for parallax)
 		mLayerDecl.samplers.push_back(TerrainLayerSampler("albedo_specular", PF_BYTE_RGBA));
-		mLayerDecl.samplers.push_back(TerrainLayerSampler("normal_height", PF_BYTE_RGBA));
+		//mLayerDecl.samplers.push_back(TerrainLayerSampler("normal_height", PF_BYTE_RGBA));
 		
 		mLayerDecl.elements.push_back(
 			TerrainLayerSamplerElement(0, TLSS_ALBEDO, 0, 3));
-		mLayerDecl.elements.push_back(
-			TerrainLayerSamplerElement(0, TLSS_SPECULAR, 3, 1));
-		mLayerDecl.elements.push_back(
-			TerrainLayerSamplerElement(1, TLSS_NORMAL, 0, 3));
-		mLayerDecl.elements.push_back(
-			TerrainLayerSamplerElement(1, TLSS_HEIGHT, 3, 1));
+		//mLayerDecl.elements.push_back(
+		//	TerrainLayerSamplerElement(0, TLSS_SPECULAR, 3, 1));
+		//mLayerDecl.elements.push_back(
+		//	TerrainLayerSamplerElement(1, TLSS_NORMAL, 0, 3));
+		//mLayerDecl.elements.push_back(
+		//	TerrainLayerSamplerElement(1, TLSS_HEIGHT, 3, 1));
 
 
 		mProfiles.push_back(OGRE_NEW SM2Profile(this, "SM2", "Profile for rendering on Shader Model 2 capable cards"));
@@ -212,8 +212,8 @@ namespace Ogre
 			freeTextureUnits -= numShadowTextures;
 		}
 
-		// each layer needs 2.25 units (1xdiffusespec, 1xnormalheight, 0.25xblend)
-		return static_cast<uint8>(freeTextureUnits / 2.25f);
+		// each layer needs 2.25 units (1xdiffusespec, (1xnormalheight), 0.25xblend)
+		return static_cast<uint8>(freeTextureUnits / (1.25f + (mLayerNormalMappingEnabled||mLayerParallaxMappingEnabled)));
 		
 
 	}
@@ -368,8 +368,10 @@ namespace Ogre
 			{
 				// diffuse / specular
 				tu = pass->createTextureUnitState(terrain->getLayerTextureName(i, 0));
+                                                                
 				// normal / height
-				tu = pass->createTextureUnitState(terrain->getLayerTextureName(i, 1));
+                                if (mLayerNormalMappingEnabled || mLayerParallaxMappingEnabled)
+                                        tu = pass->createTextureUnitState(terrain->getLayerTextureName(i, 1));
 			}
 
 		}
@@ -739,8 +741,10 @@ namespace Ogre
 		
 		if(prof->isLayerNormalMappingEnabled() || prof->isLayerParallaxMappingEnabled())
 			ret->setParameter("profiles", "ps_3_0 ps_2_x fp40 arbfp1");
-		else
-			ret->setParameter("profiles", "ps_3_0 ps_2_0 fp30 arbfp1");
+		//else
+			//ret->setParameter("profiles", "ps_3_0 ps_2_0 fp30 arbfp1");
+		else // fp30 doesn't work (black terrain)
+			ret->setParameter("profiles", "ps_3_0 ps_2_x fp40 arbfp1");
 		ret->setParameter("entry_point", "main_fp");
 
 		return ret;
@@ -982,7 +986,9 @@ namespace Ogre
 			{
 				outStream << ", uniform sampler2D difftex" << i 
 					<< " : register(s" << currentSamplerIdx++ << ")\n";
-				outStream << ", uniform sampler2D normtex" << i 
+                                
+                                if (prof->mLayerNormalMappingEnabled || prof->mLayerParallaxMappingEnabled)
+                                        outStream << ", uniform sampler2D normtex" << i 
 					<< " : register(s" << currentSamplerIdx++ << ")\n";
 			}
 		}
@@ -1238,7 +1244,7 @@ namespace Ogre
 
 			// specular default
 			if (!prof->isLayerSpecularMappingEnabled())
-				outStream << "	specular = 1.0;\n";
+				outStream << "	specular = 0.0;\n";
 
 			if (tt == RENDER_COMPOSITE_MAP)
 			{
@@ -1266,7 +1272,7 @@ namespace Ogre
 		}
 
 		// Final return
-		outStream << "	return outputCol;\n"
+		outStream << "  return outputCol;\n"
 			<< "}\n";
 
 	}
