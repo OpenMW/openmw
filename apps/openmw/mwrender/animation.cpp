@@ -276,6 +276,7 @@ namespace MWRender{
 						rotmult = bonePtr->getOrientation();
 						scale = bonePtr->getScale().x;
 						boneSequenceIter++;
+						std::cout << "Entering\n";
 					    for(; boneSequenceIter != boneSequence.end(); boneSequenceIter++)
 					    {
 							if(creaturemodel->getSkeleton()->hasBone(*boneSequenceIter)){
@@ -330,7 +331,7 @@ namespace MWRender{
 		}
 
     }
-    bool Animation::timeIndex( float time, std::vector<float> times, int & i, int & j, float & x ){
+    bool Animation::timeIndex( float time, std::vector<float>& times, int & i, int & j, float & x ){
 	int count;
 	if (  (count = times.size()) > 0 )
 	{
@@ -388,6 +389,8 @@ namespace MWRender{
 }
 
  void Animation::handleAnimationTransforms(){
+
+	 
     Ogre::SkeletonInstance* skel = base->getSkeleton();
 
 
@@ -404,10 +407,10 @@ namespace MWRender{
    for(unsigned int i = 0; i < entityparts.size(); i++){
          //Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
 
-        Ogre::Bone* b = skel->getRootBone();
-	   b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
+        //Ogre::Bone* b = skel->getRootBone();
+	   //b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
 
-         entityparts[i]->getAllAnimationStates()->_notifyDirty();
+         //entityparts[i]->getAllAnimationStates()->_notifyDirty();
     }
 
 
@@ -424,18 +427,19 @@ namespace MWRender{
          float x;
 		float x2;
 
-	    std::vector<Ogre::Quaternion> quats = iter->getQuat();
+	    std::vector<Ogre::Quaternion>& quats = iter->getQuat();
 
-        std::vector<float> ttime = iter->gettTime();
-        std::vector<float>::iterator ttimeiter = ttime.begin();
+        std::vector<float>& ttime = iter->gettTime();
+        
 
-        std::vector<float> rtime = iter->getrTime();
-        int rindexJ = 0;
+        std::vector<float>& rtime = iter->getrTime();
+        int rindexJ = rindexI[slot];
+		 
 	    timeIndex(time, rtime, rindexI[slot], rindexJ, x2);
-	    int tindexJ = 0;
+	    int tindexJ = tindexI[slot];
 
 
-        std::vector<Ogre::Vector3> translist1 = iter->getTranslist1();
+        std::vector<Ogre::Vector3>& translist1 = iter->getTranslist1();
 
         timeIndex(time, ttime, tindexI[slot], tindexJ, x);
 

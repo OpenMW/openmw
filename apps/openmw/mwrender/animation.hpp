@@ -28,6 +28,8 @@ class Animation{
     MWWorld::Environment& mEnvironment;
     std::map<Nif::NiSkinData::BoneInfoCopy*, PosAndRot> vecRotPos;
     static std::map<std::string, int> mUniqueIDs;
+	float oldHund;
+	bool samePlace;
     
    
     std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating an npc
@@ -55,11 +57,11 @@ class Animation{
     Ogre::Entity* base;
     void handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel);
     void handleAnimationTransforms();
-    bool timeIndex( float time, std::vector<float> times, int & i, int & j, float & x );
+    bool timeIndex( float time, std::vector<float>& times, int & i, int & j, float & x );
     std::string getUniqueID(std::string mesh);
 	
     public:
-     Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env), animate(0){};
+     Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env), animate(0), oldHund(0){};
 	 virtual void runAnimation(float timepassed) = 0;
 	 void startScript(std::string groupname, int mode, int loops);
      void stopScript();

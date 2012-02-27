@@ -276,6 +276,7 @@ void NpcAnimation::runAnimation(float timepassed){
             shapepartsiter++;
             entitypartsiter++;
         }
+		
     }
 
 }

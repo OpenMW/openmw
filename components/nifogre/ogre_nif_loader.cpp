@@ -1328,7 +1328,8 @@ void NIFLoader::loadResource(Resource *resource)
 
             (*iter)->addBoneAssignment(vba);
         }
-       mesh->_notifySkeleton(mSkel);
+		if(triname == "")
+			mesh->_notifySkeleton(mSkel);
     }
 }
 
