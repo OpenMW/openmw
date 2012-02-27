@@ -51,17 +51,6 @@ QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
 
 include(${QT_USE_FILE})
 
-# list here plugins that can't be detected statically, but loaded in runtime
-# it needed for packaging automatisation
-set(USED_QT_PLUGINS imageformats/libqgif
-                    imageformats/libqico
-                    imageformats/libqjpeg
-                    imageformats/libqmng
-                    imageformats/libqsvg
-                    imageformats/libqtga
-                    imageformats/libqtiff)
-# It seems that launcher works without this plugins, but it loads them if they exists
-
 # Main executable
 add_executable(omwlauncher
     ${LAUNCHER}
@@ -86,13 +75,6 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/../launcher.qss")
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${APP_BUNDLE_DIR}/../launcher.cfg")
-
-    # copy used QT plugins into ${APP_BUNDLE_DIR}/Contents/Plugins
-    foreach(PLUGIN ${USED_QT_PLUGINS})
-        get_filename_component(PLUGIN_FILENAME ${PLUGIN} NAME)
-        configure_file("${QT_PLUGINS_DIR}/${PLUGIN}.dylib" "${APP_BUNDLE_DIR}/Contents/Plugins/${PLUGIN}.dylib" COPYONLY)
-    endforeach()
-
 else()
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
