@@ -13,14 +13,19 @@
 
 #include "../mwsound/soundmanager.hpp"
 
+
 #include "ptr.hpp"
 #include "environment.hpp"
 #include "class.hpp"
 #include "player.hpp"
+#include "weather.hpp"
 
 #include "refdata.hpp"
 #include "globals.hpp"
 #include "cellfunctors.hpp"
+
+#include <OgreVector3.h>
+using namespace Ogre;
 
 namespace
 {
@@ -135,12 +140,16 @@ namespace MWWorld
 
     void World::adjustSky()
     {
-        if (mSky)
+        if (mSky && (isCellExterior() || isCellQuasiExterior()))
         {
-            toggleSky();
-            // TODO set weather
-            toggleSky();
+            mRendering->skySetHour (mGlobalVariables->getFloat ("gamehour"));
+            mRendering->skySetDate (mGlobalVariables->getInt ("day"),
+                mGlobalVariables->getInt ("month"));
+
+            mRendering->getSkyManager()->enable();
         }
+        else
+            mRendering->getSkyManager()->disable();
     }
 
     World::World (OEngine::Render::OgreRenderer& renderer,
@@ -148,12 +157,14 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (false), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
+      mSky (true), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
         
         mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine, environment);
+        
+        mWeatherManager = new MWWorld::WeatherManager(mRendering, &environment);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
@@ -184,6 +195,7 @@ namespace MWWorld
 
     World::~World()
     {
+        delete mWeatherManager;
         delete mWorldScene;
         delete mGlobalVariables;
         delete mRendering;
@@ -369,6 +381,8 @@ namespace MWWorld
         mGlobalVariables->setFloat ("gamehour", hour);
 
         mRendering->skySetHour (hour);
+        
+        mWeatherManager->setHour (hour);
 
         if (days>0)
             setDay (days + mGlobalVariables->getInt ("day"));
@@ -404,6 +418,10 @@ namespace MWWorld
         mGlobalVariables->setInt ("month", month);
 
         mRendering->skySetDate (day, month);
+        
+        mWeatherManager->setDate (day, month);
+        
+        
     }
 
     void World::setMonth (int month)
@@ -438,10 +456,6 @@ namespace MWWorld
         else
         {
             mSky = true;
-            // TODO check for extorior or interior with sky.
-            mRendering->skySetHour (mGlobalVariables->getFloat ("gamehour"));
-            mRendering->skySetDate (mGlobalVariables->getInt ("day"),
-                mGlobalVariables->getInt ("month"));
             mRendering->skyEnable();
             return true;
         }
@@ -688,6 +702,52 @@ namespace MWWorld
     void World::update (float duration)
     {
         mWorldScene->update (duration);
+        
+        mWeatherManager->update (duration);
+        
+        // cast a ray from player to sun to detect if the sun is visible
+        // this is temporary until we find a better place to put this code
+        // currently its here because we need to access the physics system
+        float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
+        Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
+        sun = Vector3(sun.x, -sun.z, sun.y);
+        mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
+    }
+    
+    bool World::isCellExterior() const
+    {
+        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        if (currentCell)
+        {
+            if (!(currentCell->cell->data.flags & ESM::Cell::Interior))
+                return true;
+            else
+                return false;
+        }
+        return false;
+    }
+    
+    bool World::isCellQuasiExterior() const
+    {
+        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        if (currentCell)
+        {
+            if (!(currentCell->cell->data.flags & ESM::Cell::QuasiEx))
+                return false;
+            else
+                return true;
+        }
+        return false;
+    }
+    
+    int World::getCurrentWeather() const
+    {
+        return mWeatherManager->getWeatherID();
+    }
+    
+    void World::changeWeather(const std::string& region, const unsigned int id)
+    {
+        mWeatherManager->changeWeather(region, id);
     }
     
     OEngine::Render::Fader* World::getFader()

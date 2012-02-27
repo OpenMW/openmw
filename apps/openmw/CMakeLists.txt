@@ -44,7 +44,7 @@ add_openmw_dir (mwsound
 add_openmw_dir (mwworld
     refdata world physicssystem scene environment globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
-    cells localscripts customdata
+    cells localscripts customdata weather
     )
 
 add_openmw_dir (mwclass
@@ -77,7 +77,6 @@ target_link_libraries(openmw
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
-    caelum
     components
     MyGUIEngine
     MyGUIOgrePlatform

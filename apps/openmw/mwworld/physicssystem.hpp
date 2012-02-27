@@ -33,11 +33,15 @@ namespace MWWorld
             void scaleObject (const std::string& handle, float scale);
 
             bool toggleCollisionMode();
-			 std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
+            
+            std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
+            
+            // cast ray, return true if it hit something
+            bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to);
 
             void insertObjectPhysics(const MWWorld::Ptr& ptr, std::string model);
 
-              void insertActorPhysics(const MWWorld::Ptr&, std::string model);
+            void insertActorPhysics(const MWWorld::Ptr&, std::string model);
 
             OEngine::Physic::PhysicEngine* getEngine();
 

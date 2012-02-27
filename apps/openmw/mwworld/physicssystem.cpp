@@ -50,6 +50,17 @@ namespace MWWorld
 
         return mEngine->rayTest(from,to);
     }
+    
+    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to)
+    {
+        btVector3 _from, _to;
+        _from = btVector3(from.x, from.y, from.z);
+        _to = btVector3(to.x, to.y, to.z);
+        
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
+        
+        return !(result.first == "");
+    }
 
 
     std::vector< std::pair<std::string, Ogre::Vector3> > PhysicsSystem::doPhysics (float duration,

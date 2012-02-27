@@ -20,11 +20,9 @@ using namespace Ogre;
 namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
-:mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mDebugging(engine)
+:mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
-    //mSkyManager = 0;
-    mSkyManager = MWRender::SkyManager::create(mRendering.getWindow(), mRendering.getCamera(), resDir);
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -42,7 +40,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mMwRoot->pitch(Degree(-90));
     mObjects.setMwRoot(mMwRoot);
     mActors.setMwRoot(mMwRoot);
-
+        
     //used to obtain ingame information of ogre objects (which are faced or selected)
     mRaySceneQuery = mRendering.getScene()->createRayQuery(Ray());
 
@@ -51,6 +49,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
     cameraPitchNode->attachObject(mRendering.getCamera());
+    
+    //mSkyManager = 0;
+    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
@@ -63,6 +64,10 @@ RenderingManager::~RenderingManager ()
     delete mSkyManager;
 }
 
+MWRender::SkyManager* RenderingManager::getSkyManager()
+{
+    return mSkyManager;
+}
 
 MWRender::Objects& RenderingManager::getObjects(){
     return mObjects;
@@ -128,6 +133,8 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 void RenderingManager::update (float duration){
 
     mActors.update (duration);
+    
+    mSkyManager->update(duration);
     
     mRendering.update(duration);
 }
@@ -197,13 +204,21 @@ void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
   Ogre::ColourValue color;
   color.setAsABGR (mCell.cell->ambi.fog);
 
-  float high = 4500 + 9000 * (1-mCell.cell->ambi.fogDensity);
-  float low = 200;
-
-  mRendering.getScene()->setFog (FOG_LINEAR, color, 0, low, high);
-  mRendering.getCamera()->setFarClipDistance (high + 10);
-  mRendering.getViewport()->setBackgroundColour (color);
+  configureFog(mCell.cell->ambi.fogDensity, color);
 }
+
+void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
+{  
+  /// \todo make the viewing distance and fog start/end configurable
+  float low = 3000 / density;
+  float high = 6200 / density;
+    
+  mRendering.getScene()->setFog (FOG_LINEAR, colour, 0, low, high);
+  
+  mRendering.getCamera()->setFarClipDistance ( high );
+  mRendering.getViewport()->setBackgroundColour (colour);
+}
+
 
 void RenderingManager::setAmbientMode()
 {
@@ -273,4 +288,35 @@ void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
     mActors.skipAnimation(ptr);
 }
 
+void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
+{
+    mSun->setDiffuseColour(colour);
 }
+
+void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
+{
+    mRendering.getScene()->setAmbientLight(colour);
+}
+
+void RenderingManager::sunEnable()
+{
+    if (mSun) mSun->setVisible(true);
+}
+
+void RenderingManager::sunDisable()
+{
+    if (mSun) mSun->setVisible(false);
+}
+
+void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
+{
+    if (mSun) mSun->setDirection(Vector3(direction.x, -direction.z, direction.y));
+    mSkyManager->setSunDirection(direction);
+}
+
+void RenderingManager::setGlare(bool glare)
+{
+    mSkyManager->setGlare(glare);
+}
+
+} // namespace
