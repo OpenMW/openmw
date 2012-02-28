@@ -32,7 +32,7 @@ namespace MWGui
   class HUD : public OEngine::GUI::Layout
   {
   public:
-    HUD(int width, int height, bool fpsSwitch);
+    HUD(int width, int height, int fpsLevel);
     void setStats(int h, int hmax, int m, int mmax, int s, int smax);
     void setWeapIcon(const char *str);
     void setSpellIcon(const char *str);
@@ -41,6 +41,8 @@ namespace MWGui
     void setEffect(const char *img);
     void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
     void setFPS(float fps);
+    void setTriangleCount(size_t count);
+    void setBatchCount(size_t count);
 
     MyGUI::ProgressPtr health, magicka, stamina;
     MyGUI::StaticImagePtr weapImage, spellImage;
@@ -53,6 +55,8 @@ namespace MWGui
 
     MyGUI::WidgetPtr fpsbox;
     MyGUI::StaticTextPtr fpscounter;
+    MyGUI::StaticTextPtr trianglecounter;
+    MyGUI::StaticTextPtr batchcounter;
   };
 
   class MapWindow : public OEngine::GUI::Layout

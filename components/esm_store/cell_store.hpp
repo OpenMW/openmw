@@ -12,7 +12,6 @@
 
 #include "store.hpp"
 #include "components/esm/records.hpp"
-#include "components/esm/loadcell.hpp"
 
 #include <list>
 #include <string>
@@ -36,7 +35,7 @@ namespace ESMS
   {
     LiveCellRef(const CellRef& cref, const X* b = NULL) : base(b), ref(cref),
                                                           mData(ref) {}
-                                                          
+
 
     LiveCellRef(const X* b = NULL) : base(b), mData(ref) {}
 
@@ -224,7 +223,7 @@ namespace ESMS
             ++iter)
             if (!functor (iter->ref, iter->mData))
                 return false;
-        
+
         return true;
     }
 

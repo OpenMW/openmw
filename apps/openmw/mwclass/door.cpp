@@ -14,7 +14,7 @@
 
 #include "../mwrender/objects.hpp"
 
-#include <iostream>
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -25,7 +25,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -39,13 +39,11 @@ namespace MWClass
          ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
             ptr.get<ESM::Door>();
 
-
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-
     }
 
     std::string Door::getName (const MWWorld::Ptr& ptr) const
@@ -65,15 +63,28 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
             ptr.get<ESM::Door>();
 
+        const std::string &openSound = ref->base->openSound;
+        //const std::string &closeSound = ref->base->closeSound;
+        const std::string lockedSound = "LockedDoor";
+        const std::string trapActivationSound = "Disarm Trap Fail";
+
         if (ptr.getCellRef().lockLevel>0)
         {
             // TODO check for key
             // TODO report failure to player (message, sound?). Look up behaviour of original MW.
             std::cout << "Locked!" << std::endl;
+            environment.mSoundManager->playSound(lockedSound, 1.0, 1.0);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
 
-        // TODO check trap
+        if(!ptr.getCellRef().trap.empty())
+        {
+            // Trap activation
+            std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
+            environment.mSoundManager->playSound(trapActivationSound, 1.0, 1.0);
+            ptr.getCellRef().trap = "";
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+        }
 
         if (ref->ref.teleport)
         {
@@ -81,12 +92,13 @@ namespace MWClass
             if (environment.mWorld->getPlayer().getPlayer()==actor)
             {
                 // the player is using the door
+                environment.mSoundManager->playSound(openSound, 1.0, 1.0);
                 return boost::shared_ptr<MWWorld::Action> (
                     new MWWorld::ActionTeleportPlayer (ref->ref.destCell, ref->ref.doorDest));
             }
             else
             {
-                // another NPC or a create is using the door
+                // another NPC or a creature is using the door
                 // TODO return action for teleporting other NPC/creature
                 return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
             }
@@ -95,6 +107,9 @@ namespace MWClass
         {
             // animated door
             // TODO return action for rotating the door
+
+            // This is a little pointless, but helps with testing
+            environment.mSoundManager->playSound(openSound, 1.0, 1.0);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
     }

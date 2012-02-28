@@ -20,6 +20,7 @@
 #include "localscripts.hpp"
 
 #include <openengine/bullet/physic.hpp>
+#include <openengine/ogre/fader.hpp>
 
 namespace Ogre
 {
@@ -49,6 +50,7 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class WeatherManager;
     class Environment;
     class Player;
 
@@ -60,13 +62,16 @@ namespace MWWorld
 
             enum RenderMode
             {
-                Render_CollisionDebug
+                Render_CollisionDebug,
+                Render_Wireframe
             };
 
         private:
 
-            MWRender::RenderingManager mRendering;
+            MWRender::RenderingManager* mRendering;
             
+            MWWorld::WeatherManager* mWeatherManager;
+
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
             ESM::ESMReader mEsm;
@@ -95,17 +100,19 @@ namespace MWWorld
 
         public:
 
-           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+           World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
                 Environment& environment, const std::string& encoding);
 
             ~World();
+            
+            OEngine::Render::Fader* getFader();
 
             Ptr::CellStore *getExterior (int x, int y);
 
             Ptr::CellStore *getInterior (const std::string& name);
-
+            
             void adjustSky();
 
             MWWorld::Player& getPlayer();
@@ -118,6 +125,9 @@ namespace MWWorld
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
+            
+            bool isCellExterior() const;
+            bool isCellQuasiExterior() const;
 
             Globals::Data& getGlobalVariable (const std::string& name);
 
@@ -132,23 +142,31 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
-            
+
             /// \todo enable reference in the OGRE scene
             void enable (Ptr reference);
-            
+
             /// \todo 5disable reference in the OGRE scene
             void disable (Ptr reference);
 
             void advanceTime (double hours);
+            ///< Advance in-game time.
 
             void setHour (double hour);
+            ///< Set in-game time hour.
 
             void setMonth (int month);
+            ///< Set in-game time month.
 
             void setDay (int day);
+            ///< Set in-game time day.
 
             bool toggleSky();
             ///< \return Resulting mode
+            
+            void changeWeather(const std::string& region, const unsigned int id);
+            
+            int getCurrentWeather() const;
 
             int getMasserPhase() const;
 
@@ -206,6 +224,21 @@ namespace MWWorld
             const ESM::Cell *createRecord (const ESM::Cell& record);
             ///< Create a new recrod (of type cell) in the ESM store.
             /// \return ID, pointer to created record
+
+            void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
+                int number = 1);
+            ///< Run animation for a MW-reference. Calls to this function for references that are
+            /// currently not in the rendered scene should be ignored.
+            ///
+            /// \param mode: 0 normal, 1 immediate start, 2 immediate loop
+            /// \param number How offen the animation should be run
+
+            void skipAnimation (const MWWorld::Ptr& ptr);
+            ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
+            /// references that are currently not in the rendered scene should be ignored.
+
+            void update (float duration);
+
     };
 }
 

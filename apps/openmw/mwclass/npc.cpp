@@ -1,27 +1,88 @@
 
 #include "npc.hpp"
 
+#include <memory>
+
+#include <OgreSceneNode.h>
+
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
-#include <OgreSceneNode.h>
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/customdata.hpp"
 
 namespace
 {
     const Ogre::Radian kOgrePi (Ogre::Math::PI);
     const Ogre::Radian kOgrePiOverTwo (Ogre::Math::PI / Ogre::Real(2.0));
+
+    struct CustomData : public MWWorld::CustomData
+    {
+        MWMechanics::NpcStats mNpcStats;
+        MWMechanics::CreatureStats mCreatureStats;
+        MWMechanics::Movement mMovement;
+        MWWorld::ContainerStore mContainerStore;
+
+        virtual MWWorld::CustomData *clone() const;
+    };
+
+    MWWorld::CustomData *CustomData::clone() const
+    {
+        return new CustomData (*this);
+    }
 }
 
 namespace MWClass
 {
+    void Npc::ensureCustomData (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+        {
+            std::auto_ptr<CustomData> data (new CustomData);
+
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
+
+            // NPC stats
+            if (!ref->base->faction.empty())
+            {
+                // TODO research how initial rank is stored. The information in loadnpc.hpp are at
+                // best very unclear.
+                data->mNpcStats.mFactionRank[ref->base->faction] = 0;
+            }
+
+            for (int i=0; i<27; ++i)
+                data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
+
+            // creature stats
+            data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
+            data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
+            data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
+            data->mCreatureStats.mAttributes[3].set (ref->base->npdt52.agility);
+            data->mCreatureStats.mAttributes[4].set (ref->base->npdt52.speed);
+            data->mCreatureStats.mAttributes[5].set (ref->base->npdt52.endurance);
+            data->mCreatureStats.mAttributes[6].set (ref->base->npdt52.personality);
+            data->mCreatureStats.mAttributes[7].set (ref->base->npdt52.luck);
+            data->mCreatureStats.mDynamic[0].set (ref->base->npdt52.health);
+            data->mCreatureStats.mDynamic[1].set (ref->base->npdt52.mana);
+            data->mCreatureStats.mDynamic[2].set (ref->base->npdt52.fatigue);
+
+            data->mCreatureStats.mLevel = ref->base->npdt52.level;
+
+            // \todo add initial container content
+
+            // store
+            ptr.getRefData().setCustomData (data.release());
+        }
+    }
+
     std::string Npc::getId (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
@@ -32,34 +93,28 @@ namespace MWClass
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        /*
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
-            ptr.get<ESM::NPC>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-        
-        if (!model.empty())
-        {
-            MWRender::Npcs& npcs = renderingInterface.getNPCs();
-            //npcs.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            //npcs.insertMesh(ptr, "meshes\\" + model);
-        }*/
+        renderingInterface.getActors().insertNPC(ptr);
     }
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
     {
 
-        /*
+
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 
 
-        const std::string &model = ref->base->model;
         assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertActorPhysics(ptr, "meshes\\" + model);
-        }*/
+		 std::string headID = ref->base->head;
+		 std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
+		 bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
+
+
+        std::string smodel = "meshes\\base_anim.nif";
+		if(beast)
+			smodel = "meshes\\base_animkna.nif";
+		physics.insertActorPhysics(ptr, smodel);
+
 
     }
 
@@ -83,56 +138,16 @@ namespace MWClass
 
     MWMechanics::CreatureStats& Npc::getCreatureStats (const MWWorld::Ptr& ptr) const
     {
-        if (!ptr.getRefData().getCreatureStats().get())
-        {
-            boost::shared_ptr<MWMechanics::CreatureStats> stats (
-                new MWMechanics::CreatureStats);
+        ensureCustomData (ptr);
 
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
-
-            stats->mAttributes[0].set (ref->base->npdt52.strength);
-            stats->mAttributes[1].set (ref->base->npdt52.intelligence);
-            stats->mAttributes[2].set (ref->base->npdt52.willpower);
-            stats->mAttributes[3].set (ref->base->npdt52.agility);
-            stats->mAttributes[4].set (ref->base->npdt52.speed);
-            stats->mAttributes[5].set (ref->base->npdt52.endurance);
-            stats->mAttributes[6].set (ref->base->npdt52.personality);
-            stats->mAttributes[7].set (ref->base->npdt52.luck);
-            stats->mDynamic[0].set (ref->base->npdt52.health);
-            stats->mDynamic[1].set (ref->base->npdt52.mana);
-            stats->mDynamic[2].set (ref->base->npdt52.fatigue);
-
-            stats->mLevel = ref->base->npdt52.level;
-
-            ptr.getRefData().getCreatureStats() = stats;
-        }
-
-        return *ptr.getRefData().getCreatureStats();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
     }
 
     MWMechanics::NpcStats& Npc::getNpcStats (const MWWorld::Ptr& ptr) const
     {
-        if (!ptr.getRefData().getNpcStats().get())
-        {
-            boost::shared_ptr<MWMechanics::NpcStats> stats (
-                new MWMechanics::NpcStats);
+        ensureCustomData (ptr);
 
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
-
-            if (!ref->base->faction.empty())
-            {
-                // TODO research how initial rank is stored. The information in loadnpc.hpp are at
-                // best very unclear.
-                stats->mFactionRank[ref->base->faction] = 0;
-            }
-
-            for (int i=0; i<27; ++i)
-                stats->mSkill[i].setBase (ref->base->npdt52.skills[i]);
-
-            ptr.getRefData().getNpcStats() = stats;
-        }
-
-        return *ptr.getRefData().getNpcStats();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
     }
 
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
@@ -141,20 +156,12 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
 
-    MWWorld::ContainerStore<MWWorld::RefData>& Npc::getContainerStore (const MWWorld::Ptr& ptr)
+    MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
-        if (!ptr.getRefData().getContainerStore().get())
-        {
-            boost::shared_ptr<MWWorld::ContainerStore<MWWorld::RefData> > store (
-                new MWWorld::ContainerStore<MWWorld::RefData>);
+        ensureCustomData (ptr);
 
-            // TODO add initial content
-
-            ptr.getRefData().getContainerStore() = store;
-        }
-
-        return *ptr.getRefData().getContainerStore();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
     }
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
@@ -245,29 +252,20 @@ namespace MWClass
 
     MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
     {
-        if (!ptr.getRefData().getMovement().get())
-        {
-            boost::shared_ptr<MWMechanics::Movement> movement (
-                new MWMechanics::Movement);
+        ensureCustomData (ptr);
 
-            ptr.getRefData().getMovement() = movement;
-        }
-
-        return *ptr.getRefData().getMovement();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
     {
         Ogre::Vector3 vector (0, 0, 0);
 
-        if (ptr.getRefData().getMovement().get())
-        {
-            vector.x = - ptr.getRefData().getMovement()->mLeftRight * 200;
-            vector.y = ptr.getRefData().getMovement()->mForwardBackward * 200;
+        vector.x = - getMovementSettings (ptr).mLeftRight * 200;
+        vector.y = getMovementSettings (ptr).mForwardBackward * 200;
 
-            if (getStance (ptr, Run, false))
-                vector *= 2;
-        }
+        if (getStance (ptr, Run, false))
+            vector *= 2;
 
         return vector;
     }

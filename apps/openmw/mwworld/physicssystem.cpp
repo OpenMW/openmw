@@ -3,6 +3,7 @@
 #include "physicssystem.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/world.hpp" // FIXME
+#include <components/nifbullet/bullet_nif_loader.hpp>
 
 #include "OgreRoot.h"
 #include "OgreRenderWindow.h"
@@ -16,16 +17,24 @@ using namespace Ogre;
 namespace MWWorld
 {
 
-    PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng) :
-        mRender(_rend), mEngine(physEng), mFreeFly (true)
+    PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
+        mRender(_rend), mEngine(0), mFreeFly (true)
     {
-
+        // Create physics. shapeLoader is deleted by the physic engine
+        NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
+        mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
     }
 
     PhysicsSystem::~PhysicsSystem()
     {
-
+        delete mEngine;
+    
     }
+    OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()
+    {
+        return mEngine;
+    }
+    
 	std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
 	{
 		std::string handle = "";
@@ -40,6 +49,17 @@ namespace MWWorld
         btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
 
         return mEngine->rayTest(from,to);
+    }
+    
+    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to)
+    {
+        btVector3 _from, _to;
+        _from = btVector3(from.x, from.y, from.z);
+        _to = btVector3(to.x, to.y, to.z);
+        
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
+        
+        return !(result.first == "");
     }
 
 
@@ -145,6 +165,12 @@ namespace MWWorld
 
     void PhysicsSystem::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)
     {
+         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+        {
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // start positions others than 0, 0, 0
+            act->setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+        }
     }
 
     void PhysicsSystem::scaleObject (const std::string& handle, float scale)
@@ -191,6 +217,7 @@ namespace MWWorld
 
      void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
            Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+            // std::cout << "Adding node with name" << node->getName();
          addActor (node->getName(), model, node->getPosition());
      }
 

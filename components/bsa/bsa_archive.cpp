@@ -240,15 +240,36 @@ public:
     // should not have been declared const in the first place.
     BSAFile *narc = (BSAFile*)&arc;
 
+    String passed = filename;
+	if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
+		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
+		|| filename.at(filename.length() - 1) == '|')
+	{
+	   passed = filename.substr(0, filename.length() - 2);
+	}
+	if(filename.at(filename.length() - 2) == '>')
+		passed = filename.substr(0, filename.length() - 6);
     // Open the file
-    StreamPtr strm = narc->getFile(filename.c_str());
+    StreamPtr strm = narc->getFile(passed.c_str());
 
     // Wrap it into an Ogre::DataStream.
     return DataStreamPtr(new Mangle2OgreStream(strm));
   }
 
   // Check if the file exists.
-  bool exists(const String& filename) { return arc.exists(filename.c_str()); }
+  bool exists(const String& filename) { 
+    String passed = filename;
+	if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
+		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
+		|| filename.at(filename.length() - 1) == '|')
+	{
+	   passed = filename.substr(0, filename.length() - 2);
+	}
+	if(filename.at(filename.length() - 2) == '>')
+		passed = filename.substr(0, filename.length() - 6);
+
+return arc.exists(passed.c_str()); 
+}
   time_t getModifiedTime(const String&) { return 0; }
 
   // This is never called as far as I can see.

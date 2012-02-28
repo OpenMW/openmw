@@ -52,16 +52,20 @@ void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environme
 
 namespace MWWorld
 {
-
+    void Scene::update (float duration){
+        mRendering.update (duration);
+    }
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
-
+        std::cout << "Unloading cell\n";
         ListHandles functor;
 
-        MWWorld::Ptr::CellStore* active = *iter;
-        mRendering.removeCell(active);
 
-        active->forEach<ListHandles>(functor);
+
+
+
+
+        (*iter)->forEach<ListHandles>(functor);
 
         {
 
@@ -73,10 +77,15 @@ namespace MWWorld
                 mPhysics->removeObject (node->getName());
             }
         }
-        mWorld->getLocalScripts().clearCell (active);
-        mEnvironment.mMechanicsManager->dropActors (active);
-        mEnvironment.mSoundManager->stopSound (active);
-        mActiveCells.erase (iter);
+		mRendering.removeCell(*iter);
+		//mPhysics->removeObject("Unnamed_43");
+
+        mWorld->getLocalScripts().clearCell (*iter);
+        mEnvironment.mMechanicsManager->dropActors (*iter);
+        mEnvironment.mSoundManager->stopSound (*iter);
+		mActiveCells.erase(*iter);
+        
+        
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)
@@ -226,6 +235,9 @@ namespace MWWorld
         // adjust player
         mCurrentCell = cell;
         playerCellChange (cell, position);
+        
+        // adjust fog
+        mRendering.configureFog(*cell);
 
         // Sky system
         mWorld->adjustSky();

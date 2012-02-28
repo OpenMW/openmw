@@ -83,26 +83,13 @@ namespace MWInput
     MWGui::WindowManager &windows;
     OMW::Engine& mEngine;
 
-    // Count screenshots.
-    int shotCount;
-
 
    /* InputImpl Methods */
 
-    // Write screenshot to file.
     void screenshot()
     {
-
-      // Find the first unused filename with a do-while
-      char buf[50];
-      do
-      {
-        snprintf(buf, 50, "screenshot%03d.png", shotCount++);
-      } while (boost::filesystem::exists(buf));
-
-      ogre.screenshot(buf);
+        mEngine.screenshot();
     }
-
 
     /* toggleInventory() is called when the user presses the button to toggle the inventory screen. */
     void toggleInventory()
@@ -132,6 +119,21 @@ namespace MWInput
       if(mode == GM_Console)
         setGuiMode(GM_Game);
       else setGuiMode(GM_Console);
+    }
+
+    void toggleJournal()
+    {
+      using namespace MWGui;
+
+      GuiMode mode = windows.getMode();
+
+      // Toggle between game mode and journal mode
+      if(mode == GM_Game)
+        setGuiMode(GM_Journal);
+      else if(mode == GM_Journal)
+        setGuiMode(GM_Game);
+
+      // .. but don't touch any other mode.
     }
 
     void activate()
@@ -168,8 +170,7 @@ namespace MWInput
         poller(input),
         player(_player),
         windows(_windows),
-        mEngine (engine),
-        shotCount(0)
+        mEngine (engine)
     {
       using namespace OEngine::Input;
       using namespace OEngine::Render;
@@ -188,6 +189,8 @@ namespace MWInput
                        "Toggle inventory screen");
       disp->funcs.bind(A_Console, boost::bind(&InputImpl::toggleConsole, this),
                        "Toggle console");
+      disp->funcs.bind(A_Journal, boost::bind(&InputImpl::toggleJournal, this),
+                       "Toggle journal");
       disp->funcs.bind(A_Activate, boost::bind(&InputImpl::activate, this),
                        "Activate");
       disp->funcs.bind(A_AutoMove, boost::bind(&InputImpl::toggleAutoMove, this),
@@ -236,6 +239,7 @@ namespace MWInput
       disp->bind(A_Screenshot, KC_SYSRQ);
       disp->bind(A_Inventory, KC_I);
       disp->bind(A_Console, KC_F1);
+      disp->bind(A_Journal, KC_J);
       disp->bind(A_Activate, KC_SPACE);
       disp->bind(A_AutoMove, KC_Z);
       disp->bind(A_ToggleSneak, KC_X);

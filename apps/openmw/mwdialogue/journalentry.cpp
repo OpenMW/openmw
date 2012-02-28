@@ -42,7 +42,7 @@ namespace MWDialogue
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->data.disposition==index) /// \todo cleanup info structure
             {
-                iter->id;
+                return iter->id;
             }
 
         throw std::runtime_error ("unknown journal index for topic " + topic);

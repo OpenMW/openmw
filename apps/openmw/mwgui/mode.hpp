@@ -10,6 +10,7 @@ namespace MWGui
       GM_MainMenu,      // Main menu mode
 
       GM_Console,       // Console mode
+      GM_Journal,       // Journal mode
 
       // None of the following are implemented yet
 
