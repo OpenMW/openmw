@@ -1113,10 +1113,17 @@ namespace Ogre
 			"." + blendChannel;
 
 		// generate early-out conditional
-		/* Disable - causing some issues even when trying to force the use of texldd
+		// Disable - causing some issues even when trying to force the use of texldd
+                
+                // comment by scrawl:
+                // on a NVIDIA card in opengl mode, didn't produce any problems,
+                // while increasing FPS from 170 to 185 (!!!) in the same area
+                // so let's try this out - if something does cause problems for
+                // someone else (with a different card / renderer) we can just
+                // add a vendor-specific check here
 		if (layer && prof->_isSM3Available())
 			outStream << "  if (" << blendWeightStr << " > 0.0003)\n  { \n";
-		*/
+		
 
 		// generate UV
 		outStream << "	float2 uv" << layer << " = layerUV" << uvIdx << uvChannels << ";\n";
@@ -1165,10 +1172,17 @@ namespace Ogre
 		}
 
 		// End early-out
-		/* Disable - causing some issues even when trying to force the use of texldd
+		// Disable - causing some issues even when trying to force the use of texldd
+                
+                // comment by scrawl:
+                // on a NVIDIA card in opengl mode, didn't produce any problems,
+                // while increasing FPS from 170 to 185 (!!!) in the same area
+                // so let's try this out - if something does cause problems for
+                // someone else (with a different card / renderer) we can just
+                // add a vendor-specific check here
 		if (layer && prof->_isSM3Available())
 			outStream << "  } // early-out blend value\n";
-		*/
+		
 	}
 	//---------------------------------------------------------------------
 	void TerrainMaterialGeneratorB::SM2Profile::ShaderHelperCg::generateVpFooter(
