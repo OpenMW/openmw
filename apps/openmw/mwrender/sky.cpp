@@ -167,6 +167,8 @@ Moon::Moon( const String& textureName,
     "{	\n"
     "   float4 tex = tex2D(texture, uv); \n"
     "   oColor = float4(emissive.xyz,1) * tex2D(texture, uv) * float4(1,1,1,diffuse.a); \n"
+    "   float bump = pow((1-diffuse.a),4); \n"
+    "   oColor.rgb += float3(bump, bump, bump)*0.5; \n"
     "}";
     fshader->setSource(outStream2.str());
     fshader->load();
