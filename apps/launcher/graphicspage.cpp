@@ -246,13 +246,7 @@ void GraphicsPage::setupOgre()
     if (mOpenGLRenderSystem) {
         mOGLRTTComboBox->addItems(getAvailableOptions(QString("RTT Preferred Mode"), mOpenGLRenderSystem));
         mOGLAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mOpenGLRenderSystem));
-
-        QStringList videoModes = getAvailableOptions(QString("Video Mode"), mOpenGLRenderSystem);
-        // Remove extraneous spaces
-        videoModes.replaceInStrings(QRegExp("\\s{2,}"), QString(" "));
-        videoModes.replaceInStrings(QRegExp("^\\s"), QString());
-
-        mOGLResolutionComboBox->addItems(videoModes);
+        mOGLResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mOpenGLRenderSystem));
         mOGLFrequencyComboBox->addItems(getAvailableOptions(QString("Display Frequency"), mOpenGLRenderSystem));
     }
 
@@ -261,12 +255,7 @@ void GraphicsPage::setupOgre()
         mD3DRenderDeviceComboBox->addItems(getAvailableOptions(QString("Rendering Device"), mDirect3DRenderSystem));
         mD3DAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mDirect3DRenderSystem));
         mD3DFloatingPointComboBox->addItems(getAvailableOptions(QString("Floating-point mode"), mDirect3DRenderSystem));
-
-        QStringList videoModes = getAvailableOptions(QString("Video Mode"), mDirect3DRenderSystem);
-        // Remove extraneous spaces
-        videoModes.replaceInStrings(QRegExp("\\s{2,}"), QString(" "));
-        videoModes.replaceInStrings(QRegExp("^\\s"), QString());
-        mD3DResolutionComboBox->addItems(videoModes);
+        mD3DResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mDirect3DRenderSystem));
     }
 }
 
@@ -481,7 +470,7 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
              {
 
                  if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0)
-                     result << (*opt_it).c_str();
+                     result << QString::fromStdString((*opt_it).c_str()).simplified();
              }
 
     }
