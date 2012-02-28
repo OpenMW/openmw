@@ -180,7 +180,7 @@ void GraphicsPage::setupOgre()
         Make sure you have write access to<br>%1<br><br>")).arg(configDir.path()));
         msgBox.exec();
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -203,7 +203,7 @@ void GraphicsPage::setupOgre()
 
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -237,7 +237,7 @@ void GraphicsPage::setupOgre()
         Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
         msgBox.exec();
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -423,7 +423,7 @@ void GraphicsPage::writeConfig()
 
         qCritical("Error validating configuration");
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -449,7 +449,8 @@ void GraphicsPage::writeConfig()
 
         qCritical("Error saving Ogre configuration, the error reported was:\n %s", qPrintable(ogreError));
 
-        QApplication::exit(1);
+        qApp->exit(1);
+        return;
     }
 
 }

@@ -1015,7 +1015,8 @@ void DataFilesPage::writeConfig(QString profile)
         Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
-        QApplication::exit(1);
+        qApp->exit(1);
+        return;
     }
 
     QTextStream in(&file);
@@ -1041,7 +1042,8 @@ void DataFilesPage::writeConfig(QString profile)
         Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
-        QApplication::exit(1);
+        qApp->exit(1);
+        return;
     }
 
     file.write(buffer);
