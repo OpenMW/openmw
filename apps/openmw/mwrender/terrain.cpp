@@ -31,7 +31,7 @@ namespace MWRender
         TerrainMaterialGeneratorB::SM2Profile* matProfile =
             static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
-        matProfile->setLightmapEnabled(false); // this doesn't disable the lightmap, although it should ??
+        matProfile->setLightmapEnabled(false);
         matProfile->setReceiveDynamicShadowsEnabled(false);
         matProfile->setLayerNormalMappingEnabled(false);
         matProfile->setLayerParallaxMappingEnabled(false);

@@ -196,7 +196,8 @@ namespace Ogre
 		// count the texture units free
 		uint8 freeTextureUnits = 16;
 		// lightmap
-		--freeTextureUnits;
+                if (mLightmapEnabled)
+                        --freeTextureUnits;
 		// normalmap
 		--freeTextureUnits;
 		// colourmap
@@ -1019,7 +1020,8 @@ namespace Ogre
 		{
 			outStream << 
 				// global normal
-				"	float3 normal = expand(tex2D(globalNormal, uv)).rgb;\n";
+				"	float3 normal = expand(tex2D(globalNormal, uv)).rgb;\n"
+                                "       normal = float3(normal.x, normal.z, -normal.y); \n"; // convert Ogre to MW coordinate system
 
 		}
 
