@@ -72,10 +72,14 @@ endif()
 
 if (APPLE)
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-        "${APP_BUNDLE_DIR}/../launcher.qss")
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
+        "${APP_BUNDLE_DIR}/../resources/launcher.qss")
+    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
         "${APP_BUNDLE_DIR}/../launcher.cfg")
 else()
+    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/launcher.qss")
+
+    # Fallback in case getGlobalDataPath does not point to resources
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
 
