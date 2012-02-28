@@ -31,6 +31,9 @@ namespace MWRender{
         TerrainManager(Ogre::SceneManager*);
         virtual ~TerrainManager();
 
+        void setDiffuse(const Ogre::ColourValue& diffuse);
+        void setAmbient(const Ogre::ColourValue& ambient);
+
         void cellAdded(MWWorld::Ptr::CellStore* store);
         void cellRemoved(MWWorld::Ptr::CellStore* store);
     private:

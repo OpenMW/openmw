@@ -73,6 +73,20 @@ namespace MWRender
         OGRE_DELETE mTerrainGroup;
         OGRE_DELETE mTerrainGlobals;
     }
+    
+    //----------------------------------------------------------------------------------------------
+    
+    void TerrainManager::setDiffuse(const Ogre::ColourValue& diffuse)
+    {
+        mTerrainGlobals->setCompositeMapDiffuse(diffuse);
+    }
+    
+    //----------------------------------------------------------------------------------------------
+    
+    void TerrainManager::setAmbient(const Ogre::ColourValue& ambient)
+    {
+        mTerrainGlobals->setCompositeMapAmbient(ambient);
+    }
 
     //----------------------------------------------------------------------------------------------
 

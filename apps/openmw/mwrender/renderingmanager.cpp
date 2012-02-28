@@ -232,17 +232,17 @@ void RenderingManager::setAmbientMode()
   {
     case 0:
 
-      mRendering.getScene()->setAmbientLight(mAmbientColor);
+      setAmbientColour(mAmbientColor);
       break;
 
     case 1:
 
-      mRendering.getScene()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
+      setAmbientColour(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
       break;
 
     case 2:
 
-      mRendering.getScene()->setAmbientLight(ColourValue(1,1,1));
+      setAmbientColour(ColourValue(1,1,1));
       break;
   }
 }
@@ -297,11 +297,13 @@ void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
     mSun->setDiffuseColour(colour);
+    mTerrainManager->setDiffuse(colour);
 }
 
 void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
 {
     mRendering.getScene()->setAmbientLight(colour);
+    mTerrainManager->setAmbient(colour);
 }
 
 void RenderingManager::sunEnable()
