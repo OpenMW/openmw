@@ -18,7 +18,7 @@ namespace MWRender
         mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
 
         mTerrainGlobals->setMaxPixelError(8);
-        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 1024 : 256);
+        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 256 : 1024);
 
         Ogre::TerrainMaterialGeneratorPtr matGen;
         TerrainMaterialGeneratorB* matGenP = new TerrainMaterialGeneratorB();
