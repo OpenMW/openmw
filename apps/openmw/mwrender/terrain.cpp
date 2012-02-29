@@ -17,9 +17,6 @@ namespace MWRender
     {
         mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
 
-        mTerrainGlobals->setMaxPixelError(8);
-        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 256 : 1024);
-
         Ogre::TerrainMaterialGeneratorPtr matGen;
         TerrainMaterialGeneratorB* matGenP = new TerrainMaterialGeneratorB();
         matGen.bind(matGenP);
@@ -31,12 +28,27 @@ namespace MWRender
         TerrainMaterialGeneratorB::SM2Profile* matProfile =
             static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
+        mTerrainGlobals->setMaxPixelError(8);
+        //mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        //mTerrainGlobals->setLightMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        //mTerrainGlobals->setCompositeMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        //mTerrainGlobals->setDefaultGlobalColourMapSize(256);
+
+        //10 (default) didn't seem to be quite enough
+        mTerrainGlobals->setSkirtSize(128);
+
+        /*
+         * Here we are pushing the composite map distance beyond the edge
+         * of the rendered terrain due to not having setup lighting
+         */
+        //mTerrainGlobals->setCompositeMapDistance(ESM::Land::REAL_SIZE*4);
+        
         matProfile->setLightmapEnabled(false);
-        matProfile->setReceiveDynamicShadowsEnabled(false);
+        matProfile->setLayerSpecularMappingEnabled(false);
         matProfile->setLayerNormalMappingEnabled(false);
         matProfile->setLayerParallaxMappingEnabled(false);
-        matProfile->setLayerSpecularMappingEnabled(false);
-        
+        matProfile->setReceiveDynamicShadowsEnabled(false);
+
         mLandSize = ESM::Land::LAND_SIZE;
         mRealSize = ESM::Land::REAL_SIZE;
         if ( SPLIT_TERRAIN )
@@ -95,8 +107,6 @@ namespace MWRender
         const int cellX = store->cell->getGridX();
         const int cellY = store->cell->getGridY();
 
-        Ogre::Terrain::ImportData terrainData =
-            mTerrainGroup->getDefaultImportSettings();
 
         if ( SPLIT_TERRAIN )
         {
@@ -107,6 +117,9 @@ namespace MWRender
             {
                 for ( int y = 0; y < 2; y++ )
                 {
+                    Ogre::Terrain::ImportData terrainData =
+                        mTerrainGroup->getDefaultImportSettings();
+
                     const int terrainX = cellX * 2 + x;
                     const int terrainY = cellY * 2 + y;
 
@@ -133,6 +146,8 @@ namespace MWRender
                                         x * numTextures, y * numTextures,
                                         numTextures, indexes);
 
+                    assert( mTerrainGroup->getTerrain(cellX, cellY) == NULL &&
+                            "The terrain for this cell already existed" );
                     mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
 
                     mTerrainGroup->loadTerrain(terrainX, terrainY, true);
@@ -146,6 +161,9 @@ namespace MWRender
         }
         else
         {
+            Ogre::Terrain::ImportData terrainData =
+                mTerrainGroup->getDefaultImportSettings();
+
             //one cell is one terrain segment
             terrainData.inputFloat = OGRE_ALLOC_T(float,
                                                   mLandSize*mLandSize,
@@ -167,6 +185,7 @@ namespace MWRender
                                  ESM::Land::LAND_TEXTURE_SIZE, indexes);
         }
 
+        mTerrainGroup->freeTemporaryResources();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -179,14 +198,14 @@ namespace MWRender
             {
                 for ( int y = 0; y < 2; y++ )
                 {
-                    mTerrainGroup->removeTerrain(store->cell->getGridX() * 2 + x,
+                    mTerrainGroup->unloadTerrain(store->cell->getGridX() * 2 + x,
                                                  store->cell->getGridY() * 2 + y);
                 }
             }
         }
         else
         {
-            mTerrainGroup->removeTerrain(store->cell->getGridX(),
+            mTerrainGroup->unloadTerrain(store->cell->getGridX(),
                                          store->cell->getGridY());
         }
     }
@@ -206,19 +225,17 @@ namespace MWRender
                fromY+size <= ESM::Land::LAND_TEXTURE_SIZE &&
                "Can't get a terrain texture on terrain outside the current cell");
 
-        //have a base texture for now, but this is probably not needed on most cells
-        terrainData->layerList.resize(1);
-        terrainData->layerList[0].worldSize = 256;
-        terrainData->layerList[0].textureNames.push_back("textures\\_land_default.dds"); // diffuseSpec
-        //terrainData->layerList[0].textureNames.push_back("textures\\_land_default.dds"); // normalHeight
-
+        //there is one texture that we want to use as a base (i.e. it won't have
+        //a blend map). This holds the ltex index of that base texture so that
+        //we know not to include it in the output map
+        int baseTexture = -1;
         for ( int y = fromY - 1; y < fromY + size + 1; y++ )
         {
             for ( int x = fromX - 1; x < fromX + size + 1; x++ )
             {
                 const uint16_t ltexIndex = getLtexIndexAt(store, x, y);
                 //this is the base texture, so we can ignore this at present
-                if ( ltexIndex == 0 )
+                if ( ltexIndex == baseTexture )
                 {
                     continue;
                 }
@@ -232,21 +249,38 @@ namespace MWRender
                            store->landTextures->ltex.size() > (size_t)ltexIndex - 1 &&
                            "LAND.VTEX must be within the bounds of the LTEX array");
                     
-                    std::string texture = store->landTextures->ltex[ltexIndex-1].texture;
-                    //TODO this is needed due to MWs messed up texture handling
-                    texture = texture.substr(0, texture.rfind(".")) + ".dds";
+                    std::string texture;
+                    if ( ltexIndex == 0 )
+                    {
+                        texture = "_land_default.dds";
+                    }
+                    else
+                    {
+                        texture = store->landTextures->ltex[ltexIndex-1].texture;
+                        //TODO this is needed due to MWs messed up texture handling
+                        texture = texture.substr(0, texture.rfind(".")) + ".dds";
+                    }
 
                     const size_t position = terrainData->layerList.size();
                     terrainData->layerList.push_back(Ogre::Terrain::LayerInstance());
 
-                    terrainData->layerList[position].worldSize = 256;
+                    Ogre::TexturePtr normDisp = getNormalDisp("textures\\" + texture);
+
+                    //terrainData->layerList[position].worldSize = 256;
                     terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
 
                     //Normal map. This should be removed but it would require alterations to
                     //the material generator. Another option would be to use a 1x1 blank texture
-                    //terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
+                    //terrainData->layerList[position].textureNames.push_back(normDisp->getName());
 
-                    indexes[ltexIndex] = position;
+                    if ( baseTexture == -1 )
+                    {
+                        baseTexture = ltexIndex;
+                    }
+                    else
+                    {
+                        indexes[ltexIndex] = position;
+                    }
                 }
             }
         }
@@ -278,9 +312,9 @@ namespace MWRender
         std::map<uint16_t, int>::const_iterator iter;
         for ( iter = indexes.begin(); iter != indexes.end(); ++iter )
         {
-             float* pBlend = terrain->getLayerBlendMap(iter->second)
-                                    ->getBlendPointer();
-             memset(pBlend, 0, sizeof(float) * blendSize * blendSize);
+            float* pBlend = terrain->getLayerBlendMap(iter->second)
+                                   ->getBlendPointer();
+            memset(pBlend, 0, sizeof(float) * blendSize * blendSize);
         }
 
         //covert the ltex data into a set of blend maps
@@ -295,14 +329,12 @@ namespace MWRender
                 const int relX = texX - fromX;
                 const int relY = texY - fromY;
 
-                //this is the ground texture, which is currently the base texture
-                //so don't alter the splatting map
-                if ( ltexIndex == 0 ){
+                //check if it is the base texture (which isn't in the map) and
+                //if it is don't bother altering the blend map for it
+                if ( indexes.find(ltexIndex) == indexes.end() )
+                {
                     continue;
                 }
-
-                assert (indexes.find(ltexIndex) != indexes.end() &&
-                        "Texture layer must exist");
 
                 const int layerIndex = indexes.find(ltexIndex)->second;
 
@@ -317,7 +349,7 @@ namespace MWRender
 
                 const int startY = std::max(0, relY*splatSize - blendDist);
                 const int endY = std::min(blendSize, (relY+1)*splatSize + blendDist);
-
+                
                 for ( int blendX = startX; blendX < endX; blendX++ )
                 {
                     for ( int blendY = startY; blendY < endY; blendY++ )
@@ -328,34 +360,16 @@ namespace MWRender
                         assert(blendY >= 0 && blendY < blendSize &&
                                "index must be within texture bounds");
 
-                        //calculate the distance from the edge of the square
-                        // to the point we are shading
-                        int distX = relX*splatSize - blendX;
-                        if ( distX < 0 )
-                        {
-                            distX = std::max(0, blendX - (relX+1)*splatSize);
-                        }
-
-                        int distY = relY*splatSize - blendY;
-                        if ( distY < 0 )
-                        {
-                            distY = std::max(0, blendY - (relY+1)*splatSize);
-                        }
-
-                        float blendAmount = blendDist - std::sqrt((float)distX*distX + distY*distY);
-                        blendAmount /= blendDist;
-
-                        //this is required as blendDist < sqrt(blendDist*blendDist + blendDist*blendDist)
-                        //this means that the corners are slightly the "wrong" shape but totaly smooth 
-                        //shading for the edges
-                        blendAmount = std::max( (float) 0.0, blendAmount);
-
-                        assert(blendAmount >= 0 && "Blend should never be negative");
-
-                        //flips the y
                         const int index = blendSize*(blendSize - 1 - blendY) + blendX;
-                        pBlend[index] += blendAmount;
-                        pBlend[index] = std::min((float)1, pBlend[index]);
+                        if ( blendX >= relX*splatSize && blendX < (relX+1)*splatSize &&
+                             blendY >= relY*splatSize && blendY < (relY+1)*splatSize )
+                        {
+                            pBlend[index] = 1;
+                        }
+                        else
+                        {
+                            pBlend[index] = std::max((float)pBlend[index], 0.5f);
+                        }
                     }
                 }
                 
@@ -418,6 +432,45 @@ namespace MWRender
         return store->land[cellX][cellY]
                     ->landData
                     ->textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+    }
+
+    //----------------------------------------------------------------------------------------------
+    
+    Ogre::TexturePtr TerrainManager::getNormalDisp(const std::string& fileName)
+    {
+        Ogre::TextureManager* const texMgr = Ogre::TextureManager::getSingletonPtr();
+        const std::string normalTextureName = fileName.substr(0, fileName.rfind("."))
+                                       + "_n.dds";
+        if ( !texMgr->getByName(normalTextureName).isNull() )
+        {
+            return texMgr->getByName(normalTextureName);
+        }
+
+        const std::string textureName = "default_terrain_normal";
+        if ( !texMgr->getByName(textureName).isNull() )
+        {
+            return texMgr->getByName(textureName);
+        }
+
+        Ogre::TexturePtr tex = texMgr->createManual(
+                 textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                 Ogre::TEX_TYPE_2D, 1, 1, 0, Ogre::PF_BYTE_BGRA);
+
+        Ogre::HardwarePixelBufferSharedPtr pixelBuffer = tex->getBuffer();
+         
+        pixelBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+        const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+         
+        Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
+         
+        *pDest++ = 128; // B
+        *pDest++ = 128; // G
+        *pDest++ = 128; // R
+        *pDest++ = 0;   // A
+         
+        pixelBuffer->unlock();
+
+        return tex;
     }
 
 }

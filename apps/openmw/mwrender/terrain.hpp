@@ -65,7 +65,7 @@ namespace MWRender{
          * The distance that the current cell should be shaded into the neighbouring
          * texture. The distance is in terms of the splat size of a texture
          */
-        static const float TERRAIN_SHADE_DISTANCE = 0.5;
+        static const float TERRAIN_SHADE_DISTANCE = 0.25f;
 
         /**
          * Setups up the list of textures for part of a cell, using indexes as
@@ -110,6 +110,17 @@ namespace MWRender{
          *             first splat of the current cell
          */
         int getLtexIndexAt(MWWorld::Ptr::CellStore* store, int x, int y);
+
+        /**
+         * Retrives the texture that is the normal and parallax map for the
+         * terrain. If it doesn't exist a blank texture is used
+         *
+         * The file name of the texture should be the same as the file name of
+         * the base diffuse texture, but with _n appended before the extension
+         *
+         * @param fileName the name of the *diffuse* texture
+         */
+        Ogre::TexturePtr getNormalDisp(const std::string& fileName);
         
     };
 

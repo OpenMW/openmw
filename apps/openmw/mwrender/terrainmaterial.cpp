@@ -544,7 +544,7 @@ namespace Ogre
 		params->setNamedAutoConstant("ambient", GpuProgramParameters::ACT_AMBIENT_LIGHT_COLOUR);
 		params->setNamedAutoConstant("lightPosObjSpace", GpuProgramParameters::ACT_LIGHT_POSITION_OBJECT_SPACE, 0);
 		params->setNamedAutoConstant("lightDiffuseColour", GpuProgramParameters::ACT_LIGHT_DIFFUSE_COLOUR, 0);
-		params->setNamedAutoConstant("lightSpecularColour", GpuProgramParameters::ACT_LIGHT_SPECULAR_COLOUR, 0);
+		//params->setNamedAutoConstant("lightSpecularColour", GpuProgramParameters::ACT_LIGHT_SPECULAR_COLOUR, 0);
 		params->setNamedAutoConstant("eyePosObjSpace", GpuProgramParameters::ACT_CAMERA_POSITION_OBJECT_SPACE);
 		params->setNamedAutoConstant("fogColour", GpuProgramParameters::ACT_FOG_COLOUR);
 
@@ -948,7 +948,7 @@ namespace Ogre
 			"uniform float3 ambient,\n"
 			"uniform float4 lightPosObjSpace,\n"
 			"uniform float3 lightDiffuseColour,\n"
-			"uniform float3 lightSpecularColour,\n"
+			//"uniform float3 lightSpecularColour,\n"
 			"uniform float3 eyePosObjSpace,\n"
 			// pack scale, bias and specular
 			"uniform float4 scaleBiasSpecular,\n";
@@ -1274,7 +1274,7 @@ namespace Ogre
 			else
 			{
 				// Apply specular
-				outStream << "	outputCol.rgb += litRes.z * lightSpecularColour * specular * shadow;\n";
+				//outStream << "	outputCol.rgb += litRes.z * lightSpecularColour * specular * shadow;\n";
 
 				if (prof->getParent()->getDebugLevel())
 				{
