@@ -318,7 +318,10 @@ void RenderingManager::sunDisable()
 
 void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 {
-    if (mSun) mSun->setDirection(Vector3(direction.x, -direction.z, direction.y));
+    // direction * -1 (because 'direction' is camera to sun vector and not sun to camera), 
+    // then convert from MW to ogre coordinates (swap y,z and make y negative)
+    if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.z, direction.y));
+    
     mSkyManager->setSunDirection(direction);
 }
 
