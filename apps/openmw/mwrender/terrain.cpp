@@ -300,15 +300,18 @@ namespace MWRender
         }
 
         //add the vertex colour overlay
-        //TODO sort the *4 bit
-        Ogre::TexturePtr vclr = getVertexColours(store, vertexColourAlpha, fromX*4, fromY*4, mLandSize);
-        Ogre::TexturePtr normDisp = getNormalDisp("DOES_NOT_EXIST");
+        if ( store->land[1][1]->landData->usingColours )
+        {
+            //TODO sort the *4 bit
+            Ogre::TexturePtr vclr = getVertexColours(store, vertexColourAlpha, fromX*4, fromY*4, mLandSize);
+            Ogre::TexturePtr normDisp = getNormalDisp("DOES_NOT_EXIST");
 
-        const size_t position = terrainData->layerList.size();
-        terrainData->layerList.push_back(Ogre::Terrain::LayerInstance());
-        terrainData->layerList[position].worldSize = mRealSize;
-        terrainData->layerList[position].textureNames.push_back(vclr->getName());
-        terrainData->layerList[position].textureNames.push_back(normDisp->getName());
+            const size_t position = terrainData->layerList.size();
+            terrainData->layerList.push_back(Ogre::Terrain::LayerInstance());
+            terrainData->layerList[position].worldSize = mRealSize;
+            terrainData->layerList[position].textureNames.push_back(vclr->getName());
+            terrainData->layerList[position].textureNames.push_back(normDisp->getName());
+        }
     }
 
     //----------------------------------------------------------------------------------------------
@@ -343,6 +346,7 @@ namespace MWRender
             memset(pBlend, 0, sizeof(float) * blendSize * blendSize);
         }
         //except the overlay, which we will just splat over the top
+        if ( store->land[1][1]->landData->usingColours )
         {
             //the overlay is always the last texture layer
             float* pBlend = terrain->getLayerBlendMap(terrain->getLayerCount() - 1)
