@@ -111,6 +111,8 @@ void Land::loadData(ESMReader &esm)
     }
     else
     {
+        landData->usingColours = false;
+        memset(&landData->textures, 0, 512 * sizeof(uint16_t));
         for (int i = 0; i < LAND_NUM_VERTS; i++)
         {
             landData->heights[i] = -256.0f * HEIGHT_SCALE;

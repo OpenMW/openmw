@@ -263,8 +263,7 @@ namespace MWRender
                 if ( it == indexes.end() )
                 {
                     //NB: All vtex ids are +1 compared to the ltex ids
-                    assert((int)ltexIndex >= 0 &&
-                           (int)store->landTextures->ltex.size() >= (int)ltexIndex - 1 &&
+                    assert( (int)store->landTextures->ltex.size() >= (int)ltexIndex - 1 &&
                            "LAND.VTEX must be within the bounds of the LTEX array");
                     
                     std::string texture;
