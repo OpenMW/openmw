@@ -58,6 +58,8 @@ struct Land
         float heights[LAND_NUM_VERTS];
         //float normals[LAND_NUM_VERTS * 3];
         uint16_t textures[LAND_NUM_TEXTURES];
+
+        bool usingColours;
         char colours[3 * LAND_NUM_VERTS];
     };
 

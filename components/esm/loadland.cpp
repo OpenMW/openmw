@@ -93,7 +93,10 @@ void Land::loadData(ESMReader &esm)
         }
         if (esm.isNextSub("VCLR"))
         {
-            esm.skipHSubSize(12675);
+            landData->usingColours = true;
+            esm.getHExact(&landData->colours, 3*LAND_NUM_VERTS);
+        }else{
+            landData->usingColours = false;
         }
         //TODO fix magic numbers
         uint16_t vtex[512];

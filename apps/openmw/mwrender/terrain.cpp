@@ -2,6 +2,8 @@
 #include <OgreTerrainGroup.h>
 #include <OgreTerrainMaterialGeneratorA.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include "terrain.hpp"
 
 #include "components/esm/loadland.hpp"
@@ -104,6 +106,9 @@ namespace MWRender
                     const int terrainX = cellX * 2 + x;
                     const int terrainY = cellY * 2 + y;
 
+                    //it makes far more sense to reallocate the memory here,
+                    //and let Ogre deal with it due to the issues with deleting
+                    //it at the wrong time if using threads (Which Ogre::Terrain does)
                     terrainData.inputFloat = OGRE_ALLOC_T(float,
                                                           mLandSize*mLandSize,
                                                           Ogre::MEMCATEGORY_GEOMETRY);
@@ -122,10 +127,16 @@ namespace MWRender
                                mLandSize*sizeof(float));
                     }
 
+                    //this should really be 33*33
+                    Ogre::uchar* vertexColourAlpha = OGRE_ALLOC_T(Ogre::uchar,
+                                                                  mLandSize*mLandSize,
+                                                                  Ogre::MEMCATEGORY_GENERAL);
+
                     std::map<uint16_t, int> indexes;
                     initTerrainTextures(&terrainData, store,
                                         x * numTextures, y * numTextures,
-                                        numTextures, indexes);
+                                        numTextures, vertexColourAlpha,
+                                        indexes);
 
                     assert( mTerrainGroup->getTerrain(cellX, cellY) == NULL &&
                             "The terrain for this cell already existed" );
@@ -133,9 +144,20 @@ namespace MWRender
 
                     mTerrainGroup->loadTerrain(terrainX, terrainY, true);
                     Ogre::Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
+
+                    Ogre::Image vertexColourBlendMap = Ogre::Image();
+                    vertexColourBlendMap.loadDynamicImage(vertexColourAlpha,
+                                                          mLandSize, mLandSize, 1,
+                                                          Ogre::PF_A8, true)
+                                        .resize(mTerrainGlobals->getLayerBlendMapSize(),
+                                                mTerrainGlobals->getLayerBlendMapSize(),
+                                                Ogre::Image::FILTER_BOX);
+
                     initTerrainBlendMaps(terrain, store,
                                          x * numTextures, y * numTextures,
-                                         numTextures, indexes);
+                                         numTextures,
+                                         vertexColourBlendMap.getData(),
+                                         indexes);
                     
                 }
             }
@@ -154,16 +176,30 @@ namespace MWRender
                    &store->land[1][1]->landData->heights[0],
                    mLandSize*mLandSize*sizeof(float));
 
+            Ogre::uchar* vertexColourAlpha = OGRE_ALLOC_T(Ogre::uchar,
+                                                          mLandSize*mLandSize,
+                                                          Ogre::MEMCATEGORY_GENERAL);
+
             std::map<uint16_t, int> indexes;
             initTerrainTextures(&terrainData, store, 0, 0,
-                                ESM::Land::LAND_TEXTURE_SIZE, indexes);
+                                ESM::Land::LAND_TEXTURE_SIZE, vertexColourAlpha, indexes);
 
             mTerrainGroup->defineTerrain(cellX, cellY, &terrainData);
 
             mTerrainGroup->loadTerrain(cellX, cellY, true);
             Ogre::Terrain* terrain = mTerrainGroup->getTerrain(cellX, cellY);
+
+            Ogre::Image vertexColourBlendMap = Ogre::Image();
+            vertexColourBlendMap.loadDynamicImage(vertexColourAlpha,
+                                                  mLandSize, mLandSize, 1,
+                                                  Ogre::PF_A8, true)
+                                .resize(mTerrainGlobals->getLayerBlendMapSize(),
+                                        mTerrainGlobals->getLayerBlendMapSize(),
+                                        Ogre::Image::FILTER_BOX);
+
             initTerrainBlendMaps(terrain, store, 0, 0,
-                                 ESM::Land::LAND_TEXTURE_SIZE, indexes);
+                                 ESM::Land::LAND_TEXTURE_SIZE,
+                                 vertexColourBlendMap.getData(), indexes);
         }
 
         mTerrainGroup->freeTemporaryResources();
@@ -196,6 +232,7 @@ namespace MWRender
     void TerrainManager::initTerrainTextures(Ogre::Terrain::ImportData* terrainData,
                                              MWWorld::Ptr::CellStore* store,
                                              int fromX, int fromY, int size,
+                                             Ogre::uchar* vertexColourAlpha,
                                              std::map<uint16_t, int>& indexes)
     {
         assert(store != NULL && "store must be a valid pointer");
@@ -227,7 +264,7 @@ namespace MWRender
                 {
                     //NB: All vtex ids are +1 compared to the ltex ids
                     assert((int)ltexIndex >= 0 &&
-                           store->landTextures->ltex.size() > (size_t)ltexIndex - 1 &&
+                           (int)store->landTextures->ltex.size() >= (int)ltexIndex - 1 &&
                            "LAND.VTEX must be within the bounds of the LTEX array");
                     
                     std::string texture;
@@ -262,6 +299,17 @@ namespace MWRender
                 }
             }
         }
+
+        //add the vertex colour overlay
+        //TODO sort the *4 bit
+        Ogre::TexturePtr vclr = getVertexColours(store, vertexColourAlpha, fromX*4, fromY*4, mLandSize);
+        Ogre::TexturePtr normDisp = getNormalDisp("DOES_NOT_EXIST");
+
+        const size_t position = terrainData->layerList.size();
+        terrainData->layerList.push_back(Ogre::Terrain::LayerInstance());
+        terrainData->layerList[position].worldSize = mRealSize;
+        terrainData->layerList[position].textureNames.push_back(vclr->getName());
+        terrainData->layerList[position].textureNames.push_back(normDisp->getName());
     }
 
     //----------------------------------------------------------------------------------------------
@@ -269,6 +317,7 @@ namespace MWRender
     void TerrainManager::initTerrainBlendMaps(Ogre::Terrain* terrain,
                                               MWWorld::Ptr::CellStore* store,
                                               int fromX, int fromY, int size,
+                                              Ogre::uchar* vertexColourAlpha,
                                               const std::map<uint16_t, int>& indexes)
     {
         assert(store != NULL && "store must be a valid pointer");
@@ -293,6 +342,15 @@ namespace MWRender
             float* pBlend = terrain->getLayerBlendMap(iter->second)
                                    ->getBlendPointer();
             memset(pBlend, 0, sizeof(float) * blendSize * blendSize);
+        }
+        //except the overlay, which we will just splat over the top
+        {
+            //the overlay is always the last texture layer
+            float* pBlend = terrain->getLayerBlendMap(terrain->getLayerCount() - 1)
+                                   ->getBlendPointer();
+            for ( int i = 0; i < blendSize * blendSize; i++ ){
+                *pBlend++ = (*vertexColourAlpha++)/255.0f;
+            }
         }
 
         //covert the ltex data into a set of blend maps
@@ -354,10 +412,9 @@ namespace MWRender
             }
         }
 
-        //update the maps
-        for ( iter = indexes.begin(); iter != indexes.end(); ++iter )
+        for ( int i = 1; i < terrain->getLayerCount(); i++ )
         {
-             Ogre::TerrainLayerBlendMap* blend = terrain->getLayerBlendMap(iter->second);
+             Ogre::TerrainLayerBlendMap* blend = terrain->getLayerBlendMap(i);
              blend->dirty();
              blend->update();
         }
@@ -424,8 +481,7 @@ namespace MWRender
             return texMgr->getByName(normalTextureName);
         }
 
-        const std::string textureName = "default_terrain_normal";
-        if ( !texMgr->getByName(textureName).isNull() )
+        const std::string textureName = "default_terrain_normal"; if ( !texMgr->getByName(textureName).isNull() )
         {
             return texMgr->getByName(textureName);
         }
@@ -445,6 +501,76 @@ namespace MWRender
         *pDest++ = 128; // G
         *pDest++ = 128; // R
         *pDest++ = 0;   // A
+         
+        pixelBuffer->unlock();
+
+        return tex;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    Ogre::TexturePtr TerrainManager::getVertexColours(MWWorld::Ptr::CellStore* store,
+                                                      Ogre::uchar* alpha,
+                                                      int fromX, int fromY, int size)
+    {
+        Ogre::TextureManager* const texMgr = Ogre::TextureManager::getSingletonPtr();
+        const char* const colours = store->land[1][1]->landData->colours;
+
+        const std::string colourTextureName = "VtexColours_" +
+                                              boost::lexical_cast<std::string>(store->cell->getGridX()) +
+                                              "_" +
+                                              boost::lexical_cast<std::string>(store->cell->getGridY()) +
+                                              "_" +
+                                              boost::lexical_cast<std::string>(fromX) +
+                                              "_" +
+                                              boost::lexical_cast<std::string>(fromY);
+
+        Ogre::TexturePtr tex = texMgr->getByName(colourTextureName);
+        if ( !tex.isNull() )
+        {
+            return tex;
+        }
+
+        tex = texMgr->createManual(colourTextureName,
+                                   Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                   Ogre::TEX_TYPE_2D, size, size, 0, Ogre::PF_BYTE_BGRA);
+
+        Ogre::HardwarePixelBufferSharedPtr pixelBuffer = tex->getBuffer();
+         
+        pixelBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+        const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+         
+        Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
+         
+        for ( int y = 0; y < size; y++ )
+        {
+            for ( int x = 0; x < size; x++ )
+            {
+                const size_t colourOffset = (y+fromY)*3*65 + (x+fromX)*3;
+
+                assert( colourOffset >= 0 && colourOffset < 65*65*3 &&
+                        "Colour offset is out of the expected bounds of record" );
+
+                const unsigned char r = colours[colourOffset + 0];
+                const unsigned char g = colours[colourOffset + 1];
+                const unsigned char b = colours[colourOffset + 2];
+
+                //as is the case elsewhere we need to flip the y
+                const size_t imageOffset = (size - 1 - y)*size*4 + x*4;
+                pDest[imageOffset + 0] = b;
+                pDest[imageOffset + 1] = g;
+                pDest[imageOffset + 2] = r;
+                pDest[imageOffset + 3] = 255; //Alpha, TODO this needs to be removed
+
+                const size_t alphaOffset = (size - 1 - y)*size + x;
+                if ( r == 255 && g == 255 && b == 255 ){
+                    alpha[alphaOffset] = 0;
+                }else{
+                    alpha[alphaOffset] = 128;
+                }
+
+            }
+        }
          
         pixelBuffer->unlock();
 

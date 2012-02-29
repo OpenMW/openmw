@@ -74,12 +74,16 @@ namespace MWRender{
          * @param fromX the ltex index in the current cell to start making the texture from
          * @param fromY the ltex index in the current cell to start making the texture from
          * @param size the size (number of splats) to get
+         * @param vertexColourAlpha this should be an empty array containing the number of
+         *                          vertexes in this terrain segment. It is filled with the
+         *                          alpha values for the vertex colours
          * @param indexes a mapping of ltex index to the terrain texture layer that
          *          can be used by initTerrainBlendMaps
          */
         void initTerrainTextures(Ogre::Terrain::ImportData* terrainData,
                                  MWWorld::Ptr::CellStore* store,
                                  int fromX, int fromY, int size,
+                                 Ogre::uchar* vertexColourAlpha,
                                  std::map<uint16_t, int>& indexes);
 
         /**
@@ -90,11 +94,16 @@ namespace MWRender{
          * @param fromX the ltex index in the current cell to start making the texture from
          * @param fromY the ltex index in the current cell to start making the texture from
          * @param size the size (number of splats) to get
+         * @param vertexColourAlpha this should be an array containing the alpha values
+         *                          for the vertex colours. NOTE: This should be the
+         *                          size of a splat map, which is NOT the same size
+         *                          as retured from initTerrainTextures.
          * @param indexes the mapping of ltex to blend map produced by initTerrainTextures
          */
         void initTerrainBlendMaps(Ogre::Terrain* terrain,
                                   MWWorld::Ptr::CellStore* store,
                                   int fromX, int fromY, int size,
+                                  Ogre::uchar* vertexColourAlpha,
                                   const std::map<uint16_t, int>& indexes);
 
         /**
@@ -118,7 +127,22 @@ namespace MWRender{
          * @param fileName the name of the *diffuse* texture
          */
         Ogre::TexturePtr getNormalDisp(const std::string& fileName);
-        
+
+        /**
+         * Due to the fact that Ogre terrain doesn't support vertex colours
+         * we have to generate them manually
+         *
+         * @param store the cell store for the given terrain cell
+         * @param vertexColourAlpha this should be an empty array containing the number of
+         *                          vertexes in this terrain segment. It is filled with the
+         *                          alpha values for the vertex colours
+         * @param fromX the *vertex* index in the current cell to start making texture from
+         * @param fromY the *vertex* index in the current cell to start making the texture from
+         * @param size the size (number of vertexes) to get
+         */
+        Ogre::TexturePtr getVertexColours(MWWorld::Ptr::CellStore* store,
+                                          Ogre::uchar* alpha,
+                                          int fromX, int fromY, int size);
     };
 
 }
