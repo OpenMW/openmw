@@ -46,7 +46,7 @@ MainDialog::MainDialog()
     setMinimumSize(QSize(575, 575));
 
     // Load the stylesheet
-    QString config = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "launcher.qss").string());
+    QString config = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "resources/launcher.qss").string());
     QFile file(config);
 
     if (!file.exists()) {
