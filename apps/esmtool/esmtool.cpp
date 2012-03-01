@@ -29,6 +29,7 @@ int main(int argc, char**argv)
     }
 
   ESMReader esm;
+  esm.setEncoding("win1252"); // FIXME: This should be configurable
   const char* filename = info.inputs[0];
   cout << "\nFile: " << filename << endl;
 
