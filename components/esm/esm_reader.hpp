@@ -153,7 +153,7 @@ public:
    *************************************************************************/
 
   int getVer() { return mCtx.header.version; }
-  float getFVer() { return *((float*)&mCtx.header.version); }
+  float getFVer() { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
   int getSpecial() { return mSpf; }
   const std::string getAuthor() { return mCtx.header.author.toString(); }
   const std::string getDesc() { return mCtx.header.desc.toString(); }
