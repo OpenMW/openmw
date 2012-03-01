@@ -142,6 +142,8 @@ namespace Ogre
 			*/
 			bool getReceiveDynamicShadowsLowLod() const { return mLowLodShadows; }
 
+                        int getNumberOfLightsSupported() const;
+
 			/// Internal
 			bool _isSM3Available() const { return mSM3Available; }
 		

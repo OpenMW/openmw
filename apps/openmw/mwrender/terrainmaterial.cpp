@@ -36,6 +36,8 @@ THE SOFTWARE.
 #include "OgreHardwarePixelBuffer.h"
 #include "OgreShadowCameraSetupPSSM.h"
 
+#define POINTLIGHTS
+
 namespace Ogre
 {
 	//---------------------------------------------------------------------
@@ -218,6 +220,22 @@ namespace Ogre
 		
 
 	}
+        int TerrainMaterialGeneratorB::SM2Profile::getNumberOfLightsSupported() const
+        {
+                #ifndef POINTLIGHTS
+                return 1;
+                #else
+                // number of supported lights depends on the number of available constant registers,
+                // which in turn depends on the shader profile used
+                if (GpuProgramManager::getSingleton().isSyntaxSupported("ps_3_0")
+                        || GpuProgramManager::getSingleton().isSyntaxSupported("ps_4_0")
+                        || GpuProgramManager::getSingleton().isSyntaxSupported("fp40")
+                )
+                        return 32;
+                else
+                        return 8;
+                #endif
+        }
 	//---------------------------------------------------------------------
 	MaterialPtr TerrainMaterialGeneratorB::SM2Profile::generate(const Terrain* terrain)
 	{
@@ -542,9 +560,15 @@ namespace Ogre
 		params->setIgnoreMissingParams(true);
 
 		params->setNamedAutoConstant("ambient", GpuProgramParameters::ACT_AMBIENT_LIGHT_COLOUR);
-		params->setNamedAutoConstant("lightPosObjSpace", GpuProgramParameters::ACT_LIGHT_POSITION_OBJECT_SPACE, 0);
-		params->setNamedAutoConstant("lightDiffuseColour", GpuProgramParameters::ACT_LIGHT_DIFFUSE_COLOUR, 0);
-		//params->setNamedAutoConstant("lightSpecularColour", GpuProgramParameters::ACT_LIGHT_SPECULAR_COLOUR, 0);
+
+                for (int i=0; i<prof->getNumberOfLightsSupported(); ++i)
+                {
+                        params->setNamedAutoConstant("lightPosObjSpace"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_POSITION_OBJECT_SPACE, i);
+                        params->setNamedAutoConstant("lightDiffuseColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_DIFFUSE_COLOUR, i);
+                        params->setNamedAutoConstant("lightAttenuation"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_ATTENUATION, i);
+                        //params->setNamedAutoConstant("lightSpecularColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_SPECULAR_COLOUR, i);
+                }
+                
 		params->setNamedAutoConstant("eyePosObjSpace", GpuProgramParameters::ACT_CAMERA_POSITION_OBJECT_SPACE);
 		params->setNamedAutoConstant("fogColour", GpuProgramParameters::ACT_FOG_COLOUR);
 
@@ -945,10 +969,25 @@ namespace Ogre
 		outStream <<
 			// Only 1 light supported in this version
 			// deferred shading profile / generator later, ok? :)
-			"uniform float3 ambient,\n"
-			"uniform float4 lightPosObjSpace,\n"
-			"uniform float3 lightDiffuseColour,\n"
-			//"uniform float3 lightSpecularColour,\n"
+			"uniform float3 ambient,\n";
+
+
+                for (int i=0; i<prof->getNumberOfLightsSupported(); ++i)
+                {
+                        outStream <<
+			"uniform float4 lightPosObjSpace"<<i<<",\n"
+			"uniform float3 lightDiffuseColour"<<i<<",\n"
+			//"uniform float3 lightSpecularColour"<<i<<",\n"
+                        ;
+
+                        #ifdef POINTLIGHTS
+                        outStream <<
+                        "uniform float4 lightAttenuation"<<i<<",\n";
+                        #endif
+
+                }
+
+                outStream <<
 			"uniform float3 eyePosObjSpace,\n"
 			// pack scale, bias and specular
 			"uniform float4 scaleBiasSpecular,\n";
@@ -1027,9 +1066,12 @@ namespace Ogre
 
 		}
 
-		outStream <<
-			"	float3 lightDir = \n"
-			"		lightPosObjSpace.xyz -  (position.xyz * lightPosObjSpace.w);\n"
+                for (int i=0; i<prof->getNumberOfLightsSupported(); ++i)
+                        outStream <<
+			"	float3 lightDir"<<i<<" = \n"
+			"		lightPosObjSpace"<<i<<".xyz -  (position.xyz * lightPosObjSpace"<<i<<".w);\n";
+
+                outStream <<
 			"	float3 eyeDir = eyePosObjSpace - position.xyz;\n"
 
 			// set up accumulation areas
@@ -1088,12 +1130,28 @@ namespace Ogre
 			}
 			else
 			{
-				// simple per-pixel lighting with no normal mapping
-				outStream << "	lightDir = normalize(lightDir);\n";
-				outStream << "	eyeDir = normalize(eyeDir);\n";
-				outStream << "	float3 halfAngle = normalize(lightDir + eyeDir);\n";
-				outStream << "	float4 litRes = lit(dot(lightDir, normal), dot(halfAngle, normal), scaleBiasSpecular.z);\n";
+                                #ifdef POINTLIGHTS
+                                outStream << "float d; \n"
+                                             "float attn; \n";
+                                #endif
 
+                                outStream <<
+                                "      eyeDir = normalize(eyeDir); \n";
+                                
+				// simple per-pixel lighting with no normal mapping
+                                for (int i=0; i<prof->getNumberOfLightsSupported(); ++i)
+                                {
+                                        outStream << "	float3 halfAngle"<<i<<" = normalize(lightDir"<<i<<" + eyeDir);\n"
+                                                "	float4 litRes"<<i<<" = lit(dot(normalize(lightDir"<<i<<"), normal), dot(halfAngle"<<i<<", normal), scaleBiasSpecular.z);\n";
+
+                                        #ifdef POINTLIGHTS
+                                        outStream <<
+                                        // pre-multiply light color with attenuation factor
+                                           "d = length( lightDir"<<i<<" ); \n"
+                                           "attn = ( 1.0 / (( lightAttenuation"<<i<<".y ) + ( lightAttenuation"<<i<<".z * d ) + ( lightAttenuation"<<i<<".w * d * d ))); \n"
+                                           "lightDiffuseColour"<<i<<" *= attn; \n";
+                                        #endif
+                                }
 			}
 		}
 
@@ -1257,8 +1315,11 @@ namespace Ogre
 				generateFpDynamicShadows(prof, terrain, tt, outStream);
 			}
 
+                        outStream << "	outputCol.rgb += ambient * diffuse; \n";
+
 			// diffuse lighting
-			outStream << "	outputCol.rgb += ambient * diffuse + litRes.y * lightDiffuseColour * diffuse * shadow;\n";
+                        for (int i=0; i<prof->getNumberOfLightsSupported(); ++i)
+                                outStream << "	outputCol.rgb += litRes"<<i<<".y * lightDiffuseColour"<<i<<" * diffuse * shadow;\n";
 
 			// specular default
 			if (!prof->isLayerSpecularMappingEnabled())

@@ -29,10 +29,10 @@ namespace MWRender
             static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         mTerrainGlobals->setMaxPixelError(8);
-        //mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 256 : 1024);
-        //mTerrainGlobals->setLightMapSize(SPLIT_TERRAIN ? 256 : 1024);
-        //mTerrainGlobals->setCompositeMapSize(SPLIT_TERRAIN ? 256 : 1024);
-        //mTerrainGlobals->setDefaultGlobalColourMapSize(256);
+        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        mTerrainGlobals->setLightMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        mTerrainGlobals->setCompositeMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        mTerrainGlobals->setDefaultGlobalColourMapSize(256);
 
         //10 (default) didn't seem to be quite enough
         mTerrainGlobals->setSkirtSize(128);
@@ -266,7 +266,7 @@ namespace MWRender
 
                     Ogre::TexturePtr normDisp = getNormalDisp("textures\\" + texture);
 
-                    //terrainData->layerList[position].worldSize = 256;
+                    terrainData->layerList[position].worldSize = 256;
                     terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
 
                     //Normal map. This should be removed but it would require alterations to
