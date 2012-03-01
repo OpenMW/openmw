@@ -146,16 +146,16 @@ namespace MWRender
                                         x * numTextures, y * numTextures,
                                         numTextures, indexes);
 
-                    assert( mTerrainGroup->getTerrain(cellX, cellY) == NULL &&
-                            "The terrain for this cell already existed" );
-                    mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
+                    if (mTerrainGroup->getTerrain(cellX, cellY) == NULL)
+                    {
+                        mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
 
-                    mTerrainGroup->loadTerrain(terrainX, terrainY, true);
-                    Ogre::Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
-                    initTerrainBlendMaps(terrain, store,
-                                         x * numTextures, y * numTextures,
-                                         numTextures, indexes);
-                    
+                        mTerrainGroup->loadTerrain(terrainX, terrainY, true);
+                        Ogre::Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
+                        initTerrainBlendMaps(terrain, store,
+                                             x * numTextures, y * numTextures,
+                                             numTextures, indexes);
+                    }
                 }
             }
         }
@@ -246,7 +246,7 @@ namespace MWRender
                 {
                     //NB: All vtex ids are +1 compared to the ltex ids
                     assert((int)ltexIndex >= 0 &&
-                           store->landTextures->ltex.size() > (size_t)ltexIndex - 1 &&
+                           (int)store->landTextures->ltex.size() > (int)ltexIndex - 1 &&
                            "LAND.VTEX must be within the bounds of the LTEX array");
                     
                     std::string texture;
