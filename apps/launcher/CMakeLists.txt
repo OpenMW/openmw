@@ -72,7 +72,7 @@ endif()
 
 if (APPLE)
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-        "${APP_BUNDLE_DIR}/../resources/launcher.qss")
+        "${APP_BUNDLE_DIR}/../launcher.qss")
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
         "${APP_BUNDLE_DIR}/../launcher.cfg")
 else()
