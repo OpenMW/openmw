@@ -1,36 +1,138 @@
+#include <iostream>
+
+#include <boost/program_options.hpp>
+
 #include <components/esm/esm_reader.hpp>
 #include <components/esm/records.hpp>
 
-#include "esmtool_cmd.h"
-
-#include <iostream>
+#define ESMTOOL_VERSION 1.1
 
 using namespace std;
 using namespace ESM;
 
+// Create a local alias for brevity
+namespace bpo = boost::program_options;
+
 void printRaw(ESMReader &esm);
 void loadCell(Cell &cell, ESMReader &esm, bool quiet);
 
-int main(int argc, char**argv)
+// Based on the legacy struct
+struct Arguments
 {
-  gengetopt_args_info info;
+    unsigned int raw_given;
+    unsigned int quiet_given;
+    unsigned int loadcells_given;
+    std::string encoding;
+    std::string filename;
+};
 
-  if(cmdline_parser(argc, argv, &info) != 0)
-    return 1;
+bool parseOptions (int argc, char** argv, Arguments &info)
+{
+    bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] file \nAllowed options");
 
-  if(info.inputs_num != 1)
+    desc.add_options()
+        ("help,h", "print help message.")
+        ("version,v", "print version information and quit.")
+        ("raw,r", "Show an unformattet list of all records and subrecords.")
+        ("quiet,q", "Supress all record information. Useful for speed tests.")
+        ("loadcells,C", "Browse through contents of all cells.")
+
+        ( "encoding,e", bpo::value<std::string>(&(info.encoding))->
+            default_value("win1252"),
+            "Character encoding used in ESMTool:\n"
+            "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+            "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+            "\n\twin1252 - Western European (Latin) alphabet, used by default")
+        ;
+
+    std::string finalText = "\nIf no option is given, the default action is to parse all records in the archive\nand display diagnostic information.";
+
+    // input-file is hidden and used as a positional argument
+    bpo::options_description hidden("Hidden Options");
+
+    hidden.add_options()
+        ( "input-file,i", bpo::value< vector<std::string> >(), "input file")
+        ;
+
+    bpo::positional_options_description p;
+    p.add("input-file", -1);
+
+    // there might be a better way to do this
+    bpo::options_description all;
+    all.add(desc).add(hidden);
+    bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
+        .options(all).positional(p).run();
+
+    bpo::variables_map variables;
+    bpo::store(valid_opts, variables);
+    bpo::notify(variables);
+
+    if (variables.count ("help"))
     {
-      if(info.inputs_num == 0)
-        cout << "ERROR: missing ES file\n\n";
-      else
-        cout << "ERROR: more than one ES file specified\n\n";
-      cmdline_parser_print_help();
-      return 1;
+        std::cout << desc << finalText << std::endl;
+        return false;
+    }
+    if (variables.count ("version"))
+    {
+        std::cout << "ESMTool version " << ESMTOOL_VERSION << std::endl;
+        return false;
     }
 
+    if ( !variables.count("input-file") )
+    {
+        std::cout << "\nERROR: missing ES file\n\n";
+        std::cout << desc << finalText << std::endl;
+        return false;
+    }
+
+    // handling gracefully the user adding multiple files
+    if (variables["input-file"].as< vector<std::string> >().size() > 1)
+    {
+        std::cout << "\nERROR: more than one ES file specified\n\n";
+        std::cout << desc << finalText << std::endl;
+        return false;
+    }
+
+    info.filename = variables["input-file"].as< vector<std::string> >()[0];
+
+    info.raw_given = variables.count ("raw");
+    info.quiet_given = variables.count ("quiet");
+    info.loadcells_given = variables.count ("loadcells");
+
+    // Font encoding settings
+    info.encoding = variables["encoding"].as<std::string>();
+    if (info.encoding == "win1250")
+    {
+        std::cout << "Using Central and Eastern European font encoding." << std::endl;
+    }
+    else if (info.encoding == "win1251")
+    {
+        std::cout << "Using Cyrillic font encoding." << std::endl;
+    }
+    else
+    {
+        if(info.encoding != "win1252")
+        {
+            std::cout << info.encoding << " is not a valid encoding option." << std::endl;
+            info.encoding = "win1252";
+        }
+        std::cout << "Using default (English) font encoding." << std::endl;
+    }
+
+    return true;
+}
+
+
+int main(int argc, char**argv)
+{
+  Arguments info;
+  if(!parseOptions (argc, argv, info))
+    return 1;
+
   ESMReader esm;
-  esm.setEncoding("win1252"); // FIXME: This should be configurable
-  const char* filename = info.inputs[0];
+  esm.setEncoding(info.encoding);
+
+  string filename = info.filename;
   cout << "\nFile: " << filename << endl;
 
   try {
