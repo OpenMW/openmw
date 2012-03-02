@@ -21,10 +21,10 @@ static size_t mw_strnlen(const char *s, size_t n)
     if (strnlen != NULL) {
         return strnlen(s, n);
     }
-	else {
-  		const char *p = (const char *)memchr(s, 0, n);
-  		return(p ? p-s : n);
-  	}
+    else {
+        const char *p = (const char *)memchr(s, 0, n);
+        return(p ? p-s : n);
+    }
 }
 #define strnlen mw_strnlen
 #endif
