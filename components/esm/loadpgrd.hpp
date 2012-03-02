@@ -19,12 +19,33 @@ struct PathGrid
         short s2; // Number of path points? Size of PGRP block is always 16 * s2;
     }; // 12 bytes
 
+#pragma pack(push, 1)
+    struct Point // path grid point
+    {
+        float x, y, z; // Location of point
+        int unknown; // Possibly flag for coloring/user-placed vs auto-generated
+    }; // 16 bytes
+
+    struct Edge // path grid edge
+    {
+        int v0, v1; // index of points connected with this edge
+    }; // 8 bytes
+#pragma pack(pop)
+
     std::string cell; // Cell name
     DATAstruct data;
+
+    Point *points;
+    int pointCount;
+    
+    Edge *edges;
+    int edgeCount;
+
     ESM_Context context; // Context so we can return here later and
                          // finish the job
-
     void load(ESMReader &esm);
+
+    ~PathGrid();
 };
 }
 #endif

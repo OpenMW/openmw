@@ -74,7 +74,7 @@ namespace ESMS
     ScriptListT<Script>         scripts;
     IndexListT<MagicEffect>     magicEffects;
     IndexListT<Skill>           skills;
-    //RecListT<PathGrid>    pathgrids;
+    RecListT<PathGrid>          pathgrids;
 
     // Special entry which is hardcoded and not loaded from an ESM
     IndexListT<Attribute>       attributes;
@@ -124,7 +124,7 @@ namespace ESMS
       recLists[REC_MISC] = &miscItems;
       recLists[REC_NPC_] = &npcs;
       recLists[REC_NPCC] = &npcChange;
-      //recLists[REC_PGRD] = &pathgrids;
+      recLists[REC_PGRD] = &pathgrids;
       recLists[REC_PROB] = &probes;
       recLists[REC_RACE] = &races;
       recLists[REC_REGN] = &regions;

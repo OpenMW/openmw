@@ -255,6 +255,13 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 
     # prepare plugins
+    if (${CMAKE_BUILD_TYPE} MATCHES "Release" OR
+        ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
+    else()
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
+    endif()
+
     foreach(plugin ${USED_OGRE_PLUGINS})
         configure_file("${OGRE_PLUGIN_DIR}/${plugin}.dylib"
                         "${APP_BUNDLE_DIR}/Contents/Plugins/${plugin}.dylib"
