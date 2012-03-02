@@ -135,7 +135,7 @@ namespace Physic
          * Create a RigidBody.It does not add it to the simulation, but it does add it to the rigidBody Map,
          * so you can get it with the getRigidBody function.
          */
-        RigidBody* createRigidBody(std::string mesh,std::string name);
+        RigidBody* createRigidBody(std::string mesh,std::string name,float scale);
 
         /**
          * Add a RigidBody to the simulation
