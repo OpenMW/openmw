@@ -123,6 +123,9 @@ namespace MWRender
                     const int terrainX = cellX * 2 + x;
                     const int terrainY = cellY * 2 + y;
 
+                    //it makes far more sense to reallocate the memory here,
+                    //and let Ogre deal with it due to the issues with deleting
+                    //it at the wrong time if using threads (Which Ogre::Terrain does)
                     terrainData.inputFloat = OGRE_ALLOC_T(float,
                                                           mLandSize*mLandSize,
                                                           Ogre::MEMCATEGORY_GEOMETRY);
@@ -151,10 +154,19 @@ namespace MWRender
                         mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
 
                         mTerrainGroup->loadTerrain(terrainX, terrainY, true);
+
                         Ogre::Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
                         initTerrainBlendMaps(terrain, store,
                                              x * numTextures, y * numTextures,
-                                             numTextures, indexes);
+                                             numTextures,
+                                             indexes);
+
+                        if ( store->land[1][1]->landData->usingColours )
+                        {
+                            Ogre::Image vertex = getVertexColours(store, x*32, y*32, mLandSize);
+                            terrain->setGlobalColourMapEnabled(true);
+                            terrain->getGlobalColourMap()->loadImage(vertex);
+                        }
                     }
                 }
             }
@@ -181,8 +193,17 @@ namespace MWRender
 
             mTerrainGroup->loadTerrain(cellX, cellY, true);
             Ogre::Terrain* terrain = mTerrainGroup->getTerrain(cellX, cellY);
+
             initTerrainBlendMaps(terrain, store, 0, 0,
-                                 ESM::Land::LAND_TEXTURE_SIZE, indexes);
+                                 ESM::Land::LAND_TEXTURE_SIZE,
+                                 indexes);
+
+            if ( store->land[1][1]->landData->usingColours )
+            {
+                Ogre::Image vertex = getVertexColours(store, 0, 0, mLandSize);
+                terrain->setGlobalColourMapEnabled(true);
+                terrain->getGlobalColourMap()->loadImage(vertex);
+            }
         }
 
         mTerrainGroup->freeTemporaryResources();
@@ -245,8 +266,8 @@ namespace MWRender
                 if ( it == indexes.end() )
                 {
                     //NB: All vtex ids are +1 compared to the ltex ids
-                    assert((int)ltexIndex >= 0 &&
-                           (int)store->landTextures->ltex.size() > (int)ltexIndex - 1 &&
+
+                    assert( (int)store->landTextures->ltex.size() >= (int)ltexIndex - 1 &&
                            "LAND.VTEX must be within the bounds of the LTEX array");
                     
                     std::string texture;
@@ -376,10 +397,9 @@ namespace MWRender
             }
         }
 
-        //update the maps
-        for ( iter = indexes.begin(); iter != indexes.end(); ++iter )
+        for ( int i = 1; i < terrain->getLayerCount(); i++ )
         {
-             Ogre::TerrainLayerBlendMap* blend = terrain->getLayerBlendMap(iter->second);
+             Ogre::TerrainLayerBlendMap* blend = terrain->getLayerBlendMap(i);
              blend->dirty();
              blend->update();
         }
@@ -471,6 +491,45 @@ namespace MWRender
         pixelBuffer->unlock();
 
         return tex;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    Ogre::Image TerrainManager::getVertexColours(MWWorld::Ptr::CellStore* store,
+                                                      int fromX, int fromY, int size)
+    {
+        const char* const colours = store->land[1][1]->landData->colours;
+
+        Ogre::uchar* imgData = OGRE_ALLOC_T(Ogre::uchar,
+                                            size*size*sizeof(Ogre::uchar)*3,
+                                            Ogre::MEMCATEGORY_GENERAL);
+         
+        for ( int y = 0; y < size; y++ )
+        {
+            for ( int x = 0; x < size; x++ )
+            {
+                const size_t colourOffset = (y+fromY)*3*65 + (x+fromX)*3;
+
+                assert( colourOffset >= 0 && colourOffset < 65*65*3 &&
+                        "Colour offset is out of the expected bounds of record" );
+
+                const unsigned char r = colours[colourOffset + 0];
+                const unsigned char g = colours[colourOffset + 1];
+                const unsigned char b = colours[colourOffset + 2];
+
+                //as is the case elsewhere we need to flip the y
+                const size_t imageOffset = (size - 1 - y)*size*3 + x*3;
+                imgData[imageOffset + 0] = r;
+                imgData[imageOffset + 1] = g;
+                imgData[imageOffset + 2] = b;
+
+            }
+        }
+         
+        Ogre::Image img;
+        img.loadDynamicImage(imgData, size, size, 1, Ogre::PF_R8G8B8, true);
+
+        return img;
     }
 
 }

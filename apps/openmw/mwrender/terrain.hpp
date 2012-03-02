@@ -121,7 +121,20 @@ namespace MWRender{
          * @param fileName the name of the *diffuse* texture
          */
         Ogre::TexturePtr getNormalDisp(const std::string& fileName);
-        
+
+        /**
+         * Due to the fact that Ogre terrain doesn't support vertex colours
+         * we have to generate them manually
+         *
+         * @param store the cell store for the given terrain cell
+         * @param fromX the *vertex* index in the current cell to start making texture from
+         * @param fromY the *vertex* index in the current cell to start making the texture from
+         * @param size the size (number of vertexes) to get
+         *
+         * @TODO FIXME the return of this function possibly copies the image data
+         */
+        Ogre::Image getVertexColours(MWWorld::Ptr::CellStore* store,
+                                          int fromX, int fromY, int size);
     };
 
 }
