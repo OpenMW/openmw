@@ -31,9 +31,9 @@ namespace MWRender
             static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         mTerrainGlobals->setMaxPixelError(8);
-        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 32 : 1024);
-        mTerrainGlobals->setLightMapSize(SPLIT_TERRAIN ? 256 : 1024);
-        mTerrainGlobals->setCompositeMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        mTerrainGlobals->setLayerBlendMapSize(32);
+        mTerrainGlobals->setLightMapSize(256);
+        mTerrainGlobals->setCompositeMapSize(256);
         mTerrainGlobals->setDefaultGlobalColourMapSize(256);
 
         //10 (default) didn't seem to be quite enough
@@ -52,29 +52,21 @@ namespace MWRender
         matProfile->setReceiveDynamicShadowsEnabled(false);
         matProfile->setGlobalColourMapEnabled(true);
 
-        mLandSize = ESM::Land::LAND_SIZE;
-        mRealSize = ESM::Land::REAL_SIZE;
-        if ( SPLIT_TERRAIN )
-        {
-            mLandSize  = (mLandSize - 1)/2 + 1;
-            mRealSize /= 2;
-        }
-
         mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(mgr,
                                                     Ogre::Terrain::ALIGN_X_Z,
                                                     mLandSize,
-                                                    mRealSize);
+                                                    mWorldSize);
 
-        mTerrainGroup->setOrigin(Ogre::Vector3(mRealSize/2,
+        mTerrainGroup->setOrigin(Ogre::Vector3(mWorldSize/2,
                                                0,
-                                               -mRealSize/2));
+                                               -mWorldSize/2));
 
         Ogre::Terrain::ImportData& importSettings =
                 mTerrainGroup->getDefaultImportSettings();
 
         importSettings.inputBias    = 0;
         importSettings.terrainSize  = mLandSize;
-        importSettings.worldSize    = mRealSize;
+        importSettings.worldSize    = mWorldSize;
         importSettings.minBatchSize = 9;
         importSettings.maxBatchSize = mLandSize;
 
@@ -111,107 +103,70 @@ namespace MWRender
         const int cellY = store->cell->getGridY();
 
 
-        if ( SPLIT_TERRAIN )
+        //split the cell terrain into four segments
+        const int numTextures = ESM::Land::LAND_TEXTURE_SIZE/2;
+
+        for ( int x = 0; x < 2; x++ )
         {
-            //split the cell terrain into four segments
-            const int numTextures = ESM::Land::LAND_TEXTURE_SIZE/2;
-
-            for ( int x = 0; x < 2; x++ )
+            for ( int y = 0; y < 2; y++ )
             {
-                for ( int y = 0; y < 2; y++ )
+                Ogre::Terrain::ImportData terrainData =
+                    mTerrainGroup->getDefaultImportSettings();
+
+                const int terrainX = cellX * 2 + x;
+                const int terrainY = cellY * 2 + y;
+
+                //it makes far more sense to reallocate the memory here,
+                //and let Ogre deal with it due to the issues with deleting
+                //it at the wrong time if using threads (Which Ogre::Terrain does)
+                terrainData.inputFloat = OGRE_ALLOC_T(float,
+                                                      mLandSize*mLandSize,
+                                                      Ogre::MEMCATEGORY_GEOMETRY);
+
+                //copy the height data row by row
+                for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
                 {
-                    Ogre::Terrain::ImportData terrainData =
-                        mTerrainGroup->getDefaultImportSettings();
+                                           //the offset of the current segment
+                    const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
+                                           //offset of the row
+                                           terrainCopyY * ESM::Land::LAND_SIZE;
+                    const size_t xOffset = x * (mLandSize-1);
 
-                    const int terrainX = cellX * 2 + x;
-                    const int terrainY = cellY * 2 + y;
+                    memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
+                           &store->land[1][1]->landData->heights[yOffset + xOffset],
+                           mLandSize*sizeof(float));
+                }
 
-                    //it makes far more sense to reallocate the memory here,
-                    //and let Ogre deal with it due to the issues with deleting
-                    //it at the wrong time if using threads (Which Ogre::Terrain does)
-                    terrainData.inputFloat = OGRE_ALLOC_T(float,
-                                                          mLandSize*mLandSize,
-                                                          Ogre::MEMCATEGORY_GEOMETRY);
+                std::map<uint16_t, int> indexes;
+                initTerrainTextures(&terrainData, store,
+                                    x * numTextures, y * numTextures,
+                                    numTextures, indexes);
 
-                    //copy the height data row by row
-                    for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
+                if (mTerrainGroup->getTerrain(cellX, cellY) == NULL)
+                {
+                    mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
+
+                    mTerrainGroup->loadTerrain(terrainX, terrainY, true);
+
+                    Ogre::Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
+                    initTerrainBlendMaps(terrain, store,
+                                         x * numTextures, y * numTextures,
+                                         numTextures,
+                                         indexes);
+
+                    if ( store->land[1][1]->landData->usingColours )
                     {
-                                               //the offset of the current segment
-                        const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
-                                               //offset of the row
-                                               terrainCopyY * ESM::Land::LAND_SIZE;
-                        const size_t xOffset = x * (mLandSize-1);
+                        Ogre::TexturePtr vertex = getVertexColours(store,
+                                                                   x*(mLandSize-1),
+                                                                   y*(mLandSize-1),
+                                                                   mLandSize);
 
-                        memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
-                               &store->land[1][1]->landData->heights[yOffset + xOffset],
-                               mLandSize*sizeof(float));
-                    }
-
-                    std::map<uint16_t, int> indexes;
-                    initTerrainTextures(&terrainData, store,
-                                        x * numTextures, y * numTextures,
-                                        numTextures, indexes);
-
-                    if (mTerrainGroup->getTerrain(cellX, cellY) == NULL)
-                    {
-                        mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
-
-                        mTerrainGroup->loadTerrain(terrainX, terrainY, true);
-
-                        Ogre::Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
-                        initTerrainBlendMaps(terrain, store,
-                                             x * numTextures, y * numTextures,
-                                             numTextures,
-                                             indexes);
-
-                        if ( store->land[1][1]->landData->usingColours )
-                        {
-                            Ogre::TexturePtr vertex = getVertexColours(store, x*32, y*32, mLandSize);
-
-                            MaterialPtr mat = terrain->_getMaterial();
-                            mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
-                            mat = terrain->_getCompositeMapMaterial();
-                            mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
-                        }
+                        MaterialPtr mat = terrain->_getMaterial();
+                        mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+                        mat = terrain->_getCompositeMapMaterial();
+                        mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
                     }
                 }
-            }
-        }
-        else
-        {
-            Ogre::Terrain::ImportData terrainData =
-                mTerrainGroup->getDefaultImportSettings();
-
-            //one cell is one terrain segment
-            terrainData.inputFloat = OGRE_ALLOC_T(float,
-                                                  mLandSize*mLandSize,
-                                                  Ogre::MEMCATEGORY_GEOMETRY);
-
-            memcpy(&terrainData.inputFloat[0],
-                   &store->land[1][1]->landData->heights[0],
-                   mLandSize*mLandSize*sizeof(float));
-
-            std::map<uint16_t, int> indexes;
-            initTerrainTextures(&terrainData, store, 0, 0,
-                                ESM::Land::LAND_TEXTURE_SIZE, indexes);
-
-            mTerrainGroup->defineTerrain(cellX, cellY, &terrainData);
-
-            mTerrainGroup->loadTerrain(cellX, cellY, true);
-            Ogre::Terrain* terrain = mTerrainGroup->getTerrain(cellX, cellY);
-
-            initTerrainBlendMaps(terrain, store, 0, 0,
-                                 ESM::Land::LAND_TEXTURE_SIZE,
-                                 indexes);
-
-            if ( store->land[1][1]->landData->usingColours )
-            {
-                Ogre::TexturePtr vertex = getVertexColours(store, 0, 0, mLandSize);
-
-                MaterialPtr mat = terrain->_getMaterial();
-                mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
-                mat = terrain->_getCompositeMapMaterial();
-                mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
             }
         }
 
@@ -222,21 +177,13 @@ namespace MWRender
 
     void TerrainManager::cellRemoved(MWWorld::Ptr::CellStore *store)
     {
-        if ( SPLIT_TERRAIN )
+        for ( int x = 0; x < 2; x++ )
         {
-            for ( int x = 0; x < 2; x++ )
+            for ( int y = 0; y < 2; y++ )
             {
-                for ( int y = 0; y < 2; y++ )
-                {
-                    mTerrainGroup->unloadTerrain(store->cell->getGridX() * 2 + x,
-                                                 store->cell->getGridY() * 2 + y);
-                }
+                mTerrainGroup->unloadTerrain(store->cell->getGridX() * 2 + x,
+                                             store->cell->getGridY() * 2 + y);
             }
-        }
-        else
-        {
-            mTerrainGroup->unloadTerrain(store->cell->getGridX(),
-                                         store->cell->getGridY());
         }
     }
 
