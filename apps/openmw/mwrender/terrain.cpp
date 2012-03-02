@@ -31,7 +31,7 @@ namespace MWRender
             static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         mTerrainGlobals->setMaxPixelError(8);
-        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 256 : 1024);
+        mTerrainGlobals->setLayerBlendMapSize(SPLIT_TERRAIN ? 32 : 1024);
         mTerrainGlobals->setLightMapSize(SPLIT_TERRAIN ? 256 : 1024);
         mTerrainGlobals->setCompositeMapSize(SPLIT_TERRAIN ? 256 : 1024);
         mTerrainGlobals->setDefaultGlobalColourMapSize(256);
@@ -255,62 +255,75 @@ namespace MWRender
                fromY+size <= ESM::Land::LAND_TEXTURE_SIZE &&
                "Can't get a terrain texture on terrain outside the current cell");
 
-        //there is one texture that we want to use as a base (i.e. it won't have
-        //a blend map). This holds the ltex index of that base texture so that
-        //we know not to include it in the output map
-        int baseTexture = -1;
+        //this ensures that the ltex indexes are sorted (or retrived as sorted
+        //which simplifies shading between cells).
+        //
+        //If we don't sort the ltex indexes, the splatting order may differ between
+        //cells which may lead to inconsistent results when shading between cells
+        std::set<uint16_t> ltexIndexes;
         for ( int y = fromY - 1; y < fromY + size + 1; y++ )
         {
             for ( int x = fromX - 1; x < fromX + size + 1; x++ )
             {
-                const uint16_t ltexIndex = getLtexIndexAt(store, x, y);
-                //this is the base texture, so we can ignore this at present
-                if ( ltexIndex == baseTexture )
+                ltexIndexes.insert(getLtexIndexAt(store, x, y));
+            }
+        }
+
+        //there is one texture that we want to use as a base (i.e. it won't have
+        //a blend map). This holds the ltex index of that base texture so that
+        //we know not to include it in the output map
+        int baseTexture = -1;
+        for ( std::set<uint16_t>::iterator iter = ltexIndexes.begin();
+              iter != ltexIndexes.end();
+              ++iter )
+        {
+            const uint16_t ltexIndex = *iter;
+            //this is the base texture, so we can ignore this at present
+            if ( ltexIndex == baseTexture )
+            {
+                continue;
+            }
+
+            const std::map<uint16_t, int>::const_iterator it = indexes.find(ltexIndex);
+
+            if ( it == indexes.end() )
+            {
+                //NB: All vtex ids are +1 compared to the ltex ids
+
+                assert( (int)store->landTextures->ltex.size() >= (int)ltexIndex - 1 &&
+                       "LAND.VTEX must be within the bounds of the LTEX array");
+                
+                std::string texture;
+                if ( ltexIndex == 0 )
                 {
-                    continue;
+                    texture = "_land_default.dds";
+                }
+                else
+                {
+                    texture = store->landTextures->ltex[ltexIndex-1].texture;
+                    //TODO this is needed due to MWs messed up texture handling
+                    texture = texture.substr(0, texture.rfind(".")) + ".dds";
                 }
 
-                const std::map<uint16_t, int>::const_iterator it = indexes.find(ltexIndex);
+                const size_t position = terrainData->layerList.size();
+                terrainData->layerList.push_back(Ogre::Terrain::LayerInstance());
 
-                if ( it == indexes.end() )
+                Ogre::TexturePtr normDisp = getNormalDisp("textures\\" + texture);
+
+                terrainData->layerList[position].worldSize = 256;
+                terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
+
+                //Normal map. This should be removed but it would require alterations to
+                //the material generator. Another option would be to use a 1x1 blank texture
+                //terrainData->layerList[position].textureNames.push_back(normDisp->getName());
+
+                if ( baseTexture == -1 )
                 {
-                    //NB: All vtex ids are +1 compared to the ltex ids
-
-                    assert( (int)store->landTextures->ltex.size() >= (int)ltexIndex - 1 &&
-                           "LAND.VTEX must be within the bounds of the LTEX array");
-                    
-                    std::string texture;
-                    if ( ltexIndex == 0 )
-                    {
-                        texture = "_land_default.dds";
-                    }
-                    else
-                    {
-                        texture = store->landTextures->ltex[ltexIndex-1].texture;
-                        //TODO this is needed due to MWs messed up texture handling
-                        texture = texture.substr(0, texture.rfind(".")) + ".dds";
-                    }
-
-                    const size_t position = terrainData->layerList.size();
-                    terrainData->layerList.push_back(Ogre::Terrain::LayerInstance());
-
-                    Ogre::TexturePtr normDisp = getNormalDisp("textures\\" + texture);
-
-                    terrainData->layerList[position].worldSize = 256;
-                    terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
-
-                    //Normal map. This should be removed but it would require alterations to
-                    //the material generator. Another option would be to use a 1x1 blank texture
-                    //terrainData->layerList[position].textureNames.push_back(normDisp->getName());
-
-                    if ( baseTexture == -1 )
-                    {
-                        baseTexture = ltexIndex;
-                    }
-                    else
-                    {
-                        indexes[ltexIndex] = position;
-                    }
+                    baseTexture = ltexIndex;
+                }
+                else
+                {
+                    indexes[ltexIndex] = position;
                 }
             }
         }
@@ -335,8 +348,8 @@ namespace MWRender
         //that need to result in an integer for correct splatting
         assert( (size & (size - 1)) == 0 && "Size must be a power of 2");
 
-        const int blendSize = terrain->getLayerBlendMapSize();
-        const int blendDist = TERRAIN_SHADE_DISTANCE * (blendSize / size);
+        const int blendMapSize = terrain->getLayerBlendMapSize();
+        const int splatSize    = blendMapSize / size;
 
         //zero out every map
         std::map<uint16_t, int>::const_iterator iter;
@@ -344,7 +357,7 @@ namespace MWRender
         {
             float* pBlend = terrain->getLayerBlendMap(iter->second)
                                    ->getBlendPointer();
-            memset(pBlend, 0, sizeof(float) * blendSize * blendSize);
+            memset(pBlend, 0, sizeof(float) * blendMapSize * blendMapSize);
         }
 
         //covert the ltex data into a set of blend maps
@@ -354,11 +367,6 @@ namespace MWRender
             {
                 const uint16_t ltexIndex = getLtexIndexAt(store, texX, texY);
 
-                //whilte texX is the splat index relative to the entire cell,
-                //relX is relative to the current segment we are splatting
-                const int relX = texX - fromX;
-                const int relY = texY - fromY;
-
                 //check if it is the base texture (which isn't in the map) and
                 //if it is don't bother altering the blend map for it
                 if ( indexes.find(ltexIndex) == indexes.end() )
@@ -366,43 +374,43 @@ namespace MWRender
                     continue;
                 }
 
+                //while texX is the splat index relative to the entire cell,
+                //relX is relative to the current segment we are splatting
+                const int relX = texX - fromX;
+                const int relY = texY - fromY;
+
                 const int layerIndex = indexes.find(ltexIndex)->second;
 
                 float* const pBlend = terrain->getLayerBlendMap(layerIndex)
                                              ->getBlendPointer();
 
-                const int splatSize = blendSize / size;
+                for ( int y = -1; y < splatSize + 1; y++ ){
+                    for ( int x = -1; x < splatSize + 1; x++ ){
 
-                //setup the bounds for the shading of this texture splat
-                const int startX = std::max(0, relX*splatSize - blendDist);
-                const int endX = std::min(blendSize, (relX+1)*splatSize + blendDist);
+                        //Note: Y is reversed
+                        const int splatY = blendMapSize - 1 - relY * splatSize - y;
+                        const int splatX = relX * splatSize + x;
 
-                const int startY = std::max(0, relY*splatSize - blendDist);
-                const int endY = std::min(blendSize, (relY+1)*splatSize + blendDist);
-                
-                for ( int blendX = startX; blendX < endX; blendX++ )
-                {
-                    for ( int blendY = startY; blendY < endY; blendY++ )
-                    {
-                        assert(blendX >= 0 && blendX < blendSize &&
-                               "index must be within texture bounds");
-
-                        assert(blendY >= 0 && blendY < blendSize &&
-                               "index must be within texture bounds");
-
-                        const int index = blendSize*(blendSize - 1 - blendY) + blendX;
-                        if ( blendX >= relX*splatSize && blendX < (relX+1)*splatSize &&
-                             blendY >= relY*splatSize && blendY < (relY+1)*splatSize )
+                        if ( splatX >= 0 && splatX < blendMapSize &&
+                             splatY >= 0 && splatY < blendMapSize )
                         {
-                            pBlend[index] = 1;
+                            const int index = (splatY)*blendMapSize + splatX;
+
+                            if ( y >= 0 && y < splatSize &&
+                                 x >= 0 && x < splatSize )
+                            {
+                                pBlend[index] = 1;
+                            }
+                            else
+                            {
+                                //this provides a transition shading but also 
+                                //rounds off the corners slightly
+                                pBlend[index] = std::min(1.0f, pBlend[index] + 0.5f);
+                            }
                         }
-                        else
-                        {
-                            pBlend[index] = std::max((float)pBlend[index], 0.5f);
-                        }
+
                     }
                 }
-                
             }
         }
 

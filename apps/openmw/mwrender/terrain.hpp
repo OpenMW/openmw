@@ -62,12 +62,6 @@ namespace MWRender{
         int mRealSize;
 
         /**
-         * The distance that the current cell should be shaded into the neighbouring
-         * texture. The distance is in terms of the splat size of a texture
-         */
-        static const float TERRAIN_SHADE_DISTANCE = 0.25f;
-
-        /**
          * Setups up the list of textures for part of a cell, using indexes as
          * an output to create a mapping of MW LtexIndex to the relevant terrain
          * layer
