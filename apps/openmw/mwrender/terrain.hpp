@@ -130,10 +130,8 @@ namespace MWRender{
          * @param fromX the *vertex* index in the current cell to start making texture from
          * @param fromY the *vertex* index in the current cell to start making the texture from
          * @param size the size (number of vertexes) to get
-         *
-         * @TODO FIXME the return of this function possibly copies the image data
          */
-        Ogre::Image getVertexColours(MWWorld::Ptr::CellStore* store,
+        Ogre::TexturePtr getVertexColours(MWWorld::Ptr::CellStore* store,
                                           int fromX, int fromY, int size);
     };
 

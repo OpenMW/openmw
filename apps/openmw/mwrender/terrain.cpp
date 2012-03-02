@@ -6,6 +6,8 @@
 
 #include "components/esm/loadland.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 using namespace Ogre;
 
 namespace MWRender
@@ -48,6 +50,7 @@ namespace MWRender
         matProfile->setLayerNormalMappingEnabled(false);
         matProfile->setLayerParallaxMappingEnabled(false);
         matProfile->setReceiveDynamicShadowsEnabled(false);
+        matProfile->setGlobalColourMapEnabled(true);
 
         mLandSize = ESM::Land::LAND_SIZE;
         mRealSize = ESM::Land::REAL_SIZE;
@@ -163,9 +166,12 @@ namespace MWRender
 
                         if ( store->land[1][1]->landData->usingColours )
                         {
-                            Ogre::Image vertex = getVertexColours(store, x*32, y*32, mLandSize);
-                            terrain->setGlobalColourMapEnabled(true);
-                            terrain->getGlobalColourMap()->loadImage(vertex);
+                            Ogre::TexturePtr vertex = getVertexColours(store, x*32, y*32, mLandSize);
+
+                            MaterialPtr mat = terrain->_getMaterial();
+                            mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+                            mat = terrain->_getCompositeMapMaterial();
+                            mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
                         }
                     }
                 }
@@ -200,9 +206,12 @@ namespace MWRender
 
             if ( store->land[1][1]->landData->usingColours )
             {
-                Ogre::Image vertex = getVertexColours(store, 0, 0, mLandSize);
-                terrain->setGlobalColourMapEnabled(true);
-                terrain->getGlobalColourMap()->loadImage(vertex);
+                Ogre::TexturePtr vertex = getVertexColours(store, 0, 0, mLandSize);
+
+                MaterialPtr mat = terrain->_getMaterial();
+                mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+                mat = terrain->_getCompositeMapMaterial();
+                mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
             }
         }
 
@@ -495,14 +504,37 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
 
-    Ogre::Image TerrainManager::getVertexColours(MWWorld::Ptr::CellStore* store,
-                                                      int fromX, int fromY, int size)
+    Ogre::TexturePtr TerrainManager::getVertexColours(MWWorld::Ptr::CellStore* store,
+                                                    int fromX, int fromY, int size)
     {
+        Ogre::TextureManager* const texMgr = Ogre::TextureManager::getSingletonPtr();
         const char* const colours = store->land[1][1]->landData->colours;
 
-        Ogre::uchar* imgData = OGRE_ALLOC_T(Ogre::uchar,
-                                            size*size*sizeof(Ogre::uchar)*3,
-                                            Ogre::MEMCATEGORY_GENERAL);
+        const std::string colourTextureName = "VtexColours_" +
+                                              boost::lexical_cast<std::string>(store->cell->getGridX()) +
+                                              "_" +
+                                              boost::lexical_cast<std::string>(store->cell->getGridY()) +
+                                              "_" +
+                                              boost::lexical_cast<std::string>(fromX) +
+                                              "_" +
+                                              boost::lexical_cast<std::string>(fromY);
+
+        Ogre::TexturePtr tex = texMgr->getByName(colourTextureName);
+        if ( !tex.isNull() )
+        {
+            return tex;
+        }
+
+        tex = texMgr->createManual(colourTextureName,
+                                   Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                   Ogre::TEX_TYPE_2D, size, size, 0, Ogre::PF_BYTE_BGRA);
+
+        Ogre::HardwarePixelBufferSharedPtr pixelBuffer = tex->getBuffer();
+         
+        pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+        const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+         
+        Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
          
         for ( int y = 0; y < size; y++ )
         {
@@ -518,18 +550,16 @@ namespace MWRender
                 const unsigned char b = colours[colourOffset + 2];
 
                 //as is the case elsewhere we need to flip the y
-                const size_t imageOffset = (size - 1 - y)*size*3 + x*3;
-                imgData[imageOffset + 0] = r;
-                imgData[imageOffset + 1] = g;
-                imgData[imageOffset + 2] = b;
-
+                const size_t imageOffset = (size - 1 - y)*size*4 + x*4;
+                pDest[imageOffset + 0] = b;
+                pDest[imageOffset + 1] = g;
+                pDest[imageOffset + 2] = r;
             }
         }
          
-        Ogre::Image img;
-        img.loadDynamicImage(imgData, size, size, 1, Ogre::PF_R8G8B8, true);
+        pixelBuffer->unlock();
 
-        return img;
+        return tex;
     }
 
 }
