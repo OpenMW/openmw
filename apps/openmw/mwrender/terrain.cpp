@@ -527,7 +527,7 @@ namespace MWRender
 
         tex = texMgr->createManual(colourTextureName,
                                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                   Ogre::TEX_TYPE_2D, size, size, 0, Ogre::PF_BYTE_BGRA);
+                                   Ogre::TEX_TYPE_2D, size, size, 0, Ogre::PF_BYTE_BGR);
 
         Ogre::HardwarePixelBufferSharedPtr pixelBuffer = tex->getBuffer();
          
@@ -550,7 +550,7 @@ namespace MWRender
                 const unsigned char b = colours[colourOffset + 2];
 
                 //as is the case elsewhere we need to flip the y
-                const size_t imageOffset = (size - 1 - y)*size*4 + x*4;
+                const size_t imageOffset = (size - 1 - y)*size*3 + x*3;
                 pDest[imageOffset + 0] = b;
                 pDest[imageOffset + 1] = g;
                 pDest[imageOffset + 2] = r;
