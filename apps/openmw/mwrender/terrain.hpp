@@ -89,17 +89,6 @@ namespace MWRender{
         int getLtexIndexAt(MWWorld::Ptr::CellStore* store, int x, int y);
 
         /**
-         * Retrives the texture that is the normal and parallax map for the
-         * terrain. If it doesn't exist a blank texture is used
-         *
-         * The file name of the texture should be the same as the file name of
-         * the base diffuse texture, but with _n appended before the extension
-         *
-         * @param fileName the name of the *diffuse* texture
-         */
-        Ogre::TexturePtr getNormalDisp(const std::string& fileName);
-
-        /**
          * Due to the fact that Ogre terrain doesn't support vertex colours
          * we have to generate them manually
          *

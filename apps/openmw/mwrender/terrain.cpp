@@ -30,7 +30,11 @@ namespace MWRender
         TerrainMaterialGeneratorB::SM2Profile* matProfile =
             static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
-        mTerrainGlobals->setMaxPixelError(8);
+        //The pixel error should be as high as possible without it being noticed
+        //as it governs how fast mesh quality decreases. 16 was just about Ok
+        //when tested at the small swamp pond in Seyda Neen
+        mTerrainGlobals->setMaxPixelError(16);
+
         mTerrainGlobals->setLayerBlendMapSize(32);
         mTerrainGlobals->setLightMapSize(256);
         mTerrainGlobals->setCompositeMapSize(256);
@@ -39,11 +43,9 @@ namespace MWRender
         //10 (default) didn't seem to be quite enough
         mTerrainGlobals->setSkirtSize(128);
 
-        /*
-         * Here we are pushing the composite map distance beyond the edge
-         * of the rendered terrain due to not having setup lighting
-         */
-        //mTerrainGlobals->setCompositeMapDistance(ESM::Land::REAL_SIZE*4);
+        //due to the sudden flick between composite and non composite textures,
+        //this seemed the distance where it wasn't too noticeable
+        mTerrainGlobals->setCompositeMapDistance(mWorldSize*2);
         
         matProfile->setLightmapEnabled(false);
         matProfile->setLayerSpecularMappingEnabled(false);
@@ -142,7 +144,7 @@ namespace MWRender
                                     x * numTextures, y * numTextures,
                                     numTextures, indexes);
 
-                if (mTerrainGroup->getTerrain(cellX, cellY) == NULL)
+                if (mTerrainGroup->getTerrain(terrainX, terrainY) == NULL)
                 {
                     mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
 
@@ -161,6 +163,8 @@ namespace MWRender
                                                                    y*(mLandSize-1),
                                                                    mLandSize);
 
+                        //this is a hack to get around the fact that Ogre seems to
+                        //corrupt the composite map leading to rendering errors
                         MaterialPtr mat = terrain->_getMaterial();
                         mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
                         mat = terrain->_getCompositeMapMaterial();
@@ -255,14 +259,8 @@ namespace MWRender
                 const size_t position = terrainData->layerList.size();
                 terrainData->layerList.push_back(Ogre::Terrain::LayerInstance());
 
-                Ogre::TexturePtr normDisp = getNormalDisp("textures\\" + texture);
-
                 terrainData->layerList[position].worldSize = 256;
                 terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
-
-                //Normal map. This should be removed but it would require alterations to
-                //the material generator. Another option would be to use a 1x1 blank texture
-                //terrainData->layerList[position].textureNames.push_back(normDisp->getName());
 
                 if ( baseTexture == -1 )
                 {
@@ -419,51 +417,11 @@ namespace MWRender
     }
 
     //----------------------------------------------------------------------------------------------
-    
-    Ogre::TexturePtr TerrainManager::getNormalDisp(const std::string& fileName)
-    {
-        Ogre::TextureManager* const texMgr = Ogre::TextureManager::getSingletonPtr();
-        const std::string normalTextureName = fileName.substr(0, fileName.rfind("."))
-                                       + "_n.dds";
-        if ( !texMgr->getByName(normalTextureName).isNull() )
-        {
-            return texMgr->getByName(normalTextureName);
-        }
-
-        const std::string textureName = "default_terrain_normal";
-        if ( !texMgr->getByName(textureName).isNull() )
-        {
-            return texMgr->getByName(textureName);
-        }
-
-        Ogre::TexturePtr tex = texMgr->createManual(
-                 textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                 Ogre::TEX_TYPE_2D, 1, 1, 0, Ogre::PF_BYTE_BGRA);
-
-        Ogre::HardwarePixelBufferSharedPtr pixelBuffer = tex->getBuffer();
-         
-        pixelBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-        const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
-         
-        Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
-         
-        *pDest++ = 128; // B
-        *pDest++ = 128; // G
-        *pDest++ = 128; // R
-        *pDest++ = 0;   // A
-         
-        pixelBuffer->unlock();
-
-        return tex;
-    }
-
-    //----------------------------------------------------------------------------------------------
 
     Ogre::TexturePtr TerrainManager::getVertexColours(MWWorld::Ptr::CellStore* store,
                                                     int fromX, int fromY, int size)
     {
         Ogre::TextureManager* const texMgr = Ogre::TextureManager::getSingletonPtr();
-        const char* const colours = store->land[1][1]->landData->colours;
 
         const std::string colourTextureName = "VtexColours_" +
                                               boost::lexical_cast<std::string>(store->cell->getGridX()) +
@@ -491,6 +449,7 @@ namespace MWRender
          
         Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
          
+        const char* const colours = store->land[1][1]->landData->colours;
         for ( int y = 0; y < size; y++ )
         {
             for ( int x = 0; x < size; x++ )
