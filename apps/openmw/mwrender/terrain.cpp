@@ -550,7 +550,7 @@ namespace MWRender
                 const unsigned char b = colours[colourOffset + 2];
 
                 //as is the case elsewhere we need to flip the y
-                const size_t imageOffset = (size - 1 - y)*size*3 + x*3;
+                const size_t imageOffset = (size - 1 - y)*size*4 + x*4;
                 pDest[imageOffset + 0] = b;
                 pDest[imageOffset + 1] = g;
                 pDest[imageOffset + 2] = r;
