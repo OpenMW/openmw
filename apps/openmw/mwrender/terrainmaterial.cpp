@@ -134,7 +134,7 @@ namespace Ogre
 		if (enabled != mGlobalColourMapEnabled)
 		{
 			mGlobalColourMapEnabled = enabled;
-			mParent->_markChanged();
+			//mParent->_markChanged();
 		}
 	}
 	//---------------------------------------------------------------------
@@ -359,7 +359,7 @@ namespace Ogre
 			tu->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
 
 			// global colour map
-			//if (terrain->getGlobalColourMapEnabled() && isGlobalColourMapEnabled())
+			if (isGlobalColourMapEnabled())
 			{
 				tu = pass->createTextureUnitState("");
 				tu->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
@@ -1004,7 +1004,7 @@ namespace Ogre
 				"uniform sampler2D globalNormal : register(s" << currentSamplerIdx++ << ")\n";
 
 
-			//if (terrain->getGlobalColourMapEnabled() && prof->isGlobalColourMapEnabled())
+			if (prof->isGlobalColourMapEnabled())
 			{
 				outStream << ", uniform sampler2D globalColourMap : register(s" 
 					<< currentSamplerIdx++ << ")\n";
@@ -1299,7 +1299,7 @@ namespace Ogre
 		}
 		else
 		{
-			//if (terrain->getGlobalColourMapEnabled() && prof->isGlobalColourMapEnabled())
+			if (prof->isGlobalColourMapEnabled())
 			{
 				// sample colour map and apply to diffuse
 				outStream << "	diffuse *= tex2D(globalColourMap, uv).rgb;\n";

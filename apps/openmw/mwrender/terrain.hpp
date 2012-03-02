@@ -2,6 +2,7 @@
 #define _GAME_RENDER_TERRAIN_H
 
 #include <OgreTerrain.h>
+#include "terrainmaterial.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -33,6 +34,8 @@ namespace MWRender{
     private:
         Ogre::TerrainGlobalOptions* mTerrainGlobals;
         Ogre::TerrainGroup* mTerrainGroup;
+
+        Ogre::TerrainMaterialGeneratorB::SM2Profile* mActiveProfile;
 
         /**
          * The length in verticies of a single terrain block.
