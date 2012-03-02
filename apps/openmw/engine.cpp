@@ -316,7 +316,7 @@ void OMW::Engine::go()
     }
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
-        mCfgMgr.getLogPath().string() + std::string("/"),
+        mCfgMgr.getLogPath().string(),
         mCfgMgr.getPluginsConfigPath().string(), false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
