@@ -20,6 +20,7 @@
 #include "localscripts.hpp"
 
 #include <openengine/bullet/physic.hpp>
+#include <openengine/ogre/fader.hpp>
 
 namespace Ogre
 {
@@ -49,6 +50,7 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class WeatherManager;
     class Environment;
     class Player;
 
@@ -60,12 +62,15 @@ namespace MWWorld
 
             enum RenderMode
             {
-                Render_CollisionDebug
+                Render_CollisionDebug,
+                Render_Wireframe
             };
 
         private:
 
-            MWRender::RenderingManager mRendering;
+            MWRender::RenderingManager* mRendering;
+            
+            MWWorld::WeatherManager* mWeatherManager;
 
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
@@ -95,17 +100,19 @@ namespace MWWorld
 
         public:
 
-           World (OEngine::Render::OgreRenderer& renderer, OEngine::Physic::PhysicEngine* physEng,
+           World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
                 Environment& environment, const std::string& encoding);
 
             ~World();
+            
+            OEngine::Render::Fader* getFader();
 
             Ptr::CellStore *getExterior (int x, int y);
 
             Ptr::CellStore *getInterior (const std::string& name);
-
+            
             void adjustSky();
 
             MWWorld::Player& getPlayer();
@@ -118,6 +125,9 @@ namespace MWWorld
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
+            
+            bool isCellExterior() const;
+            bool isCellQuasiExterior() const;
 
             Globals::Data& getGlobalVariable (const std::string& name);
 
@@ -153,6 +163,10 @@ namespace MWWorld
 
             bool toggleSky();
             ///< \return Resulting mode
+            
+            void changeWeather(const std::string& region, const unsigned int id);
+            
+            int getCurrentWeather() const;
 
             int getMasserPhase() const;
 

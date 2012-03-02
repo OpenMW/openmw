@@ -14,7 +14,7 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects renderinginterface 
+    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects renderinginterface
     )
 
 add_openmw_dir (mwinput
@@ -23,7 +23,7 @@ add_openmw_dir (mwinput
 
 add_openmw_dir (mwgui
     layouts text_input widgets race class birth review window_manager console dialogue
-    dialogue_history window_base stats_window messagebox journalwindow
+    dialogue_history window_base stats_window messagebox journalwindow charactercreation
     )
 
 add_openmw_dir (mwdialogue
@@ -43,8 +43,8 @@ add_openmw_dir (mwsound
 
 add_openmw_dir (mwworld
     refdata world physicssystem scene environment globals class action nullaction actionteleport
-    containerstore actiontalk actiontake containerstore manualref containerutil player cellfunctors
-    cells localscripts
+    containerstore actiontalk actiontake manualref player cellfunctors
+    cells localscripts customdata weather
     )
 
 add_openmw_dir (mwclass
@@ -77,7 +77,6 @@ target_link_libraries(openmw
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
-    caelum
     components
     MyGUIEngine
     MyGUIOgrePlatform

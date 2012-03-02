@@ -5,6 +5,7 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {

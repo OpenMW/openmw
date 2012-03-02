@@ -2,7 +2,6 @@
 #define GAME_MWCLASS_BOOK_H
 
 #include "../mwworld/class.hpp"
-#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {
@@ -22,10 +21,6 @@ namespace MWClass
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation
-
-            virtual void insertIntoContainer (const MWWorld::Ptr& ptr,
-                MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const;
-            ///< Insert into a containe
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr

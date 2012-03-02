@@ -7,6 +7,7 @@
 
 #include "ptr.hpp"
 #include "nullaction.hpp"
+#include "containerstore.hpp"
 
 namespace MWWorld
 {
@@ -71,14 +72,9 @@ namespace MWWorld
         return boost::shared_ptr<Action> (new NullAction);
     }
 
-    ContainerStore<RefData>& Class::getContainerStore (const Ptr& ptr) const
+    ContainerStore& Class::getContainerStore (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have a container store");
-    }
-
-    void Class::insertIntoContainer (const Ptr& ptr, ContainerStore<RefData>& containerStore) const
-    {
-        throw std::runtime_error ("class does not support inserting into a container");
     }
 
     void Class::lock (const Ptr& ptr, int lockLevel) const

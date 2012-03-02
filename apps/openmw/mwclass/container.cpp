@@ -6,9 +6,45 @@
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/nullaction.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/customdata.hpp"
+#include "../mwworld/environment.hpp"
+
+#include "../mwrender/objects.hpp"
+
+#include "../mwsound/soundmanager.hpp"
+
+namespace
+{
+    struct CustomData : public MWWorld::CustomData
+    {
+        MWWorld::ContainerStore mContainerStore;
+
+        virtual MWWorld::CustomData *clone() const;
+    };
+
+    MWWorld::CustomData *CustomData::clone() const
+    {
+        return new CustomData (*this);
+    }
+}
 
 namespace MWClass
 {
+    void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+        {
+            std::auto_ptr<CustomData> data (new CustomData);
+
+            // \todo add initial container content
+
+            // store
+            ptr.getRefData().setCustomData (data.release());
+        }
+    }
+
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
@@ -16,7 +52,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -39,6 +75,38 @@ namespace MWClass
 
     }
 
+    boost::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
+        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+    {
+        const std::string lockedSound = "LockedChest";
+        const std::string trapActivationSound = "Disarm Trap Fail";
+
+        if (ptr.getCellRef().lockLevel>0)
+        {
+            // TODO check for key
+            std::cout << "Locked container" << std::endl;
+            environment.mSoundManager->playSound(lockedSound, 1.0, 1.0);
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+        }
+        else
+        {
+            std::cout << "Unlocked container" << std::endl;
+            if(ptr.getCellRef().trap.empty())
+            {
+                // Not trapped, Inventory GUI goes here
+                return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+            }
+            else
+            {
+                // Trap activation goes here
+                std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
+                environment.mSoundManager->playSound(trapActivationSound, 1.0, 1.0);
+                ptr.getCellRef().trap = "";
+                return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+            }
+        }
+    }
+
     std::string Container::getName (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
@@ -47,20 +115,12 @@ namespace MWClass
         return ref->base->name;
     }
 
-    MWWorld::ContainerStore<MWWorld::RefData>& Container::getContainerStore (const MWWorld::Ptr& ptr)
+    MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
-        if (!ptr.getRefData().getContainerStore().get())
-        {
-            boost::shared_ptr<MWWorld::ContainerStore<MWWorld::RefData> > store (
-                new MWWorld::ContainerStore<MWWorld::RefData>);
+        ensureCustomData (ptr);
 
-            // TODO add initial content
-
-            ptr.getRefData().getContainerStore() = store;
-        }
-
-        return *ptr.getRefData().getContainerStore();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
     }
 
     std::string Container::getScript (const MWWorld::Ptr& ptr) const

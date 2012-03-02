@@ -7,6 +7,6 @@ PluginFolder=
 Plugin=RenderSystem_GL.dylib
 Plugin=Plugin_ParticleFX.dylib
 Plugin=Plugin_OctreeSceneManager.dylib
-# Plugin=Plugin_CgProgramManager
+Plugin=Plugin_CgProgramManager
 
 

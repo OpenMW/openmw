@@ -7,8 +7,6 @@
 
 #include <OgreFrameListener.h>
 
-#include <openengine/bullet/physic.hpp>
-
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
 
@@ -67,7 +65,6 @@ namespace OMW
             Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
-            OEngine::Physic::PhysicEngine* mPhysicEngine;
             std::string mCellName;
             std::string mMaster;
             int mFpsLevel;
@@ -84,7 +81,7 @@ namespace OMW
             MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
-            OEngine::GUI::MyGUIManager *mGuiManager;
+            
 
             Files::Collections mFileCollections;
             bool mFSStrict;
