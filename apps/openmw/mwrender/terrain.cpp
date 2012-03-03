@@ -51,6 +51,7 @@ namespace MWRender
         mActiveProfile->setLayerNormalMappingEnabled(false);
         mActiveProfile->setLayerParallaxMappingEnabled(false);
         mActiveProfile->setReceiveDynamicShadowsEnabled(false);
+        mActiveProfile->setCompositeMapEnabled(false);
 
         mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(mgr,
                                                     Ogre::Terrain::ALIGN_X_Z,
@@ -160,10 +161,6 @@ namespace MWRender
                     else
                         mActiveProfile->setGlobalColourMapEnabled(false);
 
-                    /// \todo are we possibly generating the materials twice?
-                    mActiveProfile->generate(terrain);
-                    mActiveProfile->generateForCompositeMap(terrain);
-
                     if ( store->land[1][1]->landData->usingColours )
                     {                        
                         Ogre::TexturePtr vertex = getVertexColours(store,
@@ -173,10 +170,10 @@ namespace MWRender
 
                         //this is a hack to get around the fact that Ogre seems to
                         //corrupt the global colour map leading to rendering errors
-                        MaterialPtr mat = terrain->_getMaterial();
+                        MaterialPtr mat = terrain->getMaterial();
                         mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
-                        mat = terrain->_getCompositeMapMaterial();
-                        mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+                        //mat = terrain->_getCompositeMapMaterial();
+                        //mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
                     }
                 }
             }
