@@ -22,7 +22,7 @@ struct PathGrid
 #pragma pack(push, 1)
     struct Point // path grid point
     {
-        float x, y, z; // Location of point
+        int x, y, z; // Location of point
         int unknown; // Possibly flag for coloring/user-placed vs auto-generated
     }; // 16 bytes
 

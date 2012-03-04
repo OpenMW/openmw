@@ -61,7 +61,7 @@ void PathGrid::load(ESMReader &esm)
         {
             edgeCount = size / sizeof(Edge);
             std::cout << "Path grid edge count for cell " << data.x
-                << " " << data.y << " is " << size << std::endl;
+                << " " << data.y << " is " << edgeCount << std::endl;
             edges = new Edge[edgeCount];
             esm.getExact(edges, size);
             for (int i = 0; i < edgeCount; ++i)
