@@ -396,7 +396,7 @@ void NIFLoader::createMaterial(const String &name,
         for (int i=0; i<num_lights; ++i)
         {
             outStream <<
-            "   float3 lightDir"<<i<<" = lightPositionObjSpace"<<i<<".xyz - positionObjSpace.xyz; \n"
+            "   float3 lightDir"<<i<<" = lightPositionObjSpace"<<i<<".xyz - (positionObjSpace.xyz * lightPositionObjSpace"<<i<<".w); \n"
 
             // pre-multiply light color with attenuation factor
             "   d = length( lightDir"<<i<<" ); \n"
