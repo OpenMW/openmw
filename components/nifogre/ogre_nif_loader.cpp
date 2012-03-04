@@ -350,7 +350,7 @@ void NIFLoader::createMaterial(const String &name,
     float num_lights;
     if (GpuProgramManager::getSingleton().isSyntaxSupported("fp40") ||
         GpuProgramManager::getSingleton().isSyntaxSupported("ps_4_0"))
-        num_lights = 16 /* 32 */;
+        num_lights = 8 /* 32 */;
     else
         num_lights = 8;
 
