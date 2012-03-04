@@ -407,8 +407,8 @@ void NIFLoader::createMaterial(const String &name,
         }
         
         outStream <<
-        "   float3 lightingFinal = lightColour.xyz * diffuse.xyz + ambient.xyz * lightAmbient.xyz + emissive.xyz; \n"
-        "   oColor.xyz = lerp(lightingFinal * tex.xyz * vertexColour.xyz, fogColour, fogValue); \n"
+        "   float3 lightingFinal = lightColour.xyz * diffuse.xyz * vertexColour.xyz + ambient.xyz * lightAmbient.xyz + emissive.xyz; \n"
+        "   oColor.xyz = lerp(lightingFinal * tex.xyz, fogColour, fogValue); \n"
         "   oColor.a = tex.a * diffuse.a * vertexColour.a; \n"
         "}";
         fragment->setSource(outStream.str());
