@@ -27,13 +27,12 @@ namespace MWRender
         TerrainMaterialGenerator::Profile* const activeProfile =
             mTerrainGlobals->getDefaultMaterialGenerator()
                            ->getActiveProfile();
-        TerrainMaterialGeneratorB::SM2Profile* matProfile =
+        mActiveProfile =
             static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         //The pixel error should be as high as possible without it being noticed
-        //as it governs how fast mesh quality decreases. 16 was just about Ok
-        //when tested at the small swamp pond in Seyda Neen
-        mTerrainGlobals->setMaxPixelError(16);
+        //as it governs how fast mesh quality decreases.
+        mTerrainGlobals->setMaxPixelError(8);
 
         mTerrainGlobals->setLayerBlendMapSize(32);
         mTerrainGlobals->setLightMapSize(256);
@@ -47,12 +46,12 @@ namespace MWRender
         //this seemed the distance where it wasn't too noticeable
         mTerrainGlobals->setCompositeMapDistance(mWorldSize*2);
         
-        matProfile->setLightmapEnabled(false);
-        matProfile->setLayerSpecularMappingEnabled(false);
-        matProfile->setLayerNormalMappingEnabled(false);
-        matProfile->setLayerParallaxMappingEnabled(false);
-        matProfile->setReceiveDynamicShadowsEnabled(false);
-        matProfile->setGlobalColourMapEnabled(true);
+        mActiveProfile->setLightmapEnabled(false);
+        mActiveProfile->setLayerSpecularMappingEnabled(false);
+        mActiveProfile->setLayerNormalMappingEnabled(false);
+        mActiveProfile->setLayerParallaxMappingEnabled(false);
+        mActiveProfile->setReceiveDynamicShadowsEnabled(false);
+        mActiveProfile->setCompositeMapEnabled(false);
 
         mTerrainGroup = OGRE_NEW TerrainGroup(mgr,
                                                     Terrain::ALIGN_X_Z,
@@ -156,19 +155,25 @@ namespace MWRender
                                          numTextures,
                                          indexes);
 
+                    // disable or enable global colour map (depends on available vertex colours)
                     if ( store->land[1][1]->landData->usingColours )
-                    {
+                        mActiveProfile->setGlobalColourMapEnabled(true);
+                    else
+                        mActiveProfile->setGlobalColourMapEnabled(false);
+
+                    if ( store->land[1][1]->landData->usingColours )
+                    {                        
                         TexturePtr vertex = getVertexColours(store,
                                                                    x*(mLandSize-1),
                                                                    y*(mLandSize-1),
                                                                    mLandSize);
 
                         //this is a hack to get around the fact that Ogre seems to
-                        //corrupt the composite map leading to rendering errors
-                        MaterialPtr mat = terrain->_getMaterial();
+                        //corrupt the global colour map leading to rendering errors
+                        MaterialPtr mat = terrain->getMaterial();
                         mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
-                        mat = terrain->_getCompositeMapMaterial();
-                        mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+                        //mat = terrain->_getCompositeMapMaterial();
+                        //mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
                     }
                 }
             }
