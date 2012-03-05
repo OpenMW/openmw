@@ -120,7 +120,7 @@ namespace MWWorld
     void PhysicsSystem::addObject (const std::string& handle, const std::string& mesh,
         const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
     {
-        OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle);
+        OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle,scale);
         mEngine->addRigidBody(body);
         btTransform tr;
         tr.setOrigin(btVector3(position.x,position.y,position.z));
