@@ -39,48 +39,35 @@ namespace Files
 struct MacOsPath
 {
     /**
-     * \brief Return path to the local configuration directory.
+     * \brief Return path to the local directory.
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getLocalConfigPath() const;
+    boost::filesystem::path getUserPath() const;
 
     /**
-     * \brief Return path to the global (system) configuration directory.
+     * \brief Return path to the global (system) directory.
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getGlobalConfigPath() const;
+    boost::filesystem::path getGlobalPath() const;
 
     /**
-     * \brief Return path to the runtime configuration directory which is the
+     * \brief Return path to the runtime directory which is the
      * place where an application was started.
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getRuntimeConfigPath() const;
+    boost::filesystem::path getLocalPath() const;
 
     /**
-     * \brief Return path to the local data directory.
-     *
-     * \return boost::filesystem::path
-     */
-    boost::filesystem::path getLocalDataPath() const;
-
-    /**
-     * \brief Return path to the global (system) data directory.
+     * \brief
      *
      * \return boost::filesystem::path
      */
     boost::filesystem::path getGlobalDataPath() const;
 
-    /**
-     * \brief Return runtime data path which is a location where
-     * an application was started with 'data' suffix.
-     *
-     * \return boost::filesystem::path
-     */
-    boost::filesystem::path getRuntimeDataPath() const;
+    boost::filesystem::path getInstallPath() const;
 };
 
 } /* namespace Files */

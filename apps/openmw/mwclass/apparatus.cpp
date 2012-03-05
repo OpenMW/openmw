@@ -10,8 +10,6 @@
 
 #include "../mwrender/objects.hpp"
 
-#include "containerutil.hpp"
-
 namespace MWClass
 {
    void Apparatus::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -57,12 +55,6 @@ namespace MWClass
     {
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
-    }
-
-    void Apparatus::insertIntoContainer (const MWWorld::Ptr& ptr,
-        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
-    {
-        insertIntoContainerStore (ptr, containerStore.appas);
     }
 
     std::string Apparatus::getScript (const MWWorld::Ptr& ptr) const

@@ -1,8 +1,11 @@
 #include <QtGui>
 
 #include "graphicspage.hpp"
+#include <components/files/configurationmanager.hpp>
 
-GraphicsPage::GraphicsPage(QWidget *parent) : QWidget(parent)
+GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
+    : QWidget(parent)
+    , mCfgMgr(cfg)
 {
     QGroupBox *rendererGroup = new QGroupBox(tr("Renderer"), this);
 
@@ -147,21 +150,21 @@ void GraphicsPage::createPages()
 
 void GraphicsPage::setupConfig()
 {
-    QString ogreCfg = mCfg.getOgreConfigPath().string().c_str();
+    QString ogreCfg = mCfgMgr.getOgreConfigPath().string().c_str();
     QFile file(ogreCfg);
     mOgreConfig = new QSettings(ogreCfg, QSettings::IniFormat);
 }
 
 void GraphicsPage::setupOgre()
 {
-    QString pluginCfg = mCfg.getPluginsConfigPath().string().c_str();
+    QString pluginCfg = mCfgMgr.getPluginsConfigPath().string().c_str();
     QFile file(pluginCfg);
 
     // Create a log manager so we can surpress debug text to stdout/stderr
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
-    logMgr->createLog((mCfg.getLogPath().string() + "/launcherOgre.log"), true, false, false);
+    logMgr->createLog((mCfgMgr.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
-    QString ogreCfg = QString::fromStdString(mCfg.getOgreConfigPath().string());
+    QString ogreCfg = QString::fromStdString(mCfgMgr.getOgreConfigPath().string());
     file.setFileName(ogreCfg);
 
     //we need to check that the path to the configuration file exists before we
@@ -177,7 +180,7 @@ void GraphicsPage::setupOgre()
         Make sure you have write access to<br>%1<br><br>")).arg(configDir.path()));
         msgBox.exec();
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -200,7 +203,7 @@ void GraphicsPage::setupOgre()
 
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -234,7 +237,7 @@ void GraphicsPage::setupOgre()
         Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
         msgBox.exec();
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -420,7 +423,7 @@ void GraphicsPage::writeConfig()
 
         qCritical("Error validating configuration");
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -446,7 +449,8 @@ void GraphicsPage::writeConfig()
 
         qCritical("Error saving Ogre configuration, the error reported was:\n %s", qPrintable(ogreError));
 
-        QApplication::exit(1);
+        qApp->exit(1);
+        return;
     }
 
 }

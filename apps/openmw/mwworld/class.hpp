@@ -7,10 +7,10 @@
 #include <boost/shared_ptr.hpp>
 
 #include "action.hpp"
-#include "containerstore.hpp"
 #include "refdata.hpp"
-#include "../mwrender/renderinginterface.hpp"
 #include "physicssystem.hpp"
+
+#include "../mwrender/renderinginterface.hpp"
 
 namespace Ogre
 {
@@ -33,6 +33,7 @@ namespace MWWorld
 {
     class Ptr;
     class Environment;
+    class ContainerStore;
 
     /// \brief Base class for referenceable esm records
     class Class
@@ -60,8 +61,6 @@ namespace MWWorld
             virtual std::string getId (const Ptr& ptr) const;
             ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
-
-
 
             virtual void insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const;
@@ -105,14 +104,9 @@ namespace MWWorld
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
 
-            virtual ContainerStore<RefData>& getContainerStore (const Ptr& ptr) const;
+            virtual ContainerStore& getContainerStore (const Ptr& ptr) const;
             ///< Return container store or throw an exception, if class does not have a
             /// container store (default implementation: throw an exceoption)
-
-            virtual void insertIntoContainer (const Ptr& ptr, ContainerStore<RefData>& containerStore)
-                const;
-            ///< Insert into a container or throw an exception, if class does not support inserting into
-            /// a container.
 
             virtual void lock (const Ptr& ptr, int lockLevel) const;
             ///< Lock object (default implementation: throw an exception)

@@ -10,8 +10,6 @@
 
 #include "../mwrender/objects.hpp"
 
-#include "containerutil.hpp"
-
 namespace MWClass
 {
     void Lockpick::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -58,12 +56,6 @@ namespace MWClass
     {
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
-    }
-
-    void Lockpick::insertIntoContainer (const MWWorld::Ptr& ptr,
-        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
-    {
-        insertIntoContainerStore (ptr, containerStore.lockpicks);
     }
 
     std::string Lockpick::getScript (const MWWorld::Ptr& ptr) const

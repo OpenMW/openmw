@@ -41,8 +41,10 @@ source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC
 find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
 
-find_package(PNG REQUIRED)
-include_directories(${PNG_INCLUDE_DIR})
+if (NOT APPLE) # this dependency can be completely removed, but now it only tested on OS X
+    find_package(PNG REQUIRED)
+    include_directories(${PNG_INCLUDE_DIR})
+endif()
 
 QT4_ADD_RESOURCES(RCC_SRCS resources.qrc)
 QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
@@ -71,9 +73,13 @@ endif()
 if (APPLE)
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${APP_BUNDLE_DIR}/../launcher.qss")
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
+    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
         "${APP_BUNDLE_DIR}/../launcher.cfg")
 else()
+    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/launcher.qss")
+
+    # Fallback in case getGlobalDataPath does not point to resources
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
 

@@ -82,6 +82,7 @@ namespace MWWorld
 
                 // initialise
                 ESM::CellRef& cellRef = mPtr.getCellRef();
+                cellRef.refID = name;
                 cellRef.refnum = -1;
                 cellRef.scale = 1;
                 cellRef.factIndex = 0;

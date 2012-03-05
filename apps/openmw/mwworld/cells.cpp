@@ -63,9 +63,10 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
         result = mExteriors.insert (std::make_pair (
             std::make_pair (x, y), Ptr::CellStore (cell))).first;
-
-        result->second.load (mStore, mReader);
     }
+
+    if (result->second.mState!=Ptr::CellStore::State_Loaded)
+        result->second.load (mStore, mReader);
 
     return &result->second;
 }
@@ -79,9 +80,10 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
         const ESM::Cell *cell = mStore.cells.findInt (name);
 
         result = mInteriors.insert (std::make_pair (name, Ptr::CellStore (cell))).first;
-
-        result->second.load (mStore, mReader);
     }
+
+    if (result->second.mState!=Ptr::CellStore::State_Loaded)
+        result->second.load (mStore, mReader);
 
     return &result->second;
 }

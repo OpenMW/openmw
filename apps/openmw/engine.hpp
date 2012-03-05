@@ -9,7 +9,6 @@
 
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
-#include <components/cfg/configurationmanager.hpp>
 
 #include "mwworld/environment.hpp"
 #include "mwworld/ptr.hpp"
@@ -52,13 +51,18 @@ namespace OEngine
   }
 }
 
+namespace Files
+{
+    struct ConfigurationManager;
+}
+
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
     class Engine : private Ogre::FrameListener
     {
             std::string mEncoding;
-            boost::filesystem::path mDataDir;
+            Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
@@ -101,7 +105,7 @@ namespace OMW
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
         public:
-            Engine(Cfg::ConfigurationManager& configurationManager);
+            Engine(Files::ConfigurationManager& configurationManager);
             virtual ~Engine();
 
             /// Enable strict filesystem mode (do not fold case)
@@ -149,6 +153,9 @@ namespace OMW
             /// Activate the focussed object.
             void activate();
 
+            /// Write screenshot to file.
+            void screenshot();
+
             /// Compile all scripts (excludign dialogue scripts) at startup?
             void setCompileAll (bool all);
 
@@ -158,7 +165,7 @@ namespace OMW
             void setAnimationVerbose(bool animverbose);
 
         private:
-            Cfg::ConfigurationManager& mCfgMgr;
+            Files::ConfigurationManager& mCfgMgr;
     };
 }
 
