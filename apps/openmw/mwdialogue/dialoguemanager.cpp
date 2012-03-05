@@ -24,6 +24,18 @@
 
 #include <iostream>
 
+#include "../mwscript/extensions.hpp"
+#include <components/compiler/exception.hpp>
+#include <components/compiler/errorhandler.hpp>
+#include <components/compiler/scanner.hpp>
+#include <components/compiler/locals.hpp>
+#include <components/compiler/output.hpp>
+#include <components/interpreter/interpreter.hpp>
+
+#include "../mwscript/compilercontext.hpp"
+#include "../mwscript/interpretercontext.hpp"
+#include <components/compiler/scriptparser.hpp>
+
 namespace
 {
     std::string toLower (const std::string& name)
@@ -397,16 +409,48 @@ namespace MWDialogue
         return true;
     }
 
-    DialogueManager::DialogueManager (MWWorld::Environment& environment) : mEnvironment (environment) {}
+    DialogueManager::DialogueManager (MWWorld::Environment& environment) : 
+    mEnvironment (environment),mCompilerContext (MWScript::CompilerContext::Type_Dialgoue, environment),
+        mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
+    {
+    }
 
     void DialogueManager::addTopic(std::string topic)
     {
         knownTopics[toLower(topic)] = true;
     }
 
+    void DialogueManager::parseText(std::string text)
+    {
+        std::map<std::string,ESM::DialInfo>::iterator it;
+        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
+        {
+            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+            size_t pos = find_str_ci(text,it->first,0);
+            if(pos !=std::string::npos)
+            {
+                if(pos==0)
+                {
+                    //std::cout << "fouuuuuuuuuuund";
+                    knownTopics[it->first] = true;
+                    win->addKeyword(it->first,it->second.response);
+                }
+                else if(text.substr(pos -1,1) == " ")
+                {
+                    //std::cout << "fouuuuuuuuuuund";
+                    knownTopics[it->first] = true;
+                    win->addKeyword(it->first,it->second.response);
+                }
+            }
+
+        }
+    }
+
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
         std::cout << "talking with " << MWWorld::Class::get (actor).getName (actor) << std::endl;
+
+        mActor = actor;
 
         //initialise the GUI
         mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
@@ -425,7 +469,7 @@ namespace MWDialogue
                 {
                     if (isMatching (actor, *iter))
                     {
-                        actorKnownTopics[it->first] = iter->response;
+                        actorKnownTopics[it->first] = *iter;
                         if(knownTopics.find(toLower(it->first)) != knownTopics.end())
                         {
                             MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
@@ -463,18 +507,9 @@ namespace MWDialogue
                             // TODO execute script
                         }
                         std::string text = iter->response;
-                        std::map<std::string,std::string>::iterator it;
-                        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
-                        {
-                            if(find_str_ci(text,it->first,0) !=std::string::npos)
-                            {
-                                //std::cout << "fouuuuuuuuuuund";
-                                knownTopics[it->first] = true;
-                                MWGui::DialogueWindow* win2 = mEnvironment.mWindowManager->getDialogueWindow();
-                                win2->addKeyword(it->first,it->second);
-                            }
-                        }
+                        parseText(text);
                         win->addText(iter->response);
+                        executeScript(iter->resultScript);
                         greetingFound = true;
                         break;
                     }
@@ -483,19 +518,64 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::keywordSelected(std::string keyword)
+    bool DialogueManager::compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code)
     {
-        std::string text = actorKnownTopics[keyword];
-        std::map<std::string,std::string>::iterator it;
-        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
+        try
         {
-            if(find_str_ci(text,it->first,0) !=std::string::npos)
+            mErrorHandler.reset();
+
+            std::istringstream input (cmd);
+
+            Compiler::Scanner scanner (mErrorHandler, input, mCompilerContext.getExtensions());
+
+            Compiler::ScriptParser parser(mErrorHandler,mCompilerContext,Compiler::Locals());//??????&mActor.getRefData().getLocals());
+
+            scanner.scan (parser);
+
+            if(mErrorHandler.isGood())
             {
-                knownTopics[it->first] = true;
-                MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-                win->addKeyword(it->first,it->second);
+                parser.getCode(code);
+                return true;
+            }
+            return false;
+        }
+        catch (const Compiler::SourceException& error)
+        {
+            // error has already been reported via error handler
+        }
+        catch (const std::exception& error)
+        {
+            printError (std::string ("An exception has been thrown: ") + error.what());
+        }
+
+        return false;
+    }
+
+    void DialogueManager::executeScript(std::string script)
+    {
+        std::vector<Interpreter::Type_Code> code;
+        if(compile(script,code))
+        {
+            try
+            {
+                MWScript::InterpreterContext interpreterContext(mEnvironment,&mActor.getRefData().getLocals(),mActor);
+                Interpreter::Interpreter interpreter;
+                MWScript::installOpcodes (interpreter);
+                interpreter.run (&code[0], code.size(), interpreterContext);
+            }
+            catch (const std::exception& error)
+            {
+                printError (std::string ("An exception has been thrown: ") + error.what());
             }
         }
+    }
+
+    void DialogueManager::keywordSelected(std::string keyword)
+    {
+        std::string text = actorKnownTopics[keyword].response;
+        std::string script = actorKnownTopics[keyword].resultScript;
+        parseText(text);
+        executeScript(script);
     }
 
     void DialogueManager::goodbyeSelected()
@@ -506,6 +586,12 @@ namespace MWDialogue
     void DialogueManager::questionAnswered(std::string answere)
     {
          std::cout << "and the ansere is..."<< answere;
+    }
+
+    void DialogueManager::printError(std::string error)
+    {
+        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+        win->addText(error);
     }
 
 }

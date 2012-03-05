@@ -154,12 +154,23 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
     size_t pos = 0;
     while((pos = find_str_ci(str,keyword, pos)) != std::string::npos)
     {
+        if(pos==0)
+        {
+            str.insert(pos,color1);
+            pos += color1.length();
+            pos += keyword.length();
+            str.insert(pos,color2);
+            pos+= color2.length();
+        }
+        else if(str.substr(pos -1,1) == " ")
+        {
+            str.insert(pos,color1);
+            pos += color1.length();
+            pos += keyword.length();
+            str.insert(pos,color2);
+            pos+= color2.length();
+        }
         //str.replace(pos, oldStr.length(), "#686EBA"+str.get);
-        str.insert(pos,color1);
-        pos += color1.length();
-        pos += keyword.length();
-        str.insert(pos,color2);
-        pos+= color2.length();
     }
 }
 
@@ -190,7 +201,7 @@ void DialogueWindow::displayTopicText(std::string topic)
 
 void DialogueWindow::addText(std::string text)
 {
-    history->addDialogText(parseText(text));
+    history->addDialogText("#B29154"+parseText(text)+"#B29154");
 }
 
 void DialogueWindow::askQuestion(std::string question,std::list<std::string> answers)
