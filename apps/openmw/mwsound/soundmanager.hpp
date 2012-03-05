@@ -6,10 +6,14 @@
 #include <boost/filesystem.hpp>
 #include <boost/timer.hpp>
 
-#include "../mwworld/ptr.hpp"
+#include <mangle/sound/clients/ogre_output_updater.hpp>
+#include <mangle/sound/clients/ogre_listener_mover.hpp>
+
 #include <openengine/sound/sndmanager.hpp>
 #include <components/files/multidircollection.hpp>
+#include <components/file_finder/file_finder.hpp>
 
+#include "../mwworld/ptr.hpp"
 
 
 namespace Ogre
@@ -17,6 +21,17 @@ namespace Ogre
     class Root;
     class Camera;
 }
+
+namespace Mangle
+{
+    namespace Sound
+    {
+        typedef boost::shared_ptr<Sound> SoundPtr;
+        //struct OgreOutputUpdater;
+    }
+}
+
+typedef OEngine::Sound::SoundManagerPtr OEManagerPtr;
 
 namespace ESMS
 {
@@ -30,14 +45,8 @@ namespace MWWorld
 
 namespace MWSound
 {
-    //SoundPtr *music;
     class SoundManager
     {
-            // Hide implementation details - engine.cpp is compiling
-            // enough as it is.
-            struct SoundImpl;
-
-            SoundImpl *mData;
             Files::PathContainer files;
             bool fsStrict;
             MWWorld::Environment& mEnvironment;
@@ -50,9 +59,54 @@ namespace MWSound
             ///< Play a soundifle
             /// \param absolute filename
 
+            /* This is the sound manager. It loades, stores and deletes
+            sounds based on the sound factory it is given.
+            */
+            OEManagerPtr mgr;
+            Mangle::Sound::SoundPtr music;
+
+            /* This class calls update() on the sound manager each frame
+               using and Ogre::FrameListener
+            */
+            Mangle::Sound::OgreOutputUpdater updater;
+
+            /* This class tracks the movement of an Ogre::Camera and moves
+               a sound listener automatically to follow it.
+            */
+            Mangle::Sound::OgreListenerMover cameraTracker;
+
+            typedef std::map<std::string,Mangle::Sound::WSoundPtr> IDMap;
+            typedef std::map<MWWorld::Ptr,IDMap> PtrMap;
+            PtrMap sounds;
+
+            // This is used for case insensitive and slash-type agnostic file
+            // finding. It takes DOS paths (any case, \\ slashes or / slashes)
+            // relative to the sound dir, and translates them into full paths
+            // of existing files in the filesystem, if they exist.
+            bool FSstrict;
+            FileFinder::LessTreeFileFinder soundfiles;
+            FileFinder::StrictTreeFileFinder strict;
+            FileFinder::LessTreeFileFinder musicpath;
+            FileFinder::StrictTreeFileFinder musicpathStrict;
+
+            static std::string toMp3(std::string str);
+            bool hasFile(const std::string &str, bool music = false);
+            std::string convertPath(const std::string &str, bool music = false);
+            std::string lookup(const std::string &soundId,
+                       float &volume, float &min, float &max);
+            void add(const std::string &file,
+                MWWorld::Ptr ptr, const std::string &id,
+                float volume, float pitch, float min, float max,
+                bool loop);
+            void clearAll(PtrMap::iterator& it);
+            void remove(MWWorld::Ptr ptr, const std::string &id = "");
+            bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
+            void removeCell(const MWWorld::Ptr::CellStore *cell);
+            void updatePositions(MWWorld::Ptr ptr);
+
         public:
 
-            SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
+            SoundManager(Ogre::Root*, Ogre::Camera*,
                    const Files::PathContainer& dataDir, bool useSound, bool fsstrict,
                    MWWorld::Environment& environment);
             ~SoundManager();
@@ -65,8 +119,6 @@ namespace MWSound
             void MP3Lookup(const boost::filesystem::path& dir);
 
             bool isMusicPlaying();
-
-            SoundImpl getMData();
 
             void say (MWWorld::Ptr reference, const std::string& filename);
             ///< Make an actor say some text.

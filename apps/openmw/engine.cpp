@@ -341,7 +341,6 @@ void OMW::Engine::go()
     // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
                                                            mOgre->getCamera(),
-                                                           mEnvironment.mWorld->getStore(),
                                                            mDataDirs,
                                                            mUseSound, mFSStrict, mEnvironment);
 
