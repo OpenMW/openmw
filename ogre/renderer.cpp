@@ -49,7 +49,7 @@ bool OgreRenderer::configure(bool showConfig,
 {
   // Set up logging first
   new LogManager;
-  Log *log = LogManager::getSingleton().createLog(logPath);
+  Log *log = LogManager::getSingleton().createLog(logPath + std::string("Ogre.log"));
   logging = _logging;
 
   if(logging)
