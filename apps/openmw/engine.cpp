@@ -60,7 +60,7 @@ void OMW::Engine::executeLocalScripts()
 
         MWScript::InterpreterContext interpreterContext (mEnvironment,
             &script.second.getRefData().getLocals(), script.second);
-        mScriptManager->run (script.first, interpreterContext);
+        mEnvironment.mScriptManager->run (script.first, interpreterContext);
 
         if (mEnvironment.mWorld->hasCellChanged())
             break;
@@ -183,7 +183,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mCompileAll (false)
   , mReportFocus (false)
   , mFocusTDiff (0)
-  , mScriptManager (0)
   , mScriptContext (0)
   , mFSStrict (false)
   , mCfgMgr(configurationManager)
@@ -200,7 +199,7 @@ OMW::Engine::~Engine()
     delete mEnvironment.mMechanicsManager;
     delete mEnvironment.mDialogueManager;
     delete mEnvironment.mJournal;
-    delete mScriptManager;
+    delete mEnvironment.mScriptManager;
     delete mScriptContext;
     delete mOgre;
 }
@@ -350,11 +349,11 @@ void OMW::Engine::go()
         mEnvironment);
     mScriptContext->setExtensions (&mExtensions);
 
-    mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(), mVerboseScripts,
-        *mScriptContext);
+    mEnvironment.mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(),
+        mVerboseScripts, *mScriptContext);
 
     mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
-        *mScriptManager);
+        *mEnvironment.mScriptManager);
 
     // Create game mechanics system
     mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (mEnvironment);
@@ -395,7 +394,7 @@ void OMW::Engine::go()
     // scripts
     if (mCompileAll)
     {
-        std::pair<int, int> result = mScriptManager->compileAll();
+        std::pair<int, int> result = mEnvironment.mScriptManager->compileAll();
 
         if (result.first)
             std::cout
@@ -437,7 +436,7 @@ void OMW::Engine::activate()
     if (!script.empty())
     {
         mEnvironment.mWorld->getLocalScripts().setIgnore (ptr);
-        mScriptManager->run (script, interpreterContext);
+        mEnvironment.mScriptManager->run (script, interpreterContext);
     }
 
     if (!interpreterContext.hasActivationBeenHandled())
