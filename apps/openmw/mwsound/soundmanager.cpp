@@ -410,7 +410,12 @@ namespace MWSound
 
     if(useSound)
     {
-      mData = new SoundImpl(root, camera, store, dataDirs /* Sound */, dataDirs /* Music */, fsstrict);
+        Files::PathContainer soundDirs;;
+        for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
+        {
+            soundDirs.push_back( *it / std::string("Sound"));
+        }
+        mData = new SoundImpl(root, camera, store, soundDirs /* Sound */, dataDirs /* Music */, fsstrict);
     }
 
     test.name = "";
