@@ -96,6 +96,7 @@ source_group(libs\\mangle FILES ${MANGLE_ALL})
 set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/mouselook.cpp
+  ${LIBDIR}/openengine/ogre/fader.cpp
 )
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/events.cpp
@@ -192,7 +193,6 @@ include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
     ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
-    ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
     ${OPENAL_INCLUDE_DIR}
@@ -206,10 +206,10 @@ if(APPLE)
     # List used Ogre plugins
     SET(USED_OGRE_PLUGINS "RenderSystem_GL"
                           "Plugin_OctreeSceneManager"
+                          "Plugin_CgProgramManager"
                           "Plugin_ParticleFX")
 endif(APPLE)
 
-add_subdirectory( extern/caelum )
 add_subdirectory( extern/mygui_3.0.1 )
 
 # Make sure that certain libraries are used as static libraries
@@ -218,9 +218,6 @@ add_subdirectory( extern/mygui_3.0.1 )
 
 # MyGUI: extern/mygui_3.0.0/
 add_definitions(-DMYGUI_STATIC)
-
-# Caelum: extern/caelum/
-add_definitions(-DCAELUM_STATIC)
 
 # Specify build paths
 
@@ -329,7 +326,6 @@ if(WIN32)
     FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
     INSTALL(FILES ${files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
@@ -348,11 +344,17 @@ if(WIN32)
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
 
-    SET(VCREDIST "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
-    if(EXISTS ${VCREDIST})
-        INSTALL(FILES ${VCREDIST} DESTINATION "redist")
+    SET(VCREDIST32 "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
+    if(EXISTS ${VCREDIST32})
+        INSTALL(FILES ${VCREDIST32} DESTINATION "redist")
         SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x86.exe\\\" /q'" )
-    endif(EXISTS ${VCREDIST})
+    endif(EXISTS ${VCREDIST32})
+
+    SET(VCREDIST64 "${OpenMW_BINARY_DIR}/vcredist_x64.exe")
+    if(EXISTS ${VCREDIST64})
+        INSTALL(FILES ${VCREDIST64} DESTINATION "redist")
+        SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x64.exe\\\" /q'" )
+    endif(EXISTS ${VCREDIST64})
 
     SET(OALREDIST "${OpenMW_BINARY_DIR}/oalinst.exe")
     if(EXISTS ${OALREDIST})
@@ -360,6 +362,10 @@ if(WIN32)
         SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
             ExecWait '\\\"$INSTDIR\\\\redist\\\\oalinst.exe\\\" /s'" )
     endif(EXISTS ${OALREDIST})
+
+    if(CMAKE_CL_64)
+        SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+    endif()
 
     include(CPack)
 endif(WIN32)

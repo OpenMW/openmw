@@ -181,12 +181,15 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     std::string local(variables["data-local"].as<std::string>());
     if (!local.empty())
     {
-        dataDirs.push_back(Files::PathContainer::value_type(local));
+        std::cout << "Ignoring data-local (currently not supported)" << std::endl;
+//        dataDirs.push_back(Files::PathContainer::value_type(local));
     }
 
-    if (dataDirs.empty())
+    if (dataDirs.size()>1)
     {
-        dataDirs.push_back(cfgMgr.getLocalPath());
+        dataDirs.resize (1);
+        std::cout << "Ignoring all but the first data path (multiple data paths currently not supported)"
+            << std::endl;
     }
 
     cfgMgr.processPaths(dataDirs);

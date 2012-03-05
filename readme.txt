@@ -141,8 +141,6 @@ Feature #45: NPC animations
 Feature #46: Creature Animation
 Feature #89: Basic Journal Window
 Feature #110: Automatically pick up the path of existing MW-installations
-Feature #133: Handle resources across multiple data directories
-Feature #134: Generate a suitable default-value for --data-local
 Feature #183: More FPS display settings
 Task #19: Refactor engine class
 Task #109/Feature #162: Automate Packaging

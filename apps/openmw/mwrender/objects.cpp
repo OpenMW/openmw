@@ -101,6 +101,14 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
             sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
             //Create the scenenode and put it in the map
             mStaticGeometry[ptr.getCell()] = sg;
+
+            // This specifies the size of a single batch region.
+            // If it is set too high:
+            //  - there will be problems choosing the correct lights
+            //  - the culling will be more inefficient
+            // If it is set too low:
+            //  - there will be too many batches.
+            sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
         }
         else
         {
@@ -108,7 +116,6 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         }
 
         sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
-        sg->setRegionDimensions(Ogre::Vector3(100000,10000,100000));
 
         mRenderer.getScene()->destroyEntity(ent);
     }

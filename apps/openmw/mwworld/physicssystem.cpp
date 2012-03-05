@@ -3,6 +3,7 @@
 #include "physicssystem.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/world.hpp" // FIXME
+#include <components/nifbullet/bullet_nif_loader.hpp>
 
 #include "OgreRoot.h"
 #include "OgreRenderWindow.h"
@@ -16,16 +17,24 @@ using namespace Ogre;
 namespace MWWorld
 {
 
-    PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend , OEngine::Physic::PhysicEngine* physEng) :
-        mRender(_rend), mEngine(physEng), mFreeFly (true)
+    PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
+        mRender(_rend), mEngine(0), mFreeFly (true)
     {
-
+        // Create physics. shapeLoader is deleted by the physic engine
+        NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
+        mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
     }
 
     PhysicsSystem::~PhysicsSystem()
     {
-
+        delete mEngine;
+    
     }
+    OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()
+    {
+        return mEngine;
+    }
+    
 	std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
 	{
 		std::string handle = "";
@@ -40,6 +49,17 @@ namespace MWWorld
         btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
 
         return mEngine->rayTest(from,to);
+    }
+    
+    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to)
+    {
+        btVector3 _from, _to;
+        _from = btVector3(from.x, from.y, from.z);
+        _to = btVector3(to.x, to.y, to.z);
+        
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
+        
+        return !(result.first == "");
     }
 
 
@@ -100,7 +120,7 @@ namespace MWWorld
     void PhysicsSystem::addObject (const std::string& handle, const std::string& mesh,
         const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
     {
-        OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle);
+        OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle,scale);
         mEngine->addRigidBody(body);
         btTransform tr;
         tr.setOrigin(btVector3(position.x,position.y,position.z));

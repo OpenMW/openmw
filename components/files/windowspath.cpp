@@ -75,7 +75,7 @@ boost::filesystem::path WindowsPath::getInstallPath() const
 
     BOOL f64 = FALSE;
     LPCTSTR regkey;
-    if (IsWow64Process(GetCurrentProcess(), &f64) && f64)
+    if ((IsWow64Process(GetCurrentProcess(), &f64) && f64) || sizeof(void*) == 8)
     {
         regkey = "SOFTWARE\\Wow6432Node\\Bethesda Softworks\\Morrowind";
     }

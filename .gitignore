@@ -10,4 +10,6 @@ CMakeCache.txt
 moc_*.cxx
 cmake_install.cmake
 *.[ao]
-
+Makefile
+makefile
+data
