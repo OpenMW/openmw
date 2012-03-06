@@ -18,7 +18,7 @@ void PathGrid::load(ESMReader &esm)
 {
     esm.getHNT(data, "DATA", 12);
     cell = esm.getHNString("NAME");
-    std::cout << "loading PGRD for " << cell << std::endl;
+    std::cout << "loading PGRD for " << cell << " x=" << data.x << " y=" << data.y << std::endl;
 
     // Remember this file position
     context = esm.getContext();
@@ -34,8 +34,7 @@ void PathGrid::load(ESMReader &esm)
         else
         {
             pointCount = data.s2;
-            std::cout << "Path grid points count for cell `" << data.x
-                << " " << data.y << "` is " << data.s2 << std::endl;
+            std::cout << "Path grid points count is " << data.s2 << std::endl;
             points = new Point[pointCount];
             esm.getExact(points, size);
             for (int i = 0; i < pointCount; ++i)
@@ -55,13 +54,13 @@ void PathGrid::load(ESMReader &esm)
     {
         esm.getSubHeader();
         int size = esm.getSubSize();
+        std::cout << "PGRC size is " << size << std::endl;
         if (size % 4 != 0)
             esm.fail("PGRC size not a multiple of 4");
         else
         {
             edgeCount = size / sizeof(Edge);
-            std::cout << "Path grid edge count for cell " << data.x
-                << " " << data.y << " is " << edgeCount << std::endl;
+            std::cout << "Path grid edge count is " << edgeCount << std::endl;
             edges = new Edge[edgeCount];
             esm.getExact(edges, size);
             for (int i = 0; i < edgeCount; ++i)
@@ -71,6 +70,7 @@ void PathGrid::load(ESMReader &esm)
             }
         }
     }
+    std::cin.ignore(1);
 }
 
 }
