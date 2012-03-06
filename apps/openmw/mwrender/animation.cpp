@@ -331,7 +331,7 @@ namespace MWRender{
 		}
 
     }
-    bool Animation::timeIndex( float time, std::vector<float> & times, int & i, int & j, float & x ){
+    bool Animation::timeIndex( float time, const std::vector<float> & times, int & i, int & j, float & x ){
 	int count;
 	if (  (count = times.size()) > 0 )
 	{
@@ -427,19 +427,19 @@ namespace MWRender{
          float x;
 		float x2;
 
-	    std::vector<Ogre::Quaternion> & quats = iter->getQuat();
+	    const std::vector<Ogre::Quaternion> & quats = iter->getQuat();
 
-        std::vector<float> & ttime = iter->gettTime();
+        const std::vector<float> & ttime = iter->gettTime();
         
 
-        std::vector<float> & rtime = iter->getrTime();
+        const std::vector<float> & rtime = iter->getrTime();
         int rindexJ = rindexI[slot];
 		 
 	    timeIndex(time, rtime, rindexI[slot], rindexJ, x2);
 	    int tindexJ = tindexI[slot];
 
 
-        std::vector<Ogre::Vector3> & translist1 = iter->getTranslist1();
+        const std::vector<Ogre::Vector3> & translist1 = iter->getTranslist1();
 
         timeIndex(time, ttime, tindexI[slot], tindexJ, x);
 
