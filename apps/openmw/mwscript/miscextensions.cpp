@@ -124,7 +124,7 @@ namespace MWScript
                 }
         };
 
-        class OpTogglePathgrind : public Interpreter::Opcode0
+        class OpTogglePathgrid : public Interpreter::Opcode0
         {
         public:
             virtual void execute (Interpreter::Runtime& runtime)
@@ -239,7 +239,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeFadeIn, new OpFadeIn);
             interpreter.installSegment5 (opcodeFadeOut, new OpFadeOut);
             interpreter.installSegment5 (opcodeFadeTo, new OpFadeTo);
-            interpreter.installSegment5 (opcodeTogglePathgrid, new OpTogglePathgrind);
+            interpreter.installSegment5 (opcodeTogglePathgrid, new OpTogglePathgrid);
         }
     }
 }
