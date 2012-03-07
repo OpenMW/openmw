@@ -10,7 +10,7 @@
 #include <mangle/sound/clients/ogre_listener_mover.hpp>
 
 #include <openengine/sound/sndmanager.hpp>
-#include <components/files/multidircollection.hpp>
+#include <components/files/fileops.hpp>
 #include <components/file_finder/file_finder.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -47,8 +47,13 @@ namespace MWSound
 {
     class SoundManager
     {
-            Files::PathContainer files;
-            bool fsStrict;
+
+            // This is used for case insensitive and slash-type agnostic file
+            // finding. It takes DOS paths (any case, \\ slashes or / slashes)
+            // relative to the sound dir, and translates them into full paths
+            // of existing files in the filesystem, if they exist.
+            bool mFSStrict;
+
             MWWorld::Environment& mEnvironment;
 
             int total;
@@ -79,19 +84,10 @@ namespace MWSound
             typedef std::map<MWWorld::Ptr,IDMap> PtrMap;
             PtrMap sounds;
 
-            // This is used for case insensitive and slash-type agnostic file
-            // finding. It takes DOS paths (any case, \\ slashes or / slashes)
-            // relative to the sound dir, and translates them into full paths
-            // of existing files in the filesystem, if they exist.
-            bool FSstrict;
-            FileFinder::LessTreeFileFinder soundfiles;
-            FileFinder::StrictTreeFileFinder strict;
-            FileFinder::LessTreeFileFinder musicpath;
-            FileFinder::StrictTreeFileFinder musicpathStrict;
+            Files::PathContainer mSoundFiles;
 
-            static std::string toMp3(std::string str);
-            bool hasFile(const std::string &str, bool music = false);
-            std::string convertPath(const std::string &str, bool music = false);
+            Files::PathContainer mMusicFiles;
+
             std::string lookup(const std::string &soundId,
                        float &volume, float &min, float &max);
             void add(const std::string &file,
@@ -116,7 +112,6 @@ namespace MWSound
             /// \param filename name of a sound file in "Music/" in the data directory.
 
             void startRandomTitle();
-            void MP3Lookup(const boost::filesystem::path& dir);
 
             bool isMusicPlaying();
 

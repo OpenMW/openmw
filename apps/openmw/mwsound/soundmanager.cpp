@@ -64,28 +64,36 @@ namespace MWSound
     SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
         const Files::PathContainer& dataDirs,
         bool useSound, bool fsstrict, MWWorld::Environment& environment)
-        : fsStrict(fsstrict)
+        : mFSStrict(fsstrict)
         , mEnvironment(environment)
         , mgr(new OEManager(SoundFactoryPtr(new SOUND_FACTORY)))
         , updater(mgr)
         , cameraTracker(mgr)
     {
-        for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
-        {
-           MP3Lookup((*it) / "Music/Explore/");
-        }
-
         if(useSound)
         {
-            Files::PathContainer soundDirs;;
+            // Make a list of all the sounds
+            Files::PathContainer soundDirs;
             for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
             {
                 soundDirs.push_back( *it / std::string("Sound"));
             }
-            soundfiles = soundDirs;
-            strict = soundDirs;
-            musicpath = dataDirs;
-            musicpathStrict = dataDirs;
+            for (Files::PathContainer::const_iterator it = soundDirs.begin(); it != soundDirs.end(); ++it)
+            {
+                Files::FileLister(*it, mSoundFiles, true);
+            }
+
+            // Make a list of all the music tracks
+            Files::PathContainer musicDirs;
+            for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
+            {
+                musicDirs.push_back( *it / std::string("Music") / std::string("Explore"));
+            }
+            for (Files::PathContainer::const_iterator it = musicDirs.begin(); it != musicDirs.end(); ++it)
+            {
+                Files::FileLister(*it, mMusicFiles, true);
+            }
+
             std::cout << "Sound output:  " << SOUND_OUT << std::endl;
             std::cout << "Sound decoder: " << SOUND_IN << std::endl;
             // Attach the camera to the camera tracker
@@ -103,103 +111,6 @@ namespace MWSound
     {
         Ogre::Root::getSingleton().removeFrameListener(&updater);
         cameraTracker.unfollowCamera();
-    }
-
-
-    static std::string SoundManager::toMp3(std::string str)
-    {
-      std::string::size_type i = str.rfind('.');
-      if(str.find('/', i) == std::string::npos &&
-         str.find('\\', i) == std::string::npos)
-        str = str.substr(0, i) + ".mp3";
-      else
-        str += ".mp3";
-      return str;
-    }
-
-    bool SoundManager::hasFile(const std::string &str, bool music)
-    {
-        bool found = false;
-        if(!fsStrict)
-        {
-            if(music)
-            {
-                found = musicpath.has(str);
-                // Not found? Try with .mp3
-                if (!found)
-                {
-                    found = musicpath.has(toMp3(str));
-                }
-            }
-            else
-            {
-                found = soundfiles.has(str);
-                if (!found)
-                {
-                    found = soundfiles.has(toMp3(str));
-                }
-            }
-        }
-        else
-        {
-            if(music)
-            {
-                found = musicpathStrict.has(str);
-                // Not found? Try with .mp3
-                if (!found)
-                {
-                    found = musicpathStrict.has(toMp3(str));
-                }
-            }
-            else
-            {
-                found = strict.has(str);
-                if (!found)
-                {
-                    found = strict.has(toMp3(str));
-                }
-            }
-        }
-
-        return found;
-    }
-
-    // Convert a Morrowind sound path (eg. Fx\funny.wav) to full path
-    // with proper slash conversion (eg. datadir/Sound/Fx/funny.wav)
-    std::string SoundManager::convertPath(const std::string &str, bool music)
-    {
-        if(fsStrict == false)
-        {
-            // Search and return
-            if(music && musicpath.has(str))
-                return musicpath.lookup(str);
-            else if(soundfiles.has(str))
-                return soundfiles.lookup(str);
-
-            // Try mp3 if the wav wasn't found
-            std::string mp3 = toMp3(str);
-            if(music && musicpath.has(mp3))
-                return musicpath.lookup(mp3);
-            else if(soundfiles.has(mp3))
-                return soundfiles.lookup(mp3);
-        }
-        else
-        {
-            if(music && musicpathStrict.has(str))
-                return musicpathStrict.lookup(str);
-            else if(strict.has(str))
-                return strict.lookup(str);
-
-            // Try mp3 if the wav wasn't found
-            std::string mp3 = toMp3(str);
-            if(music && musicpathStrict.has(mp3))
-                return musicpathStrict.lookup(mp3);
-            else if(strict.has(str))
-                return strict.lookup(mp3);
-        }
-
-        // Give up
-        return "";
     }
 
     // Convert a soundId to file name, and modify the volume
@@ -229,7 +140,7 @@ namespace MWSound
         max = std::max(min, max);
       }
 
-      return convertPath(snd->sound);
+      return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict);
     }
 
     // Add a sound to the list and play it
@@ -376,33 +287,20 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        if(hasFile(filename, true))
+        std::string filePath = Files::FileListLocator(mMusicFiles, filename, mFSStrict);
+        if(!filePath.empty())
         {
-            streamMusicFull(convertPath(filename, true));
+            streamMusicFull(filePath);
         }
     }
-
-  void SoundManager::MP3Lookup(const boost::filesystem::path& dir)
-  {
-    boost::filesystem::directory_iterator dir_iter(dir), dir_end;
-
-    std::string mp3extension = ".mp3";
-    for(;dir_iter != dir_end; dir_iter++)
-    {
-        if(boost::filesystem::extension(*dir_iter) == mp3extension)
-        {
-            files.push_back(*dir_iter);
-        }
-    }
-  }
 
   void SoundManager::startRandomTitle()
   {
-    if(!files.empty())
+    if(!mMusicFiles.empty())
     {
-        Files::PathContainer::iterator fileIter = files.begin();
+        Files::PathContainer::iterator fileIter = mMusicFiles.begin();
         srand( time(NULL) );
-        int r = rand() % files.size() + 1;        //old random code
+        int r = rand() % mMusicFiles.size() + 1;        //old random code
 
         std::advance(fileIter, r - 1);
         std::string music = fileIter->string();
@@ -432,8 +330,9 @@ namespace MWSound
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
     // The range values are not tested
-    if(hasFile(filename))
-      add(convertPath(filename), ptr, "_say_sound", 1, 1, 100, 20000, false);
+    std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict);
+    if(!filePath.empty())
+      add(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
     else
       std::cout << "Sound file " << filename << " not found, skipping.\n";
   }
@@ -448,7 +347,7 @@ namespace MWSound
   {
     // Play and forget
     float min, max;
-    const std::string &file = ookup(soundId, volume, min, max);
+    const std::string &file = lookup(soundId, volume, min, max);
     if (file != "")
     {
         SoundPtr snd = mgr->load(file);
