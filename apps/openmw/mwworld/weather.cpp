@@ -758,7 +758,7 @@ unsigned int WeatherManager::getWeatherID() const
         return 3;
     else if (mCurrentWeather == "rain")
         return 4;
-    else if (mCurrentWeather == "thunder")
+    else if (mCurrentWeather == "thunderstorm")
         return 5;
     else if (mCurrentWeather == "ashstorm")
         return 6;
@@ -787,7 +787,7 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
     else if (id==4)
         weather = "rain";
     else if (id==5)
-        weather = "thunder";
+        weather = "thunderstorm";
     else if (id==6)
         weather = "ashstorm";
     else if (id==7)

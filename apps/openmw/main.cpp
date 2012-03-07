@@ -6,9 +6,9 @@
 #include <boost/program_options.hpp>
 
 #include <components/files/fileops.hpp>
-#include <components/files/path.hpp>
+#include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>
-#include <components/cfg/configurationmanager.hpp>
+#include <components/files/configurationmanager.hpp>
 
 #include "engine.hpp"
 
@@ -35,6 +35,23 @@
 
 #include "config.hpp"
 
+#include <boost/version.hpp>
+/**
+ * Workaround for problems with whitespaces in paths in older versions of Boost library
+ */
+#if (BOOST_VERSION <= 104600)
+namespace boost
+{
+
+template<>
+inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string>(const std::string& arg)
+{
+    return boost::filesystem::path(arg);
+}
+
+} /* namespace boost */
+#endif /* (BOOST_VERSION <= 104600) */
+
 using namespace std;
 
 /**
@@ -46,7 +63,7 @@ using namespace std;
  * \retval true - Everything goes OK
  * \retval false - Error
  */
-bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::ConfigurationManager& cfgMgr)
+bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::ConfigurationManager& cfgMgr)
 {
     // Create a local alias for brevity
     namespace bpo = boost::program_options;
@@ -164,13 +181,18 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Cfg::Configuratio
     std::string local(variables["data-local"].as<std::string>());
     if (!local.empty())
     {
-        dataDirs.push_back(Files::PathContainer::value_type(local));
+        std::cout << "Ignoring data-local (currently not supported)" << std::endl;
+//        dataDirs.push_back(Files::PathContainer::value_type(local));
     }
 
-    if (dataDirs.empty())
+    if (dataDirs.size()>1)
     {
-        dataDirs.push_back(cfgMgr.getLocalDataPath());
+        dataDirs.resize (1);
+        std::cout << "Ignoring all but the first data path (multiple data paths currently not supported)"
+            << std::endl;
     }
+
+    cfgMgr.processPaths(dataDirs);
 
     engine.setDataDirs(dataDirs);
 
@@ -224,7 +246,7 @@ int main(int argc, char**argv)
 
     try
     {
-        Cfg::ConfigurationManager cfgMgr;
+        Files::ConfigurationManager cfgMgr;
         OMW::Engine engine(cfgMgr);
 
         if (parseOptions(argc, argv, engine, cfgMgr))

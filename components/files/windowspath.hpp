@@ -39,48 +39,41 @@ namespace Files
 struct WindowsPath
 {
     /**
-     * \brief Returns "X:\Documents And Settings\<User name>\My Documents\My Games\"
+     * \brief Returns user path i.e.:
+     * "X:\Documents And Settings\<User name>\My Documents\My Games\"
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getLocalConfigPath() const;
+    boost::filesystem::path getUserPath() const;
 
     /**
      * \brief Returns "X:\Program Files\"
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getGlobalConfigPath() const;
+    boost::filesystem::path getGlobalPath() const;
 
     /**
-     * \brief Return runtime configuration path which is a location where
+     * \brief Return local path which is a location where
      * an application was started
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getRuntimeConfigPath() const;
+    boost::filesystem::path getLocalPath() const;
 
     /**
-     * \brief Return same path like getLocalConfigPath
-     *
-     * \return boost::filesystem::path
-     */
-    boost::filesystem::path getLocalDataPath() const;
-
-    /**
-     * \brief Return same path like getGlobalConfigPath
+     * \brief Return same path like getGlobalPath
      *
      * \return boost::filesystem::path
      */
     boost::filesystem::path getGlobalDataPath() const;
 
     /**
-     * \brief Return runtime data path which is a location where
-     * an application was started with 'data' suffix.
+     * \brief Gets the path of the installed Morrowind version if there is one.
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getRuntimeDataPath() const;
+    boost::filesystem::path getInstallPath() const;
 };
 
 } /* namespace Files */

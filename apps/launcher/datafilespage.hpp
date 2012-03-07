@@ -3,6 +3,9 @@
 
 #include <QWidget>
 #include <QModelIndex>
+
+#include <components/files/collections.hpp>
+
 #include "combobox.hpp"
 
 class QTableWidget;
@@ -19,23 +22,18 @@ class PluginsModel;
 class PluginsView;
 class ComboBox;
 
+namespace Files { struct ConfigurationManager; }
+
 class DataFilesPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    DataFilesPage(QWidget *parent = 0);
+    DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent = 0);
 
     ComboBox *mProfilesComboBox;
-    QSettings *mLauncherConfig;
 
-    const QStringList checkedPlugins();
-    const QStringList selectedMasters();
-    void setupConfig();
-    void readConfig();
     void writeConfig(QString profile = QString());
-
-    void setupDataFiles(const QStringList &paths, bool strict);
 
 public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
@@ -81,11 +79,22 @@ private:
     QAction *mCheckAction;
     QAction *mUncheckAction;
 
+    Files::ConfigurationManager &mCfgMgr;
+    Files::PathContainer mDataDirs;
+    Files::PathContainer mDataLocal;
+
+    QSettings *mLauncherConfig;
+
+    const QStringList checkedPlugins();
+    const QStringList selectedMasters();
+
     void addPlugins(const QModelIndex &index);
     void removePlugins(const QModelIndex &index);
     void uncheckPlugins();
     void createActions();
-
+    void setupDataFiles();
+    void setupConfig();
+    void readConfig();
     void scrollToSelection();
 
 };
