@@ -45,7 +45,7 @@ namespace MWGui
         void addKeyword(std::string keyWord,std::string topicText);
         void removeKeyword(std::string keyWord);
         void addText(std::string text);
-        void askQuestion(std::string question,std::list<std::string> answers);
+        void askQuestion(std::string question,int choice);
 
     protected:
         void onSelectTopic(MyGUI::List* _sender, size_t _index);

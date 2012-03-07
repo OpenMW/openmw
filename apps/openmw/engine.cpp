@@ -360,7 +360,7 @@ void OMW::Engine::go()
 
     // Create dialog system
     mEnvironment.mJournal = new MWDialogue::Journal (mEnvironment);
-    mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment);
+    mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment,mExtensions);
 
     // load cell
     ESM::Position pos;

@@ -204,13 +204,13 @@ void DialogueWindow::addText(std::string text)
     history->addDialogText("#B29154"+parseText(text)+"#B29154");
 }
 
-void DialogueWindow::askQuestion(std::string question,std::list<std::string> answers)
+void DialogueWindow::askQuestion(std::string question,int choice)
 {
-    history->addDialogText(parseText(question));
-    for(std::list<std::string>::iterator it = answers.begin();it!=answers.end();it++)
+    history->addDialogText("#572D21"+question+"#B29154"+" ");
+    /*for(std::list<std::string>::iterator it = answers.begin();it!=answers.end();it++)
     {
         history->addDialogText("#572D21"+(*it)+"#B29154"+" ");
-    }
+    }*/
 }
 
 void DialogueWindow::updateOptions()

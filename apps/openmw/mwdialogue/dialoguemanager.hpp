@@ -44,11 +44,13 @@ namespace MWDialogue
 
         public:
 
-            DialogueManager (MWWorld::Environment& environment);
+            DialogueManager (MWWorld::Environment& environment,const Compiler::Extensions& extensions);
 
             void startDialogue (const MWWorld::Ptr& actor);
 
             void addTopic(std::string topic);
+
+            void askQuestion(std::string question,int choice);
 
             //calbacks for the GUI
             void keywordSelected(std::string keyword);

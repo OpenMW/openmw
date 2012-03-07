@@ -411,10 +411,11 @@ namespace MWDialogue
         return true;
     }
 
-    DialogueManager::DialogueManager (MWWorld::Environment& environment) :
+    DialogueManager::DialogueManager (MWWorld::Environment& environment,const Compiler::Extensions& extensions) :
     mEnvironment (environment),mCompilerContext (MWScript::CompilerContext::Type_Dialgoue, environment),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
     {
+        mCompilerContext.setExtensions (&extensions);
     }
 
     void DialogueManager::addTopic(std::string topic)
@@ -522,6 +523,7 @@ namespace MWDialogue
 
     bool DialogueManager::compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code)
     {
+        std::cout << cmd << std::endl;
         try
         {
             mErrorHandler.reset();
@@ -543,7 +545,6 @@ namespace MWDialogue
             Compiler::ScriptParser parser(mErrorHandler,mCompilerContext, locals);
 
             scanner.scan (parser);
-
             if(mErrorHandler.isGood())
             {
                 parser.getCode(code);
@@ -606,4 +607,10 @@ namespace MWDialogue
         win->addText(error);
     }
 
+    void DialogueManager::askQuestion(std::string question, int choice)
+    {
+        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+        win->askQuestion(question,choice);
+        std::cout << "choice";
+    }
 }
