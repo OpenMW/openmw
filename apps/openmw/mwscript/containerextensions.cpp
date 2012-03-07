@@ -11,7 +11,7 @@
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/containerutil.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -45,8 +45,7 @@ namespace MWScript
 
                     ref.getPtr().getRefData().setCount (count);
 
-                    MWWorld::Class::get (ref.getPtr()).insertIntoContainer (ref.getPtr(),
-                        MWWorld::Class::get (ptr).getContainerStore (ptr));
+                    MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
                 }
         };
 
@@ -59,25 +58,16 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    std::vector<MWWorld::Ptr> list;
-
-                    MWWorld::listItemsInContainer (item,
-                        MWWorld::Class::get (ptr).getContainerStore (ptr),
-                        context.getWorld().getStore(), list);
+                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
 
                     Interpreter::Type_Integer sum = 0;
 
-                    for (std::vector<MWWorld::Ptr>::iterator iter (list.begin()); iter!=list.end();
-                        ++iter)
-                    {
-                        sum += iter->getRefData().getCount();
-                    }
+                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
+                        if (iter->getCellRef().refID==item)
+                            sum += iter->getRefData().getCount();
 
                     runtime.push (sum);
                 }
@@ -92,9 +82,6 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
@@ -104,25 +91,23 @@ namespace MWScript
                     if (count<0)
                         throw std::runtime_error ("second argument for RemoveItem must be non-negative");
 
-                    std::vector<MWWorld::Ptr> list;
+                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
 
-                    MWWorld::listItemsInContainer (item,
-                        MWWorld::Class::get (ptr).getContainerStore (ptr),
-                        context.getWorld().getStore(), list);
-
-                    for (std::vector<MWWorld::Ptr>::iterator iter (list.begin());
-                        iter!=list.end() && count;
+                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
                         ++iter)
                     {
-                        if (iter->getRefData().getCount()<=count)
+                        if (iter->getCellRef().refID==item)
                         {
-                            count -= iter->getRefData().getCount();
-                            iter->getRefData().setCount (0);
-                        }
-                        else
-                        {
-                            iter->getRefData().setCount (iter->getRefData().getCount()-count);
-                            count = 0;
+                            if (iter->getRefData().getCount()<=count)
+                            {
+                                count -= iter->getRefData().getCount();
+                                iter->getRefData().setCount (0);
+                            }
+                            else
+                            {
+                                iter->getRefData().setCount (iter->getRefData().getCount()-count);
+                                count = 0;
+                            }
                         }
                     }
 

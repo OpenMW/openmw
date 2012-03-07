@@ -2,14 +2,15 @@
 #define GAME_SOUND_SOUNDMANAGER_H
 
 #include <string>
-#include <map>
 
 #include <boost/filesystem.hpp>
+#include <boost/timer.hpp>
+
 #include "../mwworld/ptr.hpp"
 #include <openengine/sound/sndmanager.hpp>
+#include <components/files/multidircollection.hpp>
 
 
-#include <boost/timer.hpp>
 
 namespace Ogre
 {
@@ -37,7 +38,7 @@ namespace MWSound
             struct SoundImpl;
 
             SoundImpl *mData;
-            std::vector<boost::filesystem::path> files;
+            Files::PathContainer files;
             bool fsStrict;
             MWWorld::Environment& mEnvironment;
 
@@ -52,7 +53,7 @@ namespace MWSound
         public:
 
             SoundManager(Ogre::Root*, Ogre::Camera*, const ESMS::ESMStore &store,
-                   boost::filesystem::path dataDir, bool useSound, bool fsstrict,
+                   const Files::PathContainer& dataDir, bool useSound, bool fsstrict,
                    MWWorld::Environment& environment);
             ~SoundManager();
 
@@ -61,7 +62,7 @@ namespace MWSound
             /// \param filename name of a sound file in "Music/" in the data directory.
 
             void startRandomTitle();
-            void MP3Lookup(boost::filesystem::path dir);
+            void MP3Lookup(const boost::filesystem::path& dir);
 
             bool isMusicPlaying();
 

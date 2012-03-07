@@ -29,7 +29,7 @@ namespace
         MWMechanics::NpcStats mNpcStats;
         MWMechanics::CreatureStats mCreatureStats;
         MWMechanics::Movement mMovement;
-        MWWorld::ContainerStore<MWWorld::RefData> mContainerStore;
+        MWWorld::ContainerStore mContainerStore;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -156,7 +156,7 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
 
-    MWWorld::ContainerStore<MWWorld::RefData>& Npc::getContainerStore (const MWWorld::Ptr& ptr)
+    MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
         const
     {
         ensureCustomData (ptr);

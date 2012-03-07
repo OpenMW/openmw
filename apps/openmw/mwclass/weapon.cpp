@@ -10,8 +10,6 @@
 
 #include "../mwrender/objects.hpp"
 
-#include "containerutil.hpp"
-
 namespace MWClass
 {
     void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -70,12 +68,6 @@ namespace MWClass
             ptr.get<ESM::Weapon>();
 
         return ref->base->data.health;
-    }
-
-    void Weapon::insertIntoContainer (const MWWorld::Ptr& ptr,
-        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
-    {
-        insertIntoContainerStore (ptr, containerStore.weapons);
     }
 
     std::string Weapon::getScript (const MWWorld::Ptr& ptr) const

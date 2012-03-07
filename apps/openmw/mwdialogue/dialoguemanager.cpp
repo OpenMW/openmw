@@ -25,6 +25,8 @@
 #include <iostream>
 
 #include "../mwscript/extensions.hpp"
+#include "../mwscript/scriptmanager.hpp"
+
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>
 #include <components/compiler/scanner.hpp>
@@ -409,7 +411,7 @@ namespace MWDialogue
         return true;
     }
 
-    DialogueManager::DialogueManager (MWWorld::Environment& environment) : 
+    DialogueManager::DialogueManager (MWWorld::Environment& environment) :
     mEnvironment (environment),mCompilerContext (MWScript::CompilerContext::Type_Dialgoue, environment),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
     {
@@ -524,11 +526,21 @@ namespace MWDialogue
         {
             mErrorHandler.reset();
 
-            std::istringstream input (cmd);
+            std::istringstream input (cmd + "\n");
 
             Compiler::Scanner scanner (mErrorHandler, input, mCompilerContext.getExtensions());
 
-            Compiler::ScriptParser parser(mErrorHandler,mCompilerContext,Compiler::Locals());//??????&mActor.getRefData().getLocals());
+            Compiler::Locals locals;
+
+            std::string actorScript = MWWorld::Class::get (mActor).getScript (mActor);
+
+            if (!actorScript.empty())
+            {
+                // grab local variables from actor's script, if available.
+                locals = mEnvironment.mScriptManager->getLocals (actorScript);
+            }
+
+            Compiler::ScriptParser parser(mErrorHandler,mCompilerContext, locals);
 
             scanner.scan (parser);
 

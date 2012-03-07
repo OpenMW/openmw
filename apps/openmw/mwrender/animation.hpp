@@ -26,6 +26,7 @@ class Animation{
     Ogre::SceneNode* insert;
     OEngine::Render::OgreRenderer &mRend;
     MWWorld::Environment& mEnvironment;
+    std::map<Nif::NiSkinData::BoneInfoCopy*, PosAndRot> vecRotPos;
     static std::map<std::string, int> mUniqueIDs;
     
    

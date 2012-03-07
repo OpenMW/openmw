@@ -83,26 +83,13 @@ namespace MWInput
     MWGui::WindowManager &windows;
     OMW::Engine& mEngine;
 
-    // Count screenshots.
-    int shotCount;
-
 
    /* InputImpl Methods */
 
-    // Write screenshot to file.
     void screenshot()
     {
-
-      // Find the first unused filename with a do-while
-      char buf[50];
-      do
-      {
-        snprintf(buf, 50, "screenshot%03d.png", shotCount++);
-      } while (boost::filesystem::exists(buf));
-
-      ogre.screenshot(buf);
+        mEngine.screenshot();
     }
-
 
     /* toggleInventory() is called when the user presses the button to toggle the inventory screen. */
     void toggleInventory()
@@ -183,8 +170,7 @@ namespace MWInput
         poller(input),
         player(_player),
         windows(_windows),
-        mEngine (engine),
-        shotCount(0)
+        mEngine (engine)
     {
       using namespace OEngine::Input;
       using namespace OEngine::Render;

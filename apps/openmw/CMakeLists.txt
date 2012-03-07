@@ -43,8 +43,8 @@ add_openmw_dir (mwsound
 
 add_openmw_dir (mwworld
     refdata world physicssystem scene environment globals class action nullaction actionteleport
-    containerstore actiontalk actiontake containerstore manualref containerutil player cellfunctors
-    cells localscripts customdata
+    containerstore actiontalk actiontake manualref player cellfunctors
+    cells localscripts customdata weather
     )
 
 add_openmw_dir (mwclass
@@ -77,7 +77,6 @@ target_link_libraries(openmw
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
-    caelum
     components
     MyGUIEngine
     MyGUIOgrePlatform
@@ -86,10 +85,6 @@ target_link_libraries(openmw
 if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
     target_link_libraries(openmw ${CARBON_FRAMEWORK})
-    install(TARGETS openmw
-        BUNDLE DESTINATION .
-        RUNTIME DESTINATION ../MacOS
-        COMPONENT Runtime)
 endif(APPLE)
 
 if(DPKG_PROGRAM)
