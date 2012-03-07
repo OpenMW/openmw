@@ -21,6 +21,14 @@ const std::string WeatherGlobals::mThunderSoundID0 = "Thunder0";
 const std::string WeatherGlobals::mThunderSoundID1 = "Thunder1";
 const std::string WeatherGlobals::mThunderSoundID2 = "Thunder2";
 const std::string WeatherGlobals::mThunderSoundID3 = "Thunder3";
+const float WeatherGlobals::mSunriseTime = 8;
+const float WeatherGlobals::mSunsetTime = 18;
+const float WeatherGlobals::mSunriseDuration = 2;
+const float WeatherGlobals::mSunsetDuration = 2;
+const float WeatherGlobals::mWeatherUpdateTime = 20.f;
+const float WeatherGlobals::mThunderFrequency = .4;
+const float WeatherGlobals::mThunderThreshold = 0.6;
+const float WeatherGlobals::mThunderSoundDelay = 0.25;
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environment* env) : 
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
