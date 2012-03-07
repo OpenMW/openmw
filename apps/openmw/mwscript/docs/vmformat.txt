@@ -23,7 +23,8 @@ op 0x20006: PlayAnim
 op 0x20007: PlayAnim, explicit reference
 op 0x20008: LoopAnim
 op 0x20009: LoopAnim, explicit reference
-opcodes 0x2000a-0x3ffff unused
+op 0x2000a: Choice
+opcodes 0x2000b-0x3ffff unused
 
 Segment 4:
 (not implemented yet)

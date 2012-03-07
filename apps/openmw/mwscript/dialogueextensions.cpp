@@ -89,17 +89,48 @@ namespace MWScript
                 }
         };
 
+        class OpChoice : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::cout << "CHOICECHOICEHOCQSCHQSHD";
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWDialogue::DialogueManager* dialogue = context.getEnvironment().mDialogueManager;
+                    //int choice = 1;
+                    while(arg0>0)
+                    {
+                        std::string question = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                        arg0 = arg0 -1;
+                        Interpreter::Type_Integer choice = 1;
+                        if(arg0>0)
+                        {
+                            choice = runtime[0].mInteger;
+                            runtime.pop();
+                            arg0 = arg0 -1;
+                        }
+                        dialogue->askQuestion(question,choice);
+                    }
+                }
+        };
+
+
         const int opcodeJournal = 0x2000133;
         const int opcodeSetJournalIndex = 0x2000134;
         const int opcodeGetJournalIndex = 0x2000135;
         const int opcodeAddTopic = 0x200013a;
+        const int opcodeChoice = 0x2000a;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
             extensions.registerInstruction ("journal", "cl", opcodeJournal);
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
-            extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);            
+            extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
+            extensions.registerInstruction ("choice", "clcl", opcodeChoice);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -107,7 +138,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeJournal, new OpJournal);
             interpreter.installSegment5 (opcodeSetJournalIndex, new OpSetJournalIndex);
             interpreter.installSegment5 (opcodeGetJournalIndex, new OpGetJournalIndex);
-            interpreter.installSegment5 (opcodeAddTopic, new OpAddTopic);            
+            interpreter.installSegment5 (opcodeAddTopic, new OpAddTopic);      
+            interpreter.installSegment3 (opcodeChoice,new OpChoice);
         }
     }
 
