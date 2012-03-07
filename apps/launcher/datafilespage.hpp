@@ -3,6 +3,9 @@
 
 #include <QWidget>
 #include <QModelIndex>
+
+#include <components/files/collections.hpp>
+
 #include "combobox.hpp"
 
 class QTableWidget;
@@ -77,6 +80,8 @@ private:
     QAction *mUncheckAction;
 
     Files::ConfigurationManager &mCfgMgr;
+    Files::PathContainer mDataDirs;
+    Files::PathContainer mDataLocal;
 
     QSettings *mLauncherConfig;
 
