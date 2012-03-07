@@ -12,6 +12,7 @@
 #include <openengine/sound/sndmanager.hpp>
 #include <components/files/fileops.hpp>
 #include <components/file_finder/file_finder.hpp>
+#include <components/files/filelibrary.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -86,7 +87,9 @@ namespace MWSound
 
             Files::PathContainer mSoundFiles;
 
-            Files::PathContainer mMusicFiles;
+            Files::FileLibrary mMusicLibrary;
+
+            const Files::PathContainer* mCurrentPlaylist;
 
             std::string lookup(const std::string &soundId,
                        float &volume, float &min, float &max);
@@ -114,6 +117,17 @@ namespace MWSound
             void startRandomTitle();
 
             bool isMusicPlaying();
+
+            bool setPlaylist(std::string playlist="");
+            ///< Set the playlist to an existing folder
+            /// \param name of the folder that contains the playlist
+            /// if none is set then it is set to an empty playlist
+            /// \return Return true if the previous playlist was the same
+
+            void playPlaylist(std::string playlist="");
+            ///< Start playing music from the selected folder
+            /// \param name of the folder that contains the playlist
+            /// if none is set then it plays from the current playlist
 
             void say (MWWorld::Ptr reference, const std::string& filename);
             ///< Make an actor say some text.

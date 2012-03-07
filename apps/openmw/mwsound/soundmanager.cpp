@@ -13,7 +13,6 @@
 #include <components/file_finder/file_finder.hpp>
 #include <components/esm_store/store.hpp>
 
-
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
@@ -45,7 +44,6 @@
 
 using namespace Mangle::Sound;
 typedef OEngine::Sound::SoundManager OEManager;
-////typedef OEngine::Sound::SoundManagerPtr OEManagerPtr;
 
 // Set the position on a sound based on a Ptr.
 static void setPos(SoundPtr &snd, const MWWorld::Ptr ref)
@@ -69,11 +67,21 @@ namespace MWSound
         , mgr(new OEManager(SoundFactoryPtr(new SOUND_FACTORY)))
         , updater(mgr)
         , cameraTracker(mgr)
+        , mCurrentPlaylist(NULL)
     {
         if(useSound)
         {
-            // Make a list of all the sounds
+            // Temporary list of all sound directories
             Files::PathContainer soundDirs;
+
+            // The music library will accept these filetypes
+            // If none is given then it will accept all filetypes
+            std::vector<std::string> acceptableExtensions;
+            acceptableExtensions.push_back(".mp3");
+            acceptableExtensions.push_back(".wav");
+            acceptableExtensions.push_back(".ogg");
+            acceptableExtensions.push_back(".flac");
+
             for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
             {
                 soundDirs.push_back( *it / std::string("Sound"));
@@ -83,16 +91,13 @@ namespace MWSound
                 Files::FileLister(*it, mSoundFiles, true);
             }
 
-            // Make a list of all the music tracks
-            Files::PathContainer musicDirs;
             for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
             {
-                musicDirs.push_back( *it / std::string("Music") / std::string("Explore"));
+                mMusicLibrary.add(*it / std::string("Music"), true, mFSStrict, acceptableExtensions);
             }
-            for (Files::PathContainer::const_iterator it = musicDirs.begin(); it != musicDirs.end(); ++it)
-            {
-                Files::FileLister(*it, mMusicFiles, true);
-            }
+
+            std::string anything = "anything";      // anything is better that a segfault
+            mCurrentPlaylist = mMusicLibrary.section(anything, mFSStrict); // now points to an empty path
 
             std::cout << "Sound output:  " << SOUND_OUT << std::endl;
             std::cout << "Sound decoder: " << SOUND_IN << std::endl;
@@ -287,7 +292,8 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        std::string filePath = Files::FileListLocator(mMusicFiles, filename, mFSStrict);
+        std::cout << filename << std::endl;
+        std::string filePath = mMusicLibrary.locate(filename, mFSStrict).string();
         if(!filePath.empty())
         {
             streamMusicFull(filePath);
@@ -296,11 +302,11 @@ namespace MWSound
 
   void SoundManager::startRandomTitle()
   {
-    if(!mMusicFiles.empty())
+    if(mCurrentPlaylist && !mCurrentPlaylist->empty())
     {
-        Files::PathContainer::iterator fileIter = mMusicFiles.begin();
+        Files::PathContainer::const_iterator fileIter = mCurrentPlaylist->begin();
         srand( time(NULL) );
-        int r = rand() % mMusicFiles.size() + 1;        //old random code
+        int r = rand() % mCurrentPlaylist->size() + 1;        //old random code
 
         std::advance(fileIter, r - 1);
         std::string music = fileIter->string();
@@ -325,6 +331,42 @@ namespace MWSound
             test = music->isPlaying();
         }
         return test;
+    }
+
+    bool SoundManager::setPlaylist(std::string playlist)
+    {
+        const Files::PathContainer* previousPlaylist;
+        previousPlaylist = mCurrentPlaylist;
+        if(mMusicLibrary.containsSection(playlist, mFSStrict))
+        {
+            mCurrentPlaylist = mMusicLibrary.section(playlist, mFSStrict);
+        }
+        else
+        {
+            std::cout << "Warning: playlist named " << playlist << " does not exist.\n";
+        }
+        return previousPlaylist == mCurrentPlaylist;
+    }
+
+    void SoundManager::playPlaylist(std::string playlist)
+    {
+        if (playlist == "")
+        {
+            if(!isMusicPlaying())
+            {
+                startRandomTitle();
+            }
+            return;
+        }
+
+        if(!setPlaylist(playlist))
+        {
+            startRandomTitle();
+        }
+        else if (!isMusicPlaying())
+        {
+            startRandomTitle();
+        }
     }
 
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)

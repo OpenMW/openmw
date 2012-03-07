@@ -44,6 +44,7 @@ add_component_dir (misc
 
 add_component_dir (files
     linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
+    filelibrary
     )
 
 add_component_dir (compiler
