@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace Files
@@ -22,13 +23,24 @@ namespace Files
     void FileLibrary::add(const boost::filesystem::path &root, bool recursive, bool strict,
             const StringVector &acceptableExtensions)
     {
-        PathContainer list;
+        if (!boost::filesystem::exists(root))
+        {
+            std::cout << "Warning " << root.string() << " does not exist.\n";
+            return;
+        }
+
         std::string fileExtension;
         std::string type;
-        FileLister(root, list, recursive);
 
-        for (PathContainer::iterator listIter = list.begin();
-            listIter != list.end(); ++listIter)
+        // remember the last location of the priority list when listing new items
+        int length = mPriorityList.size();
+
+        // First makes a list of all candidate files
+        FileLister(root, mPriorityList, recursive);
+
+        // Then sort these files into sections according to the folder they belong to
+        for (PathContainer::iterator listIter = mPriorityList.begin() + length;
+            listIter != mPriorityList.end(); ++listIter)
         {
             if( !acceptableExtensions.empty() )
             {
@@ -43,7 +55,7 @@ namespace Files
                 boost::algorithm::to_lower(type);
 
             mMap[type].push_back(*listIter);
-            //std::cout << "Added path: " << listIter->string() << " in section "<< type <<std::endl;
+            // std::cout << "Added path: " << listIter->string() << " in section "<< type <<std::endl;
         }
     }
 
@@ -82,12 +94,7 @@ namespace Files
         boost::filesystem::path result("");
         if (sectionName == "")
         {
-            for(StringPathContMap::iterator iter = mMap.begin(); iter != mMap.end(); iter++)
-            {
-                result = FileListLocator(iter->second, boost::filesystem::path(item), strict);
-                if (result != boost::filesystem::path(""))
-                    return result;
-            }
+            return FileListLocator(mPriorityList, boost::filesystem::path(item), strict);
         }
         else
         {

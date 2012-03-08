@@ -17,6 +17,7 @@ namespace Files
         private:
             StringPathContMap mMap;
             PathContainer mEmptyPath;
+            PathContainer mPriorityList;
 
         public:
             /// Searches a path and adds the results to the library

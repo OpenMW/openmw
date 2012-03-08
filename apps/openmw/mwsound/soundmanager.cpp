@@ -71,9 +71,6 @@ namespace MWSound
     {
         if(useSound)
         {
-            // Temporary list of all sound directories
-            Files::PathContainer soundDirs;
-
             // The music library will accept these filetypes
             // If none is given then it will accept all filetypes
             std::vector<std::string> acceptableExtensions;
@@ -82,16 +79,14 @@ namespace MWSound
             acceptableExtensions.push_back(".ogg");
             acceptableExtensions.push_back(".flac");
 
-            for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
+            // Makes a list of all sound files, searches in reverse for priority reasons
+            for (Files::PathContainer::const_reverse_iterator it = dataDirs.rbegin(); it != dataDirs.rend(); ++it)
             {
-                soundDirs.push_back( *it / std::string("Sound"));
-            }
-            for (Files::PathContainer::const_iterator it = soundDirs.begin(); it != soundDirs.end(); ++it)
-            {
-                Files::FileLister(*it, mSoundFiles, true);
+                Files::FileLister(*it / std::string("Sound"), mSoundFiles, true);
             }
 
-            for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
+            // Makes a FileLibrary of all music files, searches in reverse for priority reasons
+            for (Files::PathContainer::const_reverse_iterator it = dataDirs.rbegin(); it != dataDirs.rend(); ++it)
             {
                 mMusicLibrary.add(*it / std::string("Music"), true, mFSStrict, acceptableExtensions);
             }
@@ -292,7 +287,6 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        std::cout << filename << std::endl;
         std::string filePath = mMusicLibrary.locate(filename, mFSStrict).string();
         if(!filePath.empty())
         {
