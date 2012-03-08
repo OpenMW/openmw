@@ -66,7 +66,7 @@ class RenderingManager: private RenderingInterface {
 
     void toggleLight();
     bool toggleRenderMode(int mode);
-    
+
     OEngine::Render::Fader* getFader();
 
     void removeCell (MWWorld::Ptr::CellStore *store);
@@ -86,13 +86,13 @@ class RenderingManager: private RenderingInterface {
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);
 
     void update (float duration);
-    
+
     void setAmbientColour(const Ogre::ColourValue& colour);
     void setSunColour(const Ogre::ColourValue& colour);
     void setSunDirection(const Ogre::Vector3& direction);
     void sunEnable();
     void sunDisable();
-    
+
     void setGlare(bool glare);
     void skyEnable ();
     void skyDisable ();
@@ -102,13 +102,13 @@ class RenderingManager: private RenderingInterface {
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
     void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
-    
+
     /// configure fog according to cell
     void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
-    
+
     /// configure fog manually
     void configureFog(const float density, const Ogre::ColourValue& colour);
-    
+
     void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
         int number = 1);
     ///< Run animation for a MW-reference. Calls to this function for references that are currently not
@@ -124,9 +124,9 @@ class RenderingManager: private RenderingInterface {
   private:
 
     void setAmbientMode();
-    
+
     SkyManager* mSkyManager;
-    
+
     OEngine::Render::OgreRenderer &mRendering;
 
     MWRender::Objects mObjects;
@@ -147,7 +147,7 @@ class RenderingManager: private RenderingInterface {
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
     MWRender::Player *mPlayer;
-    MWRender::Debugging mDebugging;
+    MWRender::Debugging *mDebugging;
 };
 
 }

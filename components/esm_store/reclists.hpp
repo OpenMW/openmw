@@ -428,14 +428,16 @@ namespace ESMS
           if (grid->data.x == 0 && grid->data.y == 0)
           {
               intGrids[grid->cell] = grid;
+              std::cout << "int grids size " << intGrids.size() << std::endl;
           }
           else
           {
               extGrids[std::make_pair(grid->data.x, grid->data.y)] = grid;
+              std::cout << "ext grids size " << extGrids.size() << std::endl;
           }
       }
 
-      Pathgrid *find(int cellX, int cellY, std::string cellName) const
+      Pathgrid *find(int cellX, int cellY, const std::string &cellName) const
       {
           Pathgrid *result = search(cellX, cellY, cellName);
           if (!result)
@@ -445,8 +447,10 @@ namespace ESMS
           return result;
       }
 
-      Pathgrid *search(int cellX, int cellY, std::string cellName) const
+      Pathgrid *search(int cellX, int cellY, const std::string &cellName) const
       {
+          std::cout << "int grids size " << intGrids.size() << std::endl;
+          std::cout << "ext grids size " << extGrids.size() << std::endl;
           Pathgrid *result = NULL;
           if (cellX == 0 && cellY == 0) // possibly interior
           {

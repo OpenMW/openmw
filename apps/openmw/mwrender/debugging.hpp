@@ -4,6 +4,7 @@
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
+#include "../mwworld/ptr.hpp"
 
 #include <vector>
 #include <string>
@@ -28,14 +29,36 @@ namespace MWRender
 {
     class Player;
 
-	class Debugging{
-	OEngine::Physic::PhysicEngine* eng;
+    class Debugging
+    {
+        OEngine::Physic::PhysicEngine* mEngine;
+        Ogre::SceneManager* mSceneMgr;
+        const ESMS::ESMStore& mStore;
 
+        // Path grid stuff
+        bool pathgridEnabled;
 
-	public:
-		Debugging(OEngine::Physic::PhysicEngine* engine);
-		bool toggleRenderMode (int mode);
-	};
+        void togglePathgrid();
+
+        typedef std::vector<MWWorld::Ptr::CellStore *> CellList;
+
+        CellList mActiveCells;
+
+        Ogre::SceneNode *mPathGridRoot;
+        Ogre::SceneNode *mInteriorPathgridNode;
+
+        typedef std::map<std::pair<int,int>, Ogre::SceneNode *> ExteriorPathgridNodes;
+        ExteriorPathgridNodes mExteriorPathgridNodes;
+
+        void togglePathgridForCell(MWWorld::Ptr::CellStore *store, bool enabled);
+
+    public:
+        Debugging(const ESMS::ESMStore &store, Ogre::SceneManager *mSceneMgr, OEngine::Physic::PhysicEngine* engine);
+        bool toggleRenderMode (int mode);
+
+        void cellAdded(MWWorld::Ptr::CellStore* store);
+        void cellRemoved(MWWorld::Ptr::CellStore* store);
+    };
 
 
 }

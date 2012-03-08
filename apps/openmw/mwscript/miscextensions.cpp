@@ -133,7 +133,7 @@ namespace MWScript
                     static_cast<InterpreterContext&> (runtime.getContext());
 
                 bool enabled =
-                    context.getWorld().toggleRenderMode (MWWorld::World::Render_Wireframe);
+                    context.getWorld().toggleRenderMode (MWWorld::World::Render_Pathgrid);
 
                 context.report (enabled ?
                     "Path Grid rendering -> On" : "Path Grid Rendering -> Off");
