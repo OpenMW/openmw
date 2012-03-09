@@ -243,8 +243,10 @@ namespace MWWorld
         MWWorld::Environment* mEnvironment;
         
         std::map<Ogre::String, Weather> mWeatherSettings;
-        
+
         std::map<std::string, std::string> mRegionOverrides;
+
+        std::vector<std::string> mSoundsPlaying;
         
         Ogre::String mCurrentWeather;
         Ogre::String mNextWeather;
