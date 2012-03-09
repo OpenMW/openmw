@@ -3,25 +3,14 @@
 namespace ESM
 {
 
-PathGrid::~PathGrid() {
-    if (points != NULL) {
-        delete[] points;
-        points = NULL;
-    }
-    if (edges != NULL) {
-        delete[] edges;
-        edges = NULL;
-    }
-}
-
-void PathGrid::load(ESMReader &esm)
+void Pathgrid::load(ESMReader &esm)
 {
     esm.getHNT(data, "DATA", 12);
     cell = esm.getHNString("NAME");
-    //std::cout << "loading PGRD for " << cell << " x=" << data.x << " y=" << data.y << std::endl;
-
-    // Remember this file position
-    context = esm.getContext();
+//    std::cout << "loading PGRD for " <<
+//                 cell << " x=" << data.x << " y=" << data.y <<
+//                 " " << data.s1
+//                 << std::endl;
 
     // Check that the sizes match up. Size = 16 * s2 (path points?)
     if (esm.isNextSub("PGRP"))
@@ -35,8 +24,13 @@ void PathGrid::load(ESMReader &esm)
         {
             pointCount = data.s2;
             //std::cout << "Path grid points count is " << data.s2 << std::endl;
-            points = new Point[pointCount];
-            esm.getExact(points, size);
+            points.reserve(pointCount);
+            for (int i = 0; i < pointCount; ++i)
+            {
+                Point p;
+                esm.getExact(&p, sizeof(Point));
+                points.push_back(p);
+            }
 //            for (int i = 0; i < pointCount; ++i)
 //            {
 //                std::cout << i << "'s point: " << points[i].x;
@@ -53,16 +47,30 @@ void PathGrid::load(ESMReader &esm)
     if (esm.isNextSub("PGRC"))
     {
         esm.getSubHeader();
+        //esm.skipHSub();
         int size = esm.getSubSize();
         //std::cout << "PGRC size is " << size << std::endl;
-        if (size % 4 != 0)
-            esm.fail("PGRC size not a multiple of 4");
+        if (size % sizeof(int) != 0)
+            esm.fail("PGRC size not a multiple of 8");
         else
         {
-            edgeCount = size / sizeof(Edge);
+            edgeCount = size / sizeof(int) - 1;
             //std::cout << "Path grid edge count is " << edgeCount << std::endl;
-            edges = new Edge[edgeCount];
-            esm.getExact(edges, size);
+            edges.reserve(edgeCount);
+            int prevValue;
+            esm.getT(prevValue);
+            //esm.getExact(&prevValue, sizeof(int));
+            for (int i = 0; i < edgeCount; ++i)
+            {
+                int nextValue;
+                esm.getT(nextValue);
+                //esm.getExact(&nextValue, sizeof(int));
+                Edge e;
+                e.v0 = prevValue;
+                e.v1 = nextValue;
+                edges.push_back(e);
+                prevValue = nextValue;
+            }
 //            for (int i = 0; i < edgeCount; ++i)
 //            {
 //                std::cout << i << "'s edge: " << edges[i].v0 << " "

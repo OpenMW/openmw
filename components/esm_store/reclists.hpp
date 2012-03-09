@@ -390,6 +390,80 @@ namespace ESMS
     }
   };
 
+  struct PathgridList : RecList
+  {
+      int count;
+
+      // List of grids for interior cells. Indexed by cell name.
+      typedef std::map<std::string,ESM::Pathgrid*, ciLessBoost> IntGrids;
+      IntGrids intGrids;
+
+      // List of grids for exterior cells. Indexed as extCells[gridX][gridY].
+      typedef std::map<std::pair<int, int>, ESM::Pathgrid*> ExtGrids;
+      ExtGrids extGrids;
+
+      PathgridList() : count(0) {}
+
+      ~PathgridList()
+      {
+          for (IntGrids::iterator it = intGrids.begin(); it!=intGrids.end(); ++it)
+              delete it->second;
+
+          for (ExtGrids::iterator it = extGrids.begin(); it!=extGrids.end(); ++it)
+              delete it->second;
+      }
+
+      int getSize() { return count; }
+
+      virtual void listIdentifier (std::vector<std::string>& identifier) const
+      {
+          // do nothing
+      }
+
+      void load(ESMReader &esm, const std::string &id)
+      {
+          count++;
+          ESM::Pathgrid *grid = new ESM::Pathgrid;
+          grid->load(esm);
+          if (grid->data.x == 0 && grid->data.y)
+          {
+              intGrids[grid->cell] = grid;
+          }
+          else
+          {
+              extGrids[std::make_pair(grid->data.x, grid->data.y)] = grid;
+          }
+      }
+
+      Pathgrid *find(int cellX, int cellY, std::string cellName) const
+      {
+          Pathgrid *result = search(cellX, cellY, cellName);
+          if (!result)
+          {
+              throw std::runtime_error("no pathgrid found for cell " + cellName);
+          }
+          return result;
+      }
+
+      Pathgrid *search(int cellX, int cellY, std::string cellName) const
+      {
+          Pathgrid *result = NULL;
+          if (cellX == 0 && cellY == 0) // possibly interior
+          {
+              IntGrids::const_iterator it = intGrids.find(cellName);
+              if (it != intGrids.end())
+                result = it->second;
+          }
+          else
+          {
+              ExtGrids::const_iterator it = extGrids.find(std::make_pair(cellX, cellY));
+              if (it != extGrids.end())
+                result = it->second;
+          }
+          return result;
+      }
+  };
+
   template <typename X>
   struct ScriptListT : RecList
   {

@@ -9,7 +9,7 @@ namespace ESM
 /*
  * Path grid.
  */
-struct PathGrid
+struct Pathgrid
 {
     struct DATAstruct
     {
@@ -19,7 +19,6 @@ struct PathGrid
         short s2; // Number of path points? Size of PGRP block is always 16 * s2;
     }; // 12 bytes
 
-#pragma pack(push, 1)
     struct Point // path grid point
     {
         int x, y, z; // Location of point
@@ -30,22 +29,17 @@ struct PathGrid
     {
         int v0, v1; // index of points connected with this edge
     }; // 8 bytes
-#pragma pack(pop)
 
     std::string cell; // Cell name
     DATAstruct data;
 
-    Point *points;
+    std::vector<Point> points;
     int pointCount;
-    
-    Edge *edges;
+
+    std::vector<Edge> edges;
     int edgeCount;
 
-    ESM_Context context; // Context so we can return here later and
-                         // finish the job
     void load(ESMReader &esm);
-
-    ~PathGrid();
 };
 }
 #endif
