@@ -44,13 +44,13 @@ namespace Files
         {
             if( !acceptableExtensions.empty() )
             {
-                fileExtension = listIter->extension().string();
+                fileExtension = boost::filesystem::path (listIter->extension()).string();
                 boost::algorithm::to_lower(fileExtension);
                 if(!containsVectorString(acceptableExtensions, fileExtension))
                     continue;
             }
 
-            type = listIter->parent_path().leaf().string();
+            type = boost::filesystem::path (listIter->parent_path().leaf()).string();
             if (!strict)
                 boost::algorithm::to_lower(type);
 

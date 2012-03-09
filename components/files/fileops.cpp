@@ -1,4 +1,7 @@
 #include "fileops.hpp"
+
+#include <iostream>
+
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
