@@ -3,15 +3,11 @@
 
 #include <string>
 
-#include <boost/filesystem.hpp>
-#include <boost/timer.hpp>
-
 #include <mangle/sound/clients/ogre_output_updater.hpp>
 #include <mangle/sound/clients/ogre_listener_mover.hpp>
 
 #include <openengine/sound/sndmanager.hpp>
-#include <components/files/fileops.hpp>
-#include <components/file_finder/file_finder.hpp>
+
 #include <components/files/filelibrary.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -28,16 +24,10 @@ namespace Mangle
     namespace Sound
     {
         typedef boost::shared_ptr<Sound> SoundPtr;
-        //struct OgreOutputUpdater;
     }
 }
 
 typedef OEngine::Sound::SoundManagerPtr OEManagerPtr;
-
-namespace ESMS
-{
-    struct ESMStore;
-}
 
 namespace MWWorld
 {
@@ -56,10 +46,6 @@ namespace MWSound
             bool mFSStrict;
 
             MWWorld::Environment& mEnvironment;
-
-            int total;
-            ESM::Region test;
-            boost::timer timer;
 
             void streamMusicFull (const std::string& filename);
             ///< Play a soundifle
@@ -85,10 +71,13 @@ namespace MWSound
             typedef std::map<MWWorld::Ptr,IDMap> PtrMap;
             PtrMap sounds;
 
+            // A list of all sound files used to lookup paths
             Files::PathContainer mSoundFiles;
 
+            // A library of all Music file paths stored by the folder they are contained in
             Files::FileLibrary mMusicLibrary;
 
+            // Points to the current playlist of music files stored in the music library
             const Files::PathContainer* mCurrentPlaylist;
 
             std::string lookup(const std::string &soundId,
@@ -115,8 +104,10 @@ namespace MWSound
             /// \param filename name of a sound file in "Music/" in the data directory.
 
             void startRandomTitle();
+            ///< Starts a random track from the current playlist
 
             bool isMusicPlaying();
+            ///< Returns true if music is playing
 
             bool setPlaylist(std::string playlist="");
             ///< Set the playlist to an existing folder

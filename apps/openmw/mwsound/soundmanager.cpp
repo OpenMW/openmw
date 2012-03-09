@@ -10,7 +10,6 @@
 #include <mangle/sound/clients/ogre_listener_mover.hpp>
 #include <mangle/sound/clients/ogre_output_updater.hpp>
 
-#include <components/file_finder/file_finder.hpp>
 #include <components/esm_store/store.hpp>
 
 #include "../mwworld/environment.hpp"
@@ -102,9 +101,6 @@ namespace MWSound
             // Tell Ogre to update the sound system each frame
             root->addFrameListener(&updater);
         }
-
-        test.name = "";
-        total = 0;
       }
 
     SoundManager::~SoundManager()
@@ -430,15 +426,22 @@ namespace MWSound
   void SoundManager::update (float duration)
   {
         MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+        static int total = 0;
+        static std::string regionName = "";
+        static float timePassed = 0.0;
+        timePassed += duration;
 
         //If the region has changed
-        if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10)
+        if(!(current->cell->data.flags & current->cell->Interior) && timePassed >= 10)
         {
-            timer.restart();
-            if (test.name != current->cell->region)
+
+            ESM::Region test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
+
+            timePassed = 0;
+            if (regionName != current->cell->region)
             {
+                regionName = current->cell->region;
                 total = 0;
-                test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
             }
 
             if(test.soundList.size() > 0)
@@ -462,15 +465,15 @@ namespace MWSound
                 soundIter = test.soundList.begin();
                 while (soundIter != test.soundList.end())
                 {
-                    const ESM::NAME32 go = soundIter->sound;
+                    const std::string go = soundIter->sound.toString();
                     int chance = (int) soundIter->chance;
                     //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
                     soundIter++;
                     if( r - pos < chance)
                     {
                         //play sound
-                        std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-                        mEnvironment.mSoundManager->playSound(go.name, 20.0, 1.0);
+                        std::cout << "Sound: " << go <<" Chance:" <<  chance << "\n";
+                        mEnvironment.mSoundManager->playSound(go, 20.0, 1.0);
 
                         break;
                     }
@@ -480,7 +483,7 @@ namespace MWSound
         }
         else if(current->cell->data.flags & current->cell->Interior)
         {
-            test.name = "";
+            regionName = "";
         }
 
   }
