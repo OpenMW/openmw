@@ -80,6 +80,8 @@ namespace MWSound
             // Points to the current playlist of music files stored in the music library
             const Files::PathContainer* mCurrentPlaylist;
 
+            IDMap mLoopedSounds;
+
             std::string lookup(const std::string &soundId,
                        float &volume, float &min, float &max);
             void add(const std::string &file,
@@ -130,7 +132,7 @@ namespace MWSound
             bool sayDone (MWWorld::Ptr reference) const;
             ///< Is actor not speaking?
 
-            void playSound (const std::string& soundId, float volume, float pitch);
+            void playSound (const std::string& soundId, float volume, float pitch, bool loop=false);
             ///< Play a sound, independently of 3D-position
 
             void playSound3D (MWWorld::Ptr reference, const std::string& soundId,
@@ -143,6 +145,9 @@ namespace MWSound
 
             void stopSound (MWWorld::Ptr::CellStore *cell);
             ///< Stop all sounds for the given cell.
+
+            void stopSound(const std::string& soundId);
+            ///< Stop a non-3d looping sound
 
             bool getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId) const;
             ///< Is the given sound currently playing on the given object?

@@ -386,18 +386,28 @@ namespace MWSound
   }
 
 
-  void SoundManager::playSound(const std::string& soundId, float volume, float pitch)
+  void SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
   {
-    // Play and forget
     float min, max;
     const std::string &file = lookup(soundId, volume, min, max);
     if (file != "")
     {
         SoundPtr snd = mgr->load(file);
+        snd->setRepeat(loop);
         snd->setVolume(volume);
         snd->setRange(min,max);
         snd->setPitch(pitch);
         snd->play();
+
+        if (loop)
+        {
+            // Only add the looping sound once
+            IDMap::iterator it = mLoopedSounds.find(soundId);
+            if(it == mLoopedSounds.end())
+            {
+                mLoopedSounds[soundId] = WSoundPtr(snd);
+            }
+        }
     }
   }
 
@@ -420,6 +430,17 @@ namespace MWSound
   {
     removeCell(cell);
   }
+
+    void SoundManager::stopSound(const std::string& soundId)
+    {
+        IDMap::iterator it = mLoopedSounds.find(soundId);
+        if(it != mLoopedSounds.end())
+        {
+            SoundPtr snd = it->second.lock();
+            if(snd) snd->stop();
+            mLoopedSounds.erase(it);
+        }
+    }
 
   bool SoundManager::getSoundPlaying (MWWorld::Ptr ptr, const std::string& soundId) const
   {
