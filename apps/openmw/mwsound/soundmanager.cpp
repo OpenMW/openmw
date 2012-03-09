@@ -266,6 +266,13 @@ namespace MWSound
         }
     }
 
+    void SoundManager::stopMusic()
+    {
+        if (music)
+            music->stop();
+        setPlaylist();
+    }
+
 
   void SoundManager::streamMusicFull(const std::string& filename)
   {
@@ -327,7 +334,11 @@ namespace MWSound
     {
         const Files::PathContainer* previousPlaylist;
         previousPlaylist = mCurrentPlaylist;
-        if(mMusicLibrary.containsSection(playlist, mFSStrict))
+        if (playlist == "")
+        {
+            mCurrentPlaylist = mMusicLibrary.section(playlist, mFSStrict);
+        }
+        else if(mMusicLibrary.containsSection(playlist, mFSStrict))
         {
             mCurrentPlaylist = mMusicLibrary.section(playlist, mFSStrict);
         }

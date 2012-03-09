@@ -99,6 +99,9 @@ namespace MWSound
                    MWWorld::Environment& environment);
             ~SoundManager();
 
+            void stopMusic();
+            ///< Stops music if it's playing
+
             void streamMusic(const std::string& filename);
             ///< Play a soundifle
             /// \param filename name of a sound file in "Music/" in the data directory.
