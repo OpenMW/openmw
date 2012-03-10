@@ -55,6 +55,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
+
+    mLocalMap = new MWRender::LocalMap(&mRendering);
 }
 
 RenderingManager::~RenderingManager ()
@@ -62,6 +64,7 @@ RenderingManager::~RenderingManager ()
     //TODO: destroy mSun?
     delete mPlayer;
     delete mSkyManager;
+    delete mLocalMap;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -320,6 +323,14 @@ void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 void RenderingManager::setGlare(bool glare)
 {
     mSkyManager->setGlare(glare);
+}
+
+void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
+{
+    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+        mLocalMap->requestMap(cell);
+    else
+        mLocalMap->requestMap(cell, mObjects.getDimensions(cell));
 }
 
 } // namespace

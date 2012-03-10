@@ -101,7 +101,8 @@ namespace MWWorld
               insertCell(*cell, mEnvironment);
                mRendering.cellAdded (cell);
                mRendering.configureAmbient(*cell);
-
+               mRendering.requestMap(cell);
+               mRendering.configureAmbient(*cell);
         }
 
 
