@@ -77,6 +77,11 @@ namespace MWWorld
         throw std::runtime_error ("class does not have a container store");
     }
 
+    InventoryStore& Class::getInventoryStore (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have an inventory store");
+    }
+
     void Class::lock (const Ptr& ptr, int lockLevel) const
     {
         throw std::runtime_error ("class does not support locking");

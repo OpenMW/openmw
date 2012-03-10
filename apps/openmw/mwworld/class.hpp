@@ -34,6 +34,7 @@ namespace MWWorld
     class Ptr;
     class Environment;
     class ContainerStore;
+    class InventoryStore;
 
     /// \brief Base class for referenceable esm records
     class Class
@@ -107,6 +108,10 @@ namespace MWWorld
             virtual ContainerStore& getContainerStore (const Ptr& ptr) const;
             ///< Return container store or throw an exception, if class does not have a
             /// container store (default implementation: throw an exceoption)
+
+            virtual InventoryStore& getInventoryStore (const Ptr& ptr) const;
+            ///< Return inventory store or throw an exception, if class does not have a
+            /// inventory store (default implementation: throw an exceoption)
 
             virtual void lock (const Ptr& ptr, int lockLevel) const;
             ///< Lock object (default implementation: throw an exception)
