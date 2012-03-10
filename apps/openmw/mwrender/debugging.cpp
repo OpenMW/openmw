@@ -10,6 +10,7 @@
 #include "OgreTextureManager.h"
 
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
+#include "../mwworld/environment.hpp"
 #include "../mwworld/ptr.hpp"
 #include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>
@@ -19,8 +20,8 @@
 using namespace MWRender;
 using namespace Ogre;
 
-Debugging::Debugging(const ESMS::ESMStore &store, SceneManager* sceneMgr, OEngine::Physic::PhysicEngine *engine) :
-    mStore(store), mSceneMgr(sceneMgr), mEngine(engine), pathgridEnabled(false)
+Debugging::Debugging(MWWorld::Environment &env, SceneManager* sceneMgr, OEngine::Physic::PhysicEngine *engine) :
+    mEnvironment(env), mSceneMgr(sceneMgr), mEngine(engine), pathgridEnabled(false)
 {
 }
 
@@ -83,7 +84,7 @@ void Debugging::togglePathgrid()
 
 void Debugging::togglePathgridForCell(MWWorld::Ptr::CellStore *store, bool enabled)
 {
-    ESM::Pathgrid *pathgrid = mStore.pathgrids.search(*store->cell);
+    ESM::Pathgrid *pathgrid = mEnvironment.mWorld->getStore().pathgrids.search(*store->cell);
     if (!pathgrid)
     {
         std::cout << "No path grid :(" << std::endl;

@@ -23,6 +23,7 @@ namespace Ogre
 namespace MWWorld
 {
     class World;
+    class Environment;
 }
 
 namespace MWRender
@@ -33,7 +34,8 @@ namespace MWRender
     {
         OEngine::Physic::PhysicEngine* mEngine;
         Ogre::SceneManager* mSceneMgr;
-        const ESMS::ESMStore& mStore;
+        MWWorld::Environment& mEnvironment;
+        //const ESMS::ESMStore& mStore;
 
         // Path grid stuff
         bool pathgridEnabled;
@@ -53,7 +55,7 @@ namespace MWRender
         void togglePathgridForCell(MWWorld::Ptr::CellStore *store, bool enabled);
 
     public:
-        Debugging(const ESMS::ESMStore &store, Ogre::SceneManager *mSceneMgr, OEngine::Physic::PhysicEngine* engine);
+        Debugging(MWWorld::Environment &env, Ogre::SceneManager *mSceneMgr, OEngine::Physic::PhysicEngine* engine);
         bool toggleRenderMode (int mode);
 
         void cellAdded(MWWorld::Ptr::CellStore* store);

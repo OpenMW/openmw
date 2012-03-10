@@ -123,8 +123,6 @@ namespace ESMS
     CellRefList<Static, D>            statics;
     CellRefList<Weapon, D>            weapons;
 
-    ESM::Pathgrid *pathgrid;
-
     void load (const ESMStore &store, ESMReader &esm)
     {
         if (mState!=State_Loaded)
@@ -135,8 +133,6 @@ namespace ESMS
             std::cout << "loading cell " << cell->getDescription() << std::endl;
 
             loadRefs (store, esm);
-
-            pathgrid = store.pathgrids.search(*cell);
 
             mState = State_Loaded;
         }

@@ -24,7 +24,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 {
     mRendering.createScene("PlayerCam", 55, 5);
 
-    mDebugging = new Debugging(environment.mWorld->getStore(), mRendering.getScene(), engine);
+    mDebugging = new Debugging(environment, mRendering.getScene(), engine);
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
