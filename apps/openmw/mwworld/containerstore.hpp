@@ -6,6 +6,11 @@
 #include "refdata.hpp"
 #include "ptr.hpp"
 
+namespace ESM
+{
+    struct InventoryList;
+}
+
 namespace MWWorld
 {
     class ContainerStoreIterator;
@@ -59,6 +64,12 @@ namespace MWWorld
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
+
+            void fill (const ESM::InventoryList& items, const ESMS::ESMStore& store);
+            ///< Insert items into *this.
+
+            void clear();
+            ///< Empty container.
 
             static int getType (const Ptr& ptr);
             ///< This function throws an exception, if ptr does not point to an object, that can be

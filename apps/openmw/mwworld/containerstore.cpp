@@ -5,6 +5,10 @@
 #include <typeinfo>
 #include <stdexcept>
 
+#include <components/esm/loadcont.hpp>
+
+#include "manualref.hpp"
+
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::begin (int mask)
 {
     return ContainerStoreIterator (mask, this);
@@ -17,7 +21,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 
 void MWWorld::ContainerStore::add (const Ptr& ptr)
 {
-    /// \todo implement item stocking
+    /// \todo implement item stacking
 
     switch (getType (ptr))
     {
@@ -34,6 +38,40 @@ void MWWorld::ContainerStore::add (const Ptr& ptr)
         case Type_Repair: repairs.list.push_back (*ptr.get<ESM::Repair>());  break;
         case Type_Weapon: weapons.list.push_back (*ptr.get<ESM::Weapon>());  break;
     }
+}
+
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS::ESMStore& store)
+{
+    for (std::vector<ESM::ContItem>::const_iterator iter (items.list.begin()); iter!=items.list.end();
+        ++iter)
+    {
+        ManualRef ref (store, iter->item.toString());
+
+        if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
+        {
+            /// \todo implement leveled item lists
+            continue;
+        }
+
+        ref.getPtr().getRefData().setCount (iter->count);
+        add (ref.getPtr());
+    }
+}
+
+void MWWorld::ContainerStore::clear()
+{
+    potions.list.clear();
+    appas.list.clear();
+    armors.list.clear();
+    books.list.clear();
+    clothes.list.clear();
+    ingreds.list.clear();
+    lights.list.clear();
+    lockpicks.list.clear();
+    miscItems.list.clear();
+    probes.list.clear();
+    repairs.list.clear();
+    weapons.list.clear();
 }
 
 int MWWorld::ContainerStore::getType (const Ptr& ptr)
