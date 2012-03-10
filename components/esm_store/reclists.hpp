@@ -425,7 +425,7 @@ namespace ESMS
           count++;
           ESM::Pathgrid *grid = new ESM::Pathgrid;
           grid->load(esm);
-          if (grid->data.x == 0 && grid->data.y)
+          if (grid->data.x == 0 && grid->data.y == 0)
           {
               intGrids[grid->cell] = grid;
           }
@@ -461,6 +461,21 @@ namespace ESMS
                 result = it->second;
           }
           return result;
+      }
+
+      Pathgrid *search(const ESM::Cell &cell) const
+      {
+          int cellX, cellY;
+          if (cell.data.flags & ESM::Cell::Interior)
+          {
+              cellX = cellY = 0;
+          }
+          else
+          {
+              cellX = cell.data.gridX;
+              cellY = cell.data.gridY;
+          }
+          return search(cellX, cellY, cell.name);
       }
   };
 

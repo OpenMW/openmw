@@ -12,17 +12,17 @@ void Pathgrid::load(ESMReader &esm)
 //                 " " << data.s1
 //                 << std::endl;
 
-    // Check that the sizes match up. Size = 16 * s2 (path points?)
+    // Check that the sizes match up. Size = 16 * s2 (path points)
     if (esm.isNextSub("PGRP"))
     {
         esm.getSubHeader();
         int size = esm.getSubSize();
         //std::cout << "PGRP size is " << size << std::endl;
-        if (size != 16 * data.s2)
+        if (size != sizeof(Point) * data.s2)
             esm.fail("Path grid table size mismatch");
         else
         {
-            pointCount = data.s2;
+            int pointCount = data.s2;
             //std::cout << "Path grid points count is " << data.s2 << std::endl;
             points.reserve(pointCount);
             for (int i = 0; i < pointCount; ++i)
@@ -41,30 +41,24 @@ void Pathgrid::load(ESMReader &esm)
         }
     }
 
-    // Size varies. Path grid chances? Connections? Multiples of 4
-    // suggest either int or two shorts, or perhaps a float. Study
-    // it later.
     if (esm.isNextSub("PGRC"))
     {
         esm.getSubHeader();
-        //esm.skipHSub();
         int size = esm.getSubSize();
         //std::cout << "PGRC size is " << size << std::endl;
         if (size % sizeof(int) != 0)
             esm.fail("PGRC size not a multiple of 8");
         else
         {
-            edgeCount = size / sizeof(int) - 1;
+            int edgeCount = size / sizeof(int) - 1;
             //std::cout << "Path grid edge count is " << edgeCount << std::endl;
             edges.reserve(edgeCount);
             int prevValue;
             esm.getT(prevValue);
-            //esm.getExact(&prevValue, sizeof(int));
             for (int i = 0; i < edgeCount; ++i)
             {
                 int nextValue;
                 esm.getT(nextValue);
-                //esm.getExact(&nextValue, sizeof(int));
                 Edge e;
                 e.v0 = prevValue;
                 e.v1 = nextValue;
