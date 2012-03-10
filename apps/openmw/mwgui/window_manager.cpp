@@ -401,3 +401,8 @@ const ESMS::ESMStore& WindowManager::getStore() const
 {
     return environment.mWorld->getStore();
 }
+
+void WindowManager::setCellName(const std::string& cellName)
+{
+    map->setCellName(cellName);
+}

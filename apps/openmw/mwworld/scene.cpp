@@ -6,6 +6,8 @@
 
 #include "../mwsound/soundmanager.hpp"
 
+#include "../mwgui/window_manager.hpp"
+
 #include "ptr.hpp"
 #include "environment.hpp"
 #include "player.hpp"
@@ -118,6 +120,17 @@ namespace MWWorld
         // TODO orientation
         mEnvironment.mMechanicsManager->addActor (mWorld->getPlayer().getPlayer());
         mEnvironment.mMechanicsManager->watchActor (mWorld->getPlayer().getPlayer());
+
+        // set map window cell name
+        if (!(mCurrentCell->cell->data.flags & ESM::Cell::Interior))
+        {
+            if (mCurrentCell->cell->name != "")
+                mEnvironment.mWindowManager->setCellName( mCurrentCell->cell->name );
+            else
+                mEnvironment.mWindowManager->setCellName( mCurrentCell->cell->region );
+        }
+        else
+            mEnvironment.mWindowManager->setCellName( mCurrentCell->cell->name );
     }
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)

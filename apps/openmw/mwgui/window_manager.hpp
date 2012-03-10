@@ -151,6 +151,8 @@ namespace MWGui
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
 
+    void setCellName(const std::string& cellName); ///< set the cell name to display in the map window
+
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
     void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
