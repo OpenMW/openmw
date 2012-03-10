@@ -53,6 +53,8 @@ namespace MWWorld
 
         public:
 
+            virtual ~ContainerStore();
+
             ContainerStoreIterator begin (int mask = Type_All);
 
             ContainerStoreIterator end();

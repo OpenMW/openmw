@@ -9,6 +9,8 @@
 
 #include "manualref.hpp"
 
+MWWorld::ContainerStore::~ContainerStore() {}
+
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::begin (int mask)
 {
     return ContainerStoreIterator (mask, this);
