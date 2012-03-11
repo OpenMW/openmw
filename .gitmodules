@@ -1,3 +1,0 @@
-[submodule "libs/openengine"]
-	path = libs/openengine
-	url = git://github.com/zinnschlag/OpenEngine
