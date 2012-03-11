@@ -33,9 +33,8 @@ namespace MWRender
     class Debugging
     {
         OEngine::Physic::PhysicEngine* mEngine;
-        Ogre::SceneManager* mSceneMgr;
+        Ogre::SceneManager *mSceneMgr;
         MWWorld::Environment& mEnvironment;
-        //const ESMS::ESMStore& mStore;
 
         // Path grid stuff
         bool pathgridEnabled;
@@ -46,6 +45,7 @@ namespace MWRender
 
         CellList mActiveCells;
 
+        Ogre::SceneNode *mMwRoot;
         Ogre::SceneNode *mPathGridRoot;
         Ogre::SceneNode *mInteriorPathgridNode;
 
@@ -54,8 +54,10 @@ namespace MWRender
 
         void togglePathgridForCell(MWWorld::Ptr::CellStore *store, bool enabled);
 
+        void destroyCellPathgridNode(Ogre::SceneNode *node);
+
     public:
-        Debugging(MWWorld::Environment &env, Ogre::SceneManager *mSceneMgr, OEngine::Physic::PhysicEngine* engine);
+        Debugging(Ogre::SceneNode* mwRoot, MWWorld::Environment &env, OEngine::Physic::PhysicEngine *engine);
         bool toggleRenderMode (int mode);
 
         void cellAdded(MWWorld::Ptr::CellStore* store);

@@ -2,12 +2,8 @@
 
 #include <assert.h>
 
-#include "OgreRoot.h"
-#include "OgreRenderWindow.h"
-#include "OgreSceneManager.h"
-#include "OgreViewport.h"
-#include "OgreCamera.h"
-#include "OgreTextureManager.h"
+#include <OgreNode.h>
+#include <OgreSceneManager.h>
 
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwworld/environment.hpp"
@@ -20,8 +16,11 @@
 using namespace MWRender;
 using namespace Ogre;
 
-Debugging::Debugging(MWWorld::Environment &env, SceneManager* sceneMgr, OEngine::Physic::PhysicEngine *engine) :
-    mEnvironment(env), mSceneMgr(sceneMgr), mEngine(engine), pathgridEnabled(false)
+Debugging::Debugging(SceneNode *mwRoot, MWWorld::Environment &env, OEngine::Physic::PhysicEngine *engine) :
+    mMwRoot(mwRoot), mEnvironment(env), mEngine(engine),
+    mSceneMgr(mwRoot->getCreator()),
+    pathgridEnabled(false),
+    mInteriorPathgridNode(NULL), mPathGridRoot(NULL)
 {
 }
 
@@ -65,7 +64,7 @@ void Debugging::togglePathgrid()
     if (pathgridEnabled)
     {
         // add path grid meshes to already loaded cells
-        mPathGridRoot = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+        mPathGridRoot = mMwRoot->createChildSceneNode();
         for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); it++)
         {
             togglePathgridForCell(*it, true);
@@ -79,6 +78,7 @@ void Debugging::togglePathgrid()
         }
         mPathGridRoot->removeAndDestroyAllChildren();
         mSceneMgr->destroySceneNode(mPathGridRoot);
+        mPathGridRoot = NULL;
     }
 }
 
@@ -87,25 +87,24 @@ void Debugging::togglePathgridForCell(MWWorld::Ptr::CellStore *store, bool enabl
     ESM::Pathgrid *pathgrid = mEnvironment.mWorld->getStore().pathgrids.search(*store->cell);
     if (!pathgrid)
     {
-        std::cout << "No path grid :(" << std::endl;
         return;
     }
-    std::cout << "Path grid exists!" << std::endl;
 
     if (enabled)
     {
         Vector3 cellPathGridPos;
+        /// \todo replace tests like this with isExterior method of ESM::Cell after merging with terrain branch
         if (!(store->cell->data.flags & ESM::Cell::Interior))
         {
             /// \todo Replace with ESM::Land::REAL_SIZE after merging with terrain branch
             cellPathGridPos.x = store->cell->data.gridX * 8192;
-            cellPathGridPos.z = -store->cell->data.gridY * 8192;
+            cellPathGridPos.y = store->cell->data.gridY * 8192;
         }
         SceneNode *cellPathGrid = mPathGridRoot->createChildSceneNode(cellPathGridPos);
         ESM::Pathgrid::PointList points = pathgrid->points;
         for (ESM::Pathgrid::PointList::iterator it = points.begin(); it != points.end(); it++)
         {
-            Vector3 position(it->x, it->z, -it->y);
+            Vector3 position(it->x, it->y, it->z);
             SceneNode* pointNode = cellPathGrid->createChildSceneNode(position);
             pointNode->setScale(0.5, 0.5, 0.5);
             Entity *pointMesh = mSceneMgr->createEntity(SceneManager::PT_CUBE);
@@ -124,18 +123,13 @@ void Debugging::togglePathgridForCell(MWWorld::Ptr::CellStore *store, bool enabl
     }
     else
     {
-        /// \todo Don't forget to destroy cubes too!
-        SceneNode *cellPathGridNode;
         if (!(store->cell->data.flags & ESM::Cell::Interior))
         {
             ExteriorPathgridNodes::iterator it =
                     mExteriorPathgridNodes.find(std::make_pair(store->cell->data.gridX, store->cell->data.gridY));
             if (it != mExteriorPathgridNodes.end())
             {
-                cellPathGridNode = it->second;
-                mPathGridRoot->removeChild(cellPathGridNode);
-                cellPathGridNode->removeAndDestroyAllChildren();
-                mSceneMgr->destroySceneNode(cellPathGridNode);
+                destroyCellPathgridNode(it->second);
                 mExteriorPathgridNodes.erase(it);
             }
         }
@@ -143,11 +137,28 @@ void Debugging::togglePathgridForCell(MWWorld::Ptr::CellStore *store, bool enabl
         {
             if (mInteriorPathgridNode)
             {
-                mPathGridRoot->removeChild(mInteriorPathgridNode);
-                mInteriorPathgridNode->removeAndDestroyAllChildren();
-                mSceneMgr->destroySceneNode(mInteriorPathgridNode);
+                destroyCellPathgridNode(mInteriorPathgridNode);
                 mInteriorPathgridNode = NULL;
             }
         }
     }
+}
+
+void Debugging::destroyCellPathgridNode(SceneNode *node)
+{
+    mPathGridRoot->removeChild(node);
+
+    SceneNode::ChildNodeIterator childIt = node->getChildIterator();
+    while (childIt.hasMoreElements())
+    {
+        SceneNode *child = static_cast<SceneNode *>(childIt.getNext());
+        SceneNode::ObjectIterator objIt = child->getAttachedObjectIterator();
+        while (objIt.hasMoreElements())
+        {
+            MovableObject *mesh = static_cast<MovableObject *>(objIt.getNext());
+            child->getCreator()->destroyMovableObject(mesh);
+        }
+    }
+    node->removeAndDestroyAllChildren();
+    mSceneMgr->destroySceneNode(node);
 }
