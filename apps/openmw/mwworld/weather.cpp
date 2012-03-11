@@ -722,6 +722,40 @@ void WeatherManager::update(float duration)
         mRendering->skyDisable();
         mRendering->getSkyManager()->setThunder(0.f);
     }
+
+    // play sounds
+    std::string ambientSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID : "");
+    if (ambientSnd != "")
+    {
+        if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
+        {
+            mSoundsPlaying.push_back(ambientSnd);
+            mEnvironment->mSoundManager->playSound(ambientSnd, 1.0, 1.0, true);
+        }
+    }
+
+    std::string rainSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mRainLoopSoundID : "");
+    if (rainSnd != "")
+    {
+        if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
+        {
+            mSoundsPlaying.push_back(rainSnd);
+            mEnvironment->mSoundManager->playSound(rainSnd, 1.0, 1.0, true);
+        }
+    }
+
+    // stop sounds
+    std::vector<std::string>::iterator it=mSoundsPlaying.begin();
+    while (it!=mSoundsPlaying.end())
+    {
+        if ( *it != ambientSnd && *it != rainSnd)
+        {
+            mEnvironment->mSoundManager->stopSound(*it);
+            it = mSoundsPlaying.erase(it);
+        }
+        else
+            ++it;
+    }
 }
 
 void WeatherManager::setHour(const float hour)
