@@ -258,7 +258,7 @@ if (APPLE)
     if (${CMAKE_BUILD_TYPE} MATCHES "Release")
         set(OPENMW_RELEASE_BUILD 1)
     endif()
-    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
+    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
         set(OPENMW_RELEASE_BUILD 1)
     endif()
 
