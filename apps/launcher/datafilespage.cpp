@@ -1,8 +1,6 @@
 #include <QtGui>
 
 #include <components/esm/esm_reader.hpp>
-#include <components/files/collections.hpp>
-#include <components/files/multidircollection.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include "datafilespage.hpp"
@@ -10,6 +8,23 @@
 #include "naturalsort.hpp"
 #include "pluginsmodel.hpp"
 #include "pluginsview.hpp"
+
+#include <boost/version.hpp>
+/**
+ * Workaround for problems with whitespaces in paths in older versions of Boost library
+ */
+#if (BOOST_VERSION <= 104600)
+namespace boost
+{
+
+    template<>
+    inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string>(const std::string& arg)
+    {
+        return boost::filesystem::path(arg);
+    }
+
+} /* namespace boost */
+#endif /* (BOOST_VERSION <= 104600) */
 
 using namespace ESM;
 using namespace std;
@@ -120,11 +135,12 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
     connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
     connect(mPluginsTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
+    connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 
-
+    createActions();
     setupConfig();
     setupDataFiles();
-    createActions();
+
 }
 
 void DataFilesPage::setupConfig()
@@ -138,8 +154,7 @@ void DataFilesPage::setupConfig()
 
     // Open our config file
     mLauncherConfig = new QSettings(config, QSettings::IniFormat);
-    mLauncherConfig->sync();
-
+    file.close();
 
     // Make sure we have no groups open
     while (!mLauncherConfig->group().isEmpty()) {
@@ -162,13 +177,14 @@ void DataFilesPage::setupConfig()
         // No current profile selected
         currentProfile = "Default";
     }
-    mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(currentProfile));
+
+    const int currentIndex = mProfilesComboBox->findText(currentProfile);
+    if (currentIndex != -1) {
+        // Profile is found
+        mProfilesComboBox->setCurrentIndex(currentIndex);
+    }
 
     mLauncherConfig->endGroup();
-
-    // Now we connect the combobox to do something if the profile changes
-    // This prevents strange behaviour while reading and appending the profiles
-    connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
 }
 
 
@@ -188,17 +204,55 @@ void DataFilesPage::setupDataFiles()
 
     // Put the paths in a boost::filesystem vector to use with Files::Collections
     Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
+    mDataDirs = dataDirs;
 
-//    std::string local(variables["data-local"].as<std::string>());
-//    if (!local.empty())
-//    {
-//        dataDirs.push_back(Files::PathContainer::value_type(local));
-//    }
+//     std::string local = variables["data-local"].as<std::string>();
+//     if (!local.empty()) {
+//         mDataLocal.push_back(Files::PathContainer::value_type(local));
+//         dataDirs.push_back(Files::PathContainer::value_type(local));
+//     }
 
     if (dataDirs.size()>1)
         dataDirs.resize (1);
 
     mCfgMgr.processPaths(dataDirs);
+
+    while (dataDirs.empty()) {
+        // No valid data files directory found
+
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error detecting Morrowind installation");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Cancel);
+        msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
+        The directory containing the Data Files was not found.<br><br> \
+        Press \"Browse...\" to specify the location manually.<br>"));
+
+        QAbstractButton *dirSelectButton =
+        msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
+
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == dirSelectButton) {
+
+            QString dataDir = QFileDialog::getExistingDirectory(
+                this, tr("Select Data Files Directory"),
+                "/home",
+                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+            dataDirs.push_back(Files::PathContainer::value_type(dataDir.toStdString()));
+            mDataDirs.push_back(Files::PathContainer::value_type(dataDir.toStdString()));
+        } else {
+            // Cancel
+            break;
+        }
+    }
+
+    // Check if cancel was clicked because we can't exit from while loop
+    if (dataDirs.empty()) {
+        QApplication::exit(1);
+        return;
+    }
 
     // Create a file collection for the dataDirs
     Files::Collections fileCollections(dataDirs, !variables["fs-strict"].as<bool>());
@@ -207,15 +261,13 @@ void DataFilesPage::setupDataFiles()
     const Files::MultiDirCollection &esm = fileCollections.getCollection(".esm");
     unsigned int i = 0; // Row number
 
-    for (Files::MultiDirCollection::TIter iter(esm.begin()); iter!=esm.end(); ++iter)
-    {
+    for (Files::MultiDirCollection::TIter iter(esm.begin()); iter!=esm.end(); ++iter) {
         QString currentMaster = QString::fromStdString(
                 boost::filesystem::path (iter->second.filename()).string());
 
         const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
-        if (itemList.isEmpty()) // Master is not yet in the widget
-        {
+        if (itemList.isEmpty()) { // Master is not yet in the widget
             mMastersWidget->insertRow(i);
             QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
             mMastersWidget->setItem(i, 0, item);
@@ -226,8 +278,7 @@ void DataFilesPage::setupDataFiles()
     // Now on to the plugins
     const Files::MultiDirCollection &esp = fileCollections.getCollection(".esp");
 
-    for (Files::MultiDirCollection::TIter iter(esp.begin()); iter!=esp.end(); ++iter)
-    {
+    for (Files::MultiDirCollection::TIter iter(esp.begin()); iter!=esp.end(); ++iter) {
         ESMReader fileReader;
         QStringList availableMasters; // Will contain all found masters
 
@@ -243,8 +294,7 @@ void DataFilesPage::setupDataFiles()
 
             const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
-            if (itemList.isEmpty()) // Master is not yet in the widget
-            {
+            if (itemList.isEmpty()) { // Master is not yet in the widget
                 mMastersWidget->insertRow(i);
 
                 QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
@@ -433,18 +483,18 @@ void DataFilesPage::deleteProfile()
         return;
     }
 
-    QMessageBox deleteMessageBox(this);
-    deleteMessageBox.setWindowTitle(tr("Delete Profile"));
-    deleteMessageBox.setText(tr("Are you sure you want to delete <b>%0</b>?").arg(profile));
-    deleteMessageBox.setIcon(QMessageBox::Warning);
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(tr("Delete Profile"));
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::Cancel);
+    msgBox.setText(tr("Are you sure you want to delete <b>%0</b>?").arg(profile));
+
     QAbstractButton *deleteButton =
-    deleteMessageBox.addButton(tr("Delete"), QMessageBox::ActionRole);
+    msgBox.addButton(tr("Delete"), QMessageBox::ActionRole);
 
-    deleteMessageBox.addButton(QMessageBox::Cancel);
+    msgBox.exec();
 
-    deleteMessageBox.exec();
-
-    if (deleteMessageBox.clickedButton() == deleteButton) {
+    if (msgBox.clickedButton() == deleteButton) {
        // Make sure we have no groups open
         while (!mLauncherConfig->group().isEmpty()) {
             mLauncherConfig->endGroup();
@@ -501,7 +551,6 @@ void DataFilesPage::moveUp()
 void DataFilesPage::moveDown()
 {
     // Shift the selected plugins down one row
-
     if (!mPluginsTable->selectionModel()->hasSelection()) {
         return;
     }
@@ -917,9 +966,18 @@ void DataFilesPage::filterChanged(const QString filter)
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
 {
+    // Prevent the deletion of the default profile
+    if (current == "Default") {
+        mDeleteProfileAction->setEnabled(false);
+    } else {
+        mDeleteProfileAction->setEnabled(true);
+    }
+
     if (!previous.isEmpty()) {
         writeConfig(previous);
         mLauncherConfig->sync();
+    } else {
+        return;
     }
 
     uncheckPlugins();
@@ -992,14 +1050,6 @@ void DataFilesPage::writeConfig(QString profile)
         return;
     }
 
-    if (profile.isEmpty()) {
-        profile = mProfilesComboBox->currentText();
-    }
-
-    if (profile.isEmpty()) {
-        return;
-    }
-
     // Prepare the OpenMW config
     QString config = QString::fromStdString((mCfgMgr.getLocalPath() / "openmw.cfg").string());
     QFile file(config);
@@ -1028,10 +1078,14 @@ void DataFilesPage::writeConfig(QString profile)
     QTextStream in(&file);
     QByteArray buffer;
 
-    // Remove all previous master/plugin entries from config
+    // Remove all previous entries from config
     while (!in.atEnd()) {
         QString line = in.readLine();
-        if (!line.contains("master") && !line.contains("plugin")) {
+        if (!line.startsWith("master") &&
+            !line.startsWith("plugin") &&
+            !line.startsWith("data") &&
+            !line.startsWith("data-local"))
+        {
             buffer += line += "\n";
         }
     }
@@ -1052,8 +1106,51 @@ void DataFilesPage::writeConfig(QString profile)
         return;
     }
 
-    file.write(buffer);
+    if (!buffer.isEmpty()) {
+        file.write(buffer);
+    }
+
     QTextStream gameConfig(&file);
+
+    // First write the list of data dirs
+    mCfgMgr.processPaths(mDataDirs);
+    mCfgMgr.processPaths(mDataLocal);
+
+    QString path;
+
+    // data= directories
+    for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
+        path = QString::fromStdString(it->string());
+        path.remove(QChar('\"'));
+
+        // Make sure the string is quoted when it contains spaces
+        if (path.contains(" ")) {
+            gameConfig << "data=\"" << path << "\"" << endl;
+        } else {
+            gameConfig << "data=" << path << endl;
+        }
+    }
+
+    // data-local directory
+    if (!mDataLocal.empty()) {
+        path = QString::fromStdString(mDataLocal.front().string());
+        path.remove(QChar('\"'));
+
+        if (path.contains(" ")) {
+            gameConfig << "data-local=\"" << path << "\"" << endl;
+        } else {
+            gameConfig << "data-local=" << path << endl;
+        }
+    }
+
+
+    if (profile.isEmpty()) {
+        profile = mProfilesComboBox->currentText();
+    }
+
+    if (profile.isEmpty()) {
+        return;
+    }
 
     // Make sure we have no groups open
     while (!mLauncherConfig->group().isEmpty()) {
@@ -1067,7 +1164,7 @@ void DataFilesPage::writeConfig(QString profile)
     mLauncherConfig->beginGroup(profile);
     mLauncherConfig->remove(""); // Clear the subgroup
 
-    // First write the masters to the configs
+    // Now write the masters to the configs
     const QStringList masters = selectedMasters();
 
     // We don't use foreach because we need i
@@ -1079,11 +1176,10 @@ void DataFilesPage::writeConfig(QString profile)
 
     }
 
-    // Now write all checked plugins
+    // And finally write all checked plugins
     const QStringList plugins = checkedPlugins();
 
-    for (int i = 0; i < plugins.size(); ++i)
-    {
+    for (int i = 0; i < plugins.size(); ++i) {
         const QString currentPlugin = plugins.at(i);
         mLauncherConfig->setValue(QString("Plugin%1").arg(i), currentPlugin);
         gameConfig << "plugin=" << currentPlugin << endl;

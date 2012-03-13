@@ -1,0 +1,12 @@
+OpenEngine README
+=================
+
+OpenEngine is a bunch of stand-alone game engine modules collected from the OpenMW project (see http://github.com/korslund/openmw or http://openmw.com ) and from certain other projects.
+
+It is currently a very early work in progress, and development will follow OpenMW closely for a while forward.
+
+OpenEngine will depend heavily on Mangle ( http://github.com/korslund/mangle/ ) and will thus aim to be backend agnostic. When finished it should work with a variety for free and commercial middleware libraries as backends for graphics, sound, physics, input and so on.
+
+All questions can be directed to Nicolay Korslund at korslund@gmail.com
+
+- Nicolay
