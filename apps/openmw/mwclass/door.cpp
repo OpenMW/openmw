@@ -73,7 +73,7 @@ namespace MWClass
             // TODO check for key
             // TODO report failure to player (message, sound?). Look up behaviour of original MW.
             std::cout << "Locked!" << std::endl;
-            environment.mSoundManager->playSound(lockedSound, 1.0, 1.0);
+            environment.mSoundManager->playSound3D (ptr, lockedSound, 1.0, 1.0, false);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
 
@@ -81,7 +81,7 @@ namespace MWClass
         {
             // Trap activation
             std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
-            environment.mSoundManager->playSound(trapActivationSound, 1.0, 1.0);
+            environment.mSoundManager->playSound3D(ptr, trapActivationSound, 1.0, 1.0, false);
             ptr.getCellRef().trap = "";
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
@@ -92,6 +92,7 @@ namespace MWClass
             if (environment.mWorld->getPlayer().getPlayer()==actor)
             {
                 // the player is using the door
+                // The reason this is not 3D is that it would get interrupted when you teleport
                 environment.mSoundManager->playSound(openSound, 1.0, 1.0);
                 return boost::shared_ptr<MWWorld::Action> (
                     new MWWorld::ActionTeleportPlayer (ref->ref.destCell, ref->ref.doorDest));
@@ -109,7 +110,7 @@ namespace MWClass
             // TODO return action for rotating the door
 
             // This is a little pointless, but helps with testing
-            environment.mSoundManager->playSound(openSound, 1.0, 1.0);
+            environment.mSoundManager->playSound3D (ptr, openSound, 1.0, 1.0, false);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
     }
