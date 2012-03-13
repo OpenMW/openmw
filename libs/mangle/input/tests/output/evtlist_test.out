@@ -1,0 +1,12 @@
+Sending type 1
+  #1 got event: type=1 index=0
+Sending type 2
+  #1 got event: type=2 index=0
+  #2 got event: type=2 index=0
+Sending type 4
+  #1 got event: type=4 index=0
+  #3 got event: type=4 index=0
+Sending type 16
+  #1 got event: type=16 index=0
+  #3 got event: type=16 index=0
+Enough of that
