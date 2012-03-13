@@ -488,7 +488,10 @@ WeatherResult WeatherManager::transition(float factor)
 void WeatherManager::update(float duration)
 {
     mWeatherUpdateTime -= duration;
-    if (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior())
+
+    bool exterior = (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior());
+    
+    if (exterior)
     {
         std::string regionstr = mEnvironment->mWorld->getPlayer().getPlayer().getCell()->cell->region;
         boost::algorithm::to_lower(regionstr);
@@ -663,7 +666,7 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->secundaDisable();
         }
         
-        if (mCurrentWeather == "thunderstorm" && mNextWeather == "")
+        if (mCurrentWeather == "thunderstorm" && mNextWeather == "" && exterior)
         {
             if (mThunderFlash > 0)
             {
@@ -725,6 +728,7 @@ void WeatherManager::update(float duration)
 
     // play sounds
     std::string ambientSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID : "");
+    if (!exterior) ambientSnd = "";
     if (ambientSnd != "")
     {
         if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
@@ -735,6 +739,7 @@ void WeatherManager::update(float duration)
     }
 
     std::string rainSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mRainLoopSoundID : "");
+    if (!exterior) rainSnd = "";
     if (rainSnd != "")
     {
         if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())

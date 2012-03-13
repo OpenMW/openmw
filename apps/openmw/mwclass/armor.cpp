@@ -2,12 +2,17 @@
 #include "armor.hpp"
 
 #include <components/esm/loadarmo.hpp>
+#include <components/esm/loadskil.hpp>
+#include <components/esm/loadgmst.hpp>
 
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -55,7 +60,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Armor::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, false, true);
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -82,6 +87,79 @@ namespace MWClass
         return ref->base->script;
     }
 
+    std::pair<std::vector<int>, bool> Armor::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        std::vector<int> slots;
+
+        const int size = 11;
+
+        static const int sMapping[size][2] =
+        {
+            { ESM::Armor::Helmet, MWWorld::InventoryStore::Slot_Helmet },
+            { ESM::Armor::Cuirass, MWWorld::InventoryStore::Slot_Cuirass },
+            { ESM::Armor::LPauldron, MWWorld::InventoryStore::Slot_LeftPauldron },
+            { ESM::Armor::RPauldron, MWWorld::InventoryStore::Slot_RightPauldron },
+            { ESM::Armor::Greaves, MWWorld::InventoryStore::Slot_Greaves },
+            { ESM::Armor::Boots, MWWorld::InventoryStore::Slot_Boots },
+            { ESM::Armor::LGauntlet, MWWorld::InventoryStore::Slot_LeftGauntlet },
+            { ESM::Armor::RGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet },
+            { ESM::Armor::Shield, MWWorld::InventoryStore::Slot_CarriedLeft },
+            { ESM::Armor::LBracer, MWWorld::InventoryStore::Slot_LeftGauntlet },
+            { ESM::Armor::RBracer, MWWorld::InventoryStore::Slot_RightGauntlet }
+        };
+
+        for (int i=0; i<size; ++i)
+            if (sMapping[i][0]==ref->base->data.type)
+            {
+                slots.push_back (int (sMapping[i][1]));
+                break;
+            }
+
+        return std::make_pair (slots, false);
+    }
+
+    int Armor::getEuqipmentSkill (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        std::string typeGmst;
+
+        switch (ref->base->data.type)
+        {
+            case ESM::Armor::Helmet: typeGmst = "iHelmWeight"; break;
+            case ESM::Armor::Cuirass: typeGmst = "iCuirassWeight"; break;
+            case ESM::Armor::LPauldron:
+            case ESM::Armor::RPauldron: typeGmst = "iPauldronWeight"; break;
+            case ESM::Armor::Greaves: typeGmst = "iGreavesWeight"; break;
+            case ESM::Armor::Boots: typeGmst = "iBootsWeight"; break;
+            case ESM::Armor::LGauntlet:
+            case ESM::Armor::RGauntlet: typeGmst = "iGauntletWeight"; break;
+/// \todo how to determine if shield light, medium or heavy?
+//            case ESM::Armor::Shield:
+            case ESM::Armor::LBracer:
+            case ESM::Armor::RBracer: typeGmst = "iGauntletWeight"; break;
+        }
+
+        if (typeGmst.empty())
+            return -1;
+
+        float iWeight = environment.mWorld->getStore().gameSettings.find (typeGmst)->f;
+
+        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fLightMaxMod")->f<=
+            ref->base->data.weight)
+            return ESM::Skill::LightArmor;
+
+        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fMedMaxMod")->f<=
+            ref->base->data.weight)
+            return ESM::Skill::MediumArmor;
+
+        return ESM::Skill::HeavyArmor;
+    }
+
     void Armor::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Armor);
@@ -89,116 +167,25 @@ namespace MWClass
         registerClass (typeid (ESM::Armor).name(), instance);
     }
 
-    std::string Armor::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Armor::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
-        int wc = getWeightCategory(ptr);
-        if (wc == WC_Light)
+        int es = getEuqipmentSkill(ptr, environment);
+        if (es == ESM::Skill::LightArmor)
             return std::string("Item Armor Light Up");
-        else if (wc == WC_Medium)
+        else if (es == ESM::Skill::MediumArmor)
             return std::string("Item Armor Medium Up");
         else
             return std::string("Item Armor Heavy Up");
     }
 
-    std::string Armor::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Armor::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
-        int wc = getWeightCategory(ptr);
-        if (wc == WC_Light)
+        int es = getEuqipmentSkill(ptr, environment);
+        if (es == ESM::Skill::LightArmor)
             return std::string("Item Armor Light Down");
-        else if (wc == WC_Medium)
+        else if (es == ESM::Skill::MediumArmor)
             return std::string("Item Armor Medium Down");
         else
             return std::string("Item Armor Heavy Down");
-    }
-
-    int Armor::getWeightCategory (const MWWorld::Ptr& ptr) const
-    {
-        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
-            ptr.get<ESM::Armor>();
-
-        float weight = ref->base->data.weight;
-        int type = ref->base->data.type;
-        // Boots
-        if (type == 5)
-        {
-            if (weight <= 12.0)
-            {
-                return WC_Light;
-            }
-            else if (weight > 18.0)
-            {
-                return WC_Heavy;
-            }
-            else
-            {
-                return WC_Medium;
-            }
-        }
-        // Cuirass
-        if (type == 1)
-        {
-            if (weight <= 18.0)
-            {
-                return WC_Light;
-            }
-            else if (weight > 27.0)
-            {
-                return WC_Heavy;
-            }
-            else
-            {
-                return WC_Medium;
-            }
-        }
-        // Greaves, Shield
-        if (type == 4 || type == 8)
-        {
-            if (weight <= 9.0)
-            {
-                return WC_Light;
-            }
-            else if (weight > 13.5)
-            {
-                return WC_Heavy;
-            }
-            else
-            {
-                return WC_Medium;
-            }
-        }
-        // Bracer, Gauntlet, Helmet
-        if (type == 6 || type == 7 || type == 9 || type == 10 || type == 0)
-        {
-            if (weight <= 3.0)
-            {
-                return WC_Light;
-            }
-            else if (weight > 4.5)
-            {
-                return WC_Heavy;
-            }
-            else
-            {
-                return WC_Medium;
-            }
-        }
-        // Pauldrons
-        if (type == 2 || type == 3)
-        {
-            if (weight <= 6.0)
-            {
-                return WC_Light;
-            }
-            else if (weight > 9.0)
-            {
-                return WC_Heavy;
-            }
-            else
-            {
-                return WC_Medium;
-            }
-        }
-
-        return WC_Light;
     }
 }

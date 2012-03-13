@@ -5,13 +5,6 @@
 
 namespace MWClass
 {
-    enum WeightCategory
-    {
-        WC_Light = 0,
-        WC_Medium = 1,
-        WC_Heavy = 2
-    };
-
     class Armor : public MWWorld::Class
     {
         public:
@@ -38,16 +31,22 @@ namespace MWClass
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 
+            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::Ptr& ptr) const;
+            ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
+            /// stay stacked when equipped?
+
+            virtual int getEuqipmentSkill (const MWWorld::Ptr& ptr,
+                const MWWorld::Environment& environment) const;
+            /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
+            /// no such skill.
+
             static void registerSelf();
 
-            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr) const;
+            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
             ///< Return the pick up sound Id
 
-            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr) const;
+            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
             ///< Return the put down sound Id
-
-            virtual int getWeightCategory (const MWWorld::Ptr& ptr) const;
-            ///< Return the weight category of the armor light/medium/heavy
     };
 }
 

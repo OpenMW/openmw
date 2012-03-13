@@ -54,7 +54,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, false, true);
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -75,12 +75,12 @@ namespace MWClass
         registerClass (typeid (ESM::Ingredient).name(), instance);
     }
 
-    std::string Ingredient::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
         return std::string("Item Ingredient Up");
     }
 
-    std::string Ingredient::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
         return std::string("Item Ingredient Down");
     }

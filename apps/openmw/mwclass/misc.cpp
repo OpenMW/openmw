@@ -56,7 +56,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, false, true);
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -77,7 +77,7 @@ namespace MWClass
         registerClass (typeid (ESM::Miscellaneous).name(), instance);
     }
 
-    std::string Miscellaneous::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Miscellaneous::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
         ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
@@ -89,7 +89,7 @@ namespace MWClass
         return std::string("Item Misc Up");
     }
 
-    std::string Miscellaneous::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Miscellaneous::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
         ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
