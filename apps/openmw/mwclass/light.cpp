@@ -9,6 +9,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/environment.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -92,6 +93,19 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         return ref->base->script;
+    }
+
+    std::pair<std::vector<int>, bool> Light::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+        std::vector<int> slots;
+
+        if (ref->base->data.flags & ESM::Light::Carry)
+            slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedLeft));
+
+        return std::make_pair (slots, false);
     }
 
     void Light::registerSelf()

@@ -7,6 +7,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -63,6 +64,15 @@ namespace MWClass
             ptr.get<ESM::Probe>();
 
         return ref->base->script;
+    }
+
+    std::pair<std::vector<int>, bool> Probe::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    {
+        std::vector<int> slots;
+
+        slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
+
+        return std::make_pair (slots, false);
     }
 
     void Probe::registerSelf()

@@ -25,6 +25,10 @@ namespace MWClass
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 
+            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::Ptr& ptr) const;
+            ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
+            /// stay stacked when equipped?
+
             static void registerSelf();
     };
 }
