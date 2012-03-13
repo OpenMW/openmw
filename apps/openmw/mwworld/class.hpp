@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -141,6 +142,12 @@ namespace MWWorld
             virtual Ogre::Vector3 getMovementVector (const Ptr& ptr) const;
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
+
+            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& pt) const;
+            ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
+            /// stay stacked when equipped?
+            ///
+            /// Default implementation: return (empty vector, false).
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

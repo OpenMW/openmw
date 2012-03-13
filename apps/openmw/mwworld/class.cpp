@@ -127,6 +127,11 @@ namespace MWWorld
         return Ogre::Vector3 (0, 0, 0);
     }
 
+    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& pt) const
+    {
+        return std::make_pair (std::vector<int>(), false);
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
