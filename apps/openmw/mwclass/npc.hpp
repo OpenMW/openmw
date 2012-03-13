@@ -38,6 +38,9 @@ namespace MWClass
             virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
+            virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;
+            ///< Return inventory store
+
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation

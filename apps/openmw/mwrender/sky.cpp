@@ -659,9 +659,15 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
     if (weather.mNight && mStarsOpacity != weather.mNightFade)
     {
-        for (int i=0; i<7; ++i)
-            mStarsMaterials[i]->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, weather.mNightFade);
-        mStarsOpacity = weather.mNightFade;
+        if (weather.mNightFade == 0)
+            mAtmosphereNight->setVisible(false);
+        else
+        {
+            mAtmosphereNight->setVisible(true);
+            for (int i=0; i<7; ++i)
+                mStarsMaterials[i]->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, weather.mNightFade);
+            mStarsOpacity = weather.mNightFade;
+        }
     }
 
     float strength;

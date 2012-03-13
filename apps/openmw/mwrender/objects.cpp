@@ -108,7 +108,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
             //  - the culling will be more inefficient
             // If it is set too low:
             //  - there will be too many batches.
-            sg->setRegionDimensions(Ogre::Vector3(1000,1000,1000));
+            sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
         }
         else
         {

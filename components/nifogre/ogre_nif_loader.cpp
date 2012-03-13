@@ -243,6 +243,8 @@ void NIFLoader::createMaterial(const String &name,
         /*TextureUnitState *txt =*/
         pass->createTextureUnitState(texName);
 
+        pass->setVertexColourTracking(TVC_DIFFUSE);
+
         // As of yet UNTESTED code from Chris:
         /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
         pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
@@ -1459,7 +1461,10 @@ void NIFLoader::loadResource(Resource *resource)
 
             (*iter)->addBoneAssignment(vba);
         }
-       mesh->_notifySkeleton(mSkel);
+		//Don't link on npc parts to eliminate redundant skeletons
+		//Will have to be changed later slightly for robes/skirts
+		if(triname == "")
+			mesh->_notifySkeleton(mSkel);
     }
 }
 

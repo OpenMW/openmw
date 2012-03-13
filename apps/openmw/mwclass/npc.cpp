@@ -16,7 +16,7 @@
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
-#include "../mwworld/containerstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 
 namespace
@@ -29,7 +29,7 @@ namespace
         MWMechanics::NpcStats mNpcStats;
         MWMechanics::CreatureStats mCreatureStats;
         MWMechanics::Movement mMovement;
-        MWWorld::ContainerStore mContainerStore;
+        MWWorld::InventoryStore mInventoryStore;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -161,7 +161,15 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
+    }
+
+    MWWorld::InventoryStore& Npc::getInventoryStore (const MWWorld::Ptr& ptr)
+        const
+    {
+        ensureCustomData (ptr);
+
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
     }
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
