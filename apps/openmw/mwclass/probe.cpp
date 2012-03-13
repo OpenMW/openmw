@@ -7,8 +7,11 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/environment.hpp"
 
 #include "../mwrender/objects.hpp"
+
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -53,6 +56,8 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
     }
@@ -70,5 +75,15 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Probe);
 
         registerClass (typeid (ESM::Probe).name(), instance);
+    }
+
+    std::string Probe::getUpSoundId (const MWWorld::Ptr& ptr) const
+    {
+        return std::string("Item Probe Up");
+    }
+
+    std::string Probe::getDownSoundId (const MWWorld::Ptr& ptr) const
+    {
+        return std::string("Item Probe Down");
     }
 }

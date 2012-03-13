@@ -7,8 +7,11 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/environment.hpp"
 
 #include "../mwrender/objects.hpp"
+
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -55,6 +58,8 @@ namespace MWClass
     {
         // TODO implement reading
 
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
     }
@@ -72,5 +77,15 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Book);
 
         registerClass (typeid (ESM::Book).name(), instance);
+    }
+
+    std::string Book::getUpSoundId (const MWWorld::Ptr& ptr) const
+    {
+        return std::string("Item Book Up");
+    }
+
+    std::string Book::getDownSoundId (const MWWorld::Ptr& ptr) const
+    {
+        return std::string("Item Book Down");
     }
 }
