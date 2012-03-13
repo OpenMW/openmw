@@ -424,11 +424,19 @@ if (WIN32)
     set(WARNINGS "/Wall") # Since windows can only disable specific warnings, not enable them
 
     set(WARNINGS_DISABLE
-        # Some unneeded and sometimes completely retarded warnings that /Wall enables
-        4061 4263 4264 4266 4347 4350 4510 4512 4514 4548 4571 4610 4619 4623 4625
-        4626 4628 4640 4668 4706 4710 4820 4826 4917 4946 4986 4996
-        # Not going to bother commenting them as they tend to warn on even standard library files
+        # Warnings that aren't enabled normally and don't need to be enabled
+        # They're unneeded and sometimes completely retarded warnings that /Wall enables
+        # Not going to bother commenting them as they tend to warn on every standard library files
+        4061 4263 4264 4266 4350 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4820 4826 4917 4946
 
+        # Warnings that are thrown on standard libraries and not OpenMW
+        4347 # Non-template function with same name and parameter count as template function
+        4510 4512 # Unable to generate copy constructor/assignment operator as it's not public in the base
+        4706 # Assignment in conditional expression
+        4986 # Undocumented warning that occurs in the crtdbg.h file
+        4996 # Function was declared deprecated
+
+        # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type
         4100 # Unreferenced formal parameter (-Wunused-parameter)
         4101 # Unreferenced local variable
