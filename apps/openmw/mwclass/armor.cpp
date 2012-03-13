@@ -2,11 +2,16 @@
 #include "armor.hpp"
 
 #include <components/esm/loadarmo.hpp>
+#include <components/esm/loadskil.hpp>
+#include <components/esm/loadgmst.hpp>
 
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -75,6 +80,79 @@ namespace MWClass
             ptr.get<ESM::Armor>();
 
         return ref->base->script;
+    }
+
+    std::pair<std::vector<int>, bool> Armor::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        std::vector<int> slots;
+
+        const int size = 11;
+
+        static const int sMapping[size][2] =
+        {
+            { ESM::Armor::Helmet, MWWorld::InventoryStore::Slot_Helmet },
+            { ESM::Armor::Cuirass, MWWorld::InventoryStore::Slot_Cuirass },
+            { ESM::Armor::LPauldron, MWWorld::InventoryStore::Slot_LeftPauldron },
+            { ESM::Armor::RPauldron, MWWorld::InventoryStore::Slot_RightPauldron },
+            { ESM::Armor::Greaves, MWWorld::InventoryStore::Slot_Greaves },
+            { ESM::Armor::Boots, MWWorld::InventoryStore::Slot_Boots },
+            { ESM::Armor::LGauntlet, MWWorld::InventoryStore::Slot_LeftGauntlet },
+            { ESM::Armor::RGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet },
+            { ESM::Armor::Shield, MWWorld::InventoryStore::Slot_CarriedLeft },
+            { ESM::Armor::LBracer, MWWorld::InventoryStore::Slot_LeftGauntlet },
+            { ESM::Armor::RBracer, MWWorld::InventoryStore::Slot_RightGauntlet }
+        };
+
+        for (int i=0; i<size; ++i)
+            if (sMapping[i][0]==ref->base->data.type)
+            {
+                slots.push_back (int (sMapping[i][1]));
+                break;
+            }
+
+        return std::make_pair (slots, false);
+    }
+
+    int Armor::getEuqipmentSkill (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        std::string typeGmst;
+
+        switch (ref->base->data.type)
+        {
+            case ESM::Armor::Helmet: typeGmst = "iHelmWeight"; break;
+            case ESM::Armor::Cuirass: typeGmst = "iCuirassWeight"; break;
+            case ESM::Armor::LPauldron:
+            case ESM::Armor::RPauldron: typeGmst = "iPauldronWeight"; break;
+            case ESM::Armor::Greaves: typeGmst = "iGreavesWeight"; break;
+            case ESM::Armor::Boots: typeGmst = "iBootsWeight"; break;
+            case ESM::Armor::LGauntlet:
+            case ESM::Armor::RGauntlet: typeGmst = "iGauntletWeight"; break;
+/// \todo how to determine if shield light, medium or heavy?
+//            case ESM::Armor::Shield:
+            case ESM::Armor::LBracer:
+            case ESM::Armor::RBracer: typeGmst = "iGauntletWeight"; break;
+        }
+
+        if (typeGmst.empty())
+            return -1;
+
+        float iWeight = environment.mWorld->getStore().gameSettings.find (typeGmst)->f;
+
+        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fLightMaxMod")->f<=
+            ref->base->data.weight)
+            return ESM::Skill::LightArmor;
+
+        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fMedMaxMod")->f<=
+            ref->base->data.weight)
+            return ESM::Skill::MediumArmor;
+
+        return ESM::Skill::HeavyArmor;
     }
 
     void Armor::registerSelf()

@@ -18,7 +18,9 @@
 #include <components/esm_store/cell_store.hpp>
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/esm_reader.hpp>
-#include <components/files/path.hpp>
+#include <components/files/fixedpath.hpp>
+#include <components/files/configurationmanager.hpp>
+
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
 
@@ -116,8 +118,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         // sound
         if (mUseSound)
         {
-            if (!mEnvironment.mSoundManager->isMusicPlaying())
-                mEnvironment.mSoundManager->startRandomTitle();
+            mEnvironment.mSoundManager->playPlaylist();
 
             mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
         }
@@ -171,7 +172,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     return true;
 }
 
-OMW::Engine::Engine(Cfg::ConfigurationManager& configurationManager)
+OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mFpsLevel(0)
   , mDebug (false)
@@ -208,15 +209,16 @@ OMW::Engine::~Engine()
 void OMW::Engine::loadBSA()
 {
     const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-
-    for (Files::MultiDirCollection::TIter iter (bsa.begin()); iter!=bsa.end(); ++iter)
+    std::string dataDirectory;
+    for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
     {
-         std::cout << "Adding " << iter->second.string() << std::endl;
-         Bsa::addBSA (iter->second.string());
-    }
+        std::cout << "Adding " << iter->second.string() << std::endl;
+        Bsa::addBSA(iter->second.string());
 
-    std::cout << "Data dir " << mDataDir.string() << std::endl;
-    Bsa::addDir(mDataDir.string(), mFSStrict);
+        dataDirectory = iter->second.parent_path().string();
+        std::cout << "Data dir " << dataDirectory << std::endl;
+        Bsa::addDir(dataDirectory, mFSStrict);
+    }
 }
 
 // add resources directory
@@ -237,9 +239,7 @@ void OMW::Engine::enableFSStrict(bool fsStrict)
 
 void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
-    /// \todo remove mDataDir, once resources system can handle multiple directories
-    assert (!dataDirs.empty());
-    mDataDir = dataDirs.back();
+    mDataDirs = dataDirs;
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
 }
 
@@ -315,7 +315,7 @@ void OMW::Engine::go()
     }
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
-        mCfgMgr.getLogPath().string() + std::string("/"),
+        mCfgMgr.getLogPath().string(),
         mCfgMgr.getPluginsConfigPath().string(), false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
@@ -340,8 +340,7 @@ void OMW::Engine::go()
     // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
                                                            mOgre->getCamera(),
-                                                           mEnvironment.mWorld->getStore(),
-                                                           (mDataDir),
+                                                           mDataDirs,
                                                            mUseSound, mFSStrict, mEnvironment);
 
     // Create script system
@@ -389,7 +388,7 @@ void OMW::Engine::go()
     mOgre->getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
-    mEnvironment.mSoundManager->startRandomTitle();
+    mEnvironment.mSoundManager->playPlaylist(std::string("Explore"));
 
     // scripts
     if (mCompileAll)
@@ -450,7 +449,7 @@ void OMW::Engine::screenshot()
     // Count screenshots.
     int shotCount = 0;
 
-    const std::string screenshotPath = mCfgMgr.getLocalConfigPath().string();
+    const std::string screenshotPath = mCfgMgr.getUserPath().string();
 
     // Find the first unused filename with a do-while
     std::ostringstream stream;

@@ -24,6 +24,12 @@ namespace MWWorld
             void addActor (const std::string& handle, const std::string& mesh,
                 const Ogre::Vector3& position);
 
+            void addHeightField (float* heights,
+                int x, int y, float yoffset,
+                float triSize, float sqrtVerts);
+
+            void removeHeightField (int x, int y);
+
             void removeObject (const std::string& handle);
 
             void moveObject (const std::string& handle, const Ogre::Vector3& position);

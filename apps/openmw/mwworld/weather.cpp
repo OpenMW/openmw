@@ -722,6 +722,40 @@ void WeatherManager::update(float duration)
         mRendering->skyDisable();
         mRendering->getSkyManager()->setThunder(0.f);
     }
+
+    // play sounds
+    std::string ambientSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID : "");
+    if (ambientSnd != "")
+    {
+        if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
+        {
+            mSoundsPlaying.push_back(ambientSnd);
+            mEnvironment->mSoundManager->playSound(ambientSnd, 1.0, 1.0, true);
+        }
+    }
+
+    std::string rainSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mRainLoopSoundID : "");
+    if (rainSnd != "")
+    {
+        if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
+        {
+            mSoundsPlaying.push_back(rainSnd);
+            mEnvironment->mSoundManager->playSound(rainSnd, 1.0, 1.0, true);
+        }
+    }
+
+    // stop sounds
+    std::vector<std::string>::iterator it=mSoundsPlaying.begin();
+    while (it!=mSoundsPlaying.end())
+    {
+        if ( *it != ambientSnd && *it != rainSnd)
+        {
+            mEnvironment->mSoundManager->stopSound(*it);
+            it = mSoundsPlaying.erase(it);
+        }
+        else
+            ++it;
+    }
 }
 
 void WeatherManager::setHour(const float hour)
@@ -758,7 +792,7 @@ unsigned int WeatherManager::getWeatherID() const
         return 3;
     else if (mCurrentWeather == "rain")
         return 4;
-    else if (mCurrentWeather == "thunder")
+    else if (mCurrentWeather == "thunderstorm")
         return 5;
     else if (mCurrentWeather == "ashstorm")
         return 6;
@@ -787,7 +821,7 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
     else if (id==4)
         weather = "rain";
     else if (id==5)
-        weather = "thunder";
+        weather = "thunderstorm";
     else if (id==6)
         weather = "ashstorm";
     else if (id==7)

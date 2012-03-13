@@ -1,6 +1,4 @@
 set(ESMTOOL
-  esmtool_cmd.c
-  esmtool_cmd.h
   esmtool.cpp
 )
 source_group(apps\\esmtool FILES ${ESMTOOL})

@@ -117,10 +117,22 @@ namespace MWWorld
         return response;
     }
 
+    void PhysicsSystem::addHeightField (float* heights,
+                int x, int y, float yoffset,
+                float triSize, float sqrtVerts)
+    {
+        mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
+    }
+
+    void PhysicsSystem::removeHeightField (int x, int y)
+    {
+        mEngine->removeHeightField(x, y);
+    }
+
     void PhysicsSystem::addObject (const std::string& handle, const std::string& mesh,
         const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
     {
-        OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle);
+        OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle,scale);
         mEngine->addRigidBody(body);
         btTransform tr;
         tr.setOrigin(btVector3(position.x,position.y,position.z));

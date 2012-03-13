@@ -42,6 +42,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
 		char secondtolast = bodyRaceID.at(bodyRaceID.length() - 2);
 		bool female = tolower(secondtolast) == 'f';
+		std::transform(bodyRaceID.begin(), bodyRaceID.end(), bodyRaceID.begin(), ::tolower);
 		bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
 
         /*std::cout << "Race: " << ref->base->race ;
@@ -276,6 +277,7 @@ void NpcAnimation::runAnimation(float timepassed){
             shapepartsiter++;
             entitypartsiter++;
         }
+		
     }
 
 }

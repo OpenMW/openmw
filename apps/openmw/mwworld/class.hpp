@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -34,6 +35,7 @@ namespace MWWorld
     class Ptr;
     class Environment;
     class ContainerStore;
+    class InventoryStore;
 
     /// \brief Base class for referenceable esm records
     class Class
@@ -108,6 +110,10 @@ namespace MWWorld
             ///< Return container store or throw an exception, if class does not have a
             /// container store (default implementation: throw an exceoption)
 
+            virtual InventoryStore& getInventoryStore (const Ptr& ptr) const;
+            ///< Return inventory store or throw an exception, if class does not have a
+            /// inventory store (default implementation: throw an exceoption)
+
             virtual void lock (const Ptr& ptr, int lockLevel) const;
             ///< Lock object (default implementation: throw an exception)
 
@@ -136,6 +142,18 @@ namespace MWWorld
             virtual Ogre::Vector3 getMovementVector (const Ptr& ptr) const;
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
+
+            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;
+            ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
+            /// stay stacked when equipped?
+            ///
+            /// Default implementation: return (empty vector, false).
+
+            virtual int getEuqipmentSkill (const Ptr& ptr, const Environment& environment)
+                const;
+            /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
+            /// no such skill.
+            /// (default implementation: return -1)
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
