@@ -425,18 +425,20 @@ if (WIN32)
 
     set(WARNINGS_DISABLE
         # Some unneeded and sometimes completely retarded warnings that /Wall enables
-        4820 4514 4710 4986 4668 4625 4626 4571 4640 4548 4512 4350 4917 4619 4061
-        4623 4263 4264 4266 4996 4347 4628 4510 4610
+        4061 4263 4264 4266 4347 4350 4510 4512 4514 4548 4571 4610 4619 4623 4625
+        4626 4628 4640 4668 4706 4710 4820 4826 4917 4946 4986 4996
+        # Not going to bother commenting them as they tend to warn on even standard library files
 
-        4099 # Type mismatch, declared class or struct defined with other type
+        4099 # Type mismatch, declared class or struct is defined with other type
         4100 # Unreferenced formal parameter (-Wunused-parameter)
+        4101 # Unreferenced local variable
         4127 # Conditional expression is constant
         4146 # Unary minus on unsigned type, result still unsigned
         4242 # Storing value in a variable of a smaller type, possible loss of data
-        4244 # Storing value of one type in variable of another (double in float, size_t in int, etc.)
+        4244 # Storing value of one type in variable of another (size_t in int, for example)
         4265 # Class has virtual functions but no virtual desctructor (-Wnon-virtual-dtor)
-        4305 # Truncating value (double -> float for example)
-        4309 # Variable overflow, trying to store 128 in a char for example
+        4305 # Truncating value (double to float, for example)
+        4309 # Variable overflow, trying to store 128 in a signed char for example
         4355 # Using 'this' in member initialization list
         4365 # Variable signed/unsigned mismatch
         4701 # Potentially uninitialized local variable used
