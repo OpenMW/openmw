@@ -49,6 +49,7 @@ namespace MWWorld
             InventoryStore& operator= (const InventoryStore& store);
 
             void equip (int slot, const ContainerStoreIterator& iterator);
+            ///< \note \a iteartor can be an end-iterator
 
             ContainerStoreIterator getSlot (int slot);
     };

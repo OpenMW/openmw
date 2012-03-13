@@ -2,6 +2,9 @@
 #include "inventorystore.hpp"
 
 #include <iterator>
+#include <algorithm>
+
+#include "class.hpp"
 
 void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
 {
@@ -46,7 +49,20 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
         throw std::runtime_error ("slot number out of range");
 
-    /// \todo verify slot
+    if (iterator.getContainerStore()!=this)
+        throw std::runtime_error ("attempt to equip an item that is not in the inventory");
+
+    if (iterator!=end())
+    {
+        std::pair<std::vector<int>, bool> slots = Class::get (*iterator).getEquipmentSlots (*iterator);
+
+        if (std::find (slots.first.begin(), slots.first.end(), slot)==slots.first.end())
+            throw std::runtime_error ("invalid slot");
+    }
+
+    /// \todo restack item previously in this slot (if required)
+
+    /// \todo unstack item pointed to by iterator if required)
 
     mSlots[slot] = iterator;
 }

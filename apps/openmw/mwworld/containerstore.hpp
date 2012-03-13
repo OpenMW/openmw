@@ -142,6 +142,8 @@ namespace MWWorld
 
             int getType() const;
 
+            const ContainerStore *getContainerStore() const;
+
         friend class ContainerStore;
     };
 

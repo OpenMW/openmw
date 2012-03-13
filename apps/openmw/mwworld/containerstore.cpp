@@ -371,6 +371,11 @@ int MWWorld::ContainerStoreIterator::getType() const
     return mType;
 }
 
+const MWWorld::ContainerStore *MWWorld::ContainerStoreIterator::getContainerStore() const
+{
+    return mContainer;
+}
+
 bool MWWorld::operator== (const ContainerStoreIterator& left, const ContainerStoreIterator& right)
 {
     return left.isEqual (right);
