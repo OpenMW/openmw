@@ -418,6 +418,20 @@ if (WIN32)
     set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
     set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
     set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+
+    # Play a bit with the warning levels
+    set(WARNINGS_DISABLE
+        4099        # Type mismatch, forward definition of a class is really a struct
+        4244 4305   # Storing value of one type in variable of another
+        4309        # Variable overflow, trying to store 128 in a char for example
+        )
+
+    foreach(d ${WARNINGS_DISABLE})
+        set(WARNINGS "${WARNINGS} /wd${d}")
+    endforeach(d)
+    set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
   endif(MSVC)
 
   # Same for MinGW
