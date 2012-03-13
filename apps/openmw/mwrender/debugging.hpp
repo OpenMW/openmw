@@ -52,12 +52,16 @@ namespace MWRender
         typedef std::map<std::pair<int,int>, Ogre::SceneNode *> ExteriorPathgridNodes;
         ExteriorPathgridNodes mExteriorPathgridNodes;
 
-        void togglePathgridForCell(MWWorld::Ptr::CellStore *store, bool enabled);
+        void enableCellPathgrid(MWWorld::Ptr::CellStore *store);
+        void disableCellPathgrid(MWWorld::Ptr::CellStore *store);
 
+        // utility
         void destroyCellPathgridNode(Ogre::SceneNode *node);
+        void destroyAttachedObjects(Ogre::SceneNode *node);
 
     public:
         Debugging(Ogre::SceneNode* mwRoot, MWWorld::Environment &env, OEngine::Physic::PhysicEngine *engine);
+        ~Debugging();
         bool toggleRenderMode (int mode);
 
         void cellAdded(MWWorld::Ptr::CellStore* store);
