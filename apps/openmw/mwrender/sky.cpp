@@ -338,24 +338,11 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     mAtmosphereNight = mRootNode->createChildSceneNode();
     mAtmosphereNight->attachObject(night1_ent);
 
-    for (unsigned int i=0; i<night1_ent->getNumSubEntities(); ++i)
-    {
-        MaterialPtr mp = night1_ent->getSubEntity(i)->getMaterial();
-        mp->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
-        mp->getTechnique(0)->getPass(0)->setAmbient(0.0, 0.0, 0.0);
-        mp->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, 1.0);
-        mp->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-        mp->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-        mp->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-
-        mStarsMaterials[i] = mp;
-    }
-
     // Stars vertex shader
-    HighLevelGpuProgramPtr vshader3 = mgr.createProgram("Stars_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+    HighLevelGpuProgramPtr stars_vp = mgr.createProgram("Stars_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         "cg", GPT_VERTEX_PROGRAM);
-    vshader3->setParameter("profiles", "vs_2_x arbvp1");
-    vshader3->setParameter("entry_point", "main_vp");
+    stars_vp->setParameter("profiles", "vs_2_x arbvp1");
+    stars_vp->setParameter("entry_point", "main_vp");
     StringUtil::StrStreamType outStream4;
     outStream4 <<
     "void main_vp(	\n"
@@ -371,10 +358,9 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     "   oFade = (position.z > 50) ? 1.f : 0.f; \n"
     "	oPosition = mul( worldViewProj, position );  \n"
     "}";
-    vshader3->setSource(outStream4.str());
-    vshader3->load();
-    vshader3->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-    night1_ent->getSubEntity(3)->getMaterial()->getTechnique(0)->getPass(0)->setVertexProgram(vshader3->getName());
+    stars_vp->setSource(outStream4.str());
+    stars_vp->load();
+    stars_vp->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
 
     // Stars fragment shader
     HighLevelGpuProgramPtr stars_fp = mgr.createProgram("Stars_FP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -399,7 +385,20 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     stars_fp->load();
     stars_fp->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     stars_fp->getDefaultParameters()->setNamedAutoConstant("diffuse", GpuProgramParameters::ACT_SURFACE_DIFFUSE_COLOUR);
-    night1_ent->getSubEntity(3)->getMaterial()->getTechnique(0)->getPass(0)->setFragmentProgram(stars_fp->getName());
+
+    for (unsigned int i=0; i<night1_ent->getNumSubEntities(); ++i)
+    {
+        MaterialPtr mp = night1_ent->getSubEntity(i)->getMaterial();
+        mp->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
+        mp->getTechnique(0)->getPass(0)->setAmbient(0.0, 0.0, 0.0);
+        mp->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, 1.0);
+        mp->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+        mp->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+        mp->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+        mp->getTechnique(0)->getPass(0)->setVertexProgram(stars_vp->getName());
+        mp->getTechnique(0)->getPass(0)->setFragmentProgram(stars_fp->getName());
+        mStarsMaterials[i] = mp;
+    }
 
     // Atmosphere (day)
     mesh = NifOgre::NIFLoader::load("meshes\\sky_atmosphere.nif");
