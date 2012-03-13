@@ -15,29 +15,26 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
     
-    TerrainManager::TerrainManager(Ogre::SceneManager* mgr)
+    TerrainManager::TerrainManager(SceneManager* mgr)
     {
-        mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
+        mTerrainGlobals = OGRE_NEW TerrainGlobalOptions();
 
-        Ogre::TerrainMaterialGeneratorPtr matGen;
+        TerrainMaterialGeneratorPtr matGen;
         TerrainMaterialGeneratorB* matGenP = new TerrainMaterialGeneratorB();
         matGen.bind(matGenP);
         mTerrainGlobals->setDefaultMaterialGenerator(matGen);
 
-        Ogre::TerrainMaterialGenerator::Profile* const activeProfile =
+        TerrainMaterialGenerator::Profile* const activeProfile =
             mTerrainGlobals->getDefaultMaterialGenerator()
                            ->getActiveProfile();
-        mActiveProfile =
-            static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
+        mActiveProfile = static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         //The pixel error should be as high as possible without it being noticed
         //as it governs how fast mesh quality decreases.
         mTerrainGlobals->setMaxPixelError(8);
 
         mTerrainGlobals->setLayerBlendMapSize(32);
-        mTerrainGlobals->setLightMapSize(256);
-        mTerrainGlobals->setCompositeMapSize(256);
-        mTerrainGlobals->setDefaultGlobalColourMapSize(256);
+        mTerrainGlobals->setDefaultGlobalColourMapSize(65);
 
         //10 (default) didn't seem to be quite enough
         mTerrainGlobals->setSkirtSize(128);
@@ -52,17 +49,20 @@ namespace MWRender
         mActiveProfile->setLayerParallaxMappingEnabled(false);
         mActiveProfile->setReceiveDynamicShadowsEnabled(false);
 
-        mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(mgr,
-                                                    Ogre::Terrain::ALIGN_X_Z,
-                                                    mLandSize,
-                                                    mWorldSize);
+        //composite maps lead to a drastic reduction in loading time so are
+        //disabled
+        mActiveProfile->setCompositeMapEnabled(false);
 
-        mTerrainGroup->setOrigin(Ogre::Vector3(mWorldSize/2,
-                                               0,
-                                               -mWorldSize/2));
+        mTerrainGroup = OGRE_NEW TerrainGroup(mgr,
+                                              Terrain::ALIGN_X_Z,
+                                              mLandSize,
+                                              mWorldSize);
 
-        Ogre::Terrain::ImportData& importSettings =
-                mTerrainGroup->getDefaultImportSettings();
+        mTerrainGroup->setOrigin(Vector3(mWorldSize/2,
+                                         0,
+                                         -mWorldSize/2));
+
+        Terrain::ImportData& importSettings = mTerrainGroup->getDefaultImportSettings();
 
         importSettings.inputBias    = 0;
         importSettings.terrainSize  = mLandSize;
@@ -83,14 +83,14 @@ namespace MWRender
     
     //----------------------------------------------------------------------------------------------
     
-    void TerrainManager::setDiffuse(const Ogre::ColourValue& diffuse)
+    void TerrainManager::setDiffuse(const ColourValue& diffuse)
     {
         mTerrainGlobals->setCompositeMapDiffuse(diffuse);
     }
     
     //----------------------------------------------------------------------------------------------
     
-    void TerrainManager::setAmbient(const Ogre::ColourValue& ambient)
+    void TerrainManager::setAmbient(const ColourValue& ambient)
     {
         mTerrainGlobals->setCompositeMapAmbient(ambient);
     }
@@ -102,7 +102,6 @@ namespace MWRender
         const int cellX = store->cell->getGridX();
         const int cellY = store->cell->getGridY();
 
-
         //split the cell terrain into four segments
         const int numTextures = ESM::Land::LAND_TEXTURE_SIZE/2;
 
@@ -110,7 +109,7 @@ namespace MWRender
         {
             for ( int y = 0; y < 2; y++ )
             {
-                Ogre::Terrain::ImportData terrainData =
+                Terrain::ImportData terrainData =
                     mTerrainGroup->getDefaultImportSettings();
 
                 const int terrainX = cellX * 2 + x;
@@ -118,10 +117,10 @@ namespace MWRender
 
                 //it makes far more sense to reallocate the memory here,
                 //and let Ogre deal with it due to the issues with deleting
-                //it at the wrong time if using threads (Which Ogre::Terrain does)
+                //it at the wrong time if using threads (Which Terrain does)
                 terrainData.inputFloat = OGRE_ALLOC_T(float,
                                                       mLandSize*mLandSize,
-                                                      Ogre::MEMCATEGORY_GEOMETRY);
+                                                      MEMCATEGORY_GEOMETRY);
 
                 //copy the height data row by row
                 for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
@@ -148,35 +147,31 @@ namespace MWRender
 
                     mTerrainGroup->loadTerrain(terrainX, terrainY, true);
 
-                    Ogre::Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
+                    Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
                     initTerrainBlendMaps(terrain, store,
                                          x * numTextures, y * numTextures,
                                          numTextures,
                                          indexes);
 
-                    // disable or enable global colour map (depends on available vertex colours)
                     if ( store->land[1][1]->landData->usingColours )
+                    {
+                        // disable or enable global colour map (depends on available vertex colours)
                         mActiveProfile->setGlobalColourMapEnabled(true);
-                    else
-                        mActiveProfile->setGlobalColourMapEnabled(false);
-
-                    /// \todo are we possibly generating the materials twice?
-                    mActiveProfile->generate(terrain);
-                    mActiveProfile->generateForCompositeMap(terrain);
-
-                    if ( store->land[1][1]->landData->usingColours )
-                    {                        
-                        Ogre::TexturePtr vertex = getVertexColours(store,
-                                                                   x*(mLandSize-1),
-                                                                   y*(mLandSize-1),
-                                                                   mLandSize);
+                        TexturePtr vertex = getVertexColours(store,
+                                                             x*(mLandSize-1),
+                                                             y*(mLandSize-1),
+                                                             mLandSize);
 
                         //this is a hack to get around the fact that Ogre seems to
                         //corrupt the global colour map leading to rendering errors
-                        MaterialPtr mat = terrain->_getMaterial();
+                        MaterialPtr mat = terrain->getMaterial();
                         mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
-                        mat = terrain->_getCompositeMapMaterial();
-                        mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+                        //mat = terrain->_getCompositeMapMaterial();
+                        //mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+                    }
+                    else
+                    {
+                        mActiveProfile->setGlobalColourMapEnabled(false);
                     }
                 }
             }
@@ -201,7 +196,7 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
 
-    void TerrainManager::initTerrainTextures(Ogre::Terrain::ImportData* terrainData,
+    void TerrainManager::initTerrainTextures(Terrain::ImportData* terrainData,
                                              MWWorld::Ptr::CellStore* store,
                                              int fromX, int fromY, int size,
                                              std::map<uint16_t, int>& indexes)
@@ -265,7 +260,7 @@ namespace MWRender
                 }
 
                 const size_t position = terrainData->layerList.size();
-                terrainData->layerList.push_back(Ogre::Terrain::LayerInstance());
+                terrainData->layerList.push_back(Terrain::LayerInstance());
 
                 terrainData->layerList[position].worldSize = 256;
                 terrainData->layerList[position].textureNames.push_back("textures\\" + texture);
@@ -284,7 +279,7 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
 
-    void TerrainManager::initTerrainBlendMaps(Ogre::Terrain* terrain,
+    void TerrainManager::initTerrainBlendMaps(Terrain* terrain,
                                               MWWorld::Ptr::CellStore* store,
                                               int fromX, int fromY, int size,
                                               const std::map<uint16_t, int>& indexes)
@@ -369,7 +364,7 @@ namespace MWRender
 
         for ( int i = 1; i < terrain->getLayerCount(); i++ )
         {
-             Ogre::TerrainLayerBlendMap* blend = terrain->getLayerBlendMap(i);
+             TerrainLayerBlendMap* blend = terrain->getLayerBlendMap(i);
              blend->dirty();
              blend->update();
         }
@@ -426,10 +421,10 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
 
-    Ogre::TexturePtr TerrainManager::getVertexColours(MWWorld::Ptr::CellStore* store,
+    TexturePtr TerrainManager::getVertexColours(MWWorld::Ptr::CellStore* store,
                                                     int fromX, int fromY, int size)
     {
-        Ogre::TextureManager* const texMgr = Ogre::TextureManager::getSingletonPtr();
+        TextureManager* const texMgr = TextureManager::getSingletonPtr();
 
         const std::string colourTextureName = "VtexColours_" +
                                               boost::lexical_cast<std::string>(store->cell->getGridX()) +
@@ -440,22 +435,22 @@ namespace MWRender
                                               "_" +
                                               boost::lexical_cast<std::string>(fromY);
 
-        Ogre::TexturePtr tex = texMgr->getByName(colourTextureName);
+        TexturePtr tex = texMgr->getByName(colourTextureName);
         if ( !tex.isNull() )
         {
             return tex;
         }
 
         tex = texMgr->createManual(colourTextureName,
-                                   Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                   Ogre::TEX_TYPE_2D, size, size, 0, Ogre::PF_BYTE_BGR);
+                                   ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                   TEX_TYPE_2D, size, size, 0, PF_BYTE_BGR);
 
-        Ogre::HardwarePixelBufferSharedPtr pixelBuffer = tex->getBuffer();
+        HardwarePixelBufferSharedPtr pixelBuffer = tex->getBuffer();
          
-        pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
-        const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+        pixelBuffer->lock(HardwareBuffer::HBL_DISCARD);
+        const PixelBox& pixelBox = pixelBuffer->getCurrentLock();
          
-        Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
+        uint8* pDest = static_cast<uint8*>(pixelBox.data);
          
         const char* const colours = store->land[1][1]->landData->colours;
         for ( int y = 0; y < size; y++ )

@@ -25,6 +25,10 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mRendering.createScene("PlayerCam", 55, 5);
     mTerrainManager = new TerrainManager(mRendering.getScene());
 
+    //The fog type must be set before any terrain objects are created as if the
+    //fog type is set to FOG_NONE then the initially created terrain won't have any fog
+    configureFog(1, ColourValue(1,1,1));
+
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
 
