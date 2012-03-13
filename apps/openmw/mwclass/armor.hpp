@@ -5,6 +5,13 @@
 
 namespace MWClass
 {
+    enum WeightCategory
+    {
+        WC_Light = 0,
+        WC_Medium = 1,
+        WC_Heavy = 2
+    };
+
     class Armor : public MWWorld::Class
     {
         public:
@@ -32,6 +39,15 @@ namespace MWClass
             ///< Return name of the script attached to ptr
 
             static void registerSelf();
+
+            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr) const;
+            ///< Return the pick up sound Id
+
+            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr) const;
+            ///< Return the put down sound Id
+
+            virtual int getWeightCategory (const MWWorld::Ptr& ptr) const;
+            ///< Return the weight category of the armor light/medium/heavy
     };
 }
 

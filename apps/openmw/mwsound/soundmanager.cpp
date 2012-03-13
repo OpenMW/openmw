@@ -145,7 +145,7 @@ namespace MWSound
              const std::string &id,
              float volume, float pitch,
              float min, float max,
-             bool loop)
+             bool loop, bool untracked)
     {
       try
         {
@@ -157,7 +157,10 @@ namespace MWSound
           setPos(snd, ptr);
           snd->play();
 
-          sounds[ptr][id] = WSoundPtr(snd);
+          if (!untracked)
+          {
+            sounds[ptr][id] = WSoundPtr(snd);
+          }
         }
       catch(...)
         {
@@ -413,13 +416,13 @@ namespace MWSound
   }
 
   void SoundManager::playSound3D (MWWorld::Ptr ptr, const std::string& soundId,
-                                  float volume, float pitch, bool loop)
+                                  float volume, float pitch, bool loop, bool untracked)
   {
     // Look up the sound in the ESM data
     float min, max;
     const std::string &file = lookup(soundId, volume, min, max);
     if (file != "")
-      add(file, ptr, soundId, volume, pitch, min, max, loop);
+      add(file, ptr, soundId, volume, pitch, min, max, loop, untracked);
   }
 
   void SoundManager::stopSound3D (MWWorld::Ptr ptr, const std::string& soundId)

@@ -144,6 +144,18 @@ namespace MWWorld
             ///< If there is no class for this pointer, an exception is thrown.
 
             static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
+
+            virtual std::string getUpSoundId (const Ptr& ptr) const;
+            ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
+            /// (default implementation: throw an exception)
+
+            virtual std::string getDownSoundId (const Ptr& ptr) const;
+            ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
+            /// (default implementation: throw an exception)
+
+            virtual  int getWeightCategory (const MWWorld::Ptr& ptr);
+            ///< Return the weight category of armors light/medium/heavy
+            /// (default implementation: throw an exception)
     };
 }
 

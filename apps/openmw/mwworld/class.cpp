@@ -141,4 +141,19 @@ namespace MWWorld
     {
         sClasses.insert (std::make_pair (key, instance));
     }
+
+    std::string Class::getUpSoundId (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have an up sound");
+    }
+
+    std::string Class::getDownSoundId (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have an down sound");
+    }
+
+    int Class::getWeightCategory (const MWWorld::Ptr& ptr)
+    {
+        throw std::runtime_error ("class does not have an weight");
+    }
 }
