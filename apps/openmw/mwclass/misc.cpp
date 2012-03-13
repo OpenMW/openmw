@@ -79,11 +79,25 @@ namespace MWClass
 
     std::string Miscellaneous::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
+
+        if (ref->base->name =="Gold")
+        {
+            return std::string("Item Gold Up");
+        }
         return std::string("Item Misc Up");
     }
 
     std::string Miscellaneous::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
+
+        if (ref->base->name =="Gold")
+        {
+            return std::string("Item Gold Down");
+        }
         return std::string("Item Misc Down");
     }
 }

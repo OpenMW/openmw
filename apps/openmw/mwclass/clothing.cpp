@@ -79,11 +79,25 @@ namespace MWClass
 
     std::string Clothing::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
+         ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+            ptr.get<ESM::Clothing>();
+
+        if (ref->base->data.type == 8)
+        {
+            return std::string("Item Ring Up");
+        }
         return std::string("Item Clothes Up");
     }
 
     std::string Clothing::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
+         ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+            ptr.get<ESM::Clothing>();
+
+        if (ref->base->data.type == 8)
+        {
+            return std::string("Item Ring Down");
+        }
         return std::string("Item Clothes Down");
     }
 }

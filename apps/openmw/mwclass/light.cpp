@@ -82,6 +82,8 @@ namespace MWClass
         if (!(ref->base->data.flags & ESM::Light::Carry))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
 
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
     }
@@ -99,5 +101,15 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Light);
 
         registerClass (typeid (ESM::Light).name(), instance);
+    }
+
+    std::string Light::getUpSoundId (const MWWorld::Ptr& ptr) const
+    {
+        return std::string("Item Misc Up");
+    }
+
+    std::string Light::getDownSoundId (const MWWorld::Ptr& ptr) const
+    {
+        return std::string("Item Misc Down");
     }
 }
