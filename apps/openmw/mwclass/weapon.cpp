@@ -7,6 +7,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -76,6 +77,61 @@ namespace MWClass
             ptr.get<ESM::Weapon>();
 
         return ref->base->script;
+    }
+
+    std::pair<std::vector<int>, bool> Weapon::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+            ptr.get<ESM::Weapon>();
+
+        std::vector<int> slots;
+        bool stack = false;
+
+        if (ref->base->data.type==ESM::Weapon::Arrow || ref->base->data.type==ESM::Weapon::Bolt)
+        {
+            slots.push_back (int (MWWorld::InventoryStore::Slot_Ammunition));
+            stack = true;
+        }
+        else if (ref->base->data.type==ESM::Weapon::MarksmanThrown)
+        {
+            slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
+            stack = true;
+        }
+        else
+            slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
+
+        return std::make_pair (slots, stack);
+    }
+
+    int Weapon::getEuqipmentSkill (const MWWorld::Ptr& ptr,
+        const MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+            ptr.get<ESM::Weapon>();
+
+        const int size = 12;
+
+        static const int sMapping[size][2] =
+        {
+            { ESM::Weapon::ShortBladeOneHand, ESM::Skill::ShortBlade },
+            { ESM::Weapon::LongBladeOneHand, ESM::Skill::LongBlade },
+            { ESM::Weapon::LongBladeTwoHand, ESM::Skill::LongBlade },
+            { ESM::Weapon::BluntOneHand, ESM::Skill::BluntWeapon },
+            { ESM::Weapon::BluntTwoClose, ESM::Skill::BluntWeapon },
+            { ESM::Weapon::BluntTwoWide, ESM::Skill::BluntWeapon },
+            { ESM::Weapon::SpearTwoWide, ESM::Skill::Spear },
+            { ESM::Weapon::AxeOneHand, ESM::Skill::Axe },
+            { ESM::Weapon::AxeTwoHand, ESM::Skill::Axe },
+            { ESM::Weapon::MarksmanBow, ESM::Skill::Marksman },
+            { ESM::Weapon::MarksmanCrossbow, ESM::Skill::Marksman },
+            { ESM::Weapon::MarksmanThrown, ESM::Skill::Marksman }
+        };
+
+        for (int i=0; i<size; ++i)
+            if (sMapping[i][0]==ref->base->data.type)
+                return sMapping[i][1];
+
+        return -1;
     }
 
     void Weapon::registerSelf()

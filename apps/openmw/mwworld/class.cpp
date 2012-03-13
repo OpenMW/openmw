@@ -77,6 +77,11 @@ namespace MWWorld
         throw std::runtime_error ("class does not have a container store");
     }
 
+    InventoryStore& Class::getInventoryStore (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have an inventory store");
+    }
+
     void Class::lock (const Ptr& ptr, int lockLevel) const
     {
         throw std::runtime_error ("class does not support locking");
@@ -120,6 +125,16 @@ namespace MWWorld
     Ogre::Vector3 Class::getMovementVector (const Ptr& ptr) const
     {
         return Ogre::Vector3 (0, 0, 0);
+    }
+
+    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& ptr) const
+    {
+        return std::make_pair (std::vector<int>(), false);
+    }
+
+    int Class::getEuqipmentSkill (const Ptr& ptr, const Environment& environment) const
+    {
+        return -1;
     }
 
     const Class& Class::get (const std::string& key)

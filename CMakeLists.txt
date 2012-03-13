@@ -255,6 +255,19 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 
     # prepare plugins
+    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
+        set(OPENMW_RELEASE_BUILD 1)
+    endif()
+    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
+        set(OPENMW_RELEASE_BUILD 1)
+    endif()
+
+    if (${OPENMW_RELEASE_BUILD})
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
+    else()
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
+    endif()
+
     foreach(plugin ${USED_OGRE_PLUGINS})
         configure_file("${OGRE_PLUGIN_DIR}/${plugin}.dylib"
                         "${APP_BUNDLE_DIR}/Contents/Plugins/${plugin}.dylib"
@@ -343,6 +356,9 @@ if(WIN32)
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
+    SET(CPACK_NSIS_MUI_ICON "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.ico")
+    SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.ico")
+    # SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
 
     SET(VCREDIST32 "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
     if(EXISTS ${VCREDIST32})

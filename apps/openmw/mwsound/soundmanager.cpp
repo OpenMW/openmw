@@ -10,9 +10,7 @@
 #include <mangle/sound/clients/ogre_listener_mover.hpp>
 #include <mangle/sound/clients/ogre_output_updater.hpp>
 
-#include <components/file_finder/file_finder.hpp>
 #include <components/esm_store/store.hpp>
-
 
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
@@ -45,7 +43,6 @@
 
 using namespace Mangle::Sound;
 typedef OEngine::Sound::SoundManager OEManager;
-typedef OEngine::Sound::SoundManagerPtr OEManagerPtr;
 
 // Set the position on a sound based on a Ptr.
 static void setPos(SoundPtr &snd, const MWWorld::Ptr ref)
@@ -60,175 +57,65 @@ static void setPos(SoundPtr &snd, const MWWorld::Ptr ref)
 
 namespace MWSound
 {
-  struct SoundManager::SoundImpl
-  {
-    /* This is the sound manager. It loades, stores and deletes
-       sounds based on the sound factory it is given.
-    */
-    OEManagerPtr mgr;
-    SoundPtr music;
 
-    /* This class calls update() on the sound manager each frame
-       using and Ogre::FrameListener
-    */
-    Mangle::Sound::OgreOutputUpdater updater;
-
-    /* This class tracks the movement of an Ogre::Camera and moves
-       a sound listener automatically to follow it.
-    */
-    Mangle::Sound::OgreListenerMover cameraTracker;
-
-    const ESMS::ESMStore &store;
-
-    typedef std::map<std::string,Mangle::Sound::WSoundPtr> IDMap;
-    typedef std::map<MWWorld::Ptr,IDMap> PtrMap;
-    PtrMap sounds;
-
-    // This is used for case insensitive and slash-type agnostic file
-    // finding. It takes DOS paths (any case, \\ slashes or / slashes)
-    // relative to the sound dir, and translates them into full paths
-    // of existing files in the filesystem, if they exist.
-    bool FSstrict;
-    FileFinder::LessTreeFileFinder files;
-    FileFinder::StrictTreeFileFinder strict;
-    FileFinder::LessTreeFileFinder musicpath;
-    FileFinder::StrictTreeFileFinder musicpathStrict;
-
-    SoundImpl(Ogre::Root *root, Ogre::Camera *camera, const ESMS::ESMStore &str,
-        const Files::PathContainer& soundDir,
-        const Files::PathContainer& musicDir,
-        bool fsstrict)
-      : mgr(new OEManager(SoundFactoryPtr(new SOUND_FACTORY)))
-      , updater(mgr)
-      , cameraTracker(mgr)
-      , store(str)
-      , FSstrict(fsstrict)
-      , files(soundDir)
-      , strict(soundDir)
-      , musicpath(musicDir)
-      , musicpathStrict(musicDir)
+    SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
+        const Files::PathContainer& dataDirs,
+        bool useSound, bool fsstrict, MWWorld::Environment& environment)
+        : mFSStrict(fsstrict)
+        , mEnvironment(environment)
+        , mgr(new OEManager(SoundFactoryPtr(new SOUND_FACTORY)))
+        , updater(mgr)
+        , cameraTracker(mgr)
+        , mCurrentPlaylist(NULL)
     {
+        if(useSound)
+        {
+            // The music library will accept these filetypes
+            // If none is given then it will accept all filetypes
+            std::vector<std::string> acceptableExtensions;
+            acceptableExtensions.push_back(".mp3");
+            acceptableExtensions.push_back(".wav");
+            acceptableExtensions.push_back(".ogg");
+            acceptableExtensions.push_back(".flac");
 
-      std::cout << "Sound output:  " << SOUND_OUT << std::endl;
-      std::cout << "Sound decoder: " << SOUND_IN << std::endl;
-      // Attach the camera to the camera tracker
-      cameraTracker.followCamera(camera);
+            // Makes a list of all sound files, searches in reverse for priority reasons
+            for (Files::PathContainer::const_reverse_iterator it = dataDirs.rbegin(); it != dataDirs.rend(); ++it)
+            {
+                Files::FileLister(*it / std::string("Sound"), mSoundFiles, true);
+            }
 
-      // Tell Ogre to update the sound system each frame
-      root->addFrameListener(&updater);
-    }
+            // Makes a FileLibrary of all music files, searches in reverse for priority reasons
+            for (Files::PathContainer::const_reverse_iterator it = dataDirs.rbegin(); it != dataDirs.rend(); ++it)
+            {
+                mMusicLibrary.add(*it / std::string("Music"), true, mFSStrict, acceptableExtensions);
+            }
 
-    ~SoundImpl()
+            std::string anything = "anything";      // anything is better that a segfault
+            mCurrentPlaylist = mMusicLibrary.section(anything, mFSStrict); // now points to an empty path
+
+            std::cout << "Sound output:  " << SOUND_OUT << std::endl;
+            std::cout << "Sound decoder: " << SOUND_IN << std::endl;
+            // Attach the camera to the camera tracker
+            cameraTracker.followCamera(camera);
+
+            // Tell Ogre to update the sound system each frame
+            root->addFrameListener(&updater);
+        }
+      }
+
+    SoundManager::~SoundManager()
     {
         Ogre::Root::getSingleton().removeFrameListener(&updater);
         cameraTracker.unfollowCamera();
     }
 
-
-
-    static std::string toMp3(std::string str)
-    {
-      std::string::size_type i = str.rfind('.');
-      if(str.find('/', i) == std::string::npos &&
-         str.find('\\', i) == std::string::npos)
-        str = str.substr(0, i) + ".mp3";
-      else
-        str += ".mp3";
-      return str;
-    }
-
-    bool hasFile(const std::string &str, bool music = false)
-    {
-        bool found = false;
-        if(!FSstrict)
-        {
-            if(music)
-            {
-                found = musicpath.has(str);
-                // Not found? Try with .mp3
-                if (!found)
-                {
-                    found = musicpath.has(toMp3(str));
-                }
-            }
-            else
-            {
-                found = files.has(str);
-                if (!found)
-                {
-                    found = files.has(toMp3(str));
-                }
-            }
-        }
-        else
-        {
-            if(music)
-            {
-                found = musicpathStrict.has(str);
-                // Not found? Try with .mp3
-                if (!found)
-                {
-                    found = musicpathStrict.has(toMp3(str));
-                }
-            }
-            else
-            {
-                found = strict.has(str);
-                if (!found)
-                {
-                    found = strict.has(toMp3(str));
-                }
-            }
-        }
-
-        return found;
-    }
-
-    // Convert a Morrowind sound path (eg. Fx\funny.wav) to full path
-    // with proper slash conversion (eg. datadir/Sound/Fx/funny.wav)
-    std::string convertPath(const std::string &str, bool music = false)
-    {
-        if(FSstrict == false)
-        {
-            // Search and return
-            if(music && musicpath.has(str))
-                return musicpath.lookup(str);
-            else if(files.has(str))
-                return files.lookup(str);
-
-            // Try mp3 if the wav wasn't found
-            std::string mp3 = toMp3(str);
-            if(music && musicpath.has(mp3))
-                return musicpath.lookup(mp3);
-            else if(files.has(mp3))
-                return files.lookup(mp3);
-        }
-        else
-        {
-            if(music && musicpathStrict.has(str))
-                return musicpathStrict.lookup(str);
-            else if(strict.has(str))
-                return strict.lookup(str);
-
-            // Try mp3 if the wav wasn't found
-            std::string mp3 = toMp3(str);
-            if(music && musicpathStrict.has(mp3))
-                return musicpathStrict.lookup(mp3);
-            else if(strict.has(str))
-                return strict.lookup(mp3);
-        }
-
-        // Give up
-        return "";
-    }
-
     // Convert a soundId to file name, and modify the volume
     // according to the sounds local volume setting, minRange and
     // maxRange.
-    std::string lookup(const std::string &soundId,
+    std::string SoundManager::lookup(const std::string &soundId,
                        float &volume, float &min, float &max)
     {
-      const ESM::Sound *snd = store.sounds.search(soundId);
+      const ESM::Sound *snd = mEnvironment.mWorld->getStore().sounds.search(soundId);
       if(snd == NULL) return "";
 
       if(snd->data.volume == 0)
@@ -249,11 +136,11 @@ namespace MWSound
         max = std::max(min, max);
       }
 
-      return convertPath(snd->sound);
+      return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict);
     }
 
     // Add a sound to the list and play it
-    void add(const std::string &file,
+    void SoundManager::add(const std::string &file,
              MWWorld::Ptr ptr,
              const std::string &id,
              float volume, float pitch,
@@ -280,7 +167,7 @@ namespace MWSound
 
     // Clears all the sub-elements of a given iterator, and then
     // removes it from 'sounds'.
-    void clearAll(PtrMap::iterator& it)
+    void SoundManager::clearAll(PtrMap::iterator& it)
     {
       IDMap::iterator sit = it->second.begin();
 
@@ -301,7 +188,7 @@ namespace MWSound
 
     // Stop a sound and remove it from the list. If id="" then
     // remove the entire object and stop all its sounds.
-    void remove(MWWorld::Ptr ptr, const std::string &id = "")
+    void SoundManager::remove(MWWorld::Ptr ptr, const std::string &id)
     {
       PtrMap::iterator it = sounds.find(ptr);
       if(it != sounds.end())
@@ -324,7 +211,7 @@ namespace MWSound
         }
     }
 
-    bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const
+    bool SoundManager::isPlaying(MWWorld::Ptr ptr, const std::string &id) const
     {
       PtrMap::const_iterator it = sounds.find(ptr);
       if(it != sounds.end())
@@ -348,7 +235,7 @@ namespace MWSound
     }
 
     // Remove all references to objects belonging to a given cell
-    void removeCell(const MWWorld::Ptr::CellStore *cell)
+    void SoundManager::removeCell(const MWWorld::Ptr::CellStore *cell)
     {
       PtrMap::iterator it2, it = sounds.begin();
       while(it != sounds.end())
@@ -360,7 +247,7 @@ namespace MWSound
         }
     }
 
-    void updatePositions(MWWorld::Ptr ptr)
+    void SoundManager::updatePositions(MWWorld::Ptr ptr)
     {
       // Find the reference (if any)
       PtrMap::iterator it = sounds.find(ptr);
@@ -378,85 +265,45 @@ namespace MWSound
             }
         }
     }
-  }; /* SoundImpl */
+
+    void SoundManager::stopMusic()
+    {
+        if (music)
+            music->stop();
+        setPlaylist();
+    }
+
 
   void SoundManager::streamMusicFull(const std::string& filename)
   {
-    if(!mData) return;
-
     // Play the sound and tell it to stream, if possible. TODO:
     // Store the reference, the jukebox will need to check status,
     // control volume etc.
-    if (mData->music)
-        mData->music->stop();
-    mData->music = mData->mgr->load(filename);
-    mData->music->setStreaming(true);
-    mData->music->setVolume(0.4);
-    mData->music->play();
+    if (music)
+        music->stop();
+    music = mgr->load(filename);
+    music->setStreaming(true);
+    music->setVolume(0.4);
+    music->play();
 
-  }
-
-  SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
-    const ESMS::ESMStore &store, const Files::PathContainer& dataDirs,
-    bool useSound, bool fsstrict, MWWorld::Environment& environment)
-    : mData(NULL)
-    , fsStrict(fsstrict)
-    , mEnvironment(environment)
-  {
-    for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
-    {
-        MP3Lookup((*it) / "Music/Explore/");
-    }
-
-    if(useSound)
-    {
-        Files::PathContainer soundDirs;;
-        for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
-        {
-            soundDirs.push_back( *it / std::string("Sound"));
-        }
-        mData = new SoundImpl(root, camera, store, soundDirs /* Sound */, dataDirs /* Music */, fsstrict);
-    }
-
-    test.name = "";
-    total = 0;
-  }
-
-  SoundManager::~SoundManager()
-  {
-    if(mData)
-      delete mData;
   }
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        if(mData->hasFile(filename, true))
+        std::string filePath = mMusicLibrary.locate(filename, mFSStrict).string();
+        if(!filePath.empty())
         {
-            streamMusicFull(mData->convertPath(filename, true));
+            streamMusicFull(filePath);
         }
     }
-
-  void SoundManager::MP3Lookup(const boost::filesystem::path& dir)
-  {
-    boost::filesystem::directory_iterator dir_iter(dir), dir_end;
-
-    std::string mp3extension = ".mp3";
-    for(;dir_iter != dir_end; dir_iter++)
-    {
-        if(boost::filesystem::extension(*dir_iter) == mp3extension)
-        {
-            files.push_back(*dir_iter);
-        }
-    }
-  }
 
   void SoundManager::startRandomTitle()
   {
-    if(!files.empty())
+    if(mCurrentPlaylist && !mCurrentPlaylist->empty())
     {
-        Files::PathContainer::iterator fileIter = files.begin();
+        Files::PathContainer::const_iterator fileIter = mCurrentPlaylist->begin();
         srand( time(NULL) );
-        int r = rand() % files.size() + 1;        //old random code
+        int r = rand() % mCurrentPlaylist->size() + 1;        //old random code
 
         std::advance(fileIter, r - 1);
         std::string music = fileIter->string();
@@ -476,105 +323,157 @@ namespace MWSound
     bool SoundManager::isMusicPlaying()
     {
         bool test = false;
-        if(mData && mData->music)
+        if(music)
         {
-            test = mData->music->isPlaying();
+            test = music->isPlaying();
         }
         return test;
     }
 
-  SoundManager::SoundImpl SoundManager::getMData()
-  {
-     // bool test = mData->music->isPlaying();
-      return *mData;
-  }
+    bool SoundManager::setPlaylist(std::string playlist)
+    {
+        const Files::PathContainer* previousPlaylist;
+        previousPlaylist = mCurrentPlaylist;
+        if (playlist == "")
+        {
+            mCurrentPlaylist = mMusicLibrary.section(playlist, mFSStrict);
+        }
+        else if(mMusicLibrary.containsSection(playlist, mFSStrict))
+        {
+            mCurrentPlaylist = mMusicLibrary.section(playlist, mFSStrict);
+        }
+        else
+        {
+            std::cout << "Warning: playlist named " << playlist << " does not exist.\n";
+        }
+        return previousPlaylist == mCurrentPlaylist;
+    }
+
+    void SoundManager::playPlaylist(std::string playlist)
+    {
+        if (playlist == "")
+        {
+            if(!isMusicPlaying())
+            {
+                startRandomTitle();
+            }
+            return;
+        }
+
+        if(!setPlaylist(playlist))
+        {
+            startRandomTitle();
+        }
+        else if (!isMusicPlaying())
+        {
+            startRandomTitle();
+        }
+    }
 
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
     // The range values are not tested
-    if(!mData) return;
-    if(mData->hasFile(filename))
-      mData->add(mData->convertPath(filename), ptr, "_say_sound", 1, 1, 100, 20000, false);
+    std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict);
+    if(!filePath.empty())
+      add(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
     else
       std::cout << "Sound file " << filename << " not found, skipping.\n";
   }
 
   bool SoundManager::sayDone (MWWorld::Ptr ptr) const
   {
-    if(!mData) return false;
-    return !mData->isPlaying(ptr, "_say_sound");
+    return !isPlaying(ptr, "_say_sound");
   }
 
 
-  void SoundManager::playSound(const std::string& soundId, float volume, float pitch)
+  void SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
   {
-    if(!mData) return;
-    // Play and forget
     float min, max;
-    const std::string &file = mData->lookup(soundId, volume, min, max);
+    const std::string &file = lookup(soundId, volume, min, max);
     if (file != "")
     {
-        SoundPtr snd = mData->mgr->load(file);
+        SoundPtr snd = mgr->load(file);
+        snd->setRepeat(loop);
         snd->setVolume(volume);
         snd->setRange(min,max);
         snd->setPitch(pitch);
         snd->play();
+
+        if (loop)
+        {
+            // Only add the looping sound once
+            IDMap::iterator it = mLoopedSounds.find(soundId);
+            if(it == mLoopedSounds.end())
+            {
+                mLoopedSounds[soundId] = WSoundPtr(snd);
+            }
+        }
     }
   }
 
   void SoundManager::playSound3D (MWWorld::Ptr ptr, const std::string& soundId,
                                   float volume, float pitch, bool loop)
   {
-    if(!mData) return;
-
     // Look up the sound in the ESM data
     float min, max;
-    const std::string &file = mData->lookup(soundId, volume, min, max);
+    const std::string &file = lookup(soundId, volume, min, max);
     if (file != "")
-      mData->add(file, ptr, soundId, volume, pitch, min, max, loop);
+      add(file, ptr, soundId, volume, pitch, min, max, loop);
   }
 
   void SoundManager::stopSound3D (MWWorld::Ptr ptr, const std::string& soundId)
   {
-    if(!mData) return;
-    mData->remove(ptr, soundId);
+    remove(ptr, soundId);
   }
 
   void SoundManager::stopSound (MWWorld::Ptr::CellStore *cell)
   {
-    if(!mData) return;
-    mData->removeCell(cell);
+    removeCell(cell);
   }
+
+    void SoundManager::stopSound(const std::string& soundId)
+    {
+        IDMap::iterator it = mLoopedSounds.find(soundId);
+        if(it != mLoopedSounds.end())
+        {
+            SoundPtr snd = it->second.lock();
+            if(snd) snd->stop();
+            mLoopedSounds.erase(it);
+        }
+    }
 
   bool SoundManager::getSoundPlaying (MWWorld::Ptr ptr, const std::string& soundId) const
   {
     // Mark all sounds as playing, otherwise the scripts will just
     // keep trying to play them every frame.
-    if(!mData) return true;
 
-    return mData->isPlaying(ptr, soundId);
+    return isPlaying(ptr, soundId);
   }
 
   void SoundManager::updateObject(MWWorld::Ptr ptr)
   {
-    if (mData != NULL)
-    {
-        mData->updatePositions(ptr);
-    }
+    updatePositions(ptr);
   }
 
   void SoundManager::update (float duration)
   {
         MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+        static int total = 0;
+        static std::string regionName = "";
+        static float timePassed = 0.0;
+        timePassed += duration;
 
         //If the region has changed
-        if(!(current->cell->data.flags & current->cell->Interior) && timer.elapsed() >= 10)
+        if(!(current->cell->data.flags & current->cell->Interior) && timePassed >= 10)
         {
-            timer.restart();
-            if (test.name != current->cell->region)
+
+            ESM::Region test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
+
+            timePassed = 0;
+            if (regionName != current->cell->region)
             {
+                regionName = current->cell->region;
                 total = 0;
-                test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
             }
 
             if(test.soundList.size() > 0)
@@ -598,15 +497,15 @@ namespace MWSound
                 soundIter = test.soundList.begin();
                 while (soundIter != test.soundList.end())
                 {
-                    const ESM::NAME32 go = soundIter->sound;
+                    const std::string go = soundIter->sound.toString();
                     int chance = (int) soundIter->chance;
                     //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
                     soundIter++;
                     if( r - pos < chance)
                     {
                         //play sound
-                        std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-                        mEnvironment.mSoundManager->playSound(go.name, 20.0, 1.0);
+                        std::cout << "Sound: " << go <<" Chance:" <<  chance << "\n";
+                        mEnvironment.mSoundManager->playSound(go, 20.0, 1.0);
 
                         break;
                     }
@@ -616,7 +515,7 @@ namespace MWSound
         }
         else if(current->cell->data.flags & current->cell->Interior)
         {
-            test.name = "";
+            regionName = "";
         }
 
   }
