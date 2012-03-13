@@ -143,11 +143,17 @@ namespace MWWorld
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
 
-            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& pt) const;
+            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
             ///
             /// Default implementation: return (empty vector, false).
+
+            virtual int getEuqipmentSkill (const Ptr& ptr, const Environment& environment)
+                const;
+            /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
+            /// no such skill.
+            /// (default implementation: return -1)
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

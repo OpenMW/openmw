@@ -127,9 +127,14 @@ namespace MWWorld
         return Ogre::Vector3 (0, 0, 0);
     }
 
-    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& pt) const
+    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& ptr) const
     {
         return std::make_pair (std::vector<int>(), false);
+    }
+
+    int Class::getEuqipmentSkill (const Ptr& ptr, const Environment& environment) const
+    {
+        return -1;
     }
 
     const Class& Class::get (const std::string& key)
