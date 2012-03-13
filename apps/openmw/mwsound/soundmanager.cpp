@@ -397,6 +397,7 @@ namespace MWSound
         snd->setVolume(volume);
         snd->setRange(min,max);
         snd->setPitch(pitch);
+        snd->setRelative(true);
         snd->play();
 
         if (loop)
