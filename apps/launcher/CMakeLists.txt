@@ -41,10 +41,11 @@ source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC
 find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
 
-if (NOT APPLE) # this dependency can be completely removed, but now it only tested on OS X
-    find_package(PNG REQUIRED)
-    include_directories(${PNG_INCLUDE_DIR})
-endif()
+# Set some platform specific settings
+if(WIN32)
+    set(GUI_TYPE WIN32)
+    set(QT_USE_QTMAIN TRUE)
+endif(WIN32)
 
 QT4_ADD_RESOURCES(RCC_SRCS resources.qrc)
 QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
@@ -53,6 +54,7 @@ include(${QT_USE_FILE})
 
 # Main executable
 add_executable(omwlauncher
+    ${GUI_TYPE}
     ${LAUNCHER}
     ${RCC_SRCS}
     ${MOC_SRCS}
@@ -62,7 +64,6 @@ target_link_libraries(omwlauncher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${QT_LIBRARIES}
-    ${PNG_LIBRARY}
     components
 )
 

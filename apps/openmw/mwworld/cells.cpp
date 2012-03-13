@@ -5,6 +5,8 @@
 #include <algorithm>
 
 #include "world.hpp"
+#include "class.hpp"
+#include "containerstore.hpp"
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
@@ -35,6 +37,39 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
     }
 }
 
+void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
+{
+    for (ESMS::CellRefList<ESM::Container, RefData>::List::iterator iter (
+        cellStore.containers.list.begin());
+        iter!=cellStore.containers.list.end(); ++iter)
+    {
+        Ptr container (&*iter, &cellStore);
+
+        Class::get (container).getContainerStore (container).fill (
+            iter->base->inventory, mStore);
+    }
+
+    for (ESMS::CellRefList<ESM::Creature, RefData>::List::iterator iter (
+        cellStore.creatures.list.begin());
+        iter!=cellStore.creatures.list.end(); ++iter)
+    {
+        Ptr container (&*iter, &cellStore);
+
+        Class::get (container).getContainerStore (container).fill (
+            iter->base->inventory, mStore);
+    }
+
+    for (ESMS::CellRefList<ESM::NPC, RefData>::List::iterator iter (
+        cellStore.npcs.list.begin());
+        iter!=cellStore.npcs.list.end(); ++iter)
+    {
+        Ptr container (&*iter, &cellStore);
+
+        Class::get (container).getContainerStore (container).fill (
+            iter->base->inventory, mStore);
+    }
+}
+
 MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader, MWWorld::World& world)
 : mStore (store), mReader (reader), mWorld (world) {}
 
@@ -42,6 +77,8 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 {
     std::map<std::pair<int, int>, Ptr::CellStore>::iterator result =
         mExteriors.find (std::make_pair (x, y));
+
+    bool fill = false;
 
     if (result==mExteriors.end())
     {
@@ -63,10 +100,15 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
         result = mExteriors.insert (std::make_pair (
             std::make_pair (x, y), Ptr::CellStore (cell))).first;
+
+        fill = true;
     }
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
         result->second.load (mStore, mReader);
+
+    if (fill)
+        fillContainers (result->second);
 
     return &result->second;
 }
@@ -75,15 +117,22 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 {
     std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (name);
 
+    bool fill = false;
+
     if (result==mInteriors.end())
     {
         const ESM::Cell *cell = mStore.cells.findInt (name);
 
         result = mInteriors.insert (std::make_pair (name, Ptr::CellStore (cell))).first;
+
+        fill = true;
     }
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
         result->second.load (mStore, mReader);
+
+    if (fill)
+        fillContainers (result->second);
 
     return &result->second;
 }

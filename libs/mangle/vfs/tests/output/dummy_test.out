@@ -1,0 +1,31 @@
+Listing all files:
+name: file1
+basename: file1
+isDir: 0
+size: 1
+time: 0
+name: dir/file2
+basename: file2
+isDir: 0
+size: 2
+time: 0
+
+Stat for single files:
+name: file1
+basename: file1
+isDir: 0
+size: 1
+time: 0
+
+name: dir/file2
+basename: file2
+isDir: 0
+size: 2
+time: 0
+
+name: dir
+basename: dir
+isDir: 1
+size: 0
+time: 0
+filesize: 11
