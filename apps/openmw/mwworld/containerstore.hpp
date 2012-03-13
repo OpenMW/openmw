@@ -1,6 +1,8 @@
 #ifndef GAME_MWWORLD_CONTAINERSTORE_H
 #define GAME_MWWORLD_CONTAINERSTORE_H
 
+#include <iterator>
+
 #include <components/esm_store/cell_store.hpp>
 
 #include "refdata.hpp"
@@ -84,6 +86,7 @@ namespace MWWorld
     ///
     /// \note The iterator will automatically skip over deleted objects.
     class ContainerStoreIterator
+        : public std::iterator<std::forward_iterator_tag, Ptr, std::ptrdiff_t, Ptr *, Ptr&>
     {
             int mType;
             int mMask;
