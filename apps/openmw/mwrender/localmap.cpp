@@ -4,14 +4,10 @@
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
 
-#include <boost/filesystem.hpp>
-
 using namespace MWRender;
 using namespace Ogre;
 
-#define CACHE_EXTENSION ".jpg"
-
-#define MAP_RESOLUTION 1024 // 1024*1024 pixels for a 8192*8192 area in world units
+#define MAP_RESOLUTION 1024 // 1024*1024 pixels for a SIZE*SIZE area in world units
 
 // warning: don't set this too high! dynamic textures are a bottleneck
 #define FOGOFWAR_RESOLUTION 32
@@ -19,6 +15,9 @@ using namespace Ogre;
 // how many frames to skip before rendering the fog of war.
 // example: at 60 fps, a value of 2 would mean to render it at 20 fps.
 #define FOGOFWAR_SKIP 2
+
+// size of a map segment (for exterior regions, this equals 1 cell)
+#define SIZE 8192.f
 
 LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend)
 {
@@ -32,16 +31,16 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend)
 
     // Debug overlay to view the maps
 
-    render(0, 0, 10000, 10000, 8192, 8192, "Cell_0_0");
+    render(0, 0, 10000, 10000, SIZE, SIZE, "Cell_0_0_");
 
     MaterialPtr mat = MaterialManager::getSingleton().create("testMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    mat->getTechnique(0)->getPass(0)->createTextureUnitState("Cell_0_0");
+    mat->getTechnique(0)->getPass(0)->createTextureUnitState("Cell_0_0_");
     mat->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     mat->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     mat->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
 
     mat = MaterialManager::getSingleton().create("testMaterial2", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    mat->getTechnique(0)->getPass(0)->createTextureUnitState("Cell_0_0");
+    mat->getTechnique(0)->getPass(0)->createTextureUnitState("Cell_0_0_");
     mat->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     mat->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     mat->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
@@ -92,26 +91,75 @@ void LocalMap::deleteBuffers()
     mBuffers.clear();
 }
 
+void LocalMap::saveTexture(const std::string& texname, const std::string& filename)
+{
+    TexturePtr tex = TextureManager::getSingleton().getByName(texname);
+    if (tex.isNull()) return;
+    HardwarePixelBufferSharedPtr readbuffer = tex->getBuffer();
+    readbuffer->lock(HardwareBuffer::HBL_NORMAL );
+    const PixelBox &readrefpb = readbuffer->getCurrentLock();    
+    uchar *readrefdata = static_cast<uchar*>(readrefpb.data);        
+
+    Image img;
+    img = img.loadDynamicImage (readrefdata, tex->getWidth(),
+        tex->getHeight(), tex->getFormat());    
+    img.save("./" + filename);
+
+    readbuffer->unlock();
+}
+
+std::string LocalMap::coordStr(const int x, const int y)
+{
+    return StringConverter::toString(x) + "_" + StringConverter::toString(y);
+}
+
+void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
+{
+    if (!mInterior)
+    {
+        /*saveTexture("Cell_"+coordStr(mCellX, mCellY)+"_fog",
+            "Cell_"+coordStr(mCellX, mCellY)+"_fog.png");*/
+    }
+    else
+    {
+        Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
+        Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().z);
+        /// \todo why is this workaround needed?
+        min *= 1.3;
+        max *= 1.3;
+        Vector2 length = max-min;
+        
+        // divide into segments
+        const int segsX = std::ceil( length.x / SIZE );
+        const int segsY = std::ceil( length.y / SIZE );
+
+        for (int x=0; x<segsX; ++x)
+        {
+            for (int y=0; y<segsY; ++y)
+            {
+                /*saveTexture(
+                    mInteriorName + "_" + coordStr(x,y) + "_fog",
+                    mInteriorName + "_" + coordStr(x,y) + "_fog.png");*/
+            }
+        }
+    }
+}
+
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
 {
-    deleteBuffers();
-
     mInterior = false;
 
-    std::string name = "Cell_" + StringConverter::toString(cell->cell->data.gridX)
-                        + "_" + StringConverter::toString(cell->cell->data.gridY);
+    std::string name = "Cell_"+coordStr(cell->cell->data.gridX, cell->cell->data.gridY);
 
-    const int x = cell->cell->data.gridX;
-    const int y = cell->cell->data.gridY;
+    int x = cell->cell->data.gridX;
+    int y = cell->cell->data.gridY;
 
-    render((x+0.5)*8192, (-y-0.5)*8192, -10000, 10000, 8192, 8192, name);
+    render((x+0.5)*SIZE, (-y-0.5)*SIZE, -10000, 10000, SIZE, SIZE, name);
 }
 
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
                             AxisAlignedBox bounds)
 {
-    deleteBuffers();
-
     mInterior = true;
     mBounds = bounds;
     
@@ -126,10 +174,9 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     Vector2 length = max-min;
     Vector2 center(bounds.getCenter().x, bounds.getCenter().z);
 
-    // divide into 8192*8192 segments
-    /// \todo interiors with more than 1 segment are untested
-    const int segsX = std::ceil( length.x / 8192 );
-    const int segsY = std::ceil( length.y / 8192 );
+    // divide into segments
+    const int segsX = std::ceil( length.x / SIZE );
+    const int segsY = std::ceil( length.y / SIZE );
 
     mInteriorName = cell->cell->name;
 
@@ -137,11 +184,11 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     {
         for (int y=0; y<segsY; ++y)
         {
-            Vector2 start = min + Vector2(8192*x,8192*y);
+            Vector2 start = min + Vector2(SIZE*x,SIZE*y);
             Vector2 newcenter = start + 4096;
 
-            render(newcenter.x, newcenter.y, z.y, z.x, 8192, 8192,
-                cell->cell->name + "_" + StringConverter::toString(x) + "_" + StringConverter::toString(y));
+            render(newcenter.x, newcenter.y, z.y, z.x, SIZE, SIZE,
+                cell->cell->name + "_" + coordStr(x,y));
         }
     }
 }
@@ -171,7 +218,7 @@ void LocalMap::render(const float x, const float y,
     if (tex.isNull())
     {
         // try loading from disk
-        //if (boost::filesystem::exists(texture+CACHE_EXTENSION))
+        //if (boost::filesystem::exists(texture+".jpg"))
         //{
             /// \todo
         //}
@@ -182,7 +229,7 @@ void LocalMap::render(const float x, const float y,
                             texture,
                             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                             TEX_TYPE_2D,
-                            xw*MAP_RESOLUTION/8192, yw*MAP_RESOLUTION/8192, 
+                            xw*MAP_RESOLUTION/SIZE, yw*MAP_RESOLUTION/SIZE, 
                             0,
                             PF_R8G8B8,
                             TU_RENDERTARGET);
@@ -202,7 +249,7 @@ void LocalMap::render(const float x, const float y,
                             texture + "_fog",
                             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                             TEX_TYPE_2D,
-                            xw*FOGOFWAR_RESOLUTION/8192, yw*FOGOFWAR_RESOLUTION/8192, 
+                            xw*FOGOFWAR_RESOLUTION/SIZE, yw*FOGOFWAR_RESOLUTION/SIZE, 
                             0,
                             PF_A8R8G8B8,
                             TU_DYNAMIC_WRITE_ONLY);
@@ -221,19 +268,10 @@ void LocalMap::render(const float x, const float y,
             tex2->getBuffer()->unlock();
 
             mBuffers[texture] = buffer;
-            
-            /// \todo
+
             // save to cache for next time
-            //rtt->writeContentsToFile("./" + texture + CACHE_EXTENSION);
+            //rtt->writeContentsToFile("./" + texture + ".jpg");
         }
-    }
-
-
-    
-    if (!MaterialManager::getSingleton().getByName("testMaterial").isNull())
-    {
-        MaterialPtr mat = MaterialManager::getSingleton().getByName("testMaterial");
-        mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(texture);
     }
     
 
@@ -254,17 +292,18 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
     Vector2 pos(position.x, position.z);
     if (!mInterior)
     {
-        x = (int) (pos.x / 8192.f);
-        y = (int) (pos.y / 8192.f);
+        x = std::ceil(pos.x / SIZE)-1;
+        y = std::ceil(-pos.y / SIZE)-1;
+        mCellX = x;
+        mCellY = y;
     }
     else
     {
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
         min *= 1.3;
         
-        /// \todo interiors with more than 1 segment are untested
-        x = (int) ((pos.x - min.x)/8192.f);
-        y = (int) ((pos.y - min.y)/8192.f);
+        x = std::ceil((pos.x - min.x)/SIZE)-1;
+        y = std::ceil((pos.y - min.y)/SIZE)-1;
     }
 
     // convert from world coordinates to texture UV coordinates
@@ -272,34 +311,30 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
     std::string texName;
     if (!mInterior)
     {
-        u = std::abs((pos.x - (8192*x))/8192.f);
-        v = std::abs((pos.y - (8192*y))/8192.f);
-        texName = "Cell_" + StringConverter::toString(x) + "_"
-                    + StringConverter::toString(y);
+        u = std::abs((pos.x - (SIZE*x))/SIZE);
+        v = 1-std::abs((pos.y + (SIZE*y))/SIZE);
+        texName = "Cell_"+coordStr(x,y);
     }
     else
     {
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
         min *= 1.3;
 
-        u = (pos.x - min.x - 8192*x)/8192.f;
-        v = (pos.y - min.y - 8192*y)/8192.f;
+        u = (pos.x - min.x - SIZE*x)/SIZE;
+        v = (pos.y - min.y - SIZE*y)/SIZE;
 
-        texName = mInteriorName + "_" + StringConverter::toString(x) + "_"
-                    + StringConverter::toString(y);
+        texName = mInteriorName + "_" + coordStr(x,y);
     }
-
-    //std::cout << "u " << u<< " v " << v << std::endl;
 
     // explore radius (squared)
     const float sqrExploreRadius = 0.01 * FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION;
 
     // get the appropriate fog of war texture
     TexturePtr tex = TextureManager::getSingleton().getByName(texName+"_fog");
-    
     if (!tex.isNull())
     {
         // get its buffer
+        if (mBuffers.find(texName) == mBuffers.end()) return;
         uint32* buffer = mBuffers[texName];
         uint32* pointer = buffer;
         for (int texV = 0; texV<FOGOFWAR_RESOLUTION; ++texV)
@@ -307,7 +342,7 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
             for (int texU = 0; texU<FOGOFWAR_RESOLUTION; ++texU)
             {
                 float sqrDist = Math::Sqr(texU - u*FOGOFWAR_RESOLUTION) + Math::Sqr(texV - v*FOGOFWAR_RESOLUTION);
-                uint32 clr = *(uint32*)pointer;
+                uint32 clr = *pointer;
                 uint8 alpha = (clr >> 24);
                 alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
                 *((uint32*)pointer) = (alpha << 24);
@@ -321,6 +356,11 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION*4);
         tex->getBuffer()->unlock();
 
+        if (!MaterialManager::getSingleton().getByName("testMaterial").isNull())
+        {
+            MaterialPtr mat = MaterialManager::getSingleton().getByName("testMaterial");
+            mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(texName);
+        }
         if (!MaterialManager::getSingleton().getByName("testMaterial2").isNull())
         {
             MaterialPtr mat = MaterialManager::getSingleton().getByName("testMaterial2");

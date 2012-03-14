@@ -335,4 +335,9 @@ void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
         mLocalMap->requestMap(cell, mObjects.getDimensions(cell));
 }
 
+void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
+{
+    mLocalMap->saveFogOfWar(cell);
+}
+
 } // namespace

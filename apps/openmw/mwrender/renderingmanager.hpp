@@ -76,6 +76,9 @@ class RenderingManager: private RenderingInterface {
     /// when rebatching is needed and update automatically at the end of each frame.
     void cellAdded (MWWorld::Ptr::CellStore *store);
 
+    void preCellChange (MWWorld::Ptr::CellStore* store);
+    ///< this event is fired immediately before changing cell
+
     void addObject (const MWWorld::Ptr& ptr);
     void removeObject (const MWWorld::Ptr& ptr);
 

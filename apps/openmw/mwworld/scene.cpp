@@ -135,6 +135,8 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
+        mRendering.preCellChange(mCurrentCell);
+
         // remove active
         mEnvironment.mMechanicsManager->removeActor (mWorld->getPlayer().getPlayer());
 

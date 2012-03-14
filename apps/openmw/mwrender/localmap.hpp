@@ -42,6 +42,14 @@ namespace MWRender
          */
         void setPlayerPosition (const Ogre::Vector3& position);
 
+        /**
+         * Save the fog of war for the current cell to disk.
+         * @remarks This should be called before loading a
+         * new cell, as well as when the game is quit.
+         * @param current cell
+         */
+        void saveFogOfWar(MWWorld::Ptr::CellStore* cell);
+
     private:
         OEngine::Render::OgreRenderer* mRendering;
 
@@ -52,6 +60,10 @@ namespace MWRender
                     const float xw, const float yw,
                     const std::string& texture);
 
+        void saveTexture(const std::string& texname, const std::string& filename);
+
+        std::string coordStr(const int x, const int y);
+
         // a buffer for the "fog of war" texture of the current cell.
         // interior cells could be divided into multiple textures,
         // so we store in a map.
@@ -60,6 +72,7 @@ namespace MWRender
         void deleteBuffers();
 
         bool mInterior;
+        int mCellX, mCellY;
         Ogre::AxisAlignedBox mBounds;
         std::string mInteriorName;
     };
