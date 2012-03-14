@@ -14,6 +14,7 @@ namespace MWRender
     {
     public:
         LocalMap(OEngine::Render::OgreRenderer*);
+        ~LocalMap();
 
         /**
          * Request the local map for an exterior cell.
@@ -51,12 +52,16 @@ namespace MWRender
                     const float xw, const float yw,
                     const std::string& texture);
 
-        bool mInterior;
-
         // a buffer for the "fog of war" texture of the current cell.
         // interior cells could be divided into multiple textures,
         // so we store in a map.
-        std::map <std::string, Ogre::uint8*> mBuffer;
+        std::map <std::string, Ogre::uint32*> mBuffers;
+
+        void deleteBuffers();
+
+        bool mInterior;
+        Ogre::AxisAlignedBox mBounds;
+        std::string mInteriorName;
     };
 
 }
