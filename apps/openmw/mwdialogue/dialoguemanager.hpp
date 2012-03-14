@@ -26,10 +26,12 @@ namespace MWDialogue
 
             bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const;
 
+            bool functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info);
+
             void parseText(std::string text);
 
             std::map<std::string,bool> knownTopics;// Those are the topics the player knows.
-            std::map<std::string,ESM::DialInfo> actorKnownTopics;
+            std::map<std::string,std::list<ESM::DialInfo>> actorKnownTopics;
 
             MWScript::CompilerContext mCompilerContext;
             std::ostream mErrorStream;
@@ -41,6 +43,8 @@ namespace MWDialogue
             MWWorld::Ptr mActor;
 
             void printError(std::string error);
+
+            int mChoice;
 
         public:
 

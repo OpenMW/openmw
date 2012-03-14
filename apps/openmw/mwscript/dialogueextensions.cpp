@@ -95,7 +95,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    std::cout << "CHOICECHOICEHOCQSCHQSHD";
+                    std::cout << "CHOICE" << arg0;
+                    arg0 = 4;
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                     MWDialogue::DialogueManager* dialogue = context.getEnvironment().mDialogueManager;
@@ -130,7 +131,7 @@ namespace MWScript
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
-            extensions.registerInstruction ("choice", "clcl", opcodeChoice);
+            extensions.registerInstruction ("choice", "/SlSl", opcodeChoice);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)

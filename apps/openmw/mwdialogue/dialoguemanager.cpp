@@ -56,12 +56,12 @@ namespace
     {
         switch (comp)
         {
-            case '0': return value1==value2;
-            case '1': return value1!=value2;
-            case '2': return value1>value2;
-            case '3': return value1>=value2;
-            case '4': return value1<value2;
-            case '5': return value1<=value2;
+        case '0': return value1==value2;
+        case '1': return value1!=value2;
+        case '2': return value1>value2;
+        case '3': return value1>=value2;
+        case '4': return value1<value2;
+        case '5': return value1<=value2;
         }
 
         throw std::runtime_error ("unknown compare type in dialogue info select");
@@ -107,26 +107,26 @@ namespace
     {
         switch (world.getGlobalVariableType (name))
         {
-            case 's':
+        case 's':
 
-                return selectCompare (comp, value, world.getGlobalVariable (name).mShort);
+            return selectCompare (comp, value, world.getGlobalVariable (name).mShort);
 
-            case 'l':
+        case 'l':
 
-                return selectCompare (comp, value, world.getGlobalVariable (name).mLong);
+            return selectCompare (comp, value, world.getGlobalVariable (name).mLong);
 
-            case 'f':
+        case 'f':
 
-                return selectCompare (comp, value, world.getGlobalVariable (name).mFloat);
+            return selectCompare (comp, value, world.getGlobalVariable (name).mFloat);
 
-            case ' ':
+        case ' ':
 
-                world.getGlobalVariable (name); // trigger exception
-                break;
+            world.getGlobalVariable (name); // trigger exception
+            break;
 
-            default:
+        default:
 
-                throw std::runtime_error ("unsupported gobal variable type");
+            throw std::runtime_error ("unsupported gobal variable type");
         }
 
         return false;
@@ -142,6 +142,38 @@ namespace MWDialogue
         return toLower(str).find(toLower(substr),pos);
     }
 
+    bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info)
+    {
+        for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
+            iter != info.selects.end(); ++iter)
+        {
+            ESM::DialInfo::SelectStruct select = *iter;
+            char type = select.selectRule[1];
+            if(type == '1')
+            {
+                char comp = select.selectRule[4];
+                std::string name = select.selectRule.substr (5);
+                std::string function = select.selectRule.substr(1,2);
+                std::cout << function;
+
+                int ifunction;
+                std::istringstream iss(function);
+                iss >> ifunction;
+
+                switch(ifunction)
+                {
+                case 4://choice
+                    if(!selectCompare(comp,mChoice,select.i)) return false;
+                    break;
+
+                default:
+                    break;
+
+                }
+            }
+        }
+        return true;
+    }
 
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor,
         const ESM::DialInfo::SelectStruct& select) const
@@ -152,168 +184,170 @@ namespace MWDialogue
         {
             char comp = select.selectRule[4];
             std::string name = select.selectRule.substr (5);
+            std::string function = select.selectRule.substr(1,2);
+            std::cout << function;
 
             // TODO types 4, 5, 6, 7, 8, 9, A, B, C
             //new TOTO: 5,6,9
             switch (type)
             {
-                case '1': // function
+            case '1': // function
 
-                    return false; // TODO implement functions
+                return false; // TODO implement functions
 
-                case '2': // global
+            case '2': // global
 
-                    if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
-                        select.type==ESM::VT_Long)
+                if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
+                    select.type==ESM::VT_Long)
+                {
+                    if (!checkGlobal (comp, toLower (name), select.i, *mEnvironment.mWorld))
+                        return false;
+                }
+                else if (select.type==ESM::VT_Float)
+                {
+                    if (!checkGlobal (comp, toLower (name), select.f, *mEnvironment.mWorld))
+                        return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
+
+                return true;
+
+            case '3': // local
+
+                if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
+                    select.type==ESM::VT_Long)
+                {
+                    if (!checkLocal (comp, toLower (name), select.i, actor,
+                        mEnvironment.mWorld->getStore()))
+                        return false;
+                }
+                else if (select.type==ESM::VT_Float)
+                {
+                    if (!checkLocal (comp, toLower (name), select.f, actor,
+                        mEnvironment.mWorld->getStore()))
+                        return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
+
+                return true;
+
+            case '4'://journal
+                if(select.type==ESM::VT_Int)
+                {
+                    //std::cout << "vtint: " << select.i << std::endl;
+                    bool isInJournal;
+                    if(mEnvironment.mJournal->begin()!=mEnvironment.mJournal->end())
                     {
-                        if (!checkGlobal (comp, toLower (name), select.i, *mEnvironment.mWorld))
-                            return false;
-                    }
-                    else if (select.type==ESM::VT_Float)
-                    {
-                        if (!checkGlobal (comp, toLower (name), select.f, *mEnvironment.mWorld))
-                            return false;
-                    }
-                    else
-                        throw std::runtime_error (
-                            "unsupported variable type in dialogue info select");
-
-                    return true;
-
-                case '3': // local
-
-                    if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
-                        select.type==ESM::VT_Long)
-                    {
-                        if (!checkLocal (comp, toLower (name), select.i, actor,
-                            mEnvironment.mWorld->getStore()))
-                            return false;
-                    }
-                    else if (select.type==ESM::VT_Float)
-                    {
-                        if (!checkLocal (comp, toLower (name), select.f, actor,
-                            mEnvironment.mWorld->getStore()))
-                            return false;
-                    }
-                    else
-                        throw std::runtime_error (
-                        "unsupported variable type in dialogue info select");
-
-                    return true;
-
-                case '4'://journal
-                    if(select.type==ESM::VT_Int)
-                    {
-                        //std::cout << "vtint: " << select.i << std::endl;
-                        bool isInJournal;
-                        if(mEnvironment.mJournal->begin()!=mEnvironment.mJournal->end())
+                        for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = mEnvironment.mJournal->begin();it!=mEnvironment.mJournal->end();it++)
                         {
-                            for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = mEnvironment.mJournal->begin();it!=mEnvironment.mJournal->end();it++)
-                            {
 
-                                if(it->mTopic == name) isInJournal = true;
-                            }
+                            if(it->mTopic == name) isInJournal = true;
                         }
-                        else
-                            isInJournal =  false;
-                        if(!selectCompare<int,int>(comp,int(isInJournal),select.i)) return false;
                     }
                     else
-                        throw std::runtime_error (
-                            "unsupported variable type in dialogue info select");
+                        isInJournal =  false;
+                    if(!selectCompare<int,int>(comp,int(isInJournal),select.i)) return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
 
-                    return true;
+                return true;
 
-                case '7':// not ID
-                    if(select.type==ESM::VT_String ||select.type==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
-                    {
-                        int isID = int(toLower(name)==toLower(MWWorld::Class::get (actor).getId (actor)));
-                        if (selectCompare<int,int>(comp,!isID,select.i)) return false;
-                    }
-                    else
-                        throw std::runtime_error (
-                            "unsupported variable type in dialogue info select");
+            case '7':// not ID
+                if(select.type==ESM::VT_String ||select.type==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
+                {
+                    int isID = int(toLower(name)==toLower(MWWorld::Class::get (actor).getId (actor)));
+                    if (selectCompare<int,int>(comp,!isID,select.i)) return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
 
-                    return true;
+                return true;
 
-                case '8':// not faction
-                    if(select.type==ESM::VT_Int)
-                    {
-                        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
-                        int isFaction = int(toLower(npc->base->faction) == toLower(name));
-                        if(selectCompare<int,int>(comp,!isFaction,select.i))
-                            return false;
-                    }
-                    else
-                        throw std::runtime_error (
-                            "unsupported variable type in dialogue info select");
+            case '8':// not faction
+                if(select.type==ESM::VT_Int)
+                {
+                    ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
+                    int isFaction = int(toLower(npc->base->faction) == toLower(name));
+                    if(selectCompare<int,int>(comp,!isFaction,select.i))
+                        return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
 
-                    return true;
+                return true;
 
-                case '9':// not class
-                    if(select.type==ESM::VT_Int)
-                    {
-                        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
-                        int isClass = int(toLower(npc->base->cls) == toLower(name));
-                        if(selectCompare<int,int>(comp,!isClass,select.i))
-                            return false;
-                    }
-                    else
-                        throw std::runtime_error (
-                            "unsupported variable type in dialogue info select");
+            case '9':// not class
+                if(select.type==ESM::VT_Int)
+                {
+                    ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
+                    int isClass = int(toLower(npc->base->cls) == toLower(name));
+                    if(selectCompare<int,int>(comp,!isClass,select.i))
+                        return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
 
-                    return true;
+                return true;
 
-                case 'A'://not Race
-                    if(select.type==ESM::VT_Int)
-                    {
-                        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
-                        int isRace = int(toLower(npc->base->race) == toLower(name));
-                        //std::cout << "isRace"<<isRace; mEnvironment.mWorld
-                        if(selectCompare<int,int>(comp,!isRace,select.i))
-                            return false;
-                    }
-                    else
-                        throw std::runtime_error (
-                            "unsupported variable type in dialogue info select");
+            case 'A'://not Race
+                if(select.type==ESM::VT_Int)
+                {
+                    ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
+                    int isRace = int(toLower(npc->base->race) == toLower(name));
+                    //std::cout << "isRace"<<isRace; mEnvironment.mWorld
+                    if(selectCompare<int,int>(comp,!isRace,select.i))
+                        return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
 
-                    return true;
+                return true;
 
-                case 'B'://not Cell
-                    if(select.type==ESM::VT_Int)
-                    {
-                        int isCell = int(toLower(actor.getCell()->cell->name) == toLower(name));
-                        if(selectCompare<int,int>(comp,!isCell,select.i))
-                            return false;
-                    }
-                    else
-                        throw std::runtime_error (
-                            "unsupported variable type in dialogue info select");
-                    return true;
+            case 'B'://not Cell
+                if(select.type==ESM::VT_Int)
+                {
+                    int isCell = int(toLower(actor.getCell()->cell->name) == toLower(name));
+                    if(selectCompare<int,int>(comp,!isCell,select.i))
+                        return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
+                return true;
 
-                case 'C'://not local
-                    if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
-                        select.type==ESM::VT_Long)
-                    {
-                        if (checkLocal (comp, toLower (name), select.i, actor,
-                            mEnvironment.mWorld->getStore()))
-                            return false;
-                    }
-                    else if (select.type==ESM::VT_Float)
-                    {
-                        if (checkLocal (comp, toLower (name), select.f, actor,
-                            mEnvironment.mWorld->getStore()))
-                            return false;
-                    }
-                    else
-                        throw std::runtime_error (
-                            "unsupported variable type in dialogue info select");
-                    return true;
+            case 'C'://not local
+                if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
+                    select.type==ESM::VT_Long)
+                {
+                    if (checkLocal (comp, toLower (name), select.i, actor,
+                        mEnvironment.mWorld->getStore()))
+                        return false;
+                }
+                else if (select.type==ESM::VT_Float)
+                {
+                    if (checkLocal (comp, toLower (name), select.f, actor,
+                        mEnvironment.mWorld->getStore()))
+                        return false;
+                }
+                else
+                    throw std::runtime_error (
+                    "unsupported variable type in dialogue info select");
+                return true;
 
 
-                default:
+            default:
 
-                    std::cout << "unchecked select: " << type << " " << comp << " " << name << std::endl;
+                std::cout << "unchecked select: " << type << " " << comp << " " << name << std::endl;
             }
         }
 
@@ -401,12 +435,12 @@ namespace MWDialogue
                 return false;
 
         /*std::cout
-            << "unchecked entries:" << std::endl
-            << "    player faction: " << info.pcFaction << std::endl
-            << "    disposition: " << info.data.disposition << std::endl
-            << "    NPC rank: " << static_cast<int> (info.data.rank) << std::endl
-            << "    gender: " << static_cast<int> (info.data.gender) << std::endl
-            << "    PC rank: " << static_cast<int> (info.data.PCrank) << std::endl;*/
+        << "unchecked entries:" << std::endl
+        << "    player faction: " << info.pcFaction << std::endl
+        << "    disposition: " << info.data.disposition << std::endl
+        << "    NPC rank: " << static_cast<int> (info.data.rank) << std::endl
+        << "    gender: " << static_cast<int> (info.data.gender) << std::endl
+        << "    PC rank: " << static_cast<int> (info.data.PCrank) << std::endl;*/
 
         return true;
     }
@@ -415,6 +449,7 @@ namespace MWDialogue
     mEnvironment (environment),mCompilerContext (MWScript::CompilerContext::Type_Dialgoue, environment),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
     {
+        mChoice = -1;
         mCompilerContext.setExtensions (&extensions);
     }
 
@@ -425,24 +460,27 @@ namespace MWDialogue
 
     void DialogueManager::parseText(std::string text)
     {
-        std::map<std::string,ESM::DialInfo>::iterator it;
+        std::map<std::string,std::list<ESM::DialInfo>>::iterator it;
         for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
         {
             MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
             size_t pos = find_str_ci(text,it->first,0);
             if(pos !=std::string::npos)
             {
-                if(pos==0)
+                if(!it->second.empty())
                 {
-                    //std::cout << "fouuuuuuuuuuund";
-                    knownTopics[it->first] = true;
-                    win->addKeyword(it->first,it->second.response);
-                }
-                else if(text.substr(pos -1,1) == " ")
-                {
-                    //std::cout << "fouuuuuuuuuuund";
-                    knownTopics[it->first] = true;
-                    win->addKeyword(it->first,it->second.response);
+                    if(pos==0)
+                    {
+                        //std::cout << "fouuuuuuuuuuund";
+                        knownTopics[it->first] = true;
+                        win->addKeyword(it->first,it->second.front().response);
+                    }
+                    else if(text.substr(pos -1,1) == " ")
+                    {
+                        //std::cout << "fouuuuuuuuuuund";
+                        knownTopics[it->first] = true;
+                        win->addKeyword(it->first,it->second.front().response);
+                    }
                 }
             }
 
@@ -472,14 +510,14 @@ namespace MWDialogue
                 {
                     if (isMatching (actor, *iter))
                     {
-                        actorKnownTopics[it->first] = *iter;
+                        actorKnownTopics[it->first].push_back(*iter);
                         if(knownTopics.find(toLower(it->first)) != knownTopics.end())
                         {
                             MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
                             win->addKeyword(it->first,iter->response);
                             //std::cout << it->first;
                             //std::cout << "match found!!";
-                            break;
+                            //break;
                         }
                     }
                 }
@@ -585,10 +623,21 @@ namespace MWDialogue
 
     void DialogueManager::keywordSelected(std::string keyword)
     {
-        std::string text = actorKnownTopics[keyword].response;
-        std::string script = actorKnownTopics[keyword].resultScript;
-        parseText(text);
-        executeScript(script);
+        if(!actorKnownTopics[keyword].empty())
+        {
+            for(std::list<ESM::DialInfo>::iterator it = actorKnownTopics[keyword].begin(); it != actorKnownTopics[keyword].end();it++)
+            {
+                ESM::DialInfo dial = *it;
+                if(functionFilter(mActor,dial))
+                {
+                    std::string text = actorKnownTopics[keyword].front().response;
+                    std::string script = actorKnownTopics[keyword].front().resultScript;
+                    parseText(text);
+                    executeScript(script);
+                    break;
+                }
+            }
+        }
     }
 
     void DialogueManager::goodbyeSelected()
@@ -598,7 +647,7 @@ namespace MWDialogue
 
     void DialogueManager::questionAnswered(std::string answere)
     {
-         std::cout << "and the ansere is..."<< answere;
+        std::cout << "and the ansere is..."<< answere;
     }
 
     void DialogueManager::printError(std::string error)
