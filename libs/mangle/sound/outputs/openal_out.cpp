@@ -264,6 +264,7 @@ OpenAL_Factory::OpenAL_Factory(bool doSetup)
 
       device = Device;
       context = Context;
+      alDistanceModel(AL_LINEAR_DISTANCE);
     }
 }
 
