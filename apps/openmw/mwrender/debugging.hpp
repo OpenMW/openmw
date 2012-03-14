@@ -37,20 +37,20 @@ namespace MWRender
         MWWorld::Environment& mEnvironment;
 
         // Path grid stuff
-        bool pathgridEnabled;
+        bool mPathgridEnabled;
 
         void togglePathgrid();
 
         typedef std::vector<MWWorld::Ptr::CellStore *> CellList;
-
         CellList mActiveCells;
 
         Ogre::SceneNode *mMwRoot;
+
         Ogre::SceneNode *mPathGridRoot;
-        Ogre::SceneNode *mInteriorPathgridNode;
 
         typedef std::map<std::pair<int,int>, Ogre::SceneNode *> ExteriorPathgridNodes;
         ExteriorPathgridNodes mExteriorPathgridNodes;
+        Ogre::SceneNode *mInteriorPathgridNode;
 
         void enableCellPathgrid(MWWorld::Ptr::CellStore *store);
         void disableCellPathgrid(MWWorld::Ptr::CellStore *store);
@@ -59,6 +59,14 @@ namespace MWRender
         void destroyCellPathgridNode(Ogre::SceneNode *node);
         void destroyAttachedObjects(Ogre::SceneNode *node);
 
+        // materials
+        bool mGridMatsCreated;
+        void createGridMaterials();
+        void destroyGridMaterials();
+
+        // path grid meshes
+        Ogre::MovableObject* createPathgridLine(const Ogre::Vector3& from, const Ogre::Vector3& to);
+        Ogre::MovableObject* createPathgridPoint();
     public:
         Debugging(Ogre::SceneNode* mwRoot, MWWorld::Environment &env, OEngine::Physic::PhysicEngine *engine);
         ~Debugging();
