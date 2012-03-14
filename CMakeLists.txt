@@ -431,6 +431,7 @@ if (WIN32)
 
         # Warnings that are thrown on standard libraries and not OpenMW
         4347 # Non-template function with same name and parameter count as template function
+        4365 # Variable signed/unsigned mismatch
         4510 4512 # Unable to generate copy constructor/assignment operator as it's not public in the base
         4706 # Assignment in conditional expression
         4986 # Undocumented warning that occurs in the crtdbg.h file
@@ -444,11 +445,10 @@ if (WIN32)
         4146 # Unary minus on unsigned type, result still unsigned
         4242 # Storing value in a variable of a smaller type, possible loss of data
         4244 # Storing value of one type in variable of another (size_t in int, for example)
-        4265 # Class has virtual functions but no virtual desctructor (-Wnon-virtual-dtor)
+        4265 # Class has virtual functions but no virtual destructor (-Wnon-virtual-dtor)
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
         4355 # Using 'this' in member initialization list
-        4365 # Variable signed/unsigned mismatch
         4701 # Potentially uninitialized local variable used
         4702 # Unreachable code
         )
