@@ -12,6 +12,7 @@ using namespace Ogre;
 #define CACHE_EXTENSION ".jpg"
 
 #define MAP_RESOLUTION 1024 // 1024*1024 pixels for a 8192*8192 area in world units
+#define FOGOFWAR_RESOLUTION 1024
 
 LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend)
 {
@@ -24,11 +25,14 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend)
     mCellCamera->setOrientation(Quaternion(sqrt0pt5, -sqrt0pt5, 0, 0));
 
     // Debug overlay to view the maps
-    /*
+    
     render(0, 0, 10000, 10000, 8192, 8192, "Cell_0_0");
 
     MaterialPtr mat = MaterialManager::getSingleton().create("testMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     mat->getTechnique(0)->getPass(0)->createTextureUnitState("Cell_0_0");
+    mat->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+    mat->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+    mat->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
     
     OverlayManager& ovm = OverlayManager::getSingleton();
 
@@ -44,23 +48,27 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend)
     overlay_panel->show();
     mOverlay->add2D(overlay_panel);
     mOverlay->show();
-    */
+    
 }
 
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
 {
+    mInterior = false;
+
     std::string name = "Cell_" + StringConverter::toString(cell->cell->data.gridX)
                         + "_" + StringConverter::toString(cell->cell->data.gridY);
 
     const int x = cell->cell->data.gridX;
     const int y = cell->cell->data.gridY;
-    
+
     render((x+0.5)*8192, (-y-0.5)*8192, -10000, 10000, 8192, 8192, name);
 }
 
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
                             AxisAlignedBox bounds)
 {
+    mInterior = true;
+    
     Vector2 z(bounds.getMaximum().y, bounds.getMinimum().y);
     Vector2 min(bounds.getMinimum().x, bounds.getMinimum().z);
     Vector2 max(bounds.getMaximum().x, bounds.getMaximum().z);
@@ -68,7 +76,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     /// \todo why is this workaround needed?
     min *= 1.3;
     max *= 1.3;
-    
+
     Vector2 length = max-min;
     Vector2 center(bounds.getCenter().x, bounds.getCenter().z);
 
@@ -102,7 +110,7 @@ void LocalMap::render(const float x, const float y,
 
     // make everything visible
     mRendering->getScene()->setAmbientLight(ColourValue(1,1,1));
-    
+
     mCellCamera->setPosition(Vector3(x, zhigh, y));
     mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
 
@@ -140,6 +148,16 @@ void LocalMap::render(const float x, const float y,
 
             rtt->update();
 
+            // create "fog of war" texture
+            TexturePtr tex2 = TextureManager::getSingleton().createManual(
+                            texture + "_fog",
+                            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                            TEX_TYPE_2D,
+                            xw*FOGOFWAR_RESOLUTION/8192, yw*FOGOFWAR_RESOLUTION/8192, 
+                            0,
+                            PF_A8R8G8B8,
+                            TU_DYNAMIC);
+            
             /// \todo
             // save to cache for next time
             //rtt->writeContentsToFile("./" + texture + CACHE_EXTENSION);
@@ -157,4 +175,72 @@ void LocalMap::render(const float x, const float y,
 
     // re-enable fog
     mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, fStart, fEnd);
+}
+
+void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
+{
+    // retrieve the x,y grid coordinates the player is in 
+    int x,y;
+    Vector2 pos(position.x, -position.z);
+    if (!mInterior)
+    {
+        x = std::ceil(pos.x / 8192.f);
+        y = std::ceil(pos.y / 8192.f);
+    }
+    else
+    {
+        /// \todo
+    }
+
+    // convert from world coordinates to texture UV coordinates
+    float u,v;
+    std::string texName;
+    if (!mInterior)
+    {
+        u = std::abs((pos.x - (8192*x))/8192.f);
+        v = std::abs((pos.y - (8192*y))/8192.f);
+        texName = "Cell_" + StringConverter::toString(x) + "_"
+                    + StringConverter::toString(y) + "_fog";
+    }
+    else
+    {
+        /// \todo
+    }
+
+    //std::cout << "u " << u<< " v " << v << std::endl;
+
+    // explore radius (squared)
+    const float sqrExploreRadius = 0.001 * FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION;
+
+    // get the appropriate fog of war texture
+    TexturePtr tex = TextureManager::getSingleton().getByName(texName);
+    HardwarePixelBufferSharedPtr buffer = tex->getBuffer();
+
+    /*void* data = buffer->lock(HardwareBuffer::HBL_NORMAL);
+
+    for (int texU = 0; texU<FOGOFWAR_RESOLUTION; ++texU)
+    {
+        for (int texV = 0; texV<FOGOFWAR_RESOLUTION; ++texV)
+        {
+            float sqrDist = Math::Sqr(texU - u*FOGOFWAR_RESOLUTION) + Math::Sqr(texV - v*FOGOFWAR_RESOLUTION);
+            uint32 clr = *(uint32*)data;
+            uint8 alpha = (clr >> 24);
+            uint8 r=0;
+            uint8 g=0;
+            uint8 b=0;
+            alpha = std::max( alpha, (uint8) (std::max(0.f, std::min(1.f, 1.f-(sqrDist/sqrExploreRadius)))*255) );
+            *((uint32*)data) = (r) + (g<<8) + (b<<16) + (alpha << 24);
+
+            // move to next texel
+            data = static_cast<unsigned char*> (data) + sizeof(uint32);
+        }
+    }
+
+    buffer->unlock();*/
+
+    if (!MaterialManager::getSingleton().getByName("testMaterial").isNull())
+    {
+        MaterialPtr mat = MaterialManager::getSingleton().getByName("testMaterial");
+        mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(tex->getName());
+    }
 }

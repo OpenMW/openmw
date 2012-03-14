@@ -140,6 +140,8 @@ void RenderingManager::update (float duration){
     mSkyManager->update(duration);
     
     mRendering.update(duration);
+
+    mLocalMap->setPlayerPosition( mRendering.getCamera()->getRealPosition() );
 }
 
 void RenderingManager::skyEnable ()

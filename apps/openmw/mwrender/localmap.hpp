@@ -17,7 +17,7 @@ namespace MWRender
 
         /**
          * Request the local map for an exterior cell.
-         * It will either be loaded from a disk cache,
+         * @remarks It will either be loaded from a disk cache,
          * or rendered if it is not already cached.
          * @param exterior cell
          */
@@ -25,13 +25,21 @@ namespace MWRender
 
         /**
          * Request the local map for an interior cell.
-         * It will either be loaded from a disk cache,
+         * @remarks It will either be loaded from a disk cache,
          * or rendered if it is not already cached.
          * @param interior cell
          * @param bounding box of the cell
          */
         void requestMap (MWWorld::Ptr::CellStore* cell,
                         Ogre::AxisAlignedBox bounds);
+
+        /**
+         * Set the position of the player.
+         * @remarks This is used to draw a "fog of war" effect
+         * to hide areas on the map the player has not discovered yet.
+         * @param position (OGRE coordinates)
+         */
+        void setPlayerPosition (const Ogre::Vector3& position);
 
     private:
         OEngine::Render::OgreRenderer* mRendering;
@@ -42,6 +50,13 @@ namespace MWRender
                     const float zlow, const float zhigh,
                     const float xw, const float yw,
                     const std::string& texture);
+
+        bool mInterior;
+
+        // a buffer for the "fog of war" texture of the current cell.
+        // interior cells could be divided into multiple textures,
+        // so we store in a map.
+        std::map <std::string, Ogre::uint8*> mBuffer;
     };
 
 }
