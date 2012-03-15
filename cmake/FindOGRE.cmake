@@ -258,6 +258,7 @@ if (OGRE_STATIC)
     endif ()
   endif ()
 
+  #Removed FWK because it normally is unnecessary and would break the build when not available
   #set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${OGRE_LIBRARY_FWK} ${ZZip_LIBRARIES} ${ZLIB_LIBRARIES} 
   #  ${FreeImage_LIBRARIES} ${FREETYPE_LIBRARIES} 
   #  ${X11_LIBRARIES} ${X11_Xt_LIBRARIES} ${XAW_LIBRARY} ${X11_Xrandr_LIB}
