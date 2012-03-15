@@ -136,7 +136,7 @@ namespace MWSound
         max = std::max(min, max);
       }
 
-      return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict);
+      return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict, true);
     }
 
     // Add a sound to the list and play it
@@ -376,7 +376,7 @@ namespace MWSound
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
     // The range values are not tested
-    std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict);
+    std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict, true);
     if(!filePath.empty())
       add(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
     else
