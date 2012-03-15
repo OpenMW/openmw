@@ -149,11 +149,11 @@ namespace MWClass
 
         float iWeight = environment.mWorld->getStore().gameSettings.find (typeGmst)->f;
 
-        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fLightMaxMod")->f<=
+        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fLightMaxMod")->f>=
             ref->base->data.weight)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fMedMaxMod")->f<=
+        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fMedMaxMod")->f>=
             ref->base->data.weight)
             return ESM::Skill::MediumArmor;
 
