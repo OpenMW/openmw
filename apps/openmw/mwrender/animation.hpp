@@ -66,7 +66,7 @@ class Animation{
      void stopScript();
     
     
-     ~Animation();
+     virtual ~Animation();
  
 };
 }

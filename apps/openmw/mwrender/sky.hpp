@@ -34,6 +34,8 @@ namespace MWRender
                         Ogre::SceneNode* rootNode
                     );
         BillboardObject();
+
+        virtual ~BillboardObject() {}
         
         void setColour(const Ogre::ColourValue& pColour);
         void setPosition(const Ogre::Vector3& pPosition);
@@ -69,6 +71,8 @@ namespace MWRender
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode
                     );
+        
+        virtual ~Moon() {}
                         
         enum Phase
         {
