@@ -16,7 +16,7 @@ void Pathgrid::load(ESMReader &esm)
         esm.getSubHeader();
         int size = esm.getSubSize();
         // Check that the sizes match up. Size = 16 * s2 (path points)
-        if (size != sizeof(Point) * data.s2)
+        if (size != static_cast<int> (sizeof(Point) * data.s2))
             esm.fail("Path point subrecord size mismatch");
         else
         {

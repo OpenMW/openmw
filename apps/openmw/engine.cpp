@@ -118,8 +118,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         // sound
         if (mUseSound)
         {
-            if (!mEnvironment.mSoundManager->isMusicPlaying())
-                mEnvironment.mSoundManager->startRandomTitle();
+            mEnvironment.mSoundManager->playPlaylist();
 
             mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
         }
@@ -316,7 +315,7 @@ void OMW::Engine::go()
     }
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
-        mCfgMgr.getLogPath().string() + std::string("/"),
+        mCfgMgr.getLogPath().string(),
         mCfgMgr.getPluginsConfigPath().string(), false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
@@ -341,7 +340,6 @@ void OMW::Engine::go()
     // Create sound system
     mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
                                                            mOgre->getCamera(),
-                                                           mEnvironment.mWorld->getStore(),
                                                            mDataDirs,
                                                            mUseSound, mFSStrict, mEnvironment);
 
@@ -390,7 +388,7 @@ void OMW::Engine::go()
     mOgre->getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
-    mEnvironment.mSoundManager->startRandomTitle();
+    mEnvironment.mSoundManager->playPlaylist(std::string("Explore"));
 
     // scripts
     if (mCompileAll)

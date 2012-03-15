@@ -356,6 +356,9 @@ if(WIN32)
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
+    SET(CPACK_NSIS_MUI_ICON "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.ico")
+    SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.ico")
+    # SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
 
     SET(VCREDIST32 "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
     if(EXISTS ${VCREDIST32})
@@ -447,7 +450,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
     set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
