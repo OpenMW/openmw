@@ -87,7 +87,7 @@ namespace MWSound
             void add(const std::string &file,
                 MWWorld::Ptr ptr, const std::string &id,
                 float volume, float pitch, float min, float max,
-                bool loop);
+                bool loop, bool untracked=false);
             void clearAll(PtrMap::iterator& it);
             void remove(MWWorld::Ptr ptr, const std::string &id = "");
             bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
@@ -136,7 +136,7 @@ namespace MWSound
             ///< Play a sound, independently of 3D-position
 
             void playSound3D (MWWorld::Ptr reference, const std::string& soundId,
-                float volume, float pitch, bool loop);
+                float volume, float pitch, bool loop, bool untracked=false);
             ///< Play a sound from an object
 
             void stopSound3D (MWWorld::Ptr reference, const std::string& soundId = "");

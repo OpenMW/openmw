@@ -42,13 +42,18 @@ bool isFile(const char *name)
     }
 
     // Locates path in path container
-    boost::filesystem::path FileListLocator (const Files::PathContainer& list, const boost::filesystem::path& toFind, bool strict)
+    boost::filesystem::path FileListLocator (const Files::PathContainer& list, const boost::filesystem::path& toFind,
+                                             bool strict, bool ignoreExtensions)
     {
         boost::filesystem::path result("");
         if (list.empty())
             return result;
 
-        std::string toFindStr = toFind.string();
+        std::string toFindStr;
+        if (ignoreExtensions)
+            toFindStr = boost::filesystem::basename(toFind);
+        else
+            toFindStr = toFind.string();
 
         std::string fullPath;
 
@@ -94,9 +99,9 @@ bool isFile(const char *name)
     }
 
     // Overloaded form of the locator that takes a string and returns a string
-    std::string FileListLocator (const Files::PathContainer& list,const std::string& toFind, bool strict)
+    std::string FileListLocator (const Files::PathContainer& list,const std::string& toFind, bool strict, bool ignoreExtensions)
     {
-        return FileListLocator(list, boost::filesystem::path(toFind), strict).string();
+        return FileListLocator(list, boost::filesystem::path(toFind), strict, ignoreExtensions).string();
     }
 
 }

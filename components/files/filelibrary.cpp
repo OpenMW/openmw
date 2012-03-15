@@ -94,7 +94,7 @@ namespace Files
         boost::filesystem::path result("");
         if (sectionName == "")
         {
-            return FileListLocator(mPriorityList, boost::filesystem::path(item), strict);
+            return FileListLocator(mPriorityList, boost::filesystem::path(item), strict, false);
         }
         else
         {
@@ -103,7 +103,7 @@ namespace Files
                 std::cout << "Warning: There is no section named " << sectionName << "\n";
                 return result;
             }
-            result = FileListLocator(mMap[sectionName], boost::filesystem::path(item), strict);
+            result = FileListLocator(mMap[sectionName], boost::filesystem::path(item), strict, false);
         }
         return result;
     }

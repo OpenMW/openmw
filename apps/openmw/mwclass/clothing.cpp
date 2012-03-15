@@ -7,9 +7,12 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/environment.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/objects.hpp"
+
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -54,6 +57,8 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Clothing::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
+         environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
     }
@@ -123,5 +128,29 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Clothing);
 
         registerClass (typeid (ESM::Clothing).name(), instance);
+    }
+
+    std::string Clothing::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+         ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+            ptr.get<ESM::Clothing>();
+
+        if (ref->base->data.type == 8)
+        {
+            return std::string("Item Ring Up");
+        }
+        return std::string("Item Clothes Up");
+    }
+
+    std::string Clothing::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+         ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+            ptr.get<ESM::Clothing>();
+
+        if (ref->base->data.type == 8)
+        {
+            return std::string("Item Ring Down");
+        }
+        return std::string("Item Clothes Down");
     }
 }
