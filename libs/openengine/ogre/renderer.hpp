@@ -7,6 +7,26 @@
 
 #include <string>
 
+// Static plugin headers
+#ifdef ENABLE_PLUGIN_CgProgramManager
+# include "OgreCgPlugin.h"
+#endif
+#ifdef ENABLE_PLUGIN_OctreeSceneManager
+# include "OgreOctreePlugin.h"
+#endif
+#ifdef ENABLE_PLUGIN_ParticleFX
+# include "OgreParticleFXPlugin.h"
+#endif
+#ifdef ENABLE_PLUGIN_BSPSceneManager
+# include "OgreBspSceneManagerPlugin.h"
+#endif
+#ifdef ENABLE_PLUGIN_GL
+# include "OgreGLPlugin.h"
+#endif
+#ifdef ENABLE_PLUGIN_Direct3D9
+# include "OgreD3D9Plugin.h"
+#endif
+
 namespace Ogre
 {
     class Root;
@@ -27,6 +47,24 @@ namespace Render
     Ogre::SceneManager *mScene;
     Ogre::Camera *mCamera;
     Ogre::Viewport *mView;
+	#ifdef ENABLE_PLUGIN_CgProgramManager
+ 	Ogre::CgPlugin* mCgPlugin;
+ 	#endif
+ 	#ifdef ENABLE_PLUGIN_OctreeSceneManager
+ 	Ogre::OctreePlugin* mOctreePlugin;
+ 	#endif
+ 	#ifdef ENABLE_PLUGIN_ParticleFX
+ 	Ogre::ParticleFXPlugin* mParticleFXPlugin;
+ 	#endif
+ 	#ifdef ENABLE_PLUGIN_BSPSceneManager
+ 	Ogre::BspSceneManagerPlugin* mBSPPlugin;
+ 	#endif
+ 	#ifdef ENABLE_PLUGIN_GL
+ 	Ogre::GLPlugin* mGLPlugin;
+ 	#endif
+	#ifdef ENABLE_PLUGIN_Direct3D9
+ 	Ogre::D3D9Plugin* mD3D9Plugin;
+ 	#endif
     Fader* mFader;
     bool logging;
 
@@ -68,6 +106,8 @@ namespace Render
 
     /// Start the main rendering loop
     void start();
+
+    bool loadPlugins();
     
     void update(float dt);
 

@@ -186,7 +186,11 @@ void GraphicsPage::setupOgre()
 
     try
     {
+    #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9)
+        mOgre = new Ogre::Root("", file.fileName().toStdString(), "./launcherOgre.log");
+    #else
         mOgre = new Ogre::Root(pluginCfg.toStdString(), file.fileName().toStdString(), "./launcherOgre.log");
+    #endif
     }
     catch(Ogre::Exception &ex)
     {
@@ -206,6 +210,15 @@ void GraphicsPage::setupOgre()
         qApp->exit(1);
         return;
     }
+
+	#ifdef ENABLE_PLUGIN_GL
+	mGLPlugin = new Ogre::GLPlugin();
+	mOgre->installPlugin(mGLPlugin);
+	#endif
+	#ifdef ENABLE_PLUGIN_Direct3D9
+	mD3D9Plugin = new Ogre::D3D9Plugin();
+	mOgre->installPlugin(mD3D9Plugin);
+	#endif
 
     // Get the available renderers and put them in the combobox
     const Ogre::RenderSystemList &renderers = mOgre->getAvailableRenderers();
