@@ -108,7 +108,7 @@ namespace MWClass
         return std::make_pair (slots, stack);
     }
 
-    int Weapon::getEuqipmentSkill (const MWWorld::Ptr& ptr,
+    int Weapon::getEquipmentSkill (const MWWorld::Ptr& ptr,
         const MWWorld::Environment& environment) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =

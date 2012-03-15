@@ -121,7 +121,7 @@ namespace MWClass
         return std::make_pair (slots, false);
     }
 
-    int Armor::getEuqipmentSkill (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    int Armor::getEquipmentSkill (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
         ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
             ptr.get<ESM::Armor>();
@@ -169,7 +169,7 @@ namespace MWClass
 
     std::string Armor::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
-        int es = getEuqipmentSkill(ptr, environment);
+        int es = getEquipmentSkill(ptr, environment);
         if (es == ESM::Skill::LightArmor)
             return std::string("Item Armor Light Up");
         else if (es == ESM::Skill::MediumArmor)
@@ -180,7 +180,7 @@ namespace MWClass
 
     std::string Armor::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
-        int es = getEuqipmentSkill(ptr, environment);
+        int es = getEquipmentSkill(ptr, environment);
         if (es == ESM::Skill::LightArmor)
             return std::string("Item Armor Light Down");
         else if (es == ESM::Skill::MediumArmor)

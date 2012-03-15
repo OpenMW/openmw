@@ -111,7 +111,7 @@ namespace MWClass
         return std::make_pair (slots, false);
     }
 
-    int Clothing::getEuqipmentSkill (const MWWorld::Ptr& ptr,
+    int Clothing::getEquipmentSkill (const MWWorld::Ptr& ptr,
         const MWWorld::Environment& environment) const
     {
         ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =

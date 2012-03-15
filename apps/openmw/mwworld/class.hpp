@@ -149,7 +149,7 @@ namespace MWWorld
             ///
             /// Default implementation: return (empty vector, false).
 
-            virtual int getEuqipmentSkill (const Ptr& ptr, const Environment& environment)
+            virtual int getEquipmentSkill (const Ptr& ptr, const Environment& environment)
                 const;
             /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
             /// no such skill.

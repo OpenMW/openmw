@@ -132,7 +132,7 @@ namespace MWWorld
         return std::make_pair (std::vector<int>(), false);
     }
 
-    int Class::getEuqipmentSkill (const Ptr& ptr, const Environment& environment) const
+    int Class::getEquipmentSkill (const Ptr& ptr, const Environment& environment) const
     {
         return -1;
     }
