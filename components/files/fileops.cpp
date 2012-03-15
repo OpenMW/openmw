@@ -13,6 +13,14 @@ bool isFile(const char *name)
     return boost::filesystem::exists(boost::filesystem::path(name));
 }
 
+    // Returns true if the last part of the superset matches the subset
+    bool endingMatches(const std::string& superset, const std::string& subset)
+    {
+        if (subset.length() > superset.length())
+            return false;
+        return superset.substr(superset.length() - subset.length()) == subset;
+    }
+
     // Makes a list of files from a directory
     void FileLister( boost::filesystem::path currentPath, Files::PathContainer& list, bool recursive)
     {
@@ -85,11 +93,14 @@ bool isFile(const char *name)
         for (Files::PathContainer::const_iterator it = list.begin(); it != list.end(); ++it)
         {
             fullPath = it->string();
+            if (ignoreExtensions)
+                fullPath.erase(fullPath.length() - it->extension().string().length());
+
             if (!strict)
             {
                 boost::algorithm::to_lower(fullPath);
             }
-            if(fullPath.find(toFindStr) != std::string::npos)
+            if(endingMatches(fullPath, toFindStr))
             {
                 result = *it;
                 break;

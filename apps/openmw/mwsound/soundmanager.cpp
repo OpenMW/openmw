@@ -136,7 +136,7 @@ namespace MWSound
         max = std::max(min, max);
       }
 
-      return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict, true);
+      return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict, false);
     }
 
     // Add a sound to the list and play it
