@@ -272,8 +272,7 @@ endif (APPLE)
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    #add_definitions (-Wall -Werror)
-    add_definitions (-Wall)
+    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-reorder)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 if(DPKG_PROGRAM)
@@ -435,17 +434,13 @@ if (WIN32)
         # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type
         4100 # Unreferenced formal parameter (-Wunused-parameter)
-        4101 # Unreferenced local variable
         4127 # Conditional expression is constant
-        4146 # Unary minus on unsigned type, result still unsigned
         4242 # Storing value in a variable of a smaller type, possible loss of data
         4244 # Storing value of one type in variable of another (size_t in int, for example)
-        4265 # Class has virtual functions but no virtual destructor (-Wnon-virtual-dtor)
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
         4355 # Using 'this' in member initialization list
         4701 # Potentially uninitialized local variable used
-        4702 # Unreachable code
         )
 
     foreach(d ${WARNINGS_DISABLE})
