@@ -147,7 +147,7 @@ namespace MWClass
         if (typeGmst.empty())
             return -1;
 
-        float iWeight = environment.mWorld->getStore().gameSettings.find (typeGmst)->f;
+        float iWeight = environment.mWorld->getStore().gameSettings.find (typeGmst)->i;
 
         if (iWeight * environment.mWorld->getStore().gameSettings.find ("fLightMaxMod")->f>=
             ref->base->data.weight)
