@@ -427,13 +427,14 @@ if (WIN32)
         # Warnings that aren't enabled normally and don't need to be enabled
         # They're unneeded and sometimes completely retarded warnings that /Wall enables
         # Not going to bother commenting them as they tend to warn on every standard library files
-        4061 4263 4264 4266 4350 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4820 4826 4917 4946
+        4061 4263 4264 4266 4350 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
 
         # Warnings that are thrown on standard libraries and not OpenMW
         4347 # Non-template function with same name and parameter count as template function
         4365 # Variable signed/unsigned mismatch
         4510 4512 # Unable to generate copy constructor/assignment operator as it's not public in the base
         4706 # Assignment in conditional expression
+        4738 # Storing 32-bit float result in memory, possible loss of performance
         4986 # Undocumented warning that occurs in the crtdbg.h file
         4996 # Function was declared deprecated
 
