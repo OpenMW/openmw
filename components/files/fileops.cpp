@@ -94,7 +94,8 @@ bool isFile(const char *name)
         {
             fullPath = it->string();
             if (ignoreExtensions)
-                fullPath.erase(fullPath.length() - it->extension().string().length());
+                fullPath.erase(fullPath.length() -
+                    boost::filesystem::path (it->extension()).string().length());
 
             if (!strict)
             {
