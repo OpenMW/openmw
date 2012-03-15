@@ -59,7 +59,8 @@ void BillboardObject::setPosition(const Vector3& pPosition)
 
 Vector3 BillboardObject::getPosition() const
 {
-    return mNode->getPosition();
+    Vector3 p = mNode->_getDerivedPosition() - mNode->getParentSceneNode()->_getDerivedPosition();
+    return Vector3(p.x, -p.z, p.y);
 }
 
 void BillboardObject::setColour(const ColourValue& pColour)
@@ -582,6 +583,9 @@ void SkyManager::update(float duration)
     mSun->setVisible(mSunEnabled);
     mMasser->setVisible(mMasserEnabled);
     mSecunda->setVisible(mSecundaEnabled);
+
+    // rotate the whole sky by 360 degrees every 4 days
+    mRootNode->roll(Degree(mHourDiff*360/96.f));
 }
 
 void SkyManager::enable()
@@ -759,6 +763,9 @@ void SkyManager::setSecundaFade(const float fade)
 
 void SkyManager::setHour(double hour)
 {
+    mHourDiff = mHour - hour;
+    if (mHourDiff > 0) mHourDiff -= 24;
+
     mHour = hour;
 }
 

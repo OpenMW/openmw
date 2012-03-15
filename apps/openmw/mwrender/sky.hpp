@@ -166,7 +166,9 @@ namespace MWRender
         float mHour;
         int mDay;
         int mMonth;
-    
+
+        float mHourDiff;
+
         BillboardObject* mSun;
         BillboardObject* mSunGlare;
         Moon* mMasser;
