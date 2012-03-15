@@ -162,14 +162,20 @@ Moon::Moon( const String& textureName,
     "   in float2 uv : TEXCOORD0, \n"
     "	out float4 oColor    : COLOR, \n"
     "   uniform sampler2D texture : TEXUNIT0, \n"
+    "   uniform float4 skyColour, \n"
     "   uniform float4 diffuse, \n"
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
     "   float4 tex = tex2D(texture, uv); \n"
-    "   oColor = float4(emissive.xyz,1) * tex2D(texture, uv) * float4(1,1,1,diffuse.a); \n"
-    "   float bump = pow((1-diffuse.a),4); \n"
-    "   oColor.rgb += float3(bump, bump, bump)*0.5; \n"
+    "   oColor = float4(emissive.xyz,1) * tex; \n"
+    // use a circle for the alpha (compute UV distance to center)
+    // looks a bit bad because its not filtered on the edges,
+    // but it's cheaper than a seperate alpha texture.
+    "   float sqrUVdist = pow(uv.x-0.5,2) + pow(uv.y-0.5, 2); \n"
+    "   oColor.a = diffuse.a * (sqrUVdist >= 0.24 ? 0 : 1); \n"
+    "   oColor.rgb += (1-tex.a) * oColor.a * skyColour.rgb; \n"//fill dark side of moon with skycolour
+    "   oColor.rgb += (1-diffuse.a) * skyColour.rgb; \n"//fade bump
     "}";
     fshader->setSource(outStream2.str());
     fshader->load();
@@ -187,15 +193,19 @@ void Moon::setType(const Moon::Type& type)
     mType = type;
 }
 
+void Moon::setSkyColour(const Ogre::ColourValue& colour)
+{
+    mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("skyColour", colour);
+}
 
-/// \todo the moon phase rendering is not correct - the dark part of the moon does not occlude the stars
 void Moon::setPhase(const Moon::Phase& phase)
 {
+    // Colour texture
     Ogre::String textureName = "textures\\tx_";
-
+    
     if (mType == Moon::Type_Secunda) textureName += "secunda_";
     else textureName += "masser_";
-
+    
     if      (phase == Moon::Phase_New)              textureName += "new";
     else if (phase == Moon::Phase_WaxingCrescent)   textureName += "one_wax";
     else if (phase == Moon::Phase_WaxingHalf)       textureName += "half_wax";
@@ -204,9 +214,9 @@ void Moon::setPhase(const Moon::Phase& phase)
     else if (phase == Moon::Phase_WaningHalf)       textureName += "half_wan";
     else if (phase == Moon::Phase_WaningGibbous)    textureName += "three_wan";
     else if (phase == Moon::Phase_Full)             textureName += "full";
-
+    
     textureName += ".dds";
-
+    
     mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(textureName);
 
     mPhase = phase;
@@ -650,6 +660,8 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     if (mSkyColour != weather.mSkyColor)
     {
         mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSkyColor);
+        mMasser->setSkyColour(weather.mSkyColor);
+        mSecunda->setSkyColour(weather.mSkyColor);
         mSkyColour = weather.mSkyColor;
     }
 

@@ -94,6 +94,7 @@ namespace MWRender
         
         void setPhase(const Phase& phase);
         void setType(const Type& type);
+        void setSkyColour(const Ogre::ColourValue& colour);
         
         Phase getPhase() const;
         unsigned int getPhaseInt() const;
