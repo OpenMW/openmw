@@ -177,6 +177,8 @@ void NIFFile::parse()
     records[i]->post(this);
 }
 
+/// \todo move to the write cpp file
+
 void NiSkinInstance::post(NIFFile *nif)
 {
   int bnum = bones.length();

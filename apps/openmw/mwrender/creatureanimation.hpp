@@ -16,7 +16,7 @@ namespace MWRender{
 class CreatureAnimation: public Animation{
    
     public:
-    ~CreatureAnimation();
+    virtual ~CreatureAnimation();
     CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);
 	virtual void runAnimation(float timepassed);
 	

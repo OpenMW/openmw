@@ -25,8 +25,7 @@ There's an OpenMW package available in the AUR Repository:
 http://aur.archlinux.org/packages.php?ID=21419
 
 OS X:
-TODO add description for OS X
-
+Open DMG file, copy OpenMW folder anywhere, for example in /Applications
 
 BUILD FROM SOURCE
 

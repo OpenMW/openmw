@@ -52,9 +52,9 @@ namespace Sound {
 
       Ogre::Vector3 nPos, nDir, nUp;
 
-      nPos = camera->getPosition();
-      nDir = camera->getDirection();
-      nUp  = camera->getUp();
+      nPos = camera->getRealPosition();
+      nDir = camera->getRealDirection();
+      nUp  = camera->getRealUp();
 
       // Don't bother the sound system needlessly
       if(nDir != dir || nPos != pos || nUp != up)

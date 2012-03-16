@@ -255,14 +255,8 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 
     # prepare plugins
-    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
-        set(OPENMW_RELEASE_BUILD 1)
-    endif()
-    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
-        set(OPENMW_RELEASE_BUILD 1)
-    endif()
-
-    if (${OPENMW_RELEASE_BUILD})
+    if (${CMAKE_BUILD_TYPE} MATCHES "Release" OR
+        ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
     else()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
@@ -278,8 +272,7 @@ endif (APPLE)
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    #add_definitions (-Wall -Werror)
-    add_definitions (-Wall)
+    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-reorder)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 if(DPKG_PROGRAM)
@@ -418,6 +411,45 @@ if (WIN32)
     set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
     set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
     set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+
+    # Play a bit with the warning levels
+
+    set(WARNINGS "/Wall") # Since windows can only disable specific warnings, not enable them
+
+    set(WARNINGS_DISABLE
+        # Warnings that aren't enabled normally and don't need to be enabled
+        # They're unneeded and sometimes completely retarded warnings that /Wall enables
+        # Not going to bother commenting them as they tend to warn on every standard library files
+        4061 4263 4264 4266 4350 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
+
+        # Warnings that are thrown on standard libraries and not OpenMW
+        4347 # Non-template function with same name and parameter count as template function
+        4365 # Variable signed/unsigned mismatch
+        4510 4512 # Unable to generate copy constructor/assignment operator as it's not public in the base
+        4706 # Assignment in conditional expression
+        4738 # Storing 32-bit float result in memory, possible loss of performance
+        4986 # Undocumented warning that occurs in the crtdbg.h file
+        4996 # Function was declared deprecated
+
+        # OpenMW specific warnings
+        4099 # Type mismatch, declared class or struct is defined with other type
+        4100 # Unreferenced formal parameter (-Wunused-parameter)
+        4127 # Conditional expression is constant
+        4242 # Storing value in a variable of a smaller type, possible loss of data
+        4244 # Storing value of one type in variable of another (size_t in int, for example)
+        4305 # Truncating value (double to float, for example)
+        4309 # Variable overflow, trying to store 128 in a signed char for example
+        4355 # Using 'this' in member initialization list
+        4701 # Potentially uninitialized local variable used
+        )
+
+    foreach(d ${WARNINGS_DISABLE})
+        set(WARNINGS "${WARNINGS} /wd${d}")
+    endforeach(d)
+
+    set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
   endif(MSVC)
 
   # Same for MinGW
