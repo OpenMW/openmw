@@ -448,7 +448,9 @@ if (WIN32)
     endforeach(d)
 
     set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
-    set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    if (BUILD_LAUNCHER)
+		set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
+	endif (BUILD_LAUNCHER)
     set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
   endif(MSVC)
 
