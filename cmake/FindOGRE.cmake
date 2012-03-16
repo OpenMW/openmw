@@ -144,7 +144,7 @@ clear_if_changed(OGRE_PREFIX_WATCH ${OGRE_RESET_VARS})
 # try to locate Ogre via pkg-config
 use_pkgconfig(OGRE_PKGC "OGRE${OGRE_LIB_SUFFIX}")
 
-if(NOT OGRE_BUILD_PLATFORM_IPHONE)
+if(NOT OGRE_BUILD_PLATFORM_IPHONE AND APPLE)
   # try to find framework on OSX
   findpkg_framework(OGRE)
 else()
@@ -258,12 +258,7 @@ if (OGRE_STATIC)
     endif ()
   endif ()
 
-  #Removed FWK because it normally is unnecessary and would break the build when not available
-  #set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${OGRE_LIBRARY_FWK} ${ZZip_LIBRARIES} ${ZLIB_LIBRARIES} 
-  #  ${FreeImage_LIBRARIES} ${FREETYPE_LIBRARIES} 
-  #  ${X11_LIBRARIES} ${X11_Xt_LIBRARIES} ${XAW_LIBRARY} ${X11_Xrandr_LIB}
-  #  ${Cocoa_LIBRARIES} ${Carbon_LIBRARIES})
-  set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${ZZip_LIBRARIES} ${ZLIB_LIBRARIES} 
+  set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${OGRE_LIBRARY_FWK} ${ZZip_LIBRARIES} ${ZLIB_LIBRARIES} 
     ${FreeImage_LIBRARIES} ${FREETYPE_LIBRARIES} 
     ${X11_LIBRARIES} ${X11_Xt_LIBRARIES} ${XAW_LIBRARY} ${X11_Xrandr_LIB}
     ${Cocoa_LIBRARIES} ${Carbon_LIBRARIES})
