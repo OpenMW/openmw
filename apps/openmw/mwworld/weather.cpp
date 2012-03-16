@@ -377,7 +377,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
 
     // sunrise
-    else if (mHour >= 5.5f && mHour <= 8)
+    else if (mHour >= 5.5f && mHour <= 9)
     {
         if (mHour <= 6)
         {
@@ -393,7 +393,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
         else //if (mHour >= 6)
         {
             // fade out
-            float advance = mHour-9;
+            float advance = mHour-6;
             float factor = advance / 3.f;
             result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor);
             result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor);
@@ -403,7 +403,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
 
     // day
-    else if (mHour >= 8 && mHour <= 17)
+    else if (mHour >= 9 && mHour <= 17)
     {
         result.mFogColor = current.mFogDayColor;
         result.mAmbientColor = current.mAmbientDayColor;
