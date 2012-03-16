@@ -89,12 +89,12 @@ namespace Files
     }
 
     // Searches the library for an item and returns a boost path to it
-    boost::filesystem::path FileLibrary::locate(std::string item, bool strict, std::string sectionName)
+    boost::filesystem::path FileLibrary::locate(std::string item, bool strict, bool ignoreExtensions, std::string sectionName)
     {
         boost::filesystem::path result("");
         if (sectionName == "")
         {
-            return FileListLocator(mPriorityList, boost::filesystem::path(item), strict, false);
+            return FileListLocator(mPriorityList, boost::filesystem::path(item), strict, ignoreExtensions);
         }
         else
         {
@@ -103,7 +103,7 @@ namespace Files
                 std::cout << "Warning: There is no section named " << sectionName << "\n";
                 return result;
             }
-            result = FileListLocator(mMap[sectionName], boost::filesystem::path(item), strict, false);
+            result = FileListLocator(mMap[sectionName], boost::filesystem::path(item), strict, ignoreExtensions);
         }
         return result;
     }

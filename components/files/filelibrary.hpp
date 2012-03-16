@@ -39,7 +39,7 @@ namespace Files
             /// Optionally you can provide a specific section
             /// The result is the first that comes up according to alphabetical
             /// section naming
-            boost::filesystem::path locate(std::string item, bool strict, std::string sectionName="");
+            boost::filesystem::path locate(std::string item, bool strict, bool ignoreExtensions, std::string sectionName="");
 
             /// Prints all the available sections, used for debugging
             void printSections();

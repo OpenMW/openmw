@@ -293,7 +293,7 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        std::string filePath = mMusicLibrary.locate(filename, mFSStrict).string();
+        std::string filePath = mMusicLibrary.locate(filename, mFSStrict, true).string();
         if(!filePath.empty())
         {
             streamMusicFull(filePath);
