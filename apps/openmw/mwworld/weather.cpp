@@ -496,7 +496,10 @@ WeatherResult WeatherManager::transition(float factor)
 void WeatherManager::update(float duration)
 {
     mWeatherUpdateTime -= duration;
-    if (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior())
+
+    bool exterior = (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior());
+    
+    if (exterior)
     {
         std::string regionstr = mEnvironment->mWorld->getPlayer().getPlayer().getCell()->cell->region;
         boost::algorithm::to_lower(regionstr);
@@ -671,7 +674,7 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->secundaDisable();
         }
         
-        if (mCurrentWeather == "thunderstorm" && mNextWeather == "")
+        if (mCurrentWeather == "thunderstorm" && mNextWeather == "" && exterior)
         {
             if (mThunderFlash > 0)
             {
@@ -729,6 +732,42 @@ void WeatherManager::update(float duration)
         mRendering->sunDisable();
         mRendering->skyDisable();
         mRendering->getSkyManager()->setThunder(0.f);
+    }
+
+    // play sounds
+    std::string ambientSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID : "");
+    if (!exterior) ambientSnd = "";
+    if (ambientSnd != "")
+    {
+        if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
+        {
+            mSoundsPlaying.push_back(ambientSnd);
+            mEnvironment->mSoundManager->playSound(ambientSnd, 1.0, 1.0, true);
+        }
+    }
+
+    std::string rainSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mRainLoopSoundID : "");
+    if (!exterior) rainSnd = "";
+    if (rainSnd != "")
+    {
+        if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
+        {
+            mSoundsPlaying.push_back(rainSnd);
+            mEnvironment->mSoundManager->playSound(rainSnd, 1.0, 1.0, true);
+        }
+    }
+
+    // stop sounds
+    std::vector<std::string>::iterator it=mSoundsPlaying.begin();
+    while (it!=mSoundsPlaying.end())
+    {
+        if ( *it != ambientSnd && *it != rainSnd)
+        {
+            mEnvironment->mSoundManager->stopSound(*it);
+            it = mSoundsPlaying.erase(it);
+        }
+        else
+            ++it;
     }
 }
 

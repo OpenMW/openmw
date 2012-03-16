@@ -26,6 +26,12 @@ namespace MWClass
             ///< Return name of the script attached to ptr
 
             static void registerSelf();
+
+            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
+            ///< Return the pick up sound Id
+
+            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
+            ///< Return the put down sound Id
     };
 }
 

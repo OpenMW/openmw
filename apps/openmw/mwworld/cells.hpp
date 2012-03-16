@@ -34,6 +34,8 @@ namespace MWWorld
 
             Ptr::CellStore *getCellStore (const ESM::Cell *cell);
 
+            void fillContainers (Ptr::CellStore& cellStore);
+
         public:
 
             Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader, MWWorld::World& world);

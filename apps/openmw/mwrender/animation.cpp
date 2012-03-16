@@ -111,7 +111,6 @@ namespace MWRender{
 
 			Nif::NiTriShapeCopy& copy = *allshapesiter;
 			std::vector<Ogre::Vector3>* allvertices = &copy.vertices;
-			std::vector<Ogre::Vector3>* allnormals = &copy.normals;
 
 
 
@@ -182,7 +181,6 @@ namespace MWRender{
                     std::vector<Nif::NiSkinData::IndividualWeight> inds = iter->second;
                     int verIndex = iter->first;
                     Ogre::Vector3 currentVertex = (*allvertices)[verIndex];
-                    Ogre::Vector3 currentNormal = (*allnormals)[verIndex];
                     Nif::NiSkinData::BoneInfoCopy* boneinfocopy = &(allshapesiter->boneinfo[inds[0].boneinfocopyindex]);
                     Ogre::Bone *bonePtr = 0;
 
@@ -276,6 +274,7 @@ namespace MWRender{
 						rotmult = bonePtr->getOrientation();
 						scale = bonePtr->getScale().x;
 						boneSequenceIter++;
+
 					    for(; boneSequenceIter != boneSequence.end(); boneSequenceIter++)
 					    {
 							if(creaturemodel->getSkeleton()->hasBone(*boneSequenceIter)){
@@ -330,7 +329,7 @@ namespace MWRender{
 		}
 
     }
-    bool Animation::timeIndex( float time, std::vector<float> times, int & i, int & j, float & x ){
+    bool Animation::timeIndex( float time, const std::vector<float> & times, int & i, int & j, float & x ){
 	int count;
 	if (  (count = times.size()) > 0 )
 	{
@@ -388,6 +387,8 @@ namespace MWRender{
 }
 
  void Animation::handleAnimationTransforms(){
+
+
     Ogre::SkeletonInstance* skel = base->getSkeleton();
 
 
@@ -404,10 +405,10 @@ namespace MWRender{
    for(unsigned int i = 0; i < entityparts.size(); i++){
          //Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
 
-        Ogre::Bone* b = skel->getRootBone();
-	   b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
+        //Ogre::Bone* b = skel->getRootBone();
+	   //b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
 
-         entityparts[i]->getAllAnimationStates()->_notifyDirty();
+         //entityparts[i]->getAllAnimationStates()->_notifyDirty();
     }
 
 
@@ -424,18 +425,19 @@ namespace MWRender{
          float x;
 		float x2;
 
-	    std::vector<Ogre::Quaternion> quats = iter->getQuat();
+	    const std::vector<Ogre::Quaternion> & quats = iter->getQuat();
 
-        std::vector<float> ttime = iter->gettTime();
-        std::vector<float>::iterator ttimeiter = ttime.begin();
+        const std::vector<float> & ttime = iter->gettTime();
 
-        std::vector<float> rtime = iter->getrTime();
-        int rindexJ = 0;
+
+        const std::vector<float> & rtime = iter->getrTime();
+        int rindexJ = rindexI[slot];
+
 	    timeIndex(time, rtime, rindexI[slot], rindexJ, x2);
-	    int tindexJ = 0;
+	    int tindexJ = tindexI[slot];
 
 
-        std::vector<Ogre::Vector3> translist1 = iter->getTranslist1();
+        const std::vector<Ogre::Vector3> & translist1 = iter->getTranslist1();
 
         timeIndex(time, ttime, tindexI[slot], tindexJ, x);
 
@@ -443,34 +445,35 @@ namespace MWRender{
         Ogre::Quaternion r;
 
         bool bTrans = translist1.size() > 0;
-	    if(bTrans){
-            Ogre::Vector3 v1 = translist1[tindexI[slot]];
-            Ogre::Vector3 v2 = translist1[tindexJ];
-           t = (v1 + (v2 - v1) * x);
 
-	    }
 
         bool bQuats = quats.size() > 0;
-	    if(bQuats){
-		    r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
-	    }
-        skel = base->getSkeleton();
+
     if(skel->hasBone(iter->getBonename())){
         Ogre::Bone* bone = skel->getBone(iter->getBonename());
-        if(bTrans)
+        if(bTrans){
+			 Ogre::Vector3 v1 = translist1[tindexI[slot]];
+            Ogre::Vector3 v2 = translist1[tindexJ];
+           t = (v1 + (v2 - v1) * x);
             bone->setPosition(t);
-        if(bQuats)
+
+		}
+        if(bQuats){
+			 r = Ogre::Quaternion::Slerp(x2, quats[rindexI[slot]], quats[rindexJ], true);
             bone->setOrientation(r);
+		}
 
 
 
-        skel->_updateTransforms();
-        base->getAllAnimationStates()->_notifyDirty();
+
 
 	}
 
+
     slot++;
     }
+	skel->_updateTransforms();
+        base->getAllAnimationStates()->_notifyDirty();
 }
 }
 

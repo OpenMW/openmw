@@ -28,6 +28,7 @@ class Animation{
     MWWorld::Environment& mEnvironment;
     std::map<Nif::NiSkinData::BoneInfoCopy*, PosAndRot> vecRotPos;
     static std::map<std::string, int> mUniqueIDs;
+	
     
    
     std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating an npc
@@ -55,7 +56,7 @@ class Animation{
     Ogre::Entity* base;
     void handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel);
     void handleAnimationTransforms();
-    bool timeIndex( float time, std::vector<float> times, int & i, int & j, float & x );
+    bool timeIndex( float time, const std::vector<float> & times, int & i, int & j, float & x );
     std::string getUniqueID(std::string mesh);
 	
     public:
@@ -65,7 +66,7 @@ class Animation{
      void stopScript();
     
     
-     ~Animation();
+     virtual ~Animation();
  
 };
 }

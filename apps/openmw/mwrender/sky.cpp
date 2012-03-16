@@ -59,7 +59,8 @@ void BillboardObject::setPosition(const Vector3& pPosition)
 
 Vector3 BillboardObject::getPosition() const
 {
-    return mNode->getPosition();
+    Vector3 p = mNode->_getDerivedPosition() - mNode->getParentSceneNode()->_getDerivedPosition();
+    return Vector3(p.x, -p.z, p.y);
 }
 
 void BillboardObject::setColour(const ColourValue& pColour)
@@ -161,14 +162,20 @@ Moon::Moon( const String& textureName,
     "   in float2 uv : TEXCOORD0, \n"
     "	out float4 oColor    : COLOR, \n"
     "   uniform sampler2D texture : TEXUNIT0, \n"
+    "   uniform float4 skyColour, \n"
     "   uniform float4 diffuse, \n"
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
     "   float4 tex = tex2D(texture, uv); \n"
-    "   oColor = float4(emissive.xyz,1) * tex2D(texture, uv) * float4(1,1,1,diffuse.a); \n"
-    "   float bump = pow((1-diffuse.a),4); \n"
-    "   oColor.rgb += float3(bump, bump, bump)*0.5; \n"
+    "   oColor = float4(emissive.xyz,1) * tex; \n"
+    // use a circle for the alpha (compute UV distance to center)
+    // looks a bit bad because its not filtered on the edges,
+    // but it's cheaper than a seperate alpha texture.
+    "   float sqrUVdist = pow(uv.x-0.5,2) + pow(uv.y-0.5, 2); \n"
+    "   oColor.a = diffuse.a * (sqrUVdist >= 0.24 ? 0 : 1); \n"
+    "   oColor.rgb += (1-tex.a) * oColor.a * skyColour.rgb; \n"//fill dark side of moon with skycolour
+    "   oColor.rgb += (1-diffuse.a) * skyColour.rgb; \n"//fade bump
     "}";
     fshader->setSource(outStream2.str());
     fshader->load();
@@ -186,15 +193,19 @@ void Moon::setType(const Moon::Type& type)
     mType = type;
 }
 
+void Moon::setSkyColour(const Ogre::ColourValue& colour)
+{
+    mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("skyColour", colour);
+}
 
-/// \todo the moon phase rendering is not correct - the dark part of the moon does not occlude the stars
 void Moon::setPhase(const Moon::Phase& phase)
 {
+    // Colour texture
     Ogre::String textureName = "textures\\tx_";
-
+    
     if (mType == Moon::Type_Secunda) textureName += "secunda_";
     else textureName += "masser_";
-
+    
     if      (phase == Moon::Phase_New)              textureName += "new";
     else if (phase == Moon::Phase_WaxingCrescent)   textureName += "one_wax";
     else if (phase == Moon::Phase_WaxingHalf)       textureName += "half_wax";
@@ -203,9 +214,9 @@ void Moon::setPhase(const Moon::Phase& phase)
     else if (phase == Moon::Phase_WaningHalf)       textureName += "half_wan";
     else if (phase == Moon::Phase_WaningGibbous)    textureName += "three_wan";
     else if (phase == Moon::Phase_Full)             textureName += "full";
-
+    
     textureName += ".dds";
-
+    
     mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(textureName);
 
     mPhase = phase;
@@ -338,24 +349,11 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     mAtmosphereNight = mRootNode->createChildSceneNode();
     mAtmosphereNight->attachObject(night1_ent);
 
-    for (unsigned int i=0; i<night1_ent->getNumSubEntities(); ++i)
-    {
-        MaterialPtr mp = night1_ent->getSubEntity(i)->getMaterial();
-        mp->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
-        mp->getTechnique(0)->getPass(0)->setAmbient(0.0, 0.0, 0.0);
-        mp->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, 1.0);
-        mp->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-        mp->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-        mp->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-
-        mStarsMaterials[i] = mp;
-    }
-
     // Stars vertex shader
-    HighLevelGpuProgramPtr vshader3 = mgr.createProgram("Stars_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+    HighLevelGpuProgramPtr stars_vp = mgr.createProgram("Stars_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         "cg", GPT_VERTEX_PROGRAM);
-    vshader3->setParameter("profiles", "vs_2_x arbvp1");
-    vshader3->setParameter("entry_point", "main_vp");
+    stars_vp->setParameter("profiles", "vs_2_x arbvp1");
+    stars_vp->setParameter("entry_point", "main_vp");
     StringUtil::StrStreamType outStream4;
     outStream4 <<
     "void main_vp(	\n"
@@ -371,10 +369,9 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     "   oFade = (position.z > 50) ? 1.f : 0.f; \n"
     "	oPosition = mul( worldViewProj, position );  \n"
     "}";
-    vshader3->setSource(outStream4.str());
-    vshader3->load();
-    vshader3->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-    night1_ent->getSubEntity(3)->getMaterial()->getTechnique(0)->getPass(0)->setVertexProgram(vshader3->getName());
+    stars_vp->setSource(outStream4.str());
+    stars_vp->load();
+    stars_vp->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
 
     // Stars fragment shader
     HighLevelGpuProgramPtr stars_fp = mgr.createProgram("Stars_FP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -399,7 +396,20 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     stars_fp->load();
     stars_fp->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     stars_fp->getDefaultParameters()->setNamedAutoConstant("diffuse", GpuProgramParameters::ACT_SURFACE_DIFFUSE_COLOUR);
-    night1_ent->getSubEntity(3)->getMaterial()->getTechnique(0)->getPass(0)->setFragmentProgram(stars_fp->getName());
+
+    for (unsigned int i=0; i<night1_ent->getNumSubEntities(); ++i)
+    {
+        MaterialPtr mp = night1_ent->getSubEntity(i)->getMaterial();
+        mp->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
+        mp->getTechnique(0)->getPass(0)->setAmbient(0.0, 0.0, 0.0);
+        mp->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, 1.0);
+        mp->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+        mp->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+        mp->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+        mp->getTechnique(0)->getPass(0)->setVertexProgram(stars_vp->getName());
+        mp->getTechnique(0)->getPass(0)->setFragmentProgram(stars_fp->getName());
+        mStarsMaterials[i] = mp;
+    }
 
     // Atmosphere (day)
     mesh = NifOgre::NIFLoader::load("meshes\\sky_atmosphere.nif");
@@ -583,6 +593,9 @@ void SkyManager::update(float duration)
     mSun->setVisible(mSunEnabled);
     mMasser->setVisible(mMasserEnabled);
     mSecunda->setVisible(mSecundaEnabled);
+
+    // rotate the whole sky by 360 degrees every 4 days
+    mRootNode->roll(Degree(mHourDiff*360/96.f));
 }
 
 void SkyManager::enable()
@@ -647,6 +660,8 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     if (mSkyColour != weather.mSkyColor)
     {
         mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSkyColor);
+        mMasser->setSkyColour(weather.mSkyColor);
+        mSecunda->setSkyColour(weather.mSkyColor);
         mSkyColour = weather.mSkyColor;
     }
 
@@ -760,6 +775,9 @@ void SkyManager::setSecundaFade(const float fade)
 
 void SkyManager::setHour(double hour)
 {
+    mHourDiff = mHour - hour;
+    if (mHourDiff > 0) mHourDiff -= 24;
+
     mHour = hour;
 }
 

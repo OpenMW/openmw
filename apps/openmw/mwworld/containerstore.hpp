@@ -1,10 +1,17 @@
 #ifndef GAME_MWWORLD_CONTAINERSTORE_H
 #define GAME_MWWORLD_CONTAINERSTORE_H
 
+#include <iterator>
+
 #include <components/esm_store/cell_store.hpp>
 
 #include "refdata.hpp"
 #include "ptr.hpp"
+
+namespace ESM
+{
+    struct InventoryList;
+}
 
 namespace MWWorld
 {
@@ -48,6 +55,8 @@ namespace MWWorld
 
         public:
 
+            virtual ~ContainerStore();
+
             ContainerStoreIterator begin (int mask = Type_All);
 
             ContainerStoreIterator end();
@@ -60,6 +69,12 @@ namespace MWWorld
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
 
+            void fill (const ESM::InventoryList& items, const ESMS::ESMStore& store);
+            ///< Insert items into *this.
+
+            void clear();
+            ///< Empty container.
+
             static int getType (const Ptr& ptr);
             ///< This function throws an exception, if ptr does not point to an object, that can be
             /// put into a container.
@@ -71,6 +86,7 @@ namespace MWWorld
     ///
     /// \note The iterator will automatically skip over deleted objects.
     class ContainerStoreIterator
+        : public std::iterator<std::forward_iterator_tag, Ptr, std::ptrdiff_t, Ptr *, Ptr&>
     {
             int mType;
             int mMask;
@@ -125,6 +141,8 @@ namespace MWWorld
             bool isEqual (const ContainerStoreIterator& iter) const;
 
             int getType() const;
+
+            const ContainerStore *getContainerStore() const;
 
         friend class ContainerStore;
     };
