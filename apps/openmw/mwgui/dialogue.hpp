@@ -42,7 +42,7 @@ namespace MWGui
 
         void startDialogue(std::string npcName);
         void stopDialogue();
-        void addKeyword(std::string keyWord,std::string topicText);
+        void addKeyword(std::string keyWord);
         void removeKeyword(std::string keyWord);
         void addText(std::string text);
         void addTitle(std::string text);
@@ -59,7 +59,6 @@ namespace MWGui
         *Helper function that add topic keyword in blue in a text.
         */
         std::string parseText(std::string text);
-        void displayTopicText(std::string topic);
 
         DialogeHistory*     history;
         MyGUI::ListPtr      topicsList;

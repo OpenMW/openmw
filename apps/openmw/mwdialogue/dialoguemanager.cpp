@@ -181,10 +181,6 @@ namespace MWDialogue
         {
             return true;
         }
-        /*if(!choice && !isAChoice)
-        {
-            return false;
-        }*/
         if(isFunction)
         {
             return false;
@@ -202,7 +198,6 @@ namespace MWDialogue
             char comp = select.selectRule[4];
             std::string name = select.selectRule.substr (5);
             std::string function = select.selectRule.substr(1,2);
-            //std::cout << function;
 
             // TODO types 4, 5, 6, 7, 8, 9, A, B, C
             //new TOTO: 5,6,9
@@ -373,7 +368,6 @@ namespace MWDialogue
 
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const
     {
-        //bool return true;//does the actor knows the topic?
         // actor id
         if (!info.actor.empty())
             if (toLower (info.actor)!=MWWorld::Class::get (actor).getId (actor))
@@ -489,15 +483,13 @@ namespace MWDialogue
                 {
                     if(pos==0)
                     {
-                        //std::cout << "fouuuuuuuuuuund";
                         knownTopics[it->first] = true;
-                        win->addKeyword(it->first,it->second.front().response);
+                        win->addKeyword(it->first);
                     }
                     else if(text.substr(pos -1,1) == " ")
                     {
-                        //std::cout << "fouuuuuuuuuuund";
                         knownTopics[it->first] = true;
-                        win->addKeyword(it->first,it->second.front().response);
+                        win->addKeyword(it->first);
                     }
                 }
             }
@@ -516,6 +508,7 @@ namespace MWDialogue
         MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
         win->startDialogue(MWWorld::Class::get (actor).getName (actor));
 
+        //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         actorKnownTopics.clear();
         ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
         for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
@@ -529,16 +522,16 @@ namespace MWDialogue
                     if (isMatching (actor, *iter) && functionFilter(mActor,*iter,false))
                     {
                         actorKnownTopics[it->first].push_back(*iter);
+                        //does the player know the topic?
                         if(knownTopics.find(toLower(it->first)) != knownTopics.end())
                         {
                             MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-                            win->addKeyword(it->first,iter->response);
+                            win->addKeyword(it->first);
                         }
                     }
                 }
             }
         }
-        //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
 
         //greeting
         bool greetingFound = false;
@@ -558,11 +551,6 @@ namespace MWDialogue
                             // TODO play sound
                         }
 
-                        if (!iter->resultScript.empty())
-                        {
-                            //std::cout << "script: " << iter->resultScript << std::endl;
-                            // TODO execute script
-                        }
                         std::string text = iter->response;
                         parseText(text);
                         win->addText(iter->response);
@@ -682,13 +670,11 @@ namespace MWDialogue
             mChoice = mChoiceMap[answere];
             std::list<ESM::DialInfo> dials = actorKnownTopics[mLastTopic];
 
-            //bool passedLastDialogue = false;
             std::cout << actorKnownTopics[mLastTopic].size() << mLastTopic;
             std::list<ESM::DialInfo>::iterator iter;
             for(iter = actorKnownTopics[mLastTopic].begin(); iter->id != mLastDialogue.id;iter++)
             {
             }
-            //iter--;
             for(std::list<ESM::DialInfo>::iterator it = iter; it!=actorKnownTopics[mLastTopic].begin();)
             {
                 it--;

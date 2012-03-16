@@ -80,25 +80,14 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     if(color != "#B29154")
     {
         UString key = history->getColorTextAt(cursorPosition);
+        if(color == "#686EBA") mEnvironment.mDialogueManager->keywordSelected(lower_string(key));
 
-        //std::cout << "Clicked on key: " << key << std::endl;
-        if(color == "#686EBA")
-        {
-            //displayTopicText(lower_string(key));
-            mEnvironment.mDialogueManager->keywordSelected(lower_string(key));
-        }
-        if(color == "#572D21") 
-        {
-            //TODO: send back the answere to the question!
-            mEnvironment.mDialogueManager->questionAnswered(key);
-            //std::cout << "and the ansere is..."<< key;
-        }
+        if(color == "#572D21") mEnvironment.mDialogueManager->questionAnswered(key);
     }
 }
 
 void DialogueWindow::open()
 {
-    //updateOptions();
     topicsList->removeAllItems();
     pTopicsText.clear();
     history->eraseText(0,history->getTextLength());
@@ -108,7 +97,6 @@ void DialogueWindow::open()
 
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
 {
-    //eventBye();
     mEnvironment.mDialogueManager->goodbyeSelected();
 }
 
@@ -117,12 +105,7 @@ void DialogueWindow::onSelectTopic(MyGUI::List* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
     std::string topic =  _sender->getItem(_index);
-    //displayTopicText(topic);
     mEnvironment.mDialogueManager->keywordSelected(lower_string(topic));
-
-    //const std::string* theTopic  = topicsList->getItemDataAt<std::string>(_index);
-    //std::cout << "Selected: "<< theTopic << std::endl;
-    //eventTopicSelected(key);
 }
 
 void DialogueWindow::startDialogue(std::string npcName)
@@ -130,12 +113,12 @@ void DialogueWindow::startDialogue(std::string npcName)
     setText("NpcName", npcName);
 }
 
-void DialogueWindow::addKeyword(std::string keyWord,std::string topicText)
+void DialogueWindow::addKeyword(std::string keyWord)
 {
     if(topicsList->findItemIndexWith(keyWord) == MyGUI::ITEM_NONE)
     {
         topicsList->addItem(keyWord);
-        pTopicsText[keyWord] = topicText; 
+        pTopicsText[keyWord] = " "; 
     }
 }
 
@@ -170,33 +153,17 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
             str.insert(pos,color2);
             pos+= color2.length();
         }
-        //str.replace(pos, oldStr.length(), "#686EBA"+str.get);
     }
 }
 
 std::string DialogueWindow::parseText(std::string text)
 {
-    //topicsList->geti
     for(int i = 0;i<topicsList->getItemCount();i++)
     {
         std::string keyWord = topicsList->getItem(i);
-        //std::string newKeyWord = "#686EBA"+keyWord+"#B29154";
         addColorInString(text,keyWord,"#686EBA","#B29154");
     }
     return text;
-}
-
-void DialogueWindow::displayTopicText(std::string topic)
-{
-    if(topicsList->findItemIndexWith(topic) != MyGUI::ITEM_NONE)
-    {
-        history->addDialogHeading(topic);
-        history->addDialogText(parseText(pTopicsText[topic]));
-    }
-    else
-    {
-        std::cout << "topic not found!";
-    }
 }
 
 void DialogueWindow::addText(std::string text)
@@ -212,60 +179,18 @@ void DialogueWindow::addTitle(std::string text)
 void DialogueWindow::askQuestion(std::string question)
 {
     history->addDialogText("#572D21"+question+"#B29154"+" ");
-    /*for(std::list<std::string>::iterator it = answers.begin();it!=answers.end();it++)
-    {
-        history->addDialogText("#572D21"+(*it)+"#B29154"+" ");
-    }*/
 }
 
 void DialogueWindow::updateOptions()
 {
-    //FIXME Add this properly
-    /*history->addDialogText("Through the translucent surface of the orb, you see shifting images of distant locations...");
-    for(int z = 0; z < 10; z++)
-    {
-    history->addDialogHeading("Fort Frostmoth");
-    history->addDialogText("The image in the orb flickers, and you see.... The cold courtyard of #FF0000Fort Frostmoth#FFFFFF, battered bu werewolf attack, but still standing, still projecting Imperial might even to this distant and cold corner of the world.");
-    }*/
-
     //Clear the list of topics
     topicsList->removeAllItems();
     pTopicsText.clear();
     history->eraseText(0,history->getTextLength());
 
-    /*addKeyword("gus","gus is working on the dialogue system");
-    displayTopicText("gus");*/
-
     pDispositionBar->setProgressRange(100);
     pDispositionBar->setProgressPosition(40);
     pDispositionText->eraseText(0,pDispositionText->getTextLength());
     pDispositionText->addText("#B29154"+std::string("40/100")+"#B29154");
-
-    /*std::list<std::string> test;
-    test.push_back("option 1");
-    test.push_back("option 2");
-    askQuestion("is gus cooking?",test);*/
-    /*topicsList->addItem("Ald'ruhn", i++);
-    topicsList->addItem("Balmora", i++);
-    topicsList->addItem("Sadrith Mora", i++);
-    topicsList->addItem("Vivec", i++);
-    topicsList->addItem("Ald Velothi", i++);
-    topicsList->addItem("Caldera", i++);
-    topicsList->addItem("Dagon Fel ", i++);
-    topicsList->addItem("Gnaar Mok", i++);
-    topicsList->addItem("Gnisis", i++);
-    topicsList->addItem("Hla Oad", i++);
-    topicsList->addItem("Khuul", i++);
-    topicsList->addItem("Maar Gan", i++);
-    topicsList->addItem("Molag Mar", i++);
-    topicsList->addItem("Pelagiad", i++);
-    topicsList->addItem("Seyda Neen", i++);
-    topicsList->addItem("Suran", i++);
-    topicsList->addItem("Tel Aruhn", i++);
-    topicsList->addItem("Tel Branora", i++);
-    topicsList->addItem("Tel Fyr", i++);
-    topicsList->addItem("Tel Mora", i++);
-    topicsList->addItem("Tel Vos", i++);
-    topicsList->addItem("Vos", i++);*/
 }
 

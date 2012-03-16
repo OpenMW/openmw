@@ -95,12 +95,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    std::cout << "CHOICE" << arg0;
                     arg0 = 4;
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                     MWDialogue::DialogueManager* dialogue = context.getEnvironment().mDialogueManager;
-                    //int choice = 1;
                     while(arg0>0)
                     {
                         std::string question = runtime.getStringLiteral (runtime[0].mInteger);
