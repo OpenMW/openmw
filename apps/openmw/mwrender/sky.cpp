@@ -10,11 +10,14 @@
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 
+#include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
+
 using namespace MWRender;
 using namespace Ogre;
 
 // the speed at which the clouds are animated
-#define CLOUD_SPEED 0.001
+#define CLOUD_SPEED 0.003
 
 // this distance has to be set accordingly so that the
 // celestial bodies are behind the clouds, but in front of the atmosphere
@@ -296,9 +299,10 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
     ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource())->unlock();
 }
 
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
+SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environment* env) :
     mGlareFade(0), mGlareEnabled(false)
 {
+    mEnvironment = env;
     mViewport = pCamera->getViewport();
     mSceneMgr = pMwRoot->getCreator();
     mRootNode = pCamera->getParentSceneNode()->createChildSceneNode();
@@ -312,7 +316,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     Pass* pass = material->getTechnique(0)->getPass(0);
     pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     mThunderTextureUnit = pass->createTextureUnitState();
-    mThunderTextureUnit->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(1.f, 1.f, 1.f)); // always black colour
+    mThunderTextureUnit->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(1.f, 1.f, 1.f));
     mThunderTextureUnit->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 0.5f);
     OverlayManager& ovm = OverlayManager::getSingleton();
     mThunderOverlay = ovm.create( "ThunderOverlay" );
@@ -504,7 +508,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera) :
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
-    "   uv += float2(1,1) * time * speed * "<<CLOUD_SPEED<<"; \n" // Scroll in x,y direction
+    "   uv += float2(1,0) * time * speed * "<<CLOUD_SPEED<<"; \n" // Scroll in x direction
     "   float4 tex = lerp(tex2D(texture, uv), tex2D(secondTexture, uv), transitionFactor); \n"
     "   oColor = color * float4(emissive.xyz,1) * tex * float4(1,1,1,opacity); \n"
     "}";
@@ -558,7 +562,7 @@ void SkyManager::update(float duration)
     if (!mEnabled) return;
 
     // UV Scroll the clouds
-    mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", 1);
+    mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", mEnvironment->mWorld->getTimeScaleFactor()/30.f);
 
     /// \todo improve this
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
@@ -594,8 +598,8 @@ void SkyManager::update(float duration)
     mMasser->setVisible(mMasserEnabled);
     mSecunda->setVisible(mSecundaEnabled);
 
-    // rotate the whole sky by 360 degrees every 4 days
-    mRootNode->roll(Degree(mHourDiff*360/96.f));
+    // rotate the stars by 360 degrees every 4 days
+    mAtmosphereNight->roll(Degree(mEnvironment->mWorld->getTimeScaleFactor()*duration*360 / (3600*96.f)));
 }
 
 void SkyManager::enable()
@@ -775,9 +779,6 @@ void SkyManager::setSecundaFade(const float fade)
 
 void SkyManager::setHour(double hour)
 {
-    mHourDiff = mHour - hour;
-    if (mHourDiff > 0) mHourDiff -= 24;
-
     mHour = hour;
 }
 
