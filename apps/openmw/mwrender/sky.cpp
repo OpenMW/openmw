@@ -696,6 +696,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         strength = 1.f;
 
     mSunGlare->setVisibility(weather.mGlareView * strength);
+    mSun->setVisibility(strength);
 
     mAtmosphereNight->setVisible(weather.mNight && mEnabled);
 }

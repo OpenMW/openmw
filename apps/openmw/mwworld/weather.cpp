@@ -572,7 +572,7 @@ void WeatherManager::update(float duration)
         mRendering->configureFog(result.mFogDepth, result.mFogColor);
 
         // disable sun during night
-        if (mHour >= 21 || mHour <= 5.5f)
+        if (mHour >= 20 || mHour <= 6.f)
             mRendering->getSkyManager()->sunDisable();
         else
         {
