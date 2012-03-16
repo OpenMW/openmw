@@ -84,7 +84,7 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
         //std::cout << "Clicked on key: " << key << std::endl;
         if(color == "#686EBA")
         {
-            displayTopicText(lower_string(key));
+            //displayTopicText(lower_string(key));
             mEnvironment.mDialogueManager->keywordSelected(lower_string(key));
         }
         if(color == "#572D21") 
@@ -117,7 +117,7 @@ void DialogueWindow::onSelectTopic(MyGUI::List* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
     std::string topic =  _sender->getItem(_index);
-    displayTopicText(topic);
+    //displayTopicText(topic);
     mEnvironment.mDialogueManager->keywordSelected(lower_string(topic));
 
     //const std::string* theTopic  = topicsList->getItemDataAt<std::string>(_index);
@@ -204,7 +204,12 @@ void DialogueWindow::addText(std::string text)
     history->addDialogText("#B29154"+parseText(text)+"#B29154");
 }
 
-void DialogueWindow::askQuestion(std::string question,int choice)
+void DialogueWindow::addTitle(std::string text)
+{
+    history->addDialogHeading(text);
+}
+
+void DialogueWindow::askQuestion(std::string question)
 {
     history->addDialogText("#572D21"+question+"#B29154"+" ");
     /*for(std::list<std::string>::iterator it = answers.begin();it!=answers.end();it++)

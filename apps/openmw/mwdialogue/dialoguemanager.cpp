@@ -142,8 +142,10 @@ namespace MWDialogue
         return toLower(str).find(toLower(substr),pos);
     }
 
-    bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info)
+    bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info,bool choice)
     {
+        bool isAChoice = false;//is there any choice in the filters?
+        bool isFunction = false;
         for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
             iter != info.selects.end(); ++iter)
         {
@@ -151,19 +153,24 @@ namespace MWDialogue
             char type = select.selectRule[1];
             if(type == '1')
             {
+                isFunction = true;
                 char comp = select.selectRule[4];
                 std::string name = select.selectRule.substr (5);
-                std::string function = select.selectRule.substr(1,2);
-                std::cout << function;
+                std::string function = select.selectRule.substr(2,2);
+                std::cout << "f " <<select.selectRule <<"  ";
 
                 int ifunction;
                 std::istringstream iss(function);
                 iss >> ifunction;
-
                 switch(ifunction)
                 {
-                case 4://choice
-                    if(!selectCompare(comp,mChoice,select.i)) return false;
+                case 50://choice
+                    std::cout << "choice";
+                    isAChoice = true;
+                    if(choice)
+                    {
+                        if(!selectCompare(comp,mChoice,select.i)){std::cout << "pbhere"; return false;}
+                    }
                     break;
 
                 default:
@@ -171,6 +178,19 @@ namespace MWDialogue
 
                 }
             }
+        }
+        if(isAChoice)
+        {
+            std::cout << "CHOICEEE!";
+            return true;
+        }
+        /*if(!choice && !isAChoice)
+        {
+            return false;
+        }*/
+        if(isFunction)
+        {
+            return false;
         }
         return true;
     }
@@ -185,7 +205,7 @@ namespace MWDialogue
             char comp = select.selectRule[4];
             std::string name = select.selectRule.substr (5);
             std::string function = select.selectRule.substr(1,2);
-            std::cout << function;
+            //std::cout << function;
 
             // TODO types 4, 5, 6, 7, 8, 9, A, B, C
             //new TOTO: 5,6,9
@@ -193,7 +213,7 @@ namespace MWDialogue
             {
             case '1': // function
 
-                return false; // TODO implement functions
+                return true; // TODO implement functions
 
             case '2': // global
 
@@ -450,6 +470,7 @@ namespace MWDialogue
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
     {
         mChoice = -1;
+        mIsInChoice = false;
         mCompilerContext.setExtensions (&extensions);
     }
 
@@ -508,8 +529,15 @@ namespace MWDialogue
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
                     iter!=it->second.mInfo.end(); ++iter)
                 {
-                    if (isMatching (actor, *iter))
+                    if(it->first == "anneau")
                     {
+                        std::cout << iter->response << std::endl;
+                    }
+                    //std::cout << "a";
+                    if (isMatching (actor, *iter) && functionFilter(mActor,*iter,false))
+                    {
+                        std::cout << "OK";
+                        //std::cout << it->first;
                         actorKnownTopics[it->first].push_back(*iter);
                         if(knownTopics.find(toLower(it->first)) != knownTopics.end())
                         {
@@ -521,10 +549,12 @@ namespace MWDialogue
                         }
                     }
                 }
+                //std::cout << "b";
             }
         }
         //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
 
+        //greeting
         bool greetingFound = false;
         for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
@@ -535,7 +565,7 @@ namespace MWDialogue
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
                     iter!=it->second.mInfo.end(); ++iter)
                 {
-                    if (isMatching (actor, *iter))
+                    if (isMatching (actor, *iter) && functionFilter(mActor,*iter,false))
                     {
                         if (!iter->sound.empty())
                         {
@@ -552,6 +582,8 @@ namespace MWDialogue
                         win->addText(iter->response);
                         executeScript(iter->resultScript);
                         greetingFound = true;
+                        mLastTopic = it->first;
+                        mLastDialogue = *iter;
                         break;
                     }
                 }
@@ -623,18 +655,30 @@ namespace MWDialogue
 
     void DialogueManager::keywordSelected(std::string keyword)
     {
-        if(!actorKnownTopics[keyword].empty())
+        if(!mIsInChoice)
         {
-            for(std::list<ESM::DialInfo>::iterator it = actorKnownTopics[keyword].begin(); it != actorKnownTopics[keyword].end();it++)
+            if(!actorKnownTopics[keyword].empty())
             {
-                ESM::DialInfo dial = *it;
-                if(functionFilter(mActor,dial))
+                for(std::list<ESM::DialInfo>::iterator it = actorKnownTopics[keyword].begin(); it != actorKnownTopics[keyword].end();it++)
                 {
-                    std::string text = actorKnownTopics[keyword].front().response;
-                    std::string script = actorKnownTopics[keyword].front().resultScript;
-                    parseText(text);
-                    executeScript(script);
-                    break;
+                    ESM::DialInfo dial = *it;
+                    if(functionFilter(mActor,dial,true))
+                    {
+                        std::string text = it->response;
+                        std::string script = it->resultScript;
+
+                        parseText(text);
+
+                        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                        win->addTitle(keyword);
+                        win->addText(it->response);
+
+                        executeScript(script);
+                        
+                        mLastTopic = keyword;
+                        mLastDialogue = dial;
+                        break;
+                    }
                 }
             }
         }
@@ -647,6 +691,40 @@ namespace MWDialogue
 
     void DialogueManager::questionAnswered(std::string answere)
     {
+        if(mChoiceMap.find(answere) != mChoiceMap.end())
+        {
+            mChoice = mChoiceMap[answere];
+            std::cout << "found1";
+            std::list<ESM::DialInfo> dials = actorKnownTopics[mLastTopic];
+
+            //bool passedLastDialogue = false;
+            std::cout << actorKnownTopics[mLastTopic].size() << mLastTopic;
+            std::list<ESM::DialInfo>::iterator iter;
+            for(iter = actorKnownTopics[mLastTopic].begin(); iter->id != mLastDialogue.id;iter++)
+            {
+            }
+            //iter--;
+            for(std::list<ESM::DialInfo>::iterator it = iter; it!=actorKnownTopics[mLastTopic].begin();)
+            {
+                it--;
+                std::cout << "parsing\n";
+                if(functionFilter(mActor,*it,true))
+                {
+                    mChoiceMap.clear();
+                    mChoice = -1;
+                    mIsInChoice = false;
+                    std::cout << "2";
+                    MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                    std::string text = it->response;
+                    parseText(text);
+                    win->addText(text);
+                    executeScript(it->resultScript);
+                    mLastTopic = mLastTopic;
+                    mLastDialogue = *it;
+                    break;
+                }
+            }                       
+        }
         std::cout << "and the ansere is..."<< answere;
     }
 
@@ -659,7 +737,9 @@ namespace MWDialogue
     void DialogueManager::askQuestion(std::string question, int choice)
     {
         MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-        win->askQuestion(question,choice);
+        win->askQuestion(question);
+        mChoiceMap[question] = choice;
+        mIsInChoice = true;
         std::cout << "choice";
     }
 }

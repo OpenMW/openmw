@@ -26,7 +26,7 @@ namespace MWDialogue
 
             bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const;
 
-            bool functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info);
+            bool functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info,bool choice);
 
             void parseText(std::string text);
 
@@ -45,6 +45,10 @@ namespace MWDialogue
             void printError(std::string error);
 
             int mChoice;
+            std::map<std::string,int> mChoiceMap;
+            std::string mLastTopic;
+            ESM::DialInfo mLastDialogue;
+            bool mIsInChoice;
 
         public:
 
