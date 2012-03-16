@@ -157,7 +157,6 @@ namespace MWDialogue
                 char comp = select.selectRule[4];
                 std::string name = select.selectRule.substr (5);
                 std::string function = select.selectRule.substr(2,2);
-                std::cout << "f " <<select.selectRule <<"  ";
 
                 int ifunction;
                 std::istringstream iss(function);
@@ -165,11 +164,10 @@ namespace MWDialogue
                 switch(ifunction)
                 {
                 case 50://choice
-                    std::cout << "choice";
                     isAChoice = true;
                     if(choice)
                     {
-                        if(!selectCompare(comp,mChoice,select.i)){std::cout << "pbhere"; return false;}
+                        if(!selectCompare(comp,mChoice,select.i)) return false;
                     }
                     break;
 
@@ -181,7 +179,6 @@ namespace MWDialogue
         }
         if(isAChoice)
         {
-            std::cout << "CHOICEEE!";
             return true;
         }
         /*if(!choice && !isAChoice)
@@ -529,27 +526,16 @@ namespace MWDialogue
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
                     iter!=it->second.mInfo.end(); ++iter)
                 {
-                    if(it->first == "anneau")
-                    {
-                        std::cout << iter->response << std::endl;
-                    }
-                    //std::cout << "a";
                     if (isMatching (actor, *iter) && functionFilter(mActor,*iter,false))
                     {
-                        std::cout << "OK";
-                        //std::cout << it->first;
                         actorKnownTopics[it->first].push_back(*iter);
                         if(knownTopics.find(toLower(it->first)) != knownTopics.end())
                         {
                             MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
                             win->addKeyword(it->first,iter->response);
-                            //std::cout << it->first;
-                            //std::cout << "match found!!";
-                            //break;
                         }
                     }
                 }
-                //std::cout << "b";
             }
         }
         //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
@@ -694,7 +680,6 @@ namespace MWDialogue
         if(mChoiceMap.find(answere) != mChoiceMap.end())
         {
             mChoice = mChoiceMap[answere];
-            std::cout << "found1";
             std::list<ESM::DialInfo> dials = actorKnownTopics[mLastTopic];
 
             //bool passedLastDialogue = false;
@@ -707,13 +692,11 @@ namespace MWDialogue
             for(std::list<ESM::DialInfo>::iterator it = iter; it!=actorKnownTopics[mLastTopic].begin();)
             {
                 it--;
-                std::cout << "parsing\n";
                 if(functionFilter(mActor,*it,true))
                 {
                     mChoiceMap.clear();
                     mChoice = -1;
                     mIsInChoice = false;
-                    std::cout << "2";
                     MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
                     std::string text = it->response;
                     parseText(text);
@@ -725,7 +708,6 @@ namespace MWDialogue
                 }
             }                       
         }
-        std::cout << "and the ansere is..."<< answere;
     }
 
     void DialogueManager::printError(std::string error)
@@ -740,6 +722,5 @@ namespace MWDialogue
         win->askQuestion(question);
         mChoiceMap[question] = choice;
         mIsInChoice = true;
-        std::cout << "choice";
     }
 }
