@@ -121,16 +121,7 @@ namespace MWWorld
         mEnvironment.mMechanicsManager->addActor (mWorld->getPlayer().getPlayer());
         mEnvironment.mMechanicsManager->watchActor (mWorld->getPlayer().getPlayer());
 
-        // set map window cell name
-        if (!(mCurrentCell->cell->data.flags & ESM::Cell::Interior))
-        {
-            if (mCurrentCell->cell->name != "")
-                mEnvironment.mWindowManager->setCellName( mCurrentCell->cell->name );
-            else
-                mEnvironment.mWindowManager->setCellName( mCurrentCell->cell->region );
-        }
-        else
-            mEnvironment.mWindowManager->setCellName( mCurrentCell->cell->name );
+        mEnvironment.mWindowManager->changeCell( mCurrentCell );
     }
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)

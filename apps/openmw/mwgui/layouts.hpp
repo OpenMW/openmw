@@ -67,7 +67,7 @@ namespace MWGui
     {
       setCoord(500,0,320,300);
       setText("WorldButton", "World");
-      setImage("Compass", "compass.dds");
+      setImage("Compass", "textures\\compass.dds");
 
       // Obviously you should override this later on
       setCellName("No Cell Loaded");
@@ -77,6 +77,32 @@ namespace MWGui
     {
       mMainWidget->setCaption(cellName);
     }
+
+    // for interiors: cell name, for exteriors: "Cell"
+    void setCellPrefix(const std::string& prefix)
+    {
+      mPrefix = prefix;
+    }
+
+    void setActiveCell(const int x, const int y)
+    {
+      for (int mx=0; mx<3; ++mx)
+      {
+        for (int my=0; my<3; ++my)
+        {
+          std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
+                          + boost::lexical_cast<std::string>(my);
+          
+          std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
+                                        + boost::lexical_cast<std::string>(y - (my-1));
+          setImage(name, image);
+          setImage(name+"_fog", image+"_fog");
+        }
+      }
+    }
+
+  private:
+    std::string mPrefix;
   };
 
   class MainMenu : public OEngine::GUI::Layout

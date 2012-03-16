@@ -402,7 +402,21 @@ const ESMS::ESMStore& WindowManager::getStore() const
     return environment.mWorld->getStore();
 }
 
-void WindowManager::setCellName(const std::string& cellName)
+void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
 {
-    map->setCellName(cellName);
+    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+    {
+        if (cell->cell->name != "")
+            map->setCellName( cell->cell->name );
+        else
+            map->setCellName( cell->cell->region );
+        map->setCellPrefix("Cell");
+        map->setActiveCell( cell->cell->data.gridX, cell->cell->data.gridY );
+    }
+    else
+    {
+        map->setCellName( cell->cell->name );
+        map->setCellPrefix( cell->cell->name );
+    }
+
 }

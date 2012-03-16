@@ -58,7 +58,7 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend)
     overlay_panel->setMaterialName( "testMaterial" );
     overlay_panel->show();
     mOverlay->add2D(overlay_panel);
-    mOverlay->show();
+    //mOverlay->show();
 
     Overlay* mOverlay2 = ovm.create( "testOverlay2" );
     mOverlay2->setZOrder(1);
@@ -72,7 +72,7 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend)
     overlay_panel2->show();
     mOverlay2->add2D(overlay_panel2);
     
-    mOverlay2->show();
+    //mOverlay2->show();
     
 }
 
@@ -252,7 +252,7 @@ void LocalMap::render(const float x, const float y,
                             xw*FOGOFWAR_RESOLUTION/SIZE, yw*FOGOFWAR_RESOLUTION/SIZE, 
                             0,
                             PF_A8R8G8B8,
-                            TU_DYNAMIC_WRITE_ONLY);
+                            TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
 
             // create a buffer to use for dynamic operations
             uint32* buffer = new uint32[FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION];

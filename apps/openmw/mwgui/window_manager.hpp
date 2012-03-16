@@ -18,6 +18,7 @@
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
 #include "../mwmechanics/stat.hpp"
+#include "../mwworld/ptr.hpp"
 #include "mode.hpp"
 
 namespace MyGUI
@@ -150,8 +151,7 @@ namespace MWGui
     void setBounty (int bounty);                                           ///< set the current bounty value
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
-
-    void setCellName(const std::string& cellName); ///< set the cell name to display in the map window
+    void changeCell(MWWorld::Ptr::CellStore* cell); ///< change the active cell
 
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
