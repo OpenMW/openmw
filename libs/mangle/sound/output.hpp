@@ -62,6 +62,9 @@ class Sound
   /// Set loop mode
   virtual void setRepeat(bool) = 0;
 
+  /// If set to true the sound will not be affected by player movement
+  virtual void setRelative(bool) = 0;
+
   /// Set streaming mode.
   /** This may be used by implementations to optimize for very large
       files. If streaming mode is off (default), most implementations

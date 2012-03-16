@@ -111,7 +111,6 @@ namespace MWRender{
 
 			Nif::NiTriShapeCopy& copy = *allshapesiter;
 			std::vector<Ogre::Vector3>* allvertices = &copy.vertices;
-			std::vector<Ogre::Vector3>* allnormals = &copy.normals;
 
 
 
@@ -182,7 +181,6 @@ namespace MWRender{
                     std::vector<Nif::NiSkinData::IndividualWeight> inds = iter->second;
                     int verIndex = iter->first;
                     Ogre::Vector3 currentVertex = (*allvertices)[verIndex];
-                    Ogre::Vector3 currentNormal = (*allnormals)[verIndex];
                     Nif::NiSkinData::BoneInfoCopy* boneinfocopy = &(allshapesiter->boneinfo[inds[0].boneinfocopyindex]);
                     Ogre::Bone *bonePtr = 0;
 
@@ -276,7 +274,7 @@ namespace MWRender{
 						rotmult = bonePtr->getOrientation();
 						scale = bonePtr->getScale().x;
 						boneSequenceIter++;
-						
+
 					    for(; boneSequenceIter != boneSequence.end(); boneSequenceIter++)
 					    {
 							if(creaturemodel->getSkeleton()->hasBone(*boneSequenceIter)){
@@ -390,7 +388,7 @@ namespace MWRender{
 
  void Animation::handleAnimationTransforms(){
 
-	 
+
     Ogre::SkeletonInstance* skel = base->getSkeleton();
 
 
@@ -430,11 +428,11 @@ namespace MWRender{
 	    const std::vector<Ogre::Quaternion> & quats = iter->getQuat();
 
         const std::vector<float> & ttime = iter->gettTime();
-        
+
 
         const std::vector<float> & rtime = iter->getrTime();
         int rindexJ = rindexI[slot];
-		 
+
 	    timeIndex(time, rtime, rindexI[slot], rindexJ, x2);
 	    int tindexJ = tindexI[slot];
 
@@ -447,10 +445,10 @@ namespace MWRender{
         Ogre::Quaternion r;
 
         bool bTrans = translist1.size() > 0;
-	   
+
 
         bool bQuats = quats.size() > 0;
-	   
+
     if(skel->hasBone(iter->getBonename())){
         Ogre::Bone* bone = skel->getBone(iter->getBonename());
         if(bTrans){
@@ -467,10 +465,10 @@ namespace MWRender{
 
 
 
-        
+
 
 	}
-	
+
 
     slot++;
     }

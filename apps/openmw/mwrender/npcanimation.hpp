@@ -20,7 +20,7 @@ class NpcAnimation: public Animation{
     
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);
-     ~NpcAnimation();
+     virtual ~NpcAnimation();
     Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
     void insertFreePart(const std::string &mesh, const std::string suffix, Ogre::SceneNode* insert);
 	virtual void runAnimation(float timepassed);

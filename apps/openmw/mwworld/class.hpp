@@ -149,7 +149,7 @@ namespace MWWorld
             ///
             /// Default implementation: return (empty vector, false).
 
-            virtual int getEuqipmentSkill (const Ptr& ptr, const Environment& environment)
+            virtual int getEquipmentSkill (const Ptr& ptr, const Environment& environment)
                 const;
             /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
             /// no such skill.
@@ -162,6 +162,14 @@ namespace MWWorld
             ///< If there is no class for this pointer, an exception is thrown.
 
             static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
+
+            virtual std::string getUpSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const;
+            ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
+            /// (default implementation: throw an exception)
+
+            virtual std::string getDownSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const;
+            ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
+            /// (default implementation: throw an exception)
     };
 }
 

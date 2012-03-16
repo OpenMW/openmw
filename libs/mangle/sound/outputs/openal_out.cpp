@@ -197,6 +197,7 @@ class Mangle::Sound::OpenAL_Sound : public Sound
   void setPos(float x, float y, float z);
   void setPitch(float);
   void setRepeat(bool);
+  void setRelative(bool);
 
   void notifyOwnerDeath()
   { ownerAlive = false; }
@@ -263,6 +264,7 @@ OpenAL_Factory::OpenAL_Factory(bool doSetup)
 
       device = Device;
       context = Context;
+      alDistanceModel(AL_LINEAR_DISTANCE);
     }
 }
 
@@ -361,6 +363,12 @@ void OpenAL_Sound::setPitch(float pitch)
 void OpenAL_Sound::setRepeat(bool rep)
 {
   alSourcei(inst, AL_LOOPING, rep?AL_TRUE:AL_FALSE);
+}
+
+void OpenAL_Sound::setRelative(bool rel)
+{
+  alSourcei(inst, AL_SOURCE_RELATIVE, rel?AL_TRUE:AL_FALSE);
+  checkALError("setting relative");
 }
 
 SoundPtr OpenAL_Sound::clone()

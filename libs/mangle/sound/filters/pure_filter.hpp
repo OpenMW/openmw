@@ -28,6 +28,7 @@ namespace Mangle
       void setRange(float a, float b=0, float c=0)
       { client->setRange(a,b,c); }
       void setStreaming(bool b) { client->setStreaming(b); }
+      void setRelative(bool b) { client->setRelative(b); }
 
       // The clone() function is not implemented here, as you will
       // almost certainly want to override it yourself
