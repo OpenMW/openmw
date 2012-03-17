@@ -104,7 +104,7 @@ void DialogueWindow::onSelectTopic(MyGUI::List* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;
-    std::string topic =  _sender->getItem(_index);
+    std::string topic =  _sender->getItemNameAt(_index);
     mEnvironment.mDialogueManager->keywordSelected(lower_string(topic));
 }
 
@@ -126,8 +126,8 @@ void DialogueWindow::removeKeyword(std::string keyWord)
 {
     if(topicsList->findItemIndexWith(keyWord) != MyGUI::ITEM_NONE)
     {
-        std::cout << topicsList->findItem(keyWord);
-        topicsList->removeItemAt(topicsList->findItem(keyWord));
+        std::cout << topicsList->findItemIndexWith(keyWord);
+        topicsList->removeItemAt(topicsList->findItemIndexWith(keyWord));
         pTopicsText.erase(keyWord);
     }
 }
@@ -158,9 +158,9 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
 
 std::string DialogueWindow::parseText(std::string text)
 {
-    for(int i = 0;i<topicsList->getItemCount();i++)
+    for(unsigned int i = 0;i<topicsList->getItemCount();i++)
     {
-        std::string keyWord = topicsList->getItem(i);
+        std::string keyWord = topicsList->getItemNameAt(i);
         addColorInString(text,keyWord,"#686EBA","#B29154");
     }
     return text;
