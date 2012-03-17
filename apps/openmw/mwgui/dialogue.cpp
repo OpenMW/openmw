@@ -145,13 +145,20 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
             str.insert(pos,color2);
             pos+= color2.length();
         }
-        else if(str.substr(pos -1,1) == " ")
+        else 
         {
-            str.insert(pos,color1);
-            pos += color1.length();
-            pos += keyword.length();
-            str.insert(pos,color2);
-            pos+= color2.length();
+            if(str.substr(pos -1,1) == " ")
+            {
+                str.insert(pos,color1);
+                pos += color1.length();
+                pos += keyword.length();
+                str.insert(pos,color2);
+                pos+= color2.length();
+            }
+            else
+            {
+                pos += keyword.length();
+            }
         }
     }
 }
