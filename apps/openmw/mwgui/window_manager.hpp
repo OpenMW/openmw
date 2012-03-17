@@ -152,6 +152,9 @@ namespace MWGui
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     void changeCell(MWWorld::Ptr::CellStore* cell); ///< change the active cell
+    
+    void setInteriorMapTexture(const int x, const int y);
+    ///< set the index of the map texture that should be used (for interiors)
 
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.

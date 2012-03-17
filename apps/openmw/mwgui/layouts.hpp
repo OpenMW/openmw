@@ -84,7 +84,7 @@ namespace MWGui
       mPrefix = prefix;
     }
 
-    void setActiveCell(const int x, const int y)
+    void setActiveCell(const int x, const int y, bool interior=false)
     {
       for (int mx=0; mx<3; ++mx)
       {
@@ -94,7 +94,7 @@ namespace MWGui
                           + boost::lexical_cast<std::string>(my);
           
           std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
-                                        + boost::lexical_cast<std::string>(y - (my-1));
+                                        + boost::lexical_cast<std::string>(y + (interior ? (my-1) : -1*(my-1)));
           setImage(name, image);
           setImage(name+"_fog", image+"_fog");
         }

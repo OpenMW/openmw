@@ -1,6 +1,9 @@
 #include "localmap.hpp"
 #include "renderingmanager.hpp"
 
+#include "../mwworld/environment.hpp"
+#include "../mwgui/window_manager.hpp"
+
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
 
@@ -19,61 +22,16 @@ using namespace Ogre;
 // size of a map segment (for exterior regions, this equals 1 cell)
 #define SIZE 8192.f
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend)
+LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* env)
 {
     mRendering = rend;
-
+    mEnvironment = env;
+    
     mCellCamera = mRendering->getScene()->createCamera("CellCamera");
     mCellCamera->setProjectionType(PT_ORTHOGRAPHIC);
     // look down -y
     const float sqrt0pt5 = 0.707106781;
     mCellCamera->setOrientation(Quaternion(sqrt0pt5, -sqrt0pt5, 0, 0));
-
-    // Debug overlay to view the maps
-
-    render(0, 0, 10000, 10000, SIZE, SIZE, "Cell_0_0_");
-
-    MaterialPtr mat = MaterialManager::getSingleton().create("testMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    mat->getTechnique(0)->getPass(0)->createTextureUnitState("Cell_0_0_");
-    mat->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-    mat->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-    mat->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-
-    mat = MaterialManager::getSingleton().create("testMaterial2", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    mat->getTechnique(0)->getPass(0)->createTextureUnitState("Cell_0_0_");
-    mat->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-    mat->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-    mat->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-    
-    OverlayManager& ovm = OverlayManager::getSingleton();
-
-    Overlay* mOverlay = ovm.create( "testOverlay" );
-    mOverlay->setZOrder(0);
-    OverlayContainer* overlay_panel;
-    overlay_panel = (OverlayContainer*)ovm.createOverlayElement("Panel", "testPanel");
-    
-    overlay_panel->_setPosition(0, 0);
-    overlay_panel->_setDimensions(0.5, 0.5);
-    
-    overlay_panel->setMaterialName( "testMaterial" );
-    overlay_panel->show();
-    mOverlay->add2D(overlay_panel);
-    //mOverlay->show();
-
-    Overlay* mOverlay2 = ovm.create( "testOverlay2" );
-    mOverlay2->setZOrder(1);
-    OverlayContainer* overlay_panel2;
-    overlay_panel2 = (OverlayContainer*)ovm.createOverlayElement("Panel", "testPanel2");
-    
-    overlay_panel2->_setPosition(0, 0);
-    overlay_panel2->_setDimensions(0.5, 0.5);
-    
-    overlay_panel2->setMaterialName( "testMaterial2" );
-    overlay_panel2->show();
-    mOverlay2->add2D(overlay_panel2);
-    
-    //mOverlay2->show();
-    
 }
 
 LocalMap::~LocalMap()
@@ -304,6 +262,8 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         
         x = std::ceil((pos.x - min.x)/SIZE)-1;
         y = std::ceil((pos.y - min.y)/SIZE)-1;
+
+        mEnvironment->mWindowManager->setInteriorMapTexture(x,y);
     }
 
     // convert from world coordinates to texture UV coordinates
@@ -355,17 +315,5 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         // copy to the texture
         memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION*4);
         tex->getBuffer()->unlock();
-
-        if (!MaterialManager::getSingleton().getByName("testMaterial").isNull())
-        {
-            MaterialPtr mat = MaterialManager::getSingleton().getByName("testMaterial");
-            mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(texName);
-        }
-        if (!MaterialManager::getSingleton().getByName("testMaterial2").isNull())
-        {
-            MaterialPtr mat = MaterialManager::getSingleton().getByName("testMaterial2");
-            mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(tex->getName());
-        }
-        
     }
 }

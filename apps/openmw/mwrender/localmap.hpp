@@ -5,6 +5,11 @@
 
 #include <openengine/ogre/renderer.hpp>
 
+namespace MWWorld
+{
+    class Environment;
+}
+
 namespace MWRender
 {
     ///
@@ -13,7 +18,7 @@ namespace MWRender
     class LocalMap
     {
     public:
-        LocalMap(OEngine::Render::OgreRenderer*);
+        LocalMap(OEngine::Render::OgreRenderer*, MWWorld::Environment* env);
         ~LocalMap();
 
         /**
@@ -52,6 +57,7 @@ namespace MWRender
 
     private:
         OEngine::Render::OgreRenderer* mRendering;
+        MWWorld::Environment* mEnvironment;
 
         Ogre::Camera* mCellCamera;
 

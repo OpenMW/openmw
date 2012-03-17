@@ -420,3 +420,8 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
     }
 
 }
+
+void WindowManager::setInteriorMapTexture(const int x, const int y)
+{
+    map->setActiveCell(x,y, true);
+}

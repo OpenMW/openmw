@@ -56,7 +56,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
 
-    mLocalMap = new MWRender::LocalMap(&mRendering);
+    mLocalMap = new MWRender::LocalMap(&mRendering, &environment);
 }
 
 RenderingManager::~RenderingManager ()
