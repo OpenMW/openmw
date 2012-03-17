@@ -7,7 +7,7 @@ namespace MWSound
 {
     class Sound
     {
-        virtual bool Play() = 0;
+        virtual void Play() = 0;
         virtual void Stop() = 0;
         virtual bool isPlaying() = 0;
 

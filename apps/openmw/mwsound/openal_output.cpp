@@ -66,7 +66,7 @@ public:
     OpenAL_SoundStream(std::auto_ptr<Sound_Decoder> decoder);
     virtual ~OpenAL_SoundStream();
 
-    virtual bool Play();
+    virtual void Play();
     virtual void Stop();
     virtual bool isPlaying();
 };
@@ -116,7 +116,7 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
     Decoder->Close();
 }
 
-bool OpenAL_SoundStream::Play()
+void OpenAL_SoundStream::Play()
 {
     std::vector<char> data(BufferSize);
 
@@ -135,8 +135,6 @@ bool OpenAL_SoundStream::Play()
     alSourceQueueBuffers(Source, NumBuffers, Buffers);
     alSourcePlay(Source);
     throwALerror();
-
-    return true;
 }
 
 void OpenAL_SoundStream::Stop()
