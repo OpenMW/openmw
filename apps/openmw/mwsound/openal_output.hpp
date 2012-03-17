@@ -24,6 +24,8 @@ namespace MWSound
 
         virtual Sound *StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder);
 
+        virtual void UpdateListener(float pos[3], float atdir[3], float updir[3]);
+
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();
 
