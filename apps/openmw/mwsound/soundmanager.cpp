@@ -199,7 +199,7 @@ namespace MWSound
         if(mMusic)
             mMusic->Stop();
         std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
-        mMusic.reset(Output->StreamSound(filename, decoder));
+        mMusic.reset(Output->StreamSound(filename, decoder, 0.4f, 1.0f));
     }
 
     void SoundManager::streamMusic(const std::string& filename)

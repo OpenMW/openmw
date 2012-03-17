@@ -28,7 +28,8 @@ namespace MWSound
                                    MWWorld::Ptr ptr, float volume, float pitch,
                                    float min, float max, bool loop);
 
-        virtual Sound *StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder);
+        virtual Sound *StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
+                                   float volume, float pitch);
 
         virtual void UpdateListener(float pos[3], float atdir[3], float updir[3]);
 

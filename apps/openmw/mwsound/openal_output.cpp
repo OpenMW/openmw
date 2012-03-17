@@ -92,7 +92,7 @@ public:
     OpenAL_SoundStream(std::auto_ptr<Sound_Decoder> decoder);
     virtual ~OpenAL_SoundStream();
 
-    void Play();
+    void Play(float volume, float pitch);
     virtual void Stop();
     virtual bool isPlaying();
 };
@@ -156,12 +156,14 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
     Decoder->Close();
 }
 
-void OpenAL_SoundStream::Play()
+void OpenAL_SoundStream::Play(float volume, float pitch)
 {
     std::vector<char> data(BufferSize);
 
     alSourceStop(Source);
     alSourcei(Source, AL_BUFFER, 0);
+    alSourcef(Source, AL_GAIN, volume);
+    alSourcef(Source, AL_PITCH, pitch);
     throwALerror();
 
     for(ALuint i = 0;i < NumBuffers;i++)
@@ -395,14 +397,14 @@ Sound* OpenAL_Output::PlaySound3D(const std::string &fname, std::auto_ptr<Sound_
 }
 
 
-Sound* OpenAL_Output::StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder)
+Sound* OpenAL_Output::StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder, float volume, float pitch)
 {
     std::auto_ptr<OpenAL_SoundStream> sound;
 
     decoder->Open(fname);
 
     sound.reset(new OpenAL_SoundStream(decoder));
-    sound->Play();
+    sound->Play(volume, pitch);
 
     return sound.release();
 }
