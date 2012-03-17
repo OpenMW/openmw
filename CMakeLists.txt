@@ -120,10 +120,6 @@ set(OENGINE_BULLET
 
 # Sound setup
 if (USE_AUDIERE)
-    set(MANGLE_SOUND_OUTPUT
-        ${LIBDIR}/mangle/sound/sources/audiere_source.cpp
-        ${LIBDIR}/mangle/sound/sources/sample_reader.cpp
-        ${LIBDIR}/mangle/stream/clients/audiere_file.cpp)
     find_package(Audiere REQUIRED)
     set(SOUND_INPUT_INCLUDES ${AUDIERE_INCLUDE_DIR})
     set(SOUND_INPUT_LIBRARY ${AUDIERE_LIBRARY})
@@ -131,8 +127,6 @@ if (USE_AUDIERE)
 endif (USE_AUDIERE)
 
 if (USE_FFMPEG)
-    set(MANGLE_SOUND_OUTPUT
-        ${LIBDIR}/mangle/sound/sources/ffmpeg_source.cpp)
     find_package(FFMPEG REQUIRED)
     set(SOUND_INPUT_INCLUDES ${FFMPEG_INCLUDE_DIR})
     set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
@@ -140,10 +134,6 @@ if (USE_FFMPEG)
 endif (USE_FFMPEG)
 
 if (USE_MPG123)
-    set(MANGLE_SOUND_OUTPUT
-        ${LIBDIR}/mangle/sound/sources/mpg123_source.cpp
-        ${LIBDIR}/mangle/sound/sources/libsndfile.cpp
-        ${LIBDIR}/mangle/sound/sources/sample_reader.cpp)
     find_package(MPG123 REQUIRED)
     find_package(SNDFILE REQUIRED)
     set(SOUND_INPUT_INCLUDES ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
@@ -151,14 +141,7 @@ if (USE_MPG123)
     set(SOUND_DEFINE -DOPENMW_USE_MPG123)
 endif (USE_MPG123)
 
-set(OENGINE_SOUND
-  # Mangle and OEngine sound files are sort of intertwined, so put
-  # them together here
-  ${LIBDIR}/openengine/sound/sndmanager.cpp
-  ${LIBDIR}/mangle/sound/outputs/openal_out.cpp
-  ${MANGLE_SOUND_OUTPUT}
-)
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_SOUND} ${OENGINE_BULLET})
+set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
 
 set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
