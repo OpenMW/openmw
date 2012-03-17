@@ -1,3 +1,5 @@
+#ifdef OPENMW_USE_MPG123
+
 #include "mpgsnd_decoder.hpp"
 
 
@@ -27,3 +29,5 @@ MpgSnd_Decoder::~MpgSnd_Decoder()
 }
 
 }
+
+#endif
