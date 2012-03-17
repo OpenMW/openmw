@@ -245,11 +245,8 @@ Sound* OpenAL_Output::StreamSound(const std::string &fname, std::auto_ptr<Sound_
 
 void OpenAL_Output::UpdateListener(float pos[3], float atdir[3], float updir[3])
 {
-    alListener3f(AL_POSITION, pos[0], pos[2], -pos[1]);
-    ALfloat orient[6] = {
-        atdir[0], atdir[2], -atdir[1],
-        updir[0], updir[2], -updir[1]
-    };
+    float orient[6] = { atdir[0], atdir[1], atdir[2], updir[0], updir[1], updir[2] };
+    alListenerfv(AL_POSITION, pos);
     alListenerfv(AL_ORIENTATION, orient);
     throwALerror();
 }

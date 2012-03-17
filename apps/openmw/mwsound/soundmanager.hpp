@@ -62,6 +62,7 @@ namespace MWSound
         bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
         void removeCell(const MWWorld::Ptr::CellStore *cell);
         void updatePositions(MWWorld::Ptr ptr);
+        void updateRegionSound(float duration);
 
     public:
         SoundManager(Ogre::Root*, Ogre::Camera*,

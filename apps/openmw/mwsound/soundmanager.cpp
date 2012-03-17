@@ -305,7 +305,7 @@ namespace MWSound
         updatePositions(ptr);
     }
 
-    void SoundManager::update(float duration)
+    void SoundManager::updateRegionSound(float duration)
     {
         MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
         static int total = 0;
@@ -362,5 +362,26 @@ namespace MWSound
             }
             pos += chance;
         }
+    }
+
+    void SoundManager::update(float duration)
+    {
+        static float timePassed = 0.0;
+
+        timePassed += duration;
+        if(timePassed > (1.0f/30.0f))
+        {
+            timePassed = 0.0f;
+            Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
+
+            Ogre::Vector3 nPos, nDir, nUp;
+            nPos = cam->getRealPosition();
+            nDir = cam->getRealDirection();
+            nUp  = cam->getRealUp();
+
+            Output->UpdateListener(&nPos[0], &nDir[0], &nUp[0]);
+        }
+
+        updateRegionSound(duration);
     }
 }
