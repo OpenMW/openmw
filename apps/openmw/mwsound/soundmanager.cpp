@@ -165,7 +165,16 @@ namespace MWSound
     {
         std::string filePath = mMusicLibrary.locate(filename, mFSStrict, true).string();
         if(!filePath.empty())
-            streamMusicFull(filePath);
+        {
+            try
+            {
+                streamMusicFull(filePath);
+            }
+            catch(std::exception &e)
+            {
+                std::cout << "Music Error: " << e.what() << "\n";
+            }
+        }
     }
 
     void SoundManager::startRandomTitle()
