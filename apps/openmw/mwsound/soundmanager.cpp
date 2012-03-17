@@ -120,7 +120,17 @@ namespace MWSound
              float min, float max,
              bool loop, bool untracked)
     {
-        //std::cout << "Cannot load " << file << ", skipping.\n";
+        try
+        {
+            Sound *sound;
+            std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
+            sound = Output->PlaySound3D(file, decoder, ptr, volume, pitch, min, max, loop);
+            delete sound;
+        }
+        catch(std::exception &e)
+        {
+            std::cout <<"Sound play error: "<<e.what()<< std::endl;
+        }
     }
 
     // Stop a sound and remove it from the list. If id="" then
@@ -251,8 +261,6 @@ namespace MWSound
         std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict, true);
         if(!filePath.empty())
             add(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
-        else
-            std::cout << "Sound file " << filename << " not found, skipping.\n";
     }
 
     bool SoundManager::sayDone(MWWorld::Ptr ptr) const
@@ -264,8 +272,23 @@ namespace MWSound
     void SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
     {
         float min, max;
-        const std::string &file = lookup(soundId, volume, min, max);
-        std::cout << "Cannot play " << file << ", skipping.\n";
+        std::string file = lookup(soundId, volume, min, max);
+        if(!file.empty())
+        {
+            try
+            {
+                Sound *sound;
+                std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
+                sound = Output->PlaySound(file, decoder, volume, pitch, loop);
+                delete sound;
+            }
+            catch(std::exception &e)
+            {
+                std::cout <<"Sound play error: "<<e.what()<< std::endl;
+            }
+        }
+        else
+            std::cout << "Sound file " << soundId << " not found, skipping.\n";
     }
 
     void SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
@@ -273,9 +296,11 @@ namespace MWSound
     {
         // Look up the sound in the ESM data
         float min, max;
-        const std::string &file = lookup(soundId, volume, min, max);
-        if(file != "")
-            std::cout << "Cannot play " << file << ", skipping.\n";
+        std::string file = lookup(soundId, volume, min, max);
+        if(!file.empty())
+            add(file, ptr, soundId, volume, pitch, min, max, false);
+        else
+            std::cout << "Sound file " << soundId << " not found, skipping.\n";
     }
 
     void SoundManager::stopSound3D(MWWorld::Ptr ptr, const std::string& soundId)

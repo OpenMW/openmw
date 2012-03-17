@@ -230,6 +230,22 @@ void OpenAL_Output::Deinitialize()
 }
 
 
+Sound* OpenAL_Output::PlaySound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
+                                float volume, float pitch, bool loop)
+{
+    fail("PlaySound not yet supported");
+    return NULL;
+}
+
+Sound* OpenAL_Output::PlaySound3D(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
+                                   MWWorld::Ptr ptr, float volume, float pitch,
+                                   float min, float max, bool loop)
+{
+    fail("PlaySound3D not yet supported");
+    return NULL;
+}
+
+
 Sound* OpenAL_Output::StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder)
 {
     std::auto_ptr<OpenAL_SoundStream> sound;
