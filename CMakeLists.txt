@@ -28,7 +28,6 @@ set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VE
 configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
 
 # Sound source selection
-option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
@@ -125,13 +124,6 @@ set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
 set(OPENMW_LIBS_HEADER)
 
 # Sound setup
-if (USE_AUDIERE)
-    find_package(Audiere REQUIRED)
-    set(SOUND_INPUT_INCLUDES ${AUDIERE_INCLUDE_DIR})
-    set(SOUND_INPUT_LIBRARY ${AUDIERE_LIBRARY})
-    set(SOUND_DEFINE -DOPENMW_USE_AUDIERE)
-endif (USE_AUDIERE)
-
 if (USE_FFMPEG)
     find_package(FFMPEG REQUIRED)
     set(SOUND_INPUT_INCLUDES ${FFMPEG_INCLUDE_DIR})

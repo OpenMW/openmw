@@ -21,10 +21,6 @@
    MPG123/libsndfile for input. The OPENMW_USE_x macros are set in
    CMakeLists.txt.
 */
-#ifdef OPENMW_USE_AUDIERE
-#define SOUND_IN "Audiere"
-#endif
-
 #ifdef OPENMW_USE_FFMPEG
 #define SOUND_IN "FFmpeg"
 #endif
