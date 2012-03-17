@@ -155,7 +155,7 @@ namespace MWSound
         if(mMusic)
             mMusic->Stop();
         std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
-        //mMusic.reset(Output->StreamSound(filename, decoder));
+        mMusic.reset(Output->StreamSound(filename, decoder));
     }
 
     void SoundManager::streamMusic(const std::string& filename)

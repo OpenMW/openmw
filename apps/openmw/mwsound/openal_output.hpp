@@ -11,6 +11,8 @@
 namespace MWSound
 {
     class SoundManager;
+    class Sound_Decoder;
+    class Sound;
 
     class OpenAL_Output : public Sound_Output
     {
@@ -19,6 +21,8 @@ namespace MWSound
 
         virtual bool Initialize(const std::string &devname="");
         virtual void Deinitialize();
+
+        virtual Sound *StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder);
 
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();
