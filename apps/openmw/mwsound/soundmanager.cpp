@@ -76,6 +76,8 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
+        LooseSounds.clear();
+        ActiveSounds.clear();
         if(mMusic)
             mMusic->Stop();
         mMusic.reset();
@@ -113,7 +115,7 @@ namespace MWSound
     }
 
     // Add a sound to the list and play it
-    void SoundManager::add(const std::string &file,
+    void SoundManager::play3d(const std::string &file,
              MWWorld::Ptr ptr,
              const std::string &id,
              float volume, float pitch,
@@ -125,7 +127,10 @@ namespace MWSound
             Sound *sound;
             std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
             sound = Output->PlaySound3D(file, decoder, ptr, volume, pitch, min, max, loop);
-            delete sound;
+            if(untracked)
+                LooseSounds[id] = SoundPtr(sound);
+            else
+                ActiveSounds[ptr][id] = SoundPtr(sound);
         }
         catch(std::exception &e)
         {
@@ -137,6 +142,22 @@ namespace MWSound
     // remove the entire object and stop all its sounds.
     void SoundManager::remove(MWWorld::Ptr ptr, const std::string &id)
     {
+        SoundMap::iterator snditer = ActiveSounds.find(ptr);
+        if(snditer == ActiveSounds.end())
+            return;
+
+        if(!id.empty())
+        {
+            IDMap::iterator iditer = snditer->second.find(id);
+            if(iditer != snditer->second.end())
+            {
+                snditer->second.erase(iditer);
+                if(snditer->second.size() == 0)
+                    ActiveSounds.erase(snditer);
+            }
+        }
+        else
+            ActiveSounds.erase(snditer);
     }
 
     bool SoundManager::isPlaying(MWWorld::Ptr ptr, const std::string &id) const
@@ -149,6 +170,14 @@ namespace MWSound
     // Remove all references to objects belonging to a given cell
     void SoundManager::removeCell(const MWWorld::Ptr::CellStore *cell)
     {
+        SoundMap::iterator snditer = ActiveSounds.begin();
+        while(snditer != ActiveSounds.end())
+        {
+            if(snditer->first.getCell() == cell)
+                ActiveSounds.erase(snditer++);
+            else
+                snditer++;
+        }
     }
 
     void SoundManager::updatePositions(MWWorld::Ptr ptr)
@@ -260,7 +289,7 @@ namespace MWSound
         // The range values are not tested
         std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict, true);
         if(!filePath.empty())
-            add(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
+            play3d(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
     }
 
     bool SoundManager::sayDone(MWWorld::Ptr ptr) const
@@ -280,7 +309,7 @@ namespace MWSound
                 Sound *sound;
                 std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
                 sound = Output->PlaySound(file, decoder, volume, pitch, loop);
-                delete sound;
+                LooseSounds[soundId] = SoundPtr(sound);
             }
             catch(std::exception &e)
             {
@@ -298,7 +327,7 @@ namespace MWSound
         float min, max;
         std::string file = lookup(soundId, volume, min, max);
         if(!file.empty())
-            add(file, ptr, soundId, volume, pitch, min, max, false);
+            play3d(file, ptr, soundId, volume, pitch, min, max, false);
         else
             std::cout << "Sound file " << soundId << " not found, skipping.\n";
     }
@@ -315,6 +344,9 @@ namespace MWSound
 
     void SoundManager::stopSound(const std::string& soundId)
     {
+        IDMap::iterator iditer = LooseSounds.find(soundId);
+        if(iditer != LooseSounds.end())
+            LooseSounds.erase(iditer);
     }
 
     bool SoundManager::getSoundPlaying(MWWorld::Ptr ptr, const std::string& soundId) const
@@ -382,7 +414,7 @@ namespace MWSound
             {
                 //play sound
                 std::cout << "Sound: " << go <<" Chance:" <<  chance << "\n";
-                playSound(go, 20.0, 1.0);
+                playSound(go, 1.0f, 1.0f);
                 break;
             }
             pos += chance;
@@ -397,14 +429,24 @@ namespace MWSound
         if(timePassed > (1.0f/30.0f))
         {
             timePassed = 0.0f;
-            Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
 
+            Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
             Ogre::Vector3 nPos, nDir, nUp;
             nPos = cam->getRealPosition();
             nDir = cam->getRealDirection();
             nUp  = cam->getRealUp();
 
             Output->UpdateListener(&nPos[0], &nDir[0], &nUp[0]);
+
+
+            IDMap::iterator snditer = LooseSounds.begin();
+            while(snditer != LooseSounds.end())
+            {
+                if(!snditer->second->isPlaying())
+                    LooseSounds.erase(snditer++);
+                else
+                    snditer++;
+            }
         }
 
         updateRegionSound(duration);

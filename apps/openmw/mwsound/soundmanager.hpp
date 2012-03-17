@@ -52,9 +52,15 @@ namespace MWSound
         // Points to the current playlist of music files stored in the music library
         const Files::PathContainer* mCurrentPlaylist;
 
+        typedef boost::shared_ptr<Sound> SoundPtr;
+        typedef std::map<std::string,SoundPtr> IDMap;
+        typedef std::map<MWWorld::Ptr,IDMap> SoundMap;
+        SoundMap ActiveSounds;
+        IDMap LooseSounds;
+
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
-        void add(const std::string &file,
+        void play3d(const std::string &file,
             MWWorld::Ptr ptr, const std::string &id,
             float volume, float pitch, float min, float max,
             bool loop, bool untracked=false);
