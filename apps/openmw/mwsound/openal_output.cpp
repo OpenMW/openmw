@@ -1,3 +1,6 @@
+#include <stdexcept>
+#include <iostream>
+
 #include "openal_output.hpp"
 
 namespace MWSound

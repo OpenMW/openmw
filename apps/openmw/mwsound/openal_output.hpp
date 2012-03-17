@@ -1,13 +1,17 @@
 #ifndef GAME_SOUND_OPENAL_OUTPUT_H
 #define GAME_SOUND_OPENAL_OUTPUT_H
 
-#include "soundmanager.hpp"
+#include <string>
 
 #include "alc.h"
 #include "al.h"
 
+#include "sound_output.hpp"
+
 namespace MWSound
 {
+    class SoundManager;
+
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *Device;

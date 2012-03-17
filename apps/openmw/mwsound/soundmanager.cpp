@@ -12,6 +12,7 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
+#include "sound_output.hpp"
 #include "sound_decoder.hpp"
 
 #include "openal_output.hpp"
