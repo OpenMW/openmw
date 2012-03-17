@@ -472,7 +472,7 @@ namespace MWDialogue
 
     void DialogueManager::parseText(std::string text)
     {
-        std::map<std::string,std::list<ESM::DialInfo>>::iterator it;
+        std::map<std::string,std::list <ESM::DialInfo> >::iterator it;
         for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
         {
             MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
