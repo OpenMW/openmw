@@ -328,6 +328,9 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
 
 void WeatherManager::setWeather(const String& weather, bool instant)
 {
+    if (weather == mCurrentWeather && mNextWeather == "") 
+        return;
+
     if (instant || mFirstUpdate)
     {
         mNextWeather = "";
@@ -339,12 +342,12 @@ void WeatherManager::setWeather(const String& weather, bool instant)
         if (mNextWeather != "")
         {
             // transition more than 50% finished?
-            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60) <= 0.5)
+            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600) <= 0.5)
                 mCurrentWeather = mNextWeather;
         }
-            
+
         mNextWeather = weather;
-        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60;
+        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600;
     }
 }
 
@@ -459,7 +462,8 @@ WeatherResult WeatherManager::transition(float factor)
     result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor);
     result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth);
     result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed);
-    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
+    //result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
+    result.mCloudSpeed = current.mCloudSpeed;
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     result.mGlareView = lerp(current.mGlareView, other.mGlareView);
 
@@ -470,7 +474,7 @@ WeatherResult WeatherManager::transition(float factor)
 
 void WeatherManager::update(float duration)
 {
-    mWeatherUpdateTime -= duration;
+    mWeatherUpdateTime -= duration * mEnvironment->mWorld->getTimeScaleFactor();
 
     bool exterior = (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior());
 
@@ -482,7 +486,7 @@ void WeatherManager::update(float duration)
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
             mCurrentRegion = regionstr;
-            mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*60.f;
+            mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*3600;
 
             std::string weather;
 
@@ -539,7 +543,7 @@ void WeatherManager::update(float duration)
 
         if (mNextWeather != "")
         {
-            mRemainingTransitionTime -= duration;
+            mRemainingTransitionTime -= duration * mEnvironment->mWorld->getTimeScaleFactor();
             if (mRemainingTransitionTime < 0)
             {
                 mCurrentWeather = mNextWeather;
@@ -548,10 +552,10 @@ void WeatherManager::update(float duration)
         }
 
         if (mNextWeather != "")
-            result = transition(1-(mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60)));
+            result = transition(1-(mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600)));
         else
             result = getResult(mCurrentWeather);
-        
+
         mRendering->configureFog(result.mFogDepth, result.mFogColor);
 
         // disable sun during night
@@ -570,9 +574,9 @@ void WeatherManager::update(float duration)
             height = (mHour-20.f)/4.f;
         else //if (mHour > 0 && mHour < 6)
             height = 1-(mHour/6.f);
-            
+
         int facing = (mHour > 13.f) ? 1 : -1;
-        
+
         Vector3 final(
             (1-height)*facing, 
             (1-height)*facing, 
