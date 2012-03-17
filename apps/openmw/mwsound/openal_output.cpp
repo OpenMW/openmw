@@ -63,125 +63,133 @@ class OpenAL_SoundStream : public Sound
     std::auto_ptr<Sound_Decoder> Decoder;
 
 public:
-    OpenAL_SoundStream(std::auto_ptr<Sound_Decoder> decoder) : Decoder(decoder)
+    OpenAL_SoundStream(std::auto_ptr<Sound_Decoder> decoder);
+    virtual ~OpenAL_SoundStream();
+
+    virtual bool Play();
+    virtual void Stop();
+    virtual bool isPlaying();
+};
+
+OpenAL_SoundStream::OpenAL_SoundStream(std::auto_ptr<Sound_Decoder> decoder)
+  : Decoder(decoder)
+{
+    throwALerror();
+
+    alGenSources(1, &Source);
+    throwALerror();
+    try
     {
+        alGenBuffers(NumBuffers, Buffers);
         throwALerror();
-
-        alGenSources(1, &Source);
-        throwALerror();
-        try
-        {
-            alGenBuffers(NumBuffers, Buffers);
-            throwALerror();
-        }
-        catch(std::exception &e)
-        {
-            alDeleteSources(1, &Source);
-            alGetError();
-            throw;
-        }
-
-        try
-        {
-            int srate;
-            enum Sound_Decoder::ChannelConfig chans;
-            enum Sound_Decoder::SampleType type;
-
-            Decoder->GetInfo(&srate, &chans, &type);
-            Format = getALFormat(chans, type);
-            SampleRate = srate;
-        }
-        catch(std::exception &e)
-        {
-            alDeleteSources(1, &Source);
-            alDeleteBuffers(NumBuffers, Buffers);
-            alGetError();
-            throw;
-        }
     }
-    virtual ~OpenAL_SoundStream()
+    catch(std::exception &e)
+    {
+        alDeleteSources(1, &Source);
+        alGetError();
+        throw;
+    }
+
+    try
+    {
+        int srate;
+        Sound_Decoder::ChannelConfig chans;
+        Sound_Decoder::SampleType type;
+
+        Decoder->GetInfo(&srate, &chans, &type);
+        Format = getALFormat(chans, type);
+        SampleRate = srate;
+    }
+    catch(std::exception &e)
     {
         alDeleteSources(1, &Source);
         alDeleteBuffers(NumBuffers, Buffers);
         alGetError();
-        Decoder->Close();
+        throw;
     }
+}
+OpenAL_SoundStream::~OpenAL_SoundStream()
+{
+    alDeleteSources(1, &Source);
+    alDeleteBuffers(NumBuffers, Buffers);
+    alGetError();
+    Decoder->Close();
+}
 
-    virtual bool Play()
+bool OpenAL_SoundStream::Play()
+{
+    std::vector<char> data(BufferSize);
+
+    alSourceStop(Source);
+    alSourcei(Source, AL_BUFFER, 0);
+    throwALerror();
+
+    for(ALuint i = 0;i < NumBuffers;i++)
+    {
+        size_t got;
+        got = Decoder->Read(&data[0], data.size());
+        alBufferData(Buffers[i], Format, &data[0], got, SampleRate);
+    }
+    throwALerror();
+
+    alSourceQueueBuffers(Source, NumBuffers, Buffers);
+    alSourcePlay(Source);
+    throwALerror();
+
+    return true;
+}
+
+void OpenAL_SoundStream::Stop()
+{
+    alSourceStop(Source);
+    alSourcei(Source, AL_BUFFER, 0);
+    throwALerror();
+    // FIXME: Rewind decoder
+}
+
+bool OpenAL_SoundStream::isPlaying()
+{
+    ALint processed, state;
+
+    alGetSourcei(Source, AL_SOURCE_STATE, &state);
+    alGetSourcei(Source, AL_BUFFERS_PROCESSED, &processed);
+    throwALerror();
+
+    if(processed > 0)
     {
         std::vector<char> data(BufferSize);
-
-        alSourceStop(Source);
-        alSourcei(Source, AL_BUFFER, 0);
-        throwALerror();
-
-        for(ALuint i = 0;i < NumBuffers;i++)
-        {
+        do {
+            ALuint bufid;
             size_t got;
-            got = Decoder->Read(&data[0], data.size());
-            alBufferData(Buffers[i], Format, &data[0], got, SampleRate);
-        }
-        throwALerror();
 
-        alSourceQueueBuffers(Source, NumBuffers, Buffers);
+            alSourceUnqueueBuffers(Source, 1, &bufid);
+            processed--;
+
+            got = Decoder->Read(&data[0], data.size());
+            if(got > 0)
+            {
+                alBufferData(bufid, Format, &data[0], got, SampleRate);
+                alSourceQueueBuffers(Source, 1, &bufid);
+            }
+        } while(processed > 0);
+        throwALerror();
+    }
+
+    if(state != AL_PLAYING && state != AL_PAUSED)
+    {
+        ALint queued;
+
+        alGetSourcei(Source, AL_BUFFERS_QUEUED, &queued);
+        throwALerror();
+        if(queued == 0)
+            return false;
+
         alSourcePlay(Source);
         throwALerror();
-
-        return true;
     }
 
-    virtual void Stop()
-    {
-        alSourceStop(Source);
-        alSourcei(Source, AL_BUFFER, 0);
-        throwALerror();
-        // FIXME: Rewind decoder
-    }
-
-    virtual bool isPlaying()
-    {
-        ALint processed, state;
-
-        alGetSourcei(Source, AL_SOURCE_STATE, &state);
-        alGetSourcei(Source, AL_BUFFERS_PROCESSED, &processed);
-        throwALerror();
-
-        if(processed > 0)
-        {
-            std::vector<char> data(BufferSize);
-            do {
-                ALuint bufid;
-                size_t got;
-
-                alSourceUnqueueBuffers(Source, 1, &bufid);
-                processed--;
-
-                got = Decoder->Read(&data[0], data.size());
-                if(got > 0)
-                {
-                    alBufferData(bufid, Format, &data[0], got, SampleRate);
-                    alSourceQueueBuffers(Source, 1, &bufid);
-                }
-            } while(processed > 0);
-            throwALerror();
-        }
-
-        if(state != AL_PLAYING && state != AL_PAUSED)
-        {
-            ALint queued;
-
-            alGetSourcei(Source, AL_BUFFERS_QUEUED, &queued);
-            throwALerror();
-            if(queued == 0)
-                return false;
-
-            alSourcePlay(Source);
-            throwALerror();
-        }
-
-        return true;
-    }
-};
+    return true;
+}
 
 
 bool OpenAL_Output::Initialize(const std::string &devname)
