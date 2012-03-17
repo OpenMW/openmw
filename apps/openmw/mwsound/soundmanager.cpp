@@ -445,12 +445,16 @@ namespace MWSound
             nDir = cam->getRealDirection();
             nUp  = cam->getRealUp();
 
+            // The output handler is expecting vectors oriented like the game
+            // (that is, -Z goes down, +Y goes forward), but that's not what we
+            // get from Ogre's camera, so we have to convert.
             float pos[3] = { nPos[0], -nPos[2], nPos[1] };
             float at[3] = { nDir[0], -nDir[2], nDir[1] };
             float up[3] = { nUp[0], -nUp[2], nUp[1] };
             Output->UpdateListener(pos, at, up);
 
-
+            // Check if any "untracked" sounds are finished playing, and trash
+            // them
             IDMap::iterator snditer = LooseSounds.begin();
             while(snditer != LooseSounds.end())
             {
