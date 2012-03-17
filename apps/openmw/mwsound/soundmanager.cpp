@@ -76,6 +76,9 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
+        if(mMusic)
+            mMusic->Stop();
+        mMusic.reset();
         Output.reset();
     }
 
