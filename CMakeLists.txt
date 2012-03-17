@@ -118,6 +118,12 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
 )
 
+set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
+source_group(libs\\openengine FILES ${OENGINE_ALL})
+
+set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
+set(OPENMW_LIBS_HEADER)
+
 # Sound setup
 if (USE_AUDIERE)
     find_package(Audiere REQUIRED)
@@ -140,12 +146,6 @@ if (USE_MPG123)
     set(SOUND_INPUT_LIBRARY ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
     set(SOUND_DEFINE -DOPENMW_USE_MPG123)
 endif (USE_MPG123)
-
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
-source_group(libs\\openengine FILES ${OENGINE_ALL})
-
-set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
-set(OPENMW_LIBS_HEADER)
 
 # Platform specific
 if (WIN32)

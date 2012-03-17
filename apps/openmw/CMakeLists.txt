@@ -38,7 +38,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanager
+    soundmanager openal_output
     )
 
 add_openmw_dir (mwworld

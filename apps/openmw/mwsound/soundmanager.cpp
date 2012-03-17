@@ -12,32 +12,28 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
+
+#include "openal_output.hpp"
+#define SOUND_OUT "OpenAL"
 /* Set up the sound manager to use Audiere, FFMPEG or
    MPG123/libsndfile for input. The OPENMW_USE_x macros are set in
    CMakeLists.txt.
 */
 #ifdef OPENMW_USE_AUDIERE
-#define SOUND_FACTORY OpenAL_Audiere_Factory
-#define SOUND_OUT "OpenAL"
 #define SOUND_IN "Audiere"
 #endif
 
 #ifdef OPENMW_USE_FFMPEG
-#define SOUND_FACTORY OpenAL_FFMpeg_Factory
-#define SOUND_OUT "OpenAL"
 #define SOUND_IN "FFmpeg"
 #endif
 
 #ifdef OPENMW_USE_MPG123
-#define SOUND_FACTORY OpenAL_SndFile_Mpg123_Factory
-#define SOUND_OUT "OpenAL"
 #define SOUND_IN "mpg123,sndfile"
 #endif
 
 
 namespace MWSound
 {
-
     SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
         const Files::PathContainer& dataDirs,
         bool useSound, bool fsstrict, MWWorld::Environment& environment)
@@ -47,6 +43,16 @@ namespace MWSound
     {
         if(!useSound)
             return;
+
+        std::cout << "Sound output: " << SOUND_OUT << std::endl;
+        std::cout << "Sound decoder: " << SOUND_IN << std::endl;
+
+        Output.reset(new DEFAULT_OUTPUT(*this));
+        if(!Output->Initialize())
+        {
+            Output.reset();
+            return;
+        }
 
         // The music library will accept these filetypes
         // If none is given then it will accept all filetypes
@@ -66,13 +72,11 @@ namespace MWSound
 
         std::string anything = "anything";      // anything is better that a segfault
         mCurrentPlaylist = mMusicLibrary.section(anything, mFSStrict); // now points to an empty path
-
-        std::cout << "Sound output: " << SOUND_OUT << std::endl;
-        std::cout << "Sound decoder: " << SOUND_IN << std::endl;
     }
 
     SoundManager::~SoundManager()
     {
+        Output.reset();
     }
 
     // Convert a soundId to file name, and modify the volume
@@ -258,7 +262,7 @@ namespace MWSound
         float min, max;
         const std::string &file = lookup(soundId, volume, min, max);
         if(file != "")
-            add(file, ptr, soundId, volume, pitch, min, max, loop, untracked);
+            std::cout << "Cannot play " << file << ", skipping.\n";
     }
 
     void SoundManager::stopSound3D(MWWorld::Ptr ptr, const std::string& soundId)
