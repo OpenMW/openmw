@@ -3,12 +3,15 @@
 
 #include <string>
 
+#include "../mwworld/ptr.hpp"
+
 namespace MWSound
 {
     class Sound
     {
         virtual void Stop() = 0;
         virtual bool isPlaying() = 0;
+        virtual void Update(MWWorld::Ptr ptr) = 0;
 
     public:
         virtual ~Sound() { }

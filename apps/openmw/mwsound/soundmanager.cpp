@@ -353,15 +353,21 @@ namespace MWSound
 
     bool SoundManager::getSoundPlaying(MWWorld::Ptr ptr, const std::string& soundId) const
     {
-        // Mark all sounds as playing, otherwise the scripts will just
-        // keep trying to play them every frame.
-
         return isPlaying(ptr, soundId);
     }
 
     void SoundManager::updateObject(MWWorld::Ptr ptr)
     {
-        // FIXME: Update tracked sounds that are using this ptr
+        SoundMap::iterator snditer = ActiveSounds.find(ptr);
+        if(snditer == ActiveSounds.end())
+            return;
+
+        IDMap::iterator iditer = snditer->second.begin();
+        while(iditer != snditer->second.end())
+        {
+            iditer->second->Update(ptr);
+            iditer++;
+        }
     }
 
     void SoundManager::updateRegionSound(float duration)

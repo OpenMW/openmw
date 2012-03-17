@@ -95,6 +95,7 @@ public:
     void Play(float volume, float pitch);
     virtual void Stop();
     virtual bool isPlaying();
+    virtual void Update(MWWorld::Ptr ptr);
 };
 
 class OpenAL_Sound : public Sound
@@ -108,6 +109,7 @@ public:
 
     virtual void Stop();
     virtual bool isPlaying();
+    virtual void Update(MWWorld::Ptr ptr);
 };
 
 
@@ -231,6 +233,15 @@ bool OpenAL_SoundStream::isPlaying()
     return true;
 }
 
+void OpenAL_SoundStream::Update(MWWorld::Ptr ptr)
+{
+    const float *pos = ptr.getCellRef().pos.pos;
+    alSource3f(Source, AL_POSITION, pos[0], pos[2], -pos[1]);
+    alSource3f(Source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(Source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    throwALerror();
+}
+
 
 OpenAL_Sound::OpenAL_Sound(ALuint src, ALuint buf)
   : Source(src), Buffer(buf)
@@ -257,6 +268,15 @@ bool OpenAL_Sound::isPlaying()
     throwALerror();
 
     return state==AL_PLAYING;
+}
+
+void OpenAL_Sound::Update(MWWorld::Ptr ptr)
+{
+    const float *pos = ptr.getCellRef().pos.pos;
+    alSource3f(Source, AL_POSITION, pos[0], pos[2], -pos[1]);
+    alSource3f(Source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(Source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    throwALerror();
 }
 
 
