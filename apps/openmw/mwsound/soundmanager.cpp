@@ -162,9 +162,15 @@ namespace MWSound
 
     bool SoundManager::isPlaying(MWWorld::Ptr ptr, const std::string &id) const
     {
-        // HACK: Return true to prevent the engine from trying to keep playing
-        // sounds and tanking the framerate.
-        return true;
+        SoundMap::const_iterator snditer = ActiveSounds.find(ptr);
+        if(snditer == ActiveSounds.end())
+            return false;
+
+        IDMap::const_iterator iditer = snditer->second.find(id);
+        if(iditer == snditer->second.end())
+            return false;
+
+        return iditer->second->isPlaying();
     }
 
     // Remove all references to objects belonging to a given cell
