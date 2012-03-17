@@ -336,7 +336,7 @@ Sound* OpenAL_Output::PlaySound(const std::string &fname, std::auto_ptr<Sound_De
     }
     catch(std::exception &e)
     {
-        if(alIsSource(buf))
+        if(alIsSource(src))
             alDeleteSources(1, &src);
         if(alIsBuffer(buf))
             alDeleteBuffers(1, &buf);
@@ -384,7 +384,7 @@ Sound* OpenAL_Output::PlaySound3D(const std::string &fname, std::auto_ptr<Sound_
     }
     catch(std::exception &e)
     {
-        if(alIsSource(buf))
+        if(alIsSource(src))
             alDeleteSources(1, &src);
         if(alIsBuffer(buf))
             alDeleteBuffers(1, &buf);
