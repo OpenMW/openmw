@@ -95,7 +95,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    arg0 = 4;
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                     MWDialogue::DialogueManager* dialogue = context.getEnvironment().mDialogueManager;
@@ -129,7 +128,7 @@ namespace MWScript
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
-            extensions.registerInstruction ("choice", "/SlSl", opcodeChoice);
+            extensions.registerInstruction ("choice", "/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -137,7 +136,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeJournal, new OpJournal);
             interpreter.installSegment5 (opcodeSetJournalIndex, new OpSetJournalIndex);
             interpreter.installSegment5 (opcodeGetJournalIndex, new OpGetJournalIndex);
-            interpreter.installSegment5 (opcodeAddTopic, new OpAddTopic);      
+            interpreter.installSegment5 (opcodeAddTopic, new OpAddTopic);
             interpreter.installSegment3 (opcodeChoice,new OpChoice);
         }
     }
