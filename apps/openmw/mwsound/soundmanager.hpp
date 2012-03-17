@@ -22,6 +22,7 @@ namespace MWWorld
 namespace MWSound
 {
     class Sound_Output;
+    class Sound_Decoder;
 
     class SoundManager
     {
@@ -131,7 +132,6 @@ namespace MWSound
         virtual void Deinitialize() = 0;
 
         Sound_Output(SoundManager &mgr) : mgr(mgr) { }
-
     public:
         virtual ~Sound_Output() { }
 

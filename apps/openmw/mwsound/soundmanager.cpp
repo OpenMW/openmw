@@ -12,6 +12,7 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
+#include "sound_decoder.hpp"
 
 #include "openal_output.hpp"
 #define SOUND_OUT "OpenAL"
@@ -28,6 +29,7 @@
 #endif
 
 #ifdef OPENMW_USE_MPG123
+#include "mpgsnd_decoder.hpp"
 #define SOUND_IN "mpg123,sndfile"
 #endif
 
