@@ -368,7 +368,7 @@ Sound* OpenAL_Output::PlaySound(const std::string &fname, std::auto_ptr<Sound_De
 }
 
 Sound* OpenAL_Output::PlaySound3D(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
-                                  MWWorld::Ptr ptr, float volume, float pitch,
+                                  const float *pos, float volume, float pitch,
                                   float min, float max, bool loop)
 {
     throwALerror();
@@ -393,7 +393,6 @@ Sound* OpenAL_Output::PlaySound3D(const std::string &fname, std::auto_ptr<Sound_
     }
 
     std::auto_ptr<OpenAL_Sound> sound(new OpenAL_Sound(src, buf));
-    const float *pos = ptr.getCellRef().pos.pos;
     alSource3f(src, AL_POSITION, pos[0], pos[2], -pos[1]);
     alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
@@ -430,10 +429,14 @@ Sound* OpenAL_Output::StreamSound(const std::string &fname, std::auto_ptr<Sound_
 }
 
 
-void OpenAL_Output::UpdateListener(float pos[3], float atdir[3], float updir[3])
+void OpenAL_Output::UpdateListener(const float *pos, const float *atdir, const float *updir)
 {
-    float orient[6] = { atdir[0], atdir[1], atdir[2], updir[0], updir[1], updir[2] };
-    alListenerfv(AL_POSITION, pos);
+    float orient[6] = {
+        atdir[0], atdir[2], -atdir[1],
+        updir[0], updir[2], -updir[1]
+    };
+
+    alListener3f(AL_POSITION, pos[0], pos[2], -pos[1]);
     alListenerfv(AL_ORIENTATION, orient);
     throwALerror();
 }

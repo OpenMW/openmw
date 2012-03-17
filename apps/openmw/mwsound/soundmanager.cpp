@@ -125,8 +125,9 @@ namespace MWSound
         try
         {
             Sound *sound;
+            const float *pos = ptr.getCellRef().pos.pos;
             std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
-            sound = Output->PlaySound3D(file, decoder, ptr, volume, pitch, min, max, loop);
+            sound = Output->PlaySound3D(file, decoder, pos, volume, pitch, min, max, loop);
             if(untracked)
                 LooseSounds[id] = SoundPtr(sound);
             else
@@ -444,7 +445,10 @@ namespace MWSound
             nDir = cam->getRealDirection();
             nUp  = cam->getRealUp();
 
-            Output->UpdateListener(&nPos[0], &nDir[0], &nUp[0]);
+            float pos[3] = { nPos[0], -nPos[2], nPos[1] };
+            float at[3] = { nDir[0], -nDir[2], nDir[1] };
+            float up[3] = { nUp[0], -nUp[2], nUp[1] };
+            Output->UpdateListener(pos, at, up);
 
 
             IDMap::iterator snditer = LooseSounds.begin();

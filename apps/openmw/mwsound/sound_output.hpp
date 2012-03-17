@@ -22,13 +22,12 @@ namespace MWSound
         virtual Sound *PlaySound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
                                  float volume, float pitch, bool loop) = 0;
         virtual Sound *PlaySound3D(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
-                                   MWWorld::Ptr ptr, float volume, float pitch,
+                                   const float *pos, float volume, float pitch,
                                    float min, float max, bool loop) = 0;
         virtual Sound *StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
                                    float volume, float pitch) = 0;
 
-        // FIXME: This should take an MWWorld::Ptr that represents the in-world camera
-        virtual void UpdateListener(float pos[3], float atdir[3], float updir[3]) = 0;
+        virtual void UpdateListener(const float *pos, const float *atdir, const float *updir) = 0;
 
         Sound_Output(SoundManager &mgr) : mgr(mgr) { }
     public:
