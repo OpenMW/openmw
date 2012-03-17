@@ -48,10 +48,6 @@ bool OgreRenderer::loadPlugins()
     mParticleFXPlugin = new Ogre::ParticleFXPlugin();
     mRoot->installPlugin(mParticleFXPlugin);
     #endif
-    #ifdef ENABLE_PLUGIN_BSPSceneManager
-    mBSPPlugin = new Ogre::BspSceneManagerPlugin();
-    mRoot->installPlugin(mBSPPlugin);
-    #endif
     return true;
 }
 
@@ -88,7 +84,7 @@ bool OgreRenderer::configure(bool showConfig,
     // Disable logging
     log->setDebugOutputEnabled(false);
 
-#if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX) || defined(ENABLE_PLUGIN_BSPSceneManager)
+#if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
   mRoot = new Root("", cfgPath, "");
   loadPlugins();
 #else

@@ -17,9 +17,6 @@
 #ifdef ENABLE_PLUGIN_ParticleFX
 # include "OgreParticleFXPlugin.h"
 #endif
-#ifdef ENABLE_PLUGIN_BSPSceneManager
-# include "OgreBspSceneManagerPlugin.h"
-#endif
 #ifdef ENABLE_PLUGIN_GL
 # include "OgreGLPlugin.h"
 #endif
@@ -55,9 +52,6 @@ namespace Render
  	#endif
  	#ifdef ENABLE_PLUGIN_ParticleFX
  	Ogre::ParticleFXPlugin* mParticleFXPlugin;
- 	#endif
- 	#ifdef ENABLE_PLUGIN_BSPSceneManager
- 	Ogre::BspSceneManagerPlugin* mBSPPlugin;
  	#endif
  	#ifdef ENABLE_PLUGIN_GL
  	Ogre::GLPlugin* mGLPlugin;
