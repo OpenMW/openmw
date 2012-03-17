@@ -19,6 +19,9 @@ namespace MWSound
         virtual bool Open(const std::string &fname);
         virtual void Close();
 
+        virtual void GetInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
+        virtual size_t Read(char *buffer, size_t bytes);
+
         FFmpeg_Decoder();
         virtual ~FFmpeg_Decoder();
 
