@@ -465,14 +465,6 @@ WeatherResult WeatherManager::transition(float factor)
 
     result.mNight = current.mNight;
 
-    // sound change behaviour:
-    // if 'other' has a new sound, switch to it after 1/2 of the transition length
-    if (other.mAmbientLoopSoundID != "")
-        result.mAmbientLoopSoundID = factor>0.5 ? other.mAmbientLoopSoundID : current.mAmbientLoopSoundID;
-    // if 'current' has a sound and 'other' does not have a sound, turn off the sound immediately
-    else if (current.mAmbientLoopSoundID != "")
-        result.mAmbientLoopSoundID = "";
-
     return result;
 }
 
@@ -541,15 +533,6 @@ void WeatherManager::update(float duration)
             }
 
             setWeather(weather, false);
-            /*
-            std::cout << "roll result: " << random << std::endl;
-            
-            std::cout << regionstr << " weather probabilities: " << clear << " " << cloudy << " " << foggy << " " 
-                << overcast << " " << rain << " " << thunder << " " << ash << " " << blight << " " << snow << " " 
-                << blizzard << std::endl;
-            
-            std::cout << "New weather : " << weather << std::endl;
-            */
         }
 
         WeatherResult result;
@@ -575,18 +558,26 @@ void WeatherManager::update(float duration)
         if (mHour >= 20 || mHour <= 6.f)
             mRendering->getSkyManager()->sunDisable();
         else
-        {
-            // during day, calculate sun angle
-            float height = 1-std::abs(((mHour-13)/7.f));
-            int facing = mHour > 13.f ? 1 : -1;
-            Vector3 final(
-                (1-height)*facing, 
-                (1-height)*facing, 
-                height);
-            mRendering->setSunDirection(final);
-            
             mRendering->getSkyManager()->sunEnable();
-        }
+
+        // sun angle
+        float height;
+
+        // rise at 6, set at 20
+        if (mHour >= 6 && mHour <= 20)
+            height = 1-std::abs(((mHour-13)/7.f));
+        else if (mHour > 20)
+            height = (mHour-20.f)/4.f;
+        else //if (mHour > 0 && mHour < 6)
+            height = 1-(mHour/6.f);
+            
+        int facing = (mHour > 13.f) ? 1 : -1;
+        
+        Vector3 final(
+            (1-height)*facing, 
+            (1-height)*facing, 
+            height);
+        mRendering->setSunDirection(final);
 
         // moon calculations
         float night;
@@ -755,15 +746,6 @@ void WeatherManager::update(float duration)
 
 void WeatherManager::setHour(const float hour)
 {
-    // accelerate a bit for testing
-    /*
-    mHour += 0.005;
-    
-    if (mHour >= 24.f) mHour = 0.f;
-    
-    std::cout << "hour " << mHour << std::endl;
-    */
-    
     mHour = hour;
 }
 
