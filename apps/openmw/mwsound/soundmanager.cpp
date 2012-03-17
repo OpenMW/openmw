@@ -329,7 +329,7 @@ namespace MWSound
         float min, max;
         std::string file = lookup(soundId, volume, min, max);
         if(!file.empty())
-            play3d(file, ptr, soundId, volume, pitch, min, max, false);
+            play3d(file, ptr, soundId, volume, pitch, min, max, loop, untracked);
         else
             std::cout << "Sound file " << soundId << " not found, skipping.\n";
     }
