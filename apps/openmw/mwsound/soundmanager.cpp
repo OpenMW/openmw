@@ -186,10 +186,6 @@ namespace MWSound
         }
     }
 
-    void SoundManager::updatePositions(MWWorld::Ptr ptr)
-    {
-    }
-
     void SoundManager::stopMusic()
     {
         if(mMusic)
@@ -365,7 +361,7 @@ namespace MWSound
 
     void SoundManager::updateObject(MWWorld::Ptr ptr)
     {
-        updatePositions(ptr);
+        // FIXME: Update tracked sounds that are using this ptr
     }
 
     void SoundManager::updateRegionSound(float duration)

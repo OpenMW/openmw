@@ -92,7 +92,7 @@ public:
     OpenAL_SoundStream(std::auto_ptr<Sound_Decoder> decoder);
     virtual ~OpenAL_SoundStream();
 
-    virtual void Play();
+    void Play();
     virtual void Stop();
     virtual bool isPlaying();
 };
@@ -106,7 +106,6 @@ public:
     OpenAL_Sound(ALuint src, ALuint buf);
     virtual ~OpenAL_Sound();
 
-    virtual void Play();
     virtual void Stop();
     virtual bool isPlaying();
 };
@@ -240,10 +239,6 @@ OpenAL_Sound::~OpenAL_Sound()
     alDeleteSources(1, &Source);
     alDeleteBuffers(1, &Buffer);
     alGetError();
-}
-
-void OpenAL_Sound::Play()
-{
 }
 
 void OpenAL_Sound::Stop()
