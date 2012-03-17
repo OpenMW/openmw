@@ -236,8 +236,7 @@ Sound* OpenAL_Output::StreamSound(const std::string &fname, std::auto_ptr<Sound_
 {
     std::auto_ptr<OpenAL_SoundStream> sound;
 
-    if(!decoder->Open(fname))
-        return NULL;
+    decoder->Open(fname);
 
     sound.reset(new OpenAL_SoundStream(decoder));
     sound->Play();

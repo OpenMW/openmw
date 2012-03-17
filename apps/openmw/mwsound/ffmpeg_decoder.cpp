@@ -9,10 +9,9 @@ namespace MWSound
 static void fail(const std::string &msg)
 { throw std::runtime_error("FFmpeg exception: "+msg); }
 
-bool FFmpeg_Decoder::Open(const std::string &fname)
+void FFmpeg_Decoder::Open(const std::string &fname)
 {
     fail("Not currently working");
-    return false;
 }
 
 void FFmpeg_Decoder::Close()

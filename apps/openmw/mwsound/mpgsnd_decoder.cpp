@@ -12,7 +12,7 @@ static void fail(const std::string &msg)
 namespace MWSound
 {
 
-bool MpgSnd_Decoder::Open(const std::string &fname)
+void MpgSnd_Decoder::Open(const std::string &fname)
 {
     Close();
 
@@ -31,7 +31,7 @@ bool MpgSnd_Decoder::Open(const std::string &fname)
             fail("Unsupported channel count in "+fname);
         }
         sampleRate = info.samplerate;
-        return true;
+        return;
     }
 
     mpgFile = mpg123_new(NULL, NULL);
@@ -49,7 +49,7 @@ bool MpgSnd_Decoder::Open(const std::string &fname)
                 fail("Unsupported channel count in "+fname);
             chanConfig = ((channels==2)?StereoChannels:MonoChannels);
             sampleRate = rate;
-            return true;
+            return;
         }
         catch(std::exception &e)
         {
@@ -64,7 +64,6 @@ bool MpgSnd_Decoder::Open(const std::string &fname)
     mpgFile = NULL;
 
     fail("Unsupported file type: "+fname);
-    return false;
 }
 
 void MpgSnd_Decoder::Close()

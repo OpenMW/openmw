@@ -19,7 +19,7 @@ namespace MWSound
         ChannelConfig chanConfig;
         int sampleRate;
 
-        virtual bool Open(const std::string &fname);
+        virtual void Open(const std::string &fname);
         virtual void Close();
 
         virtual void GetInfo(int *samplerate, ChannelConfig *chans, SampleType *type);

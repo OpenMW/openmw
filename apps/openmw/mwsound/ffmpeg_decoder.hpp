@@ -16,7 +16,7 @@ namespace MWSound
 {
     class FFmpeg_Decoder : public Sound_Decoder
     {
-        virtual bool Open(const std::string &fname);
+        virtual void Open(const std::string &fname);
         virtual void Close();
 
         virtual void GetInfo(int *samplerate, ChannelConfig *chans, SampleType *type);

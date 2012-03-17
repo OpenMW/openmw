@@ -14,7 +14,7 @@ namespace MWSound
             MonoChannels,
             StereoChannels
         };
-        virtual bool Open(const std::string &fname) = 0;
+        virtual void Open(const std::string &fname) = 0;
         virtual void Close() = 0;
 
         virtual void GetInfo(int *samplerate, ChannelConfig *chans, SampleType *type) = 0;
