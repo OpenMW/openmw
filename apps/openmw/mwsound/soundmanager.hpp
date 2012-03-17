@@ -23,6 +23,7 @@ namespace MWSound
 {
     class Sound_Output;
     class Sound_Decoder;
+    class Sound;
 
     class SoundManager
     {
@@ -35,6 +36,8 @@ namespace MWSound
         MWWorld::Environment& mEnvironment;
 
         std::auto_ptr<Sound_Output> Output;
+
+        boost::shared_ptr<Sound> mMusic;
 
         void streamMusicFull(const std::string& filename);
         ///< Play a soundifle

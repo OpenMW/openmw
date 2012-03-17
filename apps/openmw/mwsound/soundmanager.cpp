@@ -14,6 +14,7 @@
 
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"
+#include "sound.hpp"
 
 #include "openal_output.hpp"
 #define SOUND_OUT "OpenAL"
@@ -143,15 +144,18 @@ namespace MWSound
 
     void SoundManager::stopMusic()
     {
+        if(mMusic)
+            mMusic->Stop();
         setPlaylist();
     }
 
 
     void SoundManager::streamMusicFull(const std::string& filename)
     {
-        // Play the sound and tell it to stream, if possible. TODO:
-        // Store the reference, the jukebox will need to check status,
-        // control volume etc.
+        if(mMusic)
+            mMusic->Stop();
+        std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
+        //mMusic.reset(Output->StreamSound(filename, decoder));
     }
 
     void SoundManager::streamMusic(const std::string& filename)
@@ -186,9 +190,7 @@ namespace MWSound
 
     bool SoundManager::isMusicPlaying()
     {
-        // HACK: Return true to prevent the engine from trying to keep playing
-        // music and tanking the framerate.
-        return true;
+        return mMusic && mMusic->isPlaying();
     }
 
     bool SoundManager::setPlaylist(std::string playlist)
