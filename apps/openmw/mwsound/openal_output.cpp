@@ -303,6 +303,8 @@ bool OpenAL_Output::Initialize(const std::string &devname)
         Device = 0;
         return false;
     }
+    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+    throwALerror();
 
     return true;
 }
