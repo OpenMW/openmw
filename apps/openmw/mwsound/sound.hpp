@@ -11,7 +11,7 @@ namespace MWSound
     {
         virtual void Stop() = 0;
         virtual bool isPlaying() = 0;
-        virtual void Update(MWWorld::Ptr ptr) = 0;
+        virtual void Update(const float *pos) = 0;
 
     public:
         virtual ~Sound() { }

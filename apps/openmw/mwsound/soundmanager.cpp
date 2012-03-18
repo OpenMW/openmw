@@ -358,7 +358,8 @@ namespace MWSound
         IDMap::iterator iditer = snditer->second.begin();
         while(iditer != snditer->second.end())
         {
-            iditer->second->Update(ptr);
+            const ESM::Position &pos = ptr.getCellRef().pos;
+            iditer->second->Update(pos.pos);
             iditer++;
         }
     }
