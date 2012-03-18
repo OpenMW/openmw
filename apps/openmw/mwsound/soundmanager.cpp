@@ -23,6 +23,7 @@
    CMakeLists.txt.
 */
 #ifdef OPENMW_USE_FFMPEG
+#include "ffmpeg_decoder.hpp"
 #define SOUND_IN "FFmpeg"
 #endif
 
