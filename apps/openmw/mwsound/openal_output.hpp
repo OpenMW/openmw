@@ -16,19 +16,19 @@ namespace MWSound
 
     class OpenAL_Output : public Sound_Output
     {
-        ALCdevice *Device;
-        ALCcontext *Context;
+        ALCdevice *mDevice;
+        ALCcontext *mContext;
 
-        virtual bool Initialize(const std::string &devname="");
-        virtual void Deinitialize();
+        virtual bool init(const std::string &devname="");
+        virtual void deinit();
 
-        virtual Sound *PlaySound(const std::string &fname, float volume, float pitch, bool loop);
-        virtual Sound *PlaySound3D(const std::string &fname, const float *pos, float volume, float pitch,
+        virtual Sound *playSound(const std::string &fname, float volume, float pitch, bool loop);
+        virtual Sound *playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
                                    float min, float max, bool loop);
 
-        virtual Sound *StreamSound(const std::string &fname, float volume, float pitch);
+        virtual Sound *streamSound(const std::string &fname, float volume, float pitch);
 
-        virtual void UpdateListener(const float *pos, const float *atdir, const float *updir);
+        virtual void updateListener(const float *pos, const float *atdir, const float *updir);
 
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();

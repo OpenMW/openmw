@@ -14,19 +14,19 @@ namespace MWSound
 
     class Sound_Output
     {
-        SoundManager &mgr;
+        SoundManager &mManager;
 
-        virtual bool Initialize(const std::string &devname="") = 0;
-        virtual void Deinitialize() = 0;
+        virtual bool init(const std::string &devname="") = 0;
+        virtual void deinit() = 0;
 
-        virtual Sound *PlaySound(const std::string &fname, float volume, float pitch, bool loop) = 0;
-        virtual Sound *PlaySound3D(const std::string &fname, const float *pos, float volume, float pitch,
+        virtual Sound *playSound(const std::string &fname, float volume, float pitch, bool loop) = 0;
+        virtual Sound *playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
                                    float min, float max, bool loop) = 0;
-        virtual Sound *StreamSound(const std::string &fname, float volume, float pitch) = 0;
+        virtual Sound *streamSound(const std::string &fname, float volume, float pitch) = 0;
 
-        virtual void UpdateListener(const float *pos, const float *atdir, const float *updir) = 0;
+        virtual void updateListener(const float *pos, const float *atdir, const float *updir) = 0;
 
-        Sound_Output(SoundManager &mgr) : mgr(mgr) { }
+        Sound_Output(SoundManager &mgr) : mManager(mgr) { }
     public:
         virtual ~Sound_Output() { }
 

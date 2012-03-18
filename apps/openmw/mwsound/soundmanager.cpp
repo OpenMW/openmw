@@ -48,7 +48,7 @@ namespace MWSound
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
 
         mOutput.reset(new DEFAULT_OUTPUT(*this));
-        if(!mOutput->Initialize())
+        if(!mOutput->init())
         {
             mOutput.reset();
             return;
@@ -130,7 +130,7 @@ namespace MWSound
         {
             Sound *sound;
             const ESM::Position &pos = ptr.getCellRef().pos;
-            sound = mOutput->PlaySound3D(file, pos.pos, volume, pitch, min, max, loop);
+            sound = mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop);
             if(untracked)
                 mLooseSounds[id] = SoundPtr(sound);
             else
@@ -167,7 +167,7 @@ namespace MWSound
     {
         if(mMusic)
             mMusic->Stop();
-        mMusic.reset(mOutput->StreamSound(filename, 0.4f, 1.0f));
+        mMusic.reset(mOutput->streamSound(filename, 0.4f, 1.0f));
     }
 
     void SoundManager::streamMusic(const std::string& filename)
@@ -277,7 +277,7 @@ namespace MWSound
             try
             {
                 Sound *sound;
-                sound = mOutput->PlaySound(file, volume, pitch, loop);
+                sound = mOutput->playSound(file, volume, pitch, loop);
                 mLooseSounds[soundId] = SoundPtr(sound);
             }
             catch(std::exception &e)
@@ -443,7 +443,7 @@ namespace MWSound
             float pos[3] = { nPos[0], -nPos[2], nPos[1] };
             float at[3] = { nDir[0], -nDir[2], nDir[1] };
             float up[3] = { nUp[0], -nUp[2], nUp[1] };
-            mOutput->UpdateListener(pos, at, up);
+            mOutput->updateListener(pos, at, up);
 
             // Check if any "untracked" sounds are finished playing, and trash
             // them

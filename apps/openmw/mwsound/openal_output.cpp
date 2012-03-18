@@ -78,16 +78,16 @@ class OpenAL_SoundStream : public Sound
 {
     // This should be something sane, like 4, but currently cell loads tend to
     // cause the stream to underrun
-    static const ALuint NumBuffers = 150;
-    static const ALuint BufferSize = 32768;
+    static const ALuint sNumBuffers = 150;
+    static const ALuint sBufferSize = 32768;
 
-    ALuint Source;
-    ALuint Buffers[NumBuffers];
+    ALuint mSource;
+    ALuint mBuffers[sNumBuffers];
 
-    ALenum Format;
-    ALsizei SampleRate;
+    ALenum mFormat;
+    ALsizei mSampleRate;
 
-    DecoderPtr Decoder;
+    DecoderPtr mDecoder;
 
 public:
     OpenAL_SoundStream(DecoderPtr decoder);
@@ -102,8 +102,8 @@ public:
 class OpenAL_Sound : public Sound
 {
 public:
-    ALuint Source;
-    ALuint Buffer;
+    ALuint mSource;
+    ALuint mBuffer;
 
     OpenAL_Sound(ALuint src, ALuint buf);
     virtual ~OpenAL_Sound();
@@ -115,20 +115,20 @@ public:
 
 
 OpenAL_SoundStream::OpenAL_SoundStream(DecoderPtr decoder)
-  : Decoder(decoder)
+  : mDecoder(decoder)
 {
     throwALerror();
 
-    alGenSources(1, &Source);
+    alGenSources(1, &mSource);
     throwALerror();
     try
     {
-        alGenBuffers(NumBuffers, Buffers);
+        alGenBuffers(sNumBuffers, mBuffers);
         throwALerror();
     }
     catch(std::exception &e)
     {
-        alDeleteSources(1, &Source);
+        alDeleteSources(1, &mSource);
         alGetError();
         throw;
     }
@@ -139,53 +139,53 @@ OpenAL_SoundStream::OpenAL_SoundStream(DecoderPtr decoder)
         Sound_Decoder::ChannelConfig chans;
         Sound_Decoder::SampleType type;
 
-        Decoder->GetInfo(&srate, &chans, &type);
-        Format = getALFormat(chans, type);
-        SampleRate = srate;
+        mDecoder->GetInfo(&srate, &chans, &type);
+        mFormat = getALFormat(chans, type);
+        mSampleRate = srate;
     }
     catch(std::exception &e)
     {
-        alDeleteSources(1, &Source);
-        alDeleteBuffers(NumBuffers, Buffers);
+        alDeleteSources(1, &mSource);
+        alDeleteBuffers(sNumBuffers, mBuffers);
         alGetError();
         throw;
     }
 }
 OpenAL_SoundStream::~OpenAL_SoundStream()
 {
-    alDeleteSources(1, &Source);
-    alDeleteBuffers(NumBuffers, Buffers);
+    alDeleteSources(1, &mSource);
+    alDeleteBuffers(sNumBuffers, mBuffers);
     alGetError();
-    Decoder->Close();
+    mDecoder->Close();
 }
 
 void OpenAL_SoundStream::Play(float volume, float pitch)
 {
-    std::vector<char> data(BufferSize);
+    std::vector<char> data(sBufferSize);
 
-    alSourceStop(Source);
-    alSourcei(Source, AL_BUFFER, 0);
-    alSourcef(Source, AL_GAIN, volume);
-    alSourcef(Source, AL_PITCH, pitch);
+    alSourceStop(mSource);
+    alSourcei(mSource, AL_BUFFER, 0);
+    alSourcef(mSource, AL_GAIN, volume);
+    alSourcef(mSource, AL_PITCH, pitch);
     throwALerror();
 
-    for(ALuint i = 0;i < NumBuffers;i++)
+    for(ALuint i = 0;i < sNumBuffers;i++)
     {
         size_t got;
-        got = Decoder->Read(&data[0], data.size());
-        alBufferData(Buffers[i], Format, &data[0], got, SampleRate);
+        got = mDecoder->Read(&data[0], data.size());
+        alBufferData(mBuffers[i], mFormat, &data[0], got, mSampleRate);
     }
     throwALerror();
 
-    alSourceQueueBuffers(Source, NumBuffers, Buffers);
-    alSourcePlay(Source);
+    alSourceQueueBuffers(mSource, sNumBuffers, mBuffers);
+    alSourcePlay(mSource);
     throwALerror();
 }
 
 void OpenAL_SoundStream::Stop()
 {
-    alSourceStop(Source);
-    alSourcei(Source, AL_BUFFER, 0);
+    alSourceStop(mSource);
+    alSourcei(mSource, AL_BUFFER, 0);
     throwALerror();
     // FIXME: Rewind decoder
 }
@@ -194,25 +194,25 @@ bool OpenAL_SoundStream::isPlaying()
 {
     ALint processed, state;
 
-    alGetSourcei(Source, AL_SOURCE_STATE, &state);
-    alGetSourcei(Source, AL_BUFFERS_PROCESSED, &processed);
+    alGetSourcei(mSource, AL_SOURCE_STATE, &state);
+    alGetSourcei(mSource, AL_BUFFERS_PROCESSED, &processed);
     throwALerror();
 
     if(processed > 0)
     {
-        std::vector<char> data(BufferSize);
+        std::vector<char> data(sBufferSize);
         do {
             ALuint bufid;
             size_t got;
 
-            alSourceUnqueueBuffers(Source, 1, &bufid);
+            alSourceUnqueueBuffers(mSource, 1, &bufid);
             processed--;
 
-            got = Decoder->Read(&data[0], data.size());
+            got = mDecoder->Read(&data[0], data.size());
             if(got > 0)
             {
-                alBufferData(bufid, Format, &data[0], got, SampleRate);
-                alSourceQueueBuffers(Source, 1, &bufid);
+                alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
+                alSourceQueueBuffers(mSource, 1, &bufid);
             }
         } while(processed > 0);
         throwALerror();
@@ -222,12 +222,12 @@ bool OpenAL_SoundStream::isPlaying()
     {
         ALint queued;
 
-        alGetSourcei(Source, AL_BUFFERS_QUEUED, &queued);
+        alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
         throwALerror();
         if(queued == 0)
             return false;
 
-        alSourcePlay(Source);
+        alSourcePlay(mSource);
         throwALerror();
     }
 
@@ -236,27 +236,27 @@ bool OpenAL_SoundStream::isPlaying()
 
 void OpenAL_SoundStream::Update(const float *pos)
 {
-    alSource3f(Source, AL_POSITION, pos[0], pos[2], -pos[1]);
-    alSource3f(Source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSource3f(Source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    alSource3f(mSource, AL_POSITION, pos[0], pos[2], -pos[1]);
+    alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();
 }
 
 
 OpenAL_Sound::OpenAL_Sound(ALuint src, ALuint buf)
-  : Source(src), Buffer(buf)
+  : mSource(src), mBuffer(buf)
 {
 }
 OpenAL_Sound::~OpenAL_Sound()
 {
-    alDeleteSources(1, &Source);
-    alDeleteBuffers(1, &Buffer);
+    alDeleteSources(1, &mSource);
+    alDeleteBuffers(1, &mBuffer);
     alGetError();
 }
 
 void OpenAL_Sound::Stop()
 {
-    alSourceStop(Source);
+    alSourceStop(mSource);
     throwALerror();
 }
 
@@ -264,7 +264,7 @@ bool OpenAL_Sound::isPlaying()
 {
     ALint state;
 
-    alGetSourcei(Source, AL_SOURCE_STATE, &state);
+    alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     throwALerror();
 
     return state==AL_PLAYING;
@@ -272,35 +272,35 @@ bool OpenAL_Sound::isPlaying()
 
 void OpenAL_Sound::Update(const float *pos)
 {
-    alSource3f(Source, AL_POSITION, pos[0], pos[2], -pos[1]);
-    alSource3f(Source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSource3f(Source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    alSource3f(mSource, AL_POSITION, pos[0], pos[2], -pos[1]);
+    alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();
 }
 
 
-bool OpenAL_Output::Initialize(const std::string &devname)
+bool OpenAL_Output::init(const std::string &devname)
 {
-    if(Context)
+    if(mContext)
         fail("Device already initialized");
 
-    Device = alcOpenDevice(devname.c_str());
-    if(!Device)
+    mDevice = alcOpenDevice(devname.c_str());
+    if(!mDevice)
     {
         std::cout << "Failed to open \""<<devname<<"\"" << std::endl;
         return false;
     }
-    std::cout << "Opened \""<<alcGetString(Device, ALC_DEVICE_SPECIFIER)<<"\"" << std::endl;
+    std::cout << "Opened \""<<alcGetString(mDevice, ALC_DEVICE_SPECIFIER)<<"\"" << std::endl;
 
-    Context = alcCreateContext(Device, NULL);
-    if(!Context || alcMakeContextCurrent(Context) == ALC_FALSE)
+    mContext = alcCreateContext(mDevice, NULL);
+    if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
     {
         std::cout << "Failed to setup device context" << std::endl;
-        if(Context)
-            alcDestroyContext(Context);
-        Context = 0;
-        alcCloseDevice(Device);
-        Device = 0;
+        if(mContext)
+            alcDestroyContext(mContext);
+        mContext = 0;
+        alcCloseDevice(mDevice);
+        mDevice = 0;
         return false;
     }
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
@@ -309,23 +309,23 @@ bool OpenAL_Output::Initialize(const std::string &devname)
     return true;
 }
 
-void OpenAL_Output::Deinitialize()
+void OpenAL_Output::deinit()
 {
     alcMakeContextCurrent(0);
-    if(Context)
-        alcDestroyContext(Context);
-    Context = 0;
-    if(Device)
-        alcCloseDevice(Device);
-    Device = 0;
+    if(mContext)
+        alcDestroyContext(mContext);
+    mContext = 0;
+    if(mDevice)
+        alcCloseDevice(mDevice);
+    mDevice = 0;
 }
 
 
-Sound* OpenAL_Output::PlaySound(const std::string &fname, float volume, float pitch, bool loop)
+Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, bool loop)
 {
     throwALerror();
 
-    DecoderPtr decoder = mgr.getDecoder();
+    DecoderPtr decoder = mManager.getDecoder();
     decoder->Open(fname);
 
     ALuint src=0, buf=0;
@@ -368,12 +368,12 @@ Sound* OpenAL_Output::PlaySound(const std::string &fname, float volume, float pi
     return sound.release();
 }
 
-Sound* OpenAL_Output::PlaySound3D(const std::string &fname, const float *pos, float volume, float pitch,
+Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
                                   float min, float max, bool loop)
 {
     throwALerror();
 
-    DecoderPtr decoder = mgr.getDecoder();
+    DecoderPtr decoder = mManager.getDecoder();
     decoder->Open(fname);
 
     ALuint src=0, buf=0;
@@ -417,11 +417,11 @@ Sound* OpenAL_Output::PlaySound3D(const std::string &fname, const float *pos, fl
 }
 
 
-Sound* OpenAL_Output::StreamSound(const std::string &fname, float volume, float pitch)
+Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch)
 {
     std::auto_ptr<OpenAL_SoundStream> sound;
 
-    DecoderPtr decoder = mgr.getDecoder();
+    DecoderPtr decoder = mManager.getDecoder();
     decoder->Open(fname);
 
     sound.reset(new OpenAL_SoundStream(decoder));
@@ -431,7 +431,7 @@ Sound* OpenAL_Output::StreamSound(const std::string &fname, float volume, float 
 }
 
 
-void OpenAL_Output::UpdateListener(const float *pos, const float *atdir, const float *updir)
+void OpenAL_Output::updateListener(const float *pos, const float *atdir, const float *updir)
 {
     float orient[6] = {
         atdir[0], atdir[2], -atdir[1],
@@ -445,13 +445,13 @@ void OpenAL_Output::UpdateListener(const float *pos, const float *atdir, const f
 
 
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
-  : Sound_Output(mgr), Device(0), Context(0)
+  : Sound_Output(mgr), mDevice(0), mContext(0)
 {
 }
 
 OpenAL_Output::~OpenAL_Output()
 {
-    Deinitialize();
+    deinit();
 }
 
 }
