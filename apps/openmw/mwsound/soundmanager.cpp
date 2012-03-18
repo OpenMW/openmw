@@ -18,9 +18,8 @@
 
 #include "openal_output.hpp"
 #define SOUND_OUT "OpenAL"
-/* Set up the sound manager to use Audiere, FFMPEG or
-   MPG123/libsndfile for input. The OPENMW_USE_x macros are set in
-   CMakeLists.txt.
+/* Set up the sound manager to use FFMPEG or MPG123+libsndfile for input. The
+ * OPENMW_USE_x macros are set in CMakeLists.txt.
 */
 #ifdef OPENMW_USE_FFMPEG
 #include "ffmpeg_decoder.hpp"
