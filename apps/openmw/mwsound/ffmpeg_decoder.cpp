@@ -36,6 +36,7 @@ FFmpeg_Decoder::FFmpeg_Decoder()
 
 FFmpeg_Decoder::~FFmpeg_Decoder()
 {
+    Close();
 }
 
 }

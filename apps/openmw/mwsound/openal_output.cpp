@@ -332,6 +332,7 @@ Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pi
     try
     {
         buf = LoadBuffer(decoder);
+        decoder->Close();
         alGenSources(1, &src);
         throwALerror();
     }
@@ -380,6 +381,7 @@ Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, fl
     try
     {
         buf = LoadBuffer(decoder);
+        decoder->Close();
         alGenSources(1, &src);
         throwALerror();
     }

@@ -118,6 +118,7 @@ MpgSnd_Decoder::MpgSnd_Decoder() : sndFile(NULL), mpgFile(NULL)
 
 MpgSnd_Decoder::~MpgSnd_Decoder()
 {
+    Close();
 }
 
 }
