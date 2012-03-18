@@ -16,13 +16,6 @@
 using namespace MWRender;
 using namespace Ogre;
 
-// the speed at which the clouds are animated
-#define CLOUD_SPEED 0.003
-
-// this distance has to be set accordingly so that the
-// celestial bodies are behind the clouds, but in front of the atmosphere
-#define CELESTIAL_BODY_DISTANCE 1000.f
-
 BillboardObject::BillboardObject( const String& textureName,
                     const float initialSize,
                     const Vector3& position,
@@ -53,7 +46,7 @@ void BillboardObject::setVisibility(const float visibility)
 void BillboardObject::setPosition(const Vector3& pPosition)
 {
     Vector3 normalised = pPosition.normalisedCopy();
-    Vector3 finalPosition = normalised * CELESTIAL_BODY_DISTANCE;
+    Vector3 finalPosition = normalised * 1000.f;
 
     mBBSet->setCommonDirection( -normalised );
 
@@ -88,7 +81,7 @@ void BillboardObject::init(const String& textureName,
 {
     SceneManager* sceneMgr = rootNode->getCreator();
 
-    Vector3 finalPosition = position.normalisedCopy() * CELESTIAL_BODY_DISTANCE;
+    Vector3 finalPosition = position.normalisedCopy() * 1000.f;
 
     static unsigned int bodyCount=0;
 
@@ -508,7 +501,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environmen
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
-    "   uv += float2(1,0) * time * speed * "<<CLOUD_SPEED<<"; \n" // Scroll in x direction
+    "   uv += float2(1,0) * time * speed * 0.003; \n" // Scroll in x direction
     "   float4 tex = lerp(tex2D(texture, uv), tex2D(secondTexture, uv), transitionFactor); \n"
     "   oColor = color * float4(emissive.xyz,1) * tex * float4(1,1,1,opacity); \n"
     "}";
