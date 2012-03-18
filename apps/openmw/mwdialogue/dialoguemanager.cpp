@@ -333,6 +333,7 @@ namespace MWDialogue
                 return true;
 
             case '5'://item
+            {
                 MWWorld::Ptr player = mEnvironment.mWorld->getPlayer().getPlayer();
                 MWWorld::ContainerStore& store = MWWorld::Class::get (player).getContainerStore (player);
 
@@ -342,6 +343,9 @@ namespace MWDialogue
                     if (iter->getCellRef().refID==name)
                         sum += iter->getRefData().getCount();
                 if(!selectCompare<int,int>(comp,sum,select.i)) return false;
+
+                return true;
+            }
 
             case '7':// not ID
                 if(select.type==ESM::VT_String ||select.type==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
