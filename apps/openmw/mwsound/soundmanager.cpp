@@ -83,6 +83,12 @@ namespace MWSound
         Output.reset();
     }
 
+    // Return a new decoder instance, used as needed by the output implementations
+    DecoderPtr SoundManager::getDecoder()
+    {
+        return DecoderPtr(new DEFAULT_DECODER);
+    }
+
     // Convert a soundId to file name, and modify the volume
     // according to the sounds local volume setting, minRange and
     // maxRange.
@@ -124,9 +130,8 @@ namespace MWSound
         try
         {
             Sound *sound;
-            const float *pos = ptr.getCellRef().pos.pos;
-            std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
-            sound = Output->PlaySound3D(file, decoder, pos, volume, pitch, min, max, loop);
+            const ESM::Position &pos = ptr.getCellRef().pos;
+            sound = Output->PlaySound3D(file, pos.pos, volume, pitch, min, max, loop);
             if(untracked)
                 LooseSounds[id] = SoundPtr(sound);
             else
@@ -163,8 +168,7 @@ namespace MWSound
     {
         if(mMusic)
             mMusic->Stop();
-        std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
-        mMusic.reset(Output->StreamSound(filename, decoder, 0.4f, 1.0f));
+        mMusic.reset(Output->StreamSound(filename, 0.4f, 1.0f));
     }
 
     void SoundManager::streamMusic(const std::string& filename)
@@ -274,8 +278,7 @@ namespace MWSound
             try
             {
                 Sound *sound;
-                std::auto_ptr<Sound_Decoder> decoder(new DEFAULT_DECODER);
-                sound = Output->PlaySound(file, decoder, volume, pitch, loop);
+                sound = Output->PlaySound(file, volume, pitch, loop);
                 LooseSounds[soundId] = SoundPtr(sound);
             }
             catch(std::exception &e)

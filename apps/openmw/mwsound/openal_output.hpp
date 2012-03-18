@@ -22,14 +22,11 @@ namespace MWSound
         virtual bool Initialize(const std::string &devname="");
         virtual void Deinitialize();
 
-        virtual Sound *PlaySound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
-                                 float volume, float pitch, bool loop);
-        virtual Sound *PlaySound3D(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
-                                   const float *pos, float volume, float pitch,
+        virtual Sound *PlaySound(const std::string &fname, float volume, float pitch, bool loop);
+        virtual Sound *PlaySound3D(const std::string &fname, const float *pos, float volume, float pitch,
                                    float min, float max, bool loop);
 
-        virtual Sound *StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
-                                   float volume, float pitch);
+        virtual Sound *StreamSound(const std::string &fname, float volume, float pitch);
 
         virtual void UpdateListener(const float *pos, const float *atdir, const float *updir);
 

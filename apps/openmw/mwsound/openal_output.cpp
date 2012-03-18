@@ -5,6 +5,7 @@
 #include "openal_output.hpp"
 #include "sound_decoder.hpp"
 #include "sound.hpp"
+#include "soundmanager.hpp"
 
 
 namespace MWSound
@@ -47,7 +48,7 @@ static ALenum getALFormat(Sound_Decoder::ChannelConfig chans, Sound_Decoder::Sam
 }
 
 
-ALuint LoadBuffer(std::auto_ptr<Sound_Decoder> decoder)
+ALuint LoadBuffer(DecoderPtr decoder)
 {
     int srate;
     Sound_Decoder::ChannelConfig chans;
@@ -86,10 +87,10 @@ class OpenAL_SoundStream : public Sound
     ALenum Format;
     ALsizei SampleRate;
 
-    std::auto_ptr<Sound_Decoder> Decoder;
+    DecoderPtr Decoder;
 
 public:
-    OpenAL_SoundStream(std::auto_ptr<Sound_Decoder> decoder);
+    OpenAL_SoundStream(DecoderPtr decoder);
     virtual ~OpenAL_SoundStream();
 
     void Play(float volume, float pitch);
@@ -113,7 +114,7 @@ public:
 };
 
 
-OpenAL_SoundStream::OpenAL_SoundStream(std::auto_ptr<Sound_Decoder> decoder)
+OpenAL_SoundStream::OpenAL_SoundStream(DecoderPtr decoder)
   : Decoder(decoder)
 {
     throwALerror();
@@ -320,11 +321,11 @@ void OpenAL_Output::Deinitialize()
 }
 
 
-Sound* OpenAL_Output::PlaySound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
-                                float volume, float pitch, bool loop)
+Sound* OpenAL_Output::PlaySound(const std::string &fname, float volume, float pitch, bool loop)
 {
     throwALerror();
 
+    DecoderPtr decoder = mgr.getDecoder();
     decoder->Open(fname);
 
     ALuint src=0, buf=0;
@@ -367,12 +368,12 @@ Sound* OpenAL_Output::PlaySound(const std::string &fname, std::auto_ptr<Sound_De
     return sound.release();
 }
 
-Sound* OpenAL_Output::PlaySound3D(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder,
-                                  const float *pos, float volume, float pitch,
+Sound* OpenAL_Output::PlaySound3D(const std::string &fname, const float *pos, float volume, float pitch,
                                   float min, float max, bool loop)
 {
     throwALerror();
 
+    DecoderPtr decoder = mgr.getDecoder();
     decoder->Open(fname);
 
     ALuint src=0, buf=0;
@@ -416,10 +417,11 @@ Sound* OpenAL_Output::PlaySound3D(const std::string &fname, std::auto_ptr<Sound_
 }
 
 
-Sound* OpenAL_Output::StreamSound(const std::string &fname, std::auto_ptr<Sound_Decoder> decoder, float volume, float pitch)
+Sound* OpenAL_Output::StreamSound(const std::string &fname, float volume, float pitch)
 {
     std::auto_ptr<OpenAL_SoundStream> sound;
 
+    DecoderPtr decoder = mgr.getDecoder();
     decoder->Open(fname);
 
     sound.reset(new OpenAL_SoundStream(decoder));

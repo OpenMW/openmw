@@ -26,6 +26,7 @@ namespace MWSound
         virtual size_t Read(char *buffer, size_t bytes);
 
         MpgSnd_Decoder();
+    public:
         virtual ~MpgSnd_Decoder();
 
         friend class SoundManager;

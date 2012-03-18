@@ -25,6 +25,8 @@ namespace MWSound
     class Sound_Decoder;
     class Sound;
 
+    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
+
     class SoundManager
     {
         // This is used for case insensitive and slash-type agnostic file
@@ -66,6 +68,10 @@ namespace MWSound
             bool loop, bool untracked=false);
         bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
         void updateRegionSound(float duration);
+
+    protected:
+        DecoderPtr getDecoder();
+        friend class OpenAL_Output;
 
     public:
         SoundManager(Ogre::Root*, Ogre::Camera*,
