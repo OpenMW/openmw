@@ -47,10 +47,10 @@ namespace MWSound
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
 
-        Output.reset(new DEFAULT_OUTPUT(*this));
-        if(!Output->Initialize())
+        mOutput.reset(new DEFAULT_OUTPUT(*this));
+        if(!mOutput->Initialize())
         {
-            Output.reset();
+            mOutput.reset();
             return;
         }
 
@@ -76,10 +76,10 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
-        LooseSounds.clear();
-        ActiveSounds.clear();
+        mLooseSounds.clear();
+        mActiveSounds.clear();
         mMusic.reset();
-        Output.reset();
+        mOutput.reset();
     }
 
     // Return a new decoder instance, used as needed by the output implementations
@@ -130,11 +130,11 @@ namespace MWSound
         {
             Sound *sound;
             const ESM::Position &pos = ptr.getCellRef().pos;
-            sound = Output->PlaySound3D(file, pos.pos, volume, pitch, min, max, loop);
+            sound = mOutput->PlaySound3D(file, pos.pos, volume, pitch, min, max, loop);
             if(untracked)
-                LooseSounds[id] = SoundPtr(sound);
+                mLooseSounds[id] = SoundPtr(sound);
             else
-                ActiveSounds[ptr][id] = SoundPtr(sound);
+                mActiveSounds[ptr][id] = SoundPtr(sound);
         }
         catch(std::exception &e)
         {
@@ -144,8 +144,8 @@ namespace MWSound
 
     bool SoundManager::isPlaying(MWWorld::Ptr ptr, const std::string &id) const
     {
-        SoundMap::const_iterator snditer = ActiveSounds.find(ptr);
-        if(snditer == ActiveSounds.end())
+        SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
+        if(snditer == mActiveSounds.end())
             return false;
 
         IDMap::const_iterator iditer = snditer->second.find(id);
@@ -167,7 +167,7 @@ namespace MWSound
     {
         if(mMusic)
             mMusic->Stop();
-        mMusic.reset(Output->StreamSound(filename, 0.4f, 1.0f));
+        mMusic.reset(mOutput->StreamSound(filename, 0.4f, 1.0f));
     }
 
     void SoundManager::streamMusic(const std::string& filename)
@@ -277,8 +277,8 @@ namespace MWSound
             try
             {
                 Sound *sound;
-                sound = Output->PlaySound(file, volume, pitch, loop);
-                LooseSounds[soundId] = SoundPtr(sound);
+                sound = mOutput->PlaySound(file, volume, pitch, loop);
+                mLooseSounds[soundId] = SoundPtr(sound);
             }
             catch(std::exception &e)
             {
@@ -305,8 +305,8 @@ namespace MWSound
     {
         // Stop a sound and remove it from the list. If soundId="" then
         // stop all its sounds.
-        SoundMap::iterator snditer = ActiveSounds.find(ptr);
-        if(snditer == ActiveSounds.end())
+        SoundMap::iterator snditer = mActiveSounds.find(ptr);
+        if(snditer == mActiveSounds.end())
             return;
 
         if(!soundId.empty())
@@ -316,21 +316,21 @@ namespace MWSound
             {
                 snditer->second.erase(iditer);
                 if(snditer->second.size() == 0)
-                    ActiveSounds.erase(snditer);
+                    mActiveSounds.erase(snditer);
             }
         }
         else
-            ActiveSounds.erase(snditer);
+            mActiveSounds.erase(snditer);
     }
 
     void SoundManager::stopSound(MWWorld::Ptr::CellStore *cell)
     {
         // Remove all references to objects belonging to a given cell
-        SoundMap::iterator snditer = ActiveSounds.begin();
-        while(snditer != ActiveSounds.end())
+        SoundMap::iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
         {
             if(snditer->first.getCell() == cell)
-                ActiveSounds.erase(snditer++);
+                mActiveSounds.erase(snditer++);
             else
                 snditer++;
         }
@@ -338,9 +338,9 @@ namespace MWSound
 
     void SoundManager::stopSound(const std::string& soundId)
     {
-        IDMap::iterator iditer = LooseSounds.find(soundId);
-        if(iditer != LooseSounds.end())
-            LooseSounds.erase(iditer);
+        IDMap::iterator iditer = mLooseSounds.find(soundId);
+        if(iditer != mLooseSounds.end())
+            mLooseSounds.erase(iditer);
     }
 
     bool SoundManager::getSoundPlaying(MWWorld::Ptr ptr, const std::string& soundId) const
@@ -350,8 +350,8 @@ namespace MWSound
 
     void SoundManager::updateObject(MWWorld::Ptr ptr)
     {
-        SoundMap::iterator snditer = ActiveSounds.find(ptr);
-        if(snditer == ActiveSounds.end())
+        SoundMap::iterator snditer = mActiveSounds.find(ptr);
+        if(snditer == mActiveSounds.end())
             return;
 
         IDMap::iterator iditer = snditer->second.begin();
@@ -443,15 +443,15 @@ namespace MWSound
             float pos[3] = { nPos[0], -nPos[2], nPos[1] };
             float at[3] = { nDir[0], -nDir[2], nDir[1] };
             float up[3] = { nUp[0], -nUp[2], nUp[1] };
-            Output->UpdateListener(pos, at, up);
+            mOutput->UpdateListener(pos, at, up);
 
             // Check if any "untracked" sounds are finished playing, and trash
             // them
-            IDMap::iterator snditer = LooseSounds.begin();
-            while(snditer != LooseSounds.end())
+            IDMap::iterator snditer = mLooseSounds.begin();
+            while(snditer != mLooseSounds.end())
             {
                 if(!snditer->second->isPlaying())
-                    LooseSounds.erase(snditer++);
+                    mLooseSounds.erase(snditer++);
                 else
                     snditer++;
             }

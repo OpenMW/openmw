@@ -37,7 +37,7 @@ namespace MWSound
 
         MWWorld::Environment& mEnvironment;
 
-        std::auto_ptr<Sound_Output> Output;
+        std::auto_ptr<Sound_Output> mOutput;
 
         boost::shared_ptr<Sound> mMusic;
 
@@ -57,8 +57,8 @@ namespace MWSound
         typedef boost::shared_ptr<Sound> SoundPtr;
         typedef std::map<std::string,SoundPtr> IDMap;
         typedef std::map<MWWorld::Ptr,IDMap> SoundMap;
-        SoundMap ActiveSounds;
-        IDMap LooseSounds;
+        SoundMap mActiveSounds;
+        IDMap mLooseSounds;
 
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
