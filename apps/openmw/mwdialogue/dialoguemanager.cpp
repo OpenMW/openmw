@@ -269,8 +269,6 @@ namespace MWDialogue
             std::string name = select.selectRule.substr (5);
             std::string function = select.selectRule.substr(1,2);
 
-            // TODO types 4, 5, 6, 7, 8, 9, A, B, C
-            //new TOTO: 5,6,9
             switch (type)
             {
             case '1': // function
