@@ -21,9 +21,9 @@ void MpgSnd_Decoder::open(const std::string &fname)
     if(mSndFile)
     {
         if(info.channels == 1)
-            mChanConfig = MonoChannels;
+            mChanConfig = ChannelConfig_Mono;
         else if(info.channels == 2)
-            mChanConfig = StereoChannels;
+            mChanConfig = ChannelConfig_Stereo;
         else
         {
             sf_close(mSndFile);
@@ -47,7 +47,7 @@ void MpgSnd_Decoder::open(const std::string &fname)
                 fail("Unsupported encoding in "+fname);
             if(channels != 1 && channels != 2)
                 fail("Unsupported channel count in "+fname);
-            mChanConfig = ((channels==2)?StereoChannels:MonoChannels);
+            mChanConfig = ((channels==2)?ChannelConfig_Stereo:ChannelConfig_Mono);
             mSampleRate = rate;
             return;
         }
@@ -88,7 +88,7 @@ void MpgSnd_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
 
     *samplerate = mSampleRate;
     *chans = mChanConfig;
-    *type = Int16Sample;
+    *type = SampleType_Int16;
 }
 
 size_t MpgSnd_Decoder::read(char *buffer, size_t bytes)

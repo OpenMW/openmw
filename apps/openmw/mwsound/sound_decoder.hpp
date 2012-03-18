@@ -1,19 +1,22 @@
 #ifndef GAME_SOUND_SOUND_DECODER_H
 #define GAME_SOUND_SOUND_DECODER_H
 
+#include <string>
+
 namespace MWSound
 {
+    enum SampleType {
+        SampleType_UInt8,
+        SampleType_Int16
+    };
+    enum ChannelConfig {
+        ChannelConfig_Mono,
+        ChannelConfig_Stereo
+    };
+
     class Sound_Decoder
     {
     public:
-        enum SampleType {
-            UInt8Sample,
-            Int16Sample
-        };
-        enum ChannelConfig {
-            MonoChannels,
-            StereoChannels
-        };
         virtual void open(const std::string &fname) = 0;
         virtual void close() = 0;
 

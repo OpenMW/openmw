@@ -22,22 +22,22 @@ static void throwALerror()
 }
 
 
-static ALenum getALFormat(Sound_Decoder::ChannelConfig chans, Sound_Decoder::SampleType type)
+static ALenum getALFormat(ChannelConfig chans, SampleType type)
 {
-    if(chans == Sound_Decoder::MonoChannels)
+    if(chans == ChannelConfig_Mono)
     {
-        if(type == Sound_Decoder::Int16Sample)
+        if(type == SampleType_Int16)
             return AL_FORMAT_MONO16;
-        else if(type == Sound_Decoder::UInt8Sample)
+        else if(type == SampleType_UInt8)
             return AL_FORMAT_MONO8;
         else
             fail("Unsupported sample type");
     }
-    else if(chans == Sound_Decoder::StereoChannels)
+    else if(chans == ChannelConfig_Stereo)
     {
-        if(type == Sound_Decoder::Int16Sample)
+        if(type == SampleType_Int16)
             return AL_FORMAT_STEREO16;
-        else if(type == Sound_Decoder::UInt8Sample)
+        else if(type == SampleType_UInt8)
             return AL_FORMAT_STEREO8;
         else
             fail("Unsupported sample type");
@@ -51,8 +51,8 @@ static ALenum getALFormat(Sound_Decoder::ChannelConfig chans, Sound_Decoder::Sam
 ALuint LoadBuffer(DecoderPtr decoder)
 {
     int srate;
-    Sound_Decoder::ChannelConfig chans;
-    Sound_Decoder::SampleType type;
+    ChannelConfig chans;
+    SampleType type;
     ALenum format;
 
     decoder->getInfo(&srate, &chans, &type);
@@ -136,8 +136,8 @@ OpenAL_SoundStream::OpenAL_SoundStream(DecoderPtr decoder)
     try
     {
         int srate;
-        Sound_Decoder::ChannelConfig chans;
-        Sound_Decoder::SampleType type;
+        ChannelConfig chans;
+        SampleType type;
 
         mDecoder->getInfo(&srate, &chans, &type);
         mFormat = getALFormat(chans, type);
