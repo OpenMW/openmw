@@ -60,7 +60,12 @@ namespace MWDialogue
 
     int Journal::getJournalIndex (const std::string& id) const
     {
-        return 0;
+        TQuestContainer::const_iterator iter = mQuests.find (id);
+
+        if (iter==mQuests.end())
+            return 0;
+
+        return iter->second.getIndex();
     }
 
     Journal::TEntryIter Journal::begin() const
