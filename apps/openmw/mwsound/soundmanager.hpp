@@ -64,9 +64,7 @@ namespace MWSound
             MWWorld::Ptr ptr, const std::string &id,
             float volume, float pitch, float min, float max,
             bool loop, bool untracked=false);
-        void remove(MWWorld::Ptr ptr, const std::string &id = "");
         bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
-        void removeCell(const MWWorld::Ptr::CellStore *cell);
         void updateRegionSound(float duration);
 
     public:

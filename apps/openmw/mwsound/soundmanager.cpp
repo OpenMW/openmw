@@ -78,8 +78,6 @@ namespace MWSound
     {
         LooseSounds.clear();
         ActiveSounds.clear();
-        if(mMusic)
-            mMusic->Stop();
         mMusic.reset();
         Output.reset();
     }
@@ -135,30 +133,8 @@ namespace MWSound
         }
         catch(std::exception &e)
         {
-            std::cout <<"Sound play error: "<<e.what()<< std::endl;
+            std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
-    }
-
-    // Stop a sound and remove it from the list. If id="" then
-    // remove the entire object and stop all its sounds.
-    void SoundManager::remove(MWWorld::Ptr ptr, const std::string &id)
-    {
-        SoundMap::iterator snditer = ActiveSounds.find(ptr);
-        if(snditer == ActiveSounds.end())
-            return;
-
-        if(!id.empty())
-        {
-            IDMap::iterator iditer = snditer->second.find(id);
-            if(iditer != snditer->second.end())
-            {
-                snditer->second.erase(iditer);
-                if(snditer->second.size() == 0)
-                    ActiveSounds.erase(snditer);
-            }
-        }
-        else
-            ActiveSounds.erase(snditer);
     }
 
     bool SoundManager::isPlaying(MWWorld::Ptr ptr, const std::string &id) const
@@ -174,18 +150,6 @@ namespace MWSound
         return iditer->second->isPlaying();
     }
 
-    // Remove all references to objects belonging to a given cell
-    void SoundManager::removeCell(const MWWorld::Ptr::CellStore *cell)
-    {
-        SoundMap::iterator snditer = ActiveSounds.begin();
-        while(snditer != ActiveSounds.end())
-        {
-            if(snditer->first.getCell() == cell)
-                ActiveSounds.erase(snditer++);
-            else
-                snditer++;
-        }
-    }
 
     void SoundManager::stopMusic()
     {
@@ -193,7 +157,6 @@ namespace MWSound
             mMusic->Stop();
         setPlaylist();
     }
-
 
     void SoundManager::streamMusicFull(const std::string& filename)
     {
@@ -337,12 +300,37 @@ namespace MWSound
 
     void SoundManager::stopSound3D(MWWorld::Ptr ptr, const std::string& soundId)
     {
-        remove(ptr, soundId);
+        // Stop a sound and remove it from the list. If soundId="" then
+        // stop all its sounds.
+        SoundMap::iterator snditer = ActiveSounds.find(ptr);
+        if(snditer == ActiveSounds.end())
+            return;
+
+        if(!soundId.empty())
+        {
+            IDMap::iterator iditer = snditer->second.find(soundId);
+            if(iditer != snditer->second.end())
+            {
+                snditer->second.erase(iditer);
+                if(snditer->second.size() == 0)
+                    ActiveSounds.erase(snditer);
+            }
+        }
+        else
+            ActiveSounds.erase(snditer);
     }
 
     void SoundManager::stopSound(MWWorld::Ptr::CellStore *cell)
     {
-        removeCell(cell);
+        // Remove all references to objects belonging to a given cell
+        SoundMap::iterator snditer = ActiveSounds.begin();
+        while(snditer != ActiveSounds.end())
+        {
+            if(snditer->first.getCell() == cell)
+                ActiveSounds.erase(snditer++);
+            else
+                snditer++;
+        }
     }
 
     void SoundManager::stopSound(const std::string& soundId)
