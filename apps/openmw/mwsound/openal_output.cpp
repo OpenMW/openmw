@@ -93,10 +93,10 @@ public:
     OpenAL_SoundStream(DecoderPtr decoder);
     virtual ~OpenAL_SoundStream();
 
-    void Play(float volume, float pitch);
-    virtual void Stop();
+    void play(float volume, float pitch);
+    virtual void stop();
     virtual bool isPlaying();
-    virtual void Update(const float *pos);
+    virtual void update(const float *pos);
 };
 
 class OpenAL_Sound : public Sound
@@ -108,9 +108,9 @@ public:
     OpenAL_Sound(ALuint src, ALuint buf);
     virtual ~OpenAL_Sound();
 
-    virtual void Stop();
+    virtual void stop();
     virtual bool isPlaying();
-    virtual void Update(const float *pos);
+    virtual void update(const float *pos);
 };
 
 
@@ -159,7 +159,7 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
     mDecoder->close();
 }
 
-void OpenAL_SoundStream::Play(float volume, float pitch)
+void OpenAL_SoundStream::play(float volume, float pitch)
 {
     std::vector<char> data(sBufferSize);
 
@@ -182,7 +182,7 @@ void OpenAL_SoundStream::Play(float volume, float pitch)
     throwALerror();
 }
 
-void OpenAL_SoundStream::Stop()
+void OpenAL_SoundStream::stop()
 {
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
@@ -234,7 +234,7 @@ bool OpenAL_SoundStream::isPlaying()
     return true;
 }
 
-void OpenAL_SoundStream::Update(const float *pos)
+void OpenAL_SoundStream::update(const float *pos)
 {
     alSource3f(mSource, AL_POSITION, pos[0], pos[2], -pos[1]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
@@ -254,7 +254,7 @@ OpenAL_Sound::~OpenAL_Sound()
     alGetError();
 }
 
-void OpenAL_Sound::Stop()
+void OpenAL_Sound::stop()
 {
     alSourceStop(mSource);
     throwALerror();
@@ -270,7 +270,7 @@ bool OpenAL_Sound::isPlaying()
     return state==AL_PLAYING;
 }
 
-void OpenAL_Sound::Update(const float *pos)
+void OpenAL_Sound::update(const float *pos)
 {
     alSource3f(mSource, AL_POSITION, pos[0], pos[2], -pos[1]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
@@ -427,7 +427,7 @@ Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float 
     decoder->open(fname);
 
     sound.reset(new OpenAL_SoundStream(decoder));
-    sound->Play(volume, pitch);
+    sound->play(volume, pitch);
 
     return sound.release();
 }

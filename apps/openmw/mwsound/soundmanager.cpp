@@ -159,14 +159,14 @@ namespace MWSound
     void SoundManager::stopMusic()
     {
         if(mMusic)
-            mMusic->Stop();
+            mMusic->stop();
         setPlaylist();
     }
 
     void SoundManager::streamMusicFull(const std::string& filename)
     {
         if(mMusic)
-            mMusic->Stop();
+            mMusic->stop();
         mMusic.reset(mOutput->streamSound(filename, 0.4f, 1.0f));
     }
 
@@ -358,7 +358,7 @@ namespace MWSound
         while(iditer != snditer->second.end())
         {
             const ESM::Position &pos = ptr.getCellRef().pos;
-            iditer->second->Update(pos.pos);
+            iditer->second->update(pos.pos);
             iditer++;
         }
     }
