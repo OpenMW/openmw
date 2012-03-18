@@ -15,6 +15,7 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwinput/inputmanager.hpp"
 #include "../mwgui/dialogue.hpp"
@@ -332,7 +333,15 @@ namespace MWDialogue
                 return true;
 
             case '5'://item
-                if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                MWWorld::Ptr player = mEnvironment.mWorld->getPlayer().getPlayer();
+                MWWorld::ContainerStore& store = MWWorld::Class::get (player).getContainerStore (player);
+
+                Interpreter::Type_Integer sum = 0;
+
+                for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
+                    if (iter->getCellRef().refID==name)
+                        sum += iter->getRefData().getCount();
+                if(!selectCompare<int,int>(comp,sum,select.i)) return false;
 
             case '7':// not ID
                 if(select.type==ESM::VT_String ||select.type==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
