@@ -353,6 +353,9 @@ namespace MWDialogue
                 if(!selectCompare<int,int>(comp,sum,select.i)) return false;
                 }
 
+                return true;
+            }
+
             case '7':// not ID
                 if(select.type==ESM::VT_String ||select.type==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
                 {
