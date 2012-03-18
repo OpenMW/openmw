@@ -650,7 +650,7 @@ namespace MWDialogue
                 locals = mEnvironment.mScriptManager->getLocals (actorScript);
             }
 
-            Compiler::ScriptParser parser(mErrorHandler,mCompilerContext, locals);
+            Compiler::ScriptParser parser(mErrorHandler,mCompilerContext, locals, false);
 
             scanner.scan (parser);
             if(mErrorHandler.isGood())
@@ -712,7 +712,7 @@ namespace MWDialogue
                         win->addText(it->response);
 
                         executeScript(script);
-                        
+
                         mLastTopic = keyword;
                         mLastDialogue = dial;
                         break;
@@ -756,7 +756,7 @@ namespace MWDialogue
                     mLastDialogue = *it;
                     break;
                 }
-            }                       
+            }
         }
     }
 
