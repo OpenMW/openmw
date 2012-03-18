@@ -354,7 +354,10 @@ namespace MWDialogue
                 }
 
                 return true;
-            }
+                
+
+            case '6'://dead
+                if(!selectCompare<int,int>(comp,0,select.i)) return false;
 
             case '7':// not ID
                 if(select.type==ESM::VT_String ||select.type==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
