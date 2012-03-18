@@ -55,12 +55,12 @@ ALuint LoadBuffer(DecoderPtr decoder)
     Sound_Decoder::SampleType type;
     ALenum format;
 
-    decoder->GetInfo(&srate, &chans, &type);
+    decoder->getInfo(&srate, &chans, &type);
     format = getALFormat(chans, type);
 
     std::vector<char> data(32768);
     size_t got, total = 0;
-    while((got=decoder->Read(&data[total], data.size()-total)) > 0)
+    while((got=decoder->read(&data[total], data.size()-total)) > 0)
     {
         total += got;
         data.resize(total*2);
@@ -139,7 +139,7 @@ OpenAL_SoundStream::OpenAL_SoundStream(DecoderPtr decoder)
         Sound_Decoder::ChannelConfig chans;
         Sound_Decoder::SampleType type;
 
-        mDecoder->GetInfo(&srate, &chans, &type);
+        mDecoder->getInfo(&srate, &chans, &type);
         mFormat = getALFormat(chans, type);
         mSampleRate = srate;
     }
@@ -156,7 +156,7 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
     alDeleteSources(1, &mSource);
     alDeleteBuffers(sNumBuffers, mBuffers);
     alGetError();
-    mDecoder->Close();
+    mDecoder->close();
 }
 
 void OpenAL_SoundStream::Play(float volume, float pitch)
@@ -172,7 +172,7 @@ void OpenAL_SoundStream::Play(float volume, float pitch)
     for(ALuint i = 0;i < sNumBuffers;i++)
     {
         size_t got;
-        got = mDecoder->Read(&data[0], data.size());
+        got = mDecoder->read(&data[0], data.size());
         alBufferData(mBuffers[i], mFormat, &data[0], got, mSampleRate);
     }
     throwALerror();
@@ -208,7 +208,7 @@ bool OpenAL_SoundStream::isPlaying()
             alSourceUnqueueBuffers(mSource, 1, &bufid);
             processed--;
 
-            got = mDecoder->Read(&data[0], data.size());
+            got = mDecoder->read(&data[0], data.size());
             if(got > 0)
             {
                 alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
@@ -326,13 +326,13 @@ Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pi
     throwALerror();
 
     DecoderPtr decoder = mManager.getDecoder();
-    decoder->Open(fname);
+    decoder->open(fname);
 
     ALuint src=0, buf=0;
     try
     {
         buf = LoadBuffer(decoder);
-        decoder->Close();
+        decoder->close();
         alGenSources(1, &src);
         throwALerror();
     }
@@ -375,13 +375,13 @@ Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, fl
     throwALerror();
 
     DecoderPtr decoder = mManager.getDecoder();
-    decoder->Open(fname);
+    decoder->open(fname);
 
     ALuint src=0, buf=0;
     try
     {
         buf = LoadBuffer(decoder);
-        decoder->Close();
+        decoder->close();
         alGenSources(1, &src);
         throwALerror();
     }
@@ -424,7 +424,7 @@ Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float 
     std::auto_ptr<OpenAL_SoundStream> sound;
 
     DecoderPtr decoder = mManager.getDecoder();
-    decoder->Open(fname);
+    decoder->open(fname);
 
     sound.reset(new OpenAL_SoundStream(decoder));
     sound->Play(volume, pitch);

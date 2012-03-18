@@ -13,17 +13,17 @@ namespace MWSound
 {
     class MpgSnd_Decoder : public Sound_Decoder
     {
-        SNDFILE *sndFile;
-        mpg123_handle *mpgFile;
+        SNDFILE *mSndFile;
+        mpg123_handle *mMpgFile;
 
-        ChannelConfig chanConfig;
-        int sampleRate;
+        ChannelConfig mChanConfig;
+        int mSampleRate;
 
-        virtual void Open(const std::string &fname);
-        virtual void Close();
+        virtual void open(const std::string &fname);
+        virtual void close();
 
-        virtual void GetInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
-        virtual size_t Read(char *buffer, size_t bytes);
+        virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
+        virtual size_t read(char *buffer, size_t bytes);
 
         MpgSnd_Decoder();
     public:
