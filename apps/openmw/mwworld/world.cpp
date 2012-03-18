@@ -478,7 +478,7 @@ namespace MWWorld
 
     float World::getTimeScaleFactor() const
     {
-        return mGlobalVariables->getInt ("timescale");
+        return mGlobalVariables->getFloat ("timescale");
     }
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
