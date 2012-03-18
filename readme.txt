@@ -96,9 +96,12 @@ athile
 Cris “Mirceam” Mihalache
 gugus / gus
 Jacob “Yacoby” Essex
+Jannik “scrawl” Heller
 Jason “jhooks” Hooks
+Karl-Felix “k1ll” Glatzer
 Lukasz “lgro” Gromanowski
 Marc “Zini” Zinnschlag
+Michael “werdanith” Papageorgiou
 Nikolay “corristo” Kasyanov
 Pieter “pvdk” van der Kloet
 Sebastian “swick” Wick
@@ -110,7 +113,6 @@ Diggory Hardy
 Jan Borsodi
 Jan-Peter “peppe” Nilsson
 Josua Grawitter
-Karl-Felix “k1ll” Glatzer
 Nicolay Korslund
 sergoz
 Star-Demon
