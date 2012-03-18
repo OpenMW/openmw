@@ -27,6 +27,8 @@ set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VE
 
 configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
 
+option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+
 # Sound source selection
 option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
@@ -189,8 +191,16 @@ find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
+IF(OGRE_STATIC)
+find_package(Cg REQUIRED)
+IF(WIN32)
+set(OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_Plugin_CgProgramManager_INCLUDE_DIRS} ${OGRE_Plugin_OctreeSceneManager_INCLUDE_DIRS} ${OGRE_Plugin_ParticleFX_INCLUDE_DIRS} ${OGRE_RenderSystem_Direct3D9_INCLUDE_DIRS} ${OGRE_RenderSystem_GL_INCLUDE_DIRS})
+ELSE(WIN32)
+set(OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_Plugin_CgProgramManager_INCLUDE_DIRS} ${OGRE_Plugin_OctreeSceneManager_INCLUDE_DIRS} ${OGRE_Plugin_ParticleFX_INCLUDE_DIRS} ${OGRE_RenderSystem_GL_INCLUDE_DIRS})
+ENDIF(WIN32)
+ENDIF(OGRE_STATIC)
 include_directories("."
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
