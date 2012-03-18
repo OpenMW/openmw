@@ -1,25 +1,5 @@
 # Minimal MyGUI build system for OpenMW
 
-cmake_minimum_required(VERSION 2.6)
-project(MYGUI)
-
-# Use Freetype
-find_package(Freetype REQUIRED)
-set(MYGUI_USE_FREETYPE TRUE)
-
-# Use Ogre
-add_definitions("-DMYGUI_OGRE_PLATFORM")
-
-# Static linking
-set(MYGUI_LIB_TYPE STATIC)
-add_definitions(-DMYGUI_STATIC)
-
-# Setup MyGUIEngine project
-add_subdirectory(MyGUIEngine)
-
-# Setup OgrePlatform
-add_subdirectory(OgrePlatform)
-
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR}/openmw_resources)
 set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
