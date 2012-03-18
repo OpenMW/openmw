@@ -67,6 +67,7 @@ namespace MWSound
         , updater(mgr)
         , cameraTracker(mgr)
         , mCurrentPlaylist(NULL)
+        , mUsingSound(useSound)
     {
         if(useSound)
         {
@@ -105,8 +106,11 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
-        Ogre::Root::getSingleton().removeFrameListener(&updater);
-        cameraTracker.unfollowCamera();
+        if(mUsingSound)
+        {
+            Ogre::Root::getSingleton().removeFrameListener(&updater);
+            cameraTracker.unfollowCamera();
+        }
     }
 
     // Convert a soundId to file name, and modify the volume
