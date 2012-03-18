@@ -163,6 +163,26 @@ namespace MWDialogue
                 iss >> ifunction;
                 switch(ifunction)
                 {
+                case 39://PC Expelled
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 43://PC Crime level
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 46://Same faction
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 48://Detected
+                    if(!selectCompare(comp,1,select.i)) return false;
+                    break;
+
+                case 49://Alarmed
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
                 case 50://choice
                     isAChoice = true;
                     if(choice)
@@ -171,20 +191,61 @@ namespace MWDialogue
                     }
                     break;
 
+                case 60://PC Vampire
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 61://Level
+                    if(!selectCompare(comp,1,select.i)) return false;
+                    break;
+
+                case 62://Attacked
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 63://Talked to PC
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 64://PC Health
+                    if(!selectCompare(comp,50,select.i)) return false;
+                    break;
+
+                case 65://Creature target
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 66://Friend hit
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 67://Fight
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 68://Hello????
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 69://Alarm
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 70://Flee
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
+                case 71://Should Attack
+                    if(!selectCompare(comp,0,select.i)) return false;
+                    break;
+
                 default:
                     break;
 
                 }
             }
         }
-        if(isAChoice)
-        {
-            return true;
-        }
-        if(isFunction)
-        {
-            return false;
-        }
+
         return true;
     }
 
@@ -373,6 +434,9 @@ namespace MWDialogue
             if (toLower (info.actor)!=MWWorld::Class::get (actor).getId (actor))
                 return false;
 
+        //PC Faction
+        if(!info.pcFaction.empty()) return false;
+
         //NPC race
         if (!info.race.empty())
         {
@@ -544,7 +608,7 @@ namespace MWDialogue
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
                     iter!=it->second.mInfo.end(); ++iter)
                 {
-                    if (isMatching (actor, *iter) && functionFilter(mActor,*iter,false))
+                    if (isMatching (actor, *iter) && functionFilter(mActor,*iter,true))
                     {
                         if (!iter->sound.empty())
                         {
