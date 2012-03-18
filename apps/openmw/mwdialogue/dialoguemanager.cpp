@@ -318,7 +318,7 @@ namespace MWDialogue
             case '4'://journal
                 if(select.type==ESM::VT_Int)
                 {
-                    if(!selectCompare<int,int>(comp,mEnvironment.mJournal->getJournalIndex(name),select.i)) return false;
+                    if(!selectCompare<int,int>(comp,mEnvironment.mJournal->getJournalIndex(toLower(name)),select.i)) return false;
                 }
                 else
                     throw std::runtime_error (
