@@ -358,6 +358,9 @@ namespace MWSound
 
     void SoundManager::playPlaylist(std::string playlist)
     {
+        if (!mUsingSound)
+            return;
+
         if (playlist == "")
         {
             if(!isMusicPlaying())
@@ -379,6 +382,9 @@ namespace MWSound
 
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
+    if (!mUsingSound)
+      return;
+
     // The range values are not tested
     std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict, true);
     if(!filePath.empty())
