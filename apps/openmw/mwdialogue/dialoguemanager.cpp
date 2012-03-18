@@ -164,79 +164,79 @@ namespace MWDialogue
                 switch(ifunction)
                 {
                 case 39://PC Expelled
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 43://PC Crime level
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 46://Same faction
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 48://Detected
-                    if(!selectCompare(comp,1,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,1,select.i)) return false;
                     break;
 
                 case 49://Alarmed
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 50://choice
                     isAChoice = true;
                     if(choice)
                     {
-                        if(!selectCompare(comp,mChoice,select.i)) return false;
+                        if(!selectCompare<int,int>(comp,mChoice,select.i)) return false;
                     }
                     break;
 
                 case 60://PC Vampire
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 61://Level
-                    if(!selectCompare(comp,1,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,1,select.i)) return false;
                     break;
 
                 case 62://Attacked
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 63://Talked to PC
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 64://PC Health
-                    if(!selectCompare(comp,50,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,50,select.i)) return false;
                     break;
 
                 case 65://Creature target
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 66://Friend hit
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 67://Fight
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 68://Hello????
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 69://Alarm
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 70://Flee
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 case 71://Should Attack
-                    if(!selectCompare(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
                 default:
@@ -330,6 +330,9 @@ namespace MWDialogue
                     "unsupported variable type in dialogue info select");
 
                 return true;
+
+            case '5'://item
+                if(!selectCompare<int,int>(comp,0,select.i)) return false;
 
             case '7':// not ID
                 if(select.type==ESM::VT_String ||select.type==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
@@ -563,6 +566,8 @@ namespace MWDialogue
 
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
+        mChoice = -1;
+        mIsInChoice = false;
         std::cout << "talking with " << MWWorld::Class::get (actor).getName (actor) << std::endl;
 
         mActor = actor;
