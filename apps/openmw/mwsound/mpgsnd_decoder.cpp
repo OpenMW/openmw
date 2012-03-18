@@ -22,8 +22,8 @@ void MpgSnd_Decoder::Open(const std::string &fname)
     {
         if(info.channels == 1)
             chanConfig = MonoChannels;
-        else if(info.channels == 1)
-            chanConfig = MonoChannels;
+        else if(info.channels == 2)
+            chanConfig = StereoChannels;
         else
         {
             sf_close(sndFile);
