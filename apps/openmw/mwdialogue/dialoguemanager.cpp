@@ -318,19 +318,7 @@ namespace MWDialogue
             case '4'://journal
                 if(select.type==ESM::VT_Int)
                 {
-                    //std::cout << "vtint: " << select.i << std::endl;
-                    bool isInJournal;
-                    if(mEnvironment.mJournal->begin()!=mEnvironment.mJournal->end())
-                    {
-                        for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = mEnvironment.mJournal->begin();it!=mEnvironment.mJournal->end();it++)
-                        {
-
-                            if(it->mTopic == name) isInJournal = true;
-                        }
-                    }
-                    else
-                        isInJournal =  false;
-                    if(!selectCompare<int,int>(comp,int(isInJournal),select.i)) return false;
+                    if(!selectCompare<int,int>(comp,mEnvironment.mJournal->getJournalIndex(name),select.i)) return false;
                 }
                 else
                     throw std::runtime_error (
@@ -728,7 +716,7 @@ namespace MWDialogue
                 for(std::list<ESM::DialInfo>::iterator it = actorKnownTopics[keyword].begin(); it != actorKnownTopics[keyword].end();it++)
                 {
                     ESM::DialInfo dial = *it;
-                    if(functionFilter(mActor,dial,true))
+                    if(functionFilter(mActor,dial,true) && isMatching (mActor,dial))
                     {
                         std::string text = it->response;
                         std::string script = it->resultScript;
@@ -770,7 +758,7 @@ namespace MWDialogue
             for(std::list<ESM::DialInfo>::iterator it = iter; it!=actorKnownTopics[mLastTopic].begin();)
             {
                 it--;
-                if(functionFilter(mActor,*it,true))
+                if(functionFilter(mActor,*it,true) && isMatching (mActor,*it))
                 {
                     mChoiceMap.clear();
                     mChoice = -1;
