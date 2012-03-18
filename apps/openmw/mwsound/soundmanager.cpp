@@ -47,9 +47,14 @@ namespace MWSound
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
 
-        mOutput.reset(new DEFAULT_OUTPUT(*this));
-        if(!mOutput->init())
+        try
         {
+            mOutput.reset(new DEFAULT_OUTPUT(*this));
+            mOutput->init();
+        }
+        catch(std::exception &e)
+        {
+            std::cout <<"Sound init failed: "<<e.what()<< std::endl;
             mOutput.reset();
             return;
         }

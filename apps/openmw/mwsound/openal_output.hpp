@@ -19,7 +19,7 @@ namespace MWSound
         ALCdevice *mDevice;
         ALCcontext *mContext;
 
-        virtual bool init(const std::string &devname="");
+        virtual void init(const std::string &devname="");
         virtual void deinit();
 
         virtual Sound *playSound(const std::string &fname, float volume, float pitch, bool loop);

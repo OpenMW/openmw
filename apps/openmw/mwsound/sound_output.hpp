@@ -16,7 +16,7 @@ namespace MWSound
     {
         SoundManager &mManager;
 
-        virtual bool init(const std::string &devname="") = 0;
+        virtual void init(const std::string &devname="") = 0;
         virtual void deinit() = 0;
 
         virtual Sound *playSound(const std::string &fname, float volume, float pitch, bool loop) = 0;

@@ -279,34 +279,22 @@ void OpenAL_Sound::update(const float *pos)
 }
 
 
-bool OpenAL_Output::init(const std::string &devname)
+void OpenAL_Output::init(const std::string &devname)
 {
-    if(mContext)
-        fail("Device already initialized");
+    if(mDevice || mContext)
+        fail("Device already open");
 
     mDevice = alcOpenDevice(devname.c_str());
     if(!mDevice)
-    {
-        std::cout << "Failed to open \""<<devname<<"\"" << std::endl;
-        return false;
-    }
+        fail("Failed to open \""+devname+"\"");
     std::cout << "Opened \""<<alcGetString(mDevice, ALC_DEVICE_SPECIFIER)<<"\"" << std::endl;
 
     mContext = alcCreateContext(mDevice, NULL);
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
-    {
-        std::cout << "Failed to setup device context" << std::endl;
-        if(mContext)
-            alcDestroyContext(mContext);
-        mContext = 0;
-        alcCloseDevice(mDevice);
-        mDevice = 0;
-        return false;
-    }
+        fail(std::string("Failed to setup context: ")+alcGetString(mDevice, alcGetError(mDevice)));
+
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
     throwALerror();
-
-    return true;
 }
 
 void OpenAL_Output::deinit()
