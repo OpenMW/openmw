@@ -127,6 +127,36 @@ Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Fil
 
 CHANGELOG
 
+0.13.0
+
+Bug #145: Fixed sound problems after cell change
+Bug #179: Pressing space in console triggers activation
+Bug #186: CMake doesn't use the debug versions of Ogre libraries on Linux
+Bug #189: ASCII 16 character added to console on it's activation on Mac OS X
+Bug #190: Case Folding fails with music files
+Bug #196: Collision shapes out of place
+Bug #202: ESMTool doesn't not work with localised ESM files anymore
+Bug #203: Torch lights only visible on short distance
+Bug #207: Ogre.log not written
+Bug #209: Sounds do not play
+Bug #210: Ogre crash at Dren plantation
+Feature #9: NPC Dialogue Window
+Feature #16/42: New sky/weather implementation
+Feature #40: Fading
+Feature #48: NPC Dialogue System
+Feature #117: Equipping Items (backend only, no GUI yet, no rendering of equipped items yet)
+Feature #161: Load REC_PGRD records
+Feature #195: Wireframe-mode
+Feature #198/199: Various sound effects
+Feature #206: Allow picking data path from launcher if non is set
+Task #108: Refactor window manager class
+Task #172: Sound Manager Cleanup
+Task #173: Create OpenEngine systems in the appropriate manager classes
+Task #184: Adjust MSVC and gcc warning levels
+Task #185: RefData rewrite
+Task #201: Workaround for transparency issues
+Task #208: silenced esm_reader.hpp warning
+
 0.12.0
 
 Bug #154: FPS Drop
