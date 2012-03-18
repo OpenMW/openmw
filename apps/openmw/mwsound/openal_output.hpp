@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <boost/thread.hpp>
+
 #include "alc.h"
 #include "al.h"
 
@@ -18,6 +20,8 @@ namespace MWSound
     {
         ALCdevice *mDevice;
         ALCcontext *mContext;
+
+        boost::thread mStreamThread;
 
         virtual void init(const std::string &devname="");
         virtual void deinit();

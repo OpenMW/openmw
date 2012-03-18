@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <vector>
@@ -76,9 +77,7 @@ ALuint LoadBuffer(DecoderPtr decoder)
 
 class OpenAL_SoundStream : public Sound
 {
-    // This should be something sane, like 4, but currently cell loads tend to
-    // cause the stream to underrun
-    static const ALuint sNumBuffers = 150;
+    static const ALuint sNumBuffers = 4;
     static const ALuint sBufferSize = 32768;
 
     ALuint mSource;
@@ -89,14 +88,18 @@ class OpenAL_SoundStream : public Sound
 
     DecoderPtr mDecoder;
 
+    volatile bool mIsFinished;
+
 public:
     OpenAL_SoundStream(DecoderPtr decoder);
     virtual ~OpenAL_SoundStream();
 
-    void play(float volume, float pitch);
     virtual void stop();
     virtual bool isPlaying();
     virtual void update(const float *pos);
+
+    void play(float volume, float pitch);
+    bool process();
 };
 
 class OpenAL_Sound : public Sound
@@ -114,8 +117,52 @@ public:
 };
 
 
+struct StreamThread {
+    typedef std::vector<OpenAL_SoundStream*> StreamVec;
+    static StreamVec sStreams;
+    static boost::mutex sMutex;
+
+    void operator()()
+    {
+        while(1)
+        {
+            sMutex.lock();
+            StreamVec::iterator iter = sStreams.begin();
+            while(iter != sStreams.end())
+            {
+                if((*iter)->process() == false)
+                    iter = sStreams.erase(iter);
+                else
+                    iter++;
+            }
+            sMutex.unlock();
+            boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+        }
+    }
+
+    static void add(OpenAL_SoundStream *stream)
+    {
+        sMutex.lock();
+        if(std::find(sStreams.begin(), sStreams.end(), stream) == sStreams.end())
+            sStreams.push_back(stream);
+        sMutex.unlock();
+    }
+
+    static void remove(OpenAL_SoundStream *stream)
+    {
+        sMutex.lock();
+        StreamVec::iterator iter = std::find(sStreams.begin(), sStreams.end(), stream);
+        if(iter != sStreams.end())
+            sStreams.erase(iter);
+        sMutex.unlock();
+    }
+};
+StreamThread::StreamVec StreamThread::sStreams;
+boost::mutex StreamThread::sMutex;
+
+
 OpenAL_SoundStream::OpenAL_SoundStream(DecoderPtr decoder)
-  : mDecoder(decoder)
+  : mDecoder(decoder), mIsFinished(true)
 {
     throwALerror();
 
@@ -153,9 +200,12 @@ OpenAL_SoundStream::OpenAL_SoundStream(DecoderPtr decoder)
 }
 OpenAL_SoundStream::~OpenAL_SoundStream()
 {
+    StreamThread::remove(this);
+
     alDeleteSources(1, &mSource);
     alDeleteBuffers(sNumBuffers, mBuffers);
     alGetError();
+
     mDecoder->close();
 }
 
@@ -180,17 +230,36 @@ void OpenAL_SoundStream::play(float volume, float pitch)
     alSourceQueueBuffers(mSource, sNumBuffers, mBuffers);
     alSourcePlay(mSource);
     throwALerror();
+
+    StreamThread::add(this);
+    mIsFinished = false;
 }
 
 void OpenAL_SoundStream::stop()
 {
+    StreamThread::remove(this);
+
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
     throwALerror();
     // FIXME: Rewind decoder
+    mIsFinished = true;
 }
 
 bool OpenAL_SoundStream::isPlaying()
+{
+    return !mIsFinished;
+}
+
+void OpenAL_SoundStream::update(const float *pos)
+{
+    alSource3f(mSource, AL_POSITION, pos[0], pos[2], -pos[1]);
+    alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    throwALerror();
+}
+
+bool OpenAL_SoundStream::process()
 {
     ALint processed, state;
 
@@ -225,21 +294,16 @@ bool OpenAL_SoundStream::isPlaying()
         alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
         throwALerror();
         if(queued == 0)
+        {
+            mIsFinished = true;
             return false;
+        }
 
         alSourcePlay(mSource);
         throwALerror();
     }
 
     return true;
-}
-
-void OpenAL_SoundStream::update(const float *pos)
-{
-    alSource3f(mSource, AL_POSITION, pos[0], pos[2], -pos[1]);
-    alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-    throwALerror();
 }
 
 
@@ -435,12 +499,13 @@ void OpenAL_Output::updateListener(const float *pos, const float *atdir, const f
 
 
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
-  : Sound_Output(mgr), mDevice(0), mContext(0)
+  : Sound_Output(mgr), mDevice(0), mContext(0), mStreamThread(StreamThread())
 {
 }
 
 OpenAL_Output::~OpenAL_Output()
 {
+    mStreamThread.interrupt();
     deinit();
 }
 
