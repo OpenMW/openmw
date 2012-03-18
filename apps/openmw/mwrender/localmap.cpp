@@ -10,18 +10,6 @@
 using namespace MWRender;
 using namespace Ogre;
 
-#define MAP_RESOLUTION 1024 // 1024*1024 pixels for a SIZE*SIZE area in world units
-
-// warning: don't set this too high! dynamic textures are a bottleneck
-#define FOGOFWAR_RESOLUTION 32
-
-// how many frames to skip before rendering the fog of war.
-// example: at 60 fps, a value of 2 would mean to render it at 20 fps.
-#define FOGOFWAR_SKIP 2
-
-// size of a map segment (for exterior regions, this equals 1 cell)
-#define SIZE 8192.f
-
 LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* env)
 {
     mRendering = rend;
@@ -88,8 +76,8 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
         Vector2 length = max-min;
         
         // divide into segments
-        const int segsX = std::ceil( length.x / SIZE );
-        const int segsY = std::ceil( length.y / SIZE );
+        const int segsX = std::ceil( length.x / sSize );
+        const int segsY = std::ceil( length.y / sSize );
 
         for (int x=0; x<segsX; ++x)
         {
@@ -112,7 +100,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
     int x = cell->cell->data.gridX;
     int y = cell->cell->data.gridY;
 
-    render((x+0.5)*SIZE, (-y-0.5)*SIZE, -10000, 10000, SIZE, SIZE, name);
+    render((x+0.5)*sSize, (-y-0.5)*sSize, -10000, 10000, sSize, sSize, name);
 }
 
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
@@ -133,8 +121,8 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     Vector2 center(bounds.getCenter().x, bounds.getCenter().z);
 
     // divide into segments
-    const int segsX = std::ceil( length.x / SIZE );
-    const int segsY = std::ceil( length.y / SIZE );
+    const int segsX = std::ceil( length.x / sSize );
+    const int segsY = std::ceil( length.y / sSize );
 
     mInteriorName = cell->cell->name;
 
@@ -142,10 +130,10 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     {
         for (int y=0; y<segsY; ++y)
         {
-            Vector2 start = min + Vector2(SIZE*x,SIZE*y);
+            Vector2 start = min + Vector2(sSize*x,sSize*y);
             Vector2 newcenter = start + 4096;
 
-            render(newcenter.x, newcenter.y, z.y, z.x, SIZE, SIZE,
+            render(newcenter.x, newcenter.y, z.y, z.x, sSize, sSize,
                 cell->cell->name + "_" + coordStr(x,y));
         }
     }
@@ -187,7 +175,7 @@ void LocalMap::render(const float x, const float y,
                             texture,
                             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                             TEX_TYPE_2D,
-                            xw*MAP_RESOLUTION/SIZE, yw*MAP_RESOLUTION/SIZE, 
+                            xw*sMapResolution/sSize, yw*sMapResolution/sSize, 
                             0,
                             PF_R8G8B8,
                             TU_RENDERTARGET);
@@ -207,22 +195,22 @@ void LocalMap::render(const float x, const float y,
                             texture + "_fog",
                             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                             TEX_TYPE_2D,
-                            xw*FOGOFWAR_RESOLUTION/SIZE, yw*FOGOFWAR_RESOLUTION/SIZE, 
+                            xw*sFogOfWarResolution/sSize, yw*sFogOfWarResolution/sSize, 
                             0,
                             PF_A8R8G8B8,
                             TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
 
             // create a buffer to use for dynamic operations
-            uint32* buffer = new uint32[FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION];
+            uint32* buffer = new uint32[sFogOfWarResolution*sFogOfWarResolution];
 
             // initialize to (0, 0, 0, 1)
             uint32* pointer = buffer;
-            for (int p=0; p<FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION; ++p)
+            for (int p=0; p<sFogOfWarResolution*sFogOfWarResolution; ++p)
             {
                 *(pointer+p) = (255 << 24);
             }
 
-            memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION*4);
+            memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, sFogOfWarResolution*sFogOfWarResolution*4);
             tex2->getBuffer()->unlock();
 
             mBuffers[texture] = buffer;
@@ -239,19 +227,20 @@ void LocalMap::render(const float x, const float y,
 
 void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
 {
-    #if FOGOFWAR_SKIP != 0
-    static int count=0;
-    if (++count % FOGOFWAR_SKIP != 0)
-        return;
-    #endif
+    if (sFogOfWarSkip != 0)
+    {
+        static int count=0;
+        if (++count % sFogOfWarSkip != 0)
+            return;
+    }
 
     // retrieve the x,y grid coordinates the player is in 
     int x,y;
     Vector2 pos(position.x, position.z);
     if (!mInterior)
     {
-        x = std::ceil(pos.x / SIZE)-1;
-        y = std::ceil(-pos.y / SIZE)-1;
+        x = std::ceil(pos.x / sSize)-1;
+        y = std::ceil(-pos.y / sSize)-1;
         mCellX = x;
         mCellY = y;
     }
@@ -260,8 +249,8 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
         min *= 1.3;
         
-        x = std::ceil((pos.x - min.x)/SIZE)-1;
-        y = std::ceil((pos.y - min.y)/SIZE)-1;
+        x = std::ceil((pos.x - min.x)/sSize)-1;
+        y = std::ceil((pos.y - min.y)/sSize)-1;
 
         mEnvironment->mWindowManager->setInteriorMapTexture(x,y);
     }
@@ -271,8 +260,8 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
     std::string texName;
     if (!mInterior)
     {
-        u = std::abs((pos.x - (SIZE*x))/SIZE);
-        v = 1-std::abs((pos.y + (SIZE*y))/SIZE);
+        u = std::abs((pos.x - (sSize*x))/sSize);
+        v = 1-std::abs((pos.y + (sSize*y))/sSize);
         texName = "Cell_"+coordStr(x,y);
     }
     else
@@ -280,14 +269,14 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
         min *= 1.3;
 
-        u = (pos.x - min.x - SIZE*x)/SIZE;
-        v = (pos.y - min.y - SIZE*y)/SIZE;
+        u = (pos.x - min.x - sSize*x)/sSize;
+        v = (pos.y - min.y - sSize*y)/sSize;
 
         texName = mInteriorName + "_" + coordStr(x,y);
     }
 
     // explore radius (squared)
-    const float sqrExploreRadius = 0.01 * FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION;
+    const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;
 
     // get the appropriate fog of war texture
     TexturePtr tex = TextureManager::getSingleton().getByName(texName+"_fog");
@@ -297,11 +286,11 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         if (mBuffers.find(texName) == mBuffers.end()) return;
         uint32* buffer = mBuffers[texName];
         uint32* pointer = buffer;
-        for (int texV = 0; texV<FOGOFWAR_RESOLUTION; ++texV)
+        for (int texV = 0; texV<sFogOfWarResolution; ++texV)
         {
-            for (int texU = 0; texU<FOGOFWAR_RESOLUTION; ++texU)
+            for (int texU = 0; texU<sFogOfWarResolution; ++texU)
             {
-                float sqrDist = Math::Sqr(texU - u*FOGOFWAR_RESOLUTION) + Math::Sqr(texV - v*FOGOFWAR_RESOLUTION);
+                float sqrDist = Math::Sqr(texU - u*sFogOfWarResolution) + Math::Sqr(texV - v*sFogOfWarResolution);
                 uint32 clr = *pointer;
                 uint8 alpha = (clr >> 24);
                 alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
@@ -313,7 +302,7 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         }
 
         // copy to the texture
-        memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, FOGOFWAR_RESOLUTION*FOGOFWAR_RESOLUTION*4);
+        memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, sFogOfWarResolution*sFogOfWarResolution*4);
         tex->getBuffer()->unlock();
     }
 }

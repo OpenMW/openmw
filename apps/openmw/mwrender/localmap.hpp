@@ -59,6 +59,18 @@ namespace MWRender
         OEngine::Render::OgreRenderer* mRendering;
         MWWorld::Environment* mEnvironment;
 
+        // 1024*1024 pixels for a cell
+        static const int sMapResolution = 1024;
+
+        // the dynamic texture is a bottleneck, so don't set this too high
+        static const int sFogOfWarResolution = 32;
+
+        // frames to skip before rendering fog of war
+        static const int sFogOfWarSkip = 2;
+
+        // size of a map segment (for exteriors, 1 cell)
+        static const int sSize = 8192;
+
         Ogre::Camera* mCellCamera;
 
         void render(const float x, const float y,
