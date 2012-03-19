@@ -583,6 +583,50 @@ Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float 
     return sound.release();
 }
 
+Sound* OpenAL_Output::streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+                                    float min, float max)
+{
+    throwALerror();
+
+    std::auto_ptr<OpenAL_SoundStream> sound;
+    ALuint src;
+
+    if(mFreeSources.empty())
+        fail("No free sources");
+    src = mFreeSources.back();
+    mFreeSources.pop_back();
+
+    try
+    {
+        DecoderPtr decoder = mManager.getDecoder();
+        decoder->open(fname);
+        sound.reset(new OpenAL_SoundStream(*this, src, decoder));
+    }
+    catch(std::exception &e)
+    {
+        mFreeSources.push_back(src);
+        throw;
+    }
+
+    alSource3f(src, AL_POSITION, pos[0], pos[2], -pos[1]);
+    alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+
+    alSourcef(src, AL_REFERENCE_DISTANCE, min);
+    alSourcef(src, AL_MAX_DISTANCE, max);
+    alSourcef(src, AL_ROLLOFF_FACTOR, 1.0f);
+
+    alSourcef(src, AL_GAIN, volume);
+    alSourcef(src, AL_PITCH, pitch);
+
+    alSourcei(src, AL_SOURCE_RELATIVE, AL_FALSE);
+    alSourcei(src, AL_LOOPING, AL_FALSE);
+    throwALerror();
+
+    sound->play();
+    return sound.release();
+}
+
 
 void OpenAL_Output::updateListener(const float *pos, const float *atdir, const float *updir)
 {

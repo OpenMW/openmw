@@ -23,6 +23,8 @@ namespace MWSound
         virtual Sound *playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
                                    float min, float max, bool loop) = 0;
         virtual Sound *streamSound(const std::string &fname, float volume, float pitch) = 0;
+        virtual Sound *streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+                                     float min, float max) = 0;
 
         virtual void updateListener(const float *pos, const float *atdir, const float *updir) = 0;
 
