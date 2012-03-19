@@ -29,6 +29,10 @@ size_t FFmpeg_Decoder::read(char *buffer, size_t bytes)
     return 0;
 }
 
+void FFmpeg_Decoder::rewind()
+{
+    fail("Not currently working");
+}
 
 FFmpeg_Decoder::FFmpeg_Decoder()
 {

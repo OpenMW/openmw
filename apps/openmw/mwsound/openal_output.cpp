@@ -225,7 +225,8 @@ void OpenAL_SoundStream::stop()
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
     throwALerror();
-    // FIXME: Rewind decoder
+
+    mDecoder->rewind();
 }
 
 bool OpenAL_SoundStream::isPlaying()

@@ -27,7 +27,9 @@ namespace MWSound
         virtual void close() = 0;
 
         virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type) = 0;
+
         virtual size_t read(char *buffer, size_t bytes) = 0;
+        virtual void rewind() = 0;
 
         virtual ~Sound_Decoder() { }
 

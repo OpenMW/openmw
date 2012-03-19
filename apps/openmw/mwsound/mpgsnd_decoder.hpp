@@ -23,7 +23,9 @@ namespace MWSound
         virtual void close();
 
         virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
+
         virtual size_t read(char *buffer, size_t bytes);
+        virtual void rewind();
 
         MpgSnd_Decoder();
     public:

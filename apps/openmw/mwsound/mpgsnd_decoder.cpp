@@ -109,6 +109,23 @@ size_t MpgSnd_Decoder::read(char *buffer, size_t bytes)
     return got;
 }
 
+void MpgSnd_Decoder::rewind()
+{
+    if(!mSndFile && !mMpgFile)
+        fail("No open file");
+
+    if(mSndFile)
+    {
+        if(sf_seek(mSndFile, 0, SEEK_SET) == -1)
+            fail("seek failed");
+    }
+    else if(mMpgFile)
+    {
+        if(mpg123_seek(mMpgFile, 0, SEEK_SET) < 0)
+            fail("seek failed");
+    }
+}
+
 MpgSnd_Decoder::MpgSnd_Decoder() : mSndFile(NULL), mMpgFile(NULL)
 {
     static bool initdone = false;
