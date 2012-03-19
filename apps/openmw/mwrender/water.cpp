@@ -40,14 +40,12 @@ namespace MWRender {
 
   Water::~Water() {
       Ogre::MeshManager::getSingleton().remove("water");
-      //mCamera->removeListener(this);
     
       mWaterNode->detachObject(mWater);
       mSceneManager->destroyEntity(mWater);
       mSceneManager->destroySceneNode(mWaterNode);
      
-    //Ogre::TextureManager::getSingleton().remove("refraction");
-    //Ogre::TextureManager::getSingleton().remove("reflection");
+   
     Ogre::CompositorManager::getSingleton().removeCompositorChain(mViewport);
   }
 
@@ -63,23 +61,6 @@ namespace MWRender {
   }
 
 
-  void Water::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt) {
-    mWater->setVisible(false);
-
-    if (evt.source == mReflectionTarget) {
-      mCamera->enableReflection(mWaterPlane);
-    } else {
-    }
-  }
-
-  void Water::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt) {
-    mWater->setVisible(true);
-
-    if (evt.source == mReflectionTarget) {
-      mCamera->disableReflection();
-    } else {
-    }
-  }
 
   void Water::checkUnderwater(float  y) {
 
@@ -101,21 +82,7 @@ namespace MWRender {
   }
 
 
-  void Water::cameraPreRenderScene(Ogre::Camera *cam) {
-    Ogre::Vector3 pos = cam->getPosition();
-    
-    if (pos != mOldCameraPos) {
-      mWaterNode->setPosition(pos.x, 0, pos.z);
- 
-      mOldCameraPos = pos;
-    }
-  }
-
-  void Water::cameraPostRenderScene(Ogre::Camera *cam) {
-  }
-
-  void Water::cameraDestroyed(Ogre::Camera *cam) {
-  }
+  
   Ogre::Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY){
       Ogre::Vector3 out = Ogre::Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), mTop, -gridY * CELL_SIZE - (CELL_SIZE / 2));
       

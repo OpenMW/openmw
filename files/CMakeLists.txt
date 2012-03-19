@@ -8,5 +8,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/GlassVP.cg "${OpenMW_BINARY_DIR
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/perlinvolume.dds "${OpenMW_BINARY_DIR}/resources/water/perlinvolume.dds" COPYONLY) 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/Water02.jpg "${OpenMW_BINARY_DIR}/resources/water/Water02.jpg" COPYONLY) 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/water.compositor "${OpenMW_BINARY_DIR}/resources/water/water.compositor" COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/water.material "${OpenMW_BINARY_DIR}/resources/water/water.material" COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/waves2.dds "${OpenMW_BINARY_DIR}/resources/water/waves2.dds" COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/Examples-Water.material "${OpenMW_BINARY_DIR}/resources/water/Examples-Water.material" COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/WaterNormal1.tga "${OpenMW_BINARY_DIR}/resources/water/WaterNormal1.tga" COPYONLY)
