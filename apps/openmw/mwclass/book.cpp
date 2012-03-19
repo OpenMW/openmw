@@ -7,9 +7,11 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/environment.hpp"
 
+#include "../mwrender/objects.hpp"
 
-#include "containerutil.hpp"
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -20,7 +22,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -56,14 +58,10 @@ namespace MWClass
     {
         // TODO implement reading
 
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
-    }
-
-    void Book::insertIntoContainer (const MWWorld::Ptr& ptr,
-        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
-    {
-        insertIntoContainerStore (ptr, containerStore.books);
     }
 
     std::string Book::getScript (const MWWorld::Ptr& ptr) const
@@ -79,5 +77,15 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Book);
 
         registerClass (typeid (ESM::Book).name(), instance);
+    }
+
+    std::string Book::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        return std::string("Item Book Up");
+    }
+
+    std::string Book::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        return std::string("Item Book Down");
     }
 }

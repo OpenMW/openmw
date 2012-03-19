@@ -1,0 +1,21 @@
+Reading cow.raw first
+Size: 37502
+Done
+
+Loading cow.wav by filename:
+Source size: 37502
+rate=11025
+channels=1
+bits=16
+Reading entire buffer into memory
+Comparing...
+Done
+
+Loading cow.wav by stream:
+Source size: 37502
+rate=11025
+channels=1
+bits=16
+Reading entire buffer into memory
+Comparing...
+Done

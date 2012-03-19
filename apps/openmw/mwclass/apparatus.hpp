@@ -2,7 +2,6 @@
 #define GAME_MWCLASS_APPARATUS_H
 
 #include "../mwworld/class.hpp"
-#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {
@@ -23,14 +22,16 @@ namespace MWClass
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation
 
-            virtual void insertIntoContainer (const MWWorld::Ptr& ptr,
-                MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const;
-            ///< Insert into a containe
-
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 
             static void registerSelf();
+
+            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr) const;
+            ///< Return the pick up sound Id
+
+            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr) const;
+            ///< Return the put down sound Id
     };
 }
 

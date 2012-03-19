@@ -2,12 +2,13 @@
 #define GAME_MWCLASS_CONTAINER_H
 
 #include "../mwworld/class.hpp"
-#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {
     class Container : public MWWorld::Class
     {
+            void ensureCustomData (const MWWorld::Ptr& ptr) const;
+
         public:
 
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
@@ -19,8 +20,11 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
-            virtual MWWorld::ContainerStore<MWWorld::RefData>& getContainerStore (
-                const MWWorld::Ptr& ptr) const;
+            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+                const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
+            ///< Generate action for activation
+
+            virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;

@@ -2,7 +2,6 @@
 #define GAME_MWCLASS_LIGHT_H
 
 #include "../mwworld/class.hpp"
-#include "../mwrender/objects.hpp"
 
 namespace MWClass
 {
@@ -28,14 +27,20 @@ namespace MWClass
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation
 
-            virtual void insertIntoContainer (const MWWorld::Ptr& ptr,
-                MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const;
-            ///< Insert into a containe
-
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 
+            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::Ptr& ptr) const;
+            ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
+            /// stay stacked when equipped?
+
             static void registerSelf();
+
+            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
+            ///< Return the pick up sound Id
+
+            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
+            ///< Return the put down sound Id
     };
 }
 

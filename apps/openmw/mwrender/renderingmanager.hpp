@@ -9,6 +9,7 @@
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
+#include <openengine/ogre/fader.hpp>
 #include <openengine/bullet/physic.hpp>
 
 #include <vector>
@@ -19,9 +20,9 @@
 #include <boost/filesystem.hpp>
 
 #include "renderinginterface.hpp"
-#include "npcs.hpp"
-#include "creatures.hpp"
+
 #include "objects.hpp"
+#include "actors.hpp"
 #include "player.hpp"
 #include "water.hpp"
 
@@ -50,12 +51,12 @@ class RenderingManager: private RenderingInterface {
 
   private:
 
-    virtual MWRender::Npcs& getNPCs();
-    virtual MWRender::Creatures& getCreatures();
+
     virtual MWRender::Objects& getObjects();
+    virtual MWRender::Actors& getActors();
 
   public:
-    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
+    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment);
     virtual ~RenderingManager();
 
 
@@ -64,8 +65,12 @@ class RenderingManager: private RenderingInterface {
                                             /// MWWorld::Player has been rewritten to not need access
                                             /// to internal details of the rendering system anymore
 
+    SkyManager* getSkyManager();
+
     void toggleLight();
     bool toggleRenderMode(int mode);
+    
+    OEngine::Render::Fader* getFader();
 
     void removeCell (MWWorld::Ptr::CellStore *store);
 
@@ -89,7 +94,14 @@ class RenderingManager: private RenderingInterface {
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);
 
     void update (float duration);
-
+    
+    void setAmbientColour(const Ogre::ColourValue& colour);
+    void setSunColour(const Ogre::ColourValue& colour);
+    void setSunDirection(const Ogre::Vector3& direction);
+    void sunEnable();
+    void sunDisable();
+    
+    void setGlare(bool glare);
     void skyEnable ();
     void skyDisable ();
     void skySetHour (double hour);
@@ -98,34 +110,55 @@ class RenderingManager: private RenderingInterface {
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
     void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
+    
     /// configure fog according to cell
     void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
+    
+    /// configure fog manually
+    void configureFog(const float density, const Ogre::ColourValue& colour);
+    
+    void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
+        int number = 1);
+    ///< Run animation for a MW-reference. Calls to this function for references that are currently not
+    /// in the rendered scene should be ignored.
+    ///
+    /// \param mode: 0 normal, 1 immediate start, 2 immediate loop
+    /// \param number How offen the animation should be run
+
+    void skipAnimation (const MWWorld::Ptr& ptr);
+    ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
+    /// references that are currently not in the rendered scene should be ignored.
 
   private:
 
     void setAmbientMode();
+    
     SkyManager* mSkyManager;
-	 OEngine::Render::OgreRenderer &rend;
-	 Ogre::Camera* camera;
-	MWRender::Npcs npcs;
-	 MWRender::Creatures creatures;
-     MWRender::Water *mWater;
-	 MWRender::Objects objects;
 
+	 Ogre::Camera* camera;
+     MWRender::Water *mWater;
+
+
+    
+    OEngine::Render::OgreRenderer &mRendering;
+
+    MWRender::Objects mObjects;
+    MWRender::Actors mActors;
 
 
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;
 
     Ogre::ColourValue mAmbientColor;
+    Ogre::Light* mSun;
 
     /// Root node for all objects added to the scene. This is rotated so
     /// that the OGRE coordinate system matches that used internally in
     /// Morrowind.
-    Ogre::SceneNode *mwRoot;
+    Ogre::SceneNode *mMwRoot;
     Ogre::RaySceneQuery *mRaySceneQuery;
 
-    OEngine::Physic::PhysicEngine* eng;
+    OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
     MWRender::Player *mPlayer;
     MWRender::Debugging mDebugging;

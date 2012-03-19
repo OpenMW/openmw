@@ -4,6 +4,7 @@
 #include "class.hpp"
 #include "environment.hpp"
 #include "world.hpp"
+#include "containerstore.hpp"
 
 namespace MWWorld
 {
@@ -14,8 +15,7 @@ namespace MWWorld
         // insert into player's inventory
         MWWorld::Ptr player = environment.mWorld->getPtr ("player", true);
 
-        MWWorld::Class::get (mObject).insertIntoContainer (mObject,
-            MWWorld::Class::get (player).getContainerStore (player));
+        MWWorld::Class::get (player).getContainerStore (player).add (mObject);
 
         // remove from world
         environment.mWorld->deleteObject (mObject);

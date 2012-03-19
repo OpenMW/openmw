@@ -1,8 +1,11 @@
 #include <QtGui>
 
 #include "graphicspage.hpp"
+#include <components/files/configurationmanager.hpp>
 
-GraphicsPage::GraphicsPage(QWidget *parent) : QWidget(parent)
+GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
+    : QWidget(parent)
+    , mCfgMgr(cfg)
 {
     QGroupBox *rendererGroup = new QGroupBox(tr("Renderer"), this);
 
@@ -147,21 +150,21 @@ void GraphicsPage::createPages()
 
 void GraphicsPage::setupConfig()
 {
-    QString ogreCfg = mCfg.getOgreConfigPath().string().c_str();
+    QString ogreCfg = mCfgMgr.getOgreConfigPath().string().c_str();
     QFile file(ogreCfg);
     mOgreConfig = new QSettings(ogreCfg, QSettings::IniFormat);
 }
 
 void GraphicsPage::setupOgre()
 {
-    QString pluginCfg = mCfg.getPluginsConfigPath().string().c_str();
+    QString pluginCfg = mCfgMgr.getPluginsConfigPath().string().c_str();
     QFile file(pluginCfg);
 
     // Create a log manager so we can surpress debug text to stdout/stderr
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
-    logMgr->createLog((mCfg.getLogPath().string() + "/launcherOgre.log"), true, false, false);
+    logMgr->createLog((mCfgMgr.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
-    QString ogreCfg = QString::fromStdString(mCfg.getOgreConfigPath().string());
+    QString ogreCfg = QString::fromStdString(mCfgMgr.getOgreConfigPath().string());
     file.setFileName(ogreCfg);
 
     //we need to check that the path to the configuration file exists before we
@@ -177,13 +180,17 @@ void GraphicsPage::setupOgre()
         Make sure you have write access to<br>%1<br><br>")).arg(configDir.path()));
         msgBox.exec();
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
     try
     {
+    #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9)
+        mOgre = new Ogre::Root("", file.fileName().toStdString(), "./launcherOgre.log");
+    #else
         mOgre = new Ogre::Root(pluginCfg.toStdString(), file.fileName().toStdString(), "./launcherOgre.log");
+    #endif
     }
     catch(Ogre::Exception &ex)
     {
@@ -200,9 +207,18 @@ void GraphicsPage::setupOgre()
 
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
+
+	#ifdef ENABLE_PLUGIN_GL
+	mGLPlugin = new Ogre::GLPlugin();
+	mOgre->installPlugin(mGLPlugin);
+	#endif
+	#ifdef ENABLE_PLUGIN_Direct3D9
+	mD3D9Plugin = new Ogre::D3D9Plugin();
+	mOgre->installPlugin(mD3D9Plugin);
+	#endif
 
     // Get the available renderers and put them in the combobox
     const Ogre::RenderSystemList &renderers = mOgre->getAvailableRenderers();
@@ -234,7 +250,7 @@ void GraphicsPage::setupOgre()
         Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
         msgBox.exec();
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -243,13 +259,7 @@ void GraphicsPage::setupOgre()
     if (mOpenGLRenderSystem) {
         mOGLRTTComboBox->addItems(getAvailableOptions(QString("RTT Preferred Mode"), mOpenGLRenderSystem));
         mOGLAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mOpenGLRenderSystem));
-
-        QStringList videoModes = getAvailableOptions(QString("Video Mode"), mOpenGLRenderSystem);
-        // Remove extraneous spaces
-        videoModes.replaceInStrings(QRegExp("\\s{2,}"), QString(" "));
-        videoModes.replaceInStrings(QRegExp("^\\s"), QString());
-
-        mOGLResolutionComboBox->addItems(videoModes);
+        mOGLResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mOpenGLRenderSystem));
         mOGLFrequencyComboBox->addItems(getAvailableOptions(QString("Display Frequency"), mOpenGLRenderSystem));
     }
 
@@ -258,12 +268,7 @@ void GraphicsPage::setupOgre()
         mD3DRenderDeviceComboBox->addItems(getAvailableOptions(QString("Rendering Device"), mDirect3DRenderSystem));
         mD3DAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mDirect3DRenderSystem));
         mD3DFloatingPointComboBox->addItems(getAvailableOptions(QString("Floating-point mode"), mDirect3DRenderSystem));
-
-        QStringList videoModes = getAvailableOptions(QString("Video Mode"), mDirect3DRenderSystem);
-        // Remove extraneous spaces
-        videoModes.replaceInStrings(QRegExp("\\s{2,}"), QString(" "));
-        videoModes.replaceInStrings(QRegExp("^\\s"), QString());
-        mD3DResolutionComboBox->addItems(videoModes);
+        mD3DResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mDirect3DRenderSystem));
     }
 }
 
@@ -420,7 +425,7 @@ void GraphicsPage::writeConfig()
 
         qCritical("Error validating configuration");
 
-        QApplication::exit(1);
+        qApp->exit(1);
         return;
     }
 
@@ -446,7 +451,8 @@ void GraphicsPage::writeConfig()
 
         qCritical("Error saving Ogre configuration, the error reported was:\n %s", qPrintable(ogreError));
 
-        QApplication::exit(1);
+        qApp->exit(1);
+        return;
     }
 
 }
@@ -478,7 +484,7 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
              {
 
                  if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0)
-                     result << (*opt_it).c_str();
+                     result << QString::fromStdString((*opt_it).c_str()).simplified();
              }
 
     }

@@ -7,9 +7,11 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/environment.hpp"
 
+#include "../mwrender/objects.hpp"
 
-#include "containerutil.hpp"
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -20,7 +22,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -34,14 +36,11 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
             ptr.get<ESM::Ingredient>();
 
-
-
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-
     }
 
     std::string Ingredient::getName (const MWWorld::Ptr& ptr) const
@@ -55,14 +54,10 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
-    }
-
-    void Ingredient::insertIntoContainer (const MWWorld::Ptr& ptr,
-        MWWorld::ContainerStore<MWWorld::RefData>& containerStore) const
-    {
-        insertIntoContainerStore (ptr, containerStore.ingreds);
     }
 
     std::string Ingredient::getScript (const MWWorld::Ptr& ptr) const
@@ -78,5 +73,15 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Ingredient);
 
         registerClass (typeid (ESM::Ingredient).name(), instance);
+    }
+
+    std::string Ingredient::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        return std::string("Item Ingredient Up");
+    }
+
+    std::string Ingredient::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        return std::string("Item Ingredient Down");
     }
 }

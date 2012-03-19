@@ -7,6 +7,7 @@
 
 #include "ptr.hpp"
 #include "nullaction.hpp"
+#include "containerstore.hpp"
 
 namespace MWWorld
 {
@@ -71,14 +72,14 @@ namespace MWWorld
         return boost::shared_ptr<Action> (new NullAction);
     }
 
-    ContainerStore<RefData>& Class::getContainerStore (const Ptr& ptr) const
+    ContainerStore& Class::getContainerStore (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have a container store");
     }
 
-    void Class::insertIntoContainer (const Ptr& ptr, ContainerStore<RefData>& containerStore) const
+    InventoryStore& Class::getInventoryStore (const Ptr& ptr) const
     {
-        throw std::runtime_error ("class does not support inserting into a container");
+        throw std::runtime_error ("class does not have an inventory store");
     }
 
     void Class::lock (const Ptr& ptr, int lockLevel) const
@@ -126,6 +127,16 @@ namespace MWWorld
         return Ogre::Vector3 (0, 0, 0);
     }
 
+    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& ptr) const
+    {
+        return std::make_pair (std::vector<int>(), false);
+    }
+
+    int Class::getEquipmentSkill (const Ptr& ptr, const Environment& environment) const
+    {
+        return -1;
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
@@ -144,5 +155,15 @@ namespace MWWorld
     void Class::registerClass (const std::string& key,  boost::shared_ptr<Class> instance)
     {
         sClasses.insert (std::make_pair (key, instance));
+    }
+
+    std::string Class::getUpSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        throw std::runtime_error ("class does not have an up sound");
+    }
+
+    std::string Class::getDownSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        throw std::runtime_error ("class does not have an down sound");
     }
 }

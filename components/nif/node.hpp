@@ -93,6 +93,20 @@ public:
   }
 };
 
+struct NiTriShapeCopy
+{
+ std::string sname;
+ std::vector<std::string> boneSequence;
+ Nif::NiSkinData::BoneTrafoCopy trafo;
+ //Ogre::Quaternion initialBoneRotation;
+ //Ogre::Vector3 initialBoneTranslation;
+ std::vector<Ogre::Vector3> vertices;
+ std::vector<Ogre::Vector3> normals;
+ std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfo;
+ std::map<int, std::vector<Nif::NiSkinData::IndividualWeight> > vertsToWeights;
+ Nif::NiMorphData morph;
+};
+
 struct NiNode : Node
 {
   NodeList children;
@@ -132,6 +146,27 @@ struct NiTriShape : Node
     Node::read(nif);
     data.read(nif);
     skin.read(nif);
+  }
+
+  NiTriShapeCopy clone(){
+	  NiTriShapeCopy copy;
+      copy.sname = name.toString();
+	  float *ptr = (float*)data->vertices.ptr;
+	  float *ptrNormals = (float*)data->normals.ptr;
+	  int numVerts = data->vertices.length / 3;
+	  for(int i = 0; i < numVerts; i++)
+	  {
+		   float *current = (float*) (ptr + i * 3);
+		   copy.vertices.push_back(Ogre::Vector3(*current, *(current + 1), *(current + 2)));
+
+		   if(ptrNormals){
+			float *currentNormals = (float*) (ptrNormals + i * 3);
+		   copy.normals.push_back(Ogre::Vector3(*currentNormals, *(currentNormals + 1), *(currentNormals + 2)));
+	 		  }
+      }
+
+
+  return copy;
   }
 };
 
@@ -185,6 +220,8 @@ struct NiRotatingParticles : Node
     nif->getInt(); // -1
   }
 };
+
+
 
 } // Namespace
 #endif
