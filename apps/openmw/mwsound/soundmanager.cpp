@@ -133,13 +133,11 @@ namespace MWSound
     {
         try
         {
-            Sound *sound;
             const ESM::Position &pos = ptr.getCellRef().pos;
-            sound = mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop);
-            if(untracked)
-                mLooseSounds[id] = SoundPtr(sound);
-            else
-                mActiveSounds[ptr][id] = SoundPtr(sound);
+            SoundPtr sound(mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop));
+
+            if(untracked) mLooseSounds[id] = sound;
+            else mActiveSounds[ptr][id] = sound;
         }
         catch(std::exception &e)
         {
@@ -157,7 +155,7 @@ namespace MWSound
         if(iditer == snditer->second.end())
             return false;
 
-        return iditer->second->isPlaying();
+        return true;
     }
 
 
@@ -320,7 +318,7 @@ namespace MWSound
             if(iditer != snditer->second.end())
             {
                 snditer->second.erase(iditer);
-                if(snditer->second.size() == 0)
+                if(snditer->second.empty())
                     mActiveSounds.erase(snditer);
             }
         }
@@ -450,15 +448,31 @@ namespace MWSound
             float up[3] = { nUp[0], -nUp[2], nUp[1] };
             mOutput->updateListener(pos, at, up);
 
-            // Check if any "untracked" sounds are finished playing, and trash
-            // them
-            IDMap::iterator snditer = mLooseSounds.begin();
-            while(snditer != mLooseSounds.end())
+            // Check if any sounds are finished playing, and trash them
+            SoundMap::iterator snditer = mActiveSounds.begin();
+            while(snditer != mActiveSounds.end())
             {
-                if(!snditer->second->isPlaying())
-                    mLooseSounds.erase(snditer++);
+                IDMap::iterator iditer = snditer->second.begin();
+                while(iditer != snditer->second.end())
+                {
+                    if(!iditer->second->isPlaying())
+                        snditer->second.erase(iditer++);
+                    else
+                        iditer++;
+                }
+                if(snditer->second.empty())
+                    mActiveSounds.erase(snditer++);
                 else
                     snditer++;
+            }
+
+            IDMap::iterator iditer = mLooseSounds.begin();
+            while(iditer != mLooseSounds.end())
+            {
+                if(!iditer->second->isPlaying())
+                    mLooseSounds.erase(iditer++);
+                else
+                    iditer++;
             }
         }
 
