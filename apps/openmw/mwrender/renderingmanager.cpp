@@ -51,7 +51,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(mRendering.getCamera());
     
     //mSkyManager = 0;
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
+    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;

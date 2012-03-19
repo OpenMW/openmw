@@ -410,6 +410,9 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
+    if (mEnvironment.mWindowManager->getMode()!=MWGui::GM_Game)
+        return;
+
     std::string handle = mEnvironment.mWorld->getFacedHandle();
 
     if (handle.empty())
