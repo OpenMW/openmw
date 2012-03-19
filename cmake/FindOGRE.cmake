@@ -405,10 +405,22 @@ macro(ogre_find_plugin PLUGIN HEADER)
   set(OGRE_${PLUGIN}_LIBRARY_NAMES "${PLUGIN}${OGRE_LIB_SUFFIX}")
   get_debug_names(OGRE_${PLUGIN}_LIBRARY_NAMES)
   set(OGRE_${PLUGIN}_LIBRARY_FWK ${OGRE_LIBRARY_FWK})
+  # Search for release plugins in OGRE dir with version suffix
   find_library(OGRE_${PLUGIN}_LIBRARY_REL NAMES ${OGRE_${PLUGIN}_LIBRARY_NAMES}
-    HINTS ${OGRE_LIBRARY_DIRS} PATH_SUFFIXES "" OGRE opt release release/opt relwithdebinfo relwithdebinfo/opt minsizerel minsizerel/opt)
+    HINTS ${OGRE_LIBRARY_DIRS} PATH_SUFFIXES "" OGRE-${OGRE_VERSION} opt release release/opt relwithdebinfo relwithdebinfo/opt minsizerel minsizerel/opt)
+  if(NOT EXISTS "${OGRE_${PLUGIN}_LIBRARY_REL}")
+    # Search for release plugins in OGRE dir without version suffix
+    find_library(OGRE_${PLUGIN}_LIBRARY_REL NAMES ${OGRE_${PLUGIN}_LIBRARY_NAMES}
+      HINTS ${OGRE_LIBRARY_DIRS} PATH_SUFFIXES "" OGRE opt release release/opt relwithdebinfo relwithdebinfo/opt minsizerel minsizerel/opt)
+  endif()
+  # Search for debug plugins in OGRE dir with version suffix
   find_library(OGRE_${PLUGIN}_LIBRARY_DBG NAMES ${OGRE_${PLUGIN}_LIBRARY_NAMES_DBG}
-    HINTS ${OGRE_LIBRARY_DIRS} PATH_SUFFIXES "" OGRE opt debug debug/opt)
+    HINTS ${OGRE_LIBRARY_DIRS} PATH_SUFFIXES "" OGRE-${OGRE_VERSION} opt debug debug/opt)
+  if(NOT EXISTS "${OGRE_${PLUGIN}_LIBRARY_DBG}")
+    # Search for debug plugins in OGRE dir without version suffix
+    find_library(OGRE_${PLUGIN}_LIBRARY_DBG NAMES ${OGRE_${PLUGIN}_LIBRARY_NAMES_DBG}
+      HINTS ${OGRE_LIBRARY_DIRS} PATH_SUFFIXES "" OGRE opt debug debug/opt)
+  endif()
   make_library_set(OGRE_${PLUGIN}_LIBRARY)
 
   if (OGRE_${PLUGIN}_LIBRARY OR OGRE_${PLUGIN}_INCLUDE_DIR)
@@ -441,9 +453,13 @@ macro(ogre_find_plugin PLUGIN HEADER)
           PATH_SUFFIXES "" bin bin/debug debug)
       elseif (UNIX)
         get_filename_component(OGRE_PLUGIN_DIR_TMP ${OGRE_${PLUGIN}_LIBRARY_REL} PATH)
-        set(OGRE_PLUGIN_DIR_REL ${OGRE_PLUGIN_DIR_TMP} CACHE STRING "Ogre plugin dir (release)")
+        # For some reason this fails
+        #set(OGRE_PLUGIN_DIR_REL ${OGRE_PLUGIN_DIR_TMP} CACHE STRING "Ogre plugin dir (release)")
+        set(OGRE_PLUGIN_DIR_REL ${OGRE_PLUGIN_DIR_TMP})
         get_filename_component(OGRE_PLUGIN_DIR_TMP ${OGRE_${PLUGIN}_LIBRARY_DBG} PATH)
-        set(OGRE_PLUGIN_DIR_DBG ${OGRE_PLUGIN_DIR_TMP} CACHE STRING "Ogre plugin dir (debug)")
+        # Same here
+        #set(OGRE_PLUGIN_DIR_DBG ${OGRE_PLUGIN_DIR_TMP} CACHE STRING "Ogre plugin dir (debug)")
+        set(OGRE_PLUGIN_DIR_DBG ${OGRE_PLUGIN_DIR_TMP})
       endif ()
     endif ()
 	
