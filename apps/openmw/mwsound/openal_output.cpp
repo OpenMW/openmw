@@ -156,6 +156,13 @@ struct StreamThread {
             sStreams.erase(iter);
         sMutex.unlock();
     }
+
+    static void removeAll()
+    {
+        sMutex.lock();
+        sStreams.clear();
+        sMutex.unlock();
+    }
 };
 StreamThread::StreamVec StreamThread::sStreams;
 boost::mutex StreamThread::sMutex;
@@ -363,6 +370,8 @@ void OpenAL_Output::init(const std::string &devname)
 
 void OpenAL_Output::deinit()
 {
+    StreamThread::removeAll();
+
     alcMakeContextCurrent(0);
     if(mContext)
         alcDestroyContext(mContext);
