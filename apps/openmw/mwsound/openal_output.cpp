@@ -213,8 +213,8 @@ void OpenAL_SoundStream::play()
     alSourcePlay(mSource);
     throwALerror();
 
-    mOutput.mStreamThread->add(this);
     mIsFinished = false;
+    mOutput.mStreamThread->add(this);
 }
 
 void OpenAL_SoundStream::stop()
