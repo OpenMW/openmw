@@ -550,7 +550,6 @@ namespace MWDialogue
 
     void DialogueManager::parseText(std::string text)
     {
-        std::cout << "PARSE";
         std::list<std::string>::iterator it;
         for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
         {
@@ -786,8 +785,9 @@ namespace MWDialogue
                 if(found)
                 {
                     for (std::vector<ESM::DialInfo>::const_iterator iter2 = iter;
-                        iter2!=ndialogue.mInfo.begin(); --iter2)
+                        iter2!=ndialogue.mInfo.begin();)
                     {
+                        --iter2;
                         if (isMatching (mActor, *iter2) && functionFilter(mActor,*iter2,true))
                         {
                             mChoiceMap.clear();
