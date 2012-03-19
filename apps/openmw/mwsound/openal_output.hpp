@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <deque>
 
 #include "alc.h"
 #include "al.h"
@@ -21,6 +23,18 @@ namespace MWSound
 
         typedef std::vector<ALuint> IDVec;
         IDVec mFreeSources;
+
+        typedef std::map<std::string,ALuint> NameMap;
+        NameMap mBufferCache;
+
+        typedef std::map<ALuint,ALuint> IDRefMap;
+        IDRefMap mBufferRefs;
+
+        typedef std::deque<ALuint> IDDq;
+        IDDq mUnusedBuffers;
+
+        ALuint getBuffer(const std::string &fname);
+        void bufferFinished(ALuint buffer);
 
         virtual void init(const std::string &devname="");
         virtual void deinit();

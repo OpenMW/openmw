@@ -313,34 +313,7 @@ public:
     virtual void stop();
     virtual bool isPlaying();
     virtual void update(const float *pos);
-
-    static ALuint LoadBuffer(DecoderPtr decoder);
 };
-
-ALuint OpenAL_Sound::LoadBuffer(DecoderPtr decoder)
-{
-    int srate;
-    ChannelConfig chans;
-    SampleType type;
-    ALenum format;
-
-    decoder->getInfo(&srate, &chans, &type);
-    format = getALFormat(chans, type);
-
-    std::vector<char> data(32768);
-    size_t got, total = 0;
-    while((got=decoder->read(&data[total], data.size()-total)) > 0)
-    {
-        total += got;
-        data.resize(total*2);
-    }
-    data.resize(total);
-
-    ALuint buf=0;
-    alGenBuffers(1, &buf);
-    alBufferData(buf, format, &data[0], total, srate);
-    return buf;
-}
 
 OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf)
   : mOutput(output), mSource(src), mBuffer(buf)
@@ -352,8 +325,7 @@ OpenAL_Sound::~OpenAL_Sound()
     alSourcei(mSource, AL_BUFFER, 0);
 
     mOutput.mFreeSources.push_back(mSource);
-    alDeleteBuffers(1, &mBuffer);
-    alGetError();
+    mOutput.bufferFinished(mBuffer);
 }
 
 void OpenAL_Sound::stop()
@@ -431,6 +403,15 @@ void OpenAL_Output::deinit()
         alDeleteSources(mFreeSources.size(), mFreeSources.data());
         mFreeSources.clear();
     }
+
+    mBufferRefs.clear();
+    mUnusedBuffers.clear();
+    while(!mBufferCache.empty())
+    {
+        alDeleteBuffers(1, &mBufferCache.begin()->second);
+        mBufferCache.erase(mBufferCache.begin());
+    }
+
     alcMakeContextCurrent(0);
     if(mContext)
         alcDestroyContext(mContext);
@@ -438,6 +419,63 @@ void OpenAL_Output::deinit()
     if(mDevice)
         alcCloseDevice(mDevice);
     mDevice = 0;
+}
+
+
+ALuint OpenAL_Output::getBuffer(const std::string &fname)
+{
+    ALuint buf = 0;
+
+    NameMap::iterator iditer = mBufferCache.find(fname);
+    if(iditer != mBufferCache.end())
+    {
+        buf = iditer->second;
+        if(mBufferRefs[buf]++ == 0)
+        {
+            IDDq::iterator iter = std::find(mUnusedBuffers.begin(),
+                                            mUnusedBuffers.end(), buf);
+            if(iter != mUnusedBuffers.end())
+                mUnusedBuffers.erase(iter);
+        }
+
+        return buf;
+    }
+    throwALerror();
+
+    int srate;
+    ChannelConfig chans;
+    SampleType type;
+    ALenum format;
+
+    DecoderPtr decoder = mManager.getDecoder();
+    decoder->open(fname);
+    decoder->getInfo(&srate, &chans, &type);
+    format = getALFormat(chans, type);
+
+    std::vector<char> data(32768);
+    size_t got, total = 0;
+    while((got=decoder->read(&data[total], data.size()-total)) > 0)
+    {
+        total += got;
+        data.resize(total*2);
+    }
+    data.resize(total);
+    decoder->close();
+
+    alGenBuffers(1, &buf);
+    throwALerror();
+
+    alBufferData(buf, format, &data[0], total, srate);
+    mBufferCache[fname] = buf;
+    mBufferRefs[buf] = 1;
+
+    return buf;
+}
+
+void OpenAL_Output::bufferFinished(ALuint buf)
+{
+    if(mBufferRefs.at(buf)-- == 1)
+        mUnusedBuffers.push_back(buf);
 }
 
 
@@ -455,19 +493,14 @@ Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pi
 
     try
     {
-        DecoderPtr decoder = mManager.getDecoder();
-        decoder->open(fname);
-        buf = OpenAL_Sound::LoadBuffer(decoder);
-        throwALerror();
-        decoder->close();
-
+        buf = getBuffer(fname);
         sound.reset(new OpenAL_Sound(*this, src, buf));
     }
     catch(std::exception &e)
     {
         mFreeSources.push_back(src);
-        if(alIsBuffer(buf))
-            alDeleteBuffers(1, &buf);
+        if(buf && alIsBuffer(buf))
+            bufferFinished(buf);
         alGetError();
         throw;
     }
@@ -509,19 +542,14 @@ Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, fl
 
     try
     {
-        DecoderPtr decoder = mManager.getDecoder();
-        decoder->open(fname);
-        buf = OpenAL_Sound::LoadBuffer(decoder);
-        throwALerror();
-        decoder->close();
-
+        buf = getBuffer(fname);
         sound.reset(new OpenAL_Sound(*this, src, buf));
     }
     catch(std::exception &e)
     {
         mFreeSources.push_back(src);
-        if(alIsBuffer(buf))
-            alDeleteBuffers(1, &buf);
+        if(buf && alIsBuffer(buf))
+            bufferFinished(buf);
         alGetError();
         throw;
     }
