@@ -17,6 +17,9 @@ namespace MWSound
     };
     const char *getChannelConfigName(ChannelConfig config);
 
+    size_t framesToBytes(size_t frames, ChannelConfig config, SampleType type);
+    size_t bytesToFrames(size_t bytes, ChannelConfig config, SampleType type);
+
     class Sound_Decoder
     {
     public:

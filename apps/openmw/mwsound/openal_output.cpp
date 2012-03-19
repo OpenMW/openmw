@@ -53,8 +53,8 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
 //
 class OpenAL_SoundStream : public Sound
 {
-    static const ALuint sNumBuffers = 4;
-    static const ALuint sBufferSize = 32768;
+    static const ALuint sNumBuffers = 6;
+    static const ALfloat sBufferLength = 0.125f;
 
     OpenAL_Output &mOutput;
 
@@ -63,6 +63,7 @@ class OpenAL_SoundStream : public Sound
 
     ALenum mFormat;
     ALsizei mSampleRate;
+    ALuint mBufferSize;
 
     DecoderPtr mDecoder;
 
@@ -171,6 +172,9 @@ OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, DecoderPtr decoder
         mDecoder->getInfo(&srate, &chans, &type);
         mFormat = getALFormat(chans, type);
         mSampleRate = srate;
+
+        mBufferSize = static_cast<ALuint>(sBufferLength*srate);
+        mBufferSize = framesToBytes(mBufferSize, chans, type);
     }
     catch(std::exception &e)
     {
@@ -193,7 +197,7 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
 
 void OpenAL_SoundStream::play(float volume, float pitch)
 {
-    std::vector<char> data(sBufferSize);
+    std::vector<char> data(mBufferSize);
 
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
@@ -251,7 +255,7 @@ bool OpenAL_SoundStream::process()
 
     if(processed > 0)
     {
-        std::vector<char> data(sBufferSize);
+        std::vector<char> data(mBufferSize);
         do {
             ALuint bufid;
             size_t got;

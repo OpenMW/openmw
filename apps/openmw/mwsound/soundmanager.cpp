@@ -485,4 +485,24 @@ namespace MWSound
         }
         return "(unknown channel config)";
     }
+
+    size_t framesToBytes(size_t frames, ChannelConfig config, SampleType type)
+    {
+        switch(config)
+        {
+            case ChannelConfig_Mono:   frames *= 1; break;
+            case ChannelConfig_Stereo: frames *= 2; break;
+        }
+        switch(type)
+        {
+            case SampleType_UInt8: frames *= 1; break;
+            case SampleType_Int16: frames *= 2; break;
+        }
+        return frames;
+    }
+
+    size_t bytesToFrames(size_t bytes, ChannelConfig config, SampleType type)
+    {
+        return bytes / framesToBytes(1, config, type);
+    }
 }
