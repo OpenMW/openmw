@@ -9,10 +9,13 @@ namespace MWSound
         SampleType_UInt8,
         SampleType_Int16
     };
+    const char *getSampleTypeName(SampleType type);
+
     enum ChannelConfig {
         ChannelConfig_Mono,
         ChannelConfig_Stereo
     };
+    const char *getChannelConfigName(ChannelConfig config);
 
     class Sound_Decoder
     {

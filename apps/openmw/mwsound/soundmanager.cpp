@@ -464,4 +464,25 @@ namespace MWSound
 
         updateRegionSound(duration);
     }
+
+
+    const char *getSampleTypeName(SampleType type)
+    {
+        switch(type)
+        {
+            case SampleType_UInt8: return "U8";
+            case SampleType_Int16: return "S16";
+        }
+        return "(unknown sample type)";
+    }
+
+    const char *getChannelConfigName(ChannelConfig config)
+    {
+        switch(config)
+        {
+            case ChannelConfig_Mono:   return "Mono";
+            case ChannelConfig_Stereo: return "Stereo";
+        }
+        return "(unknown channel config)";
+    }
 }

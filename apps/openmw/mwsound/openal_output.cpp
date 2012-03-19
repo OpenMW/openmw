@@ -44,7 +44,7 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
         if(fmtlist[i].chans == chans && fmtlist[i].type == type)
             return fmtlist[i].format;
     }
-    fail("Unsupported sound format");
+    fail(std::string("Unsupported sound format (")+getChannelConfigName(chans)+", "+getSampleTypeName(type)+")");
     return AL_NONE;
 }
 
