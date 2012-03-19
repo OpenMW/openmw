@@ -81,7 +81,7 @@ add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
     ${OGRE_LIBRARIES}
-	${OGRE_STATIC_PLUGINS}
+    ${OGRE_STATIC_PLUGINS}
     ${OIS_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
@@ -91,6 +91,11 @@ target_link_libraries(openmw
     MyGUIEngine
     MyGUIOgrePlatform
 )
+
+# Fix for not visible pthreads functions for linker with glibc 2.15 
+if (UNIX AND NOT APPLE)
+target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
+endif()
 
 if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
