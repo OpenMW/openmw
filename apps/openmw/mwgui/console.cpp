@@ -50,7 +50,7 @@ namespace MWGui
 
             return isGood();
         }
-        catch (const Compiler::SourceException& error)
+        catch (const Compiler::SourceException&)
         {
             // error has already been reported via error handler
         }
@@ -342,7 +342,7 @@ namespace MWGui
             if( ( matches.front().find(' ') != string::npos )  ) {
                 if( !has_front_quote )
                     output.append(string("\""));
-                return output.append(matches.front() + string("\" ")); 
+                return output.append(matches.front() + string("\" "));
             }
             else if( has_front_quote ) {
                 return  output.append(matches.front() + string("\" "));
@@ -361,7 +361,7 @@ namespace MWGui
                     /* Append the longest match to the end of the output string*/
                     output.append(matches.front().substr( 0, i));
                     return output;
-                }  
+                }
             }
         }
 

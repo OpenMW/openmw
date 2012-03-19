@@ -27,10 +27,11 @@ bool isFile(const char *name);
     /// that contains the searched path.
     /// If it's not found it returns and empty path
     /// Takes care of slashes, backslashes and it has a strict option.
-    boost::filesystem::path FileListLocator (const Files::PathContainer& list, const boost::filesystem::path& toFind, bool strict);
+    boost::filesystem::path FileListLocator (const Files::PathContainer& list, const boost::filesystem::path& toFind,
+                                             bool strict, bool ignoreExtensions);
 
     /// Overloaded form of the locator that takes a string and returns a string
-    std::string FileListLocator (const Files::PathContainer& list,const std::string& toFind, bool strict);
+    std::string FileListLocator (const Files::PathContainer& list,const std::string& toFind, bool strict, bool ignoreExtensions);
 
 }
 

@@ -9,6 +9,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/environment.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -82,6 +83,8 @@ namespace MWClass
         if (!(ref->base->data.flags & ESM::Light::Carry))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
 
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
     }
@@ -94,10 +97,33 @@ namespace MWClass
         return ref->base->script;
     }
 
+    std::pair<std::vector<int>, bool> Light::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+        std::vector<int> slots;
+
+        if (ref->base->data.flags & ESM::Light::Carry)
+            slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedLeft));
+
+        return std::make_pair (slots, false);
+    }
+
     void Light::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Light);
 
         registerClass (typeid (ESM::Light).name(), instance);
+    }
+
+    std::string Light::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        return std::string("Item Misc Up");
+    }
+
+    std::string Light::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        return std::string("Item Misc Down");
     }
 }
