@@ -168,11 +168,11 @@ namespace MWDialogue
                     if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
-                case 40://PC Common Disease 
+                case 40://PC Common Disease
                     if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
-                case 41://PC Blight Disease 
+                case 41://PC Blight Disease
                     if(!selectCompare<int,int>(comp,0,select.i)) return false;
                     break;
 
@@ -340,7 +340,7 @@ namespace MWDialogue
                 }
 
                 return true;
-                
+
 
             case '6'://dead
                 if(!selectCompare<int,int>(comp,0,select.i)) return false;
@@ -390,7 +390,6 @@ namespace MWDialogue
                 {
                     ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
                     int isRace = int(toLower(npc->base->race) == toLower(name));
-                    //std::cout << "isRace"<<isRace; mEnvironment.mWorld
                     if(selectCompare<int,int>(comp,!isRace,select.i))
                         return false;
                 }
@@ -522,14 +521,6 @@ namespace MWDialogue
             if (!isMatching (actor, *iter))
                 return false;
 
-        /*std::cout
-        << "unchecked entries:" << std::endl
-        << "    player faction: " << info.pcFaction << std::endl
-        << "    disposition: " << info.data.disposition << std::endl
-        << "    NPC rank: " << static_cast<int> (info.data.rank) << std::endl
-        << "    gender: " << static_cast<int> (info.data.gender) << std::endl
-        << "    PC rank: " << static_cast<int> (info.data.PCrank) << std::endl;*/
-
         return true;
     }
 
@@ -552,7 +543,6 @@ namespace MWDialogue
         std::list<std::string>::iterator it;
         for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
         {
-            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
             size_t pos = find_str_ci(text,*it,0);
             if(pos !=std::string::npos)
             {
@@ -573,7 +563,6 @@ namespace MWDialogue
     {
         mChoice = -1;
         mIsInChoice = false;
-        std::cout << "talking with " << MWWorld::Class::get (actor).getName (actor) << std::endl;
 
         mActor = actor;
 
@@ -584,7 +573,7 @@ namespace MWDialogue
         {
             mDialogueMap[it->first] = it->second;
         }
-        
+
         //initialise the GUI
         mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
         MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
@@ -743,7 +732,7 @@ namespace MWDialogue
                             win->addTitle(keyword);
                             win->addText(iter->response);
 
-                            executeScript(script);                        
+                            executeScript(script);
 
                             mLastTopic = keyword;
                             mLastDialogue = *iter;
