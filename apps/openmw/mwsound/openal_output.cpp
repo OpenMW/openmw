@@ -113,7 +113,7 @@ struct OpenAL_Output::StreamThread {
                     iter++;
             }
             mMutex.unlock();
-            boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+            boost::this_thread::sleep(boost::posix_time::milliseconds(50));
         }
     }
 
