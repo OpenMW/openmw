@@ -230,6 +230,13 @@ void OpenAL_SoundStream::stop()
 
 bool OpenAL_SoundStream::isPlaying()
 {
+    ALint state;
+
+    alGetSourcei(mSource, AL_SOURCE_STATE, &state);
+    throwALerror();
+
+    if(state == AL_PLAYING)
+        return true;
     return !mIsFinished;
 }
 
@@ -259,7 +266,11 @@ bool OpenAL_SoundStream::process()
             alSourceUnqueueBuffers(mSource, 1, &bufid);
             processed--;
 
+            if(mIsFinished)
+                continue;
+
             got = mDecoder->read(&data[0], data.size());
+            mIsFinished = (got < data.size());
             if(got > 0)
             {
                 alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
@@ -275,17 +286,14 @@ bool OpenAL_SoundStream::process()
 
         alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
         throwALerror();
-        if(queued == 0)
+        if(queued > 0)
         {
-            mIsFinished = true;
-            return false;
+            alSourcePlay(mSource);
+            throwALerror();
         }
-
-        alSourcePlay(mSource);
-        throwALerror();
     }
 
-    return true;
+    return !mIsFinished;
 }
 
 //
