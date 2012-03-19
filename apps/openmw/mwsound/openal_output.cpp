@@ -25,26 +25,24 @@ static void throwALerror()
 
 static ALenum getALFormat(ChannelConfig chans, SampleType type)
 {
-    if(chans == ChannelConfig_Mono)
+    static const struct {
+        ALenum format;
+        ChannelConfig chans;
+        SampleType type;
+    } fmtlist[] = {
+        { AL_FORMAT_MONO16,   ChannelConfig_Mono,   SampleType_Int16 },
+        { AL_FORMAT_MONO8,    ChannelConfig_Mono,   SampleType_UInt8 },
+        { AL_FORMAT_STEREO16, ChannelConfig_Stereo, SampleType_Int16 },
+        { AL_FORMAT_STEREO8,  ChannelConfig_Stereo, SampleType_UInt8 },
+    };
+    static const size_t fmtlistsize = sizeof(fmtlist)/sizeof(fmtlist[0]);
+
+    for(size_t i = 0;i < fmtlistsize;i++)
     {
-        if(type == SampleType_Int16)
-            return AL_FORMAT_MONO16;
-        else if(type == SampleType_UInt8)
-            return AL_FORMAT_MONO8;
-        else
-            fail("Unsupported sample type");
+        if(fmtlist[i].chans == chans && fmtlist[i].type == type)
+            return fmtlist[i].format;
     }
-    else if(chans == ChannelConfig_Stereo)
-    {
-        if(type == SampleType_Int16)
-            return AL_FORMAT_STEREO16;
-        else if(type == SampleType_UInt8)
-            return AL_FORMAT_STEREO8;
-        else
-            fail("Unsupported sample type");
-    }
-    else
-        fail("Unsupported channel config");
+    fail("Unsupported sound format");
     return AL_NONE;
 }
 
