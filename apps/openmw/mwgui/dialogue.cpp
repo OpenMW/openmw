@@ -51,7 +51,7 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
     history->setOverflowToTheLeft(true);
     history->getClient()->eventMouseButtonClick = MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
     history->setMaxTextLength(1000000);
-    //Topics list 
+    //Topics list
     getWidget(topicsList, "TopicsList");
     topicsList->setScrollVisible(true);
     //topicsList->eventListSelectAccept      = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
@@ -64,7 +64,6 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
 
     getWidget(pDispositionBar, "Disposition");
     getWidget(pDispositionText,"DispositionText");
-    std::cout << "creation dialogue";
 }
 
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
@@ -126,7 +125,6 @@ void DialogueWindow::removeKeyword(std::string keyWord)
 {
     if(topicsList->findItemIndexWith(keyWord) != MyGUI::ITEM_NONE)
     {
-        std::cout << topicsList->findItemIndexWith(keyWord);
         topicsList->removeItemAt(topicsList->findItemIndexWith(keyWord));
         pTopicsText.erase(keyWord);
     }
@@ -145,7 +143,7 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
             str.insert(pos,color2);
             pos+= color2.length();
         }
-        else 
+        else
         {
             if(str.substr(pos -1,1) == " ")
             {
@@ -200,4 +198,3 @@ void DialogueWindow::updateOptions()
     pDispositionText->eraseText(0,pDispositionText->getTextLength());
     pDispositionText->addText("#B29154"+std::string("40/100")+"#B29154");
 }
-
