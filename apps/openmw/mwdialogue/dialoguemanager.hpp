@@ -30,8 +30,11 @@ namespace MWDialogue
 
             void parseText(std::string text);
 
+            void updateTopics();
+
+            std::map<std::string,ESM::Dialogue> mDialogueMap;
             std::map<std::string,bool> knownTopics;// Those are the topics the player knows.
-            std::map<std::string,std::list <ESM::DialInfo> > actorKnownTopics;
+            std::list<std::string> actorKnownTopics;
 
             MWScript::CompilerContext mCompilerContext;
             std::ostream mErrorStream;

@@ -550,25 +550,23 @@ namespace MWDialogue
 
     void DialogueManager::parseText(std::string text)
     {
-        std::map<std::string,std::list <ESM::DialInfo> >::iterator it;
+        std::cout << "PARSE";
+        std::list<std::string>::iterator it;
         for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
         {
             MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-            size_t pos = find_str_ci(text,it->first,0);
+            size_t pos = find_str_ci(text,*it,0);
             if(pos !=std::string::npos)
             {
-                if(!it->second.empty())
+                if(pos==0)
                 {
-                    if(pos==0)
-                    {
-                        knownTopics[it->first] = true;
-                        win->addKeyword(it->first);
-                    }
-                    else if(text.substr(pos -1,1) == " ")
-                    {
-                        knownTopics[it->first] = true;
-                        win->addKeyword(it->first);
-                    }
+                    knownTopics[*it] = true;
+                    win->addKeyword(*it);
+                }
+                else if(text.substr(pos -1,1) == " ")
+                {
+                    knownTopics[*it] = true;
+                    win->addKeyword(*it);
                 }
             }
 
@@ -583,38 +581,25 @@ namespace MWDialogue
 
         mActor = actor;
 
+        mDialogueMap.clear();
+        actorKnownTopics.clear();
+        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        {
+            mDialogueMap[it->first] = it->second;
+        }
+        
         //initialise the GUI
         mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
         MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
         win->startDialogue(MWWorld::Class::get (actor).getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
-        actorKnownTopics.clear();
-        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
-        {
-            ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.type == ESM::Dialogue::Topic)
-            {
-                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
-                    iter!=it->second.mInfo.end(); ++iter)
-                {
-                    if (isMatching (actor, *iter) && functionFilter(mActor,*iter,false))
-                    {
-                        actorKnownTopics[it->first].push_back(*iter);
-                        //does the player know the topic?
-                        if(knownTopics.find(toLower(it->first)) != knownTopics.end())
-                        {
-                            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-                            win->addKeyword(it->first);
-                        }
-                    }
-                }
-            }
-        }
+        updateTopics();
 
         //greeting
         bool greetingFound = false;
+        //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
         for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
@@ -647,7 +632,6 @@ namespace MWDialogue
 
     bool DialogueManager::compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code)
     {
-        std::cout << cmd << std::endl;
         try
         {
             mErrorHandler.reset();
@@ -707,35 +691,68 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::keywordSelected(std::string keyword)
+    void DialogueManager::updateTopics()
     {
-        if(!mIsInChoice)
+        actorKnownTopics.clear();
+        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
-            if(!actorKnownTopics[keyword].empty())
+            ESM::Dialogue ndialogue = it->second;
+            if(ndialogue.type == ESM::Dialogue::Topic)
             {
-                for(std::list<ESM::DialInfo>::iterator it = actorKnownTopics[keyword].begin(); it != actorKnownTopics[keyword].end();it++)
+                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
+                    iter!=it->second.mInfo.end(); ++iter)
                 {
-                    ESM::DialInfo dial = *it;
-                    if(functionFilter(mActor,dial,true) && isMatching (mActor,dial))
+                    if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,false))
                     {
-                        std::string text = it->response;
-                        std::string script = it->resultScript;
-
-                        parseText(text);
-
-                        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-                        win->addTitle(keyword);
-                        win->addText(it->response);
-
-                        executeScript(script);
-
-                        mLastTopic = keyword;
-                        mLastDialogue = dial;
-                        break;
+                         actorKnownTopics.push_back(it->first);
+                        //does the player know the topic?
+                        if(knownTopics.find(toLower(it->first)) != knownTopics.end())
+                        {
+                            win->addKeyword(it->first);
+                        }
                     }
                 }
             }
         }
+    }
+
+    void DialogueManager::keywordSelected(std::string keyword)
+    {
+        if(!mIsInChoice)
+        {
+            if(mDialogueMap.find(keyword) != mDialogueMap.end())
+            {
+                ESM::Dialogue ndialogue = mDialogueMap[keyword];
+                std::vector<ESM::DialInfo>::const_iterator iter;
+                if(ndialogue.type == ESM::Dialogue::Topic)
+                {
+                    for (iter  = ndialogue.mInfo.begin();
+                        iter!=ndialogue.mInfo.end(); ++iter)
+                    {
+                        if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
+                        {
+                            std::string text = iter->response;
+                            std::string script = iter->resultScript;
+
+                            parseText(text);
+
+                            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                            win->addTitle(keyword);
+                            win->addText(iter->response);
+
+                            executeScript(script);                        
+
+                            mLastTopic = keyword;
+                            mLastDialogue = *iter;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        updateTopics();
     }
 
     void DialogueManager::goodbyeSelected()
@@ -748,31 +765,47 @@ namespace MWDialogue
         if(mChoiceMap.find(answere) != mChoiceMap.end())
         {
             mChoice = mChoiceMap[answere];
-            std::list<ESM::DialInfo> dials = actorKnownTopics[mLastTopic];
 
-            std::cout << actorKnownTopics[mLastTopic].size() << mLastTopic;
-            std::list<ESM::DialInfo>::iterator iter;
-            for(iter = actorKnownTopics[mLastTopic].begin(); iter->id != mLastDialogue.id;iter++)
+            //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+            bool found = false;
+            //ESMS::RecListT<ESM::Dialogue>::MapType::iterator it;
+            std::vector<ESM::DialInfo>::const_iterator iter;
+            //for(it = dialogueList.begin(); it!=dialogueList.end();it++)
+            if(mDialogueMap.find(mLastTopic) != mDialogueMap.end())
             {
-            }
-            for(std::list<ESM::DialInfo>::iterator it = iter; it!=actorKnownTopics[mLastTopic].begin();)
-            {
-                it--;
-                if(functionFilter(mActor,*it,true) && isMatching (mActor,*it))
+                ESM::Dialogue ndialogue = mDialogueMap[mLastTopic];
+                if(ndialogue.type == ESM::Dialogue::Topic)
                 {
-                    mChoiceMap.clear();
-                    mChoice = -1;
-                    mIsInChoice = false;
-                    MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-                    std::string text = it->response;
-                    parseText(text);
-                    win->addText(text);
-                    executeScript(it->resultScript);
-                    mLastTopic = mLastTopic;
-                    mLastDialogue = *it;
-                    break;
+                    for (iter  = ndialogue.mInfo.begin();
+                        iter!=ndialogue.mInfo.end(); ++iter)
+                    {
+                        if(iter->id == mLastDialogue.id) found = true;
+                        if(found) break;
+                    }
+                }
+                if(found)
+                {
+                    for (std::vector<ESM::DialInfo>::const_iterator iter2 = iter;
+                        iter2!=ndialogue.mInfo.begin(); --iter2)
+                    {
+                        if (isMatching (mActor, *iter2) && functionFilter(mActor,*iter2,true))
+                        {
+                            mChoiceMap.clear();
+                            mChoice = -1;
+                            mIsInChoice = false;
+                            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                            std::string text = iter2->response;
+                            parseText(text);
+                            win->addText(text);
+                            executeScript(iter2->resultScript);
+                            mLastTopic = mLastTopic;
+                            mLastDialogue = *iter2;
+                            break;
+                        }
+                    }
                 }
             }
+            updateTopics();
         }
     }
 
