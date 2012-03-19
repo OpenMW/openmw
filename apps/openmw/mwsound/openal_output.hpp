@@ -33,6 +33,8 @@ namespace MWSound
         typedef std::deque<ALuint> IDDq;
         IDDq mUnusedBuffers;
 
+        uint64_t mBufferCacheMemSize;
+
         ALuint getBuffer(const std::string &fname);
         void bufferFinished(ALuint buffer);
 

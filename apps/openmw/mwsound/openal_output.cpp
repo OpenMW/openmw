@@ -469,13 +469,46 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
     mBufferCache[fname] = buf;
     mBufferRefs[buf] = 1;
 
+    ALint bufsize = 0;
+    alGetBufferi(buf, AL_SIZE, &bufsize);
+    mBufferCacheMemSize += bufsize;
+
+    // NOTE: Max buffer cache: 15MB
+    while(mBufferCacheMemSize > 15*1024*1024)
+    {
+        if(mUnusedBuffers.empty())
+        {
+            std::cout <<"No more unused buffers to clear!"<< std::endl;
+            break;
+        }
+
+        ALuint oldbuf = mUnusedBuffers.front();
+        mUnusedBuffers.pop_front();
+
+        NameMap::iterator nameiter = mBufferCache.begin();
+        while(nameiter != mBufferCache.end())
+        {
+            if(nameiter->second == oldbuf)
+                mBufferCache.erase(nameiter++);
+            else
+                nameiter++;
+        }
+
+        bufsize = 0;
+        alGetBufferi(oldbuf, AL_SIZE, &bufsize);
+        alDeleteBuffers(1, &oldbuf);
+        mBufferCacheMemSize -= bufsize;
+    }
     return buf;
 }
 
 void OpenAL_Output::bufferFinished(ALuint buf)
 {
     if(mBufferRefs.at(buf)-- == 1)
+    {
+        mBufferRefs.erase(mBufferRefs.find(buf));
         mUnusedBuffers.push_back(buf);
+    }
 }
 
 
@@ -679,7 +712,8 @@ void OpenAL_Output::updateListener(const float *pos, const float *atdir, const f
 
 
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
-  : Sound_Output(mgr), mDevice(0), mContext(0), mStreamThread(new StreamThread)
+  : Sound_Output(mgr), mDevice(0), mContext(0), mBufferCacheMemSize(0),
+    mStreamThread(new StreamThread)
 {
 }
 
