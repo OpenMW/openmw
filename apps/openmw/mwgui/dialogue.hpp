@@ -42,7 +42,7 @@ namespace MWGui
 
         void startDialogue(std::string npcName);
         void stopDialogue();
-        void addKeyword(std::string keyWord);
+        void setKeywords(std::list<std::string> keyWord);
         void removeKeyword(std::string keyWord);
         void addText(std::string text);
         void addTitle(std::string text);

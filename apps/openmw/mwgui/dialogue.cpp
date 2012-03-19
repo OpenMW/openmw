@@ -113,12 +113,12 @@ void DialogueWindow::startDialogue(std::string npcName)
     setText("NpcName", npcName);
 }
 
-void DialogueWindow::addKeyword(std::string keyWord)
+void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
-    if(topicsList->findItemIndexWith(keyWord) == MyGUI::ITEM_NONE)
+    topicsList->removeAllItems();
+    for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); it++)
     {
-        topicsList->addItem(keyWord);
-        pTopicsText[keyWord] = " "; 
+        topicsList->addItem(*it);
     }
 }
 
