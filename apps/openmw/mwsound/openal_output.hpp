@@ -2,6 +2,7 @@
 #define GAME_SOUND_OPENAL_OUTPUT_H
 
 #include <string>
+#include <vector>
 
 #include "alc.h"
 #include "al.h"
@@ -17,6 +18,9 @@ namespace MWSound
     {
         ALCdevice *mDevice;
         ALCcontext *mContext;
+
+        typedef std::vector<ALuint> IDVec;
+        IDVec mFreeSources;
 
         virtual void init(const std::string &devname="");
         virtual void deinit();
@@ -35,6 +39,7 @@ namespace MWSound
         class StreamThread;
         std::auto_ptr<StreamThread> mStreamThread;
 
+        friend class OpenAL_Sound;
         friend class OpenAL_SoundStream;
         friend class SoundManager;
     };

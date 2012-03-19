@@ -17,6 +17,13 @@ namespace MWSound
 static void fail(const std::string &msg)
 { throw std::runtime_error("OpenAL exception: " + msg); }
 
+static void throwALCerror(ALCdevice *device)
+{
+    ALCenum err = alcGetError(device);
+    if(err != ALC_NO_ERROR)
+        fail(alcGetString(device, err));
+}
+
 static void throwALerror()
 {
     ALenum err = alGetError();
@@ -70,14 +77,14 @@ class OpenAL_SoundStream : public Sound
     volatile bool mIsFinished;
 
 public:
-    OpenAL_SoundStream(OpenAL_Output &output, DecoderPtr decoder);
+    OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder);
     virtual ~OpenAL_SoundStream();
 
     virtual void stop();
     virtual bool isPlaying();
     virtual void update(const float *pos);
 
-    void play(float volume, float pitch);
+    void play();
     bool process();
 };
 
@@ -144,25 +151,13 @@ struct OpenAL_Output::StreamThread {
 };
 
 
-OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, DecoderPtr decoder)
-  : mOutput(output), mDecoder(decoder), mIsFinished(true)
+OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder)
+  : mOutput(output), mSource(src), mDecoder(decoder), mIsFinished(true)
 {
     throwALerror();
 
-    alGenSources(1, &mSource);
+    alGenBuffers(sNumBuffers, mBuffers);
     throwALerror();
-    try
-    {
-        alGenBuffers(sNumBuffers, mBuffers);
-        throwALerror();
-    }
-    catch(std::exception &e)
-    {
-        alDeleteSources(1, &mSource);
-        alGetError();
-        throw;
-    }
-
     try
     {
         int srate;
@@ -178,7 +173,7 @@ OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, DecoderPtr decoder
     }
     catch(std::exception &e)
     {
-        alDeleteSources(1, &mSource);
+        mOutput.mFreeSources.push_back(mSource);
         alDeleteBuffers(sNumBuffers, mBuffers);
         alGetError();
         throw;
@@ -188,21 +183,22 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
 {
     mOutput.mStreamThread->remove(this);
 
-    alDeleteSources(1, &mSource);
+    alSourceStop(mSource);
+    alSourcei(mSource, AL_BUFFER, 0);
+
+    mOutput.mFreeSources.push_back(mSource);
     alDeleteBuffers(sNumBuffers, mBuffers);
     alGetError();
 
     mDecoder->close();
 }
 
-void OpenAL_SoundStream::play(float volume, float pitch)
+void OpenAL_SoundStream::play()
 {
     std::vector<char> data(mBufferSize);
 
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
-    alSourcef(mSource, AL_GAIN, volume);
-    alSourcef(mSource, AL_PITCH, pitch);
     throwALerror();
 
     for(ALuint i = 0;i < sNumBuffers;i++)
@@ -297,11 +293,12 @@ bool OpenAL_SoundStream::process()
 //
 class OpenAL_Sound : public Sound
 {
+    OpenAL_Output &mOutput;
+
     ALuint mSource;
     ALuint mBuffer;
-
 public:
-    OpenAL_Sound(ALuint src, ALuint buf);
+    OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf);
     virtual ~OpenAL_Sound();
 
     virtual void stop();
@@ -330,19 +327,22 @@ ALuint OpenAL_Sound::LoadBuffer(DecoderPtr decoder)
     }
     data.resize(total);
 
-    ALuint buf;
+    ALuint buf=0;
     alGenBuffers(1, &buf);
     alBufferData(buf, format, &data[0], total, srate);
     return buf;
 }
 
-OpenAL_Sound::OpenAL_Sound(ALuint src, ALuint buf)
-  : mSource(src), mBuffer(buf)
+OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf)
+  : mOutput(output), mSource(src), mBuffer(buf)
 {
 }
 OpenAL_Sound::~OpenAL_Sound()
 {
-    alDeleteSources(1, &mSource);
+    alSourceStop(mSource);
+    alSourcei(mSource, AL_BUFFER, 0);
+
+    mOutput.mFreeSources.push_back(mSource);
     alDeleteBuffers(1, &mBuffer);
     alGetError();
 }
@@ -391,13 +391,37 @@ void OpenAL_Output::init(const std::string &devname)
 
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
     throwALerror();
+
+    ALCint maxmono, maxstereo;
+    alcGetIntegerv(mDevice, ALC_MONO_SOURCES, 1, &maxmono);
+    alcGetIntegerv(mDevice, ALC_STEREO_SOURCES, 1, &maxstereo);
+    throwALCerror(mDevice);
+
+    mFreeSources.resize(std::min(maxmono+maxstereo, 256));
+    for(size_t i = 0;i < mFreeSources.size();i++)
+    {
+        ALuint src;
+        alGenSources(1, &src);
+        if(alGetError() != AL_NO_ERROR)
+        {
+            mFreeSources.resize(i);
+            break;
+        }
+        mFreeSources[i] = src;
+    }
+    if(mFreeSources.size() == 0)
+        fail("Could not allocate any sources");
 }
 
 void OpenAL_Output::deinit()
 {
-    if(mStreamThread.get() != 0)
-        mStreamThread->removeAll();
+    mStreamThread->removeAll();
 
+    if(!mFreeSources.empty())
+    {
+        alDeleteSources(mFreeSources.size(), mFreeSources.data());
+        mFreeSources.clear();
+    }
     alcMakeContextCurrent(0);
     if(mContext)
         alcDestroyContext(mContext);
@@ -412,28 +436,33 @@ Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pi
 {
     throwALerror();
 
-    DecoderPtr decoder = mManager.getDecoder();
-    decoder->open(fname);
-
+    std::auto_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
+
+    if(mFreeSources.empty())
+        fail("No free sources");
+    src = mFreeSources.back();
+    mFreeSources.pop_back();
+
     try
     {
+        DecoderPtr decoder = mManager.getDecoder();
+        decoder->open(fname);
         buf = OpenAL_Sound::LoadBuffer(decoder);
-        decoder->close();
-        alGenSources(1, &src);
         throwALerror();
+        decoder->close();
+
+        sound.reset(new OpenAL_Sound(*this, src, buf));
     }
     catch(std::exception &e)
     {
-        if(alIsSource(src))
-            alDeleteSources(1, &src);
+        mFreeSources.push_back(src);
         if(alIsBuffer(buf))
             alDeleteBuffers(1, &buf);
         alGetError();
         throw;
     }
 
-    std::auto_ptr<OpenAL_Sound> sound(new OpenAL_Sound(src, buf));
     alSource3f(src, AL_POSITION, 0.0f, 0.0f, 0.0f);
     alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
@@ -461,28 +490,33 @@ Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, fl
 {
     throwALerror();
 
-    DecoderPtr decoder = mManager.getDecoder();
-    decoder->open(fname);
-
+    std::auto_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
+
+    if(mFreeSources.empty())
+        fail("No free sources");
+    src = mFreeSources.back();
+    mFreeSources.pop_back();
+
     try
     {
+        DecoderPtr decoder = mManager.getDecoder();
+        decoder->open(fname);
         buf = OpenAL_Sound::LoadBuffer(decoder);
-        decoder->close();
-        alGenSources(1, &src);
         throwALerror();
+        decoder->close();
+
+        sound.reset(new OpenAL_Sound(*this, src, buf));
     }
     catch(std::exception &e)
     {
-        if(alIsSource(src))
-            alDeleteSources(1, &src);
+        mFreeSources.push_back(src);
         if(alIsBuffer(buf))
             alDeleteBuffers(1, &buf);
         alGetError();
         throw;
     }
 
-    std::auto_ptr<OpenAL_Sound> sound(new OpenAL_Sound(src, buf));
     alSource3f(src, AL_POSITION, pos[0], pos[2], -pos[1]);
     alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
@@ -508,14 +542,44 @@ Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, fl
 
 Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch)
 {
+    throwALerror();
+
     std::auto_ptr<OpenAL_SoundStream> sound;
+    ALuint src;
 
-    DecoderPtr decoder = mManager.getDecoder();
-    decoder->open(fname);
+    if(mFreeSources.empty())
+        fail("No free sources");
+    src = mFreeSources.back();
+    mFreeSources.pop_back();
 
-    sound.reset(new OpenAL_SoundStream(*this, decoder));
-    sound->play(volume, pitch);
+    try
+    {
+        DecoderPtr decoder = mManager.getDecoder();
+        decoder->open(fname);
+        sound.reset(new OpenAL_SoundStream(*this, src, decoder));
+    }
+    catch(std::exception &e)
+    {
+        mFreeSources.push_back(src);
+        throw;
+    }
 
+    alSource3f(src, AL_POSITION, 0.0f, 0.0f, 0.0f);
+    alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+
+    alSourcef(src, AL_REFERENCE_DISTANCE, 1.0f);
+    alSourcef(src, AL_MAX_DISTANCE, 1000.0f);
+    alSourcef(src, AL_ROLLOFF_FACTOR, 0.0f);
+
+    alSourcef(src, AL_GAIN, volume);
+    alSourcef(src, AL_PITCH, pitch);
+
+    alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE);
+    alSourcei(src, AL_LOOPING, AL_FALSE);
+    throwALerror();
+
+    sound->play();
     return sound.release();
 }
 
@@ -540,7 +604,6 @@ OpenAL_Output::OpenAL_Output(SoundManager &mgr)
 
 OpenAL_Output::~OpenAL_Output()
 {
-    mStreamThread.reset();
     deinit();
 }
 
