@@ -46,33 +46,9 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
     return AL_NONE;
 }
 
-
-ALuint LoadBuffer(DecoderPtr decoder)
-{
-    int srate;
-    ChannelConfig chans;
-    SampleType type;
-    ALenum format;
-
-    decoder->getInfo(&srate, &chans, &type);
-    format = getALFormat(chans, type);
-
-    std::vector<char> data(32768);
-    size_t got, total = 0;
-    while((got=decoder->read(&data[total], data.size()-total)) > 0)
-    {
-        total += got;
-        data.resize(total*2);
-    }
-    data.resize(total);
-
-    ALuint buf;
-    alGenBuffers(1, &buf);
-    alBufferData(buf, format, &data[0], total, srate);
-    return buf;
-}
-
-
+//
+// A streaming OpenAL sound.
+//
 class OpenAL_SoundStream : public Sound
 {
     static const ALuint sNumBuffers = 4;
@@ -100,26 +76,15 @@ public:
     bool process();
 };
 
-class OpenAL_Sound : public Sound
-{
-public:
-    ALuint mSource;
-    ALuint mBuffer;
-
-    OpenAL_Sound(ALuint src, ALuint buf);
-    virtual ~OpenAL_Sound();
-
-    virtual void stop();
-    virtual bool isPlaying();
-    virtual void update(const float *pos);
-};
-
-
+//
+// A background streaming thread (keeps active streams processed)
+//
 struct StreamThread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     static StreamVec sStreams;
     static boost::mutex sMutex;
 
+    // boost::thread entry point
     void operator()()
     {
         while(1)
@@ -243,12 +208,12 @@ void OpenAL_SoundStream::play(float volume, float pitch)
 void OpenAL_SoundStream::stop()
 {
     StreamThread::remove(this);
+    mIsFinished = true;
 
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
     throwALerror();
     // FIXME: Rewind decoder
-    mIsFinished = true;
 }
 
 bool OpenAL_SoundStream::isPlaying()
@@ -311,6 +276,49 @@ bool OpenAL_SoundStream::process()
     return true;
 }
 
+//
+// A regular OpenAL sound
+//
+class OpenAL_Sound : public Sound
+{
+    ALuint mSource;
+    ALuint mBuffer;
+
+public:
+    OpenAL_Sound(ALuint src, ALuint buf);
+    virtual ~OpenAL_Sound();
+
+    virtual void stop();
+    virtual bool isPlaying();
+    virtual void update(const float *pos);
+
+    static ALuint LoadBuffer(DecoderPtr decoder);
+};
+
+ALuint OpenAL_Sound::LoadBuffer(DecoderPtr decoder)
+{
+    int srate;
+    ChannelConfig chans;
+    SampleType type;
+    ALenum format;
+
+    decoder->getInfo(&srate, &chans, &type);
+    format = getALFormat(chans, type);
+
+    std::vector<char> data(32768);
+    size_t got, total = 0;
+    while((got=decoder->read(&data[total], data.size()-total)) > 0)
+    {
+        total += got;
+        data.resize(total*2);
+    }
+    data.resize(total);
+
+    ALuint buf;
+    alGenBuffers(1, &buf);
+    alBufferData(buf, format, &data[0], total, srate);
+    return buf;
+}
 
 OpenAL_Sound::OpenAL_Sound(ALuint src, ALuint buf)
   : mSource(src), mBuffer(buf)
@@ -348,6 +356,9 @@ void OpenAL_Sound::update(const float *pos)
 }
 
 
+//
+// An OpenAL output device
+//
 void OpenAL_Output::init(const std::string &devname)
 {
     if(mDevice || mContext)
@@ -390,7 +401,7 @@ Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pi
     ALuint src=0, buf=0;
     try
     {
-        buf = LoadBuffer(decoder);
+        buf = OpenAL_Sound::LoadBuffer(decoder);
         decoder->close();
         alGenSources(1, &src);
         throwALerror();
@@ -439,7 +450,7 @@ Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, fl
     ALuint src=0, buf=0;
     try
     {
-        buf = LoadBuffer(decoder);
+        buf = OpenAL_Sound::LoadBuffer(decoder);
         decoder->close();
         alGenSources(1, &src);
         throwALerror();
