@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <boost/thread.hpp>
-
 #include "alc.h"
 #include "al.h"
 
@@ -13,15 +11,12 @@
 namespace MWSound
 {
     class SoundManager;
-    class Sound_Decoder;
     class Sound;
 
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *mDevice;
         ALCcontext *mContext;
-
-        boost::thread mStreamThread;
 
         virtual void init(const std::string &devname="");
         virtual void deinit();
@@ -37,6 +32,10 @@ namespace MWSound
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();
 
+        class StreamThread;
+        std::auto_ptr<StreamThread> mStreamThread;
+
+        friend class OpenAL_SoundStream;
         friend class SoundManager;
     };
 #ifndef DEFAULT_OUTPUT
