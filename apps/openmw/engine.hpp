@@ -78,10 +78,9 @@ namespace OMW
             std::string mFocusName;
 
             MWWorld::Environment mEnvironment;
-            MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
-            
+
 
             Files::Collections mFileCollections;
             bool mFSStrict;

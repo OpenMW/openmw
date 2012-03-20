@@ -95,18 +95,18 @@ namespace MWWorld
         Script Color=255,20,20
         */
         
-        static const float mSunriseTime = 8;
-        static const float mSunsetTime = 18;
-        static const float mSunriseDuration = 2;
-        static const float mSunsetDuration = 2;
+        static const float mSunriseTime;
+        static const float mSunsetTime;
+        static const float mSunriseDuration;
+        static const float mSunsetDuration;
         
-        static const float mWeatherUpdateTime = 20.f;
+        static const float mWeatherUpdateTime;
         
         // morrowind sets these per-weather, but since they are only used by 'thunderstorm'
         // weather setting anyway, we can just as well set them globally
-        static const float mThunderFrequency = .4;
-        static const float mThunderThreshold = 0.6;
-        static const float mThunderSoundDelay = 0.25;
+        static const float mThunderFrequency;
+        static const float mThunderThreshold;
+        static const float mThunderSoundDelay;
         static const std::string mThunderSoundID0;
         static const std::string mThunderSoundID1;
         static const std::string mThunderSoundID2;

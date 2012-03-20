@@ -63,7 +63,7 @@ namespace MWScript
             {
                 std::vector<Interpreter::Type_Code> code;
                 mParser.getCode (code);
-                mScripts.insert (std::make_pair (name, code));
+                mScripts.insert (std::make_pair (name, std::make_pair (code, mParser.getLocals())));
 
                 // TODO sanity check on generated locals
 
@@ -77,8 +77,7 @@ namespace MWScript
     void ScriptManager::run (const std::string& name, Interpreter::Context& interpreterContext)
     {
         // compile script
-        std::map<std::string, std::vector<Interpreter::Type_Code> >::iterator iter =
-            mScripts.find (name);
+        ScriptCollection::iterator iter = mScripts.find (name);
 
         if (iter==mScripts.end())
         {
@@ -86,7 +85,7 @@ namespace MWScript
             {
                 // failed -> ignore script from now on.
                 std::vector<Interpreter::Type_Code> empty;
-                mScripts.insert (std::make_pair (name, empty));
+                mScripts.insert (std::make_pair (name, std::make_pair (empty, Compiler::Locals())));
                 return;
             }
 
@@ -95,7 +94,7 @@ namespace MWScript
         }
 
         // execute script
-        if (!iter->second.empty())
+        if (!iter->second.first.empty())
             try
             {
                 if (!mOpcodesInstalled)
@@ -104,7 +103,7 @@ namespace MWScript
                     mOpcodesInstalled = true;
                 }
 
-                mInterpreter.run (&iter->second[0], iter->second.size(), interpreterContext);
+                mInterpreter.run (&iter->second.first[0], iter->second.first.size(), interpreterContext);
             }
             catch (const std::exception& e)
             {
@@ -113,7 +112,7 @@ namespace MWScript
                 if (mVerbose)
                     std::cerr << "(" << e.what() << ")" << std::endl;
 
-                iter->second.clear(); // don't execute again.
+                iter->second.first.clear(); // don't execute again.
             }
     }
 
@@ -131,5 +130,25 @@ namespace MWScript
                 ++success;
 
         return std::make_pair (count, success);
+    }
+
+    Compiler::Locals& ScriptManager::getLocals (const std::string& name)
+    {
+        ScriptCollection::iterator iter = mScripts.find (name);
+
+        if (iter==mScripts.end())
+        {
+            if (!compile (name))
+            {
+                // failed -> ignore script from now on.
+                std::vector<Interpreter::Type_Code> empty;
+                mScripts.insert (std::make_pair (name, std::make_pair (empty, Compiler::Locals())));
+                throw std::runtime_error ("failed to compile script " + name);
+            }
+
+            iter = mScripts.find (name);
+        }
+
+        return iter->second.second;
     }
 }

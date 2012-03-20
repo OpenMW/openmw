@@ -17,8 +17,13 @@
             <Property key="Edit_VisibleVScroll" value="1" />
         </Widget>
 
+		<!-- The disposition bar-->
+        <Widget type="Progress" skin="MW_EnergyBar_Blue" position="432 39 132 18"
+            align="Right Top" name="Disposition">		
+			<Widget type="Edit" skin="MW_DispositionEdit" position_real = "0.25 0 0.5 1" name = "DispositionText"/>	
+		</Widget>
         <!-- The list of topics -->
-        <Widget type="List" skin="MW_List" position="432 39 132 341" name="TopicsList">
+        <Widget type="List" skin="MW_List" position="432 62 132 318" name="TopicsList">
         </Widget>
 
         <!-- The Goodbye button -->
