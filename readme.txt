@@ -104,6 +104,7 @@ Marc “Zini” Zinnschlag
 Michael “werdanith” Papageorgiou
 Nikolay “corristo” Kasyanov
 Pieter “pvdk” van der Kloet
+Roman "Kromgart" Melni
 Sebastian “swick” Wick
 
 Retired Developers:
