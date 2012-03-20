@@ -40,6 +40,7 @@ namespace MWSound
         : mFSStrict(fsstrict)
         , mEnvironment(environment)
         , mCurrentPlaylist(NULL)
+        , mUsingSound(useSound)
     {
         if(!useSound)
             return;
@@ -238,6 +239,9 @@ namespace MWSound
 
     void SoundManager::playPlaylist(std::string playlist)
     {
+        if (!mUsingSound)
+            return;
+
         if (playlist == "")
         {
             if(!isMusicPlaying())

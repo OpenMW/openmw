@@ -57,6 +57,15 @@ add_openmw_dir (mwmechanics
     )
 
 # Main executable
+IF(OGRE_STATIC)
+IF(WIN32)
+ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager -DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_-DENABLE_PLUGIN_Direct3D9 -DENABLE_PLUGIN_GL)
+set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_Direct3D9_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
+ELSE(WIN32)
+ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager -DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_GL)
+set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${Cg_LIBRARIES} ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
+ENDIF(WIN32)
+ENDIF(OGRE_STATIC)
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
     ${COMPONENT_FILES}
@@ -72,6 +81,7 @@ add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
     ${OGRE_LIBRARIES}
+    ${OGRE_STATIC_PLUGINS}
     ${OIS_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
@@ -81,6 +91,11 @@ target_link_libraries(openmw
     MyGUIEngine
     MyGUIOgrePlatform
 )
+
+# Fix for not visible pthreads functions for linker with glibc 2.15 
+if (UNIX AND NOT APPLE)
+target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
+endif()
 
 if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)

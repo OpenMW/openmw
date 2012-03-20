@@ -39,6 +39,11 @@ namespace Compiler
             mState = CommaState;
             return true;
         }
+        else if (code==Scanner::S_newline && mState==StartState)
+        {
+            scanner.putbackSpecial (code, loc);
+            return false;
+        }
 
         return Parser::parseSpecial (code, loc, scanner);
     }

@@ -26,6 +26,31 @@ void OgreRenderer::start()
   mRoot->startRendering();
 }
 
+bool OgreRenderer::loadPlugins()
+{
+    #ifdef ENABLE_PLUGIN_GL
+    mGLPlugin = new Ogre::GLPlugin();
+    mRoot->installPlugin(mGLPlugin);
+    #endif
+    #ifdef ENABLE_PLUGIN_Direct3D9
+    mD3D9Plugin = new Ogre::D3D9Plugin();
+    mRoot->installPlugin(mD3D9Plugin);
+    #endif
+    #ifdef ENABLE_PLUGIN_CgProgramManager
+    mCgPlugin = new Ogre::CgPlugin();
+    mRoot->installPlugin(mCgPlugin);
+    #endif
+    #ifdef ENABLE_PLUGIN_OctreeSceneManager
+    mOctreePlugin = new Ogre::OctreePlugin();
+    mRoot->installPlugin(mOctreePlugin);
+    #endif
+    #ifdef ENABLE_PLUGIN_ParticleFX
+    mParticleFXPlugin = new Ogre::ParticleFXPlugin();
+    mRoot->installPlugin(mParticleFXPlugin);
+    #endif
+    return true;
+}
+
 void OgreRenderer::update(float dt)
 {
   mFader->update(dt);
@@ -59,7 +84,12 @@ bool OgreRenderer::configure(bool showConfig,
     // Disable logging
     log->setDebugOutputEnabled(false);
 
+#if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
+  mRoot = new Root("", cfgPath, "");
+  loadPlugins();
+#else
   mRoot = new Root(pluginCfg, cfgPath, "");
+#endif
 
   // Show the configuration dialog and initialise the system, if the
   // showConfig parameter is specified. The settings are stored in

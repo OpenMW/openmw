@@ -39,7 +39,11 @@ namespace MWScript
             Interpreter::Interpreter mInterpreter;
             bool mOpcodesInstalled;
 
-            std::map<std::string, std::vector<Interpreter::Type_Code> > mScripts;
+            typedef std::pair<std::vector<Interpreter::Type_Code>, Compiler::Locals> CompiledScript;
+            typedef std::map<std::string, CompiledScript> ScriptCollection;
+
+
+            ScriptCollection mScripts;
 
         public:
 
@@ -56,6 +60,9 @@ namespace MWScript
             std::pair<int, int> compileAll();
             ///< Compile all scripts
             /// \return count, success
+
+            Compiler::Locals& getLocals (const std::string& name);
+            ///< Return locals for script \a name.
     };
 };
 

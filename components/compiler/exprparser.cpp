@@ -639,7 +639,7 @@ namespace Compiler
         std::vector<Interpreter::Type_Code>& code, bool invert)
     {
         bool optional = false;
-        bool optionalCount = 0;
+        int optionalCount = 0;
 
         ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals, true);
         StringParser stringParser (getErrorHandler(), getContext(), mLiterals);
