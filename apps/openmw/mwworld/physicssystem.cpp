@@ -13,6 +13,7 @@
 #include "OgreTextureManager.h"
 
 
+
 using namespace Ogre;
 namespace MWWorld
 {
@@ -20,9 +21,11 @@ namespace MWWorld
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
         mRender(_rend), mEngine(0), mFreeFly (true)
     {
+		playerphysics = new playerMove;
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
         mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
+		playerphysics->mEngine = mEngine;
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -68,55 +71,90 @@ namespace MWWorld
     {
         //set the DebugRenderingMode. To disable it,set it to 0
         //eng->setDebugRenderingMode(1);
-
+		
+		
         //set the walkdirection to 0 (no movement) for every actor)
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
             OEngine::Physic::PhysicActor* act = it->second;
             act->setWalkDirection(btVector3(0,0,0));
         }
-
+		playerMove::playercmd& pm_ref = playerphysics->cmd;
+		
+		pm_ref.rightmove = 0;
+		pm_ref.forwardmove = 0;
+		pm_ref.upmove = 0;
+		//playerphysics->ps.move_type = PM_NOCLIP;
         for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
             iter!=actors.end(); ++iter)
         {
             OEngine::Physic::PhysicActor* act = mEngine->getCharacter(iter->first);
-
+			//if(iter->first == "player")
+			//	std::cout << "This is player\n";
             //dirty stuff to get the camera orientation. Must be changed!
 
             Ogre::SceneNode *sceneNode = mRender.getScene()->getSceneNode (iter->first);
             Ogre::Vector3 dir;
             Ogre::Node* yawNode = sceneNode->getChildIterator().getNext();
             Ogre::Node* pitchNode = yawNode->getChildIterator().getNext();
+			Ogre::Quaternion yawQuat = yawNode->getOrientation();
+                Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
+				Ogre::Quaternion both = yawQuat * pitchQuat;
+				
+				playerphysics->ps.viewangles.x = 0;
+				playerphysics->ps.viewangles.z = 0;
+				playerphysics->ps.viewangles.y = both.getYaw().valueDegrees() *-1 + 90;
+				//playerphysics->ps.viewangles.z = both.getPitch().valueDegrees();
+				
+			
             if(mFreeFly)
             {
-                Ogre::Quaternion yawQuat = yawNode->getOrientation();
-                Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
+                
                 Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
+				pm_ref.rightmove = -dir1.x;
+				pm_ref.forwardmove = dir1.z;
+				
+				
+				
+				//std::cout << "Current angle" << yawQuat.getYaw().valueDegrees() - 90<< "\n";
+				//playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
+				//std::cout << "Pitch: " << yawQuat.getPitch() << "Yaw:" << yawQuat.getYaw() << "Roll: " << yawQuat.getRoll() << "\n";
                 dir = 0.07*(yawQuat*pitchQuat*dir1);
             }
             else
             {
                 Ogre::Quaternion quat = yawNode->getOrientation();
                 Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
+				pm_ref.rightmove = -dir1.x;
+				pm_ref.forwardmove = dir1.z;
+				
                 dir = 0.025*(quat*dir1);
             }
+			Pmove(playerphysics);
 
             //set the walk direction
             act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
         }
-        mEngine->stepSimulation(duration);
-
+        //mEngine->stepSimulation(duration);
+		Pmove(playerphysics);
         std::vector< std::pair<std::string, Ogre::Vector3> > response;
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
             btVector3 newPos = it->second->getPosition();
+			
             Ogre::Vector3 coord(newPos.x(), newPos.y(), newPos.z());
-
+			if(it->first == "player"){
+				
+				coord = playerphysics->ps.origin;
+				//std::cout << "Coord" << coord << "\n";
+				coord = Ogre::Vector3(coord.x, coord.z, coord.y);   //x, z, -y
+				
+			}
             response.push_back(std::pair<std::string, Ogre::Vector3>(it->first, coord));
         }
+		
         return response;
     }
-
     void PhysicsSystem::addObject (const std::string& handle, const std::string& mesh,
         const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
     {

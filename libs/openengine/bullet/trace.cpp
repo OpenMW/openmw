@@ -32,7 +32,7 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	Ogre::Vector3 endReplace = startReplace;
 	endReplace.y -= .25;
 	
-	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, startReplace, endReplace, BBHalfExtents, Ogre::Vector3(0.0f, rotation, 0.0f), isInterior, enginePass);
+	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, rotation, 0.0f), isInterior, enginePass);
 	if(hasHit)
 		std::cout << "Has hit\n";
 	if (out.fraction < 0.001f)
@@ -102,7 +102,7 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 	const btVector3 btend(end.x, end.y, end.z);
 	const btQuaternion btrot(rotation.y, rotation.x, rotation.z);
 
-	const btBoxShape newshape(btVector3(1000, 1000, 1000) );
+	const btBoxShape newshape(btVector3(BBHalfExtents.x, BBHalfExtents.y, BBHalfExtents.z));
 	const btTransform from(btrot, btstart);
 	const btTransform to(btrot, btend);	
 	float x = from.getOrigin().getX();
