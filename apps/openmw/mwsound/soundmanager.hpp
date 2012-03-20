@@ -83,10 +83,9 @@ namespace MWSound
         bool isMusicPlaying();
         ///< Returns true if music is playing
 
-        void playPlaylist(std::string playlist="");
+        void playPlaylist(std::string playlist);
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
-        /// if none is set then it plays from the current playlist
 
         void say(MWWorld::Ptr reference, const std::string& filename);
         ///< Make an actor say some text.

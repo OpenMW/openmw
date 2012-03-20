@@ -384,6 +384,10 @@ namespace MWSound
         {
             timePassed = 0.0f;
 
+            // Make sure music is still playing
+            if(!mMusic || !mMusic->isPlaying())
+                startRandomTitle();
+
             Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
             Ogre::Vector3 nPos, nDir, nUp;
             nPos = cam->getRealPosition();

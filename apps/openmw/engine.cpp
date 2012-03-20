@@ -117,11 +117,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // sound
         if (mUseSound)
-        {
-            mEnvironment.mSoundManager->playPlaylist();
-
             mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
-        }
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
