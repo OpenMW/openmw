@@ -58,6 +58,7 @@ namespace MWSound
             MWWorld::Ptr ptr, const std::string &id,
             float volume, float pitch, float min, float max,
             bool loop, bool untracked=false);
+        void streamMusicFull(const std::string& filename);
         bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
         void updateRegionSound(float duration);
 

@@ -155,7 +155,7 @@ namespace MWSound
         mMusic.reset();
     }
 
-    void SoundManager::streamMusic(const std::string& filename)
+    void SoundManager::streamMusicFull(const std::string& filename)
     {
         std::cout <<"Playing "<<filename<< std::endl;
         try
@@ -170,6 +170,11 @@ namespace MWSound
         }
     }
 
+    void SoundManager::streamMusic(const std::string& filename)
+    {
+        streamMusicFull("Music/"+filename);
+    }
+
     void SoundManager::startRandomTitle()
     {
         Ogre::StringVectorPtr filelist;
@@ -179,7 +184,7 @@ namespace MWSound
             return;
 
         int i = rand()%filelist->size();
-        streamMusic((*filelist)[i]);
+        streamMusicFull((*filelist)[i]);
     }
 
     bool SoundManager::isMusicPlaying()
