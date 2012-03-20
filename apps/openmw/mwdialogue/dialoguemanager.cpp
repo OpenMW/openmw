@@ -516,7 +516,6 @@ namespace MWDialogue
                 return false;
 
         // TODO check DATAstruct
-
         for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
             iter != info.selects.end(); ++iter)
             if (!isMatching (actor, *iter))
@@ -680,7 +679,8 @@ namespace MWDialogue
     void DialogueManager::updateTopics()
     {
         std::list<std::string> keywordList;
-
+        int choice = mChoice;
+        mChoice = -1;
         actorKnownTopics.clear();
         MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
         ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
@@ -692,7 +692,7 @@ namespace MWDialogue
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
                     iter!=it->second.mInfo.end(); ++iter)
                 {
-                    if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,false))
+                    if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                     {
                          actorKnownTopics.push_back(it->first);
                         //does the player know the topic?
@@ -706,6 +706,7 @@ namespace MWDialogue
             }
         }
         win->setKeywords(keywordList);
+        mChoice = choice;
     }
 
     void DialogueManager::keywordSelected(std::string keyword)
@@ -715,10 +716,9 @@ namespace MWDialogue
             if(mDialogueMap.find(keyword) != mDialogueMap.end())
             {
                 ESM::Dialogue ndialogue = mDialogueMap[keyword];
-                std::vector<ESM::DialInfo>::const_iterator iter;
                 if(ndialogue.type == ESM::Dialogue::Topic)
                 {
-                    for (iter  = ndialogue.mInfo.begin();
+                    for (std::vector<ESM::DialInfo>::const_iterator iter  = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
                     {
                         if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
@@ -742,6 +742,7 @@ namespace MWDialogue
                 }
             }
         }
+        std::cout << std::endl << std::endl;
         updateTopics();
     }
 
