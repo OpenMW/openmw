@@ -186,6 +186,11 @@ endif (APPLE)
 
 # Dependencies
 
+# Fix for not visible pthreads functions for linker with glibc 2.15 
+if (UNIX AND NOT APPLE)
+find_package (Threads)
+endif()
+
 find_package(OGRE REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
