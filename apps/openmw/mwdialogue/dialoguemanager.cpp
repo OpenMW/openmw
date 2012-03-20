@@ -145,8 +145,6 @@ namespace MWDialogue
 
     bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info,bool choice)
     {
-        bool isAChoice = false;//is there any choice in the filters?
-        bool isFunction = false;
         for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
             iter != info.selects.end(); ++iter)
         {
@@ -154,7 +152,6 @@ namespace MWDialogue
             char type = select.selectRule[1];
             if(type == '1')
             {
-                isFunction = true;
                 char comp = select.selectRule[4];
                 std::string name = select.selectRule.substr (5);
                 std::string function = select.selectRule.substr(2,2);
@@ -193,7 +190,7 @@ namespace MWDialogue
                     break;
 
                 case 50://choice
-                    isAChoice = true;
+
                     if(choice)
                     {
                         if(!selectCompare<int,int>(comp,mChoice,select.i)) return false;
