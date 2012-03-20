@@ -157,6 +157,7 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
+        std::cout <<"Playing "<<filename<< std::endl;
         try
         {
             if(mMusic)
@@ -171,6 +172,14 @@ namespace MWSound
 
     void SoundManager::startRandomTitle()
     {
+        Ogre::StringVectorPtr filelist;
+        filelist = mResourceMgr->findResourceNames(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                   "Music/"+mCurrentPlaylist+"/*");
+        if(!filelist->size())
+            return;
+
+        int i = rand()%filelist->size();
+        streamMusic((*filelist)[i]);
     }
 
     bool SoundManager::isMusicPlaying()
@@ -178,8 +187,10 @@ namespace MWSound
         return mMusic && mMusic->isPlaying();
     }
 
-    void SoundManager::playPlaylist(std::string playlist)
+    void SoundManager::playPlaylist(const std::string &playlist)
     {
+        mCurrentPlaylist = playlist;
+        startRandomTitle();
     }
 
     void SoundManager::say(MWWorld::Ptr ptr, const std::string& filename)
@@ -385,7 +396,7 @@ namespace MWSound
             timePassed = 0.0f;
 
             // Make sure music is still playing
-            if(!mMusic || !mMusic->isPlaying())
+            if(!isMusicPlaying())
                 startRandomTitle();
 
             Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();

@@ -44,6 +44,7 @@ namespace MWSound
         std::auto_ptr<Sound_Output> mOutput;
 
         boost::shared_ptr<Sound> mMusic;
+        std::string mCurrentPlaylist;
 
         typedef boost::shared_ptr<Sound> SoundPtr;
         typedef std::map<std::string,SoundPtr> IDMap;
@@ -83,7 +84,7 @@ namespace MWSound
         bool isMusicPlaying();
         ///< Returns true if music is playing
 
-        void playPlaylist(std::string playlist);
+        void playPlaylist(const std::string &playlist);
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
 
