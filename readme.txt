@@ -140,6 +140,7 @@ Bug #203: Torch lights only visible on short distance
 Bug #207: Ogre.log not written
 Bug #209: Sounds do not play
 Bug #210: Ogre crash at Dren plantation
+Bug #214: Unsupported file format version
 Feature #9: NPC Dialogue Window
 Feature #16/42: New sky/weather implementation
 Feature #40: Fading
