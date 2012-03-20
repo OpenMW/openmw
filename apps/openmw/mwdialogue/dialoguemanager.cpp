@@ -742,7 +742,7 @@ namespace MWDialogue
                 }
             }
         }
-        std::cout << std::endl << std::endl;
+
         updateTopics();
     }
 
