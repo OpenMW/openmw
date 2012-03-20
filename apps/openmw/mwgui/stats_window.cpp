@@ -95,7 +95,7 @@ void StatsWindow::setBar(const std::string& name, const std::string& tname, int 
 
 void StatsWindow::setPlayerName(const std::string& playerName)
 {
-    mMainWidget->setCaption(playerName);
+    static_cast<MyGUI::Window*>(mMainWidget)->setCaption(playerName);
 }
 
 void StatsWindow::setStyledText(MyGUI::StaticTextPtr widget, ColorStyle style, const std::string &value)

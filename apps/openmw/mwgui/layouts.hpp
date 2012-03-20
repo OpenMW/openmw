@@ -75,7 +75,7 @@ namespace MWGui
 
     void setCellName(const std::string& cellName)
     {
-      mMainWidget->setCaption(cellName);
+      static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
     }
   };
 

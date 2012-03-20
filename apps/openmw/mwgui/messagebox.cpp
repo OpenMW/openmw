@@ -166,7 +166,8 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
 
     mMessageWidget->setSize(size);
 
-    MyGUI::IntSize textSize = mMessageWidget->_getTextSize();
+    MyGUI::IntSize textSize = mMessageWidget->getTextSize();
+
     size.height = mHeight = textSize.height + 20; // this is the padding between the text and the box
 
     mMainWidget->setSize(size);
@@ -219,7 +220,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     mMessageWidget->setOverflowToTheLeft(true);
     mMessageWidget->addText(message);
 
-    MyGUI::IntSize textSize = mMessageWidget->_getTextSize();
+    MyGUI::IntSize textSize = mMessageWidget->getTextSize();
 
     MyGUI::IntSize gameWindowSize = mMessageBoxManager.mWindowManager->getGui()->getViewSize();
 
@@ -243,9 +244,9 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
 
         mButtons.push_back(button);
 
-        buttonWidth = button->_getTextSize().width + 2*buttonPadding + buttonLeftPadding;
+        buttonWidth = button->getTextSize().width + 2*buttonPadding + buttonLeftPadding;
         buttonsWidth += buttonWidth;
-        buttonHeight = button->_getTextSize().height + 2*buttonPadding + buttonTopPadding;
+        buttonHeight = button->getTextSize().height + 2*buttonPadding + buttonTopPadding;
 
         if(buttonWidth > biggestButtonWidth)
         {
@@ -299,8 +300,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
             buttonCord.left = left;
             buttonCord.top = textSize.height + textButtonPadding;
 
-            buttonSize.width = (*button)->_getTextSize().width + 2*buttonPadding;
-            buttonSize.height = (*button)->_getTextSize().height + 2*buttonPadding;
+            buttonSize.width = (*button)->getTextSize().width + 2*buttonPadding;
+            buttonSize.height = (*button)->getTextSize().height + 2*buttonPadding;
 
             (*button)->setCoord(buttonCord);
             (*button)->setSize(buttonSize);
@@ -347,8 +348,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         std::vector<MyGUI::ButtonPtr>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
         {
-            buttonSize.width = (*button)->_getTextSize().width + buttonPadding*2;
-            buttonSize.height = (*button)->_getTextSize().height + buttonPadding*2;
+            buttonSize.width = (*button)->getTextSize().width + buttonPadding*2;
+            buttonSize.height = (*button)->getTextSize().height + buttonPadding*2;
 
             buttonCord.top = top;
             buttonCord.left = (mainWidgetSize.width - buttonSize.width)/2 - 5; // FIXME: -5 is not so nice :/

@@ -89,7 +89,7 @@ namespace GUI
     {
       MyGUI::WidgetPtr pt;
       getWidget(pt, name);
-      pt->setCaption(caption);
+      static_cast<MyGUI::TextBox*>(pt)->setCaption(caption);
     }
 
     void setTextColor(const std::string& name, float r, float g, float b)
