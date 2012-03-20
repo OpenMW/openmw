@@ -39,7 +39,6 @@ namespace MWSound
         bool useSound, bool fsstrict, MWWorld::Environment& environment)
         : mFSStrict(fsstrict)
         , mEnvironment(environment)
-        , mCurrentPlaylist(NULL)
     {
         if(!useSound)
             return;
@@ -59,24 +58,7 @@ namespace MWSound
             return;
         }
 
-        // The music library will accept these filetypes
-        // If none is given then it will accept all filetypes
-        std::vector<std::string> acceptableExtensions;
-        acceptableExtensions.push_back(".mp3");
-        acceptableExtensions.push_back(".wav");
-        acceptableExtensions.push_back(".ogg");
-        acceptableExtensions.push_back(".flac");
-
-        // Makes a list of all sound files, searches in reverse for priority reasons
-        for(Files::PathContainer::const_reverse_iterator it = dataDirs.rbegin(); it != dataDirs.rend(); ++it)
-            Files::FileLister(*it / std::string("Sound"), mSoundFiles, true);
-
-        // Makes a FileLibrary of all music files, searches in reverse for priority reasons
-        for(Files::PathContainer::const_reverse_iterator it = dataDirs.rbegin(); it != dataDirs.rend(); ++it)
-            mMusicLibrary.add(*it / std::string("Music"), true, mFSStrict, acceptableExtensions);
-
-        std::string anything = "anything";      // anything is better that a segfault
-        mCurrentPlaylist = mMusicLibrary.section(anything, mFSStrict); // now points to an empty path
+        mResourceMgr = Ogre::ResourceGroupManager::getSingletonPtr();
     }
 
     SoundManager::~SoundManager()
@@ -120,7 +102,14 @@ namespace MWSound
             max = std::max(min, max);
         }
 
-        return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict, false);
+        std::string fname = std::string("Sound\\")+snd->sound;
+        if(!mResourceMgr->resourceExistsInAnyGroup(fname))
+        {
+            std::string::size_type pos = fname.rfind('.');
+            if(pos != std::string::npos)
+                fname = fname.substr(0, pos)+".mp3";
+        }
+        return fname;
     }
 
     // Add a sound to the list and play it
@@ -163,53 +152,25 @@ namespace MWSound
     {
         if(mMusic)
             mMusic->stop();
-        setPlaylist();
-    }
-
-    void SoundManager::streamMusicFull(const std::string& filename)
-    {
-        if(mMusic)
-            mMusic->stop();
-        mMusic.reset(mOutput->streamSound(filename, 0.4f, 1.0f));
+        mMusic.reset();
     }
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        std::string filePath = mMusicLibrary.locate(filename, mFSStrict, true).string();
-        if(!filePath.empty())
+        try
         {
-            try
-            {
-                streamMusicFull(filePath);
-            }
-            catch(std::exception &e)
-            {
-                std::cout << "Music Error: " << e.what() << "\n";
-            }
+            if(mMusic)
+                mMusic->stop();
+            mMusic.reset(mOutput->streamSound(filename, 0.4f, 1.0f));
+        }
+        catch(std::exception &e)
+        {
+            std::cout << "Music Error: " << e.what() << "\n";
         }
     }
 
     void SoundManager::startRandomTitle()
     {
-        if(mCurrentPlaylist && !mCurrentPlaylist->empty())
-        {
-            Files::PathContainer::const_iterator fileIter = mCurrentPlaylist->begin();
-            srand( time(NULL) );
-            int r = rand() % mCurrentPlaylist->size() + 1;        //old random code
-
-            std::advance(fileIter, r - 1);
-            std::string music = fileIter->string();
-            //std::cout << "Playing " << music << "\n";
-
-            try
-            {
-                streamMusicFull(music);
-            }
-            catch (std::exception &e)
-            {
-                std::cout << "Music Error: " << e.what() << "\n";
-            }
-        }
     }
 
     bool SoundManager::isMusicPlaying()
@@ -217,52 +178,21 @@ namespace MWSound
         return mMusic && mMusic->isPlaying();
     }
 
-    bool SoundManager::setPlaylist(std::string playlist)
-    {
-        const Files::PathContainer* previousPlaylist;
-        previousPlaylist = mCurrentPlaylist;
-        if (playlist == "")
-        {
-            mCurrentPlaylist = mMusicLibrary.section(playlist, mFSStrict);
-        }
-        else if(mMusicLibrary.containsSection(playlist, mFSStrict))
-        {
-            mCurrentPlaylist = mMusicLibrary.section(playlist, mFSStrict);
-        }
-        else
-        {
-            std::cout << "Warning: playlist named " << playlist << " does not exist.\n";
-        }
-        return previousPlaylist == mCurrentPlaylist;
-    }
-
     void SoundManager::playPlaylist(std::string playlist)
     {
-        if (playlist == "")
-        {
-            if(!isMusicPlaying())
-            {
-                startRandomTitle();
-            }
-            return;
-        }
-
-        if(!setPlaylist(playlist))
-        {
-            startRandomTitle();
-        }
-        else if (!isMusicPlaying())
-        {
-            startRandomTitle();
-        }
     }
 
     void SoundManager::say(MWWorld::Ptr ptr, const std::string& filename)
     {
         // The range values are not tested
-        std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict, true);
-        if(!filePath.empty())
-            play3d(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
+        std::string filePath = std::string("Sound\\")+filename;
+        if(!mResourceMgr->resourceExistsInAnyGroup(filePath))
+        {
+            std::string::size_type pos = filePath.rfind('.');
+            if(pos != std::string::npos)
+                filePath = filePath.substr(0, pos)+".mp3";
+        }
+        play3d(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
     }
 
     bool SoundManager::sayDone(MWWorld::Ptr ptr) const

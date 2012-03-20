@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <OgreResourceGroupManager.h>
+
 #include <components/files/filelibrary.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -29,6 +31,8 @@ namespace MWSound
 
     class SoundManager
     {
+        Ogre::ResourceGroupManager *mResourceMgr;
+
         // This is used for case insensitive and slash-type agnostic file
         // finding. It takes DOS paths (any case, \\ slashes or / slashes)
         // relative to the sound dir, and translates them into full paths
@@ -40,19 +44,6 @@ namespace MWSound
         std::auto_ptr<Sound_Output> mOutput;
 
         boost::shared_ptr<Sound> mMusic;
-
-        void streamMusicFull(const std::string& filename);
-        ///< Play a soundifle
-        /// \param absolute filename
-
-        // A list of all sound files used to lookup paths
-        Files::PathContainer mSoundFiles;
-
-        // A library of all Music file paths stored by the folder they are contained in
-        Files::FileLibrary mMusicLibrary;
-
-        // Points to the current playlist of music files stored in the music library
-        const Files::PathContainer* mCurrentPlaylist;
 
         typedef boost::shared_ptr<Sound> SoundPtr;
         typedef std::map<std::string,SoundPtr> IDMap;
@@ -91,12 +82,6 @@ namespace MWSound
 
         bool isMusicPlaying();
         ///< Returns true if music is playing
-
-        bool setPlaylist(std::string playlist="");
-        ///< Set the playlist to an existing folder
-        /// \param name of the folder that contains the playlist
-        /// if none is set then it is set to an empty playlist
-        /// \return Return true if the previous playlist was the same
 
         void playPlaylist(std::string playlist="");
         ///< Start playing music from the selected folder

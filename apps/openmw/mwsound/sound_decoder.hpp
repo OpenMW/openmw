@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <OgreResourceGroupManager.h>
+
 namespace MWSound
 {
     enum SampleType {
@@ -20,9 +22,10 @@ namespace MWSound
     size_t framesToBytes(size_t frames, ChannelConfig config, SampleType type);
     size_t bytesToFrames(size_t bytes, ChannelConfig config, SampleType type);
 
-    class Sound_Decoder
+    struct Sound_Decoder
     {
-    public:
+        Ogre::ResourceGroupManager &mResourceMgr;
+
         virtual void open(const std::string &fname) = 0;
         virtual void close() = 0;
 
@@ -31,10 +34,9 @@ namespace MWSound
         virtual size_t read(char *buffer, size_t bytes) = 0;
         virtual void rewind() = 0;
 
+        Sound_Decoder() : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
+        { }
         virtual ~Sound_Decoder() { }
-
-        friend class OpenAL_Output;
-        friend class SoundManager;
     };
 }
 

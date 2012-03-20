@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <OgreDataStream.h>
+
 #include "mpg123.h"
 #include "sndfile.h"
 
@@ -15,6 +17,15 @@ namespace MWSound
     {
         SNDFILE *mSndFile;
         mpg123_handle *mMpgFile;
+
+        Ogre::DataStreamPtr mDataStream;
+        static sf_count_t ogresf_get_filelen(void *user_data);
+        static sf_count_t ogresf_seek(sf_count_t offset, int whence, void *user_data);
+        static sf_count_t ogresf_read(void *ptr, sf_count_t count, void *user_data);
+        static sf_count_t ogresf_write(const void*, sf_count_t, void*);
+        static sf_count_t ogresf_tell(void *user_data);
+        static ssize_t ogrempg_read(void*, void*, size_t);
+        static off_t ogrempg_lseek(void*, off_t, int);
 
         ChannelConfig mChanConfig;
         int mSampleRate;
