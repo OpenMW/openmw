@@ -40,7 +40,6 @@ namespace MWSound
         : mFSStrict(fsstrict)
         , mEnvironment(environment)
         , mCurrentPlaylist(NULL)
-        , mUsingSound(useSound)
     {
         if(!useSound)
             return;
@@ -239,9 +238,6 @@ namespace MWSound
 
     void SoundManager::playPlaylist(std::string playlist)
     {
-        if (!mUsingSound)
-            return;
-
         if (playlist == "")
         {
             if(!isMusicPlaying())
@@ -321,13 +317,22 @@ namespace MWSound
             IDMap::iterator iditer = snditer->second.find(soundId);
             if(iditer != snditer->second.end())
             {
+                iditer->second->stop();
                 snditer->second.erase(iditer);
                 if(snditer->second.empty())
                     mActiveSounds.erase(snditer);
             }
         }
         else
+        {
+            IDMap::iterator iditer = snditer->second.begin();
+            while(iditer != snditer->second.end())
+            {
+                iditer->second->stop();
+                iditer++;
+            }
             mActiveSounds.erase(snditer);
+        }
     }
 
     void SoundManager::stopSound(MWWorld::Ptr::CellStore *cell)
@@ -337,7 +342,15 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->first.getCell() == cell)
+            {
+                IDMap::iterator iditer = snditer->second.begin();
+                while(iditer != snditer->second.end())
+                {
+                    iditer->second->stop();
+                    iditer++;
+                }
                 mActiveSounds.erase(snditer++);
+            }
             else
                 snditer++;
         }
@@ -347,7 +360,10 @@ namespace MWSound
     {
         IDMap::iterator iditer = mLooseSounds.find(soundId);
         if(iditer != mLooseSounds.end())
+        {
+            iditer->second->stop();
             mLooseSounds.erase(iditer);
+        }
     }
 
     bool SoundManager::getSoundPlaying(MWWorld::Ptr ptr, const std::string& soundId) const
