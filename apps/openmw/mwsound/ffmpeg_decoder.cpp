@@ -247,10 +247,10 @@ void FFmpeg_Decoder::open(const std::string &fname)
     {
         mFormatCtx->pb = avio_alloc_context(NULL, 0, 0, this, readPacket, writePacket, seek);
         if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), NULL, NULL) != 0)
-            fail("Failed to open input");
+            fail("Failed to open input stream for "+fname);
 
         if(avformat_find_stream_info(mFormatCtx, NULL) < 0)
-            fail("Failed to find stream info");
+            fail("Failed to find stream info in "+fname);
 
         for(size_t j = 0;j < mFormatCtx->nb_streams;j++)
         {
@@ -261,10 +261,15 @@ void FFmpeg_Decoder::open(const std::string &fname)
                 stream->mStreamIdx = j;
                 stream->mPackets = NULL;
 
-                AVCodec *codec;
-                codec = avcodec_find_decoder(stream->mCodecCtx->codec_id);
-                if(!codec || avcodec_open(stream->mCodecCtx, codec) < 0)
-                    fail("Could not open audio codec");
+                AVCodec *codec = avcodec_find_decoder(stream->mCodecCtx->codec_id);
+                if(!codec)
+                {
+                    std::stringstream ss("No codec found for id ");
+                    ss << stream->mCodecCtx->codec_id;
+                    fail(ss.str());
+                }
+                if(avcodec_open(stream->mCodecCtx, codec) < 0)
+                    fail("Failed to open audio codec " + std::string(codec->long_name));
 
                 stream->mDecodedData = (char*)av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE);
                 stream->mDecodedDataSize = 0;
@@ -275,7 +280,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
             }
         }
         if(mStreams.empty())
-            fail("No audio streams");
+            fail("No audio streams in "+fname);
     }
     catch(std::exception &e)
     {
@@ -313,7 +318,7 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
     else if(stream->mCodecCtx->sample_fmt == AV_SAMPLE_FMT_S16)
         *type = SampleType_Int16;
     else
-        fail(std::string("Unsupported sample format:")+
+        fail(std::string("Unsupported sample format: ")+
              av_get_sample_fmt_name(stream->mCodecCtx->sample_fmt));
 
     if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_MONO)
