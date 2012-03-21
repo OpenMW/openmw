@@ -23,12 +23,16 @@
 */
 #ifdef OPENMW_USE_FFMPEG
 #include "ffmpeg_decoder.hpp"
+#ifndef SOUND_IN
 #define SOUND_IN "FFmpeg"
+#endif
 #endif
 
 #ifdef OPENMW_USE_MPG123
 #include "mpgsnd_decoder.hpp"
+#ifndef SOUND_IN
 #define SOUND_IN "mpg123,sndfile"
+#endif
 #endif
 
 
