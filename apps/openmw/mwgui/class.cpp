@@ -267,7 +267,7 @@ void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
     for (unsigned i = 0; i < count; ++i)
     {
         MyGUI::WidgetPtr child = widget->getChildAt(i);
-        if (!child->isVisible())
+        if (!child->getVisible())
             continue;
 
         child->setPosition(child->getLeft(), pos);

@@ -72,7 +72,7 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     if(t == nullptr)
         return;
 
-    const IntPoint& lastPressed = InputManager::getInstance().getLastLeftPressed();
+    const IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
 
     size_t cursorPosition = t->getCursorPosition(lastPressed);
     MyGUI::UString color = history->getColorAtPos(cursorPosition);
