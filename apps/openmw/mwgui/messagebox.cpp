@@ -177,7 +177,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
 
 void MessageBox::update (int height)
 {
-    MyGUI::IntSize gameWindowSize = mMessageBoxManager.mWindowManager->getGui()->getViewSize();
+    MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
     MyGUI::IntCoord coord;
     coord.left = (gameWindowSize.width - mFixedWidth)/2;
     coord.top = (gameWindowSize.height - mHeight - height - mBottomPadding);
@@ -222,7 +222,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
 
     MyGUI::IntSize textSize = mMessageWidget->getTextSize();
 
-    MyGUI::IntSize gameWindowSize = mMessageBoxManager.mWindowManager->getGui()->getViewSize();
+    MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
 
     int biggestButtonWidth = 0;
     int buttonWidth = 0;

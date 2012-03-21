@@ -41,8 +41,8 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
 
     // Get size info from the Gui object
     assert(gui);
-    int w = gui->getViewSize().width;
-    int h = gui->getViewSize().height;
+    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
+    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
@@ -153,7 +153,7 @@ void WindowManager::updateVisible()
     dialogueWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
-    gui->setVisiblePointer(isGuiMode());
+    MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
     // If in game mode, don't show anything.
     if(mode == GM_Game) //Use a switch/case structure
