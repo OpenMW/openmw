@@ -204,8 +204,8 @@ void OpenAL_SoundStream::play()
     for(ALuint i = 0;i < sNumBuffers;i++)
     {
         size_t got;
-        got = mDecoder->read(&data[0], data.size());
-        alBufferData(mBuffers[i], mFormat, &data[0], got, mSampleRate);
+        got = mDecoder->read(data.data(), data.size());
+        alBufferData(mBuffers[i], mFormat, data.data(), got, mSampleRate);
     }
     throwALerror();
 
@@ -270,11 +270,11 @@ bool OpenAL_SoundStream::process()
             if(mIsFinished)
                 continue;
 
-            got = mDecoder->read(&data[0], data.size());
+            got = mDecoder->read(data.data(), data.size());
             mIsFinished = (got < data.size());
             if(got > 0)
             {
-                alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
+                alBufferData(bufid, mFormat, data.data(), got, mSampleRate);
                 alSourceQueueBuffers(mSource, 1, &bufid);
             }
         } while(processed > 0);
