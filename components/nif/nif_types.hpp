@@ -59,6 +59,21 @@ struct Transformation
   Matrix rotation;
   float scale;
   Vector velocity;
+
+  static const Transformation* getIdentity()
+  {
+	  static Transformation* identity = NULL;
+	  if (NULL == identity)
+      {
+        identity = new Transformation();
+        identity->scale = 1.0f;
+        identity->rotation.v[0].array[0] = 1.0f;
+        identity->rotation.v[1].array[1] = 1.0f;
+        identity->rotation.v[2].array[2] = 1.0f;
+      }
+
+	  return identity;
+  }
 };
 #pragma pack(pop)
 
