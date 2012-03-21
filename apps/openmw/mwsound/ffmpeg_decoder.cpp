@@ -373,8 +373,7 @@ void FFmpeg_Decoder::readAll(std::vector<char> &output)
 void FFmpeg_Decoder::rewind()
 {
     av_seek_frame(mFormatCtx, -1, 0, 0);
-    for(size_t i = 0;i < mStreams.size();i++)
-        mStreams[i]->clearPackets();
+    std::for_each(mStreams.begin(), mStreams.end(), std::mem_fun(&MyStream::clearPackets));
 }
 
 FFmpeg_Decoder::FFmpeg_Decoder() : mFormatCtx(NULL)
