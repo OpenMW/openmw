@@ -225,7 +225,7 @@
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_CENTER" />
         <Property key="Colour" value = "0.8 0.8 0.8" />
-        <Property key="ToStick" value = "true" />
+        <Property key="Snap" value = "true" />
 
         <Child type="Widget" skin="BlackBG" offset = "8 28 240 18" align = "ALIGN_STRETCH" name = "Client"/>
 

@@ -8,9 +8,9 @@
             <Widget type="TextBox" skin="NormalText" position="4 4 70 18" name="Health_str"/>
             <Widget type="TextBox" skin="NormalText" position="4 22 70 18" name="Magicka_str"/>
             <Widget type="TextBox" skin="NormalText" position="4 40 70 18" name="Fatigue_str"/>
-            <Widget type="Progress" skin="MW_Progress_Red" position="78 4 130 18" name="HBar"/>
-            <Widget type="Progress" skin="MW_Progress_Blue" position="78 22 130 18" name="MBar"/>
-            <Widget type="Progress" skin="MW_Progress_Green" position="78 40 130 18" name="FBar"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Red" position="78 4 130 18" name="HBar"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Blue" position="78 22 130 18" name="MBar"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Green" position="78 40 130 18" name="FBar"/>
             <Widget type="TextBox" skin="ProgressText" position="78 4 130 18" align="Center" name="HBarT"/>
             <Widget type="TextBox" skin="ProgressText" position="78 22 130 18" align="Center" name="MBarT"/>
             <Widget type="TextBox" skin="ProgressText" position="78 40 130 18" align="Center" name="FBarT"/>

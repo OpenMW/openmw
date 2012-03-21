@@ -3,11 +3,11 @@
 <MyGUI type="Layout">
     <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main">
         <!-- Energy bars -->
-        <Widget type="Progress" skin="MW_EnergyBar_Red" position="13 146 65 12"
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="13 146 65 12"
             align="Left Bottom" name="Health"/>
-        <Widget type="Progress" skin="MW_EnergyBar_Blue" position="13 161 65 12"
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="13 161 65 12"
             align="Left Bottom" name="Magicka"/>
-        <Widget type="Progress" skin="MW_EnergyBar_Green" position="13 176 65 12"
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Green" position="13 176 65 12"
             align="Left Bottom" name="Stamina"/>
 
         <!-- Equipped weapon box -->
@@ -16,7 +16,7 @@
             <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top"
                 name="WeapImage"/>
         </Widget>
-        <Widget type="Progress" skin="MW_EnergyBar_Red" position="82 182 36 6"
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="82 182 36 6"
             align="Left Bottom" name="WeapStatus"/>
 
         <!-- Selected spell box -->
@@ -25,7 +25,7 @@
             <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top"
                 name="SpellImage"/>
         </Widget>
-        <Widget type="Progress" skin="MW_EnergyBar_Red" position="122 182 36 6"
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="122 182 36 6"
             align="Left Bottom" name="SpellStatus"/>
 
         <!-- Spell effects box -->

@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 300" name="_Main">
 
         <!-- Player enumbrance -->
-        <Widget type="Progress" skin="MW_Progress_Blue" position="8 8 212 18" name="EncumbranceBar">
+        <Widget type="ProgressBar" skin="MW_Progress_Blue" position="8 8 212 18" name="EncumbranceBar">
             <Widget type="TextBox" skin="ProgressText" position="0 0 212 18" align="Center" name="EncumbranceBarT"/>
         </Widget>
 

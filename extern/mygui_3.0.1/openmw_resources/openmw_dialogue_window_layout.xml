@@ -18,7 +18,7 @@
         </Widget>
 
 		<!-- The disposition bar-->
-        <Widget type="Progress" skin="MW_EnergyBar_Blue" position="432 39 132 18"
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="432 39 132 18"
             align="Right Top" name="Disposition">		
 			<Widget type="Edit" skin="MW_DispositionEdit" position_real = "0.25 0 0.5 1" name = "DispositionText"/>	
 		</Widget>
