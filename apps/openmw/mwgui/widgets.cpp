@@ -102,11 +102,11 @@ void MWSkill::initialiseOverride()
     MyGUI::ButtonPtr button;
     assignWidget(button, "StatNameButton");
     //skillNameWidget = button; // ???
-    button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWSkill::onClicked);
+    button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWSkill::onClicked);
 
     assignWidget(button, "StatValue");
     //skillNameWidget = button; // ???
-    button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWSkill::onClicked);
+    button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWSkill::onClicked);
 }
 
 /* MWAttribute */
@@ -187,11 +187,11 @@ void MWAttribute::initialiseOverride()
     MyGUI::ButtonPtr button;
     assignWidget(button, "StatNameButton");
     //attributeNameWidget = button; // ???
-    button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWAttribute::onClicked);
+    button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWAttribute::onClicked);
 
     assignWidget(button, "StatValue");
     //attributeNameWidget = button; // ???
-    button->eventMouseButtonClick = MyGUI::newDelegate(this, &MWAttribute::onClicked);
+    button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWAttribute::onClicked);
 
 }
 

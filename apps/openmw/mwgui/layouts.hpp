@@ -165,7 +165,7 @@ namespace MWGui
           last_x += coord.width + margin;
           button_pt->setCoord(coord);
 
-          button_pt->eventMouseButtonClick = MyGUI::newDelegate(this, &InventoryWindow::onCategorySelected);
+          button_pt->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onCategorySelected);
       }
     }
 

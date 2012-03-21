@@ -48,7 +48,7 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
     getWidget(skillClientWidget, "SkillClient");
     getWidget(skillScrollerWidget, "SkillScroller");
 
-    skillScrollerWidget->eventScrollChangePosition = MyGUI::newDelegate(this, &StatsWindow::onScrollChangePosition);
+    skillScrollerWidget->eventScrollChangePosition += MyGUI::newDelegate(this, &StatsWindow::onScrollChangePosition);
     updateScroller();
 
     for (int i = 0; i < ESM::Skill::Length; ++i)
@@ -58,7 +58,7 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
     }
 
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
-    t->eventWindowChangeCoord = MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
+    t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
 }
 
 void StatsWindow::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos)

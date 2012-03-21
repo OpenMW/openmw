@@ -49,18 +49,18 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
     //History view
     getWidget(history, "History");
     history->setOverflowToTheLeft(true);
-    history->getClient()->eventMouseButtonClick = MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
+    history->getClient()->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
     history->setMaxTextLength(1000000);
     //Topics list
     getWidget(topicsList, "TopicsList");
     topicsList->setScrollVisible(true);
-    //topicsList->eventListSelectAccept      = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
-    topicsList->eventListMouseItemActivate = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
-    //topicsList->eventListChangePosition    = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    //topicsList->eventListSelectAccept      += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    topicsList->eventListMouseItemActivate += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    //topicsList->eventListChangePosition    += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
     MyGUI::ButtonPtr byeButton;
     getWidget(byeButton, "ByeButton");
-    byeButton->eventMouseButtonClick = MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
+    byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
 
     getWidget(pDispositionBar, "Disposition");
     getWidget(pDispositionText,"DispositionText");

@@ -31,7 +31,7 @@ namespace MWGui
         int getChosenButton() const;
 
         // Events
-        typedef delegates::CDelegate1<int> EventHandle_Int;
+        typedef delegates::CMultiDelegate1<int> EventHandle_Int;
 
         /** Event : Button was clicked.\n
             signature : void method(MyGUI::WidgetPtr widget, int index)\n
@@ -78,7 +78,7 @@ namespace MWGui
         void open();
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -108,7 +108,7 @@ namespace MWGui
         void open();
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -143,7 +143,7 @@ namespace MWGui
         ESM::Class::Specialization getSpecializationId() const { return specializationId; }
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -175,7 +175,7 @@ namespace MWGui
         void setAffectedWidget(Widgets::MWAttributePtr widget) { affectedWidget = widget; }
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -207,7 +207,7 @@ namespace MWGui
         void setAffectedWidget(Widgets::MWSkillPtr widget) { affectedWidget = widget; }
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -264,7 +264,7 @@ namespace MWGui
         void open();
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n

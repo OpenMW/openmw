@@ -240,7 +240,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
             MyGUI::Align::Default);
         button->setCaption(*it);
 
-        button->eventMouseButtonClick = MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed);
+        button->eventMouseButtonClick += MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed);
 
         mButtons.push_back(button);
 

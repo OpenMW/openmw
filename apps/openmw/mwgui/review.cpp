@@ -28,22 +28,22 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
     getWidget(nameWidget, "NameText");
     getWidget(button, "NameButton");
     button->setCaption(mWindowManager.getGameSettingString("sName", ""));
-    button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);;
+    button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);;
 
     getWidget(raceWidget, "RaceText");
     getWidget(button, "RaceButton");
     button->setCaption(mWindowManager.getGameSettingString("sRace", ""));
-    button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);;
+    button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);;
 
     getWidget(classWidget, "ClassText");
     getWidget(button, "ClassButton");
     button->setCaption(mWindowManager.getGameSettingString("sClass", ""));
-    button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);;
+    button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);;
 
     getWidget(birthSignWidget, "SignText");
     getWidget(button, "SignButton");
     button->setCaption(mWindowManager.getGameSettingString("sBirthSign", ""));
-    button->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);;
+    button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);;
 
     // Setup dynamic stats
     getWidget(health, "Health");
@@ -75,7 +75,7 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
     getWidget(skillClientWidget, "SkillClient");
     getWidget(skillScrollerWidget, "SkillScroller");
 
-    skillScrollerWidget->eventScrollChangePosition = MyGUI::newDelegate(this, &ReviewDialog::onScrollChangePosition);
+    skillScrollerWidget->eventScrollChangePosition += MyGUI::newDelegate(this, &ReviewDialog::onScrollChangePosition);
     updateScroller();
 
     for (int i = 0; i < ESM::Skill::Length; ++i)
@@ -84,16 +84,16 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
         skillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::StaticText*> (0)));
     }
 
-    static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord = MyGUI::newDelegate(this, &ReviewDialog::onWindowResize);
+    static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ReviewDialog::onWindowResize);
 
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
+    backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
 }
 
 void ReviewDialog::open()

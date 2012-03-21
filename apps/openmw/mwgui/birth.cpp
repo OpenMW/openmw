@@ -21,18 +21,18 @@ BirthDialog::BirthDialog(WindowManager& parWindowManager)
 
     getWidget(birthList, "BirthsignList");
     birthList->setScrollVisible(true);
-    birthList->eventListSelectAccept = MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
-    birthList->eventListMouseItemActivate = MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
-    birthList->eventListChangePosition = MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    birthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    birthList->eventListMouseItemActivate += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    birthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
+    backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
 
     updateBirths();
     updateSpells();
