@@ -9,6 +9,8 @@
 
 #include "manualref.hpp"
 
+MWWorld::ContainerStore::ContainerStore() : mStateId (0) {}
+
 MWWorld::ContainerStore::~ContainerStore() {}
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::begin (int mask)
@@ -40,6 +42,8 @@ void MWWorld::ContainerStore::add (const Ptr& ptr)
         case Type_Repair: repairs.list.push_back (*ptr.get<ESM::Repair>());  break;
         case Type_Weapon: weapons.list.push_back (*ptr.get<ESM::Weapon>());  break;
     }
+
+    flagAsModified();
 }
 
 void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS::ESMStore& store)
@@ -58,6 +62,8 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS:
         ref.getPtr().getRefData().setCount (iter->count);
         add (ref.getPtr());
     }
+
+    flagAsModified();
 }
 
 void MWWorld::ContainerStore::clear()
@@ -74,6 +80,18 @@ void MWWorld::ContainerStore::clear()
     probes.list.clear();
     repairs.list.clear();
     weapons.list.clear();
+
+    flagAsModified();
+}
+
+void MWWorld::ContainerStore::flagAsModified()
+{
+    ++mStateId;
+}
+
+int MWWorld::ContainerStore::getStateId() const
+{
+    return mStateId;
 }
 
 int MWWorld::ContainerStore::getType (const Ptr& ptr)
