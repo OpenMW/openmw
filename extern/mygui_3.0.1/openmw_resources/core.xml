@@ -2,13 +2,13 @@
 
 <MyGUI>
 
-    <MyGUI type="List">
-	    <List file="core.skin" group="General"/>
-
-	    <List file="openmw_layers.xml" group="General"/>
-	    <List file="openmw.pointer.xml" group="General"/>
-	    <List file="openmw.font.xml" group="General"/>
-	    <List file="openmw_text.skin.xml" group="General"/>
+      <MyGUI type="List">
+            <List file="core.skin" group="General"/>
+            <List file="openmw_images.xml" group="General"/>
+            <List file="openmw_layers.xml" group="General"/>
+            <List file="openmw.pointer.xml" group="General"/>
+            <List file="openmw.font.xml" group="General"/>
+            <List file="openmw_text.skin.xml" group="General"/>
             <List file="openmw_windows.skin.xml" group="General"/>
             <List file="openmw_button.skin.xml" group="General"/>
             <List file="openmw_list.skin.xml" group="General"/>
@@ -20,7 +20,8 @@
             <List file="openmw_mainmenu_skin.xml" group="General"/>
             <List file="openmw_console.skin.xml" group="General"/>
             <List file="openmw_journal_skin.xml" group="General"/>
-			<List file="openmw_dialogue_window_skin.xml" group="General"/>
-    </MyGUI>
+            <List file="openmw_dialogue_window_skin.xml" group="General"/>
+            <List file="openmw_settings.xml" group="General"/>
+      </MyGUI>
 
 </MyGUI>

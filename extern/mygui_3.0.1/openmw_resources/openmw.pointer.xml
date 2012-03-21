@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Pointer">
-
-    <Pointer layer="Pointer" texture="mwpointer.png" default="arrow">
-        <Info name="arrow" point="7 0" size="32 32" offset="0 0 32 32"/>
-        <Info name="hresize" point="16 14" size="32 32" offset="32 0 32 32"/>
-        <Info name="vresize" point="17 16" size="32 32" offset="0 32 32 32"/>
-        <Info name="dresize" point="17 15" size="32 32" offset="32 32 32 32"/>
-        <Info name="dresize2" point="15 15" size="32 32" offset="64 32 32 32"/>
-    </Pointer>
-
+<MyGUI type="Resource">
+	<Resource type="ResourceImageSetPointer" name="arrow">
+		<Property key="Point" value="7 0"/>
+		<Property key="Size" value="32 32"/>
+		<Property key="Resource" value="ArrowPointerImage"/>
+	</Resource>
+	<Resource type="ResourceImageSetPointer" name="hresize">
+		<Property key="Point" value="16 14"/>
+		<Property key="Size" value="32 32"/>
+		<Property key="Resource" value="HResizePointerImage"/>
+	</Resource>
+	<Resource type="ResourceImageSetPointer" name="vresize">
+		<Property key="Point" value="17 16"/>
+		<Property key="Size" value="32 32"/>
+		<Property key="Resource" value="VResizePointerImage"/>
+	</Resource>
+	<Resource type="ResourceImageSetPointer" name="dresize">
+		<Property key="Point" value="17 15"/>
+		<Property key="Size" value="32 32"/>
+		<Property key="Resource" value="DResizePointerImage"/>
+	</Resource>
+	<Resource type="ResourceImageSetPointer" name="dresize2">
+		<Property key="Point" value="15 15"/>
+		<Property key="Size" value="32 32"/>
+		<Property key="Resource" value="DResize2PointerImage"/>
+	</Resource>
 </MyGUI>
