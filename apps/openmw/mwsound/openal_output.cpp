@@ -251,6 +251,7 @@ void OpenAL_SoundStream::update(const float *pos)
 
 bool OpenAL_SoundStream::process()
 {
+    bool finished = mIsFinished;
     ALint processed, state;
 
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
@@ -267,11 +268,11 @@ bool OpenAL_SoundStream::process()
             alSourceUnqueueBuffers(mSource, 1, &bufid);
             processed--;
 
-            if(mIsFinished)
+            if(finished)
                 continue;
 
             got = mDecoder->read(data.data(), data.size());
-            mIsFinished = (got < data.size());
+            finished = (got < data.size());
             if(got > 0)
             {
                 alBufferData(bufid, mFormat, data.data(), got, mSampleRate);
@@ -294,7 +295,8 @@ bool OpenAL_SoundStream::process()
         }
     }
 
-    return !mIsFinished;
+    mIsFinished = finished;
+    return !finished;
 }
 
 //
