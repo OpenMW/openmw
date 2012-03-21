@@ -7,7 +7,7 @@
 
         <!-- Class image -->
         <Widget type="Widget" skin="MW_Box" position="212 9 265 138" align="ALIGN_LEFT ALIGN_TOP">
-            <Widget type="StaticImage" skin="StaticImage" position="2 2 261 134" name="ClassImage" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 261 134" name="ClassImage" align="ALIGN_LEFT ALIGN_TOP" />
         </Widget>
 
         <!-- Specialization -->

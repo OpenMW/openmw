@@ -96,7 +96,7 @@
     </Skin>
 
     <Skin name = "MW_EffectImage" size = "200 24">
-        <Child type="StaticImage" skin="StaticImage" offset = "4 4 16 16" align = "ALIGN_LEFT ALIGN_TOP" name = "Image" />
+        <Child type="ImageBox" skin="ImageBox" offset = "4 4 16 16" align = "ALIGN_LEFT ALIGN_TOP" name = "Image" />
         <Child type="StaticText" skin="SandText" offset = "24 0 176 20" align = "ALIGN_VCENTRE ALIGN_HSTRETCH" name = "Text" />
     </Skin>
 

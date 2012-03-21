@@ -6,7 +6,7 @@
 
         <!-- Birthsign image -->
         <Widget type="Widget" skin="MW_Box" position="206 13 263 137" align="ALIGN_LEFT ALIGN_TOP">
-            <Widget type="StaticImage" skin="StaticImage" position="2 2 259 133" name="BirthsignImage" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="BirthsignImage" align="ALIGN_LEFT ALIGN_TOP" />
         </Widget>
 
         <!-- Spell list -->

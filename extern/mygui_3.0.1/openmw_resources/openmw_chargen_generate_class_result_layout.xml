@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 330 217" name="_Main">
         <!-- Class image -->
         <Widget type="Widget" skin="MW_Box" position="32 10 265 138" align="ALIGN_LEFT ALIGN_TOP">
-            <Widget type="StaticImage" skin="StaticImage" position="2 2 261 134" name="ClassImage" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 261 134" name="ClassImage" align="ALIGN_LEFT ALIGN_TOP" />
         </Widget>
 
         <!-- Class text -->
