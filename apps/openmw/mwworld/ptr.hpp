@@ -67,17 +67,9 @@ namespace MWWorld
                 return boost::any_cast<ESMS::LiveCellRef<T, RefData>*> (mPtr);
             }
 
-            ESM::CellRef& getCellRef() const
-            {
-                assert (mCellRef);
-                return *mCellRef;
-            }
+            ESM::CellRef& getCellRef() const;
 
-            RefData& getRefData() const
-            {
-                assert (mRefData);
-                return *mRefData;
-            }
+            RefData& getRefData() const;
 
             Ptr::CellStore *getCell() const
             {
