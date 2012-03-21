@@ -343,38 +343,34 @@ namespace MWSound
         timePassed += duration;
         if((current->cell->data.flags & current->cell->Interior) || timePassed < 10)
             return;
-
-        ESM::Region test = (ESM::Region) *(mEnvironment.mWorld->getStore().regions.find(current->cell->region));
-
         timePassed = 0;
+
         if(regionName != current->cell->region)
         {
             regionName = current->cell->region;
             total = 0;
         }
 
-        if(test.soundList.size() == 0)
+        const ESM::Region *regn = mEnvironment.mWorld->getStore().regions.find(regionName);
+        if(regn->soundList.size() == 0)
             return;
 
-        std::vector<ESM::Region::SoundRef>::iterator soundIter;
+        std::vector<ESM::Region::SoundRef>::const_iterator soundIter;
         if(total == 0)
         {
-            soundIter = test.soundList.begin();
-            while(soundIter != test.soundList.end())
+            soundIter = regn->soundList.begin();
+            while(soundIter != regn->soundList.end())
             {
-                int chance = (int) soundIter->chance;
-                //ESM::NAME32 go = soundIter->sound;
-                //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
+                total += (int)soundIter->chance;
                 soundIter++;
-                total += chance;
             }
         }
 
         int r = rand() % total;        //old random code
         int pos = 0;
 
-        soundIter = test.soundList.begin();
-        while(soundIter != test.soundList.end())
+        soundIter = regn->soundList.begin();
+        while(soundIter != regn->soundList.end())
         {
             const std::string go = soundIter->sound.toString();
             int chance = (int) soundIter->chance;
