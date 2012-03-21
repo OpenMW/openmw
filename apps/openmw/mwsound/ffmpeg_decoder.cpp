@@ -309,6 +309,8 @@ void FFmpeg_Decoder::close()
     if(mFormatCtx)
         av_close_input_file(mFormatCtx);
     mFormatCtx = NULL;
+
+    mDataStream.setNull();
 }
 
 void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
