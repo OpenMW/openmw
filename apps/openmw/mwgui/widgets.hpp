@@ -130,7 +130,7 @@ namespace MWGui
 
             WindowManager* mWindowManager;
             std::string id;
-            MyGUI::StaticTextPtr spellNameWidget;
+            MyGUI::TextBox* spellNameWidget;
         };
         typedef MWSpell* MWSpellPtr;
 
@@ -158,8 +158,8 @@ namespace MWGui
 
             WindowManager* mWindowManager;
             SpellEffectValue effect;
-            MyGUI::StaticImagePtr imageWidget;
-            MyGUI::StaticTextPtr textWidget;
+            MyGUI::ImageBox* imageWidget;
+            MyGUI::TextBox* textWidget;
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
 
@@ -183,9 +183,9 @@ namespace MWGui
         private:
 
             int value, max;
-            MyGUI::StaticTextPtr textWidget;
+            MyGUI::TextBox* textWidget;
             MyGUI::ProgressPtr barWidget;
-            MyGUI::StaticTextPtr barTextWidget;
+            MyGUI::TextBox* barTextWidget;
         };
         typedef MWDynamicStat* MWDynamicStatPtr;
 

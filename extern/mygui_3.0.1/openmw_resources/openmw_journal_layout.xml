@@ -14,8 +14,8 @@
 <Widget type="Button" skin="Prev_btn" position="80 220 128 32" name="PrevPageBTN">
 </Widget>
 
-    <Widget type="Edit" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.8" name = "LeftText"/>
-    <Widget type="Edit" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.8" name = "RightText"/>
+    <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.8" name = "LeftText"/>
+    <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.8" name = "RightText"/>
 </Widget>
 </Widget>
 

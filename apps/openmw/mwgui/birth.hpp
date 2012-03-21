@@ -51,7 +51,7 @@ namespace MWGui
 
         MyGUI::ListPtr    birthList;
         MyGUI::WidgetPtr  spellArea;
-        MyGUI::StaticImagePtr birthImage;
+        MyGUI::ImageBox* birthImage;
         std::vector<MyGUI::WidgetPtr> spellItems;
 
         std::string currentBirthId;

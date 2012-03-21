@@ -43,11 +43,11 @@ namespace MWGui
 
     private:
 
-        void fitToText(MyGUI::StaticTextPtr widget);
+        void fitToText(MyGUI::TextBox* widget);
         void layoutVertically(MyGUI::WidgetPtr widget, int margin);
         int currentButton;
         MyGUI::WidgetPtr textBox;
-        MyGUI::StaticTextPtr text;
+        MyGUI::TextBox* text;
         MyGUI::WidgetPtr buttonBar;
         std::vector<MyGUI::ButtonPtr> buttons;
     };
@@ -90,8 +90,8 @@ namespace MWGui
         void onBackClicked(MyGUI::Widget* _sender);
 
     private:
-        MyGUI::StaticImagePtr classImage;
-        MyGUI::StaticTextPtr  className;
+        MyGUI::ImageBox* classImage;
+        MyGUI::TextBox*  className;
 
         std::string currentClassId;
     };
@@ -125,9 +125,9 @@ namespace MWGui
         void updateClasses();
         void updateStats();
 
-        MyGUI::StaticImagePtr classImage;
+        MyGUI::ImageBox* classImage;
         MyGUI::ListPtr        classList;
-        MyGUI::StaticTextPtr  specializationName;
+        MyGUI::TextBox*  specializationName;
         Widgets::MWAttributePtr favoriteAttribute[2];
         Widgets::MWSkillPtr   majorSkill[5];
         Widgets::MWSkillPtr   minorSkill[5];
@@ -160,7 +160,7 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        MyGUI::StaticTextPtr      specialization0, specialization1, specialization2;
+        MyGUI::TextBox      *specialization0, *specialization1, *specialization2;
 
         ESM::Class::Specialization specializationId;
     };
@@ -287,7 +287,7 @@ namespace MWGui
 
     private:
         MyGUI::EditPtr          editName;
-        MyGUI::StaticTextPtr    specializationName;
+        MyGUI::TextBox*    specializationName;
         Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
         Widgets::MWSkillPtr     majorSkill[5];
         Widgets::MWSkillPtr     minorSkill[5];

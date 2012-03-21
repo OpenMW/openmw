@@ -54,7 +54,7 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
         skillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
-        skillWidgetMap.insert(std::pair<int, MyGUI::StaticTextPtr>(i, nullptr));
+        skillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, nullptr));
     }
 
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
@@ -98,7 +98,7 @@ void StatsWindow::setPlayerName(const std::string& playerName)
     static_cast<MyGUI::Window*>(mMainWidget)->setCaption(playerName);
 }
 
-void StatsWindow::setStyledText(MyGUI::StaticTextPtr widget, ColorStyle style, const std::string &value)
+void StatsWindow::setStyledText(MyGUI::TextBox* widget, ColorStyle style, const std::string &value)
 {
     widget->setCaption(value);
     if (style == CS_Super)
@@ -175,7 +175,7 @@ void StatsWindow::setValue (const std::string& id, int value)
 void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
 {
     skillValues[parSkill] = value;
-    MyGUI::StaticTextPtr widget = skillWidgetMap[(int)parSkill];
+    MyGUI::TextBox* widget = skillWidgetMap[(int)parSkill];
     if (widget)
     {
         float modified = value.getModified(), base = value.getBase();
@@ -221,7 +221,7 @@ void StatsWindow::setBirthSign (const std::string& signId)
 
 void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::StaticImagePtr separator = skillClientWidget->createWidget<MyGUI::StaticImage>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
+    MyGUI::ImageBox* separator = skillClientWidget->createWidget<MyGUI::ImageBox>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
     skillWidgets.push_back(separator);
 
     coord1.top += separator->getHeight();
@@ -230,7 +230,7 @@ void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 
 void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::StaticTextPtr groupWidget = skillClientWidget->createWidget<MyGUI::StaticText>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
+    MyGUI::TextBox* groupWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
     groupWidget->setCaption(label);
     skillWidgets.push_back(groupWidget);
 
@@ -238,14 +238,14 @@ void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, My
     coord2.top += lineHeight;
 }
 
-MyGUI::StaticTextPtr StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::TextBox* StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::StaticTextPtr skillNameWidget, skillValueWidget;
+    MyGUI::TextBox *skillNameWidget, *skillValueWidget;
 
-    skillNameWidget = skillClientWidget->createWidget<MyGUI::StaticText>("SandText", coord1, MyGUI::Align::Default);
+    skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
 
-    skillValueWidget = skillClientWidget->createWidget<MyGUI::StaticText>("SandTextRight", coord2, MyGUI::Align::Default);
+    skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
     setStyledText(skillValueWidget, style, value);
 
     skillWidgets.push_back(skillNameWidget);
@@ -259,9 +259,9 @@ MyGUI::StaticTextPtr StatsWindow::addValueItem(const std::string text, const std
 
 void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::StaticTextPtr skillNameWidget;
+    MyGUI::TextBox* skillNameWidget;
 
-    skillNameWidget = skillClientWidget->createWidget<MyGUI::StaticText>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+    skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
 
     skillWidgets.push_back(skillNameWidget);
@@ -297,7 +297,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
             style = CS_Super;
         else if (modified < base)
             style = CS_Sub;
-        MyGUI::StaticTextPtr widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
         skillWidgetMap[skillId] = widget;
     }
 }

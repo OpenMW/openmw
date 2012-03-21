@@ -188,7 +188,7 @@ void BirthDialog::updateSpells()
     {
         if (!categories[category].spells.empty())
         {
-            MyGUI::StaticTextPtr label = spellArea->createWidget<MyGUI::StaticText>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
+            MyGUI::TextBox* label = spellArea->createWidget<MyGUI::TextBox>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
             label->setCaption(mWindowManager.getGameSettingString(categories[category].label, ""));
             spellItems.push_back(label);
             coord.top += lineHeight;

@@ -13,7 +13,7 @@ namespace GUI
   class Layout
   {
   public:
-    Layout(const std::string & _layout, MyGUI::WidgetPtr _parent = nullptr)
+    Layout(const std::string & _layout, MyGUI::Widget* _parent = nullptr)
       : mMainWidget(nullptr)
     { initialise(_layout, _parent); }
     virtual ~Layout() { shutdown();  }
@@ -25,7 +25,7 @@ namespace GUI
       for (MyGUI::VectorWidgetPtr::iterator iter=mListWindowRoot.begin();
            iter!=mListWindowRoot.end(); ++iter)
         {
-          MyGUI::WidgetPtr find = (*iter)->findWidget(mPrefix + _name);
+          MyGUI::Widget* find = (*iter)->findWidget(mPrefix + _name);
           if (nullptr != find)
             {
               T * cast = find->castType<T>(false);
@@ -44,7 +44,7 @@ namespace GUI
     }
 
     void initialise(const std::string & _layout,
-                    MyGUI::WidgetPtr _parent = nullptr)
+                    MyGUI::Widget* _parent = nullptr)
     {
       const std::string MAIN_WINDOW = "_Main";
       mLayoutName = _layout;
@@ -87,30 +87,30 @@ namespace GUI
 
     void setText(const std::string& name, const std::string& caption)
     {
-      MyGUI::WidgetPtr pt;
+      MyGUI::Widget* pt;
       getWidget(pt, name);
       static_cast<MyGUI::TextBox*>(pt)->setCaption(caption);
     }
 
     void setTextColor(const std::string& name, float r, float g, float b)
     {
-      MyGUI::WidgetPtr pt;
+      MyGUI::Widget* pt;
       getWidget(pt, name);
-      MyGUI::StaticText *st = dynamic_cast<MyGUI::StaticText*>(pt);
+      MyGUI::TextBox *st = dynamic_cast<MyGUI::TextBox*>(pt);
       if(st != NULL)
         st->setTextColour(MyGUI::Colour(b,g,r));
     }
 
     void setImage(const std::string& name, const std::string& imgName)
     {
-      MyGUI::StaticImagePtr pt;
+      MyGUI::ImageBox* pt;
       getWidget(pt, name);
       pt->setImageTexture(imgName);
     }
 
   protected:
 
-    MyGUI::WidgetPtr mMainWidget;
+    MyGUI::Widget* mMainWidget;
     std::string mPrefix;
     std::string mLayoutName;
     MyGUI::VectorWidgetPtr mListWindowRoot;

@@ -248,7 +248,7 @@ void PickClassDialog::updateStats()
 
 /* InfoBoxDialog */
 
-void InfoBoxDialog::fitToText(MyGUI::StaticTextPtr widget)
+void InfoBoxDialog::fitToText(MyGUI::TextBox* widget)
 {
     MyGUI::IntCoord inner = widget->getTextRegion();
     MyGUI::IntCoord outer = widget->getCoord();

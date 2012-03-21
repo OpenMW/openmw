@@ -13,16 +13,16 @@
         <!-- Specialization -->
         <Widget type="Widget" skin="" position="15 152 484 178" align="ALIGN_LEFT ALIGN_TOP">
 
-        <Widget type="StaticText" skin="HeaderText" position="0 0 162 18" name="SpecializationT" align="ALIGN_LEFT ALIGN_TOP">
+        <Widget type="TextBox" skin="HeaderText" position="0 0 162 18" name="SpecializationT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_Caption" value="Specialization:"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
-        <Widget type="StaticText" skin="SandText" position="0 18 162 18" name="SpecializationName" align="ALIGN_LEFT ALIGN_TOP">
+        <Widget type="TextBox" skin="SandText" position="0 18 162 18" name="SpecializationName" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
 
         <!-- Favorite Attributes -->
-        <Widget type="StaticText" skin="HeaderText" position="0 41 162 18" name="FavoriteAttributesT" align="ALIGN_LEFT ALIGN_TOP">
+        <Widget type="TextBox" skin="HeaderText" position="0 41 162 18" name="FavoriteAttributesT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_Caption" value="Favorite Attributes:"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
@@ -30,7 +30,7 @@
         <Widget type="MWAttribute" skin="MW_StatName" position="0 77 162 18" name="FavoriteAttribute1" align="ALIGN_LEFT ALIGN_TOP" />
 
         <!-- Major Skills -->
-        <Widget type="StaticText" skin="HeaderText" position="162 0 162 18" name="MajorSkillT" align="ALIGN_LEFT ALIGN_TOP">
+        <Widget type="TextBox" skin="HeaderText" position="162 0 162 18" name="MajorSkillT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_Caption" value="Major Skills:"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
@@ -41,7 +41,7 @@
         <Widget type="MWSkill" skin="MW_StatName" position="162 90 162 18" name="MajorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
 
         <!-- Minor Skills -->
-        <Widget type="StaticText" skin="HeaderText" position="325 0 162 18" name="MinorSkillT" align="ALIGN_LEFT ALIGN_TOP">
+        <Widget type="TextBox" skin="HeaderText" position="325 0 162 18" name="MinorSkillT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_Caption" value="Minor Skills:"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>

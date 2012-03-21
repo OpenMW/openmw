@@ -5,7 +5,7 @@
 
         <!-- Edit box -->
         <Widget type="Widget" skin="MW_Box" position="14 14 516 70" name="TextBox" align="ALIGN_TOP ALIGN_HCENTER">
-            <Widget type="StaticText" skin="SandText" position="4 4 508 62" name="Text" align="ALIGN_TOP ALIGN_HCENTER">
+            <Widget type="TextBox" skin="SandText" position="4 4 508 62" name="Text" align="ALIGN_TOP ALIGN_HCENTER">
                 <Property key="Edit_WordWrap" value="1" />
             </Widget>
         </Widget>
