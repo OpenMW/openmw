@@ -5,13 +5,13 @@
 
             <!-- Label -->
             <Widget type="TextBox" skin="HeaderText" position="0 0 447 18" name="LabelT" align="ALIGN_HCENTRE ALIGN_TOP">
-                <Property key="Widget_Caption" value="Choose a Skill"/>
+                <Property key="Caption" value="Choose a Skill"/>
                 <Property key="Widget_AlignText" value="ALIGN_HCENTRE ALIGN_TOP"/>
             </Widget>
 
             <!-- Combat list -->
             <Widget type="TextBox" skin="HeaderText" position="0 32 154 18" name="CombatLabelT" align="ALIGN_LEFT ALIGN_TOP">
-                <Property key="Widget_Caption" value="Combat"/>
+                <Property key="Caption" value="Combat"/>
                 <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
             </Widget>
             <Widget type="MWSkill" skin="MW_StatNameButton" position="0 50 154 18" name="CombatSkill0" align="ALIGN_LEFT ALIGN_TOP" />
@@ -26,7 +26,7 @@
 
             <!-- Magic list -->
             <Widget type="TextBox" skin="HeaderText" position="158 32 154 18" name="MagicLabelT" align="ALIGN_LEFT ALIGN_TOP">
-                <Property key="Widget_Caption" value="Magic"/>
+                <Property key="Caption" value="Magic"/>
                 <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
             </Widget>
             <Widget type="MWSkill" skin="MW_StatNameButton" position="158 50 154 18" name="MagicSkill0" align="ALIGN_LEFT ALIGN_TOP" />
@@ -41,7 +41,7 @@
 
             <!-- Stealth list -->
             <Widget type="TextBox" skin="HeaderText" position="316 32 131 18" name="StealthLabelT" align="ALIGN_LEFT ALIGN_TOP">
-                <Property key="Widget_Caption" value="Stealth"/>
+                <Property key="Caption" value="Stealth"/>
                 <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
             </Widget>
             <Widget type="MWSkill" skin="MW_StatNameButton" position="316 50 131 18" name="StealthSkill0" align="ALIGN_LEFT ALIGN_TOP" />
@@ -56,7 +56,7 @@
 
             <!-- Dialog buttons -->
             <Widget type="Button" skin="MW_Button" position="381 218 66 21" name="CancelButton">
-                <Property key="Widget_Caption" value="Cancel"/>
+                <Property key="Caption" value="Cancel"/>
             </Widget>
 
         </Widget>

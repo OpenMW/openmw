@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 588 433" name="_Main">
         <!-- HEADER -->
         <Widget type="TextBox" skin="HeaderText" position="0 0 588 18" name="NpcName" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_Caption" value="Name"/>
+            <Property key="Caption" value="Name"/>
             <Property key="Widget_AlignText" value="ALIGN_CENTER"/>
         </Widget>
 
@@ -28,7 +28,7 @@
 
         <!-- The Goodbye button -->
         <Widget type="Button" skin="MW_Button" position="432 387 132 23" name="ByeButton">
-            <Property key="Widget_Caption" value="Goodbye"/>
+            <Property key="Caption" value="Goodbye"/>
         </Widget>
     </Widget>
 </MyGUI>

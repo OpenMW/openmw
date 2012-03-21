@@ -9,20 +9,20 @@
 
         <!-- Class text -->
         <Widget type="TextBox" skin="SandText" position="32 152 265 18" name="ReflectT" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_Caption" value="Your personality and past reflect a:"/>
+            <Property key="Caption" value="Your personality and past reflect a:"/>
             <Property key="Widget_AlignText" value="ALIGN_TOP ALIGN_HCENTER"/>
         </Widget>
         <Widget type="TextBox" skin="SandText" position="32 170 265 18" name="ClassName" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Widget_Caption" value="[Class]"/>
+            <Property key="Caption" value="[Class]"/>
             <Property key="Widget_AlignText" value="ALIGN_TOP ALIGN_HCENTER"/>
         </Widget>
 
         <!-- Dialog buttons -->
         <Widget type="Button" skin="MW_Button" position="220 184 53 23" name="BackButton">
-            <Property key="Widget_Caption" value="Back"/>
+            <Property key="Caption" value="Back"/>
         </Widget>
         <Widget type="Button" skin="MW_Button" position="277 184 42 23" name="OKButton">
-            <Property key="Widget_Caption" value="OK"/>
+            <Property key="Caption" value="OK"/>
         </Widget>
     </Widget>
 </MyGUI>

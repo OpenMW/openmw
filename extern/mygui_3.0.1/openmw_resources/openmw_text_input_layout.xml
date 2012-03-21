@@ -11,7 +11,7 @@
 
         <!-- Dialog buttons -->
         <Widget type="Button" skin="MW_Button" position="264 60 42 23" name="OKButton">
-            <Property key="Widget_Caption" value="OK"/>
+            <Property key="Caption" value="OK"/>
         </Widget>
     </Widget>
 </MyGUI>

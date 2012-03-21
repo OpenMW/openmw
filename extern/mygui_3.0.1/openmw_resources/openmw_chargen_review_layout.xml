@@ -42,10 +42,10 @@
 
         <!-- Dialog buttons -->
         <Widget type="Button" skin="MW_Button" position="400 372 53 23" name="BackButton">
-            <Property key="Widget_Caption" value="Back"/>
+            <Property key="Caption" value="Back"/>
         </Widget>
         <Widget type="Button" skin="MW_Button" position="460 372 42 23" name="OKButton">
-            <Property key="Widget_Caption" value="OK"/>
+            <Property key="Caption" value="OK"/>
         </Widget>
     </Widget>
 </MyGUI>

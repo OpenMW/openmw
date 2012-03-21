@@ -12,7 +12,7 @@
 
         <!-- Dialog buttons -->
         <Widget type="Button" skin="MW_Button" position="177 214 57 24" name="OKButton">
-            <Property key="Widget_Caption" value="Enter"/>
+            <Property key="Caption" value="Enter"/>
         </Widget>
     </Widget>
 </MyGUI>

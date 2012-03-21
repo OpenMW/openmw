@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
   <Widget type="Window" skin="MW_ConsoleWindow" position="0 0 400 400" layer="Console" name="_Main">
-    <Property key="Widget_Caption" value="Console"/>
+    <Property key="Caption" value="Console"/>
     <Property key="Window_MinMax" value="200 100 2000 2000"/>
 
     <!-- Log window -->
