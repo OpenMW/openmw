@@ -353,6 +353,18 @@ size_t FFmpeg_Decoder::read(char *buffer, size_t bytes)
     return mStreams.front()->readAVAudioData(buffer, bytes);
 }
 
+void FFmpeg_Decoder::readAll(std::vector<char> &output)
+{
+    if(mStreams.empty())
+        fail("No audio streams");
+    MyStream *stream = mStreams.front();
+    char *inbuf;
+    size_t got;
+
+    while((inbuf=(char*)stream->getAVAudioData(&got)) != NULL && got > 0)
+        output.insert(output.end(), inbuf, inbuf+got);
+}
+
 void FFmpeg_Decoder::rewind()
 {
     av_seek_frame(mFormatCtx, -1, 0, 0);

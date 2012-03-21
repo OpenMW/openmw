@@ -83,17 +83,16 @@ void MpgSnd_Decoder::open(const std::string &fname)
     close();
     mDataStream = mResourceMgr.openResource(fname);
 
-    SF_INFO info;
     SF_VIRTUAL_IO streamIO = {
         ogresf_get_filelen, ogresf_seek,
         ogresf_read, ogresf_write, ogresf_tell
     };
-    mSndFile = sf_open_virtual(&streamIO, SFM_READ, &info, this);
+    mSndFile = sf_open_virtual(&streamIO, SFM_READ, &mSndInfo, this);
     if(mSndFile)
     {
-        if(info.channels == 1)
+        if(mSndInfo.channels == 1)
             mChanConfig = ChannelConfig_Mono;
-        else if(info.channels == 2)
+        else if(mSndInfo.channels == 2)
             mChanConfig = ChannelConfig_Stereo;
         else
         {
@@ -101,7 +100,7 @@ void MpgSnd_Decoder::open(const std::string &fname)
             mSndFile = NULL;
             fail("Unsupported channel count in "+fname);
         }
-        mSampleRate = info.samplerate;
+        mSampleRate = mSndInfo.samplerate;
         return;
     }
     mDataStream->seek(0);
@@ -182,6 +181,19 @@ size_t MpgSnd_Decoder::read(char *buffer, size_t bytes)
             fail("Failed to read from file");
     }
     return got;
+}
+
+void MpgSnd_Decoder::readAll(std::vector<char> &output)
+{
+    if(mSndFile && mSndInfo.frames > 0)
+    {
+        size_t pos = output.size();
+        output.resize(pos + mSndInfo.frames*mSndInfo.channels*2);
+        sf_readf_short(mSndFile, (short*)(output.data()+pos), mSndInfo.frames);
+        return;
+    }
+    // Fallback in case we don't know the total already
+    Sound_Decoder::readAll(output);
 }
 
 void MpgSnd_Decoder::rewind()

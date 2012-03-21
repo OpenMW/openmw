@@ -449,6 +449,22 @@ namespace MWSound
         updateRegionSound(duration);
     }
 
+    // Default readAll implementation, for decoders that can't do anything
+    // better
+    void Sound_Decoder::readAll(std::vector<char> &output)
+    {
+        size_t total = output.size();
+        size_t got;
+
+        output.resize(total+32768);
+        while((got=read(&output[total], output.size()-total)) > 0)
+        {
+            total += got;
+            output.resize(total*2);
+        }
+        output.resize(total);
+    }
+
 
     const char *getSampleTypeName(SampleType type)
     {

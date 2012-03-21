@@ -442,30 +442,25 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
     }
     throwALerror();
 
-    int srate;
+    std::vector<char> data;
     ChannelConfig chans;
     SampleType type;
     ALenum format;
+    int srate;
 
     DecoderPtr decoder = mManager.getDecoder();
     decoder->open(fname);
+
     decoder->getInfo(&srate, &chans, &type);
     format = getALFormat(chans, type);
 
-    std::vector<char> data(32768);
-    size_t got, total = 0;
-    while((got=decoder->read(&data[total], data.size()-total)) > 0)
-    {
-        total += got;
-        data.resize(total*2);
-    }
-    data.resize(total);
+    decoder->readAll(data);
     decoder->close();
 
     alGenBuffers(1, &buf);
     throwALerror();
 
-    alBufferData(buf, format, &data[0], total, srate);
+    alBufferData(buf, format, data.data(), data.size(), srate);
     mBufferCache[fname] = buf;
     mBufferRefs[buf] = 1;
 
