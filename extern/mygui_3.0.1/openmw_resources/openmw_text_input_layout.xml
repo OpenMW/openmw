@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 320 97" name="_Main">
 
         <!-- Appearance -->
-        <Widget type="StaticText" skin="ProgressText" position="10 12 300 18" name="LabelT" align="ALIGN_LEFT ALIGN_TOP">
+        <Widget type="TextBox" skin="ProgressText" position="10 12 300 18" name="LabelT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
         <Widget type="Edit" skin="MW_TextEdit" position="10 28 300 30" name="TextEdit" align="ALIGN_LEFT ALIGN_TOP"/>

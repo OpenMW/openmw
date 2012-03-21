@@ -3,7 +3,7 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 588 433" name="_Main">
         <!-- HEADER -->
-        <Widget type="StaticText" skin="HeaderText" position="0 0 588 18" name="NpcName" align="ALIGN_LEFT ALIGN_TOP">
+        <Widget type="TextBox" skin="HeaderText" position="0 0 588 18" name="NpcName" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Widget_Caption" value="Name"/>
             <Property key="Widget_AlignText" value="ALIGN_CENTER"/>
         </Widget>

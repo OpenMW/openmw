@@ -9,10 +9,10 @@
             <Widget type="Button" skin="MW_Button" position="8 37 56 23" name="RaceButton"/>
             <Widget type="Button" skin="MW_Button" position="8 66 56 23" name="ClassButton"/>
             <Widget type="Button" skin="MW_Button" position="8 95 54 23" name="SignButton"/>
-            <Widget type="StaticText" skin="SandTextRight" position="100 10 140 18" name="NameText"/>
-            <Widget type="StaticText" skin="SandTextRight" position="100 39 140 18" name="RaceText"/>
-            <Widget type="StaticText" skin="SandTextRight" position="100 68 140 18" name="ClassText"/>
-            <Widget type="StaticText" skin="SandTextRight" position="100 97 140 18" name="SignText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="100 10 140 18" name="NameText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="100 39 140 18" name="RaceText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="100 68 140 18" name="ClassText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="100 97 140 18" name="SignText"/>
         </Widget>
 
         <!-- Player health, magicka and fatigue -->
