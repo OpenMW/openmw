@@ -301,23 +301,30 @@ MWWorld::Ptr *MWWorld::ContainerStoreIterator::operator->() const
 
 MWWorld::Ptr MWWorld::ContainerStoreIterator::operator*() const
 {
+    Ptr ptr;
+
     switch (mType)
     {
-        case ContainerStore::Type_Potion: return MWWorld::Ptr (&*mPotion, 0);
-        case ContainerStore::Type_Apparatus: return MWWorld::Ptr (&*mApparatus, 0);
-        case ContainerStore::Type_Armor: return MWWorld::Ptr (&*mArmor, 0);
-        case ContainerStore::Type_Book: return MWWorld::Ptr (&*mBook, 0);
-        case ContainerStore::Type_Clothing: return MWWorld::Ptr (&*mClothing, 0);
-        case ContainerStore::Type_Ingredient: return MWWorld::Ptr (&*mIngredient, 0);
-        case ContainerStore::Type_Light: return MWWorld::Ptr (&*mLight, 0);
-        case ContainerStore::Type_Lockpick: return MWWorld::Ptr (&*mLockpick, 0);
-        case ContainerStore::Type_Miscellaneous: return MWWorld::Ptr (&*mMiscellaneous, 0);
-        case ContainerStore::Type_Probe: return MWWorld::Ptr (&*mProbe, 0);
-        case ContainerStore::Type_Repair: return MWWorld::Ptr (&*mRepair, 0);
-        case ContainerStore::Type_Weapon: return MWWorld::Ptr (&*mWeapon, 0);
+        case ContainerStore::Type_Potion: ptr = MWWorld::Ptr (&*mPotion, 0); break;
+        case ContainerStore::Type_Apparatus: ptr = MWWorld::Ptr (&*mApparatus, 0); break;
+        case ContainerStore::Type_Armor: ptr = MWWorld::Ptr (&*mArmor, 0); break;
+        case ContainerStore::Type_Book: ptr = MWWorld::Ptr (&*mBook, 0); break;
+        case ContainerStore::Type_Clothing: ptr = MWWorld::Ptr (&*mClothing, 0); break;
+        case ContainerStore::Type_Ingredient: ptr = MWWorld::Ptr (&*mIngredient, 0); break;
+        case ContainerStore::Type_Light: ptr = MWWorld::Ptr (&*mLight, 0); break;
+        case ContainerStore::Type_Lockpick: ptr = MWWorld::Ptr (&*mLockpick, 0); break;
+        case ContainerStore::Type_Miscellaneous: ptr = MWWorld::Ptr (&*mMiscellaneous, 0); break;
+        case ContainerStore::Type_Probe: ptr = MWWorld::Ptr (&*mProbe, 0); break;
+        case ContainerStore::Type_Repair: ptr = MWWorld::Ptr (&*mRepair, 0); break;
+        case ContainerStore::Type_Weapon: ptr = MWWorld::Ptr (&*mWeapon, 0); break;
     }
 
-    throw std::runtime_error ("invalid pointer");
+    if (ptr.isEmpty())
+        throw std::runtime_error ("invalid iterator");
+
+    ptr.setContainerStore (mContainer);
+
+    return ptr;
 }
 
 MWWorld::ContainerStoreIterator& MWWorld::ContainerStoreIterator::operator++()

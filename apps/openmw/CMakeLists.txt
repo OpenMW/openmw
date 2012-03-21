@@ -44,7 +44,7 @@ add_openmw_dir (mwsound
 add_openmw_dir (mwworld
     refdata world physicssystem scene environment globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
-    cells localscripts customdata weather inventorystore
+    cells localscripts customdata weather inventorystore ptr
     )
 
 add_openmw_dir (mwclass
@@ -92,7 +92,7 @@ target_link_libraries(openmw
     MyGUIOgrePlatform
 )
 
-# Fix for not visible pthreads functions for linker with glibc 2.15 
+# Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
 target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
 endif()
