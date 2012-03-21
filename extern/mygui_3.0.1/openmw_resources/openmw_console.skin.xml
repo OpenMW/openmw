@@ -5,7 +5,7 @@
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "17" />
         <Property key="AlignText" value = "ALIGN_CENTER" />
-        <Property key="Colour" value = "0.8 0.8 0.8" />
+        <Property key="TextColour" value = "0.8 0.8 0.8" />
         <Property key="Snap" value = "true" />
 
         <Child type="Widget" skin="BlackBG" offset = "4 4 248 46" align = "ALIGN_STRETCH" name = "Client"/>
@@ -41,7 +41,7 @@
     <Skin name = "MW_LogClient" size = "10 10">
         <Property key="FontName" value = "MonoFont" />
         <Property key="AlignText" value = "Left Top" />
-        <Property key="Colour" value = "1 1 1" />
+        <Property key="TextColour" value = "1 1 1" />
         <!--Property key="Pointer" value = "beam" /-->
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
     </Skin>
@@ -55,7 +55,7 @@
     <Skin name = "MW_EditClient" size = "10 10">
         <Property key="FontName" value = "MonoFont" />
         <Property key="AlignText" value = "Left VCenter" />
-        <Property key="Colour" value = "1 1 1" />
+        <Property key="TextColour" value = "1 1 1" />
         <!--Property key="Pointer" value = "beam" /-->
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
     </Skin>

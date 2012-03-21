@@ -6,7 +6,7 @@
         <Property key="FontName" value = "MyGUI_CoreFont.18"/>
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_LEFT ALIGN_VCENTER" />
-        <Property key="Colour" value = "0.6 0.6 0.6" />
+        <Property key="TextColour" value = "0.6 0.6 0.6" />
 
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
     </Skin>
@@ -15,7 +15,7 @@
         <Property key="FontName" value = "MyGUI_CoreFont.18"/>
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_LEFT ALIGN_TOP" />
-        <Property key="Colour" value = "0.6 0.6 0.6" />
+        <Property key="TextColour" value = "0.6 0.6 0.6" />
 
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
     </Skin>

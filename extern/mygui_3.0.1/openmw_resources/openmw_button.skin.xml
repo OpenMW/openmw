@@ -50,7 +50,7 @@
         <!--Property key="FontName" value = "albertis"/-->
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_CENTER" />
-        <Property key="Colour" value = "0.6 0.6 0.6" />
+        <Property key="TextColour" value = "0.6 0.6 0.6" />
 
         <Child type="Widget" skin="BTN_Left" offset="0 4 4 16" align="ALIGN_VSTRETCH ALIGN_LEFT"/>
         <Child type="Widget" skin="BTN_Right" offset="132 4 4 16" align="ALIGN_VSTRETCH ALIGN_RIGHT"/>
