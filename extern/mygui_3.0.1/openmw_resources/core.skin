@@ -10,7 +10,7 @@
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
     </Skin>
 
-    <Skin name = "StaticImage" size = "16 16">
+    <Skin name = "ImageBox" size = "16 16">
         <BasisSkin type="MainSkin" offset = "0 0 16 16"/>
     </Skin>
 
