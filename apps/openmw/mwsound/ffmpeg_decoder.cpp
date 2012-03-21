@@ -243,12 +243,16 @@ void FFmpeg_Decoder::open(const std::string &fname)
     if((mFormatCtx=avformat_alloc_context()) == NULL)
         fail("Failed to allocate context");
 
+    mFormatCtx->pb = avio_alloc_context(NULL, 0, 0, this, readPacket, writePacket, seek);
+    if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), NULL, NULL) != 0)
+    {
+        avformat_free_context(mFormatCtx);
+        mFormatCtx = NULL;
+        fail("Failed to allocate input stream");
+    }
+
     try
     {
-        mFormatCtx->pb = avio_alloc_context(NULL, 0, 0, this, readPacket, writePacket, seek);
-        if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), NULL, NULL) != 0)
-            fail("Failed to open input stream for "+fname);
-
         if(avformat_find_stream_info(mFormatCtx, NULL) < 0)
             fail("Failed to find stream info in "+fname);
 
