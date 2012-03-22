@@ -35,4 +35,12 @@
             </Widget>
         </Widget>
     </Resource>
+
+    <!-- The edit control used for entering commands -->
+    <Resource type="ResourceLayout" name="MW_ConsoleCommand" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 29 26" name="Root">
+            <Widget type="TextBox" skin="MW_EditClient" position="2 1 23 22" align="Stretch" name="Client"/>
+            <Widget type="Widget" skin="MW_BarFrame" position="0 0 29 26" align="ALIGN_STRETCH"/>
+        </Widget>
+    </Resource>
 </MyGUI>

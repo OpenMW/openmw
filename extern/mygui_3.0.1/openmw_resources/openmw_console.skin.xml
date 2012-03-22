@@ -59,11 +59,4 @@
         <!--Property key="Pointer" value = "beam" /-->
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
     </Skin>
-
-    <!-- The edit control used for entering commands -->
-    <Skin name = "MW_ConsoleCommand" size = "29 26">
-        <Child type="Widget" skin="MW_EditClient" offset = "2 1 23 22" align = "Stretch" name = "Client"/>
-
-        <Child type="Widget" skin="MW_BarFrame" offset="0 0 29 26" align="ALIGN_STRETCH"/>
-    </Skin>
 </MyGUI>

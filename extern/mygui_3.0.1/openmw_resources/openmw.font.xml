@@ -12,7 +12,7 @@
 		<Code hide="1104"/>
 	</Font>
 
-    <Font name="MonoFont" default_height="17" source="VeraMono.ttf" size="13" resolution="50" antialias_colour="false" space_width="4" tab_width="8" cursor_width="2" distance="10" offset_height="0">
+    <Font name="MonoFont" default_height="17" source="VeraMono.ttf" size="18" resolution="50" antialias_colour="false" space_width="4" tab_width="8" cursor_width="2" distance="10" offset_height="0">
         <Code range="33 126"/>
         <Code range="192 382"/><!-- Central and Eastern European glyphs -->
         <Code range="1025 1105"/>
