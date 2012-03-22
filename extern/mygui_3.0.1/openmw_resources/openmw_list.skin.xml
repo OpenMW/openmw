@@ -195,7 +195,7 @@
         <Property key="SkinLine" value = "MW_ListLine" />
         <Property key="HeightLine" value = "20" />
 
-        <Child type="VScroll" skin="MW_VScroll" offset = "498 3 14 509" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "VScroll">
+        <Child type="ScrollBar" skin="MW_VScroll" offset = "498 3 14 509" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "VScroll">
         </Child>
 
         <Child type="Widget" skin="ClientDefaultSkin" offset = "3 3 493 509" align = "ALIGN_STRETCH" name = "Client">
@@ -216,7 +216,7 @@
         <Property key="SkinLine" value = "MW_ListLine" />
         <Property key="HeightLine" value = "20" />
 
-        <Child type="VScroll" skin="VScroll" offset = "498 3 14 509" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "VScroll">
+        <Child type="ScrollBar" skin="VScroll" offset = "498 3 14 509" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "VScroll">
         </Child>
 
         <Child type="Widget" skin="Default" offset = "3 3 493 509" align = "ALIGN_STRETCH" name = "Client">

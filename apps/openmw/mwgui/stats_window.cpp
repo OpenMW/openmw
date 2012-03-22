@@ -61,7 +61,7 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
     t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
 }
 
-void StatsWindow::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos)
+void StatsWindow::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
 {
     int diff = lastPos - pos;
     // Adjust position of all widget according to difference

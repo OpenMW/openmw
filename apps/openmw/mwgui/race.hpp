@@ -54,7 +54,7 @@ namespace MWGui
         EventHandle_Void eventBack;
 
     protected:
-        void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
+        void onHeadRotate(MyGUI::ScrollBar* _sender, size_t _position);
 
         void onSelectPreviousGender(MyGUI::Widget* _sender);
         void onSelectNextGender(MyGUI::Widget* _sender);
@@ -77,7 +77,7 @@ namespace MWGui
 
         MyGUI::CanvasPtr  appearanceBox;
         MyGUI::ListPtr    raceList;
-        MyGUI::HScrollPtr headRotate;
+        MyGUI::ScrollBar* headRotate;
 
         MyGUI::WidgetPtr skillList;
         std::vector<MyGUI::WidgetPtr> skillItems;

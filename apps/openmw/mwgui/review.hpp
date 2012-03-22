@@ -84,14 +84,14 @@ namespace MWGui
         void updateScroller();
         void updateSkillArea();
 
-        void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
+        void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
         void onWindowResize(MyGUI::Window* window);
 
         static const int lineHeight;
 
         MyGUI::TextBox *nameWidget, *raceWidget, *classWidget, *birthSignWidget;
         MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
-        MyGUI::VScrollPtr skillScrollerWidget;
+        MyGUI::ScrollBar* skillScrollerWidget;
         int lastPos, clientHeight;
 
         Widgets::MWDynamicStatPtr health, magicka, fatigue;

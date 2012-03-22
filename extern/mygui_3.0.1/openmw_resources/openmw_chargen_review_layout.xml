@@ -37,7 +37,7 @@
         <!-- Player skills, factions, birthsign and reputation -->
         <Widget type="Widget" skin="MW_Box" position="258 12 244 356" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Skills">
             <Widget type="Widget" skin="" position="4 4 218 346" align="ALIGN_STRETCH" name="SkillClient" />
-            <Widget type="VScroll" skin="MW_VScroll" position="226 4 14 346" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="SkillScroller" />
+            <Widget type="ScrollBar" skin="MW_VScroll" position="226 4 14 346" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="SkillScroller" />
         </Widget>
 
         <!-- Dialog buttons -->

@@ -20,7 +20,7 @@
                 <Property key="AlignText" value = "ALIGN_LEFT ALIGN_TOP" />
                 <Property key="TextColour" value = "0.6 0.6 0.6" />
             </Widget>
-            <Widget type="VScroll" skin="MW_VScroll" position="494 3 14 14" align="Right VStretch" name="VScroll"/>
+            <Widget type="ScrollBar" skin="MW_VScroll" position="494 3 14 14" align="Right VStretch" name="VScroll"/>
         </Widget>
     </Resource>
 
@@ -49,7 +49,7 @@
             <Widget type="EditBox" skin="MW_LogClient" position="0 0 35 10" align="Stretch" name="Client">
                 <Property key="WordWrap" value = "true" />
             </Widget>
-            <!--Child type="VScroll" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
+            <!--Child type="ScrollBar" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
         </Widget>
     </Resource>
 </MyGUI>

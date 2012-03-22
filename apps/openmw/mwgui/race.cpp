@@ -157,7 +157,7 @@ void RaceDialog::onBackClicked(MyGUI::Widget* _sender)
     eventBack();
 }
 
-void RaceDialog::onHeadRotate(MyGUI::VScroll*, size_t _position)
+void RaceDialog::onHeadRotate(MyGUI::ScrollBar*, size_t _position)
 {
     // TODO: Rotate head
 }

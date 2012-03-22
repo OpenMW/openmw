@@ -102,7 +102,7 @@ void ReviewDialog::open()
     setVisible(true);
 }
 
-void ReviewDialog::onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos)
+void ReviewDialog::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
 {
     int diff = lastPos - pos;
     // Adjust position of all widget according to difference

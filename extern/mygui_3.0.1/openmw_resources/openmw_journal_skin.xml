@@ -24,6 +24,6 @@
     <Skin name="MW_BookPage" size="0 0 50 50">
         <Property key="WordWrap" value = "true" />
         <Child type="Widget" skin="MW_BookClient" offset="0 0 35 10" align = "ALIGN_STRETCH" name = "Client"/>
-        <!--Child type="VScroll" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
+        <!--Child type="ScrollBar" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
     </Skin>
 </MyGUI>

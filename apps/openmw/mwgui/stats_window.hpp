@@ -57,13 +57,13 @@ namespace MWGui
             void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void updateScroller();
 
-            void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
+            void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onWindowResize(MyGUI::Window* window);
 
             static const int lineHeight;
 
             MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
-            MyGUI::VScrollPtr skillScrollerWidget;
+            MyGUI::ScrollBar* skillScrollerWidget;
             int lastPos, clientHeight;
 
             SkillList majorSkills, minorSkills, miscSkills;
