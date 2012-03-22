@@ -225,7 +225,7 @@ void DataFilesPage::setupDataFiles()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Cancel);
         msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
-        The directory containing the Data Files was not found.<br><br> \
+        The directory containing the data files was not found.<br><br> \
         Press \"Browse...\" to specify the location manually.<br>"));
 
         QAbstractButton *dirSelectButton =
