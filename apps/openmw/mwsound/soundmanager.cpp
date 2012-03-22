@@ -370,63 +370,67 @@ namespace MWSound
         }
     }
 
-    void SoundManager::update(float duration)
+    void SoundManager::updateSounds(float duration)
     {
         static float timePassed = 0.0;
 
         timePassed += duration;
-        if(timePassed > (1.0f/30.0f))
+        if(timePassed < (1.0f/30.0f))
+            return;
+        timePassed = 0.0f;
+
+        // Make sure music is still playing
+        if(!isMusicPlaying())
+            startRandomTitle();
+
+        Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
+        Ogre::Vector3 nPos, nDir, nUp;
+        nPos = cam->getRealPosition();
+        nDir = cam->getRealDirection();
+        nUp  = cam->getRealUp();
+
+        // The output handler is expecting vectors oriented like the game
+        // (that is, -Z goes down, +Y goes forward), but that's not what we
+        // get from Ogre's camera, so we have to convert.
+        float pos[3] = { nPos[0], -nPos[2], nPos[1] };
+        float at[3] = { nDir[0], -nDir[2], nDir[1] };
+        float up[3] = { nUp[0], -nUp[2], nUp[1] };
+        mOutput->updateListener(pos, at, up);
+
+        // Check if any sounds are finished playing, and trash them
+        SoundMap::iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
         {
-            timePassed = 0.0f;
-
-            // Make sure music is still playing
-            if(!isMusicPlaying())
-                startRandomTitle();
-
-            Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
-            Ogre::Vector3 nPos, nDir, nUp;
-            nPos = cam->getRealPosition();
-            nDir = cam->getRealDirection();
-            nUp  = cam->getRealUp();
-
-            // The output handler is expecting vectors oriented like the game
-            // (that is, -Z goes down, +Y goes forward), but that's not what we
-            // get from Ogre's camera, so we have to convert.
-            float pos[3] = { nPos[0], -nPos[2], nPos[1] };
-            float at[3] = { nDir[0], -nDir[2], nDir[1] };
-            float up[3] = { nUp[0], -nUp[2], nUp[1] };
-            mOutput->updateListener(pos, at, up);
-
-            // Check if any sounds are finished playing, and trash them
-            SoundMap::iterator snditer = mActiveSounds.begin();
-            while(snditer != mActiveSounds.end())
-            {
-                IDMap::iterator iditer = snditer->second.begin();
-                while(iditer != snditer->second.end())
-                {
-                    if(!iditer->second->isPlaying())
-                        snditer->second.erase(iditer++);
-                    else
-                        iditer++;
-                }
-                if(snditer->second.empty())
-                    mActiveSounds.erase(snditer++);
-                else
-                    snditer++;
-            }
-
-            IDMap::iterator iditer = mLooseSounds.begin();
-            while(iditer != mLooseSounds.end())
+            IDMap::iterator iditer = snditer->second.begin();
+            while(iditer != snditer->second.end())
             {
                 if(!iditer->second->isPlaying())
-                    mLooseSounds.erase(iditer++);
+                    snditer->second.erase(iditer++);
                 else
                     iditer++;
             }
+            if(snditer->second.empty())
+                mActiveSounds.erase(snditer++);
+            else
+                snditer++;
         }
 
+        IDMap::iterator iditer = mLooseSounds.begin();
+        while(iditer != mLooseSounds.end())
+        {
+            if(!iditer->second->isPlaying())
+                mLooseSounds.erase(iditer++);
+            else
+                iditer++;
+        }
+    }
+
+    void SoundManager::update(float duration)
+    {
+        updateSounds(duration);
         updateRegionSound(duration);
     }
+
 
     // Default readAll implementation, for decoders that can't do anything
     // better
