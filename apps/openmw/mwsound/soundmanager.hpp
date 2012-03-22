@@ -82,6 +82,8 @@ namespace MWSound
 
             IDMap mLoopedSounds;
 
+            bool mUsingSound;
+
             std::string lookup(const std::string &soundId,
                        float &volume, float &min, float &max);
             void add(const std::string &file,

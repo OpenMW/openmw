@@ -10,12 +10,12 @@ TextInputDialog::TextInputDialog(WindowManager& parWindowManager)
     center();
 
     getWidget(textEdit, "TextEdit");
-    textEdit->eventEditSelectAccept = newDelegate(this, &TextInputDialog::onTextAccepted);
+    textEdit->eventEditSelectAccept += newDelegate(this, &TextInputDialog::onTextAccepted);
 
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &TextInputDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TextInputDialog::onOkClicked);
 
     // Make sure the edit box has focus
     MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);

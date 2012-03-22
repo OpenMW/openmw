@@ -8,6 +8,29 @@
 #include <components/esm/loadcont.hpp>
 
 #include "manualref.hpp"
+#include "refdata.hpp"
+
+namespace
+{
+    template<typename T>
+    float getTotalWeight (const ESMS::CellRefList<T, MWWorld::RefData>& cellRefList)
+    {
+        float sum = 0;
+
+        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::const_iterator iter (
+            cellRefList.list.begin());
+            iter!=cellRefList.list.end();
+            ++iter)
+        {
+            if (iter->mData.getCount()>0)
+                sum += iter->mData.getCount()*iter->base->data.weight;
+        }
+
+        return sum;
+    }
+}
+
+MWWorld::ContainerStore::ContainerStore() : mStateId (0), mCachedWeight (0), mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
@@ -40,6 +63,8 @@ void MWWorld::ContainerStore::add (const Ptr& ptr)
         case Type_Repair: repairs.list.push_back (*ptr.get<ESM::Repair>());  break;
         case Type_Weapon: weapons.list.push_back (*ptr.get<ESM::Weapon>());  break;
     }
+
+    flagAsModified();
 }
 
 void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS::ESMStore& store)
@@ -58,6 +83,8 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS:
         ref.getPtr().getRefData().setCount (iter->count);
         add (ref.getPtr());
     }
+
+    flagAsModified();
 }
 
 void MWWorld::ContainerStore::clear()
@@ -74,6 +101,44 @@ void MWWorld::ContainerStore::clear()
     probes.list.clear();
     repairs.list.clear();
     weapons.list.clear();
+
+    flagAsModified();
+}
+
+void MWWorld::ContainerStore::flagAsModified()
+{
+    ++mStateId;
+    mWeightUpToDate = false;
+}
+
+int MWWorld::ContainerStore::getStateId() const
+{
+    return mStateId;
+}
+
+float MWWorld::ContainerStore::getWeight() const
+{
+    if (!mWeightUpToDate)
+    {
+        mCachedWeight = 0;
+
+        mCachedWeight += getTotalWeight (potions);
+        mCachedWeight += getTotalWeight (appas);
+        mCachedWeight += getTotalWeight (armors);
+        mCachedWeight += getTotalWeight (books);
+        mCachedWeight += getTotalWeight (clothes);
+        mCachedWeight += getTotalWeight (ingreds);
+        mCachedWeight += getTotalWeight (lights);
+        mCachedWeight += getTotalWeight (lockpicks);
+        mCachedWeight += getTotalWeight (miscItems);
+        mCachedWeight += getTotalWeight (probes);
+        mCachedWeight += getTotalWeight (repairs);
+        mCachedWeight += getTotalWeight (weapons);
+
+        mWeightUpToDate = true;
+    }
+
+    return mCachedWeight;
 }
 
 int MWWorld::ContainerStore::getType (const Ptr& ptr)
@@ -301,23 +366,30 @@ MWWorld::Ptr *MWWorld::ContainerStoreIterator::operator->() const
 
 MWWorld::Ptr MWWorld::ContainerStoreIterator::operator*() const
 {
+    Ptr ptr;
+
     switch (mType)
     {
-        case ContainerStore::Type_Potion: return MWWorld::Ptr (&*mPotion, 0);
-        case ContainerStore::Type_Apparatus: return MWWorld::Ptr (&*mApparatus, 0);
-        case ContainerStore::Type_Armor: return MWWorld::Ptr (&*mArmor, 0);
-        case ContainerStore::Type_Book: return MWWorld::Ptr (&*mBook, 0);
-        case ContainerStore::Type_Clothing: return MWWorld::Ptr (&*mClothing, 0);
-        case ContainerStore::Type_Ingredient: return MWWorld::Ptr (&*mIngredient, 0);
-        case ContainerStore::Type_Light: return MWWorld::Ptr (&*mLight, 0);
-        case ContainerStore::Type_Lockpick: return MWWorld::Ptr (&*mLockpick, 0);
-        case ContainerStore::Type_Miscellaneous: return MWWorld::Ptr (&*mMiscellaneous, 0);
-        case ContainerStore::Type_Probe: return MWWorld::Ptr (&*mProbe, 0);
-        case ContainerStore::Type_Repair: return MWWorld::Ptr (&*mRepair, 0);
-        case ContainerStore::Type_Weapon: return MWWorld::Ptr (&*mWeapon, 0);
+        case ContainerStore::Type_Potion: ptr = MWWorld::Ptr (&*mPotion, 0); break;
+        case ContainerStore::Type_Apparatus: ptr = MWWorld::Ptr (&*mApparatus, 0); break;
+        case ContainerStore::Type_Armor: ptr = MWWorld::Ptr (&*mArmor, 0); break;
+        case ContainerStore::Type_Book: ptr = MWWorld::Ptr (&*mBook, 0); break;
+        case ContainerStore::Type_Clothing: ptr = MWWorld::Ptr (&*mClothing, 0); break;
+        case ContainerStore::Type_Ingredient: ptr = MWWorld::Ptr (&*mIngredient, 0); break;
+        case ContainerStore::Type_Light: ptr = MWWorld::Ptr (&*mLight, 0); break;
+        case ContainerStore::Type_Lockpick: ptr = MWWorld::Ptr (&*mLockpick, 0); break;
+        case ContainerStore::Type_Miscellaneous: ptr = MWWorld::Ptr (&*mMiscellaneous, 0); break;
+        case ContainerStore::Type_Probe: ptr = MWWorld::Ptr (&*mProbe, 0); break;
+        case ContainerStore::Type_Repair: ptr = MWWorld::Ptr (&*mRepair, 0); break;
+        case ContainerStore::Type_Weapon: ptr = MWWorld::Ptr (&*mWeapon, 0); break;
     }
 
-    throw std::runtime_error ("invalid pointer");
+    if (ptr.isEmpty())
+        throw std::runtime_error ("invalid iterator");
+
+    ptr.setContainerStore (mContainer);
+
+    return ptr;
 }
 
 MWWorld::ContainerStoreIterator& MWWorld::ContainerStoreIterator::operator++()

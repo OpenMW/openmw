@@ -9,6 +9,7 @@ namespace MWSound
 namespace MWScript
 {
     class GlobalScripts;
+    class ScriptManager;
 }
 
 namespace MWGui
@@ -41,7 +42,7 @@ namespace MWWorld
     {
     public:
         Environment()
-        : mWorld (0), mSoundManager (0), mGlobalScripts (0), mWindowManager (0),
+        : mWorld (0), mSoundManager (0), mGlobalScripts (0), mScriptManager (0), mWindowManager (0),
           mMechanicsManager (0), mDialogueManager (0), mJournal (0), mFrameDuration (0),
           mInputManager (0)
         {}
@@ -49,6 +50,7 @@ namespace MWWorld
         World *mWorld;
         MWSound::SoundManager *mSoundManager;
         MWScript::GlobalScripts *mGlobalScripts;
+        MWScript::ScriptManager *mScriptManager;
         MWGui::WindowManager *mWindowManager;
         MWMechanics::MechanicsManager *mMechanicsManager;
         MWDialogue::DialogueManager *mDialogueManager;

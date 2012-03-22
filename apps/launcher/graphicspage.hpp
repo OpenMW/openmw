@@ -8,6 +8,14 @@
 #include <OgreConfigFile.h>
 #include <OgreConfigDialog.h>
 
+// Static plugin headers
+#ifdef ENABLE_PLUGIN_GL
+# include "OgreGLPlugin.h"
+#endif
+#ifdef ENABLE_PLUGIN_Direct3D9
+# include "OgreD3D9Plugin.h"
+#endif
+
 class QComboBox;
 class QCheckBox;
 class QStackedWidget;
@@ -32,6 +40,12 @@ private:
     Ogre::RenderSystem *mSelectedRenderSystem;
     Ogre::RenderSystem *mOpenGLRenderSystem;
     Ogre::RenderSystem *mDirect3DRenderSystem;
+ 	#ifdef ENABLE_PLUGIN_GL
+ 	Ogre::GLPlugin* mGLPlugin;
+ 	#endif
+	#ifdef ENABLE_PLUGIN_Direct3D9
+ 	Ogre::D3D9Plugin* mD3D9Plugin;
+ 	#endif
 
     QComboBox *mRendererComboBox;
 

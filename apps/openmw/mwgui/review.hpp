@@ -49,8 +49,8 @@ namespace MWGui
         void open();
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
-        typedef delegates::CDelegate1<int> EventHandle_Int;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate1<int> EventHandle_Int;
 
         /** Event : Back button clicked.\n
         signature : void method()\n
@@ -75,23 +75,23 @@ namespace MWGui
             CS_Normal,
             CS_Super
         };
-        void setStyledText(MyGUI::StaticTextPtr widget, ColorStyle style, const std::string &value);
+        void setStyledText(MyGUI::TextBox* widget, ColorStyle style, const std::string &value);
         void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        MyGUI::StaticTextPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+        MyGUI::TextBox* addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void updateScroller();
         void updateSkillArea();
 
-        void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
+        void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
         void onWindowResize(MyGUI::Window* window);
 
         static const int lineHeight;
 
-        MyGUI::StaticTextPtr nameWidget, raceWidget, classWidget, birthSignWidget;
+        MyGUI::TextBox *nameWidget, *raceWidget, *classWidget, *birthSignWidget;
         MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
-        MyGUI::VScrollPtr skillScrollerWidget;
+        MyGUI::ScrollBar* skillScrollerWidget;
         int lastPos, clientHeight;
 
         Widgets::MWDynamicStatPtr health, magicka, fatigue;
@@ -100,7 +100,7 @@ namespace MWGui
 
         SkillList majorSkills, minorSkills, miscSkills;
         std::map<int, MWMechanics::Stat<float> > skillValues;
-        std::map<int, MyGUI::StaticTextPtr> skillWidgetMap;
+        std::map<int, MyGUI::TextBox*> skillWidgetMap;
         std::string name, raceId, birthSignId;
         ESM::Class klass;
         std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information

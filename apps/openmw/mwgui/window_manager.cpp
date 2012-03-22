@@ -37,12 +37,12 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     gui = mGuiManager->getGui();
 
     //Register own widgets with MyGUI
-    MyGUI::FactoryManager::getInstance().registerFactory<DialogeHistory>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
 
     // Get size info from the Gui object
     assert(gui);
-    int w = gui->getViewSize().width;
-    int h = gui->getViewSize().height;
+    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
+    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
@@ -51,6 +51,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     console = new Console(w,h, environment, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
+    dialogueWindow = new DialogueWindow(*this,environment);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -149,9 +150,10 @@ void WindowManager::updateVisible()
     stats->setVisible(false);
     console->disable();
     mJournal->setVisible(false);
+    dialogueWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
-    gui->setVisiblePointer(isGuiMode());
+    MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
     // If in game mode, don't show anything.
     if(mode == GM_Game) //Use a switch/case structure
@@ -195,11 +197,6 @@ void WindowManager::updateVisible()
 
     if (mode == GM_Dialogue)
     {
-        if (!dialogueWindow)
-        {
-            dialogueWindow = new DialogueWindow(*this);
-            dialogueWindow->eventBye = MyGUI::newDelegate(this, &WindowManager::onDialogueWindowBye);
-        }
         dialogueWindow->open();
         return;
     }
@@ -349,6 +346,7 @@ void WindowManager::updateSkillArea()
 
 void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 {
+    std::cout << "dialogue a la poubelle";
     assert(dialog);
     if (!dialog)
         return;
@@ -387,7 +385,8 @@ void WindowManager::onDialogueWindowBye()
     if (dialogueWindow)
     {
         //FIXME set some state and stuff?
-        removeDialog(dialogueWindow);
+        //removeDialog(dialogueWindow);
+        dialogueWindow->setVisible(false);
     }
     setGuiMode(GM_Game);
 }

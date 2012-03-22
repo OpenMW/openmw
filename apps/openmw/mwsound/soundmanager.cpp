@@ -67,6 +67,7 @@ namespace MWSound
         , updater(mgr)
         , cameraTracker(mgr)
         , mCurrentPlaylist(NULL)
+        , mUsingSound(useSound)
     {
         if(useSound)
         {
@@ -105,8 +106,11 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
-        Ogre::Root::getSingleton().removeFrameListener(&updater);
-        cameraTracker.unfollowCamera();
+        if(mUsingSound)
+        {
+            Ogre::Root::getSingleton().removeFrameListener(&updater);
+            cameraTracker.unfollowCamera();
+        }
     }
 
     // Convert a soundId to file name, and modify the volume
@@ -354,6 +358,9 @@ namespace MWSound
 
     void SoundManager::playPlaylist(std::string playlist)
     {
+        if (!mUsingSound)
+            return;
+
         if (playlist == "")
         {
             if(!isMusicPlaying())
@@ -375,6 +382,9 @@ namespace MWSound
 
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
+    if (!mUsingSound)
+      return;
+
     // The range values are not tested
     std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict, true);
     if(!filePath.empty())

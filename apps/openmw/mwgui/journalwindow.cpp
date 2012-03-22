@@ -4,6 +4,8 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
+#include "../mwsound/soundmanager.hpp"
+
 namespace
 {
     struct book
@@ -87,9 +89,9 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
     getWidget(mLeftTextWidget, "LeftText");
     getWidget(mRightTextWidget, "RightText");
     getWidget(mPrevBtn, "PrevPageBTN");
-    mPrevBtn->eventMouseButtonClick = MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyPrevPage);
+    mPrevBtn->eventMouseButtonClick += MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyPrevPage);
     getWidget(mNextBtn, "NextPageBTN");
-    mNextBtn->eventMouseButtonClick = MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyNextPage);
+    mNextBtn->eventMouseButtonClick += MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyNextPage);
     //MyGUI::ItemBox* list = new MyGUI::ItemBox();
     //list->addItem("qaq","aqzazaz");
     //mScrollerWidget->addChildItem(list);
@@ -109,12 +111,14 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
     //displayLeftText(list.front());
 
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
-    t->eventWindowChangeCoord = MyGUI::newDelegate(this, &JournalWindow::onWindowResize);
+    t->eventWindowChangeCoord += MyGUI::newDelegate(this, &JournalWindow::onWindowResize);
 }
 
 void MWGui::JournalWindow::open()
 {
     mPageNumber = 0;
+    std::string journalOpenSound = "book open";
+    mWindowManager.getEnvironment().mSoundManager->playSound (journalOpenSound, 1.0, 1.0);
     if(mWindowManager.getEnvironment().mJournal->begin()!=mWindowManager.getEnvironment().mJournal->end())
     {
         book journal;
@@ -176,6 +180,8 @@ void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
 {
     if(mPageNumber < int(leftPages.size())-1)
     {
+        std::string nextSound = "book page2";
+        mWindowManager.getEnvironment().mSoundManager->playSound (nextSound, 1.0, 1.0);
         mPageNumber = mPageNumber + 1;
         displayLeftText(leftPages[mPageNumber]);
         displayRightText(rightPages[mPageNumber]);
@@ -186,6 +192,8 @@ void MWGui::JournalWindow::notifyPrevPage(MyGUI::WidgetPtr _sender)
 {
     if(mPageNumber > 0)
     {
+        std::string prevSound = "book page";
+        mWindowManager.getEnvironment().mSoundManager->playSound (prevSound, 1.0, 1.0);
         mPageNumber = mPageNumber - 1;
         displayLeftText(leftPages[mPageNumber]);
         displayRightText(rightPages[mPageNumber]);
