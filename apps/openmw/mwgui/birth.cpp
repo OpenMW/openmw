@@ -100,7 +100,7 @@ void BirthDialog::onBackClicked(MyGUI::Widget* _sender)
     eventBack();
 }
 
-void BirthDialog::onSelectBirth(MyGUI::List* _sender, size_t _index)
+void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;

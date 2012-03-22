@@ -25,7 +25,7 @@
 			<Widget type="EditBox" skin="MW_DispositionEdit" position_real = "0.25 0 0.5 1" name = "DispositionText"/>	
 		</Widget>
         <!-- The list of topics -->
-        <Widget type="List" skin="MW_List" position="432 62 132 318" name="TopicsList">
+        <Widget type="ListBox" skin="MW_List" position="432 62 132 318" name="TopicsList">
         </Widget>
 
         <!-- The Goodbye button -->

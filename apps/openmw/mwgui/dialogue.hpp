@@ -49,7 +49,7 @@ namespace MWGui
         void askQuestion(std::string question);
 
     protected:
-        void onSelectTopic(MyGUI::List* _sender, size_t _index);
+        void onSelectTopic(MyGUI::ListBox* _sender, size_t _index);
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
 
@@ -61,7 +61,7 @@ namespace MWGui
         std::string parseText(std::string text);
 
         DialogueHistory*     history;
-        MyGUI::ListPtr      topicsList;
+        MyGUI::ListBox*      topicsList;
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;
         std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.

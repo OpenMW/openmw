@@ -2,7 +2,7 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 485 375" name="_Main">
         <!-- Birthsign list -->
-        <Widget type="List" skin="MW_List" position="8 13 196 137" name="BirthsignList" />
+        <Widget type="ListBox" skin="MW_List" position="8 13 196 137" name="BirthsignList" />
 
         <!-- Birthsign image -->
         <Widget type="Widget" skin="MW_Box" position="206 13 263 137" align="ALIGN_LEFT ALIGN_TOP">

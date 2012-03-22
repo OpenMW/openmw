@@ -192,7 +192,7 @@ void RaceDialog::onSelectNextHair(MyGUI::Widget*)
     hairIndex = wrap(hairIndex - 1, hairCount);
 }
 
-void RaceDialog::onSelectRace(MyGUI::List* _sender, size_t _index)
+void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;

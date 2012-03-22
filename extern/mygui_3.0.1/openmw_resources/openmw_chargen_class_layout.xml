@@ -3,7 +3,7 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 491 302" name="_Main">
         <!-- Class list -->
-        <Widget type="List" skin="MW_List" position="14 13 181 131" name="ClassList" />
+        <Widget type="ListBox" skin="MW_List" position="14 13 181 131" name="ClassList" />
 
         <!-- Class image -->
         <Widget type="Widget" skin="MW_Box" position="212 9 265 138" align="ALIGN_LEFT ALIGN_TOP">

@@ -106,7 +106,7 @@ void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
     mEnvironment.mDialogueManager->goodbyeSelected();
 }
 
-void DialogueWindow::onSelectTopic(MyGUI::List* _sender, size_t _index)
+void DialogueWindow::onSelectTopic(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;

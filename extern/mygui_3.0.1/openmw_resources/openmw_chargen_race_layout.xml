@@ -40,7 +40,7 @@
             <Property key="Caption" value="Race"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
-        <Widget type="List" skin="MW_List" position="264 39 132 161" name="RaceList">
+        <Widget type="ListBox" skin="MW_List" position="264 39 132 161" name="RaceList">
         </Widget>
 
         <!-- Spell powers -->

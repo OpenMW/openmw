@@ -116,7 +116,7 @@ namespace MWGui
         EventHandle_Void eventBack;
 
     protected:
-        void onSelectClass(MyGUI::List* _sender, size_t _index);
+        void onSelectClass(MyGUI::ListBox* _sender, size_t _index);
 
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -126,7 +126,7 @@ namespace MWGui
         void updateStats();
 
         MyGUI::ImageBox* classImage;
-        MyGUI::ListPtr        classList;
+        MyGUI::ListBox*        classList;
         MyGUI::TextBox*  specializationName;
         Widgets::MWAttributePtr favoriteAttribute[2];
         Widgets::MWSkillPtr   majorSkill[5];

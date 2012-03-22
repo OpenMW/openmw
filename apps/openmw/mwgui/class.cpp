@@ -177,7 +177,7 @@ void PickClassDialog::onBackClicked(MyGUI::Widget* _sender)
     eventBack();
 }
 
-void PickClassDialog::onSelectClass(MyGUI::List* _sender, size_t _index)
+void PickClassDialog::onSelectClass(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;

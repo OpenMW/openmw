@@ -65,7 +65,7 @@ namespace MWGui
         void onSelectPreviousHair(MyGUI::Widget* _sender);
         void onSelectNextHair(MyGUI::Widget* _sender);
 
-        void onSelectRace(MyGUI::List* _sender, size_t _index);
+        void onSelectRace(MyGUI::ListBox* _sender, size_t _index);
 
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -76,7 +76,7 @@ namespace MWGui
         void updateSpellPowers();
 
         MyGUI::CanvasPtr  appearanceBox;
-        MyGUI::ListPtr    raceList;
+        MyGUI::ListBox*    raceList;
         MyGUI::ScrollBar* headRotate;
 
         MyGUI::WidgetPtr skillList;
