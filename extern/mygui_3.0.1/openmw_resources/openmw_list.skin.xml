@@ -229,7 +229,7 @@
     <Skin name = "MW_MultiList" size = "516 516" align = "ALIGN_LEFT ALIGN_TOP">
         <Property key="NeedKey" value = "true" />
         <Property key="SkinButton" value = "ButtonSmall" />
-        <Property key="_SkinButtonEmpty" value = "Edit" />
+        <Property key="_SkinButtonEmpty" value = "EditBox" />
         <Property key="HeightButton" value = "20" />
 
         <Property key="SkinList" value = "MW_MultiSubList" />

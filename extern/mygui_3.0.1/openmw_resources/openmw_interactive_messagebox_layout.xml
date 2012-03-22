@@ -2,13 +2,13 @@
 
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 500 400" name="_Main">
-        <Widget type="Edit" skin="MW_TextEditClient" position="10 10 490 20" align="ALIGN_LEFT ALIGN_TOP STRETCH" name="message">
-            <Property key="Edit_Static" value="true"/>
-            <Property key="Edit_WordWrap" value="true"/>
-            <Property key="Text_FontHeight" value="18"/>
-            <Property key="Edit_MultiLine" value="1" />
-            <Property key="Edit_VisibleVScroll" value="1" />
-            <Property key="Widget_AlignText" value="ALIGN_CENTER" />
+        <Widget type="EditBox" skin="MW_TextEditClient" position="10 10 490 20" align="ALIGN_LEFT ALIGN_TOP STRETCH" name="message">
+            <Property key="Static" value="true"/>
+            <Property key="WordWrap" value="true"/>
+            <Property key="FontHeight" value="18"/>
+            <Property key="MultiLine" value="1" />
+            <Property key="VisibleVScroll" value="1" />
+            <Property key="TextAlign" value="ALIGN_CENTER" />
             <Property key="FontName" value = "MyGUI_CoreFont.18" />
             <Property key="TextColour" value = "0.7 0.7 0.7" />
         </Widget>

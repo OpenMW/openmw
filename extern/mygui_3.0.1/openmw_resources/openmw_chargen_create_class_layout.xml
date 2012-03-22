@@ -6,7 +6,7 @@
             <Property key="Caption" value="Name"/>
             <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_VCENTRE"/>
         </Widget>
-        <Widget type="Edit" skin="MW_TextEdit" position="62 12 250 30" name="EditName" align="ALIGN_HSTRETCH ALIGN_TOP"/>
+        <Widget type="EditBox" skin="MW_TextEdit" position="62 12 250 30" name="EditName" align="ALIGN_HSTRETCH ALIGN_TOP"/>
 
         <Widget type="Widget" skin="" position="12 46 480 110" align="ALIGN_STRETCH">
 
