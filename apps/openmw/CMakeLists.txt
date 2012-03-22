@@ -87,9 +87,9 @@ target_link_libraries(openmw
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
+    ${MYGUI_LIBRARIES}
+    MyGUI.OgrePlatform #TODO MyGUI ogre platform is not added by the find script
     components
-    MyGUIEngine
-    MyGUIOgrePlatform
 )
 
 # Fix for not visible pthreads functions for linker with glibc 2.15

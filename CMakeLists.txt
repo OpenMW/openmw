@@ -177,7 +177,6 @@ include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
-    add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
 endif()
 
 if (APPLE)
@@ -192,6 +191,7 @@ find_package (Threads)
 endif()
 
 find_package(OGRE REQUIRED)
+find_package(MyGUI REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -208,14 +208,14 @@ include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
-    ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
-    ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
+    ${MYGUI_INCLUDE_DIRS}
+    ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
-link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
+link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
 
 if(APPLE)
     # List used Ogre plugins
@@ -225,14 +225,7 @@ if(APPLE)
                           "Plugin_ParticleFX")
 endif(APPLE)
 
-add_subdirectory( extern/mygui_3.0.1 )
-
-# Make sure that certain libraries are used as static libraries
-# This is in effect turns off __declspec (dllexport) for windows
-# Each library will also need to be configured to build as a static lib
-
-# MyGUI: extern/mygui_3.0.0/
-add_definitions(-DMYGUI_STATIC)
+add_subdirectory( files/mygui )
 
 # Specify build paths
 

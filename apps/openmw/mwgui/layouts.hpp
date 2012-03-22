@@ -45,18 +45,18 @@ namespace MWGui
     void setBatchCount(size_t count);
 
     MyGUI::ProgressPtr health, magicka, stamina;
-    MyGUI::StaticImagePtr weapImage, spellImage;
+    MyGUI::ImageBox *weapImage, *spellImage;
     MyGUI::ProgressPtr weapStatus, spellStatus;
     MyGUI::WidgetPtr effectBox;
-    MyGUI::StaticImagePtr effect1;
-    MyGUI::StaticImagePtr minimap;
-    MyGUI::StaticImagePtr compass;
-    MyGUI::StaticImagePtr crosshair;
+    MyGUI::ImageBox* effect1;
+    MyGUI::ImageBox* minimap;
+    MyGUI::ImageBox* compass;
+    MyGUI::ImageBox* crosshair;
 
     MyGUI::WidgetPtr fpsbox;
-    MyGUI::StaticTextPtr fpscounter;
-    MyGUI::StaticTextPtr trianglecounter;
-    MyGUI::StaticTextPtr batchcounter;
+    MyGUI::TextBox* fpscounter;
+    MyGUI::TextBox* trianglecounter;
+    MyGUI::TextBox* batchcounter;
   };
 
   class MapWindow : public OEngine::GUI::Layout
@@ -75,7 +75,7 @@ namespace MWGui
 
     void setCellName(const std::string& cellName)
     {
-      mMainWidget->setCaption(cellName);
+      static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
     }
   };
 
@@ -127,7 +127,7 @@ namespace MWGui
       getWidget(avatar, "Avatar");
 
       // Adjust armor rating text to bottom of avatar widget
-      MyGUI::StaticTextPtr armor_rating;
+      MyGUI::TextBox* armor_rating;
       getWidget(armor_rating, "ArmorRating");
       armor_rating->setCaption("Armor: 11");
       MyGUI::IntCoord coord = armor_rating->getCoord();
@@ -165,7 +165,7 @@ namespace MWGui
           last_x += coord.width + margin;
           button_pt->setCoord(coord);
 
-          button_pt->eventMouseButtonClick = MyGUI::newDelegate(this, &InventoryWindow::onCategorySelected);
+          button_pt->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onCategorySelected);
       }
     }
 

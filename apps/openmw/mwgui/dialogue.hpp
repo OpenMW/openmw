@@ -21,7 +21,7 @@ namespace MWWorld
 
 namespace MWGui
 {
-    class DialogeHistory;
+    class DialogueHistory;
 
     using namespace MyGUI;
 
@@ -33,7 +33,7 @@ namespace MWGui
         void open();
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Dialog finished, OK button clicked.\n
             signature : void method()\n
@@ -49,7 +49,7 @@ namespace MWGui
         void askQuestion(std::string question);
 
     protected:
-        void onSelectTopic(MyGUI::List* _sender, size_t _index);
+        void onSelectTopic(MyGUI::ListBox* _sender, size_t _index);
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
 
@@ -60,8 +60,8 @@ namespace MWGui
         */
         std::string parseText(std::string text);
 
-        DialogeHistory*     history;
-        MyGUI::ListPtr      topicsList;
+        DialogueHistory*     history;
+        MyGUI::ListBox*      topicsList;
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;
         std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.

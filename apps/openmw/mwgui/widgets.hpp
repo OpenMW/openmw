@@ -38,26 +38,21 @@ namespace MWGui
             const SkillValue& getSkillValue() const { return value; }
 
             // Events
-            typedef delegates::CDelegate1<MWSkill*> EventHandle_SkillVoid;
+            typedef delegates::CMultiDelegate1<MWSkill*> EventHandle_SkillVoid;
 
             /** Event : Skill clicked.\n
                 signature : void method(MWSkill* _sender)\n
             */
             EventHandle_SkillVoid eventClicked;
 
-        /*internal:*/
-            virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-
         protected:
             virtual ~MWSkill();
 
-            void baseChangeWidgetSkin(ResourceSkin* _info);
+            virtual void initialiseOverride();
 
             void onClicked(MyGUI::Widget* _sender);
 
         private:
-            void initialiseWidgetSkin(ResourceSkin* _info);
-            void shutdownWidgetSkin();
 
             void updateWidgets();
 
@@ -85,26 +80,21 @@ namespace MWGui
             const AttributeValue& getAttributeValue() const { return value; }
 
             // Events
-            typedef delegates::CDelegate1<MWAttribute*> EventHandle_AttributeVoid;
+            typedef delegates::CMultiDelegate1<MWAttribute*> EventHandle_AttributeVoid;
 
             /** Event : Attribute clicked.\n
                 signature : void method(MWAttribute* _sender)\n
             */
             EventHandle_AttributeVoid eventClicked;
 
-        /*internal:*/
-            virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-
         protected:
             virtual ~MWAttribute();
 
-            void baseChangeWidgetSkin(ResourceSkin* _info);
+            virtual void initialiseOverride();
 
             void onClicked(MyGUI::Widget* _sender);
 
         private:
-            void initialiseWidgetSkin(ResourceSkin* _info);
-            void shutdownWidgetSkin();
 
             void updateWidgets();
 
@@ -130,23 +120,17 @@ namespace MWGui
 
             const std::string &getSpellId() const { return id; }
 
-        /*internal:*/
-            virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-
         protected:
             virtual ~MWSpell();
 
-            void baseChangeWidgetSkin(ResourceSkin* _info);
+		virtual void initialiseOverride();
 
         private:
-            void initialiseWidgetSkin(ResourceSkin* _info);
-            void shutdownWidgetSkin();
-
             void updateWidgets();
 
             WindowManager* mWindowManager;
             std::string id;
-            MyGUI::StaticTextPtr spellNameWidget;
+            MyGUI::TextBox* spellNameWidget;
         };
         typedef MWSpell* MWSpellPtr;
 
@@ -163,24 +147,19 @@ namespace MWGui
 
             const SpellEffectValue &getSpellEffect() const { return effect; }
 
-        /*internal:*/
-            virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-
         protected:
             virtual ~MWSpellEffect();
 
-            void baseChangeWidgetSkin(ResourceSkin* _info);
-
+            virtual void initialiseOverride();
+            
         private:
-            void initialiseWidgetSkin(ResourceSkin* _info);
-            void shutdownWidgetSkin();
 
             void updateWidgets();
 
             WindowManager* mWindowManager;
             SpellEffectValue effect;
-            MyGUI::StaticImagePtr imageWidget;
-            MyGUI::StaticTextPtr textWidget;
+            MyGUI::ImageBox* imageWidget;
+            MyGUI::TextBox* textWidget;
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
 
@@ -196,22 +175,17 @@ namespace MWGui
             int getValue() const { return value; }
             int getMax() const { return max; }
 
-            /*internal:*/
-            virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-
         protected:
             virtual ~MWDynamicStat();
 
-            void baseChangeWidgetSkin(ResourceSkin* _info);
+            virtual void initialiseOverride();
 
         private:
-            void initialiseWidgetSkin(ResourceSkin* _info);
-            void shutdownWidgetSkin();
 
             int value, max;
-            MyGUI::StaticTextPtr textWidget;
+            MyGUI::TextBox* textWidget;
             MyGUI::ProgressPtr barWidget;
-            MyGUI::StaticTextPtr barTextWidget;
+            MyGUI::TextBox* barTextWidget;
         };
         typedef MWDynamicStat* MWDynamicStatPtr;
 
