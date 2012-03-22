@@ -287,7 +287,7 @@
             <Property key="Scale" value = "1 1 0 0"/>
         </Child>
 
-        <Child type="Widget" skin="MW_Caption" offset = "80 4 88 20" align = "ALIGN_HCENTER ALIGN_TOP" name = "Caption">
+        <Child type="TextBox" skin="MW_Caption" offset = "80 4 88 20" align = "ALIGN_HCENTER ALIGN_TOP" name = "Caption">
         </Child>
 
         <!-- This invisible button makes it possible to move the
