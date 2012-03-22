@@ -6,7 +6,9 @@
     <Property key="MaxSize" value="2000 2000"/>
 
     <!-- Log window -->
-    <Widget type="EditBox" skin="MW_ConsoleLog" position="5 5 390 360" align="Stretch" name="list_History"/>
+    <Widget type="EditBox" skin="MW_ConsoleLog" position="5 5 390 360" align="Stretch" name="list_History">
+        <Property key="Edit_MultiLine" value="1"/>
+    </Widget>
 
     <!-- Command line -->
     <Widget type="EditBox" skin="MW_ConsoleCommand" position="0 365 392 28" align="HStretch Bottom" name="edit_Command"/>
