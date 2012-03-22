@@ -67,6 +67,7 @@ namespace MWSound
         , updater(mgr)
         , cameraTracker(mgr)
         , mCurrentPlaylist(NULL)
+        , mUsingSound(useSound)
     {
         if(useSound)
         {
@@ -105,8 +106,11 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
-        Ogre::Root::getSingleton().removeFrameListener(&updater);
-        cameraTracker.unfollowCamera();
+        if(mUsingSound)
+        {
+            Ogre::Root::getSingleton().removeFrameListener(&updater);
+            cameraTracker.unfollowCamera();
+        }
     }
 
     // Convert a soundId to file name, and modify the volume
@@ -136,7 +140,7 @@ namespace MWSound
         max = std::max(min, max);
       }
 
-      return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict);
+      return Files::FileListLocator(mSoundFiles, snd->sound, mFSStrict, false);
     }
 
     // Add a sound to the list and play it
@@ -145,7 +149,7 @@ namespace MWSound
              const std::string &id,
              float volume, float pitch,
              float min, float max,
-             bool loop)
+             bool loop, bool untracked)
     {
       try
         {
@@ -157,7 +161,10 @@ namespace MWSound
           setPos(snd, ptr);
           snd->play();
 
-          sounds[ptr][id] = WSoundPtr(snd);
+          if (!untracked)
+          {
+            sounds[ptr][id] = WSoundPtr(snd);
+          }
         }
       catch(...)
         {
@@ -290,7 +297,7 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        std::string filePath = mMusicLibrary.locate(filename, mFSStrict).string();
+        std::string filePath = mMusicLibrary.locate(filename, mFSStrict, true).string();
         if(!filePath.empty())
         {
             streamMusicFull(filePath);
@@ -351,6 +358,9 @@ namespace MWSound
 
     void SoundManager::playPlaylist(std::string playlist)
     {
+        if (!mUsingSound)
+            return;
+
         if (playlist == "")
         {
             if(!isMusicPlaying())
@@ -372,8 +382,11 @@ namespace MWSound
 
   void SoundManager::say (MWWorld::Ptr ptr, const std::string& filename)
   {
+    if (!mUsingSound)
+      return;
+
     // The range values are not tested
-    std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict);
+    std::string filePath = Files::FileListLocator(mSoundFiles, filename, mFSStrict, true);
     if(!filePath.empty())
       add(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
     else
@@ -397,6 +410,7 @@ namespace MWSound
         snd->setVolume(volume);
         snd->setRange(min,max);
         snd->setPitch(pitch);
+        snd->setRelative(true);
         snd->play();
 
         if (loop)
@@ -412,13 +426,13 @@ namespace MWSound
   }
 
   void SoundManager::playSound3D (MWWorld::Ptr ptr, const std::string& soundId,
-                                  float volume, float pitch, bool loop)
+                                  float volume, float pitch, bool loop, bool untracked)
   {
     // Look up the sound in the ESM data
     float min, max;
     const std::string &file = lookup(soundId, volume, min, max);
     if (file != "")
-      add(file, ptr, soundId, volume, pitch, min, max, loop);
+      add(file, ptr, soundId, volume, pitch, min, max, loop, untracked);
   }
 
   void SoundManager::stopSound3D (MWWorld::Ptr ptr, const std::string& soundId)

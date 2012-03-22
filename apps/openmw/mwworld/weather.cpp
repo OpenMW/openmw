@@ -21,6 +21,18 @@ const std::string WeatherGlobals::mThunderSoundID0 = "Thunder0";
 const std::string WeatherGlobals::mThunderSoundID1 = "Thunder1";
 const std::string WeatherGlobals::mThunderSoundID2 = "Thunder2";
 const std::string WeatherGlobals::mThunderSoundID3 = "Thunder3";
+const float WeatherGlobals::mSunriseTime = 8;
+const float WeatherGlobals::mSunsetTime = 18;
+const float WeatherGlobals::mSunriseDuration = 2;
+const float WeatherGlobals::mSunsetDuration = 2;
+const float WeatherGlobals::mWeatherUpdateTime = 20.f;
+
+
+// morrowind sets these per-weather, but since they are only used by 'thunderstorm'
+// weather setting anyway, we can just as well set them globally
+const float WeatherGlobals::mThunderFrequency = .4;
+const float WeatherGlobals::mThunderThreshold = 0.6;
+const float WeatherGlobals::mThunderSoundDelay = 0.25;
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environment* env) : 
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
@@ -259,7 +271,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     blight.mGlareView = 0;
     blight.mAmbientLoopSoundID = "blight";
     mWeatherSettings["blight"] = blight;
-    
+
+    /*
     Weather snow;
     snow.mCloudTexture = "tx_bm_sky_snow.dds";
     snow.mCloudsMaximumPercent = 1.0;
@@ -316,10 +329,14 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     blizzard.mGlareView = 0;
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
     mWeatherSettings["blizzard"] = blizzard;
+    */
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
 {
+    if (weather == mCurrentWeather && mNextWeather == "") 
+        return;
+
     if (instant || mFirstUpdate)
     {
         mNextWeather = "";
@@ -331,12 +348,12 @@ void WeatherManager::setWeather(const String& weather, bool instant)
         if (mNextWeather != "")
         {
             // transition more than 50% finished?
-            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60) <= 0.5)
+            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600) <= 0.5)
                 mCurrentWeather = mNextWeather;
         }
-            
+
         mNextWeather = weather;
-        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60;
+        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600;
     }
 }
 
@@ -344,7 +361,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
 {
     const Weather& current = mWeatherSettings[weather];
     WeatherResult result;
-    
+
     result.mCloudTexture = current.mCloudTexture;
     result.mCloudBlendFactor = 0;
     result.mCloudOpacity = current.mCloudsMaximumPercent;
@@ -353,16 +370,13 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     result.mSunColor = current.mSunDiscSunsetColor;
-    
-    const float fade_duration = current.mTransitionDelta * 24.f;
-    
-    result.mNight = (mHour < 6.f+fade_duration || mHour > 20.f-fade_duration);
-    
+
+    result.mNight = (mHour < 6 || mHour > 19);
+
     result.mFogDepth = result.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
-    
+
     // night
-    if (mHour <= (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration)
-        || mHour >= (WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration))
+    if (mHour <= 5.5f || mHour >= 21)
     {
         result.mFogColor = current.mFogNightColor;
         result.mAmbientColor = current.mAmbientNightColor;
@@ -370,82 +384,68 @@ WeatherResult WeatherManager::getResult(const String& weather)
         result.mSkyColor = current.mSkyNightColor;
         result.mNightFade = 1.f;
     }
-    
+
     // sunrise
-    else if (mHour >= (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration) && mHour <= WeatherGlobals::mSunriseTime)
+    else if (mHour >= 5.5f && mHour <= 9)
     {
-        if (mHour <= (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration+fade_duration))
+        if (mHour <= 6)
         {
             // fade in
-            float advance = (WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration+fade_duration)-mHour;
-            float factor = (advance / fade_duration);
+            float advance = 6-mHour;
+            float factor = advance / 0.5f;
             result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor);
             result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor);
             result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor);
             result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor);
             result.mNightFade = factor;
         }
-        else if (mHour >= (WeatherGlobals::mSunriseTime-fade_duration))
+        else //if (mHour >= 6)
         {
             // fade out
-            float advance = mHour-(WeatherGlobals::mSunriseTime-fade_duration);
-            float factor = advance / fade_duration;
+            float advance = mHour-6;
+            float factor = advance / 3.f;
             result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor);
             result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor);
             result.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor);
             result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor);
         }
-        else 
-        {
-            result.mFogColor = current.mFogSunriseColor;
-            result.mAmbientColor = current.mAmbientSunriseColor;
-            result.mSunColor = current.mSunSunriseColor;
-            result.mSkyColor = current.mSkySunriseColor;
-        }
     }
-    
+
     // day
-    else if (mHour >= (WeatherGlobals::mSunriseTime) && mHour <= (WeatherGlobals::mSunsetTime))
+    else if (mHour >= 9 && mHour <= 17)
     {
         result.mFogColor = current.mFogDayColor;
         result.mAmbientColor = current.mAmbientDayColor;
         result.mSunColor = current.mSunDayColor;
         result.mSkyColor = current.mSkyDayColor;
     }
-    
+
     // sunset
-    else if (mHour >= (WeatherGlobals::mSunsetTime) && mHour <= (WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration))
+    else if (mHour >= 17 && mHour <= 21)
     {
-        if (mHour <= (WeatherGlobals::mSunsetTime+fade_duration))
+        if (mHour <= 19)
         {
             // fade in
-            float advance = (WeatherGlobals::mSunsetTime+fade_duration)-mHour;
-            float factor = (advance / fade_duration);
+            float advance = 19-mHour;
+            float factor = (advance / 2);
             result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor);
             result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor);
             result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor);
             result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor);
         }
-        else if (mHour >= (WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration-fade_duration))
+        else //if (mHour >= 19)
         {
             // fade out
-            float advance = mHour-(WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration-fade_duration);
-            float factor = advance / fade_duration;
+            float advance = mHour-19;
+            float factor = advance / 2.f;
             result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor);
             result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor);
             result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor);
             result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor);
             result.mNightFade = factor;
         }
-        else 
-        {
-            result.mFogColor = current.mFogSunsetColor;
-            result.mAmbientColor = current.mAmbientSunsetColor;
-            result.mSunColor = current.mSunSunsetColor;
-            result.mSkyColor = current.mSkySunsetColor;
-        }
     }
-    
+
     return result;
 }
 
@@ -454,41 +454,37 @@ WeatherResult WeatherManager::transition(float factor)
     const WeatherResult& current = getResult(mCurrentWeather);
     const WeatherResult& other = getResult(mNextWeather);
     WeatherResult result;
-    
+
     result.mCloudTexture = current.mCloudTexture;
     result.mNextCloudTexture = other.mCloudTexture;
     result.mCloudBlendFactor = factor;
-    
+
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     result.mFogColor = lerp(current.mFogColor, other.mFogColor);
     result.mSunColor = lerp(current.mSunColor, other.mSunColor);
     result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor);
-    
+
     result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor);
     result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor);
     result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth);
     result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed);
-    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
+    //result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
+    result.mCloudSpeed = current.mCloudSpeed;
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     result.mGlareView = lerp(current.mGlareView, other.mGlareView);
-    
+
     result.mNight = current.mNight;
-    
-    // sound change behaviour:
-    // if 'other' has a new sound, switch to it after 1/2 of the transition length
-    if (other.mAmbientLoopSoundID != "")
-        result.mAmbientLoopSoundID = factor>0.5 ? other.mAmbientLoopSoundID : current.mAmbientLoopSoundID;
-    // if 'current' has a sound and 'other' does not have a sound, turn off the sound immediately
-    else if (current.mAmbientLoopSoundID != "")
-        result.mAmbientLoopSoundID = "";
-        
+
     return result;
 }
 
 void WeatherManager::update(float duration)
 {
-    mWeatherUpdateTime -= duration;
-    if (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior())
+    mWeatherUpdateTime -= duration * mEnvironment->mWorld->getTimeScaleFactor();
+
+    bool exterior = (mEnvironment->mWorld->isCellExterior() || mEnvironment->mWorld->isCellQuasiExterior());
+
+    if (exterior)
     {
         std::string regionstr = mEnvironment->mWorld->getPlayer().getPlayer().getCell()->cell->region;
         boost::algorithm::to_lower(regionstr);
@@ -496,17 +492,17 @@ void WeatherManager::update(float duration)
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
             mCurrentRegion = regionstr;
-            mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*60.f;
-            
+            mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*3600;
+
             std::string weather;
-            
+
             if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
                 weather = mRegionOverrides[regionstr];
             else
             {
                 // get weather probabilities for the current region
                 const ESM::Region *region = mEnvironment->mWorld->getStore().regions.find (regionstr);
-                
+
                 float clear = region->data.clear/255.f;
                 float cloudy = region->data.cloudy/255.f;
                 float foggy = region->data.foggy/255.f;
@@ -515,86 +511,84 @@ void WeatherManager::update(float duration)
                 float thunder = region->data.thunder/255.f;
                 float ash = region->data.ash/255.f;
                 float blight = region->data.blight/255.f;
-                float snow = region->data.a/255.f;
-                float blizzard = region->data.b/255.f;
-                
+                //float snow = region->data.a/255.f;
+                //float blizzard = region->data.b/255.f;
+
                 // re-scale to 100 percent
-                const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
-                            
+                const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
+
                 srand(time(NULL));
                 float random = ((rand()%100)/100.f) * total;
-                                
-                if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    weather = "blizzard";
-                else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    weather = "snow";
-                else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
+
+                //if (random > snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //    weather = "blizzard";
+                //else if (random > blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //    weather = "snow";
+                /*else*/ if (random > ash+thunder+rain+overcast+foggy+cloudy+clear)
                     weather = "blight";
-                else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
+                else if (random > thunder+rain+overcast+foggy+cloudy+clear)
                     weather = "ashstorm";
-                else if (random >= rain+overcast+foggy+cloudy+clear)
+                else if (random > rain+overcast+foggy+cloudy+clear)
                     weather = "thunderstorm";
-                else if (random >= overcast+foggy+cloudy+clear)
+                else if (random > overcast+foggy+cloudy+clear)
                     weather = "rain";
-                else if (random >= foggy+cloudy+clear)
+                else if (random > foggy+cloudy+clear)
                     weather = "overcast";
-                else if (random >= cloudy+clear)
+                else if (random > cloudy+clear)
                     weather = "foggy";
-                else if (random >= clear)
+                else if (random > clear)
                     weather = "cloudy";
                 else
                     weather = "clear";
             }
-            
+
             setWeather(weather, false);
-            /*
-            std::cout << "roll result: " << random << std::endl;
-            
-            std::cout << regionstr << " weather probabilities: " << clear << " " << cloudy << " " << foggy << " " 
-                << overcast << " " << rain << " " << thunder << " " << ash << " " << blight << " " << snow << " " 
-                << blizzard << std::endl;
-            
-            std::cout << "New weather : " << weather << std::endl;
-            */
         }
-                
+
         WeatherResult result;
-        
+
         if (mNextWeather != "")
         {
-            mRemainingTransitionTime -= duration;
+            mRemainingTransitionTime -= duration * mEnvironment->mWorld->getTimeScaleFactor();
             if (mRemainingTransitionTime < 0)
             {
                 mCurrentWeather = mNextWeather;
                 mNextWeather = "";
             }
         }
-        
+
         if (mNextWeather != "")
-            result = transition(1-(mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*60)));
+            result = transition(1-(mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600)));
         else
             result = getResult(mCurrentWeather);
-        
+
         mRendering->configureFog(result.mFogDepth, result.mFogColor);
-        
+
         // disable sun during night
-        if (mHour >= WeatherGlobals::mSunsetTime+WeatherGlobals::mSunsetDuration
-            || mHour <= WeatherGlobals::mSunriseTime-WeatherGlobals::mSunriseDuration)
+        if (mHour >= 20 || mHour <= 6.f)
             mRendering->getSkyManager()->sunDisable();
         else
-        {
-            // during day, calculate sun angle
-            float height = 1-std::abs(((mHour-13)/7.f));
-            int facing = mHour > 13.f ? 1 : -1;
-            Vector3 final(
-                (1-height)*facing, 
-                (1-height)*facing, 
-                height);
-            mRendering->setSunDirection(final);
-            
             mRendering->getSkyManager()->sunEnable();
-        }
-        
+
+        // sun angle
+        float height;
+
+        // rise at 6, set at 20
+        if (mHour >= 6 && mHour <= 20)
+            height = 1-std::abs(((mHour-13)/7.f));
+        else if (mHour > 20)
+            height = (mHour-20.f)/4.f;
+        else //if (mHour > 0 && mHour < 6)
+            height = 1-(mHour/6.f);
+
+        int facing = (mHour > 13.f) ? 1 : -1;
+
+        Vector3 final(
+            (1-height)*facing, 
+            (1-height)*facing, 
+            height);
+        mRendering->setSunDirection(final);
+
         // moon calculations
         float night;
         if (mHour >= 14)
@@ -603,9 +597,9 @@ void WeatherManager::update(float duration)
             night = mHour+10;
         else
             night = 0;
-            
+
         night /= 20.f;
-        
+
         if (night != 0)
         {
             float moonHeight = 1-std::abs((night-0.5)*2);
@@ -614,17 +608,17 @@ void WeatherManager::update(float duration)
                 (1-moonHeight)*facing, 
                 (1-moonHeight)*facing, 
                 moonHeight);
-            
+
             Vector3 secunda(
                 (1-moonHeight)*facing*0.8, 
                 (1-moonHeight)*facing*1.25, 
                 moonHeight);
-            
+
             mRendering->getSkyManager()->setMasserDirection(masser);
             mRendering->getSkyManager()->setSecundaDirection(secunda);
             mRendering->getSkyManager()->masserEnable();
             mRendering->getSkyManager()->secundaEnable();
-            
+
             float hour_fade;
             if (mHour >= 7.f && mHour <= 14.f)
                 hour_fade = 1-(mHour-7)/3.f;
@@ -632,28 +626,28 @@ void WeatherManager::update(float duration)
                 hour_fade = mHour-14;
             else
                 hour_fade = 1;
-            
+
             float secunda_angle_fade;
             float masser_angle_fade;
             float angle = moonHeight*90.f;
-            
+
             if (angle >= 30 && angle <= 50)
                 secunda_angle_fade = (angle-30)/20.f;
             else if (angle <30)
                 secunda_angle_fade = 0.f;
             else
                 secunda_angle_fade = 1.f;
-            
+
             if (angle >= 40 && angle <= 50)
                 masser_angle_fade = (angle-40)/10.f;
             else if (angle <40)
                 masser_angle_fade = 0.f;
             else
                 masser_angle_fade = 1.f;
-                
+
             masser_angle_fade *= hour_fade;
             secunda_angle_fade *= hour_fade;
-            
+
             mRendering->getSkyManager()->setMasserFade(masser_angle_fade);
             mRendering->getSkyManager()->setSecundaFade(secunda_angle_fade);
         }
@@ -662,8 +656,8 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->masserDisable();
             mRendering->getSkyManager()->secundaDisable();
         }
-        
-        if (mCurrentWeather == "thunderstorm" && mNextWeather == "")
+
+        if (mCurrentWeather == "thunderstorm" && mNextWeather == "" && exterior)
         {
             if (mThunderFlash > 0)
             {
@@ -681,7 +675,7 @@ void WeatherManager::update(float duration)
                     mEnvironment->mSoundManager->playSound(soundname, 1.0, 1.0);
                     mThunderSoundDelay = 1000;
                 }
-                
+
                 mThunderFlash -= duration;
                 if (mThunderFlash > 0)
                     mRendering->getSkyManager()->setThunder( mThunderFlash / WeatherGlobals::mThunderThreshold );
@@ -700,20 +694,20 @@ void WeatherManager::update(float duration)
                 if (mThunderChance >= mThunderChanceNeeded)
                 {
                     mThunderFlash = WeatherGlobals::mThunderThreshold;
-                    
+
                     mRendering->getSkyManager()->setThunder( mThunderFlash / WeatherGlobals::mThunderThreshold );
-                    
+
                     mThunderSoundDelay = WeatherGlobals::mThunderSoundDelay;
                 }
             }
         }
         else
             mRendering->getSkyManager()->setThunder(0.f);
-        
+
         mRendering->setAmbientColour(result.mAmbientColor);
         mRendering->sunEnable();
         mRendering->setSunColour(result.mSunColor);
-        
+
         mRendering->getSkyManager()->setWeather(result);
     }
     else
@@ -725,6 +719,7 @@ void WeatherManager::update(float duration)
 
     // play sounds
     std::string ambientSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID : "");
+    if (!exterior) ambientSnd = "";
     if (ambientSnd != "")
     {
         if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
@@ -735,6 +730,7 @@ void WeatherManager::update(float duration)
     }
 
     std::string rainSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mRainLoopSoundID : "");
+    if (!exterior) rainSnd = "";
     if (rainSnd != "")
     {
         if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
@@ -760,15 +756,6 @@ void WeatherManager::update(float duration)
 
 void WeatherManager::setHour(const float hour)
 {
-    // accelerate a bit for testing
-    /*
-    mHour += 0.005;
-    
-    if (mHour >= 24.f) mHour = 0.f;
-    
-    std::cout << "hour " << mHour << std::endl;
-    */
-    
     mHour = hour;
 }
 

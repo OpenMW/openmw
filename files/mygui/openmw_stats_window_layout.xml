@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 500 342" name="_Main">
+
+        <!-- Player health stats -->
+        <Widget type="Widget" skin="MW_Box" position="8 8 212 62">
+            <Widget type="TextBox" skin="NormalText" position="4 4 70 18" name="Health_str"/>
+            <Widget type="TextBox" skin="NormalText" position="4 22 70 18" name="Magicka_str"/>
+            <Widget type="TextBox" skin="NormalText" position="4 40 70 18" name="Fatigue_str"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Red" position="78 4 130 18" name="HBar"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Blue" position="78 22 130 18" name="MBar"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Green" position="78 40 130 18" name="FBar"/>
+            <Widget type="TextBox" skin="ProgressText" position="78 4 130 18" align="Center" name="HBarT"/>
+            <Widget type="TextBox" skin="ProgressText" position="78 22 130 18" align="Center" name="MBarT"/>
+            <Widget type="TextBox" skin="ProgressText" position="78 40 130 18" align="Center" name="FBarT"/>
+        </Widget>
+
+        <!-- Player level, race and class -->
+        <Widget type="Widget" skin="MW_Box" position="8 78 212 62">
+            <Widget type="TextBox" skin="NormalText" position="4 4 100 18" name="Level_str"/>
+            <Widget type="TextBox" skin="NormalText" position="4 22 100 18" name="Race_str"/>
+            <Widget type="TextBox" skin="NormalText" position="4 40 100 18" name="Class_str"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 4 104 18" name="LevelText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 22 104 18" name="RaceText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 40 104 18" name="ClassText"/>
+        </Widget>
+
+        <Widget type="Widget" skin="MW_Box" position="8 148 212 152">
+            <Widget type="TextBox" skin="SandText" position="4 4 100 18" name="Attrib1"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 4 104 18" name="AttribVal1"/>
+
+            <Widget type="TextBox" skin="SandText" position="4 22 100 18" name="Attrib2"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 22 104 18" name="AttribVal2"/>
+
+            <Widget type="TextBox" skin="SandText" position="4 40 100 18" name="Attrib3"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 40 104 18" name="AttribVal3"/>
+
+            <Widget type="TextBox" skin="SandText" position="4 58 100 18" name="Attrib4"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 58 104 18" name="AttribVal4"/>
+
+            <Widget type="TextBox" skin="SandText" position="4 76 100 18" name="Attrib5"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 76 104 18" name="AttribVal5"/>
+
+            <Widget type="TextBox" skin="SandText" position="4 94 100 18" name="Attrib6"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 94 104 18" name="AttribVal6"/>
+
+            <Widget type="TextBox" skin="SandText" position="4 112 100 18" name="Attrib7"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 112 104 18" name="AttribVal7"/>
+
+            <Widget type="TextBox" skin="SandText" position="4 130 100 18" name="Attrib8"/>
+            <Widget type="TextBox" skin="SandTextRight" position="104 130 104 18" name="AttribVal8"/>
+        </Widget>
+
+        <!-- Player skills, factions, birthsign and reputation -->
+        <Widget type="Widget" skin="MW_Box" position="228 8 248 292" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Skills">
+            <Widget type="Widget" skin="" position="4 4 222 284" align="ALIGN_STRETCH" name="SkillClient" />
+            <Widget type="ScrollBar" skin="MW_VScroll" position="230 4 14 284" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="SkillScroller" />
+        </Widget>
+    </Widget>
+</MyGUI>

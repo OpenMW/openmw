@@ -29,12 +29,18 @@ namespace MWClass
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
 
-            virtual int getEuqipmentSkill (const MWWorld::Ptr& ptr,
+            virtual int getEquipmentSkill (const MWWorld::Ptr& ptr,
                 const MWWorld::Environment& environment) const;
             /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
             /// no such skill.
 
             static void registerSelf();
+
+            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
+            ///< Return the pick up sound Id
+
+            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
+            ///< Return the put down sound Id
     };
 }
 

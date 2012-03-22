@@ -13,6 +13,8 @@
 
 namespace MWWorld
 {
+    class ContainerStore;
+
     /// \brief Pointer to a LiveCellRef
 
     class Ptr
@@ -26,10 +28,11 @@ namespace MWWorld
             RefData *mRefData;
             CellStore *mCell;
             std::string mTypeName;
+            ContainerStore *mContainerStore;
 
         public:
 
-            Ptr() : mCellRef (0), mRefData (0), mCell (0) {}
+            Ptr() : mCellRef (0), mRefData (0), mCell (0), mContainerStore (0) {}
 
             bool isEmpty() const
             {
@@ -49,6 +52,7 @@ namespace MWWorld
 
             template<typename T>
             Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
+            : mContainerStore (0)
             {
                 mPtr = liveCellRef;
                 mCellRef = &liveCellRef->ref;
@@ -63,23 +67,21 @@ namespace MWWorld
                 return boost::any_cast<ESMS::LiveCellRef<T, RefData>*> (mPtr);
             }
 
-            ESM::CellRef& getCellRef() const
-            {
-                assert (mCellRef);
-                return *mCellRef;
-            }
+            ESM::CellRef& getCellRef() const;
 
-            RefData& getRefData() const
-            {
-                assert (mRefData);
-                return *mRefData;
-            }
+            RefData& getRefData() const;
 
             Ptr::CellStore *getCell() const
             {
                 assert (mCell);
                 return mCell;
             }
+
+            void setContainerStore (ContainerStore *store);
+            ///< Must not be called on references that are in a cell.
+
+            ContainerStore *getContainerStore() const;
+            ///< May return a 0-pointer, if reference is not in a container.
     };
 
     inline bool operator== (const Ptr& left, const Ptr& right)

@@ -53,6 +53,15 @@ QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
 include(${QT_USE_FILE})
 
 # Main executable
+IF(OGRE_STATIC)
+IF(WIN32)
+ADD_DEFINITIONS(-DENABLE_PLUGIN_Direct3D9 -DENABLE_PLUGIN_GL)
+set(OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_Direct3D9_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
+ELSE(WIN32)
+ADD_DEFINITIONS(-DENABLE_PLUGIN_GL)
+set(OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_GL_LIBRARIES})
+ENDIF(WIN32)
+ENDIF(OGRE_STATIC)
 add_executable(omwlauncher
     ${GUI_TYPE}
     ${LAUNCHER}
@@ -63,6 +72,7 @@ add_executable(omwlauncher
 target_link_libraries(omwlauncher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
+	${OGRE_STATIC_PLUGINS}
     ${QT_LIBRARIES}
     components
 )
