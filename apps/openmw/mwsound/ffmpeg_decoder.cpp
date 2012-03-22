@@ -303,6 +303,7 @@ void FFmpeg_Decoder::close()
         stream->clearPackets();
         avcodec_close(stream->mCodecCtx);
         av_free(stream->mDecodedData);
+        delete stream;
 
         mStreams.erase(mStreams.begin());
     }
