@@ -107,14 +107,7 @@ namespace MWSound
             max = std::max(min, max);
         }
 
-        std::string fname = std::string("Sound\\")+snd->sound;
-        if(!mResourceMgr->resourceExistsInAnyGroup(fname))
-        {
-            std::string::size_type pos = fname.rfind('.');
-            if(pos != std::string::npos)
-                fname = fname.substr(0, pos)+".mp3";
-        }
-        return fname;
+        return std::string("Sound/")+snd->sound;
     }
 
     // Add a sound to the list and play it
@@ -207,12 +200,6 @@ namespace MWSound
     {
         // The range values are not tested
         std::string filePath = std::string("Sound\\")+filename;
-        if(!mResourceMgr->resourceExistsInAnyGroup(filePath))
-        {
-            std::string::size_type pos = filePath.rfind('.');
-            if(pos != std::string::npos)
-                filePath = filePath.substr(0, pos)+".mp3";
-        }
         play3d(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
     }
 
