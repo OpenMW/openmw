@@ -180,7 +180,6 @@
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
         <Property key="AlignText" value = "ALIGN_LEFT ALIGN_VCENTER" />
-        <Property key="TextColour" value = "0.70 0.57 0.33" />
         
         <BasisSkin type="SimpleText" offset = "2 0 1 5" align = "ALIGN_STRETCH">
             <State name="normal" colour = "0.70 0.57 0.33"/>
