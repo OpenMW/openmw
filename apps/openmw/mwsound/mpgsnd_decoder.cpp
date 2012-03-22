@@ -81,17 +81,7 @@ off_t MpgSnd_Decoder::ogrempg_lseek(void *user_data, off_t offset, int whence)
 void MpgSnd_Decoder::open(const std::string &fname)
 {
     close();
-    try
-    {
-        mDataStream = mResourceMgr.openResource(fname);
-    }
-    catch(Ogre::Exception &e)
-    {
-        std::string::size_type pos = fname.rfind('.');
-        if(pos == std::string::npos)
-            throw;
-        mDataStream = mResourceMgr.openResource(fname.substr(0, pos)+".mp3");
-    }
+    mDataStream = mResourceMgr.openResource(fname);
 
     SF_VIRTUAL_IO streamIO = {
         ogresf_get_filelen, ogresf_seek,

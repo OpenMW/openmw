@@ -465,7 +465,17 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
     int srate;
 
     DecoderPtr decoder = mManager.getDecoder();
-    decoder->open(fname);
+    try
+    {
+        decoder->open(fname);
+    }
+    catch(Ogre::FileNotFoundException &e)
+    {
+        std::string::size_type pos = fname.rfind('.');
+        if(pos == std::string::npos)
+            throw;
+        decoder->open(fname.substr(0, pos)+".mp3");
+    }
 
     decoder->getInfo(&srate, &chans, &type);
     format = getALFormat(chans, type);
