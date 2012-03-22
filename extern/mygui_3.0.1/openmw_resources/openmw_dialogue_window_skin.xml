@@ -9,7 +9,7 @@
 
     <Skin name="MW_DispositionEdit" size="0 0 50 50">
         <Property key="FontName" value = "MonoFont" />
-        <Property key="AlignText" value = "Left Top" />
+        <Property key="TextAlign" value = "Left Top" />
         <Property key="Colour" value = "0000FF" />
         <Property key="Static" value="1" />
         <Property key="WordWrap" value = "true" />

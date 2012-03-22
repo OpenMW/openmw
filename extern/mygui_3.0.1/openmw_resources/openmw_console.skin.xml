@@ -4,7 +4,7 @@
     <Skin name = "MW_ConsoleWindow" size = "256 54">
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "17" />
-        <Property key="AlignText" value = "ALIGN_CENTER" />
+        <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
         <Property key="Snap" value = "true" />
 
@@ -40,7 +40,7 @@
 
     <Skin name = "MW_LogClient" size = "10 10">
         <Property key="FontName" value = "MonoFont" />
-        <Property key="AlignText" value = "Left Top" />
+        <Property key="TextAlign" value = "Left Top" />
         <Property key="TextColour" value = "1 1 1" />
         <!--Property key="Pointer" value = "beam" /-->
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
@@ -61,7 +61,7 @@
 
     <Skin name = "MW_EditClient" size = "10 10">
         <Property key="FontName" value = "MonoFont" />
-        <Property key="AlignText" value = "Left VCenter" />
+        <Property key="TextAlign" value = "Left VCenter" />
         <Property key="TextColour" value = "1 1 1" />
         <!--Property key="Pointer" value = "beam" /-->
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>

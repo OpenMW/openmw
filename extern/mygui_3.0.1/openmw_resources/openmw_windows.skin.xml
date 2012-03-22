@@ -197,7 +197,7 @@
         -->
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
-        <Property key="AlignText" value = "ALIGN_CENTER" />
+        <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.75 0.62 0.36" />
 
         <BasisSkin type="SubSkin" offset="0 0 88 20" align="ALIGN_STRETCH">
@@ -223,7 +223,7 @@
     <Skin name = "MW_Window" size = "256 54">
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
-        <Property key="AlignText" value = "ALIGN_CENTER" />
+        <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
         <Property key="Snap" value = "true" />
 
@@ -300,7 +300,7 @@
     <Skin name = "MW_Dialog" size = "256 54">
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
-        <Property key="AlignText" value = "ALIGN_CENTER" />
+        <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
 
         <Child type="Widget" skin="DialogBG" offset = "4 4 248 46" align = "ALIGN_STRETCH" name = "Client"/>

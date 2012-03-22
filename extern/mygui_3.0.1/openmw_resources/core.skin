@@ -4,7 +4,7 @@
     <Skin name = "TextBox" size = "16 16">
         <Property key="FontName" value = "MyGUI_CoreFont.18" />
         <Property key="FontHeight" value = "18" />
-        <Property key="AlignText" value = "ALIGN_DEFAULT" />
+        <Property key="TextAlign" value = "ALIGN_DEFAULT" />
         <Property key="TextColour" value = "0.7 0.7 0.7" />
         
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>

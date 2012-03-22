@@ -10,11 +10,11 @@
         <!-- Class text -->
         <Widget type="TextBox" skin="SandText" position="32 152 265 18" name="ReflectT" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Caption" value="Your personality and past reflect a:"/>
-            <Property key="Widget_AlignText" value="ALIGN_TOP ALIGN_HCENTER"/>
+            <Property key="TextAlign" value="ALIGN_TOP ALIGN_HCENTER"/>
         </Widget>
         <Widget type="TextBox" skin="SandText" position="32 170 265 18" name="ClassName" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Caption" value="[Class]"/>
-            <Property key="Widget_AlignText" value="ALIGN_TOP ALIGN_HCENTER"/>
+            <Property key="TextAlign" value="ALIGN_TOP ALIGN_HCENTER"/>
         </Widget>
 
         <!-- Dialog buttons -->

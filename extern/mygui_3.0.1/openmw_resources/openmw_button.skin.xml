@@ -49,7 +49,7 @@
         <!--Property key="FontName" value = "cards" /-->
         <!--Property key="FontName" value = "albertis"/-->
         <Property key="FontHeight" value = "18" />
-        <Property key="AlignText" value = "ALIGN_CENTER" />
+        <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.6 0.6 0.6" />
 
         <Child type="Widget" skin="BTN_Left" offset="0 4 4 16" align="ALIGN_VSTRETCH ALIGN_LEFT"/>

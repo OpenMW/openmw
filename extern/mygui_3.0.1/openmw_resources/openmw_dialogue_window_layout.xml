@@ -5,16 +5,16 @@
         <!-- HEADER -->
         <Widget type="TextBox" skin="HeaderText" position="0 0 588 18" name="NpcName" align="ALIGN_LEFT ALIGN_TOP">
             <Property key="Caption" value="Name"/>
-            <Property key="Widget_AlignText" value="ALIGN_CENTER"/>
+            <Property key="TextAlign" value="ALIGN_CENTER"/>
         </Widget>
 
         <!-- The Dialogue history -->
         <Widget type="DialogueHistory" skin="MW_TextBoxEdit" position="8 39 400 375" name="History"  align="ALIGN_LEFT ALIGN_TOP STRETCH">
-            <Property key="Edit_Static" value="true"/>
-            <Property key="Edit_WordWrap" value="true"/>
-            <Property key="Text_FontHeight" value="18"/>
-            <Property key="Edit_MultiLine" value="1" />
-            <Property key="Edit_VisibleVScroll" value="1" />
+            <Property key="Static" value="true"/>
+            <Property key="WordWrap" value="true"/>
+            <Property key="FontHeight" value="18"/>
+            <Property key="MultiLine" value="1" />
+            <Property key="VisibleVScroll" value="1" />
             <!-- invisible box for receiving mouse events -->
             <Widget type="Widget" skin="" position="0 0 400 375" name="EventBox" align="ALIGN_LEFT ALIGN_TOP STRETCH"/>
         </Widget>

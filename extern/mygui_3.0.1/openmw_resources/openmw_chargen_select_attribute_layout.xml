@@ -6,7 +6,7 @@
             <!-- Label -->
             <Widget type="TextBox" skin="HeaderText" position="0 0 186 18" name="LabelT" align="ALIGN_LEFT ALIGN_TOP">
                 <Property key="Caption" value="Choose a Specialization"/>
-                <Property key="Widget_AlignText" value="ALIGN_LEFT ALIGN_TOP"/>
+                <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
             </Widget>
 
             <!-- Attribute list -->
