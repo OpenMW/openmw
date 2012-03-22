@@ -48,14 +48,14 @@
 
     <!-- The edit control used for entering commands -->
     <Skin name = "MW_ConsoleCommand" size = "29 26">
-        <Child type="EditBox" skin="MW_EditClient" offset = "2 1 23 22" align = "Stretch" name = "Client"/>
+        <Child type="TextBox" skin="MW_EditClient" offset = "2 1 23 22" align = "Stretch" name = "Client"/>
 
         <Child type="Widget" skin="MW_BarFrame" offset="0 0 29 26" align="ALIGN_STRETCH"/>
     </Skin>
 
     <Skin name="MW_ConsoleLog" size="0 0 50 50">
         <Property key="WordWrap" value = "true" />
-        <Child type="EditBox" skin="MW_LogClient" offset="0 0 35 10" align = "ALIGN_STRETCH" name = "Client"/>
+        <Child type="TextBox" skin="MW_LogClient" offset="0 0 35 10" align = "ALIGN_STRETCH" name = "Client"/>
         <!--Child type="VScroll" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
     </Skin>
 

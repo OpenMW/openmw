@@ -4,7 +4,6 @@
 
       <MyGUI type="List">
             <List file="core.skin" group="General"/>
-            <List file="openmw_widgetbase.xml" group="General"/>
             <List file="openmw_images.xml" group="General"/>
             <List file="openmw_layers.xml" group="General"/>
             <List file="openmw.pointer.xml" group="General"/>
