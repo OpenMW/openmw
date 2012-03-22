@@ -86,7 +86,8 @@ namespace MWSound
                        float &volume, float &min, float &max)
     {
         const ESM::Sound *snd = mEnvironment.mWorld->getStore().sounds.search(soundId);
-        if(snd == NULL) return "";
+        if(snd == NULL)
+            throw std::runtime_error(std::string("Failed to lookup sound ")+soundId);
 
         if(snd->data.volume == 0)
             volume = 0.0f;
@@ -224,34 +225,32 @@ namespace MWSound
     void SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
     {
         float min, max;
-        std::string file = lookup(soundId, volume, min, max);
-        if(!file.empty())
+        try
         {
-            try
-            {
-                Sound *sound;
-                sound = mOutput->playSound(file, volume, pitch, loop);
-                mLooseSounds[soundId] = SoundPtr(sound);
-            }
-            catch(std::exception &e)
-            {
-                std::cout <<"Sound play error: "<<e.what()<< std::endl;
-            }
+            std::string file = lookup(soundId, volume, min, max);
+            Sound *sound = mOutput->playSound(file, volume, pitch, loop);
+            mLooseSounds[soundId] = SoundPtr(sound);
         }
-        else
-            std::cout << "Sound file " << soundId << " not found, skipping.\n";
+        catch(std::exception &e)
+        {
+            std::cout <<"Sound play error: "<<e.what()<< std::endl;
+        }
     }
 
     void SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
                                    float volume, float pitch, bool loop, bool untracked)
     {
-        // Look up the sound in the ESM data
         float min, max;
-        std::string file = lookup(soundId, volume, min, max);
-        if(!file.empty())
+        try
+        {
+            // Look up the sound in the ESM data
+            std::string file = lookup(soundId, volume, min, max);
             play3d(file, ptr, soundId, volume, pitch, min, max, loop, untracked);
-        else
-            std::cout << "Sound file " << soundId << " not found, skipping.\n";
+        }
+        catch(std::exception &e)
+        {
+            std::cout <<"Sound play error: "<<e.what()<< std::endl;
+        }
     }
 
     void SoundManager::stopSound3D(MWWorld::Ptr ptr, const std::string& soundId)
