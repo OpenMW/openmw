@@ -5,9 +5,9 @@
 namespace MWGui
 {
     using namespace MyGUI;
-    class DialogeHistory : public MyGUI::EditBox
+    class DialogueHistory : public MyGUI::EditBox
     {
-        MYGUI_RTTI_DERIVED( DialogeHistory )
+        MYGUI_RTTI_DERIVED( DialogueHistory )
         public:
             Widget* getClient() { return mClient; }
             UString getColorAtPos(size_t _pos);

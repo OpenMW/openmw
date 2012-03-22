@@ -9,7 +9,7 @@
         </Widget>
 
         <!-- The Dialogue history -->
-        <Widget type="DialogeHistory" skin="MW_TextBoxEdit" position="8 39 400 375" name="History"  align="ALIGN_LEFT ALIGN_TOP STRETCH">
+        <Widget type="DialogueHistory" skin="MW_TextBoxEdit" position="8 39 400 375" name="History"  align="ALIGN_LEFT ALIGN_TOP STRETCH">
             <Property key="Edit_Static" value="true"/>
             <Property key="Edit_WordWrap" value="true"/>
             <Property key="Text_FontHeight" value="18"/>

@@ -21,7 +21,7 @@ namespace MWWorld
 
 namespace MWGui
 {
-    class DialogeHistory;
+    class DialogueHistory;
 
     using namespace MyGUI;
 
@@ -60,7 +60,7 @@ namespace MWGui
         */
         std::string parseText(std::string text);
 
-        DialogeHistory*     history;
+        DialogueHistory*     history;
         MyGUI::ListPtr      topicsList;
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;

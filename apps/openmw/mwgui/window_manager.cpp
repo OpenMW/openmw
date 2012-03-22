@@ -37,7 +37,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     gui = mGuiManager->getGui();
 
     //Register own widgets with MyGUI
-    MyGUI::FactoryManager::getInstance().registerFactory<DialogeHistory>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
 
     // Get size info from the Gui object
     assert(gui);
