@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Skin">
+    <Skin name="MW_MapView" size="516 516" texture="mwgui.png">
+        <Child type="Widget" skin="ClientDefaultSkin" offset="0 0 516 516" align="Stretch" name="Client"/>
+
+        <!-- invisible scroll bars, needed for setting the view offset -->
+        <Child type="ScrollBar" skin="ClientDefaultSkin" offset="498 3 14 509" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll"/>
+        <Child type="ScrollBar" skin="ClientDefaultSkin" offset="3 498 489 14" align="ALIGN_BOTTOM ALIGN_HSTRETCH" name="HScroll"/>
+    </Skin>
+</MyGUI>

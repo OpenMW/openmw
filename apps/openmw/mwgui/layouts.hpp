@@ -71,6 +71,8 @@ namespace MWGui
 
       // Obviously you should override this later on
       setCellName("No Cell Loaded");
+
+      getWidget(mMap, "Map");
     }
 
     void setCellName(const std::string& cellName)
@@ -103,6 +105,7 @@ namespace MWGui
 
   private:
     std::string mPrefix;
+    MyGUI::ScrollView* mMap;
   };
 
   class MainMenu : public OEngine::GUI::Layout
