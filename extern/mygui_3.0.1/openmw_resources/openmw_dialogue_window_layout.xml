@@ -15,6 +15,8 @@
             <Property key="Text_FontHeight" value="18"/>
             <Property key="Edit_MultiLine" value="1" />
             <Property key="Edit_VisibleVScroll" value="1" />
+            <!-- invisible box for receiving mouse events -->
+            <Widget type="Widget" skin="" position="0 0 400 375" name="EventBox" align="ALIGN_LEFT ALIGN_TOP STRETCH"/>
         </Widget>
 
 		<!-- The disposition bar-->

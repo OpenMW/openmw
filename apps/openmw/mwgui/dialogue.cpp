@@ -49,8 +49,15 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
     //History view
     getWidget(history, "History");
     history->setOverflowToTheLeft(true);
-    history->getClient()->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
     history->setMaxTextLength(1000000);
+    Widget* eventbox;
+
+    //An EditBox cannot receive mouse click events, so we use an
+    //invisible widget on top of the editbox to receive them
+    /// \todo scrolling the dialogue history with the mouse wheel doesn't work using this solution
+    getWidget(eventbox, "EventBox");
+    eventbox->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
+    
     //Topics list
     getWidget(topicsList, "TopicsList");
     topicsList->setScrollVisible(true);
@@ -68,7 +75,7 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
 
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 {
-    ISubWidgetText* t = history->getSubWidgetText();
+    ISubWidgetText* t = history->getClient()->getSubWidgetText();
     if(t == nullptr)
         return;
 

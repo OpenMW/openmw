@@ -5,7 +5,7 @@
 namespace MWGui
 {
     using namespace MyGUI;
-    class DialogeHistory : public MyGUI::Edit
+    class DialogeHistory : public MyGUI::EditBox
     {
         MYGUI_RTTI_DERIVED( DialogeHistory )
         public:
