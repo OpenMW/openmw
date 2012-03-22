@@ -73,6 +73,15 @@ namespace MWGui
       setCellName("No Cell Loaded");
 
       getWidget(mMap, "Map");
+
+      MyGUI::Button* button;
+      getWidget(button, "WorldButton");
+      button->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
+
+      MyGUI::Button* eventbox;
+      getWidget(eventbox, "EventBox");
+      eventbox->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+      eventbox->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
     }
 
     void setCellName(const std::string& cellName)
@@ -88,6 +97,7 @@ namespace MWGui
 
     void setActiveCell(const int x, const int y, bool interior=false)
     {
+      if (x==mCurX && y==mCurY && mInterior==interior) return; // don't do anything if we're still in the same cell
       for (int mx=0; mx<3; ++mx)
       {
         for (int my=0; my<3; ++my)
@@ -97,15 +107,45 @@ namespace MWGui
           
           std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
                                         + boost::lexical_cast<std::string>(y + (interior ? (my-1) : -1*(my-1)));
-          setImage(name, image);
-          setImage(name+"_fog", image+"_fog");
+
+          if (MyGUI::RenderManager::getInstance().getTexture(image) != 0)
+            setImage(name, image);
+          if (MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0)
+            setImage(name+"_fog", image+"_fog");
         }
       }
+      mInterior = interior;
+      mCurX = x;
+      mCurY = y;
+    }
+
+    void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+    {
+      if (_id!=MyGUI::MouseButton::Left) return;
+      mLastDragPos = MyGUI::IntPoint(_left, _top);
+    }
+
+    void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+    {
+      if (_id!=MyGUI::MouseButton::Left) return;
+
+      MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
+      mMap->setViewOffset( mMap->getViewOffset() + diff );
+
+      mLastDragPos = MyGUI::IntPoint(_left, _top);
+    }
+
+    void onWorldButtonClicked(MyGUI::Widget* _sender)
+    {
+      /// \todo
     }
 
   private:
     std::string mPrefix;
     MyGUI::ScrollView* mMap;
+    MyGUI::IntPoint mLastDragPos;
+    int mCurX, mCurY;
+    bool mInterior;
   };
 
   class MainMenu : public OEngine::GUI::Layout
