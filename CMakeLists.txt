@@ -225,7 +225,7 @@ if(APPLE)
                           "Plugin_ParticleFX")
 endif(APPLE)
 
-add_subdirectory( extern/mygui_3.0.1 )
+add_subdirectory( files/mygui )
 
 # Specify build paths
 
