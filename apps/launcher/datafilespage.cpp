@@ -1057,16 +1057,8 @@ void DataFilesPage::writeConfig(QString profile)
         return;
     }
 
-    // Prepare the OpenMW config
-    QString config = QString::fromStdString((mCfgMgr.getLocalPath() / "openmw.cfg").string());
-    QFile file(config);
-
-    if (!file.exists()) {
-        config = QString::fromStdString((mCfgMgr.getUserPath() / "openmw.cfg").string());
-    }
-
-    // Open the config as a QFile
-    file.setFileName(config);
+    // Open the OpenMW config as a QFile
+    QFile file(QString::fromStdString((mCfgMgr.getUserPath() / "openmw.cfg").string()));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
