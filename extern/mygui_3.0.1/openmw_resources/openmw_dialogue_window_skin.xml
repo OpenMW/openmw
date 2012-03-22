@@ -3,16 +3,11 @@
 <MyGUI type="Skin">
 
     <Skin name = "MW_DispEdit" size = "10 10">
-        <Property key="FontName" value = "MonoFont" />
-        <Property key="AlignText" value = "Left Top" />
-        <Property key="TextColour" value = "0000FF" />
-        <!--Property key="Pointer" value = "beam" /-->
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
     </Skin>
-	
-    <Skin name="MW_DispositionEdit" size="0 0 50 50">
-        <Property key="WordWrap" value = "true" />
-        <Child type="Widget" skin="MW_DispEdit" offset="0 0 35 10" align = "ALIGN_STRETCH" name = "Client"/>
-        <!--Child type="VScroll" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
+
+    <Skin name="MW_DispEditRootSkin" size="50 50">
+        <BasisSkin type="EditText" offset = "0 0 50 50" align = "Stretch"/>
     </Skin>
+    
 </MyGUI>
