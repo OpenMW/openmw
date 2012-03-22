@@ -110,27 +110,6 @@ namespace MWSound
         return std::string("Sound/")+snd->sound;
     }
 
-    // Add a sound to the list and play it
-    void SoundManager::play3d(const std::string &file,
-             MWWorld::Ptr ptr,
-             const std::string &id,
-             float volume, float pitch,
-             float min, float max,
-             bool loop, bool untracked)
-    {
-        try
-        {
-            const ESM::Position &pos = ptr.getCellRef().pos;
-            SoundPtr sound(mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop));
-
-            if(untracked) mLooseSounds[id] = sound;
-            else mActiveSounds[ptr][id] = sound;
-        }
-        catch(std::exception &e)
-        {
-            std::cout <<"Sound Error: "<<e.what()<< std::endl;
-        }
-    }
 
     bool SoundManager::isPlaying(MWWorld::Ptr ptr, const std::string &id) const
     {
@@ -198,9 +177,19 @@ namespace MWSound
 
     void SoundManager::say(MWWorld::Ptr ptr, const std::string& filename)
     {
-        // The range values are not tested
-        std::string filePath = std::string("Sound\\")+filename;
-        play3d(filePath, ptr, "_say_sound", 1, 1, 100, 20000, false);
+        try
+        {
+            // The range values are not tested
+            const ESM::Position &pos = ptr.getCellRef().pos;
+            std::string filePath = std::string("Sound/")+filename;
+
+            SoundPtr sound(mOutput->playSound3D(filePath, pos.pos, 1.0f, 1.0f, 100.0f, 20000.0f, false));
+            mActiveSounds[ptr]["_say_sound"] = sound;
+        }
+        catch(std::exception &e)
+        {
+            std::cout <<"Sound Error: "<<e.what()<< std::endl;
+        }
     }
 
     bool SoundManager::sayDone(MWWorld::Ptr ptr) const
@@ -220,7 +209,7 @@ namespace MWSound
         }
         catch(std::exception &e)
         {
-            std::cout <<"Sound play error: "<<e.what()<< std::endl;
+            std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
     }
 
@@ -231,12 +220,16 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
+            const ESM::Position &pos = ptr.getCellRef().pos;
             std::string file = lookup(soundId, volume, min, max);
-            play3d(file, ptr, soundId, volume, pitch, min, max, loop, untracked);
+
+            SoundPtr sound(mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop));
+            if(untracked) mLooseSounds[soundId] = sound;
+            else mActiveSounds[ptr][soundId] = sound;
         }
         catch(std::exception &e)
         {
-            std::cout <<"Sound play error: "<<e.what()<< std::endl;
+            std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
     }
 
