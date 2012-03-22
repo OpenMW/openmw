@@ -35,21 +35,4 @@
             </Widget>
         </Widget>
     </Resource>
-
-    <!-- The edit control used for entering commands -->
-    <Resource type="ResourceLayout" name="MW_ConsoleCommand" version="3.2.0">
-        <Widget type="Widget" skin="" position="0 0 29 26" name="Root">
-            <Widget type="TextBox" skin="MW_EditClient" position="2 1 23 22" align="Stretch" name="Client"/>
-            <Widget type="Widget" skin="MW_BarFrame" position="0 0 29 26" align="ALIGN_STRETCH"/>
-        </Widget>
-    </Resource>
-
-    <Resource type="ResourceLayout" name="MW_ConsoleLog" version="3.2.0">
-        <Widget type="Widget" skin="" position="0 0 50 50" name="Root">
-            <Widget type="EditBox" skin="MW_LogClient" position="0 0 35 10" align="Stretch" name="Client">
-                <Property key="WordWrap" value = "true" />
-            </Widget>
-            <!--Child type="ScrollBar" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
-        </Widget>
-    </Resource>
 </MyGUI>
