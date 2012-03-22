@@ -358,6 +358,20 @@ void OpenAL_Sound::update(const float *pos)
 //
 // An OpenAL output device
 //
+std::vector<std::string> OpenAL_Output::enumerate()
+{
+    std::vector<std::string> devlist;
+    const ALCchar *devnames;
+
+    devnames = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+    while(devnames && *devnames)
+    {
+        devlist.push_back(devnames);
+        devnames += strlen(devnames)+1;
+    }
+    return devlist;
+}
+
 void OpenAL_Output::init(const std::string &devname)
 {
     if(mDevice || mContext)

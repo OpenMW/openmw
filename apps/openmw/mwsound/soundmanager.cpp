@@ -53,6 +53,12 @@ namespace MWSound
         try
         {
             mOutput.reset(new DEFAULT_OUTPUT(*this));
+
+            std::vector<std::string> names = mOutput->enumerate();
+            std::cout <<"Enumerated output devices:"<< std::endl;
+            for(size_t i = 0;i < names.size();i++)
+                std::cout <<"  "<<names[i]<< std::endl;
+
             mOutput->init();
         }
         catch(std::exception &e)

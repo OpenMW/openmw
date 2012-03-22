@@ -38,6 +38,7 @@ namespace MWSound
         ALuint getBuffer(const std::string &fname);
         void bufferFinished(ALuint buffer);
 
+        virtual std::vector<std::string> enumerate();
         virtual void init(const std::string &devname="");
         virtual void deinit();
 

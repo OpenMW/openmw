@@ -16,6 +16,7 @@ namespace MWSound
     {
         SoundManager &mManager;
 
+        virtual std::vector<std::string> enumerate() = 0;
         virtual void init(const std::string &devname="") = 0;
         virtual void deinit() = 0;
 
