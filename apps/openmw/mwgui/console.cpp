@@ -113,9 +113,9 @@ namespace MWGui
         getWidget(history, "list_History");
 
         // Set up the command line box
-        command->eventEditSelectAccept =
+        command->eventEditSelectAccept +=
             newDelegate(this, &Console::acceptCommand);
-        command->eventKeyButtonPressed =
+        command->eventKeyButtonPressed +=
             newDelegate(this, &Console::keyPress);
 
         // Set up the log window
@@ -139,6 +139,9 @@ namespace MWGui
     void Console::disable()
     {
         setVisible(false);
+        // Remove keyboard focus from the console input whenever the 
+        // console is turned off
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(NULL);
     }
 
     void Console::setFont(const std::string &fntName)

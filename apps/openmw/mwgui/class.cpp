@@ -29,11 +29,11 @@ GenerateClassResultDialog::GenerateClassResultDialog(WindowManager& parWindowMan
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
+    backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
 }
 
 void GenerateClassResultDialog::open()
@@ -96,20 +96,20 @@ PickClassDialog::PickClassDialog(WindowManager& parWindowManager)
 
     getWidget(classList, "ClassList");
     classList->setScrollVisible(true);
-    classList->eventListSelectAccept = MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
-    classList->eventListMouseItemActivate = MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
-    classList->eventListChangePosition = MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
+    classList->eventListSelectAccept += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
+    classList->eventListMouseItemActivate += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
+    classList->eventListChangePosition += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
 
     getWidget(classImage, "ClassImage");
 
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &PickClassDialog::onBackClicked);
+    backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
 
     updateClasses();
     updateStats();
@@ -177,7 +177,7 @@ void PickClassDialog::onBackClicked(MyGUI::Widget* _sender)
     eventBack();
 }
 
-void PickClassDialog::onSelectClass(MyGUI::List* _sender, size_t _index)
+void PickClassDialog::onSelectClass(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;
@@ -248,7 +248,7 @@ void PickClassDialog::updateStats()
 
 /* InfoBoxDialog */
 
-void InfoBoxDialog::fitToText(MyGUI::StaticTextPtr widget)
+void InfoBoxDialog::fitToText(MyGUI::TextBox* widget)
 {
     MyGUI::IntCoord inner = widget->getTextRegion();
     MyGUI::IntCoord outer = widget->getCoord();
@@ -267,7 +267,7 @@ void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
     for (unsigned i = 0; i < count; ++i)
     {
         MyGUI::WidgetPtr child = widget->getChildAt(i);
-        if (!child->isVisible())
+        if (!child->getVisible())
             continue;
 
         child->setPosition(child->getLeft(), pos);
@@ -322,7 +322,7 @@ void InfoBoxDialog::setButtons(ButtonList &buttons)
         button->getSubWidgetText()->setWordWrap(true);
         button->setCaption(text);
         fitToText(button);
-        button->eventMouseButtonClick = MyGUI::newDelegate(this, &InfoBoxDialog::onButtonClicked);
+        button->eventMouseButtonClick += MyGUI::newDelegate(this, &InfoBoxDialog::onButtonClicked);
         coord.top += button->getHeight();
         this->buttons.push_back(button);
     }
@@ -389,15 +389,15 @@ CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
     setText("SpecializationT", mWindowManager.getGameSettingString("sChooseClassMenu1", "Specialization"));
     getWidget(specializationName, "SpecializationName");
     specializationName->setCaption(mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Combat], ""));
-    specializationName->eventMouseButtonClick = MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationClicked);
+    specializationName->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationClicked);
 
     setText("FavoriteAttributesT", mWindowManager.getGameSettingString("sChooseClassMenu2", "Favorite Attributes:"));
     getWidget(favoriteAttribute0, "FavoriteAttribute0");
     getWidget(favoriteAttribute1, "FavoriteAttribute1");
     favoriteAttribute0->setWindowManager(&mWindowManager);
     favoriteAttribute1->setWindowManager(&mWindowManager);
-    favoriteAttribute0->eventClicked = MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
-    favoriteAttribute1->eventClicked = MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
+    favoriteAttribute0->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
+    favoriteAttribute1->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
 
     setText("MajorSkillT", mWindowManager.getGameSettingString("sSkillClassMajor", ""));
     setText("MinorSkillT", mWindowManager.getGameSettingString("sSkillClassMinor", ""));
@@ -414,7 +414,7 @@ CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
     for (std::vector<Widgets::MWSkillPtr>::const_iterator it = skills.begin(); it != end; ++it)
     {
         (*it)->setWindowManager(&mWindowManager);
-        (*it)->eventClicked = MyGUI::newDelegate(this, &CreateClassDialog::onSkillClicked);
+        (*it)->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onSkillClicked);
     }
 
     setText("LabelT", mWindowManager.getGameSettingString("sName", ""));
@@ -426,15 +426,15 @@ CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr descriptionButton;
     getWidget(descriptionButton, "DescriptionButton");
-    descriptionButton->eventMouseButtonClick = MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionClicked);
+    descriptionButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionClicked);
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &CreateClassDialog::onBackClicked);
+    backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &CreateClassDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onOkClicked);
 
     // Set default skills, attributes
 
@@ -560,8 +560,8 @@ void CreateClassDialog::onSpecializationClicked(MyGUI::WidgetPtr _sender)
     if (specDialog)
         delete specDialog;
     specDialog = new SelectSpecializationDialog(mWindowManager);
-    specDialog->eventCancel = MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
-    specDialog->eventItemSelected = MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationSelected);
+    specDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
+    specDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationSelected);
     specDialog->setVisible(true);
 }
 
@@ -578,8 +578,8 @@ void CreateClassDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
         delete attribDialog;
     attribDialog = new SelectAttributeDialog(mWindowManager);
     attribDialog->setAffectedWidget(_sender);
-    attribDialog->eventCancel = MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
-    attribDialog->eventItemSelected = MyGUI::newDelegate(this, &CreateClassDialog::onAttributeSelected);
+    attribDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
+    attribDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeSelected);
     attribDialog->setVisible(true);
 }
 
@@ -607,8 +607,8 @@ void CreateClassDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
         delete skillDialog;
     skillDialog = new SelectSkillDialog(mWindowManager);
     skillDialog->setAffectedWidget(_sender);
-    skillDialog->eventCancel = MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
-    skillDialog->eventItemSelected = MyGUI::newDelegate(this, &CreateClassDialog::onSkillSelected);
+    skillDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
+    skillDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSkillSelected);
     skillDialog->setVisible(true);
 }
 
@@ -638,7 +638,7 @@ void CreateClassDialog::onDescriptionClicked(MyGUI::Widget* _sender)
 {
     descDialog = new DescriptionDialog(mWindowManager);
     descDialog->setTextInput(description);
-    descDialog->eventDone = MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionEntered);
+    descDialog->eventDone += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionEntered);
     descDialog->setVisible(true);
 }
 
@@ -672,18 +672,18 @@ SelectSpecializationDialog::SelectSpecializationDialog(WindowManager& parWindowM
     getWidget(specialization1, "Specialization1");
     getWidget(specialization2, "Specialization2");
     specialization0->setCaption(mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Combat], ""));
-    specialization0->eventMouseButtonClick = MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
+    specialization0->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
     specialization1->setCaption(mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Magic], ""));
-    specialization1->eventMouseButtonClick = MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
+    specialization1->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
     specialization2->setCaption(mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Stealth], ""));
-    specialization2->eventMouseButtonClick = MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
+    specialization2->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
     specializationId = ESM::Class::Combat;
 
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr cancelButton;
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
-    cancelButton->eventMouseButtonClick = MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
+    cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
 }
 
 // widget controls
@@ -725,14 +725,14 @@ SelectAttributeDialog::SelectAttributeDialog(WindowManager& parWindowManager)
         getWidget(attribute,  std::string("Attribute").append(1, theIndex));
         attribute->setWindowManager(&parWindowManager);
         attribute->setAttributeId(ESM::Attribute::attributeIds[i]);
-        attribute->eventClicked = MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
+        attribute->eventClicked += MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
     }
 
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr cancelButton;
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
-    cancelButton->eventMouseButtonClick = MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
+    cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
 }
 
 // widget controls
@@ -813,7 +813,7 @@ SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
         {
             skills[spec][i].widget->setWindowManager(&mWindowManager);
             skills[spec][i].widget->setSkillId(skills[spec][i].skillId);
-            skills[spec][i].widget->eventClicked = MyGUI::newDelegate(this, &SelectSkillDialog::onSkillClicked);
+            skills[spec][i].widget->eventClicked += MyGUI::newDelegate(this, &SelectSkillDialog::onSkillClicked);
         }
     }
 
@@ -821,7 +821,7 @@ SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
     MyGUI::ButtonPtr cancelButton;
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
-    cancelButton->eventMouseButtonClick = MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
+    cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
 }
 
 // widget controls
@@ -850,7 +850,7 @@ DescriptionDialog::DescriptionDialog(WindowManager& parWindowManager)
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &DescriptionDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DescriptionDialog::onOkClicked);
     okButton->setCaption(mWindowManager.getGameSettingString("sInputMenu1", ""));
 
     // Make sure the edit box has focus

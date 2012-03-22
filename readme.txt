@@ -93,6 +93,7 @@ CREDITS
 Current Developers:
 Alexander “Ace” Olofsson
 athile
+BrotherBrick
 Cris “Mirceam” Mihalache
 gugus / gus
 Jacob “Yacoby” Essex
@@ -104,6 +105,7 @@ Marc “Zini” Zinnschlag
 Michael “werdanith” Papageorgiou
 Nikolay “corristo” Kasyanov
 Pieter “pvdk” van der Kloet
+Roman "Kromgart" Melnik
 Sebastian “swick” Wick
 
 Retired Developers:
@@ -134,12 +136,14 @@ Bug #179: Pressing space in console triggers activation
 Bug #186: CMake doesn't use the debug versions of Ogre libraries on Linux
 Bug #189: ASCII 16 character added to console on it's activation on Mac OS X
 Bug #190: Case Folding fails with music files
+Bug #192: Keypresses write Text into Console no matter which gui element is active
 Bug #196: Collision shapes out of place
 Bug #202: ESMTool doesn't not work with localised ESM files anymore
 Bug #203: Torch lights only visible on short distance
 Bug #207: Ogre.log not written
 Bug #209: Sounds do not play
 Bug #210: Ogre crash at Dren plantation
+Bug #214: Unsupported file format version
 Feature #9: NPC Dialogue Window
 Feature #16/42: New sky/weather implementation
 Feature #40: Fading

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Skin">
+    <Skin name = "MW_ConsoleWindow" size = "256 54">
+        <Property key="FontName" value = "MyGUI_CoreFont.18" />
+        <Property key="FontHeight" value = "17" />
+        <Property key="TextAlign" value = "ALIGN_CENTER" />
+        <Property key="TextColour" value = "0.8 0.8 0.8" />
+        <Property key="Snap" value = "true" />
+
+        <Child type="Widget" skin="BlackBG" offset = "4 4 248 46" align = "ALIGN_STRETCH" name = "Client"/>
+
+        <!-- Outer borders -->
+        <Child type="Widget" skin="TB_T" offset="4 0 248 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Action">
+            <Property key="Scale" value = "0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_L" offset="0 4 4 46" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Action">
+            <Property key="Scale" value = "1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="TB_B" offset="4 50 248 4" align="ALIGN_BOTTOM ALIGN_HSTRETCH" name="Action">
+            <Property key="Scale" value = "0 0 0 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_R" offset="252 4 4 46" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="Action">
+            <Property key="Scale" value = "0 0 1 0"/>
+        </Child>
+
+        <Child type="Widget" skin="TB_BR" offset="252 50 4 4" align="ALIGN_RIGHT ALIGN_BOTTOM" name="Action">
+            <Property key="Scale" value = "0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_BL" offset="0 50 4 4" align="ALIGN_LEFT ALIGN_BOTTOM" name="Action">
+            <Property key="Scale" value = "1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TR" offset="252 0 4 4" align="ALIGN_RIGHT ALIGN_TOP" name="Action">
+            <Property key="Scale" value = "0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="TB_TL" offset="0 0 4 4" align="ALIGN_LEFT ALIGN_TOP" name="Action">
+            <Property key="Scale" value = "1 1 -1 -1"/>
+        </Child>
+    </Skin>
+
+    <Skin name = "MW_LogClient" size = "10 10">
+        <Property key="FontName" value = "MonoFont" />
+        <Property key="TextAlign" value = "Left Top" />
+        <Property key="TextColour" value = "1 1 1" />
+        <!--Property key="Pointer" value = "beam" /-->
+        <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
+    </Skin>
+
+    <!-- The edit control used for entering commands -->
+    <Skin name = "MW_ConsoleCommand" size = "29 26">
+        <Child type="TextBox" skin="MW_EditClient" offset = "2 1 23 22" align = "Stretch" name = "Client"/>
+
+        <Child type="Widget" skin="MW_BarFrame" offset="0 0 29 26" align="ALIGN_STRETCH"/>
+    </Skin>
+
+    <Skin name="MW_ConsoleLog" size="0 0 50 50">
+        <Property key="WordWrap" value = "true" />
+        <Child type="TextBox" skin="MW_LogClient" offset="0 0 35 10" align = "ALIGN_STRETCH" name = "Client"/>
+        <!--Child type="VScroll" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
+    </Skin>
+
+    <Skin name = "MW_EditClient" size = "10 10">
+        <Property key="FontName" value = "MonoFont" />
+        <Property key="TextAlign" value = "Left VCenter" />
+        <Property key="TextColour" value = "1 1 1" />
+        <!--Property key="Pointer" value = "beam" /-->
+        <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
+    </Skin>
+</MyGUI>

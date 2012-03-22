@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main">
+        <!-- Energy bars -->
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="13 146 65 12"
+            align="Left Bottom" name="Health"/>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="13 161 65 12"
+            align="Left Bottom" name="Magicka"/>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Green" position="13 176 65 12"
+            align="Left Bottom" name="Stamina"/>
+
+        <!-- Equipped weapon box -->
+        <Widget type="Widget" skin="HUD_Box" position="82 146 36 36"
+            align="Left Bottom">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top"
+                name="WeapImage"/>
+        </Widget>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="82 182 36 6"
+            align="Left Bottom" name="WeapStatus"/>
+
+        <!-- Selected spell box -->
+        <Widget type="Widget" skin="HUD_Box" position="122 146 36 36"
+            align="Left Bottom">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top"
+                name="SpellImage"/>
+        </Widget>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="122 182 36 6"
+            align="Left Bottom" name="SpellStatus"/>
+
+        <!-- Spell effects box -->
+        <Widget type="Widget" skin="HUD_Box" position="199 168 20 20"
+            align="Right Bottom" name="EffectBox">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 16 16" align="Left Bottom"
+                name="Effect1"/>
+        </Widget>
+
+        <!-- Map box -->
+        <Widget type="Widget" skin="HUD_Box" position="223 123 65 65"
+            align="Right Bottom">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 61 61" align="Left Bottom"
+                name="MiniMap"/>
+            <Widget type="ImageBox" skin="ImageBox" position="17 18 32 32" align="Left Bottom"
+                name="Compass"/>
+        </Widget>
+
+        <!-- Crosshair -->
+
+        <Widget type="ImageBox" skin="ImageBox" position="0 0 32
+            32" align="Center Center" name="Crosshair"/>
+
+        <!-- Basic FPSCounter box -->
+        <Widget type="Widget" skin="HUD_Box" position="12 12 28 21" align="Left Top"
+            name="FPSBox">
+            <Property key="Visible" value="false"/>
+            <Widget type="TextBox" skin="NumFPS" position="3 3 21 17" name="FPSCounter"/>
+        </Widget>
+
+        <!-- Advanced FPSCounter box -->
+        <Widget type="Widget" skin="HUD_Box" position="12 12 118 51" align="Left Top"
+            name="FPSBoxAdv">
+            <Property key="Visible" value="false"/>
+
+            <Widget type="TextBox" skin="NumFPS" position="3 3 71 17">
+                    <Property key="Caption" value="FPS: "/>
+            </Widget>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 71 17" name="FPSCounterAdv"/>
+
+            <Widget type="TextBox" skin="NumFPS" position="3 3 71 32">
+                    <Property key="Caption" value="Tri Count: "/>
+            </Widget>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 71 32" name="TriangleCounter"/>
+
+            <Widget type="TextBox" skin="NumFPS" position="3 3 71 47">
+                    <Property key="Caption" value="Batch Count: "/>
+            </Widget>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 71 47" name="BatchCounter"/>
+        </Widget>
+
+    </Widget>
+</MyGUI>
