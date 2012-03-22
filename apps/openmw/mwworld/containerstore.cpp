@@ -8,8 +8,29 @@
 #include <components/esm/loadcont.hpp>
 
 #include "manualref.hpp"
+#include "refdata.hpp"
 
-MWWorld::ContainerStore::ContainerStore() : mStateId (0) {}
+namespace
+{
+    template<typename T>
+    float getTotalWeight (const ESMS::CellRefList<T, MWWorld::RefData>& cellRefList)
+    {
+        float sum = 0;
+
+        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::const_iterator iter (
+            cellRefList.list.begin());
+            iter!=cellRefList.list.end();
+            ++iter)
+        {
+            if (iter->mData.getCount()>0)
+                sum += iter->mData.getCount()*iter->base->data.weight;
+        }
+
+        return sum;
+    }
+}
+
+MWWorld::ContainerStore::ContainerStore() : mStateId (0), mCachedWeight (0), mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
@@ -87,11 +108,37 @@ void MWWorld::ContainerStore::clear()
 void MWWorld::ContainerStore::flagAsModified()
 {
     ++mStateId;
+    mWeightUpToDate = false;
 }
 
 int MWWorld::ContainerStore::getStateId() const
 {
     return mStateId;
+}
+
+float MWWorld::ContainerStore::getWeight() const
+{
+    if (!mWeightUpToDate)
+    {
+        mCachedWeight = 0;
+
+        mCachedWeight += getTotalWeight (potions);
+        mCachedWeight += getTotalWeight (appas);
+        mCachedWeight += getTotalWeight (armors);
+        mCachedWeight += getTotalWeight (books);
+        mCachedWeight += getTotalWeight (clothes);
+        mCachedWeight += getTotalWeight (ingreds);
+        mCachedWeight += getTotalWeight (lights);
+        mCachedWeight += getTotalWeight (lockpicks);
+        mCachedWeight += getTotalWeight (miscItems);
+        mCachedWeight += getTotalWeight (probes);
+        mCachedWeight += getTotalWeight (repairs);
+        mCachedWeight += getTotalWeight (weapons);
+
+        mWeightUpToDate = true;
+    }
+
+    return mCachedWeight;
 }
 
 int MWWorld::ContainerStore::getType (const Ptr& ptr)

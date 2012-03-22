@@ -53,6 +53,8 @@ namespace MWWorld
             ESMS::CellRefList<ESM::Repair, RefData>            repairs;
             ESMS::CellRefList<ESM::Weapon, RefData>            weapons;
             int mStateId;
+            mutable float mCachedWeight;
+            mutable bool mWeightUpToDate;
 
         public:
 
@@ -86,6 +88,9 @@ namespace MWWorld
             ///< This ID is changed every time the container is modified or items in the container
             /// are accessed in a way that may be used to modify the item.
             /// \note This method of change-tracking will ocasionally yield false positives.
+
+            float getWeight() const;
+            ///< Return total weight of the items contained in *this.
 
             static int getType (const Ptr& ptr);
             ///< This function throws an exception, if ptr does not point to an object, that can be
