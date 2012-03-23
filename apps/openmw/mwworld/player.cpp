@@ -89,4 +89,57 @@ namespace MWWorld
 
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
     }
+
+    Player::Faction Player::getFaction(std::string faction)
+    {
+        for(std::list<Player::Faction>::iterator it = mFactions.begin(); it != mFactions.end();it++)
+        {
+            if(it->name == faction) return *it;
+        }
+        //faction was not found->dummy faction
+        Player::Faction fact;
+        fact.id = "not found";
+        fact.name = "not found";
+        fact.rank = -10;
+        fact.expelled = false;
+        return fact;
+    }
+
+    void Player::addFaction(std::string faction)
+    {
+        if(getFaction(faction).name == "not found")
+        {
+            Player::Faction fact;
+            const ESM::Faction* eFact = mWorld.getStore().factions.find(faction);
+            fact.expelled = false;
+            fact.rank = 0;
+            fact.name = faction;
+            fact.id = eFact->id;
+            mFactions.push_back(fact);
+        }
+    }
+
+    int Player::getRank(std::string faction)
+    {
+        Player::Faction fact = getFaction(faction);
+        return fact.rank;
+    }
+
+    void Player::setRank(std::string faction,int rank)
+    {
+        Player::Faction fact = getFaction(faction);
+        fact.rank = rank;
+    }
+
+    bool Player::isExpelled(std::string faction)
+    {
+        Player::Faction fact = getFaction(faction);
+        return fact.expelled;
+    }
+
+    void Player::setExpelled(std::string faction,bool expelled)
+    {
+        Player::Faction fact = getFaction(faction);
+        fact.expelled = expelled;
+    }
 }

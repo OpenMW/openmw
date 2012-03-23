@@ -4,6 +4,7 @@
 #include "OgreCamera.h"
 
 #include <components/esm_store/cell_store.hpp>
+#include <list>
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
@@ -20,6 +21,13 @@ namespace MWWorld
     /// \brief NPC object representing the player and additional player data
     class Player
     {
+        struct Faction
+        {
+            std::string id,name;
+            int rank;
+            bool expelled;
+        };
+
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
         MWWorld::Ptr::CellStore *mCellStore;
         MWRender::Player *mRenderer;
@@ -29,8 +37,11 @@ namespace MWWorld
         std::string mRace;
         std::string mBirthsign;
         ESM::Class *mClass;
+        std::list<Faction> mFactions;
         bool mAutoMove;
         int mForwardBackward;
+
+        Faction getFaction(std::string faction);
 
     public:
 
@@ -107,6 +118,16 @@ namespace MWWorld
         }
 
         void setAutoMove (bool enable);
+
+        void addFaction(std::string faction);
+
+        int getRank(std::string faction);
+
+        void setRank(std::string faction,int rank);
+
+        bool isExpelled(std::string faction);
+
+        void setExpelled(std::string faction,bool expelled);
 
         void setLeftRight (int value);
 
