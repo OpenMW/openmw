@@ -363,7 +363,10 @@ std::vector<std::string> OpenAL_Output::enumerate()
     std::vector<std::string> devlist;
     const ALCchar *devnames;
 
-    devnames = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+    if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT"))
+        devnames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+    else
+        devnames = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
     while(devnames && *devnames)
     {
         devlist.push_back(devnames);
@@ -380,7 +383,10 @@ void OpenAL_Output::init(const std::string &devname)
     mDevice = alcOpenDevice(devname.c_str());
     if(!mDevice)
         fail("Failed to open \""+devname+"\"");
-    std::cout << "Opened \""<<alcGetString(mDevice, ALC_DEVICE_SPECIFIER)<<"\"" << std::endl;
+    if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
+        std::cout << "Opened \""<<alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER)<<"\"" << std::endl;
+    else
+        std::cout << "Opened \""<<alcGetString(mDevice, ALC_DEVICE_SPECIFIER)<<"\"" << std::endl;
 
     mContext = alcCreateContext(mDevice, NULL);
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
