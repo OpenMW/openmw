@@ -152,3 +152,127 @@ void HUD::setPlayerDir(const float x, const float y)
     rotatingSubskin->setAngle(angle);
 }
 
+MapWindow::MapWindow()
+  : Layout("openmw_map_window_layout.xml"), mGlobal(false)
+{
+    setCoord(500,0,320,300);
+    setText("WorldButton", "World");
+    setImage("Compass", "textures\\compass.dds");
+
+    // Obviously you should override this later on
+    setCellName("No Cell Loaded");
+
+    getWidget(mLocalMap, "LocalMap");
+    getWidget(mGlobalMap, "GlobalMap");
+    getWidget(mPlayerArrow, "Compass");
+
+    getWidget(mButton, "WorldButton");
+    mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
+
+    MyGUI::Button* eventbox;
+    getWidget(eventbox, "EventBox");
+    eventbox->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+    eventbox->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+}
+
+void MapWindow::setVisible(bool b)
+{
+    mMainWidget->setVisible(b);
+    if (b)
+        mVisible = true;
+    else
+        mVisible = false;
+}
+
+void MapWindow::setCellName(const std::string& cellName)
+{
+    static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
+}
+
+void MapWindow::setCellPrefix(const std::string& prefix)
+{
+    mPrefix = prefix;
+}
+
+void MapWindow::setActiveCell(const int x, const int y, bool interior)
+{
+    if (x==mCurX && y==mCurY && mInterior==interior) return; // don't do anything if we're still in the same cell
+    for (int mx=0; mx<3; ++mx)
+    {
+        for (int my=0; my<3; ++my)
+        {
+            std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
+                    + boost::lexical_cast<std::string>(my);
+
+            std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
+                    + boost::lexical_cast<std::string>(y + (interior ? (my-1) : -1*(my-1)));
+
+            if (MyGUI::RenderManager::getInstance().getTexture(image) != 0)
+                setImage(name, image);
+            else
+                setImage(name, "black.png");
+
+            if (MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0)
+                setImage(name+"_fog", image+"_fog");
+            else
+                setImage(name+"_fog", "black.png");
+        }
+    }
+    mInterior = interior;
+    mCurX = x;
+    mCurY = y;
+}
+
+void MapWindow::setPlayerPos(const float x, const float y)
+{
+    if (mGlobal || mVisible) return;
+    MyGUI::IntSize size = mLocalMap->getCanvasSize();
+    MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
+    MyGUI::IntCoord viewsize = mLocalMap->getCoord();
+    MyGUI::IntPoint pos(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
+    mLocalMap->setViewOffset(pos);
+
+    mPlayerArrow->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
+}
+
+void MapWindow::setPlayerDir(const float x, const float y)
+{
+    if (!mVisible) return;
+    MyGUI::ISubWidget* main = mPlayerArrow->getSubWidgetMain();
+    MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
+    rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
+    float angle = std::atan2(x,y);
+    rotatingSubskin->setAngle(angle);
+}
+
+void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+{
+    if (_id!=MyGUI::MouseButton::Left) return;
+    if (!mGlobal)
+        mLastDragPos = MyGUI::IntPoint(_left, _top);
+}
+
+void MapWindow::onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+{
+    if (_id!=MyGUI::MouseButton::Left) return;
+
+    if (!mGlobal)
+    {
+        MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
+        mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
+
+        mLastDragPos = MyGUI::IntPoint(_left, _top);
+    }
+}
+
+void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
+{
+    mGlobal = !mGlobal;
+    mGlobalMap->setVisible(mGlobal);
+    mLocalMap->setVisible(!mGlobal);
+
+    mButton->setCaption( mGlobal ? "Local" : "World" );
+}
+
+
+
