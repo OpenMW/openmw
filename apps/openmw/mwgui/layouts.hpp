@@ -14,6 +14,8 @@
 #include "../mwmechanics/stat.hpp"
 #include "window_base.hpp"
 
+#include <cmath>
+
 /*
   This file contains classes corresponding to window layouts
   defined in resources/mygui/ *.xml.
@@ -144,11 +146,16 @@ namespace MWGui
       mLocalMap->setViewOffset(pos);
 
       mPlayerArrow->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
+    }
 
+    void setPlayerDir(const float x, const float y)
+    {
+      if (!mVisible) return;
       MyGUI::ISubWidget* main = mPlayerArrow->getSubWidgetMain();
       MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
       rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
-      rotatingSubskin->setAngle(3.141);
+      float angle = std::atan2(x,y);
+      rotatingSubskin->setAngle(angle);
     }
 
     void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)

@@ -225,7 +225,7 @@ void LocalMap::render(const float x, const float y,
     mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, fStart, fEnd);
 }
 
-void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
+void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3& direction)
 {
     if (sFogOfWarSkip != 0)
     {
@@ -276,6 +276,7 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         texName = mInteriorName + "_" + coordStr(x,y);
     }
     mEnvironment->mWindowManager->setPlayerPos(u, v);
+    mEnvironment->mWindowManager->setPlayerDir(direction.x, -direction.z);
 
     // explore radius (squared)
     const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;

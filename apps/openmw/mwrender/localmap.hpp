@@ -40,12 +40,13 @@ namespace MWRender
                         Ogre::AxisAlignedBox bounds);
 
         /**
-         * Set the position of the player.
+         * Set the position & direction of the player.
          * @remarks This is used to draw a "fog of war" effect
          * to hide areas on the map the player has not discovered yet.
          * @param position (OGRE coordinates)
+         * @param view direction (OGRE coordinates)
          */
-        void setPlayerPosition (const Ogre::Vector3& position);
+        void updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3& direction);
 
         /**
          * Save the fog of war for the current cell to disk.

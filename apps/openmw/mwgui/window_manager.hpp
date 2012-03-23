@@ -155,6 +155,7 @@ namespace MWGui
 
     void changeCell(MWWorld::Ptr::CellStore* cell); ///< change the active cell
     void setPlayerPos(const float x, const float y); ///< set player position in map space
+    void setPlayerDir(const float x, const float y); ///< set player view direction in map space
     
     void setInteriorMapTexture(const int x, const int y);
     ///< set the index of the map texture that should be used (for interiors)
