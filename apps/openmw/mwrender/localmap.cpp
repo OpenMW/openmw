@@ -275,7 +275,7 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
 
         texName = mInteriorName + "_" + coordStr(x,y);
     }
-    mEnvironment->mWindowManager->setPlayerPos(1/3.f + u/3.f, 1/3.f + v/3.f);
+    mEnvironment->mWindowManager->setPlayerPos(u, v);
 
     // explore radius (squared)
     const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;

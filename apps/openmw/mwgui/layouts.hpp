@@ -73,6 +73,7 @@ namespace MWGui
       setCellName("No Cell Loaded");
 
       getWidget(mMap, "Map");
+      getWidget(mPlayerArrow, "Compass");
 
       MyGUI::Button* button;
       getWidget(button, "WorldButton");
@@ -137,10 +138,16 @@ namespace MWGui
     {
       if (mVisible) return;
       MyGUI::IntSize size = mMap->getCanvasSize();
-      MyGUI::IntPoint middle = MyGUI::IntPoint(x*size.width,y*size.height);
+      MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
       MyGUI::IntCoord viewsize = mMap->getCoord();
       MyGUI::IntPoint pos(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
       mMap->setViewOffset(pos);
+
+      mPlayerArrow->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
+
+      MyGUI::ISubWidget* main = mPlayerArrow->getSubWidgetMain();
+      MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
+      rotatingSubskin->setAngle(3.141 * 0.5);
     }
 
     void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
@@ -167,6 +174,7 @@ namespace MWGui
   private:
     std::string mPrefix;
     MyGUI::ScrollView* mMap;
+    MyGUI::ImageBox* mPlayerArrow;
     MyGUI::IntPoint mLastDragPos;
     int mCurX, mCurY;
     bool mInterior;

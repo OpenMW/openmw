@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 300 300" name="_Main">
         <Widget type="ScrollView" skin="MW_MapView" position="0 0 284 264" align="ALIGN_STRETCH" name="Map">
             <Property key="CanvasSize" value="1536 1536"/>
-            
+
             <!-- 3x3 maps, 1024x1024 each, but we will downsample to 512 to antialias them -->
             <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_0">
                 <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_0_fog"/>
@@ -23,7 +23,10 @@
             </Widget>
 
             <Widget type="ImageBox" skin="ImageBox" position="512 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1">
-                <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1_fog"/>
+                <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1_fog">
+                    <!-- Player arrow -->
+                    <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_TOP ALIGN_LEFT" name="Compass"/>
+                </Widget>
             </Widget>
 
             <Widget type="ImageBox" skin="ImageBox" position="1024 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_1">
@@ -42,11 +45,8 @@
                 <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_2_fog"/>
             </Widget>
 
-                <!-- positioned and rotated in code -->
-            <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="ALIGN_TOP ALIGN_LEFT" name="Compass"/>
-
             <Widget type="Button" skin="" position="0 0 1536 1536" name="EventBox" align="ALIGN_STRETCH"/>
-        </Widget>
+        </Widget>        
         <Widget type="Button" skin="MW_Button" position="213 233 61 22" align="ALIGN_BOTTOM ALIGN_RIGHT" name="WorldButton"/>
     </Widget>
 </MyGUI>
