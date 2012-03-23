@@ -44,6 +44,7 @@ namespace MWGui
     bool mInterior;
     MyGUI::ScrollView* mLocalMap;
     std::string mPrefix;
+    bool mChanged;
 
     OEngine::GUI::Layout* mLayout;
   };

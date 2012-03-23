@@ -264,11 +264,12 @@ void LocalMapBase::init(MyGUI::ScrollView* widget, OEngine::GUI::Layout* layout)
 void LocalMapBase::setCellPrefix(const std::string& prefix)
 {
     mPrefix = prefix;
+    mChanged = true;
 }
 
 void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
 {
-    if (x==mCurX && y==mCurY && mInterior==interior) return; // don't do anything if we're still in the same cell
+    if (x==mCurX && y==mCurY && mInterior==interior && !mChanged) return; // don't do anything if we're still in the same cell
     for (int mx=0; mx<3; ++mx)
     {
         for (int my=0; my<3; ++my)
@@ -298,5 +299,6 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
     mInterior = interior;
     mCurX = x;
     mCurY = y;
+    mChanged = false;
 }
 

@@ -153,8 +153,9 @@ void LocalMap::render(const float x, const float y,
     // make everything visible
     mRendering->getScene()->setAmbientLight(ColourValue(1,1,1));
 
-    mCellCamera->setPosition(Vector3(x, zhigh, y));
-    mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
+    mCellCamera->setPosition(Vector3(x, zhigh+100000, y));
+    //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
+    mCellCamera->setFarClipDistance(0); // infinite
 
     mCellCamera->setOrthoWindow(xw, yw);
 
