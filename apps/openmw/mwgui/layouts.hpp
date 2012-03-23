@@ -140,7 +140,6 @@ namespace MWGui
       MyGUI::IntPoint middle = MyGUI::IntPoint(x*size.width,y*size.height);
       MyGUI::IntCoord viewsize = mMap->getCoord();
       MyGUI::IntPoint pos(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
-      std::cout << pos.left << " top " << pos.top << std::endl;
       mMap->setViewOffset(pos);
     }
 
