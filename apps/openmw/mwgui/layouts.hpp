@@ -31,7 +31,24 @@
 
 namespace MWGui
 {
-  class HUD : public OEngine::GUI::Layout
+  class LocalMapBase
+  {
+  public:
+    void init(MyGUI::ScrollView* widget, OEngine::GUI::Layout* layout);
+
+    void setCellPrefix(const std::string& prefix);
+    void setActiveCell(const int x, const int y, bool interior=false);
+
+  protected:
+    int mCurX, mCurY;
+    bool mInterior;
+    MyGUI::ScrollView* mLocalMap;
+    std::string mPrefix;
+
+    OEngine::GUI::Layout* mLayout;
+  };
+  
+  class HUD : public OEngine::GUI::Layout, public LocalMapBase
   {
   public:
     HUD(int width, int height, int fpsLevel);
@@ -45,7 +62,6 @@ namespace MWGui
     void setFPS(float fps);
     void setTriangleCount(size_t count);
     void setBatchCount(size_t count);
-
     void setPlayerDir(const float x, const float y);
 
     MyGUI::ProgressPtr health, magicka, stamina;
@@ -63,31 +79,25 @@ namespace MWGui
     MyGUI::TextBox* batchcounter;
   };
 
-  class MapWindow : public OEngine::GUI::Layout
+  class MapWindow : public OEngine::GUI::Layout, public LocalMapBase
   {
   public:
     MapWindow();
 
     void setVisible(bool b);
-    void setCellName(const std::string& cellName);
-    void setCellPrefix(const std::string& prefix);
-    void setActiveCell(const int x, const int y, bool interior=false);
     void setPlayerPos(const float x, const float y);
     void setPlayerDir(const float x, const float y);
+    void setCellName(const std::string& cellName);
   
   private:
     void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
     void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
     void onWorldButtonClicked(MyGUI::Widget* _sender);
 
-    std::string mPrefix;
-    MyGUI::ScrollView* mLocalMap;
     MyGUI::ScrollView* mGlobalMap;
     MyGUI::ImageBox* mPlayerArrow;
     MyGUI::Button* mButton;
     MyGUI::IntPoint mLastDragPos;
-    int mCurX, mCurY;
-    bool mInterior;
     bool mVisible;
     bool mGlobal;
   };
