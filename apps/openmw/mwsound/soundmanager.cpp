@@ -341,9 +341,6 @@ namespace MWSound
         }
 
         const ESM::Region *regn = mEnvironment.mWorld->getStore().regions.find(regionName);
-        if(regn->soundList.size() == 0)
-            return;
-
         std::vector<ESM::Region::SoundRef>::const_iterator soundIter;
         if(total == 0)
         {
@@ -353,6 +350,8 @@ namespace MWSound
                 total += (int)soundIter->chance;
                 soundIter++;
             }
+            if(total == 0)
+                return;
         }
 
         int r = rand() % total;        //old random code
