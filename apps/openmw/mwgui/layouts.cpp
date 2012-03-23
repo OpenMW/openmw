@@ -142,3 +142,13 @@ void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& v
             }
         }
 }
+
+void HUD::setPlayerDir(const float x, const float y)
+{
+    MyGUI::ISubWidget* main = compass->getSubWidgetMain();
+    MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
+    rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
+    float angle = std::atan2(x,y);
+    rotatingSubskin->setAngle(angle);
+}
+

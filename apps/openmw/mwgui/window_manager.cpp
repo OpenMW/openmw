@@ -433,4 +433,5 @@ void WindowManager::setPlayerPos(const float x, const float y)
 void WindowManager::setPlayerDir(const float x, const float y)
 {
     map->setPlayerDir(x,y);
+    hud->setPlayerDir(x,y);
 }

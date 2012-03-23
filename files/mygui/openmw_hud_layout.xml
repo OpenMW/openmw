@@ -40,7 +40,7 @@
             align="Right Bottom">
             <Widget type="ImageBox" skin="ImageBox" position="2 2 61 61" align="Left Bottom"
                 name="MiniMap"/>
-            <Widget type="ImageBox" skin="ImageBox" position="17 18 32 32" align="Left Bottom"
+            <Widget type="ImageBox" skin="RotatingSkin" position="17 18 32 32" align="Left Bottom"
                 name="Compass"/>
         </Widget>
 
