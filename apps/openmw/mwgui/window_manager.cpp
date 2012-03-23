@@ -424,3 +424,8 @@ void WindowManager::setInteriorMapTexture(const int x, const int y)
 {
     map->setActiveCell(x,y, true);
 }
+
+void WindowManager::setPlayerPos(const float x, const float y)
+{
+    map->setPlayerPos(x,y);
+}

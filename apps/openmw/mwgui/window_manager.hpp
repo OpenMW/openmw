@@ -154,6 +154,7 @@ namespace MWGui
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     void changeCell(MWWorld::Ptr::CellStore* cell); ///< change the active cell
+    void setPlayerPos(const float x, const float y); ///< set player position in map space
     
     void setInteriorMapTexture(const int x, const int y);
     ///< set the index of the map texture that should be used (for interiors)

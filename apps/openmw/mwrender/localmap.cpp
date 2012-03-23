@@ -263,6 +263,7 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
         u = std::abs((pos.x - (sSize*x))/sSize);
         v = 1-std::abs((pos.y + (sSize*y))/sSize);
         texName = "Cell_"+coordStr(x,y);
+
     }
     else
     {
@@ -274,6 +275,7 @@ void LocalMap::setPlayerPosition (const Ogre::Vector3& position)
 
         texName = mInteriorName + "_" + coordStr(x,y);
     }
+    mEnvironment->mWindowManager->setPlayerPos(1/3.f + u/3.f, 1/3.f + v/3.f);
 
     // explore radius (squared)
     const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;

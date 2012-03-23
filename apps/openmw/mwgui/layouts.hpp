@@ -84,6 +84,15 @@ namespace MWGui
       eventbox->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
     }
 
+    void setVisible(bool b)
+    {
+      mMainWidget->setVisible(b);
+      if (b)
+        mVisible = true;
+      else
+        mVisible = false;
+    }
+
     void setCellName(const std::string& cellName)
     {
       static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
@@ -110,13 +119,29 @@ namespace MWGui
 
           if (MyGUI::RenderManager::getInstance().getTexture(image) != 0)
             setImage(name, image);
+          else
+            setImage(name, "black.png");
+            
           if (MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0)
             setImage(name+"_fog", image+"_fog");
+          else
+            setImage(name+"_fog", "black.png");
         }
       }
       mInterior = interior;
       mCurX = x;
       mCurY = y;
+    }
+
+    void setPlayerPos(const float x, const float y)
+    {
+      if (mVisible) return;
+      MyGUI::IntSize size = mMap->getCanvasSize();
+      MyGUI::IntPoint middle = MyGUI::IntPoint(x*size.width,y*size.height);
+      MyGUI::IntCoord viewsize = mMap->getCoord();
+      MyGUI::IntPoint pos(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
+      std::cout << pos.left << " top " << pos.top << std::endl;
+      mMap->setViewOffset(pos);
     }
 
     void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
@@ -146,6 +171,7 @@ namespace MWGui
     MyGUI::IntPoint mLastDragPos;
     int mCurX, mCurY;
     bool mInterior;
+    bool mVisible;
   };
 
   class MainMenu : public OEngine::GUI::Layout
