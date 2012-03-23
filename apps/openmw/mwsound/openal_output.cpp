@@ -382,7 +382,12 @@ void OpenAL_Output::init(const std::string &devname)
 
     mDevice = alcOpenDevice(devname.c_str());
     if(!mDevice)
-        fail("Failed to open \""+devname+"\"");
+    {
+        if(devname.empty())
+            fail("Failed to open default device");
+        else
+            fail("Failed to open \""+devname+"\"");
+    }
     if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
         std::cout << "Opened \""<<alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER)<<"\"" << std::endl;
     else
