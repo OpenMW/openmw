@@ -62,17 +62,18 @@ struct Transformation
 
   static const Transformation* getIdentity()
   {
-	  static Transformation* identity = NULL;
-	  if (NULL == identity)
+	  static Transformation identity;
+      static bool iset = false;
+	  if (!iset)
       {
-        identity = new Transformation();
-        identity->scale = 1.0f;
-        identity->rotation.v[0].array[0] = 1.0f;
-        identity->rotation.v[1].array[1] = 1.0f;
-        identity->rotation.v[2].array[2] = 1.0f;
+        identity.scale = 1.0f;
+        identity.rotation.v[0].array[0] = 1.0f;
+        identity.rotation.v[1].array[1] = 1.0f;
+        identity.rotation.v[2].array[2] = 1.0f;
+        iset = true;
       }
 
-	  return identity;
+	  return &identity;
   }
 };
 #pragma pack(pop)
