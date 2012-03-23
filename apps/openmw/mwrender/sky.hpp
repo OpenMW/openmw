@@ -107,7 +107,7 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera);
+        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera, MWWorld::Environment* env);
         ~SkyManager();
         
         void update(float duration);
@@ -164,11 +164,10 @@ namespace MWRender
         Ogre::Vector3 getRealSunPos();
         
     private:
+        MWWorld::Environment* mEnvironment;
         float mHour;
         int mDay;
         int mMonth;
-
-        float mHourDiff;
 
         BillboardObject* mSun;
         BillboardObject* mSunGlare;

@@ -13,7 +13,7 @@ namespace MWGui
         WindowBase(const std::string& parLayout, WindowManager& parWindowManager);
 
         // Events
-        typedef MyGUI::delegates::CDelegate1<WindowBase*> EventHandle_WindowBase;
+        typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
         virtual void open();
         void center();
