@@ -63,13 +63,14 @@ namespace MWGui
     void setTriangleCount(size_t count);
     void setBatchCount(size_t count);
     void setPlayerDir(const float x, const float y);
+    void setPlayerPos(const float x, const float y);
 
     MyGUI::ProgressPtr health, magicka, stamina;
     MyGUI::ImageBox *weapImage, *spellImage;
     MyGUI::ProgressPtr weapStatus, spellStatus;
     MyGUI::WidgetPtr effectBox;
     MyGUI::ImageBox* effect1;
-    MyGUI::ImageBox* minimap;
+    MyGUI::ScrollView* minimap;
     MyGUI::ImageBox* compass;
     MyGUI::ImageBox* crosshair;
 
