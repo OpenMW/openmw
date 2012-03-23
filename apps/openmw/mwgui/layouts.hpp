@@ -63,7 +63,7 @@ namespace MWGui
   {
   public:
     MapWindow()
-      : Layout("openmw_map_window_layout.xml")
+      : Layout("openmw_map_window_layout.xml"), mGlobal(false)
     {
       setCoord(500,0,320,300);
       setText("WorldButton", "World");
@@ -72,12 +72,12 @@ namespace MWGui
       // Obviously you should override this later on
       setCellName("No Cell Loaded");
 
-      getWidget(mMap, "Map");
+      getWidget(mLocalMap, "LocalMap");
+      getWidget(mGlobalMap, "GlobalMap");
       getWidget(mPlayerArrow, "Compass");
 
-      MyGUI::Button* button;
-      getWidget(button, "WorldButton");
-      button->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
+      getWidget(mButton, "WorldButton");
+      mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
 
       MyGUI::Button* eventbox;
       getWidget(eventbox, "EventBox");
@@ -136,49 +136,62 @@ namespace MWGui
 
     void setPlayerPos(const float x, const float y)
     {
-      if (mVisible) return;
-      MyGUI::IntSize size = mMap->getCanvasSize();
+      if (mGlobal || mVisible) return;
+      MyGUI::IntSize size = mLocalMap->getCanvasSize();
       MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
-      MyGUI::IntCoord viewsize = mMap->getCoord();
+      MyGUI::IntCoord viewsize = mLocalMap->getCoord();
       MyGUI::IntPoint pos(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
-      mMap->setViewOffset(pos);
+      mLocalMap->setViewOffset(pos);
 
       mPlayerArrow->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
 
       MyGUI::ISubWidget* main = mPlayerArrow->getSubWidgetMain();
       MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
-      rotatingSubskin->setAngle(3.141 * 0.5);
+      rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
+      rotatingSubskin->setAngle(3.141);
     }
 
     void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
     {
       if (_id!=MyGUI::MouseButton::Left) return;
-      mLastDragPos = MyGUI::IntPoint(_left, _top);
+      if (!mGlobal)
+        mLastDragPos = MyGUI::IntPoint(_left, _top);
     }
 
     void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
     {
       if (_id!=MyGUI::MouseButton::Left) return;
 
-      MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
-      mMap->setViewOffset( mMap->getViewOffset() + diff );
+      if (!mGlobal)
+      {
+        MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
+        mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
 
-      mLastDragPos = MyGUI::IntPoint(_left, _top);
+        mLastDragPos = MyGUI::IntPoint(_left, _top);
+      }
     }
 
     void onWorldButtonClicked(MyGUI::Widget* _sender)
     {
-      /// \todo
+      mGlobal = !mGlobal;
+      mGlobalMap->setVisible(mGlobal);
+      mLocalMap->setVisible(!mGlobal);
+
+      mButton->setCaption( mGlobal ? "Local" : "World" );
     }
 
   private:
     std::string mPrefix;
-    MyGUI::ScrollView* mMap;
+    MyGUI::ScrollView* mLocalMap;
+    MyGUI::ScrollView* mGlobalMap;
     MyGUI::ImageBox* mPlayerArrow;
+    MyGUI::Button* mButton;
     MyGUI::IntPoint mLastDragPos;
     int mCurX, mCurY;
     bool mInterior;
     bool mVisible;
+
+    bool mGlobal;
   };
 
   class MainMenu : public OEngine::GUI::Layout
