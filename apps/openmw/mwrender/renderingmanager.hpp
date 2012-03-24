@@ -3,6 +3,7 @@
 
 
 #include "sky.hpp"
+#include "terrain.hpp"
 #include "debugging.hpp"
 
 #include "../mwworld/class.hpp"
@@ -136,6 +137,8 @@ class RenderingManager: private RenderingInterface {
     SkyManager* mSkyManager;
 
     OcclusionQuery* mOcclusionQuery;
+
+    TerrainManager* mTerrainManager;
 
     OEngine::Render::OgreRenderer &mRendering;
 

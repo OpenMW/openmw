@@ -23,6 +23,11 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
+    mTerrainManager = new TerrainManager(mRendering.getScene());
+
+    //The fog type must be set before any terrain objects are created as if the
+    //fog type is set to FOG_NONE then the initially created terrain won't have any fog
+    configureFog(1, ColourValue(1,1,1));
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -66,6 +71,7 @@ RenderingManager::~RenderingManager ()
     //TODO: destroy mSun?
     delete mPlayer;
     delete mSkyManager;
+    delete mTerrainManager;
     delete mLocalMap;
     delete mOcclusionQuery;
 }
@@ -94,11 +100,15 @@ OEngine::Render::Fader* RenderingManager::getFader()
 void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
     mObjects.removeCell(store);
     mActors.removeCell(store);
+    if (store->cell->isExterior())
+      mTerrainManager->cellRemoved(store);
 }
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
     mObjects.buildStaticGeometry (*store);
+    if (store->cell->isExterior())
+      mTerrainManager->cellAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
@@ -239,17 +249,17 @@ void RenderingManager::setAmbientMode()
   {
     case 0:
 
-      mRendering.getScene()->setAmbientLight(mAmbientColor);
+      setAmbientColour(mAmbientColor);
       break;
 
     case 1:
 
-      mRendering.getScene()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
+      setAmbientColour(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
       break;
 
     case 2:
 
-      mRendering.getScene()->setAmbientLight(ColourValue(1,1,1));
+      setAmbientColour(ColourValue(1,1,1));
       break;
   }
 }
@@ -304,11 +314,13 @@ void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
     mSun->setDiffuseColour(colour);
+    mTerrainManager->setDiffuse(colour);
 }
 
 void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
 {
     mRendering.getScene()->setAmbientLight(colour);
+    mTerrainManager->setAmbient(colour);
 }
 
 void RenderingManager::sunEnable()
