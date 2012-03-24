@@ -49,6 +49,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
     cameraPitchNode->attachObject(mRendering.getCamera());
+
+    mOcclusionQuery = new OcclusionQuery();
     
     //mSkyManager = 0;
     mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
@@ -65,6 +67,7 @@ RenderingManager::~RenderingManager ()
     delete mPlayer;
     delete mSkyManager;
     delete mLocalMap;
+    delete mOcclusionQuery;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()

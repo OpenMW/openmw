@@ -25,6 +25,7 @@
 #include "actors.hpp"
 #include "player.hpp"
 #include "localmap.hpp"
+#include "occlusionquery.hpp"
 
 namespace Ogre
 {
@@ -131,9 +132,11 @@ class RenderingManager: private RenderingInterface {
   private:
 
     void setAmbientMode();
-    
+
     SkyManager* mSkyManager;
-    
+
+    OcclusionQuery* mOcclusionQuery;
+
     OEngine::Render::OgreRenderer &mRendering;
 
     MWRender::Objects mObjects;
