@@ -63,17 +63,17 @@ size_t BulletShape::calculateSize() const
 
 
 //=============================================================================================================
-template<> BulletShapeManager *Ogre::Singleton<BulletShapeManager>::ms_Singleton = 0;
+template<> BulletShapeManager *Ogre::Singleton<BulletShapeManager>::msSingleton = 0;
 
 BulletShapeManager *BulletShapeManager::getSingletonPtr()
 {
-    return ms_Singleton;
+    return msSingleton;
 }
 
 BulletShapeManager &BulletShapeManager::getSingleton()
 {
-    assert(ms_Singleton);
-    return(*ms_Singleton);
+    assert(msSingleton);
+    return(*msSingleton);
 }
 
 BulletShapeManager::BulletShapeManager()

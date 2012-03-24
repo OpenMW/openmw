@@ -93,7 +93,7 @@ class BSAFile
   void readHeader();
 
   /// Get the index of a given file name, or -1 if not found
-  int getIndex(const char *str);
+  int getIndex(const char *str) const;
 
  public:
 
@@ -119,7 +119,7 @@ class BSAFile
    */
 
   /// Check if a file exists
-  bool exists(const char *file) { return getIndex(file) != -1; }
+  bool exists(const char *file) const { return getIndex(file) != -1; }
 
   /** Open a file contained in the archive. Throws an exception if the
       file doesn't exist.
