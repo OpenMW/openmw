@@ -202,6 +202,7 @@ void MapWindow::setVisible(bool b)
 void MapWindow::setCellName(const std::string& cellName)
 {
     static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
+    adjustWindowCaption();
 }
 
 void MapWindow::setPlayerPos(const float x, const float y)
