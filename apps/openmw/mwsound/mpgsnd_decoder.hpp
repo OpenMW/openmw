@@ -40,6 +40,9 @@ namespace MWSound
         virtual void readAll(std::vector<char> &output);
         virtual void rewind();
 
+        MpgSnd_Decoder& operator=(const MpgSnd_Decoder &rhs);
+        MpgSnd_Decoder(const MpgSnd_Decoder &rhs);
+
         MpgSnd_Decoder();
     public:
         virtual ~MpgSnd_Decoder();

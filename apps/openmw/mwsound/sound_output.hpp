@@ -29,6 +29,9 @@ namespace MWSound
 
         virtual void updateListener(const float *pos, const float *atdir, const float *updir) = 0;
 
+        Sound_Output& operator=(const Sound_Output &rhs);
+        Sound_Output(const Sound_Output &rhs);
+
         Sound_Output(SoundManager &mgr) : mManager(mgr) { }
     public:
         virtual ~Sound_Output() { }

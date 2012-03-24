@@ -52,6 +52,9 @@ namespace MWSound
 
         virtual void updateListener(const float *pos, const float *atdir, const float *updir);
 
+        OpenAL_Output& operator=(const OpenAL_Output &rhs);
+        OpenAL_Output(const OpenAL_Output &rhs);
+
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();
 

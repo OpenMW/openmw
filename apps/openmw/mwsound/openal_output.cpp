@@ -76,6 +76,9 @@ class OpenAL_SoundStream : public Sound
 
     volatile bool mIsFinished;
 
+    OpenAL_SoundStream(const OpenAL_SoundStream &rhs);
+    OpenAL_SoundStream& operator=(const OpenAL_SoundStream &rhs);
+
 public:
     OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder);
     virtual ~OpenAL_SoundStream();
@@ -148,6 +151,10 @@ struct OpenAL_Output::StreamThread {
         mStreams.clear();
         mMutex.unlock();
     }
+
+private:
+    StreamThread(const StreamThread &rhs);
+    StreamThread& operator=(const StreamThread &rhs);
 };
 
 
@@ -308,6 +315,10 @@ class OpenAL_Sound : public Sound
 
     ALuint mSource;
     ALuint mBuffer;
+
+    OpenAL_Sound(const OpenAL_Sound &rhs);
+    OpenAL_Sound& operator=(const OpenAL_Sound &rhs);
+
 public:
     OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf);
     virtual ~OpenAL_Sound();

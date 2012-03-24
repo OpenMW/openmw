@@ -53,6 +53,9 @@ namespace MWSound
         void updateSounds(float duration);
         void updateRegionSound(float duration);
 
+        SoundManager(const SoundManager &rhs);
+        SoundManager& operator=(const SoundManager &rhs);
+
     protected:
         DecoderPtr getDecoder();
         friend class OpenAL_Output;

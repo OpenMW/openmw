@@ -42,6 +42,9 @@ namespace MWSound
         virtual void readAll(std::vector<char> &output);
         virtual void rewind();
 
+        FFmpeg_Decoder& operator=(const FFmpeg_Decoder &rhs);
+        FFmpeg_Decoder(const FFmpeg_Decoder &rhs);
+
         FFmpeg_Decoder();
     public:
         virtual ~FFmpeg_Decoder();

@@ -38,6 +38,10 @@ namespace MWSound
         Sound_Decoder() : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
         { }
         virtual ~Sound_Decoder() { }
+
+    private:
+        Sound_Decoder(const Sound_Decoder &rhs);
+        Sound_Decoder& operator=(const Sound_Decoder &rhs);
     };
 }
 
