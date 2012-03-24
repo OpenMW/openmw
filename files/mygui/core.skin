@@ -14,4 +14,7 @@
         <BasisSkin type="MainSkin" offset = "0 0 16 16"/>
     </Skin>
 
+    <Skin name = "RotatingSkin" size = "16 16">
+        <BasisSkin type="RotatingSkin" offset="0 0 16 16" align="Stretch"/>
+    </Skin>
 </MyGUI>

@@ -197,7 +197,7 @@
         <Child type="ScrollBar" skin="MW_VScroll" offset = "498 3 14 509" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "VScroll">
         </Child>
 
-        <Child type="Widget" skin="ClientDefaultSkin" offset = "3 3 493 509" align = "ALIGN_STRETCH" name = "Client">
+        <Child type="Widget" skin="" offset = "3 3 493 509" align = "ALIGN_STRETCH" name = "Client">
         </Child>
 
         <Child type="Widget" skin="IB_T" offset="2 0 512 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
@@ -233,7 +233,7 @@
 
         <Property key="SkinList" value = "MW_MultiSubList" />
 
-        <Child type="Widget" skin="ClientDefaultSkin" offset = "3 3 516 516" align = "ALIGN_STRETCH" name = "Client">
+        <Child type="Widget" skin="" offset = "3 3 516 516" align = "ALIGN_STRETCH" name = "Client">
         </Child>
 
         <Child type="Widget" skin="IB_T" offset="2 0 512 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
