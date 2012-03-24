@@ -308,10 +308,10 @@ namespace MWSound
         if(snditer == mActiveSounds.end())
             return;
 
+        const ESM::Position &pos = ptr.getCellRef().pos;
         IDMap::iterator iditer = snditer->second.begin();
         while(iditer != snditer->second.end())
         {
-            const ESM::Position &pos = ptr.getCellRef().pos;
             iditer->second->update(pos.pos);
             iditer++;
         }
