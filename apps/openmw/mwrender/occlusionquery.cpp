@@ -45,19 +45,21 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     matQueryVisible->setColourWriteEnabled(false);
     matQueryVisible->setDepthCheckEnabled(true); // Occluded by objects
 
+    mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
+
     mBBQueryTotal = mRendering->getScene()->createBillboardSet(1);
     mBBQueryTotal->setDefaultDimensions(150, 150);
     mBBQueryTotal->createBillboard(Vector3::ZERO);
     mBBQueryTotal->setMaterialName("QueryTotalPixels");
     mBBQueryTotal->setRenderQueueGroup(queue);
-    mSunNode->attachObject(mBBQueryTotal);
+    mBBNode->attachObject(mBBQueryTotal);
 
     mBBQueryVisible = mRendering->getScene()->createBillboardSet(1);
     mBBQueryVisible->setDefaultDimensions(150, 150);
     mBBQueryVisible->createBillboard(Vector3::ZERO);
     mBBQueryVisible->setMaterialName("QueryVisiblePixels");
     mBBQueryVisible->setRenderQueueGroup(queue);
-    mSunNode->attachObject(mBBQueryVisible);
+    mBBNode->attachObject(mBBQueryVisible);
 
     mRendering->getScene()->addRenderObjectListener(this);
     mDoQuery = true;
@@ -109,6 +111,15 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
 void OcclusionQuery::update()
 {
     if (!mSupported) return;
+
+    // Adjust the position of the sun billboards according to camera viewing distance
+    // we need to do this to make sure that _everything_ can occlude the sun
+    float dist = mRendering->getCamera()->getFarClipDistance();
+    if (dist==0) dist = 10000000;
+    dist -= 1000; // bias
+    dist /= 1000.f;
+    mBBNode->setPosition(mSunNode->getPosition() * dist);
+    mBBNode->setScale(dist, dist, dist);
 
     // Stop occlusion queries until we get their information
     // (may not happen on the same frame they are requested in)

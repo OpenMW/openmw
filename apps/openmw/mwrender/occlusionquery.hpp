@@ -17,11 +17,32 @@ namespace MWRender
         OcclusionQuery(OEngine::Render::OgreRenderer*, Ogre::SceneNode* sunNode);
         ~OcclusionQuery();
 
+        /**
+         * @return true if occlusion queries are supported on the user's hardware
+         */
         bool supported();
-        ///< returns true if occlusion queries are supported on the user's hardware
 
+        /**
+         * per-frame update
+         */
         void update();
-        ///< per-frame update
+
+        /**
+         * request occlusion test for a billboard at the given position, omitting an entity
+         * @param position of the billboard in ogre coordinates
+         * @param entity to exclude from the occluders
+         */
+        void occlusionTest(const Ogre::Vector3& position, Ogre::Entity* entity);
+
+        /**
+         * @return true if a request is still outstanding
+         */
+        bool occlusionTestPending();
+
+        /**
+         * @return true if the object tested in the last request was occluded
+         */
+        bool getTestResult();
 
         float getSunVisibility() const {return mSunVisibility;};
 
@@ -35,7 +56,11 @@ namespace MWRender
 
         Ogre::SceneNode* mSunNode;
 
+        Ogre::SceneNode* mBBNode;
+
         float mSunVisibility;
+
+        bool mTestResult;
 
         bool mSupported;
         bool mDoQuery;
