@@ -38,10 +38,8 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(Ogre::Root *root, Ogre::Camera *camera,
-        const Files::PathContainer& dataDirs,
-        bool useSound, bool fsstrict, MWWorld::Environment& environment)
-        : mFSStrict(fsstrict)
+    SoundManager::SoundManager(bool useSound, MWWorld::Environment& environment)
+        : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
         , mEnvironment(environment)
     {
         if(!useSound)
@@ -67,8 +65,6 @@ namespace MWSound
             mOutput.reset();
             return;
         }
-
-        mResourceMgr = Ogre::ResourceGroupManager::getSingletonPtr();
     }
 
     SoundManager::~SoundManager()
@@ -161,8 +157,8 @@ namespace MWSound
     void SoundManager::startRandomTitle()
     {
         Ogre::StringVectorPtr filelist;
-        filelist = mResourceMgr->findResourceNames(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                   "Music/"+mCurrentPlaylist+"/*");
+        filelist = mResourceMgr.findResourceNames(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                  "Music/"+mCurrentPlaylist+"/*");
         if(!filelist->size())
             return;
 

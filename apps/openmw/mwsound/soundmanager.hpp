@@ -31,13 +31,7 @@ namespace MWSound
 
     class SoundManager
     {
-        Ogre::ResourceGroupManager *mResourceMgr;
-
-        // This is used for case insensitive and slash-type agnostic file
-        // finding. It takes DOS paths (any case, \\ slashes or / slashes)
-        // relative to the sound dir, and translates them into full paths
-        // of existing files in the filesystem, if they exist.
-        bool mFSStrict;
+        Ogre::ResourceGroupManager& mResourceMgr;
 
         MWWorld::Environment& mEnvironment;
 
@@ -64,9 +58,7 @@ namespace MWSound
         friend class OpenAL_Output;
 
     public:
-        SoundManager(Ogre::Root*, Ogre::Camera*,
-                   const Files::PathContainer& dataDir, bool useSound, bool fsstrict,
-                   MWWorld::Environment& environment);
+        SoundManager(bool useSound, MWWorld::Environment& environment);
         ~SoundManager();
 
         void stopMusic();

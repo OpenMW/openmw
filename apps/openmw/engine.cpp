@@ -333,10 +333,7 @@ void OMW::Engine::go()
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"));
 
     // Create sound system
-    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
-                                                           mOgre->getCamera(),
-                                                           mDataDirs,
-                                                           mUseSound, mFSStrict, mEnvironment);
+    mEnvironment.mSoundManager = new MWSound::SoundManager(mUseSound, mEnvironment);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
