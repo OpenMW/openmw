@@ -1,8 +1,14 @@
 #ifndef _GAME_OCCLUSION_QUERY_H
 #define _GAME_OCCLUSION_QUERY_H
 
-#include <OgreHardwareOcclusionQuery.h>
 #include <OgreRenderObjectListener.h>
+
+namespace Ogre
+{
+    class HardwareOcclusionQuery;
+    class Entity;
+    class SceneNode;
+}
 
 #include <openengine/ogre/renderer.hpp>
 
@@ -49,21 +55,29 @@ namespace MWRender
     private:
         Ogre::HardwareOcclusionQuery* mSunTotalAreaQuery;
         Ogre::HardwareOcclusionQuery* mSunVisibleAreaQuery;
+        Ogre::HardwareOcclusionQuery* mSingleObjectQuery;
         Ogre::HardwareOcclusionQuery* mActiveQuery;
 
         Ogre::BillboardSet* mBBQueryVisible;
         Ogre::BillboardSet* mBBQueryTotal;
+        Ogre::BillboardSet* mBBQuerySingleObject;
 
         Ogre::SceneNode* mSunNode;
-
         Ogre::SceneNode* mBBNode;
-
         float mSunVisibility;
+
+        Ogre::Entity* mObject;
+
+        Ogre::SceneNode* mObjectNode;
+        int mObjectOldRenderQueue;
 
         bool mTestResult;
 
         bool mSupported;
         bool mDoQuery;
+
+        bool mQuerySingleObjectRequested;
+        bool mQuerySingleObjectStarted;
 
         OEngine::Render::OgreRenderer* mRendering;
 
