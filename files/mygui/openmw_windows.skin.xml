@@ -189,14 +189,7 @@
     <!-- The actual caption. It contains the edges of the blocks on
          its sides as well -->
     <Skin name = "MW_Caption" size = "88 20" texture = "black.png" >
-        <!--
-        <Property key="FontName" value = "dorcla" />
-        <Property key="FontHeight" value = "20" />
-        <Property key="FontName" value = "albertis" />
-        <Property key="FontName" value = "cards" />
-        -->
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.75 0.62 0.36" />
 
@@ -221,8 +214,7 @@
 ------------------------------------------------------ -->
 
     <Skin name = "MW_Window" size = "256 54">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
         <Property key="Snap" value = "true" />
@@ -298,8 +290,7 @@
     </Skin>
 
     <Skin name = "MW_Dialog" size = "256 54">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
 
