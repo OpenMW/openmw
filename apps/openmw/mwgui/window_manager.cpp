@@ -400,3 +400,47 @@ const ESMS::ESMStore& WindowManager::getStore() const
 {
     return environment.mWorld->getStore();
 }
+
+void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
+{
+    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+    {
+        std::string name;
+        if (cell->cell->name != "")
+            name = cell->cell->name;
+        else
+            name = cell->cell->region;
+
+        map->setCellName( name );
+
+        map->setCellPrefix("Cell");
+        hud->setCellPrefix("Cell");
+        map->setActiveCell( cell->cell->data.gridX, cell->cell->data.gridY );
+        hud->setActiveCell( cell->cell->data.gridX, cell->cell->data.gridY );
+    }
+    else
+    {
+        map->setCellName( cell->cell->name );
+        map->setCellPrefix( cell->cell->name );
+        hud->setCellPrefix( cell->cell->name );
+    }
+
+}
+
+void WindowManager::setInteriorMapTexture(const int x, const int y)
+{
+    map->setActiveCell(x,y, true);
+    hud->setActiveCell(x,y, true);
+}
+
+void WindowManager::setPlayerPos(const float x, const float y)
+{
+    map->setPlayerPos(x,y);
+    hud->setPlayerPos(x,y);
+}
+
+void WindowManager::setPlayerDir(const float x, const float y)
+{
+    map->setPlayerDir(x,y);
+    hud->setPlayerDir(x,y);
+}

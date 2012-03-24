@@ -20,6 +20,7 @@
             <List file="openmw_mainmenu_skin.xml" group="General"/>
             <List file="openmw_console.skin.xml" group="General"/>
             <List file="openmw_journal_skin.xml" group="General"/>
+            <List file="openmw_map_window_skin.xml" group="General"/>
             <List file="openmw_dialogue_window_skin.xml" group="General"/>
             <List file="openmw_settings.xml" group="General"/>
       </MyGUI>
