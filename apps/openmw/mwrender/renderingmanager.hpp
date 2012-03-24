@@ -98,7 +98,9 @@ class RenderingManager: private RenderingInterface {
     void setSunDirection(const Ogre::Vector3& direction);
     void sunEnable();
     void sunDisable();
-    
+
+    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
+
     void setGlare(bool glare);
     void skyEnable ();
     void skyDisable ();

@@ -54,11 +54,11 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
     cameraPitchNode->attachObject(mRendering.getCamera());
-
-    mOcclusionQuery = new OcclusionQuery();
     
     //mSkyManager = 0;
     mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
+
+    mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
@@ -149,9 +149,13 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 void RenderingManager::update (float duration){
 
     mActors.update (duration);
-    
+
+    mOcclusionQuery->update();
+
     mSkyManager->update(duration);
-    
+
+    mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
+
     mRendering.update(duration);
 
     mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealDirection() );
