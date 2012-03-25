@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main">
+        <!-- Energy bars -->
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="13 146 65 12"
+            align="Left Bottom" name="Health"/>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="13 161 65 12"
+            align="Left Bottom" name="Magicka"/>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Green" position="13 176 65 12"
+            align="Left Bottom" name="Stamina"/>
+
+        <!-- Equipped weapon box -->
+        <Widget type="Widget" skin="HUD_Box" position="82 146 36 36"
+            align="Left Bottom">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top"
+                name="WeapImage"/>
+        </Widget>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="82 182 36 6"
+            align="Left Bottom" name="WeapStatus"/>
+
+        <!-- Selected spell box -->
+        <Widget type="Widget" skin="HUD_Box" position="122 146 36 36"
+            align="Left Bottom">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top"
+                name="SpellImage"/>
+        </Widget>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="122 182 36 6"
+            align="Left Bottom" name="SpellStatus"/>
+
+        <!-- Spell effects box -->
+        <Widget type="Widget" skin="HUD_Box" position="199 168 20 20"
+            align="Right Bottom" name="EffectBox">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 16 16" align="Left Bottom"
+                name="Effect1"/>
+        </Widget>
+
+        <!-- Map box -->
+        <Widget type="Widget" skin="HUD_Box" position="223 123 65 65"
+            align="Right Bottom">
+
+            <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
+                <Property key="CanvasSize" value="1536 1536"/>
+               <!-- 3x3 maps, 1024x1024 each, but we will downsample to 512 to antialias them -->
+                <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_0">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_0_fog"/>
+                </Widget>
+
+                <Widget type="ImageBox" skin="ImageBox" position="512 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_0">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_0_fog"/>
+                </Widget>
+
+                <Widget type="ImageBox" skin="ImageBox" position="1024 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_0">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_0_fog"/>
+                </Widget>
+
+                <Widget type="ImageBox" skin="ImageBox" position="0 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_1">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_1_fog"/>
+                </Widget>
+
+                <Widget type="ImageBox" skin="ImageBox" position="512 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1_fog">
+                        <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Left Bottom" name="Compass"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="ImageBox" skin="ImageBox" position="1024 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_1">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_1_fog"/>
+                </Widget>
+
+                <Widget type="ImageBox" skin="ImageBox" position="0 1024 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_2">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_2_fog"/>
+                </Widget>
+
+                <Widget type="ImageBox" skin="ImageBox" position="512 1024 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_2">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_2_fog"/>
+                </Widget>
+
+                <Widget type="ImageBox" skin="ImageBox" position="1024 1024 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_2">
+                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_2_fog"/>
+                </Widget>
+            </Widget>
+        </Widget>
+
+        <!-- Crosshair -->
+
+        <Widget type="ImageBox" skin="ImageBox" position="0 0 32
+            32" align="Center Center" name="Crosshair"/>
+
+        <!-- Basic FPSCounter box -->
+        <Widget type="Widget" skin="HUD_Box" position="12 12 28 21" align="Left Top"
+            name="FPSBox">
+            <Property key="Visible" value="false"/>
+            <Widget type="TextBox" skin="NumFPS" position="3 3 21 17" name="FPSCounter"/>
+        </Widget>
+
+        <!-- Advanced FPSCounter box -->
+        <Widget type="Widget" skin="HUD_Box" position="12 12 118 51" align="Left Top"
+            name="FPSBoxAdv">
+            <Property key="Visible" value="false"/>
+
+            <Widget type="TextBox" skin="NumFPS" position="3 3 71 17">
+                    <Property key="Caption" value="FPS: "/>
+            </Widget>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 71 17" name="FPSCounterAdv"/>
+
+            <Widget type="TextBox" skin="NumFPS" position="3 3 71 32">
+                    <Property key="Caption" value="Tri Count: "/>
+            </Widget>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 71 32" name="TriangleCounter"/>
+
+            <Widget type="TextBox" skin="NumFPS" position="3 3 71 47">
+                    <Property key="Caption" value="Batch Count: "/>
+            </Widget>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 71 47" name="BatchCounter"/>
+        </Widget>
+
+    </Widget>
+</MyGUI>

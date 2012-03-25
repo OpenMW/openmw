@@ -37,12 +37,12 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     gui = mGuiManager->getGui();
 
     //Register own widgets with MyGUI
-    MyGUI::FactoryManager::getInstance().registerFactory<DialogeHistory>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
 
     // Get size info from the Gui object
     assert(gui);
-    int w = gui->getViewSize().width;
-    int h = gui->getViewSize().height;
+    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
+    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
@@ -153,7 +153,7 @@ void WindowManager::updateVisible()
     dialogueWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
-    gui->setVisiblePointer(isGuiMode());
+    MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
     // If in game mode, don't show anything.
     if(mode == GM_Game) //Use a switch/case structure
@@ -399,4 +399,48 @@ void WindowManager::onFrame (float frameDuration)
 const ESMS::ESMStore& WindowManager::getStore() const
 {
     return environment.mWorld->getStore();
+}
+
+void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
+{
+    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+    {
+        std::string name;
+        if (cell->cell->name != "")
+            name = cell->cell->name;
+        else
+            name = cell->cell->region;
+
+        map->setCellName( name );
+
+        map->setCellPrefix("Cell");
+        hud->setCellPrefix("Cell");
+        map->setActiveCell( cell->cell->data.gridX, cell->cell->data.gridY );
+        hud->setActiveCell( cell->cell->data.gridX, cell->cell->data.gridY );
+    }
+    else
+    {
+        map->setCellName( cell->cell->name );
+        map->setCellPrefix( cell->cell->name );
+        hud->setCellPrefix( cell->cell->name );
+    }
+
+}
+
+void WindowManager::setInteriorMapTexture(const int x, const int y)
+{
+    map->setActiveCell(x,y, true);
+    hud->setActiveCell(x,y, true);
+}
+
+void WindowManager::setPlayerPos(const float x, const float y)
+{
+    map->setPlayerPos(x,y);
+    hud->setPlayerPos(x,y);
+}
+
+void WindowManager::setPlayerDir(const float x, const float y)
+{
+    map->setPlayerDir(x,y);
+    hud->setPlayerDir(x,y);
 }

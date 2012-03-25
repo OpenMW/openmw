@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 474 192" name="_Main">
+        <!-- Class name -->
+        <Widget type="TextBox" skin="ProgressText" position="12 12 48 30" name="LabelT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Caption" value="Name"/>
+            <Property key="TextAlign" value="ALIGN_LEFT ALIGN_VCENTRE"/>
+        </Widget>
+        <Widget type="EditBox" skin="MW_TextEdit" position="62 12 250 30" name="EditName" align="ALIGN_HSTRETCH ALIGN_TOP"/>
+
+        <Widget type="Widget" skin="" position="12 46 480 110" align="ALIGN_STRETCH">
+
+            <!-- Specialization -->
+            <Widget type="TextBox" skin="HeaderText" position="0 0 156 18" name="SpecializationT" align="ALIGN_LEFT ALIGN_TOP">
+                <Property key="Caption" value="Specialization:"/>
+                <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+            </Widget>
+            <Widget type="TextBox" skin="SandText" position="0 18 156 18" name="SpecializationName" align="ALIGN_LEFT ALIGN_TOP">
+                <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+            </Widget>
+
+            <!-- Favorite Attributes -->
+            <Widget type="TextBox" skin="HeaderText" position="0 41 156 18" name="FavoriteAttributesT" align="ALIGN_LEFT ALIGN_TOP">
+                <Property key="Caption" value="Favorite Attributes:"/>
+                <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+            </Widget>
+            <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 59 156 18" name="FavoriteAttribute0" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 77 156 18" name="FavoriteAttribute1" align="ALIGN_LEFT ALIGN_TOP" />
+
+            <!-- Major Skills -->
+            <Widget type="TextBox" skin="HeaderText" position="156 0 158 18" name="MajorSkillT" align="ALIGN_LEFT ALIGN_TOP">
+                <Property key="Caption" value="Major Skills:"/>
+                <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+            </Widget>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 18 158 18" name="MajorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 36 158 18" name="MajorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 54 158 18" name="MajorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 72 158 18" name="MajorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="156 90 158 18" name="MajorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
+
+            <!-- Minor Skills -->
+            <Widget type="TextBox" skin="HeaderText" position="314 0 140 18" name="MinorSkillT" align="ALIGN_LEFT ALIGN_TOP">
+                <Property key="Caption" value="Minor Skills:"/>
+                <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+            </Widget>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 18 140 18" name="MinorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 36 140 18" name="MinorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 54 140 18" name="MinorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 72 140 18" name="MinorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="314 90 140 18" name="MinorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
+
+        </Widget>
+
+        <!-- Dialog buttons -->
+        <Widget type="Button" skin="MW_Button" position="207 158 143 23" name="DescriptionButton">
+            <Property key="Caption" value="Class Description"/>
+        </Widget>
+        <Widget type="Button" skin="MW_Button" position="356 158 53 23" name="BackButton">
+            <Property key="Caption" value="Back"/>
+        </Widget>
+        <Widget type="Button" skin="MW_Button" position="417 158 42 23" name="OKButton">
+            <Property key="Caption" value="OK"/>
+        </Widget>
+    </Widget>
+</MyGUI>

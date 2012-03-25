@@ -49,18 +49,25 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
     //History view
     getWidget(history, "History");
     history->setOverflowToTheLeft(true);
-    history->getClient()->eventMouseButtonClick = MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
     history->setMaxTextLength(1000000);
+    Widget* eventbox;
+
+    //An EditBox cannot receive mouse click events, so we use an
+    //invisible widget on top of the editbox to receive them
+    /// \todo scrolling the dialogue history with the mouse wheel doesn't work using this solution
+    getWidget(eventbox, "EventBox");
+    eventbox->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
+    
     //Topics list
     getWidget(topicsList, "TopicsList");
     topicsList->setScrollVisible(true);
-    //topicsList->eventListSelectAccept      = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
-    topicsList->eventListMouseItemActivate = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
-    //topicsList->eventListChangePosition    = MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    //topicsList->eventListSelectAccept      += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    topicsList->eventListMouseItemActivate += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    //topicsList->eventListChangePosition    += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
     MyGUI::ButtonPtr byeButton;
     getWidget(byeButton, "ByeButton");
-    byeButton->eventMouseButtonClick = MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
+    byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
 
     getWidget(pDispositionBar, "Disposition");
     getWidget(pDispositionText,"DispositionText");
@@ -68,11 +75,11 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
 
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 {
-    ISubWidgetText* t = history->getSubWidgetText();
+    ISubWidgetText* t = history->getClient()->getSubWidgetText();
     if(t == nullptr)
         return;
 
-    const IntPoint& lastPressed = InputManager::getInstance().getLastLeftPressed();
+    const IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
 
     size_t cursorPosition = t->getCursorPosition(lastPressed);
     MyGUI::UString color = history->getColorAtPos(cursorPosition);
@@ -99,7 +106,7 @@ void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
     mEnvironment.mDialogueManager->goodbyeSelected();
 }
 
-void DialogueWindow::onSelectTopic(MyGUI::List* _sender, size_t _index)
+void DialogueWindow::onSelectTopic(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;

@@ -14,7 +14,8 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects renderinginterface
+    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
+    renderinginterface localmap
     )
 
 add_openmw_dir (mwinput
@@ -44,7 +45,7 @@ add_openmw_dir (mwsound
 add_openmw_dir (mwworld
     refdata world physicssystem scene environment globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
-    cells localscripts customdata weather inventorystore
+    cells localscripts customdata weather inventorystore ptr
     )
 
 add_openmw_dir (mwclass
@@ -87,12 +88,12 @@ target_link_libraries(openmw
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
+    ${MYGUI_LIBRARIES}
+    MyGUI.OgrePlatform #TODO MyGUI ogre platform is not added by the find script
     components
-    MyGUIEngine
-    MyGUIOgrePlatform
 )
 
-# Fix for not visible pthreads functions for linker with glibc 2.15 
+# Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
 target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
 endif()

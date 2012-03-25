@@ -446,6 +446,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environmen
     vshader->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
     vshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setVertexProgram(vshader->getName());
+    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setFragmentProgram("");
 
     // Clouds
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");

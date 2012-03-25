@@ -93,6 +93,7 @@ CREDITS
 Current Developers:
 Alexander “Ace” Olofsson
 athile
+BrotherBrick
 Cris “Mirceam” Mihalache
 gugus / gus
 Jacob “Yacoby” Essex
