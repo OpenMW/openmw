@@ -241,8 +241,8 @@ namespace Physic
 
         static bool cmp( const std::pair<float, btCollisionObject*>& i, const std::pair<float, btCollisionObject*>& j )
         {
-            if( i.first < j.first ) return false;
-            if( j.first < i.first ) return true;
+            if( i.first > j.first ) return false;
+            if( j.first > i.first ) return true;
             return false;
         }
 

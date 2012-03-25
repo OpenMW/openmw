@@ -498,13 +498,21 @@ namespace MWWorld
 
     std::string World::getFacedHandle()
     {
-        std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
+        if (!mRendering->occlusionQuerySupported())
+        {
+            std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
-        if (result.first.empty() ||
-            result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
-            return "";
+            if (result.first.empty() ||
+                result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
+                return "";
 
-        return result.first;
+            return result.first;
+        }
+        else
+        {
+            // updated every few frames in update()
+            return mFacedHandle;
+        }
     }
 
     void World::deleteObject (Ptr ptr)
@@ -714,6 +722,61 @@ namespace MWWorld
             Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
             sun = Vector3(sun.x, -sun.z, sun.y);
             mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
+        }
+
+        // update faced handle (object the player is looking at)
+        // this uses a mixture of raycasts and occlusion queries.
+        else // if (mRendering->occlusionQuerySupported())
+        {
+            MWRender::OcclusionQuery* query = mRendering->getOcclusionQuery();
+            if (!query->occlusionTestPending())
+            {
+                // get result of last query
+                if (mNumFacing == 0) mFacedHandle = "";
+                else if (mNumFacing == 1)
+                {
+                    bool result = query->getTestResult();
+                    mFacedHandle = result ? mFaced1Name : "";
+                }
+                else if (mNumFacing == 2)
+                {
+                    bool result = query->getTestResult();
+                    mFacedHandle = result ? mFaced2Name : mFaced1Name;
+                }
+
+                // send new query
+                // figure out which object we want to test against
+                std::vector < std::pair < float, std::string > > results = mPhysics->getFacedObjects();
+
+                if (results.size() == 0)
+                {
+                    mNumFacing = 0;
+                }
+                else if (results.size() == 1)
+                {
+                    mFaced1 = getPtrViaHandle(results.front().second);
+                    mFaced1Name = results.front().second;
+                    mNumFacing = 1;
+
+                    btVector3 p = mPhysics->getRayPoint(results.front().first);
+                    Ogre::Vector3 pos(p.x(), p.z(), -p.y());
+                    Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
+                    query->occlusionTest(pos, node);
+                }
+                else
+                {
+                    mFaced1Name = results.front().second;
+                    mFaced2Name = results[1].second;
+                    mFaced1 = getPtrViaHandle(results.front().second);
+                    mFaced2 = getPtrViaHandle(results[1].second);
+                    mNumFacing = 2;
+
+                    btVector3 p = mPhysics->getRayPoint(results[1].first);
+                    Ogre::Vector3 pos(p.x(), p.z(), -p.y());
+                    Ogre::SceneNode* node = mFaced2.getRefData().getBaseNode();
+                    query->occlusionTest(pos, node);
+                }
+            }
         }
     }
 

@@ -47,7 +47,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     matQueryArea->setDepthCheckEnabled(false); // Not occluded by objects
     MaterialPtr matQueryVisible = matBase->clone("QueryVisiblePixels");
     matQueryVisible->setDepthWriteEnabled(false);
-    matQueryVisible->setColourWriteEnabled(false);
+    matQueryVisible->setColourWriteEnabled(false); // Uncomment this to visualize the occlusion query
     matQueryVisible->setDepthCheckEnabled(true); // Occluded by objects
 
     mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
@@ -69,13 +69,14 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBNode->attachObject(mBBQueryVisible);
 
     mBBQuerySingleObject = mRendering->getScene()->createBillboardSet(1);
-    mBBQuerySingleObject->setDefaultDimensions(10, 10);
+    mBBQuerySingleObject->setDefaultDimensions(0.01, 0.01);
     mBBQuerySingleObject->createBillboard(Vector3::ZERO);
     mBBQuerySingleObject->setMaterialName("QueryVisiblePixels");
     mBBQuerySingleObject->setRenderQueueGroup(queue);
     mObjectNode->attachObject(mBBQuerySingleObject);
 
     mRendering->getScene()->addRenderObjectListener(this);
+    mRendering->getScene()->addRenderQueueListener(this);
     mDoQuery = true;
 }
 
@@ -95,8 +96,6 @@ bool OcclusionQuery::supported()
 void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass, const AutoParamDataSource* source, 
 			const LightList* pLightList, bool suppressRenderStateChanges)
 {
-    if (!mSupported) return;
-
     // The following code activates and deactivates the occlusion queries
     // so that the queries only include the rendering of their intended targets
 
@@ -111,25 +110,46 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
     // Open a new occlusion query
     if (mDoQuery == true)
     {
-        if (rend == mBBQueryTotal) 
-            mActiveQuery = mSunTotalAreaQuery;
-        else if (rend == mBBQueryVisible) 
-            mActiveQuery = mSunVisibleAreaQuery;
-        else if (rend == mBBQuerySingleObject && mQuerySingleObjectRequested)
+        if (rend == mBBQueryTotal)
         {
-            mQuerySingleObjectStarted = true;
-            mQuerySingleObjectRequested = false;
-            mActiveQuery = mSingleObjectQuery;
+            mActiveQuery = mSunTotalAreaQuery;
+            mWasVisible = true;
         }
-
-        if (mActiveQuery != NULL)
-            mActiveQuery->beginOcclusionQuery();
+        else if (rend == mBBQueryVisible)
+        {
+            mActiveQuery = mSunVisibleAreaQuery;
+        }
     }
+    if (rend == mBBQuerySingleObject && mQuerySingleObjectRequested)
+    {
+        mQuerySingleObjectStarted = true;
+        mQuerySingleObjectRequested = false;
+        mActiveQuery = mSingleObjectQuery;
+    }
+    
+    if (mActiveQuery != NULL)
+        mActiveQuery->beginOcclusionQuery();
+}
+
+void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& repeatThisInvocation)
+{    
+    if (queueGroupId == RENDER_QUEUE_SKIES_LATE && mWasVisible == false)
+    {
+        // for some reason our single object query returns wrong results when the sun query was never executed
+        // (which can happen when we are in interiors, or when the sun is outside of the view frustum and gets culled)
+        // so we force it here once everything has been rendered
+        mSunTotalAreaQuery->beginOcclusionQuery();
+        mSunTotalAreaQuery->endOcclusionQuery();
+        mSunVisibleAreaQuery->beginOcclusionQuery();
+        mSunVisibleAreaQuery->endOcclusionQuery();
+    } 
 }
 
 void OcclusionQuery::update()
 {
     if (!mSupported) return;
+
+    mWasVisible = false;
 
     // Adjust the position of the sun billboards according to camera viewing distance
     // we need to do this to make sure that _everything_ can occlude the sun
@@ -145,8 +165,7 @@ void OcclusionQuery::update()
     mDoQuery = false;
 
     if (!mSunTotalAreaQuery->isStillOutstanding()
-        && !mSunVisibleAreaQuery->isStillOutstanding()
-        && !mSingleObjectQuery->isStillOutstanding())
+        && !mSunVisibleAreaQuery->isStillOutstanding())
     {
         unsigned int totalPixels;
         unsigned int visiblePixels;
@@ -165,24 +184,33 @@ void OcclusionQuery::update()
             if (mSunVisibility > 1) mSunVisibility = 1;
         }
 
-        if (mQuerySingleObjectStarted)
+        mDoQuery = true;
+    }
+    if (!mSingleObjectQuery->isStillOutstanding() && mQuerySingleObjectStarted)
+    {
+        unsigned int result;
+
+        mSingleObjectQuery->pullOcclusionQuery(&result);
+
+        //std::cout << "Single object query result: " << result << " pixels " << std::endl;
+        mTestResult = (result != 0);
+
+        mBBQuerySingleObject->setVisible(false);
+
+        // restore old render queues
+        for (std::vector<ObjectInfo>::iterator it=mObjectsInfo.begin();
+            it!=mObjectsInfo.end(); ++it)
         {
-            unsigned int visiblePixels;
-
-            mSingleObjectQuery->pullOcclusionQuery(&visiblePixels);
-
-            mBBQuerySingleObject->setVisible(false);
-            mObject->setRenderQueueGroup(mObjectOldRenderQueue);
-
-            mQuerySingleObjectStarted = false;
-            mQuerySingleObjectRequested = false;
+            if (!mRendering->getScene()->hasMovableObject((*it).name, (*it).typeName)) return;
+            mRendering->getScene()->getMovableObject((*it).name, (*it).typeName)->setRenderQueueGroup( (*it).oldRenderqueue );
         }
 
-        mDoQuery = true;
+        mQuerySingleObjectStarted = false;
+        mQuerySingleObjectRequested = false;
     }
 }
 
-void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::Entity* entity)
+void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::SceneNode* object)
 {
     assert( !occlusionTestPending()
         && "Occlusion test still pending");
@@ -190,11 +218,24 @@ void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::Entity* 
     mBBQuerySingleObject->setVisible(true);
 
     // we don't want the object to occlude itself
-    mObjectOldRenderQueue = entity->getRenderQueueGroup();
-    if (mObjectOldRenderQueue < RENDER_QUEUE_MAIN+2)
-        entity->setRenderQueueGroup(RENDER_QUEUE_MAIN+2);
+    // put it in a render queue _after_ the occlusion query
+    mObjectsInfo.clear();
+    for (int i=0; i<object->numAttachedObjects(); ++i)
+    {
+        ObjectInfo info;
+        MovableObject* obj = object->getAttachedObject(i);
+        info.name = obj->getName();
+        info.typeName = obj->getMovableType();
+        info.oldRenderqueue = obj->getRenderQueueGroup();
+
+        mObjectsInfo.push_back(info);
+
+        object->getAttachedObject(i)->setRenderQueueGroup(RENDER_QUEUE_MAIN+5);
+    }
 
     mObjectNode->setPosition(position);
+    // scale proportional to camera distance, in order to always give the billboard the same size in screen-space
+    mObjectNode->setScale( Vector3(1,1,1)*(position - mRendering->getCamera()->getRealPosition()).length() );
 
     mQuerySingleObjectRequested = true;
 }

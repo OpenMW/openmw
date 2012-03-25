@@ -100,6 +100,7 @@ class RenderingManager: private RenderingInterface {
     void sunDisable();
 
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
+    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
 
     void setGlare(bool glare);
     void skyEnable ();

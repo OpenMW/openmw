@@ -50,6 +50,33 @@ namespace MWWorld
 
         return mEngine->rayTest(from,to);
     }
+
+    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects ()
+    {
+        //get a ray pointing to the center of the viewport
+        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
+        mRender.getViewport()->getWidth()/2,
+        mRender.getViewport()->getHeight()/2);
+        //let's avoid the capsule shape of the player.
+        centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
+        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
+        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+
+        return mEngine->rayTest2(from,to);
+    }
+
+    btVector3 PhysicsSystem::getRayPoint(float extent)
+    {
+        //get a ray pointing to the center of the viewport
+        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
+        mRender.getViewport()->getWidth()/2,
+        mRender.getViewport()->getHeight()/2);
+        //let's avoid the capsule shape of the player.
+        centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
+        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
+        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+        return from * (1-extent) + to * extent;
+    }
     
     bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to)
     {
