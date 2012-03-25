@@ -71,7 +71,8 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBNode->attachObject(mBBQueryVisible);
 
     mBBQuerySingleObject = mRendering->getScene()->createBillboardSet(1);
-    mBBQuerySingleObject->setDefaultDimensions(0.01, 0.01);
+    /// \todo ideally this should occupy exactly 1 pixel on the screen
+    mBBQuerySingleObject->setDefaultDimensions(0.003, 0.003);
     mBBQuerySingleObject->createBillboard(Vector3::ZERO);
     mBBQuerySingleObject->setMaterialName("QueryVisiblePixels");
     mBBQuerySingleObject->setRenderQueueGroup(queue);
