@@ -350,7 +350,7 @@ namespace MWSound
                 return;
         }
 
-        int r = rand() % total;        //old random code
+        int r = (int)(rand()/((double)RAND_MAX+1) * total);
         int pos = 0;
 
         soundIter = regn->soundList.begin();
