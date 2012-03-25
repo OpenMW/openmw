@@ -15,6 +15,22 @@ using namespace MWGui;
 
 HUD::HUD(int width, int height, int fpsLevel)
     : Layout("openmw_hud_layout.xml")
+    , health(NULL)
+    , magicka(NULL)
+    , stamina(NULL)
+    , weapImage(NULL)
+    , spellImage(NULL)
+    , weapStatus(NULL)
+    , spellStatus(NULL)
+    , effectBox(NULL)
+    , effect1(NULL)
+    , minimap(NULL)
+    , compass(NULL)
+    , crosshair(NULL)
+    , fpsbox(NULL)
+    , fpscounter(NULL)
+    , trianglecounter(NULL)
+    , batchcounter(NULL)
 {
     setCoord(0,0, width, height);
 
