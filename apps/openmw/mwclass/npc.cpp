@@ -269,8 +269,9 @@ namespace MWClass
     {
         Ogre::Vector3 vector (0, 0, 0);
 
-        vector.x = - getMovementSettings (ptr).mLeftRight * 200;
-        vector.y = getMovementSettings (ptr).mForwardBackward * 200;
+        vector.x = - getMovementSettings (ptr).mLeftRight * 127;
+        vector.y = getMovementSettings (ptr).mForwardBackward * 127;
+		vector.z = getMovementSettings(ptr).mUpDown * 127;
 
         if (getStance (ptr, Run, false))
             vector *= 2;

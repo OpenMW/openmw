@@ -111,6 +111,7 @@ namespace MWWorld
         void setLeftRight (int value);
 
         void setForwardBackward (int value);
+		void setUpDown(int value);
 
         void toggleRunning();
     };

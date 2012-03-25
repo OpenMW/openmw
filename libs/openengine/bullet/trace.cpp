@@ -112,8 +112,8 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 	float y2 = to.getOrigin().getY();
 	float z2 = to.getOrigin().getZ();
 	
-	std::cout << "BtFrom: " << x << "," << y << "," << z << "\n";
-	std::cout << "BtTo: " << x2 << "," << y2 << "," << z2 << "\n";
+	//std::cout << "BtFrom: " << x << "," << y << "," << z << "\n";
+	//std::cout << "BtTo: " << x2 << "," << y2 << "," << z2 << "\n";
 	//std::cout << "BtTo: " << to.getOrigin().getX() << "," << to.getOrigin().getY() << "," << to.getOrigin().getZ() << "\n";
 
 

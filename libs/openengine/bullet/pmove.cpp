@@ -786,7 +786,7 @@ static void PM_WaterMove( playerMove* const pm )
 		wishvel = pml.forward * scale * pm->cmd.forwardmove + pml.right * scale * pm->cmd.rightmove;
 
 		//wishvel[2] += scale * pm->cmd.upmove;
-		wishvel.y += pm->cmd.upmove * scale;
+		wishvel.z += pm->cmd.upmove * scale;
 	}
 
 	//VectorCopy (wishvel, wishdir);
@@ -1094,21 +1094,22 @@ void AngleVectors( const Ogre::Vector3& angles, Ogre::Vector3* const forward, Og
 	if (forward)
 	{
 		forward->x = cp * cy;
-		forward->z = cp * sy;
-		forward->y = -sp;
+		forward->y = cp * sy;
+		forward->z = -sp;
 	}
 	if (right)
 	{
 		right->x = (-1 * sr * sp * cy + -1 * cr * -sy);
-		right->z = (-1 * sr * sp * sy + -1 * cr * cy);
-		right->y = 0.0f;//-1 * sp * cp;
+		right->y = (-1 * sr * sp * sy + -1 * cr * cy);
+		right->z = 0.0f;//-1 * sp * cp;
 	}
 	if (up)
 	{
-		up->x = (cr * sp * cy + -sr * -sy);
-		up->z = (cr * sp * sy + -sr * cy);
-		up->y = cr * cp;
+		up->x =(cr * sp * cy + -sr * -sy);
+		up->y=(cr * sp * sy + -sr * cy);
+		up->z = cr * cp;
 	}
+	
 }
 
 void PM_GroundTraceMissed()
@@ -1356,7 +1357,7 @@ static void PM_CrashLand( void )
 
 static void PM_GroundTrace( void ) 
 {
-	std::cout << "Ground trace\n";
+	//std::cout << "Ground trace\n";
 	Ogre::Vector3		point;
 	traceResults		trace;
 
@@ -1578,9 +1579,12 @@ static void PM_NoclipMove( void )
 	
 	//for (i=0 ; i<3 ; i++)
 		//wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
+	std::cout << "Forward" << pml.forward << "\n";
+	std::cout << "Right" << pml.right << "\n";
+	std::cout << "Up" << pml.up << "\n";
 	wishvel = pml.forward * fmove + pml.right * smove;
 	//wishvel[2] += pm->cmd.upmove;
-	wishvel.y += pm->cmd.upmove;
+	wishvel.z += pm->cmd.upmove;
 
 	//VectorCopy (wishvel, wishdir);
 	wishdir = wishvel;
@@ -1720,7 +1724,6 @@ void PM_SetWaterLevel( playerMove* const pm )
 
 void PmoveSingle (playerMove* const pmove) 
 {
-	std::cout << "Pmove single\n";
 	//pm = pmove;
 
 	// Aedra doesn't support Q3-style VM traps D:	//while(1);
@@ -1944,7 +1947,7 @@ void PmoveSingle (playerMove* const pmove)
 	else 
 	{
 		// airborne
-		std::cout << "AIRMOVE\n";
+		//std::cout << "AIRMOVE\n";
 		PM_AirMove();
 		//bprintf("AirMove\n");
 	}

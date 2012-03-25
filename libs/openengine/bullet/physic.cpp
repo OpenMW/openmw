@@ -156,10 +156,10 @@ namespace Physic
         solver = new btSequentialImpulseConstraintSolver;
 
         //TODO: memory leak?
-        btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
+        //btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
         //pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
 
-        broadphase = new btDbvtBroadphase(pairCache);
+        broadphase = new btDbvtBroadphase();
 
         // The world.
         dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
