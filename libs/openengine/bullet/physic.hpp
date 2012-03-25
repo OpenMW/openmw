@@ -201,6 +201,11 @@ namespace Physic
          */
         std::pair<std::string,float> rayTest(btVector3& from,btVector3& to);
 
+        /**
+         * Return all objects hit by a ray.
+         */
+        std::vector< std::pair<float, std::string> > rayTest2(btVector3& from, btVector3& to);
+
         //event list of non player object
         std::list<PhysicEvent> NPEventList;
 
@@ -223,6 +228,30 @@ namespace Physic
         //debug rendering
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
+    };
+
+
+    struct MyRayResultCallback : public btCollisionWorld::RayResultCallback
+    {
+        virtual btScalar addSingleResult( btCollisionWorld::LocalRayResult& rayResult, bool bNormalInWorldSpace)
+        {
+            results.push_back( std::make_pair(rayResult.m_hitFraction, rayResult.m_collisionObject) );
+            return rayResult.m_hitFraction;
+        }
+
+        static bool cmp( const std::pair<float, btCollisionObject*>& i, const std::pair<float, btCollisionObject*>& j )
+        {
+            if( i.first < j.first ) return false;
+            if( j.first < i.first ) return true;
+            return false;
+        }
+
+        void sort()
+        {
+            std::sort(results.begin(), results.end(), cmp);
+        }
+
+        std::vector < std::pair<float, btCollisionObject*> > results;
     };
 
 }}

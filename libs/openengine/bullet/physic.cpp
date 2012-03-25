@@ -372,4 +372,35 @@ namespace Physic
 
         return std::pair<std::string,float>(name,d);
     }
+
+    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
+    {
+        MyRayResultCallback resultCallback1;
+        resultCallback1.m_collisionFilterMask = COL_WORLD;
+        dynamicsWorld->rayTest(from, to, resultCallback1);
+        resultCallback1.sort();
+        std::vector< std::pair<float, btCollisionObject*> > results = resultCallback1.results;
+
+        MyRayResultCallback resultCallback2;
+        resultCallback2.m_collisionFilterMask = COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL;
+        dynamicsWorld->rayTest(from, to, resultCallback2);
+        resultCallback2.sort();
+        std::vector< std::pair<float, btCollisionObject*> > actorResults = resultCallback2.results;
+
+        std::vector< std::pair<float, std::string> > results2;
+
+        for (std::vector< std::pair<float, btCollisionObject*> >::iterator it=results.begin();
+            it != results.end(); ++it)
+        {
+            results2.push_back( std::make_pair( (*it).first, static_cast<RigidBody&>(*(*it).second).mName ) );
+        }
+
+        for (std::vector< std::pair<float, btCollisionObject*> >::iterator it=actorResults.begin();
+            it != actorResults.end(); ++it)
+        {
+            results2.push_back( std::make_pair( (*it).first, static_cast<PairCachingGhostObject&>(*(*it).second).mName ) );
+        }
+
+        return results2;
+    }
 }};
