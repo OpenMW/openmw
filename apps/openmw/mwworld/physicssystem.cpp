@@ -148,6 +148,7 @@ namespace MWWorld
 			if(it->first == "player"){
 				
 				coord = playerphysics->ps.origin;
+				//std::cout << "ZCoord: " << coord.z << "\n";
 				//std::cout << "Coord" << coord << "\n";
 				//coord = Ogre::Vector3(coord.x, coord.z, coord.y);   //x, z, -y
 				

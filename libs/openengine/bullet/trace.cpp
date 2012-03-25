@@ -28,11 +28,11 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 
 	NewPhysTraceResults out;
 	//std::cout << "Starting trace\n";
-	Ogre::Vector3 startReplace = Ogre::Vector3(650,950, 45);
-	Ogre::Vector3 endReplace = startReplace;
-	endReplace.y -= .25;
+	//Ogre::Vector3 startReplace = Ogre::Vector3(650,950, 45);
+	//Ogre::Vector3 endReplace = startReplace;
+	//endReplace.z -= .25;
 	
-	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, rotation, 0.0f), isInterior, enginePass);
+	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0f, rotation), isInterior, enginePass);
 	if(hasHit)
 		std::cout << "Has hit\n";
 	if (out.fraction < 0.001f)
@@ -65,7 +65,7 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	if (!hasHit)
 	{
 		results->endpos = end;
-		results->planenormal = Ogre::Vector3(0.0f, 1.0f, 0.0f);
+		results->planenormal = Ogre::Vector3(0.0f, 0.0f, 1.0f);
 		results->entityNum = ENTITYNUM_NONE;
 		results->fraction = 1.0f;
 	}

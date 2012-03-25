@@ -178,7 +178,7 @@ bool	PM_SlideMove( bool gravity )
 	float		into;
 	Ogre::Vector3		endVelocity;
 	Ogre::Vector3		endClipVelocity;
-	
+	std::cout << "Slide move\n";
 	numbumps = 4;
 
 	// primal_velocity = pm->ps->velocity
@@ -191,14 +191,14 @@ bool	PM_SlideMove( bool gravity )
 		//VectorCopy( pm->ps->velocity, endVelocity );
 		endVelocity = pm->ps.velocity;
 		//endVelocity[2] -= pm->ps->gravity * pml.frametime;
-		endVelocity.y -= pm->ps.gravity * pml.frametime;
+		endVelocity.z -= pm->ps.gravity * pml.frametime;
 
 		// pm->ps->velocity = avg(pm->ps->velocity.z, endVelocity.z)
 		//pm->ps->velocity[2] = ( pm->ps->velocity[2] + endVelocity[2] ) * 0.5;
-		pm->ps.velocity.y= (pm->ps.velocity.y + endVelocity.y) * 0.5f;
+		pm->ps.velocity.z= (pm->ps.velocity.z + endVelocity.z) * 0.5f;
 
 		//primal_velocity[2] = endVelocity[2];
-		primal_velocity.y = endVelocity.y;
+		primal_velocity.z = endVelocity.z;
 
 		if ( pml.groundPlane ) 
 			// slide along the ground plane
@@ -239,7 +239,7 @@ bool	PM_SlideMove( bool gravity )
 		{
 			// entity is completely trapped in another solid
 			//pm->ps->velocity[2] = 0;	// don't build up falling damage, but allow sideways acceleration
-			pm->ps.velocity.y = 0;
+			pm->ps.velocity.z = 0;
 			return true;
 		}
 
@@ -427,10 +427,11 @@ int PM_StepSlideMove( bool gravity )
 	if ( PM_SlideMove( gravity ) == false )
 		return 1;		// we got exactly where we wanted to go first try	
 
+	std::cout << "Step Slide move\n";
 	// down = start_o - vec3(0, 0, STEPSIZE)
 	//VectorCopy(start_o, down);
 	down = start_o;
-	down.y -= STEPSIZE;
+	down.z -= STEPSIZE;
 
 	//pm->trace (&trace, start_o, pm->mins, pm->maxs, down, pm->ps->clientNum, pm->tracemask);
 	//tracefunc(&trace, start_o, down, , 0, pml.scene);
@@ -439,11 +440,11 @@ int PM_StepSlideMove( bool gravity )
 	
 	// up = vec3(0, 0, 1)
 	//VectorSet(up, 0, 0, 1);
-	up = Ogre::Vector3(0.0f, 1.0f, 0.0f);
+	up = Ogre::Vector3(0.0f, 0.0f, 1.0f);
 
 	// never step up when you still have up velocity
 	//if ( pm->ps->velocity[2] > 0 && (trace.fraction == 1.0 || DotProduct(trace.plane.normal, up) < 0.7)) 
-	if (pm->ps.velocity.y > 0 && (
+	if (pm->ps.velocity.z > 0 && (
 		trace.fraction == 1.0 || trace.planenormal.dotProduct(up) < 0.7
 		) )
 		return 2;
@@ -460,7 +461,7 @@ int PM_StepSlideMove( bool gravity )
 	//VectorCopy (start_o, up);
 	up = start_o;
 	//up[2] += STEPSIZE;
-	up.y += STEPSIZE;
+	up.z += STEPSIZE;
 
 	// test the player position if they were a stepheight higher
 	//pm->trace (&trace, start_o, pm->mins, pm->maxs, up, pm->ps->clientNum, pm->tracemask);
@@ -475,7 +476,7 @@ int PM_StepSlideMove( bool gravity )
 	}
 
 	//stepSize = trace.endpos[2] - start_o[2];
-	stepSize = trace.endpos.y - start_o.y;
+	stepSize = trace.endpos.z - start_o.z;
 
 	// try slidemove from this position
 	//VectorCopy (trace.endpos, pm->ps->origin); // pm->ps->origin = trace.endpos
@@ -491,7 +492,7 @@ int PM_StepSlideMove( bool gravity )
 	//VectorCopy (pm->ps->origin, down);
 	down = pm->ps.origin;
 	//down[2] -= stepSize;
-	down.y -= stepSize;
+	down.z -= stepSize;
 
 
 	//pm->trace (&trace, pm->ps->origin, pm->mins, pm->maxs, down, pm->ps->clientNum, pm->tracemask);
@@ -510,7 +511,7 @@ int PM_StepSlideMove( bool gravity )
 		float	delta;
 
 		//delta = pm->ps->origin[2] - start_o[2];
-		delta = pm->ps.origin.y - start_o.y;
+		delta = pm->ps.origin.z - start_o.z;
 		if ( delta > 2 ) 
 		{
 			if (gravity)
@@ -541,6 +542,7 @@ int PM_StepSlideMove( bool gravity )
 
 void PM_Friction(void)
 {
+	std::cout << "Friction\n";
 	Ogre::Vector3	vec;
 	float* vel;
 	float	speed, newspeed, control;
@@ -554,14 +556,14 @@ void PM_Friction(void)
 
 	if ( pml.walking )
 		//vec[2] = 0;	// ignore slope movement
-		vec.y = 0;
+		vec.z = 0;
 
 	//speed = VectorLength(vec);
 	speed = vec.length();
 	if (speed < 1) 
 	{
 		vel[0] = 0;
-		vel[2] = 0;		// allow sinking underwater
+		vel[1] = 0;		// allow sinking underwater
 		// FIXME: still have z friction underwater?
 		//bprintf("Static friction (vec = [%f, %f, %f]) (vec.length = %f)\n", vec.x, vec.y, vec.z, speed);
 		return;
@@ -636,6 +638,7 @@ static void PM_Accelerate( Ogre::Vector3& wishdir, float wishspeed, float accel 
 {
 //	int			i;
 	float		addspeed, accelspeed, currentspeed;
+	std::cout << "Accelerate\n";
 
 	// currentspeed = pm->ps->velocity dot wishdir
 	//currentspeed = DotProduct (pm->ps->velocity, wishdir);
@@ -681,7 +684,7 @@ static bool PM_CheckJump(void)
 	//pm->ps->pm_flags |= PMF_JUMP_HELD;
 
 	pm->ps.groundEntityNum = ENTITYNUM_NONE;
-	pm->ps.velocity.y = JUMP_VELOCITY;
+	pm->ps.velocity.z = JUMP_VELOCITY;
 	//PM_AddEvent( EV_JUMP );
 
 	/*if ( pm->cmd.forwardmove >= 0 ) 
@@ -776,8 +779,8 @@ static void PM_WaterMove( playerMove* const pm )
 		wishvel[2] = -60;		// sink towards bottom
 		*/
 		wishvel.x = 0;
-		wishvel.y = -60;
-		wishvel.z = 0;
+		wishvel.z = -60;
+		wishvel.y = 0;
 	} 
 	else 
 	{
@@ -834,6 +837,7 @@ static void PM_WalkMove( playerMove* const pmove )
 	playerMove::playercmd cmd;
 	float		accelerate;
 	float		vel;
+	std::cout << "Walking\n";
 
 	if ( pm->ps.waterlevel > 2 && //DotProduct( pml.forward, pml.groundTrace.plane.normal ) > 0 ) 
 		pml.forward.dotProduct(pml.groundTrace.planenormal) > 0.0f)
@@ -937,10 +941,10 @@ static void PM_WalkMove( playerMove* const pmove )
 
 	// project moves down to flat plane
 	//pml.forward[2] = 0;
-	pml.forward.y = 0;
+	pml.forward.z = 0;
 
 	//pml.right[2] = 0;
-	pml.right.y = 0;
+	pml.right.z = 0;
 
 	// project the forward and right directions onto the ground plane
 	PM_ClipVelocity (pml.forward, pml.groundTrace.planenormal, pml.forward, OVERCLIP );
@@ -1035,7 +1039,7 @@ void PM_UpdateViewAngles( playerMove::playerStruct* const ps, playerMove::player
 {
 	short		temp;
 	int		i;
-
+	std::cout << "Updating viewangles\n";
 	//while(1);
 
 	//if ( ps->pm_type == PM_INTERMISSION || ps->pm_type == PM_SPINTERMISSION) 
@@ -1128,7 +1132,7 @@ void PM_GroundTraceMissed()
 		//VectorCopy( pm->ps->origin, point );
 		point = pm->ps.origin;
 		//point[2] -= 64;
-		point.y -= 64;
+		point.z -= 64;
 
 		//pm->trace (&trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
 		//tracefunc(&trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&point, D3DXVECTOR3(0.0f, -64.0f, 0.0f), 0, pml.traceObj);
@@ -1188,7 +1192,7 @@ static bool PM_CorrectAllSolid(traceResults* const trace)
 					point[1] = pm->ps->origin[1];
 					point[2] = pm->ps->origin[2] - 0.25;*/
 					point = pm->ps.origin;
-					point.y -= 0.25f;
+					point.z -= 0.25f;
 
 					//pm->trace (trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
 					//tracefunc(trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&point, D3DXVECTOR3(0.0f, -0.25f, 0.0f), 0, pml.traceObj);
@@ -1215,7 +1219,7 @@ static void PM_CrashLand( void )
 	float		vel, acc;
 	float		t;
 	float		a, b, c, den;
-
+	std::cout << "Crash land\n";
 	// decide which landing animation to use
 	/*if ( pm->ps->pm_flags & PMF_BACKWARDS_JUMP ) 
 		PM_ForceLegsAnim( LEGS_LANDB );
@@ -1227,10 +1231,10 @@ static void PM_CrashLand( void )
 	// calculate the exact velocity on landing
 	//dist = pm->ps->origin[2] - pml.previous_origin[2];
 
-	dist = pm->ps.origin.y - pml.previous_origin.y;
+	dist = pm->ps.origin.z - pml.previous_origin.z;
 
 	//vel = pml.previous_velocity[2];
-	vel = pml.previous_velocity.y;
+	vel = pml.previous_velocity.z;
 
 	//acc = -pm->ps->gravity;
 	acc = -pm->ps.gravity;
@@ -1294,7 +1298,7 @@ static void PM_CrashLand( void )
 				
 					const float waterHeight = pm->waterHeight;
 					const float waterHeightSplash = waterHeight + halfExtents.y;
-					if (pm->ps.origin.y < waterHeightSplash)
+					if (pm->ps.origin.z < waterHeightSplash)
 					{
 						splashSound = true;
 					}
@@ -1357,7 +1361,7 @@ static void PM_CrashLand( void )
 
 static void PM_GroundTrace( void ) 
 {
-	//std::cout << "Ground trace\n";
+	std::cout << "Ground trace\n";
 	Ogre::Vector3		point;
 	traceResults		trace;
 
@@ -1365,7 +1369,7 @@ static void PM_GroundTrace( void )
 	point[1] = pm->ps->origin[1];
 	point[2] = pm->ps->origin[2] - 0.25;*/
 	point = pm->ps.origin;
-	point.y -= 0.25f;
+	point.z -= 0.25f;
 
 	//pm->trace (&trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
 	//tracefunc(&trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&point, D3DXVECTOR3(0.0f, -0.25f, 0.0f), 0, pml.traceObj);
@@ -1392,7 +1396,7 @@ static void PM_GroundTrace( void )
 
 	// check if getting thrown off the ground
 	//if ( pm->ps->velocity[2] > 0 && DotProduct( pm->ps->velocity, trace.plane.normal ) > 10 ) 
-	if (pm->ps.velocity.y > 0 && pm->ps.velocity.dotProduct(trace.planenormal) > 10.0f)
+	if (pm->ps.velocity.z > 0 && pm->ps.velocity.dotProduct(trace.planenormal) > 10.0f)
 	{
 		//if ( pm->debugLevel ) 
 			//Com_Printf("%i:kickoff\n", c_pmove);
@@ -1417,7 +1421,7 @@ static void PM_GroundTrace( void )
 	
 	// slopes that are too steep will not be considered onground
 	//if ( trace.plane.normal[2] < MIN_WALK_NORMAL ) 
-	if (trace.planenormal.y < MIN_WALK_NORMAL)
+	if (trace.planenormal.z < MIN_WALK_NORMAL)
 	{
 		//if ( pm->debugLevel )
 			//Com_Printf("%i:steep\n", c_pmove);
@@ -1451,7 +1455,7 @@ static void PM_GroundTrace( void )
 
 		// don't do landing time if we were just going down a slope
 		//if ( pml.previous_velocity[2] < -200 ) 
-		if (pml.previous_velocity.y < -200)
+		if (pml.previous_velocity.z < -200)
 		{
 			// don't allow another jump for a little while
 			//pm->ps->pm_flags |= PMF_TIME_LAND;
@@ -1469,6 +1473,7 @@ static void PM_GroundTrace( void )
 
 static void PM_AirMove()
 {
+	std::cout << "Air move\n";
 	//int			i;
 	Ogre::Vector3		wishvel;
 	float		fmove, smove;
@@ -1490,7 +1495,7 @@ static void PM_AirMove()
 
 	// project moves down to flat plane
 	//pml.forward[2] = 0;
-	pml.forward.y = 0;
+	pml.forward.y = 0;             //Z or Y?
 	//pml.right[2] = 0;
 	pml.right.y = 0;
 	//VectorNormalize (pml.forward);
@@ -1503,7 +1508,7 @@ static void PM_AirMove()
 	wishvel = pml.forward * fmove + pml.right * smove;
 
 	//wishvel[2] = 0;
-	wishvel.y = 0;
+	wishvel.z = 0;
 
 	//VectorCopy (wishvel, wishdir);
 	wishdir = wishvel;
@@ -1659,7 +1664,7 @@ static void PM_FlyMove( void )
 		wishvel = pml.forward * scale * pm->cmd.forwardmove + pml.right * scale * pm->cmd.rightmove;
 
 		//wishvel[2] += scale * pm->cmd.upmove;
-		wishvel.y += /*6.35f * */pm->cmd.upmove * scale;
+		wishvel.z += /*6.35f * */pm->cmd.upmove * scale;
 	}
 
 	//VectorCopy (wishvel, wishdir);
@@ -1939,7 +1944,7 @@ void PmoveSingle (playerMove* const pmove)
 		PM_WaterMove(pmove);
 	else if ( pml.walking ) 
 	{
-		std::cout << "WALKING\n";
+		
 		// walking on ground
 		PM_WalkMove(pmove);
 		//bprintf("WalkMove\n");
