@@ -150,7 +150,7 @@ void RenderingManager::update (float duration){
 
     mActors.update (duration);
 
-    mOcclusionQuery->update();
+    mOcclusionQuery->update(duration);
 
     mSkyManager->update(duration);
 

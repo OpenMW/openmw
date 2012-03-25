@@ -39,7 +39,7 @@ namespace MWRender
         /**
          * per-frame update
          */
-        void update();
+        void update(float duration);
 
         /**
          * request occlusion test for a billboard at the given position, omitting an entity
@@ -78,6 +78,10 @@ namespace MWRender
         std::vector<ObjectInfo> mObjectsInfo;
 
         bool mWasVisible;
+
+        bool mResponding;
+
+        float mDelay;
 
         bool mTestResult;
 
