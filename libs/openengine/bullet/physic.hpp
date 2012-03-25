@@ -239,16 +239,11 @@ namespace Physic
             return rayResult.m_hitFraction;
         }
 
-        static bool cmp( const std::pair<float, btCollisionObject*>& i, const std::pair<float, btCollisionObject*>& j )
+        static bool cmp( const std::pair<float, std::string>& i, const std::pair<float, std::string>& j )
         {
             if( i.first > j.first ) return false;
             if( j.first > i.first ) return true;
             return false;
-        }
-
-        void sort()
-        {
-            std::sort(results.begin(), results.end(), cmp);
         }
 
         std::vector < std::pair<float, btCollisionObject*> > results;

@@ -49,6 +49,8 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     matQueryVisible->setDepthWriteEnabled(false);
     matQueryVisible->setColourWriteEnabled(false); // Uncomment this to visualize the occlusion query
     matQueryVisible->setDepthCheckEnabled(true); // Occluded by objects
+    matQueryVisible->setCullingMode(CULL_NONE);
+    matQueryVisible->setManualCullingMode(MANUAL_CULL_NONE);
 
     mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
 
@@ -133,16 +135,18 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
 
 void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& repeatThisInvocation)
 {    
-    if (queueGroupId == RENDER_QUEUE_SKIES_LATE && mWasVisible == false)
+    if (queueGroupId == RENDER_QUEUE_SKIES_LATE && mWasVisible == false && mDoQuery)
     {
         // for some reason our single object query returns wrong results when the sun query was never executed
         // (which can happen when we are in interiors, or when the sun is outside of the view frustum and gets culled)
         // so we force it here once everything has been rendered
+        
         mSunTotalAreaQuery->beginOcclusionQuery();
         mSunTotalAreaQuery->endOcclusionQuery();
         mSunVisibleAreaQuery->beginOcclusionQuery();
         mSunVisibleAreaQuery->endOcclusionQuery();
-    } 
+        
+    }
 }
 
 void OcclusionQuery::update()
@@ -201,7 +205,7 @@ void OcclusionQuery::update()
         for (std::vector<ObjectInfo>::iterator it=mObjectsInfo.begin();
             it!=mObjectsInfo.end(); ++it)
         {
-            if (!mRendering->getScene()->hasMovableObject((*it).name, (*it).typeName)) return;
+            if (!mRendering->getScene()->hasMovableObject((*it).name, (*it).typeName)) break;
             mRendering->getScene()->getMovableObject((*it).name, (*it).typeName)->setRenderQueueGroup( (*it).oldRenderqueue );
         }
 

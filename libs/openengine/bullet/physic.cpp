@@ -378,13 +378,11 @@ namespace Physic
         MyRayResultCallback resultCallback1;
         resultCallback1.m_collisionFilterMask = COL_WORLD;
         dynamicsWorld->rayTest(from, to, resultCallback1);
-        resultCallback1.sort();
         std::vector< std::pair<float, btCollisionObject*> > results = resultCallback1.results;
 
         MyRayResultCallback resultCallback2;
         resultCallback2.m_collisionFilterMask = COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL;
         dynamicsWorld->rayTest(from, to, resultCallback2);
-        resultCallback2.sort();
         std::vector< std::pair<float, btCollisionObject*> > actorResults = resultCallback2.results;
 
         std::vector< std::pair<float, std::string> > results2;
@@ -400,6 +398,8 @@ namespace Physic
         {
             results2.push_back( std::make_pair( (*it).first, static_cast<PairCachingGhostObject&>(*(*it).second).mName ) );
         }
+
+        std::sort(results2.begin(), results2.end(), MyRayResultCallback::cmp);
 
         return results2;
     }
