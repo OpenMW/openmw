@@ -173,6 +173,7 @@ namespace Physic
         mShapeLoader = shapeLoader;
 
         isDebugCreated = false;
+        mDebugDrawer = NULL;
     }
 
     void PhysicEngine::createDebugRendering()
@@ -202,6 +203,35 @@ namespace Physic
 
     PhysicEngine::~PhysicEngine()
     {
+
+        RigidBodyContainer::iterator rb_it = RigidBodyMap.begin();
+        for (; rb_it != RigidBodyMap.end(); ++rb_it)
+        {
+            if (rb_it->second != NULL)
+            {
+                dynamicsWorld->removeRigidBody(rb_it->second);
+
+                delete rb_it->second;
+                rb_it->second = NULL;
+            }
+        }
+
+        PhysicActorContainer::iterator pa_it = PhysicActorMap.begin();
+        for (; pa_it != PhysicActorMap.end(); ++pa_it)
+        {
+            if (pa_it->second != NULL)
+            {
+                dynamicsWorld->removeCollisionObject(pa_it->second->externalGhostObject);
+                dynamicsWorld->removeCollisionObject(pa_it->second->internalGhostObject);
+                dynamicsWorld->removeAction(pa_it->second->mCharacter);
+
+                delete pa_it->second;
+                pa_it->second = NULL;
+            }
+        }
+
+        delete mDebugDrawer;
+
         delete dynamicsWorld;
         delete solver;
         delete collisionConfiguration;
@@ -239,32 +269,39 @@ namespace Physic
             dynamicsWorld->addRigidBody(body,COL_WORLD,COL_NOTHING);
         }
         body->setActivationState(DISABLE_DEACTIVATION);
+        RigidBody* oldBody = RigidBodyMap[body->mName];
+        if (oldBody != NULL)
+        {
+            dynamicsWorld->removeRigidBody(oldBody);
+            delete oldBody;
+        }
+
         RigidBodyMap[body->mName] = body;
     }
 
     void PhysicEngine::removeRigidBody(std::string name)
     {
-        std::map<std::string,RigidBody*>::iterator it = RigidBodyMap.find(name);
+        RigidBodyContainer::iterator it = RigidBodyMap.find(name);
         if (it != RigidBodyMap.end() )
         {
             RigidBody* body = it->second;
             if(body != NULL)
             {
                 // broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
-                /*std::map<std::string,PhysicActor*>::iterator it2 = PhysicActorMap.begin();
+                /*PhysicActorContainer::iterator it2 = PhysicActorMap.begin();
                   for(;it2!=PhysicActorMap.end();it++)
                   {
                   it2->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
                   it2->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(body->getBroadphaseProxy(),dispatcher);
                   }*/
-                dynamicsWorld->removeRigidBody(RigidBodyMap[name]);
+                dynamicsWorld->removeRigidBody(body);
             }
         }
     }
 
     void PhysicEngine::deleteRigidBody(std::string name)
     {
-        std::map<std::string,RigidBody*>::iterator it = RigidBodyMap.find(name);
+        RigidBodyContainer::iterator it = RigidBodyMap.find(name);
         if (it != RigidBodyMap.end() )
         {
             RigidBody* body = it->second;
@@ -293,6 +330,10 @@ namespace Physic
 
     void PhysicEngine::addCharacter(std::string name)
     {
+        // Remove character with given name, so we don't make memory
+        // leak when character would be added twice
+        removeCharacter(name);
+
         PhysicActor* newActor = new PhysicActor(name);
         dynamicsWorld->addCollisionObject( newActor->externalGhostObject, COL_ACTOR_EXTERNAL, COL_WORLD |COL_ACTOR_EXTERNAL );
         dynamicsWorld->addCollisionObject( newActor->internalGhostObject, COL_ACTOR_INTERNAL, COL_WORLD |COL_ACTOR_INTERNAL );
@@ -303,7 +344,7 @@ namespace Physic
     void PhysicEngine::removeCharacter(std::string name)
     {
         //std::cout << "remove";
-        std::map<std::string,PhysicActor*>::iterator it = PhysicActorMap.find(name);
+        PhysicActorContainer::iterator it = PhysicActorMap.find(name);
         if (it != PhysicActorMap.end() )
         {
             PhysicActor* act = it->second;
@@ -311,7 +352,7 @@ namespace Physic
             {
                 /*broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
                   broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
-                  std::map<std::string,PhysicActor*>::iterator it2 = PhysicActorMap.begin();
+                  PhysicActorContainer::iterator it2 = PhysicActorMap.begin();
                   for(;it2!=PhysicActorMap.end();it++)
                   {
                   it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
