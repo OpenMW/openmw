@@ -134,10 +134,15 @@ namespace Physic
 
 
     RigidBody::RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name)
-        :btRigidBody(CI),mName(name)
+        : btRigidBody(CI)
+        , mName(name)
     {
+    }
 
-    };
+    RigidBody::~RigidBody()
+    {
+        delete getMotionState();
+    }
 
 
 
@@ -155,8 +160,7 @@ namespace Physic
         // The actual physics solver
         solver = new btSequentialImpulseConstraintSolver;
 
-        //TODO: memory leak?
-        btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
+        pairCache = new btSortedOverlappingPairCache();
         //pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
 
         broadphase = new btDbvtBroadphase(pairCache);
@@ -237,6 +241,7 @@ namespace Physic
         delete collisionConfiguration;
         delete dispatcher;
         delete broadphase;
+        delete pairCache;
         delete mShapeLoader;
     }
 

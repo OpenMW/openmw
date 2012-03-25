@@ -108,7 +108,7 @@ namespace Physic
     {
     public:
         RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
-        virtual ~RigidBody() {}
+        virtual ~RigidBody();
         std::string mName;
 
         //is this body used for raycasting only?
@@ -211,6 +211,7 @@ namespace Physic
         std::list<PhysicEvent> PEventList;
 
         //Bullet Stuff
+        btOverlappingPairCache* pairCache;
         btBroadphaseInterface* broadphase;
         btDefaultCollisionConfiguration* collisionConfiguration;
         btSequentialImpulseConstraintSolver* solver;
