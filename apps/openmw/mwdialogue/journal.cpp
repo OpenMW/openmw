@@ -3,6 +3,9 @@
 
 #include "../mwworld/environment.hpp"
 
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/messagebox.hpp"
+
 namespace MWDialogue
 {
     Quest& Journal::getQuest (const std::string& id)
@@ -34,6 +37,10 @@ namespace MWDialogue
         Quest& quest = getQuest (id);
 
         quest.addEntry (entry, *mEnvironment.mWorld); // we are doing slicing on purpose here
+        
+        std::vector<std::string> empty;
+        std::string notification = "Your Journal has been updated.";
+        mEnvironment.mWindowManager->messageBox (notification, empty);
     }
 
     void Journal::setJournalIndex (const std::string& id, int index)

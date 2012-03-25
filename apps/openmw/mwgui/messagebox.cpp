@@ -19,7 +19,7 @@ void MessageBoxManager::onFrame (float frameDuration)
         if(it->current >= it->max)
         {
             it->messageBox->mMarkedToDelete = true;
-            
+
             if(*mMessageBoxes.begin() == it->messageBox) // if this box is the last one
             {
                 // collect all with mMarkedToDelete and delete them.
@@ -47,7 +47,7 @@ void MessageBoxManager::onFrame (float frameDuration)
             it++;
         }
     }
-    
+
     if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
         delete mInterMessageBoxe;
         mInterMessageBoxe = NULL;
@@ -57,20 +57,18 @@ void MessageBoxManager::onFrame (float frameDuration)
 
 void MessageBoxManager::createMessageBox (const std::string& message)
 {
-    std::cout << "MessageBox: " << message << std::endl;
-    
     MessageBox *box = new MessageBox(*this, message);
-    
+
     removeMessageBox(message.length()*mMessageBoxSpeed, box);
-    
+
     mMessageBoxes.push_back(box);
     std::vector<MessageBox*>::iterator it;
-    
+
     if(mMessageBoxes.size() > 3) {
         delete *mMessageBoxes.begin();
         mMessageBoxes.erase(mMessageBoxes.begin());
     }
-    
+
     int height = 0;
     for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
     {
@@ -88,9 +86,9 @@ bool MessageBoxManager::createInteractiveMessageBox (const std::string& message,
     std::cout << "interactive MessageBox: " << message << " - ";
     std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
     std::cout << std::endl;
-    
+
     mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
-    
+
     return true;
 }
 
@@ -105,7 +103,7 @@ void MessageBoxManager::removeMessageBox (float time, MessageBox *msgbox)
     timer.current = 0;
     timer.max = time;
     timer.messageBox = msgbox;
-    
+
     mTimers.insert(mTimers.end(), timer);
 }
 
@@ -152,25 +150,25 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     mBottomPadding = 20;
     mNextBoxPadding = 20;
     mMarkedToDelete = false;
-    
+
     getWidget(mMessageWidget, "message");
-    
+
     mMessageWidget->setOverflowToTheLeft(true);
     mMessageWidget->addText(cMessage);
-    
+
     MyGUI::IntSize size;
     size.width = mFixedWidth;
     size.height = 100; // dummy
-    
+
     MyGUI::IntCoord coord;
     coord.left = 10; // dummy
     coord.top = 10; // dummy
 
     mMessageWidget->setSize(size);
-    
+
     MyGUI::IntSize textSize = mMessageWidget->_getTextSize();
     size.height = mHeight = textSize.height + 20; // this is the padding between the text and the box
-    
+
     mMainWidget->setSize(size);
     size.width -= 15; // this is to center the text (see messagebox_layout.xml, Widget type="Edit" position="-2 -3 0 0")
     mMessageWidget->setSize(size);
@@ -182,11 +180,11 @@ void MessageBox::update (int height)
     MyGUI::IntCoord coord;
     coord.left = (gameWindowSize.width - mFixedWidth)/2;
     coord.top = (gameWindowSize.height - mHeight - height - mBottomPadding);
-    
+
     MyGUI::IntSize size;
     size.width = mFixedWidth;
     size.height = mHeight;
-    
+
     mMainWidget->setCoord(coord);
     mMainWidget->setSize(size);
     mMainWidget->setVisible(true);
@@ -211,26 +209,26 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     int buttonTopPadding = 5; // ^-- if vertical
     int buttonPadding = 5; // padding between button label and button itself
     int buttonMainPadding = 10; // padding between buttons and bottom of the main widget
-    
+
     mMarkedToDelete = false;
-    
-    
+
+
     getWidget(mMessageWidget, "message");
     getWidget(mButtonsWidget, "buttons");
-    
+
     mMessageWidget->setOverflowToTheLeft(true);
     mMessageWidget->addText(message);
-    
+
     MyGUI::IntSize textSize = mMessageWidget->_getTextSize();
-    
+
     MyGUI::IntSize gameWindowSize = mMessageBoxManager.mWindowManager->getGui()->getViewSize();
-    
+
     int biggestButtonWidth = 0;
     int buttonWidth = 0;
     int buttonsWidth = 0;
     int buttonHeight = 0;
     MyGUI::IntCoord dummyCoord(0, 0, 0, 0);
-    
+
     std::vector<std::string>::const_iterator it;
     for(it = buttons.begin(); it != buttons.end(); ++it)
     {
@@ -240,28 +238,28 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
             dummyCoord,
             MyGUI::Align::Default);
         button->setCaption(*it);
-        
-        button->eventMouseButtonClick = MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed); 
-        
+
+        button->eventMouseButtonClick = MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed);
+
         mButtons.push_back(button);
-        
+
         buttonWidth = button->_getTextSize().width + 2*buttonPadding + buttonLeftPadding;
         buttonsWidth += buttonWidth;
         buttonHeight = button->_getTextSize().height + 2*buttonPadding + buttonTopPadding;
-        
+
         if(buttonWidth > biggestButtonWidth)
         {
             biggestButtonWidth = buttonWidth;
         }
     }
     buttonsWidth += buttonLeftPadding;
-    
+
     MyGUI::IntSize mainWidgetSize;
     if(buttonsWidth < fixedWidth)
     {
         // on one line
         std::cout << "on one line" << std::endl;
-        
+
         if(textSize.width + 2*textPadding < buttonsWidth)
         {
             std::cout << "width = buttonsWidth" << std::endl;
@@ -272,48 +270,48 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
             mainWidgetSize.width = textSize.width + 3*textPadding;
         }
         mainWidgetSize.height = textSize.height + textButtonPadding + buttonHeight + buttonMainPadding;
-        
+
         MyGUI::IntCoord absCoord;
         absCoord.left = (gameWindowSize.width - mainWidgetSize.width)/2;
         absCoord.top = (gameWindowSize.height - mainWidgetSize.height)/2;
-        
+
         std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
         std::cout << "left " << absCoord.left << " top " << absCoord.top << std::endl;
-        
+
         mMainWidget->setCoord(absCoord);
         mMainWidget->setSize(mainWidgetSize);
-        
-        
+
+
         MyGUI::IntCoord messageWidgetCoord;
         messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
         messageWidgetCoord.top = textPadding;
         mMessageWidget->setCoord(messageWidgetCoord);
-        
+
         mMessageWidget->setSize(textSize);
-        
+
         MyGUI::IntCoord buttonCord;
         MyGUI::IntSize buttonSize(0, buttonHeight);
         int left = (mainWidgetSize.width - buttonsWidth)/2 + buttonPadding;
-        
+
         std::vector<MyGUI::ButtonPtr>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
         {
             buttonCord.left = left;
             buttonCord.top = textSize.height + textButtonPadding;
-            
+
             buttonSize.width = (*button)->_getTextSize().width + 2*buttonPadding;
             buttonSize.height = (*button)->_getTextSize().height + 2*buttonPadding;
-            
+
             (*button)->setCoord(buttonCord);
             (*button)->setSize(buttonSize);
-            
+
             left += buttonSize.width + buttonLeftPadding;
         }
     }
     else
     {
         // among each other
-        
+
         if(biggestButtonWidth > textSize.width) {
             mainWidgetSize.width = biggestButtonWidth + buttonTopPadding;
         }
@@ -321,46 +319,46 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
             mainWidgetSize.width = textSize.width + 3*textPadding;
         }
         mainWidgetSize.height = textSize.height + 2*textPadding + textButtonPadding + buttonHeight * buttons.size() + buttonMainPadding;
-        
+
         std::cout << "biggestButtonWidth " << biggestButtonWidth << " textSize.width " << textSize.width << std::endl;
         std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
         mMainWidget->setSize(mainWidgetSize);
-        
+
         MyGUI::IntCoord absCoord;
         absCoord.left = (gameWindowSize.width - mainWidgetSize.width)/2;
         absCoord.top = (gameWindowSize.height - mainWidgetSize.height)/2;
-        
+
         mMainWidget->setCoord(absCoord);
         mMainWidget->setSize(mainWidgetSize);
-        
-        
+
+
         MyGUI::IntCoord messageWidgetCoord;
         messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
         messageWidgetCoord.top = textPadding;
         mMessageWidget->setCoord(messageWidgetCoord);
-        
+
         mMessageWidget->setSize(textSize);
-        
+
         MyGUI::IntCoord buttonCord;
         MyGUI::IntSize buttonSize(0, buttonHeight);
-        
+
         int top = textButtonPadding + buttonTopPadding + textSize.height;
-        
+
         std::vector<MyGUI::ButtonPtr>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
         {
             buttonSize.width = (*button)->_getTextSize().width + buttonPadding*2;
             buttonSize.height = (*button)->_getTextSize().height + buttonPadding*2;
-            
+
             buttonCord.top = top;
             buttonCord.left = (mainWidgetSize.width - buttonSize.width)/2 - 5; // FIXME: -5 is not so nice :/
-            
+
             (*button)->setCoord(buttonCord);
             (*button)->setSize(buttonSize);
-            
+
             top += buttonSize.height + 2*buttonTopPadding;
         }
-        
+
     }
 }
 
@@ -387,8 +385,3 @@ int InteractiveMessageBox::readPressedButton ()
     mButtonPressed = -1;
     return pressed;
 }
-
-
-
-
-

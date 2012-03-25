@@ -186,6 +186,11 @@ endif (APPLE)
 
 # Dependencies
 
+# Fix for not visible pthreads functions for linker with glibc 2.15 
+if (UNIX AND NOT APPLE)
+find_package (Threads)
+endif()
+
 find_package(OGRE REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
@@ -322,7 +327,7 @@ if(DPKG_PROGRAM)
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogre-1.7.3 (>= 1.7.3), libbullet0 (>= 2.77),  libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "nvidia-cg-toolkit (>= 2.1),  libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
@@ -342,6 +347,7 @@ if(WIN32)
     FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
     INSTALL(FILES ${files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/readme.txt" DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
@@ -352,6 +358,7 @@ if(WIN32)
     SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
     SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;esmtool;Esmtool;omwlauncher;OpenMW Launcher")
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'") 
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_RESOURCE_FILE_LICENSE "${OpenMW_SOURCE_DIR}/GPL3.txt")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
@@ -494,6 +501,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
