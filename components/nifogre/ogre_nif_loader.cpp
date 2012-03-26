@@ -510,7 +510,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 			datamod[index+2] = original.z;
 		}
         vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
-        delete datamod;
+        delete [] datamod;
 	}
 	else
 	{
@@ -551,7 +551,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 			    datamod[index+2] = original.z;
 		    }
 			vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
-            delete datamod;
+            delete [] datamod;
 		}
 		else
 		{
@@ -603,7 +603,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 				datamod[i + 1] =y;
 		    }
 			vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
-            delete datamod;
+            delete [] datamod;
 		}
 		else
 			vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, false);
@@ -648,7 +648,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 			}
 
             ibuf->writeData(0, ibuf->getSizeInBytes(), datamod, false);
-            delete datamod;
+            delete [] datamod;
 
 		}
 		else
