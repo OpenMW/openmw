@@ -69,7 +69,6 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
-        mLooseSounds.clear();
         mActiveSounds.clear();
         mMusic.reset();
         mOutput.reset();
@@ -207,7 +206,7 @@ namespace MWSound
         {
             std::string file = lookup(soundId, volume, min, max);
             Sound *sound = mOutput->playSound(file, volume, pitch, loop);
-            mLooseSounds[soundId] = SoundPtr(sound);
+            mActiveSounds[MWWorld::Ptr()][soundId] = SoundPtr(sound);
         }
         catch(std::exception &e)
         {
@@ -226,8 +225,7 @@ namespace MWSound
             std::string file = lookup(soundId, volume, min, max);
 
             SoundPtr sound(mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop));
-            if(untracked) mLooseSounds[soundId] = sound;
-            else mActiveSounds[ptr][soundId] = sound;
+            mActiveSounds[untracked?MWWorld::Ptr():ptr][soundId] = sound;
         }
         catch(std::exception &e)
         {
@@ -272,7 +270,7 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
         {
-            if(snditer->first.getCell() == cell)
+            if(snditer->first != MWWorld::Ptr() && snditer->first.getCell() == cell)
             {
                 IDMap::iterator iditer = snditer->second.begin();
                 while(iditer != snditer->second.end())
@@ -289,11 +287,17 @@ namespace MWSound
 
     void SoundManager::stopSound(const std::string& soundId)
     {
-        IDMap::iterator iditer = mLooseSounds.find(soundId);
-        if(iditer != mLooseSounds.end())
+        SoundMap::iterator snditer = mActiveSounds.find(MWWorld::Ptr());
+        if(snditer == mActiveSounds.end())
+            return;
+
+        IDMap::iterator iditer = snditer->second.find(soundId);
+        if(iditer != snditer->second.end())
         {
             iditer->second->stop();
-            mLooseSounds.erase(iditer);
+            snditer->second.erase(iditer);
+            if(snditer->second.empty())
+                mActiveSounds.erase(snditer);
         }
     }
 
@@ -414,15 +418,6 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             else
                 snditer++;
-        }
-
-        IDMap::iterator iditer = mLooseSounds.begin();
-        while(iditer != mLooseSounds.end())
-        {
-            if(!iditer->second->isPlaying())
-                mLooseSounds.erase(iditer++);
-            else
-                iditer++;
         }
     }
 

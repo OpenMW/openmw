@@ -44,7 +44,6 @@ namespace MWSound
         typedef std::map<std::string,SoundPtr> IDMap;
         typedef std::map<MWWorld::Ptr,IDMap> SoundMap;
         SoundMap mActiveSounds;
-        IDMap mLooseSounds;
 
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
