@@ -12,7 +12,7 @@ using namespace Ogre;
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mSingleObjectQuery(0), mActiveQuery(0),
     mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false),
-    mQuerySingleObjectRequested(false), mResponding(true), mDelay(0)
+    mQuerySingleObjectRequested(false), mResponding(true), mDelay(0), mWasVisible(false), mObjectWasVisible(false)
 {
     mRendering = renderer;
     mSunNode = sunNode;
@@ -93,7 +93,7 @@ OcclusionQuery::~OcclusionQuery()
 
 bool OcclusionQuery::supported()
 {
-    if (!mResponding) std::cout << "Occlusion query timed out" << std::endl;
+    //if (!mResponding) std::cout << "Occlusion query timed out" << std::endl;
     return mSupported && mResponding;
 }
 
@@ -129,6 +129,7 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
         mQuerySingleObjectStarted = true;
         mQuerySingleObjectRequested = false;
         mActiveQuery = mSingleObjectQuery;
+        mObjectWasVisible = true;
     }
     
     if (mActiveQuery != NULL)
@@ -136,18 +137,29 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
 }
 
 void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& repeatThisInvocation)
-{    
-    if (queueGroupId == RENDER_QUEUE_SKIES_LATE && mWasVisible == false && mDoQuery)
+{
+    /**
+     * for every beginOcclusionQuery(), we want a respective pullOcclusionQuery() and vice versa
+     * this also means that results can be wrong at other places if we pull, but beginOcclusionQuery() was never called
+     * this can happen for example if the object that is tested is outside of the view frustum
+     * to prevent this, check if the queries have been performed after everything has been rendered and if not, start them manually
+     */
+    if (queueGroupId == RENDER_QUEUE_SKIES_LATE)
     {
-        // for some reason our single object query returns wrong results when the sun query was never executed
-        // (which can happen when we are in interiors, or when the sun is outside of the view frustum and gets culled)
-        // so we force it here once everything has been rendered
-        
-        mSunTotalAreaQuery->beginOcclusionQuery();
-        mSunTotalAreaQuery->endOcclusionQuery();
-        mSunVisibleAreaQuery->beginOcclusionQuery();
-        mSunVisibleAreaQuery->endOcclusionQuery();
-        
+        if (mWasVisible == false && mDoQuery)
+        {
+            mSunTotalAreaQuery->beginOcclusionQuery();
+            mSunTotalAreaQuery->endOcclusionQuery();
+            mSunVisibleAreaQuery->beginOcclusionQuery();
+            mSunVisibleAreaQuery->endOcclusionQuery();
+        }
+        if (mObjectWasVisible == false && mQuerySingleObjectRequested)
+        {
+            mSingleObjectQuery->beginOcclusionQuery();
+            mSingleObjectQuery->endOcclusionQuery();
+            mQuerySingleObjectStarted = true;
+            mQuerySingleObjectRequested = false;
+        }
     }
 }
 
@@ -159,6 +171,7 @@ void OcclusionQuery::update(float duration)
     if (mDelay >= 2) mResponding = false;
 
     mWasVisible = false;
+    mObjectWasVisible = false;
 
     // Adjust the position of the sun billboards according to camera viewing distance
     // we need to do this to make sure that _everything_ can occlude the sun

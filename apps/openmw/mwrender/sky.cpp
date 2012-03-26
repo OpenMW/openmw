@@ -294,7 +294,8 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
 }
 
 SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environment* env) :
-    mGlare(0), mGlareFade(0)
+    mGlare(0), mGlareFade(0), mCloudBlendFactor(0),
+    mCloudOpacity(0), mCloudColour(1,1,1), mSkyColour(1,1,1), mCloudSpeed(0), mStarsOpacity(0)
 {
     mEnvironment = env;
     mViewport = pCamera->getViewport();

@@ -78,6 +78,7 @@ namespace MWRender
         std::vector<ObjectInfo> mObjectsInfo;
 
         bool mWasVisible;
+        bool mObjectWasVisible;
 
         bool mResponding;
 
