@@ -10,6 +10,10 @@
 #include "sound.hpp"
 #include "soundmanager.hpp"
 
+#ifndef ALC_ALL_DEVICES_SPECIFIER
+#define ALC_ALL_DEVICES_SPECIFIER 0x1013
+#endif
+
 
 namespace MWSound
 {
