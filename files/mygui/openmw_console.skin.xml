@@ -2,8 +2,6 @@
 
 <MyGUI type="Skin">
     <Skin name = "MW_ConsoleWindow" size = "256 54">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "17" />
         <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
         <Property key="Snap" value = "true" />

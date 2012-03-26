@@ -7,6 +7,10 @@ Version: 0.13.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
+Font Licenses:
+EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
+VeraMono.ttf: custom (see Bitstream Vera License.txt for more information)
+
 
 THIS IS A WORK IN PROGRESS
 

@@ -11,8 +11,7 @@
     </Skin>
 
     <Skin name="MW_TextEdit" size="512 20" texture="mwgui.png">
-        <Property key="FontName" value = "MyGUI_CoreFont.18"/>
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default"/>
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_VCENTER" />
         <Property key="TextColour" value = "0.6 0.6 0.6" />
 
@@ -33,8 +32,7 @@
     </Skin>
 
     <Skin name="MW_TextBoxEdit" size="512 20" texture="mwgui.png">
-        <Property key="FontName" value = "MyGUI_CoreFont.18"/>
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default"/>
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_TOP" />
         <Property key="TextColour" value = "0.6 0.6 0.6" />
 
@@ -51,7 +49,7 @@
             <State name="normal" offset = "2 20 512 2"/>
         </BasisSkin>
 
-        <Child type="TextBox" skin="MW_TextBoxEditClient" offset = "2 2 490 18" align = "Stretch" name = "Client"/>	  	
+        <Child type="TextBox" skin="MW_TextBoxEditClient" offset = "2 2 490 18" align = "Stretch" name = "Client"/>
         <Child type="ScrollBar" skin="MW_VScroll" offset = "494 3 14 14" align = "Right VStretch" name = "VScroll"/>
     </Skin>
 </MyGUI>

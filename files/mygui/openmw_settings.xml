@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI>
     <MyGUI type="Font">
-        <Property key="Default" value="MyGUI_CoreFont.18"/>
-    </MyGUI>
+        <Property key="Default" value="EB Garamond"/>
 
+    </MyGUI>
     <MyGUI type="Pointer">
         <Property key="Default" value="arrow"/>
         <Property key="Layer" value="Pointer"/>

@@ -39,7 +39,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanager
+    soundmanager openal_output mpgsnd_decoder ffmpeg_decoder
     )
 
 add_openmw_dir (mwworld
