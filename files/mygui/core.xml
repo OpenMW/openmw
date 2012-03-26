@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <MyGUI>
-
-      <MyGUI type="List">
-            <List file="core.skin" group="General"/>
-            <List file="openmw_images.xml" group="General"/>
-            <List file="openmw_layers.xml" group="General"/>
-            <List file="openmw.pointer.xml" group="General"/>
-            <List file="openmw.font.xml" group="General"/>
-            <List file="openmw_text.skin.xml" group="General"/>
-            <List file="openmw_windows.skin.xml" group="General"/>
-            <List file="openmw_button.skin.xml" group="General"/>
-            <List file="openmw_list.skin.xml" group="General"/>
-            <List file="openmw_edit.skin.xml" group="General"/>
-            <List file="openmw_box.skin.xml" group="General"/>
-            <List file="openmw_progress.skin.xml" group="General"/>
-            <List file="openmw_hud_energybar.skin.xml" group="General"/>
-            <List file="openmw_hud_box.skin.xml" group="General"/>
-            <List file="openmw_mainmenu_skin.xml" group="General"/>
-            <List file="openmw_console.skin.xml" group="General"/>
-            <List file="openmw_journal_skin.xml" group="General"/>
-            <List file="openmw_map_window_skin.xml" group="General"/>
-            <List file="openmw_dialogue_window_skin.xml" group="General"/>
-            <List file="openmw_settings.xml" group="General"/>
-      </MyGUI>
-
+    <MyGUI type="List">
+        <List file="core.skin" />
+        <List file="openmw_images.xml" />
+        <List file="openmw_layers.xml" />
+        <List file="openmw.pointer.xml" />
+        <List file="openmw.font.xml" />
+        <List file="openmw_text.skin.xml" />
+        <List file="openmw_windows.skin.xml" />
+        <List file="openmw_button.skin.xml" />
+        <List file="openmw_list.skin.xml" />
+        <List file="openmw_edit.skin.xml" />
+        <List file="openmw_box.skin.xml" />
+        <List file="openmw_progress.skin.xml" />
+        <List file="openmw_hud_energybar.skin.xml" />
+        <List file="openmw_hud_box.skin.xml" />
+        <List file="openmw_mainmenu_skin.xml" />
+        <List file="openmw_console.skin.xml" />
+        <List file="openmw_journal_skin.xml" />
+        <List file="openmw_map_window_skin.xml" />
+        <List file="openmw_dialogue_window_skin.xml" />
+        <List file="openmw_settings.xml" />
+    </MyGUI>
 </MyGUI>
+

@@ -45,9 +45,28 @@ MainDialog::MainDialog()
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setMinimumSize(QSize(575, 575));
 
+    // Install the stylesheet font
+    QFile file;
+    QFontDatabase fontDatabase;
+    
+    const QStringList fonts = fontDatabase.families();
+    
+    // Check if the font is installed
+    if (!fonts.contains("EB Garamond")) {
+      
+      QString font = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "resources/mygui/EBGaramond-Regular.ttf").string());
+      file.setFileName(font);
+      
+      if (!file.exists()) {
+	  font = QString::fromStdString((mCfgMgr.getLocalPath() / "resources/mygui/EBGaramond-Regular.ttf").string());
+      }
+      
+      fontDatabase.addApplicationFont(font);
+    }
+    
     // Load the stylesheet
     QString config = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "resources/launcher.qss").string());
-    QFile file(config);
+    file.setFileName(config);
 
     if (!file.exists()) {
         file.setFileName(QString::fromStdString((mCfgMgr.getLocalPath() / "launcher.qss").string()));
