@@ -29,11 +29,6 @@ LocalMap::~LocalMap()
 
 void LocalMap::deleteBuffers()
 {
-    for (std::map<std::string, uint32*>::iterator it=mBuffers.begin();
-        it != mBuffers.end(); ++it)
-    {
-        delete[] it->second;
-    }
     mBuffers.clear();
 }
 
@@ -202,16 +197,16 @@ void LocalMap::render(const float x, const float y,
                             TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
 
             // create a buffer to use for dynamic operations
-            uint32* buffer = new uint32[sFogOfWarResolution*sFogOfWarResolution];
+            std::vector<uint32> buffer;
+            buffer.resize(sFogOfWarResolution*sFogOfWarResolution);
 
             // initialize to (0, 0, 0, 1)
-            uint32* pointer = buffer;
             for (int p=0; p<sFogOfWarResolution*sFogOfWarResolution; ++p)
             {
-                *(pointer+p) = (255 << 24);
+                buffer[p] = (255 << 24);
             }
 
-            memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, sFogOfWarResolution*sFogOfWarResolution*4);
+            memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
             tex2->getBuffer()->unlock();
 
             mBuffers[texture] = buffer;
@@ -288,25 +283,23 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
     {
         // get its buffer
         if (mBuffers.find(texName) == mBuffers.end()) return;
-        uint32* buffer = mBuffers[texName];
-        uint32* pointer = buffer;
+        int i=0;
         for (int texV = 0; texV<sFogOfWarResolution; ++texV)
         {
             for (int texU = 0; texU<sFogOfWarResolution; ++texU)
             {
                 float sqrDist = Math::Sqr(texU - u*sFogOfWarResolution) + Math::Sqr(texV - v*sFogOfWarResolution);
-                uint32 clr = *pointer;
+                uint32 clr = mBuffers[texName][i];
                 uint8 alpha = (clr >> 24);
                 alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
-                *((uint32*)pointer) = (alpha << 24);
+                mBuffers[texName][i] = (uint32) (alpha << 24);
 
-                // move to next texel
-                ++pointer;
+                ++i;
             }
         }
 
         // copy to the texture
-        memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, sFogOfWarResolution*sFogOfWarResolution*4);
+        memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &mBuffers[texName][0], sFogOfWarResolution*sFogOfWarResolution*4);
         tex->getBuffer()->unlock();
     }
 }
