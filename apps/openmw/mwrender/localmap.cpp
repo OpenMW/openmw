@@ -32,7 +32,7 @@ void LocalMap::deleteBuffers()
     for (std::map<std::string, uint32*>::iterator it=mBuffers.begin();
         it != mBuffers.end(); ++it)
     {
-        delete it->second;
+        delete[] it->second;
     }
     mBuffers.clear();
 }
