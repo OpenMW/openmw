@@ -124,9 +124,6 @@ namespace ESMS
     CellRefList<Static, D>            statics;
     CellRefList<Weapon, D>            weapons;
 
-    const Land* land[3][3];
-    const LTexList* landTextures;
-
     void load (const ESMStore &store, ESMReader &esm)
     {
         if (mState!=State_Loaded)
@@ -137,21 +134,6 @@ namespace ESMS
             std::cout << "loading cell " << cell->getDescription() << std::endl;
 
             loadRefs (store, esm);
-
-            if ( ! (cell->data.flags & ESM::Cell::Interior) )
-            {
-                for ( size_t x = 0; x < 3; x++ )
-                {
-                    for ( size_t y = 0; y < 3; y++ )
-                    {
-                        land[x][y] = loadTerrain(cell->data.gridX + x - 1,
-                                                 cell->data.gridY + y - 1,
-                                                 store,
-                                                 esm);
-                    }
-                }
-                landTextures = &store.landTexts;
-            }
 
             mState = State_Loaded;
         }
@@ -197,24 +179,6 @@ namespace ESMS
     }
 
   private:
-
-    Land* loadTerrain(int X, int Y, const ESMStore &store, ESMReader &esm)
-    {
-        // load terrain
-        Land *land = store.lands.search(X, Y);
-        if (land != NULL)
-        {
-            land->loadData(esm);
-        }
-
-        return land;
-    }
-
-    void unloadTerrain(int X, int Y, const ESMStore &store) {
-        assert (false &&
-                "This function is not implemented due to the fact that we now store overlapping land blocks so" &&
-                "we cannot be sure that the land segment is not being used by another CellStore");
-    }
 
     template<class Functor, class List>
     bool forEachImp (Functor& functor, List& list)
