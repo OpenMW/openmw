@@ -28,6 +28,7 @@ namespace MWSound
     class Sound;
 
     typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
+    typedef boost::shared_ptr<Sound> SoundPtr;
 
     class SoundManager
     {
@@ -40,7 +41,6 @@ namespace MWSound
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
-        typedef boost::shared_ptr<Sound> SoundPtr;
         typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
         typedef std::map<PtrIDPair,SoundPtr> SoundMap;
         SoundMap mActiveSounds;

@@ -559,11 +559,11 @@ void OpenAL_Output::bufferFinished(ALuint buf)
 }
 
 
-Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, bool loop)
+SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, bool loop)
 {
     throwALerror();
 
-    std::auto_ptr<OpenAL_Sound> sound;
+    boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
     if(mFreeSources.empty())
@@ -604,15 +604,15 @@ Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pi
     alSourcePlay(src);
     throwALerror();
 
-    return sound.release();
+    return sound;
 }
 
-Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
-                                  float min, float max, bool loop)
+SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+                                    float min, float max, bool loop)
 {
     throwALerror();
 
-    std::auto_ptr<OpenAL_Sound> sound;
+    boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
     if(mFreeSources.empty())
@@ -653,15 +653,15 @@ Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, fl
     alSourcePlay(src);
     throwALerror();
 
-    return sound.release();
+    return sound;
 }
 
 
-Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch)
+SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch)
 {
     throwALerror();
 
-    std::auto_ptr<OpenAL_SoundStream> sound;
+    boost::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
 
     if(mFreeSources.empty())
@@ -697,15 +697,15 @@ Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float 
     throwALerror();
 
     sound->play();
-    return sound.release();
+    return sound;
 }
 
-Sound* OpenAL_Output::streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
-                                    float min, float max)
+SoundPtr OpenAL_Output::streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+                                      float min, float max)
 {
     throwALerror();
 
-    std::auto_ptr<OpenAL_SoundStream> sound;
+    boost::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
 
     if(mFreeSources.empty())
@@ -741,7 +741,7 @@ Sound* OpenAL_Output::streamSound3D(const std::string &fname, const float *pos, 
     throwALerror();
 
     sound->play();
-    return sound.release();
+    return sound;
 }
 
 

@@ -42,13 +42,13 @@ namespace MWSound
         virtual void init(const std::string &devname="");
         virtual void deinit();
 
-        virtual Sound *playSound(const std::string &fname, float volume, float pitch, bool loop);
-        virtual Sound *playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
-                                   float min, float max, bool loop);
+        virtual SoundPtr playSound(const std::string &fname, float volume, float pitch, bool loop);
+        virtual SoundPtr playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+                                     float min, float max, bool loop);
 
-        virtual Sound *streamSound(const std::string &fname, float volume, float pitch);
-        virtual Sound *streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
-                                     float min, float max);
+        virtual SoundPtr streamSound(const std::string &fname, float volume, float pitch);
+        virtual SoundPtr streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+                                       float min, float max);
 
         virtual void updateListener(const float *pos, const float *atdir, const float *updir);
 

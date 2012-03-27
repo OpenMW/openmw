@@ -136,7 +136,7 @@ namespace MWSound
         {
             if(mMusic)
                 mMusic->stop();
-            mMusic.reset(mOutput->streamSound(filename, 0.4f, 1.0f));
+            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f);
         }
         catch(std::exception &e)
         {
@@ -180,7 +180,7 @@ namespace MWSound
             const ESM::Position &pos = ptr.getCellRef().pos;
             std::string filePath = std::string("Sound/")+filename;
 
-            SoundPtr sound(mOutput->playSound3D(filePath, pos.pos, 1.0f, 1.0f, 100.0f, 20000.0f, false));
+            SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, 1.0f, 1.0f, 100.0f, 20000.0f, false);
             mActiveSounds[std::make_pair(ptr, std::string("_say_sound"))] = sound;
         }
         catch(std::exception &e)
@@ -201,7 +201,7 @@ namespace MWSound
         try
         {
             std::string file = lookup(soundId, volume, min, max);
-            SoundPtr sound = SoundPtr(mOutput->playSound(file, volume, pitch, loop));
+            SoundPtr sound = mOutput->playSound(file, volume, pitch, loop);
             mActiveSounds[std::make_pair(MWWorld::Ptr(), soundId)] = sound;
         }
         catch(std::exception &e)
@@ -220,7 +220,7 @@ namespace MWSound
             const ESM::Position &pos = ptr.getCellRef().pos;
             std::string file = lookup(soundId, volume, min, max);
 
-            SoundPtr sound(mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop));
+            SoundPtr sound = mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop);
             mActiveSounds[std::make_pair((untracked?MWWorld::Ptr():ptr), soundId)] = sound;
         }
         catch(std::exception &e)
