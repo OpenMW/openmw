@@ -2,10 +2,10 @@
 #define GAME_SOUND_SOUNDMANAGER_H
 
 #include <string>
+#include <utility>
+#include <map>
 
 #include <OgreResourceGroupManager.h>
-
-#include <components/files/filelibrary.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -41,8 +41,8 @@ namespace MWSound
         std::string mCurrentPlaylist;
 
         typedef boost::shared_ptr<Sound> SoundPtr;
-        typedef std::map<std::string,SoundPtr> IDMap;
-        typedef std::map<MWWorld::Ptr,IDMap> SoundMap;
+        typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
+        typedef std::map<PtrIDPair,SoundPtr> SoundMap;
         SoundMap mActiveSounds;
 
         std::string lookup(const std::string &soundId,
