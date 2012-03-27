@@ -16,33 +16,32 @@ namespace MWRender
     //----------------------------------------------------------------------------------------------
     
     TerrainManager::TerrainManager(Ogre::SceneManager* mgr, const MWWorld::Environment& evn) :
-        mEnvironment(evn)
+        mEnvironment(evn), mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize))
     {
-        mTerrainGlobals = OGRE_NEW TerrainGlobalOptions();
 
         TerrainMaterialGeneratorPtr matGen;
         TerrainMaterialGeneratorB* matGenP = new TerrainMaterialGeneratorB();
         matGen.bind(matGenP);
-        mTerrainGlobals->setDefaultMaterialGenerator(matGen);
+        mTerrainGlobals.setDefaultMaterialGenerator(matGen);
 
         TerrainMaterialGenerator::Profile* const activeProfile =
-            mTerrainGlobals->getDefaultMaterialGenerator()
+            mTerrainGlobals.getDefaultMaterialGenerator()
                            ->getActiveProfile();
         mActiveProfile = static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         //The pixel error should be as high as possible without it being noticed
         //as it governs how fast mesh quality decreases.
-        mTerrainGlobals->setMaxPixelError(8);
+        mTerrainGlobals.setMaxPixelError(8);
 
-        mTerrainGlobals->setLayerBlendMapSize(32);
-        mTerrainGlobals->setDefaultGlobalColourMapSize(65);
+        mTerrainGlobals.setLayerBlendMapSize(32);
+        mTerrainGlobals.setDefaultGlobalColourMapSize(65);
 
         //10 (default) didn't seem to be quite enough
-        mTerrainGlobals->setSkirtSize(128);
+        mTerrainGlobals.setSkirtSize(128);
 
         //due to the sudden flick between composite and non composite textures,
         //this seemed the distance where it wasn't too noticeable
-        mTerrainGlobals->setCompositeMapDistance(mWorldSize*2);
+        mTerrainGlobals.setCompositeMapDistance(mWorldSize*2);
         
         mActiveProfile->setLightmapEnabled(false);
         mActiveProfile->setLayerSpecularMappingEnabled(false);
@@ -54,16 +53,11 @@ namespace MWRender
         //disabled
         mActiveProfile->setCompositeMapEnabled(false);
 
-        mTerrainGroup = OGRE_NEW TerrainGroup(mgr,
-                                              Terrain::ALIGN_X_Z,
-                                              mLandSize,
-                                              mWorldSize);
-
-        mTerrainGroup->setOrigin(Vector3(mWorldSize/2,
+        mTerrainGroup.setOrigin(Vector3(mWorldSize/2,
                                          0,
                                          -mWorldSize/2));
 
-        Terrain::ImportData& importSettings = mTerrainGroup->getDefaultImportSettings();
+        Terrain::ImportData& importSettings = mTerrainGroup.getDefaultImportSettings();
 
         importSettings.inputBias    = 0;
         importSettings.terrainSize  = mLandSize;
@@ -78,22 +72,20 @@ namespace MWRender
 
     TerrainManager::~TerrainManager()
     {
-        OGRE_DELETE mTerrainGroup;
-        OGRE_DELETE mTerrainGlobals;
     }
     
     //----------------------------------------------------------------------------------------------
     
     void TerrainManager::setDiffuse(const ColourValue& diffuse)
     {
-        mTerrainGlobals->setCompositeMapDiffuse(diffuse);
+        mTerrainGlobals.setCompositeMapDiffuse(diffuse);
     }
     
     //----------------------------------------------------------------------------------------------
     
     void TerrainManager::setAmbient(const ColourValue& ambient)
     {
-        mTerrainGlobals->setCompositeMapAmbient(ambient);
+        mTerrainGlobals.setCompositeMapAmbient(ambient);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -117,7 +109,7 @@ namespace MWRender
             for ( int y = 0; y < 2; y++ )
             {
                 Terrain::ImportData terrainData =
-                    mTerrainGroup->getDefaultImportSettings();
+                    mTerrainGroup.getDefaultImportSettings();
 
                 const int terrainX = cellX * 2 + x;
                 const int terrainY = cellY * 2 + y;
@@ -155,13 +147,13 @@ namespace MWRender
                                     x * numTextures, y * numTextures,
                                     numTextures, indexes);
 
-                if (mTerrainGroup->getTerrain(terrainX, terrainY) == NULL)
+                if (mTerrainGroup.getTerrain(terrainX, terrainY) == NULL)
                 {
-                    mTerrainGroup->defineTerrain(terrainX, terrainY, &terrainData);
+                    mTerrainGroup.defineTerrain(terrainX, terrainY, &terrainData);
 
-                    mTerrainGroup->loadTerrain(terrainX, terrainY, true);
+                    mTerrainGroup.loadTerrain(terrainX, terrainY, true);
 
-                    Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
+                    Terrain* terrain = mTerrainGroup.getTerrain(terrainX, terrainY);
                     initTerrainBlendMaps(terrain,
                                          cellX, cellY,
                                          x * numTextures, y * numTextures,
@@ -193,7 +185,7 @@ namespace MWRender
             }
         }
 
-        mTerrainGroup->freeTemporaryResources();
+        mTerrainGroup.freeTemporaryResources();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -204,8 +196,8 @@ namespace MWRender
         {
             for ( int y = 0; y < 2; y++ )
             {
-                mTerrainGroup->unloadTerrain(store->cell->getGridX() * 2 + x,
-                                             store->cell->getGridY() * 2 + y);
+                mTerrainGroup.unloadTerrain(store->cell->getGridX() * 2 + x,
+                                            store->cell->getGridY() * 2 + y);
             }
         }
     }

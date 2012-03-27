@@ -2,6 +2,7 @@
 #define _GAME_RENDER_TERRAIN_H
 
 #include <OgreTerrain.h>
+#include <OgreTerrainGroup.h>
 #include "terrainmaterial.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -32,8 +33,8 @@ namespace MWRender{
         void cellAdded(MWWorld::Ptr::CellStore* store);
         void cellRemoved(MWWorld::Ptr::CellStore* store);
     private:
-        Ogre::TerrainGlobalOptions* mTerrainGlobals;
-        Ogre::TerrainGroup* mTerrainGroup;
+        Ogre::TerrainGlobalOptions mTerrainGlobals;
+        Ogre::TerrainGroup mTerrainGroup;
 
         const MWWorld::Environment& mEnvironment;
 

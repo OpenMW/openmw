@@ -239,7 +239,13 @@ namespace ESMS
    */
   struct LandList : RecList
   {
-    virtual ~LandList() {}
+    virtual ~LandList()
+    {
+      for ( LandMap::iterator itr = lands.begin(); itr != lands.end(); ++itr )
+      {
+          delete itr->second;
+      }
+    }
 
     // Map containing all landscapes
     typedef std::pair<int, int> LandCoord;
