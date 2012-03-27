@@ -86,7 +86,7 @@ namespace MWRender
         // a buffer for the "fog of war" texture of the current cell.
         // interior cells could be divided into multiple textures,
         // so we store in a map.
-        std::map <std::string, Ogre::uint32*> mBuffers;
+        std::map <std::string, std::vector<Ogre::uint32> > mBuffers;
 
         void deleteBuffers();
 
