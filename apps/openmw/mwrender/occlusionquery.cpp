@@ -11,7 +11,7 @@ using namespace Ogre;
 
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mSingleObjectQuery(0), mActiveQuery(0),
-    mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false),
+    mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false), mTestResult(false), 
     mQuerySingleObjectRequested(false), mResponding(true), mDelay(0), mWasVisible(false), mObjectWasVisible(false)
 {
     mRendering = renderer;
@@ -211,7 +211,7 @@ void OcclusionQuery::update(float duration)
 
         mDoQuery = true;
     }
-    if (!mSingleObjectQuery->isStillOutstanding() && mQuerySingleObjectStarted)
+    if (mQuerySingleObjectStarted && !mSingleObjectQuery->isStillOutstanding())
     {
         mDelay = 0;
         mResponding = true;
