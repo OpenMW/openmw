@@ -95,9 +95,11 @@ namespace MWSound
                          bool untracked=false);
         ///< Play a sound from an object
 
-        void stopSound3D(MWWorld::Ptr reference, const std::string& soundId="");
-        ///< Stop the given object from playing the given sound, If no soundId is given,
-        /// all sounds for this reference will stop.
+        void stopSound3D(MWWorld::Ptr reference, const std::string& soundId);
+        ///< Stop the given object from playing the given sound,
+
+        void stopSound3D(MWWorld::Ptr reference);
+        ///< Stop the given object from playing all sounds.
 
         void stopSound(const MWWorld::Ptr::CellStore *cell);
         ///< Stop all sounds for the given cell.

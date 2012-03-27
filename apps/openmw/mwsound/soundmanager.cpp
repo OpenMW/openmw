@@ -231,36 +231,31 @@ namespace MWSound
 
     void SoundManager::stopSound3D(MWWorld::Ptr ptr, const std::string& soundId)
     {
-        // Stop a sound and remove it from the list. If soundId="" then
-        // stop all its sounds.
-        if(!soundId.empty())
-        {
-            SoundMap::iterator snditer = mActiveSounds.find(std::make_pair(ptr, soundId));
-            if(snditer == mActiveSounds.end())
-                return;
+        SoundMap::iterator snditer = mActiveSounds.find(std::make_pair(ptr, soundId));
+        if(snditer == mActiveSounds.end())
+            return;
 
-            snditer->second->stop();
-            mActiveSounds.erase(snditer);
-        }
-        else
+        snditer->second->stop();
+        mActiveSounds.erase(snditer);
+    }
+
+    void SoundManager::stopSound3D(MWWorld::Ptr ptr)
+    {
+        SoundMap::iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
         {
-            SoundMap::iterator snditer = mActiveSounds.begin();
-            while(snditer != mActiveSounds.end())
+            if(snditer->first.first == ptr)
             {
-                if(snditer->first.first == ptr)
-                {
-                    snditer->second->stop();
-                    mActiveSounds.erase(snditer++);
-                }
-                else
-                    snditer++;
+                snditer->second->stop();
+                mActiveSounds.erase(snditer++);
             }
+            else
+                snditer++;
         }
     }
 
     void SoundManager::stopSound(const MWWorld::Ptr::CellStore *cell)
     {
-        // Remove all references to objects belonging to a given cell
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
         {
