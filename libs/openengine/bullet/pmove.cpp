@@ -178,7 +178,7 @@ bool	PM_SlideMove( bool gravity )
 	float		into;
 	Ogre::Vector3		endVelocity;
 	Ogre::Vector3		endClipVelocity;
-	std::cout << "Slide move\n";
+	std::cout << "Slide move" << pm->ps.velocity << "\n";
 	numbumps = 4;
 
 	// primal_velocity = pm->ps->velocity
@@ -415,6 +415,7 @@ int PM_StepSlideMove( bool gravity )
 //	vec3_t		delta, delta2;
 	Ogre::Vector3		up, down;
 	float		stepSize;
+	std::cout << "Step Slide move" << pm->ps.velocity << "\n";
 
 	// start_o = pm->ps->origin
 	//VectorCopy (pm->ps->origin, start_o);
@@ -427,7 +428,7 @@ int PM_StepSlideMove( bool gravity )
 	if ( PM_SlideMove( gravity ) == false )
 		return 1;		// we got exactly where we wanted to go first try	
 
-	std::cout << "Step Slide move\n";
+	
 	// down = start_o - vec3(0, 0, STEPSIZE)
 	//VectorCopy(start_o, down);
 	down = start_o;
@@ -711,7 +712,7 @@ static void PM_WaterMove( playerMove* const pm )
 	Ogre::Vector3 wishdir;
 	float	scale;
 	float	vel;
-
+	std::cout << "Water moving";
 	/*if ( PM_CheckWaterJump() ) 
 	{
 		PM_WaterJumpMove();
@@ -837,7 +838,7 @@ static void PM_WalkMove( playerMove* const pmove )
 	playerMove::playercmd cmd;
 	float		accelerate;
 	float		vel;
-	std::cout << "Walking\n";
+	std::cout << "Walking"  << pm->ps.velocity << "\n";
 
 	if ( pm->ps.waterlevel > 2 && //DotProduct( pml.forward, pml.groundTrace.plane.normal ) > 0 ) 
 		pml.forward.dotProduct(pml.groundTrace.planenormal) > 0.0f)
@@ -927,6 +928,7 @@ static void PM_WalkMove( playerMove* const pmove )
 
 
 	PM_Friction ();
+	std::cout << "After friction" << pm->ps.velocity << "\n";
 
 	//bprintf("vel: (%f, %f, %f)\n", pm->ps.velocity.x, pm->ps.velocity.y, pm->ps.velocity.z);
 
@@ -945,20 +947,28 @@ static void PM_WalkMove( playerMove* const pmove )
 
 	//pml.right[2] = 0;
 	pml.right.z = 0;
+	//std::cout << "Further down" << pm->ps.velocity << "\n";
 
+	
 	// project the forward and right directions onto the ground plane
 	PM_ClipVelocity (pml.forward, pml.groundTrace.planenormal, pml.forward, OVERCLIP );
 	PM_ClipVelocity (pml.right, pml.groundTrace.planenormal, pml.right, OVERCLIP );
+	std::cout << "Clip velocity" << pm->ps.velocity << "\n";
 	//
-	//VectorNormalize (pml.forward);
-	pml.forward = pml.forward.normalise();
-	pml.right = pml.right.normalise();
+	
+	VectorNormalize (pml.forward);
+	VectorNormalize (pml.right);
+	//pml.forward = pml.forward.normalise();
+	//pml.right = pml.right.normalise();
+	std::cout << "forward2" << pml.forward << "\n";
+	std::cout << "right2" << pml.right << "\n";
 	
 
 	// wishvel = (pml.forward * fmove) + (pml.right * smove);
 	//for ( i = 0 ; i < 3 ; i++ ) 
 		//wishvel[i] = pml.forward[i] * fmove + pml.right[i] * smove;
 	wishvel = pml.forward * fmove + pml.right * smove;
+	std::cout << "WishVel" << wishvel << "\n";
 	//bprintf("f: (%f, %f, %f), s: (%f, %f, %f)\n", fmove, smove);
 
 
@@ -971,7 +981,9 @@ static void PM_WalkMove( playerMove* const pmove )
 	wishdir = wishvel;
 
 	wishspeed = VectorNormalize(wishdir);
+	std::cout << "Wishspeed: " << wishspeed << "\n";
 	wishspeed *= scale;
+	std::cout << "Wishspeed scaled:" << wishspeed << "\n";
 
 	// clamp the speed lower if ducking
 	if ( pm->cmd.ducking ) 
@@ -998,6 +1010,7 @@ static void PM_WalkMove( playerMove* const pmove )
 
 
 	PM_Accelerate (wishdir, wishspeed, accelerate);
+	std::cout << "Velocityafter: " << pm->ps.velocity << "\n";
 
 	//Com_Printf("velocity = %1.1f %1.1f %1.1f\n", pm->ps->velocity[0], pm->ps->velocity[1], pm->ps->velocity[2]);
 	//Com_Printf("velocity1 = %1.1f\n", VectorLength(pm->ps->velocity));
@@ -1012,15 +1025,18 @@ static void PM_WalkMove( playerMove* const pmove )
 
 	//vel = VectorLength(pm->ps->velocity);
 	vel = pm->ps.velocity.length();
+	std::cout << "The length" << vel << "\n";
 
 	// slide along the ground plane
 	PM_ClipVelocity (pm->ps.velocity, pml.groundTrace.planenormal, 
 		pm->ps.velocity, OVERCLIP );
+	std::cout << "Velocity clipped" << pm->ps.velocity << "\n";
 
 	// don't decrease velocity when going up or down a slope
-	//VectorNormalize(pm->ps->velocity);
-	pm->ps.velocity = pm->ps.velocity.normalise();
+	VectorNormalize(pm->ps.velocity);
+	//pm->ps.velocity = pm->ps.velocity.normalise();
 	
+	std::cout << "Final:" << pm->ps.velocity << "\n";
 	//VectorScale(pm->ps->velocity, vel, pm->ps->velocity);
 	pm->ps.velocity = pm->ps.velocity * vel;
 
@@ -1032,6 +1048,7 @@ static void PM_WalkMove( playerMove* const pmove )
 	PM_StepSlideMove( false );
 
 	//Com_Printf("velocity2 = %1.1f\n", VectorLength(pm->ps->velocity));
+	std::cout << "Walk2" << pm->ps.velocity << "\n";
 
 }
 
@@ -1361,7 +1378,7 @@ static void PM_CrashLand( void )
 
 static void PM_GroundTrace( void ) 
 {
-	std::cout << "Ground trace\n";
+	std::cout << "Ground trace" << pm->ps.velocity << "\n";
 	Ogre::Vector3		point;
 	traceResults		trace;
 
@@ -1467,13 +1484,13 @@ static void PM_GroundTrace( void )
 
 	// don't reset the z velocity for slopes
 //	pm->ps->velocity[2] = 0;
-
+	std::cout << "Ground trace2" << pm->ps.velocity << "\n";
 	//PM_AddTouchEnt( trace.entityNum );
 }
 
 static void PM_AirMove()
 {
-	std::cout << "Air move\n";
+	std::cout << "Air move " << pm->ps.velocity << "\n";
 	//int			i;
 	Ogre::Vector3		wishvel;
 	float		fmove, smove;
@@ -1495,9 +1512,9 @@ static void PM_AirMove()
 
 	// project moves down to flat plane
 	//pml.forward[2] = 0;
-	pml.forward.y = 0;             //Z or Y?
+	pml.forward.z = 0;             //Z or Y?
 	//pml.right[2] = 0;
-	pml.right.y = 0;
+	pml.right.z = 0;
 	//VectorNormalize (pml.forward);
 	pml.forward = Ogre::Vector3(pml.forward.normalise());
 	pml.right = Ogre::Vector3(pml.right.normalise());
@@ -1535,8 +1552,9 @@ static void PM_AirMove()
 	else
 		PM_SlideMove ( qtrue );
 #endif*/
-
+	
 	/*bprintf("%i ", */PM_StepSlideMove ( true )/* )*/;
+	std::cout << "Velocity 2 " << pm->ps.velocity << "\n"; 
 }
 
 static void PM_NoclipMove( void ) 
