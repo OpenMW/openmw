@@ -13,9 +13,22 @@ const int StatsWindow::lineHeight = 18;
 
 StatsWindow::StatsWindow (WindowManager& parWindowManager)
   : WindowBase("openmw_stats_window_layout.xml", parWindowManager)
+  , skillAreaWidget(NULL)
+  , skillClientWidget(NULL)
+  , skillScrollerWidget(NULL)
   , lastPos(0)
+  , clientHeight(0)
+  , majorSkills()
+  , minorSkills()
+  , miscSkills()
+  , skillValues()
+  , skillWidgetMap()
+  , factionWidgetMap()
+  , factions()
+  , birthSignId()
   , reputation(0)
   , bounty(0)
+  , skillWidgets()
 {
     setCoord(0,0,498, 342);
 
