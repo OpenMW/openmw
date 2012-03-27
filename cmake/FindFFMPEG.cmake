@@ -9,9 +9,23 @@
 
 SET( FFMPEG_FOUND "NO" )
 
+FIND_PATH( FFMPEG_general_INCLUDE_DIR libavcodec/avcodec.h libavformat/avformat.h
+  HINTS
+  PATHS
+  /usr/include
+  /usr/local/include
+  /usr/include/ffmpeg
+  /usr/local/include/ffmpeg
+  /usr/include/ffmpeg/libavcodec
+  /usr/local/include/ffmpeg/libavcodec
+  /usr/include/libavcodec
+  /usr/local/include/libavcodec
+  )
+
 FIND_PATH( FFMPEG_avcodec_INCLUDE_DIR avcodec.h
   HINTS
   PATHS
+  ${FFMPEG_general_INCLUDE_DIR}/libavcodec
   /usr/include
   /usr/local/include
   /usr/include/ffmpeg
@@ -25,6 +39,7 @@ FIND_PATH( FFMPEG_avcodec_INCLUDE_DIR avcodec.h
 FIND_PATH( FFMPEG_avformat_INCLUDE_DIR avformat.h
   HINTS
   PATHS
+  ${FFMPEG_general_INCLUDE_DIR}/libavformat
   /usr/include
   /usr/local/include
   /usr/include/ffmpeg
@@ -35,7 +50,7 @@ FIND_PATH( FFMPEG_avformat_INCLUDE_DIR avformat.h
   /usr/local/include/libavformat
 )
 
-set(FFMPEG_INCLUDE_DIR ${FFMPEG_avcodec_INCLUDE_DIR} ${FFMPEG_avformat_INCLUDE_DIR})
+set(FFMPEG_INCLUDE_DIR ${FFMPEG_general_INCLUDE_DIR} ${FFMPEG_avcodec_INCLUDE_DIR} ${FFMPEG_avformat_INCLUDE_DIR})
 
 IF( FFMPEG_INCLUDE_DIR )
 

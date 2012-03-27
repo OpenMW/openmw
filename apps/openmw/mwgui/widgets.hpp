@@ -7,6 +7,9 @@
 
 #include "../mwmechanics/stat.hpp"
 
+#undef MYGUI_EXPORT
+#define MYGUI_EXPORT
+
 /*
   This file contains various custom widgets used in OpenMW.
  */

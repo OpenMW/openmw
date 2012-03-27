@@ -213,7 +213,13 @@ void MpgSnd_Decoder::rewind()
     }
 }
 
-MpgSnd_Decoder::MpgSnd_Decoder() : mSndFile(NULL), mMpgFile(NULL)
+MpgSnd_Decoder::MpgSnd_Decoder()
+    : mSndInfo()
+    , mSndFile(NULL)
+    , mMpgFile(NULL)
+    , mDataStream()
+    , mChanConfig(ChannelConfig_Stereo)
+    , mSampleRate(0)
 {
     static bool initdone = false;
     if(!initdone)

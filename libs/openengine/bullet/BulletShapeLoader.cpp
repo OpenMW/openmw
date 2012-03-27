@@ -22,6 +22,7 @@ Ogre::Resource(creator, name, handle, group, isManual, loader)
 
 BulletShape::~BulletShape()
 {
+    deleteShape(Shape);
 }
 
 // farm out to BulletShapeLoader
