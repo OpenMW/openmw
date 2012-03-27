@@ -749,6 +749,17 @@ namespace MWWorld
                 // figure out which object we want to test against
                 std::vector < std::pair < float, std::string > > results = mPhysics->getFacedObjects();
 
+                // ignore the player
+                for (std::vector < std::pair < float, std::string > >::iterator it = results.begin();
+                    it != results.end(); ++it)
+                {
+                    if ( (*it).second == mPlayer->getPlayer().getRefData().getHandle() )
+                    {
+                        results.erase(it);
+                        break;
+                    }
+                }
+
                 if (results.size() == 0)
                 {
                     mNumFacing = 0;

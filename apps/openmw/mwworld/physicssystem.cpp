@@ -57,8 +57,6 @@ namespace MWWorld
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
         mRender.getViewport()->getWidth()/2,
         mRender.getViewport()->getHeight()/2);
-        //let's avoid the capsule shape of the player.
-        centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
         btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
         btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
 
@@ -71,11 +69,8 @@ namespace MWWorld
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
         mRender.getViewport()->getWidth()/2,
         mRender.getViewport()->getHeight()/2);
-        //let's avoid the capsule shape of the player.
-        centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
-        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
-        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
-        return from * (1-extent) + to * extent;
+        btVector3 result(centerRay.getPoint(500*extent).x,-centerRay.getPoint(500*extent).z,centerRay.getPoint(500*extent).y);
+        return result;
     }
     
     bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to)
