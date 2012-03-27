@@ -99,7 +99,7 @@ namespace MWSound
         ///< Stop the given object from playing the given sound, If no soundId is given,
         /// all sounds for this reference will stop.
 
-        void stopSound(MWWorld::Ptr::CellStore *cell);
+        void stopSound(const MWWorld::Ptr::CellStore *cell);
         ///< Stop all sounds for the given cell.
 
         void stopSound(const std::string& soundId);

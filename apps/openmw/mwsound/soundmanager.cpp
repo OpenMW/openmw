@@ -258,7 +258,7 @@ namespace MWSound
         }
     }
 
-    void SoundManager::stopSound(MWWorld::Ptr::CellStore *cell)
+    void SoundManager::stopSound(const MWWorld::Ptr::CellStore *cell)
     {
         // Remove all references to objects belonging to a given cell
         SoundMap::iterator snditer = mActiveSounds.begin();
