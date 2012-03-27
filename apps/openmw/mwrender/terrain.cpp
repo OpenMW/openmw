@@ -1,12 +1,12 @@
 #include <OgreTerrain.h>
 #include <OgreTerrainGroup.h>
+#include <boost/lexical_cast.hpp>
+
+#include "../mwworld/world.hpp"
 
 #include "terrainmaterial.hpp"
 #include "terrain.hpp"
 
-#include "components/esm/loadland.hpp"
-
-#include <boost/lexical_cast.hpp>
 
 using namespace Ogre;
 
@@ -15,7 +15,8 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
     
-    TerrainManager::TerrainManager(SceneManager* mgr)
+    TerrainManager::TerrainManager(Ogre::SceneManager* mgr, const MWWorld::Environment& evn) :
+        mEnvironment(evn)
     {
         mTerrainGlobals = OGRE_NEW TerrainGlobalOptions();
 
@@ -102,6 +103,12 @@ namespace MWRender
         const int cellX = store->cell->getGridX();
         const int cellY = store->cell->getGridY();
 
+        ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
+        if ( land != NULL )
+        {
+            land->loadData();
+        }
+
         //split the cell terrain into four segments
         const int numTextures = ESM::Land::LAND_TEXTURE_SIZE/2;
 
@@ -122,22 +129,29 @@ namespace MWRender
                                                       mLandSize*mLandSize,
                                                       MEMCATEGORY_GEOMETRY);
 
-                //copy the height data row by row
-                for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
+                if ( land != NULL )
                 {
-                                           //the offset of the current segment
-                    const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
-                                           //offset of the row
-                                           terrainCopyY * ESM::Land::LAND_SIZE;
-                    const size_t xOffset = x * (mLandSize-1);
+                    //copy the height data row by row
+                    for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
+                    {
+                                               //the offset of the current segment
+                        const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
+                                               //offset of the row
+                                               terrainCopyY * ESM::Land::LAND_SIZE;
+                        const size_t xOffset = x * (mLandSize-1);
 
-                    memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
-                           &store->land[1][1]->landData->heights[yOffset + xOffset],
-                           mLandSize*sizeof(float));
+                        memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
+                               &land->landData->heights[yOffset + xOffset],
+                               mLandSize*sizeof(float));
+                    }
+                }
+                else
+                {
+                    memset(terrainData.inputFloat, 0, mLandSize*mLandSize*sizeof(float));
                 }
 
                 std::map<uint16_t, int> indexes;
-                initTerrainTextures(&terrainData, store,
+                initTerrainTextures(&terrainData, cellX, cellY,
                                     x * numTextures, y * numTextures,
                                     numTextures, indexes);
 
@@ -148,16 +162,18 @@ namespace MWRender
                     mTerrainGroup->loadTerrain(terrainX, terrainY, true);
 
                     Terrain* terrain = mTerrainGroup->getTerrain(terrainX, terrainY);
-                    initTerrainBlendMaps(terrain, store,
+                    initTerrainBlendMaps(terrain,
+                                         cellX, cellY,
                                          x * numTextures, y * numTextures,
                                          numTextures,
                                          indexes);
 
-                    if ( store->land[1][1]->landData->usingColours )
+                    if ( land->landData->usingColours )
                     {
                         // disable or enable global colour map (depends on available vertex colours)
                         mActiveProfile->setGlobalColourMapEnabled(true);
-                        TexturePtr vertex = getVertexColours(store,
+                        TexturePtr vertex = getVertexColours(land,
+                                                             cellX, cellY,
                                                              x*(mLandSize-1),
                                                              y*(mLandSize-1),
                                                              mLandSize);
@@ -197,11 +213,10 @@ namespace MWRender
     //----------------------------------------------------------------------------------------------
 
     void TerrainManager::initTerrainTextures(Terrain::ImportData* terrainData,
-                                             MWWorld::Ptr::CellStore* store,
+                                             int cellX, int cellY,
                                              int fromX, int fromY, int size,
                                              std::map<uint16_t, int>& indexes)
     {
-        assert(store != NULL && "store must be a valid pointer");
         assert(terrainData != NULL && "Must have valid terrain data");
         assert(fromX >= 0 && fromY >= 0 &&
                "Can't get a terrain texture on terrain outside the current cell");
@@ -219,7 +234,7 @@ namespace MWRender
         {
             for ( int x = fromX - 1; x < fromX + size + 1; x++ )
             {
-                ltexIndexes.insert(getLtexIndexAt(store, x, y));
+                ltexIndexes.insert(getLtexIndexAt(cellX, cellY, x, y));
             }
         }
 
@@ -244,7 +259,7 @@ namespace MWRender
             {
                 //NB: All vtex ids are +1 compared to the ltex ids
 
-                assert( (int)store->landTextures->ltex.size() >= (int)ltexIndex - 1 &&
+                assert( (int)mEnvironment.mWorld->getStore().landTexts.getSize() >= (int)ltexIndex - 1 &&
                        "LAND.VTEX must be within the bounds of the LTEX array");
                 
                 std::string texture;
@@ -254,7 +269,7 @@ namespace MWRender
                 }
                 else
                 {
-                    texture = store->landTextures->ltex[ltexIndex-1].texture;
+                    texture = mEnvironment.mWorld->getStore().landTexts.search(ltexIndex-1)->texture;
                     //TODO this is needed due to MWs messed up texture handling
                     texture = texture.substr(0, texture.rfind(".")) + ".dds";
                 }
@@ -280,11 +295,10 @@ namespace MWRender
     //----------------------------------------------------------------------------------------------
 
     void TerrainManager::initTerrainBlendMaps(Terrain* terrain,
-                                              MWWorld::Ptr::CellStore* store,
+                                              int cellX, int cellY,
                                               int fromX, int fromY, int size,
                                               const std::map<uint16_t, int>& indexes)
     {
-        assert(store != NULL && "store must be a valid pointer");
         assert(terrain != NULL && "Must have valid terrain");
         assert(fromX >= 0 && fromY >= 0 &&
                "Can't get a terrain texture on terrain outside the current cell");
@@ -313,7 +327,7 @@ namespace MWRender
         {
             for ( int texX = fromX - 1; texX < fromX + size + 1; texX++ )
             {
-                const uint16_t ltexIndex = getLtexIndexAt(store, texX, texY);
+                const uint16_t ltexIndex = getLtexIndexAt(cellX, cellY, texX, texY);
 
                 //check if it is the base texture (which isn't in the map) and
                 //if it is don't bother altering the blend map for it
@@ -332,8 +346,10 @@ namespace MWRender
                 float* const pBlend = terrain->getLayerBlendMap(layerIndex)
                                              ->getBlendPointer();
 
-                for ( int y = -1; y < splatSize + 1; y++ ){
-                    for ( int x = -1; x < splatSize + 1; x++ ){
+                for ( int y = -1; y < splatSize + 1; y++ )
+                {
+                    for ( int x = -1; x < splatSize + 1; x++ )
+                    {
 
                         //Note: Y is reversed
                         const int splatY = blendMapSize - 1 - relY * splatSize - y;
@@ -373,7 +389,7 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
 
-    int TerrainManager::getLtexIndexAt(MWWorld::Ptr::CellStore* store,
+    int TerrainManager::getLtexIndexAt(int cellX, int cellY,
                                        int x, int y)
     {
         //check texture index falls within the 9 cell bounds
@@ -385,12 +401,6 @@ namespace MWRender
         assert(x < 2*ESM::Land::LAND_TEXTURE_SIZE &&
                y < 2*ESM::Land::LAND_TEXTURE_SIZE &&
                "Trying to get land textures that are out of bounds");
-
-        assert(store != NULL && "Store pointer must be valid");
-
-        //default center cell is indexed at (1,1)
-        int cellX = 1;
-        int cellY = 1;
 
         if ( x < 0 )
         {
@@ -414,22 +424,32 @@ namespace MWRender
             y -= ESM::Land::LAND_TEXTURE_SIZE;
         }
 
-        return store->land[cellX][cellY]
-                    ->landData
-                    ->textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+
+        ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
+        if ( land != NULL )
+        {
+            land->loadData();
+            return land->landData
+                       ->textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     //----------------------------------------------------------------------------------------------
 
-    TexturePtr TerrainManager::getVertexColours(MWWorld::Ptr::CellStore* store,
-                                                    int fromX, int fromY, int size)
+    TexturePtr TerrainManager::getVertexColours(ESM::Land* land,
+                                                int cellX, int cellY,
+                                                int fromX, int fromY, int size)
     {
         TextureManager* const texMgr = TextureManager::getSingletonPtr();
 
         const std::string colourTextureName = "VtexColours_" +
-                                              boost::lexical_cast<std::string>(store->cell->getGridX()) +
+                                              boost::lexical_cast<std::string>(cellX) +
                                               "_" +
-                                              boost::lexical_cast<std::string>(store->cell->getGridY()) +
+                                              boost::lexical_cast<std::string>(cellY) +
                                               "_" +
                                               boost::lexical_cast<std::string>(fromX) +
                                               "_" +
@@ -451,26 +471,42 @@ namespace MWRender
         const PixelBox& pixelBox = pixelBuffer->getCurrentLock();
          
         uint8* pDest = static_cast<uint8*>(pixelBox.data);
-         
-        const char* const colours = store->land[1][1]->landData->colours;
-        for ( int y = 0; y < size; y++ )
+
+        if ( land != NULL )
         {
-            for ( int x = 0; x < size; x++ )
+            const char* const colours = land->landData->colours;
+            for ( int y = 0; y < size; y++ )
             {
-                const size_t colourOffset = (y+fromY)*3*65 + (x+fromX)*3;
+                for ( int x = 0; x < size; x++ )
+                {
+                    const size_t colourOffset = (y+fromY)*3*65 + (x+fromX)*3;
 
-                assert( colourOffset >= 0 && colourOffset < 65*65*3 &&
-                        "Colour offset is out of the expected bounds of record" );
+                    assert( colourOffset < 65*65*3 &&
+                            "Colour offset is out of the expected bounds of record" );
 
-                const unsigned char r = colours[colourOffset + 0];
-                const unsigned char g = colours[colourOffset + 1];
-                const unsigned char b = colours[colourOffset + 2];
+                    const unsigned char r = colours[colourOffset + 0];
+                    const unsigned char g = colours[colourOffset + 1];
+                    const unsigned char b = colours[colourOffset + 2];
 
-                //as is the case elsewhere we need to flip the y
-                const size_t imageOffset = (size - 1 - y)*size*4 + x*4;
-                pDest[imageOffset + 0] = b;
-                pDest[imageOffset + 1] = g;
-                pDest[imageOffset + 2] = r;
+                    //as is the case elsewhere we need to flip the y
+                    const size_t imageOffset = (size - 1 - y)*size*4 + x*4;
+                    pDest[imageOffset + 0] = b;
+                    pDest[imageOffset + 1] = g;
+                    pDest[imageOffset + 2] = r;
+                }
+            }
+        }
+        else
+        {
+            for ( int y = 0; y < size; y++ )
+            {
+                for ( int x = 0; x < size; x++ )
+                {
+                    for ( int k = 0; k < 3; k++ )
+                    {
+                        *pDest++ = 0;
+                    }
+                }
             }
         }
          

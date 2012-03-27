@@ -17,6 +17,7 @@ struct Land
 
     // File context. This allows the ESM reader to be 'reset' to this
     // location later when we are ready to load the full data set.
+    ESMReader* mEsm;
     ESM_Context context;
 
     bool hasData;
@@ -70,7 +71,7 @@ struct Land
     /**
      * Actually loads data
      */
-    void loadData(ESMReader &esm);
+    void loadData();
 
     /**
      * Frees memory allocated for land data

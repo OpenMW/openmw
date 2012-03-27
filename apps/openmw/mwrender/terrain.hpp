@@ -23,7 +23,7 @@ namespace MWRender{
      */
     class TerrainManager{
     public:
-        TerrainManager(Ogre::SceneManager*);
+        TerrainManager(Ogre::SceneManager* mgr, const MWWorld::Environment& env);
         virtual ~TerrainManager();
 
         void setDiffuse(const Ogre::ColourValue& diffuse);
@@ -34,6 +34,8 @@ namespace MWRender{
     private:
         Ogre::TerrainGlobalOptions* mTerrainGlobals;
         Ogre::TerrainGroup* mTerrainGroup;
+
+        const MWWorld::Environment& mEnvironment;
 
         Ogre::TerrainMaterialGeneratorB::SM2Profile* mActiveProfile;
 
@@ -53,7 +55,8 @@ namespace MWRender{
          * layer
          *
          * @param terrainData the terrain data to setup the textures for
-         * @param store the cell store for the given terrain cell
+         * @param cellX the coord of the cell
+         * @param cellY the coord of the cell
          * @param fromX the ltex index in the current cell to start making the texture from
          * @param fromY the ltex index in the current cell to start making the texture from
          * @param size the size (number of splats) to get
@@ -61,7 +64,7 @@ namespace MWRender{
          *          can be used by initTerrainBlendMaps
          */
         void initTerrainTextures(Ogre::Terrain::ImportData* terrainData,
-                                 MWWorld::Ptr::CellStore* store,
+                                 int cellX, int cellY,
                                  int fromX, int fromY, int size,
                                  std::map<uint16_t, int>& indexes);
 
@@ -69,14 +72,15 @@ namespace MWRender{
          * Creates the blend (splatting maps) for the given terrain from the ltex data.
          *
          * @param terrain the terrain object for the current cell
-         * @param store the cell store for the given terrain cell
+         * @param cellX the coord of the cell
+         * @param cellY the coord of the cell
          * @param fromX the ltex index in the current cell to start making the texture from
          * @param fromY the ltex index in the current cell to start making the texture from
          * @param size the size (number of splats) to get
          * @param indexes the mapping of ltex to blend map produced by initTerrainTextures
          */
         void initTerrainBlendMaps(Ogre::Terrain* terrain,
-                                  MWWorld::Ptr::CellStore* store,
+                                  int cellX, int cellY,
                                   int fromX, int fromY, int size,
                                   const std::map<uint16_t, int>& indexes);
 
@@ -85,22 +89,25 @@ namespace MWRender{
          * starts at (0,0). This supports getting values from the surrounding
          * cells so negative x, y is acceptable
          *
-         * @param store the cell store for the current cell
+         * @param cellX the coord of the cell
+         * @param cellY the coord of the cell
          * @param x, y the splat position of the ltex index to get relative to the
          *             first splat of the current cell
          */
-        int getLtexIndexAt(MWWorld::Ptr::CellStore* store, int x, int y);
+        int getLtexIndexAt(int cellX, int cellY, int x, int y);
 
         /**
          * Due to the fact that Ogre terrain doesn't support vertex colours
          * we have to generate them manually
          *
-         * @param store the cell store for the given terrain cell
+         * @param cellX the coord of the cell
+         * @param cellY the coord of the cell
          * @param fromX the *vertex* index in the current cell to start making texture from
          * @param fromY the *vertex* index in the current cell to start making the texture from
          * @param size the size (number of vertexes) to get
          */
-        Ogre::TexturePtr getVertexColours(MWWorld::Ptr::CellStore* store,
+        Ogre::TexturePtr getVertexColours(ESM::Land* land,
+                                          int cellX, int cellY,
                                           int fromX, int fromY, int size);
     };
 
