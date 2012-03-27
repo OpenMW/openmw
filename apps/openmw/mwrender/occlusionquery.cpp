@@ -225,14 +225,6 @@ void OcclusionQuery::update(float duration)
 
         mBBQuerySingleObject->setVisible(false);
 
-        // restore old render queues
-        for (std::vector<ObjectInfo>::iterator it=mObjectsInfo.begin();
-            it!=mObjectsInfo.end(); ++it)
-        {
-            if (!mRendering->getScene()->hasMovableObject((*it).name, (*it).typeName)) break;
-            mRendering->getScene()->getMovableObject((*it).name, (*it).typeName)->setRenderQueueGroup( (*it).oldRenderqueue );
-        }
-
         mQuerySingleObjectStarted = false;
         mQuerySingleObjectRequested = false;
     }
@@ -244,22 +236,6 @@ void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::SceneNod
         && "Occlusion test still pending");
 
     mBBQuerySingleObject->setVisible(true);
-
-    // we don't want the object to occlude itself
-    // put it in a render queue _after_ the occlusion query
-    mObjectsInfo.clear();
-    for (int i=0; i<object->numAttachedObjects(); ++i)
-    {
-        ObjectInfo info;
-        MovableObject* obj = object->getAttachedObject(i);
-        info.name = obj->getName();
-        info.typeName = obj->getMovableType();
-        info.oldRenderqueue = obj->getRenderQueueGroup();
-
-        mObjectsInfo.push_back(info);
-
-        object->getAttachedObject(i)->setRenderQueueGroup(RENDER_QUEUE_MAIN+5);
-    }
 
     mObjectNode->setPosition(position);
     // scale proportional to camera distance, in order to always give the billboard the same size in screen-space

@@ -18,13 +18,6 @@ namespace MWRender
     ///
     /// \brief Implements hardware occlusion queries on the GPU
     ///
-    struct ObjectInfo
-    {
-        int oldRenderqueue;
-        std::string name;
-        std::string typeName;
-    };
-    
     class OcclusionQuery : public Ogre::RenderObjectListener, public Ogre::RenderQueueListener
     {
     public:
@@ -75,7 +68,6 @@ namespace MWRender
         float mSunVisibility;
 
         Ogre::SceneNode* mObjectNode;
-        std::vector<ObjectInfo> mObjectsInfo;
 
         bool mWasVisible;
         bool mObjectWasVisible;
