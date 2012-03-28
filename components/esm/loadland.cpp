@@ -4,6 +4,8 @@ namespace ESM
 {
 void Land::load(ESMReader &esm)
 {
+    mEsm = &esm;
+
     // Get the grid location
     esm.getSubNameIs("INTV");
     esm.getSubHeaderIs(8);
@@ -51,7 +53,7 @@ void Land::load(ESMReader &esm)
     landData = NULL;
 }
 
-void Land::loadData(ESMReader &esm)
+void Land::loadData()
 {
     if (dataLoaded)
     {
@@ -62,17 +64,17 @@ void Land::loadData(ESMReader &esm)
 
     if (hasData)
     {
-        esm.restoreContext(context);
+        mEsm->restoreContext(context);
 
         //esm.getHNExact(landData->normals, sizeof(VNML), "VNML");
-        if (esm.isNextSub("VNML"))
+        if (mEsm->isNextSub("VNML"))
         {
-            esm.skipHSubSize(12675);
+            mEsm->skipHSubSize(12675);
         }
 
         VHGT rawHeights;
 
-        esm.getHNExact(&rawHeights, sizeof(VHGT), "VHGT");
+        mEsm->getHNExact(&rawHeights, sizeof(VHGT), "VHGT");
         int currentHeightOffset = rawHeights.heightOffset;
         for (int y = 0; y < LAND_SIZE; y++)
         {
@@ -87,20 +89,20 @@ void Land::loadData(ESMReader &esm)
             }
         }
 
-        if (esm.isNextSub("WNAM"))
+        if (mEsm->isNextSub("WNAM"))
         {
-            esm.skipHSubSize(81);
+            mEsm->skipHSubSize(81);
         }
-        if (esm.isNextSub("VCLR"))
+        if (mEsm->isNextSub("VCLR"))
         {
             landData->usingColours = true;
-            esm.getHExact(&landData->colours, 3*LAND_NUM_VERTS);
+            mEsm->getHExact(&landData->colours, 3*LAND_NUM_VERTS);
         }else{
             landData->usingColours = false;
         }
         //TODO fix magic numbers
         uint16_t vtex[512];
-        esm.getHNExact(&vtex, 512, "VTEX");
+        mEsm->getHNExact(&vtex, 512, "VTEX");
 
         int readPos = 0; //bit ugly, but it works
         for ( int y1 = 0; y1 < 4; y1++ )

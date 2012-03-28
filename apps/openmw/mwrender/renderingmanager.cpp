@@ -23,7 +23,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
-    mTerrainManager = new TerrainManager(mRendering.getScene());
+    mTerrainManager = new TerrainManager(mRendering.getScene(),
+                                         environment);
 
     //The fog type must be set before any terrain objects are created as if the
     //fog type is set to FOG_NONE then the initially created terrain won't have any fog
