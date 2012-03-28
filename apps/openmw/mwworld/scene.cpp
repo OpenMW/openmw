@@ -112,9 +112,12 @@ namespace MWWorld
             float worldsize = ESM::Land::REAL_SIZE;
 
             if (!(cell->cell->data.flags & ESM::Cell::Interior))
-                mPhysics->addHeightField (cell->land[1][1]->landData->heights,
+            {
+                ESM::Land* land = mWorld->getStore().lands.search(cell->cell->data.gridX,cell->cell->data.gridY);
+                mPhysics->addHeightField (land->landData->heights,
                     cell->cell->data.gridX, cell->cell->data.gridY,
                     0, ( worldsize/(verts-1) ), verts);
+            }
 
             mRendering.configureAmbient(*cell);
             mRendering.requestMap(cell);
