@@ -140,6 +140,7 @@ namespace MWSound
             if(mMusic)
                 mMusic->stop();
             mMusic = mOutput->streamSound(filename, 0.4f, 1.0f);
+            mMusic->mBaseVolume = 0.4f;
         }
         catch(std::exception &e)
         {
@@ -180,10 +181,13 @@ namespace MWSound
         try
         {
             // The range values are not tested
-            const ESM::Position &pos = ptr.getCellRef().pos;
+            float basevol = 1.0f; /* TODO: volume settings */
             std::string filePath = std::string("Sound/")+filename;
+            const ESM::Position &pos = ptr.getCellRef().pos;
 
-            SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, 1.0f, 1.0f, 100.0f, 20000.0f, false);
+            SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, basevol, 1.0f, 20.0f, 12750.0f, false);
+            sound->mBaseVolume = basevol;
+
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
         }
         catch(std::exception &e)
@@ -200,12 +204,18 @@ namespace MWSound
 
     void SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
     {
-        float min, max;
         try
         {
-            std::string file = lookup(soundId, volume, min, max);
+            float basevol = 1.0f; /* TODO: volume settings */
+            float min, max;
+            std::string file = lookup(soundId, basevol, min, max);
 
-            SoundPtr sound = mOutput->playSound(file, volume, pitch, loop);
+            SoundPtr sound = mOutput->playSound(file, volume*basevol, pitch, loop);
+            sound->mVolume = volume;
+            sound->mBaseVolume = basevol;
+            sound->mMinDistance = min;
+            sound->mMaxDistance = max;
+
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
         catch(std::exception &e)
@@ -217,16 +227,22 @@ namespace MWSound
     void SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
                                    float volume, float pitch, bool loop, bool untracked)
     {
-        float min, max;
         try
         {
             // Look up the sound in the ESM data
+            float basevol = 1.0f; /* TODO: volume settings */
+            float min, max;
+            std::string file = lookup(soundId, basevol, min, max);
             const ESM::Position &pos = ptr.getCellRef().pos;
-            std::string file = lookup(soundId, volume, min, max);
 
-            SoundPtr sound = mOutput->playSound3D(file, pos.pos, volume, pitch, min, max, loop);
+            SoundPtr sound = mOutput->playSound3D(file, pos.pos, volume*basevol, pitch, min, max, loop);
+            sound->mVolume = volume;
+            sound->mBaseVolume = basevol;
+            sound->mMinDistance = min;
+            sound->mMaxDistance = max;
+
             mActiveSounds[sound] = (!untracked ? std::make_pair(ptr, soundId) :
-                                    std::make_pair(MWWorld::Ptr(), std::string()));
+                                    std::make_pair(MWWorld::Ptr(), soundId));
         }
         catch(std::exception &e)
         {
