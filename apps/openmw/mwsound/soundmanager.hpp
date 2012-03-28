@@ -42,7 +42,7 @@ namespace MWSound
         std::string mCurrentPlaylist;
 
         typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
-        typedef std::map<PtrIDPair,SoundPtr> SoundMap;
+        typedef std::map<SoundPtr,PtrIDPair> SoundMap;
         SoundMap mActiveSounds;
 
         std::string lookup(const std::string &soundId,
