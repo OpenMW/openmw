@@ -46,9 +46,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mMwRoot->pitch(Degree(-90));
     mObjects.setMwRoot(mMwRoot);
     mActors.setMwRoot(mMwRoot);
-        
-    //used to obtain ingame information of ogre objects (which are faced or selected)
-    mRaySceneQuery = mRendering.getScene()->createRayQuery(Ray());
 
     Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
     playerNode->pitch(Degree(90));

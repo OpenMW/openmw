@@ -158,7 +158,6 @@ class RenderingManager: private RenderingInterface {
     /// that the OGRE coordinate system matches that used internally in
     /// Morrowind.
     Ogre::SceneNode *mMwRoot;
-    Ogre::RaySceneQuery *mRaySceneQuery;
 
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
