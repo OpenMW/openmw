@@ -23,7 +23,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
-    mTerrainManager = new TerrainManager(mRendering.getScene());
+    mTerrainManager = new TerrainManager(mRendering.getScene(),
+                                         environment);
 
     //The fog type must be set before any terrain objects are created as if the
     //fog type is set to FOG_NONE then the initially created terrain won't have any fog
@@ -56,10 +57,12 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(mRendering.getCamera());
     
     //mSkyManager = 0;
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
+    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
+
+    mLocalMap = new MWRender::LocalMap(&mRendering, &environment);
 }
 
 RenderingManager::~RenderingManager ()
@@ -68,6 +71,7 @@ RenderingManager::~RenderingManager ()
     delete mPlayer;
     delete mSkyManager;
     delete mTerrainManager;
+    delete mLocalMap;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -147,6 +151,8 @@ void RenderingManager::update (float duration){
     mSkyManager->update(duration);
     
     mRendering.update(duration);
+
+    mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealDirection() );
 }
 
 void RenderingManager::skyEnable ()
@@ -220,9 +226,14 @@ void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
 {  
   /// \todo make the viewing distance and fog start/end configurable
-  float low = 3000 / density;
-  float high = 6200 / density;
-    
+
+  // right now we load 3x3 cells, so the maximum viewing distance we 
+  // can allow (to prevent objects suddenly popping up) equals:
+  // 8192            * 0.69
+  //   ^ cell size    ^ minimum density value used (clear weather)
+  float low = 5652.48 / density / 2.f;
+  float high = 5652.48 / density;
+
   mRendering.getScene()->setFog (FOG_LINEAR, colour, 0, low, high);
   
   mRendering.getCamera()->setFarClipDistance ( high );
@@ -332,6 +343,19 @@ void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 void RenderingManager::setGlare(bool glare)
 {
     mSkyManager->setGlare(glare);
+}
+
+void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
+{
+    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+        mLocalMap->requestMap(cell);
+    else
+        mLocalMap->requestMap(cell, mObjects.getDimensions(cell));
+}
+
+void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
+{
+    mLocalMap->saveFogOfWar(cell);
 }
 
 } // namespace

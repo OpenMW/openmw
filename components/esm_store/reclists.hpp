@@ -22,6 +22,8 @@ namespace ESMS
 
   struct RecList
   {
+    virtual ~RecList() {}
+
     virtual void load(ESMReader &esm, const std::string &id) = 0;
     virtual int getSize() = 0;
     virtual void listIdentifier (std::vector<std::string>& identifier) const = 0;
@@ -42,6 +44,8 @@ namespace ESMS
   template <typename X>
   struct RecListT : RecList
   {
+    virtual ~RecListT() {}
+
     typedef std::map<std::string,X> MapType;
 
     MapType list;
@@ -90,6 +94,8 @@ namespace ESMS
   template <typename X>
   struct RecListWithIDT : RecList
   {
+    virtual ~RecListWithIDT() {}
+
     typedef std::map<std::string,X> MapType;
 
     MapType list;
@@ -139,6 +145,8 @@ namespace ESMS
   template <typename X>
   struct RecIDListT : RecList
   {
+    virtual ~RecIDListT() {}
+
     typedef std::map<std::string,X> MapType;
 
     MapType list;
@@ -189,17 +197,25 @@ namespace ESMS
    */
   struct LTexList : RecList
   {
+    virtual ~LTexList() {}
+
     // TODO: For multiple ESM/ESP files we need one list per file.
     std::vector<LandTexture> ltex;
-    int count;
 
-    LTexList() : count(0)
+    LTexList()
     {
       // More than enough to hold Morrowind.esm.
       ltex.reserve(128);
     }
 
-    int getSize() { return count; }
+    const LandTexture* search(size_t index) const
+    {
+        assert(index < ltex.size());
+        return &ltex.at(index);
+    }
+
+    int getSize() { return ltex.size(); }
+    int getSize() const { return ltex.size(); }
 
     virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
@@ -223,10 +239,18 @@ namespace ESMS
    */
   struct LandList : RecList
   {
+    virtual ~LandList()
+    {
+      for ( LandMap::iterator itr = lands.begin(); itr != lands.end(); ++itr )
+      {
+          delete itr->second;
+      }
+    }
+
     // Map containing all landscapes
-    typedef std::map<int, Land*> LandsCol;
-    typedef std::map<int, LandsCol> Lands;
-    Lands lands;
+    typedef std::pair<int, int> LandCoord;
+    typedef std::map<LandCoord, Land*> LandMap;
+    LandMap lands;
 
     int count;
     LandList() : count(0) {}
@@ -237,15 +261,13 @@ namespace ESMS
     // Find land for the given coordinates. Return null if no data.
     Land *search(int x, int y) const
     {
-      Lands::const_iterator it = lands.find(x);
-      if(it==lands.end())
+      LandMap::const_iterator itr = lands.find(std::make_pair<int, int>(x, y));
+      if ( itr == lands.end() )
+      {
         return NULL;
+      }
 
-      LandsCol::const_iterator it2 = it->second.find(y);
-      if(it2 == it->second.end())
-        return NULL;
-
-      return it2->second;
+      return itr->second;
     }
 
     void load(ESMReader &esm, const std::string &id)
@@ -254,11 +276,11 @@ namespace ESMS
 
       // Create the structure and load it. This actually skips the
       // landscape data and remembers the file position for later.
-      Land *land = new Land;
+      Land *land = new Land();
       land->load(esm);
 
       // Store the structure
-      lands[land->X][land->Y] = land;
+      lands[std::make_pair<int, int>(land->X, land->Y)] = land;
     }
   };
 
@@ -296,7 +318,7 @@ namespace ESMS
             identifier.push_back (iter->first);
     }
 
-    ~CellList()
+    virtual ~CellList()
     {
       for (IntCells::iterator it = intCells.begin(); it!=intCells.end(); ++it)
         delete it->second;
@@ -390,9 +412,100 @@ namespace ESMS
     }
   };
 
+  struct PathgridList : RecList
+  {
+      int count;
+
+      // List of grids for interior cells. Indexed by cell name.
+      typedef std::map<std::string,ESM::Pathgrid*, ciLessBoost> IntGrids;
+      IntGrids intGrids;
+
+      // List of grids for exterior cells. Indexed as extCells[gridX][gridY].
+      typedef std::map<std::pair<int, int>, ESM::Pathgrid*> ExtGrids;
+      ExtGrids extGrids;
+
+      PathgridList() : count(0) {}
+
+      virtual ~PathgridList()
+      {
+          for (IntGrids::iterator it = intGrids.begin(); it!=intGrids.end(); ++it)
+              delete it->second;
+
+          for (ExtGrids::iterator it = extGrids.begin(); it!=extGrids.end(); ++it)
+              delete it->second;
+      }
+
+      int getSize() { return count; }
+
+      virtual void listIdentifier (std::vector<std::string>& identifier) const
+      {
+          // do nothing
+      }
+
+      void load(ESMReader &esm, const std::string &id)
+      {
+          count++;
+          ESM::Pathgrid *grid = new ESM::Pathgrid;
+          grid->load(esm);
+          if (grid->data.x == 0 && grid->data.y == 0)
+          {
+              intGrids[grid->cell] = grid;
+          }
+          else
+          {
+              extGrids[std::make_pair(grid->data.x, grid->data.y)] = grid;
+          }
+      }
+
+      Pathgrid *find(int cellX, int cellY, std::string cellName) const
+      {
+          Pathgrid *result = search(cellX, cellY, cellName);
+          if (!result)
+          {
+              throw std::runtime_error("no pathgrid found for cell " + cellName);
+          }
+          return result;
+      }
+
+      Pathgrid *search(int cellX, int cellY, std::string cellName) const
+      {
+          Pathgrid *result = NULL;
+          if (cellX == 0 && cellY == 0) // possibly interior
+          {
+              IntGrids::const_iterator it = intGrids.find(cellName);
+              if (it != intGrids.end())
+                result = it->second;
+          }
+          else
+          {
+              ExtGrids::const_iterator it = extGrids.find(std::make_pair(cellX, cellY));
+              if (it != extGrids.end())
+                result = it->second;
+          }
+          return result;
+      }
+
+      Pathgrid *search(const ESM::Cell &cell) const
+      {
+          int cellX, cellY;
+          if (cell.data.flags & ESM::Cell::Interior)
+          {
+              cellX = cellY = 0;
+          }
+          else
+          {
+              cellX = cell.data.gridX;
+              cellY = cell.data.gridY;
+          }
+          return search(cellX, cellY, cell.name);
+      }
+  };
+
   template <typename X>
   struct ScriptListT : RecList
   {
+    virtual ~ScriptListT() {}
+
     typedef std::map<std::string,X> MapType;
 
     MapType list;
@@ -444,6 +557,8 @@ namespace ESMS
   template <typename X>
   struct IndexListT
   {
+        virtual ~IndexListT() {}
+
         typedef std::map<int, X> MapType;
 
         MapType list;

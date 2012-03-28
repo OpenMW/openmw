@@ -11,8 +11,8 @@ EventInjector::EventInjector(MyGUI::Gui *g)
   : gui(g), mouseX(0), mouseY(0), enabled(true)
 {
   assert(gui);
-  maxX = gui->getViewSize().width;
-  maxY = gui->getViewSize().height;
+  maxX = MyGUI::RenderManager::getInstance().getViewSize().width;
+  maxY = MyGUI::RenderManager::getInstance().getViewSize().height;
 }
 
 template <typename X>
@@ -51,11 +51,11 @@ void EventInjector::event(Type type, int index, const void *p)
             is still pretty significant.)
           */
           MyGUI::Char text = (MyGUI::Char)key->text;
-          gui->injectKeyPress(code,text);
+          MyGUI::InputManager::getInstance().injectKeyPress(code,text);
         }
       else
         {
-          gui->injectKeyRelease(code);
+          MyGUI::InputManager::getInstance().injectKeyRelease(code);
         }
     }
   else if(type & EV_Mouse)
@@ -71,10 +71,10 @@ void EventInjector::event(Type type, int index, const void *p)
       setRange(mouseY,0,maxY);
 
       if(type == EV_MouseDown)
-        gui->injectMousePress(mouseX, mouseY, id);
+        MyGUI::InputManager::getInstance().injectMousePress(mouseX, mouseY, id);
       else if(type == EV_MouseUp)
-        gui->injectMouseRelease(mouseX, mouseY, id);
+        MyGUI::InputManager::getInstance().injectMouseRelease(mouseX, mouseY, id);
       else
-        gui->injectMouseMove(mouseX, mouseY, mouse->state.Z.abs);
+        MyGUI::InputManager::getInstance().injectMouseMove(mouseX, mouseY, mouse->state.Z.abs);
     }
 }

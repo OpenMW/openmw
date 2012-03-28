@@ -18,6 +18,7 @@
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
 #include "../mwmechanics/stat.hpp"
+#include "../mwworld/ptr.hpp"
 #include "mode.hpp"
 
 namespace MyGUI
@@ -124,6 +125,8 @@ namespace MWGui
       updateVisible();
     }
 
+    MWGui::DialogueWindow* getDialogueWindow() {return dialogueWindow;}
+
     MyGUI::Gui* getGui() const { return gui; }
 
     void wmUpdateFps(float fps, size_t triangleCount, size_t batchCount)
@@ -150,6 +153,12 @@ namespace MWGui
     void setBounty (int bounty);                                           ///< set the current bounty value
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
+    void changeCell(MWWorld::Ptr::CellStore* cell); ///< change the active cell
+    void setPlayerPos(const float x, const float y); ///< set player position in map space
+    void setPlayerDir(const float x, const float y); ///< set player view direction in map space
+    
+    void setInteriorMapTexture(const int x, const int y);
+    ///< set the index of the map texture that should be used (for interiors)
 
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.

@@ -60,13 +60,13 @@ class Animation{
     std::string getUniqueID(std::string mesh);
 	
     public:
-     Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env), animate(0){};
-	 virtual void runAnimation(float timepassed) = 0;
-	 void startScript(std::string groupname, int mode, int loops);
-     void stopScript();
-    
-    
-     ~Animation();
+        Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);
+        virtual void runAnimation(float timepassed) = 0;
+        void startScript(std::string groupname, int mode, int loops);
+        void stopScript();
+
+
+        virtual ~Animation();
  
 };
 }

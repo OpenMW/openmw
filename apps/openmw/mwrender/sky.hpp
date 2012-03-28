@@ -34,6 +34,8 @@ namespace MWRender
                         Ogre::SceneNode* rootNode
                     );
         BillboardObject();
+
+        virtual ~BillboardObject() {}
         
         void setColour(const Ogre::ColourValue& pColour);
         void setPosition(const Ogre::Vector3& pPosition);
@@ -69,6 +71,8 @@ namespace MWRender
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode
                     );
+        
+        virtual ~Moon() {}
                         
         enum Phase
         {
@@ -90,6 +94,7 @@ namespace MWRender
         
         void setPhase(const Phase& phase);
         void setType(const Type& type);
+        void setSkyColour(const Ogre::ColourValue& colour);
         
         Phase getPhase() const;
         unsigned int getPhaseInt() const;
@@ -102,7 +107,7 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera);
+        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera, MWWorld::Environment* env);
         ~SkyManager();
         
         void update(float duration);
@@ -159,10 +164,11 @@ namespace MWRender
         Ogre::Vector3 getRealSunPos();
         
     private:
+        MWWorld::Environment* mEnvironment;
         float mHour;
         int mDay;
         int mMonth;
-    
+
         BillboardObject* mSun;
         BillboardObject* mSunGlare;
         Moon* mMasser;

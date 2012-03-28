@@ -42,6 +42,8 @@ namespace Physic
             :btPairCachingGhostObject(),mName(name)
         {
         }
+        virtual ~PairCachingGhostObject(){}
+
         std::string mName;
     };
 
@@ -106,6 +108,7 @@ namespace Physic
     {
     public:
         RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
+        virtual ~RigidBody();
         std::string mName;
 
         //is this body used for raycasting only?
@@ -220,6 +223,7 @@ namespace Physic
         std::list<PhysicEvent> PEventList;
 
         //Bullet Stuff
+        btOverlappingPairCache* pairCache;
         btBroadphaseInterface* broadphase;
         btDefaultCollisionConfiguration* collisionConfiguration;
         btSequentialImpulseConstraintSolver* solver;
@@ -229,8 +233,11 @@ namespace Physic
         //the NIF file loader.
         BulletShapeLoader* mShapeLoader;
 
-        std::map<std::string,RigidBody*> RigidBodyMap;
-        std::map<std::string,PhysicActor*> PhysicActorMap;
+        typedef std::map<std::string,RigidBody*> RigidBodyContainer;
+        RigidBodyContainer RigidBodyMap;
+
+        typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
+        PhysicActorContainer PhysicActorMap;
 
         //debug rendering
         BtOgre::DebugDrawer* mDebugDrawer;

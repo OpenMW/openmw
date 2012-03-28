@@ -34,7 +34,7 @@ RaceDialog::RaceDialog(WindowManager& parWindowManager)
     headRotate->setScrollRange(50);
     headRotate->setScrollPosition(20);
     headRotate->setScrollViewPage(10);
-    headRotate->eventScrollChangePosition = MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
+    headRotate->eventScrollChangePosition += MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
 
     // Set up next/previous buttons
     MyGUI::ButtonPtr prevButton, nextButton;
@@ -42,27 +42,27 @@ RaceDialog::RaceDialog(WindowManager& parWindowManager)
     setText("GenderChoiceT", mWindowManager.getGameSettingString("sRaceMenu2", "Change Sex"));
     getWidget(prevButton, "PrevGenderButton");
     getWidget(nextButton, "NextGenderButton");
-    prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousGender);
-    nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextGender);
+    prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousGender);
+    nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextGender);
 
     setText("FaceChoiceT", mWindowManager.getGameSettingString("sRaceMenu3", "Change Face"));
     getWidget(prevButton, "PrevFaceButton");
     getWidget(nextButton, "NextFaceButton");
-    prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousFace);
-    nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextFace);
+    prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousFace);
+    nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextFace);
 
     setText("HairChoiceT", mWindowManager.getGameSettingString("sRaceMenu3", "Change Hair"));
     getWidget(prevButton, "PrevHairButton");
     getWidget(nextButton, "NextHairButton");
-    prevButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
-    nextButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onSelectNextHair);
+    prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
+    nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextHair);
 
     setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu4", "Race"));
     getWidget(raceList, "RaceList");
     raceList->setScrollVisible(true);
-    raceList->eventListSelectAccept = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
-    raceList->eventListMouseItemActivate = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
-    raceList->eventListChangePosition = MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
+    raceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
+    raceList->eventListMouseItemActivate += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
+    raceList->eventListChangePosition += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
     setText("SkillsT", mWindowManager.getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
     getWidget(skillList, "SkillList");
@@ -72,11 +72,11 @@ RaceDialog::RaceDialog(WindowManager& parWindowManager)
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
+    backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
 
     updateRaces();
     updateSkills();
@@ -157,7 +157,7 @@ void RaceDialog::onBackClicked(MyGUI::Widget* _sender)
     eventBack();
 }
 
-void RaceDialog::onHeadRotate(MyGUI::VScroll*, size_t _position)
+void RaceDialog::onHeadRotate(MyGUI::ScrollBar*, size_t _position)
 {
     // TODO: Rotate head
 }
@@ -192,7 +192,7 @@ void RaceDialog::onSelectNextHair(MyGUI::Widget*)
     hairIndex = wrap(hairIndex - 1, hairCount);
 }
 
-void RaceDialog::onSelectRace(MyGUI::List* _sender, size_t _index)
+void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;

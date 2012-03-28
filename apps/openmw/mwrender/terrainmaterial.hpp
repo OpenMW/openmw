@@ -63,6 +63,9 @@ namespace Ogre
 		public:
 			SM2Profile(TerrainMaterialGenerator* parent, const String& name, const String& desc);
 			~SM2Profile();
+
+            bool isVertexCompressionSupported() const {return false;}
+            
 			MaterialPtr generate(const Terrain* terrain);
 			MaterialPtr generateForCompositeMap(const Terrain* terrain);
 			uint8 getMaxLayers(const Terrain* terrain) const;

@@ -162,6 +162,15 @@ void NIFFile::parse()
       r->recName = rec;
       records[i] = r;
       r->read(this);
+
+      // Discard tranformations for the root node, otherwise some meshes
+      // occasionally get wrong orientation. Only for NiNode-s for now, but
+      // can be expanded if needed.
+      // This should be rewritten when the method is cleaned up.
+      if (0 == i && rec == "NiNode")
+      {
+          static_cast<Nif::Node*>(r)->trafo = Nif::Transformation::getIdentity();
+      }
     }
 
   /* After the data, the nif contains an int N and then a list of N
@@ -176,6 +185,8 @@ void NIFFile::parse()
   for(int i=0; i<recNum; i++)
     records[i]->post(this);
 }
+
+/// \todo move to the write cpp file
 
 void NiSkinInstance::post(NIFFile *nif)
 {

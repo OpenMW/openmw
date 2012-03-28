@@ -109,6 +109,9 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
             // If it is set too low:
             //  - there will be too many batches.
             sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
+
+            mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
+            mBounds[ptr.getCell()].merge(ent->getBoundingBox());
         }
         else
         {
@@ -116,6 +119,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         }
 
         sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
+        mBounds[ptr.getCell()].merge(insert->_getDerivedPosition());
 
         mRenderer.getScene()->destroyEntity(ent);
     }
@@ -202,6 +206,9 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
         mRenderer.getScene()->destroyStaticGeometry (sg);
         sg = 0;
     }
+    
+    if(mBounds.find(store) != mBounds.end())
+        mBounds.erase(store);
 }
 
 void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell)
@@ -211,4 +218,9 @@ void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell)
         Ogre::StaticGeometry* sg = mStaticGeometry[&cell];
         sg->build();
     }
+}
+
+Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
+{
+    return mBounds[cell];
 }

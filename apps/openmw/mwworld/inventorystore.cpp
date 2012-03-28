@@ -65,6 +65,8 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     /// \todo unstack item pointed to by iterator if required)
 
     mSlots[slot] = iterator;
+
+    flagAsModified();
 }
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)

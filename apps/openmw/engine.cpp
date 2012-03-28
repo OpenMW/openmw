@@ -60,7 +60,7 @@ void OMW::Engine::executeLocalScripts()
 
         MWScript::InterpreterContext interpreterContext (mEnvironment,
             &script.second.getRefData().getLocals(), script.second);
-        mScriptManager->run (script.first, interpreterContext);
+        mEnvironment.mScriptManager->run (script.first, interpreterContext);
 
         if (mEnvironment.mWorld->hasCellChanged())
             break;
@@ -117,11 +117,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // sound
         if (mUseSound)
-        {
-            mEnvironment.mSoundManager->playPlaylist();
-
             mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
-        }
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
@@ -182,7 +178,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mCompileAll (false)
   , mReportFocus (false)
   , mFocusTDiff (0)
-  , mScriptManager (0)
   , mScriptContext (0)
   , mFSStrict (false)
   , mCfgMgr(configurationManager)
@@ -199,7 +194,7 @@ OMW::Engine::~Engine()
     delete mEnvironment.mMechanicsManager;
     delete mEnvironment.mDialogueManager;
     delete mEnvironment.mJournal;
-    delete mScriptManager;
+    delete mEnvironment.mScriptManager;
     delete mScriptContext;
     delete mOgre;
 }
@@ -338,28 +333,25 @@ void OMW::Engine::go()
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"));
 
     // Create sound system
-    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
-                                                           mOgre->getCamera(),
-                                                           mDataDirs,
-                                                           mUseSound, mFSStrict, mEnvironment);
+    mEnvironment.mSoundManager = new MWSound::SoundManager(mUseSound, mEnvironment);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
         mEnvironment);
     mScriptContext->setExtensions (&mExtensions);
 
-    mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(), mVerboseScripts,
-        *mScriptContext);
+    mEnvironment.mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(),
+        mVerboseScripts, *mScriptContext);
 
     mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
-        *mScriptManager);
+        *mEnvironment.mScriptManager);
 
     // Create game mechanics system
     mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (mEnvironment);
 
     // Create dialog system
     mEnvironment.mJournal = new MWDialogue::Journal (mEnvironment);
-    mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment);
+    mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment,mExtensions);
 
     // load cell
     ESM::Position pos;
@@ -393,7 +385,7 @@ void OMW::Engine::go()
     // scripts
     if (mCompileAll)
     {
-        std::pair<int, int> result = mScriptManager->compileAll();
+        std::pair<int, int> result = mEnvironment.mScriptManager->compileAll();
 
         if (result.first)
             std::cout
@@ -411,6 +403,9 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
+    if (mEnvironment.mWindowManager->getMode()!=MWGui::GM_Game)
+        return;
+
     std::string handle = mEnvironment.mWorld->getFacedHandle();
 
     if (handle.empty())
@@ -435,7 +430,7 @@ void OMW::Engine::activate()
     if (!script.empty())
     {
         mEnvironment.mWorld->getLocalScripts().setIgnore (ptr);
-        mScriptManager->run (script, interpreterContext);
+        mEnvironment.mScriptManager->run (script, interpreterContext);
     }
 
     if (!interpreterContext.hasActivationBeenHandled())

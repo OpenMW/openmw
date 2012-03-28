@@ -9,11 +9,14 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
 #include "../mwrender/objects.hpp"
+
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -57,6 +60,8 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Armor::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
     }
@@ -116,7 +121,7 @@ namespace MWClass
         return std::make_pair (slots, false);
     }
 
-    int Armor::getEuqipmentSkill (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    int Armor::getEquipmentSkill (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
         ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
             ptr.get<ESM::Armor>();
@@ -142,13 +147,13 @@ namespace MWClass
         if (typeGmst.empty())
             return -1;
 
-        float iWeight = environment.mWorld->getStore().gameSettings.find (typeGmst)->f;
+        float iWeight = environment.mWorld->getStore().gameSettings.find (typeGmst)->i;
 
-        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fLightMaxMod")->f<=
+        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fLightMaxMod")->f>=
             ref->base->data.weight)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fMedMaxMod")->f<=
+        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fMedMaxMod")->f>=
             ref->base->data.weight)
             return ESM::Skill::MediumArmor;
 
@@ -160,5 +165,27 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Armor);
 
         registerClass (typeid (ESM::Armor).name(), instance);
+    }
+
+    std::string Armor::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        int es = getEquipmentSkill(ptr, environment);
+        if (es == ESM::Skill::LightArmor)
+            return std::string("Item Armor Light Up");
+        else if (es == ESM::Skill::MediumArmor)
+            return std::string("Item Armor Medium Up");
+        else
+            return std::string("Item Armor Heavy Up");
+    }
+
+    std::string Armor::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        int es = getEquipmentSkill(ptr, environment);
+        if (es == ESM::Skill::LightArmor)
+            return std::string("Item Armor Light Down");
+        else if (es == ESM::Skill::MediumArmor)
+            return std::string("Item Armor Medium Down");
+        else
+            return std::string("Item Armor Heavy Down");
     }
 }
