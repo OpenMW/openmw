@@ -222,7 +222,7 @@ void DataFilesPage::setupDataFiles()
 
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error detecting Morrowind installation");
-        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Cancel);
         msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
         The directory containing the Data Files was not found.<br><br> \
@@ -279,72 +279,79 @@ void DataFilesPage::setupDataFiles()
     const Files::MultiDirCollection &esp = fileCollections.getCollection(".esp");
 
     for (Files::MultiDirCollection::TIter iter(esp.begin()); iter!=esp.end(); ++iter) {
-        ESMReader fileReader;
-        QStringList availableMasters; // Will contain all found masters
 
-        fileReader.setEncoding(variables["encoding"].as<std::string>());
-        fileReader.open(iter->second.string());
+        try {
+            ESMReader fileReader;
+            QStringList availableMasters; // Will contain all found masters
 
-        // First we fill the availableMasters and the mMastersWidget
-        ESMReader::MasterList mlist = fileReader.getMasters();
+            fileReader.setEncoding(variables["encoding"].as<std::string>());
+            fileReader.open(iter->second.string());
 
-        for (unsigned int i = 0; i < mlist.size(); ++i) {
-            const QString currentMaster = QString::fromStdString(mlist[i].name);
-            availableMasters.append(currentMaster);
+            // First we fill the availableMasters and the mMastersWidget
+            ESMReader::MasterList mlist = fileReader.getMasters();
 
-            const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
+            for (unsigned int i = 0; i < mlist.size(); ++i) {
+                const QString currentMaster = QString::fromStdString(mlist[i].name);
+                availableMasters.append(currentMaster);
 
-            if (itemList.isEmpty()) { // Master is not yet in the widget
-                mMastersWidget->insertRow(i);
+                const QList<QTableWidgetItem*> itemList = mMastersWidget->findItems(currentMaster, Qt::MatchExactly);
 
-                QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
-                item->setForeground(Qt::red);
-                item->setFlags(item->flags() & ~(Qt::ItemIsSelectable));
+                if (itemList.isEmpty()) { // Master is not yet in the widget
+                    mMastersWidget->insertRow(i);
 
-                mMastersWidget->setItem(i, 0, item);
+                    QTableWidgetItem *item = new QTableWidgetItem(currentMaster);
+                    item->setForeground(Qt::red);
+                    item->setFlags(item->flags() & ~(Qt::ItemIsSelectable));
+
+                    mMastersWidget->setItem(i, 0, item);
+                }
             }
-        }
 
-        availableMasters.sort(); // Sort the masters alphabetically
+            availableMasters.sort(); // Sort the masters alphabetically
 
-        // Now we put the current plugin in the mDataFilesModel under its masters
-        QStandardItem *parent = new QStandardItem(availableMasters.join(","));
+            // Now we put the current plugin in the mDataFilesModel under its masters
+            QStandardItem *parent = new QStandardItem(availableMasters.join(","));
 
-        QString fileName = QString::fromStdString(boost::filesystem::path (iter->second.filename()).string());
-        QStandardItem *child = new QStandardItem(fileName);
+            QString fileName = QString::fromStdString(boost::filesystem::path (iter->second.filename()).string());
+            QStandardItem *child = new QStandardItem(fileName);
 
-        // Tooltip information
-        QString author = QString::fromStdString(fileReader.getAuthor());
-        float version = fileReader.getFVer();
-        QString description = QString::fromStdString(fileReader.getDesc());
+            // Tooltip information
+            QString author = QString::fromStdString(fileReader.getAuthor());
+            float version = fileReader.getFVer();
+            QString description = QString::fromStdString(fileReader.getDesc());
 
-        // For the date created/modified
-        QFileInfo fi(QString::fromStdString(iter->second.string()));
+            // For the date created/modified
+            QFileInfo fi(QString::fromStdString(iter->second.string()));
 
-        QString toolTip= QString("<b>Author:</b> %1<br/> \
-                                <b>Version:</b> %2<br/><br/> \
-                                <b>Description:</b><br/> \
-                                %3<br/><br/> \
-                                <b>Created on:</b> %4<br/> \
-                                <b>Last modified:</b> %5")
-                            .arg(author)
-                            .arg(version)
-                            .arg(description)
-                            .arg(fi.created().toString(Qt::TextDate))
-                            .arg(fi.lastModified().toString(Qt::TextDate));
+            QString toolTip= QString("<b>Author:</b> %1<br/> \
+                                    <b>Version:</b> %2<br/><br/> \
+                                    <b>Description:</b><br/> \
+                                    %3<br/><br/> \
+                                    <b>Created on:</b> %4<br/> \
+                                    <b>Last modified:</b> %5")
+                                .arg(author)
+                                .arg(version)
+                                .arg(description)
+                                .arg(fi.created().toString(Qt::TextDate))
+                                .arg(fi.lastModified().toString(Qt::TextDate));
 
-        child->setToolTip(toolTip);
+            child->setToolTip(toolTip);
 
-        const QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
+            const QList<QStandardItem*> masterList = mDataFilesModel->findItems(availableMasters.join(","));
 
-        if (masterList.isEmpty()) { // Masters node not yet in the mDataFilesModel
-            parent->appendRow(child);
-            mDataFilesModel->appendRow(parent);
-        } else {
-            // Masters node exists, append current plugin
-            foreach (QStandardItem *currentItem, masterList) {
-                currentItem->appendRow(child);
+            if (masterList.isEmpty()) { // Masters node not yet in the mDataFilesModel
+                parent->appendRow(child);
+                mDataFilesModel->appendRow(parent);
+            } else {
+                // Masters node exists, append current plugin
+                foreach (QStandardItem *currentItem, masterList) {
+                    currentItem->appendRow(child);
+                }
             }
+
+        } catch(std::runtime_error &e) {
+            // An error occurred while reading the .esp
+            continue;
         }
     }
 
