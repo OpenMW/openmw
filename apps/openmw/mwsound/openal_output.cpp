@@ -89,6 +89,7 @@ public:
 
     virtual void stop();
     virtual bool isPlaying();
+    virtual void setVolume(float volume);
     virtual void update(const float *pos);
 
     void play();
@@ -254,6 +255,13 @@ bool OpenAL_SoundStream::isPlaying()
     return !mIsFinished;
 }
 
+void OpenAL_SoundStream::setVolume(float volume)
+{
+    alSourcef(mSource, AL_GAIN, volume*mBaseVolume);
+    throwALerror();
+    mVolume = volume;
+}
+
 void OpenAL_SoundStream::update(const float *pos)
 {
     alSource3f(mSource, AL_POSITION, pos[0], pos[2], -pos[1]);
@@ -331,6 +339,7 @@ public:
 
     virtual void stop();
     virtual bool isPlaying();
+    virtual void setVolume(float volume);
     virtual void update(const float *pos);
 };
 
@@ -361,6 +370,13 @@ bool OpenAL_Sound::isPlaying()
     throwALerror();
 
     return state==AL_PLAYING;
+}
+
+void OpenAL_Sound::setVolume(float volume)
+{
+    alSourcef(mSource, AL_GAIN, volume*mBaseVolume);
+    throwALerror();
+    mVolume = volume;
 }
 
 void OpenAL_Sound::update(const float *pos)
@@ -417,24 +433,27 @@ void OpenAL_Output::init(const std::string &devname)
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
     throwALerror();
 
-    ALCint maxmono, maxstereo;
+    ALCint maxmono=0, maxstereo=0;
     alcGetIntegerv(mDevice, ALC_MONO_SOURCES, 1, &maxmono);
     alcGetIntegerv(mDevice, ALC_STEREO_SOURCES, 1, &maxstereo);
     throwALCerror(mDevice);
 
-    mFreeSources.resize(std::min(maxmono+maxstereo, 256));
-    for(size_t i = 0;i < mFreeSources.size();i++)
+    try
     {
-        ALuint src;
-        alGenSources(1, &src);
-        if(alGetError() != AL_NO_ERROR)
+        ALCuint maxtotal = std::min<ALCuint>(maxmono+maxstereo, 256);
+        for(size_t i = 0;i < maxtotal;i++)
         {
-            mFreeSources.resize(i);
-            break;
+            ALuint src = 0;
+            alGenSources(1, &src);
+            throwALerror();
+            mFreeSources.push_back(src);
         }
-        mFreeSources[i] = src;
     }
-    if(mFreeSources.size() == 0)
+    catch(std::exception &e)
+    {
+        std::cout <<"Error: "<<e.what()<<", trying to continue"<< std::endl;
+    }
+    if(mFreeSources.empty())
         fail("Could not allocate any sources");
 }
 
@@ -442,10 +461,10 @@ void OpenAL_Output::deinit()
 {
     mStreamThread->removeAll();
 
-    if(!mFreeSources.empty())
+    while(!mFreeSources.empty())
     {
-        alDeleteSources(mFreeSources.size(), mFreeSources.data());
-        mFreeSources.clear();
+        alDeleteSources(1, &mFreeSources.front());
+        mFreeSources.pop_front();
     }
 
     mBufferRefs.clear();
@@ -561,17 +580,17 @@ void OpenAL_Output::bufferFinished(ALuint buf)
 }
 
 
-Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, bool loop)
+SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, bool loop)
 {
     throwALerror();
 
-    std::auto_ptr<OpenAL_Sound> sound;
+    boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
     if(mFreeSources.empty())
         fail("No free sources");
-    src = mFreeSources.back();
-    mFreeSources.pop_back();
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
 
     try
     {
@@ -606,21 +625,21 @@ Sound* OpenAL_Output::playSound(const std::string &fname, float volume, float pi
     alSourcePlay(src);
     throwALerror();
 
-    return sound.release();
+    return sound;
 }
 
-Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
-                                  float min, float max, bool loop)
+SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+                                    float min, float max, bool loop)
 {
     throwALerror();
 
-    std::auto_ptr<OpenAL_Sound> sound;
+    boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
     if(mFreeSources.empty())
         fail("No free sources");
-    src = mFreeSources.back();
-    mFreeSources.pop_back();
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
 
     try
     {
@@ -655,21 +674,21 @@ Sound* OpenAL_Output::playSound3D(const std::string &fname, const float *pos, fl
     alSourcePlay(src);
     throwALerror();
 
-    return sound.release();
+    return sound;
 }
 
 
-Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch)
+SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch)
 {
     throwALerror();
 
-    std::auto_ptr<OpenAL_SoundStream> sound;
+    boost::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
 
     if(mFreeSources.empty())
         fail("No free sources");
-    src = mFreeSources.back();
-    mFreeSources.pop_back();
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
 
     try
     {
@@ -699,21 +718,21 @@ Sound* OpenAL_Output::streamSound(const std::string &fname, float volume, float 
     throwALerror();
 
     sound->play();
-    return sound.release();
+    return sound;
 }
 
-Sound* OpenAL_Output::streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
-                                    float min, float max)
+SoundPtr OpenAL_Output::streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+                                      float min, float max)
 {
     throwALerror();
 
-    std::auto_ptr<OpenAL_SoundStream> sound;
+    boost::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
 
     if(mFreeSources.empty())
         fail("No free sources");
-    src = mFreeSources.back();
-    mFreeSources.pop_back();
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
 
     try
     {
@@ -743,7 +762,7 @@ Sound* OpenAL_Output::streamSound3D(const std::string &fname, const float *pos, 
     throwALerror();
 
     sound->play();
-    return sound.release();
+    return sound;
 }
 
 

@@ -225,7 +225,7 @@ void DataFilesPage::setupDataFiles()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Cancel);
         msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
-        The directory containing the Data Files was not found.<br><br> \
+        The directory containing the data files was not found.<br><br> \
         Press \"Browse...\" to specify the location manually.<br>"));
 
         QAbstractButton *dirSelectButton =
@@ -1057,16 +1057,8 @@ void DataFilesPage::writeConfig(QString profile)
         return;
     }
 
-    // Prepare the OpenMW config
-    QString config = QString::fromStdString((mCfgMgr.getLocalPath() / "openmw.cfg").string());
-    QFile file(config);
-
-    if (!file.exists()) {
-        config = QString::fromStdString((mCfgMgr.getUserPath() / "openmw.cfg").string());
-    }
-
-    // Open the config as a QFile
-    file.setFileName(config);
+    // Open the OpenMW config as a QFile
+    QFile file(QString::fromStdString((mCfgMgr.getUserPath() / "openmw.cfg").string()));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
