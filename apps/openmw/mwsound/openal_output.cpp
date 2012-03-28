@@ -436,19 +436,22 @@ void OpenAL_Output::init(const std::string &devname)
     alcGetIntegerv(mDevice, ALC_STEREO_SOURCES, 1, &maxstereo);
     throwALCerror(mDevice);
 
-    mFreeSources.resize(std::min<ALCuint>(maxmono+maxstereo, 256));
-    for(size_t i = 0;i < mFreeSources.size();i++)
+    try
     {
-        ALuint src;
-        alGenSources(1, &src);
-        if(alGetError() != AL_NO_ERROR)
+        ALCuint maxtotal = std::min<ALCuint>(maxmono+maxstereo, 256);
+        for(size_t i = 0;i < maxtotal;i++)
         {
-            mFreeSources.resize(i);
-            break;
+            ALuint src = 0;
+            alGenSources(1, &src);
+            throwALerror();
+            mFreeSources.push_back(src);
         }
-        mFreeSources[i] = src;
     }
-    if(mFreeSources.size() == 0)
+    catch(std::exception &e)
+    {
+        std::cout <<"Error: "<<e.what()<<", trying to continue"<< std::endl;
+    }
+    if(mFreeSources.empty())
         fail("Could not allocate any sources");
 }
 
@@ -456,10 +459,10 @@ void OpenAL_Output::deinit()
 {
     mStreamThread->removeAll();
 
-    if(!mFreeSources.empty())
+    while(!mFreeSources.empty())
     {
-        alDeleteSources(mFreeSources.size(), mFreeSources.data());
-        mFreeSources.clear();
+        alDeleteSources(1, &mFreeSources.front());
+        mFreeSources.pop_front();
     }
 
     mBufferRefs.clear();
@@ -584,8 +587,8 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
 
     if(mFreeSources.empty())
         fail("No free sources");
-    src = mFreeSources.back();
-    mFreeSources.pop_back();
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
 
     try
     {
@@ -633,8 +636,8 @@ SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const float *pos, 
 
     if(mFreeSources.empty())
         fail("No free sources");
-    src = mFreeSources.back();
-    mFreeSources.pop_back();
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
 
     try
     {
@@ -682,8 +685,8 @@ SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, floa
 
     if(mFreeSources.empty())
         fail("No free sources");
-    src = mFreeSources.back();
-    mFreeSources.pop_back();
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
 
     try
     {
@@ -726,8 +729,8 @@ SoundPtr OpenAL_Output::streamSound3D(const std::string &fname, const float *pos
 
     if(mFreeSources.empty())
         fail("No free sources");
-    src = mFreeSources.back();
-    mFreeSources.pop_back();
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
 
     try
     {

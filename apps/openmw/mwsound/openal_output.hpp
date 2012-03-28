@@ -21,17 +21,15 @@ namespace MWSound
         ALCdevice *mDevice;
         ALCcontext *mContext;
 
-        typedef std::vector<ALuint> IDVec;
-        IDVec mFreeSources;
+        typedef std::deque<ALuint> IDDq;
+        IDDq mFreeSources;
+        IDDq mUnusedBuffers;
 
         typedef std::map<std::string,ALuint> NameMap;
         NameMap mBufferCache;
 
         typedef std::map<ALuint,ALuint> IDRefMap;
         IDRefMap mBufferRefs;
-
-        typedef std::deque<ALuint> IDDq;
-        IDDq mUnusedBuffers;
 
         uint64_t mBufferCacheMemSize;
 
