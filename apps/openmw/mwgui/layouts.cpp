@@ -15,6 +15,22 @@ using namespace MWGui;
 
 HUD::HUD(int width, int height, int fpsLevel)
     : Layout("openmw_hud_layout.xml")
+    , health(NULL)
+    , magicka(NULL)
+    , stamina(NULL)
+    , weapImage(NULL)
+    , spellImage(NULL)
+    , weapStatus(NULL)
+    , spellStatus(NULL)
+    , effectBox(NULL)
+    , effect1(NULL)
+    , minimap(NULL)
+    , compass(NULL)
+    , crosshair(NULL)
+    , fpsbox(NULL)
+    , fpscounter(NULL)
+    , trianglecounter(NULL)
+    , batchcounter(NULL)
 {
     setCoord(0,0, width, height);
 
@@ -202,6 +218,7 @@ void MapWindow::setVisible(bool b)
 void MapWindow::setCellName(const std::string& cellName)
 {
     static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
+    adjustWindowCaption();
 }
 
 void MapWindow::setPlayerPos(const float x, const float y)

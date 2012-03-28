@@ -22,15 +22,40 @@ using namespace MWGui;
 
 WindowManager::WindowManager(MWWorld::Environment& environment,
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath)
-  : environment(environment)
+  : mGuiManager(NULL)
+  , environment(environment)
+  , hud(NULL)
+  , map(NULL)
+  , menu(NULL)
+  , stats(NULL)
+  , mMessageBoxManager(NULL)
+  , console(NULL)
+  , mJournal(NULL)
   , dialogueWindow(nullptr)
+  , mCharGen(NULL)
+  , playerClass()
+  , playerName()
+  , playerRaceId()
+  , playerBirthSignId()
+  , playerAttributes()
+  , playerMajorSkills()
+  , playerMinorSkills()
+  , playerSkillValues()
+  , playerHealth()
+  , playerMagicka()
+  , playerFatigue()
+  , gui(NULL)
   , mode(GM_Game)
   , nextMode(GM_Game)
   , needModeChange(false)
+  , garbageDialogs()
   , shown(GW_ALL)
   , allowed(newGame ? GW_None : GW_ALL)
+  , showFPSLevel(fpsLevel)
+  , mFPS(0.0f)
+  , mTriangleCount(0)
+  , mBatchCount(0)
 {
-    showFPSLevel = fpsLevel;
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
