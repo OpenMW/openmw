@@ -8,6 +8,8 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/environment.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -280,6 +282,36 @@ namespace MWScript
                 }
         };
 
+        class OpPCJoinFaction : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    context.getEnvironment().mWorld->getPlayer().addFaction(factionID);
+                }
+        };
+
+        class OpPCRaiseRank : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    context.getEnvironment().mWorld->getPlayer().raiseRank(factionID);
+                }
+        };
+        
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -310,6 +342,8 @@ namespace MWScript
         const int opcodeSetSkillExplicit = 0x20000df;
         const int opcodeModSkill = 0x20000fa;
         const int opcodeModSkillExplicit = 0x2000115;
+        const int opcodePCJoinFaction = 0x2000141;
+        const int opcodePCRaiseRank = 0x2000142;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -381,6 +415,8 @@ namespace MWScript
                 extensions.registerInstruction (mod + skills[i], "l",
                     opcodeModSkill+i, opcodeModSkillExplicit+i);
             }
+            extensions.registerInstruction("PCJoinFaction","S",opcodePCJoinFaction);
+            extensions.registerInstruction("PCRaiseRank","S",opcodePCRaiseRank);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -436,6 +472,9 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeModSkill+i, new OpModSkill<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
             }
+
+            interpreter.installSegment5(opcodePCJoinFaction,new OpPCJoinFaction);
+            interpreter.installSegment5(opcodePCRaiseRank,new OpPCRaiseRank);
         }
     }
 }

@@ -119,15 +119,19 @@ namespace MWWorld
 
         void setAutoMove (bool enable);
 
-        void addFaction(std::string faction);
+        void addFaction(std::string factionID);
 
-        int getRank(std::string faction);
+        int getRank(std::string factionID);
 
-        void setRank(std::string faction,int rank);
+        void setRank(std::string factionID,int rank);
 
-        bool isExpelled(std::string faction);
+        void raiseRank(std::string factionID);
 
-        void setExpelled(std::string faction,bool expelled);
+        void lowerRank(std::string factionID);
+
+        bool isExpelled(std::string factionID);
+
+        void setExpelled(std::string factionID,bool expelled);
 
         void setLeftRight (int value);
 

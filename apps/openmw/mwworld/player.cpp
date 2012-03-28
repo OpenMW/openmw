@@ -90,11 +90,11 @@ namespace MWWorld
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
     }
 
-    Player::Faction Player::getFaction(std::string faction)
+    Player::Faction Player::getFaction(std::string factionID)
     {
         for(std::list<Player::Faction>::iterator it = mFactions.begin(); it != mFactions.end();it++)
         {
-            if(it->name == faction) return *it;
+            if(it->name == factionID) return *it;
         }
         //faction was not found->dummy faction
         Player::Faction fact;
@@ -105,41 +105,66 @@ namespace MWWorld
         return fact;
     }
 
-    void Player::addFaction(std::string faction)
+    void Player::addFaction(std::string factionID)
     {
-        if(getFaction(faction).name == "not found")
+        if(getFaction(factionID).name == "not found")
         {
             Player::Faction fact;
-            const ESM::Faction* eFact = mWorld.getStore().factions.find(faction);
+            const ESM::Faction* eFact = mWorld.getStore().factions.find(factionID);
             fact.expelled = false;
             fact.rank = 0;
-            fact.name = faction;
+            fact.name = eFact->name;
             fact.id = eFact->id;
             mFactions.push_back(fact);
         }
     }
 
-    int Player::getRank(std::string faction)
+    int Player::getRank(std::string factionID)
     {
-        Player::Faction fact = getFaction(faction);
+        Player::Faction fact = getFaction(factionID);
         return fact.rank;
     }
 
-    void Player::setRank(std::string faction,int rank)
+    void Player::setRank(std::string factionID,int rank)
     {
-        Player::Faction fact = getFaction(faction);
+        Player::Faction fact = getFaction(factionID);
         fact.rank = rank;
     }
 
-    bool Player::isExpelled(std::string faction)
+    void Player::raiseRank(std::string factionID)
     {
-        Player::Faction fact = getFaction(faction);
+        if(getFaction(factionID).name == "not found")
+        {
+            addFaction(factionID);
+            setRank(factionID,1);
+        }
+        else
+        {
+            setRank(factionID,getRank(factionID) + 1);
+        }
+    }
+
+    void Player::lowerRank(std::string factionID)
+    {
+        if(getFaction(factionID).name == "not found")
+        {
+            std::cout << "cannot lower the rank of the player: faction no found. Faction: "<< factionID << std::endl;
+        }
+        else
+        {
+            setRank(factionID,getRank(factionID) - 1);
+        }
+    }
+
+    bool Player::isExpelled(std::string factionID)
+    {
+        Player::Faction fact = getFaction(factionID);
         return fact.expelled;
     }
 
-    void Player::setExpelled(std::string faction,bool expelled)
+    void Player::setExpelled(std::string factionID,bool expelled)
     {
-        Player::Faction fact = getFaction(faction);
+        Player::Faction fact = getFaction(factionID);
         fact.expelled = expelled;
     }
 }
