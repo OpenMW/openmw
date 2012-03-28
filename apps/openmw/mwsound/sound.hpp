@@ -7,6 +7,7 @@ namespace MWSound
     {
         virtual void stop() = 0;
         virtual bool isPlaying() = 0;
+        virtual void setVolume(float volume) = 0;
         virtual void update(const float *pos) = 0;
 
         Sound& operator=(const Sound &rhs);

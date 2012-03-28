@@ -89,6 +89,7 @@ public:
 
     virtual void stop();
     virtual bool isPlaying();
+    virtual void setVolume(float volume);
     virtual void update(const float *pos);
 
     void play();
@@ -252,6 +253,13 @@ bool OpenAL_SoundStream::isPlaying()
     return !mIsFinished;
 }
 
+void OpenAL_SoundStream::setVolume(float volume)
+{
+    alSourcef(mSource, AL_GAIN, volume*mBaseVolume);
+    throwALerror();
+    mVolume = volume;
+}
+
 void OpenAL_SoundStream::update(const float *pos)
 {
     alSource3f(mSource, AL_POSITION, pos[0], pos[2], -pos[1]);
@@ -329,6 +337,7 @@ public:
 
     virtual void stop();
     virtual bool isPlaying();
+    virtual void setVolume(float volume);
     virtual void update(const float *pos);
 };
 
@@ -359,6 +368,13 @@ bool OpenAL_Sound::isPlaying()
     throwALerror();
 
     return state==AL_PLAYING;
+}
+
+void OpenAL_Sound::setVolume(float volume)
+{
+    alSourcef(mSource, AL_GAIN, volume*mBaseVolume);
+    throwALerror();
+    mVolume = volume;
 }
 
 void OpenAL_Sound::update(const float *pos)
