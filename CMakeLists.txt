@@ -143,6 +143,7 @@ endif (USE_MPG123)
 
 # Platform specific
 if (WIN32)
+    set(Boost_USE_STATIC_LIBS   ON)
     set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
