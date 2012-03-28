@@ -280,7 +280,7 @@ LocalMapBase::LocalMapBase()
     , mInterior(false)
     , mLocalMap(NULL)
     , mPrefix()
-    , mChanged(false)
+    , mChanged(true)
     , mLayout(NULL)
 {
 }
