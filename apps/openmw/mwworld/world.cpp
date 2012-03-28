@@ -701,6 +701,7 @@ namespace MWWorld
 
     void World::update (float duration)
     {
+        getNorthVector(mWorldScene->getCurrentCell());
         mWorldScene->update (duration);
 
         mWeatherManager->update (duration);
@@ -753,5 +754,20 @@ namespace MWWorld
     OEngine::Render::Fader* World::getFader()
     {
         return mRendering->getFader();
+    }
+
+    Ogre::Vector2 World::getNorthVector(Ptr::CellStore* cell)
+    {
+        ESMS::CellRefList<ESM::Static, MWWorld::RefData> statics = cell->statics;
+        ESMS::LiveCellRef<ESM::Static, MWWorld::RefData>* ref = statics.find("northmarker");
+        if (!ref)
+        {
+            std::cout << "No north marker found." << std::endl;
+            return Vector2(0, 1);
+        }
+        Ogre::SceneNode* node = ref->mData.getBaseNode();
+        Vector3 dir = -node->_getDerivedOrientation().zAxis();
+        Vector2 d = Vector2(dir.x, dir.z);
+        return d;
     }
 }
