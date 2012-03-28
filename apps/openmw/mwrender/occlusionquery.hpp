@@ -72,10 +72,6 @@ namespace MWRender
         bool mWasVisible;
         bool mObjectWasVisible;
 
-        bool mResponding;
-
-        float mDelay;
-
         bool mTestResult;
 
         bool mSupported;

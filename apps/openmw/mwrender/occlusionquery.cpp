@@ -12,7 +12,7 @@ using namespace Ogre;
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mSingleObjectQuery(0), mActiveQuery(0),
     mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false), mTestResult(false), 
-    mQuerySingleObjectRequested(false), mResponding(true), mDelay(0), mWasVisible(false), mObjectWasVisible(false)
+    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false)
 {
     mRendering = renderer;
     mSunNode = sunNode;
@@ -94,7 +94,7 @@ OcclusionQuery::~OcclusionQuery()
 bool OcclusionQuery::supported()
 {
     //if (!mResponding) std::cout << "Occlusion query timed out" << std::endl;
-    return mSupported && mResponding;
+    return mSupported;
 }
 
 void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass, const AutoParamDataSource* source, 
@@ -167,9 +167,6 @@ void OcclusionQuery::update(float duration)
 {
     if (!mSupported) return;
 
-    mDelay += duration;
-    if (mDelay >= 2) mResponding = false;
-
     mWasVisible = false;
     mObjectWasVisible = false;
 
@@ -189,9 +186,6 @@ void OcclusionQuery::update(float duration)
     if (!mSunTotalAreaQuery->isStillOutstanding()
         && !mSunVisibleAreaQuery->isStillOutstanding())
     {
-        mDelay = 0;
-        mResponding = true;
-
         unsigned int totalPixels;
         unsigned int visiblePixels;
 
@@ -213,9 +207,6 @@ void OcclusionQuery::update(float duration)
     }
     if (mQuerySingleObjectStarted && !mSingleObjectQuery->isStillOutstanding())
     {
-        mDelay = 0;
-        mResponding = true;
-
         unsigned int result;
 
         mSingleObjectQuery->pullOcclusionQuery(&result);
