@@ -4,9 +4,6 @@ if (APPLE)
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
-
-    # using 10.6 sdk
-    set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
 endif (APPLE)
 
 # Macros
@@ -258,7 +255,13 @@ endif (APPLE)
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-reorder)
+    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder)
+
+    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
+                OUTPUT_VARIABLE GCC_VERSION)
+    if ("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
+        add_definitions (-Wno-unused-but-set-parameter)
+    endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 if(DPKG_PROGRAM)
@@ -318,6 +321,7 @@ if(WIN32)
     FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
     INSTALL(FILES ${files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/readme.txt" DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
@@ -328,6 +332,7 @@ if(WIN32)
     SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
     SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;esmtool;Esmtool;omwlauncher;OpenMW Launcher")
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'") 
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_RESOURCE_FILE_LICENSE "${OpenMW_SOURCE_DIR}/GPL3.txt")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
@@ -470,6 +475,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})

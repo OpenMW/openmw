@@ -194,6 +194,7 @@ void MainDialog::play()
     QDir dir(QCoreApplication::applicationDirPath());
     QString game = dir.absoluteFilePath("openmw");
     QFile file(game);
+    game = "\"" + game + "\"";
 #else
     QString game = "./openmw";
     QFile file(game);
