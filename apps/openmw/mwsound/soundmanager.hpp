@@ -2,10 +2,10 @@
 #define GAME_SOUND_SOUNDMANAGER_H
 
 #include <string>
+#include <utility>
+#include <map>
 
 #include <OgreResourceGroupManager.h>
-
-#include <components/files/filelibrary.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -24,10 +24,11 @@ namespace MWWorld
 namespace MWSound
 {
     class Sound_Output;
-    class Sound_Decoder;
+    struct Sound_Decoder;
     class Sound;
 
     typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
+    typedef boost::shared_ptr<Sound> SoundPtr;
 
     class SoundManager
     {
@@ -40,11 +41,9 @@ namespace MWSound
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
-        typedef boost::shared_ptr<Sound> SoundPtr;
-        typedef std::map<std::string,SoundPtr> IDMap;
-        typedef std::map<MWWorld::Ptr,IDMap> SoundMap;
+        typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
+        typedef std::map<SoundPtr,PtrIDPair> SoundMap;
         SoundMap mActiveSounds;
-        IDMap mLooseSounds;
 
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
@@ -88,19 +87,21 @@ namespace MWSound
         bool sayDone(MWWorld::Ptr reference) const;
         ///< Is actor not speaking?
 
-        void playSound(const std::string& soundId, float volume, float pitch, bool loop=false);
+        SoundPtr playSound(const std::string& soundId, float volume, float pitch, bool loop=false);
         ///< Play a sound, independently of 3D-position
 
-        void playSound3D(MWWorld::Ptr reference, const std::string& soundId,
-                         float volume, float pitch, bool loop,
-                         bool untracked=false);
+        SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
+                             float volume, float pitch, bool loop,
+                             bool untracked=false);
         ///< Play a sound from an object
 
-        void stopSound3D(MWWorld::Ptr reference, const std::string& soundId="");
-        ///< Stop the given object from playing the given sound, If no soundId is given,
-        /// all sounds for this reference will stop.
+        void stopSound3D(MWWorld::Ptr reference, const std::string& soundId);
+        ///< Stop the given object from playing the given sound,
 
-        void stopSound(MWWorld::Ptr::CellStore *cell);
+        void stopSound3D(MWWorld::Ptr reference);
+        ///< Stop the given object from playing all sounds.
+
+        void stopSound(const MWWorld::Ptr::CellStore *cell);
         ///< Stop all sounds for the given cell.
 
         void stopSound(const std::string& soundId);

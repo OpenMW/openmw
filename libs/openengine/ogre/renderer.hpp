@@ -44,27 +44,51 @@ namespace Render
     Ogre::SceneManager *mScene;
     Ogre::Camera *mCamera;
     Ogre::Viewport *mView;
-	#ifdef ENABLE_PLUGIN_CgProgramManager
+#ifdef ENABLE_PLUGIN_CgProgramManager
  	Ogre::CgPlugin* mCgPlugin;
- 	#endif
- 	#ifdef ENABLE_PLUGIN_OctreeSceneManager
+#endif
+#ifdef ENABLE_PLUGIN_OctreeSceneManager
  	Ogre::OctreePlugin* mOctreePlugin;
- 	#endif
- 	#ifdef ENABLE_PLUGIN_ParticleFX
+#endif
+#ifdef ENABLE_PLUGIN_ParticleFX
  	Ogre::ParticleFXPlugin* mParticleFXPlugin;
- 	#endif
- 	#ifdef ENABLE_PLUGIN_GL
+#endif
+#ifdef ENABLE_PLUGIN_GL
  	Ogre::GLPlugin* mGLPlugin;
- 	#endif
-	#ifdef ENABLE_PLUGIN_Direct3D9
+#endif
+#ifdef ENABLE_PLUGIN_Direct3D9
  	Ogre::D3D9Plugin* mD3D9Plugin;
- 	#endif
+#endif
     Fader* mFader;
     bool logging;
 
   public:
     OgreRenderer()
-      : mRoot(NULL), mWindow(NULL), mScene(NULL), mFader(NULL) {}
+      : mRoot(NULL)
+      , mWindow(NULL)
+      , mScene(NULL)
+      , mCamera(NULL)
+      , mView(NULL)
+#ifdef ENABLE_PLUGIN_CgProgramManager
+      , mCgPlugin(NULL)
+#endif
+#ifdef ENABLE_PLUGIN_OctreeSceneManager
+      , mOctreePlugin(NULL)
+#endif
+#ifdef ENABLE_PLUGIN_ParticleFX
+      , mParticleFXPlugin(NULL)
+#endif
+#ifdef ENABLE_PLUGIN_GL
+      , mGLPlugin(NULL)
+#endif
+#ifdef ENABLE_PLUGIN_Direct3D9
+      , mD3D9Plugin(NULL)
+#endif
+      , mFader(NULL)
+      , logging(false)
+    {
+    }
+
     ~OgreRenderer() { cleanup(); }
 
     /** Configure the renderer. This will load configuration files and

@@ -89,7 +89,7 @@ target_link_libraries(openmw
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
-    MyGUI.OgrePlatform #TODO MyGUI ogre platform is not added by the find script
+    ${MYGUI_PLATFORM_LIBRARIES}
     components
 )
 
