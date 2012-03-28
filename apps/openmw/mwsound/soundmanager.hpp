@@ -87,12 +87,12 @@ namespace MWSound
         bool sayDone(MWWorld::Ptr reference) const;
         ///< Is actor not speaking?
 
-        void playSound(const std::string& soundId, float volume, float pitch, bool loop=false);
+        SoundPtr playSound(const std::string& soundId, float volume, float pitch, bool loop=false);
         ///< Play a sound, independently of 3D-position
 
-        void playSound3D(MWWorld::Ptr reference, const std::string& soundId,
-                         float volume, float pitch, bool loop,
-                         bool untracked=false);
+        SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
+                             float volume, float pitch, bool loop,
+                             bool untracked=false);
         ///< Play a sound from an object
 
         void stopSound3D(MWWorld::Ptr reference, const std::string& soundId);

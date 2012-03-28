@@ -185,7 +185,8 @@ namespace MWSound
             std::string filePath = std::string("Sound/")+filename;
             const ESM::Position &pos = ptr.getCellRef().pos;
 
-            SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, basevol, 1.0f, 20.0f, 12750.0f, false);
+            SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, basevol, 1.0f,
+                                                  20.0f, 12750.0f, false);
             sound->mBaseVolume = basevol;
 
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
@@ -202,15 +203,16 @@ namespace MWSound
     }
 
 
-    void SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
+    SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
     {
+        SoundPtr sound;
         try
         {
             float basevol = 1.0f; /* TODO: volume settings */
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
 
-            SoundPtr sound = mOutput->playSound(file, volume*basevol, pitch, loop);
+            sound = mOutput->playSound(file, volume*basevol, pitch, loop);
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
             sound->mMinDistance = min;
@@ -222,11 +224,14 @@ namespace MWSound
         {
             std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
+        return sound;
     }
 
-    void SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
-                                   float volume, float pitch, bool loop, bool untracked)
+    SoundPtr SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
+                                       float volume, float pitch, bool loop,
+                                       bool untracked)
     {
+        SoundPtr sound;
         try
         {
             // Look up the sound in the ESM data
@@ -235,7 +240,7 @@ namespace MWSound
             std::string file = lookup(soundId, basevol, min, max);
             const ESM::Position &pos = ptr.getCellRef().pos;
 
-            SoundPtr sound = mOutput->playSound3D(file, pos.pos, volume*basevol, pitch, min, max, loop);
+            sound = mOutput->playSound3D(file, pos.pos, volume*basevol, pitch, min, max, loop);
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
             sound->mMinDistance = min;
@@ -248,6 +253,7 @@ namespace MWSound
         {
             std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
+        return sound;
     }
 
     void SoundManager::stopSound3D(MWWorld::Ptr ptr, const std::string& soundId)
