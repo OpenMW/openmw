@@ -22,7 +22,7 @@
         stop:0.9 rgba(0, 0, 0, 55),
         stop:1 rgba(0, 0, 0, 100));
 
-    font: 24pt "Trebuchet MS";
+    font: 26pt "EB Garamond";
     color: black;
 
     border-right: 1px solid rgba(0, 0, 0, 155);
@@ -54,7 +54,7 @@
 }
 
 #ProfileLabel {
-    font: 14pt "Trebuchet MS";
+    font: 18pt "EB Garamond";
 }
 
 #ProfilesComboBox {
@@ -82,7 +82,7 @@
     padding-top: 3px;
     padding-left: 4px;
 
-    font: 11pt "Trebuchet MS";
+    font: 12pt "EB Garamond";
 }
 
 #ProfilesComboBox::drop-down {

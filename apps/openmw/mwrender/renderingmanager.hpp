@@ -25,6 +25,7 @@
 #include "actors.hpp"
 #include "player.hpp"
 #include "water.hpp"
+#include "localmap.hpp"
 
 namespace Ogre
 {
@@ -79,9 +80,11 @@ class RenderingManager: private RenderingInterface {
     void cellAdded (MWWorld::Ptr::CellStore *store);
     void waterAdded(MWWorld::Ptr::CellStore *store);
 
-
     void removeWater();
     
+    void preCellChange (MWWorld::Ptr::CellStore* store);
+    ///< this event is fired immediately before changing cell
+
     void addObject (const MWWorld::Ptr& ptr);
     void removeObject (const MWWorld::Ptr& ptr);
 
@@ -110,6 +113,9 @@ class RenderingManager: private RenderingInterface {
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
     void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
+
+    void requestMap (MWWorld::Ptr::CellStore* cell);
+    ///< request the local map for a cell
     
     /// configure fog according to cell
     void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
@@ -162,6 +168,8 @@ class RenderingManager: private RenderingInterface {
 
     MWRender::Player *mPlayer;
     MWRender::Debugging mDebugging;
+
+    MWRender::LocalMap* mLocalMap;
 };
 
 }

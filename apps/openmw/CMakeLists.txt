@@ -14,11 +14,8 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-
-    renderingmanager debugging sky player renderinginterface water
-
-   animation npcanimation creatureanimation actors objects renderinginterface
-
+    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
+    renderinginterface localmap water
     )
 
 add_openmw_dir (mwinput
@@ -42,7 +39,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanager
+    soundmanager openal_output mpgsnd_decoder ffmpeg_decoder
     )
 
 add_openmw_dir (mwworld
@@ -92,7 +89,7 @@ target_link_libraries(openmw
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
-    MyGUI.OgrePlatform #TODO MyGUI ogre platform is not added by the find script
+    ${MYGUI_PLATFORM_LIBRARIES}
     components
 )
 

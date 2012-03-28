@@ -45,10 +45,7 @@
 
     <!-- Button widget -->
     <Skin name="MW_Button" size="136 24">
-        <Property key="FontName" value = "MyGUI_CoreFont.18"/>
-        <!--Property key="FontName" value = "cards" /-->
-        <!--Property key="FontName" value = "albertis"/-->
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default"/>
         <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.6 0.6 0.6" />
 

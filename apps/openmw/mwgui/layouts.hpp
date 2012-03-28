@@ -14,6 +14,8 @@
 #include "../mwmechanics/stat.hpp"
 #include "window_base.hpp"
 
+#include <cmath>
+
 /*
   This file contains classes corresponding to window layouts
   defined in resources/mygui/ *.xml.
@@ -29,7 +31,25 @@
 
 namespace MWGui
 {
-  class HUD : public OEngine::GUI::Layout
+  class LocalMapBase
+  {
+  public:
+    void init(MyGUI::ScrollView* widget, OEngine::GUI::Layout* layout);
+
+    void setCellPrefix(const std::string& prefix);
+    void setActiveCell(const int x, const int y, bool interior=false);
+
+  protected:
+    int mCurX, mCurY;
+    bool mInterior;
+    MyGUI::ScrollView* mLocalMap;
+    std::string mPrefix;
+    bool mChanged;
+
+    OEngine::GUI::Layout* mLayout;
+  };
+  
+  class HUD : public OEngine::GUI::Layout, public LocalMapBase
   {
   public:
     HUD(int width, int height, int fpsLevel);
@@ -43,13 +63,15 @@ namespace MWGui
     void setFPS(float fps);
     void setTriangleCount(size_t count);
     void setBatchCount(size_t count);
+    void setPlayerDir(const float x, const float y);
+    void setPlayerPos(const float x, const float y);
 
     MyGUI::ProgressPtr health, magicka, stamina;
     MyGUI::ImageBox *weapImage, *spellImage;
     MyGUI::ProgressPtr weapStatus, spellStatus;
     MyGUI::WidgetPtr effectBox;
     MyGUI::ImageBox* effect1;
-    MyGUI::ImageBox* minimap;
+    MyGUI::ScrollView* minimap;
     MyGUI::ImageBox* compass;
     MyGUI::ImageBox* crosshair;
 
@@ -59,24 +81,27 @@ namespace MWGui
     MyGUI::TextBox* batchcounter;
   };
 
-  class MapWindow : public OEngine::GUI::Layout
+  class MapWindow : public OEngine::GUI::Layout, public LocalMapBase
   {
   public:
-    MapWindow()
-      : Layout("openmw_map_window_layout.xml")
-    {
-      setCoord(500,0,320,300);
-      setText("WorldButton", "World");
-      setImage("Compass", "compass.dds");
+    MapWindow();
 
-      // Obviously you should override this later on
-      setCellName("No Cell Loaded");
-    }
+    void setVisible(bool b);
+    void setPlayerPos(const float x, const float y);
+    void setPlayerDir(const float x, const float y);
+    void setCellName(const std::string& cellName);
+  
+  private:
+    void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+    void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+    void onWorldButtonClicked(MyGUI::Widget* _sender);
 
-    void setCellName(const std::string& cellName)
-    {
-      static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
-    }
+    MyGUI::ScrollView* mGlobalMap;
+    MyGUI::ImageBox* mPlayerArrow;
+    MyGUI::Button* mButton;
+    MyGUI::IntPoint mLastDragPos;
+    bool mVisible;
+    bool mGlobal;
   };
 
   class MainMenu : public OEngine::GUI::Layout

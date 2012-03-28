@@ -254,7 +254,7 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
         // Get a pointer to the vertex colour
         ves_diffuse->baseVertexPointerToElement( pData, &currentVertex );
 
-        unsigned char alpha;
+        unsigned char alpha=0;
         if (meshType == 0) alpha = i%2 ? 0 : 255; // this is a cylinder, so every second vertex belongs to the bottom-most row
         else if (meshType == 1)
         {
@@ -292,10 +292,40 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
     ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource())->unlock();
 }
 
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environment* env) :
-    mGlareFade(0), mGlareEnabled(false)
+SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environment* env)
+    : mEnvironment(env)
+    , mHour(0.0f)
+    , mDay(0)
+    , mMonth(0)
+    , mSun(NULL)
+    , mSunGlare(NULL)
+    , mMasser(NULL)
+    , mSecunda(NULL)
+    , mViewport(NULL)
+    , mRootNode(NULL)
+    , mSceneMgr(NULL)
+    , mAtmosphereDay(NULL)
+    , mAtmosphereNight(NULL)
+    , mCloudMaterial()
+    , mAtmosphereMaterial()
+    , mCloudFragmentShader()
+    , mClouds()
+    , mNextClouds()
+    , mCloudBlendFactor(0.0f)
+    , mCloudOpacity(0.0f)
+    , mCloudSpeed(0.0f)
+    , mStarsOpacity(0.0f)
+    , mThunderOverlay(NULL)
+    , mThunderTextureUnit(NULL)
+    , mRemainingTransitionTime(0.0f)
+    , mGlareFade(0.0f)
+    , mEnabled(true)
+    , mGlareEnabled(true)
+    , mSunEnabled(true)
+    , mMasserEnabled(true)
+    , mSecundaEnabled(true)
 {
-    mEnvironment = env;
+
     mViewport = pCamera->getViewport();
     mSceneMgr = pMwRoot->getCreator();
     mRootNode = pCamera->getParentSceneNode()->createChildSceneNode();
@@ -446,6 +476,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environmen
     vshader->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
     vshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setVertexProgram(vshader->getName());
+    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setFragmentProgram("");
 
     // Clouds
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
