@@ -415,12 +415,12 @@ void OpenAL_Output::init(const std::string &devname)
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
     throwALerror();
 
-    ALCint maxmono, maxstereo;
+    ALCint maxmono=0, maxstereo=0;
     alcGetIntegerv(mDevice, ALC_MONO_SOURCES, 1, &maxmono);
     alcGetIntegerv(mDevice, ALC_STEREO_SOURCES, 1, &maxstereo);
     throwALCerror(mDevice);
 
-    mFreeSources.resize(std::min(maxmono+maxstereo, 256));
+    mFreeSources.resize(std::min<ALCuint>(maxmono+maxstereo, 256));
     for(size_t i = 0;i < mFreeSources.size();i++)
     {
         ALuint src;
