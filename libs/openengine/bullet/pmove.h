@@ -90,7 +90,7 @@ struct playerMove
 {
 	struct playerStruct
 	{
-		playerStruct() : gravity(50.0f), speed(320.0f), pmove_framecount(20), groundEntityNum(ENTITYNUM_NONE), commandTime(40), move_type(PM_NOCLIP), pm_time(0)
+		playerStruct() : gravity(800.0f), speed(320.0f), pmove_framecount(20), groundEntityNum(ENTITYNUM_NONE), commandTime(40), move_type(PM_NOCLIP), pm_time(0)
 		{
 			origin = Ogre::Vector3(733.164f,900.0f, 839.432f);
 			velocity = Ogre::Vector3(0.0f, 0.0f, 0.0f);

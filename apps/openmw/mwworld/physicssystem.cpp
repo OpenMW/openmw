@@ -116,7 +116,6 @@ namespace MWWorld
 				pm_ref.upmove = dir1.y;
 				
 				
-				
 				//std::cout << "Current angle" << yawQuat.getYaw().valueDegrees() - 90<< "\n";
 				//playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
 				//std::cout << "Pitch: " << yawQuat.getPitch() << "Yaw:" << yawQuat.getYaw() << "Roll: " << yawQuat.getRoll() << "\n";
@@ -124,11 +123,15 @@ namespace MWWorld
             }
             else
             {
+				
                 Ogre::Quaternion quat = yawNode->getOrientation();
                 Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
+				
 				pm_ref.rightmove = -dir1.x;
 				pm_ref.forwardmove = dir1.z;
-				pm_ref.upmove = dir.y;
+				pm_ref.upmove = dir1.y;
+				
+				
 				
                 dir = 0.025*(quat*dir1);
             }

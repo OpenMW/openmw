@@ -273,8 +273,8 @@ namespace MWClass
         vector.y = getMovementSettings (ptr).mForwardBackward * 127;
 		vector.z = getMovementSettings(ptr).mUpDown * 127;
 
-        if (getStance (ptr, Run, false))
-            vector *= 2;
+        //if (getStance (ptr, Run, false))
+        //    vector *= 2;
 
         return vector;
     }

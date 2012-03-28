@@ -32,9 +32,8 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	//Ogre::Vector3 endReplace = startReplace;
 	//endReplace.z -= .25;
 	
-	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, rotation, 0.0f), isInterior, enginePass);
-	if(hasHit)
-		std::cout << "Has hit\n";
+	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0, rotation), isInterior, enginePass);
+	
 	if (out.fraction < 0.001f)
 		results->startsolid = true;
 	else
@@ -180,8 +179,7 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 
 	const bool hasHit = newTraceCallback.hasHit();
 
-	if(hasHit)
-		std::cout << "HIT\n";
+	
 
 	
 	return hasHit;
