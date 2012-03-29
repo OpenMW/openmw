@@ -22,6 +22,8 @@ namespace ESMS
 
   struct RecList
   {
+    virtual ~RecList() {}
+
     virtual void load(ESMReader &esm, const std::string &id) = 0;
     virtual int getSize() = 0;
     virtual void listIdentifier (std::vector<std::string>& identifier) const = 0;
@@ -42,6 +44,8 @@ namespace ESMS
   template <typename X>
   struct RecListT : RecList
   {
+    virtual ~RecListT() {}
+
     typedef std::map<std::string,X> MapType;
 
     MapType list;
@@ -90,6 +94,8 @@ namespace ESMS
   template <typename X>
   struct RecListWithIDT : RecList
   {
+    virtual ~RecListWithIDT() {}
+
     typedef std::map<std::string,X> MapType;
 
     MapType list;
@@ -139,6 +145,8 @@ namespace ESMS
   template <typename X>
   struct RecIDListT : RecList
   {
+    virtual ~RecIDListT() {}
+
     typedef std::map<std::string,X> MapType;
 
     MapType list;
@@ -189,6 +197,8 @@ namespace ESMS
    */
   struct LTexList : RecList
   {
+    virtual ~LTexList() {}
+
     // TODO: For multiple ESM/ESP files we need one list per file.
     std::vector<LandTexture> ltex;
     int count;
@@ -223,6 +233,8 @@ namespace ESMS
    */
   struct LandList : RecList
   {
+    virtual ~LandList() {}
+
     // Map containing all landscapes
     typedef std::map<int, Land*> LandsCol;
     typedef std::map<int, LandsCol> Lands;
@@ -296,7 +308,7 @@ namespace ESMS
             identifier.push_back (iter->first);
     }
 
-    ~CellList()
+    virtual ~CellList()
     {
       for (IntCells::iterator it = intCells.begin(); it!=intCells.end(); ++it)
         delete it->second;
@@ -404,7 +416,7 @@ namespace ESMS
 
       PathgridList() : count(0) {}
 
-      ~PathgridList()
+      virtual ~PathgridList()
       {
           for (IntGrids::iterator it = intGrids.begin(); it!=intGrids.end(); ++it)
               delete it->second;
@@ -482,6 +494,8 @@ namespace ESMS
   template <typename X>
   struct ScriptListT : RecList
   {
+    virtual ~ScriptListT() {}
+
     typedef std::map<std::string,X> MapType;
 
     MapType list;
@@ -533,6 +547,8 @@ namespace ESMS
   template <typename X>
   struct IndexListT
   {
+        virtual ~IndexListT() {}
+
         typedef std::map<int, X> MapType;
 
         MapType list;

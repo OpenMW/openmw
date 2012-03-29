@@ -16,7 +16,7 @@ void WindowBase::open()
 void WindowBase::center()
 {
     // Centre dialog
-    MyGUI::IntSize gameWindowSize = mWindowManager.getGui()->getViewSize();
+    MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
     MyGUI::IntCoord coord = mMainWidget->getCoord();
     coord.left = (gameWindowSize.width - coord.width)/2;
     coord.top = (gameWindowSize.height - coord.height)/2;

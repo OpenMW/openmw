@@ -256,8 +256,12 @@ public:
     return DataStreamPtr(new Mangle2OgreStream(strm));
   }
 
+bool exists(const String& filename) {
+    return cexists(filename);
+}
+
   // Check if the file exists.
-  bool exists(const String& filename) { 
+  bool cexists(const String& filename) const { 
     String passed = filename;
 	if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
 		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
@@ -309,13 +313,36 @@ return arc.exists(passed.c_str());
      set up a single-element result list if the file is found.
   */
   FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                               bool dirs = false) const
+  {
+      FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+
+    // Check if the file exists (only works for single files - wild
+    // cards and recursive search isn't implemented.)
+    if(cexists(pattern))
+      {
+        FileInfo fi;
+        fi.archive = this;
+        fi.filename = pattern;
+        // It apparently doesn't matter that we return bogus
+        // information
+        fi.path = "";
+        fi.compressedSize = fi.uncompressedSize = 0;
+
+        ptr->push_back(fi);
+      }
+
+    return ptr;
+  }
+
+  FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
                                bool dirs = false)
   {
     FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
 
     // Check if the file exists (only works for single files - wild
     // cards and recursive search isn't implemented.)
-    if(exists(pattern))
+    if(cexists(pattern))
       {
         FileInfo fi;
         fi.archive = this;

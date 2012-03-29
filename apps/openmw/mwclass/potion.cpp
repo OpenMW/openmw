@@ -7,8 +7,11 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/environment.hpp"
 
 #include "../mwrender/objects.hpp"
+
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -53,6 +56,8 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Potion::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
+
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
     }
@@ -70,5 +75,15 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Potion);
 
         registerClass (typeid (ESM::Potion).name(), instance);
+    }
+
+    std::string Potion::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        return std::string("Item Potion Up");
+    }
+
+    std::string Potion::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        return std::string("Item Potion Down");
     }
 }

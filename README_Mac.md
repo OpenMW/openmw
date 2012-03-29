@@ -1,80 +1,79 @@
-NOTE: This README is for ardekantur's Mac branch of OpenMW. A README
-for the main branch has yet to be written. If you want to submit one,
-please send me a message!
+#Getting OpenMW Working on OS X
 
-OpenMW
-======
+## Initial setup
+First of all, clone OpenMW repo.
 
-From the [official website][]:
+        $ git clone github.com/zinnschlag/openmw
 
-> OpenMW is an attempt to reimplement the popular role playing game
-  Morrowind. It aims to be a fully playable, open source
-  implementation of the game. You must own Morrowind to use OpenMW.
+Or use your github url if you forked.
 
+About dependencies: I prefer not to install them globally (i. e. in /usr/local/), so I'm installing them in directory in my home directory. If OpenMW sources is in $HOME/path/openmw, I'm using $HOME/path/libs/root as prefix for boost and other libs.
 
-About This Project
-------------------
+It's useful to create env var for lib install prefix:
+        
+        $ export OMW_LIB_PREFIX=$HOME/path/libs/root`
 
-This specific repository is a branch of OpenMW intended to keep pace
-with development of the project in order to provide a Mac build for
-interested parties to contribute. This is not an official, sanctioned
-branch of the OpenMW project. I will only be able to answer specific
-questions about getting this project running on Mac OS X, **no other
-platform**. I will not even be able to guarantee my changes maintain
-backwards compatibility against builds in other operating systems. You
-have been warned.
+Most of libs can be installed from [Homebrew][homebrew]. Only mpg123 needs to be installed from source (due to lack of universal compilation support). I think that some of libs can be installed from MacPorts or Fink too.
 
+As OpenMW currently only supports i386 architecture on OS X, denendencies also should support it. Set some env vars in current terminal:
 
-Getting OpenMW Working
-----------------------
-
-1. Clone this repository.
-2. Note about libs: I prefer not to install them globally (i. e. in /usr/local/), so I installing them in directory in my home directory. If OpenMW sources is in $HOME/path/openmw, I'm using $HOME/path/libs/root as prefix for boost and other libs.
-  It's useful to create env var for lib install prefix:
-        $ export OMW_LIB_PREFIX=$HOME/path/libs/root
-
-3. First of all, set for current terminal some env vars:
         $ export CFLAGS="-arch i386"
         $ export CXXFLAGS="-arch i386"
         $ export LDFLAGS="-arch i386"
-  All libs will build with correct architecture.
-  If you close your terminal, you should set env vars again before pcoceeding to next steps!
 
-4. Download [boost][] (tested with 1.45) and install it with the following command:
+If you close your terminal, you should set env vars again before pcoceeding to next steps!
+
+## Boost
+Download [boost][boost] and install it with the following command:
 
         $ cd /path/to/boost/source
         $ ./bootstrap.sh --prefix=$OMW_LIB_PREFIX
         $ ./bjam --build-dir=build --layout=versioned \
         --toolset=darwin architecture=x86 address-model=32 \
         --link-shared,static --prefix=$OMW_LIB_PREFIX install
+    
+        
+Alternatively you can install boost with homebrew:
 
+        $ brew install boost --universal
 
-5. Download [Ogre][] SDK (tested with 1.7.2), unpack it and move
-`lib/Release/Ogre.framework` into `Library/Frameworks`.
+I think MacPorts also should support universal build for boost.
 
-6. Download [OIS][] and use the XCode project provided in
-   `ois/Mac/XCode-2.2`. Be sure to set your build architecture to
-   `i386` and your SDK platform to either 10.5 or 10.6. Once it
-   builds, move `ois/Mac/XCode-2.2/build/Debug/OIS.framework` to
-   `/Library/Frameworks`.
+## Ogre
+Download [Ogre][] SDK (tested with 1.7.3), unpack it somewhere and move
+`lib/Release/Ogre.framework` into `/Library/Frameworks`.
 
-7. Download [mpg123][] and build it:
+## OIS
+Download patched [OIS][] and use the XCode project provided. Be sure to set your build architecture to
+   `i386`. Once it built, locate built OIS.framework with Xcode and move it to `/Library/Frameworks`.
+
+## mpg123
+Download [MPG 123][mpg123] and build it:
+
         $ cd /path/to/mpg123/source
         $ ./configure --prefix=$OMW_LIB_PREFIX --disable-debug \
         --disable-dependency-tracking \
         --with-optimization=4 \
-        --with-audio=coreaudio \
-        --with-default-audio=coreaudio \
+        --with-audio=dummy \
+        --with-default-audio=dummy \
         --with-cpu=sse_alone \
         $ make install
 
-8. Download [libsndfile][] and build it:
+## libsndfile
+Download [libsndfile][] and build it:
+
         $ cd /path/to/libsndfile/source
         $ ./configure --prefix=$OMW_LIB_PREFIX \
         --disable-dependency-tracking
         $ make install
 
-9. Download [Bullet][] and build it:
+or install with homebrew:
+    
+        $ brew install libsndfile --universal
+
+## Bullet
+Download [Bullet][] and build it:
+
         $ cd /path/to/bullet/source
         $ mkdir build
         $ cd build
@@ -87,12 +86,25 @@ Getting OpenMW Working
         -G"Unix Makefiles" ../
         $ make install
 
-10. Generate the Makefile for OpenMW as follows and build OpenMW:
+or install with homebrew:
+    
+        $ brew install bullet --HEAD --universal
+    
+I prefer head because 2.79 has some issue which causes OpenMW to lag. Also you can edit formula and install 2.77, which is stable and haven't mentioned issue.
+
+## Qt
+Install [Qt][qt]. Qt SDK distributed by Nokia is not an option because it's 64 bit only, and OpenMW currently doesn't build for 64 bit on OS X. I'm installing it from Homebrew:
+
+        $ brew install qt --universal
+
+## Run CMake
+Generate the Makefile for OpenMW as follows and build OpenMW:
+
         $ mkdir /path/to/openmw/build/dir
         $ cd /path/to/open/build/dir
         $ cmake \
         -D CMAKE_OSX_ARCHITECTURES=i386 \
-        -D OGRESDK=/path/to/ogre/sdk \
+        -D OGRE_SDK=/path/to/ogre/sdk \
         -D BOOST_INCLUDEDIR=$OMW_LIB_PREFIX/include/boost-1_45 \
         -D BOOST_LIBRARYDIR=$OMW_LIB_PREFIX/lib \
         -D SNDFILE_INCLUDE_DIR=$OMW_LIB_PREFIX/include \
@@ -106,27 +118,43 @@ Getting OpenMW Working
         -D BULLET_INCLUDE_DIR=$OMW_LIB_PREFIX/include/bullet/ \
         -G "Unix Makefiles" /path/to/openmw/source/dir
         $ make
-    You can use -G"Xcode" if you prefer Xcode, or -G"Eclipse CDT4 - Unix Makefiles"
-    if you prefer Eclipse. You also can specify -D CMAKE_BUILD_TYPE=Debug for debug
-    build.
+    
+You can use `-G"Xcode"` if you prefer Xcode, or -G"Eclipse CDT4 - Unix Makefiles"
+if you prefer Eclipse. You also can specify `-D CMAKE_BUILD_TYPE=Debug` for debug
+build. As for CMake 2.8.7 and Xcode 4.3, Xcode generator is broken. Sadly Eclipse CDT also cannot import generated project at least on my machine.
 
-11. Copy your Morrowind `Data Files` directory into the OpenMW build dir
-   with the name `data` or create symlink:
-        $ ln -s /path/to/morrowind/data/files /path/to/openmw/build/dir/data
+If all libs installed via homebrew (excluding mpg123), then command would be even simplier:
 
-12. From your build directory run:
+        $ cmake \
+        -D CMAKE_OSX_ARCHITECTURES="i386" \
+        -D OGRE_SDK=/path/to/ogre/sdk \
+        -D MPG123_LIBRARY=$OMW_LIB_PREFIX/lib/libmpg123.a \
+        -D MPG123_INCLUDE_DIR=$OMW_LIB_PREFIX/include \
+        -G "Unix Makefiles" /path/to/openmw/source/dir
+        $ make
+    
+Note for users with recent Xcode versions: you must explicitly specify what set of compilers do you use! If not, gcc will be used for C and Clang for C++. Just add this two -D's to command: `-D CMAKE_C_COMPILER=/usr/bin/clang` and `-D CMAKE_CXX_COMPILER=/usr/bin/clang`
+    
+Note for Xcode 4.3 users: you should specify full path to used SDK, because current CMake (2.8.7) couldn't find SDKs inside Xcode app bundle:
+    
+        -D CMAKE_OSX_SYSROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk"
+
+# Run
+From your build directory run:
+
         $ OpenMW.app/Contents/MacOS/openmw
-    or:
+or:
+
         $ open OpenMW.app    
-  Enjoy!
+Enjoy!
 
-   
-
+[homebrew]: https://github.com/mxcl/homebrew
 [boost]: http://www.boost.org
 [Ogre]: http://www.ogre3d.org
 [Bullet]: http://bulletphysics.org
-[OIS]: http://wgois.sf.net
+[OIS]: https://github.com/corristo/ois-fork
 [mpg123]: http://www.mpg123.de
 [libsndfile]: http://www.mega-nerd.com/libsndfile
 [official website]: http://openmw.com
 [Will Thimbleby's Ogre Framework]: http://www.thimbleby.net/ogre/
+[qt]: http://qt.nokia.com/

@@ -132,7 +132,7 @@ namespace MWWorld
         return std::make_pair (std::vector<int>(), false);
     }
 
-    int Class::getEuqipmentSkill (const Ptr& ptr, const Environment& environment) const
+    int Class::getEquipmentSkill (const Ptr& ptr, const Environment& environment) const
     {
         return -1;
     }
@@ -155,5 +155,15 @@ namespace MWWorld
     void Class::registerClass (const std::string& key,  boost::shared_ptr<Class> instance)
     {
         sClasses.insert (std::make_pair (key, instance));
+    }
+
+    std::string Class::getUpSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        throw std::runtime_error ("class does not have an up sound");
+    }
+
+    std::string Class::getDownSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const
+    {
+        throw std::runtime_error ("class does not have an down sound");
     }
 }

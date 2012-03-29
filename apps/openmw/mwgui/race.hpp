@@ -46,7 +46,7 @@ namespace MWGui
         void open();
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -54,7 +54,7 @@ namespace MWGui
         EventHandle_Void eventBack;
 
     protected:
-        void onHeadRotate(MyGUI::VScroll* _sender, size_t _position);
+        void onHeadRotate(MyGUI::ScrollBar* _sender, size_t _position);
 
         void onSelectPreviousGender(MyGUI::Widget* _sender);
         void onSelectNextGender(MyGUI::Widget* _sender);
@@ -65,7 +65,7 @@ namespace MWGui
         void onSelectPreviousHair(MyGUI::Widget* _sender);
         void onSelectNextHair(MyGUI::Widget* _sender);
 
-        void onSelectRace(MyGUI::List* _sender, size_t _index);
+        void onSelectRace(MyGUI::ListBox* _sender, size_t _index);
 
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -76,8 +76,8 @@ namespace MWGui
         void updateSpellPowers();
 
         MyGUI::CanvasPtr  appearanceBox;
-        MyGUI::ListPtr    raceList;
-        MyGUI::HScrollPtr headRotate;
+        MyGUI::ListBox*    raceList;
+        MyGUI::ScrollBar* headRotate;
 
         MyGUI::WidgetPtr skillList;
         std::vector<MyGUI::WidgetPtr> skillItems;

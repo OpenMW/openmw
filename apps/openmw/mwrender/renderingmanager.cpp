@@ -51,12 +51,13 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(mRendering.getCamera());
 
     //mSkyManager = 0;
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
+    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
 
     mDebugging = new Debugging(mMwRoot, environment, engine);
+    mLocalMap = new MWRender::LocalMap(&mRendering, &environment);
 }
 
 RenderingManager::~RenderingManager ()
@@ -65,6 +66,7 @@ RenderingManager::~RenderingManager ()
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
+    delete mLocalMap;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -142,6 +144,8 @@ void RenderingManager::update (float duration){
     mSkyManager->update(duration);
 
     mRendering.update(duration);
+
+    mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealDirection() );
 }
 
 void RenderingManager::skyEnable ()
@@ -330,6 +334,19 @@ void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 void RenderingManager::setGlare(bool glare)
 {
     mSkyManager->setGlare(glare);
+}
+
+void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
+{
+    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+        mLocalMap->requestMap(cell);
+    else
+        mLocalMap->requestMap(cell, mObjects.getDimensions(cell));
+}
+
+void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
+{
+    mLocalMap->saveFogOfWar(cell);
 }
 
 } // namespace
