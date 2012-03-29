@@ -535,7 +535,6 @@ namespace MWWorld
         {
             //std::cout << "X:" <<   ptr.getRefData().getPosition().pos[0] << " Z: "  << ptr.getRefData().getPosition().pos[1] << "\n";
             
-            mRendering->checkUnderwater( ptr.getRefData().getPosition().pos[2]);
             Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
             if (currentCell)
             {

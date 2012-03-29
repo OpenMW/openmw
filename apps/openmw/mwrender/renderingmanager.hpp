@@ -91,7 +91,7 @@ class RenderingManager: private RenderingInterface {
     void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
     void rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation);
-    void checkUnderwater(float y);
+    void checkUnderwater();
 
     /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);

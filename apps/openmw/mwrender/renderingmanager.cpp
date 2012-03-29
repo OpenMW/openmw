@@ -154,6 +154,8 @@ void RenderingManager::update (float duration){
     mRendering.update(duration);
 
     mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealDirection() );
+
+    checkUnderwater();
 }
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater){
@@ -311,9 +313,9 @@ void RenderingManager::toggleLight()
 
   setAmbientMode();
 }
-void RenderingManager::checkUnderwater(float y){
+void RenderingManager::checkUnderwater(){
     if(mWater){
-         mWater->checkUnderwater(y);
+         mWater->checkUnderwater( mRendering.getCamera()->getRealPosition().y );
     }
 }
 
