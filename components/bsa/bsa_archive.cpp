@@ -50,7 +50,7 @@ struct mrComparer
 private:
     int m_start, m_size;
 
-    bool comparePortion(std::string file1, std::string file2, int start, int size) const
+    bool comparePortion(const std::string& file1, const std::string& file2, int start, int size) const
     {
         for(int i = start; i < start+size; i++)
         {
@@ -59,7 +59,7 @@ private:
             if(one != two)
                 return (one < two);
         }
-        return true;
+        return false;
     }
 
 public:
