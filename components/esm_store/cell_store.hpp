@@ -95,11 +95,16 @@ namespace ESMS
         State_Unloaded, State_Preloaded, State_Loaded
     };
 
-    CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded) {}
+    CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded)
+    {
+        mWaterLevel = cell->water;
+    }
 
     const ESM::Cell *cell;
     State mState;
     std::vector<std::string> mIds;
+
+    float mWaterLevel;
 
     // Lists for each individual object type
     CellRefList<Activator, D>         activators;
