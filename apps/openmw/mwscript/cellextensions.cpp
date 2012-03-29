@@ -159,6 +159,10 @@ namespace MWScript
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
                     MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+
+                    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+                        throw std::runtime_error("Can't set water level in exterior cell");
+
                     cell->mWaterLevel = level;
                     context.getEnvironment().mWorld->setWaterHeight(cell->mWaterLevel);
                 }
@@ -176,6 +180,10 @@ namespace MWScript
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
                     MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+
+                    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+                        throw std::runtime_error("Can't set water level in exterior cell");
+                    
                     cell->mWaterLevel +=level;
                     context.getEnvironment().mWorld->setWaterHeight(cell->mWaterLevel);
                 }
