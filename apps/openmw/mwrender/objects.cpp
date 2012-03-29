@@ -98,6 +98,13 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     if (ptr.getTypeName().find("Door") != std::string::npos)
         small = false;
 
+    if (mBounds.find(ptr.getCell()) == mBounds.end())
+        mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
+
+    Ogre::AxisAlignedBox bounds = ent->getBoundingBox();
+    bounds.scale(insert->getScale());
+    mBounds[ptr.getCell()].merge(bounds);
+
     if(!mIsStatic)
     {
         insert->attachObject(ent);
@@ -142,10 +149,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         //  - there will be too many batches.
         sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
 
-        mBounds[ptr.getCell()].merge(ent->getBoundingBox());
-
         sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
-        mBounds[ptr.getCell()].merge(insert->_getDerivedPosition());
 
         mRenderer.getScene()->destroyEntity(ent);
     }
