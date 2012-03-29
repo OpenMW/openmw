@@ -111,7 +111,8 @@ class DirArchive: public Ogre::FileSystemArchive
                 found = m.find(folder);
             }
 
-            current = found->second;
+            if (found != m.end())
+                current = found->second;
         }
 
         mrComparer comp(delimiter, copy.size() - delimiter-1);
