@@ -45,7 +45,7 @@ struct ciLessBoost : std::binary_function<std::string, std::string, bool>
     }
 };
 
-struct mrComparer
+struct pathComparer
 {
 private:
     int m_start, m_size;
@@ -63,7 +63,7 @@ private:
     }
 
 public:
-    mrComparer(int start, int size) : m_start(start), m_size(size) { }
+    pathComparer(int start, int size) : m_start(start), m_size(size) { }
 
     bool operator() (const std::string& first, const std::string& other)
     {
@@ -115,7 +115,7 @@ class DirArchive: public Ogre::FileSystemArchive
                 current = found->second;
         }
 
-        mrComparer comp(delimiter, copy.size() - delimiter-1);
+        pathComparer comp(delimiter, copy.size() - delimiter-1);
         return std::binary_search(current.begin(), current.end(), copy, comp);
     }
 
