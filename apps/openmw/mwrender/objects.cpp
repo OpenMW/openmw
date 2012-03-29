@@ -92,11 +92,14 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
+/*
     bool small = (size < 250); /// \todo config value
 
     // do not fade out doors. that will cause holes and look stupid
     if (ptr.getTypeName().find("Door") != std::string::npos)
         small = false;
+*/
+    const bool small = false;
 
     if (mBounds.find(ptr.getCell()) == mBounds.end())
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
