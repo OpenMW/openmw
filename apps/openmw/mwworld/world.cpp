@@ -761,4 +761,9 @@ namespace MWWorld
         mRendering->setWaterHeight(height);
     }
 
+    void World::toggleWater()
+    {
+        mRendering->toggleWater();
+    }
+
 }

@@ -92,17 +92,24 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
-void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
-
-   mObjects.removeCell(store);
+void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
+{
+    mObjects.removeCell(store);
     mActors.removeCell(store);
-    
 }
-void RenderingManager::removeWater (){
+
+void RenderingManager::removeWater ()
+{
     if(mWater){
         delete mWater;
         mWater = 0;
     }
+}
+
+void RenderingManager::toggleWater()
+{
+    if (mWater)
+        mWater->toggle();
 }
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
