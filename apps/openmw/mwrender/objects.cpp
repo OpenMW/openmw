@@ -90,7 +90,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
     Ogre::Vector3 extents = ent->getBoundingBox().getSize();
     extents *= insert->getScale();
-    float size = std::max(std::max(extents.x, extents.y), extents.z);
+//    float size = std::max(std::max(extents.x, extents.y), extents.z);
 
 /*
     bool small = (size < 250); /// \todo config value
@@ -143,7 +143,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
             else
                 sg = mStaticGeometry[ptr.getCell()];
         }
-        
+
         // This specifies the size of a single batch region.
         // If it is set too high:
         //  - there will be problems choosing the correct lights
@@ -246,7 +246,7 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
         mRenderer.getScene()->destroyStaticGeometry (sg);
         sg = 0;
     }
-    
+
     if(mBounds.find(store) != mBounds.end())
         mBounds.erase(store);
 }
