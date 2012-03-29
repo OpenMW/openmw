@@ -112,6 +112,8 @@ namespace MWWorld
             Ptr::CellStore *getExterior (int x, int y);
 
             Ptr::CellStore *getInterior (const std::string& name);
+
+            void setWaterHeight(const float height);
             
             void adjustSky();
 

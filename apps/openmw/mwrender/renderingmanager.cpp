@@ -171,6 +171,12 @@ void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
    
 }
 
+void RenderingManager::setWaterHeight(const float height)
+{
+    if (mWater)
+        mWater->setHeight(height);
+}
+
 void RenderingManager::skyEnable ()
 {
     if(mSkyManager)

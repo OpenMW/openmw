@@ -92,6 +92,7 @@ class RenderingManager: private RenderingInterface {
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
     void rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation);
     void checkUnderwater();
+    void setWaterHeight(const float height);
 
     /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);
@@ -141,16 +142,12 @@ class RenderingManager: private RenderingInterface {
     
     SkyManager* mSkyManager;
 
-	 Ogre::Camera* camera;
-     MWRender::Water *mWater;
+    MWRender::Water *mWater;
 
-
-    
     OEngine::Render::OgreRenderer &mRendering;
 
     MWRender::Objects mObjects;
     MWRender::Actors mActors;
-
 
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;

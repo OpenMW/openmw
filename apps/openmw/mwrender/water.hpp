@@ -35,7 +35,7 @@ namespace MWRender {
 
     void checkUnderwater(float y);
     void changeCell(const ESM::Cell* cell);
-
+    void setHeight(const float height);
 
   };
 }

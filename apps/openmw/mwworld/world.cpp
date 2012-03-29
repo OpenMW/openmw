@@ -755,4 +755,10 @@ namespace MWWorld
     {
         return mRendering->getFader();
     }
+
+    void World::setWaterHeight(const float height)
+    {
+        mRendering->setWaterHeight(height);
+    }
+
 }
