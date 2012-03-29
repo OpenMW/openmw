@@ -116,12 +116,7 @@ class DirArchive: public Ogre::FileSystemArchive
         }
 
         mrComparer comp(delimiter, copy.size() - delimiter-1);
-        std::vector<std::string>::iterator found = std::lower_bound(current.begin(), current.end(), copy, comp);
-
-        if (found != current.end() && !(comp(copy, current.front())))
-            return true;
-
-      return false;
+        return std::binary_search(current.begin(), current.end(), copy, comp);
     }
 
     public:
