@@ -34,6 +34,7 @@ namespace MWGui
   class LocalMapBase
   {
   public:
+    LocalMapBase();
     void init(MyGUI::ScrollView* widget, OEngine::GUI::Layout* layout);
 
     void setCellPrefix(const std::string& prefix);
@@ -85,6 +86,7 @@ namespace MWGui
   {
   public:
     MapWindow();
+    virtual ~MapWindow(){}
 
     void setVisible(bool b);
     void setPlayerPos(const float x, const float y);

@@ -160,7 +160,7 @@ endif (APPLE)
 
 # Dependencies
 
-# Fix for not visible pthreads functions for linker with glibc 2.15 
+# Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
 find_package (Threads)
 endif()
@@ -257,6 +257,9 @@ endif (APPLE)
 if (CMAKE_COMPILER_IS_GNUCC)
     add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder)
 
+    # Silence warnings in OGRE headers. Remove once OGRE got fixed!
+    add_definitions (-Wno-ignored-qualifiers)
+
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                 OUTPUT_VARIABLE GCC_VERSION)
     if ("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
@@ -332,7 +335,7 @@ if(WIN32)
     SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
     SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;esmtool;Esmtool;omwlauncher;OpenMW Launcher")
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'") 
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_RESOURCE_FILE_LICENSE "${OpenMW_SOURCE_DIR}/GPL3.txt")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
