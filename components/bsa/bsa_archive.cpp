@@ -155,6 +155,7 @@ class DirArchive: public Ogre::FileSystemArchive
             filesind.push_back(small);
         }
     }
+    std::sort(filesind.begin(), filesind.end(), ciLessBoost());
     std::string small;
     std::string original = d.string();
     if(cutoff < original.size())
