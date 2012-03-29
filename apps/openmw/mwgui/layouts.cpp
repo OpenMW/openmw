@@ -182,7 +182,9 @@ void HUD::setPlayerPos(const float x, const float y)
 }
 
 MapWindow::MapWindow()
-  : Layout("openmw_map_window_layout.xml"), mGlobal(false)
+  : Layout("openmw_map_window_layout.xml")
+  , mGlobal(false)
+  , mVisible(false)
 {
     setCoord(500,0,320,300);
     setText("WorldButton", "World");
@@ -270,6 +272,17 @@ void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
     mLocalMap->setVisible(!mGlobal);
 
     mButton->setCaption( mGlobal ? "Local" : "World" );
+}
+
+LocalMapBase::LocalMapBase()
+    : mCurX(0)
+    , mCurY(0)
+    , mInterior(false)
+    , mLocalMap(NULL)
+    , mPrefix()
+    , mChanged(true)
+    , mLayout(NULL)
+{
 }
 
 void LocalMapBase::init(MyGUI::ScrollView* widget, OEngine::GUI::Layout* layout)
