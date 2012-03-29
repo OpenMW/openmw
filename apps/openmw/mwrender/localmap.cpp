@@ -11,7 +11,8 @@
 using namespace MWRender;
 using namespace Ogre;
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* env)
+LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* env) :
+    mInterior(false), mCellX(0), mCellY(0)
 {
     mRendering = rend;
     mEnvironment = env;
@@ -92,6 +93,8 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
 {
     mInterior = false;
+
+    mCameraRotNode->setOrientation(Quaternion::IDENTITY);
 
     std::string name = "Cell_"+coordStr(cell->cell->data.gridX, cell->cell->data.gridY);
 
@@ -235,7 +238,12 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
 
     // retrieve the x,y grid coordinates the player is in 
     int x,y;
-    Vector2 pos(position.x, position.z);
+    Vector3 _pos(position.x, 0, position.z);
+    _pos = mCameraRotNode->convertWorldToLocalPosition(_pos);
+    Vector2 pos(_pos.x, _pos.z);
+
+    Vector3 playerdirection = mCameraRotNode->convertWorldToLocalPosition(direction);
+
     if (!mInterior)
     {
         x = std::ceil(pos.x / sSize)-1;
@@ -273,7 +281,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
         texName = mInteriorName + "_" + coordStr(x,y);
     }
     mEnvironment->mWindowManager->setPlayerPos(u, v);
-    mEnvironment->mWindowManager->setPlayerDir(direction.x, -direction.z);
+    mEnvironment->mWindowManager->setPlayerDir(playerdirection.x, -playerdirection.z);
 
     // explore radius (squared)
     const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;
