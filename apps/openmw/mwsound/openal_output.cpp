@@ -426,30 +426,12 @@ void OpenAL_Output::init(const std::string &devname)
     else
         std::cout << "Opened \""<<alcGetString(mDevice, ALC_DEVICE_SPECIFIER)<<"\"" << std::endl;
 
-    ALCint params[5];
-//    params[0] = ALC_MONO_SOURCES;
-//    params[1] = 10;
-//    params[2] = ALC_STEREO_SOURCES;
-//    params[3] = 10;
-//    params[4] = 0;
     mContext = alcCreateContext(mDevice, NULL);
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
         fail(std::string("Failed to setup context: ")+alcGetString(mDevice, alcGetError(mDevice)));
 
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
     throwALerror();
-
-//    ALCint size;
-//    alcGetIntegerv( mDevice, ALC_ATTRIBUTES_SIZE, 1, &size);
-//    std::vector<ALCint> attrs(size);
-//    alcGetIntegerv( mDevice, ALC_ALL_ATTRIBUTES, size, &attrs[0] );
-//    for(int i=0; i<attrs.size(); ++i)
-//    {
-//       if( attrs[i] == ALC_MONO_SOURCES )
-//       {
-//          std::cout << "max mono sources: " << attrs.at(i+1) << std::endl;
-//       }
-//    }
 
     ALCint maxmono=0, maxstereo=0;
     alcGetIntegerv(mDevice, ALC_MONO_SOURCES, 1, &maxmono);
@@ -458,24 +440,35 @@ void OpenAL_Output::init(const std::string &devname)
 
     try
     {
-        ALCuint maxtotal = 256;//std::min<ALCuint>(maxmono+maxstereo, 256);
-        bool stop = false;
-        for(size_t i = 0;i < maxtotal && !stop;i++)
+        ALCuint maxtotal = std::min<ALCuint>(maxmono+maxstereo, 256);
+        if (maxtotal == 0) // workaround for broken implementations
         {
-            ALuint src = 0;
-            alGenSources(1, &src);
-
-            ALenum err = alGetError();
-            if(err != AL_NO_ERROR)
+            maxtotal = 256;
+            bool stop = false;
+            for(size_t i = 0;i < maxtotal && !stop;i++) // generate source until error returned
             {
-                stop = true;
-                std::cout << "Stopping source generation at " << i << std::endl;
+                ALuint src = 0;
+                alGenSources(1, &src);
+                ALenum err = alGetError();
+                if(err != AL_NO_ERROR)
+                {
+                    stop = true;
+                }
+                else
+                {
+                    mFreeSources.push_back(src);
+                }
             }
-            else
+        }
+        else // normal case
+        {
+            for(size_t i = 0;i < maxtotal;i++)
             {
+                ALuint src = 0;
+                alGenSources(1, &src);
+                throwALerror();
                 mFreeSources.push_back(src);
             }
-            //throwALerror();
         }
     }
     catch(std::exception &e)
