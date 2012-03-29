@@ -88,11 +88,11 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     NifOgre::NIFLoader::load(mesh);
     Ogre::Entity *ent = mRenderer.getScene()->createEntity(mesh);
 
+/*
     Ogre::Vector3 extents = ent->getBoundingBox().getSize();
     extents *= insert->getScale();
 //    float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-/*
     bool small = (size < 250); /// \todo config value
 
     // do not fade out doors. that will cause holes and look stupid
@@ -105,6 +105,11 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
 
     Ogre::AxisAlignedBox bounds = ent->getBoundingBox();
+    bounds = Ogre::AxisAlignedBox(
+        insert->_getDerivedPosition() + bounds.getMinimum(),
+        insert->_getDerivedPosition() + bounds.getMaximum()
+    );
+
     bounds.scale(insert->getScale());
     mBounds[ptr.getCell()].merge(bounds);
 
