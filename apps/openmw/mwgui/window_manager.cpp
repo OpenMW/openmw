@@ -469,3 +469,9 @@ void WindowManager::setPlayerDir(const float x, const float y)
     map->setPlayerDir(x,y);
     hud->setPlayerDir(x,y);
 }
+
+void WindowManager::toggleFogOfWar()
+{
+    map->toggleFogOfWar();
+    hud->toggleFogOfWar();
+}

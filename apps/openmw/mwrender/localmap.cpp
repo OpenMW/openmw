@@ -269,7 +269,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
         u = std::abs((pos.x - (sSize*x))/sSize);
         v = 1-std::abs((pos.y + (sSize*y))/sSize);
         texName = "Cell_"+coordStr(x,y);
-
     }
     else
     {
