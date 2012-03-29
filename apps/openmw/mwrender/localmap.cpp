@@ -2,6 +2,7 @@
 #include "renderingmanager.hpp"
 
 #include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
 #include "../mwgui/window_manager.hpp"
 
 #include <OgreOverlayManager.h>
@@ -14,12 +15,17 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* en
 {
     mRendering = rend;
     mEnvironment = env;
-    
+
+    mCameraRotNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
+    mCameraNode = mCameraRotNode->createChildSceneNode();
+
     mCellCamera = mRendering->getScene()->createCamera("CellCamera");
     mCellCamera->setProjectionType(PT_ORTHOGRAPHIC);
     // look down -y
     const float sqrt0pt5 = 0.707106781;
     mCellCamera->setOrientation(Quaternion(sqrt0pt5, -sqrt0pt5, 0, 0));
+
+    mCameraNode->attachObject(mCellCamera);
 }
 
 LocalMap::~LocalMap()
@@ -100,10 +106,14 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
 {
     mInterior = true;
     mBounds = bounds;
-    
+
     Vector2 z(bounds.getMaximum().y, bounds.getMinimum().y);
     Vector2 min(bounds.getMinimum().x, bounds.getMinimum().z);
     Vector2 max(bounds.getMaximum().x, bounds.getMaximum().z);
+
+    const Vector2& north = mEnvironment->mWorld->getNorthVector(cell);
+    Radian angle(std::atan2(north.x, north.y));
+    mCameraRotNode->setOrientation(Quaternion(Math::Cos(angle/2.f), 0, Math::Sin(angle/2.f), 0));
 
     Vector2 length = max-min;
     Vector2 center(bounds.getCenter().x, bounds.getCenter().z);
@@ -141,7 +151,7 @@ void LocalMap::render(const float x, const float y,
     // make everything visible
     mRendering->getScene()->setAmbientLight(ColourValue(1,1,1));
 
-    mCellCamera->setPosition(Vector3(x, zhigh+100000, y));
+    mCameraNode->setPosition(Vector3(x, zhigh+100000, y));
     //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
     mCellCamera->setFarClipDistance(0); // infinite
 

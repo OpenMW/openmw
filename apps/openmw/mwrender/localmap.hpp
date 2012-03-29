@@ -73,6 +73,8 @@ namespace MWRender
         static const int sSize = 8192;
 
         Ogre::Camera* mCellCamera;
+        Ogre::SceneNode* mCameraNode;
+        Ogre::SceneNode* mCameraRotNode;
 
         void render(const float x, const float y,
                     const float zlow, const float zhigh,
