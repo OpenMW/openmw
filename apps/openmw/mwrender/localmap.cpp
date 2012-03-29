@@ -65,9 +65,6 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
     {
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
         Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().z);
-        /// \todo why is this workaround needed?
-        min *= 1.3;
-        max *= 1.3;
         Vector2 length = max-min;
         
         // divide into segments
@@ -107,10 +104,6 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     Vector2 z(bounds.getMaximum().y, bounds.getMinimum().y);
     Vector2 min(bounds.getMinimum().x, bounds.getMinimum().z);
     Vector2 max(bounds.getMaximum().x, bounds.getMaximum().z);
-
-    /// \todo why is this workaround needed?
-    min *= 1.3;
-    max *= 1.3;
 
     Vector2 length = max-min;
     Vector2 center(bounds.getCenter().x, bounds.getCenter().z);
@@ -243,7 +236,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
     else
     {
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
-        min *= 1.3;
         
         x = std::ceil((pos.x - min.x)/sSize)-1;
         y = std::ceil((pos.y - min.y)/sSize)-1;
@@ -264,7 +256,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
     else
     {
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
-        min *= 1.3;
 
         u = (pos.x - min.x - sSize*x)/sSize;
         v = (pos.y - min.y - sSize*y)/sSize;
