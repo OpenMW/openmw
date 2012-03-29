@@ -108,7 +108,7 @@ namespace MWSound
             max = std::max(min, max);
         }
 
-        return std::string("Sound/")+snd->sound;
+        return "Sound/"+snd->sound;
     }
 
 
@@ -182,7 +182,7 @@ namespace MWSound
         {
             // The range values are not tested
             float basevol = 1.0f; /* TODO: volume settings */
-            std::string filePath = std::string("Sound/")+filename;
+            std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getCellRef().pos;
 
             SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, basevol, 1.0f,
