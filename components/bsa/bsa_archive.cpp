@@ -45,6 +45,32 @@ struct ciLessBoost : std::binary_function<std::string, std::string, bool>
     }
 };
 
+struct mrComparer
+{
+private:
+    int m_start, m_size;
+
+    bool comparePortion(std::string file1, std::string file2, int start, int size) const
+    {
+        for(int i = start; i < start+size; i++)
+        {
+            char one = tolower(file1.at(i));
+            char two = tolower(file2.at(i));
+            if(one != two)
+                return (one < two);
+        }
+        return true;
+    }
+
+public:
+    mrComparer(int start, int size) : m_start(start), m_size(size) { }
+
+    bool operator() (const std::string& first, const std::string& other)
+    {
+        return comparePortion(first, other, m_start, m_size);
+    }
+};
+
 static bool fsstrict = false;
 
 /// An OGRE Archive wrapping a BSAFile archive
@@ -55,16 +81,46 @@ class DirArchive: public Ogre::FileSystemArchive
     std::map<std::string, std::vector<std::string>, ciLessBoost> m;
     unsigned int cutoff;
 
-    bool comparePortion(std::string file1, std::string file2, int start, int size) const
+    bool findFile(const String& filename, std::string& copy) const
     {
-        for(int i = start; i < start+size; i++)
+        copy = filename;
+
+        std::replace(copy.begin(), copy.end(), '\\', '/');
+
+        if(copy.at(0) == '/')
+            copy.erase(0, 1);
+
+        if(fsstrict == true)
+            return true;
+
+        std::string folder;
+        int delimiter = 0;
+        size_t lastSlash = copy.rfind('/');
+        if (lastSlash != std::string::npos)
         {
-            char one = file1.at(i);
-            char two = file2.at(i);
-            if(tolower(one) != tolower(two) )
-                return false;
+            folder = copy.substr(0, lastSlash);
+            delimiter = lastSlash+1;
         }
-        return true;
+
+        std::vector<std::string> current;
+        {
+            std::map<std::string,std::vector<std::string>,ciLessBoost>::const_iterator found = m.find(folder);
+            if (found == m.end())
+            {
+                std::replace(folder.begin(), folder.end(), '/', '\\');
+                found = m.find(folder);
+            }
+
+            current = found->second;
+        }
+
+        mrComparer comp(delimiter, copy.size() - delimiter-1);
+        std::vector<std::string>::iterator found = std::lower_bound(current.begin(), current.end(), copy, comp);
+
+        if (found != current.end() && !(comp(copy, current.front())))
+            return true;
+
+      return false;
     }
 
     public:
@@ -120,97 +176,21 @@ class DirArchive: public Ogre::FileSystemArchive
     void unload() {}
 
      bool exists(const String& filename) {
-        std::string copy = filename;
-
-
-
-      for (unsigned int i = 0; i < filename.size(); i++)
-      {
-          if(copy.at(i) == '\\' ){
-                copy.replace(i, 1, "/");
-          }
-      }
-
-
-      if(copy.at(0) == '\\' || copy.at(0) == '/')
-        {
-            copy.erase(0, 1);
-        }
-        if(fsstrict == true)
-        {
-            //std::cout << "fsstrict " << copy << "\n";
+        std::string copy;
+         
+        if (findFile(filename, copy))
             return FileSystemArchive::exists(copy);
-        }
-
-
-      int last = copy.size() - 1;
-      int i = last;
-
-      for (;last >= 0; i--)
-      {
-          if(copy.at(i) == '/' || copy.at(i) == '\\')
-                break;
-      }
-
-      std::string folder = copy.substr(0, i);                              //folder with no slash
-
-      std::vector<std::string>& current = m[folder];
-
-       for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
-       {
-            if(comparePortion(*iter, copy, i + 1, copy.size() - i -1) == true){
-            return FileSystemArchive::exists(*iter);
-            }
-       }
-
 
       return false;
      }
 
     DataStreamPtr open(const String& filename, bool readonly = true) const
   {
-     std::map<std::string, std::vector<std::string>, ciLessBoost> mlocal = m;
-        std::string copy = filename;
+        std::string copy;
 
-
-
-      for (unsigned int i = 0; i < filename.size(); i++)
-      {
-          if(copy.at(i) == '\\' ){
-                copy.replace(i, 1, "/");
-          }
-      }
-
-
-      if(copy.at(0) == '\\' || copy.at(0) == '/')
-        {
-            copy.erase(0, 1);
-        }
-
-        if(fsstrict == true)
-        {
+        if (findFile(filename, copy))
             return FileSystemArchive::open(copy, readonly);
-        }
-
-
-      int last = copy.size() - 1;
-      int i = last;
-
-      for (;last >= 0; i--)
-      {
-          if(copy.at(i) == '/' || copy.at(i) == '\\')
-                break;
-      }
-
-      std::string folder = copy.substr(0, i);                              //folder with no slash
-      std::vector<std::string> current = mlocal[folder];
-
-       for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
-       {
-            if(comparePortion(*iter, copy, i + 1, copy.size() - i -1) == true){
-            return FileSystemArchive::open(*iter, readonly);
-            }
-       }
+            
         DataStreamPtr p;
       return p;
   }
