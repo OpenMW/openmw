@@ -14,7 +14,7 @@ namespace MWRender
 {
 
     //----------------------------------------------------------------------------------------------
-    
+
     TerrainManager::TerrainManager(Ogre::SceneManager* mgr, const MWWorld::Environment& evn) :
         mEnvironment(evn), mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize))
     {
@@ -42,7 +42,7 @@ namespace MWRender
         //due to the sudden flick between composite and non composite textures,
         //this seemed the distance where it wasn't too noticeable
         mTerrainGlobals.setCompositeMapDistance(mWorldSize*2);
-        
+
         mActiveProfile->setLightmapEnabled(false);
         mActiveProfile->setLayerSpecularMappingEnabled(false);
         mActiveProfile->setLayerNormalMappingEnabled(false);
@@ -73,16 +73,16 @@ namespace MWRender
     TerrainManager::~TerrainManager()
     {
     }
-    
+
     //----------------------------------------------------------------------------------------------
-    
+
     void TerrainManager::setDiffuse(const ColourValue& diffuse)
     {
         mTerrainGlobals.setCompositeMapDiffuse(diffuse);
     }
-    
+
     //----------------------------------------------------------------------------------------------
-    
+
     void TerrainManager::setAmbient(const ColourValue& ambient)
     {
         mTerrainGlobals.setCompositeMapAmbient(ambient);
@@ -160,7 +160,7 @@ namespace MWRender
                                          numTextures,
                                          indexes);
 
-                    if ( land->landData->usingColours )
+                    if ( land && land->landData->usingColours )
                     {
                         // disable or enable global colour map (depends on available vertex colours)
                         mActiveProfile->setGlobalColourMapEnabled(true);
@@ -253,7 +253,7 @@ namespace MWRender
 
                 assert( (int)mEnvironment.mWorld->getStore().landTexts.getSize() >= (int)ltexIndex - 1 &&
                        "LAND.VTEX must be within the bounds of the LTEX array");
-                
+
                 std::string texture;
                 if ( ltexIndex == 0 )
                 {
@@ -359,7 +359,7 @@ namespace MWRender
                             }
                             else
                             {
-                                //this provides a transition shading but also 
+                                //this provides a transition shading but also
                                 //rounds off the corners slightly
                                 pBlend[index] = std::min(1.0f, pBlend[index] + 0.5f);
                             }
@@ -458,10 +458,10 @@ namespace MWRender
                                    TEX_TYPE_2D, size, size, 0, PF_BYTE_BGR);
 
         HardwarePixelBufferSharedPtr pixelBuffer = tex->getBuffer();
-         
+
         pixelBuffer->lock(HardwareBuffer::HBL_DISCARD);
         const PixelBox& pixelBox = pixelBuffer->getCurrentLock();
-         
+
         uint8* pDest = static_cast<uint8*>(pixelBox.data);
 
         if ( land != NULL )
@@ -501,7 +501,7 @@ namespace MWRender
                 }
             }
         }
-         
+
         pixelBuffer->unlock();
 
         return tex;
