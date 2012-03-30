@@ -1,7 +1,6 @@
 #ifndef GAME_MWMECHANICS_MECHANICSMANAGER_H
 #define GAME_MWMECHANICS_MECHANICSMANAGER_H
 
-#include <set>
 #include <vector>
 #include <string>
 
@@ -9,6 +8,7 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
+#include "actors.hpp"
 
 namespace Ogre
 {
@@ -25,13 +25,13 @@ namespace MWMechanics
     class MechanicsManager
     {
             MWWorld::Environment& mEnvironment;
-            std::set<MWWorld::Ptr> mActors;
             MWWorld::Ptr mWatched;
             CreatureStats mWatchedCreature;
             NpcStats mWatchedNpc;
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
+            Actors mActors;
 
             void buildPlayer();
             ///< build player according to stored class/race/birthsign information. Will
