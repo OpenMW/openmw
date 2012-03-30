@@ -184,10 +184,11 @@ namespace MWSound
             float basevol = 1.0f; /* TODO: volume settings */
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getCellRef().pos;
+            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, basevol, 1.0f,
+            SoundPtr sound = mOutput->playSound3D(filePath, objpos, basevol, 1.0f,
                                                   20.0f, 12750.0f, false);
-            sound->mPos = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+            sound->mPos = objpos;
             sound->mBaseVolume = basevol;
 
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
@@ -240,9 +241,10 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
             const ESM::Position &pos = ptr.getCellRef().pos;
+            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            sound = mOutput->playSound3D(file, pos.pos, volume*basevol, pitch, min, max, loop);
-            sound->mPos = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+            sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, loop);
+            sound->mPos = objpos;
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
             sound->mMinDistance = min;
@@ -414,9 +416,9 @@ namespace MWSound
         // The output handler is expecting vectors oriented like the game
         // (that is, -Z goes down, +Y goes forward), but that's not what we
         // get from Ogre's camera, so we have to convert.
-        float pos[3] = { nPos[0], -nPos[2], nPos[1] };
-        float at[3] = { nDir[0], -nDir[2], nDir[1] };
-        float up[3] = { nUp[0], -nUp[2], nUp[1] };
+        const Ogre::Vector3 pos(nPos[0], -nPos[2], nPos[1]);
+        const Ogre::Vector3 at(nDir[0], -nDir[2], nDir[1]);
+        const Ogre::Vector3 up(nUp[0], -nUp[2], nUp[1]);
         mOutput->updateListener(pos, at, up);
 
         // Check if any sounds are finished playing, and trash them

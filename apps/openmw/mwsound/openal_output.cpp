@@ -616,7 +616,7 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
     return sound;
 }
 
-SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
+SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float volume, float pitch,
                                     float min, float max, bool loop)
 {
     throwALerror();
@@ -643,7 +643,7 @@ SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const float *pos, 
         throw;
     }
 
-    alSource3f(src, AL_POSITION, pos[0], pos[2], -pos[1]);
+    alSource3f(src, AL_POSITION, pos.x, pos.z, -pos.y);
     alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 
@@ -710,15 +710,15 @@ SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, floa
 }
 
 
-void OpenAL_Output::updateListener(const float *pos, const float *atdir, const float *updir)
+void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir)
 {
-    float orient[6] = {
-        atdir[0], atdir[2], -atdir[1],
-        updir[0], updir[2], -updir[1]
+    ALfloat orient[6] = {
+        atdir.x, atdir.z, -atdir.y,
+        updir.x, updir.z, -updir.y
     };
-    mPos = Ogre::Vector3(pos[0], pos[1], pos[2]);
+    mPos = pos;
 
-    alListener3f(AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alListener3f(AL_POSITION, mPos.x, mPos.z, -mPos.y);
     alListenerfv(AL_ORIENTATION, orient);
     throwALerror();
 }
