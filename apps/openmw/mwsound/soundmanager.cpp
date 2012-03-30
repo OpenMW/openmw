@@ -328,14 +328,12 @@ namespace MWSound
     void SoundManager::updateObject(MWWorld::Ptr ptr)
     {
         const ESM::Position &pos = ptr.getCellRef().pos;
+        const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first == ptr)
-            {
-                snditer->first->update(pos.pos);
-                snditer->first->mPos = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
-            }
+                snditer->first->mPos = objpos;
             snditer++;
         }
     }
@@ -428,7 +426,10 @@ namespace MWSound
             if(!snditer->first->isPlaying())
                 mActiveSounds.erase(snditer++);
             else
+            {
+                snditer->first->update();
                 snditer++;
+            }
         }
     }
 

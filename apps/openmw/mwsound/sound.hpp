@@ -7,7 +7,7 @@ namespace MWSound
 {
     class Sound
     {
-        virtual void update(const float *pos) = 0;
+        virtual void update() = 0;
 
         Sound& operator=(const Sound &rhs);
         Sound(const Sound &rhs);
