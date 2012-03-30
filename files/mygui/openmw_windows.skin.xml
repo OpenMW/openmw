@@ -294,7 +294,7 @@
         <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
 
-        <Child type="Widget" skin="DialogBG" offset = "4 4 248 46" align = "ALIGN_STRETCH" name = "Client"/>
+        <Child type="Widget" skin="BlackBG" offset = "4 4 248 46" align = "ALIGN_STRETCH" name = "Client"/>
 
         <!-- Outer borders -->
         <Child type="Widget" skin="DB_T" offset="4 0 248 4" align="ALIGN_TOP ALIGN_HSTRETCH" name="Border">
