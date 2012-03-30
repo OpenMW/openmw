@@ -58,6 +58,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
+    mWater = 0;
+
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
 
@@ -95,11 +97,26 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
-void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
+void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
+{
     mObjects.removeCell(store);
     mActors.removeCell(store);
     if (store->cell->isExterior())
       mTerrainManager->cellRemoved(store);
+}
+
+void RenderingManager::removeWater ()
+{
+    if(mWater){
+        delete mWater;
+        mWater = 0;
+    }
+}
+
+void RenderingManager::toggleWater()
+{
+    if (mWater)
+        mWater->toggle();
 }
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
@@ -157,6 +174,27 @@ void RenderingManager::update (float duration){
     mRendering.update(duration);
 
     mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealDirection() );
+
+    checkUnderwater();
+}
+void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
+    if(store->cell->data.flags & store->cell->HasWater){
+        if(mWater == 0)
+            mWater = new MWRender::Water(mRendering.getCamera(), store->cell);
+        else
+            mWater->changeCell(store->cell);
+        //else
+
+    }
+    else
+        removeWater();
+   
+}
+
+void RenderingManager::setWaterHeight(const float height)
+{
+    if (mWater)
+        mWater->setHeight(height);
 }
 
 void RenderingManager::skyEnable ()
@@ -300,6 +338,11 @@ void RenderingManager::toggleLight()
   }
 
   setAmbientMode();
+}
+void RenderingManager::checkUnderwater(){
+    if(mWater){
+         mWater->checkUnderwater( mRendering.getCamera()->getRealPosition().y );
+    }
 }
 
 void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,

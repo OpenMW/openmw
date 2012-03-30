@@ -25,6 +25,7 @@
 #include "objects.hpp"
 #include "actors.hpp"
 #include "player.hpp"
+#include "water.hpp"
 #include "localmap.hpp"
 #include "occlusionquery.hpp"
 
@@ -61,6 +62,8 @@ class RenderingManager: private RenderingInterface {
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment);
     virtual ~RenderingManager();
 
+
+
     virtual MWRender::Player& getPlayer(); /// \todo move this to private again as soon as
                                             /// MWWorld::Player has been rewritten to not need access
                                             /// to internal details of the rendering system anymore
@@ -77,7 +80,10 @@ class RenderingManager: private RenderingInterface {
     /// \todo this function should be removed later. Instead the rendering subsystems should track
     /// when rebatching is needed and update automatically at the end of each frame.
     void cellAdded (MWWorld::Ptr::CellStore *store);
+    void waterAdded(MWWorld::Ptr::CellStore *store);
 
+    void removeWater();
+    
     void preCellChange (MWWorld::Ptr::CellStore* store);
     ///< this event is fired immediately before changing cell
 
@@ -87,6 +93,10 @@ class RenderingManager: private RenderingInterface {
     void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
     void rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation);
+
+    void checkUnderwater();
+    void setWaterHeight(const float height);
+    void toggleWater();
 
     /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);
@@ -142,6 +152,8 @@ class RenderingManager: private RenderingInterface {
     OcclusionQuery* mOcclusionQuery;
 
     TerrainManager* mTerrainManager;
+
+    MWRender::Water *mWater;
 
     OEngine::Render::OgreRenderer &mRendering;
 
