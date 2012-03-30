@@ -442,33 +442,13 @@ void OpenAL_Output::init(const std::string &devname)
     {
         ALCuint maxtotal = std::min<ALCuint>(maxmono+maxstereo, 256);
         if (maxtotal == 0) // workaround for broken implementations
-        {
             maxtotal = 256;
-            bool stop = false;
-            for(size_t i = 0;i < maxtotal && !stop;i++) // generate source until error returned
-            {
-                ALuint src = 0;
-                alGenSources(1, &src);
-                ALenum err = alGetError();
-                if(err != AL_NO_ERROR)
-                {
-                    stop = true;
-                }
-                else
-                {
-                    mFreeSources.push_back(src);
-                }
-            }
-        }
-        else // normal case
+        for(size_t i = 0;i < maxtotal;i++)
         {
-            for(size_t i = 0;i < maxtotal;i++)
-            {
-                ALuint src = 0;
-                alGenSources(1, &src);
-                throwALerror();
-                mFreeSources.push_back(src);
-            }
+            ALuint src = 0;
+            alGenSources(1, &src);
+            throwALerror();
+            mFreeSources.push_back(src);
         }
     }
     catch(std::exception &e)
