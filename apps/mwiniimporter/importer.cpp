@@ -10,6 +10,7 @@ void MwIniImporter::setVerbose(bool verbose) {
 strmap MwIniImporter::loadIniFile(std::string filename) {
     std::cout << "load ini file: " << filename << std::endl;
     
+    std::string section("");
     std::map<std::string, std::string> map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
 
@@ -17,8 +18,16 @@ strmap MwIniImporter::loadIniFile(std::string filename) {
     while (std::getline(file, line)) {
 
         // ignore sections for now
-        if(line.empty() || line[0] == ';' || line[0] == '[') {
+        if(line.empty() || line[0] == ';') {
             continue;
+        }
+        
+        if(line[0] == '[') {
+            if(line.length() > 2) {
+                section = line.substr(1, line.length()-3);
+                continue;
+            }
+            throw IniParseException();
         }
         
         int pos = line.find("=");
@@ -27,7 +36,7 @@ strmap MwIniImporter::loadIniFile(std::string filename) {
         }
         
         map.insert(std::pair<std::string,std::string>(
-            line.substr(0,pos), line.substr(pos+1)
+            section + " " + line.substr(0,pos), line.substr(pos+1)
         ));
     }
     
