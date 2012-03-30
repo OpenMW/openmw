@@ -22,7 +22,7 @@ namespace MWSound
     public:
         virtual void stop() = 0;
         virtual bool isPlaying() = 0;
-        virtual void setVolume(float volume) = 0;
+        void setVolume(float volume) { mVolume = volume; }
 
         Sound() : mPos(0.0f, 0.0f, 0.0f)
                 , mVolume(1.0f)
