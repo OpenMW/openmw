@@ -21,8 +21,14 @@ void Cell::load(ESMReader &esm)
     if (data.flags & Interior)
     {
         // Interior cells
-
-        esm.getHNT(water, "WHGT", 4);
+        if (esm.isNextSub("INTV"))
+        {
+            int waterl;
+            esm.getHT(waterl);
+            water = (float) waterl;
+        }
+        else if (esm.isNextSub("WHGT"))
+            esm.getHT(water);
 
         // Quasi-exterior cells have a region (which determines the
         // weather), pure interior cells have ambient lighting
