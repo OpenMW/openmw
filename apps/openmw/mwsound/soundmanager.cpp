@@ -187,6 +187,7 @@ namespace MWSound
 
             SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, basevol, 1.0f,
                                                   20.0f, 12750.0f, false);
+            sound->mPos = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
             sound->mBaseVolume = basevol;
 
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
@@ -241,6 +242,7 @@ namespace MWSound
             const ESM::Position &pos = ptr.getCellRef().pos;
 
             sound = mOutput->playSound3D(file, pos.pos, volume*basevol, pitch, min, max, loop);
+            sound->mPos = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
             sound->mMinDistance = min;
@@ -330,7 +332,10 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first == ptr)
+            {
                 snditer->first->update(pos.pos);
+                snditer->first->mPos = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+            }
             snditer++;
         }
     }
