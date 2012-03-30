@@ -371,7 +371,6 @@ void WindowManager::updateSkillArea()
 
 void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 {
-    std::cout << "dialogue a la poubelle";
     assert(dialog);
     if (!dialog)
         return;
