@@ -44,9 +44,9 @@ namespace MWRender
          * @remarks This is used to draw a "fog of war" effect
          * to hide areas on the map the player has not discovered yet.
          * @param position (OGRE coordinates)
-         * @param view direction (OGRE coordinates)
+         * @param camera orientation (OGRE coordinates)
          */
-        void updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3& direction);
+        void updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation);
 
         /**
          * Save the fog of war for the current cell to disk.
@@ -74,6 +74,7 @@ namespace MWRender
 
         Ogre::Camera* mCellCamera;
         Ogre::SceneNode* mCameraNode;
+        Ogre::SceneNode* mCameraPosNode;
         Ogre::SceneNode* mCameraRotNode;
 
         void render(const float x, const float y,

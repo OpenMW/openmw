@@ -17,7 +17,8 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* en
     mRendering = rend;
     mEnvironment = env;
 
-    mCameraRotNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
+    mCameraPosNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
+    mCameraRotNode = mCameraPosNode->createChildSceneNode();
     mCameraNode = mCameraRotNode->createChildSceneNode();
 
     mCellCamera = mRendering->getScene()->createCamera("CellCamera");
@@ -101,6 +102,8 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
     int x = cell->cell->data.gridX;
     int y = cell->cell->data.gridY;
 
+    mCameraPosNode->setPosition(Vector3(0,0,0));
+
     render((x+0.5)*sSize, (-y-0.5)*sSize, -10000, 10000, sSize, sSize, name);
 }
 
@@ -110,16 +113,25 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     mInterior = true;
     mBounds = bounds;
 
-    Vector2 z(bounds.getMaximum().y, bounds.getMinimum().y);
-    Vector2 min(bounds.getMinimum().x, bounds.getMinimum().z);
-    Vector2 max(bounds.getMaximum().x, bounds.getMaximum().z);
+    Vector2 z(mBounds.getMaximum().y, mBounds.getMinimum().y);
 
     const Vector2& north = mEnvironment->mWorld->getNorthVector(cell);
-    Radian angle(std::atan2(north.x, north.y));
+    Radian angle(std::atan2(-north.x, -north.y));
     mCameraRotNode->setOrientation(Quaternion(Math::Cos(angle/2.f), 0, Math::Sin(angle/2.f), 0));
 
-    Vector2 length = max-min;
+    mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::NEAR_LEFT_BOTTOM)));
+    mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::FAR_LEFT_BOTTOM)));
+    mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::NEAR_RIGHT_BOTTOM)));
+    mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::FAR_RIGHT_BOTTOM)));
+
     Vector2 center(bounds.getCenter().x, bounds.getCenter().z);
+
+    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
+    Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().z);
+
+    Vector2 length = max-min;
+
+    mCameraPosNode->setPosition(Vector3(center.x, 0, center.y));
 
     // divide into segments
     const int segsX = std::ceil( length.x / sSize );
@@ -134,7 +146,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
             Vector2 start = min + Vector2(sSize*x,sSize*y);
             Vector2 newcenter = start + 4096;
 
-            render(newcenter.x, newcenter.y, z.y, z.x, sSize, sSize,
+            render(newcenter.x - center.x, newcenter.y - center.y, z.y, z.x, sSize, sSize,
                 cell->cell->name + "_" + coordStr(x,y));
         }
     }
@@ -227,7 +239,7 @@ void LocalMap::render(const float x, const float y,
     mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, fStart, fEnd);
 }
 
-void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3& direction)
+void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation)
 {
     if (sFogOfWarSkip != 0)
     {
@@ -240,9 +252,13 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
     int x,y;
     Vector3 _pos(position.x, 0, position.z);
     _pos = mCameraRotNode->convertWorldToLocalPosition(_pos);
+
+    //if (mInterior)
+       /// \todo
+
     Vector2 pos(_pos.x, _pos.z);
 
-    Vector3 playerdirection = mCameraRotNode->convertWorldToLocalPosition(direction);
+    Vector3 playerdirection = -mCameraRotNode->convertWorldToLocalOrientation(orientation).zAxis();
 
     if (!mInterior)
     {
@@ -279,6 +295,9 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
 
         texName = mInteriorName + "_" + coordStr(x,y);
     }
+
+    //std::cout << " x,y " << x << ", " << y << " u,v " << u << "," << v << std::endl;
+
     mEnvironment->mWindowManager->setPlayerPos(u, v);
     mEnvironment->mWindowManager->setPlayerDir(playerdirection.x, -playerdirection.z);
 

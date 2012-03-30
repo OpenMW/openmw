@@ -171,7 +171,7 @@ void RenderingManager::update (float duration){
     
     mRendering.update(duration);
 
-    mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealDirection() );
+    mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealOrientation() );
 
     checkUnderwater();
 }
