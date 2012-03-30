@@ -531,9 +531,10 @@ namespace MWWorld
         ptr.getRefData().getPosition().pos[0] = x;
         ptr.getRefData().getPosition().pos[1] = y;
         ptr.getRefData().getPosition().pos[2] = z;
-
         if (ptr==mPlayer->getPlayer())
         {
+            //std::cout << "X:" <<   ptr.getRefData().getPosition().pos[0] << " Z: "  << ptr.getRefData().getPosition().pos[1] << "\n";
+            
             Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
             if (currentCell)
             {
@@ -766,4 +767,15 @@ namespace MWWorld
         Vector2 d = Vector2(dir.x, dir.z);
         return d;
     }
+
+    void World::setWaterHeight(const float height)
+    {
+        mRendering->setWaterHeight(height);
+    }
+
+    void World::toggleWater()
+    {
+        mRendering->toggleWater();
+    }
+
 }

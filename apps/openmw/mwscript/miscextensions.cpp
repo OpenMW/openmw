@@ -175,6 +175,19 @@ namespace MWScript
                 }
         };
 
+        class OpToggleWater : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    context.getWorld().toggleWater();
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -187,6 +200,7 @@ namespace MWScript
         const int opcodeFadeIn = 0x200013c;
         const int opcodeFadeOut = 0x200013d;
         const int opcodeFadeTo = 0x200013e;
+        const int opcodeToggleWater = 0x2000144;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -204,6 +218,8 @@ namespace MWScript
             extensions.registerInstruction ("fadein", "f", opcodeFadeIn);
             extensions.registerInstruction ("fadeout", "f", opcodeFadeOut);
             extensions.registerInstruction ("fadeto", "ff", opcodeFadeTo);
+            extensions.registerInstruction ("togglewater", "", opcodeToggleWater);
+            extensions.registerInstruction ("twa", "", opcodeToggleWater);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -220,6 +236,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeFadeIn, new OpFadeIn);
             interpreter.installSegment5 (opcodeFadeOut, new OpFadeOut);
             interpreter.installSegment5 (opcodeFadeTo, new OpFadeTo);
+            interpreter.installSegment5 (opcodeToggleWater, new OpToggleWater);
         }
     }
 }

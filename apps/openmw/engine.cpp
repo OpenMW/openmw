@@ -315,7 +315,11 @@ void OMW::Engine::go()
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
+
+    //addResourcesDirectory(mResDir);
+   
     addResourcesDirectory(mResDir / "mygui");
+    addResourcesDirectory(mResDir / "water");
 
     // Create the window
     mOgre->createWindow("OpenMW");
