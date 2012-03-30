@@ -52,8 +52,15 @@ private:
 
     bool comparePortion(const std::string& file1, const std::string& file2, int start, int size) const
     {
+        return lexicographical_compare(file1.substr(start,size), file2.substr(start,size), boost::algorithm::is_iless());
+
         for(int i = start; i < start+size; i++)
         {
+            if (i >= file1.size())
+                return true;
+            else if (i >= file2.size())
+                return false;
+
             char one = tolower(file1.at(i));
             char two = tolower(file2.at(i));
             if(one != two)
@@ -83,7 +90,18 @@ class DirArchive: public Ogre::FileSystemArchive
 
     bool findFile(const String& filename, std::string& copy) const
     {
-        copy = filename;
+        {
+            String passed = filename;
+	        if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
+		        || filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
+		        || filename.at(filename.length() - 1) == '|')
+	        {
+	           passed = filename.substr(0, filename.length() - 2);
+	        }
+	        if(filename.at(filename.length() - 2) == '>')
+		        passed = filename.substr(0, filename.length() - 6);
+            copy = passed;
+        }
 
         std::replace(copy.begin(), copy.end(), '\\', '/');
 
