@@ -119,6 +119,21 @@ struct Cell
 
   void load(ESMReader &esm);
 
+  bool isExterior() const
+  {
+      return !(data.flags & Interior);
+  }
+
+  int getGridX() const
+  {
+      return data.gridX;
+  }
+
+  int getGridY() const
+  {
+      return data.gridY;
+  }
+
   // Restore the given reader to the stored position. Will try to open
   // the file matching the stored file name. If you want to read from
   // somewhere other than the file system, you need to pre-open the
