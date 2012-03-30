@@ -3,6 +3,7 @@
 
 
 #include "sky.hpp"
+#include "terrain.hpp"
 #include "debugging.hpp"
 
 #include "../mwworld/class.hpp"
@@ -81,7 +82,7 @@ class RenderingManager: private RenderingInterface {
     void waterAdded(MWWorld::Ptr::CellStore *store);
 
     void removeWater();
-    
+
     void preCellChange (MWWorld::Ptr::CellStore* store);
     ///< this event is fired immediately before changing cell
 
@@ -145,6 +146,8 @@ class RenderingManager: private RenderingInterface {
     SkyManager* mSkyManager;
 
     MWRender::Water *mWater;
+
+    TerrainManager* mTerrainManager;
 
     OEngine::Render::OgreRenderer &mRendering;
 
