@@ -253,7 +253,8 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
-    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement)
+    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
+        float duration, bool paused)
     {
         if (!mWatched.isEmpty())
         {
@@ -336,7 +337,7 @@ namespace MWMechanics
             mEnvironment.mWindowManager->configureSkills (majorSkills, minorSkills);
         }
 
-        mActors.update (movement);
+        mActors.update (movement, duration, paused);
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)

@@ -148,7 +148,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // update actors
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
-        mEnvironment.mMechanicsManager->update (movement);
+        mEnvironment.mMechanicsManager->update (movement, mEnvironment.mFrameDuration,
+            mEnvironment.mWindowManager->getMode()!=MWGui::GM_Game);
 
         if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
             mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
@@ -317,7 +318,7 @@ void OMW::Engine::go()
     // to find core.xml here.
 
     //addResourcesDirectory(mResDir);
-   
+
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
 

@@ -21,8 +21,13 @@ namespace MWMechanics
 {
     class Actors
     {
-           MWWorld::Environment& mEnvironment;
-           std::set<MWWorld::Ptr> mActors;
+            MWWorld::Environment& mEnvironment;
+            std::set<MWWorld::Ptr> mActors;
+            float mDuration;
+
+            void updateActor (const MWWorld::Ptr& ptr, float duration);
+
+            void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
 
         public:
 
@@ -37,7 +42,8 @@ namespace MWMechanics
             void dropActors (const MWWorld::Ptr::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
 
-            void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement);
+            void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
+                float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
     };
 }
