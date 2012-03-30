@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include <OgreVector3.h>
+
 #include "soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -34,7 +36,13 @@ namespace MWSound
         Sound_Output& operator=(const Sound_Output &rhs);
         Sound_Output(const Sound_Output &rhs);
 
-        Sound_Output(SoundManager &mgr) : mManager(mgr) { }
+    protected:
+        Ogre::Vector3 mPos;
+
+        Sound_Output(SoundManager &mgr)
+          : mManager(mgr)
+          , mPos(0.0f, 0.0f, 0.0f)
+        { }
     public:
         virtual ~Sound_Output() { }
 

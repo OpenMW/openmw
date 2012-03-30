@@ -760,8 +760,9 @@ void OpenAL_Output::updateListener(const float *pos, const float *atdir, const f
         atdir[0], atdir[2], -atdir[1],
         updir[0], updir[2], -updir[1]
     };
+    mPos = Ogre::Vector3(pos[0], pos[1], pos[2]);
 
-    alListener3f(AL_POSITION, pos[0], pos[2], -pos[1]);
+    alListener3f(AL_POSITION, mPos[0], mPos[2], -mPos[1]);
     alListenerfv(AL_ORIENTATION, orient);
     throwALerror();
 }
