@@ -151,7 +151,8 @@ namespace Physic
 
 
 
-    PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader)
+    PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader) :
+        mDebugActive(0)
     {
         // Set up the collision configuration and dispatcher
         collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -203,6 +204,13 @@ namespace Physic
             createDebugRendering();
         }
         mDebugDrawer->setDebugMode(mode);
+        mDebugActive = mode;
+    }
+
+    bool  PhysicEngine::toggleDebugRendering()
+    {
+        setDebugRenderingMode(!mDebugActive);
+        return mDebugActive;
     }
 
     PhysicEngine::~PhysicEngine()

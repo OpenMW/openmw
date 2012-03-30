@@ -199,6 +199,8 @@ namespace Physic
          */
         void setDebugRenderingMode(int mode);
 
+        bool toggleDebugRendering();
+
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          */
@@ -230,6 +232,7 @@ namespace Physic
         //debug rendering
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
+        bool mDebugActive;
     };
 
 }}
