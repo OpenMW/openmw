@@ -101,12 +101,17 @@ class DirArchive: public Ogre::FileSystemArchive
             delimiter = lastSlash+1;
         }
 
+        std::cout << "Finding: " << copy;
+
         std::vector<std::string> current;
         {
             std::map<std::string,std::vector<std::string>,ciLessBoost>::const_iterator found = m.find(folder);
 
             if (found == m.end())
+            {
+                std::cout << " failed, couldn't find folder." << std::endl;
                 return false;
+            }
             else
                 current = found->second;
         }
@@ -115,9 +120,18 @@ class DirArchive: public Ogre::FileSystemArchive
         std::vector<std::string>::iterator find = std::lower_bound(current.begin(), current.end(), copy, comp);
         if (find != current.end() && !comp(copy, current.front()))
         {
+            std::cout << " found";
+            if (copy != *find)
+                if (lexicographical_compare(copy, *find, boost::algorithm::is_iless()))
+                    std::cout << " case folded to " << *find << std::endl;
+                else
+                    std::cout << " as different file " << *find << std::endl;
+
             copy = *find;
             return true;
         }
+
+        std::cout << " failed, couldn't find file." << std::endl;
         return false;
     }
 
