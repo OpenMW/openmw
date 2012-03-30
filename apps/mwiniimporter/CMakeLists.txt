@@ -4,7 +4,6 @@ set(MWINIIMPORT
 )
 
 set(MWINIIMPORT_HEADER
-    main.hpp
     importer.hpp
 )
 
