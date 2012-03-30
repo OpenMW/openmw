@@ -104,13 +104,10 @@ class DirArchive: public Ogre::FileSystemArchive
         std::vector<std::string> current;
         {
             std::map<std::string,std::vector<std::string>,ciLessBoost>::const_iterator found = m.find(folder);
-            if (found == m.end())
-            {
-                std::replace(folder.begin(), folder.end(), '/', '\\');
-                found = m.find(folder);
-            }
 
-            if (found != m.end())
+            if (found == m.end())
+                return false;
+            else
                 current = found->second;
         }
 
@@ -134,16 +131,14 @@ class DirArchive: public Ogre::FileSystemArchive
      //need to cut off first
       boost::filesystem::directory_iterator dir_iter(d), dir_end;
       std::vector<std::string> filesind;
-      boost::filesystem::path f;
       for(;dir_iter != dir_end; dir_iter++)
     {
         if(boost::filesystem::is_directory(*dir_iter))
             populateMap(*dir_iter);
         else
         {
-
-            f = *dir_iter;
-            std::string s = f.string();
+            std::string s = dir_iter->path().string();
+            std::replace(s.begin(), s.end(), '\\', '/');
 
             std::string small;
             if(cutoff < s.size())
@@ -155,14 +150,16 @@ class DirArchive: public Ogre::FileSystemArchive
         }
     }
     std::sort(filesind.begin(), filesind.end(), ciLessBoost());
+
     std::string small;
     std::string original = d.string();
+    std::replace(original.begin(), original.end(), '\\', '/');
     if(cutoff < original.size())
         small = original.substr(cutoff, original.size() - cutoff);
     else
         small = original.substr(cutoff - 1, original.size() - cutoff);
-    m[small] = filesind;
 
+    m[small] = filesind;
   }
 
     bool isCaseSensitive() const { return fsstrict; }
