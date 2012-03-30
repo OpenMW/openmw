@@ -142,8 +142,8 @@ namespace MWScript
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
 
-                    const ESM::Cell *cell = context.getWorld().getPlayer().getPlayer().getCell()->cell;
-                    runtime.push (cell->water);
+                    MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+                    runtime.push (cell->mWaterLevel);
                 }
         };
 
