@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 MwIniImporter::MwIniImporter() {
     const char *map[][2] =
@@ -21,6 +22,12 @@ MwIniImporter::MwIniImporter() {
 
 void MwIniImporter::setVerbose(bool verbose) {
     mVerbose = verbose;
+}
+
+std::string MwIniImporter::numberToString(int n) {
+    std::stringstream str;
+    str << n;
+    return str.str();
 }
 
 MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
@@ -130,7 +137,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {
     multistrmap::iterator it = ini.begin();
     for(int i=0; it != ini.end(); i++) {
         gameFile = baseGameFile;
-        gameFile.append(1,i+'0');
+        gameFile.append(this->numberToString(i));
         
         it = ini.find(gameFile);
         if(it == ini.end()) {
@@ -152,24 +159,19 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {
         gameFile = "";
     }
     
-    if(!esmFiles.empty()) {
-        multistrmap::iterator it;
-        cfg.erase("master");
-        cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("master", std::vector<std::string>() ) );
-        
-        for(std::vector<std::string>::iterator it=esmFiles.begin(); it!=esmFiles.end(); it++) {
-            cfg["master"].push_back(*it);
-        }
+    multistrmap::iterator it;
+    cfg.erase("master");
+    cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("master", std::vector<std::string>() ) );
+    
+    for(std::vector<std::string>::iterator it=esmFiles.begin(); it!=esmFiles.end(); it++) {
+        cfg["master"].push_back(*it);
     }
     
-    if(!espFiles.empty()) {
-        multistrmap::iterator it;
-        cfg.erase("plugin");
-        cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("plugin", std::vector<std::string>() ) );
-        
-        for(std::vector<std::string>::iterator it=espFiles.begin(); it!=espFiles.end(); it++) {
-            cfg["plugin"].push_back(*it);
-        }
+    cfg.erase("plugin");
+    cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("plugin", std::vector<std::string>() ) );
+    
+    for(std::vector<std::string>::iterator it=espFiles.begin(); it!=espFiles.end(); it++) {
+        cfg["plugin"].push_back(*it);
     }
 }
 

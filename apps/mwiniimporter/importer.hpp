@@ -23,6 +23,7 @@ class MwIniImporter {
     
   private:
     bool specialMerge(std::string cfgKey, std::string iniKey, multistrmap &cfg, multistrmap &ini);
+    std::string numberToString(int n);
     bool mVerbose;
     strmap mMergeMap;
 };
