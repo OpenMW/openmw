@@ -204,13 +204,18 @@ OMW::Engine::~Engine()
 void OMW::Engine::loadBSA()
 {
     const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-    std::string dataDirectory;
+    
     for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
     {
         std::cout << "Adding " << iter->second.string() << std::endl;
         Bsa::addBSA(iter->second.string());
+    }
 
-        dataDirectory = iter->second.parent_path().string();
+    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
+    std::string dataDirectory;
+    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    {
+        dataDirectory = iter->string();
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
     }
