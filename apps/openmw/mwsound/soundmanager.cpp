@@ -335,7 +335,7 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first == ptr)
-                snditer->first->mPos = objpos;
+                snditer->first->setPosition(objpos);
             snditer++;
         }
     }
