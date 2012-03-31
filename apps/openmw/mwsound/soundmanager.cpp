@@ -41,6 +41,8 @@ namespace MWSound
     SoundManager::SoundManager(bool useSound, MWWorld::Environment& environment)
         : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
         , mEnvironment(environment)
+        , mOutput(new DEFAULT_OUTPUT(*this))
+
     {
         if(!useSound)
             return;
@@ -50,8 +52,6 @@ namespace MWSound
 
         try
         {
-            mOutput.reset(new DEFAULT_OUTPUT(*this));
-
             std::vector<std::string> names = mOutput->enumerate();
             std::cout <<"Enumerated output devices:"<< std::endl;
             for(size_t i = 0;i < names.size();i++)
@@ -62,7 +62,6 @@ namespace MWSound
         catch(std::exception &e)
         {
             std::cout <<"Sound init failed: "<<e.what()<< std::endl;
-            return;
         }
     }
 

@@ -25,14 +25,20 @@ static void throwALCerror(ALCdevice *device)
 {
     ALCenum err = alcGetError(device);
     if(err != ALC_NO_ERROR)
-        fail(alcGetString(device, err));
+    {
+        const ALCchar *errstring = alcGetString(device, err);
+        fail(errstring ? errstring : "");
+    }
 }
 
 static void throwALerror()
 {
     ALenum err = alGetError();
     if(err != AL_NO_ERROR)
-        fail(alGetString(err));
+    {
+        const ALchar *errstring = alGetString(err);
+        fail(errstring ? errstring : "");
+    }
 }
 
 
@@ -424,8 +430,7 @@ std::vector<std::string> OpenAL_Output::enumerate()
 
 void OpenAL_Output::init(const std::string &devname)
 {
-    if(mDevice || mContext)
-        fail("Device already open");
+    deinit();
 
     mDevice = alcOpenDevice(devname.c_str());
     if(!mDevice)
@@ -442,7 +447,12 @@ void OpenAL_Output::init(const std::string &devname)
 
     mContext = alcCreateContext(mDevice, NULL);
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
+    {
+        if(mContext)
+            alcDestroyContext(mContext);
+        mContext = 0;
         fail(std::string("Failed to setup context: ")+alcGetString(mDevice, alcGetError(mDevice)));
+    }
 
     alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
     throwALerror();
@@ -598,8 +608,6 @@ void OpenAL_Output::bufferFinished(ALuint buf)
 
 SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, bool loop)
 {
-    throwALerror();
-
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
@@ -647,8 +655,6 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
 SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float volume, float pitch,
                                     float min, float max, bool loop)
 {
-    throwALerror();
-
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
@@ -697,8 +703,6 @@ SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector
 
 SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch)
 {
-    throwALerror();
-
     boost::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
 
@@ -741,15 +745,18 @@ SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, floa
 
 void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir)
 {
-    ALfloat orient[6] = {
-        atdir.x, atdir.z, -atdir.y,
-        updir.x, updir.z, -updir.y
-    };
     mPos = pos;
 
-    alListener3f(AL_POSITION, mPos.x, mPos.z, -mPos.y);
-    alListenerfv(AL_ORIENTATION, orient);
-    throwALerror();
+    if(mContext)
+    {
+        ALfloat orient[6] = {
+            atdir.x, atdir.z, -atdir.y,
+            updir.x, updir.z, -updir.y
+        };
+        alListener3f(AL_POSITION, mPos.x, mPos.z, -mPos.y);
+        alListenerfv(AL_ORIENTATION, orient);
+        throwALerror();
+    }
 }
 
 
