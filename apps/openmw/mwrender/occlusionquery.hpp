@@ -77,6 +77,7 @@ namespace MWRender
 
         bool mSupported;
         bool mDoQuery;
+        bool mDoQuery2;
 
         bool mQuerySingleObjectRequested;
         bool mQuerySingleObjectStarted;

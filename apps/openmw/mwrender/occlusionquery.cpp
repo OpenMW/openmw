@@ -12,7 +12,7 @@ using namespace Ogre;
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mSingleObjectQuery(0), mActiveQuery(0),
     mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false), mTestResult(false), 
-    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false)
+    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false), mDoQuery2(false)
 {
     mRendering = renderer;
     mSunNode = sunNode;
@@ -82,6 +82,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mRendering->getScene()->addRenderObjectListener(this);
     mRendering->getScene()->addRenderQueueListener(this);
     mDoQuery = true;
+    mDoQuery2 = true;
 }
 
 OcclusionQuery::~OcclusionQuery()
@@ -125,7 +126,7 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
             mActiveQuery = mSunVisibleAreaQuery;
         }
     }
-    if (rend == mBBQuerySingleObject && mQuerySingleObjectRequested)
+    if (mDoQuery2 == true && rend == mBBQuerySingleObject && mQuerySingleObjectRequested)
     {
         mQuerySingleObjectStarted = true;
         mQuerySingleObjectRequested = false;
@@ -154,7 +155,7 @@ void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocati
             mSunVisibleAreaQuery->beginOcclusionQuery();
             mSunVisibleAreaQuery->endOcclusionQuery();
         }
-        if (mObjectWasVisible == false && mQuerySingleObjectRequested)
+        if (mObjectWasVisible == false && mDoQuery2 && mQuerySingleObjectRequested)
         {
             mSingleObjectQuery->beginOcclusionQuery();
             mSingleObjectQuery->endOcclusionQuery();
@@ -185,6 +186,7 @@ void OcclusionQuery::update(float duration)
     // Stop occlusion queries until we get their information
     // (may not happen on the same frame they are requested in)
     mDoQuery = false;
+    mDoQuery2 = false;
 
     if (!mSunTotalAreaQuery->isStillOutstanding()
         && !mSunVisibleAreaQuery->isStillOutstanding())
@@ -219,6 +221,8 @@ void OcclusionQuery::update(float duration)
 
         mQuerySingleObjectStarted = false;
         mQuerySingleObjectRequested = false;
+
+        mDoQuery2 = true;
     }
 }
 
