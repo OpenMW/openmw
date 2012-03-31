@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <algorithm>
 
 MwIniImporter::MwIniImporter() {
     const char *map[][2] =
@@ -26,21 +27,25 @@ strmap MwIniImporter::loadIniFile(std::string filename) {
     std::cout << "load ini file: " << filename << std::endl;
     
     std::string section("");
-    std::multimap<std::string, std::string> map;
+    std::map<std::string, std::string> map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
 
     std::string line;
     while (std::getline(file, line)) {
 
-        // ignore sections for now
-        if(line.empty() || line[0] == ';') {
-            continue;
-        }
-        
         if(line[0] == '[') {
             if(line.length() > 2) {
                 section = line.substr(1, line.length()-3);
             }
+            continue;
+        }
+        
+        int comment_pos = line.find(";");
+        if(comment_pos > 0) {
+            line = line.substr(0,comment_pos);
+        }
+        
+        if(line.empty()) {
             continue;
         }
         
@@ -58,15 +63,11 @@ strmap MwIniImporter::loadIniFile(std::string filename) {
 strmap MwIniImporter::loadCfgFile(std::string filename) {
     std::cout << "load cfg file: " << filename << std::endl;
     
-    std::multimap<std::string, std::string> map;
+    std::map<std::string, std::string> map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
 
     std::string line;
     while (std::getline(file, line)) {
-        
-        if(line[0] == '[') { // section
-            continue; // ignore for now
-        }
         
         // we cant say comment by only looking at first char anymore
         int comment_pos = line.find("#");
@@ -102,67 +103,50 @@ void MwIniImporter::merge(strmap &cfg, strmap &ini) {
     }
 }
 
-void MwIniImporter::importGameFiles(strmap &cfg, strmap &ini) {
-    std::vector<std::string> esmFiles;
-    std::string baseEsm("Game Files:GameFile");
-    std::string esmFile("");
-
-    strmap::iterator it = ini.begin();
-    for(int i=0; it != ini.end(); i++) {
-        esmFile = baseEsm;
-        esmFile.append(1,i+'0');
-        
-        it = ini.find(esmFile);
-        if(it == ini.end()) {
-            break;
-        }
-        
-        std::cout << "found EMS file: " << it->second << std::endl;
-        esmFiles.push_back(it->second);
-        esmFile = "";
-    }
-
-
-    std::vector<std::string> bsaFiles;
-    std::string baseBsa("Archives:Archive ");
-    std::string bsaFile("");
-    
-    it = ini.begin();
-    for(int i=0; it != ini.end(); i++) {
-        bsaFile = baseBsa;
-        bsaFile.append(1,i+'0');
-        
-        it = ini.find(bsaFile);
-        if(it == ini.end()) {
-            break;
-        }
-        
-        std::cout << "found BSA file: " << it->second << std::endl;
-        bsaFiles.push_back(it->second);
-        bsaFile = "";
-    }
-    
-    if(!esmFiles.empty()) {
-        cfg.erase("master");
-        for(std::vector<std::string>::iterator it = esmFiles.begin(); it != esmFiles.end(); it++) {
-            cfg.insert(std::make_pair<std::string, std::string>("master", *it));
-        }
-    }
-    
-    if(!bsaFile.empty()) {
-        cfg.erase("plugin");
-        for(std::vector<std::string>::iterator it = bsaFiles.begin(); it != bsaFiles.end(); it++) {
-            cfg.insert(std::make_pair<std::string, std::string>("plugin", *it));
-        }
-    }
-}
-
 bool MwIniImporter::specialMerge(std::string cfgKey, std::string iniKey, strmap &cfg, strmap &ini) {
     return false;
 }
 
-void MwIniImporter::writeToFile(std::string file, strmap &cfg) {
-    boost::iostreams::stream<boost::iostreams::file_sink> out(file);
+void MwIniImporter::importGameFiles(strmap &cfg, strmap &ini, std::vector<std::string> &esmFiles, std::vector<std::string> &espFiles) {
+    std::string baseGameFile("Game Files:GameFile");
+    std::string gameFile("");
+
+    strmap::iterator it = ini.begin();
+    for(int i=0; it != ini.end(); i++) {
+        gameFile = baseGameFile;
+        gameFile.append(1,i+'0');
+        
+        it = ini.find(gameFile);
+        if(it == ini.end()) {
+            break;
+        }
+        
+        std::string filetype(it->second.substr(it->second.length()-4, 3));
+        std::transform(filetype.begin(), filetype.end(), filetype.begin(), ::tolower);
+        
+        if(filetype.compare("esm") == 0) {
+            esmFiles.push_back(it->second);
+        }
+        else if(filetype.compare("esp") == 0) {
+            espFiles.push_back(it->second);
+        }
+        
+        gameFile = "";
+    }
+}
+
+void MwIniImporter::writeGameFiles(boost::iostreams::stream<boost::iostreams::file_sink> &out, std::vector<std::string> &esmFiles, std::vector<std::string> &espFiles) {
+    for(std::vector<std::string>::iterator it=esmFiles.begin(); it != esmFiles.end(); it++) {
+        out << "master=" << *it << std::endl;
+    }
+    for(std::vector<std::string>::iterator it=espFiles.begin(); it != espFiles.end(); it++) {
+        out << "plugin=" << *it << std::endl;
+    }
+}
+
+void MwIniImporter::writeToFile(boost::iostreams::stream<boost::iostreams::file_sink> &out, strmap &cfg) {
+    cfg.erase("master");
+    cfg.erase("plugin");
     
     for(strmap::iterator it=cfg.begin(); it != cfg.end(); it++) {
         out << (it->first) << "=" << (it->second) << std::endl;

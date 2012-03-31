@@ -58,21 +58,27 @@ int main(int argc, char *argv[]) {
         std::cerr << "cfg file does not exist" << std::endl;
         return -4;
     }
+    
 
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));
+    boost::iostreams::stream<boost::iostreams::file_sink> file(outputFile);
 
-    std::multimap<std::string, std::string>ini = importer.loadIniFile(iniFile);
-    std::multimap<std::string, std::string>cfg = importer.loadCfgFile(cfgFile);
+    std::map<std::string, std::string>ini = importer.loadIniFile(iniFile);
+    std::map<std::string, std::string>cfg = importer.loadCfgFile(cfgFile);
 
     importer.merge(cfg, ini);
     
     if(vm.count("game-files")) {
-        importer.importGameFiles(cfg, ini);
+        std::vector<std::string> esmFiles;
+        std::vector<std::string> espFiles;
+        
+        importer.importGameFiles(cfg, ini, esmFiles, espFiles);
+        importer.writeGameFiles(file, esmFiles, espFiles);
     }
 
     std::cout << "write to: " << outputFile << std::endl;
-    importer.writeToFile(outputFile, cfg);
+    importer.writeToFile(file, cfg);
 
     return 0;
 }
