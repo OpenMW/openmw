@@ -88,10 +88,7 @@ namespace MWSound
         if(snd == NULL)
             throw std::runtime_error(std::string("Failed to lookup sound ")+soundId);
 
-        if(snd->data.volume == 0)
-            volume = 0.0f;
-        else
-            volume *= pow(10.0, (snd->data.volume/255.0f*3348.0 - 3348.0) / 2000.0);
+        volume *= pow(10.0, (snd->data.volume/255.0*3348.0 - 3348.0) / 2000.0);
 
         if(snd->data.minRange == 0 && snd->data.maxRange == 0)
         {
