@@ -7,14 +7,11 @@
 
 
 typedef std::map<std::string, std::string> strmap;
-#define STRPAIR std::make_pair<std::string, std::string>
 
 class MwIniImporter {
 
   public:
-    MwIniImporter() {
-        mMergeMap.insert(STRPAIR("fps", "General:Show FPS"));
-    };
+    MwIniImporter();
     void    setVerbose(bool verbose);
     strmap  loadIniFile(std::string filename);
     strmap  loadCfgFile(std::string filename);

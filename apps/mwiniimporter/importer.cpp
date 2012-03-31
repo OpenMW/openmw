@@ -3,6 +3,18 @@
 #include <boost/iostreams/stream.hpp>
 #include <iostream>
 
+MwIniImporter::MwIniImporter() {
+    const char *map[][2] =
+    {
+        { "fps", "General:Show FPS" },
+        { 0, 0 }
+    };
+    
+    for(int i=0; map[i][0]; i++) {
+        mMergeMap.insert(std::make_pair<std::string, std::string>(map[i][0], map[i][1]));
+    }
+}
+
 void MwIniImporter::setVerbose(bool verbose) {
     mVerbose = verbose;
 }
@@ -34,7 +46,7 @@ strmap MwIniImporter::loadIniFile(std::string filename) {
             continue;
         }
         
-        map.insert(STRPAIR(section + ":" + line.substr(0,pos), line.substr(pos+1)));
+        map.insert(std::make_pair<std::string, std::string>(section + ":" + line.substr(0,pos), line.substr(pos+1)));
     }
     
     return map;
@@ -68,7 +80,7 @@ strmap MwIniImporter::loadCfgFile(std::string filename) {
             continue;
         }
         
-        map.insert(STRPAIR(line.substr(0,pos), line.substr(pos+1)));
+        map.insert(std::make_pair<std::string, std::string>(line.substr(0,pos), line.substr(pos+1)));
     }
     
     return map;
@@ -81,7 +93,7 @@ void MwIniImporter::merge(strmap &cfg, strmap &ini) {
         if((iniIt = ini.find(it->second)) != ini.end()) {
             cfg.erase(it->first);
             if(!this->specialMerge(it->first, it->second, cfg, ini)) {
-                cfg.insert(STRPAIR(it->first, iniIt->second));
+                cfg.insert(std::make_pair<std::string, std::string>(it->first, iniIt->second));
             }
         }
     }
