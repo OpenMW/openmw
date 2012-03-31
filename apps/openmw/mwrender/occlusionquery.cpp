@@ -217,8 +217,6 @@ void OcclusionQuery::update(float duration)
         //std::cout << "Single object query result: " << result << " pixels " << std::endl;
         mTestResult = (result != 0);
 
-        mBBQuerySingleObject->setVisible(false);
-
         mQuerySingleObjectStarted = false;
         mQuerySingleObjectRequested = false;
     }
