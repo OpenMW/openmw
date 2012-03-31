@@ -126,7 +126,7 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
             mActiveQuery = mSunVisibleAreaQuery;
         }
     }
-    if (mDoQuery2 == true && rend == mBBQuerySingleObject && mQuerySingleObjectRequested)
+    if (mDoQuery2 == true && rend == mBBQuerySingleObject)
     {
         mQuerySingleObjectStarted = true;
         mQuerySingleObjectRequested = false;
@@ -155,7 +155,7 @@ void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocati
             mSunVisibleAreaQuery->beginOcclusionQuery();
             mSunVisibleAreaQuery->endOcclusionQuery();
         }
-        if (mObjectWasVisible == false && mDoQuery2 && mQuerySingleObjectRequested)
+        if (mObjectWasVisible == false && mDoQuery2)
         {
             mSingleObjectQuery->beginOcclusionQuery();
             mSingleObjectQuery->endOcclusionQuery();
@@ -210,13 +210,13 @@ void OcclusionQuery::update(float duration)
 
         mDoQuery = true;
     }
-    if (mQuerySingleObjectStarted && !mSingleObjectQuery->isStillOutstanding())
+    if (!mSingleObjectQuery->isStillOutstanding())
     {
         unsigned int result;
 
         mSingleObjectQuery->pullOcclusionQuery(&result);
 
-        //std::cout << "Single object query result: " << result << " pixels " << std::endl;
+        std::cout << "Single object query result: " << result << " pixels " << std::endl;
         mTestResult = (result != 0);
 
         mQuerySingleObjectStarted = false;
