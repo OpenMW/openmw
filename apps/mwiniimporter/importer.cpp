@@ -25,19 +25,16 @@ strmap MwIniImporter::loadIniFile(std::string filename) {
         if(line[0] == '[') {
             if(line.length() > 2) {
                 section = line.substr(1, line.length()-3);
-                continue;
             }
-            throw IniParseException();
+            continue;
         }
         
         int pos = line.find("=");
         if(pos < 1) {
-            throw IniParseException();
+            continue;
         }
         
-        map.insert(std::pair<std::string,std::string>(
-            section + " " + line.substr(0,pos), line.substr(pos+1)
-        ));
+        map.insert(STRPAIR(section + ":" + line.substr(0,pos), line.substr(pos+1)));
     }
     
     return map;
@@ -68,30 +65,30 @@ strmap MwIniImporter::loadCfgFile(std::string filename) {
         
         int pos = line.find("=");
         if(pos < 1) {
-            throw IniParseException();
+            continue;
         }
         
-        map.insert(std::pair<std::string,std::string>(
-            line.substr(0,pos), line.substr(pos+1)
-        ));
+        map.insert(STRPAIR(line.substr(0,pos), line.substr(pos+1)));
     }
     
     return map;
 }
 
 void MwIniImporter::merge(strmap &cfg, strmap &ini) {
-    strmap::iterator ini_it;
-    for(strmap::iterator it=cfg.begin(); it != cfg.end(); it++) {
-        ini_it = ini.find(it->first);
-        
-        // found a key in both files
-        if(ini_it != ini.end()) {
-            cfg.erase(it);
-            cfg.insert(std::pair<std::string,std::string>(
-                ini_it->first, ini_it->second
-            ));
+    strmap::iterator cfgIt;
+    strmap::iterator iniIt;
+    for(strmap::iterator it=mMergeMap.begin(); it!=mMergeMap.end(); it++) {
+        if((iniIt = ini.find(it->second)) != ini.end()) {
+            cfg.erase(it->first);
+            if(!this->specialMerge(it->first, it->second, cfg, ini)) {
+                cfg.insert(STRPAIR(it->first, iniIt->second));
+            }
         }
     }
+}
+
+bool MwIniImporter::specialMerge(std::string cfgKey, std::string iniKey, strmap cfg, strmap ini) {
+    return false;
 }
 
 void MwIniImporter::writeToFile(std::string file, strmap &cfg) {
