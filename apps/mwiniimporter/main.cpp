@@ -59,22 +59,17 @@ int main(int argc, char *argv[]) {
         return -4;
     }
     
-
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));
     boost::iostreams::stream<boost::iostreams::file_sink> file(outputFile);
 
-    std::map<std::string, std::string>ini = importer.loadIniFile(iniFile);
-    std::map<std::string, std::string>cfg = importer.loadCfgFile(cfgFile);
+    MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
+    MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
 
     importer.merge(cfg, ini);
     
     if(vm.count("game-files")) {
-        std::vector<std::string> esmFiles;
-        std::vector<std::string> espFiles;
-        
-        importer.importGameFiles(cfg, ini, esmFiles, espFiles);
-        importer.writeGameFiles(file, esmFiles, espFiles);
+        importer.importGameFiles(cfg, ini);
     }
 
     std::cout << "write to: " << outputFile << std::endl;

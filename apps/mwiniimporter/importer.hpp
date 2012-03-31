@@ -8,23 +8,21 @@
 #include <vector>
 #include <exception>
 
-
-typedef std::map<std::string, std::string> strmap;
-
 class MwIniImporter {
-
   public:
+    typedef std::map<std::string, std::string> strmap;
+    typedef std::map<std::string, std::vector<std::string> > multistrmap;
+
     MwIniImporter();
     void    setVerbose(bool verbose);
-    strmap  loadIniFile(std::string filename);
-    strmap  loadCfgFile(std::string filename);
-    void    merge(strmap &cfg, strmap &ini);
-    void    importGameFiles(strmap &cfg, strmap &ini, std::vector<std::string> &esmFiles, std::vector<std::string> &espFiles);
-    void    writeGameFiles(boost::iostreams::stream<boost::iostreams::file_sink> &out, std::vector<std::string> &esmFiles, std::vector<std::string> &espFiles);
-    void    writeToFile(boost::iostreams::stream<boost::iostreams::file_sink> &out, strmap &cfg);
+    multistrmap  loadIniFile(std::string filename);
+    multistrmap  loadCfgFile(std::string filename);
+    void    merge(multistrmap &cfg, multistrmap &ini);
+    void    importGameFiles(multistrmap &cfg, multistrmap &ini);
+    void    writeToFile(boost::iostreams::stream<boost::iostreams::file_sink> &out, multistrmap &cfg);
     
   private:
-    bool   specialMerge(std::string cfgKey, std::string iniKey, strmap &cfg, strmap &ini);
+    bool specialMerge(std::string cfgKey, std::string iniKey, multistrmap &cfg, multistrmap &ini);
     bool mVerbose;
     strmap mMergeMap;
 };
