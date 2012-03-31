@@ -62,7 +62,6 @@ namespace MWSound
         catch(std::exception &e)
         {
             std::cout <<"Sound init failed: "<<e.what()<< std::endl;
-            mOutput.reset();
             return;
         }
     }
