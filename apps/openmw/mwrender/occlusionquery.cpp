@@ -95,7 +95,6 @@ OcclusionQuery::~OcclusionQuery()
 
 bool OcclusionQuery::supported()
 {
-    //if (!mResponding) std::cout << "Occlusion query timed out" << std::endl;
     return mSupported;
 }
 
@@ -218,7 +217,6 @@ void OcclusionQuery::update(float duration)
 
         mSingleObjectQuery->pullOcclusionQuery(&result);
 
-        std::cout << "Single object query result: " << result << " pixels " << std::endl;
         mTestResult = (result != 0);
 
         mQuerySingleObjectStarted = false;
