@@ -204,7 +204,7 @@ namespace MWSound
     }
 
 
-    SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
+    SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
     {
         SoundPtr sound;
         try
@@ -213,7 +213,7 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
 
-            sound = mOutput->playSound(file, volume*basevol, pitch, loop);
+            sound = mOutput->playSound(file, volume*basevol, pitch, mode&Play_Loop);
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
             sound->mMinDistance = min;
@@ -229,14 +229,13 @@ namespace MWSound
     }
 
     SoundPtr SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
-                                       float volume, float pitch, bool loop,
-                                       bool untracked)
+                                       float volume, float pitch, int mode)
     {
         const ESM::Position &pos = ptr.getCellRef().pos;
         const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
         SoundPtr sound;
 
-        if(!untracked)
+        if((mode&Play_Single))
         {
             IDSoundMap::iterator inviter = mSingleSounds.find(soundId);
             if(inviter != mSingleSounds.end())
@@ -256,14 +255,14 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
 
-            sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, loop);
+            sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, mode&Play_Loop);
             sound->mPos = objpos;
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
 
-            if(untracked)
+            if((mode&Play_NoTrack))
                 mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
             else
             {
