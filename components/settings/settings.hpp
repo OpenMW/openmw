@@ -18,16 +18,24 @@ namespace Settings
         void loadDefault (const std::string& file);
         ///< load file as the default settings (can be overridden by user settings)
 
-        void load (const std::string& file);
+        void copyDefaultToUserSettings ();
+        ///< copy the default settings to the user settings (useful when there are no user settings yet)
+
+        void loadUser (const std::string& file);
         ///< load file as user settings
 
-        void save (const std::string& file);
-        ///< save to file
+        void saveUser (const std::string& file);
+        ///< save user settings to file
 
         static const int getInt (const std::string& setting, const std::string& category);
         static const float getFloat (const std::string& setting, const std::string& category);
         static const std::string getString (const std::string& setting, const std::string& category);
         static const bool getBool (const std::string& setting, const std::string& category);
+
+        static void setInt (const std::string& setting, const std::string& category, const int value);
+        static void setFloat (const std::string& setting, const std::string& category, const float value);
+        static void setString (const std::string& setting, const std::string& category, const std::string& value);
+        static void setBool (const std::string& setting, const std::string& category, const bool value);
     };
 
 }

@@ -10,17 +10,22 @@ using namespace Settings;
 Ogre::ConfigFile Manager::mFile = Ogre::ConfigFile();
 Ogre::ConfigFile Manager::mDefaultFile = Ogre::ConfigFile();
 
-void Manager::load(const std::string& file)
+void Manager::loadUser (const std::string& file)
 {
     mFile.load(file);
 }
 
-void Manager::loadDefault(const std::string& file)
+void Manager::loadDefault (const std::string& file)
 {
     mDefaultFile.load(file);
 }
 
-void Manager::save(const std::string& file)
+void Manager::copyDefaultToUserSettings ()
+{
+    mFile = mDefaultFile;
+}
+
+void Manager::saveUser(const std::string& file)
 {
     std::fstream fout(file.c_str(), std::ios::out);
 
@@ -39,6 +44,8 @@ void Manager::save(const std::string& file)
         {
             fout << i->first.c_str() << '=' << i->second.c_str() << '\n';
         }
+
+        seci.getNext();
     }
 }
 
@@ -61,4 +68,33 @@ const int Manager::getInt (const std::string& setting, const std::string& catego
 const bool Manager::getBool (const std::string& setting, const std::string& category)
 {
     return Ogre::StringConverter::parseBool( getString(setting, category) );
+}
+
+void Manager::setString (const std::string& setting, const std::string& category, const std::string& value)
+{
+    Ogre::ConfigFile::SettingsIterator it = mFile.getSettingsIterator(category);
+    while (it.hasMoreElements())
+    {
+        Ogre::ConfigFile::SettingsMultiMap::iterator i = it.current();
+
+        if ((*i).first == setting)
+            (*i).second = value;
+
+        it.getNext();
+    }
+}
+
+void Manager::setInt (const std::string& setting, const std::string& category, const int value)
+{
+    setString(setting, category, Ogre::StringConverter::toString(value));
+}
+
+void Manager::setFloat (const std::string& setting, const std::string& category, const float value)
+{
+    setString(setting, category, Ogre::StringConverter::toString(value));
+}
+
+void Manager::setBool (const std::string& setting, const std::string& category, const bool value)
+{
+    setString(setting, category, Ogre::StringConverter::toString(value));
 }
