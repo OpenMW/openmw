@@ -45,6 +45,9 @@ namespace MWSound
         typedef std::map<SoundPtr,PtrIDPair> SoundMap;
         SoundMap mActiveSounds;
 
+        typedef std::map<std::string,SoundPtr> IDSoundMap;
+        IDSoundMap mSingleSounds;
+
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
         void streamMusicFull(const std::string& filename);

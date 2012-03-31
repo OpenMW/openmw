@@ -67,6 +67,7 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
+        mSingleSounds.clear();
         mActiveSounds.clear();
         mMusic.reset();
         mOutput.reset();
@@ -231,15 +232,29 @@ namespace MWSound
                                        float volume, float pitch, bool loop,
                                        bool untracked)
     {
+        const ESM::Position &pos = ptr.getCellRef().pos;
+        const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
         SoundPtr sound;
+
+        if(!untracked)
+        {
+            IDSoundMap::iterator inviter = mSingleSounds.find(soundId);
+            if(inviter != mSingleSounds.end())
+            {
+                if(inviter->second->mPos.squaredDistance(mOutput->mPos) <
+                   objpos.squaredDistance(mOutput->mPos))
+                    return sound;
+                inviter->second->stop();
+                mSingleSounds.erase(inviter);
+            }
+        }
+
         try
         {
             // Look up the sound in the ESM data
             float basevol = 1.0f; /* TODO: volume settings */
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
-            const ESM::Position &pos = ptr.getCellRef().pos;
-            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
             sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, loop);
             sound->mPos = objpos;
@@ -248,8 +263,13 @@ namespace MWSound
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
 
-            mActiveSounds[sound] = (!untracked ? std::make_pair(ptr, soundId) :
-                                    std::make_pair(MWWorld::Ptr(), soundId));
+            if(untracked)
+                mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
+            else
+            {
+                mActiveSounds[sound] = std::make_pair(ptr, soundId);
+                mSingleSounds[soundId] = sound;
+            }
         }
         catch(std::exception &e)
         {
@@ -265,6 +285,9 @@ namespace MWSound
         {
             if(snditer->second.first == ptr && snditer->second.second == soundId)
             {
+                IDSoundMap::iterator inviter = mSingleSounds.find(snditer->second.second);
+                if(inviter != mSingleSounds.end() && inviter->second == snditer->first)
+                    mSingleSounds.erase(inviter);
                 snditer->first->stop();
                 mActiveSounds.erase(snditer++);
             }
@@ -280,6 +303,9 @@ namespace MWSound
         {
             if(snditer->second.first == ptr)
             {
+                IDSoundMap::iterator inviter = mSingleSounds.find(snditer->second.second);
+                if(inviter != mSingleSounds.end() && inviter->second == snditer->first)
+                    mSingleSounds.erase(inviter);
                 snditer->first->stop();
                 mActiveSounds.erase(snditer++);
             }
@@ -296,6 +322,9 @@ namespace MWSound
             if(snditer->second.first != MWWorld::Ptr() &&
                snditer->second.first.getCell() == cell)
             {
+                IDSoundMap::iterator inviter = mSingleSounds.find(snditer->second.second);
+                if(inviter != mSingleSounds.end() && inviter->second == snditer->first)
+                    mSingleSounds.erase(inviter);
                 snditer->first->stop();
                 mActiveSounds.erase(snditer++);
             }
@@ -424,7 +453,12 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(!snditer->first->isPlaying())
+            {
+                IDSoundMap::iterator inviter = mSingleSounds.find(snditer->second.second);
+                if(inviter != mSingleSounds.end() && inviter->second == snditer->first)
+                    mSingleSounds.erase(inviter);
                 mActiveSounds.erase(snditer++);
+            }
             else
             {
                 snditer->first->update();
