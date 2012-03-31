@@ -37,9 +37,6 @@ namespace MWSound
         Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
                               * but do not keep it updated (the sound will not move with
                               * the object and will not stop when the object is deleted. */
-        Play_Single  = 1<<3, /* (3D only) Play only a single instance of the given sound id.
-                              * Sounds not marked as Single will not count, and all but the
-                              * closest to the listener's position will be stopped. */
     };
     static inline int operator|(const PlayMode &a, const PlayMode &b)
     { return (int)a | (int)b; }
@@ -60,9 +57,6 @@ namespace MWSound
         typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
         typedef std::map<SoundPtr,PtrIDPair> SoundMap;
         SoundMap mActiveSounds;
-
-        typedef std::map<std::string,SoundPtr> IDSoundMap;
-        IDSoundMap mSingleSounds;
 
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);

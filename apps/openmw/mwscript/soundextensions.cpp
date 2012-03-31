@@ -130,7 +130,7 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    context.getSoundManager().playSound3D (ptr, sound, 1.0, 1.0, MWSound::Play_Single | (mLoop ? MWSound::Play_Loop : 0));
+                    context.getSoundManager().playSound3D (ptr, sound, 1.0, 1.0, mLoop ? MWSound::Play_Loop : 0);
                 }
         };
 
@@ -159,7 +159,7 @@ namespace MWScript
                     Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
 
-                    context.getSoundManager().playSound3D (ptr, sound, volume, pitch, MWSound::Play_Single | (mLoop ? MWSound::Play_Loop : 0));
+                    context.getSoundManager().playSound3D (ptr, sound, volume, pitch, mLoop ? MWSound::Play_Loop : 0);
 
                 }
         };
