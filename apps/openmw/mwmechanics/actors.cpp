@@ -6,6 +6,7 @@
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 namespace MWMechanics
 {
@@ -16,7 +17,9 @@ namespace MWMechanics
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
     {
-
+        if (!paused)
+            MWWorld::Class::get (ptr).getInventoryStore (ptr).autoEquip (
+                MWWorld::Class::get (ptr).getNpcStats (ptr));
     }
 
     Actors::Actors (MWWorld::Environment& environment) : mEnvironment (environment), mDuration (0) {}

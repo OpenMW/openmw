@@ -6,6 +6,8 @@
 
 #include "class.hpp"
 
+#include <iostream> /// \todo remove after rendering is implemented
+
 void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
 {
     // some const-trickery, required because of a flaw in the handling of MW-references and the
@@ -24,10 +26,15 @@ void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
     }
 }
 
-MWWorld::InventoryStore::InventoryStore()
+void MWWorld::InventoryStore::initSlots (TSlots& slots)
 {
     for (int i=0; i<Slots; ++i)
-        mSlots.push_back (end());
+        slots.push_back (end());
+}
+
+MWWorld::InventoryStore::InventoryStore()
+{
+    initSlots (mSlots);
 }
 
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
@@ -85,4 +92,51 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     }
 
     return mSlots[slot];
+}
+
+void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
+{
+    TSlots slots;
+    initSlots (slots);
+
+    for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+    {
+        std::pair<std::vector<int>, bool> itemsSlots =
+            MWWorld::Class::get (*iter).getEquipmentSlots (*iter);
+
+        for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
+            iter2!=itemsSlots.first.end(); ++iter2)
+        {
+            /// \todo comapre item with item in slot
+            if (slots.at (*iter2)==end())
+            {
+                /// \todo unstack, if reqquired (itemsSlots.second)
+
+                slots[*iter2] = iter;
+                break;
+            }
+        }
+    }
+
+    bool changed = false;
+
+    for (std::size_t i=0; i<slots.size(); ++i)
+        if (slots[i]!=mSlots[i])
+        {
+            changed = true;
+        }
+
+    if (changed)
+    {
+        mSlots.swap (slots);
+        flagAsModified();
+
+        /// \todo remove the following line after rendering is implemented
+        for (std::size_t i=0; i<mSlots.size(); ++i)
+            if (mSlots[i]!=end())
+            {
+                std::cout<<"NPC is equipping " << MWWorld::Class::get (*mSlots[i]).getName (*mSlots[i])
+                    << " in slot " << i << std::endl;
+            }
+    }
 }
