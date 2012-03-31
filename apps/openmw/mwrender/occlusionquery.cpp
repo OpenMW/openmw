@@ -126,7 +126,7 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
             mActiveQuery = mSunVisibleAreaQuery;
         }
     }
-    if (mDoQuery2 == true && rend == mBBQuerySingleObject)
+    if (mDoQuery == true && rend == mBBQuerySingleObject)
     {
         mQuerySingleObjectStarted = true;
         mQuerySingleObjectRequested = false;
@@ -155,7 +155,7 @@ void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocati
             mSunVisibleAreaQuery->beginOcclusionQuery();
             mSunVisibleAreaQuery->endOcclusionQuery();
         }
-        if (mObjectWasVisible == false && mDoQuery2)
+        if (mObjectWasVisible == false && mDoQuery)
         {
             mSingleObjectQuery->beginOcclusionQuery();
             mSingleObjectQuery->endOcclusionQuery();
@@ -189,7 +189,8 @@ void OcclusionQuery::update(float duration)
     mDoQuery2 = false;
 
     if (!mSunTotalAreaQuery->isStillOutstanding()
-        && !mSunVisibleAreaQuery->isStillOutstanding())
+        && !mSunVisibleAreaQuery->isStillOutstanding()
+        && !mSingleObjectQuery->isStillOutstanding())
     {
         unsigned int totalPixels;
         unsigned int visiblePixels;
@@ -208,10 +209,6 @@ void OcclusionQuery::update(float duration)
             if (mSunVisibility > 1) mSunVisibility = 1;
         }
 
-        mDoQuery = true;
-    }
-    if (!mSingleObjectQuery->isStillOutstanding())
-    {
         unsigned int result;
 
         mSingleObjectQuery->pullOcclusionQuery(&result);
@@ -222,7 +219,7 @@ void OcclusionQuery::update(float duration)
         mQuerySingleObjectStarted = false;
         mQuerySingleObjectRequested = false;
 
-        mDoQuery2 = true;
+        mDoQuery = true;
     }
 }
 
