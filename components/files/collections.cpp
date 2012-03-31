@@ -30,4 +30,9 @@ namespace Files
 
         return iter->second;
     }
+
+    const Files::PathContainer& Collections::getPaths() const
+    {
+        return mDirectories;
+    }
 }

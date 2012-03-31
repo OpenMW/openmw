@@ -27,6 +27,7 @@
 #include "player.hpp"
 #include "water.hpp"
 #include "localmap.hpp"
+#include "occlusionquery.hpp"
 
 namespace Ogre
 {
@@ -108,6 +109,9 @@ class RenderingManager: private RenderingInterface {
     void sunEnable();
     void sunDisable();
 
+    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
+    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
+
     void setGlare(bool glare);
     void skyEnable ();
     void skyDisable ();
@@ -145,9 +149,11 @@ class RenderingManager: private RenderingInterface {
 
     SkyManager* mSkyManager;
 
-    MWRender::Water *mWater;
+    OcclusionQuery* mOcclusionQuery;
 
     TerrainManager* mTerrainManager;
+
+    MWRender::Water *mWater;
 
     OEngine::Render::OgreRenderer &mRendering;
 
@@ -164,7 +170,6 @@ class RenderingManager: private RenderingInterface {
     /// that the OGRE coordinate system matches that used internally in
     /// Morrowind.
     Ogre::SceneNode *mMwRoot;
-    Ogre::RaySceneQuery *mRaySceneQuery;
 
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
