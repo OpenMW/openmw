@@ -140,6 +140,11 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
 
 void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& repeatThisInvocation)
 {
+    if (mActiveQuery != NULL)
+    {
+        mActiveQuery->endOcclusionQuery();
+        mActiveQuery = NULL;
+    }
     /**
      * for every beginOcclusionQuery(), we want a respective pullOcclusionQuery() and vice versa
      * this also means that results can be wrong at other places if we pull, but beginOcclusionQuery() was never called
