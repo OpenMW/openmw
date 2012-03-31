@@ -71,6 +71,9 @@ class DirArchive: public Ogre::FileSystemArchive
 
     bool findFile(const String& filename, std::string& copy) const
     {
+        if (filename.find(".tga") != std::string::npos)
+            return false;
+
         {
             String passed = filename;
 	        if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
@@ -179,7 +182,7 @@ class DirArchive: public Ogre::FileSystemArchive
 
      bool exists(const String& filename) {
         std::string copy;
-         
+
         if (findFile(filename, copy))
             return FileSystemArchive::exists(copy);
 
@@ -192,7 +195,7 @@ class DirArchive: public Ogre::FileSystemArchive
 
         if (findFile(filename, copy))
             return FileSystemArchive::open(copy, readonly);
-            
+
         DataStreamPtr p;
       return p;
   }
@@ -243,7 +246,7 @@ bool exists(const String& filename) {
 }
 
   // Check if the file exists.
-  bool cexists(const String& filename) const { 
+  bool cexists(const String& filename) const {
     String passed = filename;
 	if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
 		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
@@ -254,7 +257,7 @@ bool exists(const String& filename) {
 	if(filename.at(filename.length() - 2) == '>')
 		passed = filename.substr(0, filename.length() - 6);
 
-return arc.exists(passed.c_str()); 
+return arc.exists(passed.c_str());
 }
   time_t getModifiedTime(const String&) { return 0; }
 
