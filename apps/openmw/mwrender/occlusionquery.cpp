@@ -55,20 +55,21 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
 
     mObjectNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
+    mBBNodeReal = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
 
     mBBQueryTotal = mRendering->getScene()->createBillboardSet(1);
     mBBQueryTotal->setDefaultDimensions(150, 150);
     mBBQueryTotal->createBillboard(Vector3::ZERO);
     mBBQueryTotal->setMaterialName("QueryTotalPixels");
     mBBQueryTotal->setRenderQueueGroup(queue);
-    mBBNode->attachObject(mBBQueryTotal);
+    mBBNodeReal->attachObject(mBBQueryTotal);
 
     mBBQueryVisible = mRendering->getScene()->createBillboardSet(1);
     mBBQueryVisible->setDefaultDimensions(150, 150);
     mBBQueryVisible->createBillboard(Vector3::ZERO);
     mBBQueryVisible->setMaterialName("QueryVisiblePixels");
     mBBQueryVisible->setRenderQueueGroup(queue);
-    mBBNode->attachObject(mBBQueryVisible);
+    mBBNodeReal->attachObject(mBBQueryVisible);
 
     mBBQuerySingleObject = mRendering->getScene()->createBillboardSet(1);
     /// \todo ideally this should occupy exactly 1 pixel on the screen
@@ -178,6 +179,8 @@ void OcclusionQuery::update(float duration)
     dist /= 1000.f;
     mBBNode->setPosition(mSunNode->getPosition() * dist);
     mBBNode->setScale(dist, dist, dist);
+    mBBNodeReal->setPosition(mBBNode->_getDerivedPosition());
+    mBBNodeReal->setScale(mBBNode->getScale());
 
     // Stop occlusion queries until we get their information
     // (may not happen on the same frame they are requested in)

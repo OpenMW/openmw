@@ -65,6 +65,7 @@ namespace MWRender
 
         Ogre::SceneNode* mSunNode;
         Ogre::SceneNode* mBBNode;
+        Ogre::SceneNode* mBBNodeReal;
         float mSunVisibility;
 
         Ogre::SceneNode* mObjectNode;
