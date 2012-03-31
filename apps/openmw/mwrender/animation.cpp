@@ -126,6 +126,11 @@ namespace MWRender{
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
         shapeNumber = 0;
 
+        if (allshapes == NULL || creaturemodel == NULL || skel == NULL)
+        {
+            return;
+        }
+
         std::vector<Nif::NiTriShapeCopy>::iterator allshapesiter;
 	    for(allshapesiter = allshapes->begin(); allshapesiter != allshapes->end(); allshapesiter++)
 
