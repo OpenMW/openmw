@@ -180,12 +180,10 @@ void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
     if (!pathgrid) return;
 
     Vector3 cellPathGridPos;
-    /// \todo replace tests like this with isExterior method of ESM::Cell after merging with terrain branch
-    if (!(store->cell->data.flags & ESM::Cell::Interior))
+    if (store->cell->isExterior())
     {
-        /// \todo Replace with ESM::Land::REAL_SIZE after merging with terrain branch
-        cellPathGridPos.x = store->cell->data.gridX * 8192;
-        cellPathGridPos.y = store->cell->data.gridY * 8192;
+        cellPathGridPos.x = store->cell->data.gridX * ESM::Land::REAL_SIZE;
+        cellPathGridPos.y = store->cell->data.gridY * ESM::Land::REAL_SIZE;
     }
     SceneNode *cellPathGrid = mPathGridRoot->createChildSceneNode(cellPathGridPos);
     ESM::Pathgrid::PointList points = pathgrid->points;
@@ -207,7 +205,7 @@ void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
                                                       Vector3(p2.x, p2.y, p2.z)));
     }
 
-    if (!(store->cell->data.flags & ESM::Cell::Interior))
+    if (store->cell->isExterior())
     {
         mExteriorPathgridNodes[std::make_pair(store->cell->data.gridX, store->cell->data.gridY)] = cellPathGrid;
     }
@@ -220,7 +218,7 @@ void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
 
 void Debugging::disableCellPathgrid(MWWorld::Ptr::CellStore *store)
 {
-    if (!(store->cell->data.flags & ESM::Cell::Interior))
+    if (store->cell->isExterior())
     {
         ExteriorPathgridNodes::iterator it =
                 mExteriorPathgridNodes.find(std::make_pair(store->cell->data.gridX, store->cell->data.gridY));
