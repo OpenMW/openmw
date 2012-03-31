@@ -50,7 +50,7 @@ namespace Ogre
 		terrain. 
 		@note Requires the Cg plugin to render correctly
 	*/
-	class _OgreTerrainExport TerrainMaterialGeneratorB : public TerrainMaterialGenerator
+	class TerrainMaterialGeneratorB : public TerrainMaterialGenerator
 	{
 	public:
 		TerrainMaterialGeneratorB();
@@ -58,7 +58,7 @@ namespace Ogre
 
 		/** Shader model 2 profile target. 
 		*/
-		class _OgreTerrainExport SM2Profile : public TerrainMaterialGenerator::Profile
+		class SM2Profile : public TerrainMaterialGenerator::Profile
 		{
 		public:
 			SM2Profile(TerrainMaterialGenerator* parent, const String& name, const String& desc);
@@ -161,7 +161,7 @@ namespace Ogre
 			void addTechnique(const MaterialPtr& mat, const Terrain* terrain, TechniqueType tt);
 
 			/// Interface definition for helper class to generate shaders
-			class _OgreTerrainExport ShaderHelper : public TerrainAlloc
+			class ShaderHelper : public TerrainAlloc
 			{
 			public:
 				ShaderHelper() {}
@@ -194,7 +194,7 @@ namespace Ogre
 			};
 
 			/// Utility class to help with generating shaders for Cg / HLSL.
-			class _OgreTerrainExport ShaderHelperCg : public ShaderHelper
+			class ShaderHelperCg : public ShaderHelper
 			{
 			protected:
 				HighLevelGpuProgramPtr createVertexProgram(const SM2Profile* prof, const Terrain* terrain, TechniqueType tt);
@@ -212,7 +212,7 @@ namespace Ogre
 				void generateFpDynamicShadows(const SM2Profile* prof, const Terrain* terrain, TechniqueType tt, StringUtil::StrStreamType& outStream);
 			};
 
-			class _OgreTerrainExport ShaderHelperHLSL : public ShaderHelperCg
+			class ShaderHelperHLSL : public ShaderHelperCg
 			{
 			protected:
 				HighLevelGpuProgramPtr createVertexProgram(const SM2Profile* prof, const Terrain* terrain, TechniqueType tt);
@@ -220,7 +220,7 @@ namespace Ogre
 			};
 
 			/// Utility class to help with generating shaders for GLSL.
-			class _OgreTerrainExport ShaderHelperGLSL : public ShaderHelper
+			class ShaderHelperGLSL : public ShaderHelper
 			{
 			protected:
 				HighLevelGpuProgramPtr createVertexProgram(const SM2Profile* prof, const Terrain* terrain, TechniqueType tt);
