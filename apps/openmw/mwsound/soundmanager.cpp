@@ -185,7 +185,7 @@ namespace MWSound
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
             SoundPtr sound = mOutput->playSound3D(filePath, objpos, basevol, 1.0f,
-                                                  20.0f, 12750.0f, false);
+                                                  20.0f, 12750.0f, Play_Normal);
             sound->mPos = objpos;
             sound->mBaseVolume = basevol;
 
@@ -212,11 +212,12 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
 
-            sound = mOutput->playSound(file, volume*basevol, pitch, mode&Play_Loop);
+            sound = mOutput->playSound(file, volume*basevol, pitch, mode);
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
+            sound->mFlags = mode;
 
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
@@ -240,12 +241,13 @@ namespace MWSound
             const ESM::Position &pos = ptr.getCellRef().pos;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, mode&Play_Loop);
+            sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, mode);
             sound->mPos = objpos;
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
+            sound->mFlags = mode;
 
             if((mode&Play_NoTrack))
                 mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);

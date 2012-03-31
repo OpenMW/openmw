@@ -18,6 +18,7 @@ namespace MWSound
         float mBaseVolume;
         float mMinDistance;
         float mMaxDistance;
+        int mFlags;
 
     public:
         virtual void stop() = 0;
@@ -30,6 +31,7 @@ namespace MWSound
                 , mBaseVolume(1.0f)
                 , mMinDistance(20.0f) /* 1 * min_range_scale */
                 , mMaxDistance(12750.0f) /* 255 * max_range_scale */
+                , mFlags(Play_Normal)
         { }
         virtual ~Sound() { }
 

@@ -606,7 +606,7 @@ void OpenAL_Output::bufferFinished(ALuint buf)
 }
 
 
-SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, bool loop)
+SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, int flags)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
@@ -642,7 +642,7 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
     alSourcef(src, AL_PITCH, pitch);
 
     alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE);
-    alSourcei(src, AL_LOOPING, (loop?AL_TRUE:AL_FALSE));
+    alSourcei(src, AL_LOOPING, (flags&Play_Loop) ? AL_TRUE : AL_FALSE);
     throwALerror();
 
     alSourcei(src, AL_BUFFER, buf);
@@ -653,7 +653,7 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
 }
 
 SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float volume, float pitch,
-                                    float min, float max, bool loop)
+                                    float min, float max, int flags)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
@@ -690,7 +690,7 @@ SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector
     alSourcef(src, AL_PITCH, pitch);
 
     alSourcei(src, AL_SOURCE_RELATIVE, AL_FALSE);
-    alSourcei(src, AL_LOOPING, (loop?AL_TRUE:AL_FALSE));
+    alSourcei(src, AL_LOOPING, (flags&Play_Loop) ? AL_TRUE : AL_FALSE);
     throwALerror();
 
     alSourcei(src, AL_BUFFER, buf);
