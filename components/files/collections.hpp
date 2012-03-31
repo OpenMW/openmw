@@ -21,6 +21,8 @@ namespace Files
             /// leading dot and must be all lower-case.
             const MultiDirCollection& getCollection(const std::string& extension) const;
 
+            const Files::PathContainer& getPaths() const;
+
         private:
             typedef std::map<std::string, MultiDirCollection> MultiDirCollectionContainer;
             Files::PathContainer mDirectories;

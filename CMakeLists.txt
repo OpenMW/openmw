@@ -182,6 +182,7 @@ ENDIF(WIN32)
 ENDIF(OGRE_STATIC)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
+    ${OGRE_Terrain_INCLUDE_DIR}
     ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${MYGUI_INCLUDE_DIRS}
@@ -201,6 +202,7 @@ if(APPLE)
                           "Plugin_ParticleFX")
 endif(APPLE)
 
+add_subdirectory( files/)
 add_subdirectory( files/mygui )
 
 # Specify build paths

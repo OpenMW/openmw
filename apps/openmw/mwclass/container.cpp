@@ -85,7 +85,7 @@ namespace MWClass
         {
             // TODO check for key
             std::cout << "Locked container" << std::endl;
-            environment.mSoundManager->playSound3D (ptr, lockedSound, 1.0, 1.0, false);
+            environment.mSoundManager->playSound3D (ptr, lockedSound, 1.0, 1.0);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
         else
@@ -100,7 +100,7 @@ namespace MWClass
             {
                 // Trap activation goes here
                 std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
-                environment.mSoundManager->playSound3D (ptr, trapActivationSound, 1.0, 1.0, false);
+                environment.mSoundManager->playSound3D (ptr, trapActivationSound, 1.0, 1.0);
                 ptr.getCellRef().trap = "";
                 return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
             }

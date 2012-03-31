@@ -201,15 +201,21 @@ namespace ESMS
 
     // TODO: For multiple ESM/ESP files we need one list per file.
     std::vector<LandTexture> ltex;
-    int count;
 
-    LTexList() : count(0)
+    LTexList()
     {
       // More than enough to hold Morrowind.esm.
       ltex.reserve(128);
     }
 
-    int getSize() { return count; }
+    const LandTexture* search(size_t index) const
+    {
+        assert(index < ltex.size());
+        return &ltex.at(index);
+    }
+
+    int getSize() { return ltex.size(); }
+    int getSize() const { return ltex.size(); }
 
     virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
@@ -233,12 +239,18 @@ namespace ESMS
    */
   struct LandList : RecList
   {
-    virtual ~LandList() {}
+    virtual ~LandList()
+    {
+      for ( LandMap::iterator itr = lands.begin(); itr != lands.end(); ++itr )
+      {
+          delete itr->second;
+      }
+    }
 
     // Map containing all landscapes
-    typedef std::map<int, Land*> LandsCol;
-    typedef std::map<int, LandsCol> Lands;
-    Lands lands;
+    typedef std::pair<int, int> LandCoord;
+    typedef std::map<LandCoord, Land*> LandMap;
+    LandMap lands;
 
     int count;
     LandList() : count(0) {}
@@ -247,17 +259,15 @@ namespace ESMS
     virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
     // Find land for the given coordinates. Return null if no data.
-    const Land *search(int x, int y) const
+    Land *search(int x, int y) const
     {
-      Lands::const_iterator it = lands.find(x);
-      if(it==lands.end())
+      LandMap::const_iterator itr = lands.find(std::make_pair<int, int>(x, y));
+      if ( itr == lands.end() )
+      {
         return NULL;
+      }
 
-      LandsCol::const_iterator it2 = it->second.find(y);
-      if(it2 == it->second.end())
-        return NULL;
-
-      return it2->second;
+      return itr->second;
     }
 
     void load(ESMReader &esm, const std::string &id)
@@ -266,11 +276,11 @@ namespace ESMS
 
       // Create the structure and load it. This actually skips the
       // landscape data and remembers the file position for later.
-      Land *land = new Land;
+      Land *land = new Land();
       land->load(esm);
 
       // Store the structure
-      lands[land->X][land->Y] = land;
+      lands[std::make_pair<int, int>(land->X, land->Y)] = land;
     }
   };
 
