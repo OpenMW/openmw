@@ -180,7 +180,6 @@ void WindowManager::updateVisible()
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
-    int eff;
     switch(mode) {
         case GM_Game:
             // If in game mode, don't show anything.
@@ -202,16 +201,18 @@ void WindowManager::updateVisible()
             mCharGen->spawnDialog(mode);
             break;
         case GM_Inventory:
+        {
             // First, compute the effective set of windows to show.
             // This is controlled both by what windows the
             // user has opened/closed (the 'shown' variable) and by what
             // windows we are allowed to show (the 'allowed' var.)
-            eff = shown & allowed;
+            int eff = shown & allowed;
 
             // Show the windows we want
             map   -> setVisible( (eff & GW_Map) != 0 );
             stats -> setVisible( (eff & GW_Stats) != 0 );
             break;
+        }
         case GM_Dialogue:
             dialogueWindow->open();
             break;
