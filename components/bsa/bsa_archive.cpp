@@ -71,9 +71,6 @@ class DirArchive: public Ogre::FileSystemArchive
 
     bool findFile(const String& filename, std::string& copy) const
     {
-        if (filename.find(".tga") != std::string::npos)
-            return false;
-
         {
             String passed = filename;
 	        if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
@@ -116,22 +113,14 @@ class DirArchive: public Ogre::FileSystemArchive
                 current = found->second;
         }
 
-        std::cout << "Finding: " << copy;
-
         pathComparer comp(delimiter, copy.size() - delimiter-1);
         std::vector<std::string>::iterator find = std::lower_bound(current.begin(), current.end(), copy, comp);
         if (find != current.end() && !comp(copy, current.front()))
         {
-            std::cout << " found";
-            if (copy != *find && !lexicographical_compare(copy, *find, boost::algorithm::is_iequal()))
-                std::cout << ", as different file " << *find;
-
-            std::cout << "." << std::endl;
             copy = *find;
             return true;
         }
 
-        std::cout << " failed." << std::endl;
         return false;
     }
 
