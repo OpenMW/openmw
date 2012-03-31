@@ -121,11 +121,7 @@ bool Debugging::toggleRenderMode (int mode){
     switch (mode)
     {
         case MWWorld::World::Render_CollisionDebug:
-
-            // TODO use a proper function instead of accessing the member variable
-            // directly.
-            mEngine->setDebugRenderingMode (!mEngine->isDebugCreated);
-            return mEngine->isDebugCreated;
+            return mEngine->toggleDebugRendering();
         case MWWorld::World::Render_Pathgrid:
             togglePathgrid();
             return mPathgridEnabled;

@@ -1368,7 +1368,7 @@ void NIFLoader::loadResource(Resource *resource)
 
     if (!vfs->isFile(resourceName))
     {
-        warn("File not found.");
+        warn("File "+resourceName+" not found.");
         return;
     }
 
