@@ -180,71 +180,57 @@ void WindowManager::updateVisible()
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
-    // If in game mode, don't show anything.
-    if(mode == GM_Game) //Use a switch/case structure
-    {
-        return;
-    }
+    int eff;
+    switch(mode) {
+        case GM_Game:
+            // If in game mode, don't show anything.
+            break;
+        case GM_MainMenu:
+            menu->setVisible(true);
+            break;
+        case GM_Console:
+            console->enable();
+            break;
+        case GM_Name:
+        case GM_Race:
+        case GM_Class:
+        case GM_ClassPick:
+        case GM_ClassCreate:
+        case GM_Birth:
+        case GM_ClassGenerate:
+        case GM_Review:
+            mCharGen->spawnDialog(mode);
+            break;
+        case GM_Inventory:
+            // First, compute the effective set of windows to show.
+            // This is controlled both by what windows the
+            // user has opened/closed (the 'shown' variable) and by what
+            // windows we are allowed to show (the 'allowed' var.)
+            eff = shown & allowed;
 
-    if(mode == GM_MainMenu)
-    {
-        // Enable the main menu
-        menu->setVisible(true);
-        return;
-    }
-
-    if(mode == GM_Console)
-    {
-        console->enable();
-        return;
-    }
-
-    //There must be a more elegant solution
-    if (mode == GM_Name || mode == GM_Race || mode == GM_Class || mode == GM_ClassPick || mode == GM_ClassCreate || mode == GM_Birth || mode == GM_ClassGenerate || mode == GM_Review)
-    {
-        mCharGen->spawnDialog(mode);
-        return;
-    }
-
-    if(mode == GM_Inventory)
-    {
-        // Ah, inventory mode. First, compute the effective set of
-        // windows to show. This is controlled both by what windows the
-        // user has opened/closed (the 'shown' variable) and by what
-        // windows we are allowed to show (the 'allowed' var.)
-        int eff = shown & allowed;
-
-        // Show the windows we want
-        map   -> setVisible( (eff & GW_Map) != 0 );
-        stats -> setVisible( (eff & GW_Stats) != 0 );
-        return;
-    }
-
-    if (mode == GM_Dialogue)
-    {
-        dialogueWindow->open();
-        return;
-    }
-
-    if(mode == GM_InterMessageBox)
-    {
-        if(!mMessageBoxManager->isInteractiveMessageBox()) {
+            // Show the windows we want
+            map   -> setVisible( (eff & GW_Map) != 0 );
+            stats -> setVisible( (eff & GW_Stats) != 0 );
+            break;
+        case GM_Dialogue:
+            dialogueWindow->open();
+            break;
+        case GM_InterMessageBox:
+            if(!mMessageBoxManager->isInteractiveMessageBox()) {
+                setGuiMode(GM_Game);
+            }
+            break;
+        case GM_Journal:
+            mJournal->setVisible(true);
+            mJournal->open();
+            break;
+        default:
+            // Unsupported mode, switch back to game
+            // Note: The call will eventually end up this method again but
+            // will stop at the check if mode is GM_Game.
             setGuiMode(GM_Game);
-        }
-        return;
+            break;
     }
-
-    if(mode == GM_Journal)
-    {
-        mJournal->setVisible(true);
-        mJournal->open();
-        return;
-    }
-
-    // Unsupported mode, switch back to game
-    // Note: The call will eventually end up this method again but
-    // will stop at the check if(mode == GM_Game) above.
-    setGuiMode(GM_Game);
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
