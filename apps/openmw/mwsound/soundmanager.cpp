@@ -137,8 +137,9 @@ namespace MWSound
         {
             if(mMusic)
                 mMusic->stop();
-            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f);
+            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f, Play_NoEnv);
             mMusic->mBaseVolume = 0.4f;
+            mMusic->mFlags = Play_NoEnv;
         }
         catch(std::exception &e)
         {
@@ -408,11 +409,16 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
+        MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
         Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
         Ogre::Vector3 nPos, nDir, nUp;
         nPos = cam->getRealPosition();
         nDir = cam->getRealDirection();
         nUp  = cam->getRealUp();
+
+        Environment env = Env_Normal;
+        if(nPos.y < current->cell->water)
+            env = Env_Underwater;
 
         // The output handler is expecting vectors oriented like the game
         // (that is, -Z goes down, +Y goes forward), but that's not what we
@@ -420,7 +426,8 @@ namespace MWSound
         const Ogre::Vector3 pos(nPos[0], -nPos[2], nPos[1]);
         const Ogre::Vector3 at(nDir[0], -nDir[2], nDir[1]);
         const Ogre::Vector3 up(nUp[0], -nUp[2], nUp[1]);
-        mOutput->updateListener(pos, at, up);
+
+        mOutput->updateListener(pos, at, up, env);
 
         // Check if any sounds are finished playing, and trash them
         SoundMap::iterator snditer = mActiveSounds.begin();
