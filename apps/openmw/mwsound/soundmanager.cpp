@@ -132,8 +132,7 @@ namespace MWSound
         std::cout <<"Playing "<<filename<< std::endl;
         try
         {
-            if(mMusic)
-                mMusic->stop();
+            stopMusic();
             mMusic = mOutput->streamSound(filename, 0.4f, 1.0f, Play_NoEnv);
             mMusic->mBaseVolume = 0.4f;
             mMusic->mFlags = Play_NoEnv;
