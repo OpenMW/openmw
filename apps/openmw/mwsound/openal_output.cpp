@@ -65,7 +65,7 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
 class OpenAL_SoundStream : public Sound
 {
     static const ALuint sNumBuffers = 6;
-    static const ALfloat sBufferLength;
+    static const ALfloat sBufferLength = 0.125f;
 
     OpenAL_Output &mOutput;
 
@@ -95,7 +95,6 @@ public:
     bool process();
 };
 
-const ALfloat OpenAL_SoundStream::sBufferLength = 0.125f;
 
 //
 // A background streaming thread (keeps active streams processed)
@@ -186,7 +185,6 @@ OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, Decode
     }
     catch(std::exception &e)
     {
-        mOutput.mFreeSources.push_back(mSource);
         alDeleteBuffers(sNumBuffers, mBuffers);
         alGetError();
         throw;
