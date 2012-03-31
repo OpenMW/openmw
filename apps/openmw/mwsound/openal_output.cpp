@@ -261,7 +261,7 @@ bool OpenAL_SoundStream::isPlaying()
 void OpenAL_SoundStream::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
-    ALfloat pitch = 1.0f;
+    ALfloat pitch = mPitch;
     if(!(mFlags&Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
     {
         gain *= 0.9f;
@@ -398,7 +398,7 @@ bool OpenAL_Sound::isPlaying()
 void OpenAL_Sound::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
-    ALfloat pitch = 1.0f;
+    ALfloat pitch = mPitch;
     if(!(mFlags&Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
     {
         gain *= 0.9f;
@@ -416,7 +416,7 @@ void OpenAL_Sound::update()
 void OpenAL_Sound3D::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
-    ALfloat pitch = 1.0f;
+    ALfloat pitch = mPitch;
     if(mPos.squaredDistance(mOutput.mPos) > mMaxDistance*mMaxDistance)
         gain = 0.0f;
     else if(!(mFlags&Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)

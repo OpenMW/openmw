@@ -216,6 +216,7 @@ namespace MWSound
             sound = mOutput->playSound(file, volume*basevol, pitch, mode);
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
+            sound->mPitch = pitch;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
             sound->mFlags = mode;
@@ -246,6 +247,7 @@ namespace MWSound
             sound->mPos = objpos;
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
+            sound->mPitch = pitch;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
             sound->mFlags = mode;
