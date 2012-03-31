@@ -201,8 +201,13 @@ void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
     {
         ESM::Pathgrid::Edge edge = *it;
         ESM::Pathgrid::Point p1 = points[edge.v0], p2 = points[edge.v1];
-        cellPathGrid->attachObject(createPathgridLine(Vector3(p1.x, p1.y, p1.z),
-                                                      Vector3(p2.x, p2.y, p2.z)));
+
+        Vector3 direction = (Vector3(p2.x, p2.y, p2.z) - Vector3(p1.x, p1.y, p1.z));
+        Vector3 lineDisplacement = direction.crossProduct(Vector3::UNIT_Z).normalisedCopy();
+        lineDisplacement = lineDisplacement * POINT_MESH_BASE/2 +
+                Vector3(0, 0, 10); // move lines up a little, so they will be less covered by meshes/landscape
+        cellPathGrid->attachObject(createPathgridLine(Vector3(p1.x, p1.y, p1.z) + lineDisplacement,
+                                                      Vector3(p2.x, p2.y, p2.z) + lineDisplacement));
     }
 
     if (store->cell->isExterior())
