@@ -6,7 +6,7 @@
 #include <exception>
 
 
-typedef std::map<std::string, std::string> strmap;
+typedef std::multimap<std::string, std::string> strmap;
 
 class MwIniImporter {
 

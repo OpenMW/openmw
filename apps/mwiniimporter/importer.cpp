@@ -26,7 +26,7 @@ strmap MwIniImporter::loadIniFile(std::string filename) {
     std::cout << "load ini file: " << filename << std::endl;
     
     std::string section("");
-    std::map<std::string, std::string> map;
+    std::multimap<std::string, std::string> map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
 
     std::string line;
@@ -58,7 +58,7 @@ strmap MwIniImporter::loadIniFile(std::string filename) {
 strmap MwIniImporter::loadCfgFile(std::string filename) {
     std::cout << "load cfg file: " << filename << std::endl;
     
-    std::map<std::string, std::string> map;
+    std::multimap<std::string, std::string> map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
 
     std::string line;

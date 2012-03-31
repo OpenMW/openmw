@@ -62,8 +62,8 @@ int main(int argc, char *argv[]) {
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));
 
-    std::map<std::string, std::string>ini = importer.loadIniFile(iniFile);
-    std::map<std::string, std::string>cfg = importer.loadCfgFile(cfgFile);
+    std::multimap<std::string, std::string>ini = importer.loadIniFile(iniFile);
+    std::multimap<std::string, std::string>cfg = importer.loadCfgFile(cfgFile);
 
     importer.merge(cfg, ini);
     
