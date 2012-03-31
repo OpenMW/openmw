@@ -87,7 +87,7 @@ void MwIniImporter::merge(strmap &cfg, strmap &ini) {
     }
 }
 
-bool MwIniImporter::specialMerge(std::string cfgKey, std::string iniKey, strmap cfg, strmap ini) {
+bool MwIniImporter::specialMerge(std::string cfgKey, std::string iniKey, strmap &cfg, strmap &ini) {
     return false;
 }
 

@@ -22,7 +22,7 @@ class MwIniImporter {
     void    writeToFile(std::string file, strmap &cfg);
     
   private:
-    bool   specialMerge(std::string cfgKey, std::string iniKey, strmap cfg, strmap ini);
+    bool   specialMerge(std::string cfgKey, std::string iniKey, strmap &cfg, strmap &ini);
     bool mVerbose;
     strmap mMergeMap;
 };
