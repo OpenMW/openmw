@@ -2,6 +2,9 @@
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <iostream>
+#include <string>
+#include <map>
+#include <vector>
 
 MwIniImporter::MwIniImporter() {
     const char *map[][2] =
@@ -95,6 +98,61 @@ void MwIniImporter::merge(strmap &cfg, strmap &ini) {
             if(!this->specialMerge(it->first, it->second, cfg, ini)) {
                 cfg.insert(std::make_pair<std::string, std::string>(it->first, iniIt->second));
             }
+        }
+    }
+}
+
+void MwIniImporter::importGameFiles(strmap &cfg, strmap &ini) {
+    std::vector<std::string> esmFiles;
+    std::string baseEsm("Game Files:GameFile");
+    std::string esmFile("");
+
+    strmap::iterator it = ini.begin();
+    for(int i=0; it != ini.end(); i++) {
+        esmFile = baseEsm;
+        esmFile.append(1,i+'0');
+        
+        it = ini.find(esmFile);
+        if(it == ini.end()) {
+            break;
+        }
+        
+        std::cout << "found EMS file: " << it->second << std::endl;
+        esmFiles.push_back(it->second);
+        esmFile = "";
+    }
+
+
+    std::vector<std::string> bsaFiles;
+    std::string baseBsa("Archives:Archive ");
+    std::string bsaFile("");
+    
+    it = ini.begin();
+    for(int i=0; it != ini.end(); i++) {
+        bsaFile = baseBsa;
+        bsaFile.append(1,i+'0');
+        
+        it = ini.find(bsaFile);
+        if(it == ini.end()) {
+            break;
+        }
+        
+        std::cout << "found BSA file: " << it->second << std::endl;
+        bsaFiles.push_back(it->second);
+        bsaFile = "";
+    }
+    
+    if(!esmFiles.empty()) {
+        cfg.erase("master");
+        for(std::vector<std::string>::iterator it = esmFiles.begin(); it != esmFiles.end(); it++) {
+            cfg.insert(std::make_pair<std::string, std::string>("master", *it));
+        }
+    }
+    
+    if(!bsaFile.empty()) {
+        cfg.erase("plugin");
+        for(std::vector<std::string>::iterator it = bsaFiles.begin(); it != bsaFiles.end(); it++) {
+            cfg.insert(std::make_pair<std::string, std::string>("plugin", *it));
         }
     }
 }

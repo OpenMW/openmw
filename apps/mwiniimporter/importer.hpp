@@ -16,6 +16,7 @@ class MwIniImporter {
     strmap  loadIniFile(std::string filename);
     strmap  loadCfgFile(std::string filename);
     void    merge(strmap &cfg, strmap &ini);
+    void    importGameFiles(strmap &cfg, strmap &ini);
     void    writeToFile(std::string file, strmap &cfg);
     
   private:
