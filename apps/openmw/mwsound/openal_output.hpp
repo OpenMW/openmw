@@ -57,6 +57,7 @@ namespace MWSound
         std::auto_ptr<StreamThread> mStreamThread;
 
         friend class OpenAL_Sound;
+        friend class OpenAL_Sound3D;
         friend class OpenAL_SoundStream;
         friend class SoundManager;
     };

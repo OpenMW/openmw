@@ -77,7 +77,6 @@ class OpenAL_SoundStream : public Sound
     ALuint mBufferSize;
 
     DecoderPtr mDecoder;
-    bool mIs3D;
 
     volatile bool mIsFinished;
 
@@ -85,7 +84,7 @@ class OpenAL_SoundStream : public Sound
     OpenAL_SoundStream& operator=(const OpenAL_SoundStream &rhs);
 
 public:
-    OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, bool is3D);
+    OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder);
     virtual ~OpenAL_SoundStream();
 
     virtual void stop();
@@ -165,8 +164,8 @@ private:
 };
 
 
-OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, bool is3D)
-  : mOutput(output), mSource(src), mDecoder(decoder), mIs3D(is3D), mIsFinished(true)
+OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder)
+  : mOutput(output), mSource(src), mDecoder(decoder), mIsFinished(true)
 {
     throwALerror();
 
@@ -257,10 +256,7 @@ bool OpenAL_SoundStream::isPlaying()
 
 void OpenAL_SoundStream::update()
 {
-    if(mIs3D && mPos.squaredDistance(mOutput.mPos) > mMaxDistance*mMaxDistance)
-        alSourcef(mSource, AL_GAIN, 0.0f);
-    else
-        alSourcef(mSource, AL_GAIN, mVolume*mBaseVolume);
+    alSourcef(mSource, AL_GAIN, mVolume*mBaseVolume);
     alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
@@ -318,22 +314,22 @@ bool OpenAL_SoundStream::process()
 }
 
 //
-// A regular OpenAL sound
+// A regular 2D OpenAL sound
 //
 class OpenAL_Sound : public Sound
 {
+protected:
     OpenAL_Output &mOutput;
 
     ALuint mSource;
     ALuint mBuffer;
 
-    bool mIs3D;
-
+private:
     OpenAL_Sound(const OpenAL_Sound &rhs);
     OpenAL_Sound& operator=(const OpenAL_Sound &rhs);
 
 public:
-    OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, bool is3D);
+    OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf);
     virtual ~OpenAL_Sound();
 
     virtual void stop();
@@ -341,8 +337,24 @@ public:
     virtual void update();
 };
 
-OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, bool is3D)
-  : mOutput(output), mSource(src), mBuffer(buf), mIs3D(is3D)
+//
+// A regular 3D OpenAL sound
+//
+class OpenAL_Sound3D : public OpenAL_Sound
+{
+    OpenAL_Sound3D(const OpenAL_Sound &rhs);
+    OpenAL_Sound3D& operator=(const OpenAL_Sound &rhs);
+
+public:
+    OpenAL_Sound3D(OpenAL_Output &output, ALuint src, ALuint buf)
+      : OpenAL_Sound(output, src, buf)
+    { }
+
+    virtual void update();
+};
+
+OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf)
+  : mOutput(output), mSource(src), mBuffer(buf)
 {
 }
 OpenAL_Sound::~OpenAL_Sound()
@@ -372,7 +384,16 @@ bool OpenAL_Sound::isPlaying()
 
 void OpenAL_Sound::update()
 {
-    if(mIs3D && mPos.squaredDistance(mOutput.mPos) > mMaxDistance*mMaxDistance)
+    alSourcef(mSource, AL_GAIN, mVolume*mBaseVolume);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    throwALerror();
+}
+
+void OpenAL_Sound3D::update()
+{
+    if(mPos.squaredDistance(mOutput.mPos) > mMaxDistance*mMaxDistance)
         alSourcef(mSource, AL_GAIN, 0.0f);
     else
         alSourcef(mSource, AL_GAIN, mVolume*mBaseVolume);
@@ -592,7 +613,7 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
     try
     {
         buf = getBuffer(fname);
-        sound.reset(new OpenAL_Sound(*this, src, buf, false));
+        sound.reset(new OpenAL_Sound(*this, src, buf));
     }
     catch(std::exception &e)
     {
@@ -641,7 +662,7 @@ SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector
     try
     {
         buf = getBuffer(fname);
-        sound.reset(new OpenAL_Sound(*this, src, buf, true));
+        sound.reset(new OpenAL_Sound3D(*this, src, buf));
     }
     catch(std::exception &e)
     {
@@ -692,7 +713,7 @@ SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, floa
     {
         DecoderPtr decoder = mManager.getDecoder();
         decoder->open(fname);
-        sound.reset(new OpenAL_SoundStream(*this, src, decoder, false));
+        sound.reset(new OpenAL_SoundStream(*this, src, decoder));
     }
     catch(std::exception &e)
     {
