@@ -16,6 +16,7 @@ namespace MWSound
         Ogre::Vector3 mPos;
         float mVolume; /* NOTE: Real volume = mVolume*mBaseVolume */
         float mBaseVolume;
+        float mPitch;
         float mMinDistance;
         float mMaxDistance;
         int mFlags;
@@ -29,6 +30,7 @@ namespace MWSound
         Sound() : mPos(0.0f, 0.0f, 0.0f)
                 , mVolume(1.0f)
                 , mBaseVolume(1.0f)
+                , mPitch(1.0f)
                 , mMinDistance(20.0f) /* 1 * min_range_scale */
                 , mMaxDistance(12750.0f) /* 255 * max_range_scale */
                 , mFlags(Play_Normal)

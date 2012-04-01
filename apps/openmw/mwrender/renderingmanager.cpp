@@ -201,6 +201,8 @@ void RenderingManager::skyEnable ()
 {
     if(mSkyManager)
     mSkyManager->enable();
+
+    mOcclusionQuery->setSunNode(mSkyManager->getSunNode());
 }
 
 void RenderingManager::skyDisable ()

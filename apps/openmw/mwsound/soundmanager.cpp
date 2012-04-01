@@ -88,10 +88,7 @@ namespace MWSound
         if(snd == NULL)
             throw std::runtime_error(std::string("Failed to lookup sound ")+soundId);
 
-        if(snd->data.volume == 0)
-            volume = 0.0f;
-        else
-            volume *= pow(10.0, (snd->data.volume/255.0f*3348.0 - 3348.0) / 2000.0);
+        volume *= pow(10.0, (snd->data.volume/255.0*3348.0 - 3348.0) / 2000.0);
 
         if(snd->data.minRange == 0 && snd->data.maxRange == 0)
         {
@@ -135,10 +132,10 @@ namespace MWSound
         std::cout <<"Playing "<<filename<< std::endl;
         try
         {
-            if(mMusic)
-                mMusic->stop();
-            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f);
+            stopMusic();
+            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f, Play_NoEnv);
             mMusic->mBaseVolume = 0.4f;
+            mMusic->mFlags = Play_NoEnv;
         }
         catch(std::exception &e)
         {
@@ -215,6 +212,7 @@ namespace MWSound
             sound = mOutput->playSound(file, volume*basevol, pitch, mode);
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
+            sound->mPitch = pitch;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
             sound->mFlags = mode;
@@ -245,6 +243,7 @@ namespace MWSound
             sound->mPos = objpos;
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
+            sound->mPitch = pitch;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
             sound->mFlags = mode;
@@ -408,11 +407,16 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
+        MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
         Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
         Ogre::Vector3 nPos, nDir, nUp;
         nPos = cam->getRealPosition();
         nDir = cam->getRealDirection();
         nUp  = cam->getRealUp();
+
+        Environment env = Env_Normal;
+        if(nPos.y < current->cell->water)
+            env = Env_Underwater;
 
         // The output handler is expecting vectors oriented like the game
         // (that is, -Z goes down, +Y goes forward), but that's not what we
@@ -420,7 +424,8 @@ namespace MWSound
         const Ogre::Vector3 pos(nPos[0], -nPos[2], nPos[1]);
         const Ogre::Vector3 at(nDir[0], -nDir[2], nDir[1]);
         const Ogre::Vector3 up(nUp[0], -nUp[2], nUp[1]);
-        mOutput->updateListener(pos, at, up);
+
+        mOutput->updateListener(pos, at, up, env);
 
         // Check if any sounds are finished playing, and trash them
         SoundMap::iterator snditer = mActiveSounds.begin();

@@ -43,6 +43,11 @@ namespace MWSound
     static inline int operator&(const PlayMode &a, const PlayMode &b)
     { return (int)a & (int)b; }
 
+    enum Environment {
+        Env_Normal,
+        Env_Underwater,
+    };
+
     class SoundManager
     {
         Ogre::ResourceGroupManager& mResourceMgr;

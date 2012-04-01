@@ -41,21 +41,21 @@ struct ciLessBoost : std::binary_function<std::string, std::string, bool>
 {
     bool operator() (const std::string & s1, const std::string & s2) const {
                                                //case insensitive version of is_less
-        return lexicographical_compare(s1, s2, boost::algorithm::is_iless());
+        return boost::ilexicographical_compare(s1, s2);
     }
 };
 
 struct pathComparer
 {
 private:
-    int m_start, m_size;
+    std::string find;
 
 public:
-    pathComparer(int start, int size) : m_start(start), m_size(size) { }
+    pathComparer(const std::string& toFind) : find(toFind) { }
 
-    bool operator() (const std::string& first, const std::string& other)
+    bool operator() (const std::string& other)
     {
-        return lexicographical_compare(first.substr(m_start,m_size), other.substr(m_start,m_size), boost::algorithm::is_iless());
+        return boost::iequals(find, other);
     }
 };
 
@@ -71,9 +71,6 @@ class DirArchive: public Ogre::FileSystemArchive
 
     bool findFile(const String& filename, std::string& copy) const
     {
-        if (filename.find(".tga") != std::string::npos)
-            return false;
-
         {
             String passed = filename;
 	        if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
@@ -116,10 +113,13 @@ class DirArchive: public Ogre::FileSystemArchive
                 current = found->second;
         }
 
-        pathComparer comp(delimiter, copy.size() - delimiter-1);
-        std::vector<std::string>::iterator find = std::lower_bound(current.begin(), current.end(), copy, comp);
-        if (find != current.end() && !comp(copy, current.front()))
+        std::vector<std::string>::iterator find = std::lower_bound(current.begin(), current.end(), copy, ciLessBoost());
+        if (find != current.end() && !ciLessBoost()(copy, current.front()))
         {
+            if (!boost::iequals(copy, *find))
+                if ((find = std::find_if(current.begin(), current.end(), pathComparer(copy))) == current.end()) //\todo Check if this line is actually needed
+                    return false;
+
             copy = *find;
             return true;
         }
