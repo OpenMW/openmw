@@ -14,7 +14,7 @@ MwIniImporter::MwIniImporter() {
         { "fps", "General:Show FPS" },
         { 0, 0 }
     };
-    
+
     for(int i=0; map[i][0]; i++) {
         mMergeMap.insert(std::make_pair<std::string, std::string>(map[i][0], map[i][1]));
     }
@@ -32,7 +32,7 @@ std::string MwIniImporter::numberToString(int n) {
 
 MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
     std::cout << "load ini file: " << filename << std::endl;
-    
+
     std::string section("");
     MwIniImporter::multistrmap map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
@@ -46,68 +46,68 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
             }
             continue;
         }
-        
+
         int comment_pos = line.find(";");
         if(comment_pos > 0) {
             line = line.substr(0,comment_pos);
         }
-        
+
         if(line.empty()) {
             continue;
         }
-        
+
         int pos = line.find("=");
         if(pos < 1) {
             continue;
         }
-        
+
         std::string key(section + ":" + line.substr(0,pos));
         std::string value(line.substr(pos+1));
-        
+
         multistrmap::iterator it;
         if((it = map.find(key)) == map.end()) {
             map.insert( std::make_pair<std::string, std::vector<std::string> > (key, std::vector<std::string>() ) );
         }
         map[key].push_back(value);
     }
-    
+
     return map;
 }
 
 MwIniImporter::multistrmap MwIniImporter::loadCfgFile(std::string filename) {
     std::cout << "load cfg file: " << filename << std::endl;
-    
+
     MwIniImporter::multistrmap map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
 
     std::string line;
     while (std::getline(file, line)) {
-        
+
         // we cant say comment by only looking at first char anymore
         int comment_pos = line.find("#");
         if(comment_pos > 0) {
             line = line.substr(0,comment_pos);
         }
-        
+
         if(line.empty()) {
             continue;
         }
-        
+
         int pos = line.find("=");
         if(pos < 1) {
             continue;
         }
-        
+
         std::string key(line.substr(0,pos));
         std::string value(line.substr(pos+1));
-        
+
         multistrmap::iterator it;
         if((it = map.find(key)) == map.end()) {
             map.insert( std::make_pair<std::string, std::vector<std::string> > (key, std::vector<std::string>() ) );
         }
         map[key].push_back(value);
     }
-    
+
     return map;
 }
 
@@ -138,16 +138,16 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {
     for(int i=0; it != ini.end(); i++) {
         gameFile = baseGameFile;
         gameFile.append(this->numberToString(i));
-        
+
         it = ini.find(gameFile);
         if(it == ini.end()) {
             break;
         }
-        
+
         for(std::vector<std::string>::iterator entry = it->second.begin(); entry!=it->second.end(); entry++) {
             std::string filetype(entry->substr(entry->length()-4, 3));
             std::transform(filetype.begin(), filetype.end(), filetype.begin(), ::tolower);
-            
+
             if(filetype.compare("esm") == 0) {
                 esmFiles.push_back(*entry);
             }
@@ -155,33 +155,30 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {
                 espFiles.push_back(*entry);
             }
         }
-        
+
         gameFile = "";
     }
-    
-    multistrmap::iterator it;
+
     cfg.erase("master");
     cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("master", std::vector<std::string>() ) );
-    
+
     for(std::vector<std::string>::iterator it=esmFiles.begin(); it!=esmFiles.end(); it++) {
         cfg["master"].push_back(*it);
     }
-    
+
     cfg.erase("plugin");
     cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("plugin", std::vector<std::string>() ) );
-    
+
     for(std::vector<std::string>::iterator it=espFiles.begin(); it!=espFiles.end(); it++) {
         cfg["plugin"].push_back(*it);
     }
 }
 
 void MwIniImporter::writeToFile(boost::iostreams::stream<boost::iostreams::file_sink> &out, multistrmap &cfg) {
-    
+
     for(multistrmap::iterator it=cfg.begin(); it != cfg.end(); it++) {
         for(std::vector<std::string>::iterator entry=it->second.begin(); entry != it->second.end(); entry++) {
             out << (it->first) << "=" << (*entry) << std::endl;
         }
     }
 }
-
-
