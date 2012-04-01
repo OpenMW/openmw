@@ -12,7 +12,6 @@ namespace MWGui
         MapWindow(WindowManager& parWindowManager);
         virtual ~MapWindow(){}
 
-        void setVisible(bool b);
         void setPlayerPos(const float x, const float y);
         void setPlayerDir(const float x, const float y);
         void setCellName(const std::string& cellName);
@@ -26,8 +25,11 @@ namespace MWGui
         MyGUI::ImageBox* mPlayerArrow;
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;
-        bool mVisible;
         bool mGlobal;
+        float mLastPositionX;
+        float mLastPositionY;
+        float mLastDirectionX;
+        float mLastDirectionY;
     };
 }
 #endif

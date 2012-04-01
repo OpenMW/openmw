@@ -4,7 +4,7 @@
 using namespace MWGui;
 
 WindowPinnableBase::WindowPinnableBase(const std::string& parLayout, WindowManager& parWindowManager)
-  : WindowBase(parLayout, parWindowManager), mIsPinned(false)
+  : WindowBase(parLayout, parWindowManager), mPinned(false), mVisible(false)
 {
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
     t->eventWindowButtonPressed += MyGUI::newDelegate(this, &WindowPinnableBase::onWindowButtonPressed);
@@ -13,17 +13,18 @@ WindowPinnableBase::WindowPinnableBase(const std::string& parLayout, WindowManag
 void WindowPinnableBase::setVisible(bool b)
 {
     // Pinned windows can not be hidden
-    if (mIsPinned && !b)
+    if (mPinned && !b)
         return;
 
     WindowBase::setVisible(b);
+    mVisible = b;
 }
 
 void WindowPinnableBase::onWindowButtonPressed(MyGUI::Window* sender, const std::string& eventName)
 {
     if ("PinToggle" == eventName)
     {
-        mIsPinned = !mIsPinned;
+        mPinned = !mPinned;
     }
 
     eventDone(this);

@@ -14,8 +14,11 @@ using namespace MWGui;
 
 MapWindow::MapWindow(WindowManager& parWindowManager) : 
     MWGui::WindowPinnableBase("openmw_map_window_layout.xml", parWindowManager),
-    mGlobal(false), 
-    mVisible(false)
+    mGlobal(false),
+    mLastPositionX(0.0f),
+    mLastPositionY(0.0f),
+    mLastDirectionX(0.0f),
+    mLastDirectionY(0.0f)
 {
     setCoord(500,0,320,300);
     setText("WorldButton", "World");
@@ -39,12 +42,6 @@ MapWindow::MapWindow(WindowManager& parWindowManager) :
     LocalMapBase::init(mLocalMap, this);
 }
 
-void MapWindow::setVisible(bool b)
-{
-    WindowPinnableBase::setVisible(b);
-    mVisible = b;
-}
-
 void MapWindow::setCellName(const std::string& cellName)
 {
     static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
@@ -53,7 +50,7 @@ void MapWindow::setCellName(const std::string& cellName)
 
 void MapWindow::setPlayerPos(const float x, const float y)
 {
-    if (mGlobal || mVisible) return;
+    if (mGlobal || !mVisible || (x == mLastPositionX && y == mLastPositionY)) return;
     MyGUI::IntSize size = mLocalMap->getCanvasSize();
     MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
     MyGUI::IntCoord viewsize = mLocalMap->getCoord();
@@ -61,16 +58,21 @@ void MapWindow::setPlayerPos(const float x, const float y)
     mLocalMap->setViewOffset(pos);
 
     mPlayerArrow->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
+    mLastPositionX = x;
+    mLastPositionY = y;
 }
 
 void MapWindow::setPlayerDir(const float x, const float y)
 {
-    if (!mVisible) return;
+    if (!mVisible || (x == mLastDirectionX && y == mLastDirectionY)) return;
     MyGUI::ISubWidget* main = mPlayerArrow->getSubWidgetMain();
     MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
     rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
     float angle = std::atan2(x,y);
     rotatingSubskin->setAngle(angle);
+
+    mLastDirectionX = x;
+    mLastDirectionY = y;
 }
 
 void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
