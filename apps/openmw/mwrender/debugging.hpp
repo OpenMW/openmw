@@ -65,8 +65,8 @@ namespace MWRender
         void destroyGridMaterials();
 
         // path grid meshes
-        Ogre::MovableObject* createPathgridLine(const Ogre::Vector3& from, const Ogre::Vector3& to);
-        Ogre::MovableObject* createPathgridPoint();
+        Ogre::ManualObject *createPathgridLines(const ESM::Pathgrid *pathgrid);
+        Ogre::ManualObject *createPathgridPoints(const ESM::Pathgrid *pathgrid);
     public:
         Debugging(Ogre::SceneNode* mwRoot, MWWorld::Environment &env, OEngine::Physic::PhysicEngine *engine);
         ~Debugging();

@@ -23,7 +23,7 @@ namespace MWRender
 static const std::string PATHGRID_POINT_MATERIAL = "pathgridPointMaterial";
 static const std::string PATHGRID_LINE_MATERIAL = "pathgridLineMaterial";
 static const std::string DEBUGGING_GROUP = "debugging";
-static const int POINT_MESH_BASE = 80;
+static const int POINT_MESH_BASE = 40;
 
 void Debugging::createGridMaterials()
 {
@@ -61,39 +61,80 @@ void Debugging::destroyGridMaterials()
     }
 }
 
-MovableObject *Debugging::createPathgridLine(const Vector3& from, const Vector3& to)
+ManualObject *Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
 {
-    ManualObject *line = mSceneMgr->createManualObject();
-    line->begin(PATHGRID_LINE_MATERIAL, Ogre::RenderOperation::OT_LINE_LIST);
-    line->position(from);
-    line->position(to);
-    line->end();
+    ManualObject *result = mSceneMgr->createManualObject();
 
-    return line;
+    result->begin(PATHGRID_LINE_MATERIAL, RenderOperation::OT_LINE_LIST);
+    for(ESM::Pathgrid::EdgeList::const_iterator it = pathgrid->edges.begin();
+        it != pathgrid->edges.end();
+        it++)
+    {
+        const ESM::Pathgrid::Edge &edge = *it;
+        const ESM::Pathgrid::Point &p1 = pathgrid->points[edge.v0], &p2 = pathgrid->points[edge.v1];
+        Vector3 direction = (Vector3(p2.x, p2.y, p2.z) - Vector3(p1.x, p1.y, p1.z));
+        Vector3 lineDisplacement = direction.crossProduct(Vector3::UNIT_Z).normalisedCopy();
+        lineDisplacement = lineDisplacement * POINT_MESH_BASE/2 + Vector3(0, 0, 10); // move lines up a little, so they will be less covered by meshes/landscape
+        result->position(Vector3(p1.x, p1.y, p1.z) + lineDisplacement);
+        result->position(Vector3(p2.x, p2.y, p2.z) + lineDisplacement);
+    }
+    result->end();
+
+    return result;
 }
 
-MovableObject *Debugging::createPathgridPoint()
+ManualObject *Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
 {
-    ManualObject *point = mSceneMgr->createManualObject();
-    point->begin(PATHGRID_POINT_MATERIAL, Ogre::RenderOperation::OT_TRIANGLE_FAN);
-    float height = POINT_MESH_BASE /*/ sqrtf(2)*/;
-    point->position(0, 0, height);
-    point->position(-POINT_MESH_BASE, -POINT_MESH_BASE, 0);
-    point->position(POINT_MESH_BASE, -POINT_MESH_BASE, 0);
-    point->position(POINT_MESH_BASE, POINT_MESH_BASE, 0);
-    point->position(-POINT_MESH_BASE, POINT_MESH_BASE, 0);
-    point->position(-POINT_MESH_BASE, -POINT_MESH_BASE, 0);
-    point->end();
-    point->begin(PATHGRID_POINT_MATERIAL, Ogre::RenderOperation::OT_TRIANGLE_FAN);
-    point->position(0, 0, -height);
-    point->position(-POINT_MESH_BASE, -POINT_MESH_BASE, 0);
-    point->position(-POINT_MESH_BASE, POINT_MESH_BASE, 0);
-    point->position(POINT_MESH_BASE, POINT_MESH_BASE, 0);
-    point->position(POINT_MESH_BASE, -POINT_MESH_BASE, 0);
-    point->position(-POINT_MESH_BASE, -POINT_MESH_BASE, 0);
-    point->end();
+    ManualObject *result = mSceneMgr->createManualObject();
+    const float height = POINT_MESH_BASE /*/ sqrtf(2)*/;
 
-    return point;
+    result->begin(PATHGRID_POINT_MATERIAL, RenderOperation::OT_TRIANGLE_STRIP);
+
+    bool first = true;
+    uint32 startIndex = 0;
+    for(ESM::Pathgrid::PointList::const_iterator it = pathgrid->points.begin();
+        it != pathgrid->points.end();
+        it++, startIndex += 6)
+    {
+        Vector3 pointPos(it->x, it->y, it->z);
+
+        if (!first)
+        {
+            // degenerate triangle from previous octahedron
+            result->index(startIndex - 4); // 2nd point of previous octahedron
+            result->index(startIndex); // start point of current octahedron
+        }
+
+        result->position(pointPos + Vector3(0, 0, height)); // 0
+        result->position(pointPos + Vector3(-POINT_MESH_BASE, -POINT_MESH_BASE, 0)); // 1
+        result->position(pointPos + Vector3(POINT_MESH_BASE, -POINT_MESH_BASE, 0)); // 2
+        result->position(pointPos + Vector3(POINT_MESH_BASE, POINT_MESH_BASE, 0)); // 3
+        result->position(pointPos + Vector3(-POINT_MESH_BASE, POINT_MESH_BASE, 0)); // 4
+        result->position(pointPos + Vector3(0, 0, -height)); // 5
+
+        result->index(startIndex + 0);
+        result->index(startIndex + 1);
+        result->index(startIndex + 2);
+        result->index(startIndex + 5);
+        result->index(startIndex + 3);
+        result->index(startIndex + 4);
+        // degenerates
+        result->index(startIndex + 4);
+        result->index(startIndex + 5);
+        result->index(startIndex + 5);
+        // end degenerates
+        result->index(startIndex + 1);
+        result->index(startIndex + 4);
+        result->index(startIndex + 0);
+        result->index(startIndex + 3);
+        result->index(startIndex + 2);
+
+        first = false;
+    }
+
+    result->end();
+
+    return result;
 }
 
 Debugging::Debugging(SceneNode *mwRoot, MWWorld::Environment &env, OEngine::Physic::PhysicEngine *engine) :
@@ -179,36 +220,15 @@ void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
     ESM::Pathgrid *pathgrid = mEnvironment.mWorld->getStore().pathgrids.search(*store->cell);
     if (!pathgrid) return;
 
-    Vector3 cellPathGridPos;
+    Vector3 cellPathGridPos(0, 0, 0);
     if (store->cell->isExterior())
     {
         cellPathGridPos.x = store->cell->data.gridX * ESM::Land::REAL_SIZE;
         cellPathGridPos.y = store->cell->data.gridY * ESM::Land::REAL_SIZE;
     }
     SceneNode *cellPathGrid = mPathGridRoot->createChildSceneNode(cellPathGridPos);
-    ESM::Pathgrid::PointList points = pathgrid->points;
-    for (ESM::Pathgrid::PointList::iterator it = points.begin(); it != points.end(); it++)
-    {
-        Vector3 position(it->x, it->y, it->z);
-        SceneNode* pointNode = cellPathGrid->createChildSceneNode(position);
-        pointNode->setScale(0.5, 0.5, 0.5);
-        pointNode->attachObject(createPathgridPoint());
-    }
-
-    ESM::Pathgrid::EdgeList edges = pathgrid->edges;
-    for(ESM::Pathgrid::EdgeList::const_iterator it = edges.begin();
-        it != edges.end(); it++)
-    {
-        ESM::Pathgrid::Edge edge = *it;
-        ESM::Pathgrid::Point p1 = points[edge.v0], p2 = points[edge.v1];
-
-        Vector3 direction = (Vector3(p2.x, p2.y, p2.z) - Vector3(p1.x, p1.y, p1.z));
-        Vector3 lineDisplacement = direction.crossProduct(Vector3::UNIT_Z).normalisedCopy();
-        lineDisplacement = lineDisplacement * POINT_MESH_BASE/2 +
-                Vector3(0, 0, 10); // move lines up a little, so they will be less covered by meshes/landscape
-        cellPathGrid->attachObject(createPathgridLine(Vector3(p1.x, p1.y, p1.z) + lineDisplacement,
-                                                      Vector3(p2.x, p2.y, p2.z) + lineDisplacement));
-    }
+    cellPathGrid->attachObject(createPathgridLines(pathgrid));
+    cellPathGrid->attachObject(createPathgridPoints(pathgrid));
 
     if (store->cell->isExterior())
     {
@@ -246,15 +266,7 @@ void Debugging::disableCellPathgrid(MWWorld::Ptr::CellStore *store)
 void Debugging::destroyCellPathgridNode(SceneNode *node)
 {
     mPathGridRoot->removeChild(node);
-
-    SceneNode::ChildNodeIterator childIt = node->getChildIterator();
-    while (childIt.hasMoreElements())
-    {
-        SceneNode *child = static_cast<SceneNode *>(childIt.getNext());
-        destroyAttachedObjects(child);
-    }
     destroyAttachedObjects(node);
-    node->removeAndDestroyAllChildren();
     mSceneMgr->destroySceneNode(node);
 }
 
