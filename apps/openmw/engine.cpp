@@ -315,9 +315,16 @@ void OMW::Engine::go()
         boost::filesystem::create_directories(configPath);
     }
 
+    // Create the settings manager and load default and user settings file
     Settings::Manager settings;
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
 
-    //settings.loadDefault(defaultsettingspath);
+    // prefer local
+    if (boost::filesystem::exists(localdefault))
+        settings.loadDefault(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadDefault(globaldefault);
 
     const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
     if (boost::filesystem::exists(settingspath))
