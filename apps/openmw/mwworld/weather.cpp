@@ -34,7 +34,7 @@ const float WeatherGlobals::mThunderFrequency = .4;
 const float WeatherGlobals::mThunderThreshold = 0.6;
 const float WeatherGlobals::mThunderSoundDelay = 0.25;
 
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environment* env) : 
+WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::Environment* env) : 
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0)
 {
