@@ -23,7 +23,7 @@ namespace MWRender
 static const std::string PATHGRID_POINT_MATERIAL = "pathgridPointMaterial";
 static const std::string PATHGRID_LINE_MATERIAL = "pathgridLineMaterial";
 static const std::string DEBUGGING_GROUP = "debugging";
-static const int POINT_MESH_BASE = 40;
+static const int POINT_MESH_BASE = 35;
 
 void Debugging::createGridMaterials()
 {
@@ -74,7 +74,8 @@ ManualObject *Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
         const ESM::Pathgrid::Point &p1 = pathgrid->points[edge.v0], &p2 = pathgrid->points[edge.v1];
         Vector3 direction = (Vector3(p2.x, p2.y, p2.z) - Vector3(p1.x, p1.y, p1.z));
         Vector3 lineDisplacement = direction.crossProduct(Vector3::UNIT_Z).normalisedCopy();
-        lineDisplacement = lineDisplacement * POINT_MESH_BASE/2 + Vector3(0, 0, 10); // move lines up a little, so they will be less covered by meshes/landscape
+        lineDisplacement = lineDisplacement * POINT_MESH_BASE +
+                                Vector3(0, 0, 10); // move lines up a little, so they will be less covered by meshes/landscape
         result->position(Vector3(p1.x, p1.y, p1.z) + lineDisplacement);
         result->position(Vector3(p2.x, p2.y, p2.z) + lineDisplacement);
     }
@@ -86,7 +87,7 @@ ManualObject *Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
 ManualObject *Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
 {
     ManualObject *result = mSceneMgr->createManualObject();
-    const float height = POINT_MESH_BASE /*/ sqrtf(2)*/;
+    const float height = POINT_MESH_BASE * sqrtf(2);
 
     result->begin(PATHGRID_POINT_MATERIAL, RenderOperation::OT_TRIANGLE_STRIP);
 
