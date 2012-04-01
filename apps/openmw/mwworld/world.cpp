@@ -750,15 +750,16 @@ namespace MWWorld
                 // figure out which object we want to test against
                 std::vector < std::pair < float, std::string > > results = mPhysics->getFacedObjects();
 
-                // ignore the player
-                for (std::vector < std::pair < float, std::string > >::iterator it = results.begin();
-                    it != results.end(); ++it)
+                // ignore the player and other things we're not interested in
+                std::vector < std::pair < float, std::string > >::iterator it = results.begin();
+                while (it != results.end())
                 {
-                    if ( (*it).second == mPlayer->getPlayer().getRefData().getHandle() )
+                    if ( (*it).second == mPlayer->getPlayer().getRefData().getHandle())
                     {
-                        results.erase(it);
-                        break;
+                        it = results.erase(it);
                     }
+                    else
+                        ++it;
                 }
 
                 if (results.size() == 0)
@@ -774,6 +775,7 @@ namespace MWWorld
                     btVector3 p = mPhysics->getRayPoint(results.front().first);
                     Ogre::Vector3 pos(p.x(), p.z(), -p.y());
                     Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
+
                     query->occlusionTest(pos, node);
                 }
                 else
@@ -784,10 +786,38 @@ namespace MWWorld
                     mFaced2 = getPtrViaHandle(results[1].second);
                     mNumFacing = 2;
 
+                    //std::cout << "Num facing 2 : " << mFaced1Name << " " << mFaced2Name << std::endl;
+                    //std::cout << "Type 1 " << mFaced1.getTypeName() << " " << mFaced2.getTypeName() << std::endl;
+
                     btVector3 p = mPhysics->getRayPoint(results[1].first);
                     Ogre::Vector3 pos(p.x(), p.z(), -p.y());
-                    Ogre::SceneNode* node = mFaced2.getRefData().getBaseNode();
-                    query->occlusionTest(pos, node);
+                    Ogre::SceneNode* node1 = mFaced1.getRefData().getBaseNode();
+                    Ogre::SceneNode* node2 = mFaced2.getRefData().getBaseNode();
+
+                    // no need to test if the first node is not occluder
+                    if (!query->isPotentialOccluder(node1) && (mFaced1.getTypeName().find("Static") == std::string::npos))
+                    {
+                        mFacedHandle = mFaced1Name;
+                        //std::cout << "node1 Not an occluder" << std::endl;
+                        return;
+                    }
+
+                    // no need to test if the second object is static (thus cannot be activated)
+                    if (mFaced2.getTypeName().find("Static") != std::string::npos)
+                    {
+                        mFacedHandle = mFaced1Name;
+                        return;
+                    }
+
+                    // work around door problems
+                    if (mFaced1.getTypeName().find("Static") != std::string::npos
+                        && mFaced2.getTypeName().find("Door") != std::string::npos)
+                    {
+                        mFacedHandle = mFaced2Name;
+                        return;
+                    }
+
+                    query->occlusionTest(pos, node2);
                 }
             }
         }
