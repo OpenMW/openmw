@@ -754,7 +754,7 @@ namespace MWWorld
                 std::vector < std::pair < float, std::string > >::iterator it = results.begin();
                 while (it != results.end())
                 {
-                    if ( (*it).second == mPlayer->getPlayer().getRefData().getHandle())
+                    if ( getPtrViaHandle((*it).second) == mPlayer->getPlayer() )
                     {
                         it = results.erase(it);
                     }
@@ -776,6 +776,9 @@ namespace MWWorld
                     Ogre::Vector3 pos(p.x(), p.z(), -p.y());
                     Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
 
+                    //std::cout << "Num facing 1 : " << mFaced1Name <<  std::endl;
+                    //std::cout << "Type 1 " << mFaced1.getTypeName() <<  std::endl;
+
                     query->occlusionTest(pos, node);
                 }
                 else
@@ -786,8 +789,8 @@ namespace MWWorld
                     mFaced2 = getPtrViaHandle(results[1].second);
                     mNumFacing = 2;
 
-                    //std::cout << "Num facing 2 : " << mFaced1Name << " " << mFaced2Name << std::endl;
-                    //std::cout << "Type 1 " << mFaced1.getTypeName() << " " << mFaced2.getTypeName() << std::endl;
+                    std::cout << "Num facing 2 : " << mFaced1Name << " " << mFaced2Name << std::endl;
+                    std::cout << "Type 1 " << mFaced1.getTypeName() << " " << mFaced2.getTypeName() << std::endl;
 
                     btVector3 p = mPhysics->getRayPoint(results[1].first);
                     Ogre::Vector3 pos(p.x(), p.z(), -p.y());
