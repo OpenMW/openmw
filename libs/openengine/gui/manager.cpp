@@ -18,8 +18,7 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
   // manager before the main gui system itself, otherwise the main
   // object will get the chance to spit out a few messages before we
   // can able to disable it.
-  LogManager::initialise();
-  LogManager::setSTDOutputEnabled(logging);
+  /// \todo - can't avoid this with MyGUI 3.2?
 
   std::string theLogFile = std::string(MYGUI_PLATFORM_LOG_FILENAME);
   if(!logDir.empty())
@@ -29,9 +28,11 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
   mPlatform = new OgrePlatform();
   mPlatform->initialise(wnd, mgr, "General", theLogFile);
 
+  LogManager::getInstance().setSTDOutputEnabled(logging);
+
   // Create GUI
   mGui = new Gui();
-  mGui->initialise("core.xml", theLogFile);
+  mGui->initialise("core.xml");
 }
 
 void MyGUIManager::shutdown()

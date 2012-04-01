@@ -12,6 +12,7 @@
 
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
+#include "occlusionquery.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -30,7 +31,7 @@ BillboardObject::BillboardObject()
 
 void BillboardObject::setVisible(const bool visible)
 {
-    mNode->setVisible(visible);
+    mBBSet->setVisible(visible);
 }
 
 void BillboardObject::setSize(const float size)
@@ -88,7 +89,7 @@ void BillboardObject::init(const String& textureName,
     /// \todo These billboards are not 100% correct, might want to revisit them later
     mBBSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
     mBBSet->setDefaultDimensions(550.f*initialSize, 550.f*initialSize);
-    mBBSet->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+2);
+    mBBSet->setRenderQueueGroup(RENDER_QUEUE_MAIN+2);
     mBBSet->setBillboardType(BBT_PERPENDICULAR_COMMON);
     mBBSet->setCommonDirection( -position.normalisedCopy() );
     mNode = rootNode->createChildSceneNode();
@@ -254,7 +255,7 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
         // Get a pointer to the vertex colour
         ves_diffuse->baseVertexPointerToElement( pData, &currentVertex );
 
-        unsigned char alpha;
+        unsigned char alpha=0;
         if (meshType == 0) alpha = i%2 ? 0 : 255; // this is a cylinder, so every second vertex belongs to the bottom-most row
         else if (meshType == 1)
         {
@@ -292,10 +293,40 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
     ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource())->unlock();
 }
 
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environment* env) :
-    mGlareFade(0), mGlareEnabled(false)
+SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environment* env)
+    : mEnvironment(env)
+    , mHour(0.0f)
+    , mDay(0)
+    , mMonth(0)
+    , mSun(NULL)
+    , mSunGlare(NULL)
+    , mMasser(NULL)
+    , mSecunda(NULL)
+    , mViewport(NULL)
+    , mRootNode(NULL)
+    , mSceneMgr(NULL)
+    , mAtmosphereDay(NULL)
+    , mAtmosphereNight(NULL)
+    , mCloudMaterial()
+    , mAtmosphereMaterial()
+    , mCloudFragmentShader()
+    , mClouds()
+    , mNextClouds()
+    , mCloudBlendFactor(0.0f)
+    , mCloudOpacity(0.0f)
+    , mCloudSpeed(0.0f)
+    , mStarsOpacity(0.0f)
+    , mThunderOverlay(NULL)
+    , mThunderTextureUnit(NULL)
+    , mRemainingTransitionTime(0.0f)
+    , mGlareFade(0.0f)
+    , mGlare(0.0f)
+    , mEnabled(true)
+    , mSunEnabled(true)
+    , mMasserEnabled(true)
+    , mSecundaEnabled(true)
 {
-    mEnvironment = env;
+
     mViewport = pCamera->getViewport();
     mSceneMgr = pMwRoot->getCreator();
     mRootNode = pCamera->getParentSceneNode()->createChildSceneNode();
@@ -446,6 +477,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environmen
     vshader->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
     vshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setVertexProgram(vshader->getName());
+    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setFragmentProgram("");
 
     // Clouds
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
@@ -561,10 +593,23 @@ void SkyManager::update(float duration)
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
     mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
 
-    // increase the strength of the sun glare effect depending
-    // on how directly the player is looking at the sun
+
     if (mSunEnabled)
     {
+        // take 1/5 sec for fading the glare effect from invisible to full
+        if (mGlareFade > mGlare)
+        {
+            mGlareFade -= duration*5;
+            if (mGlareFade < mGlare) mGlareFade = mGlare;
+        }
+        else if (mGlareFade < mGlare)
+        {
+            mGlareFade += duration*5;
+            if (mGlareFade > mGlare) mGlareFade = mGlare;
+        }
+
+        // increase the strength of the sun glare effect depending
+        // on how directly the player is looking at the sun
         Vector3 sun = mSunGlare->getPosition();
         sun = Vector3(sun.x, sun.z, -sun.y);
         Vector3 cam = mViewport->getCamera()->getRealDirection();
@@ -572,21 +617,10 @@ void SkyManager::update(float duration)
         float val = 1- (angle.valueDegrees() / 180.f);
         val = (val*val*val*val)*2;
 
-        if (mGlareEnabled)
-        {
-            mGlareFade += duration*3;
-            if (mGlareFade > 1) mGlareFade = 1;
-        }
-        else
-        {
-            mGlareFade -= duration*3;
-            if (mGlareFade < 0.3) mGlareFade = 0;
-        }
-
-        mSunGlare->setSize(val * (mGlareFade));
+        mSunGlare->setSize(val * mGlareFade);
     }
 
-    mSunGlare->setVisible(mGlareFade>0 && mSunEnabled);
+    mSunGlare->setVisible(mSunEnabled);
     mSun->setVisible(mSunEnabled);
     mMasser->setVisible(mMasserEnabled);
     mSecunda->setVisible(mSecundaEnabled);
@@ -688,15 +722,15 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     else
         strength = 1.f;
 
-    mSunGlare->setVisibility(weather.mGlareView * strength);
-    mSun->setVisibility(strength);
+    mSunGlare->setVisibility(weather.mGlareView * mGlareFade * strength);
+    mSun->setVisibility(mGlareFade >= 0.5 ? weather.mGlareView * mGlareFade * strength : 0);
 
     mAtmosphereNight->setVisible(weather.mNight && mEnabled);
 }
 
-void SkyManager::setGlare(bool glare)
+void SkyManager::setGlare(const float glare)
 {
-    mGlareEnabled = glare;
+    mGlare = glare;
 }
 
 Vector3 SkyManager::getRealSunPos()
@@ -780,4 +814,9 @@ void SkyManager::setDate(int day, int month)
 {
     mDay = day;
     mMonth = month;
+}
+
+Ogre::SceneNode* SkyManager::getSunNode()
+{
+    return mSun->getNode();
 }

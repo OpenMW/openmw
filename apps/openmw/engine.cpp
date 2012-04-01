@@ -117,11 +117,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // sound
         if (mUseSound)
-        {
-            mEnvironment.mSoundManager->playPlaylist();
-
             mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
-        }
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
@@ -208,13 +204,18 @@ OMW::Engine::~Engine()
 void OMW::Engine::loadBSA()
 {
     const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-    std::string dataDirectory;
+    
     for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
     {
         std::cout << "Adding " << iter->second.string() << std::endl;
         Bsa::addBSA(iter->second.string());
+    }
 
-        dataDirectory = iter->second.parent_path().string();
+    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
+    std::string dataDirectory;
+    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    {
+        dataDirectory = iter->string();
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
     }
@@ -319,7 +320,11 @@ void OMW::Engine::go()
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
+
+    //addResourcesDirectory(mResDir);
+   
     addResourcesDirectory(mResDir / "mygui");
+    addResourcesDirectory(mResDir / "water");
 
     // Create the window
     mOgre->createWindow("OpenMW");
@@ -337,10 +342,7 @@ void OMW::Engine::go()
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"));
 
     // Create sound system
-    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
-                                                           mOgre->getCamera(),
-                                                           mDataDirs,
-                                                           mUseSound, mFSStrict, mEnvironment);
+    mEnvironment.mSoundManager = new MWSound::SoundManager(mUseSound, mEnvironment);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,

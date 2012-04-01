@@ -4,7 +4,30 @@
 namespace MWRender{
     std::map<std::string, int> Animation::mUniqueIDs;
 
-    Animation::~Animation(){
+    Animation::Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend)
+        : insert(NULL)
+        , mRend(_rend)
+        , mEnvironment(_env)
+        , vecRotPos()
+        , shapeparts()
+        , time(0.0f)
+        , startTime(0.0f)
+        , stopTime(0.0f)
+        , animate(0)
+        , rindexI()
+        , tindexI()
+        , shapeNumber(0)
+        , shapeIndexI()
+        , shapes(NULL)
+        , entityparts()
+        , transformations(NULL)
+        , textmappings(NULL)
+        , base(NULL)
+    {
+    }
+
+    Animation::~Animation()
+    {
     }
 
     std::string Animation::getUniqueID(std::string mesh){
@@ -102,6 +125,11 @@ namespace MWRender{
 
    void Animation::handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel){
         shapeNumber = 0;
+
+        if (allshapes == NULL || creaturemodel == NULL || skel == NULL)
+        {
+            return;
+        }
 
         std::vector<Nif::NiTriShapeCopy>::iterator allshapesiter;
 	    for(allshapesiter = allshapes->begin(); allshapesiter != allshapes->end(); allshapesiter++)

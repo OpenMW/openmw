@@ -133,11 +133,70 @@ namespace MWScript
                 }
         };
 
+        class OpGetWaterLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context
+                        = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+                    runtime.push (cell->mWaterLevel);
+                }
+        };
+
+        class OpSetWaterLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context
+                        = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Float level = runtime[0].mFloat;
+
+                    MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+
+                    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+                        throw std::runtime_error("Can't set water level in exterior cell");
+
+                    cell->mWaterLevel = level;
+                    context.getEnvironment().mWorld->setWaterHeight(cell->mWaterLevel);
+                }
+        };
+
+        class OpModWaterLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context
+                        = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Float level = runtime[0].mFloat;
+
+                    MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+
+                    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+                        throw std::runtime_error("Can't set water level in exterior cell");
+                    
+                    cell->mWaterLevel +=level;
+                    context.getEnvironment().mWorld->setWaterHeight(cell->mWaterLevel);
+                }
+        };
+
         const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
         const int opcodeCOE = 0x200008e;
         const int opcodeGetInterior = 0x2000131;
         const int opcodeGetPCCell = 0x2000136;
+        const int opcodeGetWaterLevel = 0x2000141;
+        const int opcodeSetWaterLevel = 0x2000142;
+        const int opcodeModWaterLevel = 0x2000143;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -146,8 +205,11 @@ namespace MWScript
             extensions.registerInstruction ("centeroncell", "S", opcodeCOC);
             extensions.registerInstruction ("coe", "ll", opcodeCOE);
             extensions.registerInstruction ("centeronexterior", "ll", opcodeCOE);
+            extensions.registerInstruction ("setwaterlevel", "f", opcodeSetWaterLevel);
+            extensions.registerInstruction ("modwaterlevel", "f", opcodeModWaterLevel);
             extensions.registerFunction ("getinterior", 'l', "", opcodeGetInterior);
             extensions.registerFunction ("getpccell", 'l', "c", opcodeGetPCCell);
+            extensions.registerFunction ("getwaterlevel", 'f', "", opcodeGetWaterLevel);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -157,6 +219,9 @@ namespace MWScript
             interpreter.installSegment5 (opcodeCOE, new OpCOE);
             interpreter.installSegment5 (opcodeGetInterior, new OpGetInterior);
             interpreter.installSegment5 (opcodeGetPCCell, new OpGetPCCell);
+            interpreter.installSegment5 (opcodeGetWaterLevel, new OpGetWaterLevel);
+            interpreter.installSegment5 (opcodeSetWaterLevel, new OpSetWaterLevel);
+            interpreter.installSegment5 (opcodeModWaterLevel, new OpModWaterLevel);
         }
     }
 }

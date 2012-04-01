@@ -4,9 +4,6 @@ if (APPLE)
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
-
-    # using 10.6 sdk
-    set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk")
 endif (APPLE)
 
 # Macros
@@ -30,7 +27,6 @@ configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_
 option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 
 # Sound source selection
-option(USE_AUDIERE "use Audiere for sound" OFF)
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
@@ -124,51 +120,30 @@ set(OENGINE_BULLET
 	${LIBDIR}/openengine/bullet/trace.cpp
 )
 
-# Sound setup
-if (USE_AUDIERE)
-    set(MANGLE_SOUND_OUTPUT
-        ${LIBDIR}/mangle/sound/sources/audiere_source.cpp
-        ${LIBDIR}/mangle/sound/sources/sample_reader.cpp
-        ${LIBDIR}/mangle/stream/clients/audiere_file.cpp)
-    find_package(Audiere REQUIRED)
-    set(SOUND_INPUT_INCLUDES ${AUDIERE_INCLUDE_DIR})
-    set(SOUND_INPUT_LIBRARY ${AUDIERE_LIBRARY})
-    set(SOUND_DEFINE -DOPENMW_USE_AUDIERE)
-endif (USE_AUDIERE)
-
-if (USE_FFMPEG)
-    set(MANGLE_SOUND_OUTPUT
-        ${LIBDIR}/mangle/sound/sources/ffmpeg_source.cpp)
-    find_package(FFMPEG REQUIRED)
-    set(SOUND_INPUT_INCLUDES ${FFMPEG_INCLUDE_DIR})
-    set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
-    set(SOUND_DEFINE -DOPENMW_USE_FFMPEG)
-endif (USE_FFMPEG)
-
-if (USE_MPG123)
-    set(MANGLE_SOUND_OUTPUT
-        ${LIBDIR}/mangle/sound/sources/mpg123_source.cpp
-        ${LIBDIR}/mangle/sound/sources/libsndfile.cpp
-        ${LIBDIR}/mangle/sound/sources/sample_reader.cpp)
-    find_package(MPG123 REQUIRED)
-    find_package(SNDFILE REQUIRED)
-    set(SOUND_INPUT_INCLUDES ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
-    set(SOUND_INPUT_LIBRARY ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
-    set(SOUND_DEFINE -DOPENMW_USE_MPG123)
-endif (USE_MPG123)
-
-set(OENGINE_SOUND
-  # Mangle and OEngine sound files are sort of intertwined, so put
-  # them together here
-  ${LIBDIR}/openengine/sound/sndmanager.cpp
-  ${LIBDIR}/mangle/sound/outputs/openal_out.cpp
-  ${MANGLE_SOUND_OUTPUT}
-)
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_SOUND} ${OENGINE_BULLET})
+set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
 
 set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
 set(OPENMW_LIBS_HEADER)
+
+# Sound setup
+set(SOUND_INPUT_INCLUDES "")
+set(SOUND_INPUT_LIBRARY "")
+set(SOUND_DEFINE "")
+if (USE_FFMPEG)
+    find_package(FFMPEG REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${FFMPEG_INCLUDE_DIR})
+    set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${FFMPEG_LIBRARIES})
+    set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_FFMPEG)
+endif (USE_FFMPEG)
+
+if (USE_MPG123)
+    find_package(MPG123 REQUIRED)
+    find_package(SNDFILE REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
+    set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
+    set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_MPG123)
+endif (USE_MPG123)
 
 # Platform specific
 if (WIN32)
@@ -181,7 +156,6 @@ include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
-    add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
 endif()
 
 if (APPLE)
@@ -190,7 +164,13 @@ endif (APPLE)
 
 # Dependencies
 
+# Fix for not visible pthreads functions for linker with glibc 2.15
+if (UNIX AND NOT APPLE)
+find_package (Threads)
+endif()
+
 find_package(OGRE REQUIRED)
+find_package(MyGUI REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -205,16 +185,17 @@ ENDIF(WIN32)
 ENDIF(OGRE_STATIC)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
+    ${OGRE_Terrain_INCLUDE_DIR}
     ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
-    ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
-    ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
+    ${MYGUI_INCLUDE_DIRS}
+    ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
-link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
+link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
 
 if(APPLE)
     # List used Ogre plugins
@@ -224,14 +205,8 @@ if(APPLE)
                           "Plugin_ParticleFX")
 endif(APPLE)
 
-add_subdirectory( extern/mygui_3.0.1 )
-
-# Make sure that certain libraries are used as static libraries
-# This is in effect turns off __declspec (dllexport) for windows
-# Each library will also need to be configured to build as a static lib
-
-# MyGUI: extern/mygui_3.0.0/
-add_definitions(-DMYGUI_STATIC)
+add_subdirectory( files/)
+add_subdirectory( files/mygui )
 
 # Specify build paths
 
@@ -286,7 +261,16 @@ endif (APPLE)
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-reorder)
+    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder)
+
+    # Silence warnings in OGRE headers. Remove once OGRE got fixed!
+    add_definitions (-Wno-ignored-qualifiers)
+
+    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
+                OUTPUT_VARIABLE GCC_VERSION)
+    if ("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
+        add_definitions (-Wno-unused-but-set-parameter)
+    endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 if(DPKG_PROGRAM)
@@ -326,7 +310,7 @@ if(DPKG_PROGRAM)
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogre-1.7.3 (>= 1.7.3), libbullet0 (>= 2.77),  libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "nvidia-cg-toolkit (>= 2.1),  libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
@@ -346,6 +330,7 @@ if(WIN32)
     FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
     INSTALL(FILES ${files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/readme.txt" DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
@@ -356,6 +341,7 @@ if(WIN32)
     SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
     SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;esmtool;Esmtool;omwlauncher;OpenMW Launcher")
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_RESOURCE_FILE_LICENSE "${OpenMW_SOURCE_DIR}/GPL3.txt")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
@@ -498,6 +484,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})

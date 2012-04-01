@@ -23,6 +23,12 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mDebugging(engine)
 {
     mRendering.createScene("PlayerCam", 55, 5);
+    mTerrainManager = new TerrainManager(mRendering.getScene(),
+                                         environment);
+
+    //The fog type must be set before any terrain objects are created as if the
+    //fog type is set to FOG_NONE then the initially created terrain won't have any fog
+    configureFog(1, ColourValue(1,1,1));
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -40,9 +46,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mMwRoot->pitch(Degree(-90));
     mObjects.setMwRoot(mMwRoot);
     mActors.setMwRoot(mMwRoot);
-        
-    //used to obtain ingame information of ogre objects (which are faced or selected)
-    mRaySceneQuery = mRendering.getScene()->createRayQuery(Ray());
 
     Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
     playerNode->pitch(Degree(90));
@@ -53,8 +56,14 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     //mSkyManager = 0;
     mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
 
+    mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
+
+    mWater = 0;
+
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
+
+    mLocalMap = new MWRender::LocalMap(&mRendering, &environment);
 }
 
 RenderingManager::~RenderingManager ()
@@ -62,6 +71,9 @@ RenderingManager::~RenderingManager ()
     //TODO: destroy mSun?
     delete mPlayer;
     delete mSkyManager;
+    delete mTerrainManager;
+    delete mLocalMap;
+    delete mOcclusionQuery;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -85,14 +97,33 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
-void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store){
+void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
+{
     mObjects.removeCell(store);
     mActors.removeCell(store);
+    if (store->cell->isExterior())
+      mTerrainManager->cellRemoved(store);
+}
+
+void RenderingManager::removeWater ()
+{
+    if(mWater){
+        delete mWater;
+        mWater = 0;
+    }
+}
+
+void RenderingManager::toggleWater()
+{
+    if (mWater)
+        mWater->toggle();
 }
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
     mObjects.buildStaticGeometry (*store);
+    if (store->cell->isExterior())
+      mTerrainManager->cellAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
@@ -133,10 +164,37 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 void RenderingManager::update (float duration){
 
     mActors.update (duration);
-    
+
+    mOcclusionQuery->update(duration);
+
     mSkyManager->update(duration);
-    
+
+    mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
+
     mRendering.update(duration);
+
+    mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealDirection() );
+
+    checkUnderwater();
+}
+void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
+    if(store->cell->data.flags & store->cell->HasWater){
+        if(mWater == 0)
+            mWater = new MWRender::Water(mRendering.getCamera(), store->cell);
+        else
+            mWater->changeCell(store->cell);
+        //else
+
+    }
+    else
+        removeWater();
+   
+}
+
+void RenderingManager::setWaterHeight(const float height)
+{
+    if (mWater)
+        mWater->setHeight(height);
 }
 
 void RenderingManager::skyEnable ()
@@ -231,17 +289,17 @@ void RenderingManager::setAmbientMode()
   {
     case 0:
 
-      mRendering.getScene()->setAmbientLight(mAmbientColor);
+      setAmbientColour(mAmbientColor);
       break;
 
     case 1:
 
-      mRendering.getScene()->setAmbientLight(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
+      setAmbientColour(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
       break;
 
     case 2:
 
-      mRendering.getScene()->setAmbientLight(ColourValue(1,1,1));
+      setAmbientColour(ColourValue(1,1,1));
       break;
   }
 }
@@ -281,6 +339,11 @@ void RenderingManager::toggleLight()
 
   setAmbientMode();
 }
+void RenderingManager::checkUnderwater(){
+    if(mWater){
+         mWater->checkUnderwater( mRendering.getCamera()->getRealPosition().y );
+    }
+}
 
 void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
      int mode, int number)
@@ -296,11 +359,13 @@ void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
     mSun->setDiffuseColour(colour);
+    mTerrainManager->setDiffuse(colour);
 }
 
 void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
 {
     mRendering.getScene()->setAmbientLight(colour);
+    mTerrainManager->setAmbient(colour);
 }
 
 void RenderingManager::sunEnable()
@@ -325,6 +390,19 @@ void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 void RenderingManager::setGlare(bool glare)
 {
     mSkyManager->setGlare(glare);
+}
+
+void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
+{
+    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+        mLocalMap->requestMap(cell);
+    else
+        mLocalMap->requestMap(cell, mObjects.getDimensions(cell));
+}
+
+void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
+{
+    mLocalMap->saveFogOfWar(cell);
 }
 
 } // namespace

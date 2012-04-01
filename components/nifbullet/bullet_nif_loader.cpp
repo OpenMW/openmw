@@ -51,7 +51,11 @@ using namespace Mangle::VFS;
 
 using namespace NifBullet;
 
-//====================================================================================================
+ManualBulletShapeLoader::~ManualBulletShapeLoader()
+{
+    delete vfs;
+}
+
 Ogre::Matrix3 ManualBulletShapeLoader::getMatrix(Nif::Transformation* tr)
 {
     Ogre::Matrix3 rot(tr->rotation.v[0].array[0],tr->rotation.v[0].array[1],tr->rotation.v[0].array[2],
@@ -135,7 +139,21 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
         handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,true);
     }
 
-    currentShape = new btBvhTriangleMeshShape(mTriMesh,true);
+    struct TriangleMeshShape : public btBvhTriangleMeshShape
+    {
+        TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
+            : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
+        {
+        }
+
+        virtual ~TriangleMeshShape()
+        {
+            delete getTriangleInfoMap();
+            delete m_meshInterface;
+        }
+    };
+
+    currentShape = new TriangleMeshShape(mTriMesh,true);
     cShape->Shape = currentShape;
 }
 

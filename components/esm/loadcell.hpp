@@ -114,10 +114,25 @@ struct Cell
   ESM_Context context; // File position
   DATAstruct data;
   AMBIstruct ambi;
-  int water; // Water level
+  float water; // Water level
   int mapColor;
 
   void load(ESMReader &esm);
+
+  bool isExterior() const
+  {
+      return !(data.flags & Interior);
+  }
+
+  int getGridX() const
+  {
+      return data.gridX;
+  }
+
+  int getGridY() const
+  {
+      return data.gridY;
+  }
 
   // Restore the given reader to the stored position. Will try to open
   // the file matching the stored file name. If you want to read from

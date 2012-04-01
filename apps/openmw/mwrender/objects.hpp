@@ -14,6 +14,8 @@ class Objects{
     OEngine::Render::OgreRenderer &mRenderer;
     std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
     std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometry;
+    std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometrySmall;
+    std::map<MWWorld::Ptr::CellStore *, Ogre::AxisAlignedBox> mBounds;
     Ogre::SceneNode* mMwRoot;
     bool mIsStatic;
     static int uniqueID;
@@ -41,6 +43,9 @@ public:
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
     void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
+
+    Ogre::AxisAlignedBox getDimensions(MWWorld::Ptr::CellStore*);
+    ///< get a bounding box that encloses all objects in the specified cell
 
     bool deleteObject (const MWWorld::Ptr& ptr);
     ///< \return found?
