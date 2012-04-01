@@ -28,6 +28,7 @@ option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
+option(USE_AUDIERE "use audiere for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
 find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
@@ -132,6 +133,13 @@ if (USE_FFMPEG)
     set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${FFMPEG_LIBRARIES})
     set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_FFMPEG)
 endif (USE_FFMPEG)
+
+if (USE_AUDIERE)
+    find_package(Audiere REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${AUDIERE_INCLUDE_DIR})
+    set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${AUDIERE_LIBRARY})
+    set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_AUDIERE)
+endif (USE_AUDIERE)
 
 if (USE_MPG123)
     find_package(MPG123 REQUIRED)
