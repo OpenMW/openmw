@@ -9,6 +9,7 @@ using namespace Settings;
 
 Ogre::ConfigFile Manager::mFile = Ogre::ConfigFile();
 Ogre::ConfigFile Manager::mDefaultFile = Ogre::ConfigFile();
+SettingCategoryVector Manager::mChangedSettings = SettingCategoryVector();
 
 void Manager::loadUser (const std::string& file)
 {
@@ -77,8 +78,11 @@ void Manager::setString (const std::string& setting, const std::string& category
     {
         Ogre::ConfigFile::SettingsMultiMap::iterator i = it.current();
 
-        if ((*i).first == setting)
+        if ((*i).first == setting && (*i).second != value)
+        {
+            mChangedSettings.push_back(std::make_pair(setting, category));
             (*i).second = value;
+        }
 
         it.getNext();
     }
@@ -97,4 +101,11 @@ void Manager::setFloat (const std::string& setting, const std::string& category,
 void Manager::setBool (const std::string& setting, const std::string& category, const bool value)
 {
     setString(setting, category, Ogre::StringConverter::toString(value));
+}
+
+const SettingCategoryVector Manager::apply()
+{
+    SettingCategoryVector vec = mChangedSettings;
+    mChangedSettings.clear();
+    return vec;
 }
