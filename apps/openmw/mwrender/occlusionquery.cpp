@@ -12,7 +12,8 @@ using namespace Ogre;
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mSingleObjectQuery(0), mActiveQuery(0),
     mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false), mTestResult(false), 
-    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false), mDoQuery2(false)
+    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false), mDoQuery2(false),
+    mBBNode(0)
 {
     mRendering = renderer;
     mSunNode = sunNode;
@@ -52,7 +53,8 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     matQueryVisible->setCullingMode(CULL_NONE);
     matQueryVisible->setManualCullingMode(MANUAL_CULL_NONE);
 
-    mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
+    if (sunNode)
+        mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
 
     mObjectNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
     mBBNodeReal = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
@@ -182,10 +184,13 @@ void OcclusionQuery::update(float duration)
     if (dist==0) dist = 10000000;
     dist -= 1000; // bias
     dist /= 1000.f;
-    mBBNode->setPosition(mSunNode->getPosition() * dist);
-    mBBNode->setScale(dist, dist, dist);
-    mBBNodeReal->setPosition(mBBNode->_getDerivedPosition());
-    mBBNodeReal->setScale(mBBNode->getScale());
+    if (mBBNode)
+    {
+        mBBNode->setPosition(mSunNode->getPosition() * dist);
+        mBBNode->setScale(dist, dist, dist);
+        mBBNodeReal->setPosition(mBBNode->_getDerivedPosition());
+        mBBNodeReal->setScale(mBBNode->getScale());
+    }
 
     // Stop occlusion queries until we get their information
     // (may not happen on the same frame they are requested in)
@@ -243,6 +248,13 @@ void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::SceneNod
 bool OcclusionQuery::occlusionTestPending()
 {
     return (mQuerySingleObjectRequested || mQuerySingleObjectStarted);
+}
+
+void OcclusionQuery::setSunNode(Ogre::SceneNode* node)
+{
+    mSunNode = node;
+    if (!mBBNode)
+        mBBNode = node->getParentSceneNode()->createChildSceneNode();
 }
 
 bool OcclusionQuery::getTestResult()

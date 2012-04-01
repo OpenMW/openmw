@@ -325,14 +325,17 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environmen
     , mSunEnabled(true)
     , mMasserEnabled(true)
     , mSecundaEnabled(true)
+    , mCreated(false)
 {
-
     mViewport = pCamera->getViewport();
     mSceneMgr = pMwRoot->getCreator();
     mRootNode = pCamera->getParentSceneNode()->createChildSceneNode();
     mRootNode->pitch(Degree(-90)); // convert MW to ogre coordinates
     mRootNode->setInheritOrientation(false);
+}
 
+void SkyManager::create()
+{
     /// \todo preload all the textures and meshes that are used for sky rendering
 
     // Create overlay used for thunderstorm
@@ -562,6 +565,8 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environmen
     mCloudMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
     mCloudMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("");
+
+    mCreated = true;
 }
 
 SkyManager::~SkyManager()
@@ -574,11 +579,13 @@ SkyManager::~SkyManager()
 
 int SkyManager::getMasserPhase() const
 {
+    if (!mCreated) return 0;
     return mMasser->getPhaseInt();
 }
 
 int SkyManager::getSecundaPhase() const
 {
+    if (!mCreated) return 0;
     return mSecunda->getPhaseInt();
 }
 
@@ -631,6 +638,9 @@ void SkyManager::update(float duration)
 
 void SkyManager::enable()
 {
+    if (!mCreated)
+        create();
+
     mRootNode->setVisible(true);
     mEnabled = true;
 }
@@ -654,6 +664,7 @@ void SkyManager::setCloudsOpacity(float opacity)
 
 void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 {
+    if (!mCreated) return;
     if (mClouds != weather.mCloudTexture)
     {
         mCloudMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("textures\\"+weather.mCloudTexture);
@@ -750,17 +761,20 @@ void SkyManager::sunDisable()
 
 void SkyManager::setSunDirection(const Vector3& direction)
 {
+    if (!mCreated) return;
     mSun->setPosition(direction);
     mSunGlare->setPosition(direction);
 }
 
 void SkyManager::setMasserDirection(const Vector3& direction)
 {
+    if (!mCreated) return;
     mMasser->setPosition(direction);
 }
 
 void SkyManager::setSecundaDirection(const Vector3& direction)
 {
+    if (!mCreated) return;
     mSecunda->setPosition(direction);
 }
 
@@ -786,6 +800,7 @@ void SkyManager::secundaDisable()
 
 void SkyManager::setThunder(const float factor)
 {
+    if (!mCreated) return;
     if (factor > 0.f)
     {
         mThunderOverlay->show();
@@ -818,5 +833,6 @@ void SkyManager::setDate(int day, int month)
 
 Ogre::SceneNode* SkyManager::getSunNode()
 {
+    if (!mCreated) return 0;
     return mSun->getNode();
 }

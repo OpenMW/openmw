@@ -112,6 +112,9 @@ namespace MWRender
 
         void update(float duration);
 
+        void create();
+        ///< no need to call this, automatically done on first enable()
+
         void enable();
 
         void disable();
@@ -164,8 +167,10 @@ namespace MWRender
 
         void setGlare(const float glare);
         Ogre::Vector3 getRealSunPos();
-        
+
     private:
+        bool mCreated;
+
         MWWorld::Environment* mEnvironment;
         float mHour;
         int mDay;
