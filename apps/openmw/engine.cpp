@@ -20,6 +20,7 @@
 #include <components/esm/esm_reader.hpp>
 #include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
@@ -313,6 +314,17 @@ void OMW::Engine::go()
     {
         boost::filesystem::create_directories(configPath);
     }
+
+    Settings::Manager settings;
+
+    //settings.loadDefault(defaultsettingspath);
+
+    const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
+    if (boost::filesystem::exists(settingspath))
+        settings.loadUser(settingspath);
+    else
+        settings.copyDefaultToUserSettings();
+
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string(),

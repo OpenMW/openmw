@@ -73,6 +73,7 @@ const bool Manager::getBool (const std::string& setting, const std::string& cate
 
 void Manager::setString (const std::string& setting, const std::string& category, const std::string& value)
 {
+    bool found=false;
     Ogre::ConfigFile::SettingsIterator it = mFile.getSettingsIterator(category);
     while (it.hasMoreElements())
     {
@@ -82,10 +83,12 @@ void Manager::setString (const std::string& setting, const std::string& category
         {
             mChangedSettings.push_back(std::make_pair(setting, category));
             (*i).second = value;
+            found = true;
         }
 
         it.getNext();
     }
+    assert(found && "Attempting to change a non-existing setting");
 }
 
 void Manager::setInt (const std::string& setting, const std::string& category, const int value)

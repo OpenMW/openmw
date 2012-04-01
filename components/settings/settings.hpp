@@ -13,7 +13,6 @@ namespace Settings
     class Manager
     {
     public:
-
         static Ogre::ConfigFile mFile;
         static Ogre::ConfigFile mDefaultFile;
 
