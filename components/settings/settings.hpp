@@ -5,7 +5,9 @@
 
 namespace Settings
 {
-    typedef std::vector< std::pair<std::string, std::string> > SettingCategoryVector;
+    typedef std::pair < std::string, std::string > CategorySetting; 
+    typedef std::vector< std::pair<std::string, std::string> > CategorySettingVector;
+    typedef std::map < CategorySetting, std::string > CategorySettingValueMap;
 
     ///
     /// \brief Settings management (can change during runtime)
@@ -16,8 +18,11 @@ namespace Settings
         static Ogre::ConfigFile mFile;
         static Ogre::ConfigFile mDefaultFile;
 
-        static SettingCategoryVector mChangedSettings;
+        static CategorySettingVector mChangedSettings;
         ///< tracks all the settings that were changed since the last apply() call
+
+        static CategorySettingValueMap mNewSettings;
+        ///< tracks all the settings that are in the default file, but not in user file yet
 
         void loadDefault (const std::string& file);
         ///< load file as the default settings (can be overridden by user settings)
@@ -31,7 +36,7 @@ namespace Settings
         void saveUser (const std::string& file);
         ///< save user settings to file
 
-        const SettingCategoryVector apply();
+        static const CategorySettingVector apply();
         ///< returns the list of changed settings and then clears it
 
         static const int getInt (const std::string& setting, const std::string& category);

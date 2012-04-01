@@ -426,6 +426,9 @@ void OMW::Engine::go()
     // Start the main rendering loop
     mOgre->start();
 
+    // Save user settings
+    settings.saveUser(settingspath);
+
     std::cout << "Quitting peacefully.\n";
 }
 

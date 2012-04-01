@@ -9,7 +9,8 @@ using namespace Settings;
 
 Ogre::ConfigFile Manager::mFile = Ogre::ConfigFile();
 Ogre::ConfigFile Manager::mDefaultFile = Ogre::ConfigFile();
-SettingCategoryVector Manager::mChangedSettings = SettingCategoryVector();
+CategorySettingVector Manager::mChangedSettings = CategorySettingVector();
+CategorySettingValueMap Manager::mNewSettings = CategorySettingValueMap();
 
 void Manager::loadUser (const std::string& file)
 {
@@ -43,15 +44,40 @@ void Manager::saveUser(const std::string& file)
         Ogre::ConfigFile::SettingsMultiMap::iterator i;
         for (i = settings->begin(); i != settings->end(); ++i)
         {
-            fout << i->first.c_str() << '=' << i->second.c_str() << '\n';
+            fout << i->first.c_str() << " = " << i->second.c_str() << '\n';
         }
 
-        seci.getNext();
+        CategorySettingValueMap::iterator it = mNewSettings.begin();
+        while (it != mNewSettings.end())
+        {
+            if (it->first.first == sectionName)
+            {
+                fout << it->first.second << " = " << it->second << '\n';
+                mNewSettings.erase(it++);
+            }
+            else
+                ++it;
+        }
+    }
+
+    std::string category = "";
+    for (CategorySettingValueMap::iterator it = mNewSettings.begin();
+            it != mNewSettings.end(); ++it)
+    {
+        if (category != it->first.first)
+        {
+            category = it->first.first;
+            fout << '\n' << '[' << category << ']' << '\n';
+        }
+        fout << it->first.second << " = " << it->second << '\n';
     }
 }
 
 const std::string Manager::getString (const std::string& setting, const std::string& category)
 {
+    if (mNewSettings.find(std::make_pair(category, setting)) != mNewSettings.end())
+        return mNewSettings[std::make_pair(category, setting)];
+
     std::string defaultval = mDefaultFile.getSetting(setting, category);
     return mFile.getSetting(setting, category, defaultval);
 }
@@ -73,22 +99,45 @@ const bool Manager::getBool (const std::string& setting, const std::string& cate
 
 void Manager::setString (const std::string& setting, const std::string& category, const std::string& value)
 {
+    CategorySetting s = std::make_pair(category, setting);
+
     bool found=false;
-    Ogre::ConfigFile::SettingsIterator it = mFile.getSettingsIterator(category);
-    while (it.hasMoreElements())
+    try
     {
-        Ogre::ConfigFile::SettingsMultiMap::iterator i = it.current();
-
-        if ((*i).first == setting && (*i).second != value)
+        Ogre::ConfigFile::SettingsIterator it = mFile.getSettingsIterator(category);
+        while (it.hasMoreElements())
         {
-            mChangedSettings.push_back(std::make_pair(setting, category));
-            (*i).second = value;
-            found = true;
-        }
+            Ogre::ConfigFile::SettingsMultiMap::iterator i = it.current();
 
-        it.getNext();
+            if ((*i).first == setting)
+            {
+                if ((*i).second != value)
+                {
+                    mChangedSettings.push_back(std::make_pair(category, setting));
+                    (*i).second = value;
+                }
+                found = true;
+            }
+
+            it.getNext();
+        }
     }
-    assert(found && "Attempting to change a non-existing setting");
+    catch (Ogre::Exception&)
+    {}
+
+    if (!found)
+    {
+        if (mNewSettings.find(s) != mNewSettings.end())
+        {
+            if (mNewSettings[s] != value)
+            {
+                mChangedSettings.push_back(std::make_pair(category, setting));
+                mNewSettings[s] = value;
+            }
+        }
+        else
+            mNewSettings[s] = value;
+    }
 }
 
 void Manager::setInt (const std::string& setting, const std::string& category, const int value)
@@ -106,9 +155,9 @@ void Manager::setBool (const std::string& setting, const std::string& category, 
     setString(setting, category, Ogre::StringConverter::toString(value));
 }
 
-const SettingCategoryVector Manager::apply()
+const CategorySettingVector Manager::apply()
 {
-    SettingCategoryVector vec = mChangedSettings;
+    CategorySettingVector vec = mChangedSettings;
     mChangedSettings.clear();
     return vec;
 }
