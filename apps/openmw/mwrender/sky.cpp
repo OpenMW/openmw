@@ -536,7 +536,7 @@ void SkyManager::create()
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
-    "   uv += float2(1,0) * time * speed * 0.003; \n" // Scroll in x direction
+    "   uv += float2(0,1) * time * speed * 0.003; \n" // Scroll in y direction
     "   float4 tex = lerp(tex2D(texture, uv), tex2D(secondTexture, uv), transitionFactor); \n"
     "   oColor = color * float4(emissive.xyz,1) * tex * float4(1,1,1,opacity); \n"
     "}";
