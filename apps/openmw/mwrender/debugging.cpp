@@ -27,11 +27,7 @@ bool Debugging::toggleRenderMode (int mode){
 	 switch (mode)
     {
         case MWWorld::World::Render_CollisionDebug:
-
-            // TODO use a proper function instead of accessing the member variable
-            // directly.
-            eng->setDebugRenderingMode (!eng->isDebugCreated);
-            return eng->isDebugCreated;
+            return eng->toggleDebugRendering();
     }
 
     return false;

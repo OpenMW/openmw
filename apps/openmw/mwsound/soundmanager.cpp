@@ -41,6 +41,8 @@ namespace MWSound
     SoundManager::SoundManager(bool useSound, MWWorld::Environment& environment)
         : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
         , mEnvironment(environment)
+        , mOutput(new DEFAULT_OUTPUT(*this))
+
     {
         if(!useSound)
             return;
@@ -50,8 +52,6 @@ namespace MWSound
 
         try
         {
-            mOutput.reset(new DEFAULT_OUTPUT(*this));
-
             std::vector<std::string> names = mOutput->enumerate();
             std::cout <<"Enumerated output devices:"<< std::endl;
             for(size_t i = 0;i < names.size();i++)
@@ -62,8 +62,6 @@ namespace MWSound
         catch(std::exception &e)
         {
             std::cout <<"Sound init failed: "<<e.what()<< std::endl;
-            mOutput.reset();
-            return;
         }
     }
 
@@ -90,10 +88,7 @@ namespace MWSound
         if(snd == NULL)
             throw std::runtime_error(std::string("Failed to lookup sound ")+soundId);
 
-        if(snd->data.volume == 0)
-            volume = 0.0f;
-        else
-            volume *= pow(10.0, (snd->data.volume/255.0f*3348.0 - 3348.0) / 2000.0);
+        volume *= pow(10.0, (snd->data.volume/255.0*3348.0 - 3348.0) / 2000.0);
 
         if(snd->data.minRange == 0 && snd->data.maxRange == 0)
         {
@@ -108,7 +103,7 @@ namespace MWSound
             max = std::max(min, max);
         }
 
-        return std::string("Sound/")+snd->sound;
+        return "Sound/"+snd->sound;
     }
 
 
@@ -137,10 +132,10 @@ namespace MWSound
         std::cout <<"Playing "<<filename<< std::endl;
         try
         {
-            if(mMusic)
-                mMusic->stop();
-            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f);
+            stopMusic();
+            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f, Play_NoEnv);
             mMusic->mBaseVolume = 0.4f;
+            mMusic->mFlags = Play_NoEnv;
         }
         catch(std::exception &e)
         {
@@ -182,11 +177,13 @@ namespace MWSound
         {
             // The range values are not tested
             float basevol = 1.0f; /* TODO: volume settings */
-            std::string filePath = std::string("Sound/")+filename;
+            std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getCellRef().pos;
+            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            SoundPtr sound = mOutput->playSound3D(filePath, pos.pos, basevol, 1.0f,
-                                                  20.0f, 12750.0f, false);
+            SoundPtr sound = mOutput->playSound3D(filePath, objpos, basevol, 1.0f,
+                                                  20.0f, 12750.0f, Play_Normal);
+            sound->mPos = objpos;
             sound->mBaseVolume = basevol;
 
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
@@ -203,7 +200,7 @@ namespace MWSound
     }
 
 
-    SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, bool loop)
+    SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
     {
         SoundPtr sound;
         try
@@ -212,11 +209,13 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
 
-            sound = mOutput->playSound(file, volume*basevol, pitch, loop);
+            sound = mOutput->playSound(file, volume*basevol, pitch, mode);
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
+            sound->mPitch = pitch;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
+            sound->mFlags = mode;
 
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
@@ -228,8 +227,7 @@ namespace MWSound
     }
 
     SoundPtr SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
-                                       float volume, float pitch, bool loop,
-                                       bool untracked)
+                                       float volume, float pitch, int mode)
     {
         SoundPtr sound;
         try
@@ -239,15 +237,21 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
             const ESM::Position &pos = ptr.getCellRef().pos;
+            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            sound = mOutput->playSound3D(file, pos.pos, volume*basevol, pitch, min, max, loop);
+            sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, mode);
+            sound->mPos = objpos;
             sound->mVolume = volume;
             sound->mBaseVolume = basevol;
+            sound->mPitch = pitch;
             sound->mMinDistance = min;
             sound->mMaxDistance = max;
+            sound->mFlags = mode;
 
-            mActiveSounds[sound] = (!untracked ? std::make_pair(ptr, soundId) :
-                                    std::make_pair(MWWorld::Ptr(), soundId));
+            if((mode&Play_NoTrack))
+                mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
+            else
+                mActiveSounds[sound] = std::make_pair(ptr, soundId);
         }
         catch(std::exception &e)
         {
@@ -326,11 +330,12 @@ namespace MWSound
     void SoundManager::updateObject(MWWorld::Ptr ptr)
     {
         const ESM::Position &pos = ptr.getCellRef().pos;
+        const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first == ptr)
-                snditer->first->update(pos.pos);
+                snditer->first->setPosition(objpos);
             snditer++;
         }
     }
@@ -402,19 +407,25 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
+        MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
         Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
         Ogre::Vector3 nPos, nDir, nUp;
         nPos = cam->getRealPosition();
         nDir = cam->getRealDirection();
         nUp  = cam->getRealUp();
 
+        Environment env = Env_Normal;
+        if(nPos.y < current->cell->water)
+            env = Env_Underwater;
+
         // The output handler is expecting vectors oriented like the game
         // (that is, -Z goes down, +Y goes forward), but that's not what we
         // get from Ogre's camera, so we have to convert.
-        float pos[3] = { nPos[0], -nPos[2], nPos[1] };
-        float at[3] = { nDir[0], -nDir[2], nDir[1] };
-        float up[3] = { nUp[0], -nUp[2], nUp[1] };
-        mOutput->updateListener(pos, at, up);
+        const Ogre::Vector3 pos(nPos[0], -nPos[2], nPos[1]);
+        const Ogre::Vector3 at(nDir[0], -nDir[2], nDir[1]);
+        const Ogre::Vector3 up(nUp[0], -nUp[2], nUp[1]);
+
+        mOutput->updateListener(pos, at, up, env);
 
         // Check if any sounds are finished playing, and trash them
         SoundMap::iterator snditer = mActiveSounds.begin();
@@ -423,7 +434,10 @@ namespace MWSound
             if(!snditer->first->isPlaying())
                 mActiveSounds.erase(snditer++);
             else
+            {
+                snditer->first->update();
                 snditer++;
+            }
         }
     }
 
