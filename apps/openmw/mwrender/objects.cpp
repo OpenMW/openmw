@@ -3,6 +3,7 @@
 #include <OgreSceneNode.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/settings/settings.hpp>
 
 using namespace MWRender;
 
@@ -88,18 +89,16 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     NifOgre::NIFLoader::load(mesh);
     Ogre::Entity *ent = mRenderer.getScene()->createEntity(mesh);
 
-/*
+
     Ogre::Vector3 extents = ent->getBoundingBox().getSize();
     extents *= insert->getScale();
-//    float size = std::max(std::max(extents.x, extents.y), extents.z);
+    float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < 250); /// \todo config value
+    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) && Settings::Manager::getBool("limit small object distance", "Objects");
 
     // do not fade out doors. that will cause holes and look stupid
     if (ptr.getTypeName().find("Door") != std::string::npos)
         small = false;
-*/
-    const bool small = false;
 
     if (mBounds.find(ptr.getCell()) == mBounds.end())
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
@@ -113,11 +112,11 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     bounds.scale(insert->getScale());
     mBounds[ptr.getCell()].merge(bounds);
 
-    if(!mIsStatic)
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects"))
     {
         insert->attachObject(ent);
 
-        ent->setRenderingDistance(small ? 2500 : 0); /// \todo config value
+        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0); /// \todo config value
     }
     else
     {
@@ -131,7 +130,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
                 sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
                 mStaticGeometrySmall[ptr.getCell()] = sg;
 
-                sg->setRenderingDistance(2500); /// \todo config value
+                sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance")); /// \todo config value
             }
             else
                 sg = mStaticGeometrySmall[ptr.getCell()];
