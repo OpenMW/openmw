@@ -12,6 +12,7 @@
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwworld/ptr.hpp"
 #include <components/esm/loadstat.hpp>
+#include <components/settings/settings.hpp>
 
 
 using namespace MWRender;
@@ -273,18 +274,14 @@ void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
 
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
 {
-  /// \todo make the viewing distance and fog start/end configurable
+  float max = Settings::Manager::getFloat("max viewing distance", "Viewing distance");
 
-  // right now we load 3x3 cells, so the maximum viewing distance we
-  // can allow (to prevent objects suddenly popping up) equals:
-  // 8192            * 0.69
-  //   ^ cell size    ^ minimum density value used (clear weather)
-  float low = 5652.48 / density / 2.f;
-  float high = 5652.48 / density;
+  float low = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
+  float high = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
 
   mRendering.getScene()->setFog (FOG_LINEAR, colour, 0, low, high);
 
-  mRendering.getCamera()->setFarClipDistance ( high );
+  mRendering.getCamera()->setFarClipDistance ( max / density );
   mRendering.getViewport()->setBackgroundColour (colour);
 }
 

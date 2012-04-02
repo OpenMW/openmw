@@ -20,6 +20,7 @@
 #include <components/esm/esm_reader.hpp>
 #include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
@@ -321,6 +322,29 @@ void OMW::Engine::go()
     {
         boost::filesystem::create_directories(configPath);
     }
+
+    // Create the settings manager and load default settings file
+    Settings::Manager settings;
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
+
+    // prefer local
+    if (boost::filesystem::exists(localdefault))
+        settings.loadDefault(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadDefault(globaldefault);
+
+    // load user settings if they exist, otherwise just load the default settings as user settings
+    const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
+    if (boost::filesystem::exists(settingspath))
+        settings.loadUser(settingspath);
+    else if (boost::filesystem::exists(localdefault))
+        settings.loadUser(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadUser(globaldefault);
+
+    mFpsLevel = settings.getInt("fps", "HUD");
+
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string(),
@@ -414,6 +438,9 @@ void OMW::Engine::go()
 
     // Start the main rendering loop
     mOgre->start();
+
+    // Save user settings
+    settings.saveUser(settingspath);
 
     std::cout << "Quitting peacefully.\n";
 }
