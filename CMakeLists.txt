@@ -28,6 +28,7 @@ option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
+option(USE_AUDIERE "use audiere for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
 find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
@@ -133,6 +134,13 @@ if (USE_FFMPEG)
     set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_FFMPEG)
 endif (USE_FFMPEG)
 
+if (USE_AUDIERE)
+    find_package(Audiere REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${AUDIERE_INCLUDE_DIR})
+    set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${AUDIERE_LIBRARY})
+    set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_AUDIERE)
+endif (USE_AUDIERE)
+
 if (USE_MPG123)
     find_package(MPG123 REQUIRED)
     find_package(SNDFILE REQUIRED)
@@ -143,6 +151,7 @@ endif (USE_MPG123)
 
 # Platform specific
 if (WIN32)
+    set(Boost_USE_STATIC_LIBS   ON)
     set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
@@ -201,6 +210,7 @@ if(APPLE)
                           "Plugin_ParticleFX")
 endif(APPLE)
 
+add_subdirectory( files/)
 add_subdirectory( files/mygui )
 
 # Specify build paths
@@ -212,6 +222,9 @@ else (APPLE)
 endif (APPLE)
 
 # Other files
+
+configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
+    "${OpenMW_BINARY_DIR}/settings-default.cfg")
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
     "${OpenMW_BINARY_DIR}/openmw.cfg")
@@ -239,8 +252,14 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 
     # prepare plugins
-    if (${CMAKE_BUILD_TYPE} MATCHES "Release" OR
-        ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
+    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
+        set(OPENMW_RELEASE_BUILD 1)
+    endif()
+    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
+        set(OPENMW_RELEASE_BUILD 1)
+    endif()
+
+    if (${OPENMW_RELEASE_BUILD})
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
     else()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
@@ -287,6 +306,7 @@ if(DPKG_PROGRAM)
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install global configuration files
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
@@ -304,7 +324,7 @@ if(DPKG_PROGRAM)
  Data files from the original game is required to run it.")
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "nvidia-cg-toolkit (>= 2.1),  libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
@@ -388,6 +408,11 @@ endif()
 option(BUILD_LAUNCHER "build Launcher inspector" ON)
 if (BUILD_LAUNCHER)
    add_subdirectory( apps/launcher )
+endif()
+
+option(BUILD_MWINIIMPORTER "build MWiniImporter inspector" ON)
+if (BUILD_MWINIIMPORTER)
+   add_subdirectory( apps/mwiniimporter )
 endif()
 
 if (WIN32)

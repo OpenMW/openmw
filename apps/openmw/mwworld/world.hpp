@@ -63,13 +63,14 @@ namespace MWWorld
             enum RenderMode
             {
                 Render_CollisionDebug,
-                Render_Wireframe
+                Render_Wireframe,
+                Render_Pathgrid
             };
 
         private:
 
             MWRender::RenderingManager* mRendering;
-            
+
             MWWorld::WeatherManager* mWeatherManager;
 
             MWWorld::Scene *mWorldScene;
@@ -93,6 +94,12 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
+            std::string mFacedHandle;
+            Ptr mFaced1;
+            Ptr mFaced2;
+            std::string mFaced1Name;
+            std::string mFaced2Name;
+            int mNumFacing;
 
             int getDaysPerMonth (int month) const;
 
@@ -106,13 +113,16 @@ namespace MWWorld
                 Environment& environment, const std::string& encoding);
 
             ~World();
-            
+
             OEngine::Render::Fader* getFader();
 
             Ptr::CellStore *getExterior (int x, int y);
 
             Ptr::CellStore *getInterior (const std::string& name);
-            
+
+            void setWaterHeight(const float height);
+            void toggleWater();
+
             void adjustSky();
 
             MWWorld::Player& getPlayer();
@@ -125,7 +135,7 @@ namespace MWWorld
 
             bool hasCellChanged() const;
             ///< Has the player moved to a different cell, since the last frame?
-            
+
             bool isCellExterior() const;
             bool isCellQuasiExterior() const;
 
@@ -163,9 +173,9 @@ namespace MWWorld
 
             bool toggleSky();
             ///< \return Resulting mode
-            
+
             void changeWeather(const std::string& region, const unsigned int id);
-            
+
             int getCurrentWeather() const;
 
             int getMasserPhase() const;

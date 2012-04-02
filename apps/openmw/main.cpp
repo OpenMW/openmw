@@ -92,9 +92,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("plugin", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "plugin file(s)")
 
-        ("fps", boost::program_options::value<int>()->implicit_value(1)
-            ->default_value(0), "fps counter detail (0 = off, 1 = fps counter, 2 = full detail)")
-
         ("anim-verbose", boost::program_options::value<bool>()->implicit_value(true)
             ->default_value(false), "output animation indices files")
 
@@ -225,7 +222,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
-    engine.showFPS(variables["fps"].as<int>());
     engine.setDebugMode(variables["debug"].as<bool>());
     engine.setSoundUsage(!variables["nosound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());

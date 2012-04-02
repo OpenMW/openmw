@@ -457,7 +457,7 @@ namespace ESMS
           }
       }
 
-      Pathgrid *find(int cellX, int cellY, std::string cellName) const
+      Pathgrid *find(int cellX, int cellY, const std::string &cellName) const
       {
           Pathgrid *result = search(cellX, cellY, cellName);
           if (!result)
@@ -467,7 +467,7 @@ namespace ESMS
           return result;
       }
 
-      Pathgrid *search(int cellX, int cellY, std::string cellName) const
+      Pathgrid *search(int cellX, int cellY, const std::string &cellName) const
       {
           Pathgrid *result = NULL;
           if (cellX == 0 && cellY == 0) // possibly interior

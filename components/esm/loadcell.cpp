@@ -21,8 +21,13 @@ void Cell::load(ESMReader &esm)
     if (data.flags & Interior)
     {
         // Interior cells
-
-        if (esm.isNextSub("INTV") || esm.isNextSub("WHGT"))
+        if (esm.isNextSub("INTV"))
+        {
+            int waterl;
+            esm.getHT(waterl);
+            water = (float) waterl;
+        }
+        else if (esm.isNextSub("WHGT"))
             esm.getHT(water);
 
         // Quasi-exterior cells have a region (which determines the

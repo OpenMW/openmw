@@ -54,9 +54,11 @@ void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environme
 
 namespace MWWorld
 {
+
     void Scene::update (float duration){
         mRendering.update (duration);
     }
+
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         std::cout << "Unloading cell\n";
@@ -82,6 +84,7 @@ namespace MWWorld
             if (!((*iter)->cell->data.flags & ESM::Cell::Interior))
                 mPhysics->removeHeightField( (*iter)->cell->data.gridX, (*iter)->cell->data.gridY );
         }
+
 		mRendering.removeCell(*iter);
 		//mPhysics->removeObject("Unnamed_43");
 
@@ -90,6 +93,7 @@ namespace MWWorld
         mEnvironment.mSoundManager->stopSound (*iter);
 		mActiveCells.erase(*iter);
         
+
         
     }
 
@@ -209,6 +213,7 @@ namespace MWWorld
 
         mCurrentCell = *iter;
 
+
         // adjust player
         playerCellChange (mWorld->getExterior(X, Y), position, adjustPlayerPos);
 
@@ -216,6 +221,7 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
+        mRendering.waterAdded(mCurrentCell);
     }
 
     //We need the ogre renderer and a scene node.
@@ -255,6 +261,7 @@ namespace MWWorld
         Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
         loadCell (cell);
+        
 
         // adjust player
         mCurrentCell = cell;
@@ -267,6 +274,8 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
+
+        mRendering.waterAdded(cell);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)

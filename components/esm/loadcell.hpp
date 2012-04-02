@@ -114,7 +114,7 @@ struct Cell
   ESM_Context context; // File position
   DATAstruct data;
   AMBIstruct ambi;
-  int water; // Water level
+  float water; // Water level
   int mapColor;
 
   void load(ESMReader &esm);

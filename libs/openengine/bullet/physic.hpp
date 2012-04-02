@@ -211,10 +211,17 @@ namespace Physic
          */
         void setDebugRenderingMode(int mode);
 
+        bool toggleDebugRendering();
+
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          */
         std::pair<std::string,float> rayTest(btVector3& from,btVector3& to);
+
+        /**
+         * Return all objects hit by a ray.
+         */
+        std::vector< std::pair<float, std::string> > rayTest2(btVector3& from, btVector3& to);
 
         //event list of non player object
         std::list<PhysicEvent> NPEventList;
@@ -242,6 +249,26 @@ namespace Physic
         //debug rendering
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
+        bool mDebugActive;
+    };
+
+
+    struct MyRayResultCallback : public btCollisionWorld::RayResultCallback
+    {
+        virtual btScalar addSingleResult( btCollisionWorld::LocalRayResult& rayResult, bool bNormalInWorldSpace)
+        {
+            results.push_back( std::make_pair(rayResult.m_hitFraction, rayResult.m_collisionObject) );
+            return rayResult.m_hitFraction;
+        }
+
+        static bool cmp( const std::pair<float, std::string>& i, const std::pair<float, std::string>& j )
+        {
+            if( i.first > j.first ) return false;
+            if( j.first > i.first ) return true;
+            return false;
+        }
+
+        std::vector < std::pair<float, btCollisionObject*> > results;
     };
 
 }}

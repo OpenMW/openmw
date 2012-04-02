@@ -146,10 +146,10 @@ namespace MWWorld
             mRendering->skySetDate (mGlobalVariables->getInt ("day"),
                 mGlobalVariables->getInt ("month"));
 
-            mRendering->getSkyManager()->enable();
+            mRendering->skyEnable();
         }
         else
-            mRendering->getSkyManager()->disable();
+            mRendering->skyDisable();
     }
 
     World::World (OEngine::Render::OgreRenderer& renderer,
@@ -157,7 +157,8 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir,
         bool newGame, Environment& environment, const std::string& encoding)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (true), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this)
+      mSky (true), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
+      mNumFacing(0)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -498,13 +499,21 @@ namespace MWWorld
 
     std::string World::getFacedHandle()
     {
-        std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
+        if (!mRendering->occlusionQuerySupported())
+        {
+            std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
-        if (result.first.empty() ||
-            result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
-            return "";
+            if (result.first.empty() ||
+                result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
+                return "";
 
-        return result.first;
+            return result.first;
+        }
+        else
+        {
+            // updated every few frames in update()
+            return mFacedHandle;
+        }
     }
 
     void World::deleteObject (Ptr ptr)
@@ -531,9 +540,10 @@ namespace MWWorld
         ptr.getRefData().getPosition().pos[0] = x;
         ptr.getRefData().getPosition().pos[1] = y;
         ptr.getRefData().getPosition().pos[2] = z;
-
         if (ptr==mPlayer->getPlayer())
         {
+            //std::cout << "X:" <<   ptr.getRefData().getPosition().pos[0] << " Z: "  << ptr.getRefData().getPosition().pos[1] << "\n";
+
             Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
             if (currentCell)
             {
@@ -705,13 +715,113 @@ namespace MWWorld
 
         mWeatherManager->update (duration);
 
-        // cast a ray from player to sun to detect if the sun is visible
-        // this is temporary until we find a better place to put this code
-        // currently its here because we need to access the physics system
-        float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
-        Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
-        sun = Vector3(sun.x, -sun.z, sun.y);
-        mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
+        if (!mRendering->occlusionQuerySupported())
+        {
+            // cast a ray from player to sun to detect if the sun is visible
+            // this is temporary until we find a better place to put this code
+            // currently its here because we need to access the physics system
+            float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
+            Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
+            sun = Vector3(sun.x, -sun.z, sun.y);
+            mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
+        }
+
+        // update faced handle (object the player is looking at)
+        // this uses a mixture of raycasts and occlusion queries.
+        else // if (mRendering->occlusionQuerySupported())
+        {
+            MWRender::OcclusionQuery* query = mRendering->getOcclusionQuery();
+            if (!query->occlusionTestPending())
+            {
+                // get result of last query
+                if (mNumFacing == 0) mFacedHandle = "";
+                else if (mNumFacing == 1)
+                {
+                    bool result = query->getTestResult();
+                    mFacedHandle = result ? mFaced1Name : "";
+                }
+                else if (mNumFacing == 2)
+                {
+                    bool result = query->getTestResult();
+                    mFacedHandle = result ? mFaced2Name : mFaced1Name;
+                }
+
+                // send new query
+                // figure out which object we want to test against
+                std::vector < std::pair < float, std::string > > results = mPhysics->getFacedObjects();
+
+                // ignore the player and other things we're not interested in
+                std::vector < std::pair < float, std::string > >::iterator it = results.begin();
+                while (it != results.end())
+                {
+                    if ( (*it).second.find("HeightField") != std::string::npos // not interested in terrain
+                    || getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
+                    {
+                        it = results.erase(it);
+                    }
+                    else
+                        ++it;
+                }
+
+                if (results.size() == 0)
+                {
+                    mNumFacing = 0;
+                }
+                else if (results.size() == 1)
+                {
+                    mFaced1 = getPtrViaHandle(results.front().second);
+                    mFaced1Name = results.front().second;
+                    mNumFacing = 1;
+
+                    btVector3 p = mPhysics->getRayPoint(results.front().first);
+                    Ogre::Vector3 pos(p.x(), p.z(), -p.y());
+                    Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
+
+                    //std::cout << "Num facing 1 : " << mFaced1Name <<  std::endl;
+                    //std::cout << "Type 1 " << mFaced1.getTypeName() <<  std::endl;
+
+                    query->occlusionTest(pos, node);
+                }
+                else
+                {
+                    mFaced1Name = results.front().second;
+                    mFaced2Name = results[1].second;
+                    mFaced1 = getPtrViaHandle(results.front().second);
+                    mFaced2 = getPtrViaHandle(results[1].second);
+                    mNumFacing = 2;
+
+                    btVector3 p = mPhysics->getRayPoint(results[1].first);
+                    Ogre::Vector3 pos(p.x(), p.z(), -p.y());
+                    Ogre::SceneNode* node1 = mFaced1.getRefData().getBaseNode();
+                    Ogre::SceneNode* node2 = mFaced2.getRefData().getBaseNode();
+
+                    // no need to test if the first node is not occluder
+                    if (!query->isPotentialOccluder(node1) && (mFaced1.getTypeName().find("Static") == std::string::npos))
+                    {
+                        mFacedHandle = mFaced1Name;
+                        //std::cout << "node1 Not an occluder" << std::endl;
+                        return;
+                    }
+
+                    // no need to test if the second object is static (thus cannot be activated)
+                    if (mFaced2.getTypeName().find("Static") != std::string::npos)
+                    {
+                        mFacedHandle = mFaced1Name;
+                        return;
+                    }
+
+                    // work around door problems
+                    if (mFaced1.getTypeName().find("Static") != std::string::npos
+                        && mFaced2.getTypeName().find("Door") != std::string::npos)
+                    {
+                        mFacedHandle = mFaced2Name;
+                        return;
+                    }
+
+                    query->occlusionTest(pos, node2);
+                }
+            }
+        }
     }
 
     bool World::isCellExterior() const
@@ -754,4 +864,15 @@ namespace MWWorld
     {
         return mRendering->getFader();
     }
+
+    void World::setWaterHeight(const float height)
+    {
+        mRendering->setWaterHeight(height);
+    }
+
+    void World::toggleWater()
+    {
+        mRendering->toggleWater();
+    }
+
 }

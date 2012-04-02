@@ -36,19 +36,18 @@ namespace MWSound
         ALuint getBuffer(const std::string &fname);
         void bufferFinished(ALuint buffer);
 
+        Environment mLastEnvironment;
+
         virtual std::vector<std::string> enumerate();
         virtual void init(const std::string &devname="");
         virtual void deinit();
 
-        virtual SoundPtr playSound(const std::string &fname, float volume, float pitch, bool loop);
-        virtual SoundPtr playSound3D(const std::string &fname, const float *pos, float volume, float pitch,
-                                     float min, float max, bool loop);
+        virtual SoundPtr playSound(const std::string &fname, float volume, float pitch, int flags);
+        virtual SoundPtr playSound3D(const std::string &fname, const Ogre::Vector3 &pos,
+                                     float volume, float pitch, float min, float max, int flags);
+        virtual SoundPtr streamSound(const std::string &fname, float volume, float pitch, int flags);
 
-        virtual SoundPtr streamSound(const std::string &fname, float volume, float pitch);
-        virtual SoundPtr streamSound3D(const std::string &fname, const float *pos, float volume, float pitch,
-                                       float min, float max);
-
-        virtual void updateListener(const float *pos, const float *atdir, const float *updir);
+        virtual void updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir, Environment env);
 
         OpenAL_Output& operator=(const OpenAL_Output &rhs);
         OpenAL_Output(const OpenAL_Output &rhs);
@@ -60,6 +59,7 @@ namespace MWSound
         std::auto_ptr<StreamThread> mStreamThread;
 
         friend class OpenAL_Sound;
+        friend class OpenAL_Sound3D;
         friend class OpenAL_SoundStream;
         friend class SoundManager;
     };
