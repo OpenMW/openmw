@@ -343,6 +343,8 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(globaldefault))
         settings.loadUser(globaldefault);
 
+    mFpsLevel = settings.getInt("fps", "HUD");
+
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string(),
