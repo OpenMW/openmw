@@ -76,6 +76,7 @@ namespace OMW
             bool mReportFocus;
             float mFocusTDiff;
             std::string mFocusName;
+            std::vector<std::string> mFallbackPairs;
 
             MWWorld::Environment mEnvironment;
             Compiler::Extensions mExtensions;
@@ -162,6 +163,8 @@ namespace OMW
             void setEncoding(const std::string& encoding);
 
             void setAnimationVerbose(bool animverbose);
+
+            void setFallbackValues(std::vector<std::string> pairs);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

@@ -141,8 +141,8 @@ void MwIniImporter::mergeFallback(multistrmap &cfg, multistrmap &ini) {
     for(strmap::iterator it=mMergeFallback.begin(); it!=mMergeFallback.end(); it++) {
         if((iniIt = ini.find(it->second)) != ini.end()) {
             for(std::vector<std::string>::iterator vc = iniIt->second.begin(); vc != iniIt->second.end(); vc++) {
-                std::string value("\"");
-                value.append(it->first).append("=").append(vc->substr(0,vc->length()-1)).append("\"");
+                std::string value(it->first);
+                value.append("=").append(vc->substr(0,vc->length()-1));
                 insertMultistrmap(cfg, "fallback", value);
             }
         }

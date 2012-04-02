@@ -28,6 +28,8 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    bpo::notify(vm);
+
     std::string iniFile = vm["ini"].as<std::string>();
     std::string cfgFile = vm["cfg"].as<std::string>();
 

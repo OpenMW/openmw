@@ -152,10 +152,40 @@ namespace MWWorld
             mRendering->skyDisable();
     }
 
+    void World::setFallbackValues(std::vector<std::string> pairs)
+    {
+        for(std::vector<std::string>::iterator it = pairs.begin(); it != pairs.end(); it++)
+        {
+            std::string kv = *it;
+            int seperator = kv.find("=");
+            if(seperator < 1 || seperator == (kv.length()-1))
+            {
+                continue;
+            }
+
+            std::string key = it->substr(0,seperator);
+            std::string value = it->substr(seperator+1);
+            if(mFallback.find(key) == mFallback.end()) {
+                std::cout << "insert " << key << ":" << value << std::endl;
+                mFallback.insert(std::make_pair<std::string,std::string>(key,value));
+            }
+        }
+    }
+
+    std::string World::getFallback(std::string key)
+    {
+        std::map<std::string,std::string>::iterator it;
+        if((it = mFallback.find(key)) == mFallback.end())
+        {
+            return std::string("");
+        }
+        return it->second;
+    }
+
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
-        bool newGame, Environment& environment, const std::string& encoding)
+        bool newGame, Environment& environment, const std::string& encoding, std::vector<std::string> fallbackPairs)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
       mNumFacing(0)
@@ -190,6 +220,8 @@ namespace MWWorld
         }
 
         mWorldScene = new Scene(environment, this, *mRendering, mPhysics);
+        
+        setFallbackValues(fallbackPairs);
 
     }
 
