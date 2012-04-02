@@ -14,18 +14,16 @@ MwIniImporter::MwIniImporter() {
         { "fps", "General:Show FPS" },
         { 0, 0 }
     };
-    const char *fallback[][2] = {
-        { "Weather_Sunrise_Time", "Weather:Sunrise Time" },
-        { "Weather_Sunset_Time", "Weather:Sunset Time" },
-        { 0, 0 }
+    const char *fallback[] = {
+        "Weather:Sunrise Time", "Weather_Sunset_Time", 0
     };
 
     for(int i=0; map[i][0]; i++) {
         mMergeMap.insert(std::make_pair<std::string, std::string>(map[i][0], map[i][1]));
     }
 
-    for(int i=0; fallback[i][0]; i++) {
-        mMergeFallback.insert(std::make_pair<std::string, std::string>(fallback[i][0], fallback[i][1]));
+    for(int i=0; fallback[i]; i++) {
+        mMergeFallback.push_back(fallback[i]);
     }
 }
 
@@ -138,11 +136,13 @@ void MwIniImporter::mergeFallback(multistrmap &cfg, multistrmap &ini) {
 
     multistrmap::iterator cfgIt;
     multistrmap::iterator iniIt;
-    for(strmap::iterator it=mMergeFallback.begin(); it!=mMergeFallback.end(); it++) {
-        if((iniIt = ini.find(it->second)) != ini.end()) {
+    for(std::vector<std::string>::iterator it=mMergeFallback.begin(); it!=mMergeFallback.end(); it++) {
+        if((iniIt = ini.find(*it)) != ini.end()) {
             for(std::vector<std::string>::iterator vc = iniIt->second.begin(); vc != iniIt->second.end(); vc++) {
-                std::string value(it->first);
-                value.append("=").append(vc->substr(0,vc->length()-1));
+                std::string value(*it);
+                std::replace( value.begin(), value.end(), ' ', '_' );
+                std::replace( value.begin(), value.end(), ':', '_' );
+                value.append(",").append(vc->substr(0,vc->length()-1));
                 insertMultistrmap(cfg, "fallback", value);
             }
         }

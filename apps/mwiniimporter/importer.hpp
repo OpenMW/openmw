@@ -27,7 +27,7 @@ class MwIniImporter {
     std::string numberToString(int n);
     bool mVerbose;
     strmap mMergeMap;
-    strmap mMergeFallback;
+    std::vector<std::string> mMergeFallback;
 };
 
 
