@@ -109,6 +109,9 @@ class RenderingManager: private RenderingInterface {
     void sunEnable();
     void sunDisable();
 
+    void disableLights();
+    void enableLights();
+
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
 

@@ -12,13 +12,15 @@ namespace MWWorld
 
 namespace MWRender
 {
+    class RenderingManager;
+
     ///
     /// \brief Local map rendering
     ///
     class LocalMap
     {
     public:
-        LocalMap(OEngine::Render::OgreRenderer*, MWWorld::Environment* env);
+        LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering, MWWorld::Environment* env);
         ~LocalMap();
 
         /**
@@ -58,6 +60,7 @@ namespace MWRender
 
     private:
         OEngine::Render::OgreRenderer* mRendering;
+        MWRender::RenderingManager* mRenderingManager;
         MWWorld::Environment* mEnvironment;
 
         // 1024*1024 pixels for a cell
@@ -76,6 +79,9 @@ namespace MWRender
         Ogre::SceneNode* mCameraNode;
         Ogre::SceneNode* mCameraPosNode;
         Ogre::SceneNode* mCameraRotNode;
+
+        float mAngle;
+        const Ogre::Vector2 rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle);
 
         void render(const float x, const float y,
                     const float zlow, const float zhigh,

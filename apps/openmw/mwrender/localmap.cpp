@@ -11,10 +11,11 @@
 using namespace MWRender;
 using namespace Ogre;
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* env) :
+LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering, MWWorld::Environment* env) :
     mInterior(false), mCellX(0), mCellY(0)
 {
     mRendering = rend;
+    mRenderingManager = rendering;
     mEnvironment = env;
 
     mCameraPosNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
@@ -33,6 +34,12 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* en
 LocalMap::~LocalMap()
 {
     deleteBuffers();
+}
+
+const Ogre::Vector2 LocalMap::rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle)
+{
+    return Vector2( Math::Cos(angle) * (p.x - c.x) - Math::Sin(angle) * (p.y - c.y) + c.x,
+                    Math::Sin(angle) * (p.x - c.x) + Math::Cos(angle) * (p.y - c.y) + c.y);
 }
 
 void LocalMap::deleteBuffers()
@@ -117,6 +124,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
 
     const Vector2& north = mEnvironment->mWorld->getNorthVector(cell);
     Radian angle(std::atan2(-north.x, -north.y));
+    mAngle = angle.valueRadians();
     mCameraRotNode->setOrientation(Quaternion(Math::Cos(angle/2.f), 0, Math::Sin(angle/2.f), 0));
 
     mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::NEAR_LEFT_BOTTOM)));
@@ -124,7 +132,9 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::NEAR_RIGHT_BOTTOM)));
     mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::FAR_RIGHT_BOTTOM)));
 
-    Vector2 center(bounds.getCenter().x, bounds.getCenter().z);
+    mBounds.scale(Vector3(2,2,2));
+
+    Vector2 center(mBounds.getCenter().x, mBounds.getCenter().z);
 
     Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
     Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().z);
@@ -165,6 +175,7 @@ void LocalMap::render(const float x, const float y,
 
     // make everything visible
     mRendering->getScene()->setAmbientLight(ColourValue(1,1,1));
+    mRenderingManager->disableLights();
 
     mCameraNode->setPosition(Vector3(x, zhigh+100000, y));
     //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
@@ -233,7 +244,8 @@ void LocalMap::render(const float x, const float y,
             //rtt->writeContentsToFile("./" + texture + ".jpg");
         }
     }
-    
+
+    mRenderingManager->enableLights();
 
     // re-enable fog
     mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, fStart, fEnd);
@@ -251,14 +263,17 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     // retrieve the x,y grid coordinates the player is in 
     int x,y;
     Vector3 _pos(position.x, 0, position.z);
-    _pos = mCameraRotNode->convertWorldToLocalPosition(_pos);
-
-    //if (mInterior)
-       /// \todo
-
     Vector2 pos(_pos.x, _pos.z);
 
+    if (mInterior)
+    {
+        pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().z), mAngle);
+    }
+
+
     Vector3 playerdirection = -mCameraRotNode->convertWorldToLocalOrientation(orientation).zAxis();
+
+    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
 
     if (!mInterior)
     {
@@ -269,8 +284,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     }
     else
     {
-        Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
-        
         x = std::ceil((pos.x - min.x)/sSize)-1;
         y = std::ceil((pos.y - min.y)/sSize)-1;
 
@@ -288,15 +301,11 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     }
     else
     {
-        Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
-
         u = (pos.x - min.x - sSize*x)/sSize;
         v = (pos.y - min.y - sSize*y)/sSize;
 
         texName = mInteriorName + "_" + coordStr(x,y);
     }
-
-    //std::cout << " x,y " << x << ", " << y << " u,v " << u << "," << v << std::endl;
 
     mEnvironment->mWindowManager->setPlayerPos(u, v);
     mEnvironment->mWindowManager->setPlayerDir(playerdirection.x, -playerdirection.z);

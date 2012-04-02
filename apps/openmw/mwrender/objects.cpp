@@ -169,6 +169,7 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     assert(insert);
     Ogre::Light *light = mRenderer.getScene()->createLight();
     light->setDiffuseColour (r, g, b);
+    mLights.push_back(light->getName());
 
     float cval=0.0f, lval=0.0f, qval=0.0f;
 
@@ -274,3 +275,34 @@ Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
 {
     return mBounds[cell];
 }
+
+void Objects::enableLights()
+{
+    std::vector<std::string>::iterator it = mLights.begin();
+    while (it != mLights.end())
+    {
+        if (mMwRoot->getCreator()->hasLight(*it))
+        {
+            mMwRoot->getCreator()->getLight(*it)->setVisible(true);
+            ++it;
+        }
+        else
+            it = mLights.erase(it);
+    }
+}
+
+void Objects::disableLights()
+{
+    std::vector<std::string>::iterator it = mLights.begin();
+    while (it != mLights.end())
+    {
+        if (mMwRoot->getCreator()->hasLight(*it))
+        {
+            mMwRoot->getCreator()->getLight(*it)->setVisible(false);
+            ++it;
+        }
+        else
+            it = mLights.erase(it);
+    }
+}
+

@@ -64,7 +64,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mSun = 0;
 
     mDebugging = new Debugging(mMwRoot, environment, engine);
-    mLocalMap = new MWRender::LocalMap(&mRendering, &environment);
+    mLocalMap = new MWRender::LocalMap(&mRendering, this, &environment);
 }
 
 RenderingManager::~RenderingManager ()
@@ -409,6 +409,16 @@ void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
 void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
 {
     mLocalMap->saveFogOfWar(cell);
+}
+
+void RenderingManager::disableLights()
+{
+    mObjects.disableLights();
+}
+
+void RenderingManager::enableLights()
+{
+    mObjects.enableLights();
 }
 
 } // namespace
