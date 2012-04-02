@@ -47,7 +47,6 @@ int main(int argc, char *argv[]) {
     
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));
-    boost::iostreams::stream<boost::iostreams::file_sink> file(outputFile);
 
     MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
     MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
@@ -59,6 +58,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << "write to: " << outputFile << std::endl;
+    boost::iostreams::stream<boost::iostreams::file_sink> file(outputFile);
     importer.writeToFile(file, cfg);
 
     return 0;
