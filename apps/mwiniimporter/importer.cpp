@@ -14,9 +14,18 @@ MwIniImporter::MwIniImporter() {
         { "fps", "General:Show FPS" },
         { 0, 0 }
     };
+    const char *fallback[][2] = {
+        { "Weather_Sunrise_Time", "Weather:Sunrise Time" },
+        { "Weather_Sunset_Time", "Weather:Sunset Time" },
+        { 0, 0 }
+    };
 
     for(int i=0; map[i][0]; i++) {
         mMergeMap.insert(std::make_pair<std::string, std::string>(map[i][0], map[i][1]));
+    }
+
+    for(int i=0; fallback[i][0]; i++) {
+        mMergeFallback.insert(std::make_pair<std::string, std::string>(fallback[i][0], fallback[i][1]));
     }
 }
 
@@ -116,16 +125,36 @@ void MwIniImporter::merge(multistrmap &cfg, multistrmap &ini) {
     multistrmap::iterator iniIt;
     for(strmap::iterator it=mMergeMap.begin(); it!=mMergeMap.end(); it++) {
         if((iniIt = ini.find(it->second)) != ini.end()) {
-            cfg.erase(it->first);
-            if(!this->specialMerge(it->first, it->second, cfg, ini)) {
-                cfg.insert(std::make_pair<std::string, std::vector<std::string> >(it->first, iniIt->second));
+            for(std::vector<std::string>::iterator vc = iniIt->second.begin(); vc != iniIt->second.end(); vc++) {
+                cfg.erase(it->first);
+                insertMultistrmap(cfg, it->first, *vc);
             }
         }
     }
 }
 
-bool MwIniImporter::specialMerge(std::string cfgKey, std::string iniKey, multistrmap &cfg, multistrmap &ini) {
-    return false;
+void MwIniImporter::mergeFallback(multistrmap &cfg, multistrmap &ini) {
+    cfg.erase("fallback");
+
+    multistrmap::iterator cfgIt;
+    multistrmap::iterator iniIt;
+    for(strmap::iterator it=mMergeFallback.begin(); it!=mMergeFallback.end(); it++) {
+        if((iniIt = ini.find(it->second)) != ini.end()) {
+            for(std::vector<std::string>::iterator vc = iniIt->second.begin(); vc != iniIt->second.end(); vc++) {
+                std::string value("\"");
+                value.append(it->first).append("=").append(vc->substr(0,vc->length()-1)).append("\"");
+                insertMultistrmap(cfg, "fallback", value);
+            }
+        }
+    }
+};
+
+void MwIniImporter::insertMultistrmap(multistrmap &cfg, std::string key, std::string value) {
+    multistrmap::iterator it = cfg.find(key);
+    if(it == cfg.end()) {
+        cfg.insert(std::make_pair<std::string, std::vector<std::string> >(key, std::vector<std::string>() ));
+    }
+    cfg[key].push_back(value);
 }
 
 void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {

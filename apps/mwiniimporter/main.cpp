@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
         ("ini,i", bpo::value<std::string>(), "morrowind.ini file")
         ("cfg,c", bpo::value<std::string>(), "openmw.cfg file")
         ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
+        ("fallback,f", "import fallback settings")
         ("game-files,g", "import esm and esp files")
         ;
 
@@ -44,7 +45,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "cfg file does not exist" << std::endl;
         return -4;
     }
-    
+
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));
 
@@ -52,7 +53,11 @@ int main(int argc, char *argv[]) {
     MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
 
     importer.merge(cfg, ini);
-    
+
+    if(vm.count("fallback")) {
+        importer.mergeFallback(cfg, ini);
+    }
+
     if(vm.count("game-files")) {
         importer.importGameFiles(cfg, ini);
     }
