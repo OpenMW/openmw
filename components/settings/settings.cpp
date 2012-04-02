@@ -22,11 +22,6 @@ void Manager::loadDefault (const std::string& file)
     mDefaultFile.load(file);
 }
 
-void Manager::copyDefaultToUserSettings ()
-{
-    mFile = mDefaultFile;
-}
-
 void Manager::saveUser(const std::string& file)
 {
     std::fstream fout(file.c_str(), std::ios::out);

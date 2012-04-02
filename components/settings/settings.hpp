@@ -27,9 +27,6 @@ namespace Settings
         void loadDefault (const std::string& file);
         ///< load file as the default settings (can be overridden by user settings)
 
-        void copyDefaultToUserSettings ();
-        ///< copy the default settings to the user settings (useful when there are no user settings yet)
-
         void loadUser (const std::string& file);
         ///< load file as user settings
 

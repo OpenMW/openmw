@@ -315,7 +315,7 @@ void OMW::Engine::go()
         boost::filesystem::create_directories(configPath);
     }
 
-    // Create the settings manager and load default and user settings file
+    // Create the settings manager and load default settings file
     Settings::Manager settings;
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
@@ -326,11 +326,14 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(globaldefault))
         settings.loadDefault(globaldefault);
 
+    // load user settings if they exist, otherwise just load the default settings as user settings
     const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
-    else
-        settings.copyDefaultToUserSettings();
+    else if (boost::filesystem::exists(localdefault))
+        settings.loadUser(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadUser(globaldefault);
 
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
