@@ -3,6 +3,7 @@
 #include <OgreSceneNode.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/settings/settings.hpp>
 
 using namespace MWRender;
 
@@ -113,7 +114,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     bounds.scale(insert->getScale());
     mBounds[ptr.getCell()].merge(bounds);
 
-    if(!mIsStatic)
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects"))
     {
         insert->attachObject(ent);
 
