@@ -9,7 +9,7 @@ namespace bpo = boost::program_options;
 
 int main(int argc, char *argv[]) {
 
-    bpo::options_description desc("Syntax: mwiniimporter <options>\nAllowed options");
+    bpo::options_description desc("Syntax: mwiniimporter -i inifile -c configfile <options>\nAllowed options");
     desc.add_options()
         ("help,h", "produce help message")
         ("verbose,v", "verbose output")
@@ -20,25 +20,11 @@ int main(int argc, char *argv[]) {
         ;
 
     bpo::variables_map vm;
-    try {
-        bpo::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+    bpo::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 
-        // parse help before calling notify because we dont want it to throw an error if help is set
-        if(vm.count("help")) {
-            std::cout << desc;
-            return 0;
-        }
-
-        bpo::notify(vm);
-
-    }
-    catch(std::exception& e) {
-        std::cerr << "Error:" << e.what() << std::endl;
-        return -1;
-    }
-    catch(...) {
-        std::cerr << "Error" << std::endl;
-        return -2;
+    if(vm.count("help") || !vm.count("ini") || !vm.count("cfg")) {
+        std::cout << desc;
+        return 0;
     }
 
     std::string iniFile = vm["ini"].as<std::string>();
