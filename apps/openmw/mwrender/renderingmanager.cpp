@@ -23,7 +23,7 @@ namespace MWRender {
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0)
 {
-    mRendering.createScene("PlayerCam", 55, 5);
+    mRendering.createScene("PlayerCam", Settings::Manager::getFloat("fieldofview", "General"), 5);
     mTerrainManager = new TerrainManager(mRendering.getScene(),
                                          environment);
 
