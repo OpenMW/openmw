@@ -746,6 +746,7 @@ void SkyManager::setGlare(const float glare)
 
 Vector3 SkyManager::getRealSunPos()
 {
+    if (!mCreated) return Vector3(0,0,0);
     return mSun->getNode()->_getDerivedPosition();
 }
 
