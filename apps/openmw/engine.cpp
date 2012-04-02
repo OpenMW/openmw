@@ -82,12 +82,20 @@ void OMW::Engine::updateFocusReport (float duration)
 
         if (!handle.empty())
         {
-            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+            // the faced handle is not updated immediately, so on a cell change it might
+            // point to an object that doesn't exist anymore
+            // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
+            try
+            {
+                MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
-            if (!ptr.isEmpty()){
-                name = MWWorld::Class::get (ptr).getName (ptr);
+                if (!ptr.isEmpty()){
+                    name = MWWorld::Class::get (ptr).getName (ptr);
 
+                }
             }
+            catch (std::runtime_error& e)
+            {}
         }
 
         if (name!=mFocusName)
@@ -420,10 +428,21 @@ void OMW::Engine::activate()
     if (handle.empty())
         return;
 
-    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+    // the faced handle is not updated immediately, so on a cell change it might
+    // point to an object that doesn't exist anymore
+    // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
+    MWWorld::Ptr ptr;
+    try
+    {
+        ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
-    if (ptr.isEmpty())
+        if (ptr.isEmpty())
+            return;
+    }
+    catch (std::runtime_error&)
+    {
         return;
+    }
 
     MWScript::InterpreterContext interpreterContext (mEnvironment,
         &ptr.getRefData().getLocals(), ptr);

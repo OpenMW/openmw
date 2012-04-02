@@ -128,4 +128,5 @@ op 0x2000142: SetWaterLevel
 op 0x2000143: ModWaterLevel
 op 0x2000144: ToggleWater, twa
 op 0x2000145: ToggleFogOfWar (tfow)
-opcodes 0x2000146-0x3ffffff unused
+op 0x2000146: TogglePathgrid
+opcodes 0x2000147-0x3ffffff unused
