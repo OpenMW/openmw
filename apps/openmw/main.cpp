@@ -54,6 +54,35 @@ inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string
 
 using namespace std;
 
+struct FallbackMap {
+    std::map<std::string,std::string> mMap;
+
+    static void
+    validate(boost::any &v, std::vector<std::string> const &tokens)
+    {
+        if(v.empty())
+        {
+            v = boost::any(FallbackMap());
+        }
+        
+        FallbackMap *map = boost::any_cast<FallbackMap>(&v);
+        
+        std::map<std::string,std::string>::iterator mapIt;
+        for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); it++)
+        {
+            int sep = it->find(",");
+            std::string key(it->substr(0,sep-1));
+            std::string value(it->substr(sep));
+            
+            if((mapIt = map->mMap.find(key)) == map->mMap.end())
+            {
+                map->mMap.insert(std::make_pair<std::string,std::string>(key,value));
+            }
+        }
+    }   
+};
+
+
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
  * to parse configuration files.
@@ -126,7 +155,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("report-focus", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "write name of focussed object to cout")
 
-        ("fallback", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+        ("fallback", bpo::value<FallbackMap>()
             ->multitoken()->composing(), "fallback values")
 
         ;
@@ -236,7 +265,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setReportFocus(variables["report-focus"].as<bool>());
     engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
-    engine.setFallbackValues(variables["fallback"].as<std::vector<std::string> >());
+    //engine.setFallbackValues(variables["fallback"].as<std::vector<std::string> >());
 
     return true;
 }
