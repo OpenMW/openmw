@@ -70,7 +70,7 @@ void Water::toggle()
 
 void Water::checkUnderwater(float y)
 {
-    if ((mIsUnderwater && y > mTop) || !mWater->isVisible())
+    if ((mIsUnderwater && y > mTop) || !mWater->isVisible() || mCamera->getPolygonMode() != Ogre::PM_SOLID)
     {
         try {
             Ogre::CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
@@ -78,7 +78,7 @@ void Water::checkUnderwater(float y)
         mIsUnderwater = false;
     } 
 
-    if (!mIsUnderwater && y < mTop && mWater->isVisible())
+    if (!mIsUnderwater && y < mTop && mWater->isVisible() && mCamera->getPolygonMode() == Ogre::PM_SOLID)
     {
         try {
             Ogre::CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", true);

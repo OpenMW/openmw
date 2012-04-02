@@ -31,11 +31,8 @@
 
 namespace Ogre
 {
-    class Camera;
-    class Viewport;
     class SceneManager;
     class SceneNode;
-    class RaySceneQuery;
     class Quaternion;
     class Vector3;
 }
