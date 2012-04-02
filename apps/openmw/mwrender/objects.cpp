@@ -94,7 +94,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < Settings::Manager::getInt("small object size", "View distance")) && Settings::Manager::getBool("limit small object distance", "Objects");
+    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) && Settings::Manager::getBool("limit small object distance", "Objects");
 
     // do not fade out doors. that will cause holes and look stupid
     if (ptr.getTypeName().find("Door") != std::string::npos)
@@ -116,7 +116,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     {
         insert->attachObject(ent);
 
-        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "View distance") : 0); /// \todo config value
+        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0); /// \todo config value
     }
     else
     {
@@ -130,7 +130,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
                 sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
                 mStaticGeometrySmall[ptr.getCell()] = sg;
 
-                sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "View distance")); /// \todo config value
+                sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance")); /// \todo config value
             }
             else
                 sg = mStaticGeometrySmall[ptr.getCell()];
