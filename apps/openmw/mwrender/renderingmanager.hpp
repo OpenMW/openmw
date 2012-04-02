@@ -174,7 +174,8 @@ class RenderingManager: private RenderingInterface {
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
     MWRender::Player *mPlayer;
-    MWRender::Debugging mDebugging;
+
+    MWRender::Debugging *mDebugging;
 
     MWRender::LocalMap* mLocalMap;
 };

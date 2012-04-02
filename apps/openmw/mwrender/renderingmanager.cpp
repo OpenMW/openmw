@@ -20,7 +20,7 @@ using namespace Ogre;
 namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
-:mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mDebugging(engine)
+    :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0)
 {
     mRendering.createScene("PlayerCam", 55, 5);
     mTerrainManager = new TerrainManager(mRendering.getScene(),
@@ -52,7 +52,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
     cameraPitchNode->attachObject(mRendering.getCamera());
-    
+
     //mSkyManager = 0;
     mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
 
@@ -63,6 +63,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
 
+    mDebugging = new Debugging(mMwRoot, environment, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, &environment);
 }
 
@@ -71,6 +72,7 @@ RenderingManager::~RenderingManager ()
     //TODO: destroy mSun?
     delete mPlayer;
     delete mSkyManager;
+    delete mDebugging;
     delete mTerrainManager;
     delete mLocalMap;
     delete mOcclusionQuery;
@@ -101,6 +103,7 @@ void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
 {
     mObjects.removeCell(store);
     mActors.removeCell(store);
+    mDebugging->cellRemoved(store);
     if (store->cell->isExterior())
       mTerrainManager->cellRemoved(store);
 }
@@ -122,6 +125,7 @@ void RenderingManager::toggleWater()
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
     mObjects.buildStaticGeometry (*store);
+    mDebugging->cellAdded(store);
     if (store->cell->isExterior())
       mTerrainManager->cellAdded(store);
 }
@@ -188,7 +192,7 @@ void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     }
     else
         removeWater();
-   
+
 }
 
 void RenderingManager::setWaterHeight(const float height)
@@ -226,7 +230,7 @@ void RenderingManager::skySetDate (int day, int month)
 
 int RenderingManager::skyGetMasserPhase() const
 {
-   
+
     return mSkyManager->getMasserPhase();
 }
 
@@ -242,8 +246,8 @@ void RenderingManager::skySetMoonColour (bool red){
 
 bool RenderingManager::toggleRenderMode(int mode)
 {
-    if (mode == MWWorld::World::Render_CollisionDebug)
-        return mDebugging.toggleRenderMode(mode);
+    if (mode != MWWorld::World::Render_Wireframe)
+        return mDebugging->toggleRenderMode(mode);
     else // if (mode == MWWorld::World::Render_Wireframe)
     {
         if (mRendering.getCamera()->getPolygonMode() == PM_SOLID)
@@ -268,10 +272,10 @@ void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
 }
 
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
-{  
+{
   /// \todo make the viewing distance and fog start/end configurable
 
-  // right now we load 3x3 cells, so the maximum viewing distance we 
+  // right now we load 3x3 cells, so the maximum viewing distance we
   // can allow (to prevent objects suddenly popping up) equals:
   // 8192            * 0.69
   //   ^ cell size    ^ minimum density value used (clear weather)
@@ -279,7 +283,7 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
   float high = 5652.48 / density;
 
   mRendering.getScene()->setFog (FOG_LINEAR, colour, 0, low, high);
-  
+
   mRendering.getCamera()->setFarClipDistance ( high );
   mRendering.getViewport()->setBackgroundColour (colour);
 }
@@ -382,10 +386,10 @@ void RenderingManager::sunDisable()
 
 void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 {
-    // direction * -1 (because 'direction' is camera to sun vector and not sun to camera), 
+    // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
     // then convert from MW to ogre coordinates (swap y,z and make y negative)
     if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.z, direction.y));
-    
+
     mSkyManager->setSunDirection(direction);
 }
 
