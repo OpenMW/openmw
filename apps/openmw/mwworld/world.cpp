@@ -146,10 +146,10 @@ namespace MWWorld
             mRendering->skySetDate (mGlobalVariables->getInt ("day"),
                 mGlobalVariables->getInt ("month"));
 
-            mRendering->getSkyManager()->enable();
+            mRendering->skyEnable();
         }
         else
-            mRendering->getSkyManager()->disable();
+            mRendering->skyDisable();
     }
 
     World::World (OEngine::Render::OgreRenderer& renderer,

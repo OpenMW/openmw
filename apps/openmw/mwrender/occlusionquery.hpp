@@ -53,6 +53,8 @@ namespace MWRender
 
         float getSunVisibility() const {return mSunVisibility;};
 
+        void setSunNode(Ogre::SceneNode* node);
+
     private:
         Ogre::HardwareOcclusionQuery* mSunTotalAreaQuery;
         Ogre::HardwareOcclusionQuery* mSunVisibleAreaQuery;
