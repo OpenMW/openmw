@@ -7,7 +7,7 @@
 namespace MWRender {
 
     /// Water rendering 	
-    class Water : Ogre::RenderTargetListener, Ogre::Camera::Listener
+    class Water : Ogre::RenderTargetListener
     {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
@@ -22,6 +22,13 @@ namespace MWRender {
         int mTop;
 
         Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
+
+    protected:
+        void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+        void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+
+        Ogre::RenderTarget* mReflectionTarget;
+        Ogre::RenderTarget* mRefractionTarget;
 
     public:
         Water (Ogre::Camera *camera, const ESM::Cell* cell);
