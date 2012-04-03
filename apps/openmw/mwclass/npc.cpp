@@ -53,9 +53,14 @@ namespace MWClass
             // NPC stats
             if (!ref->base->faction.empty())
             {
-                // TODO research how initial rank is stored. The information in loadnpc.hpp are at
-                // best very unclear.
-                data->mNpcStats.mFactionRank[ref->base->faction] = 0;
+                if(ref->base->npdt52.gold != -10)
+                {
+                    data->mNpcStats.mFactionRank[ref->base->faction] = ref->base->npdt52.rank;
+                }
+                else
+                {
+                    data->mNpcStats.mFactionRank[ref->base->faction] = ref->base->npdt52.rank;
+                }
             }
 
             for (int i=0; i<27; ++i)
@@ -281,7 +286,7 @@ namespace MWClass
     void Npc::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Npc);
-
+        std::cout << "class npc:" << typeid (ESM::NPC).name();
         registerClass (typeid (ESM::NPC).name(), instance);
     }
 }
