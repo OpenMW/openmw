@@ -93,6 +93,12 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
+            std::string mFacedHandle;
+            Ptr mFaced1;
+            Ptr mFaced2;
+            std::string mFaced1Name;
+            std::string mFaced2Name;
+            int mNumFacing;
 
             int getDaysPerMonth (int month) const;
 
@@ -112,6 +118,9 @@ namespace MWWorld
             Ptr::CellStore *getExterior (int x, int y);
 
             Ptr::CellStore *getInterior (const std::string& name);
+
+            void setWaterHeight(const float height);
+            void toggleWater();
             
             void adjustSky();
 

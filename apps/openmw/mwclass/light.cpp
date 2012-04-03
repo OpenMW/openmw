@@ -59,7 +59,7 @@ namespace MWClass
 
         if (!ref->base->sound.empty())
         {
-            environment.mSoundManager->playSound3D (ptr, ref->base->sound, 1.0, 1.0, true);
+            environment.mSoundManager->playSound3D (ptr, ref->base->sound, 1.0, 1.0, MWSound::Play_Loop);
         }
     }
 
@@ -83,7 +83,7 @@ namespace MWClass
         if (!(ref->base->data.flags & ESM::Light::Carry))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
 
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));

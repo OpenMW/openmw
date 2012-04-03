@@ -109,61 +109,68 @@ namespace MWRender
     public:
         SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera, MWWorld::Environment* env);
         ~SkyManager();
-        
+
         void update(float duration);
-        
+
+        void create();
+        ///< no need to call this, automatically done on first enable()
+
         void enable();
-        
+
         void disable();
-        
+
         void setHour (double hour);
         ///< will be called even when sky is disabled.
-        
+
         void setDate (int day, int month);
         ///< will be called even when sky is disabled.
-        
+
         int getMasserPhase() const;
         ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
         /// 3 waxing or waning gibbous, 4 full moon
-        
+
         int getSecundaPhase() const;
         ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
         /// 3 waxing or waning gibbous, 4 full moon
-        
+
         void setMoonColour (bool red);
         ///< change Secunda colour to red
-        
+
         void setCloudsOpacity(float opacity);
         ///< change opacity of the clouds
-        
+
         void setWeather(const MWWorld::WeatherResult& weather);
-        
+
+        Ogre::SceneNode* getSunNode();
+
         void sunEnable();
-        
+
         void sunDisable();
-        
+
         void setSunDirection(const Ogre::Vector3& direction);
-        
+
         void setMasserDirection(const Ogre::Vector3& direction);
-        
+
         void setSecundaDirection(const Ogre::Vector3& direction);
-        
+
         void setMasserFade(const float fade);
-        
+
         void setSecundaFade(const float fade);
-        
+
         void masserEnable();
         void masserDisable();
 
         void secundaEnable();
         void secundaDisable();
-        
+
         void setThunder(const float factor);
-        
-        void setGlare(bool glare);
+
+        void setGlare(const float glare);
         Ogre::Vector3 getRealSunPos();
-        
+
     private:
+        bool mCreated;
+
         MWWorld::Environment* mEnvironment;
         float mHour;
         int mDay;
@@ -203,12 +210,12 @@ namespace MWRender
                 
         float mRemainingTransitionTime;
         
-        float mGlareFade;
+        float mGlare; // target
+        float mGlareFade; // actual
         
         void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
         
         bool mEnabled;
-        bool mGlareEnabled;
         bool mSunEnabled;
         bool mMasserEnabled;
         bool mSecundaEnabled;
