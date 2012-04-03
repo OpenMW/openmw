@@ -127,12 +127,24 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     mAngle = angle.valueRadians();
     mCameraRotNode->setOrientation(Quaternion(Math::Cos(angle/2.f), 0, Math::Sin(angle/2.f), 0));
 
-    mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::NEAR_LEFT_BOTTOM)));
-    mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::FAR_LEFT_BOTTOM)));
-    mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::NEAR_RIGHT_BOTTOM)));
-    mBounds.merge(mCameraRotNode->convertWorldToLocalPosition(bounds.getCorner(AxisAlignedBox::FAR_RIGHT_BOTTOM)));
-
-    mBounds.scale(Vector3(2,2,2));
+    // rotate the cell and merge the rotated corners to the bounding box
+    Vector2 _center(bounds.getCenter().x, bounds.getCenter().z);
+    Vector3 _c1 = bounds.getCorner(AxisAlignedBox::NEAR_LEFT_BOTTOM);
+    Vector3 _c2 = bounds.getCorner(AxisAlignedBox::FAR_LEFT_BOTTOM);
+    Vector3 _c3 = bounds.getCorner(AxisAlignedBox::NEAR_RIGHT_BOTTOM);
+    Vector3 _c4 = bounds.getCorner(AxisAlignedBox::FAR_RIGHT_BOTTOM);
+    Vector2 c1(_c1.x, _c1.z);
+    Vector2 c2(_c2.x, _c2.z);
+    Vector2 c3(_c3.x, _c3.z);
+    Vector2 c4(_c4.x, _c4.z);
+    c1 = rotatePoint(c1, _center, mAngle);
+    c2 = rotatePoint(c2, _center, mAngle);
+    c3 = rotatePoint(c3, _center, mAngle);
+    c4 = rotatePoint(c4, _center, mAngle);
+    mBounds.merge(Vector3(c1.x, 0, c1.y));
+    mBounds.merge(Vector3(c2.x, 0, c2.y));
+    mBounds.merge(Vector3(c3.x, 0, c3.y));
+    mBounds.merge(Vector3(c4.x, 0, c4.y));
 
     Vector2 center(mBounds.getCenter().x, mBounds.getCenter().z);
 
