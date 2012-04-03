@@ -27,7 +27,8 @@ Water::Water (Ogre::Camera *camera, const ESM::Cell* cell) :
 
     mWater = mSceneManager->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
-    mWater->setMaterialName("Examples/Water0");
+
+    mWater->setMaterial(createMaterial());
 
     mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
                         + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")
@@ -161,6 +162,33 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
 		mCamera->disableReflection();
 		mCamera->disableCustomNearClipPlane();
 	}
+}
+
+Ogre::MaterialPtr Water::createMaterial()
+{
+    MaterialPtr mat = MaterialManager::getSingleton().create("Water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    mat->removeAllTechniques();
+
+    // fallback technique without shaders
+    // also used for minimap (because it can't have reflecting water)
+    Technique* old = mat->createTechnique();
+    old->setSchemeName("Map");
+    Pass* oldpass = old->createPass();
+    oldpass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+    oldpass->setDepthWriteEnabled(false);
+    oldpass->setDiffuse(0,0,0,1);
+    oldpass->setSelfIllumination(0.6, 0.7, 1.0);
+    oldpass->setAmbient(0,0,0);
+    TextureUnitState* oldtus = oldpass->createTextureUnitState();
+    std::string textureNames[32];
+    for (int i=0; i<32; ++i)
+    {
+        textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
+    }
+    oldtus->setAnimatedTextureName(textureNames, 32, 2);
+    oldtus->setTextureScale(0.1, 0.1);
+    oldtus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 0.7);
+    return mat;
 }
 
 } // namespace

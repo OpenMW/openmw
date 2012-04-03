@@ -30,6 +30,8 @@ namespace MWRender {
         void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
 
+        Ogre::MaterialPtr createMaterial();
+
         Ogre::RenderTarget* mReflectionTarget;
         Ogre::RenderTarget* mRefractionTarget;
 

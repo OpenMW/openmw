@@ -225,6 +225,7 @@ void LocalMap::render(const float x, const float y,
             vp->setShadowsEnabled(false);
             vp->setBackgroundColour(ColourValue(0, 0, 0));
             vp->setVisibilityMask(RV_Map);
+            vp->setMaterialScheme("Map");
 
             rtt->update();
 
