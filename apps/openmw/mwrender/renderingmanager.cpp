@@ -112,8 +112,7 @@ void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
 void RenderingManager::removeWater ()
 {
     if(mWater){
-        delete mWater;
-        mWater = 0;
+        mWater->setActive(false);
     }
 }
 
@@ -188,8 +187,7 @@ void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
             mWater = new MWRender::Water(mRendering.getCamera(), store->cell);
         else
             mWater->changeCell(store->cell);
-        //else
-
+        mWater->setActive(true);
     }
     else
         removeWater();

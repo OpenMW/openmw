@@ -1,5 +1,6 @@
 #include "npcanimation.hpp"
 #include "../mwworld/world.hpp"
+#include "renderconst.hpp"
 
 
 using namespace Ogre;
@@ -65,6 +66,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          NifOgre::NIFLoader::load(smodel);
 
     base = mRend.getScene()->createEntity(smodel);
+    base->setVisibilityFlags(RV_Actors);
     base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones
                                                //stay in the same place when we skipanim, or open a gui window
 

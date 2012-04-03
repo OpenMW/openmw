@@ -12,7 +12,7 @@
 
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
-#include "occlusionquery.hpp"
+#include "renderconst.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -92,6 +92,7 @@ void BillboardObject::init(const String& textureName,
     mBBSet->setRenderQueueGroup(RENDER_QUEUE_MAIN+2);
     mBBSet->setBillboardType(BBT_PERPENDICULAR_COMMON);
     mBBSet->setCommonDirection( -position.normalisedCopy() );
+    mBBSet->setVisibilityFlags(RV_Sky);
     mNode = rootNode->createChildSceneNode();
     mNode->setPosition(finalPosition);
     mNode->attachObject(mBBSet);
@@ -376,6 +377,7 @@ void SkyManager::create()
     MeshPtr mesh = NifOgre::NIFLoader::load("meshes\\sky_night_01.nif");
     Entity* night1_ent = mSceneMgr->createEntity("meshes\\sky_night_01.nif");
     night1_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+1);
+    night1_ent->setVisibilityFlags(RV_Sky);
 
     mAtmosphereNight = mRootNode->createChildSceneNode();
     mAtmosphereNight->attachObject(night1_ent);
@@ -449,6 +451,7 @@ void SkyManager::create()
     ModVertexAlpha(atmosphere_ent, 0);
 
     atmosphere_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY);
+    atmosphere_ent->setVisibilityFlags(RV_Sky);
     mAtmosphereDay = mRootNode->createChildSceneNode();
     mAtmosphereDay->attachObject(atmosphere_ent);
     mAtmosphereMaterial = atmosphere_ent->getSubEntity(0)->getMaterial();
@@ -485,6 +488,7 @@ void SkyManager::create()
     // Clouds
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
     Entity* clouds_ent = mSceneMgr->createEntity("meshes\\sky_clouds_01.nif");
+    clouds_ent->setVisibilityFlags(RV_Sky);
     clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+5);
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
     clouds_node->attachObject(clouds_ent);

@@ -1,4 +1,5 @@
 #include "creatureanimation.hpp"
+#include "renderconst.hpp"
 
 #include "../mwworld/world.hpp"
 
@@ -20,6 +21,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
         std::string meshNumbered = mesh + getUniqueID(mesh) + ">|";
         NifOgre::NIFLoader::load(meshNumbered);
         base = mRend.getScene()->createEntity(meshNumbered);
+        base->setVisibilityFlags(RV_Actors);
         std::string meshZero = mesh + "0000>|";
 
         if((transformations = (NIFLoader::getSingletonPtr())->getAnim(meshZero))){

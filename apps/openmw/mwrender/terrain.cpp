@@ -6,6 +6,7 @@
 
 #include "terrainmaterial.hpp"
 #include "terrain.hpp"
+#include "renderconst.hpp"
 
 
 using namespace Ogre;
@@ -159,6 +160,7 @@ namespace MWRender
                                          x * numTextures, y * numTextures,
                                          numTextures,
                                          indexes);
+                    terrain->setVisibilityFlags(RV_Terrain);
 
                     if ( land && land->landData->usingColours )
                     {

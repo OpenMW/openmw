@@ -4,6 +4,7 @@
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 #include <components/settings/settings.hpp>
+#include "renderconst.hpp"
 
 using namespace MWRender;
 
@@ -116,7 +117,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     {
         insert->attachObject(ent);
 
-        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0); /// \todo config value
+        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+        ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
     }
     else
     {
@@ -157,6 +159,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
 
         sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
+
+        sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
 
         mRenderer.getScene()->destroyEntity(ent);
     }

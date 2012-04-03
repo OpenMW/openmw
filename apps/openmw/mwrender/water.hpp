@@ -4,6 +4,8 @@
 #include <Ogre.h>
 #include <components/esm/loadcell.hpp>
 
+#include "renderconst.hpp"
+
 namespace MWRender {
 
     /// Water rendering 	
@@ -19,6 +21,7 @@ namespace MWRender {
         Ogre::Entity *mWater;
 
         bool mIsUnderwater;
+        bool mActive;
         int mTop;
 
         Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
@@ -30,9 +33,15 @@ namespace MWRender {
         Ogre::RenderTarget* mReflectionTarget;
         Ogre::RenderTarget* mRefractionTarget;
 
+        int mVisibilityFlags;
+        int mReflectDistance;
+        int mOldCameraFarClip;
+
     public:
         Water (Ogre::Camera *camera, const ESM::Cell* cell);
         ~Water();
+
+        void setActive(bool active);
 
         void toggle();
 
