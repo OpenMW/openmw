@@ -128,6 +128,7 @@ void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
     mDebugging->cellAdded(store);
     if (store->cell->isExterior())
       mTerrainManager->cellAdded(store);
+    waterAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
