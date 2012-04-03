@@ -9,7 +9,7 @@ namespace MWRender
 Water::Water (Ogre::Camera *camera, const ESM::Cell* cell) :
     mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()),
     mIsUnderwater(false), mReflectDistance(0), mVisibilityFlags(0), mOldCameraFarClip(0),
-    mReflectionTarget(0), mRefractionTarget(0), mActive(1)
+    mReflectionTarget(0), mActive(1)
 {
     try
     {
@@ -27,8 +27,6 @@ Water::Water (Ogre::Camera *camera, const ESM::Cell* cell) :
 
     mWater = mSceneManager->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
-
-    mWater->setMaterial(createMaterial());
 
     mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
                         + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")
@@ -48,33 +46,31 @@ Water::Water (Ogre::Camera *camera, const ESM::Cell* cell) :
 
     // Create rendertargets for reflection and refraction
     int rttsize = Settings::Manager::getInt("rtt size", "Water");
-	for (unsigned int i = 0; i < 2; ++i)
-	{
-		if (i==0 && !Settings::Manager::getBool("reflection", "Water")) continue;
-		if (i==1 && !Settings::Manager::getBool("refraction", "Water")) continue;
 
-		TexturePtr tex = TextureManager::getSingleton().createManual(i == 0 ? "WaterReflection" : "WaterRefraction",
-			ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_R8G8B8, TU_RENDERTARGET);
+    if (Settings::Manager::getBool("reflection", "Water"))
+    {
+        TexturePtr tex = TextureManager::getSingleton().createManual("WaterReflection",
+            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_R8G8B8, TU_RENDERTARGET);
 
-		RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
-		Viewport* vp = rtt->addViewport(mCamera);
-		vp->setOverlaysEnabled(false);
-		vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
-		vp->setShadowsEnabled(false);
-		vp->setVisibilityMask( (i == 0) ? mVisibilityFlags : RV_All);
-		rtt->addListener(this);
+        RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
+        Viewport* vp = rtt->addViewport(mCamera);
+        vp->setOverlaysEnabled(false);
+        vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
+        vp->setShadowsEnabled(false);
+        vp->setVisibilityMask( mVisibilityFlags );
+        rtt->addListener(this);
         rtt->setActive(true);
 
-		if (i == 0) mReflectionTarget = rtt;
-		else mRefractionTarget = rtt;
-	}
+        mReflectionTarget = rtt;
+    }
+
+    mWater->setMaterial(createMaterial());
 }
 
 void Water::setActive(bool active)
 {
     mActive = active;
     if (mReflectionTarget) mReflectionTarget->setActive(active);
-    if (mRefractionTarget) mRefractionTarget->setActive(active);
     mWater->setVisible(active);
 }
 
@@ -146,8 +142,8 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
 
 	if (evt.source == mReflectionTarget)
 	{
-		mCamera->enableCustomNearClipPlane(mWaterPlane);
-		mCamera->enableReflection(Plane(Vector3::UNIT_Y, mWaterNode->_getDerivedPosition().y));
+		mCamera->enableCustomNearClipPlane(Plane(Vector3::UNIT_Y, mTop));
+		mCamera->enableReflection(Plane(Vector3::UNIT_Y, mTop));
 	}
 }
 
@@ -166,33 +162,16 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
 
 Ogre::MaterialPtr Water::createMaterial()
 {
-    MaterialPtr mat = MaterialManager::getSingleton().create("Water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    mat->removeAllTechniques();
+    MaterialPtr mat = MaterialManager::getSingleton().getByName("Water");
 
-    // shader technique
-    Technique* tech = mat->createTechnique();
-    Pass* pass = tech->createPass();
-    
-
-    // fallback technique without shaders
-    // also used for minimap (because it can't have reflecting water)
-    Technique* old = mat->createTechnique();
-    old->setSchemeName("Map");
-    Pass* oldpass = old->createPass();
-    oldpass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-    oldpass->setDepthWriteEnabled(false);
-    oldpass->setDiffuse(0,0,0,1);
-    oldpass->setSelfIllumination(0.6, 0.7, 1.0);
-    oldpass->setAmbient(0,0,0);
-    TextureUnitState* oldtus = oldpass->createTextureUnitState();
+    // these have to be set in code
     std::string textureNames[32];
     for (int i=0; i<32; ++i)
     {
         textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
     }
-    oldtus->setAnimatedTextureName(textureNames, 32, 2);
-    oldtus->setTextureScale(0.1, 0.1);
-    oldtus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 0.7);
+    mat->getTechnique(1)->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
+
     return mat;
 }
 

@@ -33,7 +33,6 @@ namespace MWRender {
         Ogre::MaterialPtr createMaterial();
 
         Ogre::RenderTarget* mReflectionTarget;
-        Ogre::RenderTarget* mRefractionTarget;
 
         int mVisibilityFlags;
         int mReflectDistance;

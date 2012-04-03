@@ -18,6 +18,67 @@ fragment_program Water/GlassFP cg
 	profiles ps_2_0 arbfp1
 }
 
+vertex_program Water_VP cg
+{
+    source water.cg
+    entry_point main_vp
+    profiles vs_2_x arbvp1
+
+    default_params
+    {
+        param_named_auto wvpMat worldviewproj_matrix
+    }
+}
+
+fragment_program Water_FP cg
+{
+    source water.cg
+    entry_point main_fp
+    profiles ps_2_x arbfp1
+}
+
+material Water
+{
+    technique
+    {
+        pass
+        {
+            scene_blend alpha_blend
+            depth_write off
+
+            vertex_program_ref Water_VP
+            {
+            }
+            fragment_program_ref Water_FP
+            {
+            }
+
+            texture_unit reflectionMap
+            {
+                texture WaterReflection
+            }
+        }
+    }
+    technique
+    {
+        scheme Map
+        pass
+        {
+            scene_blend alpha_blend
+            depth_write off
+            diffuse 0 0 0 1
+            emissive 0.6 0.7 1.0
+            ambient 0 0 0
+            texture_unit
+            {
+                // texture names set via code
+                scale 0.1 0.1
+                alpha_op_ex source1 src_manual src_current 0.7
+            }
+        }
+    }
+}
+
 material Water/Compositor
 {
 	technique
