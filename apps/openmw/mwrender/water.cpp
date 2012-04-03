@@ -1,16 +1,19 @@
 #include "water.hpp"
 #include <components/settings/settings.hpp>
+#include "sky.hpp"
 
 using namespace Ogre;
 
 namespace MWRender
 {
 
-Water::Water (Ogre::Camera *camera, const ESM::Cell* cell) :
+Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()),
     mIsUnderwater(false), mReflectDistance(0), mVisibilityFlags(0), mOldCameraFarClip(0),
     mReflectionTarget(0), mActive(1)
 {
+    mSky = sky;
+
     try
     {
         CompositorManager::getSingleton().addCompositor(mViewport, "Water", -1);
@@ -33,6 +36,7 @@ Water::Water (Ogre::Camera *camera, const ESM::Cell* cell) :
                         + RV_StaticsSmall * Settings::Manager::getBool("reflect small statics", "Water")
                         + RV_Actors * Settings::Manager::getBool("reflect actors", "Water")
                         + RV_Misc * Settings::Manager::getBool("reflect misc", "Water");
+                        //+ RV_Sky;
     mReflectDistance = Settings::Manager::getInt("reflect distance", "Water");
 
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
@@ -44,7 +48,7 @@ Water::Water (Ogre::Camera *camera, const ESM::Cell* cell) :
     }
     mWaterNode->attachObject(mWater);
 
-    // Create rendertargets for reflection and refraction
+    // Create rendertarget for reflection
     int rttsize = Settings::Manager::getInt("rtt size", "Water");
 
     if (Settings::Manager::getBool("reflection", "Water"))
@@ -171,6 +175,10 @@ Ogre::MaterialPtr Water::createMaterial()
         textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
     }
     mat->getTechnique(1)->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
+
+    // use technique without shaders if reflection is disabled
+    if (mReflectionTarget == 0)
+        mat->removeTechnique(0);
 
     return mat;
 }

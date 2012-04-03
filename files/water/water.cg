@@ -1,0 +1,56 @@
+void main_vp
+(
+    in float4 iPos : POSITION
+    , in float2 iUv : TEXCOORD0
+
+    , out float4 oPos : POSITION
+    , out float3 oScreenCoords : TEXCOORD0
+    , out float2 oUv : TEXCOORD1
+
+    , uniform float4x4 wvpMat
+)
+{
+    oPos = mul(wvpMat, iPos);
+
+    oUv = iUv * 10; // uv scale
+
+    float4x4 scalemat = float4x4(   0.5,    0,      0,      0.5,
+                                    0,		-0.5,   0,      0.5,
+                                    0,  	0, 	    0.5,    0.5,
+                                    0,  	0,      0,      1   );
+    float4 texcoordProj = mul(scalemat, oPos);
+    oScreenCoords = float3(texcoordProj.x, texcoordProj.y, texcoordProj.w);
+}
+
+void main_fp
+(
+    out float4 oColor : COLOR
+
+    , in float3 iScreenCoords : TEXCOORD0
+    , in float2 iUv : TEXCOORD1
+    , uniform float renderTargetFlipping
+
+    , uniform sampler2D reflectionMap : register(s0)
+    , uniform sampler2D normalMap : register(s1)
+    , uniform float time
+)
+{
+
+    float2 screenCoords = iScreenCoords.xy / iScreenCoords.z;
+    screenCoords.y = (renderTargetFlipping == -1) ? (1-screenCoords.y) : screenCoords.y; 
+
+    float2 uv1 = iUv + time * float2(0.5, 0);
+    float2 uv2 = iUv + time * float2(0, 0.5);
+    float2 uv3 = iUv + time * float2(-0.5, 0);
+    float2 uv4 = iUv + time * float2(0, -0.5);
+
+    float4 normal = tex2D(normalMap, uv1) + tex2D(normalMap, uv2) + tex2D(normalMap, uv3) + tex2D(normalMap, uv4);
+    normal = normal / 4.f;
+    normal = 2*normal - 1;
+    screenCoords += normal.yx * 0.05;
+
+    float4 reflection = tex2D(reflectionMap, screenCoords);
+
+    oColor.xyz = reflection.xyz;
+    oColor.a = 0.45;
+}

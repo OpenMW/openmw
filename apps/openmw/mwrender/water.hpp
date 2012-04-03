@@ -8,6 +8,8 @@
 
 namespace MWRender {
 
+    class SkyManager;
+
     /// Water rendering 	
     class Water : Ogre::RenderTargetListener
     {
@@ -30,6 +32,8 @@ namespace MWRender {
         void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
 
+        SkyManager* mSky;
+
         Ogre::MaterialPtr createMaterial();
 
         Ogre::RenderTarget* mReflectionTarget;
@@ -39,7 +43,7 @@ namespace MWRender {
         int mOldCameraFarClip;
 
     public:
-        Water (Ogre::Camera *camera, const ESM::Cell* cell);
+        Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell);
         ~Water();
 
         void setActive(bool active);

@@ -185,7 +185,7 @@ void RenderingManager::update (float duration){
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater){
         if(mWater == 0)
-            mWater = new MWRender::Water(mRendering.getCamera(), store->cell);
+            mWater = new MWRender::Water(mRendering.getCamera(), mSkyManager, store->cell);
         else
             mWater->changeCell(store->cell);
         mWater->setActive(true);

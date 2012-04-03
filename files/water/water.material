@@ -51,11 +51,17 @@ material Water
             }
             fragment_program_ref Water_FP
             {
+                param_named_auto time time 0.1
             }
 
             texture_unit reflectionMap
             {
                 texture WaterReflection
+                tex_address_mode clamp
+            }
+            texture_unit normalMap
+            {
+                texture WaterNormal2.tga
             }
         }
     }
