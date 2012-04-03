@@ -48,6 +48,7 @@ material Water
 
             vertex_program_ref Water_VP
             {
+                param_named_auto renderTargetFlipping render_target_flipping
             }
             fragment_program_ref Water_FP
             {
