@@ -21,11 +21,11 @@ namespace MWWorld
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
         mRender(_rend), mEngine(0), mFreeFly (true)
     {
-		playerphysics = new playerMove;
+		
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
         mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
-		playerphysics->mEngine = mEngine;
+		
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -101,11 +101,9 @@ namespace MWWorld
             OEngine::Physic::PhysicActor* act = it->second;
             act->setWalkDirection(btVector3(0,0,0));
         }
-		playerMove::playercmd& pm_ref = playerphysics->cmd;
 		
-		pm_ref.rightmove = 0;
-		pm_ref.forwardmove = 0;
-		pm_ref.upmove = 0;
+		
+		
 		//playerphysics->ps.move_type = PM_NOCLIP;
         for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
             iter!=actors.end(); ++iter)
@@ -123,9 +121,7 @@ namespace MWWorld
                 Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
 				Ogre::Quaternion both = yawQuat * pitchQuat;
 				
-				playerphysics->ps.viewangles.x = 0;
-				playerphysics->ps.viewangles.z = 0;
-				playerphysics->ps.viewangles.y = both.getYaw().valueDegrees() *-1 + 90;
+				
 				//playerphysics->ps.viewangles.z = both.getPitch().valueDegrees();
 				
 			
@@ -133,8 +129,7 @@ namespace MWWorld
             {
                 
                 Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-				pm_ref.rightmove = -dir1.x;
-				pm_ref.forwardmove = dir1.z;
+				
 				
 				
 				
@@ -147,31 +142,24 @@ namespace MWWorld
             {
                 Ogre::Quaternion quat = yawNode->getOrientation();
                 Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-				pm_ref.rightmove = -dir1.x;
-				pm_ref.forwardmove = dir1.z;
+				
 				
                 dir = 0.025*(quat*dir1);
             }
-			Pmove(playerphysics);
+			
 
             //set the walk direction
             act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
         }
-        //mEngine->stepSimulation(duration);
-		Pmove(playerphysics);
+        mEngine->stepSimulation(duration);
+		
         std::vector< std::pair<std::string, Ogre::Vector3> > response;
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
             btVector3 newPos = it->second->getPosition();
 			
             Ogre::Vector3 coord(newPos.x(), newPos.y(), newPos.z());
-			if(it->first == "player"){
-				
-				coord = playerphysics->ps.origin;
-				//std::cout << "Coord" << coord << "\n";
-				coord = Ogre::Vector3(coord.x, coord.z, coord.y);   //x, z, -y
-				
-			}
+			
             response.push_back(std::pair<std::string, Ogre::Vector3>(it->first, coord));
         }
 		

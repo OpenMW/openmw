@@ -14,6 +14,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 
+
 		//Part selection on last character of the file string
 		//  " Tri Chest
 		//  * Tri Tail
@@ -65,6 +66,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          NifOgre::NIFLoader::load(smodel);
 
     base = mRend.getScene()->createEntity(smodel);
+	
     base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones
                                                //stay in the same place when we skipanim, or open a gui window
 
@@ -82,6 +84,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
     }
     textmappings = NIFLoader::getSingletonPtr()->getTextIndices(smodel);
     insert->attachObject(base);
+	
 
         if(female)
             insert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
@@ -124,6 +127,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 			insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg");
 
 		}
+		
         if(foot){
 			if(bodyRaceID.compare("b_n_khajiit_m_") == 0)
 			{
@@ -190,28 +194,29 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 			insertBoundedPart("meshes\\" + hair->model, "Head");
 
         if (chest){
-				insertFreePart("meshes\\" + chest->model, ">\"", insert);
+				insertFreePart("meshes\\" + chest->model, ":\"", insert);
 
 
 		}
         if (handr){
-				insertFreePart("meshes\\" + handr->model , ">?", insert);
+				insertFreePart("meshes\\" + handr->model , ":?", insert);
 
 		}
         if (handl){
-				insertFreePart("meshes\\" + handl->model, ">>", insert);
+				insertFreePart("meshes\\" + handl->model, ":>", insert);
 
 		}
         if(tail){
-                insertFreePart("meshes\\" + tail->model, ">*", insert);
+                insertFreePart("meshes\\" + tail->model, ":*", insert);
         }
         if(feet){
                 std::string num = getUniqueID(feet->model);
-                insertFreePart("meshes\\" + feet->model,"><", insert);
-                insertFreePart("meshes\\" + feet->model,">:", insert);
+                insertFreePart("meshes\\" + feet->model,":<", insert);
+                insertFreePart("meshes\\" + feet->model,"::", insert);
         }
         //originalpos = insert->_getWorldAABB().getCenter();
         //originalscenenode = insert->getPosition();
+		
 }
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
@@ -262,7 +267,7 @@ void NpcAnimation::runAnimation(float timepassed){
                 time = startTime + (time - stopTime);
         }
 
-        handleAnimationTransforms();
+       handleAnimationTransforms();
 
         std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
         std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();

@@ -5,7 +5,6 @@
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
 #include "ptr.hpp"
-#include <openengine/bullet/pmove.h>
 
 namespace MWWorld
 {
@@ -54,7 +53,7 @@ namespace MWWorld
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
-			playerMove* playerphysics;
+
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);
