@@ -169,6 +169,11 @@ Ogre::MaterialPtr Water::createMaterial()
     MaterialPtr mat = MaterialManager::getSingleton().create("Water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     mat->removeAllTechniques();
 
+    // shader technique
+    Technique* tech = mat->createTechnique();
+    Pass* pass = tech->createPass();
+    
+
     // fallback technique without shaders
     // also used for minimap (because it can't have reflecting water)
     Technique* old = mat->createTechnique();

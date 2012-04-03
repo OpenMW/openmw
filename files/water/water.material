@@ -45,7 +45,7 @@ material Water/Compositor
 
 			texture_unit
 			{
-				texture WaterNormal1.tga 2d
+				texture WaterNormal2.tga 2d
                 		tex_coord_set 1
 				//tex_address_mode clamp
 				filtering linear linear linear
