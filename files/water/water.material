@@ -52,6 +52,8 @@ material Water
             fragment_program_ref Water_FP
             {
                 param_named_auto time time 0.1
+                param_named_auto fogColour fog_colour
+                param_named_auto fogParams fog_params
             }
 
             texture_unit reflectionMap

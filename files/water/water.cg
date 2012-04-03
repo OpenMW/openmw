@@ -6,6 +6,7 @@ void main_vp
     , out float4 oPos : POSITION
     , out float3 oScreenCoords : TEXCOORD0
     , out float2 oUv : TEXCOORD1
+    , out float oDepth : TEXCOORD2
 
     , uniform float4x4 wvpMat
 )
@@ -13,6 +14,7 @@ void main_vp
     oPos = mul(wvpMat, iPos);
 
     oUv = iUv * 10; // uv scale
+    oDepth = oPos.z;
 
     float4x4 scalemat = float4x4(   0.5,    0,      0,      0.5,
                                     0,		-0.5,   0,      0.5,
@@ -28,11 +30,14 @@ void main_fp
 
     , in float3 iScreenCoords : TEXCOORD0
     , in float2 iUv : TEXCOORD1
+    , in float iDepth : TEXCOORD2
     , uniform float renderTargetFlipping
 
     , uniform sampler2D reflectionMap : register(s0)
     , uniform sampler2D normalMap : register(s1)
     , uniform float time
+    , uniform float4 fogParams
+    , uniform float4 fogColour
 )
 {
 
@@ -51,6 +56,7 @@ void main_fp
 
     float4 reflection = tex2D(reflectionMap, screenCoords);
 
-    oColor.xyz = reflection.xyz;
+    float fogValue = saturate((iDepth - fogParams.y) * fogParams.w);
+    oColor.xyz = lerp(reflection.xyz, fogColour, fogValue);
     oColor.a = 0.45;
 }
