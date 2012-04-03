@@ -139,6 +139,9 @@ namespace MWWorld
             bool isCellExterior() const;
             bool isCellQuasiExterior() const;
 
+            Ogre::Vector2 getNorthVector(Ptr::CellStore* cell);
+            ///< get north vector (OGRE coordinates) for given interior cell
+
             Globals::Data& getGlobalVariable (const std::string& name);
 
             Globals::Data getGlobalVariable (const std::string& name) const;
