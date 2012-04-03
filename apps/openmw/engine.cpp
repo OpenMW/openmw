@@ -341,7 +341,7 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mNewGame, mEnvironment, mEncoding, mFallbackPairs);
+        mResDir, mNewGame, mEnvironment, mEncoding, mFallbackMap);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
@@ -509,7 +509,7 @@ void OMW::Engine::setEncoding(const std::string& encoding)
     mEncoding = encoding;
 }
 
-void OMW::Engine::setFallbackValues(std::vector<std::string> pairs)
+void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
 {
-    mFallbackPairs = pairs;
+    mFallbackMap = fallbackMap;
 }

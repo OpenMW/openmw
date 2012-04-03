@@ -56,31 +56,33 @@ using namespace std;
 
 struct FallbackMap {
     std::map<std::string,std::string> mMap;
-
-    static void
-    validate(boost::any &v, std::vector<std::string> const &tokens)
-    {
-        if(v.empty())
-        {
-            v = boost::any(FallbackMap());
-        }
-        
-        FallbackMap *map = boost::any_cast<FallbackMap>(&v);
-        
-        std::map<std::string,std::string>::iterator mapIt;
-        for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); it++)
-        {
-            int sep = it->find(",");
-            std::string key(it->substr(0,sep-1));
-            std::string value(it->substr(sep));
-            
-            if((mapIt = map->mMap.find(key)) == map->mMap.end())
-            {
-                map->mMap.insert(std::make_pair<std::string,std::string>(key,value));
-            }
-        }
-    }   
 };
+
+void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
+{
+    if(v.empty())
+    {
+        v = boost::any(FallbackMap());
+    }
+
+    FallbackMap *map = boost::any_cast<FallbackMap>(&v);
+
+    std::map<std::string,std::string>::iterator mapIt;
+    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); it++)
+    {
+        int sep = it->find(",");
+        if(sep < 1)
+            continue;
+
+        std::string key(it->substr(0,sep));
+        std::string value(it->substr(sep+1));
+
+        if((mapIt = map->mMap.find(key)) == map->mMap.end())
+        {
+            map->mMap.insert(std::make_pair<std::string,std::string>(key,value));
+        }
+    }
+}
 
 
 /**
@@ -265,7 +267,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setReportFocus(variables["report-focus"].as<bool>());
     engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
-    //engine.setFallbackValues(variables["fallback"].as<std::vector<std::string> >());
+    engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
 
     return true;
 }

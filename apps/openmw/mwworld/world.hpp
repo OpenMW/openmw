@@ -111,7 +111,7 @@ namespace MWWorld
            World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
-                Environment& environment, const std::string& encoding, std::vector<std::string> fallbackPairs);
+                Environment& environment, const std::string& encoding, std::map<std::string,std::string> fallbackMap);
 
             ~World();
 
@@ -126,7 +126,7 @@ namespace MWWorld
 
             void adjustSky();
 
-            void setFallbackValues(std::vector<std::string> pairs);
+            void setFallbackValues(std::map<std::string,std::string> fallbackMap);
 
             std::string getFallback(std::string key);
 
