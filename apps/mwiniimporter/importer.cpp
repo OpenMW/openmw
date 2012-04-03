@@ -15,7 +15,9 @@ MwIniImporter::MwIniImporter() {
         { 0, 0 }
     };
     const char *fallback[] = {
-        "Weather:Sunrise Time", "Weather_Sunset_Time", 0
+        "Weather:Sunrise Time",
+        "Weather:Sunset Time",
+        0
     };
 
     for(int i=0; map[i][0]; i++) {
