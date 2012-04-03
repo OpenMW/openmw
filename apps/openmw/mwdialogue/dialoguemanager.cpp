@@ -39,6 +39,9 @@
 #include "../mwscript/interpretercontext.hpp"
 #include <components/compiler/scriptparser.hpp>
 
+#include "../mwclass/npc.hpp"
+#include "../mwmechanics/npcstats.hpp"
+
 namespace
 {
     std::string toLower (const std::string& name)
@@ -474,22 +477,18 @@ namespace MWDialogue
         //NPC faction
         if (!info.npcFaction.empty())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
-
-            if (!cellRef)
-                return false;
-
-            if (toLower (info.npcFaction)!=toLower (cellRef->base->faction))
-                return false;
-
-            //check NPC rank
-            if(cellRef->base->npdt52.gold != -10)
+            //MWWorld::Class npcClass = MWWorld::Class::get(actor);
+            MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(actor);
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.npcFaction);
+            if(it!=stats.mFactionRank.end())
             {
-                if(cellRef->base->npdt52.rank < info.data.rank) return false;
+                //check rank
+                if(it->second < info.data.rank) return false;
             }
             else
             {
-                if(cellRef->base->npdt12.rank < info.data.rank) return false;
+                //not in the faction
+                return false;
             }
         }
 
