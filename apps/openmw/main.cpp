@@ -157,7 +157,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("report-focus", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "write name of focussed object to cout")
 
-        ("fallback", bpo::value<FallbackMap>()
+        ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
         ;
