@@ -80,6 +80,11 @@ struct Land
      * Frees memory allocated for land data
      */
     void unloadData();
+
+    private:
+        Land(const Land& land);
+        Land& operator=(const Land& land);
 };
+
 }
 #endif
