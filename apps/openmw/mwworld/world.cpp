@@ -159,10 +159,15 @@ namespace MWWorld
 
     std::string World::getFallback(std::string key)
     {
+        return getFallback(key, "");
+    }
+
+    std::string World::getFallback(std::string key, std::string def)
+    {
         std::map<std::string,std::string>::iterator it;
         if((it = mFallback.find(key)) == mFallback.end())
         {
-            return std::string("");
+            return def;
         }
         return it->second;
     }

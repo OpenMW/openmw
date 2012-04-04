@@ -130,6 +130,8 @@ namespace MWWorld
 
             std::string getFallback(std::string key);
 
+            std::string getFallback(std::string key, std::string def);
+
             MWWorld::Player& getPlayer();
 
             const ESMS::ESMStore& getStore() const;
