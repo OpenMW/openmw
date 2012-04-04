@@ -267,7 +267,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setReportFocus(variables["report-focus"].as<bool>());
     engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
-    engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
+    
+    if(variables.count("fallback"))
+    {
+        engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
+    }
 
     return true;
 }
