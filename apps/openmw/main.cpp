@@ -72,11 +72,11 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
     {
         int sep = it->find(",");
         if(sep < 1 || sep == (int)it->length()-1)
-#if (BOOST_VERSION <= 104200)
+#if (BOOST_VERSION < 104200)
             throw boost::program_options::validation_error("invalid value");
 #else
             throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
-#endif /* #if (BOOST_VERSION <= 104200) */
+#endif/
 
         std::string key(it->substr(0,sep));
         std::string value(it->substr(sep+1));
