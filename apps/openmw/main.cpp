@@ -76,7 +76,7 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
             throw boost::program_options::validation_error("invalid value");
 #else
             throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
-#endif/
+#endif
 
         std::string key(it->substr(0,sep));
         std::string value(it->substr(sep+1));
