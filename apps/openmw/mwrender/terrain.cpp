@@ -98,7 +98,10 @@ namespace MWRender
         ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
-            land->loadData();
+            if (!land->dataLoaded)
+            {
+                land->loadData();
+            }
         }
 
         //split the cell terrain into four segments
@@ -133,7 +136,7 @@ namespace MWRender
                         const size_t xOffset = x * (mLandSize-1);
 
                         memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
-                               &land->landData.heights[yOffset + xOffset],
+                               &land->landData->heights[yOffset + xOffset],
                                mLandSize*sizeof(float));
                     }
                 }
@@ -160,7 +163,7 @@ namespace MWRender
                                          numTextures,
                                          indexes);
 
-                    if ( land && land->landData.usingColours )
+                    if ( land && land->landData->usingColours )
                     {
                         // disable or enable global colour map (depends on available vertex colours)
                         mActiveProfile->setGlobalColourMapEnabled(true);
@@ -420,12 +423,18 @@ namespace MWRender
         ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
-            land->loadData();
+            if (!land->dataLoaded)
+            {
+                land->loadData();
+            }
 
-            return land->landData.textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+            return land->landData
+                       ->textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
         }
-
-        return 0;
+        else
+        {
+            return 0;
+        }
     }
 
     //----------------------------------------------------------------------------------------------
@@ -464,7 +473,7 @@ namespace MWRender
 
         if ( land != NULL )
         {
-            const char* const colours = land->landData.colours;
+            const char* const colours = land->landData->colours;
             for ( int y = 0; y < size; y++ )
             {
                 for ( int x = 0; x < size; x++ )

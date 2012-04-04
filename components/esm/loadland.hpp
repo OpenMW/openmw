@@ -12,6 +12,7 @@ namespace ESM
 struct Land
 {
     Land();
+    ~Land();
 
     int flags; // Only first four bits seem to be used, don't know what
     // they mean.
@@ -66,7 +67,7 @@ struct Land
         char colours[3 * LAND_NUM_VERTS];
     };
 
-    LandData landData;
+    LandData *landData;
 
     void load(ESMReader &esm);
 
@@ -74,6 +75,11 @@ struct Land
      * Actually loads data
      */
     void loadData();
+
+    /**
+     * Frees memory allocated for land data
+     */
+    void unloadData();
 };
 }
 #endif

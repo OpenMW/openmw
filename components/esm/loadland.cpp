@@ -10,9 +10,15 @@ Land::Land()
     , mEsm(NULL)
     , hasData(false)
     , dataLoaded(false)
+    , landData(NULL)
 {
-    memset(&landData, 0, sizeof(landData));
 }
+
+Land::~Land()
+{
+    delete landData;
+}
+
 
 void Land::load(ESMReader &esm)
 {
@@ -62,6 +68,7 @@ void Land::load(ESMReader &esm)
     hasData = (cnt == 3);
 
     dataLoaded = false;
+    landData = NULL;
 }
 
 void Land::loadData()
@@ -70,6 +77,8 @@ void Land::loadData()
     {
         return;
     }
+
+    landData = new LandData;
 
     if (hasData)
     {
@@ -82,20 +91,19 @@ void Land::loadData()
         }
 
         VHGT rawHeights;
-        memset(&rawHeights, 0, sizeof(rawHeights));
 
         mEsm->getHNExact(&rawHeights, sizeof(VHGT), "VHGT");
         int currentHeightOffset = rawHeights.heightOffset;
         for (int y = 0; y < LAND_SIZE; y++)
         {
             currentHeightOffset += rawHeights.heightData[y * LAND_SIZE];
-            landData.heights[y * LAND_SIZE] = currentHeightOffset * HEIGHT_SCALE;
+            landData->heights[y * LAND_SIZE] = currentHeightOffset * HEIGHT_SCALE;
 
             int tempOffset = currentHeightOffset;
             for (int x = 1; x < LAND_SIZE; x++)
             {
                 tempOffset += rawHeights.heightData[y * LAND_SIZE + x];
-                landData.heights[x + y * LAND_SIZE] = tempOffset * HEIGHT_SCALE;
+                landData->heights[x + y * LAND_SIZE] = tempOffset * HEIGHT_SCALE;
             }
         }
 
@@ -105,10 +113,10 @@ void Land::loadData()
         }
         if (mEsm->isNextSub("VCLR"))
         {
-            landData.usingColours = true;
-            mEsm->getHExact(&landData.colours, 3*LAND_NUM_VERTS);
+            landData->usingColours = true;
+            mEsm->getHExact(&landData->colours, 3*LAND_NUM_VERTS);
         }else{
-            landData.usingColours = false;
+            landData->usingColours = false;
         }
         //TODO fix magic numbers
         uint16_t vtex[512];
@@ -119,19 +127,29 @@ void Land::loadData()
             for ( int x1 = 0; x1 < 4; x1++ )
                 for ( int y2 = 0; y2 < 4; y2++)
                     for ( int x2 = 0; x2 < 4; x2++ )
-                        landData.textures[(y1*4+y2)*16+(x1*4+x2)] = vtex[readPos++];
+                        landData->textures[(y1*4+y2)*16+(x1*4+x2)] = vtex[readPos++];
     }
     else
     {
-        landData.usingColours = false;
-        memset(landData.textures, 0, sizeof(landData.textures));
+        landData->usingColours = false;
+        memset(&landData->textures, 0, 512 * sizeof(uint16_t));
         for (int i = 0; i < LAND_NUM_VERTS; i++)
         {
-            landData.heights[i] = -256.0f * HEIGHT_SCALE;
+            landData->heights[i] = -256.0f * HEIGHT_SCALE;
         }
     }
 
     dataLoaded = true;
+}
+
+void Land::unloadData()
+{
+    if (dataLoaded)
+    {
+        delete landData;
+        landData = NULL;
+        dataLoaded = false;
+    }
 }
 
 }
