@@ -161,6 +161,7 @@ namespace MWRender
                                          numTextures,
                                          indexes);
                     terrain->setVisibilityFlags(RV_Terrain);
+                    terrain->setRenderQueueGroup(RQG_Main);
 
                     if ( land && land->landData->usingColours )
                     {

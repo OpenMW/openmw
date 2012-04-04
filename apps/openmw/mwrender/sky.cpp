@@ -89,7 +89,6 @@ void BillboardObject::init(const String& textureName,
     /// \todo These billboards are not 100% correct, might want to revisit them later
     mBBSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
     mBBSet->setDefaultDimensions(550.f*initialSize, 550.f*initialSize);
-    mBBSet->setRenderQueueGroup(RENDER_QUEUE_MAIN+2);
     mBBSet->setBillboardType(BBT_PERPENDICULAR_COMMON);
     mBBSet->setCommonDirection( -position.normalisedCopy() );
     mBBSet->setVisibilityFlags(RV_Sky);
@@ -359,15 +358,16 @@ void SkyManager::create()
 
     mSecunda = new Moon("textures\\tx_secunda_full.dds", 0.5, Vector3(-0.4, 0.4, 0.5), mRootNode);
     mSecunda->setType(Moon::Type_Secunda);
-    mSecunda->setRenderQueue(RENDER_QUEUE_SKIES_EARLY+4);
+    mSecunda->setRenderQueue(RQG_SkiesEarly+4);
 
     mMasser = new Moon("textures\\tx_masser_full.dds", 0.75, Vector3(-0.4, 0.4, 0.5), mRootNode);
-    mMasser->setRenderQueue(RENDER_QUEUE_SKIES_EARLY+3);
+    mMasser->setRenderQueue(RQG_SkiesEarly+3);
     mMasser->setType(Moon::Type_Masser);
 
     mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 0.4), mRootNode);
+    mSun->setRenderQueue(RQG_SkiesEarly+4);
     mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode);
-    mSunGlare->setRenderQueue(RENDER_QUEUE_SKIES_LATE);
+    mSunGlare->setRenderQueue(RQG_SkiesLate);
 
 
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
@@ -376,7 +376,7 @@ void SkyManager::create()
     /// \todo sky_night_02.nif (available in Bloodmoon)
     MeshPtr mesh = NifOgre::NIFLoader::load("meshes\\sky_night_01.nif");
     Entity* night1_ent = mSceneMgr->createEntity("meshes\\sky_night_01.nif");
-    night1_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+1);
+    night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
     night1_ent->setVisibilityFlags(RV_Sky);
 
     mAtmosphereNight = mRootNode->createChildSceneNode();
@@ -450,7 +450,7 @@ void SkyManager::create()
 
     ModVertexAlpha(atmosphere_ent, 0);
 
-    atmosphere_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY);
+    atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
     atmosphere_ent->setVisibilityFlags(RV_Sky);
     mAtmosphereDay = mRootNode->createChildSceneNode();
     mAtmosphereDay->attachObject(atmosphere_ent);
@@ -489,7 +489,7 @@ void SkyManager::create()
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
     Entity* clouds_ent = mSceneMgr->createEntity("meshes\\sky_clouds_01.nif");
     clouds_ent->setVisibilityFlags(RV_Sky);
-    clouds_ent->setRenderQueueGroup(RENDER_QUEUE_SKIES_EARLY+5);
+    clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
     clouds_node->attachObject(clouds_ent);
     mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
@@ -738,7 +738,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         strength = 1.f;
 
     mSunGlare->setVisibility(weather.mGlareView * mGlareFade * strength);
-    mSun->setVisibility(mGlareFade >= 0.5 ? weather.mGlareView * mGlareFade * strength : 0);
+    mSun->setVisibility(weather.mGlareView);
 
     mAtmosphereNight->setVisible(weather.mNight && mEnabled);
 }

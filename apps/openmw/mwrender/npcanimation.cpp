@@ -67,6 +67,26 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 
     base = mRend.getScene()->createEntity(smodel);
     base->setVisibilityFlags(RV_Actors);
+    bool transparent = false;
+    for (unsigned int i=0; i<base->getNumSubEntities(); ++i)
+    {
+        Ogre::MaterialPtr mat = base->getSubEntity(i)->getMaterial();
+        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+        while (techIt.hasMoreElements())
+        {
+            Ogre::Technique* tech = techIt.getNext();
+            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+            while (passIt.hasMoreElements())
+            {
+                Ogre::Pass* pass = passIt.getNext();
+
+                if (pass->getDepthWriteEnabled() == false)
+                    transparent = true;
+            }
+        }
+    }
+    base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+
     base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones
                                                //stay in the same place when we skipanim, or open a gui window
 

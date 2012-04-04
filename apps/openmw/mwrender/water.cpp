@@ -26,10 +26,11 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
 
     mWaterPlane = Plane(Vector3::UNIT_Y, 0);
 
-    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,5, Vector3::UNIT_Z);
+    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,3, Vector3::UNIT_Z);
 
     mWater = mSceneManager->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
+    mWater->setRenderQueueGroup(RQG_Alpha);
 
     mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
                         + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")

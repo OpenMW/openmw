@@ -22,6 +22,27 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
         NifOgre::NIFLoader::load(meshNumbered);
         base = mRend.getScene()->createEntity(meshNumbered);
         base->setVisibilityFlags(RV_Actors);
+
+        bool transparent = false;
+        for (unsigned int i=0; i<base->getNumSubEntities(); ++i)
+        {
+            Ogre::MaterialPtr mat = base->getSubEntity(i)->getMaterial();
+            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+            while (techIt.hasMoreElements())
+            {
+                Ogre::Technique* tech = techIt.getNext();
+                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+                while (passIt.hasMoreElements())
+                {
+                    Ogre::Pass* pass = passIt.getNext();
+
+                    if (pass->getDepthWriteEnabled() == false)
+                        transparent = true;
+                }
+            }
+        }
+        base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+
         std::string meshZero = mesh + "0000>|";
 
         if((transformations = (NIFLoader::getSingletonPtr())->getAnim(meshZero))){

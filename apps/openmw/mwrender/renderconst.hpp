@@ -7,7 +7,18 @@ namespace MWRender
 {
 
 // Render queue groups
-/// \todo
+enum RenderQueueGroups
+{
+    // Sky early (atmosphere, clouds, moons)
+    RQG_SkiesEarly = Ogre::RENDER_QUEUE_SKIES_EARLY,
+
+    RQG_Main = Ogre::RENDER_QUEUE_MAIN,
+
+    RQG_Alpha = Ogre::RENDER_QUEUE_7,
+
+    // Sky late (sun & sun flare)
+    RQG_SkiesLate = Ogre::RENDER_QUEUE_SKIES_LATE
+};
 
 // Visibility flags
 enum VisibilityFlags

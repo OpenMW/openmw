@@ -113,6 +113,26 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     bounds.scale(insert->getScale());
     mBounds[ptr.getCell()].merge(bounds);
 
+    bool transparent = false;
+    for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+    {
+        Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
+        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+        while (techIt.hasMoreElements())
+        {
+            Ogre::Technique* tech = techIt.getNext();
+            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+            while (passIt.hasMoreElements())
+            {
+                Ogre::Pass* pass = passIt.getNext();
+
+                if (pass->getDepthWriteEnabled() == false)
+                    transparent = true;
+            }
+        }
+    }
+    ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+
     if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects"))
     {
         insert->attachObject(ent);

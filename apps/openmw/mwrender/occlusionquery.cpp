@@ -1,4 +1,5 @@
 #include "occlusionquery.hpp"
+#include "renderconst.hpp"
 
 #include <OgreRenderSystem.h>
 #include <OgreRoot.h>
@@ -39,8 +40,8 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
         return;
     }
 
-    // This means that everything up to RENDER_QUEUE_MAIN can occlude the objects that are tested
-    const int queue = RENDER_QUEUE_MAIN+1;
+    // This means that everything up to RQG_Main can occlude the objects that are tested
+    const int queue = RQG_Main+1;
 
     MaterialPtr matBase = MaterialManager::getSingleton().getByName("BaseWhiteNoLighting");
     MaterialPtr matQueryArea = matBase->clone("QueryTotalPixels");
@@ -152,7 +153,7 @@ void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocati
      * this can happen for example if the object that is tested is outside of the view frustum
      * to prevent this, check if the queries have been performed after everything has been rendered and if not, start them manually
      */
-    if (queueGroupId == RENDER_QUEUE_SKIES_LATE)
+    if (queueGroupId == RQG_SkiesLate)
     {
         if (mWasVisible == false && mDoQuery)
         {
