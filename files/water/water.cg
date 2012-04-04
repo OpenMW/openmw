@@ -34,7 +34,8 @@ void main_fp
     , uniform float renderTargetFlipping
 
     , uniform sampler2D reflectionMap : register(s0)
-    , uniform sampler2D normalMap : register(s1)
+    , uniform sampler2D refractionMap : register(s1)
+    , uniform sampler2D normalMap : register(s2)
     , uniform float time
     , uniform float4 fogParams
     , uniform float4 fogColour
@@ -42,7 +43,7 @@ void main_fp
 {
 
     float2 screenCoords = iScreenCoords.xy / iScreenCoords.z;
-    screenCoords.y = (renderTargetFlipping == -1) ? (1-screenCoords.y) : screenCoords.y; 
+    screenCoords.y = (1-saturate(renderTargetFlipping))+renderTargetFlipping*screenCoords.y;
 
     float2 uv1 = iUv + time * float2(0.5, 0);
     float2 uv2 = iUv + time * float2(0, 0.5);
@@ -55,8 +56,11 @@ void main_fp
     screenCoords += normal.yx * 0.05;
 
     float4 reflection = tex2D(reflectionMap, screenCoords);
+    float4 refraction = tex2D(refractionMap, screenCoords);
+
+    oColor.xyz = lerp(reflection.xyz, refraction.xyz, 1);
 
     float fogValue = saturate((iDepth - fogParams.y) * fogParams.w);
-    oColor.xyz = lerp(reflection.xyz, fogColour, fogValue);
-    oColor.a = 0.45;
+    oColor.xyz = lerp(oColor.xyz, fogColour, fogValue);
+    oColor.a = 1;
 }

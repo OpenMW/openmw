@@ -181,6 +181,21 @@ Ogre::MaterialPtr Water::createMaterial()
     if (mReflectionTarget == 0)
         mat->removeTechnique(0);
 
+    if (Settings::Manager::getBool("multiple render targets", "Render"))
+    {
+		CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mViewport)->getCompositor("gbuffer");
+
+        TexturePtr colorTexture = compositor->getTextureInstance("mrt_output", 0);
+        TextureUnitState* tus = mat->getTechnique(0)->getPass(0)->getTextureUnitState("refractionMap");
+        if (tus != 0)
+            tus->setTexture(colorTexture);
+
+        TexturePtr depthTexture = compositor->getTextureInstance("mrt_output", 1);
+        tus = mat->getTechnique(0)->getPass(0)->getTextureUnitState("depthMap");
+        if (tus != 0)
+            tus->setTexture(depthTexture);
+    }
+
     return mat;
 }
 

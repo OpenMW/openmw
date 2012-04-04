@@ -48,13 +48,13 @@ material Water
 
             vertex_program_ref Water_VP
             {
-                param_named_auto renderTargetFlipping render_target_flipping
             }
             fragment_program_ref Water_FP
             {
                 param_named_auto time time 0.1
                 param_named_auto fogColour fog_colour
                 param_named_auto fogParams fog_params
+                param_named_auto renderTargetFlipping render_target_flipping
             }
 
             texture_unit reflectionMap
@@ -62,6 +62,12 @@ material Water
                 texture WaterReflection
                 tex_address_mode clamp
             }
+
+            texture_unit refractionMap
+            {
+                tex_address_mode clamp
+            }
+
             texture_unit normalMap
             {
                 texture WaterNormal2.tga

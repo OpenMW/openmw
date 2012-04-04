@@ -1,9 +1,9 @@
-sampler RT : register(s0);
-sampler NormalMap : register(s1);
-sampler CausticMap : register(s2);
 
 float4 main_ps(float2 iTexCoord : TEXCOORD0,
        	       float3 noiseCoord : TEXCOORD1,
+               uniform sampler2D RT : register(s0),
+               uniform sampler2D NormalMap : register(s1),
+               uniform sampler2D CausticMap : register(s2),
        	       uniform float4 tintColour) : COLOR
 {
 	float4 normal = tex2D(NormalMap, noiseCoord) * 2 - 1;

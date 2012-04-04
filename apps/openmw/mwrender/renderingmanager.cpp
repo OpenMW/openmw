@@ -37,6 +37,14 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
+    if (Settings::Manager::getBool("multiple render targets", "Render"))
+    {
+        CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbuffer");
+        CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", true);
+        CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbufferFinalizer");
+        CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", true);
+    }
+
     // Turn the entire scene (represented by the 'root' node) -90
     // degrees around the x axis. This makes Z go upwards, and Y go into
     // the screen (when x is to the right.) This is the orientation that
@@ -252,11 +260,22 @@ bool RenderingManager::toggleRenderMode(int mode)
     {
         if (mRendering.getCamera()->getPolygonMode() == PM_SOLID)
         {
+            // disable compositors
+            CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", false);
+            CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", false);
+
             mRendering.getCamera()->setPolygonMode(PM_WIREFRAME);
             return true;
         }
         else
         {
+            // re-enable compositors
+            if (Settings::Manager::getBool("multiple render targets", "Render"))
+            {
+                CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", true);
+                CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", true);
+            }
+
             mRendering.getCamera()->setPolygonMode(PM_SOLID);
             return false;
         }

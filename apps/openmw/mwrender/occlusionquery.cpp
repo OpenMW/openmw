@@ -40,9 +40,6 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
         return;
     }
 
-    // This means that everything up to RQG_Main can occlude the objects that are tested
-    const int queue = RQG_Main+1;
-
     MaterialPtr matBase = MaterialManager::getSingleton().getByName("BaseWhiteNoLighting");
     MaterialPtr matQueryArea = matBase->clone("QueryTotalPixels");
     matQueryArea->setDepthWriteEnabled(false);
@@ -65,14 +62,14 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBQueryTotal->setDefaultDimensions(150, 150);
     mBBQueryTotal->createBillboard(Vector3::ZERO);
     mBBQueryTotal->setMaterialName("QueryTotalPixels");
-    mBBQueryTotal->setRenderQueueGroup(queue+1);
+    mBBQueryTotal->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBNodeReal->attachObject(mBBQueryTotal);
 
     mBBQueryVisible = mRendering->getScene()->createBillboardSet(1);
     mBBQueryVisible->setDefaultDimensions(150, 150);
     mBBQueryVisible->createBillboard(Vector3::ZERO);
     mBBQueryVisible->setMaterialName("QueryVisiblePixels");
-    mBBQueryVisible->setRenderQueueGroup(queue+1);
+    mBBQueryVisible->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBNodeReal->attachObject(mBBQueryVisible);
 
     mBBQuerySingleObject = mRendering->getScene()->createBillboardSet(1);
@@ -80,7 +77,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBQuerySingleObject->setDefaultDimensions(0.003, 0.003);
     mBBQuerySingleObject->createBillboard(Vector3::ZERO);
     mBBQuerySingleObject->setMaterialName("QueryVisiblePixels");
-    mBBQuerySingleObject->setRenderQueueGroup(queue);
+    mBBQuerySingleObject->setRenderQueueGroup(RQG_OcclusionQuery);
     mObjectNode->attachObject(mBBQuerySingleObject);
 
     mRendering->getScene()->addRenderObjectListener(this);
