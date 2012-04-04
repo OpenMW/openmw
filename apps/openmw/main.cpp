@@ -71,8 +71,8 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
     for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); it++)
     {
         int sep = it->find(",");
-        if(sep < 1)
-            continue;
+        if(sep < 1 || sep = it->length()-1)
+            throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
 
         std::string key(it->substr(0,sep));
         std::string value(it->substr(sep+1));
