@@ -205,9 +205,8 @@ namespace MWWorld
         }
 
         mWorldScene = new Scene(environment, this, *mRendering, mPhysics);
-        
+
         setFallbackValues(fallbackMap);
-        std::cout << "Weather_Sunrise_Time=" << getFallback("Weather_Sunrise_Time") << std::endl;
 
     }
 
