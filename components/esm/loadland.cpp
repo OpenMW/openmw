@@ -2,6 +2,24 @@
 
 namespace ESM
 {
+
+Land::Land()
+    : flags(0)
+    , X(0)
+    , Y(0)
+    , mEsm(NULL)
+    , hasData(false)
+    , dataLoaded(false)
+    , landData(NULL)
+{
+}
+
+Land::~Land()
+{
+    delete landData;
+}
+
+
 void Land::load(ESMReader &esm)
 {
     mEsm = &esm;

@@ -98,7 +98,10 @@ namespace MWRender
         ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
-            land->loadData();
+            if (!land->dataLoaded)
+            {
+                land->loadData();
+            }
         }
 
         //split the cell terrain into four segments
@@ -420,7 +423,11 @@ namespace MWRender
         ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
-            land->loadData();
+            if (!land->dataLoaded)
+            {
+                land->loadData();
+            }
+
             return land->landData
                        ->textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
         }

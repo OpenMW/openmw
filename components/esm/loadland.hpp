@@ -11,6 +11,9 @@ namespace ESM
 
 struct Land
 {
+    Land();
+    ~Land();
+
     int flags; // Only first four bits seem to be used, don't know what
     // they mean.
     int X, Y; // Map coordinates.
@@ -77,6 +80,11 @@ struct Land
      * Frees memory allocated for land data
      */
     void unloadData();
+
+    private:
+        Land(const Land& land);
+        Land& operator=(const Land& land);
 };
+
 }
 #endif
