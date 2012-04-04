@@ -17,6 +17,8 @@
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
+#include "../mwdialogue/dialoguemanager.hpp"
+
 namespace MWScript
 {
     namespace Stats
@@ -303,12 +305,18 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    std::cout << "try to rais rank...";
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string factionID = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-                    context.getEnvironment().mWorld->getPlayer().raiseRank(factionID);
+                    
+                    std::string factionID = context.getEnvironment().mDialogueManager->getFaction();
+                    if(factionID != "")
+                    {
+                        std::cout << "raiserank!!!!!";
+                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 1;
+                    }
+                    std::cout << std::endl;
                 }
         };
         
@@ -342,8 +350,8 @@ namespace MWScript
         const int opcodeSetSkillExplicit = 0x20000df;
         const int opcodeModSkill = 0x20000fa;
         const int opcodeModSkillExplicit = 0x2000115;
-        const int opcodePCJoinFaction = 0x2000141;
-        const int opcodePCRaiseRank = 0x2000142;
+        //const int opcodePCJoinFaction = 0x2000141;
+        const int opcodePCRaiseRank = 0x2000145;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -415,8 +423,9 @@ namespace MWScript
                 extensions.registerInstruction (mod + skills[i], "l",
                     opcodeModSkill+i, opcodeModSkillExplicit+i);
             }
-            extensions.registerInstruction("PCJoinFaction","S",opcodePCJoinFaction);
-            extensions.registerInstruction("PCRaiseRank","S",opcodePCRaiseRank);
+            //extensions.registerInstruction("PCJoinFaction","S",opcodePCJoinFaction);
+            std::cout << "rgister raiserank";
+            extensions.registerInstruction("pcraiserank","",opcodePCRaiseRank);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -473,7 +482,7 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
             }
 
-            interpreter.installSegment5(opcodePCJoinFaction,new OpPCJoinFaction);
+            //interpreter.installSegment5(opcodePCJoinFaction,new OpPCJoinFaction);
             interpreter.installSegment5(opcodePCRaiseRank,new OpPCRaiseRank);
         }
     }
