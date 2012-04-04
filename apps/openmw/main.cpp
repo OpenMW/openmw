@@ -123,14 +123,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("plugin", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "plugin file(s)")
 
-<<<<<<< HEAD
-        ("fps", bpo::value<int>()->implicit_value(1)
-            ->default_value(0), "fps counter detail (0 = off, 1 = fps counter, 2 = full detail)")
-
         ("anim-verbose", bpo::value<bool>()->implicit_value(true)
-=======
-        ("anim-verbose", boost::program_options::value<bool>()->implicit_value(true)
->>>>>>> e403c7158acfb118bed01a08a46431b24cff8747
             ->default_value(false), "output animation indices files")
 
         ("debug", bpo::value<bool>()->implicit_value(true)
