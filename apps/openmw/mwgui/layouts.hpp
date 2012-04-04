@@ -40,12 +40,17 @@ namespace MWGui
     void setCellPrefix(const std::string& prefix);
     void setActiveCell(const int x, const int y, bool interior=false);
 
+    void toggleFogOfWar();
+
   protected:
     int mCurX, mCurY;
     bool mInterior;
     MyGUI::ScrollView* mLocalMap;
     std::string mPrefix;
     bool mChanged;
+    bool mFogOfWar;
+
+    void applyFogOfWar();
 
     OEngine::GUI::Layout* mLayout;
   };

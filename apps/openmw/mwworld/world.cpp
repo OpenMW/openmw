@@ -886,6 +886,18 @@ namespace MWWorld
         return mRendering->getFader();
     }
 
+    Ogre::Vector2 World::getNorthVector(Ptr::CellStore* cell)
+    {
+        ESMS::CellRefList<ESM::Static, MWWorld::RefData> statics = cell->statics;
+        ESMS::LiveCellRef<ESM::Static, MWWorld::RefData>* ref = statics.find("northmarker");
+        if (!ref)
+            return Vector2(0, 1);
+        Ogre::SceneNode* node = ref->mData.getBaseNode();
+        Vector3 dir = node->_getDerivedOrientation().yAxis();
+        Vector2 d = Vector2(dir.x, dir.z);
+        return d;
+    }
+
     void World::setWaterHeight(const float height)
     {
         mRendering->setWaterHeight(height);

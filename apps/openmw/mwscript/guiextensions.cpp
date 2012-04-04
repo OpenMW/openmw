@@ -67,6 +67,19 @@ namespace MWScript
                 }
         };
 
+        class OpToggleFogOfWar : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+                    
+                    context.getEnvironment().mWindowManager->toggleFogOfWar();
+                }
+        };
+
         const int opcodeEnableBirthMenu = 0x200000e;
         const int opcodeEnableClassMenu = 0x200000f;
         const int opcodeEnableNameMenu = 0x2000010;
@@ -79,6 +92,7 @@ namespace MWScript
         const int opcodeEnableRest = 0x2000017;
         const int opcodeShowRestMenu = 0x2000018;
         const int opcodeGetButtonPressed = 0x2000137;
+        const int opcodeToggleFogOfWar = 0x2000145;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -100,6 +114,9 @@ namespace MWScript
             extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);
 
             extensions.registerFunction ("getbuttonpressed", 'l', "", opcodeGetButtonPressed);
+
+            extensions.registerInstruction ("togglefogofwar", "", opcodeToggleFogOfWar);
+            extensions.registerInstruction ("tfow", "", opcodeToggleFogOfWar);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -135,6 +152,8 @@ namespace MWScript
                 new OpShowDialogue (MWGui::GM_Rest));
 
             interpreter.installSegment5 (opcodeGetButtonPressed, new OpGetButtonPressed);
+
+            interpreter.installSegment5 (opcodeToggleFogOfWar, new OpToggleFogOfWar);
         }
     }
 }

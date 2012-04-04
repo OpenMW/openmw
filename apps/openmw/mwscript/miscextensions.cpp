@@ -217,7 +217,7 @@ namespace MWScript
         const int opcodeFadeOut = 0x200013d;
         const int opcodeFadeTo = 0x200013e;
         const int opcodeToggleWater = 0x2000144;
-        const int opcodeTogglePathgrid = 0x2000145;
+        const int opcodeTogglePathgrid = 0x2000146;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {

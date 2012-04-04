@@ -36,7 +36,7 @@ THE SOFTWARE.
 #include "OgreHardwarePixelBuffer.h"
 #include "OgreShadowCameraSetupPSSM.h"
 
-#define POINTLIGHTS
+#include <components/settings/settings.hpp>
 
 namespace Ogre
 {
@@ -220,22 +220,10 @@ namespace Ogre
 		
 
 	}
-        int TerrainMaterialGeneratorB::SM2Profile::getNumberOfLightsSupported() const
-        {
-                #ifndef POINTLIGHTS
-                return 1;
-                #else
-                // number of supported lights depends on the number of available constant registers,
-                // which in turn depends on the shader profile used
-                if (GpuProgramManager::getSingleton().isSyntaxSupported("ps_3_0")
-                        || GpuProgramManager::getSingleton().isSyntaxSupported("ps_4_0")
-                        || GpuProgramManager::getSingleton().isSyntaxSupported("fp40")
-                )
-                        return 32;
-                else
-                        return 8;
-                #endif
-        }
+    int TerrainMaterialGeneratorB::SM2Profile::getNumberOfLightsSupported() const
+    {
+        return Settings::Manager::getInt("num lights", "Terrain");
+    }
 	//---------------------------------------------------------------------
 	MaterialPtr TerrainMaterialGeneratorB::SM2Profile::generate(const Terrain* terrain)
 	{
@@ -565,7 +553,8 @@ namespace Ogre
                 {
                         params->setNamedAutoConstant("lightPosObjSpace"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_POSITION_OBJECT_SPACE, i);
                         params->setNamedAutoConstant("lightDiffuseColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_DIFFUSE_COLOUR, i);
-                        params->setNamedAutoConstant("lightAttenuation"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_ATTENUATION, i);
+                        if (prof->getNumberOfLightsSupported() > 1)
+                            params->setNamedAutoConstant("lightAttenuation"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_ATTENUATION, i);
                         //params->setNamedAutoConstant("lightSpecularColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_SPECULAR_COLOUR, i);
                 }
                 
@@ -980,10 +969,9 @@ namespace Ogre
 			//"uniform float3 lightSpecularColour"<<i<<",\n"
                         ;
 
-                        #ifdef POINTLIGHTS
-                        outStream <<
-                        "uniform float4 lightAttenuation"<<i<<",\n";
-                        #endif
+                        if (prof->getNumberOfLightsSupported() > 1)
+                            outStream <<
+                            "uniform float4 lightAttenuation"<<i<<",\n";
 
                 }
 
@@ -1130,10 +1118,9 @@ namespace Ogre
 			}
 			else
 			{
-                                #ifdef POINTLIGHTS
-                                outStream << "float d; \n"
+                                if (prof->getNumberOfLightsSupported() > 1)
+                                    outStream << "float d; \n"
                                              "float attn; \n";
-                                #endif
 
                                 outStream <<
                                 "      eyeDir = normalize(eyeDir); \n";
@@ -1144,13 +1131,12 @@ namespace Ogre
                                         outStream << "	float3 halfAngle"<<i<<" = normalize(lightDir"<<i<<" + eyeDir);\n"
                                                 "	float4 litRes"<<i<<" = lit(dot(normalize(lightDir"<<i<<"), normal), dot(halfAngle"<<i<<", normal), scaleBiasSpecular.z);\n";
 
-                                        #ifdef POINTLIGHTS
+                                    if (prof->getNumberOfLightsSupported() > 1)
                                         outStream <<
                                         // pre-multiply light color with attenuation factor
                                            "d = length( lightDir"<<i<<" ); \n"
                                            "attn = ( 1.0 / (( lightAttenuation"<<i<<".y ) + ( lightAttenuation"<<i<<".z * d ) + ( lightAttenuation"<<i<<".w * d * d ))); \n"
                                            "lightDiffuseColour"<<i<<" *= attn; \n";
-                                        #endif
                                 }
 			}
 		}
