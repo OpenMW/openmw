@@ -493,6 +493,21 @@ namespace MWDialogue
         }
 
         // TODO check player faction
+        if(!info.pcFaction.empty())
+        {
+            MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.npcFaction);
+            if(it!=stats.mFactionRank.end())
+            {
+                //check rank
+                if(it->second < info.data.rank) return false;
+            }
+            else
+            {
+                //not in the faction
+                return false;
+            }
+        }
 
         //check gender
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
@@ -655,6 +670,7 @@ namespace MWDialogue
 
     void DialogueManager::executeScript(std::string script)
     {
+        std::cout << script;
         std::vector<Interpreter::Type_Code> code;
         if(compile(script,code))
         {
@@ -795,5 +811,20 @@ namespace MWDialogue
         win->askQuestion(question);
         mChoiceMap[question] = choice;
         mIsInChoice = true;
+    }
+
+    std::string DialogueManager::getFaction()
+    {
+        std::string factionID("");
+        MWMechanics::NpcStats stats = MWWorld::Class::get(mActor).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+        if(stats.mFactionRank.empty())
+        {
+            std::cout << "No faction for this actor!";
+        }
+        else
+        {
+            factionID = stats.mFactionRank.begin()->first;
+        }
+        return factionID;
     }
 }
