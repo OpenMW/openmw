@@ -37,6 +37,12 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
+    // disable MRT if it is unsupported
+    const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
+    if (caps->getNumMultiRenderTargets() < 2
+        || (!caps->isShaderProfileSupported("fp40") && !caps->isShaderProfileSupported("ps_3_0")))
+        Settings::Manager::setBool("multiple render targets", "Render", false);
+
     if (Settings::Manager::getBool("multiple render targets", "Render"))
     {
         CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbuffer");
