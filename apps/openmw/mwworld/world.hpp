@@ -100,6 +100,7 @@ namespace MWWorld
             std::string mFaced1Name;
             std::string mFaced2Name;
             int mNumFacing;
+            std::map<std::string,std::string> mFallback;
 
             int getDaysPerMonth (int month) const;
 
@@ -110,7 +111,7 @@ namespace MWWorld
            World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
-                Environment& environment, const std::string& encoding);
+                Environment& environment, const std::string& encoding, std::map<std::string,std::string> fallbackMap);
 
             ~World();
 
@@ -124,6 +125,12 @@ namespace MWWorld
             void toggleWater();
 
             void adjustSky();
+
+            void setFallbackValues(std::map<std::string,std::string> fallbackMap);
+
+            std::string getFallback(std::string key);
+
+            std::string getFallback(std::string key, std::string def);
 
             MWWorld::Player& getPlayer();
 

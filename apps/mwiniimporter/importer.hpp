@@ -18,14 +18,16 @@ class MwIniImporter {
     multistrmap  loadIniFile(std::string filename);
     multistrmap  loadCfgFile(std::string filename);
     void    merge(multistrmap &cfg, multistrmap &ini);
+    void    mergeFallback(multistrmap &cfg, multistrmap &ini);
     void    importGameFiles(multistrmap &cfg, multistrmap &ini);
     void    writeToFile(boost::iostreams::stream<boost::iostreams::file_sink> &out, multistrmap &cfg);
     
   private:
-    bool specialMerge(std::string cfgKey, std::string iniKey, multistrmap &cfg, multistrmap &ini);
+    void insertMultistrmap(multistrmap &cfg, std::string key, std::string value);
     std::string numberToString(int n);
     bool mVerbose;
     strmap mMergeMap;
+    std::vector<std::string> mMergeFallback;
 };
 
 
