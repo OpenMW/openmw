@@ -200,8 +200,6 @@ namespace MWInput
 
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
-      // Add ourselves as a frame listener to catch movement keys
-      ogre.getRoot()->addFrameListener(this);
 
       // Set up the mouse handler and tell it about the player camera
       mouse = MouseLookEventPtr(new MouseLookEvent(player.getRenderer()->getCamera()));
@@ -262,7 +260,7 @@ namespace MWInput
     }
 
     //NOTE: Used to check for movement keys
-    bool frameRenderingQueued (const Ogre::FrameEvent &evt)
+    void update ()
     {
         // Tell OIS to handle all input events
         input.capture();
@@ -276,7 +274,7 @@ namespace MWInput
         windows.update();
 
         // Disable movement in Gui mode
-        if (windows.isGuiMode()) return true;
+        if (windows.isGuiMode()) return;
 
         // Configure player movement according to keyboard input. Actual movement will
         // be done in the physics system.
@@ -305,8 +303,6 @@ namespace MWInput
         }
         else
             player.setForwardBackward (0);
-
-        return true;
     }
 
     // Switch between gui modes. Besides controlling the Gui windows
@@ -357,5 +353,10 @@ namespace MWInput
   void MWInputManager::setGuiMode(MWGui::GuiMode mode)
   {
       impl->setGuiMode(mode);
+  }
+
+  void MWInputManager::update()
+  {
+      impl->update();
   }
 }
