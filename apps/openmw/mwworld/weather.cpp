@@ -472,6 +472,7 @@ WeatherResult WeatherManager::transition(float factor)
     result.mCloudSpeed = current.mCloudSpeed;
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     result.mGlareView = lerp(current.mGlareView, other.mGlareView);
+    result.mNightFade = lerp(current.mNightFade, other.mNightFade);
 
     result.mNight = current.mNight;
 
