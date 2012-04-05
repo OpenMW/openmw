@@ -183,7 +183,7 @@ Ogre::MaterialPtr Water::createMaterial()
 
     if (Settings::Manager::getBool("multiple render targets", "Render"))
     {
-		CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mViewport)->getCompositor("gbuffer");
+        CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mViewport)->getCompositor("gbuffer");
 
         TexturePtr colorTexture = compositor->getTextureInstance("mrt_output", 0);
         TextureUnitState* tus = mat->getTechnique(0)->getPass(0)->getTextureUnitState("refractionMap");
