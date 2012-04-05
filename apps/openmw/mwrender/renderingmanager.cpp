@@ -23,7 +23,7 @@ namespace MWRender {
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0)
 {
-    mRendering.createScene("PlayerCam", 55, 5);
+    mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
     mTerrainManager = new TerrainManager(mRendering.getScene(),
                                          environment);
 
@@ -32,7 +32,17 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     configureFog(1, ColourValue(1,1,1));
 
     // Set default mipmap level (NB some APIs ignore this)
-    TextureManager::getSingleton().setDefaultNumMipmaps(5);
+    TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
+
+    // Set default texture filtering options
+    TextureFilterOptions tfo;
+    std::string filter = Settings::Manager::getString("texture filtering", "General");
+    if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
+    else if (filter == "trilinear") tfo = TFO_TRILINEAR;
+    else /* if (filter == "bilinear") */ tfo = TFO_BILINEAR;
+
+    MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
+    MaterialManager::getSingleton().setDefaultAnisotropy(Settings::Manager::getInt("anisotropy", "General"));
 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
