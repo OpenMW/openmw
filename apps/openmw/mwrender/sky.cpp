@@ -109,6 +109,59 @@ void BillboardObject::init(const String& textureName,
     p->createTextureUnitState(textureName);
     mBBSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
 
+    HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
+    HighLevelGpuProgramPtr vshader;
+    if (mgr.resourceExists("BBO_VP"))
+        vshader = mgr.getByName("BBO_VP");
+    else
+        vshader = mgr.createProgram("BBO_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "cg", GPT_VERTEX_PROGRAM);
+    vshader->setParameter("profiles", "vs_2_x arbvp1");
+    vshader->setParameter("entry_point", "main_vp");
+    StringUtil::StrStreamType outStream;
+    outStream <<
+    "void main_vp(	\n"
+    "	float4 position : POSITION,	\n"
+    "   in float2 uv : TEXCOORD0, \n"
+    "   out float2 oUV : TEXCOORD0, \n"
+    "	out float4 oPosition : POSITION,	\n"
+    "	uniform float4x4 worldViewProj	\n"
+    ")	\n"
+    "{	\n"
+    "   oUV = uv; \n"
+    "	oPosition = mul( worldViewProj, position );  \n"
+    "}";
+    vshader->setSource(outStream.str());
+    vshader->load();
+    vshader->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
+    mMaterial->getTechnique(0)->getPass(0)->setVertexProgram(vshader->getName());
+
+    HighLevelGpuProgramPtr fshader;
+    if (mgr.resourceExists("BBO_FP"))
+        fshader = mgr.getByName("BBO_FP");
+    else
+        fshader = mgr.createProgram("BBO_FP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "cg", GPT_FRAGMENT_PROGRAM);
+
+    fshader->setParameter("profiles", "ps_2_x arbfp1");
+    fshader->setParameter("entry_point", "main_fp");
+    StringUtil::StrStreamType outStream2;
+    outStream2 <<
+    "void main_fp(	\n"
+    "   in float2 uv : TEXCOORD0, \n"
+    "	out float4 oColor    : COLOR, \n"
+    "   uniform sampler2D texture : TEXUNIT0, \n"
+    "   uniform float4 diffuse, \n"
+    "   uniform float4 emissive \n"
+    ")	\n"
+    "{	\n"
+    "   float4 tex = tex2D(texture, uv); \n"
+    "   oColor = float4(emissive.xyz,1) * tex * float4(1,1,1,diffuse.a); \n"
+    "}";
+    fshader->setSource(outStream2.str());
+    fshader->load();
+    fshader->getDefaultParameters()->setNamedAutoConstant("diffuse", GpuProgramParameters::ACT_SURFACE_DIFFUSE_COLOUR);
+    fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
+    mMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
+
     bodyCount++;
 }
 
@@ -469,21 +522,42 @@ void SkyManager::create()
     "	float4 position : POSITION,	\n"
     "	in float4 color	: COLOR,	\n"
     "	out float4 oPosition : POSITION,	\n"
-    "	out float4 oColor    : COLOR, \n"
+    "	out float4 oVertexColor    : TEXCOORD0, \n"
     "   uniform float4 emissive, \n"
     "	uniform float4x4 worldViewProj	\n"
     ")	\n"
     "{	\n"
     "	oPosition = mul( worldViewProj, position );  \n"
-    "   oColor = color * emissive; \n"
+    "   oVertexColor = color; \n"
     "}";
     vshader->setSource(outStream.str());
     vshader->load();
 
     vshader->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-    vshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setVertexProgram(vshader->getName());
-    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setFragmentProgram("");
+
+    HighLevelGpuProgramPtr fshader = mgr.createProgram("Atmosphere_FP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+        "cg", GPT_FRAGMENT_PROGRAM);
+
+    fshader->setParameter("profiles", "ps_2_x arbfp1");
+    fshader->setParameter("entry_point", "main_fp");
+
+    StringUtil::StrStreamType _outStream;
+    _outStream <<
+    "void main_fp(	\n"
+    "	in float4 iVertexColor	: TEXCOORD0,	\n"
+    "	out float4 oColor    : COLOR, \n"
+    "   uniform float4 emissive, \n"
+    "	uniform float4x4 worldViewProj	\n"
+    ")	\n"
+    "{	\n"
+    "   oColor = iVertexColor * emissive; \n"
+    "}";
+    fshader->setSource(_outStream.str());
+    fshader->load();
+
+    fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
+    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
 
     // Clouds
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
