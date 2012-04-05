@@ -76,7 +76,7 @@ void main_fp
 
     // fresnel
     float facing = 1.0 - max(abs(dot(normalize(iEyeVector.xyz), normal.xyz)), 0);
-    float reflectionFactor = saturate(0.3 + 0.7 * pow(facing, 2));
+    float reflectionFactor = saturate(0.35 + 0.65 * pow(facing, 2));
 
     oColor.xyz = lerp(refraction.xyz, reflection.xyz, depth1 * reflectionFactor);
 

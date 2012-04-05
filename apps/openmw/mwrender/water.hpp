@@ -50,6 +50,8 @@ namespace MWRender {
 
         void toggle();
 
+        void setViewportBackground(const Ogre::ColourValue& bg);
+
         void checkUnderwater(float y);
         void changeCell(const ESM::Cell* cell);
         void setHeight(const float height);

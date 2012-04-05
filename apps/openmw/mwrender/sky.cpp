@@ -913,3 +913,13 @@ Ogre::SceneNode* SkyManager::getSunNode()
     if (!mCreated) return 0;
     return mSun->getNode();
 }
+
+void SkyManager::setSkyPosition(const Ogre::Vector3& position)
+{
+    mRootNode->_setDerivedPosition(position);
+}
+
+void SkyManager::resetSkyPosition()
+{
+    mRootNode->setPosition(0,0,0);
+}

@@ -27,6 +27,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mTerrainManager = new TerrainManager(mRendering.getScene(),
                                          environment);
 
+    mWater = 0;
+
     //The fog type must be set before any terrain objects are created as if the
     //fog type is set to FOG_NONE then the initially created terrain won't have any fog
     configureFog(1, ColourValue(1,1,1));
@@ -39,8 +41,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     // disable MRT if it is unsupported
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-    if (caps->getNumMultiRenderTargets() < 2
-        || (!caps->isShaderProfileSupported("fp40") && !caps->isShaderProfileSupported("ps_3_0")))
+    if (caps->getNumMultiRenderTargets() < 2)
         Settings::Manager::setBool("multiple render targets", "Render", false);
 
     if (Settings::Manager::getBool("multiple render targets", "Render"))
@@ -72,8 +73,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
-
-    mWater = 0;
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
@@ -311,6 +310,8 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
     CompositorInstance* inst = CompositorManager::getSingleton().getCompositorChain(mRendering.getViewport())->getCompositor("gbuffer");
     if (inst != 0)
         inst->getCompositor()->getTechnique(0)->getTargetPass(0)->getPass(0)->setClearColour(colour);
+    if (mWater)
+        mWater->setViewportBackground(colour);
 }
 
 

@@ -168,6 +168,9 @@ namespace MWRender
         void setGlare(const float glare);
         Ogre::Vector3 getRealSunPos();
 
+        void setSkyPosition(const Ogre::Vector3& position);
+        void resetSkyPosition();
+
     private:
         bool mCreated;
 

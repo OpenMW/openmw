@@ -36,8 +36,8 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
                         + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")
                         + RV_StaticsSmall * Settings::Manager::getBool("reflect small statics", "Water")
                         + RV_Actors * Settings::Manager::getBool("reflect actors", "Water")
-                        + RV_Misc * Settings::Manager::getBool("reflect misc", "Water");
-                        //+ RV_Sky;
+                        + RV_Misc * Settings::Manager::getBool("reflect misc", "Water")
+                        + RV_Sky;
     mReflectDistance = Settings::Manager::getInt("reflect distance", "Water");
 
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
@@ -145,11 +145,14 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
     if (mReflectDistance != 0)
         mCamera->setFarClipDistance(mReflectDistance);
 
-	if (evt.source == mReflectionTarget)
-	{
-		mCamera->enableCustomNearClipPlane(Plane(Vector3::UNIT_Y, mTop));
-		mCamera->enableReflection(Plane(Vector3::UNIT_Y, mTop));
-	}
+    if (evt.source == mReflectionTarget)
+    {
+        Vector3 pos = mCamera->getRealPosition();
+        pos.y = mTop*2 - pos.y;
+        mSky->setSkyPosition(pos);
+        mCamera->enableCustomNearClipPlane(Plane(Vector3::UNIT_Y, mTop));
+        mCamera->enableReflection(Plane(Vector3::UNIT_Y, mTop));
+    }
 }
 
 void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
@@ -158,11 +161,12 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
 
     mCamera->setFarClipDistance(mOldCameraFarClip);
 
-	if (evt.source == mReflectionTarget)
-	{
-		mCamera->disableReflection();
-		mCamera->disableCustomNearClipPlane();
-	}
+    if (evt.source == mReflectionTarget)
+    {
+        mSky->resetSkyPosition();
+        mCamera->disableReflection();
+        mCamera->disableCustomNearClipPlane();
+    }
 }
 
 Ogre::MaterialPtr Water::createMaterial()
@@ -197,6 +201,12 @@ Ogre::MaterialPtr Water::createMaterial()
     }
 
     return mat;
+}
+
+void Water::setViewportBackground(const ColourValue& bg)
+{
+    if (mReflectionTarget)
+        mReflectionTarget->getViewport(0)->setBackgroundColour(bg);
 }
 
 } // namespace
