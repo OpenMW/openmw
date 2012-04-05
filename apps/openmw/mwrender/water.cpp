@@ -52,7 +52,7 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     // Create rendertarget for reflection
     int rttsize = Settings::Manager::getInt("rtt size", "Water");
 
-    if (Settings::Manager::getBool("shader", "Water") && Settings::Manager::getBool("multiple render targets", "Render"))
+    if (Settings::Manager::getBool("shader", "Water"))
     {
         TexturePtr tex = TextureManager::getSingleton().createManual("WaterReflection",
             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_R8G8B8, TU_RENDERTARGET);
@@ -185,7 +185,7 @@ Ogre::MaterialPtr Water::createMaterial()
     if (mReflectionTarget == 0)
         mat->removeTechnique(0);
 
-    if (Settings::Manager::getBool("multiple render targets", "Render"))
+    if (Settings::Manager::getBool("shader", "Water"))
     {
         CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mViewport)->getCompositor("gbuffer");
 

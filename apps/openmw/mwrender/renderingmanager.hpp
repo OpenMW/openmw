@@ -81,6 +81,8 @@ class RenderingManager: private RenderingInterface {
 
     void removeWater();
 
+    static const bool useMRT();
+
     void preCellChange (MWWorld::Ptr::CellStore* store);
     ///< this event is fired immediately before changing cell
 

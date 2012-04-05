@@ -39,12 +39,12 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-    // disable MRT if it is unsupported
+    // disable unsupported effects
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
     if (caps->getNumMultiRenderTargets() < 2)
-        Settings::Manager::setBool("multiple render targets", "Render", false);
+        Settings::Manager::setBool("shader", "Water", false);
 
-    if (Settings::Manager::getBool("multiple render targets", "Render"))
+    if (useMRT())
     {
         CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbuffer");
         CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", true);
@@ -266,8 +266,11 @@ bool RenderingManager::toggleRenderMode(int mode)
         if (mRendering.getCamera()->getPolygonMode() == PM_SOLID)
         {
             // disable compositors
-            CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", false);
-            CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", false);
+            if (useMRT())
+            {
+                CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", false);
+                CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", false);
+            }
 
             mRendering.getCamera()->setPolygonMode(PM_WIREFRAME);
             return true;
@@ -275,7 +278,7 @@ bool RenderingManager::toggleRenderMode(int mode)
         else
         {
             // re-enable compositors
-            if (Settings::Manager::getBool("multiple render targets", "Render"))
+            if (useMRT())
             {
                 CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", true);
                 CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", true);
@@ -447,6 +450,11 @@ void RenderingManager::disableLights()
 void RenderingManager::enableLights()
 {
     mObjects.enableLights();
+}
+
+const bool RenderingManager::useMRT()
+{
+    return Settings::Manager::getBool("shader", "Water");
 }
 
 } // namespace

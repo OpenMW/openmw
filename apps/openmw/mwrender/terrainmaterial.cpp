@@ -37,6 +37,7 @@ THE SOFTWARE.
 #include "OgreShadowCameraSetupPSSM.h"
 
 #include <components/settings/settings.hpp>
+#include "renderingmanager.hpp"
 
 namespace Ogre
 {
@@ -558,7 +559,7 @@ namespace Ogre
                         //params->setNamedAutoConstant("lightSpecularColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_SPECULAR_COLOUR, i);
                 }
 
-        if (Settings::Manager::getBool("multiple render targets", "Render"))
+        if (MWRender::RenderingManager::useMRT())
             params->setNamedAutoConstant("far", GpuProgramParameters::ACT_FAR_CLIP_DISTANCE);
 
 		params->setNamedAutoConstant("eyePosObjSpace", GpuProgramParameters::ACT_CAMERA_POSITION_OBJECT_SPACE);
@@ -1032,7 +1033,7 @@ namespace Ogre
 				__FUNCTION__);
 		}
 
-        if (Settings::Manager::getBool("multiple render targets", "Render")) outStream <<
+        if (MWRender::RenderingManager::useMRT()) outStream <<
             "   , out float4 oColor : COLOR \n"
             "   , out float4 oColor1 : COLOR1 \n"
             "   , uniform float far \n";
@@ -1348,7 +1349,7 @@ namespace Ogre
 		// Final return
 		outStream << "  oColor = outputCol;\n";
 
-        if (Settings::Manager::getBool("multiple render targets", "Render")) outStream <<
+        if (MWRender::RenderingManager::useMRT()) outStream <<
             "   oColor1 = float4(uvMisc.z / far, 0, 0, 1); \n";
 
         outStream

@@ -302,7 +302,7 @@ void NIFLoader::createMaterial(const String &name,
 
     if (Settings::Manager::getBool("shaders", "Objects"))
     {
-        bool mrt = Settings::Manager::getBool("multiple render targets", "Render");
+        bool mrt = Settings::Manager::getBool("shader", "Water");
 
         // Create shader for the material
         // vertex
