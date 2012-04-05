@@ -284,23 +284,27 @@ bool RenderingManager::toggleRenderMode(int mode)
 
 void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
 {
-  Ogre::ColourValue color;
-  color.setAsABGR (mCell.cell->ambi.fog);
+    Ogre::ColourValue color;
+    color.setAsABGR (mCell.cell->ambi.fog);
 
-  configureFog(mCell.cell->ambi.fogDensity, color);
+    configureFog(mCell.cell->ambi.fogDensity, color);
 }
 
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
 {
-  float max = Settings::Manager::getFloat("max viewing distance", "Viewing distance");
+    float max = Settings::Manager::getFloat("max viewing distance", "Viewing distance");
 
-  float low = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
-  float high = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
+    float low = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
+    float high = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
 
-  mRendering.getScene()->setFog (FOG_LINEAR, colour, 0, low, high);
+    mRendering.getScene()->setFog (FOG_LINEAR, colour, 0, low, high);
 
-  mRendering.getCamera()->setFarClipDistance ( max / density );
-  mRendering.getViewport()->setBackgroundColour (colour);
+    mRendering.getCamera()->setFarClipDistance ( max / density );
+    mRendering.getViewport()->setBackgroundColour (colour);
+
+    CompositorInstance* inst = CompositorManager::getSingleton().getCompositorChain(mRendering.getViewport())->getCompositor("gbuffer");
+    if (inst != 0)
+        inst->getCompositor()->getTechnique(0)->getTargetPass(0)->getPass(0)->setClearColour(colour);
 }
 
 
@@ -327,41 +331,43 @@ void RenderingManager::setAmbientMode()
 
 void RenderingManager::configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell)
 {
-  mAmbientColor.setAsABGR (mCell.cell->ambi.ambient);
-  setAmbientMode();
+    mAmbientColor.setAsABGR (mCell.cell->ambi.ambient);
+    setAmbientMode();
 
-  // Create a "sun" that shines light downwards. It doesn't look
-  // completely right, but leave it for now.
-  if(!mSun)
-  {
-      mSun = mRendering.getScene()->createLight();
-  }
-  Ogre::ColourValue colour;
-  colour.setAsABGR (mCell.cell->ambi.sunlight);
-  mSun->setDiffuseColour (colour);
-  mSun->setType(Ogre::Light::LT_DIRECTIONAL);
-  mSun->setDirection(0,-1,0);
+    // Create a "sun" that shines light downwards. It doesn't look
+    // completely right, but leave it for now.
+    if(!mSun)
+    {
+        mSun = mRendering.getScene()->createLight();
+    }
+    Ogre::ColourValue colour;
+    colour.setAsABGR (mCell.cell->ambi.sunlight);
+    mSun->setDiffuseColour (colour);
+    mSun->setType(Ogre::Light::LT_DIRECTIONAL);
+    mSun->setDirection(0,-1,0);
 }
 // Switch through lighting modes.
 
 void RenderingManager::toggleLight()
 {
-  if (mAmbientMode==2)
-    mAmbientMode = 0;
-  else
-    ++mAmbientMode;
+    if (mAmbientMode==2)
+        mAmbientMode = 0;
+    else
+        ++mAmbientMode;
 
-  switch (mAmbientMode)
-  {
-    case 0: std::cout << "Setting lights to normal\n"; break;
-    case 1: std::cout << "Turning the lights up\n"; break;
-    case 2: std::cout << "Turning the lights to full\n"; break;
-  }
+    switch (mAmbientMode)
+    {
+        case 0: std::cout << "Setting lights to normal\n"; break;
+        case 1: std::cout << "Turning the lights up\n"; break;
+        case 2: std::cout << "Turning the lights to full\n"; break;
+    }
 
-  setAmbientMode();
+    setAmbientMode();
 }
-void RenderingManager::checkUnderwater(){
-    if(mWater){
+void RenderingManager::checkUnderwater()
+{
+    if(mWater)
+    {
          mWater->checkUnderwater( mRendering.getCamera()->getRealPosition().y );
     }
 }
