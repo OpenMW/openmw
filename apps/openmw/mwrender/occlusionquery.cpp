@@ -7,6 +7,7 @@
 #include <OgreHardwareOcclusionQuery.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
+#include <OgreMaterialManager.h>
 
 using namespace MWRender;
 using namespace Ogre;

@@ -366,7 +366,7 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mNewGame, mEnvironment, mEncoding);
+        mResDir, mNewGame, mEnvironment, mEncoding, mFallbackMap);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
@@ -535,4 +535,9 @@ void OMW::Engine::showFPS(int level)
 void OMW::Engine::setEncoding(const std::string& encoding)
 {
     mEncoding = encoding;
+}
+
+void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
+{
+    mFallbackMap = fallbackMap;
 }
