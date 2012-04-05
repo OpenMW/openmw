@@ -7,8 +7,10 @@ void main_vp
     , out float3 oScreenCoords : TEXCOORD0
     , out float2 oUv : TEXCOORD1
     , out float oDepth : TEXCOORD2
+    , out float4 oEyeVector : TEXCOORD3
 
     , uniform float4x4 wvpMat
+    , uniform float4 camPosObjSpace
 )
 {
     oPos = mul(wvpMat, iPos);
@@ -22,6 +24,8 @@ void main_vp
                                     0,  	0,      0,      1   );
     float4 texcoordProj = mul(scalemat, oPos);
     oScreenCoords = float3(texcoordProj.x, texcoordProj.y, texcoordProj.w);
+
+    oEyeVector = camPosObjSpace - iPos;
 }
 
 void main_fp
@@ -31,6 +35,7 @@ void main_fp
     , in float3 iScreenCoords : TEXCOORD0
     , in float2 iUv : TEXCOORD1
     , in float iDepth : TEXCOORD2
+    , in float4 iEyeVector : TEXCOORD3
     , uniform float renderTargetFlipping
 
     , uniform sampler2D reflectionMap : register(s0)
@@ -47,23 +52,29 @@ void main_fp
     float2 screenCoords = iScreenCoords.xy / iScreenCoords.z;
     screenCoords.y = (1-saturate(renderTargetFlipping))+renderTargetFlipping*screenCoords.y;
 
+    // Sample screen-space depth map and subtract pixel depth to get the real water depth
     float depth1 = tex2D(depthMap, screenCoords).r * far - iDepth;
     depth1 = saturate(depth1 / 500.f);
 
+    // Simple wave effect. to be replaced by something better
     float2 uv1 = iUv + time * float2(0.5, 0);
     float2 uv2 = iUv + time * float2(0, 0.5);
     float2 uv3 = iUv + time * float2(-0.5, 0);
     float2 uv4 = iUv + time * float2(0, -0.5);
-
     float4 normal = tex2D(normalMap, uv1) + tex2D(normalMap, uv2) + tex2D(normalMap, uv3) + tex2D(normalMap, uv4);
     normal = normal / 4.f;
     normal = 2*normal - 1;
+    //normal = normalize(normal);
 
     float2 screenCoords_reflect = screenCoords + normal.yx * 0.05;
     float2 screenCoords_refract = screenCoords + normal.yx * 0.1 * depth1;
 
     float4 reflection = tex2D(reflectionMap, screenCoords_reflect);
     float4 refraction = tex2D(refractionMap, screenCoords_refract);
+
+    // fresnel
+    //float facing = 1.0 - max(abs(dot(iEyeVector.xyz, normal.xyz)), 0);
+    //float reflectionFactor = saturate(0.3 + 0.7 * pow(facing, 2));
 
     oColor.xyz = lerp(refraction.xyz, reflection.xyz, depth1);
 

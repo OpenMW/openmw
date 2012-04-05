@@ -11,6 +11,7 @@ compositor gbuffer
             input none
             pass clear
             {
+                colour_value 0 0 0 1
             }
             pass render_scene
             {
