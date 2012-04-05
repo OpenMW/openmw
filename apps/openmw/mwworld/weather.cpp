@@ -521,23 +521,23 @@ void WeatherManager::update(float duration)
                 srand(time(NULL));
                 float random = ((rand()%100)/100.f) * total;
 
-                //if (random > snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
                 //    weather = "blizzard";
-                //else if (random > blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
                 //    weather = "snow";
-                /*else*/ if (random > ash+thunder+rain+overcast+foggy+cloudy+clear)
+                /*else*/ if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
                     weather = "blight";
-                else if (random > thunder+rain+overcast+foggy+cloudy+clear)
+                else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
                     weather = "ashstorm";
-                else if (random > rain+overcast+foggy+cloudy+clear)
+                else if (random >= rain+overcast+foggy+cloudy+clear)
                     weather = "thunderstorm";
-                else if (random > overcast+foggy+cloudy+clear)
+                else if (random >= overcast+foggy+cloudy+clear)
                     weather = "rain";
-                else if (random > foggy+cloudy+clear)
+                else if (random >= foggy+cloudy+clear)
                     weather = "overcast";
-                else if (random > cloudy+clear)
+                else if (random >= cloudy+clear)
                     weather = "foggy";
-                else if (random > clear)
+                else if (random >= clear)
                     weather = "cloudy";
                 else
                     weather = "clear";
