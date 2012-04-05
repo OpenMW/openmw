@@ -160,6 +160,11 @@ namespace MWGui
     void setInteriorMapTexture(const int x, const int y);
     ///< set the index of the map texture that should be used (for interiors)
 
+    // sets the visibility of the hud health/magicka/stamina bars
+    void setHMSVisibility(bool visible);
+    // sets the visibility of the hud minimap
+    void setMinimapVisibility(bool visible);
+
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
     void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.

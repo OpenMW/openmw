@@ -48,6 +48,11 @@ namespace MWGui
     bool mChanged;
 
     OEngine::GUI::Layout* mLayout;
+
+    float mLastPositionX;
+    float mLastPositionY;
+    float mLastDirectionX;
+    float mLastDirectionY;
   };
   
   class HUD : public OEngine::GUI::Layout, public LocalMapBase
@@ -66,11 +71,14 @@ namespace MWGui
     void setBatchCount(size_t count);
     void setPlayerDir(const float x, const float y);
     void setPlayerPos(const float x, const float y);
+    void setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible);
+    void setBottomRightVisibility(bool effectBoxVisible, bool minimapVisible);
 
     MyGUI::ProgressPtr health, magicka, stamina;
+    MyGUI::Widget *weapBox, *spellBox;
     MyGUI::ImageBox *weapImage, *spellImage;
     MyGUI::ProgressPtr weapStatus, spellStatus;
-    MyGUI::WidgetPtr effectBox;
+    MyGUI::Widget *effectBox, *minimapBox;
     MyGUI::ImageBox* effect1;
     MyGUI::ScrollView* minimap;
     MyGUI::ImageBox* compass;
@@ -80,6 +88,12 @@ namespace MWGui
     MyGUI::TextBox* fpscounter;
     MyGUI::TextBox* trianglecounter;
     MyGUI::TextBox* batchcounter;
+
+  private:
+    // bottom left elements
+    int hmsBaseLeft, weapBoxBaseLeft, spellBoxBaseLeft;
+    // bottom right elements
+    int minimapBoxBaseRight, effectBoxBaseRight;
   };
 
   class MainMenu : public OEngine::GUI::Layout

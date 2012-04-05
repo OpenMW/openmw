@@ -25,6 +25,7 @@ void WindowPinnableBase::onWindowButtonPressed(MyGUI::Window* sender, const std:
     if ("PinToggle" == eventName)
     {
         mPinned = !mPinned;
+        onPinToggled();
     }
 
     eventDone(this);

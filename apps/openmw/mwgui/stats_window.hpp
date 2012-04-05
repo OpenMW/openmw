@@ -74,6 +74,9 @@ namespace MWGui
             std::string birthSignId;
             int reputation, bounty;
             std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
+
+        protected:
+            virtual void onPinToggled();
     };
 }
 #endif

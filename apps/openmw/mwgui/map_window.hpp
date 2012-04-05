@@ -26,10 +26,9 @@ namespace MWGui
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;
         bool mGlobal;
-        float mLastPositionX;
-        float mLastPositionY;
-        float mLastDirectionX;
-        float mLastDirectionY;
+
+    protected:
+        virtual void onPinToggled();
     };
 }
 #endif

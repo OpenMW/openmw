@@ -456,3 +456,13 @@ void WindowManager::setPlayerDir(const float x, const float y)
     map->setPlayerDir(x,y);
     hud->setPlayerDir(x,y);
 }
+
+void WindowManager::setHMSVisibility(bool visible)
+{
+    hud->setBottomLeftVisibility(visible, hud->weapBox->getVisible(), hud->spellBox->getVisible());
+}
+
+void WindowManager::setMinimapVisibility(bool visible)
+{
+    hud->setBottomRightVisibility(hud->effectBox->getVisible(), visible);
+}

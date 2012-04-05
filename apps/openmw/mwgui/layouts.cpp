@@ -31,6 +31,11 @@ HUD::HUD(int width, int height, int fpsLevel)
     , fpscounter(NULL)
     , trianglecounter(NULL)
     , batchcounter(NULL)
+    , hmsBaseLeft(0)
+    , weapBoxBaseLeft(0)
+    , spellBoxBaseLeft(0)
+    , effectBoxBaseRight(0)
+    , minimapBoxBaseRight(0)
 {
     setCoord(0,0, width, height);
 
@@ -38,16 +43,25 @@ HUD::HUD(int width, int height, int fpsLevel)
     getWidget(health, "Health");
     getWidget(magicka, "Magicka");
     getWidget(stamina, "Stamina");
+    hmsBaseLeft = health->getLeft();
 
     // Item and spell images and status bars
+    getWidget(weapBox, "WeapBox");
     getWidget(weapImage, "WeapImage");
     getWidget(weapStatus, "WeapStatus");
+    weapBoxBaseLeft = weapBox->getLeft();
+
+    getWidget(spellBox, "SpellBox");
     getWidget(spellImage, "SpellImage");
     getWidget(spellStatus, "SpellStatus");
+    spellBoxBaseLeft = spellBox->getLeft();
 
     getWidget(effectBox, "EffectBox");
     getWidget(effect1, "Effect1");
+    effectBoxBaseRight = effectBox->getRight();
 
+    getWidget(minimapBox, "MiniMapBox");
+    minimapBoxBaseRight = minimapBox->getRight();
     getWidget(minimap, "MiniMap");
     getWidget(compass, "Compass");
 
@@ -163,15 +177,21 @@ void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& v
 
 void HUD::setPlayerDir(const float x, const float y)
 {
+    if (!minimapBox->getVisible() || (x == mLastPositionX && y == mLastPositionY)) return;
+
     MyGUI::ISubWidget* main = compass->getSubWidgetMain();
     MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
     rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
     float angle = std::atan2(x,y);
     rotatingSubskin->setAngle(angle);
+    mLastPositionX = x;
+    mLastPositionY = y;
 }
 
 void HUD::setPlayerPos(const float x, const float y)
 {
+    if (!minimapBox->getVisible() || (x == mLastDirectionX && y == mLastDirectionY)) return;
+
     MyGUI::IntSize size = minimap->getCanvasSize();
     MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
     MyGUI::IntCoord viewsize = minimap->getCoord();
@@ -179,6 +199,39 @@ void HUD::setPlayerPos(const float x, const float y)
 
     minimap->setViewOffset(pos);
     compass->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
+
+    mLastDirectionX = x;
+    mLastDirectionY = y;
+}
+
+void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible)
+{
+    int weapDx = 0, spellDx = 0;
+    if (!hmsVisible)
+        spellDx = weapDx = weapBoxBaseLeft - hmsBaseLeft;
+
+    if (!weapVisible)
+        spellDx -= spellBoxBaseLeft - weapBoxBaseLeft;
+
+    health->setVisible(hmsVisible);
+    stamina->setVisible(hmsVisible);
+    magicka->setVisible(hmsVisible);
+    weapBox->setPosition(weapBoxBaseLeft - weapDx, weapBox->getTop());
+    weapBox->setVisible(weapVisible);
+    spellBox->setPosition(spellBoxBaseLeft - spellDx, spellBox->getTop());
+    spellBox->setVisible(spellVisible);
+}
+
+void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible)
+{
+    // effect box can have variable width -> variable left coordinate
+    int effectsDx = 0;
+    if (!minimapBoxVisible)
+        effectsDx = minimapBoxBaseRight - effectBoxBaseRight;
+
+    minimapBox->setVisible(minimapBoxVisible);
+    effectBox->setPosition(effectBoxBaseRight - effectBox->getWidth() + effectsDx, effectBox->getTop());
+    effectBox->setVisible(effectBoxVisible);
 }
 
 LocalMapBase::LocalMapBase()
@@ -189,6 +242,10 @@ LocalMapBase::LocalMapBase()
     , mPrefix()
     , mChanged(true)
     , mLayout(NULL)
+    , mLastPositionX(0.0f)
+    , mLastPositionY(0.0f)
+    , mLastDirectionX(0.0f)
+    , mLastDirectionY(0.0f)
 {
 }
 

@@ -381,3 +381,8 @@ void StatsWindow::updateScroller()
     skillScrollerWidget->setScrollRange(std::max(clientHeight - skillClientWidget->getHeight(), 0));
     skillScrollerWidget->setScrollPage(std::max(skillClientWidget->getHeight() - lineHeight, 0));
 }
+
+void StatsWindow::onPinToggled()
+{
+    mWindowManager.setHMSVisibility(!mPinned);
+}

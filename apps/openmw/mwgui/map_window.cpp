@@ -1,7 +1,7 @@
 #include "map_window.hpp"
+#include "window_manager.hpp"
 /*
 #include "../mwmechanics/mechanicsmanager.hpp"
-#include "window_manager.hpp"
 
 #include <cmath>
 #include <algorithm>
@@ -14,11 +14,7 @@ using namespace MWGui;
 
 MapWindow::MapWindow(WindowManager& parWindowManager) : 
     MWGui::WindowPinnableBase("openmw_map_window_layout.xml", parWindowManager),
-    mGlobal(false),
-    mLastPositionX(0.0f),
-    mLastPositionY(0.0f),
-    mLastDirectionX(0.0f),
-    mLastDirectionY(0.0f)
+    mGlobal(false)
 {
     setCoord(500,0,320,300);
     setText("WorldButton", "World");
@@ -104,3 +100,7 @@ void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
     mButton->setCaption( mGlobal ? "Local" : "World" );
 }
 
+void MapWindow::onPinToggled()
+{
+    mWindowManager.setMinimapVisibility(!mPinned);
+}

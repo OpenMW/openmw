@@ -17,6 +17,8 @@ namespace MWGui
         void onWindowButtonPressed(MyGUI::Window* sender, const std::string& eventName);
         
     protected:
+        virtual void onPinToggled() = 0;
+
         bool mPinned;
         bool mVisible;
     };
