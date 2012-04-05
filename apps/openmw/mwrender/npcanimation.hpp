@@ -15,7 +15,39 @@
 namespace MWRender{
 
 class NpcAnimation: public Animation{
-    
+private:
+
+	int mStateID;
+	//Free Parts
+	Ogre::Entity* chest;   std::vector<Nif::NiTriShapeCopy>* chestShapes;
+	Ogre::Entity* skirt;   std::vector<Nif::NiTriShapeCopy>* skirtShapes;
+	Ogre::Entity* rhand;   std::vector<Nif::NiTriShapeCopy>* rhandShapes;
+	Ogre::Entity* lhand;   std::vector<Nif::NiTriShapeCopy>* lhandShapes;
+	Ogre::Entity* tail;    std::vector<Nif::NiTriShapeCopy>* tailShapes;
+	Ogre::Entity* lBeastFoot;   std::vector<Nif::NiTriShapeCopy>* lBeastFootShapes;
+	Ogre::Entity* rBeastFoot;  std::vector<Nif::NiTriShapeCopy>* rBeastFootShapes;
+	
+	//Bounded Parts
+	Ogre::Entity* lclavicle;
+	Ogre::Entity* rclavicle;
+	Ogre::Entity* rupperArm;
+	Ogre::Entity* lupperArm;
+	Ogre::Entity* rUpperLeg;
+	Ogre::Entity* lUpperLeg;
+	Ogre::Entity* lForearm;
+	Ogre::Entity* rForearm;
+	Ogre::Entity* lWrist;
+	Ogre::Entity* rWrist;
+	Ogre::Entity* rKnee;
+	Ogre::Entity* lKnee;
+	Ogre::Entity* neck;
+	Ogre::Entity* rAnkle;
+	Ogre::Entity* lAnkle;
+	Ogre::Entity* groin;
+	Ogre::Entity* lfoot;
+	Ogre::Entity* rfoot;
+	Ogre::Entity* hair;
+	Ogre::Entity* head;
     
     
     public:
