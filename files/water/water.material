@@ -55,6 +55,7 @@ material Water
                 param_named_auto fogColour fog_colour
                 param_named_auto fogParams fog_params
                 param_named_auto renderTargetFlipping render_target_flipping
+                param_named_auto far far_clip_distance
             }
 
             texture_unit reflectionMap
@@ -64,6 +65,11 @@ material Water
             }
 
             texture_unit refractionMap
+            {
+                tex_address_mode clamp
+            }
+
+            texture_unit depthMap
             {
                 tex_address_mode clamp
             }
