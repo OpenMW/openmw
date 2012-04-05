@@ -17,7 +17,7 @@ compositor gbuffer
             pass render_scene
             {
                 first_render_queue 0
-                last_render_queue 69
+                last_render_queue 59
             }
 
         }
@@ -63,7 +63,7 @@ compositor gbufferFinalizer
             }
             pass render_scene
             {
-                first_render_queue 70
+                first_render_queue 60
                 last_render_queue 100
             }
         }

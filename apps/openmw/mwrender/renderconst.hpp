@@ -14,9 +14,11 @@ enum RenderQueueGroups
 
     RQG_Main = Ogre::RENDER_QUEUE_MAIN,
 
-    RQG_OcclusionQuery = Ogre::RENDER_QUEUE_MAIN+1,
+    RQG_Water = Ogre::RENDER_QUEUE_6,
 
     RQG_Alpha = Ogre::RENDER_QUEUE_7,
+
+    RQG_OcclusionQuery = Ogre::RENDER_QUEUE_8,
 
     // Sky late (sun & sun flare)
     RQG_SkiesLate = Ogre::RENDER_QUEUE_SKIES_LATE

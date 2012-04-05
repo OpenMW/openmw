@@ -43,9 +43,6 @@ material Water
     {
         pass
         {
-            scene_blend alpha_blend
-            depth_write off
-
             vertex_program_ref Water_VP
             {
                 param_named_auto camPosObjSpace camera_position_object_space

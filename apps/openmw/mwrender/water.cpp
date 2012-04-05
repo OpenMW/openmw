@@ -30,7 +30,7 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
 
     mWater = mSceneManager->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
-    mWater->setRenderQueueGroup(RQG_Alpha);
+    mWater->setRenderQueueGroup(RQG_Water);
 
     mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
                         + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")
