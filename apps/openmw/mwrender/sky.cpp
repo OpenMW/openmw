@@ -546,7 +546,7 @@ void SkyManager::create()
     "void main_fp(	\n"
     "	in float4 iVertexColor	: TEXCOORD0,	\n"
     "	out float4 oColor    : COLOR, \n"
-    "   uniform float4 emissive, \n"
+    "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
     "   oColor = iVertexColor * emissive; \n"
