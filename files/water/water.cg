@@ -59,8 +59,10 @@ void main_fp
     oColor.a = 1;
 
     // Sample screen-space depth map and subtract pixel depth to get the real water depth
-    float depth1 = tex2D(depthMap, screenCoords).r * far - iDepth;
+    float depthTex = tex2D(depthMap, screenCoords).r;
+    float depth1 = depthTex * far - iDepth;
     depth1 = saturate(depth1 / 500.f);
+    depth1 = (depthTex == 0 ? 1 : depth1);
 
     // Simple wave effect. to be replaced by something better
     float2 uv1 = iUv + time * float2(0.5, 0);
