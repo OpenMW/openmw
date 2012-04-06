@@ -9,7 +9,7 @@ float4 main_ps(float2 iTexCoord : TEXCOORD0,
 	float4 normal = tex2D(NormalMap, noiseCoord) * 2 - 1;
 	
 
-	return tex2D(RT, iTexCoord + normal.xy * 0.05) +
+	return tex2D(RT, iTexCoord + normal.xy * 0.015) +
 	       (tex2D(CausticMap, noiseCoord) / 5) +
 	       tintColour ;
 }
