@@ -1,7 +1,7 @@
-vertex_program Water/GlassVP cg
+vertex_program UnderwaterEffectVP cg
 {
-    source GlassVP.cg
-    entry_point glass_vp
+    source underwater.cg
+    entry_point main_vp
     profiles vs_1_1 arbvp1
 
     default_params 
@@ -11,10 +11,17 @@ vertex_program Water/GlassVP cg
 }
 
 
-fragment_program Water/GlassFP cg
+fragment_program UnderwaterEffectFP_NoMRT cg
 {
-    source GlassFP.cg
-    entry_point main_ps
+    source underwater.cg
+    entry_point main_fp_nomrt
+    profiles ps_2_0 arbfp1
+}
+
+fragment_program UnderwaterEffectFP cg
+{
+    source underwater.cg
+    entry_point main_fp
     profiles ps_2_0 arbfp1
 }
 
@@ -111,13 +118,13 @@ material Water/CompositorNoMRT
         pass
         {
             depth_check off
-            vertex_program_ref Water/GlassVP
+            vertex_program_ref UnderwaterEffectVP
             {
                 param_named_auto timeVal time 0.25
                 param_named scale float 0.1
             }
 
-            fragment_program_ref Water/GlassFP
+            fragment_program_ref UnderwaterEffectFP_NoMRT
             {
                 param_named tintColour float4 0 0.35 0.35 1
             }
@@ -154,37 +161,33 @@ material Water/Compositor
         pass
         {
             depth_check off
-            vertex_program_ref Water/GlassVP
+            vertex_program_ref UnderwaterEffectVP
             {
                 param_named_auto timeVal time 0.25
                 param_named scale float 0.1
             }
 
-            fragment_program_ref Water/GlassFP
+            fragment_program_ref UnderwaterEffectFP
             {
                 param_named tintColour float4 0 0.35 0.35 1
+                param_named_auto far far_clip_distance
             }
 
             texture_unit RT
             {
-                    tex_coord_set 0
+                tex_coord_set 0
                 tex_address_mode clamp
-                filtering linear linear linear
             }
 
             texture_unit
             {
                 texture WaterNormal2.tga 2d
-                        tex_coord_set 2
-                //tex_address_mode clamp
-                filtering linear linear linear
+                tex_coord_set 2
             }
             texture_unit
             {
                 texture caustic_0.png 2d
-                        tex_coord_set 3
-                //tex_address_mode clamp
-                filtering linear linear linear
+                tex_coord_set 3
             }
 
             texture_unit DepthMap

@@ -59,9 +59,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     {
         CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbuffer");
         CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", true);
+        CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "Underwater");
         CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbufferFinalizer");
         CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", true);
-        CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "Underwater");
     }
     else
     {
