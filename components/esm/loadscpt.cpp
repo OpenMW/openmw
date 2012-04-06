@@ -44,7 +44,7 @@ void Script::save(ESMWriter &esm)
     
     if (!varNames.empty())
     {
-        esm.writeHString("SCVR");
+        esm.writeName("SCVR");
         for (std::vector<std::string>::iterator it = varNames.begin(); it != varNames.end(); ++it)
         {
             esm.writeT(it->c_str(), it->size());

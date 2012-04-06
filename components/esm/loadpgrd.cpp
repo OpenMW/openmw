@@ -74,7 +74,7 @@ void Pathgrid::save(ESMWriter &esm)
     
     if (!points.empty())
     {
-        esm.writeHString("PGRP");
+        esm.writeName("PGRP");
         for (PointList::iterator it = points.begin(); it != points.end(); ++it)
         {
             esm.writeT(*it);
@@ -83,7 +83,7 @@ void Pathgrid::save(ESMWriter &esm)
     
     if (!edges.empty())
     {
-        esm.writeHString("PGRC");
+        esm.writeName("PGRC");
         for (std::vector<Edge>::iterator it = edges.begin(); it != edges.end(); ++it)
         {
             esm.writeT(it->v1);

@@ -84,7 +84,7 @@ void Land::load(ESMReader &esm)
 
 void Land::save(ESMWriter &esm)
 {
-    esm.writeHString("INTV");
+    esm.writeName("INTV");
     esm.writeT(X);
     esm.writeT(Y);
 

@@ -17,6 +17,7 @@ void ESMWriter::writeHString(const std::string& data)
 
 void ESMWriter::writeName(const std::string& name)
 {
+    assert((name.size() == 4 && name.c_str()[3] != '\0') || (name.size() == 5 && name.c_str()[4] == '\0'));
     write(name.c_str(), name.size()-1);
 }
 

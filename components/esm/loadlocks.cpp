@@ -38,9 +38,9 @@ void Tool::save(ESMWriter &esm)
     
     switch(type)
     {
-    case Type_Repair: esm.writeHString("RIDT"); break;
-    case Type_Pick: esm.writeHString("LKDT"); break;
-    case Type_Probe: esm.writeHString("PBDT"); break;
+    case Type_Repair: esm.writeName("RIDT"); break;
+    case Type_Pick: esm.writeName("LKDT"); break;
+    case Type_Probe: esm.writeName("PBDT"); break;
     }
 
     esm.writeT(data, 16);
