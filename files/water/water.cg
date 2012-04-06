@@ -37,6 +37,8 @@ void main_fp
     , in float iDepth : TEXCOORD2
     , in float4 iEyeVector : TEXCOORD3
     , uniform float renderTargetFlipping
+    , uniform float4 lightPosObjSpace0
+    , uniform float4 lightSpecularColour0
 
     , uniform sampler2D reflectionMap : register(s0)
     , uniform sampler2D refractionMap : register(s1)
@@ -74,11 +76,22 @@ void main_fp
     // tangent to object space
     normal.xyz = normal.xzy;
 
+    iEyeVector.xyz = normalize(iEyeVector.xyz);
+
     // fresnel
-    float facing = 1.0 - max(abs(dot(normalize(iEyeVector.xyz), normal.xyz)), 0);
+    float facing = 1.0 - max(abs(dot(iEyeVector.xyz, normal.xyz)), 0);
     float reflectionFactor = saturate(0.35 + 0.65 * pow(facing, 2));
 
-    oColor.xyz = lerp(refraction.xyz, reflection.xyz, depth1 * reflectionFactor);
+    // specular
+    float3 lightDir = normalize(lightPosObjSpace0.xyz); // assumes that light 0 is a directional light
+    float3 halfVector = normalize(iEyeVector + lightDir);
+    float specular = pow(max(dot(normal.xyz, halfVector.xyz), 0), 64);
+
+    float opacity = depth1 * saturate(reflectionFactor + specular);
+
+    reflection.xyz += lightSpecularColour0.xyz * specular;
+
+    oColor.xyz = lerp(refraction.xyz, reflection.xyz, opacity);
 
     float fogValue = saturate((iDepth - fogParams.y) * fogParams.w);
     oColor.xyz = lerp(oColor.xyz, fogColour, fogValue);

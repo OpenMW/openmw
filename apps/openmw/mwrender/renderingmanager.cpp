@@ -406,6 +406,7 @@ void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
     mSun->setDiffuseColour(colour);
+    mSun->setSpecularColour(colour);
     mTerrainManager->setDiffuse(colour);
 }
 

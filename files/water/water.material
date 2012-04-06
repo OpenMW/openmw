@@ -54,6 +54,8 @@ material Water
                 param_named_auto fogParams fog_params
                 param_named_auto renderTargetFlipping render_target_flipping
                 param_named_auto far far_clip_distance
+                param_named_auto lightPosObjSpace0 light_position_object_space 0
+                param_named_auto lightSpecularColour0 light_specular_colour 0
             }
 
             texture_unit reflectionMap
