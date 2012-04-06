@@ -13,6 +13,7 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "renderconst.hpp"
+#include "renderingmanager.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -152,14 +153,20 @@ void BillboardObject::init(const String& textureName,
     outStream2 <<
     "void main_fp(	\n"
     "   in float2 uv : TEXCOORD0, \n"
-    "	out float4 oColor    : COLOR, \n"
+    "	out float4 oColor    : COLOR, \n";
+    if (RenderingManager::useMRT()) outStream2 <<
+        "   out float4 oColor1 : COLOR1, \n";
+    outStream2 <<
     "   uniform sampler2D texture : TEXUNIT0, \n"
     "   uniform float4 diffuse, \n"
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
     "   float4 tex = tex2D(texture, uv); \n"
-    "   oColor = float4(emissive.xyz,1) * tex * float4(1,1,1,diffuse.a); \n"
+    "   oColor = float4(emissive.xyz,1) * tex * float4(1,1,1,diffuse.a); \n";
+    if (RenderingManager::useMRT()) outStream2 <<
+        "   oColor1 = float4(1, 0, 0, 1); \n";
+    outStream2 <<
     "}";
     fshader->setSource(outStream2.str());
     fshader->load();
@@ -215,7 +222,10 @@ Moon::Moon( const String& textureName,
     outStream2 <<
     "void main_fp(	\n"
     "   in float2 uv : TEXCOORD0, \n"
-    "	out float4 oColor    : COLOR, \n"
+    "	out float4 oColor    : COLOR, \n";
+    if (RenderingManager::useMRT()) outStream2 <<
+        "   out float4 oColor1 : COLOR1, \n";
+    outStream2 <<
     "   uniform sampler2D texture : TEXUNIT0, \n"
     "   uniform float4 skyColour, \n"
     "   uniform float4 diffuse, \n"
@@ -223,7 +233,10 @@ Moon::Moon( const String& textureName,
     ")	\n"
     "{	\n"
     "   float4 tex = tex2D(texture, uv); \n"
-    "   oColor = float4(emissive.xyz,1) * tex; \n"
+    "   oColor = float4(emissive.xyz,1) * tex; \n";
+    if (RenderingManager::useMRT()) outStream2 <<
+        "   oColor1 = float4(1, 0, 0, 1); \n";
+    outStream2 <<
     // use a circle for the alpha (compute UV distance to center)
     // looks a bit bad because its not filtered on the edges,
     // but it's cheaper than a seperate alpha texture.
@@ -474,7 +487,10 @@ void SkyManager::create()
     outStream5 <<
     "void main_fp(	\n"
     "   in float2 uv : TEXCOORD0, \n"
-    "	out float4 oColor    : COLOR, \n"
+    "	out float4 oColor    : COLOR, \n";
+    if (RenderingManager::useMRT()) outStream5 <<
+        "   out float4 oColor1 : COLOR1, \n";
+    outStream5 <<
     "   in float fade : TEXCOORD1, \n"
     "   uniform sampler2D texture : TEXUNIT0, \n"
     "   uniform float opacity, \n"
@@ -482,7 +498,10 @@ void SkyManager::create()
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
-    "   oColor =  tex2D(texture, uv) * float4(emissive.xyz, 1) * float4(1,1,1,fade*diffuse.a); \n"
+    "   oColor =  tex2D(texture, uv) * float4(emissive.xyz, 1) * float4(1,1,1,fade*diffuse.a); \n";
+    if (RenderingManager::useMRT()) outStream5 <<
+        "   oColor1 = float4(1, 0, 0, 1); \n";
+    outStream5 <<
     "}";
     stars_fp->setSource(outStream5.str());
     stars_fp->load();
@@ -551,11 +570,17 @@ void SkyManager::create()
     _outStream <<
     "void main_fp(	\n"
     "	in float4 iVertexColor	: TEXCOORD0,	\n"
-    "	out float4 oColor    : COLOR, \n"
+    "	out float4 oColor    : COLOR, \n";
+    if (RenderingManager::useMRT()) _outStream <<
+        "   out float4 oColor1 : COLOR1, \n";
+    _outStream <<
     "   uniform float4 emissive \n"
     ")	\n"
     "{	\n"
-    "   oColor = iVertexColor * emissive; \n"
+    "   oColor = iVertexColor * emissive; \n";
+    if (RenderingManager::useMRT()) _outStream <<
+        "   oColor1 = float4(1, 0, 0, 1); \n";
+    _outStream <<
     "}";
     fshader->setSource(_outStream.str());
     fshader->load();
@@ -607,8 +632,11 @@ void SkyManager::create()
     outStream2 <<
     "void main_fp(	\n"
     "   in float2 uv : TEXCOORD0, \n"
-    "	out float4 oColor    : COLOR, \n"
     "   in float4 color : TEXCOORD1, \n"
+    "	out float4 oColor    : COLOR, \n";
+    if (RenderingManager::useMRT()) outStream2 <<
+        "   out float4 oColor1 : COLOR1, \n";
+    outStream2 <<
     "   uniform sampler2D texture : TEXUNIT0, \n"
     "   uniform sampler2D secondTexture : TEXUNIT1, \n"
     "   uniform float transitionFactor, \n"
@@ -620,7 +648,10 @@ void SkyManager::create()
     "{	\n"
     "   uv += float2(0,1) * time * speed * 0.003; \n" // Scroll in y direction
     "   float4 tex = lerp(tex2D(texture, uv), tex2D(secondTexture, uv), transitionFactor); \n"
-    "   oColor = color * float4(emissive.xyz,1) * tex * float4(1,1,1,opacity); \n"
+    "   oColor = color * float4(emissive.xyz,1) * tex * float4(1,1,1,opacity); \n";
+    if (RenderingManager::useMRT()) outStream2 <<
+        "   oColor1 = float4(1, 0, 0, 1); \n";
+    outStream2 <<
     "}";
     mCloudFragmentShader->setSource(outStream2.str());
     mCloudFragmentShader->load();
