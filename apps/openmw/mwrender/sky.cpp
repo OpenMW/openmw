@@ -810,7 +810,9 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         strength = 1.f;
 
     mSunGlare->setVisibility(weather.mGlareView * mGlareFade * strength);
-    mSun->setVisibility(weather.mGlareView);
+
+    if (strength < 0.4) strength = 0.4;
+    mSun->setVisibility(weather.mGlareView * strength);
 
     mAtmosphereNight->setVisible(weather.mNight && mEnabled);
 }
@@ -922,4 +924,9 @@ void SkyManager::setSkyPosition(const Ogre::Vector3& position)
 void SkyManager::resetSkyPosition()
 {
     mRootNode->setPosition(0,0,0);
+}
+
+void SkyManager::scaleSky(float scale)
+{
+    mRootNode->setScale(scale, scale, scale);
 }

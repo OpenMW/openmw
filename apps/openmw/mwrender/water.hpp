@@ -11,7 +11,7 @@ namespace MWRender {
     class SkyManager;
 
     /// Water rendering 	
-    class Water : Ogre::RenderTargetListener
+    class Water : public Ogre::RenderTargetListener
     {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;

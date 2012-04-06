@@ -54,6 +54,9 @@ void main_fp
     float2 screenCoords = iScreenCoords.xy / iScreenCoords.z;
     screenCoords.y = (1-saturate(renderTargetFlipping))+renderTargetFlipping*screenCoords.y;
 
+    // No need for transparency since we are using a refraction map
+    oColor.a = 1;
+
     // Sample screen-space depth map and subtract pixel depth to get the real water depth
     float depth1 = tex2D(depthMap, screenCoords).r * far - iDepth;
     depth1 = saturate(depth1 / 500.f);
@@ -93,7 +96,7 @@ void main_fp
 
     oColor.xyz = lerp(refraction.xyz, reflection.xyz, opacity);
 
+    // add fog
     float fogValue = saturate((iDepth - fogParams.y) * fogParams.w);
     oColor.xyz = lerp(oColor.xyz, fogColour, fogValue);
-    oColor.a = 1;
 }

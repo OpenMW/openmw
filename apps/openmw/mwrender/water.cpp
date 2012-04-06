@@ -141,15 +141,16 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
 {
     mWater->setVisible(false);
 
-    mOldCameraFarClip = mCamera->getFarClipDistance();
-    if (mReflectDistance != 0)
-        mCamera->setFarClipDistance(mReflectDistance);
+    //mOldCameraFarClip = mCamera->getFarClipDistance();
+    //if (mReflectDistance != 0)
+    //    mCamera->setFarClipDistance(mReflectDistance);
 
     if (evt.source == mReflectionTarget)
     {
         Vector3 pos = mCamera->getRealPosition();
         pos.y = mTop*2 - pos.y;
         mSky->setSkyPosition(pos);
+        mSky->scaleSky(mCamera->getFarClipDistance() / 1000.f);
         mCamera->enableCustomNearClipPlane(Plane(Vector3::UNIT_Y, mTop));
         mCamera->enableReflection(Plane(Vector3::UNIT_Y, mTop));
     }
@@ -159,11 +160,12 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
 {
     mWater->setVisible(true);
 
-    mCamera->setFarClipDistance(mOldCameraFarClip);
+    //mCamera->setFarClipDistance(mOldCameraFarClip);
 
     if (evt.source == mReflectionTarget)
     {
         mSky->resetSkyPosition();
+        mSky->scaleSky(1);
         mCamera->disableReflection();
         mCamera->disableCustomNearClipPlane();
     }

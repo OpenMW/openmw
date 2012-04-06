@@ -170,6 +170,7 @@ namespace MWRender
 
         void setSkyPosition(const Ogre::Vector3& position);
         void resetSkyPosition();
+        void scaleSky(float scale);
 
     private:
         bool mCreated;
@@ -183,21 +184,21 @@ namespace MWRender
         BillboardObject* mSunGlare;
         Moon* mMasser;
         Moon* mSecunda;
-    
+
         Ogre::Viewport* mViewport;
         Ogre::SceneNode* mRootNode;
         Ogre::SceneManager* mSceneMgr;
-        
+
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
-        
+
         Ogre::MaterialPtr mCloudMaterial;
         Ogre::MaterialPtr mAtmosphereMaterial;
-        
+
         Ogre::MaterialPtr mStarsMaterials[7];
-        
+
         Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
-        
+
         // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;
         Ogre::String mNextClouds;
@@ -207,17 +208,17 @@ namespace MWRender
         float mStarsOpacity;
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
-        
+
         Ogre::Overlay* mThunderOverlay;
         Ogre::TextureUnitState* mThunderTextureUnit;
-                
+
         float mRemainingTransitionTime;
-        
+
         float mGlare; // target
         float mGlareFade; // actual
-        
+
         void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
-        
+
         bool mEnabled;
         bool mSunEnabled;
         bool mMasserEnabled;
