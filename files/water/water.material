@@ -1,21 +1,21 @@
 vertex_program Water/GlassVP cg
 {
-	source GlassVP.cg
-	entry_point glass_vp
-	profiles vs_1_1 arbvp1
+    source GlassVP.cg
+    entry_point glass_vp
+    profiles vs_1_1 arbvp1
 
-	default_params 
-	{
-		param_named_auto worldViewProj worldviewproj_matrix
-	}
+    default_params 
+    {
+        param_named_auto worldViewProj worldviewproj_matrix
+    }
 }
 
 
 fragment_program Water/GlassFP cg
 {
-	source GlassFP.cg
-	entry_point main_ps
-	profiles ps_2_0 arbfp1
+    source GlassFP.cg
+    entry_point main_ps
+    profiles ps_2_0 arbfp1
 }
 
 vertex_program Water_VP cg
@@ -104,45 +104,92 @@ material Water
     }
 }
 
+material Water/CompositorNoMRT
+{
+    technique
+    {
+        pass
+        {
+            depth_check off
+            vertex_program_ref Water/GlassVP
+            {
+                param_named_auto timeVal time 0.25
+                param_named scale float 0.1
+            }
+
+            fragment_program_ref Water/GlassFP
+            {
+                param_named tintColour float4 0 0.35 0.35 1
+            }
+
+            texture_unit RT
+            {
+                    tex_coord_set 0
+                tex_address_mode clamp
+                filtering linear linear linear
+            }
+
+            texture_unit
+            {
+                texture WaterNormal2.tga 2d
+                        tex_coord_set 1
+                //tex_address_mode clamp
+                filtering linear linear linear
+            }
+            texture_unit
+            {
+                texture caustic_0.png 2d
+                        tex_coord_set 2
+                //tex_address_mode clamp
+                filtering linear linear linear
+            }
+        }
+    }
+}
+
 material Water/Compositor
 {
-	technique
-	{
-		pass
-		{
-			depth_check off
-			vertex_program_ref Water/GlassVP
-			{
-				param_named_auto timeVal time 0.25
-				param_named scale float 0.1
-			}
+    technique
+    {
+        pass
+        {
+            depth_check off
+            vertex_program_ref Water/GlassVP
+            {
+                param_named_auto timeVal time 0.25
+                param_named scale float 0.1
+            }
 
-			fragment_program_ref Water/GlassFP
-			{
-				param_named tintColour float4 0 0.35 0.35 1
-			}
+            fragment_program_ref Water/GlassFP
+            {
+                param_named tintColour float4 0 0.35 0.35 1
+            }
 
-			texture_unit RT
-			{
-			        tex_coord_set 0
-				tex_address_mode clamp
-				filtering linear linear linear
-			}
+            texture_unit RT
+            {
+                    tex_coord_set 0
+                tex_address_mode clamp
+                filtering linear linear linear
+            }
 
-			texture_unit
-			{
-				texture WaterNormal2.tga 2d
-                		tex_coord_set 1
-				//tex_address_mode clamp
-				filtering linear linear linear
-			}
-			texture_unit
-			{
-				texture caustic_0.png 2d
-                		tex_coord_set 2
-				//tex_address_mode clamp
-				filtering linear linear linear
-			}
-		}
-	}
+            texture_unit
+            {
+                texture WaterNormal2.tga 2d
+                        tex_coord_set 2
+                //tex_address_mode clamp
+                filtering linear linear linear
+            }
+            texture_unit
+            {
+                texture caustic_0.png 2d
+                        tex_coord_set 3
+                //tex_address_mode clamp
+                filtering linear linear linear
+            }
+
+            texture_unit DepthMap
+            {
+            }
+        }
+    }
 }

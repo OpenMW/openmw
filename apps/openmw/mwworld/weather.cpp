@@ -585,8 +585,8 @@ void WeatherManager::update(float duration)
         int facing = (mHour > 13.f) ? 1 : -1;
 
         Vector3 final(
-            (1-height)*facing, 
-            (1-height)*facing, 
+            -(1-height)*facing, 
+            -(1-height)*facing, 
             height);
         mRendering->setSunDirection(final);
 
@@ -606,13 +606,13 @@ void WeatherManager::update(float duration)
             float moonHeight = 1-std::abs((night-0.5)*2);
             int facing = (mHour > 0.f && mHour<12.f) ? 1 : -1;
             Vector3 masser(
-                (1-moonHeight)*facing, 
-                (1-moonHeight)*facing, 
+                -(1-moonHeight)*facing, 
+                -(1-moonHeight)*facing, 
                 moonHeight);
 
             Vector3 secunda(
-                (1-moonHeight)*facing*0.8, 
-                (1-moonHeight)*facing*1.25, 
+                -(1-moonHeight)*facing*0.8, 
+                -(1-moonHeight)*facing*1.25, 
                 moonHeight);
 
             mRendering->getSkyManager()->setMasserDirection(masser);

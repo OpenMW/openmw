@@ -1,6 +1,7 @@
 #include "water.hpp"
 #include <components/settings/settings.hpp>
 #include "sky.hpp"
+#include "renderingmanager.hpp"
 
 using namespace Ogre;
 
@@ -68,6 +69,8 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
         mReflectionTarget = rtt;
     }
 
+    mCompositorName = RenderingManager::useMRT() ? "Underwater" : "UnderwaterNoMRT";
+
     createMaterial();
     mWater->setMaterial(mMaterial);
 }
@@ -118,7 +121,7 @@ void Water::checkUnderwater(float y)
     if ((mIsUnderwater && y > mTop) || !mWater->isVisible() || mCamera->getPolygonMode() != Ogre::PM_SOLID)
     {
         try {
-            CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
+            CompositorManager::getSingleton().setCompositorEnabled(mViewport, mCompositorName, false);
         } catch(...) {}
 
         // tell the shader we are not underwater
@@ -137,7 +140,7 @@ void Water::checkUnderwater(float y)
     if (!mIsUnderwater && y < mTop && mWater->isVisible() && mCamera->getPolygonMode() == Ogre::PM_SOLID)
     {
         try {
-            CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", true);
+            CompositorManager::getSingleton().setCompositorEnabled(mViewport, mCompositorName, true);
         } catch(...) {}
 
         // tell the shader we are underwater

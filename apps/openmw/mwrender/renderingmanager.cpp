@@ -61,8 +61,12 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
         CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbuffer", true);
         CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbufferFinalizer");
         CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", true);
+        CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "Underwater");
     }
-    CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "Water");
+    else
+    {
+        CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "UnderwaterNoMRT");
+    }
 
     // Turn the entire scene (represented by the 'root' node) -90
     // degrees around the x axis. This makes Z go upwards, and Y go into

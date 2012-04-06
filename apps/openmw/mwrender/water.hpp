@@ -34,6 +34,8 @@ namespace MWRender {
 
         SkyManager* mSky;
 
+        std::string mCompositorName;
+
         void createMaterial();
         Ogre::MaterialPtr mMaterial;
 

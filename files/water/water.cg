@@ -19,9 +19,9 @@ void main_vp
     oDepth = oPos.z;
 
     float4x4 scalemat = float4x4(   0.5,    0,      0,      0.5,
-                                    0,		-0.5,   0,      0.5,
-                                    0,  	0, 	    0.5,    0.5,
-                                    0,  	0,      0,      1   );
+                                    0,      -0.5,   0,      0.5,
+                                    0,      0,      0.5,    0.5,
+                                    0,      0,      0,      1   );
     float4 texcoordProj = mul(scalemat, oPos);
     oScreenCoords = float3(texcoordProj.x, texcoordProj.y, texcoordProj.w);
 
