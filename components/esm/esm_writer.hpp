@@ -11,6 +11,16 @@ namespace ESM {
 class ESMWriter
 {
 public:
+    void setVersion(Version ver);
+    void setType(FileType type);
+
+    void setAuthor(const std::string& author);
+    void setDescription(const std::string& desc);
+
+    void save(const std::string& file);
+    void save(std::ostream& file);
+    void close();
+
     void writeHNString(const std::string& name, const std::string& data);
     void writeHNOString(const std::string& name, const std::string& data)
     {
@@ -65,6 +75,9 @@ public:
 
 private:
     std::ostream m_stream;
+
+    HEDRstruct m_header;
+    SaveData m_saveData;
 };
 
 }
