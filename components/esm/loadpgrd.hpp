@@ -2,6 +2,7 @@
 #define _ESM_PGRD_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -42,6 +43,7 @@ struct Pathgrid
     EdgeList edges;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

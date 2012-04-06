@@ -3,6 +3,7 @@
 
 #include "defs.hpp"
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -15,6 +16,7 @@ struct BirthSign
     SpellList powers;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

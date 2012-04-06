@@ -2,6 +2,7 @@
 #define _ESM_LIGH_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -41,6 +42,7 @@ struct Light
     std::string sound, script, model, icon, name;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

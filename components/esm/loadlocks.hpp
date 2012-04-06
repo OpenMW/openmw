@@ -2,6 +2,7 @@
 #define _ESM_LOCKS_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -13,6 +14,13 @@ namespace ESM
 
 struct Tool
 {
+    enum Type
+    {
+        Type_Pick,
+        Type_Probe,
+        Type_Repair
+    };
+
     struct Data
     {
         float weight;
@@ -25,9 +33,11 @@ struct Tool
     }; // Size = 16
 
     Data data;
+    Type type;
     std::string name, model, icon, script;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 struct Probe: Tool

@@ -2,6 +2,7 @@
 #define _ESM_DEFS_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -47,6 +48,11 @@ struct SpellList
         while (esm.isNextSub("NPCS"))
             list.push_back(esm.getHString());
     }
+    void save(ESMWriter &esm)
+    {
+        for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
+            esm.writeHNString("NPCS", *it);
+    }
 };
 
 /** Defines a spell effect. Shared between SPEL (Spells), ALCH
@@ -90,6 +96,13 @@ struct EffectList
         {
             esm.getHT(s, 24);
             list.push_back(s);
+        }
+    }
+    void save(ESMWriter &esm)
+    {
+        for (std::vector<ENAMstruct>::iterator it = list.begin(); it != list.end(); ++it)
+        {
+            esm.writeHNT<ENAMstruct>("ENAM", *it, 24);
         }
     }
 };

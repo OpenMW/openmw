@@ -2,6 +2,7 @@
 #define _ESM_NPC_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "loadcont.hpp"
 #include "defs.hpp"
 
@@ -83,6 +84,7 @@ struct NPC
 
 #pragma pack(pop)
 
+  char npdtType;
   NPDTstruct52 npdt52;
   NPDTstruct12 npdt12; // Use this if npdt52.gold == -10
 
@@ -101,6 +103,7 @@ struct NPC
 
   // Implementation moved to load_impl.cpp
   void load(ESMReader &esm, const std::string& id);
+  void save(ESMWriter &esm);
 };
 }
 #endif

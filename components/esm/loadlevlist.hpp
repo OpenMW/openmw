@@ -2,6 +2,7 @@
 #define _ESM_LEVLISTS_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -43,6 +44,7 @@ struct LeveledListBase
     std::vector<LevelItem> list;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 struct CreatureLevList: LeveledListBase

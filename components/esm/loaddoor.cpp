@@ -11,5 +11,17 @@ void Door::load(ESMReader &esm)
     openSound = esm.getHNOString("SNAM");
     closeSound = esm.getHNOString("ANAM");
 }
+void Door::save(ESMWriter &esm)
+{
+    esm.writeHNString("MODL", model);
+    if (!name.empty())
+        esm.writeHNString("FNAM", name);
+    if (!script.empty())
+        esm.writeHNString("SCRI", script);
+    if (!openSound.empty())
+        esm.writeHNString("SNAM", openSound);
+    if (!closeSound.empty())
+        esm.writeHNString("ANAM", closeSound);
+}
 
 }

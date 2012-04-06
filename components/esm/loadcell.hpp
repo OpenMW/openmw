@@ -2,6 +2,7 @@
 #define _ESM_CELL_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "defs.hpp"
 
 namespace ESM {
@@ -71,6 +72,8 @@ public:
 
   // Position and rotation of this object within the cell
   Position pos;
+
+  void save(ESMWriter &esm);
 };
 
 /* Cells hold data about objects, creatures, statics (rocks, walls,
@@ -118,6 +121,7 @@ struct Cell
   int mapColor;
 
   void load(ESMReader &esm);
+  void save(ESMWriter &esm);
 
   bool isExterior() const
   {

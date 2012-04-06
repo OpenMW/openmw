@@ -2,6 +2,7 @@
 #define _ESM_GMST_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "defs.hpp"
 
 namespace ESM
@@ -83,6 +84,7 @@ struct GameSetting
     bool isDirtyBloodmoon();
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

@@ -2,6 +2,7 @@
 #define _ESM_CREC_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM {
 
@@ -15,6 +16,10 @@ struct LoadCREC
     {
       esm.skipRecord();
     }
+
+  void save(ESMWriter &esm)
+    {
+    }
 };
 
 /// Changes an item list / container
@@ -23,6 +28,10 @@ struct LoadCNTC
   void load(ESMReader &esm)
     {
       esm.skipRecord();
+    }
+
+  void save(ESMWriter &esm)
+    {
     }
 };
 }

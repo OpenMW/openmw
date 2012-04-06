@@ -14,5 +14,10 @@ void Sound::load(ESMReader &esm)
      << endl;
      */
 }
+void Sound::save(ESMWriter &esm)
+{
+    esm.writeHNString("FNAM", sound);
+    esm.writeHNT("DATA", data, 3);
+}
 
 }

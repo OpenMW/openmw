@@ -35,7 +35,7 @@ add_component_dir (esm_store
     )
 
 add_component_dir (esm
-    attr defs esm_reader loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
+    attr defs esm_reader esm_writer loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
     loadinfo loadingr loadland loadlevlist loadligh loadlocks loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat

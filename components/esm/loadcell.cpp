@@ -6,6 +6,49 @@
 namespace ESM
 {
 
+void CellRef::save(ESMWriter &esm)
+{
+    esm.writeHNT("FRMR", refnum);
+    esm.writeHNString("NAME", refID);
+
+    if (scale != 1.0)
+        esm.writeHNT("XSCL", scale);
+
+    esm.writeHNOString("ANAM", owner);
+    esm.writeHNOString("BNAM", glob);
+    esm.writeHNOString("SXOL", soul);
+
+    esm.writeHNOString("CNAM", faction);
+    if (factIndex != -1)
+        esm.writeHNT("INDX", factIndex);
+
+    if (charge != -1.0)
+        esm.writeHNT("XCHG", charge);
+
+    if (intv != 0)
+        esm.writeHNT("INTV", intv);
+    if (nam9 != 0)
+        esm.writeHNT("NAM9", nam9);
+
+    if (teleport)
+    {
+        esm.writeHNT("DODT", doorDest);
+        esm.writeHNOString("DNAM", destCell);
+    }
+
+    if (lockLevel != 0)
+        esm.writeHNT("FLTV", lockLevel);
+    esm.writeHNOString("KNAM", key);
+    esm.writeHNOString("TNAM", trap);
+
+    if (unam != 0)
+        esm.writeHNT("UNAM", unam);
+    if (fltv != 0)
+        esm.writeHNT("FLTV", fltv);
+
+    esm.writeHNT("DATA", pos, 24);
+}
+
 void Cell::load(ESMReader &esm)
 {
     // Ignore this for now, it might mean we should delete the entire
@@ -48,6 +91,30 @@ void Cell::load(ESMReader &esm)
     // Save position of the cell references and move on
     context = esm.getContext();
     esm.skipRecord();
+}
+
+void Cell::save(ESMWriter &esm)
+{
+    esm.writeHNT("DATA", data, 12);
+    if (data.flags & Interior)
+    {
+        if (water != 0)
+            esm.writeHNT("WHGT", water);
+        if (data.flags & QuasiEx)
+        {
+            if (!region.empty())
+                esm.writeHNString("RGNN", region);
+        }
+        else
+            esm.writeHNT("AMBI", ambi, 16);
+    }
+    else
+    {
+        if (!region.empty())
+            esm.writeHNString("RGNN", region);
+        if (mapColor != 0)
+            esm.writeHNT("NAM5", mapColor);
+    }
 }
 
 void Cell::restore(ESMReader &esm) const

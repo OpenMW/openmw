@@ -2,6 +2,7 @@
 #define _ESM_MGEF_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -46,6 +47,7 @@ struct MagicEffect
     int index;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

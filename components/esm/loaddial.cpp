@@ -22,4 +22,15 @@ void Dialogue::load(ESMReader &esm)
         esm.fail("Unknown sub record size");
 }
 
+void Dialogue::save(ESMWriter &esm)
+{
+    if (type != Deleted)
+        esm.writeHNT("DATA", type);
+    else
+    {
+        esm.writeHNT("DATA", (int)1);
+        esm.writeHNT("DELE", (int)1);
+    }
+}
+
 }

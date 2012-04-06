@@ -2,6 +2,7 @@
 #define _ESM_SSCR_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -20,6 +21,7 @@ struct StartScript
 
     // Load a record and add it to the list
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 }

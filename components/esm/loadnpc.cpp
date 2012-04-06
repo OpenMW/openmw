@@ -23,9 +23,15 @@ void NPC::load(ESMReader &esm, const std::string& id)
     esm.getSubNameIs("NPDT");
     esm.getSubHeader();
     if (esm.getSubSize() == 52)
+    {
+        npdtType = 52;
         esm.getExact(&npdt52, 52);
+    }
     else if (esm.getSubSize() == 12)
+    {
+        npdtType = 12;
         esm.getExact(&npdt12, 12);
+    }
     else
         esm.fail("NPC_NPDT must be 12 or 52 bytes long");
 
@@ -43,6 +49,30 @@ void NPC::load(ESMReader &esm, const std::string& id)
         hasAI = false;
 
     esm.skipRecord();
+}
+void NPC::save(ESMWriter &esm)
+{
+    esm.writeHNOString("MODL", model);
+    esm.writeHNOString("FNAM", name);
+    esm.writeHNString("RNAM", race);
+    esm.writeHNString("CNAM", cls);
+    esm.writeHNString("ANAM", faction);
+    esm.writeHNString("BNAM", head);
+    esm.writeHNString("KNAM", hair);
+    esm.writeHNOString("SCRI", script);
+    
+    if (npdtType == 52)
+        esm.writeHNT("NPDT", npdt52, 52);
+    else if (npdtType == 12)
+        esm.writeHNT("NPDT", npdt12, 12);
+
+    esm.writeHNT("FLAG", flags);
+    
+    inventory.save(esm);
+    spells.save(esm);
+    
+    if (hasAI)
+        esm.writeHNT("AIDT", AI);
 }
 
 }

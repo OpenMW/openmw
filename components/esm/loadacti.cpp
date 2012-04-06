@@ -8,4 +8,13 @@ void Activator::load(ESMReader &esm)
     name = esm.getHNString("FNAM");
     script = esm.getHNOString("SCRI");
 }
+void Activator::save(ESMWriter &esm)
+{
+    esm.writeHNString("MODL", model);
+    esm.writeHNString("FNAM", name);
+    if (!script.empty())
+    {
+        esm.writeHNString("SCRI", script);
+    }
+}
 }

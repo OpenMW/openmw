@@ -13,6 +13,14 @@ void InventoryList::load(ESMReader &esm)
     }
 }
 
+void InventoryList::save(ESMWriter &esm)
+{
+    for (std::vector<ContItem>::iterator it = list.begin(); it != list.end(); ++it)
+    {
+        esm.writeHNT("NPCO", *it, 36);
+    }
+}
+
 void Container::load(ESMReader &esm)
 {
     model = esm.getHNString("MODL");
@@ -28,6 +36,20 @@ void Container::load(ESMReader &esm)
     script = esm.getHNOString("SCRI");
 
     inventory.load(esm);
+}
+
+void Container::save(ESMWriter &esm)
+{
+    esm.writeHNString("MODL", model);
+    if (!name.empty())
+        esm.writeHNString("FNAM", name);
+    esm.writeHNT("CNDT", weight, 4);
+    esm.writeHNT("FLAG", flags, 4);
+
+    if (!script.empty())
+        esm.writeHNString("SCRI", script);
+
+    inventory.save(esm);
 }
 
 }

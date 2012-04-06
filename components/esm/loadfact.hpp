@@ -2,6 +2,7 @@
 #define _ESM_FACT_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -53,6 +54,7 @@ struct Faction
     std::string ranks[10];
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

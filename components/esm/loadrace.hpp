@@ -2,6 +2,7 @@
 #define _ESM_RACE_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "defs.hpp"
 
 namespace ESM
@@ -58,6 +59,7 @@ struct Race
     SpellList powers;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

@@ -2,6 +2,7 @@
 #define _ESM_CREA_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "loadcont.hpp"
 
 namespace ESM
@@ -64,6 +65,7 @@ struct Creature
     std::string mId;
 
     void load(ESMReader &esm, const std::string& id);
+    void save(ESMWriter &esm);
 };
 }
 #endif

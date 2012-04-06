@@ -4,6 +4,7 @@
 #include <boost/array.hpp>
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "defs.hpp"
 
 namespace ESM {
@@ -67,6 +68,7 @@ struct Skill
   static const boost::array<SkillEnum, Length> skillIds;
 
   void load(ESMReader &esm);
+  void save(ESMWriter &esm);
 };
 }
 #endif

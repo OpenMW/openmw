@@ -27,5 +27,22 @@ void Faction::load(ESMReader &esm)
         reactions.push_back(r);
     }
 }
+void Faction::save(ESMWriter &esm)
+{
+    esm.writeHNString("FNAM", name);
+    
+    for (int i = 0; !ranks[i].empty(); i++)
+    {
+        esm.writeHNString("RNAM", ranks[i]);
+    }
+
+    esm.writeHNT("FADT", data, 240);
+    
+    for (std::vector<Reaction>::iterator it = reactions.begin(); it != reactions.end(); ++it)
+    {
+        esm.writeHNString("ANAM", it->faction);
+        esm.writeHNT("INTV", it->reaction);
+    }
+}
 
 }

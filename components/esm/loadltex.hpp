@@ -2,6 +2,7 @@
 #define _ESM_LTEX_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -28,6 +29,7 @@ struct LandTexture
     int index;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

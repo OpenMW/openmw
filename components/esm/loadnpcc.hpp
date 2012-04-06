@@ -2,6 +2,7 @@
 #define _ESM_NPCC_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM {
 
@@ -75,6 +76,9 @@ struct LoadNPCC
   void load(ESMReader &esm)
   {
     esm.skipRecord();
+  }
+  void save(ESMWriter &esm)
+  {
   }
 };
 }

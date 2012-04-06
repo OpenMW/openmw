@@ -67,4 +67,10 @@ void Skill::load(ESMReader &esm)
     esm.getHNT(data, "SKDT", 24);
     description = esm.getHNOString("DESC");
 }
+void Skill::save(ESMWriter &esm)
+{
+    esm.writeHNT("INDX", index);
+    esm.writeHNT("SKDT", data, 24);
+    esm.writeHNOString("DESC", description);
+}
 }

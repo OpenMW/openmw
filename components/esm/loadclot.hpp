@@ -2,6 +2,7 @@
 #define _ESM_CLOT_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "loadarmo.hpp"
 
 namespace ESM
@@ -41,6 +42,7 @@ struct Clothing
     std::string name, model, icon, enchant, script;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

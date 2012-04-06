@@ -2,6 +2,7 @@
 #define _ESM_ARMO_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -50,6 +51,7 @@ struct PartReferenceList
     std::vector<PartReference> parts;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 struct Armor
@@ -82,6 +84,7 @@ struct Armor
     std::string name, model, icon, script, enchant;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

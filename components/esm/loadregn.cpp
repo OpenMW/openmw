@@ -25,5 +25,19 @@ void Region::load(ESMReader &esm)
         soundList.push_back(sr);
     }
 }
+void Region::save(ESMWriter &esm)
+{
+    esm.writeHNString("FNAM", name);
+    
+    esm.writeHNT("WEAT", data);
+    
+    esm.writeHNOString("BNAM", sleepList);
+    
+    esm.writeHNT("CNAM", mapColor);
+    for (std::vector<SoundRef>::iterator it = soundList.begin(); it != soundList.end(); ++it)
+    {
+        esm.writeHNT<SoundRef>("SNAM", *it);
+    }
+}
 
 }

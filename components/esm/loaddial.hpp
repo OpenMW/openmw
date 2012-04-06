@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "loadinfo.hpp"
 
 namespace ESM
@@ -30,6 +31,7 @@ struct Dialogue
     std::vector<DialInfo> mInfo;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

@@ -10,5 +10,11 @@ void SoundGenerator::load(ESMReader &esm)
   creature = esm.getHNOString("CNAM");
   sound = esm.getHNOString("SNAM");
 }
+void SoundGenerator::save(ESMWriter &esm)
+{
+    esm.writeHNT("DATA", type, 4);
+    esm.writeHNOString("CNAM", creature);
+    esm.writeHNOString("SNAM", sound);
+}
 
 }

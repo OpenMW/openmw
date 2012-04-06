@@ -3,6 +3,17 @@
 namespace ESM
 {
 
+void Land::LandData::save(ESMWriter &esm)
+{
+    // TODO: Make this actually work.
+
+    //esm.writeHNT("VNML", normals, sizeof(VNML));
+    esm.writeHNT("VHGT", heights, sizeof(VHGT));
+    esm.writeHNT("WNAM", 0, 81);
+    esm.writeHNT("VCLR", colours, 3*LAND_NUM_VERTS);
+    esm.writeHNT("VTEX", textures, 512);
+}
+
 Land::Land()
     : flags(0)
     , X(0)
@@ -69,6 +80,21 @@ void Land::load(ESMReader &esm)
 
     dataLoaded = false;
     landData = NULL;
+}
+
+void Land::save(ESMWriter &esm)
+{
+    esm.writeHString("INTV");
+    esm.writeT(X);
+    esm.writeT(Y);
+
+    esm.writeHNT("DATA", flags);
+
+    if (hasData && !dataLoaded)
+        loadData(); // I think it might be a good idea to have 
+                    // the data loaded before trying to save it
+    if (dataLoaded)
+        landData->save(esm);
 }
 
 void Land::loadData()

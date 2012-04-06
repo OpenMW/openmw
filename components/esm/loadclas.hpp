@@ -2,6 +2,7 @@
 #define _ESM_CLAS_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -61,6 +62,7 @@ struct Class
     CLDTstruct data;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

@@ -21,4 +21,17 @@ void Global::load(ESMReader &esm)
     esm.getHNT(value, "FLTV");
 }
 
+void Global::save(ESMWriter &esm)
+{
+    switch(type)
+    {
+    case VT_Short: esm.writeHNString("FNAM", "s"); break;
+    case VT_Int: esm.writeHNString("FNAM", "l"); break;
+    case VT_Float: esm.writeHNString("FNAM", "f"); break;
+    default: return;
+    }
+    
+    esm.writeHNT("FLTV", value);
+}
+
 }

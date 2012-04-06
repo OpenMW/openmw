@@ -38,5 +38,21 @@ void Script::load(ESMReader &esm)
     // Script text
     scriptText = esm.getHNOString("SCTX");
 }
+void Script::save(ESMWriter &esm)
+{
+    esm.writeHNT("SCHD", data, 52);
+    
+    if (!varNames.empty())
+    {
+        esm.writeHString("SCVR");
+        for (std::vector<std::string>::iterator it = varNames.begin(); it != varNames.end(); ++it)
+        {
+            esm.writeT(it->c_str(), it->size());
+        }
+    }
+
+    esm.writeHNT("SCDT", &scriptData[0], scriptData.size());
+    esm.writeHNOString("SCDT", scriptText);
+}
 
 }

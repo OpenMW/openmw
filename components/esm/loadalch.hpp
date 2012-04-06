@@ -2,6 +2,7 @@
 #define _ESM_ALCH_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 #include "defs.hpp"
 
 namespace ESM
@@ -25,6 +26,7 @@ struct Potion
     EffectList effects;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

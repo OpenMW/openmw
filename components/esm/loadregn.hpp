@@ -2,6 +2,7 @@
 #define _ESM_REGN_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -41,6 +42,7 @@ struct Region
     std::vector<SoundRef> soundList;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

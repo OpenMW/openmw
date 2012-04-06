@@ -2,6 +2,7 @@
 #define _ESM_STAT_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM {
 
@@ -22,6 +23,7 @@ struct Static
   std::string model;
 
   void load(ESMReader &esm);
+  void save(ESMWriter &esm);
 };
 }
 #endif

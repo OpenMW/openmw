@@ -2,6 +2,7 @@
 #define _ESM_BODY_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -52,6 +53,7 @@ struct BodyPart
     std::string model, name;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

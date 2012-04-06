@@ -2,6 +2,7 @@
 #define _ESM_LAND_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -65,11 +66,14 @@ struct Land
 
         bool usingColours;
         char colours[3 * LAND_NUM_VERTS];
+
+        void save(ESMWriter &esm);
     };
 
     LandData *landData;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 
     /**
      * Actually loads data

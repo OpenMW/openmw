@@ -67,5 +67,28 @@ void Pathgrid::load(ESMReader &esm)
         }
     }
 }
+void Pathgrid::save(ESMWriter &esm)
+{
+    esm.writeHNT("DATA", data, 12);
+    esm.writeHNString("NAME", cell);
+    
+    if (!points.empty())
+    {
+        esm.writeHString("PGRP");
+        for (PointList::iterator it = points.begin(); it != points.end(); ++it)
+        {
+            esm.writeT(*it);
+        }
+    }
+    
+    if (!edges.empty())
+    {
+        esm.writeHString("PGRC");
+        for (std::vector<Edge>::iterator it = edges.begin(); it != edges.end(); ++it)
+        {
+            esm.writeT(it->v1);
+        }
+    }
+}
 
 }

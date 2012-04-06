@@ -2,6 +2,7 @@
 #define _ESM_APPA_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -32,6 +33,7 @@ struct Apparatus
     std::string model, icon, script, name;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

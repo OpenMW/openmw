@@ -2,6 +2,7 @@
 #define _ESM_SCPT_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -50,6 +51,7 @@ public:
     std::string scriptText; // Uncompiled script
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

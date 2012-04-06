@@ -2,6 +2,7 @@
 #define _ESM_MISC_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -26,6 +27,7 @@ struct Miscellaneous
     std::string name, model, icon, script;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

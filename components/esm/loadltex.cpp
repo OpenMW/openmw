@@ -8,5 +8,10 @@ void LandTexture::load(ESMReader &esm)
     esm.getHNT(index, "INTV");
     texture = esm.getHNString("DATA");
 }
+void LandTexture::save(ESMWriter &esm)
+{
+    esm.writeHNT("INTV", index);
+    esm.writeHNString("DATA", texture);
+}
 
 }

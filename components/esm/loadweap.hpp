@@ -2,6 +2,7 @@
 #define _ESM_WEAP_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -56,6 +57,7 @@ struct Weapon
     std::string name, model, icon, enchant, script;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

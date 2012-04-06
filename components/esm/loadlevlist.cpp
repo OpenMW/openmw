@@ -30,5 +30,17 @@ void LeveledListBase::load(ESMReader &esm)
         esm.getHNT(li.level, "INTV");
     }
 }
+void LeveledListBase::save(ESMWriter &esm)
+{
+    esm.writeHNT("DATA", flags);
+    esm.writeHNT("NNAM", chanceNone);
+    esm.writeHNT<int>("INDX", list.size());
+    
+    for (std::vector<LevelItem>::iterator it = list.begin(); it != list.end(); ++it)
+    {
+        esm.writeHNString("INAM", it->id);
+        esm.writeHNT("INTV", it->level);
+    }
+}
 
 }

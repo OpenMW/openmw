@@ -9,5 +9,10 @@ void StartScript::load(ESMReader &esm)
     esm.skipHSub();
     script = esm.getHNString("NAME");
 }
+void StartScript::save(ESMWriter &esm)
+{
+    esm.writeHNString("DATA", "NIET");
+    esm.writeHNString("NAME", script);
+}
 
 }

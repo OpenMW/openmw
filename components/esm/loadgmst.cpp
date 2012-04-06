@@ -168,5 +168,15 @@ void GameSetting::load(ESMReader &esm)
             && isDirtyBloodmoon()))
         dirty = true;
 }
+void GameSetting::save(ESMWriter &esm)
+{
+    switch(type)
+    {
+    case VT_String: esm.writeHNString("STRV", str); break;
+    case VT_Int: esm.writeHNT("INTV", i); break;
+    case VT_Float: esm.writeHNT("FLTV", f); break;
+    default: break;
+    }
+}
 
 }

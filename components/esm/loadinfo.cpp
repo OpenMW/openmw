@@ -130,4 +130,43 @@ void DialInfo::load(ESMReader &esm)
         esm.skipRecord();
 }
 
+void DialInfo::save(ESMWriter &esm)
+{
+    esm.writeHNString("INAM", id);
+    esm.writeHNString("PNAM", prev);
+    esm.writeHNString("NNAM", next);
+    esm.writeHNT("DATA", data, 12);
+    esm.writeHNOString("ONAM", actor);
+    esm.writeHNOString("RNAM", race);
+    esm.writeHNOString("CNAM", clas);
+    esm.writeHNOString("FNAM", npcFaction);
+    esm.writeHNOString("ANAM", cell);
+    esm.writeHNOString("DNAM", pcFaction);
+    esm.writeHNOString("SNAM", sound);
+    esm.writeHNOString("NAME", response);
+
+    for (std::vector<SelectStruct>::iterator it = selects.begin(); it != selects.end(); ++it)
+    {
+        esm.writeHNString("SCVR", it->selectRule);
+        switch(it->type)
+        {
+        case VT_Int: esm.writeHNT("INTV", it->i); break;
+        case VT_Float: esm.writeHNT("FLTV", it->f); break;
+        default: break;
+        }
+    }
+
+    if (!resultScript.empty())
+        esm.writeHNString("BNAM", resultScript);
+    
+    switch(questStatus)
+    {
+    case QS_Name: esm.writeHNT("QSTN",'\1'); break;
+    case QS_Finished: esm.writeHNT("QSTF", '\1'); break;
+    case QS_Restart: esm.writeHNT("QSTR", '\1'); break;
+    case QS_Deleted: esm.writeHNT("DELE", '\1'); break;
+    default: break;
+    }
+}
+
 }

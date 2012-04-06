@@ -2,6 +2,7 @@
 #define _ESM_BOOK_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -22,6 +23,7 @@ struct Book
     std::string name, model, icon, script, enchant, text;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

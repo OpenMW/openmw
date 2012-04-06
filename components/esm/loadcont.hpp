@@ -2,6 +2,7 @@
 #define _ESM_CONT_H
 
 #include "esm_reader.hpp"
+#include "esm_writer.hpp"
 
 namespace ESM
 {
@@ -21,6 +22,7 @@ struct InventoryList
     std::vector<ContItem> list;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 struct Container
@@ -39,6 +41,7 @@ struct Container
     InventoryList inventory;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif
