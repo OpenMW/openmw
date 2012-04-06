@@ -136,6 +136,8 @@ namespace MWSound
 
     void SoundManager::streamMusicFull(const std::string& filename)
     {
+        if(!mOutput->isInitialized())
+            return;
         std::cout <<"Playing "<<filename<< std::endl;
         try
         {
@@ -180,6 +182,8 @@ namespace MWSound
 
     void SoundManager::say(MWWorld::Ptr ptr, const std::string& filename)
     {
+        if(!mOutput->isInitialized())
+            return;
         try
         {
             // The range values are not tested
@@ -210,6 +214,8 @@ namespace MWSound
     SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
     {
         SoundPtr sound;
+        if(!mOutput->isInitialized())
+            return sound;
         try
         {
             float basevol = 1.0f; /* TODO: volume settings */
@@ -237,6 +243,8 @@ namespace MWSound
                                        float volume, float pitch, int mode)
     {
         SoundPtr sound;
+        if(!mOutput->isInitialized())
+            return sound;
         try
         {
             // Look up the sound in the ESM data
@@ -450,6 +458,8 @@ namespace MWSound
 
     void SoundManager::update(float duration)
     {
+        if(!mOutput->isInitialized())
+            return;
         updateSounds(duration);
         updateRegionSound(duration);
     }
