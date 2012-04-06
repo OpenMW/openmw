@@ -36,24 +36,25 @@ namespace MWRender
         BillboardObject();
 
         virtual ~BillboardObject() {}
-        
+
         void setColour(const Ogre::ColourValue& pColour);
         void setPosition(const Ogre::Vector3& pPosition);
         void setVisible(const bool visible);
         void setRenderQueue(unsigned int id);
+        void setVisibilityFlags(int flags);
         void setSize(const float size);
         Ogre::Vector3 getPosition() const;
-        
+
         void setVisibility(const float visibility);
-        
+
         Ogre::SceneNode* getNode();
-        
+
     protected:
         virtual void init(const Ogre::String& textureName,
                         const float size,
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode);
-    
+
         Ogre::SceneNode* mNode;
         Ogre::MaterialPtr mMaterial;
         Ogre::BillboardSet* mBBSet;
@@ -71,9 +72,9 @@ namespace MWRender
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode
                     );
-        
+
         virtual ~Moon() {}
-                        
+
         enum Phase
         {
             Phase_New = 0,
@@ -85,20 +86,20 @@ namespace MWRender
             Phase_WaningHalf,
             Phase_WaningCrescent
         };
-        
+
         enum Type
         {
             Type_Masser = 0,
             Type_Secunda
         };
-        
+
         void setPhase(const Phase& phase);
         void setType(const Type& type);
         void setSkyColour(const Ogre::ColourValue& colour);
-        
+
         Phase getPhase() const;
         unsigned int getPhaseInt() const;
-    
+
     private:
         Type mType;
         Phase mPhase;

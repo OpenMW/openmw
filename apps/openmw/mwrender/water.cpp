@@ -139,14 +139,13 @@ Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY)
 
 void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
 {
-    mWater->setVisible(false);
-
     //mOldCameraFarClip = mCamera->getFarClipDistance();
     //if (mReflectDistance != 0)
     //    mCamera->setFarClipDistance(mReflectDistance);
 
     if (evt.source == mReflectionTarget)
     {
+        mWater->setVisible(false);
         Vector3 pos = mCamera->getRealPosition();
         pos.y = mTop*2 - pos.y;
         mSky->setSkyPosition(pos);

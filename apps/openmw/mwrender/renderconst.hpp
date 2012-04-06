@@ -47,6 +47,9 @@ enum VisibilityFlags
 
     RV_Sky = 64,
 
+    // Sun glare (not visible in reflection)
+    RV_Glare = 128,
+
     RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water,
 
     /// \todo markers (normally hidden)

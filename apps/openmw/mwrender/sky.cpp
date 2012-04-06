@@ -60,6 +60,11 @@ Vector3 BillboardObject::getPosition() const
     return Vector3(p.x, -p.z, p.y);
 }
 
+void BillboardObject::setVisibilityFlags(int flags)
+{
+    mBBSet->setVisibilityFlags(flags);
+}
+
 void BillboardObject::setColour(const ColourValue& pColour)
 {
     mMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(pColour);
@@ -421,6 +426,7 @@ void SkyManager::create()
     mSun->setRenderQueue(RQG_SkiesEarly+4);
     mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode);
     mSunGlare->setRenderQueue(RQG_SkiesLate);
+    mSunGlare->setVisibilityFlags(RV_Glare);
 
 
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
