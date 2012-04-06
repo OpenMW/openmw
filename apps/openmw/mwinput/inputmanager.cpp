@@ -70,7 +70,7 @@ namespace MWInput
     };
 
   // Class that handles all input and key bindings for OpenMW
-  class InputImpl : public Ogre::FrameListener
+  class InputImpl
   {
     OEngine::Input::DispatcherPtr disp;
     OEngine::Render::OgreRenderer &ogre;
