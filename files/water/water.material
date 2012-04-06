@@ -43,6 +43,8 @@ material Water
     {
         pass
         {
+            cull_hardware none
+
             vertex_program_ref Water_VP
             {
                 param_named_auto camPosObjSpace camera_position_object_space
@@ -56,6 +58,7 @@ material Water
                 param_named_auto far far_clip_distance
                 param_named_auto lightPosObjSpace0 light_position_object_space 0
                 param_named_auto lightSpecularColour0 light_specular_colour 0
+                param_named isUnderwater float 0
             }
 
             texture_unit reflectionMap
@@ -85,6 +88,7 @@ material Water
         scheme Map
         pass
         {
+            cull_hardware none
             scene_blend alpha_blend
             depth_write off
             diffuse 0 0 0 1

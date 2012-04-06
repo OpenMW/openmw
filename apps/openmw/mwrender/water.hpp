@@ -34,7 +34,8 @@ namespace MWRender {
 
         SkyManager* mSky;
 
-        Ogre::MaterialPtr createMaterial();
+        void createMaterial();
+        Ogre::MaterialPtr mMaterial;
 
         Ogre::RenderTarget* mReflectionTarget;
 

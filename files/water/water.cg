@@ -48,6 +48,7 @@ void main_fp
     , uniform float far
     , uniform float4 fogParams
     , uniform float4 fogColour
+    , uniform float isUnderwater
 )
 {
 
@@ -91,6 +92,7 @@ void main_fp
     float specular = pow(max(dot(normal.xyz, halfVector.xyz), 0), 64);
 
     float opacity = depth1 * saturate(reflectionFactor + specular);
+    opacity *= (1-isUnderwater);
 
     reflection.xyz += lightSpecularColour0.xyz * specular;
 

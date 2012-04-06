@@ -69,7 +69,8 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
         mReflectionTarget = rtt;
     }
 
-    mWater->setMaterial(createMaterial());
+    createMaterial();
+    mWater->setMaterial(mMaterial);
 }
 
 void Water::setActive(bool active)
@@ -120,6 +121,15 @@ void Water::checkUnderwater(float y)
         try {
             CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
         } catch(...) {}
+
+        // tell the shader we are not underwater
+        Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
+        if (pass->hasFragmentProgram() && pass->getFragmentProgramParameters()->_findNamedConstantDefinition("isUnderwater", false))
+            pass->getFragmentProgramParameters()->setNamedConstant("isUnderwater", Real(0));
+
+        if (mReflectionTarget)
+            mReflectionTarget->setActive(mActive);
+
         mIsUnderwater = false;
     } 
 
@@ -128,6 +138,15 @@ void Water::checkUnderwater(float y)
         try {
             CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", true);
         } catch(...) {}
+
+        // tell the shader we are underwater
+        Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
+        if (pass->hasFragmentProgram() && pass->getFragmentProgramParameters()->_findNamedConstantDefinition("isUnderwater", false))
+            pass->getFragmentProgramParameters()->setNamedConstant("isUnderwater", Real(1));
+
+        if (mReflectionTarget)
+            mReflectionTarget->setActive(false);
+
         mIsUnderwater = true;
     }
 }
@@ -146,10 +165,15 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
     if (evt.source == mReflectionTarget)
     {
         mWater->setVisible(false);
+
+        // Some messy code to get the skybox to show up at all
+        // The problem here is that it gets clipped by the water plane
+        // Therefore scale it up a bit
         Vector3 pos = mCamera->getRealPosition();
         pos.y = mTop*2 - pos.y;
         mSky->setSkyPosition(pos);
         mSky->scaleSky(mCamera->getFarClipDistance() / 1000.f);
+
         mCamera->enableCustomNearClipPlane(Plane(Vector3::UNIT_Y, mTop));
         mCamera->enableReflection(Plane(Vector3::UNIT_Y, mTop));
     }
@@ -170,9 +194,9 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
     }
 }
 
-Ogre::MaterialPtr Water::createMaterial()
+void Water::createMaterial()
 {
-    MaterialPtr mat = MaterialManager::getSingleton().getByName("Water");
+    mMaterial = MaterialManager::getSingleton().getByName("Water");
 
     // these have to be set in code
     std::string textureNames[32];
@@ -180,28 +204,26 @@ Ogre::MaterialPtr Water::createMaterial()
     {
         textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
     }
-    mat->getTechnique(1)->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
+    mMaterial->getTechnique(1)->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
 
     // use technique without shaders if reflection is disabled
     if (mReflectionTarget == 0)
-        mat->removeTechnique(0);
+        mMaterial->removeTechnique(0);
 
     if (Settings::Manager::getBool("shader", "Water"))
     {
         CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mViewport)->getCompositor("gbuffer");
 
         TexturePtr colorTexture = compositor->getTextureInstance("mrt_output", 0);
-        TextureUnitState* tus = mat->getTechnique(0)->getPass(0)->getTextureUnitState("refractionMap");
+        TextureUnitState* tus = mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState("refractionMap");
         if (tus != 0)
             tus->setTexture(colorTexture);
 
         TexturePtr depthTexture = compositor->getTextureInstance("mrt_output", 1);
-        tus = mat->getTechnique(0)->getPass(0)->getTextureUnitState("depthMap");
+        tus = mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState("depthMap");
         if (tus != 0)
             tus->setTexture(depthTexture);
     }
-
-    return mat;
 }
 
 void Water::setViewportBackground(const ColourValue& bg)
