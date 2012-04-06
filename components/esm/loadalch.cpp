@@ -14,12 +14,9 @@ void Potion::load(ESMReader &esm)
 void Potion::save(ESMWriter &esm)
 {
     esm.writeHNString("MODL", model);
-    if (!icon.empty())
-        esm.writeHNString("TEXT", icon);
-    if (!script.empty())
-        esm.writeHNString("SCRI", script);
-    if (!name.empty())
-        esm.writeHNString("FNAM", name);
+    esm.writeHNOString("TEXT", icon);
+    esm.writeHNOString("SCRI", script);
+    esm.writeHNOString("FNAM", name);
     esm.writeHNT("ALDT", data, 12);
     effects.save(esm);
 }

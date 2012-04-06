@@ -16,17 +16,12 @@ void Book::load(ESMReader &esm)
 void Book::save(ESMWriter &esm)
 {
     esm.writeHNString("MODL", model);
-    if (!name.empty())
-        esm.writeHNString("FNAM", name);
+    esm.writeHNOString("FNAM", name);
     esm.writeHNT("BKDT", data, 20);
-    if (!script.empty())
-        esm.writeHNString("SCRI", script);
-    if (!icon.empty())
-        esm.writeHNString("ITEX", icon);
-    if (!text.empty())
-        esm.writeHNString("TEXT", text);
-    if (!enchant.empty())
-        esm.writeHNString("ENAM", enchant);
+    esm.writeHNOString("SCRI", script);
+    esm.writeHNOString("ITEX", icon);
+    esm.writeHNOString("TEXT", text);
+    esm.writeHNOString("ENAM", enchant);
 }
 
 }

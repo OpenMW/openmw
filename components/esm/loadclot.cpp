@@ -19,19 +19,15 @@ void Clothing::load(ESMReader &esm)
 void Clothing::save(ESMWriter &esm)
 {
     esm.writeHNString("MODL", model);
-    if (!name.empty())
-        esm.writeHNString("FNAM", name);
+    esm.writeHNOString("FNAM", name);
     esm.writeHNT("CTDT", data, 12);
 
-    if (!script.empty())
-        esm.writeHNString("SCRI", script);
-    if (!icon.empty())
-        esm.writeHNString("ITEX", icon);
+    esm.writeHNOString("SCRI", script);
+    esm.writeHNOString("ITEX", icon);
     
     parts.save(esm);
     
-    if (!enchant.empty())
-        esm.writeHNString("ENAM", enchant);
+    esm.writeHNOString("ENAM", enchant);
 }
 
 }

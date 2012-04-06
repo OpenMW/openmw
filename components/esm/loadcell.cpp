@@ -100,18 +100,15 @@ void Cell::save(ESMWriter &esm)
     {
         if (water != 0)
             esm.writeHNT("WHGT", water);
+
         if (data.flags & QuasiEx)
-        {
-            if (!region.empty())
-                esm.writeHNString("RGNN", region);
-        }
+            esm.writeHNOString("RGNN", region);
         else
             esm.writeHNT("AMBI", ambi, 16);
     }
     else
     {
-        if (!region.empty())
-            esm.writeHNString("RGNN", region);
+        esm.writeHNOString("RGNN", region);
         if (mapColor != 0)
             esm.writeHNT("NAM5", mapColor);
     }

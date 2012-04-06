@@ -16,10 +16,8 @@ void Ingredient::save(ESMWriter &esm)
     esm.writeHNString("MODL", model);
     esm.writeHNString("FNAM", name);
     esm.writeHNT("IRDT", data, 56);
-    if (!script.empty())
-        esm.writeHNString("SCRI", script);
-    if (!icon.empty())
-        esm.writeHNString("ITEX", script);
+    esm.writeHNOString("SCRI", script);
+    esm.writeHNOString("ITEX", script);
 }
 
 }

@@ -14,10 +14,8 @@ void BirthSign::load(ESMReader &esm)
 void BirthSign::save(ESMWriter &esm)
 {
     esm.writeHNString("FNAM", name);
-    if (!texture.empty())
-        esm.writeHNString("TNAM", texture);
-    if (!description.empty())
-        esm.writeHNString("DESC", description);
+    esm.writeHNOString("TNAM", texture);
+    esm.writeHNOString("DESC", description);
 
     powers.save(esm);
 }

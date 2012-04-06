@@ -29,8 +29,7 @@ void Class::save(ESMWriter &esm)
 {
     esm.writeHNString("FNAM", name);
     esm.writeHNT("CLDT", data, 60);
-    if (!description.empty())
-        esm.writeHNString("DESC", description);
+    esm.writeHNOString("DESC", description);
 }
 
 }

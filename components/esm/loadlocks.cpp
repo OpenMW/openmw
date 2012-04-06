@@ -44,10 +44,8 @@ void Tool::save(ESMWriter &esm)
     }
 
     esm.writeT(data, 16);
-    if (!script.empty())
-        esm.writeHNString("SCRI", script);
-    if (!icon.empty())
-        esm.writeHNString("ITEX", icon);
+    esm.writeHNOString("SCRI", script);
+    esm.writeHNOString("ITEX", icon);
 }
 
 

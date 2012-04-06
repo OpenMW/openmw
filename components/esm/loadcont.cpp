@@ -41,13 +41,11 @@ void Container::load(ESMReader &esm)
 void Container::save(ESMWriter &esm)
 {
     esm.writeHNString("MODL", model);
-    if (!name.empty())
-        esm.writeHNString("FNAM", name);
+    esm.writeHNOString("FNAM", name);
     esm.writeHNT("CNDT", weight, 4);
     esm.writeHNT("FLAG", flags, 4);
 
-    if (!script.empty())
-        esm.writeHNString("SCRI", script);
+    esm.writeHNOString("SCRI", script);
 
     inventory.save(esm);
 }

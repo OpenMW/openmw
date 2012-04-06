@@ -20,10 +20,8 @@ void PartReferenceList::save(ESMWriter &esm)
     for (std::vector<PartReference>::iterator it = parts.begin(); it != parts.end(); ++it)
     {
         esm.writeHT(it->part);
-        if (!it->male.empty())
-            esm.writeHNString("BNAM", it->male);
-        if (!it->female.empty())
-            esm.writeHNString("CNAM", it->female);
+        esm.writeHNOString("BNAM", it->male);
+        esm.writeHNOString("CNAM", it->female);
     }
 }
 
@@ -42,14 +40,11 @@ void Armor::save(ESMWriter &esm)
 {
     esm.writeHNString("MODL", model);
     esm.writeHNString("FNAM", name);
-    if (!script.empty())
-        esm.writeHNString("SCRI", script);
+    esm.writeHNOString("SCRI", script);
     esm.writeHNT("AODT", data, 24);
-    if (!icon.empty())
-        esm.writeHNString("ITEX", icon);
+    esm.writeHNOString("ITEX", icon);
     parts.save(esm);
-    if (!enchant.empty())
-        esm.writeHNString("ENAM", enchant);
+    esm.writeHNOString("ENAM", enchant);
 }
 
 }

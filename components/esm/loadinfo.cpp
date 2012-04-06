@@ -156,8 +156,7 @@ void DialInfo::save(ESMWriter &esm)
         }
     }
 
-    if (!resultScript.empty())
-        esm.writeHNString("BNAM", resultScript);
+    esm.writeHNOString("BNAM", resultScript);
     
     switch(questStatus)
     {

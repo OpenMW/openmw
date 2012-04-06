@@ -12,9 +12,6 @@ void Activator::save(ESMWriter &esm)
 {
     esm.writeHNString("MODL", model);
     esm.writeHNString("FNAM", name);
-    if (!script.empty())
-    {
-        esm.writeHNString("SCRI", script);
-    }
+    esm.writeHNOString("SCRI", script);
 }
 }

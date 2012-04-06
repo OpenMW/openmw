@@ -40,12 +40,9 @@ void Creature::load(ESMReader &esm, const std::string& id)
 void Creature::save(ESMWriter &esm)
 {
     esm.writeHNString("MODL", model);
-    if (!original.empty())
-        esm.writeHNString("CNAM", original);
-    if (!name.empty())
-        esm.writeHNString("FNAM", name);
-    if (!script.empty())
-        esm.writeHNString("SCRI", script);
+    esm.writeHNOString("CNAM", original);
+    esm.writeHNOString("FNAM", name);
+    esm.writeHNOString("SCRI", script);
     esm.writeHNT("NPDT", data, 96);
     esm.writeHNT("FLAG", flags);
     if (scale != 1.0)
