@@ -16,7 +16,6 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
 
     try
     {
-        CompositorManager::getSingleton().addCompositor(mViewport, "Water", -1);
         CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
     } catch(...) {}
 
@@ -76,7 +75,7 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
 void Water::setActive(bool active)
 {
     mActive = active;
-    if (mReflectionTarget) mReflectionTarget->setActive(active);
+    if (mReflectionTarget) mReflectionTarget->setActive(active && !mIsUnderwater);
     mWater->setVisible(active);
 }
 
@@ -130,6 +129,8 @@ void Water::checkUnderwater(float y)
         if (mReflectionTarget)
             mReflectionTarget->setActive(mActive);
 
+        mWater->setRenderQueueGroup(RQG_Water);
+
         mIsUnderwater = false;
     } 
 
@@ -146,6 +147,8 @@ void Water::checkUnderwater(float y)
 
         if (mReflectionTarget)
             mReflectionTarget->setActive(false);
+
+        mWater->setRenderQueueGroup(RQG_UnderWater);
 
         mIsUnderwater = true;
     }

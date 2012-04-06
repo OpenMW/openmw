@@ -54,6 +54,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     if (caps->getNumMultiRenderTargets() < 2)
         Settings::Manager::setBool("shader", "Water", false);
 
+    // note that the order is important here
     if (useMRT())
     {
         CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbuffer");
@@ -61,6 +62,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
         CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "gbufferFinalizer");
         CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "gbufferFinalizer", true);
     }
+    CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "Water");
 
     // Turn the entire scene (represented by the 'root' node) -90
     // degrees around the x axis. This makes Z go upwards, and Y go into
