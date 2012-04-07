@@ -56,6 +56,10 @@ namespace MWSound
 
         std::auto_ptr<Sound_Output> mOutput;
 
+        float mMasterVolume;
+        float mSFXVolume;
+        float mMusicVolume;
+
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
