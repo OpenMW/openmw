@@ -16,8 +16,9 @@ compositor gbuffer
             }
             pass render_scene
             {
+                // Renders everything except water
                 first_render_queue 0
-                last_render_queue 59
+                last_render_queue 70
             }
 
         }
@@ -35,7 +36,9 @@ compositor gbuffer
     }
 }
 
-// Finalizer compositor to render objects that we don't want in the MRT textures (this is the case for most transparent stuff)
+// Finalizer compositor to render objects that we don't want in the MRT textures (ex. water)
+// NB the water has to be rendered in a seperate compositor anyway, because it
+// accesses the MRT textures which can't be done while they are still being rendered to.
 compositor gbufferFinalizer
 {
     technique
@@ -63,7 +66,7 @@ compositor gbufferFinalizer
             }
             pass render_scene
             {
-                first_render_queue 60
+                first_render_queue 71
                 last_render_queue 100
             }
         }

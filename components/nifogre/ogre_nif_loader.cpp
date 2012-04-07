@@ -420,7 +420,7 @@ void NIFLoader::createMaterial(const String &name,
             "   oColor.a = tex.a * diffuse.a * vertexColour.a; \n";
 
             if (mrt) outStream <<
-                "   oColor1 = float4(iDepth / far, 0, 0, 1); \n";
+                "   oColor1 = float4(iDepth / far, 0, 0, (oColor.a == 1)); \n"; // only write to MRT if alpha is 1
 
             outStream <<
             "}";
