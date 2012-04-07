@@ -12,13 +12,15 @@ namespace MWWorld
 
 namespace MWRender
 {
+    class RenderingManager;
+
     ///
     /// \brief Local map rendering
     ///
     class LocalMap
     {
     public:
-        LocalMap(OEngine::Render::OgreRenderer*, MWWorld::Environment* env);
+        LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering, MWWorld::Environment* env);
         ~LocalMap();
 
         /**
@@ -44,9 +46,9 @@ namespace MWRender
          * @remarks This is used to draw a "fog of war" effect
          * to hide areas on the map the player has not discovered yet.
          * @param position (OGRE coordinates)
-         * @param view direction (OGRE coordinates)
+         * @param camera orientation (OGRE coordinates)
          */
-        void updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3& direction);
+        void updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation);
 
         /**
          * Save the fog of war for the current cell to disk.
@@ -58,6 +60,7 @@ namespace MWRender
 
     private:
         OEngine::Render::OgreRenderer* mRendering;
+        MWRender::RenderingManager* mRenderingManager;
         MWWorld::Environment* mEnvironment;
 
         // 1024*1024 pixels for a cell
@@ -73,6 +76,12 @@ namespace MWRender
         static const int sSize = 8192;
 
         Ogre::Camera* mCellCamera;
+        Ogre::SceneNode* mCameraNode;
+        Ogre::SceneNode* mCameraPosNode;
+        Ogre::SceneNode* mCameraRotNode;
+
+        float mAngle;
+        const Ogre::Vector2 rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle);
 
         void render(const float x, const float y,
                     const float zlow, const float zhigh,

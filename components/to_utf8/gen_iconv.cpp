@@ -12,7 +12,7 @@ void tab() { cout << "   "; }
 // write one number with a space in front of it and a comma after it
 void num(unsigned char i, bool last)
 {
-  cout << " 0x" << (unsigned)i;
+  cout << " (char)0x" << (unsigned)i;
   if(!last) cout << ",";
 }
 

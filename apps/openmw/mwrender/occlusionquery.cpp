@@ -5,14 +5,17 @@
 #include <OgreBillboardSet.h>
 #include <OgreHardwareOcclusionQuery.h>
 #include <OgreEntity.h>
+#include <OgreSubEntity.h>
+#include <OgreMaterialManager.h>
 
 using namespace MWRender;
 using namespace Ogre;
 
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mSingleObjectQuery(0), mActiveQuery(0),
-    mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false), mTestResult(false), 
-    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false), mDoQuery2(false)
+    mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false), mTestResult(false),
+    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false), mDoQuery2(false),
+    mBBNode(0)
 {
     mRendering = renderer;
     mSunNode = sunNode;
@@ -52,7 +55,8 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     matQueryVisible->setCullingMode(CULL_NONE);
     matQueryVisible->setManualCullingMode(MANUAL_CULL_NONE);
 
-    mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
+    if (sunNode)
+        mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
 
     mObjectNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
     mBBNodeReal = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
@@ -82,7 +86,6 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mRendering->getScene()->addRenderObjectListener(this);
     mRendering->getScene()->addRenderQueueListener(this);
     mDoQuery = true;
-    mDoQuery2 = true;
 }
 
 OcclusionQuery::~OcclusionQuery()
@@ -98,7 +101,7 @@ bool OcclusionQuery::supported()
     return mSupported;
 }
 
-void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass, const AutoParamDataSource* source, 
+void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass, const AutoParamDataSource* source,
 			const LightList* pLightList, bool suppressRenderStateChanges)
 {
     // The following code activates and deactivates the occlusion queries
@@ -132,7 +135,7 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
         mActiveQuery = mSingleObjectQuery;
         mObjectWasVisible = true;
     }
-    
+
     if (mActiveQuery != NULL)
         mActiveQuery->beginOcclusionQuery();
 }
@@ -182,15 +185,17 @@ void OcclusionQuery::update(float duration)
     if (dist==0) dist = 10000000;
     dist -= 1000; // bias
     dist /= 1000.f;
-    mBBNode->setPosition(mSunNode->getPosition() * dist);
-    mBBNode->setScale(dist, dist, dist);
-    mBBNodeReal->setPosition(mBBNode->_getDerivedPosition());
-    mBBNodeReal->setScale(mBBNode->getScale());
+    if (mBBNode)
+    {
+        mBBNode->setPosition(mSunNode->getPosition() * dist);
+        mBBNode->setScale(dist, dist, dist);
+        mBBNodeReal->setPosition(mBBNode->_getDerivedPosition());
+        mBBNodeReal->setScale(mBBNode->getScale());
+    }
 
     // Stop occlusion queries until we get their information
     // (may not happen on the same frame they are requested in)
     mDoQuery = false;
-    mDoQuery2 = false;
 
     if (!mSunTotalAreaQuery->isStillOutstanding()
         && !mSunVisibleAreaQuery->isStillOutstanding()
@@ -245,10 +250,54 @@ bool OcclusionQuery::occlusionTestPending()
     return (mQuerySingleObjectRequested || mQuerySingleObjectStarted);
 }
 
+void OcclusionQuery::setSunNode(Ogre::SceneNode* node)
+{
+    mSunNode = node;
+    if (!mBBNode)
+        mBBNode = node->getParentSceneNode()->createChildSceneNode();
+}
+
 bool OcclusionQuery::getTestResult()
 {
     assert( !occlusionTestPending()
         && "Occlusion test still pending");
 
     return mTestResult;
+}
+
+bool OcclusionQuery::isPotentialOccluder(Ogre::SceneNode* node)
+{
+    bool result = false;
+    for (unsigned int i=0; i < node->numAttachedObjects(); ++i)
+    {
+        MovableObject* ob = node->getAttachedObject(i);
+        std::string type = ob->getMovableType();
+        if (type == "Entity")
+        {
+            Entity* ent = static_cast<Entity*>(ob);
+            for (unsigned int j=0; j < ent->getNumSubEntities(); ++j)
+            {
+                // if any sub entity has a material with depth write off,
+                // consider the object as not an occluder
+                MaterialPtr mat = ent->getSubEntity(j)->getMaterial();
+
+                Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+                while (techIt.hasMoreElements())
+                {
+                    Technique* tech = techIt.getNext();
+                    Technique::PassIterator passIt = tech->getPassIterator();
+                    while (passIt.hasMoreElements())
+                    {
+                        Pass* pass = passIt.getNext();
+
+                        if (pass->getDepthWriteEnabled() == false)
+                            return false;
+                        else
+                            result = true;
+                    }
+                }
+            }
+        }
+    }
+    return result;
 }

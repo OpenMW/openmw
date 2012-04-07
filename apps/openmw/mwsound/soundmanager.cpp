@@ -18,13 +18,20 @@
 
 #include "openal_output.hpp"
 #define SOUND_OUT "OpenAL"
-/* Set up the sound manager to use FFMPEG or MPG123+libsndfile for input. The
- * OPENMW_USE_x macros are set in CMakeLists.txt.
+/* Set up the sound manager to use FFMPEG, MPG123+libsndfile, or Audiere for
+ * input. The OPENMW_USE_x macros are set in CMakeLists.txt.
 */
 #ifdef OPENMW_USE_FFMPEG
 #include "ffmpeg_decoder.hpp"
 #ifndef SOUND_IN
 #define SOUND_IN "FFmpeg"
+#endif
+#endif
+
+#ifdef OPENMW_USE_AUDIERE
+#include "audiere_decoder.hpp"
+#ifndef SOUND_IN
+#define SOUND_IN "Audiere"
 #endif
 #endif
 
@@ -129,6 +136,8 @@ namespace MWSound
 
     void SoundManager::streamMusicFull(const std::string& filename)
     {
+        if(!mOutput->isInitialized())
+            return;
         std::cout <<"Playing "<<filename<< std::endl;
         try
         {
@@ -173,6 +182,8 @@ namespace MWSound
 
     void SoundManager::say(MWWorld::Ptr ptr, const std::string& filename)
     {
+        if(!mOutput->isInitialized())
+            return;
         try
         {
             // The range values are not tested
@@ -203,6 +214,8 @@ namespace MWSound
     SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
     {
         SoundPtr sound;
+        if(!mOutput->isInitialized())
+            return sound;
         try
         {
             float basevol = 1.0f; /* TODO: volume settings */
@@ -230,6 +243,8 @@ namespace MWSound
                                        float volume, float pitch, int mode)
     {
         SoundPtr sound;
+        if(!mOutput->isInitialized())
+            return sound;
         try
         {
             // Look up the sound in the ESM data
@@ -407,7 +422,7 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
-        MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+        const ESM::Cell *cell = mEnvironment.mWorld->getPlayer().getPlayer().getCell()->cell;
         Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
         Ogre::Vector3 nPos, nDir, nUp;
         nPos = cam->getRealPosition();
@@ -415,7 +430,7 @@ namespace MWSound
         nUp  = cam->getRealUp();
 
         Environment env = Env_Normal;
-        if(nPos.y < current->cell->water)
+        if((cell->data.flags&cell->HasWater) && nPos.y < cell->water)
             env = Env_Underwater;
 
         // The output handler is expecting vectors oriented like the game
@@ -443,6 +458,8 @@ namespace MWSound
 
     void SoundManager::update(float duration)
     {
+        if(!mOutput->isInitialized())
+            return;
         updateSounds(duration);
         updateRegionSound(duration);
     }

@@ -109,6 +109,9 @@ class RenderingManager: private RenderingInterface {
     void sunEnable();
     void sunDisable();
 
+    void disableLights();
+    void enableLights();
+
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
 
@@ -174,7 +177,8 @@ class RenderingManager: private RenderingInterface {
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
     MWRender::Player *mPlayer;
-    MWRender::Debugging mDebugging;
+
+    MWRender::Debugging *mDebugging;
 
     MWRender::LocalMap* mLocalMap;
 };

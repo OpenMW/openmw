@@ -47,11 +47,21 @@ namespace MWRender
         bool occlusionTestPending();
 
         /**
+         * Checks if the objects held by this scenenode
+         * can be considered as potential occluders
+         * (which might not be the case when transparency is involved)
+         * @param Scene node
+         */
+        bool isPotentialOccluder(Ogre::SceneNode* node);
+
+        /**
          * @return true if the object tested in the last request was occluded
          */
         bool getTestResult();
 
         float getSunVisibility() const {return mSunVisibility;};
+
+        void setSunNode(Ogre::SceneNode* node);
 
     private:
         Ogre::HardwareOcclusionQuery* mSunTotalAreaQuery;

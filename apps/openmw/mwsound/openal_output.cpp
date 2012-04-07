@@ -508,6 +508,8 @@ void OpenAL_Output::init(const std::string &devname)
     }
     if(mFreeSources.empty())
         fail("Could not allocate any sources");
+
+    mInitialized = true;
 }
 
 void OpenAL_Output::deinit()
@@ -535,6 +537,8 @@ void OpenAL_Output::deinit()
     if(mDevice)
         alcCloseDevice(mDevice);
     mDevice = 0;
+
+    mInitialized = false;
 }
 
 

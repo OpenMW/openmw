@@ -20,6 +20,7 @@
 #include <components/esm/esm_reader.hpp>
 #include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
@@ -82,12 +83,20 @@ void OMW::Engine::updateFocusReport (float duration)
 
         if (!handle.empty())
         {
-            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+            // the faced handle is not updated immediately, so on a cell change it might
+            // point to an object that doesn't exist anymore
+            // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
+            try
+            {
+                MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
-            if (!ptr.isEmpty()){
-                name = MWWorld::Class::get (ptr).getName (ptr);
+                if (!ptr.isEmpty()){
+                    name = MWWorld::Class::get (ptr).getName (ptr);
 
+                }
             }
+            catch (std::runtime_error& e)
+            {}
         }
 
         if (name!=mFocusName)
@@ -114,6 +123,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     try
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
+
+        // update input
+        mEnvironment.mInputManager->update();
 
         // sound
         if (mUseSound)
@@ -313,6 +325,29 @@ void OMW::Engine::go()
     {
         boost::filesystem::create_directories(configPath);
     }
+
+    // Create the settings manager and load default settings file
+    Settings::Manager settings;
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
+
+    // prefer local
+    if (boost::filesystem::exists(localdefault))
+        settings.loadDefault(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadDefault(globaldefault);
+
+    // load user settings if they exist, otherwise just load the default settings as user settings
+    const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
+    if (boost::filesystem::exists(settingspath))
+        settings.loadUser(settingspath);
+    else if (boost::filesystem::exists(localdefault))
+        settings.loadUser(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadUser(globaldefault);
+
+    mFpsLevel = settings.getInt("fps", "HUD");
+
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string(),
@@ -333,7 +368,7 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mNewGame, mEnvironment, mEncoding);
+        mResDir, mNewGame, mEnvironment, mEncoding, mFallbackMap);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
@@ -407,6 +442,9 @@ void OMW::Engine::go()
     // Start the main rendering loop
     mOgre->start();
 
+    // Save user settings
+    settings.saveUser(settingspath);
+
     std::cout << "Quitting peacefully.\n";
 }
 
@@ -420,10 +458,21 @@ void OMW::Engine::activate()
     if (handle.empty())
         return;
 
-    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+    // the faced handle is not updated immediately, so on a cell change it might
+    // point to an object that doesn't exist anymore
+    // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
+    MWWorld::Ptr ptr;
+    try
+    {
+        ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
-    if (ptr.isEmpty())
+        if (ptr.isEmpty())
+            return;
+    }
+    catch (std::runtime_error&)
+    {
         return;
+    }
 
     MWScript::InterpreterContext interpreterContext (mEnvironment,
         &ptr.getRefData().getLocals(), ptr);
@@ -488,4 +537,9 @@ void OMW::Engine::showFPS(int level)
 void OMW::Engine::setEncoding(const std::string& encoding)
 {
     mEncoding = encoding;
+}
+
+void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
+{
+    mFallbackMap = fallbackMap;
 }

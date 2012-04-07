@@ -238,6 +238,7 @@ LocalMapBase::LocalMapBase()
     : mCurX(0)
     , mCurY(0)
     , mInterior(false)
+    , mFogOfWar(true)
     , mLocalMap(NULL)
     , mPrefix()
     , mChanged(true)
@@ -261,6 +262,32 @@ void LocalMapBase::setCellPrefix(const std::string& prefix)
     mChanged = true;
 }
 
+void LocalMapBase::toggleFogOfWar()
+{
+    mFogOfWar = !mFogOfWar;
+    applyFogOfWar();
+}
+
+void LocalMapBase::applyFogOfWar()
+{
+    for (int mx=0; mx<3; ++mx)
+    {
+        for (int my=0; my<3; ++my)
+        {
+            std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
+                    + boost::lexical_cast<std::string>(my);
+            std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(mCurX + (mx-1)) + "_"
+                    + boost::lexical_cast<std::string>(mCurY + (mInterior ? (my-1) : -1*(my-1)));
+            MyGUI::ImageBox* fog;
+            mLayout->getWidget(fog, name+"_fog");
+            fog->setImageTexture(mFogOfWar ?
+                ((MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0) ? image+"_fog"
+                : "black.png" )
+               : "");
+        }
+    }
+}
+
 void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
 {
     if (x==mCurX && y==mCurY && mInterior==interior && !mChanged) return; // don't do anything if we're still in the same cell
@@ -276,23 +303,17 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
 
             MyGUI::ImageBox* box;
             mLayout->getWidget(box, name);
-            MyGUI::ImageBox* fog;
-            mLayout->getWidget(fog, name+"_fog");
 
             if (MyGUI::RenderManager::getInstance().getTexture(image) != 0)
                 box->setImageTexture(image);
             else
                 box->setImageTexture("black.png");
-
-            if (MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0)
-                fog->setImageTexture(image+"_fog");
-            else
-                fog->setImageTexture("black.png");
         }
     }
     mInterior = interior;
     mCurX = x;
     mCurY = y;
     mChanged = false;
+    applyFogOfWar();
 }
 

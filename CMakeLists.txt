@@ -24,10 +24,12 @@ set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VE
 
 configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
 
+option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
+option(USE_AUDIERE "use audiere for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
 find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
@@ -133,6 +135,13 @@ if (USE_FFMPEG)
     set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_FFMPEG)
 endif (USE_FFMPEG)
 
+if (USE_AUDIERE)
+    find_package(Audiere REQUIRED)
+    set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${AUDIERE_INCLUDE_DIR})
+    set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${AUDIERE_LIBRARY})
+    set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_AUDIERE)
+endif (USE_AUDIERE)
+
 if (USE_MPG123)
     find_package(MPG123 REQUIRED)
     find_package(SNDFILE REQUIRED)
@@ -215,6 +224,9 @@ endif (APPLE)
 
 # Other files
 
+configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
+    "${OpenMW_BINARY_DIR}/settings-default.cfg")
+
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
     "${OpenMW_BINARY_DIR}/openmw.cfg")
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
@@ -241,8 +253,14 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 
     # prepare plugins
-    if (${CMAKE_BUILD_TYPE} MATCHES "Release" OR
-        ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
+    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
+        set(OPENMW_RELEASE_BUILD 1)
+    endif()
+    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
+        set(OPENMW_RELEASE_BUILD 1)
+    endif()
+
+    if (${OPENMW_RELEASE_BUILD})
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
     else()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
@@ -289,6 +307,7 @@ if(DPKG_PROGRAM)
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install global configuration files
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 

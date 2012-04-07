@@ -466,3 +466,9 @@ void WindowManager::setMinimapVisibility(bool visible)
 {
     hud->setBottomRightVisibility(hud->effectBox->getVisible(), visible);
 }
+
+void WindowManager::toggleFogOfWar()
+{
+    map->toggleFogOfWar();
+    hud->toggleFogOfWar();
+}
