@@ -3,6 +3,11 @@
 
 #include "containerstore.hpp"
 
+namespace MWMechanics
+{
+    struct NpcStats;
+}
+
 namespace MWWorld
 {
     ///< \brief Variant of the ContainerStore for NPCs
@@ -36,9 +41,13 @@ namespace MWWorld
 
         private:
 
-            mutable std::vector<ContainerStoreIterator> mSlots;
+            typedef std::vector<ContainerStoreIterator> TSlots;
+
+            mutable TSlots mSlots;
 
             void copySlots (const InventoryStore& store);
+
+            void initSlots (TSlots& slots);
 
         public:
 
@@ -52,6 +61,9 @@ namespace MWWorld
             ///< \note \a iteartor can be an end-iterator
 
             ContainerStoreIterator getSlot (int slot);
+
+            void autoEquip (const MWMechanics::NpcStats& stats);
+            ///< Auto equip items according to stats and item value.
     };
 }
 
