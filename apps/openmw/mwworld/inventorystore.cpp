@@ -101,20 +101,30 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
 
     for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
     {
+        Ptr test = *iter;
+
         std::pair<std::vector<int>, bool> itemsSlots =
             MWWorld::Class::get (*iter).getEquipmentSlots (*iter);
 
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {
-            /// \todo comapre item with item in slot
-            if (slots.at (*iter2)==end())
+            if (slots.at (*iter2)!=end())
             {
-                /// \todo unstack, if reqquired (itemsSlots.second)
+                Ptr old = *slots.at (*iter2);
 
-                slots[*iter2] = iter;
-                break;
+                // check value
+                if (MWWorld::Class::get (old).getValue (old)>=MWWorld::Class::get (test).getValue (test))
+                {
+                    /// \todo check skill
+                    continue;
+                }
             }
+
+            /// \todo unstack, if reqquired (itemsSlots.second)
+
+            slots[*iter2] = iter;
+            break;
         }
     }
 
