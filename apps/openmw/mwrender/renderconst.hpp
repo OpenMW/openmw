@@ -55,8 +55,6 @@ enum VisibilityFlags
     RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water,
 
     /// \todo markers (normally hidden)
-
-    RV_All = 255
 };
 
 }
