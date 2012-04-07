@@ -123,6 +123,14 @@ namespace MWClass
         return -1;
     }
 
+    int Clothing::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+            ptr.get<ESM::Clothing>();
+
+        return ref->base->data.value;
+    }
+
     void Clothing::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Clothing);

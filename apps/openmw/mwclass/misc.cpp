@@ -70,6 +70,14 @@ namespace MWClass
         return ref->base->script;
     }
 
+    int Miscellaneous::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
+
+        return ref->base->data.value;
+    }
+
     void Miscellaneous::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Miscellaneous);

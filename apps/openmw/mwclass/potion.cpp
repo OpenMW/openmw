@@ -70,6 +70,14 @@ namespace MWClass
         return ref->base->script;
     }
 
+    int Potion::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+            ptr.get<ESM::Potion>();
+
+        return ref->base->data.value;
+    }
+
     void Potion::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Potion);

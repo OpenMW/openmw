@@ -70,6 +70,14 @@ namespace MWClass
         return ref->base->script;
     }
 
+    int Apparatus::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+            ptr.get<ESM::Apparatus>();
+
+        return ref->base->data.value;
+    }
+
     void Apparatus::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Apparatus);

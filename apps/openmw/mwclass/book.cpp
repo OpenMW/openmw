@@ -72,6 +72,14 @@ namespace MWClass
         return ref->base->script;
     }
 
+    int Book::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return ref->base->data.value;
+    }
+
     void Book::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Book);

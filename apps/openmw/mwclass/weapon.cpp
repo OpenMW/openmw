@@ -139,6 +139,14 @@ namespace MWClass
         return -1;
     }
 
+    int Weapon::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return ref->base->data.value;
+    }
+
     void Weapon::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Weapon);

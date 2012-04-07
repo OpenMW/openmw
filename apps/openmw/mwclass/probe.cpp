@@ -80,6 +80,14 @@ namespace MWClass
         return std::make_pair (slots, false);
     }
 
+    int Probe::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+            ptr.get<ESM::Probe>();
+
+        return ref->base->data.value;
+    }
+
     void Probe::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Probe);
