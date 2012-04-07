@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_NPCSTATS_H
 
 #include <map>
+#include <set>
 
 #include "stat.hpp"
 
@@ -24,6 +25,9 @@ namespace MWMechanics
         bool mRun;
         bool mSneak;
         bool mCombat;
+
+        std::set<std::string> mKnownSpells;
+        std::string mSelectedSpell; // can be an empty string (no spell selected)
 
         NpcStats() : mForceRun (false), mForceSneak (false), mRun (false), mSneak (false),
             mCombat (false) {}
