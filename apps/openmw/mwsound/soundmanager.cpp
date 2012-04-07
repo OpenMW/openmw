@@ -7,6 +7,7 @@
 #include <OgreRoot.h>
 
 #include <components/esm_store/store.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
@@ -64,7 +65,19 @@ namespace MWSound
             for(size_t i = 0;i < names.size();i++)
                 std::cout <<"  "<<names[i]<< std::endl;
 
-            mOutput->init();
+            std::string devname = Settings::Manager::getString("device", "Sound");
+            try
+            {
+                mOutput->init(devname);
+            }
+            catch(std::exception &e)
+            {
+                if(devname.empty())
+                    throw;
+                std::cout <<"Failed to open device \""<<devname<<"\", trying default"<< std::endl;
+                mOutput->init();
+                Settings::Manager::setString("device", "Sound", "");
+            }
         }
         catch(std::exception &e)
         {
