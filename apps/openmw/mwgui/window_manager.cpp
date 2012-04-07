@@ -4,6 +4,7 @@
 #include "review.hpp"
 #include "dialogue.hpp"
 #include "dialogue_history.hpp"
+#include "map_window.hpp"
 #include "stats_window.hpp"
 #include "messagebox.hpp"
 
@@ -71,7 +72,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
 
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
-    map = new MapWindow();
+    map = new MapWindow(*this);
     stats = new StatsWindow(*this);
     console = new Console(w,h, environment, extensions);
     mJournal = new JournalWindow(*this);
@@ -454,6 +455,16 @@ void WindowManager::setPlayerDir(const float x, const float y)
 {
     map->setPlayerDir(x,y);
     hud->setPlayerDir(x,y);
+}
+
+void WindowManager::setHMSVisibility(bool visible)
+{
+    hud->setBottomLeftVisibility(visible, hud->weapBox->getVisible(), hud->spellBox->getVisible());
+}
+
+void WindowManager::setMinimapVisibility(bool visible)
+{
+    hud->setBottomRightVisibility(hud->effectBox->getVisible(), visible);
 }
 
 void WindowManager::toggleFogOfWar()

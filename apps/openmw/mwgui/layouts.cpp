@@ -31,6 +31,11 @@ HUD::HUD(int width, int height, int fpsLevel)
     , fpscounter(NULL)
     , trianglecounter(NULL)
     , batchcounter(NULL)
+    , hmsBaseLeft(0)
+    , weapBoxBaseLeft(0)
+    , spellBoxBaseLeft(0)
+    , effectBoxBaseRight(0)
+    , minimapBoxBaseRight(0)
 {
     setCoord(0,0, width, height);
 
@@ -38,16 +43,25 @@ HUD::HUD(int width, int height, int fpsLevel)
     getWidget(health, "Health");
     getWidget(magicka, "Magicka");
     getWidget(stamina, "Stamina");
+    hmsBaseLeft = health->getLeft();
 
     // Item and spell images and status bars
+    getWidget(weapBox, "WeapBox");
     getWidget(weapImage, "WeapImage");
     getWidget(weapStatus, "WeapStatus");
+    weapBoxBaseLeft = weapBox->getLeft();
+
+    getWidget(spellBox, "SpellBox");
     getWidget(spellImage, "SpellImage");
     getWidget(spellStatus, "SpellStatus");
+    spellBoxBaseLeft = spellBox->getLeft();
 
     getWidget(effectBox, "EffectBox");
     getWidget(effect1, "Effect1");
+    effectBoxBaseRight = effectBox->getRight();
 
+    getWidget(minimapBox, "MiniMapBox");
+    minimapBoxBaseRight = minimapBox->getRight();
     getWidget(minimap, "MiniMap");
     getWidget(compass, "Compass");
 
@@ -163,15 +177,21 @@ void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& v
 
 void HUD::setPlayerDir(const float x, const float y)
 {
+    if (!minimapBox->getVisible() || (x == mLastPositionX && y == mLastPositionY)) return;
+
     MyGUI::ISubWidget* main = compass->getSubWidgetMain();
     MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
     rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
     float angle = std::atan2(x,y);
     rotatingSubskin->setAngle(angle);
+    mLastPositionX = x;
+    mLastPositionY = y;
 }
 
 void HUD::setPlayerPos(const float x, const float y)
 {
+    if (!minimapBox->getVisible() || (x == mLastDirectionX && y == mLastDirectionY)) return;
+
     MyGUI::IntSize size = minimap->getCanvasSize();
     MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
     MyGUI::IntCoord viewsize = minimap->getCoord();
@@ -179,99 +199,39 @@ void HUD::setPlayerPos(const float x, const float y)
 
     minimap->setViewOffset(pos);
     compass->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
+
+    mLastDirectionX = x;
+    mLastDirectionY = y;
 }
 
-MapWindow::MapWindow()
-  : Layout("openmw_map_window_layout.xml")
-  , mGlobal(false)
-  , mVisible(false)
+void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible)
 {
-    setCoord(500,0,320,300);
-    setText("WorldButton", "World");
-    setImage("Compass", "textures\\compass.dds");
+    int weapDx = 0, spellDx = 0;
+    if (!hmsVisible)
+        spellDx = weapDx = weapBoxBaseLeft - hmsBaseLeft;
 
-    // Obviously you should override this later on
-    setCellName("No Cell Loaded");
+    if (!weapVisible)
+        spellDx -= spellBoxBaseLeft - weapBoxBaseLeft;
 
-    getWidget(mLocalMap, "LocalMap");
-    getWidget(mGlobalMap, "GlobalMap");
-    getWidget(mPlayerArrow, "Compass");
-
-    getWidget(mButton, "WorldButton");
-    mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
-
-    MyGUI::Button* eventbox;
-    getWidget(eventbox, "EventBox");
-    eventbox->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
-    eventbox->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
-
-    LocalMapBase::init(mLocalMap, this);
+    health->setVisible(hmsVisible);
+    stamina->setVisible(hmsVisible);
+    magicka->setVisible(hmsVisible);
+    weapBox->setPosition(weapBoxBaseLeft - weapDx, weapBox->getTop());
+    weapBox->setVisible(weapVisible);
+    spellBox->setPosition(spellBoxBaseLeft - spellDx, spellBox->getTop());
+    spellBox->setVisible(spellVisible);
 }
 
-void MapWindow::setVisible(bool b)
+void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible)
 {
-    mMainWidget->setVisible(b);
-    if (b)
-        mVisible = true;
-    else
-        mVisible = false;
-}
+    // effect box can have variable width -> variable left coordinate
+    int effectsDx = 0;
+    if (!minimapBoxVisible)
+        effectsDx = minimapBoxBaseRight - effectBoxBaseRight;
 
-void MapWindow::setCellName(const std::string& cellName)
-{
-    static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
-    adjustWindowCaption();
-}
-
-void MapWindow::setPlayerPos(const float x, const float y)
-{
-    if (mGlobal || mVisible) return;
-    MyGUI::IntSize size = mLocalMap->getCanvasSize();
-    MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
-    MyGUI::IntCoord viewsize = mLocalMap->getCoord();
-    MyGUI::IntPoint pos(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
-    mLocalMap->setViewOffset(pos);
-
-    mPlayerArrow->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
-}
-
-void MapWindow::setPlayerDir(const float x, const float y)
-{
-    if (!mVisible) return;
-    MyGUI::ISubWidget* main = mPlayerArrow->getSubWidgetMain();
-    MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
-    rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
-    float angle = std::atan2(x,y);
-    rotatingSubskin->setAngle(angle);
-}
-
-void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
-{
-    if (_id!=MyGUI::MouseButton::Left) return;
-    if (!mGlobal)
-        mLastDragPos = MyGUI::IntPoint(_left, _top);
-}
-
-void MapWindow::onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
-{
-    if (_id!=MyGUI::MouseButton::Left) return;
-
-    if (!mGlobal)
-    {
-        MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
-        mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
-
-        mLastDragPos = MyGUI::IntPoint(_left, _top);
-    }
-}
-
-void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
-{
-    mGlobal = !mGlobal;
-    mGlobalMap->setVisible(mGlobal);
-    mLocalMap->setVisible(!mGlobal);
-
-    mButton->setCaption( mGlobal ? "Local" : "World" );
+    minimapBox->setVisible(minimapBoxVisible);
+    effectBox->setPosition(effectBoxBaseRight - effectBox->getWidth() + effectsDx, effectBox->getTop());
+    effectBox->setVisible(effectBoxVisible);
 }
 
 LocalMapBase::LocalMapBase()
@@ -283,6 +243,10 @@ LocalMapBase::LocalMapBase()
     , mPrefix()
     , mChanged(true)
     , mLayout(NULL)
+    , mLastPositionX(0.0f)
+    , mLastPositionY(0.0f)
+    , mLastDirectionX(0.0f)
+    , mLastDirectionY(0.0f)
 {
 }
 
