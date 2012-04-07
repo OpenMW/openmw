@@ -328,7 +328,6 @@ void NIFLoader::createMaterial(const String &name,
             "   out float4 oNormal : TEXCOORD2, \n"
             "   out float oDepth : TEXCOORD3, \n"
             "   out float4 oVertexColour : TEXCOORD4, \n"
-            "   uniform float4 cameraPosObjSpace, \n"
             "	uniform float4x4 worldViewProj	\n"
             ")	\n"
             "{	\n"
@@ -336,13 +335,12 @@ void NIFLoader::createMaterial(const String &name,
             "   oUV = uv; \n"
             "   oNormal = normal; \n"
             "	oPosition = mul( worldViewProj, position );  \n"
-            "   oDepth = length(position.xyz - cameraPosObjSpace.xyz); \n"
+            "   oDepth = oPosition.z; \n"
             "   oPositionObjSpace = position; \n"
             "}";
             vertex->setSource(outStream.str());
             vertex->load();
             vertex->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-            vertex->getDefaultParameters()->setNamedAutoConstant("cameraPosObjSpace", GpuProgramParameters::ACT_CAMERA_POSITION_OBJECT_SPACE);
         }
         else
             vertex = mgr.getByName("main_vp");

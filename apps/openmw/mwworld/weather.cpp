@@ -334,11 +334,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::E
 
 void WeatherManager::setWeather(const String& weather, bool instant)
 {
-    if (weather == mCurrentWeather && mNextWeather == "")
-    {
-        mFirstUpdate = false;
+    if (weather == mCurrentWeather && mNextWeather == "") 
         return;
-    }
 
     if (instant || mFirstUpdate)
     {
