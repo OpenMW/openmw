@@ -341,7 +341,6 @@ void WeatherManager::setWeather(const String& weather, bool instant)
     {
         mNextWeather = "";
         mCurrentWeather = weather;
-        mFirstUpdate = false;
     }
     else
     {
@@ -355,6 +354,7 @@ void WeatherManager::setWeather(const String& weather, bool instant)
         mNextWeather = weather;
         mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600;
     }
+    mFirstUpdate = false;
 }
 
 WeatherResult WeatherManager::getResult(const String& weather)
