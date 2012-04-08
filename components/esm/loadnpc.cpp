@@ -3,11 +3,6 @@
 namespace ESM
 {
 
-void NPC::setID(const std::string& id)
-{
-    mId = id;
-}
-
 void NPC::load(ESMReader &esm)
 {
     npdt52.gold = -10;

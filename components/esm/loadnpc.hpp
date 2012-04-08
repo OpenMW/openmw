@@ -100,10 +100,9 @@ struct NPC : public Record
   std::string name, model, race, cls, faction, script,
     hair, head; // body parts
 
-    std::string mId;
+    //std::string mId;
 
   // Implementation moved to load_impl.cpp
-  void setID(const std::string& id);
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
 

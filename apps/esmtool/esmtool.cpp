@@ -410,7 +410,6 @@ int load(Arguments& info)
             {
                 rec = new Creature();
                 Creature& b = *(Creature*)rec;
-                b.setID(id);
                 b.load(esm);
                 if(quiet) break;
                 cout << "  Name: " << b.name << endl;

@@ -63,9 +63,6 @@ struct Creature : public Record
     // Defined in loadcont.hpp
     InventoryList inventory;
 
-    std::string mId;
-
-    void setID(const std::string& id);
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
 

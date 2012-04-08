@@ -64,7 +64,7 @@ public:
     virtual void load(ESMReader& esm) = 0;
     virtual void save(ESMWriter& esm) = 0;
 
-    std::string getId() { return m_id; }
+    std::string getId() const { return m_id; }
     void setId(const std::string& in) { m_id = in; } 
     
     virtual int getName() = 0;

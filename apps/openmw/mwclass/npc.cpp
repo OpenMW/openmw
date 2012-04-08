@@ -88,7 +88,7 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 
-        return ref->base->mId;
+        return ref->base->getId();
     }
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const

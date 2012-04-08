@@ -65,7 +65,7 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
-        return ref->base->mId;
+        return ref->base->getId();
     }
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
