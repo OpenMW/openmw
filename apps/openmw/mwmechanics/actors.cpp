@@ -17,7 +17,7 @@ namespace MWMechanics
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
     {
-        if (!paused)
+        if (!paused && ptr.getRefData().getHandle()!="player")
             MWWorld::Class::get (ptr).getInventoryStore (ptr).autoEquip (
                 MWWorld::Class::get (ptr).getNpcStats (ptr), mEnvironment);
     }
