@@ -16,7 +16,7 @@ void CellRef::save(ESMWriter &esm)
 
     esm.writeHNOString("ANAM", owner);
     esm.writeHNOString("BNAM", glob);
-    esm.writeHNOString("SXOL", soul);
+    esm.writeHNOString("XSOL", soul);
 
     esm.writeHNOString("CNAM", faction);
     if (factIndex != -1)
