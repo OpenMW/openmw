@@ -10,7 +10,7 @@ namespace MWMechanics
 
 namespace MWWorld
 {
-    struct Environment;
+    class Environment;
 
     ///< \brief Variant of the ContainerStore for NPCs
     class InventoryStore : public ContainerStore
