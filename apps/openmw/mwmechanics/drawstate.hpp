@@ -3,9 +3,9 @@
 
 enum DrawState 
 {
-    DrawState_Weapon,
-    DrawState_Spell,
-    DrawState_Nothing
-}
+    DrawState_Weapon = 0,
+    DrawState_Spell = 1,
+    DrawState_Nothing = 2,
+};
 
 #endif
