@@ -467,10 +467,15 @@ void OpenAL_Output::init(const std::string &devname)
         else
             fail("Failed to open \""+devname+"\"");
     }
-    if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
-        std::cout << "Opened \""<<alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER)<<"\"" << std::endl;
     else
-        std::cout << "Opened \""<<alcGetString(mDevice, ALC_DEVICE_SPECIFIER)<<"\"" << std::endl;
+    {
+        const ALCchar *name = NULL;
+        if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
+            name = alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER);
+        if(alcGetError(mDevice) != AL_NO_ERROR || !name)
+            name = alcGetString(mDevice, ALC_DEVICE_SPECIFIER);
+        std::cout << "Opened \""<<name<<"\"" << std::endl;
+    }
 
     mContext = alcCreateContext(mDevice, NULL);
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
