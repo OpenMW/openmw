@@ -10,7 +10,7 @@ namespace MWRender
 
 Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()),
-    mIsUnderwater(false), mReflectDistance(0), mVisibilityFlags(0), mOldCameraFarClip(0),
+    mIsUnderwater(false), mVisibilityFlags(0),
     mReflectionTarget(0), mActive(1)
 {
     mSky = sky;
@@ -38,7 +38,6 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
                         + RV_Actors * Settings::Manager::getBool("reflect actors", "Water")
                         + RV_Misc * Settings::Manager::getBool("reflect misc", "Water")
                         + RV_Sky;
-    mReflectDistance = Settings::Manager::getInt("reflect distance", "Water");
 
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
     mWaterNode->setPosition(0, mTop, 0);
@@ -73,6 +72,8 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
 
     createMaterial();
     mWater->setMaterial(mMaterial);
+
+    mUnderwaterEffect = Settings::Manager::getBool("underwater effect", "Water");
 }
 
 void Water::setActive(bool active)
@@ -120,9 +121,7 @@ void Water::checkUnderwater(float y)
     if (!mActive) return;
     if ((mIsUnderwater && y > mTop) || !mWater->isVisible() || mCamera->getPolygonMode() != Ogre::PM_SOLID)
     {
-        try {
-            CompositorManager::getSingleton().setCompositorEnabled(mViewport, mCompositorName, false);
-        } catch(...) {}
+        CompositorManager::getSingleton().setCompositorEnabled(mViewport, mCompositorName, false);
 
         // tell the shader we are not underwater
         Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
@@ -139,9 +138,8 @@ void Water::checkUnderwater(float y)
 
     if (!mIsUnderwater && y < mTop && mWater->isVisible() && mCamera->getPolygonMode() == Ogre::PM_SOLID)
     {
-        try {
+        if (mUnderwaterEffect)
             CompositorManager::getSingleton().setCompositorEnabled(mViewport, mCompositorName, true);
-        } catch(...) {}
 
         // tell the shader we are underwater
         Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
@@ -164,10 +162,6 @@ Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY)
 
 void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
 {
-    //mOldCameraFarClip = mCamera->getFarClipDistance();
-    //if (mReflectDistance != 0)
-    //    mCamera->setFarClipDistance(mReflectDistance);
-
     if (evt.source == mReflectionTarget)
     {
         mWater->setVisible(false);
@@ -188,8 +182,6 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
 void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
 {
     mWater->setVisible(true);
-
-    //mCamera->setFarClipDistance(mOldCameraFarClip);
 
     if (evt.source == mReflectionTarget)
     {
