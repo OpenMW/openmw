@@ -4,6 +4,7 @@
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "world.hpp"
 #include "class.hpp"
@@ -48,6 +49,12 @@ namespace MWWorld
         mClass = new_class;
     }
 
+    void Player::setDrawState(const DrawState& value)
+    {
+         MWWorld::Ptr ptr = getPlayer();
+         MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState = value;
+    }
+
     void Player::setAutoMove (bool enable)
     {
         MWWorld::Ptr ptr = getPlayer();
@@ -88,5 +95,11 @@ namespace MWWorld
         bool running = MWWorld::Class::get (ptr).getStance (ptr, MWWorld::Class::Run, true);
 
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
+    }
+
+    DrawState Player::getDrawState()
+    {
+         MWWorld::Ptr ptr = getPlayer();
+         return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
     }
 }
