@@ -13,6 +13,8 @@
 #include "../mwworld/environment.hpp"
 #include "components/nifogre/ogre_nif_loader.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwclass/npc.hpp"
+#include "../mwworld/containerstore.hpp"
 
 namespace MWRender{
 
@@ -57,7 +59,12 @@ private:
 	Ogre::Entity* hair;
 	Ogre::Entity* head;
 	Ogre::SceneNode* insert;
-    
+    bool isBeast;
+	std::string headID;
+	std::string hairID;
+	std::string npcName;
+	std::string bodyRaceID;
+	MWWorld::ContainerStoreIterator robe;
     
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
@@ -65,6 +72,7 @@ private:
     Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
      std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> insertFreePart(const std::string &mesh, const std::string suffix);
 	virtual void runAnimation(float timepassed);
+	void updateParts();
 	
 };
 }
