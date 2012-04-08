@@ -31,11 +31,8 @@
 
 namespace Ogre
 {
-    class Camera;
-    class Viewport;
     class SceneManager;
     class SceneNode;
-    class RaySceneQuery;
     class Quaternion;
     class Vector3;
 }
@@ -83,6 +80,8 @@ class RenderingManager: private RenderingInterface {
     void waterAdded(MWWorld::Ptr::CellStore *store);
 
     void removeWater();
+
+    static const bool useMRT();
 
     void preCellChange (MWWorld::Ptr::CellStore* store);
     ///< this event is fired immediately before changing cell

@@ -1,0 +1,86 @@
+// Compositor that just controls output to the MRT textures
+compositor gbuffer
+{
+    technique
+    {
+        // MRT output. Currently this is a color texture plus a depth texture
+        texture mrt_output target_width target_height PF_FLOAT16_RGBA PF_FLOAT16_RGBA chain_scope depth_pool 2
+
+        target mrt_output
+        {
+            input none
+            pass clear
+            {
+                // make sure to set this to the viewport background color from outside
+                colour_value 0 0 0 1
+            }
+            pass render_scene
+            {
+                // Renders everything except water
+                first_render_queue 0
+                last_render_queue 70
+            }
+
+        }
+
+        target_output
+        {
+            input none
+
+            pass render_quad
+            {
+                material RenderScene
+                input 0 mrt_output 0
+            }
+        }
+    }
+}
+
+// Finalizer compositor to render objects that we don't want in the MRT textures (ex. water)
+// NB the water has to be rendered in a seperate compositor anyway, because it
+// accesses the MRT textures which can't be done while they are still being rendered to.
+compositor gbufferFinalizer
+{
+    technique
+    {
+        texture no_mrt_output target_width target_height PF_R8G8B8A8 depth_pool 2 no_fsaa
+        texture previousscene target_width target_height PF_R8G8B8A8
+
+        target previousscene
+        {
+            input previous
+        }
+        target no_mrt_output
+        {
+            input none
+            shadows off
+            pass clear
+            {
+                buffers colour
+                colour_value 0 0 0 0
+            }
+            pass render_quad
+            {
+                material RenderSceneNoDepth
+                input 0 previousscene
+            }
+            pass render_scene
+            {
+                first_render_queue 71
+                last_render_queue 100
+            }
+        }
+        target_output
+        {
+            input none
+            pass clear
+            {
+            }
+            pass render_quad
+            {
+                material RenderSceneNoDepth
+                input 0 no_mrt_output
+            }
+        }
+    }
+}

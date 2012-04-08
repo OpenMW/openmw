@@ -1,0 +1,62 @@
+#ifndef GAME_RENDER_CONST_H
+#define GAME_RENDER_CONST_H
+
+#include <OgreRenderQueue.h>
+
+namespace MWRender
+{
+
+// Render queue groups
+enum RenderQueueGroups
+{
+    // Sky early (atmosphere, clouds, moons)
+    RQG_SkiesEarly = Ogre::RENDER_QUEUE_SKIES_EARLY,
+
+    RQG_Main = Ogre::RENDER_QUEUE_MAIN,
+
+    RQG_Water = Ogre::RENDER_QUEUE_7+1,
+
+    RQG_Alpha = Ogre::RENDER_QUEUE_MAIN,
+
+    RQG_UnderWater = Ogre::RENDER_QUEUE_7+1,
+
+    RQG_OcclusionQuery = Ogre::RENDER_QUEUE_8,
+
+    // Sky late (sun & sun flare)
+    RQG_SkiesLate = Ogre::RENDER_QUEUE_SKIES_LATE
+};
+
+// Visibility flags
+enum VisibilityFlags
+{
+    // Terrain
+    RV_Terrain = 1,
+
+    // Statics (e.g. trees, houses)
+    RV_Statics = 2,
+
+    // Small statics
+    RV_StaticsSmall = 4,
+
+    // Water
+    RV_Water = 8,
+
+    // Actors (player, npcs, creatures)
+    RV_Actors = 16,
+
+    // Misc objects (containers, dynamic objects)
+    RV_Misc = 32,
+
+    RV_Sky = 64,
+
+    // Sun glare (not visible in reflection)
+    RV_Glare = 128,
+
+    RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water,
+
+    /// \todo markers (normally hidden)
+};
+
+}
+
+#endif
