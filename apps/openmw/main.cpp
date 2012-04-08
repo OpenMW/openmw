@@ -342,7 +342,7 @@ private:
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
     std::streambuf* old_rdbuf = std::cout.rdbuf ();
-    std::cout << "Testing stuff in the new branch!";
+
     int ret = 0;
 #if defined(_DEBUG)
     // Redirect cout to VS debug output when running in debug mode
