@@ -59,8 +59,8 @@ material Water
             fragment_program_ref Water_FP
             {
                 param_named_auto time time 0.1
-                param_named_auto fogColour fog_colour
-                param_named_auto fogParams fog_params
+                //param_named_auto fogColour fog_colour
+                //param_named_auto fogParams fog_params
                 param_named_auto renderTargetFlipping render_target_flipping
                 param_named_auto far far_clip_distance
                 param_named_auto lightPosObjSpace0 light_position_object_space 0

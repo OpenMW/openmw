@@ -41,9 +41,8 @@ namespace MWRender {
 
         Ogre::RenderTarget* mReflectionTarget;
 
+        bool mUnderwaterEffect;
         int mVisibilityFlags;
-        int mReflectDistance;
-        int mOldCameraFarClip;
 
     public:
         Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell);
