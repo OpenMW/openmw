@@ -47,10 +47,12 @@ namespace MWWorld
         delete mClass;
         mClass = new_class;
     }
+
     void Player::setDrawState(const DrawState& value)
     {
          mDrawState = value;
     }
+
     void Player::setAutoMove (bool enable)
     {
         MWWorld::Ptr ptr = getPlayer();
