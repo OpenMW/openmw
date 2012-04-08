@@ -8,6 +8,8 @@
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include "../mwmechanics/drawstate.hpp"
+
 namespace MWRender
 {
     class Player;
@@ -31,7 +33,7 @@ namespace MWWorld
         ESM::Class *mClass;
         bool mAutoMove;
         int mForwardBackward;
-
+        DrawState mDrawState;
     public:
 
         Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
@@ -76,6 +78,8 @@ namespace MWWorld
 
         void setClass (const ESM::Class& class_);
 
+        void setDrawState(const DrawState& state);
+
         std::string getName() const
         {
             return mName;
@@ -105,6 +109,8 @@ namespace MWWorld
         {
             return mAutoMove;
         }
+
+        DrawState getDrawState() { return mDrawState; }
 
         void setAutoMove (bool enable);
 

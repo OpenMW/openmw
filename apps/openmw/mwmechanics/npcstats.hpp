@@ -4,13 +4,13 @@
 #include <map>
 
 #include "stat.hpp"
+#include "drawstate.hpp"
 
 namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
     ///
     /// For non-NPC-specific stats, see the CreatureStats struct.
-
     struct NpcStats
     {
         // NPCs other than the player can only have one faction. But for the sake of consistency
@@ -24,9 +24,10 @@ namespace MWMechanics
         bool mRun;
         bool mSneak;
         bool mCombat;
+        DrawState mDrawState;
 
         NpcStats() : mForceRun (false), mForceSneak (false), mRun (false), mSneak (false),
-            mCombat (false) {}
+            mCombat (false) , mDrawState(DrawState::DrawState_Nothing) {}
     };
 }
 

@@ -12,7 +12,7 @@ namespace MWWorld
 {
     Player::Player (MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world) :
       mCellStore (0), mRenderer (renderer), mWorld (world), mClass (0),
-      mAutoMove (false), mForwardBackward (0)
+      mAutoMove (false), mForwardBackward (0) , mDrawState(DrawState_Nothing)
     {
         mPlayer.base = player;
         mPlayer.ref.refID = "player";
@@ -47,7 +47,10 @@ namespace MWWorld
         delete mClass;
         mClass = new_class;
     }
-
+    void Player::setDrawState(const DrawState& value)
+    {
+         mDrawState = value;
+    }
     void Player::setAutoMove (bool enable)
     {
         MWWorld::Ptr ptr = getPlayer();
