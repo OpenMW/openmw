@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <map>
 
 #include <boost/program_options.hpp>
 
@@ -15,9 +16,6 @@ using namespace ESM;
 // Create a local alias for brevity
 namespace bpo = boost::program_options;
 
-void printRaw(ESMReader &esm);
-void loadCell(Cell &cell, ESMReader &esm, bool quiet);
-
 struct ESMData
 {
     std::string author;
@@ -27,6 +25,7 @@ struct ESMData
     ESMReader::MasterList masters;
 
     std::list<Record*> records;
+    std::map<Record*, std::list<CellRef> > cellRefs;
 };
 
 // Based on the legacy struct
@@ -157,6 +156,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     return true;
 }
 
+void printRaw(ESMReader &esm);
+void loadCell(Cell &cell, ESMReader &esm, Arguments& info);
+
 int load(Arguments& info);
 int clone(Arguments& info);
 
@@ -179,8 +181,11 @@ int main(int argc, char**argv)
     return 0;
 }
 
-void loadCell(Cell &cell, ESMReader &esm, bool quiet)
+void loadCell(Cell &cell, ESMReader &esm, Arguments& info)
 {
+    bool quiet = (info.quiet_given || info.mode == "clone");
+    bool save = (info.mode == "clone");
+
     // Skip back to the beginning of the reference list
     cell.restore(esm);
 
@@ -189,6 +194,9 @@ void loadCell(Cell &cell, ESMReader &esm, bool quiet)
     if(!quiet) cout << "  References:\n";
     while(cell.getNextRef(esm, ref))
     {
+        if (save)
+            info.data.cellRefs[&cell].push_back(ref);
+
         if(quiet) continue;
 
         cout << "    Refnum: " << ref.refnum << endl;
@@ -241,7 +249,7 @@ int load(Arguments& info)
         }
 
         bool quiet = (info.quiet_given || info.mode == "clone");
-        bool loadCells = (info.loadcells_given);// || info.mode == "clone");
+        bool loadCells = (info.loadcells_given || info.mode == "clone");
         bool save = (info.mode == "clone");
 
         esm.open(filename);
@@ -367,7 +375,7 @@ int load(Arguments& info)
                     cout << "  Region: " << b.region << endl;
                 }
                 if(loadCells)
-                    loadCell(b, esm, quiet);
+                    loadCell(b, esm, info);
                 break;
             }
             case REC_CLAS:
@@ -738,7 +746,6 @@ int load(Arguments& info)
     return 0;
 }
 
-#include <map>
 #include <iomanip>
 
 int clone(Arguments& info)
@@ -817,6 +824,16 @@ int clone(Arguments& info)
         std::string id = rec->getId();
         esm.writeHNOString("NAME", id);
         rec->save(esm);
+
+        if (n.val == REC_CELL && !info.data.cellRefs[rec].empty())
+        {
+            std::list<CellRef>& refs = info.data.cellRefs[rec];
+            for (std::list<CellRef>::iterator it = refs.begin(); it != refs.end(); ++it)
+            {
+                it->save(esm);
+            }
+        }
+
         esm.endRecord(n.toString());
 
         saved++;
