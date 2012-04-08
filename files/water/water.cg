@@ -116,6 +116,6 @@ void main_fp
     oColor.xyz = lerp(oColor.xyz, float3(0, 0.65, 0.65), saturate(isUnderwater * (iDepth / 2000.f))); // underwater fog
 
     // add fog
-    float fogValue = saturate((iDepth - fogParams.y) * fogParams.w);
-    oColor.xyz = lerp(oColor.xyz, fogColour, fogValue);
+    //float fogValue = saturate((iDepth - fogParams.y) * fogParams.w);
+    //oColor.xyz = lerp(oColor.xyz, fogColour, fogValue);
 }
