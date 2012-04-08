@@ -88,6 +88,24 @@ namespace MWInput
 
    /* InputImpl Methods */
 
+    void toggleSpell()
+    {
+         DrawState state = player.getDrawState();
+         if(state == DrawState_Weapon || state == DrawState_Nothing)
+             player.setDrawState(DrawState_Spell);
+         else
+             player.setDrawState(DrawState_Nothing);
+    }
+
+    void toggleWeapon()
+    {
+         DrawState state = player.getDrawState();
+         if(state == DrawState_Spell || state == DrawState_Nothing)
+             player.setDrawState(DrawState_Weapon);
+         else
+             player.setDrawState(DrawState_Nothing);
+    }
+
     void screenshot()
     {
         mEngine.screenshot();
@@ -199,7 +217,10 @@ namespace MWInput
                       "Auto Move");
       disp->funcs.bind(A_ToggleWalk, boost::bind(&InputImpl::toggleWalking, this),
                       "Toggle Walk/Run");
-
+      disp->funcs.bind(A_ToggleWeapon,boost::bind(&InputImpl::toggleWeapon,this),
+                      "Draw Weapon");
+      disp->funcs.bind(A_ToggleSpell,boost::bind(&InputImpl::toggleSpell,this),
+                      "Ready hands");
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
 
@@ -244,6 +265,8 @@ namespace MWInput
       disp->bind(A_AutoMove, KC_Z);
       disp->bind(A_ToggleSneak, KC_X);
       disp->bind(A_ToggleWalk, KC_C);
+      disp->bind(A_ToggleWeapon,KC_F);
+      disp->bind(A_ToggleSpell,KC_R);
 
       // Key bindings for polled keys
       // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.
