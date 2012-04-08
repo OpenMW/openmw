@@ -41,10 +41,11 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     std::string filter = Settings::Manager::getString("texture filtering", "General");
     if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
     else if (filter == "trilinear") tfo = TFO_TRILINEAR;
-    else /* if (filter == "bilinear") */ tfo = TFO_BILINEAR;
+    else if (filter == "bilinear") tfo = TFO_BILINEAR;
+    else if (filter == "none") tfo = TFO_NONE;
 
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
-    MaterialManager::getSingleton().setDefaultAnisotropy(Settings::Manager::getInt("anisotropy", "General"));
+    MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
