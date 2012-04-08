@@ -144,7 +144,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     {
         Ogre::StaticGeometry* sg = 0;
 
-        if (transparent)
+/*        if (transparent)
         {
             if( mStaticGeometryAlpha.find(ptr.getCell()) == mStaticGeometryAlpha.end())
             {
@@ -155,7 +155,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
             else
                 sg = mStaticGeometryAlpha[ptr.getCell()];
         }
-        else if (small)
+        else*/ if (small)
         {
             if( mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
             {
@@ -288,13 +288,13 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
         mRenderer.getScene()->destroyStaticGeometry (sg);
         sg = 0;
     }
-    if(mStaticGeometryAlpha.find(store) != mStaticGeometryAlpha.end())
+    /*if(mStaticGeometryAlpha.find(store) != mStaticGeometryAlpha.end())
     {
         Ogre::StaticGeometry* sg = mStaticGeometryAlpha[store];
         mStaticGeometryAlpha.erase(store);
         mRenderer.getScene()->destroyStaticGeometry (sg);
         sg = 0;
-    }
+    }*/
 
     if(mBounds.find(store) != mBounds.end())
         mBounds.erase(store);
@@ -312,11 +312,11 @@ void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell)
         Ogre::StaticGeometry* sg = mStaticGeometrySmall[&cell];
         sg->build();
     }
-    if(mStaticGeometryAlpha.find(&cell) != mStaticGeometryAlpha.end())
+    /*if(mStaticGeometryAlpha.find(&cell) != mStaticGeometryAlpha.end())
     {
         Ogre::StaticGeometry* sg = mStaticGeometryAlpha[&cell];
         sg->build();
-    }
+    }*/
 }
 
 Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
