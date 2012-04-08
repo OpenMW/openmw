@@ -2,6 +2,7 @@
 #define _ESM_WRITER_H
 
 #include <iostream>
+#include <vector>
 #include <assert.h>
 
 #include "esm_common.hpp"
@@ -10,6 +11,12 @@ namespace ESM {
 
 class ESMWriter
 {
+    struct RecordData
+    {
+        std::streampos position;
+        int size;
+    };
+
 public:
     void setVersion(Version ver);
     void setType(FileType type);
@@ -68,13 +75,16 @@ public:
         assert(sizeof(T) == size);
         writeT(data);
     }
-
+    
+    void startRecord(const std::string& name);
+    void endRecord();
     void writeHString(const std::string& data);
     void writeName(const std::string& data);
     void write(const char* data, int size);
 
 private:
-    std::ostream m_stream;
+    std::vector<RecordData> m_records;
+    std::ostream* m_stream;
 
     HEDRstruct m_header;
     SaveData m_saveData;

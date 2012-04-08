@@ -1,6 +1,7 @@
 #ifndef _ESM_MISC_H
 #define _ESM_MISC_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -12,7 +13,7 @@ namespace ESM
  * carried, bought and sold. It also includes keys.
  */
 
-struct Miscellaneous
+struct Miscellaneous : public Record
 {
     struct MCDTstruct
     {
@@ -28,6 +29,8 @@ struct Miscellaneous
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_MISC; }
 };
 }
 #endif

@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "loadinfo.hpp"
@@ -15,7 +16,7 @@ namespace ESM
  * the INFO records following the DIAL.
  */
 
-struct Dialogue
+struct Dialogue : public Record
 {
     enum Type
     {
@@ -32,6 +33,8 @@ struct Dialogue
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_DIAL; }
 };
 }
 #endif

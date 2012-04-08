@@ -1,13 +1,14 @@
 #ifndef _ESM_BODY_H
 #define _ESM_BODY_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
 namespace ESM
 {
 
-struct BodyPart
+struct BodyPart : public Record
 {
     enum MeshPart
     {
@@ -54,6 +55,8 @@ struct BodyPart
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_BODY; }
 };
 }
 #endif

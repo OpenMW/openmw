@@ -1,6 +1,7 @@
 #ifndef _ESM_NPCC_H
 #define _ESM_NPCC_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -71,7 +72,7 @@ namespace ESM {
  * will be harder than reading it.
  */
 
-struct LoadNPCC
+struct LoadNPCC : public Record
 {
   void load(ESMReader &esm)
   {
@@ -80,6 +81,8 @@ struct LoadNPCC
   void save(ESMWriter &esm)
   {
   }
+
+    int getName() { return REC_NPCC; }
 };
 }
 #endif

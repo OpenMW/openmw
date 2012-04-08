@@ -1,6 +1,7 @@
 #ifndef _ESM_SPEL_H
 #define _ESM_SPEL_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "defs.hpp"
@@ -8,7 +9,7 @@
 namespace ESM
 {
 
-struct Spell
+struct Spell : public Record
 {
     enum SpellType
     {
@@ -40,6 +41,8 @@ struct Spell
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_SPEL; }
 };
 }
 #endif

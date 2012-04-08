@@ -1,6 +1,7 @@
 #ifndef _ESM_CELL_H
 #define _ESM_CELL_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "defs.hpp"
@@ -84,7 +85,7 @@ public:
    (using ESMReader::getContext()) and jumping back into place
    whenever we need to load a given cell.
  */
-struct Cell
+struct Cell : public Record
 {
   enum Flags
     {
@@ -122,6 +123,8 @@ struct Cell
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
+
+  int getName() { return REC_CELL; }
 
   bool isExterior() const
   {

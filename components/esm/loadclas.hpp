@@ -1,6 +1,7 @@
 #ifndef _ESM_CLAS_H
 #define _ESM_CLAS_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -13,7 +14,7 @@ namespace ESM
 
 // These flags tells us which items should be auto-calculated for this
 // class
-struct Class
+struct Class : public Record
 {
     enum AutoCalc
     {
@@ -63,6 +64,8 @@ struct Class
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_CLAS; }
 };
 }
 #endif

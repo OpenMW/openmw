@@ -1,6 +1,7 @@
 #ifndef _ESM_CONT_H
 #define _ESM_CONT_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -25,7 +26,7 @@ struct InventoryList
     void save(ESMWriter &esm);
 };
 
-struct Container
+struct Container : public Record
 {
     enum Flags
     {
@@ -42,6 +43,8 @@ struct Container
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_CONT; }
 };
 }
 #endif

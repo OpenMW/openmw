@@ -1,6 +1,7 @@
 #ifndef _ESM_STAT_H
 #define _ESM_STAT_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -18,12 +19,14 @@ namespace ESM {
  * you decode the CELL blocks, if you want to test this hypothesis.
  */
 
-struct Static
+struct Static : public Record
 {
   std::string model;
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
+
+    int getName() { return REC_STAT; }
 };
 }
 #endif

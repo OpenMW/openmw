@@ -1,6 +1,7 @@
 #ifndef _ESM_FACT_H
 #define _ESM_FACT_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -24,7 +25,7 @@ struct RankData
     int factReaction; // Reaction from faction members
 };
 
-struct Faction
+struct Faction : public Record
 {
     std::string id, name;
 
@@ -55,6 +56,8 @@ struct Faction
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_FACT; }
 };
 }
 #endif

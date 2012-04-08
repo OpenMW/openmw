@@ -1,6 +1,7 @@
 #ifndef _ESM_CLOT_H
 #define _ESM_CLOT_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "loadarmo.hpp"
@@ -12,7 +13,7 @@ namespace ESM
  * Clothing
  */
 
-struct Clothing
+struct Clothing : public Record
 {
     enum Type
     {
@@ -43,6 +44,8 @@ struct Clothing
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_CLOT; }
 };
 }
 #endif

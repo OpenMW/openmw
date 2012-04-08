@@ -1,6 +1,7 @@
 #ifndef _ESM_CREA_H
 #define _ESM_CREA_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "loadcont.hpp"
@@ -13,7 +14,7 @@ namespace ESM
  *
  */
 
-struct Creature
+struct Creature : public Record
 {
     // Default is 0x48?
     enum Flags
@@ -64,8 +65,11 @@ struct Creature
 
     std::string mId;
 
-    void load(ESMReader &esm, const std::string& id);
+    void setID(const std::string& id);
+    void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_CREA; }
 };
 }
 #endif

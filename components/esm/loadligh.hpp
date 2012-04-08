@@ -1,6 +1,7 @@
 #ifndef _ESM_LIGH_H
 #define _ESM_LIGH_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -12,7 +13,7 @@ namespace ESM
  * and torches.
  */
 
-struct Light
+struct Light : public Record
 {
     enum Flags
     {
@@ -43,6 +44,8 @@ struct Light
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_LIGH; }
 };
 }
 #endif

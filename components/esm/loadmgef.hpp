@@ -1,13 +1,14 @@
 #ifndef _ESM_MGEF_H
 #define _ESM_MGEF_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
 namespace ESM
 {
 
-struct MagicEffect
+struct MagicEffect : public Record
 {
     enum Flags
     {
@@ -48,6 +49,8 @@ struct MagicEffect
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_MGEF; }
 };
 }
 #endif

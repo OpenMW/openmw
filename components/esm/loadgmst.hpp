@@ -1,6 +1,7 @@
 #ifndef _ESM_GMST_H
 #define _ESM_GMST_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "defs.hpp"
@@ -13,7 +14,7 @@ namespace ESM
  *
  */
 
-struct GameSetting
+struct GameSetting : public Record
 {
     std::string id;
 
@@ -85,6 +86,8 @@ struct GameSetting
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_GMST; }
 };
 }
 #endif

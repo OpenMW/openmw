@@ -1,6 +1,7 @@
 #ifndef _ESM_INFO_H
 #define _ESM_INFO_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "defs.hpp"
@@ -15,7 +16,7 @@ namespace ESM
  * and form a linked list of dialogue items.
  */
 
-struct DialInfo
+struct DialInfo : public Record
 {
     enum Gender
     {
@@ -100,6 +101,8 @@ struct DialInfo
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_INFO; }
 };
 
 /*

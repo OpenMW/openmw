@@ -1,6 +1,7 @@
 #ifndef _ESM_BOOK_H
 #define _ESM_BOOK_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -11,7 +12,7 @@ namespace ESM
  * Books, magic scrolls, notes and so on
  */
 
-struct Book
+struct Book : public Record
 {
     struct BKDTstruct
     {
@@ -24,6 +25,8 @@ struct Book
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+    
+    int getName() { return REC_BOOK; }
 };
 }
 #endif

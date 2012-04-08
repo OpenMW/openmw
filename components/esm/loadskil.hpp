@@ -3,6 +3,7 @@
 
 #include <boost/array.hpp>
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "defs.hpp"
@@ -14,7 +15,7 @@ namespace ESM {
  *
  */
 
-struct Skill
+struct Skill : public Record
 {
   struct SKDTstruct
   {
@@ -69,6 +70,8 @@ struct Skill
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
+
+    int getName() { return REC_SKIL; }
 };
 }
 #endif

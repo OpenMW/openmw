@@ -1,6 +1,7 @@
 #ifndef _ESM_INGR_H
 #define _ESM_INGR_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -11,7 +12,7 @@ namespace ESM
  * Alchemy ingredient
  */
 
-struct Ingredient
+struct Ingredient : public Record
 {
     struct IRDTstruct
     {
@@ -27,6 +28,8 @@ struct Ingredient
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_INGR; }
 };
 }
 #endif

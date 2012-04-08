@@ -1,6 +1,7 @@
 #ifndef _ESM_WEAP_H
 #define _ESM_WEAP_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -11,7 +12,7 @@ namespace ESM
  * Weapon definition
  */
 
-struct Weapon
+struct Weapon : public Record
 {
     enum Type
     {
@@ -58,6 +59,8 @@ struct Weapon
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_WEAP; }
 };
 }
 #endif

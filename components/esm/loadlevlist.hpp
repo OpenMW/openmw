@@ -1,6 +1,7 @@
 #ifndef _ESM_LEVLISTS_H
 #define _ESM_LEVLISTS_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -15,7 +16,7 @@ namespace ESM
  * several files. 
  */
 
-struct LeveledListBase
+struct LeveledListBase : public Record
 {
     enum Flags
     {
@@ -45,6 +46,14 @@ struct LeveledListBase
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName()
+    {
+        if (recName[0] == 'C')
+            return REC_LEVC;
+        
+        return REC_LEVI;
+    }
 };
 
 struct CreatureLevList: LeveledListBase

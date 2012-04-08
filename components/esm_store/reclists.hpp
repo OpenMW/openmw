@@ -104,7 +104,8 @@ namespace ESMS
     void load(ESMReader &esm, const std::string &id)
     {
       std::string id2 = toLower (id);
-      list[id2].load(esm, id2);
+      list[id2].setID(id2);
+      list[id2].load(esm);
     }
 
     // Find the given object ID, or return NULL if not found.

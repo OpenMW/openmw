@@ -1,6 +1,7 @@
 #ifndef _ESM_LOCKS_H
 #define _ESM_LOCKS_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -12,7 +13,7 @@ namespace ESM
  * items (REPA). These have nearly identical data structures.
  */
 
-struct Tool
+struct Tool : public Record
 {
     enum Type
     {
@@ -38,16 +39,26 @@ struct Tool
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName()
+    {
+        if (type == Type_Probe)
+            return REC_PROB;
+        else if (type == Type_Repair)
+            return REC_REPA;
+        else
+            return REC_LOCK;
+    }
 };
 
 struct Probe: Tool
 {
-
+    Probe() { type = Type_Probe; }
 };
 
 struct Repair: Tool
 {
-
+    Repair() { type = Type_Repair; }
 };
 
 }

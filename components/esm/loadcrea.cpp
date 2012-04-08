@@ -2,10 +2,13 @@
 
 namespace ESM {
 
-void Creature::load(ESMReader &esm, const std::string& id)
+void Creature::setID(const std::string& id)
 {
     mId = id;
+}
 
+void Creature::load(ESMReader &esm)
+{
     model = esm.getHNString("MODL");
     original = esm.getHNOString("CNAM");
     name = esm.getHNOString("FNAM");

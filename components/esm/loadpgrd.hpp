@@ -1,6 +1,7 @@
 #ifndef _ESM_PGRD_H
 #define _ESM_PGRD_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -10,7 +11,7 @@ namespace ESM
 /*
  * Path grid.
  */
-struct Pathgrid
+struct Pathgrid : public Record
 {
     struct DATAstruct
     {
@@ -44,6 +45,8 @@ struct Pathgrid
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_PGRD; }
 };
 }
 #endif

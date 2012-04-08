@@ -1,6 +1,7 @@
 #ifndef _ESM_SCPT_H
 #define _ESM_SCPT_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -11,7 +12,7 @@ namespace ESM
  * Script definitions
  */
 
-class Script
+class Script : public Record
 {
 public:
     struct SCHDstruct
@@ -52,6 +53,8 @@ public:
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_SCPT; }
 };
 }
 #endif

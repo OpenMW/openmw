@@ -1,6 +1,7 @@
 #ifndef _ESM_LAND_H
 #define _ESM_LAND_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -10,7 +11,7 @@ namespace ESM
  * Landscape data.
  */
 
-struct Land
+struct Land : public Record
 {
     Land();
     ~Land();
@@ -74,6 +75,8 @@ struct Land
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_LAND; }
 
     /**
      * Actually loads data

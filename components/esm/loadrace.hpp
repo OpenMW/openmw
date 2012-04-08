@@ -1,6 +1,7 @@
 #ifndef _ESM_RACE_H
 #define _ESM_RACE_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "defs.hpp"
@@ -12,7 +13,7 @@ namespace ESM
  * Race definition
  */
 
-struct Race
+struct Race : public Record
 {
     struct SkillBonus
     {
@@ -60,6 +61,8 @@ struct Race
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_RACE; }
 };
 }
 #endif

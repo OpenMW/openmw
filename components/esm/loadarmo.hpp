@@ -1,6 +1,7 @@
 #ifndef _ESM_ARMO_H
 #define _ESM_ARMO_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -54,7 +55,7 @@ struct PartReferenceList
     void save(ESMWriter &esm);
 };
 
-struct Armor
+struct Armor : public Record
 {
     enum Type
     {
@@ -85,6 +86,8 @@ struct Armor
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_ARMO; }
 };
 }
 #endif

@@ -1,6 +1,7 @@
 #ifndef _ESM_REGN_H
 #define _ESM_REGN_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -11,7 +12,7 @@ namespace ESM
  * Region data
  */
 
-struct Region
+struct Region : public Record
 {
 #pragma pack(push)
 #pragma pack(1)
@@ -43,6 +44,8 @@ struct Region
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_REGN; }
 };
 }
 #endif

@@ -1,6 +1,7 @@
 #ifndef _ESM_APPA_H
 #define _ESM_APPA_H
 
+#include "record.hpp"
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
@@ -11,7 +12,7 @@ namespace ESM
  * Alchemist apparatus
  */
 
-struct Apparatus
+struct Apparatus : public Record
 {
     enum AppaType
     {
@@ -34,6 +35,8 @@ struct Apparatus
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    int getName() { return REC_APPA; }
 };
 }
 #endif

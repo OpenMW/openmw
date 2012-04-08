@@ -3,10 +3,13 @@
 namespace ESM
 {
 
-void NPC::load(ESMReader &esm, const std::string& id)
+void NPC::setID(const std::string& id)
 {
     mId = id;
+}
 
+void NPC::load(ESMReader &esm)
+{
     npdt52.gold = -10;
 
     model = esm.getHNOString("MODL");
