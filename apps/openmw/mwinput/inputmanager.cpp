@@ -65,6 +65,8 @@ namespace MWInput
       A_QuickLoad,
       A_QuickMenu,
       A_GameMenu,
+      A_ToggleWeapon,
+      A_ToggleSpell,
 
       A_LAST            // Marker for the last item
     };
