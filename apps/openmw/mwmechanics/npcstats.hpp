@@ -27,7 +27,7 @@ namespace MWMechanics
         DrawState mDrawState;
 
         NpcStats() : mForceRun (false), mForceSneak (false), mRun (false), mSneak (false),
-            mCombat (false) , mDrawState(DrawState::DrawState_Nothing) {}
+            mCombat (false) , mDrawState(DrawState_Nothing) {}
     };
 }
 
