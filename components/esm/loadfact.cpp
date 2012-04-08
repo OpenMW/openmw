@@ -31,7 +31,7 @@ void Faction::save(ESMWriter &esm)
 {
     esm.writeHNString("FNAM", name);
     
-    for (int i = 0; !ranks[i].empty(); i++)
+    for (int i = 0; i < 10; i++)
     {
         esm.writeHNString("RNAM", ranks[i]);
     }

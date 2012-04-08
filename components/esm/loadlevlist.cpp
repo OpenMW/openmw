@@ -38,7 +38,7 @@ void LeveledListBase::save(ESMWriter &esm)
     
     for (std::vector<LevelItem>::iterator it = list.begin(); it != list.end(); ++it)
     {
-        esm.writeHNString("INAM", it->id);
+        esm.writeHNString(recName, it->id);
         esm.writeHNT("INTV", it->level);
     }
 }

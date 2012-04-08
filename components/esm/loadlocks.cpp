@@ -36,14 +36,15 @@ void Tool::save(ESMWriter &esm)
     esm.writeHNString("MODL", model);
     esm.writeHNString("FNAM", name);
     
+    std::string typeName;
     switch(type)
     {
-    case Type_Repair: esm.writeName("RIDT"); break;
-    case Type_Pick: esm.writeName("LKDT"); break;
-    case Type_Probe: esm.writeName("PBDT"); break;
+    case Type_Repair: typeName = "RIDT"; break;
+    case Type_Pick: typeName = "LKDT"; break;
+    case Type_Probe: typeName = "PBDT"; break;
     }
-
-    esm.writeT(data, 16);
+    
+    esm.writeHNT(typeName, data, 16);
     esm.writeHNOString("SCRI", script);
     esm.writeHNOString("ITEX", icon);
 }

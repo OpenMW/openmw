@@ -1,6 +1,8 @@
 #ifndef _ESM_RECORD_H
 #define _ESM_RECORD_H
 
+#include <string>
+
 namespace ESM
 {
 
@@ -62,7 +64,13 @@ public:
     virtual void load(ESMReader& esm) = 0;
     virtual void save(ESMWriter& esm) = 0;
 
+    std::string getId() { return m_id; }
+    void setId(const std::string& in) { m_id = in; } 
+    
     virtual int getName() = 0;
+
+protected:
+    std::string m_id;
 };
 
 }

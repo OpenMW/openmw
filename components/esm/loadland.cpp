@@ -84,15 +84,18 @@ void Land::load(ESMReader &esm)
 
 void Land::save(ESMWriter &esm)
 {
-    esm.writeName("INTV");
+    esm.startSubRecord("INTV");
     esm.writeT(X);
     esm.writeT(Y);
+    esm.endRecord("INTV");
 
     esm.writeHNT("DATA", flags);
 
+    /* TODO: Land!
     if (hasData && !dataLoaded)
         loadData(); // I think it might be a good idea to have 
                     // the data loaded before trying to save it
+                    */
     if (dataLoaded)
         landData->save(esm);
 }

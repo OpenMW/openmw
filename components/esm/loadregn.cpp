@@ -29,7 +29,10 @@ void Region::save(ESMWriter &esm)
 {
     esm.writeHNString("FNAM", name);
     
-    esm.writeHNT("WEAT", data);
+    if (esm.getVersion() == VER_12)
+        esm.writeHNT("WEAT", data, sizeof(data) - 2);
+    else
+        esm.writeHNT("WEAT", data);
     
     esm.writeHNOString("BNAM", sleepList);
     

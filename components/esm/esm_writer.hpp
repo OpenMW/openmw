@@ -2,7 +2,7 @@
 #define _ESM_WRITER_H
 
 #include <iostream>
-#include <vector>
+#include <list>
 #include <assert.h>
 
 #include "esm_common.hpp"
@@ -13,16 +13,21 @@ class ESMWriter
 {
     struct RecordData
     {
+        std::string name;
         std::streampos position;
         int size;
     };
 
 public:
-    void setVersion(Version ver);
-    void setType(FileType type);
-
+    int getVersion();
+    void setVersion(int ver);
+    int getType();
+    void setType(int type);
+//    void setEncoding(const std::string& encoding); // Write strings as UTF-8?
     void setAuthor(const std::string& author);
     void setDescription(const std::string& desc);
+
+    void addMaster(const std::string& name, uint64_t size);
 
     void save(const std::string& file);
     void save(std::ostream& file);
@@ -38,18 +43,20 @@ public:
     template<typename T>
     void writeHNT(const std::string& name, const T& data)
     {
-        writeName(name);
+        startSubRecord(name);
         writeT(data);
+        endRecord(name);
     }
 
     template<typename T>
     void writeHNT(const std::string& name, const T& data, int size)
     {
-        assert(sizeof(T) == size);
-        writeHNT(name, data);
+        startSubRecord(name);
+        writeT(data, size);
+        endRecord(name);
     }
 
-    template<typename T>
+    /*template<typename T>
     void writeHT(const T& data)
     {
         writeT((unsigned int)sizeof(T));
@@ -61,7 +68,7 @@ public:
     {
         assert(sizeof(T) == size);
         writeHT(data);
-    }
+        }*/
 
     template<typename T>
     void writeT(const T& data)
@@ -72,18 +79,19 @@ public:
     template<typename T>
     void writeT(const T& data, int size)
     {
-        assert(sizeof(T) == size);
-        writeT(data);
+        write((char*)&data, size);
     }
     
-    void startRecord(const std::string& name);
-    void endRecord();
+    void startRecord(const std::string& name, uint32_t flags);
+    void startSubRecord(const std::string& name);
+    void endRecord(const std::string& name);
     void writeHString(const std::string& data);
     void writeName(const std::string& data);
     void write(const char* data, int size);
 
 private:
-    std::vector<RecordData> m_records;
+    std::list<MasterData> m_masters;
+    std::list<RecordData> m_records;
     std::ostream* m_stream;
 
     HEDRstruct m_header;

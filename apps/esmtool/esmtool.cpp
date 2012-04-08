@@ -22,6 +22,8 @@ struct ESMData
 {
     std::string author;
     std::string description;
+    int version;
+    int type;
     ESMReader::MasterList masters;
 
     std::list<Record*> records;
@@ -221,7 +223,7 @@ int load(Arguments& info)
 
     try {
 
-        if(info.raw_given)
+        if(info.raw_given && info.mode == "dump")
         {
             cout << "RAW file listing:\n";
 
@@ -233,7 +235,7 @@ int load(Arguments& info)
         }
 
         bool quiet = (info.quiet_given || info.mode == "clone");
-        bool loadCells = (info.loadcells_given || info.mode == "clone");
+        bool loadCells = (info.loadcells_given);// || info.mode == "clone");
         bool save = (info.mode == "clone");
 
         esm.open(filename);
@@ -241,15 +243,23 @@ int load(Arguments& info)
         info.data.author = esm.getAuthor();
         info.data.description = esm.getDesc();
         info.data.masters = esm.getMasters();
+        info.data.version = esm.getVer();
+        info.data.type = esm.getType();
 
-        cout << "Author: " << esm.getAuthor() << endl;
-        cout << "Description: " << esm.getDesc() << endl;
-        cout << "File format version: " << esm.getFVer() << endl;
-        cout << "Special flag: " << esm.getSpecial() << endl;
-        cout << "Masters:\n";
-        ESMReader::MasterList m = esm.getMasters();
-        for(unsigned int i=0;i<m.size();i++)
-            cout << "  " << m[i].name << ", " << m[i].size << " bytes\n";
+        if (!quiet)
+        {
+            cout << "Author: " << esm.getAuthor() << endl
+                 << "Description: " << esm.getDesc() << endl
+                 << "File format version: " << esm.getFVer() << endl
+                 << "Special flag: " << esm.getSpecial() << endl;
+            ESMReader::MasterList m = esm.getMasters();
+            if (!m.empty())
+            {
+                cout << "Masters:" << endl;
+                for(unsigned int i=0;i<m.size();i++)
+                    cout << "  " << m[i].name << ", " << m[i].size << " bytes" << endl;
+            }
+        }
 
         // Loop through all records
         while(esm.hasMoreRecs())
@@ -512,6 +522,7 @@ int load(Arguments& info)
                 cout << "  Name: " << l.name << endl
                      << "  Weight: " << l.data.weight << endl
                      << "  Value: " << l.data.value << endl;
+                break;
             }
             case REC_LOCK:
             {
@@ -697,6 +708,8 @@ int load(Arguments& info)
 
             if (rec != NULL)
             {
+                rec->setId(id);
+
                 if (save)
                     info.data.records.push_back(rec);
                 else
@@ -720,6 +733,7 @@ int load(Arguments& info)
 }
 
 #include <map>
+#include <iomanip>
 
 int clone(Arguments& info)
 {
@@ -735,26 +749,82 @@ int clone(Arguments& info)
         return 1;
     }
 
-    cout << "Loaded " << info.data.records.size() << " records:" << endl;
+    int recordCount = info.data.records.size();
+
+    int digitCount = 1; // For a nicer output
+    if (recordCount > 9) ++digitCount;
+    if (recordCount > 99) ++digitCount;
+    if (recordCount > 999) ++digitCount;
+    if (recordCount > 9999) ++digitCount;
+    if (recordCount > 99999) ++digitCount;
+    if (recordCount > 999999) ++digitCount;
+
+    cout << "Loaded " << recordCount << " records:" << endl << endl;
 
     std::map<std::string, int> records;
 
-    for (std::list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end();)
+    for (std::list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end(); ++it)
     {
         Record* rec = *it;
         NAME n;
         n.val = rec->getName();
         records[n.toString()]++;
-
-        delete rec;
-        info.data.records.erase(it++);
     }
 
+    int i = 0;
     for (std::map<std::string,int>::iterator it = records.begin(); it != records.end(); ++it)
     {
         std::string n = it->first;
-        cout << n << ": " << it->second << " records." << endl;
+        float amount = it->second;
+        cout << setw(digitCount) << amount << " " << n << "  ";
+
+        if (++i % 3 == 0)
+            cout << endl;
     }
+    
+    if (i % 3 != 0)
+        cout << endl;
+
+    cout << endl << "Saving records to: " << info.outname << "..." << endl;
+
+    ESMWriter esm;
+    esm.setAuthor(info.data.author);
+    esm.setDescription(info.data.description);
+    esm.setVersion(info.data.version);
+    esm.setType(info.data.type);
+
+    for (ESMReader::MasterList::iterator it = info.data.masters.begin(); it != info.data.masters.end(); ++it)
+        esm.addMaster(it->name, it->size);
+
+    std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
+    esm.save(save);
+
+    int saved = 0;
+    for (std::list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end() && i > 0; ++it)
+    {
+        Record* rec = *it;
+        
+        NAME n;
+        n.val = rec->getName();
+
+        esm.startRecord(n.toString(), 0);
+        std::string id = rec->getId();
+        esm.writeHNOString("NAME", id);
+        rec->save(esm);
+        esm.endRecord(n.toString());
+
+        saved++;
+        int perc = ((int)saved / (float)recordCount)*100;
+        if (perc % 10 == 0)
+        {
+            cerr << "\r" << perc << "%";
+        }
+    }
+    
+    cout << "\rDone!" << endl;
+
+    esm.close();
+    save.close();
 
     return 0;
 }

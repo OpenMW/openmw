@@ -19,7 +19,7 @@ void PartReferenceList::save(ESMWriter &esm)
 {
     for (std::vector<PartReference>::iterator it = parts.begin(); it != parts.end(); ++it)
     {
-        esm.writeHT(it->part);
+        esm.writeHNT("INDX", it->part);
         esm.writeHNOString("BNAM", it->male);
         esm.writeHNOString("CNAM", it->female);
     }

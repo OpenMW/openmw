@@ -61,6 +61,7 @@ public:
   int getVer() { return mCtx.header.version; }
   float getFVer() { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
   int getSpecial() { return mSpf; }
+  int getType() { return mCtx.header.type; }
   const std::string getAuthor() { return mCtx.header.author.toString(); }
   const std::string getDesc() { return mCtx.header.desc.toString(); }
   const SaveData &getSaveData() { return mSaveData; }
