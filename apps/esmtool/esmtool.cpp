@@ -46,7 +46,7 @@ struct Arguments
 
 bool parseOptions (int argc, char** argv, Arguments &info)
 {
-    bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed options");
+    bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed modes:\n  dump\t Dumps all readable data from the input file\n  clone\t Clones the input file to the output file.\n\nAllowed options");
 
     desc.add_options()
         ("help,h", "print help message.")
@@ -103,6 +103,14 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         return false;
     }
 
+    info.mode = variables["mode"].as<std::string>();
+    if (!(info.mode == "dump" || info.mode == "clone"))
+    {
+        std::cout << std::endl << "ERROR: invalid mode \"" << info.mode << "\"" << std::endl << std::endl
+                  << desc << finalText << std::endl;
+        return false;
+    }
+
     if ( !variables.count("input-file") )
     {
         std::cout << "\nERROR: missing ES file\n\n";
@@ -117,8 +125,6 @@ bool parseOptions (int argc, char** argv, Arguments &info)
       std::cout << desc << finalText << std::endl;
       return false;
       }*/
-
-    info.mode = variables["mode"].as<std::string>();
 
     info.filename = variables["input-file"].as< vector<std::string> >()[0];
     if (variables["input-file"].as< vector<std::string> >().size() > 1)
@@ -814,7 +820,7 @@ int clone(Arguments& info)
         esm.endRecord(n.toString());
 
         saved++;
-        int perc = ((int)saved / (float)recordCount)*100;
+        int perc = (saved / (float)recordCount)*100;
         if (perc % 10 == 0)
         {
             cerr << "\r" << perc << "%";
