@@ -7,6 +7,7 @@
 #include "window_base.hpp"
 #include "window_manager.hpp"
 
+#undef MessageBox
 
 namespace MWGui
 {

@@ -3,6 +3,7 @@
 
 
 #include "sky.hpp"
+#include "terrain.hpp"
 #include "debugging.hpp"
 
 #include "../mwworld/class.hpp"
@@ -24,6 +25,9 @@
 #include "objects.hpp"
 #include "actors.hpp"
 #include "player.hpp"
+#include "water.hpp"
+#include "localmap.hpp"
+#include "occlusionquery.hpp"
 
 namespace Ogre
 {
@@ -58,6 +62,8 @@ class RenderingManager: private RenderingInterface {
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment);
     virtual ~RenderingManager();
 
+
+
     virtual MWRender::Player& getPlayer(); /// \todo move this to private again as soon as
                                             /// MWWorld::Player has been rewritten to not need access
                                             /// to internal details of the rendering system anymore
@@ -66,7 +72,7 @@ class RenderingManager: private RenderingInterface {
 
     void toggleLight();
     bool toggleRenderMode(int mode);
-    
+
     OEngine::Render::Fader* getFader();
 
     void removeCell (MWWorld::Ptr::CellStore *store);
@@ -74,6 +80,12 @@ class RenderingManager: private RenderingInterface {
     /// \todo this function should be removed later. Instead the rendering subsystems should track
     /// when rebatching is needed and update automatically at the end of each frame.
     void cellAdded (MWWorld::Ptr::CellStore *store);
+    void waterAdded(MWWorld::Ptr::CellStore *store);
+
+    void removeWater();
+
+    void preCellChange (MWWorld::Ptr::CellStore* store);
+    ///< this event is fired immediately before changing cell
 
     void addObject (const MWWorld::Ptr& ptr);
     void removeObject (const MWWorld::Ptr& ptr);
@@ -82,17 +94,27 @@ class RenderingManager: private RenderingInterface {
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
     void rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation);
 
+    void checkUnderwater();
+    void setWaterHeight(const float height);
+    void toggleWater();
+
     /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);
 
     void update (float duration);
-    
+
     void setAmbientColour(const Ogre::ColourValue& colour);
     void setSunColour(const Ogre::ColourValue& colour);
     void setSunDirection(const Ogre::Vector3& direction);
     void sunEnable();
     void sunDisable();
-    
+
+    void disableLights();
+    void enableLights();
+
+    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
+    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
+
     void setGlare(bool glare);
     void skyEnable ();
     void skyDisable ();
@@ -102,13 +124,16 @@ class RenderingManager: private RenderingInterface {
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
     void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
-    
+
+    void requestMap (MWWorld::Ptr::CellStore* cell);
+    ///< request the local map for a cell
+
     /// configure fog according to cell
     void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
-    
+
     /// configure fog manually
     void configureFog(const float density, const Ogre::ColourValue& colour);
-    
+
     void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
         int number = 1);
     ///< Run animation for a MW-reference. Calls to this function for references that are currently not
@@ -124,9 +149,15 @@ class RenderingManager: private RenderingInterface {
   private:
 
     void setAmbientMode();
-    
+
     SkyManager* mSkyManager;
-    
+
+    OcclusionQuery* mOcclusionQuery;
+
+    TerrainManager* mTerrainManager;
+
+    MWRender::Water *mWater;
+
     OEngine::Render::OgreRenderer &mRendering;
 
     MWRender::Objects mObjects;
@@ -142,12 +173,14 @@ class RenderingManager: private RenderingInterface {
     /// that the OGRE coordinate system matches that used internally in
     /// Morrowind.
     Ogre::SceneNode *mMwRoot;
-    Ogre::RaySceneQuery *mRaySceneQuery;
 
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
     MWRender::Player *mPlayer;
-    MWRender::Debugging mDebugging;
+
+    MWRender::Debugging *mDebugging;
+
+    MWRender::LocalMap* mLocalMap;
 };
 
 }

@@ -116,7 +116,7 @@ namespace ESMS
       recLists[REC_GLOB] = &globals;
       recLists[REC_GMST] = &gameSettings;
       recLists[REC_INGR] = &ingreds;
-      //recLists[REC_LAND] = &lands;
+      recLists[REC_LAND] = &lands;
       recLists[REC_LEVC] = &creatureLists;
       recLists[REC_LEVI] = &itemLists;
       recLists[REC_LIGH] = &lights;

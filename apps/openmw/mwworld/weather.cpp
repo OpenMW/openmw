@@ -31,7 +31,7 @@ const float WeatherGlobals::mThunderFrequency = .4;
 const float WeatherGlobals::mThunderThreshold = 0.6;
 const float WeatherGlobals::mThunderSoundDelay = 0.25;
 
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environment* env) : 
+WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::Environment* env) : 
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0)
 {
@@ -268,7 +268,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     blight.mGlareView = 0;
     blight.mAmbientLoopSoundID = "blight";
     mWeatherSettings["blight"] = blight;
-    
+
+    /*
     Weather snow;
     snow.mCloudTexture = "tx_bm_sky_snow.dds";
     snow.mCloudsMaximumPercent = 1.0;
@@ -325,6 +326,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, Environmen
     blizzard.mGlareView = 0;
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
     mWeatherSettings["blizzard"] = blizzard;
+    */
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -506,32 +508,32 @@ void WeatherManager::update(float duration)
                 float thunder = region->data.thunder/255.f;
                 float ash = region->data.ash/255.f;
                 float blight = region->data.blight/255.f;
-                float snow = region->data.a/255.f;
-                float blizzard = region->data.b/255.f;
+                //float snow = region->data.a/255.f;
+                //float blizzard = region->data.b/255.f;
 
                 // re-scale to 100 percent
-                const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
+                const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
 
                 srand(time(NULL));
                 float random = ((rand()%100)/100.f) * total;
 
-                if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    weather = "blizzard";
-                else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    weather = "snow";
-                else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //if (random > snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //    weather = "blizzard";
+                //else if (random > blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //    weather = "snow";
+                /*else*/ if (random > ash+thunder+rain+overcast+foggy+cloudy+clear)
                     weather = "blight";
-                else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
+                else if (random > thunder+rain+overcast+foggy+cloudy+clear)
                     weather = "ashstorm";
-                else if (random >= rain+overcast+foggy+cloudy+clear)
+                else if (random > rain+overcast+foggy+cloudy+clear)
                     weather = "thunderstorm";
-                else if (random >= overcast+foggy+cloudy+clear)
+                else if (random > overcast+foggy+cloudy+clear)
                     weather = "rain";
-                else if (random >= foggy+cloudy+clear)
+                else if (random > foggy+cloudy+clear)
                     weather = "overcast";
-                else if (random >= cloudy+clear)
+                else if (random > cloudy+clear)
                     weather = "foggy";
-                else if (random >= clear)
+                else if (random > clear)
                     weather = "cloudy";
                 else
                     weather = "clear";

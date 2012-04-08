@@ -95,5 +95,5 @@ else()
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
 
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}launcher.cfg")
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.cfg")
 endif()

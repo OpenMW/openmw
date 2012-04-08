@@ -69,7 +69,7 @@ class ManualBulletShapeLoader : public BulletShapeLoader
 public:
 
     ManualBulletShapeLoader():resourceGroup("General"){vfs = 0;}
-    virtual ~ManualBulletShapeLoader() {}
+    virtual ~ManualBulletShapeLoader();
 
     void warn(std::string msg)
     {

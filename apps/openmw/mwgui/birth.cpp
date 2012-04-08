@@ -21,18 +21,18 @@ BirthDialog::BirthDialog(WindowManager& parWindowManager)
 
     getWidget(birthList, "BirthsignList");
     birthList->setScrollVisible(true);
-    birthList->eventListSelectAccept = MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
-    birthList->eventListMouseItemActivate = MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
-    birthList->eventListChangePosition = MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    birthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    birthList->eventListMouseItemActivate += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    birthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->eventMouseButtonClick = MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
+    backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->eventMouseButtonClick = MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
+    okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
 
     updateBirths();
     updateSpells();
@@ -100,7 +100,7 @@ void BirthDialog::onBackClicked(MyGUI::Widget* _sender)
     eventBack();
 }
 
-void BirthDialog::onSelectBirth(MyGUI::List* _sender, size_t _index)
+void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;
@@ -188,7 +188,7 @@ void BirthDialog::updateSpells()
     {
         if (!categories[category].spells.empty())
         {
-            MyGUI::StaticTextPtr label = spellArea->createWidget<MyGUI::StaticText>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
+            MyGUI::TextBox* label = spellArea->createWidget<MyGUI::TextBox>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
             label->setCaption(mWindowManager.getGameSettingString(categories[category].label, ""));
             spellItems.push_back(label);
             coord.top += lineHeight;

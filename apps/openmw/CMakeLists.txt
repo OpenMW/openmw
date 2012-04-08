@@ -14,7 +14,8 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects renderinginterface
+    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
+    renderinginterface localmap occlusionquery terrain terrainmaterial water
     )
 
 add_openmw_dir (mwinput
@@ -24,6 +25,7 @@ add_openmw_dir (mwinput
 add_openmw_dir (mwgui
     layouts text_input widgets race class birth review window_manager console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
+    map_window window_pinnable_base
     )
 
 add_openmw_dir (mwdialogue
@@ -38,13 +40,13 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanager
+    soundmanager openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
     )
 
 add_openmw_dir (mwworld
     refdata world physicssystem scene environment globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
-    cells localscripts customdata weather inventorystore
+    cells localscripts customdata weather inventorystore ptr
     )
 
 add_openmw_dir (mwclass
@@ -53,7 +55,7 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanager stat creaturestats magiceffects movement
+    mechanicsmanager stat creaturestats magiceffects movement actors
     )
 
 # Main executable
@@ -81,16 +83,22 @@ add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
     ${OGRE_LIBRARIES}
-	${OGRE_STATIC_PLUGINS}
+    ${OGRE_Terrain_LIBRARY}
+    ${OGRE_STATIC_PLUGINS}
     ${OIS_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
+    ${MYGUI_LIBRARIES}
+    ${MYGUI_PLATFORM_LIBRARIES}
     components
-    MyGUIEngine
-    MyGUIOgrePlatform
 )
+
+# Fix for not visible pthreads functions for linker with glibc 2.15
+if (UNIX AND NOT APPLE)
+target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
+endif()
 
 if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
