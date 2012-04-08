@@ -1489,7 +1489,7 @@ static void PM_GroundTrace( void )
 	//PM_AddTouchEnt( trace.entityNum );
 }
 
-static void PM_AirMove()
+void PM_AirMove()
 {
 	//int			i;
 	Ogre::Vector3		wishvel;
