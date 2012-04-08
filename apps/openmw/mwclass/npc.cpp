@@ -93,8 +93,9 @@ namespace MWClass
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-		std::cout << "Inserting NPC\n";
-        renderingInterface.getActors().insertNPC(ptr);
+		
+			
+        renderingInterface.getActors().insertNPC(ptr, getInventoryStore(ptr));
 		
     }
 

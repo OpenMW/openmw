@@ -20,10 +20,10 @@ Actors::~Actors(){
 void Actors::setMwRoot(Ogre::SceneNode* root){
     mMwRoot = root;
 }
-void Actors::insertNPC(const MWWorld::Ptr& ptr){
+void Actors::insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv){
 
         insertBegin(ptr, true, true);
-         NpcAnimation* anim = new MWRender::NpcAnimation(ptr, mEnvironment, mRend);
+         NpcAnimation* anim = new MWRender::NpcAnimation(ptr, mEnvironment, mRend, inv);
 
         mAllActors[ptr] = anim;
 }

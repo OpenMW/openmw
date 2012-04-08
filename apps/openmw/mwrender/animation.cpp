@@ -9,7 +9,6 @@ namespace MWRender{
         , mRend(_rend)
         , mEnvironment(_env)
         , vecRotPos()
-        , shapeparts()
         , time(0.0f)
         , startTime(0.0f)
         , stopTime(0.0f)
@@ -19,7 +18,6 @@ namespace MWRender{
         , shapeNumber(0)
         , shapeIndexI()
         , shapes(NULL)
-        , entityparts()
         , transformations(NULL)
         , textmappings(NULL)
         , base(NULL)
@@ -430,14 +428,7 @@ namespace MWRender{
      //base->_updateAnimation();
    //base->_notifyMoved();
 
-   for(unsigned int i = 0; i < entityparts.size(); i++){
-         //Ogre::SkeletonInstance* skel = entityparts[i]->getSkeleton();
-
-        //Ogre::Bone* b = skel->getRootBone();
-	   //b->setOrientation(Ogre::Real(.3),Ogre::Real(.3),Ogre::Real(.3), Ogre::Real(.3));//This is a trick
-
-         //entityparts[i]->getAllAnimationStates()->_notifyDirty();
-    }
+  
 
 
     std::vector<Nif::NiKeyframeData>::iterator iter;

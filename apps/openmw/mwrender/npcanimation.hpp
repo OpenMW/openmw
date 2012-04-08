@@ -6,26 +6,34 @@
 #include <components/nif/property.hpp>
 #include <components/nif/controller.hpp>
 #include <components/nif/extra.hpp>
+#include <utility>
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/environment.hpp"
 #include "components/nifogre/ogre_nif_loader.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 namespace MWRender{
 
 class NpcAnimation: public Animation{
 private:
-
+	MWWorld::InventoryStore& inv;
 	int mStateID;
 	//Free Parts
-	Ogre::Entity* chest;   std::vector<Nif::NiTriShapeCopy>* chestShapes;
-	Ogre::Entity* skirt;   std::vector<Nif::NiTriShapeCopy>* skirtShapes;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> chest;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> skirt;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> lhand;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rhand;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> tail;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> lBeastFoot;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rBeastFoot;
+	/*Ogre::Entity* skirt;   std::vector<Nif::NiTriShapeCopy>* skirtShapes;
 	Ogre::Entity* rhand;   std::vector<Nif::NiTriShapeCopy>* rhandShapes;
 	Ogre::Entity* lhand;   std::vector<Nif::NiTriShapeCopy>* lhandShapes;
 	Ogre::Entity* tail;    std::vector<Nif::NiTriShapeCopy>* tailShapes;
 	Ogre::Entity* lBeastFoot;   std::vector<Nif::NiTriShapeCopy>* lBeastFootShapes;
-	Ogre::Entity* rBeastFoot;  std::vector<Nif::NiTriShapeCopy>* rBeastFootShapes;
+	Ogre::Entity* rBeastFoot;  std::vector<Nif::NiTriShapeCopy>* rBeastFootShapes;*/
 	
 	//Bounded Parts
 	Ogre::Entity* lclavicle;
@@ -48,13 +56,14 @@ private:
 	Ogre::Entity* rfoot;
 	Ogre::Entity* hair;
 	Ogre::Entity* head;
+	Ogre::SceneNode* insert;
     
     
     public:
-     NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);
+     NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
      virtual ~NpcAnimation();
     Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
-    void insertFreePart(const std::string &mesh, const std::string suffix, Ogre::SceneNode* insert);
+     std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> insertFreePart(const std::string &mesh, const std::string suffix);
 	virtual void runAnimation(float timepassed);
 	
 };

@@ -2,6 +2,7 @@
 #include "../mwworld/world.hpp"
 
 
+
 using namespace Ogre;
 using namespace NifOgre;
 namespace MWRender{
@@ -10,11 +11,12 @@ NpcAnimation::~NpcAnimation(){
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend): Animation(_env,_rend){
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv){
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
-
-
+	 Ogre::Entity* blank = 0;
+	  std::vector<Nif::NiTriShapeCopy>* blankshape = 0;
+	 chest = std::make_pair(blank, blankshape);
 		//Part selection on last character of the file string
 		//  " Tri Chest
 		//  * Tri Tail
@@ -95,85 +97,85 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 
 		std::string hairModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
-        const ESM::BodyPart *chest = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
+        const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
         const ESM::BodyPart *upperleg = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper leg");
-		const ESM::BodyPart *groin = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "groin");
+		const ESM::BodyPart *groinpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "groin");
 		const ESM::BodyPart *arml = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper arm");  //We need two
-		const ESM::BodyPart *neck = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "neck");
+		const ESM::BodyPart *neckpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "neck");
 		const ESM::BodyPart *knee = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "knee");
 		const ESM::BodyPart *ankle = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "ankle");
 		const ESM::BodyPart *foot = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
-		const ESM::BodyPart *feet = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
-		const ESM::BodyPart *tail = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "tail");
-		const ESM::BodyPart *wristl = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "wrist");  //We need two
-		const ESM::BodyPart *forearml = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "forearm");  //We need two
-		const ESM::BodyPart *handl = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand");   //We need two
-		const ESM::BodyPart *hair = mEnvironment.mWorld->getStore().bodyParts.search(hairID);
-		const ESM::BodyPart *head = mEnvironment.mWorld->getStore().bodyParts.search(headID);
+		const ESM::BodyPart *feetpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
+		const ESM::BodyPart *tailpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "tail");
+		const ESM::BodyPart *wristlpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "wrist");  //We need two
+		const ESM::BodyPart *forearmlpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "forearm");  //We need two
+		const ESM::BodyPart *handlpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand");   //We need two
+		const ESM::BodyPart *hairpart = mEnvironment.mWorld->getStore().bodyParts.search(hairID);
+		const ESM::BodyPart *headpart = mEnvironment.mWorld->getStore().bodyParts.search(headID);
         if(bodyRaceID == "b_n_argonian_f_")
-            forearml = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");  //We need two
-		if(!handl)
-			handl = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
+            forearmlpart = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");  //We need two
+		if(!handlpart)
+			handlpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
 		//const ESM::BodyPart* claviclel = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "clavicle");
 		//const ESM::BodyPart* clavicler = claviclel;
-		const ESM::BodyPart* handr = handl;
-		const ESM::BodyPart* forearmr = forearml;
-		const ESM::BodyPart* wristr = wristl;
+		const ESM::BodyPart* handrpart = handlpart;
+		const ESM::BodyPart* forearmr = forearmlpart;
+		const ESM::BodyPart* wristrpart = wristlpart;
 		const ESM::BodyPart* armr = arml;
 
 
         if(upperleg){
-			insertBoundedPart("meshes\\" + upperleg->model + "*|", "Left Upper Leg");
-			insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg");
+			lUpperLeg = insertBoundedPart("meshes\\" + upperleg->model + "*|", "Left Upper Leg");
+			rUpperLeg = insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg");
 
 		}
 		
         if(foot){
 			if(bodyRaceID.compare("b_n_khajiit_m_") == 0)
 			{
-				feet = foot;
+				feetpart = foot;
 			}
 			else
 			{
-				insertBoundedPart("meshes\\" + foot->model, "Right Foot");
-				insertBoundedPart("meshes\\" + foot->model + "*|", "Left Foot");
+				rfoot = insertBoundedPart("meshes\\" + foot->model, "Right Foot");
+				lfoot = insertBoundedPart("meshes\\" + foot->model + "*|", "Left Foot");
 			}
 		}
-        if(groin){
-			insertBoundedPart("meshes\\" + groin->model, "Groin");
+        if(groinpart){
+			groin = insertBoundedPart("meshes\\" + groinpart->model, "Groin");
 		}
         if(knee)
 		{
-			insertBoundedPart("meshes\\" + knee->model + "*|", "Left Knee");  //e
-			insertBoundedPart("meshes\\" + knee->model, "Right Knee");   //e
+			lKnee = insertBoundedPart("meshes\\" + knee->model + "*|", "Left Knee");  //e
+			rKnee = insertBoundedPart("meshes\\" + knee->model, "Right Knee");   //e
 
 		}
 		if(ankle){
 
-			insertBoundedPart("meshes\\" + ankle->model + "*|", "Left Ankle"); //Ogre::Quaternion(Ogre::Radian(3.14 / 4), Ogre::Vector3(1, 0, 0)),blank); //1,0,0, blank);
-			insertBoundedPart("meshes\\" + ankle->model, "Right Ankle");
+			lAnkle = insertBoundedPart("meshes\\" + ankle->model + "*|", "Left Ankle"); //Ogre::Quaternion(Ogre::Radian(3.14 / 4), Ogre::Vector3(1, 0, 0)),blank); //1,0,0, blank);
+			rAnkle = insertBoundedPart("meshes\\" + ankle->model, "Right Ankle");
 		}
         if (armr){
-			insertBoundedPart("meshes\\" + armr->model, "Right Upper Arm");
+			rupperArm = insertBoundedPart("meshes\\" + armr->model, "Right Upper Arm");
 		}
 		if(arml){
-			insertBoundedPart("meshes\\" + arml->model + "*|", "Left Upper Arm");
+			lupperArm = insertBoundedPart("meshes\\" + arml->model + "*|", "Left Upper Arm");
 		}
 
 		if (forearmr)
 		{
-				insertBoundedPart("meshes\\" + forearmr->model, "Right Forearm");
+				rForearm = insertBoundedPart("meshes\\" + forearmr->model, "Right Forearm");
 		}
-		if(forearml)
-			insertBoundedPart("meshes\\" + forearml->model + "*|", "Left Forearm");
+		if(forearmlpart)
+			lForearm = insertBoundedPart("meshes\\" + forearmlpart->model + "*|", "Left Forearm");
 
-		if (wristr)
+		if (wristrpart)
 		{
-			insertBoundedPart("meshes\\" + wristr->model, "Right Wrist");
+			rWrist = insertBoundedPart("meshes\\" + wristrpart->model, "Right Wrist");
 		}
 
-		if(wristl)
-				insertBoundedPart("meshes\\" + wristl->model + "*|", "Left Wrist");
+		if(wristlpart)
+				lWrist = insertBoundedPart("meshes\\" + wristlpart->model + "*|", "Left Wrist");
 
 
 
@@ -184,35 +186,35 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		if(clavicler)
 			insertBoundedPart("meshes\\" + clavicler->model , "Right Clavicle", base);*/
 
-		if(neck)
+		if(neckpart)
 		{
-			insertBoundedPart("meshes\\" + neck->model, "Neck");
+			neck = insertBoundedPart("meshes\\" + neckpart->model, "Neck");
 		}
-		if(head)
-			insertBoundedPart("meshes\\" + head->model, "Head");
-		if(hair)
-			insertBoundedPart("meshes\\" + hair->model, "Head");
+		if(headpart)
+			head = insertBoundedPart("meshes\\" + headpart->model, "Head");
+		if(hairpart)
+			hair = insertBoundedPart("meshes\\" + hairpart->model, "Head");
 
-        if (chest){
-				insertFreePart("meshes\\" + chest->model, ":\"", insert);
+        if (chestPart){
+				chest = insertFreePart("meshes\\" + chestPart->model, ":\"");
 
-
-		}
-        if (handr){
-				insertFreePart("meshes\\" + handr->model , ":?", insert);
 
 		}
-        if (handl){
-				insertFreePart("meshes\\" + handl->model, ":>", insert);
+        if (handrpart){
+				rhand = insertFreePart("meshes\\" + handrpart->model , ":?");
 
 		}
-        if(tail){
-                insertFreePart("meshes\\" + tail->model, ":*", insert);
+        if (handlpart){
+				lhand = insertFreePart("meshes\\" + handlpart->model, ":>");
+
+		}
+        if(tailpart){
+                tail = insertFreePart("meshes\\" + tailpart->model, ":*");
         }
-        if(feet){
-                std::string num = getUniqueID(feet->model);
-                insertFreePart("meshes\\" + feet->model,":<", insert);
-                insertFreePart("meshes\\" + feet->model,"::", insert);
+        if(feetpart){
+                
+                lBeastFoot = insertFreePart("meshes\\" + feetpart->model,"::");
+                rBeastFoot = insertFreePart("meshes\\" + feetpart->model,":<");
         }
         //originalpos = insert->_getWorldAABB().getCenter();
         //originalscenenode = insert->getPosition();
@@ -222,34 +224,38 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
    
     NIFLoader::load(mesh);
-    Entity* ent = mRend.getScene()->createEntity(mesh);
+    Ogre::Entity* part = mRend.getScene()->createEntity(mesh);
 
-    base->attachObjectToBone(bonename, ent);
-    return ent;
+    base->attachObjectToBone(bonename, part);
+    return part;
 }
-void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suffix, Ogre::SceneNode* insert){
+std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> NpcAnimation::insertFreePart(const std::string &mesh, const std::string suffix){
+	
     std::string meshNumbered = mesh + getUniqueID(mesh + suffix) + suffix;
     NIFLoader::load(meshNumbered);
 
-    Ogre::Entity* ent = mRend.getScene()->createEntity(meshNumbered);
+    Ogre::Entity* part = mRend.getScene()->createEntity(meshNumbered);
 
      
 
 
-    insert->attachObject(ent);
-    entityparts.push_back(ent);
-    shapes = ((NIFLoader::getSingletonPtr())->getShapes(mesh + "0000" + suffix));
-    if(shapes){
-        shapeparts.push_back(shapes);
-        handleShapes(shapes, ent, base->getSkeleton());
+    insert->attachObject(part);
+   
+    std::vector<Nif::NiTriShapeCopy>* shape = ((NIFLoader::getSingletonPtr())->getShapes(mesh + "0000" + suffix));
+    if(shape){
+        
+        handleShapes(shape, part, base->getSkeleton());
     }
-
-
+	 std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> pair = std::make_pair(part, shape);
+	 return pair;
 }
 
 
 void NpcAnimation::runAnimation(float timepassed){
-    
+
+	mStateID = inv.getStateId();
+	
+   
     //1. Add the amount of time passed to time
 
 	//2. Handle the animation transforms dependent on time
@@ -269,21 +275,25 @@ void NpcAnimation::runAnimation(float timepassed){
 
        handleAnimationTransforms();
 
-        std::vector<std::vector<Nif::NiTriShapeCopy>*>::iterator shapepartsiter = shapeparts.begin();
-        std::vector<Ogre::Entity*>::iterator entitypartsiter = entityparts.begin();
-        while(shapepartsiter != shapeparts.end())
-        {
+       
             vecRotPos.clear();
-            std::vector<Nif::NiTriShapeCopy>* shapes = *shapepartsiter;
-            Ogre::Entity* theentity = *entitypartsiter;
-
-
-            handleShapes(shapes, theentity, base->getSkeleton());
-            shapepartsiter++;
-            entitypartsiter++;
-        }
-		
-    }
-
+          
+			/*
+			if(lBeastFoot)
+				handleShapes(lBeastFootShapes, lBeastFoot, base->getSkeleton());
+			if(rBeastFoot)
+				handleShapes(rBeastFootShapes, rBeastFoot, base->getSkeleton());
+			if(chest)
+				handleShapes(chestShapes, chest, base->getSkeleton());
+			if(tail)
+				handleShapes(tailShapes, tail, base->getSkeleton());
+			if(skirt)
+				handleShapes(skirtShapes, skirt, base->getSkeleton());
+			if(lhand)
+				handleShapes(lhandShapes, lhand, base->getSkeleton());
+			if(rhand)
+				handleShapes(rhandShapes, rhand, base->getSkeleton());
+			*/
+}
 }
 }
