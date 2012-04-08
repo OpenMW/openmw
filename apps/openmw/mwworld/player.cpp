@@ -4,6 +4,7 @@
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "world.hpp"
 #include "class.hpp"
@@ -12,7 +13,7 @@ namespace MWWorld
 {
     Player::Player (MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world) :
       mCellStore (0), mRenderer (renderer), mWorld (world), mClass (0),
-      mAutoMove (false), mForwardBackward (0) , mDrawState(DrawState_Nothing)
+      mAutoMove (false), mForwardBackward (0)
     {
         mPlayer.base = player;
         mPlayer.ref.refID = "player";
@@ -50,7 +51,8 @@ namespace MWWorld
 
     void Player::setDrawState(const DrawState& value)
     {
-         mDrawState = value;
+         MWWorld::Ptr ptr = getPlayer();
+         MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState = value;
     }
 
     void Player::setAutoMove (bool enable)
@@ -93,5 +95,11 @@ namespace MWWorld
         bool running = MWWorld::Class::get (ptr).getStance (ptr, MWWorld::Class::Run, true);
 
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
+    }
+
+    DrawState Player::getDrawState()
+    {
+         MWWorld::Ptr ptr = getPlayer();
+         return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
     }
 }

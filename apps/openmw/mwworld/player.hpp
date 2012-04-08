@@ -20,7 +20,7 @@ namespace MWWorld
     class World;
 
     /// \brief NPC object representing the player and additional player data
-    class Player
+    class Player 
     {
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
         MWWorld::Ptr::CellStore *mCellStore;
@@ -33,7 +33,6 @@ namespace MWWorld
         ESM::Class *mClass;
         bool mAutoMove;
         int mForwardBackward;
-        DrawState mDrawState;
     public:
 
         Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
@@ -110,7 +109,7 @@ namespace MWWorld
             return mAutoMove;
         }
 
-        DrawState getDrawState() { return mDrawState; }
+        DrawState getDrawState();
 
         void setAutoMove (bool enable);
 
