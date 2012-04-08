@@ -50,7 +50,7 @@ float4 main_fp (float2 iTexCoord : TEXCOORD0,
 {
 	float4 normal = tex2D(NormalMap, noiseCoord) * 2 - 1;
 
-    float depth = tex2D(DepthMap, iTexCoord).r * far;
+    float depth = tex2D(DepthMap, iTexCoord + normal.xy * 0.015).r * far;
     depth = saturate(depth / 2000.f);
 
     float4 color = tex2D(RT, iTexCoord + normal.xy * 0.015) +

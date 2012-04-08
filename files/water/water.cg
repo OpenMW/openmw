@@ -62,7 +62,6 @@ void main_fp
     float depthTex = tex2D(depthMap, screenCoords).r;
     float depth1 = depthTex * far - iDepth;
     depth1 = saturate(depth1 / 500.f);
-    depth1 = (depthTex == 0 ? 1 : depth1);
 
     // Simple wave effect. to be replaced by something better
     float2 uv1 = iUv + time * float2(0.5, 0);
@@ -74,7 +73,20 @@ void main_fp
     normal = 2*normal - 1;
 
     float2 screenCoords_reflect = screenCoords + normal.yx * 0.05;
-    float2 screenCoords_refract = screenCoords + normal.yx * 0.1 * depth1;
+    float2 screenCoords_refract = screenCoords + normal.yx * 0.05 * depth1;
+
+    // Sample depth again with the refracted coordinates
+    depthTex = tex2D(depthMap, screenCoords_refract).r;
+    float depth2 = (depthTex * far - iDepth) / 500.f;
+    depth2 = (depthTex == 0 ? 1 : depth2);
+    // if depth2 is less than 0, this means we would refract something which is above water,
+    // which we don't want to - so in that case, don't refract
+    if (depth2 < 0.25) // delta due to inaccuracies
+    {
+        screenCoords_refract = screenCoords;
+        depth2 = depth1;
+    }
+    depth2 = saturate(depth2);
 
     float4 reflection = tex2D(reflectionMap, screenCoords_reflect);
     float4 refraction = tex2D(refractionMap, screenCoords_refract);
@@ -93,7 +105,7 @@ void main_fp
     float3 halfVector = normalize(iEyeVector + lightDir);
     float specular = pow(max(dot(normal.xyz, halfVector.xyz), 0), 64);
 
-    float opacity = depth1 * saturate(reflectionFactor + specular);
+    float opacity = depth2 * saturate(reflectionFactor + specular);
     opacity *= (1-isUnderwater);
 
     reflection.xyz += lightSpecularColour0.xyz * specular;
