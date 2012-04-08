@@ -7,6 +7,7 @@
 #include <OgreRoot.h>
 
 #include <components/esm_store/store.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
@@ -49,10 +50,19 @@ namespace MWSound
         : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
         , mEnvironment(environment)
         , mOutput(new DEFAULT_OUTPUT(*this))
-
+        , mMasterVolume(1.0f)
+        , mSFXVolume(1.0f)
+        , mMusicVolume(1.0f)
     {
         if(!useSound)
             return;
+
+        mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
+        mMasterVolume = std::min(std::max(mMasterVolume, 0.0f), 1.0f);
+        mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
+        mSFXVolume = std::min(std::max(mSFXVolume, 0.0f), 1.0f);
+        mMusicVolume = Settings::Manager::getFloat("music volume", "Sound");
+        mMusicVolume = std::min(std::max(mMusicVolume, 0.0f), 1.0f);
 
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
@@ -64,7 +74,19 @@ namespace MWSound
             for(size_t i = 0;i < names.size();i++)
                 std::cout <<"  "<<names[i]<< std::endl;
 
-            mOutput->init();
+            std::string devname = Settings::Manager::getString("device", "Sound");
+            try
+            {
+                mOutput->init(devname);
+            }
+            catch(std::exception &e)
+            {
+                if(devname.empty())
+                    throw;
+                std::cout <<"Failed to open device \""<<devname<<"\", trying default"<< std::endl;
+                mOutput->init();
+                Settings::Manager::setString("device", "Sound", "");
+            }
         }
         catch(std::exception &e)
         {
@@ -141,9 +163,10 @@ namespace MWSound
         std::cout <<"Playing "<<filename<< std::endl;
         try
         {
+            float basevol = mMasterVolume * mMusicVolume;
             stopMusic();
-            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f, Play_NoEnv);
-            mMusic->mBaseVolume = 0.4f;
+            mMusic = mOutput->streamSound(filename, basevol, 1.0f, Play_NoEnv);
+            mMusic->mBaseVolume = basevol;
             mMusic->mFlags = Play_NoEnv;
         }
         catch(std::exception &e)
@@ -187,7 +210,7 @@ namespace MWSound
         try
         {
             // The range values are not tested
-            float basevol = 1.0f; /* TODO: volume settings */
+            float basevol = mMasterVolume * mSFXVolume;
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getCellRef().pos;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
@@ -218,7 +241,7 @@ namespace MWSound
             return sound;
         try
         {
-            float basevol = 1.0f; /* TODO: volume settings */
+            float basevol = mMasterVolume * mSFXVolume;
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
 
@@ -248,7 +271,7 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
-            float basevol = 1.0f; /* TODO: volume settings */
+            float basevol = mMasterVolume * mSFXVolume;
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
             const ESM::Position &pos = ptr.getCellRef().pos;
