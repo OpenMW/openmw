@@ -305,14 +305,11 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    std::cout << "arg0:" << arg0<< std::endl;
-                    std::cout << "try to rais rank...";
                     std::string factionID = "";
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
                     if(arg0==0)
                     {
-                        std::cout << "slurpppp";
                         factionID = context.getEnvironment().mDialogueManager->getFaction();
                     }
                     else
@@ -322,7 +319,6 @@ namespace MWScript
                     }
                     if(factionID != "")
                     {
-                        std::cout << "raiserank!!!!!";
                         MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
                         if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
                         {
@@ -336,7 +332,41 @@ namespace MWScript
                     std::cout << std::endl;
                 }
         };
-        
+    
+        class OpPCLowerRank : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    if(arg0==0)
+                    {
+                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    if(factionID != "")
+                    {
+                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        {
+                            //do nothing, the player is not in the faction... Throw an exeption?
+                        }
+                        else
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] -1;
+                        }
+                    }
+                    std::cout << std::endl;
+                }
+        };
+
         class OpModDisposition : public Interpreter::Opcode0
         {
             public:
@@ -379,6 +409,7 @@ namespace MWScript
         const int opcodeModSkillExplicit = 0x2000115;
         //const int opcodePCJoinFaction = 0x2000141;
         const int opcodePCRaiseRank = 0x2000b;
+        const int opcodePCLowerRank = 0x2000c;
         const int opcodeModDisposition = 0x2000145;
 
         void registerExtensions (Compiler::Extensions& extensions)
@@ -453,6 +484,7 @@ namespace MWScript
             }
             //extensions.registerInstruction("PCJoinFaction","S",opcodePCJoinFaction);
             extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
+            extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank);
             extensions.registerInstruction("moddisposition","l",opcodeModDisposition);
         }
 
@@ -512,6 +544,7 @@ namespace MWScript
 
             //interpreter.installSegment5(opcodePCJoinFaction,new OpPCJoinFaction);
             interpreter.installSegment3(opcodePCRaiseRank,new OpPCRaiseRank);
+            interpreter.installSegment3(opcodePCLowerRank,new OpPCLowerRank);
             interpreter.installSegment5(opcodeModDisposition,new OpModDisposition);
         }
     }

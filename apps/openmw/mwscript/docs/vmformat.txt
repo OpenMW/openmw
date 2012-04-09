@@ -25,7 +25,8 @@ op 0x20008: LoopAnim
 op 0x20009: LoopAnim, explicit reference
 op 0x2000a: Choice
 op 0x2000b: PCRaiseRank
-opcodes 0x2000c-0x3ffff unused
+op 0x2000c: PCLowerRank
+opcodes 0x2000d-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
