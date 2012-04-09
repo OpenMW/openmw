@@ -181,7 +181,17 @@ namespace MWDialogue
                     break;
 
                 case 46://Same faction
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    {
+                    MWMechanics::NpcStats PCstats = MWWorld::Class::get(mEnvironment.mWorld->getPlayer().getPlayer()).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+                    MWMechanics::NpcStats NPCstats = MWWorld::Class::get(actor).getNpcStats(actor);
+                    int sameFaction = 0;
+                    if(!NPCstats.mFactionRank.empty())
+                    {
+                        std::string NPCFaction = NPCstats.mFactionRank.begin()->first;
+                        if(PCstats.mFactionRank.find(NPCFaction) != PCstats.mFactionRank.end()) sameFaction = 1;
+                    }
+                    if(!selectCompare<int,int>(comp,sameFaction,select.i)) return false;
+                    }
                     break;
 
                 case 48://Detected
@@ -193,7 +203,6 @@ namespace MWDialogue
                     break;
 
                 case 50://choice
-
                     if(choice)
                     {
                         if(!selectCompare<int,int>(comp,mChoice,select.i)) return false;
@@ -447,9 +456,6 @@ namespace MWDialogue
             if (toLower (info.actor)!=MWWorld::Class::get (actor).getId (actor))
                 return false;
 
-        //PC Faction
-        if(!info.pcFaction.empty()) return false;
-
         //NPC race
         if (!info.race.empty())
         {
@@ -495,8 +501,8 @@ namespace MWDialogue
         // TODO check player faction
         if(!info.pcFaction.empty())
         {
-            MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
-            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.npcFaction);
+            MWMechanics::NpcStats stats = MWWorld::Class::get(mEnvironment.mWorld->getPlayer().getPlayer()).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.pcFaction);
             if(it!=stats.mFactionRank.end())
             {
                 //check rank
@@ -816,7 +822,7 @@ namespace MWDialogue
     std::string DialogueManager::getFaction()
     {
         std::string factionID("");
-        MWMechanics::NpcStats stats = MWWorld::Class::get(mActor).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+        MWMechanics::NpcStats stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
         if(stats.mFactionRank.empty())
         {
             std::cout << "No faction for this actor!";

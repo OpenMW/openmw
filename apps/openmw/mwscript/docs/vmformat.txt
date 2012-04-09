@@ -24,7 +24,8 @@ op 0x20007: PlayAnim, explicit reference
 op 0x20008: LoopAnim
 op 0x20009: LoopAnim, explicit reference
 op 0x2000a: Choice
-opcodes 0x2000b-0x3ffff unused
+op 0x2000b: PCRaiseRank
+opcodes 0x2000c-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -127,5 +128,5 @@ op 0x2000141: GetWaterLevel
 op 0x2000142: SetWaterLevel
 op 0x2000143: ModWaterLevel
 op 0x2000144: ToggleWater, twa
-op 0x2000145: PCRaiseRank
+op 0x2000145: ModDisposition
 opcodes 0x2000146-0x3ffffff unused

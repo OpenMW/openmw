@@ -299,27 +299,54 @@ namespace MWScript
                 }
         };
 
-        class OpPCRaiseRank : public Interpreter::Opcode0
+        class OpPCRaiseRank : public Interpreter::Opcode1
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    std::cout << "arg0:" << arg0<< std::endl;
                     std::cout << "try to rais rank...";
+                    std::string factionID = "";
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-                    
-                    std::string factionID = context.getEnvironment().mDialogueManager->getFaction();
+                    if(arg0==0)
+                    {
+                        std::cout << "slurpppp";
+                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
                     if(factionID != "")
                     {
                         std::cout << "raiserank!!!!!";
                         MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
-                        MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 1;
+                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 1;
+                        }
+                        else
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] +1;
+                        }
                     }
                     std::cout << std::endl;
                 }
         };
         
+        class OpModDisposition : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -351,7 +378,8 @@ namespace MWScript
         const int opcodeModSkill = 0x20000fa;
         const int opcodeModSkillExplicit = 0x2000115;
         //const int opcodePCJoinFaction = 0x2000141;
-        const int opcodePCRaiseRank = 0x2000145;
+        const int opcodePCRaiseRank = 0x2000b;
+        const int opcodeModDisposition = 0x2000145;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -424,8 +452,8 @@ namespace MWScript
                     opcodeModSkill+i, opcodeModSkillExplicit+i);
             }
             //extensions.registerInstruction("PCJoinFaction","S",opcodePCJoinFaction);
-            std::cout << "rgister raiserank";
-            extensions.registerInstruction("pcraiserank","",opcodePCRaiseRank);
+            extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
+            extensions.registerInstruction("moddisposition","l",opcodeModDisposition);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -483,7 +511,8 @@ namespace MWScript
             }
 
             //interpreter.installSegment5(opcodePCJoinFaction,new OpPCJoinFaction);
-            interpreter.installSegment5(opcodePCRaiseRank,new OpPCRaiseRank);
+            interpreter.installSegment3(opcodePCRaiseRank,new OpPCRaiseRank);
+            interpreter.installSegment5(opcodeModDisposition,new OpModDisposition);
         }
     }
 }
