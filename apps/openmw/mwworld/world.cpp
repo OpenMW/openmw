@@ -776,7 +776,8 @@ namespace MWWorld
                 std::vector < std::pair < float, std::string > >::iterator it = results.begin();
                 while (it != results.end())
                 {
-                    if ( getPtrViaHandle((*it).second) == mPlayer->getPlayer() )
+                    if ( (*it).second.find("HeightField") != std::string::npos // not interested in terrain
+                    || getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
                     {
                         it = results.erase(it);
                     }

@@ -1,6 +1,7 @@
 #include "physic.hpp"
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <components/nifbullet/bullet_nif_loader.hpp>
 //#include <apps\openmw\mwworld\world.hpp>
 #include "CMotionState.h"
@@ -9,6 +10,8 @@
 #include "BtOgrePG.h"
 #include "BtOgreGP.h"
 #include "BtOgreExtras.h"
+
+#include <boost/lexical_cast.hpp>
 
 #define BIT(x) (1<<(x))
 
@@ -252,6 +255,60 @@ namespace Physic
         delete broadphase;
         //delete pairCache;
         delete mShapeLoader;
+    }
+
+    void PhysicEngine::addHeightField(float* heights,
+        int x, int y, float yoffset,
+        float triSize, float sqrtVerts)
+    {
+        const std::string name = "HeightField_"
+            + boost::lexical_cast<std::string>(x) + "_"
+            + boost::lexical_cast<std::string>(y);
+
+        // find the minimum and maximum heights (needed for bullet)
+        float minh;
+        float maxh;
+        for (int i=0; i<sqrtVerts*sqrtVerts; ++i)
+        {
+            float h = heights[i];
+            if (i==0)
+            {
+                minh = h;
+                maxh = h;
+            }
+            
+            if (h>maxh) maxh = h;
+            if (h<minh) minh = h;
+        }
+
+        btHeightfieldTerrainShape* hfShape = new btHeightfieldTerrainShape(
+            sqrtVerts, sqrtVerts, heights, 1,
+            minh, maxh, 2,
+            PHY_FLOAT,true);
+
+        hfShape->setUseDiamondSubdivision(true);
+
+        btVector3 scl(triSize, triSize, 1);
+        hfShape->setLocalScaling(scl);
+
+        CMotionState* newMotionState = new CMotionState(this,name);
+
+        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,hfShape);
+        RigidBody* body = new RigidBody(CI,name);
+        body->collide = true;
+        body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
+
+        addRigidBody(body);
+    }
+
+    void PhysicEngine::removeHeightField(int x, int y)
+    {
+        const std::string name = "HeightField_"
+            + boost::lexical_cast<std::string>(x) + "_"
+            + boost::lexical_cast<std::string>(y);
+
+        removeRigidBody(name);
+        deleteRigidBody(name);
     }
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
