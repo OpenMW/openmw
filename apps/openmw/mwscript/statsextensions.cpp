@@ -284,18 +284,36 @@ namespace MWScript
                 }
         };
 
-        class OpPCJoinFaction : public Interpreter::Opcode0
+        class OpPCJoinFaction : public Interpreter::Opcode1
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    std::string factionID = "";
                     MWScript::InterpreterContext& context
                         = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string factionID = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-                    context.getEnvironment().mWorld->getPlayer().addFaction(factionID);
+                    if(arg0==0)
+                    {
+                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    if(factionID != "")
+                    {
+                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 1;
+                        }
+                        else
+                        {
+                            //the player is already in the faction... Throw an exeption?
+                        }
+                    }
                 }
         };
 
@@ -329,7 +347,6 @@ namespace MWScript
                             MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] +1;
                         }
                     }
-                    std::cout << std::endl;
                 }
         };
     
@@ -363,7 +380,6 @@ namespace MWScript
                             MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] -1;
                         }
                     }
-                    std::cout << std::endl;
                 }
         };
 
@@ -410,6 +426,7 @@ namespace MWScript
         //const int opcodePCJoinFaction = 0x2000141;
         const int opcodePCRaiseRank = 0x2000b;
         const int opcodePCLowerRank = 0x2000c;
+        const int opcodePCJoinFaction = 0x2000d;
         const int opcodeModDisposition = 0x2000145;
 
         void registerExtensions (Compiler::Extensions& extensions)
@@ -485,6 +502,7 @@ namespace MWScript
             //extensions.registerInstruction("PCJoinFaction","S",opcodePCJoinFaction);
             extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
             extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank);
+            extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction);
             extensions.registerInstruction("moddisposition","l",opcodeModDisposition);
         }
 
@@ -545,6 +563,7 @@ namespace MWScript
             //interpreter.installSegment5(opcodePCJoinFaction,new OpPCJoinFaction);
             interpreter.installSegment3(opcodePCRaiseRank,new OpPCRaiseRank);
             interpreter.installSegment3(opcodePCLowerRank,new OpPCLowerRank);
+            interpreter.installSegment3(opcodePCJoinFaction,new OpPCJoinFaction);
             interpreter.installSegment5(opcodeModDisposition,new OpModDisposition);
         }
     }
