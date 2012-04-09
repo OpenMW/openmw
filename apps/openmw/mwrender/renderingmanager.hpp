@@ -31,11 +31,8 @@
 
 namespace Ogre
 {
-    class Camera;
-    class Viewport;
     class SceneManager;
     class SceneNode;
-    class RaySceneQuery;
     class Quaternion;
     class Vector3;
 }
@@ -84,6 +81,8 @@ class RenderingManager: private RenderingInterface {
 
     void removeWater();
 
+    static const bool useMRT();
+
     void preCellChange (MWWorld::Ptr::CellStore* store);
     ///< this event is fired immediately before changing cell
 
@@ -108,6 +107,9 @@ class RenderingManager: private RenderingInterface {
     void setSunDirection(const Ogre::Vector3& direction);
     void sunEnable();
     void sunDisable();
+
+    void disableLights();
+    void enableLights();
 
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
@@ -174,7 +176,8 @@ class RenderingManager: private RenderingInterface {
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
     MWRender::Player *mPlayer;
-    MWRender::Debugging mDebugging;
+
+    MWRender::Debugging *mDebugging;
 
     MWRender::LocalMap* mLocalMap;
 };

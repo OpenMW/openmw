@@ -4,10 +4,11 @@
 #include "OgreCamera.h"
 
 #include <components/esm_store/cell_store.hpp>
-#include <list>
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
+
+#include "../mwmechanics/drawstate.hpp"
 
 namespace MWRender
 {
@@ -19,15 +20,8 @@ namespace MWWorld
     class World;
 
     /// \brief NPC object representing the player and additional player data
-    class Player
+    class Player 
     {
-        struct Faction
-        {
-            std::string id,name;
-            int rank;
-            bool expelled;
-        };
-
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
         MWWorld::Ptr::CellStore *mCellStore;
         MWRender::Player *mRenderer;
@@ -37,12 +31,8 @@ namespace MWWorld
         std::string mRace;
         std::string mBirthsign;
         ESM::Class *mClass;
-        std::list<Faction> mFactions;
         bool mAutoMove;
         int mForwardBackward;
-
-        Faction getFaction(std::string faction);
-
     public:
 
         Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
@@ -87,6 +77,8 @@ namespace MWWorld
 
         void setClass (const ESM::Class& class_);
 
+        void setDrawState(const DrawState& state);
+
         std::string getName() const
         {
             return mName;
@@ -117,21 +109,9 @@ namespace MWWorld
             return mAutoMove;
         }
 
+        DrawState getDrawState();
+
         void setAutoMove (bool enable);
-
-        void addFaction(std::string factionID);
-
-        int getRank(std::string factionID);
-
-        void setRank(std::string factionID,int rank);
-
-        void raiseRank(std::string factionID);
-
-        void lowerRank(std::string factionID);
-
-        bool isExpelled(std::string factionID);
-
-        void setExpelled(std::string factionID,bool expelled);
 
         void setLeftRight (int value);
 

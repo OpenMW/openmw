@@ -36,7 +36,8 @@ THE SOFTWARE.
 #include "OgreHardwarePixelBuffer.h"
 #include "OgreShadowCameraSetupPSSM.h"
 
-#define POINTLIGHTS
+#include <components/settings/settings.hpp>
+#include "renderingmanager.hpp"
 
 namespace Ogre
 {
@@ -220,22 +221,10 @@ namespace Ogre
 		
 
 	}
-        int TerrainMaterialGeneratorB::SM2Profile::getNumberOfLightsSupported() const
-        {
-                #ifndef POINTLIGHTS
-                return 1;
-                #else
-                // number of supported lights depends on the number of available constant registers,
-                // which in turn depends on the shader profile used
-                if (GpuProgramManager::getSingleton().isSyntaxSupported("ps_3_0")
-                        || GpuProgramManager::getSingleton().isSyntaxSupported("ps_4_0")
-                        || GpuProgramManager::getSingleton().isSyntaxSupported("fp40")
-                )
-                        return 32;
-                else
-                        return 8;
-                #endif
-        }
+    int TerrainMaterialGeneratorB::SM2Profile::getNumberOfLightsSupported() const
+    {
+        return Settings::Manager::getInt("num lights", "Terrain");
+    }
 	//---------------------------------------------------------------------
 	MaterialPtr TerrainMaterialGeneratorB::SM2Profile::generate(const Terrain* terrain)
 	{
@@ -565,10 +554,14 @@ namespace Ogre
                 {
                         params->setNamedAutoConstant("lightPosObjSpace"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_POSITION_OBJECT_SPACE, i);
                         params->setNamedAutoConstant("lightDiffuseColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_DIFFUSE_COLOUR, i);
-                        params->setNamedAutoConstant("lightAttenuation"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_ATTENUATION, i);
+                        if (prof->getNumberOfLightsSupported() > 1)
+                            params->setNamedAutoConstant("lightAttenuation"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_ATTENUATION, i);
                         //params->setNamedAutoConstant("lightSpecularColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_SPECULAR_COLOUR, i);
                 }
-                
+
+        if (MWRender::RenderingManager::useMRT())
+            params->setNamedAutoConstant("far", GpuProgramParameters::ACT_FAR_CLIP_DISTANCE);
+
 		params->setNamedAutoConstant("eyePosObjSpace", GpuProgramParameters::ACT_CAMERA_POSITION_OBJECT_SPACE);
 		params->setNamedAutoConstant("fogColour", GpuProgramParameters::ACT_FOG_COLOUR);
 
@@ -764,12 +757,7 @@ namespace Ogre
 			ret->unload();
 		}
 		
-		if(prof->isLayerNormalMappingEnabled() || prof->isLayerParallaxMappingEnabled())
-			ret->setParameter("profiles", "ps_3_0 ps_2_x fp40 arbfp1");
-		//else
-			//ret->setParameter("profiles", "ps_3_0 ps_2_0 fp30 arbfp1");
-		else // fp30 doesn't work (black terrain)
-			ret->setParameter("profiles", "ps_3_0 ps_2_x fp40 arbfp1");
+        ret->setParameter("profiles", "ps_3_0 ps_2_x fp40 arbfp1");
 		ret->setParameter("entry_point", "main_fp");
 
 		return ret;
@@ -928,7 +916,7 @@ namespace Ogre
 
 
 		outStream << 
-			"float4 main_fp(\n"
+			"void main_fp(\n"
 			"float4 position : TEXCOORD0,\n";
 
 		uint texCoordSet = 1;
@@ -980,10 +968,9 @@ namespace Ogre
 			//"uniform float3 lightSpecularColour"<<i<<",\n"
                         ;
 
-                        #ifdef POINTLIGHTS
-                        outStream <<
-                        "uniform float4 lightAttenuation"<<i<<",\n";
-                        #endif
+                        if (prof->getNumberOfLightsSupported() > 1)
+                            outStream <<
+                            "uniform float4 lightAttenuation"<<i<<",\n";
 
                 }
 
@@ -1046,8 +1033,15 @@ namespace Ogre
 				__FUNCTION__);
 		}
 
+        if (MWRender::RenderingManager::useMRT()) outStream <<
+            "   , out float4 oColor : COLOR \n"
+            "   , out float4 oColor1 : COLOR1 \n"
+            "   , uniform float far \n";
+        else outStream <<
+            "   , out float4 oColor : COLOR \n";
+
 		outStream << 
-			") : COLOR\n"
+			")\n"
 			"{\n"
 			"	float4 outputCol;\n"
 			"	float shadow = 1.0;\n"
@@ -1130,10 +1124,9 @@ namespace Ogre
 			}
 			else
 			{
-                                #ifdef POINTLIGHTS
-                                outStream << "float d; \n"
+                                if (prof->getNumberOfLightsSupported() > 1)
+                                    outStream << "float d; \n"
                                              "float attn; \n";
-                                #endif
 
                                 outStream <<
                                 "      eyeDir = normalize(eyeDir); \n";
@@ -1144,13 +1137,12 @@ namespace Ogre
                                         outStream << "	float3 halfAngle"<<i<<" = normalize(lightDir"<<i<<" + eyeDir);\n"
                                                 "	float4 litRes"<<i<<" = lit(dot(normalize(lightDir"<<i<<"), normal), dot(halfAngle"<<i<<", normal), scaleBiasSpecular.z);\n";
 
-                                        #ifdef POINTLIGHTS
+                                    if (prof->getNumberOfLightsSupported() > 1)
                                         outStream <<
                                         // pre-multiply light color with attenuation factor
                                            "d = length( lightDir"<<i<<" ); \n"
                                            "attn = ( 1.0 / (( lightAttenuation"<<i<<".y ) + ( lightAttenuation"<<i<<".z * d ) + ( lightAttenuation"<<i<<".w * d * d ))); \n"
                                            "lightDiffuseColour"<<i<<" *= attn; \n";
-                                        #endif
                                 }
 			}
 		}
@@ -1255,6 +1247,10 @@ namespace Ogre
 			"	oPos = mul(viewProjMatrix, worldPos);\n"
 			"	oUVMisc.xy = uv.xy;\n";
 
+        outStream <<
+            "	// pass cam depth\n"
+            "	oUVMisc.z = oPos.z;\n";
+
 		bool fog = terrain->getSceneManager()->getFogMode() != FOG_NONE && tt != RENDER_COMPOSITE_MAP;
 		if (fog)
 		{
@@ -1351,7 +1347,12 @@ namespace Ogre
 		}
 
 		// Final return
-		outStream << "  return outputCol;\n"
+		outStream << "  oColor = outputCol;\n";
+
+        if (MWRender::RenderingManager::useMRT()) outStream <<
+            "   oColor1 = float4(uvMisc.z / far, 0, 0, 1); \n";
+
+        outStream
 			<< "}\n";
 
 	}
@@ -1523,14 +1524,6 @@ namespace Ogre
 					"oLightSpacePos" << i << ".z = (oLightSpacePos" << i << ".z - depthRange" << i << ".x) * depthRange" << i << ".w;\n";
 
 			}
-		}
-
-
-		if (prof->getReceiveDynamicShadowsPSSM())
-		{
-			outStream <<
-				"	// pass cam depth\n"
-				"	oUVMisc.z = oPos.z;\n";
 		}
 
 	}

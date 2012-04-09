@@ -25,6 +25,9 @@ namespace MWClass
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 
+            virtual int getValue (const MWWorld::Ptr& ptr) const;
+            ///< Return trade value of the object. Throws an exception, if the object can't be traded.
+
             static void registerSelf();
 
             virtual std::string getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;

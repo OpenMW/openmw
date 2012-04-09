@@ -110,6 +110,14 @@ namespace MWClass
         return std::make_pair (slots, false);
     }
 
+    int Light::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+        return ref->base->data.value;
+    }
+
     void Light::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Light);

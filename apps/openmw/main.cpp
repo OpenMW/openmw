@@ -54,6 +54,41 @@ inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string
 
 using namespace std;
 
+struct FallbackMap {
+    std::map<std::string,std::string> mMap;
+};
+
+void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
+{
+    if(v.empty())
+    {
+        v = boost::any(FallbackMap());
+    }
+
+    FallbackMap *map = boost::any_cast<FallbackMap>(&v);
+
+    std::map<std::string,std::string>::iterator mapIt;
+    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); it++)
+    {
+        int sep = it->find(",");
+        if(sep < 1 || sep == (int)it->length()-1)
+#if (BOOST_VERSION < 104200)
+            throw boost::program_options::validation_error("invalid value");
+#else
+            throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
+#endif
+
+        std::string key(it->substr(0,sep));
+        std::string value(it->substr(sep+1));
+
+        if((mapIt = map->mMap.find(key)) == map->mMap.end())
+        {
+            map->mMap.insert(std::make_pair<std::string,std::string>(key,value));
+        }
+    }
+}
+
+
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
  * to parse configuration files.
@@ -92,39 +127,40 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("plugin", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "plugin file(s)")
 
-        ("fps", boost::program_options::value<int>()->implicit_value(1)
-            ->default_value(0), "fps counter detail (0 = off, 1 = fps counter, 2 = full detail)")
-
-        ("anim-verbose", boost::program_options::value<bool>()->implicit_value(true)
+        ("anim-verbose", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "output animation indices files")
 
-        ("debug", boost::program_options::value<bool>()->implicit_value(true)
+        ("debug", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "debug mode")
 
-        ("nosound", boost::program_options::value<bool>()->implicit_value(true)
+        ("nosound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
-        ("script-verbose", boost::program_options::value<bool>()->implicit_value(true)
+        ("script-verbose", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "verbose script output")
 
-        ("new-game", boost::program_options::value<bool>()->implicit_value(true)
+        ("new-game", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "activate char gen/new game mechanics")
 
-        ("script-all", boost::program_options::value<bool>()->implicit_value(true)
+        ("script-all", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "compile all scripts (excluding dialogue scripts) at startup")
 
-        ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)
+        ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
 
-        ( "encoding", boost::program_options::value<std::string>()->
+        ( "encoding", bpo::value<std::string>()->
             default_value("win1252"),
             "Character encoding used in OpenMW game messages:\n"
             "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default")
 
-        ("report-focus", boost::program_options::value<bool>()->implicit_value(true)
+        ("report-focus", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "write name of focussed object to cout")
+
+        ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
+            ->multitoken()->composing(), "fallback values")
+
         ;
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -225,13 +261,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
-    engine.showFPS(variables["fps"].as<int>());
     engine.setDebugMode(variables["debug"].as<bool>());
     engine.setSoundUsage(!variables["nosound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setReportFocus(variables["report-focus"].as<bool>());
     engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
+    engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
 
     return true;
 }

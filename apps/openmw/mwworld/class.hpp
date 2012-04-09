@@ -155,6 +155,10 @@ namespace MWWorld
             /// no such skill.
             /// (default implementation: return -1)
 
+            virtual int getValue (const Ptr& ptr) const;
+            ///< Return trade value of the object. Throws an exception, if the object can't be traded.
+            /// (default implementation: throws an exception)
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 

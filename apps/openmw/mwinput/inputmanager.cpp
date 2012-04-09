@@ -65,12 +65,14 @@ namespace MWInput
       A_QuickLoad,
       A_QuickMenu,
       A_GameMenu,
+      A_ToggleWeapon,
+      A_ToggleSpell,
 
       A_LAST            // Marker for the last item
     };
 
   // Class that handles all input and key bindings for OpenMW
-  class InputImpl : public Ogre::FrameListener
+  class InputImpl
   {
     OEngine::Input::DispatcherPtr disp;
     OEngine::Render::OgreRenderer &ogre;
@@ -85,6 +87,38 @@ namespace MWInput
 
 
    /* InputImpl Methods */
+
+    void toggleSpell()
+    {
+         DrawState state = player.getDrawState();
+         if(state == DrawState_Weapon || state == DrawState_Nothing)
+         {
+             player.setDrawState(DrawState_Spell);
+             std::cout << "Player has now readied his hands for spellcasting!\n";
+         }
+         else
+         {
+             player.setDrawState(DrawState_Nothing);
+             std::cout << "Player does not have any kind of attack ready now.\n";
+         }
+
+    }
+
+    void toggleWeapon()
+    {
+         DrawState state = player.getDrawState();
+         if(state == DrawState_Spell || state == DrawState_Nothing)
+         {
+             player.setDrawState(DrawState_Weapon);
+             std::cout << "Player is now drawing his weapon.\n";
+         }
+         else
+         {
+             player.setDrawState(DrawState_Nothing);
+             std::cout << "Player does not have any kind of attack ready now.\n";
+         }
+
+    }
 
     void screenshot()
     {
@@ -197,11 +231,12 @@ namespace MWInput
                       "Auto Move");
       disp->funcs.bind(A_ToggleWalk, boost::bind(&InputImpl::toggleWalking, this),
                       "Toggle Walk/Run");
-
+      disp->funcs.bind(A_ToggleWeapon,boost::bind(&InputImpl::toggleWeapon,this),
+                      "Draw Weapon");
+      disp->funcs.bind(A_ToggleSpell,boost::bind(&InputImpl::toggleSpell,this),
+                      "Ready hands");
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
-      // Add ourselves as a frame listener to catch movement keys
-      ogre.getRoot()->addFrameListener(this);
 
       // Set up the mouse handler and tell it about the player camera
       mouse = MouseLookEventPtr(new MouseLookEvent(player.getRenderer()->getCamera()));
@@ -244,6 +279,8 @@ namespace MWInput
       disp->bind(A_AutoMove, KC_Z);
       disp->bind(A_ToggleSneak, KC_X);
       disp->bind(A_ToggleWalk, KC_C);
+      disp->bind(A_ToggleWeapon,KC_F);
+      disp->bind(A_ToggleSpell,KC_R);
 
       // Key bindings for polled keys
       // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.
@@ -262,7 +299,7 @@ namespace MWInput
     }
 
     //NOTE: Used to check for movement keys
-    bool frameRenderingQueued (const Ogre::FrameEvent &evt)
+    void update ()
     {
         // Tell OIS to handle all input events
         input.capture();
@@ -276,7 +313,7 @@ namespace MWInput
         windows.update();
 
         // Disable movement in Gui mode
-        if (windows.isGuiMode()) return true;
+        if (windows.isGuiMode()) return;
 
         // Configure player movement according to keyboard input. Actual movement will
         // be done in the physics system.
@@ -305,8 +342,6 @@ namespace MWInput
         }
         else
             player.setForwardBackward (0);
-
-        return true;
     }
 
     // Switch between gui modes. Besides controlling the Gui windows
@@ -357,5 +392,10 @@ namespace MWInput
   void MWInputManager::setGuiMode(MWGui::GuiMode mode)
   {
       impl->setGuiMode(mode);
+  }
+
+  void MWInputManager::update()
+  {
+      impl->update();
   }
 }

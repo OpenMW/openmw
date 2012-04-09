@@ -427,7 +427,7 @@ namespace MWScript
         const int opcodePCRaiseRank = 0x2000b;
         const int opcodePCLowerRank = 0x2000c;
         const int opcodePCJoinFaction = 0x2000d;
-        const int opcodeModDisposition = 0x2000145;
+        const int opcodeModDisposition = 0x2000147;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {

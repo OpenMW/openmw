@@ -6,6 +6,7 @@
 
 #include "terrainmaterial.hpp"
 #include "terrain.hpp"
+#include "renderconst.hpp"
 
 
 using namespace Ogre;
@@ -98,7 +99,10 @@ namespace MWRender
         ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
-            land->loadData();
+            if (!land->dataLoaded)
+            {
+                land->loadData();
+            }
         }
 
         //split the cell terrain into four segments
@@ -159,6 +163,8 @@ namespace MWRender
                                          x * numTextures, y * numTextures,
                                          numTextures,
                                          indexes);
+                    terrain->setVisibilityFlags(RV_Terrain);
+                    terrain->setRenderQueueGroup(RQG_Main);
 
                     if ( land && land->landData->usingColours )
                     {
@@ -420,7 +426,11 @@ namespace MWRender
         ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
-            land->loadData();
+            if (!land->dataLoaded)
+            {
+                land->loadData();
+            }
+
             return land->landData
                        ->textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
         }

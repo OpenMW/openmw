@@ -9,7 +9,8 @@ namespace bpo = boost::program_options;
 
 int main(int argc, char *argv[]) {
 
-    bpo::options_description desc("Syntax: mwiniimporter <options>\nAllowed options");
+    bpo::options_description desc("Syntax: mwiniimporter <options> inifile configfile\nAllowed options");
+    bpo::positional_options_description p_desc;
     desc.add_options()
         ("help,h", "produce help message")
         ("verbose,v", "verbose output")
@@ -18,28 +19,22 @@ int main(int argc, char *argv[]) {
         ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
         ("game-files,g", "import esm and esp files")
         ;
+    p_desc.add("ini", 1).add("cfg", 1);
 
     bpo::variables_map vm;
-    try {
-        bpo::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+    bpo::parsed_options parsed = bpo::command_line_parser(argc, argv)
+        .options(desc)
+        .positional(p_desc)
+        .run();
+    
+    bpo::store(parsed, vm);
 
-        // parse help before calling notify because we dont want it to throw an error if help is set
-        if(vm.count("help")) {
-            std::cout << desc;
-            return 0;
-        }
+    if(vm.count("help") || !vm.count("ini") || !vm.count("cfg")) {
+        std::cout << desc;
+        return 0;
+    }
 
-        bpo::notify(vm);
-
-    }
-    catch(std::exception& e) {
-        std::cerr << "Error:" << e.what() << std::endl;
-        return -1;
-    }
-    catch(...) {
-        std::cerr << "Error" << std::endl;
-        return -2;
-    }
+    bpo::notify(vm);
 
     std::string iniFile = vm["ini"].as<std::string>();
     std::string cfgFile = vm["cfg"].as<std::string>();
@@ -58,21 +53,22 @@ int main(int argc, char *argv[]) {
         std::cerr << "cfg file does not exist" << std::endl;
         return -4;
     }
-    
+
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));
-    boost::iostreams::stream<boost::iostreams::file_sink> file(outputFile);
 
     MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
     MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
 
     importer.merge(cfg, ini);
-    
+    importer.mergeFallback(cfg, ini);
+
     if(vm.count("game-files")) {
         importer.importGameFiles(cfg, ini);
     }
 
     std::cout << "write to: " << outputFile << std::endl;
+    boost::iostreams::stream<boost::iostreams::file_sink> file(outputFile);
     importer.writeToFile(file, cfg);
 
     return 0;

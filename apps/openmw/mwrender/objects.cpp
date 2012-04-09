@@ -3,6 +3,8 @@
 #include <OgreSceneNode.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/settings/settings.hpp>
+#include "renderconst.hpp"
 
 using namespace MWRender;
 
@@ -88,18 +90,16 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     NifOgre::NIFLoader::load(mesh);
     Ogre::Entity *ent = mRenderer.getScene()->createEntity(mesh);
 
-/*
+
     Ogre::Vector3 extents = ent->getBoundingBox().getSize();
     extents *= insert->getScale();
-//    float size = std::max(std::max(extents.x, extents.y), extents.z);
+    float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < 250); /// \todo config value
+    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) && Settings::Manager::getBool("limit small object distance", "Objects");
 
     // do not fade out doors. that will cause holes and look stupid
     if (ptr.getTypeName().find("Door") != std::string::npos)
         small = false;
-*/
-    const bool small = false;
 
     if (mBounds.find(ptr.getCell()) == mBounds.end())
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
@@ -113,17 +113,49 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     bounds.scale(insert->getScale());
     mBounds[ptr.getCell()].merge(bounds);
 
-    if(!mIsStatic)
+    bool transparent = false;
+    for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+    {
+        Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
+        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+        while (techIt.hasMoreElements())
+        {
+            Ogre::Technique* tech = techIt.getNext();
+            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+            while (passIt.hasMoreElements())
+            {
+                Ogre::Pass* pass = passIt.getNext();
+
+                if (pass->getDepthWriteEnabled() == false)
+                    transparent = true;
+            }
+        }
+    }
+
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects"))
     {
         insert->attachObject(ent);
 
-        ent->setRenderingDistance(small ? 2500 : 0); /// \todo config value
+        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+        ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
+        ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
     }
     else
     {
         Ogre::StaticGeometry* sg = 0;
 
-        if (small)
+/*        if (transparent)
+        {
+            if( mStaticGeometryAlpha.find(ptr.getCell()) == mStaticGeometryAlpha.end())
+            {
+                uniqueID = uniqueID +1;
+                sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+                mStaticGeometryAlpha[ptr.getCell()] = sg;
+            }
+            else
+                sg = mStaticGeometryAlpha[ptr.getCell()];
+        }
+        else*/ if (small)
         {
             if( mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
             {
@@ -131,7 +163,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
                 sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
                 mStaticGeometrySmall[ptr.getCell()] = sg;
 
-                sg->setRenderingDistance(2500); /// \todo config value
+                sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance"));
             }
             else
                 sg = mStaticGeometrySmall[ptr.getCell()];
@@ -159,6 +191,10 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
         sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
 
+        sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
+
+        sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+
         mRenderer.getScene()->destroyEntity(ent);
     }
 }
@@ -169,6 +205,7 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     assert(insert);
     Ogre::Light *light = mRenderer.getScene()->createLight();
     light->setDiffuseColour (r, g, b);
+    mLights.push_back(light->getName());
 
     float cval=0.0f, lval=0.0f, qval=0.0f;
 
@@ -251,6 +288,13 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
         mRenderer.getScene()->destroyStaticGeometry (sg);
         sg = 0;
     }
+    /*if(mStaticGeometryAlpha.find(store) != mStaticGeometryAlpha.end())
+    {
+        Ogre::StaticGeometry* sg = mStaticGeometryAlpha[store];
+        mStaticGeometryAlpha.erase(store);
+        mRenderer.getScene()->destroyStaticGeometry (sg);
+        sg = 0;
+    }*/
 
     if(mBounds.find(store) != mBounds.end())
         mBounds.erase(store);
@@ -268,9 +312,45 @@ void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell)
         Ogre::StaticGeometry* sg = mStaticGeometrySmall[&cell];
         sg->build();
     }
+    /*if(mStaticGeometryAlpha.find(&cell) != mStaticGeometryAlpha.end())
+    {
+        Ogre::StaticGeometry* sg = mStaticGeometryAlpha[&cell];
+        sg->build();
+    }*/
 }
 
 Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
 {
     return mBounds[cell];
 }
+
+void Objects::enableLights()
+{
+    std::vector<std::string>::iterator it = mLights.begin();
+    while (it != mLights.end())
+    {
+        if (mMwRoot->getCreator()->hasLight(*it))
+        {
+            mMwRoot->getCreator()->getLight(*it)->setVisible(true);
+            ++it;
+        }
+        else
+            it = mLights.erase(it);
+    }
+}
+
+void Objects::disableLights()
+{
+    std::vector<std::string>::iterator it = mLights.begin();
+    while (it != mLights.end())
+    {
+        if (mMwRoot->getCreator()->hasLight(*it))
+        {
+            mMwRoot->getCreator()->getLight(*it)->setVisible(false);
+            ++it;
+        }
+        else
+            it = mLights.erase(it);
+    }
+}
+

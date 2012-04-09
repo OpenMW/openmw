@@ -4,6 +4,7 @@
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "world.hpp"
 #include "class.hpp"
@@ -48,6 +49,12 @@ namespace MWWorld
         mClass = new_class;
     }
 
+    void Player::setDrawState(const DrawState& value)
+    {
+         MWWorld::Ptr ptr = getPlayer();
+         MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState = value;
+    }
+
     void Player::setAutoMove (bool enable)
     {
         MWWorld::Ptr ptr = getPlayer();
@@ -90,81 +97,9 @@ namespace MWWorld
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
     }
 
-    Player::Faction Player::getFaction(std::string factionID)
+    DrawState Player::getDrawState()
     {
-        for(std::list<Player::Faction>::iterator it = mFactions.begin(); it != mFactions.end();it++)
-        {
-            if(it->name == factionID) return *it;
-        }
-        //faction was not found->dummy faction
-        Player::Faction fact;
-        fact.id = "not found";
-        fact.name = "not found";
-        fact.rank = -10;
-        fact.expelled = false;
-        return fact;
-    }
-
-    void Player::addFaction(std::string factionID)
-    {
-        if(getFaction(factionID).name == "not found")
-        {
-            Player::Faction fact;
-            const ESM::Faction* eFact = mWorld.getStore().factions.find(factionID);
-            fact.expelled = false;
-            fact.rank = 0;
-            fact.name = eFact->name;
-            fact.id = eFact->id;
-            mFactions.push_back(fact);
-        }
-    }
-
-    int Player::getRank(std::string factionID)
-    {
-        Player::Faction fact = getFaction(factionID);
-        return fact.rank;
-    }
-
-    void Player::setRank(std::string factionID,int rank)
-    {
-        Player::Faction fact = getFaction(factionID);
-        fact.rank = rank;
-    }
-
-    void Player::raiseRank(std::string factionID)
-    {
-        if(getFaction(factionID).name == "not found")
-        {
-            addFaction(factionID);
-            setRank(factionID,1);
-        }
-        else
-        {
-            setRank(factionID,getRank(factionID) + 1);
-        }
-    }
-
-    void Player::lowerRank(std::string factionID)
-    {
-        if(getFaction(factionID).name == "not found")
-        {
-            std::cout << "cannot lower the rank of the player: faction no found. Faction: "<< factionID << std::endl;
-        }
-        else
-        {
-            setRank(factionID,getRank(factionID) - 1);
-        }
-    }
-
-    bool Player::isExpelled(std::string factionID)
-    {
-        Player::Faction fact = getFaction(factionID);
-        return fact.expelled;
-    }
-
-    void Player::setExpelled(std::string factionID,bool expelled)
-    {
-        Player::Faction fact = getFaction(factionID);
-        fact.expelled = expelled;
+         MWWorld::Ptr ptr = getPlayer();
+         return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
     }
 }

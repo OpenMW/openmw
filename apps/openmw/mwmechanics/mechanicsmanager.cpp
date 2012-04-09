@@ -222,14 +222,14 @@ namespace MWMechanics
 
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
     : mEnvironment (environment), mUpdatePlayer (true), mClassSelected (false),
-      mRaceSelected (false)
+      mRaceSelected (false), mActors (environment)
     {
         buildPlayer();
     }
 
     void MechanicsManager::addActor (const MWWorld::Ptr& ptr)
     {
-        mActors.insert (ptr);
+        mActors.addActor (ptr);
     }
 
     void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
@@ -237,7 +237,7 @@ namespace MWMechanics
         if (ptr==mWatched)
             mWatched = MWWorld::Ptr();
 
-        mActors.erase (ptr);
+        mActors.removeActor (ptr);
     }
 
     void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
@@ -245,16 +245,7 @@ namespace MWMechanics
         if (!mWatched.isEmpty() && mWatched.getCell()==cellStore)
             mWatched = MWWorld::Ptr();
 
-        std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
-
-        while (iter!=mActors.end())
-            if (iter->getCell()==cellStore)
-            {
-                //std::cout << "Erasing an actor";
-                mActors.erase (iter++);
-            }
-            else
-                ++iter;
+        mActors.dropActors (cellStore);
     }
 
     void MechanicsManager::watchActor (const MWWorld::Ptr& ptr)
@@ -262,7 +253,8 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
-    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement)
+    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
+        float duration, bool paused)
     {
         if (!mWatched.isEmpty())
         {
@@ -345,14 +337,7 @@ namespace MWMechanics
             mEnvironment.mWindowManager->configureSkills (majorSkills, minorSkills);
         }
 
-        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end();
-            ++iter)
-        {
-            Ogre::Vector3 vector = MWWorld::Class::get (*iter).getMovementVector (*iter);
-
-            if (vector!=Ogre::Vector3::ZERO)
-                movement.push_back (std::make_pair (iter->getRefData().getHandle(), vector));
-        }
+        mActors.update (movement, duration, paused);
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)

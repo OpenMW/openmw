@@ -70,6 +70,14 @@ namespace MWClass
         return ref->base->script;
     }
 
+    int Repair::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+            ptr.get<ESM::Repair>();
+
+        return ref->base->data.value;
+    }
+
     void Repair::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Repair);
