@@ -134,8 +134,10 @@ void NpcAnimation::updateParts(){
 
 		//inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
 		
-		//MWWorld::ContainerStoreIterator robe = inv.getSlot(MWWorld::InventoryStore::Slot_Cuirass);
-		//if(robe == inv.end())
+		MWWorld::ContainerStoreIterator robe = inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
+		
+		
+		
 		//	;
 		
 		
@@ -295,6 +297,7 @@ void NpcAnimation::runAnimation(float timepassed){
 	
 	if(mStateID != inv.getStateId()){
 		std::cout << "StateID" <<inv.getStateId()<< "\n";
+		mStateID = inv.getStateId();
 		
 	}
 	
