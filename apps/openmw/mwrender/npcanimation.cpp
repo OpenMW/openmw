@@ -295,7 +295,7 @@ void NpcAnimation::runAnimation(float timepassed){
 	
 	if(mStateID != inv.getStateId()){
 		std::cout << "StateID" <<inv.getStateId()<< "\n";
-		inv.flagAsModified();
+		
 	}
 	
 	
