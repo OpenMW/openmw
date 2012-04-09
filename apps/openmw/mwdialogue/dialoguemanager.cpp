@@ -112,16 +112,15 @@ namespace
         switch (world.getGlobalVariableType (name))
         {
         case 's':
-
-            return selectCompare (comp, value, world.getGlobalVariable (name).mShort);
+            return selectCompare (comp, world.getGlobalVariable (name).mShort, value);
 
         case 'l':
 
-            return selectCompare (comp, value, world.getGlobalVariable (name).mLong);
+            return selectCompare (comp, world.getGlobalVariable (name).mLong, value);
 
         case 'f':
 
-            return selectCompare (comp, value, world.getGlobalVariable (name).mFloat);
+            return selectCompare (comp, world.getGlobalVariable (name).mFloat, value);
 
         case ' ':
 
@@ -282,7 +281,7 @@ namespace MWDialogue
             {
             case '1': // function
 
-                return true; // TODO implement functions
+                return true; // Done elsewhere.
 
             case '2': // global
 
