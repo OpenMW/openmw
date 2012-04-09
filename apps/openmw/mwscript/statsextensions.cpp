@@ -423,7 +423,7 @@ namespace MWScript
         const int opcodeSetSkillExplicit = 0x20000df;
         const int opcodeModSkill = 0x20000fa;
         const int opcodeModSkillExplicit = 0x2000115;
-        //const int opcodePCJoinFaction = 0x2000141;
+
         const int opcodePCRaiseRank = 0x2000b;
         const int opcodePCLowerRank = 0x2000c;
         const int opcodePCJoinFaction = 0x2000d;
@@ -499,7 +499,6 @@ namespace MWScript
                 extensions.registerInstruction (mod + skills[i], "l",
                     opcodeModSkill+i, opcodeModSkillExplicit+i);
             }
-            //extensions.registerInstruction("PCJoinFaction","S",opcodePCJoinFaction);
             extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
             extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank);
             extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction);
@@ -560,7 +559,6 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
             }
 
-            //interpreter.installSegment5(opcodePCJoinFaction,new OpPCJoinFaction);
             interpreter.installSegment3(opcodePCRaiseRank,new OpPCRaiseRank);
             interpreter.installSegment3(opcodePCLowerRank,new OpPCLowerRank);
             interpreter.installSegment3(opcodePCJoinFaction,new OpPCJoinFaction);
