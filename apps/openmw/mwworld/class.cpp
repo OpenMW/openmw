@@ -137,6 +137,11 @@ namespace MWWorld
         return -1;
     }
 
+    int Class::getValue (const Ptr& ptr) const
+    {
+        throw std::logic_error ("value not supported by this class");
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);

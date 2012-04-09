@@ -25,6 +25,7 @@ add_openmw_dir (mwinput
 add_openmw_dir (mwgui
     layouts text_input widgets race class birth review window_manager console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
+    map_window window_pinnable_base
     )
 
 add_openmw_dir (mwdialogue
@@ -39,7 +40,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanager openal_output mpgsnd_decoder ffmpeg_decoder
+    soundmanager openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
     )
 
 add_openmw_dir (mwworld
@@ -54,7 +55,7 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanager stat creaturestats magiceffects movement
+    mechanicsmanager stat creaturestats magiceffects movement actors
     )
 
 # Main executable

@@ -528,6 +528,13 @@ namespace MWDialogue
         mChoice = -1;
         mIsInChoice = false;
         mCompilerContext.setExtensions (&extensions);
+        mDialogueMap.clear();
+        actorKnownTopics.clear();
+        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        {
+            mDialogueMap[it->first] = it->second;
+        }
     }
 
     void DialogueManager::addTopic(std::string topic)
@@ -563,13 +570,7 @@ namespace MWDialogue
 
         mActor = actor;
 
-        mDialogueMap.clear();
         actorKnownTopics.clear();
-        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
-        {
-            mDialogueMap[it->first] = it->second;
-        }
 
         //initialise the GUI
         mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
@@ -582,6 +583,7 @@ namespace MWDialogue
         //greeting
         bool greetingFound = false;
         //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
         for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;

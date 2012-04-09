@@ -1,5 +1,6 @@
 #include "npcanimation.hpp"
 #include "../mwworld/world.hpp"
+#include "renderconst.hpp"
 
 
 
@@ -11,7 +12,7 @@ NpcAnimation::~NpcAnimation(){
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv), robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)){
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv){
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 	 Ogre::Entity* blank = 0;
@@ -75,6 +76,28 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 
     base = mRend.getScene()->createEntity(smodel);
 	
+    base->setVisibilityFlags(RV_Actors);
+    bool transparent = false;
+    for (unsigned int i=0; i<base->getNumSubEntities(); ++i)
+    {
+        Ogre::MaterialPtr mat = base->getSubEntity(i)->getMaterial();
+        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+        while (techIt.hasMoreElements())
+        {
+            Ogre::Technique* tech = techIt.getNext();
+            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+            while (passIt.hasMoreElements())
+            {
+                Ogre::Pass* pass = passIt.getNext();
+
+                if (pass->getDepthWriteEnabled() == false)
+                    transparent = true;
+            }
+        }
+    }
+    base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+	
+
     base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones
                                                //stay in the same place when we skipanim, or open a gui window
 
@@ -111,11 +134,9 @@ void NpcAnimation::updateParts(){
 
 		//inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
 		
-		robe = inv.getSlot(MWWorld::InventoryStore::Slot_Cuirass);
-		if(robe == inv.end())
-			std::cout << "No part\n";
-		else
-			std::cout << "yes part\n";
+		//MWWorld::ContainerStoreIterator robe = inv.getSlot(MWWorld::InventoryStore::Slot_Cuirass);
+		//if(robe == inv.end())
+		//	;
 		
 		
         const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
@@ -271,10 +292,12 @@ std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> NpcAnimation::insert
 
 
 void NpcAnimation::runAnimation(float timepassed){
+	
 	if(mStateID != inv.getStateId()){
-		mStateID = inv.getStateId();
-		updateParts();
+		std::cout << "StateID" <<inv.getStateId()<< "\n";
+		inv.flagAsModified();
 	}
+	
 	
    
     //1. Add the amount of time passed to time

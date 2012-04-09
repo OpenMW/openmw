@@ -7,6 +7,7 @@
 
 #include "errorhandler.hpp"
 #include "exception.hpp"
+#include "scanner.hpp"
 
 namespace Compiler
 {
@@ -81,6 +82,8 @@ namespace Compiler
     {
         if (!(mOptional && mEmpty))
             reportSeriousError ("Unexpected numeric value", loc);
+        else
+            scanner.putbackInt (value, loc);
 
         return false;
     }
@@ -94,6 +97,8 @@ namespace Compiler
     {
         if (!(mOptional && mEmpty))
             reportSeriousError ("Unexpected floating point value", loc);
+        else
+            scanner.putbackFloat (value, loc);
 
         return false;
     }
@@ -108,6 +113,8 @@ namespace Compiler
     {
         if (!(mOptional && mEmpty))
             reportSeriousError ("Unexpected name", loc);
+        else
+            scanner.putbackName (name, loc);
 
         return false;
     }
@@ -121,6 +128,8 @@ namespace Compiler
     {
         if (!(mOptional && mEmpty))
             reportSeriousError ("Unexpected keyword", loc);
+        else
+            scanner.putbackKeyword (keyword, loc);
 
         return false;
     }
@@ -134,6 +143,8 @@ namespace Compiler
     {
         if (!(mOptional && mEmpty))
             reportSeriousError ("Unexpected special token", loc);
+        else
+            scanner.putbackSpecial (code, loc);
 
         return false;
     }

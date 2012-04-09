@@ -2,6 +2,10 @@ project (Components)
 
 # source files
 
+add_component_dir (settings
+    settings
+    )
+
 add_component_dir (bsa
     bsa_archive bsa_file
     )

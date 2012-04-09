@@ -1,4 +1,5 @@
 #include "occlusionquery.hpp"
+#include "renderconst.hpp"
 
 #include <OgreRenderSystem.h>
 #include <OgreRoot.h>
@@ -6,6 +7,7 @@
 #include <OgreHardwareOcclusionQuery.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
+#include <OgreMaterialManager.h>
 
 using namespace MWRender;
 using namespace Ogre;
@@ -39,9 +41,6 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
         return;
     }
 
-    // This means that everything up to RENDER_QUEUE_MAIN can occlude the objects that are tested
-    const int queue = RENDER_QUEUE_MAIN+1;
-
     MaterialPtr matBase = MaterialManager::getSingleton().getByName("BaseWhiteNoLighting");
     MaterialPtr matQueryArea = matBase->clone("QueryTotalPixels");
     matQueryArea->setDepthWriteEnabled(false);
@@ -64,14 +63,14 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBQueryTotal->setDefaultDimensions(150, 150);
     mBBQueryTotal->createBillboard(Vector3::ZERO);
     mBBQueryTotal->setMaterialName("QueryTotalPixels");
-    mBBQueryTotal->setRenderQueueGroup(queue+1);
+    mBBQueryTotal->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBNodeReal->attachObject(mBBQueryTotal);
 
     mBBQueryVisible = mRendering->getScene()->createBillboardSet(1);
     mBBQueryVisible->setDefaultDimensions(150, 150);
     mBBQueryVisible->createBillboard(Vector3::ZERO);
     mBBQueryVisible->setMaterialName("QueryVisiblePixels");
-    mBBQueryVisible->setRenderQueueGroup(queue+1);
+    mBBQueryVisible->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBNodeReal->attachObject(mBBQueryVisible);
 
     mBBQuerySingleObject = mRendering->getScene()->createBillboardSet(1);
@@ -79,7 +78,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBQuerySingleObject->setDefaultDimensions(0.003, 0.003);
     mBBQuerySingleObject->createBillboard(Vector3::ZERO);
     mBBQuerySingleObject->setMaterialName("QueryVisiblePixels");
-    mBBQuerySingleObject->setRenderQueueGroup(queue);
+    mBBQuerySingleObject->setRenderQueueGroup(RQG_OcclusionQuery);
     mObjectNode->attachObject(mBBQuerySingleObject);
 
     mRendering->getScene()->addRenderObjectListener(this);
@@ -152,7 +151,7 @@ void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocati
      * this can happen for example if the object that is tested is outside of the view frustum
      * to prevent this, check if the queries have been performed after everything has been rendered and if not, start them manually
      */
-    if (queueGroupId == RENDER_QUEUE_SKIES_LATE)
+    if (queueGroupId == RQG_SkiesLate)
     {
         if (mWasVisible == false && mDoQuery)
         {

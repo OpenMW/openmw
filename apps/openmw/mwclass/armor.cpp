@@ -160,6 +160,14 @@ namespace MWClass
         return ESM::Skill::HeavyArmor;
     }
 
+    int Armor::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        return ref->base->data.value;
+    }
+
     void Armor::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Armor);

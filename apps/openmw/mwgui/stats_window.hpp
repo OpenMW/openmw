@@ -9,13 +9,13 @@
 #include <utility>
 
 #include "../mwmechanics/stat.hpp"
-#include "window_base.hpp"
+#include "window_pinnable_base.hpp"
 
 namespace MWGui
 {
     class WindowManager;
 
-    class StatsWindow : public WindowBase
+    class StatsWindow : public WindowPinnableBase
     {
         public:
             typedef std::pair<std::string, int> Faction;
@@ -74,6 +74,9 @@ namespace MWGui
             std::string birthSignId;
             int reputation, bounty;
             std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
+
+        protected:
+            virtual void onPinToggled();
     };
 }
 #endif

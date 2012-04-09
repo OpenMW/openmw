@@ -35,14 +35,18 @@ namespace MWSound
         Sound_Output(const Sound_Output &rhs);
 
     protected:
+        bool mInitialized;
         Ogre::Vector3 mPos;
 
         Sound_Output(SoundManager &mgr)
           : mManager(mgr)
+          , mInitialized(false)
           , mPos(0.0f, 0.0f, 0.0f)
         { }
     public:
         virtual ~Sound_Output() { }
+
+        bool isInitialized() { return mInitialized; }
 
         friend class OpenAL_Output;
         friend class SoundManager;

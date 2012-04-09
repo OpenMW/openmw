@@ -152,10 +152,30 @@ namespace MWWorld
             mRendering->skyDisable();
     }
 
+    void World::setFallbackValues(std::map<std::string,std::string> fallbackMap)
+    {
+        mFallback = fallbackMap;
+    }
+
+    std::string World::getFallback(std::string key)
+    {
+        return getFallback(key, "");
+    }
+
+    std::string World::getFallback(std::string key, std::string def)
+    {
+        std::map<std::string,std::string>::iterator it;
+        if((it = mFallback.find(key)) == mFallback.end())
+        {
+            return def;
+        }
+        return it->second;
+    }
+
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir,
-        bool newGame, Environment& environment, const std::string& encoding)
+        bool newGame, Environment& environment, const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
       mNumFacing(0)
@@ -190,6 +210,8 @@ namespace MWWorld
         }
 
         mWorldScene = new Scene(environment, this, *mRendering, mPhysics);
+
+        setFallbackValues(fallbackMap);
 
     }
 

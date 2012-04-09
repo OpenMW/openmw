@@ -48,6 +48,8 @@ namespace MWInput
                    OMW::Engine& engine);
     ~MWInputManager();
 
+    void update();
+
     void setGuiMode(MWGui::GuiMode mode);
   };
 }
