@@ -1,9 +1,13 @@
 #ifndef GAME_MWMECHANICS_SPELLS_H
 #define GAME_MWMECHANICS_SPELLS_H
 
-#include <components/esm/loadspel.hpp>
-
 #include <vector>
+#include <string>
+
+namespace ESM
+{
+    struct Spell;
+}
 
 namespace MWWorld
 {
@@ -22,29 +26,27 @@ namespace MWMechanics
     {
         public:
 
-            typedef std::vector<const ESM::Spell *> TContainer;
+            typedef std::vector<std::string> TContainer;
             typedef TContainer::const_iterator TIterator;
 
         private:
 
-            static const int sTypes = 6;
-
-            std::vector<const ESM::Spell *> mSpells[sTypes];
+            std::vector<std::string> mSpells;
 
             void addSpell (const ESM::Spell *, MagicEffects& effects) const;
 
         public:
 
-            TIterator begin (ESM::Spell::SpellType type) const;
+            TIterator begin() const;
 
-            TIterator end (ESM::Spell::SpellType type) const;
+            TIterator end() const;
 
-            void add (const std::string& spell, MWWorld::Environment& environment);
+            void add (const std::string& spell);
             /// \note Adding a spell that is already listed in *this is a no-op.
 
-            void remove (const std::string& spell, MWWorld::Environment& environment);
+            void remove (const std::string& spell);
 
-            MagicEffects getMagicEffects (MWWorld::Environment& environment) const;
+            MagicEffects getMagicEffects (const MWWorld::Environment& environment) const;
             ///< Return sum of magic effects resulting from abilities, blights, deseases and curses.
 
             void clear();

@@ -71,7 +71,7 @@ namespace MWMechanics
             for (std::vector<std::string>::const_iterator iter (race->powers.list.begin());
                 iter!=race->powers.list.end(); ++iter)
             {
-                creatureStats.mSpells.add (*iter, mEnvironment);
+                creatureStats.mSpells.add (*iter);
             }
         }
 
@@ -85,7 +85,7 @@ namespace MWMechanics
             for (std::vector<std::string>::const_iterator iter (sign->powers.list.begin());
                 iter!=sign->powers.list.end(); ++iter)
             {
-                creatureStats.mSpells.add (*iter, mEnvironment);
+                creatureStats.mSpells.add (*iter);
             }
         }
 

@@ -1,7 +1,7 @@
 
 #include "spells.hpp"
 
-#include <cassert>
+#include <components/esm/loadspel.hpp>
 
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
@@ -21,57 +21,48 @@ namespace MWMechanics
         }
     }
 
-    Spells::TIterator Spells::begin (ESM::Spell::SpellType type) const
+    Spells::TIterator Spells::begin() const
     {
-        assert (type>=0 && type<sTypes);
-        return mSpells[type].begin();
+        return mSpells.begin();
     }
 
-    Spells::TIterator Spells::end (ESM::Spell::SpellType type) const
+    Spells::TIterator Spells::end() const
     {
-        assert (type>=0 && type<sTypes);
-        return mSpells[type].end();
+        return mSpells.end();
     }
 
-    void Spells::add (const std::string& spellId, MWWorld::Environment& environment)
+    void Spells::add (const std::string& spellId)
     {
-        const ESM::Spell *spell = environment.mWorld->getStore().spells.find (spellId);
-
-        int type = spell->data.type;
-
-        assert (type>=0 && type<sTypes);
-
-        if (std::find (mSpells[type].begin(), mSpells[type].end(), spell)!=mSpells[type].end())
-            mSpells[type].push_back (spell);
+        if (std::find (mSpells.begin(), mSpells.end(), spellId)!=mSpells.end())
+            mSpells.push_back (spellId);
     }
 
-    void Spells::remove (const std::string& spellId, MWWorld::Environment& environment)
+    void Spells::remove (const std::string& spellId)
     {
-        const ESM::Spell *spell = environment.mWorld->getStore().spells.find (spellId);
+        TContainer::iterator iter = std::find (mSpells.begin(), mSpells.end(), spellId);
 
-        int type = spell->data.type;
-
-        TContainer::iterator iter = std::find (mSpells[type].begin(), mSpells[type].end(), spell);
-
-        if (iter!=mSpells[type].end())
-            mSpells[type].erase (iter);
+        if (iter!=mSpells.end())
+            mSpells.erase (iter);
     }
 
-    MagicEffects Spells::getMagicEffects (MWWorld::Environment& environment) const
+    MagicEffects Spells::getMagicEffects (const MWWorld::Environment& environment) const
     {
         MagicEffects effects;
 
-        for (int i=ESM::Spell::ST_Ability; i<=ESM::Spell::ST_Curse; ++i)
-            for (TIterator iter (begin (static_cast<ESM::Spell::SpellType> (i)));
-                iter!=end(static_cast<ESM::Spell::SpellType> (i)); ++iter)
-                addSpell (*iter, effects);
+        for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
+        {
+            const ESM::Spell *spell = environment.mWorld->getStore().spells.find (*iter);
+
+            if (spell->data.type==ESM::Spell::ST_Ability || spell->data.type==ESM::Spell::ST_Blight ||
+                spell->data.type==ESM::Spell::ST_Disease || spell->data.type==ESM::Spell::ST_Curse)
+                addSpell (spell, effects);
+        }
 
         return effects;
     }
 
     void Spells::clear()
     {
-        for (int i=0; i<sTypes; ++i)
-            mSpells[i].clear();
+        mSpells.clear();
     }
 }
