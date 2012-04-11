@@ -63,7 +63,7 @@ namespace MWClass
 
             for (std::vector<std::string>::const_iterator iter (ref->base->spells.list.begin());
                 iter!=ref->base->spells.list.end(); ++iter)
-                data->mNpcStats.mKnownSpells.insert (*iter);
+                data->mCreatureStats.mSpells.add (*iter);
 
             // creature stats
             data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
