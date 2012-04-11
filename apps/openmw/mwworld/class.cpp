@@ -26,7 +26,9 @@ namespace MWWorld
     {
 
     }
-    void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const{
+
+    void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    {
 
     }
 
@@ -135,6 +137,11 @@ namespace MWWorld
     int Class::getEquipmentSkill (const Ptr& ptr, const Environment& environment) const
     {
         return -1;
+    }
+
+    int Class::getValue (const Ptr& ptr) const
+    {
+        throw std::logic_error ("value not supported by this class");
     }
 
     const Class& Class::get (const std::string& key)

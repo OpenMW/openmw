@@ -4,6 +4,8 @@
 #include <iterator>
 #include <algorithm>
 
+#include "../mwmechanics/npcstats.hpp"
+
 #include "class.hpp"
 
 #include <iostream> /// \todo remove after rendering is implemented
@@ -94,27 +96,64 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return mSlots[slot];
 }
 
-void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
+void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats,
+    const Environment& environment)
 {
     TSlots slots;
     initSlots (slots);
 
     for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
     {
+        Ptr test = *iter;
+        int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test, environment);
+
         std::pair<std::vector<int>, bool> itemsSlots =
             MWWorld::Class::get (*iter).getEquipmentSlots (*iter);
 
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {
-            /// \todo comapre item with item in slot
-            if (slots.at (*iter2)==end())
-            {
-                /// \todo unstack, if reqquired (itemsSlots.second)
+            bool use = false;
 
-                slots[*iter2] = iter;
-                break;
+            if (slots.at (*iter2)==end())
+                use = true; // slot was empty before -> skill all further checks
+            else
+            {
+                Ptr old = *slots.at (*iter2);
+
+                if (!use)
+                {
+                    // check skill
+                    int oldSkill =
+                        MWWorld::Class::get (old).getEquipmentSkill (old, environment);
+
+                    if (testSkill!=-1 || oldSkill!=-1 || testSkill!=oldSkill)
+                    {
+                        if (stats.mSkill[oldSkill].getModified()>stats.mSkill[testSkill].getModified())
+                            continue; // rejected, because old item better matched the NPC's skills.
+
+                        if (stats.mSkill[oldSkill].getModified()<stats.mSkill[testSkill].getModified())
+                            use = true;
+                    }
+                }
+
+                if (!use)
+                {
+                    // check value
+                    if (MWWorld::Class::get (old).getValue (old)>=
+                        MWWorld::Class::get (test).getValue (test))
+                    {
+                        continue;
+                    }
+
+                    use = true;
+                }
             }
+
+            /// \todo unstack, if reqquired (itemsSlots.second)
+
+            slots[*iter2] = iter;
+            break;
         }
     }
 

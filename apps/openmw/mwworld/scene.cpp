@@ -204,7 +204,6 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
-        mRendering.waterAdded(mCurrentCell);
     }
 
     //We need the ogre renderer and a scene node.
@@ -257,8 +256,6 @@ namespace MWWorld
         mWorld->adjustSky();
 
         mCellChanged = true;
-
-        mRendering.waterAdded(cell);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)

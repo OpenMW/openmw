@@ -4,6 +4,7 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwgui/window_manager.hpp"
+#include "renderconst.hpp"
 
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
@@ -223,7 +224,8 @@ void LocalMap::render(const float x, const float y,
             vp->setOverlaysEnabled(false);
             vp->setShadowsEnabled(false);
             vp->setBackgroundColour(ColourValue(0, 0, 0));
-            //vp->setVisibilityMask( ... );
+            vp->setVisibilityMask(RV_Map);
+            vp->setMaterialScheme("Map");
 
             rtt->update();
 

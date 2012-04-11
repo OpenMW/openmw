@@ -361,6 +361,7 @@ void OMW::Engine::go()
 
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
+    addResourcesDirectory(mResDir / "gbuffer");
 
     // Create the window
     mOgre->createWindow("OpenMW");

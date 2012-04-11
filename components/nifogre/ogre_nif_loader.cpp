@@ -302,6 +302,8 @@ void NIFLoader::createMaterial(const String &name,
 
     if (Settings::Manager::getBool("shaders", "Objects"))
     {
+        bool mrt = Settings::Manager::getBool("shader", "Water");
+
         // Create shader for the material
         // vertex
         HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
@@ -324,9 +326,8 @@ void NIFLoader::createMaterial(const String &name,
             "	out float4 oPosition : POSITION,	\n"
             "   out float4 oPositionObjSpace : TEXCOORD1, \n"
             "   out float4 oNormal : TEXCOORD2, \n"
-            "   out float oFogValue : TEXCOORD3, \n"
+            "   out float oDepth : TEXCOORD3, \n"
             "   out float4 oVertexColour : TEXCOORD4, \n"
-            "   uniform float4 fogParams, \n"
             "	uniform float4x4 worldViewProj	\n"
             ")	\n"
             "{	\n"
@@ -334,13 +335,12 @@ void NIFLoader::createMaterial(const String &name,
             "   oUV = uv; \n"
             "   oNormal = normal; \n"
             "	oPosition = mul( worldViewProj, position );  \n"
-            "   oFogValue = saturate((oPosition.z - fogParams.y) * fogParams.w); \n"
+            "   oDepth = oPosition.z; \n"
             "   oPositionObjSpace = position; \n"
             "}";
             vertex->setSource(outStream.str());
             vertex->load();
             vertex->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-            vertex->getDefaultParameters()->setNamedAutoConstant("fogParams", GpuProgramParameters::ACT_FOG_PARAMS);
         }
         else
             vertex = mgr.getByName("main_vp");
@@ -370,9 +370,14 @@ void NIFLoader::createMaterial(const String &name,
             "   uniform sampler2D texture : TEXUNIT0, \n"
             "   float4 positionObjSpace : TEXCOORD1, \n"
             "   float4 normal : TEXCOORD2, \n"
-            "   float fogValue : TEXCOORD3, \n"
+            "   float iDepth : TEXCOORD3, \n"
             "   float4 vertexColour : TEXCOORD4, \n"
-            "   uniform float4 fogColour, \n";
+            "   uniform float4 fogColour, \n"
+            "   uniform float4 fogParams, \n";
+
+            if (mrt) outStream <<
+                "   out float4 oColor1 : COLOR1, \n"
+                "   uniform float far, \n";
 
             for (int i=0; i<num_lights; ++i)
             {
@@ -408,8 +413,14 @@ void NIFLoader::createMaterial(const String &name,
             
             outStream <<
             "   float3 lightingFinal = lightColour.xyz * diffuse.xyz * vertexColour.xyz + ambient.xyz * lightAmbient.xyz + emissive.xyz; \n"
+            "   float fogValue = saturate((iDepth - fogParams.y) * fogParams.w); \n"
             "   oColor.xyz = lerp(lightingFinal * tex.xyz, fogColour, fogValue); \n"
-            "   oColor.a = tex.a * diffuse.a * vertexColour.a; \n"
+            "   oColor.a = tex.a * diffuse.a * vertexColour.a; \n";
+
+            if (mrt) outStream <<
+                "   oColor1 = float4(iDepth / far, 0, 0, (oColor.a == 1)); \n"; // only write to MRT if alpha is 1
+
+            outStream <<
             "}";
             fragment->setSource(outStream.str());
             fragment->load();
@@ -425,6 +436,9 @@ void NIFLoader::createMaterial(const String &name,
             fragment->getDefaultParameters()->setNamedAutoConstant("ambient", GpuProgramParameters::ACT_SURFACE_AMBIENT_COLOUR);
             fragment->getDefaultParameters()->setNamedAutoConstant("lightAmbient", GpuProgramParameters::ACT_AMBIENT_LIGHT_COLOUR);
             fragment->getDefaultParameters()->setNamedAutoConstant("fogColour", GpuProgramParameters::ACT_FOG_COLOUR);
+            fragment->getDefaultParameters()->setNamedAutoConstant("fogParams", GpuProgramParameters::ACT_FOG_PARAMS);
+            if (mrt)
+                fragment->getDefaultParameters()->setNamedAutoConstant("far", GpuProgramParameters::ACT_FAR_CLIP_DISTANCE);
         }
         else
             fragment = mgr.getByName("main_fp");

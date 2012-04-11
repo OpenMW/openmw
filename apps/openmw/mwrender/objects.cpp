@@ -4,6 +4,7 @@
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 #include <components/settings/settings.hpp>
+#include "renderconst.hpp"
 
 using namespace MWRender;
 
@@ -112,17 +113,49 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     bounds.scale(insert->getScale());
     mBounds[ptr.getCell()].merge(bounds);
 
+    bool transparent = false;
+    for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+    {
+        Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
+        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+        while (techIt.hasMoreElements())
+        {
+            Ogre::Technique* tech = techIt.getNext();
+            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+            while (passIt.hasMoreElements())
+            {
+                Ogre::Pass* pass = passIt.getNext();
+
+                if (pass->getDepthWriteEnabled() == false)
+                    transparent = true;
+            }
+        }
+    }
+
     if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects"))
     {
         insert->attachObject(ent);
 
-        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0); /// \todo config value
+        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+        ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
+        ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
     }
     else
     {
         Ogre::StaticGeometry* sg = 0;
 
-        if (small)
+/*        if (transparent)
+        {
+            if( mStaticGeometryAlpha.find(ptr.getCell()) == mStaticGeometryAlpha.end())
+            {
+                uniqueID = uniqueID +1;
+                sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+                mStaticGeometryAlpha[ptr.getCell()] = sg;
+            }
+            else
+                sg = mStaticGeometryAlpha[ptr.getCell()];
+        }
+        else*/ if (small)
         {
             if( mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
             {
@@ -130,7 +163,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
                 sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
                 mStaticGeometrySmall[ptr.getCell()] = sg;
 
-                sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance")); /// \todo config value
+                sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance"));
             }
             else
                 sg = mStaticGeometrySmall[ptr.getCell()];
@@ -157,6 +190,10 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
 
         sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
+
+        sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
+
+        sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
         mRenderer.getScene()->destroyEntity(ent);
     }
@@ -251,6 +288,13 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
         mRenderer.getScene()->destroyStaticGeometry (sg);
         sg = 0;
     }
+    /*if(mStaticGeometryAlpha.find(store) != mStaticGeometryAlpha.end())
+    {
+        Ogre::StaticGeometry* sg = mStaticGeometryAlpha[store];
+        mStaticGeometryAlpha.erase(store);
+        mRenderer.getScene()->destroyStaticGeometry (sg);
+        sg = 0;
+    }*/
 
     if(mBounds.find(store) != mBounds.end())
         mBounds.erase(store);
@@ -268,6 +312,11 @@ void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell)
         Ogre::StaticGeometry* sg = mStaticGeometrySmall[&cell];
         sg->build();
     }
+    /*if(mStaticGeometryAlpha.find(&cell) != mStaticGeometryAlpha.end())
+    {
+        Ogre::StaticGeometry* sg = mStaticGeometryAlpha[&cell];
+        sg->build();
+    }*/
 }
 
 Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)

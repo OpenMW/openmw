@@ -10,6 +10,8 @@ namespace MWMechanics
 
 namespace MWWorld
 {
+    class Environment;
+
     ///< \brief Variant of the ContainerStore for NPCs
     class InventoryStore : public ContainerStore
     {
@@ -62,7 +64,7 @@ namespace MWWorld
 
             ContainerStoreIterator getSlot (int slot);
 
-            void autoEquip (const MWMechanics::NpcStats& stats);
+            void autoEquip (const MWMechanics::NpcStats& stats, const Environment& environment);
             ///< Auto equip items according to stats and item value.
     };
 }
