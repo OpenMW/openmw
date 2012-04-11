@@ -11,3 +11,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/water/water.cg "${OpenMW_BINARY_DIR}/
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gbuffer/gbuffer.cg "${OpenMW_BINARY_DIR}/resources/gbuffer/gbuffer.cg" COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gbuffer/gbuffer.material "${OpenMW_BINARY_DIR}/resources/gbuffer/gbuffer.material" COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gbuffer/gbuffer.compositor "${OpenMW_BINARY_DIR}/resources/gbuffer/gbuffer.compositor" COPYONLY)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/shadows/depthshadowcaster.material "${OpenMW_BINARY_DIR}/resources/shadows/depthshadowcaster.material" COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/shadows/depthshadowcaster.cg "${OpenMW_BINARY_DIR}/resources/shadows/depthshadowcaster.cg" COPYONLY)

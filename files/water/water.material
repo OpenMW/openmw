@@ -92,7 +92,7 @@ material Water
     }
     technique
     {
-        scheme Map
+        scheme Fallback
         pass
         {
             cull_hardware none

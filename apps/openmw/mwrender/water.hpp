@@ -39,6 +39,8 @@ namespace MWRender {
         void createMaterial();
         Ogre::MaterialPtr mMaterial;
 
+        Ogre::Camera* mReflectionCamera;
+
         Ogre::RenderTarget* mReflectionTarget;
 
         bool mUnderwaterEffect;

@@ -102,6 +102,7 @@ void BillboardObject::init(const String& textureName,
     mNode->setPosition(finalPosition);
     mNode->attachObject(mBBSet);
     mBBSet->createBillboard(0,0,0);
+    mBBSet->setCastShadows(false);
 
     mMaterial = MaterialManager::getSingleton().create("BillboardMaterial"+StringConverter::toString(bodyCount), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     mMaterial->removeAllTechniques();
@@ -450,6 +451,7 @@ void SkyManager::create()
     Entity* night1_ent = mSceneMgr->createEntity("meshes\\sky_night_01.nif");
     night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
     night1_ent->setVisibilityFlags(RV_Sky);
+    night1_ent->setCastShadows(false);
 
     mAtmosphereNight = mRootNode->createChildSceneNode();
     mAtmosphereNight->attachObject(night1_ent);
@@ -525,6 +527,7 @@ void SkyManager::create()
     // Atmosphere (day)
     mesh = NifOgre::NIFLoader::load("meshes\\sky_atmosphere.nif");
     Entity* atmosphere_ent = mSceneMgr->createEntity("meshes\\sky_atmosphere.nif");
+    atmosphere_ent->setCastShadows(false);
 
     ModVertexAlpha(atmosphere_ent, 0);
 
@@ -596,6 +599,7 @@ void SkyManager::create()
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
     clouds_node->attachObject(clouds_ent);
     mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
+    clouds_ent->setCastShadows(false);
 
     // Clouds vertex shader
     HighLevelGpuProgramPtr vshader2 = mgr.createProgram("Clouds_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -677,6 +681,8 @@ void SkyManager::create()
     mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     mCloudMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
+    mCloudMaterial->getTechnique(0)->getPass(0)->removeAllTextureUnitStates();
+    mCloudMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("textures\\tx_sky_cloudy.dds");
     mCloudMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("");
 
     mCreated = true;
@@ -766,12 +772,14 @@ void SkyManager::disable()
 
 void SkyManager::setMoonColour (bool red)
 {
+    if (!mCreated) return;
     mSecunda->setColour( red ? ColourValue(1.0, 0.0784, 0.0784)
                             : ColourValue(1.0, 1.0, 1.0));
 }
 
 void SkyManager::setCloudsOpacity(float opacity)
 {
+    if (!mCreated) return;
     mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("opacity", Real(opacity));
 }
 
@@ -927,11 +935,13 @@ void SkyManager::setThunder(const float factor)
 
 void SkyManager::setMasserFade(const float fade)
 {
+    if (!mCreated) return;
     mMasser->setVisibility(fade);
 }
 
 void SkyManager::setSecundaFade(const float fade)
 {
+    if (!mCreated) return;
     mSecunda->setVisibility(fade);
 }
 
