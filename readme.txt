@@ -95,6 +95,7 @@ Allowed options:
 CREDITS
 
 Current Developers:
+Aleksandar Jovanov
 Alexander “Ace” Olofsson
 athile
 BrotherBrick
