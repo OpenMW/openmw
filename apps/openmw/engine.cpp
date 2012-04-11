@@ -21,6 +21,7 @@
 #include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
+#include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
@@ -348,6 +349,13 @@ void OMW::Engine::go()
         settings.loadUser(globaldefault);
 
     mFpsLevel = settings.getInt("fps", "HUD");
+
+    // load nif overrides
+    NifOverrides::Overrides nifOverrides;
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg"))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg");
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
 
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),

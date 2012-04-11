@@ -26,6 +26,7 @@
 #include "ogre_nif_loader.hpp"
 
 #include <components/settings/settings.hpp>
+#include <components/nifoverrides/nifoverrides.hpp>
 
 typedef unsigned char ubyte;
 
@@ -282,11 +283,21 @@ void NIFLoader::createMaterial(const String &name,
             // other values. 237 basically means normal transparencly.
             if (alphaFlags == 237)
             {
-                // Enable transparency
-                pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+                NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
+                if (result.first)
+                {
+                    pass->setAlphaRejectFunction(CMPF_GREATER_EQUAL);
+                    pass->setAlphaRejectValue(result.second);
+                }
+                else
+                {
+                    // Enable transparency
+                    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
-                //pass->setDepthCheckEnabled(false);
-                pass->setDepthWriteEnabled(false);
+                    //pass->setDepthCheckEnabled(false);
+                    pass->setDepthWriteEnabled(false);
+                    std::cout << "alpha 237; material: " << name << " texName: " << texName << std::endl;
+                }
             }
             else
                 warn("Unhandled alpha setting for texture " + texName);
