@@ -27,7 +27,7 @@ void Class::load(ESMReader &esm)
 }
 void Class::save(ESMWriter &esm)
 {
-    esm.writeHNString("FNAM", name);
+    esm.writeHNCString("FNAM", name);
     esm.writeHNT("CLDT", data, 60);
     esm.writeHNOString("DESC", description);
 }

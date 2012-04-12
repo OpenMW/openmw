@@ -12,7 +12,7 @@ void Race::load(ESMReader &esm)
 }
 void Race::save(ESMWriter &esm)
 {
-    esm.writeHNString("FNAM", name);
+    esm.writeHNCString("FNAM", name);
     esm.writeHNT("RADT", data, 140);
     powers.save(esm);
     esm.writeHNOString("DESC", description);

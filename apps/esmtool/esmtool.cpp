@@ -19,13 +19,13 @@ namespace bpo = boost::program_options;
 struct ESMData
 {
     std::string author;
-    std::string description;
+    string description;
     int version;
     int type;
     ESMReader::MasterList masters;
 
-    std::list<Record*> records;
-    std::map<Record*, std::list<CellRef> > cellRefs;
+    list<Record*> records;
+    map<Record*, list<CellRef> > cellRefs;
 };
 
 // Based on the legacy struct
@@ -35,17 +35,17 @@ struct Arguments
     unsigned int quiet_given;
     unsigned int loadcells_given;
 
-    std::string mode;
-    std::string encoding;
-    std::string filename;
-    std::string outname;
+    string mode;
+    string encoding;
+    string filename;
+    string outname;
   
     ESMData data;
 };
 
 bool parseOptions (int argc, char** argv, Arguments &info)
 {
-    bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed modes:\n  dump\t Dumps all readable data from the input file\n  clone\t Clones the input file to the output file.\n\nAllowed options");
+    bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed modes:\n  dump\t Dumps all readable data from the input file.\n  clone\t Clones the input file to the output file.\n  comp\t Compares the given files.\n\nAllowed options");
 
     desc.add_options()
         ("help,h", "print help message.")
@@ -54,7 +54,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("quiet,q", "Supress all record information. Useful for speed tests.")
         ("loadcells,C", "Browse through contents of all cells.")
 
-        ( "encoding,e", bpo::value<std::string>(&(info.encoding))->
+        ( "encoding,e", bpo::value<string>(&(info.encoding))->
           default_value("win1252"),
           "Character encoding used in ESMTool:\n"
           "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
@@ -62,14 +62,14 @@ bool parseOptions (int argc, char** argv, Arguments &info)
           "\n\twin1252 - Western European (Latin) alphabet, used by default")
         ;
 
-    std::string finalText = "\nIf no option is given, the default action is to parse all records in the archive\nand display diagnostic information.";
+    string finalText = "\nIf no option is given, the default action is to parse all records in the archive\nand display diagnostic information.";
 
     // input-file is hidden and used as a positional argument
     bpo::options_description hidden("Hidden Options");
 
     hidden.add_options()
-        ( "mode,m", bpo::value<std::string>(), "esmtool mode")
-        ( "input-file,i", bpo::value< vector<std::string> >(), "input file")
+        ( "mode,m", bpo::value<string>(), "esmtool mode")
+        ( "input-file,i", bpo::value< vector<string> >(), "input file")
         ;
 
     bpo::positional_options_description p;
@@ -87,70 +87,70 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
     if (variables.count ("help"))
     {
-        std::cout << desc << finalText << std::endl;
+        cout << desc << finalText << endl;
         return false;
     }
     if (variables.count ("version"))
     {
-        std::cout << "ESMTool version " << ESMTOOL_VERSION << std::endl;
+        cout << "ESMTool version " << ESMTOOL_VERSION << endl;
         return false;
     }
     if (!variables.count("mode"))
     {
-        std::cout << "No mode specified!" << std::endl << std::endl
-                  << desc << finalText << std::endl;
+        cout << "No mode specified!" << endl << endl
+                  << desc << finalText << endl;
         return false;
     }
 
-    info.mode = variables["mode"].as<std::string>();
-    if (!(info.mode == "dump" || info.mode == "clone"))
+    info.mode = variables["mode"].as<string>();
+    if (!(info.mode == "dump" || info.mode == "clone" || info.mode == "comp"))
     {
-        std::cout << std::endl << "ERROR: invalid mode \"" << info.mode << "\"" << std::endl << std::endl
-                  << desc << finalText << std::endl;
+        cout << endl << "ERROR: invalid mode \"" << info.mode << "\"" << endl << endl
+                  << desc << finalText << endl;
         return false;
     }
 
     if ( !variables.count("input-file") )
     {
-        std::cout << "\nERROR: missing ES file\n\n";
-        std::cout << desc << finalText << std::endl;
+        cout << "\nERROR: missing ES file\n\n";
+        cout << desc << finalText << endl;
         return false;
     }
 
     // handling gracefully the user adding multiple files
-/*    if (variables["input-file"].as< vector<std::string> >().size() > 1)
+/*    if (variables["input-file"].as< vector<string> >().size() > 1)
       {
-      std::cout << "\nERROR: more than one ES file specified\n\n";
-      std::cout << desc << finalText << std::endl;
+      cout << "\nERROR: more than one ES file specified\n\n";
+      cout << desc << finalText << endl;
       return false;
       }*/
 
-    info.filename = variables["input-file"].as< vector<std::string> >()[0];
-    if (variables["input-file"].as< vector<std::string> >().size() > 1)
-        info.outname = variables["input-file"].as< vector<std::string> >()[1];
+    info.filename = variables["input-file"].as< vector<string> >()[0];
+    if (variables["input-file"].as< vector<string> >().size() > 1)
+        info.outname = variables["input-file"].as< vector<string> >()[1];
 
     info.raw_given = variables.count ("raw");
     info.quiet_given = variables.count ("quiet");
     info.loadcells_given = variables.count ("loadcells");
 
     // Font encoding settings
-    info.encoding = variables["encoding"].as<std::string>();
+    info.encoding = variables["encoding"].as<string>();
     if (info.encoding == "win1250")
     {
-        std::cout << "Using Central and Eastern European font encoding." << std::endl;
+        cout << "Using Central and Eastern European font encoding." << endl;
     }
     else if (info.encoding == "win1251")
     {
-        std::cout << "Using Cyrillic font encoding." << std::endl;
+        cout << "Using Cyrillic font encoding." << endl;
     }
     else
     {
         if(info.encoding != "win1252")
         {
-            std::cout << info.encoding << " is not a valid encoding option." << std::endl;
+            cout << info.encoding << " is not a valid encoding option." << endl;
             info.encoding = "win1252";
         }
-        std::cout << "Using default (English) font encoding." << std::endl;
+        cout << "Using default (English) font encoding." << endl;
     }
 
     return true;
@@ -161,6 +161,7 @@ void loadCell(Cell &cell, ESMReader &esm, Arguments& info);
 
 int load(Arguments& info);
 int clone(Arguments& info);
+int comp(Arguments& info);
 
 int main(int argc, char**argv)
 {
@@ -172,6 +173,8 @@ int main(int argc, char**argv)
         return load(info);
     else if (info.mode == "clone")
         return clone(info);
+    else if (info.mode == "comp")
+        return comp(info);
     else
     {
         cout << "Invalid or no mode specified, dying horribly. Have a nice day." << endl;
@@ -231,9 +234,9 @@ int load(Arguments& info)
     esm.setEncoding(info.encoding);
 
     string filename = info.filename;
-    cout << "\nFile: " << filename << endl;
+    cout << "Loading file: " << filename << endl;
 
-    std::list<int> skipped;
+    list<int> skipped;
 
     try {
 
@@ -734,7 +737,7 @@ int load(Arguments& info)
     {
         cout << "\nERROR:\n\n  " << e.what() << endl;
 
-        for (std::list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end();)
+        for (list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end();)
         {
             delete *it;
             info.data.records.erase(it++);
@@ -773,9 +776,9 @@ int clone(Arguments& info)
 
     cout << "Loaded " << recordCount << " records:" << endl << endl;
 
-    std::map<std::string, int> records;
+    map<string, int> records;
 
-    for (std::list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end(); ++it)
+    for (list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end(); ++it)
     {
         Record* rec = *it;
         NAME n;
@@ -784,9 +787,9 @@ int clone(Arguments& info)
     }
 
     int i = 0;
-    for (std::map<std::string,int>::iterator it = records.begin(); it != records.end(); ++it)
+    for (map<string,int>::iterator it = records.begin(); it != records.end(); ++it)
     {
-        std::string n = it->first;
+        string n = it->first;
         float amount = it->second;
         cout << setw(digitCount) << amount << " " << n << "  ";
 
@@ -808,11 +811,11 @@ int clone(Arguments& info)
     for (ESMReader::MasterList::iterator it = info.data.masters.begin(); it != info.data.masters.end(); ++it)
         esm.addMaster(it->name, it->size);
 
-    std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
+    fstream save(info.outname.c_str(), fstream::out | fstream::binary);
     esm.save(save);
 
     int saved = 0;
-    for (std::list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end() && i > 0; ++it)
+    for (list<Record*>::iterator it = info.data.records.begin(); it != info.data.records.end() && i > 0; ++it)
     {
         Record* rec = *it;
         
@@ -820,14 +823,18 @@ int clone(Arguments& info)
         n.val = rec->getName();
 
         esm.startRecord(n.toString(), 0);
-        std::string id = rec->getId();
-        esm.writeHNOString("NAME", id);
+        string id = rec->getId();
+
+        if (n.val == REC_GLOB || n.val == REC_CLAS || n.val == REC_FACT || n.val == REC_RACE)
+            esm.writeHNCString("NAME", id);
+        else
+            esm.writeHNOString("NAME", id);
         rec->save(esm);
 
         if (n.val == REC_CELL && !info.data.cellRefs[rec].empty())
         {
-            std::list<CellRef>& refs = info.data.cellRefs[rec];
-            for (std::list<CellRef>::iterator it = refs.begin(); it != refs.end(); ++it)
+            list<CellRef>& refs = info.data.cellRefs[rec];
+            for (list<CellRef>::iterator it = refs.begin(); it != refs.end(); ++it)
             {
                 it->save(esm);
             }
@@ -847,6 +854,53 @@ int clone(Arguments& info)
 
     esm.close();
     save.close();
+
+    return 0;
+}
+
+int comp(Arguments& info)
+{
+    if (info.filename.empty() || info.outname.empty())
+    {
+        cout << "You need to specify two input files" << endl;
+        return 1;
+    }
+
+    Arguments fileOne;
+    Arguments fileTwo;
+
+    fileOne.raw_given = 0;
+    fileTwo.raw_given = 0;
+
+    fileOne.mode = "clone";
+    fileTwo.mode = "clone";
+
+    fileOne.encoding = info.encoding;
+    fileTwo.encoding = info.encoding;
+    
+    fileOne.filename = info.filename;
+    fileTwo.filename = info.outname;
+
+    if (load(fileOne) != 0)
+    {
+        cout << "Failed to load " << info.filename << ", aborting comparison." << endl;
+        return 1;
+    }
+
+    if (load(fileTwo) != 0)
+    {
+        cout << "Failed to load " << info.outname << ", aborting comparison." << endl;
+        return 1;
+    }
+
+    if (fileOne.data.records.size() != fileTwo.data.records.size())
+    {
+        cout << "Not equal, different amount of records." << endl;
+        return 1;
+    }
+    
+    
+    
 
     return 0;
 }

@@ -53,12 +53,14 @@ void ESMWriter::save(const std::string& file)
 
 void ESMWriter::save(std::ostream& file)
 {
+    m_recordCount = 0;
     m_stream = &file;
 
     startRecord("TES3", 0);
 
     m_header.records = 0;
     writeHNT("HEDR", m_header, 300);
+    m_headerPos = m_stream->tellp() - (std::streampos)4;
 
     for (std::list<MasterData>::iterator it = m_masters.begin(); it != m_masters.end(); ++it)
     {
@@ -71,6 +73,10 @@ void ESMWriter::save(std::ostream& file)
 
 void ESMWriter::close()
 {
+    std::cout << "Writing amount of saved records (" << m_recordCount - 1 << ")" << std::endl;
+    m_stream->seekp(m_headerPos);
+    writeT<int>(m_recordCount-1);
+    m_stream->seekp(0, std::ios::end);
     m_stream->flush();
 
     if (!m_records.empty())
@@ -79,6 +85,8 @@ void ESMWriter::close()
 
 void ESMWriter::startRecord(const std::string& name, uint32_t flags)
 {
+    m_recordCount++;
+    
     writeName(name);
     RecordData rec;
     rec.name = name;
@@ -125,6 +133,21 @@ void ESMWriter::writeHNString(const std::string& name, const std::string& data)
 {
     startSubRecord(name);
     writeHString(data);
+    endRecord(name);
+}
+
+    void ESMWriter::writeHNString(const std::string& name, const std::string& data, int size)
+{
+    assert(data.size() <= size);
+    startSubRecord(name);
+    writeHString(data);
+
+    if (data.size() < size)
+    {
+        for (int i = data.size(); i < size; ++i)
+            write("\0",1);
+    }
+
     endRecord(name);
 }
 

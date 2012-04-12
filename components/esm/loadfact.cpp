@@ -29,11 +29,14 @@ void Faction::load(ESMReader &esm)
 }
 void Faction::save(ESMWriter &esm)
 {
-    esm.writeHNString("FNAM", name);
+    esm.writeHNCString("FNAM", name);
     
     for (int i = 0; i < 10; i++)
     {
-        esm.writeHNString("RNAM", ranks[i]);
+        if (ranks[i].empty())
+            break;
+
+        esm.writeHNString("RNAM", ranks[i], 32);
     }
 
     esm.writeHNT("FADT", data, 240);

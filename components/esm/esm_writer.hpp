@@ -34,6 +34,15 @@ public:
     void close();
 
     void writeHNString(const std::string& name, const std::string& data);
+    void writeHNString(const std::string& name, const std::string& data, int size);
+    void writeHNCString(const std::string& name, const std::string& data)
+    {
+        startSubRecord(name);
+        writeHString(data);
+        if (data.size() > 0 && data[data.size()-1] != '\0')
+            write("\0", 1);
+        endRecord(name);
+    }
     void writeHNOString(const std::string& name, const std::string& data)
     {
         if (!data.empty())
@@ -55,20 +64,6 @@ public:
         writeT(data, size);
         endRecord(name);
     }
-
-    /*template<typename T>
-    void writeHT(const T& data)
-    {
-        writeT((unsigned int)sizeof(T));
-        writeT(data);
-    }
-
-    template<typename T>
-    void writeHT(const T& data, int size)
-    {
-        assert(sizeof(T) == size);
-        writeHT(data);
-        }*/
 
     template<typename T>
     void writeT(const T& data)
@@ -93,6 +88,8 @@ private:
     std::list<MasterData> m_masters;
     std::list<RecordData> m_records;
     std::ostream* m_stream;
+    std::streampos m_headerPos;
+    int m_recordCount;
 
     HEDRstruct m_header;
     SaveData m_saveData;
