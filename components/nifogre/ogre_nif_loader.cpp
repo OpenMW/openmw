@@ -296,7 +296,7 @@ void NIFLoader::createMaterial(const String &name,
 
                     //pass->setDepthCheckEnabled(false);
                     pass->setDepthWriteEnabled(false);
-                    std::cout << "alpha 237; material: " << name << " texName: " << texName << std::endl;
+                    //std::cout << "alpha 237; material: " << name << " texName: " << texName << std::endl;
                 }
             }
             else
