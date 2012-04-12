@@ -307,7 +307,7 @@ namespace MWScript
                         MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
                         if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
                         {
-                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 1;
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 0;
                         }
                         else
                         {
@@ -340,7 +340,7 @@ namespace MWScript
                         MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
                         if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
                         {
-                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 1;
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 0;
                         }
                         else
                         {

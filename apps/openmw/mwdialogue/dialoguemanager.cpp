@@ -488,7 +488,7 @@ namespace MWDialogue
             if(it!=stats.mFactionRank.end())
             {
                 //check rank
-                if(it->second < info.data.rank) return false;
+                if(it->second < (int)info.data.rank) return false;
             }
             else
             {
@@ -505,7 +505,7 @@ namespace MWDialogue
             if(it!=stats.mFactionRank.end())
             {
                 //check rank
-                if(it->second < info.data.rank) return false;
+                if(it->second < (int)info.data.PCrank) return false;
             }
             else
             {
