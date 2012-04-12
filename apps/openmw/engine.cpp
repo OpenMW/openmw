@@ -28,6 +28,7 @@
 #include "mwinput/inputmanager.hpp"
 
 #include "mwgui/window_manager.hpp"
+#include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanager.hpp"
 #include "mwscript/compilercontext.hpp"
@@ -367,6 +368,9 @@ void OMW::Engine::go()
     mOgre->createWindow("OpenMW");
 
     loadBSA();
+
+    // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
+    MWGui::CursorReplace replacer;
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,

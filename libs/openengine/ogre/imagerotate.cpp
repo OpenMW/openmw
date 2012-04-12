@@ -49,7 +49,7 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
     unsigned int height = sourceTexture->getHeight();
 
     TexturePtr destTexture = TextureManager::getSingleton().createManual(
-                    "ImageRotateDestTexture",
+                    destImage,
                     ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     TEX_TYPE_2D,
                     width, height,
@@ -69,7 +69,6 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
     rtt->writeContentsToFile(destImage);
 
     // remove all the junk we've created
-    TextureManager::getSingleton().remove("ImageRotateDestTexture");
     MaterialManager::getSingleton().remove("ImageRotateMaterial");
     root->destroySceneManager(sceneMgr);
     delete rect;
