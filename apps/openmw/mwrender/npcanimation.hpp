@@ -15,6 +15,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwclass/npc.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "components/esm/loadarmo.hpp"
 
 namespace MWRender{
 
@@ -30,12 +31,11 @@ private:
 	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> tail;
 	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> lBeastFoot;
 	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rBeastFoot;
-	/*Ogre::Entity* skirt;   std::vector<Nif::NiTriShapeCopy>* skirtShapes;
-	Ogre::Entity* rhand;   std::vector<Nif::NiTriShapeCopy>* rhandShapes;
-	Ogre::Entity* lhand;   std::vector<Nif::NiTriShapeCopy>* lhandShapes;
-	Ogre::Entity* tail;    std::vector<Nif::NiTriShapeCopy>* tailShapes;
-	Ogre::Entity* lBeastFoot;   std::vector<Nif::NiTriShapeCopy>* lBeastFootShapes;
-	Ogre::Entity* rBeastFoot;  std::vector<Nif::NiTriShapeCopy>* rBeastFootShapes;*/
+
+       int partslots[27];  //Each part slot is taken by clothing, armor, or is empty
+
+
+	
 	
 	//Bounded Parts
 	Ogre::Entity* lclavicle;
@@ -64,7 +64,8 @@ private:
 	std::string hairID;
 	std::string npcName;
 	std::string bodyRaceID;
-	
+	float timeToChange;
+	MWWorld::ContainerStoreIterator robe;
     
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);

@@ -12,7 +12,7 @@ NpcAnimation::~NpcAnimation(){
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv){
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv), timeToChange(0), robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)){
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 	 Ogre::Entity* blank = 0;
@@ -121,6 +121,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
             insert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
         else
             insert->scale(race->data.height.male, race->data.height.male, race->data.height.male);
+		std::cout << "Inv" << inv.getStateId() << "\n";
         updateParts();
 		
 }
@@ -133,134 +134,43 @@ void NpcAnimation::updateParts(){
             mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
 
 		//inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
-		
-		MWWorld::ContainerStoreIterator robe = inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
-		
-		
-		
-		//	;
-		
-		
-        const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
-        const ESM::BodyPart *upperleg = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper leg");
-		const ESM::BodyPart *groinpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "groin");
-		const ESM::BodyPart *arml = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper arm");  //We need two
-		const ESM::BodyPart *neckpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "neck");
-		const ESM::BodyPart *knee = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "knee");
-		const ESM::BodyPart *ankle = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "ankle");
-		const ESM::BodyPart *foot = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
-		const ESM::BodyPart *feetpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
-		const ESM::BodyPart *tailpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "tail");
-		const ESM::BodyPart *wristlpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "wrist");  //We need two
-		const ESM::BodyPart *forearmlpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "forearm");  //We need two
-		const ESM::BodyPart *handlpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand");   //We need two
-		const ESM::BodyPart *hairpart = mEnvironment.mWorld->getStore().bodyParts.search(hairID);
-		const ESM::BodyPart *headpart = mEnvironment.mWorld->getStore().bodyParts.search(headID);
-        if(bodyRaceID == "b_n_argonian_f_")
-            forearmlpart = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");  //We need two
-		if(!handlpart)
-			handlpart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
-		//const ESM::BodyPart* claviclel = environment.mWorld->getStore().bodyParts.search (bodyRaceID + "clavicle");
-		//const ESM::BodyPart* clavicler = claviclel;
-		const ESM::BodyPart* handrpart = handlpart;
-		const ESM::BodyPart* forearmr = forearmlpart;
-		const ESM::BodyPart* wristrpart = wristlpart;
-		const ESM::BodyPart* armr = arml;
-
-
-        if(upperleg){
-			lUpperLeg = insertBoundedPart("meshes\\" + upperleg->model + "*|", "Left Upper Leg");
-			rUpperLeg = insertBoundedPart("meshes\\" + upperleg->model, "Right Upper Leg");
-
-		}
-		
-        if(foot){
-			if(bodyRaceID.compare("b_n_khajiit_m_") == 0)
-			{
-				feetpart = foot;
-			}
-			else
-			{
-				rfoot = insertBoundedPart("meshes\\" + foot->model, "Right Foot");
-				lfoot = insertBoundedPart("meshes\\" + foot->model + "*|", "Left Foot");
-			}
-		}
-        if(groinpart){
-			groin = insertBoundedPart("meshes\\" + groinpart->model, "Groin");
-		}
-        if(knee)
-		{
-			lKnee = insertBoundedPart("meshes\\" + knee->model + "*|", "Left Knee");  //e
-			rKnee = insertBoundedPart("meshes\\" + knee->model, "Right Knee");   //e
-
-		}
-		if(ankle){
-
-			lAnkle = insertBoundedPart("meshes\\" + ankle->model + "*|", "Left Ankle"); //Ogre::Quaternion(Ogre::Radian(3.14 / 4), Ogre::Vector3(1, 0, 0)),blank); //1,0,0, blank);
-			rAnkle = insertBoundedPart("meshes\\" + ankle->model, "Right Ankle");
-		}
-        if (armr){
-			rupperArm = insertBoundedPart("meshes\\" + armr->model, "Right Upper Arm");
-		}
-		if(arml){
-			lupperArm = insertBoundedPart("meshes\\" + arml->model + "*|", "Left Upper Arm");
-		}
-
-		if (forearmr)
-		{
-				rForearm = insertBoundedPart("meshes\\" + forearmr->model, "Right Forearm");
-		}
-		if(forearmlpart)
-			lForearm = insertBoundedPart("meshes\\" + forearmlpart->model + "*|", "Left Forearm");
-
-		if (wristrpart)
-		{
-			rWrist = insertBoundedPart("meshes\\" + wristrpart->model, "Right Wrist");
-		}
-
-		if(wristlpart)
-				lWrist = insertBoundedPart("meshes\\" + wristlpart->model + "*|", "Left Wrist");
-
-
-
-
-
-		/*if(claviclel)
-			insertBoundedPart("meshes\\" + claviclel->model + "*|", "Left Clavicle", base);
-		if(clavicler)
-			insertBoundedPart("meshes\\" + clavicler->model , "Right Clavicle", base);*/
-
-		if(neckpart)
-		{
-			neck = insertBoundedPart("meshes\\" + neckpart->model, "Neck");
-		}
-		if(headpart)
-			head = insertBoundedPart("meshes\\" + headpart->model, "Head");
-		if(hairpart)
-			hair = insertBoundedPart("meshes\\" + hairpart->model, "Head");
-
-        if (chestPart){
-				chest = insertFreePart("meshes\\" + chestPart->model, ":\"");
-
-
-		}
-        if (handrpart){
-				rhand = insertFreePart("meshes\\" + handrpart->model , ":?");
-
-		}
-        if (handlpart){
-				lhand = insertFreePart("meshes\\" + handlpart->model, ":>");
-
-		}
-        if(tailpart){
-                tail = insertFreePart("meshes\\" + tailpart->model, ":*");
-        }
-        if(feetpart){
+		if(robe != inv.getSlot(MWWorld::InventoryStore::Slot_Robe)){
+            //A robe was added or removed
+            if(chest.first)
+            {
+                insert->detachObject(chest.first); chest.first = 0;
+            }
+            robe = inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
+            if(robe != inv.end())
+            {
+                MWWorld::Ptr ptr = *robe;
                 
-                lBeastFoot = insertFreePart("meshes\\" + feetpart->model,"::");
-                rBeastFoot = insertFreePart("meshes\\" + feetpart->model,":<");
+                const ESM::Clothing *clothes = (ptr.get<ESM::Clothing>())->base;
+                std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                for(int i = 0; i < parts.size(); i++)
+                {
+                    ESM::PartReference part = parts[i];
+                    if(part.part == ESM::PRT_Cuirass)
+                    {
+                        const ESM::BodyPart *bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.male);
+                        chest = insertFreePart("meshes\\" + bodypart->model, ":\"");
+                    }
+                }
+            }
+		
+		}
+        if(robe == inv.end() ){
+            //if(inv.getSlot(MWWorld::InventoryStore::Cuirass) != inv.end())
+            if(chest.first == 0){
+                const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
+                chest = insertFreePart("meshes\\" + chestPart->model, ":\"");
+            }
+            
         }
-        //originalpos = insert->_getWorl
+		
+		
+		
+		
 }
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::string bonename){
@@ -295,13 +205,14 @@ std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> NpcAnimation::insert
 
 void NpcAnimation::runAnimation(float timepassed){
 	
-	if(mStateID != inv.getStateId()){
-		std::cout << "StateID" <<inv.getStateId()<< "\n";
-		mStateID = inv.getStateId();
+	if(timeToChange > .2){
 		
+		timeToChange = 0;
+		
+		updateParts();
 	}
 	
-	
+	timeToChange += timepassed;
    
     //1. Add the amount of time passed to time
 
