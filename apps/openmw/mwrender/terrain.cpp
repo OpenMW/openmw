@@ -7,7 +7,8 @@
 #include "terrainmaterial.hpp"
 #include "terrain.hpp"
 #include "renderconst.hpp"
-
+#include "shadows.hpp"
+#include <components/settings/settings.hpp>
 
 using namespace Ogre;
 
@@ -16,8 +17,8 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
 
-    TerrainManager::TerrainManager(Ogre::SceneManager* mgr, const MWWorld::Environment& evn) :
-        mEnvironment(evn), mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize))
+    TerrainManager::TerrainManager(Ogre::SceneManager* mgr, RenderingManager* rend, const MWWorld::Environment& evn) :
+        mEnvironment(evn), mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize)), mRendering(rend)
     {
 
         TerrainMaterialGeneratorPtr matGen;
@@ -48,9 +49,19 @@ namespace MWRender
         mActiveProfile->setLayerSpecularMappingEnabled(false);
         mActiveProfile->setLayerNormalMappingEnabled(false);
         mActiveProfile->setLayerParallaxMappingEnabled(false);
-        mActiveProfile->setReceiveDynamicShadowsEnabled(false);
 
-        //composite maps lead to a drastic reduction in loading time so are
+        bool shadows = Settings::Manager::getBool("enabled", "Shadows");
+        mActiveProfile->setReceiveDynamicShadowsEnabled(shadows);
+        mActiveProfile->setReceiveDynamicShadowsDepth(shadows);
+        if (Settings::Manager::getBool("split", "Shadows"))
+            mActiveProfile->setReceiveDynamicShadowsPSSM(mRendering->getShadows()->getPSSMSetup());
+        else
+            mActiveProfile->setReceiveDynamicShadowsPSSM(0);
+
+        mActiveProfile->setShadowFar(mRendering->getShadows()->getShadowFar());
+        mActiveProfile->setShadowFadeStart(mRendering->getShadows()->getFadeStart());
+
+        //composite maps lead to a drastic increase in loading time so are
         //disabled
         mActiveProfile->setCompositeMapEnabled(false);
 

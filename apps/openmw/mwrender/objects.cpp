@@ -193,6 +193,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
         sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
 
+        sg->setCastShadows(true);
+
         sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
         mRenderer.getScene()->destroyEntity(ent);
