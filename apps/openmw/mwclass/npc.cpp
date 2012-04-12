@@ -55,31 +55,38 @@ namespace MWClass
             {
                 if(ref->base->npdt52.gold != -10)
                 {
-                    data->mNpcStats.mFactionRank[ref->base->faction] = ref->base->npdt52.rank;
+                    data->mNpcStats.mFactionRank[ref->base->faction] = (int)ref->base->npdt52.rank;
                 }
                 else
                 {
-                    data->mNpcStats.mFactionRank[ref->base->faction] = ref->base->npdt52.rank;
+                    data->mNpcStats.mFactionRank[ref->base->faction] = (int)ref->base->npdt12.rank;
                 }
             }
 
-            for (int i=0; i<27; ++i)
-                data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
+            if(ref->base->npdt52.gold != -10)
+            {
+                for (int i=0; i<27; ++i)
+                    data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
 
-            // creature stats
-            data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
-            data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
-            data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
-            data->mCreatureStats.mAttributes[3].set (ref->base->npdt52.agility);
-            data->mCreatureStats.mAttributes[4].set (ref->base->npdt52.speed);
-            data->mCreatureStats.mAttributes[5].set (ref->base->npdt52.endurance);
-            data->mCreatureStats.mAttributes[6].set (ref->base->npdt52.personality);
-            data->mCreatureStats.mAttributes[7].set (ref->base->npdt52.luck);
-            data->mCreatureStats.mDynamic[0].set (ref->base->npdt52.health);
-            data->mCreatureStats.mDynamic[1].set (ref->base->npdt52.mana);
-            data->mCreatureStats.mDynamic[2].set (ref->base->npdt52.fatigue);
+                // creature stats
+                data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
+                data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
+                data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
+                data->mCreatureStats.mAttributes[3].set (ref->base->npdt52.agility);
+                data->mCreatureStats.mAttributes[4].set (ref->base->npdt52.speed);
+                data->mCreatureStats.mAttributes[5].set (ref->base->npdt52.endurance);
+                data->mCreatureStats.mAttributes[6].set (ref->base->npdt52.personality);
+                data->mCreatureStats.mAttributes[7].set (ref->base->npdt52.luck);
+                data->mCreatureStats.mDynamic[0].set (ref->base->npdt52.health);
+                data->mCreatureStats.mDynamic[1].set (ref->base->npdt52.mana);
+                data->mCreatureStats.mDynamic[2].set (ref->base->npdt52.fatigue);
 
-            data->mCreatureStats.mLevel = ref->base->npdt52.level;
+                data->mCreatureStats.mLevel = ref->base->npdt52.level;
+            }
+            else
+            {
+                //TODO: do something with npdt12 maybe:p
+            }
 
             // \todo add initial container content
 
