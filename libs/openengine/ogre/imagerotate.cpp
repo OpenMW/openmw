@@ -66,7 +66,6 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
     vp->setClearEveryFrame(true, FBT_DEPTH);
 
     rtt->update();
-    rtt->writeContentsToFile(destImage);
 
     // remove all the junk we've created
     MaterialManager::getSingleton().remove("ImageRotateMaterial");
