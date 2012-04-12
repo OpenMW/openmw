@@ -97,6 +97,7 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/mouselook.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
+  ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/events.cpp
