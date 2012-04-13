@@ -382,7 +382,7 @@ void NpcAnimation::removeIndividualPart(int type){
             lKnee = 0;
         }
          else if(type == ESM::PRT_RLeg && rUpperLeg){    //21
-            base->detachObjectFromBone(rAnkle);
+            base->detachObjectFromBone(rUpperLeg);
             rUpperLeg = 0;
         }
         else if(type == ESM::PRT_LLeg && lUpperLeg){    //22
@@ -416,6 +416,104 @@ void NpcAnimation::removeIndividualPart(int type){
                  removeIndividualPart(i);
             }
         }
+    }
+    bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh){
+        if(priority >= partpriorities[type]){
+            removeIndividualPart(type);
+            partslots[type] = group;
+            switch(type){
+                case ESM::PRT_Head:                           //0
+                    head = insertBoundedPart(mesh, "Head");
+                    break;
+                case ESM::PRT_Hair:                          //1
+                    hair = insertBoundedPart(mesh, "Head");
+                    break;
+                case ESM::PRT_Neck:                          //2
+                    neck = insertBoundedPart(mesh, "Neck");
+                    break;
+                case ESM::PRT_Cuirass:                          //3
+                    chest = insertFreePart(mesh, ":\"");
+                    break;
+                case ESM::PRT_Groin:                          //4
+                    neck = insertBoundedPart(mesh, "Groin");
+                    break;
+                case ESM::PRT_Skirt:                          //5
+                    skirt = insertFreePart(mesh, ":|");
+                    break;
+                case ESM::PRT_RHand:                         //6
+                    rhand = insertFreePart(mesh, ":?");
+                    break;
+                case ESM::PRT_LHand:                         //7
+                    lhand = insertFreePart(mesh,  ":>");
+                    break;
+                case ESM::PRT_RWrist:                          //8
+                    rWrist = insertBoundedPart(mesh, "Right Wrist");
+                    break;
+                case ESM::PRT_LWrist:                          //9
+                    lWrist = insertBoundedPart(mesh + "*|", "Left Wrist");
+                    break;
+                case ESM::PRT_Shield:                         //10
+                    break;
+                case ESM::PRT_RForearm:                          //11
+                    rForearm = insertBoundedPart(mesh, "Right Forearm");
+                    break;
+                case ESM::PRT_LForearm:                          //12
+                    lForearm = insertBoundedPart(mesh + "*|", "Left Forearm");
+                    break;
+                case ESM::PRT_RUpperarm:                          //13
+                    rupperArm = insertBoundedPart(mesh, "Right Upper Arm");
+                    break;
+                case ESM::PRT_LUpperarm:                          //14
+                    lupperArm = insertBoundedPart(mesh + "*|", "Left Upper Arm");
+                    break;
+                case ESM::PRT_RFoot:                             //15
+                    if(isBeast)   
+                        rBeastFoot = insertFreePart(mesh, ":<");
+                    else
+                        rfoot = insertBoundedPart(mesh, "Right Foot");
+                    break;
+                case ESM::PRT_LFoot:                             //16
+                    if(isBeast)   
+                        lBeastFoot = insertFreePart(mesh, "::");
+                    else
+                        lfoot = insertBoundedPart(mesh + "*|", "Left Foot");
+                    break;
+
+                 case ESM::PRT_RAnkle:                          //17
+                    rAnkle = insertBoundedPart(mesh , "Right Ankle");
+                    break;
+                case ESM::PRT_LAnkle:                          //18
+                    lAnkle = insertBoundedPart(mesh + "*|", "Left Ankle");
+                    break;
+                 case ESM::PRT_RKnee:                          //19
+                    rKnee = insertBoundedPart(mesh , "Right Knee");
+                    break;
+                case ESM::PRT_LKnee:                          //20
+                    lKnee = insertBoundedPart(mesh + "*|", "Left Knee");
+                    break;
+                 case ESM::PRT_RLeg:                          //21
+                    rUpperLeg = insertBoundedPart(mesh, "Right Upper Leg");
+                    break;
+                case ESM::PRT_LLeg:                          //22
+                    lUpperLeg = insertBoundedPart(mesh + "*|", "Left Upper Leg");
+                    break;
+                case ESM::PRT_RPauldron:                          //23
+                    rclavicle = insertBoundedPart(mesh , "Right Clavicle");
+                    break;
+                case ESM::PRT_LPauldron:                          //24
+                    lclavicle = insertBoundedPart(mesh + "*|", "Left Clavicle");
+                    break;
+                case ESM::PRT_Weapon:                             //25
+                    break;
+                case ESM::PRT_Tail:                              //26
+                    tail = insertFreePart(mesh, ":*");
+                    break;
+
+
+            }
+            return true;
+        }
+        return false;
     }
 }
 

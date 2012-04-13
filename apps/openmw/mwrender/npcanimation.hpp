@@ -78,6 +78,7 @@ private:
 	void updateParts();
     void removeIndividualPart(int type);
     void removePartGroup(int group);
+    bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
 	
 };
 }
