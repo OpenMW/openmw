@@ -133,4 +133,6 @@ op 0x2000147: AddSpell
 op 0x2000148: AddSpell, explicit reference
 op 0x2000149: RemoveSpell
 op 0x200014a: RemoveSpell, explicit reference
-opcodes 0x200014b-0x3ffffff unused
+op 0x200014b: GetSpell
+op 0x200014c: GetSpell, explicit reference
+opcodes 0x200014d-0x3ffffff unused
