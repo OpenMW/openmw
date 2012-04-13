@@ -8,12 +8,16 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/environment.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
+
+#include "../mwdialogue/dialoguemanager.hpp"
 
 namespace MWScript
 {
@@ -319,6 +323,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
@@ -336,6 +341,107 @@ namespace MWScript
                         }
 
                     runtime.push (value);
+                }
+        };
+
+        class OpPCJoinFaction : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    if(arg0==0)
+                    {
+                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    if(factionID != "")
+                    {
+                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 0;
+                        }
+                    }
+                }
+        };
+
+        class OpPCRaiseRank : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    if(arg0==0)
+                    {
+                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    if(factionID != "")
+                    {
+                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 0;
+                        }
+                        else
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] +1;
+                        }
+                    }
+                }
+        };
+
+        class OpPCLowerRank : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    if(arg0==0)
+                    {
+                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    if(factionID != "")
+                    {
+                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) != MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] -1;
+                        }
+                    }
+                }
+        };
+
+        class OpModDisposition : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+
                 }
         };
 
@@ -376,6 +482,11 @@ namespace MWScript
         const int opcodeRemoveSpellExplicit = 0x200014a;
         const int opcodeGetSpell = 0x200014b;
         const int opcodeGetSpellExplicit = 0x200014c;
+
+        const int opcodePCRaiseRank = 0x2000b;
+        const int opcodePCLowerRank = 0x2000c;
+        const int opcodePCJoinFaction = 0x2000d;
+        const int opcodeModDisposition = 0x200014d;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -452,6 +563,11 @@ namespace MWScript
             extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
                 opcodeRemoveSpellExplicit);
             extensions.registerFunction ("getspell", 'l', "c", opcodeGetSpell, opcodeGetSpellExplicit);
+
+            extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
+            extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank);
+            extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction);
+            extensions.registerInstruction("moddisposition","l",opcodeModDisposition);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -515,6 +631,11 @@ namespace MWScript
                 new OpRemoveSpell<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetSpell, new OpGetSpell<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);
+
+            interpreter.installSegment3(opcodePCRaiseRank,new OpPCRaiseRank);
+            interpreter.installSegment3(opcodePCLowerRank,new OpPCLowerRank);
+            interpreter.installSegment3(opcodePCJoinFaction,new OpPCJoinFaction);
+            interpreter.installSegment5(opcodeModDisposition,new OpModDisposition);
         }
     }
 }

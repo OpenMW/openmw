@@ -24,7 +24,10 @@ op 0x20007: PlayAnim, explicit reference
 op 0x20008: LoopAnim
 op 0x20009: LoopAnim, explicit reference
 op 0x2000a: Choice
-opcodes 0x2000b-0x3ffff unused
+op 0x2000b: PCRaiseRank
+op 0x2000c: PCLowerRank
+op x20000d: PCJoinFaction
+opcodes 0x2000e-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -135,4 +138,5 @@ op 0x2000149: RemoveSpell
 op 0x200014a: RemoveSpell, explicit reference
 op 0x200014b: GetSpell
 op 0x200014c: GetSpell, explicit reference
-opcodes 0x200014d-0x3ffffff unused
+op 0x200014d: ModDisposition
+opcodes 0x200014e-0x3ffffff unused
