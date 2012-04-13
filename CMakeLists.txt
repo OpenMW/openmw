@@ -244,6 +244,9 @@ endif (WIN32)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
         "${OpenMW_BINARY_DIR}/plugins.cfg")
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
+        "${OpenMW_BINARY_DIR}/openmw.desktop")
 endif()
 
 if (APPLE)
