@@ -33,7 +33,8 @@ private:
 	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rBeastFoot;
 
        int partslots[27];  //Each part slot is taken by clothing, armor, or is empty
-
+       int partpriorities[27];
+       std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> zero;
 
 	
 	
@@ -58,6 +59,7 @@ private:
 	Ogre::Entity* rfoot;
 	Ogre::Entity* hair;
 	Ogre::Entity* head;
+    
 	Ogre::SceneNode* insert;
     bool isBeast;
 	std::string headID;
@@ -74,6 +76,7 @@ private:
      std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> insertFreePart(const std::string &mesh, const std::string suffix);
 	virtual void runAnimation(float timepassed);
 	void updateParts();
+    void removeIndividualPart(int type);
 	
 };
 }

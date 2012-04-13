@@ -12,11 +12,32 @@ NpcAnimation::~NpcAnimation(){
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv), timeToChange(0), robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)){
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv), timeToChange(0), 
+    robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)), 
+    lclavicle(0),
+	rclavicle(0),
+	rupperArm(0),
+	lupperArm(0),
+	rUpperLeg(0),
+	lUpperLeg(0),
+	lForearm(0),
+	rForearm(0),
+	lWrist(0),
+	rWrist(0),
+	rKnee(0),
+	lKnee(0),
+	neck(0),
+	rAnkle(0),
+	lAnkle(0),
+	groin(0),
+	lfoot(0),
+	rfoot(0)
+    {
      ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 	 Ogre::Entity* blank = 0;
 	  std::vector<Nif::NiTriShapeCopy>* blankshape = 0;
+      zero = std::make_pair(blank, blankshape);
 	 chest = std::make_pair(blank, blankshape);
 	 tail = std::make_pair(blank, blankshape);
 	 lBeastFoot = std::make_pair(blank, blankshape);
@@ -24,6 +45,12 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 	 rhand = std::make_pair(blank, blankshape);
 	 lhand = std::make_pair(blank, blankshape);
 	 skirt = std::make_pair(blank, blankshape);
+     for (int init = 0; init < 27; init++){
+         partslots[init] = -1;  //each slot is empty
+         partpriorities[init] = 0;
+     }
+
+
 		//Part selection on last character of the file string
 		//  " Tri Chest
 		//  * Tri Tail
@@ -254,4 +281,133 @@ void NpcAnimation::runAnimation(float timepassed){
 			
 }
 }
+
+void NpcAnimation::removeIndividualPart(int type){
+    partpriorities[type] = 0;
+    partslots[type] = -1;
+    
+        if(type == ESM::PRT_Head && head){   //0
+            base->detachObjectFromBone(head);
+            head = 0;
+        }
+        else if(type == ESM::PRT_Hair && hair){//1
+            base->detachObjectFromBone(hair);
+            hair = 0;
+        }
+        else if(type == ESM::PRT_Neck && neck){//2
+            base->detachObjectFromBone(neck);
+            neck = 0;
+        }
+        else if(type == ESM::PRT_Cuirass && chest.first){//3
+            insert->detachObject(chest.first);
+            chest = zero;
+        }
+        else if(type == ESM::PRT_Groin && groin){//4
+            base->detachObjectFromBone(groin);
+            groin = 0;
+        }
+        else if(type == ESM::PRT_Skirt && skirt.first){//5
+            insert->detachObject(skirt.first);
+            skirt = zero;
+        }
+        else if(type == ESM::PRT_RHand && rhand.first){//6
+            insert->detachObject(rhand.first);
+            rhand = zero;
+        }
+        else if(type == ESM::PRT_LHand && lhand.first){//7
+            insert->detachObject(lhand.first);
+            lhand = zero;
+        }
+        else if(type == ESM::PRT_RWrist && rWrist){//8
+            base->detachObjectFromBone(rWrist);
+            rWrist = 0;
+        }
+        else if(type == ESM::PRT_LWrist && lWrist){//9
+            base->detachObjectFromBone(lWrist);
+            lWrist = 0;
+        }
+        else if(type == ESM::PRT_Shield){//10
+            
+        }
+        else if(type == ESM::PRT_RForearm && rForearm){//11
+            base->detachObjectFromBone(rForearm);
+            rForearm = 0;
+        }
+        else if(type == ESM::PRT_LForearm && lForearm){//12
+            base->detachObjectFromBone(lForearm);
+            lForearm = 0;
+        }
+        else if(type == ESM::PRT_RUpperarm && rupperArm){//13
+            base->detachObjectFromBone(rupperArm);
+            rupperArm = 0;
+        }
+        else if(type == ESM::PRT_LUpperarm && lupperArm){//14
+            base->detachObjectFromBone(lupperArm);
+            lupperArm = 0;
+        }
+        else if(type == ESM::PRT_RFoot){                 //15
+            if(rfoot){
+                base->detachObjectFromBone(rfoot);
+                rfoot = 0;
+            }
+            else if(rBeastFoot.first){
+                insert->detachObject(rBeastFoot.first);
+                rBeastFoot = zero;
+            }
+        }
+        else if(type == ESM::PRT_LFoot){                //16
+            if(lfoot){
+                base->detachObjectFromBone(lfoot);
+                lfoot = 0;
+            }
+            else if(lBeastFoot.first){
+                insert->detachObject(lBeastFoot.first);
+                lBeastFoot = zero;
+            }
+        }
+        else if(type == ESM::PRT_RAnkle && rAnkle){    //17
+            base->detachObjectFromBone(rAnkle);
+            rAnkle = 0;
+        }
+        else if(type == ESM::PRT_LAnkle && lAnkle){    //18
+            base->detachObjectFromBone(lAnkle);
+            lAnkle = 0;
+        }
+         else if(type == ESM::PRT_RKnee && rKnee){    //19
+            base->detachObjectFromBone(rKnee);
+            rKnee = 0;
+        }
+        else if(type == ESM::PRT_LKnee && lKnee){    //20
+            base->detachObjectFromBone(lKnee);
+            lKnee = 0;
+        }
+         else if(type == ESM::PRT_RLeg && rUpperLeg){    //21
+            base->detachObjectFromBone(rAnkle);
+            rUpperLeg = 0;
+        }
+        else if(type == ESM::PRT_LLeg && lUpperLeg){    //22
+            base->detachObjectFromBone(lUpperLeg);
+            lUpperLeg = 0;
+        }
+          else if(type == ESM::PRT_RPauldron && rclavicle){    //23
+            base->detachObjectFromBone(rclavicle);
+            rclavicle = 0;
+        }
+        else if(type == ESM::PRT_LPauldron && lclavicle){    //24
+            base->detachObjectFromBone(lclavicle);
+            lclavicle = 0;
+        }
+        else if(type == ESM::PRT_Weapon){                  //25
+
+        }
+        else if(type == ESM::PRT_Tail && tail.first){     //26
+            insert->detachObject(tail.first);
+            tail = zero;
+        }
+        
+        
+        
+
+    }
+
 }
