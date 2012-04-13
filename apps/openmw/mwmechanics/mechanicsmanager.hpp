@@ -37,8 +37,6 @@ namespace MWMechanics
             ///< build player according to stored class/race/birthsign information. Will
             /// default to the values of the ESM::NPC object, if no explicit information is given.
 
-            void insertSpell (const std::string& id, MWWorld::Ptr& creature);
-
             void adjustMagicEffects (MWWorld::Ptr& creature);
 
         public:
