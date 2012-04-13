@@ -27,6 +27,11 @@ configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 
+# Apps and tools
+option(BUILD_ESMTOOL "build ESM inspector" ON)
+option(BUILD_LAUNCHER "build Launcher" ON)
+option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
 option(USE_AUDIERE "use audiere for sound" OFF)
@@ -416,17 +421,14 @@ add_subdirectory (components)
 # Apps and tools
 add_subdirectory( apps/openmw )
 
-option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
 
-option(BUILD_LAUNCHER "build Launcher inspector" ON)
 if (BUILD_LAUNCHER)
    add_subdirectory( apps/launcher )
 endif()
 
-option(BUILD_MWINIIMPORTER "build MWiniImporter inspector" ON)
 if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
 endif()
