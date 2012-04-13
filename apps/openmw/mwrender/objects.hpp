@@ -15,6 +15,7 @@ class Objects{
     std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
     std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometry;
     std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometrySmall;
+    //std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometryAlpha;
     std::map<MWWorld::Ptr::CellStore *, Ogre::AxisAlignedBox> mBounds;
     std::vector<std::string> mLights;
     Ogre::SceneNode* mMwRoot;

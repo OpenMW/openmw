@@ -4,10 +4,14 @@
 #include <Ogre.h>
 #include <components/esm/loadcell.hpp>
 
+#include "renderconst.hpp"
+
 namespace MWRender {
 
+    class SkyManager;
+
     /// Water rendering 	
-    class Water : Ogre::RenderTargetListener, Ogre::Camera::Listener
+    class Water : public Ogre::RenderTargetListener
     {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
@@ -19,15 +23,40 @@ namespace MWRender {
         Ogre::Entity *mWater;
 
         bool mIsUnderwater;
+        bool mActive;
+        bool mToggled;
         int mTop;
 
         Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
 
+    protected:
+        void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+        void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+        void updateVisible();
+
+        SkyManager* mSky;
+
+        std::string mCompositorName;
+
+        void createMaterial();
+        Ogre::MaterialPtr mMaterial;
+
+        Ogre::Camera* mReflectionCamera;
+
+        Ogre::RenderTarget* mReflectionTarget;
+
+        bool mUnderwaterEffect;
+        int mVisibilityFlags;
+
     public:
-        Water (Ogre::Camera *camera, const ESM::Cell* cell);
+        Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell);
         ~Water();
 
+        void setActive(bool active);
+
         void toggle();
+
+        void setViewportBackground(const Ogre::ColourValue& bg);
 
         void checkUnderwater(float y);
         void changeCell(const ESM::Cell* cell);

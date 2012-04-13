@@ -280,6 +280,65 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpAddSpell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mSpells.add (id);
+                }
+        };
+
+        template<class R>
+        class OpRemoveSpell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mSpells.remove (id);
+                }
+        };
+
+        template<class R>
+        class OpGetSpell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer value = 0;
+
+                    for (MWMechanics::Spells::TIterator iter (
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mSpells.begin());
+                        iter!=MWWorld::Class::get (ptr).getCreatureStats (ptr).mSpells.end(); ++iter)
+                        if (*iter==id)
+                        {
+                            value = 1;
+                            break;
+                        }
+
+                    runtime.push (value);
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -310,6 +369,13 @@ namespace MWScript
         const int opcodeSetSkillExplicit = 0x20000df;
         const int opcodeModSkill = 0x20000fa;
         const int opcodeModSkillExplicit = 0x2000115;
+
+        const int opcodeAddSpell = 0x2000147;
+        const int opcodeAddSpellExplicit = 0x2000148;
+        const int opcodeRemoveSpell = 0x2000149;
+        const int opcodeRemoveSpellExplicit = 0x200014a;
+        const int opcodeGetSpell = 0x200014b;
+        const int opcodeGetSpellExplicit = 0x200014c;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -381,6 +447,11 @@ namespace MWScript
                 extensions.registerInstruction (mod + skills[i], "l",
                     opcodeModSkill+i, opcodeModSkillExplicit+i);
             }
+
+            extensions.registerInstruction ("addspell", "c", opcodeAddSpell, opcodeAddSpellExplicit);
+            extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
+                opcodeRemoveSpellExplicit);
+            extensions.registerFunction ("getspell", 'l', "c", opcodeGetSpell, opcodeGetSpellExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -436,6 +507,14 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeModSkill+i, new OpModSkill<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
             }
+
+            interpreter.installSegment5 (opcodeAddSpell, new OpAddSpell<ImplicitRef>);
+            interpreter.installSegment5 (opcodeAddSpellExplicit, new OpAddSpell<ExplicitRef>);
+            interpreter.installSegment5 (opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);
+            interpreter.installSegment5 (opcodeRemoveSpellExplicit,
+                new OpRemoveSpell<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetSpell, new OpGetSpell<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);
         }
     }
 }

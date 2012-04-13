@@ -331,14 +331,16 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::E
 
 void WeatherManager::setWeather(const String& weather, bool instant)
 {
-    if (weather == mCurrentWeather && mNextWeather == "") 
+    if (weather == mCurrentWeather && mNextWeather == "")
+    {
+        mFirstUpdate = false;
         return;
+    }
 
     if (instant || mFirstUpdate)
     {
         mNextWeather = "";
         mCurrentWeather = weather;
-        mFirstUpdate = false;
     }
     else
     {
@@ -352,6 +354,7 @@ void WeatherManager::setWeather(const String& weather, bool instant)
         mNextWeather = weather;
         mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600;
     }
+    mFirstUpdate = false;
 }
 
 WeatherResult WeatherManager::getResult(const String& weather)
@@ -469,6 +472,7 @@ WeatherResult WeatherManager::transition(float factor)
     result.mCloudSpeed = current.mCloudSpeed;
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     result.mGlareView = lerp(current.mGlareView, other.mGlareView);
+    result.mNightFade = lerp(current.mNightFade, other.mNightFade);
 
     result.mNight = current.mNight;
 
@@ -517,23 +521,23 @@ void WeatherManager::update(float duration)
                 srand(time(NULL));
                 float random = ((rand()%100)/100.f) * total;
 
-                //if (random > snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
                 //    weather = "blizzard";
-                //else if (random > blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                //else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
                 //    weather = "snow";
-                /*else*/ if (random > ash+thunder+rain+overcast+foggy+cloudy+clear)
+                /*else*/ if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
                     weather = "blight";
-                else if (random > thunder+rain+overcast+foggy+cloudy+clear)
+                else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
                     weather = "ashstorm";
-                else if (random > rain+overcast+foggy+cloudy+clear)
+                else if (random >= rain+overcast+foggy+cloudy+clear)
                     weather = "thunderstorm";
-                else if (random > overcast+foggy+cloudy+clear)
+                else if (random >= overcast+foggy+cloudy+clear)
                     weather = "rain";
-                else if (random > foggy+cloudy+clear)
+                else if (random >= foggy+cloudy+clear)
                     weather = "overcast";
-                else if (random > cloudy+clear)
+                else if (random >= cloudy+clear)
                     weather = "foggy";
-                else if (random > clear)
+                else if (random >= clear)
                     weather = "cloudy";
                 else
                     weather = "clear";
@@ -581,8 +585,8 @@ void WeatherManager::update(float duration)
         int facing = (mHour > 13.f) ? 1 : -1;
 
         Vector3 final(
-            (1-height)*facing, 
-            (1-height)*facing, 
+            -(1-height)*facing, 
+            -(1-height)*facing, 
             height);
         mRendering->setSunDirection(final);
 

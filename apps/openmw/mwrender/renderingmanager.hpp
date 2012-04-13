@@ -25,17 +25,12 @@
 #include "objects.hpp"
 #include "actors.hpp"
 #include "player.hpp"
-#include "water.hpp"
-#include "localmap.hpp"
 #include "occlusionquery.hpp"
 
 namespace Ogre
 {
-    class Camera;
-    class Viewport;
     class SceneManager;
     class SceneNode;
-    class RaySceneQuery;
     class Quaternion;
     class Vector3;
 }
@@ -48,7 +43,10 @@ namespace MWWorld
 namespace MWRender
 {
 
-
+    class Shadows;
+    class ShaderHelper;
+    class LocalMap;
+    class Water;
 
 class RenderingManager: private RenderingInterface {
 
@@ -84,6 +82,8 @@ class RenderingManager: private RenderingInterface {
 
     void removeWater();
 
+    static const bool useMRT();
+
     void preCellChange (MWWorld::Ptr::CellStore* store);
     ///< this event is fired immediately before changing cell
 
@@ -114,6 +114,8 @@ class RenderingManager: private RenderingInterface {
 
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
+
+    Shadows* getShadows();
 
     void setGlare(bool glare);
     void skyEnable ();
@@ -150,6 +152,8 @@ class RenderingManager: private RenderingInterface {
 
     void setAmbientMode();
 
+    bool mSunEnabled;
+
     SkyManager* mSkyManager;
 
     OcclusionQuery* mOcclusionQuery;
@@ -181,6 +185,10 @@ class RenderingManager: private RenderingInterface {
     MWRender::Debugging *mDebugging;
 
     MWRender::LocalMap* mLocalMap;
+
+    MWRender::Shadows* mShadows;
+
+    MWRender::ShaderHelper* mShaderHelper;
 };
 
 }
