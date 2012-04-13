@@ -435,13 +435,19 @@ namespace MWScript
                 }
         };
 
+        template<class R>
         class OpModDisposition : public Interpreter::Opcode0
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    MWWorld::Ptr ptr = R()(runtime);
 
+//                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    /// \todo modify disposition towards the player
                 }
         };
 
@@ -487,6 +493,7 @@ namespace MWScript
         const int opcodePCLowerRank = 0x2000c;
         const int opcodePCJoinFaction = 0x2000d;
         const int opcodeModDisposition = 0x200014d;
+        const int opcodeModDispositionExplicit = 0x200014e;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -567,7 +574,8 @@ namespace MWScript
             extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
             extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank);
             extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction);
-            extensions.registerInstruction("moddisposition","l",opcodeModDisposition);
+            extensions.registerInstruction("moddisposition","l",opcodeModDisposition,
+                opcodeModDispositionExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -635,7 +643,8 @@ namespace MWScript
             interpreter.installSegment3(opcodePCRaiseRank,new OpPCRaiseRank);
             interpreter.installSegment3(opcodePCLowerRank,new OpPCLowerRank);
             interpreter.installSegment3(opcodePCJoinFaction,new OpPCJoinFaction);
-            interpreter.installSegment5(opcodeModDisposition,new OpModDisposition);
+            interpreter.installSegment5(opcodeModDisposition,new OpModDisposition<ImplicitRef>);
+            interpreter.installSegment5(opcodeModDispositionExplicit,new OpModDisposition<ExplicitRef>);
         }
     }
 }
