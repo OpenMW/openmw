@@ -55,9 +55,7 @@ void Shadows::recreate()
     mSceneMgr->setShadowCasterRenderBackFaces(true);
     mSceneMgr->setShadowTextureCasterMaterial("depth_shadow_caster");
     mSceneMgr->setShadowTexturePixelFormat(PF_FLOAT32_R);
-    mSceneMgr->setShadowDirLightTextureOffset(0.9);
     mSceneMgr->setShadowDirectionalLightExtrusionDistance(1000000);
-    mSceneMgr->setShowDebugShadows(true);
 
     mShadowFar = split ? Settings::Manager::getInt("split shadow distance", "Shadows") : Settings::Manager::getInt("shadow distance", "Shadows");
     mSceneMgr->setShadowFarDistance(mShadowFar);
