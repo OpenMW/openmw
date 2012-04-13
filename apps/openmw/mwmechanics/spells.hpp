@@ -32,6 +32,7 @@ namespace MWMechanics
         private:
 
             std::vector<std::string> mSpells;
+            std::string mSelectedSpell;
 
             void addSpell (const ESM::Spell *, MagicEffects& effects) const;
 
@@ -42,15 +43,23 @@ namespace MWMechanics
             TIterator end() const;
 
             void add (const std::string& spell);
-            /// \note Adding a spell that is already listed in *this is a no-op.
+            ///< Adding a spell that is already listed in *this is a no-op.
 
             void remove (const std::string& spell);
+            ///< If the spell to be removed is the selected spell, the selected spell will be changed to
+            /// no spell (empty string).
 
             MagicEffects getMagicEffects (const MWWorld::Environment& environment) const;
             ///< Return sum of magic effects resulting from abilities, blights, deseases and curses.
 
             void clear();
             ///< Remove all spells of al types.
+
+            void setSelectedSpell (const std::string& spellId);
+            ///< This function does not verify, if the spell is available.
+
+            const std::string getSelectedSpell() const;
+            ///< May return an empty string.
     };
 }
 

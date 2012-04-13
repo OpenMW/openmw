@@ -43,6 +43,9 @@ namespace MWMechanics
 
         if (iter!=mSpells.end())
             mSpells.erase (iter);
+
+        if (spellId==mSelectedSpell)
+            mSelectedSpell.clear();
     }
 
     MagicEffects Spells::getMagicEffects (const MWWorld::Environment& environment) const
@@ -64,5 +67,15 @@ namespace MWMechanics
     void Spells::clear()
     {
         mSpells.clear();
+    }
+
+    void Spells::setSelectedSpell (const std::string& spellId)
+    {
+        mSelectedSpell = spellId;
+    }
+
+    const std::string Spells::getSelectedSpell() const
+    {
+        return mSelectedSpell;
     }
 }

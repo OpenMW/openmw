@@ -12,7 +12,8 @@ namespace MWMechanics
     ///
     /// For non-NPC-specific stats, see the CreatureStats struct.
     ///
-    /// \note For technical reasons the spell list is also handled by CreatureStats.
+    /// \note For technical reasons the spell list and the currently selected spell is also handled by
+    /// CreatureStats, even though they are actually NPC stats.
 
     struct NpcStats
     {
@@ -27,8 +28,6 @@ namespace MWMechanics
         bool mRun;
         bool mSneak;
         bool mCombat;
-
-        std::string mSelectedSpell; // can be an empty string (no spell selected)
 
         NpcStats() : mForceRun (false), mForceSneak (false), mRun (false), mSneak (false),
             mCombat (false) {}
