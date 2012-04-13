@@ -77,6 +77,7 @@ private:
 	virtual void runAnimation(float timepassed);
 	void updateParts();
     void removeIndividualPart(int type);
+    void removePartGroup(int group);
 	
 };
 }

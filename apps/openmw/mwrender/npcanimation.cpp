@@ -410,4 +410,13 @@ void NpcAnimation::removeIndividualPart(int type){
 
     }
 
+    void NpcAnimation::removePartGroup(int group){
+        for(int i = 0; i < 27; i++){
+            if(partslots[i] == group){
+                 removeIndividualPart(i);
+            }
+        }
+    }
 }
+
+
