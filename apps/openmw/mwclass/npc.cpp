@@ -61,6 +61,10 @@ namespace MWClass
             for (int i=0; i<27; ++i)
                 data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
 
+            for (std::vector<std::string>::const_iterator iter (ref->base->spells.list.begin());
+                iter!=ref->base->spells.list.end(); ++iter)
+                data->mCreatureStats.mSpells.add (*iter);
+
             // creature stats
             data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
             data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);

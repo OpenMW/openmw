@@ -6,6 +6,7 @@
 
 #include "stat.hpp"
 #include "magiceffects.hpp"
+#include "spells.hpp"
 
 namespace MWMechanics
 {
@@ -14,7 +15,7 @@ namespace MWMechanics
         Stat<int> mAttributes[8];
         DynamicStat<int> mDynamic[3]; // health, magicka, fatigue
         int mLevel;
-        std::set<std::string> mAbilities;
+        Spells mSpells;
         MagicEffects mMagicEffects;
     };
 }
