@@ -28,17 +28,17 @@ void MagicEffect::save(ESMWriter &esm)
     esm.writeHNT("INDX", index);
     esm.writeHNT("MEDT", data, 36);
 
-    esm.writeHNOString("ITEX", icon);
-    esm.writeHNOString("PTEX", particle);
-    esm.writeHNOString("BSND", boltSound);
-    esm.writeHNOString("CSND", castSound);
-    esm.writeHNOString("HSND", hitSound);
-    esm.writeHNOString("ASND", areaSound);
+    esm.writeHNOCString("ITEX", icon);
+    esm.writeHNOCString("PTEX", particle);
+    esm.writeHNOCString("BSND", boltSound);
+    esm.writeHNOCString("CSND", castSound);
+    esm.writeHNOCString("HSND", hitSound);
+    esm.writeHNOCString("ASND", areaSound);
     
-    esm.writeHNOString("CVFX", casting);
-    esm.writeHNOString("BVFX", bolt);
-    esm.writeHNOString("HVFX", hit);
-    esm.writeHNOString("AVFX", area);
+    esm.writeHNOCString("CVFX", casting);
+    esm.writeHNOCString("BVFX", bolt);
+    esm.writeHNOCString("HVFX", hit);
+    esm.writeHNOCString("AVFX", area);
     
     esm.writeHNOString("DESC", description);
 }

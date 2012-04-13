@@ -16,6 +16,8 @@ void Creature::load(ESMReader &esm)
     esm.getHNOT(scale, "XSCL");
 
     inventory.load(esm);
+    spells.load(esm);
+    aiData.load(esm);
 
     // More subrecords:
 
@@ -37,15 +39,18 @@ void Creature::load(ESMReader &esm)
 
 void Creature::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNOString("CNAM", original);
-    esm.writeHNOString("FNAM", name);
-    esm.writeHNOString("SCRI", script);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNOCString("CNAM", original);
+    esm.writeHNOCString("FNAM", name);
+    esm.writeHNOCString("SCRI", script);
     esm.writeHNT("NPDT", data, 96);
     esm.writeHNT("FLAG", flags);
     if (scale != 1.0)
         esm.writeHNT("XSCL", scale);
+
     inventory.save(esm);
+    spells.save(esm);
+    aiData.save(esm);
 }
 
 }

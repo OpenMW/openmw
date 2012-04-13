@@ -14,12 +14,12 @@ void Weapon::load(ESMReader &esm)
 }
 void Weapon::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNOString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNOCString("FNAM", name);
     esm.writeHNT("WPDT", data, 32);
-    esm.writeHNOString("SCRI", script);
-    esm.writeHNOString("ITEX", icon);
-    esm.writeHNOString("ENAM", enchant);
+    esm.writeHNOCString("SCRI", script);
+    esm.writeHNOCString("ITEX", icon);
+    esm.writeHNOCString("ENAM", enchant);
 }
 
 }

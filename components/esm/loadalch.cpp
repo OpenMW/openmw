@@ -13,10 +13,10 @@ void Potion::load(ESMReader &esm)
 }
 void Potion::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNOString("TEXT", icon);
-    esm.writeHNOString("SCRI", script);
-    esm.writeHNOString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNOCString("TEXT", icon);
+    esm.writeHNOCString("SCRI", script);
+    esm.writeHNOCString("FNAM", name);
     esm.writeHNT("ALDT", data, 12);
     effects.save(esm);
 }

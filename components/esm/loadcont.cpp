@@ -40,12 +40,12 @@ void Container::load(ESMReader &esm)
 
 void Container::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNOString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNOCString("FNAM", name);
     esm.writeHNT("CNDT", weight, 4);
     esm.writeHNT("FLAG", flags, 4);
 
-    esm.writeHNOString("SCRI", script);
+    esm.writeHNOCString("SCRI", script);
 
     inventory.save(esm);
 }

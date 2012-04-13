@@ -12,10 +12,10 @@ void Apparatus::load(ESMReader &esm)
 }
 void Apparatus::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNCString("FNAM", name);
     esm.writeHNT("AADT", data, 16);
-    esm.writeHNOString("SCRI", script);
-    esm.writeHNString("ITEX", icon);
+    esm.writeHNOCString("SCRI", script);
+    esm.writeHNCString("ITEX", icon);
 }
 }

@@ -15,12 +15,12 @@ void Light::load(ESMReader &esm)
 }
 void Light::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNOString("FNAM", name);
-    esm.writeHNOString("ITEX", icon);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNOCString("FNAM", name);
+    esm.writeHNOCString("ITEX", icon);
     esm.writeHNT("LHDT", data, 24);
-    esm.writeHNOString("SCRI", script);
-    esm.writeHNOString("SNAM", sound);
+    esm.writeHNOCString("SCRI", script);
+    esm.writeHNOCString("SNAM", sound);
 }
 
 }

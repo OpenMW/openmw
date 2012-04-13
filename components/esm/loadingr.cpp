@@ -13,11 +13,11 @@ void Ingredient::load(ESMReader &esm)
 }
 void Ingredient::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNCString("FNAM", name);
     esm.writeHNT("IRDT", data, 56);
-    esm.writeHNOString("SCRI", script);
-    esm.writeHNOString("ITEX", script);
+    esm.writeHNOCString("SCRI", script);
+    esm.writeHNOCString("ITEX", icon);
 }
 
 }

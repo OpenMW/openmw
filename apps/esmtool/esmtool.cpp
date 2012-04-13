@@ -282,7 +282,9 @@ int load(Arguments& info)
         while(esm.hasMoreRecs())
         {
             NAME n = esm.getRecName();
-            esm.getRecHeader();
+            uint32_t flags;
+            esm.getRecHeader(flags);
+
             string id = esm.getHNOString("NAME");
             if(!quiet)
                 cout << "\nRecord: " << n.toString()
@@ -726,6 +728,8 @@ int load(Arguments& info)
             {
                 rec->setId(id);
 
+                rec->setFlags((int)flags);
+
                 if (save)
                     info.data.records.push_back(rec);
                 else
@@ -803,6 +807,7 @@ int clone(Arguments& info)
     cout << endl << "Saving records to: " << info.outname << "..." << endl;
 
     ESMWriter esm;
+    esm.setEncoding(info.encoding);
     esm.setAuthor(info.data.author);
     esm.setDescription(info.data.description);
     esm.setVersion(info.data.version);
@@ -822,13 +827,22 @@ int clone(Arguments& info)
         NAME n;
         n.val = rec->getName();
 
-        esm.startRecord(n.toString(), 0);
+        esm.startRecord(n.toString(), rec->getFlags());
         string id = rec->getId();
 
-        if (n.val == REC_GLOB || n.val == REC_CLAS || n.val == REC_FACT || n.val == REC_RACE)
+        if (n.val == REC_GLOB || n.val == REC_CLAS || n.val == REC_FACT || n.val == REC_RACE || n.val == REC_SOUN 
+            || n.val == REC_REGN || n.val == REC_BSGN || n.val == REC_LTEX || n.val == REC_STAT || n.val == REC_DOOR
+            || n.val == REC_MISC || n.val == REC_WEAP || n.val == REC_CONT || n.val == REC_SPEL || n.val == REC_CREA
+            || n.val == REC_BODY || n.val == REC_LIGH || n.val == REC_ENCH || n.val == REC_NPC_ || n.val == REC_ARMO
+            || n.val == REC_CLOT || n.val == REC_REPA || n.val == REC_ACTI || n.val == REC_APPA || n.val == REC_LOCK
+            || n.val == REC_PROB || n.val == REC_INGR || n.val == REC_BOOK || n.val == REC_ALCH || n.val == REC_LEVI
+            || n.val == REC_LEVC)
             esm.writeHNCString("NAME", id);
+        else if (n.val == REC_CELL)
+            esm.writeHNString("NAME", id);
         else
             esm.writeHNOString("NAME", id);
+
         rec->save(esm);
 
         if (n.val == REC_CELL && !info.data.cellRefs[rec].empty())

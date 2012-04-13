@@ -74,15 +74,6 @@ struct NPC : public Record
     int gold; // ?? not certain
   }; // 12 bytes
 
-  struct AIDTstruct
-  {
-    // These are probabilities
-    char hello, u1, fight, flee, alarm, u2, u3, u4;
-    // The last u's might be the skills that this NPC can train you
-    // in?
-    int services; // See the Services enum
-  }; // 12 bytes
-
 #pragma pack(pop)
 
   char npdtType;
@@ -93,12 +84,10 @@ struct NPC : public Record
 
   InventoryList inventory;
   SpellList spells;
-
-  AIDTstruct AI;
-  bool hasAI;
+    AIData aiData;
 
   std::string name, model, race, cls, faction, script,
-    hair, head; // body parts
+      hair, head; // body parts
 
     //std::string mId;
 

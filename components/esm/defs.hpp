@@ -51,7 +51,7 @@ struct SpellList
     void save(ESMWriter &esm)
     {
         for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
-            esm.writeHNString("NPCS", *it);
+            esm.writeHNString("NPCS", *it, 32);
     }
 };
 
@@ -83,6 +83,139 @@ struct ENAMstruct
 
     // Struct size should be 24 bytes
 };
+
+struct AIDTstruct
+{
+    // These are probabilities
+    char hello, u1, fight, flee, alarm, u2, u3, u4;
+    // The last u's might be the skills that this NPC can train you
+    // in?
+    int services; // See the Services enum
+};  // 12 bytes
+
+struct DODTstruct
+{
+    float pos[3];
+    float rot[3];
+};
+
+struct AI_Package
+{
+    void load(ESMReader& esm)
+    {
+        getData(esm);
+        cndt = esm.getHNOString("CNDT");
+    }
+
+    void save(ESMWriter& esm)
+    {
+        esm.startSubRecord(getName());
+        saveData(esm);
+        esm.endRecord(getName());
+
+        esm.writeHNOCString("CNDT", cndt);
+    }
+
+    std::string cndt;
+
+    virtual void getData(ESMReader&) = 0;
+    virtual void saveData(ESMWriter&) = 0;
+
+    virtual std::string getName() const = 0;
+    virtual int size() const = 0;
+};
+
+struct AI_Wstruct : AI_Package
+{
+    struct Data
+    {
+        short distance, duration;
+        char timeofday;
+        char idle[8];
+        char unknown;
+    };
+
+    Data data;
+
+    void getData(ESMReader& esm) { esm.getHExact(&data, sizeof(data)); }
+    void saveData(ESMWriter& esm) { esm.writeT(data); }
+
+    std::string getName() const { return "AI_W"; }
+    int size() const { return sizeof(AI_Wstruct); }
+};
+
+struct AI_Tstruct : AI_Package
+{
+    struct Data
+    {
+        float pos[3];
+        int unknown;
+    };
+
+    Data data;
+
+    void getData(ESMReader& esm) { esm.getHExact(&data, sizeof(data)); }
+    void saveData(ESMWriter& esm) { esm.writeT(data); }
+
+    std::string getName() const { return "AI_T"; }
+    int size() const { return sizeof(AI_Tstruct); }
+};
+
+struct AI_Fstruct : AI_Package
+{
+    struct Data
+    {
+        float pos[3];
+        short duration;
+        NAME32 id;
+        short unknown;
+    };
+
+    Data data;
+    
+    void getData(ESMReader& esm) { esm.getHExact(&data, sizeof(data)); }
+    void saveData(ESMWriter& esm) { esm.writeT(data); }
+
+    std::string getName() const { return "AI_F"; }
+    int size() const { return sizeof(AI_Fstruct); }
+};
+
+struct AI_Estruct : AI_Package
+{
+    struct Data
+    {
+        float pos[3];
+        short duration;
+        NAME32 id;
+        short unknown;
+    };
+
+    Data data;
+
+    void getData(ESMReader& esm) { esm.getHExact(&data, sizeof(data)); }
+    void saveData(ESMWriter& esm) { esm.writeT(data); }
+
+    std::string getName() const { return "AI_E"; }
+    int size() const { return sizeof(AI_Estruct); }
+};
+
+struct AI_Astruct : AI_Package
+{
+    struct Data
+    {
+        NAME32 name;
+        char unknown;
+    };
+
+    Data data;
+
+    void getData(ESMReader& esm) { esm.getHExact(&data, sizeof(data)); }
+    void saveData(ESMWriter& esm) { esm.writeT(data); }
+
+    std::string getName() const { return "AI_A"; }
+    int size() const { return sizeof(AI_Astruct); }
+};
+
 #pragma pack(pop)
 
 struct EffectList
@@ -103,6 +236,87 @@ struct EffectList
         for (std::vector<ENAMstruct>::iterator it = list.begin(); it != list.end(); ++it)
         {
             esm.writeHNT<ENAMstruct>("ENAM", *it, 24);
+        }
+    }
+};
+
+struct AIData
+{
+    struct Travelstruct
+    {
+        DODTstruct dodt;
+        std::string dnam;
+    };
+
+    AIDTstruct aidt;
+    bool hasAI;
+    std::vector<AI_Package*> packages;
+    std::vector<Travelstruct> travel;
+    
+    void load(ESMReader &esm)
+    {
+        if (esm.isNextSub("AIDT"))
+        {
+            esm.getHExact(&aidt, sizeof(aidt));
+            hasAI = true;
+        }
+        else
+            hasAI = false;
+
+#define LOAD_IF_FOUND(x)                        \
+        if (esm.isNextSub(#x))                  \
+        {                                       \
+            found = true;                       \
+            x##struct *t = new x##struct();     \
+            t->load(esm);                       \
+            packages.push_back(t);              \
+        }
+        
+        bool found = true;
+        while (esm.hasMoreSubs() && found)
+        {
+            found = false;
+
+            if (esm.isNextSub("DODT"))
+            {
+                found = true;
+                Travelstruct t;
+                esm.getHExact(&t.dodt, sizeof(t.dodt));
+                t.dnam = esm.getHNOString("DNAM");
+                travel.push_back(t);
+            }
+
+            LOAD_IF_FOUND(AI_W);
+            LOAD_IF_FOUND(AI_T);
+            LOAD_IF_FOUND(AI_F);
+            LOAD_IF_FOUND(AI_E);
+            LOAD_IF_FOUND(AI_A);
+        }
+    }
+
+    void save(ESMWriter &esm)
+    {
+        if (hasAI)
+            esm.writeHNT("AIDT", aidt);
+
+        for (std::vector<Travelstruct>::iterator it = travel.begin(); it != travel.end(); ++it)   
+        {
+            esm.writeHNT("DODT", it->dodt);
+            esm.writeHNOCString("DNAM", it->dnam);
+        }
+
+        for (std::vector<AI_Package*>::iterator it = packages.begin(); it != packages.end(); ++it)
+        {
+            (*it)->save(esm);
+        }
+    }
+
+    ~AIData()
+    {
+        for (std::vector<AI_Package*>::iterator it = packages.begin(); it != packages.end();)
+        {
+            delete *it;
+            packages.erase(it++);
         }
     }
 };

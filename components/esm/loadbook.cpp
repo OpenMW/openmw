@@ -15,13 +15,13 @@ void Book::load(ESMReader &esm)
 }
 void Book::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNOString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNOCString("FNAM", name);
     esm.writeHNT("BKDT", data, 20);
-    esm.writeHNOString("SCRI", script);
-    esm.writeHNOString("ITEX", icon);
+    esm.writeHNOCString("SCRI", script);
+    esm.writeHNOCString("ITEX", icon);
     esm.writeHNOString("TEXT", text);
-    esm.writeHNOString("ENAM", enchant);
+    esm.writeHNOCString("ENAM", enchant);
 }
 
 }

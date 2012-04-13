@@ -37,27 +37,20 @@ void NPC::load(ESMReader &esm)
 
     inventory.load(esm);
     spells.load(esm);
-
-    if (esm.isNextSub("AIDT"))
-    {
-        esm.getHExact(&AI, sizeof(AI));
-        hasAI = true;
-    }
-    else
-        hasAI = false;
+    aiData.load(esm);
 
     esm.skipRecord();
 }
 void NPC::save(ESMWriter &esm)
 {
-    esm.writeHNOString("MODL", model);
-    esm.writeHNOString("FNAM", name);
-    esm.writeHNString("RNAM", race);
-    esm.writeHNString("CNAM", cls);
-    esm.writeHNString("ANAM", faction);
-    esm.writeHNString("BNAM", head);
-    esm.writeHNString("KNAM", hair);
-    esm.writeHNOString("SCRI", script);
+    esm.writeHNOCString("MODL", model);
+    esm.writeHNOCString("FNAM", name);
+    esm.writeHNCString("RNAM", race);
+    esm.writeHNCString("CNAM", cls);
+    esm.writeHNCString("ANAM", faction);
+    esm.writeHNCString("BNAM", head);
+    esm.writeHNCString("KNAM", hair);
+    esm.writeHNOCString("SCRI", script);
     
     if (npdtType == 52)
         esm.writeHNT("NPDT", npdt52, 52);
@@ -68,9 +61,7 @@ void NPC::save(ESMWriter &esm)
     
     inventory.save(esm);
     spells.save(esm);
-    
-    if (hasAI)
-        esm.writeHNT("AIDT", AI);
+    aiData.save(esm);
 }
 
 }

@@ -27,14 +27,14 @@ void Region::load(ESMReader &esm)
 }
 void Region::save(ESMWriter &esm)
 {
-    esm.writeHNString("FNAM", name);
+    esm.writeHNCString("FNAM", name);
     
     if (esm.getVersion() == VER_12)
         esm.writeHNT("WEAT", data, sizeof(data) - 2);
     else
         esm.writeHNT("WEAT", data);
     
-    esm.writeHNOString("BNAM", sleepList);
+    esm.writeHNOCString("BNAM", sleepList);
     
     esm.writeHNT("CNAM", mapColor);
     for (std::vector<SoundRef>::iterator it = soundList.begin(); it != soundList.end(); ++it)

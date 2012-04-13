@@ -42,21 +42,25 @@ void Script::save(ESMWriter &esm)
 {
     std::string varNameString;
     if (!varNames.empty())
-    {
         for (std::vector<std::string>::iterator it = varNames.begin(); it != varNames.end(); ++it)
-        {
             varNameString.append(*it);
-            //varNameString.append("\0");
-        }
-
-        data.stringTableSize = varNameString.size();
-    }
 
     esm.writeHNT("SCHD", data, 52);
     
-    esm.writeHNOString("SCVR", varNameString);
+    if (!varNames.empty())
+    {
+        esm.startSubRecord("SCVR");
+        for (std::vector<std::string>::iterator it = varNames.begin(); it != varNames.end(); ++it)
+        {
+            esm.writeHCString(*it);
+        }
+        esm.endRecord("SCVR");
+    }
 
-    esm.writeHNString("SCDT", std::string(&scriptData[0], scriptData.size()));
+    esm.startSubRecord("SCDT");
+    esm.write(&scriptData[0], data.scriptDataSize);
+    esm.endRecord("SCDT");
+
     esm.writeHNOString("SCTX", scriptText);
 }
 

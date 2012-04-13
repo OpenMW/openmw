@@ -13,11 +13,11 @@ void Door::load(ESMReader &esm)
 }
 void Door::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNOString("FNAM", name);
-    esm.writeHNOString("SCRI", script);
-    esm.writeHNOString("SNAM", openSound);
-    esm.writeHNOString("ANAM", closeSound);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNOCString("FNAM", name);
+    esm.writeHNOCString("SCRI", script);
+    esm.writeHNOCString("SNAM", openSound);
+    esm.writeHNOCString("ANAM", closeSound);
 }
 
 }

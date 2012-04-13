@@ -13,11 +13,11 @@ void Miscellaneous::load(ESMReader &esm)
 }
 void Miscellaneous::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNOString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNOCString("FNAM", name);
     esm.writeHNT("MCDT", data, 12);
-    esm.writeHNOString("SCRI", script);
-    esm.writeHNOString("ITEX", icon);
+    esm.writeHNOCString("SCRI", script);
+    esm.writeHNOCString("ITEX", icon);
 }
 
 }

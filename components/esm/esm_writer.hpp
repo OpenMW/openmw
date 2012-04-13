@@ -6,6 +6,7 @@
 #include <assert.h>
 
 #include "esm_common.hpp"
+#include "../to_utf8/to_utf8.hpp"
 
 namespace ESM {
 
@@ -23,7 +24,7 @@ public:
     void setVersion(int ver);
     int getType();
     void setType(int type);
-//    void setEncoding(const std::string& encoding); // Write strings as UTF-8?
+    void setEncoding(const std::string& encoding); // Write strings as UTF-8?
     void setAuthor(const std::string& author);
     void setDescription(const std::string& desc);
 
@@ -38,15 +39,18 @@ public:
     void writeHNCString(const std::string& name, const std::string& data)
     {
         startSubRecord(name);
-        writeHString(data);
-        if (data.size() > 0 && data[data.size()-1] != '\0')
-            write("\0", 1);
+        writeHCString(data);
         endRecord(name);
     }
     void writeHNOString(const std::string& name, const std::string& data)
     {
         if (!data.empty())
             writeHNString(name, data);
+    }
+    void writeHNOCString(const std::string& name, const std::string& data)
+    {
+        if (!data.empty())
+            writeHNCString(name, data);
     }
 
     template<typename T>
@@ -81,6 +85,7 @@ public:
     void startSubRecord(const std::string& name);
     void endRecord(const std::string& name);
     void writeHString(const std::string& data);
+    void writeHCString(const std::string& data);
     void writeName(const std::string& data);
     void write(const char* data, int size);
 
@@ -89,6 +94,7 @@ private:
     std::list<RecordData> m_records;
     std::ostream* m_stream;
     std::streampos m_headerPos;
+    ToUTF8::FromType m_encoding;
     int m_recordCount;
 
     HEDRstruct m_header;

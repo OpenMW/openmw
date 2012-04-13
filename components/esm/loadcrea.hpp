@@ -5,6 +5,7 @@
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 #include "loadcont.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -54,6 +55,7 @@ struct Creature : public Record
     }; // 96 bytes
 
     NPDTstruct data;
+    AIData aiData;
 
     int flags;
     float scale;
@@ -62,6 +64,7 @@ struct Creature : public Record
 
     // Defined in loadcont.hpp
     InventoryList inventory;
+    SpellList spells;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

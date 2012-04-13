@@ -33,8 +33,8 @@ void Tool::load(ESMReader &esm)
 }
 void Tool::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNCString("FNAM", name);
     
     std::string typeName;
     switch(type)
@@ -44,9 +44,17 @@ void Tool::save(ESMWriter &esm)
     case Type_Probe: typeName = "PBDT"; break;
     }
     
-    esm.writeHNT(typeName, data, 16);
+    Data write = data;
+    if (type == Type_Repair)
+    {
+        float tmp = *((float*) &write.uses);
+        write.uses = *((int*) &write.quality);
+        write.quality = tmp;
+    }
+
+    esm.writeHNT(typeName, write, 16);
     esm.writeHNOString("SCRI", script);
-    esm.writeHNOString("ITEX", icon);
+    esm.writeHNOCString("ITEX", icon);
 }
 
 

@@ -108,7 +108,7 @@ void Cell::save(ESMWriter &esm)
     }
     else
     {
-        esm.writeHNOString("RGNN", region);
+        esm.writeHNOCString("RGNN", region);
         if (mapColor != 0)
             esm.writeHNT("NAM5", mapColor);
     }

@@ -9,7 +9,7 @@ void Static::load(ESMReader &esm)
 }
 void Static::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
+    esm.writeHNCString("MODL", model);
 }
 
 }

@@ -67,10 +67,14 @@ public:
     std::string getId() const { return m_id; }
     void setId(const std::string& in) { m_id = in; } 
     
+    int getFlags() const { return (m_flags & 0x1 ? 0x00002000 : 0) | (m_flags & 0x2 ? 0x00000400 : 0); }
+    void setFlags(int in) { m_flags = (in & 0x00002000 ? 0x1 : 0) | (in & 0x00000400 ? 0x2 : 0); }
+
     virtual int getName() = 0;
 
 protected:
     std::string m_id;
+    char m_flags;
 };
 
 }

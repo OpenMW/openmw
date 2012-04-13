@@ -11,8 +11,8 @@ void BodyPart::load(ESMReader &esm)
 }
 void BodyPart::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNString("FNAM", name);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNCString("FNAM", name);
     esm.writeHNT("BYDT", data, 4);
 }
 

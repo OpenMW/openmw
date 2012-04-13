@@ -10,8 +10,8 @@ void Activator::load(ESMReader &esm)
 }
 void Activator::save(ESMWriter &esm)
 {
-    esm.writeHNString("MODL", model);
-    esm.writeHNString("FNAM", name);
-    esm.writeHNOString("SCRI", script);
+    esm.writeHNCString("MODL", model);
+    esm.writeHNCString("FNAM", name);
+    esm.writeHNOCString("SCRI", script);
 }
 }
