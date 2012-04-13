@@ -39,6 +39,8 @@ THE SOFTWARE.
 #include <components/settings/settings.hpp>
 #include "renderingmanager.hpp"
 
+#undef far
+
 namespace Ogre
 {
 	//---------------------------------------------------------------------
