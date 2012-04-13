@@ -1339,7 +1339,13 @@ namespace Ogre
 
 			// diffuse lighting
                         for (int i=0; i<prof->getNumberOfLightsSupported(); ++i)
+                        {
+                            // shadows only for first light (directional)
+                            if (i==0)
                                 outStream << "	outputCol.rgb += litRes"<<i<<".y * lightDiffuseColour"<<i<<" * diffuse * shadow;\n";
+                            else
+                                outStream << "	outputCol.rgb += litRes"<<i<<".y * lightDiffuseColour"<<i<<" * diffuse;\n";
+                        }
 
 			// specular default
 			if (!prof->isLayerSpecularMappingEnabled())

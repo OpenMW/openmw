@@ -56,6 +56,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
     if (caps->getNumMultiRenderTargets() < 2)
         Settings::Manager::setBool("shader", "Water", false);
+    if (!caps->isShaderProfileSupported("fp40") && !caps->isShaderProfileSupported("ps_4_0"))
+        Settings::Manager::setBool("enabled", "Shadows", false);
 
     // note that the order is important here
     if (useMRT())
@@ -108,7 +110,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
 RenderingManager::~RenderingManager ()
 {
-    //TODO: destroy mSun?
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
