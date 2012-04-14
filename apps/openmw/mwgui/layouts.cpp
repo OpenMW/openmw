@@ -67,17 +67,8 @@ HUD::HUD(int width, int height, int fpsLevel)
 
     getWidget(crosshair, "Crosshair");
 
-    if ( fpsLevel == 2 ){
-        getWidget(fpsbox, "FPSBoxAdv");
-        fpsbox->setVisible(true);
-        getWidget(fpscounter, "FPSCounterAdv");
-    }else if ( fpsLevel == 1 ){
-        getWidget(fpsbox, "FPSBox");
-        fpsbox->setVisible(true);
-        getWidget(fpscounter, "FPSCounter");
-    }else{
-        getWidget(fpscounter, "FPSCounter");
-    }
+    setFpsLevel(fpsLevel);
+
     getWidget(trianglecounter, "TriangleCounter");
     getWidget(batchcounter, "BatchCounter");
 
@@ -93,6 +84,28 @@ HUD::HUD(int width, int height, int fpsLevel)
     setEffect("icons\\s\\tx_s_chameleon.dds");
 
     LocalMapBase::init(minimap, this);
+}
+
+void HUD::setFpsLevel(int level)
+{
+    MyGUI::Widget* fps;
+    getWidget(fps, "FPSBoxAdv");
+    fps->setVisible(false);
+    getWidget(fps, "FPSBox");
+    fps->setVisible(false);
+
+    if (level == 2)
+    {
+        getWidget(fpsbox, "FPSBoxAdv");
+        fpsbox->setVisible(true);
+        getWidget(fpscounter, "FPSCounterAdv");
+    }
+    else if (level == 1)
+    {
+        getWidget(fpsbox, "FPSBox");
+        fpsbox->setVisible(true);
+        getWidget(fpscounter, "FPSCounter");
+    }
 }
 
 void HUD::setFPS(float fps)

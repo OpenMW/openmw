@@ -78,6 +78,7 @@ namespace MWGui
     void setPlayerPos(const float x, const float y);
     void setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible);
     void setBottomRightVisibility(bool effectBoxVisible, bool minimapVisible);
+    void setFpsLevel(const int level);
 
     MyGUI::ProgressPtr health, magicka, stamina;
     MyGUI::Widget *weapBox, *spellBox;

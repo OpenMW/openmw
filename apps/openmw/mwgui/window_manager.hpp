@@ -158,7 +158,10 @@ namespace MWGui
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
     void toggleFogOfWar();
-    
+
+    int toggleFps();
+    ///< toggle fps display @return resulting fps level
+
     void setInteriorMapTexture(const int x, const int y);
     ///< set the index of the map texture that should be used (for interiors)
 
