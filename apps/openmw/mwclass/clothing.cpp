@@ -89,7 +89,7 @@ namespace MWClass
 
             static const int sMapping[size][2] =
             {
-                { ESM::Clothing::Shirt, MWWorld::InventoryStore::Slot_Cuirass },
+                { ESM::Clothing::Shirt, MWWorld::InventoryStore::Slot_Shirt },
                 { ESM::Clothing::Belt, MWWorld::InventoryStore::Slot_Belt },
                 { ESM::Clothing::Robe, MWWorld::InventoryStore::Slot_Robe },
                 { ESM::Clothing::Pants, MWWorld::InventoryStore::Slot_Pants },

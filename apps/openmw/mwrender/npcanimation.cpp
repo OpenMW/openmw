@@ -13,7 +13,8 @@ NpcAnimation::~NpcAnimation(){
 
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv), timeToChange(0), 
-    robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)), helmet(inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)),
+    robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)), helmet(inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)), shirt(inv.getSlot(MWWorld::InventoryStore::Slot_Shirt)),
+    cuirass(inv.getSlot(MWWorld::InventoryStore::Slot_Cuirass)),
     lclavicle(0),
 	rclavicle(0),
 	rupperArm(0),
@@ -159,7 +160,7 @@ void NpcAnimation::updateParts(){
 
 		std::string hairModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
-
+        bool apparelChanged = false;
         
 
 		//inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
@@ -167,7 +168,31 @@ void NpcAnimation::updateParts(){
             //A robe was added or removed
             removePartGroup(MWWorld::InventoryStore::Slot_Robe);
             robe = inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
-            if(robe != inv.end())
+            apparelChanged = true;
+           
+		
+		}
+        if(helmet != inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)){
+            apparelChanged = true;
+            helmet = inv.getSlot(MWWorld::InventoryStore::Slot_Helmet);
+            removePartGroup(MWWorld::InventoryStore::Slot_Helmet);
+
+        }
+        if(cuirass != inv.getSlot(MWWorld::InventoryStore::Slot_Cuirass)){
+            cuirass = inv.getSlot(MWWorld::InventoryStore::Slot_Cuirass);
+            removePartGroup(MWWorld::InventoryStore::Slot_Cuirass);
+            apparelChanged = true;
+            
+        }
+        if(shirt != inv.getSlot(MWWorld::InventoryStore::Slot_Shirt)){
+            shirt = inv.getSlot(MWWorld::InventoryStore::Slot_Shirt);
+            removePartGroup(MWWorld::InventoryStore::Slot_Shirt);
+            apparelChanged = true;
+            
+        }
+
+        if(apparelChanged){
+             if(robe != inv.end())
             {
                 MWWorld::Ptr ptr = *robe;
                 
@@ -183,13 +208,9 @@ void NpcAnimation::updateParts(){
                     
                 }
             }
-		
-		}
-        if(helmet != inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)){
-            helmet = inv.getSlot(MWWorld::InventoryStore::Slot_Helmet);
-            removePartGroup(MWWorld::InventoryStore::Slot_Helmet);
-            removeIndividualPart(ESM::PRT_Hair);
-            if(helmet != inv.end()){
+            
+             if(helmet != inv.end()){
+                removeIndividualPart(ESM::PRT_Hair);
                 const ESM::Armor *armor = (helmet->get<ESM::Armor>())->base;
                 std::vector<ESM::PartReference> parts = armor->parts.parts;
                 for(int i = 0; i < parts.size(); i++)
@@ -202,7 +223,32 @@ void NpcAnimation::updateParts(){
                     
                 }
             }
-
+             if(cuirass != inv.end()){
+                const ESM::Armor *armor = (cuirass->get<ESM::Armor>())->base;
+                std::vector<ESM::PartReference> parts = armor->parts.parts;
+                for(int i = 0; i < parts.size(); i++)
+                {
+                    ESM::PartReference part = parts[i];
+                    
+                        const ESM::BodyPart *bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.male);
+                        if(bodypart)
+                            addOrReplaceIndividualPart(part.part, MWWorld::InventoryStore::Slot_Cuirass,3,"meshes\\" + bodypart->model);
+                    
+                }
+            }
+             if(shirt != inv.end()){
+                const ESM::Clothing *clothes = (shirt->get<ESM::Clothing>())->base;
+                std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                for(int i = 0; i < parts.size(); i++)
+                {
+                    ESM::PartReference part = parts[i];
+                    
+                        const ESM::BodyPart *bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.male);
+                        if(bodypart)
+                            addOrReplaceIndividualPart(part.part, MWWorld::InventoryStore::Slot_Shirt,2,"meshes\\" + bodypart->model);
+                    
+                }
+            }
         }
 
                 if(partpriorities[ESM::PRT_Cuirass] < 1){

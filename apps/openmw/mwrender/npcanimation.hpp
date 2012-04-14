@@ -69,6 +69,8 @@ private:
 	float timeToChange;
 	MWWorld::ContainerStoreIterator robe;
     MWWorld::ContainerStoreIterator helmet;
+    MWWorld::ContainerStoreIterator shirt;
+    MWWorld::ContainerStoreIterator cuirass;
     
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
