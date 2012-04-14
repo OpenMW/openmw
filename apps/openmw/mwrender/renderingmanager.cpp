@@ -482,11 +482,13 @@ void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
 void RenderingManager::disableLights()
 {
     mObjects.disableLights();
+    sunDisable();
 }
 
 void RenderingManager::enableLights()
 {
     mObjects.enableLights();
+    sunEnable();
 }
 
 const bool RenderingManager::useMRT()
