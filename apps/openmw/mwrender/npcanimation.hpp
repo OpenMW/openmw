@@ -62,6 +62,7 @@ private:
     
 	Ogre::SceneNode* insert;
     bool isBeast;
+    bool isFemale;
 	std::string headID;
 	std::string hairID;
 	std::string npcName;
@@ -71,6 +72,7 @@ private:
     MWWorld::ContainerStoreIterator helmet;
     MWWorld::ContainerStoreIterator shirt;
     MWWorld::ContainerStoreIterator cuirass;
+    MWWorld::ContainerStoreIterator greaves;
     
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
@@ -80,8 +82,10 @@ private:
 	virtual void runAnimation(float timepassed);
 	void updateParts();
     void removeIndividualPart(int type);
-    void removePartGroup(int group);
+   
     bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
+     void removePartGroup(int group);
+    void addPartGroup(int group, int priority, std::vector<ESM::PartReference>& parts);
 	
 };
 }
