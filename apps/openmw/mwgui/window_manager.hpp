@@ -62,6 +62,7 @@ namespace MWGui
   class Console;
   class JournalWindow;
   class CharacterCreation;
+  class ToolTips;
 
   class TextInputDialog;
   class InfoBoxDialog;
@@ -196,6 +197,7 @@ namespace MWGui
     HUD *hud;
     MapWindow *map;
     MainMenu *menu;
+    ToolTips *mToolTips;
     StatsWindow *stats;
     MessageBoxManager *mMessageBoxManager;
     Console *console;

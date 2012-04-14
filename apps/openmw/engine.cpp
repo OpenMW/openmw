@@ -133,14 +133,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (mUseSound)
             mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
 
-        // update GUI
-        Ogre::RenderWindow* window = mOgre->getWindow();
-        mEnvironment.mWindowManager->wmUpdateFps(window->getLastFPS(),
-                                                 window->getTriangleCount(),
-                                                 window->getBatchCount());
-
-        mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
-
         // global scripts
         mEnvironment.mGlobalScripts->run (mEnvironment);
 
@@ -170,6 +162,14 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // update world
         mEnvironment.mWorld->update (evt.timeSinceLastFrame);
+
+        // update GUI
+        Ogre::RenderWindow* window = mOgre->getWindow();
+        mEnvironment.mWindowManager->wmUpdateFps(window->getLastFPS(),
+                                                 window->getTriangleCount(),
+                                                 window->getBatchCount());
+
+        mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
         // report focus object (for debugging)
         if (mReportFocus)

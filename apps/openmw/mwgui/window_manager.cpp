@@ -7,6 +7,7 @@
 #include "map_window.hpp"
 #include "stats_window.hpp"
 #include "messagebox.hpp"
+#include "tooltips.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -31,6 +32,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
   , map(NULL)
   , menu(NULL)
   , stats(NULL)
+  , mToolTips(NULL)
   , mMessageBoxManager(NULL)
   , console(NULL)
   , mJournal(NULL)
@@ -80,6 +82,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
     dialogueWindow = new DialogueWindow(*this,environment);
+    mToolTips = new ToolTips();
 
     // The HUD is always on
     hud->setVisible(true);
@@ -118,6 +121,7 @@ WindowManager::~WindowManager()
     delete stats;
     delete mJournal;
     delete dialogueWindow;
+    delete mToolTips;
 
     delete mCharGen;
 
@@ -182,6 +186,11 @@ void WindowManager::updateVisible()
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
+
+    if (mode == GM_Game)
+        mToolTips->enterGameMode();
+    else
+        mToolTips->enterGuiMode();
 
     switch(mode) {
         case GM_Game:
@@ -408,6 +417,7 @@ void WindowManager::onDialogueWindowBye()
 void WindowManager::onFrame (float frameDuration)
 {
     mMessageBoxManager->onFrame(frameDuration);
+    mToolTips->onFrame(frameDuration);
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
