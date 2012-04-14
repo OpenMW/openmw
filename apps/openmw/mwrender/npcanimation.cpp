@@ -13,7 +13,7 @@ NpcAnimation::~NpcAnimation(){
 
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv), timeToChange(0), 
-    robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)), 
+    robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)), helmet(inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)),
     lclavicle(0),
 	rclavicle(0),
 	rupperArm(0),
@@ -160,13 +160,12 @@ void NpcAnimation::updateParts(){
 		std::string hairModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
 
+        
+
 		//inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
 		if(robe != inv.getSlot(MWWorld::InventoryStore::Slot_Robe)){
             //A robe was added or removed
-            if(chest.first)
-            {
-                insert->detachObject(chest.first); chest.first = 0;
-            }
+            removePartGroup(MWWorld::InventoryStore::Slot_Robe);
             robe = inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
             if(robe != inv.end())
             {
@@ -177,23 +176,47 @@ void NpcAnimation::updateParts(){
                 for(int i = 0; i < parts.size(); i++)
                 {
                     ESM::PartReference part = parts[i];
-                    if(part.part == ESM::PRT_Cuirass)
-                    {
+                    
                         const ESM::BodyPart *bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.male);
-                        chest = insertFreePart("meshes\\" + bodypart->model, ":\"");
-                    }
+                        if(bodypart)
+                            addOrReplaceIndividualPart(part.part, MWWorld::InventoryStore::Slot_Robe,5,"meshes\\" + bodypart->model);
+                    
                 }
             }
 		
 		}
-        if(robe == inv.end() ){
-            //if(inv.getSlot(MWWorld::InventoryStore::Cuirass) != inv.end())
-            if(chest.first == 0){
-                const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
-                chest = insertFreePart("meshes\\" + chestPart->model, ":\"");
+        if(helmet != inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)){
+            helmet = inv.getSlot(MWWorld::InventoryStore::Slot_Helmet);
+            removePartGroup(MWWorld::InventoryStore::Slot_Helmet);
+            removeIndividualPart(ESM::PRT_Hair);
+            if(helmet != inv.end()){
+                const ESM::Armor *armor = (helmet->get<ESM::Armor>())->base;
+                std::vector<ESM::PartReference> parts = armor->parts.parts;
+                for(int i = 0; i < parts.size(); i++)
+                {
+                    ESM::PartReference part = parts[i];
+                    
+                        const ESM::BodyPart *bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.male);
+                        if(bodypart)
+                            addOrReplaceIndividualPart(part.part, MWWorld::InventoryStore::Slot_Helmet,3,"meshes\\" + bodypart->model);
+                    
+                }
             }
-            
+
         }
+
+                if(partpriorities[ESM::PRT_Cuirass] < 1){
+                    const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
+                    if(chestPart)
+                        addOrReplaceIndividualPart(ESM::PRT_Cuirass, -1,1,"meshes\\" + chestPart->model);
+                }
+                if(partpriorities[ESM::PRT_Head] < 1){
+                        addOrReplaceIndividualPart(ESM::PRT_Head, -1,1,headModel);
+                }
+                if(partpriorities[ESM::PRT_Hair] < 1 && partpriorities[ESM::PRT_Head] <= 1){
+                        addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1,hairModel);
+                }
+           
 		
 		
 		
@@ -418,9 +441,10 @@ void NpcAnimation::removeIndividualPart(int type){
         }
     }
     bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh){
-        if(priority >= partpriorities[type]){
+        if(priority > partpriorities[type]){
             removeIndividualPart(type);
             partslots[type] = group;
+            partpriorities[type] = priority;
             switch(type){
                 case ESM::PRT_Head:                           //0
                     head = insertBoundedPart(mesh, "Head");

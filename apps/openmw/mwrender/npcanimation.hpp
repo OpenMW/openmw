@@ -68,6 +68,7 @@ private:
 	std::string bodyRaceID;
 	float timeToChange;
 	MWWorld::ContainerStoreIterator robe;
+    MWWorld::ContainerStoreIterator helmet;
     
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
