@@ -58,7 +58,7 @@ namespace MWClass
     {
         // TODO implement reading
 
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, false, true);
+        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -70,6 +70,14 @@ namespace MWClass
             ptr.get<ESM::Book>();
 
         return ref->base->script;
+    }
+
+    int Book::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return ref->base->data.value;
     }
 
     void Book::registerSelf()

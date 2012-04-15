@@ -1,5 +1,6 @@
 #include "npcanimation.hpp"
 #include "../mwworld/world.hpp"
+#include "renderconst.hpp"
 
 
 using namespace Ogre;
@@ -65,6 +66,27 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
          NifOgre::NIFLoader::load(smodel);
 
     base = mRend.getScene()->createEntity(smodel);
+    base->setVisibilityFlags(RV_Actors);
+    bool transparent = false;
+    for (unsigned int i=0; i<base->getNumSubEntities(); ++i)
+    {
+        Ogre::MaterialPtr mat = base->getSubEntity(i)->getMaterial();
+        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+        while (techIt.hasMoreElements())
+        {
+            Ogre::Technique* tech = techIt.getNext();
+            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+            while (passIt.hasMoreElements())
+            {
+                Ogre::Pass* pass = passIt.getNext();
+
+                if (pass->getDepthWriteEnabled() == false)
+                    transparent = true;
+            }
+        }
+    }
+    base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+
     base->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones
                                                //stay in the same place when we skipanim, or open a gui window
 
@@ -218,6 +240,7 @@ Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::stri
    
     NIFLoader::load(mesh);
     Entity* ent = mRend.getScene()->createEntity(mesh);
+    ent->setVisibilityFlags(RV_Actors);
 
     base->attachObjectToBone(bonename, ent);
     return ent;
@@ -227,9 +250,7 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
     NIFLoader::load(meshNumbered);
 
     Ogre::Entity* ent = mRend.getScene()->createEntity(meshNumbered);
-
-     
-
+    ent->setVisibilityFlags(RV_Actors);
 
     insert->attachObject(ent);
     entityparts.push_back(ent);

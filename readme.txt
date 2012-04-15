@@ -7,6 +7,10 @@ Version: 0.13.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
+Font Licenses:
+EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
+VeraMono.ttf: custom (see Bitstream Vera License.txt for more information)
+
 
 THIS IS A WORK IN PROGRESS
 
@@ -91,6 +95,7 @@ Allowed options:
 CREDITS
 
 Current Developers:
+Aleksandar Jovanov
 Alexander “Ace” Olofsson
 athile
 BrotherBrick
@@ -144,6 +149,7 @@ Bug #207: Ogre.log not written
 Bug #209: Sounds do not play
 Bug #210: Ogre crash at Dren plantation
 Bug #214: Unsupported file format version
+Bug #222: Launcher is writing openmw.cfg file to wrong location
 Feature #9: NPC Dialogue Window
 Feature #16/42: New sky/weather implementation
 Feature #40: Fading

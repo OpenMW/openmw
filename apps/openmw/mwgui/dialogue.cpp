@@ -43,9 +43,6 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
     // Centre dialog
     center();
 
-    //WindowManager *wm = environment.mWindowManager;
-    setText("NpcName", "Name of character");
-
     //History view
     getWidget(history, "History");
     history->setOverflowToTheLeft(true);
@@ -116,7 +113,8 @@ void DialogueWindow::onSelectTopic(MyGUI::ListBox* _sender, size_t _index)
 
 void DialogueWindow::startDialogue(std::string npcName)
 {
-    setText("NpcName", npcName);
+    static_cast<MyGUI::Window*>(mMainWidget)->setCaption(npcName);
+    adjustWindowCaption();
 }
 
 void DialogueWindow::setKeywords(std::list<std::string> keyWords)

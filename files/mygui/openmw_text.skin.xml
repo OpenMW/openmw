@@ -2,40 +2,35 @@
 
 <MyGUI type="Skin">
     <Skin name = "NormalText" size = "16 16">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
         <Property key="TextColour" value = "0.87 0.78 0.62" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16" align = "ALIGN_STRETCH"/>
     </Skin>
 
     <Skin name = "NumFPS" size = "16 16">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_HCENTER ALIGN_BOTTOM" />
         <Property key="TextColour" value = "1 1 1" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16" align = "ALIGN_STRETCH"/>
     </Skin>
 
     <Skin name = "SandText" size = "16 16">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
         <Property key="TextColour" value = "0.75 0.6 0.35" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
     </Skin>
 
     <Skin name = "SandTextC" size = "16 16">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "TOP HCENTER" />
         <Property key="TextColour" value = "0.75 0.6 0.35" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
     </Skin>
 
     <Skin name = "SandTextRight" size = "16 16">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_RIGHT ALIGN_BOTTOM" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH">
             <State name="normal" colour = "0.75 0.6 0.35"/>
@@ -45,8 +40,7 @@
     </Skin>
 
     <Skin name = "SandBrightText" size = "16 16">
-        <Property key="FontName" value = "MyGUI_CoreFont.18" />
-        <Property key="FontHeight" value = "18" />
+        <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
         <Property key="TextColour" value = "0.85 0.76 0.60" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>

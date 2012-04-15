@@ -2,7 +2,9 @@
 #include "renderingmanager.hpp"
 
 #include "../mwworld/environment.hpp"
+#include "../mwworld/world.hpp"
 #include "../mwgui/window_manager.hpp"
+#include "renderconst.hpp"
 
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
@@ -10,16 +12,24 @@
 using namespace MWRender;
 using namespace Ogre;
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWWorld::Environment* env)
+LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering, MWWorld::Environment* env) :
+    mInterior(false), mCellX(0), mCellY(0)
 {
     mRendering = rend;
+    mRenderingManager = rendering;
     mEnvironment = env;
-    
+
+    mCameraPosNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
+    mCameraRotNode = mCameraPosNode->createChildSceneNode();
+    mCameraNode = mCameraRotNode->createChildSceneNode();
+
     mCellCamera = mRendering->getScene()->createCamera("CellCamera");
     mCellCamera->setProjectionType(PT_ORTHOGRAPHIC);
     // look down -y
     const float sqrt0pt5 = 0.707106781;
     mCellCamera->setOrientation(Quaternion(sqrt0pt5, -sqrt0pt5, 0, 0));
+
+    mCameraNode->attachObject(mCellCamera);
 }
 
 LocalMap::~LocalMap()
@@ -27,13 +37,14 @@ LocalMap::~LocalMap()
     deleteBuffers();
 }
 
+const Ogre::Vector2 LocalMap::rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle)
+{
+    return Vector2( Math::Cos(angle) * (p.x - c.x) - Math::Sin(angle) * (p.y - c.y) + c.x,
+                    Math::Sin(angle) * (p.x - c.x) + Math::Cos(angle) * (p.y - c.y) + c.y);
+}
+
 void LocalMap::deleteBuffers()
 {
-    for (std::map<std::string, uint32*>::iterator it=mBuffers.begin();
-        it != mBuffers.end(); ++it)
-    {
-        delete it->second;
-    }
     mBuffers.clear();
 }
 
@@ -70,9 +81,6 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
     {
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
         Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().z);
-        /// \todo why is this workaround needed?
-        min *= 1.3;
-        max *= 1.3;
         Vector2 length = max-min;
         
         // divide into segments
@@ -95,10 +103,14 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
 {
     mInterior = false;
 
+    mCameraRotNode->setOrientation(Quaternion::IDENTITY);
+
     std::string name = "Cell_"+coordStr(cell->cell->data.gridX, cell->cell->data.gridY);
 
     int x = cell->cell->data.gridX;
     int y = cell->cell->data.gridY;
+
+    mCameraPosNode->setPosition(Vector3(0,0,0));
 
     render((x+0.5)*sSize, (-y-0.5)*sSize, -10000, 10000, sSize, sSize, name);
 }
@@ -108,17 +120,41 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
 {
     mInterior = true;
     mBounds = bounds;
-    
-    Vector2 z(bounds.getMaximum().y, bounds.getMinimum().y);
-    Vector2 min(bounds.getMinimum().x, bounds.getMinimum().z);
-    Vector2 max(bounds.getMaximum().x, bounds.getMaximum().z);
 
-    /// \todo why is this workaround needed?
-    min *= 1.3;
-    max *= 1.3;
+    Vector2 z(mBounds.getMaximum().y, mBounds.getMinimum().y);
+
+    const Vector2& north = mEnvironment->mWorld->getNorthVector(cell);
+    Radian angle(std::atan2(-north.x, -north.y));
+    mAngle = angle.valueRadians();
+    mCameraRotNode->setOrientation(Quaternion(Math::Cos(angle/2.f), 0, Math::Sin(angle/2.f), 0));
+
+    // rotate the cell and merge the rotated corners to the bounding box
+    Vector2 _center(bounds.getCenter().x, bounds.getCenter().z);
+    Vector3 _c1 = bounds.getCorner(AxisAlignedBox::NEAR_LEFT_BOTTOM);
+    Vector3 _c2 = bounds.getCorner(AxisAlignedBox::FAR_LEFT_BOTTOM);
+    Vector3 _c3 = bounds.getCorner(AxisAlignedBox::NEAR_RIGHT_BOTTOM);
+    Vector3 _c4 = bounds.getCorner(AxisAlignedBox::FAR_RIGHT_BOTTOM);
+    Vector2 c1(_c1.x, _c1.z);
+    Vector2 c2(_c2.x, _c2.z);
+    Vector2 c3(_c3.x, _c3.z);
+    Vector2 c4(_c4.x, _c4.z);
+    c1 = rotatePoint(c1, _center, mAngle);
+    c2 = rotatePoint(c2, _center, mAngle);
+    c3 = rotatePoint(c3, _center, mAngle);
+    c4 = rotatePoint(c4, _center, mAngle);
+    mBounds.merge(Vector3(c1.x, 0, c1.y));
+    mBounds.merge(Vector3(c2.x, 0, c2.y));
+    mBounds.merge(Vector3(c3.x, 0, c3.y));
+    mBounds.merge(Vector3(c4.x, 0, c4.y));
+
+    Vector2 center(mBounds.getCenter().x, mBounds.getCenter().z);
+
+    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
+    Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().z);
 
     Vector2 length = max-min;
-    Vector2 center(bounds.getCenter().x, bounds.getCenter().z);
+
+    mCameraPosNode->setPosition(Vector3(center.x, 0, center.y));
 
     // divide into segments
     const int segsX = std::ceil( length.x / sSize );
@@ -133,7 +169,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
             Vector2 start = min + Vector2(sSize*x,sSize*y);
             Vector2 newcenter = start + 4096;
 
-            render(newcenter.x, newcenter.y, z.y, z.x, sSize, sSize,
+            render(newcenter.x - center.x, newcenter.y - center.y, z.y, z.x, sSize, sSize,
                 cell->cell->name + "_" + coordStr(x,y));
         }
     }
@@ -152,8 +188,9 @@ void LocalMap::render(const float x, const float y,
 
     // make everything visible
     mRendering->getScene()->setAmbientLight(ColourValue(1,1,1));
+    mRenderingManager->disableLights();
 
-    mCellCamera->setPosition(Vector3(x, zhigh+100000, y));
+    mCameraNode->setPosition(Vector3(x, zhigh+100000, y));
     //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
     mCellCamera->setFarClipDistance(0); // infinite
 
@@ -187,7 +224,10 @@ void LocalMap::render(const float x, const float y,
             vp->setOverlaysEnabled(false);
             vp->setShadowsEnabled(false);
             vp->setBackgroundColour(ColourValue(0, 0, 0));
-            //vp->setVisibilityMask( ... );
+            vp->setVisibilityMask(RV_Map);
+
+            // use fallback techniques without shadows and without mrt
+            vp->setMaterialScheme("Fallback");
 
             rtt->update();
 
@@ -202,16 +242,16 @@ void LocalMap::render(const float x, const float y,
                             TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
 
             // create a buffer to use for dynamic operations
-            uint32* buffer = new uint32[sFogOfWarResolution*sFogOfWarResolution];
+            std::vector<uint32> buffer;
+            buffer.resize(sFogOfWarResolution*sFogOfWarResolution);
 
             // initialize to (0, 0, 0, 1)
-            uint32* pointer = buffer;
             for (int p=0; p<sFogOfWarResolution*sFogOfWarResolution; ++p)
             {
-                *(pointer+p) = (255 << 24);
+                buffer[p] = (255 << 24);
             }
 
-            memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, sFogOfWarResolution*sFogOfWarResolution*4);
+            memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
             tex2->getBuffer()->unlock();
 
             mBuffers[texture] = buffer;
@@ -220,13 +260,14 @@ void LocalMap::render(const float x, const float y,
             //rtt->writeContentsToFile("./" + texture + ".jpg");
         }
     }
-    
+
+    mRenderingManager->enableLights();
 
     // re-enable fog
     mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, fStart, fEnd);
 }
 
-void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3& direction)
+void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation)
 {
     if (sFogOfWarSkip != 0)
     {
@@ -237,7 +278,19 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
 
     // retrieve the x,y grid coordinates the player is in 
     int x,y;
-    Vector2 pos(position.x, position.z);
+    Vector3 _pos(position.x, 0, position.z);
+    Vector2 pos(_pos.x, _pos.z);
+
+    if (mInterior)
+    {
+        pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().z), mAngle);
+    }
+
+
+    Vector3 playerdirection = -mCameraRotNode->convertWorldToLocalOrientation(orientation).zAxis();
+
+    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
+
     if (!mInterior)
     {
         x = std::ceil(pos.x / sSize)-1;
@@ -247,9 +300,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
     }
     else
     {
-        Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
-        min *= 1.3;
-        
         x = std::ceil((pos.x - min.x)/sSize)-1;
         y = std::ceil((pos.y - min.y)/sSize)-1;
 
@@ -264,20 +314,17 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
         u = std::abs((pos.x - (sSize*x))/sSize);
         v = 1-std::abs((pos.y + (sSize*y))/sSize);
         texName = "Cell_"+coordStr(x,y);
-
     }
     else
     {
-        Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
-        min *= 1.3;
-
         u = (pos.x - min.x - sSize*x)/sSize;
         v = (pos.y - min.y - sSize*y)/sSize;
 
         texName = mInteriorName + "_" + coordStr(x,y);
     }
+
     mEnvironment->mWindowManager->setPlayerPos(u, v);
-    mEnvironment->mWindowManager->setPlayerDir(direction.x, -direction.z);
+    mEnvironment->mWindowManager->setPlayerDir(playerdirection.x, -playerdirection.z);
 
     // explore radius (squared)
     const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;
@@ -288,25 +335,23 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Vector3&
     {
         // get its buffer
         if (mBuffers.find(texName) == mBuffers.end()) return;
-        uint32* buffer = mBuffers[texName];
-        uint32* pointer = buffer;
+        int i=0;
         for (int texV = 0; texV<sFogOfWarResolution; ++texV)
         {
             for (int texU = 0; texU<sFogOfWarResolution; ++texU)
             {
                 float sqrDist = Math::Sqr(texU - u*sFogOfWarResolution) + Math::Sqr(texV - v*sFogOfWarResolution);
-                uint32 clr = *pointer;
+                uint32 clr = mBuffers[texName][i];
                 uint8 alpha = (clr >> 24);
                 alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
-                *((uint32*)pointer) = (alpha << 24);
+                mBuffers[texName][i] = (uint32) (alpha << 24);
 
-                // move to next texel
-                ++pointer;
+                ++i;
             }
         }
 
         // copy to the texture
-        memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), buffer, sFogOfWarResolution*sFogOfWarResolution*4);
+        memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &mBuffers[texName][0], sFogOfWarResolution*sFogOfWarResolution*4);
         tex->getBuffer()->unlock();
     }
 }

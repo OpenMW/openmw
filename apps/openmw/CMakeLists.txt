@@ -15,7 +15,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
     renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
-    renderinginterface localmap
+    renderinginterface localmap occlusionquery terrain terrainmaterial water shadows shaderhelper
     )
 
 add_openmw_dir (mwinput
@@ -25,6 +25,7 @@ add_openmw_dir (mwinput
 add_openmw_dir (mwgui
     layouts text_input widgets race class birth review window_manager console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation container
+    map_window window_pinnable_base cursorreplace
     )
 
 add_openmw_dir (mwdialogue
@@ -39,7 +40,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanager
+    soundmanager openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
     )
 
 add_openmw_dir (mwworld
@@ -54,7 +55,7 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanager stat creaturestats magiceffects movement
+    mechanicsmanager stat creaturestats magiceffects movement actors drawstate spells
     )
 
 # Main executable
@@ -82,6 +83,7 @@ add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
     ${OGRE_LIBRARIES}
+    ${OGRE_Terrain_LIBRARY}
     ${OGRE_STATIC_PLUGINS}
     ${OIS_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -89,7 +91,7 @@ target_link_libraries(openmw
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
-    MyGUI.OgrePlatform #TODO MyGUI ogre platform is not added by the find script
+    ${MYGUI_PLATFORM_LIBRARIES}
     components
 )
 

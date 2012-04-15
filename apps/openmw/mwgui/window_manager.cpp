@@ -4,6 +4,7 @@
 #include "review.hpp"
 #include "dialogue.hpp"
 #include "dialogue_history.hpp"
+#include "map_window.hpp"
 #include "stats_window.hpp"
 #include "messagebox.hpp"
 #include "container.hpp"
@@ -15,6 +16,8 @@
 #include "journalwindow.hpp"
 #include "charactercreation.hpp"
 
+#include <components/settings/settings.hpp>
+
 #include <assert.h>
 #include <iostream>
 #include <iterator>
@@ -23,15 +26,40 @@ using namespace MWGui;
 
 WindowManager::WindowManager(MWWorld::Environment& environment,
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath)
-  : environment(environment)
+  : mGuiManager(NULL)
+  , environment(environment)
+  , hud(NULL)
+  , map(NULL)
+  , menu(NULL)
+  , stats(NULL)
+  , mMessageBoxManager(NULL)
+  , console(NULL)
+  , mJournal(NULL)
   , dialogueWindow(nullptr)
+  , mCharGen(NULL)
+  , playerClass()
+  , playerName()
+  , playerRaceId()
+  , playerBirthSignId()
+  , playerAttributes()
+  , playerMajorSkills()
+  , playerMinorSkills()
+  , playerSkillValues()
+  , playerHealth()
+  , playerMagicka()
+  , playerFatigue()
+  , gui(NULL)
   , mode(GM_Game)
   , nextMode(GM_Game)
   , needModeChange(false)
+  , garbageDialogs()
   , shown(GW_ALL)
   , allowed(newGame ? GW_None : GW_ALL)
+  , showFPSLevel(fpsLevel)
+  , mFPS(0.0f)
+  , mTriangleCount(0)
+  , mBatchCount(0)
 {
-    showFPSLevel = fpsLevel;
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
@@ -47,7 +75,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
 
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
-    map = new MapWindow();
+    map = new MapWindow(*this);
     stats = new StatsWindow(*this);
     console = new Console(w,h, environment, extensions);
     mJournal = new JournalWindow(*this);
@@ -157,71 +185,58 @@ void WindowManager::updateVisible()
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
-    // If in game mode, don't show anything.
-    if(mode == GM_Game) //Use a switch/case structure
-    {
-        return;
-    }
+    switch(mode) {
+        case GM_Game:
+            // If in game mode, don't show anything.
+            break;
+        case GM_MainMenu:
+            menu->setVisible(true);
+            break;
+        case GM_Console:
+            console->enable();
+            break;
+        case GM_Name:
+        case GM_Race:
+        case GM_Class:
+        case GM_ClassPick:
+        case GM_ClassCreate:
+        case GM_Birth:
+        case GM_ClassGenerate:
+        case GM_Review:
+            mCharGen->spawnDialog(mode);
+            break;
+        case GM_Inventory:
+        {
+            // First, compute the effective set of windows to show.
+            // This is controlled both by what windows the
+            // user has opened/closed (the 'shown' variable) and by what
+            // windows we are allowed to show (the 'allowed' var.)
+            int eff = shown & allowed;
 
-    if(mode == GM_MainMenu)
-    {
-        // Enable the main menu
-        menu->setVisible(true);
-        return;
-    }
-
-    if(mode == GM_Console)
-    {
-        console->enable();
-        return;
-    }
-
-    //There must be a more elegant solution
-    if (mode == GM_Name || mode == GM_Race || mode == GM_Class || mode == GM_ClassPick || mode == GM_ClassCreate || mode == GM_Birth || mode == GM_ClassGenerate || mode == GM_Review)
-    {
-        mCharGen->spawnDialog(mode);
-        return;
-    }
-
-    if(mode == GM_Inventory)
-    {
-        // Ah, inventory mode. First, compute the effective set of
-        // windows to show. This is controlled both by what windows the
-        // user has opened/closed (the 'shown' variable) and by what
-        // windows we are allowed to show (the 'allowed' var.)
-        int eff = shown & allowed;
-
-        // Show the windows we want
-        map   -> setVisible( (eff & GW_Map) != 0 );
-        stats -> setVisible( (eff & GW_Stats) != 0 );
-        return;
-    }
-
-    if (mode == GM_Dialogue)
-    {
-        dialogueWindow->open();
-        return;
-    }
-
-    if(mode == GM_InterMessageBox)
-    {
-        if(!mMessageBoxManager->isInteractiveMessageBox()) {
-            setGuiMode(GM_Game);
+            // Show the windows we want
+            map   -> setVisible( (eff & GW_Map) != 0 );
+            stats -> setVisible( (eff & GW_Stats) != 0 );
+            break;
         }
-        return;
+        case GM_Dialogue:
+            dialogueWindow->open();
+            break;
+        case GM_InterMessageBox:
+            if(!mMessageBoxManager->isInteractiveMessageBox()) {
+                setGuiMode(GM_Game);
+            }
+            break;
+        case GM_Journal:
+            mJournal->setVisible(true);
+            mJournal->open();
+            break;
+        default:
+            // Unsupported mode, switch back to game
+            // Note: The call will eventually end up this method again but
+            // will stop at the check if mode is GM_Game.
+            setGuiMode(GM_Game);
+            break;
     }
-
-    if(mode == GM_Journal)
-    {
-        mJournal->setVisible(true);
-        mJournal->open();
-        return;
-    }
-
-    // Unsupported mode, switch back to game
-    // Note: The call will eventually end up this method again but
-    // will stop at the check if(mode == GM_Game) above.
-    setGuiMode(GM_Game);
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
@@ -348,7 +363,6 @@ void WindowManager::updateSkillArea()
 
 void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 {
-    std::cout << "dialogue a la poubelle";
     assert(dialog);
     if (!dialog)
         return;
@@ -445,4 +459,28 @@ void WindowManager::setPlayerDir(const float x, const float y)
 {
     map->setPlayerDir(x,y);
     hud->setPlayerDir(x,y);
+}
+
+void WindowManager::setHMSVisibility(bool visible)
+{
+    hud->setBottomLeftVisibility(visible, hud->weapBox->getVisible(), hud->spellBox->getVisible());
+}
+
+void WindowManager::setMinimapVisibility(bool visible)
+{
+    hud->setBottomRightVisibility(hud->effectBox->getVisible(), visible);
+}
+
+void WindowManager::toggleFogOfWar()
+{
+    map->toggleFogOfWar();
+    hud->toggleFogOfWar();
+}
+
+int WindowManager::toggleFps()
+{
+    showFPSLevel = (showFPSLevel+1)%3;
+    hud->setFpsLevel(showFPSLevel);
+    Settings::Manager::setInt("fps", "HUD", showFPSLevel);
+    return showFPSLevel;
 }

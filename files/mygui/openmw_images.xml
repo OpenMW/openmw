@@ -2,37 +2,37 @@
 
 <MyGUI type="Resource">
         <Resource type="ResourceImageSet" name="ArrowPointerImage">
-                <Group name="Pointer" texture="mwpointer.png" size="32 32">
+                <Group name="Pointer" texture="textures\tx_cursor.dds" size="32 32">
                         <Index name="Pointer" >
                                 <Frame point="0 0"/>
                         </Index>
                 </Group>
         </Resource>
         <Resource type="ResourceImageSet" name="HResizePointerImage">
-                <Group name="Pointer" texture="mwpointer.png" size="32 32">
+                <Group name="Pointer" texture="textures\tx_cursormove.dds" size="32 32">
                         <Index name="Pointer" >
-                                <Frame point="32 0"/>
+                                <Frame point="0 0"/>
                         </Index>
                 </Group>
         </Resource>
         <Resource type="ResourceImageSet" name="VResizePointerImage">
-                <Group name="Pointer" texture="mwpointer.png" size="32 32">
+                <Group name="Pointer" texture="mwpointer_vresize.png" size="32 32">
                         <Index name="Pointer" >
-                                <Frame point="0 32"/>
+                                <Frame point="0 0"/>
                         </Index>
                 </Group>
         </Resource>
         <Resource type="ResourceImageSet" name="DResizePointerImage">
-                <Group name="Pointer" texture="mwpointer.png" size="32 32">
+                <Group name="Pointer" texture="mwpointer_dresize1.png" size="32 32">
                         <Index name="Pointer" >
-                                <Frame point="32 32"/>
+                                <Frame point="o o"/>
                         </Index>
                 </Group>
         </Resource>
         <Resource type="ResourceImageSet" name="DResize2PointerImage">
-                <Group name="Pointer" texture="mwpointer.png" size="32 32">
+                <Group name="Pointer" texture="mwpointer_dresize2.png" size="32 32">
                         <Index name="Pointer" >
-                                <Frame point="64 32"/>
+                                <Frame point="0 0"/>
                         </Index>
                 </Group>
         </Resource>

@@ -2,13 +2,10 @@
 #define GAME_SOUND_SOUNDMANAGER_H
 
 #include <string>
+#include <utility>
+#include <map>
 
-#include <mangle/sound/clients/ogre_output_updater.hpp>
-#include <mangle/sound/clients/ogre_listener_mover.hpp>
-
-#include <openengine/sound/sndmanager.hpp>
-
-#include <components/files/filelibrary.hpp>
+#include <OgreResourceGroupManager.h>
 
 #include "../mwworld/ptr.hpp"
 
@@ -19,16 +16,6 @@ namespace Ogre
     class Camera;
 }
 
-namespace Mangle
-{
-    namespace Sound
-    {
-        typedef boost::shared_ptr<Sound> SoundPtr;
-    }
-}
-
-typedef OEngine::Sound::SoundManagerPtr OEManagerPtr;
-
 namespace MWWorld
 {
     struct Environment;
@@ -36,128 +23,118 @@ namespace MWWorld
 
 namespace MWSound
 {
+    class Sound_Output;
+    struct Sound_Decoder;
+    class Sound;
+
+    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
+    typedef boost::shared_ptr<Sound> SoundPtr;
+
+    enum PlayMode {
+        Play_Normal  = 0, /* tracked, non-looping, multi-instance, environment */
+        Play_Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
+        Play_NoEnv   = 1<<1, /* Do not apply environment effects (eg, underwater filters) */
+        Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
+                              * but do not keep it updated (the sound will not move with
+                              * the object and will not stop when the object is deleted. */
+    };
+    static inline int operator|(const PlayMode &a, const PlayMode &b)
+    { return (int)a | (int)b; }
+    static inline int operator&(const PlayMode &a, const PlayMode &b)
+    { return (int)a & (int)b; }
+
+    enum Environment {
+        Env_Normal,
+        Env_Underwater,
+    };
+
     class SoundManager
     {
+        Ogre::ResourceGroupManager& mResourceMgr;
 
-            // This is used for case insensitive and slash-type agnostic file
-            // finding. It takes DOS paths (any case, \\ slashes or / slashes)
-            // relative to the sound dir, and translates them into full paths
-            // of existing files in the filesystem, if they exist.
-            bool mFSStrict;
+        MWWorld::Environment& mEnvironment;
 
-            MWWorld::Environment& mEnvironment;
+        std::auto_ptr<Sound_Output> mOutput;
 
-            void streamMusicFull (const std::string& filename);
-            ///< Play a soundifle
-            /// \param absolute filename
+        float mMasterVolume;
+        float mSFXVolume;
+        float mMusicVolume;
 
-            /* This is the sound manager. It loades, stores and deletes
-            sounds based on the sound factory it is given.
-            */
-            OEManagerPtr mgr;
-            Mangle::Sound::SoundPtr music;
+        boost::shared_ptr<Sound> mMusic;
+        std::string mCurrentPlaylist;
 
-            /* This class calls update() on the sound manager each frame
-               using and Ogre::FrameListener
-            */
-            Mangle::Sound::OgreOutputUpdater updater;
+        typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
+        typedef std::map<SoundPtr,PtrIDPair> SoundMap;
+        SoundMap mActiveSounds;
 
-            /* This class tracks the movement of an Ogre::Camera and moves
-               a sound listener automatically to follow it.
-            */
-            Mangle::Sound::OgreListenerMover cameraTracker;
+        std::string lookup(const std::string &soundId,
+                  float &volume, float &min, float &max);
+        void streamMusicFull(const std::string& filename);
+        bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
+        void updateSounds(float duration);
+        void updateRegionSound(float duration);
 
-            typedef std::map<std::string,Mangle::Sound::WSoundPtr> IDMap;
-            typedef std::map<MWWorld::Ptr,IDMap> PtrMap;
-            PtrMap sounds;
+        SoundManager(const SoundManager &rhs);
+        SoundManager& operator=(const SoundManager &rhs);
 
-            // A list of all sound files used to lookup paths
-            Files::PathContainer mSoundFiles;
+    protected:
+        DecoderPtr getDecoder();
+        friend class OpenAL_Output;
 
-            // A library of all Music file paths stored by the folder they are contained in
-            Files::FileLibrary mMusicLibrary;
+    public:
+        SoundManager(bool useSound, MWWorld::Environment& environment);
+        ~SoundManager();
 
-            // Points to the current playlist of music files stored in the music library
-            const Files::PathContainer* mCurrentPlaylist;
+        void stopMusic();
+        ///< Stops music if it's playing
 
-            IDMap mLoopedSounds;
+        void streamMusic(const std::string& filename);
+        ///< Play a soundifle
+        /// \param filename name of a sound file in "Music/" in the data directory.
 
-            bool mUsingSound;
+        void startRandomTitle();
+        ///< Starts a random track from the current playlist
 
-            std::string lookup(const std::string &soundId,
-                       float &volume, float &min, float &max);
-            void add(const std::string &file,
-                MWWorld::Ptr ptr, const std::string &id,
-                float volume, float pitch, float min, float max,
-                bool loop, bool untracked=false);
-            void clearAll(PtrMap::iterator& it);
-            void remove(MWWorld::Ptr ptr, const std::string &id = "");
-            bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
-            void removeCell(const MWWorld::Ptr::CellStore *cell);
-            void updatePositions(MWWorld::Ptr ptr);
+        bool isMusicPlaying();
+        ///< Returns true if music is playing
 
-        public:
+        void playPlaylist(const std::string &playlist);
+        ///< Start playing music from the selected folder
+        /// \param name of the folder that contains the playlist
 
-            SoundManager(Ogre::Root*, Ogre::Camera*,
-                   const Files::PathContainer& dataDir, bool useSound, bool fsstrict,
-                   MWWorld::Environment& environment);
-            ~SoundManager();
+        void say(MWWorld::Ptr reference, const std::string& filename);
+        ///< Make an actor say some text.
+        /// \param filename name of a sound file in "Sound/Vo/" in the data directory.
 
-            void stopMusic();
-            ///< Stops music if it's playing
+        bool sayDone(MWWorld::Ptr reference) const;
+        ///< Is actor not speaking?
 
-            void streamMusic(const std::string& filename);
-            ///< Play a soundifle
-            /// \param filename name of a sound file in "Music/" in the data directory.
+        SoundPtr playSound(const std::string& soundId, float volume, float pitch, int mode=Play_Normal);
+        ///< Play a sound, independently of 3D-position
 
-            void startRandomTitle();
-            ///< Starts a random track from the current playlist
+        SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
+                             float volume, float pitch, int mode=Play_Normal);
+        ///< Play a sound from an object
 
-            bool isMusicPlaying();
-            ///< Returns true if music is playing
+        void stopSound3D(MWWorld::Ptr reference, const std::string& soundId);
+        ///< Stop the given object from playing the given sound,
 
-            bool setPlaylist(std::string playlist="");
-            ///< Set the playlist to an existing folder
-            /// \param name of the folder that contains the playlist
-            /// if none is set then it is set to an empty playlist
-            /// \return Return true if the previous playlist was the same
+        void stopSound3D(MWWorld::Ptr reference);
+        ///< Stop the given object from playing all sounds.
 
-            void playPlaylist(std::string playlist="");
-            ///< Start playing music from the selected folder
-            /// \param name of the folder that contains the playlist
-            /// if none is set then it plays from the current playlist
+        void stopSound(const MWWorld::Ptr::CellStore *cell);
+        ///< Stop all sounds for the given cell.
 
-            void say (MWWorld::Ptr reference, const std::string& filename);
-            ///< Make an actor say some text.
-            /// \param filename name of a sound file in "Sound/Vo/" in the data directory.
+        void stopSound(const std::string& soundId);
+        ///< Stop a non-3d looping sound
 
-            bool sayDone (MWWorld::Ptr reference) const;
-            ///< Is actor not speaking?
+        bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const;
+        ///< Is the given sound currently playing on the given object?
 
-            void playSound (const std::string& soundId, float volume, float pitch, bool loop=false);
-            ///< Play a sound, independently of 3D-position
+        void updateObject(MWWorld::Ptr reference);
+        ///< Update the position of all sounds connected to the given object.
 
-            void playSound3D (MWWorld::Ptr reference, const std::string& soundId,
-                float volume, float pitch, bool loop, bool untracked=false);
-            ///< Play a sound from an object
-
-            void stopSound3D (MWWorld::Ptr reference, const std::string& soundId = "");
-            ///< Stop the given object from playing the given sound, If no soundId is given,
-            /// all sounds for this reference will stop.
-
-            void stopSound (MWWorld::Ptr::CellStore *cell);
-            ///< Stop all sounds for the given cell.
-
-            void stopSound(const std::string& soundId);
-            ///< Stop a non-3d looping sound
-
-            bool getSoundPlaying (MWWorld::Ptr reference, const std::string& soundId) const;
-            ///< Is the given sound currently playing on the given object?
-
-            void updateObject(MWWorld::Ptr reference);
-            ///< Update the position of all sounds connected to the given object.
-
-            void update (float duration);
+        void update(float duration);
     };
 }
 

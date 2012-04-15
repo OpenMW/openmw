@@ -39,7 +39,7 @@ namespace MWWorld
                 return mPtr.empty();
             }
 
-            const std::type_info& getType()
+            const std::type_info& getType() const
             {
                 assert (!mPtr.empty());
                 return mPtr.type();

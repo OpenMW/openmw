@@ -34,6 +34,9 @@ namespace MWClass
             /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
             /// no such skill.
 
+            virtual int getValue (const MWWorld::Ptr& ptr) const;
+            ///< Return trade value of the object. Throws an exception, if the object can't be traded.
+
             static void registerSelf();
 
             virtual std::string getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;

@@ -1,35 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 588 433" name="_Main">
-        <!-- HEADER -->
-        <Widget type="TextBox" skin="HeaderText" position="0 0 588 18" name="NpcName" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Caption" value="Name"/>
-            <Property key="TextAlign" value="ALIGN_CENTER"/>
-        </Widget>
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 588 433" name="_Main">
 
         <!-- The Dialogue history -->
-        <Widget type="DialogueHistory" skin="MW_TextBoxEdit" position="8 39 400 375" name="History"  align="ALIGN_LEFT ALIGN_TOP STRETCH">
+        <Widget type="DialogueHistory" skin="MW_TextBoxEdit" position="8 8 415 381" name="History"  align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH">
             <Property key="Static" value="true"/>
             <Property key="WordWrap" value="true"/>
-            <Property key="FontHeight" value="18"/>
             <Property key="MultiLine" value="1" />
             <Property key="VisibleVScroll" value="1" />
             <!-- invisible box for receiving mouse events -->
-            <Widget type="Widget" skin="" position="0 0 400 375" name="EventBox" align="ALIGN_LEFT ALIGN_TOP STRETCH"/>
+            <Widget type="Widget" skin="" position="0 0 400 375" name="EventBox" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH"/>
         </Widget>
 
 		<!-- The disposition bar-->
-        <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="432 39 132 18"
-            align="Right Top" name="Disposition">		
-			<Widget type="EditBox" skin="MW_DispositionEdit" position_real = "0.25 0 0.5 1" name = "DispositionText"/>	
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="432 8 132 18"
+            align="Right Top" name="Disposition">
+			<Widget type="EditBox" skin="MW_DispositionEdit" position_real = "0.25 0 0.5 1" name = "DispositionText"/>
 		</Widget>
         <!-- The list of topics -->
-        <Widget type="ListBox" skin="MW_List" position="432 62 132 318" name="TopicsList">
+        <Widget type="ListBox" skin="MW_List" position="432 31 132 328" name="TopicsList" align="Right VStretch">
         </Widget>
 
         <!-- The Goodbye button -->
-        <Widget type="Button" skin="MW_Button" position="432 387 132 23" name="ByeButton">
+        <Widget type="Button" skin="MW_Button" position="432 366 132 23" name="ByeButton" align="Right Bottom">
             <Property key="Caption" value="Goodbye"/>
         </Widget>
     </Widget>

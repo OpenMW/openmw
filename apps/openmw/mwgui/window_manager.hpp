@@ -158,9 +158,19 @@ namespace MWGui
     void changeCell(MWWorld::Ptr::CellStore* cell); ///< change the active cell
     void setPlayerPos(const float x, const float y); ///< set player position in map space
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
-    
+
+    void toggleFogOfWar();
+
+    int toggleFps();
+    ///< toggle fps display @return resulting fps level
+
     void setInteriorMapTexture(const int x, const int y);
     ///< set the index of the map texture that should be used (for interiors)
+
+    // sets the visibility of the hud health/magicka/stamina bars
+    void setHMSVisibility(bool visible);
+    // sets the visibility of the hud minimap
+    void setMinimapVisibility(bool visible);
 
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
