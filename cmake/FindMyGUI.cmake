@@ -139,7 +139,7 @@ SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} CACHE STRING "")
 SET(MYGUI_PLATFORM_LIBRARIES ${MYGUI_PLATFORM_LIBRARIES} CACHE STRING "")
 SET(MYGUI_LIB_DIR ${MYGUI_LIB_DIR} CACHE PATH "")
 
-IF (NOT APPLE OR NOT MYGUI_STATIC) # we need freetype libs only on OS X for static build, for other cases just make it TRUE
+IF (NOT APPLE OR NOT MYGUI_STATIC) # we need explicit freetype libs only on OS X for static build, for other cases just make it TRUE
     SET(FREETYPE_LIBRARIES TRUE)
 ENDIF (NOT APPLE OR NOT MYGUI_STATIC)
 
