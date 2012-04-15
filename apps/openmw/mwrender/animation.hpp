@@ -31,7 +31,7 @@ class Animation{
 	
     
    
-    std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating an npc
+
 
     float time;
 	float startTime;
@@ -48,7 +48,7 @@ class Animation{
 
 	//Ogre::SkeletonInstance* skel;
      std::vector<Nif::NiTriShapeCopy>* shapes;          //All the NiTriShapeData for a creature
-     std::vector<Ogre::Entity*> entityparts;
+     
 
 
     std::vector<Nif::NiKeyframeData>* transformations;
