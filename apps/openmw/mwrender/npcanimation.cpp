@@ -205,7 +205,7 @@ void NpcAnimation::updateParts(){
             apparelChanged = true;
             
         }
-        if(boots != inv.getSlot(MWWorld::InventoryStore::Slot_Boots)){
+        if(!isBeast && boots != inv.getSlot(MWWorld::InventoryStore::Slot_Boots)){
             boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
             removePartGroup(MWWorld::InventoryStore::Slot_Boots);
             apparelChanged = true;
@@ -226,6 +226,12 @@ void NpcAnimation::updateParts(){
         if(shirt != inv.getSlot(MWWorld::InventoryStore::Slot_Shirt)){
             shirt = inv.getSlot(MWWorld::InventoryStore::Slot_Shirt);
             removePartGroup(MWWorld::InventoryStore::Slot_Shirt);
+            apparelChanged = true;
+            
+        }
+        if(pants != inv.getSlot(MWWorld::InventoryStore::Slot_Pants)){
+            pants = inv.getSlot(MWWorld::InventoryStore::Slot_Pants);
+            removePartGroup(MWWorld::InventoryStore::Slot_Pants);
             apparelChanged = true;
             
         }
@@ -273,7 +279,7 @@ void NpcAnimation::updateParts(){
                 addPartGroup(MWWorld::InventoryStore::Slot_RightPauldron, 3, parts);
                 
             }
-             if(boots != inv.end()){
+             if(!isBeast && boots != inv.end()){
               
                if(boots->getTypeName() == "struct ESM::Clothing"){
                     const ESM::Clothing *clothes = (boots->get<ESM::Clothing>())->base;
@@ -324,19 +330,136 @@ void NpcAnimation::updateParts(){
                 std::vector<ESM::PartReference> parts = clothes->parts.parts;
                 addPartGroup(MWWorld::InventoryStore::Slot_Shirt, 2, parts);
             }
+              if(pants != inv.end()){
+                const ESM::Clothing *clothes = (pants->get<ESM::Clothing>())->base;
+                std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                addPartGroup(MWWorld::InventoryStore::Slot_Pants, 2, parts);
+            }
         }
 
-                if(partpriorities[ESM::PRT_Cuirass] < 1){
-                    const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
-                    if(chestPart)
-                        addOrReplaceIndividualPart(ESM::PRT_Cuirass, -1,1,"meshes\\" + chestPart->model);
-                }
                 if(partpriorities[ESM::PRT_Head] < 1){
                         addOrReplaceIndividualPart(ESM::PRT_Head, -1,1,headModel);
                 }
                 if(partpriorities[ESM::PRT_Hair] < 1 && partpriorities[ESM::PRT_Head] <= 1){
                         addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1,hairModel);
                 }
+                 if(partpriorities[ESM::PRT_Neck] < 1){
+                    const ESM::BodyPart *neckPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "neck");
+                    if(neckPart)
+                        addOrReplaceIndividualPart(ESM::PRT_Neck, -1,1,"meshes\\" + neckPart->model);
+                }
+                if(partpriorities[ESM::PRT_Cuirass] < 1){
+                    const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
+                    if(chestPart)
+                        addOrReplaceIndividualPart(ESM::PRT_Cuirass, -1,1,"meshes\\" + chestPart->model);
+                }
+                
+                 if(partpriorities[ESM::PRT_Groin] < 1){
+                    const ESM::BodyPart *groinPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "groin");
+                    if(groinPart)
+                        addOrReplaceIndividualPart(ESM::PRT_Groin, -1,1,"meshes\\" + groinPart->model);
+                }
+                if(partpriorities[ESM::PRT_RHand] < 1){
+                    const ESM::BodyPart *handPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand");
+                    if(!handPart)
+                        handPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
+                    if(handPart)
+                        addOrReplaceIndividualPart(ESM::PRT_RHand, -1,1,"meshes\\" + handPart->model);
+                }
+                if(partpriorities[ESM::PRT_LHand] < 1){
+                    const ESM::BodyPart *handPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand");
+                    if(!handPart)
+                        handPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
+                    if(handPart)
+                        addOrReplaceIndividualPart(ESM::PRT_LHand, -1,1,"meshes\\" + handPart->model);
+                }
+               
+                if(partpriorities[ESM::PRT_RWrist] < 1){
+                    const ESM::BodyPart *wristPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "wrist");
+                    if(wristPart)
+                        addOrReplaceIndividualPart(ESM::PRT_RWrist, -1,1,"meshes\\" + wristPart->model);
+                }
+                 if(partpriorities[ESM::PRT_LWrist] < 1){
+                    const ESM::BodyPart *wristPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "wrist");
+                    if(wristPart)
+                        addOrReplaceIndividualPart(ESM::PRT_LWrist, -1,1,"meshes\\" + wristPart->model);
+                }
+                  if(partpriorities[ESM::PRT_RForearm] < 1){
+                    const ESM::BodyPart *forearmPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "forearm");
+                    if(bodyRaceID == "b_n_argonian_f_")
+                        forearmPart = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");
+                    if(forearmPart)
+                        addOrReplaceIndividualPart(ESM::PRT_RForearm, -1,1,"meshes\\" + forearmPart->model);
+                }
+                 if(partpriorities[ESM::PRT_LForearm] < 1){
+                    const ESM::BodyPart *forearmPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "forearm");
+                    if(bodyRaceID == "b_n_argonian_f_")
+                        forearmPart = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");
+                    if(forearmPart)
+                        addOrReplaceIndividualPart(ESM::PRT_LForearm, -1,1,"meshes\\" + forearmPart->model);
+                }
+                  if(partpriorities[ESM::PRT_RUpperarm] < 1){
+                    const ESM::BodyPart *armPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper arm");
+                    if(armPart)
+                        addOrReplaceIndividualPart(ESM::PRT_RUpperarm, -1,1,"meshes\\" + armPart->model);
+                }
+                 if(partpriorities[ESM::PRT_LUpperarm] < 1){
+                    const ESM::BodyPart *armPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper arm");
+                    if(armPart)
+                        addOrReplaceIndividualPart(ESM::PRT_LUpperarm, -1,1,"meshes\\" + armPart->model);
+                }
+                  if(partpriorities[ESM::PRT_RFoot] < 1){
+                    const ESM::BodyPart *footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
+                    if(isBeast)
+                        footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
+                    if(footPart)
+                        addOrReplaceIndividualPart(ESM::PRT_RFoot, -1,1,"meshes\\" + footPart->model);
+                }
+                  if(partpriorities[ESM::PRT_LFoot] < 1){
+                    const ESM::BodyPart *footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
+                    if(isBeast)
+                        footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
+                    if(footPart)
+                        addOrReplaceIndividualPart(ESM::PRT_LFoot, -1,1,"meshes\\" + footPart->model);
+                }
+                 if(partpriorities[ESM::PRT_RAnkle] < 1){
+                    const ESM::BodyPart *anklePart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "ankle");
+                    if(anklePart)
+                        addOrReplaceIndividualPart(ESM::PRT_RAnkle, -1,1,"meshes\\" + anklePart->model);
+                }
+                 if(partpriorities[ESM::PRT_LAnkle] < 1){
+                    const ESM::BodyPart *anklePart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "ankle");
+                    if(anklePart)
+                        addOrReplaceIndividualPart(ESM::PRT_LAnkle, -1,1,"meshes\\" + anklePart->model);
+                }
+                     if(partpriorities[ESM::PRT_RKnee] < 1){
+                    const ESM::BodyPart *kneePart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "knee");
+                    if(kneePart)
+                        addOrReplaceIndividualPart(ESM::PRT_RKnee, -1,1,"meshes\\" + kneePart->model);
+                }
+                 if(partpriorities[ESM::PRT_LKnee] < 1){
+                    const ESM::BodyPart *kneePart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "knee");
+                    if(kneePart)
+                        addOrReplaceIndividualPart(ESM::PRT_LKnee, -1,1,"meshes\\" + kneePart->model);
+                }
+                   if(partpriorities[ESM::PRT_RLeg] < 1){
+                    const ESM::BodyPart *legPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper leg");
+                    if(legPart)
+                        addOrReplaceIndividualPart(ESM::PRT_RLeg, -1,1,"meshes\\" + legPart->model);
+                }
+                 if(partpriorities[ESM::PRT_LLeg] < 1){
+                    const ESM::BodyPart *legPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper leg");
+                    if(legPart)
+                        addOrReplaceIndividualPart(ESM::PRT_LLeg, -1,1,"meshes\\" + legPart->model);
+                }
+                 if(partpriorities[ESM::PRT_Tail] < 1){
+                    const ESM::BodyPart *tailPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "tail");
+                    if(tailPart)
+                        addOrReplaceIndividualPart(ESM::PRT_Tail, -1,1,"meshes\\" + tailPart->model);
+                }
+
+                
+                
            
 		
 		
