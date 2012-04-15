@@ -1,5 +1,5 @@
 [Desktop Entry]
-Version=0.11
+Version=${OPENMW_VERSION}
 Type=Application
 Name=OpenMW Launcher
 GenericName=Role Playing Game

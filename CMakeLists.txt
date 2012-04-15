@@ -27,6 +27,11 @@ configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 
+# Apps and tools
+option(BUILD_ESMTOOL "build ESM inspector" ON)
+option(BUILD_LAUNCHER "build Launcher" ON)
+option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
 option(USE_AUDIERE "use audiere for sound" OFF)
@@ -244,6 +249,9 @@ endif (WIN32)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
         "${OpenMW_BINARY_DIR}/plugins.cfg")
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
+        "${OpenMW_BINARY_DIR}/openmw.desktop")
 endif()
 
 if (APPLE)
@@ -307,7 +315,7 @@ if(DPKG_PROGRAM)
     endif()
 
     #Install icon and desktop file
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install global configuration files
@@ -413,17 +421,14 @@ add_subdirectory (components)
 # Apps and tools
 add_subdirectory( apps/openmw )
 
-option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
 
-option(BUILD_LAUNCHER "build Launcher inspector" ON)
 if (BUILD_LAUNCHER)
    add_subdirectory( apps/launcher )
 endif()
 
-option(BUILD_MWINIIMPORTER "build MWiniImporter inspector" ON)
 if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
 endif()
