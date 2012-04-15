@@ -237,4 +237,13 @@ namespace MWClass
 
         return std::string("Item Misc Down");
     }
+
+
+    std::string Weapon::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return ref->base->icon;
+    }
 }

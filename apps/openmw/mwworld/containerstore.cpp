@@ -457,3 +457,33 @@ bool MWWorld::operator!= (const ContainerStoreIterator& left, const ContainerSto
 {
     return !(left==right);
 }
+
+
+std::string MWWorld::ContainerStoreIterator::getInventoryIcon()
+{
+    Ptr ptr;
+
+    switch (mType)
+    {
+        case ContainerStore::Type_Potion: ptr = MWWorld::Ptr (&*mPotion, 0); break;
+        case ContainerStore::Type_Apparatus: ptr = MWWorld::Ptr (&*mApparatus, 0); break;
+        case ContainerStore::Type_Armor: ptr = MWWorld::Ptr (&*mArmor, 0); break;
+        case ContainerStore::Type_Book: ptr = MWWorld::Ptr (&*mBook, 0); break;
+        case ContainerStore::Type_Clothing: ptr = MWWorld::Ptr (&*mClothing, 0); break;
+        case ContainerStore::Type_Ingredient: ptr = MWWorld::Ptr (&*mIngredient, 0); break;
+        case ContainerStore::Type_Light: ptr = MWWorld::Ptr (&*mLight, 0); break;
+        case ContainerStore::Type_Lockpick: ptr = MWWorld::Ptr (&*mLockpick, 0); break;
+        case ContainerStore::Type_Miscellaneous: ptr = MWWorld::Ptr (&*mMiscellaneous, 0); break;
+        case ContainerStore::Type_Probe: ptr = MWWorld::Ptr (&*mProbe, 0); break;
+        case ContainerStore::Type_Repair: ptr = MWWorld::Ptr (&*mRepair, 0); break;
+        case ContainerStore::Type_Weapon: ptr = MWWorld::Ptr (&*mWeapon, 0); break;
+    }
+
+    if (ptr.isEmpty())
+        throw std::runtime_error ("invalid iterator");
+
+
+    std::string s = ptr.getInventoryIcon();
+
+    return s;
+}

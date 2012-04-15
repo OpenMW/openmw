@@ -6,6 +6,7 @@
 #include "dialogue_history.hpp"
 #include "stats_window.hpp"
 #include "messagebox.hpp"
+#include "container.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -52,6 +53,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
     dialogueWindow = new DialogueWindow(*this,environment);
+    containerWindow = new ContainerWindow(*this,environment);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -90,7 +92,7 @@ WindowManager::~WindowManager()
     delete stats;
     delete mJournal;
     delete dialogueWindow;
-
+    delete containerWindow;
     delete mCharGen;
 
     cleanupGarbage();

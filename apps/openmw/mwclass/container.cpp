@@ -12,6 +12,7 @@
 #include "../mwworld/environment.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwworld/actionopen.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -81,6 +82,7 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
+
         if (ptr.getCellRef().lockLevel>0)
         {
             // TODO check for key
@@ -94,7 +96,8 @@ namespace MWClass
             if(ptr.getCellRef().trap.empty())
             {
                 // Not trapped, Inventory GUI goes here
-                return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                //return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
             }
             else
             {
@@ -137,4 +140,6 @@ namespace MWClass
 
         registerClass (typeid (ESM::Container).name(), instance);
     }
+
+
 }

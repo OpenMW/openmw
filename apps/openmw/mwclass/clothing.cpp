@@ -153,4 +153,12 @@ namespace MWClass
         }
         return std::string("Item Clothes Down");
     }
+
+    std::string Clothing::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+            ptr.get<ESM::Clothing>();
+
+        return ref->base->icon;
+    }
 }

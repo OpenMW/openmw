@@ -188,4 +188,12 @@ namespace MWClass
         else
             return std::string("Item Armor Heavy Down");
     }
+
+        std::string Armor::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        return ref->base->icon;
+    }
 }

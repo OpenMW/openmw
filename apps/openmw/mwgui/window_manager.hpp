@@ -62,7 +62,7 @@ namespace MWGui
   class Console;
   class JournalWindow;
   class CharacterCreation;
-
+  class ContainerWindow;
   class TextInputDialog;
   class InfoBoxDialog;
   class DialogueWindow;
@@ -126,6 +126,8 @@ namespace MWGui
     }
 
     MWGui::DialogueWindow* getDialogueWindow() {return dialogueWindow;}
+
+    MWGui::ContainerWindow* getContainerWindow() {return containerWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -191,7 +193,7 @@ namespace MWGui
     Console *console;
     JournalWindow* mJournal;
     DialogueWindow *dialogueWindow;
-
+    ContainerWindow *containerWindow;
     CharacterCreation* mCharGen;
 
     // Various stats about player as needed by window manager

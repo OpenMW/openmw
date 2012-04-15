@@ -88,4 +88,12 @@ namespace MWClass
     {
         return std::string("Item Book Down");
     }
+    std::string Book::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return ref->base->icon;
+    }
+
 }

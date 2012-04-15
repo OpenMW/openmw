@@ -47,6 +47,11 @@ namespace MWClass
 
             virtual std::string getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
             ///< Return the put down sound Id
+
+            virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
+            ///< Return name of inventory icon.
+
+
     };
 }
 

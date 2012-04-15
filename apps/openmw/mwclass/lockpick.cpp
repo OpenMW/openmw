@@ -97,4 +97,12 @@ namespace MWClass
     {
         return std::string("Item Lockpick Down");
     }
+
+    std::string Lockpick::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData> *ref =
+            ptr.get<ESM::Tool>();
+
+        return ref->base->icon;
+    }
 }

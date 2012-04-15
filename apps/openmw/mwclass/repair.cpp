@@ -86,4 +86,12 @@ namespace MWClass
     {
         return std::string("Item Repair Down");
     }
+
+    std::string Repair::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+            ptr.get<ESM::Repair>();
+
+        return ref->base->icon;
+    }
 }
