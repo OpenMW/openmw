@@ -136,6 +136,7 @@ namespace MWScript
         const int opcodeAddTopic = 0x200013a;
         const int opcodeChoice = 0x2000a;
         const int opcodeForceGreeting = 0x200014f;
+        const int opcodeForceGreetingExplicit = 0x2000150;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -144,7 +145,9 @@ namespace MWScript
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
             extensions.registerInstruction ("choice", "/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
-            extensions.registerInstruction("forcegreeting","",-1,opcodeForceGreeting);
+            extensions.registerInstruction("forcegreeting","",opcodeForceGreeting);
+            extensions.registerInstruction("forcegreeting","",opcodeForceGreeting,
+                opcodeForceGreetingExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -154,7 +157,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetJournalIndex, new OpGetJournalIndex);
             interpreter.installSegment5 (opcodeAddTopic, new OpAddTopic);
             interpreter.installSegment3 (opcodeChoice,new OpChoice);
-            interpreter.installSegment5 (opcodeForceGreeting, new OpForceGreeting<ExplicitRef>);
+            interpreter.installSegment5 (opcodeForceGreeting, new OpForceGreeting<ImplicitRef>);
+            interpreter.installSegment5 (opcodeForceGreetingExplicit, new OpForceGreeting<ExplicitRef>);
         }
     }
 
