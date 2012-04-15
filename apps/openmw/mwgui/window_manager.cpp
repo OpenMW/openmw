@@ -492,3 +492,8 @@ int WindowManager::toggleFps()
     Settings::Manager::setInt("fps", "HUD", showFPSLevel);
     return showFPSLevel;
 }
+
+void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
+{
+    mToolTips->setFocusObject(focus);
+}

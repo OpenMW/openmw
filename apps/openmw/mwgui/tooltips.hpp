@@ -3,6 +3,7 @@
 #define MWGUI_TOOLTIPS_H
 
 #include <openengine/gui/layout.hpp>
+#include "../mwworld/ptr.hpp"
 
 namespace MWGui
 {
@@ -16,6 +17,8 @@ namespace MWGui
         void enterGameMode();
         void enterGuiMode();
 
+        void setFocusObject(const MWWorld::Ptr& focus);
+
         void adjustScreen(int screenWidth, int screenHeight);
 
     private:
@@ -23,6 +26,9 @@ namespace MWGui
         MyGUI::Widget* mTextToolTipBox;
 
         MyGUI::Widget* mDynamicToolTipBox;
+
+        MWWorld::Ptr mFocusObject;
+        bool mFocusChanged;
 
         bool mGameMode;
     };

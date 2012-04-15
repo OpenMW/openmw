@@ -13,6 +13,7 @@
 
 #include "../mwsound/soundmanager.hpp"
 
+#include "../mwgui/window_manager.hpp"
 
 #include "ptr.hpp"
 #include "environment.hpp"
@@ -736,6 +737,17 @@ namespace MWWorld
         mWorldScene->update (duration);
 
         mWeatherManager->update (duration);
+
+        // inform the GUI about focused object
+        try
+        {
+            mEnvironment.mWindowManager->setFocusObject(getPtrViaHandle(mFacedHandle));
+        }
+        catch (std::runtime_error&)
+        {
+            MWWorld::Ptr null;
+            mEnvironment.mWindowManager->setFocusObject(null);
+        }
 
         if (!mRendering->occlusionQuerySupported())
         {

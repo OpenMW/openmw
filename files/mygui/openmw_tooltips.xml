@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Widget" layer="Popup" position="0 0 300 200" name="_Main">
+    <Widget type="Widget" layer="Popup" position="0 0 300 300" name="_Main">
 
         <!-- Simple text-only tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 200" align="Stretch" name="TextToolTipBox">
-            <Widget type="EditBox" skin="MW_TextEdit" position="0 0 300 200" align="Stretch" name="TextToolTip">
+        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="TextToolTipBox">
+            <Property key="Visible" value="false"/>
+            <Widget type="EditBox" skin="MW_TextEdit" position="0 0 300 300" align="Stretch" name="TextToolTip">
                 <Property key="WordWrap" value="true"/>
                 <Property key="Static" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
@@ -13,7 +14,8 @@
         </Widget>
 
         <!-- Dynamically constructed tooltip goes here -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 200" align="Stretch" name="DynamicToolTipBox">
+        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="DynamicToolTipBox">
+            <Property key="Visible" value="false"/>
         </Widget>
 
     </Widget>

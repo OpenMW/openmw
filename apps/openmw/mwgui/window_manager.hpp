@@ -158,6 +158,8 @@ namespace MWGui
     void setPlayerPos(const float x, const float y); ///< set player position in map space
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
+    void setFocusObject(const MWWorld::Ptr& focus);
+
     void toggleFogOfWar();
 
     int toggleFps();
