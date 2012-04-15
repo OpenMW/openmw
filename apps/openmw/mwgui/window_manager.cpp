@@ -181,6 +181,7 @@ void WindowManager::updateVisible()
     console->disable();
     mJournal->setVisible(false);
     dialogueWindow->setVisible(false);
+    containerWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
@@ -216,8 +217,12 @@ void WindowManager::updateVisible()
             // Show the windows we want
             map   -> setVisible( (eff & GW_Map) != 0 );
             stats -> setVisible( (eff & GW_Stats) != 0 );
+
             break;
         }
+        case GM_Container:
+            containerWindow->setVisible(true);
+            break;
         case GM_Dialogue:
             dialogueWindow->open();
             break;

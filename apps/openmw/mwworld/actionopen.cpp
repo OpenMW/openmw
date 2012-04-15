@@ -16,6 +16,7 @@ namespace MWWorld
 
     void ActionOpen::execute (Environment& environment)
     {
+        environment.mWindowManager->setGuiMode(MWGui::GuiMode::GM_Container);
         environment.mWindowManager->getContainerWindow()->open(mContainer);
     }
 }

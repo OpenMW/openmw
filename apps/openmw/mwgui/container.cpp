@@ -27,7 +27,7 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
     mEnvironment(environment)
 {
     setText("_Main", "Name of Container");
-    setVisible(false);
+    center();
 
     getWidget(containerWidget, "Items");
     getWidget(takeButton, "TakeButton");
@@ -35,17 +35,10 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
 
     setText("CloseButton","Close");
     setText("TakeButton","Take All");
-
-    //ctor
 }
 
 ContainerWindow::~ContainerWindow()
 {
-    //dtor
-
-
-
-
 }
 
 void ContainerWindow::setName(std::string contName)
@@ -108,49 +101,49 @@ void ContainerWindow::open(MWWorld::Ptr& container)
         std::string path = std::string("icons\\");
 
 
-        path += iter.getInventoryIcon();
-//        switch (iter.getType())
-//        {
-//
-//        case MWWorld::ContainerStore::Type_Potion:
-//            path += iter->get<ESM::Potion>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Apparatus:
-//            path += iter->get<ESM::Apparatus>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Armor:
-//            path += iter->get<ESM::Armor>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Book:
-//            path += iter->get<ESM::Book>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Clothing:
-//            path += iter->get<ESM::Clothing>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Ingredient:
-//            path += iter->get<ESM::Ingredient>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Light:
-//            path += iter->get<ESM::Light>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Lockpick:
-//            path += iter->get<ESM::Tool>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Miscellaneous:
-//            path += iter->get<ESM::Miscellaneous>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Probe:
-//            path += iter->get<ESM::Probe>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Repair:
-//            path += iter->get<ESM::Repair>()->base->icon;
-//            break;
-//        case MWWorld::ContainerStore::Type_Weapon:
-//            path += iter->get<ESM::Weapon>()->base->icon;
-//            break;
-//
-//
-//        }
+        //path += iter.getInventoryIcon();
+        switch (iter.getType())
+        {
+
+        case MWWorld::ContainerStore::Type_Potion:
+            path += iter->get<ESM::Potion>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Apparatus:
+            path += iter->get<ESM::Apparatus>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Armor:
+            path += iter->get<ESM::Armor>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Book:
+            path += iter->get<ESM::Book>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Clothing:
+            path += iter->get<ESM::Clothing>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Ingredient:
+            path += iter->get<ESM::Ingredient>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Light:
+            path += iter->get<ESM::Light>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Lockpick:
+            path += iter->get<ESM::Tool>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Miscellaneous:
+            path += iter->get<ESM::Miscellaneous>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Probe:
+            path += iter->get<ESM::Probe>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Repair:
+            path += iter->get<ESM::Repair>()->base->icon;
+            break;
+        case MWWorld::ContainerStore::Type_Weapon:
+            path += iter->get<ESM::Weapon>()->base->icon;
+            break;
+
+
+        }
         count++;
 
         if(count % 8 == 0)

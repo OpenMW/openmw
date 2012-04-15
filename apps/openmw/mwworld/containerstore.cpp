@@ -483,7 +483,7 @@ std::string MWWorld::ContainerStoreIterator::getInventoryIcon()
         throw std::runtime_error ("invalid iterator");
 
 
-    std::string s = ptr.getInventoryIcon();
+    std::string s = "";//ptr.getInventoryIcon();
 
     return s;
 }
