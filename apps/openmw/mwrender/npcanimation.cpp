@@ -16,6 +16,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
     robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)), helmet(inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)), shirt(inv.getSlot(MWWorld::InventoryStore::Slot_Shirt)),
     cuirass(inv.getSlot(MWWorld::InventoryStore::Slot_Cuirass)), greaves(inv.getSlot(MWWorld::InventoryStore::Slot_Greaves)),
     leftpauldron(inv.getSlot(MWWorld::InventoryStore::Slot_LeftPauldron)), rightpauldron(inv.getSlot(MWWorld::InventoryStore::Slot_RightPauldron)),
+    boots(inv.getSlot(MWWorld::InventoryStore::Slot_Boots)),
+    leftglove(inv.getSlot(MWWorld::InventoryStore::Slot_LeftGauntlet)), rightglove(inv.getSlot(MWWorld::InventoryStore::Slot_RightGauntlet)),
+    pants(inv.getSlot(MWWorld::InventoryStore::Slot_Pants)),
     lclavicle(0),
 	rclavicle(0),
 	rupperArm(0),
@@ -197,8 +200,26 @@ void NpcAnimation::updateParts(){
             
         }
         if(rightpauldron != inv.getSlot(MWWorld::InventoryStore::Slot_RightPauldron)){
-            leftpauldron = inv.getSlot(MWWorld::InventoryStore::Slot_RightPauldron);
+            rightpauldron = inv.getSlot(MWWorld::InventoryStore::Slot_RightPauldron);
             removePartGroup(MWWorld::InventoryStore::Slot_RightPauldron);
+            apparelChanged = true;
+            
+        }
+        if(boots != inv.getSlot(MWWorld::InventoryStore::Slot_Boots)){
+            boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+            removePartGroup(MWWorld::InventoryStore::Slot_Boots);
+            apparelChanged = true;
+            
+        }
+        if(leftglove != inv.getSlot(MWWorld::InventoryStore::Slot_LeftGauntlet)){
+            leftglove = inv.getSlot(MWWorld::InventoryStore::Slot_LeftGauntlet);
+            removePartGroup(MWWorld::InventoryStore::Slot_LeftGauntlet);
+            apparelChanged = true;
+            
+        }
+         if(rightglove != inv.getSlot(MWWorld::InventoryStore::Slot_RightGauntlet)){
+            rightglove = inv.getSlot(MWWorld::InventoryStore::Slot_RightGauntlet);
+            removePartGroup(MWWorld::InventoryStore::Slot_RightGauntlet);
             apparelChanged = true;
             
         }
@@ -210,6 +231,7 @@ void NpcAnimation::updateParts(){
         }
 
         if(apparelChanged){
+            std::cout << "Modifying stuff\n";
              if(robe != inv.end())
             {
                 MWWorld::Ptr ptr = *robe;
@@ -238,6 +260,7 @@ void NpcAnimation::updateParts(){
                 addPartGroup(MWWorld::InventoryStore::Slot_Greaves, 3, parts);
                 
             }
+             
              if(leftpauldron != inv.end()){
                 const ESM::Armor *armor = (leftpauldron->get<ESM::Armor>())->base;
                 std::vector<ESM::PartReference> parts = armor->parts.parts;
@@ -250,6 +273,52 @@ void NpcAnimation::updateParts(){
                 addPartGroup(MWWorld::InventoryStore::Slot_RightPauldron, 3, parts);
                 
             }
+             if(boots != inv.end()){
+              
+               if(boots->getTypeName() == "struct ESM::Clothing"){
+                    const ESM::Clothing *clothes = (boots->get<ESM::Clothing>())->base;
+                    std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                    addPartGroup(MWWorld::InventoryStore::Slot_Boots, 2, parts);
+               }
+               else
+               {
+                   const ESM::Armor *armor = (boots->get<ESM::Armor>())->base;
+                    std::vector<ESM::PartReference> parts = armor->parts.parts;
+                    addPartGroup(MWWorld::InventoryStore::Slot_Boots, 3, parts);
+               }
+                
+            }
+             if(leftglove != inv.end()){
+              
+               if(leftglove->getTypeName() == "struct ESM::Clothing"){
+                    const ESM::Clothing *clothes = (leftglove->get<ESM::Clothing>())->base;
+                    std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                    addPartGroup(MWWorld::InventoryStore::Slot_LeftGauntlet, 2, parts);
+               }
+               else
+               {
+                   const ESM::Armor *armor = (leftglove->get<ESM::Armor>())->base;
+                    std::vector<ESM::PartReference> parts = armor->parts.parts;
+                    addPartGroup(MWWorld::InventoryStore::Slot_LeftGauntlet, 3, parts);
+               }
+                
+            }
+             if(rightglove != inv.end()){
+              
+               if(rightglove->getTypeName() == "struct ESM::Clothing"){
+                    const ESM::Clothing *clothes = (rightglove->get<ESM::Clothing>())->base;
+                    std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                    addPartGroup(MWWorld::InventoryStore::Slot_RightGauntlet, 2, parts);
+               }
+               else
+               {
+                   const ESM::Armor *armor = (rightglove->get<ESM::Armor>())->base;
+                    std::vector<ESM::PartReference> parts = armor->parts.parts;
+                    addPartGroup(MWWorld::InventoryStore::Slot_RightGauntlet, 3, parts);
+               }
+                
+            }
+
              if(shirt != inv.end()){
                 const ESM::Clothing *clothes = (shirt->get<ESM::Clothing>())->base;
                 std::vector<ESM::PartReference> parts = clothes->parts.parts;

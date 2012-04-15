@@ -75,6 +75,10 @@ private:
     MWWorld::ContainerStoreIterator greaves;
     MWWorld::ContainerStoreIterator leftpauldron;
     MWWorld::ContainerStoreIterator rightpauldron;
+    MWWorld::ContainerStoreIterator boots;
+    MWWorld::ContainerStoreIterator pants;
+    MWWorld::ContainerStoreIterator leftglove;
+    MWWorld::ContainerStoreIterator rightglove;
     
     public:
      NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
