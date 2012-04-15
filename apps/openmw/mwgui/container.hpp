@@ -53,7 +53,7 @@ namespace MWGui
         MyGUI::ButtonPtr closeButton;
 
 
-
+        void onByeClicked(MyGUI::Widget* _sender);
 
 
         //MWWorld::Ptr& mContainer;

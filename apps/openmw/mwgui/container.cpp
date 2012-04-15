@@ -29,10 +29,13 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
 {
     setText("_Main", "Name of Container");
     center();
+    adjustWindowCaption();
 
     getWidget(containerWidget, "Items");
     getWidget(takeButton, "TakeButton");
     getWidget(closeButton, "CloseButton");
+
+    closeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onByeClicked);
 
     setText("CloseButton","Close");
     setText("TakeButton","Take All");
@@ -136,8 +139,13 @@ void ContainerWindow::open(MWWorld::Ptr& container)
     setVisible(true);
 }
 
-void Update()
+void ContainerWindow::Update()
 {
 
+}
+
+void ContainerWindow::onByeClicked(MyGUI::Widget* _sender)
+{
+    mEnvironment.mWindowManager->setGuiMode(MWGui::GuiMode::GM_Game);
 }
 
