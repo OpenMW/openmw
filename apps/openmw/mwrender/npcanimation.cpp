@@ -308,12 +308,12 @@ void NpcAnimation::updateParts(){
             }
              if(!isBeast && boots != inv.end()){
 
-               if(boots->getTypeName() == "struct ESM::Clothing"){
+               if(boots->getTypeName() == typeid(ESM::Clothing).name()){
                     const ESM::Clothing *clothes = (boots->get<ESM::Clothing>())->base;
                     std::vector<ESM::PartReference> parts = clothes->parts.parts;
                     addPartGroup(MWWorld::InventoryStore::Slot_Boots, 2, parts);
                }
-               else
+               else if(boots->getTypeName() == typeid(ESM::Armor).name())
                {
                    const ESM::Armor *armor = (boots->get<ESM::Armor>())->base;
                     std::vector<ESM::PartReference> parts = armor->parts.parts;
@@ -323,7 +323,7 @@ void NpcAnimation::updateParts(){
             }
              if(leftglove != inv.end()){
 
-               if(leftglove->getTypeName() == "struct ESM::Clothing"){
+               if(leftglove->getTypeName() == typeid(ESM::Clothing).name()){
                     const ESM::Clothing *clothes = (leftglove->get<ESM::Clothing>())->base;
                     std::vector<ESM::PartReference> parts = clothes->parts.parts;
                     addPartGroup(MWWorld::InventoryStore::Slot_LeftGauntlet, 2, parts);
@@ -338,7 +338,7 @@ void NpcAnimation::updateParts(){
             }
              if(rightglove != inv.end()){
 
-               if(rightglove->getTypeName() == "struct ESM::Clothing"){
+               if(rightglove->getTypeName() == typeid(ESM::Clothing).name()){
                     const ESM::Clothing *clothes = (rightglove->get<ESM::Clothing>())->base;
                     std::vector<ESM::PartReference> parts = clothes->parts.parts;
                     addPartGroup(MWWorld::InventoryStore::Slot_RightGauntlet, 2, parts);

@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.13.0
+Version: 0.14.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -64,8 +64,6 @@ Allowed options:
   --start arg (=Beshara)           set initial cell
   --master arg                     master file(s)
   --plugin arg                     plugin file(s)
-  --fps [=arg(=1)] (=0)            fps counter detail (0 = off, 1 = fps counter
-                                   , 2 = full detail)
   --anim-verbose [=arg(=1)] (=0)   output animation indices files
   --debug [=arg(=1)] (=0)          debug mode
   --nosound [=arg(=1)] (=0)        disable all sounds
@@ -90,6 +88,7 @@ Allowed options:
                                    win1252 - Western European (Latin) alphabet,
                                    used by default
   --report-focus [=arg(=1)] (=0)   write name of focussed object to cout
+  --fallback arg                   fallback values
 
 
 CREDITS
@@ -133,6 +132,36 @@ Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Fil
 
 
 CHANGELOG
+
+0.14.0
+
+Bug #1: Meshes rendered with wrong orientation
+Bug #6/Task #220: Picking up small objects doesn't always work
+Bug #127: tcg doesn't work
+Bug #178: Compablity problems with Ogre 1.8.0 RC 1
+Bug #211: Wireframe mode (toggleWireframe command) should not apply to Console & other UI
+Bug #227: Terrain crashes when moving away from predefined cells
+Bug #229: On OS X Launcher cannot launch game if path to binary contains spaces
+Bug #235: TGA texture loading problem
+Bug #246: wireframe mode does not work in water
+Feature #8/#232: Water Rendering
+Feature #13: Terrain Rendering
+Feature #37: Render Path Grid
+Feature #66: Factions
+Feature #77: Local Map
+Feature #78: Compass/Mini-Map
+Feature #97: Render Clothing/Armour
+Feature #121: Window Pinning
+Feature #205: Auto equip
+Feature #217: Contiainer should track changes to its content
+Feature #221: NPC Dialogue Window Enhancements
+Feature #233: Game settings manager
+Feature #240: Spell List and selected spell (no GUI yet)
+Feature #243: Draw State
+Task #113: Morrowind.ini Importer
+Task #215: Refactor the sound code
+Task #216: Update MyGUI
+
 
 0.13.0
 
