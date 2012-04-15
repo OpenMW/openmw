@@ -20,6 +20,7 @@
         <List file="openmw_journal_skin.xml" />
         <List file="openmw_map_window_skin.xml" />
         <List file="openmw_dialogue_window_skin.xml" />
+		<List file="openmw_container_window_layout.xml" />
         <List file="openmw_settings.xml" />
     </MyGUI>
 </MyGUI>

@@ -16,6 +16,7 @@
 #include "../mwclass/container.hpp"
 #include "../mwworld/containerstore.hpp"
 #include <boost/lexical_cast.hpp>
+#include "../mwworld/class.hpp"
 
 
 using namespace MWGui;
@@ -101,49 +102,7 @@ void ContainerWindow::open(MWWorld::Ptr& container)
         std::string path = std::string("icons\\");
 
 
-        //path += iter.getInventoryIcon();
-        switch (iter.getType())
-        {
-
-        case MWWorld::ContainerStore::Type_Potion:
-            path += iter->get<ESM::Potion>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Apparatus:
-            path += iter->get<ESM::Apparatus>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Armor:
-            path += iter->get<ESM::Armor>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Book:
-            path += iter->get<ESM::Book>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Clothing:
-            path += iter->get<ESM::Clothing>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Ingredient:
-            path += iter->get<ESM::Ingredient>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Light:
-            path += iter->get<ESM::Light>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Lockpick:
-            path += iter->get<ESM::Tool>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Miscellaneous:
-            path += iter->get<ESM::Miscellaneous>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Probe:
-            path += iter->get<ESM::Probe>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Repair:
-            path += iter->get<ESM::Repair>()->base->icon;
-            break;
-        case MWWorld::ContainerStore::Type_Weapon:
-            path += iter->get<ESM::Weapon>()->base->icon;
-            break;
-
-
-        }
+        path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
         count++;
 
         if(count % 8 == 0)

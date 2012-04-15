@@ -173,4 +173,9 @@ namespace MWWorld
     {
         throw std::runtime_error ("class does not have an down sound");
     }
+
+    std::string Class::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have any inventory icon");
+    }
 }

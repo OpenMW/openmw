@@ -161,8 +161,6 @@ namespace MWWorld
 
             const ContainerStore *getContainerStore() const;
 
-            std::string getInventoryIcon();
-
         friend class ContainerStore;
     };
 

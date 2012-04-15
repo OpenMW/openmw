@@ -174,6 +174,9 @@ namespace MWWorld
             virtual std::string getDownSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const;
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
+
+            virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
+            ///< Return name of inventory icon.
     };
 }
 
