@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 13)
+set (OPENMW_VERSION_MINOR 14)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -122,7 +122,7 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
-	
+
 )
 
 set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
@@ -361,7 +361,7 @@ if(WIN32)
     INSTALL(FILES ${files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES
-        "${OpenMW_SOURCE_DIR}/readme.txt" 
+        "${OpenMW_SOURCE_DIR}/readme.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
