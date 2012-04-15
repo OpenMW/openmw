@@ -240,6 +240,7 @@ Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::stri
    
     NIFLoader::load(mesh);
     Entity* ent = mRend.getScene()->createEntity(mesh);
+    ent->setVisibilityFlags(RV_Actors);
 
     base->attachObjectToBone(bonename, ent);
     return ent;
@@ -249,9 +250,7 @@ void NpcAnimation::insertFreePart(const std::string &mesh, const std::string suf
     NIFLoader::load(meshNumbered);
 
     Ogre::Entity* ent = mRend.getScene()->createEntity(meshNumbered);
-
-     
-
+    ent->setVisibilityFlags(RV_Actors);
 
     insert->attachObject(ent);
     entityparts.push_back(ent);
