@@ -142,4 +142,5 @@ op 0x200014b: GetSpell
 op 0x200014c: GetSpell, explicit reference
 op 0x200014d: ModDisposition
 op 0x200014e: ModDisposition, explicit reference
-opcodes 0x200014f-0x3ffffff unused
+op 0x200014f: ForceGreeting
+opcodes 0x200015-0x3ffffff unused

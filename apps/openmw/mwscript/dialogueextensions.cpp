@@ -11,6 +11,7 @@
 #include "../mwdialogue/dialoguemanager.hpp"
 
 #include "interpretercontext.hpp"
+#include "ref.hpp"
 
 namespace MWScript
 {
@@ -115,12 +116,26 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpForceGreeting : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    context.getEnvironment().mDialogueManager->startDialogue (ptr);
+                }
+        };
 
         const int opcodeJournal = 0x2000133;
         const int opcodeSetJournalIndex = 0x2000134;
         const int opcodeGetJournalIndex = 0x2000135;
         const int opcodeAddTopic = 0x200013a;
         const int opcodeChoice = 0x2000a;
+        const int opcodeForceGreeting = 0x200014f;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -129,6 +144,7 @@ namespace MWScript
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
             extensions.registerInstruction ("choice", "/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
+            extensions.registerInstruction("forcegreeting","",-1,opcodeForceGreeting);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -138,6 +154,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetJournalIndex, new OpGetJournalIndex);
             interpreter.installSegment5 (opcodeAddTopic, new OpAddTopic);
             interpreter.installSegment3 (opcodeChoice,new OpChoice);
+            interpreter.installSegment5 (opcodeForceGreeting, new OpForceGreeting<ExplicitRef>);
         }
     }
 
