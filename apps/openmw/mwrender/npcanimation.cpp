@@ -13,12 +13,12 @@ NpcAnimation::~NpcAnimation(){
 
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv), timeToChange(0), 
-    robe(inv.getSlot(MWWorld::InventoryStore::Slot_Robe)), helmet(inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)), shirt(inv.getSlot(MWWorld::InventoryStore::Slot_Shirt)),
-    cuirass(inv.getSlot(MWWorld::InventoryStore::Slot_Cuirass)), greaves(inv.getSlot(MWWorld::InventoryStore::Slot_Greaves)),
-    leftpauldron(inv.getSlot(MWWorld::InventoryStore::Slot_LeftPauldron)), rightpauldron(inv.getSlot(MWWorld::InventoryStore::Slot_RightPauldron)),
-    boots(inv.getSlot(MWWorld::InventoryStore::Slot_Boots)),
-    leftglove(inv.getSlot(MWWorld::InventoryStore::Slot_LeftGauntlet)), rightglove(inv.getSlot(MWWorld::InventoryStore::Slot_RightGauntlet)),
-    pants(inv.getSlot(MWWorld::InventoryStore::Slot_Pants)),
+    robe(inv.end()), helmet(inv.end()), shirt(inv.end()),
+    cuirass(inv.end()), greaves(inv.end()),
+    leftpauldron(inv.end()), rightpauldron(inv.end()),
+    boots(inv.end()),
+    leftglove(inv.end()), rightglove(inv.end()), skirtiter(inv.end()),
+    pants(inv.end()),
     lclavicle(0),
 	rclavicle(0),
 	rupperArm(0),
@@ -74,8 +74,13 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		//	vector = Ogre::Vector3(1,1,-1);
 
 
-		hairID = ref->base->hair;
-        headID = ref->base->head;
+		std::string hairID = ref->base->hair;
+        std::string headID = ref->base->head;
+        headModel = "meshes\\" +
+            mEnvironment.mWorld->getStore().bodyParts.find(headID)->model;
+
+		hairModel = "meshes\\" +
+            mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
 		npcName = ref->base->name;
         //ESMStore::Races r =
         const ESM::Race* race = mEnvironment.mWorld->getStore().races.find(ref->base->race);
@@ -159,11 +164,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 }
 
 void NpcAnimation::updateParts(){
-	std::string headModel = "meshes\\" +
-            mEnvironment.mWorld->getStore().bodyParts.find(headID)->model;
-
-		std::string hairModel = "meshes\\" +
-            mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
+	
         bool apparelChanged = false;
         
 
@@ -173,8 +174,12 @@ void NpcAnimation::updateParts(){
             removePartGroup(MWWorld::InventoryStore::Slot_Robe);
             robe = inv.getSlot(MWWorld::InventoryStore::Slot_Robe);
             apparelChanged = true;
-           
-		
+		}
+        if(skirtiter != inv.getSlot(MWWorld::InventoryStore::Slot_Skirt)){
+            //A robe was added or removed
+            removePartGroup(MWWorld::InventoryStore::Slot_Skirt);
+            skirtiter = inv.getSlot(MWWorld::InventoryStore::Slot_Skirt);
+            apparelChanged = true;
 		}
         if(helmet != inv.getSlot(MWWorld::InventoryStore::Slot_Helmet)){
             apparelChanged = true;
@@ -237,7 +242,6 @@ void NpcAnimation::updateParts(){
         }
 
         if(apparelChanged){
-            std::cout << "Modifying stuff\n";
              if(robe != inv.end())
             {
                 MWWorld::Ptr ptr = *robe;
@@ -245,6 +249,29 @@ void NpcAnimation::updateParts(){
                 const ESM::Clothing *clothes = (ptr.get<ESM::Clothing>())->base;
                 std::vector<ESM::PartReference> parts = clothes->parts.parts;
                 addPartGroup(MWWorld::InventoryStore::Slot_Robe, 5, parts);
+                reserveIndividualPart(ESM::PRT_Groin, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_Skirt, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_RLeg, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_LLeg, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_RUpperarm, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_LUpperarm, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_RKnee, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_LKnee, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_RForearm, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_LForearm, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_RPauldron, MWWorld::InventoryStore::Slot_Robe, 5);
+                reserveIndividualPart(ESM::PRT_LPauldron, MWWorld::InventoryStore::Slot_Robe, 5);
+            }
+             if(skirtiter != inv.end())
+            {
+                MWWorld::Ptr ptr = *skirtiter;
+                
+                const ESM::Clothing *clothes = (ptr.get<ESM::Clothing>())->base;
+                std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                addPartGroup(MWWorld::InventoryStore::Slot_Skirt, 4, parts);
+                reserveIndividualPart(ESM::PRT_Groin, MWWorld::InventoryStore::Slot_Skirt, 4);
+                reserveIndividualPart(ESM::PRT_RLeg, MWWorld::InventoryStore::Slot_Skirt, 4);
+                reserveIndividualPart(ESM::PRT_LLeg, MWWorld::InventoryStore::Slot_Skirt, 4);
             }
             
              if(helmet != inv.end()){
@@ -489,7 +516,6 @@ std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> NpcAnimation::insert
    
     std::vector<Nif::NiTriShapeCopy>* shape = ((NIFLoader::getSingletonPtr())->getShapes(mesh + "0000" + suffix));
     if(shape){
-        
         handleShapes(shape, part, base->getSkeleton());
     }
 	 std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> pair = std::make_pair(part, shape);
@@ -541,8 +567,9 @@ void NpcAnimation::runAnimation(float timepassed){
 				handleShapes(chest.second, chest.first, base->getSkeleton());
 			if(tail.first)
 				handleShapes(tail.second, tail.first, base->getSkeleton());
-			if(skirt.first)
+			if(skirt.first){
 				handleShapes(skirt.second, skirt.first, base->getSkeleton());
+            }
 			if(lhand.first)
 				handleShapes(lhand.second, lhand.first, base->getSkeleton());
 			if(rhand.first)
@@ -679,6 +706,14 @@ void NpcAnimation::removeIndividualPart(int type){
 
     }
 
+    void NpcAnimation::reserveIndividualPart(int type, int group, int priority){
+        if(priority > partpriorities[type]){
+            removeIndividualPart(type);
+            partpriorities[type] = priority;
+            partslots[type] = group;
+        }
+    }
+
     void NpcAnimation::removePartGroup(int group){
         for(int i = 0; i < 27; i++){
             if(partslots[i] == group){
@@ -705,7 +740,7 @@ void NpcAnimation::removeIndividualPart(int type){
                     chest = insertFreePart(mesh, ":\"");
                     break;
                 case ESM::PRT_Groin:                          //4
-                    neck = insertBoundedPart(mesh, "Groin");
+                    groin = insertBoundedPart(mesh, "Groin");
                     break;
                 case ESM::PRT_Skirt:                          //5
                     skirt = insertFreePart(mesh, ":|");
@@ -791,16 +826,15 @@ void NpcAnimation::removeIndividualPart(int type){
                 {
                     ESM::PartReference part = parts[i];
                     
-
                         const ESM::BodyPart *bodypart = 0;
-                        
                         if(isFemale)
                             bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.female);
                         if(!bodypart)
                             bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.male);
-
                         if(bodypart)
                             addOrReplaceIndividualPart(part.part, group,priority,"meshes\\" + bodypart->model);
+                        else
+                            reserveIndividualPart(part.part, group, priority);
                     
                 }
     }
