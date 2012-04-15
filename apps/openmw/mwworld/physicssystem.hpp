@@ -54,6 +54,7 @@ namespace MWWorld
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
 
+
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);
     };

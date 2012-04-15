@@ -1211,6 +1211,7 @@ void NIFLoader::loadResource(Resource *resource)
     char suffix = name.at(name.length() - 2);
     bool addAnim = true;
     bool hasAnim = false;
+	bool linkSkeleton = true;
     //bool baddin = false;
     bNiTri = true;
     if(name == "meshes\\base_anim.nif" || name == "meshes\\base_animkna.nif")
@@ -1234,6 +1235,17 @@ void NIFLoader::loadResource(Resource *resource)
 		else if(suffix == '>')
 		{
             //baddin = true;
+			bNiTri = true;
+			std::string sub = name.substr(name.length() - 6, 4);
+
+			if(sub.compare("0000") != 0)
+			addAnim = false;
+
+		}
+		else if(suffix == ':')
+		{
+            //baddin = true;
+			linkSkeleton = false;
 			bNiTri = true;
 			std::string sub = name.substr(name.length() - 6, 4);
 
@@ -1379,7 +1391,7 @@ void NIFLoader::loadResource(Resource *resource)
         }
 		//Don't link on npc parts to eliminate redundant skeletons
 		//Will have to be changed later slightly for robes/skirts
-		if(triname == "")
+		if(linkSkeleton)
 			mesh->_notifySkeleton(mSkel);
     }
 }
