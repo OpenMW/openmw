@@ -72,6 +72,8 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
 
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
     t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
+
+    setupToolTips();
 }
 
 void StatsWindow::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
@@ -393,4 +395,99 @@ void StatsWindow::updateScroller()
 void StatsWindow::onPinToggled()
 {
     mWindowManager.setHMSVisibility(!mPinned);
+}
+
+void StatsWindow::setupToolTips()
+{
+
+    const ESMS::ESMStore &store = mWindowManager.getStore();
+    MyGUI::Widget* widget;
+
+    getWidget(widget, "Attrib1");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeStrength")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sStrDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_strength.dds");
+    getWidget(widget, "AttribVal1");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeStrength")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sStrDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_strength.dds");
+
+    getWidget(widget, "Attrib2");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeIntelligence")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sIntDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_int.dds");
+    getWidget(widget, "AttribVal2");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeIntelligence")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sIntDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_int.dds");
+
+    getWidget(widget, "Attrib3");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeWillpower")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sWilDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_wilpower.dds");
+    getWidget(widget, "AttribVal3");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeWillpower")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sWilDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_wilpower.dds");
+
+    getWidget(widget, "Attrib4");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeAgility")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sAgiDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_agility.dds");
+    getWidget(widget, "AttribVal4");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeAgility")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sAgiDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_agility.dds");
+
+    getWidget(widget, "Attrib5");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeSpeed")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sSpdDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_speed.dds");
+    getWidget(widget, "AttribVal5");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeSpeed")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sSpdDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_speed.dds");
+
+    getWidget(widget, "Attrib6");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeEndurance")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sEndDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_endurance.dds");
+    getWidget(widget, "AttribVal6");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeEndurance")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sEndDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_endurance.dds");
+
+    getWidget(widget, "Attrib7");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributePersonality")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sPerDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_personality.dds");
+    getWidget(widget, "AttribVal7");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributePersonality")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sPerDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_personality.dds");
+
+    getWidget(widget, "Attrib8");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeLuck")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sLucDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_luck.dds");
+    getWidget(widget, "AttribVal8");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeLuck")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sLucDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_luck.dds");
 }

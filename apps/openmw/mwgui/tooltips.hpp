@@ -21,12 +21,7 @@ namespace MWGui
 
         void setFocusObject(const MWWorld::Ptr& focus);
 
-        void adjustScreen(int screenWidth, int screenHeight);
-
     private:
-        MyGUI::EditBox* mTextToolTip;
-        MyGUI::Widget* mTextToolTipBox;
-
         MyGUI::Widget* mDynamicToolTipBox;
 
         WindowManager* mWindowManager;
@@ -42,6 +37,9 @@ namespace MWGui
         ///< @return requested tooltip size
 
         MyGUI::IntSize createToolTip(const std::string& caption, const std::string& text);
+        ///< @return requested tooltip size
+
+        MyGUI::IntSize createToolTip(const std::string& text);
         ///< @return requested tooltip size
 
         std::string getValueString(const int value);

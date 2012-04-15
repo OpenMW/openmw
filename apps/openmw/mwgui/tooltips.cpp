@@ -11,8 +11,6 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     , mGameMode(true)
     , mWindowManager(windowManager)
 {
-    getWidget(mTextToolTip, "TextToolTip");
-    getWidget(mTextToolTipBox, "TextToolTipBox");
     getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
     mDynamicToolTipBox->setVisible(false);
@@ -20,8 +18,6 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     // turn off mouse focus so that getMouseFocusWidget returns the correct widget,
     // even if the mouse is over the tooltip
     mDynamicToolTipBox->setNeedMouseFocus(false);
-    mTextToolTipBox->setNeedMouseFocus(false);
-    mTextToolTip->setNeedMouseFocus(false);
     mMainWidget->setNeedMouseFocus(false);
 }
 
@@ -29,37 +25,54 @@ void ToolTips::onFrame(float frameDuration)
 {
     /// \todo Store a MWWorld::Ptr in the widget user data, retrieve it here and construct a tooltip dynamically
 
+    /// \todo we are destroying/creating the tooltip widgets every frame here,
+    /// because the tooltip might change (e.g. when trap is activated)
+    /// is there maybe a better way (listener when the object changes)?
+    for (size_t i=0; i<mDynamicToolTipBox->getChildCount(); ++i)
+    {
+        mDynamicToolTipBox->_destroyChildWidget(mDynamicToolTipBox->getChildAt(i));
+    }
+
     const IntSize &viewSize = RenderManager::getInstance().getViewSize();
 
     if (!mGameMode)
     {
-        mDynamicToolTipBox->setVisible(false);
-        mTextToolTipBox->setVisible(true);
-
         Widget* focus = InputManager::getInstance().getMouseFocusWidget();
         if (focus == 0)
         {
-            mTextToolTipBox->setVisible(false);
-            return;
-        }
-
-        std::string type = focus->getUserString("ToolTipType");
-        std::string text = focus->getUserString("ToolTipText");
-        if (type == "" || text == "")
-        {
-            mTextToolTipBox->setVisible(false);
+            mDynamicToolTipBox->setVisible(false);
             return;
         }
 
         // this the maximum width of the tooltip before it starts word-wrapping
         setCoord(0, 0, 300, 300);
 
-        mTextToolTip->setCaption(text);
-        const IntSize &textSize = mTextToolTip->getTextSize();
+        IntSize tooltipSize;
+
+        std::string type = focus->getUserString("ToolTipType");
+        std::string text = focus->getUserString("ToolTipText");
+        if (type == "")
+        {
+            mDynamicToolTipBox->setVisible(false);
+            return;
+        }
+        else if (type == "Text")
+            tooltipSize = createToolTip(text);
+        else if (type == "CaptionText")
+        {
+            std::string caption = focus->getUserString("ToolTipCaption");
+            tooltipSize = createToolTip(caption, text);
+        }
+        else if (type == "ImageCaptionText")
+        {
+            std::string caption = focus->getUserString("ToolTipCaption");
+            std::string image = focus->getUserString("ToolTipImage");
+            tooltipSize = createImageToolTip(caption, image, text);
+        }
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
-        IntSize size = textSize + IntSize(6, 6);
+        IntSize size = tooltipSize + IntSize(6, 6);
         // make the tooltip stay completely in the viewport
         if ((tooltipPosition.left + size.width) > viewSize.width)
         {
@@ -74,8 +87,6 @@ void ToolTips::onFrame(float frameDuration)
     }
     else
     {
-        mTextToolTipBox->setVisible(false);
-
         if (!mFocusObject.isEmpty())
         {
             IntSize tooltipSize = getToolTipViaPtr();
@@ -111,14 +122,6 @@ void ToolTips::setFocusObject(const MWWorld::Ptr& focus)
 
 IntSize ToolTips::getToolTipViaPtr ()
 {
-    /// \todo we are destroying/creating the tooltip widgets every frame here,
-    /// because the tooltip might change (e.g. when trap is activated)
-    /// is there maybe a better way (listener when the object changes)?
-    for (size_t i=0; i<mDynamicToolTipBox->getChildCount(); ++i)
-    {
-        mDynamicToolTipBox->_destroyChildWidget(mDynamicToolTipBox->getChildAt(i));
-    }
-
     // this the maximum width of the tooltip before it starts word-wrapping
     setCoord(0, 0, 300, 300);
 
@@ -337,7 +340,7 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, "");
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
     }
 
     // --------------------  Activator -------------------------------
@@ -375,7 +378,7 @@ IntSize ToolTips::createImageToolTip(const std::string& caption, const std::stri
 {
     // remove the first newline (easier this way)
     std::string realText = text;
-    if (realText.size() > 0)
+    if (realText.size() > 0 && realText[0] == '\n')
         realText.erase(0, 1);
 
     std::string realImage = "icons\\" + image;
@@ -389,6 +392,7 @@ IntSize ToolTips::createImageToolTip(const std::string& caption, const std::stri
     EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, imageSize, 300, 262), Align::Stretch, "ToolTipText");
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
+    textWidget->setProperty("WordWrap", "true");
     textWidget->setCaption(realText);
     textWidget->setTextAlign(Align::HCenter);
 
@@ -414,16 +418,31 @@ IntSize ToolTips::createToolTip(const std::string& caption, const std::string& t
 {
     // remove the first newline (easier this way)
     std::string realText = text;
-    if (realText.size() > 0)
+    if (realText.size() > 0 && realText[0] == '\n')
         realText.erase(0, 1);
 
     EditBox* box = mDynamicToolTipBox->createWidget<EditBox>("NormalText", IntCoord(0, 0, 300, 300), Align::Stretch, "ToolTip");
     box->setTextAlign(Align::HCenter);
     box->setProperty("Static", "true");
     box->setProperty("MultiLine", "true");
+    box->setProperty("WordWrap", "true");
     box->setCaption(caption + (realText != "" ? "\n#BF9959" + realText : ""));
 
     mDynamicToolTipBox->setVisible(caption != "");
+
+    return box->getTextSize();
+}
+
+IntSize ToolTips::createToolTip(const std::string& text)
+{
+    EditBox* box = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, 0, 300, 300), Align::Stretch, "ToolTip");
+    box->setTextAlign(Align::HCenter);
+    box->setProperty("Static", "true");
+    box->setProperty("MultiLine", "true");
+    box->setProperty("WordWrap", "true");
+    box->setCaption(text);
+
+    mDynamicToolTipBox->setVisible(text != "");
 
     return box->getTextSize();
 }
