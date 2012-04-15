@@ -53,7 +53,7 @@ namespace MWGui
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            MyGUI::TextBox* addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            MyGUI::TextBox* addValueItem(const std::string text, const std::string& tooltip, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void updateScroller();
 

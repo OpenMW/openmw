@@ -82,7 +82,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
     dialogueWindow = new DialogueWindow(*this,environment);
-    mToolTips = new ToolTips();
+    mToolTips = new ToolTips(this);
 
     // The HUD is always on
     hud->setVisible(true);

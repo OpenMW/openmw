@@ -251,14 +251,18 @@ void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, My
     coord2.top += lineHeight;
 }
 
-MyGUI::TextBox* StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::TextBox* StatsWindow::addValueItem(const std::string text, const std::string& tooltip, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox *skillNameWidget, *skillValueWidget;
 
     skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
+    skillNameWidget->setUserString("ToolTipType", "Text");
+    skillNameWidget->setUserString("ToolTipText", tooltip);
 
     skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
+    skillValueWidget->setUserString("ToolTipType", "Text");
+    skillValueWidget->setUserString("ToolTipText", tooltip);
     setStyledText(skillValueWidget, style, value);
 
     skillWidgets.push_back(skillNameWidget);
@@ -310,7 +314,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
             style = CS_Super;
         else if (modified < base)
             style = CS_Sub;
-        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), "", boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
         skillWidgetMap[skillId] = widget;
     }
 }
@@ -369,8 +373,12 @@ void StatsWindow::updateSkillArea()
     if (!skillWidgets.empty())
         addSeparator(coord1, coord2);
 
-    addValueItem(mWindowManager.getGameSettingString("sReputation", "Reputation"), boost::lexical_cast<std::string>(static_cast<int>(reputation)), CS_Normal, coord1, coord2);
-    addValueItem(mWindowManager.getGameSettingString("sBounty", "Bounty"), boost::lexical_cast<std::string>(static_cast<int>(bounty)), CS_Normal, coord1, coord2);
+    addValueItem(mWindowManager.getGameSettingString("sReputation", "Reputation"),
+                mWindowManager.getGameSettingString("sSkillsMenuReputationHelp", ""),
+                boost::lexical_cast<std::string>(static_cast<int>(reputation)), CS_Normal, coord1, coord2);
+    addValueItem(mWindowManager.getGameSettingString("sBounty", "Bounty"),
+                mWindowManager.getGameSettingString("sCrimeHelp", ""),
+                boost::lexical_cast<std::string>(static_cast<int>(bounty)), CS_Normal, coord1, coord2);
 
     clientHeight = coord1.top;
     updateScroller();

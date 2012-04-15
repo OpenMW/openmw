@@ -6,7 +6,7 @@
         <!-- Simple text-only tooltip -->
         <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="TextToolTipBox">
             <Property key="Visible" value="false"/>
-            <Widget type="EditBox" skin="MW_TextEdit" position="0 0 300 300" align="Stretch" name="TextToolTip">
+            <Widget type="EditBox" skin="NormalText" position="0 0 300 300" align="Stretch" name="TextToolTip">
                 <Property key="WordWrap" value="true"/>
                 <Property key="Static" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
