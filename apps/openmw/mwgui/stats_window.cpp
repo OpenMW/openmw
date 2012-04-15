@@ -251,7 +251,7 @@ void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, My
     coord2.top += lineHeight;
 }
 
-MyGUI::TextBox* StatsWindow::addValueItem(const std::string text, const std::string& tooltip, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::string& tooltip, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox *skillNameWidget, *skillValueWidget;
 
