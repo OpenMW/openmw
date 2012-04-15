@@ -443,7 +443,6 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    runtime.pop();
 
                     std::string factionID = "";
                     if(arg0 >0)
