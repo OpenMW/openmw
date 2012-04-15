@@ -39,6 +39,9 @@
 #include "../mwscript/interpretercontext.hpp"
 #include <components/compiler/scriptparser.hpp>
 
+#include "../mwclass/npc.hpp"
+#include "../mwmechanics/npcstats.hpp"
+
 namespace
 {
     std::string toLower (const std::string& name)
@@ -109,16 +112,15 @@ namespace
         switch (world.getGlobalVariableType (name))
         {
         case 's':
-
-            return selectCompare (comp, value, world.getGlobalVariable (name).mShort);
+            return selectCompare (comp, world.getGlobalVariable (name).mShort, value);
 
         case 'l':
 
-            return selectCompare (comp, value, world.getGlobalVariable (name).mLong);
+            return selectCompare (comp, world.getGlobalVariable (name).mLong, value);
 
         case 'f':
 
-            return selectCompare (comp, value, world.getGlobalVariable (name).mFloat);
+            return selectCompare (comp, world.getGlobalVariable (name).mFloat, value);
 
         case ' ':
 
@@ -178,7 +180,17 @@ namespace MWDialogue
                     break;
 
                 case 46://Same faction
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    {
+                    MWMechanics::NpcStats PCstats = MWWorld::Class::get(mEnvironment.mWorld->getPlayer().getPlayer()).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+                    MWMechanics::NpcStats NPCstats = MWWorld::Class::get(actor).getNpcStats(actor);
+                    int sameFaction = 0;
+                    if(!NPCstats.mFactionRank.empty())
+                    {
+                        std::string NPCFaction = NPCstats.mFactionRank.begin()->first;
+                        if(PCstats.mFactionRank.find(NPCFaction) != PCstats.mFactionRank.end()) sameFaction = 1;
+                    }
+                    if(!selectCompare<int,int>(comp,sameFaction,select.i)) return false;
+                    }
                     break;
 
                 case 48://Detected
@@ -190,7 +202,6 @@ namespace MWDialogue
                     break;
 
                 case 50://choice
-
                     if(choice)
                     {
                         if(!selectCompare<int,int>(comp,mChoice,select.i)) return false;
@@ -270,7 +281,7 @@ namespace MWDialogue
             {
             case '1': // function
 
-                return true; // TODO implement functions
+                return true; // Done elsewhere.
 
             case '2': // global
 
@@ -444,9 +455,6 @@ namespace MWDialogue
             if (toLower (info.actor)!=MWWorld::Class::get (actor).getId (actor))
                 return false;
 
-        //PC Faction
-        if(!info.pcFaction.empty()) return false;
-
         //NPC race
         if (!info.race.empty())
         {
@@ -474,26 +482,37 @@ namespace MWDialogue
         //NPC faction
         if (!info.npcFaction.empty())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
-
-            if (!cellRef)
-                return false;
-
-            if (toLower (info.npcFaction)!=toLower (cellRef->base->faction))
-                return false;
-
-            //check NPC rank
-            if(cellRef->base->npdt52.gold != -10)
+            //MWWorld::Class npcClass = MWWorld::Class::get(actor);
+            MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(actor);
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.npcFaction);
+            if(it!=stats.mFactionRank.end())
             {
-                if(cellRef->base->npdt52.rank < info.data.rank) return false;
+                //check rank
+                if(it->second < (int)info.data.rank) return false;
             }
             else
             {
-                if(cellRef->base->npdt12.rank < info.data.rank) return false;
+                //not in the faction
+                return false;
             }
         }
 
         // TODO check player faction
+        if(!info.pcFaction.empty())
+        {
+            MWMechanics::NpcStats stats = MWWorld::Class::get(mEnvironment.mWorld->getPlayer().getPlayer()).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.pcFaction);
+            if(it!=stats.mFactionRank.end())
+            {
+                //check rank
+                if(it->second < (int)info.data.PCrank) return false;
+            }
+            else
+            {
+                //not in the faction
+                return false;
+            }
+        }
 
         //check gender
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
@@ -658,6 +677,7 @@ namespace MWDialogue
 
     void DialogueManager::executeScript(std::string script)
     {
+        std::cout << script;
         std::vector<Interpreter::Type_Code> code;
         if(compile(script,code))
         {
@@ -798,5 +818,20 @@ namespace MWDialogue
         win->askQuestion(question);
         mChoiceMap[question] = choice;
         mIsInChoice = true;
+    }
+
+    std::string DialogueManager::getFaction()
+    {
+        std::string factionID("");
+        MWMechanics::NpcStats stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
+        if(stats.mFactionRank.empty())
+        {
+            std::cout << "No faction for this actor!";
+        }
+        else
+        {
+            factionID = stats.mFactionRank.begin()->first;
+        }
+        return factionID;
     }
 }

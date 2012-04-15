@@ -39,6 +39,8 @@ THE SOFTWARE.
 #include <components/settings/settings.hpp>
 #include "renderingmanager.hpp"
 
+#undef far
+
 namespace Ogre
 {
 	//---------------------------------------------------------------------
@@ -86,6 +88,7 @@ namespace Ogre
 		, mPSSM(0)
 		, mDepthShadows(false)
 		, mLowLodShadows(false)
+        , mShadowFar(1300)
 	{
 
 	}
@@ -102,6 +105,24 @@ namespace Ogre
 		terrain->_setLightMapRequired(mLightmapEnabled, true);
 		terrain->_setCompositeMapRequired(mCompositeMapEnabled);
 	}
+	//---------------------------------------------------------------------
+	void TerrainMaterialGeneratorB::SM2Profile::setShadowFar(float far)
+    {
+        if (mShadowFar != far)
+        {
+            mShadowFar = far;
+            mParent->_markChanged();
+        }
+    }
+	//---------------------------------------------------------------------
+    void TerrainMaterialGeneratorB::SM2Profile::setShadowFadeStart(float fadestart)
+    {
+        if (mShadowFadeStart != fadestart)
+        {
+            mShadowFadeStart = fadestart;
+            mParent->_markChanged();
+        }
+    }
 	//---------------------------------------------------------------------
 	void TerrainMaterialGeneratorB::SM2Profile::setLayerNormalMappingEnabled(bool enabled)
 	{
@@ -462,6 +483,7 @@ namespace Ogre
 
 		StringUtil::StrStreamType sourceStr;
 		generateFragmentProgramSource(prof, terrain, tt, sourceStr);
+
 		ret->setSource(sourceStr.str());
 		ret->load();
 		defaultFpParams(prof, terrain, tt, ret);
@@ -518,7 +540,6 @@ namespace Ogre
 		params->setNamedAutoConstant("viewProjMatrix", GpuProgramParameters::ACT_VIEWPROJ_MATRIX);
 		params->setNamedAutoConstant("lodMorph", GpuProgramParameters::ACT_CUSTOM, 
 			Terrain::LOD_MORPH_CUSTOM_PARAM);
-		params->setNamedAutoConstant("fogParams", GpuProgramParameters::ACT_FOG_PARAMS);
 
 		if (prof->isShadowingEnabled(tt, terrain))
 		{
@@ -533,8 +554,8 @@ namespace Ogre
 					GpuProgramParameters::ACT_TEXTURE_VIEWPROJ_MATRIX, i);
 				if (prof->getReceiveDynamicShadowsDepth())
 				{
-					params->setNamedAutoConstant("depthRange" + StringConverter::toString(i), 
-						GpuProgramParameters::ACT_SHADOW_SCENE_DEPTH_RANGE, i);
+					//params->setNamedAutoConstant("depthRange" + StringConverter::toString(i), 
+						//GpuProgramParameters::ACT_SHADOW_SCENE_DEPTH_RANGE, i);
 				}
 			}
 		}
@@ -554,7 +575,7 @@ namespace Ogre
                 {
                         params->setNamedAutoConstant("lightPosObjSpace"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_POSITION_OBJECT_SPACE, i);
                         params->setNamedAutoConstant("lightDiffuseColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_DIFFUSE_COLOUR, i);
-                        if (prof->getNumberOfLightsSupported() > 1)
+                        if (i > 0)
                             params->setNamedAutoConstant("lightAttenuation"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_ATTENUATION, i);
                         //params->setNamedAutoConstant("lightSpecularColour"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_SPECULAR_COLOUR, i);
                 }
@@ -564,9 +585,11 @@ namespace Ogre
 
 		params->setNamedAutoConstant("eyePosObjSpace", GpuProgramParameters::ACT_CAMERA_POSITION_OBJECT_SPACE);
 		params->setNamedAutoConstant("fogColour", GpuProgramParameters::ACT_FOG_COLOUR);
+		params->setNamedAutoConstant("fogParams", GpuProgramParameters::ACT_FOG_PARAMS);
 
 		if (prof->isShadowingEnabled(tt, terrain))
 		{
+            params->setNamedConstant("shadowFar_fadeStart", Vector4(prof->mShadowFar, prof->mShadowFadeStart * prof->mShadowFar, 0, 0));
 			uint numTextures = 1;
 			if (prof->getReceiveDynamicShadowsPSSM())
 			{
@@ -732,7 +755,7 @@ namespace Ogre
 			ret->unload();
 		}
 
-		ret->setParameter("profiles", "vs_3_0 vs_2_0 arbvp1");
+		ret->setParameter("profiles", "vs_3_0 vs_2_0 vp40 arbvp1");
 		ret->setParameter("entry_point", "main_vp");
 
 		return ret;
@@ -794,7 +817,7 @@ namespace Ogre
 
 		uint texCoordSet = 1;
 		outStream <<
-			", out float4 oUVMisc : TEXCOORD" << texCoordSet++ <<" // xy = uv, z = camDepth\n";
+			", out float4 oUVMisc : COLOR0 // xy = uv, z = camDepth\n";
 
 		// layer UV's premultiplied, packed as xy/zw
 		uint numUVSets = numLayers / 2;
@@ -814,14 +837,6 @@ namespace Ogre
 			outStream << ", out float2 lodInfo : TEXCOORD" << texCoordSet++ << "\n";
 		}
 
-		bool fog = terrain->getSceneManager()->getFogMode() != FOG_NONE && tt != RENDER_COMPOSITE_MAP;
-		if (fog)
-		{
-			outStream <<
-				", uniform float4 fogParams\n"
-				", out float fogVal : COLOR\n";
-		}
-
 		if (prof->isShadowingEnabled(tt, terrain))
 		{
 			texCoordSet = generateVpDynamicShadowsParams(texCoordSet, prof, terrain, tt, outStream);
@@ -831,7 +846,7 @@ namespace Ogre
 		if (texCoordSet > 8)
 		{
 			OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, 
-				"Requested options require too many texture coordinate sets! Try reducing the number of layers.",
+				"Requested options require too many texture coordinate sets! Try reducing the number of layers. requested: " + StringConverter::toString(texCoordSet),
 				__FUNCTION__);
 		}
 
@@ -921,7 +936,7 @@ namespace Ogre
 
 		uint texCoordSet = 1;
 		outStream <<
-			"float4 uvMisc : TEXCOORD" << texCoordSet++ << ",\n";
+			"float4 uvMisc : COLOR0,\n";
 
 		// UV's premultiplied, packed as xy/zw
 		uint maxLayers = prof->getMaxLayers(terrain);
@@ -948,8 +963,8 @@ namespace Ogre
 		if (fog)
 		{
 			outStream <<
-				"uniform float3 fogColour, \n"
-				"float fogVal : COLOR,\n";
+				"uniform float4 fogParams, \n"
+				"uniform float3 fogColour, \n";
 		}
 
 		uint currentSamplerIdx = 0;
@@ -968,7 +983,7 @@ namespace Ogre
 			//"uniform float3 lightSpecularColour"<<i<<",\n"
                         ;
 
-                        if (prof->getNumberOfLightsSupported() > 1)
+                        if (i > 0)
                             outStream <<
                             "uniform float4 lightAttenuation"<<i<<",\n";
 
@@ -1137,7 +1152,7 @@ namespace Ogre
                                         outStream << "	float3 halfAngle"<<i<<" = normalize(lightDir"<<i<<" + eyeDir);\n"
                                                 "	float4 litRes"<<i<<" = lit(dot(normalize(lightDir"<<i<<"), normal), dot(halfAngle"<<i<<", normal), scaleBiasSpecular.z);\n";
 
-                                    if (prof->getNumberOfLightsSupported() > 1)
+                                    if (i > 0)
                                         outStream <<
                                         // pre-multiply light color with attenuation factor
                                            "d = length( lightDir"<<i<<" ); \n"
@@ -1249,22 +1264,7 @@ namespace Ogre
 
         outStream <<
             "	// pass cam depth\n"
-            "	oUVMisc.z = oPos.z;\n";
-
-		bool fog = terrain->getSceneManager()->getFogMode() != FOG_NONE && tt != RENDER_COMPOSITE_MAP;
-		if (fog)
-		{
-			if (terrain->getSceneManager()->getFogMode() == FOG_LINEAR)
-			{
-				outStream <<
-					"	fogVal = saturate((oPos.z - fogParams.y) * fogParams.w);\n";
-			}
-			else
-			{
-				outStream <<
-					"	fogVal = saturate(1 / (exp(oPos.z * fogParams.x)));\n";
-			}
-		}
+            "	oPosObj.w = oPos.z;\n";
 		
 		if (prof->isShadowingEnabled(tt, terrain))
 			generateVpDynamicShadows(prof, terrain, tt, outStream);
@@ -1315,7 +1315,13 @@ namespace Ogre
 
 			// diffuse lighting
                         for (int i=0; i<prof->getNumberOfLightsSupported(); ++i)
+                        {
+                            // shadows only for first light (directional)
+                            if (i==0)
                                 outStream << "	outputCol.rgb += litRes"<<i<<".y * lightDiffuseColour"<<i<<" * diffuse * shadow;\n";
+                            else
+                                outStream << "	outputCol.rgb += litRes"<<i<<".y * lightDiffuseColour"<<i<<" * diffuse;\n";
+                        }
 
 			// specular default
 			if (!prof->isLayerSpecularMappingEnabled())
@@ -1343,6 +1349,16 @@ namespace Ogre
 		bool fog = terrain->getSceneManager()->getFogMode() != FOG_NONE && tt != RENDER_COMPOSITE_MAP;
 		if (fog)
 		{
+            if (terrain->getSceneManager()->getFogMode() == FOG_LINEAR)
+            {
+                outStream <<
+                    "	float fogVal = saturate((position.w - fogParams.y) * fogParams.w);\n";
+            }
+            else
+            {
+                outStream <<
+                    "	float fogVal = saturate(1 / (exp(position.w * fogParams.x)));\n";
+            }
 			outStream << "	outputCol.rgb = lerp(outputCol.rgb, fogColour, fogVal);\n";
 		}
 
@@ -1350,7 +1366,7 @@ namespace Ogre
 		outStream << "  oColor = outputCol;\n";
 
         if (MWRender::RenderingManager::useMRT()) outStream <<
-            "   oColor1 = float4(uvMisc.z / far, 0, 0, 1); \n";
+            "   oColor1 = float4(position.w / far, 0, 0, 1); \n";
 
         outStream
 			<< "}\n";
@@ -1364,7 +1380,7 @@ namespace Ogre
 		outStream <<
 			"// Simple PCF \n"
 			"// Number of samples in one dimension (square for total samples) \n"
-			"#define NUM_SHADOW_SAMPLES_1D 2.0 \n"
+			"#define NUM_SHADOW_SAMPLES_1D 1.0 \n"
 			"#define SHADOW_FILTER_SCALE 1 \n"
 
 			"#define SHADOW_SAMPLES NUM_SHADOW_SAMPLES_1D*NUM_SHADOW_SAMPLES_1D \n"
@@ -1377,28 +1393,18 @@ namespace Ogre
 		if (prof->getReceiveDynamicShadowsDepth())
 		{
 			outStream << 
-				"float calcDepthShadow(sampler2D shadowMap, float4 uv, float invShadowMapSize) \n"
-				"{ \n"
-				"	// 4-sample PCF \n"
-					
-				"	float shadow = 0.0; \n"
-				"	float offset = (NUM_SHADOW_SAMPLES_1D/2 - 0.5) * SHADOW_FILTER_SCALE; \n"
-				"	for (float y = -offset; y <= offset; y += SHADOW_FILTER_SCALE) \n"
-				"		for (float x = -offset; x <= offset; x += SHADOW_FILTER_SCALE) \n"
-				"		{ \n"
-				"			float4 newUV = offsetSample(uv, float2(x, y), invShadowMapSize);\n"
-				"			// manually project and assign derivatives \n"
-				"			// to avoid gradient issues inside loops \n"
-				"			newUV = newUV / newUV.w; \n"
-				"			float depth = tex2D(shadowMap, newUV.xy, 1, 1).x; \n"
-				"			if (depth >= 1 || depth >= uv.z)\n"
-				"				shadow += 1.0;\n"
-				"		} \n"
-
-				"	shadow /= SHADOW_SAMPLES; \n"
-
-				"	return shadow; \n"
-				"} \n";
+				"float calcDepthShadow(sampler2D shadowMap, float4 shadowMapPos, float2 offset) \n"
+                "   { \n"
+                "      shadowMapPos = shadowMapPos / shadowMapPos.w; \n"
+                "      float2 uv = shadowMapPos.xy; \n"
+                "      float3 o = float3(offset, -offset.x) * 0.3f; \n"
+                "      // Note: We using 2x2 PCF. Good enough and is alot faster. \n"
+                "      float c =   (shadowMapPos.z <= tex2D(shadowMap, uv.xy - o.xy).r) ? 1 : 0; // top left \n"
+                "      c +=        (shadowMapPos.z <= tex2D(shadowMap, uv.xy + o.xy).r) ? 1 : 0; // bottom right \n"
+                "      c +=        (shadowMapPos.z <= tex2D(shadowMap, uv.xy + o.zy).r) ? 1 : 0; // bottom left \n"
+                "      c +=        (shadowMapPos.z <= tex2D(shadowMap, uv.xy - o.zy).r) ? 1 : 0; // top right \n"
+                "      return c / 4; \n"
+                "   } \n";
 		}
 		else
 		{
@@ -1436,7 +1442,7 @@ namespace Ogre
 			{
 				outStream << "\n	";
 				for (uint i = 0; i < numTextures; ++i)
-					outStream << "float invShadowmapSize" << i << ", ";
+					outStream << "float2 invShadowmapSize" << i << ", ";
 			}
 			outStream << "\n"
 				"	float4 pssmSplitPoints, float camDepth) \n"
@@ -1458,7 +1464,7 @@ namespace Ogre
 				if (prof->getReceiveDynamicShadowsDepth())
 				{
 					outStream <<
-						"		shadow = calcDepthShadow(shadowMap" << i << ", lsPos" << i << ", invShadowmapSize" << i << "); \n";
+						"		shadow = calcDepthShadow(shadowMap" << i << ", lsPos" << i << ", invShadowmapSize" << i << ".xy); \n";
 				}
 				else
 				{
@@ -1520,8 +1526,8 @@ namespace Ogre
 			if (prof->getReceiveDynamicShadowsDepth())
 			{
 				// make linear
-				outStream <<
-					"oLightSpacePos" << i << ".z = (oLightSpacePos" << i << ".z - depthRange" << i << ".x) * depthRange" << i << ".w;\n";
+				//outStream <<
+				//	"oLightSpacePos" << i << ".z = (oLightSpacePos" << i << ".z - depthRange" << i << ".x) * depthRange" << i << ".w;\n";
 
 			}
 		}
@@ -1538,6 +1544,8 @@ namespace Ogre
 
 		// in semantics & params
 		uint numTextures = 1;
+        outStream <<
+        ", uniform float4 shadowFar_fadeStart \n";
 		if (prof->getReceiveDynamicShadowsPSSM())
 		{
 			numTextures = prof->getReceiveDynamicShadowsPSSM()->getSplitCount();
@@ -1554,7 +1562,7 @@ namespace Ogre
 			if (prof->getReceiveDynamicShadowsDepth())
 			{
 				outStream <<
-					", uniform float inverseShadowmapSize" << i << " \n";
+					", uniform float4 inverseShadowmapSize" << i << " \n";
 			}
 		}
 
@@ -1567,7 +1575,7 @@ namespace Ogre
 		{
 			uint numTextures = prof->getReceiveDynamicShadowsPSSM()->getSplitCount();
 			outStream << 
-				"	float camDepth = uvMisc.z;\n";
+				"	float camDepth = position.w;\n";
 
 			if (prof->getReceiveDynamicShadowsDepth())
 			{
@@ -1589,7 +1597,7 @@ namespace Ogre
 			{
 				outStream << "\n		";
 				for (uint i = 0; i < numTextures; ++i)
-					outStream << "inverseShadowmapSize" << i << ", ";
+					outStream << "inverseShadowmapSize" << i << ".xy, ";
 			}
 			outStream << "\n" <<
 				"		pssmSplitPoints, camDepth);\n";
@@ -1600,7 +1608,7 @@ namespace Ogre
 			if (prof->getReceiveDynamicShadowsDepth())
 			{
 				outStream <<
-					"	float rtshadow = calcDepthShadow(shadowMap0, lightSpacePos0, inverseShadowmapSize0);";
+					"	float rtshadow = calcDepthShadow(shadowMap0, lightSpacePos0, inverseShadowmapSize0.xy);"; 
 			}
 			else
 			{
@@ -1609,7 +1617,11 @@ namespace Ogre
 			}
 		}
 
-		outStream << 
+		outStream <<
+            "   float fadeRange = shadowFar_fadeStart.x - shadowFar_fadeStart.y; \n"
+            "   float fade = 1-((position.w - shadowFar_fadeStart.y) / fadeRange); \n"
+            "   rtshadow = (position.w > shadowFar_fadeStart.x) ? 1 : ((position.w > shadowFar_fadeStart.y) ? 1-((1-rtshadow)*fade) : rtshadow); \n"
+            "   rtshadow = (1-(1-rtshadow)*0.6); \n" // make the shadow a little less intensive
 			"	shadow = min(shadow, rtshadow);\n";
 		
 	}

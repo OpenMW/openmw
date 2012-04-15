@@ -21,6 +21,7 @@
 #include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
+#include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
@@ -28,6 +29,7 @@
 #include "mwinput/inputmanager.hpp"
 
 #include "mwgui/window_manager.hpp"
+#include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanager.hpp"
 #include "mwscript/compilercontext.hpp"
@@ -349,6 +351,13 @@ void OMW::Engine::go()
 
     mFpsLevel = settings.getInt("fps", "HUD");
 
+    // load nif overrides
+    NifOverrides::Overrides nifOverrides;
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg"))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg");
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
+
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string(),
@@ -362,11 +371,15 @@ void OMW::Engine::go()
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "gbuffer");
+    addResourcesDirectory(mResDir / "shadows");
 
     // Create the window
     mOgre->createWindow("OpenMW");
 
     loadBSA();
+
+    // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
+    MWGui::CursorReplace replacer;
 
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,

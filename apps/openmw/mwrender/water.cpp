@@ -11,7 +11,7 @@ namespace MWRender
 Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
-    mReflectionTarget(0), mActive(1)
+    mReflectionTarget(0), mActive(1), mToggled(1)
 {
     mSky = sky;
 
@@ -31,6 +31,7 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     mWater = mSceneManager->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
     mWater->setRenderQueueGroup(RQG_Water);
+    mWater->setCastShadows(false);
 
     mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
                         + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")
@@ -42,6 +43,8 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
     mWaterNode->setPosition(0, mTop, 0);
 
+    mReflectionCamera = mSceneManager->createCamera("ReflectionCamera");
+
     if(!(cell->data.flags & cell->Interior))
     {
         mWaterNode->setPosition(getSceneNodeCoordinates(cell->data.gridX, cell->data.gridY));
@@ -51,17 +54,20 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     // Create rendertarget for reflection
     int rttsize = Settings::Manager::getInt("rtt size", "Water");
 
+    TexturePtr tex;
     if (Settings::Manager::getBool("shader", "Water"))
     {
-        TexturePtr tex = TextureManager::getSingleton().createManual("WaterReflection",
-            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_R8G8B8, TU_RENDERTARGET);
+        tex = TextureManager::getSingleton().createManual("WaterReflection",
+            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_FLOAT16_RGBA, TU_RENDERTARGET);
 
         RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
-        Viewport* vp = rtt->addViewport(mCamera);
+        Viewport* vp = rtt->addViewport(mReflectionCamera);
         vp->setOverlaysEnabled(false);
         vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
         vp->setShadowsEnabled(false);
         vp->setVisibilityMask( mVisibilityFlags );
+        // use fallback techniques without shadows and without mrt (currently not implemented for sky and terrain)
+        //vp->setMaterialScheme("Fallback");
         rtt->addListener(this);
         rtt->setActive(true);
 
@@ -74,13 +80,61 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     mWater->setMaterial(mMaterial);
 
     mUnderwaterEffect = Settings::Manager::getBool("underwater effect", "Water");
+
+
+    // ----------------------------------------------------------------------------------------------
+    // ---------------------------------- reflection debug overlay ----------------------------------
+    // ----------------------------------------------------------------------------------------------
+    /*
+    if (Settings::Manager::getBool("shader", "Water"))
+    {
+        OverlayManager& mgr = OverlayManager::getSingleton();
+        Overlay* overlay;
+        // destroy if already exists
+        if (overlay = mgr.getByName("ReflectionDebugOverlay"))
+            mgr.destroy(overlay);
+
+        overlay = mgr.create("ReflectionDebugOverlay");
+
+        if (MaterialManager::getSingleton().resourceExists("Ogre/ReflectionDebugTexture"))
+            MaterialManager::getSingleton().remove("Ogre/ReflectionDebugTexture");
+        MaterialPtr debugMat = MaterialManager::getSingleton().create(
+            "Ogre/ReflectionDebugTexture",
+            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+        debugMat->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+        TextureUnitState *t = debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(tex->getName());
+        t->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
+
+        OverlayContainer* debugPanel;
+
+        // destroy container if exists
+        try
+        {
+            if (debugPanel =
+                static_cast<OverlayContainer*>(
+                    mgr.getOverlayElement("Ogre/ReflectionDebugTexPanel"
+                )))
+                mgr.destroyOverlayElement(debugPanel);
+        }
+        catch (Ogre::Exception&) {}
+
+        debugPanel = (OverlayContainer*)
+            (OverlayManager::getSingleton().createOverlayElement("Panel", "Ogre/ReflectionDebugTexPanel"));
+        debugPanel->_setPosition(0, 0.55);
+        debugPanel->_setDimensions(0.3, 0.3);
+        debugPanel->setMaterialName(debugMat->getName());
+        debugPanel->show();
+        overlay->add2D(debugPanel);
+        overlay->show();
+    }
+    */
 }
 
 void Water::setActive(bool active)
 {
     mActive = active;
-    if (mReflectionTarget) mReflectionTarget->setActive(active && !mIsUnderwater);
-    mWater->setVisible(active);
+    updateVisible();
 }
 
 Water::~Water()
@@ -112,8 +166,8 @@ void Water::setHeight(const float height)
 
 void Water::toggle()
 {
-    if (mActive)
-        mWater->setVisible(!mWater->getVisible());
+    mToggled = !mToggled;
+    updateVisible();
 }
 
 void Water::checkUnderwater(float y)
@@ -128,13 +182,10 @@ void Water::checkUnderwater(float y)
         if (pass->hasFragmentProgram() && pass->getFragmentProgramParameters()->_findNamedConstantDefinition("isUnderwater", false))
             pass->getFragmentProgramParameters()->setNamedConstant("isUnderwater", Real(0));
 
-        if (mReflectionTarget)
-            mReflectionTarget->setActive(mActive);
-
         mWater->setRenderQueueGroup(RQG_Water);
 
         mIsUnderwater = false;
-    } 
+    }
 
     if (!mIsUnderwater && y < mTop && mWater->isVisible() && mCamera->getPolygonMode() == Ogre::PM_SOLID)
     {
@@ -146,13 +197,12 @@ void Water::checkUnderwater(float y)
         if (pass->hasFragmentProgram() && pass->getFragmentProgramParameters()->_findNamedConstantDefinition("isUnderwater", false))
             pass->getFragmentProgramParameters()->setNamedConstant("isUnderwater", Real(1));
 
-        if (mReflectionTarget)
-            mReflectionTarget->setActive(false);
-
         mWater->setRenderQueueGroup(RQG_UnderWater);
 
         mIsUnderwater = true;
     }
+
+    updateVisible();
 }
 
 Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY)
@@ -164,7 +214,12 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
 {
     if (evt.source == mReflectionTarget)
     {
-        mWater->setVisible(false);
+        mReflectionCamera->setOrientation(mCamera->getDerivedOrientation());
+        mReflectionCamera->setPosition(mCamera->getDerivedPosition());
+        mReflectionCamera->setNearClipDistance(mCamera->getNearClipDistance());
+        mReflectionCamera->setFarClipDistance(mCamera->getFarClipDistance());
+        mReflectionCamera->setAspectRatio(mCamera->getAspectRatio());
+        mReflectionCamera->setFOVy(mCamera->getFOVy());
 
         // Some messy code to get the skybox to show up at all
         // The problem here is that it gets clipped by the water plane
@@ -174,21 +229,19 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
         mSky->setSkyPosition(pos);
         mSky->scaleSky(mCamera->getFarClipDistance() / 1000.f);
 
-        mCamera->enableCustomNearClipPlane(Plane(Vector3::UNIT_Y, mTop));
-        mCamera->enableReflection(Plane(Vector3::UNIT_Y, mTop));
+        mReflectionCamera->enableCustomNearClipPlane(Plane(Vector3::UNIT_Y, mTop));
+        mReflectionCamera->enableReflection(Plane(Vector3::UNIT_Y, mTop));
     }
 }
 
 void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
 {
-    mWater->setVisible(true);
-
     if (evt.source == mReflectionTarget)
     {
         mSky->resetSkyPosition();
         mSky->scaleSky(1);
-        mCamera->disableReflection();
-        mCamera->disableCustomNearClipPlane();
+        mReflectionCamera->disableCustomNearClipPlane();
+        mReflectionCamera->disableReflection();
     }
 }
 
@@ -228,6 +281,13 @@ void Water::setViewportBackground(const ColourValue& bg)
 {
     if (mReflectionTarget)
         mReflectionTarget->getViewport(0)->setBackgroundColour(bg);
+}
+
+void Water::updateVisible()
+{
+    mWater->setVisible(mToggled && mActive);
+    if (mReflectionTarget)
+        mReflectionTarget->setActive(mToggled && mActive && !mIsUnderwater);
 }
 
 } // namespace

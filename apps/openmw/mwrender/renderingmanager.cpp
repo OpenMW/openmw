@@ -14,6 +14,10 @@
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
 
+#include "shadows.hpp"
+#include "shaderhelper.hpp"
+#include "localmap.hpp"
+#include "water.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -21,11 +25,9 @@ using namespace Ogre;
 namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
-    :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0)
+    :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mSunEnabled(0)
 {
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
-    mTerrainManager = new TerrainManager(mRendering.getScene(),
-                                         environment);
 
     mWater = 0;
 
@@ -54,6 +56,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
     if (caps->getNumMultiRenderTargets() < 2)
         Settings::Manager::setBool("shader", "Water", false);
+    if (!caps->isShaderProfileSupported("fp40") && !caps->isShaderProfileSupported("ps_4_0"))
+        Settings::Manager::setBool("enabled", "Shadows", false);
 
     // note that the order is important here
     if (useMRT())
@@ -86,6 +90,12 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
     cameraPitchNode->attachObject(mRendering.getCamera());
 
+    mShadows = new Shadows(&mRendering);
+    mShaderHelper = new ShaderHelper(this);
+
+    mTerrainManager = new TerrainManager(mRendering.getScene(), this,
+                                         environment);
+
     //mSkyManager = 0;
     mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
 
@@ -100,7 +110,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
 RenderingManager::~RenderingManager ()
 {
-    //TODO: destroy mSun?
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
@@ -412,6 +421,7 @@ void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
 
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
+    if (!mSunEnabled) return;
     mSun->setDiffuseColour(colour);
     mSun->setSpecularColour(colour);
     mTerrainManager->setDiffuse(colour);
@@ -425,12 +435,21 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
 
 void RenderingManager::sunEnable()
 {
-    if (mSun) mSun->setVisible(true);
+    // Don't disable the light, as the shaders assume the first light to be directional.
+    //if (mSun) mSun->setVisible(true);
+    mSunEnabled = true;
 }
 
 void RenderingManager::sunDisable()
 {
-    if (mSun) mSun->setVisible(false);
+    // Don't disable the light, as the shaders assume the first light to be directional.
+    //if (mSun) mSun->setVisible(false);
+    mSunEnabled = false;
+    if (mSun)
+    {
+        mSun->setDiffuseColour(ColourValue(0,0,0));
+        mSun->setSpecularColour(ColourValue(0,0,0));
+    }
 }
 
 void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
@@ -463,16 +482,23 @@ void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
 void RenderingManager::disableLights()
 {
     mObjects.disableLights();
+    sunDisable();
 }
 
 void RenderingManager::enableLights()
 {
     mObjects.enableLights();
+    sunEnable();
 }
 
 const bool RenderingManager::useMRT()
 {
     return Settings::Manager::getBool("shader", "Water");
+}
+
+Shadows* RenderingManager::getShadows()
+{
+    return mShadows;
 }
 
 } // namespace

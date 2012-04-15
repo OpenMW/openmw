@@ -24,7 +24,12 @@ op 0x20007: PlayAnim, explicit reference
 op 0x20008: LoopAnim
 op 0x20009: LoopAnim, explicit reference
 op 0x2000a: Choice
-opcodes 0x2000b-0x3ffff unused
+op 0x2000b: PCRaiseRank
+op 0x2000c: PCLowerRank
+op 0x2000d: PCJoinFaction
+op 0x2000e: PCGetRank implicit
+op 0x2000f: PCGetRank explicit
+opcodes 0x20010-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -129,4 +134,14 @@ op 0x2000143: ModWaterLevel
 op 0x2000144: ToggleWater, twa
 op 0x2000145: ToggleFogOfWar (tfow)
 op 0x2000146: TogglePathgrid
-opcodes 0x2000147-0x3ffffff unused
+op 0x2000147: AddSpell
+op 0x2000148: AddSpell, explicit reference
+op 0x2000149: RemoveSpell
+op 0x200014a: RemoveSpell, explicit reference
+op 0x200014b: GetSpell
+op 0x200014c: GetSpell, explicit reference
+op 0x200014d: ModDisposition
+op 0x200014e: ModDisposition, explicit reference
+op 0x200014f: ForceGreeting
+op 0x2000150: ForceGreeting, explicit reference
+opcodes 0x2000151-0x3ffffff unused

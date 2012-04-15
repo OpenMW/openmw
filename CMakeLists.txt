@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 13)
+set (OPENMW_VERSION_MINOR 14)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -26,6 +26,11 @@ configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+
+# Apps and tools
+option(BUILD_ESMTOOL "build ESM inspector" ON)
+option(BUILD_LAUNCHER "build Launcher" ON)
+option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
@@ -97,6 +102,7 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/mouselook.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
+  ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/events.cpp
@@ -116,6 +122,7 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
+
 )
 
 set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
@@ -227,6 +234,9 @@ endif (APPLE)
 configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}/settings-default.cfg")
 
+configure_file(${OpenMW_SOURCE_DIR}/files/transparency-overrides.cfg
+    "${OpenMW_BINARY_DIR}/transparency-overrides.cfg")
+
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
     "${OpenMW_BINARY_DIR}/openmw.cfg")
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
@@ -240,6 +250,9 @@ endif (WIN32)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
         "${OpenMW_BINARY_DIR}/plugins.cfg")
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
+        "${OpenMW_BINARY_DIR}/openmw.desktop")
 endif()
 
 if (APPLE)
@@ -303,11 +316,12 @@ if(DPKG_PROGRAM)
     endif()
 
     #Install icon and desktop file
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
@@ -347,7 +361,7 @@ if(WIN32)
     INSTALL(FILES ${files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES
-        "${OpenMW_SOURCE_DIR}/readme.txt" 
+        "${OpenMW_SOURCE_DIR}/readme.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
@@ -408,17 +422,14 @@ add_subdirectory (components)
 # Apps and tools
 add_subdirectory( apps/openmw )
 
-option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
 
-option(BUILD_LAUNCHER "build Launcher inspector" ON)
 if (BUILD_LAUNCHER)
    add_subdirectory( apps/launcher )
 endif()
 
-option(BUILD_MWINIIMPORTER "build MWiniImporter inspector" ON)
 if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
 endif()

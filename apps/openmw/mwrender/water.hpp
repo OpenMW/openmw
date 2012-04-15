@@ -24,6 +24,7 @@ namespace MWRender {
 
         bool mIsUnderwater;
         bool mActive;
+        bool mToggled;
         int mTop;
 
         Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
@@ -31,6 +32,7 @@ namespace MWRender {
     protected:
         void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+        void updateVisible();
 
         SkyManager* mSky;
 
@@ -38,6 +40,8 @@ namespace MWRender {
 
         void createMaterial();
         Ogre::MaterialPtr mMaterial;
+
+        Ogre::Camera* mReflectionCamera;
 
         Ogre::RenderTarget* mReflectionTarget;
 
