@@ -303,8 +303,8 @@ namespace MWRender{
 
 					    for(; boneSequenceIter != boneSequence.end(); boneSequenceIter++)
 					    {
-							if(creaturemodel->getSkeleton()->hasBone(*boneSequenceIter)){
-							Ogre::Bone *bonePtr = creaturemodel->getSkeleton()->getBone(*boneSequenceIter);
+							if(skel->hasBone(*boneSequenceIter)){
+							Ogre::Bone *bonePtr = skel->getBone(*boneSequenceIter);
 								// Computes C = B + AxC*scale
 								transmult = transmult + rotmult * bonePtr->getPosition();
 								rotmult = rotmult * bonePtr->getOrientation();
