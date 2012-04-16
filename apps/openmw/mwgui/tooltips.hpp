@@ -10,13 +10,12 @@ namespace MWGui
     class WindowManager;
 
     // Info about tooltip that is supplied by the MWWorld::Class object
-    // Not used yet, but it will replace the if-else-if blocks in tooltips.cpp
     struct ToolTipInfo
     {
     public:
         std::string caption;
         std::string text;
-        std::string image;
+        std::string icon;
 
         /// \todo enchantments (armor, cloth, weapons), magic effects (potions, ingredients)
     };
@@ -32,8 +31,18 @@ namespace MWGui
         void enterGuiMode();
 
         void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
+        bool getFullHelp() const;
 
         void setFocusObject(const MWWorld::Ptr& focus);
+
+        static std::string getValueString(const int value, const std::string& prefix);
+        ///< @return "prefix: value" or "" if value is 0
+
+        static std::string getMiscString(const std::string& text, const std::string& prefix);
+        ///< @return "prefix: text" or "" if text is empty
+
+        static std::string toString(const float value);
+        static std::string toString(const int value);
 
     private:
         MyGUI::Widget* mDynamicToolTipBox;
@@ -55,12 +64,6 @@ namespace MWGui
 
         MyGUI::IntSize createToolTip(const std::string& text);
         ///< @return requested tooltip size
-
-        std::string getValueString(const int value);
-        ///< get "Value: X" string or "" if value is 0
-
-        std::string toString(const float value);
-        std::string toString(const int value);
 
         bool mGameMode;
 

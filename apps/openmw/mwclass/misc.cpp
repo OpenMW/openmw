@@ -10,9 +10,14 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/environment.hpp"
 
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
+
 #include "../mwrender/objects.hpp"
 
 #include "../mwsound/soundmanager.hpp"
+
+#include <boost/lexical_cast.hpp>
 
 namespace MWClass
 {
@@ -108,5 +113,42 @@ namespace MWClass
             return std::string("Item Gold Down");
         }
         return std::string("Item Misc Down");
+    }
+
+    bool Miscellaneous::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+        info.icon = ref->base->icon;
+
+        std::string text;
+
+        if (ref->base->name == environment.mWorld->getStore().gameSettings.search("sGold")->str)
+            info.caption += " (" + boost::lexical_cast<std::string>(ref->base->data.value) + ")";
+        else
+        {
+            text += "\n" + environment.mWorld->getStore().gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+            text += MWGui::ToolTips::getValueString(ref->base->data.value, environment.mWorld->getStore().gameSettings.search("sValue")->str);
+        }
+
+        if (environment.mWindowManager->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.text = text;
+
+        return info;
     }
 }

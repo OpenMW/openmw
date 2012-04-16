@@ -1,6 +1,8 @@
 #include "tooltips.hpp"
 #include "window_manager.hpp"
 
+#include "../mwworld/class.hpp"
+
 #include <boost/lexical_cast.hpp>
 
 using namespace MWGui;
@@ -130,314 +132,24 @@ IntSize ToolTips::getToolTipViaPtr ()
 
     IntSize tooltipSize;
 
-    // --------------------  Door -------------------------------
-    if (mFocusObject.getTypeName() == typeid(ESM::Door).name())
+    const MWWorld::Class& object = MWWorld::Class::get (mFocusObject);
+    if (!object.hasToolTip(mFocusObject))
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData>* ref = mFocusObject.get<ESM::Door>();
-
-        std::string text;
-        /// \todo If destCell is empty, the teleport target is an exterior cell. In that case we 
-        /// need to fetch that cell (via target position) and retrieve the region name.
-        if (ref->ref.teleport && (ref->ref.destCell != ""))
-        {
-            text += "\n" + mWindowManager->getGameSettingString("sTo", "to");
-            text += "\n"+ref->ref.destCell;
-        }
-
-        if (ref->ref.lockLevel > 0)
-            text += "\n" + mWindowManager->getGameSettingString("sLockLevel", "Lock") + ": " + toString(ref->ref.lockLevel);
-        if (ref->ref.trap != "")
-            text += "\n" + mWindowManager->getGameSettingString("sTrapped", "Trapped!");
-
-        tooltipSize = createToolTip(ref->base->name, text);
+        mDynamicToolTipBox->setVisible(false);
     }
-
-    // --------------------  NPC -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::NPC).name())
-    {
-        /// \todo We don't want tooltips for NPCs in combat mode.
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mFocusObject.get<ESM::NPC>();
-
-        std::string text;
-        if (mFullHelp) {
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createToolTip(ref->base->name, text);
-    }
-
-    // --------------------  Creature -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Creature).name())
-    {
-        /// \todo We don't want tooltips for Creatures in combat mode.
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mFocusObject.get<ESM::Creature>();
-
-        std::string text;
-        if (mFullHelp) {
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createToolTip(ref->base->name, text);
-    }
-
-    // --------------------  Container -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Container).name())
-    {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData>* ref = mFocusObject.get<ESM::Container>();
-
-        std::string text;
-
-        if (ref->ref.lockLevel > 0)
-            text += "\n" + mWindowManager->getGameSettingString("sLockLevel", "Lock") + ": " + toString(ref->ref.lockLevel);
-        if (ref->ref.trap != "")
-            text += "\n" + mWindowManager->getGameSettingString("sTrapped", "Trapped!");
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createToolTip(ref->base->name, text);
-    }
-
-    // --------------------  Potion -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Potion).name())
-    {
-        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData>* ref = mFocusObject.get<ESM::Potion>();
-
-        /// \todo magic effects
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Apparatus -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Apparatus).name())
-    {
-        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData>* ref = mFocusObject.get<ESM::Apparatus>();
-
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sQuality", "Quality") + ": " + toString(ref->base->data.quality);
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Armor -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Armor).name())
-    {
-        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData>* ref = mFocusObject.get<ESM::Armor>();
-
-        /// \todo magic effects, armor type (medium/light/heavy)
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sArmorRating", "Armor Rating") + ": " + toString(ref->base->data.armor);
-
-        /// \todo where is the current armor health stored?
-        //text += "\n" + mWindowManager->getGameSettingString("sCondition", "Condition") + ": " + toString(ref->base->data.health);
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Book -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Book).name())
-    {
-        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData>* ref = mFocusObject.get<ESM::Book>();
-
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Clothing -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Clothing).name())
-    {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData>* ref = mFocusObject.get<ESM::Clothing>();
-
-        /// \todo magic effects
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Ingredient -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Ingredient).name())
-    {
-        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData>* ref = mFocusObject.get<ESM::Ingredient>();
-
-        /// \todo magic effects
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Light -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Light).name())
-    {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData>* ref = mFocusObject.get<ESM::Light>();
-
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Tool -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Tool).name())
-    {
-        ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData>* ref = mFocusObject.get<ESM::Tool>();
-
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sUses", "Uses") + ": " + toString(ref->base->data.uses);
-        text += "\n" + mWindowManager->getGameSettingString("sQuality", "Quality") + ": " + toString(ref->base->data.quality);
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Miscellaneous -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Miscellaneous).name())
-    {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData>* ref = mFocusObject.get<ESM::Miscellaneous>();
-
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Probe -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Probe).name())
-    {
-        ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData>* ref = mFocusObject.get<ESM::Probe>();
-
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sUses", "Uses") + ": " + toString(ref->base->data.uses);
-        text += "\n" + mWindowManager->getGameSettingString("sQuality", "Quality") + ": " + toString(ref->base->data.quality);
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Repair -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Repair).name())
-    {
-        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData>* ref = mFocusObject.get<ESM::Repair>();
-
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sUses", "Uses") + ": " + toString(ref->base->data.uses);
-        text += "\n" + mWindowManager->getGameSettingString("sQuality", "Quality") + ": " + toString(ref->base->data.quality);
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Weapon -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Weapon).name())
-    {
-        ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData>* ref = mFocusObject.get<ESM::Weapon>();
-
-        /// \todo weapon damage, magic effects, health (condition)
-
-        std::string text;
-        text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
-        text += getValueString(ref->base->data.value);
-
-        if (mFullHelp) {
-            text += "\n Owner: " + ref->ref.owner;
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
-    }
-
-    // --------------------  Activator -------------------------------
-    else if (mFocusObject.getTypeName() == typeid(ESM::Activator).name())
-    {
-        ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData>* ref = mFocusObject.get<ESM::Activator>();
-
-        std::string text;
-        if (mFullHelp) {
-            text += "\n Script: " + ref->base->script;
-        }
-
-        tooltipSize = createToolTip(ref->base->name, text);
-    }
-
     else
     {
-        // object without tooltip
-        mDynamicToolTipBox->setVisible(false);
+        mDynamicToolTipBox->setVisible(true);
+
+        ToolTipInfo info = object.getToolTipInfo(mFocusObject, mWindowManager->getEnvironment());
+        if (info.icon == "")
+        {
+            tooltipSize= createToolTip(info.caption, info.text);
+        }
+        else
+        {
+            tooltipSize = createImageToolTip(info.caption, info.icon, 32, info.text);
+        }
     }
 
     return tooltipSize;
@@ -490,8 +202,6 @@ IntSize ToolTips::createImageToolTip(const std::string& caption, const std::stri
 
     captionWidget->setCoord( (totalSize.width - captionSize.width)/2 + imageSize, (imageSize-captionSize.height)/2, captionSize.width-imageSize, captionSize.height);
 
-    mDynamicToolTipBox->setVisible(caption != "");
-
     return totalSize;
 }
 
@@ -509,8 +219,6 @@ IntSize ToolTips::createToolTip(const std::string& caption, const std::string& t
     box->setProperty("WordWrap", "true");
     box->setCaption(caption + (realText != "" ? "\n#BF9959" + realText : ""));
 
-    mDynamicToolTipBox->setVisible(caption != "");
-
     return box->getTextSize();
 }
 
@@ -522,8 +230,6 @@ IntSize ToolTips::createToolTip(const std::string& text)
     box->setProperty("MultiLine", "true");
     box->setProperty("WordWrap", "true");
     box->setCaption(text);
-
-    mDynamicToolTipBox->setVisible(text != "");
 
     return box->getTextSize();
 }
@@ -542,15 +248,28 @@ std::string ToolTips::toString(const int value)
     return stream.str();
 }
 
-std::string ToolTips::getValueString(const int value)
+std::string ToolTips::getValueString(const int value, const std::string& prefix)
 {
     if (value == 0)
         return "";
     else
-        return "\n" + mWindowManager->getGameSettingString("sValue", "Value") + ": " + toString(value);
+        return "\n" + prefix + ": " + toString(value);
+}
+
+std::string ToolTips::getMiscString(const std::string& text, const std::string& prefix)
+{
+    if (text == "")
+        return "";
+    else
+        return "\n" + prefix + ": " + text;
 }
 
 void ToolTips::toggleFullHelp()
 {
     mFullHelp = !mFullHelp;
+}
+
+bool ToolTips::getFullHelp() const
+{
+    return mFullHelp;
 }

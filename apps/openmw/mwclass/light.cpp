@@ -10,6 +10,10 @@
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/world.hpp"
+
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -133,5 +137,37 @@ namespace MWClass
     std::string Light::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
     {
         return std::string("Item Misc Down");
+    }
+
+    bool Light::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+        info.icon = ref->base->icon;
+
+        std::string text;
+
+        text += "\n" + environment.mWorld->getStore().gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, environment.mWorld->getStore().gameSettings.search("sValue")->str);
+
+        if (environment.mWindowManager->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.text = text;
+
+        return info;
     }
 }

@@ -9,6 +9,10 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/world.hpp"
+
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -244,5 +248,42 @@ namespace MWClass
         }
 
         return std::string("Item Misc Down");
+    }
+
+    bool Weapon::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+            ptr.get<ESM::Weapon>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+        info.icon = ref->base->icon;
+
+        std::string text;
+
+        /// \todo weapon type, damage
+
+        /// \todo store the current weapon health somewhere
+        text += "\n" + environment.mWorld->getStore().gameSettings.search("sCondition")->str + ": " + MWGui::ToolTips::toString(ref->base->data.health);
+
+        text += "\n" + environment.mWorld->getStore().gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, environment.mWorld->getStore().gameSettings.search("sValue")->str);
+
+        if (environment.mWindowManager->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.text = text;
+
+        return info;
     }
 }

@@ -22,6 +22,12 @@ namespace MWClass
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation
 
+            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: false)
+
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
+
             virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const;
             ///< \return Item health data available?
 

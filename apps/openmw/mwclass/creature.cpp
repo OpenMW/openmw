@@ -12,6 +12,8 @@
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
 
+#include "../mwgui/window_manager.hpp"
+
 namespace
 {
     struct CustomData : public MWWorld::CustomData
@@ -139,5 +141,28 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Creature);
 
         registerClass (typeid (ESM::Creature).name(), instance);
+    }
+
+    bool Creature::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        /// \todo We don't want tooltips for Creatures in combat mode.
+
+        return true;
+    }
+
+    MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+            ptr.get<ESM::Creature>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        std::string text;
+        if (environment.mWindowManager->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        info.text = text;
+
+        return info;
     }
 }

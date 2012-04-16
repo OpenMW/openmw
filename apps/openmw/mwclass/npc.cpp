@@ -19,6 +19,8 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 
+#include "../mwgui/window_manager.hpp"
+
 namespace
 {
     const Ogre::Radian kOgrePi (Ogre::Math::PI);
@@ -298,5 +300,28 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Npc);
         std::cout << "class npc:" << typeid (ESM::NPC).name();
         registerClass (typeid (ESM::NPC).name(), instance);
+    }
+
+    bool Npc::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        /// \todo We don't want tooltips for NPCs in combat mode.
+
+        return true;
+    }
+
+    MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+            ptr.get<ESM::NPC>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        std::string text;
+        if (environment.mWindowManager->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        info.text = text;
+
+        return info;
     }
 }

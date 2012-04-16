@@ -38,6 +38,12 @@ namespace MWClass
             virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
+            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: false)
+
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
+
             virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;
             ///< Return inventory store
 

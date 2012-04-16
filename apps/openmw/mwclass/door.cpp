@@ -12,6 +12,9 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
+
 #include "../mwrender/objects.hpp"
 
 #include "../mwsound/soundmanager.hpp"
@@ -141,5 +144,44 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Door);
 
         registerClass (typeid (ESM::Door).name(), instance);
+    }
+
+    bool Door::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+            ptr.get<ESM::Door>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+            ptr.get<ESM::Door>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        std::string text;
+
+        /// \todo If destCell is empty, the teleport target is an exterior cell. In that case we 
+        /// need to fetch that cell (via target position) and retrieve the region name.
+        if (ref->ref.teleport && (ref->ref.destCell != ""))
+        {
+            text += "\n" + environment.mWorld->getStore().gameSettings.search("sTo")->str;
+            text += "\n"+ref->ref.destCell;
+        }
+
+        if (ref->ref.lockLevel > 0)
+            text += "\n" + environment.mWorld->getStore().gameSettings.search("sLockLevel")->str + ": " + MWGui::ToolTips::toString(ref->ref.lockLevel);
+        if (ref->ref.trap != "")
+            text += "\n" + environment.mWorld->getStore().gameSettings.search("sTrapped")->str;
+
+        if (environment.mWindowManager->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+
+        info.text = text;
+
+        return info;
     }
 }

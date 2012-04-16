@@ -23,6 +23,12 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
+            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: false)
+
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
+
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
             ///< Generate action for activation

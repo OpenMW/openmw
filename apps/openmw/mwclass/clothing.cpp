@@ -9,6 +9,10 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/environment.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/world.hpp"
+
+#include "../mwgui/tooltips.hpp"
+#include "../mwgui/window_manager.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -160,5 +164,37 @@ namespace MWClass
             return std::string("Item Ring Down");
         }
         return std::string("Item Clothes Down");
+    }
+
+    bool Clothing::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+            ptr.get<ESM::Clothing>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Clothing::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    {
+        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+            ptr.get<ESM::Clothing>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+        info.icon = ref->base->icon;
+
+        std::string text;
+
+        text += "\n" + environment.mWorld->getStore().gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, environment.mWorld->getStore().gameSettings.search("sValue")->str);
+
+        if (environment.mWindowManager->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.text = text;
+
+        return info;
     }
 }

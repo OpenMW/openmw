@@ -502,3 +502,8 @@ void WindowManager::toggleFullHelp()
 {
     mToolTips->toggleFullHelp();
 }
+
+bool WindowManager::getFullHelp() const
+{
+    return mToolTips->getFullHelp();
+}
