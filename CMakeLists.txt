@@ -256,14 +256,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 if (APPLE)
-    # prepare plugins
-    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
-        set(OPENMW_RELEASE_BUILD TRUE)
-    endif()
-    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
-        set(OPENMW_RELEASE_BUILD TRUE)
-    endif()
-
     if (${OGRE_PLUGIN_DIR_REL}})
         set(OGRE_PLUGINS_REL_FOUND TRUE)
     endif ()
@@ -272,17 +264,11 @@ if (APPLE)
         set(OGRE_PLUGINS_DBG_FOUND TRUE)
     endif ()
 
-    if (${OPENMW_RELEASE_BUILD} AND ${OGRE_PLUGINS_REL_FOUND})
+    if (${OGRE_PLUGINS_REL_FOUND})
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
     else ()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
     endif ()
-    
-    if (NOT ${OPENMW_RELEASE_BUILD} AND ${OGRE_PLUGINS_DBG_FOUND})
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
-    else()
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
-    endif()
 
     set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
@@ -587,7 +573,7 @@ if (APPLE)
                 if (item MATCHES \"Frameworks\") # if it is a framework
                     # get last segment of path
                     get_filename_component(fname \"\${item}\" NAME_WE)
-                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /Library/Frameworks)
+                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} \${CMAKE_SYSTEM_FRAMEWORK_PATH})
                     if (ri)
                         string(REGEX REPLACE \"^.*/Frameworks/.*\\\\.framework\" \"\" item_part \${item})
                         set(ri \"\${ri}\${item_part}\")
