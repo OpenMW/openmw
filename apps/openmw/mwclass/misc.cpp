@@ -7,6 +7,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/world.hpp"
 #include "../mwworld/environment.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -90,7 +91,7 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
-        if (ref->base->name =="Gold")
+        if (ref->base->name == environment.mWorld->getStore().gameSettings.search("sGold")->str)
         {
             return std::string("Item Gold Up");
         }
@@ -102,7 +103,7 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
-        if (ref->base->name =="Gold")
+        if (ref->base->name == environment.mWorld->getStore().gameSettings.search("sGold")->str)
         {
             return std::string("Item Gold Down");
         }

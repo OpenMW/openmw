@@ -158,7 +158,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         /// \todo We don't want tooltips for NPCs in combat mode.
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mFocusObject.get<ESM::NPC>();
 
-        tooltipSize = createToolTip(ref->base->name, "");
+        std::string text;
+        if (mFullHelp) {
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createToolTip(ref->base->name, text);
     }
 
     // --------------------  Creature -------------------------------
@@ -167,7 +172,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         /// \todo We don't want tooltips for Creatures in combat mode.
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mFocusObject.get<ESM::Creature>();
 
-        tooltipSize = createToolTip(ref->base->name, "");
+        std::string text;
+        if (mFullHelp) {
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createToolTip(ref->base->name, text);
     }
 
     // --------------------  Container -------------------------------
