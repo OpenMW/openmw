@@ -111,6 +111,7 @@ void StatsWindow::setBar(const std::string& name, const std::string& tname, int 
 void StatsWindow::setPlayerName(const std::string& playerName)
 {
     static_cast<MyGUI::Window*>(mMainWidget)->setCaption(playerName);
+    adjustWindowCaption();
 }
 
 void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<int>& value)

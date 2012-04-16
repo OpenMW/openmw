@@ -85,7 +85,7 @@ namespace GUI
       // adjust the size of the window caption so that all text is visible
       // NOTE: this assumes that mMainWidget is of type Window.
       MyGUI::TextBox* box = static_cast<MyGUI::Window*>(mMainWidget)->getCaptionWidget();
-      box->setSize(box->getTextSize().width + 48, box->getSize().height);
+      box->setSize(box->getTextSize().width + 24, box->getSize().height);
 
       // in order to trigger alignment updates, we need to update the parent
       // mygui doesn't provide a proper way of doing this, so we are just changing size
