@@ -54,9 +54,10 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     // disable unsupported effects
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-    if (caps->getNumMultiRenderTargets() < 2)
+    if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("shader", "Water", false);
-    if (!caps->isShaderProfileSupported("fp40") && !caps->isShaderProfileSupported("ps_4_0"))
+    if ( !(caps->isShaderProfileSupported("fp40") || caps->isShaderProfileSupported("ps_4_0"))
+        || !Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
 
     // note that the order is important here
