@@ -161,6 +161,7 @@ namespace MWGui
     void setFocusObject(const MWWorld::Ptr& focus);
 
     void toggleFogOfWar();
+    void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
 
     int toggleFps();
     ///< toggle fps display @return resulting fps level

@@ -497,3 +497,8 @@ void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
 {
     mToolTips->setFocusObject(focus);
 }
+
+void WindowManager::toggleFullHelp()
+{
+    mToolTips->toggleFullHelp();
+}

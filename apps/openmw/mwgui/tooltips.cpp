@@ -10,6 +10,7 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     Layout("openmw_tooltips.xml")
     , mGameMode(true)
     , mWindowManager(windowManager)
+    , mFullHelp(false)
 {
     getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -67,7 +68,9 @@ void ToolTips::onFrame(float frameDuration)
         {
             std::string caption = focus->getUserString("ToolTipCaption");
             std::string image = focus->getUserString("ToolTipImage");
-            tooltipSize = createImageToolTip(caption, image, text);
+            std::string sizeString = focus->getUserString("ToolTipImageSize");
+            int size = (sizeString != "" ? boost::lexical_cast<int>(sizeString) : 32);
+            tooltipSize = createImageToolTip(caption, image, size, text);
         }
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
@@ -179,6 +182,11 @@ IntSize ToolTips::getToolTipViaPtr ()
         if (ref->ref.trap != "")
             text += "\n" + mWindowManager->getGameSettingString("sTrapped", "Trapped!");
 
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
         tooltipSize = createToolTip(ref->base->name, text);
     }
 
@@ -192,7 +200,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Apparatus -------------------------------
@@ -205,7 +218,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Armor -------------------------------
@@ -222,7 +240,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Book -------------------------------
@@ -234,7 +257,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Clothing -------------------------------
@@ -247,7 +275,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Ingredient -------------------------------
@@ -260,7 +293,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Light -------------------------------
@@ -272,7 +310,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Tool -------------------------------
@@ -286,7 +329,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Miscellaneous -------------------------------
@@ -298,7 +346,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Probe -------------------------------
@@ -312,7 +365,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Repair -------------------------------
@@ -326,7 +384,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Weapon -------------------------------
@@ -340,7 +403,12 @@ IntSize ToolTips::getToolTipViaPtr ()
         text += "\n" + mWindowManager->getGameSettingString("sWeight", "Weight") + ": " + toString(ref->base->data.weight);
         text += getValueString(ref->base->data.value);
 
-        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, text);
+        if (mFullHelp) {
+            text += "\n Owner: " + ref->ref.owner;
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createImageToolTip(ref->base->name, ref->base->icon, 32, text);
     }
 
     // --------------------  Activator -------------------------------
@@ -348,7 +416,12 @@ IntSize ToolTips::getToolTipViaPtr ()
     {
         ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData>* ref = mFocusObject.get<ESM::Activator>();
 
-        tooltipSize = createToolTip(ref->base->name, "");
+        std::string text;
+        if (mFullHelp) {
+            text += "\n Script: " + ref->base->script;
+        }
+
+        tooltipSize = createToolTip(ref->base->name, text);
     }
 
     else
@@ -374,7 +447,7 @@ void ToolTips::findImageExtension(std::string& image)
     }
 }
 
-IntSize ToolTips::createImageToolTip(const std::string& caption, const std::string& image, const std::string& text)
+IntSize ToolTips::createImageToolTip(const std::string& caption, const std::string& image, const int imageSize, const std::string& text)
 {
     // remove the first newline (easier this way)
     std::string realText = text;
@@ -384,12 +457,10 @@ IntSize ToolTips::createImageToolTip(const std::string& caption, const std::stri
     std::string realImage = "icons\\" + image;
     findImageExtension(realImage);
 
-    const int imageSize = 32;
-
     EditBox* captionWidget = mDynamicToolTipBox->createWidget<EditBox>("NormalText", IntCoord(0, 0, 300, 300), Align::Left | Align::Top, "ToolTipCaption");
     captionWidget->setProperty("Static", "true");
     captionWidget->setCaption(caption);
-    EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, imageSize, 300, 262), Align::Stretch, "ToolTipText");
+    EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, imageSize, 300, 300-imageSize), Align::Stretch, "ToolTipText");
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
     textWidget->setProperty("WordWrap", "true");
@@ -407,7 +478,7 @@ IntSize ToolTips::createImageToolTip(const std::string& caption, const std::stri
         Align::Left | Align::Top, "ToolTipImage");
     imageWidget->setImageTexture(realImage);
 
-    captionWidget->setCoord( (totalSize.width - captionSize.width)/2 + imageSize, (32-captionSize.height)/2, captionSize.width-imageSize, captionSize.height);
+    captionWidget->setCoord( (totalSize.width - captionSize.width)/2 + imageSize, (imageSize-captionSize.height)/2, captionSize.width-imageSize, captionSize.height);
 
     mDynamicToolTipBox->setVisible(caption != "");
 
@@ -467,4 +538,9 @@ std::string ToolTips::getValueString(const int value)
         return "";
     else
         return "\n" + mWindowManager->getGameSettingString("sValue", "Value") + ": " + toString(value);
+}
+
+void ToolTips::toggleFullHelp()
+{
+    mFullHelp = !mFullHelp;
 }

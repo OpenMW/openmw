@@ -80,6 +80,19 @@ namespace MWScript
                 }
         };
 
+        class OpToggleFullHelp : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    context.getEnvironment().mWindowManager->toggleFullHelp();
+                }
+        };
+
         const int opcodeEnableBirthMenu = 0x200000e;
         const int opcodeEnableClassMenu = 0x200000f;
         const int opcodeEnableNameMenu = 0x2000010;
@@ -93,6 +106,7 @@ namespace MWScript
         const int opcodeShowRestMenu = 0x2000018;
         const int opcodeGetButtonPressed = 0x2000137;
         const int opcodeToggleFogOfWar = 0x2000145;
+        const int opcodeToggleFullHelp = 0x2000151;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -101,7 +115,7 @@ namespace MWScript
             extensions.registerInstruction ("enablenamemenu", "", opcodeEnableNameMenu);
             extensions.registerInstruction ("enableracemenu", "", opcodeEnableRaceMenu);
             extensions.registerInstruction ("enablestatsreviewmenu", "",
-                opcodeEnableStatsReviewMenu);
+opcodeEnableStatsReviewMenu);
 
             extensions.registerInstruction ("enableinventorymenu", "", opcodeEnableInventoryMenu);
             extensions.registerInstruction ("enablemagicmenu", "", opcodeEnableMagicMenu);
@@ -117,6 +131,9 @@ namespace MWScript
 
             extensions.registerInstruction ("togglefogofwar", "", opcodeToggleFogOfWar);
             extensions.registerInstruction ("tfow", "", opcodeToggleFogOfWar);
+
+            extensions.registerInstruction ("togglefullhelp", "", opcodeToggleFullHelp);
+            extensions.registerInstruction ("tfh", "", opcodeToggleFullHelp);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -154,6 +171,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetButtonPressed, new OpGetButtonPressed);
 
             interpreter.installSegment5 (opcodeToggleFogOfWar, new OpToggleFogOfWar);
+
+            interpreter.installSegment5 (opcodeToggleFullHelp, new OpToggleFullHelp);
         }
     }
 }

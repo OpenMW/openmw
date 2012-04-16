@@ -19,6 +19,8 @@ namespace MWGui
         void enterGameMode();
         void enterGuiMode();
 
+        void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
+
         void setFocusObject(const MWWorld::Ptr& focus);
 
     private:
@@ -33,7 +35,7 @@ namespace MWGui
         MyGUI::IntSize getToolTipViaPtr ();
         ///< @return requested tooltip size
 
-        MyGUI::IntSize createImageToolTip(const std::string& caption, const std::string& image, const std::string& text);
+        MyGUI::IntSize createImageToolTip(const std::string& caption, const std::string& image, const int imageSize, const std::string& text);
         ///< @return requested tooltip size
 
         MyGUI::IntSize createToolTip(const std::string& caption, const std::string& text);
@@ -49,6 +51,8 @@ namespace MWGui
         std::string toString(const int value);
 
         bool mGameMode;
+
+        bool mFullHelp;
     };
 }
 #endif
