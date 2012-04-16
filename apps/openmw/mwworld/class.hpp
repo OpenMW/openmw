@@ -12,6 +12,7 @@
 #include "physicssystem.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwgui/tooltips.hpp"
 
 namespace Ogre
 {
@@ -85,6 +86,12 @@ namespace MWWorld
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
             /// (default implementation: throw an exceoption)
+
+            virtual bool hasToolTip (const Ptr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: false)
+
+            virtual MWGui::ToolTipInfo getToolTipInfo (const Ptr& ptr) const;
+            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             virtual MWMechanics::NpcStats& getNpcStats (const Ptr& ptr) const;
             ///< Return NPC stats or throw an exception, if class does not have NPC stats
