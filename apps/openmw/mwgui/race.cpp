@@ -72,10 +72,12 @@ RaceDialog::RaceDialog(WindowManager& parWindowManager)
     // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
+    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
+    okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
 
     updateRaces();
@@ -94,15 +96,12 @@ void RaceDialog::setNextButtonShow(bool shown)
     // TODO: All hardcoded coords for buttons are temporary, will be replaced with a dynamic system.
     if (shown)
     {
-        okButton->setCaption("Next");
-
         // Adjust back button when next is shown
         backButton->setCoord(MyGUI::IntCoord(471 - 18, 397, 53, 23));
         okButton->setCoord(MyGUI::IntCoord(532 - 18, 397, 42 + 18, 23));
     }
     else
     {
-        okButton->setCaption("OK");
         backButton->setCoord(MyGUI::IntCoord(471, 397, 53, 23));
         okButton->setCoord(MyGUI::IntCoord(532, 397, 42, 23));
     }
