@@ -174,12 +174,12 @@ namespace MWWorld
         throw std::runtime_error ("class does not have an down sound");
     }
 
-    MWGui::ToolTipInfo Class::getToolTipInfo (const Ptr& ptr)
+    MWGui::ToolTipInfo Class::getToolTipInfo (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have a tool tip");
     }
 
-    bool Class::hasToolTip (const Ptr& ptr)
+    bool Class::hasToolTip (const Ptr& ptr) const
     {
         return false;
     }
